@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { renderNote } from '../../../src/diagrams/class/renderer-note.js';
+import { renderNote, renderPlainNote } from '../../../src/diagrams/class/renderer-note.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { FontStyle } from '../../../src/core/klimt/shape/UText.js';
 import {
   buildMemberAtoms,
@@ -11,6 +12,8 @@ import {
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { noteLineAtomDy } from '../../../src/diagrams/class/class-member-creole-sea.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
+
+const theme = scaleClassTheme(defaultTheme, 1);
 
 const baseNote: NoteGeo = {
   id: '__note_0',
@@ -24,32 +27,114 @@ const baseNote: NoteGeo = {
   connector: [],
 };
 
+// cdd-T8 (A5/M2): body is a `<path>` in `Opale.getPolygonNormal`'s vertex
+// order (`Opale.java:149-167`), stroke-width 0.5; the fold is a CLOSED
+// `<path>` (`Opale.getCorner`, `Opale.java:134-147`) filled with the note's
+// own background at stroke-width 1 (the diagram default, not the note
+// style's 0.5) -- `EntityImageNote.java:275-289`. `baseNote`: x=0 y=0 w=40
+// h=23, cornersize=10.
+describe('renderNote / renderPlainNote — body vertex order and fold paint (cdd-T8, A5/M2)', () => {
+  it("draws the body as a <path> with getPolygonNormal's exact vertex order and stroke-width 0.5", () => {
+    const svg = renderNote(baseNote, theme);
+    expect(svg).toContain(
+      '<path d="M0,0 L0,23 L40,23 L40,10 L30,0 L0,0" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+    );
+    expect(svg).not.toContain('<polygon');
+  });
+
+  it('draws the fold as a closed <path> (getCorner) with the note background fill and stroke-width 1', () => {
+    const svg = renderNote(baseNote, theme);
+    expect(svg).toContain('<path d="M30,0 L30,10 L40,10 L30,0" fill="#FEFFDD" stroke="#181818" stroke-width="1"/>');
+  });
+
+  it('never fills the fold with none', () => {
+    const svg = renderNote(baseNote, theme);
+    // Isolate the fold element (the second <path ... fill=...> after body).
+    const foldMatch = svg.match(/<path d="M30,0[^/]*\/>/);
+    expect(foldMatch).not.toBeNull();
+    expect(foldMatch![0]).not.toContain('fill="none"');
+  });
+
+  it('uses the resolved note background (not the hardcoded default) for both body and fold when overridden', () => {
+    const coloredNote: NoteGeo = { ...baseNote, color: '#FF0000' };
+    const svg = renderNote(coloredNote, theme);
+    // Rule 2 (`svg.ts#resolvePaint`) shortens `#FF0000` -> `#F00` at emission.
+    const fills = [...svg.matchAll(/fill="(#[0-9A-Fa-f]{3,6})"/g)].map((m) => m[1]);
+    expect(fills[0]).toBe('#F00');
+    expect(fills[1]).toBe('#F00');
+  });
+
+  it('renderPlainNote returns only entityParts (body, fold, text) -- no connector shape at all', () => {
+    const result = renderPlainNote(baseNote, theme);
+    expect('connector' in result).toBe(false);
+    expect(result.entityParts).toHaveLength(3);
+    expect(result.entityParts[0]).toContain('M0,0 L0,23 L40,23 L40,10 L30,0 L0,0');
+    expect(result.entityParts[1]).toContain('M30,0 L30,10 L40,10 L30,0');
+  });
+
+  // cdd-T9b: a note's host connector is a completely separate upstream
+  // `Link` (`CommandFactoryNoteOnEntity.java:342`), never the note's own
+  // `NOTE_STROKE_WIDTH`/`'4 4'` style -- `renderPlainNote`/`renderNote` no
+  // longer build it at all, regardless of `note.connector` geometry (see
+  // `renderer-note-connector.ts#renderNoteConnectorPath` for where it now
+  // lives). This replaces the pre-T9b tests asserting `renderPlainNote`
+  // returned a `'4 4'`-dashed connector string.
+  it('renderPlainNote ignores note.connector geometry entirely -- entityParts never carry a dashed connector', () => {
+    const anchored: NoteGeo = {
+      ...baseNote,
+      connector: [
+        { x: 40, y: 10 },
+        { x: 60, y: 10 },
+      ],
+    };
+    const result = renderPlainNote(anchored, theme);
+    expect('connector' in result).toBe(false);
+    expect(result.entityParts).toHaveLength(3);
+    for (const part of result.entityParts) {
+      expect(part).not.toContain('stroke-dasharray');
+    }
+  });
+
+  it('renderNote draws only the box+text, never a connector, even when note.connector is non-empty', () => {
+    const anchored: NoteGeo = {
+      ...baseNote,
+      connector: [
+        { x: 40, y: 10 },
+        { x: 60, y: 10 },
+      ],
+    };
+    const svg = renderNote(anchored, theme);
+    expect(svg).not.toContain('stroke-dasharray');
+    expect(svg).toContain('M0,0 L0,23');
+  });
+});
+
 // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N` --
 // jar-verified `xokipa-29-rafu481`. `theme.colors.elements['note'].fontSize`
 // is ALREADY populated by the pre-existing generic bucket mechanism
 // (`ELEMENT_BUCKET_SNAMES`, G2 N34); this only wires the consuming side.
 describe('renderNote — theme-overridden note fontSize (G2 N39)', () => {
   it('draws every text row at the theme-overridden fontSize, not the hardcoded default 13', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, elements: { note: { fontSize: 10 } } },
-    };
-    const svg = renderNote(baseNote, theme);
+    const overridden = scaleClassTheme(
+      { ...defaultTheme, colors: { ...defaultTheme.colors, elements: { note: { fontSize: 10 } } } },
+      1,
+    );
+    const svg = renderNote(baseNote, overridden);
     expect(svg).toContain('font-size="10"');
     expect(svg).not.toContain('font-size="13"');
   });
 
   it('falls back to the hardcoded default 13 when no note fontSize override is set', () => {
-    const svg = renderNote(baseNote, defaultTheme);
+    const svg = renderNote(baseNote, theme);
     expect(svg).toContain('font-size="13"');
   });
 
   it('spaces stacked lines by the OVERRIDDEN fontSize, not the hardcoded default', () => {
-    const theme = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, elements: { note: { fontSize: 10 } } },
-    };
-    const svg = renderNote(baseNote, theme);
+    const overridden = scaleClassTheme(
+      { ...defaultTheme, colors: { ...defaultTheme.colors, elements: { note: { fontSize: 10 } } } },
+      1,
+    );
+    const svg = renderNote(baseNote, overridden);
     const ys = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)"/g)].map((m) => Number(m[1]));
     expect(ys).toHaveLength(2);
     // baselineOffset = 10 - 10/4.5; row i's y = note.y + marginY + i*fontSize + baselineOffset.
@@ -88,7 +173,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
   };
 
   it("draws one <text> per atom run, x-advancing by the PRIOR atom's own width (jar: tenobo-24-liga464)", () => {
-    const svg = renderNote(boldNote, defaultTheme);
+    const svg = renderNote(boldNote, theme);
     const texts = [...svg.matchAll(/<text x="([^"]*)"[^>]*>([^<]*)<\/text>/g)];
     expect(texts).toHaveLength(2);
     // `StringUtils.trin` — the SVG driver trims chars <= U+0020 from both ends
@@ -107,7 +192,7 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
   });
 
   it('the BOLD run carries font-weight="700", the plain run does not', () => {
-    const svg = renderNote(boldNote, defaultTheme);
+    const svg = renderNote(boldNote, theme);
     const texts = [...svg.matchAll(/<text[^>]*>[^<]*<\/text>/g)].map((m) => m[0]);
     expect(texts[0]).not.toContain('font-weight');
     expect(texts[1]).toContain('font-weight="700"');
@@ -118,12 +203,12 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
       ...boldNote,
       lineAtoms: [[{ kind: 'text', text: 'warning', font: { ...plainFont, color: '#FF0000' }, width: 40 }]],
     };
-    const svg = renderNote(coloredNote, defaultTheme);
+    const svg = renderNote(coloredNote, theme);
     expect(svg).toContain('fill="#F00"');
   });
 
   it('a hand-built NoteGeo with NO lineAtoms falls back to the pre-cutover single-<text>-per-line path unchanged', () => {
-    const svg = renderNote(baseNote, defaultTheme);
+    const svg = renderNote(baseNote, theme);
     const texts = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)];
     expect(texts.map((m) => m[1])).toEqual(['l1', 'l2']);
   });
@@ -139,10 +224,13 @@ describe('renderNote — per-run creole atom rendering (G2 N55)', () => {
 // (`<style> note { Fontcolor red } }`, every note text run `fill="#F00"`).
 describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   it('the per-atom creole path (lineAtoms) uses the cascade when the atom has no OWN color (nufini-44-jofo787 shape)', () => {
-    const themed = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
-    };
+    const themed = scaleClassTheme(
+      {
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
+      },
+      1,
+    );
     const plainFont = { family: 'sans-serif', size: 13, color: null, styles: new Set<FontStyle>() };
     const note: NoteGeo = {
       ...baseNote,
@@ -155,10 +243,13 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   });
 
   it("an atom's OWN explicit color still wins over the cascade", () => {
-    const themed = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
-    };
+    const themed = scaleClassTheme(
+      {
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
+      },
+      1,
+    );
     const plainFont = { family: 'sans-serif', size: 13, color: '#0000FF', styles: new Set<FontStyle>() };
     const note: NoteGeo = {
       ...baseNote,
@@ -172,17 +263,20 @@ describe('renderNote — note FontColor cascade (G2 N67 item 49)', () => {
   });
 
   it('the pre-cutover fallback path (no lineAtoms) ALSO uses the cascade', () => {
-    const themed = {
-      ...defaultTheme,
-      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
-    };
+    const themed = scaleClassTheme(
+      {
+        ...defaultTheme,
+        colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, noteCascadeFontColor: '#FF0000' } },
+      },
+      1,
+    );
     const svg = renderNote(baseNote, themed);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
     expect(texts.map((m) => m[1])).toEqual(['#F00', '#F00']);
   });
 
   it('falls back to the hardcoded #000000 default when no cascade is set (unset-is-noop regression guard)', () => {
-    const svg = renderNote(baseNote, defaultTheme);
+    const svg = renderNote(baseNote, theme);
     const texts = [...svg.matchAll(/<text[^>]*fill="([^"]*)"[^>]*>/g)];
     expect(texts.map((m) => m[1])).toEqual(['#000', '#000']);
   });
@@ -222,7 +316,7 @@ describe('renderNote — per-atom baseline on a mixed-font-size line (G2 N56)', 
   };
 
   it("the 18pt run's baseline sits ABOVE the 13pt runs' baseline on the SAME line", () => {
-    const svg = renderNote(mixedNote, defaultTheme);
+    const svg = renderNote(mixedNote, theme);
     const ys = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)"/g)].map((m) => Number(m[1]));
     expect(ys).toHaveLength(4);
     // note.y(6) + NOTE_MARGIN_Y(5) + lineHeight(18) - descent(13pt: 13/4.5).
@@ -262,7 +356,7 @@ describe('renderNote — <sub> note line: measure and render share the same runs
   };
 
   it('draws the sub run at its sizer-measured muted size and dy', () => {
-    const svg = renderNote(subNote, defaultTheme);
+    const svg = renderNote(subNote, theme);
     const texts = [...svg.matchAll(/<text x="[^"]*" y="([^"]*)" font-size="([^"]*)"/g)];
     expect(texts).toHaveLength(3);
     const [a, sub, b] = texts as [RegExpMatchArray, RegExpMatchArray, RegExpMatchArray];

@@ -1,0 +1,20 @@
+{
+  // Ad-hoc program for manually type-checking this mission's scratch
+  // tooling (T0b correction 2). Not wired into `npm run typecheck` — the
+  // root program's `include` is `["src", "tests", "demo"]` and
+  // `tsconfig.node.json`'s is `["...", "scripts/**/*.ts"]`; neither reaches
+  // `plans/`. Run with: `npx tsc --noEmit -p plans/class-divergence-drive/tools`.
+  "extends": "../../../tsconfig.node.json",
+  "compilerOptions": {
+    // The tools import `.mts` siblings by their literal extension (jiti/Node
+    // ESM resolve them directly, unlike `src/`'s .js-referring-to-.ts
+    // convention) and this program only ever runs `--noEmit`, so
+    // `allowImportingTsExtensions` is safe here without being a banned
+    // pattern (it's an escape valve gated on noEmit, not a module-system
+    // change). `rootDir` is inherited from `tsconfig.json` (repo root) —
+    // overriding it here breaks TS6059 for every upstream file this
+    // program's imports reach into (src/, scripts/, tests/oracle/).
+    "allowImportingTsExtensions": true
+  },
+  "include": ["*.mts", "*.ts"]
+}

@@ -4,7 +4,7 @@
  * strips the `(CHAR[,COLOR])` prefix from the visible stereotype TEXT
  * (`class-stereotype.ts#stripCircledCharDecoration`); this is the badge
  * itself: the ellipse fill color and (where the char happens to be one of
- * the 5 jar-captured glyphs) the vector letter.
+ * the 17 jar-captured glyphs, T21) the vector letter.
  *
  * Jar-verified against `bejeli-39-sina124/in.svg`: `NamedStereotype`/
  * `ColoredCircle` (`<<(S,#FF7700)...>>`) both draw `fill="#F70"`;
@@ -93,9 +93,14 @@ describe('resolveBadgeLetter', () => {
     expect(resolveBadgeLetter('class', 'E')).toBe('E');
   });
 
+  it('uses the custom char now that T21 captures S/R too (was: fell back)', () => {
+    expect(resolveBadgeLetter('class', 'S')).toBe('S');
+    expect(resolveBadgeLetter('interface', 'R')).toBe('R');
+  });
+
   it('falls back to the kind default when the custom char has no captured glyph', () => {
-    expect(resolveBadgeLetter('class', 'S')).toBe('C');
-    expect(resolveBadgeLetter('interface', 'R')).toBe('I');
+    expect(resolveBadgeLetter('class', 'Z')).toBe('C');
+    expect(resolveBadgeLetter('interface', 'Y')).toBe('I');
   });
 
   it('falls back to the kind default when no override is given', () => {

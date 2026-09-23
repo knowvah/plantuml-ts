@@ -88,14 +88,16 @@ describe('muteClassifierToGroup creationIndex reuse (G2 N8)', () => {
     'a dotted reopen whose FULL id exactly matches an existing classifier ' +
       'reuses it too (not just single-segment ids)',
     () => {
-      // A dotted class DECLARATION ("class a.X") implies its own enclosing
-      // namespace chain up front: "a" (index 1, namespace) and "a.X" (index 2,
-      // classifier, member of "a"). "Q --> a.X" then creates Q (index 3) and
-      // the relationship itself (index 4). `package a.X { class Y }` reopens
-      // the FULL "a.X" id -- "a" already exists (no new index consumed at
-      // all), and the reused "a.X" namespace keeps index 2 (NOT a fresh 5,
-      // which class Y -- the next genuinely new thing -- would otherwise
-      // steal); Y lands on 5.
+      // A dotted class DECLARATION ("class a.X") takes index 1 for the LEAF
+      // itself; its implied enclosing namespace "a" is a phantom group and
+      // takes index 2, at the tail of `reallyCreateLeaf` (cdd-T1,
+      // CucaDiagram.java:239-240,325-336 -- this test previously encoded the
+      // pre-cdd-T1 eager order, a=1/a.X=2). "Q --> a.X" then creates Q (index
+      // 3) and the relationship itself (index 4). `package a.X { class Y }`
+      // reopens the FULL "a.X" id -- "a" already exists (no new index
+      // consumed at all), and the reused "a.X" namespace keeps the muted
+      // classifier's index 1 (NOT a fresh 5, which class Y -- the next
+      // genuinely new thing -- would otherwise steal); Y lands on 5.
       const ast = parse(`
       class a.X
       Q --> a.X
@@ -107,8 +109,8 @@ describe('muteClassifierToGroup creationIndex reuse (G2 N8)', () => {
       const y = ast.classifiers.find((c) => c.id === 'a.X.Y')!;
       const aNs = ast.namespaces.find((n) => n.id === 'a')!;
       const axNs = ast.namespaces.find((n) => n.id === 'a.X')!;
-      expect(aNs.creationIndex).toBe(1);
-      expect(axNs.creationIndex).toBe(2); // reused from the muted "a.X" classifier
+      expect(aNs.creationIndex).toBe(2); // phantom group, numbered after its leaf
+      expect(axNs.creationIndex).toBe(1); // reused from the muted "a.X" classifier
       expect(q.creationIndex).toBe(3);
       expect(y.creationIndex).toBe(5);
       // The muted "a.X" classifier no longer exists as a top-level classifier

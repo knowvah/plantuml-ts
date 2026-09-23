@@ -236,11 +236,26 @@ no multi-file equivalent; stacking pages into one tall image is this
 port's own choice, not a jar-matched behavior. The 20px gap is likewise
 ours.
 
-- **Consumer impact:** any class diagram using `newpage` now renders
-  visibly different (and correct, multi-page) output instead of a
-  silently-merged single page. Diagrams without `newpage` are unaffected
-  — `layoutClass`/`renderClass` output is byte-identical to pre-T7 for the
-  single-page path.
+- **Consumer impact (AMENDED, cdd-T34):** `render()`/`renderSync()`/
+  `renderAll()` now emit **page 1 only** of a `newpage` class source — the
+  T7 vertical-stack behavior described above is no longer what those three
+  functions return. `layoutClass` still lays out and `renderClass` still
+  CAN render every page (a genuine capability this library has that the
+  reference CLI lacks, per the "known limitation" paragraph below); reach
+  the full set via `renderPages()`/`renderPagesSync()`, which now return
+  one array element per page for class sources exactly as they already did
+  for sequence's own `newpage` (`getNbPages`/`renderPage`/`pageAst`,
+  `core/dispatcher.ts`'s `PaginatedPlugin` trio, wired for class in
+  cdd-T34). This reverses T7's own "stack every page vertically into one
+  image" choice, made BEFORE this trio existed and (per T7's own doc
+  comment above) explicitly acknowledged as this port's own adaptation,
+  not a jar-matched behavior — the trio is the jar-matched one: upstream's
+  reference CLI itself only ever exports page 1 of a `newpage` class
+  source (see "Known limitation" below), and `renderSync`'s own doc
+  comment ("Page 1 of the first diagram") already promised this for every
+  OTHER paginating engine. Diagrams without `newpage` are unaffected —
+  `layoutClass`/`renderClass` output is byte-identical to pre-T7 for the
+  single-page path, and so is every function's return value.
 
 **Known limitation surfaced by this work (not fixed here, upstream-side):**
 `NewpagedDiagram` (`~/git/plantuml/.../NewpagedDiagram.java`) never

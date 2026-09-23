@@ -24,17 +24,23 @@ import {
 type HideShowResolver = (state: ParseState, input: string) => boolean;
 
 /**
- * A2s R2g: record the enclosing package/namespace onto a just-parsed
- * `CommandHideShowByGender`-family directive — upstream ANDs the gender with
+ * A2s R2g / cdd-T31 (E5 defect c): record the enclosing package/namespace
+ * onto a just-parsed directive. TWO distinct upstream mechanisms share this
+ * one `scopeNsId` field: the THREE `CommandHideShowByGender`-family forms
+ * (global-portion, entity-qualified, type-keyword) AND the gender with
  * `byPackage(getCurrentGroup())` whenever the current group is non-root
- * (classdiagram/command/CommandHideShowByGender.java:272-273; the apply-side
- * gate is `class-directives-removal.ts#directiveAppliesTo`). Only the THREE
- * gender-command forms are stamped (global-portion, entity-qualified,
- * type-keyword): `CommandHideShow2`'s pattern form and
- * `CommandHideShowByVisibility` have no such AND upstream, and the
+ * (classdiagram/command/CommandHideShowByGender.java:272-273 -- the
+ * apply-side gate is `class-directives-removal.ts#directiveAppliesTo`,
+ * DIRECT-parent equality). `CommandHideShow2`'s pattern form (the 4th
+ * resolver below) instead feeds `CucaDiagram#fixWhat` (net/atmp/
+ * CucaDiagram.java:638-646), which PREFIXES `what` with this same group id
+ * (+ separator) at match time (`class-directives-removal.ts`'s `fixWhat`) --
+ * a different mechanism, not an AND-gate, but the same "reached only from
+ * inside this group" shape, so it reuses this helper and field.
+ * `CommandHideShowByVisibility` has no such AND/prefix upstream, and the
  * `hide [<<pattern>>] stereotype(s)` label form's applier lives in
  * `class-stereotype.ts` (unscoped today — no corpus reach, out of R2g's
- * write-set).
+ * write-set) — neither is stamped.
  */
 function stampGroupScope(state: ParseState, directive: { scopeNsId?: string }): void {
   if (state.activeNamespace !== null) directive.scopeNsId = state.activeNamespace;
@@ -86,9 +92,13 @@ const HIDE_SHOW_RESOLVERS: readonly HideShowResolver[] = [
     (state.ast.hideKindDirectives ??= []).push(kindDirective);
     return true;
   },
+  // cdd-T31 (E5 defect c): stamp scopeNsId here too -- see stampGroupScope's
+  // doc comment for why this is the fixWhat-prefix mechanism, not the
+  // gender family's AND-gate, despite sharing the field/helper.
   (state, input) => {
     const pattern = parseHideShowPatternDirective(input);
     if (pattern === null) return false;
+    stampGroupScope(state, pattern);
     (state.ast.hidePatternDirectives ??= []).push(pattern);
     return true;
   },

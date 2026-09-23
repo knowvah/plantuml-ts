@@ -9,8 +9,9 @@
  * behavior change.
  */
 import type { ClassifierGeo } from './layout.js';
-import type { Theme } from '../../core/theme.js';
-import { rect, text, ellipse, path } from '../../core/svg.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
+import { rect, text, ellipse, path, image } from '../../core/svg.js';
 import {
   resolveBadgeFill,
   resolveBadgeBorder,
@@ -51,7 +52,15 @@ import {
  * `geo.height` is the correct value in every case that reaches this
  * fallback, not a new formula.
  */
-export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
+/** cdd-T29 R2: `BADGE_RADIUS` (`class-badge.ts`) is a render-time
+ *  pixel-literal constant, scaled here like every other local literal this
+ *  round's audit found (D4/journal row 175) -- split out purely to keep
+ *  {@link renderBadge}'s own NLOC under this project's cap. */
+function scaledBadgeRadius(theme: ScaledTheme): number {
+  return resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius) * theme.scaleK;
+}
+
+export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
   const headerH = geo.dividerYs[0] ?? geo.height;
   const nameRowIndex = (geo.headerRowCount ?? 1) - 1;
   // G2 N38: resolved from theme (formula or explicit override) -- see
@@ -59,11 +68,8 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
   // the SAME value `buildHeaderRow` used to compute `badgeIndent`
   // whenever that field is present (the common case); only reached for
   // hand-built test geometries that bypass the real layout pipeline.
-  const badgeRadius = resolveBadgeRadius(
-    theme.colors.graph.circledCharacterFontSize,
-    theme.colors.graph.circledCharacterRadius,
-  );
-  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN + badgeRadius;
+  const badgeRadius = scaledBadgeRadius(theme);
+  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN * theme.scaleK + badgeRadius;
   const badgeX = geo.x + badgeIndent;
   const badgeY = geo.y + headerH / 2;
   // G2 N32: `skinparam stereotype<X>BackgroundColor/BorderColor` / `<style>
@@ -89,7 +95,7 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
       // `resolveBadgeGlyphColor`'s own `rootFallback` doc comments.
       fill: resolveBadgeFill(geo.kind, geo.badgeColor, spot?.background, theme.colors.graph.spotCascadeBackground),
       stroke: resolveBadgeBorder(theme.colors.border, spot?.border, theme.colors.graph.spotCascadeBorder),
-      'stroke-width': 1,
+      'stroke-width': theme.scaleK,
     }) +
     // `style.value(PName.FontColor)` on the spot style signature -- black in
     // every non-monochrome theme sampled (`plans/g2-class-svg/ledger.md`
@@ -114,10 +120,40 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
         theme.colors.graph.circledCharacterFontFamily,
         theme.colors.graph.circledCharacterFontBold,
         theme.colors.graph.circledCharacterFontItalic,
+        theme.scaleK,
       ),
       { fill: resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont) },
     )
   );
+}
+
+/** `withMargin(4, 0, 5, 5)`'s top/bottom margin -- see `class-layout-header-
+ *  creole.ts#computeBadgeSpriteBox`'s own doc comment (same value, small
+ *  constant duplicated across the layout/render module family, matching
+ *  this project's established convention rather than crossing a module
+ *  boundary for one number). */
+const BADGE_SPRITE_TOP_MARGIN = 5;
+
+/**
+ * CDD B7FU-R2 item (c-b): `class Foo <<($sprite[,color])>>`'s SPRITE badge
+ * -- drawn in place of {@link renderBadge}'s default circled-character
+ * badge whenever `geo.badgeSpriteImage` is set (`renderer-classifier-
+ * box.ts#buildHeaderPrimitive`'s own dispatch). Position: jar-verified
+ * rotisi-30-loge424 `class zz <<($bug16,red)>>` -- the image sits at
+ * `geo.x + BADGE_LEFT_MARGIN(4), geo.y + BADGE_SPRITE_TOP_MARGIN(5)`
+ * (box `x=287.5,y=116.114`, image `x=291.5,y=121.114`, both offsets
+ * exact), i.e. flush against the classifier box's OWN top-left corner --
+ * NOT vertically centered in `headerH` the way the char badge's `<ellipse>`
+ * is (`Stereotype#getSprite`'s `withMargin(4,0,5,5)`-wrapped block is the
+ * FIRST element `HeaderLayout`'s ctor places, at a fixed top offset, unlike
+ * the circled-character badge's own vertical-center placement rule).
+ */
+export function renderBadgeSpriteImage(
+  geo: ClassifierGeo,
+  sprite: { href: string; width: number; height: number },
+  k: number,
+): string {
+  return image(geo.x + BADGE_LEFT_MARGIN * k, geo.y + BADGE_SPRITE_TOP_MARGIN * k, sprite.width, sprite.height, sprite.href);
 }
 
 /**
@@ -150,25 +186,34 @@ const GENERIC_TAG_BACKGROUND = '#FFFFFF';
 export function renderGenericTag(
   geo: ClassifierGeo,
   tag: NonNullable<ClassifierGeo['genericTag']>,
-  theme: Theme,
+  theme: ScaledTheme,
 ): string {
   return (
     rect(geo.x + tag.rectX, geo.y + tag.rectY, tag.rectWidth, tag.rectHeight, {
       fill: GENERIC_TAG_BACKGROUND,
       stroke: theme.colors.border,
-      strokeWidth: 1,
-      strokeDasharray: '2,2',
+      strokeWidth: theme.scaleK,
+      strokeDasharray: scaleDashArrayString('2,2', theme.scaleK),
     }) +
-    text(geo.x + tag.textX, geo.y + tag.textY, tag.text, {
-      fontFamily: tag.fontFamily,
-      fontSize: tag.fontSize,
-      fill: '#000000',
-      // G2 N39: `skinparam classStereotypeFontStyle` override -- see
-      // `GenericTagGeo`'s own doc comment.
-      ...(tag.italic ? { fontStyle: 'italic' as const } : {}),
-      ...(tag.bold === true ? { fontWeight: '700' as const } : {}),
-      lengthAdjust: 'spacing',
-      textLength: tag.textWidth,
-    })
+    // CDD T6FU: one `<text>` per `Display.getWithNewlines` line
+    // (`EntityImageClassHeader.java:146`), each pre-placed and pre-measured
+    // by `buildGenericTagGeo`. A single-line clause yields exactly one
+    // entry at `textX`/`textY` with `width === tag.textWidth`, so this is
+    // byte-identical to the previous single-`<text>` emission there.
+    tag.lines
+      .map((line) =>
+        text(geo.x + line.x, geo.y + line.y, line.text, {
+          fontFamily: tag.fontFamily,
+          fontSize: tag.fontSize,
+          fill: '#000000',
+          // G2 N39: `skinparam classStereotypeFontStyle` override -- see
+          // `GenericTagGeo`'s own doc comment.
+          ...(tag.italic ? { fontStyle: 'italic' as const } : {}),
+          ...(tag.bold === true ? { fontWeight: '700' as const } : {}),
+          lengthAdjust: 'spacing',
+          textLength: line.width,
+        }),
+      )
+      .join('')
   );
 }

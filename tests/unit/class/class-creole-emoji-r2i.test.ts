@@ -129,7 +129,18 @@ describe('MemberRowBuild.height (lozego-15-coci435 per-row heights)', () => {
     expect(sectionHeight([sprite, plain])).toBeCloseTo(8 + (100 * 14) / 13 + 14, 6);
   });
 
-  test("buildSectionRows advances y by each PRIOR row's own height", () => {
+  // CDD B7FU-R2 item (b): `y` is BOTTOM-anchored to each row's own height
+  // (`y = sectionTop + MARGIN + rowTop + build.height - (fontSize -
+  // baselineOffset)`, `class-member-rows.ts#buildSectionRows`'s own doc
+  // comment) -- the delta between two consecutive rows' `y` is therefore
+  // the SECOND (later) row's own height (rowTop_1 - rowTop_0 == height_0
+  // cancels against the bottom-anchor term identically on both sides,
+  // leaving `height_1`), not the first row's, matching `MethodsOrFieldsArea
+  // #drawU`'s own per-block internal anchoring (java:429-440) -- the SAME
+  // mechanism/citation `class-body-enhanced-layout.ts#buildRowsBlockRows`
+  // already fixed for the enhanced-body path, jar-verified on rotisi-30-
+  // loge424 and malara-55-moce209.
+  test("buildSectionRows advances y by each LATER row's own height (bottom-anchored)", () => {
     const registry = registryWith('test', 50, 100);
     const sprite = buildMemberRow('<$test>', {}, FONT_SPEC, measurer, registry);
     const plain = buildMemberRow('+a', {}, FONT_SPEC, measurer);
@@ -137,8 +148,58 @@ describe('MemberRowBuild.height (lozego-15-coci435 per-row heights)', () => {
     const rows = buildSectionRows([member, member], ['<$test>', '+a'], [sprite, plain], 0, false, {
       baselineOffset: 11,
       iconZoneWidth: 14,
+      fontSize: 14,
     });
-    expect(rows[1]!.y - rows[0]!.y).toBeCloseTo((100 * 14) / 13, 6);
+    expect(rows[1]!.y - rows[0]!.y).toBeCloseTo(plain.height, 6);
+    expect(plain.height).toBe(14);
+  });
+
+  // CDD B7FU-R2 item (b) correction: exposant-01-class (`x<sup>2</sup>`)
+  // and sovuxo-25-tepi226 (`skinparam classAttributeFontSize 8`, a small-
+  // font height floor) both regressed when the bottom-anchor formula
+  // applied unconditionally -- `build.height` differs from `fontSize` for
+  // reasons OTHER than a sprite/img atom, and only a sprite/img (`'image'`
+  // kind) atom needs the shift (see `class-member-rows.ts#buildSectionRows`
+  // 's own doc comment for the full diagnosis).
+  test('a <sup>/<sub> row (height inflated by Sea, no image atom) keeps the FLAT baseline formula', () => {
+    const sup = buildMemberRow('x<sup>2</sup>', {}, FONT_SPEC, measurer);
+    expect(sup.height).toBe(17); // Sea's own ascent/descent envelope, NOT the font size
+    expect(sup.atoms.every((a) => a.kind === 'text')).toBe(true);
+    const member = { visibility: '+', hidden: false } as never;
+    const rows = buildSectionRows([member], ['x<sup>2</sup>'], [sup], 0, false, {
+      baselineOffset: 11,
+      iconZoneWidth: 14,
+      fontSize: 14,
+    });
+    // OLD/flat formula: sectionTop(0) + SECTION_MARGIN_TOP(4) + rowTop(0) + baselineOffset(11) = 15.
+    expect(rows[0]!.y).toBe(15);
+  });
+
+  test('a small-font-floor row (height clamped, no image atom) keeps the FLAT baseline formula', () => {
+    const small = buildMemberRow('example1', {}, { family: 'sans-serif', size: 8 }, measurer);
+    expect(small.height).toBe(10); // clamped above the 8px font size
+    const member = { visibility: '+', hidden: false } as never;
+    const rows = buildSectionRows([member], ['example1'], [small], 0, false, {
+      baselineOffset: 6.222222222222222,
+      iconZoneWidth: 14,
+      fontSize: 8,
+    });
+    expect(rows[0]!.y).toBeCloseTo(0 + 4 + 0 + 6.222222222222222, 6);
+  });
+
+  test('an image-atom row (sprite) STILL gets the bottom-anchor shift', () => {
+    const registry = registryWith('test', 50, 100);
+    const sprite = buildMemberRow('<$test>', {}, FONT_SPEC, measurer, registry);
+    expect(sprite.atoms.some((a) => a.kind === 'image')).toBe(true);
+    const member = { visibility: '+', hidden: false } as never;
+    const rows = buildSectionRows([member], ['<$test>'], [sprite], 0, false, {
+      baselineOffset: 11,
+      iconZoneWidth: 14,
+      fontSize: 14,
+    });
+    // Bottom-anchor formula: sectionTop(0) + MARGIN(4) + rowTop(0) + height - (fontSize(14) - baselineOffset(11)).
+    expect(rows[0]!.y).toBeCloseTo(0 + 4 + 0 + sprite.height - (14 - 11), 6);
+    expect(rows[0]!.y).not.toBe(0 + 4 + 0 + 11); // NOT the flat formula
   });
 });
 

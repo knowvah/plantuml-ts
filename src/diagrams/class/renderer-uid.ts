@@ -24,19 +24,18 @@
  * this function does NOT use `creationIndex` values as the uid number
  * directly — it uses them only to SORT the kept geometry items, then
  * assigns a fresh dense 1..N sequence over that sorted order. This is
- * deliberate, not an approximation: `ensureClassifier` sometimes stamps a
- * creationIndex on a classifier that never reaches `ClassGeometry` at all
- * (a relationship endpoint that resolves to an EXISTING namespace, e.g.
- * `pkg --> Foo` where `pkg` is a package — `ensureClassifier` still
- * auto-creates a phantom `Classifier` row for the bare reference before
- * `class-shield-helpers.ts#packageEndpointAnchors` redirects the actual DOT
- * edge to an anchor point inside the cluster, so the phantom never gets a
- * `ClassifierGeo` — verified against `bajotu-30-soku184`: raw
- * creationIndex values are namespace=1, classifier=2, classifier=3,
- * PHANTOM=4, relationship=5, but jar's real uids are ent0001/ent0002/
- * ent0003/lnk4 with NO gap — dense re-numbering over the 4 KEPT items
- * (phantom excluded, it has no geo) reproduces that exactly, whereas a
- * literal counter replay would not).
+ * deliberate, not an approximation: the AST can carry rows that never
+ * reach `ClassGeometry` at all, and a literal counter replay would leave
+ * their holes in place. (cdd-T3 A1 SB4 removed the ORIGINAL example of
+ * this — a relationship endpoint resolving to an EXISTING namespace, e.g.
+ * `pkg --> Foo` where `pkg` is a package. `ensureClassifier` used to mint a
+ * phantom `Classifier` row AND burn a `cpt1` tick for it; upstream burns
+ * neither (`CommandLinkClass.java:326-334` reads `quark.getData()` and
+ * skips `reallyCreateLeaf`), so `class-ensure-classifier.ts
+ * #existingGroupAlias` now returns an unregistered stub and the row is gone
+ * — `bajotu-30-soku184`'s creationIndex values are namespace=1,
+ * classifier=2, classifier=3, relationship=4, matching jar's
+ * ent0001/ent0002/ent0003/lnk4 directly.)
  *
  * NOT reachable by dense re-numbering: upstream itself sometimes consumes
  * a real (non-phantom) uid for an internal node/edge this port does not
@@ -84,6 +83,15 @@ export interface ClassUidPlan {
   readonly noteUid: ReadonlyMap<string, string>;
   /** Parallel to `geo.edges` — the assigned `lnkN` uid per edge. */
   readonly edgeUid: readonly string[];
+  /** cdd-T9b: `NoteGeo.id` → the assigned `lnkN` uid for that note's OWN
+   *  dashed host connector (`ClassUidPlanInput.notes[].connector`'s own
+   *  doc comment) — present only for a note that draws one. Promotes the
+   *  G2 N68 phantom rank at `creationIndex + 1` (exact path) to a real,
+   *  addressable uid instead of a consumed-but-uid-less rank; the fallback
+   *  (non-exact) path numbers every connector after the real edges,
+   *  continuing the SAME `lnkN` sequence `edgeUid` ends on — same posture
+   *  `assignFallback`'s own doc comment already documents for that path. */
+  readonly noteConnectorUid: ReadonlyMap<string, string>;
   /** Resolves a raw `EdgeGeo.from`/`.to` endpoint string (a classifier id
    *  OR a namespace id — see `packageEndpointAnchors` in the module doc
    *  comment) to its assigned uid, falling back to the raw string itself
@@ -100,6 +108,8 @@ interface UidMaps {
   readonly namespaceUid: Map<string, string>;
   readonly noteUid: Map<string, string>;
   readonly edgeUid: string[];
+  /** cdd-T9b: see {@link ClassUidPlan.noteConnectorUid}. */
+  readonly noteConnectorUid: Map<string, string>;
 }
 
 type EntityKind = 'classifier' | 'namespace';
@@ -151,6 +161,7 @@ export interface ClassUidPlanInput {
     readonly noUidSlot?: true;
     readonly phantomSlot?: true;
     readonly subsumedLinkCreationIndex?: number;
+    readonly apointNameCreationIndex?: number;
     readonly invertedClassEdgeOldCreationIndex?: number;
     readonly repeatCoupleInvisLinkCreationIndex?: number;
   }[];
@@ -160,8 +171,26 @@ export interface ClassUidPlanInput {
     readonly creationIndex?: number;
     readonly phantomSlot?: true;
     readonly tipGroupPhantomIndex?: number;
+    /** cdd-T9b: non-empty ⟺ this note draws its OWN dashed connector line
+     *  to its host (not opalised, not a `'tips'` leaf) — the SAME
+     *  predicate `NoteGeo.connector`'s own doc comment documents. A
+     *  `ClassGeometry`'s real `NoteGeo[]` satisfies this structurally
+     *  (`renderer.ts#renderClass`'s `buildClassUidPlan({ ...geo, notes })`
+     *  call passes it straight through); the AST-derived plan
+     *  (`classUidPlanInputFromAst`) never has this field, so it stays
+     *  `undefined` there — the ONE consumer of that path (`sametail`) has
+     *  no note-connector reach today, so promoting nothing for it is a
+     *  behavior-preserving default (see this field's use in
+     *  `assignExact`). */
+    readonly connector?: ReadonlyArray<unknown>;
   }[];
   readonly edges: readonly { readonly creationIndex?: number; readonly phantomSlot?: true }[];
+  /** cdd-T3 (A1 SB5): ranks burned by entities `filterRemovedEntities` dropped
+   *  before geometry existed -- see `class-directives-removal.ts
+   *  #computeRemovedRanks`. Re-injected as uid-less phantom ranks so dense
+   *  re-numbering leaves the same holes jar's export-time `isRemoved()` skip
+   *  does. */
+  readonly removedRanks?: readonly number[];
 }
 
 /** Projects a parsed AST onto {@link ClassUidPlanInput}. `relationships` are
@@ -185,6 +214,43 @@ function isExact(geo: ClassUidPlanInput): boolean {
     geo.namespaces.every((n) => n.creationIndex !== undefined) &&
     geo.edges.every((e) => e.creationIndex !== undefined)
   );
+}
+
+/** One numbering-rank slot in `assignExact`'s creationIndex-sorted merge —
+ *  module-scope (not local to `assignExact`) so {@link noteRankedEntries}
+ *  can be its own top-level function (complexity-hook NLOC/CCN cap). */
+type Ranked =
+  | { readonly type: 'entity'; readonly item: EntityItem }
+  | { readonly type: 'edge'; readonly index: number; readonly creationIndex: number }
+  | { readonly type: 'note'; readonly id: string; readonly creationIndex: number }
+  // cdd-T9b: the note's own note<->host CONNECTOR link, promoted from a
+  // phantom (see below) to a real, addressable `lnkN` rank when it is
+  // actually DRAWN as its own `<g class="link">` (`ClassUidPlanInput
+  // .notes[].connector` non-empty — `renderer-note-connector.ts`'s own
+  // doc comment).
+  | { readonly type: 'connector'; readonly noteId: string; readonly creationIndex: number }
+  // G2 N15: a discarded "GMN" phantom slot (`ClassNote.phantomSlot`'s doc
+  // comment) -- consumes a numbering RANK (keeping the gap it produced in
+  // the real upstream counter) without being written to any uid map.
+  // Distinct from a phantom CLASSIFIER stub (module doc comment above),
+  // which correctly has NO Ranked entry at all -- this phantom's rank
+  // consumption is exactly the point, not an artifact to collapse away.
+  | { readonly type: 'phantom'; readonly creationIndex: number };
+
+/** One exact-numbered note's Ranked entries — split out of `assignExact`
+ *  purely for the complexity-hook NLOC/CCN cap (pure extraction, no
+ *  behavior change). See the `'connector'`/`'phantom'` cases in {@link
+ *  Ranked}'s own doc comment for the G2 N68 / cdd-T9b promotion rule. */
+function noteRankedEntries(n: ClassUidPlanInput['notes'][number]): Ranked[] {
+  if (n.phantomSlot !== true) return [{ type: 'note', id: n.id, creationIndex: n.creationIndex! }];
+  const hasConnector = (n.connector?.length ?? 0) > 0;
+  return [
+    { type: 'phantom', creationIndex: n.creationIndex! - 1 },
+    { type: 'note', id: n.id, creationIndex: n.creationIndex! },
+    hasConnector
+      ? { type: 'connector', noteId: n.id, creationIndex: n.creationIndex! + 1 }
+      : { type: 'phantom', creationIndex: n.creationIndex! + 1 },
+  ];
 }
 
 /** Exact path: dense re-numbering over the creationIndex-sorted merge of
@@ -211,17 +277,6 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
   ];
   const exactNotes = geo.notes.filter((n) => n.creationIndex !== undefined);
 
-  type Ranked =
-    | { readonly type: 'entity'; readonly item: EntityItem }
-    | { readonly type: 'edge'; readonly index: number; readonly creationIndex: number }
-    | { readonly type: 'note'; readonly id: string; readonly creationIndex: number }
-    // G2 N15: a discarded "GMN" phantom slot (`ClassNote.phantomSlot`'s doc
-    // comment) -- consumes a numbering RANK (keeping the gap it produced in
-    // the real upstream counter) without being written to any uid map.
-    // Distinct from a phantom CLASSIFIER stub (module doc comment above),
-    // which correctly has NO Ranked entry at all -- this phantom's rank
-    // consumption is exactly the point, not an artifact to collapse away.
-    | { readonly type: 'phantom'; readonly creationIndex: number };
   const merged: Ranked[] = [
     ...entities.map((item): Ranked => ({ type: 'entity', item })),
     ...geo.edges.flatMap((e, index): Ranked[] =>
@@ -236,19 +291,9 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
           ]
         : [{ type: 'edge', index, creationIndex: e.creationIndex! }],
     ),
-    ...exactNotes.flatMap((n): Ranked[] =>
-      n.phantomSlot === true
-        ? [
-            { type: 'phantom', creationIndex: n.creationIndex! - 1 },
-            { type: 'note', id: n.id, creationIndex: n.creationIndex! },
-            // G2 N68: the note's own note<->host CONNECTOR link (a `noDisplay`
-            // dashed `Link` the jar's `CommandFactoryNoteOnEntity` always
-            // creates) burns ONE more rank immediately AFTER the note entity --
-            // see `class-notes.ts`'s own doc comment for the jar mechanism.
-            { type: 'phantom', creationIndex: n.creationIndex! + 1 },
-          ]
-        : [{ type: 'note', id: n.id, creationIndex: n.creationIndex! }],
-    ),
+    // G2 N68 / cdd-T9b: see {@link noteRankedEntries} + {@link Ranked}'s
+    // own doc comments for the phantom-vs-real-connector promotion rule.
+    ...exactNotes.flatMap(noteRankedEntries),
     // G2 N19: couple/lollipop phantom-slot bookkeeping -- see
     // `Classifier.phantomSlot`/`.noUidSlot`'s doc comments (ast.ts). A
     // classifier's OWN 'entity' Ranked entry (added above, when
@@ -269,6 +314,13 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
       if (c.subsumedLinkCreationIndex !== undefined) {
         out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex });
       }
+      // cdd-T3 (A1 SB3): the DOUBLE-couple path's `getUniqueSequence
+      // ("apoint")` NAME tick -- a standalone rank two below the point
+      // entity's own, since upstream mints BOTH names before EITHER entity
+      // (`objectdiagram/AbstractClassOrObjectDiagram.java:120-129`).
+      if (c.apointNameCreationIndex !== undefined) {
+        out.push({ type: 'phantom', creationIndex: c.apointNameCreationIndex });
+      }
       // G2 N20: repeat-coupling's two classifier-level standalone phantom
       // ranks -- see `Classifier.invertedClassEdgeOldCreationIndex`/
       // `.repeatCoupleInvisLinkCreationIndex`'s own doc comments (ast.ts).
@@ -286,6 +338,8 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
     // ALL of `geo.notes`, not just `exactNotes` above -- a tip note's own
     // `creationIndex` is (and stays) undefined, so it is never itself an
     // 'entity'/'note' Ranked entry; only these two phantom slots are added.
+    // cdd-T3 (A1 SB5): the removed rows' own burned ranks.
+    ...(geo.removedRanks ?? []).map((creationIndex): Ranked => ({ type: 'phantom', creationIndex })),
     ...geo.notes.flatMap((n): Ranked[] =>
       n.tipGroupPhantomIndex !== undefined
         ? [
@@ -308,6 +362,8 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
       maps.edgeUid[entry.index] = lnkUid(rank);
     } else if (entry.type === 'note') {
       maps.noteUid.set(entry.id, entUid(rank));
+    } else if (entry.type === 'connector') {
+      maps.noteConnectorUid.set(entry.noteId, lnkUid(rank));
     }
     // 'phantom': rank consumed, nothing written -- see the Ranked union's
     // own doc comment above.
@@ -338,6 +394,38 @@ function assignFallback(geo: ClassUidPlanInput, maps: UidMaps): number {
   return counter;
 }
 
+/** cdd-T9b: fallback-path connector uid pass, split out of {@link
+ *  buildClassUidPlan} purely for the complexity-hook NLOC/CCN cap (pure
+ *  extraction, no behavior change) — see that function's own call site
+ *  comment for why only the fallback (non-exact) path needs this. */
+function assignFallbackConnectorUids(geo: ClassUidPlanInput, maps: UidMaps): void {
+  let connectorCounter = maps.edgeUid.length;
+  for (const note of geo.notes) {
+    if ((note.connector?.length ?? 0) > 0) {
+      connectorCounter += 1;
+      maps.noteConnectorUid.set(note.id, lnkUid(connectorCounter));
+    }
+  }
+}
+
+/** Remaining notes (member-tips whose merge-by-host+position isn't modeled
+ *  at parse time, or — when the overall geometry is NOT exact — every note
+ *  regardless of its own creationIndex, since mixing a real creationIndex
+ *  into an array-order fallback count would be meaningless) keep the
+ *  pre-existing best-effort fallback: continuing the dense count from
+ *  wherever the exact/fallback pass left off, in `geo.notes` array order.
+ *  G2 N15: skips notes already assigned (exact-numbered). Split out of
+ *  {@link buildClassUidPlan} purely for the complexity-hook NLOC/CCN cap
+ *  (pure extraction, no behavior change). */
+function assignNoteFallbackUids(geo: ClassUidPlanInput, maps: UidMaps, lastRank: number): void {
+  let noteCounter = lastRank;
+  for (const note of geo.notes) {
+    if (maps.noteUid.has(note.id)) continue;
+    noteCounter += 1;
+    maps.noteUid.set(note.id, entUid(noteCounter));
+  }
+}
+
 /** Builds the uid plan for one `ClassGeometry` — see module doc comment
  *  for the exact-vs-fallback algorithm choice and notes' partially-exact
  *  numbering. */
@@ -347,24 +435,22 @@ export function buildClassUidPlan(geo: ClassUidPlanInput): ClassUidPlan {
     namespaceUid: new Map<string, string>(),
     noteUid: new Map<string, string>(),
     edgeUid: new Array<string>(geo.edges.length).fill(''),
+    noteConnectorUid: new Map<string, string>(),
   };
 
   const exact = isExact(geo);
   const lastRank = exact ? assignExactAndCountRank(geo, maps) : assignFallback(geo, maps);
 
-  // Remaining notes (member-tips whose merge-by-host+position isn't
-  // modeled at parse time, or — when the overall geometry is NOT exact —
-  // every note regardless of its own creationIndex, since mixing a real
-  // creationIndex into an array-order fallback count would be meaningless)
-  // keep the pre-existing best-effort fallback: continuing the dense count
-  // from wherever the exact/fallback pass left off, in `geo.notes` array
-  // order. G2 N15: skip notes already assigned above (exact-numbered).
-  let noteCounter = lastRank;
-  for (const note of geo.notes) {
-    if (maps.noteUid.has(note.id)) continue;
-    noteCounter += 1;
-    maps.noteUid.set(note.id, entUid(noteCounter));
-  }
+  // cdd-T9b: the exact path already assigned every connector uid as part
+  // of its dense creationIndex-sorted merge ({@link noteRankedEntries}'s
+  // 'connector' case) — only the fallback path needs a separate pass,
+  // continuing the SAME `lnkN` sequence `edgeUid` ends on (this task's own
+  // "fallback keeps numbering the connector after the real edges"
+  // requirement — `renderer.ts` used to do this inline per-connector;
+  // centralized here so every consumer reads ONE map regardless of path).
+  if (!exact) assignFallbackConnectorUids(geo, maps);
+
+  assignNoteFallbackUids(geo, maps, lastRank);
 
   const resolveEntityUid = (id: string): string =>
     maps.classifierUid.get(id) ?? maps.namespaceUid.get(id) ?? maps.noteUid.get(id) ?? id;
@@ -374,6 +460,7 @@ export function buildClassUidPlan(geo: ClassUidPlanInput): ClassUidPlan {
     namespaceUid: maps.namespaceUid,
     noteUid: maps.noteUid,
     edgeUid: maps.edgeUid,
+    noteConnectorUid: maps.noteConnectorUid,
     resolveEntityUid,
   };
 }

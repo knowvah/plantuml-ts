@@ -200,6 +200,31 @@ export function addPlainInk(box: InkBox, x: number, y: number, w: number, h: num
 }
 
 /**
+ * CDD B7FU-R2 item (e): `SvgGraphics#svgImageUnsecure` (`klimt/drawing/svg/
+ * SvgGraphics.java:987-999`) draws an embedded `{{ }}` diagram's `<image>`
+ * and calls `ensureVisible(x, y)` / `ensureVisible(x + image.getData
+ * ("width"), y + image.getData("height"))` on the REAL, successfully-drawn
+ * SVG's OWN `width`/`height` attributes -- independent of whatever the
+ * enclosing classifier's own box reserved for it at LAYOUT time (`class-
+ * body-enhanced-embeds.ts`'s "sizing/drawing asymmetry" doc comment: that
+ * reservation is upstream's OWN `(42, 42)` fallback, never the drawn size).
+ * So a drawn embed taller/wider than its (42, 42)-sized row reservation
+ * still pushes the WHOLE diagram's canvas out to its real footprint --
+ * jar-verified `zikabo-17-gugi332` (embed drawn at `x=13,y=57,w=67,h=64`,
+ * jar canvas exactly `(80,121)+1 = (81,122)`, byte-exact once this point is
+ * added; our canvas before this fix, 74x116, never reached the embed's
+ * real corner at all) and `gadufu-56-votu808` (same mechanism, Y axis
+ * only -- its own `image.getWidth()`/`getHeight()` value gap is a SEPARATE,
+ * out-of-scope activity-engine Cyrillic-measurement residual, `class-body-
+ * enhanced-embeds.ts`'s own doc comment). No inset on either corner
+ * (`ensureVisible` is a bare `x > maxX`/`y > maxY` comparison, not
+ * `LimitFinder#drawRectangle`'s `-1`-inset rect rule) -- {@link addPlainInk}
+ * shares this exact shape and is reused rather than duplicated. */
+export function addEmbedImageInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPlainInk(box, x, y, w, h);
+}
+
+/**
  * G2 N60 (item 42): `LimitFinder#drawUPolygon` -- `x` padded by
  * `HACK_X_FOR_POLYGON` on BOTH sides, `y` unpadded. `USymbolFolder#asBig`
  * draws its outline as a `UPolygon` (not the default rounded-arc `UPath`)
@@ -235,6 +260,41 @@ export function addFolderPolygonInk(box: InkBox, x: number, y: number, w: number
  * `buildInkBox` namespace-ink gap this function's `addFolderPolygonInk`
  * sibling closes.
  */
+/**
+ * cdd-T12 (diagnosis A2b E3): `USymbolNode#asBig`'s ink --
+ * `USymbolNode#drawNode` (`decoration/symbol/USymbolNode.java:71-92`) draws
+ * a `UPolygon` (so `LimitFinder#drawUPolygon`'s `HACK_X_FOR_POLYGON` x-pad,
+ * see {@link addFolderPolygonInk}) and then, at `:90`,
+ * `ug.apply(new UTranslate(0, height)).draw(new UEmpty(10, 10))` --
+ * `LimitFinder#drawEmpty` (`klimt/drawing/LimitFinder.java:159-162`) records
+ * `(x, y)`/`(x+10, y+10)` for it, so the node's ink reaches 10px BELOW its
+ * own box. Jar-verified on `dativu-93-pona469`: canvas `381x133` against
+ * cluster bboxes `[16,356]x[6,108]` -- `356+10+5(margin)+1 = 372`? no:
+ * `minX = 16-10 = 6`, `maxX = 356+10 = 366`, `maxY = 108+10 = 118`, which
+ * after this port's own shift/margin/`+1` recipe gives exactly `381x133`.
+ */
+export function addNamespaceNodeInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x - HACK_X_FOR_POLYGON, y);
+  addPoint(box, x + w + HACK_X_FOR_POLYGON, y + h + USYMBOL_EMPTY_RESERVATION);
+}
+
+/**
+ * cdd-T12: `USymbolDatabase#asBig`'s ink -- `drawDatabase` draws a `UPath`
+ * (the plain rule, no polygon hack) and then
+ * `ug.apply(new UTranslate(width, height)).draw(new UEmpty(10, 10))`,
+ * reserving 10px to the RIGHT and BELOW the box
+ * (`LimitFinder.java:159-162`, as for {@link addNamespaceNodeInk}).
+ */
+export function addNamespaceDatabaseInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x, y);
+  addPoint(box, x + w + USYMBOL_EMPTY_RESERVATION, y + h + USYMBOL_EMPTY_RESERVATION);
+}
+
+/** The `new UEmpty(10, 10)` several `USymbol#drawXxx` bodies append past the
+ *  shape's own box (`USymbolNode.java:90`, `USymbolDatabase.java`'s
+ *  `drawDatabase`) -- upstream's own literal, kept as one named constant. */
+const USYMBOL_EMPTY_RESERVATION = 10;
+
 export function addNamespaceRectInk(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w - 1, y + h - 1);

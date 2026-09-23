@@ -110,7 +110,10 @@ under other names — see above), ELK cannot be satisfied by routing to
 `@knowvah/dot-engine`: it would produce a different layout. Diagrams carrying
 this pragma lay out with `@knowvah/dot-engine`, which will **not** match
 upstream. The ~8 corpus fixtures using it are ledgered and excluded from the
-conformance bars.
+conformance bars. The seven class-corpus fixtures are the `entries` of
+`oracle/accepted-divergences.json` (accepted 2026-09-21, one exact `svg-class/<slug>`
+id each; every one carries the pragma in `in.puml` and has no `svek-N.dot` dump in
+`test-results/dot-cache/class/`, so DOT parity has no oracle either).
 
 **Why (ruling, extending "one layout engine" of 2026-08-09):** this port has
 **one** layout engine, `@knowvah/dot-engine`, and supports no alternative
@@ -163,135 +166,43 @@ decision, landed.
 
 ---
 
-### `mainframe <label>` — parsed, not yet rendered (BigFrame port deferred)
+### `mainframe <label>` — rendered via a ported `BigFrame` (CDD T34); non-class engines carry a sizing residual
 
 **Upstream:** `mainframe <label>` (`command/CommandMainframe.java`) wraps the
 whole diagram in a bordered frame with a folded-corner tab carrying the
 label, drawn by `DiagramChromeFactory.decorateWithFrame`
-(`core/DiagramChromeFactory.java:257-318`) + `BigFrame`
-(`klimt/shape/BigFrame.java`), applied as the innermost chrome layer
-(mission G0b `decisions.md` D1/D9).
+(`core/DiagramChromeFactory.java:126-133,275-336`) + `BigFrame`
+(`klimt/shape/BigFrame.java`), applied as the innermost chrome layer.
 
-**This port:** `mainframe` is parsed into `DiagramAnnotations.mainFrame`
-(T1) and participates in `isEmpty()`'s chrome-skip check (T1/T4), but
-`applyChrome` (`src/core/annotations/chrome.ts`) does not draw it — a
-diagram with a `mainframe` directive renders identically to one without.
+**This port (since class-divergence-drive T34, 2026-09-23):**
+`src/core/klimt/shape/big-frame.ts#buildBigFrame` ports `BigFrame.java`
+(rect plus the folder-tab title cutout; constants from `plantuml.skin:85-89`)
+and `src/core/annotations/chrome.ts#addMainframe` wraps the diagram body
+before legend/title/caption/header/footer, for every engine that routes
+through `applyChrome`. The frame's unset `BackGroundColor` does not inherit
+`root {}`'s the way `LineColor`/`FontColor`/`RoundCorner` do; it resolves as
+`style.backgroundColor ?? style.documentBackground` (probed against three
+oracle renders; `plans/class-divergence-drive/decision-journal.md` rows
+202-206).
 
-**Why (T9, jar-verified investigation) — UPDATED by mission G0/T5,
-STILL TEMPORARY per D9's escape hatch:** T9 found the blocker was a
-missing *primitive* — `BigFrame`'s `computeWidth`/`computeHeight` need
-`TextBlockUtils.getMinMax(original, stringBounder, false)`, a real
-ink-bounding-box walk (`LimitFinder`) over every drawn primitive, and
-this port had no `LimitFinder`/`MinMax`/`TextBlockUtils.getMinMax` at
-all. Mission G0 ported that machinery in full (T1) and wired it into the
-description (klimt) engine's own document-sizing pass
-(`renderer-ink-extent.ts#computeDocumentDims`, T3) — the primitive T9
-was missing now exists, and the description engine already performs the
-exact kind of ink walk `BigFrame` needs, over the same `draw` callback
-(`drawClusters`/`drawEntities`/`drawEdges`) `renderDescription` uses for
-its real pass.
+**Status by engine:** class is byte-exact (`jakaja-15-faze022`). The five
+sequence and three unknown-bucket corpus fixtures that carry `mainframe`
+(`decace-28-majo724`, `futaxe-10-xonu513`, `gunecu-53-jebu067`,
+`jutomu-49-kemi074`, `zidova-39-bapi223`; `miveni-64-rexo238`,
+`rivino-95-midu088`, `soseka-43-riru110`) now draw the frame and moved
+toward the jar (their structural childCount gap closed) but are not exact:
+those engines' fragments lack the ink-corrected `preChromeWidth`/
+`preChromeHeight` the class engine carries (G2 N46), so the frame's outer
+box is off by the chrome-margin delta the class path re-applies after
+chrome.
 
-T5 evaluated decisions.md D5's two branches and re-traced the blocker
-with the primitive now available. The remaining obstacle is
-**architectural, not a missing primitive**: `BigFrame` needs the
-`mainFrame` display data AND its resolved box style
-(`padding`/`margin`/`lineColor`/`lineThickness`, honoring `skinparam`
-and `<style>` overrides the same way title/legend/caption/header/footer
-already do) available *inside* the klimt draw pass — and neither is
-reachable there without crossing a boundary this port's plugin
-architecture does not currently expose:
+**Category:** limitation (residual on the non-class engines only).
 
-- `renderDescription(geo, theme, measurer)` — the only entry point with
-  a real `draw` callback / `UGraphic` — receives `DescriptionGeometry`
-  (`layout.ts`), which carries no annotation data. Threading
-  `ast.annotations.mainFrame` onto it requires an edit to
-  `src/diagrams/description/layout.ts` (mirroring the already-
-  established `ast.seed -> geo.seed` precedent) — a file outside every
-  branch-(a) write-set this mission authorized for T5 (`decisions.md`
-  D5, batch-3/overview.md, T5's own boundaries section).
-- Even with display data threaded onto `geo`, the *style* (padding/
-  margin/lineColor/lineThickness) cannot follow the same path:
-  `resolveAnnotationStyles(theme, skinparam, styleMap)` — the ONE
-  function every other annotation element uses to honor `skinparam` and
-  `<style>` block overrides — needs `preprocessed.skinparam` and
-  `styleMap`, which exist only in `src/index.ts`'s top-level
-  `renderSync`/`render`, resolved *after* `plugin.render()` already
-  ran (`applyAnnotationChrome`, called on the returned fragment). Reaching
-  them from inside `renderDescription` means either widening
-  `SyncPlugin.layoutSync`/`render` (`src/core/dispatcher.ts`) to carry
-  skinparam/styleMap — a plugin-contract change rippling to every
-  diagram engine, not just description — or mutating `geo` from
-  `src/index.ts` with an engine-specific, type-unsafe cast before
-  `plugin.render()` runs, growing a SECOND, pre-render, description-only
-  special case next to T7's existing post-render unwrap/reassemble
-  special case (`src/index.ts#applyAnnotationChrome`). Both are exactly
-  the "second chrome pipeline" shape D5/T5 were scoped to avoid; hard-
-  coding the style (skipping `skinparam`/`<style>` support only for
-  `mainframe`) would silently diverge mainframe from every other
-  annotation element's fidelity to user overrides, undocumented, inside
-  the same diagram.
-
-Because the clean data path requires touching files this task was not
-authorized to write (`layout.ts`) and the style path requires either a
-cross-engine plugin-contract change or an undocumented fidelity
-asymmetry, T5 takes **branch (b)**: keep the divergence TEMPORARY,
-update the rationale, make no code change. Geometry itself is no longer
-the open question — T5 independently re-derived `BigFrame`'s exact
-formula against `klimt/shape/BigFrame.java` and
-`DiagramChromeFactory.java:257-318` and confirms it is fully portable
-(`ww = minX>=0 ? maxX : width`, `computeWidth = padL + max(ww+12,
-titleW+10) + padR`, etc., off a `TextBlockUtils.getMinMax`-shaped raw
-`MinMax`, not `computeDocumentDims`'s own post-processed width/height) —
-only the plumbing to reach it from inside the klimt pass, with correct
-style resolution, is missing.
-
-Probe evidence (`@startuml\nmainframe demo\na->b\n@enduml` vs bare
-`a->b`, oracle jar `-tsvg`): the bare diagram reports canvas 70×107.
-Wrapped in `mainframe demo`, the frame's own `<rect>` is 80.543×139.953
-(`x=5 y=15`), and the embedded original content is translated by exactly
-`(10, 38.4883)` inside it — consistent with `margin.left + padding.left`
-/ `margin.top + padding.top + dimTitle.height + 10` (`padding` = mission
-G0b's already-ported `mainframe` style, `{top:1,right:5,bottom:1,left:5}`;
-`dimTitle.height` = 16.4883, independently reconciled from the tab
-path's `textHeight - 3`, and matches this port's own
-`LINE_ADVANCE_RATIO` — `14 * 14.1328/12 = 16.4883` exactly).
-
-`computeWidth`'s `Math.max(ww + 12, dimTitle.width + 10)` term only
-reconciles (`80.543 - padding.left - padding.right = 70.543 = ww + 12`)
-if `ww ≈ 58.5` — the diagram's ink-derived max-X — not its declared
-width (`70`); using `ww = original.width` is off by ~11.5px, not a
-rounding difference. The same pattern holds for height: `computeHeight`
-reconciles only with an ink-derived `hh ≈ 95`, not the declared height
-(`107`). This is exactly the `LimitFinder`/`getMinMax`-shaped quantity
-T1/T3 now compute for description's own document sizing — G0's own
-confirmation that the *ink extent* half of the problem is solved; only
-the annotation-plumbing half (above) remains.
-
-For every OTHER (non-description) engine, T9's original blocker still
-holds unchanged: chrome (`src/core/annotations/chrome.ts`) composes flat,
-pre-measured `{ body, width, height }` `AnnotationBlock` fragments
-(project CLAUDE.md D2's string-fragment architecture) with no drawable
-tree and no ink-bounding-box tracking anywhere — reproducing `LimitFinder`
-there means walking/parsing composed SVG body strings (D5's explicitly
-rejected "SVG-string extent walker") or threading real geometry objects
-through the whole render pipeline instead of flat strings, both far
-outside a "small, isolated" `BigFrame` port.
-
-**Category:** limitation (parsed, not yet rendered — see D9).
-
-**Revisit:** description-engine BigFrame is unblocked as soon as (a) the
-mainframe annotation can reach `DescriptionGeometry` (a `layout.ts`
-write-set expansion, mirroring `geo.seed`) and (b) `resolveAnnotationStyles`
-or an equivalent can be evaluated before/inside the klimt render pass
-(a `SyncPlugin` contract change, or an index.ts-level restructuring that
-resolves styles before calling `plugin.render`) — both are natural
-follow-up mission scope, not new unported machinery. Fragment-string
-engines still need the same primitive as before: an SVG path/shape
-extent walker, or geometry-object threading in place of flat fragment
-strings.
-
----
-
+**Revisit:** port the pre-chrome ink correction into the klimt
+document-shell path so every engine sizes the frame from real ink; the
+earlier history of this entry (the missing `LimitFinder` primitive, mission
+G0's port of it, the description-engine style-resolution blocker) is in git
+history under this heading.
 
 ### Default element skin — grey (`#F1F1F1`), not legacy yellow (`#FEFECE`)
 
@@ -549,6 +460,103 @@ non-deterministic across JDKs; verbatim pass-through is also the
 licensing-safe path for ND-licensed artwork.
 
 **Affects:** any diagram rendering stdlib icons or creole `img`/sprite atoms.
+
+### Emoji shorthand `<:name:>` — the platform glyph, not OpenMoji artwork (limitation, CDD B7FU-R1)
+
+**Upstream:** a `<:name:>` atom is drawn as VECTOR ARTWORK. `AtomEmoji`
+(`klimt/creole/atom/AtomEmoji.java`) resolves the shortname through
+`Emoji.java`'s table to a bundled OpenMoji glyph and draws it as a stack of
+filled `<path>` elements, one per colour region, inside the atom's square. In
+`class/lecelo-92-loma110`'s third class the jar draws 7 `<path>` elements plus
+3 label `<text>`s (11 children in that group) — no `<text>` carries the icon,
+and the rendering depends on no font at all.
+
+**This port:** the same atom is drawn as ONE `<text>` element carrying the
+emoji's Unicode code point at the atom's own emoji font size, so the rendered
+glyph is whatever the VIEWER's emoji font supplies (Apple Color Emoji, Noto
+Color Emoji, ...), or a tofu box on a system with none. The atom's GEOMETRY is
+upstream's: `Emoji.ts` maps `label`/`wrench`/`hammer_and_wrench` to the same
+code points (1f3f7/1f527/1f6e0), and the 36*factor square with its -3*factor
+starting altitude (a 39*factor effective line height) is ported and
+jar-verified, which is why lines containing emoji still size like the jar's.
+
+**Not affected:** the `<U+1F3F7>` and `&#127991;` spellings. Upstream draws
+THOSE as plain `<text>` with the literal character (same fixture, first two
+classes) — this port matches them, and only the `<:name:>` shorthand diverges.
+
+**Reason:** the artwork is a per-emoji vector asset bundle — a separate
+deliverable from the creole engine, with its own asset-licensing question
+(upstream ships OpenMoji, CC BY-SA 4.0). Nothing structural blocks it:
+`AtomEmoji` already reaches the emoji by code point, so an artwork bundle
+drops in at exactly that resolution point.
+
+**Affects:** `class/lecelo-92-loma110` and any diagram using `<:name:>`. The
+element KIND and count differ (a `<text>` where the jar has N `<path>`), so
+these fixtures cannot reach structural parity until the artwork lands; the
+surrounding layout numbers already match.
+
+**See also:** `.agent-notes/r2i-creole-class-wiring.md` ("Twemoji artwork not
+ported") and `.agent-notes/cdd-T25.md`, which traced the same finding from the
+`<:name:>` shorthand side.
+
+### Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster (deliberate, CDD T27)
+
+**Upstream:** `EmbeddedDiagram#getImageSvg`/`getImageSvgSlow`
+(`EmbeddedDiagram.java:129-133,169-174,197-213`) renders the nested diagram,
+strips its `<?plantuml ...?>` processing instructions, and embeds the
+resulting bytes as a `data:image/svg+xml;base64` (or PNG, off the raster
+branch) `<image>` inside the parent diagram.
+
+**This port:** `src/diagrams/class/class-nested-diagram-renderer.ts`
+(`createNestedDiagramRenderer`, CDD T27) renders the nested source through
+this port's OWN `renderSync` recursively, strips the same `<?plantuml ...?>`
+PIs (java:199), and embeds the resulting SVG SOURCE, base64-encoded
+verbatim, as a `data:image/svg+xml;base64` `<image>` sized from the nested
+render's own `viewBox`. Geometry (one `<image>` element, `x`/`y`/`width`/
+`height`) is the target; the payload BYTES deliberately differ — this port
+never re-encodes through ImageIO/AWT (no raster pipeline at all, this
+project's architecture note). The jar's CURRENT oracle cache for this
+corpus holds REAL nested renders, not the `calculateDimensionSlow` catch
+fallback (`(42, 42)`, java:150-152) -- an earlier note
+(`.agent-notes/r2b-embedded-42x42.md`) documented the fallback against an
+OLDER cache and is corrected by `.agent-notes/cdd-T27.md`, which decodes
+the current cache's `<image>` payloads directly.
+
+**Reason:** same as the sprite/img entry above — no portable, deterministic
+raster re-encode path exists in a browser-safe library; embedding the real
+rendered SVG source is cheaper and strictly more informative than a raster.
+
+**Status (CDD T27FU, updated):** wired into production for the class
+engine's own ENHANCED-body pipeline (`class-body-enhanced-embeds.ts`
+ports `MethodsOrFieldsArea.java:109-123,141-152,429-440`'s embed
+separation/stacking directly into `class-body-enhanced-layout.ts
+#buildRowsBlockRows`; `src/index.ts#prepareBlock` registers the renderer,
+closing over the ambient call's own `options`/measurer, on every
+`renderSync` call). Observable today for any classifier body that ALREADY
+takes the enhanced-body path (a `--`/`==`/`..`/`__` separator or `|_` tree
+line present anywhere in the body) and also contains a `{{ }}` block —
+`gadufu-56-votu808` is such a fixture (0 structural diffs; the image's own
+width/height carry a small residual, `.agent-notes/cdd-T27.md`'s own
+mechanism finding — belongs to the embedded ACTIVITY engine's text
+measurement, not this seam). A body whose ONLY enhancing trigger would be
+the `{{ }}` block itself (no separator/tree line otherwise present, e.g.
+`moxobo-16-tipo829`/`zikabo-17-gugi332`) is still NOT reached: `class-body-
+enhanced.ts#isEnhancedBody` lacks upstream's third disjunct
+(`EmbeddedDiagram.getEmbeddedType(s) != null`, `BodierLikeClassOrObject
+.java:96`) and is excluded from this task's write-set (a concurrent task
+edits it) — see `.agent-notes/cdd-T27.md` for the one-line fix needed and
+why even fixing it would not unblock genuine multi-level recursion (a
+SEPARATE, more severe parser gap: `handlePendingBodyLine` has no
+embedded-block awareness at parse time at all, so a NESTED class
+declaration's own closing `}` inside a `{{ }}` region prematurely closes
+the outer body regardless of `isEnhancedBody`). `core/cucadiagram/
+MethodsOrFieldsArea.ts`'s OWN consumer remains unreached (dead code for
+class-body rendering, ADR-5 — a DIFFERENT, pre-existing fact this task's
+diagnosis re-confirmed, not something T27FU changed).
+
+**Affects:** any class-body `{{ }}` embed whose enclosing body already
+takes the enhanced path; the bare-embed-only case and T28's chrome/legend
+consumer remain as described above.
 
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 

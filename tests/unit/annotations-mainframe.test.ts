@@ -1,21 +1,14 @@
 /**
- * Unit tests for `mainframe`'s current (T9) state — mission G0b.
+ * Unit tests for `mainframe` rendering (cdd-T34, E14) — mission G0b's own
+ * T9 escape hatch is CLOSED by this task: `DiagramChromeFactory
+ * .decorateWithFrame` + `BigFrame` (`klimt/shape/BigFrame.java`) are now
+ * ported (`core/klimt/shape/big-frame.ts`, `chrome.ts#addMainframe`).
+ * `plans/g0b-annotations/decisions.md` D9's "deferred whole" is superseded;
+ * `DIVERGENCES.md`'s "mainframe <label> — rendered via a ported BigFrame"
+ * entry records the rendered state and the non-class engines' residual.
  *
- * T9 investigated porting `DiagramChromeFactory.decorateWithFrame` +
- * `BigFrame` (`klimt/shape/BigFrame.java`) and took the D9 escape hatch:
- * `BigFrame`'s geometry depends on `TextBlockUtils.getMinMax`'s ink-
- * bounding-box walk (`LimitFinder`), which this port's flat-fragment
- * `AnnotationBlock` chrome pipeline (T4) has no equivalent for anywhere —
- * jar-verified (`plans/g0b-annotations/decision-journal.md`'s T9 row;
- * `DIVERGENCES.md`, "## General" → "mainframe <label> — parsed, not yet
- * rendered"). This file pins the CURRENT, documented state: `mainframe`
- * parses into the model (T1) and participates in `isEmpty()` (so chrome
- * still runs for a mainframe-only diagram), but `applyChrome` does not
- * draw it — content passes through unchanged. Delete/replace these tests
- * the day `BigFrame` actually gets ported.
- *
- * @see DIVERGENCES.md ("mainframe <label> — parsed, not yet rendered")
- * @see plans/g0b-annotations/decisions.md D9
+ * @see ~/git/plantuml/.../core/DiagramChromeFactory.java:275-336 (decorateWithFrame)
+ * @see ~/git/plantuml/.../klimt/shape/BigFrame.java
  */
 import { describe, it, expect } from 'vitest';
 import { applyChrome, type AnnotationStyles } from '../../src/core/annotations/chrome.js';
@@ -41,11 +34,24 @@ const PLAIN_STYLE: AnnotationBoxStyle = {
   horizontalAlignment: 'LEFT',
 };
 
+// cdd-T34: mainframe's own real defaults (plantuml.skin:85-89) rather than
+// PLAIN_STYLE's all-zero padding/margin/null-color stand-in — the geometry
+// assertions below need real numbers to check against.
+const MAINFRAME_STYLE: AnnotationBoxStyle = {
+  ...PLAIN_STYLE,
+  lineColor: '#181818',
+  lineThickness: 1.5,
+  padding: { top: 1, right: 5, bottom: 1, left: 5 },
+  margin: { top: 10, right: 5, bottom: 10, left: 5 },
+};
+
 function plainStyles(): AnnotationStyles {
   const elements: AnnotationElement[] = ['title', 'caption', 'header', 'footer', 'legend', 'mainframe'];
   const result = {} as AnnotationStyles;
-  for (const el of elements)
-    result[el] = { ...PLAIN_STYLE, padding: { ...PLAIN_STYLE.padding }, margin: { ...PLAIN_STYLE.margin } };
+  for (const el of elements) {
+    const base = el === 'mainframe' ? MAINFRAME_STYLE : PLAIN_STYLE;
+    result[el] = { ...base, padding: { ...base.padding }, margin: { ...base.margin } };
+  }
   return result;
 }
 
@@ -53,23 +59,49 @@ function makeFragment(width: number, height: number, body = '<rect id="BODY"/>')
   return { body, width, height, background: '#FFFFFF', extraDefs: '<marker/>' };
 }
 
-describe('mainframe — T9 escape hatch (D9): parsed, not rendered', () => {
+describe('mainframe — parsing + isEmpty (unaffected by cdd-T34)', () => {
   it('a mainframe-only annotations bag is NOT isEmpty (chrome still runs)', () => {
     const annotations = createAnnotations();
     setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
     expect(isEmpty(annotations)).toBe(false);
   });
 
-  it('applyChrome leaves body/width/height unchanged when mainFrame is the ONLY annotation set', () => {
+  it('byte-stability: applyChrome returns the SAME fragment object when no annotations are present at all', () => {
+    const fragment = makeFragment(70, 107);
+    const result = applyChrome(fragment, createAnnotations(), plainStyles(), MEASURER);
+    expect(result).toBe(fragment);
+  });
+});
+
+describe('mainframe — drawn via BigFrame (cdd-T34)', () => {
+  it('wraps the original body in a frame + folder-tab title, growing width/height', () => {
     const annotations = createAnnotations();
     setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
     const fragment = makeFragment(70, 107);
 
     const result = applyChrome(fragment, annotations, plainStyles(), MEASURER);
 
-    expect(result.body).toBe(fragment.body);
-    expect(result.width).toBe(fragment.width);
-    expect(result.height).toBe(fragment.height);
+    expect(result.body).not.toBe(fragment.body);
+    expect(result.body).toContain('<rect id="BODY"/>');
+    expect(result.width).toBeGreaterThan(fragment.width);
+    expect(result.height).toBeGreaterThan(fragment.height);
+  });
+
+  it('draws the frame rect, the folder-tab cutout path, and the title text BEFORE the original body', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
+    const fragment = makeFragment(70, 107);
+
+    const result = applyChrome(fragment, annotations, plainStyles(), MEASURER);
+
+    const rectIndex = result.body.indexOf('<rect');
+    const pathIndex = result.body.indexOf('<path');
+    const textIndex = result.body.indexOf('<text');
+    const bodyIndex = result.body.indexOf('<rect id="BODY"/>');
+    expect(rectIndex).toBeGreaterThanOrEqual(0);
+    expect(pathIndex).toBeGreaterThan(rectIndex);
+    expect(textIndex).toBeGreaterThan(pathIndex);
+    expect(bodyIndex).toBeGreaterThan(textIndex);
   });
 
   it('applyChrome preserves background/extraDefs (spread-through, decisions.md D5 shape)', () => {
@@ -83,9 +115,16 @@ describe('mainframe — T9 escape hatch (D9): parsed, not rendered', () => {
     expect(result.extraDefs).toBe('<marker/>');
   });
 
-  it('byte-stability: applyChrome returns the SAME fragment object when no annotations are present at all', () => {
+  it('the outer margin is baked into every drawn coordinate (frame rect starts at margin.left/top)', () => {
+    const annotations = createAnnotations();
+    setMainFrame(annotations, singleDisplayPositioned(['demo'], null, null, 0));
     const fragment = makeFragment(70, 107);
-    const result = applyChrome(fragment, createAnnotations(), plainStyles(), MEASURER);
-    expect(result).toBe(fragment);
+
+    const result = applyChrome(fragment, annotations, plainStyles(), MEASURER);
+
+    // MAINFRAME_STYLE.margin = {top: 10, left: 5} -- BigFrame.java:296-303's
+    // `margin.getTranslate()`, the same offset `jakaja-15-faze022`'s real
+    // oracle rect carries (`x="5" y="10"`).
+    expect(result.body).toContain('<rect x="5" y="10"');
   });
 });

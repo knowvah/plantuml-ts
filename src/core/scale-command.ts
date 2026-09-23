@@ -20,9 +20,10 @@
  * resolves a scalar FACTOR from the diagram's own UNSCALED (pre-scale)
  * document dimension — `TextBlockExporter#computeScaleFactor`
  * (`core/TextBlockExporter.java:205-209`): `scale.getScale(dim.width,
- * dim.height) * dpi/96.0` (dpi is always 96 in this port — no `skinparam
- * dpi` wiring exists anywhere, confirmed by grep, so the `*dpi/96` term is
- * always exactly 1 and is not reproduced here). Every `Scale`
+ * dim.height) * dpi/96.0` (cdd-T30: the `dpi` term is now wired — see
+ * `resolveScaleFactor`'s own doc comment. `dpi` is read from `SkinParam
+ * #getDpi()`, `skin/SkinParam.java:649-656`: `getAsInt("dpi", 96)`, falling
+ * back to 96 when the raw value is absent, non-digit, or `<= 0`). Every `Scale`
  * implementation (`ScaleSimple`/`ScaleWidth`/`ScaleHeight`/
  * `ScaleWidthAndHeight`/`ScaleMaxWidth`/`ScaleMaxHeight`/
  * `ScaleMaxWidthAndHeight`, all `net/sourceforge/plantuml/Scale*.java`) is
@@ -82,7 +83,9 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/ScaleMaxHeight.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/ScaleMaxWidthAndHeight.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java
  * @see plans/g1-description-svg/decision-journal.md (I-scale)
+ * @see plans/class-divergence-drive/batch-8/T30-dpi-core-reader.md (dpi term)
  */
 
 export type ScaleSpec =
@@ -168,35 +171,52 @@ function clampScale(raw: number): number {
 }
 
 /**
- * Resolves a `ScaleSpec` into the final, clamped scale FACTOR to feed into
+ * Resolves a `ScaleSpec` into the final scale FACTOR to feed into
  * `SvgOption.scale` — one `Scale#getScale(width, height)` strategy per
  * `ScaleSpec.kind` (`ScaleSimple`/`ScaleWidth`/`ScaleHeight`/
  * `ScaleWidthAndHeight`/`ScaleMaxWidth`/`ScaleMaxHeight`/
  * `ScaleMaxWidthAndHeight`, all `net/sourceforge/plantuml/Scale*.java`),
- * clamped by `ScaleProtected`. `width`/`height` MUST be the diagram's own
- * UNSCALED document dimension (`TextBlockExporter
+ * clamped by `ScaleProtected`, then multiplied by `dpi / 96` — cdd-T30,
+ * `TextBlockExporter#computeScaleFactor` (`core/TextBlockExporter.java:
+ * 205-209`): `fromScale * dpi/96.0`, where `fromScale` is `scale == null ?
+ * 1 : scale.getScale(dim.width, dim.height)` — i.e. the CLAMPED strategy
+ * factor (or the unclamped default 1 when `spec` is `undefined`). The `dpi`
+ * multiplier is applied UNCLAMPED, strictly AFTER `ScaleProtected`'s own
+ * `<=0 -> 1` / `>4 -> 4` clamp runs inside `getScale` — never folded into
+ * the clamped strategy factor itself. `width`/`height` MUST be the
+ * diagram's own UNSCALED document dimension (`TextBlockExporter
  * #calculateFinalDimension` — this port's `computeDocumentDims` result, or
  * `geo.totalWidth`/`totalHeight` for a degenerate single-leaf geometry,
  * BEFORE any scale is applied) — the exact same dimension DOT/layout
  * already computed and `SvgOption.minDim` is built from, never re-derived
  * from an already-scaled value.
+ *
+ * @param dpi the diagram's own `skinparam dpi` value (`SkinParam#getDpi()`,
+ *   `skin/SkinParam.java:649-656`), default 96 — the port-wide "no
+ *   `skinparam dpi` declared" value, matching upstream's own default.
  */
-export function resolveScaleFactor(spec: ScaleSpec | undefined, width: number, height: number): number {
-  if (spec === undefined) return 1;
+export function resolveScaleFactor(
+  spec: ScaleSpec | undefined,
+  width: number,
+  height: number,
+  dpi: number = 96,
+): number {
+  const dpiFactor = dpi / 96;
+  if (spec === undefined) return dpiFactor;
   switch (spec.kind) {
     case 'simple':
-      return clampScale(spec.factor);
+      return clampScale(spec.factor) * dpiFactor;
     case 'width':
-      return clampScale(spec.target / width);
+      return clampScale(spec.target / width) * dpiFactor;
     case 'height':
-      return clampScale(spec.target / height);
+      return clampScale(spec.target / height) * dpiFactor;
     case 'widthAndHeight':
-      return clampScale(Math.min(spec.width / width, spec.height / height));
+      return clampScale(Math.min(spec.width / width, spec.height / height)) * dpiFactor;
     case 'maxWidth':
-      return clampScale(Math.min(1, spec.target / width));
+      return clampScale(Math.min(1, spec.target / width)) * dpiFactor;
     case 'maxHeight':
-      return clampScale(Math.min(1, spec.target / height));
+      return clampScale(Math.min(1, spec.target / height)) * dpiFactor;
     case 'maxWidthAndHeight':
-      return clampScale(Math.min(1, Math.min(spec.width / width, spec.height / height)));
+      return clampScale(Math.min(1, Math.min(spec.width / width, spec.height / height))) * dpiFactor;
   }
 }

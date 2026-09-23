@@ -415,6 +415,78 @@ describe('mapNoteGeos — member-tip (`::member`) note connector resolution (G2/
   });
 });
 
+describe('groupNotes/buildNoteGraphParts — opalisable (cdd-T9, E6 mechanism b)', () => {
+  it('a note targeting a KNOWN GROUP id (present in anchors) is not opalisable', () => {
+    const n: ClassNote = { id: '__note_0', target: 'pkg', position: 'top', text: 'hi' };
+    const anchors = new Map([['pkg', 'zaent-pkg']]);
+    const { groups } = buildNoteGraphParts([n], defaultTheme, measurer, anchors);
+    expect(groups[0]!.opalisable).toBe(false);
+  });
+
+  it('a note targeting an ordinary classifier (absent from anchors) stays opalisable', () => {
+    const n: ClassNote = { id: '__note_0', target: 'A', position: 'top', text: 'hi' };
+    const { groups } = buildNoteGraphParts([n], defaultTheme, measurer, noAnchors);
+    expect(groups[0]!.opalisable).toBe(true);
+  });
+
+  it('a freestanding note (no target) stays opalisable', () => {
+    const n: ClassNote = { id: '__note_0', text: 'hi' };
+    const { groups } = buildNoteGraphParts([n], defaultTheme, measurer, noAnchors);
+    expect(groups[0]!.opalisable).toBe(true);
+  });
+});
+
+describe(
+  'mapNoteGeos — group-target opalise guard (cdd-T9, E6 mechanism b, ' +
+    'GraphvizImageBuilder.java:245-259/Bibliotekon.java:120-122)',
+  () => {
+    it('never opalises when the target is a known group, even with a resolvable connector and non-strict theme', () => {
+      const plain: ClassNote = { id: '__note_0', target: 'pkg', position: 'top', text: 'hi' };
+      const anchors = new Map([['pkg', 'zaent-pkg']]);
+      const { measurements, groups } = buildNoteGraphParts([plain], defaultTheme, measurer, anchors);
+      expect(groups[0]!.opalisable).toBe(false);
+      const result = {
+        nodes: [
+          {
+            id: '__note_0',
+            x: 200,
+            y: 50,
+            width: measurements.get('__note_0')!.width,
+            height: measurements.get('__note_0')!.height,
+          },
+        ],
+        edges: [
+          {
+            id: '__noteedge___note_0',
+            points: [
+              { x: 150, y: 50 },
+              { x: 200, y: 50 },
+            ],
+          },
+        ],
+        width: 0,
+        height: 0,
+      };
+      const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer });
+
+      expect(geos).toHaveLength(1);
+      // The SAME connector points resolve to `opale` for a classifier
+      // target (see 'a non-member (plain) note...' above) -- for a GROUP
+      // target they must NOT: `Bibliotekon#getNode` returns null for a
+      // package/namespace (never registered via `createNode`), so
+      // `GraphvizImageBuilder#buildImage`'s `if (other != null)` guard
+      // skips `line.setOpale(true)` and the note stays a plain box with a
+      // real connector.
+      expect(geos[0]!.opale).toBeUndefined();
+      expect(geos[0]!.kind).toBe('note');
+      expect(geos[0]!.connector).toEqual([
+        { x: 150, y: 50 },
+        { x: 200, y: 50 },
+      ]);
+    });
+  },
+);
+
 // G2 N56: note per-line height == the MAX of every 'text' atom's own height
 // on that line (`Math.max(font.size, 10)`), NOT a flat `NOTE_FONT_SIZE` --
 // jar-verified against `fogexa-30-zupo141`/`vicuro-37-tese143` (both share

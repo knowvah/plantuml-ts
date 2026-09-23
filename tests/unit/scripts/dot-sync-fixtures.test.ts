@@ -317,7 +317,7 @@ describe('enumerateFixtures over the committed corpus', () => {
   // stated assumption.
   // ---------------------------------------------------------------------------
 
-  it('keeps the class.json manifest unchanged, then appends the 4 authored fixtures new to it', () => {
+  it('keeps the class.json manifest unchanged, then appends the authored fixtures new to it', () => {
     const manifest = JSON.parse(readFileSync(join(DATA_DIR, 'class.json'), 'utf-8')) as Fixture[];
     expect(manifest).toHaveLength(768);
 
@@ -330,6 +330,12 @@ describe('enumerateFixtures over the committed corpus', () => {
       'class-inheritance-interface-assoc',
       'class-usecase-inline-img',
       'class-usecase-inline-sprite',
+      // Since class-divergence-drive/close-b1 (2026-09-21): a cache fixture
+      // (`test-results/dot-cache/class/exposant-01-class`, creole-exposant-port)
+      // with no `tests/visual/data/class.json` row, pinned into the class
+      // ratchet once it measured conformant + zero-diff + dotEqual. The
+      // enumerator's rule (golden root minus manifest slugs) now lists it.
+      'exposant-01-class',
     ]);
   });
 

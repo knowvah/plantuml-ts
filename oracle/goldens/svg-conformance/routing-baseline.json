@@ -1,5 +1,5 @@
 {
-  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended).",
+  "$comment": "Routing-conformance baseline (sequence-engine-overclaims-nested-diagrams / T1; re-pinned by routing-heuristic-repair / T8). jarType is the answer upstream itself gave, read from the committed golden root attribute (TextBlockExporter.java:292-294). ourType is what renderSync produces for the same source through tests/helpers/fixture-include-store.ts. Corpus directory names are NOT the oracle (D6). Regenerated only from a fresh measurement, never by hand-editing an entry to make the gate pass; a fall is re-pinned to \"agree\", never the reverse. Gated by tests/oracle/svg-conformance/routing-conformance.test.ts. Measured 2026-08-24 at 2d5e47dc, after batches 2-5 of routing-heuristic-repair re-routed 73 fixtures: 3158 fixtures, 3148 agree, 2 known-misroute, 8 jar-error (unchanged). Residual known-misroute (both confirmed structural stop conditions, see plans/routing-heuristic-repair/decision-journal.md):   CLASS -> DESCRIPTION: 1 (component/kokebo-27-vafi688 -- CommandPackageWithUSymbol/CommandRemoveRestore registered on both ClassDiagramFactory and DescriptionDiagramFactory, no line-text discriminator, needs parse-attempt dispatch)   SEQUENCE -> NONE: 1 (sequence/nuvoja-46-dezu541 -- !includedef preprocessor stop, IncludeExecutor.ts:127, outside this mission's write-set). Prior state (2026-08-23 at 0315454c): 3079 agree, 79 known-misroute -- SEQUENCE -> DESCRIPTION: 34   SEQUENCE -> CLASS: 12   SEQUENCE -> JSON: 12   SEQUENCE -> NONE: 10   NONE -> CLASS: 4   CLASS -> DESCRIPTION: 2   CLASS -> YAML: 2   SEQUENCE -> YAML: 2   CLASS -> SEQUENCE: 1. Re-pinned 2026-09-02 at 0cf15e23 by activity-oracle-harness / T6, activity entries ONLY (verified by diff: 350 activity entries moved, ZERO non-activity entries): 3531 fixtures, 3401 agree, 99 known-misroute, 31 jar-error. T0b had pinned all 350 non-jar-error activity fixtures `known-misroute` on ONE shared mechanism -- renderActivity stamped no root data-diagram-type (src/diagrams/activity/renderer.ts:221-226 vs TextBlockExporter.java:293). T5 routed activity through the klimt document shell and 268 of the 350 fell to agree. The other 82 did NOT fall and were NOT re-pinned: our activity parser refuses those sources outright, so renderSync returns a PSystemError page that carries no root attribute either. They stay known-misroute with a rewritten reason naming the reproduced refusal -- the same 82 diff-baseline.json records as status:\"error\" (activity-oracle-harness D8). Re-pinning all 350 to agree, as a straight reading of T5's effect would suggest, would have turned this gate RED on those 82 and violated this file's own rule above. Re-pinned 2026-09-20 at bdd3344e by parity-dashboard-refresh / T5, ADDITIVE ONLY (41 rows appended, zero existing rows changed, verified by git diff --numstat): 3572 fixtures, 3402 agree, 139 known-misroute, 31 jar-error. The five never-captured families were captured with scripts/capture-oracle-cache.ts. board (4), chart (29), files (1) and packet (6) are pinned known-misroute on ONE shared mechanism: each engine's renderer returns a RenderFragment without diagramType, so assemble-svg.ts:496-497 never stamps the root attribute TextBlockExporter.java:292-294 writes -- NONE here, BOARD/CHART/FILES/PACKET in the golden. chronology (1) agrees at NONE == NONE: the pinned jar (1.2026.8beta1) has no factory for DiagramType.CHRONOLOGY, so PSystemBuilder.java:284 returns PSystemUnsupported and its golden is the 'Diagram not supported by this release' page (PSystemUnsupported.java:62), which carries no data-diagram-type and is NOT a PSystemError page. Re-pinned 2026-09-20 at 27ed6346 (follow-on to parity-dashboard-refresh, maintainer request), ADDITIVE ONLY: 912 rows appended for c4, ditaa, ebnf, gantt, mindmap, network, regex, salt, timing, wbs, wire — the buckets that had no oracle. The ten no-engine types are pinned known-misroute on ONE mechanism: no plugin registers their DiagramType, so DiagramRegistry#resolve has zero candidates and returns the error sentinel (src/core/dispatcher.ts:317-342) where upstream runs the factory PSystemBuilder.java registers; each reason names that factory line and the Phase D row that ports it. unknown-bucket-routing-repair/T9 (2026-09-20, 418b30ef): 5 rows re-pinned STATE -> NONE (4 sequence, 1 timing) after the state parser stopped swallowing lines whose transition grammar did not match; reasons name the missing Command. unknown-bucket-routing-repair (2026-09-20, a11418a1): 43 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). unknown-bucket-routing-repair (2026-09-20, a11418a1): 0 activity known-misroute rows retired to agree from a fresh measurement ([FIXED] lines of the gate). Re-pinned 2026-09-20 at 31f579dd by unknown-bucket-routing-repair / T0's pin-corpus-tree.ts, ADDITIVE ONLY (825 \"unknown\" rows appended). Re-pinned 2026-09-21 at 340eae4d by class-divergence-drive / close-b1, ADDITIVE ONLY (119 \"svg-class\" golden rows appended, each the clone of its byte-identical dot-cache twin, as every prior svg-class golden row was). Re-pinned 2026-09-21 at e6f840a1 by class-divergence-drive / close-b2, ADDITIVE ONLY (24 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at cae310f1 by class-divergence-drive / close-b3, ADDITIVE ONLY (5 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 2397dcde by class-divergence-drive / close-b4, ADDITIVE ONLY (8 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-22 at 3dc87cb3 by class-divergence-drive / close-b6, ADDITIVE ONLY (23 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (19 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (9 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 7c745722 by class-divergence-drive / close-b7, ADDITIVE ONLY (2 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 35cb2771 by class-divergence-drive / close-b8, ADDITIVE ONLY (7 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at f8d9f6cb by class-divergence-drive / close-b9, ADDITIVE ONLY (18 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (0 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins). Re-pinned 2026-09-23 at 40bc2ebc by class-divergence-drive / close-b10, ADDITIVE ONLY (11 \"svg-class\" golden rows appended, clones of their byte-identical dot-cache twins; class-inheritance-interface-assoc already carried its golden rows as an authored fixture).",
   "fixtures": [
     {
       "tree": "dot-cache",
@@ -54242,6 +54242,2456 @@
       "measuredAt": "2026-09-20",
       "measuredAgainstCommit": "31f579dd",
       "reason": "no plugin registers DiagramType.NWDIAG: NwDiagramFactory is never added to PSystemBuilder's factory list (PSystemBuilder.java:155, D5), so DiagramRegistry#resolve (src/core/dispatcher.ts:317-342) has zero NWDIAG candidates and returns the error sentinel; the document reads as NONE here while the golden says NWDIAG. Frozen registration order (D1) means this is a missing engine, not a heuristic to retune."
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bijeru-39-vefi741",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bososa-44-fipu544",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bugeli-63-mixa543",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bujedi-30-cize673",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bumuma-72-zoka383",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cajicu-52-cego765",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "camiba-14-java616",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cejili-77-gepe377",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cexibu-81-bize688",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cezaka-60-jado323",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cidepu-54-bemo048",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cixote-08-vope282",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cuxebo-14-babu885",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dareti-67-siti389",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dejuse-14-pule208",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dekaba-54-fafi485",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dijuce-52-rilu751",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dimesa-45-ruju320",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dimisi-54-dula946",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ditapa-46-bete946",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dokego-92-zilu832",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "duceso-27-koco023",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "duruga-39-lani451",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "exposant-01-class",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fibamu-81-zimo884",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "finono-05-cuvu171",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fipoke-21-suno116",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "focabu-31-kide232",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fokudo-49-xiki231",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ganola-90-cuco343",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "garizu-98-nixo496",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gavimi-70-nuju057",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gidabo-27-juza410",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "goceso-49-pega905",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gotefu-91-zime541",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gufife-94-ropa486",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gupire-42-xege904",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jaloja-18-tisu915",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jatome-90-pire087",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jaxebi-71-nanu771",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jecopa-66-vepe168",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jijovu-48-gole133",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jinibe-02-tebi269",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jocapi-44-lova378",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "josazo-53-bode013",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kejeka-49-kofa156",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kevoda-64-mije856",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kicolo-81-sidi387",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kidugi-68-noje040",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kipure-14-suli112",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kixiso-09-lezo371",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "konaju-10-sopa054",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kugasi-68-josu446",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kuxato-79-muno809",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kuxosa-67-keko885",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "labele-71-gudo044",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lafosa-17-buvu129",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lobofa-60-vexe031",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "makoko-44-mapu988",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "makumi-60-peri797",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "minuko-19-pobo264",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mocoda-55-take697",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "momaku-69-duxe918",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mopesi-01-gapo101",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "morile-94-muda826",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mucuxi-36-beku683",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mujopi-06-lusi222",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mulafo-23-tove961",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "nacuzu-17-bepi660",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ninuma-44-giza562",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "nivemi-28-cixe274",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "nopaca-69-voda316",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "novaro-13-socu897",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pajoka-72-reju527",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pasova-33-toze386",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pidagu-83-dopu070",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pofebo-79-nape407",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pudata-29-vuze753",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "puvugo-38-nuku299",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "refeku-65-gapu585",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "repipi-06-dike782",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rilaki-69-cuni337",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rizazi-13-sepe706",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rocere-18-faza042",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rofijo-47-masa695",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ropola-55-ketu141",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "roputo-88-fuxo199",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rozudo-79-zavu288",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sabaku-38-jeli592",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sevaxa-72-pudi231",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sofagu-98-fezi999",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sokole-95-zuxe354",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sotepe-41-semo054",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sovuxo-25-tepi226",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "style-stereotype-on-arrow-4",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tacezi-12-rica461",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ticote-50-neno681",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tokegi-55-doko929",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tomuxi-86-juje957",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tugema-78-comi533",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vilobu-97-leto330",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vipejo-56-nubi928",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vivifa-42-mire839",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vofuvu-97-juto275",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vokulo-90-fado357",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vuciba-84-toke217",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vuneta-67-gija125",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xakatu-11-tapu041",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xexaza-01-bane080",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xexido-15-paxa075",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xofumu-51-jozi528",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xopuku-46-nefa571",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zakufi-53-sofe736",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zaloza-02-toti585",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zapibo-38-kope984",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zevupa-35-juto545",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zofabi-70-core205",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zomidu-04-fizu253",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zuxoxu-54-pejo512",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "340eae4d"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bivevo-25-xara984",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "canuti-20-jotu614",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cenubi-27-xova754",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "delano-03-xino845",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dudimi-83-mimo845",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dujinu-38-badu006",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "duvuti-29-lugi970",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "faxoga-34-moja699",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fexedu-26-dira713",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fitini-85-kupo803",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gaxipe-22-maxa852",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gixesa-28-feri809",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jabeme-35-logi109",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jinema-90-laga721",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lozijo-52-pesu023",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mefaca-83-lebu193",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mupuzo-63-femu686",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pareli-69-cixe116",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "paziji-13-jede796",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pukuzu-30-zode181",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tiguma-69-tovu135",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vuvico-92-keza999",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xodopa-41-tazo512",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zogari-39-ziza794",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-21",
+      "measuredAgainstCommit": "e6f840a1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fogexa-30-zupo141",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "cae310f1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fomofi-36-lova857",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "cae310f1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jovigo-38-tuni063",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "cae310f1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sodizo-26-salo123",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "cae310f1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xekeje-31-taba218",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "cae310f1"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bajotu-30-soku184",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dativu-93-pona469",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dopuzi-50-muxo994",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "garumi-63-vuze973",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lujaje-96-vafu961",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "momoba-92-bole393",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tibatu-28-jiro743",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vacole-77-vivo236",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "2397dcde"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "conija-14-nuta580",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cutasu-32-zete658",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dacisu-77-paca840",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fijali-69-pina030",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gojadi-30-tame684",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gojatu-01-jibo986",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jikase-93-tipa633",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lilura-67-cati343",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lukexe-74-moco323",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "murotu-83-cebo380",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "najuxe-66-nuzi850",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "niduni-65-bujo175",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "pakemi-72-cani346",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "picija-82-jebu272",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "remanu-84-sega129",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sosono-24-vuro518",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tabaxa-70-pomu341",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tagofo-84-nuti362",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tepazu-23-zapo261",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vubofi-17-dedi529",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xidura-26-teki974",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xogixe-78-zuro619",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zubevi-64-fume582",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "3dc87cb3"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "curupe-50-kibu120",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "diseka-11-gozu390",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "foxiki-17-kosa114",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gojofu-46-xaci340",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jabama-09-kago823",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "juxora-90-fisu720",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kacico-91-bati232",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "malara-55-moce209",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "monoda-73-guto455",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "nucite-98-kuga991",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "nufini-44-jofo787",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "padapo-73-beke177",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "paroxa-83-lofa387",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "repuga-78-xora226",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ropera-76-jico895",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rotisi-30-loge424",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "rusuzi-21-kile910",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sejuzo-42-fini523",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xicipi-57-bibe032",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "beruje-75-jimu270",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "capode-04-jeka075",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dacixi-46-lina038",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dizuse-83-dabi909",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "galili-87-zivo129",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "manube-50-xora983",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "mexaka-52-gati860",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "taceve-49-mezi408",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ziripa-77-zizo842",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "moxobo-16-tipo829",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zikabo-17-gugi332",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "7c745722"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bavoxa-34-keje375",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "cicovi-23-zipe215",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "corine-48-pemu761",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "fuxoju-95-xuko052",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jiramo-39-xuze087",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "koxoco-29-moke425",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "zirori-93-jefo337",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "35cb2771"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "camupi-97-gezi072",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gikipi-69-pepo172",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jakaja-15-faze022",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jinoba-14-firi471",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kexaca-03-situ523",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "kutazo-40-texe886",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lacote-58-sozu269",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "laluve-92-raxu863",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "senece-96-fomu913",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "siteza-47-lixe343",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tamixa-86-jiku308",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tebore-53-tese080",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tedeba-19-lisi250",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tenomi-61-ceta987",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "ticuxa-26-tixo262",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "tilipa-86-suxi130",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "vafaka-92-xose973",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "verufu-58-jile750",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "f8d9f6cb"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "bitove-03-sanu160",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dofima-22-kofe334",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "dorelu-66-lixu637",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "gobuco-16-ruke239",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "jireze-84-loti743",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lapoma-04-vaga142",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lazeju-60-boki114",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "lojepe-37-liri985",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sacacu-34-dobo091",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "sicile-99-pefa679",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
+    },
+    {
+      "tree": "goldens",
+      "type": "svg-class",
+      "slug": "xifuza-00-paze682",
+      "jarType": "CLASS",
+      "ourType": "CLASS",
+      "status": "agree",
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "40bc2ebc"
     }
   ]
 }

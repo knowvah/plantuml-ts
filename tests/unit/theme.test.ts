@@ -43,8 +43,8 @@ describe('defaultTheme', () => {
     expect(typeof g.interfaceBackground).toBe('string');
     expect(typeof g.enumBackground).toBe('string');
     expect(typeof g.actorStroke).toBe('string');
-    expect(typeof g.packageBackground).toBe('string');
-    expect(typeof g.packageBorder).toBe('string');
+    // CDD T18b: packageBackground/packageBorder are deliberately optional
+    // and unset on defaultTheme -- see the dedicated test below.
     expect(typeof g.edgeLabel).toBe('string');
     expect(typeof g.actorFill).toBe('string');
     expect(typeof g.usecaseFill).toBe('string');
@@ -68,12 +68,21 @@ describe('defaultTheme', () => {
     expect(defaultTheme.colors.graph.actorStroke).toBe('#181818');
   });
 
-  it('graph.packageBackground is none', () => {
-    expect(defaultTheme.colors.graph.packageBackground).toBe('none');
+  // CDD T18b: `packageBackground`/`packageBorder` are genuinely `undefined`
+  // on an unstyled theme (theme.ts no longer bakes the cluster's own
+  // 'none'/'#000000' unstyled default into them -- the collapsed-EMPTY-
+  // package leaf's `...package_,title` signature, `EntityImageEmptyPackage
+  // .java:87-88`, must NOT inherit the cluster's `...package_,group` one,
+  // `Cluster.java:285-296`). Each `...group`-signature draw site now
+  // supplies 'none'/'#000000' itself:
+  // `class-namespace-shape.ts#PACKAGE_CLUSTER_BACKGROUND_DEFAULT`/
+  // `PACKAGE_CLUSTER_BORDER_DEFAULT`, `renderer-cluster.ts:133`.
+  it('graph.packageBackground is undefined on an unstyled theme', () => {
+    expect(defaultTheme.colors.graph.packageBackground).toBeUndefined();
   });
 
-  it('graph.packageBorder is #000000 (G2 N17: jar-verified folder-tab border)', () => {
-    expect(defaultTheme.colors.graph.packageBorder).toBe('#000000');
+  it('graph.packageBorder is undefined on an unstyled theme', () => {
+    expect(defaultTheme.colors.graph.packageBorder).toBeUndefined();
   });
 
   it('graph.edgeLabel is #444444', () => {
@@ -122,8 +131,8 @@ describe('darkTheme', () => {
     expect(typeof g.interfaceBackground).toBe('string');
     expect(typeof g.enumBackground).toBe('string');
     expect(typeof g.actorStroke).toBe('string');
-    expect(typeof g.packageBackground).toBe('string');
-    expect(typeof g.packageBorder).toBe('string');
+    // CDD T18b: packageBackground/packageBorder are optional -- darkTheme
+    // spreads `defaultTheme.colors.graph`, which leaves them unset too.
     expect(typeof g.edgeLabel).toBe('string');
     expect(typeof g.actorFill).toBe('string');
     expect(typeof g.usecaseFill).toBe('string');

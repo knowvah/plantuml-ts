@@ -1,0 +1,16 @@
+@startuml
+' cdd-T26 residual round: a successfully-decoded `<img:data:...>` reference
+' in a namespace/package title (as opposed to jabama-09-kago823's FILE-path
+' `<img:HelloWorld.png>`, which always falls back to "(Cannot decode)" under
+' this browser-safe port's no-filesystem-access architecture -- see
+' AtomImg.java:171-177). No corpus fixture exercises a data-URI title, so
+' there is no jar oracle to pin a full render against -- see
+' tests/unit/class/class-namespace-title-runs.test.ts's "sprite/img-data in
+' a namespace title (no oracle -- atom-level only)" suite, which drives
+' namespaceTitleRuns() directly with the equivalent markup this fixture
+' documents, asserting the RESOLVED atom shape (an 'image' NamespaceTitleRun
+' carrying the data URI verbatim) rather than a full SVG comparison.
+package "Data <img:data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEElEQVR4XmNgYGD4D8UQBgAd9AP95BvM/wAAAABJRU5ErkJggg==>" {
+  class Item
+}
+@enduml

@@ -122,7 +122,7 @@ describe('edgeLabelAttrs — note-on-link merge, activated via noteCtx (T10)', (
   });
 
   it('a note-bearing edge wins over linkConstraint (hasNoteLabelText precedence, SvekEdge.java:437)', () => {
-    const r = rel({ linkNote: 'solo note', linkConstraint: true });
+    const r = rel({ linkNote: 'solo note', linkConstraint: { text: 'enten/eller' } });
     const attrs = edgeLabelAttrs(r, font, font, measurer, noteCtx);
     // Not the 10x10 CONSTRAINT_SPOT -- the merge ran instead.
     expect(attrs.labelWidth).not.toBe(10);

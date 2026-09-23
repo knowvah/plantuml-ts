@@ -30,8 +30,13 @@ import type { ParseState } from './parser.js';
 import { splitOnSeparator, ensureNamespaceChain, collapseEmptyNamespace, qualifiedId } from './class-namespace.js';
 import { NOTE_URL, NOTE_COLOR } from './class-notes.js';
 import { stripQuotes } from './class-relationship-parser.js';
+import { parseTagTokens } from './class-declaration-parser.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { Pragma } from '../../core/skin/Pragma.js';
+// T11: split out to keep this file under the line cap; re-exported below
+// so existing/expected `from './class-container.js'` import sites work.
+import { setNamespaceUrl, setNamespaceColor } from './class-namespace-decorations.js';
+export { setNamespaceUrl, setNamespaceColor };
 
 /**
  * Quark collision: a `package`/`namespace` block reuses the SAME name as an
@@ -354,6 +359,20 @@ const USYMBOL_REGISTRY_TO_KEYWORD: ReadonlyMap<string, string> = new Map([
  * @see ~/git/plantuml/.../command/CommandNamespace.java:113-124
  * @see ~/git/plantuml/.../command/CommandNamespace2.java:122-124
  */
+/**
+ * T11: applies a gated stereotype's mapped USymbol keyword to BOTH
+ * `state.descriptiveContainers` (the EMPTY-collapse path's source of
+ * truth, unchanged) and the Namespace itself (a copy, for the
+ * non-collapsed real-cluster case -- see `Namespace.usymbol`'s doc
+ * comment). Split out of `setNamespaceStereotype` to keep that function's
+ * complexity under the project cap.
+ */
+function applyNamespaceUsymbol(state: ParseState, nsId: string, keyword: string): void {
+  state.descriptiveContainers.set(nsId, keyword);
+  const ns = state.ast.namespaces.find((n) => n.id === nsId);
+  if (ns !== undefined) ns.usymbol = keyword;
+}
+
 export function setNamespaceStereotype(
   state: ParseState,
   nsId: string,
@@ -364,13 +383,32 @@ export function setNamespaceStereotype(
   const registryName = stereoRaw.replace(/\W/g, '').toUpperCase();
   if (gated && USYMBOL_NAMES.has(registryName)) {
     const keyword = USYMBOL_REGISTRY_TO_KEYWORD.get(registryName);
-    if (keyword !== undefined) state.descriptiveContainers.set(nsId, keyword);
+    if (keyword !== undefined) applyNamespaceUsymbol(state, nsId, keyword);
     return;
   }
   const inner = /<<\s*(.+)\s*>>/.exec(stereoRaw)?.[1]?.trim();
   if (inner === undefined || inner.length === 0) return;
   const ns = state.ast.namespaces.find((n) => n.id === nsId);
   if (ns !== undefined) ns.stereotype = inner;
+}
+
+/**
+ * cdd-T31 round 2 (E5 defect b): a `package NAME $tag {` header's TAGS1/
+ * TAGS2 runs (`Stereotag.pattern()` either side of the stereotype,
+ * `CommandPackage.java:87,89`) -- `CommandPackage.java:198` calls
+ * `CommandCreateClassMultilines.addTags(p, arg.getLazzy("TAGS", 0))`, which
+ * strips each `$`-prefixed token and calls `Entity#addStereotag`
+ * (`classdiagram/command/CommandCreateClassMultilines.java:321-329`) --
+ * the SAME per-token strip {@link parseTagTokens} already implements for a
+ * classifier declaration's own `$tag` tokens. `raw` is the TWO capture
+ * runs joined with a space (mirrors upstream's single lazy "TAGS" group
+ * spanning both regex slots); a no-op when neither run matched.
+ */
+export function setNamespaceTags(state: ParseState, nsId: string, raw: string): void {
+  const tags = parseTagTokens(raw);
+  if (tags.length === 0) return;
+  const ns = state.ast.namespaces.find((n) => n.id === nsId);
+  if (ns !== undefined) ns.tags = [...new Set([...(ns.tags ?? []), ...tags])];
 }
 
 /**
@@ -403,11 +441,13 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
       // CommandNamespace2.java:122-124 calls setStereotype without any
       // `USymbols.fromString` check (unlike CommandNamespace/CommandPackage).
       setNamespaceStereotype(state, effectiveId, match[3], false);
-      // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
-      // too (it precedes COLOR here); A8: the stereo group above shifted
-      // url/color/brace by one more -- the same-line-brace group is now
-      // match[6]. This command does not consume a namespace's own URL (no
-      // render path for it yet).
+      // G2 N34/N70: NOTE_COLOR/NOTE_URL are capturing (url group 4, color
+      // group 5); A8's stereo group above shifted url/color/brace by one
+      // more -- the same-line-brace group is match[6]. T11 (E4/M3): both
+      // are now read onto the Namespace (setNamespaceUrl/setNamespaceColor,
+      // class-namespace-decorations.ts).
+      setNamespaceUrl(state, effectiveId, match[4]);
+      setNamespaceColor(state, effectiveId, match[5]);
       if (match[6] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
@@ -436,11 +476,13 @@ export const NAMESPACE_COMMANDS: readonly Command[] = [
       // USymbol-naming stereotype selects the shape instead
       // (CommandNamespace.java:113-124).
       setNamespaceStereotype(state, effectiveId, match[2], true);
-      // G2 N34: NOTE_COLOR is capturing; G2 N70: NOTE_URL is now capturing
-      // too (it precedes COLOR here); A8: the stereo group above shifted
-      // url/color/brace by one more -- the same-line-brace group is now
-      // match[5]. This command does not consume a namespace's own URL (no
-      // render path for it yet).
+      // G2 N34/N70: NOTE_COLOR/NOTE_URL are capturing (url group 3, color
+      // group 4); A8's stereo group above shifted url/color/brace by one
+      // more -- the same-line-brace group is match[5]. T11 (E4/M3): both
+      // are now read onto the Namespace (setNamespaceUrl/setNamespaceColor,
+      // class-namespace-decorations.ts).
+      setNamespaceUrl(state, effectiveId, match[3]);
+      setNamespaceColor(state, effectiveId, match[4]);
       if (match[5] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,

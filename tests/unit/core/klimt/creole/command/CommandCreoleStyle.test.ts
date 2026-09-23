@@ -173,3 +173,107 @@ describe('bare-tag regressions (must stay green)', () => {
     expect(textAtoms(buildStripeAtoms('<b>x</b>', PLAIN))).toEqual([{ text: 'x', styles: [FontStyle.BOLD] }]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd-T25: `<plain>...</plain>` (legacy + legacyEol only, no creole-pure
+// form) and its "clear all styles first" application
+// (`FontConfiguration.add(FontStyle)`, `FontConfiguration.java:301-309`;
+// `FontStyle#starters`, `FontStyle.java:47-48`; activation/deactivation,
+// `FontStyle.java:89-90,114-115,142-143,167-168`). diseka-11-gozu390
+// (`<color:#888888><plain>Enumeration</plain></color>`) is the corpus
+// fixture this registration targets.
+// ---------------------------------------------------------------------------
+
+describe('cdd-T25 — <plain>...</plain>', () => {
+  test('"<plain>x</plain>" consumes the tag, tagging the run PLAIN', () => {
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', PLAIN))).toEqual([{ text: 'x', styles: [FontStyle.PLAIN] }]);
+  });
+
+  test('case-insensitive starters/tags: "<PLAIN>x</PLAIN>"', () => {
+    expect(textAtoms(buildStripeAtoms('<PLAIN>x</PLAIN>', PLAIN))).toEqual([{ text: 'x', styles: [FontStyle.PLAIN] }]);
+  });
+
+  test('legacyEol form: "<plain>rest of line" (no closing tag)', () => {
+    expect(textAtoms(buildStripeAtoms('a <plain>rest of line', PLAIN))).toEqual([
+      { text: 'a ', styles: [] },
+      { text: 'rest of line', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('clears an ALREADY-tracked style — "<b><plain>x</plain></b>" drops BOLD inside the plain run', () => {
+    expect(textAtoms(buildStripeAtoms('<b><plain>x</plain></b>', PLAIN))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('clears MULTIPLE tracked styles at once — bold+italic both drop', () => {
+    const boldItalic: FontConfiguration = { ...PLAIN, styles: new Set([FontStyle.BOLD, FontStyle.ITALIC]) };
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', boldItalic))).toEqual([
+      { text: 'x', styles: [FontStyle.PLAIN] },
+    ]);
+  });
+
+  test('a run OUTSIDE the <plain> tag keeps its own style — "<b>a<plain>b</plain>c</b>"', () => {
+    expect(textAtoms(buildStripeAtoms('<b>a<plain>b</plain>c</b>', PLAIN))).toEqual([
+      { text: 'a', styles: [FontStyle.BOLD] },
+      { text: 'b', styles: [FontStyle.PLAIN] },
+      { text: 'c', styles: [FontStyle.BOLD] },
+    ]);
+  });
+
+  test('"<p" starters do not collide with any other L1 style', () => {
+    expect(textAtoms(buildStripeAtoms('<plain>x</plain>', PLAIN))).not.toEqual(textAtoms(buildStripeAtoms('x', PLAIN)));
+  });
+});
+
+/**
+ * cdd-B7FU-R1 — the captured `$XC` colour now REACHES the configuration
+ * (`CommandCreoleStyle.java:91-99,111` -> `AddStyle.java:52-58` ->
+ * `FontConfiguration#changeExtendedColor`, java:263-266), where it was
+ * previously matched and thrown away.
+ */
+describe('cdd-B7FU-R1 — the extended colour reaches FontConfiguration', () => {
+  function colorsOf(line: string): (string | undefined)[] {
+    return buildStripeAtoms(line, PLAIN).map((a) => {
+      if (a.kind !== 'text') throw new Error('expected a text atom');
+      return a.font.extendedColor;
+    });
+  }
+
+  test('"<u:#FF0000>" carries #FF0000 on the inner run', () => {
+    expect(colorsOf('<u:#FF0000>toto</u>')).toEqual(['#FF0000']);
+  });
+
+  test('a NAMED colour is carried verbatim, resolved late at emission', () => {
+    expect(colorsOf('<w:green>green</w>')).toEqual(['green']);
+  });
+
+  test('"<s:#00FFFF>" carries its colour too', () => {
+    expect(colorsOf('<s:#00FFFF>strike</s>')).toEqual(['#00FFFF']);
+  });
+
+  test('"<back:red>" carries the BACKCOLOR value', () => {
+    expect(colorsOf('<back:red>ok</back>')).toEqual(['red']);
+  });
+
+  test('a BACKCOLOR GRADIENT token is captured whole (both halves, one $XC group)', () => {
+    expect(colorsOf('<back:red-green>ok</back>')).toEqual(['red-green']);
+  });
+
+  test('the colourless forms carry no extended colour at all', () => {
+    expect(colorsOf('<u>toto</u>')).toEqual([undefined]);
+    expect(colorsOf('<back>ok</back>')).toEqual([undefined]);
+  });
+
+  test('a sibling run outside the tag is unaffected', () => {
+    expect(colorsOf('a<u:red>b</u>')).toEqual([undefined, 'red']);
+  });
+
+  test('the legacyEol form (no closing tag) carries it as well', () => {
+    expect(colorsOf('<back:red>to end of line')).toEqual(['to end of line'].map(() => 'red'));
+  });
+
+  test('the creole-pure form can never carry one (createCreole passes tryExtendedColor=false)', () => {
+    expect(colorsOf('__toto__')).toEqual([undefined]);
+  });
+});

@@ -118,7 +118,15 @@ describe('A11 — --/---- block separators in notes (BodyEnhanced2)', () => {
     const m = note('alpha\n--\nbeta');
     expect(m.width / 72).toBeCloseTo(0.734028, 4);
     expect(m.height / 72).toBeCloseTo(0.611111, 4);
-    expect(m.lineHeights).toEqual([13, 8, 13]);
+    // T10 fix: the +8 splits 4 LEADING (where the <line> draws, jar-
+    // verified `sodizo-26-salo123`) + 4 TRAILING, not one flat +8 row
+    // before the content (see `note-layout-measure.ts
+    // #appendUntitledSeparatorBlock`'s own doc comment) — sum unchanged.
+    expect(m.lineHeights).toEqual([13, 4, 13, 4]);
+    expect(m.lineDividers[1]).toMatchObject({ dividerYOffset: 0, strokeWidth: 1 });
+    expect(m.lineDividers[0]).toBeUndefined();
+    expect(m.lineDividers[2]).toBeUndefined();
+    expect(m.lineDividers[3]).toBeUndefined();
   });
 
   it('treats -- and ---- identically (a2s-note-hline-2)', () => {

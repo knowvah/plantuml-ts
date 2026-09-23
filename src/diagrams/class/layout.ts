@@ -27,35 +27,32 @@
  * this file under the 500-line cap after adding shadow support.
  */
 
-import type { ClassDiagramAST } from './ast.js';
+import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
-import { filterRemovedEntities, computeHiddenIds } from './class-directives.js';
+import { filterRemovedEntities, computeHiddenIds, computeRemovedRanks } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
 import { collapseEmptyNamespacesFinal } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
 import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
+import { measureCircleInterface } from './class-layout-leaf-shapes.js';
 import { buildDotGraph } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
+import { applyTopUrlToClassifiers } from './class-url.js';
+import { resolveScaleFactor } from '../../core/scale-command.js';
+import { scaleClassGeometry } from './class-scale-geo.js';
 import {
   buildClassifierGeos,
   buildNamespaceGeos,
   buildEdgeGeos,
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
-import {
-  isNoteGeo,
-  type ClassifierGeo,
-  type EdgeGeo,
-  type NamespaceGeo,
-  type ClassGeometry,
-  type ClassLeafGeo,
-} from './class-geo-types.js';
+import type { ClassifierGeo, EdgeGeo, NamespaceGeo, ClassGeometry, ClassLeafGeo } from './class-geo-types.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
 export {
@@ -74,6 +71,19 @@ export {
 // ---------------------------------------------------------------------------
 // Directive resolution helpers
 // ---------------------------------------------------------------------------
+
+/** cdd-T22 (E8): `circle` sizes via `class-layout-leaf-shapes.ts
+ *  #measureCircleInterface`, not the generic box. */
+function measureLeaf(
+  classifier: Classifier,
+  theme: Theme,
+  measurer: StringMeasurer,
+  suppress: { fields: boolean; methods: boolean },
+  sprites: ClassDiagramAST['sprites'],
+): MeasuredClassifier {
+  if (classifier.kind === 'circle') return measureCircleInterface(classifier, theme, measurer, sprites);
+  return measureClassifier(classifier, theme, measurer, suppress, sprites);
+}
 
 /**
  * Pre-measure every classifier, honoring "hide members" / "hide empty
@@ -140,7 +150,7 @@ function preMeasureClassifiers(
       classifier.suppressMethods === true;
     measuredMap.set(
       classifier.id,
-      measureClassifier(classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites),
+      measureLeaf(classifier, theme, measurer, { fields: suppressFields, methods: suppressMethods }, ast.sprites),
     );
   }
   // #lizard forgives -- pre-existing hide/show directive resolution (4
@@ -150,66 +160,10 @@ function preMeasureClassifiers(
   return measuredMap;
 }
 
-// ---------------------------------------------------------------------------
-// Ink-shift application (G2/N11) — post-dot-layout, pre-render uniform
-// translate. `SvekResult#calculateDimension`'s own `moveDelta(6 - minMax
-// .getMinX(), 6 - minMax.getMinY())` side effect (svek/SvekResult.java:133,
-// see `layout-ink-extent.ts`'s own doc comment for the full jar citation).
-// Shared by `layoutSinglePage` (the real ink shift, both axes) and
-// `layoutMultiPage` (the y-only, OUR-OWN `NEWPAGE_GAP` page-stacking offset
-// — same shape of translate, different origin, so the SAME helpers apply
-// with `dx=0`).
-// ---------------------------------------------------------------------------
-
-/** Shift a ClassifierGeo's absolute position by `(dx, dy)`. */
-function shiftClassifierGeo(c: ClassifierGeo, dx: number, dy: number): ClassifierGeo {
-  return { ...c, x: c.x + dx, y: c.y + dy };
-}
-
-/** Shift a NamespaceGeo's absolute position by `(dx, dy)`. */
-function shiftNamespaceGeo(n: NamespaceGeo, dx: number, dy: number): NamespaceGeo {
-  return { ...n, x: n.x + dx, y: n.y + dy };
-}
-
-/** Shift every coordinate in an EdgeGeo by `(dx, dy)` (labels included). */
-function shiftEdgeGeo(edge: EdgeGeo, dx: number, dy: number): EdgeGeo {
-  return {
-    ...edge,
-    points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-    ...(edge.label !== undefined ? { label: { ...edge.label, x: edge.label.x + dx, y: edge.label.y + dy } } : {}),
-    ...(edge.labelLines !== undefined
-      ? {
-          labelLines: edge.labelLines.map((l) => ({
-            ...l,
-            x: l.x + dx,
-            y: l.y + dy,
-            ...(l.glyph !== undefined
-              ? { glyph: { points: l.glyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
-              : {}),
-          })),
-        }
-      : {}),
-    ...(edge.arrowGlyph !== undefined
-      ? { arrowGlyph: { points: edge.arrowGlyph.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) } }
-      : {}),
-    ...(edge.tailLabel !== undefined
-      ? { tailLabel: { ...edge.tailLabel, x: edge.tailLabel.x + dx, y: edge.tailLabel.y + dy } }
-      : {}),
-    ...(edge.headLabel !== undefined
-      ? { headLabel: { ...edge.headLabel, x: edge.headLabel.x + dx, y: edge.headLabel.y + dy } }
-      : {}),
-  };
-}
-
-/** Shift every coordinate in a NoteGeo by `(dx, dy)` (connector included). */
-function shiftNoteGeo(note: NoteGeo, dx: number, dy: number): NoteGeo {
-  return {
-    ...note,
-    x: note.x + dx,
-    y: note.y + dy,
-    connector: note.connector.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-  };
-}
+// cdd-T6: the five ink-shift helpers moved to `class-layout-shift.ts` when
+// `shiftEdgeExtras` (the four new `EdgeGeo` coordinate fields) pushed this
+// file past the 500-line hook cap -- a pure move, pre-authorised split.
+import { shiftClassifierGeo, shiftEdgeGeo, shiftNamespaceGeo, shiftNoteGeo } from './class-layout-shift.js';
 
 /**
  * T4 (mission leaf-draw-order, D3): reorders `leaves` (built by
@@ -248,7 +202,9 @@ function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]):
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
+// cdd-T29: exported so `class-layout-multipage.ts` (split out of this file)
+// can call it -- see that module's own doc comment.
+export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   // Empty diagram (isDegeneratedWithFewEntities(0): 0 groups, 0 links, 0
   // leafs — leafs includes notes, so a lone freestanding note must NOT hit
   // this shortcut or it would be silently dropped) — zero-size result.
@@ -266,16 +222,26 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // class-namespace.ts#collapseEmptyNamespacesFinal). Before measuring.
   const collapsedAst = collapseEmptyNamespacesFinal(ast);
 
+  // cdd-T34 (E14 `topurl`): `theme.topurl` is only resolved HERE, at
+  // layout, not at parse time (`class-url.ts#applyTopUrlToClassifiers`'s
+  // own doc comment). `collapseEmptyNamespacesFinal` may return the INPUT
+  // `ast` unchanged (`===`) -- never mutate `collapsedAst.classifiers` in
+  // place, or an unshared no-op `ast` would corrupt the caller's own
+  // object. A no-op (`===`) when no `skinparam topurl` was declared, so
+  // this allocates nothing for the common case.
+  const urledClassifiers = applyTopUrlToClassifiers(collapsedAst.classifiers, theme.topurl);
+  const pageAst = urledClassifiers === collapsedAst.classifiers ? collapsedAst : { ...collapsedAst, classifiers: [...urledClassifiers] };
+
   // Pre-measure all classifiers (the hide/show directive fold is per
   // classifier inside — last applicable writer wins per target, A2s R2g)
-  const measuredMap = preMeasureClassifiers(collapsedAst, theme, measurer);
+  const measuredMap = preMeasureClassifiers(pageAst, theme, measurer);
 
   // Degenerate diagram (0-1 entities, no relationships) — skip graphviz
   // entirely, mirroring GraphvizImageBuilder.buildImage:211-223. Checked on
   // the RAW ast: upstream's isDegeneratedWithFewEntities counts getLeafs()/
   // getLinks() UNFILTERED, so removed entities still count here (a graph
   // reduced to one node by `remove` still runs graphviz — pijode-83).
-  const degenerate = degenerateSingleClassifier(collapsedAst, measuredMap);
+  const degenerate = degenerateSingleClassifier(pageAst, measuredMap);
   if (degenerate !== undefined) return degenerate;
 
   // remove/restore exclusion at the layout-input boundary — the port's
@@ -284,26 +250,38 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // Same object back when no remove directives exist (the common path).
   // Everything below — dot graph, note synthesis, geo building — sees only
   // the surviving entities, keeping edge-index alignment consistent.
-  const effAst = filterRemovedEntities(collapsedAst);
+  const effAst = filterRemovedEntities(pageAst);
+  // cdd-T3 (A1 SB5): the ranks that filtering just dropped -- jar burned them
+  // at parse time and only skips the entities at EXPORT time, so they stay as
+  // holes in its numbering (`computeRemovedRanks`'s own doc comment).
+  const removedRanks = computeRemovedRanks(pageAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
-  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs } = buildDotGraph(
-    effAst,
-    measuredMap,
-    theme,
-    measurer,
-  );
+  const { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds } =
+    buildDotGraph(effAst, measuredMap, theme, measurer);
 
   const result = layout(dotGraph);
 
   // Build position map from dot layout result
   const posMap = new Map(result.nodes.map((n) => [n.id, n]));
   const hiddenIds = computeHiddenIds(effAst);
-  const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, hiddenIds, theme);
+  const classifiers = buildClassifierGeos(effAst, measuredMap, posMap, { hiddenIds, theme, protectedIds });
   // T5 (namespace-cluster-box): read the namespace box from the real
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
-  const namespaces = buildNamespaceGeos(effAst, theme, measurer, result.clusters, clusterIdByNs);
+  const namespaces = buildNamespaceGeos(effAst, { theme, measurer, clusters: result.clusters, clusterIdByNs, hiddenIds });
+  // cdd-T13 (M1): the real graphviz cluster box for every cluster-anchored
+  // edge endpoint -- `NamespaceGeo.x/y/width/height` is `box` VERBATIM
+  // (`Cluster#setPosition`, `class-geo-builders.ts#namespaceGeoFromBox`'s
+  // own doc comment), the SAME pre-shift frame `result.edges[].points` and
+  // the note connector's raw points are in (`core/graph-layout.ts
+  // #shiftToOrigin` shifts nodes/edges/clusters together, BEFORE this
+  // file's own `assembleShiftedGeometry` runs). Keyed by namespace id, the
+  // SAME key `anchors` uses -- see `class-shield-helpers.ts
+  // #clipClusterEdgeEnds`'s own doc comment.
+  const clusterRects = new Map(
+    namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]),
+  );
   // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
   // tail/head cardinality labels stay at `theme.fontFamily` (see
@@ -312,9 +290,33 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
     effAst,
     result,
     swappedEdges,
-    { measurer, labelFont: resolveArrowLabelFont(theme), fontFamily: theme.fontFamily },
+    {
+      measurer,
+      labelFont: resolveArrowLabelFont(theme),
+      fontFamily: theme.fontFamily,
+      // cdd-T6 (A2a/M2): the SAME `skinparam classAttributeIconSize`
+      // `class-layout-edge-labels.ts` reserved the label box with.
+      classAttributeIconSize: theme.classAttributeIconSize,
+      // cdd-T6 (A2a/M10): the SAME resolved `arrow.cardinality` font
+      // `class-dot-graph.ts` sizes the tail/head DOT boxes with.
+      cardinalityFont: { family: theme.cardinalityFontFamily!, size: theme.cardinalityFontSize! },
+      // cdd-T6 (A2a/M5, M9): the SAME theme+sprite pair `class-dot-graph.ts`
+      // sized a `note on link`-merged label box with.
+      noteCtx: { theme, ...(effAst.sprites !== undefined ? { sprites: effAst.sprites } : {}) },
+      // cdd-T15 (A2a/M1, D6): the SAME `Kal` list `class-dot-graph.ts`
+      // sized the node shield margins with -- see `EdgeGeoTextContext.kals`.
+      kals,
+      // cdd-T16 (M7): the SAME grouped-tail map `class-dot-graph.ts`
+      // emitted the `sametail` DOT attribute from -- see
+      // `EdgeGeoTextContext.sametailByRelIndex`.
+      sametailByRelIndex,
+      // cdd-T16b (E11): every protected leaf's classifier id -- see
+      // `EdgeGeoTextContext.protectedIds`.
+      protectedIds,
+    },
     posMap,
     anchors,
+    clusterRects,
     theme.colors.graph.arrowThickness,
   );
   // Mission note-leaf-model D3: `mapNoteGeos` reads NO classifier -- a
@@ -332,7 +334,24 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // resolve (degenerate spline) keeps its ordinary edge draw, the same
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
   const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
-  const notes: NoteGeo[] = mapNoteGeos(effAst.notes, result, noteParts, { theme, measurer }, freestandingConnectors);
+  // cdd-T13 (M1): a `note <pos> of <package>` connector is upstream's OWN
+  // ordinary `Link` (`CommandFactoryNoteOnEntity.java:342`), so its
+  // `SvekEdge` gets the SAME `:671-672` clip -- threaded into `mapNoteGeos`
+  // (write-set extension, flagged, precedent rows 18/29/36/39: T9b's own
+  // row 39 names this exact residual as T13's). Freestanding notes need no
+  // extra wiring here: their connector is `edges[]` itself
+  // (`findFreestandingNoteConnectors`, above), already clipped by
+  // `buildEdgeGeos`.
+  const notes: NoteGeo[] = mapNoteGeos(
+    effAst.notes,
+    result,
+    noteParts,
+    { theme, measurer },
+    {
+      freestandingConnectors,
+      clusterRects,
+    },
+  );
   const opaleNoteIds = new Set(notes.filter((n) => n.opale !== undefined).map((n) => n.id));
   const consumedEdgeIds = new Set(
     [...freestandingConnectors.entries()].filter(([noteId]) => opaleNoteIds.has(noteId)).map(([, edge]) => edge.id),
@@ -346,7 +365,11 @@ function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMe
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
   // `effAst` the dot graph/geo builders above already read.
-  return { ...assembled, leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)) };
+  return {
+    ...assembled,
+    ...(removedRanks.length > 0 ? { removedRanks } : {}),
+    leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)),
+  };
   // #lizard forgives -- linear orchestration (empty-diagram guard,
   // namespace-collapse, hide/show resolution, pre-measure, degenerate skip,
   // dot-graph build+layout, geo builders, final assembly), each step ALREADY
@@ -378,12 +401,30 @@ function assembleShiftedGeometry(
   // (see `class-ink-box.ts#addVisibilityIconInk`).
   iconSize: number,
 ): ClassGeometry {
-  const documentDims = computeClassDocumentDims(classifiers, namespaces, edges, notes, iconSize);
+  // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
+  // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
+  // `return`s BEFORE any `draw()`/`apply()` call, so its border/title never
+  // reaches `LimitFinder` and contributes zero ink there. A hidden
+  // CLASSIFIER is different: `SvekResult.java:85` wraps its draw calls in
+  // `ug.apply(UHidden.HIDDEN)`, but `LimitFinder#apply` (klimt/drawing/
+  // LimitFinder.java:78-83) does not special-case `UHidden` at all -- the
+  // wrapped `draw()` calls still run and still accumulate ink; only the
+  // real SVG-emitting `UGraphic` (a different implementation) skips markup.
+  // So ONLY namespaces are filtered out of the ink walk here; classifiers
+  // keep contributing ink exactly as if visible, matching the jar. The
+  // FULL (unfiltered) `classifiers`/`namespaces` still get shifted and
+  // returned below -- layout/uid numbering is unaffected either way
+  // (`ClassifierGeo.hidden`'s own doc comment). Confirmed via senece-96-
+  // fomu913 (`hide Foo1`/`Foo3`/`util`): filtering classifiers too
+  // shrank the canvas width from 293 (jar 277, before this fix) to 85 (jar
+  // 277) -- classifier ink is NOT excluded upstream, only the cluster's.
+  const inkNamespaces = namespaces.filter((n) => n.hidden !== true);
+  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, iconSize);
   // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
-  const rawDims = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
-  const shift = computeClassInkShift(classifiers, namespaces, edges, notes, iconSize);
+  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, iconSize);
+  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, iconSize);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
@@ -404,63 +445,17 @@ function assembleShiftedGeometry(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Multi-page (`newpage`) combination — T7
-// ---------------------------------------------------------------------------
-
-/**
- * Vertical gap (px) inserted between stacked pages. This offset is OURS, not
- * upstream's: upstream's `NewpagedDiagram` lays out each page as an
- * independent svek graph and (per `NewpagedDiagram.java`, which never
- * overrides `AbstractDiagram.getNbImages()`) the reference CLI only ever
- * exports page 1 as a separate file per source — there is no upstream
- * "stacked" rendering to match pixel-for-pixel. Since this library returns a
- * single SVG string rather than one file per page, we stack pages vertically
- * ourselves; see CHANGELOG.md.
- */
-const NEWPAGE_GAP = 20;
-
-/**
- * Lay out every page independently (each page is a complete, standalone
- * diagram per upstream `NewpagedDiagram` semantics — see T6/ast.ts), then
- * stack the resulting geometries vertically with `NEWPAGE_GAP` between them.
- * One dot-layout pass per non-degenerate page, in page order (a degenerate
- * page still contributes its own geometry via `layoutSinglePage`'s internal
- * skip — it just never reaches the graphviz call). Each page's own G2/N11
- * ink shift is already baked in by `layoutSinglePage` before this function
- * ever sees it; this is a SEPARATE, purely additive y-only offset (`dx=0`)
- * stacked on top.
- */
-function layoutMultiPage(pages: ClassDiagramAST[], theme: Theme, measurer: StringMeasurer): ClassGeometry {
-  const leaves: ClassLeafGeo[] = [];
-  const edges: EdgeGeo[] = [];
-  const namespaces: NamespaceGeo[] = [];
-  let maxWidth = 0;
-  let yOffset = 0;
-
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i]!;
-    const geo = layoutSinglePage(page, theme, measurer);
-    const dy = yOffset;
-
-    // T4: each page's own `leaves` is already jar's real draw order (D3,
-    // `layoutSinglePage`'s own `orderLeaves` call); shifting per-kind and
-    // re-pushing in the same relative order preserves that order, and pages
-    // concatenate in page order (the outer `for` loop) -- no re-sort needed
-    // here, each page IS its own upstream `NewpagedDiagram` page.
-    for (const leaf of geo.leaves) {
-      leaves.push(isNoteGeo(leaf) ? shiftNoteGeo(leaf, 0, dy) : shiftClassifierGeo(leaf, 0, dy));
-    }
-    for (const e of geo.edges) edges.push(shiftEdgeGeo(e, 0, dy));
-    for (const n of geo.namespaces) namespaces.push(shiftNamespaceGeo(n, 0, dy));
-
-    maxWidth = Math.max(maxWidth, geo.totalWidth);
-    yOffset += geo.totalHeight;
-    if (i < pages.length - 1) yOffset += NEWPAGE_GAP;
-  }
-
-  return { totalWidth: maxWidth, totalHeight: yOffset, leaves, edges, namespaces };
-}
+// cdd-T29: `layoutMultiPage`/`NEWPAGE_GAP` moved to `class-layout-
+// multipage.ts` when this task's scale-wiring lines pushed the file back
+// over the 500-line hook cap (pre-authorised split, same precedent as
+// `class-layout-shift.ts`'s earlier move from this same file) --
+// `layoutSinglePage` below is exported so that file can call it; a pure
+// move otherwise, re-exported so no consumer's import path changed.
+import { layoutMultiPage } from './class-layout-multipage.js';
+export { layoutMultiPage };
+// cdd-T34: same re-export precedent, one line each, for the `newpage`
+// pagination trio `class/index.ts#classPlugin` wires onto `PaginatedPlugin`.
+export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-layout-multipage.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -474,12 +469,24 @@ function layoutMultiPage(pages: ClassDiagramAST[], theme: Theme, measurer: Strin
  * geometries are stacked vertically (`layoutMultiPage`); otherwise the single
  * top-level AST is laid out directly, unchanged from pre-T7 behavior.
  *
+ * cdd-T29 (D4): `scale ...` is resolved AFTER layout, from the diagram's
+ * OWN final unscaled dimension (`resolveScaleFactor`'s own doc comment --
+ * never a partial/intermediate one) — matches upstream's `UgDiagram.java:
+ * 138`, which passes `scale` only to the exporter, never to svek/DOT
+ * layout itself (`core/scale-command.ts`'s module doc, D4).
+ *
  * @param ast      - Parsed class diagram AST.
  * @param theme    - Visual theme for font metrics and sizing.
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
 export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
-  if (ast.pages !== undefined) return layoutMultiPage(ast.pages, theme, measurer);
-  return layoutSinglePage(ast, theme, measurer);
+  const geo =
+    ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
+  // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
+  // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
+  // never declared (`Theme.dpi`'s own doc comment). SAME `resolveScaleFactor`
+  // call as before T30 -- no second scale-resolution path.
+  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
+  return scaleClassGeometry(geo, k, theme.fontSize);
 }

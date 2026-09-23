@@ -5,13 +5,34 @@
  * module). Pure type-only move, no behavior change.
  */
 
+import type { Paint } from './paint.js';
+
 export interface ThemeGraphColorsA {
-  classBackground: string;
+  /** CDD T18/D8: `Paint`, not `string` -- `skinparam classBackgroundColor
+   *  #FEFECE-FFFFFF` is a gradient upstream (`HColorSet.java:107-116`) and
+   *  reaches `DriverRectangleSvg#applyFillColor`'s `createSvgGradient`
+   *  branch (java:82-96), not a flattened solid. Jar-verified
+   *  `dizuse-83-dabi909`/`taceve-49-mezi408`. */
+  classBackground: Paint;
   interfaceBackground: string;
   enumBackground: string;
   actorStroke: string;
-  packageBackground: string;
-  packageBorder: string;
+  /** CDD T18b: optional, not `string` -- `defaultTheme` (theme.ts)
+   *  deliberately omits these two so a genuinely unstyled theme reads
+   *  `undefined`. Each `...package_,group`-signature consumer (the
+   *  populated-namespace cluster, `Cluster.java:285-296`) supplies its
+   *  OWN unstyled default via `?? <default>` --
+   *  `class-namespace-shape.ts#PACKAGE_CLUSTER_BACKGROUND_DEFAULT`/
+   *  `PACKAGE_CLUSTER_BORDER_DEFAULT`, `renderer-cluster.ts:133`. The
+   *  collapsed-EMPTY-package leaf's `...package_,title` signature
+   *  (`EntityImageEmptyPackage.java:87-88`, no `group` ancestor) reads
+   *  the SAME field ONLY as a mid-tier override -- above its own
+   *  `theme.colors.border`/`classBackground` default, below `<style>
+   *  package {}` (`class-namespace-shape.ts#emptyPackagePaint`) -- jar-
+   *  verified `cocube-46-tusu692` (`packageBorderColor blue` recolours
+   *  the leaf) vs `gatula-10-bifu561` (unstyled leaf stays #181818). */
+  packageBackground?: string;
+  packageBorder?: string;
   /** G2 N18: `skinparam packageBorderThickness N` / `skinparam
    *  package { BorderThickness N }` -- the folder-tab outline's own
    *  stroke width (jar default 1.5, `class-namespace-shape.ts
@@ -34,7 +55,7 @@ export interface ThemeGraphColorsA {
    *  `cunavo-77-filo788` (`classBorderColor #F0F`, no `<style>` block,
    *  no stereotype tag match -- box `stroke`/both divider `stroke`s all
    *  render `#FF00FF`). */
-  classBorder?: string;
+  classBorder?: Paint;
   /** G2 N51: `skinparam classBorderThickness N` / `skinparam class {
    *  BorderThickness N }` -- the classifier box outline's + divider
    *  lines' own stroke-width override (`FromSkinparamToStyle.java:195`:
@@ -393,6 +414,22 @@ export interface ThemeGraphColorsA {
   classCascadeBorder?: string;
   classCascadeFontColor?: string;
   classCascadeHeaderFontColor?: string;
+  /** cdd-T15 (A2a/M1, D6): the `class.qualified` style block's three paints
+   *  (`svek/Kal.java:93-97`'s `{root,element,classDiagram,class_,qualified}`
+   *  signature; `drawU` reads BackGroundColor + LineColor at `:138-139` and
+   *  the font — FontColor included — at `:99`). A strict superset of
+   *  `CLASS_SNAMES`, so a bare `class { BackgroundColor X }` already
+   *  satisfies it (`style-map-element.ts#resolveStyleCascade`'s subset
+   *  match) and a nested `class { qualified { ... } }` wins over it —
+   *  jar-verified `camuna-58-veca254`/`nafiki-56-jixu680`, whose boxes
+   *  render `#008000` on a diagram whose `class {}` sets `yellow`, with
+   *  `ivory` (`#FFFFF0`) text. Unset ⇒ the qualifier box falls back to the
+   *  class box's own resolved paints, which is what the Style system's own
+   *  inheritance does with no override (`baneru-00-kuro607`: `#F1F1F1`
+   *  fill, `#181818` stroke, `#000` text). */
+  classCascadeQualifiedBackground?: string;
+  classCascadeQualifiedBorder?: string;
+  classCascadeQualifiedFontColor?: string;
   /** G2 N65 item 35: `<style> class { MaximumWidth N } }`'s word-wrap
    *  cascade -- `Style#wrapWidth` (`Style.java:292-295`, `PName
    *  .MaximumWidth`) resolved against the SAME two style signatures the

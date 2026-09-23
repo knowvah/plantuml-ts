@@ -117,8 +117,34 @@ const ROUND_TRIP_EPSILON = 1e-3;
  */
 function portNodeSize(d: DotInputNode | undefined, engine: number, declared: number): number {
   if (d === undefined) return engine;
-  const htmlSized = (d.isPort === true && d.shape === 'plaintext') || d.portRows !== undefined;
+  // cdd-T15: `shieldMargins` is the third HTML-sized shape -- jar declares
+  // the qualified end's shield table with no `width`/`height` either, and
+  // reads the centre `PORT="h"` cell's own polygon back as the classifier's
+  // box (`DotStringFactory#solve` takes the FIRST `points=` after the node
+  // title, which is that cell's BGCOLOR polygon).
+  const htmlSized =
+    (d.isPort === true && d.shape === 'plaintext') || d.portRows !== undefined || d.shieldMargins !== undefined;
   return htmlSized ? declared : engine;
+}
+
+/**
+ * cdd-T15 (D6): the top-left corner OFFSET from graphviz's node centre for
+ * a `shieldMargins` node. The shield table is a 3x3 grid whose outer cells
+ * carry the `Kal` margins, so its total size is `(x1 + w + x2)` by
+ * `(y1 + h + y2)` and the centre cell starts `(x1, y1)` into it. Graphviz
+ * centres the whole table in the `PAD`ded node box, so the centre cell's
+ * corner is `centre - table/2 + (x1, y1)` -- independent of `PAD`, which is
+ * why no padding constant appears here.
+ *
+ * Checked against `baneru-00-kuro607`'s oracle: `class1`'s table is
+ * `72.995 x (0 + 48 + 16)`, its drawn rect sits at `y=7` and `class2`'s at
+ * `y=135` -- 60px `ranksep` plus the 4px bottom `PAD` plus the 16px bottom
+ * margin cell, exactly what this offset reproduces.
+ */
+function shieldCorner(d: DotInputNode | undefined, width: number, height: number): [number, number] {
+  const m = d?.shieldMargins;
+  if (m === undefined) return [0, 0];
+  return [m.x1 - (m.x1 + width + m.x2) / 2, m.y1 - (m.y1 + height + m.y2) / 2];
 }
 
 /**
@@ -176,6 +202,10 @@ function mapNodes(snap: LayoutSnapshot, input: DotInputGraph): OutNodes {
     const width = portNodeSize(d, echo(d?.width, n.width), d?.width ?? n.width);
     const height = portNodeSize(d, echo(d?.height, n.height), d?.height ?? n.height);
     const [cornerW, cornerH] = cornerSize(d, width, height);
+    const [shieldDx, shieldDy] = shieldCorner(d, width, height);
+    if (d?.shieldMargins !== undefined) {
+      return { id: n.name, x: n.x + shieldDx, y: n.y + shieldDy, width, height };
+    }
     return { id: n.name, x: n.x - cornerW / 2, y: n.y - cornerH / 2, width, height };
   });
 }

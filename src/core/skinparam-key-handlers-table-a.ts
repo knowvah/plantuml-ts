@@ -113,8 +113,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconprivatecolor'],
-    (acc, _v, color) => {
-      acc.iconPrivateColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPrivateColor = paint;
     },
   ],
   [
@@ -125,8 +125,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconpackagecolor'],
-    (acc, _v, color) => {
-      acc.iconPackageColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPackageColor = paint;
     },
   ],
   [
@@ -137,8 +137,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconprotectedcolor'],
-    (acc, _v, color) => {
-      acc.iconProtectedColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconProtectedColor = paint;
     },
   ],
   [
@@ -149,8 +149,8 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['iconpubliccolor'],
-    (acc, _v, color) => {
-      acc.iconPublicColor = color;
+    (acc, _v, _color, paint) => {
+      acc.iconPublicColor = paint;
     },
   ],
   [
@@ -211,6 +211,34 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
     (acc, value) => {
       const v = parseNonZeroInt(value);
       if (v !== undefined) acc.wrapWidth = v;
+    },
+  ],
+  [
+    ['dpi'],
+    (acc, value) => {
+      // cdd-T30: `SkinParam#getDpi()` (`skin/SkinParam.java:649-656`):
+      // `getAsInt("dpi", 96)` -- `getAsInt` itself only accepts a value
+      // matching `isDigits` (`\d+`, NO sign/decimal point,
+      // `SkinParam.java:135-137`), else returns the 96 default outright;
+      // then `dpi <= 0 -> 96` (reachable only via the literal string "0",
+      // since a minus sign already fails `isDigits`). `parseNonZeroInt`
+      // (`Number.parseInt`) is NOT reused here -- unlike nodesep/ranksep/
+      // wrapwidth, it would accept a leading "-" upstream's `isDigits`
+      // rejects, silently diverging from the jar on a negative dpi.
+      const trimmed = value.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const v = Number.parseInt(trimmed, 10);
+        if (v > 0) acc.dpi = v;
+      }
+    },
+  ],
+  [
+    // cdd-T34 (E14 `topurl`): `SkinParam#getValue("topurl")` -- a raw
+    // string, no validation upstream (`classdiagram/command/
+    // CommandCreateClass.java:219`).
+    ['topurl'],
+    (acc, value) => {
+      acc.topurl = value;
     },
   ],
   [

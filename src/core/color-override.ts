@@ -20,6 +20,18 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:95-124
  */
 
+/** `ColorType.BACK`'s lowercase spelling in a `name:value` colour part
+ *  (`ColorType.getType`, klimt/color/ColorType.java). */
+const BACK_COLOR_TYPE = 'back';
+
+/** `ColorType.getType` (klimt/color/ColorType.java:41-47) -- the name half
+ *  of a `name:value` part is truncated at its first `.` before the enum
+ *  lookup, so `line.dashed:blue` keys LINE, not an unknown type. */
+function colorTypeName(name: string): string {
+  const dot = name.indexOf('.');
+  return (dot === -1 ? name : name.slice(0, dot)).toLowerCase();
+}
+
 /**
  * G2 N31 (classifier) / G2 N34 (note) / mission G4 S2 (state): a bare token
  * (`#f00`) IS the background per `ColorParser`'s own `simpleColor(BACK)`
@@ -51,7 +63,31 @@ export function resolveBareOrBackColor(color: string | undefined): string | unde
   if (color === undefined) return undefined;
   const colorToken = color.split(' ')[0];
   if (colorToken === undefined || colorToken.startsWith('##')) return undefined;
-  if (!colorToken.includes(';') && !colorToken.includes(':')) return colorToken;
-  const backMatch = /(?:^#|;)back:([^;]+)/i.exec(colorToken);
-  return backMatch?.[1];
+  // `Colors.java:96-104`'s tokenizer, verbatim: strip every `#`, walk each
+  // `;` token, and `map.put(mainType, ...)` for any token with no `:` and
+  // no `.`. One map key, so the LAST claimant of BACK wins -- positional,
+  // not "the first token only". The returned value keeps its `#` (callers
+  // hand it to `parseColor`, which accepts both forms); upstream strips it
+  // because `HColorSet#getColor` is fed the bare word.
+  let back: string | undefined;
+  for (const part of colorToken.split(';')) {
+    const stripped = part.replace(/#/g, '');
+    if (stripped === '') continue; // `StringTokenizer` yields no empty token
+    const x = stripped.indexOf(':');
+    if (x === -1) {
+      // `if (s.contains(".") == false)` -- a dotted token is a LINE STYLE
+      // (`line.bold`/`.dashed`/`.dotted`, read at `Colors.java:117-122` and
+      // ported in `class-declaration-extractors.ts#parseDeclarationColors`),
+      // never a colour. Divergence: upstream's `set.getColor(s)` THROWS
+      // `NoSuchColorException` on an unparseable bare token (aborting the
+      // whole declaration); this port has no rejection path and passes the
+      // token through to `parseColor` instead.
+      if (!stripped.includes('.')) back = part;
+      // `ColorType.getType` truncates the name at its first `.`
+      // (`ColorType.java:41-47`), so `back.anything:blue` is still BACK.
+    } else if (colorTypeName(stripped.slice(0, x)) === BACK_COLOR_TYPE) {
+      back = stripped.slice(x + 1);
+    }
+  }
+  return back;
 }

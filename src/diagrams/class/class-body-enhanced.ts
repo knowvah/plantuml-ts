@@ -2,31 +2,37 @@
  * class-body-enhanced.ts — pure raw-line splitting for a classifier's
  * "enhanced body" (upstream `BodyEnhancedAbstract`/`BodyEnhanced1`): the
  * alternate render strategy upstream uses whenever a classifier body
- * contains a `--`/`==`/`..`/`__` block separator or a `|_` tree-list line,
- * REPLACING the classic two-compartment (fields, methods) split entirely —
- * `BodierLikeClassOrObject#getBody`, `type.isLikeClass() && isBodyEnhanced()`
- * branch: `showMethods || showFields` routes to `BodyFactory.create1`
- * (`Body1`/`BodyEnhanced1`), never `getFieldsToDisplay()`/
- * `getMethodsToDisplay()`.
+ * contains a `--`/`==`/`..`/`__` block separator, a `|_` tree-list line, or
+ * a `{{ }}` embedded-diagram opener, REPLACING the classic two-compartment
+ * (fields, methods) split entirely — `BodierLikeClassOrObject#getBody`,
+ * `type.isLikeClass() && isBodyEnhanced()` branch: `showMethods ||
+ * showFields` routes to `BodyFactory.create1` (`Body1`/`BodyEnhanced1`),
+ * never `getFieldsToDisplay()`/`getMethodsToDisplay()`.
  *
  * G2 N42 (mission priority 1, carried from N40/N41's own survey —
  * `plans/g2-class-svg/ledger.md` N40 "Priority 2" for the tree-list
  * derivation this file's tree-cell extraction implements).
  *
- * Scope: block separators (labeled/unlabeled `--`/`==`/`..`/`__`) and `|_`
- * tree-list runs — upstream's THIRD `isBodyEnhanced` trigger, a `|...|`
- * table line (`CreoleParser.isTableLine`), has ZERO corpus reach inside a
- * class member body (surveyed: every `|...|` table sample in the class
- * corpus is inside a `legend`/`note`, a different render subsystem) and is
- * NOT ported here — a table-line-only body still falls through
- * `isEnhancedBody` as `false` (classic 2-compartment rendering, matching
- * this port's pre-N42 behavior, not a new regression).
+ * Scope: block separators (labeled/unlabeled `--`/`==`/`..`/`__`), `|_`
+ * tree-list runs, and `{{ }}` embedded-diagram openers (CDD B7FU-R2,
+ * `BodierLikeClassOrObject.java:96`'s fourth disjunct,
+ * `EmbeddedDiagram.getEmbeddedType(s) != null` — a bare `{{ }}` block with
+ * no separator/tree line, e.g. `class C { {{ file f }} }`, is "enhanced"
+ * on its own) — upstream's THIRD `isBodyEnhanced` trigger, a `|...|` table
+ * line (`CreoleParser.isTableLine`), has ZERO corpus reach inside a class
+ * member body (surveyed: every `|...|` table sample in the class corpus is
+ * inside a `legend`/`note`, a different render subsystem) and is NOT
+ * ported here — a table-line-only body still falls through `isEnhancedBody`
+ * as `false` (classic 2-compartment rendering, matching this port's
+ * pre-N42 behavior, not a new regression).
  *
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhancedAbstract.java#isBlockSeparator
  * @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java#isBodyEnhanced
  * @see ~/git/plantuml/.../cucadiagram/BodyEnhanced1.java#getArea
  * @see ~/git/plantuml/.../klimt/creole/legacy/StripeTree.java
+ * @see ~/git/plantuml/.../EmbeddedDiagram.java#getEmbeddedType
  */
+import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 
 /** One `--`/`==`/`..`/`__` block-separator line, parsed into its draw
  *  char + optional label. `char` selects the divider's stroke (`class-
@@ -86,15 +92,19 @@ function isTreeStartLine(s: string): boolean {
 }
 
 /**
- * `BodierLikeClassOrObject#isBodyEnhanced` — true when ANY raw body line is
- * a block separator or a tree-start line (untrimmed, matching upstream's
- * own un-trimmed `Parser.isTreeStart(s.toString())` check here — this is
- * the TRIGGER scan, distinct from `isTreeOrTable`'s trimmed check used
- * inside the block-splitting loop below).
+ * `BodierLikeClassOrObject#isBodyEnhanced` (java:93-100) — true when ANY raw
+ * body line is a block separator, a tree-start line (untrimmed, matching
+ * upstream's own un-trimmed `Parser.isTreeStart(s.toString())` check here —
+ * this is the TRIGGER scan, distinct from `isTreeOrTable`'s trimmed check
+ * used inside the block-splitting loop below), or a `{{ }}` embedded-diagram
+ * opener (`EmbeddedDiagram.getEmbeddedType(s) != null`, java:96 — checked
+ * on the RAW line, same as upstream, no trim).
  */
 export function isEnhancedBody(rawLines: readonly string[] | undefined): boolean {
   if (rawLines === undefined) return false;
-  return rawLines.some((s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()));
+  return rawLines.some(
+    (s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()) || getEmbeddedType(s) !== null,
+  );
 }
 
 /** `BodyEnhancedAbstract#getTitle`: strips the leading+trailing 2-char
@@ -142,6 +152,17 @@ const TREE_MARKER_RE = /^\s*\|_/;
  * 8-space-indented `|_ Tree item 11` — computes levels relative to ITS OWN
  * base indent, not the source file's column 0) before extracting each
  * cell's level + display text.
+ *
+ * A4 2a: `text` is `purged.replace(TREE_MARKER_RE, '')` with NO trailing
+ * `.trim()` — `StripeTree#analyzeAndAdd` (java:80-90) is `final String text
+ * = s.replaceFirst("^\\s*\\|_", "")`, nothing more, which for the common
+ * one-space-after-`|_` source style (`"|_ prop"`) leaves a SINGLE leading
+ * space on `text` (`" prop"`). That space is a real creole atom
+ * downstream — {@link resolveOneAtom} in `class-member-creole.ts` strips it
+ * (and any trailing whitespace) at RENDER time, mirroring
+ * `DriverTextSvg.java:112-124` — not here. Trimming here (the old code)
+ * silently dropped the atom a bold/whitespace-only run needs to sit next
+ * to (`foxiki-17-kosa114`'s missing NBSP `<text>`, A4-text.md#2a).
  */
 function buildTreeRun(rawLines: readonly string[], startIdx: number): { cells: EnhancedTreeCell[]; consumed: number } {
   const first = rawLines[startIdx]!;
@@ -153,7 +174,7 @@ function buildTreeRun(rawLines: readonly string[], startIdx: number): { cells: E
     const raw = rawLines[i]!;
     if (!isTreeStartLine(raw.trimStart())) break;
     const purged = raw.startsWith(start) ? raw.slice(start.length) : raw;
-    cells.push({ level: computeTreeLevel(purged), text: purged.replace(TREE_MARKER_RE, '').trim() });
+    cells.push({ level: computeTreeLevel(purged), text: purged.replace(TREE_MARKER_RE, '') });
   }
   return { cells, consumed: i - startIdx };
 }

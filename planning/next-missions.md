@@ -35,6 +35,249 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive` — DONE 2026-09-23 (T0–T38, batches 0–10)
+
+Branch `feat/class-divergence-drive` (not merged; T38 reports, the
+maintainer merges). Class survey 412 / 50 / 261 → 560 / 86 / 77 over 723
+fixtures (`docs/parity-report.md`), ratchet 314 → 560, DOT parity
+711/712 held at every close, zero conformant losses and zero unexplained
+rises at every re-pin (`plans/class-divergence-drive/decision-journal.md`,
+rows 1–240). Exit bar clause 1 (diverged = 0 minus the 7 ELK
+slugs) NOT met — closed as met-with-named-exceptions: every remaining
+`diverged` and `structural-match` row names its mechanism in
+`plans/class-divergence-drive/fixtures.md`. Open items, by owner:
+
+- **Oracle pin (D12).** `oracle/dist/plantuml-oracle.jar` symlinks to
+  `~/git/plantuml/build/libs/plantuml-1.2026.8beta1.jar` while
+  `oracle/pin.json` still names 1.2026.7beta11 / seam `de1f986f`; the fork
+  is at `7726a27b`. T35 rebuilt that jar (stop 9, journal row 232) from the
+  pristine `dot-output` tree; no cached oracle changed. Repoint the symlink
+  and re-pin `pin.json` in one maintainer step, then re-run
+  `scripts/oracle-render.sh` on one fixture per type to confirm byte parity
+  with the cache.
+- **dot-engine** — issue 20 (`taillabel`/`headlabel` reserve no canvas:
+  focaci 0+95), issue 21 (same-rank node order mirrored on byte-identical
+  DOT: boseba 1+681, majuva 1+114), plus kupetu Δ0.011 / konomi Δ0.315
+  (solver precision, N25/N62). `docs/graphviz-issues/TRACKER.md`.
+- **Seed input for def ids** — `UmlSource#seed()` hashes the PREPROCESSED
+  lines (`UmlSource.java:222-234`, `PSystemBuilder.java:232-240`); the port
+  hashes the raw ones, so a source with `!define` mints a different uid
+  (popesa 7+2). Needs a post-substitution, pre-extraction line list kept by
+  `core/BlockUmlBuilder.ts`; `description/index.ts:38-47` has the same gap.
+- **`scale max N width|height` / `scale N width`** — cagace 3+37, nadaba
+  12+178, kujiji 49+824: `k = target / unscaledDimension` and our unscaled
+  canvas is ~1 px off the jar's (nadaba 70 vs ~69.0). Not the T35 margin
+  term (refuted, row 232); a class-layout diagnosis item.
+- **Nested `{{ }}`** — bixogo/roxosu 1+4 embed `{{salt}}` and this port has
+  no salt engine (the nested render is an error page); gadufu 0+4 is the
+  nested ACTIVITY diagram's own Cyrillic text sizing (121×96 vs 133×107).
+- **Class renderer residuals** — medosa (crow's-foot `side` is always null:
+  the `SvekEdge.ts` adapter never receives node geometry; every
+  `ExtremityFactory` call site), dorafa 0+36 (`sameClassWidth` is a global max unknown at measure time; the header badge/name `indent` from `computeHeaderSlack` is cached in `preMeasureClassifiers` before `applySameClassWidthFloor` — the jar lays the header out at draw time from the FINAL width, `EntityImageClass.java:182,238`; fix shapes in the B10FU filing), pijiju 0+19 (the `Neighborhood` triangle/stub contact points, sub-1.5 px — the protected inset itself is exact now), pixexi 0+58 (a +5.389 canvas shift with zero edges — NOT the label-margin term, disproved by measurement), lozego/mizupo (no
+  `<linearGradient>` emitted at all), sijisi (`allow_mixing` nested
+  `rectangle` clusters, ENT3/GEO1), cukaze 0+109 (whole-document 0.87 px
+  shift, untraced), luzive 11+21 and sadamo 11+19 (error-page `textLength`,
+  `[From string…]`, version identity — DIVERGENCES.md), filoxo 16 / rakopi
+  10 / givofi 10+2 (T19's `<style> visibilityIcon {}` cascade + shadow
+  filter shape), xadado 1+344 (note-region residual), gatula/jixamu/xosiza
+  (~0.005 px position rounding tipping `ensureVisible`), jubobo (a third,
+  unexamined ink term), `RemoveRestoreDirective` lacks `scopeNsId`
+  (upstream's `removeOrRestore` calls `fixWhat`; no corpus fixture).
+- **Shared seams left for other engines** — `sequence-creole.ts`'s own
+  text emitter bypasses the klimt decorations (migodo, ravire); `<back:a|b>`
+  gradient backgrounds skipped in the klimt text driver (no corpus reach);
+  the multi-block Welcome/error page's background rect lacks
+  `stroke-width:1`; non-class `mainframe` fixtures lack the pre-chrome ink
+  correction (DIVERGENCES.md); activity's own `mode dark` defaults
+  (diamond fill/border, text tier — T33 filing above); json/yaml/hcl
+  correctly ignore `skinparam dpi` (jar-verified, row 182), not a gap.
+- **Tooling** — the survey now supplies the fixture include store
+  (32a284d2): every other type's next survey will move its
+  `!include <bundle/…>` fixtures toward the jar — expect and journal them.
+- **Diagnosis coverage** — every A2b code (E1–E14) has batch coverage;
+  E11 (`groupInheritance`) is tracked under `fixtures.md`'s `LNK7` token
+  (batches 3/5), not `ENT11`. A5's port-row premise (T36) and M7's canvas
+  rule (T35), and A6 §5a's dispatch bug (T32), were disproved by
+  measurement and are recorded as negative results.
+
+## `class-divergence-drive` T37 follow-ons — filed 2026-09-23, item 3 DONE (B10FU, same day)
+
+Three items from T37 (batch 10, M8 marker offset + eight singletons)
+named a mechanism but the fix needs a file outside T37's write-set:
+
+1. **`dorafa-63-soba922`** (`skinparam sameClassWidth true`, A5
+   Unclassified) — STILL OPEN, mechanism refined by B10FU (see below,
+   supersedes this item's own original wording). The WIDTH floor itself
+   is already correctly ported and wired (`class-dot-width-floors.ts
+   #applySameClassWidthFloor`, called from `class-dot-graph.ts:402`;
+   `theme.sameClassWidth` is fully plumbed end to end,
+   `skinparam-key-handlers-table-a.ts:236-243` ->
+   `skinparam-theme-builder.ts:54`) — both rects render at the SAME
+   floored width (116.875, byte-identical to the jar). The remaining
+   0+36 diff is the header BADGE (kind-icon ellipse + glyph path) +
+   name-row `indent`, both derived from `h1`/`h2`
+   (`class-badge.ts#computeHeaderSlack`), computed in
+   `class-layout-generic-classifier.ts#computeClassifierGeoPipeline:
+   227-239` DURING `preMeasureClassifiers` — BEFORE
+   `applySameClassWidthFloor` ever runs (a CROSS-classifier pass that
+   can only run after every classifier's own measurement completes, so
+   it structurally CANNOT be folded in at the SAME point
+   `minClassWidth` is, `computeClassifierGeoPipeline`'s own line 234 —
+   `minClassWidth` is a static per-classifier constant, `sameClassWidth`
+   a global max over every classifier). Jar computes header layout
+   FRESH at draw time from the FINAL (floored) width
+   (`EntityImageClass.java:182,238`), never cached from measure time.
+   A correct fix needs EITHER restructuring the pipeline so
+   `computeHeaderRowsGeo` (`class-layout-header-geo.ts`, already
+   exported/reusable) runs AFTER the floor for every classifier, OR
+   storing `headerNameGeo`/`stereoGeo`/`fonts`/`guillemet`/`badgeRadius`/
+   `stereoFont` on `MeasuredClassifier` (`class-layout-helpers.ts`,
+   currently stores none of it) so the floored classifiers' header rows
+   can be re-derived after the fact. Touches `class-layout-generic-
+   classifier.ts`, `class-layout-header-geo.ts`, `class-dot-graph.ts`
+   and `class-layout-helpers.ts` — not narrow (B10FU's own diagnosis
+   pass, `decision-journal.md` row 236).
+2. **`medosa-71-ligu412`** (two crow's-foot `<line>`s at different
+   `y2` when jar equalises them) — `ExtremityCrowfoot.ts`'s own doc
+   comment already names this: `side` (`WEST`/`EAST`/`NORTH`/`SOUTH`,
+   which axis-clamps the wing endpoints) is ALWAYS `null` in this port
+   because "`SvekEdge.ts`'s adapter interface does not receive node
+   rectangle geometry at draw time." Two crow-feet converging on the
+   SAME node (`foo1 --{ foo2`, `foo0 --{ foo2`) get axis-clamped to the
+   SAME Y in jar (both resolve `side=NORTH` against `foo2`'s box) but
+   free-rotated (and therefore different) in this port. Fix needs
+   threading node-rectangle geometry through the `SvekEdge.ts` adapter
+   to every `ExtremityFactory.createUDrawable` call site — a
+   multi-file, architecture-level plumbing change, not a narrow fix.
+3. **`pijiju-95-xexi872`** — **DONE by B10FU** (`decision-journal.md`
+   row 235, `.agent-notes/cdd-B10FU.md`): `ClassifierGeo.protectedBorder`
+   (new field) + `protectedInnerBox()` (moved to `class-dot-graph.ts`),
+   consumed by `renderer-classifier-box.ts#renderClassifierBox` and
+   `class-ink-box.ts#addClassifierInk`. 0+183 -> 0+19; the box/header/
+   rows/dividers are byte-exact. The REMAINING 19-diff residual is a
+   DIFFERENT, smaller, still-open mechanism: the `Neighborhood`
+   triangle/stub decoration's own contact-point precision
+   (`renderer-group.ts#renderGroupInheritanceNeighborhood`, sub-0.02px
+   to 1.5px) — not chased, likely an edge-spline/contact-point
+   precision gap similar in class to `kupetu-36-kive480` below but not
+   independently confirmed as the same family.
+
+Two items are RULED OUT as defects, not filed (same class as the
+retired `bipudo-23` precedent — `oracle/accepted-divergences.json`):
+
+- **`kupetu-36-kive480`** (Δ0.011 on one bezier `@d` point) —
+  `dot-sync-report.ts --slug kupetu-36-kive480 class` confirms
+  `structurallyEqual: true`; the SAME tiny (<0.02px) drift recurs
+  across the WHOLE spline for BOTH extension edges in the fixture, the
+  jar-vs-ours signature of dot-engine-vs-real-graphviz spline solver
+  precision (bipudo-23's own retired finding), not a formula bug in
+  this port.
+- **`konomi-00-gico141`** (Δ0.315 on one edge-cardinality `text/@y`,
+  `AfSession "1" --> "0..*" MediaComponent` in a 20-node diagram) —
+  MEDIUM confidence: not exhaustively proven, but the magnitude and
+  the fact it is the ONLY residual among many structurally-identical
+  cardinality labels in the same large diagram is most consistent with
+  the already-documented "gvts-genuine" N25/N62 dot-engine label-
+  placement residual (`class-edge-label-anchor.ts`'s own repeated
+  citation) rather than a `manageCollision`/`portLabelAnchor` formula
+  defect — not independently re-derived from the Java in this pass.
+
+**`pixexi-81-sete111`** (`skinparam package { BorderThickness 4;
+FontSize 40 }`) — PARTIALLY fixed by T37 (see the decision journal):
+`class-namespace-shape.ts#getTitleBaselineOffset` used the diagram-wide
+`theme.fontSize` instead of `titleFont(theme).size` for its own
+ascent term, while measuring descent at the correct (package-override)
+font — a 31.389px local text-position bug, now fixed. The REMAINING
+residual (a uniform +5.389 Y-shift of the ENTIRE cluster + a 5px
+taller canvas — box/header geometry is otherwise byte-identical) is
+STILL UNDIAGNOSED. The spec's original "BorderThickness stroke-inset"
+framing is NOT confirmed by measurement (the DOT emission carries no
+`penwidth`/thickness attribute at all, and box/header sizing already
+matches byte-for-byte). B10FU (2026-09-23, `decision-journal.md` row
+237) tested and DISPROVED a second hypothesis — that this is the SAME
+missing multi-line edge-label margin ink `addMultiLineLabelMarginInk`
+now models (`dofima`/`jireze`/`sicile`/`lapoma`, all fixed by that
+change): `pixexi`'s own render-diff is BYTE-IDENTICAL before and after
+that fix (0+58 both times) because it carries zero edges/relationships
+at all. The next task should re-diagnose from scratch: two hypotheses
+are now ruled out (BorderThickness stroke-inset, edge-label margin
+ink); the mechanism is almost certainly in the NAMESPACE/cluster ink
+walk (`class-ink-box.ts#addNamespaceInk`) or the package folder-tab's
+own canvas-margin contribution, neither yet instrumented for this
+fixture specifically.
+
+---
+
+## `class-divergence-drive` T31 follow-ons — filed 2026-09-23, DONE round 2 (same day)
+
+Both narrowly-scoped gaps surfaced by T31 round 1 (`hide`/`show` by
+name, A2b E5) were closed in T31 round 2, once the coordinator extended
+the write-set (T34, which would otherwise own these files, had not yet
+started). Full mechanism and before/after numbers: `.agent-notes/
+cdd-T31.md`'s "Round 2" section, decision-journal rows 210-211.
+
+1. **Namespace-cluster hidden suppression** — DONE. `NamespaceGeo.hidden`
+   (`class-geo-builders.ts#buildNamespaceGeos`, threaded from the same
+   `computeHiddenIds` set) + a `renderer.ts` skip, porting `Cluster
+   #drawU`'s early return (svek/Cluster.java:298-300). A SECOND
+   mechanism was also needed to reach exact parity: `LimitFinder#apply`
+   (klimt/drawing/LimitFinder.java:78-83) does not special-case
+   `UHidden` — a hidden CLASSIFIER's ink still accumulates, only a
+   hidden NAMESPACE's cluster-decoration ink is truly zero (`Cluster
+   #drawU`'s early return skips its `draw()` calls entirely). Filtering
+   both classifiers AND namespaces out of the ink walk overshot; only
+   namespaces was correct. senece-96-fomu913: 1+45 -> 0+0 exact.
+
+2. **`Namespace.tags` population** — DONE. `class-command-containers.ts`'s
+   `package` regex's TAGS1/TAGS2 runs made capturing (renumbering every
+   subsequent match index in the rule), joined and passed through a new
+   `setNamespaceTags` (`class-container.ts`) reusing the existing
+   `parseTagTokens` a classifier's own `$tag` already uses (cites
+   `CommandPackage.java:198` -> `Entity#addStereotag`,
+   `CommandCreateClassMultilines.java:321-329`). Round 1's fold+cascade
+   logic needed no changes. verufu-58-jile750: 1+86 -> 0+0 exact.
+
+---
+
+## `class-divergence-drive` T34 follow-ons — filed 2026-09-23
+
+Two named, out-of-scope residuals surfaced by T34 (E14: `newpage`,
+`mainframe`, `topurl`, `<>` diamond). Full mechanism and before/after
+numbers: `.agent-notes/cdd-T34.md`, decision-journal rows 202-206.
+
+1. **`DIVERGENCES.md`'s "mainframe — parsed, not yet rendered" entry
+   (lines 169-294) is now stale for class.** T34 ported `BigFrame`
+   (`core/klimt/shape/big-frame.ts`) and wired it into `chrome.ts
+   #addMainframe`, closing G0b's T9 escape hatch for the class engine
+   specifically — `jakaja-15-faze022` is now exact (0+0). The entry's
+   OWN "for every OTHER (non-description) engine, T9's original blocker
+   still holds unchanged" paragraph is only PARTLY true post-T34: class
+   is exact because it already carries an ink-corrected `preChromeWidth`/
+   `preChromeHeight` (G2 N46) `BigFrame`'s `ww`/`hh` formula consumes;
+   sequence/unknown-bucket fixtures moved toward the jar (childCount now
+   matches, residual numeric deltas shrank from 35-52px stray offsets to
+   1-8px) but are NOT byte-exact, for the exact reason the entry already
+   predicts (no ink-extent field, only a declared width/height). Needs a
+   rewrite distinguishing class (closed) from every other flat-fragment
+   engine (still open, now partially closed) — a documentation task, not
+   a code one; left unedited by T34 (a full rewrite, outside its
+   write-set).
+2. **cukaze-78-zija070's residual 109 numeric diffs** (a uniform
+   ~0.87px offset on every coordinate in the WHOLE document, height off
+   by 11px) — confirmed PRE-EXISTING via stash/pop against T34's own
+   diamond-render fix (byte-identical before and after), so it is not a
+   diamond-specific defect. The offset's uniformity (every element, not
+   just the diamond) points at a whole-document ink-shift/margin
+   constant (`layout-ink-extent.ts#computeClassInkShift`-family), not a
+   render-shape bug — unNAMED beyond that; no Java citation traced yet.
+   Candidate for a `class-render-scale-literals`-adjacent mission (cites
+   `cdd-T29`'s own filed remainder, journal row 175) once someone reads
+   `computeClassInkShift`'s exact minX/minY derivation against a second
+   `<>`-diamond fixture to isolate which element's ink the shift is
+   keying off.
+
+---
+
 ## `unknown-bucket-routing-repair` — DONE 2026-09-21 (T0-T14, batches 0-2)
 
 Branch `feat/unknown-bucket-routing-repair`, T14 landed at `4b6949ee`
@@ -911,6 +1154,307 @@ never cleared `reason` on a routing flip (`:93-99`) — 222 stale fields cleared
 ## 5. Named, briefed or diagnosed — pick from here after 1
 
 Ordered by how ready they are, not by size.
+
+- **`skinparam mode dark` — activity-side defaults + a stale re-pin**
+  (NEW, unbriefed) — FILED 2026-09-23 from `class-divergence-drive` T33
+  (decision-journal row 201). T33 ported `skinparam mode dark`'s five
+  class-scoped defaults (`theme-dark.ts`); the key handler is SHARED
+  infra (`skinparam-key-handlers-table-b.ts`), so `activity/
+  levuma-67-cego489` (a real corpus fixture with `skinparam mode dark`)
+  picked up the shared `theme.colors.background`/`.text` seam for free
+  and moved 219→216 `compareSvg` diffs (root canvas background now
+  exact). Two follow-ons, both outside T33's `class-divergence-drive`
+  authority: (a) `tests/oracle/svg-conformance/activity.style-baseline
+  .test.ts > levuma-67-cego489` is now RED (`rx { (absent): pinned 0 ->
+  now 1 }`, the newly-drawn rx-less background `<rect>`) — re-pin
+  `oracle/goldens/svg-activity/style-baseline.json` for `levuma` ONLY via
+  `scripts/repin-activity-baselines.ts --slugs-file`, under mission
+  `activity-lane-capture`'s own orchestrator-only process (its tool's own
+  header forbids a per-task run). (b) Activity's diamond fill/border and
+  its OWN text-color tertiary-fallback tier (`activity-style-defaults
+  .ts`, a hardcoded default ABOVE `theme.colors.text`'s fallback — the
+  SAME shape as class's `renderer-classifier-rows.ts` terminal
+  `'#000000'`) remain unfixed; a small activity-specific dark-defaults
+  task, mirroring T33's `theme-dark.ts` table, would close both.
+
+- **`isField` classification is duplicated, and the duplicate is stale**
+  (NEW, unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T19
+  (decision-journal rows; `fijali-69-pina030` 11/11 structural,
+  `tuguku-78-zega630`/`filoxo-23-fafi328` partial). **Mechanism**:
+  `class-member-rows.ts#isMethodMember` correctly checks
+  `m.forcedBucket`/`m.rawDisplay` before falling back to `m.params !==
+  undefined` (added later, A2s R2f, `pasova-33-toze386`), but
+  `class-body-enhanced-layout.ts:199` (the ".. label .." / enhanced-body
+  layout path fijali's `.. interface Servlet ..` separators route
+  through) computes `visibilityIsField` INLINE as bare `m.params ===
+  undefined`, never calling `isMethodMember` and never consulting
+  `forcedBucket`/`rawDisplay`. **Origin**: `class-body-enhanced-
+  layout.ts:199`. **Causal chain**: `+void destroy()` (Java-style
+  return-type-before-name) fails BOTH `tryParseMethod` (expects
+  `name(params)` at the string start) and `tryParseAttribute` (expects
+  the whole string to be one identifier), so `class-member-parser.ts`
+  falls to `rawDisplayFallback`, leaving `params` `undefined` and setting
+  `rawDisplay`. `isMethodMember` would return `true` (rawDisplay contains
+  `(`) but `class-body-enhanced-layout.ts`'s inline check sees only
+  `params === undefined` → `true` → `visibilityIsField: true` →
+  `renderVisibilityIcon`'s `isFilled` draws the PUBLIC ellipse unfilled
+  (`fill="none"`) where the jar fills it `#84BE84` (method rule). The
+  SAME bug affects `{method}`-tagged rows with no parens (tuguku/filoxo's
+  `{method} + execute`): `forcedBucket` is ignored too. **Ruled out**:
+  a `.. label ..`-specific state-tracking bug (the diagnosis's original
+  LOW-confidence hypothesis) — disproven by tracing `parseMemberLine`/
+  `isMethodMember` directly (both correct in isolation, verified via a
+  probe script); the actual divergence is the SECOND, unsynced call site.
+  **Fix shape**: replace `class-body-enhanced-layout.ts:199`'s
+  `m.params === undefined` with `isMethodMember(m) === false` (import
+  from `class-member-rows.ts`) — a one-line fix once a task owns that
+  file. Write-set: `class-body-enhanced-layout.ts` — not claimed by any
+  `class-divergence-drive` batch-6 task (T19 read-only: `class-member-
+  rows.ts`/`renderer-classifier-box.ts` are T20's, off limits per T19's
+  own boundary).
+
+- **`<style> visibilityIcon { protected { ... } } }` selector has no
+  theme cascade** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `tuguku-78-
+  zega630` 7/7, `filoxo-23-fafi328` partial of 20/20). **Mechanism**:
+  `class-visibility-icon.ts#colorsFor` reads ONLY
+  `theme.colors.graph.icon<Kind>Color`/`icon<Kind>BackgroundColor`
+  (T18/G2 N54's `skinparam icon*Color` bridge) with the hardcoded
+  `VISIBILITY_COLORS` table as the sole fallback — `colorsFor`'s own doc
+  comment already says "no `<style>`-cascade tier exists for this
+  StyleSignature in the reachable corpus," which this pair of fixtures
+  disproves. **Origin**: `class-visibility-icon.ts:133-146` (`colorsFor`,
+  no cascade read); absence confirmed in `style-cascade-class-snames.ts`
+  (no `visibilityIcon`/`visibilityicon` SNAMES constant exists) and
+  `style-cascade-class.ts` (no `visibilityIcon` selector branch in
+  `computeClassStyleCascadeOverrides`). **Causal chain**: `<style>
+  visibilityIcon { protected { LineColor DarkGoldenRod; BackgroundColor
+  DarkGoldenRod } } }` parses into the generic StyleMap but nothing reads
+  a `visibilityIcon`/`protected` selector out of it, so `colorsFor('#')`
+  falls straight to `VISIBILITY_COLORS['#']`'s hardcoded `{ line:
+  '#B38D22', background: '#FFFF44' }` — coincidentally close to
+  DarkGoldenRod's real hex (`#B8860B`) in the LINE channel only, which is
+  why the diagnosis first read this as a colour-table rounding drift
+  rather than a missing cascade (disproven: the rendered stroke is the
+  literal unthemed DEFAULT, not a resolved-but-imprecise DarkGoldenRod).
+  **Ruled out**: a `resolveColorToSvgHex` precision issue on
+  "DarkGoldenRod" — probed directly (`resolveColorToSvgHex('DarkGoldenRod')`
+  is exact `#B8860B`; the value never reaches that function). **Fix
+  shape**: a new `VISIBILITY_ICON_SNAMES`-style selector (`{root,element,
+  visibilityIcon,<public|private|protected|package>}`, upstream's own
+  `skin/VisibilityModifier`-adjacent `SName` — needs a Java read before
+  porting) in `style-cascade-class.ts`/`style-cascade-class-snames.ts`,
+  new `ThemeGraphColors` fields (`theme-graph-colors-a.ts`/`-b.ts`), read
+  in `class-visibility-icon.ts#colorsFor` ABOVE the skinparam-bridge tier.
+  Write-set: `style-cascade-class.ts`, `style-cascade-class-snames.ts`,
+  `theme-graph-colors-a.ts`/`-b.ts` — none claimed this batch; `class-
+  visibility-icon.ts` alone (T19's) cannot land this without those.
+
+- **`skinparam classBackgroundColor<<stereo>>`/`classBorderColor<<stereo>>`/
+  `classFontColor<<stereo>>` are direct stereotype-qualified value lookups,
+  unmodelled** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `tabaxa-70-
+  pomu341` 1/1, `nagega-30-poso418`'s stereotype-scoped diff among its
+  114 numeric/14 structural). **Mechanism**: BOTH of T19's two named
+  grammars — the nested-block form (`skinparam class { <<Foo1>> {
+  BackgroundColor LightBlue } } }`, tabaxa) and the suffix form
+  (`skinparam class { BackgroundColor<<alias>> #PowderBlue }`, nagega) —
+  normalize to the IDENTICAL final key `classbackgroundcolor<<foo1>>`
+  after `preprocessor.ts#cleanSkinKey` (which strips every `<<x>>` and
+  re-appends it at the end, `SkinParam#cleanForKeySlow`'s own algorithm)
+  — so there is only ONE grammar to route, not two, and no parser change
+  is needed. But `skinparam-stereo-keys.ts` (this port's whitelist of
+  `<<stereo>>`-suffixed keys it actually consumes) has no
+  `classbackgroundcolor<<X>>`/`classbordercolor<<X>>`/`classfontcolor<<X>>`
+  entry, so the parsed value lands in `acc.unknown` and is dropped.
+  **Origin**: absence in `skinparam-stereo-keys.ts` (compare its existing
+  `CLASS_BORDER_THICKNESS_STEREO_RE` precedent). **Java confirmation**:
+  `SkinParam.java:371-381 getHtmlColor(ColorParam, Stereotype, boolean)`
+  — for EVERY `ColorParam` (not colour-specific to background), a
+  stereotype match does a DIRECT key lookup `param.name() + "color" +
+  "<<" + label + ">>"`, exactly the same "direct value lookup, not the
+  `<style>`/StyleSignature cascade" shape `theme-graph-colors-
+  a.ts#classBorderThicknessByStereo`'s own doc comment already documents
+  for `classBorderThickness<<X>>` — i.e. this is a `ByStereo`-Record
+  mechanism (like `classBorderThicknessByStereo`/`stateBorderColor
+  ByStereo`), NOT `style-cascade-class.ts#resolveClassTagCascadeEntry`
+  as T19's own brief assumed (that cascade is fed exclusively by `<style>`
+  blocks, a structurally different upstream mechanism that only shares
+  the `<<stereotype>>` suffix syntax by coincidence). **Ruled out**:
+  routing through `resolveClassTagCascadeEntry` as briefed — rejected
+  before implementation once `classBorderThicknessByStereo`'s own
+  precedent and the Java citation surfaced; would have required a
+  same-file collision with T20 besides (see below). **Fix shape**: a new
+  `classBackgroundByStereo`/`classBorderByStereo`/`classFontColorByStereo`
+  `Readonly<Record<string,Paint|string>>` accumulator+theme field per key
+  (mirrors `classBorderThicknessByStereo` exactly), a
+  `CLASS_BACKGROUND_COLOR_STEREO_RE`-style handler in `skinparam-stereo-
+  keys.ts`, consumed as a precedence tier in `classifierFill()`/
+  `classBorder()`. Write-set collision: those two functions live in
+  `renderer-classifier-colors.ts`, ACTIVELY owned by T20 this batch (its
+  border/dasharray half) — cannot land without T20, even though T18's
+  fill half is already merged.
+
+- **Creole `<back:color>text</back>` has no SVG filter emission (extended
+  colour deferred at the `FontConfiguration` type)** (NEW, unbriefed) —
+  FILED 2026-09-22 from `class-divergence-drive` T19 (decision-journal
+  rows; `beruje-75-jimu270` 2/2 structural). T19's own brief named this
+  gap M7/`<w>` wave — INSTRUMENTATION DISPROVED THAT PREMISE: `<w>` (wavy
+  underline) and `<s>` (strike) both ALREADY render byte-identical to the
+  jar (`text-decoration="wavy underline"`/`"line-through"`, confirmed
+  present in both `ours.svg` and the oracle) via `memberAtomDecoration`
+  (`renderer-classifier-rows.ts:209-215`) — no filter/turbulence
+  primitive is involved in wave at all, upstream or in this port.
+  **Mechanism**: the jar's ONE `<filter>` in beruje's `<defs>`
+  (`id="b144o7cb4selba0"`, `feFlood`+`feComposite`) belongs to
+  `<back:#FFF000>string nouvelAttributi</back>` — creole's EXTENDED-COLOR
+  BACKCOLOR command — referenced via `filter="url(#...)"` on that ONE
+  `<text>` element (`SvgGraphics.java:761-786`'s `filterBackColor`/
+  `manageColor` flood-filter cache). **Origin**:
+  `src/core/klimt/creole/command/CommandCreoleStyle.ts`'s own doc comment
+  (already self-documented, cdd predates T19): "The captured color VALUE
+  is consumed but not yet applied: upstream's `AddStyle(style,
+  extendedColor)` also calls `FontConfiguration#changeExtendedColor`, but
+  this port's `FontConfiguration` (`shape/UText.ts`) has no
+  `extendedColor` field yet — a driver-side rendering concern
+  (`DriverTextSvg`), deliberately deferred." **Causal chain**:
+  `<back:#FFF000>` is parsed and its color captured
+  (`CommandCreoleStyle.ts`'s BACKCOLOR arm) but dropped on the floor
+  before it reaches `FontConfiguration`, so the atom draws with no
+  `filter` attribute and the document gets no flood-filter `<defs>`
+  entry. **Ruled out**: a class-diagram-local rendering gap — the type
+  carrying the field (`shape/UText.ts#FontConfiguration`) and the command
+  parsing it (`core/klimt/creole/command/`) are BOTH shared across every
+  diagram engine, not class-specific; class is merely the first fixture
+  to reach it. **Fix shape**: add `extendedColor?: string` to
+  `FontConfiguration` (`shape/UText.ts`), thread it through `AddStyle.ts`/
+  `CommandCreoleStyle.ts`, emit the `feFlood`+`feComposite` filter (mirror
+  `SvgGraphics.java:761-786`'s content-keyed filter-id cache, matching
+  this port's own `paintToSvg` FNV-hash-id precedent rather than the
+  jar's seeded scheme, per T18's gradient-def-id note) in `core/svg.ts`,
+  and wire `filter=` onto the `<text>` in every atom-drawing call site
+  (class member rows AND note bodies AND any other creole consumer).
+  Write-set: core (`src/core/klimt/shape/UText.ts`, `src/core/klimt/
+  creole/command/`, `src/core/svg.ts`) — outside class-diagram scope
+  entirely, none claimed this batch.
+
+- **A classifier NAME's own creole formatting (monospace/bold/italic) is
+  discarded at layout time** (NEW, unbriefed) — FILED 2026-09-22 from
+  `class-divergence-drive` T19 (decision-journal rows; `curupe-50-
+  kibu120` 3/3 structural, A3 M8b). T19's own brief guessed the title/
+  name creole call site was `class-declaration-extractors.ts` —
+  INSTRUMENTATION DISPROVED THAT: the classifier NAME already routes
+  through the SAME creole atom engine member rows use
+  (`class-layout-header-creole.ts#buildHeaderLine` calls
+  `resolveMemberAtoms`, identical to `class-member-creole.ts`'s member-
+  row path) and the per-atom `font.family`/monospace info IS correctly
+  built. **Mechanism**: the sibling function
+  `class-layout-header-creole.ts#buildHeaderLineMetrics` (`:105-121`)
+  DISCARDS `buildHeaderLine`'s `atoms` field, returning only
+  `headerLineWidths`/`headerDisplayLines` (flattened PLAIN TEXT via
+  `atomsToPlainText`)/`nameBlockHeight`. **Origin**: `class-layout-
+  header-creole.ts:105-121` (`buildHeaderLineMetrics`); consumed at
+  `class-layout-header-geo.ts:119`, which never receives or forwards an
+  `atoms` array for the header row. **Causal chain**: with no `row.atoms`
+  on the header's `ClassifierGeo['rows']` entry, `renderer-classifier-
+  rows.ts#renderRowText` takes its PLAIN-TEXT branch (`row.atoms ===
+  undefined`), which draws ONE `<text>` with a single `fontFamily: row
+  .fontFamily ?? theme.fontFamily` for the WHOLE line — any per-run
+  creole formatting inside a `""..."" `/`**...**`/`//...//` classifier
+  display name (not just monospace) is silently flattened to plain,
+  uniformly-styled text. `class ""Test"" as foo4` loses its
+  `font-family="monospace"` entirely (jar: `monospace`; ours: absent).
+  **Ruled out**: `class-declaration-extractors.ts` (T20's file, the
+  brief's own guess) — that file only extracts the RAW display-name
+  STRING at parse time; it never touches font/creole atoms at all, so it
+  cannot be the mechanism. **Fix shape**: thread `atoms` through
+  `buildHeaderLineMetrics`'s return (a 4th field alongside `width`/
+  `displayText`/`height`) into whatever builds the header's `rows[]`
+  entry in `class-layout-header-geo.ts`, setting `row.atoms` there the
+  same way `class-member-rows.ts` already does for member rows. Low
+  risk, additive — a header line with no creole markup already reduces
+  to one atom byte-identical to today's plain-text path (per
+  `buildHeaderLine`'s own doc comment). Write-set: `class-layout-header-
+  creole.ts`, `class-layout-header-geo.ts` — not claimed by any
+  `class-divergence-drive` batch-6 task.
+
+- **`#`-prefixed numbered lists in notes render as literal `#`** (NEW,
+  unbriefed) — FILED 2026-09-22 from `class-divergence-drive` T10
+  (decision-journal rows, `ponono-25-fevo574`/`sumocu-27-vubo674`).
+  **Mechanism**: a `#`-prefixed note line (`HASH_HEADING_PATTERN =
+  "^(#+)(.+)$"`, `CreoleStripeSimpleParser.java:71,138-145`) classifies
+  upstream as `StripeStyleType.LIST_WITH_NUMBER` and draws an
+  auto-incrementing ordinal marker ("1.", "2.", ... per nesting `order`)
+  via `context.getLocalNumber(order)` + `AtomTextUtils.createListNumber`
+  (`StripeStyle.java:57-66`) — the numbered-list sibling of the ALREADY-
+  ported `*`-bullet mechanism. **Origin**:
+  `src/diagrams/class/note-layout-measure.ts` (`matchBulletLine`, its
+  `ASTERISK_PREFIXED_LINE_PATTERN`/`ASTERISK_HEADER_LINE_PATTERN` pair) —
+  no `#`/`HASH_HEADING_PATTERN` counterpart exists anywhere in this port.
+  **Causal chain**: a `#`-line fails `matchBulletLine` → falls through to
+  `buildPlainRows` as ordinary creole text → the literal `#` character has
+  no creole meaning and draws as its own `<text>#</text>` run, with the
+  following space becoming a SECOND `<text>` run (the pre-existing NBSP-
+  substitution-per-whitespace-atom rule, `class-member-creole.ts` G2 N57
+  item 38) → ONE EXTRA `<text>` element per numbered line vs. jar's single
+  "1."/"2." atom → `ponono-25-fevo574`/`sumocu-27-vubo674` (2 numbered
+  lines each) end up with 107 `<text>` elements vs. the jar's 105, and
+  every element AFTER the first numbered line reads as off-by-one in
+  `compareSvg`'s positional LCS alignment (the "alternating childCount
+  0/1" symptom). **Ruled out**: a word-wrap/Fission off-by-one in the
+  fixture's long bulleted sentence (the initial hypothesis) — DISPROVEN by
+  an ordered `<text>`-content sequence diff (Python `difflib
+  .SequenceMatcher` over both sides' full text-run arrays): every wrapped
+  word matches jar's content in EXACT order from element 0 through the
+  end; the ONLY two diff hunks are precisely the two `#`-lines
+  (`jar[75:76]=['1.']` vs `ours[75:77]=['#','\xa0']`, and the identical
+  shape at index 85/86). **Fix shape**: port `HASH_HEADING_PATTERN`
+  alongside the existing asterisk patterns in `matchBulletLine` (or its
+  successor), plus a stateful per-`order` auto-increment counter
+  (`CreoleContext.getLocalNumber`'s equivalent — resets per note, unlike
+  the asterisk path's stateless per-line order) and a `createListNumber`-
+  equivalent atom. Medium risk: shares `buildBulletRows`'s row-building
+  path with the `*` mechanism, and needs a stateful pass across the note's
+  lines (not today's independent per-line classify calls) to get the
+  numbering sequence right across wrapped/interspersed content.
+
+- **Class SVG comments diverge from the jar (gate-invisible)** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T4
+  (decision-journal row 20; diagnosis `A1-order.md` "Invisible-to-the-gate
+  findings"). `normalize.ts` drops XML comments, so none of these moves the
+  survey, but a long-time user diffing SVGs sees them: (1) the link comment's
+  endpoint name and order differ from `abel/Link.java:115-120 commentForSvg()`
+  (~44 fixtures) and carry the fully-qualified dotted id where the jar writes
+  the bare leaf (T2's `.agent-notes/cdd-T2.md`); (2) the classifier comment
+  always says `class` regardless of leaf type (~28); (3) couple points are
+  named `__assoc0` in comments where the jar writes `apoint<N>`. One
+  comment-building site each; small, but touch only after the class buckets
+  are closed so the survey stays the score.
+
+- **Parity dashboards cannot show an accepted divergence** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T0
+  (decision-journal row 4). `oracle/accepted-divergences.json` ids are
+  `svg-<type>/<slug>` (the retired `bipudo` entry, D10 of the mission,
+  and `tests/unit/scripts/svg-parity.test.ts:314`'s own sample), but
+  `scripts/svg-parity-dashboard.ts:161-171` (`ledgerRows`) joins on the
+  bare survey slug, so the class dashboard renders the 7 ELK entries as
+  `_(none matched)_`; and `scripts/parity-dashboard.ts` (the
+  `docs/parity-report.md` generator) has no ledger join at all. Fix:
+  match `svg-${f.type}/${f.slug}` (and keep the bare form) in
+  `ledgerRows`, then add a "declared" column or ledger section to
+  `parity-dashboard.ts` so the exit bar's "0 minus 7" is readable from
+  the report. Two scripts + their unit tests; small.
+
+- **`lint-staged` glob cannot stage a `.test.ts` under `plans/`** (NEW,
+  unbriefed) — FILED 2026-09-21 from `class-divergence-drive` T0b
+  (decision-journal row 2). `.husky/pre-commit` runs typed `eslint --fix`
+  on `*.{ts,tsx,mjs,js}`; no tsconfig `include` reaches `plans/`, so a
+  `plans/**/*.test.ts` throws the typed-rule `parserOptions` error
+  `eslint.config.ts` already documents for `docs-site/**`. Mission tools
+  work around it by using `.test.mts`. Fix: either extend the
+  `docs-site` carve-out in `eslint.config.ts` to `plans/**`, or narrow
+  the `lint-staged` glob to the paths `npm run lint` actually covers.
+  One config file; trivial.
 
 - **`activity-emphasize-arrow-atomic-anchor`** (NEW, unbriefed) — FILED
   2026-09-21 from `unknown-bucket-routing-repair` T15
@@ -2842,6 +3386,41 @@ From `planning/mission-index.md`; each warrants `/plan-mission` when picked:
   `surfaceSpriteWarnings`. The two port-own allow-listed sites
   (activity `tile-layout.ts`, description `renderer-draw-sequence.ts`) belong
   in the same pass.
+- **`EntityImageProtected`'s 20 px border is unported on the DRAW side**
+  (cdd-T36, `pijiju-95-xexi872` 0+183). When `skinparam groupInheritance N`
+  gives a leaf a `Neighborhood` (`dot/DotData.java:136-151`),
+  `GeneralImageBuilder.java:110-114` wraps its `EntityImageClass` in
+  `EntityImageProtected(orig, 20, …)`, whose `calculateDimension` is
+  `orig.calculateDimension().delta(2 * border)` and whose `drawU` draws the
+  original under `UTranslate(border, border)`
+  (`svek/EntityImageProtected.java:76-83`). We carry the +40 into the DOT node
+  (our label for `B` is byte-identical to the jar's `svek-1.dot`, WIDTH
+  81.3625 / rows 36+14+52) but then DRAW the class rect at that OUTER size:
+  jar `<rect width="41.363" height="62">`, ours `81.363 x 102`. Fix belongs in
+  the class render/geo path (`renderer-group.ts` and the ClassifierGeo box
+  builder), NOT in `class-port-rows.ts`.
+- **DOT `BGCOLOR`/`color` hex is emitted lowercase, upstream emits uppercase**
+  (cdd-T36, cosmetic, 10 of 37 row-port table labels in the class corpus).
+  `src/core/svek-dot-emit-labels.ts:17`'s `hex` uses `toString(16)`; upstream
+  is `XColor.toHexRGBColor` = `String.format("#%06X", …)`
+  (`klimt/awt/XColor.java:127-129`), reached from `svek/SvekNode.java:255,277`
+  and `:163,200,218`. Geometrically inert (DOT colour parsing is
+  case-insensitive; every affected fixture is `dotEqual: true`), but it is the
+  ONLY remaining byte difference between our emitted `RECTANGLE_HTML_FOR_PORTS`
+  label and the jar's, so fixing it would make that family byte-exact. One
+  `.toUpperCase()`; the file is outside every batch-10 write-set.
+- **`Class::member` row-port family: closed, with 6 residuals owned elsewhere**
+  (cdd-T36). The measured reach is 22 fixtures, not the 53 A5 guessed; 15 are
+  0+0. The open 6 are `gekope-01-ricu859` / `nenepe-70-keri784` /
+  `pegeso-72-mana305` (canvas `@width` only, zero ink diffs — T35's `minDim`),
+  `xefeme-77-fagu709` (whole drawing X-shifted by exactly 5.001 with an
+  identical ink SPAN and zero Y diffs — the same ink-extent walk, measuring the
+  left-most edge-LABEL text differently), `bicabi-42-coto932` (one polygon
+  vertex, delta 0.011), `pijiju-95-xexi872` (the `EntityImageProtected` item
+  above) and `sijisi-94-ripu606` (`allow_mixing` + nested `rectangle`
+  clusters: childCount 2 vs 3 and 2 vs 4, one missing `@textLength`; already
+  attributed ENT3/GEO1/B4). None is a port-row-sizing defect: the emitted DOT
+  table is byte-identical to the jar's for all 22.
 
 ---
 

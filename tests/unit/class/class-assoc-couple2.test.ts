@@ -385,6 +385,56 @@ describe('association-class couple: render-layer decor/dashing (G2 N8)', () => {
   );
 
   it(
+    "T4: the subsumed edge's B-side decor lands on circle->B's own end, " +
+      'NOT on A->circle\'s circle end (pajoka-72-reju527, "Foo --> Bar")',
+    () => {
+      const ast = parse(`
+      class Foo
+      class Bar
+      class Qux
+      Foo --> Bar
+      (Foo, Bar) --> Qux
+    `);
+      const foo = ast.classifiers.find((c) => c.display === 'Foo')!;
+      const bar = ast.classifiers.find((c) => c.display === 'Bar')!;
+      const [circleId] = circleIds(ast);
+      const aEdge = findRel(ast, foo.id, circleId!);
+      const bEdge = findRel(ast, circleId!, bar.id);
+      // "Foo --> Bar": the open arrowhead sits at Bar's OWN end (bSideDecor),
+      // none at Foo's own end (aSideDecor), in the original subsumed link.
+      expect(aEdge.sourceDecor).toBe('none'); // Foo's own end: aSideDecor
+      expect(aEdge.targetDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.sourceDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.targetDecor).toBe('open'); // Bar's own end: bSideDecor
+    },
+  );
+
+  it(
+    "T4: the subsumed edge's A-side decor lands on A->circle's own end, " +
+      "NOT on circle->B's circle end (mirror of the B-side case above)",
+    () => {
+      const ast = parse(`
+      class Foo
+      class Bar
+      class Qux
+      Foo <-- Bar
+      (Foo, Bar) --> Qux
+    `);
+      const foo = ast.classifiers.find((c) => c.display === 'Foo')!;
+      const bar = ast.classifiers.find((c) => c.display === 'Bar')!;
+      const [circleId] = circleIds(ast);
+      const aEdge = findRel(ast, foo.id, circleId!);
+      const bEdge = findRel(ast, circleId!, bar.id);
+      // "Foo <-- Bar" parses to {from: Bar, to: Foo, targetDecor: 'open'} --
+      // the arrowhead sits at Foo's OWN end (aSideDecor), none at Bar's.
+      expect(aEdge.sourceDecor).toBe('open'); // Foo's own end: aSideDecor
+      expect(aEdge.targetDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.sourceDecor).toBe('none'); // circle end: ALWAYS none
+      expect(bEdge.targetDecor).toBe('none'); // Bar's own end: bSideDecor
+    },
+  );
+
+  it(
     'an arrowhead on the couple line carries onto the class-link edge ' + '(not just dashing) — "R1 --> (A,B)"',
     () => {
       const ast = parse(`
@@ -630,6 +680,92 @@ describe('association-class couple: G2 N19 synthetic-id naming (single coupling)
       expect(order.indexOf(`${r1.id}->${circles[0]!.id}`)).toBeGreaterThan(
         order.indexOf(`${circles[1]!.id}->${bEdge2.to}`),
       );
+    },
+  );
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T3 (A1 SB3) — the DOUBLE couple `(A,B) . (C,D)` burns jar's shared
+// cpt1 counter in `AbstractClassOrObjectDiagram#associationClass`'s 4-entity
+// overload order: BOTH `getUniqueSequence("apoint")` NAME ticks first
+// (`objectdiagram/AbstractClassOrObjectDiagram.java:120-121`), THEN both
+// point `Entity` ctors (`:123-129`), THEN the two `insertPointBetween`
+// calls (`:131-132`, two `Link`s each, plus one phantom default `Link` when
+// no explicit A-B association existed to remove — `:145-148`), and finally
+// the point1<->point2 `Link` (`:136-138`). The per-couple interleaving the
+// SINGLE-couple path uses (`Association`'s ctor, `:226-231`) is a DIFFERENT
+// order and cannot be reused here.
+// ---------------------------------------------------------------------------
+
+describe('double association-class couple: shared-counter burns (cdd-T3 SB3)', () => {
+  it('stamps both apoint NAME ticks before either point entity (pibifa-14-leno075)', () => {
+    const ast = parse(`
+      class A0
+      class B1
+      class C2
+      A0 *--  B1
+      A0 *--  C2
+      (A0, B1) . (A0, C2)
+    `);
+    const [c0, c1] = circleIds(ast);
+    const circle0 = ast.classifiers.find((c) => c.id === c0)!;
+    const circle1 = ast.classifiers.find((c) => c.id === c1)!;
+    // A0=1, B1=2, C2=3, A0*--B1=lnk4, A0*--C2=lnk5.
+    expect(circle0).toMatchObject({
+      apointNameCreationIndex: 6,
+      syntheticIdName: 'apoint6',
+      creationIndex: 8,
+      noUidSlot: true,
+    });
+    expect(circle1).toMatchObject({
+      apointNameCreationIndex: 7,
+      syntheticIdName: 'apoint7',
+      creationIndex: 9,
+      noUidSlot: true,
+    });
+    // `phantomSlot` (a rank at `creationIndex - 1`) cannot express a name
+    // tick two ranks below the entity -- it must stay unset on this path.
+    expect(circle0.phantomSlot).toBeUndefined();
+    expect(circle1.phantomSlot).toBeUndefined();
+  });
+
+  it('stamps the four insertPointBetween links then the joining link', () => {
+    const ast = parse(`
+      class A0
+      class B1
+      class C2
+      A0 *--  B1
+      A0 *--  C2
+      (A0, B1) . (A0, C2)
+    `);
+    const [c0, c1] = circleIds(ast);
+    expect(findRel(ast, 'A0', c0!).creationIndex).toBe(10);
+    expect(findRel(ast, c0!, 'B1').creationIndex).toBe(11);
+    expect(findRel(ast, 'A0', c1!).creationIndex).toBe(12);
+    expect(findRel(ast, c1!, 'C2').creationIndex).toBe(13);
+    expect(findRel(ast, c0!, c1!).creationIndex).toBe(14);
+  });
+
+  it(
+    'a couple with NO explicit A-B association to subsume burns one extra ' +
+      "phantom rank for `insertPointBetween`'s default `new Link(NONE,NONE)` " +
+      '(AbstractClassOrObjectDiagram.java:145-148)',
+    () => {
+      const ast = parse(`
+      class A0
+      class B1
+      class C2
+      (A0, B1) . (A0, C2)
+    `);
+      const [c0, c1] = circleIds(ast);
+      // A0=1, B1=2, C2=3; names 4/5; entities 6/7.
+      // couple 1: phantom 8, A0->c0 = 9, c0->B1 = 10.
+      // couple 2: phantom 11, A0->c1 = 12, c1->C2 = 13. join = 14.
+      expect(findRel(ast, 'A0', c0!)).toMatchObject({ creationIndex: 9, phantomSlot: true });
+      expect(findRel(ast, c0!, 'B1').creationIndex).toBe(10);
+      expect(findRel(ast, 'A0', c1!)).toMatchObject({ creationIndex: 12, phantomSlot: true });
+      expect(findRel(ast, c1!, 'C2').creationIndex).toBe(13);
+      expect(findRel(ast, c0!, c1!).creationIndex).toBe(14);
     },
   );
 });

@@ -786,10 +786,23 @@ describe('resolveSkinparam — unknown keys', () => {
     expect(() => resolveSkinparam(new Map([['totally_unknown_key', 'value']]), defaultTheme)).not.toThrow();
   });
 
-  it('collects stereotype-qualified key in unknown[] without throwing', () => {
-    expect(() => resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme)).not.toThrow();
-    const { unknown } = resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme);
+  // CDD T6FU: `classBackgroundColor<<Foo>>` is no longer unknown -- it now
+  // populates `classBackgroundColorByStereo` (see `theme-graph-colors-b.ts`
+  // for the upstream route). An UNMODELLED stereotype-qualified key still
+  // lands in `unknown[]`, which is what this test now pins.
+  it('collects an unmodelled stereotype-qualified key in unknown[] without throwing', () => {
+    expect(() => resolveSkinparam(new Map([['totallyUnknown<<Foo>>', '#AABBCC']]), defaultTheme)).not.toThrow();
+    const { unknown } = resolveSkinparam(new Map([['totallyUnknown<<Foo>>', '#AABBCC']]), defaultTheme);
     expect(unknown.some((k) => k.includes('<<'))).toBe(true);
+  });
+
+  it('routes classBackgroundColor<<stereo>> to the modelled theme field', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.classBackgroundColorByStereo).toEqual({ foo: '#AABBCC' });
+    expect(unknown).toEqual([]);
   });
 
   it('unknown[] is empty when all keys are recognised', () => {
@@ -1244,6 +1257,47 @@ describe('resolveSkinparam — wrapWidth', () => {
   it('deepMergeTheme copies wrapWidth as a top-level optional scalar', () => {
     const merged = deepMergeTheme(defaultTheme, { wrapWidth: 150 });
     expect(merged.wrapWidth).toBe(150);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveSkinparam — dpi (cdd-T30, `SkinParam#getDpi()`,
+// `skin/SkinParam.java:649-656`)
+// ---------------------------------------------------------------------------
+describe('resolveSkinparam — dpi', () => {
+  it('maps dpi to theme.dpi', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['dpi', '300']]), defaultTheme);
+    expect(theme.dpi).toBe(300);
+    expect(unknown).toEqual([]);
+  });
+
+  it('is case/key-normalisation insensitive, matching nodesep/wrapwidth precedent', () => {
+    const { theme } = resolveSkinparam(new Map([['Dpi', '200']]), defaultTheme);
+    expect(theme.dpi).toBe(200);
+  });
+
+  it('a value of "0" falls back to the 96 default (SkinParam.java:653-654 `dpi <= 0`)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '0']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('a negative value is rejected (upstream `isDigits` has no sign, unlike parseNonZeroInt)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '-300']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('a non-digit value is rejected (upstream `isDigits`, no decimal point either)', () => {
+    const { theme } = resolveSkinparam(new Map([['dpi', '96.5']]), defaultTheme);
+    expect(theme.dpi).toBeUndefined();
+  });
+
+  it('absent by default — defaultTheme carries no dpi (jar default is 96, applied at resolveScaleFactor)', () => {
+    expect(defaultTheme.dpi).toBeUndefined();
+  });
+
+  it('deepMergeTheme copies dpi as a top-level optional scalar', () => {
+    const merged = deepMergeTheme(defaultTheme, { dpi: 150 });
+    expect(merged.dpi).toBe(150);
   });
 });
 

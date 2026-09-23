@@ -10,12 +10,14 @@
  */
 import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import type { MeasuredClassifier } from './class-layout-helpers.js';
+import { LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
+import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
+import { PROTECTED_BORDER } from './class-dot-graph.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
 
 /**
@@ -76,6 +78,43 @@ function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   };
 }
 
+/** CDD B7FU-R2 item (c-b): the badge-decoration fields, shared by both
+ *  `buildClassifierGeos`/`degenerateSingleClassifier` call sites below
+ *  (identical spread, previously duplicated) -- `mirrors inkBodyFields`'s
+ *  own "one shared helper, two callers" precedent. */
+function badgeFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
+  return {
+    ...(m.badgeChar !== undefined ? { badgeChar: m.badgeChar } : {}),
+    ...(m.badgeColor !== undefined ? { badgeColor: m.badgeColor } : {}),
+    ...(m.badgeSpriteImage !== undefined ? { badgeSpriteImage: m.badgeSpriteImage } : {}),
+  };
+}
+
+/** cdd-B10FU: `ClassifierGeo.protectedBorder` -- gated the SAME way
+ *  `class-dot-graph.ts#protectedPad` gates the DOT node's own +40
+ *  inflation (`protectedIds.has(id) && LIKE_CLASS_KINDS.has(kind)`, that
+ *  function's own doc comment). Split out purely to keep
+ *  `buildClassifierGeos`'s own NLOC/CCN under the project caps, same
+ *  "one shared helper" precedent as {@link inkBodyFields}/{@link badgeFields}. */
+function protectedBorderField(classifier: Classifier, protectedIds: ReadonlySet<string>): Partial<ClassifierGeo> {
+  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind)
+    ? { protectedBorder: PROTECTED_BORDER }
+    : {};
+}
+
+/** {@link buildClassifierGeos}'s trailing options -- bundled to stay under
+ *  this repo's 5-param cap once `protectedIds` (cdd-B10FU) joined
+ *  `hiddenIds`/`theme`. */
+export interface ClassifierGeoOptions {
+  hiddenIds: ReadonlySet<string>;
+  theme: Theme;
+  /** cdd-B10FU: the SAME set `class-dot-graph.ts#buildDotGraph` already
+   *  returns and `buildEdgeGeos` already threads via
+   *  `EdgeGeoTextContext.protectedIds` -- gates `ClassifierGeo
+   *  .protectedBorder` (see that field's own doc comment). */
+  protectedIds: ReadonlySet<string>;
+}
+
 /**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
  * positions.
@@ -88,8 +127,7 @@ export function buildClassifierGeos(
   ast: ClassDiagramAST,
   measuredMap: Map<string, MeasuredClassifier>,
   posMap: Map<string, DotLayoutResult['nodes'][number]>,
-  hiddenIds: ReadonlySet<string>,
-  theme: Theme,
+  options: ClassifierGeoOptions,
 ): ClassifierGeo[] {
   const classifiers: ClassifierGeo[] = [];
   for (const classifier of ast.classifiers) {
@@ -103,10 +141,10 @@ export function buildClassifierGeos(
       ...contentBox(classifier, pos, measured),
       dividerYs: measured.dividerYs,
       rows: measured.rows,
+      ...protectedBorderField(classifier, options.protectedIds),
       ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
       ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-      ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-      ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+      ...badgeFields(measured),
       ...inkBodyFields(measured),
       ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
       ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
@@ -123,21 +161,24 @@ export function buildClassifierGeos(
       ...(classifier.subsumedLinkCreationIndex !== undefined
         ? { subsumedLinkCreationIndex: classifier.subsumedLinkCreationIndex }
         : {}),
+      ...(classifier.apointNameCreationIndex !== undefined
+        ? { apointNameCreationIndex: classifier.apointNameCreationIndex }
+        : {}),
       ...(classifier.invertedClassEdgeOldCreationIndex !== undefined
         ? { invertedClassEdgeOldCreationIndex: classifier.invertedClassEdgeOldCreationIndex }
         : {}),
       ...(classifier.repeatCoupleInvisLinkCreationIndex !== undefined
         ? { repeatCoupleInvisLinkCreationIndex: classifier.repeatCoupleInvisLinkCreationIndex }
         : {}),
-      ...(hiddenIds.has(classifier.id) ? { hidden: true } : {}),
+      ...(options.hiddenIds.has(classifier.id) ? { hidden: true } : {}),
       ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
       ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
       // mission skin-file-loading (deferred D3 item): see
       // `ClassifierGeo.shadowing`'s own doc comment (class-geo-types.ts)
       // for the full jar-verified mechanism and the eligibility gate
       // `drawsBorderedBox` below reproduces.
-      ...(theme.shadowing !== undefined && theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
-        ? { shadowing: theme.shadowing }
+      ...(options.theme.shadowing !== undefined && options.theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
+        ? { shadowing: options.theme.shadowing }
         : {}),
     });
   }
@@ -209,7 +250,7 @@ function namespaceGeoFromBox(
   box: ClusterBox,
   theme: Theme,
   measurer: StringMeasurer,
-  inkShape: 'polygon' | 'rect' | undefined,
+  inkShape: NamespaceGeo['inkShape'],
 ): NamespaceGeo {
   return {
     id: ns.id,
@@ -223,7 +264,25 @@ function namespaceGeoFromBox(
     baselineOffset: getTitleBaselineOffset(measurer, theme, ns.display),
     ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
     ...(inkShape !== undefined ? { inkShape } : {}),
+    // cdd-T12: three carry-only copies of T11's AST fields -- see
+    // `class-geo-namespace-types.ts`'s own doc comments for each consumer.
+    ...(ns.usymbol !== undefined ? { usymbol: ns.usymbol } : {}),
+    ...(ns.color !== undefined ? { color: ns.color } : {}),
+    ...(ns.url !== undefined ? { url: ns.url } : {}),
   };
+}
+
+/** `buildNamespaceGeos`'s inputs beyond the AST -- bundled into one object
+ *  (5-param hook cap) once T31 round 2 added `hiddenIds` as a 6th. */
+export interface NamespaceGeoInputs {
+  theme: Theme;
+  measurer: StringMeasurer;
+  clusters: DotLayoutResult['clusters'];
+  clusterIdByNs: ReadonlyMap<string, string>;
+  /** cdd-T31 round 2 (E5 defect b): see `NamespaceGeo.hidden`'s own doc
+   *  comment -- same `computeHiddenIds` set `buildClassifierGeos` already
+   *  consumes, just also threaded here. */
+  hiddenIds: ReadonlySet<string>;
 }
 
 /**
@@ -239,21 +298,16 @@ function namespaceGeoFromBox(
  * "no member positions" skip was -- decision 3 governs the no-cluster case
  * (T6 proves no namespace draws a box while having no cluster).
  */
-export function buildNamespaceGeos(
-  ast: ClassDiagramAST,
-  theme: Theme,
-  measurer: StringMeasurer,
-  clusters: DotLayoutResult['clusters'],
-  clusterIdByNs: ReadonlyMap<string, string>,
-): NamespaceGeo[] {
-  const inkShape = resolveNamespaceInkShape(theme);
+export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInputs): NamespaceGeo[] {
+  const { theme, measurer, clusters, clusterIdByNs, hiddenIds } = inputs;
   const clusterById = new Map<string, ClusterBox>((clusters ?? []).map((c) => [c.id, c]));
   const namespaces: NamespaceGeo[] = [];
   for (const ns of ast.namespaces) {
     const clusterId = clusterIdByNs.get(ns.id);
     const box = clusterId !== undefined ? clusterById.get(clusterId) : undefined;
     if (box === undefined) continue;
-    namespaces.push(namespaceGeoFromBox(ns, box, theme, measurer, inkShape));
+    const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
+    namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
   return namespaces;
 }
@@ -269,11 +323,40 @@ export function buildNamespaceGeos(
  * this port has no per-group `PackageStyle` override yet, matching
  * `renderer.ts`'s own established scope note) rather than per-namespace.
  */
-function resolveNamespaceInkShape(theme: Theme): 'polygon' | 'rect' | undefined {
+function resolveNamespaceInkShape(theme: Theme, usymbol: string | undefined): NamespaceGeo['inkShape'] {
+  // cdd-T12 (A2b E3): an explicit group `USymbol` wins over the diagram-wide
+  // `packageStyle` fallback -- `ClusterDecoration#guess`
+  // (`svek/ClusterDecoration.java:66-71`) only consults the `PackageStyle`
+  // when `symbol == null`, so a `<<Node>>`/`<<Rectangle>>` container's ink
+  // rule follows ITS shape, not `theme.packageStyle`/`theme.strictUml`.
+  const bySymbol = usymbol !== undefined ? USYMBOL_INK_SHAPE[usymbol] : undefined;
+  if (bySymbol !== undefined) return bySymbol;
+  if (usymbol !== undefined && !FOLDER_FAMILY_KEYWORDS.has(usymbol)) return undefined;
   if (theme.packageStyle === 'rect') return 'rect';
   if (theme.strictUml === true) return 'polygon';
   return undefined;
 }
+
+/** Group-`USymbol` keyword -> `LimitFinder` ink rule, for the shapes whose
+ *  `asBig` draws something other than a plain `UPath` -- see
+ *  `class-geo-namespace-types.ts#NamespaceGeo.inkShape` and
+ *  `class-ink-shapes.ts` for the per-rule upstream citations. Every keyword
+ *  absent here (`cloud`, `card`, `frame`, `artifact`, ...) draws a `UPath`,
+ *  which is the plain rule (`undefined`). `rectangle`/`agent`/`archimate`/
+ *  the rectangle-faced `component` all resolve to `USymbolRectangle`, whose
+ *  `drawRect` emits a `URectangle` (`LimitFinder#drawRectangle`). */
+const USYMBOL_INK_SHAPE: Readonly<Record<string, NamespaceGeo['inkShape']>> = {
+  node: 'node',
+  database: 'database',
+  rectangle: 'rect',
+  agent: 'rect',
+  archimate: 'rect',
+};
+
+/** `USymbols.FOLDER`/`USymbols.PACKAGE` are both `USymbolFolder` instances,
+ *  i.e. the shapes `renderNamespaceFolder` still draws -- so they keep the
+ *  pre-cdd-T12 `theme.packageStyle`/`theme.strictUml` dispatch. */
+const FOLDER_FAMILY_KEYWORDS: ReadonlySet<string> = new Set(['package', 'folder']);
 
 // Edge geometry moved to a sibling module (line cap); re-exported.
 export { buildEdgeGeos } from './class-edge-geo.js';
@@ -341,8 +424,7 @@ export function degenerateSingleClassifier(
     rows: measured.rows,
     ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
     ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-    ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-    ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+    ...badgeFields(measured),
     ...inkBodyFields(measured),
     ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
     ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
@@ -378,9 +460,29 @@ export function degenerateSingleClassifier(
     height: measured.height + DEGENERATE_NEAR_MARGIN * 2,
   };
   const totalDims = applyClassDocumentMargin(rawDims);
+  // CDD B7FU-R2 item (e): a body whose DRAWN embedded `{{ }}` diagram
+  // overflows its own (42,42)-fallback-sized row reservation still pushes
+  // the canvas out to its real footprint -- `SvgGraphics#svgImageUnsecure`'s
+  // own `ensureVisible` calls (`klimt/drawing/svg/SvgGraphics.java:987-999`)
+  // track a drawn embed's REAL absolute corner directly, `Math.floor(v)+1`,
+  // independent of the `CucaDiagram`-margin recipe `applyClassDocumentMargin`
+  // folds into `totalDims` above -- so the embed's contribution is a MAX
+  // against the box-driven total, never routed through that recipe a
+  // second time (jar-verified `zikabo-17-gugi332`/`gadufu-56-votu808`: the
+  // embed's own absolute corner, truncated this way, lands EXACTLY on the
+  // jar's real canvas dims). `drawnEnhancedBodyEmbeds` returns `[]` (this
+  // max is a no-op, byte-identical) for every classifier with no enhanced
+  // body / no drawn embed -- the overwhelming majority of degenerate
+  // diagrams. `rawWidth`/`rawHeight` (chrome-centering inputs, G2 N48's own
+  // doc comment) stay the box-only value: no fixture in this corpus
+  // combines a title/chrome with an overflowing embed, so extending them
+  // the same way would be unverified.
+  const embeds = drawnEnhancedBodyEmbeds(geo);
+  const embedRight = Math.max(0, ...embeds.map((e) => e.x + e.width));
+  const embedBottom = Math.max(0, ...embeds.map((e) => e.y + e.height));
   return {
-    totalWidth: totalDims.width,
-    totalHeight: totalDims.height,
+    totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1),
+    totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1),
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
     leaves: [geo],

@@ -27,15 +27,17 @@
  */
 
 import { parseColor } from './paint.js';
+import type { Paint } from './paint.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import {
   matchElementColorKey,
   matchElementFontSizeKey,
+  matchElementLineThicknessKey,
   matchElementShadowingKey,
   matchStereotypeSpotColorKey,
   parseShadowingValue,
 } from './skinparam-element-buckets.js';
-import { resolveColor } from './skinparam-key-normalize.js';
+import { isColorSpec, resolveColor } from './skinparam-key-normalize.js';
 import type { KeyHandler } from './skinparam-key-handlers-shared.js';
 import { KEY_HANDLERS_A } from './skinparam-key-handlers-table-a.js';
 import { KEY_HANDLERS_B } from './skinparam-key-handlers-table-b.js';
@@ -99,6 +101,21 @@ function tryElementShadowingBucket(acc: SkinparamAccumulator, key: string, value
 }
 
 /**
+ * cdd-B7FU-R3: `<sname>BorderThickness` -> per-element bucket, numeric.
+ * Mirrors {@link tryElementFontSizeBucket}'s exact shape (a plain finite
+ * double, no boolean-word alias unlike shadowing's `parseShadowingValue`).
+ */
+function tryElementLineThicknessBucket(acc: SkinparamAccumulator, key: string, value: string): boolean {
+  const thicknessElem = matchElementLineThicknessKey(key);
+  if (thicknessElem === undefined) return false;
+  const thickness = Number(value);
+  if (!Number.isFinite(thickness)) return false;
+  const bucket = (acc.elements[thicknessElem.sname] ??= {});
+  bucket.lineThickness = thickness;
+  return true;
+}
+
+/**
  * Fallback for a normalized key that matched no {@link KEY_HANDLER_MAP}
  * entry: tries each generic per-element bucket matcher in turn. Mirrors the
  * original switch `default` arm's exact fallthrough shape — a font-size
@@ -109,7 +126,36 @@ function applyElementBucketFallback(acc: SkinparamAccumulator, key: string, valu
   if (tryElementColorBucket(acc, key, value)) return;
   if (tryElementFontSizeBucket(acc, key, value)) return;
   if (tryElementShadowingBucket(acc, key, value)) return;
+  if (tryElementLineThicknessBucket(acc, key, value)) return;
   acc.unknown.push(key);
+}
+
+/**
+ * CDD T18/D8: the `color` argument a dedicated `class*Color`/`icon*Color`
+ * handler stores, WITHOUT the gradient flattening `resolveColor` applies.
+ *
+ * Upstream has exactly one colour parser for every caller --
+ * `HColorSet#parseColor` (`klimt/color/HColorSet.java:78-119`), whose
+ * separator scan (java:107-116) returns `HColors.gradient(col0, col1, c)`
+ * for `color1<sep>color2`. This port's dedicated-key path instead took
+ * `skinparam-key-normalize.ts#resolveColor`, a deliberately-simpler
+ * flatten-to-solid helper whose `-`-only regex leaves `\`/`/`/`|`
+ * gradients as raw unsplit text in `fill=` (`fill="#yellow\FFFFFF"`,
+ * jar-verified `taceve-49-mezi408`).
+ *
+ * The `getColorOrWhite` guard is preserved unchanged: a token that is not a
+ * colour at all still becomes `resolveColor`'s WHITE and never reaches an
+ * SVG attribute verbatim (`HColorSet.java:58-63`; the CodeQL
+ * js/html-constructed-from-input sink `resolveColor`'s own doc comment
+ * names). And when `parseColor` finds no gradient, this returns EXACTLY
+ * `resolveColor(value)` -- so every non-gradient key is byte-identical to
+ * the pre-T18 behaviour.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:78-119
+ */
+export function resolveColorPaint(value: string): Paint {
+  if (!isColorSpec(value)) return resolveColor(value);
+  const parsed = parseColor(value);
+  return typeof parsed === 'string' ? resolveColor(value) : parsed;
 }
 
 /**
@@ -120,7 +166,7 @@ function applyElementBucketFallback(acc: SkinparamAccumulator, key: string, valu
 export function applyNormalKey(acc: SkinparamAccumulator, key: string, value: string): void {
   const handler = KEY_HANDLER_MAP.get(key);
   if (handler !== undefined) {
-    handler(acc, value, resolveColor(value));
+    handler(acc, value, resolveColor(value), resolveColorPaint(value));
     return;
   }
   applyElementBucketFallback(acc, key, value);

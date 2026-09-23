@@ -97,7 +97,14 @@ describe('class — annotation commands land in ast.annotations', () => {
     const bodyLines = source.split('\n').filter((l) => !/^@(start|end)uml/i.test(l.trim()));
     const ast = parseClassSource(bodyLines.join('\n'));
     expect(isEmpty(ast.annotations!)).toBe(true);
-    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['cl2', 'p1', 'p1.cl1']);
+    // cdd-T3 (A1 SB4): `p1` is a declared PACKAGE, and `p1 --> cl2`'s
+    // endpoint therefore resolves to the existing group quark -- upstream
+    // reads `quark.getData()` and never reaches `reallyCreateLeaf`
+    // (`classdiagram/command/CommandLinkClass.java:326-334`), so no leaf row
+    // (and no `cpt1` tick) exists for it. This port used to mint a phantom
+    // `Classifier` here; `class-ensure-classifier.ts#existingGroupAlias` no
+    // longer does.
+    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['cl2', 'p1.cl1']);
     expect(ast.relationships).toHaveLength(1);
   });
 });

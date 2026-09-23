@@ -26,13 +26,17 @@ import { computeClassTagCascadeGenerations } from '../../../src/core/style-casca
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
+import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
+import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
-import { assembleSvg } from '../../../src/index.js';
+import { assembleSvg, renderSync } from '../../../src/index.js';
+import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
+import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { applyClassDocumentMargin } from '../../../src/diagrams/class/layout-ink-extent.js';
 
 interface ResolvedThemeAndStyles {
@@ -106,7 +110,17 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
  * per-element fidelity. Stripping `.pages` here (test-harness-only) routes
  * `layoutClass` through its EXISTING single-page branch -- no new
  * production code, matching what the doc comment already promised. */
-export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+/** cdd-T6: {@link renderFixtureClass}'s parse+theme+layout half, exposed so
+ *  a unit test can assert on the GEOMETRY (`EdgeGeo.visibilityIcon`,
+ *  `.quantifierLines`, `.noteBox`, `.constraint` — fields the SVG does not
+ *  yet carry) through the exact same `<style>`/skinparam resolution the
+ *  conformance harness renders with. Extracted verbatim; `renderFixtureClass`
+ *  now calls it, so the two cannot drift. */
+export function layoutFixtureClass(
+  markup: string,
+  measurer: StringMeasurer,
+  options?: PreprocessOptions,
+): { geo: ClassGeometry; theme: Theme; styleMap: StyleMap; annotations: ClassDiagramAST['annotations'] } {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -118,6 +132,23 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   const fullAst = astOrThrow(parseClass(block), 'class');
   // G2 N28: page-1-only view -- see this function's own doc comment.
   const { pages: _pages, ...firstPageAst } = fullAst;
+  const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
+  const geo = { ...layoutClass(firstPageAst, theme, measurer), measurer, ...spritesField };
+  return { geo, theme, styleMap, annotations: firstPageAst.annotations };
+}
+
+export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+  // cdd-close-b7: mirrors `index.ts#prepareBlock` exactly -- production
+  // registers the recursive nested-diagram renderer (T27/B7FU-R2) and seeds
+  // every `<linearGradient>`/`<filter>` id from the diagram source
+  // (B7FU-R4, `SvgGraphics.java:160-162`) before assembling. Without both,
+  // this harness measured 11 survey-conformant fixtures as census-diverged
+  // on the close-b7 tree: the instrument, not the port.
+  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
+  const seed = seedOf(markup);
+  const { geo, theme, styleMap, annotations } = layoutFixtureClass(markup, measurer, options);
+  const blocks = buildBlockUmls(markup, options);
+  const preprocessed = blocks[0]!.ok ? blocks[0]!.preprocessed : undefined!;
   // SI14 T3/T4: mirrors `class/index.ts#classPlugin.layoutSync`'s own
   // post-layout `measurer`/`sprites` passthrough exactly -- `layoutClass`
   // itself does not set either field (T3's `SyncPlugin.render(geo, theme)`
@@ -126,22 +157,23 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // usecase/actor draw path silently falls back to the pre-T4 renderer for
   // EVERY fixture this harness runs, never exercising the code this task
   // adds. Reproduces production's exact behavior, not new test-only logic.
-  const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
-  const geo = { ...layoutClass(firstPageAst, theme, measurer), measurer, ...spritesField };
   const fragment = renderClass(geo, theme);
 
-  const annotations = firstPageAst.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
+  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
-  const chromed = applyChrome(fragment, annotations, styles, measurer);
+  // cdd-T28: mirrors `index.ts#applyAnnotationChrome`'s `spritesOf(ast)`
+  // -- chrome text is creole now, so a `<$sprite>` in a title/legend has to
+  // resolve against the diagram's own registry here too, or this harness
+  // measures chrome differently from production.
+  const chromed = applyChrome(fragment, annotations, styles, measurer, geo.sprites);
   // G2 N46: mirrors `index.ts#applyAnnotationChrome`'s class-specific
   // margin re-application exactly -- see that function's own doc comment
   // and `RenderFragment.preChromeWidth`'s doc comment for the jar-verified
   // mechanism. `renderClass` always sets `preChromeWidth` (non-degenerate
   // single-page path), so this always re-margins when annotations are
   // present.
-  if (fragment.preChromeWidth === undefined) return assembleSvg(chromed);
+  if (fragment.preChromeWidth === undefined) return assembleSvg(chromed, seed);
   const margined = applyClassDocumentMargin({ width: chromed.width, height: chromed.height });
-  return assembleSvg({ ...chromed, width: margined.width, height: margined.height });
+  return assembleSvg({ ...chromed, width: margined.width, height: margined.height }, seed);
 }

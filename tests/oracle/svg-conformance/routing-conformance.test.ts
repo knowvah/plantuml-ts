@@ -665,10 +665,49 @@ describe('routing conformance — jar-error classification', () => {
     // embedded-diagram gaps 3, a class link fallback 1, a Tim function
     // gap 1). The same batch retired 43 activity + 1 sequence pins of the
     // existing tree (`[FIXED]`), already folded into 3468/943 above.
-    expect(pinnedAgree.length).toBe(4157);
+    //
+    // 4157 -> 4276 / 5309 -> 5428 at class-divergence-drive/close-b1
+    // (2026-09-21): 119 `goldens:svg-class/<slug>` rows appended when the
+    // class ratchet pinned 119 fixtures; each is the clone of its
+    // byte-identical dot-cache twin (all `agree`, CLASS/CLASS), exactly how
+    // every prior svg-class golden row was pinned. Misroutes and jar errors
+    // unchanged. Derivation: 4276 + 1053 + 99 = 5428.
+    //
+    // 4276 -> 4300 / 5428 -> 5452 at class-divergence-drive/close-b2
+    // (2026-09-21): 24 more svg-class golden rows, same procedure.
+    // Derivation: 4300 + 1053 + 99 = 5452.
+    //
+    // 4300 -> 4305 / 5452 -> 5457 at class-divergence-drive/close-b3
+    // (2026-09-22): 5 more svg-class golden rows, same procedure.
+    // Derivation: 4305 + 1053 + 99 = 5457.
+    //
+    // 4305 -> 4313 / 5457 -> 5465 at class-divergence-drive/close-b4
+    // (2026-09-22): 8 more svg-class golden rows, same procedure.
+    // Derivation: 4313 + 1053 + 99 = 5465.
+    //
+    // 4313 -> 4336 / 5465 -> 5488 at class-divergence-drive/close-b6
+    // (2026-09-22): 23 more svg-class golden rows, same procedure.
+    // Derivation: 4336 + 1053 + 99 = 5488.
+    //
+    // 4336 -> 4366 / 5488 -> 5518 at class-divergence-drive/close-b7
+    // (2026-09-23): 30 more svg-class golden rows, same procedure.
+    // Derivation: 4366 + 1053 + 99 = 5518.
+    //
+    // 4366 -> 4373 / 5518 -> 5525 at class-divergence-drive/close-b8
+    // (2026-09-23): 7 more svg-class golden rows, same procedure.
+    // Derivation: 4373 + 1053 + 99 = 5525.
+    //
+    // 4373 -> 4391 / 5525 -> 5543 at class-divergence-drive/close-b9
+    // (2026-09-23): 18 more svg-class golden rows, same procedure.
+    // Derivation: 4391 + 1053 + 99 = 5543.
+    //
+    // 4391 -> 4402 / 5543 -> 5554 at class-divergence-drive/close-b10
+    // (2026-09-23): 11 more svg-class golden rows, same procedure.
+    // Derivation: 4402 + 1053 + 99 = 5554.
+    expect(pinnedAgree.length).toBe(4402);
     expect(pinnedMisroutes.length).toBe(1053);
     expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5309);
+    expect(manifest.fixtures.length).toBe(5554);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

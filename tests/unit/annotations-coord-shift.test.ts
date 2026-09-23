@@ -105,3 +105,29 @@ describe('shiftFragmentBody — negative and fractional shift amounts', () => {
     );
   });
 });
+
+/**
+ * cdd-B7FU-R1 — an inline `<defs>` element's own attributes are in the def's
+ * units, never document coordinates (`SvgGraphics.java:377-383` emits a
+ * gradient vector in objectBoundingBox percentages; `:780-783` emits the
+ * `feFlood` filter's region in filter units), so the shift must step over
+ * them. Both cases were observed live before the fix: a `<filter y="0">`
+ * displaced by the chrome offset (`ziripa-77-zizo842`), and `x1="NaN"` from
+ * `Number('0%')` on any class diagram combining a gradient with chrome.
+ */
+describe('shiftFragmentBody — inline defs are not document coordinates', () => {
+  it('leaves a `<linearGradient>` vector alone (no NaN from a percentage)', () => {
+    const gradient =
+      '<linearGradient id="gab" x1="0%" y1="50%" x2="100%" y2="50%">' +
+      '<stop offset="0%" stop-color="#F00"/></linearGradient>';
+    expect(shiftFragmentBody(`${gradient}<rect x="1" y="2"/>`, 10, 20)).toBe(`${gradient}<rect x="11" y="22"/>`);
+  });
+
+  it('leaves a `feFlood` filter region alone while still shifting its user', () => {
+    const filter =
+      '<filter id="bab" x="0" y="0" width="1" height="1">' + '<feFlood flood-color="#FF0000" result="flood"/></filter>';
+    expect(shiftFragmentBody(`${filter}<text x="1" y="2" filter="url(#bab)">a</text>`, 10, 20)).toBe(
+      `${filter}<text x="11" y="22" filter="url(#bab)">a</text>`,
+    );
+  });
+});

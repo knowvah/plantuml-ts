@@ -13,6 +13,7 @@ import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Classifier } from '../../../src/diagrams/class/ast.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
+import { parseClass } from './parse-helper.js';
 
 const measurer = new WidthTableMeasurer();
 const SUPPRESS = { fields: false, methods: false };
@@ -38,5 +39,41 @@ describe('R2h — association diamond fixed 24x24 (EntityImageAssociation)', () 
     const m = measureClassifier(association('diamond'), defaultTheme, measurer, SUPPRESS);
     expect(m.rows).toEqual([]);
     expect(m.dividerYs).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T34 (E14, luzive-62-zote562): `<> name` refuses a name collision
+// ---------------------------------------------------------------------------
+
+describe('`<> name` name collision (CommandDiamondAssociation.java:73-84)', () => {
+  it('a fresh name creates the diamond, kind === association, no error (cukaze-78-zija070)', () => {
+    const ast = parseClass({
+      lines: ['class Station', 'class StationCrossing', '<> diamond', 'StationCrossing . diamond'],
+      type: 'class',
+    });
+    const diamond = ast.classifiers.find((c) => c.id === 'diamond');
+    expect(diamond?.kind).toBe('association');
+    expect(ast.errors).toBeUndefined();
+  });
+
+  it('colliding with an already-declared classifier refuses, not silently overwrites (luzive-62-zote562)', () => {
+    const ast = parseClass({
+      lines: ['class Station', 'class StationCrossing', '<> StationCrossing'],
+      type: 'class',
+    });
+    expect(ast.errors).toEqual(['Already existing : StationCrossing']);
+    // The original classifier's kind is untouched -- no silent corruption.
+    const stationCrossing = ast.classifiers.find((c) => c.id === 'StationCrossing');
+    expect(stationCrossing?.kind).toBe('class');
+  });
+
+  it('a diamond can still be named after a DIFFERENT, not-yet-declared identifier', () => {
+    const ast = parseClass({
+      lines: ['class Station', 'class StationCrossing', '<> junction'],
+      type: 'class',
+    });
+    expect(ast.errors).toBeUndefined();
+    expect(ast.classifiers.find((c) => c.id === 'junction')?.kind).toBe('association');
   });
 });

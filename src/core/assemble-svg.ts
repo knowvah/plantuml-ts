@@ -40,6 +40,8 @@
  */
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
+import { applySeededDefIds } from './svg-defs.js';
+import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { shortenColor } from './svg-format.js';
@@ -491,10 +493,66 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
  * defs shell (`TextBlockExporter.java:292-294`). Everything else falls
  * through to the generic `svgRoot` (`core/svg.ts`).
  */
-export function assembleSvg(fragment: AssembledSvg): string {
+export function assembleSvg(fragment: AssembledSvg, seed?: bigint): string {
+  return withSeededDefIds(assembleDocument(fragment), seed);
+}
+
+/** The pre-seed assembly, unchanged -- split out so {@link assembleSvg}'s own
+ *  body stays one expression per branch. */
+function assembleDocument(fragment: AssembledSvg): string {
   if ('completeSvg' in fragment) return fragment.completeSvg;
   if (fragment.diagramType !== undefined) {
     return assembleDocumentShell(finalizeShellFragment(fragment), fragment.diagramType);
   }
   return svgRoot(fragment.width, fragment.height, [fragment.body], fragment.background, fragment.extraDefs);
+}
+
+/**
+ * cdd-B7FU-R4: renames every `<linearGradient>`/`<filter>` id to the one
+ * upstream's single per-diagram `SvgGraphics` would have minted
+ * (`SvgGraphics.java:160-162,285-287,393,766,1076` -- see
+ * `svg-defs.ts#applySeededDefIds`).
+ *
+ * Here, and not in the two assemblers below it, for one reason: this is
+ * already D2's single central assembly point, and it is the ONLY point that
+ * also sees the `completeSvg` escape hatch. A document assembled with no
+ * seed (a direct `assembleSvg(fragment)` call, every test harness that
+ * predates this parameter) keeps the content-hash ids it has always had --
+ * the rename is opt-in, so nothing moves until a caller supplies a seed.
+ */
+function withSeededDefIds(document: string, seed: bigint | undefined): string {
+  return seed === undefined ? document : applySeededDefIds(document, seed);
+}
+
+/**
+ * The diagram seed `assembleSvg`'s `seed` parameter wants, from the block's
+ * own `UmlSource` — upstream's `UmlSource#seed()` (`UmlSource.java:222-234`:
+ * `h = 31*h + line.hashCode(); h = 31*h + '\n'`, over `this.source`).
+ *
+ * Mirrors `diagrams/description/index.ts:38-47#reconstructSourceForSeed`,
+ * the one place in this port that already does this, INCLUDING its fallback:
+ * prefer the raw block lines (`@start`/`@end` and directives included — the
+ * shape upstream hashes), and wrap the directive-stripped interior in
+ * `@startuml`/`@enduml` for a hand-built source that carries none.
+ *
+ * KNOWN GAP, measured, not assumed: upstream hashes the PREPROCESSED line
+ * list, not the raw one — `PSystemBuilder#createPSystem(pathSystem, data,
+ * rawSource, …)` (`PSystemBuilder.java:232-240`) passes `data` as `source`
+ * to `UmlSource.createWithRaw` (`UmlSource.java:133-138`), which is what
+ * `seed()` walks, while `rawSource` is kept beside it untouched. The two
+ * agree for every block with no preprocessor directive, which is 722 of the
+ * 723 class-corpus fixtures; `popesa-39-sobe866` (`!define MyBlue #6192d1`)
+ * is the one that differs, and hashing its post-substitution, `!define`-free
+ * lines reproduces the jar's `30vatrr2be6m` exactly. Closing it needs the
+ * preprocessor to keep that list (this port's `preprocessed.lines` is not it
+ * — it also hoists `skinparam`/`<style>` blocks out), which is a
+ * `BlockUmlBuilder` change, filed rather than guessed at here.
+ */
+export function seedOfUmlSource(umlSource: {
+  readonly lines: readonly string[];
+  readonly rawSourceLines?: readonly string[] | undefined;
+}): bigint {
+  const raw = umlSource.rawSourceLines;
+  if (raw !== undefined) return seedOf(raw.join('\n'));
+  return seedOf(['@startuml', ...umlSource.lines, '@enduml'].join('\n'));
 }

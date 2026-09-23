@@ -8,8 +8,10 @@
 import type { ClassifierGeo } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { text, image } from '../../core/svg.js';
-import {} from '../../core/klimt/color/HColorSet.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { text, image, decorationLines } from '../../core/svg.js';
+import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
@@ -17,13 +19,14 @@ import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-
 import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-note.js';
-import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
+import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
 import { resolveElementFont, resolveElementHeaderFont } from './renderer-classifier-colors.js';
+import { parseDeclarationColors } from './class-declaration-extractors.js';
 
 /**
  * Every classifier row (header AND member) shares ONE plain-baseline
@@ -67,18 +70,59 @@ import { resolveElementFont, resolveElementHeaderFont } from './renderer-classif
  * the icon's own `descent` term differed by `(18-14)/4.5 == 1.1111` against
  * `xabije-20-xusi569`'s `AttributeFontSize 18`).
  */
-export function attributeFontSize(theme: Theme): number {
-  return theme.colors.graph.classAttributeFontSize ?? theme.fontSize;
+export function attributeFontSize(theme: ScaledTheme): number {
+  // cdd-B8FU: the two override tiers are UNSCALED skinparam/`<style>`
+  // values (unlike `theme.fontSize`, already scaled by T29's
+  // `scaleClassTheme`) -- materialized the same way `edgeStrokeWidth`'s
+  // fallback tiers are (`renderer-edge.ts#resolveEdgeStrokeWidth`, T29
+  // round 2), so the icon-centering math below stays consistent whichever
+  // tier wins.
+  const override = theme.colors.graph.classCascadeFontSize ?? theme.colors.graph.classAttributeFontSize;
+  return override !== undefined ? override * theme.scaleK : theme.fontSize;
 }
 
-export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: Theme): string {
+/**
+ * CDD T20 (M6) / T6FU: the visibility icon's origin Y for a member whose
+ * text may be WRAPPED over several physical lines.
+ * cdd-B7FU-R3: `attributeFontSize` also reads `classCascadeFontSize` (the
+ * `<style> class { FontSize N } }` cascade, `style-cascade-class-font.ts`)
+ * ahead of the flat `classAttributeFontSize` skinparam -- the SAME "cascade
+ * before flat skinparam" tier `class-layout-fonts.ts#resolveAttributeFont`
+ * now carries, mirroring this function's own doc comment's "EXACTLY" claim
+ * (`ropera-76-jico895`'s `attr1`/`method1()` visibility icons were 1.111px
+ * off-center before this without it).
+ *
+ * `PlacementStrategyVisibility#getPositions` (java:56-69) centres the icon
+ * block on `maxHeight12 = max(iconHeight, textBlockHeight)`, where the text
+ * block is the member's WHOLE wrapped TextBlock -- not its first line. The
+ * ported form is a closed-form shift of the row's first-line baseline by
+ * `(blockHeight - fontSize) / 2`, leaving {@link visibilityIconOriginY}
+ * (whose own `rowHeight` param couples the single-line ascent/descent basis
+ * to its `maxHeight12` term, so substituting the block total there moves the
+ * icon the WRONG way) untouched -- see `.agent-notes/cdd-T20.md`'s M6
+ * derivation. Zero change for a non-wrapped row (`visibilityBlockHeight`
+ * is absent, and `class-member-rows.ts#iconRowFields` omits it whenever the
+ * block equals the row's own height).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-69
+ */
+export function wrappedVisibilityIconOriginY(
+  geo: ClassifierGeo,
+  row: ClassifierGeo['rows'][number],
+  theme: ScaledTheme,
+): number {
+  const fontSize = attributeFontSize(theme);
+  const blockHeight = row.visibilityBlockHeight ?? fontSize;
+  return visibilityIconOriginY(geo.y + row.y + (blockHeight - fontSize) / 2, fontSize, theme);
+}
+
+export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number], theme: ScaledTheme): string {
   const icon =
     row.visibilityIcon !== undefined
       ? renderVisibilityIcon(
           row.visibilityIcon,
           row.visibilityIsField === true,
           geo.x + ROW_TEXT_LEFT_MARGIN,
-          visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme),
+          wrappedVisibilityIconOriginY(geo, row, theme),
           undefined,
           theme,
         )
@@ -93,10 +137,76 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
  * string; see `renderer-url.ts`'s "icon `<g>` forces a link-flush boundary"
  * doc comment for why they need independent `<a>` runs.
  */
+/** The terminal `classCascade(Header)FontColor ?? classCascadeFontColor ??
+ *  '#000000'` tier, shared verbatim by both the object/map/json and class
+ *  branches below -- factored out so neither branch re-states it (keeps
+ *  both, and their caller, under the per-function CCN cap). */
+function terminalCascadeFontColor(theme: Theme, isHeader: boolean): string {
+  return (
+    (isHeader
+      ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
+      : theme.colors.graph.classCascadeFontColor) ?? '#000000'
+  );
+}
+
+/** G3/O4: the object/map/json branch of {@link classifierCascadeFontColor}
+ *  -- own `theme.colors.elements[kind].font` bucket FIRST (`<style>
+ *  objectDiagram { object { FontColor ... } } }`/bare `object { FontColor
+ *  ... }`, the OBJECT-specific override -- `EntityImageObject`/`Map`/
+ *  `Json#getStyleSignature` has NO `classDiagram`/`class` token, so a
+ *  class-only `.tagname` cascade must never apply), `<style> <sname> {
+ *  header { FontColor } } }` winning over the bare bucket's own FontColor
+ *  ONLY for the NAME row (`isHeader && !isStereoLabelRow` --
+ *  `resolveElementHeaderFont`'s own doc comment; the stereo label row's
+ *  FontConfiguration is independent upstream, `EntityImageObject.java`'s
+ *  own ctor). Falls through to {@link terminalCascadeFontColor} ONLY as a
+ *  root/element-level default -- see {@link classifierCascadeFontColor}'s
+ *  own doc comment for the shared-prefix caveat this preserves. */
+function objectFamilyCascadeFontColor(
+  geo: ClassifierGeo,
+  theme: Theme,
+  isHeader: boolean,
+  isStereoLabelRow: boolean,
+): string {
+  return (
+    (isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
+    resolveElementFont(theme, geo.kind) ??
+    terminalCascadeFontColor(theme, isHeader)
+  );
+}
+
+/**
+ * The cascade/default fallback chain {@link renderRowText} falls to when
+ * the classifier has no inline `#text:color` override -- split out purely
+ * to keep that already-near-cap function's own CCN from growing (cdd-T19,
+ * A3 M1 text half added one more tier above this one). Pure move of the
+ * PRE-EXISTING ternary; no behavior change.
+ */
+function classifierCascadeFontColor(
+  geo: ClassifierGeo,
+  theme: Theme,
+  isHeader: boolean,
+  isStereoLabelRow: boolean,
+): string {
+  if (geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json') {
+    return objectFamilyCascadeFontColor(geo, theme, isHeader, isStereoLabelRow);
+  }
+  // G2 N37: the `.tagname` sub-selector cascade wins over the plain
+  // ancestor cascade for BOTH the name row AND member rows uniformly --
+  // but NEVER a stereotype label row (`isStereoLabelRow`'s own doc
+  // comment on {@link renderRowText}'s own parameter).
+  return (
+    (isStereoLabelRow
+      ? undefined
+      : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
+    terminalCascadeFontColor(theme, isHeader)
+  );
+}
+
 export function renderRowText(
   geo: ClassifierGeo,
   row: ClassifierGeo['rows'][number],
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N36: true for the header/name row(s) only (`buildHeaderPrimitive`'s
   // own call) -- selects the WIDER `classCascadeHeaderFontColor` signature
   // (which additionally allows a nested `... { header { FontColor } } }`
@@ -139,26 +249,30 @@ export function renderRowText(
   // object text through this SAME shared fallback is a pre-existing,
   // un-narrowed edge case (no fixture in the corpus isolates it), not
   // introduced by this iteration.
-  const fontColor =
-    geo.kind === 'object' || geo.kind === 'map' || geo.kind === 'json'
-      ? // G3/O4: `<style> <sname> { header { FontColor } } }` wins over the
-        // bare bucket's own FontColor, but ONLY for the NAME row (`isHeader
-        // && !isStereoLabelRow` -- `resolveElementHeaderFont`'s own doc
-        // comment; the stereo label row's FontConfiguration is independent
-        // upstream, `EntityImageObject.java`'s own ctor).
-        ((isHeader && !isStereoLabelRow ? resolveElementHeaderFont(theme, geo.kind) : undefined) ??
-        resolveElementFont(theme, geo.kind) ??
-        (isHeader
-          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
-          : theme.colors.graph.classCascadeFontColor) ??
-        '#000000')
-      : ((isStereoLabelRow
-          ? undefined
-          : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
-        (isHeader
-          ? (theme.colors.graph.classCascadeHeaderFontColor ?? theme.colors.graph.classCascadeFontColor)
-          : theme.colors.graph.classCascadeFontColor) ??
-        '#000000');
+  //
+  // cdd-T19 (A3 M1 text half): a classifier's OWN inline `#text:color`
+  // decoration (`class-declaration-extractors.ts#extractDecorations`'s
+  // `text?` field, T18) wins over EVERYTHING below -- `Style.java:206-208
+  // eventuallyOverride(Colors)` puts the inline `ColorType.TEXT` value into
+  // `PName.FontColor` at `Integer.MAX_VALUE` priority (`:191-192`), and
+  // `getFontConfiguration(set, colors)` (`:259-263`) checks
+  // `colors.getColor(ColorType.TEXT)` BEFORE `value(PName.FontColor)` at
+  // all -- i.e. the classifier's own override is checked first, full stop,
+  // not merged into the cascade. `MethodsOrFieldsArea.java:240`'s
+  // `FontConfiguration.create(skinParam, style, leaf.getColors())` and
+  // `EntityImageClassHeader.java:99`'s identical `entity.getColors()` call
+  // both pass the SAME per-classifier `Colors`, so the tier applies
+  // uniformly to the header AND every member row -- no `isHeader` branch
+  // needed. `geo.color` is the raw, un-decomposed `COLOR [LINECOLOR]`
+  // capture `renderer-classifier-colors.ts#classifierFill`'s
+  // `resolveBareOrBackColor(geo.color)` already reads for the BACK half;
+  // `parseDeclarationColors` re-parses the SAME string for its `text:`
+  // part (`Colors.java:95-124`, T18's extractor), then resolved to hex
+  // exactly like every other named-colour tier this file's own module doc
+  // comment documents (`resolveColorToSvgHex`, the M5 precedent).
+  const inlineTextColor = parseDeclarationColors(geo.color).text;
+  const resolvedInlineTextColor = inlineTextColor !== undefined ? resolveColorToSvgHex(inlineTextColor) : undefined;
+  const fontColor = resolvedInlineTextColor ?? classifierCascadeFontColor(geo, theme, isHeader, isStereoLabelRow);
   if (row.atoms !== undefined) {
     return renderRowAtoms(row.atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
@@ -200,20 +314,6 @@ export function renderRowText(
   });
 }
 
-/** `FontStyle` set -> the SVG `text-decoration` attribute value -- mirrors
- *  `core/klimt/drawing/svg/driver-text-svg.ts#textDecorationOf` exactly
- *  (same three flags, same CSS keywords, same join order); duplicated
- *  rather than imported because that function is `DriverTextSvg`'s own
- *  private helper and class's renderer has no `UDriver`/`UGraphic` seam to
- *  hang a shared import off of (this file's own module doc comment). */
-export function memberAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
 /**
  * G2 N22: draws a member row's per-atom creole content -- one `<text>` per
  * styled text run, one `<image>` per resolved img/sprite atom, left to
@@ -242,7 +342,7 @@ export function renderRowAtoms(
   atoms: readonly MemberRenderAtom[],
   startX: number,
   y: number,
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N36: the SAME `classCascade(Header)FontColor ?? '#000000'` fallback
   // `renderRowText` computes for its plain-text path -- an atom's OWN
   // creole-resolved color (`atom.font.color`, a `<color>text</color>` run
@@ -260,7 +360,12 @@ export function renderRowAtoms(
   let out = '';
   for (const atom of atoms) {
     if (atom.kind === 'text') {
-      const decoration = memberAtomDecoration(atom.font.styles);
+      // cdd-B7FU-R1: one call for every font-configuration-derived attribute
+      // `DriverTextSvg#draw` computes (java:93-173) -- weight (two-tier, so a
+      // `skinparam classFontStyle bold` face survives `<plain>`), style,
+      // `text-decoration`, the `<back:>` filter and the custom-coloured
+      // underline/strike lines.
+      const deco = textRenderDecorations(atom.font, getFont(atom.font).size);
       // G2 N57 item 38: `atom.renderText`/`renderWidth` are set ONLY for a
       // whitespace-only run (`DriverTextSvg.java`'s NBSP-substitution
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
@@ -276,14 +381,23 @@ export function renderRowAtoms(
         fill: atom.font.color ?? fallbackFontColor,
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,
-        ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
-        ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
-        ...(decoration !== undefined ? { textDecoration: decoration } : {}),
+        ...(deco.fontWeight !== null ? { fontWeight: deco.fontWeight as '700' } : {}),
+        ...(deco.fontStyle !== null ? { fontStyle: 'italic' as const } : {}),
+        ...(deco.textDecoration !== null ? { textDecoration: deco.textDecoration } : {}),
+        ...(deco.backColor !== null ? { textBackColor: deco.backColor } : {}),
       });
       // G2 N40: a `[[url]]` creole command's captured-label run wraps in
       // its OWN `<a href>` -- `class-member-creole.ts#MemberRenderAtom`'s
       // `url` field doc comment.
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
+      // Upstream java:180: the extra lines are drawn AFTER the `<text>`.
+      out += decorationLines(
+        deco.extraLines,
+        x,
+        textAtomRowY(y, atom),
+        atom.renderWidth ?? atom.width,
+        getFont(atom.font).size,
+      );
       x += atom.width;
       continue;
     }
@@ -295,7 +409,7 @@ export function renderRowAtoms(
       // patterns gated `if (mode == CreoleMode.FULL)`). Handled anyway so the
       // atom union stays exhaustive here, using this file's own
       // line-bottom-minus-height convention rather than the note renderer's.
-      out += renderBulletAtom(atom, x, y + theme.fontSize / 4.5 - theme.fontSize, theme.fontSize);
+      out += renderBulletAtom(atom, x, y + theme.fontSize / 4.5 - theme.fontSize, theme.fontSize, theme.scaleK);
       x += atom.width;
       continue;
     }

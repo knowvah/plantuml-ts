@@ -9,6 +9,7 @@
  * version.
  */
 
+import type { Paint } from './paint.js';
 import type { SkinparamAccumulator } from './skinparam-accumulator.js';
 import { resolveColorToSvgHex, parseSimpleColor } from './klimt/color/HColorSet.js';
 import { isColorSpec } from './skinparam-key-normalize.js';
@@ -38,7 +39,20 @@ export function arrowFontColorValue(value: string, color: string): string | unde
   return resolveColorToSvgHex(color);
 }
 
-export type KeyHandler = (acc: SkinparamAccumulator, value: string, color: string) => void;
+/**
+ * One `case` arm of upstream `SkinParam.java`'s key switch.
+ *
+ * @param value the RAW skinparam token, exactly as written
+ * @param color `skinparam-key-normalize.ts#resolveColor(value)` --
+ *   flattened to a single solid colour, WHITE when unparseable
+ *   (`HColorSet#getColorOrWhite`, java:58-63)
+ * @param paint CDD T18/D8: `resolveColorPaint(value)` -- the SAME value as
+ *   `color` for every non-gradient token, a {@link Paint} `Gradient` for a
+ *   `color1<sep>color2` one (`HColorSet.java:107-116`). Only the handlers
+ *   whose accumulator field is `Paint`-typed read it; every other arm keeps
+ *   `color` and is byte-identical to the pre-T18 switch.
+ */
+export type KeyHandler = (acc: SkinparamAccumulator, value: string, color: string, paint: Paint) => void;
 
 // ---------------------------------------------------------------------------
 // Shared numeric/string parse helpers — each dedupes an identical parse

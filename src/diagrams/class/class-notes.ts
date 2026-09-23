@@ -459,13 +459,16 @@ export function applyNoteOnLink(ast: ClassDiagramAST, position: NotePosition, te
  *  (CucaDiagram#constraintOnLinks via getTwoLastLinks, CucaDiagram.java:660,
  *  712). svek then emits a fixed 10x10 label spot on each constrained edge
  *  carrying no note/label text (SvekEdge.java:430; CONSTRAINT_SPOT at :122)
- *  — the constraint's text/color never reach the DOT. Fewer than two links
- *  → upstream errors; here a consumed no-op. */
+ *  plus the constraint's own TEXT, drawn post-layout
+ *  (SvekEdge.java:993-1011's `linkConstraint.drawMe`). Fewer than two links
+ *  → upstream errors; here a consumed no-op. Group 1 is the display text
+ *  (T5/M9 — previously captured then discarded at the call site). */
 export const CONSTRAINT_ON_LINKS_RE = /^constraint\s*on\s+links\s*(?:#\w+\s*)?:\s*(.*)$/i;
 
-export function applyConstraintOnLinks(ast: ClassDiagramAST): void {
+export function applyConstraintOnLinks(ast: ClassDiagramAST, text: string): void {
   const links = ast.relationships.filter((r) => !isNoteId(ast, r.from) && !isNoteId(ast, r.to));
   if (links.length < 2) return;
-  links[links.length - 1]!.linkConstraint = true;
-  links[links.length - 2]!.linkConstraint = true;
+  const constraint = { text: text.trim() };
+  links[links.length - 1]!.linkConstraint = constraint;
+  links[links.length - 2]!.linkConstraint = constraint;
 }

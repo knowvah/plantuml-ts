@@ -104,7 +104,16 @@ const RE_STYLE_CLOSE = /^<\/style>$/i;
 // `(\w+)\s+` alternative failed to match at all (the char right after
 // the key word is `<`, not whitespace), silently dropping the entire
 // line -- diagnosed G2 N51 (`ragona-89-fadi984`).
-const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
+// cdd-T28 (`/i`): upstream compiles EVERY command regex through
+// `Pattern2.compileInternal`, whose one `Pattern.compile(regex,
+// Pattern.CASE_INSENSITIVE)` (`regex/Pattern2.java:114`) covers
+// `CommandSkinParam`'s own `(skinparam|skinparamlocked)` leaf
+// (`command/CommandSkinParam.java:58`) and `CommandSkinParamMultilines`'s
+// `^skinparam[%s]*...\{$` (java:49). So `skinParam CaptionFontSize 10` is
+// an ordinary skinparam line upstream, while this port's case-SENSITIVE
+// spelling dropped the whole line silently (`repuga-78-xora226`: every
+// caption skinparam ignored, `preprocess()` returning an empty map).
+const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/i;
 /** mission skin-file-loading Batch 1: `skin <name>` -- mirrors upstream's
  *  `CommandSkin` grammar (`^skin\\s+([\\w.]+)$`, see `skins-builtin.ts`'s
  *  own doc comment). The `\\s+` after the literal `skin` prefix means this
@@ -112,7 +121,7 @@ const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
  *  "skinparam" is "p", not whitespace) -- no negative lookahead needed.
  *  Case-insensitive, matching every other directive-keyword regex here. */
 const RE_SKIN_LINE = /^skin\s+([\w.]+)\s*$/i;
-const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
+const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/i;
 /** Selector-scoped block, e.g. `skinparam component {` -- inner entries are
  *  keyed `<selector><name>` (upstream sugar: `component { Style X }` is
  *  `skinparam componentStyle X`).
@@ -135,7 +144,7 @@ const RE_SKINPARAM_BLOCK_OPEN = /^skinparam\s*\{$/;
  *  handing an AWS deployment diagram to the CLASS engine, which then
  *  measured each node's raw `<img data:image/png;base64,...>` markup as
  *  label text (19214px wide vs the jar's 142px). Found closing S1L-f. */
-const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/;
+const RE_SKINPARAM_SELECTOR_BLOCK_OPEN = /^skinparam\s+(\w+)(<<[^<>]+>>)?\s*\{$/i;
 /** A stereotype sub-block inside a selector block: `<<Foo1>> {`. */
 /**
  * A nested scope opener inside a `skinparam` block: any name followed by `{`.

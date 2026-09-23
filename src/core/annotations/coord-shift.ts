@@ -41,6 +41,7 @@
  */
 
 import { attrs } from '../svg.js';
+import { mapOutsideInlineDefs } from '../svg-defs.js';
 
 /** Matches a JS-`Number`-parseable numeric token — integer, decimal, or
  *  exponential, optionally signed. Every numeric attribute value / path
@@ -158,11 +159,20 @@ const SHIFTABLE_ATTR_RE = /\b(x|y|cx|cy|x1|y1|x2|y2|points|d|transform)="([^"]*)
  */
 export function shiftFragmentBody(body: string, dx: number, dy: number): string {
   if (dx === 0 && dy === 0) return body;
-  return body.replace(SHIFTABLE_ATTR_RE, (match, name: string, value: string) => {
-    if (X_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dx)]]).trimStart();
-    if (Y_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dy)]]).trimStart();
-    if (name === 'points') return attrs([['points', shiftPoints(value, dx, dy)]]).trimStart();
-    if (name === 'd') return attrs([['d', shiftPathD(value, dx, dy)]]).trimStart();
-    return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();
-  });
+  // cdd-B7FU-R1: an inline `<linearGradient>`/`<filter>` def carries
+  // `x1`/`y1`/`x`/`y` in the DEF's own units (objectBoundingBox percentages,
+  // filter units -- `SvgGraphics.java:377-383,780-783`), never document
+  // coordinates, so it is stepped over rather than shifted. Observed as a
+  // `<filter y>` shifted by the chrome offset on `ziripa-77-zizo842`, and
+  // as a PRE-EXISTING `x1="NaN"` (from `Number('0%')`) on any class diagram
+  // combining a gradient fill with chrome.
+  return mapOutsideInlineDefs(body, (segment) =>
+    segment.replace(SHIFTABLE_ATTR_RE, (match, name: string, value: string) => {
+      if (X_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dx)]]).trimStart();
+      if (Y_ATTRS.has(name)) return attrs([[name, shiftNumberToken(value, dy)]]).trimStart();
+      if (name === 'points') return attrs([['points', shiftPoints(value, dx, dy)]]).trimStart();
+      if (name === 'd') return attrs([['d', shiftPathD(value, dx, dy)]]).trimStart();
+      return attrs([['transform', shiftTransform(value, dx, dy)]]).trimStart();
+    }),
+  );
 }

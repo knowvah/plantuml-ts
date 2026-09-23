@@ -869,10 +869,10 @@
       "type": "activity",
       "slug": "fonebe-54-save009",
       "status": "baseline",
-      "weightedScore": 25,
-      "diffCount": 25,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 24,
+      "diffCount": 24,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
@@ -1607,10 +1607,10 @@
       "type": "activity",
       "slug": "letare-59-gore448",
       "status": "baseline",
-      "weightedScore": 72,
-      "diffCount": 39,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 37,
+      "diffCount": 37,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -1625,19 +1625,19 @@
       "type": "activity",
       "slug": "levuma-67-cego489",
       "status": "baseline",
-      "weightedScore": 276,
-      "diffCount": 219,
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "77d50172"
+      "weightedScore": 266,
+      "diffCount": 216,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
       "slug": "lidefe-01-vaki092",
       "status": "baseline",
-      "weightedScore": 141,
-      "diffCount": 74,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 133,
+      "diffCount": 73,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2"
     },
     {
       "type": "activity",
@@ -3182,10 +3182,10 @@
       "type": "activity",
       "slug": "xovano-23-tazo278",
       "status": "baseline",
-      "weightedScore": 375,
-      "diffCount": 260,
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "77d50172"
+      "weightedScore": 371,
+      "diffCount": 256,
+      "measuredAt": "2026-09-23",
+      "measuredAgainstCommit": "782fea58"
     },
     {
       "type": "activity",
@@ -3254,10 +3254,10 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "diffCount": 340,
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
-      "weightedScore": 581
+      "diffCount": 376,
+      "measuredAt": "2026-09-22",
+      "measuredAgainstCommit": "70a81ca2",
+      "weightedScore": 488
     },
     {
       "type": "activity",

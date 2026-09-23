@@ -6,7 +6,7 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
-import type { ClassDiagramAST, Classifier, ClassifierKind } from './ast.js';
+import type { ClassDiagramAST } from './ast.js';
 import {
   applyDirectives,
   applyHideShowEntityDirectives,
@@ -17,19 +17,15 @@ import {
 import { handlePendingNoteLine } from './class-notes.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
-import {
-  makeClassifier,
-  normalizeSameConnectionLengths,
-  registerInNamespace,
-  resolveReference,
-} from './class-namespace.js';
+import { normalizeSameConnectionLengths } from './class-namespace.js';
+import { eventuallyBuildPhantomGroups } from './class-namespace-resolve.js';
+export { ensureClassifier } from './class-ensure-classifier.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
 import { applyMapBodyLine } from './class-map-commands.js';
 import { finalizeJsonBody } from '../../core/command/CommandCreateJson.js';
 import { isPendingJsonBodyComplete } from './class-json-commands.js';
 import { dedentRawLines } from './class-body-enhanced.js';
-import { stripQuotes } from './class-relationship-parser.js';
 import { COMMANDS } from './class-commands.js';
 import { mergeStandaloneBraces } from './class-line-merge.js';
 import { filterPendingBodyBlanks } from './class-body-blank-filter.js';
@@ -54,97 +50,11 @@ function makeDefaultAST(): ClassDiagramAST {
     notes: [],
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(),
+    // cdd-T31 (E5 defect a): mirrors ParseState.namespaceSeparator's own
+    // default ('.', set below and in startNewPage) -- see
+    // ClassDiagramAST.namespaceSeparator's own doc comment.
+    namespaceSeparator: '.',
   };
-}
-
-/**
- * G2 N39: how many `<style>` blocks (their own opening `<style>` tag's
- * source line) sit strictly BEFORE `currentLine` -- the "style generation"
- * a classifier created AT `currentLine` captures, mirroring upstream's
- * `Entity#currentStyleBuilder` snapshot (`ast.ts#Classifier.styleGeneration`'s
- * doc comment). `currentLine === undefined` (a hand-built literal fixture,
- * or a merged-brace line with no tracked position) returns `0` -- the same
- * "no scoping information available" fallback `state.currentLine`'s own
- * doc comment already documents for `Relationship.sourceLine`.
- */
-function countStyleBlocksBefore(
-  stylePositions: readonly (number | undefined)[],
-  currentLine: number | undefined,
-): number {
-  if (currentLine === undefined) return 0;
-  let count = 0;
-  for (const pos of stylePositions) {
-    if (pos !== undefined && pos < currentLine) count += 1;
-  }
-  return count;
-}
-
-/**
- * Ensure a classifier exists for the raw reference; create if absent. The
- * reference is resolved to a fully-qualified (namespace-aware) id, so the
- * returned `id` may differ from `rawName` — callers storing the reference
- * elsewhere (relationships, body opener) must use the returned `id`.
- *
- * `reuseExistingChild` mirrors upstream `quarkInContext`'s flag of the same
- * name: true at relation-endpoint sites (a bare name may resolve to an
- * existing classifier declared elsewhere), false at declaration sites
- * (always scope-local, upstream `CommandCreateClass`). Defaults to false so
- * every pre-existing declaration call site is unaffected; endpoint call
- * sites pass `true` explicitly.
- */
-export function ensureClassifier(
-  state: ParseState,
-  rawName: string,
-  kind: ClassifierKind = 'class',
-  display?: string,
-  reuseExistingChild = false,
-): Classifier {
-  const {
-    id,
-    nsId,
-    display: disp,
-  } = resolveReference({
-    namespaces: state.ast.namespaces,
-    sep: state.namespaceSeparator,
-    activeNamespace: state.activeNamespace,
-    // Strip surrounding quotes so a quoted name (`"side1"`) resolves to the same
-    // id whether it comes from a declaration, a relationship, or an assoc-couple.
-    name: stripQuotes(rawName),
-    display,
-    intermediatePackages: state.intermediatePackages,
-    classifiers: state.ast.classifiers,
-    reuseExistingChild,
-    counter: state.creationCounter,
-  });
-  const existing = state.classifierIndex.get(id);
-  if (existing !== undefined) {
-    return state.ast.classifiers[existing]!;
-  }
-  const classifier = makeClassifier(id, kind, disp, nsId);
-  // G2 N2 (mechanism 3): this is the single classifier-creation chokepoint
-  // (declarations AND relationship-endpoint auto-create both funnel
-  // through here — see this function's own doc comment) — see
-  // ast.ts#Classifier.creationIndex's doc comment.
-  state.creationCounter.value += 1;
-  classifier.creationIndex = state.creationCounter.value;
-  // G2 N39: mirrors upstream `CucaDiagram#createLeaf` capturing
-  // `getCurrentStyleBuilder()` AT THIS SAME CHOKEPOINT — see
-  // ast.ts#Classifier.styleGeneration's doc comment.
-  classifier.styleGeneration = countStyleBlocksBefore(state.stylePositions, state.currentLine);
-  const idx = state.ast.classifiers.length;
-  state.ast.classifiers.push(classifier);
-  state.classifierIndex.set(id, idx);
-  registerInNamespace(state.ast.namespaces, nsId, id);
-  // Mirrors upstream `reallyCreateLeaf` (CucaDiagram.java:218-228), which
-  // unconditionally sets `lastEntity` on every leaf creation. ensureClassifier
-  // is the single creation chokepoint for both declarations and
-  // relationship-endpoint auto-create, so this covers both call sites —
-  // matching upstream, where both paths also funnel through reallyCreateLeaf.
-  state.lastEntity = id;
-  return classifier;
-  // #lizard forgives -- pre-existing violation (34 NLOC/5 PARAM vs this
-  // repo's caps), unchanged by the allowmixing gate: `git diff` shows zero
-  // overlap with this function.
 }
 
 /**
@@ -161,6 +71,9 @@ export function startNewPage(state: ParseState): void {
   // checkFinalError's same-pair length normalization runs per finished
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
+  // cdd-T1: `getTextBlock`'s own closing sweep (CucaDiagram.java:464) -- a
+  // page IS a finished diagram, rendered through its own getTextBlock.
+  eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
   applyDirectives(state.ast);
   // A2s F-A / B2: kind BEFORE entity/stereotype -- see finalizeParse's
   // identical ordering note.
@@ -330,6 +243,30 @@ function dispatchCommand(state: ParseState, line: string): boolean {
   return false;
 }
 
+
+/** cdd-T28: `matchAnnotationCommand`'s SINGLE-line matchers read `lines[i]`
+ *  verbatim (they require an already-trimmed line), but a matched MULTILINE
+ *  block's BODY must keep its indentation: upstream's `BlocLines` never
+ *  trims a legend/title/caption body, and `CreoleStripeSimpleParser`'s
+ *  FULL-mode list patterns are anchored at column 0
+ *  (`^(\*+)…`/`^(#+)…`, java:70-72), so a leading space is what makes the
+ *  jar draw ` * Hyp 1` as literal text instead of a bullet (jar-probed
+ *  directly: the same source WITHOUT the leading space draws
+ *  `<ellipse cx="22.5" …>` + the text at x=29, which is exactly what this
+ *  port now draws). Trimming only index `i` is
+ *  `description/annotation-line-trim.ts#trimLineForAnnotationMatch`'s
+ *  established shape, duplicated here rather than imported across engine
+ *  boundaries (the same convention that file's own doc records). */
+function annotationLines(lines: readonly string[], i: number): readonly string[] {
+  const raw = lines[i];
+  if (raw === undefined) return lines;
+  const trimmed = raw.trim();
+  if (trimmed === raw) return lines;
+  const copy = lines.slice();
+  copy[i] = trimmed;
+  return copy;
+}
+
 /**
  * T5 (dispatch-by-parse-attempt): upstream's fall-through refusal point --
  * no registered `Command` matched the line, so `getCandidate` returns `null`
@@ -428,7 +365,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
     // not include it (see ast.ts's doc on the field).
-    const annotationMatch = matchAnnotationCommand(lines, i, state.ast.annotations!);
+    const annotationMatch = matchAnnotationCommand(annotationLines(merged.rawLines, i), i, state.ast.annotations!);
     if (annotationMatch !== null) {
       i += annotationMatch.consumed - 1;
       continue;
@@ -466,6 +403,9 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
   adjudicateAllowMixing(state);
 
   normalizeSameConnectionLengths(state.ast.relationships);
+  // cdd-T1: `getTextBlock`'s closing sweep (CucaDiagram.java:464, as in
+  // startNewPage) -- numbers any package no like-class leaf ever swept.
+  eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
   applyDirectives(state.ast);
   // A2s F-A / B2: kind BEFORE entity/stereotype -- entity `show` now clears
   // flags (CucaDiagram#showPortion's last-matching-rule fold), so the more-

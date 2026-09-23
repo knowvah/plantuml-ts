@@ -63,10 +63,17 @@ describe('parseArrowStyleOverrides', () => {
     });
   });
 
-  it('ignores hidden/plain/node — never misclassified as color', () => {
-    expect(parseArrowStyleOverrides('-[hidden]->')).toEqual({});
+  it('plain/node are still no-ops — never misclassified as color', () => {
     expect(parseArrowStyleOverrides('-[plain]->')).toEqual({});
     expect(parseArrowStyleOverrides('-[node]->')).toEqual({});
+  });
+
+  // T5/M12: `hidden` gained its own field (`Link#isHidden()`) — no longer a
+  // NON_COLOR_KEYWORDS no-op. See class-arrow-decors.test.ts's own
+  // "T5/M12: -[hidden]- carried as its own field" block for the
+  // parseRelationshipLine-level coverage.
+  it('hidden is carried as its own field, never a color', () => {
+    expect(parseArrowStyleOverrides('-[hidden]->')).toEqual({ hidden: true });
   });
 
   it('norank is carried as the constraint flag, never a color', () => {

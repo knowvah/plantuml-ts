@@ -107,6 +107,37 @@ export function sectionHeight(rowBuilds: readonly MemberRowBuild[]): number {
 }
 
 /**
+ * T24-diagnosis row 83 / CDD T27FU: `BodierLikeClassOrObject#isMethod`
+ * (java:107-116) strips every `[[...]]` url bracket with `URL_PATTERN
+ * .matcher(s).replaceAll("")` BEFORE the paren scan, where `URL_PATTERN =
+ * Pattern.compile(UrlBuilder.getRegexp())` — the SAME 5-alternative grammar
+ * `class-url.ts` already ports for STRICT whole-bracket matching, here
+ * reproduced un-anchored (find/replace-all mode, not `^...$`) since a
+ * `[[...]]` url can sit ANYWHERE in a raw-fallback member's line, not just
+ * fill it entirely (`sejuzo-42-fini523`: a leading `[[url{tooltip
+ * containing "(pagename)"} label]] : TEXT` field). Without the strip, the
+ * tooltip's own parens leak into the paren scan and the field is
+ * misbucketed as a method.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:52-88 (S_QUOTED..S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL, getRegexp)
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodierLikeClassOrObject.java:104-116
+ */
+const URL_BRACKET_RE = new RegExp(
+  [
+    // 1. `[["quoted link"{tooltip} label]]`.
+    String.raw`\[\[\s*"[^"]+"(?:\s*\{[^{}]*\})?(?:\s[^\s{}[\]][^[\]]*)?\s*\]\]`,
+    // 2. `[[{tooltip}]]`.
+    String.raw`\[\[\s*\{.*\}\s*\]\]`,
+    // 3. `[[{tooltip} label]]`.
+    String.raw`\[\[\s*\{[^{}]*\}\s*[^\s{}[\]][^[\]]*\s*\]\]`,
+    // 4. `[[link{tooltip}]]`.
+    String.raw`\[\[\s*[^\s"{}[\]]+?\s*\{.+\}\s*\]\]`,
+    // 5. `[[link{tooltip} label]]` (tooltip/label both optional).
+    String.raw`\[\[\s*[^\s"[\]]+?(?:\s*\{[^{}]*\})?(?:\s[^\s{}[\]][^[\]]*)?\s*\]\]`,
+  ].join('|'),
+  'g',
+);
+
+/**
  * `Member.params !== undefined` means a method (see `Member`'s own doc
  * comment); upstream's equivalent is `BodierLikeClassOrObject#isMethod`
  * (`purged.contains("(") || purged.contains(")")`) — this port already
@@ -124,7 +155,10 @@ export function isMethodMember(m: Classifier['members'][number]): boolean {
   // line for the tags first (see `Member.forcedBucket`'s own doc comment).
   // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:102-111
   if (m.forcedBucket !== undefined) return m.forcedBucket === 'method';
-  if (m.rawDisplay !== undefined) return m.rawDisplay.includes('(') || m.rawDisplay.includes(')');
+  if (m.rawDisplay !== undefined) {
+    const purged = m.rawDisplay.replace(URL_BRACKET_RE, '');
+    return purged.includes('(') || purged.includes(')');
+  }
   return m.params !== undefined;
 }
 
@@ -145,6 +179,83 @@ export interface SectionRowContext {
    *  icon-section indent, matching `sectionWidth`'s width reserve
    *  (upstream uses the SAME `radius + 3` for both). */
   iconZoneWidth: number;
+  /** CDD B7FU-R2 item (b) (coordinator, journal row 161): the member-row
+   *  font's OWN size -- `buildSectionRows`'s own doc comment for the
+   *  bottom-anchor formula this feeds (identical mechanism/citation to
+   *  `class-body-enhanced-layout.ts#buildRowsBlockRows`'s own fix). */
+  fontSize: number;
+}
+
+/**
+ * CDD T20 (A5/M6): each row index's OWN member's TOTAL block height -- the
+ * sum of every physical sub-row a WRAPPED member expands into (consecutive
+ * `members[]` entries sharing the SAME `Member` reference, {@link
+ * buildWrappedSectionRowBuilds}'s own doc comment). Mirrors `klimt/geom/
+ * PlacementStrategyVisibility.java:56-62`'s `height2` term, which is the
+ * member's real TextBlock height -- the WHOLE wrapped block, not one
+ * physical line. Reduces to `rowBuilds[i].height` alone whenever member `i`
+ * is not wrapped (the overwhelming common case).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-62
+ */
+function memberBlockHeights(members: Classifier['members'], rowBuilds: readonly MemberRowBuild[]): number[] {
+  const totals = new Array<number>(members.length).fill(0);
+  let i = 0;
+  while (i < members.length) {
+    let total = 0;
+    let j = i;
+    while (j < members.length && members[j] === members[i]) {
+      total += rowBuilds[j]!.height;
+      j++;
+    }
+    totals[i] = total;
+    i = j;
+  }
+  return totals;
+}
+
+/** CDD T20 (M6): the `visibilityIcon`/`visibilityIsField`/
+ *  `visibilityBlockHeight` fields for one row -- split out of {@link
+ *  buildSectionRows}'s loop purely to keep that function under the
+ *  project's NLOC cap (pure extraction, no behavior change). */
+function iconRowFields(
+  showIcon: boolean,
+  member: Classifier['members'][number],
+  blockHeight: number,
+  ownHeight: number,
+): Pick<ClassifierGeo['rows'][number], 'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight'> {
+  if (!showIcon) return {};
+  return {
+    visibilityIcon: member.visibility,
+    visibilityIsField: isMethodMember(member) === false,
+    ...(blockHeight !== ownHeight ? { visibilityBlockHeight: blockHeight } : {}),
+  };
+}
+
+/** One member's row entry -- split out of {@link buildSectionRows}'s loop
+ *  purely to keep that function under the project's NLOC cap (pure
+ *  extraction, no behavior change). Bundled into one params object to stay
+ *  under this project's 5-param cap (mirrors `SectionRowContext`'s own
+ *  identical rationale, this file's doc comment above). */
+interface OneRowInput {
+  text: string;
+  member: Classifier['members'][number];
+  build: MemberRowBuild;
+  y: number;
+  indent: number;
+  showIcon: boolean;
+  blockHeight: number;
+}
+function buildOneRow(input: OneRowInput): ClassifierGeo['rows'][number] {
+  const { text, member, build, y, indent, showIcon, blockHeight } = input;
+  return {
+    text,
+    y,
+    indent,
+    width: build.width,
+    atoms: build.atoms,
+    ...iconRowFields(showIcon, member, blockHeight, build.height),
+    ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
+  };
 }
 
 /**
@@ -152,9 +263,20 @@ export interface SectionRowContext {
  * at `sectionTop`. `y` is the text BASELINE (G2 N4 -- jar draws plain,
  * un-centered `<text>` for every row, never `dominant-baseline="middle"`;
  * see `renderer.ts#renderRow`'s own doc comment for the render-side half of
- * this fix), `sectionTop + SECTION_MARGIN_TOP + i * memberRowHeight +
- * baselineOffset` where `baselineOffset` is the SAME ascent-from-line-top
- * value `measureGenericClassifier` derives for the header row.
+ * this fix), `sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset`
+ * where `baselineOffset` is the SAME ascent-from-line-top value
+ * `measureGenericClassifier` derives for the header row.
+ *
+ * CDD B7FU-R2 item (b) (coordinator, journal row 161, malara-55-moce209):
+ * `y` is BOTTOM-anchored to the row's own height, not the flat
+ * `baselineOffset` alone -- `y = sectionTop + SECTION_MARGIN_TOP + rowTop +
+ * build.height - (fontSize - baselineOffset)`, identical to the OLD
+ * formula when `build.height === fontSize` (text-only rows, zero behavior
+ * change). Same mechanism/citation `class-body-enhanced-layout.ts
+ * #buildRowsBlockRows` already fixed for the enhanced-body path
+ * (`MethodsOrFieldsArea#drawU`, java:429-440): a row taller/shorter than
+ * the font (a sprite atom scaled `fontSize/13`) shifts its own internal
+ * anchor with it, not a shared flat per-classifier offset.
  */
 export function buildSectionRows(
   members: Classifier['members'],
@@ -169,13 +291,16 @@ export function buildSectionRows(
   // here: the bare `#lizard forgive` flag is reset by every nested-context
   // pop, and the spread-ternary object literals below stack contexts that
   // pop at function end, eating the flag (lizard.py#end_of_function).
-  const { baselineOffset } = ctx;
+  const { baselineOffset, fontSize } = ctx;
+  const bottomAnchor = fontSize - baselineOffset;
   const rows: ClassifierGeo['rows'] = [];
   const indent = sectionHasIcon ? ROW_TEXT_LEFT_MARGIN + ctx.iconZoneWidth : ROW_TEXT_LEFT_MARGIN;
   // A2s R2i: rows advance by each PRIOR row's own height (see
   // `sectionHeight`'s doc comment) -- identical to the previous
   // `i * memberRowHeight` whenever every row is atom-free.
   let rowTop = 0;
+  // CDD T20 (M6): see `memberBlockHeights`'s own doc comment.
+  const blockHeights = memberBlockHeights(members, rowBuilds);
   for (let i = 0; i < members.length; i++) {
     const text = texts[i]!;
     const member = members[i]!;
@@ -197,17 +322,29 @@ export function buildSectionRows(
     // non-zero icon size, sectionHasIcon true iff ANY member is explicit,
     // so a row with `visibilityExplicit` implies sectionHasIcon.
     const showIcon = sectionHasIcon && member.visibilityExplicit === true && members[i - 1] !== member;
-    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset;
+    // CDD B7FU-R2 item (b) correction (exposant-01-class/sovuxo-25-tepi226
+    // regressions, diagnosed): `build.height` differs from `fontSize` for
+    // THREE distinct reasons, only ONE of which needs the bottom-anchor
+    // shift. (1) A sprite/img/latex atom (`kind: 'image'`) is drawn TOP-
+    // anchored at an absolute pixel position with no `dy` correction of
+    // its own (`renderer-classifier-rows.ts#renderRowAtoms`'s `lineBottomY
+    // = y + fontSize/4.5` formula) -- genuinely needs `y` shifted so that
+    // formula reaches the row's real top; jar-verified on rotisi-30-
+    // loge424/malara-55-moce209. (2) A `<sup>`/`<sub>` creole run inflates
+    // Sea's own ascent/descent envelope (`exposant-01-class`, `x<sup>2
+    // </sup>` measured height 17 at font 14) but each run's OWN position
+    // is corrected via `atom.dy` (SI30 D2/D3, "must not be applied
+    // twice") -- the row's BASELINE stays put. (3) A pure-text row's
+    // height is floor-clamped for a small font (`sovuxo-25-tepi226`,
+    // `skinparam classAttributeFontSize 8`, measured height 10 not 8) --
+    // a STACKING floor only, not a real top-anchor difference. Gated on
+    // an `'image'`-kind atom (sprite/img/latex -- `class-member-render-
+    // atom.ts`'s own doc comment; emoji resolves to `'text'`, dy-corrected
+    // like sup/sub, confirmed via `resolveEmojiAtom`) to reach ONLY case 1.
+    const hasImageAtom = build.atoms.some((a) => a.kind === 'image');
+    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
     rowTop += build.height;
-    rows.push({
-      text,
-      y,
-      indent,
-      width: build.width,
-      atoms: build.atoms,
-      ...(showIcon ? { visibilityIcon: member.visibility, visibilityIsField: isMethodMember(member) === false } : {}),
-      ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
-    });
+    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]! }));
   }
   return rows;
 }

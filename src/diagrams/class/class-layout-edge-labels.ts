@@ -14,27 +14,12 @@ import type { DotInputEdge } from '../../core/graph-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { CARDINALITY_FONT_SIZE } from '../../core/graph-layout.js';
-import {
-  computeQuantifierBox,
-  computeMergedLabelBox,
-  applyVisibilityIcon,
-  applyGuillemet,
-  stripCreoleMarkup,
-  resolveLineFont,
-} from '../../core/edge-label-box.js';
-// `AtomText.manageSpecialChars` (`klimt/creole/legacy/AtomText.java:120-133`)
-// -- per-line, AFTER guillemet/format-tag resolution (`nagega-30-poso418`).
-import { resolveTextEscapes } from '../../core/text-escapes.js';
-import {
-  isBareMagicArrowLabel,
-  parseMagicArrowLabel,
-  hasSeveralGuideLines,
-  computeGuideLinesBox,
-} from './class-magic-arrow.js';
-// T1: the ONE `Display#getWithNewlines` port -- replaces this file's own
-// `splitEdgeLabelLines` re-export, see `class-edge-label-lines.ts`'s own
-// doc comment.
-import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { computeQuantifierBox, computeMergedLabelBox } from '../../core/edge-label-box.js';
+import { isBareMagicArrowLabel } from './class-magic-arrow.js';
+// cdd-T17: the multi-line/magic-arrow/plain-string measured-label arm moved
+// to `class-edge-label-measure.ts` (500-line hook cap) -- a pure move, see
+// that file's own doc comment for the split rationale/precedent.
+import { computeMeasuredLabelAttrs } from './class-edge-label-measure.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
 // `measureNote` models -- see `class-note-link-box.ts`'s own doc comment for
@@ -128,7 +113,9 @@ export { wrapPlainTextLine } from './class-edge-label-lines.js';
  * A leading `<size:N>` tag on the remaining text resolves to its own font
  * before measuring ({@link resolveLineFont}, `xamule-03-jeda376`).
  */
-type LabelAttrs = Pick<
+// cdd-T17: exported so `class-edge-label-measure.ts#computeMeasuredLabelAttrs`
+// (split out below, 500-line hook cap) can share this exact shape.
+export type LabelAttrs = Pick<
   NonNullable<DotInputEdge['attributes']>,
   'label' | 'labelWidth' | 'labelHeight' | 'labelBoxWidth' | 'labelBoxHeight'
 >;
@@ -155,12 +142,21 @@ type MultiplicityAttrs = Pick<
  * are built straight from `Display.create` and never pass through it — which
  * is why `tobuka-93-jale775`, whose only labels are tail/head, already matched
  * the oracle byte for byte before this change.
+ *
+ * cdd-T35: exported (with {@link labelMarginOf}) so `class-ink-box.ts`'s own
+ * ink walk can apply the SAME margin to the `UEmpty` reservation
+ * `TextBlockMarged#drawU` draws for it (`klimt/shape/TextBlockMarged.java:82`,
+ * walked by `LimitFinder#drawEmpty`, `klimt/drawing/LimitFinder.java:159-162`)
+ * -- the missing per-shape ink term the T35 diagnosis names (`decision-
+ * journal.md`, rows 215-219): this file only ever modeled the margin's
+ * effect on the GRAPHVIZ LAYOUT box size ({@link withLabelMargin}), never its
+ * OWN separate ink contribution at draw time.
  */
-const SELF_LINK_LABEL_MARGIN = 6;
-const LINK_LABEL_MARGIN = 1;
+export const SELF_LINK_LABEL_MARGIN = 6;
+export const LINK_LABEL_MARGIN = 1;
 
-function labelMarginOf(rel: Relationship): number {
-  return rel.from === rel.to ? SELF_LINK_LABEL_MARGIN : LINK_LABEL_MARGIN;
+export function labelMarginOf(edge: { from: string; to: string }): number {
+  return edge.from === edge.to ? SELF_LINK_LABEL_MARGIN : LINK_LABEL_MARGIN;
 }
 
 /** Grow a MEASURED label block by its all-round margin — see
@@ -259,98 +255,6 @@ function computeNoteMergedLabelAttrs(
   return { label: rel.label ?? '', labelWidth: box.reservedWidth, labelHeight: box.reservedHeight };
 }
 
-/** {@link computeMeasuredLabelAttrs}'s magic-arrow arm, factored out to keep
- *  that function's NLOC under the project's per-function cap -- resolves a
- *  leading `<size:N>` tag ({@link resolveLineFont}) then decodes escapes on
- *  the result. `undefined` for an absent/empty remaining text. */
-function resolveMagicArrowText(
-  text: string | undefined,
-  font: { family: string; size: number },
-): { text: string; font: { family: string; size: number } } | undefined {
-  if (text === undefined || text === '') return undefined;
-  const resolved = resolveLineFont(text, font);
-  return { text: resolveTextEscapes(resolved.text), font: resolved.font };
-}
-
-/** The plain (non-note, non-constraint-spot) measured label -- multi-line,
- *  magic-arrow, or a single plain string. Plain single-line now ports M4
- *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
- *  `core/edge-label-box.ts`); multi-line ports C, the D6 per-line
- *  guide-line-arrow branch, and (T4) a per-line creole-tag strip;
- *  single-line magic-arrow resolves a leading `<size:N>` tag and strips
- *  creole formatting on its remaining text via {@link resolveLineFont}
- *  (`xamule-03-jeda376`) -- still no guillemet rewrite on that arm (no
- *  fixture combines a magic-arrow token with `<<x>>`). `label` stays RAW:
- *  only width/height change. */
-function computeMeasuredLabelAttrs(
-  label: string,
-  font: { family: string; size: number },
-  measurer: StringMeasurer,
-  classAttributeIconSize?: number,
-): LabelAttrs {
-  const { lines } = splitDisplayLines(label);
-  if (lines.length > 1) {
-    // D6 (`SvekEdge.java:290-297`): a multi-line label whose lines include a
-    // leading/trailing `< `/`> `/` <`/` >` guide-line token takes the
-    // PER-LINE arrow path (`Display.hasSeveralGuideLines`,
-    // `klimt/creole/Display.java:715-740`) instead of the plain stacked-text
-    // formula below -- see {@link hasSeveralGuideLines}/
-    // {@link computeGuideLinesBox}'s own doc comments.
-    if (hasSeveralGuideLines(lines)) {
-      const box = computeGuideLinesBox(lines, font, measurer);
-      return { label, labelWidth: box.width, labelHeight: box.height };
-    }
-    // M4 cause C applies to EVERY line, unconditionally
-    // (`Display.manageGuillemet`'s loop body, `Display.java:413-419` --
-    // no `first`-only gate on the guillemet call, unlike the visibility
-    // strip). T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream
-    // RENDERS `<b>..</b>` as bold formatting rather than measuring the tag
-    // as glyphs (`Display.java:413-419` runs at Display-construction time,
-    // BEFORE the later `create()`/`create9()` creole render this port
-    // stands in for via {@link stripCreoleMarkup}) -- so the strip runs
-    // AFTER guillemet, mirroring that same construct-then-render order.
-    // Bold contributes no width delta in deterministic mode either way:
-    // `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
-    // /StringBounderFromWidthTable.java:63-79`) derives width from `font
-    // .getSize2D()` and a fixed per-codepoint table alone -- no branch on
-    // `FontStyle`/bold/italic exists in that class -- so stop 10 does not
-    // fire here.
-    // Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
-    // own per-line-not-whole-string ordering (see that function's comment).
-    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup).map(resolveTextEscapes);
-    const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
-    const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
-    return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
-  }
-  const magic = parseMagicArrowLabel(label);
-  if (magic !== undefined) {
-    // A leading `<size:N>` tag on the remaining text rewrites the TEXT's
-    // own font ({@link resolveLineFont}) -- the arrow glyph below stays at
-    // the BASE `font`, matching `addMagicArrow`'s own font argument
-    // (`SvekEdge.java:304`); see the comment on `font.size` below.
-    const resolved = resolveMagicArrowText(magic.text, font);
-    const m = resolved !== undefined ? measurer.measure(resolved.text, resolved.font) : { width: 0, height: 0 };
-    // `TextBlockArrow2.calculateDimension` (`klimt/shape/TextBlockArrow2
-    // .java:57,87`) returns `(size, size)` where `size` is the SAME font
-    // passed to `addMagicArrow` (`SvekEdge.java:304`) -- `font.size` here,
-    // NOT `ARROW_GLYPH_SIZE` (the draw-only `.80` ink triangle, `:64-65`,
-    // which never enters a measurement), and NOT the resolved text's own
-    // font size when a `<size:N>` tag runs it larger (`xamule-03-jeda376`:
-    // arrow block stays 13, text resolves to 30). `mergeLR` sums width,
-    // maxes height (`XDimension2D.java:108-112`). A bare token's
-    // `marginLabel` skip lives in {@link withLabelMargin}, not here.
-    return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
-  }
-  const vis = applyVisibilityIcon(label, classAttributeIconSize);
-  // M4 cause C: `<<x>>` -> `«x»` BEFORE measuring (`core/edge-label-box.ts
-  // #applyGuillemet`, `Guillemet.java:78-88`) -- runs AFTER the visibility
-  // strip, mirroring `Display.manageGuillemet`'s per-line order
-  // (`Display.java:415-418`: strip first, guillemet second, same line).
-  // Escape decode runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
-  const m = measurer.measure(resolveTextEscapes(applyGuillemet(vis.text)), font);
-  return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
-}
-
 /** `noteCtx` is OPTIONAL only so a hand-built `Relationship` literal
  *  predating this task (no `noteCtx` argument) keeps compiling -- every
  *  production caller (`class-dot-edges.ts`) supplies it. */
@@ -368,7 +272,7 @@ function computeRelLabelAttrs(
     return computeNoteMergedLabelAttrs(rel, font, measurer, noteCtx);
   }
   if (rel.label === undefined) {
-    if (rel.linkConstraint === true) {
+    if (rel.linkConstraint !== undefined) {
       // `constraint on links` puts a fixed 10x10 spot label on a constrained
       // edge with no note/label text (SvekEdge.java:430-444: `hasNoteLabelText()
       // || link.getLinkConstraint() != null` → dimNote = CONSTRAINT_SPOT, the
@@ -408,21 +312,26 @@ function computeRelLabelAttrs(
  * contract (a plain `{family,size}` font) and its jar citations above are
  * unchanged -- only WHERE the font comes from moved.
  *
- * **Role labels (spec item 2, journalled): no path exists to route.**
- * `Relationship.fromRole`/`toRole` are parsed and stored
- * (`class-relationship-parser.ts:247-248,314`) but never READ anywhere in
- * `src/` -- `computeMultiplicityAttrs` only ever consumed
- * `fromMultiplicity`/`toMultiplicity`, and no DOT-emission or render site
- * implements upstream's `else if` role fallback
- * (`SvekEdge.java:447-466`: use the role name in place of the cardinality
- * when that end has no multiplicity). This is a genuinely UNBUILT feature,
- * not an existing path this "wiring" task can route through
- * `computeQuantifierBox` -- building it would add new DOT-attribute
- * emission (this file, in-write-set) but also new render/positioning
- * support (`class-geo-builders.ts`/`class-edge-label-anchor.ts`/
- * `renderer.ts`, all outside T6's write-set) and could move geometry for
- * any corpus fixture using bare role syntax, which D4's zero-fixture-rise
- * bar forbids attempting speculatively in this task.
+ * **Role labels (T17/M8, resolved).** `Relationship.fromRole`/`toRole` are
+ * parsed and stored (`class-relationship-parser.ts:303-304`,
+ * `class-relationship-ast.ts:100-101`) and now feed the SAME reservation
+ * slot as the quantifier, per upstream's `else if` fallback
+ * (`SvekEdge.java:447-466`): an end with a role but NO multiplicity
+ * reserves the role text in place of the cardinality; an end with BOTH
+ * keeps reserving the multiplicity alone (upstream never emits a second,
+ * role-specific DOT attribute) and the role draws additively, positioned
+ * by `class-edge-label-anchor.ts#roleLabelAnchors` (`SvekEdge.java:
+ * 1023-1030` + `drawRoleLabel`) with no reservation of its own. Jar-verified
+ * against the corpus's only two role fixtures, `mugobo-34-fede498`/
+ * `nenexe-35-zere033` (both carry a multiplicity AND a role on both ends).
+ *
+ * `class-dot-edges.ts#swappedRel` does not swap `fromRole`/`toRole` the way
+ * it swaps `fromMultiplicity`/`toMultiplicity` for a `dotEdgeRunsReversed`
+ * edge (`Link.java:116-117`'s `getInv()` swaps `role2`/`role1` too, so a
+ * role-bearing relationship that ALSO reverses direction via `-left-`/
+ * `-up-` would reserve the wrong end's role in the FALLBACK case) --
+ * unreached by the corpus (both role fixtures have `dotEdgeReversed ===
+ * false`), out of this task's write-set, filed as a follow-on.
  */
 function computeMultiplicityAttrs(
   rel: Relationship,
@@ -430,20 +339,31 @@ function computeMultiplicityAttrs(
   measurer: StringMeasurer,
 ): MultiplicityAttrs {
   const attrs: MultiplicityAttrs = {};
-  if (rel.fromMultiplicity !== undefined) {
-    const box = computeQuantifierBox(rel.fromMultiplicity, cardinalityFont, measurer);
+  // T17/M8: `SvekEdge.java:447-466`'s `if (startTailText != null) ... else
+  // if (startTailRoleText != null) ...` -- the role occupies the SAME
+  // taillabel/headlabel slot as the quantifier, ONLY when that end has no
+  // multiplicity of its own (there is no separate `rolelabel` DOT attribute
+  // upstream ever emits). When BOTH are present, the reservation stays the
+  // quantifier's alone; the role draws as an ADDITIVE, geometrically
+  // mirrored block with no DOT reservation of its own
+  // (`SvekEdge.java:1023-1030` + `drawRoleLabel`,
+  // `class-edge-label-anchor.ts#roleLabelAnchors`).
+  const tailText = rel.fromMultiplicity ?? rel.fromRole;
+  if (tailText !== undefined) {
+    const box = computeQuantifierBox(tailText, cardinalityFont, measurer);
     attrs.tailLabelWidth = box.reservedWidth;
     attrs.tailLabelHeight = box.reservedHeight;
     // G2/N25: the actual text, fed into the real @knowvah/dot-engine layout call so
     // it computes a real position (`core/graph-layout.ts
     // #extractPortLabelPositions`) -- see that field's own doc comment.
-    attrs.tailLabel = rel.fromMultiplicity;
+    attrs.tailLabel = tailText;
   }
-  if (rel.toMultiplicity !== undefined) {
-    const box = computeQuantifierBox(rel.toMultiplicity, cardinalityFont, measurer);
+  const headText = rel.toMultiplicity ?? rel.toRole;
+  if (headText !== undefined) {
+    const box = computeQuantifierBox(headText, cardinalityFont, measurer);
     attrs.headLabelWidth = box.reservedWidth;
     attrs.headLabelHeight = box.reservedHeight;
-    attrs.headLabel = rel.toMultiplicity;
+    attrs.headLabel = headText;
   }
   return attrs;
 }

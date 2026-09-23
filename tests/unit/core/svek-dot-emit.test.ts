@@ -799,7 +799,9 @@ describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
     // its port node sh0015 — the anchors in between take nothing.
     expect(dot).toContain('subgraph cluster0 {style=solid;color="#000006"');
     expect(dot).toContain('sh0010 [shape=plaintext');
-    expect(dot).toContain('subgraph cluster1 {style=solid;color="#00000b"');
+    // cdd-T37: uppercase hex (`XColor.java:127-129`'s `%06X`, `svek-dot-
+    // emit-labels.ts#hex`).
+    expect(dot).toContain('subgraph cluster1 {style=solid;color="#00000B"');
     expect(dot).toContain('sh0015 [shape=plaintext');
     expect(dot).not.toMatch(/sh\d+ \[shape=rect,width=\.01,height=\.01,label=/);
   });
@@ -809,7 +811,8 @@ describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
     // string the cluster's own title table uses, built from getTitleColor().
     const dot = toSvekDot(twoPortClusters());
     expect(dot).toContain('zaent0001 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#000007"');
-    expect(dot).toContain('zaent0002 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#00000c"');
+    // cdd-T37: uppercase hex, same citation as above.
+    expect(dot).toContain('zaent0002 [shape=rect,width=.01,height=.01,label=<<TABLE BGCOLOR="#00000C"');
   });
 
   const batched = (): DotInputGraph => ({

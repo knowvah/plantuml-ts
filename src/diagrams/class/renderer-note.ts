@@ -11,13 +11,13 @@
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
-import type { EdgeGeo } from './layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { Paint } from '../../core/paint.js';
-import { text, path, polygon, image, linkWrap } from '../../core/svg.js';
+import { text, path, image, linkWrap, decorationLines } from '../../core/svg.js';
+import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
-import { moveTo, lineTo, cubicTo } from '../../core/svg-path-builder.js';
+import { moveTo, lineTo } from '../../core/svg-path-builder.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { splitStereotypeStyleTags } from './class-stereotype.js';
@@ -32,44 +32,16 @@ import {
   type OpaleConnector,
   type OpaleDirection,
 } from './note-opale.js';
-import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
+import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
-
-/**
- * Bezier-spline or polyline path data for a routed connector — the SAME
- * shape `renderer.ts#renderEdge` builds for a normal relationship edge
- * (`(points.length - 1) % 3 === 0` and `>= 4` points ⇒ well-formed cubic
- * bezier chain, else a plain polyline fallback for the degenerate 2-point
- * case). Duplicated rather than imported: `renderer.ts` itself imports this
- * module, so importing back would cycle; both copies are pure functions
- * with no shared state, kept in lockstep by doc-comment cross-reference.
- * @see renderer.ts#buildPathData
- */
-function buildConnectorPathData(points: EdgeGeo['points']): string {
-  if (points.length === 0) return '';
-  const [first, ...rest] = points;
-  if (first === undefined) return '';
-  // T7b: routed through svg-path-builder.ts's moveTo/lineTo/cubicTo
-  // (formatDecimal, ADR-1) instead of raw template-literal interpolation.
-  const start = moveTo(first.x, first.y);
-
-  const isBezierSpline = points.length >= 4 && (points.length - 1) % 3 === 0;
-  if (isBezierSpline) {
-    const segments: string[] = [];
-    for (let i = 1; i < points.length; i += 3) {
-      const c1 = points[i]!;
-      const c2 = points[i + 1]!;
-      const end = points[i + 2]!;
-      segments.push(cubicTo(c1, c2, end));
-    }
-    return [start, ...segments].join(' ');
-  }
-
-  const segments = rest.map((p) => lineTo(p.x, p.y));
-  return [start, ...segments].join(' ');
-}
+// cdd-T10 wiring fix: a row's own creole `----` divider / table draws AT
+// THIS ROW'S OWN POSITION inside `renderNoteText`'s loop below -- see that
+// function's own doc comment. `renderer-note-lines.ts` owns the pure
+// per-row/per-cell drawing primitives (`NoteDividerDraw`/`NoteTableDraw`
+// consumers); it imports nothing from this file, so this is not a cycle.
+import { renderNoteRowExtra } from './renderer-note-lines.js';
 
 /**
  * G2 N34: jar's `EntityImageNote` ctor default (`ColorParam.noteBackground`,
@@ -93,7 +65,7 @@ const NOTE_FILL = '#FEFFDD';
  */
 function resolveNoteBackground(
   color: string | undefined,
-  theme: Theme,
+  theme: ScaledTheme,
   // G2 N37: the note's OWN `<<stereotype>>` (`ClassNote.stereotype`) --
   // resolves the `.tagname` `<style>` cascade (`note { .faint {
   // BackgroundColor red } } }`) between the explicit `#color` override and
@@ -123,7 +95,7 @@ function resolveNoteBackground(
  * FIRST matching label's background (already a resolved `Paint` from
  * `computeNoteStyleTagCascade`'s `parseColor` call), or `undefined`.
  */
-function resolveNoteTagBackground(theme: Theme, stereotype: string | undefined): Paint | undefined {
+function resolveNoteTagBackground(theme: ScaledTheme, stereotype: string | undefined): Paint | undefined {
   if (stereotype === undefined) return undefined;
   const cascade = theme.colors.noteTagCascade;
   if (cascade === undefined) return undefined;
@@ -147,22 +119,39 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-/** `note { LineThickness 0.5 }` (`plantuml.skin`) -- both the outline/
- *  corner paths and the plain connector line. */
+/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the box
+ *  outline (body + fold). `EntityImageNote.java:275-289` `drawNormal`:
+ *  `stroked = applyStroke(ug); stroked.draw(polygon)` -- the fold draws on
+ *  `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). cdd-T9b:
+ *  the dashed host connector is NOT this note's own stroke -- upstream
+ *  draws it as a completely separate `Link` (`CommandFactoryNoteOnEntity
+ *  .java:342`), styled like any other dashed relationship edge -- see
+ *  `renderer-note-connector.ts#renderNoteConnectorPath`. */
 const NOTE_STROKE_WIDTH = 0.5;
 
-/** `FontStyle` set -> the SVG `text-decoration` attribute value -- exact
- *  duplicate of `renderer-classifier-box.ts`'s private `memberAtomDecoration`
- *  (that file's own doc comment explains why class's renderer has no shared
- *  `UDriver`/`UGraphic` seam to hang a common import off of; this note-local
- *  copy follows the SAME precedent `buildConnectorPathData` above already
- *  set for this file). */
-function noteAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : undefined;
+/** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
+ *  draws on the UNSTROKED `ug`, so it keeps the diagram's DEFAULT stroke
+ *  width (1), never the note's own {@link NOTE_STROKE_WIDTH} (0.5). */
+const NOTE_FOLD_STROKE_WIDTH = 1;
+
+/**
+ * `Opale.java:149-167` `getPolygonNormal`, `roundCorner === 0` (class notes
+ * never set `skinparam NoteRoundCorner`): `moveTo(0,0) lineTo(0,height)
+ * lineTo(w,height) lineTo(w,cornersize) lineTo(w-cornersize,0) lineTo(0,0)`
+ * -- DOWN the left side first, opposite the old winding. `f` = `Opale
+ * #cornersize` ({@link NOTE_FOLD}); `(x,y)` the note's absolute origin.
+ */
+function noteBodyPathData(x: number, y: number, w: number, h: number, f: number): string {
+  // cdd-B8FU: `f` (the fold size) is passed ALREADY scaled by every call
+  // site below -- this function itself stays a pure geometry builder.
+  return [
+    moveTo(x, y),
+    lineTo(x, y + h),
+    lineTo(x + w, y + h),
+    lineTo(x + w, y + f),
+    lineTo(x + w - f, y),
+    lineTo(x, y),
+  ].join(' ');
 }
 
 /**
@@ -205,7 +194,7 @@ function renderNoteLineAtoms(
   startX: number,
   lineTop: number,
   lineHeight: number,
-  theme: Theme,
+  theme: ScaledTheme,
   // The SAME per-line baseline offset `renderNoteText` already computed
   // (`fontSize - fontSize/4.5`, at the note's OWN resolved font size, NOT
   // `theme.fontSize` -- a note draws at `NOTE_FONT_SIZE`/its own override,
@@ -241,7 +230,11 @@ function renderNoteLineAtoms(
       // {@link noteTextAtomY} adds the atom's own `Sea` correction on top
       // (`dys[i]`, `decisions.md#D2`'s "must not be applied twice").
       const y = noteTextAtomY(lineTop, lineHeight, atom, dys[i]!);
-      const decoration = noteAtomDecoration(atom.font.styles);
+      // cdd-B7FU-R1: the SAME shared port of `DriverTextSvg#draw`'s
+      // font-configuration decisions the classifier rows now use
+      // (java:93-173) -- weight/style/decoration plus the `<back:>` filter
+      // and the custom-coloured underline/strike lines.
+      const deco = textRenderDecorations(atom.font, getFont(atom.font).size);
       // G2 N57 item 38: `atom.renderText`/`renderWidth` are set ONLY for a
       // whitespace-only run (`DriverTextSvg.java`'s NBSP-substitution
       // branch, `class-member-creole.ts#MemberRenderAtom`'s own doc
@@ -254,16 +247,19 @@ function renderNoteLineAtoms(
         fill: atom.font.color ?? theme.colors.graph.noteCascadeFontColor ?? '#000000',
         lengthAdjust: 'spacing',
         textLength: atom.renderWidth ?? atom.width,
-        ...(atom.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' as const } : {}),
-        ...(atom.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
-        ...(decoration !== undefined ? { textDecoration: decoration } : {}),
+        ...(deco.fontWeight !== null ? { fontWeight: deco.fontWeight as '700' } : {}),
+        ...(deco.fontStyle !== null ? { fontStyle: 'italic' as const } : {}),
+        ...(deco.textDecoration !== null ? { textDecoration: deco.textDecoration } : {}),
+        ...(deco.backColor !== null ? { textBackColor: deco.backColor } : {}),
       });
       out += atom.url !== undefined ? linkWrap(rendered, atom.url) : rendered;
+      // Upstream java:180: drawn AFTER the `<text>` it decorates.
+      out += decorationLines(deco.extraLines, x, y, atom.renderWidth ?? atom.width, getFont(atom.font).size);
       x += atom.width;
       continue;
     }
     if (atom.kind === 'bullet') {
-      out += renderBulletAtom(atom, x, lineTop, lineHeight);
+      out += renderBulletAtom(atom, x, lineTop, lineHeight, theme.scaleK);
       x += atom.width;
       continue;
     }
@@ -281,6 +277,42 @@ function renderNoteLineAtoms(
   // #lizard forgives -- pre-existing per-atom-kind switch, unrelated to
   // this task's `javaRound4` removal (T6c); size predates this edit.
   return out;
+}
+
+/** Per-row layout inputs {@link renderNoteLineContent} needs -- bundled to
+ *  stay under this project's per-function param cap. */
+interface NoteLineRowCtx {
+  readonly i: number;
+  readonly lineTop: number;
+  readonly lineHeight: number;
+  readonly baselineOffset: number;
+  readonly fontSize: number;
+}
+
+/** One row's own text content (creole atoms or the pre-cutover plain-
+ *  `<text>` fallback) -- split out of {@link renderNoteText} purely to
+ *  keep that function's own NLOC under this project's complexity cap
+ *  after the cdd-T10 wiring fix added a second per-row push. */
+function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, theme: ScaledTheme): string {
+  const { i, lineTop, lineHeight, baselineOffset, fontSize } = row;
+  // cdd-B8FU: `NOTE_MARGIN_X1` is a render-time literal (imported from the
+  // SHARED `core/svek/image/Opale.ts`, but used here as a plain number --
+  // scaling this call site does not touch that file) -- `note.x` is already
+  // scaled (`class-scale-geo-note.ts`), so the margin must be too.
+  const marginX1 = NOTE_MARGIN_X1 * theme.scaleK;
+  if (note.lineAtoms !== undefined) {
+    return renderNoteLineAtoms(note.lineAtoms[i]!, note.x + marginX1, lineTop, lineHeight, theme, baselineOffset);
+  }
+  return text(note.x + marginX1, lineTop + baselineOffset, ln, {
+    fontFamily: theme.fontFamily,
+    fontSize,
+    // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
+    // consults (this branch has no per-atom color to check first, since
+    // it draws the note's own single, un-decomposed source line).
+    fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
+    lengthAdjust: 'spacing',
+    textLength: note.lineWidths[i]!,
+  });
 }
 
 /**
@@ -305,14 +337,19 @@ function renderNoteLineAtoms(
  *  OWN `textLength`, so a multi-line note whose lines have different widths
  *  (the common case) previously emitted the SAME (longest-line) value on
  *  every row; jar-verified against `sisolu-74-minu975`. */
-function renderNoteText(note: NoteGeo, theme: Theme): string {
+function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
   const parts: string[] = [];
   // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N`
   // override -- see `NOTE_FONT_SIZE`'s own doc comment. `baselineOffset`'s
   // formula (`fontSize - descent`, `descent == size/4.5`) is recomputed here
   // per-note rather than as a module constant, since it now varies with the
   // resolved size.
-  const fontSize = theme.colors.elements?.['note']?.fontSize ?? NOTE_FONT_SIZE;
+  // cdd-B8FU: BOTH the `<style>`/skinparam override AND the `NOTE_FONT_SIZE`
+  // default are UNSCALED (independent of `theme.fontSize`, which
+  // `scaleClassTheme` already scales) -- materialized the same way
+  // `attributeFontSize`'s own fallback tiers are (`renderer-classifier-
+  // rows.ts`, this same round).
+  const fontSize = (theme.colors.elements?.['note']?.fontSize ?? NOTE_FONT_SIZE) * theme.scaleK;
   const baselineOffset = fontSize - fontSize / 4.5;
   // G2 N56: cumulative running top-of-line, mirroring jar's real `SheetBlock1
   // #initMap`'s `y += sea.getHeight()` stack -- each line's OWN resolved
@@ -323,66 +360,62 @@ function renderNoteText(note: NoteGeo, theme: Theme): string {
   // that constructs one directly (mirrors `lineAtoms`'s identical optional-
   // with-fallback contract) -- `undefined` falls back to the flat `fontSize`
   // per line, BYTE-IDENTICAL to the pre-N56 formula.
-  let lineTop = note.y + NOTE_MARGIN_Y;
+  let lineTop = note.y + NOTE_MARGIN_Y * theme.scaleK;
   note.lines.forEach((ln, i) => {
     const lineHeight = note.lineHeights?.[i] ?? fontSize;
-    if (note.lineAtoms !== undefined) {
-      parts.push(
-        renderNoteLineAtoms(note.lineAtoms[i]!, note.x + NOTE_MARGIN_X1, lineTop, lineHeight, theme, baselineOffset),
-      );
-      lineTop += lineHeight;
-      return;
-    }
-    const y = lineTop + baselineOffset;
-    parts.push(
-      text(note.x + NOTE_MARGIN_X1, y, ln, {
-        fontFamily: theme.fontFamily,
-        fontSize,
-        // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms
-        // now consults (this branch has no per-atom color to check first,
-        // since it draws the note's own single, un-decomposed source line).
-        fill: theme.colors.graph.noteCascadeFontColor ?? '#000000',
-        lengthAdjust: 'spacing',
-        textLength: note.lineWidths[i]!,
-      }),
-    );
+    parts.push(renderNoteLineContent(note, ln, { i, lineTop, lineHeight, baselineOffset, fontSize }, theme));
+    // cdd-T10 wiring fix: a row's own `<line>`/table draws AT THIS ROW'S
+    // OWN POSITION (`lineTop`, BEFORE advancing) -- never appended after
+    // every row, which cannot reproduce the jar's interleaved child order
+    // (`BodyEnhancedAbstract.java:107-121`: a block-separator's divider
+    // draws immediately before its own block's content, not after the
+    // whole note). `renderNoteRowExtra` is a no-op ('') for every row
+    // that carries neither `lineDividers[i]` nor `lineTables[i]`.
+    parts.push(renderNoteRowExtra(note, lineTop, i, baselineOffset, theme));
     lineTop += lineHeight;
   });
   return parts.join('');
 }
 
-/** Plain note: folded-corner box + a separate dashed connector line to its
- *  host (or no connector at all for a freestanding note) -- every note
- *  kind EXCEPT a resolved member-tip (`renderTipNote` below). */
-export function renderNote(note: NoteGeo, theme: Theme): string {
-  const parts: string[] = [];
+/** Plain note: folded-corner box only -- every note kind EXCEPT a resolved
+ *  member-tip (`renderTipNote` below). cdd-T9b: the dashed host connector
+ *  is no longer built here at all -- it is a completely separate upstream
+ *  `Link` (`CommandFactoryNoteOnEntity.java:342`), drawn as its own `<g
+ *  class="link">` by `renderer.ts`'s edges phase via
+ *  `renderer-note-connector.ts#renderNoteConnectorPath` (T9 already moved
+ *  the EMISSION site; T9b moves the STYLE/id-owning code too, since the
+ *  note's own `NOTE_STROKE_WIDTH`/`'4 4'` never applied to it upstream in
+ *  the first place -- see `NOTE_STROKE_WIDTH`'s own doc comment). */
+export function renderNote(note: NoteGeo, theme: ScaledTheme): string {
+  return renderPlainNote(note, theme).entityParts.join('');
+}
 
-  const connector = buildConnectorPathData(note.connector);
-  if (connector !== '') {
-    parts.push(path(connector, { stroke: theme.colors.arrow, strokeWidth: NOTE_STROKE_WIDTH, strokeDasharray: '4 4' }));
-  }
-
+/**
+ * Plain note: folded-corner box (body + fold, two separate `UPath`s per
+ * `EntityImageNote.java:275-289`) plus its per-line text.
+ */
+export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityParts: string[] } {
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
-  const f = NOTE_FOLD;
-  parts.push(
-    polygon(
-      [
-        { x, y },
-        { x: x + w - f, y },
-        { x: x + w, y: y + f },
-        { x: x + w, y: y + h },
-        { x, y: y + h },
-      ],
-      { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH },
-    ),
-  );
-  // T7b: routed through svg-path-builder.ts (was a raw template literal).
-  const fold = [moveTo(x + w - f, y), lineTo(x + w - f, y + f), lineTo(x + w, y + f)].join(' ');
-  parts.push(path(fold, { stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }));
-  parts.push(renderNoteText(note, theme));
-
-  return parts.join('');
+  // cdd-B8FU: `NOTE_FOLD` feeds `noteBodyPathData` -- a class-local
+  // geometry builder (unlike the SEPARATE `opaleCorner` fold-flap primitive
+  // below, which lives in the SHARED `core/svek/image/Opale.ts` and is left
+  // unscaled -- out of this class-only task's write-set, see .agent-notes).
+  const f = NOTE_FOLD * theme.scaleK;
+  const entityParts: string[] = [
+    // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
+    // own doc comment), the note style's OWN stroke width (0.5).
+    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
+    // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
+    // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
+    // `renderOpaleNote` already call) -- filled with the note's OWN
+    // background (not `none`) at the diagram's DEFAULT stroke width, per
+    // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
+    // comment).
+    path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK }),
+    renderNoteText(note, theme),
+  ];
+  return { entityParts };
 }
 
 /**
@@ -395,17 +428,17 @@ export function renderNote(note: NoteGeo, theme: Theme): string {
  * `renderAssocPoint`'s identical unwrapped precedent, G2 N8).
  * @see ~/git/plantuml/.../svek/image/EntityImageTips.java#drawU
  */
-export function renderTipNote(note: NoteGeo, tip: TipShape, theme: Theme): string {
+export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
   const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const parts: string[] = [
-    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }),
+    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
     path(opaleCorner({ x: note.x, y: note.y }, note.width), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
   ];
   parts.push(renderNoteText(note, theme));
@@ -442,7 +475,7 @@ function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: Opale
  * edge.
  * @see ~/git/plantuml/.../svek/image/EntityImageNote.java#drawU
  */
-export function renderOpaleNote(note: NoteGeo, theme: Theme): string {
+export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
   const opale = note.opale!;
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
@@ -451,12 +484,12 @@ export function renderOpaleNote(note: NoteGeo, theme: Theme): string {
     path(opaleOutline(opale.direction, box, connector), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
     path(opaleCorner({ x: note.x, y: note.y }, note.width), {
       fill,
       stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
     }),
   ];
   parts.push(renderNoteText(note, theme));

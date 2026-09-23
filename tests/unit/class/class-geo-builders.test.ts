@@ -39,7 +39,7 @@ describe('buildNamespaceGeos — reads the cluster box verbatim (T5)', () => {
   const clusterIdByNs = new Map([['p', 'cluster0']]);
 
   it('takes x/y/width/height straight from the matching cluster box, no padding applied', () => {
-    const [geo] = buildNamespaceGeos(ast, defaultTheme, measurer, [box], clusterIdByNs);
+    const [geo] = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
     expect(geo?.x).toBe(12);
     expect(geo?.y).toBe(34);
     expect(geo?.width).toBe(56);
@@ -47,17 +47,17 @@ describe('buildNamespaceGeos — reads the cluster box verbatim (T5)', () => {
   });
 
   it('skips a namespace with no clusterIdByNs entry at all', () => {
-    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, [box], new Map());
+    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs: new Map(), hiddenIds: new Set() });
     expect(geos).toHaveLength(0);
   });
 
   it('skips a namespace whose clusterIdByNs id has no matching cluster entry', () => {
-    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, [], clusterIdByNs);
+    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [], clusterIdByNs, hiddenIds: new Set() });
     expect(geos).toHaveLength(0);
   });
 
   it('skips every namespace when clusters is undefined (degenerate / no-cluster diagram)', () => {
-    const geos = buildNamespaceGeos(ast, defaultTheme, measurer, undefined, clusterIdByNs);
+    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: undefined, clusterIdByNs, hiddenIds: new Set() });
     expect(geos).toHaveLength(0);
   });
 });
@@ -68,25 +68,25 @@ describe('buildNamespaceGeos — inkShape resolution (G2 N60, item 42)', () => {
   const clusterIdByNs = new Map([['p', 'cluster0']]);
 
   it('leaves inkShape undefined for the default (non-strict, non-rect) FOLDER style', () => {
-    const [geo] = buildNamespaceGeos(ast, defaultTheme, measurer, [box], clusterIdByNs);
+    const [geo] = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
     expect(geo?.inkShape).toBeUndefined();
   });
 
   it('resolves "polygon" for FOLDER style under skinparam style strictuml', () => {
     const strictTheme = { ...defaultTheme, strictUml: true };
-    const [geo] = buildNamespaceGeos(ast, strictTheme, measurer, [box], clusterIdByNs);
+    const [geo] = buildNamespaceGeos(ast, { theme: strictTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
     expect(geo?.inkShape).toBe('polygon');
   });
 
   it('resolves "rect" for skinparam packageStyle rect, even under strictuml', () => {
     const rectTheme = { ...defaultTheme, strictUml: true, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, rectTheme, measurer, [box], clusterIdByNs);
+    const [geo] = buildNamespaceGeos(ast, { theme: rectTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
     expect(geo?.inkShape).toBe('rect');
   });
 
   it('resolves "rect" for skinparam packageStyle rect without strictuml too', () => {
     const rectTheme = { ...defaultTheme, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, rectTheme, measurer, [box], clusterIdByNs);
+    const [geo] = buildNamespaceGeos(ast, { theme: rectTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
     expect(geo?.inkShape).toBe('rect');
   });
 });
@@ -356,6 +356,37 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     expect(edge.label).toBeUndefined();
   });
 
+  /**
+   * cdd-T37 (M8): a TEXT-BEARING single-line arrow's glyph origin floors
+   * the reserved `arrowFontSize + textWidth + 2*labelMarginOf(rel)` --
+   * jar's `getXY` (`SvekEdge.java:806-813`) returns the MINIMUM x/y of the
+   * reserved marker polygon a REAL graphviz run drew at the DOT-declared,
+   * `Math.floor`-ed width (`class-layout-edge-labels.ts#withLayoutBox`'s
+   * `Math.floor(a.labelBoxWidth!)`), not this file's own un-floored
+   * `arrowFontSize + textWidth`. `label` (text) stays UNCHANGED --
+   * `portLabelAnchor`'s own `Math.trunc(width)/2` hybrid already
+   * reconciles it algebraically regardless of the margin term (see
+   * `class-edge-label-attach.ts#attachMagicArrow`'s doc comment). Values
+   * captured on this branch after the cdd-T37 fix; jar-verified byte-exact
+   * against the real oracle family this mirrors (`bitove-03-sanu160`,
+   * `class-inheritance-interface-assoc` -- `decision-journal.md` rows
+   * 225+): both went `structural-match -> conformant`.
+   */
+  it('text-bearing backward arrow: glyph origin floors the margined total width (M8)', () => {
+    const ast: ClassDiagramAST = {
+      ...twoClassAst,
+      relationships: [{ from: 'A', to: 'B', type: 'association', label: 'besetzt <' }],
+    };
+    const geo = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
+    const edge = geo.edges[0]!;
+    expect(edge.label).toEqual({ text: 'besetzt', x: 41.68125, y: 96.11112311111113, width: 41.84375 });
+    expect(edge.arrowGlyph!.points).toEqual([
+      { x: 32.68125, y: 87.50001200000001 },
+      { x: 29.742323738537632, y: 96.54509697187476 },
+      { x: 35.62017626146236, y: 96.54509697187476 },
+    ]);
+  });
+
   it('a label with no arrow token keeps the pre-existing plain-label path unchanged', () => {
     const ast: ClassDiagramAST = {
       ...twoClassAst,
@@ -470,15 +501,41 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     expect(lines[3]!.x - lines[0]!.x).toBeCloseTo(0, 6);
   });
 
+  /**
+   * cdd-T37 (M8): `guideLinesAnchor`'s `blockLeft` floors `maxWidth` --
+   * jar's `getXY` corner comes from a REAL graphviz run's reserved marker
+   * polygon, drawn at the DOT-declared, `Math.floor`-ed width. Unlike the
+   * single-line arm, NO margin term appears in this formula at all: it
+   * cancels out algebraically for ANY integer `labelMarginOf` (see
+   * `class-edge-label-anchor.ts#guideLinesAnchor`'s own doc comment).
+   * Jar-verified: `gobuco-16-ruke239`/`lapoma-04-vaga142` went from a
+   * uniform Δ0.23 on every triangle vertex AND the adjacent `text/@x` to
+   * `structural-match -> conformant` (`decision-journal.md` rows 225+).
+   * Values captured on this branch after the fix.
+   */
+  it('gobuco: glyph + text origin floors maxWidth, no margin term (M8, pinned)', () => {
+    const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
+    const lines = geo.edges[0]!.labelLines!;
+    expect(lines[0]!.x).toBeCloseTo(41.68125, 6);
+    expect(lines[0]!.glyph!.points).toEqual([
+      { x: 33.68125, y: 97.500012 },
+      { x: 36.62017626146236, y: 88.45492702812527 },
+      { x: 30.742323738537632, y: 88.45492702812527 },
+    ]);
+  });
+
   it('a two-line label with NO token keeps the exact pre-T2 create0 path (pinned)', () => {
     const geo = layoutClass(astFor('this is\\non several\\nlines'), defaultTheme, measurer);
     const lines = geo.edges[0]!.labelLines!;
     for (const l of lines) expect(l.glyph).toBeUndefined();
-    // Values captured on main at 7ba67fcd before T2 (same AST, same measurer).
+    // Values captured on main at 7ba67fcd before T2, updated by cdd-T37
+    // (M8): `multiLineLabelAnchor`'s `blockLeft` now floors `maxWidth`
+    // (`sacacu-34-dobo091` jar-verified) -- see that function's own doc
+    // comment.
     expect(lines.map((l) => [l.text, l.x, l.y, l.width])).toEqual([
-      ['this is', 41.853125, 96.11112311111111, 29.65625],
-      ['on several', 28.4875, 109.11112311111111, 56.387499999999996],
-      ['lines', 43.275, 122.11112311111111, 26.8125],
+      ['this is', 42.046875, 96.11112311111111, 29.65625],
+      ['on several', 28.68125, 109.11112311111111, 56.387499999999996],
+      ['lines', 43.46875, 122.11112311111111, 26.8125],
     ]);
   });
 
@@ -486,12 +543,20 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     const geo = layoutClass(astFor('ok >'), defaultTheme, measurer);
     const edge = geo.edges[0]!;
     expect(edge.labelLines).toBeUndefined();
-    // Values captured on main at 7ba67fcd before T2.
+    // Values captured on main at 7ba67fcd before T2. `label` (text) is
+    // UNCHANGED by cdd-T37 -- `portLabelAnchor`'s own `Math.trunc(width)/2`
+    // hybrid already reconciles it against jar (see that task's fix doc
+    // comment on `attachMagicArrow`, `class-edge-label-attach.ts`).
     expect(edge.label).toEqual({ text: 'ok', x: 41.68125, y: 96.11112311111113, width: 13.73125 });
+    // cdd-T37 (M8): the GLYPH origin moved -- jar's real oracle
+    // (`lojepe-37-liri985`) confirms these are the byte-exact values
+    // (`plans/class-divergence-drive/decision-journal.md` rows 225+):
+    // `center.x - Math.floor(arrowFontSize + textWidth) / 2`, not the
+    // pre-T37 un-floored `center.x - (arrowFontSize + textWidth) / 2`.
     expect(edge.arrowGlyph!.points).toEqual([
-      { x: 33.315625, y: 97.50001200000001 },
-      { x: 36.25455126146237, y: 88.45492702812527 },
-      { x: 30.37669873853763, y: 88.45492702812527 },
+      { x: 32.68125, y: 97.50001200000001 },
+      { x: 35.62017626146236, y: 88.45492702812527 },
+      { x: 29.742323738537632, y: 88.45492702812527 },
     ]);
   });
 

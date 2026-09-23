@@ -13,6 +13,7 @@ import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
 // `splitEdgeLabelLines` import, see `class-edge-label-lines.ts`'s own doc
 // comment.
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
 
 /** Every creole text atom's line height floors at 10px --
  *  `AtomText#calculateDimensionSlow`'s `if (h < 10) h = 10;`. Observable
@@ -109,8 +110,34 @@ export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
  * jar-verified against `dofima`'s own per-line `y` delta (exactly
  * `fontSpec.size`, 14, matching `measurer.measure(line, font).height ===
  * font.size` for EVERY measurer in this codebase, `measurer-deterministic
- * .ts`'s own doc comment).
+ * .ts`'s own doc comment). See {@link headerLineY} for the CDD B7FU-R2
+ * item (c) sprite-line exception to that flat formula.
  */
+
+/**
+ * CDD B7FU-R2 item (c) (rotisi-30-loge424, `class "<$bug16>" as foo1`):
+ * same bottom-anchor mechanism `class-member-rows.ts#buildSectionRows`'s
+ * own doc comment documents in full -- a sprite/img (`'image'`-kind) atom
+ * draws TOP-anchored at an absolute pixel position with no per-atom `dy`
+ * correction, so ITS line needs `y` bottom-anchored to its real height;
+ * every other line (plain text, sup/sub, blank) keeps the flat `nameTop +
+ * i * fontSize + baselineOffset` stepping `dofima`'s own golden verifies.
+ * Split out purely to keep {@link buildHeaderRows}'s row-map callback
+ * under the project's per-function CCN cap.
+ */
+function headerLineY(params: {
+  nameTop: number;
+  i: number;
+  fontSize: number;
+  baselineOffset: number;
+  atoms: readonly MemberRenderAtom[] | undefined;
+  height: number | undefined;
+}): number {
+  const { nameTop, i, fontSize, baselineOffset, atoms, height } = params;
+  const flat = nameTop + i * fontSize + baselineOffset;
+  if (atoms?.some((a) => a.kind === 'image') !== true) return flat;
+  return flat + (height ?? fontSize) - fontSize;
+}
 export function buildHeaderRows(input: {
   header: HeaderInfo;
   /** G2 N64: already-split via {@link splitDisplayLines} -- this module
@@ -143,9 +170,23 @@ export function buildHeaderRows(input: {
   /** G2 N64: the NBSP (U+00A0) glyph's own measured width at `fontSpec`,
    *  pre-measured by the caller -- see the blank-line handling below. */
   blankLineRenderWidth: number;
+  /** cdd-T25 (M8b): one entry per line, `undefined` when that line carries
+   *  no creole markup (`class-layout-header-creole.ts#buildHeaderLine`'s
+   *  `hasMarkup`) -- set as `row.atoms` for a markup-bearing line only, so
+   *  `renderer-classifier-rows.ts#renderRowText` draws it via the SAME
+   *  per-atom path (`renderRowAtoms`) a member row already uses, while a
+   *  markup-free header line keeps the pre-T25 plain-text row untouched
+   *  (never set for the blank-line NBSP row -- that branch's own render
+   *  substitution has no atom-path analogue). */
+  lineAtoms?: ReadonlyArray<readonly MemberRenderAtom[] | undefined>;
+  /** CDD B7FU-R2 item (c): per-line height, parallel to {@link lineAtoms}
+   *  -- feeds the bottom-anchor `y` shift below for a sprite-bearing
+   *  line, the SAME gate `class-member-rows.ts#buildSectionRows` carries. */
+  lineHeights?: readonly number[];
 }): ClassifierGeo['rows'] {
   const { header, lines, lineWidths, align, circleWidth, widthStereoAndName, nameWidth, h1, h2 } = input;
-  const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth } = input;
+  const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth, lineAtoms } = input;
+  const { lineHeights } = input;
   const indent = circleWidth + (widthStereoAndName - nameWidth) / 2 + h1 + h2 + NAME_LEFT_MARGIN;
   const badgeIndent = h1 + BADGE_LEFT_MARGIN + badgeRadius;
   const lastIndex = lines.length - 1;
@@ -171,10 +212,36 @@ export function buildHeaderRows(input: {
     // (possibly `0`) `lineWidth`, matching `julixi`'s own jar-verified `x`
     // position exactly -- only the DRAWN `text`/`width` substitute NBSP,
     // mirroring N57's "layout width stays raw, render width doesn't" split.
-    const isBlank = /^\s*$/.test(line);
+    //
+    // CDD B7FU-R2 item (c) correction (rotisi-30-loge424, `class "<$bug16>"
+    // as foo1`): a line whose ENTIRE content is a non-text atom (a sprite)
+    // ALSO has an empty `atomsToPlainText` projection (`class-member-
+    // display.ts#atomsToPlainText` filters to `kind === 'text'` only), so
+    // the bare `/^\s*$/.test(line)` check wrongly classified it as
+    // julixi's genuinely-blank case, dropping its (already correctly
+    // resolved) sprite atom and substituting a literal NBSP `<text>`
+    // instead of the `<image>` jar draws. Gated on the line carrying a
+    // real drawable (non-text) atom -- NOT on `lineAtoms?.[i] !==
+    // undefined` alone, which a SECOND regression (found by julixi-10-
+    // jide878's own test) showed is ALSO true for a genuinely EMPTY line:
+    // `class-layout-header-creole.ts#buildHeaderLine`'s `hasMarkup` check
+    // (`resolved.atoms.length === 1 && ... .text === line`) is false for
+    // a zero-atom resolution too (an empty line resolves to ZERO atoms,
+    // not one unchanged text atom), so `lineAtoms[i]` is a defined EMPTY
+    // array there, not `undefined` -- checking for an actual non-text
+    // atom handles both a real sprite line and a genuinely blank one.
+    const hasDrawableAtom = lineAtoms?.[i]?.some((a) => a.kind !== 'text') === true;
+    const isBlank = !hasDrawableAtom && /^\s*$/.test(line);
     return {
       text: isBlank ? '\u00A0' : line,
-      y: nameTop + i * fontSpec.size + baselineOffset,
+      y: headerLineY({
+        nameTop,
+        i,
+        fontSize: fontSpec.size,
+        baselineOffset,
+        atoms: lineAtoms?.[i],
+        height: lineHeights?.[i],
+      }),
       indent: indent + lineOffset,
       // G2 N32: kind-derived italic (interface/abstract) UNIONED with
       // `skinparam classFontStyle italic` -- see `theme.ts#classFontItalic`'s
@@ -188,6 +255,10 @@ export function buildHeaderRows(input: {
       ...(i === lastIndex ? { badgeIndent } : {}),
       fontFamily: fontSpec.family,
       fontSize: fontSpec.size,
+      // cdd-T25 (M8b): never for the blank-line NBSP substitution row --
+      // that branch's own render-time substitution has no atom-path
+      // analogue (see `lineAtoms`'s own doc comment above).
+      ...(!isBlank && lineAtoms?.[i] !== undefined ? { atoms: lineAtoms[i] } : {}),
     };
   });
 }
@@ -248,6 +319,12 @@ export interface GenericTagDim {
   width: number;
   height: number;
   rawTextWidth: number;
+  /** CDD T6FU: the `Display.getWithNewlines` split (`EntityImageClass
+   *  Header.java:146`) the block's own `height` is ALREADY computed from
+   *  (R2c), now carried forward so `buildGenericTagGeo` can place one
+   *  `<text>` per line instead of re-measuring a joined string. Always at
+   *  least one entry. */
+  lines: ReadonlyArray<{ text: string; width: number }>;
 }
 
 /**
@@ -284,12 +361,16 @@ export function measureGenericTagDim(
   // 4-line generic at 12pt -> 4*12+4 = 52px tall; `ps/g4f`: at 6pt ->
   // 4*10+4 = 44, the AtomText 10px line floor). Single-line input reduces
   // to the pre-existing `fontSize + 4` byte-identically at >=10pt.
-  const lines = splitDisplayLines(text).lines;
-  const rawTextWidth = Math.max(...lines.map((l) => measurer.measure(l, { family: fontFamily, size: fontSize }).width));
+  const measured = splitDisplayLines(text).lines.map((l) => ({
+    text: l,
+    width: measurer.measure(l, { family: fontFamily, size: fontSize }).width,
+  }));
+  const rawTextWidth = Math.max(...measured.map((l) => l.width));
   return {
     width: rawTextWidth + GENERIC_TAG_MARGIN,
-    height: lines.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,
+    height: measured.length * atomTextLineHeight(fontSize) + GENERIC_TAG_MARGIN,
     rawTextWidth,
+    lines: measured,
   };
 }
 
@@ -297,7 +378,17 @@ export function measureGenericTagDim(
  *  `geo.x`/`geo.y` at render time), matching `badgeIndent`/`row.indent`'s
  *  existing convention. */
 export interface GenericTagGeo {
+  /** The whole clause, joined -- kept for callers that want the raw text;
+   *  the RENDERED form is {@link GenericTagGeo.lines}. */
   text: string;
+  /** CDD T6FU: one entry per `Display.getWithNewlines` line
+   *  (`EntityImageClassHeader.java:146`), each already placed and measured
+   *  -- `HorizontalAlignment.CENTER` on the widest line, one
+   *  `atomTextLineHeight` apart. Mirrors `EdgeGeo.labelLines`'s existing
+   *  multi-line convention (`class-geo-types.ts:328-334`). A single-line
+   *  clause yields exactly one entry at `textX`/`textY`, so the rendered
+   *  output is byte-identical to the pre-T6FU single-`<text>` form. */
+  lines: ReadonlyArray<{ text: string; x: number; y: number; width: number }>;
   rectX: number;
   rectY: number;
   rectWidth: number;
@@ -343,14 +434,27 @@ export function buildGenericTagGeo(
   const rectX = boxWidth - dim.width + GENERIC_TAG_MARGIN + 1;
   const rectY = -GENERIC_TAG_MARGIN + 1;
   const text = rawText ?? typeParams.join(', ');
+  const textX = rectX + 1;
+  const textY = rectY + 1 + baselineOffset;
+  // `HorizontalAlignment.CENTER` (`EntityImageClassHeader.java:147`): each
+  // line is centred within the block's own widest line, and lines advance
+  // by the SAME `atomTextLineHeight` the block's `height` was summed from.
+  const lineHeight = atomTextLineHeight(fontSize);
+  const lines = dim.lines.map((l, i) => ({
+    text: l.text,
+    x: textX + (dim.rawTextWidth - l.width) / 2,
+    y: textY + i * lineHeight,
+    width: l.width,
+  }));
   return {
     text,
+    lines,
     rectX,
     rectY,
     rectWidth: dim.width - 2,
     rectHeight: dim.height - 2,
-    textX: rectX + 1,
-    textY: rectY + 1 + baselineOffset,
+    textX,
+    textY,
     textWidth: dim.rawTextWidth,
     fontFamily,
     fontSize,

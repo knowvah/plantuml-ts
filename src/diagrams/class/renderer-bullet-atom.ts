@@ -45,12 +45,19 @@ export function renderBulletAtom(
   x: number,
   lineTop: number,
   lineHeight: number,
+  // cdd-B8FU (D4/journal row 175): defaults to 1 so every pre-existing
+  // caller/test is unaffected; every constant below is a render-time
+  // pixel literal jar's `format()` would scale, unlike `x`/`lineTop`/
+  // `lineHeight`, already scaled by the caller.
+  k = 1,
 ): string {
-  const top = lineTop + lineHeight - BULLET_SEA_DEPTH;
+  const top = lineTop + lineHeight - BULLET_SEA_DEPTH * k;
   if (atom.order === 0) {
-    return ellipse(x + BULLET_DX_ORDER0 + BULLET_R, top + BULLET_R, BULLET_R, BULLET_R, { fill: atom.fill });
+    const r = BULLET_R * k;
+    return ellipse(x + BULLET_DX_ORDER0 * k + r, top + r, r, r, { fill: atom.fill });
   }
-  return rect(x + BULLET_DX_NESTED_BASE + BULLET_NESTED_STEP * atom.order, top, BULLET_RECT, BULLET_RECT, {
+  const rectSize = BULLET_RECT * k;
+  return rect(x + BULLET_DX_NESTED_BASE * k + BULLET_NESTED_STEP * k * atom.order, top, rectSize, rectSize, {
     fill: atom.fill,
   });
 }

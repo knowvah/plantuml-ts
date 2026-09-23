@@ -61,7 +61,7 @@ import {
   resolveOpenIconicAtom,
   type ResolvedMemberAtom,
 } from './class-member-atom-resolve.js';
-import type { CreoleAtom, CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
+import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import {
   buildStripeAtoms,
@@ -72,140 +72,11 @@ import { type SpriteDimsLookup } from '../../core/creole-atoms.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getSplitted } from '../../core/klimt/creole/Fission.js';
+import { manageGuillemet } from '../../core/text/Guillemet.js';
+import { textRenderOverride, resolveTabbedTextRuns } from './class-member-creole-render-text.js';
 
-/**
- * One RESOLVED, render-ready run of a member row -- unlike `CreoleAtom`
- * (whose `'inline'` variant carries an unresolved `InlineAtomToken`), a
- * `'sprite'`/`'img'` atom is already resolved to its drawable `<image>`
- * geometry here, at LAYOUT time (`buildMemberRow`, which already has the
- * `SpriteRegistry` in scope) -- so `renderer-classifier-box.ts` never needs
- * its own sprite-registry parameter, mirroring how `row.width`/`textLength`
- * are already pre-measured at layout time rather than recomputed at render
- * time. A `'latex'` `CreoleAtom` (`<math>`/`<latex>`) resolves to that SAME
- * `'image'` kind, via {@link resolveLatexAtom} -- `AtomMath` measures and
- * draws one image at altitude 0, exactly as `AtomImg` does
- * (`AtomMath.java:64-97`), so it needs no variant of its own. It used to be
- * DROPPED here; once `CommandCreoleBuilder.java:111`'s `CommandCreoleMath`
- * was registered that stopped meaning "renders as its own literal markup"
- * and started meaning "vanishes from the page", which is the strictly worse
- * of the two. An unresolved sprite name IS still dropped, matching
- * `StripeSimple.addSprite`'s "unknown sprite contributes nothing" rule
- * (java :228-236).
- */
-export type MemberRenderAtom =
-  | {
-      readonly kind: 'text';
-      readonly text: string;
-      readonly font: FontConfiguration;
-      /** LAYOUT width -- feeds x-advance and every line/box width sum.
-       *  Upstream: `AtomText#calculateDimensionSlow`/`drawU`'s tab-
-       *  tokenizer loop, which measures the RAW (unsubstituted) run --
-       *  G2 N57 item 38's own finding: for a run that is ENTIRELY
-       *  whitespace this is deliberately 0 (`SANS_SERIF_BLOCKS[0][32]`,
-       *  byte-exact match of the jar's own width table, full 255-block
-       *  comparison, NOT a data gap). Never derived from `renderWidth`. */
-      readonly width: number;
-      /** G2 N57 item 38: set ONLY when `text` matches `^\s*$` (entirely
-       *  whitespace) -- the RENDER-time substitution `DriverTextSvg.java`
-       *  applies (`text.matches("^\\s*$") -> text.replace(' ', (char)
-       *  160)`, regular space -> NBSP U+00A0) before drawing AND before
-       *  re-measuring for the `textLength` attribute. `undefined` for
-       *  every other atom (the common case) -- renderers fall back to
-       *  `text`/`width` unchanged, matching every other optional-field
-       *  "always set by production, absent elsewhere" precedent in this
-       *  file (`url` above). Jar-verified against `vicuro-37-tese143`'s
-       *  real golden SVG (`textLength="3.575"` for a bare 13pt space). */
-      readonly renderText?: string;
-      /** The re-measured width of {@link renderText} -- upstream's
-       *  `DriverTextSvg.draw` calls `stringBounder.calculateDimension`
-       *  a SECOND time on the substituted string, a DIFFERENT value from
-       *  `width` (which stays the RAW/layout width, see above). Always
-       *  set together with `renderText` (never independently). */
-      readonly renderWidth?: number;
-      /** G2 N40: set when this run came from a `[[url]]` creole command's
-       *  captured label (`core/klimt/creole/atom/Atom.ts#CreoleAtomUrl`) --
-       *  `renderer-classifier-box.ts#renderRowAtoms` wraps the emitted
-       *  `<text>` in `<a href>` when present. */
-      readonly url?: CreoleAtomUrl;
-      /** SI30 D2/D3: baseline correction from the row's per-line `Sea`
-       *  placement (`core/svek/image/creole-sea-line.ts`'s doc comment has
-       *  the full derivation) — 0 for every atom on an all-NORMAL line
-       *  (identity property), non-zero only when a `<sup>`/`<sub>` run
-       *  shares the line (`FontPosition.getSpace()`, `AtomText.java:
-       *  321-323`). Renderers draw at `lineTop + lineHeight -
-       *  atom.font.size / 4.5 + dy` — the UNMUTED descent term stays
-       *  unchanged (`AtomText.java:213-215`'s own commented-out altitude
-       *  line; the real altitude reaches the page through `dy` alone, per
-       *  `decisions.md#D2`'s "must not be applied twice" rule). `undefined`
-       *  only for a `'text'` atom built directly by a resolver that never
-       *  routes through {@link resolveMemberAtoms}'s own Sea pass (today:
-       *  {@link resolveEmojiAtom} in `class-member-atom-resolve.ts`, whose
-       *  underlying raw atom is `'emoji'`-kind and therefore always gets
-       *  `dy = 0` from `Sea` anyway — renderers read `atom.dy ?? 0`). */
-      readonly dy?: number;
-    }
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
-  /** G2 N41: an OpenIconic `<&glyph>` atom -- `name`/`factor` feed
-   *  `openiconic-glyphs.ts#buildOpenIconicPathD` at RENDER time (needs the
-   *  row's own x/y, not known yet at this LAYOUT-time build step -- mirrors
-   *  `'image'`'s own "resolve dims here, resolve pixel position later"
-   *  split). `fill` is the resolved color (forced `color=`/`#RRGGBB`
-   *  override, else the ambient font color, else `#000000`). */
-  /** B22/M21: a creole bullet-list marker (`* item`) — upstream's
-   *  `klimt/creole/atom/Bullet.java:58-69` draws a real SHAPE, not text:
-   *  `order 0` translates `dx(3)` and draws `UEllipse.build(5, 5)`;
-   *  `order >= 1` translates `dx(1 + 8*order)` and draws
-   *  `URectangle.build(3.5, 3.5)`. Both are stroked with
-   *  `UStroke.withThickness(0)` and filled with the font colour, which is
-   *  why the emitted shape carries a `fill` and NO stroke — visibly
-   *  different from the `VisibilityModifier` glyph (`rx=3` WITH
-   *  `stroke-width:1`) that an object member row's `*` draws instead.
-   *  `width` is the cell width the layout already reserved, unchanged. */
-  | {
-      readonly kind: 'bullet';
-      readonly order: number;
-      readonly fill: string;
-      readonly width: number;
-    }
-  | {
-      readonly kind: 'vector';
-      readonly name: string;
-      readonly factor: number;
-      readonly fill: string;
-      readonly width: number;
-      readonly height: number;
-    };
-
-/** One member row's fully built+measured creole content. */
-export interface MemberRowBuild {
-  readonly atoms: readonly MemberRenderAtom[];
-  /** Sum of every atom's own measured width -- UNROUNDED (ADR-1: `core/
-   *  svg.ts` formats every numeric attribute at emission now, so nothing
-   *  upstream of that boundary pre-rounds; `sectionWidth`'s max-width scan
-   *  and `buildSectionRows`'s stored `row.width` both consume this raw). */
-  readonly width: number;
-  /** A2s R2i (lozego-15-coci435): this row's own line height. SI30 D2/D3:
-   *  now `Sea`'s own reduction (`Sea.java:72-91`'s `doAlign`/
-   *  `translateMinYto`/`getHeight`, algebraically `max(altitude) +
-   *  max(height - altitude)` for a single stripe stacked at y=0 — see
-   *  {@link seaLineHeightAndSpan}) rather than a flat MAX, so a line mixing
-   *  a `<sub>` (altitude +3) with NORMAL runs grows correctly. Altitude is
-   *  0 for every atom except a `'text'` one with a non-NORMAL
-   *  `FontPosition` (`decisions.md#D2`'s literal scope — "Text atoms report
-   *  the getStartingAltitude"; emoji/image/vector/bullet keep the PRE-SI30
-   *  altitude-0 treatment, unchanged, so this is additive: for an
-   *  all-NORMAL line every atom's altitude is 0 and the reduction collapses
-   *  back to the original flat MAX (text -> `atomTextLineHeight(font.size)`
-   *  i.e. font size floored 10, AtomText.java:179-181; img/sprite/vector ->
-   *  the atom's scaled pixel height; emoji -> `39*factor`,
-   *  `atom/AtomEmoji.ts`) byte-identical. Upstream: `MethodsOrFieldsArea#
-   *  calculateDimensionOnlyMembers` advances `y += dim.getHeight()` PER
-   *  MEMBER (java:161-166) where `dim` is that member's own TextBlock
-   *  dimension -- a 100px sprite row advances 100*scale, not the uniform
-   *  text row height (jar: lozego's `<$test>` field row = 100*14/13 =
-   *  107.6923px; node 2.162393in golden-exact). */
-  readonly height: number;
-}
+export type { MemberRenderAtom, MemberRowBuild } from './class-member-render-atom.js';
+import type { MemberRenderAtom, MemberRowBuild } from './class-member-render-atom.js';
 
 /**
  * The base `FontConfiguration` a member row's creole build starts from --
@@ -238,7 +109,19 @@ export function memberBaseFont(
   if (member.isAbstract === true || fontSpec.italic === true) styles.add(FontStyle.ITALIC);
   if (member.isStatic === true) styles.add(FontStyle.UNDERLINE);
   if (fontSpec.bold === true) styles.add(FontStyle.BOLD);
-  return { family: fontSpec.family, size: fontSpec.size, color: null, styles };
+  // cdd-B7FU-R1: upstream seeds the two INDEPENDENTLY. `FontConfiguration
+  // #create(UFont, …)` bakes the skinparam's weight/slant into `styles` via
+  // `getStyles(font)` (`FontConfiguration.java:65-73`, reading
+  // `font.getFontFace().isBold()/isItalic()`) while `currentFont` — hence
+  // `getFontFace()` — keeps that same face in its own right. Only the FIRST
+  // is clearable: `add(FontStyle.PLAIN)` (java:301-309) clears `styles` and
+  // passes `currentFont` through, which is why `<plain>` cannot unbold a
+  // `skinparam classFontStyle bold` header (`diseka-11-gozu390`, journal
+  // rows 119-121). The ITALIC seed is the same `isItalic()` half of that
+  // face; `{abstract}`/`{static}` are per-MEMBER creole-level styles, not
+  // face properties, so they stay out of it.
+  const fontFace = { cssWeight: fontSpec.bold === true ? 700 : 400, italic: fontSpec.italic === true };
+  return { family: fontSpec.family, size: fontSpec.size, color: null, styles, fontFace };
 }
 
 /**
@@ -250,7 +133,17 @@ export function memberBaseFont(
  * with no member-row analogue).
  */
 export function buildMemberAtoms(text: string, font: FontConfiguration): readonly CreoleAtom[] {
-  const cls = classifyStripeLine(text);
+  // A4 4: `manageGuillemet` runs on EVERY creole line upstream, before
+  // classification (`CreoleParser.java:175-176`: `createStripes(skinParam
+  // .guillemet().manageGuillemet(cs.toString()), …)`) -- this port's
+  // member-row seam skipped it entirely, so a `<<Name>>` role/stereotype
+  // marker in member text never became `«Name»` (padapo-73-beke177). No
+  // skinparam-guillemet threading here (matches this seam's existing
+  // no-`skinParam`-parameter shape) -- `manageGuillemet`'s own default
+  // param is upstream's `Guillemet.GUILLEMET` default pair, the correct
+  // fallback absent a `skinparam guillemet` override.
+  const managed = manageGuillemet(text);
+  const cls = classifyStripeLine(managed);
   if (cls.type === 'NORMAL') return buildStripeAtoms(cls.content, font);
   if (cls.type === 'HEADING') return buildStripeAtoms(cls.content, fontConfigurationForHeading(font, cls.order));
   if (cls.type === 'LITERAL') return buildLiteralAtoms(cls.content, font);
@@ -258,10 +151,36 @@ export function buildMemberAtoms(text: string, font: FontConfiguration): readonl
   // `....` separator (empty capture) has no MethodsOrFieldsArea analogue --
   // that shape only exists for description's block-level separator stripe.
   // Zero corpus reach for a class member declaration (grep-verified); fall
-  // back to ONE plain atom of the untouched original text so this
-  // unreachable-in-practice case still measures/renders exactly as it did
-  // before this mission, rather than silently losing the text.
-  return [{ kind: 'text', text, font }];
+  // back to ONE plain atom of the untouched (guillemet-managed) text so
+  // this unreachable-in-practice case still measures/renders exactly as it
+  // did before this mission, rather than silently losing the text.
+  return [{ kind: 'text', text: managed, font }];
+}
+
+/** Bundled resolver inputs -- {@link resolveAtomEntries}'s own params would
+ *  otherwise exceed this project's per-function param cap (mirrors
+ *  `SectionRowContext`'s identical rationale in `class-member-rows.ts`). */
+interface ResolveContext {
+  readonly baseFont: FontConfiguration;
+  readonly measurer: StringMeasurer;
+  readonly sprites: SpriteRegistry | undefined;
+  readonly spriteDims: SpriteDimsLookup | undefined;
+  readonly expandTabs: boolean;
+}
+
+/** One input `CreoleAtom` resolved to ZERO OR MORE `ResolvedMemberAtom`s --
+ *  zero for an atom that contributes nothing (dropped sprite/latex), one for
+ *  the common case, or several for a tab-bearing `'text'` atom under
+ *  `ctx.expandTabs` (T26, {@link resolveTabbedTextRuns}'s own doc comment).
+ *  Factored out of {@link resolveMemberAtoms} purely to keep that function's
+ *  own NLOC/CCN under this project's complexity cap. */
+function resolveAtomEntries(atom: CreoleAtom, ctx: ResolveContext): readonly ResolvedMemberAtom[] {
+  if (ctx.expandTabs && atom.kind === 'text') {
+    const many = resolveTabbedTextRuns(atom.text, atom.font, atom.url, ctx.measurer);
+    if (many !== undefined) return many;
+  }
+  const single = resolveOneAtom(atom, ctx.baseFont, ctx.measurer, ctx.sprites, ctx.spriteDims);
+  return single === undefined ? [] : [single];
 }
 
 /**
@@ -273,30 +192,57 @@ export function buildMemberAtoms(text: string, font: FontConfiguration): readonl
  * with no `sprite` definitions at all); a `latex` atom resolves to the image
  * `AtomMath` measures and draws (see `MemberRenderAtom`'s own doc comment).
  */
+/** {@link resolveMemberAtoms}'s per-atom accumulation loop, factored out
+ *  purely to keep that function's own NLOC under this project's complexity
+ *  cap (T26 added the inner {@link resolveAtomEntries} fan-out). */
+function accumulateResolvedAtoms(
+  atoms: readonly CreoleAtom[],
+  ctx: ResolveContext,
+): { rendered: MemberRenderAtom[]; heightEntries: { altitude: number; height: number }[]; width: number } {
+  const rendered: MemberRenderAtom[] = [];
+  // SI30 D2/D3: each kept atom's own `{altitude, height}` for the line's
+  // `Sea` reduction (`seaLineHeightAndSpan`). Altitude is 0 for every
+  // non-`'text'` atom and for a `'text'` atom with no `FontPosition` (or
+  // NORMAL) -- the pre-SI30 flat-MAX height this reduces to when no
+  // `<sup>`/`<sub>` shares the line.
+  const heightEntries: { altitude: number; height: number }[] = [];
+  let width = 0;
+  for (const atom of atoms) {
+    for (const resolved of resolveAtomEntries(atom, ctx)) {
+      rendered.push(resolved.atom);
+      width += resolved.width;
+      const altitude =
+        resolved.atom.kind === 'text' ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL) : 0;
+      heightEntries.push({ altitude, height: resolved.lineHeight });
+    }
+  }
+  return { rendered, heightEntries, width };
+}
+
 export function resolveMemberAtoms(
   atoms: readonly CreoleAtom[],
   baseFont: FontConfiguration,
   measurer: StringMeasurer,
   sprites?: SpriteRegistry,
+  // T26 (gekope-01-ricu859): opt-in tab-stop expansion
+  // (`class-member-creole-render-text.ts#resolveTabbedTextRuns`) -- default
+  // OFF so `class-object-member-creole.ts#buildObjectMemberRow` (the ONE
+  // other caller of this shared function that ALREADY re-tokenizes a
+  // tab-bearing atom itself, with its own skinparam-tabSize-aware stop) and
+  // `class-map-sizing.ts`/`class-json-sizing.ts`/`note-layout-measure*.ts`
+  // (untouched by this mission) keep their exact pre-existing behavior.
+  // `buildMemberRow`/`buildWrappedMemberRows` -- the CLASS engine's own two
+  // entry points, which have no tab handling of their own -- opt in.
+  expandTabs = false,
 ): MemberRowBuild {
-  const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
-  const rendered: MemberRenderAtom[] = [];
-  // SI30 D2/D3: parallel to `rendered` -- each kept atom's own `{altitude,
-  // height}` for the line's `Sea` reduction (`seaLineHeightAndSpan`).
-  // Altitude is 0 for every non-`'text'` atom and for a `'text'` atom with
-  // no `FontPosition` (or NORMAL) -- the pre-SI30 flat-MAX height this
-  // reduces to when no `<sup>`/`<sub>` shares the line.
-  const heightEntries: { altitude: number; height: number }[] = [];
-  let width = 0;
-  for (const atom of atoms) {
-    const resolved = resolveOneAtom(atom, baseFont, measurer, sprites, spriteDims);
-    if (resolved === undefined) continue;
-    rendered.push(resolved.atom);
-    width += resolved.width;
-    const altitude =
-      resolved.atom.kind === 'text' ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL) : 0;
-    heightEntries.push({ altitude, height: resolved.lineHeight });
-  }
+  const ctx: ResolveContext = {
+    baseFont,
+    measurer,
+    sprites,
+    spriteDims: sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined,
+    expandTabs,
+  };
+  const { rendered, heightEntries, width } = accumulateResolvedAtoms(atoms, ctx);
   const { height } = seaLineHeightAndSpan(heightEntries);
   // SI30 D2: `dy`'s own `maxSpan` reduction is TEXT-ONLY -- an img/sprite/
   // vector atom is drawn via its own INDEPENDENT placement rule
@@ -326,7 +272,13 @@ export function resolveMemberAtoms(
  *  keep that function's own NLOC/CCN under this project's complexity cap.
  *  Returns `undefined` for an atom that contributes nothing (an unresolved
  *  sprite name, or a dropped `latex` atom). */
-function resolveOneAtom(
+// CDD B7FU-R2 item (d): exported (was private) -- `class-layout-header-
+// creole.ts#buildWrappedHeaderLine` needs the SAME per-atom width
+// callback `buildWrappedMemberRows` below passes to `getSplitted`, to
+// wrap a classifier NAME line through the real creole/sprite atom
+// pipeline instead of a synthetic plain-text stand-in (see that
+// function's own doc comment).
+export function resolveOneAtom(
   atom: CreoleAtom,
   baseFont: FontConfiguration,
   measurer: StringMeasurer,
@@ -341,15 +293,14 @@ function resolveOneAtom(
     // `atomFontSpec` for every NORMAL run.
     const spec = mutedAtomFontSpec(atom.font);
     const width = measurer.measure(atom.text, spec).width;
-    // G2 N57 item 38: `DriverTextSvg.java`'s `text.matches("^\\s*$")`
-    // RENDER-time-only NBSP substitution -- gated on the run being
-    // ENTIRELY whitespace (non-empty; an empty string trivially matches
-    // the regex too but contributes nothing either way). `width` above
-    // (the LAYOUT value) is DELIBERATELY left at the raw measured 0 --
-    // see `MemberRenderAtom`'s own doc comment for why that is correct,
-    // not a bug, per this item's own jar-table provenance verification.
-    const isWhitespaceOnly = atom.text.length > 0 && /^\s*$/.test(atom.text);
-    const renderText = isWhitespaceOnly ? atom.text.split(' ').join(' ') : undefined;
+    // A4 2a / G2 N57 item 38: `DriverTextSvg.java:112-125`'s RENDER-time
+    // text override (NBSP for whitespace-only, leading-space-strip + `trin`
+    // for mixed) -- see `class-member-creole-render-text.ts
+    // #textRenderOverride`'s own doc comment for the full derivation and
+    // why it is gated off a raw tab. `width` above (the LAYOUT value) stays
+    // the RAW measurement always -- see `MemberRenderAtom`'s own doc
+    // comment for why that is correct, not a bug.
+    const renderText = textRenderOverride(atom.text);
     const renderWidth = renderText !== undefined ? measurer.measure(renderText, spec).width : undefined;
     // Per-atom width stored on the atom itself (not just summed into the row
     // total) so `renderer-classifier-box.ts` can emit each atom's OWN
@@ -401,7 +352,9 @@ export function buildMemberRow(
 ): MemberRowBuild {
   const font = memberBaseFont(fontSpec, member);
   const atoms = buildMemberAtoms(text, font);
-  return resolveMemberAtoms(atoms, font, measurer, sprites);
+  // T26: the CLASS engine's own entry point opts into tab-stop expansion --
+  // see `resolveMemberAtoms`'s own `expandTabs` param doc comment.
+  return resolveMemberAtoms(atoms, font, measurer, sprites, true);
 }
 
 /**
@@ -445,7 +398,9 @@ export function buildWrappedMemberRows(
   for (const line of splitMemberDisplayLines(text)) {
     const atoms = buildMemberAtoms(line, font);
     if (maxWidth <= 0) {
-      rows.push(resolveMemberAtoms(atoms, font, measurer, sprites));
+      // T26: opt into tab-stop expansion (`resolveMemberAtoms`'s own
+      // `expandTabs` param doc comment).
+      rows.push(resolveMemberAtoms(atoms, font, measurer, sprites, true));
       continue;
     }
     const spriteDims: SpriteDimsLookup | undefined = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
@@ -454,7 +409,7 @@ export function buildWrappedMemberRows(
       maxWidth,
       (a) => resolveOneAtom(a, font, measurer, sprites, spriteDims)?.width ?? 0,
     );
-    for (const lineAtoms of wrappedLines) rows.push(resolveMemberAtoms(lineAtoms, font, measurer, sprites));
+    for (const lineAtoms of wrappedLines) rows.push(resolveMemberAtoms(lineAtoms, font, measurer, sprites, true));
   }
   // #lizard forgives -- pre-existing 6 PARAM (unchanged by A2s F-B).
   return rows;

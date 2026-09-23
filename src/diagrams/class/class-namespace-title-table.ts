@@ -12,6 +12,40 @@
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
+import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
+import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { namespaceTitleWidth, namespaceTitleLines } from './class-namespace-title-runs.js';
+
+/**
+ * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
+ * supplement --
+ * `titleAndAttributeWidth = max(dimLabel.w, attributeWidth) +
+ *  uSymbol.suppWidthBecauseOfShape()` and
+ * `titleAndAttributeHeight = dimLabel.h + attributeHeight + marginForFields +
+ *  uSymbol.suppHeightBecauseOfShape()`
+ * (`~/git/plantuml/.../svek/ClusterHeader.java:87-94`). Both terms are 0 for
+ * a `null` USymbol and for the base `USymbol` class
+ * (`decoration/symbol/USymbol.java:88-93`); only `USymbolNode`
+ * (`USymbolNode.java:191-199`: height+5, width+60) and `USymbolDatabase`
+ * (`USymbolDatabase.java:172-175`: height+15) override it. Read off the
+ * ported `USymbol` object itself rather than re-tabulated here, so the two
+ * upstream overrides stay in ONE place (`src/core/decoration/symbol/`).
+ *
+ * Jar-verified against `dativu-93-pona469`'s cached `svek-1.dot`: `package
+ * foo <<Node>>` emits `WIDTH="79"` (`floor(19.425) + 60`) / `HEIGHT="14"`
+ * (`14 + 5 - 5`); `package foo1 <<Node>>` emits `WIDTH="87"`
+ * (`floor(27.213) + 60`).
+ */
+function titleSupp(usymbol: string | undefined, theme: Theme): { width: number; height: number } {
+  if (usymbol === undefined) return { width: 0, height: 0 };
+  const symbol = resolveDescriptionUSymbol(
+    usymbol,
+    resolveActorStyle(theme.actorStyle),
+    mapComponentStyle(theme.componentStyle),
+  );
+  if (symbol === null) return { width: 0, height: 0 };
+  return { width: symbol.suppWidthBecauseOfShape(), height: symbol.suppHeightBecauseOfShape() };
+}
 
 /** `ClusterHeader`'s title font for a class/object package cluster --
  *  `getStyle()` resolves the `package.title` style signature
@@ -48,14 +82,55 @@ function namespaceTitleFont(theme: Theme): FontSpec {
  * 29, matching `WIDTH="29"` exactly. `computeTitleTableHeight(1, 0, 0, 14)
  * = (0+1)*14 - 5 = 9`, matching `HEIGHT="9"` exactly.
  *
+ * cdd-T26: `dimLabel.getWidth()` now routes through {@link
+ * namespaceTitleWidth} (the shared creole-atom-lexer sum,
+ * `class-namespace-title-runs.ts`) instead of one raw `measurer.measure`
+ * call, so a title carrying an unresolvable `<img:>` reference sizes its
+ * `(Cannot decode)` fallback run at ITS OWN (smaller, monospace) font
+ * rather than measuring the raw markup text at the title's bold font — the
+ * DOT-graph half of `jabama-09-kago823`'s fix (the render half is
+ * `class-namespace-shape.ts#getWTitle`). A markup-free title reduces to the
+ * OLD single `measurer.measure` call exactly (one run, same font), so
+ * `cidepu-54-bemo048`'s own byte-exact citation above is unaffected.
+ *
+ * cdd-T26 residual round: `dimLabel.getHeight()` now sums PER-LINE heights
+ * (`computeTitleTableHeight`'s new `readonly number[]` form,
+ * `core/cluster-title-table.ts`) instead of a hardcoded 1-line count, so a
+ * `\n`-split title reserves real height for every physical line, each at
+ * its OWN font size. Jar-verified `daxeno-00-kasu166`: two lines at 18pt/
+ * 14pt -> `computeTitleTableHeight([18,14], 0, 0, N/A)` = 32-5=27, +15
+ * (`titleSupp`'s own `<<Database>>` `suppHeightBecauseOfShape`, ALREADY
+ * correctly threaded via the `usymbol` param below — the `<<Database>>`
+ * shape/colour SELECTION for the cluster's own outline is a separate,
+ * un-ported mechanism, cdd-T26 residual-round journal row 122) = 42,
+ * matching the cached oracle `svek-1.dot`'s `HEIGHT="42"` exactly. A
+ * single-line title reduces to `computeTitleTableHeight([fontSize], ...)`
+ * = the OLD `computeTitleTableHeight(1, 0, 0, fontSize)` byte-identically
+ * (`titleLinesHeight`'s own array-form doc comment).
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:73-96
  */
 export function namespaceTitleTableDims(
   display: string,
   theme: Theme,
   measurer: StringMeasurer,
+  usymbol?: string,
 ): { width: number; height: number } {
   const font = namespaceTitleFont(theme);
-  const { width } = measurer.measure(display, font);
-  return { width, height: computeTitleTableHeight(1, 0, 0, font.size) };
+  const lines = namespaceTitleLines(measurer, theme, display);
+  const width = namespaceTitleWidth(measurer, theme, display);
+  // `nominalFontSize` (declared), never `fontSize` (measured) --
+  // `ClusterHeader.java:78`'s formula is `fontSize`-based, not a measured
+  // pixel height; see `NamespaceTitleLine`'s own doc comment.
+  const lineHeights = lines.map((l) => l.nominalFontSize);
+  // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
+  // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
+  const supp = titleSupp(usymbol, theme);
+  // `font.size` still feeds the (always-0 here) `stereoLines`/`attrLines`
+  // terms -- see `titleAndAttributeHeight`'s own doc comment; `lineHeights`
+  // (the array form) supplies the title term directly, per-line.
+  return {
+    width: width + supp.width,
+    height: computeTitleTableHeight(lineHeights, 0, 0, font.size) + supp.height,
+  };
 }

@@ -10,6 +10,7 @@ import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
 import { applyClassDocumentMargin } from './diagrams/class/layout-ink-extent.js';
 import { sequencePlugin } from './diagrams/sequence/index.js';
 import { classPlugin } from './diagrams/class/index.js';
+import { registerNestedDiagramRenderers } from './diagrams/class/class-nested-diagram-renderer.js';
 import { statePlugin } from './diagrams/state/index.js';
 import { descriptionPlugin } from './diagrams/description/index.js';
 import { activityPlugin } from './diagrams/activity/index.js';
@@ -27,13 +28,13 @@ import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
 import type { DiagramType, UmlSource } from './core/block-extractor.js';
 import { prepareIncludeStore } from './core/include-resolver.js';
-import { surfaceSpriteWarnings } from './core/sprite-commands.js';
+import { surfaceSpriteWarnings, type SpriteRegistry } from './core/sprite-commands.js';
 import { surfaceParseWarnings } from './diagrams/json/ast.js';
 import type { PreprocessorResult } from './core/preprocessor.js';
 import { DiagramRefusal, emptySvg, errorSvg, preprocessorErrorSvg, welcomeSvg } from './core/error/error-diagrams.js';
 import { resolveMeasurer } from './core/render-options.js';
 import type { RenderOptions } from './core/render-options.js';
-import { assembleSvg } from './core/assemble-svg.js';
+import { assembleSvg, seedOfUmlSource } from './core/assemble-svg.js';
 import { withAllowJavascriptInLink } from './core/security/SecurityUtils.js';
 
 // A5/T4: `RenderOptions` and `assembleSvg` moved out of this file (which sits
@@ -192,6 +193,15 @@ function annotationsOf(ast: unknown): DiagramAnnotations | undefined {
  * only when parse/validation errors exist) is left untouched: chrome has
  * no sensible placement on a diagnostic box with no diagram context.
  */
+/** The diagram's own `SpriteRegistry`, read off the AST exactly as
+ *  `core/sprite-registry.ts#surfaceSpriteWarnings` reads it (`'sprites' in
+ *  ast`) — every engine that parses `sprite` commands stores it there, and
+ *  an engine that does not simply has none. */
+function spritesOf(ast: unknown): SpriteRegistry | undefined {
+  if (typeof ast !== 'object' || ast === null || !('sprites' in ast)) return undefined;
+  return (ast as { sprites?: SpriteRegistry }).sprites;
+}
+
 function applyAnnotationChrome(
   fragment: AssembledSvg,
   ast: unknown,
@@ -205,9 +215,17 @@ function applyAnnotationChrome(
   if (annotations === undefined || isAnnotationsEmpty(annotations)) return fragment;
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  // cdd-T28 (decision journal row 103): chrome text is real creole now, so
+  // a `<$sprite>`/`<img:…>` in a title/legend/header/footer/caption has to
+  // resolve against the diagram's OWN sprite registry -- the same
+  // `ast.sprites` field `sprite-registry.ts#surfaceSpriteWarnings` reads
+  // off every engine's AST (see `spritesOf`). Without it the atom measures
+  // 0 wide and `UEmpty`'s `width == 0` guard rejects the resulting empty
+  // cell (`sequence/nereka-67-deco609`).
+  const sprites = spritesOf(ast);
 
   if (!('completeSvg' in fragment)) {
-    const chromed = applyChrome(fragment, annotations, styles, measurer);
+    const chromed = applyChrome(fragment, annotations, styles, measurer, sprites);
     // G2 N46: class fragments center chrome text against the PRE-margin
     // ink dims (`fragment.preChromeWidth`/`preChromeHeight`, threaded
     // through `applyChrome` -- see that function's own doc comment) --
@@ -231,7 +249,7 @@ function applyAnnotationChrome(
   // #lizard forgives -- pre-existing violation (23 NLOC/7 PARAM vs. this
   // repo's 30/5 caps; 7 params, not NLOC, is the actual trip -- unrelated
   // to skin-reddress-variants, just no longer shielded by file size.
-  return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer)) };
+  return { completeSvg: assembleSvg(applyChrome(unwrapped, annotations, styles, measurer, sprites)) };
 }
 
 /**
@@ -268,6 +286,10 @@ interface PageContext {
   readonly styleMap: StyleMap;
   readonly preprocessed: PreprocessorResult;
   readonly measurer: StringMeasurer;
+  /** The diagram's `UmlSource#seed()` -- every `<linearGradient>`/`<filter>`
+   *  id in the assembled document is minted from it (`svg-defs.ts
+   *  #applySeededDefIds`, `SvgGraphics.java:160-162`). */
+  readonly seed: bigint;
 }
 
 function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown): string {
@@ -280,7 +302,7 @@ function assembleOnePage(ctx: PageContext, fragment: AssembledSvg, ast: unknown)
     ctx.measurer,
     ctx.plugin.type,
   );
-  return assembleSvg(chromed);
+  return assembleSvg(chromed, ctx.seed);
 }
 
 /**
@@ -344,7 +366,17 @@ function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOp
   const ast = astOf(resolution, options);
   surfaceSpriteWarnings(ast, options?.onWarning);
   surfaceParseWarnings(ast, options?.onWarning);
-  return { ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer }, ast };
+  // CDD T27FU/B7FU-R2: (re-)registers the class-body AND chrome `{{ }}`-
+  // embed renderers with THIS call's own `options` -- a nested diagram
+  // measures text through the SAME bounder as its enclosing one (upstream's
+  // nested `Diagram#exportDiagram` shares the enclosing `FileFormatOption`),
+  // not a fixed default. See `class-nested-diagram-renderer.ts`'s doc
+  // comment for why this cannot be a plain import instead.
+  registerNestedDiagramRenderers((source) => renderSync(source, options));
+  return {
+    ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
+    ast,
+  };
 }
 
 /**

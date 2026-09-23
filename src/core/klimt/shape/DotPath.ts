@@ -59,6 +59,59 @@ function bezierFlatnessSq(b: Bezier): number {
   return Math.max(ptSegDistSq(p1, p2, { x: b.ctrlx1, y: b.ctrly1 }), ptSegDistSq(p1, p2, { x: b.ctrlx2, y: b.ctrly2 }));
 }
 
+/**
+ * `XCubicCurve2D#subdivide` — de Casteljau split at t=0.5, ported verbatim
+ * (same formula `class-edge-constraint.ts#subdivide` already carries for
+ * the class engine's flat point-array convention; duplicated here rather
+ * than imported since that module intentionally stays independent of this
+ * one — see its own header doc comment).
+ * @see ~/git/plantuml/.../klimt/geom/XCubicCurve2D.java#subdivide
+ */
+function subdivideBezier(b: Bezier): [Bezier, Bezier] {
+  const centerx = (b.ctrlx1 + b.ctrlx2) / 2;
+  const centery = (b.ctrly1 + b.ctrly2) / 2;
+  const ctrlx1 = (b.x1 + b.ctrlx1) / 2;
+  const ctrly1 = (b.y1 + b.ctrly1) / 2;
+  const ctrlx2 = (b.x2 + b.ctrlx2) / 2;
+  const ctrly2 = (b.y2 + b.ctrly2) / 2;
+  const ctrlx12 = (ctrlx1 + centerx) / 2;
+  const ctrly12 = (ctrly1 + centery) / 2;
+  const ctrlx21 = (ctrlx2 + centerx) / 2;
+  const ctrly21 = (ctrly2 + centery) / 2;
+  const midx = (ctrlx12 + ctrlx21) / 2;
+  const midy = (ctrly12 + ctrly21) / 2;
+  const left: Bezier = { x1: b.x1, y1: b.y1, ctrlx1, ctrly1, ctrlx2: ctrlx12, ctrly2: ctrly12, x2: midx, y2: midy };
+  const right: Bezier = { x1: midx, y1: midy, ctrlx1: ctrlx21, ctrly1: ctrly21, ctrlx2, ctrly2, x2: b.x2, y2: b.y2 };
+  return [left, right];
+}
+
+/** `BezierUtils#getStartingAngle` — the tangent direction LEAVING `b`'s own
+ *  start point, falling back to the chord when the first control point
+ *  coincides with it (a degenerate, zero-length tangent). */
+function startingAngle(b: Bezier): number {
+  if (b.x1 === b.ctrlx1 && b.y1 === b.ctrly1) return Math.atan2(b.y2 - b.y1, b.x2 - b.x1);
+  return Math.atan2(b.ctrly1 - b.y1, b.ctrlx1 - b.x1);
+}
+
+/** `BezierUtils#getEndingAngle` — the tangent direction ARRIVING at `b`'s
+ *  own end point, falling back to the chord when the second control point
+ *  coincides with it. */
+function endingAngle(b: Bezier): number {
+  if (b.x2 === b.ctrlx2 && b.y2 === b.ctrly2) return Math.atan2(b.y2 - b.y1, b.x2 - b.x1);
+  return Math.atan2(b.y2 - b.ctrly2, b.x2 - b.ctrlx2);
+}
+
+function distSq(p: Point2D, q: Point2D): number {
+  return (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
+}
+
+/** `klimt/geom/PointAndAngle` — a point plus a tangent angle (radians),
+ *  {@link DotPath.getMiddle}'s return shape. */
+export interface PointAndAngle {
+  readonly point: Point2D;
+  readonly angle: number;
+}
+
 // Named tuple aliases so lizard's (brace/comma-based) complexity
 // scanner does not misattribute a large inline union-tuple type
 // literal to the enclosing function's line span (observed with
@@ -92,16 +145,17 @@ interface MoveDelta {
  * `moveDelta`, `setCommentAndCodeLine`, `getMinDist`,
  * `getStartAngle`/`getEndAngle` (tangent-line `atan2`, no subdivision
  * needed), `isLine` (needs only point-to-segment distance, ported as
- * `ptSegDistSq`/`bezierFlatnessSq` above), and `getMinMax()` (klimt/geom/
+ * `ptSegDistSq`/`bezierFlatnessSq` above), `getMinMax()` (klimt/geom/
  * limitfinder mission, T1 — write-set expansion, journaled: no longer
  * "not read by the driver" now that `LimitFinder#drawDotPath` reads it
- * directly).
+ * directly), and `getMiddle()` (cdd-T7/A5-M4: needs one De Casteljau
+ * subdivision per segment plus `BezierUtils#getStartingAngle`/
+ * `getEndingAngle`, both ported as local helpers below — see
+ * `getMiddle`'s own doc comment).
  *
  * Deferred (NOT read by `DriverDotPathSvg`, out of D3' scope,
  * reported — these belong to the svek layout/label-positioning
  * subsystem, a separate future task):
- * - `getMiddle()` / `PointAndAngle` — needs Bezier subdivision
- *   (De Casteljau) + `BezierUtils.getStartingAngle/getEndingAngle`.
  * - `getMinFinder()` — needs the full `MinFinder` class.
  * - `sample()` — needs Bezier subdivision + flatness-driven recursion.
  * - `simulateCompound(head, tail)` — needs `RectangleArea` +
@@ -299,6 +353,47 @@ export class DotPath implements UShape {
 
   isLine(): boolean {
     return this.beziers.every((c) => bezierFlatnessSq(c) <= 0.001);
+  }
+
+  /**
+   * The path's own "middle" point plus the tangent angle there — the
+   * anchor `SvekEdge#drawU` draws a mid-link decoration at (cdd-T7/A5-M4).
+   *
+   * Subdivides each segment ONCE (t=0.5, NOT the recursive flatness-driven
+   * split `sample()`/`class-edge-constraint.ts#sampleEdgePath` use), then
+   * scans the four candidate points every segment's split produces (its own
+   * start, its subdivision midpoint from each half, its own end) and keeps
+   * whichever minimizes `distanceSq(start) + distanceSq(end)` — minimized
+   * at the point equidistant from both ends, i.e. the geometric middle of
+   * the whole path, not of any one segment. Ties (the two halves' shared
+   * midpoint candidate) keep the FIRST winner, matching upstream's `<` (not
+   * `<=`) comparison verbatim.
+   *
+   * @see ~/git/plantuml/.../klimt/shape/DotPath.java#getMiddle
+   */
+  getMiddle(): PointAndAngle {
+    const start = this.getStartPoint();
+    const end = this.getEndPoint();
+    const cost = (p: Point2D): number => distSq(p, start) + distSq(p, end);
+    let result: Point2D | undefined;
+    let angle = 0;
+    for (const bez of this.beziers) {
+      const [left, right] = subdivideBezier(bez);
+      const candidates: Array<{ point: Point2D; angle: number }> = [
+        { point: { x: left.x1, y: left.y1 }, angle: startingAngle(left) },
+        { point: { x: left.x2, y: left.y2 }, angle: endingAngle(left) },
+        { point: { x: right.x1, y: right.y1 }, angle: startingAngle(right) },
+        { point: { x: right.x2, y: right.y2 }, angle: endingAngle(right) },
+      ];
+      for (const c of candidates) {
+        if (result === undefined || cost(c.point) < cost(result)) {
+          result = c.point;
+          angle = c.angle;
+        }
+      }
+    }
+    if (result === undefined) throw new Error('DotPath.getMiddle: empty path');
+    return { point: result, angle };
   }
 
   toString(): string {

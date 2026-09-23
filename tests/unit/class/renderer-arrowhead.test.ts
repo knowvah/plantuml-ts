@@ -7,7 +7,12 @@
  * both are pure functions, preferred over exercising them only indirectly.
  */
 import { describe, it, expect } from 'vitest';
-import { buildEdgeArrowheads, applyDecorTrim, decorName } from '../../../src/diagrams/class/renderer-arrowhead.js';
+import {
+  buildEdgeArrowheads,
+  applyDecorTrim,
+  decorName,
+  buildMiddleDecorMarkup,
+} from '../../../src/diagrams/class/renderer-arrowhead.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
@@ -184,5 +189,86 @@ describe('applyDecorTrim', () => {
       { x: 70, y: 75 },
       { x: 70, y: 135 },
     ]);
+  });
+});
+
+// cdd-T7 (A5/M4, A2a/M6): mid-link decoration.
+describe('buildMiddleDecorMarkup', () => {
+  // `foo1 -0)- foo2` (cenubi-27-xova754) -- points are the real dot-layout
+  // spline (`layoutFixtureClass` on the fixture's own `in.puml`), golden
+  // `<path d="M29.539,92.104 A10,10 0 0 0 43.681 92.104" stroke-width:1.5
+  // fill=none/>` + `<ellipse cx="36.61" cy="85.033" rx="6" ry="6" fill="#FFF"
+  // stroke-width:1.5/>`.
+  const cenubiPoints = [
+    { x: 36.60625, y: 55.262155107495204 },
+    { x: 36.60625, y: 72.93564206156157 },
+    { x: 36.60625, y: 97.13201753483915 },
+    { x: 36.60625, y: 114.7921337783734 },
+  ];
+
+  it('returns undefined when middleDecor is absent', () => {
+    expect(buildMiddleDecorMarkup(cenubiPoints, undefined, '#181818', '#FFFFFF')).toBeUndefined();
+  });
+
+  it('returns undefined for a point list too short/malformed to build a DotPath from', () => {
+    expect(buildMiddleDecorMarkup([{ x: 0, y: 0 }], 'circleCircled1', '#181818', '#FFFFFF')).toBeUndefined();
+    expect(
+      buildMiddleDecorMarkup(
+        [
+          { x: 0, y: 0 },
+          { x: 1, y: 1 },
+        ],
+        'circleCircled1',
+        '#181818',
+        '#FFFFFF',
+      ),
+    ).toBeUndefined();
+  });
+
+  it('draws the MODE1 arc + filled ellipse at the path midpoint, jar-verified', () => {
+    // Golden (jar): `M29.539,92.104 A10,10 0 0 0 43.681 92.104` +
+    // `<ellipse cx="36.61" cy="85.033" rx="6" ry="6">`. This port's own
+    // spline (verified byte-identical to the jar's `d` at 2dp) yields a
+    // `getMiddle()` point/angle within ~0.005px of the golden's -- ordinary
+    // floating-point residue from deriving a 3rd-decimal value off a
+    // 2-decimal-verified input, not a mechanism defect (`toBeCloseTo(.., 1)`
+    // below matches `compareSvg`'s own numeric tolerance class).
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled1', '#181818', '#FFFFFF');
+    expect(result).toBeDefined();
+    const d = /M([\d.]+),([\d.]+) A10,10 0 0 0 ([\d.]+) ([\d.]+)/.exec(result!.body);
+    expect(d).not.toBeNull();
+    const [, x1, y1, x2, y2] = d!.map(Number) as unknown as [never, number, number, number, number];
+    expect(x1).toBeCloseTo(29.539, 1);
+    expect(y1).toBeCloseTo(92.104, 1);
+    expect(x2).toBeCloseTo(43.681, 1);
+    expect(y2).toBeCloseTo(92.104, 1);
+    expect(result!.body).toContain('stroke-width:1.5');
+    expect(result!.body).toContain('fill="none"');
+    const ellipse = /cx="([\d.]+)" cy="([\d.]+)" rx="([\d.]+)"/.exec(result!.body);
+    expect(ellipse).not.toBeNull();
+    expect(Number(ellipse![1])).toBeCloseTo(36.61, 1);
+    expect(Number(ellipse![2])).toBeCloseTo(85.033, 1);
+    expect(ellipse![3]).toBe('6');
+    expect(result!.body).toContain('fill="#FFF"');
+  });
+
+  it('draws only the filled circle for plain `circle`, no arc', () => {
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circle', '#181818', '#FFFFFF');
+    expect(result!.body).not.toContain('<path');
+    expect(result!.body).toContain('<ellipse');
+    expect(result!.body).toContain('rx="6"');
+  });
+
+  it('draws both arcs for circleCircled (MODE BOTH)', () => {
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled', '#181818', '#FFFFFF');
+    const arcCount = (result!.body.match(/<path/g) ?? []).length;
+    expect(arcCount).toBe(2);
+  });
+
+  it('draws the mirrored arc for circleCircled2', () => {
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled2', '#181818', '#FFFFFF');
+    const arcCount = (result!.body.match(/<path/g) ?? []).length;
+    expect(arcCount).toBe(1);
+    expect(result!.body).not.toContain('A10,10 0 0 0 43.681,92.104');
   });
 });

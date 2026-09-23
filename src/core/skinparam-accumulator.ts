@@ -10,6 +10,7 @@
  * per-field upstream provenance comments.
  */
 
+import type { Paint } from './paint.js';
 import type { ElementColors } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
@@ -23,6 +24,10 @@ export interface SkinparamAccumulator {
   nodeSep: number | undefined;
   rankSep: number | undefined;
   wrapWidth: number | undefined;
+  /** cdd-T30: `skinparam dpi N` -- see `theme.ts#dpi`'s own doc comment. */
+  dpi: number | undefined;
+  /** cdd-T34: `skinparam topurl <url>` -- see `theme.ts#topurl`'s own doc comment. */
+  topurl: string | undefined;
   /** Raw `skinparam maxMessageSize` value -- see `theme.ts#maxMessageSize`'s
    *  own doc comment for the fallback-precedence resolution against
    *  {@link wrapMessageWidth}, done in `skinparam-theme-builder.ts`. */
@@ -45,6 +50,12 @@ export interface SkinparamAccumulator {
    *  (`SequenceDiagram.java:478-485`). */
   footbox: string | undefined;
   handwritten: boolean | undefined;
+  /** cdd-T33: `skinparam mode dark` — `SkinParam.isDark`
+   *  (`skin/SkinParam.java:114-116`): `"dark".equalsIgnoreCase(getValue
+   *  ("mode"))`, case-insensitive, any other value (including absent) is
+   *  NOT dark. See `theme-dark.ts`'s own doc comment for the full
+   *  mechanism and `skinparam-theme-builder.ts#buildThemePartial`'s gate. */
+  mode: 'dark' | undefined;
   monochrome: 'true' | 'reverse' | undefined;
   packageStyle: 'rect' | undefined;
   fixCircleLabelOverlapping: boolean | undefined;
@@ -54,16 +65,45 @@ export interface SkinparamAccumulator {
   text: string | undefined;
   arrow: string | undefined;
   noteBackground: string | undefined;
-  classBackground: string | undefined;
+  classBackground: Paint | undefined;
+  /** CDD T6FU: `skinparam classHeaderBackgroundColor` / the nested-block
+   *  form `skinparam class { HeaderBackgroundColor X }` (both normalise to
+   *  the SAME key) -- `FromSkinparamToStyle.java:196` maps it onto the
+   *  `{element, class_, header}` signature `EntityImageClass
+   *  #getStyleHeader` (java:173-178) queries, i.e. the header-background
+   *  split's fill source. */
+  classHeaderBackground: Paint | undefined;
   interfaceBackground: string | undefined;
   enumBackground: string | undefined;
   actorStroke: string | undefined;
   packageBackground: string | undefined;
   packageBorder: string | undefined;
   packageBorderThickness: number | undefined;
-  classBorder: string | undefined;
+  classBorder: Paint | undefined;
   classBorderThickness: number | undefined;
   classBorderThicknessByStereo: Record<string, number> | undefined;
+  /** CDD T6FU: `skinparam classBackgroundColor<<stereo>>` (and the nested
+   *  `skinparam class { <<stereo>> { BackgroundColor X } }` form -- one
+   *  normalised key, `SkinParam#cleanForKeySlow` java:285-300). Stored RAW
+   *  so `classifierFill` can `parseColor` it (a `#A-B` value is a gradient
+   *  upstream), keyed by the LOWERCASED label. */
+  classBackgroundColorByStereo: Record<string, string> | undefined;
+  /** cdd-T19 (A3 M2): `skinparam classFontColor`/the block form
+   *  `skinparam class { FontColor X }` — resolved hex, mapped to the
+   *  HEADER-only `classCascadeHeaderFontColor` theme field
+   *  (`FromSkinparamToStyle.java:187`'s `{element,class_,header}`
+   *  signature, jar-verified `remanu-84-sega129`/`picija-82-jebu272`:
+   *  only the name row tints, member rows stay unaffected). */
+  classFontColor: string | undefined;
+  /** cdd-T19 (A3 M2): `skinparam class { AttributeFontColor X }` (no
+   *  bare/top-level form upstream — always block-scoped, `Colors.java`'s
+   *  key resolves to `classAttributeFontColor` after the block-name
+   *  prefix, `preprocessor.ts`'s `skinparamStack` join) — resolved hex,
+   *  mapped to the MEMBER-row `classCascadeFontColor` theme field
+   *  (`FromSkinparamToStyle.java:192`'s `{element,class_}` signature, no
+   *  `header` token, jar-verified `picija-82-jebu272`: every attribute
+   *  AND method row tints, the name row does not). */
+  classAttributeFontColor: string | undefined;
   /** R2j: `skinparam classAttributeFontSize<<Stereo>>` — see
    *  `theme-graph-colors-a.ts#classAttributeFontSizeByStereo`. */
   classAttributeFontSizeByStereo: Record<string, number> | undefined;
@@ -105,13 +145,13 @@ export interface SkinparamAccumulator {
   circledCharacterFontItalic: boolean | undefined;
   pathHoverColor: string | undefined;
   diagramBorderColor: string | undefined;
-  iconPrivateColor: string | undefined;
+  iconPrivateColor: Paint | undefined;
   iconPrivateBackgroundColor: string | undefined;
-  iconPackageColor: string | undefined;
+  iconPackageColor: Paint | undefined;
   iconPackageBackgroundColor: string | undefined;
-  iconProtectedColor: string | undefined;
+  iconProtectedColor: Paint | undefined;
   iconProtectedBackgroundColor: string | undefined;
-  iconPublicColor: string | undefined;
+  iconPublicColor: Paint | undefined;
   iconPublicBackgroundColor: string | undefined;
   guillemetStart: string | undefined;
   guillemetEnd: string | undefined;
@@ -155,6 +195,8 @@ const SCALAR_FIELD_NAMES = [
   'nodeSep',
   'rankSep',
   'wrapWidth',
+  'dpi',
+  'topurl',
   'maxMessageSize',
   'wrapMessageWidth',
   'sameClassWidth',
@@ -168,6 +210,7 @@ const SCALAR_FIELD_NAMES = [
   'strictUml',
   'footbox',
   'handwritten',
+  'mode',
   'monochrome',
   'packageStyle',
   'fixCircleLabelOverlapping',
@@ -178,6 +221,7 @@ const SCALAR_FIELD_NAMES = [
   'arrow',
   'noteBackground',
   'classBackground',
+  'classHeaderBackground',
   'interfaceBackground',
   'enumBackground',
   'actorStroke',
@@ -187,6 +231,9 @@ const SCALAR_FIELD_NAMES = [
   'classBorder',
   'classBorderThickness',
   'classBorderThicknessByStereo',
+  'classBackgroundColorByStereo',
+  'classFontColor',
+  'classAttributeFontColor',
   'classAttributeFontSizeByStereo',
   'classFontSizeByStereo',
   'stateBorderColorByStereo',

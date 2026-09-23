@@ -50,9 +50,28 @@
  * comment for the full citation.
  */
 const CLUSTER_HEADER_MARGIN = 5;
-function titleAndAttributeHeight(titleLines: number, stereoLines: number, attrLines: number, fontSize: number): number {
+
+/** `titleLines`' own height contribution to the `mergeTB(stereo, title)`
+ *  stack (`ClusterHeader.java:78`) — a plain `number` (line COUNT) reduces
+ *  to `count * fontSize` exactly as before (every pre-existing caller);
+ *  cdd-T26 (`daxeno-00-kasu166`) adds the array form for a title whose
+ *  physical lines carry DIFFERENT font sizes (`<size:N>` per line) — the
+ *  general `mergeTB` sum-not-max stack (`XDimension2D.java:94-98`) applied
+ *  to each line's own already-resolved height instead of one shared
+ *  `fontSize * count` approximation. */
+function titleLinesHeight(titleLines: number | readonly number[], fontSize: number): number {
+  if (typeof titleLines === 'number') return titleLines * fontSize;
+  return titleLines.reduce((sum, h) => sum + h, 0);
+}
+
+function titleAndAttributeHeight(
+  titleLines: number | readonly number[],
+  stereoLines: number,
+  attrLines: number,
+  fontSize: number,
+): number {
   const marginForFields = attrLines > 0 ? CLUSTER_HEADER_MARGIN : 0;
-  return (stereoLines + titleLines) * fontSize + attrLines * fontSize + marginForFields;
+  return titleLinesHeight(titleLines, fontSize) + stereoLines * fontSize + attrLines * fontSize + marginForFields;
 }
 
 /**
@@ -71,7 +90,7 @@ function titleAndAttributeHeight(titleLines: number, stereoLines: number, attrLi
  */
 const DOT_TITLE_TABLE_HEIGHT_OFFSET = 5;
 export function computeTitleTableHeight(
-  titleLines: number,
+  titleLines: number | readonly number[],
   stereoLines: number,
   attrLines: number,
   fontSize: number,

@@ -5,27 +5,41 @@
  * No DOM, no async.
  */
 
-import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
+import { sliceClassGeometryPage, type ClassGeometry, type ClassifierGeo, type NamespaceGeo } from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
-import { renderNote, renderTipNote, renderOpaleNote } from './renderer-note.js';
-import type { NoteGeo } from './note-layout.js';
-import { resolveTips, type TipResolution } from './note-tips-resolve.js';
+import { resolveTips } from './note-tips-resolve.js';
+import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
+import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { ellipse, linkWrap } from '../../core/svg.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrome.js';
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
-import { buildClassUidPlan, type ClassUidPlan } from './renderer-uid.js';
-import { wrapCluster, wrapEntity, wrapLink, leafPortion } from './renderer-group.js';
-import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
-import { renderClassifierBox, renderRow } from './renderer-classifier-box.js';
-import { renderNamespaceFolder, renderNamespaceRect, renderEmptyPackageIcon } from './class-namespace-shape.js';
+import { buildClassUidPlan } from './renderer-uid.js';
+import {
+  wrapCluster,
+  wrapEntity,
+  wrapLink,
+  leafPortion,
+  renderGroupInheritanceNeighborhood,
+} from './renderer-group.js';
+import { renderAssocPoint, renderAssociationDiamond, renderLollipop } from './renderer-assoc-lollipop.js';
+import { renderClassifierBox } from './renderer-classifier-box.js';
+import {
+  renderNamespaceFolder,
+  renderNamespaceRect,
+  renderEmptyPackageIcon,
+  namespaceFill,
+  titleFontColor,
+  PACKAGE_ROUND_CORNER,
+} from './class-namespace-shape.js';
+import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
 import { buildClassShadowFilterDef } from './class-shadow.js';
-import { renderUsecaseOrActorEntity } from './renderer-usymbol-entity.js';
+import { renderClassUSymbolEntity, usesClassUSymbolEntity } from './renderer-usymbol-entity.js';
 import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#CLASS` -- verified against
@@ -34,80 +48,19 @@ import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/docum
  *  T8: was `class/renderer-shell.ts`'s own copy of this constant. */
 const DIAGRAM_TYPE_CLASS = 'CLASS';
 
-// ---------------------------------------------------------------------------
-// Association-class-couple "point" entity (`(A,B) .. C`)
-// ---------------------------------------------------------------------------
-
-/**
- * `(A,B) .. C`'s tiny circle connector — G2 N8, `EntityImageAssociationPoint
- * .java#drawU`: a bare `<ellipse>` (radius {@link ASSOC_POINT_SIZE}`/2`),
- * fill AND stroke both the SAME `LineColor` value (`CopyForegroundColorTo
- * BackgroundColor`, upstream's own instruction to duplicate the foreground
- * color into the background/fill slot) — never wrapped in a `<g class=
- * "entity">`, never assigned an `id`, never preceded by a `<!--class ...-->`
- * comment (`GeneralImageBuilder`'s dispatch draws this leaf kind directly,
- * bypassing the normal per-entity wrapping every other classifier kind gets
- * — see `renderClass`'s own classifier loop, which special-cases
- * `kind === 'assoc-circle'` to call this instead of {@link wrapEntity}).
- */
-function renderAssocPoint(geo: ClassifierGeo, theme: Theme): string {
-  const r = ASSOC_POINT_SIZE / 2;
-  return ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.arrow,
-    stroke: theme.colors.arrow,
-    'stroke-width': 1,
-  });
-}
-
-/**
- * `Name ()-- Existing` interface lollipop -- G2 N8 established the DOT
- * sizing (`class-dot-graph.ts#buildOneDotNode`'s fixed {@link LOLLIPOP_SIZE}
- * node); G2 N20 lands the render half (`EntityImageLollipopInterface
- * .java:94-133`). UNLIKE {@link renderAssocPoint} above, jar DOES wrap the
- * circle in a real `<g class="entity" id="ent%04d">` (no `<!--class ...-->`
- * comment though -- `drawU` never calls `ug.draw(new UComment(...))`,
- * matching `wrapEntity`'s own `withComment=false` path) -- but the
- * display-label `<text>` is drawn AFTER `closeGroup()`, entirely OUTSIDE
- * that group, as a plain sibling (see `measureLollipop`'s own doc comment
- * in `class-layout-helpers.ts` for the byte-verified position formula).
- * `renderClass`'s classifier loop pushes the two pieces as separate
- * `children[]` entries to reproduce this exact sibling (not nested)
- * structure.
- *
- * The required-interface "half circle" socket shape (`LeafType
- * .LOLLIPOP_HALF`, `classifier.lollipopKind === 'half'`) needs the
- * connecting edge's own impact angle (`EntityImageLollipopInterface
- * #addImpact`, `UEllipse(SIZE, SIZE, angle - 90, 180)` -- an open 180deg
- * arc oriented away from the edge) -- ZERO reach across the entire
- * 708-fixture class corpus (grepped every `((--`/`--((`/`))--`/`--))`
- * spelling), so this draws the SAME full ellipse for both kinds rather
- * than adding unverified arc math; named divergence,
- * `plans/g2-class-svg/ledger.md` N20.
- */
-function renderLollipop(geo: ClassifierGeo, theme: Theme): { circle: string; label: string } {
-  const r = LOLLIPOP_SIZE / 2;
-  const circle = ellipse(geo.x + geo.width / 2, geo.y + geo.height / 2, r, r, {
-    fill: theme.colors.graph.classBackground,
-    stroke: theme.colors.border,
-    'stroke-width': 1.5,
-  });
-  const label = geo.rows[0] !== undefined ? renderRow(geo, geo.rows[0], theme) : '';
-  return { circle, label };
-}
-
 /** Descriptive elements (database/component/actor/usecase) draw their USymbol
  *  icon instead of the class box; usecase carries no usymbol (its kind is
  *  enough). Returns undefined when this classifier has no icon to draw (the
  *  normal box path below applies) or the icon renderer declines. Split out of
  *  renderClassifier purely to keep that function's own NLOC/CCN under cap. */
-function tryRenderUSymbol(geo: ClassifierGeo, theme: Theme): string | undefined {
+function tryRenderUSymbol(geo: ClassifierGeo, theme: ScaledTheme): string | undefined {
   const usymbol = geo.kind === 'usecase' ? 'usecase' : geo.usymbol;
   if (usymbol === undefined) return undefined;
   const display = geo.rows[0]?.text ?? geo.id;
   return renderUSymbolIcon(usymbol, { ...geo, display }, theme);
 }
 
-function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
+function renderClassifier(geo: ClassifierGeo, theme: ScaledTheme): string {
   const icon = tryRenderUSymbol(geo, theme);
   if (icon !== undefined) return icon;
   return renderClassifierBox(geo, theme);
@@ -122,9 +75,35 @@ function renderClassifier(geo: ClassifierGeo, theme: Theme): string {
  *  (104/718 fixtures). See `class-namespace-shape.ts` for the ported
  *  geometry + jar evidence. G2 N59: `skinparam packageStyle rect` selects
  *  the plain-`<rect>` `PackageStyle.RECTANGLE` variant instead -- see
- *  `renderNamespaceRect`'s own doc comment. */
-function renderNamespace(geo: NamespaceGeo, theme: Theme): string {
-  return theme.packageStyle === 'rect' ? renderNamespaceRect(geo, theme) : renderNamespaceFolder(geo, theme);
+ *  `renderNamespaceRect`'s own doc comment (measurer threaded, cdd-T26). */
+function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
+  // cdd-T12 (A2b E3): a container whose header stereotype NAMES a USymbol
+  // (`package X <<Node>>`) draws that symbol's own `asBig` chrome instead
+  // (`svek/Cluster.java:367-374` -> `ClusterDecoration.java:66-91`). Needs
+  // a real `StringMeasurer` for the klimt draw seam -- absent only for
+  // hand-built test fixtures (`class-geo-types.ts#ClassGeometry.measurer`),
+  // which fall through to the plain-string folder path below exactly as
+  // they did pre-T12.
+  if (measurer !== undefined) {
+    const drawn = renderNamespaceUSymbol(geo, theme, measurer, {
+      backColor: namespaceFill(geo, theme),
+      // `plantuml.skin:102-114` scopes the cluster's `LineColor black` /
+      // `LineThickness 1.5` to the FOLDER family only; every other group
+      // USymbol keeps the generic element default. A per-symbol `<style>
+      // node { LineColor ... }` override is NOT modeled (no corpus sample;
+      // named remainder, `.agent-notes/cdd-T12.md`).
+      borderColor: theme.colors.border,
+      // cdd-B8FU: renderNamespaceUSymbol draws through renderDrawableToFragment
+      // at scale=1 (no SvgOption.scale threading, class-namespace-usymbol-
+      // shape.ts's own citation) -- this literal needs its own scaleK factor.
+      roundCorner: (theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER) * theme.scaleK,
+      fontColor: titleFontColor(theme),
+    });
+    if (drawn !== undefined) return drawn;
+  }
+  return theme.packageStyle === 'rect'
+    ? renderNamespaceRect(geo, theme, measurer)
+    : renderNamespaceFolder(geo, theme, measurer);
 }
 
 /**
@@ -140,7 +119,7 @@ function renderNamespace(geo: NamespaceGeo, theme: Theme): string {
  * fields -- `id`/`creationIndex` are irrelevant to rendering (unused by
  * `renderNamespaceFolder`) so are filled with placeholders.
  */
-function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
+function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
   const folderTab = geo.folderTab;
   if (folderTab === undefined) return '';
   const label = geo.rows[0]?.text ?? geo.id;
@@ -155,47 +134,7 @@ function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: Theme): string {
     htitle: folderTab.htitle,
     baselineOffset: folderTab.baselineOffset,
   };
-  return renderEmptyPackageIcon(nsGeo, theme);
-}
-
-/** The two per-render note tables `renderOneNote` reads (complexity-hook
- *  param cap): the uid plan and the draw-time tip resolutions. */
-interface NoteRenderContext {
-  readonly uidPlan: ClassUidPlan;
-  readonly tips: ReadonlyMap<string, TipResolution>;
-}
-
-/**
- * G2 N52 / mission leaf-draw-order T4: one note's own draw output -- called
- * once per `'note'`/`'tips'` leaf from `renderClass`'s single ordered
- * `geo.leaves` loop, the same dispatch site every `ClassifierGeo` leaf goes
- * through (jar's `SvekResult#drawU` draws every `bibliotekon.allNodes()`
- * entry through ONE loop, notes and classifiers alike --
- * `svek/SvekResult.java:82-90`). D5: drawn regardless of its host's
- * `hidden` -- nothing in the leaf loop below skips a note/tips leaf for its
- * host's sake, matching jar (`UHidden` wraps only the host NODE's own
- * image, `:84-87`). `NoteGeo`'s own doc comments (`note-layout.ts`) cover
- * the tip/opale/plain shape choice this mirrors unchanged.
- */
-function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): string[] {
-  const { uidPlan, tips } = ctx;
-  // `GeneralImageBuilder#createEntityImageBlock`'s leaf-type dispatch:
-  // `LeafType.TIPS -> EntityImageTips` (:219-220), whose `drawU` resolves
-  // the notch against the host at DRAW time (mission note-leaf-model D3,
-  // `note-tips-resolve.ts`) and draws NOTHING for a dropped tip;
-  // `LeafType.NOTE -> EntityImageNote` (:118-119), plain or opalisable.
-  if (note.kind === 'tips') {
-    const tip = tips.get(note.id);
-    return tip === undefined || tip === 'dropped' ? [] : [renderTipNote(note, tip, theme)];
-  }
-  const uid = uidPlan.noteUid.get(note.id) ?? '';
-  const raw = note.opale !== undefined ? renderOpaleNote(note, theme) : renderNote(note, theme);
-  // G2 N70: a note's own `[[url]]` wraps its ENTIRE drawn body in one
-  // `<a xlink:href>` INSIDE the `<g class="entity">` -- upstream's
-  // `note.addUrl(url)` + `SvgGraphics` anchor open/close around the note
-  // shape. Jar-verified `danozo-79-nunu375`.
-  const inner = note.url !== undefined ? linkWrap(raw, note.url) : raw;
-  return [wrapEntity(note.id, uid, note.id, false, inner)];
+  return renderEmptyPackageIcon(nsGeo, theme, measurer);
 }
 
 // ---------------------------------------------------------------------------
@@ -203,6 +142,7 @@ function renderOneNote(note: NoteGeo, ctx: NoteRenderContext, theme: Theme): str
 // ---------------------------------------------------------------------------
 
 import { renderEdge } from './renderer-edge.js';
+import { renderNoteConnectorLink } from './renderer-note-connector.js';
 
 /**
  * Render a class diagram geometry into an SVG string.
@@ -252,13 +192,23 @@ import { renderEdge } from './renderer-edge.js';
  *              through `core/assemble-svg.ts`'s class finalize function,
  *              never the generic `svgRoot`).
  */
-export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
+export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment {
   // #lizard forgives(nloc, cyclomatic_complexity) -- pre-existing (verified
   // via `git show HEAD`, unchanged by T4's diff): one orchestrator
   // dispatching every drawn-element kind. Metric-specific form + placed
   // FIRST (not "near fn end"): plain `forgives` gets reset by this
   // function's own nested closures before its `end_of_function()` fires
   // -- see `.agent-notes/N16-lizard-forgive-nested-closures.md`.
+  // cdd-T29 R2 (D4/journal row 175): `index.ts`'s `render(geo, theme)` call
+  // site (outside this task's write-set) passes the UNSCALED theme
+  // unchanged -- this is the one remaining seam that can turn it into a
+  // `ScaledTheme` for every render-time pixel-literal constant this file's
+  // call tree carries (mirrors `sequence/scale-geo.ts`'s identical
+  // `scaleSequenceTheme` derivation). Shadows `theme` for the REST of this
+  // function so every existing read below (colors, `monochrome`,
+  // `shadowing`, every internal call) picks up the scaled value with no
+  // further changes.
+  const theme = scaleClassTheme(rawTheme, geo.scaleK ?? 1);
   // G2 N61: `skinparam monochrome true|reverse` applies to the document
   // background too (jar's `ColorMapper` is universal, not scoped to
   // entity/link colors) -- transformed HERE so every downstream reader of
@@ -332,12 +282,25 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // gate; `ClassUidPlanInput` is structural, so the views above suffice.
   const uidPlan = buildClassUidPlan({ ...geo, classifiers, notes });
   const noteCtx: NoteRenderContext = { uidPlan, tips: resolveTips(notes, classifiers) };
+  // cdd-T9 (E6 mechanism a): every plain note's connector, deferred here and
+  // drawn in the edges phase (step 3) as its own `<g class="link">` --
+  // `renderOneNote`'s own doc comment (`renderer-note-dispatch.ts`).
+  const noteConnectors: NoteConnector[] = [];
 
   // 1. Namespace boxes (behind classifiers) -- jar draws every CLUSTER
   // before any node (`svek/SvekResult.java:72-74`).
   for (const ns of geo.namespaces) {
+    // cdd-T31 round 2 (E5 defect b): `Cluster#drawU` returns immediately
+    // when `group.isHidden()` (svek/Cluster.java:298-300) -- the cluster's
+    // border/title/decoration never draws. DOT/uid numbering is unaffected
+    // (see `NamespaceGeo.hidden`'s own doc comment), so only this push is
+    // skipped -- `uidPlan.namespaceUid` still carries the slot.
+    if (ns.hidden === true) continue;
     const uid = uidPlan.namespaceUid.get(ns.id) ?? '';
-    children.push(wrapCluster(ns.label, uid, ns.id, renderNamespace(ns, theme)));
+    // cdd-T12 (A2b E4): `ns.url` opens an `<a>` INSIDE the cluster group and
+    // before the decoration (`svek/Cluster.java:337-341`, closed at
+    // `:379-382`) -- see `renderer-group.ts#wrapCluster`.
+    children.push(wrapCluster(ns.label, uid, ns.id, renderNamespace(ns, theme, geo.measurer), ns.url));
   }
 
   // G2 N7: a `hide <entity|$tag|...>` match (`layout.ts#buildClassifierGeos`'s
@@ -356,7 +319,9 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
   // separate note/tips node (see `renderOneNote`'s own doc comment).
   for (const leaf of geo.leaves) {
     if (isNoteGeo(leaf)) {
-      children.push(...renderOneNote(leaf, noteCtx, theme));
+      const drawn = renderOneNote(leaf, noteCtx, theme);
+      children.push(...drawn.entity);
+      if (drawn.connector !== undefined) noteConnectors.push(drawn.connector);
       continue;
     }
     const classifier = leaf;
@@ -368,6 +333,10 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       children.push(renderAssocPoint(classifier, theme));
       continue;
     }
+    if (classifier.kind === 'association') {
+      children.push(renderAssociationDiamond(classifier, theme)); // cdd-T34
+      continue;
+    }
     // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon
     // UNWRAPPED -- no `<g class="entity">`, no id, no `<!--class ...-->`
     // comment (jar-verified `gatula-10-bifu561`: `package foo {}`/
@@ -375,7 +344,7 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     // identical to `renderAssocPoint`'s own established unwrapped
     // precedent above) -- see `renderEmptyPackageLeaf`'s doc comment.
     if (classifier.folderTab !== undefined) {
-      children.push(renderEmptyPackageLeaf(classifier, theme));
+      children.push(renderEmptyPackageLeaf(classifier, theme, geo.measurer));
       continue;
     }
     // G2 N20: the lollipop circle DOES get a normal `<g class="entity">`
@@ -388,18 +357,17 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       if (label !== '') children.push(label);
       continue;
     }
-    // SI14 T4 (ADR-1/ADR-2): usecase/actor draws via the SAME faithful
-    // `EntityImageDescription.drawU` path description uses, when a real
-    // `StringMeasurer` reached this geo (absent only for hand-built test
-    // fixtures -- `class-geo-types.ts#ClassGeometry.measurer`). The
-    // fragment's `body` carries EntityImageDescription's OWN `<!--entity
-    // NAME-->` wrap (`renderer-usymbol-entity.ts`) -- push UNWRAPPED,
-    // never through `wrapEntity` (wrong `<!--class NAME-->` comment).
-    const isUsecaseOrActor =
-      classifier.kind === 'usecase' || (classifier.kind === 'descriptive' && classifier.usymbol === 'actor');
-    if (isUsecaseOrActor && geo.measurer !== undefined) {
+    // SI14 T4 (ADR-1/ADR-2)/cdd-T22 (E8, cacoma-43-poxu615): usecase/actor/
+    // circle/component draw via the SAME faithful `EntityImageDescription
+    // .drawU` path description uses, when a real `StringMeasurer` reached
+    // this geo (absent only for hand-built test fixtures --
+    // `class-geo-types.ts#ClassGeometry.measurer`). The fragment's `body`
+    // carries EntityImageDescription's OWN `<!--entity NAME-->` wrap
+    // (`renderer-usymbol-entity.ts`) -- push UNWRAPPED, never through
+    // `wrapEntity` (wrong `<!--class NAME-->` comment).
+    if (usesClassUSymbolEntity(classifier) && geo.measurer !== undefined) {
       const entityUid = uidPlan.classifierUid.get(classifier.id) ?? '';
-      const fragment = renderUsecaseOrActorEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
+      const fragment = renderClassUSymbolEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
       usymbolEntityFragments.push(fragment);
       children.push(fragment.body);
       continue;
@@ -408,6 +376,8 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     children.push(
       wrapEntity(leafPortion(classifier.id), uid, classifier.id, true, renderClassifier(classifier, theme)),
     );
+    // cdd-T16 (M7/E11, flagged write-set extension, SvekResult.java:82-89):
+    children.push(...renderGroupInheritanceNeighborhood(classifier, geo.edges, theme));
   }
 
   // 3. Edges (last, matching jar: `svek/SvekResult.java:97-101` draws every
@@ -437,7 +407,8 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
     // must never draw its own `<g class="link">`.
     if (edge.consumedByOpaleNote === true) return;
     if (hiddenClassifierIds.has(edge.from) || hiddenClassifierIds.has(edge.to)) return;
-    const rendered = renderEdge(edge, theme, linkIds, syntheticNames);
+    if (edge.hidden === true) return; // cdd-T7 A2a/M12: `-[hidden]-` (SvekEdge.java:835-836)
+    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer });
     extraDefs += rendered.extraDefs;
     children.push(
       wrapLink(
@@ -454,6 +425,23 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       ),
     );
   });
+
+  // cdd-T9 (E6 mechanism a): each note's connector, as its own `<g
+  // class="link">` via the SAME `wrapLink` call an ordinary edge gets above
+  // (`GraphvizImageBuilder.java:229`'s single draw loop over
+  // `dotData.getLinks()`, which upstream mints the note-host connector into
+  // as a real `Link`). Appended AFTER the real edges, matching upstream's
+  // OWN draw order for every AC fixture (fogexa/pecabi/sanixi/zepeki carry
+  // ZERO other edges); a diagram mixing note connectors with real
+  // relationships needs `Bibliotekon#addLine`'s `sameConnections` insertion
+  // (`Bibliotekon.java:83-107`) -- untouched, a named residual
+  // (`.agent-notes/cdd-T9.md`). cdd-T9b: style/id/entity-order/uid now fully
+  // resolved by `renderer-note-connector.ts#renderNoteConnectorLink` -- see
+  // that function's own doc comment for why it must run AFTER `linkIds` is
+  // populated above.
+  for (const connector of noteConnectors) {
+    children.push(renderNoteConnectorLink(connector, theme, uidPlan, linkIds));
+  }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)
   // across nodes before folding into the diagram-wide defs string.
@@ -496,4 +484,17 @@ export function renderClass(geo: ClassGeometry, theme: Theme): RenderFragment {
       : {}),
     diagramType: DIAGRAM_TYPE_CLASS,
   };
+}
+
+/**
+ * `renderClass` for exactly ONE page of `geo`, 0-based — cdd-T34 (E14
+ * `newpage`), mirrors `sequence/renderer.ts#renderSequencePage`'s identical
+ * "slice, then run the normal single-geometry renderer" shape. `geo` for
+ * page 0 of a single-page document IS `geo` itself (`sliceClassGeometryPage`
+ * returns its input unchanged, `===`, whenever `pageBoundaries` is absent
+ * or has one entry), so this is a true zero-cost superset of `renderClass`
+ * for the overwhelmingly common non-`newpage` case.
+ */
+export function renderClassPage(geo: ClassGeometry, theme: Theme, pageIndex: number): RenderFragment {
+  return renderClass(sliceClassGeometryPage(geo, pageIndex), theme);
 }

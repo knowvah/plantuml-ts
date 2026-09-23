@@ -5,15 +5,37 @@
  */
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
 import type { ClassifierKind, LinkDecor, UrlInfo, Visibility } from './ast.js';
-import type { ClassLeafGeo } from './class-leaf-geo.js';
 import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import type { StringMeasurer } from '../../core/measurer.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { MiddleDecor } from './class-arrow-middle-decor.js';
+import type { EdgeKalBoxes } from './class-geo-edge-extras.js';
 
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
+
+import type { JsonBodyItem } from './class-geo-json-types.js';
+import type {
+  EdgeConstraintGeo,
+  EdgeNoteBoxGeo,
+  QuantifierLinesGeo,
+  RoleLinesGeo,
+  SametailGeo,
+  VisibilityIconGeo,
+} from './class-geo-edge-extras.js';
+
+// cdd-T6: re-exported so `class-geo-types.ts` stays the one import site for
+// class geometry types (see `class-geo-edge-extras.ts`'s own doc comment).
+export type {
+  EdgeConstraintGeo,
+  EdgeNoteBoxGeo,
+  EdgeNoteLine,
+  QuantifierLineGeo,
+  QuantifierLinesGeo,
+  RoleLinesGeo,
+  SametailGeo,
+  VisibilityIconGeo,
+} from './class-geo-edge-extras.js';
 
 export interface ClassifierGeo {
   id: string;
@@ -98,6 +120,19 @@ export interface ClassifierGeo {
      * common case, `theme.strictUml` unset).
      */
     underline?: boolean;
+    /**
+     * CDD T20 (A5/M6): present only alongside `visibilityIcon` -- this
+     * member's OWN total wrapped-block height (sum of every physical
+     * sub-row the SAME `Member` expands into, `class-member-rows.ts
+     * #buildSectionRows`'s own doc comment), when it differs from this
+     * row's single-line height. `klimt/geom/PlacementStrategyVisibility
+     * .java:56-62`'s `height2` term is the WHOLE member block, not one
+     * physical line -- absent (falls back to `attributeFontSize(theme)`
+     * at the render call site, `renderer-classifier-box.ts`'s own doc
+     * comment) reproduces the pre-T20 single-line behavior byte-for-byte
+     * for every non-wrapped member.
+     */
+    visibilityBlockHeight?: number;
   }>;
   hideCircle?: boolean; // suppress the circle badge (hide circle directive)
   /**
@@ -108,6 +143,14 @@ export interface ClassifierGeo {
    * node/creationIndex slot, only its `<g class="entity">` disappears).
    */
   hidden?: boolean;
+  /** cdd-B10FU (`pijiju-95-xexi872`): the `EntityImageProtected` border
+   *  (`svek/EntityImageProtected.java:76-83`) this classifier was padded
+   *  by (`class-dot-graph.ts#protectedPad`). `x`/`y`/`width`/`height`
+   *  stay the OUTER (padded/DOT-node) box, still needed by
+   *  `renderer-group.ts#renderGroupInheritanceNeighborhood`; the visible
+   *  content draws at the INNER box this field derives (`UTranslate
+   *  (border, border)`). */
+  protectedBorder?: number;
   usymbol?: string; // for kind 'descriptive': the keyword whose USymbol icon renders
   /**
    * G2 N2 (mechanism 3): parse-time creation order, copied unchanged from
@@ -136,6 +179,7 @@ export interface ClassifierGeo {
    *  (`ast.ts`'s doc comment) — feeds `renderer-uid.ts#buildClassUidPlan`'s
    *  subsumed-explicit-association phantom-rank bookkeeping. */
   subsumedLinkCreationIndex?: number;
+  apointNameCreationIndex?: number; // cdd-T3: copied from `Classifier.apointNameCreationIndex` (`ast.ts` doc).
   /** G2 N20: copied unchanged from `Classifier
    *  .invertedClassEdgeOldCreationIndex` (`ast.ts`'s doc comment) — feeds
    *  `renderer-uid.ts#buildClassUidPlan`'s repeat-coupling phantom-rank
@@ -162,6 +206,11 @@ export interface ClassifierGeo {
    *  `resolveBadgeFill` calls. */
   badgeChar?: string;
   badgeColor?: string;
+  /** CDD B7FU-R2 item (c-b): copied unchanged from `MeasuredClassifier
+   *  .badgeSpriteImage` (`class-layout-helpers.ts`'s doc comment) — feeds
+   *  `renderer-classifier-box.ts#buildHeaderPrimitive`'s sprite-badge draw
+   *  (wins over `badgeChar`/the default kind badge). */
+  badgeSpriteImage?: { href: string; width: number; height: number };
   /** G2 N31: copied unchanged from `Classifier.color` (`ast.ts`'s doc
    *  comment) -- feeds `renderer-classifier-box.ts#classifierFill`'s
    *  inline `class Foo #color { ... }` background override. */
@@ -277,7 +326,20 @@ export interface EdgeGeo {
    *  out of scope) -- this field is structurally correct (real engine
    *  placement, real jar text-styling formula) but not guaranteed
    *  byte-exact for that reason. */
-  label?: { text: string; x: number; y: number; width: number };
+  label?: {
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    /** cdd-T25: a magic-arrow label's leading `<size:N>` tag resolves to a
+     *  font-size override for the TEXT run only (the arrow glyph stays at
+     *  the base `arrow` style size) -- `class-edge-label-attach.ts
+     *  #attachMagicArrow`'s doc comment has the jar-verified derivation
+     *  (`xamule-03-jeda376`). `undefined` for every label with no such
+     *  tag (the overwhelming majority), which renders at the SAME base
+     *  `labelFontAttrs.fontSize` as before this field existed. */
+    fontSize?: number;
+  };
   /** G2 item 43: present INSTEAD OF {@link label} when the relationship's
    *  text carried a `\n`/`\l`/`\r` line-break escape sequence
    *  (`class-layout-helpers.ts#splitEdgeLabelLines`) -- one entry per line,
@@ -314,6 +376,33 @@ export interface EdgeGeo {
    *  converts to the left/baseline anchor jar's own `<text>` emits. */
   tailLabel?: { text: string; x: number; y: number; width: number };
   headLabel?: { text: string; x: number; y: number; width: number };
+  /** cdd-T6 (A2a/M10): the SAME two quantifiers, `\n`-split into one anchor
+   *  per physical line — see {@link QuantifierLinesGeo}. Present whenever
+   *  either end carries a placed quantifier; `tailLabel`/`headLabel` stay
+   *  set alongside it (the single-line, unsplit form) until T7 switches the
+   *  renderer over. */
+  quantifierLines?: QuantifierLinesGeo;
+  /** cdd-T17 (M8): the ADDITIVE role label, present only when an end
+   *  carries BOTH a quantifier and a role — see {@link RoleLinesGeo}. The
+   *  role-as-fallback case (no quantifier) reuses {@link quantifierLines}
+   *  instead (`class-layout-edge-labels.ts#computeMultiplicityAttrs`). */
+  roleLines?: RoleLinesGeo;
+  /** cdd-T6 (A2a/M2): the link label's visibility-modifier icon block —
+   *  see {@link VisibilityIconGeo} and `class-edge-visibility.ts`. Present
+   *  only when the label's first line began with a visibility character
+   *  AND `classAttributeIconSize > 0`; the character is then absent from
+   *  `label`/`labelLines[0]`, matching `Display.java:415-416`. */
+  visibilityIcon?: VisibilityIconGeo;
+  /** cdd-T6 (A2a/M5): the `note on link` operand of the merged label block
+   *  — see {@link EdgeNoteBoxGeo}. Absent unless the relationship carried
+   *  `linkNote` and the layout placed its label box. */
+  noteBox?: EdgeNoteBoxGeo;
+  /** cdd-T6 (A2a/M9): `constraint on links` — see {@link EdgeConstraintGeo}.
+   *  Present on the SECOND link of a constrained pair only. */
+  constraint?: EdgeConstraintGeo;
+  /** cdd-T15 (A2a/M1, D6): the qualified-association box(es) —
+   *  see {@link EdgeKalBoxes}. */
+  kalBox?: EdgeKalBoxes;
   /** Arrow decoration at the target end (from the arrow's target-side head). */
   targetDecor: LinkDecor;
   /** Arrow decoration at the source end (from the arrow's source-side head). */
@@ -376,122 +465,33 @@ export interface EdgeGeo {
    *  `theme.colors.graph.arrowTagCascade`. Absent for every link with no
    *  `<<...>>`. */
   stereotypeTags?: readonly string[];
+  /** cdd-T7 (flagged extension, `.agent-notes/cdd-T7.md`): carry-only
+   *  copies of `Relationship.url`/`.hidden`/`.middleDecor` -- the ONLY
+   *  channel, since `renderClass(geo, theme)` has no AST access. */
+  url?: UrlInfo;
+  hidden?: true;
+  middleDecor?: MiddleDecor;
+  sametail?: SametailGeo; // cdd-T16 (M7/E11): see SametailGeo's own doc comment.
+  leafContacts?: readonly SametailGeo[]; // cdd-T16b (allButSametails): see SametailGeo.
 }
 
-export interface NamespaceGeo {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  label: string;
-  /** G2 N17: the folder-tab's own title-tab width/height, pre-computed at
-   *  layout time (`class-namespace-shape.ts#getWTitle`/`getHTitle`) -- the
-   *  render phase stays a pure `geometry -> SVG string` function with no
-   *  `StringMeasurer` of its own, matching `ClassifierGeo.rows[].text`'s
-   *  established "measure once, at layout time" convention. */
-  wtitle: number;
-  htitle: number;
-  /** G2 N17: pre-computed title baseline Y offset (relative to `y`) --
-   *  see `class-namespace-shape.ts#getTitleBaselineOffset`'s doc comment. */
-  baselineOffset: number;
-  /** G2 N2 (mechanism 3): parse-time creation order, copied unchanged from
-   *  `Namespace.creationIndex`. */
-  creationIndex?: number;
-  /** G2 N60 (item 42): which klimt shape `Cluster#drawU` draws this
-   *  namespace's outline as -- determines its `LimitFinder` ink rule
-   *  (`layout-ink-extent.ts#addNamespaceInk`'s own doc comment carries the
-   *  full jar-verified mechanism). `undefined` is the common case (default
-   *  FOLDER style, non-`strictuml`): jar draws a rounded-arc `UPath`
-   *  (`USymbolFolder#asBig`'s `roundCorner!=0` branch), which gets the
-   *  PLAIN ink rule (`addPlainInk`, no correction needed -- this is what
-   *  every namespace got before N60). `'polygon'`: FOLDER style WITH
-   *  `strictuml` (`roundCorner=0` forces the sharp-corner `UPolygon`
-   *  branch, `renderNamespaceFolder`'s own `theme.strictUml === true`
-   *  gate) -- needs `LimitFinder#drawUPolygon`'s `HACK_X_FOR_POLYGON=10`
-   *  x-padding. `'rect'`: `skinparam packageStyle rect` (`USymbolRectangle`
-   *  draws a plain `URectangle`) -- needs the classic `-1` min/max inset,
-   *  NOT the polygon hack. Computed once at layout time
-   *  (`class-geo-builders.ts#buildNamespaceGeos`) from `theme.packageStyle`/
-   *  `theme.strictUml`, mirroring `wtitle`/`htitle`'s own "resolve once,
-   *  keep render/ink-extent theme-agnostic" precedent. */
-  inkShape?: 'polygon' | 'rect';
-}
+// cdd-T6: `NamespaceGeo` moved to `class-geo-namespace-types.ts` when the
+// four new `EdgeGeo` fields pushed this file past the 500-line hook cap
+// (pre-authorised split re-export) -- a pure move, re-exported below.
+export type { NamespaceGeo } from './class-geo-namespace-types.js';
+/** cdd-T15: re-exported alongside the other `EdgeGeo` member shapes. */
+export type { EdgeKalBoxes } from './class-geo-edge-extras.js';
+export type { KalBox } from './class-kal.js';
 
-export interface ClassGeometry {
-  totalWidth: number;
-  totalHeight: number;
-  /**
-   * G2 N46: the PRE-`CucaDiagram#getDefaultMargins()`/`SvgGraphics
-   * #ensureVisible` ink-walk dims (`layout-ink-extent.ts
-   * #computeClassRawInkDims`) -- what jar's `DiagramChromeFactory.create`
-   * receives as `raw` and every `DecorateEntityImage#getTextX` centering
-   * computation runs against, DISTINCT from `totalWidth`/`totalHeight`
-   * (post-margin, post-quirk -- the correct value for a NO-chrome canvas).
-   * Optional: `assembleShiftedGeometry`'s main DOT-driven path AND
-   * `class-geo-builders.ts#degenerateSingleClassifier` (G2 N48, item 24's
-   * first of 3 named sub-cases) both set it. The empty-diagram sentinel and
-   * `layoutMultiPage`'s page-stacking combiner still leave it `undefined`
-   * -- `renderer.ts#renderClass` and `index.ts#applyAnnotationChrome`'s
-   * class branch fall back to `totalWidth`/`totalHeight` in that case
-   * (today's behavior, unchanged; named remainder, not chased this
-   * iteration -- see `plans/g2-class-svg/ledger.md` N48).
-   */
-  rawWidth?: number;
-  rawHeight?: number;
-  edges: EdgeGeo[];
-  namespaces: NamespaceGeo[];
-  /** Single leaf collection, replacing `classifiers`/`notes` (T3) -- see `class-leaf-geo.ts`'s doc comment for jar mechanism + draw-order. */
-  leaves: ClassLeafGeo[];
-  /**
-   * SI14 T3: the SAME `StringMeasurer` instance `SyncPlugin.layoutSync`
-   * received, carried onto the geometry for the same reason `errors` above
-   * `index.ts#classPlugin.layoutSync` is: `SyncPlugin.render(geo, theme)`
-   * (`dispatcher.ts`) only receives the geo, not the measurer, so a
-   * draw-time consumer that needs to measure text (T4: USymbol label
-   * placement via the faithful `TextBlock` tree, mirroring the description
-   * engine's `EntityImageDescriptionSupport.ts#buildTextBlock` precedent)
-   * has nowhere else to get one. Set unconditionally by `index.ts`'s
-   * `layoutSync` on every real `parseClass()`-driven diagram; optional only
-   * so pre-existing hand-built `ClassGeometry` test fixtures that bypass
-   * `layoutClass`/`layoutSync` entirely (unit tests constructing a geo
-   * literal directly) compile unchanged.
-   */
-  measurer?: StringMeasurer;
-  /**
-   * SI14 T3: this diagram's `sprite $name { ... }` definitions, copied
-   * unchanged from `ClassDiagramAST.sprites` (`ast.ts`'s doc comment) by
-   * the same `layoutSync` spread as {@link measurer} above -- mirrors the
-   * description engine's identical `ast.sprites` -> geo `sprites`
-   * passthrough (`description/layout.ts:487`). Omitted (not merely
-   * `undefined`) when the diagram declares no sprites, matching every
-   * other optional field in this file.
-   */
-  sprites?: SpriteRegistry;
-}
+// cdd-T17: `ClassGeometry` moved to `class-geo-geometry-types.ts` when
+// `EdgeGeo.roleLines` pushed this file back over the 500-line hook cap
+// (pre-authorised split re-export, same precedent as `NamespaceGeo`/
+// `JsonBodyItem` below) -- a pure move, re-exported so no consumer's import
+// path changed.
+export type { ClassGeometry, ClassPageBoundary } from './class-geo-geometry-types.js';
 
-/**
- * One drawing operation of a `json` leaf's entries area, in
- * `TextBlockCucaJSon#drawU`'s OWN order (see
- * `class-json-sizing.ts#buildJsonItems`). Every coordinate is
- * box-relative, the same frame `rows[].y`/`indent` and `dividerYs` use.
- *
- * A separate, ordered list rather than more `dividerYs` entries because
- * upstream's order is a pre-order traversal, not a Y-order: a nested
- * table's `vline` is drawn between its parent's key text and its own first
- * `hline`, and both share the parent row's Y. Same "this body owns its own
- * draw order" dispatch `enhancedBody` established.
- *
- * @see ~/git/plantuml/.../cucadiagram/TextBlockCucaJSon.java:162-180 (object),
- *      :213-224 (array)
- */
-export type JsonBodyItem =
-  /** `ULine.hline(jsonTotalWidth)` — scoped to the emitting table's OWN
-   *  width, which is the parent's minus the parent's key column. */
-  | { readonly kind: 'hline'; readonly x: number; readonly y: number; readonly width: number }
-  /** `ULine.vline(height)` at `dx = width1` — ONE per OBJECT table (never
-   *  per row, unlike `TextBlockMap`; never at all for an array). */
-  | { readonly kind: 'vline'; readonly x: number; readonly y: number; readonly height: number }
-  /** A key or scalar-value cell. `row` is the SAME object that appears in
-   *  `ClassifierGeo.rows`, not a copy. */
-  | { readonly kind: 'text'; readonly row: ClassifierGeo['rows'][number] };
+// cdd-T6: `JsonBodyItem` moved to `class-geo-json-types.ts` when the four
+// new `EdgeGeo` fields pushed this file past the 500-line hook cap
+// (pre-authorised split re-export) -- a pure move, re-exported below so no
+// consumer's import path changed.
+export type { JsonBodyItem } from './class-geo-json-types.js';

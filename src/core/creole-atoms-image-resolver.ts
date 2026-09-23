@@ -60,8 +60,12 @@ import type { FontConfiguration } from './klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './creole-atoms.js';
 import { measureInlineAtom, spriteAtomScale } from './creole-atoms-measure.js';
 import type { SpriteRegistry } from './sprite-commands.js';
-import { getSpriteMonochrome, getSpriteSvg, spriteDimsLookupFor } from './sprite-commands.js';
-import { spriteToPngDataUri, spriteMonochromeAsLike } from './klimt/sprite/sprite-raster.js';
+import { getSpriteMonochrome, getSpriteSvg, getSpriteColor4096, spriteDimsLookupFor } from './sprite-commands.js';
+import {
+  spriteToPngDataUri,
+  spriteMonochromeAsLike,
+  spriteColor4096ToPngDataUri,
+} from './klimt/sprite/sprite-raster.js';
 import { SvgNanoParser } from './klimt/sprite/SvgNanoParser.js';
 import type { DrawablePrimitive } from './creole-atoms.js';
 import type { UGraphic } from './klimt/UGraphic.js';
@@ -273,6 +277,32 @@ export function resolveSvgSpriteAtom(
   return { kind: 'drawable', primitives: [...collector.collected()], width: dims.width, height: dims.height };
 }
 
+/** cdd-T26 residual round: {@link resolveSpriteAtom}'s 4096-colour branch,
+ *  split out to keep that function's own NLOC under this project's cap.
+ *  No gray-level tint applies (`SpriteColor4096`'s own doc comment: every
+ *  cell from `buildSpriteColor4096` is a real decoded RGB), so `font
+ *  .color`/`atom.forcedColor` are not threaded — there is nothing for
+ *  them to tint, unlike the monochrome branch. */
+function resolveColorSpriteAtom(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  registry: SpriteRegistry,
+  spriteDims: SpriteDimsLookup,
+  font: FontConfiguration,
+): ResolvedAtomImage {
+  const sprite = getSpriteColor4096(registry, atom.name);
+  if (sprite === undefined) return undefined;
+  const dims = measureInlineAtom(atom, spriteDims, font.size);
+  const png = spriteColor4096ToPngDataUri(sprite, spriteAtomScale(atom, font.size));
+  return {
+    kind: 'image',
+    href: png.dataUri,
+    width: dims.width,
+    height: dims.height,
+    rasterWidth: Math.round(dims.width),
+    rasterHeight: Math.round(dims.height),
+  };
+}
+
 function resolveSpriteAtom(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
   registry: SpriteRegistry,
@@ -282,7 +312,7 @@ function resolveSpriteAtom(
   const svgSprite = getSpriteSvg(registry, atom.name);
   if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font);
   const sprite = getSpriteMonochrome(registry, atom.name);
-  if (sprite === undefined) return undefined; // unknown name -- StripeSimple.addSprite: skip.
+  if (sprite === undefined) return resolveColorSpriteAtom(atom, registry, spriteDims, font);
   // `font.size` is threaded so the sprite picks up `CommandCreoleSprite`'s
   // `fc.getSize2D() / 13.0` factor -- the SAME call the sizer makes, so drawn
   // and measured sprite geometry cannot drift (S1L-f).

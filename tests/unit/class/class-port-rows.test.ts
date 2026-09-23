@@ -24,6 +24,10 @@ const HEADER_HEIGHT = 32;
 /** T0's oracle per-row member height for a plain single-line text row at
  *  default font (`dekaba`/`fm-both`/`xefeme`, all 14). */
 const ROW_HEIGHT = 14;
+/** The `..` member-separator row's own height, read off the jar DOT for
+ *  `gojofu-46-xaci340` (svek-1.dot sh0007: the `user_id` band at 58 = 32 +
+ *  4 + 14 + 8, so the separator between them contributes 8). */
+const SEPARATOR_HEIGHT = 8;
 
 describe('classPortRows (T1, SI17, ADR-1 block tree)', () => {
   it('dekaba-54-fafi485: single compartment, one whole-word election -> 36/14', () => {
@@ -74,6 +78,34 @@ describe('classPortRows (T1, SI17, ADR-1 block tree)', () => {
       { id: Ports.encodePortNameToId('alpha'), position: 36, height: ROW_HEIGHT },
       { id: Ports.encodePortNameToId('noise'), position: 50, height: ROW_HEIGHT },
     ]);
+  });
+
+  it('gojofu-46-xaci340 Email: a `..` separator row between the header and the elected row pushes it to 58/14', () => {
+    // T36's instrument fixture. The jar's own DOT for this diagram
+    // (`test-results/dot-cache/class/gojofu-46-xaci340/svek-1.dot`, node
+    // sh0007) is `<TR>` HEIGHT 58 / HEIGHT 14 PORT=pe8701ad... / HEIGHT 18,
+    // i.e. the `user_id` band sits at 58 and the table is 90 tall. 58 =
+    // HEADER_HEIGHT 32 + SECTION_MARGIN 4 + `id : INTEGER` 14 + the `..`
+    // separator's own 8 -- the separator reaches this producer as an
+    // ordinary compartment member carrying only its own height, exactly as
+    // `MethodsOrFieldsArea#getPorts` accumulates every child's height
+    // (`cucadiagram/MethodsOrFieldsArea.java:194-211`) whether or not the
+    // child can be elected. Pins the header/port-row boundary the A5
+    // diagnosis suspected of reserving too little space.
+    const compartments: PortRowCompartmentInput[] = [
+      {
+        members: [
+          { text: 'id : INTEGER', height: ROW_HEIGHT },
+          { text: '..', height: SEPARATOR_HEIGHT },
+          { text: 'user_id : INTEGER', height: ROW_HEIGHT },
+          { text: 'address : INTEGER', height: ROW_HEIGHT },
+        ],
+      },
+    ];
+
+    const result = classPortRows(compartments, ['user_id'], HEADER_HEIGHT);
+
+    expect(result).toEqual([{ id: Ports.encodePortNameToId('user_id'), position: 58, height: ROW_HEIGHT }]);
   });
 
   it('a substring-only match (score 50, MethodsOrFieldsArea.java:232) still produces a band', () => {

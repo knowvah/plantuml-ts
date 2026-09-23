@@ -130,7 +130,12 @@ function buildStyleDefaults(theme: Theme, symbol: USymbol): ClusterStyleDefaults
     strictUmlStyle: false,
     diagonalCorner: 0,
     lineColorDefault: folder ? FOLDER_BORDER_DEFAULT : NON_FOLDER_BORDER_DEFAULT,
-    backGroundColorDefault: theme.colors.graph.packageBackground,
+    // CDD T18b: `theme.colors.graph.packageBackground` is optional now
+    // (theme.ts no longer bakes the cluster's own unstyled default in --
+    // see that field's doc comment) -- this call site supplies its own
+    // `'none'` (`Cluster.java:285-296`'s unstyled `BackGroundColor`,
+    // `plantuml.skin:102-114`) explicitly, matching the pre-T18b value.
+    backGroundColorDefault: theme.colors.graph.packageBackground ?? 'none',
     strokeDefault: UStroke.withThickness(folder ? CLUSTER_STROKE_WIDTH : NON_FOLDER_STROKE_WIDTH),
   };
 }

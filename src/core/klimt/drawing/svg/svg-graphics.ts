@@ -7,15 +7,20 @@
  * `SvgGraphics`) and adds the group/link management, comment/metadata
  * emission, and the D3′ throwing stubs.
  *
- * D3′ stubs (interactive links, images, sprites — out of scope, throw a
- * message naming D3′): `openLink`, `closeLink`, `svgImage` (one method
- * covering both upstream overloads — `PortableImage` and `UImageSvg` —
- * plus `svgImageUnsecure`, none of which are ported; sprites route
- * through `svgImage` upstream too, so no separate sprite method exists
- * to stub). `LinkData` (upstream: a private nested class building the
- * `<a>` element's `xlink:*` attributes) is not ported either — nothing
- * can construct one once `openLink` always throws before ever pushing
- * onto `activeLinks`.
+ * D3′ stubs (images, sprites — out of scope, throw a message naming D3′):
+ * `svgImage` (one method covering both upstream overloads —
+ * `PortableImage` and `UImageSvg` — plus `svgImageUnsecure`, none of
+ * which are ported; sprites route through `svgImage` upstream too, so no
+ * separate sprite method exists to stub).
+ *
+ * cdd-T28: `openLink`/`closeLink` and `LinkData` ARE ported now (they
+ * were D3′ stubs). `AtomText#drawU` opens a url around its runs
+ * (`klimt/creole/legacy/AtomText.java:197-198,235-236` ->
+ * `UGraphicSvg#startUrl`, java:159-162 -> `SvgGraphics#openLink`,
+ * java:1227-1239), which is how the jar wraps a creole `[[url label]]`
+ * in `<a target="_top" href=…>` — visible in
+ * `test-results/dot-cache/activity/letare-59-gore448/in.svg`'s legend and
+ * unreachable in this port while the stub threw.
  *
  * D3′ extended (this task's own finding, not in the mission brief's D3′
  * list, applying the same throw-with-citation treatment): `getMetadataHex`
@@ -34,16 +39,16 @@
  * `formatOpacity` (`svg-graphics-core.ts`, no `HColorLinearGradient`
  * representation in this klimt port's Paint-for-HColor seam).
  *
- * `activeLinks` is kept as a field (always empty, since `openLink` never
- * populates it) purely so `closeTopActiveLinkIfNeeded`/
- * `addTopOpenedLinkIfNeeded` — upstream's group/link-interleaving guards,
- * which `startGroup`/`closeGroup` call unconditionally — can be ported
- * with their exact control flow rather than special-cased away.
+ * `activeLinks` carries the open-link stack upstream's
+ * `closeTopActiveLinkIfNeeded`/`addTopOpenedLinkIfNeeded` guards read —
+ * SVG forbids a nested `<a>`, so only the topmost link is ever pending
+ * (upstream's own note, java:1178-1182).
  */
 
 import { SvgGraphicsElements } from './svg-graphics-elements.js';
 import type { XmlNode } from './xml-writer.js';
 import { UGroupType } from '../../shape/UGroup.js';
+import { ignoreThisLink } from '../../../security/SecurityUtils.js';
 
 export type { SvgOption } from './svg-graphics-core.js';
 // LengthAdjust/TransparentFillBehavior are as-const objects (a value AND
@@ -71,10 +76,55 @@ export function getMetadataHex(_comment: string): string {
  * `closeTopActiveLinkIfNeeded`, `addTopOpenedLinkIfNeeded`, `closeGroup`,
  * `startGroup`, `addComment`, `addCommentMetadata` (throws — see above).
  */
+/**
+ * Upstream: `SvgGraphics.LinkData` (a private nested class, java:1130-1175)
+ * — the `<a>` element's attribute set, in upstream's own order: `target`,
+ * `href`, `xlink:href`, `xlink:type="simple"`, `xlink:actuate="onRequest"`,
+ * `xlink:show="new"`, `title`, `xlink:title`. The identical set is already
+ * jar-verified byte-exact by `core/svg.ts#linkWrap` (the string-emitting
+ * path every non-klimt engine uses); this is the XmlNode-emitting twin, so
+ * the two agree by construction.
+ *
+ * `getXlinkTitle` (java:1147-1161) decodes `<U+XXXX>` escapes in the
+ * tooltip and turns a literal `\n` into a real newline, falling back to
+ * the url when no tooltip was given.
+ */
+class LinkData {
+  private readonly url: string;
+  constructor(
+    url: string,
+    private readonly title: string | null,
+    private readonly target: string,
+  ) {
+    // java:1136-1140 — javascript: security issue.
+    this.url = ignoreThisLink(url) ? '' : url;
+  }
+
+  private getXlinkTitle(): string {
+    if (this.title === null) return this.url;
+    return this.title
+      .replace(/<U\+([0-9A-Fa-f]+)>/g, (_m, hex: string) => String.fromCharCode(Number.parseInt(hex, 16)))
+      .replace(/\\n/g, '\n');
+  }
+
+  /** java:1163-1174. */
+  updateAttributesOf(element: XmlNode): void {
+    const title = this.getXlinkTitle();
+    element.setAttribute('target', this.target);
+    element.setAttribute('href', this.url);
+    element.setAttribute('xlink:href', this.url);
+    element.setAttribute('xlink:type', 'simple');
+    element.setAttribute('xlink:actuate', 'onRequest');
+    element.setAttribute('xlink:show', 'new');
+    element.setAttribute('title', title);
+    element.setAttribute('xlink:title', title);
+  }
+}
+
 export class SvgGraphics extends SvgGraphicsElements {
-  // Always empty — see the module doc comment above for why this field
-  // exists despite nothing ever populating it.
-  private readonly activeLinks: readonly unknown[] = [];
+  /** java:1184 — the open-link stack; SVG forbids nested `<a>`, so at most
+   *  one entry is ever pending as `pendingElements[0]`. */
+  private readonly activeLinks: LinkData[] = [];
 
   private closeTopPendingElement(): void {
     const element = this.pendingElements[0]!;
@@ -82,39 +132,47 @@ export class SvgGraphics extends SvgGraphicsElements {
     if (element.getFirstChild() !== null) this.getG().appendChild(element);
   }
 
+  /** java:1202-1215. */
   private closeTopActiveLinkIfNeeded(): void {
-    /* v8 ignore start -- unreachable: `activeLinks` is always empty
-     * while `openLink` is a D3' throwing stub (see the module doc
-     * comment above); kept for structural fidelity. */
     if (this.activeLinks.length > 0) {
-      if (this.pendingElements[0]!.getTagName() !== 'a') {
+      if (this.pendingElements[0]?.getTagName() !== 'a') {
         throw new Error('Expected top pending element to be a link.');
       }
       this.closeTopPendingElement();
     }
-    /* v8 ignore stop */
     for (const elt of this.pendingElements) {
-      /* v8 ignore next -- unreachable for the same reason: no pending
-       * element is ever tagged "a" without `openLink`. */
       if (elt.getTagName() === 'a') throw new Error('closeTopActiveLinkIfNeeded: invalid state');
     }
   }
 
+  /** java:1222-1228. */
   private addTopOpenedLinkIfNeeded(): void {
     if (this.activeLinks.length === 0) return;
-    // Unreachable: `openLink` is a D3′ throwing stub, so `activeLinks`
-    // can never gain an entry. Kept for structural fidelity with
-    // upstream's group/link interleaving logic.
+    const link = this.activeLinks[0]!;
+    const element = this.document.createElement('a');
+    this.pendingElements.unshift(element);
+    link.updateAttributesOf(element);
   }
 
-  /** D3′ throwing stub — see the module doc comment above. */
-  openLink(_url: string, _title: string | null, _target: string | null): void {
-    throw new Error('deferred per D3-prime: interactive links (openLink/closeLink) not yet ported');
+  /** java:1233-1245. `target` defaults to `_top` at the call site
+   *  (`SkinParam.java:1082`, `getValue("svglinktarget", "_top")`). */
+  openLink(url: string, title: string | null, target: string): void {
+    this.closeTopActiveLinkIfNeeded();
+    this.activeLinks.unshift(new LinkData(url, title, target));
+    this.addTopOpenedLinkIfNeeded();
   }
 
-  /** D3′ throwing stub — see the module doc comment above. */
+  /** java:1251-1264. */
   closeLink(): void {
-    throw new Error('deferred per D3-prime: interactive links (openLink/closeLink) not yet ported');
+    if (this.pendingElements.length === 0 || this.activeLinks.length === 0) {
+      throw new Error('Attempting to close a link in an invalid state.');
+    }
+    if (this.pendingElements[0]!.getTagName() !== 'a') {
+      throw new Error('Attempting to close a link in an invalid state.');
+    }
+    this.closeTopActiveLinkIfNeeded();
+    this.activeLinks.shift();
+    this.addTopOpenedLinkIfNeeded();
   }
 
   /** Upstream: `closeGroup()`. */

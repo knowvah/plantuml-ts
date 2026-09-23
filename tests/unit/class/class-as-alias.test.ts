@@ -72,37 +72,50 @@ describe('classifier — `CODE as "DISPLAY"` (quoted-display-second)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Fix D: `scale` directive must be ignored, not parsed as a relationship.
+// Fix D: `scale` directive must never be parsed as a relationship.
 //
 // Upstream's CommandScale + siblings (CommandScaleWidthAndHeight, ...) are
 // registered globally via CommonCommands.java — structurally inert for class
-// diagrams. Without the ignore rule, `scale .5` tokenizes as a phantom
-// classifier chain (`scale`, `.->`, `5`) plus a minlen-0 edge
-// (corine-48-pemu761).
+// LAYOUT (D4: scale is resolved at the layout->render boundary, `layoutClass`,
+// never re-derives node/edge positions). Without the ignore rule, `scale .5`
+// tokenizes as a phantom classifier chain (`scale`, `.->`, `5`) plus a
+// minlen-0 edge (corine-48-pemu761). cdd-T29 additionally captures the
+// directive into `ast.scale` (no longer a bare no-op) — see D4,
+// `plans/class-divergence-drive/decisions.md`.
 // ---------------------------------------------------------------------------
 
-describe('classifier — `scale` directive is ignored', () => {
-  it('scale .5 produces no classifiers and no relationships', () => {
+describe('classifier — `scale` directive is captured, never parsed as a relationship', () => {
+  it('scale .5 produces no classifiers and no relationships, and sets ast.scale', () => {
     const ast = parse('class A\nscale .5\nclass B');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
     expect(ast.relationships).toEqual([]);
+    expect(ast.scale).toEqual({ kind: 'simple', factor: 0.5 });
   });
 
-  it('scale 200*100 (width*height form) is ignored', () => {
+  it('scale 200*100 (width*height form) sets ast.scale, no phantom classifiers', () => {
     const ast = parse('class A\nscale 200*100\nclass B');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
     expect(ast.relationships).toEqual([]);
+    expect(ast.scale).toEqual({ kind: 'widthAndHeight', width: 200, height: 100 });
   });
 
-  it('scale 200 width (single-dimension form) is ignored', () => {
+  it('scale 200 width (single-dimension form) sets ast.scale, no phantom classifiers', () => {
     const ast = parse('class A\nscale 200 width\nclass B');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
     expect(ast.relationships).toEqual([]);
+    expect(ast.scale).toEqual({ kind: 'width', target: 200 });
   });
 
-  it('scale max 300*200 (max-clamped form) is ignored', () => {
+  it('scale max 300*200 (max-clamped form) sets ast.scale, no phantom classifiers', () => {
     const ast = parse('class A\nscale max 300*200\nclass B');
     expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
     expect(ast.relationships).toEqual([]);
+    expect(ast.scale).toEqual({ kind: 'maxWidthAndHeight', width: 300, height: 200 });
+  });
+
+  it('an unrecognized scale line (scale 0) leaves ast.scale unset', () => {
+    const ast = parse('class A\nscale 0\nclass B');
+    expect(ast.classifiers.map((c) => c.id)).toEqual(['A', 'B']);
+    expect(ast.scale).toBeUndefined();
   });
 });

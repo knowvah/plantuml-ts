@@ -9,11 +9,15 @@ import { BUILTIN_THEMES } from './themes-builtin.js';
 // mission skin-file-loading: ElementColors/ThemeGraphColors moved to
 // theme-graph-colors.ts (re-exported below) to keep this file under the
 // project's 500-line file-size cap — see that module's own doc comment.
-import type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
+import type { ElementColors } from './theme-graph-colors.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 import { deepMergeTheme } from './theme-merge.js';
+import type { ThemeColorFields } from './theme-colors-fields.js';
+import type { ThemeSequenceFields } from './theme-sequence-fields.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
+export type { ThemeColorFields } from './theme-colors-fields.js';
+export type { ThemeSequenceFields } from './theme-sequence-fields.js';
 
 export interface Theme {
   fontFamily: string;
@@ -153,6 +157,15 @@ export interface Theme {
    *  FOLDER default, matching this port's minimal-scope convention (no
    *  corpus sample exercises them for class diagrams yet). */
   packageStyle?: 'rect';
+  /** cdd-T30: `skinparam dpi N` — `SkinParam#getDpi()`
+   *  (`skin/SkinParam.java:649-656`): `getAsInt("dpi", 96)`, falling back to
+   *  96 when the raw value is absent, non-digit, or `<= 0`. Feeds
+   *  `resolveScaleFactor`'s `dpi/96` post-clamp multiplier
+   *  (`core/scale-command.ts`, `core/TextBlockExporter.java:205-209`) at
+   *  every consumer's own call site — never a second scale-resolution path.
+   *  Absent = 96 (no-op multiplier), matching upstream's own default. */
+  dpi?: number;
+  topurl?: string; // cdd-T34: `skinparam topurl <url>` -- `UrlBuilder#withTopUrl` (java:140-146) prefix.
   /** `skinparam nodesep N` (px) — when set (nonzero), unconditionally
    *  replaces the clamped default DOT nodesep (SkinParam.java:847-851
    *  getAsInt("nodesep",0); DotStringFactory.java:117-124). Absent = engine
@@ -220,129 +233,12 @@ export interface Theme {
    *  `\t` (`AtomText#getTabSize`/`drawU`'s tab-stop expansion) -- G3/O4.
    *  Absent = upstream default (8). */
   tabSize?: number;
-  colors: {
-    background: string;
-    /** Default fill for action/node shapes (separate from canvas background). */
-    nodeBackground: string;
-    /**
-     * Default fill of every sequence participant head — `participant,
-     * actor, boundary, control, entity, queue, database, collections`.
-     *
-     * Each kind's style signature is `root, element, sequenceDiagram,
-     * <kind>` (`sequencediagram/ParticipantType.java:55-80`), and
-     * `plantuml.skin:197-201` sets `BackgroundColor: var(--grey-blue)` for
-     * all eight, with `--grey-blue: #e2e2f0` at `plantuml.skin:4`.
-     * `skin/rose/Rose.java:138-150` builds `ComponentRoseParticipant` from
-     * those styles; the component takes `biColor.getBackColor()`
-     * (`ComponentRoseParticipant.java:82`). A flat field like
-     * {@link nodeBackground}, not a `colors.elements` bucket, because the
-     * skin rule is scoped to `sequenceDiagram { }` while the buckets are
-     * diagram-agnostic (`actor`/`database` are description kinds too). A
-     * per-kind `elements[<kind>].background` bucket (skinparam, `<style>`)
-     * and an inline `participant X #color` both still win over it; a
-     * theme's or `<style>`'s bare `root { BackgroundColor }` overrides it
-     * (declaration-order merge, `StyleStorage#computeMergedStyle:102-114`).
-     */
-    participantBackground: string;
-    border: string;
-    text: string;
-    arrow: string;
-    note: string;
-    // NOTE: upstream default is '#FBFB77' (HColors.COL_FBFB77 in ColorParam.java).
-    // This value intentionally diverges. Tracked in plans/skinparam/decision-journal.md.
-    noteBackground: string;
-    lifeline: string;
-    activation: string;
-    frame: string;
-    divider: string;
-    error: string;
-    /** Per-element (SName) color buckets — decision D4. Populated by skinparam
-     *  (T4) and element-scoped style blocks (T5); read via
-     *  {@link resolveElementPaint}, which cascades element-specific → root
-     *  default. This is where gradient (Paint) colors live — the flat fields
-     *  below stay `string` (widening them ripples into ~20 not-yet-Paint-aware
-     *  renderers with no gradient need; see decision-journal.md T3). */
-    elements?: Partial<Record<string, ElementColors>>;
-    /** G2 N37: the SAME `.tagname` stereotype-name style-cascade
-     *  sub-selector as `graph.classTagCascade` above, applied to the NOTE
-     *  bucket (`note { .faint { BackgroundColor red } } }`,
-     *  `xokipa-29-rafu481`/`fabuje-68-gona310`/`neruke-07-ruce381`) --
-     *  keyed by the SAME cleaned tag name; `renderer-note.ts
-     *  #resolveNoteBackground` reads `.background` between a note's own
-     *  explicit `#color` override and the bare `elements.note` bucket. */
-    noteTagCascade?: Readonly<Record<string, ElementColors>>;
-    /** `PName.ShowStereotype` per `.tagname` -- see
-     *  `style-map-element.ts#computeShowStereotypeByTag`. An ABSENT entry
-     *  means show, mirroring upstream's `ValueNull` branch
-     *  (`Display.java:131-133`); only an explicit `false` lands here. */
-    showStereotypeByTag?: Readonly<Record<string, boolean>>;
-    graph: ThemeGraphColors;
-  };
-  sequence: {
-    /**
-     * Padding inside a participant box, on every side.
-     *
-     * `plantuml.skin:186-190` sets `Padding 7` for
-     * `participant,actor,boundary,control,entity,queue,database,collections`,
-     * and `ClockwiseTopRightBottomLeft.read` expands a scalar to all four
-     * sides. `AbstractTextualComponent#getTextWidth` adds
-     * `padding.getLeft() + padding.getRight()` to the raw text block
-     * (`:106-108`) and `getTextHeight` adds top + bottom (`:110-114`), and
-     * `ComponentRoseParticipant#drawInternalU:100-104` draws a rectangle of
-     * exactly those two. So the drawn box is `text + 2 * this` on both axes.
-     *
-     * There is deliberately NO minimum-width companion to this. Upstream's
-     * floor is `Rose#getMinClassWidth` = `style.value(PName.MinimumWidth)`
-     * (`Rose.java:275-278`), `MinimumWidth` is declared in no skin file, and
-     * `ValueNull#asDouble()` returns 0 (`ValueNull.java:57-59`) — so
-     * upstream's floor is zero. See
-     * `plans/sequence-coordinate-convergence/findings/participant-width.md`.
-     */
-    participantPadding: number;
-    /**
-     * Horizontal gap between adjacent participant boxes.
-     *
-     * `LivingSpaces#addConstraints:61-71` is the whole rule:
-     * `current.getPosA().ensureBiggerThan(previous.getPosE().addFixed(10))`.
-     * `posA` is `posB - marginBefore` and `posE` is `posD + marginAfter`
-     * (`LivingSpace.java:292-298`), with `posB`/`posD` the box's left and
-     * right edges (`:238-248`) and the two margins zero unless an englober
-     * or a self-message overflow widened them
-     * (`Doll.java:220-221`, `CommunicationTileSelf.java:208-213`). So for
-     * ordinary participants the constraint is `nextLeft >= prevRight + 10`:
-     * a ten-pixel gap between box EDGES.
-     */
-    participantGap: number;
-    /**
-     * INERT since C3 — nothing reads it.
-     *
-     * It was "the vertical gap between messages", and teoz has no such
-     * concept: `YGauge.createWithContact:103-116` sets each tile's `min` to
-     * the previous tile's `max`, so tiles are FLUSH and the whole gap between
-     * two events is the first one's own `getPreferredHeight`. There is no
-     * inter-event spacing constant anywhere in `sequencediagram/teoz/`.
-     *
-     * Kept as a field, not deleted, because `Theme` is public and
-     * `resolveTheme` accepts a partial override of it. A knob documented as
-     * doing nothing is better than one that silently does nothing.
-     */
-    messageSpacing: number;
-    /** Width of the activation box drawn on a lifeline */
-    activationWidth: number;
-    /** INERT — no reader. A note's own box padding is
-     *  `ComponentRoseNote:67-70`'s, resolved in `sequence-layout-events.ts`. */
-    noteMargin: number;
-    /** INERT — no reader. A group's header height is MEASURED from its title
-     *  (`ComponentRoseGroupingHeader#getPreferredHeight:120-123`), never a
-     *  constant; see `sequence-layout-events.ts#handleFrameEvent`. */
-    frameHeaderHeight: number;
-    /**
-     * INERT since C3 — nothing reads it. The tail below the last tile is
-     * `PlayingSpace#getPreferredHeight:154-161`'s `+ 10`
-     * (`sequence-layout-shared.ts#PLAYING_SPACE_TAIL_Y`), not a themed 20.
-     */
-    lifelineExtension: number;
-  };
+  /** Field shapes moved to theme-colors-fields.ts (cdd-T30, 500-line split —
+   *  pure move, see that module's own doc comment). */
+  colors: ThemeColorFields;
+  /** Field shapes moved to theme-sequence-fields.ts (cdd-T30, 500-line
+   *  split — pure move, see that module's own doc comment). */
+  sequence: ThemeSequenceFields;
 }
 
 export const defaultTheme: Theme = {
@@ -372,13 +268,13 @@ export const defaultTheme: Theme = {
       interfaceBackground: '#B4D7ED',
       enumBackground: '#F1F1F1',
       actorStroke: '#181818',
-      packageBackground: 'none',
-      // G2 N17: jar-verified '#000000' for the class-diagram folder-tab
-      // border (finono-05-cuvu171, jinibe-02-tebi269, ...) -- was an
-      // unverified #999999. Class is this field's ONLY consumer
-      // (description deliberately avoids it -- renderer-cluster.ts's own
-      // doc comment), so the default is safe to correct here.
-      packageBorder: '#000000',
+      // CDD T18b: `packageBackground`/`packageBorder` omitted (not
+      // `undefined`-valued) so an unstyled theme reads them as genuinely
+      // unset -- the EMPTY-package leaf's signature has no `group` in it
+      // (`EntityImageEmptyPackage.java:87-88` vs `Cluster.java:285-296`)
+      // and must NOT inherit the cluster's baked default. Each `...group`
+      // consumer supplies its own default via `?? <default>` --
+      // `class-namespace-shape.ts`, `renderer-cluster.ts:133`.
       edgeLabel: '#444444',
       actorFill: 'none',
       usecaseFill: '#FFFFFF',
@@ -514,6 +410,9 @@ export type ThemeOverride = {
   nodeSep?: number;
   rankSep?: number;
   wrapWidth?: number;
+  /** See {@link Theme.dpi}'s own doc comment. */
+  dpi?: number;
+  topurl?: string; // See {@link Theme.topurl}'s own doc comment.
   /** See {@link Theme.maxMessageSize}'s own doc comment. */
   maxMessageSize?: number;
   sameClassWidth?: boolean;

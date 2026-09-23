@@ -9,22 +9,31 @@ import type { EdgeGeo } from './layout.js';
 import {} from './renderer-note.js';
 import type {} from './note-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type {} from '../../core/dispatcher.js';
-import { text, path, attrs } from '../../core/svg.js';
+import { text, path, attrs, linkWrap } from '../../core/svg.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import {} from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from './class-monochrome.js';
-import { buildEdgeArrowheads, decorName, applyDecorTrim } from './renderer-arrowhead.js';
+import { buildEdgeArrowheads, decorName, applyDecorTrim, buildMiddleDecorMarkup } from './renderer-arrowhead.js';
 import { looksLikeRevertedForSvg, looksLikeNoDecorAtAllSvg } from '../../core/svek/extremity/link-decor.js';
 import {} from './renderer-uid.js';
 import { leafPortion } from './renderer-group.js';
 import {} from './class-lollipop.js';
 import {} from './renderer-classifier-box.js';
 import {} from './class-namespace-shape.js';
-import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
 import {} from './class-shadow.js';
 import { resolveArrowLabelFont, resolveCardinalityFontColor } from '../../core/arrow-label-font.js';
+import {
+  renderEdgeVisibilityIcon,
+  renderEdgeNoteBox,
+  renderEdgeConstraint,
+  renderEdgeCardinalityLabels,
+  renderEdgeKalBoxes,
+} from './renderer-edge-extras.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -139,18 +148,19 @@ export function uniqLinkId(ids: Set<string>, base: string): string {
  * `core/svg.ts`'s own `fontWeight` doc comment, corpus-verified 184/184
  * class fixtures) matches `camuna-58-veca254`'s oracle `foo1`/`foo2` labels
  * exactly. Applies ONLY to the main label -- `tailLabel`/`headLabel`
- * (cardinality/quantifier) keep their own untouched `CARDINALITY_FONT_SIZE`
- * font below (T14's path, out of this task's scope).
+ * (cardinality/quantifier) use their own `CARDINALITY_FONT_SIZE` font,
+ * scaled in `renderer-edge-extras.ts#renderEdgeCardinalityLabels` (cdd-B8FU).
  */
-function arrowLabelTextAttrs(theme: Theme): {
+function arrowLabelTextAttrs(theme: ScaledTheme): {
   fontSize: number;
   fontFamily: string;
   fontWeight?: '700';
   fontStyle?: 'italic';
 } {
+  // cdd-B8FU: `resolveArrowLabelFont` (SHARED `core/arrow-label-font.ts`) stays unscaled regardless of `ScaledTheme` -- scaled here (class-only).
   const font = resolveArrowLabelFont(theme);
   return {
-    fontSize: font.size,
+    fontSize: font.size * theme.scaleK,
     fontFamily: font.family,
     ...(font.weight === 'bold' ? { fontWeight: '700' as const } : {}),
     ...(font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
@@ -169,10 +179,7 @@ function arrowLabelTextAttrs(theme: Theme): {
  * `StyleStorage#computeMergedStyle`'s own last-registered-wins merge rather
  * than inventing a specificity rule upstream does not have.
  */
-function resolveArrowTagStyle(
-  tags: readonly string[] | undefined,
-  theme: Theme,
-): { color?: string; thickness?: number } | undefined {
+function resolveArrowTagStyle(tags: readonly string[] | undefined, theme: Theme): { color?: string; thickness?: number } | undefined {
   const cascade = theme.colors.graph.arrowTagCascade;
   if (tags === undefined || cascade === undefined) return undefined;
   let found: { color?: string; thickness?: number } | undefined;
@@ -181,6 +188,14 @@ function resolveArrowTagStyle(
     if (entry !== undefined) found = entry;
   }
   return found;
+}
+
+/** cdd-T29 R2: `geo.strokeWidth` is ALREADY scaled (`class-scale-geo-
+ *  edge.ts`); the `tagStyle?.thickness ?? 1` fallback is not, and needs
+ *  the SAME materialization `class-scale-geo-row.ts#scaleRow`'s `row.
+ *  fontSize` fallback already gets -- split out for {@link renderEdge}'s NLOC cap. */
+function resolveEdgeStrokeWidth(geo: EdgeGeo, tagStyle: { thickness?: number } | undefined, theme: ScaledTheme): number {
+  return geo.strokeWidth ?? (tagStyle?.thickness ?? 1) * theme.scaleK;
 }
 
 /**
@@ -283,48 +298,48 @@ function renderEdgeMainLabel(
       }),
     );
   }
-  if (geo.label !== undefined) {
-    parts.push(
-      text(geo.label.x, geo.label.y, geo.label.text, {
-        fill: labelColor,
-        ...labelFontAttrs,
-        lengthAdjust: 'spacing',
-        textLength: geo.label.width,
-      }),
-    );
-  }
+  if (geo.label !== undefined) parts.push(renderEdgeSingleLabel(geo.label, labelFontAttrs, labelColor));
   return parts;
+}
+
+/** {@link renderEdgeMainLabel}'s single-line `geo.label` arm, split out
+ *  purely to keep that function's NLOC under the project's per-function
+ *  cap (cdd-T25) -- `fontSize` overrides the base arrow font's SIZE for a
+ *  magic-arrow label's own resolved `<size:N>` tag
+ *  (`class-edge-label-attach.ts#attachMagicArrow`'s doc comment has the
+ *  jar-verified derivation, `xamule-03-jeda376`); `undefined` for every
+ *  other label, which keeps drawing at `labelFontAttrs.fontSize`
+ *  unchanged. */
+function renderEdgeSingleLabel(
+  label: NonNullable<EdgeGeo['label']>,
+  labelFontAttrs: ReturnType<typeof arrowLabelTextAttrs>,
+  labelColor: string,
+): string {
+  return text(label.x, label.y, label.text, {
+    fill: labelColor,
+    ...labelFontAttrs,
+    ...(label.fontSize !== undefined ? { fontSize: label.fontSize } : {}),
+    lengthAdjust: 'spacing',
+    textLength: label.width,
+  });
 }
 
 /**
- * The tail/head multiplicity-role labels' half of {@link
- * renderEdgeMainLabel}'s doc comment (shared attribute set, D3/D4 font
- * split, T3's D5/D6 `cardinalityColor` fill) -- split into its own
- * function purely to stay under the lizard NLOC/CCN caps.
+ * cdd-T7: `ids`/`syntheticNames` (pre-existing) plus `measurer` (new,
+ * optional) folded into one options object -- a bare 5th positional
+ * parameter would have crossed this repo's hook-enforced param cap.
+ * `measurer` is `undefined` only for a hand-built `ClassGeometry` test
+ * literal that omits it (`ClassGeometry.measurer`'s own doc comment); only
+ * `renderEdgeConstraint` (A2a/M9's text centring) reads it.
  */
-function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: Theme, cardinalityColor: string): string[] {
-  const parts: string[] = [];
-  for (const portLabel of [geo.tailLabel, geo.headLabel]) {
-    if (portLabel === undefined) continue;
-    parts.push(
-      text(portLabel.x, portLabel.y, portLabel.text, {
-        fill: cardinalityColor,
-        fontSize: CARDINALITY_FONT_SIZE,
-        fontFamily: theme.fontFamily,
-        lengthAdjust: 'spacing',
-        textLength: portLabel.width,
-      }),
-    );
-  }
-  return parts;
+export interface RenderEdgeContext {
+  readonly ids: Set<string>;
+  readonly syntheticNames: ReadonlyMap<string, string>;
+  readonly measurer?: StringMeasurer | undefined;
 }
 
-export function renderEdge(
-  geo: EdgeGeo,
-  theme: Theme,
-  ids: Set<string>,
-  syntheticNames: ReadonlyMap<string, string>,
-): { body: string; extraDefs: string } {
+export function renderEdge(geo: EdgeGeo, theme: ScaledTheme, ctx: RenderEdgeContext): { body: string; extraDefs: string } {
+  const { ids, syntheticNames, measurer } = ctx;
   const parts: string[] = [];
   // G2 N28: arrowheads must be resolved BEFORE the path is built -- the
   // connecting `<path>` is shortened by each decor's own trim delta
@@ -358,8 +373,11 @@ export function renderEdge(
     geo.colorOverride !== undefined
       ? resolveColorToSvgHex(geo.colorOverride)
       : (tagStyle?.color ?? theme.colors.graph.classCascadeArrowColor ?? theme.colors.arrow);
-  const edgeStrokeWidth = geo.strokeWidth ?? tagStyle?.thickness ?? 1;
-  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, edgeStrokeWidth);
+  const edgeStrokeWidth = resolveEdgeStrokeWidth(geo, tagStyle, theme);
+  const arrowheads = buildEdgeArrowheads(geo, strokeColor, theme.colors.background, {
+    resolvedStrokeWidth: edgeStrokeWidth,
+    k: theme.scaleK,
+  });
   const trimmedPoints = applyDecorTrim(geo.points, arrowheads.tailTrim, arrowheads.headTrim);
   const d = buildPathData(trimmedPoints);
   if (d !== '') {
@@ -390,7 +408,7 @@ export function renderEdge(
         ...(geo.strokeDasharray !== undefined
           ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
           : geo.dashed
-            ? { strokeDasharray: '7,7' }
+            ? { strokeDasharray: scaleDashArrayString('7,7', theme.scaleK) }
             : {}),
         // G2 N9: `id`/`codeLine` -- see `linkIdForSvg`'s doc comment.
         id: linkIdForSvg(geo, ids, syntheticNames),
@@ -399,6 +417,13 @@ export function renderEdge(
     );
   }
   parts.push(arrowheads.tail, arrowheads.head);
+  // cdd-T7 (A2a/M2): the label's own visibility-modifier icon -- drawn
+  // right after the extremities and BEFORE the label text, matching
+  // `canuti-20-jotu614`'s golden child order (`SvekEdge.java:302`'s
+  // `addVisibilityModifier` merges the icon LEFT of the label block, so it
+  // paints first).
+  const visibilityIconMarkup = renderEdgeVisibilityIcon(geo, theme);
+  if (visibilityIconMarkup !== '') parts.push(visibilityIconMarkup);
   // T3: resolved here (not up front) -- `labelColor` feeds both the
   // whole-label glyph below and {@link renderEdgeMainLabel}'s main-label/
   // per-line-glyph `<text>`/`<polygon>` fills; `cardinalityColor` feeds
@@ -416,15 +441,57 @@ export function renderEdge(
   }
   const labelFontAttrs = arrowLabelTextAttrs(theme);
   parts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
+  // cdd-T7 (A2a/M5): `note on link`'s body -- drawn AFTER the main label,
+  // matching `lipazi-06-care921`'s default/BOTTOM-position fixture
+  // (`mergeTB(labelOnly, noteOnly)`, `SvekEdge.java:307-327`). A LEFT/TOP
+  // position draws the note FIRST instead (`mergeLR(noteOnly, labelOnly)`/
+  // `mergeTB(noteOnly, labelOnly)`) -- `Relationship.linkNotePosition`
+  // reaches neither `EdgeGeo` nor this renderer (T6 kept the geometry
+  // position-agnostic), so this task always emits the BOTTOM/default child
+  // order; the position-dependent flip is T8's, alongside the vertex/paint
+  // fix (see this task's commit message).
+  parts.push(renderEdgeNoteBox(geo, theme));
   parts.push(...renderEdgeCardinalityLabels(geo, theme, cardinalityColor));
-  return { body: parts.join(''), extraDefs: arrowheads.extraDefs };
+  // cdd-T7 (A5/M4, A2a/M6): the `-0)-` family's mid-link decoration --
+  // `SvekEdge.java:982-988` draws it AFTER the tail/head cardinality text,
+  // over the TRIMMED point list (the same `dotPath` object the earlier
+  // extremity trim already mutated in upstream -- see `buildPathData`'s own
+  // doc comment on why this port never builds a real `DotPath` for the
+  // connecting line itself).
+  const middleDecor = buildMiddleDecorMarkup(trimmedPoints, geo.middleDecor, strokeColor, theme.colors.background, theme.scaleK);
+  let extraDefs = arrowheads.extraDefs;
+  if (middleDecor !== undefined) {
+    parts.push(middleDecor.body);
+    extraDefs += middleDecor.extraDefs;
+  }
+  // cdd-T7 (A2a/M9): `constraint on links` -- drawn after the middle decor,
+  // matching `SvekEdge.java:993-1011`.
+  parts.push(renderEdgeConstraint(geo, theme, measurer));
+  // cdd-T15 (A2a/M1): the qualifier box(es) -- LAST in the group, matching
+  // `SvekEdge.java:1015-1019`'s `kal1.drawU(ug)`/`kal2.drawU(ug)`
+  // immediately before `ug.closeGroup()`.
+  parts.push(renderEdgeKalBoxes(geo, theme));
+  const body = parts.join('');
+  // cdd-T7 (A2a/M3): `[[url]]` on the relationship -- wraps the ENTIRE
+  // group body (path, arrowheads, label, note, constraint -- everything
+  // already emitted above) in ONE `<a>`, matching `SvekEdge.java:859-861`'s
+  // `ug.startUrl(url)` immediately after `ug.startGroup(...)` and `:990-991`'s
+  // `closeUrl()` immediately before `ug.closeGroup()` -- i.e. the url spans
+  // the group's FULL lifetime, not just one primitive.
+  return {
+    body: geo.url !== undefined ? linkWrap(body, geo.url) : body,
+    extraDefs,
+  };
   // #lizard forgives -- pre-existing (unrelated to T3): the
   // strokeColor/edgeStrokeWidth cascade (bracket override > tag style >
   // classCascadeArrowColor > default) plus the path/arrowhead/glyph/label
   // assembly mirror SvekEdge#drawU's own branching (comments above); T3
   // only added two `resolve*(theme)` reads and hoisted the label/
   // cardinality drawing into {@link renderEdgeMainLabel}/{@link
-  // renderEdgeCardinalityLabels} -- see their own doc comments.
+  // renderEdgeCardinalityLabels} -- see their own doc comments. cdd-T7
+  // added six sequential, independent primitive emissions (icon/note/
+  // middle-decor/constraint/url) mirroring `SvekEdge#drawU`'s own linear
+  // draw-call sequence one-for-one -- not a new branch, no CCN growth.
 }
 
 // ---------------------------------------------------------------------------

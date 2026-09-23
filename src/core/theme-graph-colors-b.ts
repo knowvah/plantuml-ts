@@ -5,6 +5,8 @@
  * module). Pure type-only move, no behavior change.
  */
 
+import type { Paint } from './paint.js';
+
 export interface ThemeGraphColorsB {
   /** G2 N66: `EntityImageNote`'s OWN `Style#wrapWidth` cascade -- a
    *  class-diagram NOTE's body text has a SEPARATE style signature from
@@ -109,6 +111,32 @@ export interface ThemeGraphColorsB {
    *  kofe334` (`skinparam RoundCorner 20`, no competing `<style>`
    *  block): `rect/@rx`/`@ry` 10 (was 2.5). */
   classCascadeRoundCorner?: number;
+  /** cdd-B7FU-R3 (`ropera-76-jico895`): `<style> class { FontSize N;
+   *  FontStyle <tokens> } }`'s PLAIN (non-header) font cascade --
+   *  `EntityImageClass.java:92-93,163` feeds the member/field body's
+   *  `FontConfiguration` from `getStyle()` (`CLASS_SNAMES`), via
+   *  `Style#getUFont` (`style/Style.java:241-253`: `PName.FontSize`
+   *  defaulting to 14, `PName.FontStyle.asFontFace()` for bold/italic).
+   *  Bold/italic are independent booleans, mirroring `classTagCascade`'s
+   *  own `fontBold`/`fontItalic` pair below for a combined "bold italic"
+   *  value. Consumed by `class-layout-fonts.ts#resolveAttributeFont`,
+   *  ahead of the flat `classAttributeFontSize`/`*Bold`/`*Italic`
+   *  skinparam tier. */
+  classCascadeFontSize?: number;
+  classCascadeFontBold?: boolean;
+  classCascadeFontItalic?: boolean;
+  /** cdd-B7FU-R3: the HEADER-nested sibling of the pair above --
+   *  `<style> class { header { FontStyle <tokens> } } }`, `EntityImage
+   *  ClassHeader.java:93-101` (`HEADER_SNAMES`). Size is already covered
+   *  by `theme-graph-colors-a.ts#classCascadeHeaderFontSize`; absent when
+   *  the `<style>` block sets no header-scoped `FontStyle` (the plain
+   *  `classCascadeFontBold`/`Italic` fields above already carry the
+   *  inherited value via `resolveStyleCascade`'s own subset-match, and
+   *  `class-layout-fonts.ts#resolveHeaderFont`'s `?? attributeFont.bold/
+   *  italic` fallback surfaces it) -- same "absent = inherit" contract as
+   *  `classCascadeHeaderFontSize`. */
+  classCascadeHeaderFontBold?: boolean;
+  classCascadeHeaderFontItalic?: boolean;
   /** G2 N37: the `.tagname` stereotype-name style-cascade sub-selector
    *  itself (`classDiagram { .mystyle { BackgroundColor cyan; RoundCorner
    *  5; FontStyle Bold; FontColor red } } }` / a top-level bare `.tag {
@@ -281,6 +309,42 @@ export interface ThemeGraphColorsB {
    *  for either, jar's own default (`UStroke.simple()`, thickness 1,
    *  square corners) is what `renderer-shell.ts` hardcodes instead. */
   diagramBorderColor?: string;
+  /** CDD T6FU: `skinparam classHeaderBackgroundColor <color>` / the
+   *  nested-block `skinparam class { HeaderBackgroundColor <color> }` --
+   *  `FromSkinparamToStyle.java:196` maps BOTH onto `{element, class_,
+   *  header} BackGroundColor`, the signature `EntityImageClass
+   *  #getStyleHeader` (java:173-178) queries. Consumed ONLY by
+   *  `renderer-classifier-header-split.ts#resolveClassHeaderFill` as the
+   *  `headerBackcolor` source when the classifier carries no inline
+   *  `header:` AND no inline `back:`/bare colour (`EntityImageClass
+   *  .java:202-205` makes an inline background win outright by making
+   *  `headerBackcolor` the SAME reference as `backcolor`). `Paint`, not
+   *  `string`, for the same reason `classBackground` is (T18/D8): a
+   *  `#A-B` value is a gradient upstream. `undefined` means jar's own
+   *  header default, which is value-equal to the body default and so
+   *  never splits. Jar-verified `nisune-86-faji869`. */
+  classHeaderBackground?: Paint;
+  /** CDD T6FU: `skinparam classBackgroundColor<<stereo>> #X` / `skinparam
+   *  class { <<stereo>> { BackgroundColor #X } }` -- both normalise to the
+   *  ONE key `classbackgroundcolor<<stereo>>` (`SkinParam#cleanForKeySlow`,
+   *  java:285-300; jar-probed on `tabaxa-70-pomu341`'s block form and
+   *  `nagega-30-poso418`'s suffix form).
+   *
+   *  NOT the legacy `SkinParam#getHtmlColor(ColorParam, Stereotype)` value
+   *  lookup `classBorderThicknessByStereo` models: `SkinParam#setParam`
+   *  (java:228-233) hands every cleaned key to `FromSkinparamToStyle`,
+   *  whose ctor peels the `<<...>>` into `this.stereo` (java:292-301) and
+   *  whose `addStyle` re-signs the style with `sig.addStereotype(s)` at
+   *  `StyleLoader#addPriorityForStereotype` priority (java:396-408) --
+   *  i.e. the SAME tier the `<style> class { .tag {} } }` cascade
+   *  (`classTagCascade`) already occupies. `EntityImageClass#getStyle`
+   *  (java:166-171) picks it up via `withTOBECHANGED(getStereotype())`.
+   *
+   *  Stored RAW (not pre-resolved) so `classifierFill` runs the SAME
+   *  `parseColor` a gradient value needs, exactly as it does for the
+   *  classifier's own inline colour. Keyed by the LOWERCASED label, matched
+   *  through `cleanStereotypeToken` like `classTagCascade`. */
+  classBackgroundColorByStereo?: Readonly<Record<string, string>>;
   /** G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor`
    *  (`Kind` in Private/Package/Protected/Public) -- the member-row
    *  visibility icon's own LineColor/BackgroundColor overrides
@@ -294,13 +358,13 @@ export interface ThemeGraphColorsB {
    *  jar-verified `lufide-34-cexu026` (all 8 keys set; only
    *  `iconProtectedBackgroundColor` actually diverges from the
    *  hardcoded default, `#FECF6C` vs `#FFFF44`). */
-  iconPrivateColor?: string;
+  iconPrivateColor?: Paint;
   iconPrivateBackgroundColor?: string;
-  iconPackageColor?: string;
+  iconPackageColor?: Paint;
   iconPackageBackgroundColor?: string;
-  iconProtectedColor?: string;
+  iconProtectedColor?: Paint;
   iconProtectedBackgroundColor?: string;
-  iconPublicColor?: string;
+  iconPublicColor?: Paint;
   iconPublicBackgroundColor?: string;
   edgeLabel: string;
   // NOTE: upstream actor head (via Fashion.apply in ActorStickMan.java) inherits

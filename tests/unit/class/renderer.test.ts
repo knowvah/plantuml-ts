@@ -4,6 +4,9 @@ import { assembleSvg } from '../../../src/index.js';
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import type { NoteGeo } from '../../../src/diagrams/class/note-layout.js';
 import { defaultTheme, darkTheme, deepMergeTheme } from '../../../src/core/theme.js';
+// CDD T18: `classBackground` is a `Paint` since D8; these assertions are
+// about its FLAT default value (`HColors#noGradient`, `core/paint.ts`).
+import { noGradient } from '../../../src/core/paint.js';
 import { shortenColor } from '../../../src/core/svg-format.js';
 import { visibilityIconOriginY } from '../../../src/diagrams/class/class-visibility-icon.js';
 import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
@@ -329,7 +332,7 @@ describe('renderClass — interface lollipop (G2 N20)', () => {
     () => {
       const svg = assembleSvg(renderClass(makeLollipopGeo(), defaultTheme));
       expect(svg).toContain('<ellipse cx="21.531" cy="11" rx="5" ry="5"');
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
       expect(svg).toContain(`stroke="${defaultTheme.colors.border}"`);
       expect(svg).toContain('stroke-width="1.5"');
     },
@@ -712,7 +715,7 @@ describe('renderClass — classifier kind fill', () => {
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
       expect(svg).toContain('fill="#F00"');
-      expect(svg).not.toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).not.toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
 
     it('resolves a 3-digit shorthand hex the same way (#fff -> #FFFFFF)', () => {
@@ -736,7 +739,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '#text:red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
 
     it('falls back to classBackground when color is a LINECOLOR-only spec (##red)', () => {
@@ -744,7 +747,7 @@ describe('renderClass — classifier kind fill', () => {
         classifiers: [makeClassifierGeo('Foo', 'Foo', { color: '##red' })],
       });
       const svg = assembleSvg(renderClass(geo, defaultTheme));
-      expect(svg).toContain(`fill="${defaultTheme.colors.graph.classBackground}"`);
+      expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.graph.classBackground)}"`);
     });
   });
 
@@ -805,6 +808,8 @@ describe('renderClass — classifier kind fill', () => {
         makeClassifierGeo('Foo', 'Foo', {
           genericTag: {
             text: 'T',
+            // CDD T6FU: single-line clause -- one entry at textX/textY.
+            lines: [{ text: 'T', x: 69.15, y: 7.3333, width: 7.35 }],
             rectX: 68.15,
             rectY: -3,
             rectWidth: 9.35,
@@ -844,6 +849,8 @@ describe('renderClass — classifier kind fill', () => {
           makeClassifierGeo('Foo', 'Foo', {
             genericTag: {
               text: 'T',
+              // CDD T6FU: single-line clause -- one entry at textX/textY.
+              lines: [{ text: 'T', x: 69.15, y: 7.3333, width: 7.35 }],
               rectX: 68.15,
               rectY: -3,
               rectWidth: 9.35,
@@ -1520,6 +1527,93 @@ describe('renderClass — edges', () => {
 });
 
 // ---------------------------------------------------------------------------
+// cdd-T7: url wrap, hidden skip, quantifier lines (renderer.ts wiring)
+// ---------------------------------------------------------------------------
+
+describe('renderClass — edges — cdd-T7 (A2a/M3, M12, M10)', () => {
+  it('wraps the WHOLE link group body in one <a> when the relationship carries a url (A2a/M3)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ targetDecor: 'open', url: { url: 'http://x', tooltip: '', label: '' } })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const groupBody = svg.split('<g class="link"')[1]!;
+    const inner = groupBody.slice(groupBody.indexOf('>') + 1, groupBody.indexOf('</g>'));
+    expect(inner.startsWith('<a')).toBe(true);
+    expect(inner.endsWith('</a>')).toBe(true);
+    expect(svg).toContain('href="http://x"');
+  });
+
+  it('draws no <g class="link"> at all for a hidden relationship (A2a/M12)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ hidden: true })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('<g class="link"');
+  });
+
+  it('still draws a non-hidden edge alongside a hidden one', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({ id: 'edge-0', hidden: true }),
+        makeEdgeGeo({ id: 'edge-1', from: 'A', to: 'B', targetDecor: 'open' }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect((svg.match(/<g class="link"/g) ?? []).length).toBe(1);
+  });
+
+  it('draws one <text> per quantifierLines entry instead of the single tailLabel/headLabel anchor', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          tailLabel: { text: 'customer\\n1', x: 999, y: 999, width: 999 },
+          quantifierLines: [
+            [
+              { text: 'customer', x: 10, y: 20, width: 41.063 },
+              { text: '1', x: 27.75, y: 30, width: 5.563 },
+            ],
+            [],
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('>customer<');
+    expect(svg).toContain('x="10"');
+    expect(svg).toContain('x="27.75"');
+    expect(svg).not.toContain('customer\\n1');
+  });
+
+  it('falls back to tailLabel/headLabel when quantifierLines is absent (hand-built geo)', () => {
+    const geo = makeMinimalGeo({
+      edges: [makeEdgeGeo({ tailLabel: { text: '1..*', x: 10, y: 20, width: 30 } })],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('>1..*<');
+  });
+
+  it('draws the arc+ellipse mid-decor for a middleDecor edge (A5/M4, cenubi-27-xova754)', () => {
+    const geo = makeMinimalGeo({
+      edges: [
+        makeEdgeGeo({
+          middleDecor: 'circleCircled1',
+          points: [
+            { x: 36.60625, y: 55.262155107495204 },
+            { x: 36.60625, y: 72.93564206156157 },
+            { x: 36.60625, y: 97.13201753483915 },
+            { x: 36.60625, y: 114.7921337783734 },
+          ],
+        }),
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).toContain('A10,10');
+    expect(svg).toContain('<ellipse');
+    expect(svg).toContain('rx="6"');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Namespace boxes
 // ---------------------------------------------------------------------------
 
@@ -1824,11 +1918,17 @@ describe('renderClass — notes', () => {
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain('<polygon');
+    // cdd-T8 (A5/M2): the note body is a `<path>` (`Opale.getPolygonNormal`'s
+    // vertex order), not a `<polygon>` -- `EntityImageNote.java:275-289`.
+    expect(svg).toContain('<path d="M20,30 L20,70');
     expect(svg).toContain('#FEFFDD');
     expect(svg).toContain('hello');
     expect(svg).toContain('world');
-    expect(svg).toMatch(/stroke-dasharray="4 4"/);
+    // cdd-T9b: the connector is an ordinary dashed LINK style (stroke-width
+    // 1, '7,7'), never the note's own box style (0.5, '4 4') --
+    // `renderer-note-connector.ts#renderNoteConnectorPath`.
+    expect(svg).toMatch(/stroke-dasharray="7,7"/);
+    expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
   });
 
   it('G2/N13: a dropped member-tip note (unresolved ::member) draws NOTHING at all', () => {
@@ -1920,11 +2020,117 @@ describe('renderClass — notes', () => {
     expect(svg).toContain('hi');
     expect(svg).toContain('#FEFFDD');
     // No separate dashed connector line -- the notch is merged into the outline.
-    expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
+    expect(svg).not.toMatch(/stroke-dasharray/);
     // No wrapping entity group for this note's own content (renderAssocPoint's
     // identical unwrapped precedent, G2 N8) -- the note id never appears as a
     // data-qualified-name/entity id.
     expect(svg).not.toContain('data-qualified-name="__note_0"');
+  });
+});
+
+describe('renderClass — note connector as its own link group (cdd-T9/T9b, E6 mechanism a)', () => {
+  // A note ABOVE its host (`note top of dummy`), connector routed from the
+  // note's own bottom edge (225,29) down to the host's top edge (70,10) --
+  // `noteIsConnectorSource` (`renderer-note-connector.ts`) reads this as
+  // note-first (LEFT/TOP order), matching jar's real fogexa-30-zupo141.
+  const topNote: NoteGeo = {
+    id: 'GMN2',
+    kind: 'note',
+    x: 200,
+    y: 6,
+    width: 50,
+    height: 23,
+    lines: ['bar'],
+    lineWidths: [20],
+    connector: [
+      { x: 225, y: 29 },
+      { x: 70, y: 10 },
+    ],
+    target: 'dummy',
+  };
+
+  it(
+    'draws a plain note\'s dashed connector as a SEPARATE <g class="link">, ' +
+      "not folded into the note's own entity group, styled as an ORDINARY " +
+      'dashed edge (cdd-T9b: strokeWidth 1, "7,7" -- never the note box\'s ' +
+      '0.5/"4 4")',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [makeClassifierGeo('dummy', 'dummy')],
+        notes: [topNote],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+
+      const entityStart = svg.indexOf('data-qualified-name="GMN2"');
+      expect(entityStart).toBeGreaterThan(-1);
+      const entityGroupEnd = svg.indexOf('</g>', entityStart);
+      // `renderer-note.ts:354-363` (pre-T9) pushed the connector INTO the
+      // note's own `parts` array -- mechanism (a) moves it out. The note's
+      // own entity group must carry no dashed path.
+      expect(svg.slice(entityStart, entityGroupEnd)).not.toContain('stroke-dasharray');
+
+      // The connector is a SIBLING `<g class="link">`, drawn in the edges
+      // phase (AFTER the note's own entity group closes).
+      expect(svg).toContain('<g class="link"');
+      expect(svg).toMatch(/stroke-dasharray="7,7"/);
+      expect(svg).not.toMatch(/stroke-dasharray="4 4"/);
+      const linkStart = svg.indexOf('<g class="link"');
+      expect(linkStart).toBeGreaterThan(entityGroupEnd);
+    },
+  );
+
+  it(
+    'the connector <path> carries the jar id shape (bare ent1-ent2, ' +
+      'Link.java:106-113) and the group the jar comment shape ' +
+      '(<!--link FROM to TO-->) in note-first (TOP) order',
+    () => {
+      const geo = makeMinimalGeo({
+        classifiers: [makeClassifierGeo('dummy', 'dummy')],
+        notes: [topNote],
+      });
+      const svg = assembleSvg(renderClass(geo, defaultTheme));
+      // `Link#commentForSvg`/`idCommentForSvg` shape (`renderer-group.ts
+      // #wrapLink`, `renderer-note-connector.ts#renderNoteConnectorLink`)
+      // -- TOP order is note-then-host (jar: `<!--link GMN3 to
+      // oft_openflow_types-->`, `pecabi-95-demu756`).
+      expect(svg).toContain('<!--link GMN2 to dummy-->');
+      expect(svg).toContain('id="GMN2-dummy"');
+    },
+  );
+
+  it("the connector group's data-entity-1/2 mirror the note-first order with each side's OWN entity uid", () => {
+    const geo = makeMinimalGeo({
+      classifiers: [makeClassifierGeo('dummy', 'dummy')],
+      notes: [topNote],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const linkStart = svg.indexOf('<g class="link"');
+    const linkTagEnd = svg.indexOf('>', linkStart);
+    const linkTag = svg.slice(linkStart, linkTagEnd);
+    // Fallback numbering here (no creationIndex on the hand-built note): the
+    // note gets ent0002 (after dummy's ent0001), matching `resolveEntityUid`.
+    expect(linkTag).toContain('data-entity-1="ent0002"');
+    expect(linkTag).toContain('data-entity-2="ent0001"');
+  });
+
+  it('a note with NO connector (freestanding, no target) draws no extra link group', () => {
+    const geo = makeMinimalGeo({
+      notes: [
+        {
+          id: '__note_0',
+          kind: 'note',
+          x: 20,
+          y: 30,
+          width: 80,
+          height: 40,
+          lines: ['hi'],
+          lineWidths: [10],
+          connector: [],
+        },
+      ],
+    });
+    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    expect(svg).not.toContain('<g class="link"');
   });
 });
 

@@ -294,6 +294,68 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         though this entry wired the LABEL half. pavuzo-79-zodu430 closes
         when 03 does. See 17's second-pass block and
         .agent-notes/gvi17-splines-never-emitted.md. -->
+- [ ] 18-compound-clip-last-segment-shape-delta.md  <!-- FILED 2026-09-22
+        (cdd-T13). `bejusa-95-gafo325`'s two cluster-anchored composition
+        edges whose `simulateCompound` clip lands on their LAST bezier
+        segment (`VCAN_DRV *-- PCAN_DRV`, `PCAN_DRV *-- Bus_Rx`) land ~20px
+        short of the jar's own clip point, and `pecabi-95-demu756`/
+        `sanixi-31-nofa193`'s `note top of <package>` connector (same
+        `simulateCompound` clip, T13's note-layout-tip.ts wiring) lands
+        ~4.9px short, same signature -- even though the cluster rectangle
+        and every node position are verified byte-identical between
+        engines and the clip algorithm (`spline-clip.ts`) is
+        unmodified/faithful. The structurally-identical sibling edge
+        (`PCAN_DRV *-- Bus_Tx`) clips exact (<0.001px), and
+        `bajotu-30-soku184` (T13's own acceptance fixture) clips EXACT too
+        -- both negative controls ruling out a wiring bug -- see the issue
+        file for the full elimination chain. Not chased (stop 8); a
+        per-curve dot-engine routing delta, not a general defect in T13's
+        clip. -->
+- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- FILED 2026-09-22
+        (cdd-T15). A `minlen=0` (same-rank) edge that targets an HTML-table
+        node's `PORT="h"` cell (`sh0007:h->sh0008`) starts/ends at the
+        node's BOUNDING BOX instead of the port cell; the identical seam on
+        a RANKED edge lands on the cell correctly (`baneru-00-kuro607`,
+        y=54.818 vs the cell's 55). Isolated by running the CACHED ORACLE
+        DOT itself through real graphviz 16.1.0 (`dot -Tplain`), which puts
+        `mucoti-34-seve858`'s flat edge at x=78.9 (the cell) where
+        dot-engine puts it at 142.879 (the box) -- same input bytes, one
+        variable. Costs `mucoti-34-seve858` +1 diff against the pre-T15
+        baseline; `sefazi-02-defe499` and `camuna-58-veca254` carry the
+        same delta but still fall 35/142. Not chased (stop 8); no
+        compensation applied, since any would be fitting. -->
+- [ ] 20-taillabel-headlabel-no-canvas-reservation.md  <!-- FILED 2026-09-23
+        (cdd-B7FU-R3, item 4). An edge carrying BOTH `taillabel` and
+        `headlabel` HTML tables (`A "role1" --> "role2" B`) gets NO extra
+        canvas/centring reservation from dot-engine, where real graphviz
+        reserves ~2.425px asymmetrically (left side only) for the identical
+        byte-equal DOT input. Isolated with a controlled A/B on
+        `class/focaci-80-suzu938`'s own cached `svek-1.dot`: deleting just
+        the `taillabel`/`headlabel` attributes from the SAME graph text (via
+        real `dot -Tplain`) collapses the node centring from 0.76389in to
+        0.73021in -- EXACTLY dot-engine's own (label-attribute-independent)
+        centring, confirming dot-engine's no-label behaviour is correct and
+        the divergence is entirely in how it handles the two label
+        attributes. `focaci-80-suzu938` stays `structural-match` (0
+        structural / ~92 numeric, all one cascading ~2.4px delta). Not
+        chased (stop 8); no compensation applied. -->
+- [ ] 21-same-rank-node-order-mirrored.md  <!-- FILED 2026-09-23 (cdd-T37,
+        M8 boseba/majuva). Byte-identical DOT (`dot-sync-report.ts`
+        structurallyEqual=true) for both `boseba-99-zopo693` and
+        `majuva-44-luta965`; feeding the SAME cached DOT to a real
+        graphviz 16.1.0 binary reproduces the jar's own node order
+        exactly (bbox within ~1px of the jar's final canvas for both).
+        dot-engine's `getLayout()` returns the EXACT MIRROR of that
+        order for one same-rank triple (`boseba`'s `UserPerso`/
+        `UserPro`/`UserSpace`, all three children of `User`) -- node
+        sizes match, only left-right order flips. Cascades into a wider
+        canvas (40px / 91px) and a visibly rerouted edge for the
+        reordered nodes' own edges -- confirmed downstream, not an
+        independent edge-routing bug (T37's own `render-diff`: the one
+        structural diff is exactly the rerouted path, every numeric diff
+        explained by the uniform shift). Not chased into dot-engine's own
+        mincross/ordering source (stop 8, one diagnosis pass); no
+        plantuml-ts change warranted -- the DOT input is already correct. -->
 - [x] 17-ortho-xlabel-canvas-reservation-short.md  <!-- RESOLVED 2026-09-03 by
         mission linetype-ortho-routing. This entry's own reclassification was
         right that the engine is innocent and right that the 1.583 is the

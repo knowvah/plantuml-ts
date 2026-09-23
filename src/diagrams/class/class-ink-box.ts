@@ -7,10 +7,11 @@
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
 import { resolveTips } from './note-tips-resolve.js';
-import { edgeExtremityInk } from './renderer-arrowhead.js';
+import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-edge-labels.js';
+import { addEdgeLabelMarginInk, addMultiLineLabelMarginInk } from './class-ink-edge-label-margin.js';
 import type { InkBox } from './class-ink-shapes.js';
 import {
   newInkBox,
@@ -22,8 +23,13 @@ import {
   addPlainInk,
   addFolderPolygonInk,
   addNamespaceRectInk,
+  addNamespaceNodeInk,
+  addNamespaceDatabaseInk,
   addClassicRectInk,
+  addEmbedImageInk,
 } from './class-ink-shapes.js';
+import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
+import { protectedInnerBox } from './class-dot-graph.js';
 export type { InkBox } from './class-ink-shapes.js';
 
 // `CucaDiagram#getDefaultMargins()` — single owner at
@@ -116,6 +122,53 @@ function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
   addRectInk(box, c);
 }
 
+/** One DRAWN (`href !== undefined`) embed's absolute position/size. */
+interface DrawnEmbedGeo {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * CDD B7FU-R2 item (e): every DRAWN embedded `{{ }}` diagram's own absolute
+ * position/size in `c`'s enhanced body -- shared by this file's own ink walk
+ * ({@link addEnhancedBodyEmbedInk}) and `class-geo-builders.ts
+ * #degenerateSingleClassifier`'s canvas-overflow check (the degenerate path
+ * never calls {@link buildInkBox} at all -- `layout.ts`'s own "skip
+ * graphviz entirely" doc comment -- so it needs these absolute corners
+ * directly rather than through an `InkBox` walk). A failed/no-renderer embed
+ * (`href === undefined`) draws nothing upstream (`renderEmbed`'s own doc
+ * comment) and is excluded. Absolute position mirrors `renderer-body-
+ * enhanced.ts`'s own draw call exactly: `x = c.x + BODY_ENHANCED_MARGIN_X`,
+ * `y = c.y + embed.y` (`embed.y` is local to its own rows-part,
+ * `EmbeddedBlockGeo`'s own doc comment). Empty for every classifier with no
+ * enhanced body / no embeds (`c.enhancedBody` absent, or every part's
+ * `embeds` empty).
+ */
+export function drawnEnhancedBodyEmbeds(c: Pick<ClassifierGeo, 'x' | 'y' | 'enhancedBody'>): readonly DrawnEmbedGeo[] {
+  if (c.enhancedBody === undefined) return [];
+  const drawn: DrawnEmbedGeo[] = [];
+  for (const part of c.enhancedBody.parts) {
+    if (part.kind !== 'rows') continue;
+    for (const embed of part.embeds ?? []) {
+      if (embed.href === undefined) continue;
+      drawn.push({ x: c.x + BODY_ENHANCED_MARGIN_X, y: c.y + embed.y, width: embed.width, height: embed.height });
+    }
+  }
+  return drawn;
+}
+
+/** A DRAWN embed's own real corner -- {@link addEmbedImageInk}'s own doc
+ *  comment for the jar mechanism (`SvgGraphics#svgImageUnsecure`,
+ *  independent of the classifier box's own (42,42)-fallback-sized
+ *  reservation for it). See {@link drawnEnhancedBodyEmbeds}'s own doc
+ *  comment for the shared corner-collection this and `class-geo-builders.ts
+ *  #degenerateSingleClassifier` both read from. */
+function addEnhancedBodyEmbedInk(box: InkBox, c: ClassifierGeo): void {
+  for (const e of drawnEnhancedBodyEmbeds(c)) addEmbedImageInk(box, e.x, e.y, e.width, e.height);
+}
+
 /**
  * G9/T12: a member row's PROTECTED (`#`) or PACKAGE (`~`) visibility icon is
  * a `UPolygon` upstream — `VisibilityModifier#drawDiamond`/`drawTriangle`
@@ -155,7 +208,14 @@ function addVisibilityIconInk(box: InkBox, c: ClassifierGeo, iconSize: number): 
   addPoint(box, right + HACK_X_FOR_POLYGON, c.y);
 }
 
-function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void {
+function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number): void {
+  // cdd-B10FU (`pijiju-95-xexi872`): a protected classifier's own ink
+  // walk must match what `renderer-classifier-box.ts#renderClassifierBox`
+  // actually draws -- the INNER box, not the OUTER/DOT-node box `c.x`/
+  // `c.y`/`c.width`/`c.height` are (`ClassifierGeo.protectedBorder`'s own
+  // doc comment). Every ink rule below reads `c`, never `outerC`
+  // directly, so one substitution here covers all of them.
+  const c: ClassifierGeo = outerC.protectedBorder !== undefined ? { ...outerC, ...protectedInnerBox(outerC) } : outerC;
   // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
   // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
   // below), never `EntityImageClass`'s own rect+`UEmpty` composition -- the
@@ -209,6 +269,7 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
   }
   addClassifierBoxInk(box, c);
   addVisibilityIconInk(box, c, iconSize);
+  addEnhancedBodyEmbedInk(box, c);
   // G2 N32: `class Foo<T>`'s generic type-parameter tag box is drawn
   // OUTSIDE the classifier's own rect (above-right, `class-stereotype.ts
   // #buildGenericTagGeo`'s doc comment) via a plain stroked `URectangle`
@@ -232,6 +293,16 @@ function addClassifierInk(box: InkBox, c: ClassifierGeo, iconSize: number): void
  * non-`strictuml` case.
  */
 function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
+  // cdd-T12: the two USymbol-container rules -- see `class-ink-shapes.ts`'s
+  // own doc comments for each `LimitFinder` citation.
+  if (n.inkShape === 'node') {
+    addNamespaceNodeInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
+  if (n.inkShape === 'database') {
+    addNamespaceDatabaseInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
   if (n.inkShape === 'polygon') {
     addFolderPolygonInk(box, n.x, n.y, n.width, n.height);
     return;
@@ -326,6 +397,12 @@ export function buildInkBox(
     for (const lbl of [e.label, e.tailLabel, e.headLabel, ...(e.labelLines ?? [])]) {
       if (lbl !== undefined) addEdgeTextInk(box, lbl);
     }
+    // cdd-T35: the main label's own `TextBlockMarged` margin -- see
+    // {@link addEdgeLabelMarginInk}'s own doc comment.
+    addEdgeLabelMarginInk(box, e);
+    // cdd-B10FU: the SAME margin, multi-line arm -- see
+    // {@link addMultiLineLabelMarginInk}'s own doc comment.
+    addMultiLineLabelMarginInk(box, e);
     // G2 item 44: the magic-arrow glyph's own 3 vertices -- unlike the
     // single-point simplification above, the WHOLE triangle is cheap to
     // bound exactly (only 3 points), so every vertex is added. SI25 D1: the

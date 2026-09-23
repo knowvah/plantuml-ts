@@ -7,13 +7,17 @@
  * class-commands.ts to stay under the line cap; order preserved (spread
  * second in COMMANDS, right after the directive group).
  */
-import { applyAssocCouple, applyDoubleCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './class-assoc-couple.js';
+import { applyAssocCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './class-assoc-couple.js';
+import { applyDoubleCouple } from './class-assoc-double-couple.js';
 import type { Command } from './class-command-types.js';
 import {
   closeBraceScope,
   openNamespaceBlock,
   openTogetherBlock,
   setNamespaceStereotype,
+  setNamespaceTags,
+  setNamespaceUrl,
+  setNamespaceColor,
   NAMESPACE_COMMANDS,
 } from './class-container.js';
 import { collapseEmptyNamespace } from './class-namespace.js';
@@ -24,6 +28,7 @@ import {
   CONSTRAINT_ON_LINKS_RE,
   NOTE_ON_LINK_RE,
   NOTE_ON_LINK_MULTI_RE,
+  NOTE_COLOR,
 } from './class-notes.js';
 import { applyUrlStatement, URL_STATEMENT_RE } from './class-url-command.js';
 import { ensureClassifier } from './parser.js';
@@ -48,26 +53,45 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   ...NAMESPACE_COMMANDS,
 
   // 5b. Package block. Upstream routes package through the same PACKAGE group
-  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 5)
+  //     as namespace, so it clusters alike. Trailing `(\s*\})?` (group 9)
   //     captures same-line 'X {}' (CommandPackageEmpty) for immediate collapse.
   //     `$tag` tokens after the name (CommandPackage's Stereotag.pattern()
   //     TAGS1/TAGS2 slots — `package p1 $txn {`, one run each side of the
-  //     stereotype, mirroring CommandPackage.java:88-90) are accepted and
-  //     discarded: group removal/tag-selection on packages is not
-  //     implemented, and `hide $tag` never affects the DOT export (see rule
-  //     3). A2s F-G mechanism A8: the `<<stereotype>>` (group 4, between the
-  //     TAGS runs like upstream's STEREOTYPE slot) is stored on the
-  //     Namespace via `setNamespaceStereotype` (gated: a USymbol-naming
-  //     stereotype selects the shape instead, CommandPackage.java:178-191).
+  //     stereotype, mirroring CommandPackage.java:87,89) are now CAPTURING
+  //     (groups 4/6, cdd-T31 round 2, E5 defect b -- were non-capturing and
+  //     discarded) and read onto the Namespace via `setNamespaceTags` (its
+  //     own doc comment cites `CommandPackage.java:198` + `Entity
+  //     #addStereotag`). A2s F-G mechanism A8: the `<<stereotype>>` (group
+  //     5, between the TAGS runs like upstream's STEREOTYPE slot) is stored
+  //     on the Namespace via `setNamespaceStereotype` (gated: a
+  //     USymbol-naming stereotype selects the shape instead,
+  //     CommandPackage.java:178-191).
   // T3 (unknown-bucket-routing-repair): optional leading VISIBILITY char
   // (`CommandPackage.java:74`, the SAME `VisibilityModifier
   // .regexForVisibilityCharacter()` prefix `class-declaration-parser.ts`'s
   // `DECL_KIND_RE` carries) -- captured by the non-capturing `(?:...)` group
   // and discarded, matching that command's own posture (no render-side
   // field consumes a package's visibility marker either).
+  // T11 (E4/M3): the `[[url]]` group (7) is CAPTURING and NOTE_COLOR (8,
+  // the SAME bare/`back:` grammar `class-notes.ts` note commands already
+  // reuse) is inserted ahead of the old trailing catch-all -- both read
+  // onto the Namespace via setNamespaceUrl/setNamespaceColor below; the
+  // same-line-close brace group is 9. The trailing `(?:[#<][^{]*)?`
+  // catch-all is kept as a no-op safety net for whatever it used to
+  // silently absorb.
   {
-    pattern:
-      /^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*(<<.+?>>))?(?:\s+\$[^\s{}"'<>$]+)*(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{(\s*\})?\s*$/i,
+    pattern: new RegExp(
+      String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+        NOTE_COLOR +
+        // T11: a `\s*` gap here is load-bearing -- without it, a trailing
+        // space before `{` (e.g. `#DDD {`) makes the whole match fail at
+        // NOTE_COLOR's end position, and the engine backtracks NOTE_COLOR
+        // to zero-width so the catch-all below (whose `[^{]*` tolerates
+        // the space) silently swallows the colour text instead, leaving
+        // the capture group undefined (caught by this task's own tests).
+        String.raw`\s*(?:[#<][^{]*)?\{(\s*\})?\s*$`,
+      'i',
+    ),
     execute(state, match) {
       const name = match[1] ?? match[2];
       let effectiveId: string;
@@ -77,8 +101,11 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         const id = '__pkg' + String(state.ast.namespaces.length);
         effectiveId = openNamespaceBlock(state, id, '');
       }
-      setNamespaceStereotype(state, effectiveId, match[4], true);
-      if (match[5] !== undefined) {
+      setNamespaceStereotype(state, effectiveId, match[5], true);
+      setNamespaceTags(state, effectiveId, `${match[4] ?? ''} ${match[6] ?? ''}`);
+      setNamespaceUrl(state, effectiveId, match[7]);
+      setNamespaceColor(state, effectiveId, match[8]);
+      if (match[9] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,
@@ -144,8 +171,27 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: /^<>\s+(\S+)\s*$/,
     execute(state, match) {
-      // Force kind even if a relationship endpoint auto-created it as a class.
-      ensureClassifier(state, match[1]!, 'association').kind = 'association';
+      // cdd-T34 (E14, luzive-62-zote562): `CommandDiamondAssociation
+      // .executeArg` (`classdiagram/command/CommandDiamondAssociation.java:
+      // 73-84`) refuses UNCONDITIONALLY whenever `quark.getData() != null`
+      // -- i.e. whenever ANY entity already exists at this id, whatever its
+      // origin (an explicit `class X {}` declaration, OR an earlier
+      // relationship endpoint that auto-vivified a placeholder) -- "Unlike
+      // most creation commands, executeArg fails if the name already
+      // exists" (that method's own `explainArg` comment). `ensureClassifier`
+      // passes `kind: 'association'` as the CREATE-time default, so a
+      // freshly-minted classifier already has `.kind === 'association'`
+      // the instant it's created -- nothing else in this port ever creates
+      // one with that kind, so `classifier.kind !== 'association'` here is
+      // exactly upstream's `quark.getData() != null`: this id already
+      // named something before this line ran.
+      const classifier = ensureClassifier(state, match[1]!, 'association');
+      if (classifier.kind !== 'association') {
+        (state.ast.errors ??= []).push(`Already existing : ${classifier.id}`);
+        state.ast.errorLine = state.currentLine;
+        return;
+      }
+      classifier.kind = 'association';
     },
   },
 
@@ -156,7 +202,14 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   {
     pattern: ASSOC_DOUBLE_COUPLE_RE,
     execute(state, match) {
-      applyDoubleCouple(state.ast, (id) => ensureClassifier(state, id, undefined, undefined, true), match.input);
+      // cdd-T3 (A1 SB3): the double couple burns jar's shared counter too --
+      // see `stampDoubleCouple` (class-assoc-double-couple.ts).
+      applyDoubleCouple(
+        state.ast,
+        (id) => ensureClassifier(state, id, undefined, undefined, true),
+        match.input,
+        state.creationCounter,
+      );
     },
   },
   {
@@ -195,7 +248,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   },
 
   // 5f. `constraint on links` — see CONSTRAINT_ON_LINKS_RE (class-notes.ts).
-  { pattern: CONSTRAINT_ON_LINKS_RE, execute: (state) => applyConstraintOnLinks(state.ast) },
+  { pattern: CONSTRAINT_ON_LINKS_RE, execute: (state, match) => applyConstraintOnLinks(state.ast, match[1] ?? '') },
 
   // 5g. `url [of|for] <Code> [is] [[...]]` — CommandUrl.java (README item
   //     #7, G2 N15). Attaches a url to an ALREADY-DECLARED classifier;

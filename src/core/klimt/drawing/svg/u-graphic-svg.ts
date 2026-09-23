@@ -65,9 +65,10 @@
  * NOT ported (out of this task's explicitly stated scope — driver-
  * registry wiring, comment/group dispatch, document finalization only —
  * reported): `dpiFactor()` (trivially `1`, no consumer in this port
- * yet); `matchesProperty(String)`, `startUrl`/`closeUrl` (needs the
- * `Url` type, not ported — though the underlying `SvgGraphics#openLink`/
- * `closeLink` D3′ stubs already exist, see `svg-graphics.ts`),
+ * yet); `matchesProperty(String)`. (`startUrl`/`closeUrl` ARE ported as
+ * of cdd-T28 — see below; upstream's `Url` value class is still not
+ * ported, so they take the `{url, tooltip}` shape this port already uses
+ * for a creole atom's url, `klimt/creole/atom/Atom.ts#CreoleAtomUrl`.)
  * `getDefaultBackground()`/`getColorMapper()` (T2 already dropped both
  * from `UGraphic`, see `UGraphic.ts`); `beforeDraw`/`afterDraw`/
  * `manageHiddenAutomatically()` (need `UParam#isHidden()`, dropped by T2
@@ -121,6 +122,9 @@ function asShapeCtor<S extends UShape>(ctor: { readonly name: string }): ShapeCo
 
 /** Upstream: `UGraphicSvg`. See the module doc comment above for the
  * full scope, deviations, and NOT-ported list. */
+/** `SkinParam.java:1082` — `getValue("svglinktarget", "_top")`. */
+const DEFAULT_LINK_TARGET = '_top';
+
 export class UGraphicSvg extends AbstractCommonUGraphic {
   private constructor(
     private readonly svg: SvgGraphics,
@@ -220,6 +224,29 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
   /** Upstream: `closeGroup()`. */
   closeGroup(): void {
     this.svg.closeGroup();
+  }
+
+  /**
+   * Upstream: `startUrl(Url)` (java:159-162) — opens the `<a>` wrapper
+   * every subsequently drawn shape lands inside, until {@link closeUrl}.
+   * `AtomText#drawU` brackets its runs with this pair whenever the run
+   * carries a url (`klimt/creole/legacy/AtomText.java:197-198,235-236`),
+   * which is how a creole `[[url label]]` becomes a real link.
+   *
+   * `target` is upstream's `option.getLinkTarget()` (`atmp/SvgOption.java
+   * :224`), whose skin default is `_top` (`skin/SkinParam.java:1082`,
+   * `getValue("svglinktarget", "_top")`) — this port's `SvgOption` carries
+   * no `linkTarget` field, so the default is applied here; a `skinparam
+   * svgLinkTarget` override stays the named remainder `core/svg.ts
+   * #linkWrap` already records for the string-emitting path.
+   */
+  startUrl(url: { readonly url: string; readonly tooltip: string }): void {
+    this.svg.openLink(url.url, url.tooltip === '' ? null : url.tooltip, DEFAULT_LINK_TARGET);
+  }
+
+  /** Upstream: `closeUrl()` (java:164-167). */
+  closeUrl(): void {
+    this.svg.closeLink();
   }
 
   /** Upstream: `getSvgGraphics()`. */

@@ -8,9 +8,14 @@
 import type { ClassifierGeo } from './layout.js';
 import {} from './layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
+import { scaleDashArrayString } from './class-scale-geo-row.js';
 import {} from '../../core/svg.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { noGradient, parseColor } from '../../core/paint.js';
+import type { Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { cleanStereotypeToken } from '../../core/style-map-element.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
 import {} from './class-visibility-icon.js';
@@ -22,6 +27,19 @@ import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
+// CDD T20 (M1): `Colors.java:95-124`'s `line`/`lineStyle` fields, T18-added
+// to `extractDecorations` but never consumed on the render side (that
+// function's own doc comment named them "named for T19/T20") -- imported
+// here rather than widening `ClassifierGeo` with a duplicate field, since
+// `geo.color` already carries the SAME raw joined token
+// `resolveBareOrBackColor` (the BACK-half precedent) reads directly.
+import { parseDeclarationColors } from './class-declaration-extractors.js';
+// CDD T20 (M1): `LinkStyle#getStroke3()` (decoration/LinkStyle.java:97-108)
+// is ALREADY ported for the edge engine -- reused rather than re-derived a
+// second time (DASHED->dash(7,7) thickness 1, DOTTED->dash(1,3) thickness
+// 1, BOLD->thickness 2 no dash; `nonZeroThickness()`'s null-thickness
+// default is exactly `strokeForStyle`'s own no-override path).
+import { strokeForStyle } from '../../core/svek/svek-edge-stroke.js';
 
 /** `theme.colors.graph.classCascadeBackground ?? classBackground` -- the
  *  terminal class-family default every kind falls back to when no
@@ -29,7 +47,7 @@ import {} from './class-shadow.js';
  *  coincidentally default to the SAME jar hex, `#F1F1F1`, as class --
  *  see `classifierFill`'s own doc comment for why this is NOT the same as
  *  object/map/json sharing class's CASCADE). */
-export function classDefaultBackground(theme: Theme): string {
+export function classDefaultBackground(theme: Theme): Paint {
   return theme.colors.graph.classCascadeBackground ?? theme.colors.graph.classBackground;
 }
 
@@ -105,7 +123,53 @@ export function resolveElementHeaderFont(theme: Theme, sname: string): string | 
   return undefined;
 }
 
-export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
+/** CDD T6FU: the FIRST of `stereotypeLabels` with a `skinparam
+ *  classBackgroundColor<<label>>` entry, resolved through the SAME
+ *  `parseColor` + `resolveColorToSvgHex` pair a classifier's own inline
+ *  colour takes (so a `#A-B` value is a gradient `Paint`, not a flattened
+ *  string). "First match wins" mirrors {@link resolveClassTagCascadeEntry}'s
+ *  own documented simplification for the identical upstream tier.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:396-408
+ */
+export function resolveClassBackgroundByStereo(
+  theme: Theme,
+  stereotypeLabels: readonly string[] | undefined,
+): Paint | undefined {
+  const byStereo = theme.colors.graph.classBackgroundColorByStereo;
+  if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
+  for (const label of stereotypeLabels) {
+    const raw = byStereo[cleanStereotypeToken(label)];
+    if (raw === undefined) continue;
+    const parsed = parseColor(raw);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
+  return undefined;
+}
+
+/**
+ * CDD T6FU: the classifier's background as resolved at upstream's
+ * STEREOTYPE priority tier -- the `<style> class { .tag {} } }` cascade and
+ * `skinparam classBackgroundColor<<stereo>>`, both registered at
+ * `StyleLoader#addPriorityForStereotype` (+1000, `FromSkinparamToStyle
+ * #addStyle` java:396-408). `undefined` when neither applies.
+ *
+ * Exported for `renderer-classifier-header-split.ts`: because this tier
+ * outranks BOTH the plain `{element, class_}` and the `{element, class_,
+ * header}` styles, `EntityImageClass#getStyleHeader`'s merged
+ * BackGroundColor resolves to THIS value whenever it exists -- making
+ * `headerBackcolor` equal to `backcolor`, i.e. no header split, whatever
+ * `classHeaderBackgroundColor` said. Jar-verified `tabaxa-70-pomu341`
+ * (`class { BackgroundColor LightCoral; <<Foo1>> { BackgroundColor
+ * LightBlue } }`: the stereotyped class draws ONE LightBlue rect).
+ */
+export function classStereotypeBackground(geo: ClassifierGeo, theme: Theme): Paint | undefined {
+  return (
+    resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.background ??
+    resolveClassBackgroundByStereo(theme, geo.stereotypeLabels)
+  );
+}
+
+export function classifierFill(geo: ClassifierGeo, theme: Theme): Paint {
   // Upstream has no `enum`/`interface` StyleSignature for the box fill --
   // `EntityImageClassHeader#getStyleSignature` (and the lollipop-interface
   // eye's own `ColorParam.classBackground` read) both key on `SName.class_`
@@ -124,8 +188,20 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // state's `state-render-colors.ts` can reuse the SAME grammar for a
   // note's/state's own `#color` override -- see that module's doc comment
   // for the full extraction rule).
+  // CDD T18/D8: `parseColor` FIRST -- upstream runs the identical
+  // `HColorSet#parseColor` (java:78-119) on a classifier's own inline
+  // declaration colour as on every skinparam one, so `class Test1
+  // #yellow\FFFFFF` is an `HColors.gradient(...)` here too, reaching
+  // `DriverRectangleSvg#applyFillColor`'s def branch (java:82-96). The
+  // pre-T18 `resolveColorToSvgHex(override)` handed the unsplit token
+  // straight to `fill=` (jar-verified `taceve-49-mezi408`'s Test1-4).
+  // A non-gradient token still goes through `resolveColorToSvgHex`
+  // unchanged, so every flat inline override is byte-identical.
   const override = resolveBareOrBackColor(geo.color);
-  if (override !== undefined) return resolveColorToSvgHex(override);
+  if (override !== undefined) {
+    const parsed = parseColor(override);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
   // G3/O1: `object`/`map`/`json` each carry their OWN StyleSignature
   // upstream (`SName.object`/`map`/`json` under `SName.objectDiagram`),
   // independent of class's `SName.class_` (`EntityImageObject`/`Map`/
@@ -151,6 +227,15 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
   // `style-cascade-class.ts#resolveClassTagCascadeEntry`'s own doc comment.
   const tagBackground = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.background;
   if (tagBackground !== undefined) return tagBackground;
+  // CDD T6FU: `skinparam classBackgroundColor<<stereo>>` -- the SAME
+  // stereotype-tagged-style tier as the `.tagname` cascade above
+  // (`FromSkinparamToStyle#addStyle`'s `sig.addStereotype(s)` +
+  // `addPriorityForStereotype`, java:396-408), just spelled as a skinparam
+  // instead of a `<style>` block; placed immediately below it because a
+  // `<style>` block is the later-registered of the two upstream. See
+  // `theme-graph-colors-b.ts#classBackgroundColorByStereo`.
+  const byStereo = resolveClassBackgroundByStereo(theme, geo.stereotypeLabels);
+  if (byStereo !== undefined) return byStereo;
   // G2 N36: `classCascadeBackground` is a STRICT SUPERSET of what the
   // pre-existing bare `class {}` bucket (`classBackground`, `style-map-
   // theme.ts`) could ever populate from the SAME StyleMap -- it additionally
@@ -172,7 +257,19 @@ export function classifierFill(geo: ClassifierGeo, theme: Theme): string {
  * line-color half is a SEPARATE, unsurveyed mechanism, out of this
  * iteration's scope).
  */
-export function classBorder(geo: ClassifierGeo, theme: Theme): string {
+export function classBorder(geo: ClassifierGeo, theme: Theme): Paint {
+  // CDD T20 (M1): `lineConfig.getColors().getColor(ColorType.LINE)` wins
+  // FIRST, ahead of the `.tagname`/ancestor cascade below -- the SAME
+  // "inline override always wins" precedent `classifierFill`'s own
+  // `resolveBareOrBackColor` check already established for BackGroundColor
+  // (`EntityImageClass.java:193-200`: `borderColor` only falls to
+  // `getStyle().value(LineColor)` `if (borderColor == null)`). Gradient-
+  // aware, mirroring `classifierFill`'s identical `parseColor` step.
+  const inlineLine = parseDeclarationColors(geo.color).line;
+  if (inlineLine !== undefined) {
+    const parsed = parseColor(inlineLine);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
   // G2 N37: the `.tagname` sub-selector cascade wins over the plain
   // ancestor cascade -- see `classifierFill`'s identical precedent above.
   const tagBorder = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.border;
@@ -181,6 +278,34 @@ export function classBorder(geo: ClassifierGeo, theme: Theme): string {
   // `classCascadeBackground ?? classBackground` two-tier precedent -- see
   // `theme.ts#classBorder`'s own doc comment.
   return tagBorder ?? theme.colors.graph.classCascadeBorder ?? theme.colors.graph.classBorder ?? theme.colors.border;
+}
+
+/**
+ * CDD T18/D8, the NAMED divider-line branch: the stroke a classifier's
+ * inner divider `<line>`s take, as opposed to the box outline's
+ * {@link classBorder}.
+ *
+ * Upstream resolves ONE `LineColor` for both (`EntityImageClass.java`'s
+ * single `getStyle().value(PName.LineColor)`, see {@link classBorder}) and
+ * splits them at the DRIVER, by shape kind, not by colour: a `URectangle`
+ * with a gradient stroke gets a real def and `stroke="url(#…)"`
+ * (`klimt/drawing/svg/DriverRectangleSvg.java:97-111 #applyStrokeColor`),
+ * while a `ULine` with the SAME gradient stroke is flattened to its first
+ * colour (`klimt/drawing/svg/DriverLineSvg.java:76-82`:
+ * `if (color instanceof HColorGradient) svg.setStrokeColor(gr.getColor1()
+ * .toSvg(mapper))` -- `HColors#noGradient`'s unwrap, `core/paint.ts
+ * #noGradient`). Jar-verified `capode-04-jeka075`: `skinparam
+ * classBorderColor #FFBD42-white` draws the box `stroke="url(#…)"` and
+ * BOTH divider lines `stroke="#FFBD42"`.
+ *
+ * So every `line(...)` call in `renderer-classifier-box.ts` /
+ * `renderer-body-enhanced.ts` reads this, and every `rect(...)`/`path(...)`
+ * call reads {@link classBorder}. For a non-gradient border the two are the
+ * identical value, which is why no pre-T18 output moves.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverLineSvg.java:76-82
+ */
+export function classBorderLine(geo: ClassifierGeo, theme: Theme): string {
+  return noGradient(classBorder(geo, theme));
 }
 
 /**
@@ -197,15 +322,52 @@ export function classBorder(geo: ClassifierGeo, theme: Theme): string {
  * above).
  */
 export const CLASS_BORDER_STROKE_WIDTH_DEFAULT = 0.5;
-export function classBorderStrokeWidth(geo: ClassifierGeo, theme: Theme): number {
+/**
+ * cdd-T29 round 2 (D4/journal row 175): jar's `format()` scales EVERY
+ * emitted numeric at serialization (`SvgGraphics.java:466-472,557`),
+ * `stroke-width` included -- this port computes the resolved thickness
+ * fresh at render time (no `ClassGeometry` field carries it, unlike
+ * `EdgeGeo.strokeWidth`'s own optional override), so `theme.scaleK` is the
+ * only remaining seam: multiplied uniformly across all three return paths
+ * (inline override, per-stereotype, and the `classBorderThickness`
+ * skinparam/`0.5` default) since upstream scales the resolved value
+ * regardless of which tier produced it.
+ */
+export function classBorderStrokeWidth(geo: ClassifierGeo, theme: ScaledTheme): number {
+  // CDD T20 (M1): `Style#getStroke(Colors)` -- `colors.getSpecificLineStroke()`
+  // (`Colors.java:138-142`) wins OUTRIGHT over BOTH the stereo and bare
+  // theme thickness tiers below when an inline `line.dashed`/`line.dotted`/
+  // `line.bold`/`##[style]` is set, never blended with them
+  // (`EntityImageClass.java:215`: `getStyle().getStroke(lineConfig
+  // .getColors())` returns `stroke` wholesale, no merge with `LineThickness`).
+  const lineStyle = parseDeclarationColors(geo.color).lineStyle;
+  if (lineStyle !== undefined) return strokeForStyle(lineStyle).getThickness() * theme.scaleK;
   const byStereo = theme.colors.graph.classBorderThicknessByStereo;
   if (byStereo !== undefined && geo.stereotypeLabels !== undefined) {
     for (const label of geo.stereotypeLabels) {
       const hit = byStereo[label.toLowerCase()];
-      if (hit !== undefined) return hit;
+      if (hit !== undefined) return hit * theme.scaleK;
     }
   }
-  return theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT;
+  return (theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT) * theme.scaleK;
+}
+
+/**
+ * CDD T20 (M1): the SAME `colors.getSpecificLineStroke()` override
+ * {@link classBorderStrokeWidth} consults, for the SVG `stroke-dasharray`
+ * half of the SAME `UStroke` (`LinkStyle#getStroke3()`, `decoration/
+ * LinkStyle.java:97-108` -- DASHED `(7,7)`, DOTTED `(1,3)`, BOLD/unset no
+ * dash). Every `rect(...)`/`path(...)`/`line(...)` call that reads {@link
+ * classBorder}/{@link classBorderLine} for its `stroke` reads this for its
+ * `strokeDasharray`, mirroring the fill/border split's own "one call reads
+ * both halves" convention -- `undefined` (no attribute) for every
+ * classifier with no inline line-style override, zero behavior change.
+ */
+export function classBorderStrokeDasharray(geo: ClassifierGeo, k: number): string | undefined {
+  const lineStyle = parseDeclarationColors(geo.color).lineStyle;
+  if (lineStyle === undefined) return undefined;
+  const dash = strokeForStyle(lineStyle).getDasharraySvg();
+  return dash === undefined ? undefined : scaleDashArrayString(`${dash[0]},${dash[1]}`, k);
 }
 
 /**

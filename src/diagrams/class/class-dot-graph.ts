@@ -7,22 +7,30 @@
  * size cap; behavior is unchanged (pure move).
  */
 
-import type { Classifier, ClassDiagramAST, Namespace } from './ast.js';
+import type { Classifier, ClassDiagramAST } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { DotInputCluster, DotInputGraph, DotInputNode, DotInputEdge } from '../../core/graph-layout.js';
+import type { DotInputGraph, DotInputNode, DotInputEdge } from '../../core/graph-layout.js';
 import { buildNoteGraphParts } from './note-layout.js';
 import { buildClassMagmaEdges } from './class-magma.js';
 import { buildClassUidPlan, classUidPlanInputFromAst } from './renderer-uid.js';
 import { LIKE_CLASS_KINDS, type MeasuredClassifier, type NoteBoxContext } from './class-layout-helpers.js';
 import { packageEndpointAnchors, shieldedClassifierIds } from './class-shield-helpers.js';
+import { computeKals, kalMarginsByEntity, type Kal } from './class-kal.js';
+// cdd-T15: the two pre-DOT width floors live in a sibling module (500-line
+// cap); re-exported here so every existing import path keeps working.
+import { applyKalWidthFloor, applySameClassWidthFloor } from './class-dot-width-floors.js';
+export { applyKalWidthFloor, applySameClassWidthFloor, type ThemeSameClassWidth } from './class-dot-width-floors.js';
+// cdd-T22b: the cluster builder moved to its own module for the same
+// 500-line-cap reason as the width floors above (pure move).
+import { nonEmptyNamespaceIds, buildDotClusters } from './class-dot-clusters.js';
+import { hideTextShieldMarginsByEntity } from './class-hidetext-shield.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
-import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { dotEdgeRunsReversed, getOrderedLinks } from './class-dot-edge-order.js';
 import { buildDotEdges } from './class-dot-edges.js';
-import { clusterWrapperLevel } from './class-cluster-levels.js';
-import { namespaceTitleTableDims } from './class-namespace-title-table.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { assembleDotInputGraph } from './class-dot-graph-assembly.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -45,83 +53,20 @@ export interface DotGraphParts {
    *  without re-deriving the numbering. Empty when the diagram has no
    *  cluster-bearing namespace. */
   clusterIdByNs: Map<string, string>;
-}
-
-/**
- * The set of namespace ids that must emit a cluster: any namespace whose
- * subtree contains at least one direct member classifier. A namespace with no
- * direct members is still kept when a descendant has members (it is a real
- * ancestor cluster and its members bubble up in the oracle); a namespace whose
- * entire subtree is empty is dropped — the oracle omits member-less subgraphs
- * (verified against mujopi-30-zadi566: two empty packages produce no cluster).
- */
-function nonEmptyNamespaceIds(ast: ClassDiagramAST): Set<string> {
-  const byId = new Map(ast.namespaces.map((n) => [n.id, n] as const));
-  const keep = new Set<string>();
-  for (const ns of ast.namespaces) {
-    if (ns.classifiers.length === 0) continue;
-    let cur: Namespace | undefined = ns;
-    while (cur !== undefined && !keep.has(cur.id)) {
-      keep.add(cur.id);
-      cur = cur.parentId !== undefined ? byId.get(cur.parentId) : undefined;
-    }
-  }
-  return keep;
-}
-
-/**
- * Build one `DotInputCluster` per non-empty package/namespace, nesting via
- * `parentId` for dotted/nested names (mirrors the description engine's
- * `buildDotClusters` in ../description/layout.ts). `id` is a synthetic
- * `clusterN` token — NOT `ns.id` — because the comparator's `parseClusters`
- * (tests/oracle/svek-dot.ts:109) only recognizes subgraphs named exactly
- * `^cluster\d+$`; the description engine's `clusterId` generator
- * (`cluster${counter.n++}`, description/layout.ts:108) uses the same scheme.
- * Only direct member classifiers go in `nodeIds`; descendants' members bubble
- * up through the nesting, matching the oracle's cluster-membership counting.
- */
-function buildDotClusters(
-  ast: ClassDiagramAST,
-  anchors: Map<string, string>,
-  theme: Theme,
-  measurer: StringMeasurer,
-): { clusters: DotInputCluster[]; clusterIdByNs: Map<string, string> } | undefined {
-  const keep = nonEmptyNamespaceIds(ast);
-  if (keep.size === 0) return undefined;
-  const kept = ast.namespaces.filter((ns) => keep.has(ns.id));
-  const clusterIdByNs = new Map(kept.map((ns, i) => [ns.id, `cluster${i}`] as const));
-  const clusters = kept.map((ns, i) => {
-    // A package used as a relationship endpoint carries its point anchor as an
-    // extra direct member of its own cluster (svek ClusterDotString).
-    const anchorId = anchors.get(ns.id);
-    const nodeIds = anchorId !== undefined ? [...ns.classifiers, anchorId] : ns.classifiers;
-    const cluster: DotInputCluster = { id: `cluster${i}`, nodeIds };
-    // T4: `protection0`/`protection1` (ClusterDotString.java:107-115) are
-    // unconditional for a non-swimlane, non-`USymbols.NODE` group -- NOT
-    // gated on `cluster.isLabel()` (line 122's SEPARATE branch, below) -- so
-    // `innerMarginLevels`/`unwrappedNodeId` are set for every kept cluster,
-    // independent of whether it carries a title.
-    cluster.innerMarginLevels = clusterWrapperLevel(ns.id, ast);
-    if (anchorId !== undefined) cluster.unwrappedNodeId = anchorId;
-    if (ns.display.length > 0) {
-      cluster.label = ns.display;
-      const dims = namespaceTitleTableDims(ns.display, theme, measurer);
-      // Same pair, two consumers (cluster-title-table.ts's own
-      // `computeTitleTableHeight` doc comment): `labelWidth`/`labelHeight`
-      // feed the DOT-TEXT emitter's `label=<TABLE...>` (svek-dot-emit-
-      // clusters.ts#clusterBlock, unconditional whenever both are defined);
-      // `titleTableWidth`/`titleTableHeight` feed the LAYOUT builder's real
-      // @knowvah/dot-engine reservation (graph-layout-build.ts#addClusters).
-      cluster.labelWidth = dims.width;
-      cluster.labelHeight = dims.height;
-      cluster.titleTableWidth = dims.width;
-      cluster.titleTableHeight = dims.height;
-    }
-    const parentClusterId = ns.parentId !== undefined ? clusterIdByNs.get(ns.parentId) : undefined;
-    if (parentClusterId !== undefined) cluster.parentId = parentClusterId;
-    return cluster;
-  });
-  return { clusters, clusterIdByNs };
+  /** cdd-T15 (D6): the `Kal` list built for this page, in `SvekEdge.java
+   *  :242-246` construction order over the ALREADY-reordered
+   *  `ast.relationships` (`getOrderedLinks`), so every `Kal.relIndex`
+   *  indexes the same array `layout.ts`'s later `buildEdgeGeos(effAst, …)`
+   *  walks. Threaded OUT for the same reason `anchors` is: the box's own
+   *  anchor is the post-layout spline endpoint. Empty when the diagram has
+   *  no qualified association. */
+  kals: Kal[];
+  /** cdd-T16/T16b (`Link.java:238-239`, `Neighborhood.java:69-121`):
+   *  relIndex -> protected parent uid; and (below) every protected leaf's
+   *  id (same set `buildDotNodes` uses for `protectedPad`) -- both
+   *  threaded OUT for `buildEdgeGeos`. */
+  sametailByRelIndex: ReadonlyMap<number, string>;
+  protectedIds: ReadonlySet<string>;
 }
 
 /** `EntityImageProtected`'s border -- GeneralImageBuilder.java:113 wraps a
@@ -129,7 +74,45 @@ function buildDotClusters(
  *  entityImageClass, 20, ...)`; `calculateDimension` returns
  *  `orig.calculateDimension(...).delta(2 * border)` (EntityImageProtected
  *  .java:77-79) -- +40px on BOTH axes. */
-const PROTECTED_BORDER = 20;
+// cdd-T16: exported so `renderer-group.ts` can back out the protected
+// classifier's TRUE (unpadded) box from its padded `ClassifierGeo`
+// (`EntityImageProtected.java:56`'s `border` ctor param, always 20 --
+// `GeneralImageBuilder.java:113`) rather than re-declaring the same
+// jar-cited literal a second time.
+export const PROTECTED_BORDER = 20;
+
+/** `EntityImageProtected.java:56,77-79`: the padded node's dimension is
+ *  `orig.calculateDimension().delta(2*border)`, drawn at `(border,
+ *  border)` inside it -- so the TRUE (unpadded) box a protected
+ *  classifier's `ClassifierGeo` represents is inset by `PROTECTED_BORDER`
+ *  on every side, backed out from the padded `x`/`y`/`width`/`height`
+ *  `buildOneDotNode` (below) inflated the DOT node by.
+ *
+ *  cdd-B10FU: lives here (not `renderer-group.ts`, its sole caller until
+ *  this task) so BOTH the render-side consumers (`renderer-group.ts
+ *  #renderGroupInheritanceNeighborhood`, `renderer-classifier-box.ts
+ *  #renderClassifierBox`) and the LAYOUT-side canvas ink walk
+ *  (`class-ink-box.ts#addClassifierInk`) share one formula without the
+ *  ink walk importing a renderer module (parse -> layout -> render, this
+ *  file's own layer). Falls back to the bare `PROTECTED_BORDER` constant
+ *  when `protectedBorder` is absent, matching `renderer-group.ts`'s own
+ *  pre-existing "reached only for an actually-protected classifier, by
+ *  construction" guarantee. */
+export function protectedInnerBox(geo: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  protectedBorder?: number;
+}): { x: number; y: number; width: number; height: number } {
+  const border = geo.protectedBorder ?? PROTECTED_BORDER;
+  return {
+    x: geo.x + border,
+    y: geo.y + border,
+    width: geo.width - 2 * border,
+    height: geo.height - 2 * border,
+  };
+}
 
 /** A2s F-D pending theme-plumbing seam (see the F-D report): `skinparam
  *  groupInheritance N` is not yet parsed into `Theme`, so this field is
@@ -137,54 +120,6 @@ const PROTECTED_BORDER = 20;
  *  skinparam pipeline populates it. */
 export interface ThemeGroupInheritance {
   groupInheritance?: number;
-}
-
-/** Same pending-plumbing seam as {@link ThemeGroupInheritance}, for
- *  `skinparam sameClassWidth true|false` (SkinParam.java:994). */
-export interface ThemeSameClassWidth {
-  sameClassWidth?: boolean;
-}
-
-/**
- * A2s F-D mechanism B7: `skinparam sameClassWidth true` floors EVERY
- * like-class box width to the widest like-class box --
- * `GraphvizImageBuilder#printEntityInternal` computes `getMaxWidth()` over
- * all `isLikeClass` leaves and stashes it on the skinparam
- * (GraphvizImageBuilder.java:366-375); `EntityImageClass
- * #calculateDimensionSlow` then floors each box to it (EntityImageClass
- * .java:108-110). Jar evidence: dorafa-63-soba922 emits BOTH nodes at
- * 1.623264in. Mutates the shared `MeasuredClassifier.width` in place so the
- * DOT node builder AND the renderer geos (built after `buildDotGraph`) agree
- * on the floored width. Header-row indents are NOT re-centered against the
- * widened box (bounded SVG-cosmetic gap, F-D report). Inert in production
- * until the {@link ThemeSameClassWidth} plumbing lands.
- */
-export function applySameClassWidthFloor(
-  classifiers: readonly Classifier[],
-  measuredMap: ReadonlyMap<string, MeasuredClassifier>,
-  theme: Theme,
-): void {
-  if ((theme as Theme & ThemeSameClassWidth).sameClassWidth !== true) return;
-  const max = maxLikeClassWidth(classifiers, measuredMap);
-  for (const c of classifiers) {
-    if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
-    const m = measuredMap.get(c.id);
-    if (m !== undefined && m.width < max) m.width = max;
-  }
-}
-
-/** `GraphvizImageBuilder#getMaxWidth` (GraphvizImageBuilder.java:385-395):
- *  the widest `isLikeClass` box, measured WITHOUT the sameClassWidth floor
- *  itself (upstream stashes the max before any floor applies). */
-function maxLikeClassWidth(
-  classifiers: readonly Classifier[],
-  measuredMap: ReadonlyMap<string, MeasuredClassifier>,
-): number {
-  let max = 0;
-  for (const c of classifiers) {
-    if (LIKE_CLASS_KINDS.has(c.kind)) max = Math.max(max, measuredMap.get(c.id)?.width ?? 0);
-  }
-  return max;
 }
 
 /**
@@ -215,6 +150,15 @@ interface GroupInheritanceResult {
   /** Index into `ast.relationships` → the tail entity's `ent%04d` uid.
    *  Empty unless `groupInheritance` is set AND a tail reaches the limit. */
   readonly sametailByRelIndex: ReadonlyMap<number, string>;
+}
+
+// cdd-T16b: kept away from buildDotNodesAndEdges -- an inline interface
+// between two functions confused lizard's brace-depth parser.
+interface DotNodesAndEdges {
+  dotNodes: DotInputNode[];
+  dotEdges: DotInputEdge[];
+  sametailByRelIndex: ReadonlyMap<number, string>;
+  protectedIds: ReadonlySet<string>;
 }
 
 function computeGroupInheritance(
@@ -303,8 +247,18 @@ function buildDotNodes(
   measuredMap: Map<string, MeasuredClassifier>,
   anchors: Map<string, string>,
   protectedIds: ReadonlySet<string>,
-  classPortShortNames: ReadonlyMap<string, Set<string>>,
+  // cdd-T15/T22b: `classPortShortNames` plus the page's `Kal` list, plus
+  // (T22b) the `theme`/`measurer` the hideText shield margins below need --
+  // folded into one options object -- a sixth positional parameter would
+  // cross this repo's hook-enforced 5-param cap.
+  opts: {
+    classPortShortNames: ReadonlyMap<string, Set<string>>;
+    kals: readonly Kal[];
+    theme: Theme;
+    measurer: StringMeasurer;
+  },
 ): DotInputNode[] {
+  const { classPortShortNames, kals, theme, measurer } = opts;
   const shielded = shieldedClassifierIds(ast);
   const nodes = ast.classifiers
     .filter((classifier) => !anchors.has(classifier.id))
@@ -315,21 +269,23 @@ function buildDotNodes(
     // Width/height are ignored by the point emitter (hardcoded .01in).
     nodes.push({ id: anchorId, width: 1, height: 1, shape: 'point' });
   }
+  // cdd-T15 (D6): `Kal.java:106-121`'s `ensureMargins` -- stamped as a
+  // post-pass rather than threaded into `buildOneDotNode`, whose parameter
+  // list already sits at the project's cap. `resolveNodeShape` has already
+  // made every qualified end `plaintext` off the same `shieldedClassifierIds`
+  // scan, so this only fills in the shield's real sizes.
+  const margins = kalMarginsByEntity(kals);
+  // cdd-T22b: `SvekNode.java:220-267`'s SECOND shield source -- a
+  // `hideText` (`circle`) leaf's own icon-cell margins, keyed the same
+  // way and applied through the SAME `node.shieldMargins` field (and
+  // therefore the same `graph-layout.ts#portNodeSize`/`shieldCorner`
+  // reconciliation) T15 built for the Kal qualifier case above.
+  const hideTextMargins = hideTextShieldMarginsByEntity(ast, theme, measurer);
+  for (const node of nodes) {
+    const m = margins.get(node.id) ?? hideTextMargins.get(node.id);
+    if (m !== undefined) node.shieldMargins = m;
+  }
   return nodes;
-}
-
-/** DOT nodesep/ranksep attrs. Oracle emits nodesep=0.486111in (35px),
- *  ranksep=0.833333in (60px) by default; `skinparam nodesep`/`ranksep`
- *  (theme.nodeSep/rankSep, nonzero) unconditionally replace that default
- *  (SkinParam.java:847-856, DotStringFactory.java:117-133 — no max-clamp)
- *  and skip the emitter's minimum floor (svek-dot-emit resolveSep). */
-function sepAttrs(theme: Theme): Partial<DotInputGraph> {
-  return {
-    nodeSep: theme.nodeSep ?? 35,
-    rankSep: theme.rankSep ?? 60,
-    ...(theme.nodeSep !== undefined ? { nodeSepExplicit: true } : {}),
-    ...(theme.rankSep !== undefined ? { rankSepExplicit: true } : {}),
-  };
 }
 
 /**
@@ -344,8 +300,12 @@ function buildDotNodesAndEdges(
   measuredMap: Map<string, MeasuredClassifier>,
   anchors: Map<string, string>,
   theme: Theme,
-  measurer: StringMeasurer,
-): { dotNodes: DotInputNode[]; dotEdges: DotInputEdge[] } {
+  // cdd-T15: `measurer` plus the page's `Kal` list (built once in
+  // `buildDotGraph`, shared with the node margins and with `layout.ts`) --
+  // folded into one object for the same 5-param cap reason as above.
+  ctx: { measurer: StringMeasurer; kals: readonly Kal[] },
+): DotNodesAndEdges {
+  const { measurer, kals } = ctx;
   const classPortShortNames = classPortShortNamesById(ast);
   // ONE `removeIrrelevantSametail` pass feeding both consumers, as upstream
   // does. The uid lookup is AST-derived because `sametail` is a DOT attribute
@@ -354,7 +314,8 @@ function buildDotNodesAndEdges(
   // where it is (and the test that pins it).
   const uidPlan = buildClassUidPlan(classUidPlanInputFromAst(ast));
   const groupInheritance = computeGroupInheritance(ast, theme, (id) => uidPlan.classifierUid.get(id));
-  const dotNodes = buildDotNodes(ast, measuredMap, anchors, groupInheritance.protectedIds, classPortShortNames);
+  const nodeOpts = { classPortShortNames, kals, theme, measurer };
+  const dotNodes = buildDotNodes(ast, measuredMap, anchors, groupInheritance.protectedIds, nodeOpts);
   // D3/D4: resolved arrow-label font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`). No override -> byte-identical to the prior
   // `{family:theme.fontFamily,size:ARROW_LABEL_FONT_SIZE}` literal (see the
@@ -372,10 +333,7 @@ function buildDotNodesAndEdges(
   // (`theme.ts:491`) preserves that invariant through every stage. The `!`
   // below asserts that invariant rather than papering over it with a
   // fitted fallback literal.
-  const cardinalityFont = {
-    family: theme.cardinalityFontFamily!,
-    size: theme.cardinalityFontSize!,
-  };
+  const cardinalityFont = { family: theme.cardinalityFontFamily!, size: theme.cardinalityFontSize! };
   // T10: same `theme`/`ast.sprites` pair `buildNoteGraphParts` below already
   // takes for attached/freestanding notes -- sizes a `note on link`-merged
   // label (`rel.linkNote`).
@@ -393,7 +351,41 @@ function buildDotNodesAndEdges(
     }),
     ...buildClassMagmaEdges(ast, anchors),
   ];
-  return { dotNodes, dotEdges };
+  applyKalEdgePorts(dotNodes, dotEdges);
+  return toDotNodesAndEdges(dotNodes, dotEdges, groupInheritance);
+}
+
+// cdd-T16b: keeps buildDotNodesAndEdges's own NLOC from growing.
+function toDotNodesAndEdges(
+  dotNodes: DotInputNode[],
+  dotEdges: DotInputEdge[],
+  groupInheritance: GroupInheritanceResult,
+): DotNodesAndEdges {
+  return { dotNodes, dotEdges, ...groupInheritance };
+}
+
+/**
+ * cdd-T15 (D6): `Bibliotekon#getNodeUid` (`svek/Bibliotekon.java:126-132`)
+ * appends `:h` to EVERY DOT reference to a shielded node's uid -- the
+ * compass port naming the shield table's centre cell, which is what makes
+ * graphviz route the spline from the CLASS box's own edge rather than from
+ * the margin-inflated table. `svek-dot-emit.ts#edgeRef` already writes that
+ * suffix into the emitted DOT text; this stamps the same port onto the
+ * LAYOUT edge, through the `tailport`/`headport` seam the member-row ports
+ * already use (`graph-layout-build.ts#addEdges`).
+ *
+ * Without it, `baneru-00-kuro607`'s arrow tip lands at y=74.77 instead of
+ * the jar's 70.82: the spline starts at the padded table's bottom (75)
+ * rather than the centre cell's (55).
+ */
+function applyKalEdgePorts(dotNodes: readonly DotInputNode[], dotEdges: readonly DotInputEdge[]): void {
+  const shielded = new Set(dotNodes.filter((n) => n.shieldMargins !== undefined).map((n) => n.id));
+  if (shielded.size === 0) return;
+  for (const edge of dotEdges) {
+    if (edge.attributes === undefined) continue;
+    if (shielded.has(edge.from)) edge.attributes.tailport = 'h';
+    if (shielded.has(edge.to)) edge.attributes.headport = 'h';
+  }
 }
 
 /**
@@ -424,14 +416,39 @@ export function buildDotGraph(
   theme: Theme,
   measurer: StringMeasurer,
 ): DotGraphParts {
+  // SB2: `CucaDiagramFileMakerSvek.java:90-96 getOrderedLinks`, applied
+  // ONCE here, ahead of every `ast.relationships` reader below --
+  // `buildDotNodesAndEdges`/`computeSwappedEdges`, and (same `ast` object
+  // reference) `layout.ts`'s later `buildEdgeGeos(effAst, ...)` call.
+  // `GraphvizImageBuilder.java:229` iterates ONE reordered list for both
+  // DOT emission and the SVG `<g class="link">` draw loop; reassigning
+  // here is the "mutate the shared input for downstream layout.ts" pattern
+  // `applySameClassWidthFloor` already uses below. Dense uid re-numbering
+  // is unaffected -- it sorts by `creationIndex` (parse-time, immutable),
+  // never array position (D7, decisions.md).
+  ast.relationships = getOrderedLinks(ast.relationships);
   // A2s F-D mechanism B7: cross-class width floor, applied at the
   // pre-DOT aggregation point (mirrors `GraphvizImageBuilder
   // #printEntityInternal`'s "set paramSameClassWidth before building
   // entity images" sequencing) -- mutates the shared MeasuredClassifier
   // objects so the renderer geos built after this call agree.
   applySameClassWidthFloor(ast.classifiers, measuredMap, theme);
+  // cdd-T15 (D6): `SvekEdge.java:242-246` constructs every `Kal` while the
+  // edges are built, i.e. BEFORE any node image is sized -- so the boxes
+  // are measured here, once, and feed three consumers: the width floor
+  // below, the node shield margins (`buildDotNodes`), and `layout.ts`'s
+  // post-layout box placement. The font is the `class.qualified` style's
+  // (`Kal.java:93-99`), which inherits the class font.
+  const kals = computeKals(ast.relationships, { family: theme.fontFamily, size: theme.fontSize }, measurer);
+  applyKalWidthFloor(kals, ast.classifiers, measuredMap);
   const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
-  const { dotNodes, dotEdges } = buildDotNodesAndEdges(ast, measuredMap, anchors, theme, measurer);
+  const { dotNodes, dotEdges, sametailByRelIndex, protectedIds } = buildDotNodesAndEdges(
+    ast,
+    measuredMap,
+    anchors,
+    theme,
+    { measurer, kals },
+  );
   const swappedEdges = computeSwappedEdges(ast);
 
   // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
@@ -442,45 +459,8 @@ export function buildDotGraph(
   dotEdges.push(...noteParts.edges);
 
   const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
+  const dotGraph = assembleDotInputGraph(ast, theme, dotNodes, dotEdges, clusterParts);
 
-  const dotGraph: DotInputGraph = {
-    nodes: dotNodes,
-    edges: dotEdges,
-    rankDir: ast.rankdir === 'LR' ? 'LR' : 'TB',
-    // D3 (plans/linetype-ortho-routing/decisions.md): the SAME expression
-    // as the label half reads at line 401 above (`theme.linetype`) --
-    // forwarded via conditional spread so an absent linetype stays absent
-    // on DotInputGraph rather than becoming an explicit `undefined`. Merged
-    // onto one physical line with `sepAttrs` (not a new line) to keep
-    // `buildDotGraph` under the per-function NLOC cap without an extraction.
-    ...sepAttrs(theme),
-    ...(theme.linetype !== undefined ? { linetype: theme.linetype } : {}),
-    ...(clusterParts !== undefined ? { clusters: clusterParts.clusters } : {}),
-    // G2/N29: class's renderer draws EVERY edge decoration as an inline
-    // extremity polygon (`renderer-arrowhead.ts`, landed N1 mechanism 2 --
-    // the old SVG `<marker>`-reference `targetMarker`/`sourceMarker`
-    // functions were fully removed then; `renderer.ts`'s own header doc:
-    // "zero `<marker>`/`markerEnd` anywhere", grep-verified). This flag's
-    // own doc comment (`graph-layout.types.ts#manualArrowheads`) still
-    // lists "class" among the marker-end callers that rely on graphviz's
-    // default ~10-11px arrow-clip spline reservation -- stale since N1's
-    // rewrite, never updated when class stopped using markers. Every jar
-    // svek DOT edge line already carries `arrowtail=none,arrowhead=none`
-    // unconditionally (`svek-dot-emit.ts`, confirmed corpus-wide), so
-    // withholding this flag left @knowvah/dot-engine reserving a real-graphviz-
-    // divergent gap at every edge endpoint -- root cause of the ~400-fixture
-    // "@knowvah/dot-engine routing divergence" attribution the orchestrator's
-    // 2026-07-17 falsification entry re-opened (bosiki-11-xaza958/
-    // farina-07-foti023 byte-diff evidence, `plans/g2-class-svg/ledger.md`
-    // N29): the shortfall was a seam invocation gap, not an engine bug.
-    manualArrowheads: true,
-  };
-
-  return {
-    dotGraph,
-    swappedEdges,
-    noteParts,
-    anchors,
-    clusterIdByNs: clusterParts?.clusterIdByNs ?? new Map<string, string>(),
-  };
+  const clusterIdByNs = clusterParts?.clusterIdByNs ?? new Map<string, string>();
+  return { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds };
 }

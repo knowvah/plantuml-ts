@@ -37,11 +37,18 @@
  */
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './layout.js';
-import { path, line, text, rect } from '../../core/svg.js';
-import { isTransparentColor } from '../../core/paint.js';
+import { rect } from '../../core/svg.js';
+import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
-import { folderPathD, folderPolygonPoints, renderFolderPolygon } from './class-namespace-folder-outline.js';
+import { renderFolderTabShape } from './class-namespace-folder-outline.js';
+import {
+  namespaceTitleWidth,
+  namespaceTitleHeight,
+  renderNamespaceTitleAuto,
+  TITLE_LOCAL_TOP_OFFSET,
+} from './class-namespace-title-runs.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
 // (USymbolFolder.java), kept verbatim per this project's porting
@@ -51,6 +58,13 @@ const MARGIN_TITLE_X2 = 3;
 const MARGIN_TITLE_X3 = 7;
 const MARGIN_TITLE_Y1 = 3;
 const MARGIN_TITLE_Y2 = 3;
+
+/** `USymbolFolder#asBig`'s title local X offset (`title.drawU(ug.apply(new
+ *  UTranslate(4, 2)))`'s `4`) — the render-time-only half of that
+ *  translate; {@link TITLE_LOCAL_TOP_OFFSET} (imported) is its Y half.
+ *  cdd-B8FU: named (was an inline `4` at three call sites) so its own
+ *  scaleK multiplication has one citation, not three. */
+const TITLE_X_OFFSET = 4;
 
 /** `USymbolFolder#asBig`'s unstyled default `roundCorner` — jar-verified
  *  identical to every OTHER container's default (`A2.5,2.5`/`A3.75,3.75`
@@ -65,6 +79,17 @@ export const PACKAGE_ROUND_CORNER = 5;
  *  matches description's own `CLUSTER_STROKE_WIDTH` for folder-styled
  *  containers (`renderer-cluster.ts`). */
 export const PACKAGE_STROKE_WIDTH = 1.5;
+
+/** CDD T18b: the populated-namespace cluster's own `...package_,group`
+ *  unstyled defaults (`Cluster.java:285-296`) -- `plantuml.skin:102-114`'s
+ *  `group { BackGroundColor transparent; package { LineThickness 1.5;
+ *  LineColor black } }`. Applied explicitly (`?? PACKAGE_CLUSTER_*`) at
+ *  every cluster draw site now that `theme.colors.graph.packageBackground`/
+ *  `packageBorder` are optional (theme.ts no longer bakes them in) --
+ *  see `emptyPackagePaint`'s doc comment for why the leaf must NOT share
+ *  this same baked-in default. */
+const PACKAGE_CLUSTER_BACKGROUND_DEFAULT = 'none';
+const PACKAGE_CLUSTER_BORDER_DEFAULT = '#000000';
 
 /** `USymbolFolder.java`'s title-text font is always bold; `skinparam
  *  packageFontSize N` / `skinparam package { FontSize N }` overrides the
@@ -87,7 +112,7 @@ function titleFont(theme: Theme): FontSpec {
  *  identical `typeof override !== 'string'` Gradient-guard precedent: the
  *  plain-SVG-string `text()` primitive has no gradient-fill path here
  *  either). Falls back to jar's true default `#000000`. */
-function titleFontColor(theme: Theme): string {
+export function titleFontColor(theme: Theme): string {
   const override = theme.colors.elements?.package?.font;
   return typeof override === 'string' ? override : '#000000';
 }
@@ -104,8 +129,45 @@ function titleFontColor(theme: Theme): string {
  * package/namespace outlines only -- no evidence this applies to any other
  * element family, so the shared helper is left untouched.
  */
-function packageFillValue(color: string): string {
+function packageFillValue(color: Paint): Paint {
+  // CDD T18/D8: a gradient is never the "no paint" keyword -- upstream's
+  // `HColorSet#parseColor` returns `HColors.none()` only from its two
+  // literal-keyword arms (java:82-83), before the separator scan.
+  if (typeof color !== 'string') return color;
   return isTransparentColor(color) ? 'none' : color;
+}
+
+/**
+ * cdd-T12 (diagnosis A3 M3): a namespace's OWN inline `package "X" #COLOR {`
+ * background wins over the diagram-wide `skinparam packageBackgroundColor`/
+ * `<style> package { BackGroundColor }` fallback -- `Cluster#drawU`
+ * (`svek/Cluster.java:360-362`) resolves the back colour as
+ * `getBackColor(style)` then the static
+ * `getBackColor(backColor, stereotype, ...)` overload, both of which put the
+ * group's own `Colors`/`ColorType.BACK` override ahead of the style value
+ * (`core/svek/Cluster.ts#resolveBackColor`'s ported `backColorOverride ??
+ * backGroundColorDefault` is the same precedence). `NamespaceGeo.color` is
+ * already resolved to its bare/`back:` half at parse time (T11), so there is
+ * nothing left to re-parse here.
+ *
+ * Jar-verified on `garumi-63-vuze973` (`package "Voici mon package" #DDDDDD
+ * {`): `<path ... fill="#DDD">` where this port previously emitted
+ * `fill="none"` (the global default).
+ */
+/**
+ * CDD T18/D8: `parseColor` wraps BOTH tiers, not just one -- upstream's
+ * `Cluster#getBackColor` yields a single `HColor` from the one
+ * `HColorSet#parseColor` (java:78-119) whichever tier supplied the token,
+ * and `Cluster#drawU`'s shape is a `URectangle`/`UPolygon`, both of which
+ * emit a real def for a gradient (`DriverRectangleSvg.java:82-96`,
+ * `DriverPolygonSvg.java:63`). Jar-verified `dacixi-46-lina038`
+ * (`namespace A::B::C #yellow\gold {`: `<path fill="url(#…)">`, where this
+ * port previously emitted the unsplit literal `fill="#yellow\gold"`).
+ */
+export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
+  return packageFillValue(
+    parseColor(geo.color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT),
+  );
 }
 
 /**
@@ -120,7 +182,12 @@ function packageFillValue(color: string): string {
 export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string): number {
   const dim = measurer.measure(label, titleFont(theme));
   if (dim.width === 0) return 10;
-  return dim.height + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
+  // cdd-T26 residual round (`daxeno-00-kasu166`): sums every PHYSICAL
+  // line's own height instead of the single-line `dim.height` -- see
+  // `namespaceTitleHeight`'s own doc comment for the jar citation. A
+  // markup-free, newline-free label reduces to `dim.height` exactly (one
+  // line, unchanged font size).
+  return namespaceTitleHeight(measurer, theme, label) + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
 }
 
 /**
@@ -131,9 +198,9 @@ export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string)
  * textLength 7.7875 -> wtitle 13.7875).
  */
 export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string, width: number): number {
-  const dim = measurer.measure(label, titleFont(theme));
-  if (dim.width === 0) return Math.max(30, width / 4);
-  return dim.width + MARGIN_TITLE_X1 + MARGIN_TITLE_X2;
+  const titleWidth = namespaceTitleWidth(measurer, theme, label);
+  if (titleWidth === 0) return Math.max(30, width / 4);
+  return titleWidth + MARGIN_TITLE_X1 + MARGIN_TITLE_X2;
 }
 
 /**
@@ -154,25 +221,22 @@ export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string,
  * own doc comment has the full mechanism (`USymbolFolder#asBig` draws at a
  * fixed local offset, independent of graphviz's title-table placement) and
  * the measured 333-matched-shape regression that confirmed it.
+ *
+ * cdd-T37 (M8, `pixexi-81-sete111`): jar's `title.drawU` block reads the
+ * SAME font `getDescent` measures with. Pre-fix `theme.fontSize` was the
+ * diagram default (14), disagreeing with `titleFont(theme).size`
+ * (`skinparam package { FontSize 40 }`); `finono-05-cuvu171` never
+ * overrides it, masking the gap. `text/@y` Δ31.389 -> 0.
  */
 export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, label: string): number {
-  return 2 + theme.fontSize - measurer.getDescent(titleFont(theme), label);
+  return 2 + titleFont(theme).size - measurer.getDescent(titleFont(theme), label);
 }
 
-// folderPathD / folderPolygonPoints / renderFolderPolygon moved to
-// class-namespace-folder-outline.ts (T7b, file-length split -- see that
-// module's own doc comment).
+// folderPathD / folderPolygonPoints / renderFolderPolygon / FolderTabPaint /
+// renderFolderTabShape all live in class-namespace-folder-outline.ts (T7b +
+// cdd-B8FU, file-length split -- see that module's own doc comment).
 
-/**
- * Renders one namespace/package's folder-tab outline + title, matching
- * `USymbolFolder#asBig`'s draw order: outline path, then the hline under
- * the tab (`ug.apply(UTranslate.dy(htitle)).draw(ULine.hline(...))`), then
- * the bold title text at local `(4, 2)` (baseline resolved the SAME
- * ascent-from-line-top way every other class text row is, `class-layout-
- * helpers.ts`'s `baselineOffset` convention) — jar-verified byte-exact
- * against `finono-05-cuvu171`'s `<path>`/`<line>`/`<text>` triple.
- */
-export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
+export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
   // G2 N18: `packageBorderThickness`/`packageFontSize`/`packageFontColor`
   // override the folder-specific defaults (`theme.ts`'s own doc comments) --
   // `fontSize` here previously read the DIAGRAM-WIDE `theme.fontSize`
@@ -180,32 +244,30 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // package-specific override (must match `titleFont`'s own resolution, or
   // `getHTitle`/`getWTitle`'s pre-computed `htitle`/`wtitle` would silently
   // disagree with the glyphs actually drawn here).
-  const strokeWidth = theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH;
-  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  const fontColor = titleFontColor(theme);
+  // cdd-B8FU: both tiers (the `<style>`/skinparam override AND the
+  // PACKAGE_STROKE_WIDTH default) get their own scaleK factor -- the
+  // "materialize the fallback" rule (`renderer-classifier-rows.ts
+  // #attributeFontSize`'s own doc comment) applies here identically.
+  const strokeWidth = (theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH) * theme.scaleK;
+  // CDD T18b: `theme.colors.graph.packageBorder` is optional now -- this IS
+  // a `...package_,group`-signature draw site, so it supplies the
+  // cluster's own unstyled default explicitly (see that constant's doc
+  // comment).
+  const border = theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT;
   // G2 N18: `skinparam style strictuml` selects the sharp-corner `UPolygon`
   // branch (`roundCorner=0`) instead of the default rounded-arc `UPath` --
   // `folderPolygonPoints`/`renderFolderPolygon`'s own doc comments.
   // G2 N59: `packageFillValue` maps a "no paint" background (skinparam
   // packagebackgroundcolor transparent/background) to jar's real literal
   // `fill="none"` -- see that helper's own doc comment.
-  const fill = packageFillValue(theme.colors.graph.packageBackground);
-  const outline =
-    theme.strictUml === true
-      ? renderFolderPolygon(
-          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-          theme.colors.graph.packageBorder,
-          strokeWidth,
-          fill,
-        )
-      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
-          stroke: theme.colors.graph.packageBorder,
-          strokeWidth,
-          fill,
-        });
-  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
-    stroke: theme.colors.graph.packageBorder,
+  const fill = namespaceFill(geo, theme);
+  const { outline, hline } = renderFolderTabShape(geo, {
+    strictUml: theme.strictUml,
+    border,
     strokeWidth,
+    fill,
+    roundCorner: PACKAGE_ROUND_CORNER * theme.scaleK,
+    marginX3: MARGIN_TITLE_X3 * theme.scaleK,
   });
   // G2 N18: jar's deterministic-text mode always emits `textLength`/
   // `lengthAdjust` on this title (matches every OTHER class text row,
@@ -217,15 +279,25 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
   // non-empty label (`getWTitle`'s own doc comment); the empty-label
   // fallback branch (`max(30, width/4)`) has no real text to stretch, so
   // textLength is omitted then, matching every other row's `row.width ===
-  // undefined` skip convention.
-  const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
-  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
-  });
+  // undefined` skip convention. cdd-B8FU: `geo.wtitle` is already scaled
+  // (`scaleNamespaceGeo`), so the margin literals subtracted back out need
+  // their own scaleK factor to stay consistent.
+  const titleTextLength =
+    geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
+  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
+  const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK;
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    {
+      x: titleX,
+      y: geo.y + geo.baselineOffset,
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontColor: titleFontColor(theme),
+      textLength: titleTextLength,
+    },
+    () => titleX,
+  );
   return outline + hline + label;
   // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
 }
@@ -250,27 +322,42 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: Theme): string {
  * value for RECT is unmodeled (same established gap `PACKAGE_ROUND_CORNER`
  * already carries for FOLDER, see this module's own header doc comment).
  */
-export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
-  const strokeWidth = theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH;
+export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
+  // cdd-B8FU: both tiers scaled -- see renderNamespaceFolder's identical
+  // citation.
+  const strokeWidth = (theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH) * theme.scaleK;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
-  const fill = packageFillValue(theme.colors.graph.packageBackground);
+  const fill = namespaceFill(geo, theme);
   const outline = rect(geo.x, geo.y, geo.width, geo.height, {
-    stroke: theme.colors.graph.packageBorder,
+    // CDD T18b: `...package_,group`-signature site -- see
+    // `PACKAGE_CLUSTER_BORDER_DEFAULT`'s doc comment.
+    stroke: theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT,
     strokeWidth,
     fill,
   });
   if (geo.label.length === 0) return outline;
-  const rawTextWidth = geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2;
+  // cdd-B8FU: geo.wtitle is already scaled -- see renderNamespaceFolder's
+  // identical titleTextLength citation.
+  const rawTextWidth = geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK;
   const posTitle = (geo.width - rawTextWidth) / 2;
-  const label = text(geo.x + posTitle, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    lengthAdjust: 'spacing' as const,
-    textLength: rawTextWidth,
-  });
+  // cdd-T26 residual round: each physical line is centred against
+  // `geo.width` independently -- the exact per-line generalization of this
+  // function's own pre-existing single-line `posTitle` formula (`(width -
+  // rawTextWidth) / 2`), matching `mucuxi-36-beku683`'s own citation above
+  // for a markup-free, single-line label.
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    {
+      x: geo.x + posTitle,
+      y: geo.y + geo.baselineOffset,
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontColor,
+      textLength: rawTextWidth,
+    },
+    (line) => geo.x + (geo.width - line.width) / 2,
+  );
   return outline + label;
 }
 
@@ -279,49 +366,82 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: Theme): string {
  * folder-tab shape `renderNamespaceFolder` draws for a non-empty package's
  * cluster wrapper -- but resolved through a DIFFERENT style chain
  * (`EntityImageEmptyPackage#getStyleSignature`'s own `...package_,title`
- * selector, NOT the package/cluster border-color skinparam surface
- * `renderNamespaceFolder` itself reads) -- jar-verified this reduces to the
- * SAME defaults every OTHER classifier box uses (`theme.colors.border`,
- * stroke-width 0.5, `theme.colors.graph.classBackground`), NOT the
- * (thicker, `packageBorderColor`-overridable) real package-cluster
- * defaults (`cocube-46-tusu692`'s own `skinparam packageBorderColor blue`
- * does NOT recolor its empty-package leaf, confirming these are genuinely
- * separate style chains, not a shared cascade). `skinparam
- * packageBorderThickness`/`packageBorder*` overrides are NOT modeled here
- * (unconfirmed whether they apply at all -- no corpus sample carries both;
- * named remainder if a future sample contradicts this).
+ * selector) than the cluster's own `...package_,group` one
+ * (`svek/Cluster.java:285-296`). `plantuml.skin:102-114` puts
+ * `BackGroundColor transparent` + `package { LineThickness 1.5; LineColor
+ * black }` under `group {}` ONLY, so the leaf inherits the generic element
+ * defaults instead: `theme.colors.border` (#181818), stroke-width 0.5,
+ * `theme.colors.graph.classBackground` (#F1F1F1) -- jar-verified on
+ * `gatula-10-bifu561` (`package foo {}`: `stroke:#181818;stroke-width:0.5`
+ * `fill="#F1F1F1"`).
+ *
+ * cdd-T12 (diagnosis A6 §2 / AC `xitobu-41-lame230`): a `<style> package {
+ * BackGroundColor ...; LineColor ...; LineThickness ... }` block DOES reach
+ * this leaf -- its `package` selector is a subset of BOTH signatures. Read
+ * from the per-element bucket (`theme.colors.elements.package`, populated
+ * only by a `<style>`/`skinparam package { ... }` block) rather than from
+ * `theme.colors.graph.packageBorder`/`packageBackground`, because those two
+ * fields are ALSO fed by the diagram-wide `skinparam
+ * packageBorderColor`/`packageBackgroundColor` keys and carry the CLUSTER's
+ * (`group`-signature) defaults, which are not this leaf's.
+ *
+ * CDD T18b (resolved -- was the open remainder above): `skinparam
+ * packageBorderColor blue` DOES recolor the empty-package leaf upstream
+ * (`cocube-46-tusu692`'s own leaf draws `stroke:#00F`) -- now routed as a
+ * MID-tier fallback, below the `<style> package {}` bucket above and
+ * above the leaf's own `#181818`/`classBackground` default, because
+ * `theme.colors.graph.packageBackground`/`packageBorder` are optional as
+ * of this task (`theme.ts` no longer bakes the CLUSTER's `'none'`/
+ * `'#000000'` into them -- see `theme-graph-colors-a.ts`'s doc comment).
+ * `gatula-10-bifu561` (no `packageBorderColor` set) still resolves
+ * `undefined` there and falls through to the leaf's own default,
+ * unaffected.
  */
-export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: Theme): string {
-  const strokeWidth = 0.5;
-  const border = theme.colors.border;
-  const fill = theme.colors.graph.classBackground;
+const EMPTY_PACKAGE_STROKE_WIDTH = 0.5;
+
+/** {@link renderEmptyPackageIcon}'s three `...package_,title`-signature
+ *  paint values -- see that function's own doc comment for the cascade. */
+function emptyPackagePaint(theme: ScaledTheme): { strokeWidth: number; border: string; fill: Paint } {
+  const pkg = theme.colors.elements?.package;
+  return {
+    // cdd-B8FU: both tiers scaled -- see renderNamespaceFolder's identical
+    // citation.
+    strokeWidth: (pkg?.lineThickness ?? EMPTY_PACKAGE_STROKE_WIDTH) * theme.scaleK,
+    border: typeof pkg?.border === 'string' ? pkg.border : (theme.colors.graph.packageBorder ?? theme.colors.border),
+    fill:
+      typeof pkg?.background === 'string'
+        ? pkg.background
+        : (theme.colors.graph.packageBackground ?? theme.colors.graph.classBackground),
+  };
+}
+
+export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
+  const { strokeWidth, border, fill } = emptyPackagePaint(theme);
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
-  const outline =
-    theme.strictUml === true
-      ? renderFolderPolygon(
-          folderPolygonPoints(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height),
-          border,
-          strokeWidth,
-          fill,
-        )
-      : path(folderPathD(geo.x, geo.y, geo.wtitle, geo.htitle, geo.width, geo.height, PACKAGE_ROUND_CORNER), {
-          stroke: border,
-          strokeWidth,
-          fill,
-        });
-  const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + MARGIN_TITLE_X3, geo.y + geo.htitle, {
-    stroke: border,
+  const { outline, hline } = renderFolderTabShape(geo, {
+    strictUml: theme.strictUml,
+    border,
     strokeWidth,
+    fill,
+    roundCorner: PACKAGE_ROUND_CORNER * theme.scaleK,
+    marginX3: MARGIN_TITLE_X3 * theme.scaleK,
   });
-  const titleTextLength = geo.label.length > 0 ? geo.wtitle - MARGIN_TITLE_X1 - MARGIN_TITLE_X2 : undefined;
-  const label = text(geo.x + 4, geo.y + geo.baselineOffset, geo.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fontWeight: '700',
-    fill: fontColor,
-    ...(titleTextLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: titleTextLength } : {}),
-  });
+  const titleTextLength =
+    geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
+  const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK;
+  const label = renderNamespaceTitleAuto(
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    {
+      x: titleX,
+      y: geo.y + geo.baselineOffset,
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fontColor,
+      textLength: titleTextLength,
+    },
+    () => titleX,
+  );
   return outline + hline + label;
 }
 

@@ -53,14 +53,21 @@
  * `<back:#FF0000-#00FF00>` / `<back:#red>` / `<b:#FF0000>` all raw —
  * ubrex wins, and that is what `ACTIVATION_SOURCE` below encodes.
  *
- * The captured color VALUE is consumed but not yet applied: upstream's
- * `AddStyle(style, extendedColor)` also calls
- * `FontConfiguration#changeExtendedColor`, but this port's
- * `FontConfiguration` (`shape/UText.ts`) has no extendedColor field yet —
- * a driver-side rendering concern (`DriverTextSvg`), deliberately deferred
- * per `UText.ts`'s own doc comment. Sizing (the B6 deliverable) is
- * unaffected: colors never change text metrics; what matters is that the
- * tag characters are consumed and the content measured plain.
+ * cdd-B7FU-R1 closes the last gap: the colour arm now CAPTURES its value
+ * (upstream's ubrex `〶$XC=` named group) and `getExtendedColor(match)`
+ * (`CommandCreoleStyle.java:91-99`) hands it to `AddStyle(style,
+ * extendedColor)`, which applies it via `FontConfiguration
+ * #changeExtendedColor`. The capture is gated on `tryExtendedColor`
+ * exactly as upstream gates it — true for the legacy/legacyEol factories
+ * (`createLegacy`/`createLegacyEol`, java:72-82, both pass
+ * `style.canHaveExtendedColor()`), false for `createCreole` (java:68-71),
+ * so `__text__` can never carry one. Upstream resolves the token through
+ * `HColorSet.instance().getColorOrWhite(...)`; this port stores the RAW
+ * token on the configuration and resolves at SVG-emission time, per
+ * `paint.ts`'s own documented "stored verbatim, interpreted late" design
+ * (`$XC` for BACKCOLOR spans the whole gradient token, `FontStyle.java:
+ * 128-133`, so a `<back:red|blue>` value survives intact to the driver).
+ * Sizing is unaffected: colors never change text metrics.
  */
 import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 import type { Command, StripeBuilder } from './Command.js';
@@ -69,6 +76,10 @@ import { addFontStyle } from './AddStyle.js';
 interface MatchResult {
   readonly fullLength: number;
   readonly inner: string;
+  /** The activation tag's captured `$XC` colour token, `undefined` when the
+   *  optional arm did not participate (upstream: `matcher.findValuesByKey
+   *  ("XC")` returning an empty list, `CommandCreoleStyle.java:92-95`). */
+  readonly extendedColor?: string;
 }
 
 /** Creole form: literal `syntax` + shortest 1+-char run up to the NEXT
@@ -87,13 +98,24 @@ function matchLegacy(activation: RegExp, deactivation: RegExp, line: string, pos
   const openMatch = activation.exec(line.slice(pos));
   if (openMatch === null || openMatch.index !== 0) return null;
   const afterOpen = pos + openMatch[0].length;
+  const xc = extendedColorField(openMatch);
   for (let i = afterOpen; i <= line.length; i++) {
     const closeMatch = deactivation.exec(line.slice(i));
     if (closeMatch !== null && closeMatch.index === 0) {
-      return { inner: line.slice(afterOpen, i), fullLength: i + closeMatch[0].length - pos };
+      return { inner: line.slice(afterOpen, i), fullLength: i + closeMatch[0].length - pos, ...xc };
     }
   }
   return null;
+}
+
+/** Upstream `CommandCreoleStyle#getExtendedColor(UMatcher)`'s capture half
+ *  (java:91-99): the activation pattern's single `$XC` group, present only
+ *  for a `canHaveExtendedColor` style whose optional `:colour` arm actually
+ *  participated. Spread into the result so the field stays ABSENT (not
+ *  `undefined`-valued) for every colourless match. */
+function extendedColorField(openMatch: RegExpExecArray): { extendedColor?: string } {
+  const captured = openMatch[1];
+  return captured === undefined ? {} : { extendedColor: captured };
 }
 
 /** LegacyEol form: `activation` + 1+ chars to end of line, greedy, no
@@ -103,14 +125,36 @@ function matchLegacyEol(activation: RegExp, line: string, pos: number): MatchRes
   if (openMatch === null || openMatch.index !== 0) return null;
   const afterOpen = pos + openMatch[0].length;
   if (afterOpen >= line.length) return null;
-  return { inner: line.slice(afterOpen), fullLength: line.length - pos };
+  return { inner: line.slice(afterOpen), fullLength: line.length - pos, ...extendedColorField(openMatch) };
 }
 
-function applyStyleAndRecurse(style: FontStyle, inner: string, stripe: StripeBuilder): void {
+/** Upstream `CommandCreoleStyle#executeAndAdvance`'s body (java:101-116):
+ *  `new AddStyle(style, getExtendedColor(matcher)).apply(fc1)`, recurse,
+ *  restore. `tryExtendedColor` is the ctor flag upstream sets from
+ *  `style.canHaveExtendedColor()` for the two legacy factories and to
+ *  `false` for `createCreole` (java:68-82) — with it false the captured
+ *  value is discarded, exactly as `getExtendedColor` returns `null`. */
+function applyStyleAndRecurse(
+  style: FontStyle,
+  match: MatchResult,
+  stripe: StripeBuilder,
+  tryExtendedColor: boolean,
+): void {
   const saved: FontConfiguration = stripe.getActualFontConfiguration();
-  stripe.setActualFontConfiguration(addFontStyle(saved, style));
-  stripe.analyzeAndAddInline(inner);
+  const extendedColor = tryExtendedColor ? match.extendedColor : undefined;
+  stripe.setActualFontConfiguration(addFontStyle(saved, style, extendedColor));
+  stripe.analyzeAndAddInline(match.inner);
   stripe.setActualFontConfiguration(saved);
+}
+
+/** Upstream `FontStyle#canHaveExtendedColor` (`FontStyle.java:191-205`). */
+function canHaveExtendedColor(style: FontStyle): boolean {
+  return (
+    style === FontStyle.UNDERLINE ||
+    style === FontStyle.WAVE ||
+    style === FontStyle.BACKCOLOR ||
+    style === FontStyle.STRIKE
+  );
 }
 
 /** Upstream: `FontStyle#getUbrexCreoleSyntax` — the pure-Creole
@@ -131,8 +175,13 @@ const CREOLE_SYNTAX: Partial<Record<FontStyle, string>> = {
  *  additionally allows a gradient second half `〇?〘「-\|/」【〇{6}hex┇〇+〴w】〙`
  *  = `(?:[-\\|/](?:hex6|\w+))?` — NO leading `#` on the second half (see
  *  module doc comment's jar probe). Regex SOURCE strings (not literals) per
- *  this project's complexity-hook workaround for `<`/`>` in a pattern. */
-const EXTENDED_COLOR_ARM = '(?::(?:#[0-9a-fA-F]{6}|\\w+))?';
+ *  this project's complexity-hook workaround for `<`/`>` in a pattern.
+ *
+ *  cdd-B7FU-R1: the colour half is now a CAPTURING group — upstream's
+ *  `〶$XC=` names it, and `getExtendedColor(matcher)` reads it back. Every
+ *  activation pattern below has AT MOST this one capturing group, so
+ *  `exec(...)[1]` is unambiguously `$XC` for all five styles. */
+const EXTENDED_COLOR_ARM = '(?::(#[0-9a-fA-F]{6}|\\w+))?';
 
 const ACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.BOLD]: '^<[bB]>',
@@ -140,7 +189,16 @@ const ACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.UNDERLINE]: `^<[uU]${EXTENDED_COLOR_ARM}>`,
   [FontStyle.STRIKE]: `^<(?:strike|STRIKE|s|S|del|DEL)${EXTENDED_COLOR_ARM}>`,
   [FontStyle.WAVE]: `^<[wW]${EXTENDED_COLOR_ARM}>`,
-  [FontStyle.BACKCOLOR]: '^<[bB][aA][cC][kK](?::(?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?)?>',
+  // The capture spans the WHOLE colour token, gradient half included:
+  // upstream's `$XC=〘 【#hex6┇\w+】 〇?〘「-\|/」【hex6┇\w+】〙 〙` wraps both
+  // halves in the ONE named group (`FontStyle.java:128-133`), so
+  // `<back:red|blue>` hands `HColorSet#getColorOrWhite` the gradient token.
+  [FontStyle.BACKCOLOR]: '^<[bB][aA][cC][kK](?::((?:#[0-9a-fA-F]{6}|\\w+)(?:[-\\\\|/](?:[0-9a-fA-F]{6}|\\w+))?))?>',
+  // cdd-T25: `FontStyle.java:114-115`'s ubrex activation pattern
+  // (`<「pP」「lL」「aA」「iI」「nN」>`) -- no `canHaveExtendedColor` arm (PLAIN
+  // is absent from that method's list, `FontStyle.java:191-205`), matching
+  // BOLD/ITALIC's plain `<tag>` shape.
+  [FontStyle.PLAIN]: '^<[pP][lL][aA][iI][nN]>',
 };
 
 const DEACTIVATION_SOURCE: Record<string, string> = {
@@ -150,6 +208,9 @@ const DEACTIVATION_SOURCE: Record<string, string> = {
   [FontStyle.STRIKE]: '^</(?:strike|STRIKE|s|S|del|DEL)>',
   [FontStyle.WAVE]: '^</[wW]>',
   [FontStyle.BACKCOLOR]: '^</[bB][aA][cC][kK]>',
+  // cdd-T25: `FontStyle.java:142-143`'s ubrex deactivation pattern
+  // (`</「pP」「lL」「aA」「iI」「nN」>`).
+  [FontStyle.PLAIN]: '^</[pP][lL][aA][iI][nN]>',
 };
 
 /** Upstream: `FontStyle#starters(isCreolePure)`, the `false` (legacy)
@@ -165,6 +226,8 @@ const LEGACY_STARTERS: Record<string, readonly string[]> = {
   [FontStyle.STRIKE]: ['<s', '<S', '<d', '<D'],
   [FontStyle.WAVE]: ['<w'],
   [FontStyle.BACKCOLOR]: ['<b', '<B'],
+  // cdd-T25: `FontStyle.java:47-48` -- `Arrays.asList("<p", "<P")`.
+  [FontStyle.PLAIN]: ['<p', '<P'],
 };
 
 function createCreoleForm(style: FontStyle): Command {
@@ -179,7 +242,8 @@ function createCreoleForm(style: FontStyle): Command {
     executeAndAdvance(line, pos, stripe) {
       const m = matchCreole(syntax, line, pos);
       if (m === null) return 0;
-      applyStyleAndRecurse(style, m.inner, stripe);
+      // `createCreole` passes `tryExtendedColor = false` (java:68-71).
+      applyStyleAndRecurse(style, m, stripe, false);
       return m.fullLength;
     },
   };
@@ -197,7 +261,7 @@ function createLegacyForm(style: FontStyle): Command {
     executeAndAdvance(line, pos, stripe) {
       const m = matchLegacy(activation, deactivation, line, pos);
       if (m === null) return 0;
-      applyStyleAndRecurse(style, m.inner, stripe);
+      applyStyleAndRecurse(style, m, stripe, canHaveExtendedColor(style));
       return m.fullLength;
     },
   };
@@ -214,7 +278,7 @@ function createLegacyEolForm(style: FontStyle): Command {
     executeAndAdvance(line, pos, stripe) {
       const m = matchLegacyEol(activation, line, pos);
       if (m === null) return 0;
-      applyStyleAndRecurse(style, m.inner, stripe);
+      applyStyleAndRecurse(style, m, stripe, canHaveExtendedColor(style));
       return m.fullLength;
     },
   };

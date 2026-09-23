@@ -6,9 +6,21 @@
  * (java :92-159) — tried IN ORDER: `SECTION_HEADER_PATTERN` (`^--([^-]*)--$`),
  * `SECTION_TITLE_PATTERN` (`^==([^=]*)==$`), `SECTION_SEPARATOR_PATTERN`
  * (`^===*==$`), `DOUBLE_DOT_DELIMITED_LINE` (`^\.\.([^.]*)\.\.$`),
- * [FULL-mode-only `*`/`#` bullet-list patterns — not ported, see
- * `StripeStyleType.ts`'s doc comment], `EQUALS_HEADING_PATTERN`
- * (`^(=+)(.+)$`), else NORMAL.
+ * the three FULL-mode-only list patterns (`ASTERISK_PREFIXED_LINE_PATTERN`
+ * `^(\*+)([^*]+(?:[^*]|\*\*[^*]+\*\*)*)$`, `ASTERISK_HEADER_LINE_PATTERN`
+ * `^(\*+)([%s].+)$`, `HASH_HEADING_PATTERN` `^(#+)(.+)$` over
+ * `CharHidder.hide(line)`), `EQUALS_HEADING_PATTERN` (`^(=+)(.+)$`), else
+ * NORMAL.
+ *
+ * cdd-T28: the three list branches ARE ported now (they were the last
+ * unported part of this cascade). Each is gated on `mode ===
+ * CreoleMode.FULL` exactly as upstream gates them (java:119,127,136-137) —
+ * `CreoleMode.SIMPLE_LINE`, which every class member row uses
+ * (`MethodsOrFieldsArea.java:255,264` -> `create8`), must keep drawing a
+ * leading `*` or `#` as literal text, so the parameter is REQUIRED to
+ * reach this behaviour and defaults to the FULL the description/chrome
+ * paths pass. `order` is the delimiter run's length MINUS ONE in all
+ * three (java:122,130,140), i.e. nesting depth from 0.
  *
  * G1 I9b's `classifySeparatorLine` (`EntityImageDescriptionSupport.ts`,
  * pre-E2r) already mirrored the FIRST FOUR patterns' EMPTY-capture case only
@@ -60,9 +72,13 @@
  * function lives in a different layer and isn't exported).
  */
 
+import { CreoleMode } from '../CreoleMode.js';
+
 export type StripeClassification =
   | { readonly type: 'HORIZONTAL_LINE'; readonly style: '-' | '=' | '.' }
   | { readonly type: 'HEADING'; readonly content: string; readonly order: number }
+  | { readonly type: 'LIST_WITHOUT_NUMBER'; readonly content: string; readonly order: number }
+  | { readonly type: 'LIST_WITH_NUMBER'; readonly content: string; readonly order: number }
   | { readonly type: 'NORMAL'; readonly content: string }
   | { readonly type: 'LITERAL'; readonly content: string };
 
@@ -71,6 +87,16 @@ const SECTION_TITLE_PATTERN = /^==([^=]*)==$/;
 const SECTION_SEPARATOR_PATTERN = /^=+$/;
 const DOUBLE_DOT_PATTERN = /^\.\.([^.]*)\.\.$/;
 const EQUALS_HEADING_PATTERN = /^(=+)(.+)$/;
+/** java:70 — `^(\*+)([^*]+(?:[^*]|\*\*[^*]+\*\*)*)$`: a `*` run followed by
+ *  content that may itself contain `**bold**` runs but no lone `*`. */
+const ASTERISK_PREFIXED_LINE_PATTERN = /^(\*+)([^*]+(?:[^*]|\*\*[^*]+\*\*)*)$/;
+/** java:71 — `^(\*+)([%s].+)$`; `%s` is upstream's whitespace macro
+ *  (`Pattern2#transform`), so the content must START with whitespace. This
+ *  is the arm that catches `* **bold**`, which the previous pattern's
+ *  `[^*]+` first group cannot. */
+const ASTERISK_HEADER_LINE_PATTERN = /^(\*+)(\s.+)$/;
+/** java:72 — `^(#+)(.+)$`, matched against `CharHidder.hide(line)`. */
+const HASH_HEADING_PATTERN = /^(#+)(.+)$/;
 
 /** Upstream: `StringUtils.trin` — trims only characters whose code point is
  *  <= U+0020, from both ends (NOT JS's `.trim()`, which also strips U+00A0
@@ -95,7 +121,43 @@ function bareOrLiteral(captured: string, style: '-' | '=' | '.', fullLine: strin
   return captured === '' ? { type: 'HORIZONTAL_LINE', style } : { type: 'LITERAL', content: fullLine };
 }
 
-export function classifyStripeLine(line: string): StripeClassification {
+/** `CharHidder.hide`/`unhide` (`utils/CharHidder.java`) — upstream hides
+ *  the characters that would otherwise be re-read as markup while the
+ *  `#`-heading pattern runs, then unhides the captures (java:138,140-141).
+ *  This port's `CharHidder` is not ported and the pattern below reads only
+ *  a leading `#` run plus the remainder, which no hidden character can
+ *  change: `hide` rewrites `\\#`-escaped and `<U+…>`-style sequences, none
+ *  of which can create or destroy a LEADING `#`. Documented rather than
+ *  silently skipped. */
+function listClassification(line: string, mode: CreoleMode): StripeClassification | null {
+  if (mode !== CreoleMode.FULL) return null;
+
+  // java:119-126.
+  const bullet = ASTERISK_PREFIXED_LINE_PATTERN.exec(line);
+  if (bullet !== null) {
+    return { type: 'LIST_WITHOUT_NUMBER', content: trimHeadingContent(bullet[2]!), order: bullet[1]!.length - 1 };
+  }
+
+  // java:127-135 — the SECOND asterisk arm, a distinct pattern upstream
+  // tries only after the first fails; both yield LIST_WITHOUT_NUMBER.
+  const bulletHeader = ASTERISK_HEADER_LINE_PATTERN.exec(line);
+  if (bulletHeader !== null) {
+    return {
+      type: 'LIST_WITHOUT_NUMBER',
+      content: trimHeadingContent(bulletHeader[2]!),
+      order: bulletHeader[1]!.length - 1,
+    };
+  }
+
+  // java:136-144.
+  const numbered = HASH_HEADING_PATTERN.exec(line);
+  if (numbered !== null) {
+    return { type: 'LIST_WITH_NUMBER', content: trimHeadingContent(numbered[2]!), order: numbered[1]!.length - 1 };
+  }
+  return null;
+}
+
+export function classifyStripeLine(line: string, mode: CreoleMode = CreoleMode.FULL): StripeClassification {
   const header = SECTION_HEADER_PATTERN.exec(line);
   if (header !== null) return bareOrLiteral(header[1]!, '-', line);
 
@@ -106,6 +168,9 @@ export function classifyStripeLine(line: string): StripeClassification {
 
   const dots = DOUBLE_DOT_PATTERN.exec(line);
   if (dots !== null) return bareOrLiteral(dots[1]!, '.', line);
+
+  const list = listClassification(line, mode);
+  if (list !== null) return list;
 
   const heading = EQUALS_HEADING_PATTERN.exec(line);
   if (heading !== null) {

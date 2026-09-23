@@ -5,8 +5,7 @@
  * project's 500-line cap, "new code in new modules" per CLAUDE.md's own
  * engineering-constraints note) — mirrors the existing `renderer-
  * arrowhead.ts`/`renderer-group.ts`/`renderer-note.ts`/`renderer-url.ts`
- * split precedent for a renderer sub-concern; pure move for the
- * pre-existing pieces (`classifierFill`/`renderRow`/`renderBadge`/
+ * split precedent; pure move for the pre-existing pieces (`classifierFill`/`renderRow`/`renderBadge`/
  * `mapColumnDividerEntries`), no behavior change (this note describes
  * the original G2 split -- see `MAP_JSON_DIVIDER_STROKE_WIDTH`'s own doc
  * comment for the G3/O3 map/json divider fix, which DID change behavior).
@@ -19,89 +18,44 @@
 import { roundedTopRectD } from '../../core/svg-path-builder.js';
 import type { ClassifierGeo, JsonBodyItem } from './layout.js';
 import { ROW_TEXT_LEFT_MARGIN } from './layout.js';
-import type { Theme } from '../../core/theme.js';
+import type { ScaledTheme } from './class-scale-geo.js';
 import { rect, line, path } from '../../core/svg.js';
 import {} from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
-import { MAP_CELL_MARGIN_X } from './class-map-sizing.js';
+import { mapColumnDividerEntries } from './renderer-classifier-map-dividers.js';
+import { protectedInnerBox } from './class-dot-graph.js';
 import { hasBadge } from './class-badge.js';
-import { renderBadge, renderGenericTag } from './renderer-classifier-badge-tag.js';
-import { renderVisibilityIcon, renderVisibilityUrlBackground, visibilityIconOriginY } from './class-visibility-icon.js';
+import { renderBadge, renderGenericTag, renderBadgeSpriteImage } from './renderer-classifier-badge-tag.js';
+import { renderVisibilityIcon, renderVisibilityUrlBackground } from './class-visibility-icon.js';
 import { wrapClassifierBody, type UrlTaggedPrimitive } from './renderer-url.js';
 import {} from '../../core/svg.js';
 import {} from '../../core/klimt/shape/UText.js';
 import type {} from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import {} from './renderer-openiconic.js';
-import { renderEnhancedBody } from './renderer-body-enhanced.js';
+import { buildEnhancedBodyPrimitives } from './renderer-body-enhanced.js';
 import { classShadowFilterUrl } from './class-shadow.js';
 import {
   resolveElementHeaderBackground,
   classifierFill,
   classBorder,
+  classBorderLine,
   classBorderStrokeWidth,
+  classBorderStrokeDasharray,
   MAP_JSON_DIVIDER_STROKE_WIDTH,
 } from './renderer-classifier-colors.js';
-import { renderRow, renderRowText, attributeFontSize } from './renderer-classifier-rows.js';
+import { renderRow, renderRowText, wrappedVisibilityIconOriginY } from './renderer-classifier-rows.js';
+// CDD T20 (E1): see that module's own doc comment (500-line-cap split).
+import {
+  CLASS_HEADER_SPLIT_KINDS,
+  resolveClassHeaderFill,
+  classHeaderSplitRects,
+} from './renderer-classifier-header-split.js';
 export { renderRow };
 
 // ---------------------------------------------------------------------------
 // Classifier kind → fill color
 // ---------------------------------------------------------------------------
-
-/**
- * Map-only: the column-B vertical divider per non-linked data row
- * (`TextBlockMap#drawU`'s per-row `ULine.vline`, drawn immediately after
- * that row's key+value text). Returns Y-tagged entries (NOT a joined
- * string, G3/O3) so `buildBodyPrimitives` can merge them into its own
- * stable Y-sort at the CORRECT interleaved position -- jar draws
- * `[hline, key, value, vline]` per row, never batching every vline after
- * every row (this port's pre-O3 bug: the old string-returning form was
- * appended as one extra primitive at the very end of `renderClassifierBox`,
- * after every row's own text). Each entry's sort `y` is deliberately the
- * row's OWN text baseline -- identical to the value text primitive's own
- * `y` -- so the stable sort preserves jar's `[key, value, vline]` relative
- * order for that row without needing a secondary sort key (both were
- * pushed into `buildBodyPrimitives`' array via the SAME `memberRows` loop
- * iteration order, key then value, before this function's own entries are
- * appended).
- *
- * Row/column geometry is reconstructed from rows[]/dividerYs alone (no
- * ClassifierGeo schema change — see class-map-sizing.ts#buildMapRowGeo for
- * why): every data row contributes exactly two rows[] entries (key, value)
- * after the header entries (those with y below dividerYs[0]); a linked
- * row's value entry has empty text and is skipped (upstream never draws
- * that cell either).
- *
- * NOT used for `json` — a json entries area can nest arbitrarily deep, so it
- * does not fit the "exactly two rows[] entries per data row" invariant this
- * relies on; see class-json-sizing.ts's file doc for the documented
- * rendering simplification (row/column TEXT is exact at every depth, only
- * the vertical divider lines are omitted).
- */
-function mapColumnDividerEntries(geo: ClassifierGeo, theme: Theme): Array<{ y: number; item: UrlTaggedPrimitive }> {
-  if (geo.kind !== 'map' || geo.dividerYs.length === 0) return [];
-  const dataRows = geo.rows.filter((r) => r.y >= geo.dividerYs[0]!);
-  const entries: Array<{ y: number; item: UrlTaggedPrimitive }> = [];
-  for (let i = 0; i < geo.dividerYs.length; i++) {
-    const value = dataRows[2 * i + 1];
-    if (value === undefined || value.text === '') continue; // linked/point row
-    const top = geo.dividerYs[i]!;
-    const bottom = geo.dividerYs[i + 1] ?? geo.height;
-    const dividerX = geo.x + value.indent - MAP_CELL_MARGIN_X;
-    entries.push({
-      y: value.y,
-      item: {
-        url: geo.url,
-        body: line(dividerX, geo.y + top, dividerX, geo.y + bottom, {
-          stroke: classBorder(geo, theme),
-          strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
-        }),
-      },
-    });
-  }
-  return entries;
-}
 
 /**
  * Builds the header bundle (rect + badge + stacked stereotype row(s) +
@@ -137,7 +91,7 @@ function mapColumnDividerEntries(geo: ClassifierGeo, theme: Theme): Array<{ y: n
  * combination (no corpus fixture combines `hide fields` with a `.header`
  * BackgroundColor override) and is left undrawn rather than guessed.
  */
-function headerBackgroundPath(geo: ClassifierGeo, theme: Theme, roundCorner: number, fill: string): string {
+function headerBackgroundPath(geo: ClassifierGeo, theme: ScaledTheme, roundCorner: number, fill: string): string {
   const headerHeight = geo.dividerYs[0];
   if (headerHeight === undefined) return '';
   const r = roundCorner / 2;
@@ -146,33 +100,88 @@ function headerBackgroundPath(geo: ClassifierGeo, theme: Theme, roundCorner: num
   const x1 = geo.x + geo.width;
   const y1 = geo.y + headerHeight;
   const d = roundedTopRectD(x0, y0, x1, y1, r);
-  return path(d, { fill, stroke: classBorder(geo, theme), strokeWidth: classBorderStrokeWidth(geo, theme) });
+  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  return path(d, {
+    fill,
+    stroke: classBorder(geo, theme),
+    strokeWidth: classBorderStrokeWidth(geo, theme),
+    ...(dasharray !== undefined ? { strokeDasharray: dasharray } : {}),
+  });
 }
 
-function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimitive {
+/**
+ * CDD T20 (E1): the outer box's shape -- either the plain single rect
+ * (the pre-T20, and still object/map/json/roundCorner==0, form) or the
+ * class-family four-shape header split (`classHeaderSplitRects`'s own doc
+ * comment), gated on {@link CLASS_HEADER_SPLIT_KINDS} and a resolved
+ * header fill. `roundCorner == 0` is deliberately left on the plain-rect
+ * path -- `EntityImageClass.java:198-206`'s sibling TWO-shape branch (no
+ * `rect3`, header rect stroked with the BORDER colour not the header
+ * colour) is a genuine, DIFFERENT shape this task's corpus reach does not
+ * exercise (no sampled fixture combines a header split with `RoundCorner
+ * 0`) -- left undrawn rather than guessed, same precedent `headerBackground
+ * Path`'s own doc comment already established for a suppressed-fields
+ * object/map/json.
+ */
+// mission skin-file-loading (deferred D3 item): `geo.shadowing`'s own doc
+// comment -- the outer bordered rect is the ONE shape jar's
+// `EntityImageClass`/`Object`/`Map`/`Json` all draw the shadow on
+// (`rect.setDeltaShadow(shadow)`), matching state's identical
+// `renderer-box.ts` precedent. Returns a plain variable (never a
+// spread-ternary object literal -- `buildSectionRows`'s own doc comment
+// names that construct as a lizard NLOC/CCN mis-parse trap) since `rect`'s
+// `attrs()` already drops an `undefined` `filter` cleanly.
+function boxShadowFilter(geo: ClassifierGeo): string | undefined {
+  return geo.shadowing !== undefined && geo.shadowing > 0 ? classShadowFilterUrl() : undefined;
+}
+
+function buildBoxShape(geo: ClassifierGeo, theme: ScaledTheme, roundCorner: number): string {
+  const bodyFill = classifierFill(geo, theme);
+  const border = classBorder(geo, theme);
+  const strokeWidth = classBorderStrokeWidth(geo, theme);
+  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  const filter = boxShadowFilter(geo);
+  const headerFill =
+    roundCorner !== 0 && CLASS_HEADER_SPLIT_KINDS.has(geo.kind)
+      ? resolveClassHeaderFill(geo, bodyFill, theme)
+      : undefined;
+  if (headerFill !== undefined) {
+    return classHeaderSplitRects({ geo, roundCorner, bodyFill, border, strokeWidth, dasharray, headerFill, filter });
+  }
+  return rect(geo.x, geo.y, geo.width, geo.height, {
+    fill: bodyFill,
+    stroke: border,
+    strokeWidth,
+    rx: roundCorner / 2,
+    ry: roundCorner / 2,
+    ...(dasharray !== undefined ? { strokeDasharray: dasharray } : {}),
+    ...(filter !== undefined ? { filter } : {}),
+  });
+}
+
+function buildHeaderPrimitive(geo: ClassifierGeo, theme: ScaledTheme): UrlTaggedPrimitive {
+  // #lizard forgives(nloc,cyclomatic_complexity) -- pre-existing lizard
+  // span mis-detection (confirmed against the pre-T20 HEAD revision of
+  // this SAME file: lizard already mis-bounds this function there too,
+  // `buildHeaderPrimitive@153-176` instead of its real 153-207 -- the
+  // brace-counter bleeds past this function's own closing `}` into later
+  // code, `skinparam-style-block.ts#normalizeStyleInput`'s own identical
+  // precedent). CDD T20 changed exactly ONE line inside this function's
+  // real body (`rect(...)` -> `buildBoxShape(...)`), which REMOVES
+  // branches (moved to that new function), not adds them.
   // G2 N37: `RoundCorner` -- tag cascade wins over the ancestor cascade,
   // which wins over the pre-existing hardcoded jar-default 5 (`rx`/`ry` =
   // roundCorner / 2, `URectangle.ts#build().rounded()`'s halving
   // convention) -- see `theme.ts#classCascadeRoundCorner`'s own doc
   // comment. Zero behavior change for every classifier with no `<style>`
   // RoundCorner declaration.
+  // cdd-T29 R2: `rx`/`ry` scale like any coordinate (`SvgGraphics.java:
+  // 466-472`) -- scaled ONCE here so downstream readers need no changes.
   const roundCorner =
-    resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner ??
-    theme.colors.graph.classCascadeRoundCorner ??
-    5;
-  let body = rect(geo.x, geo.y, geo.width, geo.height, {
-    fill: classifierFill(geo, theme),
-    stroke: classBorder(geo, theme),
-    strokeWidth: classBorderStrokeWidth(geo, theme),
-    rx: roundCorner / 2,
-    ry: roundCorner / 2,
-    // mission skin-file-loading (deferred D3 item): `geo.shadowing`'s own
-    // doc comment -- the outer bordered rect is the ONE shape jar's
-    // `EntityImageClass`/`Object`/`Map`/`Json` all draw the shadow on
-    // (`rect.setDeltaShadow(shadow)`), matching state's identical
-    // `renderer-box.ts` precedent.
-    ...(geo.shadowing !== undefined && geo.shadowing > 0 ? { filter: classShadowFilterUrl() } : {}),
-  });
+    (resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.roundCorner ??
+      theme.colors.graph.classCascadeRoundCorner ??
+      5) * theme.scaleK;
+  let body = buildBoxShape(geo, theme, roundCorner);
   // G3/O4: `<style> <sname> { header { BackgroundColor } } }` -- object/
   // map/json only (`headerBackgroundPath`'s own doc comment); drawn ONLY
   // when it genuinely differs from the body's own fill (jar's own
@@ -184,10 +193,13 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
       body += headerBackgroundPath(geo, theme, roundCorner, headerBg);
     }
   }
-  // G2 N58 item 40: `skinparam style strictuml` unconditionally suppresses
-  // the circled-character badge (`CucaDiagram#showPortion`'s own doc comment
-  // on the measurement side, class-layout-helpers.ts#measureGenericClassifier).
-  if (geo.hideCircle !== true && hasBadge(geo.kind) && theme.strictUml !== true) body += renderBadge(geo, theme);
+  // G2 N58 item 40: `strictuml` suppresses the badge. CDD B7FU-R2 (c-b): a resolved sprite badge wins over the default one.
+  if (geo.hideCircle !== true && hasBadge(geo.kind) && theme.strictUml !== true) {
+    body +=
+      geo.badgeSpriteImage !== undefined
+        ? renderBadgeSpriteImage(geo, geo.badgeSpriteImage, theme.scaleK)
+        : renderBadge(geo, theme);
+  }
   const headerRowCount = geo.headerRowCount ?? 1;
   // G2 N64 item 45: `nameRowCount` (new field, default 1) generalizes the
   // pre-existing "exactly one trailing name row" assumption to N trailing
@@ -196,13 +208,105 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
   // rows (`isStereoLabelRow`); every name-line row (including line 2+)
   // gets the SAME treatment line 1 always had. Reduces to the OLD
   // `nameRowIndex = headerRowCount - 1` single-row check exactly when
-  // `nameRowCount` is absent (default 1).
+  // `nameRowCount` is absent (default 1). CDD B7FU-R2 (c): a pure-sprite
+  // row's text fallback is '' -- `row.atoms` (when set) is still drawable.
   const firstNameRowIndex = headerRowCount - (geo.nameRowCount ?? 1);
   geo.rows.slice(0, headerRowCount).forEach((row, i) => {
-    if (row.text !== '') body += renderRowText(geo, row, theme, true, i < firstNameRowIndex);
+    if (row.text !== '' || row.atoms !== undefined) body += renderRowText(geo, row, theme, true, i < firstNameRowIndex);
   });
   if (geo.genericTag !== undefined) body += renderGenericTag(geo, geo.genericTag, theme);
   return { url: geo.url, body };
+}
+
+/**
+ * One section-divider `<line>` -- split out of {@link buildBodyPrimitives}
+ * purely to keep that function under the project's NLOC cap (pure
+ * extraction, no behavior change). G3/O3: map/json use a DIFFERENT
+ * drawing convention (full box width, fixed stroke-width 1, never
+ * `classBorderStrokeWidth`/`classBorderStrokeDasharray` -- {@link
+ * MAP_JSON_DIVIDER_STROKE_WIDTH}'s own doc comment: `TextBlockMap`/
+ * `TextBlockCucaJSon` bypass the classifier's own border-stroke UGraphic
+ * context entirely, so a `line.dashed`/`.bold` override never reaches
+ * them either). CDD T20 (M1): class/interface/enum's OWN dividers DO draw
+ * through that context, so they inherit it -- jar-verified `sosono-24-
+ * vuro518`'s divider lines.
+ */
+function dividerLine(geo: ClassifierGeo, theme: ScaledTheme, divY: number, isMapOrJsonDivider: boolean): string {
+  if (isMapOrJsonDivider) {
+    return line(geo.x, geo.y + divY, geo.x + geo.width, geo.y + divY, {
+      stroke: classBorderLine(geo, theme),
+      strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH * theme.scaleK,
+    });
+  }
+  const dasharray = classBorderStrokeDasharray(geo, theme.scaleK);
+  // cdd-T29 R2: the 1px inset is a render-time pixel-literal constant, not
+  // geo-sourced -- scaled here like every other local literal this round's
+  // audit found (D4/journal row 175).
+  return line(geo.x + theme.scaleK, geo.y + divY, geo.x + geo.width - theme.scaleK, geo.y + divY, {
+    stroke: classBorderLine(geo, theme),
+    strokeWidth: classBorderStrokeWidth(geo, theme),
+    ...(dasharray !== undefined ? { strokeDasharray: dasharray } : {}),
+  });
+}
+
+/**
+ * CDD T20 (A5/M6): `visibilityIconOriginY`'s `rowHeight` param is a single
+ * physical LINE's own font metric (ascent/descent), never the multi-line
+ * block total -- see that function's own doc comment. A WRAPPED member's
+ * icon must still centre on the WHOLE block (`klimt/geom/PlacementStrategy
+ * Visibility.java:56-62`'s real `height2` term), so only the BASELINE
+ * input shifts, by half the block's excess height over one line --
+ * algebraically equivalent to that Java formula (derivation: `.agent-
+ * notes/cdd-T20.md`), without touching `class-visibility-icon.ts`'s locked
+ * internals. Zero change for every non-wrapped row (`visibilityBlockHeight`
+ * absent).
+ */
+// CDD T6FU: the formula moved to `renderer-classifier-rows.ts
+// #wrappedVisibilityIconOriginY` so `renderRow` (the OTHER icon draw path,
+// reached from `renderer.ts:108` and `renderer-body-enhanced.ts:90,116`)
+// applies the SAME centring rather than a second copy of it. This module
+// imports `renderRow` from there already, so the dependency direction is
+// unchanged.
+const wrappedIconOriginY = wrappedVisibilityIconOriginY;
+
+/**
+ * An icon-bearing row's 2-or-3 primitives (icon-column url background,
+ * icon, text) -- split out of {@link buildBodyPrimitives}'s loop purely to
+ * keep that function under the project's NLOC cap (pure extraction, no
+ * behavior change). See that function's own G2 N21/N40 doc comments for
+ * the upstream mechanism each primitive mirrors.
+ */
+/** One `{ y, item: { url, preWrapped: true, body } }` entry -- split out of
+ *  {@link pushIconRowPrimitives} purely to shrink that function's own NLOC
+ *  below this project's cap (pure extraction, no behavior change). */
+function iconEntry(y: number, url: UrlTaggedPrimitive['url'], body: string): { y: number; item: UrlTaggedPrimitive } {
+  return { y, item: { url, preWrapped: true, body } };
+}
+
+/** CDD T23: exported so `renderer-body-enhanced.ts#buildRowsPartPrimitives`
+ *  can reuse this SAME icon-row primitive split for an enhanced-body row --
+ *  no logic change, visibility only (see that module's own doc comment for
+ *  why the enhanced-body path needs the identical `<g data-visibility-
+ *  modifier>`-boundary handling the classic path already has). */
+export function pushIconRowPrimitives(
+  interleaved: Array<{ y: number; item: UrlTaggedPrimitive }>,
+  geo: ClassifierGeo,
+  theme: ScaledTheme,
+  row: ClassifierGeo['rows'][number],
+  effectiveUrl: UrlTaggedPrimitive['url'],
+): void {
+  const icon = row.visibilityIcon;
+  if (icon === undefined) return;
+  const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
+  const iconOriginY = wrappedIconOriginY(geo, row, theme);
+  if (row.url !== undefined) {
+    const bg = renderVisibilityUrlBackground(iconOriginX, iconOriginY, classifierFill(geo, theme), row.url, theme.scaleK);
+    interleaved.push(iconEntry(row.y, effectiveUrl, bg));
+  }
+  const isField = row.visibilityIsField === true;
+  const shape = renderVisibilityIcon(icon, isField, iconOriginX, iconOriginY, effectiveUrl, theme);
+  interleaved.push(iconEntry(row.y, effectiveUrl, shape));
+  interleaved.push({ y: row.y, item: { url: effectiveUrl, body: renderRowText(geo, row, theme) } });
 }
 
 /**
@@ -225,9 +329,9 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
 function buildJsonBodyPrimitives(
   geo: ClassifierGeo,
   body: readonly JsonBodyItem[],
-  theme: Theme,
+  theme: ScaledTheme,
 ): UrlTaggedPrimitive[] {
-  const stroke = { stroke: classBorder(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH };
+  const stroke = { stroke: classBorderLine(geo, theme), strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH * theme.scaleK };
   return body.map((item) => {
     if (item.kind === 'hline')
       return {
@@ -243,18 +347,52 @@ function buildJsonBodyPrimitives(
   });
 }
 
-function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimitive[] {
+/**
+ * One compartment's member rows (excluding the empty-text map linked-value
+ * cell, `mapColumnDividerEntries`'s own doc comment) -- split out of
+ * {@link buildBodyPrimitives} purely to keep that function under the
+ * project's CCN cap (pure extraction, no behavior change).
+ */
+function pushMemberRowPrimitives(
+  interleaved: Array<{ y: number; item: UrlTaggedPrimitive }>,
+  geo: ClassifierGeo,
+  theme: ScaledTheme,
+  memberRows: ClassifierGeo['rows'],
+): void {
+  for (const row of memberRows) {
+    if (row.text === '') continue;
+    const effectiveUrl = row.url ?? geo.url;
+    if (row.visibilityIcon === undefined) {
+      interleaved.push({ y: row.y, item: { url: effectiveUrl, body: renderRow(geo, row, theme) } });
+      continue;
+    }
+    // G2 N21/N40: an icon-bearing row draws as 2-or-3 primitives (icon,
+    // text, +url background) -- see {@link pushIconRowPrimitives}'s own
+    // doc comment for the upstream mechanism.
+    pushIconRowPrimitives(interleaved, geo, theme, row, effectiveUrl);
+  }
+}
+
+function buildBodyPrimitives(geo: ClassifierGeo, theme: ScaledTheme): UrlTaggedPrimitive[] {
   // G2 N42: an enhanced body (`--`/`==`/`..`/`__` block separator or a
   // `|_` tree-list line) draws its OWN part list, in EXACT jar draw order
   // (never the Y-sort merge below -- `renderer-body-enhanced.ts`'s own
   // module doc comment for why the two orderings genuinely differ).
+  // CDD T23: `buildEnhancedBodyPrimitives` now returns one primitive PER
+  // divider/tree part and PER ROW (each already tagged with its own
+  // effective url, `row.url ?? geo.url`) instead of one primitive
+  // collapsing the WHOLE body under `geo.url` -- see that function's own
+  // doc comment. `wrapClassifierBody` (below, via `renderClassifierBox`)
+  // merges/breaks runs exactly as it already does for the classic path;
+  // no change needed there.
   if (geo.enhancedBody !== undefined) {
-    return [
-      {
-        url: geo.url,
-        body: renderEnhancedBody(geo, geo.enhancedBody, theme, classifierFill(geo, theme), classBorder(geo, theme)),
-      },
-    ];
+    return buildEnhancedBodyPrimitives(
+      geo,
+      geo.enhancedBody,
+      theme,
+      classifierFill(geo, theme),
+      classBorderLine(geo, theme),
+    );
   }
   // M3(c): a `json` leaf's entries area owns its own draw order
   // (`TextBlockCucaJSon#drawU` is a pre-order traversal, not a Y-order) --
@@ -271,70 +409,9 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
   const isMapOrJsonDivider = geo.kind === 'map' || geo.kind === 'json';
   const interleaved: Array<{ y: number; item: UrlTaggedPrimitive }> = geo.dividerYs.map((divY) => ({
     y: divY,
-    item: {
-      url: geo.url,
-      body: isMapOrJsonDivider
-        ? line(geo.x, geo.y + divY, geo.x + geo.width, geo.y + divY, {
-            stroke: classBorder(geo, theme),
-            strokeWidth: MAP_JSON_DIVIDER_STROKE_WIDTH,
-          })
-        : line(geo.x + 1, geo.y + divY, geo.x + geo.width - 1, geo.y + divY, {
-            stroke: classBorder(geo, theme),
-            strokeWidth: classBorderStrokeWidth(geo, theme),
-          }),
-    },
+    item: { url: geo.url, body: dividerLine(geo, theme, divY, isMapOrJsonDivider) },
   }));
-  // A map's linked-row value entry carries empty text (see
-  // mapColumnDividerEntries doc) — upstream never draws that cell.
-  for (const row of memberRows) {
-    if (row.text === '') continue;
-    const effectiveUrl = row.url ?? geo.url;
-    if (row.visibilityIcon === undefined) {
-      interleaved.push({ y: row.y, item: { url: effectiveUrl, body: renderRow(geo, row, theme) } });
-      continue;
-    }
-    // G2 N21: an icon-bearing row draws as TWO primitives (icon, text), not
-    // one -- the icon's OWN `<g data-visibility-modifier>` wrapper forces a
-    // link-flush boundary in `SvgGraphics`, so it needs its own independent
-    // `<a>` run (`class-visibility-icon.ts#renderVisibilityIcon` builds that
-    // run internally, `preWrapped` tells `wrapClassifierBody` not to wrap it
-    // again) while the row's text remains free to merge with the divider
-    // that follows, exactly like a non-icon row.
-    // G2 N40: when the ROW'S OWN url is set (not just the classifier
-    // fallback -- `row.url`, matching `Member#getUrl()`), jar draws a THIRD
-    // primitive first: an icon-column background rect, its own independent
-    // `<a>` run, positioned at the SAME icon origin
-    // (`class-visibility-icon.ts#renderVisibilityUrlBackground`'s own doc
-    // comment -- `dasagu-52-vani172`/`fijali-69-pina030`).
-    const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
-    const iconOriginY = visibilityIconOriginY(geo.y + row.y, attributeFontSize(theme), theme);
-    if (row.url !== undefined) {
-      interleaved.push({
-        y: row.y,
-        item: {
-          url: effectiveUrl,
-          preWrapped: true,
-          body: renderVisibilityUrlBackground(iconOriginX, iconOriginY, classifierFill(geo, theme), row.url),
-        },
-      });
-    }
-    interleaved.push({
-      y: row.y,
-      item: {
-        url: effectiveUrl,
-        preWrapped: true,
-        body: renderVisibilityIcon(
-          row.visibilityIcon,
-          row.visibilityIsField === true,
-          iconOriginX,
-          iconOriginY,
-          effectiveUrl,
-          theme,
-        ),
-      },
-    });
-    interleaved.push({ y: row.y, item: { url: effectiveUrl, body: renderRowText(geo, row, theme) } });
-  }
+  pushMemberRowPrimitives(interleaved, geo, theme, memberRows);
   // G3/O3: map's own vertical column dividers, merged into the SAME
   // stable Y-sort (see mapColumnDividerEntries' own doc comment for why
   // this reproduces jar's real per-row interleaved draw order).
@@ -369,7 +446,18 @@ function buildBodyPrimitives(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimiti
  * #wrapClassifierBody` -- see that module's own doc comment for the full
  * mechanism.
  */
-export function renderClassifierBox(geo: ClassifierGeo, theme: Theme): string {
+export function renderClassifierBox(outerGeo: ClassifierGeo, theme: ScaledTheme): string {
+  // cdd-B10FU (`pijiju-95-xexi872`): a `skinparam groupInheritance`-
+  // protected classifier's `x`/`y`/`width`/`height` stay the OUTER (DOT-
+  // node) box (`ClassifierGeo.protectedBorder`'s own doc comment) --
+  // every draw call below needs the INNER box `EntityImageProtected
+  // #drawUntranslated`'s `UTranslate(border, border)` actually draws the
+  // wrapped classifier at. One substitution here covers the rect, the
+  // badge, every row and every divider line, since all of them read
+  // `geo.x`/`geo.y`/`geo.width`/`geo.height` from whichever geo they're
+  // handed, never `outerGeo` directly.
+  const geo: ClassifierGeo =
+    outerGeo.protectedBorder !== undefined ? { ...outerGeo, ...protectedInnerBox(outerGeo) } : outerGeo;
   // G3/O3: map's own vertical column dividers now interleave INSIDE
   // buildBodyPrimitives' own Y-sort (mapColumnDividerEntries), not appended
   // here as one extra batched-at-the-end primitive (pre-O3 bug).

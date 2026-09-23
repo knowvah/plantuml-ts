@@ -18,6 +18,18 @@ import {
   applyGuillemet,
 } from './skinparam-key-handlers-shared.js';
 import { parseShadowingValue } from './skinparam-element-buckets.js';
+import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+
+/** `skinparam classFontColor automatic` / `AttributeFontColor automatic`
+ *  (`nisune-86-faji869`) -- A3 M2's own diagnosis names this a THIRD,
+ *  harder variant (jar computes a contrast colour against the header
+ *  background) explicitly out of this iteration's scope.
+ *  `resolveColorToSvgHex` has no rejection path for a non-colour keyword
+ *  and would otherwise return it VERBATIM as an SVG `fill` value. */
+const AUTOMATIC_FONT_COLOR = 'automatic';
+function isAutomaticFontColor(color: string): boolean {
+  return color.trim().toLowerCase() === AUTOMATIC_FONT_COLOR;
+}
 
 export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
@@ -46,6 +58,16 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    ['mode'],
+    (acc, value) => {
+      // cdd-T33: `SkinParam.isDark` (`skin/SkinParam.java:114-116`) --
+      // `"dark".equalsIgnoreCase(getValue("mode"))`. Any other value
+      // (including absent) leaves `acc.mode` unset -- see `theme-dark.ts`'s
+      // own doc comment for the default-table this gates.
+      if (value.trim().toLowerCase() === 'dark') acc.mode = 'dark';
+    },
+  ],
+  [
     ['fixcirclelabeloverlapping'],
     (acc, value) => {
       acc.fixCircleLabelOverlapping = value.trim().toLowerCase() === 'true';
@@ -60,14 +82,43 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['classbackgroundcolor'],
-    (acc, _v, color) => {
-      acc.classBackground = color;
+    (acc, _v, _color, paint) => {
+      acc.classBackground = paint;
+      // CDD T6FU: `classBackgroundColor` registers a `{element, class_}`
+      // BackGroundColor style and `classHeaderBackgroundColor` a
+      // `{element, class_, header}` one -- and BOTH match the
+      // `{root, element, classDiagram, class_, header}` signature
+      // `EntityImageClass#getStyleHeader` (java:174-177) queries.
+      // `StyleStorage#computeMergedStyle` (java:102-116) merges every
+      // matching style in REGISTRATION order with OVERWRITE_EXISTING_VALUE,
+      // and `DarkString#mergeWith` (java:50-66) keeps the bigger
+      // `AutomaticCounter` priority -- so on equal specificity the LAST
+      // skinparam written wins, header signature or not. Writing the body
+      // colour into the header slot here reproduces that overwrite; a
+      // LATER `classHeaderBackgroundColor` simply overwrites it back.
+      // Jar-probed: `classHeaderBackgroundColor` then
+      // `classBackgroundColor` draws ONE rect (`cunavo-77-filo788`,
+      // `ziromu-57-mima164`, `dofima-22-kofe334`, `jireze-84-loti743`);
+      // the reverse order draws the 4-shape split.
+      acc.classHeaderBackground = paint;
+    },
+  ],
+  [
+    // CDD T6FU: `style/FromSkinparamToStyle.java:196` --
+    // `addConvert("classHeaderBackgroundColor", PName.BackGroundColor,
+    // SName.element, SName.class_, SName.header)`. The `header` leaf is the
+    // signature `EntityImageClass#getStyleHeader` (java:173-178) reads, so
+    // this is the header-background split's fill source, NOT a second
+    // `classBackgroundColor` tier.
+    ['classheaderbackgroundcolor'],
+    (acc, _v, _color, paint) => {
+      acc.classHeaderBackground = paint;
     },
   ],
   [
     ['classbordercolor'],
-    (acc, _v, color) => {
-      acc.classBorder = color;
+    (acc, _v, _color, paint) => {
+      acc.classBorder = paint;
     },
   ],
   [
@@ -142,6 +193,29 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.classAttributeFontItalic = flags.italic;
     },
   ],
+  // cdd-T19 (A3 M2): `skinparam class { AttributeFontColor X }` -- see
+  // `skinparam-accumulator.ts#classAttributeFontColor`'s own doc comment
+  // for the theme-field mapping (`skinparam-theme-builder.ts`) and the
+  // upstream `FromSkinparamToStyle.java:192` citation. `color` (3rd
+  // handler param) is `resolveColor(value)`, gradient-flattened but not
+  // yet hex -- resolved here, matching `classCascadeFontColor`'s own
+  // "pre-resolved to SVG-ready hex at Theme-build time" contract
+  // (`style-cascade-class.ts`'s module doc comment). `automatic`
+  // (`nisune-86-faji869`) is explicitly OUT of scope (A3 M2's own fix
+  // shape: "a THIRD, harder variant -- jar computes a contrast colour
+  // against the header background... kept separate/lower confidence") --
+  // guarded here rather than fed through `resolveColorToSvgHex`, which
+  // has no rejection path for a non-colour keyword and returns it
+  // VERBATIM (`fill="automatic"`, jar-verified WORSE than the pre-T19
+  // unhandled-key baseline, which left BOTH classifiers at the shared
+  // '#000000' default and coincidentally matched one of the two).
+  [
+    ['classattributefontcolor'],
+    (acc, _v, color) => {
+      if (isAutomaticFontColor(color)) return;
+      acc.classAttributeFontColor = resolveColorToSvgHex(color);
+    },
+  ],
   [
     ['classfontsize'],
     (acc, value) => {
@@ -161,6 +235,22 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       const flags = parseFontStyleFlags(value);
       acc.classFontBold = flags.bold;
       acc.classFontItalic = flags.italic;
+    },
+  ],
+  // cdd-T19 (A3 M2): `skinparam classFontColor X` (bare) or the block form
+  // `skinparam class { FontColor X }` -- both normalize to the SAME
+  // `classfontcolor` key (`preprocessor.ts`'s single-token vs.
+  // `skinparamStack`-joined block-key paths both lowercase to it). See
+  // `skinparam-accumulator.ts#classFontColor`'s doc comment for the
+  // HEADER-only theme mapping and the `FromSkinparamToStyle.java:187`
+  // citation. `automatic` guard: see `classattributefontcolor`'s own
+  // comment two entries above -- the SAME out-of-scope keyword, same
+  // fixture (`nisune-86-faji869`).
+  [
+    ['classfontcolor'],
+    (acc, _v, color) => {
+      if (isAutomaticFontColor(color)) return;
+      acc.classFontColor = resolveColorToSvgHex(color);
     },
   ],
   [

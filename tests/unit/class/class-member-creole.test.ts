@@ -147,6 +147,32 @@ describe('buildMemberAtoms — inline creole style commands', () => {
   });
 });
 
+// A4 4: `manageGuillemet` (java `CreoleParser.java:175-176`) runs on EVERY
+// creole line upstream, before classification -- `padapo-73-beke177`'s
+// `<<NotNull>>` role marker never became `«NotNull»` because
+// `buildMemberAtoms` skipped that call entirely.
+describe('buildMemberAtoms — guillemet substitution (A4 4)', () => {
+  test('a `<<Name>>` run in member text becomes a single «Name» run', () => {
+    const atoms = buildMemberAtoms('flightNumber : Integer << NotNull >>', BASE_FONT);
+    expect(atoms).toHaveLength(1);
+    expect(atoms[0]).toEqual({
+      kind: 'text',
+      text: 'flightNumber : Integer «NotNull»',
+      font: BASE_FONT,
+    });
+  });
+
+  test('a single `<` (generic type) never trips the guillemet pattern -- byte-identical (mission HARD BOUNDARY)', () => {
+    const atoms = buildMemberAtoms('+items: List<String>', BASE_FONT);
+    expect(atoms).toEqual([{ kind: 'text', text: '+items: List<String>', font: BASE_FONT }]);
+  });
+
+  test('a line with no `<` at all is untouched (manageGuillemet fast path)', () => {
+    const atoms = buildMemberAtoms('+getName(): String', BASE_FONT);
+    expect(atoms).toEqual([{ kind: 'text', text: '+getName(): String', font: BASE_FONT }]);
+  });
+});
+
 describe('resolveMemberAtoms — inline img/sprite atoms', () => {
   test('unresolved sprite name (no registry) contributes nothing', () => {
     const atoms = buildMemberAtoms('<$foo> label', BASE_FONT);
@@ -318,15 +344,101 @@ describe('resolveMemberAtoms — whitespace-only run renders as NBSP (G2 N57, it
     expect(atom.renderWidth).toBeUndefined();
   });
 
-  test('a mixed run starting with a space ("  class") is NOT substituted (upstream gates on ENTIRELY whitespace only)', () => {
+  // A4 2a: a MIXED run (some non-whitespace content) that STARTS with a
+  // space takes `DriverTextSvg.java`'s OTHER branch (:118-124,
+  // `text.startsWith(" ")` -> strip each leading space char, then
+  // `StringUtils.trin` both ends) -- distinct from the whitespace-ONLY NBSP
+  // branch above, but landed together (A4-text.md#2a fix-shape note: either
+  // alone regresses the other). `width` (LAYOUT) stays the RAW measured
+  // value (unchanged, includes the leading spaces); `renderText`/
+  // `renderWidth` carry the DRAWN, stripped form.
+  test('a mixed run starting with spaces ("  class") strips them for render, not layout', () => {
     const build = resolveMemberAtoms(
       [{ kind: 'text' as const, text: '  class', font: BASE_FONT }],
       BASE_FONT,
       measurer,
     );
+    const atom = build.atoms[0]! as { width: number; renderText?: string; renderWidth?: number };
+    expect(atom.width).toBeCloseTo(39.66666666666667, 6);
+    expect(atom.renderText).toBe('class');
+    expect(atom.renderWidth).toBeCloseTo(31.96666666666667, 6);
+  });
+
+  test('a mixed run with trailing whitespace trims it for render (StringUtils#trin, both ends)', () => {
+    const build = resolveMemberAtoms([{ kind: 'text' as const, text: 'class ', font: BASE_FONT }], BASE_FONT, measurer);
+    const atom = build.atoms[0]! as { renderText?: string; renderWidth?: number };
+    expect(atom.renderText).toBe('class');
+    expect(atom.renderWidth).toBeCloseTo(31.96666666666667, 6);
+  });
+
+  test('a run with no leading/trailing whitespace carries no renderText override (no-op trin)', () => {
+    const build = resolveMemberAtoms([{ kind: 'text' as const, text: 'class', font: BASE_FONT }], BASE_FONT, measurer);
     const atom = build.atoms[0]! as { renderText?: string; renderWidth?: number };
     expect(atom.renderText).toBeUndefined();
     expect(atom.renderWidth).toBeUndefined();
+  });
+});
+
+// T26 (gekope-01-ricu859): `AtomText#getWidth`/`#drawU`'s tab-stop walk
+// (java:210-256) -- `buildWrappedMemberRows`/`buildMemberRow` (the CLASS
+// engine's own two entry points) opt into `resolveMemberAtoms`'s
+// `expandTabs` flag; `class-object-member-creole.ts` and the map/json/note
+// callers of the shared `resolveMemberAtoms` do NOT (own/no tab handling,
+// `resolveMemberAtoms`'s own doc comment) so this suite uses the CLASS
+// entry points, never a bare `resolveMemberAtoms(..., true)` call as its
+// only coverage. `WidthTableMeasurer` matches the deterministic table the
+// oracle jar and `gekope-01-ricu859`'s own golden run on (space glyph = 0,
+// so the tab stop falls back to `fontSize * 4`, `AtomText.ts`'s own doc
+// comment) -- jar-verified: gekope's `PK ID      \t\t Integer` row draws
+// "Integer" at x=135 = 23 (icon+margin) + 2*56 (two 14pt tab stops).
+describe('buildWrappedMemberRows — tab-stop expansion (T26)', () => {
+  const widthTable = new WidthTableMeasurer();
+  const font14 = { family: 'sans-serif', size: 14 };
+
+  test('two consecutive tabs draw as two SEPARATE runs, second at 2 tab-stops out', () => {
+    const [row] = buildWrappedMemberRows('ID\t\tInteger', {}, font14, widthTable, 0);
+    const texts = row!.atoms.filter((a): a is Extract<typeof a, { kind: 'text' }> => a.kind === 'text');
+    expect(texts).toHaveLength(2);
+    expect(texts[0]).toMatchObject({ text: 'ID', width: 56 * 2 });
+    expect(texts[1]).toMatchObject({ text: 'Integer' });
+    // First run's OWN glyph draws compact (its natural width), not
+    // stretched across the folded-in gap -- `renderWidth`/`textLength`
+    // stays the natural measured width even though `width` (x-advance)
+    // carries the full two-tab-stop gap.
+    expect(texts[0]!.renderWidth ?? texts[0]!.width).toBeCloseTo(widthTable.measure('ID', font14).width, 6);
+    // Cumulative x: 0 (row start) + 112 (ID's folded width) = 112 = 2*56.
+    expect(texts[0]!.width + 0).toBe(112);
+  });
+
+  test('a tab-free row is byte-identical to the pre-T26 single-atom path', () => {
+    const withTabs = buildWrappedMemberRows('plain field', {}, font14, widthTable, 0);
+    const [row] = withTabs;
+    expect(row!.atoms).toHaveLength(1);
+    expect(row!.atoms[0]).toMatchObject({ kind: 'text', text: 'plain field' });
+  });
+
+  test('trailing spaces before a tab are dropped from the DRAWN text (trin), not the layout width', () => {
+    const [row] = buildWrappedMemberRows('ID      \tx', {}, font14, widthTable, 0);
+    const texts = row!.atoms.filter((a): a is Extract<typeof a, { kind: 'text' }> => a.kind === 'text');
+    expect(texts[0]!.text).toBe('ID      ');
+    expect(texts[0]!.renderText).toBe('ID');
+  });
+
+  test('buildMemberRow (the non-wrapped, single-row entry point) also expands tabs', () => {
+    const build = buildMemberRow('a\tb', {}, font14, widthTable);
+    const texts = build.atoms.filter((a): a is Extract<typeof a, { kind: 'text' }> => a.kind === 'text');
+    expect(texts).toHaveLength(2);
+    expect(texts.map((t) => t.text)).toEqual(['a', 'b']);
+  });
+
+  test("class-object-member-creole.ts's own shared `resolveMemberAtoms` call (expandTabs OFF) is unaffected", () => {
+    // A bare call with no 5th argument -- the object engine's own shape --
+    // must NOT expand tabs (`object/nufoju-44-dabi767`'s ratchet regression
+    // this default guards against).
+    const atoms = buildMemberAtoms('a\tb', BASE_FONT);
+    const build = resolveMemberAtoms(atoms, BASE_FONT, widthTable);
+    expect(build.atoms).toHaveLength(1);
+    expect(build.atoms[0]).toMatchObject({ kind: 'text', text: 'a\tb' });
   });
 });
 
