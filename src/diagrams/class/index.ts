@@ -7,13 +7,31 @@ import type { SyncPlugin } from '../../core/dispatcher.js';
 import type { ClassDiagramAST } from './ast.js';
 import type { ClassGeometry } from './layout.js';
 import { parseClass } from './parser.js';
-import { layoutClass } from './layout.js';
-import { renderClass } from './renderer.js';
+import { layoutClass, classPageAst, classPageCount } from './layout.js';
+import { renderClass, renderClassPage } from './renderer.js';
 import { DiagramRefusal } from '../../core/error/error-diagrams.js';
+import type { RenderFragment } from '../../core/dispatcher.js';
 
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
+
+/**
+ * A refused diagram THROWS rather than drawing its own error page — shared
+ * by `render` and `renderPage` (cdd-T34) so a `newpage` document's command
+ * errors (carried from `ast.errors` by `layoutSync` below) abort exactly
+ * the same way regardless of which page is being asked for. See `render`'s
+ * own doc comment (below) for the upstream mechanism this mirrors.
+ */
+function throwIfRefused(geo: ClassGeometry): void {
+  const { errors, errorLine } = geo as ClassGeometry & {
+    errors?: readonly string[];
+    errorLine?: number;
+  };
+  if (errors !== undefined && errors.length > 0) {
+    throw new DiagramRefusal(errors.join('; '), errorLine, 'class');
+  }
+}
 
 export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   type: 'class',
@@ -51,10 +69,6 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   },
 
   render(geo, theme) {
-    const { errors, errorLine } = geo as ClassGeometry & {
-      errors?: readonly string[];
-      errorLine?: number;
-    };
     // A refused diagram THROWS rather than drawing its own error page.
     //
     // Upstream aborts the diagram when a command returns
@@ -70,9 +84,30 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
     // where the jar leaves the message in the inherited `sans-serif` -- a
     // difference invisible until `SvgGraphics.java:727-728`'s monospace NBSP
     // rule was ported and started rewriting its spaces.
-    if (errors !== undefined && errors.length > 0) {
-      throw new DiagramRefusal(errors.join('; '), errorLine, 'class');
-    }
+    throwIfRefused(geo);
     return renderClass(geo, theme);
+  },
+
+  // cdd-T34 (E14 `newpage`): the `PaginatedPlugin` trio (`core/dispatcher
+  // .ts`) -- `sequencePlugin` is this port's only OTHER implementer today
+  // (`sequence/index.ts`'s own doc comment). Upstream's own
+  // `NewpagedDiagram` never overrides `getNbImages()` (stays 1, `core/
+  // AbstractDiagram.java:129`), so the reference CLI itself only ever
+  // exports page 1 of a multi-page CLASS source -- `getNbPages` still
+  // reports the REAL count (this library renders every page, a genuine
+  // capability gap in the reference CLI is not a reason to under-render;
+  // see `class-layout-multipage.ts`'s own doc comments and CHANGELOG.md's
+  // amended "class diagram newpage" entry).
+  getNbPages(geo) {
+    return classPageCount(geo);
+  },
+
+  renderPage(geo, theme, pageIndex): RenderFragment {
+    throwIfRefused(geo);
+    return renderClassPage(geo, theme, pageIndex);
+  },
+
+  pageAst(ast, pageIndex) {
+    return classPageAst(ast, pageIndex);
   },
 };

@@ -6,6 +6,7 @@
  */
 
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
+import { sliceClassGeometryPage } from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
@@ -481,4 +482,17 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
       : {}),
     diagramType: DIAGRAM_TYPE_CLASS,
   };
+}
+
+/**
+ * `renderClass` for exactly ONE page of `geo`, 0-based — cdd-T34 (E14
+ * `newpage`), mirrors `sequence/renderer.ts#renderSequencePage`'s identical
+ * "slice, then run the normal single-geometry renderer" shape. `geo` for
+ * page 0 of a single-page document IS `geo` itself (`sliceClassGeometryPage`
+ * returns its input unchanged, `===`, whenever `pageBoundaries` is absent
+ * or has one entry), so this is a true zero-cost superset of `renderClass`
+ * for the overwhelmingly common non-`newpage` case.
+ */
+export function renderClassPage(geo: ClassGeometry, theme: Theme, pageIndex: number): RenderFragment {
+  return renderClass(sliceClassGeometryPage(geo, pageIndex), theme);
 }

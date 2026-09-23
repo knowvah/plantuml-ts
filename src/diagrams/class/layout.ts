@@ -442,6 +442,9 @@ function assembleShiftedGeometry(
 // move otherwise, re-exported so no consumer's import path changed.
 import { layoutMultiPage } from './class-layout-multipage.js';
 export { layoutMultiPage };
+// cdd-T34: same re-export precedent, one line each, for the `newpage`
+// pagination trio `class/index.ts#classPlugin` wires onto `PaginatedPlugin`.
+export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-layout-multipage.js';
 
 // ---------------------------------------------------------------------------
 // Public API

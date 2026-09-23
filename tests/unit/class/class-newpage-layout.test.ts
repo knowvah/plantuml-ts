@@ -23,9 +23,10 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
-import { renderClass } from '../../../src/diagrams/class/renderer.js';
-import { assembleSvg } from '../../../src/index.js';
+import { layoutClass, classifierLeaves, classPageAst, classPageCount, sliceClassGeometryPage } from '../../../src/diagrams/class/layout.js';
+import { renderClass, renderClassPage } from '../../../src/diagrams/class/renderer.js';
+import { classPlugin } from '../../../src/diagrams/class/index.js';
+import { assembleSvg, renderSync } from '../../../src/index.js';
 import type { ClassDiagramAST, Classifier, Relationship } from '../../../src/diagrams/class/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -394,5 +395,66 @@ describe('G2 N28: renderFixtureClass compares against page 1 only', () => {
     // <!--class Bar--> comment, not stacked/duplicated.
     expect(svg.match(/<!--class Foo-->/g)).toHaveLength(1);
     expect(svg.match(/<!--class Bar-->/g)).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd-T34 (E14 `newpage`): the `PaginatedPlugin` trio -- `getNbPages`/
+// `renderPage`/`pageAst`, and `renderSync`'s consumer-visible "page 1 only"
+// behavior change (CHANGELOG.md's amended T7 entry).
+// ---------------------------------------------------------------------------
+
+describe('classPlugin -- PaginatedPlugin trio (cdd-T34)', () => {
+  const page1 = () =>
+    makeAST({ classifiers: [makeClassifier('A'), makeClassifier('B')] }) satisfies ClassDiagramAST;
+  const page2 = () => makeAST({ classifiers: [makeClassifier('C')] }) satisfies ClassDiagramAST;
+
+  it('getNbPages reports 1 for a single-page geometry (no pageBoundaries)', () => {
+    const geo = layoutClass(page1(), defaultTheme, measurer);
+    expect(geo.pageBoundaries).toBeUndefined();
+    expect(classPlugin.getNbPages?.(geo)).toBe(1);
+  });
+
+  it('getNbPages reports the real page count for a multi-page geometry', () => {
+    const ast = page1();
+    ast.pages = [ast, page2()];
+    const geo = layoutClass(ast, defaultTheme, measurer);
+    expect(classPlugin.getNbPages?.(geo)).toBe(2);
+    expect(classPageCount(geo)).toBe(2);
+  });
+
+  it('sliceClassGeometryPage(geo, 0) reproduces a standalone layoutClass(page1) render exactly', () => {
+    const solo = layoutClass(page1(), defaultTheme, measurer);
+    const ast = page1();
+    ast.pages = [ast, page2()];
+    const stacked = layoutClass(ast, defaultTheme, measurer);
+    const sliced = sliceClassGeometryPage(stacked, 0);
+    expect(sliced.totalWidth).toBeCloseTo(solo.totalWidth, 5);
+    expect(sliced.totalHeight).toBeCloseTo(solo.totalHeight, 5);
+    expect(assembleSvg(renderClass(sliced, defaultTheme))).toBe(assembleSvg(renderClass(solo, defaultTheme)));
+  });
+
+  it('renderClassPage(geo, theme, 1) draws only page 2\'s classifier', () => {
+    const ast = page1();
+    ast.pages = [ast, page2()];
+    const geo = layoutClass(ast, defaultTheme, measurer);
+    const svg = assembleSvg(renderClassPage(geo, defaultTheme, 1));
+    expect(svg).toContain('<!--class C-->');
+    expect(svg).not.toContain('<!--class A-->');
+    expect(svg).not.toContain('<!--class B-->');
+  });
+
+  it('classPageAst(ast, 0) returns the top-level ast itself; classPageAst(ast, 1) returns page 2', () => {
+    const ast = page1();
+    const p2 = page2();
+    ast.pages = [ast, p2];
+    expect(classPageAst(ast, 0)).toBe(ast);
+    expect(classPageAst(ast, 1)).toBe(p2);
+  });
+
+  it('renderSync emits page 1 only for a `newpage` class source (bufogi-shaped)', () => {
+    const svg = renderSync('@startuml\nclass test\nnewpage\nclass test2\n@enduml\n');
+    expect(svg).toContain('>test</text>');
+    expect(svg).not.toContain('>test2</text>');
   });
 });
