@@ -200,6 +200,31 @@ export function addPlainInk(box: InkBox, x: number, y: number, w: number, h: num
 }
 
 /**
+ * CDD B7FU-R2 item (e): `SvgGraphics#svgImageUnsecure` (`klimt/drawing/svg/
+ * SvgGraphics.java:987-999`) draws an embedded `{{ }}` diagram's `<image>`
+ * and calls `ensureVisible(x, y)` / `ensureVisible(x + image.getData
+ * ("width"), y + image.getData("height"))` on the REAL, successfully-drawn
+ * SVG's OWN `width`/`height` attributes -- independent of whatever the
+ * enclosing classifier's own box reserved for it at LAYOUT time (`class-
+ * body-enhanced-embeds.ts`'s "sizing/drawing asymmetry" doc comment: that
+ * reservation is upstream's OWN `(42, 42)` fallback, never the drawn size).
+ * So a drawn embed taller/wider than its (42, 42)-sized row reservation
+ * still pushes the WHOLE diagram's canvas out to its real footprint --
+ * jar-verified `zikabo-17-gugi332` (embed drawn at `x=13,y=57,w=67,h=64`,
+ * jar canvas exactly `(80,121)+1 = (81,122)`, byte-exact once this point is
+ * added; our canvas before this fix, 74x116, never reached the embed's
+ * real corner at all) and `gadufu-56-votu808` (same mechanism, Y axis
+ * only -- its own `image.getWidth()`/`getHeight()` value gap is a SEPARATE,
+ * out-of-scope activity-engine Cyrillic-measurement residual, `class-body-
+ * enhanced-embeds.ts`'s own doc comment). No inset on either corner
+ * (`ensureVisible` is a bare `x > maxX`/`y > maxY` comparison, not
+ * `LimitFinder#drawRectangle`'s `-1`-inset rect rule) -- {@link addPlainInk}
+ * shares this exact shape and is reused rather than duplicated. */
+export function addEmbedImageInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPlainInk(box, x, y, w, h);
+}
+
+/**
  * G2 N60 (item 42): `LimitFinder#drawUPolygon` -- `x` padded by
  * `HACK_X_FOR_POLYGON` on BOTH sides, `y` unpadded. `USymbolFolder#asBig`
  * draws its outline as a `UPolygon` (not the default rounded-arc `UPath`)

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1165 modules · 4301 exported names.
+1165 modules · 4303 exported names.
 
 ## `src/`
 
@@ -1149,8 +1149,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-types.ts` | `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |
-| `class-ink-box.ts` | `InkBox`, `DOCUMENT_MARGIN_TOP`, `DOCUMENT_MARGIN_RIGHT`, `DOCUMENT_MARGIN_BOTTOM`, `DOCUMENT_MARGIN_LEFT`, `INK_DELTA`, `JAR_INK_MARGIN`, `buildInkBox` | Ink-extent accumulation (InkBox + per-shape ink adders + buildInkBox) for class-diagram document sizing. |
-| `class-ink-shapes.ts` | `HACK_X_FOR_POLYGON`, `InkBox`, `newInkBox`, `addPoint`, `addRectInk`, `addRectInkEmptyShownBody`, `addEllipseInk`, `addPlainInk`, `addFolderPolygonInk`, `addNamespaceNodeInk`, `addNamespaceDatabaseInk`, `addNamespaceRectInk`, `addClassicRectInk` | `LimitFinder` shape rules for the class ink walk — the primitive `InkBox` and one function per klimt shape the class engine draws, split out of `class-ink-box.ts` when that module passed the 500-line cap. |
+| `class-ink-box.ts` | `InkBox`, `DOCUMENT_MARGIN_TOP`, `DOCUMENT_MARGIN_RIGHT`, `DOCUMENT_MARGIN_BOTTOM`, `DOCUMENT_MARGIN_LEFT`, `INK_DELTA`, `JAR_INK_MARGIN`, `drawnEnhancedBodyEmbeds`, `buildInkBox` | Ink-extent accumulation (InkBox + per-shape ink adders + buildInkBox) for class-diagram document sizing. |
+| `class-ink-shapes.ts` | `HACK_X_FOR_POLYGON`, `InkBox`, `newInkBox`, `addPoint`, `addRectInk`, `addRectInkEmptyShownBody`, `addEllipseInk`, `addPlainInk`, `addEmbedImageInk`, `addFolderPolygonInk`, `addNamespaceNodeInk`, `addNamespaceDatabaseInk`, `addNamespaceRectInk`, `addClassicRectInk` | `LimitFinder` shape rules for the class ink walk — the primitive `InkBox` and one function per klimt shape the class engine draws, split out of `class-ink-box.ts` when that module passed the 500-line cap. |
 | `class-json-commands.ts` | `JSON_COMMANDS`, `isPendingJsonBodyComplete` | `json` declaration commands for the class diagram parser — thin adapter over the shared port in `core/command/CommandCreateJson.ts` (mission shared-seam-extraction T9; formerly a 74%-line-identical clone of `state/state-json-commands.ts`, D |
 | `class-json-sizing.ts` | `measureJsonClassifier` | `json` classifier sizing — `kind:'json'` leaves in the class diagram layout engine (./layout.ts), mission object-dot-sync Phase L. |
 | `class-kal.ts` | `KAL_STROKE_THICKNESS`, `KAL_TEXT_DX`, `KAL_TEXT_DY`, `KAL_WIDTH_FACTOR`, `KalPosition`, `Kal`, `KalMargins`, `KalBox`, `kalMargins`, `kalTranslateForDecoration`, `kalTextDelta`, `computeKals`, `kalMarginsByEntity`, `kalWidthByEntity`, `kalBoxAt` | cdd-T15 (A2a/M1, decisions.md D6) — the qualified-association box. |
