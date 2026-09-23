@@ -50,7 +50,7 @@ describe('sectionWidth — icon zone follows the resolved badge radius', () => {
 
 describe('buildSectionRows — indent follows the resolved icon zone', () => {
   function ctx(iconZoneWidth: number): SectionRowContext {
-    return { baselineOffset: 11, iconZoneWidth };
+    return { baselineOffset: 11, iconZoneWidth, fontSize: 14 };
   }
 
   it('icon section indents by margin + zone (6 + 11 = 17 for radius 8)', () => {

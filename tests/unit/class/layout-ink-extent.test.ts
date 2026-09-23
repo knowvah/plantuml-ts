@@ -865,6 +865,7 @@ describe('computeClassDocumentDims — visibility-icon polygon ink', () => {
             parts: [{ kind: 'rows', rows: [{ y: 20, text: 'm', indent: 0, width: 30, visibilityIcon: '#' }] }],
             width: 30,
             height: 20,
+            portMembers: [],
           },
         }),
       ],

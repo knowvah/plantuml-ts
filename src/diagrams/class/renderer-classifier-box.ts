@@ -5,8 +5,7 @@
  * project's 500-line cap, "new code in new modules" per CLAUDE.md's own
  * engineering-constraints note) — mirrors the existing `renderer-
  * arrowhead.ts`/`renderer-group.ts`/`renderer-note.ts`/`renderer-url.ts`
- * split precedent for a renderer sub-concern; pure move for the
- * pre-existing pieces (`classifierFill`/`renderRow`/`renderBadge`/
+ * split precedent; pure move for the pre-existing pieces (`classifierFill`/`renderRow`/`renderBadge`/
  * `mapColumnDividerEntries`), no behavior change (this note describes
  * the original G2 split -- see `MAP_JSON_DIVIDER_STROKE_WIDTH`'s own doc
  * comment for the G3/O3 map/json divider fix, which DID change behavior).
@@ -25,7 +24,7 @@ import {} from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import { MAP_CELL_MARGIN_X } from './class-map-sizing.js';
 import { hasBadge } from './class-badge.js';
-import { renderBadge, renderGenericTag } from './renderer-classifier-badge-tag.js';
+import { renderBadge, renderGenericTag, renderBadgeSpriteImage } from './renderer-classifier-badge-tag.js';
 import { renderVisibilityIcon, renderVisibilityUrlBackground } from './class-visibility-icon.js';
 import { wrapClassifierBody, type UrlTaggedPrimitive } from './renderer-url.js';
 import {} from '../../core/svg.js';
@@ -245,10 +244,10 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
       body += headerBackgroundPath(geo, theme, roundCorner, headerBg);
     }
   }
-  // G2 N58 item 40: `skinparam style strictuml` unconditionally suppresses
-  // the circled-character badge (`CucaDiagram#showPortion`'s own doc comment
-  // on the measurement side, class-layout-helpers.ts#measureGenericClassifier).
-  if (geo.hideCircle !== true && hasBadge(geo.kind) && theme.strictUml !== true) body += renderBadge(geo, theme);
+  // G2 N58 item 40: `strictuml` suppresses the badge. CDD B7FU-R2 (c-b): a resolved sprite badge wins over the default one.
+  if (geo.hideCircle !== true && hasBadge(geo.kind) && theme.strictUml !== true) {
+    body += geo.badgeSpriteImage !== undefined ? renderBadgeSpriteImage(geo, geo.badgeSpriteImage) : renderBadge(geo, theme);
+  }
   const headerRowCount = geo.headerRowCount ?? 1;
   // G2 N64 item 45: `nameRowCount` (new field, default 1) generalizes the
   // pre-existing "exactly one trailing name row" assumption to N trailing
@@ -257,10 +256,11 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: Theme): UrlTaggedPrimit
   // rows (`isStereoLabelRow`); every name-line row (including line 2+)
   // gets the SAME treatment line 1 always had. Reduces to the OLD
   // `nameRowIndex = headerRowCount - 1` single-row check exactly when
-  // `nameRowCount` is absent (default 1).
+  // `nameRowCount` is absent (default 1). CDD B7FU-R2 (c): a pure-sprite
+  // row's text fallback is '' -- `row.atoms` (when set) is still drawable.
   const firstNameRowIndex = headerRowCount - (geo.nameRowCount ?? 1);
   geo.rows.slice(0, headerRowCount).forEach((row, i) => {
-    if (row.text !== '') body += renderRowText(geo, row, theme, true, i < firstNameRowIndex);
+    if (row.text !== '' || row.atoms !== undefined) body += renderRowText(geo, row, theme, true, i < firstNameRowIndex);
   });
   if (geo.genericTag !== undefined) body += renderGenericTag(geo, geo.genericTag, theme);
   return { url: geo.url, body };

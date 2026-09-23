@@ -59,6 +59,7 @@ import type { NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { registerNestedDiagramRenderer } from '../../core/nested-diagram-registry.js';
 
 /**
  * Task item 3 (CDD T27): a block embedding itself, directly or via a cycle,
@@ -249,4 +250,32 @@ export function registerClassNestedDiagramRenderer(
  *  as it does for a renderer that throws. */
 export function getClassNestedDiagramRenderer(): EmbeddedRenderer | undefined {
   return registeredRenderer;
+}
+
+/**
+ * CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome
+ * seam (`src/core/annotations/blocks-creole.ts`'s `{{ }}`-in-title/legend/
+ * header/footer/caption path, `Style#createTextBlockBordered`, D5) reads a
+ * CORE-owned registration slot (`core/nested-diagram-registry.ts`) instead
+ * of one hosted here — `blocks-creole.ts` must never import from `src/
+ * diagrams/class/*` (Rule 1, `tests/architecture/layering.test.ts`). This
+ * function builds ONE renderer via {@link createNestedDiagramRenderer}
+ * (already fully generic in behavior: strip-PI/measure/base64-encode/
+ * depth-guard, nothing class-specific) and pushes it into BOTH the
+ * class-body slot above AND the core registry — the SAME module-level
+ * {@link embedDepth} counter backs both paths (a chrome `{{ }}` legend
+ * embedding a class diagram whose OWN body embeds another `{{ }}` block is
+ * one real recursion chain, bounded by one shared counter), and `src/
+ * index.ts#prepareBlock`'s own doc comment explains why registration
+ * happens per-`renderSync`-call rather than once at module load (the
+ * ambient `options`/measurer must match the CURRENT call). `src/index.ts`
+ * sits at this project's 500-line file cap already, so this ONE combined
+ * entry point keeps that file's own edit a one-line addition.
+ */
+export function registerNestedDiagramRenderers(
+  renderFn: RenderNestedDiagramFn,
+  maxDepth: number = MAX_NESTED_DIAGRAM_DEPTH,
+): void {
+  registerClassNestedDiagramRenderer(renderFn, maxDepth);
+  registerNestedDiagramRenderer(createNestedDiagramRenderer(renderFn, maxDepth));
 }

@@ -272,7 +272,13 @@ export function resolveMemberAtoms(
  *  keep that function's own NLOC/CCN under this project's complexity cap.
  *  Returns `undefined` for an atom that contributes nothing (an unresolved
  *  sprite name, or a dropped `latex` atom). */
-function resolveOneAtom(
+// CDD B7FU-R2 item (d): exported (was private) -- `class-layout-header-
+// creole.ts#buildWrappedHeaderLine` needs the SAME per-atom width
+// callback `buildWrappedMemberRows` below passes to `getSplitted`, to
+// wrap a classifier NAME line through the real creole/sprite atom
+// pipeline instead of a synthetic plain-text stand-in (see that
+// function's own doc comment).
+export function resolveOneAtom(
   atom: CreoleAtom,
   baseFont: FontConfiguration,
   measurer: StringMeasurer,

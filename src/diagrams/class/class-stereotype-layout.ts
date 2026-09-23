@@ -110,8 +110,34 @@ export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
  * jar-verified against `dofima`'s own per-line `y` delta (exactly
  * `fontSpec.size`, 14, matching `measurer.measure(line, font).height ===
  * font.size` for EVERY measurer in this codebase, `measurer-deterministic
- * .ts`'s own doc comment).
+ * .ts`'s own doc comment). See {@link headerLineY} for the CDD B7FU-R2
+ * item (c) sprite-line exception to that flat formula.
  */
+
+/**
+ * CDD B7FU-R2 item (c) (rotisi-30-loge424, `class "<$bug16>" as foo1`):
+ * same bottom-anchor mechanism `class-member-rows.ts#buildSectionRows`'s
+ * own doc comment documents in full -- a sprite/img (`'image'`-kind) atom
+ * draws TOP-anchored at an absolute pixel position with no per-atom `dy`
+ * correction, so ITS line needs `y` bottom-anchored to its real height;
+ * every other line (plain text, sup/sub, blank) keeps the flat `nameTop +
+ * i * fontSize + baselineOffset` stepping `dofima`'s own golden verifies.
+ * Split out purely to keep {@link buildHeaderRows}'s row-map callback
+ * under the project's per-function CCN cap.
+ */
+function headerLineY(params: {
+  nameTop: number;
+  i: number;
+  fontSize: number;
+  baselineOffset: number;
+  atoms: readonly MemberRenderAtom[] | undefined;
+  height: number | undefined;
+}): number {
+  const { nameTop, i, fontSize, baselineOffset, atoms, height } = params;
+  const flat = nameTop + i * fontSize + baselineOffset;
+  if (atoms?.some((a) => a.kind === 'image') !== true) return flat;
+  return flat + (height ?? fontSize) - fontSize;
+}
 export function buildHeaderRows(input: {
   header: HeaderInfo;
   /** G2 N64: already-split via {@link splitDisplayLines} -- this module
@@ -153,9 +179,14 @@ export function buildHeaderRows(input: {
    *  (never set for the blank-line NBSP row -- that branch's own render
    *  substitution has no atom-path analogue). */
   lineAtoms?: ReadonlyArray<readonly MemberRenderAtom[] | undefined>;
+  /** CDD B7FU-R2 item (c): per-line height, parallel to {@link lineAtoms}
+   *  -- feeds the bottom-anchor `y` shift below for a sprite-bearing
+   *  line, the SAME gate `class-member-rows.ts#buildSectionRows` carries. */
+  lineHeights?: readonly number[];
 }): ClassifierGeo['rows'] {
   const { header, lines, lineWidths, align, circleWidth, widthStereoAndName, nameWidth, h1, h2 } = input;
   const { nameTop, baselineOffset, fontSpec, headerTextWidth, badgeRadius, blankLineRenderWidth, lineAtoms } = input;
+  const { lineHeights } = input;
   const indent = circleWidth + (widthStereoAndName - nameWidth) / 2 + h1 + h2 + NAME_LEFT_MARGIN;
   const badgeIndent = h1 + BADGE_LEFT_MARGIN + badgeRadius;
   const lastIndex = lines.length - 1;
@@ -181,10 +212,36 @@ export function buildHeaderRows(input: {
     // (possibly `0`) `lineWidth`, matching `julixi`'s own jar-verified `x`
     // position exactly -- only the DRAWN `text`/`width` substitute NBSP,
     // mirroring N57's "layout width stays raw, render width doesn't" split.
-    const isBlank = /^\s*$/.test(line);
+    //
+    // CDD B7FU-R2 item (c) correction (rotisi-30-loge424, `class "<$bug16>"
+    // as foo1`): a line whose ENTIRE content is a non-text atom (a sprite)
+    // ALSO has an empty `atomsToPlainText` projection (`class-member-
+    // display.ts#atomsToPlainText` filters to `kind === 'text'` only), so
+    // the bare `/^\s*$/.test(line)` check wrongly classified it as
+    // julixi's genuinely-blank case, dropping its (already correctly
+    // resolved) sprite atom and substituting a literal NBSP `<text>`
+    // instead of the `<image>` jar draws. Gated on the line carrying a
+    // real drawable (non-text) atom -- NOT on `lineAtoms?.[i] !==
+    // undefined` alone, which a SECOND regression (found by julixi-10-
+    // jide878's own test) showed is ALSO true for a genuinely EMPTY line:
+    // `class-layout-header-creole.ts#buildHeaderLine`'s `hasMarkup` check
+    // (`resolved.atoms.length === 1 && ... .text === line`) is false for
+    // a zero-atom resolution too (an empty line resolves to ZERO atoms,
+    // not one unchanged text atom), so `lineAtoms[i]` is a defined EMPTY
+    // array there, not `undefined` -- checking for an actual non-text
+    // atom handles both a real sprite line and a genuinely blank one.
+    const hasDrawableAtom = lineAtoms?.[i]?.some((a) => a.kind !== 'text') === true;
+    const isBlank = !hasDrawableAtom && /^\s*$/.test(line);
     return {
       text: isBlank ? '\u00A0' : line,
-      y: nameTop + i * fontSpec.size + baselineOffset,
+      y: headerLineY({
+        nameTop,
+        i,
+        fontSize: fontSpec.size,
+        baselineOffset,
+        atoms: lineAtoms?.[i],
+        height: lineHeights?.[i],
+      }),
       indent: indent + lineOffset,
       // G2 N32: kind-derived italic (interface/abstract) UNIONED with
       // `skinparam classFontStyle italic` -- see `theme.ts#classFontItalic`'s

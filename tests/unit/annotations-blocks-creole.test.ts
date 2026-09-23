@@ -182,3 +182,48 @@ describe('chrome creole — the shared seam leaves the other engines jar-faithfu
     expect(/<line[^>]*style="([^"]*)"/.exec(ours)?.[1]).toBe('stroke:#000;stroke-width:1;');
   });
 });
+
+// ---------------------------------------------------------------------------
+// CDD B7FU-R2: `{{ }}` embedded diagrams inside chrome text (title/legend/
+// header/footer/caption) now render through the SAME nested-diagram
+// renderer T27 built for class bodies, via the CORE-owned registration slot
+// (`core/nested-diagram-registry.ts`, populated by `class-nested-diagram-
+// renderer.ts#registerNestedDiagramRenderers`, wired in `src/index.ts
+// #prepareBlock`) instead of unconditionally throwing.
+// ---------------------------------------------------------------------------
+
+describe('chrome creole — {{ }} embedded diagrams (CDD B7FU-R2)', () => {
+  it('a legend embedding a supported diagram type ({{ file f }}) draws a real <image>, not the (42,42) fallback', () => {
+    const src = '@startuml\nclass foo\nlegend\n{{\nfile f\n}}\nendlegend\n@enduml';
+    const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
+    const legend = chromeGroup(svg, 'legend');
+    const image = /<image[^>]*>/.exec(legend)?.[0];
+    expect(image).toBeDefined();
+    expect(/width="(\d+)"/.exec(image!)?.[1]).not.toBe('42');
+    expect(/height="(\d+)"/.exec(image!)?.[1]).not.toBe('42');
+    const decoded = Buffer.from(
+      /xlink:href="data:image\/svg\+xml;base64,([^"]+)"/.exec(image!)![1]!,
+      'base64',
+    ).toString('utf-8');
+    expect(decoded).toContain('data-diagram-type="DESCRIPTION"');
+    expect(decoded).toContain('>f<');
+  });
+
+  it('a legend embedding an unsupported diagram type (no salt engine) degrades to the (42,42) fallback, not a crash', () => {
+    // Mirrors bixogo-47-xulu385/roxosu-00-pini153's own shape: a user-macro
+    // `SALT(...)` expands to `{{salt ... }}`; this port has no salt engine
+    // (`EmbeddedDiagram.ts`'s own catch degrades to (42,42) -- see that
+    // file's `calculateDimensionSlow`/`drawU` doc comments), so the render
+    // call itself throws "unknown diagram type" and is caught upstream --
+    // the legend still renders (no crash), with a fixed-size placeholder
+    // rect only, no `<image>`.
+    const src = '@startuml\nclass foo\nlegend\n{{salt\n{+\n<b>x\n}\n}}\nendlegend\n@enduml';
+    const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
+    const legend = chromeGroup(svg, 'legend');
+    expect(legend).not.toContain('<image');
+    // The legend's own rect is the (42,42) fallback plus its fixed 5px
+    // padding on each side (bixogo-47-xulu385/roxosu-00-pini153's own
+    // shape, `test-results/dot-cache/class/bixogo-47-xulu385/in.puml`).
+    expect(/<rect[^>]*width="52"[^>]*height="52"/.test(legend)).toBe(true);
+  });
+});

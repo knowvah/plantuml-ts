@@ -10,7 +10,7 @@
  */
 import type { ClassifierGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, text, ellipse, path } from '../../core/svg.js';
+import { rect, text, ellipse, path, image } from '../../core/svg.js';
 import {
   resolveBadgeFill,
   resolveBadgeBorder,
@@ -118,6 +118,31 @@ export function renderBadge(geo: ClassifierGeo, theme: Theme): string {
       { fill: resolveBadgeGlyphColor(spot?.font, theme.colors.graph.spotCascadeFont) },
     )
   );
+}
+
+/** `withMargin(4, 0, 5, 5)`'s top/bottom margin -- see `class-layout-header-
+ *  creole.ts#computeBadgeSpriteBox`'s own doc comment (same value, small
+ *  constant duplicated across the layout/render module family, matching
+ *  this project's established convention rather than crossing a module
+ *  boundary for one number). */
+const BADGE_SPRITE_TOP_MARGIN = 5;
+
+/**
+ * CDD B7FU-R2 item (c-b): `class Foo <<($sprite[,color])>>`'s SPRITE badge
+ * -- drawn in place of {@link renderBadge}'s default circled-character
+ * badge whenever `geo.badgeSpriteImage` is set (`renderer-classifier-
+ * box.ts#buildHeaderPrimitive`'s own dispatch). Position: jar-verified
+ * rotisi-30-loge424 `class zz <<($bug16,red)>>` -- the image sits at
+ * `geo.x + BADGE_LEFT_MARGIN(4), geo.y + BADGE_SPRITE_TOP_MARGIN(5)`
+ * (box `x=287.5,y=116.114`, image `x=291.5,y=121.114`, both offsets
+ * exact), i.e. flush against the classifier box's OWN top-left corner --
+ * NOT vertically centered in `headerH` the way the char badge's `<ellipse>`
+ * is (`Stereotype#getSprite`'s `withMargin(4,0,5,5)`-wrapped block is the
+ * FIRST element `HeaderLayout`'s ctor places, at a fixed top offset, unlike
+ * the circled-character badge's own vertical-center placement rule).
+ */
+export function renderBadgeSpriteImage(geo: ClassifierGeo, sprite: { href: string; width: number; height: number }): string {
+  return image(geo.x + BADGE_LEFT_MARGIN, geo.y + BADGE_SPRITE_TOP_MARGIN, sprite.width, sprite.height, sprite.href);
 }
 
 /**

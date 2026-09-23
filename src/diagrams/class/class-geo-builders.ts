@@ -16,6 +16,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
+import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
 
 /**
@@ -76,6 +77,18 @@ function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   };
 }
 
+/** CDD B7FU-R2 item (c-b): the badge-decoration fields, shared by both
+ *  `buildClassifierGeos`/`degenerateSingleClassifier` call sites below
+ *  (identical spread, previously duplicated) -- `mirrors inkBodyFields`'s
+ *  own "one shared helper, two callers" precedent. */
+function badgeFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
+  return {
+    ...(m.badgeChar !== undefined ? { badgeChar: m.badgeChar } : {}),
+    ...(m.badgeColor !== undefined ? { badgeColor: m.badgeColor } : {}),
+    ...(m.badgeSpriteImage !== undefined ? { badgeSpriteImage: m.badgeSpriteImage } : {}),
+  };
+}
+
 /**
  * Build ClassifierGeo entries from pre-measured sizes + dot-assigned
  * positions.
@@ -105,8 +118,7 @@ export function buildClassifierGeos(
       rows: measured.rows,
       ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
       ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-      ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-      ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+      ...badgeFields(measured),
       ...inkBodyFields(measured),
       ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
       ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
@@ -377,8 +389,7 @@ export function degenerateSingleClassifier(
     rows: measured.rows,
     ...(measured.headerRowCount !== undefined ? { headerRowCount: measured.headerRowCount } : {}),
     ...(measured.nameRowCount !== undefined ? { nameRowCount: measured.nameRowCount } : {}),
-    ...(measured.badgeChar !== undefined ? { badgeChar: measured.badgeChar } : {}),
-    ...(measured.badgeColor !== undefined ? { badgeColor: measured.badgeColor } : {}),
+    ...badgeFields(measured),
     ...inkBodyFields(measured),
     ...(measured.genericTag !== undefined ? { genericTag: measured.genericTag } : {}),
     ...(measured.folderTab !== undefined ? { folderTab: measured.folderTab } : {}),
@@ -414,9 +425,29 @@ export function degenerateSingleClassifier(
     height: measured.height + DEGENERATE_NEAR_MARGIN * 2,
   };
   const totalDims = applyClassDocumentMargin(rawDims);
+  // CDD B7FU-R2 item (e): a body whose DRAWN embedded `{{ }}` diagram
+  // overflows its own (42,42)-fallback-sized row reservation still pushes
+  // the canvas out to its real footprint -- `SvgGraphics#svgImageUnsecure`'s
+  // own `ensureVisible` calls (`klimt/drawing/svg/SvgGraphics.java:987-999`)
+  // track a drawn embed's REAL absolute corner directly, `Math.floor(v)+1`,
+  // independent of the `CucaDiagram`-margin recipe `applyClassDocumentMargin`
+  // folds into `totalDims` above -- so the embed's contribution is a MAX
+  // against the box-driven total, never routed through that recipe a
+  // second time (jar-verified `zikabo-17-gugi332`/`gadufu-56-votu808`: the
+  // embed's own absolute corner, truncated this way, lands EXACTLY on the
+  // jar's real canvas dims). `drawnEnhancedBodyEmbeds` returns `[]` (this
+  // max is a no-op, byte-identical) for every classifier with no enhanced
+  // body / no drawn embed -- the overwhelming majority of degenerate
+  // diagrams. `rawWidth`/`rawHeight` (chrome-centering inputs, G2 N48's own
+  // doc comment) stay the box-only value: no fixture in this corpus
+  // combines a title/chrome with an overflowing embed, so extending them
+  // the same way would be unverified.
+  const embeds = drawnEnhancedBodyEmbeds(geo);
+  const embedRight = Math.max(0, ...embeds.map((e) => e.x + e.width));
+  const embedBottom = Math.max(0, ...embeds.map((e) => e.y + e.height));
   return {
-    totalWidth: totalDims.width,
-    totalHeight: totalDims.height,
+    totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1),
+    totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1),
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
     leaves: [geo],

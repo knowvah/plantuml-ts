@@ -86,6 +86,7 @@ describe('resolveTips -- EntityImageTips#drawU at draw time', () => {
           { kind: 'rows', rows: [{ text: 'attr', y: 46, width: 20, indent: 6 }] },
           { kind: 'tree', rows: [{ text: 'leaf', y: 60, width: 25, indent: 14 }], connectors: [] },
         ],
+        portMembers: [],
       },
     };
     const out = resolveTips([tip('r', 'attr', 'right', 200), tip('l', 'leaf', 'left', 200, 50)], [enhancedHost]);

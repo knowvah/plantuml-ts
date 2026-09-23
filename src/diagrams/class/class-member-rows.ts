@@ -179,6 +179,11 @@ export interface SectionRowContext {
    *  icon-section indent, matching `sectionWidth`'s width reserve
    *  (upstream uses the SAME `radius + 3` for both). */
   iconZoneWidth: number;
+  /** CDD B7FU-R2 item (b) (coordinator, journal row 161): the member-row
+   *  font's OWN size -- `buildSectionRows`'s own doc comment for the
+   *  bottom-anchor formula this feeds (identical mechanism/citation to
+   *  `class-body-enhanced-layout.ts#buildRowsBlockRows`'s own fix). */
+  fontSize: number;
 }
 
 /**
@@ -258,9 +263,20 @@ function buildOneRow(input: OneRowInput): ClassifierGeo['rows'][number] {
  * at `sectionTop`. `y` is the text BASELINE (G2 N4 -- jar draws plain,
  * un-centered `<text>` for every row, never `dominant-baseline="middle"`;
  * see `renderer.ts#renderRow`'s own doc comment for the render-side half of
- * this fix), `sectionTop + SECTION_MARGIN_TOP + i * memberRowHeight +
- * baselineOffset` where `baselineOffset` is the SAME ascent-from-line-top
- * value `measureGenericClassifier` derives for the header row.
+ * this fix), `sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset`
+ * where `baselineOffset` is the SAME ascent-from-line-top value
+ * `measureGenericClassifier` derives for the header row.
+ *
+ * CDD B7FU-R2 item (b) (coordinator, journal row 161, malara-55-moce209):
+ * `y` is BOTTOM-anchored to the row's own height, not the flat
+ * `baselineOffset` alone -- `y = sectionTop + SECTION_MARGIN_TOP + rowTop +
+ * build.height - (fontSize - baselineOffset)`, identical to the OLD
+ * formula when `build.height === fontSize` (text-only rows, zero behavior
+ * change). Same mechanism/citation `class-body-enhanced-layout.ts
+ * #buildRowsBlockRows` already fixed for the enhanced-body path
+ * (`MethodsOrFieldsArea#drawU`, java:429-440): a row taller/shorter than
+ * the font (a sprite atom scaled `fontSize/13`) shifts its own internal
+ * anchor with it, not a shared flat per-classifier offset.
  */
 export function buildSectionRows(
   members: Classifier['members'],
@@ -275,7 +291,8 @@ export function buildSectionRows(
   // here: the bare `#lizard forgive` flag is reset by every nested-context
   // pop, and the spread-ternary object literals below stack contexts that
   // pop at function end, eating the flag (lizard.py#end_of_function).
-  const { baselineOffset } = ctx;
+  const { baselineOffset, fontSize } = ctx;
+  const bottomAnchor = fontSize - baselineOffset;
   const rows: ClassifierGeo['rows'] = [];
   const indent = sectionHasIcon ? ROW_TEXT_LEFT_MARGIN + ctx.iconZoneWidth : ROW_TEXT_LEFT_MARGIN;
   // A2s R2i: rows advance by each PRIOR row's own height (see
@@ -305,7 +322,27 @@ export function buildSectionRows(
     // non-zero icon size, sectionHasIcon true iff ANY member is explicit,
     // so a row with `visibilityExplicit` implies sectionHasIcon.
     const showIcon = sectionHasIcon && member.visibilityExplicit === true && members[i - 1] !== member;
-    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + baselineOffset;
+    // CDD B7FU-R2 item (b) correction (exposant-01-class/sovuxo-25-tepi226
+    // regressions, diagnosed): `build.height` differs from `fontSize` for
+    // THREE distinct reasons, only ONE of which needs the bottom-anchor
+    // shift. (1) A sprite/img/latex atom (`kind: 'image'`) is drawn TOP-
+    // anchored at an absolute pixel position with no `dy` correction of
+    // its own (`renderer-classifier-rows.ts#renderRowAtoms`'s `lineBottomY
+    // = y + fontSize/4.5` formula) -- genuinely needs `y` shifted so that
+    // formula reaches the row's real top; jar-verified on rotisi-30-
+    // loge424/malara-55-moce209. (2) A `<sup>`/`<sub>` creole run inflates
+    // Sea's own ascent/descent envelope (`exposant-01-class`, `x<sup>2
+    // </sup>` measured height 17 at font 14) but each run's OWN position
+    // is corrected via `atom.dy` (SI30 D2/D3, "must not be applied
+    // twice") -- the row's BASELINE stays put. (3) A pure-text row's
+    // height is floor-clamped for a small font (`sovuxo-25-tepi226`,
+    // `skinparam classAttributeFontSize 8`, measured height 10 not 8) --
+    // a STACKING floor only, not a real top-anchor difference. Gated on
+    // an `'image'`-kind atom (sprite/img/latex -- `class-member-render-
+    // atom.ts`'s own doc comment; emoji resolves to `'text'`, dy-corrected
+    // like sup/sub, confirmed via `resolveEmojiAtom`) to reach ONLY case 1.
+    const hasImageAtom = build.atoms.some((a) => a.kind === 'image');
+    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
     rowTop += build.height;
     rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]! }));
   }
