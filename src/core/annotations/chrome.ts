@@ -1,9 +1,17 @@
 /**
  * chrome.ts — mission G0b / T4: `DiagramChromeFactory.create`'s
- * warnings-less, mainframe-less half (legend → title → caption →
+ * warnings-less half (mainframe → legend → title → caption →
  * header/footer, header/footer outermost — decisions.md D1/D9) plus
  * `DecorateEntityImage`'s vertical-stack composition math (`mergeTB`,
  * `getTextX`, the `xImage`/`yImage`/`yText2` layout).
+ *
+ * cdd-T34 (E14 `mainframe`): `decorateWithFrame` (`addMainframe` below) is
+ * now ported too — it was the one step this module's own doc comment
+ * previously called out as deferred whole (`BigFrame` unported, an earlier
+ * mission's D9). Structurally different from the other four slots (it
+ * WRAPS `original` on all sides via `../klimt/shape/big-frame.js` rather
+ * than stacking above/below it through {@link decorateEntityImage}), so it
+ * is applied separately, first, in {@link applyChrome}.
  *
  * Implementation note (not a divergence from the ported algorithm, a
  * divergence from the Java's OOP shape only): upstream builds a chain of
@@ -62,9 +70,11 @@ import { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { VerticalAlignment } from '../klimt/geom/VerticalAlignment.js';
 import { group } from '../svg.js';
 import { buildAnnotationBlock, type AnnotationBlock } from './blocks.js';
+import { buildChromeTextBlock } from './blocks-creole.js';
 import { mergeFragmentDefs } from '../klimt/document-shell.js';
 import type { SpriteRegistry } from '../sprite-commands.js';
 import { shiftFragmentBody } from './coord-shift.js';
+import { buildBigFrame, type BigFrameStyle } from '../klimt/shape/big-frame.js';
 
 /** T2's `resolveAnnotationStyles` return shape, re-exported under the name
  *  T4's interface contract (`plans/g0b-annotations/batch-2/T4-chrome-core.md`)
@@ -167,6 +177,134 @@ function decorateEntityImage(
 }
 
 // ---------------------------------------------------------------------------
+// Mainframe — DiagramChromeFactory.decorateWithFrame (cdd-T34)
+// ---------------------------------------------------------------------------
+
+/**
+ * `DiagramChromeFactory.decorateWithFrame` (java:275-336): wraps `original`
+ * in a {@link buildBigFrame} box with the mainframe text as a folder-tab
+ * title in its top-left corner, then applies the mainframe style's own
+ * OUTER `margin` around the whole thing. Unlike {@link addLegend}/{@link
+ * addTitle}/etc. (which stack ABOVE/BELOW `original` via {@link
+ * decorateEntityImage}), mainframe WRAPS `original` on all four sides —
+ * a structurally different composition, so it does not go through that
+ * shared helper. Applied FIRST in {@link applyChrome} (before legend/
+ * title/caption/header/footer), matching `create`'s own step order
+ * (java:126-133): mainframe decorates the raw body, and legend/title/etc.
+ * stack outside the mainframe-wrapped result.
+ *
+ * @see ~/git/plantuml/.../core/DiagramChromeFactory.java:275-336
+ */
+/** `TextBlockBordered#drawU`'s own `color` derivation (`buildAnnotationBlock`'s
+ *  identical formula) -- mainframe's `lineThickness` is never 0 by default
+ *  (1.5, plantuml.skin:87), so this is `style.lineColor` in every corpus
+ *  fixture; the `?? 'none'` guards a future `<style>` override that zeroes
+ *  it, mirroring `buildAnnotationBlock`'s own fallback. */
+function mainframeTitleColor(style: AnnotationBoxStyle): string {
+  return style.lineThickness === 0 ? (style.backgroundColor ?? 'none') : (style.lineColor ?? 'none');
+}
+
+/**
+ * `BigFrame`'s box + folder-tab title, fully composed (frame decoration +
+ * title text at its fixed `(3,1)` offset + `original` at the frame's own
+ * placement) but NOT yet margin-wrapped — split out of {@link addMainframe}
+ * to stay under this repo's per-function size cap.
+ *
+ * `Style#getSymbolContext`'s `backColor` (java:271-273): mainframe's own
+ * `BackGroundColor` is unset in `plantuml.skin` (only `Padding`/
+ * `LineThickness`/`Margin` are, `:85-89`) and does NOT inherit `root{}`'s
+ * own `BackGroundColor` the way `LineColor`/`FontColor`/`RoundCorner` do
+ * (`annotation-defaults.ts`'s mainframe entry: `backgroundColor: null`,
+ * jar-verified via direct probe -- see `.agent-notes/cdd-T34.md`) --
+ * instead it falls back to the DOCUMENT's own canvas colour: jar-verified
+ * directly (`jakaja-15-faze022`'s frame fill is the default white canvas; a
+ * probe with `skinparam BackgroundColor lightblue` made the frame fill the
+ * SAME lightblue, `#ADD8E6`, exactly matching `documentBackground`).
+ * `resolveColorToSvgHex`/`shortenColor` (already applied by `rect()`)
+ * reproduce the jar's own `#FFF` 3-digit shorthand for the white case; a
+ * future explicit `mainframe{BackgroundColor ...}` override (`style.
+ * backgroundColor` non-null) takes priority.
+ */
+/** `BigFrame`'s title text: `mainFrame.create(fontConfiguration,
+ *  HorizontalAlignment.CENTER, skinParam)` (java:288) -- CENTER is
+ *  hard-coded regardless of the mainframe style's own resolved alignment,
+ *  the same D8 quirk `addTitle`/`addCaption` document for their own slots. */
+function buildMainframeTitleBlock(
+  mainFrame: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  ctx: ChromeTextContext,
+): ReturnType<typeof buildChromeTextBlock> {
+  const centeredStyle: AnnotationBoxStyle = { ...style, horizontalAlignment: HorizontalAlignment.CENTER };
+  return buildChromeTextBlock(
+    { uid: 'mainframe', color: mainframeTitleColor(style), sprites: ctx.sprites },
+    nonNullDisplay(mainFrame),
+    centeredStyle,
+    ctx.measurer,
+  );
+}
+
+function bigFrameStyleOf(style: AnnotationBoxStyle): BigFrameStyle {
+  return {
+    fillColor: style.backgroundColor ?? style.documentBackground,
+    lineColor: style.lineColor ?? '#181818',
+    lineThickness: style.lineThickness,
+    roundCorner: style.roundCorner,
+    padding: style.padding,
+  };
+}
+
+function buildFramedBlock(
+  original: AnnotationBlock,
+  mainFrame: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  ctx: ChromeTextContext,
+): AnnotationBlock {
+  const titleBlock = buildMainframeTitleBlock(mainFrame, style, ctx);
+  const layout = buildBigFrame({ width: titleBlock.width, height: titleBlock.height }, original, bigFrameStyleOf(style));
+
+  const parts = [
+    layout.body,
+    // `BigFrame#drawU` (java:127-131): the title is always drawn at the
+    // fixed `(3,1)` offset -- see `big-frame.ts`'s own doc comment for why
+    // the `SpecialText`/direct-draw branch split there collapses to one
+    // draw call in this port (no compression-mode `UGraphic`).
+    shiftFragmentBody(titleBlock.body, 3, 1),
+    shiftFragmentBody(original.body, layout.originalX, layout.originalY),
+  ];
+  const extraDefs = mergeFragmentDefs([original, titleBlock]);
+  return {
+    body: parts.join(''),
+    width: layout.width,
+    height: layout.height,
+    ...(extraDefs === undefined ? {} : { extraDefs }),
+  };
+}
+
+function addMainframe(
+  original: AnnotationBlock,
+  mainFrame: DisplayPositioned,
+  style: AnnotationBoxStyle,
+  ctx: ChromeTextContext,
+): AnnotationBlock {
+  const framed = buildFramedBlock(original, mainFrame, style, ctx);
+
+  // The outer `margin` wrap (`decorateWithFrame`'s returned anonymous
+  // `TextBlock#drawU`/`calculateDimension`, java:298-320): `frame.drawU(ug
+  // .apply(margin.getTranslate()))` and the SAME translate composed into
+  // `original`'s own offset above already account for margin.left/top via
+  // `layout.originalX/Y` being frame-LOCAL -- so the margin shift is
+  // applied ONCE, here, to the whole already-composed `framed` block,
+  // matching `calculateDimension`'s `margin.left + frameDim.width +
+  // margin.right` (java:317-319).
+  return {
+    body: shiftFragmentBody(framed.body, style.margin.left, style.margin.top),
+    width: style.margin.left + framed.width + style.margin.right,
+    height: style.margin.top + framed.height + style.margin.bottom,
+    ...(framed.extraDefs === undefined ? {} : { extraDefs: framed.extraDefs }),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Per-element wrap steps — DiagramChromeFactory.addLegend/addTitle/
 // addCaption/addHeaderAndFooter
 // ---------------------------------------------------------------------------
@@ -256,10 +394,9 @@ function addHeaderAndFooter(
 
 /**
  * `DiagramChromeFactory.create`, minus warnings (no caller in this port —
- * `Collection<Warning>` has no producer yet) and minus mainframe
- * (decisions.md D9 — deferred whole to T9). Skips entirely — returning the
- * SAME `fragment` object, `===` — when `isEmpty(annotations)` (decisions.md
- * D5, byte-stability for annotation-free diagrams).
+ * `Collection<Warning>` has no producer yet). Skips entirely — returning
+ * the SAME `fragment` object, `===` — when `isEmpty(annotations)`
+ * (decisions.md D5, byte-stability for annotation-free diagrams).
  *
  * G1d: the fully-composed result (every active slot + the original body,
  * already transform-free per {@link decorateEntityImage}) is wrapped in
@@ -326,14 +463,19 @@ export function applyChrome(
     width: fragment.preChromeWidth ?? fragment.width,
     height: fragment.preChromeHeight ?? fragment.height,
   };
-  // D9: `mainframe` participates in `isEmpty()` (chrome still RUNS for a
-  // mainframe-only diagram) but is not yet drawn (`BigFrame` unported) --
-  // tracked separately from `block` so a mainframe-only bag still returns
-  // `fragment.body` byte-identical (no new outer `<g>` either), matching
-  // `annotations-mainframe.test.ts`'s pinned D5-adjacent invariant.
-  const { block, decorated } = applyChromeSlots(initial, annotations, styles, { measurer, sprites });
+  // cdd-T34: mainframe applies FIRST (`DiagramChromeFactory.create`'s own
+  // step order, java:126-133) -- it WRAPS `initial` rather than stacking
+  // above/below it, so it is not one of `applyChromeSlots`'s four `if`
+  // checks. `framed` stays `initial` (`===`) when there is no mainframe,
+  // so `mainframeDecorated` below is the ONLY thing that changes relative
+  // to pre-T34 behavior for a mainframe-free diagram (none — `isEmpty()`
+  // already required at least one non-null annotation to reach this line).
+  const ctx: ChromeTextContext = { measurer, sprites };
+  const mainframeDecorated = !isDisplayPositionedNull(annotations.mainFrame);
+  const framed = mainframeDecorated ? addMainframe(initial, annotations.mainFrame, styles.mainframe, ctx) : initial;
+  const { block, decorated } = applyChromeSlots(framed, annotations, styles, ctx);
 
-  if (!decorated) return fragment;
+  if (!decorated && !mainframeDecorated) return fragment;
 
   // Spread `fragment` first so `background`/`extraDefs` are inherited
   // exactly as present-or-absent (exactOptionalPropertyTypes forbids
