@@ -22,10 +22,10 @@ gated like T32 (every engine's suite, stop 4), not class-only.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T31 | `hide`/`show` by name: separator strip + group cascade (A2b E5) | typescript-pro (sonnet) | `class-directives-removal.ts`, `class-hideshow-dispatch.ts`, `ast.ts` (directive field only), tests | — | [ ] |
-| T32 | stdlib `!include` misdispatch + error-page SVG-root formatter (A6 §5a/§5b) | debugger (diagnosis) → typescript-pro (sonnet) (fix) | `core/dispatcher.ts`, `core/error/error-renderer.ts`, `core/error/error-diagrams.ts`, `DIVERGENCES.md` (version-string entry only if absent), tests | — | [ ] |
-| T33 | `skinparam mode dark` (A3 M6, A6 §5d) | typescript-pro (sonnet) | `core/theme.ts` or a new `core/theme-dark.ts`, `core/skinparam-key-handlers-table-a/b.ts`, `class-badge.ts` (spot defaults only if needed), tests | — | [ ] |
-| T34 | `newpage`, `mainframe`, `topurl`, `<>` n-ary diamond + jar-refusal sibling (A2b E14) | typescript-pro (sonnet) | `class/renderer.ts`, `class/layout.ts`, `class/class-geo-types.ts` (page-boundary field only), `core/annotations/chrome.ts`, a new `core/klimt/shape/big-frame.ts`, `core/skinparam-key-handlers-table-a/b.ts` (`topurl` key), `class/class-url.ts`, `class/class-command-containers.ts`, `CHANGELOG.md` (T7 entry amendment), tests | T32 | [ ] |
+| T31 | `hide`/`show` by name: separator strip + group cascade (A2b E5) | typescript-pro (sonnet) | `class-directives-removal.ts`, `class-hideshow-dispatch.ts`, `ast.ts` (directive field only), tests | — | [x] |
+| T32 | stdlib `!include` misdispatch + error-page SVG-root formatter (A6 §5a/§5b) | debugger (diagnosis) → typescript-pro (sonnet) (fix) | `core/dispatcher.ts`, `core/error/error-renderer.ts`, `core/error/error-diagrams.ts`, `DIVERGENCES.md` (version-string entry only if absent), tests | — | [x] |
+| T33 | `skinparam mode dark` (A3 M6, A6 §5d) | typescript-pro (sonnet) | `core/theme.ts` or a new `core/theme-dark.ts`, `core/skinparam-key-handlers-table-a/b.ts`, `class-badge.ts` (spot defaults only if needed), tests | — | [x] |
+| T34 | `newpage`, `mainframe`, `topurl`, `<>` n-ary diamond + jar-refusal sibling (A2b E14) | typescript-pro (sonnet) | `class/renderer.ts`, `class/layout.ts`, `class/class-geo-types.ts` (page-boundary field only), `core/annotations/chrome.ts`, a new `core/klimt/shape/big-frame.ts`, `core/skinparam-key-handlers-table-a/b.ts` (`topurl` key), `class/class-url.ts`, `class/class-command-containers.ts`, `CHANGELOG.md` (T7 entry amendment), tests | T32 | [x] |
 
 Specs: [`T31-hide-show-by-name.md`](T31-hide-show-by-name.md),
 [`T32-stdlib-include-dispatch-error-page.md`](T32-stdlib-include-dispatch-error-page.md),
