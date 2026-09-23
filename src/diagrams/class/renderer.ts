@@ -5,14 +5,12 @@
  * No DOM, no async.
  */
 
-import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './layout.js';
-import { sliceClassGeometryPage } from './layout.js';
+import { sliceClassGeometryPage, type ClassGeometry, type ClassifierGeo, type NamespaceGeo } from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
 import type { Theme } from '../../core/theme.js';
-import type { ScaledTheme } from './class-scale-geo.js';
-import { scaleClassTheme } from './class-scale-geo.js';
+import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -27,7 +25,7 @@ import {
   leafPortion,
   renderGroupInheritanceNeighborhood,
 } from './renderer-group.js';
-import { renderAssocPoint, renderLollipop } from './renderer-assoc-lollipop.js';
+import { renderAssocPoint, renderAssociationDiamond, renderLollipop } from './renderer-assoc-lollipop.js';
 import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
@@ -333,6 +331,10 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     // own doc comment.
     if (classifier.kind === 'assoc-circle') {
       children.push(renderAssocPoint(classifier, theme));
+      continue;
+    }
+    if (classifier.kind === 'association') {
+      children.push(renderAssociationDiamond(classifier, theme)); // cdd-T34
       continue;
     }
     // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon

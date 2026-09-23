@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1187 modules · 4418 exported names.
+1187 modules · 4419 exported names.
 
 ## `src/`
 
@@ -1251,7 +1251,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parser.ts` | `ensureClassifier`, `ParseState`, `startNewPage`, `parseClass` | Parser for PlantUML class diagrams. |
 | `renderer-arrowhead-ink.ts` | `EdgeExtremityInk`, `edgeExtremityInk` | renderer-arrowhead-ink.ts — `edgeExtremityInk`, split out of `renderer- arrowhead.ts` when cdd-T29 round 2's `scaleK` threading pushed that file back over the 500-line hook cap (pre-authorised split, same precedent as this round's other spl |
 | `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `EdgeArrowheadOptions`, `buildEdgeArrowheads`, `applyDecorTrim`, `EdgeExtremityInk`, `edgeExtremityInk`, `buildMiddleDecorMarkup` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
-| `renderer-assoc-lollipop.ts` | `renderAssocPoint`, `renderLollipop` | renderer-assoc-lollipop.ts — the association-class-couple "point" entity (`(A,B) .. |
+| `renderer-assoc-lollipop.ts` | `renderAssocPoint`, `renderAssociationDiamond`, `renderLollipop` | renderer-assoc-lollipop.ts — the association-class-couple "point" entity (`(A,B) .. |
 | `renderer-body-enhanced.ts` | `buildEnhancedBodyPrimitives` | renderer-body-enhanced.ts — draws a classifier's `EnhancedBodyGeo` (`class-body-enhanced-layout.ts`) primitives in EXACT jar draw order — NOT the classic path's Y-sort merge (`renderer-classifier-box.ts #buildBodyPrimitives`'s own doc comme |
 | `renderer-bullet-atom.ts` | `renderBulletAtom` | `renderBulletAtom` -- the creole bullet marker (`klimt/creole/atom/ Bullet.java`), split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-badge-tag.ts` | `renderBadge`, `renderBadgeSpriteImage`, `renderGenericTag` | `renderBadge` (the kind badge in a classifier's header) and `renderGenericTag` (`class Foo<T>`'s generic type-parameter tag box) -- split out of `renderer-classifier-box.ts` purely to keep that file under this project's 500-line cap. |

@@ -6,11 +6,12 @@
  * classifier-map-dividers.ts`'s sibling split this same round) -- a pure
  * move, re-imported back unchanged.
  */
-import { ellipse } from '../../core/svg.js';
+import { ellipse, polygon } from '../../core/svg.js';
 import type { ClassifierGeo } from './layout.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderRow } from './renderer-classifier-box.js';
+import { classifierFill, classBorderLine, classBorderStrokeWidth } from './renderer-classifier-colors.js';
 
 /**
  * `(A,B) .. C`'s tiny circle connector — G2 N8, `EntityImageAssociationPoint
@@ -30,6 +31,52 @@ export function renderAssocPoint(geo: ClassifierGeo, theme: ScaledTheme): string
     fill: theme.colors.arrow,
     stroke: theme.colors.arrow,
     'stroke-width': theme.scaleK,
+  });
+}
+
+/**
+ * cdd-T34 (E14, `<> name` n-ary association diamond, `cukaze-78-zija070`):
+ * `EntityImageAssociation#drawU` (`svek/image/EntityImageAssociation.java:
+ * 68-84`) -- a bare `UPolygon` diamond, no fill/border/badge of its own
+ * kind, sharing the SAME `root,element,class_,diamond` style-signature
+ * defaults every OTHER classifier box already resolves through {@link
+ * classifierFill}/{@link classBorderLine}/{@link classBorderStrokeWidth}
+ * (jar-verified: cukaze's diamond `fill="#F1F1F1"`/`stroke="#181818"`/
+ * `stroke-width="0.5"` are byte-identical to its own two classifier boxes'
+ * -- this port has no separate `diamond` StyleSignature, so the shared
+ * classifier-box resolution is the faithful approximation).
+ *
+ * UNWRAPPED like {@link renderAssocPoint} above -- `EntityImageAssociation`
+ * (an `AbstractEntityImage`, no name/badge/body) is one of the leaf kinds
+ * `GeneralImageBuilder` draws directly, bypassing the normal `<g class=
+ * "entity" id="…">` + `<!--class …-->` wrap every named classifier gets
+ * (jar-verified: no `<g>`, no `id`, no comment around cukaze's `<polygon>`)
+ * -- `renderClass`'s classifier loop special-cases `kind === 'association'`
+ * to call this instead of `wrapEntity`/`renderClassifier`.
+ *
+ * `geo.width`/`geo.height` are already the resolved `SIZE*2` square
+ * (`class-layout-leaf-shapes.ts#measureAssociationDiamond`, already scaled
+ * by `scaleClassGeometry` like every other `ClassifierGeo` field) -- the
+ * four points are derived from them rather than a re-declared `SIZE`
+ * constant, so this stays correct under `scale ...` with no extra
+ * multiplication (`classBorderStrokeWidth` scales the stroke width itself).
+ *
+ * @see ~/git/plantuml/.../svek/image/EntityImageAssociation.java:68-84
+ */
+export function renderAssociationDiamond(geo: ClassifierGeo, theme: ScaledTheme): string {
+  const hw = geo.width / 2;
+  const hh = geo.height / 2;
+  const points = [
+    { x: geo.x + hw, y: geo.y },
+    { x: geo.x + geo.width, y: geo.y + hh },
+    { x: geo.x + hw, y: geo.y + geo.height },
+    { x: geo.x, y: geo.y + hh },
+    { x: geo.x + hw, y: geo.y },
+  ];
+  return polygon(points, {
+    fill: classifierFill(geo, theme),
+    stroke: classBorderLine(geo, theme),
+    strokeWidth: classBorderStrokeWidth(geo, theme),
   });
 }
 
