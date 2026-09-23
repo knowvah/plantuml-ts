@@ -48,11 +48,12 @@
  */
 import type { ClassifierGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
-import { rect, line } from '../../core/svg.js';
+import { rect, line, image } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
 import { text as svgText } from '../../core/svg.js';
 import { renderRow, pushIconRowPrimitives } from './renderer-classifier-box.js';
 import type { EnhancedBodyGeo, EnhancedBodyPart } from './class-body-enhanced-layout.js';
+import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
 import type { UrlTaggedPrimitive } from './renderer-url.js';
 
 /** The classifier box's OWN divider stroke color (`class-border`'s own
@@ -139,6 +140,33 @@ function buildRowsPartPrimitives(
     const scratch: Array<{ y: number; item: UrlTaggedPrimitive }> = [];
     pushIconRowPrimitives(scratch, geo, theme, row, effectiveUrl);
     primitives.push(...scratch.map((entry) => entry.item));
+  }
+  primitives.push(...buildEmbedPrimitives(geo, part));
+  return primitives;
+}
+
+/**
+ * CDD T27FU: one `UrlTaggedPrimitive` per `{{ }}` block in this 'rows' part
+ * -- `MethodsOrFieldsArea.java:429-440`'s embed draw loop, AFTER every
+ * member row (upstream translates past the member group's own height
+ * first, then draws each embed in turn). No per-embed url source exists
+ * upstream either (the embed draw loop is OUTSIDE the member
+ * `TextBlockTracer` url-wrap loop entirely) -- tagged with the classifier's
+ * own fallback url, same convention as a divider/tree part. A `href`-less
+ * entry (`EmbeddedBlockGeo`'s own doc comment: the `(42,42)` render-failure
+ * fallback) reserves its height but draws nothing, matching `EmbeddedDiagram
+ * .java:191-193`'s own independent `drawU` catch.
+ */
+function buildEmbedPrimitives(
+  geo: ClassifierGeo,
+  part: Extract<EnhancedBodyPart, { kind: 'rows' }>,
+): UrlTaggedPrimitive[] {
+  const embeds = part.embeds ?? [];
+  const primitives: UrlTaggedPrimitive[] = [];
+  for (const embed of embeds) {
+    if (embed.href === undefined) continue;
+    const body = image(geo.x + BODY_ENHANCED_MARGIN_X, geo.y + embed.y, embed.width, embed.height, embed.href);
+    primitives.push({ url: geo.url, body });
   }
   return primitives;
 }

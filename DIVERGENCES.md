@@ -553,6 +553,65 @@ licensing-safe path for ND-licensed artwork.
 
 **Affects:** any diagram rendering stdlib icons or creole `img`/sprite atoms.
 
+### Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster (deliberate, CDD T27)
+
+**Upstream:** `EmbeddedDiagram#getImageSvg`/`getImageSvgSlow`
+(`EmbeddedDiagram.java:129-133,169-174,197-213`) renders the nested diagram,
+strips its `<?plantuml ...?>` processing instructions, and embeds the
+resulting bytes as a `data:image/svg+xml;base64` (or PNG, off the raster
+branch) `<image>` inside the parent diagram.
+
+**This port:** `src/diagrams/class/class-nested-diagram-renderer.ts`
+(`createNestedDiagramRenderer`, CDD T27) renders the nested source through
+this port's OWN `renderSync` recursively, strips the same `<?plantuml ...?>`
+PIs (java:199), and embeds the resulting SVG SOURCE, base64-encoded
+verbatim, as a `data:image/svg+xml;base64` `<image>` sized from the nested
+render's own `viewBox`. Geometry (one `<image>` element, `x`/`y`/`width`/
+`height`) is the target; the payload BYTES deliberately differ — this port
+never re-encodes through ImageIO/AWT (no raster pipeline at all, this
+project's architecture note). The jar's CURRENT oracle cache for this
+corpus holds REAL nested renders, not the `calculateDimensionSlow` catch
+fallback (`(42, 42)`, java:150-152) -- an earlier note
+(`.agent-notes/r2b-embedded-42x42.md`) documented the fallback against an
+OLDER cache and is corrected by `.agent-notes/cdd-T27.md`, which decodes
+the current cache's `<image>` payloads directly.
+
+**Reason:** same as the sprite/img entry above — no portable, deterministic
+raster re-encode path exists in a browser-safe library; embedding the real
+rendered SVG source is cheaper and strictly more informative than a raster.
+
+**Status (CDD T27FU, updated):** wired into production for the class
+engine's own ENHANCED-body pipeline (`class-body-enhanced-embeds.ts`
+ports `MethodsOrFieldsArea.java:109-123,141-152,429-440`'s embed
+separation/stacking directly into `class-body-enhanced-layout.ts
+#buildRowsBlockRows`; `src/index.ts#prepareBlock` registers the renderer,
+closing over the ambient call's own `options`/measurer, on every
+`renderSync` call). Observable today for any classifier body that ALREADY
+takes the enhanced-body path (a `--`/`==`/`..`/`__` separator or `|_` tree
+line present anywhere in the body) and also contains a `{{ }}` block —
+`gadufu-56-votu808` is such a fixture (0 structural diffs; the image's own
+width/height carry a small residual, `.agent-notes/cdd-T27.md`'s own
+mechanism finding — belongs to the embedded ACTIVITY engine's text
+measurement, not this seam). A body whose ONLY enhancing trigger would be
+the `{{ }}` block itself (no separator/tree line otherwise present, e.g.
+`moxobo-16-tipo829`/`zikabo-17-gugi332`) is still NOT reached: `class-body-
+enhanced.ts#isEnhancedBody` lacks upstream's third disjunct
+(`EmbeddedDiagram.getEmbeddedType(s) != null`, `BodierLikeClassOrObject
+.java:96`) and is excluded from this task's write-set (a concurrent task
+edits it) — see `.agent-notes/cdd-T27.md` for the one-line fix needed and
+why even fixing it would not unblock genuine multi-level recursion (a
+SEPARATE, more severe parser gap: `handlePendingBodyLine` has no
+embedded-block awareness at parse time at all, so a NESTED class
+declaration's own closing `}` inside a `{{ }}` region prematurely closes
+the outer body regardless of `isEnhancedBody`). `core/cucadiagram/
+MethodsOrFieldsArea.ts`'s OWN consumer remains unreached (dead code for
+class-body rendering, ADR-5 — a DIFFERENT, pre-existing fact this task's
+diagnosis re-confirmed, not something T27FU changed).
+
+**Affects:** any class-body `{{ }}` embed whose enclosing body already
+takes the enhanced path; the bare-embed-only case and T28's chrome/legend
+consumer remain as described above.
+
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 
 **Upstream:** `!includedef NAME` pulls the named definition out of the

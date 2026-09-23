@@ -148,6 +148,10 @@ export default tseslint.config([
       'src/core/tim/TMemoryLocal.ts',
       'src/diagrams/activity/layout/tile-layout.ts',
       'src/diagrams/description/renderer-draw-sequence.ts',
+      // CDD T27FU: the class engine's own EmbeddedDiagram.java:148-150
+      // Logme.error mirror (renderEmbed's catch), same faithful-port reason
+      // as EmbeddedDiagram.ts above.
+      'src/diagrams/class/class-body-enhanced-embeds.ts',
     ],
     rules: { 'no-console': 'off' },
   },

@@ -107,6 +107,37 @@ export function sectionHeight(rowBuilds: readonly MemberRowBuild[]): number {
 }
 
 /**
+ * T24-diagnosis row 83 / CDD T27FU: `BodierLikeClassOrObject#isMethod`
+ * (java:107-116) strips every `[[...]]` url bracket with `URL_PATTERN
+ * .matcher(s).replaceAll("")` BEFORE the paren scan, where `URL_PATTERN =
+ * Pattern.compile(UrlBuilder.getRegexp())` — the SAME 5-alternative grammar
+ * `class-url.ts` already ports for STRICT whole-bracket matching, here
+ * reproduced un-anchored (find/replace-all mode, not `^...$`) since a
+ * `[[...]]` url can sit ANYWHERE in a raw-fallback member's line, not just
+ * fill it entirely (`sejuzo-42-fini523`: a leading `[[url{tooltip
+ * containing "(pagename)"} label]] : TEXT` field). Without the strip, the
+ * tooltip's own parens leak into the paren scan and the field is
+ * misbucketed as a method.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/url/UrlBuilder.java:52-88 (S_QUOTED..S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL, getRegexp)
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodierLikeClassOrObject.java:104-116
+ */
+const URL_BRACKET_RE = new RegExp(
+  [
+    // 1. `[["quoted link"{tooltip} label]]`.
+    String.raw`\[\[\s*"[^"]+"(?:\s*\{[^{}]*\})?(?:\s[^\s{}[\]][^[\]]*)?\s*\]\]`,
+    // 2. `[[{tooltip}]]`.
+    String.raw`\[\[\s*\{.*\}\s*\]\]`,
+    // 3. `[[{tooltip} label]]`.
+    String.raw`\[\[\s*\{[^{}]*\}\s*[^\s{}[\]][^[\]]*\s*\]\]`,
+    // 4. `[[link{tooltip}]]`.
+    String.raw`\[\[\s*[^\s"{}[\]]+?\s*\{.+\}\s*\]\]`,
+    // 5. `[[link{tooltip} label]]` (tooltip/label both optional).
+    String.raw`\[\[\s*[^\s"[\]]+?(?:\s*\{[^{}]*\})?(?:\s[^\s{}[\]][^[\]]*)?\s*\]\]`,
+  ].join('|'),
+  'g',
+);
+
+/**
  * `Member.params !== undefined` means a method (see `Member`'s own doc
  * comment); upstream's equivalent is `BodierLikeClassOrObject#isMethod`
  * (`purged.contains("(") || purged.contains(")")`) — this port already
@@ -124,7 +155,10 @@ export function isMethodMember(m: Classifier['members'][number]): boolean {
   // line for the tags first (see `Member.forcedBucket`'s own doc comment).
   // @see ~/git/plantuml/.../cucadiagram/BodierLikeClassOrObject.java:102-111
   if (m.forcedBucket !== undefined) return m.forcedBucket === 'method';
-  if (m.rawDisplay !== undefined) return m.rawDisplay.includes('(') || m.rawDisplay.includes(')');
+  if (m.rawDisplay !== undefined) {
+    const purged = m.rawDisplay.replace(URL_BRACKET_RE, '');
+    return purged.includes('(') || purged.includes(')');
+  }
   return m.params !== undefined;
 }
 
