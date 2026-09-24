@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { defaultTheme, darkTheme, resolveTheme } from '../../src/core/theme.js';
 import { FormulaMeasurer, CanvasMeasurer, FixedMeasurer, glyphWidth } from '../../src/core/measurer.js';
 import type { FontSpec, StringMeasurer } from '../../src/core/measurer.js';
@@ -463,6 +463,20 @@ describe('CanvasMeasurer — jsdom fallback (no canvas support)', () => {
     measurer = new CanvasMeasurer();
   });
 
+  // Every measure() used to re-create a canvas and re-call getContext; jsdom
+  // logs "Not implemented" on each call, which flooded CI logs.
+  it('probes the canvas once, not once per measure, when it has no 2d context', () => {
+    const getContext = vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+    try {
+      measurer.measure('A', font);
+      measurer.measure('B', font);
+      measurer.measure('C', font);
+      expect(getContext).toHaveBeenCalledTimes(1);
+    } finally {
+      getContext.mockRestore();
+    }
+  });
+
   it('returns positive width for non-empty text (falls back to formula)', () => {
     const { width } = measurer.measure('Hello', font);
     expect(width).toBeGreaterThan(0);
@@ -564,6 +578,17 @@ describe('CanvasMeasurer — with injected mock context', () => {
     // H=8.7, e=6.7, l=2.7, l=2.7, o=6.7 → 27.5 * (14/12)
     const expected = (8.7 + 6.7 + 2.7 + 2.7 + 6.7) * (14 / 12);
     expect(width).toBeCloseTo(expected, 5);
+  });
+
+  it('asks a null-returning factory once, then stays on the formula', () => {
+    let callCount = 0;
+    const measurer = new CanvasMeasurer(() => {
+      callCount++;
+      return null;
+    });
+    measurer.measure('A', font);
+    measurer.measure('B', font);
+    expect(callCount).toBe(1);
   });
 
   it('falls back to per-glyph formula when context factory returns null', () => {

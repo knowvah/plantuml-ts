@@ -208,7 +208,8 @@ export class WidthTableMeasurer implements StringMeasurer {
  *  - getContext('2d') returns null (jsdom default)
  *  - measureText returns 0 (jsdom canvas stub)
  *
- * The canvas element is created lazily on the first call and reused.
+ * The canvas element is created lazily on the first call and reused; the
+ * probe runs once per instance, so an unavailable context is not retried.
  *
  * An optional context factory may be supplied (used in tests to inject a
  * mock context without modifying DOM access).
@@ -220,6 +221,7 @@ export class WidthTableMeasurer implements StringMeasurer {
 export class CanvasMeasurer implements StringMeasurer {
   private static readonly MAX_CACHE_SIZE = 8192;
   private ctx: CanvasRenderingContext2D | null = null;
+  private probed = false;
   private readonly fallback = new FormulaMeasurer();
   private readonly contextFactory: (() => CanvasRenderingContext2D | null) | undefined;
   private readonly measureCache = new Map<string, { width: number; height: number }>();
@@ -229,9 +231,13 @@ export class CanvasMeasurer implements StringMeasurer {
   }
 
   private getContext(): CanvasRenderingContext2D | null {
-    if (this.ctx !== null) {
+    // Probe once per instance: a null result is as final as a context. The
+    // shared default measurer otherwise re-created a canvas on every measure()
+    // wherever 2d is unavailable (jsdom logs "Not implemented" each time).
+    if (this.probed) {
       return this.ctx;
     }
+    this.probed = true;
     if (this.contextFactory !== undefined) {
       this.ctx = this.contextFactory();
       return this.ctx;
