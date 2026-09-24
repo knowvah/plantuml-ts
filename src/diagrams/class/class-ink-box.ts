@@ -231,7 +231,11 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   }
   // A `usecase` leaf is drawn as a real `<ellipse>`, never as a classifier
   // box -- see `addEllipseInk`'s own doc comment for the jar evidence.
-  if (c.kind === 'usecase') {
+  // cdd2-T17 (R-1, `jixamu-89-ribo225`): an association point is the SAME
+  // bare ellipse -- `EntityImageAssociationPoint#drawU` draws only
+  // `UEllipse.build(SIZE, SIZE)` (`svek/image/EntityImageAssociationPoint
+  // .java:77-81`), no header/body composition and no `URectangle`.
+  if (c.kind === 'usecase' || c.kind === 'assoc-circle') {
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     return;
   }

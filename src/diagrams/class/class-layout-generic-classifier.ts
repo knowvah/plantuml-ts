@@ -39,6 +39,10 @@ import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js'
 // split out to a sibling module — 500-line cap; a pure move, zero behavior
 // change (see that file's own doc comment).
 import { computeMemberSectionsGeo, computeEnhancedBodyGeo } from './class-layout-generic-classifier-sections.js';
+import { genericClassifierInkFields } from './class-classifier-ink-reservation.js';
+// cdd2-T17: the ink-reservation model is split out of this file (500-line
+// cap) and re-exported from it.
+export { genericClassifierInkFields };
 
 export type { ClassFontSpecs };
 
@@ -366,18 +370,23 @@ function measureGenericClassifierAt(
   suppress: MemberSuppression,
   options: MeasureGenericClassifierOptions,
 ): MeasuredClassifier {
-  const { headerNameGeo, stereoGeo, enhancedBody, memberSections, width, headerRowsGeo, commonFields } =
-    computeClassifierGeoPipeline(classifier, fonts, measurer, suppress, options);
+  const pipeline = computeClassifierGeoPipeline(classifier, fonts, measurer, suppress, options);
+  const { headerNameGeo, stereoGeo, enhancedBody, memberSections, width, headerRowsGeo, commonFields } = pipeline;
 
   if (enhancedBody !== undefined) {
     return buildEnhancedBodyResult(width, stereoGeo, headerRowsGeo, enhancedBody, commonFields);
   }
 
+  // cdd2-T17: `bodyInkWidth` rides with the header fields into both
+  // branches -- see `class-classifier-ink-reservation.ts`.
+  const ink = genericClassifierInkFields(classifier.kind, pipeline, suppress, options.badgeRadius);
+  const fields = { ...commonFields, ...ink };
+
   // G2 N24 (pre-existing bug, unmasked while jar-verifying the stereo
   // formula on `cuxuni-25-doxi736`): a fully-suppressed classifier's box
   // height is `headerRowHeight` EXACTLY, not `+4`.
   if (suppress.fields && suppress.methods) {
-    return { width, height: stereoGeo.headerRowHeight, rows: headerRowsGeo.rows, dividerYs: [], ...commonFields };
+    return { width, height: stereoGeo.headerRowHeight, rows: headerRowsGeo.rows, dividerYs: [], ...fields };
   }
 
   return buildNormalClassifierResult(
@@ -385,7 +394,7 @@ function measureGenericClassifierAt(
     { headerNameGeo, stereoGeo, headerRowsGeo, fontSize: fonts.attribute.size },
     memberSections!,
     suppress,
-    commonFields,
+    fields,
   );
 }
 
@@ -433,7 +442,7 @@ function buildNormalClassifierResult(
   geo: NormalClassifierGeo,
   memberSections: ReturnType<typeof computeMemberSectionsGeo>,
   suppress: MemberSuppression,
-  commonFields: CommonHeaderFields,
+  commonFields: CommonHeaderFields & Pick<MeasuredClassifier, 'bodyInkWidth'>,
 ): MeasuredClassifier {
   const { stereoGeo, headerRowsGeo, fontSize } = geo;
   const { fieldsH, methodsH } = memberSections;
