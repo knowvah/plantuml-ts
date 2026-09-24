@@ -65,14 +65,15 @@ describe('renderEdge — note-on-link draw order follows Position (cdd2-T19c)', 
     expect(orderOf(body, '>foo<', '>hi<')).toBe('a-first');
   });
 
-  it('BOTTOM (default): the label text draws BEFORE the note body — lipazi-06-care921\'s first note', () => {
+  it("BOTTOM (default): the label text draws BEFORE the note body — lipazi-06-care921's first note", () => {
     const geo = makeEdgeGeo({ noteBox: { ...makeEdgeGeo().noteBox!, position: 'bottom' } });
     const { body } = renderEdge(geo, theme, ctx);
     expect(orderOf(body, '>foo<', '>hi<')).toBe('a-first');
   });
 
   it('no note at all: draws the label with no note markup and no ordering crash', () => {
-    const geo = makeEdgeGeo({ noteBox: undefined });
+    const { noteBox: _omitted, ...rest } = makeEdgeGeo();
+    const geo: EdgeGeo = rest;
     const { body } = renderEdge(geo, theme, ctx);
     expect(body).toContain('>foo<');
     expect(body).not.toContain('>hi<');
