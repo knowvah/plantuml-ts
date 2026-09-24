@@ -6,68 +6,68 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 
 | slug | group | task | plan verdict | S | N | mechanism | final |
 |---|---|---|---|---|---|---|---|
-| baneru-00-kuro607 | Q | T11 | structural-match | 0 | 89 | | Q-1 + Q-2 + Q-3 | 
-| comaxe-39-goza236 | Q | T11 | structural-match | 0 | 89 | | Q-1 + Q-2 + Q-3 | 
-| vorimi-67-gudu296 | Q | T11 | structural-match | 0 | 89 | | Q-1 + Q-2 + Q-3 | 
-| kadifi-56-bili996 | Q | T11 | structural-match | 0 | 134 | | Q-1 + Q-2 + Q-3 | 
-| kopida-02-vaje995 | Q | T11 | structural-match | 0 | 134 | | Q-1 + Q-2 + Q-3 | 
-| pumocu-32-fiji248 | Q | T11 | structural-match | 0 | 84 | | Q-1 + Q-2 + Q-3 | 
-| tikovu-50-gale862 | Q | T11 | structural-match | 0 | 42 | | Q-1 + Q-2 + Q-3 | 
-| vileca-45-melo541 | Q | T11 | structural-match | 0 | 42 | | Q-1 + Q-2 + Q-3 | 
-| camuna-58-veca254 | Q | T13 | diverged | 9 | 147 | | Q-2 + Q-4 + Q-5 + Q-10 (open) | 
-| nafiki-56-jixu680 | Q | T13 | diverged | 8 | 152 | | Q-2 + Q-4 + Q-5 + Q-10 (open) | 
-| rifuzu-80-nixo780 | Q | T13 | structural-match | 0 | 151 | | Q-2 + Q-3 + Q-10 (open) | 
-| rilali-81-gifu188 | Q | T12 | structural-match | 0 | 181 | | Q-2 + Q-7 | 
-| xoxega-30-vuju324 | Q | T12 | structural-match | 0 | 191 | | Q-2 + Q-7 | 
-| goloxu-09-nero458 | Q | T12 | structural-match | 0 | 135 | | Q-2 + Q-7 | 
-| ririlu-13-zipi740 | Q | T12 | structural-match | 0 | 449 | | Q-2 (+ Q-7 unconfirmed) | 
-| coxose-20-nifu136 | Q | T11 | structural-match | 0 | 249 | | Q-2 + Q-3 | 
-| mucoti-34-seve858 | Q | — | structural-match | 0 | 94 | | Q-8 | open -> docs/graphviz-issues/19-flat-edge-ignores-html-table-port.md 
-| sefazi-02-defe499 | Q | — | structural-match | 0 | 53 | | Q-8 | open -> docs/graphviz-issues/19-flat-edge-ignores-html-table-port.md 
-| vuzoro-99-kizi978 | Q | T12 | structural-match | 0 | 51 | | Q-2 + Q-7 | 
-| nenepe-70-keri784 | Q | T13 | structural-match | 0 | 2 | | Q-6 (open, diagnose first) | 
-| pegeso-72-mana305 | Q | T13 | structural-match | 0 | 2 | | Q-6 (open, diagnose first) | 
-| nenexe-35-zere033 | Q | T13 | structural-match | 0 | 2 | | Q-9 | 
-| mugobo-34-fede498 | Q | T13 | structural-match | 0 | 2 | | Q-9 | 
-| befasi-62-vimu310 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| mububu-79-nalu431 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| ribove-58-tefu515 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| soboro-52-pevi612 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| zakuta-81-pese010 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| ziruni-05-fona846 | C | T15 | structural-match | 0 | 818 | | C-1 | 
-| zosaxa-86-mora157 | C | T15 | structural-match | 0 | 886 | | C-1 | 
-| bejeli-39-sina124 | R | T17 | structural-match | 0 | 2 | | R-3 | 
-| cacoma-43-poxu615 | R | T17 | structural-match | 0 | 2 | | R-6 (open, diagnose first) | 
-| gatula-10-bifu561 | R | T17 | structural-match | 0 | 2 | | R-2 (MEDIUM, trace first) | 
-| jixamu-89-ribo225 | R | T17 | structural-match | 0 | 2 | | R-1 | 
-| jubobo-22-fapu993 | R | T17 | structural-match | 0 | 2 | | R-3 | 
-| julixi-10-jide878 | R | T17 | structural-match | 0 | 2 | | R-5 (open, diagnose first) | 
-| rulite-35-muno361 | R | T17 | structural-match | 0 | 2 | | R-5 (open, diagnose first) | 
-| xosiza-60-sobu480 | R | — | structural-match | 0 | 2 | | R-4 (absorbLayoutEpsilon rounds 186.999992 up; D6) | open -> next-missions (layout-epsilon policy) 
-| daxeno-00-kasu166 | R | T17 | structural-match | 0 | 92 | | R-7 (open, diagnose first) | 
-| lojiga-09-meka859 | R | T7b | diverged | 3 | 160 | | R-8 (unported USymbolStack) | 
-| sijisi-94-ripu606 | R | T17 | diverged | 3 | 132 | | R-9 (open, diagnose first) | 
-| bejusa-95-gafo325 | D | T12 | structural-match | 0 | 4 | | CLIP-1a (magnetic border) | 
-| runane-30-vena766 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
-| vusute-48-xono099 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
-| pisobo-93-sipa138 | D | T12 | structural-match | 0 | 2 | | CLIP-1a (magnetic border) | 
-| sugifi-33-xefe083 | S | T7 | diverged | 1 | 0 | | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) 
-| sumule-00-pefa744 | S | T7 | diverged | 1 | 0 | | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) 
-| xumofu-43-fode658 | S | T7 | diverged | 3 | 0 | | S-1b (CommandLinkClass resolves both endpoints before creating either) | open -> next-missions (cdd2 S-1b: `class-ensure-classifier.ts` + `class-command-relationships.ts`) 
-| fumalu-64-vude116 | S | T8 | diverged | 2 | 0 | | S-5 | 
-| rakuci-96-tuti371 | S | T7 | diverged | 2 | 0 | | S-11 (descriptive container `[[url]]` never calls setNamespaceUrl) | open -> next-missions (cdd2 S-11: `class-command-containers.ts`) 
-| pibifa-14-leno075 | S | T7 | diverged | 3 | 2 | | S-2 | conformant (T7 probe; confirmed at T10) 
-| begico-70-guva302 | S | T7 | diverged | 5 | 4 | | S-2 + S-4 | conformant (T7 probe; confirmed at T10) 
-| rojoxi-79-vimu822 | S | T7 | diverged | 1 | 0 | | S-12 (collapseEmptyNamespace drops ns.color) | open -> next-missions (cdd2 S-12: `class-namespace.ts` + `renderer.ts`) 
-| nesivu-99-cexu403 | S | T8 | diverged | 1 | 0 | | S-10 | 
-| nisune-86-faji869 | S | T8 | diverged | 1 | 0 | | S-13 | 
-| tuguku-78-zega630 | S | T8 | diverged | 6 | 0 | | S-7 | 
-| xoxuni-96-fere626 | S | T7 | diverged | 4 | 0 | | S-4 (line colour fixed, T7) + S-4t `;text:COLOR` label fill | open -> next-missions (cdd2 S-4t: `class-relationship-ast.ts` field) 
-| gabejo-44-juki791 | S | T8 | diverged | 4 | 2 | | S-3 | 
-| guxode-39-dobi371 | S | T8 | diverged | 2 | 2 | | S-6 (+ numeric Δ0.014 g[14]: open, not CLIP-1) | 
-| vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | | S-8 | conformant (T7 probe; confirmed at T10) 
-| rezoba-58-xaze387 | D | T12 | diverged | 2 | 0 | | CLIP-1a + CLIP-1b | 
-| jojime-80-savu279 | D | T12 | diverged | 3 | 0 | | CLIP-1a + CLIP-1b | 
+| baneru-00-kuro607 | Q | T11 | structural-match | 0 | 89 | Q-1 + Q-2 + Q-3 |  |
+| comaxe-39-goza236 | Q | T11 | structural-match | 0 | 89 | Q-1 + Q-2 + Q-3 |  |
+| vorimi-67-gudu296 | Q | T11 | structural-match | 0 | 89 | Q-1 + Q-2 + Q-3 |  |
+| kadifi-56-bili996 | Q | T11 | structural-match | 0 | 134 | Q-1 + Q-2 + Q-3 |  |
+| kopida-02-vaje995 | Q | T11 | structural-match | 0 | 134 | Q-1 + Q-2 + Q-3 |  |
+| pumocu-32-fiji248 | Q | T11 | structural-match | 0 | 84 | Q-1 + Q-2 + Q-3 |  |
+| tikovu-50-gale862 | Q | T11 | structural-match | 0 | 42 | Q-1 + Q-2 + Q-3 |  |
+| vileca-45-melo541 | Q | T11 | structural-match | 0 | 42 | Q-1 + Q-2 + Q-3 |  |
+| camuna-58-veca254 | Q | T13 | diverged | 9 | 147 | Q-2 + Q-4 + Q-5 + Q-10 (open) |  |
+| nafiki-56-jixu680 | Q | T13 | diverged | 8 | 152 | Q-2 + Q-4 + Q-5 + Q-10 (open) |  |
+| rifuzu-80-nixo780 | Q | T13 | structural-match | 0 | 151 | Q-2 + Q-3 + Q-10 (open) |  |
+| rilali-81-gifu188 | Q | T12 | structural-match | 0 | 181 | Q-2 + Q-7 |  |
+| xoxega-30-vuju324 | Q | T12 | structural-match | 0 | 191 | Q-2 + Q-7 |  |
+| goloxu-09-nero458 | Q | T12 | structural-match | 0 | 135 | Q-2 + Q-7 |  |
+| ririlu-13-zipi740 | Q | T12 | structural-match | 0 | 449 | Q-2 (+ Q-7 unconfirmed) |  |
+| coxose-20-nifu136 | Q | T11 | structural-match | 0 | 249 | Q-2 + Q-3 |  |
+| mucoti-34-seve858 | Q | — | structural-match | 0 | 94 | Q-8 | open -> docs/graphviz-issues/19-flat-edge-ignores-html-table-port.md |
+| sefazi-02-defe499 | Q | — | structural-match | 0 | 53 | Q-8 | open -> docs/graphviz-issues/19-flat-edge-ignores-html-table-port.md |
+| vuzoro-99-kizi978 | Q | T12 | structural-match | 0 | 51 | Q-2 + Q-7 |  |
+| nenepe-70-keri784 | Q | T13 | structural-match | 0 | 2 | Q-6 (open, diagnose first) |  |
+| pegeso-72-mana305 | Q | T13 | structural-match | 0 | 2 | Q-6 (open, diagnose first) |  |
+| nenexe-35-zere033 | Q | T13 | structural-match | 0 | 2 | Q-9 |  |
+| mugobo-34-fede498 | Q | T13 | structural-match | 0 | 2 | Q-9 |  |
+| befasi-62-vimu310 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| mububu-79-nalu431 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| ribove-58-tefu515 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| soboro-52-pevi612 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| zakuta-81-pese010 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| ziruni-05-fona846 | C | T15 | structural-match | 0 | 818 | C-1 |  |
+| zosaxa-86-mora157 | C | T15 | structural-match | 0 | 886 | C-1 |  |
+| bejeli-39-sina124 | R | T17 | structural-match | 0 | 2 | R-3 |  |
+| cacoma-43-poxu615 | R | T17 | structural-match | 0 | 2 | R-6 (open, diagnose first) |  |
+| gatula-10-bifu561 | R | T17 | structural-match | 0 | 2 | R-2 (MEDIUM, trace first) |  |
+| jixamu-89-ribo225 | R | T17 | structural-match | 0 | 2 | R-1 |  |
+| jubobo-22-fapu993 | R | T17 | structural-match | 0 | 2 | R-3 |  |
+| julixi-10-jide878 | R | T17 | structural-match | 0 | 2 | R-5 (open, diagnose first) |  |
+| rulite-35-muno361 | R | T17 | structural-match | 0 | 2 | R-5 (open, diagnose first) |  |
+| xosiza-60-sobu480 | R | — | structural-match | 0 | 2 | R-4 (absorbLayoutEpsilon rounds 186.999992 up; D6) | open -> next-missions (layout-epsilon policy) |
+| daxeno-00-kasu166 | R | T17 | structural-match | 0 | 92 | R-7 (open, diagnose first) |  |
+| lojiga-09-meka859 | R | T12 | diverged | 3 | 160 | R-8 (closed, T7b) + CLIP-1b g[7] |  |
+| sijisi-94-ripu606 | R | T17 | diverged | 3 | 132 | R-9 (open, diagnose first) |  |
+| bejusa-95-gafo325 | D | T12 | structural-match | 0 | 4 | CLIP-1a (magnetic border) |  |
+| runane-30-vena766 | D | T12 | structural-match | 0 | 7 | CLIP-1a (magnetic border) |  |
+| vusute-48-xono099 | D | T12 | structural-match | 0 | 7 | CLIP-1a (magnetic border) |  |
+| pisobo-93-sipa138 | D | T12 | structural-match | 0 | 2 | CLIP-1a (magnetic border) |  |
+| sugifi-33-xefe083 | S | T7 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) |
+| sumule-00-pefa744 | S | T7 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) |
+| xumofu-43-fode658 | S | T7 | diverged | 3 | 0 | S-1b (CommandLinkClass resolves both endpoints before creating either) | open -> next-missions (cdd2 S-1b: `class-ensure-classifier.ts` + `class-command-relationships.ts`) |
+| fumalu-64-vude116 | S | T8 | diverged | 2 | 0 | S-5 | conformant (b1, pinned) |
+| rakuci-96-tuti371 | S | T7 | diverged | 2 | 0 | S-11 (descriptive container `[[url]]` never calls setNamespaceUrl) | open -> next-missions (cdd2 S-11: `class-command-containers.ts`) |
+| pibifa-14-leno075 | S | T7 | diverged | 3 | 2 | S-2 | conformant (b1, pinned) |
+| begico-70-guva302 | S | T7 | diverged | 5 | 4 | S-2 + S-4 | conformant (b1, pinned) |
+| rojoxi-79-vimu822 | S | T7 | diverged | 1 | 0 | S-12 (collapseEmptyNamespace drops ns.color) | open -> next-missions (cdd2 S-12: `class-namespace.ts` + `renderer.ts`) |
+| nesivu-99-cexu403 | S | T8 | diverged | 1 | 0 | S-10 | conformant (b1, pinned) |
+| nisune-86-faji869 | S | T8 | diverged | 1 | 0 | S-13 | conformant (b1, pinned) |
+| tuguku-78-zega630 | S | T8 | diverged | 6 | 0 | S-7 | conformant (b1, pinned) |
+| xoxuni-96-fere626 | S | T7 | diverged | 4 | 0 | S-4 (line colour fixed, T7) + S-4t `;text:COLOR` label fill | open -> next-missions (cdd2 S-4t: `class-relationship-ast.ts` field) |
+| gabejo-44-juki791 | S | T17 | diverged | 4 | 2 | S-3 (closed) + Δ1 canvas height (open) |  |
+| guxode-39-dobi371 | S | T8 | diverged | 2 | 2 | S-6 DISPROVED; real: `renderFolderPolygon` unresolved stroke (strictuml) + Δ0.014 g[14] (open) | open -> next-missions (cdd2 S-6: `class-namespace-folder-outline.ts#renderFolderPolygon`) |
+| vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | S-8 | conformant (b1, pinned) |
+| rezoba-58-xaze387 | D | T12 | diverged | 2 | 0 | CLIP-1a + CLIP-1b |  |
+| jojime-80-savu279 | D | T12 | diverged | 3 | 0 | CLIP-1a + CLIP-1b |  |
 | ponono-25-fevo574 | X | B5 | diverged | 62 | 75 | | |
 | sumocu-27-vubo674 | X | B5 | diverged | 62 | 75 | | |
 | pejone-71-tige404 | X | B5 | diverged | 220 | 1028 | | |

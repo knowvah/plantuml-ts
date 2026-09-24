@@ -55,7 +55,7 @@ Batch closes add the survey, census, render-all and pin-diff commands —
 | Batch | Group | Tasks | Parallel | Moves layout | Done |
 |---|---|---|---|---|---|
 | [0](batch-0/overview.md) | pre-flight + diagnosis | T0 · T1–T5 · T6 | T1–T5 ∥ | no | [x] |
-| [1](batch-1/overview.md) | S singletons + CLIP-1 + stack shape | T7 · T9 · T7b · T8 · T10 | T7 ∥ T9, then T7b ∥ T8 | CLIP-1 edges | [ ] |
+| [1](batch-1/overview.md) | S singletons + CLIP-1 + stack shape | T7 · T9 · T7b · T8 · T10 | T7 ∥ T9, then T7b ∥ T8 | CLIP-1 edges | [x] |
 | [2](batch-2/overview.md) | Q qualifier / port links | T11 · T12 · T13 · T14 | T11 ∥ T12, then T13 | YES | [ ] |
 | [3](batch-3/overview.md) | C circled-character glyph | T15 · T16 | — | no | [ ] |
 | [4](batch-4/overview.md) | R 1 px canvas + exit bar | T17 · T18 | — | canvas | [ ] |

@@ -19,7 +19,7 @@ steps. `N` = batch number, `prev` = the previous close's measurement file
    count (stop 7; memory: coverage/.tmp can under-collect and exit 0).
 4. `npm run svg:survey -- class --out tests/oracle/svg-conformance/parity-class.json`
    (never the positional form — it writes `parity.json`).
-5. `npx jiti scripts/svg-conformance-census.ts class`.
+5. `npx jiti scripts/svg-conformance-census.ts class --json tests/oracle/svg-conformance/census-class.json` (without `--json` nothing is written — journal row 23).
 6. `npx jiti $T/render-all.mts plans/class-divergence-drive-2/measurements/bN.json`.
 7. `npx jiti $T/pin-diff.mts plans/class-divergence-drive-2/measurements/<prev>.json plans/class-divergence-drive-2/measurements/bN.json`
    and the same against the committed `parity-class.json` for `dotEqual`.
