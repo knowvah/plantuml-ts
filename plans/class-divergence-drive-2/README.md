@@ -58,7 +58,7 @@ Batch closes add the survey, census, render-all and pin-diff commands —
 | [1](batch-1/overview.md) | S singletons + CLIP-1 + stack shape | T7 · T9 · T7b · T8 · T10 | T7 ∥ T9, then T7b ∥ T8 | CLIP-1 edges | [x] |
 | [2](batch-2/overview.md) | Q qualifier / port links | T11 · T12 · T13 · T14 | T11 ∥ T12, then T13 | YES | [x] |
 | [3](batch-3/overview.md) | C circled-character glyph | T15 · T16 | — | no | [x] |
-| [4](batch-4/overview.md) | R 1 px canvas + exit bar | T17 · T18 | — | canvas | [ ] |
+| [4](batch-4/overview.md) | R 1 px canvas + exit bar | T17 · T18 | — | canvas | [x] |
 | [5](batch-5/overview.md) | X stretch pairs (only if ≥ 600) | spec'd by T18 | per T18 | per T18 | [ ] |
 | [final](final/T20-mission-close-out.md) | close-out | T20 | — | no | [ ] |
 
@@ -105,6 +105,25 @@ paluca, vebini, kicuna), error-page identity (luzive, sadamo), `scale`
 def-id seed (in stretch as a pair — its T18 spec must read that filing).
 Touch one only if its batch-0 diagnosis shows it shares an in-scope
 mechanism; then it is journaled and added to `fixtures.md`.
+
+## Status
+
+Measured at T18 (`measurements/b4.json`, 2026-09-24), exit bar D8:
+
+- conformant ≥ 600 — **met** (601; plan 560)
+- diverged ≤ 61 — **not met** (64; plan 77)
+- every core row has a `final` — **met** (62/62: 41 conformant, 21
+  `open -> <owner>`)
+- zero unexplained rises — **met** (every riser journaled with mechanism)
+- class DOT parity 711/712 — **met** (`class-dot-parity.test.ts` green,
+  DOT emission unchanged)
+- other engines unmoved or journaled — **met** (rows 25, 35; committed
+  engine pins were stale at mission start, measured against baseline)
+- gates green, collected = on-disk — **met** (814/814)
+
+D9 gate met → batch 5 runs (3 tasks). Diverged ≤ 61 needs 3 more
+diverged fixtures to leave diverged; batch 5 targets 5 diverged stretch
+fixtures (xenere, sijoba, lipazi, nuvake, lozego).
 
 ## Documents
 

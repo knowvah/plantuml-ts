@@ -18,7 +18,20 @@ Candidate pairs (identical or near-identical signature in `b-plan.json`):
 | pecabi-95-demu756 · sanixi-31-nofa193 | 0+2, Δ4.89 (identical sources; note on package) |
 | givoli-70-rade072 · tekena-28-fobe713 · nadepi-13-mufu566 | 0+24, Δ0.82 |
 
+T18 read-only pass (render-diff on `b4` tree, journal row 40). Pairs
+confirmed by identical first diffs. Three families have a stated or
+cheaply diagnosable mechanism and disjoint write-sets → tasks; seven are
+filed in `planning/next-missions.md` at T20 with their first-diff
+signatures (ponono/sumocu text wrap; pejone/xonamo title vs entity, 220
+S; puvono/sekame edge routing, width +161; vudepo/lejoga entity order;
+givofi/popesa gradient order + def-id seed; givoli/tekena/nadepi one
+edge Δ10; bidusa/ruliki sprite sizing in member rows, core sprite code).
+
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T19… | written by T18 | — | — | T18 | [ ] |
-| close | [`../close-procedure.md`](../close-procedure.md) | orchestrator | — | all batch-5 tasks | [ ] |
+| [T19a](T19a-note-connector-magnetic.md) | note connector magnetic border (pecabi, sanixi) | typescript-pro | `note-layout-tip.ts` + tests | T18 | [ ] |
+| [T19b](T19b-cluster-header-stereo-legend.md) | cluster header stereotype + legend (xenere, sijoba) | typescript-pro (opus) | `class-namespace-usymbol-shape.ts`, `class-namespace-shape.ts`, `class-namespace-title*.ts`, `class-container.ts`, `ast.ts`, `parser.ts`, new `class-cluster-header.ts` + tests | T18 | [ ] |
+| [T19c](T19c-note-on-link-colour.md) | note-on-link colour + gradient (lipazi, nuvake, lozego) | typescript-pro | `class-command-notes.ts`, `class-notes.ts`, `class-note-decl-ast.ts`, `class-note-link-box.ts`, `class-edge-note-box.ts`, `renderer-note*.ts`, `note-opale.ts` + tests | T18 | [ ] |
+| close | [`../close-procedure.md`](../close-procedure.md) | orchestrator | — | T19a, T19b, T19c | [ ] |
+
+T19a ∥ T19b ∥ T19c in worktrees.

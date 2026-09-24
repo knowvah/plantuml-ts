@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-24T15:22:25.278Z",
-  "measuredAgainstCommit": "9763ca805",
+  "generatedAt": "2026-09-24T15:50:08.316Z",
+  "measuredAgainstCommit": "99fa55ff8",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -295,7 +295,7 @@
     {
       "slug": "camuna-58-veca254",
       "status": "ok",
-      "diffCount": 30,
+      "diffCount": 27,
       "bucket": "11-30"
     },
     {
@@ -1279,8 +1279,8 @@
     {
       "slug": "goloxu-09-nero458",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "gomafo-73-duta005",
@@ -1531,8 +1531,8 @@
     {
       "slug": "jixamu-89-ribo225",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "jobeto-69-dutu189",
@@ -2311,7 +2311,7 @@
     {
       "slug": "nafiki-56-jixu680",
       "status": "ok",
-      "diffCount": 35,
+      "diffCount": 32,
       "bucket": "31+"
     },
     {
@@ -2911,7 +2911,7 @@
     {
       "slug": "rifuzu-80-nixo780",
       "status": "ok",
-      "diffCount": 26,
+      "diffCount": 24,
       "bucket": "11-30"
     },
     {
@@ -2923,8 +2923,8 @@
     {
       "slug": "rilali-81-gifu188",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "ririlu-13-zipi740",
@@ -4071,8 +4071,8 @@
     {
       "slug": "xoxega-30-vuju324",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "xoxuni-96-fere626",

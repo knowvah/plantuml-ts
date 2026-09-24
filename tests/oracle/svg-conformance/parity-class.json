@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T15:22:15.452Z",
+  "generatedAt": "2026-09-24T15:49:58.532Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -1367,9 +1367,7 @@
       "slug": "goloxu-09-nero458",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "gomafo-73-duta005",
@@ -1631,9 +1629,7 @@
       "slug": "jixamu-89-ribo225",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "jobeto-69-dutu189",
@@ -3127,9 +3123,7 @@
       "slug": "rilali-81-gifu188",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "ririlu-13-zipi740",
@@ -4366,9 +4360,7 @@
       "slug": "xoxega-30-vuju324",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 1,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "xoxuni-96-fere626",
