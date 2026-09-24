@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T15:49:58.532Z",
+  "generatedAt": "2026-09-24T17:02:13.686Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -787,8 +787,8 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 33.99999999999999,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
+      "maxDelta": 20,
+      "firstDiff": "svg/g[1]/g[1]/text[2]/@fill",
       "maxDeltaPath": "svg/g[1]/text[1]/@y"
     },
     {
@@ -807,9 +807,7 @@
       "slug": "domeki-03-zaga732",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 20.849999999999994,
-      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "dopuzi-50-muxo994",
@@ -1278,9 +1276,8 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 20.000000000000004,
-      "firstDiff": "svg/g[1]/g[2]/path[1]/@stroke-width",
-      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@y"
+      "maxDelta": 0,
+      "firstDiff": "svg/g[1]/g[2]/path[1]/@stroke-width"
     },
     {
       "slug": "girebu-21-keva371",
@@ -2052,10 +2049,9 @@
       "slug": "lipazi-06-care921",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 149.584,
-      "firstDiff": "svg/g[1]/g[6]/path[2]/@fill",
-      "maxDeltaPath": "svg/g[1]/g[7]/text[3]/@x"
+      "verdict": "structural-match",
+      "maxDelta": 79,
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "lobofa-60-vexe031",
@@ -2092,8 +2088,8 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 91.99799999999999,
-      "firstDiff": "svg/defs[1][childCount]",
+      "maxDelta": 86.99799999999999,
+      "firstDiff": "svg/defs[1]/linearGradient[1]/stop[1]/@stop-color",
       "maxDeltaPath": "svg/g[1]/g[4]/text[2]/@y"
     },
     {
@@ -2391,9 +2387,7 @@
       "slug": "mujopi-30-zadi566",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 46.214999999999975,
-      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
+      "verdict": "conformant"
     },
     {
       "slug": "mulafo-23-tove961",
@@ -2678,7 +2672,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 80.99699999999999,
-      "firstDiff": "svg/g[1]/g[4]/path[2]/@fill",
+      "firstDiff": "svg/g[1]/g[5]/text[1]/@fill",
       "maxDeltaPath": "svg/g[1]/g[5]/text[1]/@x"
     },
     {
@@ -2797,9 +2791,7 @@
       "slug": "pecabi-95-demu756",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 4.893000000000001,
-      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[29]"
+      "verdict": "conformant"
     },
     {
       "slug": "pecigo-88-bubu786",
@@ -3346,9 +3338,7 @@
       "slug": "sanixi-31-nofa193",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 4.893000000000001,
-      "maxDeltaPath": "svg/g[1]/g[4]/path[1]/@d[29]"
+      "verdict": "conformant"
     },
     {
       "slug": "sanusa-54-keda128",
@@ -3444,18 +3434,15 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 40.894,
+      "maxDelta": 9.996000000000002,
       "firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
-      "maxDeltaPath": "svg/g[1]/g[1]/text[1]/@x"
+      "maxDeltaPath": "svg/g[1]/g[2]/text[1]/@x"
     },
     {
       "slug": "sijoba-16-rari847",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 305.004,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-style",
-      "maxDeltaPath": "svg/g[1]/g[2]/path[1]/@d[13]"
+      "verdict": "conformant"
     },
     {
       "slug": "siluti-87-sefa007",
@@ -4221,10 +4208,7 @@
       "slug": "xenere-07-kuji864",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 305,
-      "firstDiff": "svg/g[1]/g[1]/text[1]/@font-style",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "xeriju-13-gika499",

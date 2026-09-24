@@ -29,9 +29,9 @@ edge Δ10; bidusa/ruliki sprite sizing in member rows, core sprite code).
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T19a](T19a-note-connector-magnetic.md) | note connector magnetic border (pecabi, sanixi) | typescript-pro | `note-layout-tip.ts` + tests | T18 | [ ] |
-| [T19b](T19b-cluster-header-stereo-legend.md) | cluster header stereotype + legend (xenere, sijoba) | typescript-pro (opus) | `class-namespace-usymbol-shape.ts`, `class-namespace-shape.ts`, `class-namespace-title*.ts`, `class-container.ts`, `ast.ts`, `parser.ts`, new `class-cluster-header.ts` + tests + (row 41) `class-dot-clusters.ts`, `class-geo-namespace-types.ts`, `class-geo-builders.ts`, `class-scale-geo*.ts`, `class-command-containers.ts` | T18 | [ ] |
-| [T19c](T19c-note-on-link-colour.md) | note-on-link colour + gradient (lipazi, nuvake, lozego) | typescript-pro | `class-command-notes.ts`, `class-notes.ts`, `class-note-decl-ast.ts`, `class-note-link-box.ts`, `class-edge-note-box.ts`, `renderer-note*.ts`, `note-opale.ts` + tests + (row 42) `renderer-edge-extras.ts`, `renderer-edge.ts`, `class-layout-edge-labels.ts`, `class-relationship-ast.ts`, `class-command-containers.ts` | T19b (row 42) | [ ] |
-| close | [`../close-procedure.md`](../close-procedure.md) | orchestrator | — | T19a, T19b, T19c | [ ] |
+| [T19a](T19a-note-connector-magnetic.md) | note connector magnetic border (pecabi, sanixi) | typescript-pro | `note-layout-tip.ts` + tests | T18 | [x] |
+| [T19b](T19b-cluster-header-stereo-legend.md) | cluster header stereotype + legend (xenere, sijoba) | typescript-pro (opus) | `class-namespace-usymbol-shape.ts`, `class-namespace-shape.ts`, `class-namespace-title*.ts`, `class-container.ts`, `ast.ts`, `parser.ts`, new `class-cluster-header.ts` + tests + (row 41) `class-dot-clusters.ts`, `class-geo-namespace-types.ts`, `class-geo-builders.ts`, `class-scale-geo*.ts`, `class-command-containers.ts` | T18 | [x] |
+| [T19c](T19c-note-on-link-colour.md) | note-on-link colour + gradient (lipazi, nuvake, lozego) | typescript-pro | `class-command-notes.ts`, `class-notes.ts`, `class-note-decl-ast.ts`, `class-note-link-box.ts`, `class-edge-note-box.ts`, `renderer-note*.ts`, `note-opale.ts` + tests + (row 42) `renderer-edge-extras.ts`, `renderer-edge.ts`, `class-layout-edge-labels.ts`, `class-relationship-ast.ts`, `class-command-containers.ts` | T19b (row 42) | [x] |
+| close | [`../close-procedure.md`](../close-procedure.md) | orchestrator | — | T19a, T19b, T19c | [x] |
 
 T19a ∥ T19b in worktrees, then T19c (rows 41-42: write-set corrections made them share `class-command-containers.ts`).

@@ -59,7 +59,7 @@ Batch closes add the survey, census, render-all and pin-diff commands —
 | [2](batch-2/overview.md) | Q qualifier / port links | T11 · T12 · T13 · T14 | T11 ∥ T12, then T13 | YES | [x] |
 | [3](batch-3/overview.md) | C circled-character glyph | T15 · T16 | — | no | [x] |
 | [4](batch-4/overview.md) | R 1 px canvas + exit bar | T17 · T18 | — | canvas | [x] |
-| [5](batch-5/overview.md) | X stretch pairs (only if ≥ 600) | spec'd by T18 | per T18 | per T18 | [ ] |
+| [5](batch-5/overview.md) | X stretch pairs (only if ≥ 600) | spec'd by T18 | per T18 | per T18 | [x] |
 | [final](final/T20-mission-close-out.md) | close-out | T20 | — | no | [ ] |
 
 Every batch ends with its close task, which runs one residual round on the

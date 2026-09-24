@@ -68,25 +68,25 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 | vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | S-8 | conformant (b1, pinned) |
 | rezoba-58-xaze387 | D | T12 | diverged | 2 | 0 | CLIP-1a + CLIP-1b | conformant (b2, pinned) |
 | jojime-80-savu279 | D | T12 | diverged | 3 | 0 | CLIP-1a + CLIP-1b | conformant (b2, pinned) |
-| ponono-25-fevo574 | X | B5 | diverged | 62 | 75 | | |
-| sumocu-27-vubo674 | X | B5 | diverged | 62 | 75 | | |
-| pejone-71-tige404 | X | B5 | diverged | 220 | 1028 | | |
-| xonamo-50-podo529 | X | B5 | diverged | 220 | 1066 | | |
-| puvono-84-doro361 | X | B5 | diverged | 2 | 1360 | | |
-| sekame-22-meze147 | X | B5 | diverged | 2 | 1360 | | |
-| vudepo-27-cuvo793 | X | B5 | diverged | 84 | 402 | | |
-| lejoga-79-poji465 | X | B5 | diverged | 90 | 410 | | |
-| xenere-07-kuji864 | X | B5 | diverged | 6 | 196 | | |
-| sijoba-16-rari847 | X | B5 | diverged | 9 | 224 | | |
-| bidusa-22-jutu505 | X | B5 | diverged | 1 | 50 | | |
-| ruliki-78-biji661 | X | B5 | diverged | 1 | 50 | | |
-| lipazi-06-care921 | X | B5 | diverged | 11 | 29 | | |
-| nuvake-96-gofe203 | X | B5 | diverged | 14 | 51 | | |
-| lozego-15-coci435 | X | B5 | diverged | 7 | 27 | | |
-| givofi-11-xumu978 | X | B5 | diverged | 10 | 2 | | |
-| popesa-39-sobe866 | X | B5 | diverged | 7 | 2 | | |
-| pecabi-95-demu756 | X | B5 | structural-match | 0 | 2 | | |
-| sanixi-31-nofa193 | X | B5 | structural-match | 0 | 2 | | |
-| givoli-70-rade072 | X | B5 | structural-match | 0 | 24 | | |
-| tekena-28-fobe713 | X | B5 | structural-match | 0 | 24 | | |
-| nadepi-13-mufu566 | X | B5 | structural-match | 0 | 24 | | |
+| ponono-25-fevo574 | X | B5 | diverged | 62 | 75 | text wrap: `here` vs `is` from text[36] (undiagnosed) | open -> next-missions (cdd2 stretch: ponono/sumocu) |
+| sumocu-27-vubo674 | X | B5 | diverged | 62 | 75 | text wrap: `here` vs `is` from text[36] (undiagnosed) | open -> next-missions (cdd2 stretch: ponono/sumocu) |
+| pejone-71-tige404 | X | B5 | diverged | 220 | 1028 | g[1] title vs entity, 220 structural (undiagnosed) | open -> next-missions (cdd2 stretch: pejone/xonamo) |
+| xonamo-50-podo529 | X | B5 | diverged | 220 | 1066 | g[1] title vs entity, 220 structural (undiagnosed) | open -> next-missions (cdd2 stretch: pejone/xonamo) |
+| puvono-84-doro361 | X | B5 | diverged | 2 | 1360 | two edge paths + width +161 (undiagnosed) | open -> next-missions (cdd2 stretch: puvono/sekame) |
+| sekame-22-meze147 | X | B5 | diverged | 2 | 1360 | two edge paths + width +161 (undiagnosed) | open -> next-missions (cdd2 stretch: puvono/sekame) |
+| vudepo-27-cuvo793 | X | B5 | diverged | 84 | 402 | entity order / uid (ent0002 vs ent0001) (undiagnosed) | open -> next-missions (cdd2 stretch: vudepo/lejoga) |
+| lejoga-79-poji465 | X | B5 | diverged | 90 | 410 | entity order / uid (ent0002 vs ent0001) (undiagnosed) | open -> next-missions (cdd2 stretch: vudepo/lejoga) |
+| xenere-07-kuji864 | X | B5 | diverged | 6 | 196 | ClusterHeader stereo + legend (T19b) | conformant (b5, pinned) |
+| sijoba-16-rari847 | X | B5 | diverged | 9 | 224 | ClusterHeader stereo + legend (T19b) | conformant (b5, pinned) |
+| bidusa-22-jutu505 | X | B5 | diverged | 1 | 50 | member-row sprite sizing (archimate/stdlib sprite), childCount 14 vs 12 | open -> next-missions (cdd2 stretch: bidusa/ruliki, core sprite) |
+| ruliki-78-biji661 | X | B5 | diverged | 1 | 50 | member-row sprite sizing (archimate/stdlib sprite), childCount 14 vs 12 | open -> next-missions (cdd2 stretch: bidusa/ruliki, core sprite) |
+| lipazi-06-care921 | X | B5 | diverged | 11 | 29 | note-on-link colour/ComponentRoseNote/inkBox/order (T19c, closed); canvas: `class-ink-box.ts#buildInkBox` never walks `EdgeGeo.noteBox` | open -> next-missions (cdd2 T19c residual: note-on-link ink walk) |
+| nuvake-96-gofe203 | X | B5 | diverged | 14 | 51 | T19c (closed) + edge `;text:COLOR` (S-4t) + note ink walk | open -> next-missions (cdd2 S-4t + T19c residual) |
+| lozego-15-coci435 | X | B5 | diverged | 7 | 27 | T19c (closed) + gradient stop not shortened (`SvgGraphics.java:545-554`, `core/paint.ts`) + note ink walk | open -> next-missions (cdd2 T19c residual: gradient stop shortenColor) |
+| givofi-11-xumu978 | X | B5 | diverged | 10 | 2 | linearGradient order swapped (undiagnosed) | open -> next-missions (cdd2 stretch: givofi/popesa) |
+| popesa-39-sobe866 | X | B5 | diverged | 7 | 2 | gradient def-id seed | open -> next-missions ("Seed input for def ids", existing filing) |
+| pecabi-95-demu756 | X | B5 | structural-match | 0 | 2 | CLIP-1a on note connector (T19a) | conformant (b5, pinned) |
+| sanixi-31-nofa193 | X | B5 | structural-match | 0 | 2 | CLIP-1a on note connector (T19a) | conformant (b5, pinned) |
+| givoli-70-rade072 | X | B5 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | open -> next-missions (cdd2 stretch: givoli trio) |
+| tekena-28-fobe713 | X | B5 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | open -> next-missions (cdd2 stretch: givoli trio) |
+| nadepi-13-mufu566 | X | B5 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | open -> next-missions (cdd2 stretch: givoli trio) |
