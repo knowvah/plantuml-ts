@@ -51,21 +51,21 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 | runane-30-vena766 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
 | vusute-48-xono099 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
 | pisobo-93-sipa138 | D | T12 | structural-match | 0 | 2 | | CLIP-1a (magnetic border) | 
-| sugifi-33-xefe083 | S | T7 | diverged | 1 | 0 | | S-1 | 
-| sumule-00-pefa744 | S | T7 | diverged | 1 | 0 | | S-1 | 
-| xumofu-43-fode658 | S | T7 | diverged | 3 | 0 | | S-1b (open, diagnose first) | 
+| sugifi-33-xefe083 | S | T7 | diverged | 1 | 0 | | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) 
+| sumule-00-pefa744 | S | T7 | diverged | 1 | 0 | | S-1 (packSomePackage marks packed; we collapse at resolve) | open -> next-missions (cdd2 S-1: `class-dot-clusters.ts` + `ast.ts` Namespace.packed) 
+| xumofu-43-fode658 | S | T7 | diverged | 3 | 0 | | S-1b (CommandLinkClass resolves both endpoints before creating either) | open -> next-missions (cdd2 S-1b: `class-ensure-classifier.ts` + `class-command-relationships.ts`) 
 | fumalu-64-vude116 | S | T8 | diverged | 2 | 0 | | S-5 | 
-| rakuci-96-tuti371 | S | T7 | diverged | 2 | 0 | | S-11 (open, diagnose first) | 
-| pibifa-14-leno075 | S | T7 | diverged | 3 | 2 | | S-2 | 
-| begico-70-guva302 | S | T7 | diverged | 5 | 4 | | S-2 + S-4 | 
-| rojoxi-79-vimu822 | S | T7 | diverged | 1 | 0 | | S-12 (open, diagnose first) | 
+| rakuci-96-tuti371 | S | T7 | diverged | 2 | 0 | | S-11 (descriptive container `[[url]]` never calls setNamespaceUrl) | open -> next-missions (cdd2 S-11: `class-command-containers.ts`) 
+| pibifa-14-leno075 | S | T7 | diverged | 3 | 2 | | S-2 | conformant (T7 probe; confirmed at T10) 
+| begico-70-guva302 | S | T7 | diverged | 5 | 4 | | S-2 + S-4 | conformant (T7 probe; confirmed at T10) 
+| rojoxi-79-vimu822 | S | T7 | diverged | 1 | 0 | | S-12 (collapseEmptyNamespace drops ns.color) | open -> next-missions (cdd2 S-12: `class-namespace.ts` + `renderer.ts`) 
 | nesivu-99-cexu403 | S | T8 | diverged | 1 | 0 | | S-10 | 
 | nisune-86-faji869 | S | T8 | diverged | 1 | 0 | | S-13 | 
 | tuguku-78-zega630 | S | T8 | diverged | 6 | 0 | | S-7 | 
-| xoxuni-96-fere626 | S | T7 | diverged | 4 | 0 | | S-4 | 
+| xoxuni-96-fere626 | S | T7 | diverged | 4 | 0 | | S-4 (line colour fixed, T7) + S-4t `;text:COLOR` label fill | open -> next-missions (cdd2 S-4t: `class-relationship-ast.ts` field) 
 | gabejo-44-juki791 | S | T8 | diverged | 4 | 2 | | S-3 | 
 | guxode-39-dobi371 | S | T8 | diverged | 2 | 2 | | S-6 (+ numeric Δ0.014 g[14]: open, not CLIP-1) | 
-| vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | | S-8 | 
+| vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | | S-8 | conformant (T7 probe; confirmed at T10) 
 | rezoba-58-xaze387 | D | T12 | diverged | 2 | 0 | | CLIP-1a + CLIP-1b | 
 | jojime-80-savu279 | D | T12 | diverged | 3 | 0 | | CLIP-1a + CLIP-1b | 
 | ponono-25-fevo574 | X | B5 | diverged | 62 | 75 | | |
