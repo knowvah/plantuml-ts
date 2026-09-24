@@ -11,6 +11,7 @@ import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
 import type { EdgeGeo } from './layout.js';
 import { place } from '../../core/svek/svek-edge-extremity.js';
 import { decorName } from './renderer-arrowhead.js';
+import { kalEndTranslate } from './renderer-arrowhead-move.js';
 
 /**
  * `Math.atan2` from `from` toward `to` -- see `renderer-arrowhead.ts
@@ -85,10 +86,15 @@ export function edgeExtremityInk(edge: EdgeGeo): EdgeExtremityInk | undefined {
   if (tailName === undefined && headName === undefined) return undefined;
   if (edge.points.length < 2) return undefined;
 
-  const first = edge.points[0]!;
-  const second = edge.points[1]!;
-  const last = edge.points[edge.points.length - 1]!;
-  const secondToLast = edge.points[edge.points.length - 2]!;
+  // cdd2-T12 (Q-2): the SAME Kal-translated centre `buildEdgeArrowheads`
+  // draws at (`SvekEdge.java:551-553`); the angle pair shifts together.
+  const tk = kalEndTranslate(edge, 'start');
+  const hk = kalEndTranslate(edge, 'end');
+  const at = (i: number, d: Point2D): Point2D => ({ x: edge.points[i]!.x + d.x, y: edge.points[i]!.y + d.y });
+  const first = at(0, tk);
+  const second = at(1, tk);
+  const last = at(edge.points.length - 1, hk);
+  const secondToLast = at(edge.points.length - 2, hk);
 
   const finder = LimitFinder.create(INK_STRING_BOUNDER, false);
   if (tailName !== undefined) {

@@ -135,11 +135,13 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
 
   it('scales a kalBox with only an end box', () => {
     const edge = makeEdge({
-      kalBox: { end: { x: 1, y: 2, width: 10, height: 8, text: '*', textX: 3, textY: 9, textWidth: 6 } },
+      kalBox: {
+        end: { x: 1, y: 2, width: 10, height: 8, text: '*', textX: 3, textY: 9, textWidth: 6, position: 'UP' },
+      },
     });
     const scaled = scaleEdgeGeo(edge, 2);
     expect(scaled.kalBox).toEqual({
-      end: { x: 2, y: 4, width: 20, height: 16, text: '*', textX: 6, textY: 18, textWidth: 12 },
+      end: { x: 2, y: 4, width: 20, height: 16, text: '*', textX: 6, textY: 18, textWidth: 12, position: 'UP' },
     });
   });
 

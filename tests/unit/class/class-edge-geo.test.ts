@@ -75,6 +75,10 @@ describe('M1 — bejusa`s three package-anchored edges each clip their own clust
   const geo = fixture('bejusa-95-gafo325');
   const byNs = new Map(geo.namespaces.map((n) => [n.id, n]));
 
+  // cdd2-T12 (CLIP-1a): after the clip, `SvekEdge.java:938-941` moves an
+  // end that lands on a folder's top edge right of the tab by the magnetic
+  // force `(0, htitle)` (`USymbolFolder.java:242-266`) -- so the two top-
+  // border ends below now sit just above the tab's rule, `y + htitle`.
   it('clips VCAN_DRV -> PCAN_DRV to the PCAN_DRV cluster`s own top border', () => {
     const edge = geo.edges.find((e) => e.from === 'VCAN_DRV' && e.to === 'PCAN_DRV')!;
     const pcanDrv = byNs.get('PCAN_DRV')!;
@@ -85,8 +89,8 @@ describe('M1 — bejusa`s three package-anchored edges each clip their own clust
     // specific curve is a named dot-engine spline-shape delta (issue 18)
     // -- the endpoint itself is on OUR OWN cluster's border, which is
     // what M1's clip guarantees.
-    expect(last.y).toBeLessThan(pcanDrv.y);
-    expect(pcanDrv.y - last.y).toBeLessThan(1);
+    expect(last.y).toBeLessThan(pcanDrv.y + pcanDrv.htitle);
+    expect(pcanDrv.y + pcanDrv.htitle - last.y).toBeLessThan(1);
   });
 
   it('clips PCAN_DRV -> Bus_Tx to the Bus_Tx cluster`s own right border, byte-exact', () => {
@@ -104,8 +108,8 @@ describe('M1 — bejusa`s three package-anchored edges each clip their own clust
     const edge = geo.edges.find((e) => e.from === 'PCAN_DRV.PCAN_DRV' && e.to === 'PCAN_DRV.Bus_Rx')!;
     const busRx = byNs.get('PCAN_DRV.Bus_Rx')!;
     const last = edge.points[edge.points.length - 1]!;
-    expect(last.y).toBeLessThan(busRx.y);
-    expect(busRx.y - last.y).toBeLessThan(1);
+    expect(last.y).toBeLessThan(busRx.y + busRx.htitle);
+    expect(busRx.y + busRx.htitle - last.y).toBeLessThan(1);
   });
 });
 

@@ -27,11 +27,11 @@
  *     the copy taken at `:658`, before `simulateCompound` and before the
  *     extremity trim).
  *
- * NOT ported: `Kal#overlapx`/`moveX` and `SvekNode#fixOverlap`
- * (`svek/SvekNode.java:445-464`), which nudge two boxes on the SAME
- * UP/DOWN side of one entity apart. No fixture in the 19-fixture blast
- * radius puts two same-side boxes within `getX1()`/`getX2()` reach of each
- * other (see `.agent-notes/cdd-T15.md`); recorded rather than guessed at.
+ * cdd2-T12 (Q-7): `Kal#getX1`/`getX2`/`overlapx`/`moveX` and
+ * `SvekNode#fixOverlap`/`fixHoverlap` (`svek/SvekNode.java:445-463`),
+ * which spread boxes on the SAME UP/DOWN side of one entity apart, are
+ * ported in `class-kal-overlap.ts` (`rilali-81-gifu188` puts three DOWN
+ * boxes on `top`).
  */
 
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
@@ -96,6 +96,10 @@ export interface KalBox {
   textY: number;
   /** `textLength` for the emitted `<text>`. */
   textWidth: number;
+  /** cdd2-T12: `Kal#position` (`Kal.java:106-121`), carried so the render
+   *  side can rebuild {@link kalTranslateForDecoration} from the box's own
+   *  (scaled) `width`/`height` — `Kal#dim` IS the box. */
+  position: KalPosition;
 }
 
 /**
@@ -126,8 +130,13 @@ export function kalMargins(kal: Kal): KalMargins {
   }
 }
 
-/** `Kal#getTranslateForDecoration` (`Kal.java:72-85`). */
-export function kalTranslateForDecoration(kal: Kal): { dx: number; dy: number } {
+/** `Kal#getTranslateForDecoration` (`Kal.java:72-85`). cdd2-T12: takes
+ *  anything carrying `position` + `dim` (a {@link Kal} or its drawn
+ *  {@link KalBox}), since upstream reads only those two fields. */
+export function kalTranslateForDecoration(kal: Pick<Kal, 'position' | 'width' | 'height'>): {
+  dx: number;
+  dy: number;
+} {
   switch (kal.position) {
     case 'RIGHT':
       return { dx: kal.width, dy: 0 };
@@ -261,5 +270,6 @@ export function kalBoxAt(kal: Kal, anchor: { x: number; y: number }): KalBox {
     textX: x + KAL_TEXT_DX,
     textY: y + KAL_TEXT_DY + kal.baselineOffset,
     textWidth: kal.textWidth,
+    position: kal.position,
   };
 }
