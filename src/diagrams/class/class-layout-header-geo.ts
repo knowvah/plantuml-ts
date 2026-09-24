@@ -90,7 +90,10 @@ export interface StereoGeoOptions {
  * the literal two-char token/BLOCK_E1 sentinels), so behavior is unchanged
  * for that case too.
  */
-function splitHeaderLines(headerText: string): { headerLines: readonly string[]; headerAlign: 'center' | 'left' | 'right' } {
+function splitHeaderLines(headerText: string): {
+  headerLines: readonly string[];
+  headerAlign: 'center' | 'left' | 'right';
+} {
   const rawHeaderSplit = splitDisplayLines(headerText);
   return { headerLines: rawHeaderSplit.lines, headerAlign: rawHeaderSplit.align };
 }
@@ -123,7 +126,12 @@ export function computeHeaderNameGeo(
   // straight off the SAME `MeasuredClassifier`.
   const { badgeCharField, badgeColorField } = buildBadgeCharFields(classifier);
   const { headerLines, headerAlign } = splitHeaderLines(header.headerText);
-  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } = buildHeaderLineMetrics(headerLines, headerFont, measurer, { sprites, headerItalic: header.headerItalic, maxWidth: headerMaxWidth });
+  const { headerLineWidths, headerDisplayLines, nameBlockHeight, headerLineAtoms, headerLineHeights } =
+    buildHeaderLineMetrics(headerLines, headerFont, measurer, {
+      sprites,
+      headerItalic: header.headerItalic,
+      maxWidth: headerMaxWidth,
+    });
   const headerTextWidth = Math.max(...headerLineWidths);
   const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
@@ -418,7 +426,8 @@ function buildHeaderNameRowsGeo(
     circleWidth: stereoGeo.circleWidth,
     widthStereoAndName: stereoGeo.widthStereoAndName,
     nameWidth: headerNameGeo.nameWidth,
-    h1, h2,
+    h1,
+    h2,
     nameTop,
     baselineOffset: stereoGeo.headerBaselineOffset,
     fontSpec: headerFont,

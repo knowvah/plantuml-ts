@@ -408,7 +408,12 @@ function embeddedStringBounder(measurer: StringMeasurer): StringBounder {
  * slice drops it when present, matching `createAndSkip`'s own "consumed
  * but NOT appended to the collected block" rule for that one line.
  */
-function wrapEmbeddedNoteSource(type: string, blockLines: readonly string[], start: number, consumed: number): string[] {
+function wrapEmbeddedNoteSource(
+  type: string,
+  blockLines: readonly string[],
+  start: number,
+  consumed: number,
+): string[] {
   const body = blockLines.slice(start + 1, start + 1 + consumed);
   const last = body.at(-1);
   const hasCloser = last !== undefined && last.trim() === EmbeddedDiagram.EMBEDDED_END;

@@ -47,7 +47,9 @@ describe('scaleNoteGeo — lineDividers', () => {
       lineDividers: [{ dividerYOffset: 2, strokeWidth: 1, strokeDasharray: '1,2', doubleLine: true }],
     });
     const scaled = scaleNoteGeo(note, 2);
-    expect(scaled.lineDividers).toEqual([{ dividerYOffset: 4, strokeWidth: 2, strokeDasharray: '2,4', doubleLine: true }]);
+    expect(scaled.lineDividers).toEqual([
+      { dividerYOffset: 4, strokeWidth: 2, strokeDasharray: '2,4', doubleLine: true },
+    ]);
   });
 
   it('preserves an undefined divider slot', () => {
@@ -81,7 +83,13 @@ describe('scaleNoteGeo — lineTables', () => {
         colBounds: [0, 20],
         rowBounds: [0, 10],
         lineColor: '#000',
-        cells: [{ col: 0, row: 0, lines: [{ y: 2, atoms: [{ ...textAtom, font: { ...textAtom.font, size: 20 }, width: 24 }] }] }],
+        cells: [
+          {
+            col: 0,
+            row: 0,
+            lines: [{ y: 2, atoms: [{ ...textAtom, font: { ...textAtom.font, size: 20 }, width: 24 }] }],
+          },
+        ],
       },
     ]);
   });

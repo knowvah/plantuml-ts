@@ -773,8 +773,8 @@ describe('buildGenericTagGeo (G2 N32)', () => {
       'jar-verified `caboco-62-jula911` ("Param" on "Foo", boxWidth 95.475)',
     () => {
       // CDD T6FU: `lines` carries `measureGenericTagDim`'s own
-    // `Display.getWithNewlines` split; a single-line clause is one entry.
-    const dim = { width: 39.325, height: 16, rawTextWidth: 35.325, lines: [{ text: 'Param', width: 35.325 }] };
+      // `Display.getWithNewlines` split; a single-line clause is one entry.
+      const dim = { width: 39.325, height: 16, rawTextWidth: 35.325, lines: [{ text: 'Param', width: 35.325 }] };
       const geo = buildGenericTagGeo(['Param'], dim, 95.475, 'sans-serif', 9.8889);
       expect(geo.rectX).toBeCloseTo(61.15, 4); // 95.475 - 39.325 + 4 + 1
       expect(geo.rectY).toBe(-3); // -4 + 1

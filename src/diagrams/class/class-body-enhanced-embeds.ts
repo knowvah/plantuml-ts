@@ -136,7 +136,10 @@ const EMBEDDED_FALLBACK_SIZE = 42;
  * Δ12/Δ11 width/height, an ACTIVITY-engine Cyrillic-text measurement gap,
  * not this mechanism).
  */
-function renderEmbed(source: readonly string[], renderer: EmbeddedRenderer | undefined): Omit<EmbeddedBlockGeo, 'y' | 'sizingWidth' | 'sizingHeight'> {
+function renderEmbed(
+  source: readonly string[],
+  renderer: EmbeddedRenderer | undefined,
+): Omit<EmbeddedBlockGeo, 'y' | 'sizingWidth' | 'sizingHeight'> {
   if (renderer === undefined) return { width: EMBEDDED_FALLBACK_SIZE, height: EMBEDDED_FALLBACK_SIZE };
   try {
     return renderer.renderImage(source);

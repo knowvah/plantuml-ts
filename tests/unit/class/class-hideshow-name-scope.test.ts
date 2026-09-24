@@ -40,9 +40,7 @@ function parse(source: string): ReturnType<typeof parseClass> {
 
 describe('matchEntityName is separator-aware (defect a, cicovi-23-zipe215)', () => {
   it('a root-level "hide Foo1" does NOT hide the qualified pack1.Foo1 sibling', () => {
-    const ast = parse(
-      ['package pack1 {', 'class Foo1', '}', 'class Foo2', 'class Foo3', 'hide Foo1'].join('\n'),
-    );
+    const ast = parse(['package pack1 {', 'class Foo1', '}', 'class Foo2', 'class Foo3', 'hide Foo1'].join('\n'));
     expect(computeHiddenIds(ast).size).toBe(0);
   });
 
@@ -52,9 +50,7 @@ describe('matchEntityName is separator-aware (defect a, cicovi-23-zipe215)', () 
     // flag `matchEntityName` reads (ast.namespaceSeparator's own doc
     // comment on why this is diagram-level, not per-entity-creation-time)
     // -- the leftover "." in the already-built id is what the strip finds.
-    const ast = parse(
-      ['package pack1 {', 'class Foo1', '}', 'set separator none', 'hide Foo1'].join('\n'),
-    );
+    const ast = parse(['package pack1 {', 'class Foo1', '}', 'set separator none', 'hide Foo1'].join('\n'));
     expect(ast.namespaceSeparator).toBeNull();
     expect([...computeHiddenIds(ast)]).toEqual(['pack1.Foo1']);
   });
@@ -127,9 +123,7 @@ describe('computeHiddenIds walks namespaces and cascades to children (defect b, 
   });
 
   it('a nested grandchild cascades through two ancestor levels', () => {
-    const ast = parse(
-      ['package outer {', 'package inner {', 'class Leaf', '}', '}', 'hide outer'].join('\n'),
-    );
+    const ast = parse(['package outer {', 'package inner {', 'class Leaf', '}', '}', 'hide outer'].join('\n'));
     const hidden = computeHiddenIds(ast);
     expect(hidden.has('outer')).toBe(true);
     expect(hidden.has('outer.inner')).toBe(true);

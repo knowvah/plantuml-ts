@@ -71,7 +71,7 @@ describe('unwrapContentG — attributed vs. malformed content <g>', () => {
     expect(() => unwrapContentG(ROOT_GROUP_OPEN + INNER)).toThrow(/malformed klimt SVG output/);
   });
 
-  it('returns \'\' for an EMPTY content <g>, which klimt serialises SELF-CLOSING (cdd-T28)', () => {
+  it("returns '' for an EMPTY content <g>, which klimt serialises SELF-CLOSING (cdd-T28)", () => {
     // A drawable that paints no ink leaves `gRoot` childless, and the XML
     // writer closes a childless element in place. Reached in production by
     // chrome text whose only atom is an unresolvable sprite, or a `{{ }}`

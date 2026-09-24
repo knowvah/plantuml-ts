@@ -679,7 +679,7 @@ describe('SvgGraphics — legacy path-builder API', () => {
 });
 
 describe('SvgGraphics — openLink/closeLink (cdd-T28, was a D3-prime stub)', () => {
-  it('wraps everything drawn between the calls in one <a>, with upstream\'s attribute set', () => {
+  it("wraps everything drawn between the calls in one <a>, with upstream's attribute set", () => {
     // `LinkData#updateAttributesOf` (`SvgGraphics.java:1163-1174`), the
     // same set `core/svg.ts#linkWrap` already emits on the string path.
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
@@ -719,7 +719,6 @@ describe('SvgGraphics — openLink/closeLink (cdd-T28, was a D3-prime stub)', ()
 });
 
 describe('SvgGraphics — D3′ stubs', () => {
-
   it('svgImage throws citing D3-prime regardless of args (covers both upstream overloads)', () => {
     const svg = new SvgGraphics(0, basicSvgOption(), 'v');
     expect(() => svg.svgImage({}, 0, 0)).toThrow(/D3-prime/);

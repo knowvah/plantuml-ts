@@ -39,7 +39,13 @@ describe('buildNamespaceGeos — reads the cluster box verbatim (T5)', () => {
   const clusterIdByNs = new Map([['p', 'cluster0']]);
 
   it('takes x/y/width/height straight from the matching cluster box, no padding applied', () => {
-    const [geo] = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
+    const [geo] = buildNamespaceGeos(ast, {
+      theme: defaultTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geo?.x).toBe(12);
     expect(geo?.y).toBe(34);
     expect(geo?.width).toBe(56);
@@ -47,17 +53,35 @@ describe('buildNamespaceGeos — reads the cluster box verbatim (T5)', () => {
   });
 
   it('skips a namespace with no clusterIdByNs entry at all', () => {
-    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs: new Map(), hiddenIds: new Set() });
+    const geos = buildNamespaceGeos(ast, {
+      theme: defaultTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs: new Map(),
+      hiddenIds: new Set(),
+    });
     expect(geos).toHaveLength(0);
   });
 
   it('skips a namespace whose clusterIdByNs id has no matching cluster entry', () => {
-    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [], clusterIdByNs, hiddenIds: new Set() });
+    const geos = buildNamespaceGeos(ast, {
+      theme: defaultTheme,
+      measurer,
+      clusters: [],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geos).toHaveLength(0);
   });
 
   it('skips every namespace when clusters is undefined (degenerate / no-cluster diagram)', () => {
-    const geos = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: undefined, clusterIdByNs, hiddenIds: new Set() });
+    const geos = buildNamespaceGeos(ast, {
+      theme: defaultTheme,
+      measurer,
+      clusters: undefined,
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geos).toHaveLength(0);
   });
 });
@@ -68,25 +92,49 @@ describe('buildNamespaceGeos — inkShape resolution (G2 N60, item 42)', () => {
   const clusterIdByNs = new Map([['p', 'cluster0']]);
 
   it('leaves inkShape undefined for the default (non-strict, non-rect) FOLDER style', () => {
-    const [geo] = buildNamespaceGeos(ast, { theme: defaultTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
+    const [geo] = buildNamespaceGeos(ast, {
+      theme: defaultTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geo?.inkShape).toBeUndefined();
   });
 
   it('resolves "polygon" for FOLDER style under skinparam style strictuml', () => {
     const strictTheme = { ...defaultTheme, strictUml: true };
-    const [geo] = buildNamespaceGeos(ast, { theme: strictTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
+    const [geo] = buildNamespaceGeos(ast, {
+      theme: strictTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geo?.inkShape).toBe('polygon');
   });
 
   it('resolves "rect" for skinparam packageStyle rect, even under strictuml', () => {
     const rectTheme = { ...defaultTheme, strictUml: true, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, { theme: rectTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
+    const [geo] = buildNamespaceGeos(ast, {
+      theme: rectTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geo?.inkShape).toBe('rect');
   });
 
   it('resolves "rect" for skinparam packageStyle rect without strictuml too', () => {
     const rectTheme = { ...defaultTheme, packageStyle: 'rect' as const };
-    const [geo] = buildNamespaceGeos(ast, { theme: rectTheme, measurer, clusters: [box], clusterIdByNs, hiddenIds: new Set() });
+    const [geo] = buildNamespaceGeos(ast, {
+      theme: rectTheme,
+      measurer,
+      clusters: [box],
+      clusterIdByNs,
+      hiddenIds: new Set(),
+    });
     expect(geo?.inkShape).toBe('rect');
   });
 });

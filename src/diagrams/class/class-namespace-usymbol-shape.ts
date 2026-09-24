@@ -226,9 +226,15 @@ function buildDecoration(
  * `NamespaceGeo` (T12's own "not modeled" note, `.agent-notes/cdd-T12.md`),
  * so those two roles apply the element-bucket override unconditionally.
  */
-function resolveClusterUSymbolPaint(theme: Theme, geo: NamespaceGeo, keyword: string, fallback: NamespaceUSymbolPaint): NamespaceUSymbolPaint {
+function resolveClusterUSymbolPaint(
+  theme: Theme,
+  geo: NamespaceGeo,
+  keyword: string,
+  fallback: NamespaceUSymbolPaint,
+): NamespaceUSymbolPaint {
   const specific = theme.colors.elements?.[keyword];
-  const backColor = geo.color === undefined && specific?.background !== undefined ? specific.background : fallback.backColor;
+  const backColor =
+    geo.color === undefined && specific?.background !== undefined ? specific.background : fallback.backColor;
   const borderColor = specific?.border ?? fallback.borderColor;
   const fontColor = typeof specific?.font === 'string' ? specific.font : fallback.fontColor;
   return { backColor, borderColor, roundCorner: fallback.roundCorner, fontColor };

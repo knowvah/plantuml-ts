@@ -88,9 +88,16 @@ describe('A3 M2 — classFontColor (header) / AttributeFontColor (member)', () =
 
   test('AttributeFontColor alone ALSO tints the header (no more-specific header override)', () => {
     const svg = svgOf(
-      ['@startuml', 'skinparam class{', 'AttributeFontColor gold', '}', 'class Foo {', '  +field1', '}', '@enduml'].join(
-        '\n',
-      ),
+      [
+        '@startuml',
+        'skinparam class{',
+        'AttributeFontColor gold',
+        '}',
+        'class Foo {',
+        '  +field1',
+        '}',
+        '@enduml',
+      ].join('\n'),
     );
     expect(textFills(svg)).toEqual(['#FFD700', '#FFD700']);
   });

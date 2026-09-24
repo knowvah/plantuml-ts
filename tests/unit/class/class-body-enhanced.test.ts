@@ -260,7 +260,10 @@ describe('measureEnhancedBody — row y bottom-anchor is gated on an image atom'
     };
   }
 
-  function firstRowsPart(rawLines: readonly string[], sprites?: ReturnType<typeof createSpriteRegistry>): EnhancedRowsPart {
+  function firstRowsPart(
+    rawLines: readonly string[],
+    sprites?: ReturnType<typeof createSpriteRegistry>,
+  ): EnhancedRowsPart {
     const part = measureEnhancedBody(rawLines, ctx(sprites)).parts.find(
       (p): p is EnhancedRowsPart => p.kind === 'rows',
     );

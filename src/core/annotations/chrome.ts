@@ -260,7 +260,11 @@ function buildFramedBlock(
   ctx: ChromeTextContext,
 ): AnnotationBlock {
   const titleBlock = buildMainframeTitleBlock(mainFrame, style, ctx);
-  const layout = buildBigFrame({ width: titleBlock.width, height: titleBlock.height }, original, bigFrameStyleOf(style));
+  const layout = buildBigFrame(
+    { width: titleBlock.width, height: titleBlock.height },
+    original,
+    bigFrameStyleOf(style),
+  );
 
   const parts = [
     layout.body,
