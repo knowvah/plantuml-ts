@@ -678,7 +678,11 @@ describe('refusal coverage — baseline shape', () => {
     // 5554 -> 5561 / 5285 -> 5292 at class-divergence-drive-2/close-b1
     // (2026-09-24): 7 more svg-class golden rows, same procedure
     // (ratchet 560 -> 567). Derivation: 5292 + 269 = 5561.
-    expect(manifest.fixtures.length).toBe(5561);
+    //
+    // 5561 -> 5584 / 5292 -> 5315 at class-divergence-drive-2/close-b2
+    // (2026-09-24): 23 more svg-class golden rows, same procedure
+    // (ratchet 567 -> 590). Derivation: 5315 + 269 = 5584.
+    expect(manifest.fixtures.length).toBe(5584);
     expect(pinnedJarErrors.length).toBe(99);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -693,7 +697,8 @@ describe('refusal coverage — baseline shape', () => {
     // a fresh measurement, gaps unchanged at 137.
     expect(pinnedErroring.length).toBe(269);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
-    expect(pinnedRendering.length).toBe(5292);
+    // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
+    expect(pinnedRendering.length).toBe(5315);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

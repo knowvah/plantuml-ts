@@ -6,7 +6,10 @@
 
 jixamu-89-ribo225, gatula-10-bifu561, jubobo-22-fapu993,
 bejeli-39-sina124, julixi-10-jide878, rulite-35-muno361,
-cacoma-43-poxu615, daxeno-00-kasu166, sijisi-94-ripu606. lojiga moved
+cacoma-43-poxu615, daxeno-00-kasu166, sijisi-94-ripu606; rilali-81-gifu188,
+xoxega-30-vuju324, goloxu-09-nero458 (Q-11, from T13 — journal row 33;
+also contributes the +1 px of camuna/nafiki/rifuzu, whose rows stay open
+on dot-engine issue 19). lojiga moved
 to T7b (structural: unported `USymbolStack`); xosiza settled by T6 as
 `open -> next-missions` (R-4, below).
 
@@ -34,6 +37,18 @@ old "~0.005 px rounding" attribution for gatula/jixamu/xosiza.
   OPEN, diagnose first (R.md "ruled out" + "instrument next" per
   fixture). An origin in dot-engine coordinates: stop 8. An origin that
   would need an epsilon/rounding change: stop 12.
+- **Q-11** rilali, xoxega, goloxu (HIGH mechanism, T13 artifact —
+  `.agent-notes/cdd2-T13.md`) — after the Kal width floor
+  (`EntityImageClass.java:113`, `getKalWidth()*1.3`) the header has spare
+  width (`HeaderLayout.java:88-104`), so the name's invisible reservation
+  ends at `x+w-h1`, the body's at its natural width, and the rectangle's
+  `x+w-1` corner is the max ink; jar max x = `x+w-1` exactly in 4 fixtures.
+  Ours: `addRectInk` (`class-ink-shapes.ts:84`) uses `x+w` (`bodyInkWidth`
+  unset for a class). Same `bodyInkWidth` family as R-2/R-3 — design ONE
+  faithful model of the class's reservation extents (`measureGenericClassifier`
+  exporting what upstream's `LimitFinder` actually sees), not three flags.
+  `minClassWidth`/`sameClassWidth` widening probably reach it too (by
+  reading, not measured).
 - **R-4** xosiza — NOT a jar divergence: our raw extent is 186.999992
   (floors to the jar's 187+1), and `absorbLayoutEpsilon`
   (`core/layout-epsilon.ts:33-35`, called at `TextBlockExporter.ts:72-73`)
