@@ -7,7 +7,9 @@
 
 rilali-81-gifu188, xoxega-30-vuju324, goloxu-09-nero458,
 vuzoro-99-kizi978, ririlu-13-zipi740; plus the Q-2 term of every T11/T13
-fixture. mucoti/sefazi are Q-8 (dot-engine issue 19, already filed; final
+fixture; plus CLIP-1 (moved from T9, journal row 14): bejusa-95-gafo325,
+runane-30-vena766, vusute-48-xono099, pisobo-93-sipa138, rezoba-58-xaze387,
+jojime-80-savu279. mucoti/sefazi are Q-8 (dot-engine issue 19, already filed; final
 set by T6); coxose moved to T11.
 
 ## Mechanisms · Write-set
@@ -33,8 +35,20 @@ Diagnosis sections are quoted from `diagnosis/Q.md` into the agent prompt.
   ADDITION to `class-kal.ts` (new functions; D7 forbids restructuring the
   existing ones — stop 11). Confirm ririlu's `MoreComplex` links by probe.
 
+- **CLIP-1a / CLIP-1b** (HIGH, probe-verified by T9 — every fixture went
+  conformant under temporary edits): read `diagnosis/CLIP-1.md` in full.
+  1a: port the cluster magnetic border force after the compound clip
+  (`SvekEdge.java:927-941`, `Cluster.java:726-757`, `USymbolFolder.java:127-144,242-266`;
+  the TS force exists unused at `core/decoration/symbol/USymbolFolder.ts:109-130`).
+  1b is the SAME first-bezier removal branch as Q-2's `moveStartPoint` port
+  (`DotPath.java:206-216`) — one port serves both.
+
 Write-set: `src/diagrams/class/class-edge-geo.ts` (`attachKalBoxes`
-region; T9 already landed its clip change), `renderer-arrowhead.ts`,
+region), `renderer-arrowhead.ts`, `layout.ts` (`clusterRects` only, lines
+~285-300; T13 also owns `layout.ts` and runs after T12),
+`class-shield-helpers.ts`, `src/core/spline-clip.ts`
+(`ClipRect` type), `src/core/svek/Cluster.ts` (only if `getMagneticBorder`
+is ported there rather than beside the clip),
 `class-kal.ts`, a new `class-kal-overlap.ts` if `class-kal.ts` would pass
 500 lines, tests beside each.
 

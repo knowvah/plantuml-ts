@@ -1,0 +1,56 @@
+diff --git a/src/diagrams/class/class-shield-helpers.ts b/src/diagrams/class/class-shield-helpers.ts
+index 886e6aee3..b945de876 100644
+--- a/src/diagrams/class/class-shield-helpers.ts
++++ b/src/diagrams/class/class-shield-helpers.ts
+@@ -106,6 +106,20 @@ export function clipClusterEdgeEnds(
+   if (tail !== undefined) result = clipSplineStart(result, tail);
+   const head = endId !== undefined ? clusterRects.get(endId) : undefined;
+   if (head !== undefined) result = clipSplineEnd(result, head);
++  const force = (r: any, pt: { x: number; y: number }) => {
++    if (r === undefined || r.folder !== true) return 0;
++    const x = pt.x - r.x, y = pt.y - r.y, w = r.wtitle, h = r.htitle;
++    if (x >= w && y >= 0 && y <= h) return h;
++    if (y <= 0 && x >= w + 7) return h;
++    if (y <= 0 && x >= w - 7) return h * ((x - (w - 7)) / 14);
++    return 0;
++  };
++  if (result === points) result = points.map((p) => ({ ...p }));
++  const n = result.length;
++  const f2 = force(head, result[n - 1]!);
++  if (f2 !== 0) { result[n - 1] = { x: result[n - 1]!.x, y: result[n - 1]!.y + f2 }; result[n - 2] = { x: result[n - 2]!.x, y: result[n - 2]!.y + f2 }; }
++  const f1 = force(tail, result[0]!);
++  if (f1 !== 0) { process.stderr.write('TAILFORCE ' + f1 + '\n'); result[0] = { x: result[0]!.x, y: result[0]!.y + f1 }; result[1] = { x: result[1]!.x, y: result[1]!.y + f1 }; }
+   return result;
+ }
+ 
+diff --git a/src/diagrams/class/layout.ts b/src/diagrams/class/layout.ts
+index 9aca2cd11..82f39c44e 100644
+--- a/src/diagrams/class/layout.ts
++++ b/src/diagrams/class/layout.ts
+@@ -289,7 +289,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
+   // SAME key `anchors` uses -- see `class-shield-helpers.ts
+   // #clipClusterEdgeEnds`'s own doc comment.
+   const clusterRects = new Map(
+-    namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]),
++    namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height, wtitle: ns.wtitle, htitle: ns.htitle, folder: (ns.inkShape===undefined||ns.inkShape==='polygon') && (ns.usymbol===undefined||ns.usymbol==='package'||ns.usymbol==='folder') }]),
+   );
+   // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
+   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
+diff --git a/src/diagrams/class/renderer-arrowhead.ts b/src/diagrams/class/renderer-arrowhead.ts
+index 0a1ffe0c6..a89c9679c 100644
+--- a/src/diagrams/class/renderer-arrowhead.ts
++++ b/src/diagrams/class/renderer-arrowhead.ts
+@@ -365,6 +365,13 @@ export function applyDecorTrim(
+   if (points.length < 2) return points;
+   const out = points.map((p) => ({ ...p }));
+   const last = out.length - 1;
++  if (tailTrim !== undefined && out.length >= 7 && Math.hypot(tailTrim.x, tailTrim.y) >= Math.hypot(out[3]!.x - out[0]!.x, out[3]!.y - out[0]!.y)) {
++    const t = { x: tailTrim.x - (out[3]!.x - out[0]!.x), y: tailTrim.y - (out[3]!.y - out[0]!.y) };
++    out.splice(0, 3);
++    out[0] = { x: out[0]!.x + t.x, y: out[0]!.y + t.y };
++    out[1] = { x: out[1]!.x + t.x, y: out[1]!.y + t.y };
++    tailTrim = undefined;
++  }
+   if (tailTrim !== undefined) {
+     out[0] = { x: out[0]!.x + tailTrim.x, y: out[0]!.y + tailTrim.y };
+     if (out.length >= 4) out[1] = { x: out[1]!.x + tailTrim.x, y: out[1]!.y + tailTrim.y };

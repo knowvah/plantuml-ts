@@ -47,10 +47,10 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 | daxeno-00-kasu166 | R | T17 | structural-match | 0 | 92 | | R-7 (open, diagnose first) | 
 | lojiga-09-meka859 | R | T7b | diverged | 3 | 160 | | R-8 (unported USymbolStack) | 
 | sijisi-94-ripu606 | R | T17 | diverged | 3 | 132 | | R-9 (open, diagnose first) | 
-| bejusa-95-gafo325 | D | T9 | structural-match | 0 | 4 | | CLIP-1 (D-1 disproved, reopened) | 
-| runane-30-vena766 | D | T9 | structural-match | 0 | 7 | | CLIP-1 (D-1 disproved, reopened) | 
-| vusute-48-xono099 | D | T9 | structural-match | 0 | 7 | | CLIP-1 (D-1 disproved, reopened) | 
-| pisobo-93-sipa138 | D | T9 | structural-match | 0 | 2 | | CLIP-1 (D-1 disproved, reopened) | 
+| bejusa-95-gafo325 | D | T12 | structural-match | 0 | 4 | | CLIP-1a (magnetic border) | 
+| runane-30-vena766 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
+| vusute-48-xono099 | D | T12 | structural-match | 0 | 7 | | CLIP-1a (magnetic border) | 
+| pisobo-93-sipa138 | D | T12 | structural-match | 0 | 2 | | CLIP-1a (magnetic border) | 
 | sugifi-33-xefe083 | S | T7 | diverged | 1 | 0 | | S-1 | 
 | sumule-00-pefa744 | S | T7 | diverged | 1 | 0 | | S-1 | 
 | xumofu-43-fode658 | S | T7 | diverged | 3 | 0 | | S-1b (open, diagnose first) | 
@@ -64,10 +64,10 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 | tuguku-78-zega630 | S | T8 | diverged | 6 | 0 | | S-7 | 
 | xoxuni-96-fere626 | S | T7 | diverged | 4 | 0 | | S-4 | 
 | gabejo-44-juki791 | S | T8 | diverged | 4 | 2 | | S-3 | 
-| guxode-39-dobi371 | S | T8 | diverged | 2 | 2 | | S-6 (+ CLIP-1 numeric half, T9) | 
+| guxode-39-dobi371 | S | T8 | diverged | 2 | 2 | | S-6 (+ numeric Δ0.014 g[14]: open, not CLIP-1) | 
 | vuresa-33-kumu160 | S | T7 | diverged | 3 | 3 | | S-8 | 
-| rezoba-58-xaze387 | D | T9 | diverged | 2 | 0 | | CLIP-1 (S-9 disproved, reopened) | 
-| jojime-80-savu279 | D | T9 | diverged | 3 | 0 | | CLIP-1 (S-9 disproved, reopened) | 
+| rezoba-58-xaze387 | D | T12 | diverged | 2 | 0 | | CLIP-1a + CLIP-1b | 
+| jojime-80-savu279 | D | T12 | diverged | 3 | 0 | | CLIP-1a + CLIP-1b | 
 | ponono-25-fevo574 | X | B5 | diverged | 62 | 75 | | |
 | sumocu-27-vubo674 | X | B5 | diverged | 62 | 75 | | |
 | pejone-71-tige404 | X | B5 | diverged | 220 | 1028 | | |
