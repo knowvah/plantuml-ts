@@ -78,6 +78,13 @@ function resolveInlineHeaderColor(color: string | undefined): string | undefined
  * IS the `getStyleHeader().value(PName.BackGroundColor)` result the
  * quirk's "independently re-resolved default" stands in for. Jar-
  * verified `nisune-86-faji869`.
+ * cdd2-T8 (S-5): a `<style> ... header { BackgroundColor } }` block sets
+ * `classCascadeHeaderBackground` instead (`style-cascade-class.ts
+ * #applyColorCascadeOverrides`) -- checked FIRST, ahead of the legacy
+ * skinparam-bridged `classHeaderBackground`, mirroring `classCascade
+ * HeaderFontColor`'s own "explicit `<style>` block outranks the
+ * FromSkinparamToStyle bridge" precedent (`skinparam-theme-builder.ts
+ * :102-110`). Jar-verified `fumalu-64-vude116`.
  */
 export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint, theme: Theme): Paint | undefined {
   const inline = resolveInlineHeaderColor(geo.color);
@@ -105,7 +112,10 @@ export function resolveClassHeaderFill(geo: ClassifierGeo, bodyFill: Paint, them
   // and the `{element, class_, header}` styles, so when it applies it IS
   // `getStyleHeader()`'s merged BackGroundColor -- equal to `backcolor`,
   // hence no split (`tabaxa-70-pomu341`).
-  const styleHeader = classStereotypeBackground(geo, theme) ?? theme.colors.graph.classHeaderBackground;
+  const styleHeader =
+    classStereotypeBackground(geo, theme) ??
+    theme.colors.graph.classCascadeHeaderBackground ??
+    theme.colors.graph.classHeaderBackground;
   if (styleHeader !== undefined) {
     if (typeof styleHeader !== 'string' || typeof bodyFill !== 'string') return styleHeader;
     return resolveColorToSvgHex(styleHeader) === resolveColorToSvgHex(bodyFill) ? undefined : styleHeader;

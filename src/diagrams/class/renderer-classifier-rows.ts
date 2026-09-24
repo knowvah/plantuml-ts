@@ -25,7 +25,13 @@ import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
-import { resolveElementFont, resolveElementHeaderFont } from './renderer-classifier-colors.js';
+import {
+  resolveElementFont,
+  resolveElementHeaderFont,
+  resolveClassFontColorByStereo,
+  classifierFill,
+} from './renderer-classifier-colors.js';
+import { resolveClassHeaderFill } from './renderer-classifier-header-split.js';
 import { parseDeclarationColors } from './class-declaration-extractors.js';
 
 /**
@@ -195,12 +201,71 @@ function classifierCascadeFontColor(
   // ancestor cascade for BOTH the name row AND member rows uniformly --
   // but NEVER a stereotype label row (`isStereoLabelRow`'s own doc
   // comment on {@link renderRowText}'s own parameter).
-  return (
-    (isStereoLabelRow
-      ? undefined
-      : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor) ??
-    terminalCascadeFontColor(theme, isHeader)
-  );
+  const tagFontColor = isStereoLabelRow
+    ? undefined
+    : resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.fontColor;
+  // cdd2-T8 (S-3): `skinparam classFontColor<<stereo>>` -- SAME
+  // stereotype-tagged-style tier as the `.tagname` cascade above; its
+  // upstream registration (`FromSkinparamToStyle.java:187`'s
+  // `{element,class_,header}` signature) applies ONLY to the NAME row,
+  // mirroring the base (non-`<<>>`) `classFontColor` skinparam's own
+  // header-only bridge (`skinparam-theme-builder.ts:111`'s
+  // `classCascadeHeaderFontColor` mapping) -- never a member row or a
+  // stereotype label row. See `theme-graph-colors-a.ts
+  // #classFontColorByStereo`.
+  const stereoFontColor =
+    isHeader && !isStereoLabelRow ? resolveClassFontColorByStereo(theme, geo.stereotypeLabels) : undefined;
+  const automaticFontColor = isHeader && !isStereoLabelRow ? resolveAutomaticFontColor(geo, theme) : undefined;
+  return tagFontColor ?? stereoFontColor ?? automaticFontColor ?? terminalCascadeFontColor(theme, isHeader);
+}
+
+/**
+ * cdd2-T8 (S-13): `HColorSimple#opposite` (`klimt/color/HColorSimple.java
+ * :211-214`) -- the YIQ-luma contrast test `HColorAutomagic
+ * #getAppropriateColor` delegates to for `skinparam classFontColor
+ * automatic`. `getGrayScaleInternal`: `(r*299 + g*587 + b*114) / 1000`; a
+ * luma `< 128` is dark (white text wins), `>= 128` is light (black text
+ * wins) -- a THIRD local copy of the same 2-line formula `core/klimt/color
+ * /HColorSet.ts#isDarkResolved` and `core/tim/builtin/color-utils.ts#isDark`
+ * already each carry independently (that file's own doc comment names this
+ * as the established "no cross-module-boundary import for a 2-line pure
+ * function" precedent -- `core/klimt/color/` isn't in this task's write-set).
+ * `hex` is always `#RRGGBB`/`#RGB` (this module's own inputs are always
+ * `resolveColorToSvgHex`'s output shape), so no `#RRGGBBAA`/named-colour
+ * parsing is needed here.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:211-214
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorUtils.java:55-58
+ */
+function isDarkHex(hex: string): boolean {
+  const full = hex.length === 4 ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}` : hex;
+  const r = Number.parseInt(full.slice(1, 3), 16);
+  const g = Number.parseInt(full.slice(3, 5), 16);
+  const b = Number.parseInt(full.slice(5, 7), 16);
+  return Math.trunc((r * 299 + g * 587 + b * 114) / 1000) < 128;
+}
+
+/**
+ * cdd2-T8 (S-13): `skinparam classFontColor automatic` -- resolves a
+ * contrast colour against the NAME row's own local background (the header
+ * fill if header-split applies, else the plain body fill -- the SAME
+ * background `renderer-classifier-header-split.ts#resolveClassHeaderFill`/
+ * `renderer-classifier-colors.ts#classifierFill` already compute for the
+ * box's OWN paint, reused here rather than re-derived). `undefined` when
+ * `classFontColorAutomatic` is unset (the common case -- falls through to
+ * {@link terminalCascadeFontColor}'s existing chain) OR the resolved
+ * background is a gradient `Paint` (no corpus fixture combines `automatic`
+ * with a gradient header/body; `HColorGradient` has no `opposite()`
+ * override upstream reachable from this path either). Only ever called for
+ * the NAME row (`isHeader && !isStereoLabelRow`, mirroring `classFontColor`'s
+ * own header-only skinparam bridge -- see this file's `stereoFontColor`
+ * sibling for the identical gating precedent).
+ */
+function resolveAutomaticFontColor(geo: ClassifierGeo, theme: Theme): string | undefined {
+  if (theme.colors.graph.classFontColorAutomatic !== true) return undefined;
+  const bodyFill = classifierFill(geo, theme);
+  const headerFill = resolveClassHeaderFill(geo, bodyFill, theme) ?? bodyFill;
+  if (typeof headerFill !== 'string') return undefined;
+  return isDarkHex(headerFill) ? '#FFFFFF' : '#000000';
 }
 
 export function renderRowText(
@@ -338,6 +403,26 @@ function textAtomRowY(y: number, atom: Extract<MemberRenderAtom, { kind: 'text' 
   return y + (atom.dy ?? 0);
 }
 
+/**
+ * cdd2-T8 (S-10): `CommandCreoleMonospaced.java:81`'s `stripe.getSkinParam()
+ * .getMonospacedFamily()` substitutes the REAL configured font name for a
+ * `""text""` creole run's logical family BEFORE upstream ever draws it --
+ * this port's creole engine has no skinparam thread (`CommandCreoleMonospaced
+ * .ts`'s own doc comment), so the substitution happens here instead, at the
+ * member-row text-emission site, immediately before the atom's family
+ * reaches `text()`/`svg-text-font.ts#textFontFamily`. When no
+ * `defaultMonospacedFontName` is configured, `atom.font.family` passes
+ * through UNCHANGED and `textFontFamily`'s existing `renameLogicalMonospace`
+ * rename (`monospaced` -> CSS `monospace`) still applies exactly as before
+ * -- zero behavior change for every fixture that never sets this skinparam.
+ * Jar-verified `nesivu-99-cexu403`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleMonospaced.java:81
+ */
+function resolveAtomFontFamily(family: string, theme: Theme): string {
+  if (family.toLowerCase() !== 'monospaced') return family;
+  return theme.colors.graph.monospacedFontName ?? family;
+}
+
 export function renderRowAtoms(
   atoms: readonly MemberRenderAtom[],
   startX: number,
@@ -376,7 +461,7 @@ export function renderRowAtoms(
       // ({@link textAtomRowY} -- 0 for every atom of an all-NORMAL row, the
       // identity property `creole-sea-line.ts`'s doc comment names).
       const rendered = text(x, textAtomRowY(y, atom), atom.renderText ?? atom.text, {
-        fontFamily: atom.font.family,
+        fontFamily: resolveAtomFontFamily(atom.font.family, theme),
         fontSize: getFont(atom.font).size,
         fill: atom.font.color ?? fallbackFontColor,
         lengthAdjust: 'spacing',

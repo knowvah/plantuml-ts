@@ -60,6 +60,15 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(t1.fontFamily).toBe(t2.fontFamily);
   });
 
+  // cdd2-T8 (S-10): `SkinParam.java:1092`'s `getValue
+  // ("defaultMonospacedFontName", Parser.MONOSPACED)` -- nesivu-99-cexu403
+  // shape (`skinparam defaultMonospacedFontName Forte`).
+  it('maps defaultmonospacedfontname to colors.graph.monospacedFontName', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['defaultmonospacedfontname', 'Forte']]), defaultTheme);
+    expect(theme.colors.graph.monospacedFontName).toBe('Forte');
+    expect(unknown).toEqual([]);
+  });
+
   it('maps fontsize to fontSize as number', () => {
     const { theme, unknown } = resolveSkinparam(new Map([['fontsize', '18']]), defaultTheme);
     expect(theme.fontSize).toBe(18);
@@ -170,6 +179,27 @@ describe('resolveSkinparam — direct key matches', () => {
   it('lowercases the stereotype label in statebordercolor<<X>>', () => {
     const { theme } = resolveSkinparam(new Map([['statebordercolor<<MeBlue>>', '#0000FF']]), defaultTheme);
     expect(theme.colors.graph.stateBorderColorByStereo).toEqual({ meblue: '#0000FF' });
+  });
+
+  // cdd2-T8 (S-3): `FromSkinparamToStyle`'s stereotype-tagged Style
+  // re-sign, the SAME mechanism `classbackgroundcolor<<stereo>>` uses
+  // (gabejo-44-juki791 shape: `skinparam class { BorderColor<<Green>>
+  // Green }`) -- see `theme-graph-colors-a.ts#classBorderColorByStereo`'s
+  // own doc comment for why this is NOT `SkinParam#getColor(ColorParam,
+  // Stereotype)`.
+  // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:183,292-302,396-408
+  it('maps classbordercolor<<stereo>> to colors.graph.classBorderColorByStereo', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['classbordercolor<<Green>>', 'Green']]), defaultTheme);
+    expect(theme.colors.graph.classBorderColorByStereo).toEqual({ green: 'Green' });
+    expect(unknown).toEqual([]);
+  });
+
+  // cdd2-T8 (S-3): same mechanism, `PName.FontColor` instead of LineColor.
+  // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:187,292-302,396-408
+  it('maps classfontcolor<<stereo>> to colors.graph.classFontColorByStereo', () => {
+    const { theme, unknown } = resolveSkinparam(new Map([['classfontcolor<<Blue>>', 'Blue']]), defaultTheme);
+    expect(theme.colors.graph.classFontColorByStereo).toEqual({ blue: 'Blue' });
+    expect(unknown).toEqual([]);
   });
 
   // G2 N51

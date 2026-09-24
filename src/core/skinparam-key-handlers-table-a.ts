@@ -166,6 +166,18 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.fontFamily = value;
     },
   ],
+  // cdd2-T8 (S-10): `skinparam defaultMonospacedFontName <name>` --
+  // `SkinParam.java:1092`'s `getValue("defaultMonospacedFontName",
+  // Parser.MONOSPACED)` -- the REAL font name substituted for the logical
+  // `monospaced` token BEFORE `renameLogicalMonospace`'s CSS-generic
+  // fallback ever runs (`svg-text-font.ts`'s own doc comment). No prior
+  // handler existed for this key at all (confirmed by exhaustive grep).
+  [
+    ['defaultmonospacedfontname'],
+    (acc, value) => {
+      acc.monospacedFontName = value;
+    },
+  ],
   [
     ['fontsize'],
     (acc, value) => {

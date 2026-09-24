@@ -12,6 +12,7 @@
 import type { Paint } from './paint.js';
 import type { ThemeGraphColorsA } from './theme-graph-colors-a.js';
 import type { ThemeGraphColorsB } from './theme-graph-colors-b.js';
+import type { ThemeGraphColorsC } from './theme-graph-colors-c.js';
 
 /**
  * Per-element (SName) color overrides — decision D4. Each role may hold a solid
@@ -170,4 +171,4 @@ export interface ElementColors {
   roundCorner?: number;
 }
 
-export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB;
+export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;

@@ -84,6 +84,12 @@ const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [
 ];
 
 const GRAPH_OVERRIDE_FIELDS: FieldTable = [
+  // cdd2-T8 (S-10): see `theme-graph-colors-c.ts#ThemeGraphColorsC
+  // .monospacedFontName`.
+  ['monospacedFontName', (acc) => acc.monospacedFontName],
+  // cdd2-T8 (S-13): see `theme-graph-colors-c.ts#ThemeGraphColorsC
+  // .classFontColorAutomatic`.
+  ['classFontColorAutomatic', (acc) => acc.classFontColorAutomatic],
   ['classBackground', (acc) => acc.classBackground],
   ['classHeaderBackground', (acc) => acc.classHeaderBackground],
   // G2 N65 item 47: see `theme.ts#classCascadeRoundCorner`'s doc comment
@@ -99,6 +105,8 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   ['classBorderThickness', (acc) => acc.classBorderThickness],
   ['classBorderThicknessByStereo', (acc) => acc.classBorderThicknessByStereo],
   ['classBackgroundColorByStereo', (acc) => acc.classBackgroundColorByStereo],
+  ['classBorderColorByStereo', (acc) => acc.classBorderColorByStereo],
+  ['classFontColorByStereo', (acc) => acc.classFontColorByStereo],
   // cdd-T19 (A3 M2): the legacy `classFontColor`/`classAttributeFontColor`
   // skinparam keys bridge into the SAME `classCascade(Header)FontColor`
   // theme fields the `<style>` cascade computes (`style-cascade-class.ts

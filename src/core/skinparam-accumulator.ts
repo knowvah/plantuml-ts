@@ -16,6 +16,9 @@ import type { ActorStyle } from './skin/ActorStyle.js';
 
 export interface SkinparamAccumulator {
   fontFamily: string | undefined;
+  /** cdd2-T8 (S-10): `skinparam defaultMonospacedFontName <name>` -- see
+   *  `theme-graph-colors-c.ts#ThemeGraphColorsC.monospacedFontName`. */
+  monospacedFontName: string | undefined;
   fontSize: number | undefined;
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker — see
    *  `theme.ts#defaultFontSize`'s own doc comment. */
@@ -95,6 +98,15 @@ export interface SkinparamAccumulator {
    *  signature, jar-verified `remanu-84-sega129`/`picija-82-jebu272`:
    *  only the name row tints, member rows stay unaffected). */
   classFontColor: string | undefined;
+  /** cdd2-T8 (S-13): `skinparam classFontColor automatic` -- set instead of
+   *  `classFontColor` above when the value is the literal keyword
+   *  `automatic` (`skinparam-key-handlers-table-b.ts#isAutomaticFontColor`).
+   *  Bridges to `theme.colors.graph.classFontColorAutomatic`, resolved
+   *  PER-ROW at render time against that row's own local background
+   *  (`renderer-classifier-rows.ts#resolveAutomaticFontColor`) since a
+   *  parse-time value cannot know a classifier's resolved header colour.
+   *  Jar-verified `nisune-86-faji869`. */
+  classFontColorAutomatic: boolean | undefined;
   /** cdd-T19 (A3 M2): `skinparam class { AttributeFontColor X }` (no
    *  bare/top-level form upstream — always block-scoped, `Colors.java`'s
    *  key resolves to `classAttributeFontColor` after the block-name
@@ -111,6 +123,14 @@ export interface SkinparamAccumulator {
    *  `skinparam class { <<Stereo>> { FontSize N } }` block) — see
    *  `theme-graph-colors-a.ts#classFontSizeByStereo`. */
   classFontSizeByStereo: Record<string, number> | undefined;
+  /** cdd2-T8 (S-3): `skinparam class { BorderColor<<Stereo>> #X }` /
+   *  `skinparam classBorderColor<<Stereo>> #X` -- see
+   *  `theme-graph-colors-a.ts#classBorderColorByStereo`. */
+  classBorderColorByStereo: Record<string, string> | undefined;
+  /** cdd2-T8 (S-3): `skinparam class { FontColor<<Stereo>> #X }` /
+   *  `skinparam classFontColor<<Stereo>> #X` -- see
+   *  `theme-graph-colors-a.ts#classFontColorByStereo`. */
+  classFontColorByStereo: Record<string, string> | undefined;
   stateBorderColorByStereo: Record<string, string> | undefined;
   stateBackgroundColorByStereo: Record<string, string> | undefined;
   stateFontColorByStereo: Record<string, string> | undefined;
@@ -189,6 +209,7 @@ export interface SkinparamAccumulator {
  */
 const SCALAR_FIELD_NAMES = [
   'fontFamily',
+  'monospacedFontName',
   'fontSize',
   'defaultFontSize',
   'linetype',
@@ -232,7 +253,10 @@ const SCALAR_FIELD_NAMES = [
   'classBorderThickness',
   'classBorderThicknessByStereo',
   'classBackgroundColorByStereo',
+  'classBorderColorByStereo',
+  'classFontColorByStereo',
   'classFontColor',
+  'classFontColorAutomatic',
   'classAttributeFontColor',
   'classAttributeFontSizeByStereo',
   'classFontSizeByStereo',

@@ -88,6 +88,34 @@ describe('T20 E1: class header-background split (nisune shape, mexaka inline hea
     expect(attr(rs[0]!, 'fill')).toBe(attr(rs[1]!, 'fill'));
   });
 
+  it('a <style> classDiagram.class.header BackgroundColor drives the split (fumalu-64-vude116 shape; jar EntityImageClass.java:204-208)', () => {
+    const svg = render(
+      [
+        '@startuml',
+        '<style>',
+        'classDiagram {',
+        '  class {',
+        '    BackgroundColor yellow',
+        '    header {',
+        '      BackgroundColor red',
+        '    }',
+        '  }',
+        '}',
+        '</style>',
+        'class Foo {',
+        '  dummy',
+        '}',
+        '@enduml',
+      ].join('\n'),
+    );
+    const rs = rects(entityGroup(svg, 'Foo'));
+    expect(rs).toHaveLength(4);
+    expect(attr(rs[0]!, 'fill')).toBe('#FF0'); // body: BackgroundColor yellow
+    expect(attr(rs[1]!, 'fill')).toBe('#F00'); // header: BackgroundColor red
+    expect(attr(rs[2]!, 'fill')).toBe('#F00'); // header bottom strip
+    expect(attr(rs[3]!, 'fill')).toBe('none'); // border re-stroke
+  });
+
   it('an inline gradient BACK with no inline header does NOT split (taceve Test1)', () => {
     // `headerBackcolor = backcolor` (the SAME reference) when only BACK is
     // inline-set -- trivially `.equals()`-true, no split, even though the

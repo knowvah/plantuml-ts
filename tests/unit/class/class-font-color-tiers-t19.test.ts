@@ -102,3 +102,39 @@ describe('A3 M2 — classFontColor (header) / AttributeFontColor (member)', () =
     expect(textFills(svg)).toEqual(['#FFD700', '#FFD700']);
   });
 });
+
+// cdd2-T8 (S-13): `skinparam classFontColor automatic` -- a YIQ-luma
+// contrast test against the classifier's OWN resolved header background
+// (`HColorAutomagic#getAppropriateColor`/`HColorSimple#opposite`), NOT a
+// literal colour keyword. Jar-verified `nisune-86-faji869`.
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:211-214
+describe('cdd2-T8 S-13 — classFontColor automatic', () => {
+  test('a dark header background (#444) resolves the name row to white (nisune classA shape)', () => {
+    const svg = svgOf(
+      [
+        '@startuml',
+        'skinparam classFontColor automatic',
+        'skinparam classHeaderBackgroundColor #444',
+        'class classA {',
+        '  testMethodCode()',
+        '}',
+        '@enduml',
+      ].join('\n'),
+    );
+    expect(textFills(svg)).toEqual(['#FFF', '#000']);
+  });
+
+  test('a light background (#fff) resolves the name row to black (nisune classB shape)', () => {
+    const svg = svgOf(
+      [
+        '@startuml',
+        'skinparam classFontColor automatic',
+        'class classB #fff {',
+        '  testMethodCode()',
+        '}',
+        '@enduml',
+      ].join('\n'),
+    );
+    expect(textFills(svg)).toEqual(['#000', '#000']);
+  });
+});

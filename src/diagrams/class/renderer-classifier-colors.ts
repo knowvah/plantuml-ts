@@ -146,6 +146,47 @@ export function resolveClassBackgroundByStereo(
   return undefined;
 }
 
+/** cdd2-T8 (S-3): the FIRST of `stereotypeLabels` with a `skinparam
+ *  classBorderColor<<label>>` entry -- the SAME "stereotype re-signed
+ *  style" tier {@link resolveClassBackgroundByStereo} above models, for
+ *  `PName.LineColor` instead of BackGroundColor (`theme-graph-colors-a.ts
+ *  #classBorderColorByStereo`'s own doc comment for the full mechanism).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:183,396-408
+ */
+export function resolveClassBorderByStereo(
+  theme: Theme,
+  stereotypeLabels: readonly string[] | undefined,
+): Paint | undefined {
+  const byStereo = theme.colors.graph.classBorderColorByStereo;
+  if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
+  for (const label of stereotypeLabels) {
+    const raw = byStereo[cleanStereotypeToken(label)];
+    if (raw === undefined) continue;
+    const parsed = parseColor(raw);
+    return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+  }
+  return undefined;
+}
+
+/** cdd2-T8 (S-3): the FIRST of `stereotypeLabels` with a `skinparam
+ *  classFontColor<<label>>` entry -- the SAME tier as {@link
+ *  resolveClassBorderByStereo} above, for `PName.FontColor`. Plain
+ *  `string` (no gradient), matching every other FontColor cascade field.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:187,396-408
+ */
+export function resolveClassFontColorByStereo(
+  theme: Theme,
+  stereotypeLabels: readonly string[] | undefined,
+): string | undefined {
+  const byStereo = theme.colors.graph.classFontColorByStereo;
+  if (byStereo === undefined || stereotypeLabels === undefined) return undefined;
+  for (const label of stereotypeLabels) {
+    const raw = byStereo[cleanStereotypeToken(label)];
+    if (raw !== undefined) return resolveColorToSvgHex(raw);
+  }
+  return undefined;
+}
+
 /**
  * CDD T6FU: the classifier's background as resolved at upstream's
  * STEREOTYPE priority tier -- the `<style> class { .tag {} } }` cascade and
@@ -273,11 +314,20 @@ export function classBorder(geo: ClassifierGeo, theme: Theme): Paint {
   // G2 N37: the `.tagname` sub-selector cascade wins over the plain
   // ancestor cascade -- see `classifierFill`'s identical precedent above.
   const tagBorder = resolveClassTagCascadeEntry(theme, geo.stereotypeLabels, geo.styleGeneration)?.border;
+  if (tagBorder !== undefined) return tagBorder;
+  // cdd2-T8 (S-3): `skinparam classBorderColor<<stereo>>` -- the SAME
+  // stereotype-tagged-style tier as the `.tagname` cascade above, just
+  // spelled as a skinparam instead of a `<style>` block; placed
+  // immediately below it, mirroring `classifierFill`'s identical
+  // `resolveClassBackgroundByStereo` placement. See `theme-graph-colors-a
+  // .ts#classBorderColorByStereo`.
+  const byStereo = resolveClassBorderByStereo(theme, geo.stereotypeLabels);
+  if (byStereo !== undefined) return byStereo;
   // G2 N51: `skinparam classBorderColor #X` -- the bare (non-`<style>`,
   // non-tag) fallback tier, mirroring `classifierFill`'s identical
   // `classCascadeBackground ?? classBackground` two-tier precedent -- see
   // `theme.ts#classBorder`'s own doc comment.
-  return tagBorder ?? theme.colors.graph.classCascadeBorder ?? theme.colors.graph.classBorder ?? theme.colors.border;
+  return theme.colors.graph.classCascadeBorder ?? theme.colors.graph.classBorder ?? theme.colors.border;
 }
 
 /**
