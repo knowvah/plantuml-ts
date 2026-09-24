@@ -6,7 +6,8 @@
 
 nenexe-35-zere033, mugobo-34-fede498 (Q-9); nenepe-70-keri784,
 pegeso-72-mana305 (Q-6); camuna-58-veca254, nafiki-56-jixu680,
-rifuzu-80-nixo780 (Q-4/Q-5/Q-10, from T11).
+rifuzu-80-nixo780 (Q-4/Q-5/Q-10, from T11); rilali-81-gifu188,
+xoxega-30-vuju324, goloxu-09-nero458 (canvas +1, from T12 — journal row 31).
 
 ## Mechanisms · Write-set
 
@@ -31,6 +32,14 @@ Diagnosis sections are quoted from `diagnosis/Q.md` into the agent prompt.
 - **Q-10** (LOW, diagnose first) — rifuzu/camuna/nafiki share a Δ31/Δ37
   cascade present WITHOUT any `<style>`; compare our DOT node widths for
   `Map<K,V>`/`HashMap<Long,Customer>` against `svek-N.dot` first.
+
+- **Q-11** (open, diagnose first; journal row 31) — on the T11+T12 tree
+  rilali/xoxega/goloxu differ ONLY in `svg/@width`+`@viewBox[2]`, ours
+  1 px WIDER (373 vs 372, 374 vs 373, 239 vs 238). Every drawn element
+  matches. All three have several DOWN Kal boxes on one entity spread by
+  the newly ported `fixHoverlap` (`class-kal-overlap.ts`): check whether
+  the ink walk still sees a Kal box / edge end at its PRE-`moveX`
+  position, or counts the Kal box with the wrong `LimitFinder` rule.
 
 Write-set: `src/diagrams/class/class-ink-box.ts`, `layout-ink-extent.ts`,
 `renderer-classifier-badge-tag.ts`, `class-dot-graph.ts`, `layout.ts`,
