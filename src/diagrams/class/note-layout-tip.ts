@@ -23,7 +23,7 @@ import { buildOpaleNoteGeo } from './note-opale.js';
 import type { NoteGeo, TipRequest } from './note-layout-types.js';
 import type { NoteMeasurement } from './note-layout-measure.js';
 import { type NoteGroup, OPALE_Y_SPACING } from './note-layout-groups.js';
-import { clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
+import { applyClusterMagneticBorders, clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
 
 // Local interfaces grouped at the top of the file (lizard NLOC quirk: an
 // interface declared immediately before a function gets swept into that
@@ -258,7 +258,36 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
  * has at most one cluster-anchored end. `freestandingConnectors`' points
  * are NOT re-clipped here -- they are `edges[]` entries `buildEdgeGeos`
  * already clipped (`layout.ts`'s own doc comment at the `mapNoteGeos` call).
+ *
+ * cdd2-T19a (CLIP-1a on a note connector): the note link is a `SvekEdge`
+ * too (`CommandFactoryNoteOnEntity.java:342`), so `SvekEdge#drawU`'s
+ * cluster-magnetic-border arm (`SvekEdge.java:927-941`) also applies to its
+ * cluster end, via {@link applyClusterMagneticBorders} -- BUT that force,
+ * unlike the clip above, has no containment guard of its own
+ * (`MagneticBorder#getForceAt` is a pure function of position, e.g.
+ * `USymbolFolder.java:242-266`'s ramp is nonzero for ANY point with
+ * `y <= 0` relative to the cluster, however far above it): passing
+ * `group.target` as both `startId`/`endId` (the clip's own safe trick)
+ * would push BOTH ends whenever the note happens to share the cluster
+ * force's x-band (jar-verified `pecabi-95-demu756`: the note's own
+ * connector start sits DIRECTLY above the package at the same x, so it
+ * satisfies the SAME ramp -- pushing it too moved an already-correct point
+ * by the same delta). `startId`/`endId` here are therefore resolved by
+ * {@link clusterEndId} from RAW (pre-clip) containment -- the same
+ * `RectangleArea#contains` reason the clip finds a boundary crossing in the
+ * first place (`dot` only routes a cluster-anchored edge end to a point
+ * strictly inside the cluster box, `Cluster#getSpecialPointId`), so it is
+ * an order-independent proxy for "this end's entity is the cluster",
+ * unlike reusing `group.target` unconditionally. Run AFTER the clip
+ * (upstream: `simulateCompound` at `:671-672` before `getMagneticBorder`
+ * at `:927-941`).
  */
+function clusterEndId(point: { x: number; y: number } | undefined, target: string, rect: ClipRect): string | undefined {
+  if (point === undefined) return undefined;
+  const inside = point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
+  return inside ? target : undefined;
+}
+
 function groupConnectorPoints(
   group: NoteGroup,
   isNoteEdge: boolean,
@@ -266,7 +295,12 @@ function groupConnectorPoints(
   ctx: NoteMapContext,
 ): Array<{ x: number; y: number }> {
   if (!isNoteEdge || group.target === undefined || ctx.clusterRects === undefined) return rawPoints;
-  return clipClusterEdgeEnds(rawPoints, group.target, group.target, ctx.clusterRects);
+  const clipped = clipClusterEdgeEnds(rawPoints, group.target, group.target, ctx.clusterRects);
+  const rect = ctx.clusterRects.get(group.target);
+  if (rect === undefined) return clipped;
+  const startId = clusterEndId(rawPoints[0], group.target, rect);
+  const endId = clusterEndId(rawPoints.at(-1), group.target, rect);
+  return applyClusterMagneticBorders(clipped, startId, endId, ctx.clusterRects);
 }
 
 function resolveGroupGeos(group: NoteGroup, data: NoteDataset, ctx: NoteMapContext): NoteGeo[] {

@@ -126,19 +126,21 @@ describe('M1 — a `note top of <package>` connector clips the same way', () => 
   const note = noteLeaves(geo.leaves).find((n) => n.target === 'oft_openflow_types')!;
   const pkg = geo.namespaces.find((n) => n.id === 'oft_openflow_types')!;
 
-  it('clips the connector to the package`s own top border, not the interior zaent anchor', () => {
+  it('clips the connector to the package`s own top border, then applies the tab magnetic force', () => {
     expect(note.connector.length).toBeGreaterThan(0);
     const last = note.connector[note.connector.length - 1]!;
-    // Self-consistent: just above the package's own top (52.999) --
-    // nowhere near the old unclipped y≈117 (the anchor sits above the
-    // cluster's sole classifier, per `class-shield-helpers.ts
-    // #packageEndpointAnchors`'s own doc comment). A small residual
-    // against the jar's own clip point on this curve is the same named
-    // dot-engine delta as bejusa's (issue 18), not a clip bug: the
-    // fixture's own `render-diff` is structural=0 (the M1 defect this
-    // task targets), a small numeric-only gap on the final segment.
-    expect(last.y).toBeLessThan(pkg.y);
-    expect(pkg.y - last.y).toBeLessThan(1);
+    // cdd2-T19a: `clipClusterEdgeEnds` alone would land just above the
+    // package's own top (52.999) -- nowhere near the old unclipped y≈117
+    // (the anchor sits above the cluster's sole classifier, per
+    // `class-shield-helpers.ts#packageEndpointAnchors`'s own doc comment).
+    // But upstream ALSO applies the folder magnetic-border force to a
+    // cluster-anchored connector end (`SvekEdge.java:927-941`,
+    // `note-layout-tip.ts#groupConnectorPoints`), which pulls the clipped
+    // point back DOWN into the tab band (`[pkg.y, pkg.y + pkg.htitle)`) --
+    // matching the jar exactly (`render-diff`: structural=0, numeric=0).
+    expect(last.y).toBeGreaterThan(pkg.y);
+    expect(last.y).toBeLessThan(pkg.y + pkg.htitle);
+    expect(last.y).toBeCloseTo(57.509, 2);
   });
 });
 
