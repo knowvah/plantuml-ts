@@ -16,6 +16,7 @@ import {
 } from './class-directives.js';
 import { handlePendingNoteLine } from './class-notes.js';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
+import type { DisplayPositioned } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import { normalizeSameConnectionLengths } from './class-namespace.js';
 import { eventuallyBuildPhantomGroups } from './class-namespace-resolve.js';
@@ -364,8 +365,10 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     // makeDefaultAST() always sets annotations; the field is optional on
     // ClassDiagramAST only so hand-authored literal fixtures elsewhere need
     // not include it (see ast.ts's doc on the field).
+    const legendBefore = state.ast.annotations!.legend;
     const annotationMatch = matchAnnotationCommand(annotationLines(merged.rawLines, i), i, state.ast.annotations!);
     if (annotationMatch !== null) {
+      routeGroupLegend(state, legendBefore);
       i += annotationMatch.consumed - 1;
       continue;
     }
@@ -394,6 +397,25 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
   // to buildSyntaxRefusal -- no existing branch's condition or order changed.
   // Restructuring ported parser dispatch mid-change is what CLAUDE.md's "do
   // not refactor while porting" prevents.
+}
+
+/**
+ * cdd2-T19b: `AbstractClassOrObjectDiagram#setLegend`
+ * (`objectdiagram/AbstractClassOrObjectDiagram.java:353-363`) -- a legend
+ * command executed while the current group is NOT the root goes to that
+ * group (`currentGroup.setLegend(legend)`) and leaves the diagram's own
+ * legend untouched; only a root-level legend reaches `TitledDiagram
+ * #setLegend`. The shared annotation matcher always writes the diagram slot,
+ * so a legend it just stored inside a group is moved onto the Namespace and
+ * the diagram slot restored to `before`.
+ */
+function routeGroupLegend(state: ParseState, before: DisplayPositioned): void {
+  const annotations = state.ast.annotations!;
+  if (state.activeNamespace === null || annotations.legend === before) return;
+  const ns = state.ast.namespaces.find((n) => n.id === state.activeNamespace);
+  if (ns === undefined) return;
+  ns.legend = annotations.legend;
+  annotations.legend = before;
 }
 
 /** Post-processing: same-pair length normalization (checkFinalError,

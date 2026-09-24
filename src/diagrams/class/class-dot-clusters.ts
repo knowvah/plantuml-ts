@@ -14,6 +14,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputCluster } from '../../core/graph-layout.js';
 import { clusterWrapperLevel } from './class-cluster-levels.js';
 import { namespaceTitleTableDims } from './class-namespace-title-table.js';
+import { buildClusterHeaderStereo } from './class-cluster-header.js';
 
 /**
  * The set of namespace ids that must emit a cluster: any namespace whose
@@ -71,13 +72,17 @@ export function buildDotClusters(
     // independent of whether it carries a title.
     cluster.innerMarginLevels = clusterWrapperLevel(ns.id, ast);
     if (anchorId !== undefined) cluster.unwrappedNodeId = anchorId;
-    if (ns.display.length > 0) {
+    // cdd2-T19b: `ClusterHeader`'s `dimLabel.getWidth() > 0` gate
+    // (`ClusterHeader.java:80`) covers `mergeTB(stereo, title)`, so a header
+    // stereo block (displayed stereotype / group legend) counts too.
+    const header = buildClusterHeaderStereo(ns, ast, theme, measurer);
+    if (ns.display.length > 0 || header !== undefined) {
       cluster.label = ns.display;
       // cdd-T12 (A2b E3): `ns.usymbol` feeds `ClusterHeader`'s per-USymbol
       // `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` supplement
       // (`class-namespace-title-table.ts`) -- a `<<Node>>` package's label
       // table is 60px wider / 5px taller than its bare title text.
-      const dims = namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol);
+      const dims = namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol, header);
       // Same pair, two consumers (cluster-title-table.ts's own
       // `computeTitleTableHeight` doc comment): `labelWidth`/`labelHeight`
       // feed the DOT-TEXT emitter's `label=<TABLE...>` (svek-dot-emit-

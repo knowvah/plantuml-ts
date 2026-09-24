@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1194 modules · 4458 exported names.
+1195 modules · 4462 exported names.
 
 ## `src/`
 
@@ -1118,6 +1118,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-body-tree.ts` | `TreeCellRow`, `TreeLayout`, `measureTreeCells`, `TreeConnector`, `computeTreeConnectors` | class-body-tree.ts — `AtomTree`/`Skeleton2` port: measures a `\|_` tree-list run's cells (one creole text row per cell, indented by level) and computes the bullet/hline/vline tree-connector geometry that draws beside them. |
 | `class-classifier-ast.ts` | `ClassifierKind`, `Classifier` | Class-diagram Classifier AST types. |
 | `class-classifier-ink-reservation.ts` | `HeaderBlockDims`, `InkReservation`, `headerInkReservation`, `compartmentReservationWidth`, `GenericClassifierInkGeo`, `genericClassifierInkFields` | cdd2-T17: what `LimitFinder` sees of one `EntityImageClass` besides its bordered `URectangle` -- the invisible `UEmpty` reservations its header and body blocks draw, in `EntityImageClass#drawInternal` order (`svek/image/EntityImageClass.jav |
+| `class-cluster-header.ts` | `ClusterHeaderStereo`, `visibleNamespaceStereotypeLabels`, `buildClusterHeaderStereo`, `clusterHeaderStereoTextBlock` | `ClusterHeader#getStereoBlock` for a class/object package cluster (cdd2-T19b): the group's DISPLAYED stereotype merged with the group's OWN legend into the one block `ClusterDecoration` draws as the cluster's "stereotype" and `ClusterHeader |
 | `class-cluster-levels.ts` | `ClusterWrapperLevel`, `clusterWrapperLevel` | Class/object package cluster wrapper level. |
 | `class-command-containers.ts` | `CONTAINER_COMMANDS` | Container/creation commands for the class diagram dispatch table (rules 4-5g of the original class-commands.ts COMMANDS array): brace close, `together {`, namespace/package blocks, descriptive containers, the `()` lollipop declaration, diam |
 | `class-command-declarations.ts` | `DECLARATION_COMMANDS` | Classifier declaration commands for the class diagram dispatch table (rules 7-7c of the original class-commands.ts COMMANDS array): the `class`/`interface`/`enum`/`annotation`/`entity`/`circle` declaration, plus the already-split `object`/` |
