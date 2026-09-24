@@ -1057,7 +1057,15 @@ describe('edge-label margin ink (cdd-T35)', () => {
       [],
       [],
       edgeWithLabel(label, {
-        noteBox: { x: 0, y: 0, width: 1, height: 1, inkBox: { x: 0, y: 0, width: 1, height: 1 }, noteLines: [] },
+        noteBox: {
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1,
+          inkBox: { x: 0, y: 0, width: 1, height: 1 },
+          noteLines: [],
+          position: 'bottom',
+        },
       }),
       [],
     );

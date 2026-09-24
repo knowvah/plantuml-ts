@@ -114,5 +114,13 @@ export function computeEdgeNoteBox(
       height: noteDim.height - 2 * ROSE_NOTE_PADDING,
     },
     noteLines: note.lines.map((text, i) => ({ text, width: note.lineWidths[i] ?? 0 })),
+    // cdd2-T19c: carried through so the renderer can recover the merge's
+    // operand order (`position`) and paint the note-on-link's own `#color`
+    // (`back`/`line`) and creole/sprite atoms (`lineAtoms`) -- see
+    // `EdgeNoteBoxGeo`'s own doc comments (class-geo-edge-extras.ts).
+    position: rel.linkNotePosition ?? 'bottom',
+    ...(rel.linkNoteBack !== undefined ? { back: rel.linkNoteBack } : {}),
+    ...(rel.linkNoteLine !== undefined ? { line: rel.linkNoteLine } : {}),
+    lineAtoms: note.lineAtoms,
   };
 }

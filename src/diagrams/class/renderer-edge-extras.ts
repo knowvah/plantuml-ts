@@ -11,7 +11,7 @@ import { scaleDashArrayString } from './class-scale-geo-row.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Visibility } from './class-member-ast.js';
 import { text, line, rect } from '../../core/svg.js';
-import { renderNote } from './renderer-note.js';
+import { renderLinkNoteBox } from './renderer-note-link-box.js';
 import { colorsFor, iconSizeOf } from './class-visibility-icon.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
@@ -87,33 +87,44 @@ export function renderEdgeVisibilityIcon(geo: EdgeGeo, theme: ScaledTheme): stri
 }
 
 /**
- * cdd-T7 (A2a/M5): `note on link`'s body — reuses `renderer-note.ts
- * #renderNote`'s CURRENT plain-note path builder by CALLING it (task
- * brief boundary: never copy it, never edit `renderer-note.ts` itself —
- * T8's write-set, batch 3). Builds the minimal `NoteGeo` `renderNote`
- * actually reads: `connector: []` (so `buildConnectorPathData` draws no
- * separate line — the note-on-link box has none, it merges directly into
- * the edge's own label block) and no `color`/`stereotype`/`lineAtoms`/
- * `lineHeights` (falling back to the default note background and the
- * plain-per-line text path, `renderNoteText`'s own optional-field
- * fallback). `lipazi-06-care921`'s exact vertex order/paint is corrected
- * by T8, not here — see this task's commit message.
+ * cdd-T7 (A2a/M5): `note on link`'s body — draws via `renderer-note-link
+ * -box.ts#renderLinkNoteBox`, the `ComponentRoseNote`-shaped render path
+ * (cdd2-T19c; that module's own doc comment has the full jar derivation of
+ * why a note-on-link is NOT `renderer-note.ts#renderNote`'s plain-note
+ * path). Builds the `NoteGeo` it reads from the note operand's INK box
+ * (`box.inkBox`, the rectangle `ComponentRoseNote#drawInternalU` actually
+ * paints — NOT `box.x`/`.y`/`.width`/`.height`, the OUTER `EntityImageNoteLink
+ * `-preferred box `class-edge-note-box.ts`'s own doc comment distinguishes;
+ * cdd2-T19c: drawing the outer box instead of the ink box was this
+ * mechanism's own defect, jar-verified against `lipazi-06-care921`'s
+ * second note — the outer/ink delta matches `Rose.java:65-66`'s
+ * `paddingX`/`paddingY` (both 5) exactly). `connector: []` — the
+ * note-on-link box has none of its own, it merges directly into the
+ * edge's own label block. `lineAtoms` threads `measureNote`'s creole/
+ * sprite-atom breakdown through (`class-edge-note-box.ts`), so a
+ * `<$sprite>` token draws as an image atom instead of literal source text
+ * (`lozego-15-coci435`).
  */
-export function renderEdgeNoteBox(geo: EdgeGeo, theme: ScaledTheme): string {
+export function renderEdgeNoteBox(geo: EdgeGeo, theme: ScaledTheme): { body: string; extraDefs: string } {
   const box = geo.noteBox;
-  if (box === undefined) return '';
+  if (box === undefined) return { body: '', extraDefs: '' };
   const noteGeo: NoteGeo = {
     id: `${geo.id}-note`,
     kind: 'note',
-    x: box.x,
-    y: box.y,
-    width: box.width,
-    height: box.height,
+    x: box.inkBox.x,
+    y: box.inkBox.y,
+    width: box.inkBox.width,
+    height: box.inkBox.height,
     lines: box.noteLines.map((l) => l.text),
     lineWidths: box.noteLines.map((l) => l.width),
     connector: [],
+    ...(box.lineAtoms !== undefined ? { lineAtoms: box.lineAtoms } : {}),
   };
-  return renderNote(noteGeo, theme);
+  return renderLinkNoteBox(
+    noteGeo,
+    { ...(box.back !== undefined ? { back: box.back } : {}), ...(box.line !== undefined ? { line: box.line } : {}) },
+    theme,
+  );
 }
 
 /** `(fontSize - descent) / 2`-style ascent/descent split every note/member

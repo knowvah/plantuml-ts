@@ -175,3 +175,40 @@ describe("T11 — xitobu-41-lame230's <style> package {} cascade", () => {
     expect(namespace(ast, 'package')).toBeDefined();
   });
 });
+
+// cdd2-T19c: rules 5e/5e-multi now thread NOTE_ON_LINK_COLOR (group 2)
+// through to `applyNoteOnLink` -- see class-notes.ts#parseNoteOnLinkColors.
+describe('5e/5e-multi — note on link colour dispatch', () => {
+  it('single-line: lipazi-06-care921 "note on link #red: note red"', () => {
+    const ast = parse('class toto\nclass titi\ntoto --> titi\nnote on link #red: note red');
+    expect(ast.relationships[0]?.linkNoteBack).toBe('red');
+    expect(ast.relationships[0]?.linkNoteLine).toBeUndefined();
+  });
+
+  it('single-line, no colour: the colour fields stay unset', () => {
+    const ast = parse('class toto\nclass titi\ntoto --> titi\nnote on link: plain');
+    expect(ast.relationships[0]?.linkNoteBack).toBeUndefined();
+    expect(ast.relationships[0]?.linkNoteLine).toBeUndefined();
+  });
+
+  it('multi-line: lozego-15-coci435 "note on link #aqua/aliceblue"', () => {
+    const ast = parse(
+      'class Order\nclass OrderItem\nOrder --{ OrderItem\nnote on link #aqua/aliceblue\nNote on rel\nend note',
+    );
+    expect(ast.relationships[0]?.linkNoteBack).toBe('aqua/aliceblue');
+  });
+
+  it('multi-line, no colour: the colour fields stay unset', () => {
+    const ast = parse('class A\nclass B\nA --> B\nnote on link\nplain\nend note');
+    expect(ast.relationships[0]?.linkNoteBack).toBeUndefined();
+    expect(ast.relationships[0]?.linkNoteLine).toBeUndefined();
+  });
+
+  it('multi-attribute: nuvake-96-gofe203 "#red;line.dotted:blue;text:white"', () => {
+    const ast = parse(
+      'class Dummy\nclass Foo\nDummy --> Foo\nnote on link #red;line.dotted:blue;text:white : note that is red',
+    );
+    expect(ast.relationships[0]?.linkNoteBack).toBe('red');
+    expect(ast.relationships[0]?.linkNoteLine).toBe('blue');
+  });
+});

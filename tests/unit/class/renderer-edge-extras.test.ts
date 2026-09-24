@@ -89,7 +89,7 @@ describe('renderEdgeVisibilityIcon', () => {
 // A2a/M5 -- lipazi-06-care921's note-on-link structural presence.
 describe('renderEdgeNoteBox', () => {
   it('returns empty string when the edge carries no note box', () => {
-    expect(renderEdgeNoteBox(makeEdgeGeo(), theme)).toBe('');
+    expect(renderEdgeNoteBox(makeEdgeGeo(), theme).body).toBe('');
   });
 
   it('emits the note body path, fold path and one <text> per line', () => {
@@ -104,15 +104,63 @@ describe('renderEdgeNoteBox', () => {
           { text: 'this is my note on left link', width: 123.581 },
           { text: 'blue', width: 24.619 },
         ],
+        position: 'left',
       },
     });
-    const markup = renderEdgeNoteBox(geo, theme);
+    const markup = renderEdgeNoteBox(geo, theme).body;
     // Structural presence (AC: body path/polygon, corner path, text) --
-    // byte-exact vertex order/paint is T8's (batch 3), not this task's.
+    // byte-exact vertex order/paint is cdd2-T19c's (batch 5), not this task's.
     expect((markup.match(/<path/g) ?? []).length + (markup.match(/<polygon/g) ?? []).length).toBe(2);
     expect((markup.match(/<text/g) ?? []).length).toBe(2);
     expect(markup).toContain('this is my note on left link');
     expect(markup).toContain('blue');
+  });
+
+  // cdd2-T19c (mechanism 3): the box `ComponentRoseNote#drawInternalU`
+  // actually paints is `noteBox.inkBox`, not the OUTER `EntityImageNoteLink`
+  // -preferred box (`box.x`/`.y`/`.width`/`.height`) -- jar-verified against
+  // lipazi-06-care921's second note (Δ = Rose.java:65-66's paddingX/paddingY,
+  // both 5, exactly).
+  it('draws at the INK box origin, not the outer box origin', () => {
+    const geo = makeEdgeGeo({
+      noteBox: {
+        x: 10,
+        y: 20,
+        width: 100,
+        height: 30,
+        inkBox: { x: 15, y: 25, width: 90, height: 20 },
+        noteLines: [{ text: 'hi', width: 12 }],
+        position: 'bottom',
+      },
+    });
+    const markup = renderEdgeNoteBox(geo, theme).body;
+    expect(markup).toContain('M15,25');
+    expect(markup).not.toContain('M10,20');
+  });
+
+  // cdd2-T19c (mechanism 1/2): the note-on-link's own #color threads
+  // through as `fill`/`stroke`, and both paths share ONE stroke width
+  // (0.5) -- `ComponentRoseNote.java:104-107`, unlike a freestanding
+  // note's asymmetric fold.
+  it('threads back/line colour onto both shapes at stroke-width 0.5', () => {
+    const geo = makeEdgeGeo({
+      noteBox: {
+        x: 10,
+        y: 20,
+        width: 100,
+        height: 30,
+        inkBox: { x: 15, y: 25, width: 90, height: 20 },
+        noteLines: [{ text: 'hi', width: 12 }],
+        position: 'bottom',
+        back: 'red',
+        line: 'blue',
+      },
+    });
+    const { body, extraDefs } = renderEdgeNoteBox(geo, theme);
+    expect((body.match(/fill="#F00"/g) ?? []).length).toBe(2);
+    expect((body.match(/stroke="#00F"/g) ?? []).length).toBe(2);
+    expect((body.match(/stroke-width="0.5"/g) ?? []).length).toBe(2);
+    expect(extraDefs).toBe('');
   });
 });
 

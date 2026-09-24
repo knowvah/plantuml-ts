@@ -114,6 +114,7 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
         height: 5,
         inkBox: { x: 2, y: 3, width: 8, height: 3 },
         noteLines: [{ text: 'hi', width: 6 }],
+        position: 'bottom',
       },
     });
     const scaled = scaleEdgeGeo(edge, 2);
@@ -124,6 +125,7 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
       height: 10,
       inkBox: { x: 4, y: 6, width: 16, height: 6 },
       noteLines: [{ text: 'hi', width: 12 }],
+      position: 'bottom',
     });
   });
 

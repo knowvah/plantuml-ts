@@ -232,23 +232,28 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   },
 
   // 5e. `note on|of link: text` — see NOTE_ON_LINK_RE's doc (class-notes.ts).
-  // T10: position is now group 1 (optional, default BOTTOM); G2 N34's
-  // capturing NOTE_COLOR is group 2 (still not consumed here, same
-  // "captured but not wired to render" posture as the link-note-color
-  // cluster generally -- surveyed, named remainder, not this iteration's
-  // scope); text is group 3.
+  // T10: position is now group 1 (optional, default BOTTOM); cdd2-T19c:
+  // group 2's NOTE_COLOR is now wired through to `applyNoteOnLink`, which
+  // parses it via `parseNoteOnLinkColors`; text is group 3.
   {
     pattern: NOTE_ON_LINK_RE,
-    execute: (state, match) => applyNoteOnLink(state.ast, resolveLinkNotePosition(match[1]), match[3]!),
+    execute: (state, match) => applyNoteOnLink(state.ast, resolveLinkNotePosition(match[1]), match[3]!, match[2]),
   },
 
   // 5e-multi. `note [pos] on|of link [#color]` (no colon) — opens a
   // multi-line note-on-link block closed by `end note`. See
-  // NOTE_ON_LINK_MULTI_RE's doc (class-notes.ts).
+  // NOTE_ON_LINK_MULTI_RE's doc (class-notes.ts). cdd2-T19c: group 2's
+  // NOTE_COLOR is now carried on the pending note, applied at `end note`
+  // (`finalizePendingNote`'s `'link'` branch, class-notes.ts).
   {
     pattern: NOTE_ON_LINK_MULTI_RE,
     execute: (state, match) => {
-      state.pendingNote = { kind: 'link', position: resolveLinkNotePosition(match[1]), textLines: [] };
+      state.pendingNote = {
+        kind: 'link',
+        position: resolveLinkNotePosition(match[1]),
+        textLines: [],
+        ...(match[2] !== undefined ? { color: match[2] } : {}),
+      };
     },
   },
 

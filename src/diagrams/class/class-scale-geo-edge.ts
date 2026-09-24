@@ -17,6 +17,7 @@ import type {
   KalBox,
   SametailGeo,
 } from './class-geo-types.js';
+import { scaleAtom } from './class-scale-geo-row.js';
 
 function scalePoints(points: ReadonlyArray<{ x: number; y: number }>, k: number): Array<{ x: number; y: number }> {
   return points.map((p) => ({ x: p.x * k, y: p.y * k }));
@@ -40,6 +41,10 @@ function scaleVisibilityIcon(icon: VisibilityIconGeo, k: number): VisibilityIcon
 
 function scaleNoteBox(box: EdgeNoteBoxGeo, k: number): EdgeNoteBoxGeo {
   return {
+    // cdd2-T19c: `position`/`back`/`line` are non-geometric (an enum and
+    // raw colour tokens), so they carry through unscaled -- same "copy
+    // unchanged" rule `scaleConstraint`'s own `text` field below follows.
+    ...box,
     x: box.x * k,
     y: box.y * k,
     width: box.width * k,
@@ -51,6 +56,11 @@ function scaleNoteBox(box: EdgeNoteBoxGeo, k: number): EdgeNoteBoxGeo {
       height: box.inkBox.height * k,
     },
     noteLines: box.noteLines.map((l) => ({ ...l, width: l.width * k })),
+    // cdd2-T19c: same per-atom scaling `class-scale-geo-note.ts#scaleNoteGeo`
+    // already applies to a freestanding/attached note's own `lineAtoms`.
+    ...(box.lineAtoms !== undefined
+      ? { lineAtoms: box.lineAtoms.map((line) => line.map((a) => scaleAtom(a, k))) }
+      : {}),
   };
 }
 
