@@ -60,7 +60,7 @@ Batch closes add the survey, census, render-all and pin-diff commands —
 | [3](batch-3/overview.md) | C circled-character glyph | T15 · T16 | — | no | [x] |
 | [4](batch-4/overview.md) | R 1 px canvas + exit bar | T17 · T18 | — | canvas | [x] |
 | [5](batch-5/overview.md) | X stretch pairs (only if ≥ 600) | spec'd by T18 | per T18 | per T18 | [x] |
-| [final](final/T20-mission-close-out.md) | close-out | T20 | — | no | [ ] |
+| [final](final/T20-mission-close-out.md) | close-out | T20 | — | no | [x] |
 
 Every batch ends with its close task, which runs one residual round on the
 merged tree first (D4), then [`close-procedure.md`](close-procedure.md).
@@ -108,22 +108,31 @@ mechanism; then it is journaled and added to `fixtures.md`.
 
 ## Status
 
-Measured at T18 (`measurements/b4.json`, 2026-09-24), exit bar D8:
+**Closed 2026-09-24 (T20).** `measurements/final.json` (= `b5.json`):
+survey **560 / 86 / 77 → 607 / 55 / 61** (conformant / structural-match
+/ diverged, 723 fixtures); ratchet 560 → 607; census 0-diff 560 → 607.
+Per batch: b0 560/86/77 · b1 567/89/67 · b2 590/69/64 · b3 597/62/64 ·
+b4 601/58/64 · b5 607/55/61.
 
-- conformant ≥ 600 — **met** (601; plan 560)
-- diverged ≤ 61 — **not met** (64; plan 77)
-- every core row has a `final` — **met** (62/62: 41 conformant, 21
-  `open -> <owner>`)
-- zero unexplained rises — **met** (every riser journaled with mechanism)
-- class DOT parity 711/712 — **met** (`class-dot-parity.test.ts` green,
-  DOT emission unchanged)
-- other engines unmoved or journaled — **met** (rows 25, 35; committed
-  engine pins were stale at mission start, measured against baseline)
-- gates green, collected = on-disk — **met** (814/814)
+Exit bar D8:
 
-D9 gate met → batch 5 runs (3 tasks). Diverged ≤ 61 needs 3 more
-diverged fixtures to leave diverged; batch 5 targets 5 diverged stretch
-fixtures (xenere, sijoba, lipazi, nuvake, lozego).
+- every core fixture conformant or `mechanism + owner` — **met** (62/62:
+  41 conformant, 21 `open -> <owner>`; all 85 rows incl. stretch carry a
+  `final`)
+- conformant ≥ 600 — **met** (607)
+- diverged ≤ 61 — **met** (61)
+- zero unexplained rises at every re-pin — **met** (risers xadado,
+  xenere, delasa each journaled with mechanism: rows 19, 30, 35)
+- class DOT parity 711/712 — **met** (`class-dot-parity.test.ts` green at
+  every close; DOT emission changed only where upstream's does, row 44)
+- other engines unmoved or journaled — **met** (rows 25, 35, 47; the
+  committed engine pins were already stale at mission start — row 25)
+- gates green, JSON-reporter collected = on-disk — **met** (818/818)
+
+Decisions: 48 journal rows; flagged for review — rows 17, 30, 40, 43, 44,
+46 (see `planning/next-missions.md` "Flagged for review"). Follow-ons:
+`planning/next-missions.md` `class-divergence-drive-2` section; the
+highest-value one is R-VP (6 fixtures + lecelo, probe-verified).
 
 ## Documents
 
