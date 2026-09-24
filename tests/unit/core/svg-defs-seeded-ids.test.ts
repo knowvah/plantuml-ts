@@ -99,6 +99,20 @@ describe('applySeededDefIds — references follow the def', () => {
       '<line marker-end="url(#arrow)"/><rect fill="url(#ghash)"/></svg>';
     expect(applySeededDefIds(doc, 42n)).toContain('marker-end="url(#arrow)"');
   });
+
+  // CodeQL js/polynomial-redos (alert 17): diagram text lands in the document
+  // verbatim, so an unterminated `url(#(` run is library input. With
+  // `url\(#([^)]*)\)` every start rescanned to the end -- 40000 repetitions
+  // took ~6 s; bounding the scan at the next `(` makes it linear.
+  test('an unterminated url(#( run in text is linear, and left untouched', () => {
+    const text = `<text>${'url(#('.repeat(40000)}</text>`;
+    const doc = `<svg><defs>${GRADIENT.replace('OLD', 'ghash')}</defs><rect fill="url(#ghash)"/>${text}</svg>`;
+    const started = performance.now();
+    const out = applySeededDefIds(doc, 42n);
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(out.endsWith(`${text}</svg>`)).toBe(true);
+    expect(out).toContain(`fill="url(#g${getSeed(42n)}0)"`);
+  });
 });
 
 describe('the ids match the jar, per corpus fixture', () => {

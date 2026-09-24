@@ -110,7 +110,9 @@ function withRootGroupAttributes(body: string): string {
 /** The `data-diagram-type="…"` root attribute, or `''` when `diagramType`
  *  is `undefined` -- see {@link assembleDocumentShell}'s own doc comment. */
 function diagramTypeAttrOf(diagramType: string | undefined): string {
-  return diagramType === undefined ? '' : ' ' + DIAGRAM_TYPE_ATTR + '=' + DQUOTE + diagramType + DQUOTE;
+  return diagramType === undefined
+    ? ''
+    : ' ' + DIAGRAM_TYPE_ATTR + '=' + DQUOTE + escapeAttribute(diagramType) + DQUOTE;
 }
 
 /**

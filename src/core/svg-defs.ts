@@ -508,5 +508,8 @@ export function applySeededDefIds(document: string, seed: bigint): string {
 
 /** One pass over both spellings a def id appears in: its own `id="…"` and
  *  every `url(#…)` reference. Single pass so a renamed id can never be
- *  renamed a second time by a later entry of the map. */
-const SEEDED_REF_RE = /id="([^"]*)"|url\(#([^)]*)\)/g;
+ *  renamed a second time by a later entry of the map. The reference body
+ *  also stops at `(` -- no minted id contains one, and diagram text reaches
+ *  this document verbatim, so `[^)]*` rescanned an unterminated `url(#(`
+ *  run from every start (CodeQL js/polynomial-redos, quadratic). */
+const SEEDED_REF_RE = /id="([^"]*)"|url\(#([^()]*)\)/g;
