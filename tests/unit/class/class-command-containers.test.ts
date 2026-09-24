@@ -89,6 +89,55 @@ describe('T11 — Namespace.usymbol', () => {
   });
 });
 
+describe('cdd2-T7b (R-8) — Namespace.usymbol for a DIRECT container keyword', () => {
+  // `stack a as a { class foo1 }` (CommandPackageWithUSymbol, distinct
+  // grammar from the `package X <<Node>>` gated-stereotype path above)
+  // previously only recorded its keyword into the parser's transient
+  // `state.descriptiveContainers` map (read by `closeContainer` for the
+  // EMPTY->leaf collapse only) -- a NON-empty container's `Namespace.usymbol`
+  // stayed `undefined`, so `NamespaceGeo.usymbol` never reached the render
+  // dispatch (`class-namespace-usymbol-shape.ts#renderNamespaceUSymbol`),
+  // which fell through to the generic folder-tab outline instead of
+  // `USymbolStack#asBig`'s own chrome. `CommandPackageWithUSymbol.java:
+  // 197-198`'s `diagram.gotoGroup(..., GroupType.PACKAGE, usymbol)` stamps
+  // the group's USymbol UNCONDITIONALLY at open time, empty or not -- there
+  // is no upstream branch that withholds it from a real (non-empty) cluster.
+  it('surfaces "stack" onto a NON-empty direct-keyword container (lojiga-09-meka859)', () => {
+    const ast = parse('stack a as a {\nclass foo1\nclass foo3\nclass foo2\n}');
+    const ns = namespace(ast, 'a');
+    expect(ns?.usymbol).toBe('stack');
+    expect(ns?.classifiers.length).toBeGreaterThan(0);
+  });
+
+  it('still collapses an EMPTY direct-keyword container to a descriptive leaf', () => {
+    // The pre-existing collapse path (`closeContainer`'s
+    // `ns.classifiers.length > 0` branch) is unaffected by this fix -- an
+    // empty `stack`/`rectangle`/... container still becomes a leaf, not a
+    // real cluster, and that leaf's OWN `usymbol` (set separately, via
+    // `collapseEmptyNamespace`) is unchanged.
+    const ast = parse('stack a as a {\n}\nclass other');
+    expect(namespace(ast, 'a')).toBeUndefined();
+    const leaf = ast.classifiers.find((c) => c.id === 'a');
+    expect(leaf?.kind).toBe('descriptive');
+    expect(leaf?.usymbol).toBe('stack');
+  });
+
+  it('surfaces "rectangle"/"component" the same way -- unconditional, no per-keyword special case', () => {
+    // Mirrors upstream exactly: `CommandPackageWithUSymbol.java:197-198`'s
+    // `gotoGroup(..., usymbol)` stamps EVERY keyword's USymbol
+    // unconditionally, with no branch singling out `stack`. Widening this
+    // past `stack` moves two already-diverged corpus fixtures'
+    // `xadado-92-lazo250`/`xenere-07-kuji864` diff counts -- both have a
+    // stated mechanism/artifact in
+    // `plans/class-divergence-drive-2/.agent-notes/cdd2-T7b.md` (mission
+    // D4: a rise is acceptable once its mechanism is stated).
+    const ast = parse('rectangle r as r {\nclass inner\n}');
+    expect(namespace(ast, 'r')?.usymbol).toBe('rectangle');
+    const ast2 = parse('component c as c {\nclass inner\n}');
+    expect(namespace(ast2, 'c')?.usymbol).toBe('component');
+  });
+});
+
 describe('T11 — url/color/usymbol together on one package header', () => {
   it('populates all three fields from a single declaration', () => {
     // Upstream token order: TAGS1, STEREOTYPE, TAGS2, URL, COLOR, '{'

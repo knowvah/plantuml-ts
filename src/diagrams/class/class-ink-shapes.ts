@@ -301,6 +301,41 @@ export function addNamespaceRectInk(box: InkBox, x: number, y: number, w: number
 }
 
 /**
+ * cdd2-T7b (R-8, `lojiga-09-meka859`): `USymbolStack#drawQueue`
+ * (`decoration/symbol/USymbolStack.java:61-89`) draws TWO shapes, both
+ * ink-registering (`LimitFinder.draw` dispatches on shape type, not
+ * color -- an `HColors.none()` fill/stroke override still contributes
+ * ink, `LimitFinder.java:108-151`):
+ *
+ * 1. An inner, invisible `URectangle.build(width - 2*border, height)`
+ *    (`border=15`), translated `dx(border)` only (no `dy`) -- doc corner
+ *    `(x+border, y)`, size `(w-2*border, h)`. `LimitFinder#drawRectangle`
+ *    (`LimitFinder.java:184-188`) gives the classic symmetric `-1`/`-1`
+ *    inset on BOTH corners (see {@link addNamespaceRectInk}'s identical
+ *    rule): `(x+border-1, y-1)` .. `(x+w-border-1, y+h-1)`.
+ * 2. The outer notched-bracket `UPath` outline (`buildOutlinePath`,
+ *    `USymbolStack.ts`) -- `LimitFinder#drawUPath` (`LimitFinder.java:
+ *    164-167`) uses the path's OWN min/max over its anchor points, which
+ *    span exactly `[0,w]`x`[0,h]` locally (every corner-rounding arc
+ *    stays inside the straight-corner bounding box) -- doc corner
+ *    `(x, y)` .. `(x+w, y+h)`, the plain {@link addPlainInk} rule.
+ *
+ * The union's max corner is dominated by shape 2 (`x+w,y+h`, un-inset,
+ * beats shape 1's `x+w-border-1,y+h-1`); the min-X is also dominated by
+ * shape 2 (`x`, left of shape 1's `x+border-1`). Only min-Y differs:
+ * shape 1's `y-1` is ONE PIXEL above shape 2's `y`, so the invisible
+ * rect alone widens the cluster's own top ink by 1px past its visible
+ * outline -- jar-verified `lojiga-09-meka859`: this port's plain-bbox
+ * rule (top ink at the outline's own `y`) undershot the whole document's
+ * canvas by exactly 1 (`svg/@height` 257 vs jar's 258, every element
+ * below the cluster shifted `Δ1`); adding this `y-1` term closes it.
+ */
+export function addNamespaceStackInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x, y - 1);
+  addPoint(box, x + w, y + h);
+}
+
+/**
  * G2 N32: the "classic `-1`-inset `URectangle`" rule this module's own file
  * doc comment names (top, `addRectInk`'s doc comment) but never implements
  * standalone -- `addRectInk` is the classifier-specific NET rule (classic

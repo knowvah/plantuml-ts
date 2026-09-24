@@ -25,6 +25,7 @@ import {
   addNamespaceRectInk,
   addNamespaceNodeInk,
   addNamespaceDatabaseInk,
+  addNamespaceStackInk,
   addClassicRectInk,
   addEmbedImageInk,
 } from './class-ink-shapes.js';
@@ -293,6 +294,15 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
  * non-`strictuml` case.
  */
 function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
+  // cdd2-T7b (R-8): the `stack` USymbol's own two-shape ink rule -- see
+  // `addNamespaceStackInk`'s doc comment. Keyed on `n.usymbol` directly
+  // (not a new `inkShape` bucket): `resolveNamespaceInkShape`
+  // (`class-geo-builders.ts`) never maps `stack` to one, since `stack`
+  // is outside that function's write-set for this task.
+  if (n.usymbol === 'stack') {
+    addNamespaceStackInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
   // cdd-T12: the two USymbol-container rules -- see `class-ink-shapes.ts`'s
   // own doc comments for each `LimitFinder` citation.
   if (n.inkShape === 'node') {

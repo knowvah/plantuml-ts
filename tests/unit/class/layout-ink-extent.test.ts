@@ -163,6 +163,47 @@ describe('computeClassDocumentDims', () => {
     },
   );
 
+  it(
+    "cdd2-T7b (R-8): usymbol 'stack' adds the invisible inner URectangle's " +
+      'own ink (USymbolStack.java:64-65, LimitFinder#drawRectangle.java:' +
+      '184-188 asymmetric -1/-1 min inset) ON TOP OF the outer notched ' +
+      'UPath outline (plain bbox) -- the union is 1px TALLER at the top ' +
+      "than the plain rule alone (min-Y only; the outer path's un-inset " +
+      "max corner and the rect's own -1-inset max corner tie on X/max-Y) " +
+      "-- jar-verified lojiga-09-meka859 (svg/@height 258, this port's " +
+      'pre-fix plain rule undershot it to 257)',
+    () => {
+      const namespaces: NamespaceGeo[] = [
+        {
+          id: 'a',
+          x: 6,
+          y: 6,
+          width: 221,
+          height: 236.000048,
+          label: 'a',
+          wtitle: 25,
+          htitle: 20,
+          baselineOffset: 12.8889,
+          usymbol: 'stack',
+        },
+      ];
+      const { usymbol: _stackUsymbol, ...plainNs } = namespaces[0]!;
+      const stackDims = computeClassDocumentDims([], namespaces, [], []);
+      const plainDims = computeClassDocumentDims([], [plainNs], [], []);
+      expect(stackDims).toEqual({ width: 242, height: 258 });
+      expect(plainDims).toEqual({ width: 242, height: 257 });
+      expect(stackDims.width).toBe(plainDims.width);
+      expect(stackDims.height).toBe(plainDims.height + 1);
+
+      const stackShift = computeClassInkShift([], namespaces, [], []);
+      const plainShift = computeClassInkShift([], [plainNs], [], []);
+      // The rect's min-Y (y-1) is 1px SMALLER than the plain rule's (y), so
+      // 1px MORE positive shift is needed to land it at JAR_INK_MARGIN.
+      expect(stackShift.dx).toBe(plainShift.dx);
+      expect(stackShift.dy).toBe(plainShift.dy + 1);
+    },
+  );
+
   it('edge points widen the box beyond the classifiers alone', () => {
     const classifiers = [makeClassifierGeo({ x: 0, y: 0, width: 40, height: 40 })];
     const edges: EdgeGeo[] = [
