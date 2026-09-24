@@ -58,7 +58,13 @@ export function scaleNoteGeo(note: NoteGeo, k: number): NoteGeo {
     ...(note.lineDividers !== undefined ? { lineDividers: note.lineDividers.map((d) => scaleLineDivider(d, k)) } : {}),
     ...(note.lineTables !== undefined ? { lineTables: note.lineTables.map((t) => scaleLineTable(t, k)) } : {}),
     ...(note.tipRequest !== undefined
-      ? { tipRequest: { ...note.tipRequest, baselineOffset: note.tipRequest.baselineOffset * k, rowHeight: note.tipRequest.rowHeight * k } }
+      ? {
+          tipRequest: {
+            ...note.tipRequest,
+            baselineOffset: note.tipRequest.baselineOffset * k,
+            rowHeight: note.tipRequest.rowHeight * k,
+          },
+        }
       : {}),
     ...(note.opale !== undefined
       ? {

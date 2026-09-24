@@ -80,10 +80,7 @@ describe('scaleEdgeGeo — label variants', () => {
 
   it('scales quantifierLines (both tail and head arrays)', () => {
     const edge = makeEdge({
-      quantifierLines: [
-        [{ text: '1', x: 1, y: 2, width: 3 }],
-        [{ text: '*', x: 4, y: 5, width: 6 }],
-      ],
+      quantifierLines: [[{ text: '1', x: 1, y: 2, width: 3 }], [{ text: '*', x: 4, y: 5, width: 6 }]],
     });
     const scaled = scaleEdgeGeo(edge, 2);
     expect(scaled.quantifierLines).toEqual([

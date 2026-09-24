@@ -7,7 +7,11 @@
  * top-level scaling tests.
  */
 import { describe, it, expect } from 'vitest';
-import { scaleEnhancedBody, scaleJsonBody, scaleEmbeddedBlock } from '../../../src/diagrams/class/class-scale-geo-body.js';
+import {
+  scaleEnhancedBody,
+  scaleJsonBody,
+  scaleEmbeddedBlock,
+} from '../../../src/diagrams/class/class-scale-geo-body.js';
 import type {
   EnhancedBodyGeo,
   EnhancedDividerPart,
@@ -67,7 +71,12 @@ describe('scaleEnhancedBody — rows part', () => {
       embeds: [{ y: 2, width: 10, height: 6, sizingWidth: 10, sizingHeight: 6 }],
       portMembers: [{ text: 'a', top: 10, height: 12 }],
     };
-    const body: EnhancedBodyGeo = { parts: [rows], width: 40, height: 20, portMembers: [{ text: 'a', top: 10, height: 12 }] };
+    const body: EnhancedBodyGeo = {
+      parts: [rows],
+      width: 40,
+      height: 20,
+      portMembers: [{ text: 'a', top: 10, height: 12 }],
+    };
     const scaled = scaleEnhancedBody(body, 0.5, THEME_FONT_SIZE);
     const part = scaled.parts[0] as EnhancedRowsPart;
     expect(part.rows[0]!.y).toBe(5);

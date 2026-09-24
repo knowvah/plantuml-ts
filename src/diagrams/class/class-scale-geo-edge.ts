@@ -114,10 +114,24 @@ function scaleEdgeGeoLabels(edge: EdgeGeo, k: number): Partial<EdgeGeo> {
       : {}),
     ...(edge.arrowGlyph !== undefined ? { arrowGlyph: { points: scalePoints(edge.arrowGlyph.points, k) } } : {}),
     ...(edge.tailLabel !== undefined
-      ? { tailLabel: { ...edge.tailLabel, x: edge.tailLabel.x * k, y: edge.tailLabel.y * k, width: edge.tailLabel.width * k } }
+      ? {
+          tailLabel: {
+            ...edge.tailLabel,
+            x: edge.tailLabel.x * k,
+            y: edge.tailLabel.y * k,
+            width: edge.tailLabel.width * k,
+          },
+        }
       : {}),
     ...(edge.headLabel !== undefined
-      ? { headLabel: { ...edge.headLabel, x: edge.headLabel.x * k, y: edge.headLabel.y * k, width: edge.headLabel.width * k } }
+      ? {
+          headLabel: {
+            ...edge.headLabel,
+            x: edge.headLabel.x * k,
+            y: edge.headLabel.y * k,
+            width: edge.headLabel.width * k,
+          },
+        }
       : {}),
     ...(edge.quantifierLines !== undefined ? { quantifierLines: scaleQuantifierLines(edge.quantifierLines, k) } : {}),
     ...(edge.roleLines !== undefined ? { roleLines: scaleRoleLines(edge.roleLines, k) } : {}),

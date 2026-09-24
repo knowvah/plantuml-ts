@@ -101,9 +101,9 @@ describe('renderNamespaceUSymbol — <<Node>> container (dativu-93-pona469)', ()
   });
 
   it('declines for a keyword that resolves to no USymbol at all', () => {
-    expect(renderNamespaceUSymbol(dativuGeo({ usymbol: 'not-a-symbol' }), scaledDefaultTheme, measurer, NODE_PAINT)).toBe(
-      undefined,
-    );
+    expect(
+      renderNamespaceUSymbol(dativuGeo({ usymbol: 'not-a-symbol' }), scaledDefaultTheme, measurer, NODE_PAINT),
+    ).toBe(undefined);
   });
 
   it('paints the resolved back colour into the shape (inline `package X <<Node>> #DDDDDD`)', () => {

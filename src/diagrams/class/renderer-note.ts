@@ -405,14 +405,22 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
   const entityParts: string[] = [
     // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
     // own doc comment), the note style's OWN stroke width (0.5).
-    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
+    path(noteBodyPathData(x, y, w, h, f), {
+      fill,
+      stroke: theme.colors.border,
+      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
+    }),
     // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
     // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
     // `renderOpaleNote` already call) -- filled with the note's OWN
     // background (not `none`) at the diagram's DEFAULT stroke width, per
     // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
     // comment).
-    path(opaleCorner({ x, y }, w), { fill, stroke: theme.colors.border, strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK }),
+    path(opaleCorner({ x, y }, w), {
+      fill,
+      stroke: theme.colors.border,
+      strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK,
+    }),
     renderNoteText(note, theme),
   ];
   return { entityParts };

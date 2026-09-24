@@ -23,7 +23,13 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { layoutClass, classifierLeaves, classPageAst, classPageCount, sliceClassGeometryPage } from '../../../src/diagrams/class/layout.js';
+import {
+  layoutClass,
+  classifierLeaves,
+  classPageAst,
+  classPageCount,
+  sliceClassGeometryPage,
+} from '../../../src/diagrams/class/layout.js';
 import { renderClass, renderClassPage } from '../../../src/diagrams/class/renderer.js';
 import { classPlugin } from '../../../src/diagrams/class/index.js';
 import { assembleSvg, renderSync } from '../../../src/index.js';
@@ -405,8 +411,7 @@ describe('G2 N28: renderFixtureClass compares against page 1 only', () => {
 // ---------------------------------------------------------------------------
 
 describe('classPlugin -- PaginatedPlugin trio (cdd-T34)', () => {
-  const page1 = () =>
-    makeAST({ classifiers: [makeClassifier('A'), makeClassifier('B')] }) satisfies ClassDiagramAST;
+  const page1 = () => makeAST({ classifiers: [makeClassifier('A'), makeClassifier('B')] }) satisfies ClassDiagramAST;
   const page2 = () => makeAST({ classifiers: [makeClassifier('C')] }) satisfies ClassDiagramAST;
 
   it('getNbPages reports 1 for a single-page geometry (no pageBoundaries)', () => {
@@ -434,7 +439,7 @@ describe('classPlugin -- PaginatedPlugin trio (cdd-T34)', () => {
     expect(assembleSvg(renderClass(sliced, defaultTheme))).toBe(assembleSvg(renderClass(solo, defaultTheme)));
   });
 
-  it('renderClassPage(geo, theme, 1) draws only page 2\'s classifier', () => {
+  it("renderClassPage(geo, theme, 1) draws only page 2's classifier", () => {
     const ast = page1();
     ast.pages = [ast, page2()];
     const geo = layoutClass(ast, defaultTheme, measurer);

@@ -290,7 +290,6 @@ export function spotSnameForKind(kind: ClassifierKind): string | undefined {
  * {@link REFERENCE_CY}).
  */
 
-
 /**
  * `getCircledChar(LeafType)`: which glyph letter a classifier kind draws
  * (`svek/image/EntityImageClassHeader.java:229-260`).

@@ -179,7 +179,10 @@ function arrowLabelTextAttrs(theme: ScaledTheme): {
  * `StyleStorage#computeMergedStyle`'s own last-registered-wins merge rather
  * than inventing a specificity rule upstream does not have.
  */
-function resolveArrowTagStyle(tags: readonly string[] | undefined, theme: Theme): { color?: string; thickness?: number } | undefined {
+function resolveArrowTagStyle(
+  tags: readonly string[] | undefined,
+  theme: Theme,
+): { color?: string; thickness?: number } | undefined {
   const cascade = theme.colors.graph.arrowTagCascade;
   if (tags === undefined || cascade === undefined) return undefined;
   let found: { color?: string; thickness?: number } | undefined;
@@ -194,7 +197,11 @@ function resolveArrowTagStyle(tags: readonly string[] | undefined, theme: Theme)
  *  edge.ts`); the `tagStyle?.thickness ?? 1` fallback is not, and needs
  *  the SAME materialization `class-scale-geo-row.ts#scaleRow`'s `row.
  *  fontSize` fallback already gets -- split out for {@link renderEdge}'s NLOC cap. */
-function resolveEdgeStrokeWidth(geo: EdgeGeo, tagStyle: { thickness?: number } | undefined, theme: ScaledTheme): number {
+function resolveEdgeStrokeWidth(
+  geo: EdgeGeo,
+  tagStyle: { thickness?: number } | undefined,
+  theme: ScaledTheme,
+): number {
   return geo.strokeWidth ?? (tagStyle?.thickness ?? 1) * theme.scaleK;
 }
 
@@ -338,7 +345,11 @@ export interface RenderEdgeContext {
   readonly measurer?: StringMeasurer | undefined;
 }
 
-export function renderEdge(geo: EdgeGeo, theme: ScaledTheme, ctx: RenderEdgeContext): { body: string; extraDefs: string } {
+export function renderEdge(
+  geo: EdgeGeo,
+  theme: ScaledTheme,
+  ctx: RenderEdgeContext,
+): { body: string; extraDefs: string } {
   const { ids, syntheticNames, measurer } = ctx;
   const parts: string[] = [];
   // G2 N28: arrowheads must be resolved BEFORE the path is built -- the
@@ -458,7 +469,13 @@ export function renderEdge(geo: EdgeGeo, theme: ScaledTheme, ctx: RenderEdgeCont
   // extremity trim already mutated in upstream -- see `buildPathData`'s own
   // doc comment on why this port never builds a real `DotPath` for the
   // connecting line itself).
-  const middleDecor = buildMiddleDecorMarkup(trimmedPoints, geo.middleDecor, strokeColor, theme.colors.background, theme.scaleK);
+  const middleDecor = buildMiddleDecorMarkup(
+    trimmedPoints,
+    geo.middleDecor,
+    strokeColor,
+    theme.colors.background,
+    theme.scaleK,
+  );
   let extraDefs = arrowheads.extraDefs;
   if (middleDecor !== undefined) {
     parts.push(middleDecor.body);

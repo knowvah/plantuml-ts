@@ -53,9 +53,10 @@ describe.skipIf(!existsSync(fixtureDir(DARK_SLUG)))(
       const { markup, oracle } = readFixture(DARK_SLUG);
       const ours = render(markup);
       const { pass, diffs } = compareSvg(ours, oracle, 'deterministic');
-      expect(pass, `class/${DARK_SLUG}: first diff ${diffs[0] === undefined ? '(none)' : JSON.stringify(diffs[0])}`).toBe(
-        true,
-      );
+      expect(
+        pass,
+        `class/${DARK_SLUG}: first diff ${diffs[0] === undefined ? '(none)' : JSON.stringify(diffs[0])}`,
+      ).toBe(true);
     });
 
     it('root canvas background is #1B1B1B (document { BackGroundColor #1B1B1B }, plantuml.skin:572)', () => {

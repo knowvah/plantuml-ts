@@ -229,7 +229,12 @@ describe('scaleClassGeometry — classifier leaves', () => {
     });
     const scaled = scaleClassGeometry(geo, 0.5, THEME_FONT_SIZE);
     const c = scaled.leaves[0] as ClassifierGeo;
-    expect(c.enhancedBody).toEqual({ parts: [{ kind: 'divider', y: 2, strokeWidth: 0.5 }], width: 20, height: 10, portMembers: [] });
+    expect(c.enhancedBody).toEqual({
+      parts: [{ kind: 'divider', y: 2, strokeWidth: 0.5 }],
+      width: 20,
+      height: 10,
+      portMembers: [],
+    });
     expect(c.jsonBody).toEqual([{ kind: 'hline', x: 1, y: 2, width: 15 }]);
   });
 });

@@ -189,7 +189,8 @@ export function renderNoteRowExtra(
   const dividerOut = divider !== undefined ? renderDividerLine(note, lineTop, divider, theme) : '';
   const tableOut =
     table !== undefined
-      ? renderTableCells(note, lineTop, table, baselineOffset, theme) + renderTableGrid(note, lineTop, table, theme.scaleK)
+      ? renderTableCells(note, lineTop, table, baselineOffset, theme) +
+        renderTableGrid(note, lineTop, table, theme.scaleK)
       : '';
   return dividerOut + tableOut;
 }

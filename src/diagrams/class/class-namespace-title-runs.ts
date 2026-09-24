@@ -355,7 +355,9 @@ export function renderNamespaceTitleAuto(
       fontSize: fallback.fontSize,
       fontWeight: '700',
       fill: fallback.fontColor,
-      ...(fallback.textLength !== undefined ? { lengthAdjust: 'spacing' as const, textLength: fallback.textLength } : {}),
+      ...(fallback.textLength !== undefined
+        ? { lengthAdjust: 'spacing' as const, textLength: fallback.textLength }
+        : {}),
     });
   }
   const baselines = namespaceTitleLineBaselines(measurer!, theme, lines);

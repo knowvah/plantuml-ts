@@ -194,8 +194,8 @@ describe('blocked on out-of-write-set wiring — see .agent-notes/cdd-B7FU-R2.md
       'box.ts#buildInkBox -> class-ink-shapes.ts#addRectInk), which has no ink rule for an embed drawn past ' +
       "that box -- jar's own canvas is exactly (rightmost/bottommost embed ink pixel) + 1 " +
       '(zikabo: image x=13,width=67 -> 80, canvas width 81; gadufu: image y=75,height=107 -> 182, canvas ' +
-      'height 183), confirmed byte-exact on THREE independent fixtures\' worth of arithmetic. Needs a new ' +
-      "`addEnhancedBodyEmbedInk`-shaped rule in class-ink-shapes.ts PLUS a height-ink override class-ink-box.ts" +
+      "height 183), confirmed byte-exact on THREE independent fixtures' worth of arithmetic. Needs a new " +
+      '`addEnhancedBodyEmbedInk`-shaped rule in class-ink-shapes.ts PLUS a height-ink override class-ink-box.ts' +
       "'s addRectInk does not have yet (only bodyInkWidth exists today, class-geo-types.ts:284) -- outside " +
       "this task's write-set (class-ink-box.ts, class-ink-shapes.ts, class-layout-generic-classifier.ts are " +
       'not listed), recorded per stop condition 1.',

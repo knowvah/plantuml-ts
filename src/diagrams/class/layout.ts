@@ -230,7 +230,10 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // object. A no-op (`===`) when no `skinparam topurl` was declared, so
   // this allocates nothing for the common case.
   const urledClassifiers = applyTopUrlToClassifiers(collapsedAst.classifiers, theme.topurl);
-  const pageAst = urledClassifiers === collapsedAst.classifiers ? collapsedAst : { ...collapsedAst, classifiers: [...urledClassifiers] };
+  const pageAst =
+    urledClassifiers === collapsedAst.classifiers
+      ? collapsedAst
+      : { ...collapsedAst, classifiers: [...urledClassifiers] };
 
   // Pre-measure all classifiers (the hide/show directive fold is per
   // classifier inside — last applicable writer wins per target, A2s R2g)
@@ -269,7 +272,13 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // T5 (namespace-cluster-box): read the namespace box from the real
   // graphviz cluster polygon (`result.clusters`), not a member-bbox walk --
   // see `class-geo-builders.ts#buildNamespaceGeos`'s own doc comment.
-  const namespaces = buildNamespaceGeos(effAst, { theme, measurer, clusters: result.clusters, clusterIdByNs, hiddenIds });
+  const namespaces = buildNamespaceGeos(effAst, {
+    theme,
+    measurer,
+    clusters: result.clusters,
+    clusterIdByNs,
+    hiddenIds,
+  });
   // cdd-T13 (M1): the real graphviz cluster box for every cluster-anchored
   // edge endpoint -- `NamespaceGeo.x/y/width/height` is `box` VERBATIM
   // (`Cluster#setPosition`, `class-geo-builders.ts#namespaceGeoFromBox`'s

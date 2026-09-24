@@ -6,7 +6,11 @@
  * a header row).
  */
 import { describe, it, expect } from 'vitest';
-import { renderAssocPoint, renderAssociationDiamond, renderLollipop } from '../../../src/diagrams/class/renderer-assoc-lollipop.js';
+import {
+  renderAssocPoint,
+  renderAssociationDiamond,
+  renderLollipop,
+} from '../../../src/diagrams/class/renderer-assoc-lollipop.js';
 import type { ClassifierGeo } from '../../../src/diagrams/class/layout.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';

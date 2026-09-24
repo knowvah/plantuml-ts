@@ -1,7 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { SpriteColor4096 } from '../../../../../src/core/klimt/sprite/SpriteColor4096.js';
 import { buildSpriteColor4096 } from '../../../../../src/core/klimt/sprite/SpriteColorBuilder4096.js';
-import { spriteColor4096ToRgba, spriteColor4096ToPngDataUri } from '../../../../../src/core/klimt/sprite/sprite-raster.js';
+import {
+  spriteColor4096ToRgba,
+  spriteColor4096ToPngDataUri,
+} from '../../../../../src/core/klimt/sprite/sprite-raster.js';
 
 describe('SpriteColor4096', () => {
   it('defaults every cell to 0 (opaque black), matching Java int[][] zero-init', () => {
@@ -82,7 +85,7 @@ describe('spriteColor4096ToRgba / spriteColor4096ToPngDataUri', () => {
     expect([rgba[4], rgba[5], rgba[6], rgba[7]]).toEqual([0, 0, 0, 255]);
   });
 
-  it('scales the returned display width/height without resampling the raster (matches spriteToPngDataUri\'s own contract)', () => {
+  it("scales the returned display width/height without resampling the raster (matches spriteToPngDataUri's own contract)", () => {
     const sprite = buildSpriteColor4096(['zwzw', 'zwzw']); // 2x2
     const result = spriteColor4096ToPngDataUri(sprite, 1.5);
     expect(result.naturalWidth).toBe(2);

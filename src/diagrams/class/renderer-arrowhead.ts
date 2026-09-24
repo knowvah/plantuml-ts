@@ -419,7 +419,12 @@ interface MiddleDecorCtx {
   readonly k: number;
 }
 
-function drawMiddleDecorShape(middleDecor: MiddleDecor, point: Point2D, angle: number, ctx: MiddleDecorCtx): {
+function drawMiddleDecorShape(
+  middleDecor: MiddleDecor,
+  point: Point2D,
+  angle: number,
+  ctx: MiddleDecorCtx,
+): {
   body: string;
   extraDefs: string;
 } {

@@ -134,7 +134,9 @@ describe('renderNamespaceFolder — cdd-T26 multi-run title wiring (jabama-09-ka
 
   it('is measurement-identical for a markup-free label whether or not a measurer is supplied', () => {
     const geo: NamespaceGeo = { ...jabamaGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1)));
+    expect(renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(
+      renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1)),
+    );
   });
 });
 
@@ -225,7 +227,9 @@ describe('renderNamespaceRect/renderEmptyPackageIcon — cdd-T26 multi-line wiri
 
   it('renderNamespaceRect is byte-identical with/without a measurer for a markup-free label', () => {
     const geo: NamespaceGeo = { ...daxenoRectGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1)));
+    expect(renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(
+      renderNamespaceRect(geo, scaleClassTheme(defaultTheme, 1)),
+    );
   });
 
   it('renderEmptyPackageIcon draws two lines at the fixed geo.x+4 left margin', () => {
@@ -237,7 +241,9 @@ describe('renderNamespaceRect/renderEmptyPackageIcon — cdd-T26 multi-line wiri
 
   it('renderEmptyPackageIcon is byte-identical with/without a measurer for a markup-free label', () => {
     const geo: NamespaceGeo = { ...daxenoRectGeo(), label: 'foo', wtitle: getWTitle(measurer, defaultTheme, 'foo', 0) };
-    expect(renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1)));
+    expect(renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1), measurer)).toBe(
+      renderEmptyPackageIcon(geo, scaleClassTheme(defaultTheme, 1)),
+    );
   });
 });
 
