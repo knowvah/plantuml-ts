@@ -733,6 +733,13 @@ diagnoses — evidence gathered, mechanism not fully closed; each has a
   stripped character-count theory exactly)
 
 ### rezoba-58-xaze387
+> **T6 correction (journal rows 5-6): the dot-engine attribution below is
+> DISPROVED.** Real graphviz 16.1.0 and `@knowvah/dot-engine` return the
+> same raw spline for these edges (constant frame offset only). The
+> mechanism is reopened as CLIP-1 (T9): the divergence arises after layout,
+> in the cluster-anchored edge clip/post-processing. Read the rest of this
+> report as ruled-out evidence, not as a mechanism.
+
 - mechanism-id: S-9 (owner: dot-engine, not this repo)
 - mechanism: three `path/@d` bezier curves differ by small (sub-2px)
   per-point deltas with occasional EXTRA/MISSING interior control points

@@ -1,15 +1,18 @@
 # Batch 1 — S singletons + D dotted namespaces
 
 Structure first (D2): uid ticks, child counts, fills, and the dotted-name
-namespace edge offset. Write-sets below are PROVISIONAL — T6 rewrites them
-from `diagnosis/S.md` and `diagnosis/D.md`, and sets `Depends On` so no two
-unordered tasks share a file. Parallel tasks run in worktrees.
+namespace edge offset. Write-sets set by T6 from `diagnosis/S.md`, `D.md`, `R.md`; no two
+unordered tasks share a file.
 
-| ID | Description | Agent | Writes (provisional) | Depends On | Done |
+| ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T7 | S structural singletons (8) | typescript-pro | per `diagnosis/S.md` (likely `renderer-uid.ts`, nested renderer) + tests | T6 | [ ] |
-| T8 | S paint/text singletons (9) | typescript-pro | per `diagnosis/S.md` (likely theme/colour/font resolution) + tests | T6 | [ ] |
-| T9 | D dotted-name namespaces (4) | typescript-pro | per `diagnosis/D.md` (likely parser/namespace, DOT cluster edges) + tests | T6 | [ ] |
-| T10 | Residual round + close | orchestrator | [`../close-procedure.md`](../close-procedure.md) | T7, T8, T9 | [ ] |
+| T7 | S structural + edge singletons (9): S-1, S-1b, S-2, S-4, S-8, S-11, S-12 | typescript-pro | `class-namespace-resolve.ts`, `parser.ts`, `renderer-edge.ts`, `class-assoc-double-couple.ts`, `class-relationship-parser.ts`, `class-geo-types.ts`, `class-edge-label-{attach,anchor}.ts`, `renderer-classifier-box.ts`, `renderer-group.ts`, `class-namespace-shape.ts` + tests | T6 | [ ] |
+| T9 | CLIP-1 cluster-anchored edge clip (6 + guxode numeric) | typescript-pro | `core/spline-clip.ts`, `class-shield-helpers.ts`, `class-edge-geo.ts` (clip only), `class-cluster-levels.ts`, `class-dot-clusters.ts` + tests | T6 | [ ] |
+| T7b | `stack` container shape (lojiga, R-8) | typescript-pro | new `class-namespace-stack-shape.ts`, `class-namespace-shape.ts`, `class-container.ts`, `class-ink-{shapes,box}.ts` + tests | T7 | [ ] |
+| T8 | S paint singletons (6): S-3, S-5, S-6, S-7, S-10, S-13 | typescript-pro | `core/style-cascade-class*.ts`, `core/skinparam-*.ts` (stereo keys, handlers a/b, accumulator, theme builder), `core/theme-graph-colors-{a,b}.ts`, `core/svg-text-font.ts`, `class-visibility-icon.ts`, `renderer-classifier-{box,header-split,rows,colors}.ts` + tests | T7 | [ ] |
+| T10 | Residual round + close | orchestrator | [`../close-procedure.md`](../close-procedure.md) | T7, T7b, T8, T9 | [ ] |
 
-Every fix task's prompt: [`../fix-task.md`](../fix-task.md) + its file.
+Waves: **T7 ∥ T9**, then **T7b ∥ T8** (T7b and T8 both follow T7 on a
+shared file). Parallel tasks run in worktrees; T9's `class-edge-geo.ts`
+is not in any other batch-1 write-set. Every fix task's prompt:
+[`../fix-task.md`](../fix-task.md) + its file + its diagnosis sections.

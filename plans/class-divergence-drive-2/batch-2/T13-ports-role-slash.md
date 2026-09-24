@@ -1,16 +1,42 @@
 # T13 — member ports and role-slash labels
 
-**Agent:** typescript-pro (sonnet, effort high) · **Depends on:** T10
+**Agent:** typescript-pro (sonnet, effort high) · **Depends on:** T11, T12
 
 ## Fixtures
 
-nenepe-70-keri784 (`CC::USA --> users::3`), pegeso-72-mana305
-(`table1::id`-style ports), nenexe-35-zere033 and mugobo-34-fede498
-(`"owner"/"1" -- "0..n"/"items"`) — as re-grouped by T6.
+nenexe-35-zere033, mugobo-34-fede498 (Q-9); nenepe-70-keri784,
+pegeso-72-mana305 (Q-6); camuna-58-veca254, nafiki-56-jixu680,
+rifuzu-80-nixo780 (Q-4/Q-5/Q-10, from T11).
 
 ## Mechanisms · Write-set
 
-T6 fills from `diagnosis/Q.md`.
+Diagnosis sections are quoted from `diagnosis/Q.md` into the agent prompt.
+
+- **Q-9** (HIGH) — `class-ink-box.ts#buildInkBox`'s edge loop never reads
+  `e.roleLines` (`class-geo-types.ts:389`), so the additive role label's
+  ink is missing from the canvas walk (Δ2). Upstream `LimitFinder` sees
+  every drawn `TextBlock`, including `SvekEdge.java:1029-1063 drawRoleLabel`.
+- **Q-6** (LOW, diagnose first) — nenepe/pegeso: canvas 3 px narrow, all
+  drawn ink matches to 0.005. Not Q-9 (no labels). Instrument
+  `layout-ink-extent.ts#computeClassDocumentDims` against the jar's
+  implied extent; check whether port-anchored edges add an ink term the
+  jar counts (e.g. a `UEmpty`/shield cell).
+- **Q-4** (HIGH) — `renderGenericTag` hardcodes `GENERIC_TAG_BACKGROUND`
+  and the border; upstream resolves `{root,element,classDiagram,class_,generic}`
+  (`EntityImageClassHeader.java:138-149`).
+- **Q-5** (HIGH) — `cardinalityFont` built from theme defaults only
+  (`class-dot-graph.ts:334`, `layout.ts:311`); upstream merges
+  `{root,element,classDiagram,arrow,cardinality}`
+  (`GraphvizImageBuilder.java:124-131,235-241`) incl. FontStyle/FontColor.
+- **Q-10** (LOW, diagnose first) — rifuzu/camuna/nafiki share a Δ31/Δ37
+  cascade present WITHOUT any `<style>`; compare our DOT node widths for
+  `Map<K,V>`/`HashMap<Long,Customer>` against `svek-N.dot` first.
+
+Write-set: `src/diagrams/class/class-ink-box.ts`, `layout-ink-extent.ts`,
+`renderer-classifier-badge-tag.ts`, `class-dot-graph.ts`, `layout.ts`,
+`class-stereotype-layout.ts`, `src/core/style-cascade-class*.ts`, tests
+beside each. Runs after T11 and T12 (Q-10 is measured on their tree;
+`class-layout-generic-classifier.ts`/`class-edge-geo.ts` are theirs).
 
 ## Read-set
 

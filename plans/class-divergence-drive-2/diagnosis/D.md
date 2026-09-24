@@ -1,5 +1,13 @@
 # Group D diagnosis — dotted-name namespaces (T4)
 
+> **T6 correction (journal rows 5-6): the dot-engine attribution below is
+> DISPROVED.** Real graphviz 16.1.0 and `@knowvah/dot-engine` return the
+> same raw spline for these edges (constant frame offset only). The
+> mechanism is reopened as CLIP-1 (T9): the divergence arises after layout,
+> in the cluster-anchored edge clip/post-processing. Read the rest of this
+> report as ruled-out evidence, not as a mechanism.
+
+
 | mechanism-id | fixtures | files | est. size |
 |---|---|---|---|
 | D-1 | bejusa-95-gafo325, runane-30-vena766, vusute-48-xono099, pisobo-93-sipa138 | `@knowvah/dot-engine` (spline router for compound/cluster-anchored edges); plantuml-ts side (`src/core/spline-clip.ts`, `src/diagrams/class/class-shield-helpers.ts`) is verified NOT at fault | dot-engine issue (upstream to this repo); no plantuml-ts fix available until dot-engine's spline router is corrected |
