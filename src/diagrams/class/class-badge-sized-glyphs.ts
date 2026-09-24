@@ -5,10 +5,12 @@
  * 500-line-per-file cap (mirrors `class-stereotype.ts`'s own split
  * precedent) -- `badgeGlyphPath` (class-badge.ts) is the only consumer.
  *
- * The SAME `C` glyph, captured at EVERY `circledCharacterFontSize` value
- * actually exercised by the class corpus (13-22, the default `Monospaced`
- * family, default bold style) -- keyed by font size, each entry stores its
- * OWN reference center (the badge center of the fixture it was captured
+ * A captured glyph outline keyed by (letter, `circledCharacterFontSize`)
+ * -- the default `Monospaced` family, default bold style (G2 N38 landed
+ * 'C' only, 13-22; cdd2-T15 widened the size-12 row to every letter the
+ * `circledCharacterFontSize 12` fixture family (befasi-62-vimu310 and its
+ * 6 siblings) actually draws: M/O/W/Q/C/A). Each entry stores its OWN
+ * reference center (the badge center of the fixture it was captured
  * from) since a bigger font size also has a bigger radius, hence a
  * different natural reference position.
  *
@@ -18,17 +20,16 @@
  * the size-17 'C' outline by `18/17` and comparing to the jar's REAL
  * size-18 'C' outline (`defipi-14-xunu847`) misses by >1% of the glyph's
  * own extent at several control points -- an order of magnitude past
- * `compare.ts`'s 0.01 absolute-delta conformance tolerance. Sizes NOT in
- * this table (any size outside 13-22, or any OTHER letter at a non-17
- * size) fall back to `BADGE_GLYPH_D`'s size-17 shape via
+ * `compare.ts`'s 0.01 absolute-delta conformance tolerance. Sizes/letters
+ * NOT in this table fall back to `BADGE_GLYPH_D`'s size-17 shape via
  * `badgeGlyphPath` -- wrong-but-present, matching `resolveBadgeLetter`'s
  * established precedent for an uncaptured letter rather than omitting the
  * `<path>` entirely (a missing element is a childCount mismatch, strictly
  * worse).
  *
  * Font FAMILY (`circledCharacterFontName`, e.g. Helvetica) and STYLE
- * (`circledCharacterFontStyle Italic`) are NOT captured here either --
- * `datugo-88-sote552`/`gateja-70-losi738` (both set
+ * (`circledCharacterFontStyle Italic`) are NOT captured per-letter here
+ * either -- `datugo-88-sote552`/`gateja-70-losi738` (both set
  * `circledCharacterFontName Helvetica`) draw a STRUCTURALLY different
  * outline at fontSize 18 (32 coordinate pairs, x-extent 11.52) than the
  * Monospaced 'C' captured here (34 pairs, x-extent 8.17) -- confirmed by
@@ -36,7 +37,12 @@
  * approximate. `depulu-53-xoca727` (`circledCharacterFontStyle Italic`)
  * is the SAME kind of gap. Surveyed, NOT landed this iteration -- named
  * in `plans/g2-class-svg/ledger.md` N38 for a dedicated future
- * per-(family,style) capture pass.
+ * per-(family,style) capture pass. (The `circledCharacterFontSize 12`
+ * fixture family also sets `CircledCharacterFontStyle Bold`, which is
+ * ALREADY the jar's default style for `FontParam.CIRCLED_CHARACTER`
+ * (`klimt/font/FontParam.java:55`, `UFontFace.bold()`) -- not a variant,
+ * so these size-12 captures belong in the plain per-size table, not
+ * {@link BADGE_GLYPH_VARIANT_BY_LETTER}.)
  */
 
 interface SizedGlyph {
@@ -46,6 +52,20 @@ interface SizedGlyph {
 }
 
 const BADGE_GLYPH_C_BY_FONT_SIZE: Partial<Record<number, SizedGlyph>> = {
+  12: {
+    // cdd2-T15 (mechanism C-1): befasi-62-vimu310 ent0034 (`WaveModel`,
+    // a plain `class` with no stereotype -- upstream's default badge
+    // letter for `LeafType.CLASS`).
+    refCx: 225.03,
+    refCy: 960,
+    d:
+      'M226.864,964.248 Q226.454,964.459 226.003,964.564 Q225.551,964.67 225.053,964.67 ' +
+      'Q223.284,964.67 222.352,963.504 Q221.421,962.338 221.421,960.135 Q221.421,957.926 222.352,956.76 ' +
+      'Q223.284,955.594 225.053,955.594 Q225.551,955.594 226.009,955.699 Q226.466,955.805 226.864,956.016 ' +
+      'L226.864,957.938 Q226.419,957.527 226,957.337 Q225.581,957.146 225.135,957.146 ' +
+      'Q224.186,957.146 223.703,957.899 Q223.219,958.652 223.219,960.135 Q223.219,961.611 223.703,962.364 ' +
+      'Q224.186,963.117 225.135,963.117 Q225.581,963.117 226,962.927 Q226.419,962.736 226.864,962.326 Z',
+  },
   13: {
     refCx: 21,
     refCy: 22,
@@ -148,6 +168,89 @@ const BADGE_GLYPH_C_BY_FONT_SIZE: Partial<Record<number, SizedGlyph>> = {
 };
 
 /**
+ * cdd2-T15 (mechanism C-1): per-`circledCharacterFontSize` captures for
+ * every OTHER badge letter the `circledCharacterFontSize 12` fixture
+ * family (befasi-62-vimu310 and its 6 siblings: mububu-79-nalu431,
+ * ribove-58-tefu515, soboro-52-pevi612, zakuta-81-pese010,
+ * ziruni-05-fona846, zosaxa-86-mora157) draws -- M/O/W/Q/A. Prior to this
+ * table, `lookupSizedGlyph` hard-gated on `letter === 'C'`
+ * unconditionally, so every one of these letters fell straight through
+ * to `class-badge.ts#BADGE_GLYPH_D`'s size-17 default-size shape at ANY
+ * configured `circledCharacterFontSize`, including 12. Only size 12 is
+ * captured here (the sole size this fixture family exercises for these
+ * letters) -- widening to other sizes is future, corpus-driven work, same
+ * precedent {@link BADGE_GLYPH_C_BY_FONT_SIZE} itself set (13-22 only,
+ * not every possible size). All 5 captured verbatim from
+ * `test-results/dot-cache/class/befasi-62-vimu310/in.svg`'s own
+ * `<ellipse cx/cy>` + `<path d>`, same "capture verbatim, translate by
+ * reference center" methodology as every other table in this file.
+ */
+const BADGE_GLYPH_OTHER_LETTERS_BY_FONT_SIZE: Partial<Record<string, Partial<Record<number, SizedGlyph>>>> = {
+  M: {
+    // ent0004, `DrawableAdapter << (M, brown) >>`.
+    12: {
+      refCx: 385.88,
+      refCy: 393,
+      d:
+        'M382.884,388.752 L384.946,388.752 L385.989,392.59 L387.026,388.752 L389.101,388.752 ' +
+        'L389.101,397.5 L387.612,397.5 L387.612,390.492 L386.687,394.318 L385.31,394.318 ' +
+        'L384.372,390.492 L384.372,397.5 L382.884,397.5 Z',
+    },
+  },
+  O: {
+    // ent0005, `WaterSurfaceGeom << (O,lightblue) >>`.
+    12: {
+      refCx: 541.23,
+      refCy: 495,
+      d:
+        'M541.339,492.146 Q540.677,492.146 540.373,492.853 Q540.068,493.559 540.068,495.135 ' +
+        'Q540.068,496.705 540.373,497.411 Q540.677,498.117 541.339,498.117 Q542.007,498.117 542.312,497.411 ' +
+        'Q542.617,496.705 542.617,495.135 Q542.617,493.559 542.312,492.853 Q542.007,492.146 541.339,492.146 Z ' +
+        'M538.269,495.135 Q538.269,492.891 539.045,491.742 Q539.822,490.594 541.339,490.594 ' +
+        'Q542.863,490.594 543.639,491.742 Q544.416,492.891 544.416,495.135 Q544.416,497.373 543.639,498.521 ' +
+        'Q542.863,499.67 541.339,499.67 Q539.822,499.67 539.045,498.521 Q538.269,497.373 538.269,495.135 Z',
+    },
+  },
+  W: {
+    // ent0015, `EWSMainWindow << (W,orange) >>`.
+    12: {
+      refCx: 443.91,
+      refCy: 128,
+      d:
+        'M440.41,124.252 L441.922,124.252 L442.549,130.674 L443.305,126.52 L444.74,126.52 ' +
+        'L445.619,130.674 L446.111,124.252 L447.635,124.252 L446.627,133 L445.015,133 ' +
+        'L444.019,128.406 L443.088,133 L441.488,133 Z',
+    },
+  },
+  Q: {
+    // ent0025, `SimulationState <<(Q,orchid)>>`.
+    12: {
+      refCx: 117.96,
+      refCy: 613.5,
+      d:
+        'M117.304,617.635 Q117.222,617.652 117.166,617.661 Q117.11,617.67 117.058,617.67 ' +
+        'Q115.552,617.67 114.775,616.521 Q113.999,615.373 113.999,613.135 Q113.999,610.891 114.775,609.742 ' +
+        'Q115.552,608.594 117.069,608.594 Q118.593,608.594 119.369,609.742 Q120.146,610.891 120.146,613.135 ' +
+        'Q120.146,614.676 119.776,615.716 Q119.407,616.756 118.704,617.201 L119.794,618.268 L118.61,619.146 Z ' +
+        'M117.069,610.146 Q116.407,610.146 116.103,610.853 Q115.798,611.559 115.798,613.135 ' +
+        'Q115.798,614.705 116.103,615.411 Q116.407,616.117 117.069,616.117 Q117.737,616.117 118.042,615.411 ' +
+        'Q118.347,614.705 118.347,613.135 Q118.347,611.559 118.042,610.853 Q117.737,610.146 117.069,610.146 Z',
+    },
+  },
+  A: {
+    // ent0043, `abstract class Potential` (default letter, no
+    // stereotype override -- upstream's `getCircledChar(LeafType)`).
+    12: {
+      refCx: 244.74,
+      refCy: 1164,
+      d:
+        'M244.349,1160.834 L243.535,1164.414 L245.17,1164.414 Z M243.295,1159.252 L245.41,1159.252 ' +
+        'L247.771,1168 L246.043,1168 L245.504,1165.838 L243.189,1165.838 L242.662,1168 L240.933,1168 Z',
+    },
+  },
+};
+
+/**
  * G2 N47: per-(fontSize, fontFamily, bold, italic) 'C' glyph captures --
  * the {@link BADGE_GLYPH_C_BY_FONT_SIZE} table above assumes the default
  * `Monospaced`, non-bold, non-italic outline (this module's own doc
@@ -213,15 +316,20 @@ function variantKey(fontSize: number, fontFamily: string | undefined, bold: bool
 }
 
 /**
- * Look up the size-specific 'C' glyph capture for a given
- * `circledCharacterFontSize` (+ optional family/bold/italic, G2 N47), if
- * one was corpus-captured. `letter` is accepted (not just implied) so a
- * future widened table keyed by (letter, fontSize, ...) is a drop-in
- * replacement here without touching `class-badge.ts#badgeGlyphPath`'s own
- * call site. The variant table (family/style-aware) is checked FIRST --
- * it only has entries for a non-default family/style, so a plain
- * Monospaced/non-bold/non-italic lookup always falls through to the
- * existing size-only table unchanged.
+ * Look up the size-specific glyph capture for a given letter +
+ * `circledCharacterFontSize` (+ optional family/bold/italic, G2 N47, 'C'
+ * only), if one was corpus-captured.
+ *
+ * 'C' keeps its own pre-existing two-table path (cdd2-T15: unchanged --
+ * every pre-existing call site/behavior for 'C' is untouched): the
+ * variant table (family/style-aware) is checked FIRST -- it only has
+ * entries for a non-default family/style, so a plain Monospaced/
+ * non-bold/non-italic lookup always falls through to the size-only
+ * table unchanged. Every OTHER letter (cdd2-T15) looks up
+ * {@link BADGE_GLYPH_OTHER_LETTERS_BY_FONT_SIZE} by (letter, fontSize)
+ * directly -- family/bold/italic variants for non-'C' letters are not
+ * corpus-captured yet, same scope boundary this module's own doc
+ * comment already draws for 'C'.
  */
 export function lookupSizedGlyph(
   letter: string,
@@ -230,7 +338,9 @@ export function lookupSizedGlyph(
   bold?: boolean,
   italic?: boolean,
 ): SizedGlyph | undefined {
-  if (letter !== 'C') return undefined;
-  const variant = BADGE_GLYPH_C_BY_VARIANT[variantKey(fontSize, fontFamily, bold ?? false, italic ?? false)];
-  return variant ?? BADGE_GLYPH_C_BY_FONT_SIZE[fontSize];
+  if (letter === 'C') {
+    const variant = BADGE_GLYPH_C_BY_VARIANT[variantKey(fontSize, fontFamily, bold ?? false, italic ?? false)];
+    return variant ?? BADGE_GLYPH_C_BY_FONT_SIZE[fontSize];
+  }
+  return BADGE_GLYPH_OTHER_LETTERS_BY_FONT_SIZE[letter]?.[fontSize];
 }
