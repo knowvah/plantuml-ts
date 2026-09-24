@@ -681,3 +681,37 @@ describe('layoutGraph — port nodes report their symbol, not the padded table',
     expect(a.width).toBeGreaterThanOrEqual(12);
   });
 });
+
+// cdd2-T11 (Q-3): a shielded (`Kal`-qualified) node's corner is the `PORT="h"`
+// cell's own polygon, and graphviz sizes that cell from the TRUNCATED integer
+// `WIDTH=`/`HEIGHT=` (`htmllex.c:374-382 widthfn` -> `doInt`'s `strtol`), then
+// centres the integer table on the node (`htmltable.c:1914-1917`).
+// `DotStringFactory.java:390-396` reads the first `points=` after the title --
+// that cell -- as the node's min corner. Oracle: `baneru-00-kuro607`'s
+// `svek-1.dot` under `dot -Tsvg`: `sh0006` cell `8,-176..80,-128` (72 wide
+// from `WIDTH="72.995"`), `sh0007` rect `8.14..79.86`; jar draws 7 and 7.14.
+describe('layoutGraph — shield corner reads the truncated h cell (cdd2-T11 Q-3)', () => {
+  const shielded = (x1: number, x2: number): DotInputGraph => ({
+    nodes: [
+      { id: 'sh0006', width: 72.995, height: 48, shieldMargins: { x1, x2, y1: 0, y2: 16 } },
+      { id: 'sh0007', width: 71.725, height: 48 },
+    ],
+    edges: [{ id: 'e0', from: 'sh0006', to: 'sh0007' }],
+    rankDir: 'TB',
+  });
+
+  it('puts the plain neighbour 0.1375px right of the shielded corner (jar 7.14 - 7)', () => {
+    const r = layoutGraph(shielded(0, 0));
+    const a = r.nodes.find((n) => n.id === 'sh0006')!;
+    const b = r.nodes.find((n) => n.id === 'sh0007')!;
+    // graphviz centre 44: cell 44 - 72/2 = 8; rect 44 - 71.725/2 = 8.1375.
+    expect(b.x - a.x).toBeCloseTo(0.1375, 6);
+    expect(a.width).toBe(72.995);
+  });
+
+  it('runs the edge down the integer cell centre, 36px from the corner (jar 43 - 7)', () => {
+    const r = layoutGraph(shielded(0, 0));
+    const a = r.nodes.find((n) => n.id === 'sh0006')!;
+    expect(r.edges[0]!.points[0]!.x - a.x).toBeCloseTo(36, 6);
+  });
+});

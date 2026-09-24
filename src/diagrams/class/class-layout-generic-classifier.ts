@@ -165,6 +165,13 @@ export interface MeasureGenericClassifierOptions {
    *  `| undefined` for exactOptionalPropertyTypes: the caller passes
    *  `theme.classAttributeIconSize` through unconditionally. */
   classAttributeIconSize?: number | undefined;
+  /** cdd2-T11 (Q-1): the two floors `EntityImageClass#calculateDimensionSlow`
+   *  applies AFTER `minClassWidth` -- `paramSameClassWidth` and
+   *  `getKalWidth() * 1.3` (`svek/image/EntityImageClass.java:108-113`).
+   *  Both need every classifier (or every `Kal`) first, so they reach here
+   *  only through {@link widenMeasuredClassifier}'s re-measure; never set by
+   *  `measureClassifier`. Absent = 0. */
+  widthFloor?: number;
 }
 
 /** Every piece `measureGenericClassifier` needs to assemble its 3 possible
@@ -231,7 +238,7 @@ function computeClassifierGeoPipeline(
   // `HeaderLayout#drawU`'s own `width` parameter (the final box width).
   // Jar-verified: novaro-13-socu897 (`skinparam minClassWidth 70` -> `class a`
   // emits width 0.972222in = 70px exactly).
-  const width = Math.max(Math.max(stereoGeo.headerWidth, memberAreaWidth), minClassWidth);
+  const width = Math.max(Math.max(stereoGeo.headerWidth, memberAreaWidth), minClassWidth, options.widthFloor ?? 0);
   const headerRowsGeo = computeHeaderRowsGeo(classifier, fonts, { headerNameGeo, stereoGeo }, width, {
     guillemet,
     badgeRadius,
@@ -299,6 +306,41 @@ function buildEnhancedBodyResult(
   };
 }
 
+/**
+ * cdd2-T11 (Q-1): how to lay a measured box out again on a wider FINAL
+ * width -- the SAME inputs, plus {@link MeasureGenericClassifierOptions
+ * .widthFloor}. Keyed by the very object `measureGenericClassifier`
+ * returned, because the width floors (`class-dot-width-floors.ts`) receive
+ * only that object and mutate it in place for every later reader.
+ */
+const REMEASURE_AT = new WeakMap<MeasuredClassifier, (widthFloor: number) => MeasuredClassifier>();
+
+/**
+ * cdd2-T11 (Q-1): widens a measured classifier to `width` the way upstream
+ * does -- by computing the box at its FINAL width, never by stretching a
+ * box already laid out. `EntityImageClass#calculateDimensionSlow` returns
+ * the floored width (`svek/image/EntityImageClass.java:100-113`) and
+ * `EntityImageClass#drawU` passes exactly that width to the header
+ * (`:182,238`), so `HeaderLayout#drawU`'s `suppWith`/`h1`/`h2` split
+ * (`svek/HeaderLayout.java:81-117`) -- badge, stereotype rows, name, generic
+ * tag -- is taken against it. Re-measuring with `widthFloor = width` is that
+ * computation: every other term is `max`-floored below the same width.
+ *
+ * Mutates `m` in place (same contract as the floors that call this). A box
+ * not built by `measureGenericClassifier` has no header layout to redo and
+ * only takes the new width, as before.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/HeaderLayout.java:81-117
+ */
+export function widenMeasuredClassifier(m: MeasuredClassifier, width: number): void {
+  const remeasure = REMEASURE_AT.get(m);
+  if (remeasure === undefined) {
+    m.width = width;
+    return;
+  }
+  Object.assign(m, remeasure(width));
+}
+
 export function measureGenericClassifier(
   classifier: Classifier,
   fonts: ClassFontSpecs,
@@ -306,6 +348,22 @@ export function measureGenericClassifier(
   suppress: MemberSuppression,
   // G2 N27: `sprites` + the `guillemet` override folded into one trailing
   // options object -- this function was already at the repo's 5-param cap.
+  options: MeasureGenericClassifierOptions,
+): MeasuredClassifier {
+  const measured = measureGenericClassifierAt(classifier, fonts, measurer, suppress, options);
+  REMEASURE_AT.set(measured, (widthFloor) =>
+    measureGenericClassifierAt(classifier, fonts, measurer, suppress, { ...options, widthFloor }),
+  );
+  return measured;
+}
+
+/** The body of {@link measureGenericClassifier}, callable again at a
+ *  floored width by {@link widenMeasuredClassifier}. */
+function measureGenericClassifierAt(
+  classifier: Classifier,
+  fonts: ClassFontSpecs,
+  measurer: StringMeasurer,
+  suppress: MemberSuppression,
   options: MeasureGenericClassifierOptions,
 ): MeasuredClassifier {
   const { headerNameGeo, stereoGeo, enhancedBody, memberSections, width, headerRowsGeo, commonFields } =

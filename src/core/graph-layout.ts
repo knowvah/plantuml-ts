@@ -128,23 +128,53 @@ function portNodeSize(d: DotInputNode | undefined, engine: number, declared: num
 }
 
 /**
- * cdd-T15 (D6): the top-left corner OFFSET from graphviz's node centre for
- * a `shieldMargins` node. The shield table is a 3x3 grid whose outer cells
- * carry the `Kal` margins, so its total size is `(x1 + w + x2)` by
- * `(y1 + h + y2)` and the centre cell starts `(x1, y1)` into it. Graphviz
- * centres the whole table in the `PAD`ded node box, so the centre cell's
- * corner is `centre - table/2 + (x1, y1)` -- independent of `PAD`, which is
- * why no padding constant appears here.
+ * graphviz's `doInt` on an HTML-label `WIDTH=`/`HEIGHT=` attribute: `strtol`
+ * stops at the decimal point, so `"72.995"` sizes a 72pt cell
+ * (`lib/common/htmllex.c:374-382 widthfn`, `:364-372 heightfn`, both via
+ * `doInt`'s `strtol(v, &ep, 10)` at `:203`). Every value reaching here is
+ * non-negative, where `Math.trunc` IS `strtol`'s truncation.
  *
- * Checked against `baneru-00-kuro607`'s oracle: `class1`'s table is
- * `72.995 x (0 + 48 + 16)`, its drawn rect sits at `y=7` and `class2`'s at
- * `y=135` -- 60px `ranksep` plus the 4px bottom `PAD` plus the 16px bottom
- * margin cell, exactly what this offset reproduces.
+ * @see ~/git/graphviz/lib/common/htmllex.c:199-215
+ */
+function htmlCellSize(v: number): number {
+  return Math.trunc(v);
+}
+
+/**
+ * cdd-T15 (D6), corrected cdd2-T11 (Q-3): the top-left corner OFFSET from
+ * graphviz's node centre for a `shieldMargins` node.
+ *
+ * Jar never derives this corner: `DotStringFactory#solve`
+ * (`svek/DotStringFactory.java:390-396`) takes the FIRST `points=` after the
+ * node's `<title>` -- the `PORT="h"` BGCOLOR cell of the 3x3 table
+ * `SvekNode#appendLabelHtml` writes (`svek/SvekNode.java:245-267`) -- and
+ * `getMinXY` of it is the classifier's corner. So the corner is where graphviz
+ * PUT that cell, which is integer arithmetic, not the declared fractions:
+ *
+ * - each `FIXEDSIZE` cell is its truncated `WIDTH`/`HEIGHT` ({@link
+ *   htmlCellSize}; `size_html_cell`, `htmltable.c:1136-1150`, with
+ *   `CELLPADDING=0`/`CELLBORDER=0` adding no margin), an empty `<TD>` is 0;
+ * - a column/row is its widest/tallest cell -- the centre column also holds
+ *   the `WIDTH="1"` spacer cells and the centre row the `HEIGHT="1"` ones;
+ * - the integer table is centred on the node, `-W/2 .. W/2`
+ *   (`make_html_label`, `htmltable.c:1914-1917`), and the h cell starts one
+ *   column / one row in.
+ *
+ * Measured on `baneru-00-kuro607`'s `svek-1.dot` under real `dot -Tsvg`: the
+ * `WIDTH="72.995"` cell is the polygon `8,-176..80,-128` -- 72 wide on the
+ * node centre 44 -- where the old `centre - declared/2` put it at 7.5025, so
+ * the diagram-wide origin shift moved every OTHER node and edge +0.4975px.
+ * Graphviz centres the whole table in the `PAD`ded node box, so `PAD` still
+ * cancels out.
  */
 function shieldCorner(d: DotInputNode | undefined, width: number, height: number): [number, number] {
   const m = d?.shieldMargins;
   if (m === undefined) return [0, 0];
-  return [m.x1 - (m.x1 + width + m.x2) / 2, m.y1 - (m.y1 + height + m.y2) / 2];
+  const x1 = htmlCellSize(m.x1);
+  const y1 = htmlCellSize(m.y1);
+  const tableW = x1 + Math.max(1, htmlCellSize(width)) + htmlCellSize(m.x2);
+  const tableH = y1 + Math.max(1, htmlCellSize(height)) + htmlCellSize(m.y2);
+  return [x1 - tableW / 2, y1 - tableH / 2];
 }
 
 /**

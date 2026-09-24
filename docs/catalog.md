@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1190 modules · 4432 exported names.
+1190 modules · 4433 exported names.
 
 ## `src/`
 
@@ -1172,7 +1172,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-layout-fonts.ts` | `resolveAttributeFont`, `resolveHeaderFont`, `resolveGuillemetOption`, `resolveStereoFont` | Classifier font resolvers for the class sizing pipeline (`class-layout-helpers.ts#measureClassifier`) — attribute (member-row), header, and stereotype fonts, plus the guillemet wrapper option. |
 | `class-layout-generic-classifier-sections.ts` | `computeMemberSectionsGeo`, `computeEnhancedBodyGeo` | Member-section (fields/methods compartment) geometry for the generic classifier box — `computeMemberSectionsGeo` (classic split) and `computeEnhancedBodyGeo` (upstream's enhanced-body render strategy). |
 | `class-layout-generic-classifier-types.ts` | `ClassFontSpecs` | Types shared between class-layout-generic-classifier.ts and class-layout-header-geo.ts (a one-way types-leaf so neither file has to import a type back from the other). |
-| `class-layout-generic-classifier.ts` | `ClassFontSpecs`, `tryMeasureDescriptionLeaf`, `MeasureGenericClassifierOptions`, `measureGenericClassifier` | Generic name+members classifier box sizing for the class diagram layout engine (src/diagrams/class/layout.ts) -- the member-section half of `measureGenericClassifier`. |
+| `class-layout-generic-classifier.ts` | `ClassFontSpecs`, `tryMeasureDescriptionLeaf`, `MeasureGenericClassifierOptions`, `widenMeasuredClassifier`, `measureGenericClassifier` | Generic name+members classifier box sizing for the class diagram layout engine (src/diagrams/class/layout.ts) -- the member-section half of `measureGenericClassifier`. |
 | `class-layout-header-creole.ts` | `computeBadgeSpriteBox`, `buildBadgeCharFields`, `HeaderLineMetrics`, `HeaderLineMetricsOptions`, `buildHeaderLineMetrics` | class-layout-header-creole.ts — the A2s R2i creole-routing + badge- decoration helpers `class-layout-header-geo.ts#computeHeaderNameGeo` composes. |
 | `class-layout-header-geo.ts` | `ClassFontSpecs`, `CommonHeaderFields`, `StereoGeoOptions`, `computeHeaderNameGeo`, `StereoAndTagGeo`, `computeStereoAndTagGeo`, `HeaderGeoBundle`, `computeHeaderRowsGeo` | Generic classifier header geometry: badge decision + header display-text sizing, `<<stereotype>>` block dimensions, `class Foo<T>` generic-tag box, and the resulting stacked stereo/name rows -- the pieces `class-layout-generic-classifier.ts |
 | `class-layout-helpers.ts` | `ROW_TEXT_LEFT_MARGIN`, `isMethodMember`, `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `edgeLabelAttrs`, `NoteBoxContext`, `formatMemberText`, `MeasuredClassifier`, `MemberSuppression`, `measureClassifier`, `LIKE_CLASS_KINDS` | Classifier sizing/measurement helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
