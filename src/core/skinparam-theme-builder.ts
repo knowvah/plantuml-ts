@@ -244,7 +244,10 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
  *  FieldTable}) purely to keep that function's own CCN under the cap --
  *  a `??=` chain of 6 independent fields is 6 branches on one function. */
 const DARK_SCALAR_SEEDS: ReadonlyArray<
-  readonly [key: 'background' | 'border' | 'text' | 'classBackground' | 'classFontColor' | 'classAttributeFontColor', value: string]
+  readonly [
+    key: 'background' | 'border' | 'text' | 'classBackground' | 'classFontColor' | 'classAttributeFontColor',
+    value: string,
+  ]
 > = [
   ['background', DARK_MODE_DEFAULTS.background],
   ['border', DARK_MODE_DEFAULTS.border],

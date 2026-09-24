@@ -102,9 +102,7 @@ function isTreeStartLine(s: string): boolean {
  */
 export function isEnhancedBody(rawLines: readonly string[] | undefined): boolean {
   if (rawLines === undefined) return false;
-  return rawLines.some(
-    (s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()) || getEmbeddedType(s) !== null,
-  );
+  return rawLines.some((s) => isBlockSeparatorLine(s) || isTreeStartLine(s.trimStart()) || getEmbeddedType(s) !== null);
 }
 
 /** `BodyEnhancedAbstract#getTitle`: strips the leading+trailing 2-char

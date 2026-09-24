@@ -243,7 +243,6 @@ function dispatchCommand(state: ParseState, line: string): boolean {
   return false;
 }
 
-
 /** cdd-T28: `matchAnnotationCommand`'s SINGLE-line matchers read `lines[i]`
  *  verbatim (they require an already-trimmed line), but a matched MULTILINE
  *  block's BODY must keep its indentation: upstream's `BlocLines` never

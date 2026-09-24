@@ -141,4 +141,3 @@ export interface MemberRowBuild {
    *  107.6923px; node 2.162393in golden-exact). */
   readonly height: number;
 }
-

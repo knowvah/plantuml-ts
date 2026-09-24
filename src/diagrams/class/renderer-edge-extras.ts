@@ -271,7 +271,9 @@ export function renderEdgeKalBoxes(geo: EdgeGeo, theme: ScaledTheme): string {
   const parts: string[] = [];
   for (const box of [k.start, k.end]) {
     if (box === undefined) continue;
-    parts.push(rect(box.x, box.y, box.width, box.height, { fill, stroke, strokeWidth: KAL_STROKE_THICKNESS * theme.scaleK }));
+    parts.push(
+      rect(box.x, box.y, box.width, box.height, { fill, stroke, strokeWidth: KAL_STROKE_THICKNESS * theme.scaleK }),
+    );
     parts.push(
       text(box.textX, box.textY, box.text, {
         fill: fontColor,

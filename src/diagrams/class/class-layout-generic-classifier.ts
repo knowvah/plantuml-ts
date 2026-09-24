@@ -387,7 +387,13 @@ function buildNormalClassifierResult(
     fontSize,
   };
   if (!suppress.fields) {
-    appendMemberSectionRows(acc, memberSections.fieldFlat, stereoGeo.headerRowHeight, memberSections.fieldsHasIcon, rowCtx);
+    appendMemberSectionRows(
+      acc,
+      memberSections.fieldFlat,
+      stereoGeo.headerRowHeight,
+      memberSections.fieldsHasIcon,
+      rowCtx,
+    );
   }
   if (!suppress.methods) {
     appendMemberSectionRows(

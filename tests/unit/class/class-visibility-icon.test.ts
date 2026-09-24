@@ -152,18 +152,18 @@ describe('VISIBILITY_ICON_SIZE', () => {
 describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
   const themeWithOverride = scaleClassTheme(
     deepMergeTheme(defaultTheme, {
-    colors: {
-      graph: {
-        iconPrivateColor: '#C82930',
-        iconPrivateBackgroundColor: '#F24D5C',
-        iconPackageColor: '#1963A0',
-        iconPackageBackgroundColor: '#4177AF',
-        iconProtectedColor: '#B38D22',
-        iconProtectedBackgroundColor: '#FECF6C',
-        iconPublicColor: '#038048',
-        iconPublicBackgroundColor: '#84BE84',
+      colors: {
+        graph: {
+          iconPrivateColor: '#C82930',
+          iconPrivateBackgroundColor: '#F24D5C',
+          iconPackageColor: '#1963A0',
+          iconPackageBackgroundColor: '#4177AF',
+          iconProtectedColor: '#B38D22',
+          iconProtectedBackgroundColor: '#FECF6C',
+          iconPublicColor: '#038048',
+          iconPublicBackgroundColor: '#84BE84',
+        },
       },
-    },
     }),
     1,
   );

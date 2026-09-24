@@ -138,7 +138,7 @@ describe('renderFixtureClass — T21 letters reach the rendered <path> byte-exac
   });
 });
 
-describe('badgeLetter — T21 M3b: entity shares enum\'s own letter (E)', () => {
+describe("badgeLetter — T21 M3b: entity shares enum's own letter (E)", () => {
   it("badgeLetter('entity') returns 'E', not the un-surveyed default 'C'", () => {
     expect(badgeLetter('entity')).toBe('E');
     expect(badgeLetter('entity')).toBe(badgeLetter('enum'));

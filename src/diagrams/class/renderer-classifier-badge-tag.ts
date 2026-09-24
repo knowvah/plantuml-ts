@@ -57,7 +57,10 @@ import {
  *  round's audit found (D4/journal row 175) -- split out purely to keep
  *  {@link renderBadge}'s own NLOC under this project's cap. */
 function scaledBadgeRadius(theme: ScaledTheme): number {
-  return resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius) * theme.scaleK;
+  return (
+    resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius) *
+    theme.scaleK
+  );
 }
 
 export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
@@ -153,7 +156,13 @@ export function renderBadgeSpriteImage(
   sprite: { href: string; width: number; height: number },
   k: number,
 ): string {
-  return image(geo.x + BADGE_LEFT_MARGIN * k, geo.y + BADGE_SPRITE_TOP_MARGIN * k, sprite.width, sprite.height, sprite.href);
+  return image(
+    geo.x + BADGE_LEFT_MARGIN * k,
+    geo.y + BADGE_SPRITE_TOP_MARGIN * k,
+    sprite.width,
+    sprite.height,
+    sprite.href,
+  );
 }
 
 /**

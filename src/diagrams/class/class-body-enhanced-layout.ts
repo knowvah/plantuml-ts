@@ -281,9 +281,7 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   // = `BodyEnhanced1.getMarginX()`); zero when the block has no embed.
   const embedsHeight = embeds.reduce((sum, e) => sum + e.sizingHeight, 0);
   const embedsWidth =
-    embeds.length === 0
-      ? 0
-      : embeds.reduce((max, e) => Math.max(max, e.sizingWidth), 0) + BODY_ENHANCED_MARGIN_X * 2;
+    embeds.length === 0 ? 0 : embeds.reduce((max, e) => Math.max(max, e.sizingWidth), 0) + BODY_ENHANCED_MARGIN_X * 2;
   return {
     rows,
     width: Math.max(sectionWidth(builds, hasIcon), embedsWidth),

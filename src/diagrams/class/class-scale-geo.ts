@@ -36,7 +36,13 @@
  */
 import type { ClassGeometry, ClassifierGeo, NamespaceGeo } from './class-geo-types.js';
 import { isNoteGeo } from './class-geo-types.js';
-import { scaleRow, scaleGenericTag, scaleFolderTab, scaleSymbolInk, scaleBadgeSpriteImage } from './class-scale-geo-row.js';
+import {
+  scaleRow,
+  scaleGenericTag,
+  scaleFolderTab,
+  scaleSymbolInk,
+  scaleBadgeSpriteImage,
+} from './class-scale-geo-row.js';
 import { scaleEnhancedBody, scaleJsonBody } from './class-scale-geo-body.js';
 import { scaleEdgeGeo } from './class-scale-geo-edge.js';
 import { scaleNoteGeo } from './class-scale-geo-note.js';

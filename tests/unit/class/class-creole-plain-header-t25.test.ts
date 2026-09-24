@@ -58,9 +58,7 @@ describe('cdd-T25 — <plain> registered (diseka-11-gozu390)', () => {
   });
 
   test('regression guard — a header with NO creole markup keeps its own bold (measurement-identity path unaffected)', () => {
-    const svg = svgOf(
-      ['@startuml', 'skinparam classFontStyle bold', 'enum BookCategory', '@enduml'].join('\n'),
-    );
+    const svg = svgOf(['@startuml', 'skinparam classFontStyle bold', 'enum BookCategory', '@enduml'].join('\n'));
     expect(svg).toMatch(/<text[^>]*font-weight="700"[^>]*>BookCategory<\/text>/);
   });
 

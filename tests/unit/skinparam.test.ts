@@ -797,10 +797,7 @@ describe('resolveSkinparam — unknown keys', () => {
   });
 
   it('routes classBackgroundColor<<stereo>> to the modelled theme field', () => {
-    const { theme, unknown } = resolveSkinparam(
-      new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]),
-      defaultTheme,
-    );
+    const { theme, unknown } = resolveSkinparam(new Map([['classBackgroundColor<<Foo>>', '#AABBCC']]), defaultTheme);
     expect(theme.colors.graph.classBackgroundColorByStereo).toEqual({ foo: '#AABBCC' });
     expect(unknown).toEqual([]);
   });

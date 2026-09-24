@@ -56,7 +56,7 @@ describe('chrome creole — kacico-91-bati232 (legend: creole table + creole tre
   const ours = chromeGroup(render('class', 'kacico-91-bati232'), 'legend');
   const jar = chromeGroup(golden('class', 'kacico-91-bati232'), 'legend');
 
-  it('draws the jar\'s 34 legend children (1 rect + 12 text + 12 line + 5 rect + 4 line)', () => {
+  it("draws the jar's 34 legend children (1 rect + 12 text + 12 line + 5 rect + 4 line)", () => {
     expect(childTags(jar).length).toBe(34);
     expect(childTags(ours).length).toBe(34);
   });
@@ -117,7 +117,7 @@ describe('chrome creole — galili-87-zivo129 (<back:red> in footer and legend)'
   const ours = render('class', 'galili-87-zivo129');
   const jar = golden('class', 'galili-87-zivo129');
 
-  it('draws the legend text at the jar\'s own run width', () => {
+  it("draws the legend text at the jar's own run width", () => {
     expect(textContents(chromeGroup(ours, 'legend'))).toEqual(['The legend']);
     expect(textLengths(chromeGroup(ours, 'legend'))).toEqual(textLengths(chromeGroup(jar, 'legend')));
   });

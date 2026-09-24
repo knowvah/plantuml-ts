@@ -300,7 +300,13 @@ export function pushIconRowPrimitives(
   const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
   const iconOriginY = wrappedIconOriginY(geo, row, theme);
   if (row.url !== undefined) {
-    const bg = renderVisibilityUrlBackground(iconOriginX, iconOriginY, classifierFill(geo, theme), row.url, theme.scaleK);
+    const bg = renderVisibilityUrlBackground(
+      iconOriginX,
+      iconOriginY,
+      classifierFill(geo, theme),
+      row.url,
+      theme.scaleK,
+    );
     interleaved.push(iconEntry(row.y, effectiveUrl, bg));
   }
   const isField = row.visibilityIsField === true;

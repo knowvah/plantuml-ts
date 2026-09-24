@@ -63,7 +63,8 @@
  * font sizes (G2 N38: not a linear scale of this table, AWT hinting rounds
  * each point size's contour independently).
  */
-export type BadgeLetter = 'C' | 'I' | 'A' | 'E' | '@' | 'P' | 'M' | 'F' | '?' | 'R' | 'J' | 'O' | 'W' | 'D' | 'Q' | 'S' | 'X';
+export type BadgeLetter =
+  'C' | 'I' | 'A' | 'E' | '@' | 'P' | 'M' | 'F' | '?' | 'R' | 'J' | 'O' | 'W' | 'D' | 'Q' | 'S' | 'X';
 
 /** Reference badge center every {@link BADGE_GLYPH_D} entry is captured at. */
 export const REFERENCE_CX = 22;
