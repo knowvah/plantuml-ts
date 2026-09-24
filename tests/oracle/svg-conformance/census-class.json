@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-24T14:58:15.612Z",
-  "measuredAgainstCommit": "2f2cbb1fd",
+  "generatedAt": "2026-09-24T15:22:25.278Z",
+  "measuredAgainstCommit": "9763ca805",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -37,8 +37,8 @@
     {
       "slug": "befasi-62-vimu310",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "begico-70-guva302",
@@ -2209,8 +2209,8 @@
     {
       "slug": "mububu-79-nalu431",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "mucoti-34-seve858",
@@ -2785,7 +2785,7 @@
     {
       "slug": "puvono-84-doro361",
       "status": "ok",
-      "diffCount": 1362,
+      "diffCount": 920,
       "bucket": "31+"
     },
     {
@@ -2899,8 +2899,8 @@
     {
       "slug": "ribove-58-tefu515",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "rideze-59-lizu265",
@@ -3176,7 +3176,7 @@
     {
       "slug": "sekame-22-meze147",
       "status": "ok",
-      "diffCount": 1362,
+      "diffCount": 920,
       "bucket": "31+"
     },
     {
@@ -3272,8 +3272,8 @@
     {
       "slug": "soboro-52-pevi612",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "sodizo-26-salo123",
@@ -4113,8 +4113,8 @@
     {
       "slug": "zakuta-81-pese010",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "zalazo-34-livu931",
@@ -4245,8 +4245,8 @@
     {
       "slug": "ziruni-05-fona846",
       "status": "ok",
-      "diffCount": 818,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "zofabi-70-core205",
@@ -4281,8 +4281,8 @@
     {
       "slug": "zosaxa-86-mora157",
       "status": "ok",
-      "diffCount": 886,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "zosero-71-camu332",

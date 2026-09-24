@@ -29,13 +29,13 @@ Core: 62 fixtures (groups Q/C/R/D/S). Stretch (group X, batch 5, D9): 22. Every 
 | pegeso-72-mana305 | Q | T13 | structural-match | 0 | 2 | Q-6 (ink walk read pre-trim path; `LimitFinder.java:190-194`) | conformant (b2, pinned) |
 | nenexe-35-zere033 | Q | T13 | structural-match | 0 | 2 | Q-9 | conformant (b2, pinned) |
 | mugobo-34-fede498 | Q | T13 | structural-match | 0 | 2 | Q-9 | conformant (b2, pinned) |
-| befasi-62-vimu310 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| mububu-79-nalu431 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| ribove-58-tefu515 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| soboro-52-pevi612 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| zakuta-81-pese010 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| ziruni-05-fona846 | C | T15 | structural-match | 0 | 818 | C-1 |  |
-| zosaxa-86-mora157 | C | T15 | structural-match | 0 | 886 | C-1 |  |
+| befasi-62-vimu310 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| mububu-79-nalu431 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| ribove-58-tefu515 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| soboro-52-pevi612 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| zakuta-81-pese010 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| ziruni-05-fona846 | C | T15 | structural-match | 0 | 818 | C-1 | conformant (b3, pinned) |
+| zosaxa-86-mora157 | C | T15 | structural-match | 0 | 886 | C-1 | conformant (b3, pinned) |
 | bejeli-39-sina124 | R | T17 | structural-match | 0 | 2 | R-3 |  |
 | cacoma-43-poxu615 | R | T17 | structural-match | 0 | 2 | R-6 (open, diagnose first) |  |
 | gatula-10-bifu561 | R | T17 | structural-match | 0 | 2 | R-2 (MEDIUM, trace first) |  |
