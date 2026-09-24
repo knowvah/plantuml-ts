@@ -160,7 +160,7 @@ describe('T23: xogixe-78-zuro619 (Observation) — 50 `<a>`, explicit-visibility
     expect(triple).toContain('<text');
     // All three anchors in the triple share the SAME member-owned href
     // (excluding the `xlink:href` twin each `<a>` also carries).
-    const hrefOnly = new RegExp(`(?<!xlink:)href="${href.replace(/[[\]]/g, '\\$&')}"`, 'g');
+    const hrefOnly = new RegExp(`(?<!xlink:)href="${href.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'g');
     expect((triple.match(hrefOnly) ?? []).length).toBe(3);
   });
 
