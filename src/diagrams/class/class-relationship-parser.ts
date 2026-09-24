@@ -201,6 +201,54 @@ const REL_RE = new RegExp(
 );
 
 /**
+ * S-4 (cdd2-T7, begico-70-guva302/xoxuni-96-fere626): `CommandLinkClass
+ * .java:368`'s `link.setColors(color().getColor(arg, diagram.getSkinParam()
+ * .getIHtmlColorSet()))` -- `color()` at `:173-174` is `ColorParser
+ * .simpleColor(ColorType.LINE)`, so REL_RE's own trailing `REL_COLOR` group
+ * (line 190 above) is matched-and-DISCARDED by design (D6: DOT parity, not
+ * SVG rendering) but jar DOES store and render it. A private capturing TWIN
+ * of REL_RE's prefix, stopping right after `REL_COLOR`, extracts the raw
+ * spec independently of the main parse -- REL_RE's own group numbering
+ * (`class-relationship-field-builder.ts`'s `m[11]`/`m[12]` stereo/label
+ * reads) stays untouched by this addition.
+ */
+const REL_COLOR_CAPTURE_RE = new RegExp(
+  String.raw`^(?:${CLASS_ID})` +
+    String.raw`\s*(?:\[[^[\]]+\])?` +
+    String.raw`\s*(?:"[^"]*")?${REL_ROLE}` +
+    String.raw`\s*(?:${REL_ARROW})` +
+    String.raw`\s*(?:"[^"]*")?${REL_ROLE}` +
+    String.raw`\s*(?:\[[^[\]]+\])?` +
+    String.raw`\s*(?:${CLASS_ID})` +
+    // Named (not positional) capture -- REL_ROLE embeds its own capturing
+    // group (used twice above), so a positional index here would be wrong
+    // and silently drift if REL_ROLE's own shape ever changes.
+    String.raw`\s*(?<color>${REL_COLOR})?`,
+  'u',
+);
+
+/**
+ * `Colors.java:96-124`'s tokenizer keyed to `ColorType.LINE` as `mainType`
+ * (the relationship-line spec's own default, distinct from `core/
+ * color-override.ts#resolveBareOrBackColor`'s BACK-keyed default for
+ * classifier/note/state) -- a bare (no `:`, no `.`) token is the LINE
+ * colour; last claimant wins, same positional rule as the BACK version.
+ * The `text:COLOR` sub-token (xoxuni's label fill) is intentionally NOT
+ * extracted here -- it needs a new `Relationship`/`EdgeGeo` field outside
+ * this task's write-set (class-relationship-ast.ts), left as a residual.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:95-124
+ */
+function resolveRelLineColor(spec: string | undefined): string | undefined {
+  if (spec === undefined) return undefined;
+  let line: string | undefined;
+  for (const part of spec.replace(/#/g, '').split(';')) {
+    if (part === '' || part.includes(':') || part.includes('.')) continue;
+    line = `#${part}`;
+  }
+  return line;
+}
+
+/**
  * Non-capturing dispatch-only variant of REL_RE, used by the COMMANDS table
  * to decide whether a line is a relationship line before running the full
  * (capturing) parseRelationshipLine.
@@ -412,8 +460,19 @@ export function parseRelationshipLine(
     dashedBody: info.dashedBody,
     hidden: styleOverrides.hidden,
   };
-  return withOptionalFields(
+  const rel = withOptionalFields(
     { from: id.from, to: id.to, type: info.type, ...decors },
     buildRelOptionalFields({ ...fields, ...overrides, url, middleDecor }),
   );
+  // S-4 (cdd2-T7): the trailing `#color;text:...` spec (REL_COLOR, matched
+  // and discarded by REL_RE itself -- see REL_COLOR_CAPTURE_RE's own doc
+  // comment). Only applied when the bracket form (`-[#color]->`) left
+  // `colorOverride` unset -- that form is the more specific, already-wired
+  // override and wins on the rare line carrying both.
+  if (rel.colorOverride === undefined) {
+    const spec = REL_COLOR_CAPTURE_RE.exec(header !== null ? line.slice(header[0].length) : line)?.groups?.color;
+    const lineColor = resolveRelLineColor(spec);
+    if (lineColor !== undefined) rel.colorOverride = lineColor;
+  }
+  return rel;
 }

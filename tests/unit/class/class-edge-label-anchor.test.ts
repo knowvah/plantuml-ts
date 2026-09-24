@@ -21,6 +21,7 @@ import {
   roleLabelAnchors,
   attachPortLabels,
   placeQuantifierBox,
+  multiLineLabelAnchor,
 } from '../../../src/diagrams/class/class-edge-label-anchor.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
@@ -163,5 +164,40 @@ describe('T17 (M8) — placeQuantifierBox is still exported and usable directly 
     const box = placeQuantifierBox('1', { x: 100, y: 100 }, measurer, font);
     expect(box.lines).toEqual(['1']);
     expect(box.pos.x).toBeLessThan(100);
+  });
+});
+
+/**
+ * S-8 (cdd2-T7, vuresa-33-kumu160): `multiLineLabelAnchor` previously
+ * measured/emitted the RAW (un-creole-stripped) line text, unlike its
+ * sibling LAYOUT path (`class-edge-label-measure.ts`). Values below are
+ * read directly off `plans/class-divergence-drive/measurements/out/
+ * vuresa-33-kumu160.jar.svg`'s `<text>` nodes for the
+ * `<b>Person-Meeting</b>\nMeetings/Person\nFk=Meeting.PersonID` label --
+ * never fitted. @see ~/git/plantuml/.../klimt/creole/Display.java:413-419
+ */
+describe('S-8 (cdd2-T7) — multiLineLabelAnchor strips creole and reports bold', () => {
+  const lines = ['<b>Person-Meeting</b>', 'Meetings/Person', 'Fk=Meeting.PersonID'];
+
+  it('strips the <b> wrap from the rendered text and flags the line bold', () => {
+    const [line1] = multiLineLabelAnchor(lines, 'center', { x: 100, y: 100 }, measurer, font);
+    expect(line1?.text).toBe('Person-Meeting');
+    expect(line1?.bold).toBe(true);
+    // jar's <text textLength="91.731"> for the stripped "Person-Meeting" run.
+    expect(line1?.width).toBeCloseTo(91.731, 2);
+  });
+
+  it('leaves a plain line unstripped in content and unflagged', () => {
+    const [, line2, line3] = multiLineLabelAnchor(lines, 'center', { x: 100, y: 100 }, measurer, font);
+    expect(line2?.text).toBe('Meetings/Person');
+    expect(line2?.bold).toBeUndefined();
+    expect(line3?.text).toBe('Fk=Meeting.PersonID');
+    expect(line3?.bold).toBeUndefined();
+  });
+
+  it('measures the stripped width, not the raw tagged-string width', () => {
+    const [rawLine] = multiLineLabelAnchor(['<b>Person-Meeting</b>'], 'center', { x: 0, y: 0 }, measurer, font);
+    const [strippedLine] = multiLineLabelAnchor(['Person-Meeting'], 'center', { x: 0, y: 0 }, measurer, font);
+    expect(rawLine?.width).toBe(strippedLine?.width);
   });
 });

@@ -238,6 +238,33 @@ describe('association-class couple: subsumed-edge length transfer', () => {
   );
 });
 
+/**
+ * S-2 (cdd2-T7, pibifa-14-leno075/begico-70-guva302):
+ * `AbstractClassOrObjectDiagram.java:134-135`'s `point1ToPoint2 = new
+ * Link(..., linkType, ...)` -- `linkType` is the PARSED arrow between the
+ * two couples, not a fixed 'association'. A bare `.` resolves through the
+ * same `resolveArrow` every relationship arrow uses to `usage`
+ * (`class-arrow-grammar.ts#resolveType`'s `!dashed` false / no-arrow-head
+ * branch), which is `EDGE_DECORATION_MAP.usage = {sourceDecor:'none',
+ * targetDecor:'none', dashed:true}` -- upstream's `LinkDecor.NONE`/`NONE`
+ * plus the `.` token's dashed body.
+ */
+describe('S-2 (cdd2-T7) — double-couple join type follows the parsed arrow token', () => {
+  it('a bare "." connector resolves the join Link to usage (no decor, dashed)', () => {
+    const ast = parse(`
+      class A0
+      class B1
+      class C2
+      A0 *--  B1
+      A0 *--  C2
+      (A0, B1) . (A0, C2)
+    `);
+    const join = ast.relationships.find((r) => r.type === 'usage');
+    expect(join).toBeDefined();
+    expect(join!.length).toBe(1);
+  });
+});
+
 describe('association-class couple: note-on-link split', () => {
   it(
     'note on link: text — full label on the A->circle edge only when the ' +
