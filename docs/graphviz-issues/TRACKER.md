@@ -311,7 +311,12 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
         clip. -->
-- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- FILED 2026-09-22
+- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- RE-VERIFIED 2026-09-25
+        (cdd3-T5): still open, 5 class fixtures / 7 edges (coxose x2,
+        ririlu x2, mucoti, sefazi, rifuzu); dot-engine prints `triangulation
+        failed` once per failing edge, real dot 16.1.0 none; every other
+        element byte-equal. Probe numbers in the issue file.
+        ORIGINAL FILING NOTE FOLLOWS: FILED 2026-09-22
         (cdd-T15). A `minlen=0` (same-rank) edge that targets an HTML-table
         node's `PORT="h"` cell (`sh0007:h->sh0008`) starts/ends at the
         node's BOUNDING BOX instead of the port cell; the identical seam on
@@ -324,7 +329,14 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         baseline; `sefazi-02-defe499` and `camuna-58-veca254` carry the
         same delta but still fall 35/142. Not chased (stop 8); no
         compensation applied, since any would be fitting. -->
-- [ ] 20-taillabel-headlabel-no-canvas-reservation.md  <!-- FILED 2026-09-23
+- [~] 20-taillabel-headlabel-no-canvas-reservation.md  <!-- RECLASSIFIED
+        2026-09-25 (cdd3-T5): NOT dot-engine. Engine == real dot 16.1.0 on
+        the cached DOT and on our API-built graph (bb 107.58, node x 55);
+        the filing compared real's absolute centre with our
+        post-shiftToOrigin offset. focaci's real residual is ours:
+        class-ink-box.ts:430 bounds the raw-text headLabel anchor
+        ("~* initiators", 61.1px) instead of the drawn quantifierLines.
+        ORIGINAL NOTE FOLLOWS: FILED 2026-09-23
         (cdd-B7FU-R3, item 4). An edge carrying BOTH `taillabel` and
         `headlabel` HTML tables (`A "role1" --> "role2" B`) gets NO extra
         canvas/centring reservation from dot-engine, where real graphviz
@@ -339,7 +351,13 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         attributes. `focaci-80-suzu938` stays `structural-match` (0
         structural / ~92 numeric, all one cascading ~2.4px delta). Not
         chased (stop 8); no compensation applied. -->
-- [ ] 21-same-rank-node-order-mirrored.md  <!-- FILED 2026-09-23 (cdd-T37,
+- [~] 21-same-rank-node-order-mirrored.md  <!-- RECLASSIFIED 2026-09-25
+        (cdd3-T5): NOT dot-engine. Engine == real dot on the cached DOT for
+        both. boseba: our graph drops `together` cluster2t0 (deleting it
+        from the cached DOT makes REAL dot reproduce our mirror, 773.0pt);
+        majuva: `@3` forwarded as weight=3, which upstream never emits
+        (adding it to the cached DOT makes REAL dot reproduce our layout,
+        bb 151.04). ORIGINAL NOTE FOLLOWS: FILED 2026-09-23 (cdd-T37,
         M8 boseba/majuva). Byte-identical DOT (`dot-sync-report.ts`
         structurallyEqual=true) for both `boseba-99-zopo693` and
         `majuva-44-luta965`; feeding the SAME cached DOT to a real
