@@ -12,13 +12,14 @@
  * shared-counter burn order, and cdd-T3 deliberately does not merge them.
  */
 
-import type { ClassDiagramAST, Classifier, Relationship } from './ast.js';
+import type { ClassDiagramAST, Classifier, Relationship, RelationshipType } from './ast.js';
 import {
   ASSOC_DOUBLE_COUPLE_RE,
   type AssocCoupleCounter,
   type CoupleCircle,
   makeCoupleCircle,
 } from './class-assoc-couple.js';
+import { resolveArrow } from './class-arrow-grammar.js';
 
 /**
  * cdd-T3 (A1 SB3): one `insertPointBetween` call's shared-counter burns --
@@ -84,6 +85,32 @@ function stampDoubleCouple(counter: AssocCoupleCounter, r1: CoupleCircle, r2: Co
 }
 
 /**
+ * S-2 (cdd2-T7, pibifa-14-leno075/begico-70-guva302): `point1ToPoint2 = new
+ * Link(location, this, ..., point1, point2, linkType, ...)` -- `linkType` is
+ * the arrow token PARSED from the source line (`(A,B) <arrow> (C,D)`), not a
+ * fixed type. `ASSOC_DOUBLE_COUPLE_RE` (class-assoc-couple.ts) matches that
+ * token but does not capture it, so it is re-extracted here with a narrow,
+ * self-contained regex (kept local to this write-set file rather than
+ * widening the shared one) and resolved through the SAME `resolveArrow`
+ * every ordinary relationship arrow uses. A bare `.` (both fixtures'
+ * connector) resolves to `kind1=kind2='none'` + `dashedBody=true` ->
+ * `resolveType`'s `usage` branch (`class-arrow-grammar.ts:272-273`) --
+ * `EDGE_DECORATION_MAP.usage` is `{sourceDecor:'none', targetDecor:'none',
+ * dashed:true}`, which is exactly upstream's `LinkDecor.NONE`/`NONE` pair
+ * plus the `.` token's dashed body. Falls back to the prior hardcoded
+ * `'association'` when the token cannot be resolved (crow's-foot arrows;
+ * `resolveArrow` returns `null` for a decor pair it does not recognise).
+ * @see ~/git/plantuml/.../objectdiagram/AbstractClassOrObjectDiagram.java:134-135
+ */
+const DOUBLE_COUPLE_ARROW_RE = /\)\s*([-.=<>|*ox]+)\s*\(/;
+
+function resolveJoinType(line: string): RelationshipType {
+  const arrow = DOUBLE_COUPLE_ARROW_RE.exec(line)?.[1];
+  const info = arrow !== undefined ? resolveArrow(arrow) : null;
+  return info?.type ?? 'association';
+}
+
+/**
  * Double couple `(A,B) . (C,D)`: a circle per couple, joined by a VISIBLE
  * minlen-0 edge (pibifa/begico). Distinct from the same-pair invis sibling
  * link. Mirrors `associationClass`'s 4-entity overload + `insertPointBetween`
@@ -104,7 +131,7 @@ export function applyDoubleCouple(
   // results at once.
   const r1 = makeCoupleCircle(ast, ensure, m[1]!, m[2]!);
   const r2 = makeCoupleCircle(ast, ensure, m[3]!, m[4]!);
-  const join: Relationship = { from: r1.circleId, to: r2.circleId, type: 'association', length: 1 };
+  const join: Relationship = { from: r1.circleId, to: r2.circleId, type: resolveJoinType(line), length: 1 };
   ast.relationships.push(join);
   if (counter !== undefined) stampDoubleCouple(counter, r1, r2, join);
   return true;

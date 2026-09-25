@@ -76,6 +76,9 @@ function scaleClassifierGeo(c: ClassifierGeo, k: number, themeFontSize: number):
 
 /** A package/namespace cluster's own outline geometry, scaled. */
 function scaleNamespaceGeo(ns: NamespaceGeo, k: number): NamespaceGeo {
+  // cdd2-T19b: `clusterHeaderStereo` rides through UNSCALED (a pre-built
+  // SVG string body); no corpus fixture combines `scale` with a displayed
+  // package stereotype or group legend -- named remainder, not modelled.
   return {
     ...ns,
     x: ns.x * k,

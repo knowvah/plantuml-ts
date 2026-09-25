@@ -14,6 +14,7 @@ import type { Classifier } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import { LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
 import { kalWidthByEntity, KAL_WIDTH_FACTOR, type Kal } from './class-kal.js';
+import { widenMeasuredClassifier } from './class-layout-generic-classifier.js';
 
 /** Same pending-plumbing seam as {@link ThemeGroupInheritance}, for
  *  `skinparam sameClassWidth true|false` (SkinParam.java:994). */
@@ -31,9 +32,9 @@ export interface ThemeSameClassWidth {
  * .java:108-110). Jar evidence: dorafa-63-soba922 emits BOTH nodes at
  * 1.623264in. Mutates the shared `MeasuredClassifier.width` in place so the
  * DOT node builder AND the renderer geos (built after `buildDotGraph`) agree
- * on the floored width. Header-row indents are NOT re-centered against the
- * widened box (bounded SVG-cosmetic gap, F-D report). Inert in production
- * until the {@link ThemeSameClassWidth} plumbing lands.
+ * on the floored width. cdd2-T11 (Q-1): the header is laid out again on the
+ * widened box ({@link widenMeasuredClassifier}), as `HeaderLayout#drawU`
+ * does against the final width -- which closed dorafa-63-soba922.
  */
 export function applySameClassWidthFloor(
   classifiers: readonly Classifier[],
@@ -45,7 +46,7 @@ export function applySameClassWidthFloor(
   for (const c of classifiers) {
     if (!LIKE_CLASS_KINDS.has(c.kind)) continue;
     const m = measuredMap.get(c.id);
-    if (m !== undefined && m.width < max) m.width = max;
+    if (m !== undefined && m.width < max) widenMeasuredClassifier(m, max);
   }
 }
 
@@ -56,7 +57,10 @@ export function applySameClassWidthFloor(
  * Applied AFTER {@link applySameClassWidthFloor} because upstream applies it
  * after the `minClassWidth`/`paramSameClassWidth` floors in that same method,
  * and mutates the shared `MeasuredClassifier` objects for the same reason
- * that function does -- the DOT node and the drawn box must agree.
+ * that function does -- the DOT node and the drawn box must agree. cdd2-T11
+ * (Q-1): widening re-runs the header layout on the final width
+ * ({@link widenMeasuredClassifier}); the pre-floor header was centred on the
+ * narrower box, which put `baneru-00-kuro607`'s badge 0.572px left of jar's.
  *
  * `EntityImageClass` is only built for an `isLikeClass` leaf
  * (`GraphvizImageBuilder.java:110-116`), the SAME gate
@@ -75,7 +79,8 @@ export function applyKalWidthFloor(
     const kalWidth = widths.get(c.id);
     if (kalWidth === undefined) continue;
     const m = measuredMap.get(c.id);
-    if (m !== undefined && m.width < kalWidth * KAL_WIDTH_FACTOR) m.width = kalWidth * KAL_WIDTH_FACTOR;
+    if (m !== undefined && m.width < kalWidth * KAL_WIDTH_FACTOR)
+      widenMeasuredClassifier(m, kalWidth * KAL_WIDTH_FACTOR);
   }
 }
 

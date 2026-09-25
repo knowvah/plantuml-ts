@@ -119,6 +119,21 @@ export interface Relationship {
    */
   linkNoteHalfWidth?: boolean;
   /**
+   * cdd2-T19c: this note-on-link's own `#color` spec — the BACK (fill) and
+   * LINE (outline stroke) slots `ComponentRoseNote`'s `symbolContext` reads
+   * (`style/Style.java:270-282`), parsed from `NOTE_ON_LINK_COLOR` by
+   * {@link parseNoteOnLinkColors} (class-notes.ts) and set by the SAME
+   * `applyNoteOnLink` call that sets {@link linkNote}. Raw colour-set
+   * strings (never pre-resolved to hex), matching `linkNoteBack`'s render
+   * consumer (`renderer-note.ts`'s `resolveNoteBackground`, which already
+   * resolves a raw string/gradient token the same way for every other note
+   * kind). TEXT/HEADER are captured-but-unapplied upstream too (see
+   * {@link parseNoteOnLinkColors}'s own doc comment) and are not modeled.
+   * @see ~/git/plantuml/.../command/note/CommandFactoryNoteOnLink.java:217-218
+   */
+  linkNoteBack?: string;
+  linkNoteLine?: string;
+  /**
    * Marked by `constraint on links : text` (CommandConstraintOnLinks →
    * `Link#setLinkConstraint`, applied to the two most-recent non-note links).
    * svek emits a fixed 10x10 `label` spot on a constrained edge with no

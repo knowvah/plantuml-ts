@@ -477,4 +477,22 @@ export interface ThemeGraphColorsB {
       }
     >;
   };
+  /** cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/
+   *  BackgroundColor } } }` -- `VisibilityModifier.java:336-350`'s
+   *  `{root,element,visibilityIcon,<kind>}` StyleSignature (kind in
+   *  `public_`/`private_`/`protected_`/`package_`/`IEMandatory`, cleaned
+   *  to `public`/`private`/`protected`/`package`/`iemandatory` selector
+   *  tokens). Pre-resolved hex, keyed by the SAME cleaned kind token,
+   *  read by `class-visibility-icon.ts#colorsFor` ABOVE the legacy
+   *  `icon<Kind>Color`/`icon<Kind>BackgroundColor` skinparam-override
+   *  tier (an explicit `<style>` block outranks the FromSkinparamToStyle
+   *  bridge, the SAME precedent `classCascadeHeaderFontColor` establishes
+   *  -- `skinparam-theme-builder.ts:102-110`). `undefined` for every
+   *  fixture with no such `<style>` block -- zero behavior change.
+   *  Jar-verified `tuguku-78-zega630`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/MethodsOrFieldsArea.java:360-364 */
+  visibilityIconLineCascade?: Readonly<Record<string, string>>;
+  /** cdd2-T8 (S-7): the BackgroundColor sibling of {@link
+   *  visibilityIconLineCascade}. */
+  visibilityIconBackgroundCascade?: Readonly<Record<string, string>>;
 }

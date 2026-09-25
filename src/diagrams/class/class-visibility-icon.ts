@@ -121,15 +121,52 @@ const VISIBILITY_COLORS: Record<Exclude<Visibility, '*'>, { line: string; backgr
 };
 const IE_MANDATORY_COLOR = { line: '#000000', background: '#000000' };
 
+/** cdd2-T8 (S-7): `VisibilityModifier.java:336-350`'s five SName tokens,
+ *  keyed by this port's own `Visibility` char -- the SAME cleaned kind
+ *  strings `style-cascade-visibility-icon.ts#VISIBILITY_ICON_KINDS` uses
+ *  as `<style>` selector text. */
+const VISIBILITY_ICON_KIND: Record<Visibility, string> = {
+  '+': 'public',
+  '-': 'private',
+  '#': 'protected',
+  '~': 'package',
+  '*': 'iemandatory',
+};
+
 /**
  * G2 N54: `skinparam icon<Kind>Color`/`icon<Kind>BackgroundColor` overrides
  * (`theme.ts#iconPrivateColor`'s doc comment for the full upstream mapping,
  * `FromSkinparamToStyle.java:232-239`) -- per-visibility-char LineColor/
- * BackgroundColor, ABOVE the hardcoded `VISIBILITY_COLORS` default, BELOW
- * nothing (no `<style>`-cascade tier exists for this StyleSignature in the
- * reachable corpus). `'*'` (IE_MANDATORY) has NO skinparam override path
- * upstream (`FromSkinparamToStyle.java`'s own catalog has no IEMandatory
- * entry) -- always the hardcoded black, `theme` ignored for that icon.
+ * BackgroundColor, ABOVE the hardcoded `VISIBILITY_COLORS` default. `'*'`
+ * (IE_MANDATORY) has NO skinparam override path upstream
+ * (`FromSkinparamToStyle.java`'s own catalog has no IEMandatory entry).
+ * cdd2-T8 (S-7): a `<style> visibilityIcon { <kind> {...} } }` cascade
+ * (`theme.colors.graph.visibilityIconLineCascade`/
+ * `visibilityIconBackgroundCascade`, `style-cascade-visibility-icon.ts`)
+ * wins ABOVE this skinparam tier for `'*'` only (upstream's `SName
+ * .IEMandatory` branch has a real StyleSignature, unlike its skinparam-
+ * bridge gap, so there is no skinparam tier for it to conflict with).
+ *
+ * For the other four kinds, the skinparam tier wins ABOVE the cascade --
+ * the REVERSE of `classCascadeHeaderFontColor`'s "explicit `<style>`
+ * outranks the skinparam bridge" precedent, and deliberately so: unlike
+ * that field, `visibilityIconLineCascade`/`BackgroundCascade` is ALSO
+ * populated by a bundled SKIN's own baked-in defaults (`skin rose`/
+ * `debug`/`strictuml` route through the SAME `applyStyleMap` machinery,
+ * `skin-loader.ts`'s own doc comment), applied as the theme's BASE layer
+ * BEFORE the document's own skinparam. A `<style>`/skin field cannot tell
+ * "the document's own explicit block" apart from "the base skin's baked
+ * default" once merged into one Theme field -- so unconditionally
+ * preferring the cascade regressed `rakopi-21-sufa571` (`skin rose` +
+ * `skinparam IconProtectedColor DarkGoldenRod`: rose.skin's OWN
+ * `visibilityIcon { protected {...} }` block, jar-verified byte-identical
+ * to `VISIBILITY_COLORS`'s hardcoded default, was winning over the
+ * document's LATER, more-specific skinparam). Mirrors this codebase's own
+ * "last skinparam written wins" precedent (`skinparam-key-handlers-table-b
+ * .ts:87-102`) -- the document's skinparam is processed AFTER the skin's
+ * base layer, so it wins on a tie. `tuguku-78-zega630` (no `skin`
+ * directive, `<style>`-only) is unaffected either way, since it never sets
+ * an `icon<Kind>Color` skinparam to conflict with.
  */
 // cdd-T7 (flagged extension, `.agent-notes/cdd-T7.md`): exported so
 // `renderer-edge-extras.ts` can resolve a link label's visibility-icon
@@ -137,10 +174,15 @@ const IE_MANDATORY_COLOR = { line: '#000000', background: '#000000' };
 // etc) member rows already use, rather than re-deriving it against the
 // unthemed `core/skin/ColorParam.ts` defaults only.
 export function colorsFor(icon: Visibility, theme?: Theme): { line: Paint; background: Paint } {
-  if (icon === '*') return IE_MANDATORY_COLOR;
-  const fallback = VISIBILITY_COLORS[icon];
+  const fallback = icon === '*' ? IE_MANDATORY_COLOR : VISIBILITY_COLORS[icon];
   const g = theme?.colors.graph;
   if (g === undefined) return fallback;
+  const kind = VISIBILITY_ICON_KIND[icon];
+  const cascadeLine = g.visibilityIconLineCascade?.[kind];
+  const cascadeBackground = g.visibilityIconBackgroundCascade?.[kind];
+  if (icon === '*') {
+    return { line: cascadeLine ?? fallback.line, background: cascadeBackground ?? fallback.background };
+  }
   const OVERRIDES: Record<Exclude<Visibility, '*'>, { line: Paint | undefined; background: Paint | undefined }> = {
     '+': { line: g.iconPublicColor, background: g.iconPublicBackgroundColor },
     '-': { line: g.iconPrivateColor, background: g.iconPrivateBackgroundColor },
@@ -148,7 +190,10 @@ export function colorsFor(icon: Visibility, theme?: Theme): { line: Paint; backg
     '~': { line: g.iconPackageColor, background: g.iconPackageBackgroundColor },
   };
   const o = OVERRIDES[icon];
-  return { line: o.line ?? fallback.line, background: o.background ?? fallback.background };
+  return {
+    line: o.line ?? cascadeLine ?? fallback.line,
+    background: o.background ?? cascadeBackground ?? fallback.background,
+  };
 }
 
 /** `VisibilityModifier#name()` -- the `data-visibility-modifier` value. */

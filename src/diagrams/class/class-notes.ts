@@ -145,6 +145,11 @@ export type PendingNote =
       kind: 'link';
       position: NotePosition;
       textLines: string[];
+      /** cdd2-T19c: this note-on-link's own `#color` spec, captured from
+       *  `NOTE_ON_LINK_COLOR` (group 2 of `NOTE_ON_LINK_MULTI_RE`) — see
+       *  {@link applyNoteOnLink}'s doc comment for how it is parsed and
+       *  applied. */
+      color?: string;
     };
 
 /** True if `line` is the closer for `note` (`}` for a brace note, else `end note`). */
@@ -330,7 +335,7 @@ export function finalizePendingNote(
     );
   }
   if (note.kind === 'link') {
-    applyNoteOnLink(ast, note.position, text);
+    applyNoteOnLink(ast, note.position, text, note.color);
     return undefined;
   }
   return addFreestandingNote(ast, note.alias, text, note.namespace, note.color, counter, note.stereotype);
@@ -428,6 +433,61 @@ export const NOTE_ON_LINK_MULTI_RE = new RegExp(
   'i',
 );
 
+/** {@link parseNoteOnLinkColors}'s result — the two slots `ComponentRoseNote`'s
+ *  `symbolContext` reads (`Style.java:270-282`). */
+export interface NoteOnLinkColors {
+  readonly back?: string;
+  readonly line?: string;
+}
+
+/**
+ * cdd2-T19c: `Colors.java:96-124`'s tokenizer (the constructor
+ * `ColorParser.getColor` calls, `ColorParser.java:58-67`), scoped to the
+ * two slots a note-on-link's own paint actually reads. `CommandFactoryNoteOnLink
+ * .java:217-218` builds `colors = color().getColor(arg, ...)` (`color()` =
+ * `ColorParser.simpleColor(ColorType.BACK)`, `:106-108`) and hands it to
+ * `CucaNote.build`; `EntityImageNoteLink` -> `Rose#createComponentNote` ->
+ * `ComponentRoseNote` reads it back via `Style#getSymbolContext(set, colors)`
+ * (`style/Style.java:270-282`): `colors.getColor(BACK)` for the fill,
+ * `colors.getColor(LINE)` for the outline stroke — both paths fall back to
+ * the NOTE style's own default when the slot is unset. A `text:`/`header:`
+ * sub-token is tokenized here too (so it does not leak into BACK/LINE, e.g.
+ * `line.dotted:blue` keying LINE via `ColorType.getType`'s first-`.`
+ * truncation, `ColorType.java:41-47`) but its VALUE is dropped: upstream
+ * itself never applies it, because `ComponentRoseNote`'s text draws through
+ * the no-`colors` `getFontConfiguration()` overload
+ * (`skin/AbstractComponent.java:129-130` -> `Style.java:255-257`, `colors ==
+ * null`) — jar-verified against `nuvake-96-gofe203`, whose `text:white`/
+ * `text:purple` sub-tokens draw plain `#000` note body text. A bare
+ * `line.dashed`/`.dotted`/`.bold` DASH-STYLE token (no colon) is excluded by
+ * the same `contains(".")` guard Java uses (`:100-103`) — it sets
+ * `Colors#lineStyle`, a separate mechanism this port's `UStroke` has no dash
+ * -array plumbing for yet; no fixture in this corpus needs it.
+ * @see ~/git/plantuml/.../klimt/color/Colors.java:96-124
+ */
+export function parseNoteOnLinkColors(spec: string | undefined): NoteOnLinkColors {
+  if (spec === undefined) return {};
+  const data = spec.toLowerCase().replace(/#/g, '');
+  let back: string | undefined;
+  let line: string | undefined;
+  for (const token of data.split(';')) {
+    if (token === '') continue; // `StringTokenizer` yields no empty token
+    const x = token.indexOf(':');
+    if (x === -1) {
+      if (!token.includes('.')) back = token;
+      continue;
+    }
+    const name = token.slice(0, x);
+    const value = token.slice(x + 1);
+    const dot = name.indexOf('.');
+    const type = dot === -1 ? name : name.slice(0, dot);
+    if (type === 'back') back = value;
+    else if (type === 'line') line = value;
+    // `text`/`header`/`shadowing` intentionally dropped -- see doc comment.
+  }
+  return { ...(back !== undefined ? { back } : {}), ...(line !== undefined ? { line } : {}) };
+}
+
 /** Parse an optional `left|right|top|bottom` capture, defaulting to BOTTOM
  *  (`CommandFactoryNoteOnLink.java:203`, `abel/CucaNote.java:76-78`) --
  *  shared by the single- and multi-line `note on link` rules
@@ -445,12 +505,25 @@ export function resolveLinkNotePosition(raw: string | undefined): NotePosition {
  * moves this text onto an association-class couple's circle edges if that
  * relationship later gets subsumed (position is NOT carried across that
  * move -- see `class-assoc-couple.ts`'s own doc comment, untouched by T10).
+ *
+ * cdd2-T19c: `colorSpec` is the raw `NOTE_ON_LINK_COLOR` capture (group 2
+ * of `NOTE_ON_LINK_RE`/`NOTE_ON_LINK_MULTI_RE`) — parsed via
+ * {@link parseNoteOnLinkColors} and stored as `linkNoteBack`/`linkNoteLine`,
+ * mirroring `CommandFactoryNoteOnLink.java:217-218`'s `colors =
+ * color().getColor(arg, ...)` + `link.addNote(CucaNote.build(display,
+ * position, colors))`. Like `linkNote`/`linkNotePosition` above, NOT
+ * carried by `class-assoc-couple.ts`'s subsumed-note move -- no corpus
+ * fixture combines a coloured note-on-link with an association-class
+ * couple; named remainder if one surfaces.
  */
-export function applyNoteOnLink(ast: ClassDiagramAST, position: NotePosition, text: string): void {
+export function applyNoteOnLink(ast: ClassDiagramAST, position: NotePosition, text: string, colorSpec?: string): void {
   const last = ast.relationships.at(-1);
   if (last === undefined) return;
   last.linkNote = text.trim();
   last.linkNotePosition = position;
+  const colors = parseNoteOnLinkColors(colorSpec);
+  if (colors.back !== undefined) last.linkNoteBack = colors.back;
+  if (colors.line !== undefined) last.linkNoteLine = colors.line;
 }
 
 /** `constraint on links [#color] : text` — upstream CommandConstraintOnLinks

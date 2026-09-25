@@ -285,14 +285,14 @@ export interface ClassifierGeo {
    */
   emptyFieldPlaceholder?: true;
   /**
-   * B35/M40: the width of this classifier body's own `UEmpty` reservation
-   * -- upstream `dimFields.getWidth()`. Read ONLY by `class-ink-box.ts
-   * #addRectInk`, whose doc comment carries the full jar-verified
-   * mechanism. `undefined` means "this leaf's body reservation has not
-   * been measured", and keeps the pre-B35 fixed `x + w` max-X; it is set
-   * only on the `object` family, the only place the conditional rule is
-   * jar-verified (see `addRectInk` for why `class`/`interface`/`enum`
-   * reach `x + w` unconditionally and `map`/`json` are left unmeasured).
+   * B35/M40, cdd2-T17: the rightmost `UEmpty` reservation inside this
+   * classifier, relative to `x` -- for an `object`, its body's
+   * (`dimFields.getWidth()`); for an `isLikeClass` leaf, the max over its
+   * header and body marged blocks
+   * (`class-classifier-ink-reservation.ts#genericClassifierInkWidth`). Read
+   * ONLY by `class-ink-shapes.ts#addRectInk`, whose doc comment carries the
+   * jar-verified mechanism. `undefined` means "not measured" and keeps the
+   * fixed `x + w` max-X (`map`/`json`, the enhanced body, every other kind).
    */
   bodyInkWidth?: number;
 
@@ -357,6 +357,12 @@ export interface EdgeGeo {
     y: number;
     width: number;
     glyph?: { points: Array<{ x: number; y: number }> };
+    /** S-8 (cdd2-T7): this line's raw creole carried a `<b>...</b>` wrap --
+     *  see `class-edge-label-anchor.ts#multiLineLabelAnchor`'s own doc
+     *  comment. Consumed by `renderer-edge.ts#renderEdgeMainLabel` as a
+     *  per-line `font-weight="700"` override (base `labelFontAttrs` is
+     *  shared across every line otherwise). */
+    bold?: boolean;
   }>;
   /** G2 item 44: the magic-arrow glyph (`class-magic-arrow.ts`) -- a small
    *  filled triangle drawn ALONGSIDE `label` (present together when the

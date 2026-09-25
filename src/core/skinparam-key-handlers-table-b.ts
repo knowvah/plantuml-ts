@@ -21,11 +21,18 @@ import { parseShadowingValue } from './skinparam-element-buckets.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 
 /** `skinparam classFontColor automatic` / `AttributeFontColor automatic`
- *  (`nisune-86-faji869`) -- A3 M2's own diagnosis names this a THIRD,
+ *  (`nisune-86-faji869`) -- A3 M2's own diagnosis named this a THIRD,
  *  harder variant (jar computes a contrast colour against the header
- *  background) explicitly out of this iteration's scope.
+ *  background, `HColorAutomagic#getAppropriateColor`/`HColorSimple
+ *  #opposite`, a YIQ-luma test) than a plain colour token.
  *  `resolveColorToSvgHex` has no rejection path for a non-colour keyword
- *  and would otherwise return it VERBATIM as an SVG `fill` value. */
+ *  and would otherwise return it VERBATIM as an SVG `fill` value, so this
+ *  guard still applies to BOTH keys -- but `classfontcolor` (header-scoped)
+ *  now sets a sentinel `renderer-classifier-rows.ts#resolveAutomaticFontColor`
+ *  resolves at render time (cdd2-T8, S-13); `classattributefontcolor`
+ *  (member-row-scoped) still early-returns -- no corpus fixture exercises
+ *  it, tracked as a follow-on, not a regression (same silent-drop behavior
+ *  as before this task). */
 const AUTOMATIC_FONT_COLOR = 'automatic';
 function isAutomaticFontColor(color: string): boolean {
   return color.trim().toLowerCase() === AUTOMATIC_FONT_COLOR;
@@ -249,7 +256,13 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
   [
     ['classfontcolor'],
     (acc, _v, color) => {
-      if (isAutomaticFontColor(color)) return;
+      // cdd2-T8 (S-13): `automatic` sets a SENTINEL instead of early-
+      // returning -- see `skinparam-accumulator.ts#classFontColorAutomatic`'s
+      // own doc comment for the render-time resolution this now feeds.
+      if (isAutomaticFontColor(color)) {
+        acc.classFontColorAutomatic = true;
+        return;
+      }
       acc.classFontColor = resolveColorToSvgHex(color);
     },
   ],

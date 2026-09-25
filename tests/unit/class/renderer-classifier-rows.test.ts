@@ -12,7 +12,7 @@ import { buildMemberAtoms, resolveMemberAtoms } from '../../../src/diagrams/clas
 import { renderRowAtoms } from '../../../src/diagrams/class/renderer-classifier-rows.js';
 import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
-import { defaultTheme } from '../../../src/core/theme.js';
+import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { scaleClassTheme } from '../../../src/diagrams/class/class-scale-geo.js';
 
 const measurer = new FormulaMeasurer();
@@ -54,5 +54,41 @@ describe("renderRowAtoms — <sup>/<sub> draws the sizer's own muted size + dy (
     for (let i = 0; i < ys.length; i++) {
       expect(ys[i]).toBeCloseTo(ROW_Y + textAtoms[i]!.dy!, 2);
     }
+  });
+});
+
+// cdd2-T8 (S-10): `skinparam defaultMonospacedFontName Forte` --
+// nesivu-99-cexu403 shape (`""This is monospaced""`).
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/command/CommandCreoleMonospaced.java:81
+describe('renderRowAtoms — ""monospaced"" creole run + defaultMonospacedFontName (cdd2-T8, S-10)', () => {
+  test('with no configured name, the logical family renames to the CSS generic (unchanged behavior)', () => {
+    const atoms = buildMemberAtoms('""Test""', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, theme);
+    expect(svg).toContain('font-family="monospace"');
+  });
+
+  test('with defaultMonospacedFontName set, the REAL font name is emitted instead', () => {
+    const themeWithMonospacedFont = scaleClassTheme(
+      deepMergeTheme(defaultTheme, { colors: { graph: { monospacedFontName: 'Forte' } } }),
+      1,
+    );
+    const atoms = buildMemberAtoms('""Test""', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, themeWithMonospacedFont);
+    expect(svg).toContain('font-family="Forte"');
+    expect(svg).not.toContain('font-family="monospace"');
+  });
+
+  test('a plain (non-monospaced) run is unaffected by defaultMonospacedFontName', () => {
+    const themeWithMonospacedFont = scaleClassTheme(
+      deepMergeTheme(defaultTheme, { colors: { graph: { monospacedFontName: 'Forte' } } }),
+      1,
+    );
+    const atoms = buildMemberAtoms('Test', FONT12);
+    const build = resolveMemberAtoms(atoms, FONT12, measurer);
+    const svg = renderRowAtoms(build.atoms, 0, ROW_Y, themeWithMonospacedFont);
+    expect(svg).not.toContain('font-family="Forte"');
+    expect(svg).not.toContain('font-family="monospace"');
   });
 });

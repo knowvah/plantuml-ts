@@ -63,15 +63,19 @@ export function addPoint(box: InkBox, x: number, y: number): void {
  * that `UEmpty` is drawn nowhere on this path — T7 read the entity images,
  * where it indeed appears nowhere, and missed `TextBlockMarged`.
  *
- * `bodyInkWidth === undefined` keeps the pre-B35 fixed `x + w`, which is
- * correct for `class`/`interface`/`enum` for a DIFFERENT reason and is not
- * merely un-migrated: `HeaderLayout#drawU` centers the name block in
- * `suppWith = width - circleW - widthStereoAndName - genericW`
- * (`svek/HeaderLayout.java:89-109`), which is exactly 0 when the header
- * drove the width — so the name's own `TextBlockMarged` `UEmpty` lands on
- * `x + w`, and when the body drove it instead the body's does. Either way
- * `x + w`, which is why all 317 byte-exact class goldens hold under the
- * fixed rule. The object header cannot do this: it is placed by
+ * cdd2-T17 (Q-11): for an `EntityImageClass` leaf `bodyInkWidth` is the
+ * rightmost of ALL its marged blocks, header and body
+ * (`class-classifier-ink-reservation.ts#genericClassifierInkWidth`). The
+ * pre-T17 fixed `x + w` assumed `HeaderLayout#drawU`'s `suppWith = width -
+ * circleW - widthStereoAndName - genericW` (`svek/HeaderLayout.java:89-94`)
+ * is 0 whenever the body did not drive the width. It is not 0 once a floor
+ * widens the box (`EntityImageClass.java:104-113`: `MinimumWidth`,
+ * `sameClassWidth`, `getKalWidth() * 1.3`). The name block then ends at
+ * `x + w - h1`, and the rect corner `x + w - 1` is the max
+ * (`goloxu-09-nero458`, `rilali-81-gifu188`, `xoxega-30-vuju324`).
+ * `bodyInkWidth === undefined` (every non-`isLikeClass` kind that reaches
+ * this rule, and the enhanced body) keeps the fixed `x + w`. The object
+ * header cannot reach `x + w` at all: it is placed by
  * `PlacementStrategyY1Y2#getPositions`'s strict `x = (width - blockWidth)/2`
  * (`klimt/geom/PlacementStrategyY1Y2.java:59`), leaving `xMarginCircle` (5px)
  * clear on each side. `map`/`json` are left unmeasured deliberately — their
@@ -179,12 +183,12 @@ export function addRectInkEmptyShownBody(box: InkBox, x: number, y: number, w: n
  * was 239), `class-usecase-inline-img` (230.2848 → 244, was 245),
  * `class-allowmixing-usecase-mix` (241.635 → 255, was 256).
  *
- * NOT extended to the other ellipse-drawing kinds (`assoc-circle`,
- * `lollipop`): both are already byte-exact across the 310-fixture class
- * golden corpus under the rect rule, i.e. their ink is dominated by other
- * shapes in every fixture that exercises them, so there is no evidence to
- * decide the question and no fixture that would catch getting it wrong.
- * Named, not silently generalized.
+ * Also reached by `kind: 'assoc-circle'` (cdd2-T17, R-1):
+ * `EntityImageAssociationPoint#drawU` draws a bare `UEllipse.build(4, 4)`
+ * (`svek/image/EntityImageAssociationPoint.java:77-81`).
+ * `jixamu-89-ribo225`'s circle is its rightmost ink: jar width 326, the rect
+ * rule gave 327. `kind: 'lollipop'` dispatches here too (G9/T14, see
+ * `class-ink-box.ts#addClassifierInk`).
  */
 export function addEllipseInk(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x, y);
@@ -298,6 +302,41 @@ const USYMBOL_EMPTY_RESERVATION = 10;
 export function addNamespaceRectInk(box: InkBox, x: number, y: number, w: number, h: number): void {
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w - 1, y + h - 1);
+}
+
+/**
+ * cdd2-T7b (R-8, `lojiga-09-meka859`): `USymbolStack#drawQueue`
+ * (`decoration/symbol/USymbolStack.java:61-89`) draws TWO shapes, both
+ * ink-registering (`LimitFinder.draw` dispatches on shape type, not
+ * color -- an `HColors.none()` fill/stroke override still contributes
+ * ink, `LimitFinder.java:108-151`):
+ *
+ * 1. An inner, invisible `URectangle.build(width - 2*border, height)`
+ *    (`border=15`), translated `dx(border)` only (no `dy`) -- doc corner
+ *    `(x+border, y)`, size `(w-2*border, h)`. `LimitFinder#drawRectangle`
+ *    (`LimitFinder.java:184-188`) gives the classic symmetric `-1`/`-1`
+ *    inset on BOTH corners (see {@link addNamespaceRectInk}'s identical
+ *    rule): `(x+border-1, y-1)` .. `(x+w-border-1, y+h-1)`.
+ * 2. The outer notched-bracket `UPath` outline (`buildOutlinePath`,
+ *    `USymbolStack.ts`) -- `LimitFinder#drawUPath` (`LimitFinder.java:
+ *    164-167`) uses the path's OWN min/max over its anchor points, which
+ *    span exactly `[0,w]`x`[0,h]` locally (every corner-rounding arc
+ *    stays inside the straight-corner bounding box) -- doc corner
+ *    `(x, y)` .. `(x+w, y+h)`, the plain {@link addPlainInk} rule.
+ *
+ * The union's max corner is dominated by shape 2 (`x+w,y+h`, un-inset,
+ * beats shape 1's `x+w-border-1,y+h-1`); the min-X is also dominated by
+ * shape 2 (`x`, left of shape 1's `x+border-1`). Only min-Y differs:
+ * shape 1's `y-1` is ONE PIXEL above shape 2's `y`, so the invisible
+ * rect alone widens the cluster's own top ink by 1px past its visible
+ * outline -- jar-verified `lojiga-09-meka859`: this port's plain-bbox
+ * rule (top ink at the outline's own `y`) undershot the whole document's
+ * canvas by exactly 1 (`svg/@height` 257 vs jar's 258, every element
+ * below the cluster shifted `Δ1`); adding this `y-1` term closes it.
+ */
+export function addNamespaceStackInk(box: InkBox, x: number, y: number, w: number, h: number): void {
+  addPoint(box, x, y - 1);
+  addPoint(box, x + w, y + h);
 }
 
 /**

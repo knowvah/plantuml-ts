@@ -95,6 +95,33 @@ const CLASS_FONT_SIZE_STEREO_RE = new RegExp('^classfontsize<<(.+)>>$');
 // route is a stereotype-RE-SIGNED style, not a value lookup.
 const CLASS_BACKGROUND_COLOR_STEREO_RE = new RegExp('^classbackgroundcolor<<(.+)>>$');
 
+// cdd2-T8 (S-3): `skinparam class { BorderColor<<X>> #C; FontColor<<X>> #C }`
+// / the flat `classBorderColor<<X>>`/`classFontColor<<X>>` spellings.
+// CORRECTED MECHANISM (diagnosis.md S.md cited `SkinParam#getHtmlColor
+// (ColorParam, Stereotype)`, SkinParam.java:371-378 -- re-read against
+// `EntityImageClass`/`EntityImageClassHeader`, neither calls that method
+// for LineColor/FontColor; it is unreachable for this fixture). The REAL
+// route: `FromSkinparamToStyle`'s ctor splits `key.contains("<<")` into
+// `key`/`stereo` (java:292-302), `convertNow` resolves `datas =
+// knowledge.get("classbordercolor")` (the SAME base registration
+// `addConvert("classBorderColor", PName.LineColor, SName.element,
+// SName.class_)` the PLAIN key uses, java:183/187), then `addStyle` --
+// with `stereo != null` -- calls `StyleLoader.addPriorityForStereotype`
+// and `sig.addStereotype(s)` (java:396-408) to register a STEREOTYPE-
+// TAGGED `{element,class_}` Style, at `DELTA_PRIORITY_FOR_STEREOTYPE`
+// above the plain (non-tagged) Style of the SAME signature. This is
+// EXACTLY `classBackgroundColorByStereo` above's own mechanism (its own
+// doc comment already cites this same `addStyle`/`addPriorityForStereotype`
+// code, java:396-408) -- BorderColor/FontColor are two more PName targets
+// of the IDENTICAL "re-signed style" tier, not a separate value-lookup
+// mechanism. The base (non-stereotype) `classbordercolor`/`classfontcolor`
+// keys already have their own plain handlers in `skinparam-key-handlers-
+// table-b.ts` (cdd-T19) -- these two patterns claim ONLY the
+// `<<...>>`-suffixed form.
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:183,187,292-302,396-408
+const CLASS_BORDER_COLOR_STEREO_RE = new RegExp('^classbordercolor<<(.+)>>$');
+const CLASS_FONT_COLOR_STEREO_RE = new RegExp('^classfontcolor<<(.+)>>$');
+
 // S1L-tail G4 tier 2: `skinparam <sname>StereotypeFontSize<<label>> N` (flat
 // or `skinparam <sname> { StereotypeFontSize<<label>> N }` block form -- the
 // preprocessor normalizes both to this ONE key) -- the per-element analog of
@@ -211,6 +238,25 @@ const STEREO_KEY_MATCHERS: ReadonlyArray<readonly [RegExp, StereoHandler]> = [
         acc.classFontSizeByStereo ??= {};
         acc.classFontSizeByStereo[stereo] = v;
       }
+    },
+  ],
+  [
+    CLASS_BORDER_COLOR_STEREO_RE,
+    (acc, stereo, value) => {
+      // Stored RAW, mirroring `CLASS_BACKGROUND_COLOR_STEREO_RE` above:
+      // `classBorder`'s consumer resolves through `parseColor`, so a
+      // `#A-B` gradient value survives (`resolveColor` would flatten it).
+      acc.classBorderColorByStereo ??= {};
+      acc.classBorderColorByStereo[stereo.toLowerCase()] = value.trim();
+    },
+  ],
+  [
+    CLASS_FONT_COLOR_STEREO_RE,
+    (acc, stereo, value) => {
+      // Stored RAW too -- `resolveColorToSvgHex` runs at the consumer,
+      // matching every other FontColor cascade field's convention.
+      acc.classFontColorByStereo ??= {};
+      acc.classFontColorByStereo[stereo.toLowerCase()] = value.trim();
     },
   ],
 ];

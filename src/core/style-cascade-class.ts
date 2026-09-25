@@ -15,6 +15,7 @@ import { parseStyleBlock } from './skinparam.js';
 import { resolveStyleCascade, collectStyleTagNames, cleanStereotypeToken } from './style-map-element.js';
 import { resolveColorToSvgHex, parseSimpleColor, resolveConditionalColor } from './klimt/color/HColorSet.js';
 import { applyFontCascadeOverrides } from './style-cascade-class-font.js';
+import { applyVisibilityIconCascadeOverrides } from './style-cascade-visibility-icon.js';
 
 // cdd-T15: the style signatures moved to a sibling module (500-line cap) --
 // a pure move, re-exported there; see that file's header.
@@ -34,6 +35,7 @@ export type GraphCascadeOverride = Pick<
   | 'classCascadeBorder'
   | 'classCascadeFontColor'
   | 'classCascadeHeaderFontColor'
+  | 'classCascadeHeaderBackground'
   | 'classCascadeQualifiedBackground'
   | 'classCascadeQualifiedBorder'
   | 'classCascadeQualifiedFontColor'
@@ -54,6 +56,8 @@ export type GraphCascadeOverride = Pick<
   | 'noteCascadeFontColor'
   | 'classTagCascade'
   | 'arrowTagCascade'
+  | 'visibilityIconLineCascade'
+  | 'visibilityIconBackgroundCascade'
 >;
 
 /**
@@ -68,7 +72,7 @@ export type GraphCascadeOverride = Pick<
  * `dipune-93-sare489`) is a FontColor-only grammar upstream -- handled by
  * the sibling {@link cascadeFontColorHex}, NOT here.
  */
-function cascadeHex(
+export function cascadeHex(
   styleMap: StyleMap,
   snames: readonly string[],
   property: string,
@@ -362,6 +366,9 @@ export function computeClassStyleCascadeOverrides(
   // `style-cascade-class-font.ts#applyFontCascadeOverrides`'s own doc
   // comment.
   applyFontCascadeOverrides(styleMap, override);
+  // cdd2-T8 (S-7): `<style> visibilityIcon { <kind> {...} } }` cascade --
+  // see `style-cascade-visibility-icon.ts#applyVisibilityIconCascadeOverrides`.
+  applyVisibilityIconCascadeOverrides(styleMap, override);
   // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
   // own doc comment.
   const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};
@@ -406,6 +413,12 @@ function applyColorCascadeOverrides(styleMap: StyleMap, override: Partial<GraphC
   if (fontColor !== undefined) override.classCascadeFontColor = fontColor;
   const headerFontColor = cascadeFontColorHex(styleMap, HEADER_SNAMES, localBg);
   if (headerFontColor !== undefined) override.classCascadeHeaderFontColor = headerFontColor;
+  // cdd2-T8 (S-5): `EntityImageClassHeader.java:93-101`/`EntityImageClass
+  // .java:204-208` -- the HEADER_SNAMES sibling of `background` above, feeding
+  // `resolveClassHeaderFill`'s header-band split (`renderer-classifier-
+  // header-split.ts`) instead of the row-text font color.
+  const headerBackground = cascadeHex(styleMap, HEADER_SNAMES, 'backgroundcolor');
+  if (headerBackground !== undefined) override.classCascadeHeaderBackground = headerBackground;
   // cdd-T15 (D6): `Kal.java:93-99,138-139` reads BackGroundColor,
   // LineColor and the font (FontColor included) off ONE merged
   // `class.qualified` style; see `theme-graph-colors-a.ts`'s field doc.

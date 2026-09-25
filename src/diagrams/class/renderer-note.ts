@@ -127,7 +127,7 @@ import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
  *  draws it as a completely separate `Link` (`CommandFactoryNoteOnEntity
  *  .java:342`), styled like any other dashed relationship edge -- see
  *  `renderer-note-connector.ts#renderNoteConnectorPath`. */
-const NOTE_STROKE_WIDTH = 0.5;
+export const NOTE_STROKE_WIDTH = 0.5;
 
 /** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
  *  draws on the UNSTROKED `ug`, so it keeps the diagram's DEFAULT stroke
@@ -141,7 +141,7 @@ const NOTE_FOLD_STROKE_WIDTH = 1;
  * -- DOWN the left side first, opposite the old winding. `f` = `Opale
  * #cornersize` ({@link NOTE_FOLD}); `(x,y)` the note's absolute origin.
  */
-function noteBodyPathData(x: number, y: number, w: number, h: number, f: number): string {
+export function noteBodyPathData(x: number, y: number, w: number, h: number, f: number): string {
   // cdd-B8FU: `f` (the fold size) is passed ALREADY scaled by every call
   // site below -- this function itself stays a pure geometry builder.
   return [
@@ -337,7 +337,7 @@ function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, t
  *  OWN `textLength`, so a multi-line note whose lines have different widths
  *  (the common case) previously emitted the SAME (longest-line) value on
  *  every row; jar-verified against `sisolu-74-minu975`. */
-function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
+export function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
   const parts: string[] = [];
   // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N`
   // override -- see `NOTE_FONT_SIZE`'s own doc comment. `baselineOffset`'s

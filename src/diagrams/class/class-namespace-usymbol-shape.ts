@@ -42,7 +42,6 @@ import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
 import { buildTextBlock } from '../../core/svek/image/EntityImageDescriptionSupport.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
@@ -50,6 +49,8 @@ import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symb
 import type { USymbol as UpstreamUSymbol } from '../../core/decoration/symbol/USymbol.js';
 import { ClusterDecoration } from '../../core/svek/ClusterDecoration.js';
 import { renderDrawableToFragment } from '../../core/klimt/document-shell.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
+import { clusterHeaderStereoTextBlock } from './class-cluster-header.js';
 
 /** `FontParam.PACKAGE`'s `getDefaultFontFace` returns `UFontFace.bold()`
  *  for every group title regardless of the container's own keyword
@@ -147,6 +148,7 @@ function buildDecoration(
   symbol: UpstreamUSymbol,
   titleFont: FontConfiguration,
   scaleK: number,
+  stereo: TextBlock,
 ): ClusterDecoration {
   // cdd-T26 residual round (`daxeno-00-kasu166`): `buildTextBlock`'s own
   // multi-line split (`EntityImageDescriptionTextBlock.ts`) is a real
@@ -177,16 +179,18 @@ function buildDecoration(
   // spans the block's own full measured width), so this was invisible until
   // a multi-line title existed to distinguish the two.
   const title = buildTextBlock(splitDisplayLines(geo.label).lines.join('\n'), titleFont, HorizontalAlignment.CENTER);
-  // `ClusterHeader#getStereoBlock` is empty here by construction: a
-  // stereotype that NAMES a USymbol is consumed AS the shape and never
-  // stored for display (`CommandPackage.java:178-191`'s `if (stereotype !=
-  // null && usymbol == null) p.setStereotype(...)`, mirrored by
-  // `class-container.ts#setNamespaceStereotype`'s gated branch).
+  // cdd2-T19b: `clusterHeader.getStereo()` (`Cluster.java:367-368`) -- the
+  // displayed stereotype + the group's own legend (`class-cluster-header
+  // .ts`). A stereotype that NAMES a USymbol is consumed as the shape and
+  // never stored for display (`CommandPackage.java:178-191`), so the gated
+  // `package X <<Node>>` form reaches here with `empty(0, 0)`; the direct-
+  // keyword form's stereotype is displayed
+  // (`CommandPackageWithUSymbol.java:204-206`).
   return new ClusterDecoration(
     null,
     symbol,
     title,
-    TextBlockUtils.empty(0, 0),
+    stereo,
     { position: new UTranslate(geo.x, geo.y), width: geo.width, height: geo.height },
     // cdd-B8FU: GROUP_STROKE_WIDTH is a raw literal (jar's unscaled
     // thickness-1 default); `geo.x/y/width/height` are already scaled
@@ -256,7 +260,9 @@ export function renderNamespaceUSymbol(
   if (symbol === null) return undefined;
 
   const resolvedPaint = resolveClusterUSymbolPaint(theme, geo, keyword, paint);
-  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, resolvedPaint.fontColor), theme.scaleK);
+  const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);
+  const titleFont = clusterTitleFont(theme, resolvedPaint.fontColor);
+  const decoration = buildDecoration(geo, symbol, titleFont, theme.scaleK, header.block);
   const fragment = renderDrawableToFragment(
     {
       drawU(ug) {
@@ -266,7 +272,12 @@ export function renderNamespaceUSymbol(
           resolvedPaint.borderColor,
           0,
           resolvedPaint.roundCorner,
-          HorizontalAlignment.LEFT,
+          // cdd2-T19b: `clusterHeader.getTitleHorizontalAlignment()`
+          // (`Cluster.java:370`, `ClusterHeader.java:162-164`) -- the title
+          // style's `HorizontalAlignment center` (`plantuml.skin:94-98`),
+          // the same CENTER `buildDecoration` already lays the title out
+          // with. Was LEFT (posTitle=3 in `USymbolRectangle#asBig`).
+          HorizontalAlignment.CENTER,
           HorizontalAlignment.CENTER,
           0,
         );
@@ -274,5 +285,5 @@ export function renderNamespaceUSymbol(
     },
     { width: geo.x + geo.width, height: geo.y + geo.height, measurer, uid: geo.id },
   );
-  return (fragment.extraDefs ?? '') + fragment.body;
+  return (fragment.extraDefs ?? '') + header.splice(fragment.body);
 }

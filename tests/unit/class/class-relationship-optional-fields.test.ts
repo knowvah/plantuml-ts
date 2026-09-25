@@ -58,3 +58,35 @@ describe('withOptionalFields round-trip (via parseRelationshipLine)', () => {
     expect(r.swapDirection).toBeUndefined();
   });
 });
+
+/**
+ * S-4 (cdd2-T7, begico-70-guva302/xoxuni-96-fere626): `CommandLinkClass
+ * .java:368`'s `link.setColors(color().getColor(arg, ...))` -- the trailing
+ * `#color[;text:color2]` spec after the second endpoint (REL_RE's own
+ * REL_COLOR group, matched but discarded -- `class-relationship-parser.ts`'s
+ * own doc comment on that group) is now captured independently via
+ * `REL_COLOR_CAPTURE_RE` and resolved onto `Relationship.colorOverride`
+ * (the SAME field the `-[#color]->` bracket form already populates).
+ */
+describe('S-4 (cdd2-T7) — trailing #color spec sets colorOverride', () => {
+  it('a bare trailing #color (begico) sets colorOverride to the LINE color', () => {
+    const r = parseRelationshipLine('research .. correlations #Green : "label"')!;
+    expect(r.colorOverride).toBe('#Green');
+  });
+
+  it('a compound #color;text:color2 spec (xoxuni) sets colorOverride to the LINE half only', () => {
+    const r = parseRelationshipLine('cl1 --> cl2 #red;text:blue : foo3')!;
+    expect(r.colorOverride).toBe('#red');
+    expect(r.label).toBe('foo3');
+  });
+
+  it('the bracket form wins over a trailing spec when (implausibly) both are present', () => {
+    const r = parseRelationshipLine('A -[#blue]-> B #red')!;
+    expect(r.colorOverride).toBe('blue');
+  });
+
+  it('a line with no trailing color spec leaves colorOverride unset', () => {
+    const r = parseRelationshipLine('A --> B')!;
+    expect(r.colorOverride).toBeUndefined();
+  });
+});

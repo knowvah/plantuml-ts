@@ -97,6 +97,49 @@ export interface ThemeGraphColorsA {
    *  outline `rect` and divider `line`; its plain (non-stereotyped)
    *  children keep the `#181818` default). */
   stateBorderColorByStereo?: Readonly<Record<string, string>>;
+  /** cdd2-T8 (S-3): `skinparam class { BorderColor<<X>> #C }` /
+   *  `skinparam classBorderColor<<X>> #C` -- the SAME "stereotype
+   *  re-signed style" mechanism {@link classBackgroundColorByStereo}
+   *  (`theme-graph-colors-b.ts`) already models, just for `PName.LineColor`
+   *  instead of `PName.BackGroundColor`: `FromSkinparamToStyle`'s ctor
+   *  splits the `<<X>>` suffix off the key (java:292-302), then `addStyle`
+   *  registers a STEREOTYPE-TAGGED `{element,class_}` Style at
+   *  `DELTA_PRIORITY_FOR_STEREOTYPE` above the plain (non-tagged) Style of
+   *  the same signature (`StyleLoader.addPriorityForStereotype`,
+   *  java:396-408) -- NOT a direct `SkinParam#getColor(ColorParam,
+   *  Stereotype)` value lookup (that method is unreachable from
+   *  `EntityImageClass`'s LineColor resolution; re-read and ruled out).
+   *  Stored RAW (mirrors {@link classBackgroundColorByStereo}'s own "a
+   *  `#A-B` gradient survives" rationale), keyed by the LOWERCASED
+   *  stereotype label (`core/skinparam-stereo-keys.ts
+   *  #CLASS_BORDER_COLOR_STEREO_RE`), matching a classifier's own
+   *  `ClassifierGeo.stereotypeLabels` cleaned via `cleanStereotypeToken` at
+   *  lookup time (`renderer-classifier-colors.ts#resolveClassBorderByStereo`).
+   *  Consulted at the SAME precedence slot as {@link
+   *  classBackgroundColorByStereo}: after the `.tagname` cascade
+   *  (`resolveClassTagCascadeEntry`), before the plain `classCascadeBorder
+   *  ?? classBorder ?? theme.colors.border` default chain -- an inline
+   *  `##linecolor` still wins outright (`classBorder`'s own first tier).
+   *  Jar-verified `gabejo-44-juki791`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:183,292-302,396-408 */
+  classBorderColorByStereo?: Readonly<Record<string, string>>;
+  /** cdd2-T8 (S-3): `skinparam class { FontColor<<X>> #C }` /
+   *  `skinparam classFontColor<<X>> #C` -- the SAME "stereotype re-signed
+   *  style" mechanism as {@link classBorderColorByStereo} immediately
+   *  above, this time for `PName.FontColor` (`FromSkinparamToStyle
+   *  .java:187`'s `{element,class_,header}` registration -- the WIDER
+   *  header-inclusive signature, matching {@link classCascadeHeaderFontColor}'s
+   *  own scope, not the narrower box-only `classCascadeFontColor`). Stored
+   *  RAW, resolved through `resolveColorToSvgHex` at the consumer (plain
+   *  `string`, no gradient support -- matches every other FontColor
+   *  cascade field's convention). Keyed by the LOWERCASED stereotype
+   *  label, read by `renderer-classifier-rows.ts` for the NAME row's text
+   *  colour, consulted at the SAME precedence slot as {@link
+   *  classBorderColorByStereo}: wins over `classCascadeHeaderFontColor ??
+   *  classCascadeFontColor` (the plain `<style>` cascade tier), loses to
+   *  any `.tagname` FontColor cascade entry. Jar-verified `gabejo-44-juki791`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:187,292-302,396-408 */
+  classFontColorByStereo?: Readonly<Record<string, string>>;
   /**
    * mission G4 S15: `skinparam stateBackgroundColor<<stereo>> #X` /
    * `skinparam stateFontColor<<stereo>> #X` -- the SAME direct-value-
@@ -414,6 +457,22 @@ export interface ThemeGraphColorsA {
   classCascadeBorder?: string;
   classCascadeFontColor?: string;
   classCascadeHeaderFontColor?: string;
+  /** cdd2-T8 (S-5): `EntityImageClassHeader.java:93-101`'s style-signature
+   *  lookup (`{root,element,classDiagram,class_,header}`) additionally
+   *  resolves a `<style>` `... header { BackgroundColor } }` override --
+   *  `EntityImageClass.java:204-208`'s `getStyleHeader().value
+   *  (PName.BackGroundColor)`, feeding `headerBackcolor` alongside the
+   *  legacy skinparam-only `classHeaderBackground` (`theme-graph-colors-b
+   *  .ts`), which `renderer-classifier-header-split.ts#resolveClassHeaderFill`
+   *  now checks first (an explicit `<style>` block outranks the
+   *  skinparam-bridged value -- the SAME `classCascadeHeaderFontColor`/
+   *  FromSkinparamToStyle-bridge-is-lowest-priority precedent,
+   *  `skinparam-theme-builder.ts:102-110`'s own doc comment). Pre-resolved
+   *  to an SVG-ready hex string, matching `classCascadeBackground`'s own
+   *  convention. `undefined` means no `<style>` header BackgroundColor was
+   *  set -- zero behavior change for every fixture that never uses one.
+   *  Jar-verified `fumalu-64-vude116`. */
+  classCascadeHeaderBackground?: string;
   /** cdd-T15 (A2a/M1, D6): the `class.qualified` style block's three paints
    *  (`svek/Kal.java:93-97`'s `{root,element,classDiagram,class_,qualified}`
    *  signature; `drawU` reads BackGroundColor + LineColor at `:138-139` and

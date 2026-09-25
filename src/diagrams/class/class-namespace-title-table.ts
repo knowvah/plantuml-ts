@@ -65,8 +65,8 @@ function namespaceTitleFont(theme: Theme): FontSpec {
 /**
  * `ClusterHeader`'s title-table dims for a class/object package cluster:
  * `dimLabel.getWidth()`/`getHeight()` (`ClusterHeader.java:78-90`) with the
- * stereo term forced to 0 (ast.ts's own `Namespace.stereotype` doc comment:
- * "cluster-title stereotype display is not wired -- out of A8 scope") and
+ * stereo term supplied by the caller as `stereo` (cdd2-T19b,
+ * `class-cluster-header.ts#buildClusterHeaderStereo`; absent == empty) and
  * the attribute term forced to 0 (`g.getStateDescription()` -- a
  * package/namespace entity never carries state-description lines) -- a
  * class package's cluster title is always its bare display text, one line
@@ -115,6 +115,7 @@ export function namespaceTitleTableDims(
   theme: Theme,
   measurer: StringMeasurer,
   usymbol?: string,
+  stereo?: { readonly width: number; readonly height: number },
 ): { width: number; height: number } {
   const font = namespaceTitleFont(theme);
   const lines = namespaceTitleLines(measurer, theme, display);
@@ -122,7 +123,11 @@ export function namespaceTitleTableDims(
   // `nominalFontSize` (declared), never `fontSize` (measured) --
   // `ClusterHeader.java:78`'s formula is `fontSize`-based, not a measured
   // pixel height; see `NamespaceTitleLine`'s own doc comment.
-  const lineHeights = lines.map((l) => l.nominalFontSize);
+  // cdd2-T19b: `dimLabel = mergeTB(stereo, title)` (`ClusterHeader.java:
+  // 78-79`) -- the header stereo block (`class-cluster-header.ts`, displayed
+  // stereotype + the group's own legend) stacks ABOVE the title: its height
+  // joins the per-line sum, its width the max.
+  const lineHeights = [...(stereo !== undefined ? [stereo.height] : []), ...lines.map((l) => l.nominalFontSize)];
   // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
   // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
   const supp = titleSupp(usymbol, theme);
@@ -130,7 +135,7 @@ export function namespaceTitleTableDims(
   // terms -- see `titleAndAttributeHeight`'s own doc comment; `lineHeights`
   // (the array form) supplies the title term directly, per-line.
   return {
-    width: width + supp.width,
+    width: Math.max(width, stereo?.width ?? 0) + supp.width,
     height: computeTitleTableHeight(lineHeights, 0, 0, font.size) + supp.height,
   };
 }

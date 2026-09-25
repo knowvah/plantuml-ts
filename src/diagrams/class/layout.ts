@@ -46,6 +46,7 @@ import { iconSizeOf } from './class-visibility-icon.js';
 import { applyTopUrlToClassifiers } from './class-url.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
+import { clusterClipRect } from './class-shield-helpers.js';
 import {
   buildClassifierGeos,
   buildNamespaceGeos,
@@ -288,9 +289,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // file's own `assembleShiftedGeometry` runs). Keyed by namespace id, the
   // SAME key `anchors` uses -- see `class-shield-helpers.ts
   // #clipClusterEdgeEnds`'s own doc comment.
-  const clusterRects = new Map(
-    namespaces.map((ns) => [ns.id, { x: ns.x, y: ns.y, width: ns.width, height: ns.height }]),
-  );
+  // cdd2-T12 (CLIP-1a): plus `Cluster#getMagneticBorder` (`class-shield-helpers.ts`).
+  const clusterRects = new Map(namespaces.map((ns) => [ns.id, clusterClipRect(ns, theme, measurer)]));
   // SI25 D2: the MAIN label's ink follows `resolveArrowLabelFont(theme)` --
   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
   // tail/head cardinality labels stay at `theme.fontFamily` (see

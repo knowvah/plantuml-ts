@@ -14,6 +14,7 @@ import { LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helper
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
+import { buildClusterHeaderStereo } from './class-cluster-header.js';
 import { resolveStyleStereotypeTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
@@ -307,6 +308,8 @@ export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInp
     const box = clusterId !== undefined ? clusterById.get(clusterId) : undefined;
     if (box === undefined) continue;
     const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
+    const header = buildClusterHeaderStereo(ns, ast, theme, measurer); // cdd2-T19b: ClusterHeader#getStereo
+    if (header !== undefined) geo.clusterHeaderStereo = header;
     namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
   return namespaces;

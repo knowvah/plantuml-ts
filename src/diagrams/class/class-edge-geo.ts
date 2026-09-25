@@ -13,13 +13,14 @@ import {
   computeLeafContacts,
   resolveEdgeDecor,
 } from './class-edge-group-inheritance.js';
-import { clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
+import { applyClusterMagneticBorders, clipClusterEdgeEnds, type ClipRect } from './class-shield-helpers.js';
 import { attachPortLabels } from './class-edge-label-anchor.js';
 import { attachEdgeLabel, type EdgeGeoTextContext } from './class-edge-label-attach.js';
 import { computeEdgeNoteBox } from './class-edge-note-box.js';
 import { constraintAnchor } from './class-edge-constraint.js';
 import { edgeLabelAttrs } from './class-layout-edge-labels.js';
-import { kalBoxAt, kalTranslateForDecoration, type Kal } from './class-kal.js';
+import { kalBoxAt, type Kal } from './class-kal.js';
+import { fixKalOverlaps, type PlacedKal } from './class-kal-overlap.js';
 import type { EdgeGeo } from './layout.js';
 
 // cdd-T6: `EdgeGeoTextContext` and the three label-attach functions moved
@@ -134,49 +135,43 @@ function normalizeEdgePoints(
 }
 
 /**
- * cdd-T15 (A2a/M1, D6): the two things a `Kal` does to its link's geometry.
+ * cdd-T15 (A2a/M1, D6): `SvekEdge.java:1069-1077`'s `computeKal` anchors
+ * each box on `dotPathInit`'s start/end point — the copy taken at `:658`,
+ * i.e. the routed spline BEFORE `simulateCompound` (this port's
+ * `clipClusterEdgeEnds`) and BEFORE the extremity trim, which is why `pre`
+ * below is the un-clipped, un-trimmed array.
  *
- * 1. `SvekEdge.java:1069-1077`'s `computeKal` anchors each box on
- *    `dotPathInit`'s start/end point — the copy taken at `:658`, i.e. the
- *    routed spline BEFORE `simulateCompound` (this port's
- *    `clipClusterEdgeEnds`) and BEFORE the extremity trim, which is why
- *    `pre` below is the un-clipped, un-trimmed array.
- * 2. `SvekEdge.java:548-562`'s `getExtremitySimplier` pushes BOTH the arrow
- *    decoration's centre and the spline's own endpoint out by
- *    `kal.getTranslateForDecoration()`, so the arrowhead clears the box.
- *    Applied here to the endpoint alone: `renderer-arrowhead.ts` draws the
- *    decoration at `points[0]`/`points.at(-1)` and trims the path back from
- *    it by the decoration length, which is exactly upstream's
- *    `translateForKal.compose(new UTranslate(decorationLength, 0)
- *    .rotate(angle - Math.PI))`. Upstream measures the rotation angle on
- *    the PRE-move path; this port re-derives it from the moved endpoint, a
- *    sub-degree difference because `getTranslateForDecoration` always
- *    points along the qualified end's own axis.
+ * cdd2-T12 (Q-2): the box no longer moves the spline here. Upstream's
+ * `getExtremitySimplier` (`SvekEdge.java:539-562`) returns early when the
+ * end has no decor, and otherwise moves the start/end point AND its
+ * control point by `translateForKal.compose(decorTrim)` in ONE
+ * `DotPath#moveStartPoint`/`moveEndPoint` — so the Kal translate travels
+ * with the decor trim into `renderer-arrowhead.ts#buildEdgeArrowheads`/
+ * `applyDecorTrim`, rebuilt there from the box's `position`/`dim`.
  *
- * `pre`/`pts` run entity1 → entity2 (`normalizeEdgePoints`), so `kal.end`
- * 1 is the array's first point and 2 its last. `pts` is mutated in place —
- * it is `clipClusterEdgeEnds`'s freshly-built array, never shared.
+ * `pre` runs entity1 → entity2 (`normalizeEdgePoints`), so `kal.end` 1 is
+ * the array's first point and 2 its last. Returns the placed boxes for
+ * `class-kal-overlap.ts#fixKalOverlaps`.
  */
 function attachKalBoxes(
   edgeGeo: EdgeGeo,
   kals: readonly Kal[],
   pre: ReadonlyArray<{ x: number; y: number }>,
-  pts: Array<{ x: number; y: number }>,
-): void {
+  rel: Relationship,
+): PlacedKal[] {
   const boxes: { start?: ReturnType<typeof kalBoxAt>; end?: ReturnType<typeof kalBoxAt> } = {};
+  const placed: PlacedKal[] = [];
   for (const kal of kals) {
-    const at = kal.end === 1 ? 0 : pre.length - 1;
-    const anchor = pre[at];
-    const moved = pts[kal.end === 1 ? 0 : pts.length - 1];
-    if (anchor === undefined || moved === undefined) continue;
+    const anchor = pre[kal.end === 1 ? 0 : pre.length - 1];
+    if (anchor === undefined) continue;
     const box = kalBoxAt(kal, anchor);
     if (kal.end === 1) boxes.start = box;
     else boxes.end = box;
-    const tr = kalTranslateForDecoration(kal);
-    moved.x += tr.dx;
-    moved.y += tr.dy;
+    // `Kal.java:213`: `link.getEntity1() == entity` — kal2 only on a self link.
+    placed.push({ kal, edge: edgeGeo, onEntity1: kal.end === 1 || rel.from === rel.to });
   }
   if (boxes.start !== undefined || boxes.end !== undefined) edgeGeo.kalBox = boxes;
+  return placed;
 }
 
 /** One end of a pending `constraint on links` pair -- the edge to stamp,
@@ -286,6 +281,12 @@ export function buildEdgeGeos(
   // Built once so the per-relationship lookup below is O(1) rather than an
   // O(n) `.find` repeated per relationship (code review 2026-09-21).
   const edgeResultById = new Map(result.edges.map((e) => [e.id, e]));
+  // cdd2-T12: `SvekResult#computeKal` (`SvekResult.java:104-109`) spreads the
+  // boxes only after every edge anchored its own, and `SvekEdge#drawU`'s
+  // magnetic force (`SvekEdge.java:922-941`) runs after that -- both are
+  // collected here and applied after the loop, in that order.
+  const placedKals: PlacedKal[] = [];
+  const clusterEnds: Array<{ edgeGeo: EdgeGeo; startId: string; endId: string }> = [];
   for (let i = 0; i < ast.relationships.length; i++) {
     const rel = ast.relationships[i]!;
     if (rel.invis === true) continue;
@@ -304,8 +305,7 @@ export function buildEdgeGeos(
     const endId = matchesFromTo ? rel.to : rel.from;
     const pts = clipClusterEdgeEnds(normalizedPts, startId, endId, clusterRects);
     // cdd-T15: the `Kal`s built for THIS relationship index (see
-    // {@link attachKalBoxes}); `clipClusterEdgeEnds` returns a fresh array
-    // for every edge, so mutating its endpoints below is local.
+    // {@link attachKalBoxes}).
     const relKals = (text.kals ?? []).filter((k) => k.relIndex === i);
     // cdd-T16 (M7): grouped overrides decor/dash/stroke uniformly -- see
     // {@link groupInheritanceOverride}'s own doc comment.
@@ -338,7 +338,8 @@ export function buildEdgeGeos(
       ...(leafContacts !== undefined ? { leafContacts } : {}),
     };
 
-    if (relKals.length > 0) attachKalBoxes(edgeGeo, relKals, normalizedPts, pts);
+    if (relKals.length > 0) placedKals.push(...attachKalBoxes(edgeGeo, relKals, normalizedPts, rel));
+    clusterEnds.push({ edgeGeo, startId, endId });
     attachEdgeLabel(edgeGeo, rel, edgeResult, text, matchesFromTo ? pts : [...pts].reverse());
     attachNoteAndConstraintSpot(edgeGeo, rel, edgeResult, text, constrained);
     // `result.nodes` is the collision set — the closest analogue to
@@ -353,6 +354,10 @@ export function buildEdgeGeos(
     edges.push(edgeGeo);
   }
   attachConstraints(constrained);
+  fixKalOverlaps(placedKals);
+  for (const { edgeGeo, startId, endId } of clusterEnds) {
+    edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
+  }
   return edges;
   // #lizard forgives -- verbatim move from layout.ts (pre-existing code,
   // not touched this iteration); one EdgeGeo literal with 10 optional

@@ -163,6 +163,47 @@ describe('computeClassDocumentDims', () => {
     },
   );
 
+  it(
+    "cdd2-T7b (R-8): usymbol 'stack' adds the invisible inner URectangle's " +
+      'own ink (USymbolStack.java:64-65, LimitFinder#drawRectangle.java:' +
+      '184-188 asymmetric -1/-1 min inset) ON TOP OF the outer notched ' +
+      'UPath outline (plain bbox) -- the union is 1px TALLER at the top ' +
+      "than the plain rule alone (min-Y only; the outer path's un-inset " +
+      "max corner and the rect's own -1-inset max corner tie on X/max-Y) " +
+      "-- jar-verified lojiga-09-meka859 (svg/@height 258, this port's " +
+      'pre-fix plain rule undershot it to 257)',
+    () => {
+      const namespaces: NamespaceGeo[] = [
+        {
+          id: 'a',
+          x: 6,
+          y: 6,
+          width: 221,
+          height: 236.000048,
+          label: 'a',
+          wtitle: 25,
+          htitle: 20,
+          baselineOffset: 12.8889,
+          usymbol: 'stack',
+        },
+      ];
+      const { usymbol: _stackUsymbol, ...plainNs } = namespaces[0]!;
+      const stackDims = computeClassDocumentDims([], namespaces, [], []);
+      const plainDims = computeClassDocumentDims([], [plainNs], [], []);
+      expect(stackDims).toEqual({ width: 242, height: 258 });
+      expect(plainDims).toEqual({ width: 242, height: 257 });
+      expect(stackDims.width).toBe(plainDims.width);
+      expect(stackDims.height).toBe(plainDims.height + 1);
+
+      const stackShift = computeClassInkShift([], namespaces, [], []);
+      const plainShift = computeClassInkShift([], [plainNs], [], []);
+      // The rect's min-Y (y-1) is 1px SMALLER than the plain rule's (y), so
+      // 1px MORE positive shift is needed to land it at JAR_INK_MARGIN.
+      expect(stackShift.dx).toBe(plainShift.dx);
+      expect(stackShift.dy).toBe(plainShift.dy + 1);
+    },
+  );
+
   it('edge points widen the box beyond the classifiers alone', () => {
     const classifiers = [makeClassifierGeo({ x: 0, y: 0, width: 40, height: 40 })];
     const edges: EdgeGeo[] = [
@@ -1016,7 +1057,15 @@ describe('edge-label margin ink (cdd-T35)', () => {
       [],
       [],
       edgeWithLabel(label, {
-        noteBox: { x: 0, y: 0, width: 1, height: 1, inkBox: { x: 0, y: 0, width: 1, height: 1 }, noteLines: [] },
+        noteBox: {
+          x: 0,
+          y: 0,
+          width: 1,
+          height: 1,
+          inkBox: { x: 0, y: 0, width: 1, height: 1 },
+          noteLines: [],
+          position: 'bottom',
+        },
       }),
       [],
     );
@@ -1034,5 +1083,94 @@ describe('edge-label margin ink (cdd-T35)', () => {
     // Points-only ink: minX=maxX=minY=maxY=20 -> raw 15, margined 20, final 21.
     const withoutLabel = computeClassDocumentDims([], [], edgeWithLabel(undefined), []);
     expect(withoutLabel).toEqual({ width: 21, height: 21 });
+  });
+});
+
+/**
+ * cdd2-T13 (Q-9): `SvekEdge#drawRoleLabel` (`svek/SvekEdge.java:1029-1063`)
+ * draws the additive role `TextBlock` inside the pass `LimitFinder` walks, so
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) counts it.
+ * Geometry is `nenexe-35-zere033`'s (`User "owner"/"1" -- "0..n"/"items"
+ * Item`): jar's head role `items` at x=47.429, textLength 31.038, is the
+ * rightmost ink, and jar's canvas is 93 px wide.
+ */
+describe('edge role-label ink (cdd2-T13, Q-9)', () => {
+  // jar's `User` rect (x 14.639, width 61.575): right ink 76.214, left of the role
+  const boxes = [makeClassifierGeo({ x: 14.639, y: 7, width: 61.575, height: 48 })];
+  const role = { text: 'items', x: 47.429, y: 104.032, width: 31.038 };
+  const owner = { text: 'owner', x: 6, y: 73.253, width: 35.425 };
+  const edge = (roleLines?: EdgeGeo['roleLines']): EdgeGeo[] => [
+    {
+      id: 'e0',
+      points: [
+        { x: 43.5, y: 56 },
+        { x: 43.5, y: 118 },
+      ],
+      targetDecor: 'none',
+      sourceDecor: 'none',
+      dashed: false,
+      from: 'User',
+      to: 'Item',
+      ...(roleLines === undefined ? {} : { roleLines }),
+    },
+  ];
+
+  it('widens the canvas to the head role`s right edge (jar svg/@width 93)', () => {
+    // ink x spans [6, 78.467]: (78.467 - 6) + INK_DELTA 15 + margin 5, +1
+    // truncated by SvgGraphics#ensureVisible -> 93, the jar's own width.
+    const dims = computeClassDocumentDims(boxes, [], edge([[owner], [role]]), []);
+    expect(dims.width).toBe(93);
+  });
+
+  it('counts the tail role line too (its x=6 is the left ink edge)', () => {
+    // Tail role alone: ink x spans [6, box right] -> 91, the width we drew
+    // before this arm existed. With no role at all the left edge is the
+    // box's own `x - 1` = 13.639 instead, so the canvas is narrower still.
+    expect(computeClassDocumentDims(boxes, [], edge([[owner], []]), []).width).toBe(91);
+    expect(computeClassDocumentDims(boxes, [], edge(), []).width).toBe(83);
+  });
+});
+
+/**
+ * cdd2-T13 (Q-6): `SvekEdge#getExtremitySimplier` (`svek/SvekEdge.java
+ * :539-562`) moves `this.dotPath`'s end point AND its last control point
+ * (`DotPath#moveEndPoint`, `klimt/shape/DotPath.java:229-234`) before
+ * `drawU` draws it, and `LimitFinder#drawDotPath`
+ * (`klimt/drawing/LimitFinder.java:190-194`) bounds every control point of
+ * the drawn path. Geometry is `nenepe-70-keri784`'s pre-shift layout
+ * (`CC::USA --> users::3`, probe of `buildInkBox`'s input): the `-->` head's
+ * 5px trim moves the last control point 106.724 -> 111.724, which is then
+ * the rightmost ink. Jar's canvas is 133 px wide.
+ */
+describe('edge ink walks the drawn (extremity-moved) path (cdd2-T13, Q-6)', () => {
+  const boxes = [
+    makeClassifierGeo({ id: 'CC', x: 0, y: 0, width: 69.488, height: 90 }),
+    makeClassifierGeo({ id: 'users', x: 1.5, y: 158, width: 66.212, height: 90 }),
+  ];
+  const edge = (targetDecor: EdgeGeo['targetDecor']): EdgeGeo[] => [
+    {
+      id: 'e0',
+      points: [
+        { x: 70, y: 57 },
+        { x: 108.22367568295924, y: 57 },
+        { x: 106.72367568295924, y: 229 },
+        { x: 68.5, y: 229 },
+      ],
+      targetDecor,
+      sourceDecor: 'none',
+      dashed: false,
+      from: 'CC',
+      to: 'users',
+    },
+  ];
+
+  it('reaches the moved control point: jar svg/@width 133', () => {
+    // (111.724 - (-1)) + INK_DELTA 15 + margin 5, +1 truncated -> 133.
+    expect(computeClassDocumentDims(boxes, [], edge('open'), []).width).toBe(133);
+  });
+
+  it('leaves an undecorated end unmoved (no extremity, no trim)', () => {
+    // max control point 108.224: (108.224 + 1) + 20 + 1 -> 130.
+    expect(computeClassDocumentDims(boxes, [], edge('none'), []).width).toBe(130);
   });
 });

@@ -114,6 +114,7 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
         height: 5,
         inkBox: { x: 2, y: 3, width: 8, height: 3 },
         noteLines: [{ text: 'hi', width: 6 }],
+        position: 'bottom',
       },
     });
     const scaled = scaleEdgeGeo(edge, 2);
@@ -124,6 +125,7 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
       height: 10,
       inkBox: { x: 4, y: 6, width: 16, height: 6 },
       noteLines: [{ text: 'hi', width: 12 }],
+      position: 'bottom',
     });
   });
 
@@ -135,11 +137,13 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
 
   it('scales a kalBox with only an end box', () => {
     const edge = makeEdge({
-      kalBox: { end: { x: 1, y: 2, width: 10, height: 8, text: '*', textX: 3, textY: 9, textWidth: 6 } },
+      kalBox: {
+        end: { x: 1, y: 2, width: 10, height: 8, text: '*', textX: 3, textY: 9, textWidth: 6, position: 'UP' },
+      },
     });
     const scaled = scaleEdgeGeo(edge, 2);
     expect(scaled.kalBox).toEqual({
-      end: { x: 2, y: 4, width: 20, height: 16, text: '*', textX: 6, textY: 18, textWidth: 12 },
+      end: { x: 2, y: 4, width: 20, height: 16, text: '*', textX: 6, textY: 18, textWidth: 12, position: 'UP' },
     });
   });
 

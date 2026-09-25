@@ -33,6 +33,7 @@ export interface EdgeKalBoxes {
 }
 
 import type { KalBox } from './class-kal.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
 
 /** One measured line of a link note's body — same `{ text, width }` shape
  *  the state engine's `StateTextLine` carries (`state-geo-types.ts:13-16`),
@@ -65,6 +66,33 @@ export interface EdgeNoteBoxGeo {
   readonly height: number;
   readonly inkBox: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
   readonly noteLines: readonly EdgeNoteLine[];
+  /**
+   * cdd2-T19c: `Relationship.linkNotePosition` (`class-relationship-ast.ts`),
+   * carried through to render time so the note-vs-label draw ORDER can
+   * follow `SvekEdge.java:318-325`'s `mergeLR`/`mergeTB` operand order
+   * (note-first for LEFT/TOP, label-first for RIGHT/BOTTOM) — the merge
+   * itself already ran at layout time ({@link EdgeNoteBoxGeo}'s own doc
+   * comment); this field only lets the RENDERER recover which operand led.
+   */
+  readonly position: 'left' | 'right' | 'top' | 'bottom';
+  /**
+   * cdd2-T19c: this note-on-link's own `#color` BACK/LINE slots — see
+   * `class-relationship-ast.ts#Relationship.linkNoteBack`'s doc comment.
+   */
+  readonly back?: string;
+  readonly line?: string;
+  /**
+   * cdd2-T19c: `measureNote`'s per-line creole/sprite atoms
+   * (`note-layout-measure.ts#NoteMeasurement.lineAtoms`) — carried through
+   * so the renderer draws a `<$sprite>`/creole-formatted note-on-link body
+   * the SAME atom-aware way `renderer-note.ts#renderNoteText` already draws
+   * every other note kind, instead of the literal-source-string fallback
+   * (`renderer-note-lines.ts`/`renderer-note.ts`'s own "hand-built NoteGeo
+   * test literal" fallback contract). Optional: `computeEdgeNoteBox` always
+   * sets it in production; absent only for pre-existing hand-built test
+   * geometry.
+   */
+  readonly lineAtoms?: readonly (readonly MemberRenderAtom[])[];
 }
 
 /**

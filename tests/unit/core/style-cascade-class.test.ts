@@ -59,6 +59,17 @@ describe('computeClassStyleCascadeOverrides (G2 N36)', () => {
     expect(override.classCascadeHeaderFontColor).toBe('#EE82EE');
   });
 
+  it('a header-nested BackgroundColor override sets classCascadeHeaderBackground, distinct from classCascadeBackground (fumalu-64-vude116 shape; jar EntityImageClassHeader.java:93-101, EntityImageClass.java:204-208)', () => {
+    const override = computeClassStyleCascadeOverrides(
+      styleMap({
+        'classdiagram.class': { backgroundcolor: 'yellow' },
+        'classdiagram.class.header': { backgroundcolor: 'red' },
+      }),
+    );
+    expect(override.classCascadeBackground).toBe('#FFFF00');
+    expect(override.classCascadeHeaderBackground).toBe('#FF0000');
+  });
+
   it('an arrow-scoped nested selector under classDiagram sets classCascadeArrowColor (rakici-44-tivo701 shape)', () => {
     const override = computeClassStyleCascadeOverrides(styleMap({ 'classdiagram.arrow': { linecolor: 'blue' } }));
     expect(override.classCascadeArrowColor).toBe('#0000FF');
@@ -651,5 +662,43 @@ describe('computeArrowFontOverride / computeCardinalityFontOverride -- FontColor
     const map = styleMap({ class: { fontcolor: 'red' } });
     expect(computeArrowFontOverride(map)).toEqual({});
     expect(computeCardinalityFontOverride(map)).toEqual({});
+  });
+});
+
+// cdd2-T8 (S-7): `<style> visibilityIcon { <kind> {...} } }` -- see
+// `style-cascade-visibility-icon.ts`'s own doc comment.
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/VisibilityModifier.java:336-350
+describe('computeClassStyleCascadeOverrides -- visibilityIcon cascade (cdd2-T8, S-7)', () => {
+  it('a nested visibilityIcon.protected block sets both colour cascades (tuguku-78-zega630 shape)', () => {
+    const override = computeClassStyleCascadeOverrides(
+      styleMap({
+        'visibilityicon.protected': { linecolor: 'DarkGoldenRod', backgroundcolor: 'DarkGoldenRod' },
+      }),
+    );
+    expect(override.visibilityIconLineCascade).toEqual({ protected: '#B8860B' });
+    expect(override.visibilityIconBackgroundCascade).toEqual({ protected: '#B8860B' });
+  });
+
+  it('only the declared kind is populated -- public is untouched', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ 'visibilityicon.protected': { linecolor: 'red' } }));
+    expect(override.visibilityIconLineCascade).toEqual({ protected: '#FF0000' });
+    expect(override.visibilityIconLineCascade?.public).toBeUndefined();
+  });
+
+  it('a bare visibilityIcon {} block (no nested kind) cascades to every kind', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ visibilityicon: { linecolor: 'blue' } }));
+    expect(override.visibilityIconLineCascade).toEqual({
+      public: '#0000FF',
+      private: '#0000FF',
+      protected: '#0000FF',
+      package: '#0000FF',
+      iemandatory: '#0000FF',
+    });
+  });
+
+  it('a StyleMap that never touches visibilityIcon yields no cascade field', () => {
+    const override = computeClassStyleCascadeOverrides(styleMap({ class: { fontcolor: 'red' } }));
+    expect(override.visibilityIconLineCascade).toBeUndefined();
+    expect(override.visibilityIconBackgroundCascade).toBeUndefined();
   });
 });

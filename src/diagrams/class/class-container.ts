@@ -192,7 +192,36 @@ export function closeContainer(state: ParseState, nsId: string): void {
   const usymbol = state.descriptiveContainers.get(nsId);
   if (usymbol === undefined) return;
   const ns = state.ast.namespaces.find((n) => n.id === nsId);
-  if (ns === undefined || ns.classifiers.length > 0) return;
+  if (ns === undefined) return;
+
+  // cdd2-T7b (R-8, `lojiga-09-meka859`): upstream's `gotoGroup(location,
+  // ident, display, GroupType.PACKAGE, usymbol)`
+  // (`CommandPackageWithUSymbol.java:197-198`) stamps the group's `USymbol`
+  // UNCONDITIONALLY at open time, whether the container ends up empty or
+  // not -- there is no upstream branch that withholds it from a non-empty
+  // cluster. This port's own OPEN-time handler
+  // (`class-command-containers.ts` rule 5b') only records the keyword into
+  // `state.descriptiveContainers` (consumed below for the empty->leaf
+  // collapse), never onto the `Namespace` itself, so a non-empty `stack a {
+  // ... }` carried `usymbol: undefined` through to `NamespaceGeo` and the
+  // render dispatch fell through to the generic folder-tab outline
+  // (`class-namespace-shape.ts#renderNamespaceFolder`) instead of
+  // `USymbolStack`'s own `asBig` chrome
+  // (`class-namespace-usymbol-shape.ts#renderNamespaceUSymbol`).
+  //
+  // Unconditional for every `USYMBOL_NAMES` keyword (mirrors upstream's own
+  // unconditional stamp exactly -- no per-keyword special case): widening
+  // past `stack` reaches `USymbolComponent`/`USymbolRectangle`'s `asBig`
+  // chrome for the first time via a NON-empty direct-keyword container
+  // (previously only the GATED `package X <<Node>>` route,
+  // `applyNamespaceUsymbol`, exercised it) and moves two ALREADY-diverged
+  // fixtures' diff counts -- `xadado-92-lazo250` and `xenere-07-kuji864`,
+  // both with a stated mechanism/artifact in
+  // `plans/class-divergence-drive-2/.agent-notes/cdd2-T7b.md` (mission D4:
+  // a rise is acceptable once its mechanism is stated, not a bar to the
+  // structurally-correct port).
+  ns.usymbol = usymbol;
+  if (ns.classifiers.length > 0) return;
 
   state.ast.namespaces = collapseEmptyNamespace(
     state.ast.namespaces,

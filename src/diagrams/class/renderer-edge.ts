@@ -300,6 +300,10 @@ function renderEdgeMainLabel(
       text(line.x, line.y, line.text, {
         fill: labelColor,
         ...labelFontAttrs,
+        // S-8 (cdd2-T7): a per-line `<b>` override wins over the shared
+        // arrow-font weight -- see `EdgeGeo.labelLines[].bold`'s own doc
+        // comment (class-geo-types.ts).
+        ...(line.bold === true ? { fontWeight: '700' as const } : {}),
         lengthAdjust: 'spacing',
         textLength: line.width,
       }),
@@ -445,23 +449,30 @@ export function renderEdge(
   const cardinalityColor = resolveCardinalityFontColor(theme);
   // G2 item 44: the whole-label magic-arrow glyph -- see {@link
   // magicArrowPolygon}. Drawn before the label text (`mergeLR(arrow,
-  // label)`, `SvekEdge.java:284,304`).
+  // label)`, `SvekEdge.java:284,304`) -- part of the SAME `labelOnly`
+  // operand the note-on-link merge below orders against (`SvekEdge.java:
+  // 302-306` builds the glyph+label block BEFORE `:318-325`'s note merge).
+  const labelParts: string[] = [];
   if (geo.arrowGlyph !== undefined) {
     const glyph = magicArrowPolygon(geo.arrowGlyph.points, labelColor);
-    if (glyph !== undefined) parts.push(glyph);
+    if (glyph !== undefined) labelParts.push(glyph);
   }
   const labelFontAttrs = arrowLabelTextAttrs(theme);
-  parts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
-  // cdd-T7 (A2a/M5): `note on link`'s body -- drawn AFTER the main label,
-  // matching `lipazi-06-care921`'s default/BOTTOM-position fixture
-  // (`mergeTB(labelOnly, noteOnly)`, `SvekEdge.java:307-327`). A LEFT/TOP
-  // position draws the note FIRST instead (`mergeLR(noteOnly, labelOnly)`/
-  // `mergeTB(noteOnly, labelOnly)`) -- `Relationship.linkNotePosition`
-  // reaches neither `EdgeGeo` nor this renderer (T6 kept the geometry
-  // position-agnostic), so this task always emits the BOTTOM/default child
-  // order; the position-dependent flip is T8's, alongside the vertex/paint
-  // fix (see this task's commit message).
-  parts.push(renderEdgeNoteBox(geo, theme));
+  labelParts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
+  // cdd-T7/cdd2-T19c (A2a/M5): `note on link`'s body, ordered against the
+  // label per `SvekEdge.java:318-325`'s `mergeLR`/`mergeTB` operand order:
+  // `Position.LEFT`/`TOP` draws the note FIRST (`mergeLR(noteOnly,
+  // labelOnly)`/`mergeTB(noteOnly, labelOnly)`); `RIGHT`/`BOTTOM` (and no
+  // note at all) keeps the label first. `geo.noteBox.position` carries the
+  // SAME `Relationship.linkNotePosition` the layout-time merge already used
+  // (`class-edge-note-box.ts#computeEdgeNoteBox`).
+  const noteBoxResult = renderEdgeNoteBox(geo, theme);
+  const notePosition = geo.noteBox?.position;
+  if (notePosition === 'left' || notePosition === 'top') {
+    parts.push(noteBoxResult.body, ...labelParts);
+  } else {
+    parts.push(...labelParts, noteBoxResult.body);
+  }
   parts.push(...renderEdgeCardinalityLabels(geo, theme, cardinalityColor));
   // cdd-T7 (A5/M4, A2a/M6): the `-0)-` family's mid-link decoration --
   // `SvekEdge.java:982-988` draws it AFTER the tail/head cardinality text,
@@ -476,7 +487,7 @@ export function renderEdge(
     theme.colors.background,
     theme.scaleK,
   );
-  let extraDefs = arrowheads.extraDefs;
+  let extraDefs = arrowheads.extraDefs + noteBoxResult.extraDefs;
   if (middleDecor !== undefined) {
     parts.push(middleDecor.body);
     extraDefs += middleDecor.extraDefs;

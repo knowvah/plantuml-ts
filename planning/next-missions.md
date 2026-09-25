@@ -35,6 +35,104 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-2` — DONE 2026-09-24 (T0–T20, batches 0–5)
+
+Branch `feat/class-divergence-drive-2` (not merged; the maintainer merges
+with a merge commit). Class survey 560 / 86 / 77 → **607 / 55 / 61** over
+723 fixtures; ratchet 560 → 607; DOT parity held; zero conformant losses
+and zero unexplained rises at every close
+(`plans/class-divergence-drive-2/decision-journal.md`, rows 1–48). Exit
+bar D8 met in full (conformant ≥ 600, diverged ≤ 61, every ledger row has
+a `final`). Open items, by owner (`fixtures.md` `final` column points
+here by these ids):
+
+- **cdd2 R-VP — vertical 1 px, probe-verified, READY (6 fixtures + lecelo).**
+  jubobo, bejeli, gabejo, julixi, rulite, xosiza (+ lecelo 7→5). All
+  members hidden → body is `TextBlockUtils.empty(0,0)`
+  (`BodierLikeClassOrObject.java:249-250`) and reserves nothing; header
+  blocks stop short (`HeaderLayout.java:98-109`), so the jar's lowest ink
+  is the rect's `y+h-1`; ours is `y+h` (`class-ink-shapes.ts#addRectInk`).
+  T17's temporary probe closed all six with no rise. Fix: a
+  `bodyInkHeight` on `MeasuredClassifier` (`class-layout-helpers.ts`),
+  copied in `class-geo-builders.ts#inkBodyFields`, scaled in
+  `class-scale-geo.ts`, consumed by `addRectInk` as
+  `max(y+h-1, y+bodyInkHeight)`; `headerInkReservation`
+  (`class-classifier-ink-reservation.ts`) already computes the value.
+  Disproves the earlier R-4 (`absorbLayoutEpsilon`) and R-5 (dot-engine
+  drift) attributions — both were a tiny excess on top of this term.
+- **cdd2 R-LEAF — description leaf ink, probe-verified (2).** cacoma,
+  daxeno. `tryMeasureDescriptionLeaf`
+  (`class-layout-generic-classifier.ts:73-105`) sets no `symbolInk`, so a
+  `component`/`<<Database>>` leaf gets the class-box ink rule; upstream
+  `USymbolComponent2` walks one `URectangle`. Needs an exported
+  `measureEntityLeafInk` in `core/svek/image/leaf-sizing-entity.ts` using
+  the element's own options (the probe without them moved gujigi +2).
+  daxeno's last diff (styled namespace title `text/@y` Δ0.889) is
+  undiagnosed.
+- **cdd2 S-1** sugifi, sumule — upstream `AbstractEntityDiagram#packSomePackage`
+  (`:85-106`, gated `ClassDiagram.java:84-85`) marks a single-child group
+  `packed` AFTER uids are minted (`Entity.java:717-741`,
+  `ClusterDotString.java:76-82`); we collapse at resolve time
+  (`class-namespace-resolve.ts:418`). Needs `class-dot-clusters.ts` +
+  `ast.ts` `Namespace.packed`.
+- **cdd2 S-1b** xumofu — `CommandLinkClass.java:320-333` resolves both
+  endpoints' quark chains before creating either leaf; we resolve+create
+  per endpoint. Restructure `class-ensure-classifier.ts` +
+  `class-command-relationships.ts`.
+- **cdd2 S-11** rakuci — descriptive-container `[[url]]` never calls
+  `setNamespaceUrl` (`class-command-containers.ts`).
+- **cdd2 S-12** rojoxi — `collapseEmptyNamespace` drops `ns.color`;
+  `renderEmptyPackageLeaf` has no colour (`class-namespace.ts`,
+  `renderer.ts`).
+- **cdd2 S-4t** xoxuni, nuvake — the `;text:COLOR` half of a link's
+  trailing colour needs a `Relationship` field
+  (`class-relationship-ast.ts`, `class-relationship-parser.ts:241-247`).
+- **cdd2 S-6** guxode — `class-namespace-folder-outline.ts#renderFolderPolygon`
+  (strictuml sharp-corner folder) emits `stroke` via `shortenColor` with
+  no colour resolution (the handler-arg swap S.md proposed is a no-op);
+  plus an undiagnosed Δ0.014 on g[14].
+- **cdd2 Q-4 / Q-5** camuna, nafiki — generic-tag `<style>` colours need a
+  `Theme.colors.graph` field (`theme-graph-colors-a.ts`; jar verified with
+  four authored probes, `plantuml.skin:211-213`); cardinality font size is
+  the hard-coded `CARDINALITY_FONT_SIZE` (`renderer-edge-extras.ts:222`)
+  and FontStyle has no field (`theme.ts`). Both rows also carry
+  dot-engine issue 19 edges.
+- **cdd2 T19c residual** lipazi, nuvake, lozego — `class-ink-box.ts#buildInkBox`
+  never walks `EdgeGeo.noteBox` (canvas shortfall); lozego's gradient stop
+  is not shortened to 3 hex digits (`SvgGraphics.java:545-554`,
+  `core/paint.ts`).
+- **cdd2 sijisi** — `rectangle` leaf has no USymbol icon
+  (`core/usymbol-shapes.ts:219-231`); title-centring half closed by T19b.
+- **Layout-precision policy** (gatula, ririlu): the jar reads node
+  positions from graphviz's 2-dp `-Tsvg` text (`DotStringFactory.java:388-396`;
+  gatula 155.42 vs our exact 155.425), and `LineOfSegments.java:89-111`
+  runs out of passes on ~1e-14 float dust from full-precision coords
+  (ririlu). Only fix is 2-dp quantisation, which `layout-epsilon.ts` and
+  D6 reject; needs a maintainer ruling, not a fix task.
+- **dot-engine issue 19** (flat `minlen=0` edge ignores the HTML-table
+  port, `docs/graphviz-issues/19-...`): coxose, ririlu, camuna, nafiki,
+  rifuzu, mucoti, sefazi.
+- **Stretch pairs not attempted** (batch-5 read-only pass, journal row
+  40): ponono/sumocu (text wrap), pejone/xonamo (title vs entity, 220 S),
+  puvono/sekame (edge routing, width +161), vudepo/lejoga (entity order),
+  givofi/popesa (gradient order + def-id seed — popesa is the existing
+  "Seed input for def ids" item), givoli/tekena/nadepi (one edge Δ10),
+  bidusa/ruliki (member-row sprite sizing, core sprite code).
+- **Stale engine pins.** Every committed `parity-<engine>.json` except
+  class was stale at this mission's start: re-surveying at `18a8e0c5`
+  already moved activity 1, c4 2, component 3, object 9, sequence 1, state
+  3, unknown 97 (incl. conformant losses gemepu, kupofu, ridofi and a
+  jititi dotEqual flip), usecase 5 (journal row 25). A refresh mission
+  should re-pin them and diagnose the unknown-bucket losses.
+- **Flagged for review** (accepted, journaled): T12's 14-line edit to
+  `renderer-arrowhead-ink.ts` outside its write-set (row 30); T19a's
+  `clusterEndId` reconstructs the note connector's cluster end from
+  geometry rather than giving it a structural per-end identity (row 43);
+  T19b splices the pre-built cluster header via a comment-marker swap
+  (row 44); T15's non-C size-12 glyphs are keyed by size only, not the
+  bold/family variant (row 36); T19c's additive edits to
+  `class-geo-edge-extras.ts`/`class-scale-geo-edge.ts` (row 46).
+
 ## `class-divergence-drive` — DONE 2026-09-23 (T0–T38, batches 0–10)
 
 Branch `feat/class-divergence-drive` (not merged; T38 reports, the
@@ -73,15 +171,15 @@ slugs) NOT met — closed as met-with-named-exceptions: every remaining
   nested ACTIVITY diagram's own Cyrillic text sizing (121×96 vs 133×107).
 - **Class renderer residuals** — medosa (crow's-foot `side` is always null:
   the `SvekEdge.ts` adapter never receives node geometry; every
-  `ExtremityFactory` call site), dorafa 0+36 (`sameClassWidth` is a global max unknown at measure time; the header badge/name `indent` from `computeHeaderSlack` is cached in `preMeasureClassifiers` before `applySameClassWidthFloor` — the jar lays the header out at draw time from the FINAL width, `EntityImageClass.java:182,238`; fix shapes in the B10FU filing), pijiju 0+19 (the `Neighborhood` triangle/stub contact points, sub-1.5 px — the protected inset itself is exact now), pixexi 0+58 (a +5.389 canvas shift with zero edges — NOT the label-margin term, disproved by measurement), lozego/mizupo (no
-  `<linearGradient>` emitted at all), sijisi (`allow_mixing` nested
+  `ExtremityFactory` call site), ~~dorafa 0+36~~ — CLOSED by class-divergence-drive-2 T11 (`9763b042a`); (was: `sameClassWidth` is a global max unknown at measure time; the header badge/name `indent` from `computeHeaderSlack` is cached in `preMeasureClassifiers` before `applySameClassWidthFloor` — the jar lays the header out at draw time from the FINAL width, `EntityImageClass.java:182,238`; fix shapes in the B10FU filing), pijiju 0+19 (the `Neighborhood` triangle/stub contact points, sub-1.5 px — the protected inset itself is exact now), pixexi 0+58 (a +5.389 canvas shift with zero edges — NOT the label-margin term, disproved by measurement), lozego/mizupo (no
+  `<linearGradient>` emitted at all — lozego's gradient is now emitted, cdd2 T19c `bc7f7e55c`; residual under cdd2), sijisi (`allow_mixing` nested
   `rectangle` clusters, ENT3/GEO1), cukaze 0+109 (whole-document 0.87 px
   shift, untraced), luzive 11+21 and sadamo 11+19 (error-page `textLength`,
   `[From string…]`, version identity — DIVERGENCES.md), filoxo 16 / rakopi
   10 / givofi 10+2 (T19's `<style> visibilityIcon {}` cascade + shadow
-  filter shape), xadado 1+344 (note-region residual), gatula/jixamu/xosiza
-  (~0.005 px position rounding tipping `ensureVisible`), jubobo (a third,
-  unexamined ink term), `RemoveRestoreDirective` lacks `scopeNsId`
+  filter shape), xadado 1+344 (note-region residual; its structural childCount closed by cdd2 T7b `ccbbaca05`), ~~gatula/jixamu/xosiza
+  (~0.005 px position rounding tipping `ensureVisible`)~~ — REFUTED by cdd2: jixamu CLOSED (T17 `99fa55ff8`), xosiza is cdd2 R-VP, gatula is the layout-precision policy item; ~~jubobo (a third,
+  unexamined ink term)~~ — cdd2 R-VP, `RemoveRestoreDirective` lacks `scopeNsId`
   (upstream's `removeOrRestore` calls `fixWhat`; no corpus fixture).
 - **Shared seams left for other engines** — `sequence-creole.ts`'s own
   text emitter bypasses the klimt decorations (migodo, ravire); `<back:a|b>`

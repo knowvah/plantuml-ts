@@ -194,6 +194,91 @@ describe('renderVisibilityIcon — theme icon-color overrides (G2 N54)', () => {
   });
 });
 
+// cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/
+// BackgroundColor } } }` -- jar-verified `tuguku-78-zega630`
+// (`DarkGoldenRod` -> `#B8860B`, both LineColor and BackgroundColor, on a
+// PROTECTED method icon).
+// @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/VisibilityModifier.java:336-350
+describe('renderVisibilityIcon — <style> visibilityIcon cascade (cdd2-T8, S-7)', () => {
+  const themeWithStyleCascade = scaleClassTheme(
+    deepMergeTheme(defaultTheme, {
+      colors: {
+        graph: {
+          visibilityIconLineCascade: { protected: '#B8860B' },
+          visibilityIconBackgroundCascade: { protected: '#B8860B' },
+        },
+      },
+    }),
+    1,
+  );
+
+  it('protected method: the <style> cascade wins over the hardcoded default', () => {
+    const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, themeWithStyleCascade);
+    expect(svg).toContain('fill="#B8860B" style="stroke:#B8860B;');
+  });
+
+  it('public method: untouched by a protected-only cascade entry', () => {
+    const svg = renderVisibilityIcon('+', false, 13, 88.5, undefined, themeWithStyleCascade);
+    expect(svg).toContain('fill="#84BE84" style="stroke:#038048;');
+  });
+
+  // cdd2-T8 (S-7 regression fix): the LEGACY skinparam wins over the cascade
+  // for these four kinds -- the cascade field is ALSO populated by a
+  // bundled skin's own baked-in `visibilityIcon {}` defaults (`skin rose`
+  // et al., `skin-loader.ts`), applied as the theme's base layer BEFORE
+  // the document's own skinparam; unconditionally preferring the cascade
+  // regressed `rakopi-21-sufa571` (`colorsFor`'s own doc comment).
+  it('the legacy skinparam icon<Kind>Color tier wins over the cascade (rakopi-21-sufa571 shape)', () => {
+    const theme = scaleClassTheme(
+      deepMergeTheme(defaultTheme, {
+        colors: {
+          graph: {
+            iconProtectedColor: '#B8860B',
+            iconProtectedBackgroundColor: '#B8860B',
+            visibilityIconLineCascade: { protected: '#B38D22' },
+            visibilityIconBackgroundCascade: { protected: '#FFFF44' },
+          },
+        },
+      }),
+      1,
+    );
+    const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, theme);
+    expect(svg).toContain('fill="#B8860B" style="stroke:#B8860B;');
+  });
+
+  it('the cascade still applies when no skinparam icon<Kind>Color is set', () => {
+    const theme = scaleClassTheme(
+      deepMergeTheme(defaultTheme, {
+        colors: {
+          graph: {
+            visibilityIconLineCascade: { protected: '#B8860B' },
+            visibilityIconBackgroundCascade: { protected: '#B8860B' },
+          },
+        },
+      }),
+      1,
+    );
+    const svg = renderVisibilityIcon('#', false, 13, 88.5, undefined, theme);
+    expect(svg).toContain('fill="#B8860B" style="stroke:#B8860B;');
+  });
+
+  it('IE_MANDATORY DOES reach the <style> cascade, unlike the skinparam tier', () => {
+    const theme = scaleClassTheme(
+      deepMergeTheme(defaultTheme, {
+        colors: {
+          graph: {
+            visibilityIconLineCascade: { iemandatory: '#B8860B' },
+            visibilityIconBackgroundCascade: { iemandatory: '#B8860B' },
+          },
+        },
+      }),
+      1,
+    );
+    const svg = renderVisibilityIcon('*', true, 13, 102.5, undefined, theme);
+    expect(svg).toContain('fill="#B8860B" style="stroke:#B8860B;');
+  });
+});
+
 /**
  * B4 / ledger M5 — `skinparam classAttributeIconSize` reaching the glyph.
  *

@@ -40,6 +40,7 @@ import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './layout.js';
 import { rect } from '../../core/svg.js';
+import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
 import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
@@ -65,6 +66,7 @@ const MARGIN_TITLE_Y2 = 3;
  *  cdd-B8FU: named (was an inline `4` at three call sites) so its own
  *  scaleK multiplication has one citation, not three. */
 const TITLE_X_OFFSET = 4;
+const TOP = TITLE_LOCAL_TOP_OFFSET; // the `2` of both `asBig` stereo/title translates
 
 /** `USymbolFolder#asBig`'s unstyled default `roundCorner` — jar-verified
  *  identical to every OTHER container's default (`A2.5,2.5`/`A3.75,3.75`
@@ -238,12 +240,8 @@ export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, l
 
 export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
   // G2 N18: `packageBorderThickness`/`packageFontSize`/`packageFontColor`
-  // override the folder-specific defaults (`theme.ts`'s own doc comments) --
-  // `fontSize` here previously read the DIAGRAM-WIDE `theme.fontSize`
-  // unconditionally, a latent bug moot until this iteration threaded a
-  // package-specific override (must match `titleFont`'s own resolution, or
-  // `getHTitle`/`getWTitle`'s pre-computed `htitle`/`wtitle` would silently
-  // disagree with the glyphs actually drawn here).
+  // override the folder defaults; `fontSize` must match `titleFont` or the
+  // pre-computed `htitle`/`wtitle` disagree with the drawn glyphs.
   // cdd-B8FU: both tiers (the `<style>`/skinparam override AND the
   // PACKAGE_STROKE_WIDTH default) get their own scaleK factor -- the
   // "materialize the fallback" rule (`renderer-classifier-rows.ts
@@ -254,12 +252,8 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
   // cluster's own unstyled default explicitly (see that constant's doc
   // comment).
   const border = theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT;
-  // G2 N18: `skinparam style strictuml` selects the sharp-corner `UPolygon`
-  // branch (`roundCorner=0`) instead of the default rounded-arc `UPath` --
-  // `folderPolygonPoints`/`renderFolderPolygon`'s own doc comments.
-  // G2 N59: `packageFillValue` maps a "no paint" background (skinparam
-  // packagebackgroundcolor transparent/background) to jar's real literal
-  // `fill="none"` -- see that helper's own doc comment.
+  // G2 N18: `strictuml` -> sharp-corner `UPolygon` branch (roundCorner=0).
+  // G2 N59: `packageFillValue` maps "no paint" to jar's literal `fill="none"`.
   const fill = namespaceFill(geo, theme);
   const { outline, hline } = renderFolderTabShape(geo, {
     strictUml: theme.strictUml,
@@ -269,19 +263,10 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
     roundCorner: PACKAGE_ROUND_CORNER * theme.scaleK,
     marginX3: MARGIN_TITLE_X3 * theme.scaleK,
   });
-  // G2 N18: jar's deterministic-text mode always emits `textLength`/
-  // `lengthAdjust` on this title (matches every OTHER class text row,
-  // `renderer-classifier-box.ts`'s identical convention) plus the RAW
-  // numeric `font-weight="700"` (never the CSS keyword) -- pure arithmetic
-  // from `wtitle` (no measurer needed at render time, matching this
-  // module's "measure once, at layout time" architecture): `wtitle` is
-  // ALWAYS `rawTextWidth + MARGIN_TITLE_X1 + MARGIN_TITLE_X2` for a
-  // non-empty label (`getWTitle`'s own doc comment); the empty-label
-  // fallback branch (`max(30, width/4)`) has no real text to stretch, so
-  // textLength is omitted then, matching every other row's `row.width ===
-  // undefined` skip convention. cdd-B8FU: `geo.wtitle` is already scaled
-  // (`scaleNamespaceGeo`), so the margin literals subtracted back out need
-  // their own scaleK factor to stay consistent.
+  // G2 N18: deterministic-text `textLength` from `wtitle` (= rawTextWidth +
+  // X1 + X2 for a non-empty label, `getWTitle`); omitted for the empty-label
+  // `max(30, width/4)` fallback. cdd-B8FU: `geo.wtitle` is already scaled,
+  // so the margin literals subtracted back out take their own scaleK.
   const titleTextLength =
     geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
@@ -298,7 +283,11 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
     },
     () => titleX,
   );
-  return outline + hline + label;
+  // cdd2-T19b: `stereotype.drawU(ug.apply(new UTranslate(4 + posStereo, 2 +
+  // getHTitle(dimTitle))))`, `posStereo = (width - dimStereo.w) / 2`
+  // (`USymbolFolder.java` `asBig`); `geo.htitle` IS `getHTitle`.
+  const stereo = placeHeaderStereo(geo, geo.x + TITLE_X_OFFSET * theme.scaleK, geo.y + TOP * theme.scaleK + geo.htitle);
+  return outline + hline + label + stereo.body;
   // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
 }
 
@@ -336,9 +325,10 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
     strokeWidth,
     fill,
   });
-  if (geo.label.length === 0) return outline;
-  // cdd-B8FU: geo.wtitle is already scaled -- see renderNamespaceFolder's
-  // identical titleTextLength citation.
+  // cdd2-T19b: `USymbolRectangle#asBig`: stereo at `((width - w) / 2, 2)`
+  // BEFORE the title, title at `2 + dimStereo.getHeight()` (CENTER branch).
+  const stereo = placeHeaderStereo(geo, geo.x, geo.y + TOP * theme.scaleK);
+  if (geo.label.length === 0) return outline + stereo.body;
   const rawTextWidth = geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK;
   const posTitle = (geo.width - rawTextWidth) / 2;
   // cdd-T26 residual round: each physical line is centred against
@@ -347,10 +337,10 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
   // rawTextWidth) / 2`), matching `mucuxi-36-beku683`'s own citation above
   // for a markup-free, single-line label.
   const label = renderNamespaceTitleAuto(
-    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    { label: geo.label, theme, measurer, blockTopY: geo.y + stereo.height + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
     {
       x: geo.x + posTitle,
-      y: geo.y + geo.baselineOffset,
+      y: geo.y + stereo.height + geo.baselineOffset,
       fontFamily: theme.fontFamily,
       fontSize,
       fontColor,
@@ -358,7 +348,16 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
     },
     (line) => geo.x + (geo.width - line.width) / 2,
   );
-  return outline + label;
+  return outline + stereo.body + label;
+}
+
+/** cdd2-T19b: the pre-built `ClusterHeader` stereo block
+ *  (`class-cluster-header.ts`) centred in the box from `x0`: `posStereo =
+ *  (width - dimStereo.w) / 2` in both `asBig`s above. */
+function placeHeaderStereo(geo: NamespaceGeo, x0: number, y: number): { body: string; height: number } {
+  const h = geo.clusterHeaderStereo;
+  if (h === undefined) return { body: '', height: 0 };
+  return { body: shiftFragmentBody(h.body, x0 + (geo.width - h.width) / 2, y), height: h.height };
 }
 
 /**

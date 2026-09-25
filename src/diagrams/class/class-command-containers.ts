@@ -139,19 +139,24 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // `isContainerOpener` exemption instead of opening a real container --
       // the nested body's own lines were then never re-dispatched through
       // the per-line/allowmixing gate at all.
-      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(?:<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
+      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
       const name = match[2] !== undefined ? match[2] : match[3]!;
       const id = match[4] ?? name;
       const effectiveId = openNamespaceBlock(state, id, name);
       state.descriptiveContainers.set(effectiveId, usymbol);
+      // cdd2-T19b: `if (stereotype != null) p.setStereotype(Stereotype
+      // .build(stereotype, false))` -- UNGATED (the SYMBOL token already
+      // named the shape), so the stereotype is displayed in the cluster
+      // header (`CommandPackageWithUSymbol.java:204-206`).
+      setNamespaceStereotype(state, effectiveId, match[6], false);
       // `addTags(p, arg.getLazzy("TAGS", 0))` -- upstream applies BOTH tag
       // runs to the group it just created (`CommandPackageWithUSymbol
       // .java:214`). `remove $tag` / `restore $tag` resolve against them, so
       // discarding them here would leave `component a $a {}` un-removable
       // (kokebo-27-vafi688).
-      const tags = parseTagTokens(`${match[5] ?? ''} ${match[6] ?? ''}`);
+      const tags = parseTagTokens(`${match[5] ?? ''} ${match[7] ?? ''}`);
       if (tags.length > 0) state.pendingContainerTags.set(effectiveId, tags);
     },
   },
@@ -227,23 +232,28 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   },
 
   // 5e. `note on|of link: text` — see NOTE_ON_LINK_RE's doc (class-notes.ts).
-  // T10: position is now group 1 (optional, default BOTTOM); G2 N34's
-  // capturing NOTE_COLOR is group 2 (still not consumed here, same
-  // "captured but not wired to render" posture as the link-note-color
-  // cluster generally -- surveyed, named remainder, not this iteration's
-  // scope); text is group 3.
+  // T10: position is now group 1 (optional, default BOTTOM); cdd2-T19c:
+  // group 2's NOTE_COLOR is now wired through to `applyNoteOnLink`, which
+  // parses it via `parseNoteOnLinkColors`; text is group 3.
   {
     pattern: NOTE_ON_LINK_RE,
-    execute: (state, match) => applyNoteOnLink(state.ast, resolveLinkNotePosition(match[1]), match[3]!),
+    execute: (state, match) => applyNoteOnLink(state.ast, resolveLinkNotePosition(match[1]), match[3]!, match[2]),
   },
 
   // 5e-multi. `note [pos] on|of link [#color]` (no colon) — opens a
   // multi-line note-on-link block closed by `end note`. See
-  // NOTE_ON_LINK_MULTI_RE's doc (class-notes.ts).
+  // NOTE_ON_LINK_MULTI_RE's doc (class-notes.ts). cdd2-T19c: group 2's
+  // NOTE_COLOR is now carried on the pending note, applied at `end note`
+  // (`finalizePendingNote`'s `'link'` branch, class-notes.ts).
   {
     pattern: NOTE_ON_LINK_MULTI_RE,
     execute: (state, match) => {
-      state.pendingNote = { kind: 'link', position: resolveLinkNotePosition(match[1]), textLines: [] };
+      state.pendingNote = {
+        kind: 'link',
+        position: resolveLinkNotePosition(match[1]),
+        textLines: [],
+        ...(match[2] !== undefined ? { color: match[2] } : {}),
+      };
     },
   },
 

@@ -12,9 +12,27 @@
 
 import type { Classifier, ClassDiagramAST, ClassifierKind } from './ast.js';
 import { LIKE_CLASS_KINDS } from './class-layout-helpers.js';
-import { clipSplineStart, clipSplineEnd, type ClipRect } from '../../core/spline-clip.js';
+import { clipSplineStart, clipSplineEnd, type ClipRect as CoreClipRect } from '../../core/spline-clip.js';
+import type { MagneticBorder } from '../../core/klimt/geom/MagneticBorder.js';
+import type { StringMeasurer } from '../../core/measurer.js';
+import type { Theme } from '../../core/theme.js';
+import { FOLDER, PACKAGE } from '../../core/decoration/symbol/USymbols.js';
+import { SymbolContext } from '../../core/decoration/symbol/SymbolContext.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
+import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import type { UTranslate } from '../../core/klimt/UTranslate.js';
+import { namespaceTitleHeight, namespaceTitleWidth } from './class-namespace-title-runs.js';
+import { movePointsEnd, movePointsStart } from './renderer-arrowhead-move.js';
 
-export type { ClipRect } from '../../core/spline-clip.js';
+/**
+ * A cluster endpoint's rectangle (`Cluster#getRectangleArea`) plus, cdd2-T12
+ * (CLIP-1a), its `Cluster#getMagneticBorder` — absent for
+ * `MagneticBorderNone` (see {@link clusterMagneticBorder}).
+ */
+export interface ClipRect extends CoreClipRect {
+  readonly magneticBorder?: MagneticBorder;
+}
 
 /**
  * Whether a leaf of this kind anchors a `Class::member` endpoint to that
@@ -107,6 +125,113 @@ export function clipClusterEdgeEnds(
   const head = endId !== undefined ? clusterRects.get(endId) : undefined;
   if (head !== undefined) result = clipSplineEnd(result, head);
   return result;
+}
+
+/** `USymbolFolder.getForceAt` never measures text itself (its title block
+ *  is pre-measured below); `folderMagneticBorder` only requires a bounder
+ *  to be present. */
+const UNUSED_BOUNDER = { calculateDimension: (): XDimension2D => new XDimension2D(0, 0) };
+
+/** The cluster fields {@link clusterMagneticBorder} reads. */
+export interface MagneticClusterBox {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+  readonly label: string;
+}
+
+/**
+ * cdd2-T12 (CLIP-1a): `Cluster#getMagneticBorder` (`svek/Cluster.java:
+ * 726-757`) for a class-diagram group. Every class group is
+ * `GroupType.PACKAGE`, so upstream always builds the `ClusterDecoration`
+ * (`ClusterDecoration.java:66-71 guess`: the group's own USymbol, else the
+ * `packageStyle`'s) and asks its `asBig` block for the force; only
+ * `USymbolFolder` (`package`/`folder`, `USymbols.java`) implements one
+ * (`USymbolFolder.java:242-266`) — every other symbol inherits
+ * `TextBlock#getMagneticBorder`'s `MagneticBorderNone`, returned here as
+ * `undefined`. The force reads the rect's own width (`getWTitle`, `:127-134`,
+ * matters for an empty title) and is expressed relative to the rect's
+ * top-left (`position.move(-minX, -minY)`, `:752-754`).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/Cluster.java
+ */
+export function clusterMagneticBorder(
+  box: MagneticClusterBox,
+  usymbol: string | undefined,
+  theme: Theme,
+  measurer: StringMeasurer,
+): MagneticBorder | undefined {
+  const folder = usymbol === 'folder' ? FOLDER : usymbol === 'package' ? PACKAGE : undefined;
+  if (usymbol !== undefined && folder === undefined) return undefined;
+  // `PackageStyle.toUSymbol`: FOLDER -> USymbols.PACKAGE, RECTANGLE -> USymbolRectangle.
+  if (usymbol === undefined && theme.packageStyle === 'rect') return undefined;
+  const title = TextBlockUtils.empty(
+    namespaceTitleWidth(measurer, theme, box.label),
+    namespaceTitleHeight(measurer, theme, box.label),
+  );
+  const asBig = (folder ?? PACKAGE).asBig(
+    title,
+    HorizontalAlignment.LEFT,
+    TextBlockUtils.EMPTY_TEXT_BLOCK,
+    box.width,
+    box.height,
+    new SymbolContext(null, null),
+    HorizontalAlignment.CENTER,
+  );
+  const orig = asBig.getMagneticBorder!();
+  return {
+    getForceAt: (position): UTranslate =>
+      orig.getForceAt({ x: position.x - box.x, y: position.y - box.y }, UNUSED_BOUNDER),
+  };
+}
+
+/** cdd2-T12: a namespace's clip rect (`NamespaceGeo.x/y/width/height`,
+ *  `Cluster#setPosition` verbatim) plus its {@link clusterMagneticBorder}. */
+export function clusterClipRect(
+  ns: MagneticClusterBox & { readonly usymbol?: string },
+  theme: Theme,
+  measurer: StringMeasurer,
+): ClipRect {
+  const rect = { x: ns.x, y: ns.y, width: ns.width, height: ns.height };
+  const border = clusterMagneticBorder(ns, ns.usymbol, theme, measurer);
+  return border !== undefined ? { ...rect, magneticBorder: border } : rect;
+}
+
+/**
+ * cdd2-T12 (CLIP-1a): `SvekEdge#drawU`'s cluster arm (`SvekEdge.java:
+ * 927-931,938-941`) — for an end whose entity is a cluster, `todraw
+ * .moveStartPoint/moveEndPoint(getMagneticBorder().getForceAt(end))`
+ * (`DotPath.java:206-216,229-234`). The extremity is drawn translated by the
+ * same force (`:1124,1138`); this port draws it at the moved end point, so
+ * it follows. A `MagneticBorderNone` cluster still moves by `(0, 0)`, as
+ * upstream does (observable only through the removal branch on a zero-chord
+ * first bezier).
+ */
+export function applyClusterMagneticBorders(
+  points: Array<{ x: number; y: number }>,
+  startId: string | undefined,
+  endId: string | undefined,
+  clusterRects: ReadonlyMap<string, ClipRect>,
+): Array<{ x: number; y: number }> {
+  let result = points;
+  const tail = startId !== undefined ? clusterRects.get(startId) : undefined;
+  if (tail !== undefined) {
+    const f = forceAt(tail, result[0]!);
+    result = movePointsStart(result, f.dx, f.dy);
+  }
+  const head = endId !== undefined ? clusterRects.get(endId) : undefined;
+  if (head !== undefined) {
+    const f = forceAt(head, result[result.length - 1]!);
+    result = movePointsEnd(result, f.dx, f.dy);
+  }
+  return result;
+}
+
+function forceAt(rect: ClipRect, at: { x: number; y: number }): { dx: number; dy: number } {
+  if (rect.magneticBorder === undefined) return { dx: 0, dy: 0 };
+  const f = rect.magneticBorder.getForceAt(at);
+  return { dx: f.getDx(), dy: f.getDy() };
 }
 
 export function packageEndpointAnchors(ast: ClassDiagramAST, clusterNsIds: ReadonlySet<string>): Map<string, string> {

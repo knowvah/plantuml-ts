@@ -13,7 +13,7 @@ export type { Member, Visibility };
 import type { UrlInfo } from './class-url.js';
 export type { UrlInfo };
 
-import type { DiagramAnnotations } from '../../core/annotations/index.js';
+import type { DiagramAnnotations, DisplayPositioned } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 
@@ -199,6 +199,16 @@ export interface Namespace {
    * absent == `[]`.
    */
   tags?: string[];
+  /**
+   * cdd2-T19b: the group's OWN legend -- a `legend ... end legend` (or
+   * single-line `legend text`) written inside this container's body.
+   * Upstream `AbstractClassOrObjectDiagram#setLegend` routes it to
+   * `currentGroup.setLegend(legend)` whenever the current group is not the
+   * root (`objectdiagram/AbstractClassOrObjectDiagram.java:353-363`,
+   * `abel/Entity.java:101,551-557`); `ClusterHeader#getStereoBlock` draws it
+   * in the cluster header (`class-cluster-header.ts`). Absent == no legend.
+   */
+  legend?: DisplayPositioned;
 }
 
 // ---------------------------------------------------------------------------

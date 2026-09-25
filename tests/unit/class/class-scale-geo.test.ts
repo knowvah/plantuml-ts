@@ -294,14 +294,14 @@ describe('scaleClassGeometry — edges', () => {
       edges: [
         makeEdge({
           kalBox: {
-            start: { x: 1, y: 2, width: 10, height: 8, text: '1', textX: 3, textY: 9, textWidth: 6 },
+            start: { x: 1, y: 2, width: 10, height: 8, text: '1', textX: 3, textY: 9, textWidth: 6, position: 'DOWN' },
           },
         }),
       ],
     });
     const scaled = scaleClassGeometry(geo, 2, THEME_FONT_SIZE);
     expect(scaled.edges[0]!.kalBox).toEqual({
-      start: { x: 2, y: 4, width: 20, height: 16, text: '1', textX: 6, textY: 18, textWidth: 12 },
+      start: { x: 2, y: 4, width: 20, height: 16, text: '1', textX: 6, textY: 18, textWidth: 12, position: 'DOWN' },
     });
   });
 });

@@ -8,6 +8,7 @@ import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
+import { drawnEdgePoints } from './class-ink-dot-path.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
 import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 import { CARDINALITY_FONT_SIZE } from './class-layout-edge-labels.js';
@@ -25,6 +26,7 @@ import {
   addNamespaceRectInk,
   addNamespaceNodeInk,
   addNamespaceDatabaseInk,
+  addNamespaceStackInk,
   addClassicRectInk,
   addEmbedImageInk,
 } from './class-ink-shapes.js';
@@ -229,7 +231,11 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   }
   // A `usecase` leaf is drawn as a real `<ellipse>`, never as a classifier
   // box -- see `addEllipseInk`'s own doc comment for the jar evidence.
-  if (c.kind === 'usecase') {
+  // cdd2-T17 (R-1, `jixamu-89-ribo225`): an association point is the SAME
+  // bare ellipse -- `EntityImageAssociationPoint#drawU` draws only
+  // `UEllipse.build(SIZE, SIZE)` (`svek/image/EntityImageAssociationPoint
+  // .java:77-81`), no header/body composition and no `URectangle`.
+  if (c.kind === 'usecase' || c.kind === 'assoc-circle') {
     addEllipseInk(box, c.x, c.y, c.width, c.height);
     return;
   }
@@ -293,6 +299,15 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
  * non-`strictuml` case.
  */
 function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
+  // cdd2-T7b (R-8): the `stack` USymbol's own two-shape ink rule -- see
+  // `addNamespaceStackInk`'s doc comment. Keyed on `n.usymbol` directly
+  // (not a new `inkShape` bucket): `resolveNamespaceInkShape`
+  // (`class-geo-builders.ts`) never maps `stack` to one, since `stack`
+  // is outside that function's write-set for this task.
+  if (n.usymbol === 'stack') {
+    addNamespaceStackInk(box, n.x, n.y, n.width, n.height);
+    return;
+  }
   // cdd-T12: the two USymbol-container rules -- see `class-ink-shapes.ts`'s
   // own doc comments for each `LimitFinder` citation.
   if (n.inkShape === 'node') {
@@ -343,6 +358,22 @@ function addEdgeTextInk(box: InkBox, label: { x: number; y: number; width: numbe
 }
 
 /**
+ * cdd2-T13 (Q-9): the ADDITIVE role label's own `UText` ink. Upstream draws
+ * it through `SvekEdge#drawRoleLabel` (`svek/SvekEdge.java:1029-1063`,
+ * `role.drawU(ug.apply(new UTranslate(x + roleX, y + roleY)))`), inside the
+ * same `drawU` pass `LimitFinder` walks, so `LimitFinder#drawText`
+ * (`klimt/drawing/LimitFinder.java:217-225`) records every role line exactly
+ * like a quantifier line. `renderer-edge-extras.ts
+ * #renderEdgeCardinalityLabels` draws `e.roleLines` with the same `text(...)`
+ * call as the quantifier lines, so {@link addEdgeTextInk}'s rule applies.
+ * `nenexe-35-zere033`: the head role `items` (x 47.429 + 31.038) is the
+ * diagram's rightmost ink; without it our canvas was 2px narrow.
+ */
+function addRoleLinesInk(box: InkBox, e: EdgeGeo): void {
+  for (const line of [...(e.roleLines?.[0] ?? []), ...(e.roleLines?.[1] ?? [])]) addEdgeTextInk(box, line);
+}
+
+/**
  * The shared ink-point accumulation walk both `computeClassDocumentDims`
  * (dimension) and `computeClassInkShift` (N11, position) consume — one
  * `LimitFinder`-shaped pass over clusters/nodes/edges (`SvekResult#drawU`'s
@@ -390,13 +421,16 @@ export function buildInkBox(
     // contributes no ink of its own -- `EdgeGeo.consumedByOpaleNote`'s doc
     // comment; the note's own box already covers its Opale outline.
     if (e.consumedByOpaleNote === true) continue;
-    for (const p of e.points) addPoint(box, p.x, p.y);
+    // cdd2-T13 (Q-6): the post-extremity-move path -- see {@link
+    // drawnEdgePoints}.
+    for (const p of drawnEdgePoints(e)) addPoint(box, p.x, p.y);
     // G9/T16: every drawn label gets `LimitFinder#drawText`'s own box -- see
     // {@link addEdgeTextInk}. This replaced a documented "anchor point only"
     // simplification that `style-stereotype-on-arrow-3` disproved.
     for (const lbl of [e.label, e.tailLabel, e.headLabel, ...(e.labelLines ?? [])]) {
       if (lbl !== undefined) addEdgeTextInk(box, lbl);
     }
+    addRoleLinesInk(box, e);
     // cdd-T35: the main label's own `TextBlockMarged` margin -- see
     // {@link addEdgeLabelMarginInk}'s own doc comment.
     addEdgeLabelMarginInk(box, e);

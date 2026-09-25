@@ -182,6 +182,37 @@ describe('A2a/M5 — the note operand of the merged label block', () => {
   it('is absent on a link with no note', () => {
     expect(inline('class A\nclass B\nA --> B').edges[0]?.noteBox).toBeUndefined();
   });
+
+  // cdd2-T19c: `position` (draw order), `back`/`line` (the note's own
+  // #color), and `lineAtoms` (creole/sprite passthrough) — carried through
+  // from `Relationship`/`measureNote` so the renderer can recover them.
+  it('carries the relationship`s own linkNotePosition, defaulting to bottom', () => {
+    const bottomEdge = geo.edges.find((e) => e.to === 'titi')!;
+    expect(bottomEdge.noteBox?.position).toBe('bottom');
+    const leftEdge = geo.edges.find((e) => e.to === 'titi1')!;
+    expect(leftEdge.noteBox?.position).toBe('left');
+  });
+
+  it('carries the note-on-link`s own #color (lipazi: #red and #blue)', () => {
+    const redEdge = geo.edges.find((e) => e.to === 'titi')!;
+    expect(redEdge.noteBox?.back).toBe('red');
+    expect(redEdge.noteBox?.line).toBeUndefined();
+    const blueEdge = geo.edges.find((e) => e.to === 'titi1')!;
+    expect(blueEdge.noteBox?.back).toBe('blue');
+  });
+
+  it('carries measureNote`s own creole/sprite atom breakdown (lineAtoms)', () => {
+    const edge = geo.edges.find((e) => e.to === 'titi')!;
+    expect(edge.noteBox?.lineAtoms).toHaveLength(1);
+    expect(edge.noteBox?.lineAtoms?.[0]?.map((a) => (a.kind === 'text' ? a.text : a.kind))).toEqual(['note red']);
+  });
+
+  it('nuvake-96-gofe203: carries the compound #color;line:...;text:... spec (line wired, text dropped)', () => {
+    const nuvake = fixture('nuvake-96-gofe203');
+    const edge = nuvake.edges.find((e) => e.to === 'Foo')!;
+    expect(edge.noteBox?.back).toBe('red');
+    expect(edge.noteBox?.line).toBe('blue');
+  });
 });
 
 // ---------------------------------------------------------------------------

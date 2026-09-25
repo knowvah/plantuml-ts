@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildNoteGraphParts, mapNoteGeos } from '../../../src/diagrams/class/note-layout.js';
 import { resolveTips } from '../../../src/diagrams/class/note-tips-resolve.js';
+import { clusterMagneticBorder, type ClipRect } from '../../../src/diagrams/class/class-shield-helpers.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
@@ -486,6 +487,89 @@ describe(
     });
   },
 );
+
+// cdd2-T19a: a note connector's end on a package cluster gets the SAME
+// magnetic-border force a class-edge cluster end does (`SvekEdge.java:
+// 927-941`) — the note link is a `SvekEdge` too (`CommandFactoryNoteOnEntity
+// .java:342`). The raw (pre-clip) end point (230, 205) sits INSIDE the
+// cluster rect — the same reason `dot` routes a cluster-anchored edge to a
+// point strictly inside the cluster box in the first place
+// (`Cluster#getSpecialPointId`) — so `groupConnectorPoints` selects it as
+// the force end via raw containment (see that function's own doc comment).
+describe('mapNoteGeos — note connector cluster magnetic border (cdd2-T19a, SvekEdge.java:927-941)', () => {
+  it('applies the package magnetic force to a note connector ending on a package cluster', () => {
+    const plain: ClassNote = { id: '__note_0', target: 'pkg', position: 'top', text: 'hi' };
+    const anchors = new Map([['pkg', 'zaent-pkg']]);
+    const { measurements, groups } = buildNoteGraphParts([plain], defaultTheme, measurer, anchors);
+    const endPoint = { x: 230, y: 205 };
+    const result = {
+      nodes: [
+        {
+          id: '__note_0',
+          x: 200,
+          y: 50,
+          width: measurements.get('__note_0')!.width,
+          height: measurements.get('__note_0')!.height,
+        },
+      ],
+      edges: [{ id: '__noteedge___note_0', points: [{ x: 300, y: 100 }, endPoint] }],
+      width: 0,
+      height: 0,
+    };
+    const ns = { x: 100, y: 200, width: 150, height: 100, label: 'pkg' };
+    const border = clusterMagneticBorder(ns, undefined, defaultTheme, measurer)!;
+    const clusterRects = new Map<string, ClipRect>([
+      ['pkg', { x: ns.x, y: ns.y, width: ns.width, height: ns.height, magneticBorder: border }],
+    ]);
+    const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer }, { clusterRects });
+
+    const expectedDy = border.getForceAt(endPoint).getDy();
+    expect(expectedDy).toBeGreaterThan(0);
+    expect(geos[0]!.connector.at(-1)!.x).toBeCloseTo(230, 9);
+    expect(geos[0]!.connector.at(-1)!.y).toBeCloseTo(205 + expectedDy, 9);
+  });
+
+  // Regression for the bug this task's own probe found (jar-verified
+  // `pecabi-95-demu756`): the note's own connector start (300, 100) also
+  // sits in the force's geometric band (`getForceAt` is nonzero there too,
+  // asserted below) -- passing `group.target` unconditionally to BOTH ends
+  // (the clip's own safe trick) would wrongly push this already-correct
+  // point. Only RAW containment in the cluster rect may select an end.
+  it('leaves the note-side start point untouched even though it geometrically satisfies the same ramp force', () => {
+    const plain: ClassNote = { id: '__note_0', target: 'pkg', position: 'top', text: 'hi' };
+    const anchors = new Map([['pkg', 'zaent-pkg']]);
+    const { measurements, groups } = buildNoteGraphParts([plain], defaultTheme, measurer, anchors);
+    const startPoint = { x: 300, y: 100 };
+    const endPoint = { x: 230, y: 205 };
+    const result = {
+      nodes: [
+        {
+          id: '__note_0',
+          x: 200,
+          y: 50,
+          width: measurements.get('__note_0')!.width,
+          height: measurements.get('__note_0')!.height,
+        },
+      ],
+      edges: [{ id: '__noteedge___note_0', points: [startPoint, endPoint] }],
+      width: 0,
+      height: 0,
+    };
+    const ns = { x: 100, y: 200, width: 150, height: 100, label: 'pkg' };
+    const border = clusterMagneticBorder(ns, undefined, defaultTheme, measurer)!;
+    expect(border.getForceAt(startPoint).getDy()).toBeGreaterThan(0);
+    const clusterRects = new Map<string, ClipRect>([
+      ['pkg', { x: ns.x, y: ns.y, width: ns.width, height: ns.height, magneticBorder: border }],
+    ]);
+    const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer }, { clusterRects });
+
+    // The start (outside the rect) is untouched; the end (inside the rect,
+    // the actual cluster anchor) DID move -- proving the force logic ran at
+    // all, not merely that nothing moved.
+    expect(geos[0]!.connector[0]).toEqual(startPoint);
+    expect(geos[0]!.connector.at(-1)!.y).not.toBeCloseTo(endPoint.y, 6);
+  });
+});
 
 // G2 N56: note per-line height == the MAX of every 'text' atom's own height
 // on that line (`Math.max(font.size, 10)`), NOT a flat `NOTE_FONT_SIZE` --

@@ -11,6 +11,7 @@
  * follow).
  */
 import type { UrlInfo } from './class-url.js';
+import type { ClusterHeaderStereo } from './class-cluster-header.js';
 
 export interface NamespaceGeo {
   id: string;
@@ -96,4 +97,10 @@ export interface NamespaceGeo {
    * `dot-sync-report.ts` staying unchanged across this field's addition.
    */
   hidden?: boolean;
+  /** cdd2-T19b: `ClusterHeader#getStereo()` -- the displayed stereotype
+   *  merged with the group's own legend, pre-built at layout time with its
+   *  top-left at (0, 0) (`class-cluster-header.ts`). Placed by the cluster
+   *  draw site (`USymbolFolder#asBig`/`USymbolRectangle#asBig`/any other
+   *  `USymbol#asBig`). Absent == `TextBlockUtils.empty(0, 0)`. */
+  clusterHeaderStereo?: ClusterHeaderStereo;
 }

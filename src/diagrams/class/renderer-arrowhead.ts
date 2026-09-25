@@ -58,6 +58,7 @@ import { buildDotPathFromSplinePoints } from '../../core/svek/svek-edge-geometry
 import type { LinkDecor } from './ast.js';
 import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type { EdgeGeo } from './layout.js';
+import { kalEndTranslate, movePointsEnd, movePointsStart, plus } from './renderer-arrowhead-move.js';
 
 /** `class/ast.ts#LinkDecor` -> `core/svek/extremity/link-decor.ts
  *  #LinkDecorName` — class's own decor union is already RESOLVED (parsed
@@ -183,7 +184,8 @@ export interface EdgeArrowheads {
    */
   readonly tailTrim?: Point2D;
   /** Head-side counterpart of {@link tailTrim} — `undefined` when the head
-   *  carries no decor. */
+   *  carries no decor. cdd2-T12: both trims include their end's Kal
+   *  translate (`translateForKal.compose(...)`, `SvekEdge.java:558-561`). */
   readonly headTrim?: Point2D;
 }
 
@@ -317,44 +319,39 @@ export function buildEdgeArrowheads(
     strokeWidth: (options.resolvedStrokeWidth ?? edge.strokeWidth ?? 1) / k,
     k,
   };
-  const tail = drawTailExtremity(tailName, edge.points[0]!, edge.points[1]!, ctx);
-  const head = drawHeadExtremity(
-    headName,
-    edge.points[edge.points.length - 2]!,
-    edge.points[edge.points.length - 1]!,
-    ctx,
-  );
+  // cdd2-T12 (Q-2): `getExtremitySimplier` (`SvekEdge.java:548-561`)
+  // translates the decoration's centre by `kal.getTranslateForDecoration()`
+  // and moves the path by `translateForKal.compose(decorTrim)` -- the angle
+  // stays the PRE-move one, so both points of the angle pair shift together.
+  const tk = kalEndTranslate(edge, 'start');
+  const hk = kalEndTranslate(edge, 'end');
+  const last = edge.points.length - 1;
+  const tail = drawTailExtremity(tailName, plus(edge.points[0]!, tk), plus(edge.points[1]!, tk), ctx);
+  const head = drawHeadExtremity(headName, plus(edge.points[last - 1]!, hk), plus(edge.points[last]!, hk), ctx);
 
   return {
     tail: tail.body,
     head: head.body,
     extraDefs: tail.extraDefs + head.extraDefs,
-    ...(tail.trim !== undefined ? { tailTrim: tail.trim } : {}),
-    ...(head.trim !== undefined ? { headTrim: head.trim } : {}),
+    ...(tail.trim !== undefined ? { tailTrim: plus(tail.trim, tk) } : {}),
+    ...(head.trim !== undefined ? { headTrim: plus(head.trim, hk) } : {}),
   };
 }
 
 /**
  * Shortens `points` so the connecting `<path>` stops at the outer edge of
  * a drawn extremity instead of running underneath it -- the RENDER-side
- * counterpart of `SvekEdge#drawU`'s `dotPath.moveStartPoint`/`.moveEndPoint`
- * calls (`SvekEdge.ts:187,197`), applied here to the flat `EdgeGeo.points`
- * list `class/renderer.ts#buildPathData` consumes instead of to a
- * `DotPath`'s bezier-object array (class's renderer deliberately does not
- * build a `DotPath` at all -- see this module's header doc comment).
+ * counterpart of `SvekEdge#getExtremitySimplier`'s `dotPath.moveStartPoint`/
+ * `.moveEndPoint` (`SvekEdge.java:558-561`), applied to the flat
+ * `EdgeGeo.points` list `class/renderer.ts#buildPathData` consumes.
  *
- * Mirrors `DotPath.ts#moveStartPointXY`/`#moveEndPoint`'s SIMPLE branch
- * (shift the first/last bezier's own start/end point AND its adjacent
- * control point by the trim delta) exactly: for a `1 + 3n`-point spline,
- * that is `points[0]`/`points[1]` (tail) and `points[len-1]`/`points[len-2]`
- * (head); for a plain 2-point secant (no control points at all -- the
- * straight-line fallback `buildPathData` itself falls back to), the single
- * start/end point is shifted directly. NOT ported: `moveStartPointXY`'s
- * segment-consuming branch (trim magnitude >= the first bezier segment's own
- * length, which drops that whole segment) -- unreached by every corpus
- * fixture this iteration surveyed (every decorationLength this port draws is
- * well under a typical single-segment spline length); named as a residual
- * if a future fixture needs it, not ported speculatively.
+ * cdd2-T12: `tailTrim`/`headTrim` are the WHOLE upstream move
+ * (`translateForKal.compose(decorTrim)`, see {@link buildEdgeArrowheads}),
+ * and the move is `DotPath#moveStartPoint`/`#moveEndPoint` whole
+ * (`renderer-arrowhead-move.ts`) -- including `DotPath.java:206-211`'s
+ * first-bezier removal branch, which `rezoba-58-xaze387`, `jojime-80-savu279`
+ * and `lojiga-09-meka859` reach (CLIP-1b). Start first, then end, as
+ * `SvekEdge.java:680-685` builds `extremity1` before `extremity2`.
  */
 export function applyDecorTrim(
   points: EdgeGeo['points'],
@@ -363,18 +360,13 @@ export function applyDecorTrim(
 ): EdgeGeo['points'] {
   if (tailTrim === undefined && headTrim === undefined) return points;
   if (points.length < 2) return points;
-  const out = points.map((p) => ({ ...p }));
-  const last = out.length - 1;
-  if (tailTrim !== undefined) {
-    out[0] = { x: out[0]!.x + tailTrim.x, y: out[0]!.y + tailTrim.y };
-    if (out.length >= 4) out[1] = { x: out[1]!.x + tailTrim.x, y: out[1]!.y + tailTrim.y };
-  }
-  if (headTrim !== undefined) {
-    out[last] = { x: out[last]!.x + headTrim.x, y: out[last]!.y + headTrim.y };
-    if (out.length >= 4) out[last - 1] = { x: out[last - 1]!.x + headTrim.x, y: out[last - 1]!.y + headTrim.y };
-  }
+  let out: EdgeGeo['points'] = points;
+  if (tailTrim !== undefined) out = movePointsStart(out, tailTrim.x, tailTrim.y);
+  if (headTrim !== undefined) out = movePointsEnd(out, headTrim.x, headTrim.y);
   return out;
 }
+
+export { movePointsStart, movePointsEnd, kalEndTranslate } from './renderer-arrowhead-move.js';
 
 // cdd-T29 R2: `EdgeExtremityInk`/`edgeExtremityInk` moved to `renderer-
 // arrowhead-ink.ts` when this file's `scaleK` threading pushed it back
