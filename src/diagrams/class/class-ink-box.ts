@@ -344,16 +344,26 @@ function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
  * `y - 1` at 6. Jar's whole drawing therefore sat 0.389px lower than ours,
  * uniformly, on an otherwise byte-identical 143x55 canvas.
  *
- * `renderer-edge.ts` draws `label`, `labelLines`, `tailLabel` and `headLabel`
- * through one identical `text(...)` call, so `LimitFinder` sees one identical
- * shape for each and all four get this rule. Line height is
- * `CARDINALITY_FONT_SIZE` by construction — `class-edge-label-anchor.ts
- * #multiLineLabelAnchor` steps successive baselines by exactly that.
+ * `renderer-edge.ts` draws `label`/`labelLines` (the main arrow label, its
+ * OWN font -- `arrowLabelTextAttrs`) and `tailLabel`/`headLabel` (the
+ * cardinality quantifiers, `renderer-edge-extras.ts
+ * #renderEdgeCardinalityLabels`) through the SAME `text(...)` shape, so
+ * `LimitFinder` sees one identical rule for each -- but the two families'
+ * `height` differs whenever a diagram overrides one font and not the
+ * other (T11, cdd3 Q-5): the main label's stays `CARDINALITY_FONT_SIZE`
+ * (its default, unchanged by this task); the cardinality family (`tailLabel`/
+ * `headLabel`/role lines) takes the caller's resolved `cardinalityFontSize`
+ * (`theme.cardinalityFontSize`, already cascade-populated --
+ * `style-cascade-class-arrow-font.ts#computeCardinalityFontOverride`).
  */
 const TEXT_INK_BASELINE_DROP = 1.5;
 
-function addEdgeTextInk(box: InkBox, label: { x: number; y: number; width: number }): void {
-  addPoint(box, label.x, label.y - CARDINALITY_FONT_SIZE + TEXT_INK_BASELINE_DROP);
+function addEdgeTextInk(
+  box: InkBox,
+  label: { x: number; y: number; width: number },
+  fontSize: number = CARDINALITY_FONT_SIZE,
+): void {
+  addPoint(box, label.x, label.y - fontSize + TEXT_INK_BASELINE_DROP);
   addPoint(box, label.x + label.width, label.y + TEXT_INK_BASELINE_DROP);
 }
 
@@ -365,12 +375,28 @@ function addEdgeTextInk(box: InkBox, label: { x: number; y: number; width: numbe
  * (`klimt/drawing/LimitFinder.java:217-225`) records every role line exactly
  * like a quantifier line. `renderer-edge-extras.ts
  * #renderEdgeCardinalityLabels` draws `e.roleLines` with the same `text(...)`
- * call as the quantifier lines, so {@link addEdgeTextInk}'s rule applies.
+ * call as the quantifier lines, so {@link addEdgeTextInk}'s rule applies --
+ * T11: at `cardinalityFontSize`, the SAME font the role line itself draws at
+ * (`cardinalityFont`, `GraphvizImageBuilder.java:236-237`).
  * `nenexe-35-zere033`: the head role `items` (x 47.429 + 31.038) is the
  * diagram's rightmost ink; without it our canvas was 2px narrow.
  */
-function addRoleLinesInk(box: InkBox, e: EdgeGeo): void {
-  for (const line of [...(e.roleLines?.[0] ?? []), ...(e.roleLines?.[1] ?? [])]) addEdgeTextInk(box, line);
+function addRoleLinesInk(box: InkBox, e: EdgeGeo, cardinalityFontSize: number): void {
+  for (const line of [...(e.roleLines?.[0] ?? []), ...(e.roleLines?.[1] ?? [])]) {
+    addEdgeTextInk(box, line, cardinalityFontSize);
+  }
+}
+
+/**
+ * T11 (cdd3, Q-5): {@link buildInkBox}'s two render-time constants, grouped
+ * into one options object to stay under this project's 5-param cap.
+ * `cardinalityFontSize` defaults to the pre-T11 `CARDINALITY_FONT_SIZE`
+ * constant so every caller that omits it (hand-built test geometries)
+ * stays byte-identical.
+ */
+export interface InkBoxOptions {
+  readonly iconSize?: number | undefined;
+  readonly cardinalityFontSize?: number | undefined;
 }
 
 /**
@@ -385,13 +411,15 @@ export function buildInkBox(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  iconSize: number | undefined = VISIBILITY_ICON_SIZE,
+  options: InkBoxOptions = {},
 ): InkBox {
+  const iconSize = options.iconSize ?? VISIBILITY_ICON_SIZE;
+  const cardinalityFontSize = options.cardinalityFontSize ?? CARDINALITY_FONT_SIZE;
   // #lizard forgives -- pre-existing CCN violation, unchanged by the
   // usecase-ellipse ink task: a flat per-shape-family accumulation loop,
   // not branchy logic (each `if` is one independent ink source).
   const box = newInkBox();
-  for (const c of classifiers) addClassifierInk(box, c, iconSize ?? VISIBILITY_ICON_SIZE);
+  for (const c of classifiers) addClassifierInk(box, c, iconSize);
   for (const n of namespaces) addNamespaceInk(box, n);
   // G2/N13: a dropped member-tip note (unresolved `::member`) draws
   // NOTHING at all -- jar's own ink extent excludes it (`fupope-12-zoku847`'s
@@ -426,11 +454,17 @@ export function buildInkBox(
     for (const p of drawnEdgePoints(e)) addPoint(box, p.x, p.y);
     // G9/T16: every drawn label gets `LimitFinder#drawText`'s own box -- see
     // {@link addEdgeTextInk}. This replaced a documented "anchor point only"
-    // simplification that `style-stereotype-on-arrow-3` disproved.
-    for (const lbl of [e.label, e.tailLabel, e.headLabel, ...(e.labelLines ?? [])]) {
+    // simplification that `style-stereotype-on-arrow-3` disproved. T11: the
+    // main label (`label`/`labelLines`) and the cardinality family
+    // (`tailLabel`/`headLabel`) are split into separate loops -- they draw
+    // at DIFFERENT fonts whenever a diagram overrides one and not the other.
+    for (const lbl of [e.label, ...(e.labelLines ?? [])]) {
       if (lbl !== undefined) addEdgeTextInk(box, lbl);
     }
-    addRoleLinesInk(box, e);
+    for (const lbl of [e.tailLabel, e.headLabel]) {
+      if (lbl !== undefined) addEdgeTextInk(box, lbl, cardinalityFontSize);
+    }
+    addRoleLinesInk(box, e, cardinalityFontSize);
     // cdd-T35: the main label's own `TextBlockMarged` margin -- see
     // {@link addEdgeLabelMarginInk}'s own doc comment.
     addEdgeLabelMarginInk(box, e);

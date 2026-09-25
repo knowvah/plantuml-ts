@@ -91,6 +91,12 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     ['classbackgroundcolor'],
     (acc, _v, _color, paint) => {
       acc.classBackground = paint;
+      // T11 (cdd3, Q-4 probe c): marks `classBackground` as an EXPLICIT
+      // skinparam override -- see `theme-graph-colors-c.ts
+      // #classBackgroundExplicit`'s own doc comment for why the generic
+      // tag's fill needs this to distinguish an override from the
+      // built-in default.
+      acc.classBackgroundExplicit = true;
       // CDD T6FU: `classBackgroundColor` registers a `{element, class_}`
       // BackGroundColor style and `classHeaderBackgroundColor` a
       // `{element, class_, header}` one -- and BOTH match the

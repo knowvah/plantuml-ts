@@ -10,6 +10,7 @@
  */
 import type { ClassifierGeo } from './layout.js';
 import type { ScaledTheme } from './class-scale-geo.js';
+import type { Paint } from '../../core/paint.js';
 import { scaleDashArrayString } from './class-scale-geo-row.js';
 import { rect, text, ellipse, path, image } from '../../core/svg.js';
 import {
@@ -182,25 +183,46 @@ export function renderBadgeSpriteImage(
  * Color)`), a DIFFERENT selector from both `class_`'s own fill AND the
  * document/root background -- the earlier `caboco-62-jula911` citation
  * (default theme, non-transparent) couldn't distinguish the two since
- * `theme.colors.background` ALSO defaults to `#FFFFFF`. A `<style> class {
- * generic { BackgroundColor ... } } }` override (jar-verified honored,
- * `camuna-58-veca254`) is NOT yet wired here -- no corpus fixture reaches
- * zero-diff on that path alone (that fixture has unrelated, larger diffs);
- * ledgered as a follow-up, not attempted this iteration. Text fill
+ * `theme.colors.background` ALSO defaults to `#FFFFFF`. Text fill
  * is the SAME hardcoded `#000000` every other classifier text row uses
  * (`renderRowText`'s own doc comment); `font-style="italic"` always
  * (`FontParam.CLASS_STEREOTYPE`'s own default face, `FontParam.java:59`).
+ *
+ * T11 (cdd3, Q-4): a `<style> class { generic { BackgroundColor/LineColor
+ * } } }` override -- or a bare `class { BackgroundColor }` (no nested
+ * `generic` block, subset-match, `style-cascade-class-snames.ts
+ * #GENERIC_SNAMES`'s own doc comment) -- now wins via `theme.colors.graph
+ * .genericCascadeBackground`/`genericCascadeBorder`
+ * (`style-cascade-class-generic.ts`). `skinparam classBackgroundColor`
+ * (no `<style>` block at all) wins at the NEXT tier, via the
+ * `classBackgroundExplicit` marker (`theme-graph-colors-c.ts`'s own doc
+ * comment for why a marker, not a plain `??`, is needed). jar-verified
+ * `camuna-58-veca254`/`nafiki-56-jixu680` (fill) and `gen-c.puml`
+ * (skinparam tier, cdd2-T13 probe c).
  */
 const GENERIC_TAG_BACKGROUND = '#FFFFFF';
+
+/** T11 (cdd3, Q-4): {@link renderGenericTag}'s fill/border cascade -- split
+ *  out purely to keep that function's own NLOC under this project's cap. */
+function genericTagPaint(theme: ScaledTheme): { fill: Paint; stroke: Paint } {
+  const g = theme.colors.graph;
+  const explicitClassBackground = g.classBackgroundExplicit === true ? g.classBackground : undefined;
+  return {
+    fill: g.genericCascadeBackground ?? explicitClassBackground ?? GENERIC_TAG_BACKGROUND,
+    stroke: g.genericCascadeBorder ?? theme.colors.border,
+  };
+}
+
 export function renderGenericTag(
   geo: ClassifierGeo,
   tag: NonNullable<ClassifierGeo['genericTag']>,
   theme: ScaledTheme,
 ): string {
+  const { fill, stroke } = genericTagPaint(theme);
   return (
     rect(geo.x + tag.rectX, geo.y + tag.rectY, tag.rectWidth, tag.rectHeight, {
-      fill: GENERIC_TAG_BACKGROUND,
-      stroke: theme.colors.border,
+      fill,
+      stroke,
       strokeWidth: theme.scaleK,
       strokeDasharray: scaleDashArrayString('2,2', theme.scaleK),
     }) +

@@ -19,8 +19,7 @@ import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
-import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
-import { CARDINALITY_FONT_SIZE } from './class-layout-helpers.js';
+import { resolveArrowLabelFont, resolveCardinalityFont } from '../../core/arrow-label-font.js';
 import { KAL_STROKE_THICKNESS } from './class-kal.js';
 
 /**
@@ -222,15 +221,25 @@ export function renderEdgeConstraint(geo: EdgeGeo, theme: ScaledTheme, measurer:
  * for a hand-built `EdgeGeo` test literal that omits the field (mirrors
  * every other T6 field's optional-with-fallback contract, e.g.
  * `NoteGeo.lineAtoms`).
+ *
+ * T11 (cdd3, Q-5): font size/family/weight/style/colour all now come from
+ * {@link resolveCardinalityFont} (`GraphvizImageBuilder.java:236-237`'s
+ * `cardinalityFont`) instead of the hardcoded `CARDINALITY_FONT_SIZE`/
+ * `theme.fontFamily` pair -- `font-weight`/`font-style` mirror
+ * `renderer-edge.ts#arrowLabelTextAttrs`'s own `'700'`/`'italic'`
+ * conversion (the raw numeric weight jar's deterministic-text SVG emits).
+ * jar-verified `camuna-58-veca254`/`nafiki-56-jixu680`.
  */
-export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme, cardinalityColor: string): string[] {
+export function renderEdgeCardinalityLabels(geo: EdgeGeo, theme: ScaledTheme): string[] {
   const parts: string[] = [];
-  // cdd-B8FU: `CARDINALITY_FONT_SIZE` (`core/graph-layout-build-edges.ts`,
-  // shared machinery for the DOT `labelfontsize` hint) is independent of
-  // `theme.fontSize` -- scaled here, in class-only code, to match
-  // `geo.quantifierLines`/`.roleLines`/`.tailLabel`/`.headLabel`'s
-  // already-scaled positions (`class-scale-geo-edge.ts`).
-  const font = { fill: cardinalityColor, fontSize: CARDINALITY_FONT_SIZE * theme.scaleK, fontFamily: theme.fontFamily };
+  const cardinalityFont = resolveCardinalityFont(theme);
+  const font = {
+    fill: cardinalityFont.color,
+    fontSize: cardinalityFont.size * theme.scaleK,
+    fontFamily: cardinalityFont.family,
+    ...(cardinalityFont.weight === 'bold' ? { fontWeight: '700' as const } : {}),
+    ...(cardinalityFont.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
+  };
   if (geo.quantifierLines !== undefined) {
     // cdd-T17 (M8): draw each end's ADDITIVE role lines right after that
     // SAME end's quantifier lines -- `SvekEdge.java:956-980`'s draw order

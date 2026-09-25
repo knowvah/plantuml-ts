@@ -69,6 +69,9 @@ export interface SkinparamAccumulator {
   arrow: string | undefined;
   noteBackground: string | undefined;
   classBackground: Paint | undefined;
+  /** T11 (cdd3, Q-4 probe c): set alongside `classBackground` -- see
+   *  `theme-graph-colors-c.ts#classBackgroundExplicit`'s own doc comment. */
+  classBackgroundExplicit: true | undefined;
   /** CDD T6FU: `skinparam classHeaderBackgroundColor` / the nested-block
    *  form `skinparam class { HeaderBackgroundColor X }` (both normalise to
    *  the SAME key) -- `FromSkinparamToStyle.java:196` maps it onto the
@@ -242,6 +245,7 @@ const SCALAR_FIELD_NAMES = [
   'arrow',
   'noteBackground',
   'classBackground',
+  'classBackgroundExplicit',
   'classHeaderBackground',
   'interfaceBackground',
   'enumBackground',

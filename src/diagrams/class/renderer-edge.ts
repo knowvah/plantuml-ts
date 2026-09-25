@@ -26,7 +26,7 @@ import {} from './class-lollipop.js';
 import {} from './renderer-classifier-box.js';
 import {} from './class-namespace-shape.js';
 import {} from './class-shadow.js';
-import { resolveArrowLabelFont, resolveCardinalityFontColor } from '../../core/arrow-label-font.js';
+import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import {
   renderEdgeVisibilityIcon,
   renderEdgeNoteBox,
@@ -441,12 +441,12 @@ export function renderEdge(
   if (visibilityIconMarkup !== '') parts.push(visibilityIconMarkup);
   // T3: resolved here (not up front) -- `labelColor` feeds both the
   // whole-label glyph below and {@link renderEdgeMainLabel}'s main-label/
-  // per-line-glyph `<text>`/`<polygon>` fills; `cardinalityColor` feeds
-  // only {@link renderEdgeCardinalityLabels}'s tail/head labels. See
-  // `arrow-label-font.ts`'s own doc comments (D2/D5) for the upstream
-  // citations -- never computed by hand.
+  // per-line-glyph `<text>`/`<polygon>` fills. See `arrow-label-font.ts`'s
+  // own doc comments (D2/D5) for the upstream citations -- never computed
+  // by hand. T11: `renderEdgeCardinalityLabels` now resolves its OWN
+  // `cardinalityColor` internally (`resolveCardinalityFont`, alongside
+  // size/family/weight/style).
   const labelColor = resolveArrowLabelFont(theme).color;
-  const cardinalityColor = resolveCardinalityFontColor(theme);
   // G2 item 44: the whole-label magic-arrow glyph -- see {@link
   // magicArrowPolygon}. Drawn before the label text (`mergeLR(arrow,
   // label)`, `SvekEdge.java:284,304`) -- part of the SAME `labelOnly`
@@ -473,7 +473,7 @@ export function renderEdge(
   } else {
     parts.push(...labelParts, noteBoxResult.body);
   }
-  parts.push(...renderEdgeCardinalityLabels(geo, theme, cardinalityColor));
+  parts.push(...renderEdgeCardinalityLabels(geo, theme));
   // cdd-T7 (A5/M4, A2a/M6): the `-0)-` family's mid-link decoration --
   // `SvekEdge.java:982-988` draws it AFTER the tail/head cardinality text,
   // over the TRIMMED point list (the same `dotPath` object the earlier

@@ -1,11 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import {
-  computeArrowFontOverride,
-  computeCardinalityFontOverride,
   computeClassStyleCascadeOverrides,
   computeClassTagCascadeGenerations,
   resolveClassTagCascadeEntry,
 } from '../../../src/core/style-cascade-class.js';
+// T11 (cdd3): moved to a sibling module -- see that file's own doc comment.
+import {
+  computeArrowFontOverride,
+  computeCardinalityFontOverride,
+} from '../../../src/core/style-cascade-class-arrow-font.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 
@@ -568,6 +571,29 @@ describe('computeCardinalityFontOverride (T1, D3)', () => {
   it("defaultTheme's own cardinality font is 13/sans-serif -- the plantuml.skin arrow default (:307/:6), used when no override resolves", () => {
     expect(defaultTheme.cardinalityFontSize).toBe(13);
     expect(defaultTheme.cardinalityFontFamily).toBe('sans-serif');
+  });
+
+  // T11 (cdd3, Q-5): camuna-58-veca254's own `<style>` block --
+  // `arrow { cardinality { FontStyle italic } } }` -- jar draws every
+  // cardinality `<text>` `font-style="italic"`.
+  it('camuna-58-veca254: arrow.cardinality { FontStyle italic } resolves cardinalityFontStyle to the raw string', () => {
+    const override = computeCardinalityFontOverride(
+      styleMap({
+        arrow: { fontstyle: 'bold' },
+        'arrow.cardinality': { fontstyle: 'italic' },
+      }),
+    );
+    expect(override.cardinalityFontStyle).toBe('italic');
+  });
+
+  it('a bare arrow { FontStyle bold } (no cardinality block) falls through -- GraphvizImageBuilder.java:124-126 subset-match', () => {
+    const override = computeCardinalityFontOverride(styleMap({ arrow: { fontstyle: 'bold' } }));
+    expect(override.cardinalityFontStyle).toBe('bold');
+  });
+
+  it('no FontStyle declared at all leaves cardinalityFontStyle undefined', () => {
+    const override = computeCardinalityFontOverride(styleMap({ arrow: { fontsize: '10' } }));
+    expect(override.cardinalityFontStyle).toBeUndefined();
   });
 });
 

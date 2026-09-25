@@ -91,6 +91,9 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   // .classFontColorAutomatic`.
   ['classFontColorAutomatic', (acc) => acc.classFontColorAutomatic],
   ['classBackground', (acc) => acc.classBackground],
+  // T11 (cdd3, Q-4 probe c): see `theme-graph-colors-c.ts
+  // #classBackgroundExplicit`'s own doc comment.
+  ['classBackgroundExplicit', (acc) => acc.classBackgroundExplicit],
   ['classHeaderBackground', (acc) => acc.classHeaderBackground],
   // G2 N65 item 47: see `theme.ts#classCascadeRoundCorner`'s doc comment
   // for why a bare skinparam reuses that SAME field.

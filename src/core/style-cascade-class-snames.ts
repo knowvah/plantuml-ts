@@ -34,3 +34,11 @@ export const SPOT_SNAMES = ['root', 'element', 'spot', 'spotclass'] as const;
 export const NOTE_SNAMES = ['root', 'element', 'classdiagram', 'note'] as const;
 /** cdd-T15: `Kal.java:93-97` — a strict superset of {@link CLASS_SNAMES}. */
 export const QUALIFIED_SNAMES = [...CLASS_SNAMES, 'qualified'] as const;
+/** T11 (cdd3, Q-4): `EntityImageClassHeader.java:141-142`'s
+ *  `StyleSignatureBasic.of(root, element, classDiagram, class_, generic)`
+ *  -- the generic type-parameter tag's own fill/border signature. A strict
+ *  superset of {@link CLASS_SNAMES}, so a bare `class { BackgroundColor }`
+ *  (no nested `generic` block) already matches this query too --
+ *  `resolveStyleCascade`'s subset-match algorithm needs no separate
+ *  fallback tier for that case, jar-verified cdd2-T13 Q-4 probe a. */
+export const GENERIC_SNAMES = [...CLASS_SNAMES, 'generic'] as const;

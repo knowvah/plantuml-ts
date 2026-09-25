@@ -369,7 +369,11 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // slot counted in the dense-renumbering merge, even one that never draws.
   const markedEdges = edges.map((e) => (consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e));
 
-  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  // T11 (cdd3, Q-5): `cardinalityFontSize` rides alongside `iconSize` now (5-param cap on the callee).
+  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, {
+    iconSize: iconSizeOf(theme),
+    cardinalityFontSize: theme.cardinalityFontSize,
+  });
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
   // `effAst` the dot graph/geo builders above already read.
@@ -405,10 +409,9 @@ function assembleShiftedGeometry(
   namespaces: NamespaceGeo[],
   edges: EdgeGeo[],
   notes: NoteGeo[],
-  // G9/T12: the resolved `classAttributeIconSize` — a `#`/`~` visibility
-  // icon is a `UPolygon`, whose ink `LimitFinder` pads by 10px on each side
-  // (see `class-ink-box.ts#addVisibilityIconInk`).
-  iconSize: number,
+  // G9/T12: `classAttributeIconSize` + T11's `cardinalityFontSize`, grouped
+  // (5-param cap) -- see `class-ink-box.ts#addVisibilityIconInk`/`buildInkBox`.
+  inkOptions: { iconSize?: number; cardinalityFontSize?: number | undefined },
 ): ClassGeometry {
   // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
   // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
@@ -428,12 +431,12 @@ function assembleShiftedGeometry(
   // shrank the canvas width from 293 (jar 277, before this fix) to 85 (jar
   // 277) -- classifier ink is NOT excluded upstream, only the cluster's.
   const inkNamespaces = namespaces.filter((n) => n.hidden !== true);
-  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, iconSize);
+  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, inkOptions);
   // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
-  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, iconSize);
-  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, iconSize);
+  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, inkOptions);
+  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, inkOptions);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller

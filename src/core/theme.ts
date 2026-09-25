@@ -27,6 +27,7 @@ export interface Theme {
   cardinalityFontFamily?: string;
   /** SI26 D5: `<style> arrow { cardinality { FontColor } }`, resolved hex. Absent = inherit the arrow label colour (`GraphvizImageBuilder.java:124-126` signature `{root,element,<diagram>,arrow,cardinality}`; `plantuml.skin` has no `cardinality` block). Read by `arrow-label-font.ts#resolveCardinalityFontColor`. */
   cardinalityFontColor?: string;
+  /** T11 (cdd3, Q-5): `arrow.cardinality { FontStyle }`, UNPARSED (`GraphvizImageBuilder.java:124-126`); read by `arrow-label-font.ts#resolveCardinalityFont`. */ cardinalityFontStyle?: string;
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker (set only when the key
    *  was seen) — `SkinParam#getFontSize`'s middle tier between per-param
    *  skinparams and each FontParam's own default (SkinParam.java:441-448),
@@ -379,9 +380,9 @@ export type ThemeOverride = {
   cardinalityFontSize?: number;
   cardinalityFontFamily?: string;
   cardinalityFontColor?: string;
+  cardinalityFontStyle?: string;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
-  /** See {@link Theme.styleOverrides}. */
-  styleOverrides?: Record<string, Record<string, string>>;
+  /** See {@link Theme.styleOverrides}. */ styleOverrides?: Record<string, Record<string, string>>;
   /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
   defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
