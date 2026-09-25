@@ -330,8 +330,9 @@ export interface LeafSymbolInk {
 }
 
 /**
- * The ink extent of a usecase/actor leaf, from a `LimitFinder` walk over the
- * SAME `EntityImageDescription` instance shape that sizes it.
+ * The ink extent of a usecase/actor leaf specifically — a thin, opts-less
+ * wrapper (`opts: undefined`, exactly its pre-T8 behavior) over the general
+ * {@link measureEntityLeafInk} below.
  *
  * Upstream has ONE ink concept — walk what was drawn — and jar's extent for
  * an actor is the union of the drawn `UEllipse` head, the `UPath` body and
@@ -340,12 +341,6 @@ export interface LeafSymbolInk {
  * `(x - 1, y - 1)` corner is 1.5 above an actor's real drawn head, whose top
  * sits at `y + 0.5` — measured on `cacoma-43-poxu615`, where every shape in
  * the document is uniformly 1.5 off jar's as a result.
- *
- * Measuring here rather than in the ink walk is SI14's "share the
- * measurement OBJECT" shape: this is where the drawable is already
- * constructed, and it is the only place that holds the font/sprite context
- * the walk would otherwise have to have threaded down four call levels
- * through a seam the object engine shares.
  *
  * `undefined` when the walk records nothing (a symbol that draws no shape),
  * which keeps the caller's existing box rule in play rather than
@@ -362,8 +357,48 @@ export function measureUsecaseOrActorLeafInk(
   sprites?: SpriteDimsLookup,
 ): LeafSymbolInk | undefined {
   const node: LeafSizingSubject = { id: '', display, symbol };
-  const bounder = new MeasurerStringBounder(measurer);
-  const params = buildSizingEntityParams(node, fontSpec, { opts: undefined, sprites, measurer });
+  return measureEntityLeafInk(node, fontSpec, { opts: undefined, sprites, measurer });
+}
+
+/**
+ * The ink extent of ANY leaf symbol sized through `EntityImageDescription`
+ * (the `measureEntityLeaf`/`buildSizingEntityParams` shared construction),
+ * from a `LimitFinder` walk over the SAME instance shape `measureEntityLeaf`
+ * builds — generalizes `measureUsecaseOrActorLeafInk` above, which now
+ * delegates here with `opts: undefined`.
+ *
+ * Walked with the element's OWN `ctx` (`opts`/`sprites`/`measurer`), not a
+ * bare re-synthesis: a `<style>`-scoped override
+ * (`componentStyle`/`minimumWidth`/`guillemet`/`lineThickness`/font-size
+ * cascade — every field `buildSizingEntityParams` threads off `opts`) must
+ * size the ink exactly like it sizes the box, or a caller measuring ONE
+ * fixture's ink correctly can widen a DIFFERENT fixture whose leaf carries a
+ * real override (cdd2-T17: a probe that walked with `opts: undefined`
+ * unconditionally raised `gujigi-63-roki030` 576→578).
+ *
+ * `LimitFinder#drawRectangle` (`klimt/drawing/LimitFinder.ts#drawRectangle`,
+ * a faithful port of `klimt/drawing/LimitFinder.java:184-188`) is what
+ * supplies the `(x-1, y-1)`/`(x+w-1, y+h-1)` box-shape corner for every
+ * `URectangle`-drawing USymbol (e.g. `USymbolComponent2#drawComponent2`,
+ * `decoration/symbol/USymbolComponent2.java:62,68`, `URectangle
+ * .build(widthTotal, heightTotal)` drawn at the shape's own origin) — this
+ * function does not special-case that math, it just walks whatever the real
+ * `EntityImageDescription.drawU` draws, the same "one ink concept" upstream
+ * has for every symbol.
+ *
+ * `undefined` when the walk records nothing (a symbol that draws no shape).
+ *
+ * @see ~/git/plantuml/.../svek/image/EntityImageDescription.java
+ * @see ~/git/plantuml/.../decoration/symbol/USymbolComponent2.java
+ * @see .agent-notes/cdd2-T17.md ("description leaves ... class box ink rule")
+ */
+export function measureEntityLeafInk(
+  node: LeafSizingSubject,
+  fontSpec: FontSpec,
+  ctx: EntityLeafCtx,
+): LeafSymbolInk | undefined {
+  const bounder = new MeasurerStringBounder(ctx.measurer);
+  const params = buildSizingEntityParams(node, fontSpec, ctx);
   const finder = LimitFinder.create(bounder, false);
   new EntityImageDescription(params).drawU(finder);
   const minX = finder.getMinX();

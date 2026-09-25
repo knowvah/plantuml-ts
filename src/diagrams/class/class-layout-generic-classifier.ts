@@ -23,6 +23,7 @@ import type { ClassifierGeo } from './layout.js';
 import type { MeasuredClassifier, MemberSuppression } from './class-layout-helpers.js';
 import { resolveVisibleStereotypeLabels, type GuillemetPair } from './class-stereotype.js';
 import { measureLeafNode } from '../../core/svek/image/leaf-sizing.js';
+import { descriptionLeafSymbolInk } from './class-layout-description-leaf-ink.js';
 import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import { resolveElementFontSize, resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
@@ -91,13 +92,11 @@ export function tryMeasureDescriptionLeaf(
     symbol,
     ...(stereotype.length > 0 ? { stereotype } : {}),
   };
-  const dim = measureLeafNode(
-    node,
-    { family: theme.fontFamily, size: theme.fontSize },
-    measurer,
-    buildDescriptionLeafOpts(theme, symbol),
-    sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined,
-  );
+  const baseFont = { family: theme.fontFamily, size: theme.fontSize };
+  const opts = buildDescriptionLeafOpts(theme, symbol);
+  const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
+  const dim = measureLeafNode(node, baseFont, measurer, opts, spriteDims);
+  const symbolInk = descriptionLeafSymbolInk(node, symbol, baseFont, { opts, sprites: spriteDims, measurer });
   // Same single-row composition as `measureUsecaseOrActor` -- the renderer's
   // `tryRenderUSymbol` path reads `rows[0].text` for the drawn label.
   return {
@@ -105,6 +104,7 @@ export function tryMeasureDescriptionLeaf(
     height: dim.height,
     dividerYs: [],
     rows: [{ text: classifier.display, y: dim.height / 2, indent: 0, italic: false }],
+    ...(symbolInk !== undefined ? { symbolInk } : {}),
   };
 }
 

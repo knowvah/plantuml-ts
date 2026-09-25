@@ -137,10 +137,14 @@ export interface MeasuredClassifier {
   /** The DRAWN ink extent of a USymbol leaf's own shapes, in the leaf's own
    *  frame (origin at its box top-left) — from a `LimitFinder` walk over the
    *  same `EntityImageDescription` instance that sizes it
-   *  (`description/leaf-sizing-entity.ts#measureUsecaseOrActorLeafInk`).
-   *  Present only for an `actor` leaf; see that function's doc comment for
-   *  why usecase is excluded. Read by `class-ink-box.ts#addClassifierInk`
-   *  in place of `addRectInk`'s box rule. */
+   *  (`core/svek/image/leaf-sizing-entity.ts#measureEntityLeafInk`, used
+   *  directly by an `actor` leaf via `measureUsecaseOrActorLeafInk`
+   *  (`class-layout-leaf-shapes.ts#measureUsecaseOrActor`; usecase is
+   *  excluded there -- see that function's doc comment) and by a
+   *  `component`/`database` description leaf via
+   *  `class-layout-description-leaf-ink.ts#descriptionLeafSymbolInk`
+   *  (cdd2-T17/cdd3-T8, R-LEAF)). Read by `class-ink-box.ts
+   *  #addClassifierInk` in place of `addRectInk`'s box rule. */
   symbolInk?: LeafSymbolInk;
   rows: ClassifierGeo['rows'];
   dividerYs: number[];

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1201 modules · 4485 exported names.
+1202 modules · 4487 exported names.
 
 ## `src/`
 
@@ -711,7 +711,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `EntityImageNoteLink.ts` | `PureNoteTextDim`, `PureNoteTextMeasurer`, `measureLinkNoteDim` | ONE port of `EntityImageNoteLink`'s dimension -- collapses the FOUR former copies (`class/class-note-link-box.ts:70`, `state/state-dot-graph.ts:172`, `state/state-composite-edge-label.ts:49` -- the last two byte-identical private duplicates |
 | `Footprint.ts` | `Footprint` |  |
 | `leaf-sizing-consts.ts` | `ComponentStyle`, `BoxSizingOpts`, `ACTOR_WIDTH`, `ACTOR_HEIGHT`, `ACTOR_STICKMAN_WIDTH`, `ACTOR_STICKMAN_HEIGHT`, `USECASE_HEIGHT`, `USECASE_ELLIPSE_BIGGER`, `USECASE_ALPHA_MIN`, `USECASE_ALPHA_MAX`, `BOX_MIN_WIDTH_DEFAULT`, `DEFAULT_SIZING_STROKE_THICKNESS`, `SYMBOL_BOX_MARGIN`, `DEFAULT_BOX_MARGIN`, `SYMBOL_ICON_ALLOWANCE`, `STEREO_MARGIN`, `LINE_HEIGHT_FACTOR`, `PORT_SIZE`, `FOLDER_FAMILY_SHOW_TITLE`, `FOLDER_TAB_WIDTH`, `FOLDER_TAB_HEIGHT`, `INTERFACE_CIRCLE_SIZE`, `NOTE_FONT_SIZE`, `NOTE_MARGIN_H`, `NOTE_MARGIN_V`, `Dim` | Shared constants + context types for description leaf sizing. |
-| `leaf-sizing-entity.ts` | `sizingAtomImageResolverFor`, `measureEntityLeaf`, `measureUsecaseOrActorLeaf`, `LeafSymbolInk`, `measureUsecaseOrActorLeafInk` | `EntityImageDescription.calculateDimensionSlow` routing for the description engine's leaf sizer (T6/ADR-6). |
+| `leaf-sizing-entity.ts` | `sizingAtomImageResolverFor`, `measureEntityLeaf`, `measureUsecaseOrActorLeaf`, `LeafSymbolInk`, `measureUsecaseOrActorLeafInk`, `measureEntityLeafInk` | `EntityImageDescription.calculateDimensionSlow` routing for the description engine's leaf sizer (T6/ADR-6). |
 | `leaf-sizing-folder-title.ts` | `measureShownFolderTitle` | The SHOWN folder-family title block (`package`) — the faithful `BodyFactory.create2` → `BodyEnhanced1` route (SI1 T12, ADR-4). |
 | `leaf-sizing-folder.ts` | `measureFolderLeaf` | `folder` / `package` leaf sizing — `USymbolFolder(sname, showTitle)`. |
 | `leaf-sizing-legacy-fallback.ts` | `hasUnroutedBoxMarkup`, `LegacyBoxFallbackCtx`, `measureLegacyBoxFallback` | Legacy (pre-T6) box-family sizing math, kept ONLY as a fallback for displays this task's `EntityImageDescription` routing (`leaf-sizing.ts`, ADR-6) does not yet reproduce byte-exact: - a `<latex>` atom: the shared svek/ text pipeline (`Enti |
@@ -1175,6 +1175,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-json-sizing.ts` | `measureJsonClassifier` | `json` classifier sizing — `kind:'json'` leaves in the class diagram layout engine (./layout.ts), mission object-dot-sync Phase L. |
 | `class-kal-overlap.ts` | `LineOfSegments`, `kalX1`, `kalX2`, `kalOverlapX`, `PlacedKal`, `fixKalOverlaps` | cdd2-T12 (Q-7) — spreading apart the qualifier boxes on one side of one entity. |
 | `class-kal.ts` | `KAL_STROKE_THICKNESS`, `KAL_TEXT_DX`, `KAL_TEXT_DY`, `KAL_WIDTH_FACTOR`, `KalPosition`, `Kal`, `KalMargins`, `KalBox`, `kalMargins`, `kalTranslateForDecoration`, `kalTextDelta`, `computeKals`, `kalMarginsByEntity`, `kalWidthByEntity`, `kalBoxAt` | cdd-T15 (A2a/M1, decisions.md D6) — the qualified-association box. |
+| `class-layout-description-leaf-ink.ts` | `descriptionLeafSymbolInk` | `symbolInk` for a `class-layout-generic-classifier.ts#tryMeasureDescriptionLeaf` leaf — split out purely to keep that file under the project's 500-line cap (cdd3-T8, R-LEAF); a pure move plus the new gate/call, zero behavior change to anyth |
 | `class-layout-edge-labels.ts` | `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `LabelAttrs`, `SELF_LINK_LABEL_MARGIN`, `LINK_LABEL_MARGIN`, `labelMarginOf`, `NoteBoxContext`, `edgeLabelAttrs` | Relationship (edge) label sizing helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
 | `class-layout-fonts.ts` | `resolveAttributeFont`, `resolveHeaderFont`, `resolveGuillemetOption`, `resolveStereoFont` | Classifier font resolvers for the class sizing pipeline (`class-layout-helpers.ts#measureClassifier`) — attribute (member-row), header, and stereotype fonts, plus the guillemet wrapper option. |
 | `class-layout-generic-classifier-sections.ts` | `computeMemberSectionsGeo`, `computeEnhancedBodyGeo` | Member-section (fields/methods compartment) geometry for the generic classifier box — `computeMemberSectionsGeo` (classic split) and `computeEnhancedBodyGeo` (upstream's enhanced-body render strategy). |
