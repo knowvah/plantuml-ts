@@ -1,17 +1,17 @@
-# Batch 2 — structure — ids, order, parser/command gaps, missing elements
+# Batch 2 — structure (DOT order, clusters, ids, attributes)
 
-**Written by T6** from `diagnosis/{C,E1,E2,E3,B}.md` (D1 order: structure →
-paint → geometry, because `compare.ts` pairs elements positionally and the
-canvas is a function of every element's ink). Until T6 commits, this file is
-the whole batch.
+Written by T6 from the batch-0 diagnoses (`diagnosis/*.md`). Every task
+re-runs its diagnosis probe first (T6's HIGH-claim spot-check is carried
+by each fix task's step 1; journal row 14).
 
-Expected inputs (leads from the planning inventory, not findings): see
-`fixtures.md` workstreams C and E.
+Wave A: T14 ∥ T17 in worktrees (disjoint primaries). Wave B serial in the main checkout: T15 → T16 → T18 → T19 (T14/T16/T18/T19 share `class-dot-graph.ts`, `graph-layout.types.ts`, `svek-dot-emit.ts`, `graph-layout-build.ts`).
 
 | ID | Description | Agent | Primaries | Depends On | Done |
 |---|---|---|---|---|---|
-| T… | written by T6 | — | — | batch 1 close | [ ] |
-| close | [`../close-procedure.md`](../close-procedure.md) | orchestrator | — | all batch-2 tasks | [ ] |
-
-Every fix task's prompt: [`../fix-task.md`](../fix-task.md) + its file +
-its diagnosis sections.
+| [T14](T14-creation-order-dot.md) | Creation-order DOT emission | typescript-pro (opus) | `src/diagrams/class/class-dot-graph.ts`… | T13 | [ ] |
+| [T17](T17-assoc-couple-uid.md) | Association couple orientation + subsumed-link uid | typescript-pro (sonnet) | `src/diagrams/class/class-assoc-couple.ts`… | T13 | [ ] |
+| [T15](T15-opale-single-bezier.md) | Opale single-bezier guard + freestanding scope | typescript-pro (sonnet) | `src/core/svek/image/Opale.ts`… | T14 | [ ] |
+| [T16](T16-inverted-edge-node-order.md) | printCluster1 / getNodesOrderedTop | typescript-pro (opus) | `src/core/svek-dot-order.ts`… | T15 | [ ] |
+| [T18](T18-together-clusters.md) | `together {}` as `subgraph cluster<N>t<k>` | typescript-pro (opus) | `src/diagrams/class/class-container.ts` (+ parser state)… | T16 | [ ] |
+| [T19](T19-layout-attributes.md) | DOT attribute fidelity: weight, searchsize, label-first lines | typescript-pro (sonnet) | `src/diagrams/class/class-dot-edges.ts`… | T18 | [ ] |
+| [T20](T20-close.md) | Residual round + close | orchestrator | close-procedure | T14, T17, T15, T16, T18, T19 | [ ] |
