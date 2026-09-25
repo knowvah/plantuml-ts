@@ -4,28 +4,28 @@ Generated at planning (2026-09-25) from `measurements/b-plan.json` (cdd2 `final.
 
 | slug | ws | task | verdict | S | N | prior | mechanism | final |
 |---|---|---|---|---|---|---|---|---|
-| guxode-39-dobi371 | A | T10 | diverged | 2 | 2 | S-6 DISPROVED; real: `renderFolderPolygon` unresolved stroke (strictuml) + Δ0.014 g[14] (open) | S-6 (+Δ0.014 g[14]) |  |
-| lipazi-06-care921 | A | T10 | structural-match | 0 | 18 | note-on-link colour/ComponentRoseNote/inkBox/order (T19c, closed); canvas: `class-ink-box.ts#buildInkBox` never walks `EdgeGeo.noteBox` | note ink walk |  |
-| lozego-15-coci435 | A | T10 | diverged | 1 | 13 | T19c (closed) + gradient stop not shortened (`SvgGraphics.java:545-554`, `core/paint.ts`) + note ink walk | gradient stop + note ink walk |  |
-| nuvake-96-gofe203 | A | T10 | diverged | 1 | 19 | T19c (closed) + edge `;text:COLOR` (S-4t) + note ink walk | S-4t + note ink walk |  |
-| rakuci-96-tuti371 | A | T10 | diverged | 2 | 0 | S-11 (descriptive container `[[url]]` never calls setNamespaceUrl) | S-11 |  |
-| xoxuni-96-fere626 | A | T10 | diverged | 1 | 0 | S-4 (line colour fixed, T7) + S-4t `;text:COLOR` label fill | S-4t |  |
-| camuna-58-veca254 | A | T11 | diverged | 9 | 18 | Q-2/Q-3 (closed) + Q-4 generic-tag style + Q-5 cardinality FontStyle/size + Q-11 + flat edge (gvi 19) | Q-4, Q-5 (+ gvi 19 flat edge) |  |
-| nafiki-56-jixu680 | A | T11 | diverged | 8 | 24 | Q-2/Q-3 (closed) + Q-4 generic-tag style + Q-5 cardinality FontStyle/size + Q-11 + flat edge (gvi 19) | Q-4, Q-5 (+ gvi 19 flat edge) |  |
-| sijisi-94-ripu606 | A | T12 | diverged | 2 | 2 | canvas exact (T13+T17); `rectangle` leaf has no USymbol icon (`core/usymbol-shapes.ts:219-231`) + rectangle cluster title not centred | rectangle USymbol leaf |  |
-| bejeli-39-sina124 | A | T7 | structural-match | 0 | 2 | R-VP (as jubobo) | R-VP | conformant (T7 38a96bcc) |
-| gabejo-44-juki791 | A | T7 | structural-match | 0 | 2 | S-3 (closed) + R-VP | R-VP | conformant (T7 38a96bcc) |
-| jubobo-22-fapu993 | A | T7 | structural-match | 0 | 2 | R-VP: hidden body reserves nothing, jar max ink y+h-1 (`BodierLikeClassOrObject.java:249-250`, `HeaderLayout.java:98-109`) | R-VP | conformant (T7 38a96bcc) |
-| julixi-10-jide878 | A | T7 | structural-match | 0 | 2 | R-VP (R-5 dot-engine drift disproved) | R-VP | conformant (T7 38a96bcc) |
-| lecelo-92-loma110 | A | T23 | diverged | 6 | 7 | R-VP probe 7→5; rest untraced | R-VP (T7: 6/7 -> 6/5); residual `<<$sprite>>` stereotype glyph, undiagnosed |  |
-| rulite-35-muno361 | A | T7 | structural-match | 0 | 2 | R-VP (R-5 dot-engine drift disproved) | R-VP | conformant (T7 38a96bcc) |
-| xosiza-60-sobu480 | A | T7 | structural-match | 0 | 2 | R-VP (R-4 absorbLayoutEpsilon attribution disproved by T17 probe) | R-VP | conformant (T7 38a96bcc) |
-| cacoma-43-poxu615 | A | T8 | structural-match | 0 | 2 | R-LEAF: description leaf gets class-box ink, no `symbolInk` (`tryMeasureDescriptionLeaf`) | R-LEAF |  |
-| daxeno-00-kasu166 | A | T8 | structural-match | 0 | 92 | R-LEAF + styled namespace title `text/@y` Δ0.889 (undiagnosed) | R-LEAF + ns title y |  |
-| rojoxi-79-vimu822 | A | T9 | diverged | 1 | 0 | S-12 (collapseEmptyNamespace drops ns.color) | S-12 | conformant (T9 6b004691) |
-| sugifi-33-xefe083 | A | T9 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | S-1 | conformant (T9 6b004691) |
-| sumule-00-pefa744 | A | T9 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | S-1 | conformant (T9 6b004691) |
-| xumofu-43-fode658 | A | T9 | diverged | 3 | 0 | S-1b (CommandLinkClass resolves both endpoints before creating either) | S-1b | conformant (T9 6b004691) |
+| guxode-39-dobi371 | A | T10 | diverged | 2 | 2 | S-6 DISPROVED; real: `renderFolderPolygon` unresolved stroke (strictuml) + Δ0.014 g[14] (open) | S-6 (T10) + Δ0.014 = 2-dp read (T-D3) | open -> T-D3 (S-6 fixed T10; residual Δ0.014 = 2-dp read) |
+| lipazi-06-care921 | A | T10 | structural-match | 0 | 18 | note-on-link colour/ComponentRoseNote/inkBox/order (T19c, closed); canvas: `class-ink-box.ts#buildInkBox` never walks `EdgeGeo.noteBox` | note ink walk + label operand (T13r) | conformant (b1, pinned cdd3-b1; T10+T13r) |
+| lozego-15-coci435 | A | T26 | diverged | 1 | 13 | T19c (closed) + gradient stop not shortened (`SvgGraphics.java:545-554`, `core/paint.ts`) + note ink walk | gradient stop + note ink + label operand (T13r); residual note-line sprite baseline (T26) | open -> T26 (T10+T13r: 1/13 -> 0/1; note-line sprite baseline) |
+| nuvake-96-gofe203 | A | T10 | diverged | 1 | 19 | T19c (closed) + edge `;text:COLOR` (S-4t) + note ink walk | S-4t + note ink walk + label operand (T13r) | conformant (b1, pinned cdd3-b1; T10+T13r) |
+| rakuci-96-tuti371 | A | T10 | diverged | 2 | 0 | S-11 (descriptive container `[[url]]` never calls setNamespaceUrl) | S-11 | conformant (b1, pinned cdd3-b1; T10) |
+| xoxuni-96-fere626 | A | T10 | diverged | 1 | 0 | S-4 (line colour fixed, T7) + S-4t `;text:COLOR` label fill | S-4t | conformant (b1, pinned cdd3-b1; T10) |
+| camuna-58-veca254 | A | T11 | diverged | 9 | 18 | Q-2/Q-3 (closed) + Q-4 generic-tag style + Q-5 cardinality FontStyle/size + Q-11 + flat edge (gvi 19) | Q-4, Q-5 (+ gvi 19 flat edge) | open -> docs/graphviz-issues/19 (Q-4/Q-5 fixed T11; 1/18 residual = flat edge path) |
+| nafiki-56-jixu680 | A | T11 | diverged | 8 | 24 | Q-2/Q-3 (closed) + Q-4 generic-tag style + Q-5 cardinality FontStyle/size + Q-11 + flat edge (gvi 19) | Q-4, Q-5 (+ gvi 19 flat edge) | open -> docs/graphviz-issues/19 (Q-4/Q-5 fixed T11; 0/24 residual = flat edge) |
+| sijisi-94-ripu606 | A | T12 | diverged | 2 | 2 | canvas exact (T13+T17); `rectangle` leaf has no USymbol icon (`core/usymbol-shapes.ts:219-231`) + rectangle cluster title not centred | rectangle USymbol leaf | conformant (b1, pinned cdd3-b1; T12) |
+| bejeli-39-sina124 | A | T7 | structural-match | 0 | 2 | R-VP (as jubobo) | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| gabejo-44-juki791 | A | T7 | structural-match | 0 | 2 | S-3 (closed) + R-VP | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| jubobo-22-fapu993 | A | T7 | structural-match | 0 | 2 | R-VP: hidden body reserves nothing, jar max ink y+h-1 (`BodierLikeClassOrObject.java:249-250`, `HeaderLayout.java:98-109`) | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| julixi-10-jide878 | A | T7 | structural-match | 0 | 2 | R-VP (R-5 dot-engine drift disproved) | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| lecelo-92-loma110 | A | T23 | diverged | 6 | 7 | R-VP probe 7→5; rest untraced | R-VP (T7: 6/7 -> 6/5); residual `<<$sprite>>` stereotype glyph, undiagnosed | open -> T23 (T7: 6/7 -> 6/5; `<<$sprite>>` stereotype glyph) |
+| rulite-35-muno361 | A | T7 | structural-match | 0 | 2 | R-VP (R-5 dot-engine drift disproved) | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| xosiza-60-sobu480 | A | T7 | structural-match | 0 | 2 | R-VP (R-4 absorbLayoutEpsilon attribution disproved by T17 probe) | R-VP | conformant (b1, pinned cdd3-b1; T7) |
+| cacoma-43-poxu615 | A | T8 | structural-match | 0 | 2 | R-LEAF: description leaf gets class-box ink, no `symbolInk` (`tryMeasureDescriptionLeaf`) | R-LEAF | conformant (b1, pinned cdd3-b1; T8) |
+| daxeno-00-kasu166 | A | T8 | structural-match | 0 | 92 | R-LEAF + styled namespace title `text/@y` Δ0.889 (undiagnosed) | R-LEAF + ns title y | conformant (b1, pinned cdd3-b1; T8) |
+| rojoxi-79-vimu822 | A | T9 | diverged | 1 | 0 | S-12 (collapseEmptyNamespace drops ns.color) | S-12 | conformant (b1, pinned cdd3-b1; T9) |
+| sugifi-33-xefe083 | A | T9 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | S-1 | conformant (b1, pinned cdd3-b1; T9) |
+| sumule-00-pefa744 | A | T9 | diverged | 1 | 0 | S-1 (packSomePackage marks packed; we collapse at resolve) | S-1 | conformant (b1, pinned cdd3-b1; T9) |
+| xumofu-43-fode658 | A | T9 | diverged | 3 | 0 | S-1b (CommandLinkClass resolves both endpoints before creating either) | S-1b | conformant (b1, pinned cdd3-b1; T9) |
 | bicabi-42-coto932 | D | T-D3 | structural-match | 0 | 1 | spline precision (prior list) | B-5 (2-dp read) |  |
 | boseba-99-zopo693 | C | T18 | diverged | 1 | 681 | dot-engine issue 21 (same-rank order mirrored) | B-2 = E1-6 (together cluster; gvi 21 disproved) |  |
 | coxose-20-nifu136 | B | — | structural-match | 0 | 36 | Q-2 + Q-3 (closed) + flat `minlen=0` port edge | B-4 (gvi 19) | open -> docs/graphviz-issues/19 |
