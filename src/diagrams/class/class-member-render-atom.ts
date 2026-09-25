@@ -109,6 +109,13 @@ export type MemberRenderAtom =
       readonly fill: string;
       readonly width: number;
       readonly height: number;
+      /** cdd3-T22: the glyph box's own `Sea` top (`Sea.java:72-89`, with
+       *  `AtomOpenIconic#getStartingAltitude` = `-3*factor`,
+       *  `AtomOpenIconic.java:72-74`) relative to the row's text baseline --
+       *  `class-member-creole-sea.ts#atomTopDy`. Member-row renderers draw
+       *  the glyph at `rowBaseline + dy`. Set by every
+       *  `resolveMemberAtoms` call; the note renderer does not read it. */
+      readonly dy?: number;
     };
 
 /** One member row's fully built+measured creole content. */

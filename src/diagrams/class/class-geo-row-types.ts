@@ -97,4 +97,14 @@ export interface ClassifierRowGeo {
    * for every non-wrapped member.
    */
   visibilityBlockHeight?: number;
+  /**
+   * cdd3-T22 (E1-3): present only alongside `visibilityIcon` on a classic
+   * member row (`class-member-rows.ts#buildSectionRows`) -- the member
+   * block's own TOP relative to this row's baseline `y`, so the renderer can
+   * place the icon at `PlacementStrategyVisibility.java:62-67`'s `2 + y +
+   * (maxHeight12 - height1) / 2` directly. When set, `visibilityBlockHeight`
+   * is always set too (the member's whole block height). Absent on every
+   * other row kind, which keeps the baseline-keyed T20 formula.
+   */
+  visibilityBlockTopDy?: number;
 }

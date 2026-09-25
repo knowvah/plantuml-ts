@@ -15,14 +15,14 @@ import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import {} from '../../core/color-override.js';
 import {} from './class-map-sizing.js';
 import {} from './class-badge.js';
-import { renderVisibilityIcon, visibilityIconOriginY } from './class-visibility-icon.js';
+import { renderVisibilityIcon, visibilityIconOriginY, rowIconTopOriginY } from './class-visibility-icon.js';
 import {} from './renderer-url.js';
 import { linkWrap } from '../../core/svg.js';
 import { renderBulletAtom } from './renderer-note.js';
 import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { resolveClassTagCascadeEntry } from '../../core/style-cascade-class.js';
-import { renderOpenIconicAtom } from './renderer-openiconic.js';
+import { renderRowOpenIconicAtom } from './renderer-openiconic.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
 import {
@@ -106,9 +106,8 @@ export function attributeFontSize(theme: ScaledTheme): number {
  * (whose own `rowHeight` param couples the single-line ascent/descent basis
  * to its `maxHeight12` term, so substituting the block total there moves the
  * icon the WRONG way) untouched -- see `.agent-notes/cdd-T20.md`'s M6
- * derivation. Zero change for a non-wrapped row (`visibilityBlockHeight`
- * is absent, and `class-member-rows.ts#iconRowFields` omits it whenever the
- * block equals the row's own height).
+ * derivation. cdd3-T22 (E1-3): a classic member row now carries its block
+ * top (`visibilityBlockTopDy`) and takes the whole-method port instead.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-69
  */
 export function wrappedVisibilityIconOriginY(
@@ -116,6 +115,8 @@ export function wrappedVisibilityIconOriginY(
   row: ClassifierGeo['rows'][number],
   theme: ScaledTheme,
 ): number {
+  const fromTop = rowIconTopOriginY(geo.y + row.y, row, theme);
+  if (fromTop !== undefined) return fromTop;
   const fontSize = attributeFontSize(theme);
   const blockHeight = row.visibilityBlockHeight ?? fontSize;
   return visibilityIconOriginY(geo.y + row.y + (blockHeight - fontSize) / 2, fontSize, theme);
@@ -499,10 +500,8 @@ export function renderRowAtoms(
       continue;
     }
     if (atom.kind === 'vector') {
-      // G2 N41: an OpenIconic `<&glyph>` atom -- render logic lives in
-      // `renderer-openiconic.ts` (kept out of this already-500-line-capped
-      // file, see that module's own doc comment).
-      out += renderOpenIconicAtom(atom, x, y, theme);
+      // G2 N41 / cdd3-T22: an OpenIconic `<&glyph>` at its `Sea` top.
+      out += renderRowOpenIconicAtom(atom, x, y, theme);
       x += atom.width;
       continue;
     }

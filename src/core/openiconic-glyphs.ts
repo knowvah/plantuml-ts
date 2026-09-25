@@ -391,6 +391,15 @@ export function openIconicDims(factor: number): { readonly width: number; readon
   return { width: OPENICONIC_NATURAL_SIZE * factor + 2, height: OPENICONIC_NATURAL_SIZE * factor };
 }
 
+/** `AtomOpenIconic#getStartingAltitude` (`AtomOpenIconic.java:72-74`:
+ *  `return -3 * factor;`) -- the altitude `Sea#doAlign` adds to the atom's
+ *  `-height` (`Sea.java:72-80`), raising the glyph's box `3*factor` above
+ *  the line's text bottom.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomOpenIconic.java:72-74 */
+export function openIconicStartingAltitude(factor: number): number {
+  return -3 * factor;
+}
+
 /**
  * Icon origin Y, given the row's own text BASELINE `y` (`ClassifierGeo.rows[]
  * .y`, matching every other row-content formula's own reference point) and
@@ -416,6 +425,13 @@ export function openIconicDims(factor: number): { readonly width: number; readon
  * fontSize-independent flat constant by construction (every sample shares
  * `rowFontSize=14`, so this formula is unverified for a NON-default
  * `classAttributeFontSize` row; named here, not a silent gap).
+ *
+ * cdd3-T22: the class MEMBER-ROW path no longer uses this -- it places the
+ * glyph at its real `Sea` top (`class-member-creole.ts#resolveMemberAtoms`,
+ * altitude {@link openIconicStartingAltitude}), which equals this formula
+ * exactly whenever the text dominates the line (`14 - 11*factor` from the
+ * row top) and is correct when the icon does (cuzoga-39-tufu259). Only the
+ * note renderer still calls it.
  */
 export function openIconicOriginY(rowBaselineY: number, rowFontSize: number, factor: number): number {
   return rowBaselineY + rowFontSize / 4.5 - 11 * factor;

@@ -23,11 +23,16 @@ function build(height: number): MemberRowBuild {
 const CTX: SectionRowContext = { baselineOffset: 0, iconZoneWidth: 14, fontSize: 14 };
 
 describe('buildSectionRows — visibilityBlockHeight', () => {
-  it('a single-line explicit-visibility member gets NO visibilityBlockHeight (equals its own height)', () => {
+  // cdd3-T22: superseded expectation -- the field used to be omitted when
+  // the block equalled the row's own height, because the renderer then
+  // assumed `fontSize`; that assumption was wrong for a row taller than the
+  // font (rideze-59-lizu265). The icon is now placed from the block top
+  // (`visibilityBlockTopDy`), so every icon row carries its block height.
+  it('a single-line explicit-visibility member carries its own height as visibilityBlockHeight', () => {
     const m = member(true);
     const rows = buildSectionRows([m], ['+a'], [build(14)], 0, true, CTX);
     expect(rows[0]!.visibilityIcon).toBe('+');
-    expect(rows[0]!.visibilityBlockHeight).toBeUndefined();
+    expect(rows[0]!.visibilityBlockHeight).toBe(14);
   });
 
   it('a 4-physical-line wrapped member carries the SUM as visibilityBlockHeight on row 1 only', () => {
@@ -59,6 +64,6 @@ describe('buildSectionRows — visibilityBlockHeight', () => {
     const m2 = member(true);
     const rows = buildSectionRows([m1, m1, m2], ['a1', 'a2', 'b1'], [build(14), build(14), build(20)], 0, true, CTX);
     expect(rows[0]!.visibilityBlockHeight).toBe(28); // m1: 14 + 14
-    expect(rows[2]!.visibilityBlockHeight).toBeUndefined(); // m2: single row, 20 === 20
+    expect(rows[2]!.visibilityBlockHeight).toBe(20); // m2: single row, its own 20
   });
 });

@@ -122,6 +122,29 @@ export function textAtomDy(
   return baseline - reference;
 }
 
+/**
+ * cdd3-T22 (E1-3/E2-3): a NON-text atom's own `Sea` box top, expressed
+ * against the SAME row reference {@link textAtomDy} corrects against
+ * (`class-object-map-header.ts#baselineOffsetFor`: `size - descent`), so the
+ * renderer draws it at `rowBaseline + dy` exactly as it draws text.
+ * `top = altitude - height + maxSpan` is `Sea#doAlign` then
+ * `translateMinYto(0)` (`Sea.java:72-89`), the position
+ * `SheetBlock1#drawU` translates the `UGraphic` to before `Atom#drawU`
+ * (`SheetBlock1.java:212-217`); `AtomOpenIconic#drawU` paints its glyph
+ * from that corner (`AtomOpenIconic.java:76-83`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Sea.java:72-89
+ */
+export function atomTopDy(
+  entry: { readonly altitude: number; readonly height: number },
+  maxSpan: number,
+  baseFont: FontConfiguration,
+  measurer: StringMeasurer,
+): number {
+  const baseSpec = atomFontSpec(baseFont);
+  const reference = baseSpec.size - measurer.getDescent(baseSpec, '');
+  return entry.altitude - entry.height + maxSpan - reference;
+}
+
 /** One already-resolved atom's `{altitude, height}` -- pure function of its
  *  own `FontConfiguration.fontPosition`/`size`, no measurer needed (every
  *  `StringMeasurer` in this codebase already hardcodes `height === size` and

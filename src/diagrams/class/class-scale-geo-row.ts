@@ -80,7 +80,13 @@ export function scaleAtom(atom: MemberRenderAtom, k: number): MemberRenderAtom {
       // builder. Unverified against a jar fixture combining `scale` with an
       // OpenIconic glyph (zero corpus reach in this task's read-set) --
       // named, not silently skipped.
-      return { ...atom, width: atom.width * k, height: atom.height * k, factor: atom.factor * k };
+      return {
+        ...atom,
+        width: atom.width * k,
+        height: atom.height * k,
+        factor: atom.factor * k,
+        ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
+      };
   }
 }
 
@@ -96,6 +102,7 @@ export function scaleRow(row: RowGeo, k: number, themeFontSize: number): RowGeo 
     ...(row.width !== undefined ? { width: row.width * k } : {}),
     ...(row.badgeIndent !== undefined ? { badgeIndent: row.badgeIndent * k } : {}),
     ...(row.visibilityBlockHeight !== undefined ? { visibilityBlockHeight: row.visibilityBlockHeight * k } : {}),
+    ...(row.visibilityBlockTopDy !== undefined ? { visibilityBlockTopDy: row.visibilityBlockTopDy * k } : {}),
     ...(row.atoms !== undefined ? { atoms: row.atoms.map((a) => scaleAtom(a, k)) } : {}),
   };
 }

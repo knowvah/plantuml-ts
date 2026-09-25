@@ -221,13 +221,20 @@ function iconRowFields(
   showIcon: boolean,
   member: Classifier['members'][number],
   blockHeight: number,
-  ownHeight: number,
-): Pick<ClassifierGeo['rows'][number], 'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight'> {
+  blockTopDy: number,
+): Pick<
+  ClassifierGeo['rows'][number],
+  'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight' | 'visibilityBlockTopDy'
+> {
   if (!showIcon) return {};
+  // cdd3-T22 (E1-3): the block TOP and the whole block height feed
+  // `PlacementStrategyVisibility.java:62-67` directly
+  // (`class-visibility-icon.ts#visibilityIconOriginYFromTop`).
   return {
     visibilityIcon: member.visibility,
     visibilityIsField: isMethodMember(member) === false,
-    ...(blockHeight !== ownHeight ? { visibilityBlockHeight: blockHeight } : {}),
+    visibilityBlockHeight: blockHeight,
+    visibilityBlockTopDy: blockTopDy,
   };
 }
 
@@ -244,16 +251,18 @@ interface OneRowInput {
   indent: number;
   showIcon: boolean;
   blockHeight: number;
+  /** The member block's own top, in the same frame as `y`. */
+  blockTop: number;
 }
 function buildOneRow(input: OneRowInput): ClassifierGeo['rows'][number] {
-  const { text, member, build, y, indent, showIcon, blockHeight } = input;
+  const { text, member, build, y, indent, showIcon, blockHeight, blockTop } = input;
   return {
     text,
     y,
     indent,
     width: build.width,
     atoms: build.atoms,
-    ...iconRowFields(showIcon, member, blockHeight, build.height),
+    ...iconRowFields(showIcon, member, blockHeight, blockTop - y),
     ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
   };
 }
@@ -342,9 +351,10 @@ export function buildSectionRows(
     // atom.ts`'s own doc comment; emoji resolves to `'text'`, dy-corrected
     // like sup/sub, confirmed via `resolveEmojiAtom`) to reach ONLY case 1.
     const hasImageAtom = build.atoms.some((a) => a.kind === 'image');
-    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
+    const top = sectionTop + SECTION_MARGIN_TOP + rowTop;
+    const y = top + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
     rowTop += build.height;
-    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]! }));
+    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]!, blockTop: top }));
   }
   return rows;
 }

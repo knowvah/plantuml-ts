@@ -440,3 +440,38 @@ export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number, t
   // strategy centres against that block, not against a fixed 11.
   return rowBaselineY - ascent + centeringDelta(rowHeight, iconBlockHeight(theme, k), k);
 }
+
+/**
+ * cdd3-T22 (E1-3): `PlacementStrategyVisibility#getPositions`'s icon Y,
+ * ported whole rather than through a baseline: `2 + y + (maxHeight12 -
+ * height1) / 2` with `maxHeight12 = Math.max(height1, height2)`
+ * (`PlacementStrategyVisibility.java:62-67`) -- `y` is the member block's
+ * own TOP, `height1` the icon block (`classAttributeIconSize + 1`,
+ * `VisibilityModifier.java:100-102`), `height2` the member's whole
+ * TextBlock height. The flat `2` is a render-time numeral, scaled by `k`
+ * (cdd-B8FU precedent, {@link centeringDelta}).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-69
+ */
+export function visibilityIconOriginYFromTop(
+  blockTopY: number,
+  memberBlockHeight: number,
+  theme?: ScaledTheme,
+): number {
+  const k = theme?.scaleK ?? 1;
+  const height1 = iconBlockHeight(theme, k);
+  const maxHeight12 = Math.max(height1, memberBlockHeight);
+  return 2 * k + blockTopY + (maxHeight12 - height1) / 2;
+}
+
+/** cdd3-T22: {@link visibilityIconOriginYFromTop} for a row that carries its
+ *  member block's top (`visibilityBlockTopDy`, relative to the row baseline
+ *  `baselineY`) and height; `undefined` for a row that does not, which keeps
+ *  the caller's baseline-keyed T20 formula. */
+export function rowIconTopOriginY(
+  baselineY: number,
+  row: { readonly visibilityBlockTopDy?: number; readonly visibilityBlockHeight?: number },
+  theme?: ScaledTheme,
+): number | undefined {
+  if (row.visibilityBlockTopDy === undefined || row.visibilityBlockHeight === undefined) return undefined;
+  return visibilityIconOriginYFromTop(baselineY + row.visibilityBlockTopDy, row.visibilityBlockHeight, theme);
+}
