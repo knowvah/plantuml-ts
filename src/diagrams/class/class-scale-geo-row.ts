@@ -50,6 +50,41 @@ function scaleFontConfig(font: FontConfiguration, k: number): FontConfiguration 
   return { ...font, size: font.size * k };
 }
 
+/** `'vector'` atom scaling, split out of {@link scaleAtom} to keep that
+ *  dispatcher under this project's function-length cap. `factor` feeds
+ *  `openiconic-glyphs.ts#buildOpenIconicPathD` DIRECTLY at render time
+ *  (every raw glyph coordinate is `coord * factor`, then translated to
+ *  origin) -- scaling `factor` itself, not just `width`/`height`, is
+ *  required for the drawn glyph SHAPE to scale, since `width`/`height`
+ *  (`openIconicDims`) are never read back by the path builder. Unverified
+ *  against a jar fixture combining `scale` with an OpenIconic glyph (zero
+ *  corpus reach in this task's read-set) -- named, not silently skipped. */
+function scaleVectorAtom(atom: Extract<MemberRenderAtom, { kind: 'vector' }>, k: number): MemberRenderAtom {
+  return {
+    ...atom,
+    width: atom.width * k,
+    height: atom.height * k,
+    factor: atom.factor * k,
+    ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
+  };
+}
+
+/** `'listNumber'` atom scaling, split out of {@link scaleAtom} for the same
+ *  reason as {@link scaleVectorAtom}. C-2: `dx`/`textWidth`/`width` are all
+ *  render-time pixel geometry (`AtomTextUtils.java:145-159`'s margins +
+ *  measured text width) -- scale every one of them, mirroring `'bullet'`'s
+ *  own `width`-only scale (this kind additionally carries `dx`/`textWidth`,
+ *  which `'bullet'` has no equivalent of). */
+function scaleListNumberAtom(atom: Extract<MemberRenderAtom, { kind: 'listNumber' }>, k: number): MemberRenderAtom {
+  return {
+    ...atom,
+    font: scaleFontConfig(atom.font, k),
+    dx: atom.dx * k,
+    textWidth: atom.textWidth * k,
+    width: atom.width * k,
+  };
+}
+
 /**
  * One member row's per-atom creole content, scaled. `atom.font.size` feeds
  * `renderer-classifier-rows.ts#renderRowAtoms`'s own `<text font-size>`
@@ -72,21 +107,9 @@ export function scaleAtom(atom: MemberRenderAtom, k: number): MemberRenderAtom {
     case 'bullet':
       return { ...atom, width: atom.width * k };
     case 'vector':
-      // `factor` feeds `openiconic-glyphs.ts#buildOpenIconicPathD` DIRECTLY
-      // at render time (every raw glyph coordinate is `coord * factor`, then
-      // translated to origin) -- scaling `factor` itself, not just `width`/
-      // `height`, is required for the drawn glyph SHAPE to scale, since
-      // `width`/`height` (`openIconicDims`) are never read back by the path
-      // builder. Unverified against a jar fixture combining `scale` with an
-      // OpenIconic glyph (zero corpus reach in this task's read-set) --
-      // named, not silently skipped.
-      return {
-        ...atom,
-        width: atom.width * k,
-        height: atom.height * k,
-        factor: atom.factor * k,
-        ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
-      };
+      return scaleVectorAtom(atom, k);
+    case 'listNumber':
+      return scaleListNumberAtom(atom, k);
   }
 }
 

@@ -7,21 +7,19 @@
  *
  * `renderBulletAtom` was further split out to `renderer-bullet-atom.ts`
  * (same reason), re-exported here unchanged for
- * `renderer-classifier-rows.ts`'s own import.
+ * `renderer-classifier-rows.ts`'s own import. `resolveNoteBackground` was
+ * split out to `renderer-note-background.ts` (T26, same 500-line reason).
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
 import type { ScaledTheme } from './class-scale-geo.js';
-import type { Paint } from '../../core/paint.js';
 import { text, path, image, linkWrap, decorationLines } from '../../core/svg.js';
 import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
+import { renderListNumberAtom } from './renderer-list-number-atom.js';
 import { moveTo, lineTo } from '../../core/svg-path-builder.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { resolveBareOrBackColor } from '../../core/color-override.js';
-import { splitStereotypeStyleTags } from './class-stereotype.js';
-import { cleanStereotypeToken } from '../../core/style-map-element.js';
+import { resolveNoteBackground } from './renderer-note-background.js';
 import {
   opalePolygonLeft,
   opalePolygonRight,
@@ -43,68 +41,6 @@ import { renderOpenIconicAtom } from './renderer-openiconic.js';
 // consumers); it imports nothing from this file, so this is not a cycle.
 import { renderNoteRowExtra } from './renderer-note-lines.js';
 
-/**
- * G2 N34: jar's `EntityImageNote` ctor default (`ColorParam.noteBackground`,
- * `plantuml.skin`) -- the fallback when NEITHER the note's own explicit
- * `#color` NOR a `<style> note { BackgroundColor ... }` bucket applies.
- */
-const NOTE_FILL = '#FEFFDD';
-
-/**
- * G2 N34: a note's own fill color, cascading explicit `#color` override
- * (`ClassNote.color`, highest precedence -- `EntityImageNote.java`'s ctor:
- * `entity.getColors().getColor(BACK)` wins outright) -> the `<style> note
- * { BackgroundColor ... } </style>` bucket default -> the hardcoded
- * `NOTE_FILL`. Reads `theme.colors.elements.note` directly rather than via
- * `resolveElementPaint` (`theme.ts`) -- that helper's own generic "no
- * bucket" fallback is `nodeBackground` (`#F1F1F1`, the class-box default),
- * NOT jar's real note default (`ColorParam.noteBackground`, `#FEFFDD`) --
- * using it here would silently wrongize every note with no override. The
- * nested `.tagname` stereotype-cascade sub-selector (`note { .faint { ...
- * } }`) is a SEPARATE, deeper mechanism -- surveyed, not built (ledger).
- */
-function resolveNoteBackground(
-  color: string | undefined,
-  theme: ScaledTheme,
-  // G2 N37: the note's OWN `<<stereotype>>` (`ClassNote.stereotype`) --
-  // resolves the `.tagname` `<style>` cascade (`note { .faint {
-  // BackgroundColor red } } }`) between the explicit `#color` override and
-  // the bare `note {}` bucket default. Optional/trailing so every
-  // pre-existing call site (no stereotype) is behavior-unchanged.
-  stereotype?: string,
-): Paint {
-  const override = resolveBareOrBackColor(color);
-  if (override !== undefined) return resolveColorToSvgHex(override);
-  const tagBackground = resolveNoteTagBackground(theme, stereotype);
-  if (tagBackground !== undefined) return tagBackground;
-  const bucket = theme.colors.elements?.['note']?.background;
-  if (bucket === undefined) return NOTE_FILL;
-  // A `<style> note { BackgroundColor red }` bucket value is a raw
-  // `parseColor` result (`core/paint.ts`) -- a plain color NAME still needs
-  // HColorSet resolution (`resolveColorToSvgHex`, same as the explicit-
-  // override branch above); a Gradient object is already a resolved `Paint`
-  // and passes through unchanged (`core/svg.ts#resolvePaint` handles it).
-  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
-}
-
-/**
- * G2 N37: `theme.colors.noteTagCascade` lookup, resolving the note's own
- * (possibly multi-label) stereotype the SAME way {@link
- * splitStereotypeStyleTags} splits a classifier's -- a note's stereotype
- * blob follows the identical `<<A>><<B>>` stacking grammar. Returns the
- * FIRST matching label's background (already a resolved `Paint` from
- * `computeNoteStyleTagCascade`'s `parseColor` call), or `undefined`.
- */
-function resolveNoteTagBackground(theme: ScaledTheme, stereotype: string | undefined): Paint | undefined {
-  if (stereotype === undefined) return undefined;
-  const cascade = theme.colors.noteTagCascade;
-  if (cascade === undefined) return undefined;
-  for (const label of splitStereotypeStyleTags(stereotype)) {
-    const bg = cascade[cleanStereotypeToken(label)]?.background;
-    if (bg !== undefined) return bg;
-  }
-  return undefined;
-}
 /** `Opale.java`'s `cornersize` -- the folded-corner triangle size, shared by
  *  BOTH the plain fold (this file) and the zigzag-notch tip outline
  *  (`note-opale.ts#opaleCorner`, the SAME upstream constant). */
@@ -258,6 +194,11 @@ function renderNoteLineAtoms(
     }
     if (atom.kind === 'bullet') {
       out += renderBulletAtom(atom, x, lineTop, lineHeight, theme.scaleK);
+      x += atom.width;
+      continue;
+    }
+    if (atom.kind === 'listNumber') {
+      out += renderListNumberAtom(atom, x, lineTop, lineHeight);
       x += atom.width;
       continue;
     }

@@ -63,6 +63,26 @@ describe('R2h — Fission counts the Bullet header on every wrapped stripe', () 
     }
   });
 
+  // C-1 (ponono-25/sumocu-27): `Fission.java:87` -- only stripe 0 keeps the
+  // REAL header; every continuation stripe gets `blank(header)`. Pre-fix,
+  // every wrapped row carried the SAME non-blank header atom, so the
+  // renderer drew the bullet ellipse/rect once PER WRAPPED ROW instead of
+  // once for the whole list item (jar `svg/g[1]/g[2]` has exactly ONE
+  // `<ellipse>` per `*` line; the port had one per wrapped row).
+  it('C-1: only the FIRST wrapped row carries a drawable header -- every continuation is blank', () => {
+    const m = measureNote(
+      '* here is a very long sentence which should be wrapped. I can make it even longer by adding more words',
+      wrapTheme,
+      measurer,
+    );
+    expect(m.lineAtoms.length).toBeGreaterThan(1); // guard: this note must actually wrap
+    expect(m.lineAtoms[0]![0]).toMatchObject({ kind: 'bullet', order: 0, width: 12 });
+    expect((m.lineAtoms[0]![0] as { blank?: boolean }).blank).not.toBe(true);
+    for (const atoms of m.lineAtoms.slice(1)) {
+      expect(atoms[0]).toMatchObject({ kind: 'bullet', order: 0, width: 12, blank: true });
+    }
+  });
+
   it('keeps the unwrapped (maxWidth <= 0) single-row bullet result unchanged', () => {
     const m = measureNote('* Sjors Kaagman', defaultTheme, measurer);
     const w = measurer.measure('Sjors Kaagman', { family: defaultTheme.fontFamily, size: 13 }).width;

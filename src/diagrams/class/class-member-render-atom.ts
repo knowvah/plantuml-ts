@@ -101,6 +101,17 @@ export type MemberRenderAtom =
       readonly order: number;
       readonly fill: string;
       readonly width: number;
+      /** C-1: a wrapped bullet line's CONTINUATION row (`Fission.java:87`
+       *  — `new StripeSimpleInternal(true, stringBounder, blank(stripe.
+       *  getLHeader()))`). `blank()` (java:226-245) returns an atom with
+       *  the SAME `calculateDimensionSlow` as the real header (so `width`
+       *  above, the reserved cell, is UNCHANGED) but an empty `drawU` — only
+       *  row 0 of a wrapped bullet carries the real glyph; every
+       *  continuation row's atom sets this `true` so the renderer reserves
+       *  the width without drawing the ellipse/rect. `undefined` (falsy)
+       *  for every non-wrapped or first-row bullet, matching this file's
+       *  "always set by production, absent/false elsewhere" convention. */
+      readonly blank?: boolean;
     }
   | {
       readonly kind: 'vector';
@@ -116,6 +127,30 @@ export type MemberRenderAtom =
        *  the glyph at `rowBaseline + dy`. Set by every
        *  `resolveMemberAtoms` call; the note renderer does not read it. */
       readonly dy?: number;
+    }
+  /** C-2: a `#`-prefixed creole numbered-list header (`klimt/creole/legacy/
+   *  AtomTextUtils.java:145-159`'s `createListNumber`/`ListNumberAtom` —
+   *  `StripeStyle#getHeader`'s `LIST_WITH_NUMBER` branch, `Bullet`'s ordered
+   *  sibling). `text` is `"N."` (1-based `CreoleContext#getLocalNumber
+   *  (order)` + 1, `StripeStyle.java:59-63`'s own evaluation-before-build
+   *  order). `dx` is the per-depth indent the glyph draws AFTER — the width
+   *  of `"9. "` × `order` (java:146-151, `marginLeft`), 0 at order 0.
+   *  `textWidth` is `text`'s own measured width — the DRAWN `textLength`.
+   *  `width` is the FULL reserved cell every row/x-advance uses: `dx +
+   *  textWidth + marginRight` (marginRight = width of `"."`, java:152-157) —
+   *  mirrors `'bullet'`'s own "layout `width` unchanged, only the glyph was
+   *  missing" shape. `blank` mirrors `'bullet'`'s own field above (same
+   *  `Fission.java:87` continuation-row rule — both a bullet and a numbered
+   *  list are `Stripe`s with an `LHeader`, so `Fission#getSplitted` treats
+   *  them identically). */
+  | {
+      readonly kind: 'listNumber';
+      readonly text: string;
+      readonly font: FontConfiguration;
+      readonly dx: number;
+      readonly textWidth: number;
+      readonly width: number;
+      readonly blank?: boolean;
     };
 
 /** One member row's fully built+measured creole content. */

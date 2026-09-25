@@ -11,7 +11,9 @@ import {
   type MemberRenderAtom,
 } from '../../../src/diagrams/class/class-member-creole.js';
 import { noteLineAtomDy } from '../../../src/diagrams/class/class-member-creole-sea.js';
-import { FormulaMeasurer } from '../../../src/core/measurer.js';
+import { FormulaMeasurer, WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { measureNote } from '../../../src/diagrams/class/note-layout-measure.js';
+import { deepMergeTheme } from '../../../src/core/theme.js';
 
 const theme = scaleClassTheme(defaultTheme, 1);
 
@@ -382,5 +384,71 @@ describe('renderNote — <sub> note line: measure and render share the same runs
     }
     // The `<sub>` (altitude +3) sinks the sub run below its NORMAL siblings.
     expect(dys[1]).toBeGreaterThan(dys[0]!);
+  });
+});
+
+// C-1/C-2 (ponono-25-fevo574 / sumocu-27-vubo674, cdd3-T26): end-to-end
+// measure -> render coverage for the bullet-blank-continuation fix and the
+// new numbered-list header atom, over the REAL `measureNote` output (not a
+// hand-built literal) -- mirrors the `<sub>` block above's "measure and
+// render use the same runs" construction.
+describe('renderNote — C-1 wrapped bullet draws its ellipse ONCE, not per wrapped row', () => {
+  const measurer = new WidthTableMeasurer();
+  const wrapTheme = scaleClassTheme(
+    deepMergeTheme(defaultTheme, { colors: { graph: { noteCascadeMaximumWidth: 300 } } }),
+    1,
+  );
+
+  it('a wrapped "* ..." bullet line draws exactly one <ellipse> across every wrapped row', () => {
+    const text =
+      '* here is a very long sentence which should be wrapped. I can make it even longer by adding more words';
+    const m = measureNote(text, wrapTheme, measurer);
+    expect(m.lineAtoms.length).toBeGreaterThan(1); // guard: this note must actually wrap
+    const note: NoteGeo = {
+      id: '__note_0',
+      kind: 'note',
+      x: 0,
+      y: 0,
+      width: m.width,
+      height: m.height,
+      lines: m.lines,
+      lineWidths: m.lineWidths,
+      lineAtoms: m.lineAtoms,
+      lineHeights: m.lineHeights,
+      connector: [],
+    };
+    const svg = renderNote(note, wrapTheme);
+    expect((svg.match(/<ellipse/g) ?? []).length).toBe(1);
+  });
+});
+
+describe('renderNote — C-2 numbered-list header renders "N." at x=12, textLength jar-matched', () => {
+  const measurer = new WidthTableMeasurer();
+
+  it('draws "1." then the trimmed content, jar-shaped x/textLength', () => {
+    const m = measureNote('# here', defaultTheme, measurer);
+    const note: NoteGeo = {
+      id: '__note_0',
+      kind: 'note',
+      x: 0,
+      y: 0,
+      width: m.width,
+      height: m.height,
+      lines: m.lines,
+      lineWidths: m.lineWidths,
+      lineAtoms: m.lineAtoms,
+      lineHeights: m.lineHeights,
+      connector: [],
+    };
+    const svg = renderNote(note, theme);
+    const texts = [...svg.matchAll(/<text x="([^"]*)"[^>]*textLength="([^"]*)"[^>]*>([^<]*)<\/text>/g)];
+    expect(texts).toHaveLength(2);
+    expect(texts[0]![3]).toBe('1.');
+    expect(Number(texts[0]![1])).toBe(0 + 6); // note.x + NOTE_MARGIN_X1
+    expect(Number(texts[0]![2])).toBeCloseTo(10.806, 2);
+    expect(texts[1]![3]).toBe('here');
+    // Next run starts at header x + header's OWN reserved width (dx=0 +
+    // textWidth + marginRight), matching the jar's 26.381 - 12 = 14.381 gap.
+    expect(Number(texts[1]![1])).toBeCloseTo(6 + 10.80625 + 3.575, 2);
   });
 });
