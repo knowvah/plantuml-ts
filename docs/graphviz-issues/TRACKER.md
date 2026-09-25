@@ -441,3 +441,65 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         un-consumed fix -- 03 is now unchecked and carries the work and the
         blast radius. Full artifact:
         .agent-notes/gvi17-splines-never-emitted.md -->
+- [ ] 22-sametail-port-plaintext-lr-clip-offset.md  <!-- FILED 2026-09-25
+        (cdd3-T6, from E2-6). `class/pijiju-95-xexi872`: a `sametail` group's
+        shared start point on a `shape=plaintext` HTML-table node under
+        `rankdir=LR` clips 1.5px outside the node boundary in dot-engine
+        1.6.0 (real graphviz 16.1.0: x=97; engine: x=98.5). Controls with
+        `shape=rect` (same footprint) or `rankdir=TB` both match real
+        exactly, isolating the trigger to plaintext/HTML + LR together.
+        Re-verified against the pinned dot-engine 1.6.0. Not chased into
+        dot-engine's own `sameport.c` source beyond the port-construction
+        call site. -->
+- [ ] 23-flat-labelled-edge-mirrored-label-side.md  <!-- FILED 2026-09-25
+        (cdd3-T6, from E2-7). `class/nugecu-04-tona107`: a flat (`minlen=0`)
+        labelled edge routes via the mirrored side of its label box for
+        SOME label widths (9, 20) and matches real graphviz exactly for
+        others (5, 12, 30) -- a tie-break divergence in dot-engine's
+        box-corridor shortest-path search (`make_flat_labeled_edge` /
+        `routesplines`), not a constant offset. Re-verified against the
+        pinned 1.6.0 with a 5-point width sweep. -->
+- [ ] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- FILED 2026-09-25
+        (cdd3-T6, from C-12). `class/givoli-70-rade072` /
+        `tekena-28-fobe713` / `nadepi-13-mufu566`: the flat labelled edge
+        `sh0030->sh0014` routes with a spline up to 18px off real graphviz
+        on byte-identical DOT and identical node/label positions. EXPLICITLY
+        CHECKED against issue 23's mirror mechanism and ruled out --
+        mirroring dot-engine's points about the label centre does not
+        reproduce real's list, and the two engines' y-values differ
+        point-for-point where issue 23's mirror pairs always matched y
+        exactly (probe: scratch/T6-c12-mirror-check.mts). Filed as a
+        separate issue in the same feature area (flat labelled edge
+        routing) rather than folded into 23. -->
+- [ ] 25-edge-label-published-when-unplaced.md  <!-- FILED 2026-09-25
+        (cdd3-T6, from E3-12). `class/delasa-80-jusu462` (3 edges): real
+        graphviz leaves some centre edge labels unplaced
+        (`ED_label(e)->set` false, `lp="0,8"` sentinel, no `<text>` drawn),
+        but dot-engine 1.6.0's typed `getLayout()` API still publishes
+        `EdgeGeometry.label` at the sentinel/origin position -- unlike
+        `tailLabel`/`headLabel`/`xlabel`, which are already correctly gated
+        on the same "was it placed" condition. Re-verified: real `-Tsvg`
+        draws 0 `<text>` in the 3 labels' colours; dot-engine's
+        `getLayout()` returns a non-null `label` for all 3
+        (scratch/T6-e3-12-label-gate.mts). -->
+- [ ] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- FILED 2026-09-25
+        (cdd3-T6, from E3-D1). `class/cobumi-83-bapu892`: a self-loop's
+        spline is taller in dot-engine 1.6.0 than in real graphviz
+        (uniform +-12.98px on non-centre-line points) when the looped node
+        sits in a cluster that also holds a labelled flat edge. A lone
+        self-loop, or a self-loop alone in an empty cluster, does NOT
+        reproduce it -- re-verified on the bisected 13-line repro
+        (scratch/E3-selfloop-bisect.dot) carried over from E3. Residual on
+        top of E3-18's `Bibliotekon#addLine` fix (plantuml-ts-side, this
+        mission), not superseded by it. -->
+- [~] E3-D2 lead (builder `setAttr('remincross','true')` before
+        `searchsize` cancels searchsize) NOT FILED 2026-09-25 (cdd3-T6):
+        does not reproduce on the pinned dot-engine 1.6.0. Re-ran the
+        builder-vs-text harness (`E3-builder-vs-text3.mts` and a new
+        order-controlled probe, `scratch/T6-e3-d2-order.mts`) with
+        `remincross` set BEFORE `searchsize`: 0/184 node mismatches, same as
+        `searchsize`-only and `searchsize`-then-`remincross`; only the
+        baseline with NEITHER attribute set reproduces the original 33
+        mismatches (sanity check, matching E3.md's own number exactly). The
+        order-sensitivity E3.md recorded as a MEDIUM-confidence lead does
+        not hold today -- measurement recorded here, no issue filed. -->

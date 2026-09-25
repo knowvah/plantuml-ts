@@ -46,13 +46,13 @@ Generated at planning (2026-09-25) from `measurements/b-plan.json` (cdd2 `final.
 | cagace-55-libu760 | C | T34 | diverged | 3 | 37 | `scale` k = target / unscaled, unscaled canvas ~1 px off | C-10 |  |
 | filoxo-23-fafi328 | C | T24 | diverged | 10 | 0 | `<style> visibilityIcon {}` cascade + shadow filter shape | C-5 + C-6 |  |
 | givofi-11-xumu978 | C | T27 | diverged | 10 | 2 | linearGradient order swapped (undiagnosed) | C-7 + C-8 (T31) |  |
-| givoli-70-rade072 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (dot-engine) + C-13 (D3) |  |
+| givoli-70-rade072 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (gvi 24) + C-13 (D3) |  |
 | kujiji-68-cujo036 | C | T34 | diverged | 49 | 824 | `scale` (as cagace) | C-10 + C-13 (D3) |  |
 | lejoga-79-poji465 | C | T14 | diverged | 90 | 410 | entity order / uid (ent0002 vs ent0001) (undiagnosed) | C-14 = E3-7 + C-15 = E3-19 (T15) |  |
 | luzive-62-zote562 | C | T29 | diverged | 11 | 21 | error-page textLength / version identity | C-17 + C-18 proposed-accept |  |
 | medosa-71-ligu412 | C | T33 | structural-match | 0 | 4 | crow's-foot `side` always null (SvekEdge.ts adapter lacks node geometry) | C-11 |  |
 | nadaba-37-zaku242 | C | T34 | diverged | 12 | 178 | `scale` (as cagace) | C-10 |  |
-| nadepi-13-mufu566 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (dot-engine) + C-13 (D3) |  |
+| nadepi-13-mufu566 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (gvi 24) + C-13 (D3) |  |
 | pejone-71-tige404 | C | T14 | diverged | 220 | 1028 | g[1] title vs entity, 220 structural (undiagnosed) | C-14 + C-15 (T15) + C-16 = E2-4 (T16) |  |
 | ponono-25-fevo574 | C | T26 | diverged | 62 | 75 | text wrap: `here` vs `is` from text[36] (undiagnosed) | C-1 + C-2 |  |
 | popesa-39-sobe866 | C | T27 | diverged | 7 | 2 | gradient def-id seed | C-9 + C-8 (T31) |  |
@@ -62,7 +62,7 @@ Generated at planning (2026-09-25) from `measurements/b-plan.json` (cdd2 `final.
 | sadamo-18-siva346 | C | T29 | diverged | 11 | 19 | error-page textLength / version identity | C-17 + C-18 proposed-accept |  |
 | sekame-22-meze147 | C | T14 | diverged | 2 | 918 | two edge paths + width +161 (undiagnosed) | C-14 + C-13 residual (D3) |  |
 | sumocu-27-vubo674 | C | T26 | diverged | 62 | 75 | text wrap: `here` vs `is` from text[36] (undiagnosed) | C-1 + C-2 |  |
-| tekena-28-fobe713 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (dot-engine) + C-13 (D3) |  |
+| tekena-28-fobe713 | C | T-D3 | structural-match | 0 | 24 | one edge path Δ10 + text x Δ0.011 (undiagnosed) | C-12 (gvi 24) + C-13 (D3) |  |
 | vudepo-27-cuvo793 | C | T14 | diverged | 84 | 402 | entity order / uid (ent0002 vs ent0001) (undiagnosed) | C-14 = E3-7 + C-15 = E3-19 (T15) |  |
 | xonamo-50-podo529 | C | T14 | diverged | 220 | 1066 | g[1] title vs entity, 220 structural (undiagnosed) | C-14 + C-15 (T15) + C-16 = E2-4 (T16) |  |
 | gatula-10-bifu561 | D | T-D3 | structural-match | 0 | 2 | R-2 disproved: jar reads 2-dp `dot -Tsvg` node positions (`DotStringFactory.java:388-396`), 155.42 vs 155.425 | D3 (2-dp read) |  |
@@ -86,15 +86,15 @@ Generated at planning (2026-09-25) from `measurements/b-plan.json` (cdd2 `final.
 | ledepo-11-muto607 | D | T-D3 | structural-match | 0 | 2 |  | E2-1 |  |
 | mefike-75-vova900 | E | T32 | structural-match | 0 | 3 |  | E2-5 |  |
 | nagega-30-poso418 | E | T16 | structural-match | 0 | 114 | S-4 closed its structural; numerics pre-existing | E2-4 |  |
-| nugecu-04-tona107 | B | — | structural-match | 0 | 23 |  | E2-7 (dot-engine) | open -> docs/graphviz-issues (T6 filing) |
-| pijiju-95-xexi872 | B | — | structural-match | 0 | 19 | `Neighborhood` triangle/stub contact points, sub-1.5 px | E2-6 (dot-engine) | open -> docs/graphviz-issues (T6 filing) |
+| nugecu-04-tona107 | B | — | structural-match | 0 | 23 |  | E2-7 (dot-engine) | open -> docs/graphviz-issues/23 |
+| pijiju-95-xexi872 | B | — | structural-match | 0 | 19 | `Neighborhood` triangle/stub contact points, sub-1.5 px | E2-6 (dot-engine) | open -> docs/graphviz-issues/22 |
 | pixexi-81-sete111 | E | T31 | structural-match | 0 | 58 | +5.389 canvas shift, zero edges (label-margin term disproved) | E2-8 = E1-2 |  |
 | tijira-61-fere730 | D | T-D3 | structural-match | 0 | 2 |  | E2-1 |  |
 | zuramo-86-liku129 | D | T-D3 | structural-match | 0 | 2 | 0.012 px control-point numerics (after cdd2 T13) | E2-1 |  |
 | besepi-37-rori892 | E | T16 | diverged | 30 | 634 |  | E3-15 (T16) + E3-16/E3-17 (T17) |  |
 | bijevi-38-duza931 | E | T25 | diverged | 7 | 7 |  | E3-3 |  |
-| cobumi-83-bapu892 | E | T19 | diverged | 1 | 1038 |  | E3-18 + E3-D1 (dot-engine) |  |
-| delasa-80-jusu462 | E | T19 | diverged | 15 | 10731 |  | E3-11 (T19) + E3-12 (T32 + dot-engine gate) |  |
+| cobumi-83-bapu892 | E | T19 | diverged | 1 | 1038 |  | E3-18 + E3-D1 (gvi 26) |  |
+| delasa-80-jusu462 | E | T19 | diverged | 15 | 10731 |  | E3-11 (T19) + E3-12 (T32 + gvi 25) |  |
 | dojanu-92-vizo468 | E | T21 | diverged | 12 | 2 | cdd2 T19b closed its stereotype; `skinparam package<<Layout>>` colours + collapsed-empty `p3 <<Dummy>>` leaf | E3-1 + E3-2 + E3-6 |  |
 | giraca-14-xome136 | E | T21 | diverged | 2 | 0 | cdd2 T19b; `packageBorderThickness<<stereo>>` skinparam gap | E3-1 |  |
 | gujigi-63-roki030 | E | T28 | diverged | 30 | 576 |  | E3-14 (T28) + E3-13 (T32) |  |
