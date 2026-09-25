@@ -14,7 +14,7 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { namespaceTitleWidth, namespaceTitleLines } from './class-namespace-title-runs.js';
+import { namespaceTitleWidth, namespaceTitleLines, packageTitleFontSpec } from './class-namespace-title-runs.js';
 
 /**
  * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
@@ -58,8 +58,9 @@ function titleSupp(usymbol: string | undefined, theme: Theme): { width: number; 
  *  duplicate beats widening a module's public surface for one extra caller"
  *  precedent (state-composite-header.ts's `measureLines` doc comment). */
 function namespaceTitleFont(theme: Theme): FontSpec {
-  const size = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  return { family: theme.fontFamily, size, weight: 'bold' };
+  // cdd3-T21 (E3-5): `packageFontName`/`packageFontStyle` reach the
+  // measured title too -- the SAME font the drawn title uses.
+  return packageTitleFontSpec(theme);
 }
 
 /**

@@ -9,8 +9,8 @@
  *
  * @see ~/git/plantuml/.../decoration/symbol/USymbolFolder.java#drawFolder
  */
-import { attrs, resolvePaint, path, line } from '../../core/svg.js';
-import type { Paint } from '../../core/paint.js';
+import { attrs, resolvePaint, path, line, PAINT_NONE } from '../../core/svg.js';
+import { isTransparentColor, type Paint } from '../../core/paint.js';
 import type { NamespaceGeo } from './layout.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
@@ -183,13 +183,30 @@ export function renderFolderTabShape(geo: NamespaceGeo, paint: FolderTabPaint): 
     height: geo.height,
     marginX3,
   };
+  // cdd3-T21 (E3-1): `HColors.transparent().toSvg()` is `none` -- the tab
+  // line draws `stroke:none` (dojanu-92 p2's `packageBorderColor<<Layout>>
+  // Transparent`), not the `#00000000` hex `resolvePaint` would emit.
+  const stroke = isTransparentColor(border) ? PAINT_NONE : border;
   const outline =
     strictUml === true
       ? renderFolderPolygon(folderPolygonPoints(tabGeo), border, strokeWidth, fill)
-      : path(folderPathD(tabGeo, roundCorner), { stroke: border, strokeWidth, fill });
+      : folderPath(folderPathD(tabGeo, roundCorner), stroke, strokeWidth, fill);
   const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + marginX3, geo.y + geo.htitle, {
-    stroke: border,
+    stroke,
     strokeWidth,
   });
   return { outline, hline };
+}
+
+/**
+ * `DriverPathSvg#draw` (`klimt/drawing/svg/DriverPathSvg.java:62-75`): when
+ * the stroke colour EQUALS the back colour (neither a gradient) the path is
+ * filled with that colour and drawn with an empty stroke and width 0 --
+ * `svgPath` then writes no `style` at all (jar dojanu-92 p2: `<path d=...
+ * fill="none"/>`). Otherwise fill + stroke + thickness as usual.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverPathSvg.java:57-78
+ */
+function folderPath(d: string, stroke: string, strokeWidth: number, fill: Paint): string {
+  if (typeof fill === 'string' && resolvePaint(fill).value === resolvePaint(stroke).value) return path(d, { fill });
+  return path(d, { stroke, strokeWidth, fill });
 }

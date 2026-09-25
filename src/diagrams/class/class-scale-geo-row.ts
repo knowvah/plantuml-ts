@@ -132,6 +132,17 @@ export function scaleFolderTab(tab: EmptyPackageLeafDim, k: number): EmptyPackag
     wtitle: tab.wtitle * k,
     htitle: tab.htitle * k,
     baselineOffset: tab.baselineOffset * k,
+    // cdd3-T21 (E3-6): the leaf's stereo block, same uniform k.
+    ...(tab.stereo !== undefined
+      ? {
+          stereo: {
+            width: tab.stereo.width * k,
+            height: tab.stereo.height * k,
+            lines: tab.stereo.lines.map((l) => ({ ...l, x: l.x * k, baseline: l.baseline * k, width: l.width * k })),
+          },
+        }
+      : {}),
+    ...(tab.rect === true ? { rect: true as const } : {}),
   };
 }
 

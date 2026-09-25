@@ -161,6 +161,41 @@ const ELEMENT_FONT_SIZE_STEREO_RE = new RegExp('^(\\w+)fontsize<<(.+)>>$');
  *  win, so its handler runs AFTER that table. */
 const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(.+)>>$');
 
+/**
+ * cdd3-T21 (E3-1): `skinparam package<<label>> { BorderColor | FontColor |
+ * BorderThickness | StereotypeFontColor }` (and the flat spellings -- the
+ * preprocessor normalizes both to `package<role><<label>>`). Upstream needs
+ * no per-key matcher: `FromSkinparamToStyle`'s ctor strips `<<label>>` off
+ * ANY key (`:292-302`), `convertNow` resolves the base key's registrations
+ * (`addMagic(SName.package_)`, `:129` -> `:272-283`: `packageBorderColor` ->
+ * `LineColor`, `packageBorderThickness` -> `LineThickness`, `addConFont` ->
+ * `FontColor`, `packageStereotypeFontColor` -> `FontColor` on `{stereotype,
+ * package_}`), and `addStyle` re-signs each with the label at +1000 priority
+ * (`:396-408`). Same allowlist divergence (M22) as
+ * {@link applyElementBackgroundColorByStereo}; scoped to the four roles the
+ * package cluster/leaf renderers consume.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:127-129,272-283,292-302,396-408
+ */
+const PACKAGE_BY_STEREO_RE = new RegExp('^package(bordercolor|fontcolor|borderthickness|stereotypefontcolor)<<(.+)>>$');
+
+function applyPackageByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
+  const m = PACKAGE_BY_STEREO_RE.exec(key);
+  if (m === null) return false;
+  const label = m[2]!.trim();
+  const bucket = (acc.elements['package'] ??= {});
+  if (m[1] === 'borderthickness') {
+    const v = Number.parseFloat(value.trim());
+    if (!Number.isFinite(v)) return false;
+    bucket.lineThicknessByStereo = { ...bucket.lineThicknessByStereo, [label]: v };
+    return true;
+  }
+  const color = resolveColor(value);
+  if (m[1] === 'bordercolor') bucket.borderByStereo = { ...bucket.borderByStereo, [label]: color };
+  else if (m[1] === 'fontcolor') bucket.fontByStereo = { ...bucket.fontByStereo, [label]: color };
+  else bucket.stereotypeFontByStereo = { ...bucket.stereotypeFontByStereo, [label]: color };
+  return true;
+}
+
 type StereoHandler = (acc: SkinparamAccumulator, stereo: string, value: string) => void;
 
 /**
@@ -341,6 +376,7 @@ function applyElementBackgroundColorByStereo(acc: SkinparamAccumulator, key: str
  */
 export function applyStereoOverride(acc: SkinparamAccumulator, key: string, value: string): void {
   if (applyElementStereotypeFontSize(acc, key, value)) return;
+  if (applyPackageByStereo(acc, key, value)) return;
   for (const [re, handler] of STEREO_KEY_MATCHERS) {
     const m = re.exec(key);
     if (m !== null) {

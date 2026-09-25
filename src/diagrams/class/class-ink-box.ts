@@ -218,15 +218,13 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   // doc comment). Every ink rule below reads `c`, never `outerC`
   // directly, so one substitution here covers all of them.
   const c: ClassifierGeo = outerC.protectedBorder !== undefined ? { ...outerC, ...protectedInnerBox(outerC) } : outerC;
-  // G2 N33: a collapsed-empty package/namespace leaf draws the SAME
-  // `USymbolFolder` `UPath` outline a namespace CLUSTER draws (`addPlainInk`
-  // below), never `EntityImageClass`'s own rect+`UEmpty` composition -- the
-  // asymmetric `addRectInk` rule below does not apply to it (jar-verified
-  // `gatula-10-bifu561`: using `addRectInk` here shifts the WHOLE diagram
-  // by a uniform (1,1) versus jar, since a `UPath`'s ink-min corner is its
-  // own unshifted `x`/`y`, not `x-1`/`y-1`).
+  // G2 N33: a collapsed-empty package leaf draws the `USymbolFolder` `UPath`
+  // (`addPlainInk`), never `EntityImageClass`'s rect+`UEmpty` -- `addRectInk`
+  // shifts `gatula-10-bifu561` by (1,1). cdd3-T21 (E3-6): a `packageStyle
+  // rect` leaf is a `URectangle` -> the inset rect rule
+  // (`LimitFinder.java:184-188`, nijeli-04 height Δ1).
   if (c.folderTab !== undefined) {
-    addPlainInk(box, c.x, c.y, c.width, c.height);
+    (c.folderTab.rect === true ? addNamespaceRectInk : addPlainInk)(box, c.x, c.y, c.width, c.height);
     return;
   }
   // A `usecase` leaf is drawn as a real `<ellipse>`, never as a classifier

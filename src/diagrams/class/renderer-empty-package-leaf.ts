@@ -44,5 +44,8 @@ export function renderEmptyPackageLeaf(
   // cdd3-T9 S-12: the entity's own BACK colour (EntityImageEmptyPackage.java:97).
   const back = resolveBareOrBackColor(geo.color);
   if (back !== undefined) nsGeo.color = back;
-  return renderEmptyPackageIcon(nsGeo, theme, measurer);
+  // cdd3-T21 (E3-6): the measured stereo block + packageStyle symbol, and
+  // the entity's style tags (`EntityImageEmptyPackage#getStyle`'s
+  // `withTOBECHANGED(stereotype)`, `EntityImageEmptyPackage.java:88-91`).
+  return renderEmptyPackageIcon(nsGeo, theme, measurer, { tab: folderTab, tags: geo.stereotypeLabels ?? [] });
 }

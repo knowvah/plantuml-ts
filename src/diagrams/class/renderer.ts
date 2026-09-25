@@ -38,9 +38,9 @@ import {
   renderNamespaceFolder,
   renderNamespaceRect,
   namespaceFill,
-  titleFontColor,
   PACKAGE_ROUND_CORNER,
 } from './class-namespace-shape.js';
+import { DEFAULT_GROUP_FONT_COLOR } from './class-package-style.js';
 import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
@@ -103,7 +103,10 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
       // at scale=1 (no SvgOption.scale threading, class-namespace-usymbol-
       // shape.ts's own citation) -- this literal needs its own scaleK factor.
       roundCorner: (theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER) * theme.scaleK,
-      fontColor: titleFontColor(theme),
+      // cdd3-T21: a USymbol group's title style is `{..., <usymbol>,
+      // composite, title}` (`ClusterHeader.java:150-153`) -- no `package_`,
+      // so `packageFontColor` never reaches it (jar gigoru-88: `#000`).
+      fontColor: DEFAULT_GROUP_FONT_COLOR,
     });
     if (drawn !== undefined) return drawn;
   }

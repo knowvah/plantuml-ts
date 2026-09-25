@@ -103,4 +103,11 @@ export interface NamespaceGeo {
    *  draw site (`USymbolFolder#asBig`/`USymbolRectangle#asBig`/any other
    *  `USymbol#asBig`). Absent == `TextBlockUtils.empty(0, 0)`. */
   clusterHeaderStereo?: ClusterHeaderStereo;
+  /** cdd3-T21 (E3-1): the group's style-matching stereotype tags
+   *  (`splitStereotypeStyleTags(Namespace.stereotype)`) -- `Cluster#getStyle`
+   *  / `ClusterHeader#getStyle` resolve through `.withTOBECHANGED(group
+   *  .getStereotype())` (`Cluster.java:386-392`, `ClusterHeader.java:
+   *  144-150`), so a `package<Role><<label>>` skinparam reaches this group
+   *  only. Absent == no stereotype. */
+  stereotypeTags?: readonly string[];
 }

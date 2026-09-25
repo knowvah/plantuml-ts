@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
-import { resolveStyleStereotypeTags } from './class-stereotype.js';
+import { resolveStyleStereotypeTags, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import {
@@ -219,8 +219,8 @@ function namespaceGeoFromBox(
     baselineOffset: getTitleBaselineOffset(measurer, theme, ns.display),
     ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
     ...(inkShape !== undefined ? { inkShape } : {}),
-    // cdd-T12: three carry-only copies of T11's AST fields -- see
-    // `class-geo-namespace-types.ts`'s own doc comments for each consumer.
+    // cdd-T12/cdd3-T21: carry-only copies -- see `class-geo-namespace-types.ts`.
+    ...(ns.stereotype !== undefined ? { stereotypeTags: splitStereotypeStyleTags(ns.stereotype) } : {}),
     ...(ns.usymbol !== undefined ? { usymbol: ns.usymbol } : {}),
     ...(ns.color !== undefined ? { color: ns.color } : {}),
     ...(ns.url !== undefined ? { url: ns.url } : {}),

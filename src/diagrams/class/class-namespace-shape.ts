@@ -35,30 +35,45 @@
  *     entirely, e.g. a plain unnotched rounded rect — jar-verified via
  *     `mucuxi-36-beku683`) — same unmodeled skinparam gap.
  */
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './layout.js';
-import { rect } from '../../core/svg.js';
+import { rect, PAINT_NONE } from '../../core/svg.js';
 import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
 import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
-import { measureStereoLabelWidths, stereoBlockDim } from './class-stereotype.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
 import {
-  namespaceTitleWidth,
-  namespaceTitleHeight,
   renderNamespaceTitleAuto,
   TITLE_LOCAL_TOP_OFFSET,
+  packageTitleFontFamily,
+  packageTitleFontSize,
 } from './class-namespace-title-runs.js';
+import {
+  MARGIN_TITLE_X1,
+  MARGIN_TITLE_X2,
+  MARGIN_TITLE_X3,
+  PACKAGE_ROUND_CORNER,
+  packageTitleFontColor,
+  packageBorderColor,
+  packageBorderThickness,
+} from './class-package-style.js';
 
-// marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
-// (USymbolFolder.java), kept verbatim per this project's porting
-// discipline (mirrors `USymbolFolder.ts`'s identical constants).
-const MARGIN_TITLE_X1 = 3;
-const MARGIN_TITLE_X2 = 3;
-const MARGIN_TITLE_X3 = 7;
-const MARGIN_TITLE_Y1 = 3;
-const MARGIN_TITLE_Y2 = 3;
+// cdd3-T21: the title metrics and the empty-package leaf moved out (500-line
+// cap); re-exported so no import path changed.
+export {
+  PACKAGE_ROUND_CORNER,
+  titleFontColor,
+  getHTitle,
+  getWTitle,
+  getTitleBaselineOffset,
+} from './class-package-style.js';
+export {
+  measureEmptyPackageLeafDim,
+  renderEmptyPackageIcon,
+  type EmptyPackageLeafDim,
+  type EmptyPackageLeafExtras,
+} from './class-empty-package.js';
 
 /** `USymbolFolder#asBig`'s title local X offset (`title.drawU(ug.apply(new
  *  UTranslate(4, 2)))`'s `4`) — the render-time-only half of that
@@ -67,14 +82,6 @@ const MARGIN_TITLE_Y2 = 3;
  *  scaleK multiplication has one citation, not three. */
 const TITLE_X_OFFSET = 4;
 const TOP = TITLE_LOCAL_TOP_OFFSET; // the `2` of both `asBig` stereo/title translates
-
-/** `USymbolFolder#asBig`'s unstyled default `roundCorner` — jar-verified
- *  identical to every OTHER container's default (`A2.5,2.5`/`A3.75,3.75`
- *  arcs, `half = roundCorner/2`), matching description's own G1 I10
- *  finding (`renderer-cluster.ts#NON_FOLDER_ROUND_CORNER`). `skinparam
- *  style strictuml` (roundCorner=0) is NOT modeled — see module doc
- *  comment. */
-export const PACKAGE_ROUND_CORNER = 5;
 
 /** Jar-observed default class-diagram package/namespace border width
  *  (`stroke-width:1.5`, e.g. `finono-05-cuvu171`, `jinibe-02-tebi269`) —
@@ -92,32 +99,6 @@ export const PACKAGE_STROKE_WIDTH = 1.5;
  *  this same baked-in default. */
 const PACKAGE_CLUSTER_BACKGROUND_DEFAULT = 'none';
 const PACKAGE_CLUSTER_BORDER_DEFAULT = '#000000';
-
-/** `USymbolFolder.java`'s title-text font is always bold; `skinparam
- *  packageFontSize N` / `skinparam package { FontSize N }` overrides the
- *  diagram-wide `theme.fontSize` for the folder-tab title ONLY (G2 N18,
- *  jar-verified against `pixexi-81-sete111`: title font-size 40, the
- *  classifier's OWN member text stays the diagram default 14). Reads the
- *  SAME generic per-element bucket description's package/folder USymbol
- *  rendering already consumes (`colors.elements.package.fontSize`, G1
- *  I4b) rather than a class-local field -- both diagram types' package
- *  groups share upstream's one `Entity`/`FontParam.PACKAGE` mechanism
- *  (`abel/Entity.java`). */
-function titleFont(theme: Theme): FontSpec {
-  const size = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  return { family: theme.fontFamily, size, weight: 'bold' };
-}
-
-/** The folder-tab title's own text color -- `skinparam packageFontColor`/
- *  `skinparam package { FontColor ... }`, the SAME generic per-element
- *  bucket `titleFont` reads from (`renderer-symbol.ts#textFontColor`'s
- *  identical `typeof override !== 'string'` Gradient-guard precedent: the
- *  plain-SVG-string `text()` primitive has no gradient-fill path here
- *  either). Falls back to jar's true default `#000000`. */
-export function titleFontColor(theme: Theme): string {
-  const override = theme.colors.elements?.package?.font;
-  return typeof override === 'string' ? override : '#000000';
-}
 
 /**
  * G2 N59: package/namespace outline fill for a "no paint" background color
@@ -172,68 +153,6 @@ export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
   );
 }
 
-/**
- * `USymbolFolder#getHTitle`: the tab's own height — jar-verified via TWO
- * independent font sizes (`finono-05-cuvu171`/`jinibe-02-tebi269` at the
- * diagram default 14pt: htitle=20; `pixexi-81-sete111`'s `skinparam
- * package { FontSize 40 }`: htitle=46) — both reduce EXACTLY to
- * `measuredHeight + marginTitleY1 + marginTitleY2`, confirming the formula
- * (not a flat constant) even though `StringMeasurer.measure().height`
- * always returns the raw font size regardless of text content.
- */
-export function getHTitle(measurer: StringMeasurer, theme: Theme, label: string): number {
-  const dim = measurer.measure(label, titleFont(theme));
-  if (dim.width === 0) return 10;
-  // cdd-T26 residual round (`daxeno-00-kasu166`): sums every PHYSICAL
-  // line's own height instead of the single-line `dim.height` -- see
-  // `namespaceTitleHeight`'s own doc comment for the jar citation. A
-  // markup-free, newline-free label reduces to `dim.height` exactly (one
-  // line, unchanged font size).
-  return namespaceTitleHeight(measurer, theme, label) + MARGIN_TITLE_Y1 + MARGIN_TITLE_Y2;
-}
-
-/**
- * `USymbolFolder#getWTitle`: the tab's own width (title text width plus
- * X1/X2 margin), falling back to `max(30, width/4)` for an empty label —
- * jar-verified `titleWidth+6` exactly against `finono-05-cuvu171` ("foo",
- * textLength 19.425 -> wtitle 25.425) and `jinibe-02-tebi269` ("a",
- * textLength 7.7875 -> wtitle 13.7875).
- */
-export function getWTitle(measurer: StringMeasurer, theme: Theme, label: string, width: number): number {
-  const titleWidth = namespaceTitleWidth(measurer, theme, label);
-  if (titleWidth === 0) return Math.max(30, width / 4);
-  return titleWidth + MARGIN_TITLE_X1 + MARGIN_TITLE_X2;
-}
-
-/**
- * The title text's baseline Y offset from the namespace box's own top edge
- * -- `USymbolFolder#asBig` draws the title at local `(4, 2)`
- * (`title.drawU(ug.apply(new UTranslate(4, 2)))`); the SAME ascent-from-
- * line-top convention every other class text row uses
- * (`class-layout-helpers.ts`'s `baselineOffset`) resolves the glyph
- * baseline within that translated line. Computed at LAYOUT time (like
- * `getWTitle`/`getHTitle`) so the render phase never needs a
- * `StringMeasurer` of its own -- jar-verified against `finono-05-cuvu171`
- * (`y="18.8889"` = box-top 6 + 2 + 10.8889).
- *
- * T7 (`plans/namespace-cluster-box/`) considered deriving this from
- * `@knowvah/dot-engine`'s own placed `cluster.label` (the layout-computed
- * title-table reservation position, `ClusterGeometry.label`) instead of
- * this fixed `2`. NOT adopted: `class-geo-builders.ts#namespaceGeoFromBox`'s
- * own doc comment has the full mechanism (`USymbolFolder#asBig` draws at a
- * fixed local offset, independent of graphviz's title-table placement) and
- * the measured 333-matched-shape regression that confirmed it.
- *
- * cdd-T37 (M8, `pixexi-81-sete111`): jar's `title.drawU` block reads the
- * SAME font `getDescent` measures with. Pre-fix `theme.fontSize` was the
- * diagram default (14), disagreeing with `titleFont(theme).size`
- * (`skinparam package { FontSize 40 }`); `finono-05-cuvu171` never
- * overrides it, masking the gap. `text/@y` Δ31.389 -> 0.
- */
-export function getTitleBaselineOffset(measurer: StringMeasurer, theme: Theme, label: string): number {
-  return 2 + titleFont(theme).size - measurer.getDescent(titleFont(theme), label);
-}
-
 // folderPathD / folderPolygonPoints / renderFolderPolygon / FolderTabPaint /
 // renderFolderTabShape all live in class-namespace-folder-outline.ts (T7b +
 // cdd-B8FU, file-length split -- see that module's own doc comment).
@@ -246,12 +165,16 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
   // PACKAGE_STROKE_WIDTH default) get their own scaleK factor -- the
   // "materialize the fallback" rule (`renderer-classifier-rows.ts
   // #attributeFontSize`'s own doc comment) applies here identically.
-  const strokeWidth = (theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH) * theme.scaleK;
+  // cdd3-T21 (E3-1): each through the group's `package<Role><<label>>`
+  // tier first (`Cluster#getStyle`'s `withTOBECHANGED`, `Cluster.java:386-
+  // 392`) -- giraca-14's `packageBorderThickness<<stereo>> 1.5`.
+  const tags = geo.stereotypeTags ?? [];
+  const strokeWidth = packageBorderThickness(theme, tags, PACKAGE_STROKE_WIDTH) * theme.scaleK;
   // CDD T18b: `theme.colors.graph.packageBorder` is optional now -- this IS
   // a `...package_,group`-signature draw site, so it supplies the
   // cluster's own unstyled default explicitly (see that constant's doc
   // comment).
-  const border = theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT;
+  const border = packageBorderColor(theme, tags, PACKAGE_CLUSTER_BORDER_DEFAULT);
   // G2 N18: `strictuml` -> sharp-corner `UPolygon` branch (roundCorner=0).
   // G2 N59: `packageFillValue` maps "no paint" to jar's literal `fill="none"`.
   const fill = namespaceFill(geo, theme);
@@ -269,16 +192,15 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
   // so the margin literals subtracted back out take their own scaleK.
   const titleTextLength =
     geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
-  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK;
   const label = renderNamespaceTitleAuto(
     { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
     {
       x: titleX,
       y: geo.y + geo.baselineOffset,
-      fontFamily: theme.fontFamily,
-      fontSize,
-      fontColor: titleFontColor(theme),
+      fontFamily: packageTitleFontFamily(theme), // E3-5 packageFontName
+      fontSize: packageTitleFontSize(theme),
+      fontColor: packageTitleFontColor(theme, tags),
       textLength: titleTextLength,
     },
     () => titleX,
@@ -304,26 +226,30 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
  * `renderNamespaceFolder` uses -- jar-verified identical local Y (`12.8889`)
  * for BOTH styles, confirming the footprint/`topPad` formula
  * (`class-geo-builders.ts#buildNamespaceGeos`) is style-agnostic (only the
- * DRAWN shape differs, not the reserved box). `roundCorner` is always 0 here
- * -- the only corpus sample (`mucuxi-36-beku683`) carries `strictuml`, and
- * `Cluster.java:323-324`'s `rounded=0` override applies uniformly to every
- * `PackageStyle`, not just FOLDER; a non-strict `skinparam RoundCorner`
- * value for RECT is unmodeled (same established gap `PACKAGE_ROUND_CORNER`
- * already carries for FOLDER, see this module's own header doc comment).
+ * DRAWN shape differs, not the reserved box).
+ *
+ * cdd3-T21 (E3-4): `rounded = style.value(RoundCorner)`, forced to 0 only
+ * under `skinParam.strictUmlStyle()` (`Cluster.java:321-324`), reaches
+ * `USymbolRectangle#drawRect`'s `rect.rounded(roundCorner)` (`:65-71`);
+ * `DriverRectangleSvg` writes `rx = roundCorner / 2` (`:78`). mucuxi-36 is
+ * strictuml (no rx); nijeli-04 is not (`rx="2.5"`).
  */
 export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
   // cdd-B8FU: both tiers scaled -- see renderNamespaceFolder's identical
   // citation.
-  const strokeWidth = (theme.colors.graph.packageBorderThickness ?? PACKAGE_STROKE_WIDTH) * theme.scaleK;
-  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  const fontColor = titleFontColor(theme);
+  const tags = geo.stereotypeTags ?? [];
+  const strokeWidth = packageBorderThickness(theme, tags, PACKAGE_STROKE_WIDTH) * theme.scaleK;
   const fill = namespaceFill(geo, theme);
+  // CDD T18b: `...package_,group`-signature site -- see
+  // `PACKAGE_CLUSTER_BORDER_DEFAULT`'s doc comment.
+  const border = packageBorderColor(theme, tags, PACKAGE_CLUSTER_BORDER_DEFAULT);
+  const corner = ((theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER) * theme.scaleK) / 2;
   const outline = rect(geo.x, geo.y, geo.width, geo.height, {
-    // CDD T18b: `...package_,group`-signature site -- see
-    // `PACKAGE_CLUSTER_BORDER_DEFAULT`'s doc comment.
-    stroke: theme.colors.graph.packageBorder ?? PACKAGE_CLUSTER_BORDER_DEFAULT,
+    stroke: isTransparentColor(border) ? PAINT_NONE : border, // SvgGraphics.java:539-540 fixColor
     strokeWidth,
     fill,
+    rx: corner,
+    ry: corner,
   });
   // cdd2-T19b: `USymbolRectangle#asBig`: stereo at `((width - w) / 2, 2)`
   // BEFORE the title, title at `2 + dimStereo.getHeight()` (CENTER branch).
@@ -341,9 +267,9 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
     {
       x: geo.x + posTitle,
       y: geo.y + stereo.height + geo.baselineOffset,
-      fontFamily: theme.fontFamily,
-      fontSize,
-      fontColor,
+      fontFamily: packageTitleFontFamily(theme),
+      fontSize: packageTitleFontSize(theme),
+      fontColor: packageTitleFontColor(theme, tags),
       textLength: rawTextWidth,
     },
     (line) => geo.x + (geo.width - line.width) / 2,
@@ -358,143 +284,4 @@ function placeHeaderStereo(geo: NamespaceGeo, x0: number, y: number): { body: st
   const h = geo.clusterHeaderStereo;
   if (h === undefined) return { body: '', height: 0 };
   return { body: shiftFragmentBody(h.body, x0 + (geo.width - h.width) / 2, y), height: h.height };
-}
-
-/**
- * `EntityImageEmptyPackage#drawU`: draws the SAME `USymbolFolder#asBig`
- * folder-tab shape `renderNamespaceFolder` draws for a non-empty package's
- * cluster wrapper -- but resolved through a DIFFERENT style chain
- * (`EntityImageEmptyPackage#getStyleSignature`'s own `...package_,title`
- * selector) than the cluster's own `...package_,group` one
- * (`svek/Cluster.java:285-296`). `plantuml.skin:102-114` puts
- * `BackGroundColor transparent` + `package { LineThickness 1.5; LineColor
- * black }` under `group {}` ONLY, so the leaf inherits the generic element
- * defaults instead: `theme.colors.border` (#181818), stroke-width 0.5,
- * `theme.colors.graph.classBackground` (#F1F1F1) -- jar-verified on
- * `gatula-10-bifu561` (`package foo {}`: `stroke:#181818;stroke-width:0.5`
- * `fill="#F1F1F1"`).
- *
- * cdd-T12 (diagnosis A6 §2 / AC `xitobu-41-lame230`): a `<style> package {
- * BackGroundColor ...; LineColor ...; LineThickness ... }` block DOES reach
- * this leaf -- its `package` selector is a subset of BOTH signatures. Read
- * from the per-element bucket (`theme.colors.elements.package`, populated
- * only by a `<style>`/`skinparam package { ... }` block) rather than from
- * `theme.colors.graph.packageBorder`/`packageBackground`, because those two
- * fields are ALSO fed by the diagram-wide `skinparam
- * packageBorderColor`/`packageBackgroundColor` keys and carry the CLUSTER's
- * (`group`-signature) defaults, which are not this leaf's.
- *
- * CDD T18b (resolved -- was the open remainder above): `skinparam
- * packageBorderColor blue` DOES recolor the empty-package leaf upstream
- * (`cocube-46-tusu692`'s own leaf draws `stroke:#00F`) -- now routed as a
- * MID-tier fallback, below the `<style> package {}` bucket above and
- * above the leaf's own `#181818`/`classBackground` default, because
- * `theme.colors.graph.packageBackground`/`packageBorder` are optional as
- * of this task (`theme.ts` no longer bakes the CLUSTER's `'none'`/
- * `'#000000'` into them -- see `theme-graph-colors-a.ts`'s doc comment).
- * `gatula-10-bifu561` (no `packageBorderColor` set) still resolves
- * `undefined` there and falls through to the leaf's own default,
- * unaffected.
- */
-const EMPTY_PACKAGE_STROKE_WIDTH = 0.5;
-
-/** {@link renderEmptyPackageIcon}'s three `...package_,title`-signature
- *  paint values -- see that function's own doc comment for the cascade. */
-function emptyPackagePaint(theme: ScaledTheme): { strokeWidth: number; border: string; fill: Paint } {
-  const pkg = theme.colors.elements?.package;
-  return {
-    // cdd-B8FU: both tiers scaled -- see renderNamespaceFolder's identical
-    // citation.
-    strokeWidth: (pkg?.lineThickness ?? EMPTY_PACKAGE_STROKE_WIDTH) * theme.scaleK,
-    border: typeof pkg?.border === 'string' ? pkg.border : (theme.colors.graph.packageBorder ?? theme.colors.border),
-    fill:
-      typeof pkg?.background === 'string'
-        ? pkg.background
-        : (theme.colors.graph.packageBackground ?? theme.colors.graph.classBackground),
-  };
-}
-
-export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
-  const { strokeWidth, border, fill: styleFill } = emptyPackagePaint(theme);
-  const fill = geo.color !== undefined ? parseColor(geo.color) : styleFill; // S-12: EntityImageEmptyPackage.java:97,109-112
-  const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  const fontColor = titleFontColor(theme);
-  const { outline, hline } = renderFolderTabShape(geo, {
-    strictUml: theme.strictUml,
-    border,
-    strokeWidth,
-    fill,
-    roundCorner: PACKAGE_ROUND_CORNER * theme.scaleK,
-    marginX3: MARGIN_TITLE_X3 * theme.scaleK,
-  });
-  const titleTextLength =
-    geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
-  const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK;
-  const label = renderNamespaceTitleAuto(
-    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
-    {
-      x: titleX,
-      y: geo.y + geo.baselineOffset,
-      fontFamily: theme.fontFamily,
-      fontSize,
-      fontColor,
-      textLength: titleTextLength,
-    },
-    () => titleX,
-  );
-  return outline + hline + label;
-}
-
-/** `EntityImageEmptyPackage#calculateDimensionSlow`'s own MARGIN constant
- *  (distinct from `class-badge.ts`'s badge margin of the same name) --
- *  applied twice (both axes), see {@link measureEmptyPackageLeafDim}. */
-const EMPTY_PACKAGE_MARGIN = 10;
-
-/** Box + folder-tab geometry for a collapsed-empty `package`/`namespace`
- *  leaf (G2 N33 -- `class-magma.ts#isCollapsedGroup`'s own doc comment for
- *  which classifiers this applies to). */
-export interface EmptyPackageLeafDim {
-  width: number;
-  height: number;
-  wtitle: number;
-  htitle: number;
-  baselineOffset: number;
-}
-
-/** `FontParam.PACKAGE_STEREOTYPE` (klimt/font/FontParam.java:68) -- 14pt
- *  italic; NOT the 12pt `CLASS_STEREOTYPE` the classifier header uses. */
-const PACKAGE_STEREOTYPE_FONT_SIZE = 14;
-
-/**
- * `EntityImageEmptyPackage#calculateDimensionSlow` (G2 N33; stereotype merge
- * = A2s F-D mechanism A8): `dim = mergeTB(desc, withMargin(stereoBlock, 1,
- * 0), LEFT).atLeast(0, 2*dimDesc.height).delta(2*MARGIN)` -- width =
- * max(descW, widestStereoLabel + 2) + 20 (`stereoBlockDim`'s `STEREO_MARGIN
- * *2` IS the `withMargin(_, 1, 0)` +2px term; labels guillemet-wrapped at
- * `PACKAGE_STEREOTYPE` 14pt), height = max(descH + stereoH, 2*descH) + 20.
- * No stereotype reduces to `rawTextWidth + 20` x `2*rawTextHeight + 20`
- * (jar-verified `gatula-10-bifu561`: "foo" 39.425x48); `<<Dummy>>` jar
- * width = 1.191493in = 85.7875px (dojanu-92-vizo468 p3).
- * @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-145
- */
-export function measureEmptyPackageLeafDim(
-  measurer: StringMeasurer,
-  theme: Theme,
-  label: string,
-  stereotypeLabels: readonly string[] = [],
-): EmptyPackageLeafDim {
-  const dim = measurer.measure(label, titleFont(theme));
-  const { guillemetStart: gs, guillemetEnd: ge } = theme.colors.graph;
-  const g = gs === undefined && ge === undefined ? undefined : { start: gs ?? '«', end: ge ?? '»' };
-  const stereo = stereoBlockDim(
-    measureStereoLabelWidths(stereotypeLabels, theme.fontFamily, measurer, g, PACKAGE_STEREOTYPE_FONT_SIZE),
-    PACKAGE_STEREOTYPE_FONT_SIZE,
-  );
-  return {
-    width: Math.max(dim.width, stereo.width) + EMPTY_PACKAGE_MARGIN * 2,
-    height: Math.max(dim.height + stereo.height, dim.height * 2) + EMPTY_PACKAGE_MARGIN * 2,
-    wtitle: getWTitle(measurer, theme, label, 0),
-    htitle: getHTitle(measurer, theme, label),
-    baselineOffset: getTitleBaselineOffset(measurer, theme, label),
-  };
 }

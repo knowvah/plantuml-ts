@@ -10,7 +10,7 @@
  * and its jar citation.
  */
 import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer } from '../../core/measurer.js';
+import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
@@ -20,6 +20,7 @@ import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomFontSpec } from './class-member-creole-sea.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
 import { text, image } from '../../core/svg.js';
+import { isTransparentColor } from '../../core/paint.js';
 
 /** `USymbolFolder#asBig`'s title local vertical offset before ANY text
  *  starts (`title.drawU(ug.apply(new UTranslate(4, 2)))`) — the "+2" every
@@ -40,10 +41,45 @@ export const TITLE_LOCAL_TOP_OFFSET = 2;
  *  #namespaceTitleFont`'s identical doc-commented rationale) rather than
  *  widening `class-namespace-shape.ts`'s public surface for one caller. */
 function titleFontConfiguration(theme: Theme): FontConfiguration {
-  const size = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const override = theme.colors.elements?.package?.font;
   const color = typeof override === 'string' ? override : '#000000';
-  return { family: theme.fontFamily, size, color, styles: new Set([FontStyle.BOLD]) };
+  const faces = packageTitleFaces(theme);
+  const styles = new Set<FontStyle>();
+  if (faces.bold) styles.add(FontStyle.BOLD);
+  if (faces.italic) styles.add(FontStyle.ITALIC);
+  return { family: packageTitleFontFamily(theme), size: packageTitleFontSize(theme), color, styles };
+}
+
+/** The package title face -- `plantuml.skin:72-76,94-98` (`package { title {
+ *  FontStyle bold } }`) unless `skinparam packageFontStyle` overrides it
+ *  (cdd3-T21 E3-5: `addConFont`, `FromSkinparamToStyle.java:278`, a
+ *  skinparam-priority `FontStyle` on `{package_}`; nijeli-04's `normal`
+ *  draws every title without `font-weight`). */
+export function packageTitleFaces(theme: Theme): { readonly bold: boolean; readonly italic: boolean } {
+  return theme.colors.elements?.package?.fontStyle ?? { bold: true, italic: false };
+}
+
+/** `skinparam packageFontName` (cdd3-T21 E3-5) over the diagram font. */
+export function packageTitleFontFamily(theme: Theme): string {
+  return theme.colors.elements?.package?.fontFamily ?? theme.fontFamily;
+}
+
+/** `skinparam packageFontSize N` / `skinparam package { FontSize N }` over
+ *  the diagram default (G2 N18, `pixexi-81-sete111`). */
+export function packageTitleFontSize(theme: Theme): number {
+  return theme.colors.elements?.package?.fontSize ?? theme.fontSize;
+}
+
+/** The package title font as a measurer `FontSpec` -- the ONE spelling the
+ *  folder/rect/USymbol title draws and the DOT title table measure with. */
+export function packageTitleFontSpec(theme: Theme): FontSpec {
+  const faces = packageTitleFaces(theme);
+  return {
+    family: packageTitleFontFamily(theme),
+    size: packageTitleFontSize(theme),
+    ...(faces.bold ? { weight: 'bold' as const } : {}),
+    ...(faces.italic ? { style: 'italic' as const } : {}),
+  };
 }
 
 /** One resolved title run: either a text span (font may differ from the
@@ -291,17 +327,27 @@ export function renderNamespaceTitleRuns(
       continue;
     }
     const width = measurer.measure(run.text, atomFontSpec(run.font)).width;
-    out += text(x, y, run.text, {
-      fontFamily: run.font.family,
-      fontSize: run.font.size,
-      ...(run.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' } : {}),
-      fill: run.font.color ?? '#000000',
-      lengthAdjust: 'spacing' as const,
-      textLength: width,
-    });
+    out += renderTextRun(x, y, run, width);
     x += width;
   }
   return out;
+}
+
+/** One text run of {@link renderNamespaceTitleRuns}. cdd3-T21:
+ *  `DriverTextSvg.java:92-94` emits nothing for a transparent font colour
+ *  (the caller still advances the pen). */
+function renderTextRun(x: number, y: number, run: Extract<NamespaceTitleRun, { kind: 'text' }>, width: number): string {
+  const fill = run.font.color ?? '#000000';
+  if (isTransparentColor(fill)) return '';
+  return text(x, y, run.text, {
+    fontFamily: run.font.family,
+    fontSize: run.font.size,
+    ...(run.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' } : {}),
+    ...(run.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
+    fill,
+    lengthAdjust: 'spacing' as const,
+    textLength: width,
+  });
 }
 
 /** {@link renderNamespaceTitleAuto}'s label/theme/measurer/block-top bundle
@@ -350,10 +396,15 @@ export function renderNamespaceTitleAuto(
   const soleRun = lines.length <= 1 ? lines[0]?.runs[0] : undefined;
   const isPlainSingleRun = (lines[0]?.runs.length ?? 0) <= 1 && (soleRun === undefined || soleRun.kind === 'text');
   if (lines.length <= 1 && isPlainSingleRun) {
+    // cdd3-T21: a transparent title draws nothing (`DriverTextSvg.java:
+    // 92-94`); `packageFontStyle` picks the face (E3-5).
+    if (isTransparentColor(fallback.fontColor)) return '';
+    const faces = packageTitleFaces(theme);
     return text(fallback.x, fallback.y, label, {
       fontFamily: fallback.fontFamily,
       fontSize: fallback.fontSize,
-      fontWeight: '700',
+      ...(faces.bold ? { fontWeight: '700' as const } : {}),
+      ...(faces.italic ? { fontStyle: 'italic' as const } : {}),
       fill: fallback.fontColor,
       ...(fallback.textLength !== undefined
         ? { lengthAdjust: 'spacing' as const, textLength: fallback.textLength }

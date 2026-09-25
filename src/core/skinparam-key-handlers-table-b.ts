@@ -185,6 +185,30 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       if (v !== undefined) acc.packageBorderThickness = v;
     },
   ],
+  // cdd3-T21 (E3-2, E3-5): `addMagic(SName.package_)`
+  // (`FromSkinparamToStyle.java:129`) registers `packageStereotypeFontColor`
+  // (`:283`, `FontColor` on `{stereotype, package_}`) and, via `addConFont`
+  // (`:278`), `packageFontName`/`packageFontStyle` (`FontName`/`FontStyle`
+  // on `{package_}`). Stored in the `package` element bucket -- see
+  // `ElementColors.stereotypeFont`/`fontFamily`/`fontStyle`.
+  [
+    ['packagestereotypefontcolor'],
+    (acc, _v, color) => {
+      (acc.elements['package'] ??= {}).stereotypeFont = color;
+    },
+  ],
+  [
+    ['packagefontname'],
+    (acc, value) => {
+      (acc.elements['package'] ??= {}).fontFamily = value;
+    },
+  ],
+  [
+    ['packagefontstyle'],
+    (acc, value) => {
+      (acc.elements['package'] ??= {}).fontStyle = parseFontStyleFlags(value);
+    },
+  ],
   [
     ['classattributefontsize'],
     (acc, value) => {
