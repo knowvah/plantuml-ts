@@ -22,6 +22,7 @@ import { edgeLabelAttrs } from './class-layout-edge-labels.js';
 import { kalBoxAt, type Kal } from './class-kal.js';
 import { fixKalOverlaps, type PlacedKal } from './class-kal-overlap.js';
 import type { EdgeGeo } from './layout.js';
+import { dotEdgeId } from './class-link-order.js';
 
 // cdd-T6: `EdgeGeoTextContext` and the three label-attach functions moved
 // to `class-edge-label-attach.ts` when the note-box/constraint wiring pushed
@@ -290,7 +291,7 @@ export function buildEdgeGeos(
   for (let i = 0; i < ast.relationships.length; i++) {
     const rel = ast.relationships[i]!;
     if (rel.invis === true) continue;
-    const edgeResult = edgeResultById.get(`edge-${i}`);
+    const edgeResult = edgeResultById.get(dotEdgeId(i));
     if (edgeResult === undefined) continue;
 
     const decor = EDGE_DECORATION_MAP[rel.type];

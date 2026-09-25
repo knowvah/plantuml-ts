@@ -92,13 +92,18 @@ describe('T6: byte-level render proof -- Empty draws the small leaf icon, not a 
       '(theme.colors.graph.classBackground / theme.colors.border, stroke-width 0.5) -- ' +
       'NOT renderNamespaceFolder\'s cluster styling (fill="none", stroke-width 1.5)',
     () => {
+      // cdd3-T14 (E1-1): Empty is the root's muted EMPTY_PACKAGE, printed in
+      // `printGroups` BEFORE the unpackaged `B` (GraphvizImageBuilder.java
+      // :226-227,416-418), so graphviz places it LEFT. Jar-verified via
+      // scripts/oracle-render.sh on this exact source: svek-1.dot sh0011 =
+      // Empty (width 0.828299), sh0012 = B; in.svg `<text x="10" ...>Empty`.
       expect(svg).toContain(
-        'd="M99.5,37 L140.5,37 A3.75,3.75 0 0 1 143,39.5 L150,59 L154.5,59 A2.5,2.5 0 0 1 157,61.5 ' +
-          'L157,86.5 A2.5,2.5 0 0 1 154.5,89 L99.5,89 A2.5,2.5 0 0 1 97,86.5 L97,39.5 A2.5,2.5 0 0 1 99.5,37" ' +
+        'd="M8.5,37 L49.5,37 A3.75,3.75 0 0 1 52,39.5 L59,59 L63.5,59 A2.5,2.5 0 0 1 66,61.5 ' +
+          'L66,86.5 A2.5,2.5 0 0 1 63.5,89 L8.5,89 A2.5,2.5 0 0 1 6,86.5 L6,39.5 A2.5,2.5 0 0 1 8.5,37" ' +
           'fill="#F1F1F1" stroke="#181818" stroke-width="0.5"',
       );
       expect(svg).toContain(
-        '<text x="101" y="49.444" font-size="14" font-weight="700" fill="#000" textLength="40">Empty</text>',
+        '<text x="10" y="49.444" font-size="14" font-weight="700" fill="#000" textLength="40">Empty</text>',
       );
     },
   );
@@ -106,7 +111,7 @@ describe('T6: byte-level render proof -- Empty draws the small leaf icon, not a 
   it('the Empty leaf path is NOT nested inside a <g class="cluster"> wrapper', () => {
     const clusterOpen = svg.indexOf('<g class="cluster"');
     const clusterClose = svg.indexOf('</g>', clusterOpen);
-    const emptyPathIdx = svg.indexOf('154.5,89 L99.5,89');
+    const emptyPathIdx = svg.indexOf('63.5,89 L8.5,89');
     expect(emptyPathIdx).toBeGreaterThan(clusterClose);
   });
 });

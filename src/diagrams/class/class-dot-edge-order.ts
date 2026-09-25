@@ -81,6 +81,15 @@ export function dotEdgeRunsReversed(rel: Relationship): boolean {
   return HIERARCHICAL.has(rel.type) && rel.parentIsLinkEntity1 === true;
 }
 
+/** The two endpoint ids `Link.sameConnections` compares. cdd3-T14: generic so
+ *  a note-on-entity link (`class-link-order.ts`) goes through the SAME
+ *  `getOrderedLinks` pass as the relationships, as upstream's one
+ *  `getLinks()` list does. */
+export interface LinkEnds {
+  readonly from: string;
+  readonly to: string;
+}
+
 /**
  * `Link.sameConnections` (abel/Link.java:462-470): same endpoint pair,
  * either direction, identity only -- ignores type/label/decor. `from`/`to`
@@ -88,7 +97,7 @@ export function dotEdgeRunsReversed(rel: Relationship): boolean {
  * time a relationship reaches this module (same identity contract
  * `linkDedup.ts`'s free-function form already relies on for dedup).
  */
-function sameConnections(a: Relationship, b: Relationship): boolean {
+function sameConnections(a: LinkEnds, b: LinkEnds): boolean {
   return (a.from === b.from && a.to === b.to) || (a.from === b.to && a.to === b.from);
 }
 
@@ -104,7 +113,7 @@ function sameConnections(a: Relationship, b: Relationship): boolean {
  * identity -- a pair's FIRST occurrence still anchors the group's document
  * position).
  */
-function addLinkNew(result: Relationship[], link: Relationship): void {
+function addLinkNew<T extends LinkEnds>(result: T[], link: T): void {
   for (let i = 0; i < result.length; i++) {
     if (sameConnections(result[i]!, link)) {
       while (i < result.length && sameConnections(result[i]!, link)) i++;
@@ -130,8 +139,8 @@ function addLinkNew(result: Relationship[], link: Relationship): void {
  * DOT emission and draw order stay in lock step (that two-site drift was
  * SB2's root cause).
  */
-export function getOrderedLinks(relationships: readonly Relationship[]): Relationship[] {
-  const result: Relationship[] = [];
+export function getOrderedLinks<T extends LinkEnds>(relationships: readonly T[]): T[] {
+  const result: T[] = [];
   for (const link of relationships) addLinkNew(result, link);
   return result;
 }

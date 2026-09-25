@@ -5,7 +5,13 @@
  * No DOM, no async.
  */
 
-import { sliceClassGeometryPage, type ClassGeometry, type ClassifierGeo, type NamespaceGeo } from './layout.js';
+import {
+  sliceClassGeometryPage,
+  type ClassGeometry,
+  type ClassifierGeo,
+  type NamespaceGeo,
+  type EdgeGeo,
+} from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
@@ -112,6 +118,7 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
 
 import { renderEdge } from './renderer-edge.js';
 import { renderNoteConnectorLink } from './renderer-note-connector.js';
+import { interleaveNoteLinks, relIndexOfDotEdgeId } from './class-link-order.js';
 
 /**
  * Render a class diagram geometry into an SVG string.
@@ -369,7 +376,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     }
   }
   const linkIds = new Set<string>();
-  geo.edges.forEach((edge, i) => {
+  const drawEdge = (edge: EdgeGeo, i: number): void => {
     // G2/N16 Kind B: a freestanding note's connector, consumed by the
     // note's own Opale outline -- see `EdgeGeo.consumedByOpaleNote`'s doc
     // comment for why this edge stays IN `geo.edges` (uid numbering) but
@@ -393,23 +400,26 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
         rendered.body,
       ),
     );
-  });
+  };
 
-  // cdd-T9 (E6 mechanism a): each note's connector, as its own `<g
-  // class="link">` via the SAME `wrapLink` call an ordinary edge gets above
-  // (`GraphvizImageBuilder.java:229`'s single draw loop over
-  // `dotData.getLinks()`, which upstream mints the note-host connector into
-  // as a real `Link`). Appended AFTER the real edges, matching upstream's
-  // OWN draw order for every AC fixture (fogexa/pecabi/sanixi/zepeki carry
-  // ZERO other edges); a diagram mixing note connectors with real
-  // relationships needs `Bibliotekon#addLine`'s `sameConnections` insertion
-  // (`Bibliotekon.java:83-107`) -- untouched, a named residual
-  // (`.agent-notes/cdd-T9.md`). cdd-T9b: style/id/entity-order/uid now fully
-  // resolved by `renderer-note-connector.ts#renderNoteConnectorLink` -- see
-  // that function's own doc comment for why it must run AFTER `linkIds` is
-  // populated above.
-  for (const connector of noteConnectors) {
-    children.push(renderNoteConnectorLink(connector, theme, uidPlan, linkIds));
+  // cdd-T9 (E6 mechanism a): each note's connector is its own `<g
+  // class="link">` via the SAME `wrapLink` call an ordinary edge gets
+  // (`renderer-note-connector.ts#renderNoteConnectorLink`). cdd3-T14 (C-14):
+  // drawn at its OWN slot in upstream's one `getLinks()` walk
+  // (`GraphvizImageBuilder.java:229`, `Bibliotekon#allLines`), not after
+  // every relationship -- `NoteGeo.linkSlot`, merged by the SAME
+  // `interleaveNoteLinks` the DOT edge list goes through
+  // (`class-creation-order.ts`), so draw order, the shared `linkIds`
+  // de-dup sequence and DOT order agree.
+  const indexedEdges = geo.edges.map((edge, i) => ({ edge, i }));
+  for (const item of interleaveNoteLinks(
+    indexedEdges,
+    ({ edge }) => relIndexOfDotEdgeId(edge.id),
+    noteConnectors,
+    (connector) => connector.note.linkSlot,
+  )) {
+    if ('rel' in item) drawEdge(item.rel.edge, item.rel.i);
+    else children.push(renderNoteConnectorLink(item.note, theme, uidPlan, linkIds));
   }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)

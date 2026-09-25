@@ -180,6 +180,10 @@ export interface NoteGeo {
    * member-tip note (unchanged fallback numbering).
    */
   creationIndex?: number;
+  /** cdd3-T14 (C-14): the connector's `getLinks()` slot, copied from
+   *  `NoteGroup.linkSlot` onto the geo that carries the group's connector;
+   *  `renderer.ts` draws the connector ahead of relationship `linkSlot`. */
+  linkSlot?: number;
   /** G2 N15: copied from `ClassNote.phantomSlot` — see that field's doc
    *  comment (`renderer-uid.ts#assignExact` consumes it). */
   phantomSlot?: true;

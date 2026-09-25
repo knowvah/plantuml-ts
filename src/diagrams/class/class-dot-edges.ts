@@ -19,6 +19,7 @@ import { edgeLabelAttrs, type NoteBoxContext } from './class-layout-helpers.js';
 import { edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { dotEdgeId } from './class-link-order.js';
 
 // ---------------------------------------------------------------------------
 // Edge decoration map
@@ -256,6 +257,6 @@ export function buildDotEdges(
     const dotTo = anchors.get(to) ?? to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx, swap);
     Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
-    return { id: `edge-${i}`, from: dotFrom, to: dotTo, attributes: attrs };
+    return { id: dotEdgeId(i), from: dotFrom, to: dotTo, attributes: attrs };
   });
 }

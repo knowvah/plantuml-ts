@@ -33,7 +33,7 @@ import type { ClassDiagramAST, Classifier, ClassNote, Namespace } from './ast.js
  *  `+Infinity` -- ranked entries first (ascending), unranked entries keep
  *  their relative position among themselves, mirroring state's own
  *  `sortSpecsByCreationIndex` (`state-composite-pseudo.ts:59-61`). */
-function sortByRank(ids: readonly string[], rank: ReadonlyMap<string, number>): string[] {
+export function sortByRank(ids: readonly string[], rank: ReadonlyMap<string, number>): string[] {
   return [...ids].sort((a, b) => {
     const ra = rank.get(a) ?? Number.POSITIVE_INFINITY;
     const rb = rank.get(b) ?? Number.POSITIVE_INFINITY;
@@ -72,7 +72,7 @@ function tipLeaderRanks(notes: readonly ClassNote[]): Map<string, number> {
 
 /** Creation rank for every classifier and note id -- `creationIndex`,
  *  tip-group-adjusted for member-tip notes ({@link tipLeaderRanks}). */
-function buildLeafRankMap(ast: ClassDiagramAST): Map<string, number> {
+export function buildLeafRankMap(ast: ClassDiagramAST): Map<string, number> {
   const rank = new Map<string, number>();
   for (const c of ast.classifiers) {
     if (c.creationIndex !== undefined) rank.set(c.id, c.creationIndex);
@@ -152,19 +152,46 @@ function drawNamespace(
     ns.classifiers.filter((id) => !collapsedGroupRank.has(id)),
     leafRank,
   );
+  const childLeaves = childGroupIds(ns, allNamespaces, nsRank, collapsedGroupRank).flatMap((childId) => {
+    const child = allNamespaces.find((n) => n.id === childId);
+    return child === undefined ? [childId] : drawNamespace(child, allNamespaces, leafRank, nsRank, collapsedGroupRank);
+  });
+  return [...ownLeaves, ...childLeaves];
+}
+
+/** `getChildrenGroups(ns)` (`GraphvizImageBuilder.java:410`): live child
+ *  namespaces plus collapsed-empty children, by the shared creation rank. */
+function childGroupIds(
+  ns: Namespace,
+  allNamespaces: readonly Namespace[],
+  nsRank: ReadonlyMap<string, number>,
+  collapsedGroupRank: ReadonlyMap<string, number>,
+): string[] {
   const childGroupRank = new Map([...nsRank, ...collapsedGroupRank]);
-  const childIds = sortByRank(
+  return sortByRank(
     [
       ...allNamespaces.filter((n) => n.parentId === ns.id).map((n) => n.id),
       ...ns.classifiers.filter((id) => collapsedGroupRank.has(id)),
     ],
     childGroupRank,
   );
-  const childLeaves = childIds.flatMap((childId) => {
-    const child = allNamespaces.find((n) => n.id === childId);
-    return child === undefined ? [childId] : drawNamespace(child, allNamespaces, leafRank, nsRank, collapsedGroupRank);
-  });
-  return [...ownLeaves, ...childLeaves];
+}
+
+/** `getChildrenGroups(root)`: root namespaces plus ROOT-level collapsed-empty
+ *  classifiers, by the shared creation rank. */
+function rootGroupIds(
+  ast: ClassDiagramAST,
+  nsRank: ReadonlyMap<string, number>,
+  collapsedGroupRank: ReadonlyMap<string, number>,
+  namespaced: ReadonlySet<string>,
+): string[] {
+  return sortByRank(
+    [
+      ...ast.namespaces.filter((ns) => ns.parentId === undefined).map((ns) => ns.id),
+      ...ast.classifiers.filter((c) => collapsedGroupRank.has(c.id) && !namespaced.has(c.id)).map((c) => c.id),
+    ],
+    new Map([...nsRank, ...collapsedGroupRank]),
+  );
 }
 
 /** Every id directly claimed by some namespace's `.classifiers` member
@@ -218,17 +245,30 @@ export function computeLeafDrawOrder(ast: ClassDiagramAST): readonly string[] {
   const nsRank = buildNamespaceRankMap(ast.namespaces);
   const collapsedGroupRank = collapsedGroupRankMap(ast.classifiers);
   const namespaced = namespacedIds(ast);
-  const rootGroupRank = new Map([...nsRank, ...collapsedGroupRank]);
-  const rootIds = sortByRank(
-    [
-      ...ast.namespaces.filter((ns) => ns.parentId === undefined).map((ns) => ns.id),
-      ...ast.classifiers.filter((c) => collapsedGroupRank.has(c.id) && !namespaced.has(c.id)).map((c) => c.id),
-    ],
-    rootGroupRank,
-  );
+  const rootIds = rootGroupIds(ast, nsRank, collapsedGroupRank, namespaced);
   const grouped = rootIds.flatMap((id) => {
     const ns = ast.namespaces.find((n) => n.id === id);
     return ns === undefined ? [id] : drawNamespace(ns, ast.namespaces, leafRank, nsRank, collapsedGroupRank);
   });
   return [...grouped, ...sortByRank(unpackagedIds(ast, namespaced, collapsedGroupRank), leafRank)];
+}
+
+/**
+ * cdd3-T14 (E1-1): every GROUP id in `GraphvizImageBuilder#printGroups`
+ * walk order (`svek/GraphvizImageBuilder.java:408-433`), depth-first --
+ * namespace ids and the collapsed-empty-package classifier ids that walk
+ * mutes to `LeafType.EMPTY_PACKAGE` in place (`:416-418`). The same sibling
+ * order {@link computeLeafDrawOrder} draws groups in.
+ */
+export function computePrintGroupsOrder(ast: ClassDiagramAST): string[] {
+  const nsRank = buildNamespaceRankMap(ast.namespaces);
+  const collapsedGroupRank = collapsedGroupRankMap(ast.classifiers);
+  const out: string[] = [];
+  const visit = (id: string): void => {
+    out.push(id);
+    const ns = ast.namespaces.find((n) => n.id === id);
+    if (ns !== undefined) for (const c of childGroupIds(ns, ast.namespaces, nsRank, collapsedGroupRank)) visit(c);
+  };
+  for (const id of rootGroupIds(ast, nsRank, collapsedGroupRank, namespacedIds(ast))) visit(id);
+  return out;
 }

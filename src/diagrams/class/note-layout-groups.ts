@@ -69,6 +69,13 @@ export interface NoteGroup {
   opalisable: boolean;
   /** Indices into the original `notes` array, in stacking order. */
   memberIndices: number[];
+  /**
+   * cdd3-T14 (C-14): relationships ahead of this group's link in upstream's
+   * `getLinks()` order (`class-link-order.ts#orderClassLinks`), stamped by
+   * `class-dot-graph.ts#buildDotGraph` once that order is known. Absent for
+   * a group with no link (freestanding note).
+   */
+  linkSlot?: number;
 }
 
 /** A singleton group for a freestanding note or a note's first appearance

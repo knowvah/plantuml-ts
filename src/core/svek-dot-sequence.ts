@@ -150,6 +150,10 @@ interface SeqOut {
   anchorOf: Map<string, string>;
   /** Anchors met so far, in walk order — their `zaent####` suffix. */
   zaCount: number;
+  /** cdd3-T14: muted EMPTY_PACKAGE node id → owning cluster (see {@link mutedParents}). */
+  muted: Map<string, string | undefined>;
+  /** cdd3-T14: `printGroupsOrder` position of every id it names. */
+  groupRank: Map<string, number>;
 }
 
 /** `printEntities` — one value per leaf, in declaration order. Anchors take a
@@ -171,14 +175,53 @@ function assignNodes(ids: readonly string[], out: SeqOut, seq: Seq): void {
   }
 }
 
-/** `printGroup` — openCluster (4), then this group's OWN leaves, then recurse
- *  into child groups. Leaves-before-groups: the nested order. */
+/** `printGroup` — openCluster (4), then this group's OWN leaves, then
+ *  `printGroups(g)` over its child groups. Leaves-before-groups: the nested
+ *  order. A muted EMPTY_PACKAGE member is a child GROUP, not a leaf. */
 function walkCluster(cluster: DotInputCluster, tree: ClusterTree, out: SeqOut, seq: Seq): void {
   out.clusterColors.set(cluster.id, reserveCluster(seq));
-  assignNodes(cluster.nodeIds, out, seq);
-  for (const child of tree.childrenOf.get(cluster.id) ?? []) {
-    walkCluster(child, tree, out, seq);
+  assignNodes(
+    cluster.nodeIds.filter((id) => !out.muted.has(id)),
+    out,
+    seq,
+  );
+  printGroups(cluster.id, tree, out, seq);
+}
+
+/**
+ * cdd3-T14 (E1-1): `GraphvizImageBuilder#printGroups` (`:408-420`) -- walk
+ * `parentId`'s child groups in `getChildrenGroups` order; a group muted to
+ * `LeafType.EMPTY_PACKAGE` takes ONE value right there (`printEntity`,
+ * `:416-418`), any other opens a cluster (`printGroup`, `:419`). Clusters
+ * keep their `childrenOf` order; each muted node is slotted before the
+ * first sibling cluster that `printGroupsOrder` ranks after it.
+ */
+function printGroups(parentId: string | undefined, tree: ClusterTree, out: SeqOut, seq: Seq): void {
+  const slots: Array<DotInputCluster | string> = [...(tree.childrenOf.get(parentId) ?? [])];
+  const rankOf = (id: string): number => out.groupRank.get(id) ?? Number.POSITIVE_INFINITY;
+  for (const [id, parent] of out.muted) {
+    if (parent !== parentId) continue;
+    const at = slots.findIndex((s) => typeof s !== 'string' && rankOf(s.id) > rankOf(id));
+    slots.splice(at < 0 ? slots.length : at, 0, id);
   }
+  for (const slot of slots) {
+    if (typeof slot === 'string') assignNodes([slot], out, seq);
+    else walkCluster(slot, tree, out, seq);
+  }
+}
+
+/** Every muted EMPTY_PACKAGE node (a `printGroupsOrder` id that is a node,
+ *  not a cluster) mapped to the cluster holding it (`undefined` = root),
+ *  in `printGroupsOrder` order. */
+function mutedParents(
+  input: DotInputGraph,
+  nodeById: ReadonlyMap<string, DotInputNode>,
+): Map<string, string | undefined> {
+  const clusterOf = new Map<string, string>();
+  for (const c of input.clusters ?? []) for (const id of c.nodeIds) clusterOf.set(id, c.id);
+  const muted = new Map<string, string | undefined>();
+  for (const id of input.printGroupsOrder ?? []) if (nodeById.has(id)) muted.set(id, clusterOf.get(id));
+  return muted;
 }
 
 /**
@@ -197,15 +240,18 @@ export function assignSequence(input: DotInputGraph, tree: ClusterTree): SeqAssi
   // 1. root Cluster ctor, before anything else.
   reserveCluster(seq);
 
-  // 2. printGroups(rootGroup) — groups BEFORE the root's own leaves.
+  // 2. printGroups(rootGroup) — groups (muted EMPTY_PACKAGE leaves included,
+  //    at their group slot) BEFORE the root's own leaves.
   const out: SeqOut = {
     recs,
     nodeById,
     clusterColors,
     anchorOf: anchorOwners(input.clusters ?? []),
     zaCount: 0,
+    muted: mutedParents(input, nodeById),
+    groupRank: new Map((input.printGroupsOrder ?? []).map((id, i) => [id, i] as const)),
   };
-  for (const top of tree.childrenOf.get(undefined) ?? []) walkCluster(top, tree, out, seq);
+  printGroups(undefined, tree, out, seq);
 
   // 3. printEntities(getUnpackagedEntities()).
   assignNodes(

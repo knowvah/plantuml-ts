@@ -378,6 +378,13 @@ export interface DotInputGraph {
   /** Cluster structure for Svek-DOT emission. Layout ignores it (clusters are
    *  still resolved post-layout); only the emitter reads it. Emitter-only. */
   clusters?: DotInputCluster[];
+  /** cdd3-T14 (E1-1): `GraphvizImageBuilder#printGroups`'s sibling order
+   *  (`svek/GraphvizImageBuilder.java:408-420`), depth-first -- cluster ids
+   *  and the node ids of EMPTY packages it mutes to `LeafType.EMPTY_PACKAGE`
+   *  and prints in place (`:416-418`). Read only by `svek-dot-sequence.ts`
+   *  to give a muted package its ColorSequence value at its group slot.
+   *  Absent = no muted packages (every engine but class). Emitter-only. */
+  printGroupsOrder?: readonly string[];
   /** `!pragma kermor on` (skin/PragmaKey.java:55) — svek's alternate
    *  cluster/note DOT-emission path (svek/ClusterDotStringKermor.java,
    *  Cluster.java:595-609 `printCluster3_forKermor`). Changes the ranksep
