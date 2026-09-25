@@ -69,7 +69,7 @@ export function dotEdgeRunsReversed(rel: Relationship): boolean {
   //
   // B6 compared `idEntity1FullId`/`idEntity2FullId` against `from`/`to`. Those
   // agree only until `class-command-relationships.ts:107-113` rewrites
-  // `from`/`to` through `resolveRelationshipEndpoint`, which the FullId pair
+  // `from`/`to` through `resolveRelationshipEndpoints`, which the FullId pair
   // never sees — so inside a `namespace`/`package`, or with an `as "alias"`
   // declaration, the comparison reported "not reversed" AND returned early,
   // never reaching the fallback below. That was 28 of the 32 fixtures in
@@ -84,7 +84,7 @@ export function dotEdgeRunsReversed(rel: Relationship): boolean {
 /**
  * `Link.sameConnections` (abel/Link.java:462-470): same endpoint pair,
  * either direction, identity only -- ignores type/label/decor. `from`/`to`
- * are the parser's post-`resolveRelationshipEndpoint` canonical ids by the
+ * are the parser's post-`resolveRelationshipEndpoints` canonical ids by the
  * time a relationship reaches this module (same identity contract
  * `linkDedup.ts`'s free-function form already relies on for dedup).
  */

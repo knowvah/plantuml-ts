@@ -251,12 +251,6 @@ export interface ResolveInput {
   name: string;
   /** Declaration display (defaulted to the raw name); undefined for endpoints. */
   display: string | undefined;
-  /**
-   * When false (`!pragma useIntermediatePackages false`), a dotted qualifier
-   * collapses to a single namespace instead of a nested chain (`A.B.C.Z` → one
-   * namespace `A.B.C`, not `A` > `A.B` > `A.B.C`).
-   */
-  intermediatePackages: boolean;
   /** All classifiers declared so far in the diagram — read by the
    *  unique-match reuse lookup below (`countByName`/`firstWithName`). */
   classifiers: Classifier[];
@@ -406,7 +400,7 @@ function tryReuseExisting(input: ResolveInput): ResolvedRef | null {
  * already-null-checked separator (narrowed from `input.sep`).
  */
 function resolveQualified(input: ResolveInput, sep: string): ResolvedRef {
-  const { namespaces, activeNamespace, name, display, intermediatePackages } = input;
+  const { namespaces, activeNamespace, name, display } = input;
   const id = qualifiedId(name, activeNamespace, sep, namespaces);
   // `activeNamespace` is an already-resolved, existing namespace id — trust
   // any decoration-looking characters it contributes to `id` (see
@@ -414,8 +408,11 @@ function resolveQualified(input: ResolveInput, sep: string): ResolvedRef {
   const qSegments = splitOnSeparator(id, sep, activeNamespace ?? undefined);
   if (qSegments === null) return { id, nsId: null, display };
   const leaf = qSegments[qSegments.length - 1]!;
-  const qualifier = qSegments.slice(0, -1);
-  const nsSegments = intermediatePackages ? qualifier : [qualifier.join(sep)];
+  // cdd3-T9 S-1: always the full per-segment chain, pragma or not --
+  // `quarkInContext` registers one Quark per segment regardless of
+  // `useIntermediatePackages`; the pragma only packs groups at
+  // `checkFinalError` (`class-namespace-pack.ts`, ClassDiagram.java:84-85).
+  const nsSegments = qSegments.slice(0, -1);
   const isDefaultDisplay = display === undefined || display === name;
   return {
     id,

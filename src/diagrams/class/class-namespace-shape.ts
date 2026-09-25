@@ -415,7 +415,8 @@ function emptyPackagePaint(theme: ScaledTheme): { strokeWidth: number; border: s
 }
 
 export function renderEmptyPackageIcon(geo: NamespaceGeo, theme: ScaledTheme, measurer?: StringMeasurer): string {
-  const { strokeWidth, border, fill } = emptyPackagePaint(theme);
+  const { strokeWidth, border, fill: styleFill } = emptyPackagePaint(theme);
+  const fill = geo.color !== undefined ? parseColor(geo.color) : styleFill; // S-12: EntityImageEmptyPackage.java:97,109-112
   const fontSize = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
   const fontColor = titleFontColor(theme);
   const { outline, hline } = renderFolderTabShape(geo, {

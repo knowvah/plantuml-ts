@@ -52,7 +52,6 @@ function adapt(state: ParseState): JsonCommandHost<Classifier> {
         activeNamespace: state.activeNamespace,
         name: rawId,
         display: rawDisplay,
-        intermediatePackages: state.intermediatePackages,
         classifiers: state.ast.classifiers,
         reuseExistingChild: reuseExisting,
       });

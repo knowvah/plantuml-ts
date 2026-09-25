@@ -55,7 +55,7 @@ function pointDist(a: { x: number; y: number }, b: { x: number; y: number }): nu
  * `plans/g2-class-svg/ledger.md` N30).
  *
  * cdd-T6 (A5/M5): the node centres are resolved from `rel.from`/`rel.to`
- * -- the POST-`resolveRelationshipEndpoint` ids `posMap` is actually keyed
+ * -- the POST-`resolveRelationshipEndpoints` ids `posMap` is actually keyed
  * by -- and re-ordered into upstream's `cl1`/`cl2` pair by the parser's own
  * {@link Relationship.dotEdgeReversed} flag. The previous code keyed the
  * lookup on `idEntity1FullId`/`idEntity2FullId`, which the parser stamps

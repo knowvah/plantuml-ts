@@ -180,7 +180,6 @@ function applyMapOpen(state: ParseState, match: RegExpExecArray): void {
     activeNamespace: state.activeNamespace,
     name: rawCode,
     display: rawDisplay,
-    intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild: true,
   });

@@ -14,16 +14,34 @@ import { parseObjectField } from './class-object-commands.js';
 import { parseRelationshipLine, REL_DISPATCH_RE, stripQuotes } from './class-relationship-parser.js';
 import type { Command } from './class-command-types.js';
 import { ensureClassifier, type ParseState } from './parser.js';
+import { materializeClassifier, registerPendingLeaf, resolveClassifierRef } from './class-ensure-classifier.js';
 import { resolveReference } from './class-namespace.js';
 import { refuse } from '../../core/parse-refusal.js';
 
-/** A relationship endpoint resolves to itself when it names a note (a note
- *  alias is never auto-created as a classifier); otherwise it auto-creates/
- *  reuses a classifier and resolves to that classifier's (possibly
- *  namespace-qualified) id. Shared by the relationship-dispatch execute
- *  below for both the `from` and `to` endpoint. */
-function resolveRelationshipEndpoint(state: ParseState, id: string): string {
-  return isNoteId(state.ast, id) ? id : ensureClassifier(state, id, undefined, undefined, true).id;
+/**
+ * cdd3-T9 S-1b: `CommandLinkClass#executeArg`'s endpoint pair, in its two
+ * upstream phases -- resolve BOTH quarks (`quarkInContextSafe`,
+ * `CommandLinkClass.java:320-325`, registration only, no tick), THEN create
+ * each missing leaf in source order (`reallyCreateLeaf`, `:327-333`, tick +
+ * like-class sweep). So the first leaf's sweep already numbers the second
+ * endpoint's freshly registered package chain. A note-naming endpoint
+ * resolves to itself (a note alias is never auto-created as a classifier).
+ * Returns the two resolved ids in the order given (`first`, `second` are
+ * `ent1String`, `ent2String`: source-text order).
+ */
+function resolveRelationshipEndpoints(state: ParseState, first: string, second: string): [string, string] {
+  const firstIsNote = isNoteId(state.ast, first);
+  const secondIsNote = isNoteId(state.ast, second);
+  const ref1 = firstIsNote ? undefined : resolveClassifierRef(state, first, undefined, true);
+  const pending1 = ref1 === undefined ? undefined : registerPendingLeaf(state, ref1);
+  const ref2 = secondIsNote
+    ? undefined
+    : resolveClassifierRef(state, second, undefined, true, pending1 === undefined ? [] : [pending1]);
+  // `quark2` IS `quark1` when both name the same new leaf: registered once.
+  const pending2 = ref2 === undefined || ref2.id === ref1?.id ? undefined : registerPendingLeaf(state, ref2);
+  const id1 = ref1 === undefined ? first : materializeClassifier(state, ref1, 'class', pending1 !== undefined).id;
+  const id2 = ref2 === undefined ? second : materializeClassifier(state, ref2, 'class', pending2 !== undefined).id;
+  return [id1, id2];
 }
 
 /** A `Relationship` reduced to its two connection identities for the shared
@@ -108,11 +126,9 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
       // already declared) is unaffected either way, since `ensureClassifier`
       // reuses the existing entry without re-stamping `creationIndex`.
       if (rel.swapDirection === true) {
-        rel.to = resolveRelationshipEndpoint(state, rel.to);
-        rel.from = resolveRelationshipEndpoint(state, rel.from);
+        [rel.to, rel.from] = resolveRelationshipEndpoints(state, rel.to, rel.from);
       } else {
-        rel.from = resolveRelationshipEndpoint(state, rel.from);
-        rel.to = resolveRelationshipEndpoint(state, rel.to);
+        [rel.from, rel.to] = resolveRelationshipEndpoints(state, rel.from, rel.to);
       }
       // G2 N2 (mechanism 3): stamp AFTER both endpoints resolve/auto-create
       // -- matches upstream's shared-counter ordering (an auto-created
@@ -198,7 +214,6 @@ function existingClassifierExists(state: ParseState, rawName: string): boolean {
     activeNamespace: state.activeNamespace,
     name: stripQuotes(rawName),
     display: undefined,
-    intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild: true,
   });

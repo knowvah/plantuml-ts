@@ -34,7 +34,7 @@ import { layoutGraph as layout } from '../../core/graph-layout.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { filterRemovedEntities, computeHiddenIds, computeRemovedRanks } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
-import { collapseEmptyNamespacesFinal } from './class-namespace.js';
+import { collapseEmptyNamespacesFinal, packedGroupRanksField } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
 import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
@@ -255,9 +255,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // Everything below — dot graph, note synthesis, geo building — sees only
   // the surviving entities, keeping edge-index alignment consistent.
   const effAst = filterRemovedEntities(pageAst);
-  // cdd-T3 (A1 SB5): the ranks that filtering just dropped -- jar burned them
-  // at parse time and only skips the entities at EXPORT time, so they stay as
-  // holes in its numbering (`computeRemovedRanks`'s own doc comment).
+  // cdd-T3 (A1 SB5): ranks filtering just dropped -- jar burned them at parse
+  // time, skipped only at EXPORT time (`computeRemovedRanks`'s doc comment).
   const removedRanks = computeRemovedRanks(pageAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
@@ -377,6 +376,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   return {
     ...assembled,
     ...(removedRanks.length > 0 ? { removedRanks } : {}),
+    ...packedGroupRanksField(effAst),
     leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)),
   };
   // #lizard forgives -- linear orchestration (empty-diagram guard,

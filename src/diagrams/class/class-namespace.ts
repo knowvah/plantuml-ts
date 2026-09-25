@@ -104,6 +104,10 @@ export function collapseEmptyNamespace(
   // inherits it verbatim (widens the node via `measureEmptyPackageLeafDim`).
   // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-137
   if (ns.stereotype !== undefined) classifier.stereotype = ns.stereotype;
+  // cdd3-T9 S-12: likewise the entity's own colours -- the mute keeps the
+  // SAME entity, whose BACK colour `EntityImageEmptyPackage` reads first.
+  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:97,109-112
+  if (ns.color !== undefined) classifier.color = ns.color;
   classifierIndex.set(nsId, classifiers.length);
   classifiers.push(classifier);
   if (parentId !== null) {
@@ -171,3 +175,4 @@ export {
   GENERIC_CLAUSE_RE,
 } from './class-namespace-resolve.js';
 export type { ResolveInput, ResolvedRef } from './class-namespace-resolve.js';
+export { packedGroupRanksField } from './class-namespace-pack.js';

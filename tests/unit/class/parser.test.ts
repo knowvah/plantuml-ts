@@ -535,12 +535,18 @@ describe('namespaces', () => {
     expect(ast.classifiers.find((c) => c.id === 'a.b.c')).toBeDefined();
   });
 
-  it('useIntermediatePackages false collapses to a single namespace', () => {
+  it('useIntermediatePackages false keeps the chain and packs the single-child groups', () => {
     const ast = parse('!pragma useIntermediatePackages false\nclass A.B.C.Z {\n}');
-    // No intermediate A / A.B / A.B.C — one namespace of the whole qualifier.
-    expect(ast.namespaces.map((n) => n.id)).toEqual(['A.B.C']);
-    expect(ast.namespaces[0]?.parentId).toBeUndefined();
-    expect(ast.namespaces[0]?.classifiers).toContain('A.B.C.Z');
+    // cdd3-T9 S-1: every segment stays a group (AbstractEntityDiagram.java:
+    // 85-106 packs at checkFinalError); only the innermost one is unpacked
+    // and carries the joined display.
+    expect(ast.namespaces.map((n) => [n.id, n.packed === true])).toEqual([
+      ['A', true],
+      ['A.B', true],
+      ['A.B.C', false],
+    ]);
+    expect(ast.namespaces[2]?.display).toBe('A.B.C');
+    expect(ast.namespaces[2]?.classifiers).toContain('A.B.C.Z');
   });
 
   // Namespace-aware reference resolution (verified against the class DOT oracle).

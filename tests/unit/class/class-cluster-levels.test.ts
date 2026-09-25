@@ -22,7 +22,8 @@ import { fileURLToPath } from 'node:url';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import { classPlugin } from '../../../src/diagrams/class/index.js';
 import { collapseEmptyNamespacesFinal } from '../../../src/diagrams/class/class-namespace.js';
-import type { ClassDiagramAST, Namespace } from '../../../src/diagrams/class/ast.js';
+import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
+import { nonEmptyNamespaceIds } from '../../../src/diagrams/class/class-dot-clusters.js';
 import { clusterWrapperLevel } from '../../../src/diagrams/class/class-cluster-levels.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 
@@ -99,23 +100,12 @@ function parseFixture(source: string): ClassDiagramAST {
 
 /**
  * Namespace ids that get a jar cluster, in the SAME document order
- * `buildDotClusters` (`class-dot-graph.ts`) emits them in: any namespace
- * with a direct classifier, plus every ancestor on its way to the root. A
- * standalone local re-derivation (not imported from `class-dot-graph.ts`,
- * which does not export it) — test-only correlation logic, not production
- * behavior.
+ * `buildDotClusters` (`class-dot-clusters.ts`) emits them in -- its own
+ * exported keep-set (any namespace with a direct classifier, plus every
+ * non-packed ancestor), filtered in `ast.namespaces` order.
  */
 function keptNamespaceIds(ast: ClassDiagramAST): string[] {
-  const byId = new Map(ast.namespaces.map((n) => [n.id, n] as const));
-  const keep = new Set<string>();
-  for (const ns of ast.namespaces) {
-    if (ns.classifiers.length === 0) continue;
-    let cur: Namespace | undefined = ns;
-    while (cur !== undefined && !keep.has(cur.id)) {
-      keep.add(cur.id);
-      cur = cur.parentId !== undefined ? byId.get(cur.parentId) : undefined;
-    }
-  }
+  const keep = nonEmptyNamespaceIds(ast);
   return ast.namespaces.filter((ns) => keep.has(ns.id)).map((ns) => ns.id);
 }
 

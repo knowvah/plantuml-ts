@@ -200,6 +200,16 @@ export interface Namespace {
    */
   tags?: string[];
   /**
+   * cdd3-T9 S-1: set by `class-namespace-pack.ts#packSomePackage` under
+   * `!pragma useIntermediatePackages false` -- a single-child group whose
+   * first display line was prepended to its child's. It keeps its
+   * `creationIndex` (the uid tick is already burned), but emits no DOT
+   * subgraph and is never drawn.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Entity.java:717-741
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:83-88
+   */
+  packed?: true;
+  /**
    * cdd2-T19b: the group's OWN legend -- a `legend ... end legend` (or
    * single-line `legend text`) written inside this container's body.
    * Upstream `AbstractClassOrObjectDiagram#setLegend` routes it to

@@ -122,8 +122,8 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
-  // 2c. `!pragma useIntermediatePackages false` — collapse a dotted id to a
-  //     single namespace instead of a nested chain.
+  // 2c. `!pragma useIntermediatePackages false` — read at end of parse by
+  //     `packSomePackage` (class-namespace-pack.ts, ClassDiagram.java:84-85).
   {
     pattern: /^!pragma\s+useintermediatepackages\s+(true|false)\s*$/i,
     execute(state, match) {

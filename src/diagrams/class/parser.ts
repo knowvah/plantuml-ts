@@ -19,6 +19,7 @@ import { createAnnotations, matchAnnotationCommand } from '../../core/annotation
 import type { DisplayPositioned } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import { normalizeSameConnectionLengths } from './class-namespace.js';
+import { packSomePackage } from './class-namespace-pack.js';
 import { eventuallyBuildPhantomGroups } from './class-namespace-resolve.js';
 export { ensureClassifier } from './class-ensure-classifier.js';
 import { parseMemberLine } from './class-member-parser.js';
@@ -59,6 +60,16 @@ function makeDefaultAST(): ClassDiagramAST {
 }
 
 /**
+ * cdd3-T9 S-1: `ClassDiagram#checkFinalError`'s pack step, right after the
+ * same-pair length normalization and before `getTextBlock`'s closing sweep
+ * -- gated on the pragma's value at the END of the diagram.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/ClassDiagram.java:74-85
+ */
+function packIfNoIntermediatePackages(state: ParseState): void {
+  if (!state.intermediatePackages) packSomePackage(state.ast, state.namespaceSeparator);
+}
+
+/**
  * `newpage` (CommandNewpage): finalize the current page and start an
  * entirely fresh one. Upstream creates a brand-new empty diagram
  * (`factory.createEmptyDiagram`) and wraps the pair in `NewpagedDiagram`,
@@ -72,6 +83,7 @@ export function startNewPage(state: ParseState): void {
   // checkFinalError's same-pair length normalization runs per finished
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
+  packIfNoIntermediatePackages(state);
   // cdd-T1: `getTextBlock`'s own closing sweep (CucaDiagram.java:464) -- a
   // page IS a finished diagram, rendered through its own getTextBlock.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
@@ -424,6 +436,7 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
   adjudicateAllowMixing(state);
 
   normalizeSameConnectionLengths(state.ast.relationships);
+  packIfNoIntermediatePackages(state);
   // cdd-T1: `getTextBlock`'s closing sweep (CucaDiagram.java:464, as in
   // startNewPage) -- numbers any package no like-class leaf ever swept.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);

@@ -37,7 +37,6 @@ export function applyStereotypeStatement(state: ParseState, rawName: string, bra
     activeNamespace: state.activeNamespace,
     name: stripQuotes(rawName),
     display: undefined,
-    intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild: true,
   });

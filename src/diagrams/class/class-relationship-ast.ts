@@ -276,7 +276,7 @@ export interface Relationship {
    *
    * B6 inferred the same fact by comparing `idEntity1FullId`/`idEntity2FullId`
    * against `from`/`to`. That is unsound: `class-command-relationships.ts`
-   * rewrites `from`/`to` through `resolveRelationshipEndpoint` AFTER the
+   * rewrites `from`/`to` through `resolveRelationshipEndpoints` AFTER the
    * parser stamps the FullId pair from raw ids, so inside a `namespace` or
    * with an `as "alias"` declaration the two disagree and the comparison
    * reports "not reversed". 28 of the 32 fixtures in `direction-backlog.json`

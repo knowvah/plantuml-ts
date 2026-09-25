@@ -45,7 +45,6 @@ export function applyUrlStatement(state: ParseState, rawCode: string, bracket: s
     activeNamespace: state.activeNamespace,
     name: stripQuotes(rawCode),
     display: undefined,
-    intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild: true,
   });

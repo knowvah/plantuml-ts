@@ -84,8 +84,9 @@ export interface ParseState {
    * or `set separator` overrides it, and `none` (→ null) disables splitting.
    */
   namespaceSeparator: string | null;
-  /** `!pragma useIntermediatePackages false` collapses a dotted id to one
-   *  namespace instead of a nested chain (default true). */
+  /** `!pragma useIntermediatePackages` (default true). False packs every
+   *  single-child group at end of parse (`class-namespace-pack.ts`,
+   *  `ClassDiagram.java:84-85`); resolution is unaffected. */
   intermediatePackages: boolean;
   /**
    * Namespace id → usymbol for *descriptive* containers (`rectangle`/`component`/

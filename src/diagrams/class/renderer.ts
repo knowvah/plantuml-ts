@@ -18,6 +18,7 @@ import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrom
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
+import { renderEmptyPackageLeaf } from './renderer-empty-package-leaf.js';
 import {
   wrapCluster,
   wrapEntity,
@@ -30,7 +31,6 @@ import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
   renderNamespaceRect,
-  renderEmptyPackageIcon,
   namespaceFill,
   titleFontColor,
   PACKAGE_ROUND_CORNER,
@@ -104,37 +104,6 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
   return theme.packageStyle === 'rect'
     ? renderNamespaceRect(geo, theme, measurer)
     : renderNamespaceFolder(geo, theme, measurer);
-}
-
-/**
- * G2 N33: a collapsed-empty `package`/`namespace` leaf (`ClassifierGeo
- * .folderTab` present, `class-magma.ts#isCollapsedGroup`'s doc comment)
- * draws its OWN small `EntityImageEmptyPackage` folder-tab icon -- the
- * SAME `renderNamespaceFolder`/`USymbolFolder#asBig` shape a non-empty
- * package's CLUSTER wrapper uses, just sized by
- * `measureEmptyPackageLeafDim`'s smaller formula instead of the cluster's
- * own content-driven dimension. Reuses `renderNamespaceFolder` by
- * constructing a `NamespaceGeo`-shaped view over the classifier's own
- * (DOT-driven) `x`/`y`/`width`/`height` plus the pre-computed `folderTab`
- * fields -- `id`/`creationIndex` are irrelevant to rendering (unused by
- * `renderNamespaceFolder`) so are filled with placeholders.
- */
-function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
-  const folderTab = geo.folderTab;
-  if (folderTab === undefined) return '';
-  const label = geo.rows[0]?.text ?? geo.id;
-  const nsGeo: NamespaceGeo = {
-    id: geo.id,
-    x: geo.x,
-    y: geo.y,
-    width: geo.width,
-    height: geo.height,
-    label,
-    wtitle: folderTab.wtitle,
-    htitle: folderTab.htitle,
-    baselineOffset: folderTab.baselineOffset,
-  };
-  return renderEmptyPackageIcon(nsGeo, theme, measurer);
 }
 
 // ---------------------------------------------------------------------------

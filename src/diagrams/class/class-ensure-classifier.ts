@@ -39,31 +39,30 @@ function countStyleBlocksBefore(
   return count;
 }
 
+/** Phase-1 output: a reference resolved to its quark (id + owning
+ *  namespace + default display), no leaf created yet. */
+export interface ClassifierRef {
+  readonly id: string;
+  readonly nsId: string | null;
+  readonly display: string | undefined;
+}
+
 /**
- * Ensure a classifier exists for the raw reference; create if absent. The
- * reference is resolved to a fully-qualified (namespace-aware) id, so the
- * returned `id` may differ from `rawName` — callers storing the reference
- * elsewhere (relationships, body opener) must use the returned `id`.
- *
- * `reuseExistingChild` mirrors upstream `quarkInContext`'s flag of the same
- * name: true at relation-endpoint sites (a bare name may resolve to an
- * existing classifier declared elsewhere), false at declaration sites
- * (always scope-local, upstream `CommandCreateClass`). Defaults to false so
- * every pre-existing declaration call site is unaffected; endpoint call
- * sites pass `true` explicitly.
+ * Phase 1 of `CommandLinkClass#executeArg` -- `quarkInContextSafe`
+ * (`CommandLinkClass.java:320-325`): resolve a raw reference to its
+ * fully-qualified id, registering its namespace chain (data-less quarks, no
+ * tick). `pendingQuarks` are leaves registered by an EARLIER phase-1 call of
+ * the same command but not yet created: upstream's `countByName`
+ * (`plasma/Plasma.java:104-108`) already counts their quarks.
  */
-export function ensureClassifier(
+export function resolveClassifierRef(
   state: ParseState,
   rawName: string,
-  kind: ClassifierKind = 'class',
-  display?: string,
-  reuseExistingChild = false,
-): Classifier {
-  const {
-    id,
-    nsId,
-    display: disp,
-  } = resolveReference({
+  display: string | undefined,
+  reuseExistingChild: boolean,
+  pendingQuarks: readonly Classifier[] = [],
+): ClassifierRef {
+  return resolveReference({
     namespaces: state.ast.namespaces,
     sep: state.namespaceSeparator,
     activeNamespace: state.activeNamespace,
@@ -71,10 +70,45 @@ export function ensureClassifier(
     // id whether it comes from a declaration, a relationship, or an assoc-couple.
     name: stripQuotes(rawName),
     display,
-    intermediatePackages: state.intermediatePackages,
-    classifiers: state.ast.classifiers,
+    classifiers: pendingQuarks.length === 0 ? state.ast.classifiers : [...state.ast.classifiers, ...pendingQuarks],
     reuseExistingChild,
   });
+}
+
+/** Whether `ref` names a quark this port has not registered yet: neither a
+ *  classifier nor a namespace node (a namespace id -- data-less or not -- is
+ *  already a child of its parent through `parentId`). */
+function isUnregisteredQuark(state: ParseState, ref: ClassifierRef): boolean {
+  if (state.classifierIndex.has(ref.id)) return false;
+  return !state.ast.namespaces.some((n) => n.id === ref.id);
+}
+
+/**
+ * cdd3-T9 S-1b: register a to-be-created leaf's quark as a child of its
+ * namespace NOW (`Quark#child` registers it at resolution time,
+ * `plasma/Quark.java:57-66`), so a sweep run by another endpoint's creation
+ * in between counts it (`countChildren > 0`). Returns the unregistered stub
+ * a later phase-1 call counts by name, or undefined when the quark was
+ * already registered.
+ */
+export function registerPendingLeaf(state: ParseState, ref: ClassifierRef): Classifier | undefined {
+  if (!isUnregisteredQuark(state, ref)) return undefined;
+  registerInNamespace(state.ast.namespaces, ref.nsId, ref.id);
+  return makeClassifier(ref.id, 'class', ref.display, ref.nsId);
+}
+
+/**
+ * Phase 2 -- `reallyCreateLeaf` (`net/atmp/CucaDiagram.java:218-245`) when
+ * the quark has no data, else the existing entity. `registered` is true when
+ * {@link registerPendingLeaf} already added the id to its namespace.
+ */
+export function materializeClassifier(
+  state: ParseState,
+  ref: ClassifierRef,
+  kind: ClassifierKind,
+  registered = false,
+): Classifier {
+  const { id, nsId, display: disp } = ref;
   const existing = state.classifierIndex.get(id);
   if (existing !== undefined) {
     return state.ast.classifiers[existing]!;
@@ -95,7 +129,7 @@ export function ensureClassifier(
   const idx = state.ast.classifiers.length;
   state.ast.classifiers.push(classifier);
   state.classifierIndex.set(id, idx);
-  registerInNamespace(state.ast.namespaces, nsId, id);
+  if (!registered) registerInNamespace(state.ast.namespaces, nsId, id);
   // Mirrors upstream `reallyCreateLeaf` (CucaDiagram.java:218-228), which
   // unconditionally sets `lastEntity` on every leaf creation. ensureClassifier
   // is the single creation chokepoint for both declarations and
@@ -108,9 +142,31 @@ export function ensureClassifier(
     eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
   }
   return classifier;
-  // #lizard forgives -- pre-existing violation (34 NLOC/5 PARAM vs this
-  // repo's caps), unchanged by the allowmixing gate: `git diff` shows zero
-  // overlap with this function.
+}
+
+/**
+ * Ensure a classifier exists for the raw reference; create if absent. The
+ * reference is resolved to a fully-qualified (namespace-aware) id, so the
+ * returned `id` may differ from `rawName` — callers storing the reference
+ * elsewhere (relationships, body opener) must use the returned `id`.
+ *
+ * `reuseExistingChild` mirrors upstream `quarkInContext`'s flag of the same
+ * name: true at relation-endpoint sites (a bare name may resolve to an
+ * existing classifier declared elsewhere), false at declaration sites
+ * (always scope-local, upstream `CommandCreateClass`). Defaults to false so
+ * every pre-existing declaration call site is unaffected; endpoint call
+ * sites pass `true` explicitly. A single-reference command resolves and
+ * creates back to back; a TWO-endpoint link uses the phases separately
+ * (`class-command-relationships.ts`, cdd3-T9 S-1b).
+ */
+export function ensureClassifier(
+  state: ParseState,
+  rawName: string,
+  kind: ClassifierKind = 'class',
+  display?: string,
+  reuseExistingChild = false,
+): Classifier {
+  return materializeClassifier(state, resolveClassifierRef(state, rawName, display, reuseExistingChild), kind);
 }
 /**
  * cdd-T3 (A1 SB4): upstream's `quarkInContextSafe` hands back the
