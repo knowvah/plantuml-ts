@@ -27,6 +27,10 @@ Observations to honour:
   test files are always red in a symlinked worktree (stdlib-packages,
   stdlib-all-exports, stdlib-package-files, sprite-package-files,
   stdlib-remote-e2e); everything else must pass.
+- NEVER `git stash` (journal row 27): `refs/stash` is shared by every
+  worktree; T14 and T17 swapped uncommitted work through it. For a
+  "before" measurement, measure before editing, or save a patch
+  (`git diff > /tmp/cdd3-Tn.patch`), check out, measure, `git apply`.
 
 ## Task
 
