@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1226 modules · 4598 exported names.
+1227 modules · 4613 exported names.
 
 ## `src/`
 
@@ -336,7 +336,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `error-diagrams.ts` | `preprocessorErrorSvg`, `DiagramRefusal`, `errorSvg`, `welcomeSvg`, `emptySvg` | Error diagrams — upstream's `BlockUml#getDiagram`. |
-| `error-renderer.ts` | `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported blocks) to SVG. |
+| `error-page-exact.ts` | `renderErrorPageOnly` | Exact `PSystemError` page geometry (C-17) — split out of `error-renderer.ts` (500-line complexity hook) so the fitted-ratio `Block`/`Line` model that file still needs for `blackOnWhite` (Welcome/Unsupported) doesn't grow past the cap alongs |
+| `error-renderer.ts` | `BLACK`, `RED`, `MY_GREEN`, `SANS`, `SIZE_12`, `SIZE_14`, `ERROR_PAGE_MARGIN`, `BAND_PAD_X`, `BAND_PAD_TOP`, `BAND_PAD_BOTTOM`, `HEADER_PAD_RIGHT`, `HEADER_PAD_BOTTOM`, `Run`, `drawRun`, `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported blocks) to SVG. |
 | `ErrorUml.ts` | `ErrorUmlType`, `AssumedDiagramType`, `ErrorUml` | One error, as the error diagram prints it: the message, the line it was raised on, a score (used to pick the "best" error when several diagram parsers each fail on the same source), and — when the parser had already committed to a diagram t |
 | `index.ts` | `ErrorUml`, `ErrorUmlType`, `PSystemError`, `PSystemErrorEmpty`, `PSystemErrorPreprocessor`, `PSystemErrorV2`, `PSystemUnsupported`, `PSystemWelcome`, `buildV2`, `merge`, `umlSourceOf`, `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | The error diagram — upstream's `net/sourceforge/plantuml/error/` (plus the Welcome screen it stacks on top, from `eggs/PSystemWelcome`). |
 | `PSystemError.ts` | `PSystemError` | The error diagram: PlantUML never throws on a malformed document, it RENDERS one. |
