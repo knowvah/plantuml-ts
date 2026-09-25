@@ -341,7 +341,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // (`SvekEdge#drawU`'s `if (opale) return;`); a candidate that FAILED to
   // resolve (degenerate spline) keeps its ordinary edge draw, the same
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
-  const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
+  const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges);
   // cdd-T13 (M1): a `note <pos> of <package>` connector is upstream's OWN
   // ordinary `Link` (`CommandFactoryNoteOnEntity.java:342`), so its
   // `SvekEdge` gets the SAME `:671-672` clip -- threaded into `mapNoteGeos`

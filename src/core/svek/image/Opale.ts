@@ -299,15 +299,25 @@ export function getOpaleStrategy(width: number, height: number, pt: OpalePoint):
  * which is equivalent to just picking the closer point directly. `undefined`
  * when there's no real spline to resolve (freestanding note, or a
  * degenerate single-point connector) -- caller falls back to a plain
- * folded-corner box.
+ * folded-corner box. cdd3-T15 (C-15 = E3-19): also `undefined` when the
+ * connector routes as MORE than one bezier -- `SvekEdge.java:769-770` `if
+ * (isOpalisable() == false) setOpale(false);` and `:804-806` `return
+ * dotPath.getBeziers().size() <= 1;`. `DotPath#addCurve`
+ * (`klimt/shape/DotPath.java:112-124`) appends 4 points for the first
+ * bezier and 3 more per additional bezier (sharing the previous curve's
+ * endpoint), so `points = 3*beziers + 1` -- `beziers <= 1` is exactly
+ * `points <= 4`.
  * @see ~/git/plantuml/.../svek/image/EntityImageNote.java#drawU
+ * @see ~/git/plantuml/.../svek/SvekEdge.java:769-770,804-806
  */
+const OPALE_MAX_POINTS_FOR_SINGLE_BEZIER = 4;
+
 export function resolveOpaleConnector(
   dim: { width: number; height: number },
   origin: { x: number; y: number },
   rawPoints: ReadonlyArray<{ x: number; y: number }>,
 ): { direction: OpaleDirection; pp1: OpalePoint; pp2: OpalePoint } | undefined {
-  if (rawPoints.length < 2) return undefined;
+  if (rawPoints.length < 2 || rawPoints.length > OPALE_MAX_POINTS_FOR_SINGLE_BEZIER) return undefined;
   const first = rawPoints[0]!;
   const last = rawPoints[rawPoints.length - 1]!;
   const local = (p: { x: number; y: number }): OpalePoint => ({ x: p.x - origin.x, y: p.y - origin.y });

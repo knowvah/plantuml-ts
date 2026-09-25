@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1205 modules · 4504 exported names.
+1206 modules · 4505 exported names.
 
 ## `src/`
 
@@ -1171,6 +1171,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-ink-box.ts` | `InkBox`, `DOCUMENT_MARGIN_TOP`, `DOCUMENT_MARGIN_RIGHT`, `DOCUMENT_MARGIN_BOTTOM`, `DOCUMENT_MARGIN_LEFT`, `INK_DELTA`, `JAR_INK_MARGIN`, `drawnEnhancedBodyEmbeds`, `InkBoxOptions`, `buildInkBox` | Ink-extent accumulation (InkBox + per-shape ink adders + buildInkBox) for class-diagram document sizing. |
 | `class-ink-dot-path.ts` | `drawnEdgePoints` | class-ink-dot-path.ts — the link path `LimitFinder` actually walks. |
 | `class-ink-edge-label-margin.ts` | `addEdgeLabelMarginInk`, `addMultiLineLabelMarginInk` | cdd-T35/cdd-B10FU: an edge label's `TextBlockMarged` ink term -- split out of `class-ink-box.ts` (500-line hook cap) purely to keep that file under the cap; a pure move plus the new multi-line sibling, no behavior change to the single-line |
+| `class-ink-note.ts` | `addNoteInk` | class-ink-note.ts — the note-leaf ink term of `buildInkBox`'s `LimitFinder`-shaped walk. |
 | `class-ink-shapes.ts` | `HACK_X_FOR_POLYGON`, `InkBox`, `newInkBox`, `addPoint`, `addRectInk`, `addRectInkEmptyShownBody`, `addEllipseInk`, `addPlainInk`, `addEmbedImageInk`, `addFolderPolygonInk`, `addNamespaceNodeInk`, `addNamespaceDatabaseInk`, `addNamespaceRectInk`, `addNamespaceStackInk`, `addClassicRectInk` | `LimitFinder` shape rules for the class ink walk — the primitive `InkBox` and one function per klimt shape the class engine draws, split out of `class-ink-box.ts` when that module passed the 500-line cap. |
 | `class-json-commands.ts` | `JSON_COMMANDS`, `isPendingJsonBodyComplete` | `json` declaration commands for the class diagram parser — thin adapter over the shared port in `core/command/CommandCreateJson.ts` (mission shared-seam-extraction T9; formerly a 74%-line-identical clone of `state/state-json-commands.ts`, D |
 | `class-json-sizing.ts` | `measureJsonClassifier` | `json` classifier sizing — `kind:'json'` leaves in the class diagram layout engine (./layout.ts), mission object-dot-sync Phase L. |

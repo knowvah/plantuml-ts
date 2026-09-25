@@ -227,7 +227,7 @@ export function buildDotEdges(
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
   const { font, cardinalityFont, measurer, linetype, noteCtx, classPortShortNames } = render;
-  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
+  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
   // family or object -- with a declared port-name set (T2's

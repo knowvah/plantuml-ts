@@ -6,7 +6,7 @@
 
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
-import { resolveTips } from './note-tips-resolve.js';
+import { addNoteInk } from './class-ink-note.js';
 import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 import { drawnEdgePoints } from './class-ink-dot-path.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
@@ -420,29 +420,10 @@ export function buildInkBox(
   const box = newInkBox();
   for (const c of classifiers) addClassifierInk(box, c, iconSize);
   for (const n of namespaces) addNamespaceInk(box, n);
-  // G2/N13: a dropped member-tip note (unresolved `::member`) draws
-  // NOTHING at all -- jar's own ink extent excludes it (`fupope-12-zoku847`'s
-  // canvas dims match a plain single-classifier render with no note space
-  // reserved at all).
-  // G2/N14 CORRECTION: notes use the PLAIN (no x-hack) ink rule, not the
-  // polygon rule -- `Opale.java#drawU` draws its outline via `ug.draw
-  // (polygon)` where `polygon` is a `UPath` (built through `UPath.none()` +
-  // `moveTo`/`lineTo`/`arcTo`, EVERY branch: `getPolygonNormal`/`Left`/
-  // `Right`/`Up`/`Down` all return `UPath`, never `UPolygon`) -- so
-  // `LimitFinder` dispatches to `drawUPath` (plain bbox), not `drawUPolygon`
-  // (`HACK_X_FOR_POLYGON`-padded). The PREVIOUS `addPolygonInk` choice here
-  // was an unverified guess from before ANY note fixture had been jar-
-  // checked (this module's own file-header doc comment already flagged it
-  // as unverified) -- jar-verified wrong by exactly `HACK_X_FOR_POLYGON`
-  // (10px) against `fezugi-39-fujo327` (canvas width 174 vs jar's real 164).
-  // Mission note-leaf-model D3: dropped-ness is resolved HERE, in the draw
-  // pass, exactly as upstream's `LimitFinder` sees `EntityImageTips#drawU`'s
-  // early return -- never stored on the geo (`note-tips-resolve.ts`).
-  const tips = resolveTips(notes, classifiers);
-  for (const nt of notes) {
-    if (nt.kind === 'tips' && tips.get(nt.id) === 'dropped') continue;
-    addPlainInk(box, nt.x, nt.y, nt.width, nt.height);
-  }
+  // Note-leaf ink term (dropped-tip exclusion, plain-box rule, cdd3-T15's
+  // non-opalised connector reveal) -- see `class-ink-note.ts#addNoteInk`'s
+  // own doc comment.
+  addNoteInk(box, notes, classifiers);
   for (const e of edges) {
     // G2/N16 Kind B: a consumed (never-drawn) freestanding-note connector
     // contributes no ink of its own -- `EdgeGeo.consumedByOpaleNote`'s doc

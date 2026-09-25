@@ -5,13 +5,17 @@
  * <Entity>` syntax `note-layout.ts` otherwise handles. Upstream draws this
  * via the SAME `EntityImageNote#opaleLine`/`isOpalisable` mechanism as an
  * attached single-link note (Kind C, `note-opale.ts`) — ANY note leaf with
- * EXACTLY ONE non-invisible connection to a non-note entity is "opalisable"
- * (`GraphvizImageBuilder.java:133-148`); its connecting `Link` is suppressed
- * from drawing entirely (`SvekEdge#drawU`'s `if (opale) return;`) and the
- * note's own outline merges the connector into a zigzag notch instead
- * (jar-verified via `doseko-41-mavu661`/`sevaxa-72-pudi231`: the jar SVG
- * has no separate `<g class="link">` for the `N1 .. Bar` relationship at
- * all, just the note's own two merged `<path>`s).
+ * EXACTLY ONE non-invisible connection to a NON-NOTE entity is "opalisable"
+ * (`GraphvizImageBuilder.java:133-148`: `single.getOther(entity)
+ * .getLeafType() != LeafType.NOTE` is the ONLY "other end" condition — no
+ * further exclusion); its connecting `Link` is suppressed from drawing
+ * entirely (`SvekEdge#drawU`'s `if (opale) return;`) and the note's own
+ * outline merges the connector into a zigzag notch instead (jar-verified
+ * via `doseko-41-mavu661`/`sevaxa-72-pudi231`: the jar SVG has no separate
+ * `<g class="link">` for the `N1 .. Bar` relationship at all, just the
+ * note's own two merged `<path>`s; and via `temise-16-neco018`: `N1 ..
+ * (Reporter, Queue)` opalises against the synthetic assoc-circle point the
+ * SAME way).
  *
  * G2/N13-N14 already built the Opale mechanism for Kind A (member-tip) and
  * Kind C (attached single-link note, `note-layout.ts#mapGroupNoteGeos`'s
@@ -37,46 +41,37 @@
  *    points, and to know which edge to drop from the final visible set
  *    once its note resolves via Opale.
  *
- * SCOPE GUARD (diagnosed via `temise-16-neco018`'s 3->234 regression while
- * jar-verifying): a note's OTHER endpoint must be an ORDINARY classifier,
- * never a synthetic `assoc-circle`/`lollipop` entity (`class-assoc-
- * couple.ts`'s `(A,B)` point node, `class-lollipop.ts`'s `()--` circle) --
- * those are svek-internal layout constructs this port invents, not real
- * UML classifiers `isOpalisable` was ever verified against; `N1 ..
- * (Reporter, Queue)` is NOT the same mechanism as `N1 .. Bar`.
- * {@link excludedEntityIds} computes the exclusion set.
+ * cdd3-T15 (E3-21): a synthetic-entity SCOPE GUARD used to exclude an
+ * assoc-circle/lollipop other-end here, added against a 3->234 regression
+ * measured on `temise-16-neco018` BEFORE the DOT creation-order fix (C-14
+ * = E3-7, `cdd3-T14`) and this task's own bezier-count guard (C-15 =
+ * E3-19) had landed. Upstream's `isOpalisable` has no such exclusion (see
+ * above) — re-measured on the post-T14/T15 tree, temise now needs the
+ * guard REMOVED to match the jar's own opalised `N1 .. (Reporter, Queue)`.
  *
  * Kept separate from `note-layout.ts` (already at the project's 500-line
  * cap) and `layout.ts` (near cap).
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:133-148,245-263
  */
-import type { ClassNote, Classifier, Relationship } from './ast.js';
+import type { ClassNote, Relationship } from './ast.js';
 import type { EdgeGeo } from './layout.js';
 
 function freestandingNoteIds(notes: readonly ClassNote[]): ReadonlySet<string> {
   return new Set(notes.filter((n) => n.target === undefined).map((n) => n.id));
 }
 
-/** Synthetic-entity ids this mechanism must never treat as a note's "real"
- *  connection target — see the module doc comment's scope guard. */
-function excludedEntityIds(classifiers: readonly Classifier[]): ReadonlySet<string> {
-  return new Set(classifiers.filter((c) => c.kind === 'assoc-circle' || c.kind === 'lollipop').map((c) => c.id));
-}
-
 /**
  * Groups `items` by which freestanding note (if any) each one's `from`/`to`
  * endpoints touch, keeping only groups of size exactly 1 (`isOpalisable`'s
  * own uniqueness gate) — an item touching a NOTE at both ends (note-to-note)
- * or NEITHER end doesn't count, and one whose OTHER end is an excluded
- * synthetic entity doesn't count either (module doc comment's scope guard).
- * `isInvisible` excludes an invisible relationship the same way
- * `buildEdgeGeos` already does for the post-layout case (there, always
- * `false` — `EdgeGeo[]` is ALREADY invis-filtered).
+ * or NEITHER end doesn't count. `isInvisible` excludes an invisible
+ * relationship the same way `buildEdgeGeos` already does for the
+ * post-layout case (there, always `false` — `EdgeGeo[]` is ALREADY
+ * invis-filtered).
  */
 function findUniqueTouching<T>(
   items: readonly T[],
   noteIds: ReadonlySet<string>,
-  excludedIds: ReadonlySet<string>,
   endpoints: (item: T) => readonly [string, string],
   isInvisible: (item: T) => boolean,
 ): Map<string, T> {
@@ -88,8 +83,6 @@ function findUniqueTouching<T>(
     const toIsNote = noteIds.has(to);
     if (fromIsNote === toIsNote) continue; // both or neither -> not a candidate
     const noteEnd = fromIsNote ? from : to;
-    const otherEnd = fromIsNote ? to : from;
-    if (excludedIds.has(otherEnd)) continue;
     const list = touching.get(noteEnd) ?? [];
     list.push(item);
     touching.set(noteEnd, list);
@@ -112,16 +105,13 @@ function findUniqueTouching<T>(
 export function findFreestandingNoteRelationshipIndices(
   notes: readonly ClassNote[],
   relationships: readonly Relationship[],
-  classifiers: readonly Classifier[],
 ): ReadonlySet<number> {
   const noteIds = freestandingNoteIds(notes);
   if (noteIds.size === 0) return new Set();
-  const excluded = excludedEntityIds(classifiers);
   const indexed = relationships.map((rel, i) => ({ rel, i }));
   const matched = findUniqueTouching(
     indexed,
     noteIds,
-    excluded,
     (x) => [x.rel.from, x.rel.to],
     (x) => x.rel.invis === true,
   );
@@ -137,15 +127,12 @@ export function findFreestandingNoteRelationshipIndices(
 export function findFreestandingNoteConnectors(
   notes: readonly ClassNote[],
   edges: readonly EdgeGeo[],
-  classifiers: readonly Classifier[],
 ): Map<string, EdgeGeo> {
   const noteIds = freestandingNoteIds(notes);
   if (noteIds.size === 0) return new Map();
-  const excluded = excludedEntityIds(classifiers);
   return findUniqueTouching(
     edges,
     noteIds,
-    excluded,
     (e) => [e.from, e.to],
     () => false,
   );

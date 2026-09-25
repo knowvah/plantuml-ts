@@ -265,6 +265,40 @@ describe('computeClassDocumentDims', () => {
     expect(dims.height).toBe(51);
   });
 
+  it(
+    'cdd3-T15 (E3-19 reveal): a non-opalised note connector spline contributes its ' +
+      'own ink beyond the note box -- SvekEdge#drawU draws the connector like any other ' +
+      'Link, LimitFinder#drawDotPath walks every bezier point (zepeki-75-pifo352: the ' +
+      'connector reaches above BOTH the note and the host, Δ49.21 canvas height before ' +
+      'this fix)',
+    () => {
+      const notes: NoteGeo[] = [
+        {
+          id: 'n0',
+          kind: 'note',
+          x: 20,
+          y: 30,
+          width: 50,
+          height: 30,
+          lines: ['hi'],
+          lineWidths: [],
+          // Control point at y=-10 reaches above the note's own y=30 top.
+          connector: [
+            { x: 45, y: 30 },
+            { x: 45, y: -10 },
+            { x: 100, y: 5 },
+            { x: 100, y: 60 },
+          ],
+        },
+      ];
+      const dims = computeClassDocumentDims([], [], [], notes);
+      // Ink span (unpadded): x in [20,100], y in [-10,60].
+      // width = 80+15+5+1 floored = 101; height = 70+15+5+1 floored = 91.
+      expect(dims.width).toBe(101);
+      expect(dims.height).toBe(91);
+    },
+  );
+
   it('G2/N13: a dropped member-tip note contributes NO ink at all (jar draws nothing for it)', () => {
     // note-leaf-model T3: dropped-ness is resolved inside this draw pass
     // (`buildInkBox` is this port's `LimitFinder`) -- `typo` matches no row
