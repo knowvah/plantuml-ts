@@ -377,8 +377,8 @@ function measureGenericClassifierAt(
     return buildEnhancedBodyResult(width, stereoGeo, headerRowsGeo, enhancedBody, commonFields);
   }
 
-  // cdd2-T17: `bodyInkWidth` rides with the header fields into both
-  // branches -- see `class-classifier-ink-reservation.ts`.
+  // cdd2-T17/cdd3-T7: `bodyInkWidth`/`bodyInkHeight` ride with the header
+  // fields into both branches -- see `class-classifier-ink-reservation.ts`.
   const ink = genericClassifierInkFields(classifier.kind, pipeline, suppress, options.badgeRadius);
   const fields = { ...commonFields, ...ink };
 
@@ -442,7 +442,7 @@ function buildNormalClassifierResult(
   geo: NormalClassifierGeo,
   memberSections: ReturnType<typeof computeMemberSectionsGeo>,
   suppress: MemberSuppression,
-  commonFields: CommonHeaderFields & Pick<MeasuredClassifier, 'bodyInkWidth'>,
+  commonFields: CommonHeaderFields & Pick<MeasuredClassifier, 'bodyInkWidth' | 'bodyInkHeight'>,
 ): MeasuredClassifier {
   const { stereoGeo, headerRowsGeo, fontSize } = geo;
   const { fieldsH, methodsH } = memberSections;

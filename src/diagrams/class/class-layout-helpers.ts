@@ -205,6 +205,10 @@ export interface MeasuredClassifier {
    *  field this one feeds) and `class-ink-box.ts#addRectInk`'s (the
    *  jar-verified rule that consumes it). */
   bodyInkWidth?: number;
+  /** cdd3-T7 (R-VP): see `ClassifierGeo.bodyInkHeight`'s doc comment (the
+   *  geo field this one feeds) and `class-ink-shapes.ts#addRectInk`'s (the
+   *  jar-verified rule that consumes it). */
+  bodyInkHeight?: number;
   /** B5/M6: see `ClassifierGeo.emptyFieldPlaceholder`'s doc comment
    *  (./class-geo-types.ts). Set only by `class-object-map-sizing.ts
    *  #buildFieldBasedObjectGeo`. */

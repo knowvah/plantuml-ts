@@ -65,16 +65,17 @@ function contentBox(
 }
 
 /**
- * The two body-state fields `class-ink-box.ts` reads to pick a classifier's
- * ink rule (B5/M6's `emptyFieldPlaceholder`, B35/M40's `bodyInkWidth`) --
- * bundled into one spread so the two `ClassifierGeo` literals below stay
- * under this file's own per-function NLOC cap. Both stay ABSENT when unset,
- * exactly as spreading them individually did; no behavior change.
+ * The body-state fields `class-ink-box.ts` reads to pick a classifier's ink
+ * rule (B5/M6's `emptyFieldPlaceholder`, B35/M40's `bodyInkWidth`, cdd3-T7's
+ * `bodyInkHeight`) -- bundled into one spread so the two `ClassifierGeo`
+ * literals below stay under this file's per-function NLOC cap. All stay
+ * ABSENT when unset, exactly as spreading them individually did.
  */
 function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
   return {
     ...(m.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
     ...(m.bodyInkWidth !== undefined ? { bodyInkWidth: m.bodyInkWidth } : {}),
+    ...(m.bodyInkHeight !== undefined ? { bodyInkHeight: m.bodyInkHeight } : {}),
     ...(m.symbolInk !== undefined ? { symbolInk: m.symbolInk } : {}),
   };
 }

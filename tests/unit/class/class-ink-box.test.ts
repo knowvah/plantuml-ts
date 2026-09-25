@@ -60,3 +60,34 @@ describe('addClassifierInk — assoc-circle is a bare UEllipse (R-1)', () => {
     expect(svgDims(markup).width).toBe('326px');
   });
 });
+
+describe('addRectInk — bodyInkHeight (cdd3-T7, R-VP)', () => {
+  // Hidden body (`suppress.fields && suppress.methods`) is
+  // `BodierLikeClassOrObject.java:249-250`'s `TextBlockUtils.empty(0, 0)`:
+  // the header's own `UEmpty` reservation is the only body-side max-Y
+  // candidate, and `LimitFinder#drawRectangle`'s un-widened `y + h - 1`
+  // corner (`klimt/drawing/LimitFinder.java:184-188`) wins whenever the
+  // header's own blocks stop short of it (`HeaderLayout.java:98-109`).
+  it('caps max-Y at the rect corner y+h-1 when bodyInkHeight is set below it', () => {
+    // x=0,y=0,w=40,h=40: minY = y-1 = -1 (drawRectangle's own inset).
+    // hidden body: bodyMaxY = y + bodyInkHeight = 21; rect corner
+    // y+h-1 = 39 wins -> maxY = 39, raw height = 39 - -1 = 40, +15 = 55.
+    const hiddenBody = computeClassRawInkDims([leaf({ bodyInkHeight: 21 })], [], [], []);
+    expect(hiddenBody.height).toBe(55);
+
+    // shown body (bodyInkHeight undefined): bodyMaxY falls back to y+h=40,
+    // which beats the rect corner 39 -> maxY = 40, raw height = 41, +15 = 56.
+    const shownBody = computeClassRawInkDims([leaf({})], [], [], []);
+    expect(shownBody.height).toBe(56);
+
+    // The hidden-body box is exactly 1px shorter — the jar's own y+h-1 vs
+    // this port's pre-cdd3-T7 fixed y+h.
+    expect(hiddenBody.height).toBe(shownBody.height - 1);
+  });
+
+  it('leaves max-X untouched — this rule is Y-axis only', () => {
+    const hiddenBody = computeClassRawInkDims([leaf({ bodyInkHeight: 21 })], [], [], []);
+    const shownBody = computeClassRawInkDims([leaf({})], [], [], []);
+    expect(hiddenBody.width).toBe(shownBody.width);
+  });
+});

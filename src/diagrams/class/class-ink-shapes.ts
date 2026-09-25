@@ -81,14 +81,29 @@ export function addPoint(box: InkBox, x: number, y: number): void {
  * clear on each side. `map`/`json` are left unmeasured deliberately — their
  * bodies are `TextBlockMap`/`TextBlockCucaJSon`, not a marged body block, and
  * no jar control isolates them.
+ *
+ * cdd3-T7 (R-VP): `bodyInkHeight` is the same shape, one axis over --
+ * present only when BOTH compartments are hidden
+ * (`class-classifier-ink-reservation.ts#bodyInkHeight`'s doc comment cites
+ * `BodierLikeClassOrObject.java:249-250`'s `TextBlockUtils.empty(0, 0)`
+ * body, which reserves nothing). The header's own `UEmpty` blocks then stop
+ * short of the box's bottom edge whenever `diffHeight > 0`
+ * (`HeaderLayout.java:98-109`), so `LimitFinder#drawRectangle`'s own
+ * un-widened `y + h - 1` corner (`klimt/drawing/LimitFinder.java:184-188`)
+ * can be the real max. `bodyInkHeight === undefined` (a shown body, or any
+ * non-`isLikeClass` kind) keeps the fixed `y + h`, matching every
+ * non-hidden-body fixture byte-for-byte. This does NOT touch the object
+ * three-way body-state split (B5/M6, `addRectInkEmptyShownBody`) -- that
+ * mechanism is `kind: 'object'`-only and `bodyInkHeight` is set only for
+ * `LIKE_CLASS_KINDS` (`class-classifier-ink-reservation.ts
+ * #genericClassifierInkFields`'s own gate).
  */
 export function addRectInk(box: InkBox, c: ClassifierGeo): void {
   const shadow = c.shadowing ?? 0;
   addPoint(box, c.x - 1, c.y - 1);
   const bodyMaxX = c.x + (c.bodyInkWidth ?? c.width);
-  // Y is deliberately untouched at `y + h`: the three-way object body-state
-  // split on max-Y (B5/M6) is a separate question this rule does not model.
-  addPoint(box, Math.max(c.x + c.width - 1, bodyMaxX), c.y + c.height);
+  const bodyMaxY = c.y + (c.bodyInkHeight ?? c.height);
+  addPoint(box, Math.max(c.x + c.width - 1, bodyMaxX), Math.max(c.y + c.height - 1, bodyMaxY));
   // mission skin-file-loading (deferred D3 item): `LimitFinder
   // #drawRectangle`'s own shadow term (`addPoint(x+w-1+2*shadow,
   // y+h-1+2*shadow)`, see `state/layout-ink-extent.ts#addStateBoxInk`'s

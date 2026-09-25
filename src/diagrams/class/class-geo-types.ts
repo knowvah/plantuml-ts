@@ -4,13 +4,15 @@
  * project's 500-line cap — mirrors `state/state-geo-types.ts`'s split.
  */
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
-import type { ClassifierKind, LinkDecor, UrlInfo, Visibility } from './ast.js';
+import type { ClassifierKind, LinkDecor, UrlInfo } from './ast.js';
 import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { EnhancedBodyGeo } from './class-body-enhanced-layout.js';
-import type { MemberRenderAtom } from './class-member-creole.js';
 import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type { EdgeKalBoxes } from './class-geo-edge-extras.js';
+import type { ClassifierRowGeo } from './class-geo-row-types.js';
+
+export type { ClassifierRowGeo } from './class-geo-row-types.js';
 
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
@@ -46,94 +48,10 @@ export interface ClassifierGeo {
   height: number;
   /** y-offsets of section dividers within the box (relative to box top) */
   dividerYs: number[];
-  /** Text rows to render: [header display, ...member strings] with y offset. */
-  rows: Array<{
-    text: string;
-    y: number;
-    indent: number;
-    italic?: boolean; // abstract/interface header names — rendered in italic
-    /** G2 N32: header-only, `skinparam classFontStyle bold` --
-     *  `theme.ts#classFontBold`'s doc comment. Absent for every classifier
-     *  with no such override (zero behavior change). */
-    bold?: boolean;
-    visibilityIcon?: Visibility; // colored icon left of member text
-    /** G2 N6: true when this member is a FIELD (not a method) -- gates
-     *  the filled-vs-stroke-only fill rule
-     *  (`class-visibility-icon.ts#renderVisibilityIcon`'s own doc comment).
-     *  Present only alongside `visibilityIcon`. */
-    visibilityIsField?: boolean;
-    /** G2 N4: the row text's pre-measured (unmargined) width, from the SAME
-     *  measurer `layoutClass` sized the box with -- feeds `<text
-     *  textLength="..." lengthAdjust="spacing">` (`renderer.ts#renderRow`),
-     *  jar's `-DPLANTUML_DETERMINISTIC_TEXT=true` output. Optional: hand-
-     *  built test rows omit it (additive on `core/svg.ts#text()`). */
-    width?: number;
-    /** G2 N16: this row's source member's OWN parsed `[[url]]`/`[[[url]]]`
-     *  link suffix -- `Member.ownUrl`'s doc comment (N15 tracked presence
-     *  only via a boolean `hasUrl`; N16 carries the full value so the
-     *  render-side per-primitive `<a>`-run splitting can compare DIFFERENT
-     *  member rows' urls for value equality, not just presence). Read by
-     *  `renderer.ts`'s classifier-level url-wrap decision
-     *  (`renderer-url.ts`). */
-    url?: UrlInfo;
-    /**
-     * G2 N22: this row's text run through the shared creole atom engine
-     * (`class-member-creole.ts#buildMemberRow`) -- present on EVERY member
-     * row `layoutClass` builds (hand-built test geometries may omit it, as
-     * `width`). ABSENT on the header row (upstream's `EntityImageClassHeader`
-     * name text is a separate, non-creole mechanism). `renderer-classifier-
-     * box.ts#renderRowText` draws one `<text>`/`<image>` per atom, x-
-     * advancing by each atom's measured width -- mirrors
-     * `EntityImageDescriptionSupport.ts#drawAtoms`.
-     */
-    atoms?: readonly MemberRenderAtom[];
-    /**
-     * G2 N23: the header row's kind-badge `<ellipse>` cx, relative to
-     * `geo.x` -- `HeaderLayout#drawU`'s `xCircle = h1` term (`h1`/`h2` in
-     * `class-layout-helpers.ts#buildHeaderRow`'s doc comment) PLUS
-     * `BADGE_LEFT_MARGIN + BADGE_RADIUS`. Header row (rows[0]) only;
-     * `renderer-classifier-box.ts#renderBadge` reads it directly rather
-     * than back-solving from the header text `indent` (`h1 !== h1 + h2`
-     * once `h2 > 0`). Optional: hand-built test geometries omit it and
-     * `renderBadge` falls back to its pre-N23 constant.
-     */
-    badgeIndent?: number;
-    /**
-     * G2 N23: `skinparam class { AttributeFontSize/AttributeFontName }`
-     * (`FontParam.CLASS_ATTRIBUTE`) override -- header row (rows[0]) only,
-     * when `measureGenericClassifier` used a non-default font (jar-verified
-     * `jisanu-32-gado231`: the header's OWN `<text>` attrs move too --
-     * `class-layout-helpers.ts#buildHeaderRow`'s doc comment). Member rows
-     * carry theirs per atom (`class-member-creole.ts#buildMemberRow`).
-     * Absent = `theme.fontFamily`/`theme.fontSize`.
-     */
-    fontFamily?: string;
-    fontSize?: number;
-    /**
-     * G3/O4: `skinparam style strictuml` -- `EntityImageObject#getUnderlinedName`
-     * (`Display#underlinedName`, jar's own UML-instance-notation convention:
-     * an object's name is ALWAYS underlined, and a `name : type` header
-     * splits into an underlined name segment + a plain `: type` segment,
-     * `jotaga-99-fatu830`'s own citation). OBJECT-kind header rows only --
-     * `EntityImageMap`/`Json`/`ClassHeader` never call `underlinedName()`
-     * (jar-verified absent from all three). Absent = no underline (the
-     * common case, `theme.strictUml` unset).
-     */
-    underline?: boolean;
-    /**
-     * CDD T20 (A5/M6): present only alongside `visibilityIcon` -- this
-     * member's OWN total wrapped-block height (sum of every physical
-     * sub-row the SAME `Member` expands into, `class-member-rows.ts
-     * #buildSectionRows`'s own doc comment), when it differs from this
-     * row's single-line height. `klimt/geom/PlacementStrategyVisibility
-     * .java:56-62`'s `height2` term is the WHOLE member block, not one
-     * physical line -- absent (falls back to `attributeFontSize(theme)`
-     * at the render call site, `renderer-classifier-box.ts`'s own doc
-     * comment) reproduces the pre-T20 single-line behavior byte-for-byte
-     * for every non-wrapped member.
-     */
-    visibilityBlockHeight?: number;
-  }>;
+  /** Text rows to render: [header display, ...member strings] with y offset.
+   *  cdd3-T7: element type split to `class-geo-row-types.ts` (500-line cap
+   *  split, see that file's own doc comment) -- a pure move. */
+  rows: ClassifierRowGeo[];
   hideCircle?: boolean; // suppress the circle badge (hide circle directive)
   /**
    * G2 N7: true when `hide <entity|$tag|<<stereotype>>|*|@unlinked>`
@@ -295,6 +213,11 @@ export interface ClassifierGeo {
    * fixed `x + w` max-X (`map`/`json`, the enhanced body, every other kind).
    */
   bodyInkWidth?: number;
+
+  /** cdd3-T7 (R-VP): Y analogue of {@link bodyInkWidth} -- header's own
+   *  `UEmpty` max-Y, set only when the body is fully hidden
+   *  (`BodierLikeClassOrObject.java:249-250`); `undefined` keeps `y + h`. */
+  bodyInkHeight?: number;
 
   /** The DRAWN ink extent of a USymbol leaf's own shapes, relative to this
    *  classifier's own `x`/`y` — measured by a `LimitFinder` walk over the

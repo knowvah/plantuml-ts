@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1196 modules · 4469 exported names.
+1197 modules · 4471 exported names.
 
 ## `src/`
 
@@ -1160,7 +1160,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-geometry-types.ts` | `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | `ClassGeometry` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T17: the `EdgeGeo.roleLines` field pushed it back over after the cdd-T6 split already once cleared it). |
 | `class-geo-json-types.ts` | `JsonBodyItem` | `JsonBodyItem` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
 | `class-geo-namespace-types.ts` | `NamespaceGeo` | `NamespaceGeo` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
-| `class-geo-types.ts` | `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
+| `class-geo-row-types.ts` | `ClassifierRowGeo` | cdd3-T7: `ClassifierGeo['rows'][number]`'s element type, split out of `class-geo-types.ts` when the new `bodyInkHeight` field pushed that file past the project's 500-line hook cap -- a pure move (every consumer keys off `ClassifierGeo['rows |
+| `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
 | `class-hideshow-ast.ts` | `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective` | Hide/show + remove/restore directive AST types, split out of `ast.ts` (line cap) -- re-exported from it so every `import { ... |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |
