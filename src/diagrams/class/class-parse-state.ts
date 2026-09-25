@@ -5,6 +5,8 @@
  */
 
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import type { ClassDiagramAST } from './ast.js';
 import type { PendingNote, TipGroupSeenSet } from './class-notes.js';
 import type { TogetherEvent, TogetherFrame } from './class-together.js';
@@ -198,6 +200,17 @@ export interface ParseState {
    * display text until the closing quote/`]` line is reached.
    */
   pendingMultilineElement?: PendingMultilineElement | undefined;
+  /**
+   * C-3 (cdd3-T23): `ParseOptions.assetStore`'s two per-diagram-parse
+   * constant halves, resolved ONCE at `parseClass` entry (`index.ts#parse`'s
+   * own doc comment -- `sprite $N jar:<path>` resolves during the COMMAND,
+   * `CommandSpriteFile.java:108-112`). Carried on `state`, not passed as a
+   * loop param, because `startNewPage` must rebuild `ast.sprites` with the
+   * SAME store for every page of a `newpage` document -- these are an
+   * ENVIRONMENT the whole parse runs in, not per-page AST data.
+   */
+  internalSprites?: InternalSpriteStore | undefined;
+  internalEmoji?: InternalEmojiStore | undefined;
 }
 
 /** One open TYPE0 (`terminator: 'quote'`) or TYPE1 (`terminator: 'bracket'`)

@@ -7,6 +7,7 @@
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
+import type { DrawablePrimitive } from '../../core/creole-atoms.js';
 
 /**
  * One RESOLVED, render-ready run of a member row -- unlike `CreoleAtom`
@@ -80,6 +81,31 @@ export type MemberRenderAtom =
       readonly dy?: number;
     }
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` atom -- `SvgNanoParser`'s
+   *  draw-time `UPath`/`UEllipse`/`UText` decomposition
+   *  (`core/creole-atoms-image-resolver.ts#resolveSvgSpriteAtom`, the SAME
+   *  function the description/usecase engines call), already resolved at
+   *  LAYOUT time exactly like `'image'` above -- `width`/`height` are the
+   *  SAME declared (scaled) box; ink lives only in `primitives`, drawn by
+   *  `renderer-classifier-rows.ts` at the row's own origin
+   *  (`class-member-sprite-render.ts#renderMemberRowDrawable`). Unlike
+   *  `'image'`, this kind is NOT excluded from the row's own `Sea` span
+   *  (`class-member-creole.ts#resolveMemberAtoms`'s `seaEntries` filter
+   *  only names `'image'`) -- bidusa-22-jutu505 jar-verified: the icon
+   *  (21.538px) is taller than the row's text (14px), so the row's shared
+   *  text atom needs a real `dy` correction to sit at the icon's own `Sea`
+   *  bottom, which only happens when this kind's height feeds `maxSpan`.
+   *  `dy` mirrors `'vector'`'s own field -- this atom's `Sea` top, set by
+   *  `resolveMemberAtoms` via the SAME `atomTopDy`; `undefined` only for a
+   *  `'drawable'` atom built OUTSIDE that function (namespace-title runs,
+   *  a note line), which keep the flat bottom-anchor `'image'` uses. */
+  | {
+      readonly kind: 'drawable';
+      readonly primitives: readonly DrawablePrimitive[];
+      readonly width: number;
+      readonly height: number;
+      readonly dy?: number;
+    }
   /** G2 N41: an OpenIconic `<&glyph>` atom -- `name`/`factor` feed
    *  `openiconic-glyphs.ts#buildOpenIconicPathD` at RENDER time (needs the
    *  row's own x/y, not known yet at this LAYOUT-time build step -- mirrors

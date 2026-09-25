@@ -6,6 +6,11 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import type { ClassDiagramAST } from './ast.js';
 import {
   applyDirectives,
@@ -44,7 +49,14 @@ import { continueMultilineElement, tryOpenMultilineElement } from './class-multi
 import { recordTogetherEvent, resolveTogetherMembers } from './class-together.js';
 export type { ParseState };
 
-function makeDefaultAST(): ClassDiagramAST {
+/**
+ * C-3 (cdd3-T23): `internal`/`emoji` mirror `description/parser.ts`'s own
+ * `makeInitialState` -- the per-diagram-parse `InternalSpriteStore`/
+ * `InternalEmojiStore` (`ParseState.internalSprites`/`.internalEmoji`'s own
+ * doc comment), threaded into every page's `SpriteRegistry` so `sprite $N
+ * jar:<path>` resolves the SAME way on page 2+ of a `newpage` document.
+ */
+function makeDefaultAST(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): ClassDiagramAST {
   return {
     classifiers: [],
     relationships: [],
@@ -52,7 +64,7 @@ function makeDefaultAST(): ClassDiagramAST {
     directives: [],
     notes: [],
     annotations: createAnnotations(),
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(internal, emoji),
     // cdd-T31 (E5 defect a): mirrors ParseState.namespaceSeparator's own
     // default ('.', set below and in startNewPage) -- see
     // ClassDiagramAST.namespaceSeparator's own doc comment.
@@ -97,7 +109,7 @@ export function startNewPage(state: ParseState): void {
   applyVisibilityHideShow(state.ast);
   applyStereotypeHideShow(state.ast);
   state.pages.push(state.ast);
-  state.ast = makeDefaultAST();
+  state.ast = makeDefaultAST(state.internalSprites, state.internalEmoji);
   state.classifierIndex = new Map();
   state.pendingBodyId = null;
   state.pendingJsonLines = [];
@@ -298,9 +310,14 @@ function buildSyntaxRefusal(state: ParseState, loopIndex: number): ParseRefusal 
   return refuse('syntax', line, line, 'Syntax Error?');
 }
 
-export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
+export function parseClass(block: UmlSource, options?: ParseOptions): ClassDiagramAST | ParseRefusal {
+  // C-3 (cdd3-T23): resolved ONCE, at the same point `description/index.ts
+  // #descriptionPlugin.parse` resolves its own pair -- see `ParseState
+  // .internalSprites`'s own doc comment for why both live on `state`.
+  const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
+  const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
   const state: ParseState = {
-    ast: makeDefaultAST(),
+    ast: makeDefaultAST(internalSprites, internalEmoji),
     classifierIndex: new Map(),
     stylePositions: block.stylePositions ?? [],
     namespaceSeparator: '.',
@@ -321,6 +338,8 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     pages: [],
     creationCounter: { value: 0 },
     tipGroupsSeen: new Set(),
+    internalSprites,
+    internalEmoji,
   };
 
   // Annotation commands (title/caption/legend/header/footer/mainframe) are

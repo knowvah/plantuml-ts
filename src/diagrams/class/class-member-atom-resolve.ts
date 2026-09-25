@@ -15,12 +15,18 @@ import { type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-a
 import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { getSpriteMonochrome, getSpriteColor4096, type SpriteRegistry } from '../../core/sprite-commands.js';
+import {
+  getSpriteMonochrome,
+  getSpriteColor4096,
+  getSpriteSvg,
+  type SpriteRegistry,
+} from '../../core/sprite-commands.js';
 import {
   spriteToPngDataUri,
   spriteMonochromeAsLike,
   spriteColor4096ToPngDataUri,
 } from '../../core/klimt/sprite/sprite-raster.js';
+import { resolveSvgSpriteAtom } from '../../core/creole-atoms-image-resolver.js';
 import { renderLatexAsImage } from '../../core/latex.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 
@@ -65,12 +71,40 @@ export interface ResolvedMemberAtom {
  *  (the monochrome tint's fore/back colours) are NOT threaded to
  *  {@link spriteColor4096ToPngDataUri} -- there is nothing for them to
  *  tint. */
+/**
+ * C-4 (cdd3-T23): an SVG-registered `<$sprite>` decomposes to its
+ * `UPath`/`UEllipse`/`UText` draw-time primitives via the SAME
+ * `resolveSvgSpriteAtom` the description/usecase engines call
+ * (`core/creole-atoms-image-resolver.ts`, ADR-2's shared decomposition
+ * seam) -- reused rather than re-ported, per that module's own doc
+ * comment ("ONE shared place"). `resolveSvgSpriteAtom`'s declared return
+ * type is the wider `image | drawable | undefined` union (its OTHER
+ * caller, `makeAtomImageResolverFor`, dispatches an `img` atom to a
+ * SIBLING function first), but its own body has exactly one `return`
+ * statement and it is always the `'drawable'` shape -- the runtime check
+ * below narrows for the type checker, not a defensive "should not occur"
+ * guard against a real second branch.
+ */
+function resolveSvgSpriteAtomForRow(
+  atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
+  svg: string,
+  spriteDims: SpriteDimsLookup | undefined,
+  baseFont: FontConfiguration,
+): Extract<MemberRenderAtom, { kind: 'drawable' }> | undefined {
+  if (spriteDims === undefined) return undefined; // should not occur: paired 1:1 with `sprites` by the caller.
+  const resolved = resolveSvgSpriteAtom(atom, svg, spriteDims, baseFont);
+  if (resolved === undefined || resolved.kind !== 'drawable') return undefined;
+  return { kind: 'drawable', primitives: resolved.primitives, width: resolved.width, height: resolved.height };
+}
+
 function resolveSpriteAtom(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
   baseFont: FontConfiguration,
   sprites: SpriteRegistry,
   spriteDims: SpriteDimsLookup | undefined,
-): Extract<MemberRenderAtom, { kind: 'image' }> | undefined {
+): Extract<MemberRenderAtom, { kind: 'image' } | { kind: 'drawable' }> | undefined {
+  const svgSprite = getSpriteSvg(sprites, atom.name);
+  if (svgSprite !== undefined) return resolveSvgSpriteAtomForRow(atom, svgSprite.svg, spriteDims, baseFont);
   // `baseFont.size` threads CommandCreoleSprite's `fc.getSize2D() / 13.0`
   // factor -- same call the sizer makes (S1L-f).
   const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
@@ -95,7 +129,7 @@ export function resolveInlineAtom(
   baseFont: FontConfiguration,
   sprites: SpriteRegistry | undefined,
   spriteDims: SpriteDimsLookup | undefined,
-): Extract<MemberRenderAtom, { kind: 'image' }> | undefined {
+): Extract<MemberRenderAtom, { kind: 'image' } | { kind: 'drawable' }> | undefined {
   if (atom.kind === 'img') {
     const dims = measureInlineAtom(atom);
     return { kind: 'image', href: atom.dataUri, width: dims.width, height: dims.height };

@@ -42,7 +42,13 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
+import type { DrawablePrimitive } from '../../core/creole-atoms.js';
 import { fmt } from '../../core/svg-format.js';
+import { UPath } from '../../core/klimt/shape/UPath.js';
+import { UEllipse } from '../../core/klimt/shape/UEllipse.js';
+import { UText } from '../../core/klimt/shape/UText.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { XAffineTransform } from '../../core/klimt/UGraphicWithScale.js';
 
 type RowGeo = ClassifierGeo['rows'][number];
 
@@ -65,6 +71,43 @@ function scaleVectorAtom(atom: Extract<MemberRenderAtom, { kind: 'vector' }>, k:
     width: atom.width * k,
     height: atom.height * k,
     factor: atom.factor * k,
+    ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
+  };
+}
+
+/** C-4 (cdd3-T23): scales one `'drawable'` (SVG-sprite) primitive's own
+ *  geometry -- `translate` always (every primitive carries a position
+ *  there or bakes it into `UPath`'s own segments, `creole-atoms.ts
+ *  #DrawablePrimitive`'s own doc comment), plus the shape itself: a
+ *  `UPath`'s segment coordinates via `UPath#affine` with a pure
+ *  scale-by-`k` transform (angle 0 -- no rotation involved, `scale: k` so
+ *  an ARCTO segment's radii scale too); a `UEllipse` via its own
+ *  `.scale(k)`; a `UText`'s font size (its drawn `<text font-size>`).
+ *  Unverified against a jar fixture combining `skinparam scale` with an
+ *  SVG sprite (zero corpus reach) -- the same linear-scaling argument this
+ *  module's own header makes for every OTHER atom kind, generalized here
+ *  rather than left as a type-exhaustiveness gap. */
+function scaleDrawablePrimitive(primitive: DrawablePrimitive, k: number): DrawablePrimitive {
+  const translate = new UTranslate(primitive.translate.getDx() * k, primitive.translate.getDy() * k);
+  if (primitive.shape instanceof UPath) {
+    return { ...primitive, translate, shape: primitive.shape.affine(XAffineTransform.getScaleInstance(k, k), 0, k) };
+  }
+  if (primitive.shape instanceof UEllipse) {
+    return { ...primitive, translate, shape: primitive.shape.scale(k) };
+  }
+  if (primitive.shape instanceof UText) {
+    const fc = primitive.shape.getFontConfiguration();
+    return { ...primitive, translate, shape: UText.build(primitive.shape.getText(), { ...fc, size: fc.size * k }) };
+  }
+  return { ...primitive, translate };
+}
+
+function scaleDrawableAtom(atom: Extract<MemberRenderAtom, { kind: 'drawable' }>, k: number): MemberRenderAtom {
+  return {
+    ...atom,
+    width: atom.width * k,
+    height: atom.height * k,
+    primitives: atom.primitives.map((p) => scaleDrawablePrimitive(p, k)),
     ...(atom.dy !== undefined ? { dy: atom.dy * k } : {}),
   };
 }
@@ -110,6 +153,8 @@ export function scaleAtom(atom: MemberRenderAtom, k: number): MemberRenderAtom {
       return scaleVectorAtom(atom, k);
     case 'listNumber':
       return scaleListNumberAtom(atom, k);
+    case 'drawable':
+      return scaleDrawableAtom(atom, k);
   }
 }
 

@@ -273,7 +273,12 @@ export function resolveMemberAtoms(
   // `Sea` height -- see `textAtomDy`'s own doc comment for why the two
   // diverge and which one member rows need.
   const withDy = rendered.map((atom, i) => {
-    if (atom.kind === 'vector') return { ...atom, dy: atomTopDy(heightEntries[i]!, maxSpan, baseFont, measurer) };
+    // C-4 (cdd3-T23): 'drawable' (an SVG-backed `<$sprite>`) joins 'vector'
+    // here -- both are NON-'image' Sea participants now (see the
+    // 'drawable' kind's own doc comment, `class-member-render-atom.ts`).
+    if (atom.kind === 'vector' || atom.kind === 'drawable') {
+      return { ...atom, dy: atomTopDy(heightEntries[i]!, maxSpan, baseFont, measurer) };
+    }
     if (atom.kind !== 'text') return atom;
     const dy = textAtomDy(atom, heightEntries[i]!, maxSpan, baseFont, measurer);
     return { ...atom, dy };
@@ -342,7 +347,14 @@ export function resolveOneAtom(
         ? undefined
         : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
     }
-    const resolved = resolveInlineAtom(atom.atom, baseFont, sprites, spriteDims);
+    // C-3/C-4 (cdd3-T23, bidusa-22-jutu505): the creole `<color:X>...</color>`
+    // WRAPPER sets `atom.ambientFont`, not `atom.forcedColor` (that field is
+    // only the inline `<$name,color=X>` override) -- `resolveInlineAtom`'s
+    // sprite branch tints from ITS OWN `font` param when no forced color is
+    // set (`resolveSvgSpriteAtom`'s doc comment), so the wrapper's color is
+    // lost unless the ambient font reaches it here, mirroring the
+    // 'openiconic' branch above (`atom.ambientFont` already threaded there).
+    const resolved = resolveInlineAtom(atom.atom, atom.ambientFont ?? baseFont, sprites, spriteDims);
     return resolved === undefined ? undefined : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
   // 'latex': `AtomMath`, a measured+drawn image at altitude 0 -- see

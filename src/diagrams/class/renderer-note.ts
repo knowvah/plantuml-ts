@@ -34,6 +34,7 @@ import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
+import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 // cdd-T10 wiring fix: a row's own creole `----` divider / table draws AT
 // THIS ROW'S OWN POSITION inside `renderNoteText`'s loop below -- see that
 // function's own doc comment. `renderer-note-lines.ts` owns the pure
@@ -204,6 +205,15 @@ function renderNoteLineAtoms(
     }
     if (atom.kind === 'vector') {
       out += renderOpenIconicAtom(atom, x, legacyY, theme);
+      x += atom.width;
+      continue;
+    }
+    if (atom.kind === 'drawable') {
+      // C-4 (cdd3-T23): same altitude-0 line-TOP placement as 'image'
+      // below -- `resolveInlineAtom`'s own contract, untested against a
+      // jar note fixture (bidusa/ruliki's `<$Netw>` sits in a class member
+      // row, not a note).
+      out += renderMemberRowDrawable(atom.primitives, x, legacyY - baselineOffset);
       x += atom.width;
       continue;
     }

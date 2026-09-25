@@ -15,11 +15,12 @@ import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
-import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+import type { SpriteDimsLookup, DrawablePrimitive } from '../../core/creole-atoms.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomFontSpec } from './class-member-creole-sea.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
 import { text, image } from '../../core/svg.js';
+import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 import { isTransparentColor } from '../../core/paint.js';
 
 /** `USymbolFolder#asBig`'s title local vertical offset before ANY text
@@ -89,7 +90,19 @@ export function packageTitleFontSpec(theme: Theme): FontSpec {
  *  now resolved via the SAME `resolveInlineAtom` member rows use). */
 export type NamespaceTitleRun =
   | { readonly kind: 'text'; readonly text: string; readonly font: FontConfiguration }
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number };
+  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` title run -- the SAME
+   *  `'drawable'` kind `class-member-render-atom.ts#MemberRenderAtom` now
+   *  carries, widened onto this union by `resolveInlineAtom`'s own return
+   *  type. Untested against a jar fixture (no corpus title threads a
+   *  registry today, this type's own doc comment above), same honesty
+   *  flag as the `'image'` branch's doc comment. */
+  | {
+      readonly kind: 'drawable';
+      readonly primitives: readonly DrawablePrimitive[];
+      readonly width: number;
+      readonly height: number;
+    };
 
 /**
  * cdd-T26: resolves a folder/rect title's plain text PLUS any `<img:>`
@@ -323,6 +336,11 @@ export function renderNamespaceTitleRuns(
   for (const run of runs) {
     if (run.kind === 'image') {
       out += image(x, y - run.height, run.width, run.height, run.href);
+      x += run.width;
+      continue;
+    }
+    if (run.kind === 'drawable') {
+      out += renderMemberRowDrawable(run.primitives, x, y - run.height);
       x += run.width;
       continue;
     }

@@ -23,6 +23,7 @@ import { renderListNumberAtom } from './renderer-list-number-atom.js';
 import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { renderRowOpenIconicAtom } from './renderer-openiconic.js';
+import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
 import { classifierCascadeFontColor } from './renderer-classifier-row-font-color.js';
@@ -399,6 +400,17 @@ export function renderRowAtoms(
     if (atom.kind === 'vector') {
       // G2 N41 / cdd3-T22: an OpenIconic `<&glyph>` at its `Sea` top.
       out += renderRowOpenIconicAtom(atom, x, y, theme);
+      x += atom.width;
+      continue;
+    }
+    if (atom.kind === 'drawable') {
+      // C-4 (cdd3-T23): at its own `Sea` top when `resolveMemberAtoms` set
+      // `atom.dy` (mirrors `renderRowOpenIconicAtom`'s identical dual path)
+      // -- else the flat `'image'` bottom-anchor below, for a caller that
+      // builds a `'drawable'` atom outside that function (namespace-title
+      // runs, a note line).
+      const drawableOriginY = atom.dy !== undefined ? y + atom.dy : y + theme.fontSize / 4.5 - atom.height;
+      out += renderMemberRowDrawable(atom.primitives, x, drawableOriginY);
       x += atom.width;
       continue;
     }
