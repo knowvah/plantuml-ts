@@ -1050,7 +1050,11 @@ describe('edge-label margin ink (cdd-T35)', () => {
     expect(withMainLabel.width - withTailLabel.width).toBe(2);
   });
 
-  it('skips the margin when a note is merged into the label (already baked into label.width)', () => {
+  // cdd3-T13r: `labelOnly` is still a `TextBlockMarged` INSIDE the merged
+  // note block, and its `drawU` still draws `UEmpty(dim)` (`klimt/shape/
+  // TextBlockMarged.java:79-87`) -- `EdgeGeo.label.width` is the bare text
+  // width either way, so the margin ink is NOT skipped (lipazi's Δ1).
+  it('keeps the margin when a note is merged into the label (labelOnly still draws its UEmpty)', () => {
     const label: EdgeGeo['label'] = { text: 'x', x: 20, y: 20, width: 20 };
     const plain = computeClassDocumentDims([], [], edgeWithLabel(label), []);
     const noteMerged = computeClassDocumentDims(
@@ -1071,7 +1075,7 @@ describe('edge-label margin ink (cdd-T35)', () => {
       }),
       [],
     );
-    expect(noteMerged.width).toBe(plain.width - 2);
+    expect(noteMerged.width).toBe(plain.width);
   });
 
   // cdd3-T10: `EntityImageNoteLink#drawU` -> `ComponentRoseNote

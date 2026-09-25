@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1203 modules · 4490 exported names.
+1203 modules · 4491 exported names.
 
 ## `src/`
 
@@ -1152,7 +1152,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-edge-label-attach.ts` | `EdgeGeoTextContext`, `attachEdgeLabel` | Class-diagram edge LABEL attachment: the main label's plain, multi-line, guide-line and magic-arrow arms, plus the text context every anchor shares. |
 | `class-edge-label-lines.ts` | `wrapPlainTextLine` | Per-line word-wrap for class-engine edge labels: `wrapPlainTextLine`. |
 | `class-edge-label-measure.ts` | `resolveMagicArrowText`, `computeMeasuredLabelAttrs` | The plain (non-note, non-constraint-spot) MEASURED label arm of `class-layout-edge-labels.ts#computeRelLabelAttrs` -- split out purely to keep that file under the project's 500-line hook cap (cdd-T17, pushed over by the role-label reservati |
-| `class-edge-note-box.ts` | `computeEdgeNoteBox` | cdd-T6 (A2a/M5): the `note on link` operand of a class link's merged label block. |
+| `class-edge-note-box.ts` | `labelOperandCenter`, `computeEdgeNoteBox` | cdd-T6 (A2a/M5): the `note on link` operand of a class link's merged label block. |
 | `class-edge-role-label-anchor.ts` | `roleLabelAnchors`, `attachPortLabels` | cdd-T17 (M8): the ADDITIVE role-label mirror geometry, plus `attachPortLabels` itself -- split out of `class-edge-label-anchor.ts` (500-line hook cap; the role mirror pushed that file over) purely to keep both files under the cap. |
 | `class-edge-visibility.ts` | `VisibilityIconGeo`, `EdgeLabelVisibility`, `stripEdgeLabelVisibility`, `VisibilityBlockAnchor`, `visibilityBlockAnchor` | cdd-T6 (A2a/M2): the visibility-modifier block a link LABEL carries when its first line starts with `-`/`#`/`+`/`~`/`*`. |
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |

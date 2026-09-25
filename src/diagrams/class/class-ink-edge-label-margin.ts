@@ -54,15 +54,15 @@ import type { InkBox } from './class-ink-shapes.js';
  * Applies to `EdgeGeo.label` only -- the main label -- matching
  * `addVisibilityModifier`'s own single caller (`SvekEdge.java:302`);
  * `tailLabel`/`headLabel` are built straight from `Display.create` and
- * never pass through it (`labelMarginOf`'s own doc comment). Skipped when
- * `e.noteBox` is set: `computeNoteMergedLabelAttrs`
- * (`class-layout-edge-labels.ts`) already bakes this SAME margin into
- * `label.width` for a `note on link` merge (`withLabelMargin`'s own doc
- * comment), so adding it again here would double-count it.
+ * never pass through it (`labelMarginOf`'s own doc comment). cdd3-T13r:
+ * NOT skipped for a `note on link` merge -- `labelOnly` is still a
+ * `TextBlockMarged` inside the merged block and still draws its `UEmpty`
+ * (`TextBlockMarged.java:79-87`); `label.width` is the bare text width
+ * (the margin baked into the DOT reservation never reaches it).
  */
 export function addEdgeLabelMarginInk(box: InkBox, e: EdgeGeo): void {
   const label = e.label;
-  if (label === undefined || e.noteBox !== undefined) return;
+  if (label === undefined) return;
   const m = labelMarginOf(e);
   addPoint(box, label.x - m, label.y);
   addPoint(box, label.x + label.width + m, label.y);
@@ -83,7 +83,7 @@ export function addEdgeLabelMarginInk(box: InkBox, e: EdgeGeo): void {
  */
 export function addMultiLineLabelMarginInk(box: InkBox, e: EdgeGeo): void {
   const lines = e.labelLines;
-  if (lines === undefined || lines.length === 0 || e.noteBox !== undefined) return;
+  if (lines === undefined || lines.length === 0) return;
   const minX = Math.min(...lines.map((l) => l.x));
   const maxX = Math.max(...lines.map((l) => l.x + l.width));
   const m = labelMarginOf(e);

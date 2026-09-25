@@ -72,3 +72,43 @@
   svg.ts pass-over was deleted as redundant.
 - **Impact**: every direct `paintToSvg` gradient caller now matches.
 - **Confidence**: High.
+
+## T13r — main label inside the merged note+label block
+
+- **Mechanism (reproduced, ported)**: `SvekEdge.java:318-325` merges
+  `labelOnly` and `noteOnly` via `mergeLR`/`mergeTB`; `TextBlockHorizontal
+  #drawU` (`TextBlockHorizontal.java:78-93`) advances x per operand and
+  centres vertically, `TextBlockVertical#drawU` (`TextBlockVertical.java:
+  77-99`) advances y and centres horizontally. The port placed the label
+  at graphviz's centre of the WHOLE merged table. New
+  `class-edge-note-box.ts#labelOperandCenter` (with `labelOffset`, the
+  mirror of `noteOffset`, and a shared `mergedLayout`) feeds
+  `attachEdgeLabel` the anchor the label's OWN reservation (width floored,
+  height truncated, `appendTable` `SvekEdge.java:504-507`) would have at
+  the operand's corner, so every label arm's `center - reservation/2`
+  conversion lands on the operand's top-left. No epsilon, no fitted value.
+- **Second mechanism, same draw**: `addEdgeLabelMarginInk`/
+  `addMultiLineLabelMarginInk` skipped the `marginLabel` ink when a note is
+  merged, on the premise that `label.width` already carried it. False:
+  `EdgeGeo.label.width` is the bare text width (lipazi: 18.0375), and
+  `labelOnly` is still a `TextBlockMarged` that draws `UEmpty(dim)`
+  (`TextBlockMarged.java:79-87`). Skip removed; that caused lipazi's
+  remaining Δ1 canvas width.
+- **Fixtures (S/N, post-T10 → T13r)**: lipazi-06-care921 0/4 → 0/0
+  (conformant); nuvake-96-gofe203 0/3 → 0/0 (conformant);
+  lozego-15-coci435 0/3 → 0/1 (structural-match).
+- **Movers** (render-all `/tmp/cdd3-T13r.json`, pin-diff vs
+  `/tmp/cdd3-T10.json`): only those three. No conformant losses. Only
+  `src/diagrams/class/` was touched, so no other-engine survey was run.
+- **lozego residual (open, a different mechanism)**: `g[4]/text[2]/@y`
+  exp 349.801, act 262.803 (Δ87). This is the note BODY line
+  `<$test>Note on rel`: the jar puts the text baseline at the bottom of the
+  100 px sprite atom's line, but ours sits near the line top. It is the
+  note's creole line baseline with a tall sprite atom
+  (`renderer-note-link-box.ts` line layout), not label placement. Not
+  diagnosed further.
+- **Gates**: npm test green, including after `npm run catalog`; typecheck,
+  lint and build pass; `class-dot-parity` 721/721.
+- **Commit**: the one commit titled `fix(cdd3-T13r): ...` whose parent is
+  `ad2c69e7d`. A commit cannot carry its own id; run `git log --grep
+  cdd3-T13r`.

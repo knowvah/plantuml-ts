@@ -30,6 +30,7 @@ import { stripEdgeLabelVisibility, visibilityBlockAnchor } from './class-edge-vi
 import type { Kal } from './class-kal.js';
 import { labelMarginOf, type NoteBoxContext } from './class-layout-edge-labels.js';
 import type { EdgeGeo } from './layout.js';
+import { labelOperandCenter } from './class-edge-note-box.js';
 
 /**
  * The text inputs `buildEdgeGeos` threads to every label anchor. SI25 D2:
@@ -183,7 +184,15 @@ export function attachEdgeLabel(
   // verification.
   const vis = stripEdgeLabelVisibility(splitLines[0] ?? '', text.classAttributeIconSize);
   const lines = [vis.text, ...splitLines.slice(1)].map(resolveTextEscapes);
-  let center = { x: edgeResult.labelX, y: edgeResult.labelY };
+  // cdd3-T13r: with a `note on link`, the label is one operand of the
+  // merged block -- see `class-edge-note-box.ts#labelOperandCenter`.
+  let center = labelOperandCenter(
+    rel,
+    { x: edgeResult.labelX, y: edgeResult.labelY },
+    labelFont,
+    measurer,
+    text.noteCtx,
+  );
   if (vis.modifier !== undefined) {
     const placed = visibilityBlockAnchor(vis, lines, center, labelFont, measurer);
     edgeGeo.visibilityIcon = placed.icon;
