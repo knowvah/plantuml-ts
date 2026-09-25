@@ -20,7 +20,7 @@ import { StringLocated } from './StringLocated.js';
  * backslash) is not.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/StringUtils.java:454-456
  */
-function endsWithBackslash(s: string): boolean {
+export function endsWithBackslash(s: string): boolean {
   return s.endsWith('\\') && !s.endsWith('\\\\');
 }
 

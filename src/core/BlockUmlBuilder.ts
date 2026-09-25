@@ -50,6 +50,7 @@ import {
 import { readLines } from './tim/ReadLineReader.js';
 import { mergeEndingBackslashLines } from './tim/ReadFilterMergeLines.js';
 import { StringLocated } from './tim/StringLocated.js';
+import { umlSourceSeedLines } from './uml-source-lines.js';
 
 /** The `@start<suffix>` word, lowercased -- `uml`, `json`, `mindmap`, ... */
 function startSuffix(line: string): string {
@@ -90,6 +91,12 @@ export interface BlockUmlOk extends BlockUmlBase {
   readonly source: UmlSource;
   /** The interpreter's other output for THIS block: theme, styles, skinparam. */
   readonly preprocessed: PreprocessorResult;
+  /**
+   * The lines upstream's `UmlSource#seed()` hashes (`UmlSource.java:222-234`)
+   * -- `BlockUml#data` as `PSystemBuilder#createPSystem` loads it, `@start` /
+   * `@end` included. See `uml-source-lines.ts#umlSourceSeedLines`.
+   */
+  readonly seedSource: readonly string[];
 }
 
 /** A block whose interpretation failed -- upstream's `preprocessorError` flag. */
@@ -213,6 +220,7 @@ export function buildBlockUml(raw: RawBlock, options?: PreprocessOptions): Block
     rawSource: raw.lines,
     source: finalizeBlock(raw.suffix, interior.lines, interior.positions),
     preprocessed: outcome.result,
+    seedSource: umlSourceSeedLines(outcome.result.dataLines ?? outcome.result.lines),
   };
 }
 

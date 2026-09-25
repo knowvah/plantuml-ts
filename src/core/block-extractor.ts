@@ -89,6 +89,13 @@ export interface UmlSource {
    * always are).
    */
   readonly rawSourceLines?: readonly string[];
+  /**
+   * cdd3-T27: the list `UmlSource#seed()` ACTUALLY hashes -- the block's
+   * PREPROCESSED lines (`PSystemBuilder.java:232-240` hands `BlockUml#data`,
+   * not `rawSource`, to `UmlSource.createWithRaw`). Preferred over
+   * {@link rawSourceLines} by every seed site; `BlockUmlOk#seedSource`.
+   */
+  readonly seedSourceLines?: readonly string[];
 }
 
 // ---------------------------------------------------------------------------

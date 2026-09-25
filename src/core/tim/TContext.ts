@@ -52,7 +52,7 @@ import type { TContext as TContextInterface, TFunction, TPreprocessingArtifact }
 import { applyFunctionsAndVariablesImpl } from './TContextSubstitution.js';
 import type { TFunctionSignature } from './TFunctionSignature.js';
 import { TFunctionType } from './TFunctionType.js';
-import type { PlainLineFilter, TContextOptions } from './TContextOptions.js';
+import type { FilteredLine, PlainLineFilter, TContextOptions } from './TContextOptions.js';
 import type { TMemory } from './TMemory.js';
 import { createStandardFunctions } from './builtin/index.js';
 import { BLOCK_E1_NEWLINE } from './builtin/jaws-constants.js';
@@ -64,7 +64,7 @@ import { buildCodeIterator } from './iterator/buildCodeIterator.js';
 import type { CodeIterator } from './iterator/CodeIterator.js';
 import type { Sub } from './iterator/Sub.js';
 
-export type { PlainLineFilter, TContextOptions } from './TContextOptions.js';
+export type { FilteredLine, PlainLineFilter, TContextOptions } from './TContextOptions.js';
 
 /** @see ~/git/plantuml/.../tim/TContext.java#ONLY_WHITESPACE_NON_EMPTY */
 const ONLY_WHITESPACE_NON_EMPTY = /^\s+$/u;
@@ -75,6 +75,7 @@ const RE_UNDEF_KEYWORD = /^!undef(ine)?/u;
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java */
 export class TContext implements TContextInterface {
   private readonly resultList: StringLocated[] = [];
+  private readonly filteredLines: FilteredLine[] = [];
   private readonly debug: StringLocated[] = [];
 
   readonly functionsSet = new FunctionsSet();
@@ -280,7 +281,10 @@ export class TContext implements TContextInterface {
 
   /** @see ~/git/plantuml/.../tim/TContext.java#addPlain */
   private addPlain(memory: TMemory, s: StringLocated): void {
-    if (this.plainLineFilter?.(s, (text) => this.substituteText(memory, s, text)) === true) return;
+    if (this.plainLineFilter?.(s, (text) => this.substituteText(memory, s, text)) === true) {
+      this.recordFilteredLine(memory, s);
+      return;
+    }
 
     const tmp = this.applyFunctionsAndVariablesInternal(memory, s);
     if (tmp === undefined) return;
@@ -290,6 +294,12 @@ export class TContext implements TContextInterface {
       this.pendingAdd = undefined;
     }
     for (const line of tmp) this.resultList.push(line);
+  }
+
+  /** Upstream's `addPlain` (`TContext.java:455-466`) keeps a consumed line, substituted. */
+  private recordFilteredLine(memory: TMemory, s: StringLocated): void {
+    for (const part of this.substituteText(memory, s, s.getString()).split('\n'))
+      this.filteredLines.push({ at: this.resultList.length, line: new StringLocated(part, s.getLocation()) });
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#simulatePlain */
@@ -428,6 +438,11 @@ export class TContext implements TContextInterface {
   /** @see ~/git/plantuml/.../tim/TContext.java#getResultList */
   getResultList(): readonly StringLocated[] {
     return this.resultList;
+  }
+
+  /** The lines the `plainLineFilter` consumed -- see `uml-source-lines.ts#dataListOf`. */
+  getFilteredLines(): readonly FilteredLine[] {
+    return this.filteredLines;
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#getDebug */

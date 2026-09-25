@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1223 modules · 4584 exported names.
+1226 modules · 4598 exported names.
 
 ## `src/`
 
@@ -74,6 +74,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
+| `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts` installs as the interpreter's `PlainLineFilter`. |
 | `preprocessor.ts` | `PreprocessorResult`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
@@ -121,7 +122,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-together.ts` | `ROOT_TOGETHER_PREFIX`, `togetherClusters` | `together { }` blocks as svek prints them: an unlabelled `subgraph <clusterId>t<k> { ... |
 | `svek-dot-top.ts` | `IsNormalPosition`, `nodesOrderedTop`, `nodesOrderedWithoutTop`, `normalPositionOf`, `topsFirstClusters`, `rootTops` | `Cluster#getNodesOrderedTop` / `getNodesOrderedWithoutTop` — the split `printCluster1` / `printCluster2` make of one cluster's own nodes. |
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
-| `svg-defs.ts` | `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collapseDuplicateGradientDefs`, `collectDocumentDefs`, `mapOutsideInlineDefs`, `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
+| `svg-defs-seeded.ts` | `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs-seeded.ts — the seeded def-id pass over an assembled document. |
+| `svg-defs.ts` | `nextDef`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `ANY_ID_RE`, `idOfElement`, `collapseDuplicateFilterDefs`, `DQUOTE`, `collapseDuplicateGradientDefs`, `collectDocumentDefs`, `INLINE_DEF_OPENS`, `mapOutsideInlineDefs` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
 | `svg-format.ts` | `DEFAULT_SVG_DECIMALS`, `trimZeros`, `formatDecimal`, `fmt`, `shortenColor`, `formatOpacity`, `formatPercent`, `escapeAttribute`, `escapeText`, `escapeComment` | Shared SVG formatting rules — decimal precision, color shortening, and opacity/percent formatting. |
 | `svg-markers.ts` | `ArrowType`, `ALL_ARROW_TYPES`, `arrowHeadRef`, `arrowHead`, `openArrowHeadDef` | SVG arrow-marker builders — the `<marker>` `<defs>` for every edge arrowhead. |
 | `svg-path-builder.ts` | `moveTo`, `lineTo`, `arcTo`, `splinePathD`, `roundedTopRectD`, `roundedBottomRectD`, `cubicTo` | Shared `<path>` `d`-string segment builder — the plain-string counterpart to `UPath` (`core/klimt/shape/UPath.ts`) for this port's several class-diagram renderers that draw markup as plain strings rather than through a `UGraphic`/`SvgGraphi |
@@ -146,6 +148,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme definitions (plain .. |
 | `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme definitions. |
 | `TitledDiagram.ts` | `DiagramType`, `UmlSource`, `Previous`, `TitledDiagram` |  |
+| `uml-source-lines.ts` | `dataListOf`, `mutateExpandsBreakline`, `loadInternal`, `patchBase64Line`, `umlSourceSeedLines` | The line list upstream's `UmlSource#seed()` walks -- `BlockUml#data` as `PSystemBuilder#createPSystem` turns it into a `UmlSource`. |
 | `usymbol-shapes.ts` | `IconGeo`, `renderDatabaseIcon`, `renderComponentIcon`, `renderActorIcon`, `renderUseCaseIcon`, `renderUSymbolIcon` | Shared per-USymbol leaf-shape renderers — the SVG for a descriptive element's icon (component notch, database cylinder, actor stick-figure, usecase ellipse). |
 | `version.ts` | `VERSION`, `COMMIT`, `COMPILE_TIME_STRING`, `versionString`, `fullDescription` | The version banner the error diagram prints above the source listing. |
 
@@ -774,7 +777,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `LineLocation.ts` | `LineLocation` | Where a line of source came from: its 0-based position, the resource that produced it, and — for a line pulled in by `!include` — the location of the `!include` line that pulled it. |
 | `LineLocationImpl.ts` | `LineLocationImpl` | The only `LineLocation` implementation, exactly as upstream: an immutable `(description, parent, position)` triple whose `oneLineRead()` returns the NEXT position rather than mutating. |
 | `PreprocessingArtifact.ts` | `PreprocessingArtifact` | `PreprocessingArtifact` + `ConfigurationStore<OptionKey>` -- the two `net.sourceforge.plantuml.preproc` types `EaterOption` (`!option`) needs. |
-| `ReadFilterMergeLines.ts` | `mergeEndingBackslashLines` | Trailing-`\` line continuation: a source line ending in a bare `\` merges with the NEXT physical line, before `@start`/`@end` block splitting or command dispatch sees the document. |
+| `ReadFilterMergeLines.ts` | `endsWithBackslash`, `mergeEndingBackslashLines` | Trailing-`\` line continuation: a source line ending in a bare `\` merges with the NEXT physical line, before `@start`/`@end` block splitting or command dispatch sees the document. |
 | `ReadLineReader.ts` | `SOURCE_STRING_DESCRIPTION`, `readLines` | Raw text -> the `StringLocated` list the interpreter executes. |
 | `StartUtils.ts` | `isStartDirective`, `isEndDirective`, `isPauseDirective`, `isUnpauseDirective`, `isExit`, `possibleAppend` | The two directive probes `DiagramExtractor` needs: is this line a `@start...` / `@end...` (or the backslash spelling, `\startuml`)? |
 | `stdlib-path.ts` | `StdlibPathParts`, `splitStdlibPath` | `Stdlib.java`'s stdlib-path key transform, in one place. |
@@ -783,8 +786,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `StdlibStore.ts` | `BundleData`, `StdlibStore`, `stdlibStore`, `withStdlib` | The `<bundle/thing>` stdlib resolution seam. |
 | `StringEater.ts` | `StringEater` | A throwaway `Eater` used only to feed a bare string through the shared `Eater` character-cursor primitives (`eatAndGetQuotedString`, etc.) without a real source-line context. |
 | `StringLocated.ts` | `LineLocation`, `TLineType`, `StringLocated` | Minimal port of the surface this batch's write-set (`tim/` memory, function, and `Eater` primitives) actually calls on `net.sourceforge.plantuml.text.StringLocated` and `net.sourceforge.plantuml.utils.LineLocation`. |
-| `TContext.ts` | `PlainLineFilter`, `TContextOptions`, `TContext` | The TIM interpreter: owns the function registry (`FunctionsSet`), builds the `CodeIterator` decorator chain, executes one line at a time, and performs inline `$variable` / `%function()` substitution. |
-| `TContextOptions.ts` | `PlainLineFilter`, `TContextOptions` | Construction-time seams for {@link TContext}. |
+| `TContext.ts` | `FilteredLine`, `PlainLineFilter`, `TContextOptions`, `TContext` | The TIM interpreter: owns the function registry (`FunctionsSet`), builds the `CodeIterator` decorator chain, executes one line at a time, and performs inline `$variable` / `%function()` substitution. |
+| `TContextOptions.ts` | `PlainLineFilter`, `FilteredLine`, `TContextOptions` | Construction-time seams for {@link TContext}. |
 | `TContextSubstitution.ts` | `TContextSubstitutionHost`, `applyFunctionsAndVariablesImpl`, `getFunctionNameAt` | The inline `%function(...)` / `$variable` substitution engine used by `TContext#applyFunctionsAndVariables`. |
 | `TFunction.ts` | `TWarning`, `TPreprocessingOptionStore`, `TPreprocessingArtifact`, `TContext`, `TFunction` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunction.java |
 | `TFunctionArgument.ts` | `TFunctionArgument` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionArgument.java |
