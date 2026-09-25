@@ -23,6 +23,7 @@ function classifier(
     phantomSlot?: true;
     noUidSlot?: true;
     subsumedLinkCreationIndex?: number;
+    subsumedLinkPhantomSlot?: true;
   } = {},
 ): ClassifierGeo {
   return {
@@ -40,6 +41,7 @@ function classifier(
     ...(opts.subsumedLinkCreationIndex !== undefined
       ? { subsumedLinkCreationIndex: opts.subsumedLinkCreationIndex }
       : {}),
+    ...(opts.subsumedLinkPhantomSlot === true ? { subsumedLinkPhantomSlot: true as const } : {}),
   };
 }
 
@@ -331,6 +333,38 @@ describe('buildClassUidPlan — couple/lollipop synthetic-entity phantom-slot ' 
       // (the naive dense position) instead of jar's real ent0004.
       expect(plan.classifierUid.get('enrollment')).toBe('ent0004');
       expect(plan.edgeUid).toEqual(['lnk7']);
+    },
+  );
+
+  it(
+    'E3-16: subsumedLinkPhantomSlot injects a SECOND standalone phantom ' +
+      'rank (subsumedLinkCreationIndex - 1), for a subsumed link that was ' +
+      'itself inverted (-up-/-left-) -- jar-verified besepi-37-rori892: ' +
+      'the subsumed `ia_1000042 -up-> ia_123` burns TWO ticks (creationIndex ' +
+      '26 phantom, 27 real, abel/Link.java:135,145-146), between ia_123 ' +
+      '(25) and ia_125 (28), so ia_125 lands TWO ranks after ia_123, not one',
+    () => {
+      const g = geo({
+        classifiers: [
+          classifier('ia_123', 1),
+          classifier('ia_125', 4),
+          classifier('circle', 6, {
+            kind: 'assoc-circle',
+            phantomSlot: true,
+            noUidSlot: true,
+            subsumedLinkCreationIndex: 3,
+            subsumedLinkPhantomSlot: true,
+          }),
+        ],
+        edges: [],
+      });
+      const plan = buildClassUidPlan(g);
+      expect(plan.classifierUid.get('ia_123')).toBe('ent0001');
+      // Without the second phantom rank at 2 (subsumedLinkCreationIndex -
+      // 1), ia_125 would land on ent0002 instead of jar's real ent0004
+      // (rank 1=ia_123, 2=phantom, 3=phantom(subsumedLinkCreationIndex),
+      // 4=ia_125).
+      expect(plan.classifierUid.get('ia_125')).toBe('ent0004');
     },
   );
 });

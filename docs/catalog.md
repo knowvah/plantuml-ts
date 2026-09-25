@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1206 modules · 4505 exported names.
+1207 modules · 4509 exported names.
 
 ## `src/`
 
@@ -1158,6 +1158,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-edge-visibility.ts` | `VisibilityIconGeo`, `EdgeLabelVisibility`, `stripEdgeLabelVisibility`, `VisibilityBlockAnchor`, `visibilityBlockAnchor` | cdd-T6 (A2a/M2): the visibility-modifier block a link LABEL carries when its first line starts with `-`/`#`/`+`/`~`/`*`. |
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |
 | `class-ensure-classifier.ts` | `ClassifierRef`, `resolveClassifierRef`, `registerPendingLeaf`, `materializeClassifier`, `ensureClassifier` | `ensureClassifier` — the class parser's single classifier-creation chokepoint — split out of `parser.ts` (which sat exactly at the 500-line module cap) and re-exported from it, so every existing `import { ensureClassifier } from './parser.j |
+| `class-geo-builders-fields.ts` | `inkBodyFields`, `badgeFields`, `protectedBorderField`, `assocCircleBookkeepingFields` | class-geo-builders-fields.ts — small pure `Partial<ClassifierGeo>` field-builder helpers used by `buildClassifierGeos`/ `degenerateSingleClassifier` (`class-geo-builders.ts`), split out purely to keep that file under the project's per-file |
 | `class-geo-builders.ts` | `ClassifierGeoOptions`, `buildClassifierGeos`, `NamespaceGeoInputs`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
 | `class-geo-edge-extras.ts` | `VisibilityIconGeo`, `EdgeKalBoxes`, `EdgeNoteLine`, `EdgeNoteBoxGeo`, `EdgeConstraintGeo`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo` | cdd-T6: the four geometry shapes `EdgeGeo` grew for A2a's render-only link mechanisms (M2 visibility icon, M5 `note on link` box, M9 `constraint on links`, M10 multi-line quantifier). |
 | `class-geo-geometry-types.ts` | `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | `ClassGeometry` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T17: the `EdgeGeo.roleLines` field pushed it back over after the cdd-T6 split already once cleared it). |

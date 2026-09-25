@@ -161,6 +161,8 @@ export interface ClassUidPlanInput {
     readonly noUidSlot?: true;
     readonly phantomSlot?: true;
     readonly subsumedLinkCreationIndex?: number;
+    /** E3-16: see `Classifier.subsumedLinkPhantomSlot`'s doc comment. */
+    readonly subsumedLinkPhantomSlot?: true;
     readonly apointNameCreationIndex?: number;
     readonly invertedClassEdgeOldCreationIndex?: number;
     readonly repeatCoupleInvisLinkCreationIndex?: number;
@@ -318,6 +320,12 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
       // classifier's own `creationIndex` (unlike the two entries above).
       if (c.subsumedLinkCreationIndex !== undefined) {
         out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex });
+        // E3-16: the subsumed link's OWN preceding phantom rank (it was
+        // itself an inverted -up-/-left- link) -- see `Classifier
+        // .subsumedLinkPhantomSlot`'s doc comment.
+        if (c.subsumedLinkPhantomSlot === true) {
+          out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex - 1 });
+        }
       }
       // cdd-T3 (A1 SB3): the DOUBLE-couple path's `getUniqueSequence
       // ("apoint")` NAME tick -- a standalone rank two below the point

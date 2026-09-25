@@ -97,6 +97,10 @@ export interface ClassifierGeo {
    *  (`ast.ts`'s doc comment) — feeds `renderer-uid.ts#buildClassUidPlan`'s
    *  subsumed-explicit-association phantom-rank bookkeeping. */
   subsumedLinkCreationIndex?: number;
+  /** E3-16: copied unchanged from `Classifier.subsumedLinkPhantomSlot`
+   *  (`ast.ts`'s doc comment) — feeds `renderer-uid.ts`'s extra-phantom-
+   *  rank injection for a subsumed link that was itself inverted. */
+  subsumedLinkPhantomSlot?: true;
   apointNameCreationIndex?: number; // cdd-T3: copied from `Classifier.apointNameCreationIndex` (`ast.ts` doc).
   /** G2 N20: copied unchanged from `Classifier
    *  .invertedClassEdgeOldCreationIndex` (`ast.ts`'s doc comment) — feeds

@@ -396,17 +396,17 @@ export interface Classifier {
   /**
    * G2 N19: for `kind: 'assoc-circle'` only -- the `creationIndex` of an
    * explicit A-B association this circle SUBSUMED and removed
-   * (`class-assoc-couple.ts#subsumeExplicitAssociation`). Jar's shared
+   * (`class-assoc-subsume.ts#subsumeExplicitAssociation`). Jar's shared
    * counter already advanced past that relationship's OWN real `Link()`
-   * construction when it was first parsed (e.g. an earlier `A -- B` line) --
-   * `Association#createNew`'s `removeLink(existingLink)` branch (no NEW
-   * `Link()` call) does not un-burn that slot. `renderer-uid.ts` injects a
-   * phantom Ranked entry at this value so dense re-numbering doesn't
-   * silently collapse the gap (see `SubsumedLink.creationIndex`'s doc
-   * comment, class-assoc-couple.ts, for the jar-verified fixture). Absent
-   * when the couple's A-B pair had no explicit association to subsume.
+   * construction when first parsed; `Association#createNew`'s
+   * `removeLink(existingLink)` (no NEW `Link()` call) does not un-burn
+   * that slot. `renderer-uid.ts` injects a phantom Ranked entry at this
+   * value (see `SubsumedLink.creationIndex`'s doc comment). Absent when
+   * the couple's A-B pair had no explicit association to subsume.
    */
   subsumedLinkCreationIndex?: number;
+  /** E3-16: subsumed link was itself inverted — see `SubsumedLink.phantomSlot`. */
+  subsumedLinkPhantomSlot?: true;
   /**
    * G2 N20: for `kind: 'assoc-circle'` only, on the OLDER (PRIOR) circle of
    * a repeat-coupled pair -- the class-edge's own creationIndex value

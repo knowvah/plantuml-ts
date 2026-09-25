@@ -225,6 +225,10 @@ export function makeCoupleCircle(
   if (isRepeatCouple) applyLengthFlip(ast, priorCircles[0]!, aId, bId);
 
   const subsumed = subsumeExplicitAssociation(ast, aId, bId);
+  // E3-17: attach to the subsumed link's own entity1/2, not `aId`/`bId`
+  // (see `SubsumedLink.entity1Id`); falls back to `aId`/`bId` unsubsumed.
+  const entity1Id = subsumed.entity1Id ?? aId;
+  const entity2Id = subsumed.entity2Id ?? bId;
   const circleId = `__assoc${ast.classifiers.filter((x) => x.kind === 'assoc-circle').length}`;
   const circle: Classifier = { id: circleId, display: '', kind: 'assoc-circle', typeParams: [], members: [] };
   // G2 N19: `Association`'s ctor burns the jar shared counter TWICE,
@@ -243,10 +247,10 @@ export function makeCoupleCircle(
     circle.creationIndex = counter.value;
     circle.phantomSlot = true;
     circle.noUidSlot = true;
-    // G2 N19: preserve the removed explicit edge's own real jar burn -- see
-    // `SubsumedLink.creationIndex`'s doc comment.
+    // G2 N19/E3-16: own burn + preceding phantom if inverted (SubsumedLink.phantomSlot).
     if (subsumed.creationIndex !== undefined) {
       circle.subsumedLinkCreationIndex = subsumed.creationIndex;
+      if (subsumed.phantomSlot === true) circle.subsumedLinkPhantomSlot = true;
     }
   }
   ast.classifiers.push(circle);
@@ -254,14 +258,13 @@ export function makeCoupleCircle(
   // createInSecond hardcodes both entity edges to length 2 for a repeat
   // coupling, regardless of any subsumed edge's own length.
   const entityLength = isRepeatCouple ? 2 : (subsumed.length ?? 2);
-  // G2 N8: entity edges keep the subsumed link's own per-end decor, split
-  // via `Association#createNew`'s `getPart1()`/`getPart2()` — NONE at the
-  // circle end always, the original a/b-side decor at the classifier end
-  // (`SubsumedLink.aSideDecor`/`bSideDecor` doc comment); the body dash
-  // style (`linkStyle`, untouched by the split) is shared by both new edges.
+  // G2 N8/E3-17: entity edges keep the subsumed link's own per-end decor
+  // (`getPart1()`/`getPart2()`) — NONE at the circle end, the RAW
+  // `entity1Id`/`entity2Id`-side decor at the classifier end (no `aId`-based
+  // re-orientation); dash style is shared by both new edges.
   const subsumedDashed = subsumed.dashed ?? false;
   const aEdge: Relationship = {
-    from: aId,
+    from: entity1Id,
     to: circleId,
     type: 'association',
     length: entityLength,
@@ -271,18 +274,15 @@ export function makeCoupleCircle(
   };
   if (subsumed.a !== undefined) aEdge.fromMultiplicity = subsumed.a;
   // B2 (SI17): a `Class::member` port on the subsumed edge (pajoka-72-reju527)
-  // still shields its classifier (upstream: `Entity#addPortShortName`, a
-  // permanent entity-level registry set once, independent of the link's
-  // later lifecycle -- `Classifier.portShortNames`'s own doc comment,
-  // ast.ts). It does NOT carry onto aEdge/bEdge themselves: upstream builds
-  // BOTH replacement edges (`entity1ToPoint`/`pointToEntity2`,
-  // `AbstractClassOrObjectDiagram.java:264-273`) from a fresh `LinkArg` that
-  // never calls `Link#setPortMembers`, so the split edges have no port of
-  // their own (`sh0006->sh0009`, bare, not `sh0006:pea9f6…->sh0009`).
-  registerPersistentPort(ast, aId, subsumed.portA);
+  // still shields its classifier (`Entity#addPortShortName`, a permanent
+  // entity-level registry -- `Classifier.portShortNames`, ast.ts). Not
+  // carried onto aEdge/bEdge themselves: both replacement edges
+  // (`AbstractClassOrObjectDiagram.java:264-273`) use a fresh `LinkArg`
+  // that never calls `Link#setPortMembers` (`sh0006->sh0009`, bare).
+  registerPersistentPort(ast, entity1Id, subsumed.portA);
   const bEdge: Relationship = {
     from: circleId,
-    to: bId,
+    to: entity2Id,
     type: 'association',
     length: entityLength,
     sourceDecor: 'none',
@@ -290,7 +290,7 @@ export function makeCoupleCircle(
     dashed: subsumedDashed,
   };
   if (subsumed.b !== undefined) bEdge.toMultiplicity = subsumed.b;
-  registerPersistentPort(ast, bId, subsumed.portB);
+  registerPersistentPort(ast, entity2Id, subsumed.portB);
 
   // Association#createNew's parity flip: default 1, flip to 2 exactly when
   // the subsumed length/self-couple-ness disagree. A repeat coupling instead

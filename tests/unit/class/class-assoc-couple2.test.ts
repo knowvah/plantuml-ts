@@ -239,6 +239,47 @@ describe('association-class couple: subsumed-edge length transfer', () => {
 });
 
 /**
+ * E3-17 (besepi-37-rori892): the entity-circle edges attach to the
+ * SUBSUMED link's own `entity1real`/`entity2real`
+ * (`existingLink.getEntity1()`/`getEntity2()`, `Association#createNew`,
+ * `AbstractClassOrObjectDiagram.java:259-260`), not the couple's own
+ * `(A,B)` syntax order -- jar-verified minimal repro (`scripts/oracle-
+ * render.sh`): `A -up-> B : lbl` then `(A, B) . C` renders `B-backto-
+ * apoint6` (labeled) / `apoint6-A` (unlabeled), i.e. entity1real=B even
+ * though the couple lists A first. `A -up-> B` is parsed with
+ * `swapDirection=true` (`CommandLinkClass.java:363-364`'s `getInv()`
+ * swap), so this port's own `Relationship.from`/`.to` already carry B/A
+ * -- `subsumeExplicitAssociation` must read them raw, not re-orient by
+ * `aId`.
+ */
+describe('association-class couple: E3-17 entity-circle orientation follows the subsumed link, not (A,B) syntax order', () => {
+  it('A -up-> B then (A, B) . C attaches the labeled a-edge to B, not A', () => {
+    const ast = parse(`
+      class A
+      class B
+      class C
+      A -up-> B : lbl
+      (A, B) . C
+    `);
+    const a = ast.classifiers.find((c) => c.display === 'A')!;
+    const b = ast.classifiers.find((c) => c.display === 'B')!;
+    const [circleId] = circleIds(ast);
+    expect(circleId).toBeDefined();
+    // jar: entity1real (B) -> circle carries the label + decor; circle -> A
+    // (entity2real) is bare.
+    const bEdge = findRel(ast, b.id, circleId!);
+    expect(bEdge.label).toBe('lbl');
+    expect(bEdge.sourceDecor).toBe('open');
+    const aEdge = findRel(ast, circleId!, a.id);
+    expect(aEdge.label).toBeUndefined();
+    // No A->circle or circle->B edge exists -- the couple did NOT use the
+    // syntax order.
+    expect(ast.relationships.some((r) => r.from === a.id && r.to === circleId)).toBe(false);
+    expect(ast.relationships.some((r) => r.from === circleId && r.to === b.id)).toBe(false);
+  });
+});
+
+/**
  * S-2 (cdd2-T7, pibifa-14-leno075/begico-70-guva302):
  * `AbstractClassOrObjectDiagram.java:134-135`'s `point1ToPoint2 = new
  * Link(..., linkType, ...)` -- `linkType` is the PARSED arrow between the
