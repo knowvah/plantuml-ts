@@ -132,6 +132,12 @@ export { ShapeType, Margins, resolveDescriptionUSymbol, type HexagonPolygon };
 // Constructor param bundles (adaptation seam — see module doc comment)
 // ---------------------------------------------------------------------------
 
+/** The `Url` fields `UGraphicSvg#startUrl` reads (`url`, `tooltip`). */
+export interface EntityUrl {
+  readonly url: string;
+  readonly tooltip: string;
+}
+
 /** Upstream fields read off `Entity`: name/uid/qualified-name/location
  *  (feeds `decorateEntityDrawing`'s `UGroup` wrapper) plus `getUrl99()`. */
 export interface EntityImageDescriptionEntity {
@@ -139,8 +145,9 @@ export interface EntityImageDescriptionEntity {
   readonly uid: string;
   readonly qualifiedName: string;
   readonly location: { readonly position: number } | null;
-  /** Non-null triggers a throw in `drawU` (D3′ URL/link scope note). */
-  readonly url: string | null;
+  /** `getUrl99()` -- non-null opens `ug.startUrl(url)` inside the entity
+   *  group (`EntityImageDescription.java:304-305,327-328`). */
+  readonly url: EntityUrl | null;
 }
 
 /** Upstream: `entity.getUSymbol()` (parser-resolved keyword) plus
@@ -385,14 +392,8 @@ export class EntityImageDescription {
     return new MagneticBorderNone();
   }
 
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageDescription.java:294-331 */
   drawU(ug: UGraphic): void {
-    if (this.entity.url !== null) {
-      throw new Error(
-        'EntityImageDescription.drawU: entity hyperlinks (Url) are not supported — ' +
-          'ug.startUrl/closeUrl require the interactive-link driver, deferred per D3-prime ' +
-          '(see drawing/svg/svg-graphics.ts openLink/closeLink)',
-      );
-    }
     const info: EntityDecorationInfo = {
       name: this.entity.name,
       qualifiedName: this.entity.qualifiedName,
@@ -403,9 +404,13 @@ export class EntityImageDescription {
   }
 
   private drawInner(ug: UGraphic): void {
+    const url = this.entity.url;
+    const linkable = ug as UGraphic & Partial<{ startUrl(u: EntityUrl): void; closeUrl(): void }>;
+    if (url !== null) linkable.startUrl?.(url);
     if (this.shapeType === ShapeType.HEXAGON) this.drawHexagon(this.ctx.apply(ug));
     this.asSmall.drawU(ug);
     if (this.hideText) this.drawHiddenTextOverlay(ug);
+    if (url !== null) linkable.closeUrl?.();
   }
 
   private drawHexagon(ug: UGraphic): void {

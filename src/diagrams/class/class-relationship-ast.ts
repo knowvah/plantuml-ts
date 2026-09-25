@@ -370,6 +370,13 @@ export interface Relationship {
    */
   colorOverride?: string;
   /**
+   * cdd3-T10 (S-4t): the `text:COLOR` entry of the trailing colour spec
+   * (`Colors.java:95-124`, `class-relationship-colors.ts#parseRelColors`),
+   * raw with a leading `#`. `SvekEdge.java:260-262`'s `font.mute(colors)`
+   * recolours the link's main label (and its magic-arrow glyph) only.
+   */
+  labelTextColor?: string;
+  /**
    * SI1/T11: the `single` ARROW_STYLE token (`WithLinkType.goSingle`/
    * `isSingle`, `decoration/WithLinkType.java:110-116`) -- a link-ADD-time
    * dedup flag, not a render style: `net.atmp.CucaDiagram#addLink:896-901`

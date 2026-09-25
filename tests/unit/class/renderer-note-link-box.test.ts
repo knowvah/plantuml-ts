@@ -57,10 +57,9 @@ describe('renderLinkNoteBox — colour (A5/M5, cdd2-T19c)', () => {
     const { body, extraDefs } = renderLinkNoteBox(baseNote, { back: 'aqua/aliceblue' }, theme);
     expect((body.match(/fill="url\(#g[a-z0-9]+\)"/g) ?? []).length).toBe(2);
     expect(extraDefs).toContain('<linearGradient');
-    // jar shortens a perfect 3-digit-representable stop to `#0FF`; this
-    // port's `paint.ts#paintToSvg` does not yet -- see .agent-notes for the
-    // filed follow-on (out of this task's write-set, `core/paint.ts`).
-    expect(extraDefs).toContain('stop-color="#00FFFF"');
+    // jar shortens a perfect 3-digit-representable stop to `#0FF` -- cdd3-T10
+    // ported it into `paint.ts#paintToSvg` (`SvgGraphics.java:398,545-554`).
+    expect(extraDefs).toContain('stop-color="#0FF"');
     expect(extraDefs).toContain('stop-color="#F0F8FF"');
   });
 

@@ -139,7 +139,12 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // `isContainerOpener` exemption instead of opening a real container --
       // the nested body's own lines were then never re-dispatched through
       // the per-line/allowmixing gate at all.
-      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
+      new RegExp(
+        String.raw`^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+          NOTE_COLOR +
+          String.raw`\s*(?:[#<][^{]*)?\{\s*$`,
+        'i',
+      ),
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
       const name = match[2] !== undefined ? match[2] : match[3]!;
@@ -158,6 +163,11 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // (kokebo-27-vafi688).
       const tags = parseTagTokens(`${match[5] ?? ''} ${match[7] ?? ''}`);
       if (tags.length > 0) state.pendingContainerTags.set(effectiveId, tags);
+      // cdd3-T10 (S-11): `p.addUrl(url)` (`CommandPackageWithUSymbol.java:
+      // 208-213`) and `p.setColors(color().getColor(...))` with
+      // `ColorType.BACK` (`:215-216`, `color()` at `:132-134`).
+      setNamespaceUrl(state, effectiveId, match[8]);
+      setNamespaceColor(state, effectiveId, match[9]);
     },
   },
 

@@ -1062,7 +1062,9 @@ describe('edge-label margin ink (cdd-T35)', () => {
           y: 0,
           width: 1,
           height: 1,
-          inkBox: { x: 0, y: 0, width: 1, height: 1 },
+          // cdd3-T10: inside the label glyph's own ink, so the note's OWN
+          // ink (below) moves neither axis and only the margin skip shows.
+          inkBox: { x: 25, y: 10, width: 1, height: 1 },
           noteLines: [],
           position: 'bottom',
         },
@@ -1070,6 +1072,35 @@ describe('edge-label margin ink (cdd-T35)', () => {
       [],
     );
     expect(noteMerged.width).toBe(plain.width - 2);
+  });
+
+  // cdd3-T10: `EntityImageNoteLink#drawU` -> `ComponentRoseNote
+  // #drawInternalU` (`skin/rose/ComponentRoseNote.java:118-122`) draws the
+  // note outline as a `UPath` (`Opale.getPolygonNormal`, `svek/image/
+  // Opale.java:149-171`) inside the edge's own draw pass, so
+  // `LimitFinder#drawUPath` (`klimt/drawing/LimitFinder.java:164-167`)
+  // counts its plain bbox -- lipazi-06-care921's canvas shortfall.
+  it('counts the note-on-link outline (inkBox) as plain UPath ink', () => {
+    const without = computeClassDocumentDims([], [], edgeWithLabel(undefined), []);
+    const withNote = computeClassDocumentDims(
+      [],
+      [],
+      edgeWithLabel(undefined, {
+        noteBox: {
+          x: 95,
+          y: 5,
+          width: 60,
+          height: 40,
+          inkBox: { x: 100, y: 10, width: 50, height: 30 },
+          noteLines: [],
+          position: 'bottom',
+        },
+      }),
+      [],
+    );
+    // x: [20,20] -> [20,150]; y: [20,20] -> [10,40].
+    expect(withNote.width - without.width).toBe(130);
+    expect(withNote.height - without.height).toBe(30);
   });
 
   it('only ever widens X -- the height is unaffected by marginLabel (1px vs 6px self-loop)', () => {

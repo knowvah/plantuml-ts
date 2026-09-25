@@ -170,8 +170,17 @@ describe('A2a/M5 — the note operand of the merged label block', () => {
     // inset on all four sides.
     expect(box.inkBox.x).toBeCloseTo(box.x + 5, 6);
     expect(box.inkBox.y).toBeCloseTo(box.y + 5, 6);
-    expect(box.inkBox.width).toBeCloseTo(box.width - 10, 6);
-    expect(box.inkBox.height).toBeCloseTo(box.height - 10, 6);
+    // cdd3-T10: `ComponentRoseNote#drawInternalU` paints `(int)
+    // getTextWidth` x `(int) getTextHeight` (`skin/rose/ComponentRoseNote
+    // .java:107-109,118`) -- truncated, not the preferred box minus padding.
+    expect(box.inkBox.width).toBe(Math.trunc(box.width - 10));
+    expect(box.inkBox.height).toBe(Math.trunc(box.height - 10));
+  });
+
+  it('paints lipazi`s second note 144 x 36, as the jar (path L264.92 -> L408.92)', () => {
+    const edge = geo.edges.find((e) => e.to === 'titi1')!;
+    expect(edge.noteBox!.inkBox.width).toBe(144);
+    expect(edge.noteBox!.inkBox.height).toBe(36);
   });
 
   it('measures the note`s own lines, not the link label`s', () => {

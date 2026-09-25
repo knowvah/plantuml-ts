@@ -22,10 +22,8 @@
  * either), stereotype labels (class-diagram usecase/actor carries none),
  * `deltaShadow` (class-geo-types.ts's own `ClassifierGeo.shadowing` doc
  * comment: jar draws no shadow for an `EntityImageDescription`-family
- * shape here), `hexagonPolygon` (neither symbol is a hexagon), and entity
- * hyperlinks (`entity.url: null` — `EntityImageDescription.drawU` throws
- * on a non-null url; class-diagram usecase/actor url-wrapping was never
- * implemented pre-T4 either, so this is not a new gap).
+ * shape here) and `hexagonPolygon` (neither symbol is a hexagon). Entity
+ * hyperlinks ARE threaded (cdd3-T10, S-11: `classifier.url`).
  *
  * @see ~/git/plantuml/.../svek/image/EntityImageDescription.java
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-1, ADR-2)
@@ -153,7 +151,9 @@ function buildUSymbolEntityParams(
     symbolKeyword === 'component' || symbolKeyword === 'rectangle' ? ELEMENT_ROUND_CORNER * theme.scaleK : 0;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
   return {
-    entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: null },
+    // cdd3-T10 (S-11): the entity's own url (`getUrl99()`), drawn by
+    // `EntityImageDescription#drawU`'s `startUrl`/`closeUrl` pair.
+    entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: classifier.url ?? null },
     symbol: {
       keyword: upstreamKeyword(symbolKeyword),
       actorStyle: resolveActorStyle(theme.actorStyle),

@@ -123,7 +123,7 @@ function extractTopGroup(svg: string): string {
 }
 
 function wrapFragment(inner: string): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg"><g>${inner}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g>${inner}</g></svg>`;
 }
 
 function render(entity: EntityImageDescription): string {
@@ -360,26 +360,32 @@ describe('EntityImageDescription (T14, AC2) — stereotype guillemet block', () 
 });
 
 // ---------------------------------------------------------------------------
-// AC3 — URL/link/image paths throw, citing D3′ deferred drivers
+// cdd3-T10 (S-11) — `if (url != null) ug.startUrl(url)` inside the entity
+// group, `closeUrl()` before `closeGroup()` (EntityImageDescription.java:
+// 304-305,327-328).
 // ---------------------------------------------------------------------------
 
-describe('EntityImageDescription (T14, AC3) — D3′ deferred URL/link driver', () => {
-  test('drawU throws when the entity carries a non-null url', () => {
-    const entity = new EntityImageDescription(
-      baseParams({
-        entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' },
-      }),
-    );
-    expect(() => entity.drawU(newGraphic())).toThrow(/D3-prime/);
-  });
+const EXAMPLE_URL = 'https://example.com';
+const JAR_A_OPEN =
+  `<a target="_top" href="${EXAMPLE_URL}" xlink:href="${EXAMPLE_URL}" xlink:type="simple" ` +
+  `xlink:actuate="onRequest" xlink:show="new" title="${EXAMPLE_URL}" xlink:title="${EXAMPLE_URL}">`;
 
-  test('the throw message names the deferred openLink/closeLink driver', () => {
+describe('EntityImageDescription drawU — entity url (EntityImageDescription.java:304-305,327-328)', () => {
+  test('wraps the whole entity body in one <a> inside the entity <g>', () => {
     const entity = new EntityImageDescription(
       baseParams({
-        entity: { name: 'Comp1', uid: 'ent0001', qualifiedName: 'Comp1', location: null, url: 'https://example.com' },
+        entity: {
+          name: 'Comp1',
+          uid: 'ent0001',
+          qualifiedName: 'Comp1',
+          location: { position: 1 },
+          url: { url: EXAMPLE_URL, tooltip: EXAMPLE_URL },
+        },
       }),
     );
-    expect(() => entity.drawU(newGraphic())).toThrow(/openLink\/closeLink/);
+    const openG = '<g class="entity" data-qualified-name="Comp1" id="ent0001" data-source-line="1">';
+    const jar = JAR_COMP1.replace(openG, openG + JAR_A_OPEN).replace(/<\/g>$/, '</a></g>');
+    expectConformant(render(entity), jar);
   });
 });
 

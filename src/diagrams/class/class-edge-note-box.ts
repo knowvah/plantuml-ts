@@ -107,11 +107,16 @@ export function computeEdgeNoteBox(
     y,
     width: noteDim.width,
     height: noteDim.height,
+    // cdd3-T10: `drawInternalU` paints `x2 = (int) getTextWidth` by
+    // `textHeight = (int) getTextHeight` (`ComponentRoseNote.java:107-109,
+    // 118`; the area never exceeds the preferred box here, so `:114-116`'s
+    // widening branch is dead) -- the text dims are the preferred box less
+    // `2 * padding` (`:82-90`, no shadow on a link note).
     inkBox: {
       x: x + ROSE_NOTE_PADDING,
       y: y + ROSE_NOTE_PADDING,
-      width: noteDim.width - 2 * ROSE_NOTE_PADDING,
-      height: noteDim.height - 2 * ROSE_NOTE_PADDING,
+      width: Math.trunc(noteDim.width - 2 * ROSE_NOTE_PADDING),
+      height: Math.trunc(noteDim.height - 2 * ROSE_NOTE_PADDING),
     },
     noteLines: note.lines.map((text, i) => ({ text, width: note.lineWidths[i] ?? 0 })),
     // cdd2-T19c: carried through so the renderer can recover the merge's

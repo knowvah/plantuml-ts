@@ -13,7 +13,7 @@ import { attrs, resolvePaint, path, line } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
 import type { NamespaceGeo } from './layout.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
-import { formatDecimal, DEFAULT_SVG_DECIMALS, shortenColor } from '../../core/svg-format.js';
+import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 
 /**
  * {@link folderPathD}/{@link folderPolygonPoints}'s geometry inputs,
@@ -128,7 +128,11 @@ export function renderFolderPolygon(
 ): string {
   const d3 = DEFAULT_SVG_DECIMALS;
   const pts = points.map(([x, y]) => `${formatDecimal(x, d3)},${formatDecimal(y, d3)}`).join(',');
-  const style = `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
+  // cdd3-T10 (S-6): `DriverPolygonSvg.java:64` -> `DriverRectangleSvg
+  // #applyStrokeColor` (`:97-110`) writes the MAPPED colour (`toSvg(mapper)`),
+  // never the raw token -- the same `resolvePaint` the `path()`/`line()`
+  // siblings below apply (`White` -> `#FFF`, guxode-39-dobi371).
+  const style = `stroke:${resolvePaint(stroke).value ?? ''};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
   // CDD T18: `DriverPolygonSvg#draw` (java:63-64) delegates its fill to
   // `DriverRectangleSvg.applyFillColor`, so a `UPolygon` gets the SAME
   // `createSvgGradient` + `url(#…)` treatment a `URectangle` does.

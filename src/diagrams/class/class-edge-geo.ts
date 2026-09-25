@@ -333,6 +333,7 @@ export function buildEdgeGeos(
       ...(rel.url !== undefined ? { url: rel.url } : {}),
       ...(rel.hidden === true ? { hidden: true as const } : {}),
       ...(rel.middleDecor !== undefined ? { middleDecor: rel.middleDecor } : {}),
+      ...(rel.labelTextColor !== undefined ? { labelTextColor: rel.labelTextColor } : {}),
       ...resolved.strokeExtra,
       ...(grouped?.sametail !== undefined ? { sametail: grouped.sametail } : {}),
       ...(leafContacts !== undefined ? { leafContacts } : {}),

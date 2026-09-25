@@ -415,9 +415,8 @@ export function buildInkBox(
 ): InkBox {
   const iconSize = options.iconSize ?? VISIBILITY_ICON_SIZE;
   const cardinalityFontSize = options.cardinalityFontSize ?? CARDINALITY_FONT_SIZE;
-  // #lizard forgives -- pre-existing CCN violation, unchanged by the
-  // usecase-ellipse ink task: a flat per-shape-family accumulation loop,
-  // not branchy logic (each `if` is one independent ink source).
+  // #lizard forgives -- pre-existing CCN: a flat per-shape-family
+  // accumulation loop, each `if` one independent ink source.
   const box = newInkBox();
   for (const c of classifiers) addClassifierInk(box, c, iconSize);
   for (const n of namespaces) addNamespaceInk(box, n);
@@ -465,6 +464,9 @@ export function buildInkBox(
       if (lbl !== undefined) addEdgeTextInk(box, lbl, cardinalityFontSize);
     }
     addRoleLinesInk(box, e, cardinalityFontSize);
+    // cdd3-T10: the note-on-link `UPath` (`ComponentRoseNote.java:118-122`) -> `LimitFinder#drawUPath`.
+    if (e.noteBox !== undefined)
+      addPlainInk(box, e.noteBox.inkBox.x, e.noteBox.inkBox.y, e.noteBox.inkBox.width, e.noteBox.inkBox.height);
     // cdd-T35: the main label's own `TextBlockMarged` margin -- see
     // {@link addEdgeLabelMarginInk}'s own doc comment.
     addEdgeLabelMarginInk(box, e);

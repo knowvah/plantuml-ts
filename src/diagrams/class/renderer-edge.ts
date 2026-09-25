@@ -439,14 +439,11 @@ export function renderEdge(
   // paints first).
   const visibilityIconMarkup = renderEdgeVisibilityIcon(geo, theme);
   if (visibilityIconMarkup !== '') parts.push(visibilityIconMarkup);
-  // T3: resolved here (not up front) -- `labelColor` feeds both the
-  // whole-label glyph below and {@link renderEdgeMainLabel}'s main-label/
-  // per-line-glyph `<text>`/`<polygon>` fills. See `arrow-label-font.ts`'s
-  // own doc comments (D2/D5) for the upstream citations -- never computed
-  // by hand. T11: `renderEdgeCardinalityLabels` now resolves its OWN
-  // `cardinalityColor` internally (`resolveCardinalityFont`, alongside
-  // size/family/weight/style).
-  const labelColor = resolveArrowLabelFont(theme).color;
+  // T3: `labelColor` feeds the whole-label glyph and {@link renderEdgeMainLabel}'s
+  // fills (`arrow-label-font.ts` D2/D5; cardinality resolves its own, T11).
+  // cdd3-T10 (S-4t): `font.mute(link.getColors())` (`SvekEdge.java:260-262`).
+  const labelColor =
+    geo.labelTextColor !== undefined ? resolveColorToSvgHex(geo.labelTextColor) : resolveArrowLabelFont(theme).color;
   // G2 item 44: the whole-label magic-arrow glyph -- see {@link
   // magicArrowPolygon}. Drawn before the label text (`mergeLR(arrow,
   // label)`, `SvekEdge.java:284,304`) -- part of the SAME `labelOnly`

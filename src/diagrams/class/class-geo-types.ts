@@ -389,6 +389,9 @@ export interface EdgeGeo {
    *  doc comment) — raw, `#`-stripped color token, resolved through
    *  `HColorSet.ts#resolveColorToSvgHex` at render time. */
   colorOverride?: string;
+  /** cdd3-T10 (S-4t): copied unchanged from `Relationship.labelTextColor`
+   *  -- the muted label font colour (`SvekEdge.java:260-262`). */
+  labelTextColor?: string;
   /** B7/M8: copied unchanged from `Relationship.stereotypeTags` — the link's
    *  own `<<tag>>` style-class label(s). `renderer-edge.ts` looks each up in
    *  `theme.colors.graph.arrowTagCascade`. Absent for every link with no
