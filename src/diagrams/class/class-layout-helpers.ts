@@ -415,6 +415,7 @@ export function measureClassifier(
     badgeRadius,
     stereoFont,
     strictUml: theme.strictUml === true,
+    genericDisplayOld: theme.genericDisplayOld === true,
     headerMaxWidth: theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0,
     memberMaxWidth: theme.colors.graph.classCascadeMaximumWidth ?? 0,
     minClassWidth: resolveMinClassWidth(theme, classifier.kind),

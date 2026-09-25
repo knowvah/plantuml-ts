@@ -60,6 +60,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
+  ['genericDisplayOld', (acc) => acc.genericDisplayOld],
   ['footbox', (acc) => acc.footbox],
   ['handwritten', (acc) => acc.handwritten],
   ['monochrome', (acc) => acc.monochrome],

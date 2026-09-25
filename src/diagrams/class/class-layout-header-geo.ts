@@ -54,6 +54,9 @@ export type CommonHeaderFields = Partial<
 interface HeaderGeoOptions {
   strictUml: boolean;
   headerMaxWidth: number;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` -- see
+   *  `class-stereotype-layout.ts#computeHeaderInfo`'s own doc comment. */
+  genericDisplayOld: boolean;
   /** A2s R2i: the diagram's sprite registry (`ast.sprites`) -- header NAME
    *  lines route through the creole pipeline (item 1) so a `<$sprite>` atom
    *  in a name resolves to its real dims, and the `<<($sprite)>>` badge
@@ -112,14 +115,14 @@ export function computeHeaderNameGeo(
   measurer: StringMeasurer,
   options: HeaderGeoOptions,
 ) {
-  const { strictUml, headerMaxWidth, sprites } = options;
+  const { strictUml, headerMaxWidth, sprites, genericDisplayOld } = options;
   const badgeShown = hasBadge(classifier.kind) && classifier.hideCircle !== true && !strictUml;
   // R2c (sovuxo-25 dummy): each member row advances by its creole line
   // height, floored at 10px (`AtomText.java:179-181` via `MethodsOrFields
   // Area#calculateDimensionOnlyMembers`'s `y += dim.getHeight()`) --
   // jar-verified `classAttributeFontSize 6|8|10` all advance 10px/row.
   const memberRowHeight = atomTextLineHeight(fontSpec.size);
-  const header = computeHeaderInfo(classifier);
+  const header = computeHeaderInfo(classifier, genericDisplayOld);
   // G2 N26: `class Foo << (F,orange) >>`'s badge-customization override --
   // computed once here so BOTH `buildClassifierGeos` and
   // `degenerateSingleClassifier` (class-geo-builders.ts) can copy it
@@ -217,6 +220,29 @@ interface HeaderDimsOptions {
   stereoFont: { family: string; size: number };
   /** A2s R2i (item 5) -- see {@link StereoBlockOptions.badgeSpriteBox}. */
   badgeSpriteBox?: { width: number; height: number } | undefined;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` -- when set, the
+   *  generic-tag box is never measured (folded into the name text
+   *  instead, `computeHeaderNameGeo`/`computeHeaderInfo`), matching
+   *  `EntityImageClassHeader.java:91`'s `generic = ... ? null : ...`. */
+  genericDisplayOld: boolean;
+}
+
+/** `class Foo<T>`'s generic type-parameter tag box dims -- widens/heightens
+ *  the header exactly like the stereotype block. G2 N39: SAME
+ *  `FontParam.CLASS_STEREOTYPE` the stereotype label row(s) use --
+ *  `stereoFont`, not `headerFont`. cdd3-T25 (E3-3): NEVER measured under
+ *  `genericDisplayOld` (`HeaderDimsOptions`'s own doc comment) -- `undefined`
+ *  short-circuits every downstream tag-box term back to its no-generic
+ *  default. Split out purely to keep {@link computeHeaderDimsGeo}'s own
+ *  CCN under the project's per-function cap. */
+function resolveGenericDim(
+  classifier: Classifier,
+  measurer: StringMeasurer,
+  stereoFont: { family: string; size: number },
+  genericDisplayOld: boolean,
+): GenericTagDim | undefined {
+  if (genericDisplayOld) return undefined;
+  return measureGenericTagDim(classifier.typeParams ?? [], stereoFont.family, measurer, stereoFont.size, classifier.typeParamsRawText);
 }
 
 /**
@@ -234,19 +260,9 @@ function computeHeaderDimsGeo(
   stereoBlockGeo: ReturnType<typeof computeStereoBlockGeo>,
   options: HeaderDimsOptions,
 ) {
-  const { badgeShown, badgeRadius, nameBlockHeight, stereoFont } = options;
+  const { badgeShown, badgeRadius, nameBlockHeight, stereoFont, genericDisplayOld } = options;
   const { header: headerFont, attribute: fontSpec } = fonts;
-  // G2 N32: `class Foo<T>`'s generic type-parameter tag box -- widens/
-  // heightens the header exactly like the stereotype block. G2 N39: SAME
-  // `FontParam.CLASS_STEREOTYPE` the stereotype label row(s) use --
-  // `stereoFont`, not `headerFont`.
-  const genericDim = measureGenericTagDim(
-    classifier.typeParams ?? [],
-    stereoFont.family,
-    measurer,
-    stereoFont.size,
-    classifier.typeParamsRawText,
-  );
+  const genericDim = resolveGenericDim(classifier, measurer, stereoFont, genericDisplayOld);
   // G2 N64 item 45 / A2s R2i: the name term is the summed per-line height
   // (`nameBlockHeight` -- reduces to `N * atomTextLineHeight(size)` for
   // every atom-free header; R2c's 10px-per-line floor lives inside each
@@ -300,7 +316,7 @@ export function computeStereoAndTagGeo(
   options: StereoGeoOptions,
 ): StereoAndTagGeo {
   const { guillemet, badgeRadius, stereoFont } = options;
-  const { badgeShown, nameWidth, nameBlockHeight, badgeSpriteBox } = headerNameGeo;
+  const { badgeShown, nameWidth, nameBlockHeight, badgeSpriteBox, header } = headerNameGeo;
   const stereoBlockGeo = computeStereoBlockGeo(classifier, stereoFont, measurer, {
     guillemet,
     badgeShown,
@@ -314,6 +330,7 @@ export function computeStereoAndTagGeo(
     nameBlockHeight,
     stereoFont,
     badgeSpriteBox,
+    genericDisplayOld: header.genericDisplayOld,
   });
   return { ...stereoBlockGeo, ...headerDimsGeo };
 }

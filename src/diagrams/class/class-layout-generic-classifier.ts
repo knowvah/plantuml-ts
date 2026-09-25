@@ -144,6 +144,9 @@ export interface MeasureGenericClassifierOptions {
    *  caller, mirroring `badgeRadius`'s own "resolve once, pass down"
    *  precedent above. */
   strictUml: boolean;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` -- pre-resolved by
+   *  the caller, same precedent as `strictUml` above. */
+  genericDisplayOld: boolean;
   /** G2 N65 item 35: `<style> class { MaximumWidth N } }` -- pre-resolved
    *  by the caller, mirroring `badgeRadius`'s own "resolve once, pass
    *  down" precedent above. `0` = no wrap. */
@@ -190,6 +193,31 @@ interface ClassifierGeoPipelineResult {
   commonFields: CommonHeaderFields;
 }
 
+/** {@link computeHeaderNameGeo} + {@link computeStereoAndTagGeo} in one call
+ *  -- split out purely to keep {@link computeClassifierGeoPipeline}'s own
+ *  NLOC under the project's per-function cap (cdd3-T25). */
+function buildHeaderAndStereoGeo(
+  classifier: Classifier,
+  fonts: ClassFontSpecs,
+  measurer: StringMeasurer,
+  options: MeasureGenericClassifierOptions,
+) {
+  const { sprites, guillemet, badgeRadius, stereoFont, strictUml, headerMaxWidth, genericDisplayOld } = options;
+  const { header: headerFont, attribute: fontSpec } = fonts;
+  const headerNameGeo = computeHeaderNameGeo(classifier, headerFont, fontSpec, measurer, {
+    strictUml,
+    headerMaxWidth,
+    sprites,
+    genericDisplayOld,
+  });
+  const stereoGeo = computeStereoAndTagGeo(classifier, fonts, measurer, headerNameGeo, {
+    guillemet,
+    badgeRadius,
+    stereoFont,
+  });
+  return { headerNameGeo, stereoGeo };
+}
+
 /**
  * Runs the full header + (enhanced-body-or-member-section) + header-rows
  * geometry pipeline `measureGenericClassifier` composes -- split out purely
@@ -203,26 +231,10 @@ function computeClassifierGeoPipeline(
   suppress: MemberSuppression,
   options: MeasureGenericClassifierOptions,
 ): ClassifierGeoPipelineResult {
-  const { sprites, guillemet, badgeRadius, stereoFont, strictUml, headerMaxWidth, memberMaxWidth } = options;
+  const { sprites, memberMaxWidth, guillemet, badgeRadius, stereoFont } = options;
   const minClassWidth = options.minClassWidth ?? 0;
-  // G2 N32: `fontSpec` is the ATTRIBUTE/member-row font; `headerFont` is the
-  // classifier HEADER's own, independently-overridable font -- see
-  // `theme.ts#classFontSize`'s doc comment for the jar-verified cascade.
-  const { header: headerFont, attribute: fontSpec } = fonts;
-  // A2s R2i: `sprites` threads into the header geo (item-1 creole routing:
-  // a header NAME can carry `<$sprite>`/`<:emoji:>` atoms and the R2i badge
-  // sprite `<<($name)>>` sizes off the registry) -- both option shapes are
-  // owned by class-layout-header-geo.ts.
-  const headerNameGeo = computeHeaderNameGeo(classifier, headerFont, fontSpec, measurer, {
-    strictUml,
-    headerMaxWidth,
-    sprites,
-  });
-  const stereoGeo = computeStereoAndTagGeo(classifier, fonts, measurer, headerNameGeo, {
-    guillemet,
-    badgeRadius,
-    stereoFont,
-  });
+  const { attribute: fontSpec } = fonts;
+  const { headerNameGeo, stereoGeo } = buildHeaderAndStereoGeo(classifier, fonts, measurer, options);
   const enhancedBody = computeEnhancedBodyGeo(classifier, fontSpec, measurer, stereoGeo, { sprites, suppress });
   const memberSections =
     enhancedBody !== undefined

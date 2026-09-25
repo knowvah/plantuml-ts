@@ -33,6 +33,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'actorStyle',
   'minimumWidth',
   'strictUml',
+  'genericDisplayOld', // cdd3-T25 (E3-3)
   'monochrome',
   'shadowing',
   'packageStyle',

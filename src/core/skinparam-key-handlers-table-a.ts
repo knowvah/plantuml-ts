@@ -344,4 +344,13 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       if (value.trim().toLowerCase() === 'strictuml') acc.strictUml = true;
     },
   ],
+  // cdd3-T25 (E3-3): `SkinParam.java:1180-1181` `valueIs("genericDisplay",
+  // "old")` -- case-insensitive equality against the literal "old"; any
+  // other value (including absent) leaves the flag unset.
+  [
+    ['genericdisplay'],
+    (acc, value) => {
+      if (value.trim().toLowerCase() === 'old') acc.genericDisplayOld = true;
+    },
+  ],
 ];

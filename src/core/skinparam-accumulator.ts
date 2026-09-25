@@ -48,6 +48,11 @@ export interface SkinparamAccumulator {
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` --
+   *  `SkinParam#displayGenericWithOldFashion` (`skin/SkinParam.java:1179-
+   *  1181`, `valueIs("genericDisplay", "old")`). See `theme.ts
+   *  #genericDisplayOld`'s own doc comment for the render-side mechanism. */
+  genericDisplayOld: boolean | undefined;
   /** `skinparam footbox hide|show` — `SequenceDiagram#isShowFootbox` reads it
    *  as a raw string and compares case-insensitively to "hide"
    *  (`SequenceDiagram.java:478-485`). */
@@ -232,6 +237,7 @@ const SCALAR_FIELD_NAMES = [
   'actorStyle',
   'minimumWidth',
   'strictUml',
+  'genericDisplayOld',
   'footbox',
   'handwritten',
   'mode',
