@@ -64,25 +64,38 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
  *  tier — "materialize the fallback", same rule as `attributeFontSize`). */
 const ENTITY_STROKE_WIDTH = 0.5;
 
-/** cdd-T22 (cacoma-43-poxu615): `ENTITY_ROUND_CORNER`, duplicated (not
- *  imported, same reason as `ENTITY_STROKE_WIDTH` above) from
- *  `description/renderer-entity.ts`. `driver-rectangle-svg.ts` halves
- *  `roundCorner` at serialization (`rx = rx/2`), so 5.0 emits the jar's
- *  `rect/@rx="2.5"` (`USymbolComponent2#drawComponent2` reads
- *  `SymbolContext#getRoundCorner()` for its outer box — unlike usecase/
- *  actor/circle's shapes, which ignore it entirely, see
- *  `buildUSymbolEntityParams`'s own doc comment). cdd-B8FU: multiplied by
- *  `theme.scaleK` at its one call site below. */
-const COMPONENT_ROUND_CORNER = 5.0;
+/** cdd-T22 (cacoma-43-poxu615) / cdd3-T12 (sijisi-94-ripu606): `ENTITY_
+ *  ROUND_CORNER`, duplicated (not imported, same reason as
+ *  `ENTITY_STROKE_WIDTH` above) from `description/renderer-entity.ts`.
+ *  Upstream computes this UNCONDITIONALLY for every `EntityImageDescription`
+ *  leaf (`EntityImageDescription.java:168`: `final double roundCorner =
+ *  styleTitle.value(PName.RoundCorner).asDouble();`) — the classDiagram-
+ *  scoped `element { RoundCorner 5 }` cascade (`plantuml.skin:193-197`)
+ *  applies to every descriptive leaf's `element` `SName`, not just
+ *  `component`. Only the shapes that actually READ `SymbolContext
+ *  #getRoundCorner()` in their `drawRect`/`drawComponent2` show it:
+ *  `USymbolComponent2#drawComponent2` and `USymbolRectangle#drawRect`
+ *  (`USymbolRectangle.ts` ported from `USymbolRectangle.java:65-71` — the
+ *  `diagonalCorner > 0 ? rect.diagonalCorner(...) : rect.rounded(roundCorner)`
+ *  branch) — usecase/actor/circle/database's shapes ignore the field
+ *  entirely, so passing this same value to them is a no-op, not a
+ *  divergence (verified: `class-circle-usymbol-routing.test.ts`'s circle/
+ *  component draw assertions are unchanged by this widening).
+ *  `driver-rectangle-svg.ts` halves `roundCorner` at serialization (`rx =
+ *  rx/2`), so 5.0 emits the jar's `rect/@rx="2.5"` (`sijisi-94-ripu606`'s
+ *  golden `foo3` leaf: `<rect ... rx="2.5" ry="2.5"/>`). cdd-B8FU:
+ *  multiplied by `theme.scaleK` at its one call site below. */
+const ELEMENT_ROUND_CORNER = 5.0;
 
 /**
  * `EntityImageDescriptionParams.symbol.keyword` for one class-diagram leaf
  * routed through this file: `usecase`/`descriptive`+`actor` (SI14 T4),
  * plus cdd-T22's `circle` (E8) and `descriptive`+`component` (cacoma)
- * additions. The cast on the `descriptive` fallback documents a
- * caller-enforced invariant (`renderer.ts`'s own dispatch gate forwards
- * ONLY `usymbol === 'actor' | 'component'` here, never a raw business-
- * suffix keyword) — not an external-data guess.
+ * additions, plus cdd3-T12's `descriptive`+`rectangle` (sijisi) addition.
+ * The cast on the `descriptive` fallback documents a caller-enforced
+ * invariant (`renderer.ts`'s own dispatch gate forwards ONLY `usymbol ===
+ * 'actor' | 'component' | 'database' | 'rectangle'` here, never a raw
+ * business-suffix keyword) — not an external-data guess.
  */
 function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
   if (classifier.kind === 'usecase') return 'usecase';
@@ -136,7 +149,8 @@ function buildUSymbolEntityParams(
   const display = classifier.rows[0]?.text ?? classifier.id;
   const fontTitle = textFont(theme, symbolKeyword);
   const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
-  const roundCorner = symbolKeyword === 'component' ? COMPONENT_ROUND_CORNER * theme.scaleK : 0;
+  const roundCorner =
+    symbolKeyword === 'component' || symbolKeyword === 'rectangle' ? ELEMENT_ROUND_CORNER * theme.scaleK : 0;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
   return {
     entity: { name: classifier.id, uid: '', qualifiedName: classifier.id, location: null, url: null },
@@ -180,22 +194,42 @@ function buildUSymbolEntityParams(
  *  `core/decoration/symbol/USymbolDatabase.ts:178-203`) draws a REAL
  *  `TextBlockUtils.mergeTB(stereotype, label, CENTER)` -- exactly what
  *  `EntityImageDescription`'s `desc`/`buildDesc` already builds for
- *  usecase/actor/component. Only `database` was missing from this dispatch;
- *  the other three `usymbol-shapes.ts` icons (`renderComponentIcon` is dead
+ *  usecase/actor/component.
+ *
+ *  cdd3-T12 (sijisi-94-ripu606): `descriptive`+`rectangle` addition. Upstream
+ *  draws EVERY leaf with a resolved `USymbol` (`Entity#getUSymbol` never
+ *  returns null -- `EntityImageDescription.java:217-224`'s own fallback to
+ *  `componentStyle().toUSymbol()`) through this SAME `EntityImageDescription`
+ *  class; a plain `rectangle "foo3"` leaf under `allow_mixing` resolves to
+ *  `USymbols.RECTANGLE` (`USymbolRectangle.java`, already ported at
+ *  `core/decoration/symbol/USymbolRectangle.ts`) exactly like `component`
+ *  resolves to `USymbols.COMPONENT2`. Pre-T12 this fell through to
+ *  `renderClassifierBox` (`renderer.ts#renderClassifier`), which draws the
+ *  generic name+members class box complete with its visibility-icon badge --
+ *  `sijisi-94-ripu606`'s golden `foo3` has neither members nor a badge, only
+ *  a plain `rx="2.5"`-rounded rect and a left-anchored `<text>`.
+ *
+ *  The other three `usymbol-shapes.ts` icons (`renderComponentIcon` is dead
  *  for this engine since `component` routes here too, `renderActorIcon`/
  *  `renderUseCaseIcon` are the SAME pre-existing SI14 T4 story) already had
- *  no live class-engine caller. Exported so `renderer.ts`'s own dispatch
- *  (over its 500-line cap) stays a single call. */
+ *  no live class-engine caller; `renderUSymbolIcon` never had a `rectangle`
+ *  entry either (`core/usymbol-shapes.ts:219-224`'s `USYMBOL_ICONS` map),
+ *  so this dispatch widening -- not a new icon renderer -- is upstream's own
+ *  fix: `rectangle` was never meant to draw as a class box. Exported so
+ *  `renderer.ts`'s own dispatch (over its 500-line cap) stays a single call. */
 export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
   if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;
   return (
     classifier.kind === 'descriptive' &&
-    (classifier.usymbol === 'actor' || classifier.usymbol === 'component' || classifier.usymbol === 'database')
+    (classifier.usymbol === 'actor' ||
+      classifier.usymbol === 'component' ||
+      classifier.usymbol === 'database' ||
+      classifier.usymbol === 'rectangle')
   );
 }
 
 /**
- * Draws one usecase/actor/circle/component `ClassifierGeo` via
+ * Draws one usecase/actor/circle/component/database/rectangle `ClassifierGeo` via
  * `EntityImageDescription.drawU`, translated to its absolute layout
  * position (mirrors `description/renderer-entity.ts#drawEntity`'s
  * `ug.apply(new UTranslate(node.x, node.y))` positioning), and unwraps the
