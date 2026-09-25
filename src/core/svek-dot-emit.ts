@@ -36,6 +36,7 @@ import { clusterBlock, inches, nodeLine } from './svek-dot-emit-clusters.js';
 // file's header for the upstream derivation and for why both consumers must
 // read the SAME fields.
 import { wrapperLevels, type WrapperLevels } from './svek-dot-wrappers.js';
+import { rootTops, topsFirstClusters } from './svek-dot-top.js';
 
 // Re-exported so callers keep reaching these through the emitter's own module
 // path: `inches` for the LAYOUT builder (`graph-layout-build.ts#addNodes`), and
@@ -211,6 +212,15 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
   const body = [...graphAttrLines(input)];
   const kermor = input.kermor === true;
   const unclustered = input.nodes.filter((n) => !tree.clusteredIds.has(n.id));
+  // cdd3-T16: the root's `printCluster1` (`DotStringFactory.java:188`) —
+  // inverted-edge tails, one line per link, BEFORE `lines0`; `printCluster2`
+  // below then declares the rest (`./svek-dot-top.ts`).
+  const tops = rootTops(
+    input,
+    unclustered.map((n) => n.id),
+  );
+  for (const id of tops) body.push(nodeLine(nodeById.get(id)!, recs.get(id)!));
+  const topSet = new Set(tops);
   const { lines0, lines1 } = edgeBatches(input);
   const emitEdges = (indices: readonly number[]): void => {
     for (const i of indices) {
@@ -236,7 +246,7 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
   if (kermor && unclustered.length === 0) {
     body.push('rootEmpty [shape=point,label=""];');
   } else {
-    for (const n of unclustered) body.push(nodeLine(n, recs.get(n.id)!));
+    for (const n of unclustered) if (!topSet.has(n.id)) body.push(nodeLine(n, recs.get(n.id)!));
   }
   for (const top of tree.childrenOf.get(undefined) ?? []) {
     body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, clusterColors, kermor));
@@ -249,6 +259,8 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
 /** Serialize a DotInputGraph to Svek-shaped DOT text. */
 export function toSvekDot(input: DotInputGraph): string {
   const tree = buildClusterTree(input.clusters ?? []);
-  const body = emitBody(input, assignSequence(input, tree), tree);
+  // cdd3-T16: ids/colors in construction order (`tree`), emission in
+  // `printCluster1`-then-`printCluster2` order (`./svek-dot-top.ts`).
+  const body = emitBody(input, assignSequence(input, tree), buildClusterTree(topsFirstClusters(input)));
   return `digraph unix {\n${body.join('\n')}\n}\n`;
 }

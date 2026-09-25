@@ -479,6 +479,13 @@ function invertPriorClassEdge(
   const other = classEdge.to;
   classEdge.to = priorId;
   classEdge.from = other;
+  // cdd3-T16: `getInv()` sets `result.inverted = !this.inverted`
+  // (`abel/Link.java:147`) on a `pointToAssocied` built by `new Link` (never
+  // inverted), so the re-added edge IS inverted -- `Cluster#printCluster1`
+  // declares its tail (the associated class) first. Its tick is burned by
+  // the counter below; the dispatch-time reader of this flag
+  // (`class-command-relationships.ts`) never sees a synthesized edge.
+  classEdge.invertedLinkBurnsTick = true;
   rels.push(classEdge);
   if (counter === undefined) return;
   const oldIndex = classEdge.creationIndex;

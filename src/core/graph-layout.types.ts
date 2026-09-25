@@ -168,6 +168,15 @@ export interface DotInputEdge {
   id: string;
   from: string;
   to: string;
+  /**
+   * cdd3-T16: `SvekEdge#isInverted` → `Link#isInverted` (`svek/SvekEdge.java
+   * :1148-1150`, `abel/Link.java:145-147,434-435`) — the link was built by
+   * `getInv()` (a `-up-`/`-left-` direction word). Not a DOT attribute: it
+   * decides where `from`'s shape line is declared, `Cluster#printCluster1`
+   * (`./svek-dot-top.ts`). Only `true` is carried; absent ⇒ not inverted.
+   * Set by the class engine only.
+   */
+  inverted?: true;
   attributes?: {
     weight?: number;
     minLen?: number;

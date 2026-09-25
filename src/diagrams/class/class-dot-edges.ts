@@ -257,6 +257,9 @@ export function buildDotEdges(
     const dotTo = anchors.get(to) ?? to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx, swap);
     Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
-    return { id: dotEdgeId(i), from: dotFrom, to: dotTo, attributes: attrs };
+    // cdd3-T16: `Link#isInverted` (`CommandLinkClass.java:364-365`'s
+    // `getInv()`), read by `Cluster#printCluster1` (`core/svek-dot-top.ts`).
+    const inverted = rel.invertedLinkBurnsTick === true ? { inverted: true as const } : {};
+    return { id: dotEdgeId(i), from: dotFrom, to: dotTo, ...inverted, attributes: attrs };
   });
 }

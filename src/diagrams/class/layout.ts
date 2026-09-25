@@ -39,7 +39,7 @@ import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
 import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
 import { measureCircleInterface } from './class-layout-leaf-shapes.js';
-import { buildDotGraph } from './class-dot-graph.js';
+import { buildDotGraph, inNodeMapOrder } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
@@ -296,7 +296,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // `class-edge-geo.ts#EdgeGeoTextContext`).
   const edges = buildEdgeGeos(
     effAst,
-    result,
+    inNodeMapOrder(result, dotGraph), // cdd3-T16: `Bibliotekon#allNodes`
     swappedEdges,
     {
       measurer,

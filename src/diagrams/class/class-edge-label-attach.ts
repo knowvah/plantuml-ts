@@ -31,6 +31,33 @@ import type { Kal } from './class-kal.js';
 import { labelMarginOf, type NoteBoxContext } from './class-layout-edge-labels.js';
 import type { EdgeGeo } from './layout.js';
 import { labelOperandCenter } from './class-edge-note-box.js';
+import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+
+/**
+ * cdd3-T16: `SvekEdge#getArrowDirectionInRadianInternal` (`svek/SvekEdge.java
+ * :208-217`) measures jar's `dotPath`, which after the `:643-655` distance
+ * check runs `getEntity1()` -> `getEntity2()` -- the DOT edge's own tail ->
+ * head (`./class-dot-edge-order.ts#dotEdgeRunsReversed`), not `rel.from` ->
+ * `rel.to` (`fromToPoints`), which this port normalizes by the arrowhead.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekEdge.java:208-217
+ */
+function dotPathOf(fromToPoints: Array<{ x: number; y: number }>, rel: Relationship): Array<{ x: number; y: number }> {
+  return dotEdgeRunsReversed(rel) ? [...fromToPoints].reverse() : fromToPoints;
+}
+
+/**
+ * cdd3-T16: `Link#getLinkArrow` (`abel/Link.java:423-428`) returns
+ * `linkArrow.reverse()` for an inverted link (`getInv()`, a `-up-`/`-left-`
+ * direction word), and `SvekEdge#getArrowDirectionInRadian` (`:201-205`)
+ * adds `Math.PI` for `BACKWARD`.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Link.java:423-428
+ */
+function linkArrowOf(direction: MagicArrowDirection, rel: Relationship): MagicArrowDirection {
+  if (rel.invertedLinkBurnsTick !== true) return direction;
+  return direction === 'backward' ? 'forward' : 'backward';
+}
 
 /**
  * The text inputs `buildEdgeGeos` threads to every label anchor. SI25 D2:
@@ -199,8 +226,11 @@ export function attachEdgeLabel(
     center = placed.center;
   }
   const ctx: LabelAnchorContext = { center, measurer, labelFont };
+  const dotPath = dotPathOf(fromToPoints, rel);
   if (lines.length > 1) {
-    attachMultiLineLabel(edgeGeo, lines, align, (d) => magicArrowAngle(fromToPoints, d, rel.from === rel.to), ctx);
+    // `NONE_OR_SEVERAL.reverse()` is itself (`LinkArrow.java:47-55`): the
+    // per-line tokens are never flipped by an inverted link.
+    attachMultiLineLabel(edgeGeo, lines, align, (d) => magicArrowAngle(dotPath, d, rel.from === rel.to), ctx);
     return;
   }
 
@@ -216,7 +246,7 @@ export function attachEdgeLabel(
   const resolvedLabel = lines[0] ?? '';
   const magic = parseMagicArrowLabel(resolvedLabel);
   if (magic !== undefined) {
-    attachMagicArrow(edgeGeo, magic, fromToPoints, ctx, rel);
+    attachMagicArrow(edgeGeo, magic, dotPath, ctx, rel);
     return;
   }
 
@@ -310,12 +340,13 @@ function attachMultiLineLabel(
 function attachMagicArrow(
   edgeGeo: EdgeGeo,
   magic: MagicArrowLabel,
-  fromToPoints: Array<{ x: number; y: number }>,
+  // cdd3-T16: jar's `dotPath` order -- see {@link dotPathOf}.
+  dotPath: Array<{ x: number; y: number }>,
   ctx: LabelAnchorContext,
   rel: Relationship,
 ): void {
   const { center, measurer } = ctx;
-  const angle = magicArrowAngle(fromToPoints, magic.direction, rel.from === rel.to);
+  const angle = magicArrowAngle(dotPath, linkArrowOf(magic.direction, rel), rel.from === rel.to);
   // SI25 D2: the resolved arrow font (`GraphvizImageBuilder.java:234-235`'s
   // `labelFont`, `TextBlockArrow2.java:57` reads `getSize2D()` off it) --
   // `{ theme.fontFamily, 13 }` with no override, byte-identical to before.

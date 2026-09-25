@@ -28,6 +28,9 @@ import { hideTextShieldMarginsByEntity } from './class-hidetext-shield.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+// cdd3-T16: re-exported so `layout.ts` (at its 500-line cap) reaches it
+// through an import it already has.
+export { inNodeMapOrder } from './class-node-map-order.js';
 import { buildDotEdges } from './class-dot-edges.js';
 import { applyClassLinkOrder, creationOrderedDotParts, printGroupsOrderOf } from './class-creation-order.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
