@@ -12,6 +12,7 @@ import { dotSplinesAttrs } from './dot-splines.js';
 import { rowPortTable, portTable, shieldTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
+import { togetherClusters } from './svek-dot-together.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
@@ -268,8 +269,9 @@ interface ClusterHandles {
  */
 export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterIndex {
   const idByName = new Map<string, string>();
-  const clusters = input.clusters;
-  if (clusters === undefined || clusters.length === 0) return { idByName };
+  // cdd3-T18: `together` blocks nest as bare clusters (`./svek-dot-together.ts`).
+  const clusters = togetherClusters(input);
+  if (clusters.length === 0) return { idByName };
   const byId = new Map<string, DotInputCluster>(clusters.map((c) => [c.id, c]));
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
@@ -305,6 +307,15 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // own doc comment.
     const parentInnermost =
       c.parentId !== undefined && byId.has(c.parentId) ? handlesFor(byId.get(c.parentId)!).innermost : b;
+    // cdd3-T18: `Cluster#printTogether` (`svek/Cluster.java:528-531`) -- a
+    // bare subgraph inside the container's innermost level, where
+    // `printCluster2` runs. No `idByName` entry: nothing is drawn for it.
+    if (c.isTogether === true) {
+      const sub = parentInnermost.addSubgraph(c.id, {});
+      const handles: ClusterHandles = { main: sub, innermost: sub };
+      handlesById.set(c.id, handles);
+      return handles;
+    }
     const outerName = nameFor(c);
     // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
     // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME

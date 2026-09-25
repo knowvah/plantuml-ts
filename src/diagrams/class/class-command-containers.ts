@@ -11,9 +11,7 @@ import { applyAssocCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './cla
 import { applyDoubleCouple } from './class-assoc-double-couple.js';
 import type { Command } from './class-command-types.js';
 import {
-  closeBraceScope,
   openNamespaceBlock,
-  openTogetherBlock,
   setNamespaceStereotype,
   setNamespaceTags,
   setNamespaceUrl,
@@ -21,6 +19,7 @@ import {
   NAMESPACE_COMMANDS,
 } from './class-container.js';
 import { collapseEmptyNamespace } from './class-namespace.js';
+import { closeBraceScope, openTogetherBlock } from './class-together.js';
 import {
   applyConstraintOnLinks,
   applyNoteOnLink,
@@ -39,12 +38,12 @@ import { parseTagTokens } from './class-declaration-parser.js';
  */
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 4. Closing brace — ends a pending body, together block, or namespace
-  //    block (LIFO; see closeBraceScope in class-container.ts).
+  //    block (LIFO; see closeBraceScope in class-together.ts).
   { pattern: /^\}\s*$/, execute: (state) => closeBraceScope(state) },
 
   // 4b. `together {` (CommandTogether, ClassDiagramFactory.java:131) — a
   //     layout-proximity grouping with no comparator-visible DOT cluster; see
-  //     openTogetherBlock (class-container.ts).
+  //     openTogetherBlock (class-together.ts).
   { pattern: /^together\s*\{\s*$/i, execute: (state) => openTogetherBlock(state) },
 
   // 4b/5. Namespace block commands (CommandNamespace2 + CommandNamespace) —

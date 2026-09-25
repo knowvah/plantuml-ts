@@ -35,6 +35,7 @@ import { buildDotEdges } from './class-dot-edges.js';
 import { applyClassLinkOrder, creationOrderedDotParts, printGroupsOrderOf } from './class-creation-order.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { assembleDotInputGraph } from './class-dot-graph-assembly.js';
+import { applyClassTogethers } from './class-dot-together.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -472,5 +473,6 @@ export function buildDotGraph(
   dotGraph.printGroupsOrder = printGroupsOrderOf(ast, clusterParts?.clusterIdByNs);
 
   const clusterIdByNs = clusterParts?.clusterIdByNs ?? new Map<string, string>();
+  applyClassTogethers(dotGraph, ast, clusterIdByNs);
   return { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds };
 }

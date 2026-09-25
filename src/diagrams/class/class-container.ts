@@ -36,6 +36,7 @@ import { Pragma } from '../../core/skin/Pragma.js';
 // T11: split out to keep this file under the line cap; re-exported below
 // so existing/expected `from './class-container.js'` import sites work.
 import { setNamespaceUrl, setNamespaceColor } from './class-namespace-decorations.js';
+import { joinGroupTogether } from './class-together.js';
 export { setNamespaceUrl, setNamespaceColor };
 
 /**
@@ -94,7 +95,10 @@ export function openNamespaceBlock(state: ParseState, id: string, display: strin
   const sep = state.namespaceSeparator ?? '.';
   const ns = state.ast.namespaces;
   const effectiveId = qualifiedId(id, enclosing, state.namespaceSeparator, ns);
+  const created = !ns.some((n) => n.id === effectiveId);
   const mutedCreationIndex = muteClassifierToGroup(state, effectiveId);
+  // cdd3-T18: `gotoGroup` sets `currentTogether()` on a group it creates.
+  joinGroupTogether(state, effectiveId, created, mutedCreationIndex);
   // G2 N8: thread the muted classifier's OWN creationIndex to whichever
   // namespace path below actually creates the `effectiveId` group, so it
   // reuses that slot instead of consuming a fresh one (see
@@ -156,38 +160,6 @@ export function openNamespaceBlock(state: ParseState, id: string, display: strin
  * `collapseEmptyNamespace` (class-namespace.ts), shared with the same-line
  * `X {}` path.
  */
-/** `together {` (CommandTogether → CucaDiagram#gotoTogether,
- *  CucaDiagram.java:337): a layout-proximity grouping with NO structural DOT
- *  cluster of its own that the comparator counts (svek emits a letter-suffixed
- *  `cluster6t0` subgraph the parity bar ignores) — members still belong to the
- *  enclosing namespace. Records the namespace active at open time so the
- *  matching `}` pops the together, not that namespace (nadono-22-gidu983: the
- *  stray `}` popped the enclosing namespace early, stranding later
- *  classifiers outside its cluster). */
-export function openTogetherBlock(state: ParseState): void {
-  state.togetherStack.push(state.activeNamespace);
-}
-
-/** Shared `}` handling (rule 4 in class-commands.ts, pure move): an open
- *  member body wins, then an innermost together block (one opened in the
- *  CURRENT namespace scope — LIFO, mirroring upstream's single
- *  CucaDiagram.stacks list holding Together and group entries), then the
- *  active namespace. */
-export function closeBraceScope(state: ParseState): void {
-  if (state.pendingBodyId !== null) {
-    state.pendingBodyId = null;
-    return;
-  }
-  if (state.togetherStack.length > 0 && state.togetherStack[state.togetherStack.length - 1] === state.activeNamespace) {
-    state.togetherStack.pop();
-    return;
-  }
-  if (state.activeNamespace !== null) {
-    closeContainer(state, state.activeNamespace);
-    state.activeNamespace = state.namespaceStack.pop() ?? null;
-  }
-}
-
 export function closeContainer(state: ParseState, nsId: string): void {
   const usymbol = state.descriptiveContainers.get(nsId);
   if (usymbol === undefined) return;

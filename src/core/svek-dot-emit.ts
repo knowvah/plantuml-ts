@@ -37,6 +37,7 @@ import { clusterBlock, inches, nodeLine } from './svek-dot-emit-clusters.js';
 // read the SAME fields.
 import { wrapperLevels, type WrapperLevels } from './svek-dot-wrappers.js';
 import { rootTops, topsFirstClusters } from './svek-dot-top.js';
+import { togetherClusters } from './svek-dot-together.js';
 
 // Re-exported so callers keep reaching these through the emitter's own module
 // path: `inches` for the LAYOUT builder (`graph-layout-build.ts#addNodes`), and
@@ -261,6 +262,9 @@ export function toSvekDot(input: DotInputGraph): string {
   const tree = buildClusterTree(input.clusters ?? []);
   // cdd3-T16: ids/colors in construction order (`tree`), emission in
   // `printCluster1`-then-`printCluster2` order (`./svek-dot-top.ts`).
-  const body = emitBody(input, assignSequence(input, tree), buildClusterTree(topsFirstClusters(input)));
+  // cdd3-T18: emission nests `together` subgraphs (`./svek-dot-together.ts`);
+  // numbering stays on the raw clusters -- a together takes no value.
+  const printed: DotInputGraph = { ...input, clusters: togetherClusters(input) };
+  const body = emitBody(input, assignSequence(input, tree), buildClusterTree(topsFirstClusters(printed)));
   return `digraph unix {\n${body.join('\n')}\n}\n`;
 }

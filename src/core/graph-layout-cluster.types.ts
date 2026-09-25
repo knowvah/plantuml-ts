@@ -164,4 +164,15 @@ export interface DotInputCluster {
    *  non-port content). Meaningful ONLY when `portRanksLabelOnEe` is also
    *  `true`; ignored otherwise. */
   borderPointAncestorWrap?: true;
+  /** cdd3-T18: the `together { }` block this cluster's GROUP was created in
+   *  (`CucaDiagram#gotoGroup`, `atmp/CucaDiagram.java:349-353`, which sets
+   *  `currentTogether()` on a NEW group only). A `DotInputGraph.togethers`
+   *  id. `svek-dot-together.ts` nests the cluster inside that together's
+   *  subgraph (`Cluster#printTogether`, `svek/Cluster.java:536-538`). */
+  together?: string;
+  /** cdd3-T18: set ONLY by `svek-dot-together.ts#togetherClusters` on the
+   *  unlabelled `subgraph <clusterId>t<k>` it derives for a together
+   *  (`svek/Cluster.java:528-547`). No caller builds one, and none reaches
+   *  `DotLayoutResult.clusters`: `addClusters` registers no name for it. */
+  isTogether?: true;
 }

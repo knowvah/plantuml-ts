@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1209 modules · 4517 exported names.
+1214 modules · 4537 exported names.
 
 ## `src/`
 
@@ -51,8 +51,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `graph-layout-build.ts` | `PX_PER_INCH`, `addEdges`, `edgeKey`, `CARDINALITY_FONT_SIZE`, `EdgeIndex`, `applyGraphAttrs`, `firstEncounterOrder`, `addNodes`, `ClusterIndex`, `addClusters` | @knowvah/dot-engine builder construction for `layoutGraph()` — split from `graph-layout.ts` (500-line file cap). |
 | `graph-layout-cluster.types.ts` | `DotInputCluster` | `DotInputCluster` — the cluster half of the layout input contract. |
 | `graph-layout-result.types.ts` | `DotLayoutResult` | `DotLayoutResult` — the layout engine's OUTPUT shape. |
-| `graph-layout.ts` | `CARDINALITY_FONT_SIZE`, `setLayoutInputObserver`, `layoutGraph`, `DotInputNode`, `DotInputNodeShape`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotLayoutResult` |  |
-| `graph-layout.types.ts` | `DotInputNodeShape`, `DotInputPortRow`, `DotInputNode`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotLayoutResult` |  |
+| `graph-layout.ts` | `CARDINALITY_FONT_SIZE`, `setLayoutInputObserver`, `layoutGraph`, `DotInputNode`, `DotInputNodeShape`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotInputTogether`, `DotLayoutResult` |  |
+| `graph-layout.types.ts` | `DotInputNodeShape`, `DotInputPortRow`, `DotInputNode`, `DotInputEdge`, `DotInputCluster`, `DotInputTogether`, `DotInputGraph`, `DotLayoutResult` |  |
 | `include-resolver-errors.ts` | `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `blockedUrlError`, `includeTimeoutError`, `CircularIncludeError` | The include seam's error types, split out of `include-resolver.ts` (which sits at the repo's 500-line cap) and re-exported from it unchanged. |
 | `include-resolver-node.ts` | `ReadFileFn`, `RealpathFn`, `makeNodeFsFetcher` |  |
 | `include-resolver-timeout.ts` | `withIncludeTimeout` | Bounding one include fetch by time -- the port of upstream's `Future#get(SecurityUtils.getSecurityProfile().getTimeout(), MILLISECONDS)` around every URL read (`security/SURL.java:357-358`, :402, :438). |
@@ -116,6 +116,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-emit.ts` | `inches`, `wrapperLevels`, `WrapperLevels`, `toSvekDot` |  |
 | `svek-dot-order.ts` | `firstEncounterOrder` | The order Svek's DOT text declares nodes in — the single definition of "which node does graphviz's parser meet first", shared by the two consumers of one `DotInputGraph`. |
 | `svek-dot-sequence.ts` | `Seq`, `NodeRec`, `ClusterColors`, `EdgeColors`, `ClusterTree`, `buildClusterTree`, `SeqAssignment`, `assignSequence` |  |
+| `svek-dot-together.ts` | `ROOT_TOGETHER_PREFIX`, `togetherClusters` | `together { }` blocks as svek prints them: an unlabelled `subgraph <clusterId>t<k> { ... |
 | `svek-dot-top.ts` | `IsNormalPosition`, `nodesOrderedTop`, `nodesOrderedWithoutTop`, `normalPositionOf`, `topsFirstClusters`, `rootTops` | `Cluster#getNodesOrderedTop` / `getNodesOrderedWithoutTop` — the split `printCluster1` / `printCluster2` make of one cluster's own nodes. |
 | `svek-dot-wrappers.ts` | `WrapperLevels`, `wrapperLevels`, `subgraphNoLabel`, `outerWrapperLines`, `innerWrapperLines`, `closeCount` | ClusterDotString's protection-wrapper nesting, shared by the two consumers of one `DotInputGraph`: the LAYOUT builder (`graph-layout-build.ts` #addClusters, which already built this nesting) and the DOT-TEXT emitter (`svek-dot-emit.ts`, whi |
 | `svg-defs.ts` | `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collapseDuplicateGradientDefs`, `collectDocumentDefs`, `mapOutsideInlineDefs`, `getSeed`, `seededDefIdRenames`, `applySeededDefIds` | svg-defs.ts — `<defs>` collection for the pure-string SVG assembler. |
@@ -1102,7 +1103,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `Member`, `Visibility`, `UrlInfo`, `MAP_POINT_SENTINEL`, `MapRow`, `JsonNode`, `ClassifierKind`, `Classifier`, `RelationshipType`, `LinkDecor`, `MiddleDecor`, `Relationship`, `NotePosition`, `ClassNote`, `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective`, `Namespace`, `ClassDiagramAST` | AST type definitions for PlantUML class diagrams. |
+| `ast.ts` | `Member`, `Visibility`, `UrlInfo`, `MAP_POINT_SENTINEL`, `MapRow`, `JsonNode`, `ClassifierKind`, `Classifier`, `RelationshipType`, `LinkDecor`, `MiddleDecor`, `Relationship`, `NotePosition`, `ClassNote`, `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective`, `Namespace`, `ClassTogether`, `ClassDiagramAST` | AST type definitions for PlantUML class diagrams. |
 | `class-arrow-decor-map.ts` | `parseArrowDecors`, `parseArrowDecorsRaw` | Arrow head glyph -> `LinkDecor` mapping, split out of class-arrow-grammar.ts (pure move, no behavior change) to keep that file under the repo's 500-line-per-file cap. |
 | `class-arrow-grammar.ts` | `parseArrowDecors`, `parseArrowDecorsRaw`, `ArrowInfo`, `ARROW_DIR`, `ARROW_STYLE`, `canonicalizeArrow`, `arrowLength`, `splitCanonicalHeads`, `MiddleDecor`, `extractMiddleDecor`, `invertMiddleDecor`, `resolveArrow`, `extractArrowStyleRaw`, `ArrowStyleOverrides`, `parseArrowStyleOverrides` | Arrow-token decoration/type resolution for PlantUML class-diagram relationships. |
 | `class-arrow-middle-decor.ts` | `MiddleDecor`, `extractMiddleDecor`, `invertMiddleDecor` | T5/M6: the INSIDE middle-circle marker (CommandLinkClass's separate INSIDE regex group, `(0\|\(0\)\|\(0\|0\))(?=[-=.~])`, CommandLinkClass.java:137, 498-507) -- a LinkMiddleDecor, NOT a LinkDecor: it sits BETWEEN the two body runs (`-0)-`), ne |
@@ -1130,7 +1131,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-command-relationships.ts` | `RELATIONSHIP_COMMANDS` | Member and relationship commands for the class diagram dispatch table (rules 6-pre, 6, 6a of the original class-commands.ts COMMANDS array): the standalone-member shorthand, the general relationship dispatch, and the interface-lollipop rela |
 | `class-command-types.ts` | `Command` | Shared `Command` shape for the class diagram dispatch table. |
 | `class-commands.ts` | `COMMANDS` | Command dispatch table for the class diagram parser. |
-| `class-container.ts` | `setNamespaceUrl`, `setNamespaceColor`, `openNamespaceBlock`, `openTogetherBlock`, `closeBraceScope`, `closeContainer`, `HEADER_STEREO_CAPTURE`, `setNamespaceStereotype`, `setNamespaceTags`, `NAMESPACE_COMMANDS` | Descriptive-container helpers for the class parser. |
+| `class-container.ts` | `setNamespaceUrl`, `setNamespaceColor`, `openNamespaceBlock`, `closeContainer`, `HEADER_STEREO_CAPTURE`, `setNamespaceStereotype`, `setNamespaceTags`, `NAMESPACE_COMMANDS` | Descriptive-container helpers for the class parser. |
 | `class-creation-order.ts` | `applyClassLinkOrder`, `creationOrderedDotParts`, `printGroupsOrderOf` | cdd3-T14 (E1-1, E1-4, C-14 = E3-7): the class DOT graph's node and edge lists in upstream's creation order. |
 | `class-declaration-extractors.ts` | `extractBody`, `DeclarationColors`, `parseDeclarationColors`, `extractDecorations`, `extractInheritance`, `parseIdDisplay` | Classifier-declaration field extractors (body / decorations / inheritance / generic / id-display) for the class parser. |
 | `class-declaration-parser.ts` | `ClassifierDecl`, `parseClassifierDecl`, `InheritanceParent`, `resolveInheritance`, `parseTagTokens`, `applyClassifierDecl` | Classifier declaration line parsing for PlantUML class diagrams. |
@@ -1146,6 +1147,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-dot-edges.ts` | `EdgeDecoration`, `EDGE_DECORATION_MAP`, `ARROW_LABEL_FONT_SIZE`, `buildDotEdges` | Class diagram DOT-edge construction -- split out of ./class-dot-graph.ts (S-A, pure relocation, no logic change) to keep that file under the repo's 500-line-per-file cap, same split rationale as ./class-object-fields.ts's own module doc (sp |
 | `class-dot-graph-assembly.ts` | `assembleDotInputGraph` | Class diagram `DotInputGraph` attribute-bag assembly -- split out of ./class-dot-graph.ts (T2, `plans/class-divergence-drive/batch-1/ T2-ordered-links.md`) purely to keep that file under the repo's 500-line-per-file cap once the SB2 `getOrd |
 | `class-dot-graph.ts` | `applyKalWidthFloor`, `applySameClassWidthFloor`, `ThemeSameClassWidth`, `inNodeMapOrder`, `DotGraphParts`, `PROTECTED_BORDER`, `protectedInnerBox`, `ThemeGroupInheritance`, `buildDotGraph` | Class diagram DOT-graph construction. |
+| `class-dot-together.ts` | `applyClassTogethers` | cdd3-T18: the class parser's `together { }` membership (`ClassDiagramAST.togethers`) projected onto the `DotInputGraph`: the together list itself, `DotInputNode.together` on each member leaf, and `DotInputCluster.together` on each member gr |
 | `class-dot-width-floors.ts` | `ThemeSameClassWidth`, `applySameClassWidthFloor`, `applyKalWidthFloor` | cdd-T15: the class DOT-graph builder's two pre-DOT WIDTH FLOORS, split off `./class-dot-graph.ts` when `applyKalWidthFloor` pushed that file past the repo's 500-line cap (a pre-authorised split; the moved code is verbatim, its provenance co |
 | `class-edge-constraint.ts` | `constraintSquare`, `sampleEdgePath`, `constraintAnchor` | cdd-T6 (A2a/M9): `constraint on links: text`. |
 | `class-edge-geo.ts` | `EdgeGeoTextContext`, `buildEdgeGeos` | Class-diagram edge geometry: edge-label / magic-arrow / port-label anchors, stroke override, point normalization, and buildEdgeGeos. |
@@ -1252,6 +1254,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-stereotype-command.ts` | `STEREOTYPE_STATEMENT_RE`, `applyStereotypeStatement` | The standalone `<Name> <<stereotype>>` statement — sets the stereotype of an ALREADY-DECLARED classifier (upstream `CommandStereotype`, G2 N24). |
 | `class-stereotype-layout.ts` | `atomTextLineHeight`, `HeaderInfo`, `computeHeaderInfo`, `buildHeaderRows`, `GenericTagDim`, `measureGenericTagDim`, `GenericTagGeo`, `buildGenericTagGeo` | Class header-row + generic type-parameter-tag layout. |
 | `class-stereotype.ts` | `CLASS_STEREOTYPE_FONT_SIZE`, `DEFAULT_GUILLEMET`, `wrapGuillemet`, `splitStereotypeLabels`, `splitStereotypeStyleTags`, `parseCircledCharDecoration`, `parseCircledSpriteDecoration`, `GuillemetPair`, `CircledCharDecoration`, `CircledSpriteDecoration`, `measureStereoLabelWidths`, `stereoBlockDim`, `StereoRowsInput`, `buildStereoRows`, `computeHeaderInfo`, `buildHeaderRows`, `measureGenericTagDim`, `buildGenericTagGeo`, `HeaderInfo`, `GenericTagDim`, `GenericTagGeo`, `parseHideStereotypeDirective`, `isStereotypeLabelHidden`, `applyStereotypeHideShow`, `resolveVisibleStereotypeLabels`, `resolveStyleStereotypeTags` | Classifier header stereotype row(s) — `HeaderLayout#getDimension`/`#drawU`'s `stereoDim`/`xStereo`/`yStereo` terms (G2 N24; the mechanism N21/N22/N23 repeatedly named and deferred as an explicit DOT-gate/width-formula risk — N23's own Mecha |
+| `class-together.ts` | `TogetherFrame`, `TogetherEvent`, `currentTogether`, `openTogetherBlock`, `closeBraceScope`, `recordTogetherEvent`, `togetherAt`, `joinGroupTogether`, `resolveTogetherMembers` | `together { }` for the class parser (cdd3-T18): which entities a together block holds. |
 | `class-url-command.ts` | `URL_STATEMENT_RE`, `applyUrlStatement` | The standalone `url [of\|for] <Code> [is] [[url]]` statement — attaches a url to an already-declared classifier (`classdiagram/command/ CommandUrl.java`). |
 | `class-url.ts` | `UrlInfo`, `applyTopUrl`, `parseUrlBracket`, `URL_BRACKET_RE`, `applyTopUrlToClassifiers` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
 | `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY` | Member-row visibility icon shape/color (G2 N6). |
@@ -1300,6 +1303,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `annotation-line-trim.ts` | `trimLineForAnnotationMatch` | `matchAnnotationCommand`'s single-line matchers (`matchTitle` et al., `core/annotations/commands.ts`'s `ORDERED_MATCHERS`) read `lines[i]` verbatim, no internal trim — they require an already-trimmed line, like `state/parser.ts:147-149`'s ` |
+| `ast-stereotype-sprite.ts` | `StereotypeSpriteRef` | `StereotypeSpriteRef` -- moved out of `./ast.ts` (cdd3-T18, pure move, to keep that file under the 500-line cap); re-exported from there. |
 | `ast.ts` | `StereotypeSpriteRef`, `DescriptiveNode`, `DescriptiveLinkStyle`, `DescriptiveLink`, `DescriptionDiagramAST` | AST type definitions for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `command-table-containers.ts` | `CONTAINER_COMMANDS` | Bracket/paren shorthand, container-block, and generic keyword-dispatch commands for the descriptive diagram dispatch table (rules 10-15 of the original command-table.ts COMMANDS array): `[Name]` bracket shorthand, `(Name)` use-case shorthan |
 | `command-table-directives.ts` | `DIRECTIVE_COMMANDS` | Directive-style commands for the descriptive diagram dispatch table (rules 1-4 of the original command-table.ts COMMANDS array): comment lines, `newpage`, direction directives, `skinparam linetype`, `set separator`, `!pragma kermor`, `scale |
@@ -1345,6 +1349,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-uid.ts` | `UidPlan`, `buildUidPlan` | renderer-uid.ts — entity/cluster/link uid assignment for the klimt-backed description renderer. |
 | `renderer.ts` | `renderDescription`, `unwrapKlimtSvg` | renderer.ts — T17: klimt-backed public entry point for the description (component/use-case/deployment) diagram engine. |
 | `title-label-sizing.ts` | `measureTitleLabel`, `measureShadowAnchorDims` | Title-bar dims for a cluster's own display name — split out of layout-helpers.ts (500-line cap) as its own module, mirroring that file's existing leaf-sizing.js split. |
+| `together.ts` | `TOGETHER_FRAME_PREFIX`, `DescriptionTogether`, `currentTogether`, `openTogetherFrame`, `joinCurrentTogether`, `applyDescriptionTogethers` | `together { }` for the description engine (cdd3-T18): the same upstream code path as class. |
 
 ## `src/diagrams/dot/`
 

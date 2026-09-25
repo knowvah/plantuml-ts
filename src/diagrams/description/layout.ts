@@ -67,6 +67,7 @@ export type { ClassifyCtx, ContainerDesc, EdgeDotBuildResult } from './layout-ty
  *  `edgeFontSpec` construction (below) is its measurement-site wiring;
  *  `renderer-edge.ts#arrowLabelFontConfig` is the matching SVG-text site. */
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { applyDescriptionTogethers } from './together.js';
 
 // ── Public API helpers ──
 
@@ -195,6 +196,7 @@ function runLayout(
   if (ast.rankdir === 'LR') input.rankDir = 'LR';
   if (dotClusters.length > 0) input.clusters = dotClusters;
   if (kermor) input.kermor = true;
+  applyDescriptionTogethers(input, ast.togethers ?? [], ctx);
   const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, fontSpec, measurer, kermor);
   const spacing: ClusterSpacing = { nodeSep, rankSep, rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1

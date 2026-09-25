@@ -86,6 +86,10 @@ export interface DotInputNode {
    *  in its owning cluster's rank-chain (`ClusterDotString.printRanks`).
    *  Emitter-only. */
   isPort?: true;
+  /** cdd3-T18: the `together { }` block the entity was created in
+   *  (`CucaDiagram#reallyCreateLeaf` -> `setTogether(currentTogether())`,
+   *  `atmp/CucaDiagram.java:232`). A `DotInputGraph.togethers` id. */
+  together?: string;
   /** Only meaningful when `isPort` && `shape:'plaintext'` — the blank
    *  flanking-cell width for the PORT="P" HTML table
    *  (`SvekNode.appendLabelHtmlSpecialForPortHtml`'s `fullWidth`, clamped to
@@ -358,6 +362,12 @@ export interface DotInputEdge {
 
 export type { DotInputCluster };
 
+/** cdd3-T18: one `together { }` block — see `DotInputGraph.togethers`. */
+export interface DotInputTogether {
+  readonly id: string;
+  readonly parentId?: string;
+}
+
 export interface DotInputGraph {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
@@ -394,6 +404,12 @@ export interface DotInputGraph {
    *  to give a muted package its ColorSequence value at its group slot.
    *  Absent = no muted packages (every engine but class). Emitter-only. */
   printGroupsOrder?: readonly string[];
+  /** cdd3-T18: every `together { }` block (`abel/Together.java:39-51`), in
+   *  opening order. `parentId` is the enclosing together when the block
+   *  opened directly inside another one (`CucaDiagram#gotoTogether`,
+   *  `atmp/CucaDiagram.java:339-341`). Members point here through
+   *  `DotInputNode.together` / `DotInputCluster.together`. Absent = none. */
+  togethers?: readonly DotInputTogether[];
   /** `!pragma kermor on` (skin/PragmaKey.java:55) — svek's alternate
    *  cluster/note DOT-emission path (svek/ClusterDotStringKermor.java,
    *  Cluster.java:595-609 `printCluster3_forKermor`). Changes the ranksep

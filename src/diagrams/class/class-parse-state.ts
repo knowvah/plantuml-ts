@@ -7,6 +7,7 @@
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { ClassDiagramAST } from './ast.js';
 import type { PendingNote, TipGroupSeenSet } from './class-notes.js';
+import type { TogetherEvent, TogetherFrame } from './class-together.js';
 
 export interface ParseState {
   ast: ClassDiagramAST;
@@ -113,7 +114,14 @@ export interface ParseState {
    * together instead of the enclosing namespace — see closeBraceScope
    * (class-container.ts).
    */
-  togetherStack: (string | null)[];
+  togetherStack: TogetherFrame[];
+  /**
+   * cdd3-T18: `currentTogether()` before each dispatched line, recorded only
+   * when it changes: `at` is `creationCounter.value` at that point. An entity
+   * whose `creationIndex` follows an entry was created under its `id`
+   * (`class-together.ts#resolveTogetherMembers`). Reset on `newpage`.
+   */
+  togetherEvents: TogetherEvent[];
   /**
    * The most recently created entity's id — classifier OR note (upstream
    * `CucaDiagram#lastEntity`, set unconditionally by every `reallyCreateLeaf`

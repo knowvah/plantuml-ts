@@ -221,6 +221,22 @@ export interface Namespace {
   legend?: DisplayPositioned;
 }
 
+/**
+ * cdd3-T18: one `together { }` block (`abel/Together.java:39-51`, opened by
+ * `CucaDiagram#gotoTogether`, `atmp/CucaDiagram.java:339-341`).
+ * `members` are the ids of the entities that carry it: leaves (classifiers,
+ * notes) CREATED while it was the top of the stack
+ * (`reallyCreateLeaf` -> `setTogether(currentTogether())`, `:232`), and
+ * groups created by `gotoGroup` at that point (`:349-353`). Referencing an
+ * existing entity inside the block does not join it (`sipigu-91-baku027`).
+ */
+export interface ClassTogether {
+  id: string;
+  /** The enclosing together when this one opened directly inside it. */
+  parentId?: string;
+  members: string[];
+}
+
 // ---------------------------------------------------------------------------
 // Root AST
 // ---------------------------------------------------------------------------
@@ -348,4 +364,6 @@ export interface ClassDiagramAST {
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandScale.java
    */
   scale?: ScaleSpec;
+  /** cdd3-T18: every `together { }` block, in opening order. Absent = none. */
+  togethers?: ClassTogether[];
 }

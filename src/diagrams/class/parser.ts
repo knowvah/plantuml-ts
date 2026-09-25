@@ -41,6 +41,7 @@ import { refuse } from '../../core/parse-refusal.js';
 import type { ParseState } from './class-parse-state.js';
 import { adjudicateAllowMixing } from './class-descriptive-leaf-command.js';
 import { continueMultilineElement, tryOpenMultilineElement } from './class-multiline-element.js';
+import { recordTogetherEvent, resolveTogetherMembers } from './class-together.js';
 export type { ParseState };
 
 function makeDefaultAST(): ClassDiagramAST {
@@ -84,6 +85,7 @@ export function startNewPage(state: ParseState): void {
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
   packIfNoIntermediatePackages(state);
+  resolveTogetherMembers(state);
   // cdd-T1: `getTextBlock`'s own closing sweep (CucaDiagram.java:464) -- a
   // page IS a finished diagram, rendered through its own getTextBlock.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
@@ -107,6 +109,7 @@ export function startNewPage(state: ParseState): void {
   state.descriptiveContainers = new Map();
   state.namespaceStack = [];
   state.togetherStack = [];
+  state.togetherEvents = [];
   state.lastEntity = null;
   state.creationCounter = { value: 0 };
   state.tipGroupsSeen = new Set();
@@ -313,6 +316,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     pendingContainerTags: new Map(),
     namespaceStack: [],
     togetherStack: [],
+    togetherEvents: [],
     lastEntity: null,
     pages: [],
     creationCounter: { value: 0 },
@@ -347,6 +351,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     state.currentLine = merged.positions[i];
     // G2 N42: see `ParseState.currentRawLine`'s own doc comment.
     state.currentRawLine = merged.rawLines[i];
+    recordTogetherEvent(state);
     if (handlePendingNoteLine(state, line)) continue;
     if (handlePendingBodyLine(state, line)) continue;
     const multilineConsumed = continueMultilineElement(state, lines, merged.rawLines, i);
@@ -437,6 +442,7 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
 
   normalizeSameConnectionLengths(state.ast.relationships);
   packIfNoIntermediatePackages(state);
+  resolveTogetherMembers(state);
   // cdd-T1: `getTextBlock`'s closing sweep (CucaDiagram.java:464, as in
   // startNewPage) -- numbers any package no like-class leaf ever swept.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);

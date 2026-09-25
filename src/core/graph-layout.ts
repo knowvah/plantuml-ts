@@ -484,5 +484,6 @@ export type {
   DotInputEdge,
   DotInputCluster,
   DotInputGraph,
+  DotInputTogether,
   DotLayoutResult,
 } from './graph-layout.types.js';

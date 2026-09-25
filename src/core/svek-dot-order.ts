@@ -40,6 +40,7 @@
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildClusterTree } from './svek-dot-sequence.js';
 import { rootTops, topsFirstClusters } from './svek-dot-top.js';
+import { togetherClusters } from './svek-dot-together.js';
 
 /** Collector: appends an id the first time it is seen, ignoring ids that are
  *  not real nodes (a dangling edge endpoint, or a `portAnchorId` naming a
@@ -151,7 +152,8 @@ export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
       enc.push(e.to);
     }
   };
-  const tree = buildClusterTree(topsFirstClusters(input));
+  // cdd3-T18: the together subgraphs nest members as the emitter prints them.
+  const tree = buildClusterTree(topsFirstClusters({ ...input, clusters: togetherClusters(input) }));
   const rootIds = input.nodes.filter((n) => !tree.clusteredIds.has(n.id)).map((n) => n.id);
   for (const id of rootTops(input, rootIds)) enc.push(id);
   batch(true);
