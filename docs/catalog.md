@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1229 modules · 4624 exported names.
+1233 modules · 4633 exported names.
 
 ## `src/`
 
@@ -678,6 +678,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `closest-side.ts` | `ContactRect`, `getClosestSide` |  |
 | `draw-line-segment.ts` | `drawLineSegment` |  |
 | `Extremity.ts` | `Extremity` |  |
 | `ExtremityArrow.ts` | `ExtremityArrow`, `ExtremityFactoryArrow` |  |
@@ -1282,7 +1283,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `note-opale.ts` | `opalePolygonLeft`, `opalePolygonRight`, `opalePolygonUp`, `opalePolygonDown`, `opaleCorner`, `getOpaleStrategy`, `resolveOpaleConnector`, `OpalePoint`, `OpaleBox`, `OpaleConnector`, `OpaleDirection`, `buildOpaleNoteGeo`, `matchScore`, `getBestMatchRow` | The fuzzy member-line matcher and the class engine's own opalisable-note geo builder — `cucadiagram/BodierAbstract.java#getBestMatch`/`matchScore`, used to resolve a member-tip's `::member` against a classifier's rendered row text. |
 | `note-tips-resolve.ts` | `TipShape`, `TipResolution`, `resolveTips` | Draw-time resolution of a `'TIPS'` leaf against its host -- the port of `EntityImageTips#drawU`'s per-tip loop as a PURE function of the finished geometry, consumed by both draw passes: `class-ink-box.ts#buildInkBox` (this port's `LimitFind |
 | `parser.ts` | `ensureClassifier`, `ParseState`, `startNewPage`, `parseClass` | Parser for PlantUML class diagrams. |
+| `renderer-arrowhead-contact.ts` | `ContactRect`, `resolveContactSide` | renderer-arrowhead-contact.ts — cdd3-T33 (C-11): the class engine's own `nodeContact` resolution for `SvekEdge#getExtremitySimplier`'s `side` lookup (`SvekEdge.java:544-546` — `if (nodeContact != null) side = nodeContact.getRectangleArea(). |
 | `renderer-arrowhead-ink.ts` | `EdgeExtremityInk`, `edgeExtremityInk` | renderer-arrowhead-ink.ts — `edgeExtremityInk`, split out of `renderer- arrowhead.ts` when cdd-T29 round 2's `scaleK` threading pushed that file back over the 500-line hook cap (pre-authorised split, same precedent as this round's other spl |
+| `renderer-arrowhead-middle.ts` | `buildMiddleDecorMarkup` | renderer-arrowhead-middle.ts — cdd-T7 (A5/M4, A2a/M6): mid-link decoration (`-0)-` etc.), `MiddleCircle`/`MiddleCircleCircled#drawU`. |
 | `renderer-arrowhead-move.ts` | `movePointsStart`, `movePointsEnd`, `kalEndTranslate`, `plus` | renderer-arrowhead-move.ts — `DotPath#moveStartPoint`/`#moveEndPoint` on the flat `EdgeGeo.points` list, split out of `renderer-arrowhead.ts` (cdd2-T12, pre-authorised split, re-exported from there) so the three class-side callers of the SA |
 | `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `EdgeArrowheadOptions`, `buildEdgeArrowheads`, `applyDecorTrim`, `movePointsStart`, `movePointsEnd`, `kalEndTranslate`, `EdgeExtremityInk`, `edgeExtremityInk`, `buildMiddleDecorMarkup` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
 | `renderer-assoc-lollipop.ts` | `renderAssocPoint`, `renderAssociationDiamond`, `renderLollipop` | renderer-assoc-lollipop.ts — the association-class-couple "point" entity (`(A,B) .. |
@@ -1296,6 +1299,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-classifier-row-font-color.ts` | `classifierCascadeFontColor` | `classifierCascadeFontColor` and its own cascade/tier helpers -- split out of `renderer-classifier-rows.ts` purely to keep that file under this project's 500-line cap (T26; mirrors that file's own pre-existing `renderer-classifier-header-sp |
 | `renderer-classifier-rows.ts` | `attributeFontSize`, `wrappedVisibilityIconOriginY`, `renderRow`, `renderRowText`, `renderRowAtoms` | Classifier-box row rendering: attribute font sizing, row + row-text emitters, member atom decoration, and row-atom layout. |
 | `renderer-edge-extras.ts` | `renderEdgeVisibilityIcon`, `renderEdgeNoteBox`, `renderEdgeConstraint`, `renderEdgeCardinalityLabels`, `renderEdgeKalBoxes` | cdd-T7: `renderer-edge.ts`'s overflow — visibility-modifier icon, note-on-link body, and constraint line+text. |
+| `renderer-edge-label.ts` | `arrowLabelTextAttrs`, `magicArrowPolygon`, `renderEdgeMainLabel`, `renderEdgeSingleLabel` | renderer-edge-label.ts — a relationship's plain text label, its magic- arrow glyph, and the shared arrow-label font resolution. |
 | `renderer-edge.ts` | `linkIdForSvg`, `uniqLinkId`, `RenderEdgeContext`, `renderEdge` | Class-diagram edge SVG rendering (path data, link-id escaping, renderEdge). |
 | `renderer-empty-package-leaf.ts` | `renderEmptyPackageLeaf` | The collapsed-empty package leaf's draw -- moved out of `renderer.ts` (cdd3-T9, 500-line cap) when S-12 added its BACK colour carry. |
 | `renderer-group.ts` | `leafPortion`, `wrapEntity`, `wrapCluster`, `WrapLinkInfo`, `wrapLink`, `renderGroupInheritanceNeighborhood` | renderer-group.ts — G2 N2 (mechanism 3): the per-element `<g class= "entity"\|"cluster"\|"link">` wrapper + `<!--...-->` comment every jar class-diagram fixture stamps around each drawn classifier/namespace/ edge (verified against `bedogi-86- |

@@ -319,6 +319,12 @@ export function buildEdgeGeos(
       points: pts,
       sourceDecor: resolved.sourceDecor,
       targetDecor: resolved.targetDecor,
+      // cdd3-T33 (C-11): `startId`/`endId` already track which entity id
+      // is closest to `pts[0]`/`pts.at(-1)` (this file's own doc comment
+      // above) -- the SAME `svekNode1`/`svekNode2` `SvekEdge.java:544-546`'s
+      // `getClosestSide(center)` reads.
+      sourceContactId: startId,
+      targetContactId: endId,
       dashed: resolved.dashed,
       from: rel.from,
       to: rel.to,

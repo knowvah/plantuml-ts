@@ -135,6 +135,52 @@ describe('buildEdgeArrowheads — edge.strokeWidth inherited by the extremity st
   });
 });
 
+// cdd3-T33 (C-11): `contactRects` resolves `SvekEdge#getExtremitySimplier`'s
+// `side` (`SvekEdge.java:544-546`) for a crowfoot decor's node-contact wing
+// clamp. Points/rect are `medosa-71-ligu412`'s real jar geometry (`foo1 --{
+// foo2`, `plans/class-divergence-drive/measurements/out/
+// medosa-71-ligu412.jar.svg`): `foo2`'s rect and the crowfoot's own contact
+// point, the same fixture `closest-side.test.ts` cites.
+describe('buildEdgeArrowheads — contactRects/side (C-11)', () => {
+  const FOO2_RECT = { x: 54, y: 115, width: 59.213, height: 48 };
+  const medosaEdge = (): EdgeGeo =>
+    makeEdgeGeo({
+      points: [
+        { x: 46.92, y: 55.26 },
+        { x: 70.077, y: 107.477 },
+      ],
+      targetDecor: 'crowfoot',
+      targetContactId: 'foo2',
+    });
+  const wingY2s = (svg: string): number[] => [...svg.matchAll(/y2="([-\d.]+)"/g)].map((m) => Number(m[1]));
+
+  it('leaves both wing y2s independent (unclamped) when contactRects is omitted', () => {
+    const result = buildEdgeArrowheads(medosaEdge(), defaultTheme.colors.arrow, defaultTheme.colors.background);
+    const ys = wingY2s(result.head);
+    expect(ys.length).toBe(3);
+    expect(ys[0]).not.toBeCloseTo(107.477, 3);
+  });
+
+  it('clamps both wing y2s to the contact y (107.477) when the resolved side is NORTH', () => {
+    const contactRects = new Map([['foo2', FOO2_RECT]]);
+    const result = buildEdgeArrowheads(medosaEdge(), defaultTheme.colors.arrow, defaultTheme.colors.background, {
+      contactRects,
+    });
+    const ys = wingY2s(result.head);
+    expect(ys.length).toBe(3);
+    expect(ys[0]).toBeCloseTo(107.477, 3);
+    expect(ys[1]).toBeCloseTo(107.477, 3);
+  });
+
+  it('leaves side=null (no clamp) for a targetContactId absent from contactRects', () => {
+    const contactRects = new Map([['someOtherId', FOO2_RECT]]);
+    const result = buildEdgeArrowheads(medosaEdge(), defaultTheme.colors.arrow, defaultTheme.colors.background, {
+      contactRects,
+    });
+    expect(wingY2s(result.head)[0]).not.toBeCloseTo(107.477, 3);
+  });
+});
+
 describe('applyDecorTrim', () => {
   const points = [
     { x: 70, y: 70 },

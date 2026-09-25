@@ -379,6 +379,13 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     }
   }
   const linkIds = new Set<string>();
+  // cdd3-T33 (C-11): `SvekNode.getRectangleArea()`, keyed by classifier id
+  // -- `getExtremitySimplier`'s `nodeContact.getRectangleArea()
+  // .getClosestSide(center)` lookup (`SvekEdge.java:544-546`) resolves
+  // against this map, via `renderer-arrowhead-contact.ts#resolveContactSide`.
+  // `classifiers` is already SCALED (same `scaleClassGeometry` pass as
+  // `geo.edges`), matching `EdgeGeo.points`' coordinate space.
+  const contactRects = new Map(classifiers.map((c) => [c.id, c]));
   const drawEdge = (edge: EdgeGeo, i: number): void => {
     // G2/N16 Kind B: a freestanding note's connector, consumed by the
     // note's own Opale outline -- see `EdgeGeo.consumedByOpaleNote`'s doc
@@ -387,7 +394,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     if (edge.consumedByOpaleNote === true) return;
     if (hiddenClassifierIds.has(edge.from) || hiddenClassifierIds.has(edge.to)) return;
     if (edge.hidden === true) return; // cdd-T7 A2a/M12: `-[hidden]-` (SvekEdge.java:835-836)
-    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer });
+    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer, contactRects });
     extraDefs += rendered.extraDefs;
     children.push(
       wrapLink(

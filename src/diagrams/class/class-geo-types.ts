@@ -340,6 +340,23 @@ export interface EdgeGeo {
   targetDecor: LinkDecor;
   /** Arrow decoration at the source end (from the arrow's source-side head). */
   sourceDecor: LinkDecor;
+  /**
+   * cdd3-T33 (C-11): the id of the classifier whose rect is closest to
+   * `points[0]` (`SvekEdge.java:644-645`'s `svekNode1`, i.e.
+   * `link.getEntity1()`) — the tail/source contact node
+   * `getExtremitySimplier`'s `side` lookup (`SvekEdge.java:544-546`)
+   * resolves against. Same id `class-edge-geo.ts#normalizeEdgePoints`'s
+   * `matchesFromTo` already tracks for `sourceDecor` (`startId`), carried
+   * here so the renderer can resolve it to a rect without re-deriving
+   * `matchesFromTo` at draw time. Optional (unlike `from`/`to`) so every
+   * hand-built `EdgeGeo` test literal across this engine's other test
+   * files stays valid unchanged — absent means "no contact resolved",
+   * the same as upstream's `nodeContact == null` (`side` stays `null`).
+   */
+  sourceContactId?: string;
+  /** Head/target counterpart of {@link sourceContactId} — `svekNode2`
+   *  (`link.getEntity2()`), the id nearest `points[points.length - 1]`. */
+  targetContactId?: string;
   dashed: boolean;
   /** G2 N2 (mechanism 3): copied from `Relationship.creationIndex`. */
   creationIndex?: number;
