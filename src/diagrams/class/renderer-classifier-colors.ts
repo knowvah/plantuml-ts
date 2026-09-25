@@ -392,14 +392,33 @@ export function classBorderStrokeWidth(geo: ClassifierGeo, theme: ScaledTheme): 
   // .getColors())` returns `stroke` wholesale, no merge with `LineThickness`).
   const lineStyle = parseDeclarationColors(geo.color).lineStyle;
   if (lineStyle !== undefined) return strokeForStyle(lineStyle).getThickness() * theme.scaleK;
-  const byStereo = theme.colors.graph.classBorderThicknessByStereo;
+  return classStyleLineThickness(geo, theme) * theme.scaleK;
+}
+
+/**
+ * cdd3-T24 (C-6): the class style's own `PName.LineThickness`, UNSCALED --
+ * what `EntityImageClass.getStyle()` resolves, WITHOUT the inline
+ * `colors.getSpecificLineStroke()` override {@link classBorderStrokeWidth}
+ * applies on top (`Style#getStroke(Colors)`). Shared by the box stroke and
+ * the body's sentinel divider: `EntityImageClass.java:92-93` hands the SAME
+ * `getStyle()` to the body, whose `BodyEnhancedAbstract#getDefaultThickness`
+ * (`:121-122`) reads `style.value(PName.LineThickness)`. Tiers: per-stereo
+ * `classBorderThickness<<X>>`, then `classBorderThickness`, then the
+ * `<style>` ancestor cascade (`classCascadeLineThickness` -- `skin rose`'s
+ * root 1.0, `<style> class/root { LineThickness N }`), then the
+ * `plantuml.skin:93` default.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/BodyEnhancedAbstract.java:121-122
+ */
+export function classStyleLineThickness(geo: ClassifierGeo, theme: Theme): number {
+  const graph = theme.colors.graph;
+  const byStereo = graph.classBorderThicknessByStereo;
   if (byStereo !== undefined && geo.stereotypeLabels !== undefined) {
     for (const label of geo.stereotypeLabels) {
       const hit = byStereo[label.toLowerCase()];
-      if (hit !== undefined) return hit * theme.scaleK;
+      if (hit !== undefined) return hit;
     }
   }
-  return (theme.colors.graph.classBorderThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT) * theme.scaleK;
+  return graph.classBorderThickness ?? graph.classCascadeLineThickness ?? CLASS_BORDER_STROKE_WIDTH_DEFAULT;
 }
 
 /**

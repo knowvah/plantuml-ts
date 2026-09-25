@@ -53,7 +53,7 @@ function scaleDividerPart(part: EnhancedDividerPart, k: number): EnhancedDivider
   return {
     ...part,
     y: part.y * k,
-    strokeWidth: part.strokeWidth * k,
+    strokeWidth: part.strokeWidth === undefined ? undefined : part.strokeWidth * k,
     ...(part.strokeDasharray !== undefined ? { strokeDasharray: scaleDashArrayString(part.strokeDasharray, k) } : {}),
     ...(part.title !== undefined
       ? { title: { ...part.title, x: part.title.x * k, y: part.title.y * k, width: part.title.width * k } }

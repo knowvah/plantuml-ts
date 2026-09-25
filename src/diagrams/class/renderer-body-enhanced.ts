@@ -55,31 +55,35 @@ import { renderRow, pushIconRowPrimitives } from './renderer-classifier-box.js';
 import type { EnhancedBodyGeo, EnhancedBodyPart } from './class-body-enhanced-layout.js';
 import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
 import type { UrlTaggedPrimitive } from './renderer-url.js';
+import { classStyleLineThickness } from './renderer-classifier-colors.js';
+
+type DividerPart = Extract<EnhancedBodyPart, { kind: 'divider' }>;
+
+/** One divider `<line>`'s stroke options. G2 N44: `part.strokeDasharray`
+ *  (the `..` separator's `1,2` dash pattern, `class-body-enhanced-layout.ts
+ *  #separatorStrokeDasharray`), `undefined` for every other separator char,
+ *  matching `core/svg.ts#line`'s "omit when undefined" convention.
+ *  cdd3-T24 (C-6): the `'_'` sentinel carries no width of its own --
+ *  `UHorizontalLine`'s `defaultStroke` is the class style's LineThickness
+ *  (`BodyEnhancedAbstract.java:121-122`), scaled like every other width. */
+function dividerLineOpts(geo: ClassifierGeo, part: DividerPart, theme: ScaledTheme, borderColor: string) {
+  const dashField = part.strokeDasharray !== undefined ? { strokeDasharray: part.strokeDasharray } : {};
+  const strokeWidth = part.strokeWidth ?? classStyleLineThickness(geo, theme) * theme.scaleK;
+  return { stroke: borderColor, strokeWidth, ...dashField };
+}
 
 /** The classifier box's OWN divider stroke color (`class-border`'s own
  *  ancestor cascade) — a plain `<line>`, matching `dividerYs`' identical
  *  existing convention (`renderer-classifier-box.ts#buildBodyPrimitives`). */
-function renderDividerPart(
-  geo: ClassifierGeo,
-  part: Extract<EnhancedBodyPart, { kind: 'divider' }>,
-  theme: ScaledTheme,
-  borderColor: string,
-): string {
+function renderDividerPart(geo: ClassifierGeo, part: DividerPart, theme: ScaledTheme, borderColor: string): string {
   const y = geo.y + part.y;
-  // G2 N44: threads `part.strokeDasharray` (the `..` separator's `1,2` dash
-  // pattern, `class-body-enhanced-layout.ts#separatorStrokeDasharray`) into
-  // every `<line>` this function draws -- `undefined` for every other
-  // separator char, matching `core/svg.ts#line`'s existing "omit when
-  // undefined" convention (same as `strokeWidth` itself needs no gating).
-  const dashField = part.strokeDasharray !== undefined ? { strokeDasharray: part.strokeDasharray } : {};
+  const opts = dividerLineOpts(geo, part, theme, borderColor);
   // G3/O4: `UHorizontalLine#drawHLine`'s `style == '='` branch -- draws
   // EVERY segment below TWICE, once at its own `y`, once at `y+2` (SAME
   // x1/x2 span) -- see `EnhancedDividerPart.doubleLine`'s own doc comment.
   const segment = (x1: number, y1: number, x2: number): string => {
-    const one = line(x1, y1, x2, y1, { stroke: borderColor, strokeWidth: part.strokeWidth, ...dashField });
-    return part.doubleLine === true
-      ? one + line(x1, y1 + 2, x2, y1 + 2, { stroke: borderColor, strokeWidth: part.strokeWidth, ...dashField })
-      : one;
+    const one = line(x1, y1, x2, y1, opts);
+    return part.doubleLine === true ? one + line(x1, y1 + 2, x2, y1 + 2, opts) : one;
   };
   if (part.title === undefined) {
     return segment(geo.x + 1, y, geo.x + geo.width - 1);

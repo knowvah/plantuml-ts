@@ -119,19 +119,17 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the box
- *  outline (body + fold). `EntityImageNote.java:275-289` `drawNormal`:
- *  `stroked = applyStroke(ug); stroked.draw(polygon)` -- the fold draws on
- *  `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). cdd-T9b:
- *  the dashed host connector is NOT this note's own stroke -- upstream
- *  draws it as a completely separate `Link` (`CommandFactoryNoteOnEntity
- *  .java:342`), styled like any other dashed relationship edge -- see
- *  `renderer-note-connector.ts#renderNoteConnectorPath`. */
-export const NOTE_STROKE_WIDTH = 0.5;
+/** cdd3-T24 (E3-8): the note's OWN style stroke (body + opale fold) now
+ *  resolves from the note style -- `renderer-note-stroke.ts`. cdd-T9b: the
+ *  dashed host connector is NOT this stroke (a separate `Link`,
+ *  `renderer-note-connector.ts#renderNoteConnectorPath`). */
+import { NOTE_STROKE_WIDTH, resolveNoteStroke } from './renderer-note-stroke.js';
+export { NOTE_STROKE_WIDTH };
 
 /** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
  *  draws on the UNSTROKED `ug`, so it keeps the diagram's DEFAULT stroke
- *  width (1), never the note's own {@link NOTE_STROKE_WIDTH} (0.5). */
+ *  width (1), never the note's own style thickness -- but it IS drawn
+ *  after `ug.apply(borderColor)`, so it takes the note's LineColor. */
 const NOTE_FOLD_STROKE_WIDTH = 1;
 
 /**
@@ -402,25 +400,18 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
   // below, which lives in the SHARED `core/svek/image/Opale.ts` and is left
   // unscaled -- out of this class-only task's write-set, see .agent-notes).
   const f = NOTE_FOLD * theme.scaleK;
+  const ns = resolveNoteStroke(theme);
   const entityParts: string[] = [
     // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
-    // own doc comment), the note style's OWN stroke width (0.5).
-    path(noteBodyPathData(x, y, w, h, f), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
+    // own doc comment), the note style's OWN stroke (`applyStroke`).
+    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
     // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
     // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
     // `renderOpaleNote` already call) -- filled with the note's OWN
     // background (not `none`) at the diagram's DEFAULT stroke width, per
     // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
     // comment).
-    path(opaleCorner({ x, y }, w), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK,
-    }),
+    path(opaleCorner({ x, y }, w), { fill, stroke: ns.stroke, strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK }),
     renderNoteText(note, theme),
   ];
   return { entityParts };
@@ -441,13 +432,12 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme):
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
   const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
+  // `Opale#drawU` (`Opale.java:123-126`) draws outline AND fold on the
+  // stroked `ug` -- both take the note style's stroke.
+  const ns = resolveNoteStroke(theme);
   const parts: string[] = [
-    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
+    path(outline, { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');
@@ -488,17 +478,12 @@ export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
+  // `EntityImageNote.java:236-237,263-264`: `opale.drawU(applyStroke(ug2))`
+  // -- outline and fold both on the stroked ug (`Opale.java:123-126`).
+  const ns = resolveNoteStroke(theme);
   const parts: string[] = [
-    path(opaleOutline(opale.direction, box, connector), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
+    path(opaleOutline(opale.direction, box, connector), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');

@@ -57,4 +57,24 @@ export interface ThemeGraphColorsC {
    *  skinparam handler (`skinparam-key-handlers-table-b.ts`), never by a
    *  theme literal. */
   classBackgroundExplicit?: true;
+  /** cdd3-T24 (C-6): `EntityImageClass`'s `getStyle().value(PName
+   *  .LineThickness)` over `{root,element,classDiagram,class_}`
+   *  (`style-cascade-class-snames.ts#CLASS_SNAMES`) -- the box stroke
+   *  (`EntityImageClass.java:215`) and the body's sentinel divider
+   *  (`BodyEnhancedAbstract.java:121-122`). `skin rose` resolves 1.0
+   *  (`rose.skin:11`, no element override). Absent = the `plantuml.skin:93`
+   *  `element { LineThickness 0.5 }` default, applied by the reader
+   *  (`renderer-classifier-colors.ts#classStyleLineThickness`).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClass.java:215 */
+  classCascadeLineThickness?: number;
+  /** cdd3-T24 (E3-8): `EntityImageNote`'s `style.getStroke()` thickness
+   *  over `{root,element,classDiagram,note}` (`NOTE_SNAMES`). Absent = the
+   *  `plantuml.skin:325` `note { LineThickness 0.5 }` default.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageNote.java:283-292 */
+  noteCascadeLineThickness?: number;
+  /** cdd3-T24 (E3-8): `EntityImageNote.java:108`'s `style.value(PName
+   *  .LineColor)` over the same `NOTE_SNAMES` signature, SVG-ready hex.
+   *  Absent = `theme.colors.border`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageNote.java:108 */
+  noteCascadeBorder?: string;
 }

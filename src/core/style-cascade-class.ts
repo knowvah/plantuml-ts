@@ -17,6 +17,7 @@ import { resolveColorToSvgHex, parseSimpleColor, resolveConditionalColor } from 
 import { applyFontCascadeOverrides } from './style-cascade-class-font.js';
 import { applyVisibilityIconCascadeOverrides } from './style-cascade-visibility-icon.js';
 import { applyGenericCascadeOverrides } from './style-cascade-class-generic.js';
+import { applyLineCascadeOverrides } from './style-cascade-class-line.js';
 
 // cdd-T15: the style signatures moved to a sibling module (500-line cap) --
 // a pure move, re-exported there; see that file's header.
@@ -60,6 +61,9 @@ export type GraphCascadeOverride = Pick<
   | 'arrowTagCascade'
   | 'visibilityIconLineCascade'
   | 'visibilityIconBackgroundCascade'
+  | 'classCascadeLineThickness'
+  | 'noteCascadeLineThickness'
+  | 'noteCascadeBorder'
 >;
 
 /**
@@ -304,6 +308,8 @@ export function computeClassStyleCascadeOverrides(
   // cdd2-T8 (S-7): `<style> visibilityIcon { <kind> {...} } }` cascade --
   // see `style-cascade-visibility-icon.ts#applyVisibilityIconCascadeOverrides`.
   applyVisibilityIconCascadeOverrides(styleMap, override);
+  // cdd3-T24 (C-6, E3-8): class + note LineThickness, note LineColor.
+  applyLineCascadeOverrides(styleMap, override);
   // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
   // own doc comment.
   const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};

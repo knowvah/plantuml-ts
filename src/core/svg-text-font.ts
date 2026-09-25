@@ -28,8 +28,30 @@ import { ROOT_FONT_FAMILY } from './svg.js';
 // file (same workaround as paint.ts / svg.ts).
 const DQUOTE_RE = new RegExp('"', 'g');
 
+/**
+ * `FontStack.java:48-50`'s three logical Java family names, which
+ * `FontStack#getSvgFamily` (`:178-187`) maps to their CSS generics.
+ */
+const LOGICAL_TO_CSS_FAMILY: ReadonlyMap<string, string> = new Map([
+  ['Serif', 'serif'],
+  ['SansSerif', 'sans-serif'],
+  ['Monospaced', 'monospace'],
+]);
+
+/**
+ * cdd3-T24 (C-5): the whole of `FontStack#getSvgFamily` -- the `switch`
+ * (case-sensitive, exact `fullDefinition` match) THEN the quote swap. The
+ * jar reaches it through `UFont.java:112-113` (`case SVG: return
+ * fontStack.getSvgFamily();`) before `SvgGraphics.java:726-727` compares
+ * the family with `DEFAULT_FONT_FAMILY`, so `rose.skin`'s `root { FontName
+ * SansSerif }` never reaches a `<text>`. This seam had only the quote swap;
+ * `core/klimt/drawing/svg/svg-graphics-elements.ts#getSvgFamily` is the
+ * same method for the klimt-drawn engines.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontStack.java:178-187
+ */
 function toSvgFontFamily(family: string | undefined): string | undefined {
-  return family === undefined ? undefined : family.replace(DQUOTE_RE, "'");
+  if (family === undefined) return undefined;
+  return LOGICAL_TO_CSS_FAMILY.get(family) ?? family.replace(DQUOTE_RE, "'");
 }
 
 /**
