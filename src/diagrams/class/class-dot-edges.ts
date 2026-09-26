@@ -189,7 +189,16 @@ function buildDotEdgeAttrs(
   // engine, which converges the group's splines onto one shared tail point.
   const sametail = ctx.sametailByRelIndex?.get(i);
   if (sametail !== undefined) attrs.sametail = sametail;
-  if (rel.weight !== undefined) attrs.weight = rel.weight;
+  // cdd3-T19 (B-1): `@N` sets `Relationship.weight` (`CommandLinkClass.java
+  // :381-385` `if (weight != null) link.setWeight(...)`), and this port kept
+  // that PARSE -- `class-lollipop.ts#buildLinkExtras`,
+  // `class-relationship-optional-fields.test.ts` -- but upstream never
+  // FORWARDS it into the DOT: `Link#getWeight()` (`abel/Link.java:320-322`)
+  // has no caller anywhere in `net/`, and no cached class `svek-*.dot`
+  // carries a `weight=` attribute. Forwarding it here (as this line used to)
+  // hands @knowvah/dot-engine's mincross/position a constraint jar never applies --
+  // `majuva-44-luta965`'s `@3 Dog --|> Mammal`/`@3 Cat --|> Mammal` widened
+  // the canvas 40px versus real dot on the jar's own (weight-less) DOT.
   // G2/N16 Kind B: a freestanding note's ONE real relationship connector
   // must route with NO arrow-clip reservation (the SAME `noArrow` fix N14
   // already applied to the synthetic note-attachment edge) -- computed

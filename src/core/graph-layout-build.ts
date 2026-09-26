@@ -38,6 +38,21 @@ export function applyGraphAttrs(b: GvGraphBuilder, input: DotInputGraph): void {
     b.setAttr('ranksep', (input.rankSep / PX_PER_INCH).toString());
   }
   if (input.aspect !== undefined) b.setAttr('aspect', input.aspect.toString());
+  // cdd3-T19 (E3-11): `DotStringFactory.java:154` `sb.append("searchsize=500;")`
+  // -- unconditional, every graph, same as `remincross=true;` the line above
+  // it. `svek-dot-emit.ts#graphAttrLines` already writes both into the DOT
+  // TEXT (parity gate), but this programmatic builder -- the one that
+  // actually drives @knowvah/dot-engine's layout -- never called its equivalent, so
+  // mincross ran its default search depth instead of jar's 500. Measured:
+  // `delasa-80-jusu462` moves 33 nodes without it. `remincross` is NOT added
+  // here: graphviz already treats an absent `remincross` as true
+  // (`mincross.c:379`; real dot with/without the line: 0 diffs on delasa's
+  // cached DOT), and the builder-ordering lead that `setAttr('remincross',
+  // 'true')` before `searchsize` could cancel it (E3-D2) did not reproduce on
+  // dot-engine 1.6.0 (`plans/class-divergence-drive-3/decision-journal.md`
+  // row 18) -- so only the one attribute upstream's forwarding actually
+  // needs is set.
+  b.setAttr('searchsize', '500');
   // D2 (plans/linetype-ortho-routing/decisions.md): emitted unconditionally,
   // never gated on sep attrs -- pavuzo-79-zodu430's cached svek-1.dot carries
   // `splines=ortho;forcelabels=true;` with no nodesep/ranksep at all.

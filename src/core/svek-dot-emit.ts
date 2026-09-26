@@ -38,6 +38,7 @@ import { clusterBlock, inches, nodeLine } from './svek-dot-emit-clusters.js';
 import { wrapperLevels, type WrapperLevels } from './svek-dot-wrappers.js';
 import { rootTops, topsFirstClusters } from './svek-dot-top.js';
 import { togetherClusters } from './svek-dot-together.js';
+import { orderLines0Edges } from './svek-dot-lines0.js';
 
 // Re-exported so callers keep reaching these through the emitter's own module
 // path: `inches` for the LAYOUT builder (`graph-layout-build.ts#addNodes`), and
@@ -194,17 +195,22 @@ function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
  * (`graph-layout-build.ts#firstEncounterOrder` has the full derivation, and
  * mirrors this same split on the layout path).
  *
- * Deliberately not ported: `addLine`'s own tie-break inside `lines0`, which
- * moves a note-labelled edge ahead of the first same-connections unlabelled
- * one (`:90-99`). No cached fixture's `lines0` order differs from the input
- * edge order because of it — `temuxi-28-cega322`'s seven-edge batch matches
- * jar's exactly — so it is an unexercised residual, recorded rather than
- * guessed at.
+ * cdd3-T19 (E3-18): `lines0`'s own insertion order is `addLine`'s tie-break
+ * (`:90-99`), which moves a note-labelled edge ahead of the first
+ * same-connections unlabelled one already collected — see
+ * `./svek-dot-lines0.ts` for the full port and why this module, the LAYOUT
+ * builder and node-encounter order must all read the same reordering.
+ * `cobumi-83-bapu892`'s jar DOT is the fixture that exercises it: the
+ * labelled `sh0019->sh0018 : children` prints ahead of the unlabelled
+ * `sh0018->sh0019`, which this port previously left in declaration order.
  */
 function edgeBatches(input: DotInputGraph): { lines0: number[]; lines1: number[] } {
-  const lines0: number[] = [];
+  const indexOfEdge = new Map(input.edges.map((e, i) => [e, i] as const));
+  const lines0 = orderLines0Edges(input.edges).map((e) => indexOfEdge.get(e)!);
   const lines1: number[] = [];
-  input.edges.forEach((e, i) => (e.attributes?.minLen === 0 ? lines0 : lines1).push(i));
+  input.edges.forEach((e, i) => {
+    if (e.attributes?.minLen !== 0) lines1.push(i);
+  });
   return { lines0, lines1 };
 }
 

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1214 modules · 4537 exported names.
+1215 modules · 4538 exported names.
 
 ## `src/`
 
@@ -114,6 +114,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svek-dot-emit-clusters.ts` | `inches`, `nodeLine`, `clusterBlock` | Node lines and cluster blocks for the Svek DOT emitter — split out of ./svek-dot-emit.ts for the 500-line file cap (G9/T1; pure move apart from the wrapper emission that motivated the split, see below). |
 | `svek-dot-emit-labels.ts` | `hex`, `round`, `trunc`, `labelTable`, `edgeLabelTable`, `shieldTable`, `portTable`, `rowPortTable` | Svek HTML-label table builders — the `label=<...>` values `svek-dot-emit.ts` writes into node, edge and cluster statements. |
 | `svek-dot-emit.ts` | `inches`, `wrapperLevels`, `WrapperLevels`, `toSvekDot` |  |
+| `svek-dot-lines0.ts` | `orderLines0Edges` | `Bibliotekon#addLine`'s `lines0` insertion tie-break (`~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/Bibliotekon .java:87-106`): a note-labelled edge (`hasNoteLabelText()`, `SvekEdge.java :383-385` -- this port's `label` + `lab |
 | `svek-dot-order.ts` | `firstEncounterOrder` | The order Svek's DOT text declares nodes in — the single definition of "which node does graphviz's parser meet first", shared by the two consumers of one `DotInputGraph`. |
 | `svek-dot-sequence.ts` | `Seq`, `NodeRec`, `ClusterColors`, `EdgeColors`, `ClusterTree`, `buildClusterTree`, `SeqAssignment`, `assignSequence` |  |
 | `svek-dot-together.ts` | `ROOT_TOGETHER_PREFIX`, `togetherClusters` | `together { }` blocks as svek prints them: an unlabelled `subgraph <clusterId>t<k> { ... |

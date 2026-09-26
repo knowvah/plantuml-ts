@@ -41,6 +41,7 @@ import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layou
 import { buildClusterTree } from './svek-dot-sequence.js';
 import { rootTops, topsFirstClusters } from './svek-dot-top.js';
 import { togetherClusters } from './svek-dot-together.js';
+import { orderLines0Edges } from './svek-dot-lines0.js';
 
 /** Collector: appends an id the first time it is seen, ignoring ids that are
  *  not real nodes (a dangling edge endpoint, or a `portAnchorId` naming a
@@ -141,13 +142,19 @@ function pushCluster(c: DotInputCluster, ctx: WalkCtx): void {
  * `lines0` (`DotStringFactory.java:188-190`), and every cluster's own tails
  * ahead of its other members (`ClusterDotString.java:174-176`) — both read
  * from `./svek-dot-top.ts`, the same source the emitter uses.
+ *
+ * cdd3-T19: the `lines0` batch itself is `addLine`'s insertion order
+ * (`Bibliotekon.java:87-106`), not plain declaration order — `./svek-dot-
+ * lines0.ts` is the one definition, also read by the emitter and the layout
+ * builder so all three stay in lockstep.
  */
 export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
   const nodeById = new Map(input.nodes.map((n) => [n.id, n]));
   const enc = new Encounter(nodeById);
   const kermor = input.kermor === true;
   const batch = (wantZero: boolean): void => {
-    for (const e of input.edges.filter((e) => (e.attributes?.minLen === 0) === wantZero)) {
+    const edges = wantZero ? orderLines0Edges(input.edges) : input.edges.filter((e) => e.attributes?.minLen !== 0);
+    for (const e of edges) {
       enc.push(e.from);
       enc.push(e.to);
     }

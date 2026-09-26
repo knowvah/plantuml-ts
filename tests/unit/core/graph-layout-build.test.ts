@@ -574,3 +574,34 @@ describe('applyGraphAttrs — splines/forcelabels from linetype (lor-T2)', () =>
     expect(b.getAttr('forcelabels')).toBe('true');
   });
 });
+
+/**
+ * cdd3-T19 (E3-11): `DotStringFactory.java:154` `sb.append("searchsize=500;")`
+ * -- unconditional on every graph. `svek-dot-emit.ts` already wrote it into
+ * the DOT TEXT parity gate; the programmatic builder (this function, the one
+ * that actually drives @knowvah/dot-engine's layout) never called the engine's
+ * equivalent, so mincross ran its default search depth instead of jar's 500.
+ * `delasa-80-jusu462` moves 33 nodes without it.
+ */
+describe('applyGraphAttrs — searchsize=500 (E3-11, DotStringFactory.java:154)', () => {
+  const base = (): DotInputGraph => ({ nodes: [], edges: [] });
+
+  it('sets searchsize=500 unconditionally, even on the emptiest graph', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, base());
+    expect(b.getAttr('searchsize')).toBe('500');
+  });
+
+  it('sets searchsize=500 alongside every other graph attr, not exclusively', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, { ...base(), rankDir: 'LR', nodeSep: 72, rankSep: 72, linetype: 'ortho' });
+    expect(b.getAttr('searchsize')).toBe('500');
+    expect(b.getAttr('rankdir')).toBe('LR');
+  });
+
+  it('never sets remincross through the builder (E3-D2: not reproduced on dot-engine 1.6.0, kept minimal)', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, base());
+    expect(b.getAttr('remincross')).toBeUndefined();
+  });
+});

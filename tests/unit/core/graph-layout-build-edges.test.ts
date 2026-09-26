@@ -71,3 +71,26 @@ describe('addEdges — xlabel forwarding (SI31 T1, docs/graphviz-issues/16)', ()
     expect(g.edges[0]!.attrs.get('label')).toBe('go');
   });
 });
+
+/**
+ * cdd3-T19 (E3-18, `svek/Bibliotekon.java:87-106`): the layout builder must
+ * declare edges to @knowvah/dot-engine in the SAME `lines0` order the DOT-text
+ * emitter writes them (`svek-dot-emit.ts`) — a note-labelled lines0 edge
+ * moves ahead of the first same-connections unlabelled one already declared.
+ */
+describe('addEdges — lines0 order follows Bibliotekon#addLine (E3-18)', () => {
+  it('declares the labelled edge to the builder before the unlabelled same-connections one', () => {
+    const input: DotInputGraph = {
+      nodes: twoNodes,
+      edges: [
+        { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 0 } },
+        { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0, label: 'go', labelWidth: 20, labelHeight: 12 } },
+      ],
+    };
+    const g = build(input);
+    expect(g.edges.map((e) => [e.tail.name, e.head.name])).toEqual([
+      ['b', 'a'],
+      ['a', 'b'],
+    ]);
+  });
+});

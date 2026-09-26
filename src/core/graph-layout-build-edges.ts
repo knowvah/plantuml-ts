@@ -9,6 +9,7 @@
  */
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputEdge, DotInputGraph } from './graph-layout.types.js';
+import { orderLines0Edges } from './svek-dot-lines0.js';
 
 /** `plantuml.skin`'s `arrow { FontSize 13 }` block (`svek/GraphvizImageBuilder
  *  .java#getStyleArrowCardinality` resolves the `arrow.cardinality` style,
@@ -44,9 +45,14 @@ const fixedSizeTable = (width: number, height: number): string =>
  *  selection sufficient for the defect it was chasing. G9/T4 needs it: with
  *  the node order now matching jar's, `rijoki-89-teno556` still laid its
  *  ranks out mirrored, and edge insertion order is what mincross's initial
- *  permutation and transpose tie-breaks read after that. */
+ *  permutation and transpose tie-breaks read after that.
+ *
+ *  cdd3-T19 (E3-18): `lines0`'s own insertion order is `Bibliotekon#addLine`
+ *  (`svek/Bibliotekon.java:87-106`), not plain declaration order — see
+ *  `./svek-dot-lines0.ts` for the tie-break and why the builder, the DOT text
+ *  emitter and node-encounter order must all read the SAME reordering. */
 function svekEdgeOrder(edges: readonly DotInputEdge[]): DotInputEdge[] {
-  return [...edges.filter((e) => e.attributes?.minLen === 0), ...edges.filter((e) => e.attributes?.minLen !== 0)];
+  return [...orderLines0Edges(edges), ...edges.filter((e) => e.attributes?.minLen !== 0)];
 }
 
 export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
