@@ -47,6 +47,7 @@ import {
   upstreamKeyword,
   mapComponentStyle,
   textFont,
+  entityTitleStyles,
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
@@ -92,7 +93,7 @@ const ELEMENT_ROUND_CORNER = 5.0;
  * additions, plus cdd3-T12's `descriptive`+`rectangle` (sijisi) addition.
  * The cast on the `descriptive` fallback documents a caller-enforced
  * invariant (`renderer.ts`'s own dispatch gate forwards ONLY `usymbol ===
- * 'actor' | 'component' | 'database' | 'rectangle'` here, never a raw
+ * 'actor' | 'component' | 'database' | 'rectangle' | 'package'` here, never a raw
  * business-suffix keyword) — not an external-data guess.
  */
 function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
@@ -145,10 +146,12 @@ function buildUSymbolEntityParams(
 ): EntityImageDescriptionParams {
   const symbolKeyword = resolveSymbolKeyword(classifier);
   const display = classifier.rows[0]?.text ?? classifier.id;
-  const fontTitle = textFont(theme, symbolKeyword);
+  const fontTitle = textFont(theme, symbolKeyword, 0, entityTitleStyles(symbolKeyword));
   const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
-  const roundCorner =
-    symbolKeyword === 'component' || symbolKeyword === 'rectangle' ? ELEMENT_ROUND_CORNER * theme.scaleK : 0;
+  // cdd3-T28 (E3-14): unconditional, as upstream computes it (see
+  // ELEMENT_ROUND_CORNER's doc) -- `package`'s `USymbolFolder` tab reads it
+  // too (the jar's `A2.5,2.5` arcs on gujigi-63-roki030).
+  const roundCorner = ELEMENT_ROUND_CORNER * theme.scaleK;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
   return {
     // cdd3-T10 (S-11): the entity's own url (`getUrl99()`), drawn by
@@ -159,7 +162,9 @@ function buildUSymbolEntityParams(
       actorStyle: resolveActorStyle(theme.actorStyle),
       componentStyle: mapComponentStyle(theme.componentStyle),
     },
-    labels: { codeName: display, displayText: display, stereotypeLabels: [] },
+    // cdd3-T28 (E3-14): `codeDisplay` is `entity.getName()` (java:180) -- the
+    // leaf id, as the sizer's `measureShownFolderTitle(node.id, ...)` reads.
+    labels: { codeName: classifier.id, displayText: display, stereotypeLabels: [] },
     paint: {
       forecolor: resolveElementPaint(theme, symbolKeyword, 'border'),
       backcolor: resolveElementPaint(theme, symbolKeyword, 'background'),
@@ -170,6 +175,10 @@ function buildUSymbolEntityParams(
         (resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH) * theme.scaleK,
       ),
       fontTitle,
+      // `fc` (`style`, not `styleTitle`, java:173) -- the `desc` font when the
+      // display differs from the code name, so a package's bold title style
+      // does not leak into its label (`buildDesc`).
+      fontBody: textFont(theme, symbolKeyword),
       fontStereo,
       titleAlignment,
       stereotypeAlignment: HorizontalAlignment.CENTER,
@@ -215,7 +224,13 @@ function buildUSymbolEntityParams(
  *  no live class-engine caller; `renderUSymbolIcon` never had a `rectangle`
  *  entry either (`core/usymbol-shapes.ts:219-224`'s `USYMBOL_ICONS` map),
  *  so this dispatch widening -- not a new icon renderer -- is upstream's own
- *  fix: `rectangle` was never meant to draw as a class box. Exported so
+ *  fix: `rectangle` was never meant to draw as a class box.
+ *
+ *  cdd3-T28 (E3-14, gujigi-63-roki030): `descriptive`+`package` addition --
+ *  an `allowmixing` `package "Elektronisk dokument"` leaf with no body is a
+ *  `LeafType.DESCRIPTION` entity with `USymbols.PACKAGE`, which
+ *  `GeneralImageBuilder.java:160-167` hands to `EntityImageDescription`
+ *  (`USymbolFolder` tab path + bold title), not the class box. Exported so
  *  `renderer.ts`'s own dispatch (over its 500-line cap) stays a single call. */
 export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
   if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;
@@ -224,7 +239,8 @@ export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
     (classifier.usymbol === 'actor' ||
       classifier.usymbol === 'component' ||
       classifier.usymbol === 'database' ||
-      classifier.usymbol === 'rectangle')
+      classifier.usymbol === 'rectangle' ||
+      classifier.usymbol === 'package')
   );
 }
 

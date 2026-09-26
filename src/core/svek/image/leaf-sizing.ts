@@ -63,7 +63,8 @@ import { buildDesc } from './EntityImageDescriptionDelegates.js';
 import { USymbols } from '../../decoration/symbol/USymbols.js';
 import { measureFolderLeaf } from './leaf-sizing-folder.js';
 import { measureLegacyBoxFallback } from './leaf-sizing-legacy-fallback.js';
-import { measureEntityLeaf, sizingAtomImageResolverFor } from './leaf-sizing-entity.js';
+import { measureEntityLeaf, measureEntityLeafShield, sizingAtomImageResolverFor } from './leaf-sizing-entity.js';
+import type { Margins } from './EntityImageDescription.js';
 import {
   type BoxSizingOpts,
   type Dim,
@@ -191,6 +192,24 @@ export function measureLeafNode(
   // #lizard forgives -- a flat USymbol dispatch `switch` (this project's
   // established shape for this exact function, pre-T6); the per-case bodies
   // are 1-4 lines each, none independently over any threshold.
+}
+
+/**
+ * cdd3-T28 (E3-22): the shield `Margins` a shielded (`hideText`) interface
+ * or circle leaf reserves around its icon cell in the DOT node
+ * (`SvekNode#appendLabelHtml`, svek/SvekNode.java:245-267, reading
+ * `EntityImageDescription#getShield`, java:239-262). Resolves the element
+ * font exactly as {@link measureLeafNode} does.
+ */
+export function measureLeafShield(
+  node: LeafSizingSubject,
+  baseFont: FontSpec,
+  measurer: StringMeasurer,
+  opts?: BoxSizingOpts,
+  sprites?: SpriteDimsLookup,
+): Margins {
+  const fontSpec = opts?.fontSize === undefined ? baseFont : { ...baseFont, size: opts.fontSize };
+  return measureEntityLeafShield(node, fontSpec, { opts, sprites, measurer });
 }
 
 /** ONLY `<latex>` markup still routes through `measureUsecase` instead of

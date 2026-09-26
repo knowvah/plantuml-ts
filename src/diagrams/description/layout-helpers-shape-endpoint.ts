@@ -15,7 +15,7 @@
 import type { DescriptiveNode, DescriptiveLink } from './ast.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
-import type { DotInputNodeShape } from '../../core/graph-layout.js';
+import type { DotInputNodeShape, DotInputGraph } from '../../core/graph-layout.js';
 import type { EdgeContainerEndpoints, ResolvedEndpoint } from './layout-helpers-types.js';
 
 /** SvekNode.appendLabelHtmlSpecialForPort's `width2 > 40` threshold: a port
@@ -165,17 +165,50 @@ export function shapeForNode(
 // .java, SvekNode.appendLabelHtmlSpecialForPort)
 // ---------------------------------------------------------------------------
 
-/** SvekNode.appendLabelHtmlSpecialForPort: `getMaxWidthFromLabelForEntryExit
- *  (stringBounder) > 40` switches a port leaf from the plain small
- *  `shape=rect` square to the `shape=plaintext` PORT="P" HTML table. */
+/** `SvekNode#appendLabelHtmlSpecialForPort`'s `width2`: `final int width2 =
+ *  (int) getMaxWidthFromLabelForEntryExit(stringBounder)`
+ *  (svek/SvekNode.java:181-186) -- the port label's own width
+ *  (`EntityImagePort.java:90-94`), TRUNCATED to int before either use below.
+ *  cdd3-T28 (E3-23): the untruncated width made `sokevu-87-toce485`'s pad
+ *  41.55 where the jar writes `WIDTH="41"`.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekNode.java:181-186 */
+function portLabelWidth2(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): number {
+  return Math.trunc(measurer.measure(node.display, fontSpec).width);
+}
+
+/** SvekNode.appendLabelHtmlSpecialForPort: `width2 > 40` switches a port
+ *  leaf from the plain small `shape=rect` square to the `shape=plaintext`
+ *  PORT="P" HTML table. */
 export function isPortLabelWide(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): boolean {
-  return measurer.measure(node.display, fontSpec).width > PORT_LABEL_WIDE_THRESHOLD;
+  return portLabelWidth2(node, fontSpec, measurer) > PORT_LABEL_WIDE_THRESHOLD;
 }
 
 /** appendLabelHtmlSpecialForPortHtml's `fullWidth` (`width2 - 40`, floored
- *  at 10) — the blank cell width flanking the PORT="P" cell. Only called
- *  once {@link isPortLabelWide} is true. */
+ *  at 10, SvekNode.java:189-190) — the blank cell width flanking the
+ *  PORT="P" cell. Only called once {@link isPortLabelWide} is true. */
 export function portTablePad(node: DescriptiveNode, fontSpec: FontSpec, measurer: StringMeasurer): number {
-  const width2 = measurer.measure(node.display, fontSpec).width;
-  return Math.max(PORT_TABLE_PAD_FLOOR, width2 - PORT_LABEL_WIDE_THRESHOLD);
+  return Math.max(PORT_TABLE_PAD_FLOOR, portLabelWidth2(node, fontSpec, measurer) - PORT_LABEL_WIDE_THRESHOLD);
+}
+
+/** cdd3-T28 (E3-22): `Bibliotekon#getNodeUid` (svek/Bibliotekon.java:124-138)
+ *  appends `:h` to a SHIELDED node's uid (`SvekNode#isShielded`,
+ *  SvekNode.java:383-395: `shield().isZero() == false`), so every edge
+ *  touching it leaves/enters the shield table's centre `PORT="h"` cell, not
+ *  the margin-inflated table. Stamps that port onto the LAYOUT edges (the
+ *  text emitter's `svek-dot-emit.ts#edgeRef` already writes the suffix) --
+ *  the description counterpart of `class-dot-graph.ts#applyKalEdgePorts`.
+ *  Mutates `input.edges` in place (the graph is freshly built by the caller). */
+export function applyShieldEdgePorts(input: DotInputGraph): void {
+  const shielded = new Set(
+    input.nodes
+      .filter((n) => n.shieldMargins !== undefined && Object.values(n.shieldMargins).some((v) => v !== 0))
+      .map((n) => n.id),
+  );
+  if (shielded.size === 0) return;
+  for (const edge of input.edges) {
+    if (!shielded.has(edge.from) && !shielded.has(edge.to)) continue;
+    const attrs = (edge.attributes ??= {});
+    if (shielded.has(edge.from)) attrs.tailport = 'h';
+    if (shielded.has(edge.to)) attrs.headport = 'h';
+  }
 }

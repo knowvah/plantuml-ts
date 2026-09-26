@@ -32,6 +32,7 @@ import {
   type DescriptionEdgeGeo,
   type DescriptionGeometry,
   degenerateSingleLeaf,
+  applyShieldEdgePorts,
 } from './layout-helpers.js';
 import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layout-geo-post.js';
 import { computeInkShift } from './layout-ink-shift.js';
@@ -197,6 +198,7 @@ function runLayout(
   if (dotClusters.length > 0) input.clusters = dotClusters;
   if (kermor) input.kermor = true;
   applyDescriptionTogethers(input, ast.togethers ?? [], ctx);
+  applyShieldEdgePorts(input);
   const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, fontSpec, measurer, kermor);
   const spacing: ClusterSpacing = { nodeSep, rankSep, rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1

@@ -190,10 +190,16 @@ export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
   // Rank constraints (rank=source|sink|same|min|max): graphviz groups nodes by
   // a subgraph carrying `rank=`. Declaring an existing node id inside the
   // subgraph references it (DOT semantics — no duplicate node is created).
+  // cdd3-T28 (E3-10): a port ranked by its cluster's `portRanks` is NOT
+  // regrouped at the root -- upstream prints that rankset only inside the
+  // cluster (`ClusterDotString.java:136-137,254-260`), as the text emitter
+  // does (`svek-dot-emit.ts#rankLines`); a second, root rankset makes
+  // graphviz evict the port from its cluster (`sokevu-87-toce485`).
+  const portIds = new Set((input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)));
   const rankGroups = new Map<string, string[]>();
   for (const n of input.nodes) {
     const r = n.attributes?.rank;
-    if (r === undefined) continue;
+    if (r === undefined || portIds.has(n.id)) continue;
     const arr = rankGroups.get(r) ?? [];
     arr.push(n.id);
     rankGroups.set(r, arr);

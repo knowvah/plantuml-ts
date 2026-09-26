@@ -605,3 +605,33 @@ describe('applyGraphAttrs — searchsize=500 (E3-11, DotStringFactory.java:154)'
     expect(b.getAttr('remincross')).toBeUndefined();
   });
 });
+
+/** Builds only the node declarations + root rank subgraphs `addNodes` owns. */
+function buildNodes(input: DotInputGraph): Graph {
+  const b = createGraph({ directed: true });
+  addNodes(b, input);
+  return b.graph;
+}
+
+describe('addNodes — root rank groups (cdd3-T28, E3-10)', () => {
+  it('omits a port node already ranked by its cluster portRanks (ClusterDotString.java:136-137)', () => {
+    // Upstream prints `{rank=source;...}` for PORTIN/PORTOUT entries only
+    // inside the owning cluster (`ClusterDotString#printRanks`,
+    // ClusterDotString.java:254-260); no root-level rankset exists, and a
+    // second one makes graphviz evict the port from the cluster.
+    const input: DotInputGraph = {
+      nodes: [{ id: 'p', width: 12, height: 12, isPort: true, attributes: { rank: 'source' } }],
+      edges: [],
+      clusters: [{ id: 'n', nodeIds: ['p'], portRanks: [{ rank: 'source', nodeIds: ['p'] }] }],
+    };
+    expect(subgraphPaths(buildNodes(input))).toEqual([]);
+  });
+
+  it('keeps the root rank group for a ranked node no cluster ranks', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1, attributes: { rank: 'min' } }],
+      edges: [],
+    };
+    expect(subgraphPaths(buildNodes(input))).toEqual(['__rank_0']);
+  });
+});

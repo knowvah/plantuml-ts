@@ -16,7 +16,7 @@
 import type { Theme } from '../../theme.js';
 import { resolveElementFontSize } from '../../theme.js';
 import { isTransparentColor } from '../../paint.js';
-import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
+import { FontStyle, type FontConfiguration } from '../../klimt/shape/UText.js';
 import { ActorStyle } from '../../skin/ActorStyle.js';
 import { ComponentStyle } from './USymbols.js';
 import { resolveDescriptionUSymbol } from '../../svek/image/EntityImageDescription.js';
@@ -180,4 +180,18 @@ export function textFont(
     color: textFontColor(theme, symbol),
     styles,
   };
+}
+
+/** cdd3-T28 (E3-14): `EntityImageDescription`'s `styleTitle` FontStyle
+ *  (`fcTitle`, `EntityImageDescription.java:172`) -- bold for a `package`
+ *  leaf only: `plantuml.skin:72-76` `package { title { FontStyle bold } }`
+ *  and `:94-99` `element { composite,package { title { FontStyle bold } } }`;
+ *  every other description symbol inherits `root { FontStyle plain }`
+ *  (`:11`). */
+const PACKAGE_TITLE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.BOLD]);
+
+/** The `styles` argument for {@link textFont}'s TITLE font of a leaf drawn
+ *  by `EntityImageDescription` -- see {@link PACKAGE_TITLE_STYLES}. */
+export function entityTitleStyles(symbol: string): ReadonlySet<FontStyle> {
+  return symbol === 'package' ? PACKAGE_TITLE_STYLES : EMPTY_STYLES;
 }

@@ -20,6 +20,7 @@ import { MeasurerStringBounder } from '../../measurer-bounder.js';
 import { LimitFinder } from '../../klimt/drawing/LimitFinder.js';
 import {
   EntityImageDescription,
+  type Margins,
   type EntityImageDescriptionParams,
   type EntityImageDescriptionStereotypeSprite,
 } from './EntityImageDescription.js';
@@ -293,6 +294,21 @@ export function measureEntityLeaf(
 
   const baselineWidth = minWidthFloorBaseline(node, fontSpec, ctx, bounder);
   return { width: Math.max(width, minContentW + baselineWidth), height };
+}
+
+/**
+ * cdd3-T28 (E3-22): the `hideText` shield margins `SvekNode#shield()`
+ * (svek/SvekNode.java:220-227) reads at DOT-node-build time from
+ * `EntityImageDescription#getShield` (`EntityImageDescription.java:239-262`),
+ * built from the SAME sizing-time instance {@link measureEntityLeaf} sizes.
+ * `links` is empty: the caller has already applied `getShield`'s three link
+ * guards (`layout-helpers-shape-endpoint.ts#isInterfaceShielded`), so only
+ * the `hideText` guard and the dimension math remain to run here.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageDescription.java:239-262
+ */
+export function measureEntityLeafShield(node: LeafSizingSubject, fontSpec: FontSpec, ctx: EntityLeafCtx): Margins {
+  const bounder = new MeasurerStringBounder(ctx.measurer);
+  return new EntityImageDescription(buildSizingEntityParams(node, fontSpec, ctx)).getShield(bounder);
 }
 
 /**

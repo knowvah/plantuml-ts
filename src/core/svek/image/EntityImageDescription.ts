@@ -48,7 +48,9 @@
  * `BodyEnhanced1` -> `MethodsOrFieldsArea` -> `CucaDiagram`/`Bodier`/the
  * 40-file `skin/` package, an ≈12,100-line cascade split to mission SI1
  * (ADR-10) — `name` still uses `buildTextBlock` (support file), the
- * pre-T4 scoped substitute, UNCHANGED. `stereo` also still uses
+ * pre-T4 scoped substitute, for every symbol EXCEPT `package_` (cdd3-T28:
+ * the one `asSmall` that reads `name` now gets the real `create2`,
+ * `EntityImageDescriptionName.ts`). `stereo` also still uses
  * `buildTextBlock` (upstream: `Display.create(...)`, same substitute,
  * also unchanged by this task).
  *
@@ -106,11 +108,11 @@ import { USymbols } from '../../decoration/symbol/USymbols.js';
 import type { ComponentStyle } from '../../decoration/symbol/USymbols.js';
 import type { ActorStyle } from '../../skin/ActorStyle.js';
 import { decorateEntityDrawing, type EntityDecorationInfo } from '../DecorateEntityImage.js';
+import { buildEntityName } from './EntityImageDescriptionName.js';
 import {
   ShapeType,
   Margins,
   type HexagonPolygon,
-  buildTextBlock,
   resolveDescriptionUSymbol,
   resolveUSymbol,
   resolveShapeType,
@@ -335,11 +337,15 @@ export class EntityImageDescription {
       .withShadow(params.paint.deltaShadow)
       .withCorner(params.paint.roundCorner, params.paint.diagonalCorner);
 
-    this.name = buildTextBlock(
+    // cdd3-T28 (E3-14): `name = BodyFactory.create2(..., codeDisplay, ...)`
+    // over `entity.getName()` (`labels.codeName`, java:180,198-199) -- see
+    // `buildEntityName`.
+    this.name = buildEntityName(
+      this.symbol,
       params.labels.codeName,
-      params.paint.fontTitle,
-      params.paint.titleAlignment,
+      params.paint,
       params.atomImageResolverFor?.(params.paint.fontTitle),
+      params.emojiArtwork,
     );
     this.desc = buildDesc(this.symbol, params.labels, params.paint, params.atomImageResolverFor, params.emojiArtwork);
     this.stereo = buildStereo(

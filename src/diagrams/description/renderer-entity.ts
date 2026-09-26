@@ -52,6 +52,7 @@ import {
   upstreamKeyword,
   mapComponentStyle,
   textFont,
+  entityTitleStyles,
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
@@ -205,7 +206,11 @@ function buildEntityParams(
 ): EntityImageDescriptionParams {
   const stereotypeLabels = node.stereotype ?? [];
   const override = node.color !== undefined ? parseColorOverride(node.color) : {};
-  const fontTitle = textFont(theme, node.symbol);
+  // cdd3-T28 (E3-14): `fcTitle` (styleTitle, bold for `package`) vs `fc`
+  // (style) -- java:172-173; `buildDesc` draws a label that differs from the
+  // code name in `fontBody`.
+  const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
+  const fontBody = textFont(theme, node.symbol);
   const fontStereo = textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype');
   return {
     entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
@@ -215,7 +220,10 @@ function buildEntityParams(
       componentStyle: mapComponentStyle(theme.componentStyle),
     },
     labels: {
-      codeName: node.display,
+      // cdd3-T28 (E3-14): `codeDisplay` = `entity.getName()` (java:180) --
+      // the leaf id, which the sizer's `measureShownFolderTitle(node.id, ...)`
+      // already reads; `buildDesc`'s package/empty branch compares it.
+      codeName: node.id,
       displayText: node.display,
       stereotypeLabels,
       // Same resolution the sizer performed (`leaf-sizing-entity.ts
@@ -246,6 +254,7 @@ function buildEntityParams(
         resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH,
       ),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
+      fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
       titleAlignment: HorizontalAlignment.CENTER,
       stereotypeAlignment: HorizontalAlignment.CENTER,
