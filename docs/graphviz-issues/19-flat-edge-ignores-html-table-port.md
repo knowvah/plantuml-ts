@@ -65,7 +65,7 @@ compensation here would be fitting a number the engine should produce.
 
 ## Re-verified 2026-09-25 (class-divergence-drive-3, T5), real graphviz 16.1.0 vs dot-engine 1.6.0
 
-Still open, and it covers **5 class fixtures and 7 edges**. Each edge fails
+Still open, and it covers **7 class fixtures and 9 edges** (camuna and nafiki added 2026-09-26, see below). Each edge fails
 in dot-engine with a `triangulation failed` diagnostic, exactly one per
 failing edge; real `dot` prints none. The input is the byte-identical
 cached `svek-1.dot`, run through real `dot -Tdot` and through dot-engine
@@ -81,6 +81,8 @@ matches Δ=0.000:
 | `mucoti-34-seve858` | `sh0007:h->sh0008` | `78.903,17.168 107.61,14.139 148.35,14.111 177.28,17.082` | `e,177.38,28.788 143.44,28.588 150.95,28.632 158.46,28.676 165.98,28.72` |
 | `sefazi-02-defe499` | `sh0007->sh0008:h` | `72.081,28 101.04,28 141.84,28 170.55,28` | `e,105.91,27.412 71.915,27.212 78.871,27.253 86.49,27.298 94.453,27.345` |
 | `rifuzu-80-nixo780` | `sh0007:h->sh0009` | `184.94,15.164 216.21,14.424 250.19,15.104 276.49,17.205` | `e,276.45,28.794 242.49,28.645 250,28.678 257.52,28.711 265.04,28.744` (`head_lp` 260.99,23.705 → 260.95,35.294) |
+| `camuna-58-veca254` | `sh0007:h->sh0009` | `184.84,46.954 207.12,49.517 231.02,50.285 253.09,47 258.58,46.183 264.25,44.983 269.84,43.576` | `e,270.03,28.789 207.36,28.504 224.5,28.582 241.63,28.66 258.77,28.738` |
+| `nafiki-56-jixu680` | `sh0007:h->sh0009` | identical to rifuzu | identical to rifuzu |
 
 The engine output is a straight 4-point stub. It starts at the node's
 bounding box, not at the port cell, and carries an `e,` endpoint even
@@ -90,3 +92,15 @@ port resolution. The plantuml-ts side of this is clean: the graph that
 `layoutGraph()` builds lays out on dot-engine exactly like the cached DOT
 (`B-api-vs-real.mts`, 0 node mismatches in all 5 fixtures). The full
 artifact is in `plans/class-divergence-drive-3/diagnosis/B.md` (B-4).
+
+## Added 2026-09-26 (class-divergence-drive-4 planning): camuna, nafiki
+
+`camuna-58-veca254` and `nafiki-56-jixu680` were attributed to this issue in
+the cdd3 ledger but were not in the T5 table. The same probe (cached
+`svek-1.dot` -> real `dot -Tdot` 16.1.0 vs dot-engine 1.6.0
+`render(parse(src), 'dot')`) reproduces the same signature on both. dot-engine
+prints exactly one `triangulation failed` and real dot prints none. The one
+diverging edge is the flat `sh0007:h->sh0009`, rendered as the 4-point `e,`
+stub. Every other edge `pos` agrees within 0.01. These are the whole
+remaining class residual of both fixtures (camuna 1/18, nafiki 0/24 after
+cdd3 T11).

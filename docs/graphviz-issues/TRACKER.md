@@ -312,8 +312,9 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         per-curve dot-engine routing delta, not a general defect in T13's
         clip. -->
 - [ ] 19-flat-edge-ignores-html-table-port.md  <!-- RE-VERIFIED 2026-09-25
-        (cdd3-T5): still open, 5 class fixtures / 7 edges (coxose x2,
-        ririlu x2, mucoti, sefazi, rifuzu); dot-engine prints `triangulation
+        (cdd3-T5): still open, 7 class fixtures / 9 edges (coxose x2,
+        ririlu x2, mucoti, sefazi, rifuzu; camuna + nafiki added
+        2026-09-26 by cdd4 planning, same signature on sh0007:h->sh0009); dot-engine prints `triangulation
         failed` once per failing edge, real dot 16.1.0 none; every other
         element byte-equal. Probe numbers in the issue file.
         ORIGINAL FILING NOTE FOLLOWS: FILED 2026-09-22
