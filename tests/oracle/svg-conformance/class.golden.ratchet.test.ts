@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { compareSvg } from './compare.js';
 import { renderFixtureClass } from './render-fixture-class.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 
 interface RatchetFixture {
   slug: string;
@@ -110,7 +111,13 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet (
     it(`class/${f.slug}: stays zero-diff against the pinned golden`, () => {
       const golden = readGolden(f);
       const markup = readSource(f);
-      const ours = renderFixtureClass(markup, new DeterministicMeasurer());
+      // Same stdlib store the census renders with
+      // (`scripts/svg-conformance-census.ts`, SI5b), so a `<bundle/...>`
+      // fixture the census found zero-diff can be held here (cdd3 close-b3:
+      // cuzoga, jevuvi include `<tupadr3/common>`).
+      const ours = renderFixtureClass(markup, new DeterministicMeasurer(), {
+        includeStore: fixtureIncludeStore(),
+      });
       const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
       expect(
         pass,
