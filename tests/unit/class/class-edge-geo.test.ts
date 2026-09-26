@@ -184,12 +184,13 @@ describe('cdd-T16 — a grouped-inheritance link is suppressed to a bare solid p
     const a3children = lazeju.edges.filter((e) => e.to === 'A3');
     for (const e of a3children) {
       expect(e.sametail?.parentId).toBe('A3');
-      expect(e.sametail?.contact).toEqual({ x: 370.575, y: 76 });
+      // cdd3-T-D3: jar draws x2="370.58" (the 2-dp `-Tsvg` read).
+      expect(e.sametail?.contact).toEqual({ x: 370.58, y: 76 });
     }
     const a4children = lazeju.edges.filter((e) => e.to === 'A4');
     for (const e of a4children) {
       expect(e.sametail?.parentId).toBe('A4');
-      expect(e.sametail?.contact).toEqual({ x: 667.575, y: 76 });
+      expect(e.sametail?.contact).toEqual({ x: 667.58, y: 76 });
     }
   });
 

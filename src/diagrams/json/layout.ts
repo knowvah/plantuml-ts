@@ -435,7 +435,7 @@ export function layoutJson(ast: JsonDiagramAST, theme: Theme, measurer: StringMe
     omitSepAttrs: true,
   };
 
-  const dotResult = dotLayout(dotInput);
+  const dotResult = dotLayout(dotInput, { read: 'exact' });
 
   // Transpose the solved layout back into diagram space before anything reads
   // a coordinate off it.

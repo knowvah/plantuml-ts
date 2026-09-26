@@ -427,11 +427,12 @@ describe('buildEdgeGeos — magic-arrow edge label (G2 item 44)', () => {
     };
     const geo = layoutClass(ast, defaultTheme, new DeterministicMeasurer());
     const edge = geo.edges[0]!;
-    expect(edge.label).toEqual({ text: 'besetzt', x: 41.68125, y: 96.11112311111113, width: 41.84375 });
+    // cdd3-T-D3: label corner read at graphviz's 2-dp `-Tsvg` precision.
+    expect(edge.label).toEqual({ text: 'besetzt', x: 41.68, y: 96.11111111111111, width: 41.84375 });
     expect(edge.arrowGlyph!.points).toEqual([
-      { x: 32.68125, y: 87.50001200000001 },
-      { x: 29.742323738537632, y: 96.54509697187476 },
-      { x: 35.62017626146236, y: 96.54509697187476 },
+      { x: 32.68, y: 87.5 },
+      { x: 29.741073738537633, y: 96.54508497187473 },
+      { x: 35.61892626146236, y: 96.54508497187474 },
     ]);
   });
 
@@ -564,11 +565,11 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
   it('gobuco: glyph + text origin floors maxWidth, no margin term (M8, pinned)', () => {
     const geo = layoutClass(astFor(GOBUCO), defaultTheme, measurer);
     const lines = geo.edges[0]!.labelLines!;
-    expect(lines[0]!.x).toBeCloseTo(41.68125, 6);
+    expect(lines[0]!.x).toBeCloseTo(41.68, 6); // cdd3-T-D3 2-dp label read
     expect(lines[0]!.glyph!.points).toEqual([
-      { x: 33.68125, y: 97.500012 },
-      { x: 36.62017626146236, y: 88.45492702812527 },
-      { x: 30.742323738537632, y: 88.45492702812527 },
+      { x: 33.68, y: 97.5 },
+      { x: 36.61892626146236, y: 88.45491502812527 },
+      { x: 30.741073738537633, y: 88.45491502812527 },
     ]);
   });
 
@@ -581,9 +582,10 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     // (`sacacu-34-dobo091` jar-verified) -- see that function's own doc
     // comment.
     expect(lines.map((l) => [l.text, l.x, l.y, l.width])).toEqual([
-      ['this is', 42.046875, 96.11112311111111, 29.65625],
-      ['on several', 28.68125, 109.11112311111111, 56.387499999999996],
-      ['lines', 43.46875, 122.11112311111111, 26.8125],
+      // cdd3-T-D3: the label table corner is now the 2-dp `-Tsvg` read.
+      ['this is', 42.045625, 96.11111111111111, 29.65625],
+      ['on several', 28.68, 109.11111111111111, 56.387499999999996],
+      ['lines', 43.4675, 122.11111111111111, 26.8125],
     ]);
   });
 
@@ -595,16 +597,17 @@ describe('buildEdgeGeos — per-line guide-line glyphs (SI25 D1/D3/D4)', () => {
     // UNCHANGED by cdd-T37 -- `portLabelAnchor`'s own `Math.trunc(width)/2`
     // hybrid already reconciles it against jar (see that task's fix doc
     // comment on `attachMagicArrow`, `class-edge-label-attach.ts`).
-    expect(edge.label).toEqual({ text: 'ok', x: 41.68125, y: 96.11112311111113, width: 13.73125 });
+    // cdd3-T-D3: label corner read at graphviz's 2-dp `-Tsvg` precision.
+    expect(edge.label).toEqual({ text: 'ok', x: 41.68, y: 96.11111111111111, width: 13.73125 });
     // cdd-T37 (M8): the GLYPH origin moved -- jar's real oracle
     // (`lojepe-37-liri985`) confirms these are the byte-exact values
     // (`plans/class-divergence-drive/decision-journal.md` rows 225+):
     // `center.x - Math.floor(arrowFontSize + textWidth) / 2`, not the
     // pre-T37 un-floored `center.x - (arrowFontSize + textWidth) / 2`.
     expect(edge.arrowGlyph!.points).toEqual([
-      { x: 32.68125, y: 97.50001200000001 },
-      { x: 35.62017626146236, y: 88.45492702812527 },
-      { x: 29.742323738537632, y: 88.45492702812527 },
+      { x: 32.68, y: 97.5 },
+      { x: 35.61892626146236, y: 88.45491502812527 },
+      { x: 29.741073738537633, y: 88.45491502812527 },
     ]);
   });
 

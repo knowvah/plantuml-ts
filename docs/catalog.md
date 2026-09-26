@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1237 modules · 4646 exported names.
+1239 modules · 4662 exported names.
 
 ## `src/`
 
@@ -50,7 +50,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `graph-layout-build-edges.ts` | `CARDINALITY_FONT_SIZE`, `EdgeIndex`, `edgeKey`, `addEdges` | `addEdges` — split out of ./graph-layout-build.ts (500-line file-cap compliance, forced by G7 T14b's border-point wiring additions; pure move, no behavior change). |
 | `graph-layout-build.ts` | `PX_PER_INCH`, `addEdges`, `edgeKey`, `CARDINALITY_FONT_SIZE`, `EdgeIndex`, `applyGraphAttrs`, `firstEncounterOrder`, `addNodes`, `ClusterIndex`, `addClusters` | @knowvah/dot-engine builder construction for `layoutGraph()` — split from `graph-layout.ts` (500-line file cap). |
 | `graph-layout-cluster.types.ts` | `DotInputCluster` | `DotInputCluster` — the cluster half of the layout input contract. |
+| `graph-layout-node-corner.ts` | `portNodeSize`, `shieldCorner`, `cornerSize`, `svekCornerOf` | A laid-out node's top-left corner — split from `graph-layout.ts` (file-size cap) with no behaviour change: the HTML-sized node boxes (G9/T9, cdd-T15) and, for the Svek read, the parsed corner (cdd3-T-D3). |
 | `graph-layout-result.types.ts` | `DotLayoutResult` | `DotLayoutResult` — the layout engine's OUTPUT shape. |
+| `graph-layout-svek-read.ts` | `svgDouble`, `SvekFrame`, `svekFrame`, `svekY`, `svekPoint`, `SvekNodeBox`, `svekNodeCorner`, `LabelTable`, `EdgeLabelTables`, `edgeLabelTables`, `svekEdge`, `svekCluster` | cdd3-T-D3 (D3): read the layout the way the jar's Svek reads it. |
 | `graph-layout.ts` | `CARDINALITY_FONT_SIZE`, `setLayoutInputObserver`, `layoutGraph`, `DotInputNode`, `DotInputNodeShape`, `DotInputEdge`, `DotInputCluster`, `DotInputGraph`, `DotInputTogether`, `DotLayoutResult` |  |
 | `graph-layout.types.ts` | `DotInputNodeShape`, `DotInputPortRow`, `DotInputNode`, `DotInputEdge`, `DotInputCluster`, `DotInputTogether`, `DotInputGraph`, `DotLayoutResult` |  |
 | `include-resolver-errors.ts` | `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `blockedUrlError`, `includeTimeoutError`, `CircularIncludeError` | The include seam's error types, split out of `include-resolver.ts` (which sits at the repo's 500-line cap) and re-exported from it unchanged. |

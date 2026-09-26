@@ -150,15 +150,16 @@ describe('note ... on link (T4, state-declared-size-fix)', () => {
     // note` (findings/note.md#tumaba-64-tosu281): the fold-corner outline +
     // corner triangle (both fill #FEFFDD, stroke-width 0.5 -- symmetric,
     // unlike a freestanding note's asymmetric split) plus the LEFT-anchored
-    // body text, byte-exact against jar's own canonical SVG
+    // body text, byte-exact against jar's own canonical SVG (2-dp since
+    // cdd3-T-D3 read the layout at `-Tsvg` precision)
     // (test-results/visual-qa-svg/canonical/state/tumaba-64-tosu281.svg).
     expect(svg).toContain(
-      '<path d="M54.213,315 L54.213,338 L92.213,338 L92.213,325 L82.213,315 L54.213,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+      '<path d="M54.21,315 L54.21,338 L92.21,338 L92.21,325 L82.21,315 L54.21,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
     );
     expect(svg).toContain(
-      '<path d="M82.213,315 L82.213,325 L92.213,325 L82.213,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
+      '<path d="M82.21,315 L82.21,325 L92.21,325 L82.21,315" fill="#FEFFDD" stroke="#181818" stroke-width="0.5"/>',
     );
-    expect(svg).toContain('<text x="60.213" y="330.111" font-size="13" fill="#000" textLength="17.388">hi1</text>');
+    expect(svg).toContain('<text x="60.21" y="330.111" font-size="13" fill="#000" textLength="17.388">hi1</text>');
   });
 
   it("tumaba-64-tosu281: SubState (the composite host) reserves the note's real width", () => {

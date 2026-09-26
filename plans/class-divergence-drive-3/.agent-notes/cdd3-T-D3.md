@@ -1180,3 +1180,31 @@ complete candidate is the appendix patch, which applies cleanly on 47d21018.
 - Gates on the candidate: typecheck, lint and build green; class/object DOT
   parity green; npm test has 2 failures (above). After the revert the tree
   equals 47d21018 except for this note.
+
+## ADOPTED after maintainer ruling (supersedes the REJECT above)
+
+Maintainer decision relayed by the orchestrator: re-pin and adopt (journal
+row 56). Applied the appendix patch unchanged on b22f21df, then:
+
+- Re-pin: `scripts/measure-state-size-deltas.ts` (measurement only; there is
+  no auto re-pin script) reported exactly 2 widened of 120: nimana-36-veco708
+  0.053277 -> 0.053416, nimise-04-jove070 0.053278 -> 0.053417 (both
+  svek-2.dot). Only those two values changed in
+  `oracle/goldens/state/size-backlog.json`. The derivation (inner positions
+  now match the jar; the 3.846 px left-ink fold predates D3) is appended to
+  its `_doc`. `_doc` is the file's own convention; a `$comment` key would be
+  read as a number by the measure script, which skips only `_doc`. The same
+  run reports 47 entries now below their pins. They were NOT tightened
+  (out of scope for this re-pin).
+- Class render-all `/tmp/cdd3-TD3-final.json` vs `/tmp/cdd3-TD3-pre.json`:
+  670/34/19 -> 689/16/18, 19 transitions, all -> conformant, 0 lost.
+- All-engine reach (survey vs /tmp/cdd3-b4-eng, taken on this exact src):
+  class +19, state +2, unknown +4, 0 conformant losses anywhere.
+- Gates on the commit tree: npm test 858 files / 23036 tests passed
+  (EXIT 0); typecheck 0; lint 0; build 0. DOT-parity class/object/state:
+  1071/1071.
+- Commit 1: `feat(cdd3-T-D3): read layout at the jar's 2-dp svg precision`.
+- Commit 2 (follows): retire `absorbLayoutEpsilon` if it still moves 0 rows
+  on this tree. The earlier identity probe, run with D3 applied, moved 0 rows
+  in class and all 27 engines. It is re-verified before removal; the result
+  goes in the commit body.

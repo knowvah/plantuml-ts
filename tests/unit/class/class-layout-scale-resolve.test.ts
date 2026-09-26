@@ -39,12 +39,10 @@ describe('C-10 — scale max N width/height, scale N width (fractional pre-dim b
 
   it('kujiji-68-cujo036 (`scale 900 width`): font-size 9.874, jar pre width=1276.14375 (D3 residual: font rounds from 9.8735)', () => {
     const svg = renderSync(fixtureSource('kujiji-68-cujo036'), { measurer });
-    // D3 (C-13): the jar itself rounds this boundary value to 9.874; our
-    // fractional-basis k lands one 2-dp tick below at 9.873 (owned by the
-    // D3 layout-precision task, NOT this mechanism) -- asserted here so a
-    // future D3 fix's regression shows up as a CHANGE to this line, not a
-    // silent pass.
-    expect(fontSizes(svg)).toEqual(Array(11).fill('9.873'));
+    // D3 (C-13): the jar itself rounds this boundary value to 9.874; with
+    // the layout read at graphviz's 2-dp `-Tsvg` precision (cdd3-T-D3,
+    // DotStringFactory.java:388-396) our k lands on it too.
+    expect(fontSizes(svg)).toEqual(Array(11).fill('9.874'));
     expect(svg).toContain('viewBox="0 0 900 145"');
   });
 });
