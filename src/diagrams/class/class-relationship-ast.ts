@@ -119,6 +119,16 @@ export interface Relationship {
    */
   linkNoteHalfWidth?: boolean;
   /**
+   * cdd3-T32: `NoteLinkStrategy.HALF_NOT_PRINTED` -- the B-side of the split
+   * above. It reserves the same half-width box ({@link linkNoteHalfWidth})
+   * but `SvekEdge#drawU` never draws it (`svek/SvekEdge.java:950-951`'s
+   * `getStrategy() != HALF_NOT_PRINTED` guard); the A-side's
+   * `HALF_PRINTED_FULL` draws the full merged block. Set only by
+   * class-assoc-couple.ts, on `pointToEntity2`
+   * (`objectdiagram/AbstractClassOrObjectDiagram.java:282-284`).
+   */
+  linkNoteNotPrinted?: boolean;
+  /**
    * cdd2-T19c: this note-on-link's own `#color` spec — the BACK (fill) and
    * LINE (outline stroke) slots `ComponentRoseNote`'s `symbolContext` reads
    * (`style/Style.java:270-282`), parsed from `NOTE_ON_LINK_COLOR` by

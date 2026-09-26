@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1236 modules · 4643 exported names.
+1237 modules · 4646 exported names.
 
 ## `src/`
 
@@ -59,6 +59,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `include-resolver.ts` | `MapIncludeStore`, `IncludeNotFoundError`, `StdlibNotBundledError`, `EMPTY_INCLUDE_STORE`, `IncludeStore`, `IncludeFetcher`, `CspIncludeError`, `CorsIncludeError`, `IncludeResolveError`, `CircularIncludeError`, `fetchInclude`, `prefetchIncludes`, `IncludeWarmupOptions`, `prepareIncludeStore` | The ASYNC half of the include seam. |
 | `internal-emoji-store.ts` | `INTERNAL_EMOJI_ASSET_PREFIX`, `internalEmojiAssetKey`, `InternalEmojiStore`, `EmojiArtworkResolver`, `emojiArtworkResolverFor`, `internalEmojiStoreFrom` | The Twemoji artwork half of `<:name:>` emoji rendering. |
 | `internal-sprite-store.ts` | `INTERNAL_SPRITE_ASSET_PREFIX`, `internalSpriteAssetKey`, `InternalSpriteStore`, `internalSpriteStoreFrom`, `matchJarSpriteLine` | `SpriteImage.fromInternal` (java `klimt/sprite/SpriteImage.java:100-128`) — the jar-internal `/sprites/**` bundle, ported onto ADR-2's synchronous asset channel (`plans/s1l-tail-fix/decisions.md`). |
+| `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
 | `latex.ts` | `measureNodeLabel`, `renderNodeLabel`, `LabelSpan`, `parseLatexLabel`, `measureLatex`, `renderLatexMathML`, `renderLatexAsImage` | LaTeX label parsing, sizing, and rendering utilities. |
 | `layout-epsilon.ts` | `absorbLayoutEpsilon` | Round away the sub-thousandth float noise this port's own unit conversion introduces, so it cannot flip a truncating integer cast. |
@@ -1222,7 +1223,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-member-display.ts` | `splitMemberDisplayLines`, `atomsToPlainText` | class-member-display.ts — the physical-line splitter + plain-text projection for classifier member rows. |
 | `class-member-parser.ts` | `parseMemberLine` | Member (attribute/method) line parsing for PlantUML class diagrams. |
 | `class-member-render-atom.ts` | `MemberRenderAtom`, `MemberRowBuild` | class-member-render-atom.ts — `MemberRenderAtom`/`MemberRowBuild`, the render-ready shapes `class-member-creole.ts#resolveMemberAtoms` produces. |
-| `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
+| `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds`, `annotateWrappedMembers` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
 | `class-member-sprite-render.ts` | `renderMemberRowDrawable` | class-member-sprite-render.ts — draws a member row's `'drawable'` atom (C-4, cdd3-T23): the `DrawablePrimitive[]` decomposition `class-member-atom-resolve.ts#resolveSpriteAtom` already resolved at LAYOUT time, placed at the row's own RENDER |
 | `class-monochrome.ts` | `MonochromeMode`, `applyMonochromeHex`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |

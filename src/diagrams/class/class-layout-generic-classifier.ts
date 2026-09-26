@@ -27,7 +27,8 @@ import { descriptionLeafSymbolInk } from './class-layout-description-leaf-ink.js
 import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.js';
 import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import { resolveElementFontSize, resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
-import { buildSectionRows, type FlatMemberRows, type SectionRowContext } from './class-member-rows.js';
+import { annotateWrappedMembers, buildSectionRows } from './class-member-rows.js';
+import type { FlatMemberRows, SectionRowContext } from './class-member-rows.js';
 import {
   computeHeaderNameGeo,
   computeStereoAndTagGeo,
@@ -431,7 +432,8 @@ function appendMemberSectionRows(
   rowCtx: SectionRowContext,
 ): void {
   acc.dividerYs.push(y);
-  acc.rows.push(...buildSectionRows(section.members, section.texts, section.builds, y, hasIcon, rowCtx));
+  const rows = buildSectionRows(section.members, section.texts, section.builds, y, hasIcon, rowCtx);
+  acc.rows.push(...annotateWrappedMembers(rows, section));
 }
 
 /** The full geo bundle {@link buildNormalClassifierResult} needs. */

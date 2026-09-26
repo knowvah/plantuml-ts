@@ -172,6 +172,9 @@ export function scaleRow(row: RowGeo, k: number, themeFontSize: number): RowGeo 
     ...(row.visibilityBlockHeight !== undefined ? { visibilityBlockHeight: row.visibilityBlockHeight * k } : {}),
     ...(row.visibilityBlockTopDy !== undefined ? { visibilityBlockTopDy: row.visibilityBlockTopDy * k } : {}),
     ...(row.atoms !== undefined ? { atoms: row.atoms.map((a) => scaleAtom(a, k)) } : {}),
+    ...(row.memberWrap !== undefined
+      ? { memberWrap: { ...row.memberWrap, height: row.memberWrap.height * k, width: row.memberWrap.width * k } }
+      : {}),
   };
 }
 

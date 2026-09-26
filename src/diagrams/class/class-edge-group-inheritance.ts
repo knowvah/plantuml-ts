@@ -100,9 +100,10 @@ export function groupInheritanceOverride(
  * for every OTHER link touching a protected leaf, upstream draws a plain
  * (non-triangle) stub from `rect ∩ (center, contact)` to `contact`, where
  * `contact = link.getEntity1() == leaf ? line.getStartContactPoint() :
- * line.getEndContactPoint()`. `normalizedPts[0]`/`.at(-1)` ARE those two
- * upstream contact points (`normalizeEdgePoints` runs entity1 -> entity2
- * unconditionally, see that function's own doc comment). entity1's own
+ * line.getEndContactPoint()`. The caller passes the DRAWN path
+ * (`class-ink-dot-path.ts#drawnEdgePoints`, cdd3-T32 E2-5): those getters
+ * read `dotPath` after the decoration trim (`svek/SvekEdge.java:560-563`),
+ * entity1 -> entity2 (`normalizeEdgePoints`). entity1's own
  * leaf is skipped when it's ALSO this edge's `grouped` parent -- Java's
  * `allButSametails.removeAll(sametailLinks)` already excludes that exact
  * pairing (drawn as the shared triangle instead); entity2's leaf carries
@@ -125,11 +126,11 @@ export function computeLeafContacts(
   rel: Relationship,
   protectedIds: ReadonlySet<string> | undefined,
   grouped: ReturnType<typeof groupInheritanceOverride>,
-  normalizedPts: ReadonlyArray<{ x: number; y: number }>,
+  drawnPts: ReadonlyArray<{ x: number; y: number }>,
 ): SametailGeo[] | undefined {
   if (protectedIds === undefined || protectedIds.size === 0) return undefined;
-  const start = leafContactAt(rel.idEntity1FullId, normalizedPts[0], protectedIds, grouped !== undefined);
-  const end = leafContactAt(rel.idEntity2FullId, normalizedPts[normalizedPts.length - 1], protectedIds, false);
+  const start = leafContactAt(rel.idEntity1FullId, drawnPts[0], protectedIds, grouped !== undefined);
+  const end = leafContactAt(rel.idEntity2FullId, drawnPts[drawnPts.length - 1], protectedIds, false);
   const out = [start, end].filter((c): c is SametailGeo => c !== undefined);
   return out.length > 0 ? out : undefined;
 }

@@ -23,6 +23,7 @@ import { kalBoxAt, type Kal } from './class-kal.js';
 import { fixKalOverlaps, type PlacedKal } from './class-kal-overlap.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeId } from './class-link-order.js';
+import { drawnEdgePoints } from './class-ink-dot-path.js';
 
 // cdd-T6: `EdgeGeoTextContext` and the three label-attach functions moved
 // to `class-edge-label-attach.ts` when the note-box/constraint wiring pushed
@@ -240,6 +241,30 @@ function attachConstraints(entries: readonly ConstraintEntry[]): void {
   }
 }
 
+/** One edge awaiting {@link attachLeafContacts}. */
+interface LeafEnd {
+  edgeGeo: EdgeGeo;
+  rel: Relationship;
+  grouped: ReturnType<typeof groupInheritanceOverride>;
+}
+
+/**
+ * cdd-T16b (E11) / cdd3-T32 (E2-5): `dot/Neighborhood.java:97-99`'s
+ * `allButSametails` contact is `SvekEdge#getStartContactPoint()`/
+ * `getEndContactPoint()` (`svek/SvekEdge.java:1314-1334`), read while the
+ * NODES draw (`svek/SvekResult.java:82-89`) -- i.e. `dotPath` after
+ * `solveLine` ran `getExtremitySimplier`'s `moveStartPoint`/`moveEndPoint`
+ * decoration trim (`svek/SvekEdge.java:560-563`), and before `drawU`'s
+ * magnetic force, which moves only a copy (`svek/SvekEdge.java:907-941`).
+ * {@link drawnEdgePoints} is exactly that path (the renderer's own trim), so
+ * this runs after `fixKalOverlaps` (the Kal translate rides the same trim)
+ * and before `applyClusterMagneticBorders`.
+ */
+function attachLeafContacts(end: LeafEnd, protectedIds: ReadonlySet<string> | undefined): void {
+  const contacts = computeLeafContacts(end.rel, protectedIds, end.grouped, drawnEdgePoints(end.edgeGeo));
+  if (contacts !== undefined) end.edgeGeo.leafContacts = contacts;
+}
+
 // cdd-T16/T16b: `groupInheritanceOverride`/`computeLeafContacts`/
 // `resolveEdgeDecor`/`buildStrokeOverride` moved to
 // `class-edge-group-inheritance.ts` (500-line hook cap) -- imported above.
@@ -288,6 +313,7 @@ export function buildEdgeGeos(
   // collected here and applied after the loop, in that order.
   const placedKals: PlacedKal[] = [];
   const clusterEnds: Array<{ edgeGeo: EdgeGeo; startId: string; endId: string }> = [];
+  const leafEnds: LeafEnd[] = [];
   for (let i = 0; i < ast.relationships.length; i++) {
     const rel = ast.relationships[i]!;
     if (rel.invis === true) continue;
@@ -312,8 +338,6 @@ export function buildEdgeGeos(
     // {@link groupInheritanceOverride}'s own doc comment.
     const grouped = groupInheritanceOverride(rel, i, text.sametailByRelIndex, normalizedPts);
     const resolved = resolveEdgeDecor(rel, decor, matchesFromTo, grouped, defaultArrowThickness);
-    // cdd-T16b (E11): `allButSametails` -- see {@link computeLeafContacts}.
-    const leafContacts = computeLeafContacts(rel, text.protectedIds, grouped, normalizedPts);
     const edgeGeo: EdgeGeo = {
       id: edgeResult.id,
       points: pts,
@@ -343,11 +367,11 @@ export function buildEdgeGeos(
       ...(rel.labelTextColor !== undefined ? { labelTextColor: rel.labelTextColor } : {}),
       ...resolved.strokeExtra,
       ...(grouped?.sametail !== undefined ? { sametail: grouped.sametail } : {}),
-      ...(leafContacts !== undefined ? { leafContacts } : {}),
     };
 
     if (relKals.length > 0) placedKals.push(...attachKalBoxes(edgeGeo, relKals, normalizedPts, rel));
     clusterEnds.push({ edgeGeo, startId, endId });
+    leafEnds.push({ edgeGeo, rel, grouped });
     attachEdgeLabel(edgeGeo, rel, edgeResult, text, matchesFromTo ? pts : [...pts].reverse());
     attachNoteAndConstraintSpot(edgeGeo, rel, edgeResult, text, constrained);
     // `result.nodes` is the collision set — the closest analogue to
@@ -363,6 +387,7 @@ export function buildEdgeGeos(
   }
   attachConstraints(constrained);
   fixKalOverlaps(placedKals);
+  for (const end of leafEnds) attachLeafContacts(end, text.protectedIds);
   for (const { edgeGeo, startId, endId } of clusterEnds) {
     edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
   }

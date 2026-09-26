@@ -318,11 +318,12 @@ export function makeCoupleCircle(
       // `length == 1` (entityLength/self-couple-ness disagree): jar's
       // `entity1ToPoint`/`pointToEntity2` split -- HALF_PRINTED_FULL on the
       // A-side, HALF_NOT_PRINTED on the B-side (SvekEdge.java:314-316's `||`
-      // treats them identically: BOTH halve the reserved width, only drawing
-      // differs, which is outside this port's DOT-label-box scope).
+      // treats them identically: BOTH halve the reserved width); only the
+      // B-side skips the draw (`SvekEdge.java:950-951`, cdd3-T32).
       bEdge.linkNote = subsumed.linkNote;
       aEdge.linkNoteHalfWidth = true;
       bEdge.linkNoteHalfWidth = true;
+      bEdge.linkNoteNotPrinted = true;
     }
     // else: `NoteLinkStrategy.NORMAL` -- aEdge alone carries the note, at its
     // full (unhalved) reservation; bEdge gets none, matching `SvekEdge

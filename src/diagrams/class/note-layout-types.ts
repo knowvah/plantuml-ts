@@ -244,7 +244,15 @@ export interface ClassifierAnchor {
    * flat margin regardless of `indent` (see `tipAnchor`'s own doc comment
    * for why the two ends of one row aren't symmetric upstream).
    */
-  rows: ReadonlyArray<{ text: string; y: number; width?: number; indent: number }>;
+  rows: ReadonlyArray<{
+    text: string;
+    y: number;
+    width?: number;
+    indent: number;
+    /** cdd3-T32: `ClassifierRowGeo.memberWrap` / `.wrapContinuation`. */
+    memberWrap?: { text: string; height: number; width: number };
+    wrapContinuation?: true;
+  }>;
   /**
    * G2 N47: copied unchanged from `ClassifierGeo.enhancedBody` when present
    * -- `class-layout-helpers.ts`'s enhanced-body branch leaves `rows` at

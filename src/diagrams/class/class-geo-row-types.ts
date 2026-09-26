@@ -107,4 +107,17 @@ export interface ClassifierRowGeo {
    * other row kind, which keeps the baseline-keyed T20 formula.
    */
   visibilityBlockTopDy?: number;
+  /**
+   * cdd3-T32: set on the FIRST row of a member that word-wrapped into 2+
+   * rows. Upstream the member is ONE `rawBody` line (`cucadiagram/
+   * BodierAbstract.java:69-86`, matched by `getBestMatch`) and ONE text
+   * block (`cucadiagram/MethodsOrFieldsArea.java:287-294`, whose
+   * `getInnerPosition` is the whole block), so a `::member` tip note matches
+   * `text` and aims at the block (`svek/image/EntityImageTips.java:175-179`).
+   * `height` is the sum of the member's rows' heights, `width` the widest.
+   */
+  memberWrap?: { text: string; height: number; width: number };
+  /** cdd3-T32: a wrapped member's continuation (non-first) row -- part of
+   *  the block {@link memberWrap} describes, never a match target itself. */
+  wrapContinuation?: true;
 }

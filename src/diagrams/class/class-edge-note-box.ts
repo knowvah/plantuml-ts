@@ -112,7 +112,9 @@ function mergedLayout(
     label,
     noteDim,
     position: rel.linkNotePosition ?? 'bottom',
-    halfWidth: false,
+    // `eventuallyDivideByTwo` (`SvekEdge.java:440-442`): the table graphviz
+    // centres on `labelX` is the halved one for both HALF_* strategies.
+    halfWidth: rel.linkNoteHalfWidth ?? false,
     // Always `LinkMiddleDecor.NONE` in this port -- see
     // `class-layout-edge-labels.ts#computeNoteMergedLabelAttrs`'s own
     // derivation of the same `hasMiddleDecor: false`.
@@ -168,9 +170,11 @@ export function labelOperandCenter(
  * `center - reserved / 2` — the same corner convention every other class
  * edge-label anchor uses. `NoteLinkStrategy.HALF_NOT_PRINTED` draws
  * nothing at all (`SvekEdge.java:950-951`'s `link.getNote().getStrategy()
- * != HALF_NOT_PRINTED` guard), which this port models as
- * `Relationship.linkNoteHalfWidth` — the only path that sets it
- * (`class-assoc-couple.ts`) is upstream's `HALF_*` path.
+ * != HALF_NOT_PRINTED` guard), modelled as `Relationship
+ * .linkNoteNotPrinted`. cdd3-T32: `HALF_PRINTED_FULL` DOES draw -- the full
+ * merged block at `labelXY`, the corner of the HALF-width table
+ * (`SvekEdge.java:314-316,440-442`), so `mergedLayout` reserves with the
+ * relationship's own `linkNoteHalfWidth`.
  */
 export function computeEdgeNoteBox(
   rel: Relationship,
@@ -180,7 +184,7 @@ export function computeEdgeNoteBox(
   noteCtx: NoteBoxContext,
 ): EdgeNoteBoxGeo | undefined {
   const linkNote = rel.linkNote;
-  if (linkNote === undefined || rel.linkNoteHalfWidth === true) return undefined;
+  if (linkNote === undefined || rel.linkNoteNotPrinted === true) return undefined;
   const { noteDim, labelDim, merged, left, top } = mergedLayout({ ...rel, linkNote }, center, font, measurer, noteCtx);
   const offset =
     (rel.label ?? '').length === 0

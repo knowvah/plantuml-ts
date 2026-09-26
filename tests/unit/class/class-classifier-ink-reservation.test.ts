@@ -56,7 +56,7 @@ describe('headerInkReservation — HeaderLayout#drawU placement (HeaderLayout.ja
 
 describe('compartmentReservationWidth — MethodsOrFieldsArea.java:83-86', () => {
   it('reserves the 12px margin for an EMPTY shown compartment', () => {
-    expect(compartmentReservationWidth({ members: [], texts: [], builds: [] }, false, 14)).toBe(12);
+    expect(compartmentReservationWidth({ members: [], texts: [], builds: [], memberTexts: [] }, false, 14)).toBe(12);
   });
 });
 
