@@ -14,16 +14,17 @@ import { describe, it, expect } from 'vitest';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-function block(lines: string[]): { lines: string[] } {
-  return { lines };
+function block(lines: string[]): UmlSource {
+  return { lines, type: 'class' };
 }
 
 describe('C-3 — parseClass threads ParseOptions.assetStore into the sprite registry', () => {
   it('with no options, the registry carries no internal store (pre-fix behavior unchanged)', () => {
     const ast = parseClass(block(['sprite Netw jar:archimate/network', 'class Foo']));
     expect('errors' in ast).toBe(false);
-    expect((ast as ClassDiagramAST).sprites.internal).toBeUndefined();
+    expect((ast as ClassDiagramAST).sprites?.internal).toBeUndefined();
   });
 
   it('with assetStore, the registry resolves `jar:archimate/network`', () => {
@@ -31,13 +32,13 @@ describe('C-3 — parseClass threads ParseOptions.assetStore into the sprite reg
     const ast = parseClass(block(['sprite Netw jar:archimate/network', 'class Foo']), { assetStore });
     expect('errors' in ast).toBe(false);
     const sprites = (ast as ClassDiagramAST).sprites;
-    expect(sprites.internal).toBeDefined();
-    expect(sprites.internal?.get('archimate/network')).toBeDefined();
+    expect(sprites?.internal).toBeDefined();
+    expect(sprites?.internal?.get('archimate/network')).toBeDefined();
     // `sprite Netw jar:...` is a DEFINITION command -- it registers the
     // resolved sprite under the alias 'Netw' directly, unlike an inline
     // `<$archimate/network>` reference (which looks up `internal` by path
     // name with no alias step).
-    expect(sprites.byName.has('Netw')).toBe(true);
+    expect(sprites?.byName.has('Netw')).toBe(true);
   });
 
   it('startNewPage carries the SAME internal store into every page', () => {
@@ -49,8 +50,8 @@ describe('C-3 — parseClass threads ParseOptions.assetStore into the sprite reg
     const withPages = ast as ClassDiagramAST & { pages: ClassDiagramAST[] };
     expect(withPages.pages.length).toBeGreaterThan(0);
     for (const page of withPages.pages) {
-      expect(page.sprites.internal?.get('archimate/network')).toBeDefined();
+      expect(page.sprites?.internal?.get('archimate/network')).toBeDefined();
     }
-    expect(withPages.sprites.internal?.get('archimate/network')).toBeDefined();
+    expect(withPages.sprites?.internal?.get('archimate/network')).toBeDefined();
   });
 });
