@@ -7,6 +7,7 @@
 import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import type { NoteGeo } from './note-layout.js';
 import { addNoteInk } from './class-ink-note.js';
+import { addNamespaceInk, addLocalInk } from './class-ink-namespace.js';
 import { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 import { drawnEdgePoints } from './class-ink-dot-path.js';
 import { ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
@@ -22,11 +23,7 @@ import {
   addRectInkEmptyShownBody,
   addEllipseInk,
   addPlainInk,
-  addFolderPolygonInk,
   addNamespaceRectInk,
-  addNamespaceNodeInk,
-  addNamespaceDatabaseInk,
-  addNamespaceStackInk,
   addClassicRectInk,
   addEmbedImageInk,
 } from './class-ink-shapes.js';
@@ -225,6 +222,8 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   // (`LimitFinder.java:184-188`, nijeli-04 height Δ1).
   if (c.folderTab !== undefined) {
     (c.folderTab.rect === true ? addNamespaceRectInk : addPlainInk)(box, c.x, c.y, c.width, c.height);
+    // cdd3-T31 (E1-2): `EntityImageEmptyPackage`'s title `UText` ink.
+    if (c.folderTab.titleInk !== undefined) addLocalInk(box, c, c.folderTab.titleInk);
     return;
   }
   // A `usecase` leaf is drawn as a real `<ellipse>`, never as a classifier
@@ -290,44 +289,6 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
 }
 
 /**
- * G2 N60 (item 42): dispatches a namespace's own ink contribution on
- * `NamespaceGeo.inkShape` (see that field's own doc comment in `layout.ts`
- * for the full jar-verified mechanism) -- `undefined` keeps the PRE-N60
- * `addPlainInk` (`UPath`) behavior unchanged for the common default-FOLDER,
- * non-`strictuml` case.
- */
-function addNamespaceInk(box: InkBox, n: NamespaceGeo): void {
-  // cdd2-T7b (R-8): the `stack` USymbol's own two-shape ink rule -- see
-  // `addNamespaceStackInk`'s doc comment. Keyed on `n.usymbol` directly
-  // (not a new `inkShape` bucket): `resolveNamespaceInkShape`
-  // (`class-geo-builders.ts`) never maps `stack` to one, since `stack`
-  // is outside that function's write-set for this task.
-  if (n.usymbol === 'stack') {
-    addNamespaceStackInk(box, n.x, n.y, n.width, n.height);
-    return;
-  }
-  // cdd-T12: the two USymbol-container rules -- see `class-ink-shapes.ts`'s
-  // own doc comments for each `LimitFinder` citation.
-  if (n.inkShape === 'node') {
-    addNamespaceNodeInk(box, n.x, n.y, n.width, n.height);
-    return;
-  }
-  if (n.inkShape === 'database') {
-    addNamespaceDatabaseInk(box, n.x, n.y, n.width, n.height);
-    return;
-  }
-  if (n.inkShape === 'polygon') {
-    addFolderPolygonInk(box, n.x, n.y, n.width, n.height);
-    return;
-  }
-  if (n.inkShape === 'rect') {
-    addNamespaceRectInk(box, n.x, n.y, n.width, n.height);
-    return;
-  }
-  addPlainInk(box, n.x, n.y, n.width, n.height);
-}
-
-/**
  * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) records a
  * `UText` from the BASELINE it is drawn at: `[y - (height - 1.5), y + 1.5]`
  * horizontally spanning `[x, x + width]`. A text block's own box instead spans
@@ -386,6 +347,31 @@ function addRoleLinesInk(box: InkBox, e: EdgeGeo, cardinalityFontSize: number): 
 }
 
 /**
+ * cdd3-T31 (B-3): the quantifier ink is what `SvekEdge#drawU` DRAWS --
+ * `startTailText`/`endHeadText`, each built by `Display.getWithNewlines(...)
+ * .create(cardinalityFont, CENTER, skinParam)` (`svek/SvekEdge.java:330-340`)
+ * and drawn at `:956-980` -- one `UText` per physical line, which
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:217-225`) bounds.
+ * `renderer-edge-extras.ts#renderEdgeCardinalityLabels` draws exactly
+ * `e.quantifierLines` whenever present; `tailLabel`/`headLabel` are the
+ * legacy RAW-string anchors (`"~* initiators"`, 61.1 px, where the drawn
+ * creole line is `"* initiators"`, 53.46 px -- `focaci-80-suzu938`) and are
+ * bounded only for a hand-built geometry that omits `quantifierLines`, which
+ * is exactly when the renderer draws them instead.
+ */
+function addQuantifierInk(box: InkBox, e: EdgeGeo, cardinalityFontSize: number): void {
+  if (e.quantifierLines !== undefined) {
+    for (const line of [...e.quantifierLines[0], ...e.quantifierLines[1]]) {
+      addEdgeTextInk(box, line, cardinalityFontSize);
+    }
+    return;
+  }
+  for (const lbl of [e.tailLabel, e.headLabel]) {
+    if (lbl !== undefined) addEdgeTextInk(box, lbl, cardinalityFontSize);
+  }
+}
+
+/**
  * T11 (cdd3, Q-5): {@link buildInkBox}'s two render-time constants, grouped
  * into one options object to stay under this project's 5-param cap.
  * `cardinalityFontSize` defaults to the pre-T11 `CARDINALITY_FONT_SIZE`
@@ -439,9 +425,7 @@ export function buildInkBox(
     for (const lbl of [e.label, ...(e.labelLines ?? [])]) {
       if (lbl !== undefined) addEdgeTextInk(box, lbl);
     }
-    for (const lbl of [e.tailLabel, e.headLabel]) {
-      if (lbl !== undefined) addEdgeTextInk(box, lbl, cardinalityFontSize);
-    }
+    addQuantifierInk(box, e, cardinalityFontSize);
     addRoleLinesInk(box, e, cardinalityFontSize);
     // cdd3-T10: the note-on-link `UPath` (`ComponentRoseNote.java:118-122`) -> `LimitFinder#drawUPath`.
     if (e.noteBox !== undefined)

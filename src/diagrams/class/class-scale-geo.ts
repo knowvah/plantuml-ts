@@ -89,6 +89,9 @@ function scaleNamespaceGeo(ns: NamespaceGeo, k: number): NamespaceGeo {
     wtitle: ns.wtitle * k,
     htitle: ns.htitle * k,
     baselineOffset: ns.baselineOffset * k,
+    // cdd3-T31: the layout-time ink walks, same uniform k.
+    ...(ns.symbolInk !== undefined ? { symbolInk: scaleSymbolInk(ns.symbolInk, k) } : {}),
+    ...(ns.titleInk !== undefined ? { titleInk: scaleSymbolInk(ns.titleInk, k) } : {}),
   };
 }
 

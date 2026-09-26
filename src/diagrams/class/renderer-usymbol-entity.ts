@@ -93,7 +93,7 @@ const ELEMENT_ROUND_CORNER = 5.0;
  * additions, plus cdd3-T12's `descriptive`+`rectangle` (sijisi) addition.
  * The cast on the `descriptive` fallback documents a caller-enforced
  * invariant (`renderer.ts`'s own dispatch gate forwards ONLY `usymbol ===
- * 'actor' | 'component' | 'database' | 'rectangle' | 'package'` here, never a raw
+ * 'actor' | 'component' | 'database' | 'node' | 'rectangle' | 'package'` here, never a raw
  * business-suffix keyword) — not an external-data guess.
  */
 function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
@@ -239,6 +239,11 @@ export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
     (classifier.usymbol === 'actor' ||
       classifier.usymbol === 'component' ||
       classifier.usymbol === 'database' ||
+      // cdd3-T31 (C-8): a `node` leaf is the same `EntityImageDescription`
+      // with `USymbols.NODE` (`USymbolNode#asSmall` -> `drawNode`,
+      // `USymbolNode.java:71-92`): jar draws the `<polygon>` + fold lines,
+      // never the class box this fell through to.
+      classifier.usymbol === 'node' ||
       classifier.usymbol === 'rectangle' ||
       classifier.usymbol === 'package')
   );

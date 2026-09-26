@@ -211,6 +211,8 @@ export function scaleFolderTab(tab: EmptyPackageLeafDim, k: number): EmptyPackag
         }
       : {}),
     ...(tab.rect === true ? { rect: true as const } : {}),
+    // cdd3-T31: the leaf title's `UText` ink, same uniform k.
+    ...(tab.titleInk !== undefined ? { titleInk: scaleSymbolInk(tab.titleInk, k) } : {}),
   };
 }
 

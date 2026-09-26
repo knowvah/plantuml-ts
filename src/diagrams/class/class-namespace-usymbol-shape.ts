@@ -51,6 +51,10 @@ import { ClusterDecoration } from '../../core/svek/ClusterDecoration.js';
 import { renderDrawableToFragment } from '../../core/klimt/document-shell.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import { clusterHeaderStereoTextBlock } from './class-cluster-header.js';
+import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
+import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
+import { PACKAGE_ROUND_CORNER, DEFAULT_GROUP_FONT_COLOR } from './class-package-style.js';
 
 /** `FontParam.PACKAGE`'s `getDefaultFontFace` returns `UFontFace.bold()`
  *  for every group title regardless of the container's own keyword
@@ -244,12 +248,12 @@ function resolveClusterUSymbolPaint(
   return { backColor, borderColor, roundCorner: fallback.roundCorner, fontColor };
 }
 
-export function renderNamespaceUSymbol(
-  geo: NamespaceGeo,
-  theme: ScaledTheme,
-  measurer: StringMeasurer,
-  paint: NamespaceUSymbolPaint,
-): string | undefined {
+/** The `USymbol` a group's own keyword resolves to (`ClusterDecoration
+ *  #guess`, `svek/ClusterDecoration.java:66-71`), or `undefined` for no
+ *  keyword, the folder family, or a keyword that resolves to none -- the
+ *  one gate {@link renderNamespaceUSymbol} and {@link namespaceUSymbolInk}
+ *  share. */
+function resolveNamespaceUSymbol(geo: NamespaceGeo, theme: Theme): UpstreamUSymbol | undefined {
   const keyword = geo.usymbol;
   if (keyword === undefined || isFolderFamily(keyword)) return undefined;
   const symbol = resolveDescriptionUSymbol(
@@ -257,7 +261,61 @@ export function renderNamespaceUSymbol(
     resolveActorStyle(theme.actorStyle),
     mapComponentStyle(theme.componentStyle),
   );
-  if (symbol === null) return undefined;
+  return symbol ?? undefined;
+}
+
+/**
+ * cdd3-T31 (E1-5): a USymbol container's `LimitFinder` ink, walked over the
+ * SAME `ClusterDecoration` {@link renderNamespaceUSymbol} draws -- upstream
+ * has one ink concept (`SvekResult#calculateDimension` walks what
+ * `Cluster#drawU` draws), so the `<<cloud>>` frontier `UPath` counts with
+ * every Bezier control point (`klimt/UPath.java:84-92`,
+ * `LimitFinder.java:164-167`), a `node`/`database` its `UEmpty(10, 10)`
+ * (`USymbolNode.java:90`, `USymbolDatabase.java:77`), and the title its
+ * `UText` box (`LimitFinder.java:217-224`). Local to `(geo.x, geo.y)`;
+ * `undefined` when the group draws no USymbol (the folder/rect paths).
+ * Paint does not reach `LimitFinder`; `roundCorner` is the renderer's own
+ * value (`renderer.ts#renderNamespace`), unscaled (layout time).
+ */
+export function namespaceUSymbolInk(
+  geo: NamespaceGeo,
+  theme: Theme,
+  measurer: StringMeasurer,
+): LeafSymbolInk | undefined {
+  const symbol = resolveNamespaceUSymbol(geo, theme);
+  if (symbol === undefined) return undefined;
+  const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);
+  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, DEFAULT_GROUP_FONT_COLOR), 1, header.block);
+  const finder = LimitFinder.create(new MeasurerStringBounder(measurer), false);
+  const roundCorner = theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER;
+  decoration.drawU(
+    finder,
+    'none',
+    theme.colors.border,
+    0,
+    roundCorner,
+    HorizontalAlignment.CENTER,
+    HorizontalAlignment.CENTER,
+    0,
+  );
+  if (!Number.isFinite(finder.getMinX())) return undefined;
+  return {
+    minX: finder.getMinX() - geo.x,
+    minY: finder.getMinY() - geo.y,
+    maxX: finder.getMaxX() - geo.x,
+    maxY: finder.getMaxY() - geo.y,
+  };
+}
+
+export function renderNamespaceUSymbol(
+  geo: NamespaceGeo,
+  theme: ScaledTheme,
+  measurer: StringMeasurer,
+  paint: NamespaceUSymbolPaint,
+): string | undefined {
+  const keyword = geo.usymbol;
+  const symbol = resolveNamespaceUSymbol(geo, theme);
+  if (keyword === undefined || symbol === undefined) return undefined;
 
   const resolvedPaint = resolveClusterUSymbolPaint(theme, geo, keyword, paint);
   const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);

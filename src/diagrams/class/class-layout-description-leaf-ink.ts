@@ -16,7 +16,8 @@ import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.
 /** R-LEAF (cdd2-T17, cdd3-T8): the two USymbols a `descriptive` leaf ALSO
  *  draws through `EntityImageDescription.drawU` at render time
  *  (`renderer-usymbol-entity.ts#usesClassUSymbolEntity`'s `component`/
- *  `database` arms -- its third arm, `actor`, is already excluded by
+ *  `database` arms, and cdd3-T31's `node` arm (C-8: `USymbolNode#drawNode`'s
+ *  polygon + `UEmpty(10, 10)`, `USymbolNode.java:71-92`) -- its `actor` arm, is already excluded by
  *  `tryMeasureDescriptionLeaf`'s own early return, and `usecase`/`circle`
  *  never reach that function: they carry `classifier.kind !== 'descriptive'`).
  *  Every OTHER symbol here (`folder`/`package`/`note`/`rectangle`/...)
@@ -26,7 +27,11 @@ import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.
  *  keeps the change additive, matching `class-ink-box.ts#addClassifierInk`'s
  *  own "only leaves that would otherwise fall through to the box rule"
  *  discipline for the `symbolInk` field it already reads. */
-const DESCRIPTION_LEAF_INK_SYMBOLS: ReadonlySet<LeafSizingSubject['symbol']> = new Set(['component', 'database']);
+const DESCRIPTION_LEAF_INK_SYMBOLS: ReadonlySet<LeafSizingSubject['symbol']> = new Set([
+  'component',
+  'database',
+  'node',
+]);
 
 /**
  * `measureEntityLeafInk`'s `fontSpec` param must be the SAME per-element

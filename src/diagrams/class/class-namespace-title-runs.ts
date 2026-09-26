@@ -33,6 +33,12 @@ import { isTransparentColor } from '../../core/paint.js';
  *  fused with one line's own ascent. */
 export const TITLE_LOCAL_TOP_OFFSET = 2;
 
+/** `USymbolFolder#asBig`'s title translate `(4, 2)` X half
+ *  (`decoration/symbol/USymbolFolder.java:228`). cdd3-T31: single owner --
+ *  was declared separately in `class-namespace-shape.ts` and
+ *  `class-empty-package.ts`, and the title ink walk needs it too. */
+export const TITLE_LOCAL_LEFT_OFFSET = 4;
+
 /** `class-namespace-shape.ts#titleFont`'s `FontConfiguration` counterpart
  *  and `#titleFontColor` — needed to route a folder/rect title through the
  *  shared creole atom lexer (`buildLineAtoms`), which speaks

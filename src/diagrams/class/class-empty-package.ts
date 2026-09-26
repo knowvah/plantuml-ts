@@ -26,9 +26,12 @@ import { rect, text, PAINT_NONE } from '../../core/svg.js';
 import { parseColor, type Paint } from '../../core/paint.js';
 import { stereoBlockDim, wrapGuillemet, type GuillemetPair } from './class-stereotype.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
+import { namespaceTitleInk, folderTitlePlacement, rectTitlePlacement } from './class-namespace-title-ink.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
 import {
   renderNamespaceTitleAuto,
   TITLE_LOCAL_TOP_OFFSET,
+  TITLE_LOCAL_LEFT_OFFSET as TITLE_X_OFFSET,
   packageTitleFontFamily,
   packageTitleFontSize,
 } from './class-namespace-title-runs.js';
@@ -47,9 +50,6 @@ import {
   emptyPackageStereoFontColor,
   isNoPaint,
 } from './class-package-style.js';
-
-/** `USymbolFolder#asBig`'s title translate `(4, 2)` X half. */
-const TITLE_X_OFFSET = 4;
 
 /**
  * The leaf's `...package_,title` style defaults (`EntityImageEmptyPackage
@@ -91,6 +91,11 @@ export interface EmptyPackageLeafDim {
   baselineOffset: number;
   /** cdd3-T21 (E3-6): the leaf's `stereoBlock`; absent == `empty(0, 0)`. */
   stereo?: { readonly width: number; readonly height: number; readonly lines: readonly EmptyPackageStereoLine[] };
+  /** cdd3-T31 (E1-2): the title `UText` ink (`LimitFinder.java:217-224`),
+   *  local to the leaf -- `class-namespace-title-ink.ts#namespaceTitleInk`
+   *  at the leaf's own folder/rect title placement. Absent for an empty
+   *  label. */
+  titleInk?: LeafSymbolInk;
   /** cdd3-T21 (E3-6): `skinparam packageStyle rect` -- the leaf draws
    *  `USymbolRectangle#asBig` (a `URectangle`, `LimitFinder`'s inset rect
    *  ink rule) instead of the folder `UPath`. */
@@ -152,13 +157,22 @@ export function measureEmptyPackageLeafDim(
   const stereo = buildStereo(measurer, theme, stereotypeLabels);
   const sw = stereo?.width ?? 0;
   const sh = stereo?.height ?? 0;
+  const width = Math.max(dim.width, sw) + EMPTY_PACKAGE_MARGIN * 2;
+  const wtitle = getWTitle(measurer, theme, label, 0);
+  const baselineOffset = getTitleBaselineOffset(measurer, theme, label);
+  const place =
+    theme.packageStyle === 'rect'
+      ? rectTitlePlacement({ width, wtitle }, sh, baselineOffset)
+      : folderTitlePlacement(baselineOffset);
+  const titleInk = namespaceTitleInk(measurer, theme, label, place);
   return {
-    width: Math.max(dim.width, sw) + EMPTY_PACKAGE_MARGIN * 2,
+    width,
     height: Math.max(dim.height + sh, dim.height * 2) + EMPTY_PACKAGE_MARGIN * 2,
-    wtitle: getWTitle(measurer, theme, label, 0),
+    wtitle,
     htitle: getHTitle(measurer, theme, label),
-    baselineOffset: getTitleBaselineOffset(measurer, theme, label),
+    baselineOffset,
     ...(stereo !== undefined ? { stereo } : {}),
+    ...(titleInk !== undefined ? { titleInk } : {}),
     ...(theme.packageStyle === 'rect' ? { rect: true as const } : {}),
   };
 }

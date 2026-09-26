@@ -46,6 +46,7 @@ import { renderFolderTabShape } from './class-namespace-folder-outline.js';
 import {
   renderNamespaceTitleAuto,
   TITLE_LOCAL_TOP_OFFSET,
+  TITLE_LOCAL_LEFT_OFFSET as TITLE_X_OFFSET,
   packageTitleFontFamily,
   packageTitleFontSize,
 } from './class-namespace-title-runs.js';
@@ -75,12 +76,6 @@ export {
   type EmptyPackageLeafExtras,
 } from './class-empty-package.js';
 
-/** `USymbolFolder#asBig`'s title local X offset (`title.drawU(ug.apply(new
- *  UTranslate(4, 2)))`'s `4`) — the render-time-only half of that
- *  translate; {@link TITLE_LOCAL_TOP_OFFSET} (imported) is its Y half.
- *  cdd-B8FU: named (was an inline `4` at three call sites) so its own
- *  scaleK multiplication has one citation, not three. */
-const TITLE_X_OFFSET = 4;
 const TOP = TITLE_LOCAL_TOP_OFFSET; // the `2` of both `asBig` stereo/title translates
 
 /** Jar-observed default class-diagram package/namespace border width

@@ -18,6 +18,7 @@ import { buildClusterHeaderStereo } from './class-cluster-header.js';
 import { resolveStyleStereotypeTags, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
+import { namespaceDrawnInk } from './class-namespace-title-ink.js';
 import {
   inkBodyFields,
   badgeFields,
@@ -264,6 +265,7 @@ export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInp
     const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
     const header = buildClusterHeaderStereo(ns, ast, theme, measurer); // cdd2-T19b: ClusterHeader#getStereo
     if (header !== undefined) geo.clusterHeaderStereo = header;
+    Object.assign(geo, namespaceDrawnInk(geo, theme, measurer)); // cdd3-T31: E1-2/E2-8, E1-5
     namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
   return namespaces;
