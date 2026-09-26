@@ -56,7 +56,7 @@ Batch closes add survey, census, render-all, pin-diff, pins —
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | pre-flight + diagnosis (C, E) + B verify | T0 · T1–T5 · T6 | T1–T5 ∥ | [x] |
 | [1](batch-1/overview.md) | A — ready fixes | T7 · T9 · T11 · T8 · T10 · T12 · T13 | T7 ∥ T9 ∥ T11, then serial | [x] |
-| [2](batch-2/overview.md) | structure (from T6) | written by T6 | per T6 | [ ] |
+| [2](batch-2/overview.md) | structure (from T6) | written by T6 | per T6 | [x] |
 | [3](batch-3/overview.md) | paint / text / glyph (from T6) | written by T6 | per T6 | [ ] |
 | [4](batch-4/overview.md) | geometry / scale / canvas (from T6) | written by T6 | per T6 | [ ] |
 | [5](batch-5/overview.md) | D3 measured task + exit close | T-D3 · T-exit | — | [ ] |
