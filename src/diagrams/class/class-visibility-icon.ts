@@ -255,12 +255,22 @@ function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: stri
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
+/**
+ * `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square --
+ * cdd3-T34 (E1-8): `x`/`y`/`ctx.size` already carry `k` (scaled row
+ * position, `iconSizeOf(theme) * k`), but the RAW local constants `2`/`4`
+ * do not -- upstream draws this whole shape inside ONE ambient
+ * scale-wrapped `UGraphic` (`TextBlockExporter.java:205-208`), so every
+ * local numeral scales too, not just `size`. `ctx.size - 4` would leave
+ * the raw `4` unscaled (`(rawSize*k) - 4` instead of `(rawSize - 4) * k`);
+ * multiplying the local `2`/`4` by `ctx.k` reproduces the single ambient
+ * transform.
+ */
 function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 4;
+  const s = ctx.size - 4 * ctx.k;
   return `<rect${attrs([
-    ['x', x + 2],
-    ['y', y + 2],
+    ['x', x + 2 * ctx.k],
+    ['y', y + 2 * ctx.k],
     ['width', s],
     ['height', s],
     ['fill', ctx.fill],
@@ -268,12 +278,13 @@ function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter. */
+/** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
-  const r = (ctx.size - 4) / 2;
+  const r = (ctx.size - 4 * ctx.k) / 2;
   return `<ellipse${attrs([
-    ['cx', x + 2 + r],
-    ['cy', y + 2 + r],
+    ['cx', x + 2 * ctx.k + r],
+    ['cy', y + 2 * ctx.k + r],
     ['rx', r],
     ['ry', r],
     ['fill', ctx.fill],
@@ -281,10 +292,11 @@ function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y). */
+/** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y) --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2;
-  const ox = x + 1;
+  const s = ctx.size - 2 * ctx.k;
+  const ox = x + 1 * ctx.k;
   const points: Array<[number, number]> = [
     [ox + s / 2, y],
     [ox + s, y + s / 2],
@@ -294,14 +306,15 @@ function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
   return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }
 
-/** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y). */
+/** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y) --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawTriangle(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2;
-  const ox = x + 1;
+  const s = ctx.size - 2 * ctx.k;
+  const ox = x + 1 * ctx.k;
   const points: Array<[number, number]> = [
-    [ox + s / 2, y + 1],
-    [ox, y + s - 1],
-    [ox + s, y + s - 1],
+    [ox + s / 2, y + 1 * ctx.k],
+    [ox, y + s - 1 * ctx.k],
+    [ox + s, y + s - 1 * ctx.k],
   ];
   return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }

@@ -44,7 +44,7 @@ import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
 import { applyTopUrlToClassifiers } from './class-url.js';
-import { resolveScaleFactor } from '../../core/scale-command.js';
+import { resolveClassScaleFactor } from './class-layout-scale-resolve.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
 import { clusterClipRect } from './class-shield-helpers.js';
 import {
@@ -476,16 +476,14 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
 /**
  * Lay out a class diagram using the dot layout engine (synchronous).
  *
- * When the source contained `newpage` (`ast.pages` is set — see ast.ts), each
- * page is laid out independently via `layoutSinglePage` and the resulting
- * geometries are stacked vertically (`layoutMultiPage`); otherwise the single
- * top-level AST is laid out directly, unchanged from pre-T7 behavior.
+ * When the source contained `newpage` (`ast.pages` set — see ast.ts), each
+ * page is laid out independently via `layoutSinglePage` and stacked
+ * vertically (`layoutMultiPage`); otherwise laid out directly.
  *
  * cdd-T29 (D4): `scale ...` is resolved AFTER layout, from the diagram's
- * OWN final unscaled dimension (`resolveScaleFactor`'s own doc comment --
- * never a partial/intermediate one) — matches upstream's `UgDiagram.java:
- * 138`, which passes `scale` only to the exporter, never to svek/DOT
- * layout itself (`core/scale-command.ts`'s module doc, D4).
+ * OWN final dimension — matches `UgDiagram.java:138` (`core/scale-command
+ * .ts`'s module doc, D4; `resolveClassScaleFactor`'s doc comment for the
+ * fractional-vs-truncated basis, cdd3-T34).
  *
  * @param ast      - Parsed class diagram AST.
  * @param theme    - Visual theme for font metrics and sizing.
@@ -495,10 +493,8 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
 export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   const geo =
     ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
-  // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
-  // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
-  // never declared (`Theme.dpi`'s own doc comment). SAME `resolveScaleFactor`
-  // call as before T30 -- no second scale-resolution path.
-  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
+  // cdd-T30/cdd3-T34 (C-10): `theme.dpi` default 96 (`Theme.dpi`'s doc
+  // comment); `resolveClassScaleFactor`'s own doc comment for the basis.
+  const k = resolveClassScaleFactor(geo, ast.scale, theme.dpi);
   return scaleClassGeometry(geo, k, theme.fontSize);
 }

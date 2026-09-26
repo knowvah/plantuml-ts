@@ -123,7 +123,11 @@ export function renderRow(geo: ClassifierGeo, row: ClassifierGeo['rows'][number]
       ? renderVisibilityIcon(
           row.visibilityIcon,
           row.visibilityIsField === true,
-          geo.x + ROW_TEXT_LEFT_MARGIN,
+          // cdd3-T34 (E1-8): `ROW_TEXT_LEFT_MARGIN` is a render-time
+          // numeral (like `VisibilityModifier`'s own local offsets --
+          // see `class-visibility-icon.ts#drawSquare`'s doc comment),
+          // scaled by `theme.scaleK` the same way `geo.x` already is.
+          geo.x + ROW_TEXT_LEFT_MARGIN * theme.scaleK,
           wrappedVisibilityIconOriginY(geo, row, theme),
           undefined,
           theme,

@@ -115,13 +115,23 @@ function clamp(v: number, lo: number, hi: number): number {
  * renders identically to a straight line per the SVG spec, but the emitted
  * PATH TEXT differs (`A0,0...` vs `L...`), and this mission's conformance
  * bar is byte/structural, not merely visual.
+ *
+ * `k` (cdd3-T34, E1-8, default 1 -- every pre-existing caller, including
+ * the state engine's, is unscaled): `box`/`connector` are already in
+ * SCALED coordinates (the class engine scales the whole `NoteGeo`,
+ * `class-scale-geo-note.ts#scaleNoteGeo`, including `opale.pp1`/`pp2`),
+ * but `cornersize`/`delta` are RAW upstream constants drawn inside ONE
+ * ambient scale-wrapped `UGraphic` (`TextBlockExporter.java:205-208`), so
+ * they must scale too -- same rationale as `class-visibility-icon.ts
+ * #drawSquare`'s identical fix.
  * @see ~/git/plantuml/.../svek/image/Opale.java#getPolygonLeft
  */
-export function opalePolygonLeft(box: OpaleBox, connector: OpaleConnector): string {
+export function opalePolygonLeft(box: OpaleBox, connector: OpaleConnector, k = 1): string {
   const { origin, width, height } = box;
   const { pp1, pp2 } = connector;
-  const y1 = clamp(pp1.y - OPALE_DELTA, 0, height - 2 * OPALE_DELTA);
-  const c = OPALE_CORNERSIZE;
+  const delta = OPALE_DELTA * k;
+  const c = OPALE_CORNERSIZE * k;
+  const y1 = clamp(pp1.y - delta, 0, height - 2 * delta);
   const ox = origin.x;
   const oy = origin.y;
   // T7b: routed through svg-path-builder.ts's moveTo/lineTo/arcTo
@@ -130,7 +140,7 @@ export function opalePolygonLeft(box: OpaleBox, connector: OpaleConnector): stri
     moveTo(ox, oy),
     lineTo(ox, oy + y1),
     lineTo(ox + pp2.x, oy + pp2.y),
-    lineTo(ox, oy + y1 + 2 * OPALE_DELTA),
+    lineTo(ox, oy + y1 + 2 * delta),
     lineTo(ox, oy + height),
     arcTo(ox, oy + height, 0, 0, 0),
     lineTo(ox + width, oy + height),
@@ -146,14 +156,16 @@ export function opalePolygonLeft(box: OpaleBox, connector: OpaleConnector): stri
  * Zigzag-notch outline, notch cut into the RIGHT edge (`direction ===
  * 'right'`, upstream `Direction.RIGHT`) -- byte-exact port of
  * `Opale.java#getPolygonRight`, same `roundCorner === 0` semantics as
- * {@link opalePolygonLeft}.
+ * {@link opalePolygonLeft}. `k` -- see {@link opalePolygonLeft}'s own doc
+ * comment.
  * @see ~/git/plantuml/.../svek/image/Opale.java#getPolygonRight
  */
-export function opalePolygonRight(box: OpaleBox, connector: OpaleConnector): string {
+export function opalePolygonRight(box: OpaleBox, connector: OpaleConnector, k = 1): string {
   const { origin, width, height } = box;
   const { pp1, pp2 } = connector;
-  const y1 = clamp(pp1.y - OPALE_DELTA, OPALE_CORNERSIZE, height - 2 * OPALE_DELTA);
-  const c = OPALE_CORNERSIZE;
+  const delta = OPALE_DELTA * k;
+  const c = OPALE_CORNERSIZE * k;
+  const y1 = clamp(pp1.y - delta, c, height - 2 * delta);
   const ox = origin.x;
   const oy = origin.y;
   return [
@@ -162,7 +174,7 @@ export function opalePolygonRight(box: OpaleBox, connector: OpaleConnector): str
     arcTo(ox, oy + height, 0, 0, 0),
     lineTo(ox + width, oy + height),
     arcTo(ox + width, oy + height, 0, 0, 0),
-    lineTo(ox + width, oy + y1 + 2 * OPALE_DELTA),
+    lineTo(ox + width, oy + y1 + 2 * delta),
     lineTo(ox + pp2.x, oy + pp2.y),
     lineTo(ox + width, oy + y1),
     lineTo(ox + width, oy + c),
@@ -175,10 +187,11 @@ export function opalePolygonRight(box: OpaleBox, connector: OpaleConnector): str
 /**
  * The folded-corner triangle drawn OVER the outline, always, regardless of
  * notch direction -- `Opale.java#getCorner`, `roundCorner` fixed at 0.
+ * `k` -- see {@link opalePolygonLeft}'s own doc comment.
  * @see ~/git/plantuml/.../svek/image/Opale.java#getCorner
  */
-export function opaleCorner(origin: OpalePoint, width: number): string {
-  const c = OPALE_CORNERSIZE;
+export function opaleCorner(origin: OpalePoint, width: number, k = 1): string {
+  const c = OPALE_CORNERSIZE * k;
   const ox = origin.x;
   const oy = origin.y;
   return [
@@ -194,14 +207,16 @@ export function opaleCorner(origin: OpalePoint, width: number): string {
  * upstream `Direction.UP`) -- byte-exact port of `Opale.java#getPolygonUp`
  * with `roundCorner` fixed at 0. Used ONLY by the general opalisable-note
  * mechanism (G2/N14) -- a member-tip note's grammar never reaches this
- * direction, see this module's own doc comment.
+ * direction, see this module's own doc comment. `k` -- see
+ * {@link opalePolygonLeft}'s own doc comment.
  * @see ~/git/plantuml/.../svek/image/Opale.java#getPolygonUp
  */
-export function opalePolygonUp(box: OpaleBox, connector: OpaleConnector): string {
+export function opalePolygonUp(box: OpaleBox, connector: OpaleConnector, k = 1): string {
   const { origin, width, height } = box;
   const { pp1, pp2 } = connector;
-  const x1 = clamp(pp1.x - OPALE_DELTA, 0, width - OPALE_CORNERSIZE);
-  const c = OPALE_CORNERSIZE;
+  const delta = OPALE_DELTA * k;
+  const c = OPALE_CORNERSIZE * k;
+  const x1 = clamp(pp1.x - delta, 0, width - c);
   const ox = origin.x;
   const oy = origin.y;
   return [
@@ -212,7 +227,7 @@ export function opalePolygonUp(box: OpaleBox, connector: OpaleConnector): string
     arcTo(ox + width, oy + height, 0, 0, 0),
     lineTo(ox + width, oy + c),
     lineTo(ox + width - c, oy),
-    lineTo(ox + x1 + 2 * OPALE_DELTA, oy),
+    lineTo(ox + x1 + 2 * delta, oy),
     lineTo(ox + pp2.x, oy + pp2.y),
     lineTo(ox + x1, oy),
     lineTo(ox, oy),
@@ -224,14 +239,16 @@ export function opalePolygonUp(box: OpaleBox, connector: OpaleConnector): string
  * Zigzag-notch outline, notch cut into the BOTTOM edge (`direction ===
  * 'down'`, upstream `Direction.DOWN`) -- byte-exact port of
  * `Opale.java#getPolygonDown`, same `roundCorner === 0` semantics as
- * {@link opalePolygonUp}.
+ * {@link opalePolygonUp}. `k` -- see {@link opalePolygonLeft}'s own doc
+ * comment.
  * @see ~/git/plantuml/.../svek/image/Opale.java#getPolygonDown
  */
-export function opalePolygonDown(box: OpaleBox, connector: OpaleConnector): string {
+export function opalePolygonDown(box: OpaleBox, connector: OpaleConnector, k = 1): string {
   const { origin, width, height } = box;
   const { pp1, pp2 } = connector;
-  const x1 = clamp(pp1.x - OPALE_DELTA, 0, width);
-  const c = OPALE_CORNERSIZE;
+  const delta = OPALE_DELTA * k;
+  const c = OPALE_CORNERSIZE * k;
+  const x1 = clamp(pp1.x - delta, 0, width);
   const ox = origin.x;
   const oy = origin.y;
   return [
@@ -240,7 +257,7 @@ export function opalePolygonDown(box: OpaleBox, connector: OpaleConnector): stri
     arcTo(ox, oy + height, 0, 0, 0),
     lineTo(ox + x1, oy + height),
     lineTo(ox + pp2.x, oy + pp2.y),
-    lineTo(ox + x1 + 2 * OPALE_DELTA, oy + height),
+    lineTo(ox + x1 + 2 * delta, oy + height),
     lineTo(ox + width, oy + height),
     arcTo(ox + width, oy + height, 0, 0, 0),
     lineTo(ox + width, oy + c),

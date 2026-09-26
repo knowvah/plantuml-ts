@@ -347,9 +347,12 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
   // cdd-B8FU: `NOTE_FOLD` feeds `noteBodyPathData` -- a class-local
-  // geometry builder (unlike the SEPARATE `opaleCorner` fold-flap primitive
-  // below, which lives in the SHARED `core/svek/image/Opale.ts` and is left
-  // unscaled -- out of this class-only task's write-set, see .agent-notes).
+  // geometry builder, its OWN copy of the cornersize constant (unlike the
+  // SEPARATE `opaleCorner` fold-flap primitive below, which lives in the
+  // SHARED `core/svek/image/Opale.ts`). cdd3-T34 (E1-8): `opaleCorner` now
+  // takes `k` too (that module was out of a PRIOR task's write-set, not
+  // this one's) -- both copies of the same upstream `cornersize` constant
+  // scale identically now.
   const f = NOTE_FOLD * theme.scaleK;
   const ns = resolveNoteStroke(theme);
   const entityParts: string[] = [
@@ -362,7 +365,11 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
     // background (not `none`) at the diagram's DEFAULT stroke width, per
     // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
     // comment).
-    path(opaleCorner({ x, y }, w), { fill, stroke: ns.stroke, strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK }),
+    path(opaleCorner({ x, y }, w, theme.scaleK), {
+      fill,
+      stroke: ns.stroke,
+      strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK,
+    }),
     renderNoteText(note, theme),
   ];
   return { entityParts };
@@ -381,14 +388,21 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
 export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
-  const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);
+  // cdd3-T34 (E1-8): `theme.scaleK` -- `opalePolygonLeft/Right`'s own doc
+  // comment (`cornersize`/`delta` are RAW, ambient-scaled upstream numerals).
+  const k = theme.scaleK;
+  const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector, k) : opalePolygonRight(box, connector, k);
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   // `Opale#drawU` (`Opale.java:123-126`) draws outline AND fold on the
   // stroked `ug` -- both take the note style's stroke.
   const ns = resolveNoteStroke(theme);
   const parts: string[] = [
     path(outline, { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width, k), {
+      fill,
+      stroke: ns.stroke,
+      strokeWidth: ns.strokeWidth,
+    }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');
@@ -396,17 +410,18 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme):
 
 /** Dispatch to the right `opalePolygon*` function by direction --
  *  `Opale.java#drawU`'s own `strategy` switch, shared by {@link renderTipNote}
- *  (LEFT/RIGHT only) and {@link renderOpaleNote} (all four). */
-function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: OpaleConnector): string {
+ *  (LEFT/RIGHT only) and {@link renderOpaleNote} (all four). `k` -- see
+ *  `Opale.ts#opalePolygonLeft`'s own doc comment. */
+function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: OpaleConnector, k: number): string {
   switch (direction) {
     case 'left':
-      return opalePolygonLeft(box, connector);
+      return opalePolygonLeft(box, connector, k);
     case 'right':
-      return opalePolygonRight(box, connector);
+      return opalePolygonRight(box, connector, k);
     case 'up':
-      return opalePolygonUp(box, connector);
+      return opalePolygonUp(box, connector, k);
     case 'down':
-      return opalePolygonDown(box, connector);
+      return opalePolygonDown(box, connector, k);
   }
 }
 
@@ -431,10 +446,16 @@ export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   // `EntityImageNote.java:236-237,263-264`: `opale.drawU(applyStroke(ug2))`
   // -- outline and fold both on the stroked ug (`Opale.java:123-126`).
+  // cdd3-T34 (E1-8): `theme.scaleK` -- `opalePolygonLeft`'s own doc comment.
   const ns = resolveNoteStroke(theme);
+  const k = theme.scaleK;
   const parts: string[] = [
-    path(opaleOutline(opale.direction, box, connector), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleOutline(opale.direction, box, connector, k), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width, k), {
+      fill,
+      stroke: ns.stroke,
+      strokeWidth: ns.strokeWidth,
+    }),
   ];
   parts.push(renderNoteText(note, theme));
   return parts.join('');

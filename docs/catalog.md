@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1235 modules · 4642 exported names.
+1236 modules · 4643 exported names.
 
 ## `src/`
 
@@ -1202,6 +1202,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-layout-helpers.ts` | `ROW_TEXT_LEFT_MARGIN`, `isMethodMember`, `CARDINALITY_FONT_SIZE`, `wrapPlainTextLine`, `edgeLabelAttrs`, `NoteBoxContext`, `formatMemberText`, `MeasuredClassifier`, `MemberSuppression`, `measureClassifier`, `LIKE_CLASS_KINDS` | Classifier sizing/measurement helpers for the class diagram layout engine (src/diagrams/class/layout.ts). |
 | `class-layout-leaf-shapes.ts` | `measureUsecaseOrActor`, `measureLollipop`, `measureAssociationDiamond`, `measureCircleInterface`, `measureCircleInterfaceShield` | The usecase/actor USymbol box and the lollipop-interface circle+label — the two classifier kinds whose svek box is NOT the generic name+members rect (`class-layout-generic-classifier.ts#measureGenericClassifier`). |
 | `class-layout-multipage.ts` | `layoutMultiPage`, `sliceClassGeometryPage`, `classPageCount`, `classPageAst` | class-layout-multipage.ts — `newpage` page-stacking combinator (T7), split out of `layout.ts` (already at the project's 500-line hook cap before cdd-T29 added its scale-wiring lines) -- a pure move, exported `layoutSinglePage` is the only n |
+| `class-layout-scale-resolve.ts` | `resolveClassScaleFactor` | `layoutClass`'s `scale ...` factor resolution (cdd3-T34, C-10) -- split out of `layout.ts` (already at the project's 500-line hook cap) so the mechanism below has room for its own doc comment; a pure move of the one call site's arithmetic, |
 | `class-layout-shift.ts` | `shiftClassifierGeo`, `shiftNamespaceGeo`, `shiftEdgeGeo`, `shiftNoteGeo` | Ink-shift helpers for the class layout -- the five per-geo translate functions, split out of `layout.ts` (500-line hook cap, cdd-T6). |
 | `class-leaf-geo.ts` | `ClassLeafGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves` | `ClassGeometry`'s single leaf collection — mission `leaf-draw-order` T3: folds `ClassGeometry.classifiers`/`.notes` into one `leaves` array, mirroring jar's own single leaf collection (`Bibliotekon#allNodes()`, `net/atmp/CucaDiagram.java`) |
 | `class-leaf-order.ts` | `sortByRank`, `buildLeafRankMap`, `computeLeafDrawOrder`, `computePrintGroupsOrder` | `computeLeafDrawOrder` -- the jar's leaf-print order (D1/D2, `plans/leaf-draw-order/decisions.md`), computed purely from the parsed AST: no geometry, no new parse-time tick. |
