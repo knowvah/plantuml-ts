@@ -48,12 +48,18 @@ export function readLines(
   parent?: LineLocation,
 ): StringLocated[] {
   let location = new LineLocationImpl(description, parent);
-  return source
+  const texts = source
     .replace(/\u2013/gu, '-')
     .replace(/^\uFEFF/u, '')
-    .split('\n')
-    .map((text) => {
-      location = location.oneLineRead();
-      return new StringLocated(text, location);
-    });
+    .split('\n');
+  // `BufferedReader#readLine` (`ReadLineReader.java:85`): a terminator ENDS a
+  // line, it never opens one -- `"a\n"` reads as one line, not `["a", ""]`.
+  // `split` leaves that phantom empty tail, and it counts: a bundled theme
+  // ending in a newline (`puml-theme-aws-orange.puml`) added a blank line to
+  // the TIM result, which seeds the SVG ids (`UmlSource#seed`) -- cdd4-T7b.
+  if (texts[texts.length - 1] === '') texts.pop();
+  return texts.map((text) => {
+    location = location.oneLineRead();
+    return new StringLocated(text, location);
+  });
 }
