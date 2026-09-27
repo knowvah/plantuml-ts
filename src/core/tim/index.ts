@@ -39,7 +39,7 @@ export { TFunctionImpl } from './TFunctionImpl.js';
 export { FunctionsSet } from './FunctionsSet.js';
 export { PreprocessingArtifact } from './PreprocessingArtifact.js';
 export { TContext as TContextImpl } from './TContext.js';
-export type { PlainLineFilter, TContextOptions } from './TContextOptions.js';
+export type { TContextOptions } from './TContextOptions.js';
 export { getFromLineInternal } from './TLineType.js';
 export { EaterDeclareProcedure } from './EaterDeclareProcedure.js';
 export { EaterFunctionCall } from './EaterFunctionCall.js';

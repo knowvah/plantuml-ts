@@ -2,7 +2,7 @@
  * The ASYNC half of the include seam.
  *
  * Provides:
- *   - prefetchIncludes()  — async pass that walks !include targets transitively
+ *   - prefetchIncludes()  — async pass that walks !include / !theme targets transitively
  *                           and fills an IncludeStore for the SYNC interpreter
  *   - fetchInclude()      — built-in browser fetcher with CORS/CSP error differentiation
  *   - CspIncludeError     — CSP connect-src violation with actionable directive hint
@@ -39,6 +39,7 @@
 
 import { MapIncludeStore, StdlibNotBundledError, stdlibPathOf, type IncludeStore } from './tim/IncludeStore.js';
 import { stdlibContentFor } from './stdlib-content.js';
+import { themeStoreKey } from './tim/EaterTheme.js';
 import type { StdlibRegistry } from './tim/StdlibRegistry.js';
 import { DEFAULT_SECURITY_PROFILE, getTimeout, type SecurityProfile } from './security/SecurityProfile.js';
 import { isUrlOk } from './security/SURL.js';
@@ -179,7 +180,9 @@ export async function fetchInclude(
  * Every directive that names an external target. `!includeurl` / `!include_once`
  * / `!include_many` are spellings of `!include` (`TLineType#PATTERN_INCLUDE`);
  * `!includesub file!bloc` names a file too (the bare `!includesub name` form
- * does not — it replays a `!startsub` block from the same source).
+ * does not — it replays a `!startsub` block from the same source); and
+ * `!theme <name> [from <where>]` names a theme file unless the theme is bundled
+ * ({@link themeTargetOf}).
  *
  * `!includedef` and `!import` are NOT scanned: neither names a fetchable file in
  * this port (see `IncludeExecutor#executeIncludeDef` / `#executeImport`).
@@ -189,6 +192,22 @@ export async function fetchInclude(
 // quadratically over a long trailing run of blanks (CodeQL js/polynomial-redos).
 const INCLUDE_RE = /^\s*!include(?:url|_once|_many)?\s+(\S.*)$/;
 const INCLUDESUB_RE = /^\s*!includesub\s+(\S.*)$/;
+/** `TLineType#PATTERN_THEME` (`simpleKeyword("!theme")`) plus its argument. */
+const THEME_RE = /^\s*!theme\s+(\S.*)$/;
+/** A `$variable` or `%function` the interpreter substitutes and a text scan cannot. */
+const RE_COMPUTED = /[$%]/;
+
+/**
+ * cdd4-T7b: the store key a `!theme` line reads (`EaterTheme#getTheme` ->
+ * `ThemeUtils#loadTheme`), so `render()` prefetches a non-bundled theme like
+ * any include. A bundled theme names nothing to fetch; a computed name or
+ * location is left to the caller's store, as `!include $path` is.
+ */
+function themeTargetOf(line: string): string | undefined {
+  const theme = THEME_RE.exec(line);
+  if (theme === null || RE_COMPUTED.test(theme[1]!)) return undefined;
+  return themeStoreKey(theme[1]!);
+}
 
 /** Strip the block selector: `!include foo.puml!SUB` fetches `foo.puml`. */
 function fileOf(target: string): string {
@@ -196,19 +215,33 @@ function fileOf(target: string): string {
   return idx === -1 ? target : target.substring(0, idx);
 }
 
+/**
+ * One prefetch target. `optional` marks a `!theme` target: a miss there is
+ * not a prefetch failure, because the interpreter already has upstream's
+ * answer for it -- `Cannot load theme X[ in Y]` (`EaterTheme.java:82-85`) --
+ * where an unresolved include has none but the typed error.
+ */
+interface Target {
+  readonly url: string;
+  readonly optional: boolean;
+}
+
 /** The include targets named on one line, if any. */
-function targetOf(rawLine: string): string | undefined {
+function targetOf(rawLine: string): Target | undefined {
   const line = rawLine.trimEnd();
   const include = INCLUDE_RE.exec(line);
-  if (include !== null) return fileOf(include[1]!);
+  if (include !== null) return { url: fileOf(include[1]!), optional: false };
 
   const sub = INCLUDESUB_RE.exec(line);
-  if (sub === null) return undefined;
+  if (sub === null) {
+    const theme = themeTargetOf(line);
+    return theme === undefined ? undefined : { url: theme, optional: true };
+  }
 
   const what = sub[1]!;
   const idx = what.indexOf('!');
   // Bare `!includesub name`: a same-source !startsub block, nothing to fetch.
-  return idx === -1 ? undefined : what.substring(0, idx);
+  return idx === -1 ? undefined : { url: what.substring(0, idx), optional: false };
 }
 
 /** State constant across the walk; `source`/`visited`/`chain` change per recursion. */
@@ -274,45 +307,63 @@ async function prefetchInner(
   visited: ReadonlySet<string>,
   chain: string[],
 ): Promise<void> {
-  const { store, registry, inFlight, extraSpriteNames } = walk;
   const targets = source
     .split('\n')
     .map((line) => targetOf(line))
-    .filter((url): url is string => url !== undefined);
+    .filter((target): target is Target => target !== undefined);
 
   await Promise.all(
-    targets.map(async (url) => {
-      if (visited.has(url)) throw new CircularIncludeError(url, chain);
-      const stdlib = stdlibPathOf(url);
-      if (stdlib !== undefined) {
-        // Bundled-stdlib form: a host supplies it (SI5b). TWO channels,
-        // checked in `IncludeExecutor#load`'s order: exact key, then the
-        // `getPumlResource` seam (`StdlibStore.ts#withStdlib`).
-        if (store.has(url)) return;
-        if (store.getPumlResource(stdlib) !== undefined) return;
-        // THIRD channel (si8 ADR-4), reached only once both eager ones miss.
-        await dedupeInFlight(inFlight, url, async () => {
-          const bundled =
-            registry === undefined ? undefined : await stdlibContentFor(registry, stdlib, source, extraSpriteNames);
-          if (bundled === undefined) {
-            throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
-          }
-          // Folded in under the EXACT key `load` tries first (asserted in
-          // stdlib-registry-prefetch.test.ts).
-          store.set(url, bundled);
-          // ADR-4: bundle text may itself `!include <…>`; re-enter the walk.
-          await prefetchInner(walk, bundled, new Set([...visited, url]), [...chain, url]);
-        });
-        return;
-      }
-      if (store.has(url)) return; // already fetched (diamond include), or host-supplied
-      await dedupeInFlight(inFlight, url, async () => {
-        const content = await fetchTarget(walk, url);
-        store.set(url, content);
-        await prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
-      });
+    targets.map(({ url, optional }) => {
+      const pending = prefetchTarget(walk, source, url, { visited, chain });
+      // A `!theme` miss is left for the interpreter to report as upstream
+      // does (`Cannot load theme X`, `EaterTheme.java:82-85`); the store just
+      // stays without the key. See {@link Target}.
+      return optional ? pending.catch(() => undefined) : pending;
     }),
   );
+}
+
+/** Where the walk has been: the targets above this one, and in what order. */
+interface WalkPath {
+  readonly visited: ReadonlySet<string>;
+  readonly chain: string[];
+}
+
+/** Fetch one target into the store, then walk its own targets. */
+async function prefetchTarget(walk: PrefetchWalk, source: string, url: string, path: WalkPath): Promise<void> {
+  const { store, registry, inFlight, extraSpriteNames } = walk;
+  const { visited, chain } = path;
+  if (visited.has(url)) throw new CircularIncludeError(url, chain);
+  const next = (content: string): Promise<void> =>
+    prefetchInner(walk, content, new Set([...visited, url]), [...chain, url]);
+  const stdlib = stdlibPathOf(url);
+  if (stdlib !== undefined) {
+    // Bundled-stdlib form: a host supplies it (SI5b). TWO channels,
+    // checked in `IncludeExecutor#load`'s order: exact key, then the
+    // `getPumlResource` seam (`StdlibStore.ts#withStdlib`).
+    if (store.has(url)) return;
+    if (store.getPumlResource(stdlib) !== undefined) return;
+    // THIRD channel (si8 ADR-4), reached only once both eager ones miss.
+    await dedupeInFlight(inFlight, url, async () => {
+      const bundled =
+        registry === undefined ? undefined : await stdlibContentFor(registry, stdlib, source, extraSpriteNames);
+      if (bundled === undefined) {
+        throw new StdlibNotBundledError(url, stdlib, registry !== undefined);
+      }
+      // Folded in under the EXACT key `load` tries first (asserted in
+      // stdlib-registry-prefetch.test.ts).
+      store.set(url, bundled);
+      // ADR-4: bundle text may itself `!include <…>`; re-enter the walk.
+      await next(bundled);
+    });
+    return;
+  }
+  if (store.has(url)) return; // already fetched (diamond include), or host-supplied
+  await dedupeInFlight(inFlight, url, async () => {
+    const content = await fetchTarget(walk, url);
+    store.set(url, content);
+    await next(content);
+  });
 }
 
 /** Shared by {@link prefetchIncludes} and {@link prepareIncludeStore} so

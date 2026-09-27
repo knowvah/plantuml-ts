@@ -19,12 +19,15 @@
  *
  * The builtin `aws-orange` theme sets BOTH `skinparam defaultFontName
  * "Verdana"` and `skinparam defaultFontSize 12` (@see ~/git/plantuml/src/
- * main/resources/themes/puml-theme-aws-orange.puml:195-196), which the
- * compiled builtin entry must carry (themes-builtin-a-m.ts).
+ * main/resources/themes/puml-theme-aws-orange.puml:195-196). Since cdd4-T7b
+ * the EXECUTED theme carries them (a `!theme` runs its lines), not a
+ * compiled summary entry.
  */
 import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { defaultTheme, deepMergeTheme, resolveTheme } from '../../../src/core/theme.js';
+import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
+import { buildTheme } from '../../../src/core/build-theme.js';
+import { preprocess } from '../../../src/core/preprocessor.js';
 import { resolveSkinparam } from '../../../src/core/skinparam.js';
 import { parseClass } from './parse-helper.js';
 import { measureClassifier } from '../../../src/diagrams/class/class-layout-helpers.js';
@@ -36,6 +39,11 @@ const SUPPRESS = { fields: false, methods: false };
 function bareClass(name: string): ReturnType<typeof parseClass>['classifiers'][number] {
   const block: UmlSource = { lines: [`class ${name}`], type: 'class' };
   return parseClass(block).classifiers[0]!;
+}
+
+/** The theme `!theme aws-orange` produces, executed. */
+function awsOrange(): ReturnType<typeof buildTheme>['theme'] {
+  return buildTheme(preprocess('@startuml\n!theme aws-orange\n@enduml')).theme;
 }
 
 describe('R2j: skinparam defaultFontSize explicit-set marker plumbing', () => {
@@ -60,9 +68,9 @@ describe('R2j: skinparam defaultFontSize explicit-set marker plumbing', () => {
     expect(defaultTheme.defaultFontSize).toBeUndefined();
   });
 
-  it('builtin aws-orange carries Verdana + explicit defaultFontSize 12', () => {
-    const t = resolveTheme('aws-orange');
-    expect(t.fontFamily).toBe('Verdana');
+  it('executed aws-orange carries Verdana + explicit defaultFontSize 12', () => {
+    const t = awsOrange();
+    expect(t.fontFamily).toBe('"Verdana"');
     expect(t.fontSize).toBe(12);
     expect(t.defaultFontSize).toBe(12);
     // `skinparam class { AttributeFontSize 11 }`
@@ -75,7 +83,7 @@ describe('R2j: skinparam defaultFontSize explicit-set marker plumbing', () => {
     // mizupo-59-zala765 golden sh0007 (AbstractCollection):
     // 1.648438x0.638889in = 118.6875x46px — name at 11pt (AttributeFontSize
     // cascade), badge radius 10 (explicit defaultFontSize 12 -> 12/3+6).
-    const m = measureClassifier(bareClass('AbstractCollection'), resolveTheme('aws-orange'), measurer, SUPPRESS);
+    const m = measureClassifier(bareClass('AbstractCollection'), awsOrange(), measurer, SUPPRESS);
     expect(m.width).toBeCloseTo(118.6875, 3);
     expect(m.height).toBe(46);
   });

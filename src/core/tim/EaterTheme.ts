@@ -93,6 +93,24 @@ function themeOf(content: string, description: string): Theme {
 }
 
 /**
+ * The store key `loadTheme` reads for `!theme <name>[ from <from>]`, for the
+ * async prefetch (`include-resolver.ts`) to fill: `undefined` for a bundled
+ * theme (nothing to fetch). A `<lib>` location yields the `<lib/file>` stdlib
+ * key `loadStdlibTheme` tries first; the name/location split is
+ * `EaterTheme#analyze`'s (`EaterTheme.java:62-70`), minus the substitution a
+ * text scan cannot do.
+ */
+export function themeStoreKey(args: string): string | undefined {
+  const x = args.toLowerCase().indexOf(FROM_MARKER);
+  const name = (x === -1 ? args : args.slice(0, x)).trim();
+  if (x === -1) return bundledSource(name) === undefined ? getFilename(name) : undefined;
+
+  const from = args.slice(x + FROM_MARKER.length).trim();
+  if (from.startsWith('<') && from.endsWith('>')) return `<${from.substring(1, from.length - 1)}/${getFilename(name)}>`;
+  return getFullPath(from, name);
+}
+
+/**
  * `ThemeUtils#loadTheme` (desktop branches; the TeaVM browser branch,
  * `ThemeUtils.java:53-59`, is not what the jar oracle runs). `undefined` is
  * upstream's `null`: the caller turns it into `Cannot load theme ...`.

@@ -1,6 +1,7 @@
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import { refuse } from '../../core/parse-refusal.js';
+import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { PacketDiagramAST, PacketItem, ScaleDirection } from './ast.js';
@@ -78,6 +79,11 @@ export function parsePacket(source: UmlSource): PacketDiagramAST | ParseRefusal 
       i += spriteMatch.consumed - 1;
       continue;
     }
+
+    // `!assume transparent dark|light` -- `CommandAssumeTransparent`, one of
+    // the common commands `PacketDiagramFactory.java:76` registers; a no-op
+    // upstream (`core/assume-transparent.ts`).
+    if (isAssumeTransparent(t)) continue;
 
     let m: RegExpMatchArray | null;
 

@@ -15,21 +15,18 @@
  *
  * so the theme's variables, procedures and functions are visible to every
  * later line, and its skinparam / `<style>` output lands at the `!theme` line's
- * position -- BEFORE the document's later lines, which therefore win.
- *
- * PLANTUML-TS DIVERGENCE (interim, cdd4 D3 -- T7b retires it): the theme's
- * STYLING still reaches `Theme` through the precompiled summary
- * (`theme.ts#resolveTheme(PreprocessorResult.theme)`), applied as the base
- * below every document skinparam / `<style>` -- the upstream order for every
- * line after `!theme`. To keep that styling from being applied twice, the
- * plain lines the theme emits are removed from the result (and never offered
- * to the skinparam/style collector) once it has run; everything else it does
- * -- memory, functions, nested `!theme` / `!include` -- stands.
+ * position -- BEFORE the document's later lines, which therefore win. The port
+ * does the same: the theme's lines go to the result list like any others, and
+ * `preprocessor.ts#resultOf` collects the styling from that list in order
+ * (cdd4-T7b retired the interim withholding T7a introduced).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java#executeTheme
  */
 
 import type { JsonValue } from './expression/Token.js';
+
+/** `TContext#themeMetadata`: the executed theme's YAML header (upstream's `JsonObject`). */
+export type ThemeMetadata = Readonly<Record<string, JsonValue>>;
 import { EaterTheme } from './EaterTheme.js';
 import type { IncludeStore } from './IncludeStore.js';
 import type { StringLocated } from './StringLocated.js';
@@ -64,23 +61,17 @@ export class ThemeExecutor {
     eater.analyze(context, memory);
     const theme = eater.getTheme();
     // The DOCUMENT's theme only: a theme that itself says `!theme` (C4_united
-    // -> united) must not re-point the summary lookup T7b retires.
+    // -> united) must not re-point the residual summary lookup
+    // (`theme.ts#resolveTheme` -- the fields executed state does not reach yet).
     if (this.depth === 0) this.themeName = eater.getRealName();
 
-    const mark = context.getResultList().length;
     this.depth++;
     try {
       context.executeLines(memory, theme.lines, undefined, false);
     } finally {
       this.depth--;
       this.themeMetadata = theme.metadata;
-      context.extractFromResultList(mark);
     }
-  }
-
-  /** True while a theme's own lines are executing. */
-  isExecutingTheme(): boolean {
-    return this.depth > 0;
   }
 
   /** The last document-level `!theme` name, if any. */
@@ -89,7 +80,7 @@ export class ThemeExecutor {
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#getThemeMetadata */
-  getThemeMetadata(): { readonly [key: string]: JsonValue } {
+  getThemeMetadata(): ThemeMetadata {
     return this.themeMetadata;
   }
 }

@@ -8,6 +8,7 @@
  * `remove`/`restore`. Split out of class-commands.ts to stay under the
  * line cap; order preserved (spread first in COMMANDS).
  */
+import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
 import type { Command } from './class-command-types.js';
 import { executeHideShow } from './class-hideshow-dispatch.js';
 import { startNewPage } from './parser.js';
@@ -193,7 +194,7 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
   {
-    pattern: /^!assume\s+transparent\s+(?:dark|light)\s*$/i,
+    pattern: RE_ASSUME_TRANSPARENT,
     execute() {
       /* upstream no-op -- see rule 2c-ter's doc comment */
     },

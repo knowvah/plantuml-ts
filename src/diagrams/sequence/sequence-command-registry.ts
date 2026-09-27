@@ -53,6 +53,7 @@ import {
   hideStereotypeCommand,
   hideUnlinkedCommand,
   pragmaCommand,
+  assumeTransparentCommand,
   rotateCommand,
   scaleCommand,
   skinParamMessageAlignCommand,
@@ -119,6 +120,7 @@ export const SEQUENCE_COMMANDS: readonly SequenceCommand[] = [
   returnCommand, //                :129 CommandReturn
   arrowCommand, //                 :111 CommandArrow
   pragmaCommand, //                :100 CommandPragma (addCommonCommands2)
+  assumeTransparentCommand, //     :100 CommandAssumeTransparent (addCommonCommands2)
   rotateCommand, //                :100 CommandRotate (addCommonCommands2)
   hideEmptyDescriptionCommand, //  :100 CommandHideEmptyDescription (addCommonHides)
   hideStereotypeCommand, //        :100 CommandHideShowByGender (addCommonHides)

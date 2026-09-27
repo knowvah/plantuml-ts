@@ -5,9 +5,10 @@
  * upstream `plantuml.skin`, overlaid with `skinparam` Title/Header/
  * Footer/Caption/Legend keys, then `<style> title|header|footer|
  * caption|legend|mainframe { ... }` selectors (mission G0b decisions.md D6).
- * Layering order: skin defaults < skinparam < `<style>` — matches the
- * Stage 2 (skinparam) -> Stage 3 (style) order `buildTheme` in
- * `src/index.ts:131-160` applies for every other Theme field.
+ * Layering order: skin defaults < skinparam and `<style>` in DECLARATION
+ * order (cdd4-T7b, `style-skinparam-segments.ts`) — the order `buildTheme`
+ * applies for every other Theme field. Given a bare skinparam map instead of
+ * the block's declarations, every skinparam precedes every `<style>`.
  *
  * `theme` (the resolved base Theme, post named-theme-resolution) is
  * accepted per the T2 interface contract. G2 N48: `theme.colors.background`
@@ -62,6 +63,11 @@ import type { AnnotationBoxStyle, AnnotationElement } from './annotation-style-t
 import { BASE_DEFAULTS, cloneBoxStyle } from './annotation-defaults.js';
 import { applySkinparamOverrides } from './annotation-skinparam.js';
 import { applyStyleOverrides } from './annotation-style-overrides.js';
+import {
+  styleSkinparamSegments,
+  type StyleSkinparamSegment,
+  type StyleSkinparamSource,
+} from '../style-skinparam-segments.js';
 
 // ---------------------------------------------------------------------------
 // Public re-exports (interface contract consumed by T4) — kept importable
@@ -89,11 +95,12 @@ export { parseClockwise } from './annotation-clockwise.js';
  */
 export function resolveAnnotationStyles(
   theme: Theme,
-  skinparam: ReadonlyMap<string, string>,
+  declarations: ReadonlyMap<string, string> | StyleSkinparamSource,
   styleMap: StyleMap,
 ): Record<AnnotationElement, AnnotationBoxStyle> {
   const documentBackgroundHex = resolveColorToSvgHex(theme.colors.background);
   const themeStyleMap = toStyleMap(theme.styleOverrides);
+  const segments = segmentsOf(declarations, styleMap);
   const result = {} as Record<AnnotationElement, AnnotationBoxStyle>;
   for (const element of ANNOTATION_ELEMENTS) {
     const style = cloneBoxStyle(BASE_DEFAULTS[element]);
@@ -126,13 +133,45 @@ export function resolveAnnotationStyles(
     if (themeStyleMap !== undefined) {
       applyStyleOverrides(element, style, themeStyleMap, documentBackgroundHex);
     }
-    const defaultFontName = skinparam.get('defaultfontname');
-    if (defaultFontName !== undefined) style.fontFamily = defaultFontName.trim();
-    applySkinparamOverrides(element, style, skinparam, documentBackgroundHex);
-    applyStyleOverrides(element, style, styleMap, documentBackgroundHex);
+    for (const segment of segments) applySegment(element, style, segment, documentBackgroundHex);
     result[element] = style;
   }
   return result;
+}
+
+/**
+ * cdd4-T7b: the skinparam / `<style>` declarations as ordered runs. A whole
+ * `PreprocessorResult` yields its declaration order (`style-skinparam-
+ * segments.ts`: a later skinparam beats an earlier `<style>`, as upstream's
+ * single style store does); a bare skinparam map is the two-stage order --
+ * every skinparam, then `styleMap`.
+ */
+function segmentsOf(
+  declarations: ReadonlyMap<string, string> | StyleSkinparamSource,
+  styleMap: StyleMap,
+): readonly StyleSkinparamSegment[] {
+  if ('styles' in declarations) return styleSkinparamSegments(declarations);
+  return [
+    { kind: 'skinparam', entries: declarations },
+    { kind: 'style', styleMap },
+  ];
+}
+
+/** One run onto one element's style: skinparams (root `DefaultFontName`
+ *  first), or `<style>` selectors. */
+function applySegment(
+  element: AnnotationElement,
+  style: AnnotationBoxStyle,
+  segment: StyleSkinparamSegment,
+  documentBackgroundHex: string,
+): void {
+  if (segment.kind === 'style') {
+    applyStyleOverrides(element, style, segment.styleMap, documentBackgroundHex);
+    return;
+  }
+  const defaultFontName = segment.entries.get('defaultfontname');
+  if (defaultFontName !== undefined) style.fontFamily = defaultFontName.trim();
+  applySkinparamOverrides(element, style, segment.entries, documentBackgroundHex);
 }
 
 /** `Theme.styleOverrides`'s plain-object form as the `StyleMap` the override

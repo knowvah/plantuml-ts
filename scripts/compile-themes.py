@@ -1,17 +1,25 @@
 #!/usr/bin/env python3
 """
-Compile PlantUML built-in themes into src/core/themes-builtin.ts.
+Compile the RESIDUE of PlantUML's built-in themes into src/core/themes-builtin.ts.
 
-Reads .puml theme files from the plantuml source tree and extracts:
-  - BackgroundColor  -> colors.background
-  - FontColor        -> colors.text
-  - LineColor        -> colors.border + colors.arrow
-  - FontName         -> fontFamily
-  - node MaximumWidth -> colors.graph.json.maximumWidth (top-level `node`
-    selector only; it cascades to root.element.jsonDiagram.node)
-  - root/document Margin -> diagramMargin (overrides getDefaultMargins())
+cdd4-T7b: a `!theme` directive EXECUTES the theme source now (`TContext
+#executeTheme`, `TContext.java:726-755`), and its skinparam / `<style>` lines
+reach the styling pipeline at the directive's position like any document
+line. This summary is kept ONLY for the fields that executed state does not
+yet reach a consumer through, each for a stated mechanism (see
+`theme.ts#resolveTheme`):
 
-Outputs a TypeScript module that maps theme names to Partial<Theme>.
+  - `<style> root { FontColor }`   -> colors.text   (sequence text fill)
+  - `<style> root { LineColor }`   -> colors.border + colors.arrow
+  - MANUAL `lc` / `fn`             -> colors.border / fontFamily (hand-read
+    themes whose values the parse cannot resolve; unmeasured -- no corpus
+    fixture uses them)
+  - root colours, `LineThickness`, top-level `node { MaximumWidth }`
+                                   -> colors.graph.json
+
+Everything else it once emitted -- colors.background, fontFamily,
+diagramMargin, styleOverrides and the aws-orange font sizes -- is carried by
+the executed theme and was retired.
 """
 
 import re
@@ -33,32 +41,6 @@ FILE_LINE_CAP = 500
 # Values from inspecting the theme files directly.
 # ---------------------------------------------------------------------------
 MANUAL = {
-    'aws-orange': {
-        'bg': 'transparent', 'fg': '#232F3E', 'lc': '#FF9900', 'fn': 'Verdana',
-        # R2j (mizupo-59) hand-carried these into the GENERATED file, which
-        # regenerating then silently discarded -- the header says "do not edit
-        # by hand" and something did. Held here instead, so the output is
-        # reproducible. They stay manual only until this script learns
-        # FontSize extraction.
-        'extra_theme': [
-            "    // R2j (mizupo-59): the upstream theme file sets `skinparam",
-            "    // defaultFontName \"Verdana\"` + `skinparam defaultFontSize 12`",
-            "    // (puml-theme-aws-orange.puml:195-196). compile-themes.py has no",
-            "    // FontSize extraction at all, so the two size fields are hand-carried",
-            "    // here until the script learns them (defaultFontSize doubles as the",
-            "    // explicit-set marker, see theme.ts#defaultFontSize).",
-        ],
-        'extra_after_font': ["    fontSize: 12,", "    defaultFontSize: 12,"],
-        'extra_graph': [
-            "        // R2j: `skinparam class { AttributeFontSize 11 }`",
-            "        // (puml-theme-aws-orange.puml:446) -- member rows at 11pt, and the",
-            "        // class HEADER cascades to 11 too (no ClassFontSize in the theme;",
-            "        // the N32 attribute->header cascade, `theme-graph-colors-a.ts",
-            "        // #classAttributeFontSize`). Jar-verified via mizupo-59-zala765's",
-            "        // own golden: bare-class width = widthTable(name)@11 + 30.",
-            "        classAttributeFontSize: 11,",
-        ],
-    },
     'cloudscape-design': {
         'bg': 'transparent', 'fg': '#000716', 'lc': '#0972D3', 'fn': None,
     },
@@ -87,10 +69,10 @@ MANUAL = {
         'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888', 'fn': 'Verdana',
     },
     'sunlust': {
-        'bg': '#fdf6e3', 'fg': '#657b83', 'lc': '#657b83', 'fn': 'Dejavu Serif',
+        'bg': '#fdf6e3', 'fg': '#657b83', 'lc': '#657b83', 'fn': None,
     },
     'carbon-gray': {
-        'bg': 'transparent', 'fg': '#f4f4f4', 'lc': '#4d4d4d', 'fn': 'IBM Plex Sans',
+        'bg': 'transparent', 'fg': '#f4f4f4', 'lc': '#4d4d4d', 'fn': None,
     },
     'toy': {
         'bg': '#DDDDDD', 'fg': '#333333', 'lc': '#333333', 'fn': None,
@@ -232,78 +214,6 @@ def extract_node_maximum_width(content: str) -> str | None:
     return None
 
 
-def extract_document_styles(content: str, vars: dict[str, str]) -> dict[str, dict[str, str]]:
-    """
-    The theme's `<style> root { … }` and `document { … }` blocks, as
-    selector -> {prop: value}.
-
-    `document` and `document.<element>` are genuine members of every chrome
-    element's `{root, document, <element>}` style signature, and
-    `StyleStorage#computeMergedStyle` matches by set containment -- so a
-    theme's `document { title { FontSize 22 } }` reaches the title exactly as a
-    user `<style>` block would. `annotation-style-overrides.ts` already
-    resolves those selectors; this only has to hand it the theme's own
-    declarations, which are otherwise compiled away.
-
-    Returns lowercase property names to match `parseStyleBlock`'s own keys.
-    """
-    style_text = _style_block_text(content)
-    if style_text is None:
-        return {}
-    out: dict[str, dict[str, str]] = {}
-    for path, line in _iter_style_lines_with_path(style_text):
-        if not path or path[0] not in ('document', 'root'):
-            continue
-        parts = line.split(None, 1)
-        if len(parts) != 2:
-            continue
-        selector = '.'.join(path)
-        out.setdefault(selector, {})[parts[0].lower()] = _resolve_var(
-            parts[1].strip().strip('"\''), vars)
-    return out
-
-
-def _parse_margin_numbers(n: list[int]) -> tuple[int, int, int, int]:
-    """Expand a CSS-shaped 1/2/3/4-number margin into (top, right, bottom, left)."""
-    if len(n) == 1:
-        return n[0], n[0], n[0], n[0]
-    if len(n) == 2:
-        return n[0], n[1], n[0], n[1]
-    if len(n) == 3:
-        return n[0], n[1], n[2], n[1]
-    return n[0], n[1], n[2], n[3]
-
-
-def extract_document_margin(content: str) -> str | None:
-    """
-    The diagram margin a theme declares, as `top right bottom left`.
-
-    `TextBlockExporter#calculateMargin` (`:510-516`) reads the merged style for
-    `root.document` and falls back to `TitledDiagram#getDefaultMargins()` --
-    `same(10)` -- only when that style has no `Margin`. `root` is a prefix of
-    `root.document`, so a `root { Margin … }` cascades into it, which is the
-    form all 28 declaring themes use.
-
-    The value is CSS-shaped: 1/2/3/4 numbers (`ClockwiseTopRightBottomLeft
-    #read`, `:66-100`). Only the 1-number form appears at this scope in the
-    corpus; the others are ported anyway so an upstream change does not
-    silently truncate. Only a top-level `root`/`document` block counts
-    (`path == ['root']` or `['document']`), matching the merged-style scope.
-    """
-    style_text = _style_block_text(content)
-    if style_text is None:
-        return None
-    for path, line in _iter_style_lines_with_path(style_text):
-        if path not in (['root'], ['document']):
-            continue
-        prop = re.match(r'Margin\s+([0-9]+(?:\s+[0-9]+){0,3})\s*$', line, re.IGNORECASE)
-        if prop:
-            n = [int(x) for x in prop.group(1).split()]
-            t, r, b, l = _parse_margin_numbers(n)
-            return f"{{ top: {t}, right: {r}, bottom: {b}, left: {l} }}"
-    return None
-
-
 def extract_skinparam(content: str, vars: dict[str, str]) -> dict[str, str | None]:
     """Extract top-level skinparam BackgroundColor / DefaultFontName / FontColor."""
     result: dict[str, str | None] = {'bg': None, 'fg': None, 'fn': None}
@@ -343,7 +253,7 @@ def normalize_color(val: str | None) -> str | None:
 
 
 def parse_theme(fname: str) -> dict[str, str | None]:
-    """Parse a .puml theme file and return {bg, fg, lc, fn}."""
+    """Parse a .puml theme file and return {bg, fg, lc, lt, root_bg, mw}."""
     with open(fname) as f:
         content = f.read()
     content = strip_front_matter(content)
@@ -362,10 +272,7 @@ def parse_theme(fname: str) -> dict[str, str | None]:
         # (`FromSkinparamToStyle.java:180`), whose signature does not match a
         # node, so it cannot overwrite the highlight the way a root block does.
         'root_bg': root['bg'],
-        'fn': root['fn'] or skp['fn'],
         'mw': extract_node_maximum_width(content),
-        'margin': extract_document_margin(content),
-        'doc_styles': extract_document_styles(content, vars),
     }
 
 
@@ -373,17 +280,14 @@ def parse_theme(fname: str) -> dict[str, str | None]:
 # TypeScript emission
 # ---------------------------------------------------------------------------
 
-def ts_string(v: str | None) -> str:
-    if v is None:
-        return 'undefined'
-    return f"'{v}'"
+def _color_lines(fg: str | None, lc: str | None) -> list[str]:
+    """
+    The `colors: { … }` scalar fields still carried (text/border/arrow).
 
-
-def _color_lines(bg: str | None, fg: str | None, lc: str | None) -> list[str]:
-    """The `colors: { … }` scalar fields (background/text/border/arrow)."""
+    colors.background is not: the executed `skinparam BackgroundColor` /
+    `<style> root { BackgroundColor }` reach every consumer already.
+    """
     out: list[str] = []
-    if bg:
-        out.append(f"      background: '{bg}',")
     if fg:
         out.append(f"      text: '{fg}',")
     # border and arrow both come from LineColor
@@ -437,20 +341,7 @@ def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
     return out
 
 
-def _emit_style_overrides_lines(doc_styles: dict[str, dict[str, str]]) -> list[str]:
-    """Emit the `styleOverrides: { … }` block, or [] when there are none."""
-    if not doc_styles:
-        return []
-    lines = ["    styleOverrides: {"]
-    for selector in sorted(doc_styles):
-        decls = ', '.join(f"{k}: '{v}'" for k, v in sorted(doc_styles[selector].items()))
-        lines.append(f"      '{selector}': {{ {decls} }},")
-    lines.append("    },")
-    return lines
-
-
-def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str],
-                             extra_graph: list[str]) -> list[str]:
+def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str]) -> list[str]:
     """
     Emit the `colors: { … }` block, or [] when there is nothing to say.
 
@@ -461,40 +352,36 @@ def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str],
         return []
     lines = ["    colors: {"]
     lines.extend(color_lines)
-    if json_lines or extra_graph:
+    if json_lines:
         lines.append("      graph: {")
-        lines.extend(extra_graph)
-        if json_lines:
-            lines.append("        json: {")
-            lines.extend(json_lines)
-            lines.append("        },")
+        lines.append("        json: {")
+        lines.extend(json_lines)
+        lines.append("        },")
         lines.append("      },")
     lines.append("    },")
     return lines
 
 
 def emit_theme_entry(name: str, props: dict) -> list[str]:
-    """Emit a TypeScript object entry for one theme."""
-    bg = normalize_color(props.get('bg'))
+    """
+    Emit a TypeScript object entry for one theme.
+
+    `fontFamily` comes from a MANUAL `fn` only: every parsed `FontName` is the
+    executed theme's own `skinparam DefaultFontName` / `root { FontName }`,
+    which reach the renderers unaided.
+    """
     fg = normalize_color(props.get('fg'))
     lc = normalize_color(props.get('lc'))
-    fn = props.get('fn')
-    if fn:
-        fn = fn.strip().strip('"\'')
+    fn = MANUAL.get(name, {}).get('fn')
 
     lines = [f"  '{name}': {{"]
-    lines.extend(props.get('extra_theme', []))
     if fn:
         lines.append(f"    fontFamily: '{fn}',")
-    lines.extend(props.get('extra_after_font', []))
-    if props.get('margin'):
-        lines.append(f"    diagramMargin: {props['margin']},")
-    lines.extend(_emit_style_overrides_lines(props.get('doc_styles') or {}))
 
-    color_lines = _color_lines(bg, fg, lc)
-    json_lines = _json_graph_lines(bg, fg, lc, props.get('mw'), props.get('lt'),
-                                   normalize_color(props.get('root_bg')))
-    lines.extend(_emit_colors_block_lines(color_lines, json_lines, props.get('extra_graph', [])))
+    color_lines = _color_lines(fg, lc)
+    json_lines = _json_graph_lines(normalize_color(props.get('bg')), fg, lc, props.get('mw'),
+                                   props.get('lt'), normalize_color(props.get('root_bg')))
+    lines.extend(_emit_colors_block_lines(color_lines, json_lines))
     lines.append("  },")
     return lines
 
@@ -506,10 +393,10 @@ def collect_entries() -> dict[str, list[str]]:
         if not fname.endswith('.puml') or fname == 'puml-theme-_none_.puml':
             continue
         theme_name = fname.replace('puml-theme-', '').replace('.puml', '')
-        # MANUAL OVERLAYS the parse, it does not replace it. Replacing threw
-        # away every auto-extracted property for those themes: black-knight
-        # declares `root { Margin 10 }` and never saw it. The manual keys are
-        # all explicit, so they still win where they are set.
+        # MANUAL OVERLAYS the parse, it does not replace it: the manual keys
+        # are all explicit, so they still win where they are set, and every
+        # auto-extracted property (a root LineThickness, a node MaximumWidth)
+        # survives for those themes.
         props = {
             **parse_theme(os.path.join(THEMES_DIR, fname)),
             **MANUAL.get(theme_name, {}),
@@ -524,7 +411,8 @@ def emit_data_module(var_name: str, sibling: str, names: list[str],
     first, last = names[0], names[-1]
     out = [
         "/**",
-        f" * Built-in PlantUML theme definitions ({first} .. {last}).",
+        f" * Built-in PlantUML theme residue ({first} .. {last}): only the fields an",
+        " * executed `!theme` does not yet reach -- see scripts/compile-themes.py.",
         " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
         " * Re-run the script when upstream themes change.",
         " *",
@@ -549,7 +437,8 @@ def emit_barrel(first_range: str, second_range: str) -> list[str]:
     """Emit the themes-builtin.ts barrel that re-assembles BUILTIN_THEMES."""
     return [
         "/**",
-        " * Built-in PlantUML theme definitions.",
+        " * Built-in PlantUML theme residue: only the fields an executed `!theme`",
+        " * does not yet reach -- see scripts/compile-themes.py.",
         " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
         " * Re-run the script when upstream themes change.",
         " *",

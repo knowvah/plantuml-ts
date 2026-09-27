@@ -63,15 +63,46 @@ describe('!theme executes the bundled theme source', () => {
 
   it("makes the theme's procedures callable by the document", () => {
     const { lines } = preprocess('@startuml\n!theme aws-orange\nA -> B : $success("ok")\n@enduml');
-    expect(lines).toEqual(['@startuml', 'A -> B :   <font color=#1D8102><b>ok', '@enduml']);
+    // The theme's one non-styling line (`puml-theme-aws-orange.puml:73`) is
+    // diagram content upstream too: `CommandAssumeTransparent` takes it.
+    expect(lines.filter((l) => l !== '')).toEqual([
+      '@startuml',
+      '    !assume transparent light',
+      'A -> B :   <font color=#1D8102><b>ok',
+      '@enduml',
+    ]);
   });
 
-  it('withholds the theme styling output: the summary path applies it (no double application)', () => {
+  it("emits the theme's styling at the directive: a later document skinparam wins (TContext.java:737-743)", () => {
     const r = preprocess('@startuml\n!theme aws-orange\nskinparam ArrowColor red\nclass A\n@enduml');
-    expect(r.lines).toEqual(['@startuml', 'class A', '@enduml']);
-    expect([...r.skinparam.keys()]).toEqual(['arrowcolor']);
-    expect(r.styles).toEqual([]);
+    expect(r.skinparam.get('arrowcolor')).toBe('red');
+    expect(r.skinparam.get('defaultfontsize')).toBe('12'); // puml-theme-aws-orange.puml:196
+    expect(r.styles).toHaveLength(1); // puml-theme-aws-orange.puml:555-665
     expect(r.theme).toBe('aws-orange');
+  });
+
+  it('lets the theme override an EARLIER document skinparam', () => {
+    const r = preprocess('@startuml\nskinparam ArrowColor red\n!theme aws-orange\n@enduml');
+    // :201 `ArrowColor $DARK`, then :282-284 `skinparam arrow { Color $PRIMARY }`
+    expect(r.skinparam.get('arrowcolor')).toBe(AWS_PRIMARY);
+  });
+
+  it('runs a procedure call inside a skinparam block (the collector reads the substituted stream)', () => {
+    // `skinparam class { $primary_scheme() }` -- puml-theme-aws-orange.puml:158-166
+    const r = preprocess('@startuml\n!theme aws-orange\n@enduml');
+    expect(r.skinparam.get('classbackgroundcolor')).toBe('#F18E3E-#EC7211');
+    expect(r.skinparam.get('classbordercolor')).toBe('#EC7211');
+  });
+
+  it("orders the theme's `<style>` before a later document skinparam", () => {
+    const r = preprocess('@startuml\n!theme plain\nskinparam backgroundColor red\n@enduml');
+    const order = r.declarationOrder!;
+    expect(order.skinparam.get('backgroundcolor')).toBeGreaterThan(order.styles[0]!);
+  });
+
+  it('%get_current_theme() reads the executed theme metadata (GetCurrentTheme.java:65)', () => {
+    const { lines } = preprocess('@startuml\n!theme amiga\n!$m = %get_current_theme()\ntitle $m.name\n@enduml');
+    expect(lines).toContain('title amiga');
   });
 
   it('keeps the YAML header as theme metadata', () => {
@@ -118,7 +149,7 @@ describe('!theme resolution (ThemeUtils#loadTheme)', () => {
     const local = run(['!theme mini'], store);
     expect(variable(local.memory, '$MINI')).toBe('yes');
     expect(local.context.getThemeMetadata()).toEqual({ name: 'mini', author: 'me' });
-    expect(output(local.context)).toEqual([]);
+    expect(output(local.context)).toEqual(['skinparam backgroundColor red']);
     expect(variable(run(['!theme mini from dir/'], store).memory, '$WHERE')).toBe('dir');
     expect(variable(run(['!theme mini from https://x.test/t'], store).memory, '$WHERE')).toBe('url');
   });

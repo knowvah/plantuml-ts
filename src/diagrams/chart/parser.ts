@@ -17,6 +17,7 @@ import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-comm
 import { extractStyleMap, makeAxis } from './parse-helpers.js';
 import type { StyleMap } from '../../core/skinparam.js';
 import { refuse } from '../../core/parse-refusal.js';
+import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import {
   tryArea,
@@ -54,7 +55,20 @@ const PRIMARY_HANDLERS: readonly ChartLineHandler[] = [
   tryChartLegend,
 ];
 
-const SECONDARY_HANDLERS: readonly ChartLineHandler[] = [tryStackMode, tryOrientation, tryChartAnnotation];
+/**
+ * `!assume transparent dark|light` -- `CommandAssumeTransparent`, one of the
+ * common commands `ChartDiagramFactory.java:78` registers
+ * (`CommonCommands#addCommonCommands1`); a no-op upstream. See
+ * `core/assume-transparent.ts`.
+ */
+const tryAssumeTransparent: ChartLineHandler = (_ast, line) => isAssumeTransparent(line);
+
+const SECONDARY_HANDLERS: readonly ChartLineHandler[] = [
+  tryStackMode,
+  tryOrientation,
+  tryChartAnnotation,
+  tryAssumeTransparent,
+];
 
 /**
  * Dispatch one trimmed, non-blank line at index `i` of `lines`. Handlers

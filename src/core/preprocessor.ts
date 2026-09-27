@@ -13,7 +13,7 @@
  * upstream): the `<style>` block collector, the `skinparam` line/block
  * collector, and the `%n()` / BLOCK_E1 newline line-splitting. Upstream leaves
  * all three to layers this port does not have (the command layer and the
- * Jaws/Creole display layer). See `TContextOptions.ts#PlainLineFilter`.
+ * Jaws/Creole display layer). See `resultOf` below.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java
  */
@@ -22,12 +22,12 @@ import { EaterException } from './tim/EaterException.js';
 import type { IncludeStore } from './tim/IncludeStore.js';
 import { readLines } from './tim/ReadLineReader.js';
 import { StringLocated } from './tim/StringLocated.js';
+import type { LineLocation } from './tim/LineLocation.js';
 import { TContext } from './tim/TContext.js';
 import { TMemoryGlobal } from './tim/TMemoryGlobal.js';
 import { TValue } from './tim/expression/TValue.js';
 import { TVariableScope } from './tim/TVariableScope.js';
 import { StyleAndSkinparamCollector } from './preprocessor-collector.js';
-import { dataListOf } from './uml-source-lines.js';
 
 export interface PreprocessorResult {
   readonly lines: readonly string[];
@@ -91,6 +91,20 @@ export interface PreprocessorResult {
    * (`uml-source-lines.ts`). Absent on a hand-built result.
    */
   readonly dataLines?: readonly string[];
+  /**
+   * cdd4-T7b: where each `skinparam` key's last assignment and each `<style>`
+   * block ({@link styles}, parallel) fell on ONE declaration counter -- see
+   * `StyleAndSkinparamCollector#skinparamOrder`. Absent on a hand-built
+   * result, which `style-skinparam-segments.ts` reads as every skinparam
+   * before every `<style>` block.
+   */
+  readonly declarationOrder?: DeclarationOrder;
+}
+
+/** See {@link PreprocessorResult.declarationOrder}. */
+export interface DeclarationOrder {
+  readonly skinparam: ReadonlyMap<string, number>;
+  readonly styles: readonly number[];
 }
 
 export interface PreprocessOptions {
@@ -257,11 +271,7 @@ export function preprocessLinesOrError(
   defines?: ReadonlyMap<string, string>,
   options?: PreprocessOptions,
 ): PreprocessOutcome {
-  const collector = new StyleAndSkinparamCollector();
-  const context = new TContext({
-    plainLineFilter: (line, substitute) => collector.accept(line, substitute),
-    includeStore: options?.includeStore,
-  });
+  const context = new TContext({ includeStore: options?.includeStore });
   const memory = new TMemoryGlobal();
 
   if (defines !== undefined)
@@ -277,22 +287,63 @@ export function preprocessLinesOrError(
     };
   }
 
-  return { ok: true, result: resultOf(context, collector) };
+  return { ok: true, result: resultOf(context) };
 }
 
-/** The interpreter's output, read off a context that ran to completion. */
-function resultOf(context: TContext, collector: StyleAndSkinparamCollector): PreprocessorResult {
-  const flattened = flatten(context.getResultList());
+/**
+ * The interpreter's output, read off a context that ran to completion.
+ *
+ * The `<style>` / `skinparam` / `skin` lines are hoisted out of the FINISHED
+ * result list -- the same fully-substituted stream upstream's
+ * `CommandSkinParam` / `CommandStyleMultilinesCSS` / `CommandSkin` dispatch
+ * over, after `TimLoader` (cdd4-T7b). Collecting any earlier (the former
+ * `PlainLineFilter` at `TContext#addPlain`, pre-substitution) saw a
+ * procedure-call line before it ran: `skinparam class { $primary_scheme() }`
+ * (`puml-theme-aws-orange.puml:158-166`) never emitted its entries, and a
+ * mid-line call's `pendingAdd` prefix (`:645`) leaked into the diagram body.
+ */
+function resultOf(context: TContext): PreprocessorResult {
+  const collector = new StyleAndSkinparamCollector();
+  const positions = documentPositions(context.getResultList());
+  const kept = context.getResultList().filter((line, i) => !collector.accept(line, positions[i]));
+  const flattened = flatten(kept);
   return {
     lines: flattened.lines,
     linePositions: flattened.positions,
-    dataLines: dataListOf(context.getResultList(), context.getFilteredLines()),
+    dataLines: context.getResultList().map((line) => line.getString()),
     theme: context.getThemeName() ?? null,
     skin: collector.skin,
     styles: collector.styles,
     stylePositions: collector.stylePositions,
     skinparam: collector.skinparam,
+    declarationOrder: { skinparam: collector.skinparamOrder, styles: collector.styleOrder },
   };
+}
+
+/** The root of a line's location chain: an included line's `!include` line. */
+function rootLocation(line: StringLocated): LineLocation | undefined {
+  let location = line.getLocation();
+  while (location?.getParent() !== undefined) location = location.getParent();
+  return location;
+}
+
+/**
+ * Each result line's place in the DOCUMENT (the block's own lines, which the
+ * first line -- `@start...` -- belongs to): its own position; an included
+ * line's `!include` position (the root of its chain); and for a `!theme`'s
+ * lines, which have no document root (`ThemeUtils` reads a theme parentless,
+ * `ThemeUtils.java:140-174`), the last document position before them -- the
+ * `!theme` line's place in execution order, which is what a `<style>`
+ * block's `stylePositions` entry is compared against (G2 N39).
+ */
+function documentPositions(lines: readonly StringLocated[]): (number | undefined)[] {
+  const document = lines[0] === undefined ? undefined : rootLocation(lines[0])?.getDescription();
+  let last: number | undefined;
+  return lines.map((line) => {
+    const root = rootLocation(line);
+    if (root !== undefined && root.getDescription() === document) last = root.getPosition();
+    return last;
+  });
 }
 
 /** @see ~/git/plantuml/.../tim/TimLoader.java#changeLastLine */

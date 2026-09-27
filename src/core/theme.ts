@@ -452,6 +452,9 @@ export { deepMergeTheme } from './theme-merge.js';
  *   'sketchy' → sketchyTheme, 'monochrome' → monochromeTheme.
  * - Any other string: looked up in BUILTIN_THEMES, merged onto defaultTheme.
  *   Unknown names fall back to defaultTheme.
+ * cdd4-T7b: `!theme` executes its theme, so BUILTIN_THEMES is only a residue,
+ * below every executed declaration, for fields executed state does not reach
+ * yet -- see `scripts/compile-themes.py` and `DIVERGENCES.md`.
  * - ThemeOverride object: deep-merged on top of defaultTheme. The original
  *   defaultTheme is never mutated.
  * - undefined / omitted: returns defaultTheme.

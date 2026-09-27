@@ -214,7 +214,7 @@ function applyAnnotationChrome(
   const annotations = annotationsOf(ast);
   if (annotations === undefined || isAnnotationsEmpty(annotations)) return fragment;
 
-  const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
   // cdd-T28 (decision journal row 103): chrome text is real creole now, so
   // a `<$sprite>`/`<img:…>` in a title/legend/header/footer/caption has to
   // resolve against the diagram's OWN sprite registry -- the same

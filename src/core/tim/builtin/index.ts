@@ -234,7 +234,7 @@ export function createStandardFunctions(env: TimEnvironment): readonly TFunction
     new FunctionExists(),
     new GetAllStdlib(env),
     new GetAllTheme(env),
-    new GetCurrentTheme(env),
+    new GetCurrentTheme(),
     new GetJsonKey(),
     new GetJsonType(),
     new GetStdlib(env),
