@@ -13,9 +13,11 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { helperFor } from '../../../scripts/svg-conformance-census.js';
+import { helperFor, censusClassFixtureOptions } from '../../../scripts/svg-conformance-census.js';
 import type { CensusResult } from '../../../scripts/svg-conformance-census.js';
 import { toCensusJson, jsonPathArg, runJsonMode, bucketOf } from '../../../scripts/svg-conformance-census-json.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 
 // ---------------------------------------------------------------------------
 // helperFor (AC1: activity dispatches to the activity helper)
@@ -37,6 +39,28 @@ describe('helperFor', () => {
     expect(helperFor('dot')).toBe('dot');
     expect(helperFor('component')).toBe('description');
     expect(helperFor('usecase')).toBe('description');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// censusClassFixtureOptions (cdd4-T4: the census must thread the SAME
+// assetStore/includeStore the survey/ratchet use, not a fresh, empty one)
+// ---------------------------------------------------------------------------
+
+describe('censusClassFixtureOptions', () => {
+  it('returns the SAME memoized includeStore the ratchet uses', () => {
+    expect(censusClassFixtureOptions().includeStore).toBe(fixtureIncludeStore());
+  });
+
+  it('returns the SAME memoized assetStore the survey uses', () => {
+    expect(censusClassFixtureOptions().assetStore).toBe(buildSpriteAssetsStore());
+  });
+
+  it('returns the identical store instances across two calls (both memoized singletons)', () => {
+    const a = censusClassFixtureOptions();
+    const b = censusClassFixtureOptions();
+    expect(a.includeStore).toBe(b.includeStore);
+    expect(a.assetStore).toBe(b.assetStore);
   });
 });
 
