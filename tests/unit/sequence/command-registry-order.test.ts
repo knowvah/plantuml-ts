@@ -24,6 +24,7 @@ import {
   autonumberStopCommand,
 } from '../../../src/diagrams/sequence/command-autonumber.js';
 import {
+  assumeTransparentCommand,
   hideStereotypeCommand,
   hideUnlinkedCommand,
   pragmaCommand,
@@ -105,6 +106,7 @@ const EXPECTED: readonly RegistryEntry[] = [
   { name: 'returnCommand', command: returnCommand, upstreamLine: 129 },
   { name: 'arrowCommand', command: arrowCommand, upstreamLine: 111 },
   { name: 'pragmaCommand', command: pragmaCommand, upstreamLine: 100 },
+  { name: 'assumeTransparentCommand', command: assumeTransparentCommand, upstreamLine: 100 },
   { name: 'rotateCommand', command: rotateCommand, upstreamLine: 100 },
   {
     name: 'hideEmptyDescriptionCommand',
@@ -183,14 +185,14 @@ describe('sequence command registry — frozen registration order', () => {
     );
   });
 
-  it('holds 43 commands — one array, not two tiers', () => {
-    expect(SEQUENCE_COMMANDS).toHaveLength(43);
-    expect(new Set(SEQUENCE_COMMANDS).size).toBe(43);
+  it('holds 44 commands — one array, not two tiers', () => {
+    expect(SEQUENCE_COMMANDS).toHaveLength(44);
+    expect(new Set(SEQUENCE_COMMANDS).size).toBe(44);
   });
 
   it('cites only lines inside initCommandsList (99-155) upstream', () => {
     const cited = EXPECTED.map((e) => e.upstreamLine).filter((l): l is number => l !== null);
-    expect(cited).toHaveLength(42);
+    expect(cited).toHaveLength(43);
     expect(cited.filter((l) => l < 99 || l > 155)).toEqual([]);
   });
 

@@ -7,6 +7,7 @@
  * parser.ts.
  */
 
+import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
@@ -326,3 +327,12 @@ export type LineHandler = (
   line: string,
   lc: string,
 ) => DispatchResult | ParseRefusal | null;
+
+/**
+ * `!assume transparent dark|light` -- `CommandAssumeTransparent`, registered
+ * through `CommonCommands#addCommonCommands1` (`ActivityDiagramFactory3.java:
+ * 107`); a no-op upstream, consumed only. See `core/assume-transparent.ts`.
+ */
+export function tryAssumeTransparent(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  return isAssumeTransparent(line) ? { idx: idx + 1 } : null;
+}

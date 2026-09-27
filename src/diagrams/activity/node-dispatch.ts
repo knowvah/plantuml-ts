@@ -42,6 +42,7 @@ import {
   matchesStopKeyword,
   setCurrentSwimlane,
   swimlaneSpread,
+  tryAssumeTransparent,
   type DispatchResult,
   type LineHandler,
   type ParseContext,
@@ -419,6 +420,7 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryAnnotation,
   trySprite,
   tryScale,
+  tryAssumeTransparent,
   // Tried LAST, immediately before the unknown-line fallback: `[-*]` is a
   // broad prefix (mission ubrr-T10 M1) and upstream itself registers
   // `CommandActivityList` after every other body command

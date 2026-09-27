@@ -15,6 +15,7 @@
  * @see ~/git/plantuml/.../statediagram/StateDiagramFactory.java
  */
 
+import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
 import type { Transition } from './ast.js';
 import {
   type ParseState,
@@ -166,6 +167,18 @@ export const COMMANDS: readonly Command[] = [
     passes: ['one'],
     execute() {
       /* ignored -- see rule 3a's doc comment */
+    },
+  },
+
+  // 3a2. `!assume transparent dark|light` -- CommandAssumeTransparent, the
+  //      next addCommonCommands2 registration after CommandPragma
+  //      (CommonCommands.java:64-65); a no-op upstream. See
+  //      core/assume-transparent.ts.
+  {
+    pattern: RE_ASSUME_TRANSPARENT,
+    passes: ['one'],
+    execute() {
+      /* ignored -- CommandAssumeTransparent.java:74-81 */
     },
   },
 
