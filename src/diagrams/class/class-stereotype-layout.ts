@@ -14,6 +14,7 @@ import { CLASS_STEREOTYPE_FONT_SIZE } from './class-stereotype.js';
 // comment.
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
+import { headerLineTops, headerLineY } from './class-header-line-stacking.js';
 
 /** Every creole text atom's line height floors at 10px --
  *  `AtomText#calculateDimensionSlow`'s `if (h < 10) h = 10;`. Observable
@@ -129,38 +130,10 @@ export function computeHeaderInfo(classifier: Classifier, genericDisplayOld?: bo
  * computes (`Display#create0`'s own per-line alignment inside the merged
  * multi-line `TextBlock`).
  *
- * Vertical stacking is `nameTop + i * fontSpec.size + baselineOffset` --
- * jar-verified against `dofima`'s own per-line `y` delta (exactly
- * `fontSpec.size`, 14, matching `measurer.measure(line, font).height ===
- * font.size` for EVERY measurer in this codebase, `measurer-deterministic
- * .ts`'s own doc comment). See {@link headerLineY} for the CDD B7FU-R2
- * item (c) sprite-line exception to that flat formula.
+ * Vertical stacking: see {@link headerLineTops} (cdd4-T12) and, for the
+ * CDD B7FU-R2 item (c) sprite-line bottom anchor, {@link headerLineY}.
  */
 
-/**
- * CDD B7FU-R2 item (c) (rotisi-30-loge424, `class "<$bug16>" as foo1`):
- * same bottom-anchor mechanism `class-member-rows.ts#buildSectionRows`'s
- * own doc comment documents in full -- a sprite/img (`'image'`-kind) atom
- * draws TOP-anchored at an absolute pixel position with no per-atom `dy`
- * correction, so ITS line needs `y` bottom-anchored to its real height;
- * every other line (plain text, sup/sub, blank) keeps the flat `nameTop +
- * i * fontSize + baselineOffset` stepping `dofima`'s own golden verifies.
- * Split out purely to keep {@link buildHeaderRows}'s row-map callback
- * under the project's per-function CCN cap.
- */
-function headerLineY(params: {
-  nameTop: number;
-  i: number;
-  fontSize: number;
-  baselineOffset: number;
-  atoms: readonly MemberRenderAtom[] | undefined;
-  height: number | undefined;
-}): number {
-  const { nameTop, i, fontSize, baselineOffset, atoms, height } = params;
-  const flat = nameTop + i * fontSize + baselineOffset;
-  if (atoms?.some((a) => a.kind === 'image') !== true) return flat;
-  return flat + (height ?? fontSize) - fontSize;
-}
 export function buildHeaderRows(input: {
   header: HeaderInfo;
   /** G2 N64: already-split via {@link splitDisplayLines} -- this module
@@ -213,6 +186,7 @@ export function buildHeaderRows(input: {
   const indent = circleWidth + (widthStereoAndName - nameWidth) / 2 + h1 + h2 + NAME_LEFT_MARGIN;
   const badgeIndent = h1 + BADGE_LEFT_MARGIN + badgeRadius;
   const lastIndex = lines.length - 1;
+  const lineTops = headerLineTops(nameTop, lines.length, fontSpec.size, lineHeights);
   return lines.map((line, i) => {
     const lineWidth = lineWidths[i] ?? 0;
     const lineOffset =
@@ -258,8 +232,7 @@ export function buildHeaderRows(input: {
     return {
       text: isBlank ? '\u00A0' : line,
       y: headerLineY({
-        nameTop,
-        i,
+        lineTop: lineTops[i]!,
         fontSize: fontSpec.size,
         baselineOffset,
         atoms: lineAtoms?.[i],

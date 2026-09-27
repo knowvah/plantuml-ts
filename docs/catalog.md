@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1243 modules · 4678 exported names.
+1244 modules · 4680 exported names.
 
 ## `src/`
 
@@ -1185,6 +1185,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-namespace-types.ts` | `NamespaceGeo` | `NamespaceGeo` -- split out of `class-geo-types.ts` (500-line hook cap, cdd-T6). |
 | `class-geo-row-types.ts` | `ClassifierRowGeo` | cdd3-T7: `ClassifierGeo['rows'][number]`'s element type, split out of `class-geo-types.ts` when the new `bodyInkHeight` field pushed that file past the project's 500-line hook cap -- a pure move (every consumer keys off `ClassifierGeo['rows |
 | `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
+| `class-header-line-stacking.ts` | `headerLineY`, `headerLineTops` | Vertical placement of a classifier NAME's physical lines -- split out of `class-stereotype-layout.ts#buildHeaderRows` (500-line cap) when cdd4-T12 replaced the flat `i * fontSize` step with upstream's per-stripe running sum. |
 | `class-hideshow-ast.ts` | `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective` | Hide/show + remove/restore directive AST types, split out of `ast.ts` (line cap) -- re-exported from it so every `import { ... |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |
