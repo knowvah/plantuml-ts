@@ -3,4 +3,4 @@
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
 | [T-exit](T-exit.md) | Residual round, close N=3, exit bar | orchestrator | close-procedure write-set, README Status | batch 2 | [x] |
-| [T-close-out](T-close-out.md) | Memory, next-missions, merge | orchestrator | `planning/next-missions.md`, memory files, `.agent-notes/` | T-exit | [ ] |
+| [T-close-out](T-close-out.md) | Memory, next-missions, merge | orchestrator | `planning/next-missions.md`, memory files, `.agent-notes/` | T-exit | [x] |
