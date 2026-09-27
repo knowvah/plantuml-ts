@@ -8,6 +8,12 @@
 import type { GvGraphBuilder } from '@knowvah/dot-engine';
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildBorderPointClusterHandles, inheritedEeLabel } from './graph-layout-build-borderpoint.js';
+import {
+  addTitledAnchorNode,
+  buildHasPortClusterHandles,
+  isHasPortCluster,
+  placeHasPortMembers,
+} from './graph-layout-build-portcluster.js';
 import { dotSplinesAttrs } from './dot-splines.js';
 import { rowPortTable, portTable, shieldTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
@@ -144,6 +150,11 @@ function addOneNode(b: GvGraphBuilder, n: DotInputNode): void {
     // emitter: `[shape=point,width=.01,label=""]` — width OVERRIDES the
     // caller's measured size, exactly as ClusterDotString emits anchors.
     b.addNode(n.id, { shape: 'point', width: '.01', label: '' });
+    return;
+  }
+  // cdd4-T6 (E3-10b): the `hasPort()` anchor, `ClusterDotString.java:178-181`.
+  if (n.titleLabelWidth !== undefined && n.titleLabelHeight !== undefined) {
+    addTitledAnchorNode(b, n);
     return;
   }
   if (n.shape === 'record' && n.recordLabel !== undefined) {
@@ -297,13 +308,9 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
   let nextIndex = 0;
-  // T1b: fresh counter for port-rank grouping subgraphs (`__portrank_N`) --
-  // deliberately NOT `cluster`-prefixed, see the naming-pitfall note below.
-  // Scoped to the GENERIC (non-`portRanksLabelOnEe`) case -- genuine
-  // PORTIN/PORTOUT ports (`src/diagrams/description/layout-dot-tree.ts
-  // #buildDotClusters`'s own `portRanks` without `portRanksLabelOnEe`,
-  // `ClusterDotString.java`'s `hasPort()` branch); the state border-point
-  // family below has its OWN counter and naming.
+  // T1b: shared `__portrank_N` counter for the non-border-point rank groups
+  // (the `hasPort()` family and the kermor fallback); never `cluster`-
+  // prefixed. The state border-point family has its OWN counter below.
   let portRankSubId = 0;
   // G7 T14b: separate counter for the border-point family's OWN rank-group
   // subgraphs (`__rank_${outerName}_N`, withlabel-derivation.md "Paper gate
@@ -357,6 +364,12 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
         () => borderRankSubId++,
         inheritedEeLabel(c.parentId === undefined ? undefined : byId.get(c.parentId)),
       );
+      handlesById.set(c.id, handles);
+      return handles;
+    }
+    // cdd4-T6 (E3-10b): the `hasPort()` family, `ClusterDotString.java:117-184`.
+    if (isHasPortCluster(c)) {
+      const handles = buildHasPortClusterHandles(c, outerName, parentInnermost, () => portRankSubId++);
       handlesById.set(c.id, handles);
       return handles;
     }
@@ -429,28 +442,14 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     let innermost = main;
     if (levels === 2) innermost = innermost.addSubgraph(`${outerName}i`, {});
     if (levels !== undefined) innermost = innermost.addSubgraph(`${outerName}p1`, {});
-    // T1b: `ClusterDotString.printRanks` (`Cluster.RANK_SOURCE`/`RANK_SINK`,
-    // `ClusterDotString.java:136-137,254-287`) -- GENERIC rank-constraint
-    // wiring for genuine PORTIN/PORTOUT ports (`hasPort()`, the NoLabel/
-    // chained branch): `layout-dot-tree.ts#buildDotClusters` sets
-    // `c.portRanks` WITHOUT `portRanksLabelOnEe` for this case. State's
-    // border-point (WithLabel) family takes the dedicated branch above
-    // instead (its OWN rank subgraphs, `__rank_${outerName}_N` naming) and
-    // never reaches this block.
-    //
-    // Naming pitfall this fix had to avoid (caught by a dump of the built
-    // Graph model, not assumed): @knowvah/dot-engine's cluster detection is a bare
-    // `name.toLowerCase().startsWith('cluster')` check
-    // (@knowvah/dot-engine/src/layout/dot/rank.ts) -- an EARLIER attempt named this
-    // subgraph `${outerName}rank${pr.rank}` (e.g. "cluster1ranksink"), which
-    // ITSELF starts with "cluster" and so was silently promoted to a real
-    // nested CLUSTER (wrong: jar's own `{rank=sink;...}` block is a bare,
-    // non-cluster anonymous subgraph, `ClusterDotString.java#printRanks`) --
-    // reproducing the wrong mincross order despite the constraint being
-    // present. `__portrank_N` (a fresh global counter, never
-    // "cluster"-prefixed) avoids this entirely.
+    // T1b: rank groups for a port cluster WITHOUT an anchor -- since
+    // cdd4-T6 only the kermor path (`buildDotClusters` leaves `portAnchorId`
+    // unset there; `ClusterDotStringKermor.printRanks` has no chain). The
+    // `hasPort()` family now takes `buildHasPortClusterHandles` above.
+    // `__portrank_N` must never be `cluster`-prefixed: dot-engine promotes
+    // any `cluster*` subgraph to a real cluster (issue 08; jar's
+    // `{rank=sink;...}` is a bare anonymous subgraph).
     // @see ~/git/plantuml/.../svek/ClusterDotString.java#printRanks
-    // @see ~/git/plantuml/.../svek/Cluster.java (RANK_SOURCE/RANK_SINK)
     if (c.portRanks !== undefined) {
       for (const pr of c.portRanks) {
         const rankSub = main.addSubgraph(`__portrank_${portRankSubId++}`, { rank: pr.rank });
@@ -467,8 +466,13 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // conditional jar mechanism (ClusterDotString.java:91-201,254-287), not
     // decision complexity to simplify.
   };
+  const portIds = new Set(input.nodes.filter((n) => n.isPort === true).map((n) => n.id));
   for (const c of clusters) {
     const { main, innermost } = handlesFor(c);
+    if (isHasPortCluster(c)) {
+      placeHasPortMembers(c, { main, innermost }, portIds);
+      continue;
+    }
     // G7 T14b: border-point clusters place their OWN remainder (anchor +
     // any other non-port direct member) into `innermost` (`ee`/`i`,
     // whichever `handlesFor` resolved) -- port ids are already placed by
