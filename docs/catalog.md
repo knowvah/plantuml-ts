@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1241 modules · 4671 exported names.
+1241 modules · 4672 exported names.
 
 ## `src/`
 
@@ -774,7 +774,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `EaterOption.ts` | `OptionKey`, `optionKeyDefaultValue`, `EaterOption` | `!option <key> [<value>]`. |
 | `EaterReturn.ts` | `EaterReturn` | `!return <expr>`. |
 | `EaterStartsub.ts` | `EaterStartsub` | `!startsub <name>`. |
-| `EaterTheme.ts` | `Theme`, `readThemeWithYamlHeader`, `getFilename`, `loadTheme`, `EaterTheme` | `!theme <name>` (optionally `from <path>`), and the theme load behind it. |
+| `EaterTheme.ts` | `Theme`, `readThemeWithYamlHeader`, `getFilename`, `themeStoreKey`, `loadTheme`, `EaterTheme` | `!theme <name>` (optionally `from <path>`), and the theme load behind it. |
 | `EaterUndef.ts` | `EaterUndef` | `!undef <varname>`. |
 | `EaterWhile.ts` | `EaterWhile` | `!while <expr>`. |
 | `FunctionsSet.ts` | `FunctionsSet` | The TIM function registry: every builtin, every `!procedure` / `!function` / legacy `!define` / `!definelong`, plus the pending-function state machine the `CodeIterator*` chain drives while collecting a multi-line body. |
