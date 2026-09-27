@@ -59,7 +59,7 @@ Batch closes add survey, census, render-all, pin-diff, pins —
 | [2](batch-2/overview.md) | structure (from T6) | written by T6 | per T6 | [x] |
 | [3](batch-3/overview.md) | paint / text / glyph (from T6) | written by T6 | per T6 | [x] |
 | [4](batch-4/overview.md) | geometry / scale / canvas (from T6) | written by T6 | per T6 | [x] |
-| [5](batch-5/overview.md) | D3 measured task + exit close | T-D3 · T-exit | — | [ ] |
+| [5](batch-5/overview.md) | D3 measured task + exit close | T-D3 · T-exit | — | [x] |
 | [final](final/T-close-out.md) | close-out | T-close-out | — | [ ] |
 
 Every batch ends with its close task (one residual round first), then
@@ -110,3 +110,20 @@ Push-forward conditions: [`decisions.md#push-forward`](decisions.md#push-forward
   `plans/class-divergence-drive/`; open owners in
   `planning/next-missions.md` (`class-divergence-drive-2` and
   `class-divergence-drive` sections)
+
+## Status
+
+Exit evaluated 2026-09-26 from `measurements/b5.json` (T-exit, run as cdd4 T0b):
+
+| Clause (D1) | Result | Met |
+|---|---|---|
+| conformant ≥ 670 (floor), target 712 | **689** (607 at plan); 16 structural-match, 18 diverged | floor met; target not |
+| each of the 105 rows conformant, owned or proposed-accept | 82 conformant; 23 open or accepted, each with mechanism + owner in `fixtures.md` `final` (cdd4 tasks or TRACKER) | met |
+| zero conformant losses, zero unexplained rises | 0 losses at every close; b5: 19 transitions, all → conformant, 0 rises | met |
+| class DOT parity green | green (full suite) | met |
+| other-engine movers journaled | b5 vs b4: 6 (state jelusa, lavera; unknown gaceme, gisuvu, judelo, ridofi), all → conformant, T-D3 | met |
+| four gates, collected = on-disk | 859 = 859 at pre-flight; re-run at this close | met |
+
+Ratchet 667 → 686 (19 pins, cdd3-b5). The gap to 712 is handed to
+`plans/class-divergence-drive-4/`: 14 dot-engine rows (13 fixed in 1.6.1,
+nugecu accepted), 5 port rows, besepi (oracle), 3 acceptances.
