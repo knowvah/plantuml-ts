@@ -1,0 +1,32 @@
+diff --git a/src/diagrams/class/class-edge-label-attach.ts b/src/diagrams/class/class-edge-label-attach.ts
+index d137cb009..fb0056923 100644
+--- a/src/diagrams/class/class-edge-label-attach.ts
++++ b/src/diagrams/class/class-edge-label-attach.ts
+@@ -1,3 +1,4 @@
++import { drawnEdgePoints } from './class-ink-dot-path.js';
+ /**
+  * Class-diagram edge LABEL attachment: the main label's plain, multi-line,
+  * guide-line and magic-arrow arms, plus the text context every anchor
+@@ -346,7 +347,8 @@ function attachMagicArrow(
+   rel: Relationship,
+ ): void {
+   const { center, measurer } = ctx;
+-  const angle = magicArrowAngle(dotPath, linkArrowOf(magic.direction, rel), rel.from === rel.to);
++  const trimmed = process.env.TRIM_PROBE ? dotPathOf(drawnEdgePoints(edgeGeo), rel) : dotPath;
++  const angle = magicArrowAngle(trimmed, linkArrowOf(magic.direction, rel), rel.from === rel.to);
+   // SI25 D2: the resolved arrow font (`GraphvizImageBuilder.java:234-235`'s
+   // `labelFont`, `TextBlockArrow2.java:57` reads `getSize2D()` off it) --
+   // `{ theme.fontFamily, 13 }` with no override, byte-identical to before.
+diff --git a/src/diagrams/class/class-ink-box.ts b/src/diagrams/class/class-ink-box.ts
+index 0018b996c..eed75fedc 100644
+--- a/src/diagrams/class/class-ink-box.ts
++++ b/src/diagrams/class/class-ink-box.ts
+@@ -442,7 +442,7 @@ export function buildInkBox(
+     // per-line glyphs of a multi-guide-line label (`labelLines[i].glyph`)
+     // get the identical rule -- `UPolygon` through `LimitFinder` either way.
+     if (e.arrowGlyph !== undefined) {
+-      for (const p of e.arrowGlyph.points) addPoint(box, p.x, p.y);
++      for (const p of e.arrowGlyph.points) { addPoint(box, p.x - HACK_X_FOR_POLYGON, p.y); addPoint(box, p.x + HACK_X_FOR_POLYGON, p.y); }
+     }
+     for (const line of e.labelLines ?? []) {
+       if (line.glyph !== undefined) {

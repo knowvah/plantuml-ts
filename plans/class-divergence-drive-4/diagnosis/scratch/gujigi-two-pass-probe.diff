@@ -1,0 +1,77 @@
+diff --git a/src/diagrams/class/class-edge-geo.ts b/src/diagrams/class/class-edge-geo.ts
+index 087627bfd..7f556a42e 100644
+--- a/src/diagrams/class/class-edge-geo.ts
++++ b/src/diagrams/class/class-edge-geo.ts
+@@ -17,7 +17,7 @@ import { applyClusterMagneticBorders, clipClusterEdgeEnds, type ClipRect } from
+ import { attachPortLabels } from './class-edge-label-anchor.js';
+ import { attachEdgeLabel, type EdgeGeoTextContext } from './class-edge-label-attach.js';
+ import { computeEdgeNoteBox } from './class-edge-note-box.js';
+-import { constraintAnchor } from './class-edge-constraint.js';
++import { constraintAnchor, constraintSquare, sampleEdgePath } from './class-edge-constraint.js';
+ import { edgeLabelAttrs } from './class-layout-edge-labels.js';
+ import { kalBoxAt, type Kal } from './class-kal.js';
+ import { fixKalOverlaps, type PlacedKal } from './class-kal-overlap.js';
+@@ -183,6 +183,7 @@ interface ConstraintEntry {
+   edgeGeo: EdgeGeo;
+   constraint: { text: string };
+   point: { x: number; y: number };
++  spot?: { x: number; y: number };
+ }
+ 
+ /**
+@@ -214,7 +215,9 @@ function attachNoteAndConstraintSpot(
+     y: center.y - (attrs.labelHeight ?? 0) / 2,
+   };
+   const point = constraintAnchor(edgeGeo.points, spot);
+-  if (point !== undefined) constrained.push({ edgeGeo, constraint: rel.linkConstraint, point });
++  const tw = process.env.GUJ_PROBE ? Math.trunc(attrs.labelWidth ?? 0) : (attrs.labelWidth ?? 0);
++  const spot2 = process.env.GUJ_PROBE ? { x: center.x - tw / 2, y: spot.y } : spot;
++  if (point !== undefined) constrained.push({ edgeGeo, constraint: rel.linkConstraint, point, spot: spot2 } as ConstraintEntry);
+ }
+ 
+ /**
+@@ -391,6 +394,7 @@ export function buildEdgeGeos(
+   for (const { edgeGeo, startId, endId } of clusterEnds) {
+     edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
+   }
++  if (process.env.GUJ_PROBE) probeTwoPass(constrained);
+   return edges;
+   // #lizard forgives -- verbatim move from layout.ts (pre-existing code,
+   // not touched this iteration); one EdgeGeo literal with 10 optional
+@@ -403,3 +407,36 @@ export function buildEdgeGeos(
+ // ---------------------------------------------------------------------------
+ // Degenerate-diagram skip (0-1 entities -> no DOT graph)
+ // ---------------------------------------------------------------------------
++
++function probeTwoPass(entries: ConstraintEntry[]): void {
++  const [Dx, Dy] = process.env.GUJ_PROBE!.split(',').map(Number) as [number, number];
++  const pick = (e: ConstraintEntry, ox: number, oy: number): { x: number; y: number } => {
++    const bez = sampleEdgePath(drawnEdgePoints(e.edgeGeo));
++    let best: { x: number; y: number } | undefined;
++    let bd = Number.MAX_VALUE;
++    for (const pt of constraintSquare(e.spot!.x + ox, e.spot!.y + oy))
++      for (const b of bez) {
++        const d = Math.hypot(b.x - pt.x, b.y - pt.y);
++        if (best === undefined || d < bd) { best = pt; bd = d; }
++      }
++    return best!;
++  };
++  // entries arrive in link order; link1 = the LATER link of the pair (getTwoLastLinks)
++  const state = new Map<object, { x1?: { x: number; y: number }; x2?: { x: number; y: number } }>();
++  const lines = new Map<ConstraintEntry, [{ x: number; y: number }, { x: number; y: number }]>();
++  for (const [pass, ox, oy] of [[0, 0, 0], [1, Dx, Dy]] as const) {
++    for (const e of entries) {
++      const pair = entries.filter((o) => o.constraint === e.constraint);
++      const isLink1 = pair.indexOf(e) === pair.length - 1;
++      const st = state.get(e.constraint) ?? {};
++      state.set(e.constraint, st);
++      const p = pick(e, ox, oy);
++      const inFinalShifted = { x: p.x - Dx, y: p.y - Dy }; // drawn at ug (final frame) -> shifted frame
++      if (isLink1) st.x1 = inFinalShifted; else st.x2 = inFinalShifted;
++      if (pass === 1 && st.x1 && st.x2) lines.set(e, [st.x1, st.x2]);
++    }
++  }
++  for (const [e, [a, b]] of lines) {
++    e.edgeGeo.constraint = { line: { x1: a.x, y1: a.y, x2: b.x, y2: b.y }, text: e.constraint.text };
++  }
++}
