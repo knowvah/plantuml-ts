@@ -19,8 +19,8 @@
  *      store asynchronously first (`include-resolver.ts#prefetchIncludes`); a
  *      miss is a typed error naming the path, never a silent skip. See
  *      `IncludeStore.ts` and `IncludeExecutor.ts`.
- *   2. `!theme` records the theme NAME (this port resolves themes by name in
- *      `src/core/theme.ts`) instead of executing the theme's own source.
+ *   2. `!theme` executes the theme's source (cdd4-T7a) but, until T7b routes
+ *      it, withholds the theme's skinparam/style output -- see `ThemeExecutor.ts`.
  *   3. Ambient I/O and non-determinism reach the builtins only through the
  *      injected `TimEnvironment` seam.
  *
@@ -41,13 +41,13 @@ import { EaterException } from './EaterException.js';
 import { EaterLog } from './EaterLog.js';
 import { EaterOption } from './EaterOption.js';
 import { EaterReturn } from './EaterReturn.js';
-import { EaterTheme } from './EaterTheme.js';
 import { EaterUndef } from './EaterUndef.js';
 import { FunctionsSet } from './FunctionsSet.js';
 import { IncludeExecutor } from './IncludeExecutor.js';
 import { IncludeError } from './IncludeStore.js';
 import { PreprocessingArtifact } from './PreprocessingArtifact.js';
 import { StringLocated, type LineLocation, type TLineType } from './StringLocated.js';
+import { ThemeExecutor } from './ThemeExecutor.js';
 import type { TContext as TContextInterface, TFunction, TPreprocessingArtifact } from './TFunction.js';
 import { applyFunctionsAndVariablesImpl } from './TContextSubstitution.js';
 import type { TFunctionSignature } from './TFunctionSignature.js';
@@ -87,12 +87,15 @@ export class TContext implements TContextInterface {
   /** Upstream's `PathSystem` + `filesUsedCurrent` + `DefinitionsContainer`, behind the sync seam. */
   private readonly includeExecutor: IncludeExecutor;
 
+  /** Upstream's `executeTheme` + `themeMetadata`. */
+  private readonly themeExecutor: ThemeExecutor;
+
   private pendingAdd: string | undefined;
-  private themeName: string | undefined;
 
   constructor(options: TContextOptions = {}) {
     this.plainLineFilter = options.plainLineFilter;
     this.includeExecutor = new IncludeExecutor(this.subs, options.includeStore);
+    this.themeExecutor = new ThemeExecutor(options.includeStore);
     this.addStandardFunctions(options.env ?? createDefaultTimEnvironment());
   }
 
@@ -230,7 +233,7 @@ export class TContext implements TContextInterface {
     if (this.executeIncludeDirective(memory, s, type)) return true;
 
     if (type === 'THEME') {
-      this.executeTheme(memory, s);
+      this.themeExecutor.executeTheme(this, memory, s);
       return true;
     }
     if (type === 'DUMP_MEMORY') {
@@ -281,7 +284,9 @@ export class TContext implements TContextInterface {
 
   /** @see ~/git/plantuml/.../tim/TContext.java#addPlain */
   private addPlain(memory: TMemory, s: StringLocated): void {
-    if (this.plainLineFilter?.(s, (text) => this.substituteText(memory, s, text)) === true) {
+    // A theme's own lines bypass the collector: `ThemeExecutor.ts` withholds them.
+    const filter = this.themeExecutor.isExecutingTheme() ? undefined : this.plainLineFilter;
+    if (filter?.(s, (text) => this.substituteText(memory, s, text)) === true) {
       this.recordFilteredLine(memory, s);
       return;
     }
@@ -340,21 +345,14 @@ export class TContext implements TContextInterface {
     this.functionsSet.removeFunctionsByName(name);
   }
 
-  /**
-   * PLANTUML-TS DIVERGENCE 2 (see file header): upstream loads the theme file
-   * and executes its lines. This port resolves themes by name in
-   * `src/core/theme.ts`, so the interpreter only records the name;
-   * `preprocess()` surfaces it as `PreprocessorResult.theme`.
-   */
-  private executeTheme(memory: TMemory, s: StringLocated): void {
-    const eater = new EaterTheme(s.getTrimmed());
-    eater.analyze(this, memory);
-    this.themeName = eater.getRealName();
+  /** The document's `!theme` name, if any -- `PreprocessorResult.theme`. */
+  getThemeName(): string | undefined {
+    return this.themeExecutor.getThemeName();
   }
 
-  /** The `!theme` name seen, if any. @see #executeTheme */
-  getThemeName(): string | undefined {
-    return this.themeName;
+  /** @see ~/git/plantuml/.../tim/TContext.java#getThemeMetadata */
+  getThemeMetadata(): { readonly [key: string]: JsonValue } {
+    return this.themeExecutor.getThemeMetadata();
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#applyFunctionsAndVariablesInternal */
