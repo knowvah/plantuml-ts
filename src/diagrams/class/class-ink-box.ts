@@ -436,17 +436,31 @@ export function buildInkBox(
     // cdd-B10FU: the SAME margin, multi-line arm -- see
     // {@link addMultiLineLabelMarginInk}'s own doc comment.
     addMultiLineLabelMarginInk(box, e);
-    // G2 item 44: the magic-arrow glyph's own 3 vertices -- unlike the
-    // single-point simplification above, the WHOLE triangle is cheap to
-    // bound exactly (only 3 points), so every vertex is added. SI25 D1: the
-    // per-line glyphs of a multi-guide-line label (`labelLines[i].glyph`)
-    // get the identical rule -- `UPolygon` through `LimitFinder` either way.
+    // G2 item 44 / cdd4-T8 (jakapi-64-tine258, D8): the magic-arrow glyph
+    // is a `UPolygon` (`klimt/shape/TextBlockArrow2.java:62-77`,
+    // `final UPolygon triangle = new UPolygon(); ... ug.draw(triangle);`),
+    // so it gets `LimitFinder#drawUPolygon`'s own x-only pad, exactly like
+    // every other `UPolygon` this file bounds (`HACK_X_FOR_POLYGON`,
+    // `klimt/drawing/LimitFinder.java:169-177`:
+    // `addPoint(x + shape.getMinX() - HACK_X_FOR_POLYGON, y + shape.getMinY());
+    // addPoint(x + shape.getMaxX() + HACK_X_FOR_POLYGON, y + shape.getMaxY());`)
+    // -- unlike the single-point simplification above, the WHOLE triangle is
+    // cheap to bound exactly (only 3 points), so every vertex is added, each
+    // ± the pad on x. SI25 D1: the per-line glyphs of a multi-guide-line
+    // label (`labelLines[i].glyph`) get the identical rule -- `UPolygon`
+    // through `LimitFinder` either way.
     if (e.arrowGlyph !== undefined) {
-      for (const p of e.arrowGlyph.points) addPoint(box, p.x, p.y);
+      for (const p of e.arrowGlyph.points) {
+        addPoint(box, p.x - HACK_X_FOR_POLYGON, p.y);
+        addPoint(box, p.x + HACK_X_FOR_POLYGON, p.y);
+      }
     }
     for (const line of e.labelLines ?? []) {
       if (line.glyph !== undefined) {
-        for (const p of line.glyph.points) addPoint(box, p.x, p.y);
+        for (const p of line.glyph.points) {
+          addPoint(box, p.x - HACK_X_FOR_POLYGON, p.y);
+          addPoint(box, p.x + HACK_X_FOR_POLYGON, p.y);
+        }
       }
     }
     // G2 N54: arrowhead-polygon ink (`UPolygon`/`HACK_X_FOR_POLYGON=10` and
