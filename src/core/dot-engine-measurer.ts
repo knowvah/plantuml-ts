@@ -11,11 +11,10 @@
  * shares whichever install ran last. Importing this module for its side effect
  * is how a consumer opts in.
  *
- * NOT yet the only install point: `core/graph-layout.ts` and
- * `diagrams/description/frontier-shadow-layout.ts` each still run the identical
- * `setTextMeasurer(new LutTextMeasurer())` at module load. Same measurer, same
- * argument, so the duplication is inert — whichever import order wins installs
- * the same object. Folding those two into this module was deliberately NOT done
+ * NOT yet the only install point: `core/graph-layout.ts` still runs the
+ * identical `setTextMeasurer(new LutTextMeasurer())` at module load. Same
+ * measurer, same argument, so the duplication is inert — whichever import order
+ * wins installs the same object. Folding it into this module was deliberately NOT done
  * here: `graph-layout.ts` carries three pre-existing complexity-hook violations
  * (`parseNodeRenderCenters`, `extractPortLabelPositions`, `shiftToOrigin`), so
  * any edit to it is blocked until those are refactored, and refactoring them is
