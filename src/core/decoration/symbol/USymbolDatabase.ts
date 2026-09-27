@@ -4,6 +4,7 @@ import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
 import { UPath } from '../../klimt/shape/UPath.js';
+import { UEmpty } from '../../klimt/shape/UEmpty.js';
 import { Back } from '../../klimt/Back.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
 import { AbstractUGraphicHorizontalLine } from '../../klimt/drawing/AbstractUGraphicHorizontalLine.js';
@@ -80,14 +81,14 @@ import type { SymbolContext } from './SymbolContext.js';
  * appears for member separators inside a class-style body, which this
  * element's `TextBlock`s never carry).
  *
- * Seam — `UEmpty` (reported, this class only): upstream's `drawDatabase`
- * ends with `ug.apply(new UTranslate(width, height)).draw(new
- * UEmpty(10, 10))` — a draw of an invisible 10x10 shape purely to pad the
- * overall SVG bounding box 10px right of `width`/below `height` for a
- * compositing consumer. `klimt/shape/UEmpty.java` has no port in this
- * codebase, and `UGraphicSvg.register()` registers no driver for it
- * either. Dropped — no observable effect on this file's own cylinder
- * geometry, and not exercised by this task's conformance tests.
+ * `UEmpty` (cdd3-T31, C-8): upstream's `drawDatabase` ends with
+ * `ug.apply(new UTranslate(width, height)).draw(new UEmpty(10, 10))`
+ * (`USymbolDatabase.java:77`). It emits no SVG (`UGraphicSvg`'s `UEmpty`
+ * driver draws nothing) but `LimitFinder#drawEmpty`
+ * (`klimt/drawing/LimitFinder.java:159-162`) counts it, so it pads every
+ * ink walk 10px right of `width` and below `height`. Formerly dropped here;
+ * jar-verified by a class `database` leaf (`givofi-11-xumu978`, canvas 226
+ * vs 216 without it).
  */
 
 const DATABASE_SUPP_HEIGHT = 15;
@@ -103,8 +104,8 @@ export function getClosingPath(width: number): UPath {
   return closing;
 }
 
-/** Upstream: `USymbolDatabase#drawDatabase` — see the module doc
- * comment's `UEmpty` entry for the one dropped tail statement. */
+/** Upstream: `USymbolDatabase#drawDatabase` (`USymbolDatabase.java:61-79`),
+ * ported whole — see the module doc comment's `UEmpty` entry. */
 export function drawDatabase(ug: UGraphic, width: number, height: number, shadowing: number): void {
   const shape = UPath.none();
   shape.setDeltaShadow(shadowing);
@@ -121,6 +122,7 @@ export function drawDatabase(ug: UGraphic, width: number, height: number, shadow
 
   const closing = getClosingPath(width);
   ug.apply(new Back('none')).draw(closing);
+  ug.apply(new UTranslate(width, height)).draw(new UEmpty(10, 10));
 }
 
 /**

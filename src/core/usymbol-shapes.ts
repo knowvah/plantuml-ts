@@ -55,9 +55,8 @@ export interface IconGeo {
  * `<linearGradient>` defs (deduped later by svgRoot).
  */
 function filledPath(d: string, fill: Paint, stroke: Paint): string {
-  // resolvePaint, not paintToSvg: the former applies rule 2 to a gradient's
-  // <stop stop-color> values (svg.ts#shortenStopColors); the raw paintToSvg
-  // leaves them 6-digit, which the jar does not.
+  // resolvePaint, not paintToSvg: the former applies rule 2 to the fill value
+  // (the gradient's own stops are shortened inside paint.ts#paintToSvg).
   const f = resolvePaint(fill);
   const s = resolvePaint(stroke);
   // Through `attrs` rather than interpolated by hand: that is the one place

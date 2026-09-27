@@ -7,21 +7,19 @@
  *
  * `renderBulletAtom` was further split out to `renderer-bullet-atom.ts`
  * (same reason), re-exported here unchanged for
- * `renderer-classifier-rows.ts`'s own import.
+ * `renderer-classifier-rows.ts`'s own import. `resolveNoteBackground` was
+ * split out to `renderer-note-background.ts` (T26, same 500-line reason).
  */
 import type { NoteGeo } from './note-layout.js';
 import type { TipShape } from './note-tips-resolve.js';
 import type { ScaledTheme } from './class-scale-geo.js';
-import type { Paint } from '../../core/paint.js';
 import { text, path, image, linkWrap, decorationLines } from '../../core/svg.js';
 import { textRenderDecorations } from '../../core/klimt/drawing/svg/driver-text-svg-decorations.js';
 import { renderBulletAtom } from './renderer-bullet-atom.js';
 export { renderBulletAtom };
+import { renderListNumberAtom } from './renderer-list-number-atom.js';
 import { moveTo, lineTo } from '../../core/svg-path-builder.js';
-import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { resolveBareOrBackColor } from '../../core/color-override.js';
-import { splitStereotypeStyleTags } from './class-stereotype.js';
-import { cleanStereotypeToken } from '../../core/style-map-element.js';
+import { resolveNoteBackground } from './renderer-note-background.js';
 import {
   opalePolygonLeft,
   opalePolygonRight,
@@ -36,6 +34,7 @@ import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import { noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
+import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 // cdd-T10 wiring fix: a row's own creole `----` divider / table draws AT
 // THIS ROW'S OWN POSITION inside `renderNoteText`'s loop below -- see that
 // function's own doc comment. `renderer-note-lines.ts` owns the pure
@@ -43,68 +42,6 @@ import { renderOpenIconicAtom } from './renderer-openiconic.js';
 // consumers); it imports nothing from this file, so this is not a cycle.
 import { renderNoteRowExtra } from './renderer-note-lines.js';
 
-/**
- * G2 N34: jar's `EntityImageNote` ctor default (`ColorParam.noteBackground`,
- * `plantuml.skin`) -- the fallback when NEITHER the note's own explicit
- * `#color` NOR a `<style> note { BackgroundColor ... }` bucket applies.
- */
-const NOTE_FILL = '#FEFFDD';
-
-/**
- * G2 N34: a note's own fill color, cascading explicit `#color` override
- * (`ClassNote.color`, highest precedence -- `EntityImageNote.java`'s ctor:
- * `entity.getColors().getColor(BACK)` wins outright) -> the `<style> note
- * { BackgroundColor ... } </style>` bucket default -> the hardcoded
- * `NOTE_FILL`. Reads `theme.colors.elements.note` directly rather than via
- * `resolveElementPaint` (`theme.ts`) -- that helper's own generic "no
- * bucket" fallback is `nodeBackground` (`#F1F1F1`, the class-box default),
- * NOT jar's real note default (`ColorParam.noteBackground`, `#FEFFDD`) --
- * using it here would silently wrongize every note with no override. The
- * nested `.tagname` stereotype-cascade sub-selector (`note { .faint { ...
- * } }`) is a SEPARATE, deeper mechanism -- surveyed, not built (ledger).
- */
-function resolveNoteBackground(
-  color: string | undefined,
-  theme: ScaledTheme,
-  // G2 N37: the note's OWN `<<stereotype>>` (`ClassNote.stereotype`) --
-  // resolves the `.tagname` `<style>` cascade (`note { .faint {
-  // BackgroundColor red } } }`) between the explicit `#color` override and
-  // the bare `note {}` bucket default. Optional/trailing so every
-  // pre-existing call site (no stereotype) is behavior-unchanged.
-  stereotype?: string,
-): Paint {
-  const override = resolveBareOrBackColor(color);
-  if (override !== undefined) return resolveColorToSvgHex(override);
-  const tagBackground = resolveNoteTagBackground(theme, stereotype);
-  if (tagBackground !== undefined) return tagBackground;
-  const bucket = theme.colors.elements?.['note']?.background;
-  if (bucket === undefined) return NOTE_FILL;
-  // A `<style> note { BackgroundColor red }` bucket value is a raw
-  // `parseColor` result (`core/paint.ts`) -- a plain color NAME still needs
-  // HColorSet resolution (`resolveColorToSvgHex`, same as the explicit-
-  // override branch above); a Gradient object is already a resolved `Paint`
-  // and passes through unchanged (`core/svg.ts#resolvePaint` handles it).
-  return typeof bucket === 'string' ? resolveColorToSvgHex(bucket) : bucket;
-}
-
-/**
- * G2 N37: `theme.colors.noteTagCascade` lookup, resolving the note's own
- * (possibly multi-label) stereotype the SAME way {@link
- * splitStereotypeStyleTags} splits a classifier's -- a note's stereotype
- * blob follows the identical `<<A>><<B>>` stacking grammar. Returns the
- * FIRST matching label's background (already a resolved `Paint` from
- * `computeNoteStyleTagCascade`'s `parseColor` call), or `undefined`.
- */
-function resolveNoteTagBackground(theme: ScaledTheme, stereotype: string | undefined): Paint | undefined {
-  if (stereotype === undefined) return undefined;
-  const cascade = theme.colors.noteTagCascade;
-  if (cascade === undefined) return undefined;
-  for (const label of splitStereotypeStyleTags(stereotype)) {
-    const bg = cascade[cleanStereotypeToken(label)]?.background;
-    if (bg !== undefined) return bg;
-  }
-  return undefined;
-}
 /** `Opale.java`'s `cornersize` -- the folded-corner triangle size, shared by
  *  BOTH the plain fold (this file) and the zigzag-notch tip outline
  *  (`note-opale.ts#opaleCorner`, the SAME upstream constant). */
@@ -119,19 +56,17 @@ import { OPALE_MARGIN_Y as NOTE_MARGIN_Y } from '../../core/svek/image/Opale.js'
  *  `theme.colors.elements['note'].fontSize` override this renderer now also
  *  consults (`renderNoteText`'s own `fontSize` local). */
 import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
-/** `note { LineThickness 0.5 }` -- the note's OWN style stroke: the box
- *  outline (body + fold). `EntityImageNote.java:275-289` `drawNormal`:
- *  `stroked = applyStroke(ug); stroked.draw(polygon)` -- the fold draws on
- *  `ug` itself, not `stroked` (see {@link NOTE_FOLD_STROKE_WIDTH}). cdd-T9b:
- *  the dashed host connector is NOT this note's own stroke -- upstream
- *  draws it as a completely separate `Link` (`CommandFactoryNoteOnEntity
- *  .java:342`), styled like any other dashed relationship edge -- see
- *  `renderer-note-connector.ts#renderNoteConnectorPath`. */
-export const NOTE_STROKE_WIDTH = 0.5;
+/** cdd3-T24 (E3-8): the note's OWN style stroke (body + opale fold) now
+ *  resolves from the note style -- `renderer-note-stroke.ts`. cdd-T9b: the
+ *  dashed host connector is NOT this stroke (a separate `Link`,
+ *  `renderer-note-connector.ts#renderNoteConnectorPath`). */
+import { NOTE_STROKE_WIDTH, resolveNoteStroke } from './renderer-note-stroke.js';
+export { NOTE_STROKE_WIDTH };
 
 /** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
  *  draws on the UNSTROKED `ug`, so it keeps the diagram's DEFAULT stroke
- *  width (1), never the note's own {@link NOTE_STROKE_WIDTH} (0.5). */
+ *  width (1), never the note's own style thickness -- but it IS drawn
+ *  after `ug.apply(borderColor)`, so it takes the note's LineColor. */
 const NOTE_FOLD_STROKE_WIDTH = 1;
 
 /**
@@ -263,8 +198,22 @@ function renderNoteLineAtoms(
       x += atom.width;
       continue;
     }
+    if (atom.kind === 'listNumber') {
+      out += renderListNumberAtom(atom, x, lineTop, lineHeight);
+      x += atom.width;
+      continue;
+    }
     if (atom.kind === 'vector') {
       out += renderOpenIconicAtom(atom, x, legacyY, theme);
+      x += atom.width;
+      continue;
+    }
+    if (atom.kind === 'drawable') {
+      // C-4 (cdd3-T23): same altitude-0 line-TOP placement as 'image'
+      // below -- `resolveInlineAtom`'s own contract, untested against a
+      // jar note fixture (bidusa/ruliki's `<$Netw>` sits in a class member
+      // row, not a note).
+      out += renderMemberRowDrawable(atom.primitives, x, legacyY - baselineOffset);
       x += atom.width;
       continue;
     }
@@ -398,27 +347,27 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
   const { x, y, width: w, height: h } = note;
   // cdd-B8FU: `NOTE_FOLD` feeds `noteBodyPathData` -- a class-local
-  // geometry builder (unlike the SEPARATE `opaleCorner` fold-flap primitive
-  // below, which lives in the SHARED `core/svek/image/Opale.ts` and is left
-  // unscaled -- out of this class-only task's write-set, see .agent-notes).
+  // geometry builder, its OWN copy of the cornersize constant (unlike the
+  // SEPARATE `opaleCorner` fold-flap primitive below, which lives in the
+  // SHARED `core/svek/image/Opale.ts`). cdd3-T34 (E1-8): `opaleCorner` now
+  // takes `k` too (that module was out of a PRIOR task's write-set, not
+  // this one's) -- both copies of the same upstream `cornersize` constant
+  // scale identically now.
   const f = NOTE_FOLD * theme.scaleK;
+  const ns = resolveNoteStroke(theme);
   const entityParts: string[] = [
     // Body: `Opale.getPolygonNormal`'s vertex order (see `noteBodyPathData`'s
-    // own doc comment), the note style's OWN stroke width (0.5).
-    path(noteBodyPathData(x, y, w, h, f), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
+    // own doc comment), the note style's OWN stroke (`applyStroke`).
+    path(noteBodyPathData(x, y, w, h, f), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
     // Fold: `Opale.getCorner`, reused unchanged from `note-opale.ts`/
     // `core/svek/image/Opale.ts` (the SAME primitive `renderTipNote`/
     // `renderOpaleNote` already call) -- filled with the note's OWN
     // background (not `none`) at the diagram's DEFAULT stroke width, per
     // `EntityImageNote.java:275-289` (see `NOTE_FOLD_STROKE_WIDTH`'s doc
     // comment).
-    path(opaleCorner({ x, y }, w), {
+    path(opaleCorner({ x, y }, w, theme.scaleK), {
       fill,
-      stroke: theme.colors.border,
+      stroke: ns.stroke,
       strokeWidth: NOTE_FOLD_STROKE_WIDTH * theme.scaleK,
     }),
     renderNoteText(note, theme),
@@ -439,14 +388,20 @@ export function renderPlainNote(note: NoteGeo, theme: ScaledTheme): { entityPart
 export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: tip.pp1, pp2: tip.pp2 };
-  const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector) : opalePolygonRight(box, connector);
+  // cdd3-T34 (E1-8): `theme.scaleK` -- `opalePolygonLeft/Right`'s own doc
+  // comment (`cornersize`/`delta` are RAW, ambient-scaled upstream numerals).
+  const k = theme.scaleK;
+  const outline = tip.direction === 'left' ? opalePolygonLeft(box, connector, k) : opalePolygonRight(box, connector, k);
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
+  // `Opale#drawU` (`Opale.java:123-126`) draws outline AND fold on the
+  // stroked `ug` -- both take the note style's stroke.
+  const ns = resolveNoteStroke(theme);
   const parts: string[] = [
-    path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
+    path(outline, { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width, k), {
       fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
+      stroke: ns.stroke,
+      strokeWidth: ns.strokeWidth,
     }),
   ];
   parts.push(renderNoteText(note, theme));
@@ -455,17 +410,18 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme):
 
 /** Dispatch to the right `opalePolygon*` function by direction --
  *  `Opale.java#drawU`'s own `strategy` switch, shared by {@link renderTipNote}
- *  (LEFT/RIGHT only) and {@link renderOpaleNote} (all four). */
-function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: OpaleConnector): string {
+ *  (LEFT/RIGHT only) and {@link renderOpaleNote} (all four). `k` -- see
+ *  `Opale.ts#opalePolygonLeft`'s own doc comment. */
+function opaleOutline(direction: OpaleDirection, box: OpaleBox, connector: OpaleConnector, k: number): string {
   switch (direction) {
     case 'left':
-      return opalePolygonLeft(box, connector);
+      return opalePolygonLeft(box, connector, k);
     case 'right':
-      return opalePolygonRight(box, connector);
+      return opalePolygonRight(box, connector, k);
     case 'up':
-      return opalePolygonUp(box, connector);
+      return opalePolygonUp(box, connector, k);
     case 'down':
-      return opalePolygonDown(box, connector);
+      return opalePolygonDown(box, connector, k);
   }
 }
 
@@ -488,16 +444,17 @@ export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
   const box: OpaleBox = { origin: { x: note.x, y: note.y }, width: note.width, height: note.height };
   const connector: OpaleConnector = { pp1: opale.pp1, pp2: opale.pp2 };
   const fill = resolveNoteBackground(note.color, theme, note.stereotype);
+  // `EntityImageNote.java:236-237,263-264`: `opale.drawU(applyStroke(ug2))`
+  // -- outline and fold both on the stroked ug (`Opale.java:123-126`).
+  // cdd3-T34 (E1-8): `theme.scaleK` -- `opalePolygonLeft`'s own doc comment.
+  const ns = resolveNoteStroke(theme);
+  const k = theme.scaleK;
   const parts: string[] = [
-    path(opaleOutline(opale.direction, box, connector), {
+    path(opaleOutline(opale.direction, box, connector, k), { fill, stroke: ns.stroke, strokeWidth: ns.strokeWidth }),
+    path(opaleCorner({ x: note.x, y: note.y }, note.width, k), {
       fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
-    }),
-    path(opaleCorner({ x: note.x, y: note.y }, note.width), {
-      fill,
-      stroke: theme.colors.border,
-      strokeWidth: NOTE_STROKE_WIDTH * theme.scaleK,
+      stroke: ns.stroke,
+      strokeWidth: ns.strokeWidth,
     }),
   ];
   parts.push(renderNoteText(note, theme));

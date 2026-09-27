@@ -7,6 +7,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   scaleAtom,
+  scaleRow,
   scaleGenericTag,
   scaleFolderTab,
   scaleBadgeSpriteImage,
@@ -55,6 +56,33 @@ describe('scaleAtom — vector', () => {
   it('multiplies width/height/factor by k', () => {
     const atom: MemberRenderAtom = { kind: 'vector', name: 'key', factor: 1, fill: '#000', width: 16, height: 14 };
     expect(scaleAtom(atom, 2)).toEqual({ kind: 'vector', name: 'key', factor: 2, fill: '#000', width: 32, height: 28 });
+  });
+
+  it('multiplies the cdd3-T22 Sea-top dy when present', () => {
+    const atom: MemberRenderAtom = {
+      kind: 'vector',
+      name: 'key',
+      factor: 1,
+      fill: '#000',
+      width: 16,
+      height: 14,
+      dy: -5,
+    };
+    expect(scaleAtom(atom, 2)).toMatchObject({ factor: 2, dy: -10 });
+  });
+});
+
+describe('scaleRow — visibility block top (cdd3-T22)', () => {
+  it('multiplies visibilityBlockTopDy alongside visibilityBlockHeight', () => {
+    const row = {
+      text: '+a',
+      y: 10,
+      indent: 6,
+      visibilityIcon: '+' as const,
+      visibilityBlockHeight: 22,
+      visibilityBlockTopDy: -7,
+    };
+    expect(scaleRow(row, 2, 14)).toMatchObject({ y: 20, visibilityBlockHeight: 44, visibilityBlockTopDy: -14 });
   });
 });
 

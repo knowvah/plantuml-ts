@@ -574,3 +574,64 @@ describe('applyGraphAttrs — splines/forcelabels from linetype (lor-T2)', () =>
     expect(b.getAttr('forcelabels')).toBe('true');
   });
 });
+
+/**
+ * cdd3-T19 (E3-11): `DotStringFactory.java:154` `sb.append("searchsize=500;")`
+ * -- unconditional on every graph. `svek-dot-emit.ts` already wrote it into
+ * the DOT TEXT parity gate; the programmatic builder (this function, the one
+ * that actually drives @knowvah/dot-engine's layout) never called the engine's
+ * equivalent, so mincross ran its default search depth instead of jar's 500.
+ * `delasa-80-jusu462` moves 33 nodes without it.
+ */
+describe('applyGraphAttrs — searchsize=500 (E3-11, DotStringFactory.java:154)', () => {
+  const base = (): DotInputGraph => ({ nodes: [], edges: [] });
+
+  it('sets searchsize=500 unconditionally, even on the emptiest graph', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, base());
+    expect(b.getAttr('searchsize')).toBe('500');
+  });
+
+  it('sets searchsize=500 alongside every other graph attr, not exclusively', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, { ...base(), rankDir: 'LR', nodeSep: 72, rankSep: 72, linetype: 'ortho' });
+    expect(b.getAttr('searchsize')).toBe('500');
+    expect(b.getAttr('rankdir')).toBe('LR');
+  });
+
+  it('never sets remincross through the builder (E3-D2: not reproduced on dot-engine 1.6.0, kept minimal)', () => {
+    const b = createGraph({ directed: true });
+    applyGraphAttrs(b, base());
+    expect(b.getAttr('remincross')).toBeUndefined();
+  });
+});
+
+/** Builds only the node declarations + root rank subgraphs `addNodes` owns. */
+function buildNodes(input: DotInputGraph): Graph {
+  const b = createGraph({ directed: true });
+  addNodes(b, input);
+  return b.graph;
+}
+
+describe('addNodes — root rank groups (cdd3-T28, E3-10)', () => {
+  it('omits a port node already ranked by its cluster portRanks (ClusterDotString.java:136-137)', () => {
+    // Upstream prints `{rank=source;...}` for PORTIN/PORTOUT entries only
+    // inside the owning cluster (`ClusterDotString#printRanks`,
+    // ClusterDotString.java:254-260); no root-level rankset exists, and a
+    // second one makes graphviz evict the port from the cluster.
+    const input: DotInputGraph = {
+      nodes: [{ id: 'p', width: 12, height: 12, isPort: true, attributes: { rank: 'source' } }],
+      edges: [],
+      clusters: [{ id: 'n', nodeIds: ['p'], portRanks: [{ rank: 'source', nodeIds: ['p'] }] }],
+    };
+    expect(subgraphPaths(buildNodes(input))).toEqual([]);
+  });
+
+  it('keeps the root rank group for a ranked node no cluster ranks', () => {
+    const input: DotInputGraph = {
+      nodes: [{ id: 'a', width: 1, height: 1, attributes: { rank: 'min' } }],
+      edges: [],
+    };
+    expect(subgraphPaths(buildNodes(input))).toEqual(['__rank_0']);
+  });
+});

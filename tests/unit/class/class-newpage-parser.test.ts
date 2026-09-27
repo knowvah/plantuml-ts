@@ -131,10 +131,13 @@ describe('newpage — two pages', () => {
     `);
 
     const pages = ast.pages!;
-    // Page 1: separator '::', intermediate packages disabled → one flat
-    // namespace 'a::b' (collapsed, not nested a -> a::b).
+    // Page 1: separator '::', intermediate packages disabled → the page's
+    // own checkFinalError packs `a` into `a::b` (cdd3-T9 S-1).
     expect(pages[0]!.classifiers.map((c) => c.id)).toEqual(['a::b::C']);
-    expect(pages[0]!.namespaces.map((n) => n.id)).toEqual(['a::b']);
+    expect(pages[0]!.namespaces.map((n) => [n.id, n.display, n.packed === true])).toEqual([
+      ['a', 'a', true],
+      ['a::b', 'a::b', false],
+    ]);
 
     // Page 2: settings reset to defaults ('.' separator, intermediate
     // packages enabled) → nested namespaces x, x.y.

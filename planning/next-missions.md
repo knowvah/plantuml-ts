@@ -35,6 +35,33 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-3` — DONE 2026-09-26 (T0–T35, T-D3, batches 0–5)
+
+Branch `feat/class-divergence-drive-3` (merge commit). Class survey
+607 / 55 / 61 → **689 / 16 / 18** over 723 fixtures; ratchet 607 → 686;
+DOT parity held; zero conformant losses and zero unexplained rises at every
+close (`plans/class-divergence-drive-3/decision-journal.md`, rows 1–57).
+D1 floor (670) met; target 712 not. T-D3 adopted the jar-faithful 2-dp
+layout read (maintainer ruling), +19 class and 6 other-engine falls, and
+`absorbLayoutEpsilon` was deleted as dead code. Every open row is owned by
+`plans/class-divergence-drive-4/` (briefed 2026-09-26), by id:
+
+- **dot-engine rows (14)**: TRACKER 19/22/24/25/26 fixed in dot-engine
+  1.6.1 (PR #60), consumed by cdd4 T0d; 25's consumer half is cdd4 T11;
+  23 (nugecu) accepted as dot-engine known-divergence A3 → cdd4 T1.
+- **Port rows**: gujigi, jakapi, lecelo → cdd4 T5 (diagnosis-first);
+  sokevu (E3-9 description measurer + E3-10b `ClusterDotString#hasPort`)
+  → cdd4 T6; mizupo (E3-20 `!theme` execution) → cdd4 T7a/T7b.
+- **Oracle**: besepi's committed dot-cache disagrees with a fresh jar →
+  cdd4 T2 (maintainer ruling: re-render).
+- **Acceptances signed 2026-09-26**: luzive, sadamo (C-18), zuduxu (E3-A)
+  → cdd4 T1.
+- **Harness**: census renders without the sprite store (bidusa, ruliki)
+  and differs from `renderSync` on popesa → cdd4 T4.
+- **TRACKER 18** reclassified as plantuml-ts work (dot-engine and native
+  graphviz agree on the cached DOT); its class fixtures bejusa, pecabi are
+  already conformant, so it is open only for other engines.
+
 ## `class-divergence-drive-2` — DONE 2026-09-24 (T0–T20, batches 0–5)
 
 Branch `feat/class-divergence-drive-2` (not merged; the maintainer merges
@@ -46,7 +73,7 @@ bar D8 met in full (conformant ≥ 600, diverged ≤ 61, every ledger row has
 a `final`). Open items, by owner (`fixtures.md` `final` column points
 here by these ids):
 
-- **cdd2 R-VP — vertical 1 px, probe-verified, READY (6 fixtures + lecelo).**
+- ~~**cdd2 R-VP — vertical 1 px, probe-verified, READY (6 fixtures + lecelo).**~~ — CLOSED by class-divergence-drive-3 T7 (`38a96bcc6`); lecelo residual is cdd4 T5.
   jubobo, bejeli, gabejo, julixi, rulite, xosiza (+ lecelo 7→5). All
   members hidden → body is `TextBlockUtils.empty(0,0)`
   (`BodierLikeClassOrObject.java:249-250`) and reserves nothing; header
@@ -60,7 +87,7 @@ here by these ids):
   (`class-classifier-ink-reservation.ts`) already computes the value.
   Disproves the earlier R-4 (`absorbLayoutEpsilon`) and R-5 (dot-engine
   drift) attributions — both were a tiny excess on top of this term.
-- **cdd2 R-LEAF — description leaf ink, probe-verified (2).** cacoma,
+- ~~**cdd2 R-LEAF — description leaf ink, probe-verified (2).**~~ — CLOSED by class-divergence-drive-3 T8 (`0588418c3`). cacoma,
   daxeno. `tryMeasureDescriptionLeaf`
   (`class-layout-generic-classifier.ts:73-105`) sets no `symbolInk`, so a
   `component`/`<<Database>>` leaf gets the class-box ink rule; upstream
@@ -69,50 +96,50 @@ here by these ids):
   the element's own options (the probe without them moved gujigi +2).
   daxeno's last diff (styled namespace title `text/@y` Δ0.889) is
   undiagnosed.
-- **cdd2 S-1** sugifi, sumule — upstream `AbstractEntityDiagram#packSomePackage`
+- ~~**cdd2 S-1** sugifi, sumule~~ — CLOSED by class-divergence-drive-3 T9 (`6b0046916`). — upstream `AbstractEntityDiagram#packSomePackage`
   (`:85-106`, gated `ClassDiagram.java:84-85`) marks a single-child group
   `packed` AFTER uids are minted (`Entity.java:717-741`,
   `ClusterDotString.java:76-82`); we collapse at resolve time
   (`class-namespace-resolve.ts:418`). Needs `class-dot-clusters.ts` +
   `ast.ts` `Namespace.packed`.
-- **cdd2 S-1b** xumofu — `CommandLinkClass.java:320-333` resolves both
+- ~~**cdd2 S-1b** xumofu~~ — CLOSED by class-divergence-drive-3 T9 (`6b0046916`). — `CommandLinkClass.java:320-333` resolves both
   endpoints' quark chains before creating either leaf; we resolve+create
   per endpoint. Restructure `class-ensure-classifier.ts` +
   `class-command-relationships.ts`.
-- **cdd2 S-11** rakuci — descriptive-container `[[url]]` never calls
+- ~~**cdd2 S-11** rakuci~~ — CLOSED by class-divergence-drive-3 T10 (`ad2c69e7d`). — descriptive-container `[[url]]` never calls
   `setNamespaceUrl` (`class-command-containers.ts`).
-- **cdd2 S-12** rojoxi — `collapseEmptyNamespace` drops `ns.color`;
+- ~~**cdd2 S-12** rojoxi~~ — CLOSED by class-divergence-drive-3 T9 (`6b0046916`). — `collapseEmptyNamespace` drops `ns.color`;
   `renderEmptyPackageLeaf` has no colour (`class-namespace.ts`,
   `renderer.ts`).
-- **cdd2 S-4t** xoxuni, nuvake — the `;text:COLOR` half of a link's
+- ~~**cdd2 S-4t** xoxuni, nuvake~~ — CLOSED by class-divergence-drive-3 T10 (`ad2c69e7d`). — the `;text:COLOR` half of a link's
   trailing colour needs a `Relationship` field
   (`class-relationship-ast.ts`, `class-relationship-parser.ts:241-247`).
-- **cdd2 S-6** guxode — `class-namespace-folder-outline.ts#renderFolderPolygon`
+- ~~**cdd2 S-6** guxode~~ — CLOSED by class-divergence-drive-3 T10 (`ad2c69e7d`); the Δ0.014 closed by T-D3 (`9a4503a2a`). — `class-namespace-folder-outline.ts#renderFolderPolygon`
   (strictuml sharp-corner folder) emits `stroke` via `shortenColor` with
   no colour resolution (the handler-arg swap S.md proposed is a no-op);
   plus an undiagnosed Δ0.014 on g[14].
-- **cdd2 Q-4 / Q-5** camuna, nafiki — generic-tag `<style>` colours need a
+- ~~**cdd2 Q-4 / Q-5** camuna, nafiki~~ — CLOSED by class-divergence-drive-3 T11 (`d83b2fb7d`); the issue-19 edges are cdd4 T0d (dot-engine 1.6.1). — generic-tag `<style>` colours need a
   `Theme.colors.graph` field (`theme-graph-colors-a.ts`; jar verified with
   four authored probes, `plantuml.skin:211-213`); cardinality font size is
   the hard-coded `CARDINALITY_FONT_SIZE` (`renderer-edge-extras.ts:222`)
   and FontStyle has no field (`theme.ts`). Both rows also carry
   dot-engine issue 19 edges.
-- **cdd2 T19c residual** lipazi, nuvake, lozego — `class-ink-box.ts#buildInkBox`
+- ~~**cdd2 T19c residual** lipazi, nuvake, lozego~~ — CLOSED by class-divergence-drive-3 T10 (`ad2c69e7d`), T13r (`c6681aa67`), T26 (`ff41da9c4`). — `class-ink-box.ts#buildInkBox`
   never walks `EdgeGeo.noteBox` (canvas shortfall); lozego's gradient stop
   is not shortened to 3 hex digits (`SvgGraphics.java:545-554`,
   `core/paint.ts`).
-- **cdd2 sijisi** — `rectangle` leaf has no USymbol icon
+- ~~**cdd2 sijisi**~~ — CLOSED by class-divergence-drive-3 T12 (`e5690a4c5`). — `rectangle` leaf has no USymbol icon
   (`core/usymbol-shapes.ts:219-231`); title-centring half closed by T19b.
-- **Layout-precision policy** (gatula, ririlu): the jar reads node
+- ~~**Layout-precision policy** (gatula, ririlu)~~ — CLOSED by class-divergence-drive-3 T-D3 (`9a4503a2a`, maintainer ruling to adopt the 2-dp read); ririlu's issue-19 edges are cdd4 T0d.: the jar reads node
   positions from graphviz's 2-dp `-Tsvg` text (`DotStringFactory.java:388-396`;
   gatula 155.42 vs our exact 155.425), and `LineOfSegments.java:89-111`
   runs out of passes on ~1e-14 float dust from full-precision coords
   (ririlu). Only fix is 2-dp quantisation, which `layout-epsilon.ts` and
   D6 reject; needs a maintainer ruling, not a fix task.
-- **dot-engine issue 19** (flat `minlen=0` edge ignores the HTML-table
+- ~~**dot-engine issue 19**~~ — fixed in dot-engine 1.6.1 (PR #60); consumed by cdd4 T0d. (flat `minlen=0` edge ignores the HTML-table
   port, `docs/graphviz-issues/19-...`): coxose, ririlu, camuna, nafiki,
   rifuzu, mucoti, sefazi.
-- **Stretch pairs not attempted** (batch-5 read-only pass, journal row
+- ~~**Stretch pairs not attempted**~~ — all attempted in class-divergence-drive-3: ponono/sumocu T26 (`ff41da9c4`), pejone/xonamo, vudepo/lejoga, puvono/sekame T14 (`5f4f67906`) + T-D3, givofi/popesa T27 (`bad4ba5db`) + T31 (`d84e8cead`), bidusa/ruliki T23 (`28b560c59`); givoli/tekena/nadepi fixed in dot-engine 1.6.1 (cdd4 T0d); census pins for bidusa/ruliki/popesa are cdd4 T4. (batch-5 read-only pass, journal row
   40): ponono/sumocu (text wrap), pejone/xonamo (title vs entity, 220 S),
   puvono/sekame (edge routing, width +161), vudepo/lejoga (entity order),
   givofi/popesa (gradient order + def-id seed — popesa is the existing

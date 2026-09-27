@@ -119,6 +119,16 @@ export interface Relationship {
    */
   linkNoteHalfWidth?: boolean;
   /**
+   * cdd3-T32: `NoteLinkStrategy.HALF_NOT_PRINTED` -- the B-side of the split
+   * above. It reserves the same half-width box ({@link linkNoteHalfWidth})
+   * but `SvekEdge#drawU` never draws it (`svek/SvekEdge.java:950-951`'s
+   * `getStrategy() != HALF_NOT_PRINTED` guard); the A-side's
+   * `HALF_PRINTED_FULL` draws the full merged block. Set only by
+   * class-assoc-couple.ts, on `pointToEntity2`
+   * (`objectdiagram/AbstractClassOrObjectDiagram.java:282-284`).
+   */
+  linkNoteNotPrinted?: boolean;
+  /**
    * cdd2-T19c: this note-on-link's own `#color` spec — the BACK (fill) and
    * LINE (outline stroke) slots `ComponentRoseNote`'s `symbolContext` reads
    * (`style/Style.java:270-282`), parsed from `NOTE_ON_LINK_COLOR` by
@@ -276,7 +286,7 @@ export interface Relationship {
    *
    * B6 inferred the same fact by comparing `idEntity1FullId`/`idEntity2FullId`
    * against `from`/`to`. That is unsound: `class-command-relationships.ts`
-   * rewrites `from`/`to` through `resolveRelationshipEndpoint` AFTER the
+   * rewrites `from`/`to` through `resolveRelationshipEndpoints` AFTER the
    * parser stamps the FullId pair from raw ids, so inside a `namespace` or
    * with an `as "alias"` declaration the two disagree and the comparison
    * reports "not reversed". 28 of the 32 fixtures in `direction-backlog.json`
@@ -369,6 +379,13 @@ export interface Relationship {
    * treatment for free.
    */
   colorOverride?: string;
+  /**
+   * cdd3-T10 (S-4t): the `text:COLOR` entry of the trailing colour spec
+   * (`Colors.java:95-124`, `class-relationship-colors.ts#parseRelColors`),
+   * raw with a leading `#`. `SvekEdge.java:260-262`'s `font.mute(colors)`
+   * recolours the link's main label (and its magic-arrow glyph) only.
+   */
+  labelTextColor?: string;
   /**
    * SI1/T11: the `single` ARROW_STYLE token (`WithLinkType.goSingle`/
    * `isSingle`, `decoration/WithLinkType.java:110-116`) -- a link-ADD-time

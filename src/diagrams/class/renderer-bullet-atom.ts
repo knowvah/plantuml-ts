@@ -39,9 +39,14 @@ const BULLET_RECT = 3.5;
  *
  * `lineTop` is the atom box's own top; the atom is 5 tall at order 0 and 3
  * otherwise (`Bullet#calculateDimensionSlow:72-76`).
+ *
+ * C-1: `atom.blank` (`Fission.java:87,226-245`'s `blank(header)`) — a
+ * wrapped bullet line's continuation row carries the SAME reserved-width
+ * atom but must draw nothing; the caller's own `x += atom.width` still
+ * applies, only the glyph is skipped.
  */
 export function renderBulletAtom(
-  atom: { readonly order: number; readonly fill: string },
+  atom: { readonly order: number; readonly fill: string; readonly blank?: boolean },
   x: number,
   lineTop: number,
   lineHeight: number,
@@ -51,6 +56,7 @@ export function renderBulletAtom(
   // `lineHeight`, already scaled by the caller.
   k = 1,
 ): string {
+  if (atom.blank === true) return '';
   const top = lineTop + lineHeight - BULLET_SEA_DEPTH * k;
   if (atom.order === 0) {
     const r = BULLET_R * k;

@@ -36,3 +36,40 @@ export function renderOpenIconicAtom(
   // this call only needed to stop bypassing the shared emitter for `fill`.
   return d === undefined ? '' : path(d, { fill: atom.fill });
 }
+
+/**
+ * cdd3-T22 (E1-3/E2-3): draws the glyph with its box corner at `top` -- the
+ * atom's own `Sea` position, which `SheetBlock1#drawU` translates the
+ * `UGraphic` to (`SheetBlock1.java:212-217`) before `AtomOpenIconic#drawU`
+ * paints `TextBlockUtils.withMargin(glyph, 1, 0)` from it
+ * (`AtomOpenIconic.java:63-65,76-83`): `x + 1` for the flat left margin, no
+ * vertical margin.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomOpenIconic.java:63-83
+ */
+export function renderOpenIconicAtomAtTop(
+  atom: Extract<MemberRenderAtom, { kind: 'vector' }>,
+  x: number,
+  top: number,
+): string {
+  const d = buildOpenIconicPathD(atom.name, atom.factor, x + 1, top);
+  return d === undefined ? '' : path(d, { fill: atom.fill });
+}
+
+/**
+ * cdd3-T22: a member-row glyph -- at its own `Sea` top when
+ * `resolveMemberAtoms` set `atom.dy` (the row baseline `y` plus that
+ * offset, {@link renderOpenIconicAtomAtTop}), else the legacy
+ * baseline-keyed {@link renderOpenIconicAtom}. Kept separate from
+ * `renderOpenIconicAtom` because the note renderer passes atoms that carry
+ * `dy` against a DIFFERENT baseline reference.
+ */
+export function renderRowOpenIconicAtom(
+  atom: Extract<MemberRenderAtom, { kind: 'vector' }>,
+  x: number,
+  y: number,
+  theme: Theme,
+): string {
+  return atom.dy !== undefined
+    ? renderOpenIconicAtomAtTop(atom, x, y + atom.dy)
+    : renderOpenIconicAtom(atom, x, y, theme);
+}

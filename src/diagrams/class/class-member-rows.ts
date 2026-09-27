@@ -221,13 +221,20 @@ function iconRowFields(
   showIcon: boolean,
   member: Classifier['members'][number],
   blockHeight: number,
-  ownHeight: number,
-): Pick<ClassifierGeo['rows'][number], 'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight'> {
+  blockTopDy: number,
+): Pick<
+  ClassifierGeo['rows'][number],
+  'visibilityIcon' | 'visibilityIsField' | 'visibilityBlockHeight' | 'visibilityBlockTopDy'
+> {
   if (!showIcon) return {};
+  // cdd3-T22 (E1-3): the block TOP and the whole block height feed
+  // `PlacementStrategyVisibility.java:62-67` directly
+  // (`class-visibility-icon.ts#visibilityIconOriginYFromTop`).
   return {
     visibilityIcon: member.visibility,
     visibilityIsField: isMethodMember(member) === false,
-    ...(blockHeight !== ownHeight ? { visibilityBlockHeight: blockHeight } : {}),
+    visibilityBlockHeight: blockHeight,
+    visibilityBlockTopDy: blockTopDy,
   };
 }
 
@@ -244,16 +251,18 @@ interface OneRowInput {
   indent: number;
   showIcon: boolean;
   blockHeight: number;
+  /** The member block's own top, in the same frame as `y`. */
+  blockTop: number;
 }
 function buildOneRow(input: OneRowInput): ClassifierGeo['rows'][number] {
-  const { text, member, build, y, indent, showIcon, blockHeight } = input;
+  const { text, member, build, y, indent, showIcon, blockHeight, blockTop } = input;
   return {
     text,
     y,
     indent,
     width: build.width,
     atoms: build.atoms,
-    ...iconRowFields(showIcon, member, blockHeight, build.height),
+    ...iconRowFields(showIcon, member, blockHeight, blockTop - y),
     ...(member.ownUrl !== undefined ? { url: member.ownUrl } : {}),
   };
 }
@@ -342,9 +351,10 @@ export function buildSectionRows(
     // atom.ts`'s own doc comment; emoji resolves to `'text'`, dy-corrected
     // like sup/sub, confirmed via `resolveEmojiAtom`) to reach ONLY case 1.
     const hasImageAtom = build.atoms.some((a) => a.kind === 'image');
-    const y = sectionTop + SECTION_MARGIN_TOP + rowTop + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
+    const top = sectionTop + SECTION_MARGIN_TOP + rowTop;
+    const y = top + (hasImageAtom ? build.height - bottomAnchor : baselineOffset);
     rowTop += build.height;
-    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]! }));
+    rows.push(buildOneRow({ text, member, build, y, indent, showIcon, blockHeight: blockHeights[i]!, blockTop: top }));
   }
   return rows;
 }
@@ -391,6 +401,8 @@ export interface FlatMemberRows {
   readonly members: Classifier['members'];
   readonly texts: string[];
   readonly builds: MemberRowBuild[];
+  /** cdd3-T32: each entry's member's ORIGINAL, unwrapped display text. */
+  readonly memberTexts: string[];
 }
 
 /**
@@ -425,6 +437,7 @@ export function buildWrappedSectionRowBuilds(
   const flatMembers: Classifier['members'] = [];
   const flatTexts: string[] = [];
   const flatBuilds: MemberRowBuild[] = [];
+  const memberTexts: string[] = [];
   for (let i = 0; i < members.length; i++) {
     const member = members[i]!;
     const text = texts[i]!;
@@ -433,7 +446,30 @@ export function buildWrappedSectionRowBuilds(
       flatMembers.push(member);
       flatTexts.push(wrapped.length === 1 ? text : atomsToPlainText(build.atoms));
       flatBuilds.push(build);
+      memberTexts.push(text);
     }
   }
-  return { members: flatMembers, texts: flatTexts, builds: flatBuilds };
+  return { members: flatMembers, texts: flatTexts, builds: flatBuilds, memberTexts };
+}
+
+/**
+ * cdd3-T32: stamp {@link ClassifierRowGeo.memberWrap} /
+ * `wrapContinuation` on the rows {@link buildSectionRows} built from
+ * `section` (one row per flat entry, same order). A member occupies the run
+ * of consecutive entries sharing its `Member` reference. Rows of an
+ * unwrapped member come back unchanged.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageTips.java
+ */
+export function annotateWrappedMembers(rows: ClassifierGeo['rows'], section: FlatMemberRows): ClassifierGeo['rows'] {
+  return rows.map((row, i) => {
+    const member = section.members[i];
+    if (i > 0 && section.members[i - 1] === member) return { ...row, wrapContinuation: true as const };
+    let end = i + 1;
+    while (end < section.members.length && section.members[end] === member) end++;
+    if (end === i + 1) return row;
+    const builds = section.builds.slice(i, end);
+    const height = builds.reduce((sum, b) => sum + b.height, 0);
+    const width = Math.max(...builds.map((b) => b.width));
+    return { ...row, memberWrap: { text: section.memberTexts[i]!, height, width } };
+  });
 }

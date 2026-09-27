@@ -91,6 +91,18 @@ describe('collectDocumentDefs', () => {
     expect(out.defs).toBe(`<marker id="m"/>${gradient}${def}`);
     expect(out.body).toBe(`<rect fill="url(#gab)"/><text filter="url(#${id})">a</text>`);
   });
+
+  // SvgGraphics.java:393,404 (and :766,786, :1076,1086): every seeded def is
+  // appended to `<defs>` when its first user is drawn, so child order is
+  // first-reference order in the body -- whichever emitter supplied it.
+  test('seeded defs take first-reference order, a prefix (klimt) def included', () => {
+    const klimt = '<linearGradient x1="0%" id="gk"><stop stop-color="#FF0000"/></linearGradient>';
+    const inline = '<linearGradient id="gi" x1="0%"><stop stop-color="#0000FF"/></linearGradient>';
+    const body = `${inline}<rect fill="url(#gi)"/><path fill="url(#gk)"/>`;
+    const out = collectDocumentDefs(body, `<marker id="m"/>${klimt}<linearGradient id="gu"></linearGradient>`);
+    // `gu` has no user in the body, so it keeps its own (second) slot.
+    expect(out.defs).toBe(`<marker id="m"/>${inline}<linearGradient id="gu"></linearGradient>${klimt}`);
+  });
 });
 
 describe('mapOutsideInlineDefs — the coord-shift guard', () => {

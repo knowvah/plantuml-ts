@@ -33,6 +33,9 @@ export function atomTextLineHeight(fontSize: number): number {
 export interface HeaderInfo {
   headerText: string;
   headerItalic: boolean;
+  /** cdd3-T25 (E3-3): carried forward for `computeStereoAndTagGeo`'s own
+   *  generic-tag suppression -- see `HeaderDimsOptions#genericDisplayOld`. */
+  genericDisplayOld: boolean;
 }
 
 /** Build the header display string and kind-derived flags for a classifier.
@@ -46,11 +49,31 @@ export interface HeaderInfo {
  * @see EntityImageClassHeader.java:231), which this port already draws via
  * `class-badge.ts#badgeChar` ('annotation' -> '@'). The old prefix widened
  * every annotation header by exactly w('@'@14pt) = 14.2625px (jar-measured
- * identical delta on 7 fixtures, e.g. gojatu-01-jibo986). */
-export function computeHeaderInfo(classifier: Classifier): HeaderInfo {
-  const headerText = classifier.display;
+ * identical delta on 7 fixtures, e.g. gojatu-01-jibo986).
+ *
+ * cdd3-T25 (E3-3): `skinparam genericDisplay old` --
+ * `EntityImageClassHeader.java:90-91,108-110`:
+ *   final String generic = displayGenericWithOldFashion ? null : entity.getGeneric();
+ *   ...
+ *   if (displayGenericWithOldFashion && entity.getGeneric() != null)
+ *     display = display.addGeneric(entity.getGeneric());
+ * `Display#addGeneric` (`klimt/creole/Display.java:529-538`) appends
+ * `<generic>` onto the LAST line of the display verbatim -- appending to
+ * the end of the whole (possibly multi-line, `\n`-escaped) raw string
+ * below is equivalent, since a trailing append can never cross an interior
+ * split point `splitHeaderLines`/`splitDisplayLines` later scans for. The
+ * raw generic text is upstream's single unsplit regex capture
+ * (`CommandCreateClass.java:139`), matching `Classifier.typeParamsRawText`
+ * (falling back to the rejoined `typeParams`, `GenericTagGeo`'s own
+ * documented convention) -- `entity.getGeneric() != null` corresponds to
+ * `typeParams.length > 0`. */
+export function computeHeaderInfo(classifier: Classifier, genericDisplayOld?: boolean): HeaderInfo {
+  const generic =
+    classifier.typeParams.length > 0 ? (classifier.typeParamsRawText ?? classifier.typeParams.join(', ')) : undefined;
+  const headerText =
+    genericDisplayOld === true && generic !== undefined ? `${classifier.display}<${generic}>` : classifier.display;
   const headerItalic = classifier.kind === 'interface' || classifier.kind === 'abstract';
-  return { headerText, headerItalic };
+  return { headerText, headerItalic, genericDisplayOld: genericDisplayOld === true };
 }
 
 /**

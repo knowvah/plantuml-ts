@@ -724,10 +724,30 @@ describe('routing conformance — jar-error classification', () => {
     // 4443 -> 4449 / 5595 -> 5601 at class-divergence-drive-2/close-b5
     // (2026-09-24): 6 more svg-class golden rows, same procedure.
     // Derivation: 4449 + 1053 + 99 = 5601.
-    expect(pinnedAgree.length).toBe(4449);
+    //
+    // 4449 -> 4466 / 5601 -> 5618 at class-divergence-drive-3/close-b1
+    // (2026-09-25): 17 more svg-class golden rows, same procedure.
+    // Derivation: 4466 + 1053 + 99 = 5618.
+    //
+    // 4466 -> 4483 / 5618 -> 5635 at class-divergence-drive-3/close-b2
+    // (2026-09-26): 17 more svg-class golden rows, same procedure.
+    // Derivation: 4483 + 1053 + 99 = 5635.
+    //
+    // 4483 -> 4497 / 5635 -> 5649 at class-divergence-drive-3/close-b3
+    // (2026-09-26): 14 more svg-class golden rows, same procedure.
+    // Derivation: 4497 + 1053 + 99 = 5649.
+    //
+    // 4497 -> 4509 / 5649 -> 5661 at class-divergence-drive-3/close-b4
+    // (2026-09-26): 12 more svg-class golden rows, same procedure.
+    // Derivation: 4509 + 1053 + 99 = 5661.
+    //
+    // 4509 -> 4528 / 5661 -> 5680 at class-divergence-drive-3/close-b5
+    // (2026-09-26): 19 more svg-class golden rows, same procedure.
+    // Derivation: 4528 + 1053 + 99 = 5680.
+    expect(pinnedAgree.length).toBe(4528);
     expect(pinnedMisroutes.length).toBe(1053);
     expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5601);
+    expect(manifest.fixtures.length).toBe(5680);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

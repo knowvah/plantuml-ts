@@ -19,6 +19,7 @@ import { edgeLabelAttrs, type NoteBoxContext } from './class-layout-helpers.js';
 import { edgePortAttrs } from './class-port-rows.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { dotEdgeId } from './class-link-order.js';
 
 // ---------------------------------------------------------------------------
 // Edge decoration map
@@ -188,7 +189,16 @@ function buildDotEdgeAttrs(
   // engine, which converges the group's splines onto one shared tail point.
   const sametail = ctx.sametailByRelIndex?.get(i);
   if (sametail !== undefined) attrs.sametail = sametail;
-  if (rel.weight !== undefined) attrs.weight = rel.weight;
+  // cdd3-T19 (B-1): `@N` sets `Relationship.weight` (`CommandLinkClass.java
+  // :381-385` `if (weight != null) link.setWeight(...)`), and this port kept
+  // that PARSE -- `class-lollipop.ts#buildLinkExtras`,
+  // `class-relationship-optional-fields.test.ts` -- but upstream never
+  // FORWARDS it into the DOT: `Link#getWeight()` (`abel/Link.java:320-322`)
+  // has no caller anywhere in `net/`, and no cached class `svek-*.dot`
+  // carries a `weight=` attribute. Forwarding it here (as this line used to)
+  // hands @knowvah/dot-engine's mincross/position a constraint jar never applies --
+  // `majuva-44-luta965`'s `@3 Dog --|> Mammal`/`@3 Cat --|> Mammal` widened
+  // the canvas 40px versus real dot on the jar's own (weight-less) DOT.
   // G2/N16 Kind B: a freestanding note's ONE real relationship connector
   // must route with NO arrow-clip reservation (the SAME `noArrow` fix N14
   // already applied to the synthetic note-attachment edge) -- computed
@@ -226,7 +236,7 @@ export function buildDotEdges(
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
   const { font, cardinalityFont, measurer, linetype, noteCtx, classPortShortNames } = render;
-  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.classifiers);
+  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
   // family or object -- with a declared port-name set (T2's
@@ -256,6 +266,9 @@ export function buildDotEdges(
     const dotTo = anchors.get(to) ?? to;
     const attrs = buildDotEdgeAttrs(rel, i, ctx, swap);
     Object.assign(attrs, edgePortAttrs(rel, swap, dotFrom, dotTo, ctx.portRowIds));
-    return { id: `edge-${i}`, from: dotFrom, to: dotTo, attributes: attrs };
+    // cdd3-T16: `Link#isInverted` (`CommandLinkClass.java:364-365`'s
+    // `getInv()`), read by `Cluster#printCluster1` (`core/svek-dot-top.ts`).
+    const inverted = rel.invertedLinkBurnsTick === true ? { inverted: true as const } : {};
+    return { id: dotEdgeId(i), from: dotFrom, to: dotTo, ...inverted, attributes: attrs };
   });
 }

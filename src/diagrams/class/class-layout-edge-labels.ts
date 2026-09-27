@@ -409,12 +409,14 @@ export function edgeLabelAttrs(
  * (`splitDisplayLines`, max width, lineHeight * lineCount). The consumer
  * floors, matching the jar's truncation (`SvekEdge.java:504-507`).
  *
- * Skipped for the `linkConstraint` spot, whose EMPTY `label` marks the
- * `CONSTRAINT_SPOT` arm that never builds a `labelText` upstream -- the same
- * discriminator `withLabelMargin` uses.
+ * cdd3-T32 (E3-13): an EMPTY `label` keeps its box too. `SvekEdge.java
+ * :430-442` appends the `<TABLE>` whenever `hasNoteLabelText() ||
+ * link.getLinkConstraint() != null` -- the `CONSTRAINT_SPOT` arm (`:440`)
+ * and a note-only label (`:309-325`, no link text) both reserve it. The `''`
+ * discriminator belongs only to `withLabelMargin` (the spot never builds a
+ * `labelText`, so never sees the margin), not to the reservation.
  */
 function withLayoutBox(attrs: LabelAttrs): LabelAttrs {
   if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
-  if (attrs.label === '') return attrs;
   return { ...attrs, labelBoxWidth: attrs.labelWidth, labelBoxHeight: attrs.labelHeight };
 }

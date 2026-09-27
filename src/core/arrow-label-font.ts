@@ -85,3 +85,38 @@ export function resolveArrowLabelFont(theme: Theme): ArrowLabelFont {
 export function resolveCardinalityFontColor(theme: Theme): string {
   return theme.cardinalityFontColor ?? resolveArrowLabelFont(theme).color;
 }
+
+/**
+ * T11 (cdd3, Q-5): the FULL cardinality font -- `GraphvizImageBuilder
+ * .java:236-237`'s `cardinalityFont` `FontConfiguration`, the SAME
+ * `{root,element,<diagram>,arrow,cardinality}` merge {@link
+ * resolveCardinalityFontColor} already resolves the colour half of (D2:
+ * upstream's `cardinalityFont` carries font AND colour as ONE object).
+ * `family`/`size` fall through to the arrow label's own resolved values
+ * (`plantuml.skin` has no `cardinality` block, so an unstyled diagram
+ * inherits `arrow`'s FontSize 13/SansSerif exactly); `weight`/`style` fall
+ * through to the arrow label's own bold/italic ONLY when `cardinality`
+ * declares no FontStyle of its own (`theme.cardinalityFontStyle` is
+ * `undefined` in that case -- `style-cascade-class-arrow-font.ts
+ * #computeCardinalityFontOverride`'s own doc comment). jar-verified
+ * `camuna-58-veca254`/`nafiki-56-jixu680`: `arrow { cardinality { FontColor
+ * red; FontSize 10; FontStyle italic } }` draws every cardinality `<text>`
+ * at size 10, italic, red -- while the main arrow label (`foo1`/`foo2`)
+ * stays at the diagram's own bold blue FontSize 14.
+ */
+export function resolveCardinalityFont(theme: Theme): ArrowLabelFont {
+  const arrowFont = resolveArrowLabelFont(theme);
+  const face =
+    theme.cardinalityFontStyle !== undefined
+      ? arrowFontFace(theme.cardinalityFontStyle)
+      : {
+          ...(arrowFont.weight !== undefined ? { weight: arrowFont.weight } : {}),
+          ...(arrowFont.style !== undefined ? { style: arrowFont.style } : {}),
+        };
+  return {
+    family: theme.cardinalityFontFamily ?? arrowFont.family,
+    size: theme.cardinalityFontSize ?? arrowFont.size,
+    ...face,
+    color: resolveCardinalityFontColor(theme),
+  };
+}

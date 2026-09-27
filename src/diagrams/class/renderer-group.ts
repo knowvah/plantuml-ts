@@ -54,6 +54,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { UPolygon } from '../../core/klimt/shape/UPolygon.js';
 import { ULine } from '../../core/klimt/shape/ULine.js';
 import { rotatePoint } from '../../core/svek/extremity/rotate-point.js';
+import { javaDoubleHashCode, javaHashSetOrder } from '../../core/java-hash-set.js';
 import { protectedInnerBox } from './class-dot-graph.js';
 import type { ClassifierGeo, EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
@@ -244,23 +245,36 @@ function rectSegmentIntersect(
   return undefined;
 }
 
-/** One entry in `dot/Neighborhood.java:71-75`'s `contactPoints` --a Java
- *  `HashSet<XPoint2D>`, i.e. dedup by EXACT value equality, ported the
- *  same way (string key, no tolerance) since the points being compared
- *  are the SAME upstream `SvekEdge#getStartContactPoint()` value read
- *  twice, never independently re-computed. */
+/** `klimt/geom/XPoint2D.java:24-32`'s `hashCode` (`Double.valueOf(x)
+ *  .hashCode() + Double.valueOf(y).hashCode()`, a Java int sum) and
+ *  `equals` (`x == other.x && y == other.y`). */
+function xPoint2DHashCode(p: Point2D): number {
+  return (javaDoubleHashCode(p.x) + javaDoubleHashCode(p.y)) | 0;
+}
+
+function xPoint2DEquals(a: Point2D, b: Point2D): boolean {
+  return a.x === b.x && a.y === b.y;
+}
+
+/**
+ * `dot/Neighborhood.java:70-80`'s `contactPoints`: a `HashSet<XPoint2D>`
+ * filled in `sametailLinks` order (`dot/DotData.java:141-147`, `links`
+ * order) and then ITERATED in `HashSet` order — bucket order of each
+ * point's `XPoint2D#hashCode`, not insertion order (cdd3-T32). Dedup is the
+ * set's own `hash`+`equals`, since the points compared are the SAME
+ * upstream `SvekEdge#getStartContactPoint()` value read twice.
+ *
+ * The hash reads the exact doubles, so the order matches the jar only when
+ * the contact values do bit-for-bit (graphviz's 2-dp `-Tsvg` read, D3, and
+ * the `SvekResult#calculateDimension` `moveDelta`).
+ */
 function uniqueSametailContacts(parentId: string, edges: readonly EdgeGeo[]): Point2D[] {
-  const seen = new Set<string>();
   const points: Point2D[] = [];
   for (const edge of edges) {
     const st = edge.sametail;
-    if (st === undefined || st.parentId !== parentId) continue;
-    const key = `${st.contact.x},${st.contact.y}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    points.push(st.contact);
+    if (st !== undefined && st.parentId === parentId) points.push(st.contact);
   }
-  return points;
+  return javaHashSetOrder(points, xPoint2DHashCode, xPoint2DEquals);
 }
 
 /** Draws through the SAME throwaway-`UGraphicSvg` + `extractFlatContent`

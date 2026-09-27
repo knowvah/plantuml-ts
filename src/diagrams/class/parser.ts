@@ -6,6 +6,11 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import type { ClassDiagramAST } from './ast.js';
 import {
   applyDirectives,
@@ -19,6 +24,7 @@ import { createAnnotations, matchAnnotationCommand } from '../../core/annotation
 import type { DisplayPositioned } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import { normalizeSameConnectionLengths } from './class-namespace.js';
+import { packSomePackage } from './class-namespace-pack.js';
 import { eventuallyBuildPhantomGroups } from './class-namespace-resolve.js';
 export { ensureClassifier } from './class-ensure-classifier.js';
 import { parseMemberLine } from './class-member-parser.js';
@@ -40,9 +46,17 @@ import { refuse } from '../../core/parse-refusal.js';
 import type { ParseState } from './class-parse-state.js';
 import { adjudicateAllowMixing } from './class-descriptive-leaf-command.js';
 import { continueMultilineElement, tryOpenMultilineElement } from './class-multiline-element.js';
+import { recordTogetherEvent, resolveTogetherMembers } from './class-together.js';
 export type { ParseState };
 
-function makeDefaultAST(): ClassDiagramAST {
+/**
+ * C-3 (cdd3-T23): `internal`/`emoji` mirror `description/parser.ts`'s own
+ * `makeInitialState` -- the per-diagram-parse `InternalSpriteStore`/
+ * `InternalEmojiStore` (`ParseState.internalSprites`/`.internalEmoji`'s own
+ * doc comment), threaded into every page's `SpriteRegistry` so `sprite $N
+ * jar:<path>` resolves the SAME way on page 2+ of a `newpage` document.
+ */
+function makeDefaultAST(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): ClassDiagramAST {
   return {
     classifiers: [],
     relationships: [],
@@ -50,12 +64,22 @@ function makeDefaultAST(): ClassDiagramAST {
     directives: [],
     notes: [],
     annotations: createAnnotations(),
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(internal, emoji),
     // cdd-T31 (E5 defect a): mirrors ParseState.namespaceSeparator's own
     // default ('.', set below and in startNewPage) -- see
     // ClassDiagramAST.namespaceSeparator's own doc comment.
     namespaceSeparator: '.',
   };
+}
+
+/**
+ * cdd3-T9 S-1: `ClassDiagram#checkFinalError`'s pack step, right after the
+ * same-pair length normalization and before `getTextBlock`'s closing sweep
+ * -- gated on the pragma's value at the END of the diagram.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/ClassDiagram.java:74-85
+ */
+function packIfNoIntermediatePackages(state: ParseState): void {
+  if (!state.intermediatePackages) packSomePackage(state.ast, state.namespaceSeparator);
 }
 
 /**
@@ -72,6 +96,8 @@ export function startNewPage(state: ParseState): void {
   // checkFinalError's same-pair length normalization runs per finished
   // diagram (ClassDiagram.java:74-82) — a page is a finished diagram.
   normalizeSameConnectionLengths(state.ast.relationships);
+  packIfNoIntermediatePackages(state);
+  resolveTogetherMembers(state);
   // cdd-T1: `getTextBlock`'s own closing sweep (CucaDiagram.java:464) -- a
   // page IS a finished diagram, rendered through its own getTextBlock.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);
@@ -83,7 +109,7 @@ export function startNewPage(state: ParseState): void {
   applyVisibilityHideShow(state.ast);
   applyStereotypeHideShow(state.ast);
   state.pages.push(state.ast);
-  state.ast = makeDefaultAST();
+  state.ast = makeDefaultAST(state.internalSprites, state.internalEmoji);
   state.classifierIndex = new Map();
   state.pendingBodyId = null;
   state.pendingJsonLines = [];
@@ -95,6 +121,7 @@ export function startNewPage(state: ParseState): void {
   state.descriptiveContainers = new Map();
   state.namespaceStack = [];
   state.togetherStack = [];
+  state.togetherEvents = [];
   state.lastEntity = null;
   state.creationCounter = { value: 0 };
   state.tipGroupsSeen = new Set();
@@ -283,9 +310,14 @@ function buildSyntaxRefusal(state: ParseState, loopIndex: number): ParseRefusal 
   return refuse('syntax', line, line, 'Syntax Error?');
 }
 
-export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
+export function parseClass(block: UmlSource, options?: ParseOptions): ClassDiagramAST | ParseRefusal {
+  // C-3 (cdd3-T23): resolved ONCE, at the same point `description/index.ts
+  // #descriptionPlugin.parse` resolves its own pair -- see `ParseState
+  // .internalSprites`'s own doc comment for why both live on `state`.
+  const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
+  const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
   const state: ParseState = {
-    ast: makeDefaultAST(),
+    ast: makeDefaultAST(internalSprites, internalEmoji),
     classifierIndex: new Map(),
     stylePositions: block.stylePositions ?? [],
     namespaceSeparator: '.',
@@ -301,10 +333,13 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     pendingContainerTags: new Map(),
     namespaceStack: [],
     togetherStack: [],
+    togetherEvents: [],
     lastEntity: null,
     pages: [],
     creationCounter: { value: 0 },
     tipGroupsSeen: new Set(),
+    internalSprites,
+    internalEmoji,
   };
 
   // Annotation commands (title/caption/legend/header/footer/mainframe) are
@@ -335,6 +370,7 @@ export function parseClass(block: UmlSource): ClassDiagramAST | ParseRefusal {
     state.currentLine = merged.positions[i];
     // G2 N42: see `ParseState.currentRawLine`'s own doc comment.
     state.currentRawLine = merged.rawLines[i];
+    recordTogetherEvent(state);
     if (handlePendingNoteLine(state, line)) continue;
     if (handlePendingBodyLine(state, line)) continue;
     const multilineConsumed = continueMultilineElement(state, lines, merged.rawLines, i);
@@ -424,6 +460,8 @@ function finalizeParse(state: ParseState): ClassDiagramAST {
   adjudicateAllowMixing(state);
 
   normalizeSameConnectionLengths(state.ast.relationships);
+  packIfNoIntermediatePackages(state);
+  resolveTogetherMembers(state);
   // cdd-T1: `getTextBlock`'s closing sweep (CucaDiagram.java:464, as in
   // startNewPage) -- numbers any package no like-class leaf ever swept.
   eventuallyBuildPhantomGroups(state.ast.namespaces, state.ast.classifiers, state.creationCounter);

@@ -27,6 +27,7 @@ export interface Theme {
   cardinalityFontFamily?: string;
   /** SI26 D5: `<style> arrow { cardinality { FontColor } }`, resolved hex. Absent = inherit the arrow label colour (`GraphvizImageBuilder.java:124-126` signature `{root,element,<diagram>,arrow,cardinality}`; `plantuml.skin` has no `cardinality` block). Read by `arrow-label-font.ts#resolveCardinalityFontColor`. */
   cardinalityFontColor?: string;
+  /** T11 (cdd3, Q-5): `arrow.cardinality { FontStyle }`, UNPARSED (`GraphvizImageBuilder.java:124-126`); read by `arrow-label-font.ts#resolveCardinalityFont`. */ cardinalityFontStyle?: string;
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker (set only when the key
    *  was seen) — `SkinParam#getFontSize`'s middle tier between per-param
    *  skinparams and each FontParam's own default (SkinParam.java:441-448),
@@ -87,32 +88,27 @@ export interface Theme {
   /** `skinparam minClassWidth` (mapped to `PName.MinimumWidth`) — floors the
    *  leaf-box text-block content width. Absent = 0 (no floor). */
   minimumWidth?: number;
-  /** G2 N18: `skinparam style strictuml` — a global sharp-corner style flag
-   *  (`SkinParam.java`'s `getStyle() == UmlDiagramType.STRICT`... actually
-   *  a bare boolean toggle checked by `USymbolFolder#drawFolder`'s
-   *  `roundCorner=0` `UPolygon` branch, jar-verified via
-   *  `jinibe-02-tebi269`'s own `<polygon points="...">` package outline —
-   *  a plain `<path>` with rounded arcs otherwise). Class is this field's
-   *  first consumer this iteration (`class-namespace-shape.ts`); scope
-   *  limited to the package/namespace folder-tab corner style, matching
-   *  this iteration's own write-set — NOT threaded into classifier-box
-   *  rounding or any other strictuml-affected shape. */
   /** G2 N61: `skinparam monochrome true|reverse` -- `TitledDiagram.java
    *  #muteColorMapper` swaps in `ColorMapper.MONOCHROME`/`MONOCHROME_REVERSE`
    *  for the diagram's ENTIRE draw pass (`klimt/color/ColorMapper.java:
-   *  80-91`), a uniform YIQ grayscale transform applied to every drawn
-   *  color, LAST, regardless of where that color's own value came from.
-   *  Class has no single terminal draw call to hook this into (unlike jar's
-   *  `UGraphic`) -- consumed as a single post-processing pass over the
-   *  ASSEMBLED SVG fragment instead (`class-monochrome.ts
-   *  #applyMonochromeToFragment`, `renderer.ts#renderClass`'s own return
-   *  point). Class is this field's first consumer; NOT wired into
-   *  description/other diagram types (no corpus sample exercised it -- same
-   *  scoping as `strictUml`'s doc comment). `SkinParam.isDark(...)`'s own
-   *  DARK_MODE branch (jar's FIRST check, ahead of `monochrome`) is
-   *  unmodeled -- `!theme dark`-interaction untraced, named remainder. */
+   *  80-91`), applied LAST regardless of a color's own source. Consumed as
+   *  a post-process over the assembled SVG fragment (`class-monochrome.ts
+   *  #applyMonochromeToFragment`) -- class only; `SkinParam.isDark(...)`'s
+   *  own DARK_MODE branch (ahead of `monochrome`) is unmodeled. */
   monochrome?: 'true' | 'reverse';
+  /** G2 N18: `skinparam style strictuml` -- a global sharp-corner toggle,
+   *  checked by `USymbolFolder#drawFolder`'s `roundCorner=0` `UPolygon`
+   *  branch (jar-verified `jinibe-02-tebi269`). Class-only consumer
+   *  (`class-namespace-shape.ts`); not threaded into classifier-box
+   *  rounding or any other strictuml-affected shape. */
   strictUml?: boolean;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` --
+   *  `SkinParam#displayGenericWithOldFashion` (`skin/SkinParam.java:1179-
+   *  1181`). No separate `<T>` tag box; the generic clause is appended
+   *  `<>`-wrapped onto the LAST display line instead (`Display#addGeneric`,
+   *  `klimt/creole/Display.java:529-538`), in the header NAME's own font.
+   *  See `class-stereotype-layout.ts#computeHeaderInfo`'s doc comment. */
+  genericDisplayOld?: boolean;
   /** `skinparam footbox hide|show`; see `SequenceDiagram#isShowFootbox`. */
   footbox?: string;
   /**
@@ -379,9 +375,9 @@ export type ThemeOverride = {
   cardinalityFontSize?: number;
   cardinalityFontFamily?: string;
   cardinalityFontColor?: string;
+  cardinalityFontStyle?: string;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
-  /** See {@link Theme.styleOverrides}. */
-  styleOverrides?: Record<string, Record<string, string>>;
+  /** See {@link Theme.styleOverrides}. */ styleOverrides?: Record<string, Record<string, string>>;
   /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
   defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
@@ -390,6 +386,8 @@ export type ThemeOverride = {
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
+  /** See {@link Theme.genericDisplayOld}'s own doc comment. */
+  genericDisplayOld?: boolean;
   /**
    * `skinparam handwritten true` — draw every primitive through the sketchy
    * renderer (`core/klimt/drawing/hand/`).

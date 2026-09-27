@@ -66,52 +66,19 @@ import type { FontConfiguration, FontStyle } from '../../klimt/shape/UText.js';
 import { getFont } from '../../klimt/shape/UText.js';
 import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js';
 import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
-import { HorizontalAlignment } from '../../klimt/geom/HorizontalAlignment.js';
-import { ClockwiseTopRightBottomLeft } from '../../klimt/geom/ClockwiseTopRightBottomLeft.js';
-import { LineBreakStrategy } from '../../klimt/LineBreakStrategy.js';
-import { Display } from '../../klimt/creole/Display.js';
-import { CreoleParser } from '../../klimt/creole/legacy/CreoleParser.js';
-import { MONOSPACED } from '../../klimt/creole/Parser.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { emojiBoxDim } from '../../klimt/creole/atom/AtomEmoji.js';
-import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
-import { Pragma } from '../../skin/Pragma.js';
-import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../text/Guillemet.js';
 import { renderLatexAsImage } from '../../latex.js';
 import { measureLine } from './EntityImageDescriptionSupport.js';
-import { BodyFactory } from '../../cucadiagram/BodyFactory.js';
-import type { BodyEnhanced1Style } from '../../cucadiagram/BodyEnhanced1Config.js';
-import type { MethodsOrFieldsAreaSkinParam } from '../../cucadiagram/MethodsOrFieldsAreaConfig.js';
-import type { Entity } from '../../abel/Entity.js';
-import { LeafType } from '../../abel/LeafType.js';
 import { sizingAtomImageResolverFor } from './leaf-sizing-entity.js';
+import { buildCreate2Name } from './EntityImageDescriptionName.js';
 import type { BoxSizingOpts } from './leaf-sizing-consts.js';
 
 /** No style flags — the sizing font carries family/size only
  *  (`leaf-sizing-entity.ts#SIZING_FONT_STYLES`'s convention). */
 const SIZING_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
-
-/** `plantuml.skin:15`, `root { LineThickness 1.0 }` — the same traced
- *  default `EntityImageDescriptionDelegates.ts#ROOT_LINE_THICKNESS`
- *  documents for `create3`; see the module doc comment. */
-const ROOT_LINE_THICKNESS = 1.0;
-
-/** A description title embedding a nested `{{ ... }}` diagram is a
- *  genuinely separate, unbuilt feature (`EntityImageDescriptionDelegates
- *  .ts#blockedEmbeddedRenderer`'s identical typed deferral). */
-function blockedEmbeddedRenderer(): NestedDiagramRenderer {
-  return {
-    render(): never {
-      throw new Error(
-        'leaf-sizing-folder-title: embedded diagrams ({{ ... }}) inside a folder/package title ' +
-          'are not supported — no nested-diagram renderer exists for description text ' +
-          '(EmbeddedDiagram.ts#NestedDiagramRenderer is the seam)',
-      );
-    },
-  };
-}
 
 /** `'kind' in x` duck-typing of the plain-data `CreoleAtom` union vs a
  *  composite `Atom` instance — `EntityImageDescriptionDelegates.ts
@@ -173,85 +140,6 @@ function titleAtomOps(resolveAtomImage: AtomImageResolver | undefined): AtomOps 
 }
 
 /**
- * The `MethodsOrFieldsAreaSkinParam` surface `create2` requires
- * (`requireBodyEnhanced1SkinParam`): the `ISkinSimple` half mirrors
- * `EntityImageDescriptionDelegates.ts#buildLocalSkinSimple` member for
- * member (each value upstream's own traced `SkinParam.java` default);
- * the `abel/ISkinParam` half supplies the opaque stubs nothing on the
- * title's dimension path calls (the `fakeSkin` reference shape); the two
- * T8 additions carry upstream's own defaults (`SkinParam.java:554-555`'s
- * `classAttributeIconSize` 10 — inert here, a `Display`-built area has
- * no `Member` rows for `hasSmallIcon` to find; `getCircledCharacterRadius`
- * 11, same trace as `class-member-rows.ts`'s documented derivation).
- */
-function buildTitleSkinParam(guillemet: GuillemetPair | undefined, atomOps: AtomOps): MethodsOrFieldsAreaSkinParam {
-  const renderer = blockedEmbeddedRenderer();
-  const skin: MethodsOrFieldsAreaSkinParam = {
-    // --- abel/ISkinParam.ts consumed slice (opaque, unreached at sizing) ---
-    getFontHtmlColor: () => ({}),
-    getFont: () => ({}),
-    getHyperlinkColor: () => ({}),
-    useUnderlineForHyperlink: () => {
-      throw new Error('leaf-sizing-folder-title: useUnderlineForHyperlink is not reached by the title dimension path');
-    },
-    getCurrentStyleBuilder: () => ({}),
-    getDefaultTextAlignment: (defaultValue) => defaultValue,
-    strictUmlStyle: () => false,
-    // --- style/ISkinSimple.ts (buildLocalSkinSimple's traced defaults) ---
-    getSprite: () => null,
-    guillemet: () => guillemet ?? GUILLEMET_DEFAULT,
-    getFromMd5: () => null,
-    transformStringForSizeHack: (s: string) => s,
-    getValue: () => null,
-    values: () => new Map<string, string>(),
-    getPadding: () => ClockwiseTopRightBottomLeft.none(),
-    getMonospacedFamily: () => MONOSPACED,
-    getTabSize: () => 8,
-    getDpi: () => 96,
-    copyAllFrom: () => undefined,
-    getPragma: () => Pragma.createEmpty(),
-    sheet: (fontConfiguration, horizontalAlignment, creoleMode, stereo?: FontConfiguration) =>
-      new CreoleParser(
-        fontConfiguration,
-        horizontalAlignment,
-        skin,
-        { creoleMode, stereotype: stereo ?? fontConfiguration },
-        { atomOps, renderer },
-      ),
-    // --- MethodsOrFieldsAreaSkinParam additions (SkinParam.java defaults) ---
-    classAttributeIconSize: () => 10,
-    getCircledCharacterRadius: () => 11,
-  };
-  return skin;
-}
-
-/** The two `Entity` members `create2`'s closure reads — see the module
- *  doc comment for why this is a shape, not a real `abel/Entity`. */
-function titleEntity(): Entity {
-  const shape = {
-    getLeafType: () => LeafType.DESCRIPTION,
-    getPortShortNames: () => new Set<string>(),
-  };
-  return shape as unknown as Entity;
-}
-
-/** The resolved `styleTitle` reads `create2` consumes
- *  (`requireBodyEnhanced1Style`) — every value's provenance is in the
- *  module doc comment ("Input construction"). */
-function titleStyle(font: FontConfiguration, atomOps: AtomOps): BodyEnhanced1Style {
-  return {
-    getHorizontalAlignment: () => HorizontalAlignment.CENTER,
-    lineThickness: ROOT_LINE_THICKNESS,
-    minimumWidth: 0,
-    titleConfig: font,
-    treeTableFontConfig: font,
-    memberFontConfig: font,
-    wrapWidth: LineBreakStrategy.NONE,
-    atomOps,
-  };
-}
-
-/**
  * Measures the shown folder-family title (`package`'s `dimName`) through
  * the faithful `BodyFactory.create2` → `BodyEnhanced1` route — upstream
  * `EntityImageDescription.java:198-199`'s exact construction, dimensioned
@@ -272,19 +160,9 @@ export function measureShownFolderTitle(
     styles: SIZING_FONT_STYLES,
   };
   const atomOps = titleAtomOps(sizingAtomImageResolverFor(sprites)(font));
-  const skinParam = buildTitleSkinParam(opts?.guillemet, atomOps);
-  // `codeDisplay = Display.getWithNewlines(getSkinParam().getPragma(),
-  // entity.getName())` (java:180) — the literal-`\n`-escape scanner IS the
-  // right parser here (a quoted element name carries the two-char escape).
-  const display = Display.getWithNewlines(Pragma.createEmpty(), code);
-  const block = BodyFactory.create2(
-    skinParam.getDefaultTextAlignment(HorizontalAlignment.CENTER),
-    display,
-    skinParam,
-    undefined,
-    titleEntity(),
-    titleStyle(font, atomOps),
-  );
+  // cdd3-T28: the create2 construction moved to `EntityImageDescriptionName
+  // .ts#buildCreate2Name`, shared with the drawing path.
+  const block = buildCreate2Name(code, font, atomOps, opts?.guillemet);
   const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
   return [dim.getWidth(), dim.getHeight()];
 }

@@ -91,6 +91,12 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     ['classbackgroundcolor'],
     (acc, _v, _color, paint) => {
       acc.classBackground = paint;
+      // T11 (cdd3, Q-4 probe c): marks `classBackground` as an EXPLICIT
+      // skinparam override -- see `theme-graph-colors-c.ts
+      // #classBackgroundExplicit`'s own doc comment for why the generic
+      // tag's fill needs this to distinguish an override from the
+      // built-in default.
+      acc.classBackgroundExplicit = true;
       // CDD T6FU: `classBackgroundColor` registers a `{element, class_}`
       // BackGroundColor style and `classHeaderBackgroundColor` a
       // `{element, class_, header}` one -- and BOTH match the
@@ -177,6 +183,30 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     (acc, value) => {
       const v = parseFiniteFloat(value);
       if (v !== undefined) acc.packageBorderThickness = v;
+    },
+  ],
+  // cdd3-T21 (E3-2, E3-5): `addMagic(SName.package_)`
+  // (`FromSkinparamToStyle.java:129`) registers `packageStereotypeFontColor`
+  // (`:283`, `FontColor` on `{stereotype, package_}`) and, via `addConFont`
+  // (`:278`), `packageFontName`/`packageFontStyle` (`FontName`/`FontStyle`
+  // on `{package_}`). Stored in the `package` element bucket -- see
+  // `ElementColors.stereotypeFont`/`fontFamily`/`fontStyle`.
+  [
+    ['packagestereotypefontcolor'],
+    (acc, _v, color) => {
+      (acc.elements['package'] ??= {}).stereotypeFont = color;
+    },
+  ],
+  [
+    ['packagefontname'],
+    (acc, value) => {
+      (acc.elements['package'] ??= {}).fontFamily = value;
+    },
+  ],
+  [
+    ['packagefontstyle'],
+    (acc, value) => {
+      (acc.elements['package'] ??= {}).fontStyle = parseFontStyleFlags(value);
     },
   ],
   [

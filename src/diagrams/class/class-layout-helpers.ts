@@ -137,10 +137,14 @@ export interface MeasuredClassifier {
   /** The DRAWN ink extent of a USymbol leaf's own shapes, in the leaf's own
    *  frame (origin at its box top-left) — from a `LimitFinder` walk over the
    *  same `EntityImageDescription` instance that sizes it
-   *  (`description/leaf-sizing-entity.ts#measureUsecaseOrActorLeafInk`).
-   *  Present only for an `actor` leaf; see that function's doc comment for
-   *  why usecase is excluded. Read by `class-ink-box.ts#addClassifierInk`
-   *  in place of `addRectInk`'s box rule. */
+   *  (`core/svek/image/leaf-sizing-entity.ts#measureEntityLeafInk`, used
+   *  directly by an `actor` leaf via `measureUsecaseOrActorLeafInk`
+   *  (`class-layout-leaf-shapes.ts#measureUsecaseOrActor`; usecase is
+   *  excluded there -- see that function's doc comment) and by a
+   *  `component`/`database` description leaf via
+   *  `class-layout-description-leaf-ink.ts#descriptionLeafSymbolInk`
+   *  (cdd2-T17/cdd3-T8, R-LEAF)). Read by `class-ink-box.ts
+   *  #addClassifierInk` in place of `addRectInk`'s box rule. */
   symbolInk?: LeafSymbolInk;
   rows: ClassifierGeo['rows'];
   dividerYs: number[];
@@ -205,6 +209,10 @@ export interface MeasuredClassifier {
    *  field this one feeds) and `class-ink-box.ts#addRectInk`'s (the
    *  jar-verified rule that consumes it). */
   bodyInkWidth?: number;
+  /** cdd3-T7 (R-VP): see `ClassifierGeo.bodyInkHeight`'s doc comment (the
+   *  geo field this one feeds) and `class-ink-shapes.ts#addRectInk`'s (the
+   *  jar-verified rule that consumes it). */
+  bodyInkHeight?: number;
   /** B5/M6: see `ClassifierGeo.emptyFieldPlaceholder`'s doc comment
    *  (./class-geo-types.ts). Set only by `class-object-map-sizing.ts
    *  #buildFieldBasedObjectGeo`. */
@@ -407,6 +415,7 @@ export function measureClassifier(
     badgeRadius,
     stereoFont,
     strictUml: theme.strictUml === true,
+    genericDisplayOld: theme.genericDisplayOld === true,
     headerMaxWidth: theme.colors.graph.classCascadeHeaderMaximumWidth ?? 0,
     memberMaxWidth: theme.colors.graph.classCascadeMaximumWidth ?? 0,
     minClassWidth: resolveMinClassWidth(theme, classifier.kind),

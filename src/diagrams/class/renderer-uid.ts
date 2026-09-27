@@ -161,6 +161,8 @@ export interface ClassUidPlanInput {
     readonly noUidSlot?: true;
     readonly phantomSlot?: true;
     readonly subsumedLinkCreationIndex?: number;
+    /** E3-16: see `Classifier.subsumedLinkPhantomSlot`'s doc comment. */
+    readonly subsumedLinkPhantomSlot?: true;
     readonly apointNameCreationIndex?: number;
     readonly invertedClassEdgeOldCreationIndex?: number;
     readonly repeatCoupleInvisLinkCreationIndex?: number;
@@ -191,6 +193,11 @@ export interface ClassUidPlanInput {
    *  re-numbering leaves the same holes jar's export-time `isRemoved()` skip
    *  does. */
   readonly removedRanks?: readonly number[];
+  /** cdd3-T9 S-1: a packed group's `Entity` was constructed (its uid tick
+   *  burned, `abel/Entity.java:171`) before `packSomePackage` ran, but it
+   *  never reaches geometry (`svek/SvekResult.java:72-74`) -- re-injected
+   *  as uid-less phantom ranks, same posture as `removedRanks`. */
+  readonly packedGroupRanks?: readonly number[];
 }
 
 /** Projects a parsed AST onto {@link ClassUidPlanInput}. `relationships` are
@@ -313,6 +320,12 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
       // classifier's own `creationIndex` (unlike the two entries above).
       if (c.subsumedLinkCreationIndex !== undefined) {
         out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex });
+        // E3-16: the subsumed link's OWN preceding phantom rank (it was
+        // itself an inverted -up-/-left- link) -- see `Classifier
+        // .subsumedLinkPhantomSlot`'s doc comment.
+        if (c.subsumedLinkPhantomSlot === true) {
+          out.push({ type: 'phantom', creationIndex: c.subsumedLinkCreationIndex - 1 });
+        }
       }
       // cdd-T3 (A1 SB3): the DOUBLE-couple path's `getUniqueSequence
       // ("apoint")` NAME tick -- a standalone rank two below the point
@@ -339,7 +352,11 @@ function assignExact(geo: ClassUidPlanInput, maps: UidMaps): number {
     // `creationIndex` is (and stays) undefined, so it is never itself an
     // 'entity'/'note' Ranked entry; only these two phantom slots are added.
     // cdd-T3 (A1 SB5): the removed rows' own burned ranks.
-    ...(geo.removedRanks ?? []).map((creationIndex): Ranked => ({ type: 'phantom', creationIndex })),
+    // cdd3-T9 S-1: plus every packed group's burned tick (same posture).
+    ...[...(geo.removedRanks ?? []), ...(geo.packedGroupRanks ?? [])].map((creationIndex): Ranked => ({
+      type: 'phantom',
+      creationIndex,
+    })),
     ...geo.notes.flatMap((n): Ranked[] =>
       n.tipGroupPhantomIndex !== undefined
         ? [

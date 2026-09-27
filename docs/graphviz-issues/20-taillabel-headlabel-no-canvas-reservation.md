@@ -1,3 +1,37 @@
+# RECLASSIFIED 2026-09-25: NOT a dot-engine defect (class-divergence-drive-3, T5)
+
+**Status: closed without an upstream fix. The residual is plantuml-ts work.**
+
+**Disproof.** Fed the byte-identical cached `class/focaci-80-suzu938/svek-1.dot`,
+real graphviz 16.1.0 (`dot -Tdot`) and `@knowvah/dot-engine` 1.6.0
+(`render(parse(src),'dot')`) agree exactly: `bb=0,0,107.58,156`, both node
+centres x=55, `tail_lp=27.5,101.24`, `head_lp=28.5,54.708`, and edge
+`55,107.74 55,90.064 55,65.868 55,48.208`. Their `-Tsvg` is also
+number-identical (Δ=0.000). The graph plantuml-ts builds through
+`createGraph`/`addNode`/`addEdge` (the exact `layoutGraph()` path) gives the
+same `bb=0,0,107.58,156` and node x 55, so dot-engine DOES reserve the 2.425 pt
+left label box.
+
+**Why the original filing saw a delta.** It compared real graphviz's
+ABSOLUTE centre (0.76389in = 55 pt) with dot-engine's node offset measured
+AFTER `graph-layout.ts#shiftToOrigin`. That function translates the layout
+so that min node/edge x = 0, which subtracts exactly the 2.425 pt label
+reservation (Transaction's left edge sits at 2.425 in graphviz and at 0 in
+our `layoutGraph()` result). So "5.81875 with or without labels" is a
+property of our post-processing frame, not of the engine.
+
+**The real focaci residual (uniform +1.732 px x shift, width 137 vs 135).**
+`src/diagrams/class/class-ink-box.ts:430` bounds the legacy
+`EdgeGeo.headLabel` anchor. That anchor uses the raw quantifier string
+`"~* initiators"`, measured at 61.1 px. The drawn text is
+`quantifierLines` `"* initiators"` at 53.4625 px, and upstream's
+`LimitFinder` only sees the drawn `UText` (`SvekEdge.java:969-973`).
+Counterfactual: bounding the drawn lines instead gives ink shift −1.7317,
+node x 15.4711 (jar 15.465) and width 135 (jar 135). The full artifact is
+`plans/class-divergence-drive-3/diagnosis/B.md` (B-3).
+
+ORIGINAL 2026-09-23 FILING FOLLOWS, unedited:
+
 # A `taillabel`/`headlabel` HTML table does not widen the canvas or shift node centring
 
 **Impact:** every class-diagram association edge that carries BOTH a

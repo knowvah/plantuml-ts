@@ -200,6 +200,16 @@ export interface Namespace {
    */
   tags?: string[];
   /**
+   * cdd3-T9 S-1: set by `class-namespace-pack.ts#packSomePackage` under
+   * `!pragma useIntermediatePackages false` -- a single-child group whose
+   * first display line was prepended to its child's. It keeps its
+   * `creationIndex` (the uid tick is already burned), but emits no DOT
+   * subgraph and is never drawn.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/abel/Entity.java:717-741
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:83-88
+   */
+  packed?: true;
+  /**
    * cdd2-T19b: the group's OWN legend -- a `legend ... end legend` (or
    * single-line `legend text`) written inside this container's body.
    * Upstream `AbstractClassOrObjectDiagram#setLegend` routes it to
@@ -209,6 +219,22 @@ export interface Namespace {
    * in the cluster header (`class-cluster-header.ts`). Absent == no legend.
    */
   legend?: DisplayPositioned;
+}
+
+/**
+ * cdd3-T18: one `together { }` block (`abel/Together.java:39-51`, opened by
+ * `CucaDiagram#gotoTogether`, `atmp/CucaDiagram.java:339-341`).
+ * `members` are the ids of the entities that carry it: leaves (classifiers,
+ * notes) CREATED while it was the top of the stack
+ * (`reallyCreateLeaf` -> `setTogether(currentTogether())`, `:232`), and
+ * groups created by `gotoGroup` at that point (`:349-353`). Referencing an
+ * existing entity inside the block does not join it (`sipigu-91-baku027`).
+ */
+export interface ClassTogether {
+  id: string;
+  /** The enclosing together when this one opened directly inside it. */
+  parentId?: string;
+  members: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -338,4 +364,6 @@ export interface ClassDiagramAST {
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandScale.java
    */
   scale?: ScaleSpec;
+  /** cdd3-T18: every `together { }` block, in opening order. Absent = none. */
+  togethers?: ClassTogether[];
 }

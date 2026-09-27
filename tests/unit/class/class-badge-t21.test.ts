@@ -88,15 +88,26 @@ describe('badgeGlyphPath — R/J/O/W/D/Q/S/X exact scraped outlines', () => {
     );
   });
 
-  it('Q matches befasi-62-vimu310 WaveMedium (translated to reference center 22,23)', () => {
+  // E1-7 (cdd3-T23): the pre-existing hardcoded literal here was the
+  // SIZE-12 outline (`befasi-62-vimu310` sets `skinparam
+  // CircledCharacterFontSize 12`), silently mismatched against THIS test's
+  // own DEFAULT-size-17 fixture below (`WaveMedium <<(Q,orchid)>>`, no
+  // skinparam override) -- the `renderFixtureClass` assertion at the
+  // bottom of this file compares the render against `badgeGlyphPath`'s OWN
+  // return value, a tautology that cannot catch a wrong TABLE entry; only
+  // this hardcoded literal can. Replaced with the real size-17 scrape:
+  // `class Lattice << (Q,orchid) >>`, `gamevo-26-runo973/in.svg`
+  // (`<ellipse cx="37.39" cy="183" .../>`), matching `class-badge-glyph-
+  // data.ts`'s own updated `Q` entry.
+  it('Q matches gamevo-26-runo973 Lattice, default size 17 (translated to reference center 22,23)', () => {
     expect(badgeGlyphPath('class', 22, 23, 'Q')).toBe(
-      'M21.344,27.135 Q21.262,27.152 21.206,27.161 Q21.15,27.17 21.098,27.17 Q19.592,27.17 ' +
-        '18.815,26.021 Q18.039,24.873 18.039,22.635 Q18.039,20.391 18.815,19.242 Q19.592,18.094 ' +
-        '21.109,18.094 Q22.633,18.094 23.409,19.242 Q24.186,20.391 24.186,22.635 Q24.186,24.176 ' +
-        '23.816,25.216 Q23.447,26.256 22.744,26.701 L23.834,27.768 L22.65,28.646 Z M21.109,19.646 ' +
-        'Q20.447,19.646 20.143,20.353 Q19.838,21.059 19.838,22.635 Q19.838,24.205 20.143,24.911 ' +
-        'Q20.447,25.617 21.109,25.617 Q21.777,25.617 22.082,24.911 Q22.387,24.205 22.387,22.635 ' +
-        'Q22.387,21.059 22.082,20.353 Q21.777,19.646 21.109,19.646 Z',
+      'M21.445,28.691 Q21.329,28.716 21.25,28.728 Q21.171,28.741 21.097,28.741 ' +
+        'Q18.963,28.741 17.864,27.114 Q16.764,25.487 16.764,22.316 Q16.764,19.137 17.864,17.51 ' +
+        'Q18.963,15.883 21.113,15.883 Q23.271,15.883 24.371,17.51 Q25.471,19.137 25.471,22.316 ' +
+        'Q25.471,24.499 24.948,25.972 Q24.425,27.446 23.429,28.077 L24.973,29.587 L23.296,30.833 ' +
+        'Z M21.113,18.083 Q20.175,18.083 19.744,19.083 Q19.312,20.083 19.312,22.316 ' +
+        'Q19.312,24.541 19.744,25.541 Q20.175,26.541 21.113,26.541 Q22.06,26.541 22.491,25.541 ' +
+        'Q22.923,24.541 22.923,22.316 Q22.923,20.083 22.491,19.083 Q22.06,18.083 21.113,18.083 Z',
     );
   });
 

@@ -12,6 +12,7 @@ import { dotSplinesAttrs } from './dot-splines.js';
 import { rowPortTable, portTable, shieldTable } from './svek-dot-emit-labels.js';
 import { inches } from './svek-dot-emit.js';
 import { firstEncounterOrder } from './svek-dot-order.js';
+import { togetherClusters } from './svek-dot-together.js';
 
 /** graphviz width/height/nodesep/ranksep attrs are in inches; our measured
  *  sizes are in pixels. getLayout returns points (inches × 72), so dividing px
@@ -37,6 +38,21 @@ export function applyGraphAttrs(b: GvGraphBuilder, input: DotInputGraph): void {
     b.setAttr('ranksep', (input.rankSep / PX_PER_INCH).toString());
   }
   if (input.aspect !== undefined) b.setAttr('aspect', input.aspect.toString());
+  // cdd3-T19 (E3-11): `DotStringFactory.java:154` `sb.append("searchsize=500;")`
+  // -- unconditional, every graph, same as `remincross=true;` the line above
+  // it. `svek-dot-emit.ts#graphAttrLines` already writes both into the DOT
+  // TEXT (parity gate), but this programmatic builder -- the one that
+  // actually drives @knowvah/dot-engine's layout -- never called its equivalent, so
+  // mincross ran its default search depth instead of jar's 500. Measured:
+  // `delasa-80-jusu462` moves 33 nodes without it. `remincross` is NOT added
+  // here: graphviz already treats an absent `remincross` as true
+  // (`mincross.c:379`; real dot with/without the line: 0 diffs on delasa's
+  // cached DOT), and the builder-ordering lead that `setAttr('remincross',
+  // 'true')` before `searchsize` could cancel it (E3-D2) did not reproduce on
+  // dot-engine 1.6.0 (`plans/class-divergence-drive-3/decision-journal.md`
+  // row 18) -- so only the one attribute upstream's forwarding actually
+  // needs is set.
+  b.setAttr('searchsize', '500');
   // D2 (plans/linetype-ortho-routing/decisions.md): emitted unconditionally,
   // never gated on sep attrs -- pavuzo-79-zodu430's cached svek-1.dot carries
   // `splines=ortho;forcelabels=true;` with no nodesep/ranksep at all.
@@ -174,10 +190,16 @@ export function addNodes(b: GvGraphBuilder, input: DotInputGraph): void {
   // Rank constraints (rank=source|sink|same|min|max): graphviz groups nodes by
   // a subgraph carrying `rank=`. Declaring an existing node id inside the
   // subgraph references it (DOT semantics — no duplicate node is created).
+  // cdd3-T28 (E3-10): a port ranked by its cluster's `portRanks` is NOT
+  // regrouped at the root -- upstream prints that rankset only inside the
+  // cluster (`ClusterDotString.java:136-137,254-260`), as the text emitter
+  // does (`svek-dot-emit.ts#rankLines`); a second, root rankset makes
+  // graphviz evict the port from its cluster (`sokevu-87-toce485`).
+  const portIds = new Set((input.clusters ?? []).flatMap((c) => (c.portRanks ?? []).flatMap((r) => r.nodeIds)));
   const rankGroups = new Map<string, string[]>();
   for (const n of input.nodes) {
     const r = n.attributes?.rank;
-    if (r === undefined) continue;
+    if (r === undefined || portIds.has(n.id)) continue;
     const arr = rankGroups.get(r) ?? [];
     arr.push(n.id);
     rankGroups.set(r, arr);
@@ -268,8 +290,9 @@ interface ClusterHandles {
  */
 export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterIndex {
   const idByName = new Map<string, string>();
-  const clusters = input.clusters;
-  if (clusters === undefined || clusters.length === 0) return { idByName };
+  // cdd3-T18: `together` blocks nest as bare clusters (`./svek-dot-together.ts`).
+  const clusters = togetherClusters(input);
+  if (clusters.length === 0) return { idByName };
   const byId = new Map<string, DotInputCluster>(clusters.map((c) => [c.id, c]));
   const handlesById = new Map<string, ClusterHandles>();
   const nameById = new Map<string, string>();
@@ -305,6 +328,15 @@ export function addClusters(b: GvGraphBuilder, input: DotInputGraph): ClusterInd
     // own doc comment.
     const parentInnermost =
       c.parentId !== undefined && byId.has(c.parentId) ? handlesFor(byId.get(c.parentId)!).innermost : b;
+    // cdd3-T18: `Cluster#printTogether` (`svek/Cluster.java:528-531`) -- a
+    // bare subgraph inside the container's innermost level, where
+    // `printCluster2` runs. No `idByName` entry: nothing is drawn for it.
+    if (c.isTogether === true) {
+      const sub = parentInnermost.addSubgraph(c.id, {});
+      const handles: ClusterHandles = { main: sub, innermost: sub };
+      handlesById.set(c.id, handles);
+      return handles;
+    }
     const outerName = nameFor(c);
     // G7 T14b: full ee/i-wrapped border-point (entry/exit-point) branch --
     // MUTUALLY EXCLUSIVE with the plain-cluster branch below, for the SAME

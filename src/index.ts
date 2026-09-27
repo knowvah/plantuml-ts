@@ -129,9 +129,9 @@ function umlSourceOfBlock(block: BlockUmlOk): UmlSource {
     ...block.source,
     rawStyles: block.preprocessed.styles,
     stylePositions: block.preprocessed.stylePositions,
-    // Raw lines (incl. @start/@end + directives) for the jar-faithful diagram
-    // seed -- see `UmlSource.rawSourceLines`'s doc comment.
+    // The seed inputs -- see `UmlSource.seedSourceLines`/`rawSourceLines`.
     rawSourceLines: block.rawSource.map((s) => s.getString()),
+    seedSourceLines: block.seedSource,
   };
 }
 

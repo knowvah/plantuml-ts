@@ -41,6 +41,9 @@ function reconstructSourceForSeed(block: UmlSource): string {
   // directive-stripped interior wrapped in `@startuml`/`@enduml` for
   // hand-built literal fixtures that carry no raw source (always directive-
   // free, so the two agree). See `UmlSource.rawSourceLines`'s doc comment.
+  // cdd3-T27: the preprocessed list upstream really hashes wins when present
+  // (`PSystemBuilder.java:232-240`, `assemble-svg.ts#seedOfUmlSource`).
+  if (block.seedSourceLines !== undefined) return block.seedSourceLines.join('\n');
   if (block.rawSourceLines !== undefined) return block.rawSourceLines.join('\n');
   return ['@startuml', ...block.lines, '@enduml'].join('\n');
 }

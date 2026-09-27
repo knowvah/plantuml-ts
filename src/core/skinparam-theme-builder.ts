@@ -60,6 +60,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
+  ['genericDisplayOld', (acc) => acc.genericDisplayOld],
   ['footbox', (acc) => acc.footbox],
   ['handwritten', (acc) => acc.handwritten],
   ['monochrome', (acc) => acc.monochrome],
@@ -91,6 +92,9 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   // .classFontColorAutomatic`.
   ['classFontColorAutomatic', (acc) => acc.classFontColorAutomatic],
   ['classBackground', (acc) => acc.classBackground],
+  // T11 (cdd3, Q-4 probe c): see `theme-graph-colors-c.ts
+  // #classBackgroundExplicit`'s own doc comment.
+  ['classBackgroundExplicit', (acc) => acc.classBackgroundExplicit],
   ['classHeaderBackground', (acc) => acc.classHeaderBackground],
   // G2 N65 item 47: see `theme.ts#classCascadeRoundCorner`'s doc comment
   // for why a bare skinparam reuses that SAME field.

@@ -15,6 +15,7 @@ import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import { scopedKey } from './namespace-groups.js';
 import type { DescriptionDiagramAST, DescriptiveLink, DescriptiveNode } from './ast.js';
 import { makeNode, resolveNewlineEscapes } from './parse-helpers.js';
+import { joinCurrentTogether } from './together.js';
 import type { EndpointShape } from './link-grammar.js';
 import {
   noteAttachment,
@@ -181,6 +182,7 @@ export function nextCreationIndex(state: ParseState): number {
 }
 
 export function emitNode(state: ParseState, node: DescriptiveNode): void {
+  joinCurrentTogether(state, node);
   const parent = state.containerStack[state.containerStack.length - 1];
   const arr = parent !== undefined ? parent.children : state.ast.nodes;
   arr.push(node);

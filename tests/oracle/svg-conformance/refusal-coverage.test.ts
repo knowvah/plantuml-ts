@@ -694,7 +694,27 @@ describe('refusal coverage — baseline shape', () => {
     // 5595 -> 5601 / 5326 -> 5332 at class-divergence-drive-2/close-b5
     // (2026-09-24): 6 more svg-class golden rows, same procedure
     // (ratchet 601 -> 607). Derivation: 5332 + 269 = 5601.
-    expect(manifest.fixtures.length).toBe(5601);
+    //
+    // 5601 -> 5618 / 5332 -> 5349 at class-divergence-drive-3/close-b1
+    // (2026-09-25): 17 more svg-class golden rows, same procedure
+    // (ratchet 607 -> 624). Derivation: 5349 + 269 = 5618.
+    //
+    // 5618 -> 5635 / 5349 -> 5366 at class-divergence-drive-3/close-b2
+    // (2026-09-26): 17 more svg-class golden rows, same procedure
+    // (ratchet 624 -> 641). Derivation: 5366 + 269 = 5635.
+    //
+    // 5635 -> 5649 / 5366 -> 5380 at class-divergence-drive-3/close-b3
+    // (2026-09-26): 14 more svg-class golden rows, same procedure
+    // (ratchet 641 -> 655). Derivation: 5380 + 269 = 5649.
+    //
+    // 5649 -> 5661 / 5380 -> 5392 at class-divergence-drive-3/close-b4
+    // (2026-09-26): 12 more svg-class golden rows, same procedure
+    // (ratchet 655 -> 667). Derivation: 5392 + 269 = 5661.
+    //
+    // 5661 -> 5680 / 5392 -> 5411 at class-divergence-drive-3/close-b5
+    // (2026-09-26): 19 more svg-class golden rows, same procedure
+    // (ratchet 667 -> 686). Derivation: 5411 + 269 = 5680.
+    expect(manifest.fixtures.length).toBe(5680);
     expect(pinnedJarErrors.length).toBe(99);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -713,7 +733,12 @@ describe('refusal coverage — baseline shape', () => {
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
     // 5322 -> 5326 at class-divergence-drive-2/close-b4 (4 svg-class clones).
     // 5326 -> 5332 at class-divergence-drive-2/close-b5 (6 svg-class clones).
-    expect(pinnedRendering.length).toBe(5332);
+    // 5332 -> 5349 at class-divergence-drive-3/close-b1 (17 svg-class clones).
+    // 5349 -> 5366 at class-divergence-drive-3/close-b2 (17 svg-class clones).
+    // 5366 -> 5380 at class-divergence-drive-3/close-b3 (14 svg-class clones).
+    // 5380 -> 5392 at class-divergence-drive-3/close-b4 (12 svg-class clones).
+    // 5392 -> 5411 at class-divergence-drive-3/close-b5 (19 svg-class clones).
+    expect(pinnedRendering.length).toBe(5411);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

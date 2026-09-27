@@ -132,6 +132,7 @@ import type { NoteGeo } from './note-layout.js';
 // NOT apply `ensureVisible`, subtracting the border stroke instead, so it
 // cannot go through `applyCucaDocumentMargin`.
 import { buildInkBox } from './class-ink-box.js';
+import type { InkBoxOptions } from './class-ink-box.js';
 import {
   CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
   CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
@@ -205,9 +206,11 @@ export function computeClassRawInkDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  iconSize?: number,
+  // T11 (cdd3, Q-5): forwarded to `buildInkBox` -- see that function's own
+  // doc comment (`InkBoxOptions`).
+  options?: InkBoxOptions,
 ): ClassDocumentDims {
-  return svekDimension(buildInkBox(classifiers, namespaces, edges, notes, iconSize));
+  return svekDimension(buildInkBox(classifiers, namespaces, edges, notes, options));
 }
 
 /**
@@ -236,9 +239,9 @@ export function computeClassDocumentDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  iconSize?: number,
+  options?: InkBoxOptions,
 ): ClassDocumentDims {
-  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes, iconSize);
+  const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes, options);
   // Empty diagram (no ink at all): stay {0, 0} rather than applying margin
   // to nothing -- `computeClassRawInkDims`'s own `{width: 0, height: 0}`
   // sentinel (no ink walked) is indistinguishable in VALUE from "1x1 ink at
@@ -273,7 +276,7 @@ export function computeClassInkShift(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  iconSize?: number,
+  options?: InkBoxOptions,
 ): InkShift {
-  return svekInkShift(buildInkBox(classifiers, namespaces, edges, notes, iconSize));
+  return svekInkShift(buildInkBox(classifiers, namespaces, edges, notes, options));
 }

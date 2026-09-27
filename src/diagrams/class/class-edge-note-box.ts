@@ -61,32 +61,60 @@ function noteOffset(
 }
 
 /**
- * Build {@link EdgeNoteBoxGeo} for a relationship carrying `note on link`.
- *
- * `center` is graphviz's own placement of the merged label box (this
- * port's `edgeResult.labelX`/`labelY`), so the block's top-left is
- * `center - reserved / 2` — the same corner convention every other class
- * edge-label anchor uses. `NoteLinkStrategy.HALF_NOT_PRINTED` draws
- * nothing at all (`SvekEdge.java:950-951`'s `link.getNote().getStrategy()
- * != HALF_NOT_PRINTED` guard), which this port models as
- * `Relationship.linkNoteHalfWidth` — the only path that sets it
- * (`class-assoc-couple.ts`) is upstream's `HALF_*` path.
+ * cdd3-T13r: the LABEL operand's offset inside the same merged block -- the
+ * mirror of {@link noteOffset}. `TextBlockHorizontal#drawU` advances `x` by
+ * each operand's width and centres it vertically (`klimt/shape/
+ * TextBlockHorizontal.java:78-93`); `TextBlockVertical#drawU` advances `y`
+ * by each operand's height and centres it horizontally
+ * (`TextBlockVertical.java:77-99`). The label trails for `left`/`top` and
+ * leads for `right`/`bottom` (`SvekEdge.java:318-325`).
  */
-export function computeEdgeNoteBox(
-  rel: Relationship,
+function labelOffset(
+  position: 'left' | 'right' | 'top' | 'bottom',
+  note: { width: number; height: number },
+  label: { width: number; height: number },
+  merged: { width: number; height: number },
+): { x: number; y: number } {
+  switch (position) {
+    case 'left':
+      return { x: note.width, y: (merged.height - label.height) / 2 };
+    case 'right':
+      return { x: 0, y: (merged.height - label.height) / 2 };
+    case 'top':
+      return { x: (merged.width - label.width) / 2, y: note.height };
+    case 'bottom':
+      return { x: (merged.width - label.width) / 2, y: 0 };
+  }
+}
+
+/** The merged block's operand dimensions and top-left, shared by
+ *  {@link computeEdgeNoteBox} and {@link labelOperandCenter}. */
+interface MergedLayout {
+  readonly noteDim: { width: number; height: number };
+  readonly labelDim: { width: number; height: number };
+  /** The label's OWN reservation (`computeReservedLabelBox`: width floored). */
+  readonly labelReserved: { width: number; height: number };
+  readonly merged: { width: number; height: number };
+  readonly left: number;
+  readonly top: number;
+}
+
+function mergedLayout(
+  rel: Relationship & { linkNote: string },
   center: { x: number; y: number },
   font: FontSpec,
   measurer: StringMeasurer,
   noteCtx: NoteBoxContext,
-): EdgeNoteBoxGeo | undefined {
-  if (rel.linkNote === undefined || rel.linkNoteHalfWidth === true) return undefined;
+): MergedLayout {
   const label = rel.label ?? '';
   const noteDim = measureLinkNoteDim(rel.linkNote, noteCtx.theme, measurer, noteCtx.sprites);
   const box = computeMergedLabelBox({
     label,
     noteDim,
     position: rel.linkNotePosition ?? 'bottom',
-    halfWidth: false,
+    // `eventuallyDivideByTwo` (`SvekEdge.java:440-442`): the table graphviz
+    // centres on `labelX` is the halved one for both HALF_* strategies.
+    halfWidth: rel.linkNoteHalfWidth ?? false,
     // Always `LinkMiddleDecor.NONE` in this port -- see
     // `class-layout-edge-labels.ts#computeNoteMergedLabelAttrs`'s own
     // derivation of the same `hasMiddleDecor: false`.
@@ -95,23 +123,91 @@ export function computeEdgeNoteBox(
     measurer,
   });
   const labelBox = computeReservedLabelBox(label, font, measurer, false);
-  const labelDim = { width: labelBox.measuredWidth + 2 * labelBox.marginLabel, height: labelBox.reservedHeight };
-  const merged = { width: box.measuredWidth, height: box.measuredHeight };
+  return {
+    noteDim,
+    labelDim: { width: labelBox.measuredWidth + 2 * labelBox.marginLabel, height: labelBox.reservedHeight },
+    // `appendTable` truncates BOTH table dims (`SvekEdge.java:504-507`).
+    labelReserved: { width: labelBox.reservedWidth, height: Math.trunc(labelBox.reservedHeight) },
+    merged: { width: box.measuredWidth, height: box.measuredHeight },
+    left: center.x - box.reservedWidth / 2,
+    top: center.y - box.reservedHeight / 2,
+  };
+}
+
+/**
+ * cdd3-T13r: the centre of the `labelOnly` operand inside a `note on link`
+ * merged block (`SvekEdge.java:318-325`, drawn at `labelXY` by `:952-954`)
+ * -- the anchor every main-label arm (`attachEdgeLabel`) positions from.
+ * `labelOnly` carries `withMargin(marginLabel)` on both sides
+ * (`SvekEdge.java:372-373`), inside the operand as it is inside a plain
+ * label's own table. Returns
+ * `center` unchanged when no note is merged (and for the `HALF_*` strategy,
+ * which {@link computeEdgeNoteBox} does not model either).
+ */
+export function labelOperandCenter(
+  rel: Relationship,
+  center: { x: number; y: number },
+  font: FontSpec,
+  measurer: StringMeasurer,
+  noteCtx: NoteBoxContext | undefined,
+): { x: number; y: number } {
+  const linkNote = rel.linkNote;
+  if (noteCtx === undefined || linkNote === undefined || rel.linkNoteHalfWidth === true) return center;
+  const m = mergedLayout({ ...rel, linkNote }, center, font, measurer, noteCtx);
+  const off = labelOffset(rel.linkNotePosition ?? 'bottom', m.noteDim, m.labelDim, m.merged);
+  // Every main-label arm turns its anchor back into the operand's top-left
+  // as `center - reservation / 2` (graphviz's table corner, the label's OWN
+  // floored reservation -- `portLabelAnchor`'s own doc comment), so hand it
+  // the centre that reservation would have at this operand's corner.
+  return { x: m.left + off.x + m.labelReserved.width / 2, y: m.top + off.y + m.labelReserved.height / 2 };
+}
+
+/**
+ * Build {@link EdgeNoteBoxGeo} for a relationship carrying `note on link`.
+ *
+ * `center` is graphviz's own placement of the merged label box (this
+ * port's `edgeResult.labelX`/`labelY`), so the block's top-left is
+ * `center - reserved / 2` — the same corner convention every other class
+ * edge-label anchor uses. `NoteLinkStrategy.HALF_NOT_PRINTED` draws
+ * nothing at all (`SvekEdge.java:950-951`'s `link.getNote().getStrategy()
+ * != HALF_NOT_PRINTED` guard), modelled as `Relationship
+ * .linkNoteNotPrinted`. cdd3-T32: `HALF_PRINTED_FULL` DOES draw -- the full
+ * merged block at `labelXY`, the corner of the HALF-width table
+ * (`SvekEdge.java:314-316,440-442`), so `mergedLayout` reserves with the
+ * relationship's own `linkNoteHalfWidth`.
+ */
+export function computeEdgeNoteBox(
+  rel: Relationship,
+  center: { x: number; y: number },
+  font: FontSpec,
+  measurer: StringMeasurer,
+  noteCtx: NoteBoxContext,
+): EdgeNoteBoxGeo | undefined {
+  const linkNote = rel.linkNote;
+  if (linkNote === undefined || rel.linkNoteNotPrinted === true) return undefined;
+  const { noteDim, labelDim, merged, left, top } = mergedLayout({ ...rel, linkNote }, center, font, measurer, noteCtx);
   const offset =
-    label.length === 0 ? { x: 0, y: 0 } : noteOffset(rel.linkNotePosition ?? 'bottom', noteDim, labelDim, merged);
-  const x = center.x - box.reservedWidth / 2 + offset.x;
-  const y = center.y - box.reservedHeight / 2 + offset.y;
-  const note = measureNote(rel.linkNote, noteCtx.theme, measurer, noteCtx.sprites);
+    (rel.label ?? '').length === 0
+      ? { x: 0, y: 0 }
+      : noteOffset(rel.linkNotePosition ?? 'bottom', noteDim, labelDim, merged);
+  const x = left + offset.x;
+  const y = top + offset.y;
+  const note = measureNote(linkNote, noteCtx.theme, measurer, noteCtx.sprites);
   return {
     x,
     y,
     width: noteDim.width,
     height: noteDim.height,
+    // cdd3-T10: `drawInternalU` paints `x2 = (int) getTextWidth` by
+    // `textHeight = (int) getTextHeight` (`ComponentRoseNote.java:107-109,
+    // 118`; the area never exceeds the preferred box here, so `:114-116`'s
+    // widening branch is dead) -- the text dims are the preferred box less
+    // `2 * padding` (`:82-90`, no shadow on a link note).
     inkBox: {
       x: x + ROSE_NOTE_PADDING,
       y: y + ROSE_NOTE_PADDING,
-      width: noteDim.width - 2 * ROSE_NOTE_PADDING,
-      height: noteDim.height - 2 * ROSE_NOTE_PADDING,
+      width: Math.trunc(noteDim.width - 2 * ROSE_NOTE_PADDING),
+      height: Math.trunc(noteDim.height - 2 * ROSE_NOTE_PADDING),
     },
     noteLines: note.lines.map((text, i) => ({ text, width: note.lineWidths[i] ?? 0 })),
     // cdd2-T19c: carried through so the renderer can recover the merge's

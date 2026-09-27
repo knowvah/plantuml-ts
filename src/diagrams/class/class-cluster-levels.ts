@@ -43,7 +43,7 @@ export type ClusterWrapperLevel = 1 | 2;
  * diagram. Ports `isThereALinkFromOrToGroup` (`ClusterDotString.java:317-323`)
  * for the class/object AST's flat relationship + note lists.
  */
-function isLinkFromOrToGroup(nsId: string, ast: ClassDiagramAST): boolean {
+export function isLinkFromOrToGroup(nsId: string, ast: ClassDiagramAST): boolean {
   const inRelationships = ast.relationships.some((rel) => rel.from === nsId || rel.to === nsId);
   if (inRelationships) return true;
   return ast.notes.some((note) => note.target === nsId);

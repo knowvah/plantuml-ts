@@ -52,7 +52,14 @@ export type TipResolution = TipShape | 'dropped';
 
 /** One host row as `memberAnchorRows` yields it -- the `{text, y, width,
  *  indent}` shape both classic `rows` and `enhancedBody` parts share. */
-type AnchorRow = { text: string; y: number; width?: number; indent: number };
+type AnchorRow = {
+  text: string;
+  y: number;
+  width?: number;
+  indent: number;
+  memberWrap?: { text: string; height: number; width: number };
+  wrapContinuation?: true;
+};
 
 /**
  * G2 N47: a host's member rows for `::member` tip-note matching --
@@ -64,12 +71,24 @@ type AnchorRow = { text: string; y: number; width?: number; indent: number };
  * matchable as a plain enhanced row, same `{text, y, indent, width}` shape.
  */
 function memberAnchorRows(host: ClassifierAnchor): ReadonlyArray<AnchorRow> {
-  if (host.enhancedBody === undefined) return host.rows.slice(1);
+  if (host.enhancedBody === undefined) return classicMemberRows(host.rows.slice(1));
   const out: AnchorRow[] = [];
   for (const part of host.enhancedBody.parts) {
     if (part.kind === 'rows' || part.kind === 'tree') out.push(...part.rows);
   }
   return out;
+}
+
+/**
+ * cdd3-T32: a word-wrapped member is ONE `rawBody` line upstream
+ * (`cucadiagram/BodierAbstract.java:69-86`) -- its first row stands for the
+ * whole member (matched on the unwrapped text), its continuation rows are
+ * not candidates.
+ */
+function classicMemberRows(rows: ReadonlyArray<AnchorRow>): ReadonlyArray<AnchorRow> {
+  return rows
+    .filter((row) => row.wrapContinuation !== true)
+    .map((row) => (row.memberWrap === undefined ? row : { ...row, text: row.memberWrap.text }));
 }
 
 /**
@@ -112,9 +131,11 @@ function tipAnchor(
   row: AnchorRow,
   direction: 'left' | 'right',
 ): OpalePoint {
-  const rowCenterY = row.y - req.baselineOffset + req.rowHeight / 2;
+  // cdd3-T32: a wrapped member's `getInnerPosition` is its WHOLE block
+  // (`MethodsOrFieldsArea.java:287-294`), so centre and right edge follow it.
+  const rowCenterY = row.y - req.baselineOffset + (row.memberWrap?.height ?? req.rowHeight) / 2;
   const rowMinX = ROW_TEXT_LEFT_MARGIN;
-  const rowMaxX = row.indent + (row.width ?? 0);
+  const rowMaxX = row.indent + (row.memberWrap?.width ?? row.width ?? 0);
   return {
     x: host.x - note.x + (direction === 'left' ? rowMaxX : rowMinX),
     y: host.y - note.y + rowCenterY,

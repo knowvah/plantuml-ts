@@ -1,3 +1,39 @@
+# RECLASSIFIED 2026-09-25: NOT a dot-engine defect (class-divergence-drive-3, T5)
+
+**Status: closed without an upstream fix. Both fixtures are plantuml-ts
+input divergences.**
+
+**Disproof.** On the byte-identical cached `svek-1.dot`, dot-engine 1.6.0
+and real graphviz 16.1.0 agree exactly for both fixtures (`-Tdot` pos
+maxΔ 0.0000; `-Tsvg` Δ=0.000). boseba: `bb=0,0,698.65,298`, the jar's node
+order. majuva: `bb=0,0,111.04,278`, `sh0008` at x=84.15. The filing's
+"dot-engine getLayout() on the identical graph" was never the identical
+graph. It was the graph plantuml-ts builds, which differs from the jar's DOT
+in two ways that the DOT-parity report cannot see:
+
+- **boseba-99-zopo693: `together {}` is dropped.** The jar emits
+  `subgraph cluster2t0 { sh0010 sh0011 sh0012 }` (`svek/Cluster.java
+  :528-548` `printTogether`). Our `DotInputGraph` has no clusters at all, and
+  the parity comparator ignores letter-suffixed `t` clusters
+  (`class-container.ts:158-163`). Controlled experiment: delete only that
+  subgraph's two lines from the cached DOT and run REAL graphviz. It
+  produces our layout: width 10.736in = 773.0 pt (ours 773.01), sh0007
+  (UserPerso) rightmost, and Structure at 429.94 pt (ours 429.94).
+- **majuva-44-luta965: `@3` link weight is forwarded as `weight=3`.**
+  `class-dot-edges.ts:191` → `graph-layout-build-edges.ts:79`. Upstream stores
+  `Link.weight` (`CommandLinkClass.java:381-385`) but never reads it
+  (`Link#getWeight` has no caller in `src/main/java/net/`), and
+  `svek-dot-emit.ts` never prints it. So the emitted DOT stays byte-identical
+  while the laid-out graph differs. Controlled experiment: add `weight=3`
+  to the two `--|>` edges of the cached DOT and run REAL graphviz. It gives
+  `bb=0,0,151.04,278`, nodes 84.15/44.15/124.15 and every spline equal to
+  ours to the digit.
+
+The full artifact is `plans/class-divergence-drive-3/diagnosis/B.md`
+(B-1, B-2).
+
+ORIGINAL 2026-09-23 FILING FOLLOWS, unedited:
+
 # dot-engine mirrors a same-rank node order that both the jar and real graphviz agree on
 
 **Impact:** 2 of the 723 class fixtures in the ratchet corpus:

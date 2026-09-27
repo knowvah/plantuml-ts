@@ -122,18 +122,73 @@ export function textAtomDy(
   return baseline - reference;
 }
 
-/** One already-resolved atom's `{altitude, height}` -- pure function of its
- *  own `FontConfiguration.fontPosition`/`size`, no measurer needed (every
- *  `StringMeasurer` in this codebase already hardcodes `height === size` and
- *  `getDescent === size / 4.5` for a `FontSpec`, `measurer.ts`'s own four
- *  implementations). 0/0 for a non-`'text'` atom, matching {@link
- *  resolveMemberAtoms}'s identical altitude-0 treatment. */
-function textAtomSeaEntry(atom: MemberRenderAtom): { readonly altitude: number; readonly height: number } {
-  if (atom.kind !== 'text') return { altitude: 0, height: 0 };
-  return {
-    altitude: fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL),
-    height: atomTextLineHeight(getFont(atom.font).size),
-  };
+/**
+ * cdd3-T22 (E1-3/E2-3): a NON-text atom's own `Sea` box top, expressed
+ * against the SAME row reference {@link textAtomDy} corrects against
+ * (`class-object-map-header.ts#baselineOffsetFor`: `size - descent`), so the
+ * renderer draws it at `rowBaseline + dy` exactly as it draws text.
+ * `top = altitude - height + maxSpan` is `Sea#doAlign` then
+ * `translateMinYto(0)` (`Sea.java:72-89`), the position
+ * `SheetBlock1#drawU` translates the `UGraphic` to before `Atom#drawU`
+ * (`SheetBlock1.java:212-217`); `AtomOpenIconic#drawU` paints its glyph
+ * from that corner (`AtomOpenIconic.java:76-83`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/Sea.java:72-89
+ */
+export function atomTopDy(
+  entry: { readonly altitude: number; readonly height: number },
+  maxSpan: number,
+  baseFont: FontConfiguration,
+  measurer: StringMeasurer,
+): number {
+  const baseSpec = atomFontSpec(baseFont);
+  const reference = baseSpec.size - measurer.getDescent(baseSpec, '');
+  return entry.altitude - entry.height + maxSpan - reference;
+}
+
+/**
+ * lozego-15-coci435 (T13r residual, journal row 24): one already-resolved
+ * atom's `{altitude, height}` FOR THE NOTE ENGINE'S OWN `Sea` reduction --
+ * `text` + `image` counted (altitude 0 either way; height `atomTextLineHeight
+ * (size)`/`atom.height`), matching `note-layout-measure-rows.ts
+ * #noteLineHeight`'s OWN inclusion set EXACTLY (that function already counts
+ * an `'image'` atom's raw height at altitude 0 -- `AtomImg`/`AtomSprite`'s
+ * `getStartingAltitude == 0`, java-cited there). 0/0 for every other kind
+ * (`'vector'`/`'bullet'`), same excluded set `noteLineHeight` itself
+ * documents (vector pending verification, bullet capped under the text row).
+ *
+ * This function REPLACES the pre-fix inline reduction {@link noteLineAtomDy}
+ * used to build (altitude-0-HEIGHT-0 for every non-`'text'` atom, image
+ * included) -- that reduction had exactly ONE caller (this module's own
+ * `noteLineAtomDy`; grep-verified zero other references anywhere in `src/`),
+ * so "member-row-shaped" was this formula's INTENDED future shape, not an
+ * actual shared consumer this fix had to protect. Mechanism (lozego's
+ * `<$test>Note on rel`, a 100px sprite atom sharing a line with 13px text):
+ * `noteLineHeight` correctly sizes the ROW at 100 (image included) and
+ * `lineHeight` carries that in; but the pre-fix reduction reported the SAME
+ * sprite atom as height 0, so the text-only `maxSpan` it computed was 13,
+ * not 100 -- the text atom's own `top`/`baseline` came out as though it were
+ * alone on a 13px line, then `dy = baseline - reference` (reference built
+ * from the REAL 100px `lineHeight`) was a large NEGATIVE correction that
+ * pulled the drawn text back up near the line's TOP instead of leaving it at
+ * the bottom of the sprite (jar: text baseline sits at the bottom of the
+ * tallest atom on the line, `Sea.java:72-91`'s `translateMinYto` shifts
+ * every atom by the SAME amount, so a short text atom's own bottom edge
+ * lands on the line's shared bottom). Hand-verified against the golden
+ * (`oracle/goldens/class/lozego-15-coci435/`): pre-fix `dy = 10.111 -
+ * 97.111 = -87.0`, `y = lineTop + 100 - 2.889 - 87.0 = lineTop + 10.111`
+ * (act `262.803` -> `lineTop = 252.692`); with `dy = 0` (this fix), `y =
+ * lineTop + 100 - 2.889 = lineTop + 97.111 = 349.803`, matching the jar's
+ * `349.801` to within float rounding.
+ */
+function noteAtomSeaEntry(atom: MemberRenderAtom): { readonly altitude: number; readonly height: number } {
+  if (atom.kind === 'text') {
+    return {
+      altitude: fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL),
+      height: atomTextLineHeight(getFont(atom.font).size),
+    };
+  }
+  if (atom.kind === 'image') return { altitude: 0, height: atom.height };
+  return { altitude: 0, height: 0 };
 }
 
 /**
@@ -147,20 +202,21 @@ function textAtomSeaEntry(atom: MemberRenderAtom): { readonly altitude: number; 
  * its own line's `Sea` height; a member row's does not). Consumes only
  * `MemberRenderAtom[]` (no raw `CreoleAtom`, no `StringMeasurer` -- the note
  * render path has neither in scope) because `FontPosition`/`size` alone are
- * sufficient (see {@link textAtomSeaEntry}). `lineHeight` is the CALLER's own
+ * sufficient (see {@link noteAtomSeaEntry}). `lineHeight` is the CALLER's own
  * already-computed `NoteRow.height` (`noteLineHeight`'s return) -- passing a
  * different value than what sized the line would silently desync sizer and
  * renderer, so callers must reuse the SAME value, never recompute it here.
  */
 export function noteLineAtomDy(atoms: readonly MemberRenderAtom[], lineHeight: number): readonly number[] {
-  const entries = atoms.map(textAtomSeaEntry);
-  // SI30 D2: TEXT-ONLY, same reasoning as `resolveMemberAtoms`'s own
-  // `textEntries` filter -- an img/sprite/vector atom is positioned via its
-  // own independent rule (`renderNoteLineAtoms`'s `legacyY`/bullet
-  // branches never read `dy`), so it must not perturb a text sibling's
-  // baseline through this reduction.
-  const textEntries = entries.filter((_, i) => atoms[i]!.kind === 'text');
-  const { maxSpan } = seaLineHeightAndSpan(textEntries);
+  const entries = atoms.map(noteAtomSeaEntry);
+  // SI30 D2 / lozego-15 fix: the REDUCTION (`maxSpan`) below must see every
+  // atom `noteLineHeight` itself counted (text + image, {@link
+  // noteAtomSeaEntry}'s own doc comment) so it stays consistent with the
+  // CALLER's `lineHeight` -- but only a `'text'` atom is positioned through
+  // this correction at all; an img/sprite/vector atom draws via its own
+  // independent rule (`renderNoteLineAtoms`'s `legacyY`/bullet branches
+  // never read `dy`), so the RETURNED array stays 0 for every non-text kind.
+  const { maxSpan } = seaLineHeightAndSpan(entries);
   return atoms.map((atom, i) => {
     if (atom.kind !== 'text') return 0;
     const entry = entries[i]!;

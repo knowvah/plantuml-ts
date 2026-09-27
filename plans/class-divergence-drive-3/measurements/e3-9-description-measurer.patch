@@ -1,0 +1,139 @@
+diff --git a/src/diagrams/description/index.ts b/src/diagrams/description/index.ts
+index f5dc76a62..67f7913cc 100644
+--- a/src/diagrams/description/index.ts
++++ b/src/diagrams/description/index.ts
+@@ -72,14 +72,20 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
+     return { ...ast, seed: seedOf(reconstructSourceForSeed(block)) };
+   },
+ 
++  // cdd3-T28 (E3-9): the layout measurer rides on the geometry so `render`
++  // draws `<text textLength>` with the measurer that sized the layout --
++  // `SyncPlugin#render(geo, theme)` has no measurer parameter (the class
++  // plugin carries it the same way, `class/index.ts#layoutSync`).
+   layoutSync(ast, theme, measurer) {
+-    return layoutDescription(ast, theme, measurer);
++    return { ...layoutDescription(ast, theme, measurer), measurer };
+   },
+ 
+   render(geo, theme): CompleteSvg {
+     // klimt (renderDescription) emits a complete document itself and does
+     // not route through the shared svgRoot assembler (decisions.md D2) —
+     // its chrome, when T7 lands, applies inside its own klimt pipeline.
+-    return { completeSvg: renderDescription(geo, theme) };
++    const svg =
++      geo.measurer === undefined ? renderDescription(geo, theme) : renderDescription(geo, theme, geo.measurer);
++    return { completeSvg: svg };
+   },
+ };
+diff --git a/src/diagrams/description/layout-helpers-types.ts b/src/diagrams/description/layout-helpers-types.ts
+index c2c7c81c0..5a729a35d 100644
+--- a/src/diagrams/description/layout-helpers-types.ts
++++ b/src/diagrams/description/layout-helpers-types.ts
+@@ -13,6 +13,7 @@ import type { DescriptiveLinkStyle, StereotypeSpriteRef } from './ast.js';
+ import type { USymbol } from '../../core/descriptive-keywords.js';
+ import type { SpriteRegistry } from '../../core/sprite-commands.js';
+ import type { ScaleSpec } from '../../core/scale-command.js';
++import type { StringMeasurer } from '../../core/measurer.js';
+ 
+ // ---------------------------------------------------------------------------
+ // Public output node type
+@@ -223,6 +224,15 @@ export interface DescriptionGeometry {
+    * diagram's own unscaled document dimension.
+    */
+   scale?: ScaleSpec;
++  /**
++   * cdd3-T28 (E3-9): the measurer that sized this layout, stashed by
++   * `descriptionPlugin.layoutSync` so `render(geo, theme)` draws text with
++   * the SAME one -- upstream builds and draws every image through a single
++   * `StringBounder` (`svek/GeneralImageBuilder.java`, `SvekResult#drawU`).
++   * Same seam as `class/index.ts#layoutSync`'s `measurer` field. Absent on
++   * hand-built geometries, where `renderDescription` keeps its default.
++   */
++  measurer?: StringMeasurer;
+ }
+ 
+ // ---------------------------------------------------------------------------
+diff --git a/src/diagrams/description/renderer.ts b/src/diagrams/description/renderer.ts
+index 27473a751..9919a65c2 100644
+--- a/src/diagrams/description/renderer.ts
++++ b/src/diagrams/description/renderer.ts
+@@ -56,9 +56,11 @@
+  *
+  * `measurer` param (this task — dual-measurer conformance/ratchet seam,
+  * decision-journal 2026-07-10 "DUAL MEASURER"): defaults to `jarMeasurer`
+- * so the public plugin path (`descriptionPlugin.render`,
+- * `src/index.ts#renderSync`) is byte-for-byte unchanged — neither calls
+- * `renderDescription` with a 3rd argument. The conformance/ratchet render
++ * for hand-built geometries. cdd3-T28 (E3-9): the public plugin path
++ * (`descriptionPlugin.render`, `src/index.ts#renderSync`) now passes the
++ * layout's own measurer (`DescriptionGeometry.measurer`) -- the default had
++ * drawn `textLength` with `jarMeasurer` while layout used the renderSync
++ * measurer (`sokevu-87-toce485`: 92.962 vs the jar's 81.55). The conformance/ratchet render
+  * path (survey/census scripts) calls `renderDescription(geo, theme,
+  * new DeterministicMeasurer())` directly, bypassing the public
+  * `SyncPlugin#render(geo, theme)` two-arg contract (which has no measurer
+diff --git a/tests/unit/description/description-render-measurer.test.ts b/tests/unit/description/description-render-measurer.test.ts
+new file mode 100644
+index 000000000..e9786d72b
+--- /dev/null
++++ b/tests/unit/description/description-render-measurer.test.ts
+@@ -0,0 +1,59 @@
++/**
++ * cdd3-T28 E3-9 (split out) -- `sokevu-87-toce485`, a description
++ * diagram (an `interface` feeding three ports of a `node`) that sits in the
++ * class corpus. Every expected value below is read from the jar's own output
++ * for the fixture (`test-results/dot-cache/class/sokevu-87-toce485/svek-1.dot`
++ * and `in.svg`), rendered with `-DPLANTUML_DETERMINISTIC_TEXT=true`, which is
++ * what `WidthTableMeasurer` models.
++ */
++import { describe, it, expect } from 'vitest';
++
++import { renderSync } from '../../../src/index.js';
++import { WidthTableMeasurer } from '../../../src/core/measurer.js';
++import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
++import type { DotInputGraph } from '../../../src/core/graph-layout.js';
++
++const SOKEVU = [
++  '@startuml',
++  'interface i',
++  'node n {',
++  '  port p',
++  '  port firstportname',
++  '  port "name-with-dash" as nwd',
++  '}',
++  '',
++  'i --> p',
++  'i --> firstportname',
++  'i --> nwd',
++  'nwd --> firstportname',
++  '@enduml',
++].join('\n');
++
++function renderCapturing(): { svg: string; inputs: DotInputGraph[] } {
++  const inputs: DotInputGraph[] = [];
++  setLayoutInputObserver((g) => inputs.push(g));
++  try {
++    return { svg: renderSync(SOKEVU, { measurer: new WidthTableMeasurer() }), inputs };
++  } finally {
++    setLayoutInputObserver(undefined);
++  }
++}
++
++function nodeById(input: DotInputGraph, id: string) {
++  const n = input.nodes.find((x) => x.id === id);
++  if (n === undefined) throw new Error(`node ${id} missing from the layout input`);
++  return n;
++}
++
++describe('sokevu-87-toce485 description render measurer (E3-9)', () => {
++  it('E3-9: draw-time text uses the renderSync measurer, not jarMeasurer (jar textLength 81.55)', () => {
++    // Upstream measures layout and draw with ONE StringBounder
++    // (`svek/GeneralImageBuilder.java` builds the images with the same
++    // `stringBounder` `SvekResult#drawU` draws through). The jar writes
++    // `textLength="81.55"` for `firstportname` -- the WidthTable width.
++    const { svg } = renderCapturing();
++    expect(svg).toMatch(/textLength="81\.55"[^>]*>firstportname</);
++    expect(svg).toMatch(/textLength="99\.575"[^>]*>name-with-dash</);
++  });
++
++});

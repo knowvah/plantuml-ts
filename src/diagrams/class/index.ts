@@ -44,8 +44,13 @@ export const classPlugin: SyncPlugin<ClassDiagramAST, ClassGeometry> = {
   // construct is CLAIMED even when it also names descriptive elements, so
   // the allowmixing gate can refuse the leaf the way upstream does).
 
-  parse(block) {
-    return parseClass(block);
+  // C-3 (cdd3-T23): the asset channel (`ParseOptions.assetStore`) reaches
+  // the parser here and nowhere else -- same reasoning as
+  // `description/index.ts#descriptionPlugin.parse`'s own doc comment:
+  // `sprite $N jar:<path>` resolves at COMMAND-execution time
+  // (`CommandSpriteFile.java:108-112`), i.e. during this call.
+  parse(block, options) {
+    return parseClass(block, options);
   },
 
   // Command errors abort the diagram upstream (`CommandExecutionResult.error`

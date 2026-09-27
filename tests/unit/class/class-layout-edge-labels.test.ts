@@ -78,3 +78,16 @@ describe('T17 (M8) — computeMultiplicityAttrs fallback: role occupies the card
     expect(attrs.headLabel).toBe('1');
   });
 });
+
+// cdd3-T32 (E3-13): `SvekEdge.java:430-442` reserves the `<TABLE>` whenever
+// `hasNoteLabelText() || link.getLinkConstraint() != null` -- the
+// `CONSTRAINT_SPOT` arm (`:440`) and a note-only label included. The layout
+// box must follow, or the engine gets no reservation and no `labelX`.
+describe('cdd3-T32 (E3-13) — an EMPTY-text label still hands the engine its box', () => {
+  it('the constraint spot reserves CONSTRAINT_SPOT (SvekEdge.java:122) on both axes', () => {
+    const attrs = edgeLabelAttrs(rel({ linkConstraint: { text: 'enten/eller' } }), font, font, measurer);
+    expect(attrs.label).toBe('');
+    expect(attrs.labelBoxWidth).toBe(10);
+    expect(attrs.labelBoxHeight).toBe(10);
+  });
+});

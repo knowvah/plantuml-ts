@@ -19,7 +19,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
+import { layoutFixtureClass, renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
+import { drawnEdgePoints } from '../../../src/diagrams/class/class-ink-dot-path.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { noteLeaves } from '../../../src/diagrams/class/class-geo-types.js';
 
@@ -183,12 +184,13 @@ describe('cdd-T16 — a grouped-inheritance link is suppressed to a bare solid p
     const a3children = lazeju.edges.filter((e) => e.to === 'A3');
     for (const e of a3children) {
       expect(e.sametail?.parentId).toBe('A3');
-      expect(e.sametail?.contact).toEqual({ x: 370.575, y: 76 });
+      // cdd3-T-D3: jar draws x2="370.58" (the 2-dp `-Tsvg` read).
+      expect(e.sametail?.contact).toEqual({ x: 370.58, y: 76 });
     }
     const a4children = lazeju.edges.filter((e) => e.to === 'A4');
     for (const e of a4children) {
       expect(e.sametail?.parentId).toBe('A4');
-      expect(e.sametail?.contact).toEqual({ x: 667.575, y: 76 });
+      expect(e.sametail?.contact).toEqual({ x: 667.58, y: 76 });
     }
   });
 
@@ -243,5 +245,59 @@ describe('cdd-T16b — a non-grouped link touching a protected leaf carries a le
   it('carries no leafContacts for Activity/Item/User (unprotected leaves)', () => {
     const activityItem = jakapi.edges.find((e) => e.from === 'Activity' && e.to === 'Item')!;
     expect(activityItem.leafContacts).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd3-T32 (E2-5, `dot/Neighborhood.java:97-99`): the `allButSametails`
+// contact is `SvekEdge#getStartContactPoint()`/`getEndContactPoint()`
+// (`svek/SvekEdge.java:1314-1334`), which reads `dotPath` AFTER
+// `getExtremitySimplier` trimmed it by the decoration length
+// (`svek/SvekEdge.java:560-563`) -- the drawn path's own end, not the raw
+// spline point (the diamond's tip).
+// ---------------------------------------------------------------------------
+
+describe('cdd3-T32 E2-5 — an allButSametails contact is the post-decoration path end', () => {
+  const mefike = fixture('mefike-75-vova900');
+  const link = mefike.edges.find((e) => e.from === 'A3' && e.to === 'x1')!;
+
+  it('equals the drawn (trimmed) path start, not the raw spline start', () => {
+    const drawn = drawnEdgePoints(link);
+    expect(link.leafContacts).toHaveLength(1);
+    expect(link.leafContacts![0]!.contact).toEqual(drawn[0]);
+    expect(link.leafContacts![0]!.contact).not.toEqual(link.points[0]);
+  });
+
+  it('draws the stub to the jar`s trimmed contact (210.425,83.845 in the jar SVG)', () => {
+    const markup = readFileSync('test-results/dot-cache/class/mefike-75-vova900/in.puml', 'utf8');
+    const svg = renderFixtureClass(markup, measurer);
+    const stub =
+      /<line x1="([\d.]+)" y1="55" x2="([\d.]+)" y2="([\d.]+)" style="stroke:#181818;stroke-width:1;"\/>/.exec(svg);
+    // D3 (graphviz's 2-dp `-Tsvg` read, unported) leaves ≤0.003 px here.
+    expect(Number(stub![2])).toBeCloseTo(210.425, 2);
+    expect(Number(stub![3])).toBeCloseTo(83.845, 2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd3-T32 (E3-13 follow-through): `Association#createNew`'s length-flip
+// split (`objectdiagram/AbstractClassOrObjectDiagram.java:282-284`) gives the
+// A-side edge `NoteLinkStrategy.HALF_PRINTED_FULL` and the B-side
+// `HALF_NOT_PRINTED`. Both reserve half the width (`svek/SvekEdge.java
+// :314-316`), but only HALF_NOT_PRINTED skips the draw (`:950-951`): the
+// A-side draws the FULL merged block at the half-width table's corner.
+// ---------------------------------------------------------------------------
+
+describe('cdd3-T32 — a HALF_PRINTED_FULL note-on-link is drawn at its half-width table', () => {
+  it('draws vonago`s note once, at the jar`s M70.52,6', () => {
+    const markup = readFileSync('test-results/dot-cache/class/vonago-16-zime449/in.puml', 'utf8');
+    const svg = renderFixtureClass(markup, measurer);
+    const notes = [...svg.matchAll(/<path d="M([\d.]+),([\d.]+) L[^"]*"[^>]*fill="#FEFFDD"/g)];
+    // Outline + folded corner of ONE note. D3 (graphviz's 2-dp `-Tsvg`
+    // read, unported) leaves 0.002 px on x.
+    expect(notes).toHaveLength(2);
+    expect(Number(notes[0]![1])).toBeCloseTo(70.52, 2);
+    expect(Number(notes[0]![2])).toBe(6);
+    expect(Number(notes[1]![1])).toBeCloseTo(303.52, 2);
   });
 });

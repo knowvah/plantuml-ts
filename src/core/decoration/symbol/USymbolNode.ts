@@ -6,6 +6,7 @@ import { XDimension2D } from '../../klimt/geom/XDimension2D.js';
 import { UTranslate } from '../../klimt/UTranslate.js';
 import { UPolygon } from '../../klimt/shape/UPolygon.js';
 import { ULine } from '../../klimt/shape/ULine.js';
+import { UEmpty } from '../../klimt/shape/UEmpty.js';
 import { USymbol, Margin } from './USymbol.js';
 import type { SName } from './USymbol.js';
 import type { SymbolContext } from './SymbolContext.js';
@@ -22,15 +23,11 @@ function getMargin(): Margin {
 }
 
 /**
- * `UEmpty` deferral (reported): upstream's `drawNode` ends with
- * `ug.apply(new UTranslate(0, height)).draw(new UEmpty(10, 10))`.
- * Verified (not assumed) this has zero rendered effect: upstream's own
- * `AbstractUGraphic#draw` special-cases `UEmpty` (`if (shape
- * instanceof UEmpty) return;` after only updating an internal min/max
- * bounds tracker via `drawEmpty` — no driver, no SVG output). `UEmpty`
- * is not ported at all; the call is simply omitted rather than porting
- * a shape class whose only observed behavior (upstream) is "touch two
- * numbers nobody reads back for this conformance surface."
+ * Upstream: `USymbolNode#drawNode` (`USymbolNode.java:71-92`), ported whole.
+ * The trailing `UEmpty(10, 10)` at `(0, height)` (`:90`) emits no SVG
+ * (`UGraphicSvg`'s `UEmpty` driver draws nothing) but
+ * `LimitFinder#drawEmpty` (`klimt/drawing/LimitFinder.java:159-162`) counts
+ * it -- 10px of ink below the node (cdd3-T31, C-8; formerly omitted).
  */
 function drawNode(ug: UGraphic, width: number, height: number, shadowing: number): void {
   const shape = new UPolygon();
@@ -51,8 +48,7 @@ function drawNode(ug: UGraphic, width: number, height: number, shadowing: number
   ug.apply(UTranslate.dy(10)).draw(ULine.hline(width - 10));
   ug.apply(new UTranslate(width - 10, 10)).draw(ULine.vline(height - 10));
 
-  // See this function's own doc comment above (`UEmpty` deferral) for
-  // why upstream's trailing `draw(new UEmpty(10, 10))` is omitted.
+  ug.apply(new UTranslate(0, height)).draw(new UEmpty(10, 10));
 }
 
 /**

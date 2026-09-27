@@ -36,6 +36,16 @@ import type { TimEnvironment } from './builtin/TimEnvironment.js';
  */
 export type PlainLineFilter = (rawLine: StringLocated, substitute: (text: string) => string) => boolean;
 
+/**
+ * A line a {@link PlainLineFilter} consumed, with the `resultList` index
+ * upstream's `addPlain` (`TContext.java:455-466`) would have given it --
+ * `TContext#getFilteredLines`, merged back by `uml-source-lines.ts#dataListOf`.
+ */
+export interface FilteredLine {
+  readonly at: number;
+  readonly line: StringLocated;
+}
+
 export interface TContextOptions {
   /** Injected clock / RNG / file+stdlib lookups for the seam-backed builtins. */
   readonly env?: TimEnvironment;

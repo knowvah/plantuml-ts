@@ -265,6 +265,40 @@ describe('computeClassDocumentDims', () => {
     expect(dims.height).toBe(51);
   });
 
+  it(
+    'cdd3-T15 (E3-19 reveal): a non-opalised note connector spline contributes its ' +
+      'own ink beyond the note box -- SvekEdge#drawU draws the connector like any other ' +
+      'Link, LimitFinder#drawDotPath walks every bezier point (zepeki-75-pifo352: the ' +
+      'connector reaches above BOTH the note and the host, Δ49.21 canvas height before ' +
+      'this fix)',
+    () => {
+      const notes: NoteGeo[] = [
+        {
+          id: 'n0',
+          kind: 'note',
+          x: 20,
+          y: 30,
+          width: 50,
+          height: 30,
+          lines: ['hi'],
+          lineWidths: [],
+          // Control point at y=-10 reaches above the note's own y=30 top.
+          connector: [
+            { x: 45, y: 30 },
+            { x: 45, y: -10 },
+            { x: 100, y: 5 },
+            { x: 100, y: 60 },
+          ],
+        },
+      ];
+      const dims = computeClassDocumentDims([], [], [], notes);
+      // Ink span (unpadded): x in [20,100], y in [-10,60].
+      // width = 80+15+5+1 floored = 101; height = 70+15+5+1 floored = 91.
+      expect(dims.width).toBe(101);
+      expect(dims.height).toBe(91);
+    },
+  );
+
   it('G2/N13: a dropped member-tip note contributes NO ink at all (jar draws nothing for it)', () => {
     // note-leaf-model T3: dropped-ness is resolved inside this draw pass
     // (`buildInkBox` is this port's `LimitFinder`) -- `typo` matches no row
@@ -1050,7 +1084,11 @@ describe('edge-label margin ink (cdd-T35)', () => {
     expect(withMainLabel.width - withTailLabel.width).toBe(2);
   });
 
-  it('skips the margin when a note is merged into the label (already baked into label.width)', () => {
+  // cdd3-T13r: `labelOnly` is still a `TextBlockMarged` INSIDE the merged
+  // note block, and its `drawU` still draws `UEmpty(dim)` (`klimt/shape/
+  // TextBlockMarged.java:79-87`) -- `EdgeGeo.label.width` is the bare text
+  // width either way, so the margin ink is NOT skipped (lipazi's Δ1).
+  it('keeps the margin when a note is merged into the label (labelOnly still draws its UEmpty)', () => {
     const label: EdgeGeo['label'] = { text: 'x', x: 20, y: 20, width: 20 };
     const plain = computeClassDocumentDims([], [], edgeWithLabel(label), []);
     const noteMerged = computeClassDocumentDims(
@@ -1062,14 +1100,45 @@ describe('edge-label margin ink (cdd-T35)', () => {
           y: 0,
           width: 1,
           height: 1,
-          inkBox: { x: 0, y: 0, width: 1, height: 1 },
+          // cdd3-T10: inside the label glyph's own ink, so the note's OWN
+          // ink (below) moves neither axis and only the margin skip shows.
+          inkBox: { x: 25, y: 10, width: 1, height: 1 },
           noteLines: [],
           position: 'bottom',
         },
       }),
       [],
     );
-    expect(noteMerged.width).toBe(plain.width - 2);
+    expect(noteMerged.width).toBe(plain.width);
+  });
+
+  // cdd3-T10: `EntityImageNoteLink#drawU` -> `ComponentRoseNote
+  // #drawInternalU` (`skin/rose/ComponentRoseNote.java:118-122`) draws the
+  // note outline as a `UPath` (`Opale.getPolygonNormal`, `svek/image/
+  // Opale.java:149-171`) inside the edge's own draw pass, so
+  // `LimitFinder#drawUPath` (`klimt/drawing/LimitFinder.java:164-167`)
+  // counts its plain bbox -- lipazi-06-care921's canvas shortfall.
+  it('counts the note-on-link outline (inkBox) as plain UPath ink', () => {
+    const without = computeClassDocumentDims([], [], edgeWithLabel(undefined), []);
+    const withNote = computeClassDocumentDims(
+      [],
+      [],
+      edgeWithLabel(undefined, {
+        noteBox: {
+          x: 95,
+          y: 5,
+          width: 60,
+          height: 40,
+          inkBox: { x: 100, y: 10, width: 50, height: 30 },
+          noteLines: [],
+          position: 'bottom',
+        },
+      }),
+      [],
+    );
+    // x: [20,20] -> [20,150]; y: [20,20] -> [10,40].
+    expect(withNote.width - without.width).toBe(130);
+    expect(withNote.height - without.height).toBe(30);
   });
 
   it('only ever widens X -- the height is unaffected by marginLabel (1px vs 6px self-loop)', () => {

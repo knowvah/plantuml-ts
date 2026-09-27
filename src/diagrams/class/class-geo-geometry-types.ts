@@ -16,6 +16,9 @@ import type { JsonBodyItem } from './class-geo-json-types.js';
 export interface ClassGeometry {
   /** cdd-T3 (A1 SB5): `class-directives-removal.ts#computeRemovedRanks`'s output (see its doc comment). */
   removedRanks?: readonly number[];
+  /** cdd3-T9 S-1: `creationIndex` of every packed group (`Namespace.packed`)
+   *  -- burned uid ticks with no drawn cluster (`renderer-uid.ts`). */
+  packedGroupRanks?: readonly number[];
   totalWidth: number;
   totalHeight: number;
   /**

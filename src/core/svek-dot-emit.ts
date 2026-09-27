@@ -36,6 +36,9 @@ import { clusterBlock, inches, nodeLine } from './svek-dot-emit-clusters.js';
 // file's header for the upstream derivation and for why both consumers must
 // read the SAME fields.
 import { wrapperLevels, type WrapperLevels } from './svek-dot-wrappers.js';
+import { rootTops, topsFirstClusters } from './svek-dot-top.js';
+import { togetherClusters } from './svek-dot-together.js';
+import { orderLines0Edges } from './svek-dot-lines0.js';
 
 // Re-exported so callers keep reaching these through the emitter's own module
 // path: `inches` for the LAYOUT builder (`graph-layout-build.ts#addNodes`), and
@@ -192,17 +195,22 @@ function rankLines(input: DotInputGraph, recs: Map<string, NodeRec>): string[] {
  * (`graph-layout-build.ts#firstEncounterOrder` has the full derivation, and
  * mirrors this same split on the layout path).
  *
- * Deliberately not ported: `addLine`'s own tie-break inside `lines0`, which
- * moves a note-labelled edge ahead of the first same-connections unlabelled
- * one (`:90-99`). No cached fixture's `lines0` order differs from the input
- * edge order because of it — `temuxi-28-cega322`'s seven-edge batch matches
- * jar's exactly — so it is an unexercised residual, recorded rather than
- * guessed at.
+ * cdd3-T19 (E3-18): `lines0`'s own insertion order is `addLine`'s tie-break
+ * (`:90-99`), which moves a note-labelled edge ahead of the first
+ * same-connections unlabelled one already collected — see
+ * `./svek-dot-lines0.ts` for the full port and why this module, the LAYOUT
+ * builder and node-encounter order must all read the same reordering.
+ * `cobumi-83-bapu892`'s jar DOT is the fixture that exercises it: the
+ * labelled `sh0019->sh0018 : children` prints ahead of the unlabelled
+ * `sh0018->sh0019`, which this port previously left in declaration order.
  */
 function edgeBatches(input: DotInputGraph): { lines0: number[]; lines1: number[] } {
-  const lines0: number[] = [];
+  const indexOfEdge = new Map(input.edges.map((e, i) => [e, i] as const));
+  const lines0 = orderLines0Edges(input.edges).map((e) => indexOfEdge.get(e)!);
   const lines1: number[] = [];
-  input.edges.forEach((e, i) => (e.attributes?.minLen === 0 ? lines0 : lines1).push(i));
+  input.edges.forEach((e, i) => {
+    if (e.attributes?.minLen !== 0) lines1.push(i);
+  });
   return { lines0, lines1 };
 }
 
@@ -211,6 +219,15 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
   const body = [...graphAttrLines(input)];
   const kermor = input.kermor === true;
   const unclustered = input.nodes.filter((n) => !tree.clusteredIds.has(n.id));
+  // cdd3-T16: the root's `printCluster1` (`DotStringFactory.java:188`) —
+  // inverted-edge tails, one line per link, BEFORE `lines0`; `printCluster2`
+  // below then declares the rest (`./svek-dot-top.ts`).
+  const tops = rootTops(
+    input,
+    unclustered.map((n) => n.id),
+  );
+  for (const id of tops) body.push(nodeLine(nodeById.get(id)!, recs.get(id)!));
+  const topSet = new Set(tops);
   const { lines0, lines1 } = edgeBatches(input);
   const emitEdges = (indices: readonly number[]): void => {
     for (const i of indices) {
@@ -236,7 +253,7 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
   if (kermor && unclustered.length === 0) {
     body.push('rootEmpty [shape=point,label=""];');
   } else {
-    for (const n of unclustered) body.push(nodeLine(n, recs.get(n.id)!));
+    for (const n of unclustered) if (!topSet.has(n.id)) body.push(nodeLine(n, recs.get(n.id)!));
   }
   for (const top of tree.childrenOf.get(undefined) ?? []) {
     body.push(...clusterBlock(top, tree.childrenOf, recs, nodeById, clusterColors, kermor));
@@ -249,6 +266,11 @@ function emitBody(input: DotInputGraph, seqs: SeqAssignment, tree: ClusterTree):
 /** Serialize a DotInputGraph to Svek-shaped DOT text. */
 export function toSvekDot(input: DotInputGraph): string {
   const tree = buildClusterTree(input.clusters ?? []);
-  const body = emitBody(input, assignSequence(input, tree), tree);
+  // cdd3-T16: ids/colors in construction order (`tree`), emission in
+  // `printCluster1`-then-`printCluster2` order (`./svek-dot-top.ts`).
+  // cdd3-T18: emission nests `together` subgraphs (`./svek-dot-together.ts`);
+  // numbering stays on the raw clusters -- a together takes no value.
+  const printed: DotInputGraph = { ...input, clusters: togetherClusters(input) };
+  const body = emitBody(input, assignSequence(input, tree), buildClusterTree(topsFirstClusters(printed)));
   return `digraph unix {\n${body.join('\n')}\n}\n`;
 }

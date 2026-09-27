@@ -44,8 +44,11 @@
  *     `befasi-62-vimu310/in.svg` (`cx=443.91, cy=128`).
  *   - D: `Class foo2 <<(D,orange)ABC>>`, `jikase-93-tipa633/in.svg`
  *     (`cx=123, cy=31`).
- *   - Q: `class WaveMedium <<(Q,orchid)>>`, `befasi-62-vimu310/in.svg`
- *     (`cx=369.21, cy=719`) -- the SAME fixture W was scraped from.
+ *   - Q: E1-7 (cdd3-T23) superseded this entry -- see its own inline
+ *     comment above the table. `befasi-62-vimu310`'s `<<(Q,orchid)>>` sets
+ *     `skinparam CircledCharacterFontSize 12`, so that fixture's glyph is
+ *     NOT this table's default size-17 reference; `gamevo-26-runo973`'s
+ *     `<<(Q,orchid)>>` (no size override) is.
  *   - S: `class NamedStereotype <<(S,#FF7700)Stereotype>>`,
  *     `bejeli-39-sina124/in.svg` (`cx=22, cy=25`).
  *   - X: `class Dwelling <<(X,#FF7700)>>`, `rideze-59-lizu265/in.svg`
@@ -143,6 +146,15 @@ export const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
     'Q17.264,20.137 18.364,18.51 Q19.463,16.883 21.613,16.883 Q23.771,16.883 24.871,18.51 ' +
     'Q25.971,20.137 25.971,23.316 Q25.971,26.487 24.871,28.114 Q23.771,29.741 21.613,29.741 ' +
     'Q19.463,29.741 18.364,28.114 Q17.264,26.487 17.264,23.316 Z',
+  // E1-7 (cdd3-T23): LATENT -- same size-12-vs-size-17 defect as the
+  // pre-fix Q entry (both scraped from `befasi-62-vimu310`, which sets
+  // `skinparam CircledCharacterFontSize 12`), left un-regenerated: zero
+  // corpus reach today (gamevo defines a `QW` custom stereotype but only
+  // renders `Q`, per the mission diagnosis, `E1.md` gamevo entry) -- no
+  // fixture exercises a default-size `W` badge to scrape from, and D12
+  // forbids re-rendering the jar for a value this table would only ever
+  // use synthetically. Regenerate the SAME way as Q, from a real
+  // `scripts/oracle-render.sh` capture, once a fixture needs it.
   W:
     'M18.5,19.252 L20.012,19.252 L20.639,25.674 L21.395,21.52 L22.83,21.52 L23.709,25.674 ' +
     'L24.201,19.252 L25.725,19.252 L24.717,28 L23.105,28 L22.109,23.406 L21.178,28 L19.578,28 ' +
@@ -152,14 +164,25 @@ export const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
     '24.423,23.291 Q24.423,21.125 23.809,20.22 Q23.194,19.315 21.75,19.315 Z M18.637,17.107 ' +
     'L21.26,17.107 Q24.298,17.107 25.635,18.555 Q26.971,20.004 26.971,23.291 Q26.971,26.586 ' +
     '25.635,28.043 Q24.298,29.5 21.26,29.5 L18.637,29.5 Z',
+  // E1-7 (cdd3-T23): the pre-existing entry below was the SIZE-12 outline
+  // (`skinparam CircledCharacterFontSize 12`), scraped from
+  // `befasi-62-vimu310`, mislabeled as this table's default SIZE-17
+  // reference -- ~0.71x too small (jar-verified: gamevo's default-size Q
+  // spans y -7.117..7.833, the size-12 scrape only -4.906..5.646).
+  // Replaced with a real size-17 scrape: `class Lattice << (Q,orchid) >>`
+  // (via `!define OSG (O,lightblue)`-style custom stereotype),
+  // `gamevo-26-runo973/in.svg`, `<ellipse cx="37.39" cy="183" .../>` +
+  // sibling `<path d>`, translated by `(REFERENCE_CX-37.39,
+  // REFERENCE_CY-183)` = `(-15.39, -160)` -- this table's own normalization
+  // rule (module doc comment).
   Q:
-    'M21.344,27.135 Q21.262,27.152 21.206,27.161 Q21.15,27.17 21.098,27.17 Q19.592,27.17 ' +
-    '18.815,26.021 Q18.039,24.873 18.039,22.635 Q18.039,20.391 18.815,19.242 Q19.592,18.094 ' +
-    '21.109,18.094 Q22.633,18.094 23.409,19.242 Q24.186,20.391 24.186,22.635 Q24.186,24.176 ' +
-    '23.816,25.216 Q23.447,26.256 22.744,26.701 L23.834,27.768 L22.65,28.646 Z M21.109,19.646 ' +
-    'Q20.447,19.646 20.143,20.353 Q19.838,21.059 19.838,22.635 Q19.838,24.205 20.143,24.911 ' +
-    'Q20.447,25.617 21.109,25.617 Q21.777,25.617 22.082,24.911 Q22.387,24.205 22.387,22.635 ' +
-    'Q22.387,21.059 22.082,20.353 Q21.777,19.646 21.109,19.646 Z',
+    'M21.445,28.691 Q21.329,28.716 21.25,28.728 Q21.171,28.741 21.097,28.741 ' +
+    'Q18.963,28.741 17.864,27.114 Q16.764,25.487 16.764,22.316 Q16.764,19.137 17.864,17.51 ' +
+    'Q18.963,15.883 21.113,15.883 Q23.271,15.883 24.371,17.51 Q25.471,19.137 25.471,22.316 ' +
+    'Q25.471,24.499 24.948,25.972 Q24.425,27.446 23.429,28.077 L24.973,29.587 L23.296,30.833 ' +
+    'Z M21.113,18.083 Q20.175,18.083 19.744,19.083 Q19.312,20.083 19.312,22.316 ' +
+    'Q19.312,24.541 19.744,25.541 Q20.175,26.541 21.113,26.541 Q22.06,26.541 22.491,25.541 ' +
+    'Q22.923,24.541 22.923,22.316 Q22.923,20.083 22.491,19.083 Q22.06,18.083 21.113,18.083 Z',
   S:
     'M21.733,24.063 Q19.882,23.357 19.227,22.581 Q18.571,21.805 18.571,20.494 Q18.571,18.809 ' +
     '19.65,17.846 Q20.729,16.883 22.613,16.883 Q23.468,16.883 24.323,17.078 Q25.178,17.273 ' +

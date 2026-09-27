@@ -17,7 +17,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
-import { applySeededDefIds, seededDefIdRenames, getSeed } from '../../../src/core/svg-defs.js';
+import { applySeededDefIds, seededDefIdRenames, getSeed } from '../../../src/core/svg-defs-seeded.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
@@ -133,21 +133,24 @@ describe('the ids match the jar, per corpus fixture', () => {
     expect(defIdsOf(jar)).toEqual(expected);
   });
 
-  test('popesa-39-sobe866 is the ONE known miss — the seed input, not the rule', () => {
-    // `UmlSource#seed()` hashes the PREPROCESSED lines (`UmlSource.java:
-    // 222-234` over `source`, loaded from `PSystemBuilder`'s `data`,
-    // java:232-240), and popesa carries `!define MyBlue #6192d1`. Hashing the
-    // raw lines therefore yields a different uid. Pinned so the day the port
-    // keeps a preprocessed-source artifact, this test says so.
-    //
-    // ONE id on each side since round 5: popesa mixes a `paint.ts` gradient
-    // (the class box) with a klimt-driver one (`database dummy2` through the
-    // USymbol path) for the SAME gradient, and
-    // `collapseDuplicateGradientDefs` now collapses them the way upstream's
-    // `gradients` map does (`SvgGraphics.java:367-371`).
+  test('popesa-39-sobe866 hashes the PREPROCESSED lines (UmlSource.java:222-234)', () => {
+    // `UmlSource#seed()` walks `source`, loaded from `PSystemBuilder`'s `data`
+    // (java:232-240) -- the TIM result list, where `!define MyBlue #6192d1`
+    // is gone and `MyBlue` is substituted. Hashing the raw lines gave
+    // `g1dfzmcprqomz60` (cdd3-T27, C-9).
     const { seeded, jar } = seededRenderOf('popesa-39-sobe866');
     expect(defIdsOf(jar)).toEqual(['g30vatrr2be6m0']);
-    expect(defIdsOf(seeded)).toEqual(['g1dfzmcprqomz60']);
+    expect(defIdsOf(seeded)).toEqual(['g30vatrr2be6m0']);
+  });
+
+  test('givofi-11-xumu978 numbers gradients in creation order (SvgGraphics.java:393,404)', () => {
+    // `id = gradientId + gradients.size()` then `defs.appendChild(elt)`: the
+    // class box (drawn first) owns index 0 and the first `<defs>` slot, the
+    // database USymbol's klimt gradient index 1 (cdd3-T27, C-7).
+    const { seeded, jar } = seededRenderOf('givofi-11-xumu978');
+    const stopsOf = (svg: string): string[] => [...svg.matchAll(/stop-color="([^"]*)"/g)].map((m) => m[1] as string);
+    expect(stopsOf(jar)).toEqual(['#C3D8F4', '#6192D1', '#FFD8F4', '#FF92D1']);
+    expect(stopsOf(seeded)).toEqual(stopsOf(jar));
   });
 
   test('re-seeding a rendered document is a no-op (the pass is idempotent)', () => {

@@ -212,3 +212,24 @@ describe('5e/5e-multi — note on link colour dispatch', () => {
     expect(ast.relationships[0]?.linkNoteLine).toBe('blue');
   });
 });
+
+describe('cdd3-T10 (S-11) — descriptive container url/colour (CommandPackageWithUSymbol.java:209-216)', () => {
+  it('captures a rectangle container [[url]] onto Namespace.url (rakuci XYY)', () => {
+    const ast = parse('rectangle " YX " as XYY [[/text/web/test/ced/221:2]] {\nclass AAB\n}');
+    expect(namespace(ast, 'XYY')?.url).toEqual({
+      url: '/text/web/test/ced/221:2',
+      tooltip: '/text/web/test/ced/221:2',
+      label: '/text/web/test/ced/221:2',
+    });
+  });
+
+  it('carries the url onto the leaf an EMPTY container collapses to (rakuci YYY)', () => {
+    const ast = parse('rectangle " YY " as YYY [[/x/222:0]] {\n}');
+    expect(ast.classifiers.find((c) => c.id === 'YYY')?.url?.url).toBe('/x/222:0');
+  });
+
+  it('captures a BACK colour onto Namespace.color (color() = simpleColor(BACK), :132-134)', () => {
+    const ast = parse('node n #pink {\nclass inner\n}');
+    expect(namespace(ast, 'n')?.color).toBe('#pink');
+  });
+});

@@ -27,15 +27,29 @@ import { buildClusterHeaderStereo } from './class-cluster-header.js';
 export function nonEmptyNamespaceIds(ast: ClassDiagramAST): Set<string> {
   const byId = new Map(ast.namespaces.map((n) => [n.id, n] as const));
   const keep = new Set<string>();
+  const seen = new Set<string>();
   for (const ns of ast.namespaces) {
     if (ns.classifiers.length === 0) continue;
     let cur: Namespace | undefined = ns;
-    while (cur !== undefined && !keep.has(cur.id)) {
-      keep.add(cur.id);
+    while (cur !== undefined && !seen.has(cur.id)) {
+      seen.add(cur.id);
+      // cdd3-T9 S-1: a packed group prints no subgraph of its own
+      // (`ClusterDotString.java:83-88`) -- its child's cluster sits
+      // directly in the packed group's parent.
+      if (cur.packed !== true) keep.add(cur.id);
       cur = cur.parentId !== undefined ? byId.get(cur.parentId) : undefined;
     }
   }
   return keep;
+}
+
+/** The nearest ancestor of `ns` that is NOT packed (cdd3-T9 S-1): the
+ *  cluster a packed group's child nests in (`ClusterDotString.java:83-88`
+ *  prints the packed group's children in place of its own subgraph). */
+function unpackedParentId(ns: Namespace, byId: ReadonlyMap<string, Namespace>): string | undefined {
+  let parent = ns.parentId !== undefined ? byId.get(ns.parentId) : undefined;
+  while (parent?.packed === true) parent = parent.parentId !== undefined ? byId.get(parent.parentId) : undefined;
+  return parent?.id;
 }
 
 /**
@@ -59,6 +73,7 @@ export function buildDotClusters(
   if (keep.size === 0) return undefined;
   const kept = ast.namespaces.filter((ns) => keep.has(ns.id));
   const clusterIdByNs = new Map(kept.map((ns, i) => [ns.id, `cluster${i}`] as const));
+  const byId = new Map(ast.namespaces.map((n) => [n.id, n] as const));
   const clusters = kept.map((ns, i) => {
     // A package used as a relationship endpoint carries its point anchor as an
     // extra direct member of its own cluster (svek ClusterDotString).
@@ -94,7 +109,8 @@ export function buildDotClusters(
       cluster.titleTableWidth = dims.width;
       cluster.titleTableHeight = dims.height;
     }
-    const parentClusterId = ns.parentId !== undefined ? clusterIdByNs.get(ns.parentId) : undefined;
+    const parentNsId = unpackedParentId(ns, byId);
+    const parentClusterId = parentNsId !== undefined ? clusterIdByNs.get(parentNsId) : undefined;
     if (parentClusterId !== undefined) cluster.parentId = parentClusterId;
     return cluster;
   });

@@ -147,6 +147,8 @@ function toFlatMemberRows(
     members,
     texts,
     builds: builds.map((b) => ({ atoms: b.runs.map((r) => r.atom), width: b.width, height: b.height })),
+    // One entry per member here (object rows never word-wrap).
+    memberTexts: texts,
   };
 }
 

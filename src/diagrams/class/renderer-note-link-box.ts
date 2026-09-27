@@ -78,7 +78,11 @@ function resolveLinkNoteFill(back: string | undefined, theme: ScaledTheme): { fi
  * defs, needed here so a gradient BACK override's `<linearGradient>` def
  * reaches the document's top-level `<defs>`.
  */
-export function renderLinkNoteBox(note: NoteGeo, colors: LinkNoteColors, theme: ScaledTheme): { body: string; extraDefs: string } {
+export function renderLinkNoteBox(
+  note: NoteGeo,
+  colors: LinkNoteColors,
+  theme: ScaledTheme,
+): { body: string; extraDefs: string } {
   const { fill, def } = resolveLinkNoteFill(colors.back, theme);
   // No fixture in this corpus needs a gradient LINE (stroke) override --
   // named remainder, `paint.ts`'s own `noGradient` doc comment surveys the
@@ -91,7 +95,9 @@ export function renderLinkNoteBox(note: NoteGeo, colors: LinkNoteColors, theme: 
   const strokeWidth = NOTE_STROKE_WIDTH * theme.scaleK;
   const body =
     path(noteBodyPathData(x, y, w, h, f), { fill, stroke, strokeWidth }) +
-    path(opaleCorner({ x, y }, w), { fill, stroke, strokeWidth }) +
+    // cdd3-T34 (E1-8): `theme.scaleK` -- `Opale.ts#opalePolygonLeft`'s own
+    // doc comment (`cornersize` is a RAW, ambient-scaled upstream numeral).
+    path(opaleCorner({ x, y }, w, theme.scaleK), { fill, stroke, strokeWidth }) +
     renderNoteText(note, theme);
   return { body, extraDefs: def ?? '' };
 }

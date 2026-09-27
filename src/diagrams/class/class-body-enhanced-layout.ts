@@ -94,7 +94,9 @@ export interface EnhancedLayoutCtx {
 export interface EnhancedDividerPart {
   readonly kind: 'divider';
   readonly y: number;
-  readonly strokeWidth: number;
+  /** `undefined` = the `'_'` sentinel's class-style LineThickness, resolved
+   *  at render (C-6, `renderer-classifier-colors.ts#classStyleLineThickness`). */
+  readonly strokeWidth: number | undefined;
   /** G2 N44: `UHorizontalLine#getStroke`'s `'.'` case (`new UStroke(1, 2,
    *  1)` -- dashVisible=1, dashSpace=2) -- jar-verified `gojofu-46-xaci340`/
    *  `paroxa-83-lofa387`'s `..` separators (`<line ... stroke-width:1;
@@ -151,13 +153,13 @@ export interface EnhancedBodyGeo {
  *  1); `'.'` -> `new UStroke(1, 2, 1)` (thickness 1, dashed -- G2 N44, see
  *  {@link EnhancedDividerPart.strokeDasharray}'s own doc comment); anything
  *  else (`'_'`, the synthetic block0/trailing-empty sentinel) falls to
- *  `UStroke.withThickness(defaultThickness)` (0.5, `PName.LineThickness`'s
- *  default). `'='`'s OWN double-hline rendering (`UHorizontalLine
+ *  `UStroke.withThickness(defaultThickness)` -- the class style's
+ *  LineThickness, returned `undefined` here and resolved at render (C-6). `'='`'s OWN double-hline rendering (`UHorizontalLine
  *  #drawHLine`'s `if (style == '=') drawSimpleHline(..., y + 2)`) remains
  *  zero corpus reach in this iteration's newly-reached fixtures -- named,
  *  NOT ported (unchanged from N42's original scoping). */
-function separatorStrokeWidth(char: string): number {
-  return char === '-' || char === '=' || char === '.' ? 1 : ELEMENT_DEFAULT_LINE_THICKNESS;
+function separatorStrokeWidth(char: string): number | undefined {
+  return char === '-' || char === '=' || char === '.' ? 1 : undefined;
 }
 
 function separatorStrokeDasharray(char: string): string | undefined {

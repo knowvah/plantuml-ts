@@ -86,6 +86,10 @@ export interface DotInputNode {
    *  in its owning cluster's rank-chain (`ClusterDotString.printRanks`).
    *  Emitter-only. */
   isPort?: true;
+  /** cdd3-T18: the `together { }` block the entity was created in
+   *  (`CucaDiagram#reallyCreateLeaf` -> `setTogether(currentTogether())`,
+   *  `atmp/CucaDiagram.java:232`). A `DotInputGraph.togethers` id. */
+  together?: string;
   /** Only meaningful when `isPort` && `shape:'plaintext'` — the blank
    *  flanking-cell width for the PORT="P" HTML table
    *  (`SvekNode.appendLabelHtmlSpecialForPortHtml`'s `fullWidth`, clamped to
@@ -168,6 +172,15 @@ export interface DotInputEdge {
   id: string;
   from: string;
   to: string;
+  /**
+   * cdd3-T16: `SvekEdge#isInverted` → `Link#isInverted` (`svek/SvekEdge.java
+   * :1148-1150`, `abel/Link.java:145-147,434-435`) — the link was built by
+   * `getInv()` (a `-up-`/`-left-` direction word). Not a DOT attribute: it
+   * decides where `from`'s shape line is declared, `Cluster#printCluster1`
+   * (`./svek-dot-top.ts`). Only `true` is carried; absent ⇒ not inverted.
+   * Set by the class engine only.
+   */
+  inverted?: true;
   attributes?: {
     weight?: number;
     minLen?: number;
@@ -349,6 +362,12 @@ export interface DotInputEdge {
 
 export type { DotInputCluster };
 
+/** cdd3-T18: one `together { }` block — see `DotInputGraph.togethers`. */
+export interface DotInputTogether {
+  readonly id: string;
+  readonly parentId?: string;
+}
+
 export interface DotInputGraph {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
@@ -378,6 +397,19 @@ export interface DotInputGraph {
   /** Cluster structure for Svek-DOT emission. Layout ignores it (clusters are
    *  still resolved post-layout); only the emitter reads it. Emitter-only. */
   clusters?: DotInputCluster[];
+  /** cdd3-T14 (E1-1): `GraphvizImageBuilder#printGroups`'s sibling order
+   *  (`svek/GraphvizImageBuilder.java:408-420`), depth-first -- cluster ids
+   *  and the node ids of EMPTY packages it mutes to `LeafType.EMPTY_PACKAGE`
+   *  and prints in place (`:416-418`). Read only by `svek-dot-sequence.ts`
+   *  to give a muted package its ColorSequence value at its group slot.
+   *  Absent = no muted packages (every engine but class). Emitter-only. */
+  printGroupsOrder?: readonly string[];
+  /** cdd3-T18: every `together { }` block (`abel/Together.java:39-51`), in
+   *  opening order. `parentId` is the enclosing together when the block
+   *  opened directly inside another one (`CucaDiagram#gotoTogether`,
+   *  `atmp/CucaDiagram.java:339-341`). Members point here through
+   *  `DotInputNode.together` / `DotInputCluster.together`. Absent = none. */
+  togethers?: readonly DotInputTogether[];
   /** `!pragma kermor on` (skin/PragmaKey.java:55) — svek's alternate
    *  cluster/note DOT-emission path (svek/ClusterDotStringKermor.java,
    *  Cluster.java:595-609 `printCluster3_forKermor`). Changes the ranksep

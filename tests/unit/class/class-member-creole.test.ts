@@ -653,3 +653,51 @@ describe('resolveMemberAtoms — <sup>/<sub> mute + Sea dy (SI30 T4)', () => {
     }
   });
 });
+
+/**
+ * cdd3-T22 (E1-3 / E2-3): an OpenIconic atom enters the line's `Sea` with
+ * `AtomOpenIconic#getStartingAltitude` = `-3 * factor`
+ * (`AtomOpenIconic.java:72-74`), and every atom's own top is its `Sea`
+ * position (`Sea.java:72-80` doAlign, `:82-89` translateMinYto). Jar values
+ * read off cuzoga-39-tufu259 / jevuvi-65-dipo437 / rideze-59-lizu265.
+ */
+describe('resolveMemberAtoms — OpenIconic altitude through Sea (cdd3-T22)', () => {
+  const REFERENCE = 14 - 14 / 4.5; // the row's baselineOffset (FormulaMeasurer)
+
+  test('<&x{scale=2.25}> row is 28.875 tall and its text sits 14.875 lower (AtomOpenIconic.java:72-74)', () => {
+    const build = resolveMemberAtoms(buildMemberAtoms('<&x{scale=2.25}> someBadField', BASE_FONT), BASE_FONT, measurer);
+    // factor 2.625: icon [-28.875, -7.875], text [-14, 0] -> height 28.875.
+    expect(build.height).toBeCloseTo(28.875, 10);
+    const [vec, txt] = build.atoms as [MemberRenderAtom & { dy?: number }, MemberRenderAtom & { dy?: number }];
+    expect(txt.kind).toBe('text');
+    expect(txt.dy).toBeCloseTo(14.875, 10);
+    // The icon's Sea top is the line top (0): drawn at row baseline + dy.
+    expect(vec.kind).toBe('vector');
+    expect(vec.dy).toBeCloseTo(0 - REFERENCE, 10);
+  });
+
+  test('rideze: <size:24><&ban></size> IntWindows <&thumb-up> -> height 22, text top 8', () => {
+    const build = resolveMemberAtoms(
+      buildMemberAtoms('<size:24><&ban></size> IntWindows <&thumb-up>', BASE_FONT),
+      BASE_FONT,
+      measurer,
+    );
+    expect(build.height).toBeCloseTo(22, 10);
+    const dys = build.atoms.map((a) => (a as { dy?: number }).dy);
+    // ban: factor 2, h 16, altitude -6 -> top 0.
+    expect(dys[0]).toBeCloseTo(0 - REFERENCE, 10);
+    // text: top 22 - 14 = 8, baseline 8 + 14 - 14/4.5.
+    expect(dys[1]).toBeCloseTo(8, 10);
+    // thumb-up: factor 14/12, h 8*factor, altitude -3.5 -> top 22 - 3.5 - 9.3333.
+    expect(dys[2]).toBeCloseTo(22 - 3.5 - (8 * 14) / 12 - REFERENCE, 10);
+  });
+
+  test('a text-dominated line keeps its height and reproduces the legacy icon origin exactly', () => {
+    const build = resolveMemberAtoms(buildMemberAtoms('<&key> field', BASE_FONT), BASE_FONT, measurer);
+    expect(build.height).toBe(14);
+    const vec = build.atoms[0] as { dy?: number; factor: number };
+    // legacy `openIconicOriginY`: baseline + 14/4.5 - 11*factor
+    expect(vec.dy).toBeCloseTo(14 / 4.5 - 11 * vec.factor, 10);
+    expect((build.atoms[1] as { dy?: number }).dy).toBe(0);
+  });
+});

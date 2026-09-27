@@ -10,15 +10,21 @@
  */
 import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
-import { LIKE_CLASS_KINDS, type MeasuredClassifier } from './class-layout-helpers.js';
+import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
-import { resolveStyleStereotypeTags } from './class-stereotype.js';
+import { resolveStyleStereotypeTags, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
-import { PROTECTED_BORDER } from './class-dot-graph.js';
+import { namespaceDrawnInk } from './class-namespace-title-ink.js';
+import {
+  inkBodyFields,
+  badgeFields,
+  protectedBorderField,
+  assocCircleBookkeepingFields,
+} from './class-geo-builders-fields.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
 
 /**
@@ -62,45 +68,6 @@ function contentBox(
     width: measured.width,
     height: measured.height,
   };
-}
-
-/**
- * The two body-state fields `class-ink-box.ts` reads to pick a classifier's
- * ink rule (B5/M6's `emptyFieldPlaceholder`, B35/M40's `bodyInkWidth`) --
- * bundled into one spread so the two `ClassifierGeo` literals below stay
- * under this file's own per-function NLOC cap. Both stay ABSENT when unset,
- * exactly as spreading them individually did; no behavior change.
- */
-function inkBodyFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
-  return {
-    ...(m.emptyFieldPlaceholder === true ? { emptyFieldPlaceholder: true as const } : {}),
-    ...(m.bodyInkWidth !== undefined ? { bodyInkWidth: m.bodyInkWidth } : {}),
-    ...(m.symbolInk !== undefined ? { symbolInk: m.symbolInk } : {}),
-  };
-}
-
-/** CDD B7FU-R2 item (c-b): the badge-decoration fields, shared by both
- *  `buildClassifierGeos`/`degenerateSingleClassifier` call sites below
- *  (identical spread, previously duplicated) -- `mirrors inkBodyFields`'s
- *  own "one shared helper, two callers" precedent. */
-function badgeFields(m: MeasuredClassifier): Partial<ClassifierGeo> {
-  return {
-    ...(m.badgeChar !== undefined ? { badgeChar: m.badgeChar } : {}),
-    ...(m.badgeColor !== undefined ? { badgeColor: m.badgeColor } : {}),
-    ...(m.badgeSpriteImage !== undefined ? { badgeSpriteImage: m.badgeSpriteImage } : {}),
-  };
-}
-
-/** cdd-B10FU: `ClassifierGeo.protectedBorder` -- gated the SAME way
- *  `class-dot-graph.ts#protectedPad` gates the DOT node's own +40
- *  inflation (`protectedIds.has(id) && LIKE_CLASS_KINDS.has(kind)`, that
- *  function's own doc comment). Split out purely to keep
- *  `buildClassifierGeos`'s own NLOC/CCN under the project caps, same
- *  "one shared helper" precedent as {@link inkBodyFields}/{@link badgeFields}. */
-function protectedBorderField(classifier: Classifier, protectedIds: ReadonlySet<string>): Partial<ClassifierGeo> {
-  return protectedIds.has(classifier.id) && LIKE_CLASS_KINDS.has(classifier.kind)
-    ? { protectedBorder: PROTECTED_BORDER }
-    : {};
 }
 
 /** {@link buildClassifierGeos}'s trailing options -- bundled to stay under
@@ -159,25 +126,13 @@ export function buildClassifierGeos(
       ...(classifier.syntheticIdName !== undefined ? { syntheticIdName: classifier.syntheticIdName } : {}),
       ...(classifier.phantomSlot === true ? { phantomSlot: true as const } : {}),
       ...(classifier.noUidSlot === true ? { noUidSlot: true as const } : {}),
-      ...(classifier.subsumedLinkCreationIndex !== undefined
-        ? { subsumedLinkCreationIndex: classifier.subsumedLinkCreationIndex }
-        : {}),
-      ...(classifier.apointNameCreationIndex !== undefined
-        ? { apointNameCreationIndex: classifier.apointNameCreationIndex }
-        : {}),
-      ...(classifier.invertedClassEdgeOldCreationIndex !== undefined
-        ? { invertedClassEdgeOldCreationIndex: classifier.invertedClassEdgeOldCreationIndex }
-        : {}),
-      ...(classifier.repeatCoupleInvisLinkCreationIndex !== undefined
-        ? { repeatCoupleInvisLinkCreationIndex: classifier.repeatCoupleInvisLinkCreationIndex }
-        : {}),
+      ...assocCircleBookkeepingFields(classifier),
       ...(options.hiddenIds.has(classifier.id) ? { hidden: true } : {}),
       ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
       ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
       // mission skin-file-loading (deferred D3 item): see
-      // `ClassifierGeo.shadowing`'s own doc comment (class-geo-types.ts)
-      // for the full jar-verified mechanism and the eligibility gate
-      // `drawsBorderedBox` below reproduces.
+      // `ClassifierGeo.shadowing`'s doc comment (class-geo-types.ts) for the
+      // full jar-verified mechanism the `drawsBorderedBox` gate reproduces.
       ...(options.theme.shadowing !== undefined && options.theme.shadowing > 0 && drawsBorderedBox(classifier, measured)
         ? { shadowing: options.theme.shadowing }
         : {}),
@@ -265,8 +220,8 @@ function namespaceGeoFromBox(
     baselineOffset: getTitleBaselineOffset(measurer, theme, ns.display),
     ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
     ...(inkShape !== undefined ? { inkShape } : {}),
-    // cdd-T12: three carry-only copies of T11's AST fields -- see
-    // `class-geo-namespace-types.ts`'s own doc comments for each consumer.
+    // cdd-T12/cdd3-T21: carry-only copies -- see `class-geo-namespace-types.ts`.
+    ...(ns.stereotype !== undefined ? { stereotypeTags: splitStereotypeStyleTags(ns.stereotype) } : {}),
     ...(ns.usymbol !== undefined ? { usymbol: ns.usymbol } : {}),
     ...(ns.color !== undefined ? { color: ns.color } : {}),
     ...(ns.url !== undefined ? { url: ns.url } : {}),
@@ -310,6 +265,7 @@ export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInp
     const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
     const header = buildClusterHeaderStereo(ns, ast, theme, measurer); // cdd2-T19b: ClusterHeader#getStereo
     if (header !== undefined) geo.clusterHeaderStereo = header;
+    Object.assign(geo, namespaceDrawnInk(geo, theme, measurer)); // cdd3-T31: E1-2/E2-8, E1-5
     namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
   return namespaces;

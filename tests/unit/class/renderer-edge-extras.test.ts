@@ -232,13 +232,11 @@ describe('renderEdgeConstraint', () => {
 // <text x="125.618" y="104.032" textLength="21.613">0..n</text>
 // <text x="151.23" y="104.032" textLength="31.038">items</text>.
 describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, after that end's quantifier", () => {
-  const CARDINALITY_COLOR = '#000';
-
   it('draws quantifierLines only when roleLines is absent — regression guard', () => {
     const geo = makeEdgeGeo({
       quantifierLines: [[{ text: '1', x: 1, y: 2, width: 3 }], [{ text: '0..n', x: 4, y: 5, width: 6 }]],
     });
-    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme);
     expect(parts).toHaveLength(2);
     expect(parts.join('')).toContain('>1<');
     expect(parts.join('')).toContain('>0..n<');
@@ -255,7 +253,7 @@ describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, afte
         [{ text: 'items', x: 151.23, y: 104.032, width: 31.038 }],
       ],
     });
-    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme);
     expect(parts).toHaveLength(4);
     const texts = parts.map((p) => /<text[^>]*>([^<]*)<\/text>/.exec(p)?.[1]);
     expect(texts).toEqual(['owner which is very long', '1', '0..n', 'items']);
@@ -273,7 +271,7 @@ describe("renderEdgeCardinalityLabels — T17 (M8) role lines draw per-end, afte
       ],
       roleLines: [[{ text: '1', x: 47.429, y: 73.253, width: 7.231 }], []],
     });
-    const parts = renderEdgeCardinalityLabels(geo, theme, CARDINALITY_COLOR);
+    const parts = renderEdgeCardinalityLabels(geo, theme);
     expect(parts).toHaveLength(3);
   });
 });

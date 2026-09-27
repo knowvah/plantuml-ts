@@ -18,6 +18,11 @@ function svgWidth(body: string[]): string | undefined {
   return /<svg[^>]*\bwidth="([^"]+)"/.exec(svg)?.[1];
 }
 
+function svgHeight(body: string[]): string | undefined {
+  const svg = renderSync(['@startuml', ...body, '@enduml'].join('\n'), { measurer: new WidthTableMeasurer() });
+  return /<svg[^>]*\bheight="([^"]+)"/.exec(svg)?.[1];
+}
+
 const HEADER = {
   circleWidth: 26,
   circleHeight: 32,
@@ -51,7 +56,7 @@ describe('headerInkReservation — HeaderLayout#drawU placement (HeaderLayout.ja
 
 describe('compartmentReservationWidth — MethodsOrFieldsArea.java:83-86', () => {
   it('reserves the 12px margin for an EMPTY shown compartment', () => {
-    expect(compartmentReservationWidth({ members: [], texts: [], builds: [] }, false, 14)).toBe(12);
+    expect(compartmentReservationWidth({ members: [], texts: [], builds: [], memberTexts: [] }, false, 14)).toBe(12);
   });
 });
 
@@ -69,6 +74,38 @@ describe('Q-11: a widened class box is bounded by its rect corner x + w - 1', ()
     ];
     expect(svgWidth(body)).toBe('238px');
   });
+
+  it(
+    'jubobo-22-fapu993: `hide members` -> body TextBlockUtils.empty(0,0) ' +
+      '(BodierLikeClassOrObject.java:249-250), jar canvas 233x153',
+    () => {
+      const body = [
+        'class Dummy1 {',
+        '  +thisIsALongmethod1()',
+        '  +anotherMetheod()',
+        '',
+        '  +String a1',
+        '  +Date d;',
+        '}',
+        '',
+        'class Dummy2 <<even>> {',
+        '  +String a1',
+        '  +Date d;',
+        '}',
+        '',
+        'class Dummy3 {',
+        '  +thisIsALongmethod1()',
+        '  +anotherMetheod()',
+        '}',
+        '',
+        'class Dummy4 <<even>>',
+        '',
+        'hide members',
+      ];
+      expect(svgWidth(body)).toBe('233px');
+      expect(svgHeight(body)).toBe('153px');
+    },
+  );
 
   it('rilali-81-gifu188: jar width 372', () => {
     const body = ['class top', 'class class2', 'class class3', 'class class4', ''];

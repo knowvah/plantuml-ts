@@ -27,10 +27,15 @@ import { nonEmptyNamespaceIds, buildDotClusters } from './class-dot-clusters.js'
 import { hideTextShieldMarginsByEntity } from './class-hidetext-shield.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
-import { dotEdgeRunsReversed, getOrderedLinks } from './class-dot-edge-order.js';
+import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+// cdd3-T16: re-exported so `layout.ts` (at its 500-line cap) reaches it
+// through an import it already has.
+export { inNodeMapOrder } from './class-node-map-order.js';
 import { buildDotEdges } from './class-dot-edges.js';
+import { applyClassLinkOrder, creationOrderedDotParts, printGroupsOrderOf } from './class-creation-order.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { assembleDotInputGraph } from './class-dot-graph-assembly.js';
+import { applyClassTogethers } from './class-dot-together.js';
 
 export interface DotGraphParts {
   dotGraph: DotInputGraph;
@@ -336,7 +341,9 @@ function buildDotNodesAndEdges(
   // takes for attached/freestanding notes -- sizes a `note on link`-merged
   // label (`rel.linkNote`).
   const noteCtx: NoteBoxContext = { theme, ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}) };
-  // Magma standalone-chaining edges appended after the real relationship edges.
+  // Magma standalone-chaining edges appended after the real relationship
+  // edges; `class-creation-order.ts` later slots the note links in between
+  // (`ClassDiagram.java:87` adds magma last).
   const dotEdges = [
     ...buildDotEdges(ast, anchors, {
       font: labelFont,
@@ -414,17 +421,26 @@ export function buildDotGraph(
   theme: Theme,
   measurer: StringMeasurer,
 ): DotGraphParts {
-  // SB2: `CucaDiagramFileMakerSvek.java:90-96 getOrderedLinks`, applied
-  // ONCE here, ahead of every `ast.relationships` reader below --
-  // `buildDotNodesAndEdges`/`computeSwappedEdges`, and (same `ast` object
-  // reference) `layout.ts`'s later `buildEdgeGeos(effAst, ...)` call.
-  // `GraphvizImageBuilder.java:229` iterates ONE reordered list for both
-  // DOT emission and the SVG `<g class="link">` draw loop; reassigning
-  // here is the "mutate the shared input for downstream layout.ts" pattern
-  // `applySameClassWidthFloor` already uses below. Dense uid re-numbering
-  // is unaffected -- it sorts by `creationIndex` (parse-time, immutable),
-  // never array position (D7, decisions.md).
-  ast.relationships = getOrderedLinks(ast.relationships);
+  // cdd3-T14 (C-14): the note groups are built FIRST -- their links belong
+  // to the same `getLinks()` list as the relationships. `anchors` is only a
+  // package-endpoint lookup here (its Map order reaches clustered anchor
+  // nodes alone, which emit per cluster), so computing it ahead of the
+  // re-order below changes nothing it feeds. `anchors` also routes a
+  // `note <pos> of <package>` target to that package's `zaent-*` point
+  // anchor (packageEndpointAnchors scans notes too).
+  const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
+  const noteParts = buildNoteGraphParts(ast.notes, theme, measurer, anchors, ast.sprites);
+  // SB2 + cdd3-T14: `CucaDiagramFileMakerSvek.java:90-96 getOrderedLinks`
+  // over upstream's whole `getLinks()` list -- relationships AND note links
+  // in `addLink` order (`class-link-order.ts`) -- applied ONCE here, ahead
+  // of every `ast.relationships` reader below: `buildDotNodesAndEdges`/
+  // `computeSwappedEdges`, and (same `ast` object reference) `layout.ts`'s
+  // later `buildEdgeGeos(effAst, ...)` call. `GraphvizImageBuilder.java:229`
+  // iterates ONE reordered list for both DOT emission and the SVG
+  // `<g class="link">` draw loop; each note group's slot in it rides on the
+  // group (`NoteGroup.linkSlot`) to both. Dense uid re-numbering is
+  // unaffected -- it sorts by `creationIndex` (D7, decisions.md).
+  applyClassLinkOrder(ast, noteParts.groups);
   // A2s F-D mechanism B7: cross-class width floor, applied at the
   // pre-DOT aggregation point (mirrors `GraphvizImageBuilder
   // #printEntityInternal`'s "set paramSameClassWidth before building
@@ -439,7 +455,6 @@ export function buildDotGraph(
   // (`Kal.java:93-99`), which inherits the class font.
   const kals = computeKals(ast.relationships, { family: theme.fontFamily, size: theme.fontSize }, measurer);
   applyKalWidthFloor(kals, ast.classifiers, measuredMap);
-  const anchors = packageEndpointAnchors(ast, nonEmptyNamespaceIds(ast));
   const { dotNodes, dotEdges, sametailByRelIndex, protectedIds } = buildDotNodesAndEdges(
     ast,
     measuredMap,
@@ -449,16 +464,15 @@ export function buildDotGraph(
   );
   const swappedEdges = computeSwappedEdges(ast);
 
-  // Notes lay out as their own nodes + connector edges (Svek note-on-entity).
-  // `anchors` also routes a `note <pos> of <package>` target to that
-  // package's `zaent-*` point anchor (packageEndpointAnchors scans notes too).
-  const noteParts = buildNoteGraphParts(ast.notes, theme, measurer, anchors, ast.sprites);
-  dotNodes.push(...noteParts.nodes);
-  dotEdges.push(...noteParts.edges);
+  // Notes lay out as their own nodes + connector edges (Svek note-on-entity),
+  // in creation order among the classifiers (cdd3-T14, `class-creation-order.ts`).
+  const ordered = creationOrderedDotParts(ast, { dotNodes, dotEdges }, noteParts, ast.relationships.length);
 
   const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
-  const dotGraph = assembleDotInputGraph(ast, theme, dotNodes, dotEdges, clusterParts);
+  const dotGraph = assembleDotInputGraph(ast, theme, ordered.nodes, ordered.edges, clusterParts);
+  dotGraph.printGroupsOrder = printGroupsOrderOf(ast, clusterParts?.clusterIdByNs);
 
   const clusterIdByNs = clusterParts?.clusterIdByNs ?? new Map<string, string>();
+  applyClassTogethers(dotGraph, ast, clusterIdByNs);
   return { dotGraph, swappedEdges, noteParts, anchors, clusterIdByNs, kals, sametailByRelIndex, protectedIds };
 }

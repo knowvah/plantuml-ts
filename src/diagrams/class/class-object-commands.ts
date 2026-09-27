@@ -228,7 +228,6 @@ function applyObjectDecl(state: ParseState, match: RegExpExecArray): void {
     activeNamespace: state.activeNamespace,
     name: rawId,
     display: rawDisplay,
-    intermediatePackages: state.intermediatePackages,
     classifiers: state.ast.classifiers,
     reuseExistingChild: true,
   });

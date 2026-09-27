@@ -5,8 +5,11 @@
  */
 
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 import type { ClassDiagramAST } from './ast.js';
 import type { PendingNote, TipGroupSeenSet } from './class-notes.js';
+import type { TogetherEvent, TogetherFrame } from './class-together.js';
 
 export interface ParseState {
   ast: ClassDiagramAST;
@@ -84,8 +87,9 @@ export interface ParseState {
    * or `set separator` overrides it, and `none` (→ null) disables splitting.
    */
   namespaceSeparator: string | null;
-  /** `!pragma useIntermediatePackages false` collapses a dotted id to one
-   *  namespace instead of a nested chain (default true). */
+  /** `!pragma useIntermediatePackages` (default true). False packs every
+   *  single-child group at end of parse (`class-namespace-pack.ts`,
+   *  `ClassDiagram.java:84-85`); resolution is unaffected. */
   intermediatePackages: boolean;
   /**
    * Namespace id → usymbol for *descriptive* containers (`rectangle`/`component`/
@@ -112,7 +116,14 @@ export interface ParseState {
    * together instead of the enclosing namespace — see closeBraceScope
    * (class-container.ts).
    */
-  togetherStack: (string | null)[];
+  togetherStack: TogetherFrame[];
+  /**
+   * cdd3-T18: `currentTogether()` before each dispatched line, recorded only
+   * when it changes: `at` is `creationCounter.value` at that point. An entity
+   * whose `creationIndex` follows an entry was created under its `id`
+   * (`class-together.ts#resolveTogetherMembers`). Reset on `newpage`.
+   */
+  togetherEvents: TogetherEvent[];
   /**
    * The most recently created entity's id — classifier OR note (upstream
    * `CucaDiagram#lastEntity`, set unconditionally by every `reallyCreateLeaf`
@@ -189,6 +200,17 @@ export interface ParseState {
    * display text until the closing quote/`]` line is reached.
    */
   pendingMultilineElement?: PendingMultilineElement | undefined;
+  /**
+   * C-3 (cdd3-T23): `ParseOptions.assetStore`'s two per-diagram-parse
+   * constant halves, resolved ONCE at `parseClass` entry (`index.ts#parse`'s
+   * own doc comment -- `sprite $N jar:<path>` resolves during the COMMAND,
+   * `CommandSpriteFile.java:108-112`). Carried on `state`, not passed as a
+   * loop param, because `startNewPage` must rebuild `ast.sprites` with the
+   * SAME store for every page of a `newpage` document -- these are an
+   * ENVIRONMENT the whole parse runs in, not per-page AST data.
+   */
+  internalSprites?: InternalSpriteStore | undefined;
+  internalEmoji?: InternalEmojiStore | undefined;
 }
 
 /** One open TYPE0 (`terminator: 'quote'`) or TYPE1 (`terminator: 'bracket'`)

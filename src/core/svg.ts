@@ -223,7 +223,7 @@ export function resolvePaint(p: Paint | undefined): {
   const resolved = paintToSvg(p);
   return {
     value: shortenColor(resolved.fill),
-    def: shortenStopColors(resolved.def ?? ''),
+    def: resolved.def ?? '',
   };
 }
 
@@ -232,26 +232,6 @@ export function resolvePaint(p: Paint | undefined): {
  *  ({@link SvgAttrsPaint}) carry non-color values too (`transform`, ids),
  *  which must never be rewritten. */
 const COLOR_ATTRS: ReadonlySet<string> = new Set(['fill', 'stroke', 'stop-color', 'color']);
-
-// One `<stop stop-color="…">` value inside a `paint.ts#paintToSvg` gradient
-// def. Built from a string (not a regex literal) — the complexity checker
-// miscounts regex literals containing `<`/`>` (same workaround as paint.ts).
-const STOP_COLOR_RE = new RegExp('stop-color="([^"]*)"', 'g');
-
-/**
- * Rule 2 at the gradient stops (upstream shortens both `stop-color`s in
- * `createSvgGradient`). The def is built by `paint.ts#paintToSvg`, whose
- * `<stop>` writer is the natural home for this; applied here instead so the
- * rule lands with the rest of the emitter's rule-2 sites, and scoped exactly
- * to that one producer's shape — a resolved color never contains a `"`.
- * @see .../klimt/drawing/svg/SvgGraphics.java#createSvgGradient
- */
-function shortenStopColors(def: string): string {
-  if (def === '') return '';
-  // SI-saea T3a/D2: routed through `attrs()` (the seam) rather than a
-  // template literal; `.trim()` drops `attrs()`'s leading separator space.
-  return def.replace(STOP_COLOR_RE, (_m, color: string) => attrs([['stop-color', color]]).trim());
-}
 
 /**
  * Resolve every {@link Paint} in a free-form {@link SvgAttrsPaint} record to a

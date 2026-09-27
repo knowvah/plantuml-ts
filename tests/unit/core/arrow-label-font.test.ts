@@ -3,6 +3,7 @@ import {
   ARROW_LABEL_DEFAULT_COLOR,
   resolveArrowLabelFont,
   resolveCardinalityFontColor,
+  resolveCardinalityFont,
 } from '../../../src/core/arrow-label-font.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
@@ -131,5 +132,73 @@ describe('resolveArrowLabelFont colour + resolveCardinalityFontColor (SI26 T1)',
     const theme: Theme = { ...defaultTheme, cardinalityFontColor: '#FF0000' };
     expect(resolveCardinalityFontColor(theme)).toBe('#FF0000');
     expect(resolveArrowLabelFont(theme).color).toBe('#000000');
+  });
+});
+
+// T11 (cdd3, Q-5): `resolveCardinalityFont` -- the FULL cardinality
+// `FontConfiguration` (`GraphvizImageBuilder.java:236-237`), jar-verified
+// against camuna-58-veca254/nafiki-56-jixu680's own `<style>` block
+// (`arrow { cardinality { FontColor red; FontSize 10; FontStyle italic } } }`).
+describe('resolveCardinalityFont (T11, Q-5)', () => {
+  it('with no override resolves to EXACTLY the arrow label font (size 13, sans-serif, #000000)', () => {
+    expect(resolveCardinalityFont(defaultTheme)).toEqual({
+      family: defaultTheme.fontFamily,
+      size: 13,
+      color: '#000000',
+    });
+  });
+
+  it('camuna-58-veca254: FontColor red, FontSize 10, FontStyle italic override the main arrow label independently', () => {
+    const theme: Theme = {
+      ...defaultTheme,
+      cardinalityFontColor: '#FF0000',
+      cardinalityFontSize: 10,
+      cardinalityFontStyle: 'italic',
+      colors: {
+        ...defaultTheme.colors,
+        graph: { ...defaultTheme.colors.graph, arrowFontColor: '#0000FF', arrowFontSize: 14, arrowFontStyle: 'bold' },
+      },
+    };
+    expect(resolveCardinalityFont(theme)).toEqual({
+      family: defaultTheme.fontFamily,
+      size: 10,
+      style: 'italic',
+      color: '#FF0000',
+    });
+    // the main arrow label stays at its OWN, separately-overridden font.
+    expect(resolveArrowLabelFont(theme)).toEqual({
+      family: defaultTheme.fontFamily,
+      size: 14,
+      weight: 'bold',
+      color: '#0000FF',
+    });
+  });
+
+  it('an absent cardinalityFontStyle inherits the arrow label’s own bold/italic', () => {
+    const theme: Theme = {
+      ...defaultTheme,
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, arrowFontStyle: 'bold italic' } },
+    };
+    expect(resolveCardinalityFont(theme).weight).toBe('bold');
+    expect(resolveCardinalityFont(theme).style).toBe('italic');
+  });
+
+  // `defaultTheme.cardinalityFontFamily`/`.cardinalityFontSize` are ALWAYS
+  // set (`theme.ts:247-248`, "defaultTheme/darkTheme always set both"), so
+  // this fallback is only reachable for a hand-built Theme that genuinely
+  // omits them -- the same contract `resolveCardinalityFontColor`'s D5
+  // test above exercises for the colour field.
+  it('cardinalityFontFamily/Size fall through to the arrow label’s own resolved values when genuinely unset', () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { cardinalityFontFamily, cardinalityFontSize, ...base } = defaultTheme;
+    const theme: Theme = {
+      ...base,
+      colors: {
+        ...defaultTheme.colors,
+        graph: { ...defaultTheme.colors.graph, arrowFontFamily: 'Courier', arrowFontSize: 20 },
+      },
+    };
+    expect(resolveCardinalityFont(theme).family).toBe('Courier');
+    expect(resolveCardinalityFont(theme).size).toBe(20);
   });
 });

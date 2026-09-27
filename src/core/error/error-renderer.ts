@@ -41,23 +41,24 @@ import type { ShellFragment } from '../klimt/document-shell.js';
 import type { PSystemError } from './PSystemError.js';
 import { PSystemWelcome } from './PSystemWelcome.js';
 import type { PSystemUnsupported } from './PSystemUnsupported.js';
+import { renderErrorPageOnly } from './error-page-exact.js';
 
 // --- Colors (klimt/color/HColors.java) ---------------------------------
 
-const BLACK = '#000000';
+export const BLACK = '#000000';
 const WHITE = '#FFFFFF';
-const RED = '#FF0000';
+export const RED = '#FF0000';
 /** `HColors.MY_GREEN` — the error diagram's foreground. */
-const MY_GREEN = '#33FF02';
+export const MY_GREEN = '#33FF02';
 
 // --- Fonts (klimt/shape/GraphicStrings.java) ----------------------------
 
-const SANS = 'sans-serif';
+export const SANS = 'sans-serif';
 const MONO = 'monospace';
 /** `GraphicStrings.sansSerif12` — Welcome / Unsupported text, and the banner. */
-const SIZE_12 = 12;
+export const SIZE_12 = 12;
 /** `GraphicStrings.sansSerif14` — every line of the error block proper. */
-const SIZE_14 = 14;
+export const SIZE_14 = 14;
 
 // --- Metrics ------------------------------------------------------------
 //
@@ -73,20 +74,32 @@ const LINE_ADVANCE_RATIO = 14.1328 / 12;
 const ASCENT_RATIO = 11.6016 / 12;
 
 /** `GraphicStrings#margin` */
-const ERROR_PAGE_MARGIN = 5;
+export const ERROR_PAGE_MARGIN = 5;
 
 /** `PSystemError#getGraphicalFormatted`: `withMargin(…, 1, 1, 1, 4)` on the
  *  `[From … ]` band — left 1, right 1, top 1, bottom 4. */
-const BAND_PAD_X = 1;
-const BAND_PAD_TOP = 1;
-const BAND_PAD_BOTTOM = 4;
+export const BAND_PAD_X = 1;
+export const BAND_PAD_TOP = 1;
+export const BAND_PAD_BOTTOM = 4;
+
+/** `PSystemError#getGraphicalFormatted`: `result4 = withMargin(…, 0, 2, 0,
+ *  8)` on the version banner — left 0, right 2, top 0, bottom 8. */
+export const HEADER_PAD_RIGHT = 2;
+export const HEADER_PAD_BOTTOM = 8;
 
 /** A run of characters sharing one font and color. */
-interface Run {
+export interface Run {
   readonly content: string;
   readonly font: FontSpec;
   readonly fill: string;
   readonly decoration?: string;
+  /** `SvgGraphics#text`'s `textLength` (`x+textLength` measured on the
+   *  EMITTED — leading/trailing-whitespace-trimmed — content, per
+   *  `DriverTextSvg.java:114-127`). Only the exact-metrics error-page path
+   *  below sets this; `blackOnWhite`'s Creole runs leave it `undefined`
+   *  (unchanged — `svg-shapes.ts#text`'s own `textLengthOf` then omits the
+   *  attribute exactly as before). */
+  readonly textLength?: number;
 }
 
 /** One rendered line: its runs, and optionally a color band drawn behind it. */
@@ -192,10 +205,24 @@ function blackOnWhite(strings: readonly string[]): Block {
 
 /**
  * The error block itself, in upstream's assembly order (`result4` on top, then
- * `result0`…`result3`).
+ * `result0`…`result3`) — built through the SAME fitted-ratio `Block`/`Line`
+ * model `blackOnWhite` uses (`lineAdvance`/`lineAscent`, no `textLength`, no
+ * `(int)(x+1)` canvas growth). C-17 (`plans/class-divergence-drive-3/
+ * diagnosis/C.md` § luzive/sadamo) proved that model wrong for THIS
+ * composition — upstream builds it from `TextBlockRaw`/`TextBlockVertical`/
+ * `TextBlockMarged`, under which the deterministic `StringBounder`'s
+ * `height === size` invariant applies directly, not `blackOnWhite`'s AWT-
+ * fitted line spacing (`Display`/Creole's own, different rule — unproven
+ * either way, out of C-17's fixture set). `renderErrorPageOnly` below is the
+ * faithful replacement and is what every fixture with `getTotalLineCountLessThan5()
+ * === false` now renders through; this function survives ONLY for the rare
+ * Welcome-stacked-on-error path (`addWelcome`, source < 5 lines), which no
+ * cached fixture in this mission's assigned set exercises and which this
+ * task therefore does not touch, to avoid an unverified blast radius into
+ * `blackOnWhite`/Welcome geometry.
  * @see ~/git/plantuml/.../error/PSystemError.java#getGraphicalFormatted
  */
-function errorBlock(system: PSystemError): Block {
+function errorBlockLegacy(system: PSystemError): Block {
   /** `fc4` — the version banner: green, bold, italic, size 12. */
   const fc4: FontSpec = { family: SANS, size: SIZE_12, weight: 'bold', style: 'italic' };
   /** `fc0` — the `[From … ]` stack: black on the green band, bold, size 14. */
@@ -247,7 +274,7 @@ function errorBlock(system: PSystemError): Block {
  * so the omission has to happen HERE, at emission, not by relying on
  * `text()`'s own defaults.
  */
-function drawRun(run: Run, x: number, baseline: number): string {
+export function drawRun(run: Run, x: number, baseline: number): string {
   return text(x, baseline, run.content, {
     fontFamily: run.font.family,
     fontSize: run.font.size,
@@ -255,6 +282,7 @@ function drawRun(run: Run, x: number, baseline: number): string {
     ...(run.font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
     fill: run.fill,
     ...(run.decoration === undefined ? {} : { textDecoration: run.decoration }),
+    ...(run.textLength === undefined ? {} : { textLength: run.textLength }),
   });
 }
 
@@ -358,10 +386,13 @@ function drawBlocks(blocks: readonly Block[], measurer: StringMeasurer): string 
  * @see ~/git/plantuml/.../error/PSystemError.java#getTextBlock
  */
 export function renderPSystemError(system: PSystemError, measurer: StringMeasurer): string {
-  const blocks: Block[] = [];
-  if (system.getTotalLineCountLessThan5()) blocks.push(blackOnWhite(new PSystemWelcome().getStrings()));
+  // No Welcome block: the common case (every source ≥ 5 lines), and the ONLY
+  // one this mission's C-17 fix targets — see `error-page-exact.ts`'s own
+  // header comment for why the rare combo below still uses the OLDER,
+  // fitted-ratio path.
+  if (!system.getTotalLineCountLessThan5()) return renderErrorPageOnly(system, measurer);
 
-  blocks.push(errorBlock(system));
+  const blocks: Block[] = [blackOnWhite(new PSystemWelcome().getStrings()), errorBlockLegacy(system)];
   return drawBlocks(blocks, measurer);
 }
 

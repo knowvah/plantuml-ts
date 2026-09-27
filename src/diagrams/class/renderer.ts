@@ -5,7 +5,13 @@
  * No DOM, no async.
  */
 
-import { sliceClassGeometryPage, type ClassGeometry, type ClassifierGeo, type NamespaceGeo } from './layout.js';
+import {
+  sliceClassGeometryPage,
+  type ClassGeometry,
+  type ClassifierGeo,
+  type NamespaceGeo,
+  type EdgeGeo,
+} from './layout.js';
 import { classifierLeaves, noteLeaves, isNoteGeo } from './class-geo-types.js';
 import { resolveTips } from './note-tips-resolve.js';
 import { renderOneNote, type NoteRenderContext, type NoteConnector } from './renderer-note-dispatch.js';
@@ -18,6 +24,7 @@ import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrom
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
+import { renderEmptyPackageLeaf } from './renderer-empty-package-leaf.js';
 import {
   wrapCluster,
   wrapEntity,
@@ -30,11 +37,10 @@ import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
   renderNamespaceRect,
-  renderEmptyPackageIcon,
   namespaceFill,
-  titleFontColor,
   PACKAGE_ROUND_CORNER,
 } from './class-namespace-shape.js';
+import { DEFAULT_GROUP_FONT_COLOR } from './class-package-style.js';
 import { renderNamespaceUSymbol } from './class-namespace-usymbol-shape.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
@@ -97,7 +103,10 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
       // at scale=1 (no SvgOption.scale threading, class-namespace-usymbol-
       // shape.ts's own citation) -- this literal needs its own scaleK factor.
       roundCorner: (theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER) * theme.scaleK,
-      fontColor: titleFontColor(theme),
+      // cdd3-T21: a USymbol group's title style is `{..., <usymbol>,
+      // composite, title}` (`ClusterHeader.java:150-153`) -- no `package_`,
+      // so `packageFontColor` never reaches it (jar gigoru-88: `#000`).
+      fontColor: DEFAULT_GROUP_FONT_COLOR,
     });
     if (drawn !== undefined) return drawn;
   }
@@ -106,43 +115,13 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
     : renderNamespaceFolder(geo, theme, measurer);
 }
 
-/**
- * G2 N33: a collapsed-empty `package`/`namespace` leaf (`ClassifierGeo
- * .folderTab` present, `class-magma.ts#isCollapsedGroup`'s doc comment)
- * draws its OWN small `EntityImageEmptyPackage` folder-tab icon -- the
- * SAME `renderNamespaceFolder`/`USymbolFolder#asBig` shape a non-empty
- * package's CLUSTER wrapper uses, just sized by
- * `measureEmptyPackageLeafDim`'s smaller formula instead of the cluster's
- * own content-driven dimension. Reuses `renderNamespaceFolder` by
- * constructing a `NamespaceGeo`-shaped view over the classifier's own
- * (DOT-driven) `x`/`y`/`width`/`height` plus the pre-computed `folderTab`
- * fields -- `id`/`creationIndex` are irrelevant to rendering (unused by
- * `renderNamespaceFolder`) so are filled with placeholders.
- */
-function renderEmptyPackageLeaf(geo: ClassifierGeo, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
-  const folderTab = geo.folderTab;
-  if (folderTab === undefined) return '';
-  const label = geo.rows[0]?.text ?? geo.id;
-  const nsGeo: NamespaceGeo = {
-    id: geo.id,
-    x: geo.x,
-    y: geo.y,
-    width: geo.width,
-    height: geo.height,
-    label,
-    wtitle: folderTab.wtitle,
-    htitle: folderTab.htitle,
-    baselineOffset: folderTab.baselineOffset,
-  };
-  return renderEmptyPackageIcon(nsGeo, theme, measurer);
-}
-
 // ---------------------------------------------------------------------------
 // Edge
 // ---------------------------------------------------------------------------
 
 import { renderEdge } from './renderer-edge.js';
 import { renderNoteConnectorLink } from './renderer-note-connector.js';
+import { interleaveNoteLinks, relIndexOfDotEdgeId } from './class-link-order.js';
 
 /**
  * Render a class diagram geometry into an SVG string.
@@ -400,7 +379,14 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     }
   }
   const linkIds = new Set<string>();
-  geo.edges.forEach((edge, i) => {
+  // cdd3-T33 (C-11): `SvekNode.getRectangleArea()`, keyed by classifier id
+  // -- `getExtremitySimplier`'s `nodeContact.getRectangleArea()
+  // .getClosestSide(center)` lookup (`SvekEdge.java:544-546`) resolves
+  // against this map, via `renderer-arrowhead-contact.ts#resolveContactSide`.
+  // `classifiers` is already SCALED (same `scaleClassGeometry` pass as
+  // `geo.edges`), matching `EdgeGeo.points`' coordinate space.
+  const contactRects = new Map(classifiers.map((c) => [c.id, c]));
+  const drawEdge = (edge: EdgeGeo, i: number): void => {
     // G2/N16 Kind B: a freestanding note's connector, consumed by the
     // note's own Opale outline -- see `EdgeGeo.consumedByOpaleNote`'s doc
     // comment for why this edge stays IN `geo.edges` (uid numbering) but
@@ -408,7 +394,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     if (edge.consumedByOpaleNote === true) return;
     if (hiddenClassifierIds.has(edge.from) || hiddenClassifierIds.has(edge.to)) return;
     if (edge.hidden === true) return; // cdd-T7 A2a/M12: `-[hidden]-` (SvekEdge.java:835-836)
-    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer });
+    const rendered = renderEdge(edge, theme, { ids: linkIds, syntheticNames, measurer: geo.measurer, contactRects });
     extraDefs += rendered.extraDefs;
     children.push(
       wrapLink(
@@ -424,23 +410,26 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
         rendered.body,
       ),
     );
-  });
+  };
 
-  // cdd-T9 (E6 mechanism a): each note's connector, as its own `<g
-  // class="link">` via the SAME `wrapLink` call an ordinary edge gets above
-  // (`GraphvizImageBuilder.java:229`'s single draw loop over
-  // `dotData.getLinks()`, which upstream mints the note-host connector into
-  // as a real `Link`). Appended AFTER the real edges, matching upstream's
-  // OWN draw order for every AC fixture (fogexa/pecabi/sanixi/zepeki carry
-  // ZERO other edges); a diagram mixing note connectors with real
-  // relationships needs `Bibliotekon#addLine`'s `sameConnections` insertion
-  // (`Bibliotekon.java:83-107`) -- untouched, a named residual
-  // (`.agent-notes/cdd-T9.md`). cdd-T9b: style/id/entity-order/uid now fully
-  // resolved by `renderer-note-connector.ts#renderNoteConnectorLink` -- see
-  // that function's own doc comment for why it must run AFTER `linkIds` is
-  // populated above.
-  for (const connector of noteConnectors) {
-    children.push(renderNoteConnectorLink(connector, theme, uidPlan, linkIds));
+  // cdd-T9 (E6 mechanism a): each note's connector is its own `<g
+  // class="link">` via the SAME `wrapLink` call an ordinary edge gets
+  // (`renderer-note-connector.ts#renderNoteConnectorLink`). cdd3-T14 (C-14):
+  // drawn at its OWN slot in upstream's one `getLinks()` walk
+  // (`GraphvizImageBuilder.java:229`, `Bibliotekon#allLines`), not after
+  // every relationship -- `NoteGeo.linkSlot`, merged by the SAME
+  // `interleaveNoteLinks` the DOT edge list goes through
+  // (`class-creation-order.ts`), so draw order, the shared `linkIds`
+  // de-dup sequence and DOT order agree.
+  const indexedEdges = geo.edges.map((edge, i) => ({ edge, i }));
+  for (const item of interleaveNoteLinks(
+    indexedEdges,
+    ({ edge }) => relIndexOfDotEdgeId(edge.id),
+    noteConnectors,
+    (connector) => connector.note.linkSlot,
+  )) {
+    if ('rel' in item) drawEdge(item.rel.edge, item.rel.i);
+    else children.push(renderNoteConnectorLink(item.note, theme, uidPlan, linkIds));
   }
 
   // SI14 T4 (ADR-2): de-dup usecase/actor fragment defs (e.g. gradients)

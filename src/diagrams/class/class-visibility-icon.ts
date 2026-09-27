@@ -255,12 +255,22 @@ function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: stri
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square. */
+/**
+ * `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square --
+ * cdd3-T34 (E1-8): `x`/`y`/`ctx.size` already carry `k` (scaled row
+ * position, `iconSizeOf(theme) * k`), but the RAW local constants `2`/`4`
+ * do not -- upstream draws this whole shape inside ONE ambient
+ * scale-wrapped `UGraphic` (`TextBlockExporter.java:205-208`), so every
+ * local numeral scales too, not just `size`. `ctx.size - 4` would leave
+ * the raw `4` unscaled (`(rawSize*k) - 4` instead of `(rawSize - 4) * k`);
+ * multiplying the local `2`/`4` by `ctx.k` reproduces the single ambient
+ * transform.
+ */
 function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 4;
+  const s = ctx.size - 4 * ctx.k;
   return `<rect${attrs([
-    ['x', x + 2],
-    ['y', y + 2],
+    ['x', x + 2 * ctx.k],
+    ['y', y + 2 * ctx.k],
     ['width', s],
     ['height', s],
     ['fill', ctx.fill],
@@ -268,12 +278,13 @@ function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter. */
+/** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
-  const r = (ctx.size - 4) / 2;
+  const r = (ctx.size - 4 * ctx.k) / 2;
   return `<ellipse${attrs([
-    ['cx', x + 2 + r],
-    ['cy', y + 2 + r],
+    ['cx', x + 2 * ctx.k + r],
+    ['cy', y + 2 * ctx.k + r],
     ['rx', r],
     ['ry', r],
     ['fill', ctx.fill],
@@ -281,10 +292,11 @@ function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
   ])}/>`;
 }
 
-/** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y). */
+/** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y) --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2;
-  const ox = x + 1;
+  const s = ctx.size - 2 * ctx.k;
+  const ox = x + 1 * ctx.k;
   const points: Array<[number, number]> = [
     [ox + s / 2, y],
     [ox + s, y + s / 2],
@@ -294,14 +306,15 @@ function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
   return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }
 
-/** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y). */
+/** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y) --
+ *  same `k`-scaling rationale as {@link drawSquare}. */
 function drawTriangle(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2;
-  const ox = x + 1;
+  const s = ctx.size - 2 * ctx.k;
+  const ox = x + 1 * ctx.k;
   const points: Array<[number, number]> = [
-    [ox + s / 2, y + 1],
-    [ox, y + s - 1],
-    [ox + s, y + s - 1],
+    [ox + s / 2, y + 1 * ctx.k],
+    [ox, y + s - 1 * ctx.k],
+    [ox + s, y + s - 1 * ctx.k],
   ];
   return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
 }
@@ -439,4 +452,39 @@ export function visibilityIconOriginY(rowBaselineY: number, rowHeight: number, t
   // `size + 1` (skin/VisibilityModifier.java:100-102) and the placement
   // strategy centres against that block, not against a fixed 11.
   return rowBaselineY - ascent + centeringDelta(rowHeight, iconBlockHeight(theme, k), k);
+}
+
+/**
+ * cdd3-T22 (E1-3): `PlacementStrategyVisibility#getPositions`'s icon Y,
+ * ported whole rather than through a baseline: `2 + y + (maxHeight12 -
+ * height1) / 2` with `maxHeight12 = Math.max(height1, height2)`
+ * (`PlacementStrategyVisibility.java:62-67`) -- `y` is the member block's
+ * own TOP, `height1` the icon block (`classAttributeIconSize + 1`,
+ * `VisibilityModifier.java:100-102`), `height2` the member's whole
+ * TextBlock height. The flat `2` is a render-time numeral, scaled by `k`
+ * (cdd-B8FU precedent, {@link centeringDelta}).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/PlacementStrategyVisibility.java:56-69
+ */
+export function visibilityIconOriginYFromTop(
+  blockTopY: number,
+  memberBlockHeight: number,
+  theme?: ScaledTheme,
+): number {
+  const k = theme?.scaleK ?? 1;
+  const height1 = iconBlockHeight(theme, k);
+  const maxHeight12 = Math.max(height1, memberBlockHeight);
+  return 2 * k + blockTopY + (maxHeight12 - height1) / 2;
+}
+
+/** cdd3-T22: {@link visibilityIconOriginYFromTop} for a row that carries its
+ *  member block's top (`visibilityBlockTopDy`, relative to the row baseline
+ *  `baselineY`) and height; `undefined` for a row that does not, which keeps
+ *  the caller's baseline-keyed T20 formula. */
+export function rowIconTopOriginY(
+  baselineY: number,
+  row: { readonly visibilityBlockTopDy?: number; readonly visibilityBlockHeight?: number },
+  theme?: ScaledTheme,
+): number | undefined {
+  if (row.visibilityBlockTopDy === undefined || row.visibilityBlockHeight === undefined) return undefined;
+  return visibilityIconOriginYFromTop(baselineY + row.visibilityBlockTopDy, row.visibilityBlockHeight, theme);
 }

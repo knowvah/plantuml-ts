@@ -11,9 +11,7 @@ import { applyAssocCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './cla
 import { applyDoubleCouple } from './class-assoc-double-couple.js';
 import type { Command } from './class-command-types.js';
 import {
-  closeBraceScope,
   openNamespaceBlock,
-  openTogetherBlock,
   setNamespaceStereotype,
   setNamespaceTags,
   setNamespaceUrl,
@@ -21,6 +19,7 @@ import {
   NAMESPACE_COMMANDS,
 } from './class-container.js';
 import { collapseEmptyNamespace } from './class-namespace.js';
+import { closeBraceScope, openTogetherBlock } from './class-together.js';
 import {
   applyConstraintOnLinks,
   applyNoteOnLink,
@@ -39,12 +38,12 @@ import { parseTagTokens } from './class-declaration-parser.js';
  */
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 4. Closing brace — ends a pending body, together block, or namespace
-  //    block (LIFO; see closeBraceScope in class-container.ts).
+  //    block (LIFO; see closeBraceScope in class-together.ts).
   { pattern: /^\}\s*$/, execute: (state) => closeBraceScope(state) },
 
   // 4b. `together {` (CommandTogether, ClassDiagramFactory.java:131) — a
   //     layout-proximity grouping with no comparator-visible DOT cluster; see
-  //     openTogetherBlock (class-container.ts).
+  //     openTogetherBlock (class-together.ts).
   { pattern: /^together\s*\{\s*$/i, execute: (state) => openTogetherBlock(state) },
 
   // 4b/5. Namespace block commands (CommandNamespace2 + CommandNamespace) —
@@ -139,7 +138,12 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // `isContainerOpener` exemption instead of opening a real container --
       // the nested body's own lines were then never re-dispatched through
       // the per-line/allowmixing gate at all.
-      /^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*\[\[[^\]]*\]\])?\s*(?:[#<][^{]*)?\{\s*$/i,
+      new RegExp(
+        String.raw`^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+          NOTE_COLOR +
+          String.raw`\s*(?:[#<][^{]*)?\{\s*$`,
+        'i',
+      ),
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
       const name = match[2] !== undefined ? match[2] : match[3]!;
@@ -158,6 +162,11 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // (kokebo-27-vafi688).
       const tags = parseTagTokens(`${match[5] ?? ''} ${match[7] ?? ''}`);
       if (tags.length > 0) state.pendingContainerTags.set(effectiveId, tags);
+      // cdd3-T10 (S-11): `p.addUrl(url)` (`CommandPackageWithUSymbol.java:
+      // 208-213`) and `p.setColors(color().getColor(...))` with
+      // `ColorType.BACK` (`:215-216`, `color()` at `:132-134`).
+      setNamespaceUrl(state, effectiveId, match[8]);
+      setNamespaceColor(state, effectiveId, match[9]);
     },
   },
 

@@ -34,10 +34,14 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/DotStringFactory.java:178-199
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:135-184,254-287
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/Bibliotekon.java:89-114
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/Cluster.java:195-238,515-523
  */
 
 import type { DotInputCluster, DotInputGraph, DotInputNode } from './graph-layout.types.js';
 import { buildClusterTree } from './svek-dot-sequence.js';
+import { rootTops, topsFirstClusters } from './svek-dot-top.js';
+import { togetherClusters } from './svek-dot-together.js';
+import { orderLines0Edges } from './svek-dot-lines0.js';
 
 /** Collector: appends an id the first time it is seen, ignoring ids that are
  *  not real nodes (a dangling edge endpoint, or a `portAnchorId` naming a
@@ -133,26 +137,34 @@ function pushCluster(c: DotInputCluster, ctx: WalkCtx): void {
  * only created there if they were not already, which for kermor is never the
  * case that matters, since its clusters declare everything afterwards anyway.
  *
- * Deliberately not ported, and the reason the builder's root can still differ
- * from jar's: `Cluster#printCluster1`/`getNodesOrderedTop` (`:195-212,515-523`)
- * bumps a root-direct NORMAL node ahead of `lines0` when it is the tail of an
- * INVERTED edge that is not also length-1. `DotInputEdge` carries no
- * `isInverted` signal, so the condition cannot be evaluated here — the same
- * documented residual G7 T16 recorded, unchanged.
+ * cdd3-T16: `Cluster#printCluster1`/`getNodesOrderedTop` (`Cluster.java
+ * :195-212,515-523`) declares the root's inverted-edge tails AHEAD of
+ * `lines0` (`DotStringFactory.java:188-190`), and every cluster's own tails
+ * ahead of its other members (`ClusterDotString.java:174-176`) — both read
+ * from `./svek-dot-top.ts`, the same source the emitter uses.
+ *
+ * cdd3-T19: the `lines0` batch itself is `addLine`'s insertion order
+ * (`Bibliotekon.java:87-106`), not plain declaration order — `./svek-dot-
+ * lines0.ts` is the one definition, also read by the emitter and the layout
+ * builder so all three stay in lockstep.
  */
 export function firstEncounterOrder(input: DotInputGraph): DotInputNode[] {
   const nodeById = new Map(input.nodes.map((n) => [n.id, n]));
   const enc = new Encounter(nodeById);
   const kermor = input.kermor === true;
   const batch = (wantZero: boolean): void => {
-    for (const e of input.edges.filter((e) => (e.attributes?.minLen === 0) === wantZero)) {
+    const edges = wantZero ? orderLines0Edges(input.edges) : input.edges.filter((e) => e.attributes?.minLen !== 0);
+    for (const e of edges) {
       enc.push(e.from);
       enc.push(e.to);
     }
   };
+  // cdd3-T18: the together subgraphs nest members as the emitter prints them.
+  const tree = buildClusterTree(topsFirstClusters({ ...input, clusters: togetherClusters(input) }));
+  const rootIds = input.nodes.filter((n) => !tree.clusteredIds.has(n.id)).map((n) => n.id);
+  for (const id of rootTops(input, rootIds)) enc.push(id);
   batch(true);
   if (kermor) batch(false);
-  const tree = buildClusterTree(input.clusters ?? []);
   const ctx: WalkCtx = { enc, childrenOf: tree.childrenOf, kermor };
   for (const n of input.nodes) if (!tree.clusteredIds.has(n.id)) enc.push(n.id);
   for (const top of tree.childrenOf.get(undefined) ?? []) pushCluster(top, ctx);

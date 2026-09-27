@@ -31,4 +31,50 @@ export interface ThemeGraphColorsC {
    *  Jar-verified `nisune-86-faji869`.
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSimple.java:211-214 */
   classFontColorAutomatic?: boolean;
+  /** T11 (cdd3, Q-4): `EntityImageClassHeader.java:138-149`'s
+   *  `styleGeneric.value(BackGroundColor)` -- the generic type-parameter
+   *  tag's OWN ancestor cascade (`{root,element,classDiagram,class_,
+   *  generic}`, `style-cascade-class-snames.ts#GENERIC_SNAMES`, a strict
+   *  superset of `CLASS_SNAMES` so a bare `class { BackgroundColor }` --
+   *  no nested `generic` block -- also matches, jar-verified cdd2-T13
+   *  probe a). Read by `renderer-classifier-badge-tag.ts#renderGenericTag`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClassHeader.java:138-149 */
+  genericCascadeBackground?: string;
+  /** T11: the same signature's `LineColor` half. */
+  genericCascadeBorder?: string;
+  /** T11 (cdd3, Q-4 probe c, cdd2-T13): `skinparam classBackgroundColor`
+   *  is converted into an `{element,class_}` style declaration upstream
+   *  (`FromSkinparamToStyle.java`) BEFORE the generic tag's own merge
+   *  runs above, so it recolors the tag too -- jar-verified (`gen-c.puml`:
+   *  `skinparam classBackgroundColor LightBlue` -> both the class box AND
+   *  the generic tag rect fill `#ADD8E6`; unstyled -> the tag stays
+   *  `#FFFFFF` despite `classBackground` carrying its own non-white
+   *  built-in default `#F1F1F1`, `theme.ts:267`). Our port's
+   *  `classBackground` field is ALWAYS populated (default or override),
+   *  so this marker is the only way `renderGenericTag` can tell
+   *  "explicitly set" apart from "still the built-in default" -- set
+   *  alongside `classBackground` by the SAME `classbackgroundcolor`
+   *  skinparam handler (`skinparam-key-handlers-table-b.ts`), never by a
+   *  theme literal. */
+  classBackgroundExplicit?: true;
+  /** cdd3-T24 (C-6): `EntityImageClass`'s `getStyle().value(PName
+   *  .LineThickness)` over `{root,element,classDiagram,class_}`
+   *  (`style-cascade-class-snames.ts#CLASS_SNAMES`) -- the box stroke
+   *  (`EntityImageClass.java:215`) and the body's sentinel divider
+   *  (`BodyEnhancedAbstract.java:121-122`). `skin rose` resolves 1.0
+   *  (`rose.skin:11`, no element override). Absent = the `plantuml.skin:93`
+   *  `element { LineThickness 0.5 }` default, applied by the reader
+   *  (`renderer-classifier-colors.ts#classStyleLineThickness`).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClass.java:215 */
+  classCascadeLineThickness?: number;
+  /** cdd3-T24 (E3-8): `EntityImageNote`'s `style.getStroke()` thickness
+   *  over `{root,element,classDiagram,note}` (`NOTE_SNAMES`). Absent = the
+   *  `plantuml.skin:325` `note { LineThickness 0.5 }` default.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageNote.java:283-292 */
+  noteCascadeLineThickness?: number;
+  /** cdd3-T24 (E3-8): `EntityImageNote.java:108`'s `style.value(PName
+   *  .LineColor)` over the same `NOTE_SNAMES` signature, SVG-ready hex.
+   *  Absent = `theme.colors.border`.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageNote.java:108 */
+  noteCascadeBorder?: string;
 }

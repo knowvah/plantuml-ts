@@ -57,10 +57,17 @@ import { escapeComment } from '../../core/svg-format.js';
 import {
   isStereotypeLabelHidden,
   splitStereotypeLabels,
+  splitStereotypeStyleTags,
   wrapGuillemet,
   type GuillemetPair,
 } from './class-stereotype.js';
-import { titleFontColor } from './class-namespace-shape.js';
+import {
+  clusterStereoFontColor,
+  isNoPaint,
+  isFolderFamilyUSymbol,
+  DEFAULT_GROUP_FONT_COLOR,
+} from './class-package-style.js';
+import { packageTitleFontFamily, packageTitleFontSize } from './class-namespace-title-runs.js';
 
 /** One composed header stereo block, top-left at (0, 0). */
 export interface ClusterHeaderStereo {
@@ -95,9 +102,30 @@ function resolveGuillemet(theme: Theme): GuillemetPair | undefined {
  *  group, stereotype}` -- `plantuml.skin:79-82`'s `stereotype { FontStyle
  *  italic }`, size/colour from the `package` element (the same bucket the
  *  cluster title reads). */
-function stereoFont(theme: Theme): FontSpec {
-  const size = theme.colors.elements?.package?.fontSize ?? theme.fontSize;
-  return { family: theme.fontFamily, size, style: 'italic' };
+function stereoFont(theme: Theme, ns: Namespace): FontSpec {
+  // cdd3-T21 (E3-5): `packageFontName` is a `{package_}` FontName
+  // (`FromSkinparamToStyle.java:278`) the stereotype merge also matches;
+  // `plantuml.skin:79-82`'s `stereotype {}` sets no FontName to outrank it.
+  // A USymbol group's signature has no `package_` ({@link stereoFontColor}).
+  const usymbolGroup = ns.usymbol !== undefined && !isFolderFamilyUSymbol(ns.usymbol);
+  const family = usymbolGroup ? theme.fontFamily : packageTitleFontFamily(theme);
+  return { family, size: packageTitleFontSize(theme), style: 'italic' };
+}
+
+/**
+ * The stereo block's colour. `Cluster.getDefaultStyleDefinition` (`Cluster
+ * .java:285-296`): a USymbol group's signature is `{..., group, <usymbol>}`
+ * -- no `package_`, so no `package*` skinparam reaches it (jar gigoru-88's
+ * `rectangle ... <<something4>>` stereo is `#000` under `packageFontColor
+ * green`); the folder family keeps the package tiers
+ * ({@link clusterStereoFontColor}).
+ */
+function stereoFontColor(ns: Namespace, theme: Theme): string {
+  if (ns.usymbol !== undefined && !isFolderFamilyUSymbol(ns.usymbol)) {
+    const own = theme.colors.elements?.[ns.usymbol]?.font;
+    return typeof own === 'string' ? own : DEFAULT_GROUP_FONT_COLOR;
+  }
+  return clusterStereoFontColor(theme, ns.stereotype === undefined ? [] : splitStereotypeStyleTags(ns.stereotype));
 }
 
 /**
@@ -108,22 +136,29 @@ function stereoFont(theme: Theme): FontSpec {
 function buildStereoText(ns: Namespace, ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer) {
   const labels = visibleNamespaceStereotypeLabels(ns, ast.hideStereotypeDirectives ?? []);
   if (labels.length === 0) return undefined;
-  const font = stereoFont(theme);
+  const font = stereoFont(theme, ns);
   const guillemet = resolveGuillemet(theme);
   const lines = labels.map((l) => {
     const content = wrapGuillemet(l, guillemet);
     return { content, ...measurer.measure(content, font) };
   });
   const width = Math.max(...lines.map((l) => l.width));
+  // cdd3-T21 (E3-1/E3-2): the stereotype style's own colour; transparent
+  // ink draws no text but keeps the block's size (`DriverTextSvg.java:92-94`).
+  const fill = stereoFontColor(ns, theme);
   let y = 0;
   let body = '';
   for (const line of lines) {
+    if (isNoPaint(fill)) {
+      y += line.height;
+      continue;
+    }
     const baseline = y + line.height - measurer.getDescent(font, line.content);
     body += text((width - line.width) / 2, baseline, line.content, {
       fontFamily: font.family,
       fontSize: font.size,
       fontStyle: 'italic',
-      fill: titleFontColor(theme),
+      fill,
       textLength: line.width,
     });
     y += line.height;

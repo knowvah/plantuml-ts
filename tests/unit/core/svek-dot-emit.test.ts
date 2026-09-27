@@ -855,4 +855,17 @@ describe('toSvekDot — za anchor identity and lines0/lines1 batches', () => {
     expect(dot.indexOf('minlen=1')).toBeLessThan(dot.indexOf('subgraph cluster0gamma'));
     expect(dot.indexOf('minlen=0')).toBeLessThan(dot.indexOf('minlen=1'));
   });
+
+  it('cdd3-T19 (E3-18): a note-labelled lines0 edge prints ahead of the first same-connections unlabelled one (Bibliotekon.java:87-99)', () => {
+    const g = batched();
+    g.edges = [
+      { id: 'e0', from: 'a', to: 'b', attributes: { minLen: 0 } },
+      { id: 'e1', from: 'b', to: 'a', attributes: { minLen: 0, label: 'children', labelWidth: 40, labelHeight: 14 } },
+    ];
+    const dot = toSvekDot(g);
+    // Declaration order would print sh0010->sh0011 first; addLine's
+    // tie-break moves the labelled sh0011->sh0010 ahead of it instead.
+    expect(dot.indexOf('sh0011->sh0010[')).toBeGreaterThanOrEqual(0);
+    expect(dot.indexOf('sh0010->sh0011[')).toBeGreaterThan(dot.indexOf('sh0011->sh0010['));
+  });
 });

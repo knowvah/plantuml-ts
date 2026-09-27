@@ -297,7 +297,9 @@ export function pushIconRowPrimitives(
 ): void {
   const icon = row.visibilityIcon;
   if (icon === undefined) return;
-  const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN;
+  // cdd3-T34 (E1-8): render-time numeral, scaled by `theme.scaleK` --
+  // see `renderer-classifier-rows.ts#renderRow`'s identical fix.
+  const iconOriginX = geo.x + ROW_TEXT_LEFT_MARGIN * theme.scaleK;
   const iconOriginY = wrappedIconOriginY(geo, row, theme);
   if (row.url !== undefined) {
     const bg = renderVisibilityUrlBackground(

@@ -319,6 +319,30 @@ function kermorClusterBlock(
   return out;
 }
 
+/** cdd3-T18: `Cluster#printTogether` (`svek/Cluster.java:528-547`) -- a bare
+ *  `subgraph <clusterId>t<k> {`, no style/color/label, holding the together's
+ *  own nodes, then its child clusters, then its nested togethers (the child
+ *  order `svek-dot-together.ts` builds). */
+function togetherBlock(
+  cluster: DotInputCluster,
+  childrenOf: ClusterTree['childrenOf'],
+  recs: Map<string, NodeRec>,
+  nodeById: Map<string, DotInputNode>,
+  colors: Map<string, ClusterColors>,
+): string[] {
+  const out = [`subgraph ${cluster.id} {`];
+  for (const id of cluster.nodeIds) {
+    const node = nodeById.get(id);
+    const rec = recs.get(id);
+    if (node !== undefined && rec !== undefined) out.push(nodeLine(node, rec));
+  }
+  for (const child of childrenOf.get(cluster.id) ?? []) {
+    out.push(...clusterBlock(child, childrenOf, recs, nodeById, colors, false));
+  }
+  out.push('}');
+  return out;
+}
+
 /** Emit a cluster subgraph (clean form): title table, member nodes, nested children. */
 export function clusterBlock(
   cluster: DotInputCluster,
@@ -328,6 +352,7 @@ export function clusterBlock(
   colors: Map<string, ClusterColors>,
   kermor: boolean,
 ): string[] {
+  if (cluster.isTogether === true) return togetherBlock(cluster, childrenOf, recs, nodeById, colors);
   if (kermor) return kermorClusterBlock(cluster, childrenOf, recs, nodeById, colors);
   if (cluster.portRanks !== undefined && cluster.portRanks.length > 0) {
     return portClusterBlock(cluster, childrenOf, recs, nodeById, colors);

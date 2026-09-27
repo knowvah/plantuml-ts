@@ -25,11 +25,10 @@ import {
   resolveGlobalBackground,
   resolveGlobalBorder,
 } from './style-map-element.js';
-import {
-  computeClassStyleCascadeOverrides,
-  computeCardinalityFontOverride,
-  computeArrowFontOverride,
-} from './style-cascade-class.js';
+import { computeClassStyleCascadeOverrides } from './style-cascade-class.js';
+// T11 (cdd3): moved to a sibling module (500-line cap on style-cascade-
+// class.ts) -- see that file's own doc comment.
+import { computeCardinalityFontOverride, computeArrowFontOverride } from './style-cascade-class-arrow-font.js';
 import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
 import {
   computeJsonFamilyOverride,

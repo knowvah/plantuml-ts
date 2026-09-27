@@ -87,7 +87,7 @@ describe('measureCircleInterface (cdd-T22, E8)', () => {
 describe('usesClassUSymbolEntity dispatch (cdd-T22 widened gate)', () => {
   const base = { x: 0, y: 0, width: 10, height: 10, dividerYs: [], rows: [] } satisfies Partial<ClassifierGeo>;
 
-  it('routes usecase, circle, descriptive+actor, descriptive+component and descriptive+database', () => {
+  it('routes usecase, circle, descriptive+actor, descriptive+component, descriptive+database and descriptive+rectangle', () => {
     expect(usesClassUSymbolEntity({ ...base, id: 'u', kind: 'usecase' })).toBe(true);
     expect(usesClassUSymbolEntity({ ...base, id: 'c', kind: 'circle' })).toBe(true);
     expect(usesClassUSymbolEntity({ ...base, id: 'a', kind: 'descriptive', usymbol: 'actor' })).toBe(true);
@@ -98,11 +98,17 @@ describe('usesClassUSymbolEntity dispatch (cdd-T22 widened gate)', () => {
     // `USymbolDatabase#asSmall` (already ported) draws a real
     // `TextBlockUtils.mergeTB` block.
     expect(usesClassUSymbolEntity({ ...base, id: 'd', kind: 'descriptive', usymbol: 'database' })).toBe(true);
+    // cdd3-T12 (sijisi-94-ripu606): `rectangle` now routes here too -- a
+    // plain `rectangle "foo3"` leaf resolves to `USymbols.RECTANGLE`
+    // (`USymbolRectangle.java`) exactly like `component` resolves to
+    // `USymbols.COMPONENT2`; pre-T12 it fell through to the generic
+    // classifier box (`renderClassifierBox`), drawing a members-badge no
+    // rectangle leaf carries.
+    expect(usesClassUSymbolEntity({ ...base, id: 'r', kind: 'descriptive', usymbol: 'rectangle' })).toBe(true);
   });
 
-  it('does NOT route an ordinary classifier or an unrelated descriptive usymbol (e.g. rectangle)', () => {
+  it('does NOT route an ordinary classifier', () => {
     expect(usesClassUSymbolEntity({ ...base, id: 'x', kind: 'class' })).toBe(false);
-    expect(usesClassUSymbolEntity({ ...base, id: 'r', kind: 'descriptive', usymbol: 'rectangle' })).toBe(false);
   });
 });
 
@@ -146,5 +152,34 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
     // The UML2 notch: outer box + two small plug rectangles (4 rects total).
     expect((fragment.body.match(/<rect/g) ?? []).length).toBe(4);
     expect(fragment.body).toContain('stroke-width:0.5');
+  });
+
+  it('draws a rectangle leaf as a plain rounded box, no badge/members (cdd3-T12, sijisi-94-ripu606)', () => {
+    const geo: ClassifierGeo = {
+      id: 'r1',
+      kind: 'descriptive',
+      usymbol: 'rectangle',
+      x: 0,
+      y: 0,
+      width: 47.213,
+      height: 34,
+      dividerYs: [],
+      rows: [{ text: 'foo3', y: 20, indent: 0 }],
+    };
+    const fragment = renderClassUSymbolEntity(geo, theme, measurer, undefined, 'U3');
+    // Literal output captured from a real run (jiti probe, 2026-09-25) --
+    // matches sijisi-94-ripu606's golden `foo3` leaf: a single plain rect
+    // (no visibility-icon ellipse, no members divider) at the jar's own
+    // `rx="2.5"` (ELEMENT_ROUND_CORNER, `USymbolRectangle.java:65-71`
+    // reads `SymbolContext#getRoundCorner()`) with a LEFT-anchored label
+    // (`titleAlignmentFor`: only `usecase` gets CENTER).
+    expect(fragment.body).toBe(
+      '<!--entity r1--><g class="entity" data-qualified-name="r1" id="U3">' +
+        '<rect x="0" y="0" width="47.213" height="34" fill="#F1F1F1" ' +
+        'style="stroke:#181818;stroke-width:0.5;" rx="2.5" ry="2.5"/>' +
+        '<text x="10" y="20.889" fill="#000" font-size="14" textLength="27.213">foo3</text></g>',
+    );
+    expect((fragment.body.match(/<rect/g) ?? []).length).toBe(1);
+    expect(fragment.body).not.toContain('<ellipse');
   });
 });

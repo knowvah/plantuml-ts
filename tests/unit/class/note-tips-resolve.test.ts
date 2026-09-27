@@ -7,6 +7,9 @@
  * a missing host, and NOTE leaves being ignored.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { renderFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 import { resolveTips } from '../../../src/diagrams/class/note-tips-resolve.js';
 import type { NoteGeo, ClassifierAnchor } from '../../../src/diagrams/class/note-layout.js';
 
@@ -110,5 +113,22 @@ describe('resolveTips -- EntityImageTips#drawU at draw time', () => {
     expect(out.get('bad')).toBe('dropped');
     expect(out.get('okR')).toBe('dropped'); // same group, after the abort
     expect(out.get('okL')).not.toBe('dropped'); // other side, its own group
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd3-T32: a WRAPPED member is ONE `rawBody` line upstream
+// (`cucadiagram/BodierAbstract.java:69-86` matches `member: string`, not a
+// wrapped sub-line), and `getInnerPosition` returns that member's WHOLE
+// text block (`cucadiagram/MethodsOrFieldsArea.java:287-294`), so the notch
+// aims at the wrapped block's centre (`svek/image/EntityImageTips.java:179`).
+// ---------------------------------------------------------------------------
+describe('cdd3-T32 — a member tip aims at a wrapped member`s whole block', () => {
+  it('zepeki-75-pifo352: the notch vertex lands at the jar`s y 124.21', () => {
+    const markup = readFileSync('test-results/dot-cache/class/zepeki-75-pifo352/in.puml', 'utf8');
+    const svg = renderFixtureClass(markup, new WidthTableMeasurer());
+    const notch = / L263\.65,([\d.]+) L/.exec(svg);
+    // D3 (graphviz's 2-dp `-Tsvg` read, unported) leaves 0.004 px here.
+    expect(Number(notch![1])).toBeCloseTo(124.21, 2);
   });
 });

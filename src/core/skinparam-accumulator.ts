@@ -48,6 +48,11 @@ export interface SkinparamAccumulator {
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
+  /** cdd3-T25 (E3-3): `skinparam genericDisplay old` --
+   *  `SkinParam#displayGenericWithOldFashion` (`skin/SkinParam.java:1179-
+   *  1181`, `valueIs("genericDisplay", "old")`). See `theme.ts
+   *  #genericDisplayOld`'s own doc comment for the render-side mechanism. */
+  genericDisplayOld: boolean | undefined;
   /** `skinparam footbox hide|show` — `SequenceDiagram#isShowFootbox` reads it
    *  as a raw string and compares case-insensitively to "hide"
    *  (`SequenceDiagram.java:478-485`). */
@@ -69,6 +74,9 @@ export interface SkinparamAccumulator {
   arrow: string | undefined;
   noteBackground: string | undefined;
   classBackground: Paint | undefined;
+  /** T11 (cdd3, Q-4 probe c): set alongside `classBackground` -- see
+   *  `theme-graph-colors-c.ts#classBackgroundExplicit`'s own doc comment. */
+  classBackgroundExplicit: true | undefined;
   /** CDD T6FU: `skinparam classHeaderBackgroundColor` / the nested-block
    *  form `skinparam class { HeaderBackgroundColor X }` (both normalise to
    *  the SAME key) -- `FromSkinparamToStyle.java:196` maps it onto the
@@ -229,6 +237,7 @@ const SCALAR_FIELD_NAMES = [
   'actorStyle',
   'minimumWidth',
   'strictUml',
+  'genericDisplayOld',
   'footbox',
   'handwritten',
   'mode',
@@ -242,6 +251,7 @@ const SCALAR_FIELD_NAMES = [
   'arrow',
   'noteBackground',
   'classBackground',
+  'classBackgroundExplicit',
   'classHeaderBackground',
   'interfaceBackground',
   'enumBackground',

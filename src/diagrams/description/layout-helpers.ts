@@ -68,6 +68,7 @@ export {
   shapeForNode,
   isPortLabelWide,
   portTablePad,
+  applyShieldEdgePorts,
 } from './layout-helpers-shape-endpoint.js';
 
 // ---------------------------------------------------------------------------
@@ -83,6 +84,7 @@ export {
 import { measureLeafNode, type BoxSizingOpts } from '../../core/svek/image/leaf-sizing.js';
 export {
   measureLeafNode,
+  measureLeafShield,
   ACTOR_WIDTH,
   ACTOR_HEIGHT,
   USECASE_HEIGHT,

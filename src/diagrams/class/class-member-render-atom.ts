@@ -7,6 +7,7 @@
  */
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
+import type { DrawablePrimitive } from '../../core/creole-atoms.js';
 
 /**
  * One RESOLVED, render-ready run of a member row -- unlike `CreoleAtom`
@@ -80,6 +81,31 @@ export type MemberRenderAtom =
       readonly dy?: number;
     }
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` atom -- `SvgNanoParser`'s
+   *  draw-time `UPath`/`UEllipse`/`UText` decomposition
+   *  (`core/creole-atoms-image-resolver.ts#resolveSvgSpriteAtom`, the SAME
+   *  function the description/usecase engines call), already resolved at
+   *  LAYOUT time exactly like `'image'` above -- `width`/`height` are the
+   *  SAME declared (scaled) box; ink lives only in `primitives`, drawn by
+   *  `renderer-classifier-rows.ts` at the row's own origin
+   *  (`class-member-sprite-render.ts#renderMemberRowDrawable`). Unlike
+   *  `'image'`, this kind is NOT excluded from the row's own `Sea` span
+   *  (`class-member-creole.ts#resolveMemberAtoms`'s `seaEntries` filter
+   *  only names `'image'`) -- bidusa-22-jutu505 jar-verified: the icon
+   *  (21.538px) is taller than the row's text (14px), so the row's shared
+   *  text atom needs a real `dy` correction to sit at the icon's own `Sea`
+   *  bottom, which only happens when this kind's height feeds `maxSpan`.
+   *  `dy` mirrors `'vector'`'s own field -- this atom's `Sea` top, set by
+   *  `resolveMemberAtoms` via the SAME `atomTopDy`; `undefined` only for a
+   *  `'drawable'` atom built OUTSIDE that function (namespace-title runs,
+   *  a note line), which keep the flat bottom-anchor `'image'` uses. */
+  | {
+      readonly kind: 'drawable';
+      readonly primitives: readonly DrawablePrimitive[];
+      readonly width: number;
+      readonly height: number;
+      readonly dy?: number;
+    }
   /** G2 N41: an OpenIconic `<&glyph>` atom -- `name`/`factor` feed
    *  `openiconic-glyphs.ts#buildOpenIconicPathD` at RENDER time (needs the
    *  row's own x/y, not known yet at this LAYOUT-time build step -- mirrors
@@ -101,6 +127,17 @@ export type MemberRenderAtom =
       readonly order: number;
       readonly fill: string;
       readonly width: number;
+      /** C-1: a wrapped bullet line's CONTINUATION row (`Fission.java:87`
+       *  — `new StripeSimpleInternal(true, stringBounder, blank(stripe.
+       *  getLHeader()))`). `blank()` (java:226-245) returns an atom with
+       *  the SAME `calculateDimensionSlow` as the real header (so `width`
+       *  above, the reserved cell, is UNCHANGED) but an empty `drawU` — only
+       *  row 0 of a wrapped bullet carries the real glyph; every
+       *  continuation row's atom sets this `true` so the renderer reserves
+       *  the width without drawing the ellipse/rect. `undefined` (falsy)
+       *  for every non-wrapped or first-row bullet, matching this file's
+       *  "always set by production, absent/false elsewhere" convention. */
+      readonly blank?: boolean;
     }
   | {
       readonly kind: 'vector';
@@ -109,6 +146,37 @@ export type MemberRenderAtom =
       readonly fill: string;
       readonly width: number;
       readonly height: number;
+      /** cdd3-T22: the glyph box's own `Sea` top (`Sea.java:72-89`, with
+       *  `AtomOpenIconic#getStartingAltitude` = `-3*factor`,
+       *  `AtomOpenIconic.java:72-74`) relative to the row's text baseline --
+       *  `class-member-creole-sea.ts#atomTopDy`. Member-row renderers draw
+       *  the glyph at `rowBaseline + dy`. Set by every
+       *  `resolveMemberAtoms` call; the note renderer does not read it. */
+      readonly dy?: number;
+    }
+  /** C-2: a `#`-prefixed creole numbered-list header (`klimt/creole/legacy/
+   *  AtomTextUtils.java:145-159`'s `createListNumber`/`ListNumberAtom` —
+   *  `StripeStyle#getHeader`'s `LIST_WITH_NUMBER` branch, `Bullet`'s ordered
+   *  sibling). `text` is `"N."` (1-based `CreoleContext#getLocalNumber
+   *  (order)` + 1, `StripeStyle.java:59-63`'s own evaluation-before-build
+   *  order). `dx` is the per-depth indent the glyph draws AFTER — the width
+   *  of `"9. "` × `order` (java:146-151, `marginLeft`), 0 at order 0.
+   *  `textWidth` is `text`'s own measured width — the DRAWN `textLength`.
+   *  `width` is the FULL reserved cell every row/x-advance uses: `dx +
+   *  textWidth + marginRight` (marginRight = width of `"."`, java:152-157) —
+   *  mirrors `'bullet'`'s own "layout `width` unchanged, only the glyph was
+   *  missing" shape. `blank` mirrors `'bullet'`'s own field above (same
+   *  `Fission.java:87` continuation-row rule — both a bullet and a numbered
+   *  list are `Stripe`s with an `LHeader`, so `Fission#getSplitted` treats
+   *  them identically). */
+  | {
+      readonly kind: 'listNumber';
+      readonly text: string;
+      readonly font: FontConfiguration;
+      readonly dx: number;
+      readonly textWidth: number;
+      readonly width: number;
+      readonly blank?: boolean;
     };
 
 /** One member row's fully built+measured creole content. */

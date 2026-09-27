@@ -169,6 +169,32 @@ export interface ElementColors {
    * the radius differs per element kind.
    */
   roundCorner?: number;
+  /**
+   * cdd3-T21 (E3-1): `skinparam <sname>BorderColor<<label>>` /
+   * `<sname>FontColor<<label>>` / `<sname>BorderThickness<<label>>` /
+   * `<sname>StereotypeFontColor<<label>>` -- the stereotype-RE-SIGNED
+   * `LineColor`/`FontColor`/`LineThickness` styles `FromSkinparamToStyle`
+   * registers at +1000 priority (`:292-302` splits the `<<label>>` off,
+   * `:396-408` `addStyle` -> `addPriorityForStereotype` +
+   * `sig.addStereotype`). Keyed by the CLEANED label (`StyleSignatureBasic
+   * #clean`: lowercase, `[_.]` stripped), exactly as
+   * {@link backgroundColorByStereo}. Populated for `package` only
+   * (`skinparam-stereo-keys.ts#applyPackageByStereo`).
+   */
+  borderByStereo?: Readonly<Record<string, string>>;
+  fontByStereo?: Readonly<Record<string, string>>;
+  lineThicknessByStereo?: Readonly<Record<string, number>>;
+  stereotypeFontByStereo?: Readonly<Record<string, string>>;
+  /** cdd3-T21 (E3-2): `skinparam <sname>StereotypeFontColor X` -- `addMagic`
+   *  (`FromSkinparamToStyle.java:283`) -> `FontColor` on `{stereotype,
+   *  <sname>}`; also the legacy `FontParam.<SNAME>_STEREOTYPE` colour
+   *  (`SkinParam.java:484-505`). Populated for `package` only. */
+  stereotypeFont?: string;
+  /** cdd3-T21 (E3-5): `skinparam <sname>FontName X` / `<sname>FontStyle X`
+   *  -- `addConFont(cleanName, sname)` (`FromSkinparamToStyle.java:278`) ->
+   *  `FontName`/`FontStyle` on `{<sname>}`. Populated for `package` only. */
+  fontFamily?: string;
+  fontStyle?: { readonly bold: boolean; readonly italic: boolean };
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;

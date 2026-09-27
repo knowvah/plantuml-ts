@@ -198,18 +198,24 @@ if (baselineFixtures.length === 0) {
 
 describe.skipIf(!cacheAvailable)('svg-description diff-count baseline ratchet — forced-rise detection', () => {
   it('a fabricated baseline below the live count fails, naming fixture + baseline + new count', () => {
-    const sample = baselineFixtures.find((f) => hasCachedFixture(f));
-    expect(sample, 'expected at least one measurable baseline fixture to exercise rise detection').toBeDefined();
-    const f = sample!;
+    // cdd3-T28: the first cached baseline fixture (`bozana-38-xufi750`) now
+    // reaches zero diffs -- E3-14 draws its `package "good-enough?" as
+    // goodenough` leaves with the code name as the bold title and the
+    // display as the label (`EntityImageDescription.java:180-199`) -- so the
+    // sample is the first one whose live count is still above 0; a baseline
+    // of 0 is then a guaranteed rise.
+    let sample: { f: (typeof baselineFixtures)[number]; live: number } | undefined;
+    for (const f of baselineFixtures) {
+      if (!hasCachedFixture(f)) continue;
+      const r = measure(f);
+      if (!r.errored && r.diffCount > 0) {
+        sample = { f, live: r.diffCount };
+        break;
+      }
+    }
+    expect(sample, 'expected at least one baseline fixture with a non-zero live diff count').toBeDefined();
+    const { f, live } = sample!;
 
-    const liveResult = measure(f);
-    expect(liveResult.errored, `${f.type}/${f.slug}: expected a measurable diff count for this check`).toBe(false);
-    // Narrowed by the assertion above; TS cannot see through `expect(...).toBe(false)`.
-    const live = (liveResult as { errored: false; diffCount: number }).diffCount;
-
-    // Force a rise: a baseline of 0 is guaranteed lower than any of the 22
-    // candidates' real measured counts today (none reach zero-diff yet --
-    // see .agent-notes/T1-svg-goldens.md and T1b's own manifest).
     const forcedBaseline = 0;
     const { ok, message } = checkNoRise(f, forcedBaseline, live);
 

@@ -26,19 +26,11 @@
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import { parseWithNewlines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import { ClassifierBodyGeometry, ELEMENT_DEFAULT_LINE_THICKNESS } from './class-body-enhanced-geometry.js';
-import {
-  buildMemberAtoms,
-  resolveMemberAtoms,
-  memberBaseFont,
-  buildWrappedMemberRows,
-  atomsToPlainText,
-  type MemberRenderAtom,
-} from './class-member-creole.js';
+import { memberBaseFont, type MemberRenderAtom } from './class-member-creole.js';
 import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import {
@@ -46,11 +38,12 @@ import {
   type NoteLineBuildContext,
   type NoteDividerDraw,
   type NoteTableDraw,
-  noteLineHeight,
   buildTableRow,
   buildDividerDraw,
   consumeEmbeddedRow,
 } from './note-layout-measure-rows.js';
+import { buildPlainRows, matchNumberedLine, buildNumberedListRows } from './note-layout-measure-list.js';
+import { CreoleContext } from '../../core/klimt/creole/CreoleContext.js';
 
 /** `plantuml.skin`'s `note { FontSize 13 }` default — one point smaller
  *  than the diagram's normal text. G2 N39: the DEFAULT only -- a `<style>
@@ -384,14 +377,43 @@ function resolveNoteFontContext(theme: Theme): {
 /**
  * Build one block's render rows: consecutive `|...|` table lines collapse
  * into ONE grid row (A12), `*`-bullet lines carry a `Bullet` header (A4),
- * anything else is a plain creole line (word-wrapped when `ctx.maxWidth`
- * binds, G2 N66). Classification runs on the RAW line; `<U+XXXX>`/`&#N;`
- * escapes resolve at atom-build time (upstream substitutes them inside
- * `AtomText`, AFTER stripe classification — G2/N21's `pacuve-18` mechanism,
- * order now made explicit).
+ * C-2's `#`-prefixed lines carry a numbered-list header, anything else is a
+ * plain creole line (word-wrapped when `ctx.maxWidth` binds, G2 N66).
+ * Classification runs on the RAW line; `<U+XXXX>`/`&#N;` escapes resolve at
+ * atom-build time (upstream substitutes them inside `AtomText`, AFTER
+ * stripe classification — G2/N21's `pacuve-18` mechanism, order now made
+ * explicit).
+ *
+ * C-2: `context` is a FRESH `CreoleContext` per call — this function already
+ * runs once per block-separator-delimited `Display` (`measureNote`'s
+ * `flushBlock`/`appendDecoratedBlock` loop, and `measureSeparatorTitle`'s own
+ * independent call for a titled separator's label), the EXACT scope upstream
+ * gives one (`BodyEnhanced2.java:96,107`'s `getTextBlock(display)` ->
+ * `Display#create9` -> `CreoleParser#createSheetSlow`, `CreoleParser.java:
+ * 142-145`'s `new CreoleContext()` — one per `Sheet`/`Display`, i.e. one per
+ * block, NOT shared across a note's `--`-separated sections) — so a numbered
+ * list's counter resets at every block boundary, matching the jar.
  */
+/**
+ * The `*`-bullet / C-2 `#`-numbered dispatch {@link buildBlockRows}'s own
+ * loop falls through to -- split out purely to keep that function's own
+ * NLOC under this project's complexity cap (T26). `undefined` when `ln` is
+ * neither (the caller falls back to {@link buildPlainRows}). C-2: tried
+ * AFTER the asterisk patterns, matching upstream's own cascade order
+ * (`CreoleStripeSimpleParser.java:92-159`: both asterisk patterns, THEN
+ * `HASH_HEADING_PATTERN`).
+ */
+function buildListLineRows(ln: string, context: CreoleContext, ctx: NoteLineBuildContext): NoteRow[] | undefined {
+  const bullet = matchBulletLine(ln);
+  if (bullet !== undefined) return buildBulletRows(bullet, ctx);
+  const numbered = matchNumberedLine(ln);
+  if (numbered !== undefined) return buildNumberedListRows(numbered, context, ctx);
+  return undefined;
+}
+
 function buildBlockRows(blockLines: readonly string[], ctx: NoteLineBuildContext): NoteRow[] {
   const rows: NoteRow[] = [];
+  const context = new CreoleContext();
   for (let i = 0; i < blockLines.length; i++) {
     const ln = blockLines[i]!;
     // R2b: a line opening a `{{ ... }}` embedded-diagram region collapses,
@@ -413,9 +435,9 @@ function buildBlockRows(blockLines: readonly string[], ctx: NoteLineBuildContext
       rows.push(buildTableRow(run, ctx));
       continue;
     }
-    const bullet = matchBulletLine(ln);
-    if (bullet !== undefined) {
-      rows.push(...buildBulletRows(bullet, ctx));
+    const listRows = buildListLineRows(ln, context, ctx);
+    if (listRows !== undefined) {
+      rows.push(...listRows);
       continue;
     }
     rows.push(...buildPlainRows(ln, ctx));
@@ -456,36 +478,21 @@ function buildBulletRows(bullet: { order: number; text: string }, ctx: NoteLineB
   // width is unchanged (layout was already exact) -- only the GLYPH was
   // missing, which rendered as an empty `<text>` where the jar draws an
   // ellipse/rect. See `MemberRenderAtom`'s `'bullet'` doc comment.
-  const spacer: MemberRenderAtom = {
+  const header: MemberRenderAtom = {
     kind: 'bullet',
     order: bullet.order,
     fill: ctx.font.color ?? '#000000',
     width: bulletWidth,
   };
-  return buildPlainRows(bullet.text, textCtx).map((row) => ({
+  // C-1: `Fission.java:87` -- row 0 keeps the REAL header, every
+  // continuation row gets `blank(header)` (same reserved `bulletWidth`,
+  // empty draw): a wrapped bullet sentence previously repeated the glyph
+  // on every wrapped row instead of drawing it once (`Fission.java:
+  // 226-245`'s `blank()`).
+  return buildPlainRows(bullet.text, textCtx).map((row, i) => ({
     text: row.text,
     width: bulletWidth + row.width,
-    atoms: [spacer, ...row.atoms],
+    atoms: [i === 0 ? header : { ...header, blank: true }, ...row.atoms],
     height: row.height,
-  }));
-}
-
-/**
- * Plain creole line -> one row normally, 2+ when `ctx.maxWidth` wraps it
- * (G2 N66, mirrors `buildWrappedSectionRowBuilds`'s convention: single-row
- * keeps the source text verbatim; wrapped rows rebuild from their atoms).
- */
-function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): NoteRow[] {
-  const { font, fontSpec, measurer, maxWidth, fontSize, sprites } = ctx;
-  const ln = resolveTextEscapes(rawLine);
-  const builds =
-    maxWidth > 0
-      ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth, sprites)
-      : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
-  return builds.map((build) => ({
-    text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
-    width: build.width,
-    atoms: build.atoms,
-    height: noteLineHeight(build.atoms, fontSize),
   }));
 }

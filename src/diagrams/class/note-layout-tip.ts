@@ -225,7 +225,8 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
       tipMetrics,
       strictUml,
     });
-    out.push(step.geo);
+    // cdd3-T14 (C-14): the connector rides on member 0 (`resolveGroupStep`).
+    out.push(memberOrder === 0 && group.linkSlot !== undefined ? { ...step.geo, linkSlot: group.linkSlot } : step.geo);
     yOffset += step.advance;
   }
   return out;
@@ -284,7 +285,8 @@ function mapGroupNoteGeos(group: NoteGroup, data: NoteDataset, ctx: GroupLayoutC
  */
 function clusterEndId(point: { x: number; y: number } | undefined, target: string, rect: ClipRect): string | undefined {
   if (point === undefined) return undefined;
-  const inside = point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
+  const inside =
+    point.x >= rect.x && point.x < rect.x + rect.width && point.y >= rect.y && point.y < rect.y + rect.height;
   return inside ? target : undefined;
 }
 

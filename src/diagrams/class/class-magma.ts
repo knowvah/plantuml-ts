@@ -8,6 +8,7 @@
 import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { DotInputEdge } from '../../core/graph-layout.js';
 import { buildMagmaEdges, type MagmaGroupInput } from '../../core/magma.js';
+import { buildLeafRankMap, sortByRank } from './class-leaf-order.js';
 
 /**
  * True for a classifier synthesized by `collapseEmptyNamespace`
@@ -101,20 +102,24 @@ export function buildClassMagmaEdges(ast: ClassDiagramAST, anchors: Map<string, 
   // (collectTouched) and drop out inside buildMagmaEdges, matching upstream's
   // isStandalone. In-namespace notes are already in `Namespace.classifiers`
   // (see ClassNote.namespace) so the per-namespace groups below cover them.
-  // Appending notes after classifiers loses upstream's exact creation
-  // interleave, but every parity check (degree/minlen multisets) is invariant
-  // under standalone order — only leaf identity assignments shift.
-  const rootLeaves = [
+  // cdd3-T14 (E1-1): `g.leafs()` is quark-children order
+  // (`abel/Entity.java:649-656`, walked at `atmp/CucaDiagram.java:708`), so
+  // every group's leaves are sorted by the shared creation rank -- the SAME
+  // substitute `class-leaf-order.ts` uses. Appending notes after classifiers
+  // made `MyClass` head nuxoni's square instead of `Note1`.
+  const leafRank = buildLeafRankMap(ast);
+  const byCreation = (ids: readonly string[]): string[] => sortByRank(ids.filter(isMagmaLeaf), leafRank);
+  const rootLeaves = byCreation([
     ...ast.classifiers.filter((c) => !inNamespace.has(c.id)).map((c) => c.id),
     ...ast.notes.filter((n) => n.namespace === undefined).map((n) => n.id),
-  ].filter(isMagmaLeaf);
+  ]);
 
   const groups: MagmaGroupInput[] = [{ astId: undefined, parentAstId: undefined, leafDotIds: rootLeaves }];
   for (const ns of ast.namespaces) {
     groups.push({
       astId: ns.id,
       parentAstId: ns.parentId,
-      leafDotIds: ns.classifiers.filter(isMagmaLeaf),
+      leafDotIds: byCreation(ns.classifiers),
     });
   }
 

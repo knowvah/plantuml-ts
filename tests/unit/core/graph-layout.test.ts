@@ -700,12 +700,14 @@ describe('layoutGraph — shield corner reads the truncated h cell (cdd2-T11 Q-3
     rankDir: 'TB',
   });
 
-  it('puts the plain neighbour 0.1375px right of the shielded corner (jar 7.14 - 7)', () => {
+  it('puts the plain neighbour 0.14px right of the shielded corner (jar 7.14 - 7)', () => {
     const r = layoutGraph(shielded(0, 0));
     const a = r.nodes.find((n) => n.id === 'sh0006')!;
     const b = r.nodes.find((n) => n.id === 'sh0007')!;
-    // graphviz centre 44: cell 44 - 72/2 = 8; rect 44 - 71.725/2 = 8.1375.
-    expect(b.x - a.x).toBeCloseTo(0.1375, 6);
+    // graphviz centre 44: cell 44 - 72/2 = 8; rect 44 - 71.725/2 = 8.1375,
+    // which the jar parses off `-Tsvg` as 8.14 (cdd3-T-D3,
+    // DotStringFactory.java:388-396).
+    expect(b.x - a.x).toBeCloseTo(0.14, 6);
     expect(a.width).toBe(72.995);
   });
 

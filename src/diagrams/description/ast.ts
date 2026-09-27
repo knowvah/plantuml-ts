@@ -13,30 +13,11 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
-import type { ResolvedColor } from '../../core/klimt/color/HColorSet.js';
+import type { StereotypeSpriteRef } from './ast-stereotype-sprite.js';
+import type { DescriptionTogether } from './together.js';
 import type { NotePosition } from './note-grammar.js';
 
-/**
- * The sprite half of a parsed `<<...>>` run: `StereotypeDecoration
- * .spriteName` / `.spriteScale` / `.htmlColor`.
- *
- * Upstream keeps the whole `Stereotype` on the `Entity` and asks it for
- * `getSprite(getSkinParam())` at draw time
- * (`EntityImageDescription.java:193-194`). This port's `SpriteRegistry` is
- * not in scope while parsing, so the three fields that lookup needs travel
- * on the node instead — see `Stereotype#getSpriteName`'s doc comment for
- * why the accessor exists at all.
- */
-export interface StereotypeSpriteRef {
-  readonly name: string;
-  /** `Parser.getScale(...)`, defaulting to 1 (java:167). */
-  readonly scale: number;
-  /** `Stereotype#getHtmlColor()` — `HColors.BLACK` whenever a sprite run
-   *  matched and declared no explicit color (java:164), so normally set.
-   *  Handed to `SvgNanoParser#drawU` as its `fontColor`, exactly as
-   *  `Stereotype#getSprite` hands it to `asTextBlock`. */
-  readonly color?: ResolvedColor | undefined;
-}
+export type { StereotypeSpriteRef } from './ast-stereotype-sprite.js';
 
 // ---------------------------------------------------------------------------
 // Node
@@ -497,4 +478,6 @@ export interface DescriptionDiagramAST {
    * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:574-598
    */
   stereotypeVisibilityRules?: Array<{ pattern?: string; show: boolean }>;
+  /** cdd3-T18: every `together { }` block, in opening order (`./together.ts`). */
+  togethers?: DescriptionTogether[];
 }

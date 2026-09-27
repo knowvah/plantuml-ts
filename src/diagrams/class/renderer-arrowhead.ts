@@ -49,14 +49,12 @@ import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import { UStroke } from '../../core/klimt/UStroke.js';
-import { UTranslate } from '../../core/klimt/UTranslate.js';
-import { UEllipse } from '../../core/klimt/shape/UEllipse.js';
 import { place } from '../../core/svek/svek-edge-extremity.js';
 import type { LinkDecorName } from '../../core/svek/extremity/link-decor.js';
+import type { Side } from '../../core/svek/extremity/Side.js';
+import { resolveContactSide, type ContactRect } from './renderer-arrowhead-contact.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
-import { buildDotPathFromSplinePoints } from '../../core/svek/svek-edge-geometry.js';
 import type { LinkDecor } from './ast.js';
-import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type { EdgeGeo } from './layout.js';
 import { kalEndTranslate, movePointsEnd, movePointsStart, plus } from './renderer-arrowhead-move.js';
 
@@ -222,15 +220,18 @@ interface ExtremityDrawCtx {
  *  angle/decor-name inputs). See `drawExtremityMarkup`'s own doc comment for
  *  why `point`/`ctx.strokeWidth` are unscaled here and `ctx.k` is threaded
  *  through instead, and `buildEdgeArrowheads`'s own doc comment for the
- *  trim rescale. */
+ *  trim rescale. `side` (cdd3-T33, C-11) is forwarded to `place()` unchanged
+ *  -- `null` reproduces the pre-T33 behavior for every non-crowfoot decor
+ *  and for a contact this module could not resolve a rect for. */
 function placeAndDrawExtremity(
   name: LinkDecorName,
   point: Point2D,
   angle: number,
   ctx: ExtremityDrawCtx,
+  side: Side | null,
 ): { body: string; extraDefs: string; trim: Point2D } {
   const { color, backgroundColor, strokeWidth, k } = ctx;
-  const placed = place(name, { x: point.x / k, y: point.y / k }, angle, backgroundColor);
+  const placed = place(name, { x: point.x / k, y: point.y / k }, angle, backgroundColor, side);
   const drawn = drawExtremityMarkup(placed.drawable, placed.isFill, color, strokeWidth, k);
   return { ...drawn, trim: { x: placed.trim.x * k, y: placed.trim.y * k } };
 }
@@ -245,10 +246,11 @@ function drawTailExtremity(
   first: Point2D,
   second: Point2D,
   ctx: ExtremityDrawCtx,
+  side: Side | null,
 ): { body: string; extraDefs: string; trim: Point2D | undefined } {
   if (name === undefined) return { body: '', extraDefs: '', trim: undefined };
   const tailAngle = segmentAngle(first, second) + Math.PI;
-  return placeAndDrawExtremity(name, first, tailAngle, ctx);
+  return placeAndDrawExtremity(name, first, tailAngle, ctx, side);
 }
 
 /** The head-side extremity (faces FORWARD, continuing the edge's own
@@ -260,10 +262,11 @@ function drawHeadExtremity(
   secondToLast: Point2D,
   last: Point2D,
   ctx: ExtremityDrawCtx,
+  side: Side | null,
 ): { body: string; extraDefs: string; trim: Point2D | undefined } {
   if (name === undefined) return { body: '', extraDefs: '', trim: undefined };
   const headAngle = segmentAngle(secondToLast, last);
-  return placeAndDrawExtremity(name, last, headAngle, ctx);
+  return placeAndDrawExtremity(name, last, headAngle, ctx, side);
 }
 
 /**
@@ -287,10 +290,14 @@ function drawHeadExtremity(
  *  - `k`: cdd-T29 R2 (D4/journal row 175), defaults to 1 so every
  *    pre-existing caller (this file's own unit tests) is unaffected;
  *    `renderer-edge.ts` passes the diagram's real resolved factor.
+ *  - `contactRects`: cdd3-T33 (C-11) — see `renderer-arrowhead-contact.ts`'s
+ *    doc comment. Absent -> every `side` resolves to `null` (pre-T33
+ *    behavior, unchanged for every caller that omits it).
  */
 export interface EdgeArrowheadOptions {
   readonly resolvedStrokeWidth?: number;
   readonly k?: number;
+  readonly contactRects?: ReadonlyMap<string, ContactRect> | undefined;
 }
 
 /**
@@ -326,8 +333,20 @@ export function buildEdgeArrowheads(
   const tk = kalEndTranslate(edge, 'start');
   const hk = kalEndTranslate(edge, 'end');
   const last = edge.points.length - 1;
-  const tail = drawTailExtremity(tailName, plus(edge.points[0]!, tk), plus(edge.points[1]!, tk), ctx);
-  const head = drawHeadExtremity(headName, plus(edge.points[last - 1]!, hk), plus(edge.points[last]!, hk), ctx);
+  // cdd3-T33 (C-11): `side` reads the PRE-Kal contact point
+  // (`edge.points[0]`/`.at(-1)`, NOT the `plus(..., tk/hk)` point handed to
+  // `place()` below) -- `SvekEdge.java:544-546` computes `side` BEFORE
+  // `:548-554`'s Kal translate moves `center`.
+  const tailSide = resolveContactSide(options.contactRects, edge.sourceContactId, edge.points[0]);
+  const headSide = resolveContactSide(options.contactRects, edge.targetContactId, edge.points[last]);
+  const tail = drawTailExtremity(tailName, plus(edge.points[0]!, tk), plus(edge.points[1]!, tk), ctx, tailSide);
+  const head = drawHeadExtremity(
+    headName,
+    plus(edge.points[last - 1]!, hk),
+    plus(edge.points[last]!, hk),
+    ctx,
+    headSide,
+  );
 
   return {
     tail: tail.body,
@@ -375,121 +394,9 @@ export { movePointsStart, movePointsEnd, kalEndTranslate } from './renderer-arro
 export type { EdgeExtremityInk } from './renderer-arrowhead-ink.js';
 export { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 
-// ---------------------------------------------------------------------------
-// cdd-T7 (A5/M4, A2a/M6): mid-link decoration (`-0)-` etc.)
-// ---------------------------------------------------------------------------
-
-/** `MiddleCircle`/`MiddleCircleCircled`'s two hardcoded radii (both
- *  Java classes: `radius1 = 6`, `radius2 = 10`) -- NOT derived from any
- *  edge/theme value, matching upstream's own literals. */
-const MIDDLE_RADIUS_INNER = 6;
-const MIDDLE_RADIUS_OUTER = 10;
-/** `MiddleCircle`/`MiddleCircleCircled#drawU`'s own `UStroke.withThickness
- *  (1.5)` -- a fixed value, independent of the edge's own resolved stroke
- *  width (unlike the head/tail extremities' `resolvedStrokeWidth`). */
-const MIDDLE_STROKE_WIDTH = 1.5;
-
-/**
- * `MiddleCircleCircled#drawU`/`MiddleCircle#drawU` — the arc(s) (for the
- * three `CIRCLE_CIRCLED*` members) plus the always-drawn filled inner
- * circle, all centred on {@link DotPath.getMiddle}'s own point.
- *
- * `angle` here is upstream's OWN already-transformed value (`angleDeg - 45`,
- * `SvekEdge.java:984-987` -- see {@link buildMiddleDecorMarkup}'s doc
- * comment for the `angleRad -> angleDeg -> -45` derivation), fed straight
- * into `UEllipse`'s own `start` parameter exactly as upstream does.
- *
- * @see ~/git/plantuml/.../svek/extremity/MiddleCircleCircled.java
- * @see ~/git/plantuml/.../svek/extremity/MiddleCircle.java
- */
-/** Shared draw inputs -- bundled to stay inside this project's
- *  per-function param-count cap (mirrors {@link ExtremityDrawCtx}). */
-interface MiddleDecorCtx {
-  readonly strokeColor: Paint;
-  readonly backColor: Paint;
-  readonly diagramBackColor: Paint;
-  readonly k: number;
-}
-
-function drawMiddleDecorShape(
-  middleDecor: MiddleDecor,
-  point: Point2D,
-  angle: number,
-  ctx: MiddleDecorCtx,
-): {
-  body: string;
-  extraDefs: string;
-} {
-  const { strokeColor, backColor, diagramBackColor, k } = ctx;
-  // cdd-B8FU: same double-scaling trap `drawExtremityMarkup`/`renderer-
-  // edge-extras.ts#renderEdgeVisibilityIcon` document -- `point` is
-  // `dotPath.getMiddle().point`, derived from the ALREADY-scaled `points`
-  // (`class-scale-geo-edge.ts`), and this draws through the SAME
-  // scale-aware klimt pipeline, so it must be unscaled before translating.
-  const ug = UGraphicSvg.build(0, basicSvgOption({ scale: k }), '$version$', NO_TEXT_BOUNDER);
-  const base = ug
-    .apply(new Fore(strokeColor))
-    .apply(UStroke.withThickness(MIDDLE_STROKE_WIDTH))
-    .apply(new Back(backColor))
-    .apply(new UTranslate(point.x / k, point.y / k));
-  if (middleDecor === 'circleCircled') {
-    const bigCircle = UEllipse.build(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER);
-    base
-      .apply(new Fore(diagramBackColor))
-      .apply(new Back(diagramBackColor))
-      .apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER))
-      .draw(bigCircle);
-  }
-  if (middleDecor === 'circleCircled' || middleDecor === 'circleCircled1') {
-    const arc1 = new UEllipse(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER, angle, 90);
-    base.apply(new Back('none')).apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER)).draw(arc1);
-  }
-  if (middleDecor === 'circleCircled' || middleDecor === 'circleCircled2') {
-    const arc2 = new UEllipse(2 * MIDDLE_RADIUS_OUTER, 2 * MIDDLE_RADIUS_OUTER, angle + 180, 90);
-    base.apply(new Back('none')).apply(new UTranslate(-MIDDLE_RADIUS_OUTER, -MIDDLE_RADIUS_OUTER)).draw(arc2);
-  }
-  base
-    .apply(new UTranslate(-MIDDLE_RADIUS_INNER, -MIDDLE_RADIUS_INNER))
-    .draw(UEllipse.build(2 * MIDDLE_RADIUS_INNER, 2 * MIDDLE_RADIUS_INNER));
-  return extractFlatContent(ug.getSvgString());
-  // #lizard forgives -- faithful port of MiddleCircleCircled#drawU's own
-  // three-branch (BOTH/MODE1/MODE2) dispatch plus MiddleCircle's always-on
-  // inner circle, folded into one function since both share the SAME
-  // radius/stroke setup (module doc comment above).
-}
-
-/**
- * Builds the arc+ellipse markup for `edge.middleDecor` (`-0)-` and its
- * three siblings), or `undefined` when the edge carries none or its point
- * list cannot support a real `DotPath` (fewer than 4 points, or not a
- * well-formed `1 + 3*n` bezier spline -- the same shape guard
- * `buildDotPathFromSplinePoints` itself enforces).
- *
- * `angleDeg = -angleRad * 180 / PI` then `angleDeg - 45` is
- * `SvekEdge.java:984-987` verbatim: `dotPath.getMiddle()` returns a
- * math-convention (y-down, CCW-positive) radian angle; upstream negates it
- * to its own UEllipse-arc degree convention before subtracting the fixed
- * 45° the two `MiddleCircleCircled` MODE arcs are centred at.
- */
-export function buildMiddleDecorMarkup(
-  points: EdgeGeo['points'],
-  middleDecor: MiddleDecor | undefined,
-  strokeColor: Paint,
-  backgroundColor: Paint,
-  // cdd-B8FU (D4/journal row 175): defaults to 1 so every pre-existing
-  // caller (this file's own unit tests) is unaffected; `renderer-edge.ts`
-  // passes the diagram's real resolved factor.
-  k = 1,
-): { body: string; extraDefs: string } | undefined {
-  if (middleDecor === undefined) return undefined;
-  if (points.length < 4 || (points.length - 1) % 3 !== 0) return undefined;
-  const dotPath = buildDotPathFromSplinePoints(points);
-  const middle = dotPath.getMiddle();
-  const angleDeg = (-middle.angle * 180) / Math.PI;
-  return drawMiddleDecorShape(middleDecor, middle.point, angleDeg - 45, {
-    strokeColor,
-    backColor: backgroundColor,
-    diagramBackColor: backgroundColor,
-    k,
-  });
-}
+// cdd3-T33: `MiddleDecorCtx`/`drawMiddleDecorShape`/`buildMiddleDecorMarkup`
+// (cdd-T7 A5/M4, A2a/M6 mid-link decoration, `-0)-` etc.) moved to
+// `renderer-arrowhead-middle.ts` when this file's `side`/`contactRects`
+// threading (C-11) pushed it back over the 500-line hook cap -- a pure
+// move, re-exported so no consumer's import path changed.
+export { buildMiddleDecorMarkup } from './renderer-arrowhead-middle.js';

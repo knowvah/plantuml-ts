@@ -144,10 +144,18 @@ describe('paintToSvg', () => {
   });
 
   it('resolves named-color gradient stops to their jar hex (G1 I10 gradient-stop finding)', () => {
-    // component/raxata-43-buni314: `#yellow\\FFFFFF` -- stop-color="#FFFF00".
+    // component/raxata-43-buni314: `#yellow\\FFFFFF` -- jar stop-color="#FF0"/"#FFF"
+    // (cdd3-T10: shortened, `SvgGraphics.java:398,401`).
     const out = paintToSvg({ color1: 'yellow', color2: '#FFFFFF', policy: '\\' });
-    expect(out.def).toContain('stop-color="#FFFF00"');
-    expect(out.def).toContain('stop-color="#FFFFFF"');
+    expect(out.def).toContain('stop-color="#FF0"');
+    expect(out.def).toContain('stop-color="#FFF"');
+  });
+
+  it('shortens a stop colour to #RGB when every channel pair repeats (SvgGraphics.java:545-554)', () => {
+    // lozego-15-coci435: jar `<stop offset="0%" stop-color="#0FF"/>`.
+    const out = paintToSvg({ color1: '#00FFFF', color2: '#C3D8F4', policy: '|' });
+    expect(out.def).toContain('<stop offset="0%" stop-color="#0FF"/>');
+    expect(out.def).toContain('<stop offset="100%" stop-color="#C3D8F4"/>');
   });
 
   it('is deterministic: identical gradients produce the identical id (AC4)', () => {

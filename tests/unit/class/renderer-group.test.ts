@@ -121,8 +121,9 @@ describe('cdd-T16 — lazeju-60-boki114 full pipeline', () => {
     const a4Parts = renderGroupInheritanceNeighborhood(a4, geo.edges, defaultTheme);
     expect(a3Parts.length).toBe(2);
     expect(a4Parts.length).toBe(2);
-    expect(a3Parts[1]).toContain('x2="370.575"');
-    expect(a4Parts[1]).toContain('x2="667.575"');
+    // cdd3-T-D3: the jar's own lazeju SVG draws x2="370.58".
+    expect(a3Parts[1]).toContain('x2="370.58"');
+    expect(a4Parts[1]).toContain('x2="667.58"');
   });
 
   it('renders every one of A3`s/A4`s 7 grouped links as a bare solid path, no polygon, in its own <g class="link">', () => {

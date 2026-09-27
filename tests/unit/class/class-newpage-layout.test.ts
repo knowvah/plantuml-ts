@@ -160,6 +160,9 @@ describe('layoutClass / renderClass -- single page unaffected by T7', () => {
     // comment/assertion mismatch this fix now closes. Re-verified against
     // a fresh live jar run of this exact source: root cause + jar evidence
     // in `plans/g2-class-svg/ledger.md` N29.
+    // cdd3-T-D3: the spline is now read at graphviz's 2-dp `-Tsvg`
+    // precision (DotStringFactory.java:388-396), so it IS the jar's
+    // 109.79/114.79 quoted above, not 109.792.
     expect(svg).toBe(
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" data-diagram-type="CLASS" style="width:78px;height:178px;background:#FFFFFF;" width="78px" height="178px" viewBox="0 0 78 178" zoomAndPan="magnify" preserveAspectRatio="none" contentStyleType="text/css">' +
         '<?plantuml $version$?><defs/><g font-family="sans-serif" lengthAdjust="spacing">' +
@@ -180,8 +183,8 @@ describe('layoutClass / renderClass -- single page unaffected by T7', () => {
         '<line x1="8" y1="155" x2="62" y2="155" stroke="#181818" stroke-width="0.5"/>' +
         '</g>' +
         '<!--link Foo to Bar--><g class="link" data-entity-1="ent0001" data-entity-2="ent0002" id="lnk3" data-link-type="dependency">' +
-        '<path d="M35,55.262 C35,72.936 35,92.132 35,109.792" fill="none" stroke="#181818" stroke-width="1" id="Foo-to-Bar" codeLine="3"/>' +
-        '<polygon points="35,114.792,39,105.792,35,109.792,31,105.792,35,114.792" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
+        '<path d="M35,55.26 C35,72.94 35,92.13 35,109.79" fill="none" stroke="#181818" stroke-width="1" id="Foo-to-Bar" codeLine="3"/>' +
+        '<polygon points="35,114.79,39,105.79,35,109.79,31,105.79,35,114.79" fill="#181818" style="stroke:#181818;stroke-width:1;stroke-linejoin:miter;stroke-miterlimit:10;"/>' +
         '</g>' +
         '</g></svg>',
     );

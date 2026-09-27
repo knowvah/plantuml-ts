@@ -18,6 +18,7 @@ import {
   invertMiddleDecor,
 } from './class-arrow-grammar.js';
 import { parseUrlBracket } from './class-url.js';
+import { parseRelColors } from './class-relationship-colors.js';
 import {
   resolveRelationshipEndpoints,
   resolveRelationshipLabel,
@@ -226,27 +227,6 @@ const REL_COLOR_CAPTURE_RE = new RegExp(
     String.raw`\s*(?<color>${REL_COLOR})?`,
   'u',
 );
-
-/**
- * `Colors.java:96-124`'s tokenizer keyed to `ColorType.LINE` as `mainType`
- * (the relationship-line spec's own default, distinct from `core/
- * color-override.ts#resolveBareOrBackColor`'s BACK-keyed default for
- * classifier/note/state) -- a bare (no `:`, no `.`) token is the LINE
- * colour; last claimant wins, same positional rule as the BACK version.
- * The `text:COLOR` sub-token (xoxuni's label fill) is intentionally NOT
- * extracted here -- it needs a new `Relationship`/`EdgeGeo` field outside
- * this task's write-set (class-relationship-ast.ts), left as a residual.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/Colors.java:95-124
- */
-function resolveRelLineColor(spec: string | undefined): string | undefined {
-  if (spec === undefined) return undefined;
-  let line: string | undefined;
-  for (const part of spec.replace(/#/g, '').split(';')) {
-    if (part === '' || part.includes(':') || part.includes('.')) continue;
-    line = `#${part}`;
-  }
-  return line;
-}
 
 /**
  * Non-capturing dispatch-only variant of REL_RE, used by the COMMANDS table
@@ -469,10 +449,10 @@ export function parseRelationshipLine(
   // comment). Only applied when the bracket form (`-[#color]->`) left
   // `colorOverride` unset -- that form is the more specific, already-wired
   // override and wins on the rare line carrying both.
-  if (rel.colorOverride === undefined) {
-    const spec = REL_COLOR_CAPTURE_RE.exec(header !== null ? line.slice(header[0].length) : line)?.groups?.color;
-    const lineColor = resolveRelLineColor(spec);
-    if (lineColor !== undefined) rel.colorOverride = lineColor;
-  }
+  // cdd3-T10 (S-4t): the `;text:COLOR` half -- see `parseRelColors`.
+  const spec = REL_COLOR_CAPTURE_RE.exec(header !== null ? line.slice(header[0].length) : line)?.groups?.color;
+  const colors = parseRelColors(spec);
+  if (rel.colorOverride === undefined && colors.line !== undefined) rel.colorOverride = colors.line;
+  if (colors.text !== undefined) rel.labelTextColor = colors.text;
   return rel;
 }

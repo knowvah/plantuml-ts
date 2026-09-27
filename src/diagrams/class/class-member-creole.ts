@@ -51,7 +51,8 @@
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { FontPosition, fontPositionSpace } from '../../core/klimt/font/FontPosition.js';
-import { mutedAtomFontSpec, seaLineHeightAndSpan, textAtomDy } from './class-member-creole-sea.js';
+import { atomTopDy, mutedAtomFontSpec, seaLineHeightAndSpan, textAtomDy } from './class-member-creole-sea.js';
+import { openIconicStartingAltitude } from '../../core/openiconic-glyphs.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { splitMemberDisplayLines } from './class-member-display.js';
 import {
@@ -201,22 +202,34 @@ function accumulateResolvedAtoms(
 ): { rendered: MemberRenderAtom[]; heightEntries: { altitude: number; height: number }[]; width: number } {
   const rendered: MemberRenderAtom[] = [];
   // SI30 D2/D3: each kept atom's own `{altitude, height}` for the line's
-  // `Sea` reduction (`seaLineHeightAndSpan`). Altitude is 0 for every
-  // non-`'text'` atom and for a `'text'` atom with no `FontPosition` (or
-  // NORMAL) -- the pre-SI30 flat-MAX height this reduces to when no
-  // `<sup>`/`<sub>` shares the line.
+  // `Sea` reduction (`seaLineHeightAndSpan`) -- see {@link memberAtomAltitude}.
   const heightEntries: { altitude: number; height: number }[] = [];
   let width = 0;
   for (const atom of atoms) {
     for (const resolved of resolveAtomEntries(atom, ctx)) {
       rendered.push(resolved.atom);
       width += resolved.width;
-      const altitude =
-        resolved.atom.kind === 'text' ? fontPositionSpace(resolved.atom.font.fontPosition ?? FontPosition.NORMAL) : 0;
-      heightEntries.push({ altitude, height: resolved.lineHeight });
+      heightEntries.push({ altitude: memberAtomAltitude(resolved.atom), height: resolved.lineHeight });
     }
   }
   return { rendered, heightEntries, width };
+}
+
+/**
+ * `Atom#getStartingAltitude` for a resolved member atom: `AtomText`'s
+ * `FontPosition` space for a text run (`AtomText.java:321-323`; 0 when
+ * NORMAL), `AtomOpenIconic`'s `-3 * factor` for a vector glyph
+ * (`AtomOpenIconic.java:72-74`, cdd3-T22), and 0 for an img/sprite/latex
+ * image (`AtomImg.java:242-244`, `AtomSprite.java:69-71`,
+ * `AtomMath.java:73-75`). Emoji resolves to `'text'` here with no
+ * `FontPosition` -- its own `-3*factor` (`AtomEmoji.java:62-64`) stays out
+ * of this seam, unchanged.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomOpenIconic.java:72-74
+ */
+function memberAtomAltitude(atom: MemberRenderAtom): number {
+  if (atom.kind === 'text') return fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL);
+  if (atom.kind === 'vector') return openIconicStartingAltitude(atom.factor);
+  return 0;
 }
 
 export function resolveMemberAtoms(
@@ -244,25 +257,30 @@ export function resolveMemberAtoms(
   };
   const { rendered, heightEntries, width } = accumulateResolvedAtoms(atoms, ctx);
   const { height } = seaLineHeightAndSpan(heightEntries);
-  // SI30 D2: `dy`'s own `maxSpan` reduction is TEXT-ONLY -- an img/sprite/
-  // vector atom is drawn via its own INDEPENDENT placement rule
-  // (`renderer-classifier-rows.ts#renderRowAtoms`'s image/vector branches
-  // never read `dy`), never through the text-baseline `Sea` stack, so a
-  // tall icon sharing a row must not perturb its text siblings' baseline
-  // (jar-verified regression: `rotisi-30-loge424`/`cuzoga-39-tufu259`'s
-  // `<&x{scale=2.25}> someBadField`-shaped rows moved when the FULL
-  // (all-kind) `maxSpan` was used, `<sup>`/`<sub>`-free). The row's own
-  // `height` above still uses every kind (correct, DOT-parity-verified);
-  // only the per-atom `top` computation is restricted.
-  const textEntries = heightEntries.filter((_, i) => rendered[i]!.kind === 'text');
-  const { maxSpan: textMaxSpan } = seaLineHeightAndSpan(textEntries);
+  // SI30 D2 / cdd3-T22 (E1-3/E2-3): `dy` places every text run AND every
+  // OpenIconic glyph at its own `Sea` position (`Sea.java:72-89`), so the
+  // span is taken over both -- the altitude (`memberAtomAltitude`) and the
+  // span land together; either alone moved rotisi-30-loge424/cuzoga-39-
+  // tufu259's `<&x{scale=2.25}> someBadField` rows the wrong way. An
+  // img/sprite/latex `'image'` atom stays OUT of the span: its row is
+  // bottom-anchored instead (`class-member-rows.ts#buildSectionRows`,
+  // `renderRowAtoms`'s `lineBottomY`), which equals its `Sea` placement
+  // because its altitude is 0.
+  const seaEntries = heightEntries.filter((_, i) => rendered[i]!.kind !== 'image');
+  const { maxSpan } = seaLineHeightAndSpan(seaEntries);
   // SI30 D2: `dy` corrects against the ROW's own pre-existing baseline
   // reference (`baseFont`, a per-classifier constant), NOT this line's own
   // `Sea` height -- see `textAtomDy`'s own doc comment for why the two
   // diverge and which one member rows need.
   const withDy = rendered.map((atom, i) => {
+    // C-4 (cdd3-T23): 'drawable' (an SVG-backed `<$sprite>`) joins 'vector'
+    // here -- both are NON-'image' Sea participants now (see the
+    // 'drawable' kind's own doc comment, `class-member-render-atom.ts`).
+    if (atom.kind === 'vector' || atom.kind === 'drawable') {
+      return { ...atom, dy: atomTopDy(heightEntries[i]!, maxSpan, baseFont, measurer) };
+    }
     if (atom.kind !== 'text') return atom;
-    const dy = textAtomDy(atom, heightEntries[i]!, textMaxSpan, baseFont, measurer);
+    const dy = textAtomDy(atom, heightEntries[i]!, maxSpan, baseFont, measurer);
     return { ...atom, dy };
   });
   return { atoms: withDy, width, height };
@@ -329,7 +347,14 @@ export function resolveOneAtom(
         ? undefined
         : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
     }
-    const resolved = resolveInlineAtom(atom.atom, baseFont, sprites, spriteDims);
+    // C-3/C-4 (cdd3-T23, bidusa-22-jutu505): the creole `<color:X>...</color>`
+    // WRAPPER sets `atom.ambientFont`, not `atom.forcedColor` (that field is
+    // only the inline `<$name,color=X>` override) -- `resolveInlineAtom`'s
+    // sprite branch tints from ITS OWN `font` param when no forced color is
+    // set (`resolveSvgSpriteAtom`'s doc comment), so the wrapper's color is
+    // lost unless the ambient font reaches it here, mirroring the
+    // 'openiconic' branch above (`atom.ambientFont` already threaded there).
+    const resolved = resolveInlineAtom(atom.atom, atom.ambientFont ?? baseFont, sprites, spriteDims);
     return resolved === undefined ? undefined : { atom: resolved, width: resolved.width, lineHeight: resolved.height };
   }
   // 'latex': `AtomMath`, a measured+drawn image at altitude 0 -- see

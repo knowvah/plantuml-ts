@@ -25,7 +25,7 @@
  */
 
 import { parseSimpleColor, resolveColorToSvgHex } from './klimt/color/HColorSet.js';
-import { escapeAttribute } from './svg-format.js';
+import { escapeAttribute, shortenColor } from './svg-format.js';
 
 /**
  * A two-color linear gradient.
@@ -225,11 +225,14 @@ export function paintToSvg(p: Paint): { fill: string; def?: string } {
     '" y2="' +
     v.y2 +
     '">' +
+    // cdd3-T10: `stop1/stop2.setAttribute("stop-color", shortenColor(...))`
+    // (`klimt/drawing/svg/SvgGraphics.java:398,401`, `shortenColor` at
+    // `:545-554`) -- the stops ONLY; the id hash above keeps the 6-digit form.
     '<stop offset="0%" stop-color="' +
-    escapeAttribute(color1) +
+    escapeAttribute(shortenColor(color1)) +
     '"/>' +
     '<stop offset="100%" stop-color="' +
-    escapeAttribute(color2) +
+    escapeAttribute(shortenColor(color2)) +
     '"/>' +
     '</linearGradient>';
   return { fill: `url(#${id})`, def };

@@ -16,6 +16,8 @@ import { resolveStyleCascade, collectStyleTagNames, cleanStereotypeToken } from 
 import { resolveColorToSvgHex, parseSimpleColor, resolveConditionalColor } from './klimt/color/HColorSet.js';
 import { applyFontCascadeOverrides } from './style-cascade-class-font.js';
 import { applyVisibilityIconCascadeOverrides } from './style-cascade-visibility-icon.js';
+import { applyGenericCascadeOverrides } from './style-cascade-class-generic.js';
+import { applyLineCascadeOverrides } from './style-cascade-class-line.js';
 
 // cdd-T15: the style signatures moved to a sibling module (500-line cap) --
 // a pure move, re-exported there; see that file's header.
@@ -23,7 +25,6 @@ import {
   CLASS_SNAMES,
   HEADER_SNAMES,
   ARROW_SNAMES,
-  CARDINALITY_SNAMES,
   SPOT_SNAMES,
   NOTE_SNAMES,
   QUALIFIED_SNAMES,
@@ -33,6 +34,8 @@ export type GraphCascadeOverride = Pick<
   Theme['colors']['graph'],
   | 'classCascadeBackground'
   | 'classCascadeBorder'
+  | 'genericCascadeBackground'
+  | 'genericCascadeBorder'
   | 'classCascadeFontColor'
   | 'classCascadeHeaderFontColor'
   | 'classCascadeHeaderBackground'
@@ -58,6 +61,9 @@ export type GraphCascadeOverride = Pick<
   | 'arrowTagCascade'
   | 'visibilityIconLineCascade'
   | 'visibilityIconBackgroundCascade'
+  | 'classCascadeLineThickness'
+  | 'noteCascadeLineThickness'
+  | 'noteCascadeBorder'
 >;
 
 /**
@@ -119,7 +125,7 @@ const DEFAULT_NOTE_BACKGROUND = '#FEFFDD';
  * the jar-verified transparent/dark/light branch semantics) before falling
  * back to {@link cascadeHex}'s plain-color path.
  */
-function cascadeFontColorHex(
+export function cascadeFontColorHex(
   styleMap: StyleMap,
   snames: readonly string[],
   localBackgroundHex: string,
@@ -192,73 +198,6 @@ function arrowTagCascadeEntry(
     if (Number.isFinite(n)) entry.thickness = n;
   }
   return Object.keys(entry).length > 0 ? entry : undefined;
-}
-
-/**
- * D3: resolve the `{root,element,classDiagram,arrow,cardinality}` font
- * override (T1, edge-label-box-backlog) from a diagram's own `<style>`
- * StyleMap -- `GraphvizImageBuilder.java:235-241` resolves this SEPARATELY
- * from `labelFont` and passes both into `SvekEdge`'s constructor as
- * `cardinalityFont`. Returns only the properties a matching selector
- * actually declares (`resolveStyleCascade` -> `undefined` otherwise), so a
- * StyleMap that never touches `arrow`/`arrow.cardinality` contributes
- * nothing and the caller keeps the Theme's own default
- * (`defaultTheme.cardinalityFontSize` = 13, `plantuml.skin:307`).
- * SI26 D5: `cardinalityFontColor` -- absent means "inherit the arrow
- * label colour" (`arrow-label-font.ts#resolveCardinalityFontColor`).
- */
-export function computeCardinalityFontOverride(
-  styleMap: StyleMap,
-  stereotypeTags: readonly string[] = [],
-  backgroundHex?: string,
-): { cardinalityFontSize?: number; cardinalityFontFamily?: string; cardinalityFontColor?: string } {
-  const override: { cardinalityFontSize?: number; cardinalityFontFamily?: string; cardinalityFontColor?: string } = {};
-  const sizeRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontsize', stereotypeTags);
-  if (sizeRaw !== undefined) {
-    const n = Number(sizeRaw);
-    if (Number.isFinite(n) && n > 0) override.cardinalityFontSize = n;
-  }
-  const familyRaw = resolveStyleCascade(styleMap, CARDINALITY_SNAMES, 'fontname', stereotypeTags);
-  if (familyRaw !== undefined) override.cardinalityFontFamily = familyRaw;
-  const color = cascadeArrowFontColor(styleMap, CARDINALITY_SNAMES, stereotypeTags, backgroundHex);
-  if (color !== undefined) override.cardinalityFontColor = color;
-  return override;
-}
-
-/** SI26 D4/D5: `arrow { FontColor }` / `arrow { cardinality { FontColor } }`
- *  (`GraphvizImageBuilder.java:234-241`; skinparam twin `FromSkinparamToStyle
- *  .java:149,424-429`), merged last-declared-wins by `StyleStorage
- *  #computeMergedStyle` (`style/StyleStorage.java:102-116`) = `resolveStyle
- *  Cascade`'s source-order walk, no specificity. With `backgroundHex` (the
- *  canvas the label paints on) `#?light:dark` resolves via {@link
- *  cascadeFontColorHex}; without one, plain {@link cascadeHex}. */
-function cascadeArrowFontColor(
-  styleMap: StyleMap,
-  snames: readonly string[],
-  stereotypeTags: readonly string[],
-  backgroundHex: string | undefined,
-): string | undefined {
-  return backgroundHex === undefined
-    ? cascadeHex(styleMap, snames, 'fontcolor', stereotypeTags)
-    : cascadeFontColorHex(styleMap, snames, backgroundHex, stereotypeTags);
-}
-
-/** D3: arrow `labelFont` (`GraphvizImageBuilder.java:234-235`); `fontstyle` rides UNPARSED -- `arrow-label-font.ts` is the ONE reader (`klimt/font/FontStyle.java`). SI26: `arrowFontColor` via {@link cascadeArrowFontColor}. */
-export function computeArrowFontOverride(
-  styleMap: StyleMap,
-  stereotypeTags: readonly string[] = [],
-  backgroundHex?: string,
-): { arrowFontSize?: number; arrowFontFamily?: string; arrowFontStyle?: string; arrowFontColor?: string } {
-  const size = Number(resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontsize', stereotypeTags));
-  const family = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontname', stereotypeTags);
-  const style = resolveStyleCascade(styleMap, ARROW_SNAMES, 'fontstyle', stereotypeTags);
-  const color = cascadeArrowFontColor(styleMap, ARROW_SNAMES, stereotypeTags, backgroundHex);
-  return {
-    ...(Number.isFinite(size) && size > 0 ? { arrowFontSize: size } : {}),
-    ...(family !== undefined ? { arrowFontFamily: family } : {}),
-    ...(style !== undefined ? { arrowFontStyle: style } : {}),
-    ...(color !== undefined ? { arrowFontColor: color } : {}),
-  };
 }
 
 /**
@@ -369,6 +308,8 @@ export function computeClassStyleCascadeOverrides(
   // cdd2-T8 (S-7): `<style> visibilityIcon { <kind> {...} } }` cascade --
   // see `style-cascade-visibility-icon.ts#applyVisibilityIconCascadeOverrides`.
   applyVisibilityIconCascadeOverrides(styleMap, override);
+  // cdd3-T24 (C-6, E3-8): class + note LineThickness, note LineColor.
+  applyLineCascadeOverrides(styleMap, override);
   // G2 N37: per-tag `.tagname` cascade -- see `theme.ts#classTagCascade`'s
   // own doc comment.
   const tagCascade: Record<string, NonNullable<GraphCascadeOverride['classTagCascade']>[string]> = {};
@@ -408,6 +349,9 @@ function applyColorCascadeOverrides(styleMap: StyleMap, override: Partial<GraphC
   if (background !== undefined) override.classCascadeBackground = background;
   const border = cascadeHex(styleMap, CLASS_SNAMES, 'linecolor');
   if (border !== undefined) override.classCascadeBorder = border;
+  // T11 (cdd3, Q-4): the generic type-parameter tag's own ancestor cascade
+  // -- see `style-cascade-class-generic.ts`'s own doc comment.
+  applyGenericCascadeOverrides(styleMap, override);
   const localBg = background ?? DEFAULT_CLASS_BACKGROUND;
   const fontColor = cascadeFontColorHex(styleMap, CLASS_SNAMES, localBg);
   if (fontColor !== undefined) override.classCascadeFontColor = fontColor;

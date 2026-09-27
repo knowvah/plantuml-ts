@@ -167,6 +167,24 @@ function bodyReservationMaxX(m: GenericClassifierInkGeo['memberSections'], suppr
 }
 
 /**
+ * cdd3-T7 (R-VP): both compartments hidden (`suppress.fields &&
+ * suppress.methods`) is `BodierLikeClassOrObject#getBody`'s
+ * `showFields == false && showMethods == false` branch --
+ * `TextBlockUtils.empty(0, 0)` (`cucadiagram/BodierLikeClassOrObject.java:
+ * 249-250`), which draws nothing and reserves nothing. The header's own
+ * `UEmpty` reservation (`headerInkReservation`'s `maxY`) is then the ONLY
+ * body-side candidate for the classifier's max-Y ink point -- `addRectInk`
+ * (`class-ink-shapes.ts`) maxes it against `LimitFinder#drawRectangle`'s own
+ * `y + h - 1` corner (`klimt/drawing/LimitFinder.java:184-188`), exactly the
+ * X-axis rule's `bodyInkWidth` shape, one axis over. `undefined` (every
+ * other suppression state, where the body block itself reaches the box's
+ * full height) keeps the fixed `y + h`.
+ */
+function bodyInkHeight(suppress: MemberSuppression, header: InkReservation): number | undefined {
+  return suppress.fields && suppress.methods ? header.maxY : undefined;
+}
+
+/**
  * The classifier's rightmost `UEmpty` reservation, relative to its `x`, as
  * the `bodyInkWidth` field `class-ink-shapes.ts#addRectInk` reads. Only
  * `LeafType#isLikeClass` leaves are `EntityImageClass`
@@ -178,8 +196,12 @@ export function genericClassifierInkFields(
   geo: GenericClassifierInkGeo,
   suppress: MemberSuppression,
   badgeRadius: number,
-): { bodyInkWidth?: number } {
+): { bodyInkWidth?: number; bodyInkHeight?: number } {
   if (!LIKE_CLASS_KINDS.has(kind)) return {};
   const header = headerInkReservation(headerBlockDims(geo, badgeRadius), geo.width, geo.stereoGeo.headerRowHeight);
-  return { bodyInkWidth: Math.max(header.maxX, bodyReservationMaxX(geo.memberSections, suppress)) };
+  const maxY = bodyInkHeight(suppress, header);
+  return {
+    bodyInkWidth: Math.max(header.maxX, bodyReservationMaxX(geo.memberSections, suppress)),
+    ...(maxY !== undefined ? { bodyInkHeight: maxY } : {}),
+  };
 }

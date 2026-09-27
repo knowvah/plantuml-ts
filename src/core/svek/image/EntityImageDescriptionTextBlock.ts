@@ -91,14 +91,6 @@ export function measureLine(
   return { width, height: dim.getHeight(), descent };
 }
 
-/** A line's baseline descent, independent of its text content (every
- *  measurer in this codebase computes descent from `font.size` alone — see
- *  `measureLine`'s doc comment) — used for the STRIPE-level (not per-atom)
- *  baseline offset every styled run on the same physical line shares. */
-function lineDescent(stringBounder: StringBounder, font: FontConfiguration): number {
-  return stringBounder.getDescent?.(font, '') ?? font.size / 4.5;
-}
-
 /** `HorizontalAlignment`-driven local x offset — same branch
  *  `DecorateEntityImage.ts`'s local `textX` implements (duplicated per
  *  that file's one-local-helper-per-call-site convention). */
@@ -192,18 +184,33 @@ function measureAtomsWidthHeight(
   stringBounder: StringBounder,
   atoms: readonly CreoleAtom[],
   resolveAtomImage: AtomImageResolver | undefined,
-): { width: number; height: number } {
+): { width: number; height: number; descent: number } {
   // #lizard forgives(cyclomatic_complexity, nloc) -- one flat per-atom-kind
   // dispatch loop (R2i adds the emoji width/height branch to a pre-existing
   // at-cap shape).
   let width = 0;
   let height = 0;
+  // cdd3-T8 (`daxeno-00-kasu166`): MAX across TEXT atoms' own per-atom
+  // descent (`measureLine`'s `stringBounder.getDescent(atom.font,
+  // atom.text)`, already computed there, previously discarded) -- the SAME
+  // width-ADD/height-MAX-per-atom composition this loop already applies,
+  // one term further. The prior single `built.lineFont`-wide descent used
+  // the LINE's BASE font unconditionally, ignoring a per-run `<size:N>`
+  // override baked into `atom.font` -- wrong for a `<size:18>styled</size>`
+  // run inside a 14px-base title: descent 14/4.5=3.111 instead of the run's
+  // OWN 18/4.5=4.0, an 0.889px baseline error on `daxeno-00-kasu166`'s
+  // package cluster title (`text/@y` Δ0.889). A line whose only run keeps
+  // the base font (the common case) is unaffected: its one atom's own font
+  // IS the base font. Non-text atoms contribute 0 (unread by `drawAtoms`'s
+  // `baselineDy`, which only text atoms consume).
+  let descent = 0;
   const sharedLine = hasZeroAltitudeAtom(atoms);
   for (const atom of atoms) {
     if (atom.kind === 'text') {
       const m = measureLine(stringBounder, atom.text, atom.font);
       width += m.width;
       if (m.height > height) height = m.height;
+      if (m.descent > descent) descent = m.descent;
       continue;
     }
     if (atom.kind === 'latex') {
@@ -228,7 +235,7 @@ function measureAtomsWidthHeight(
     width += resolved.width;
     if (resolved.height > height) height = resolved.height;
   }
-  return { width, height };
+  return { width, height, descent };
 }
 
 function measureBuiltLine(
@@ -239,8 +246,8 @@ function measureBuiltLine(
   if (built.classification.type === 'HORIZONTAL_LINE') {
     return { width: SEPARATOR_WIDTH_CONTRIBUTION, height: SEPARATOR_SIZE_HEIGHT, descent: 0 };
   }
-  const { width, height } = measureAtomsWidthHeight(stringBounder, built.atoms, resolveAtomImage);
-  return { width, height, descent: lineDescent(stringBounder, built.lineFont) };
+  const { width, height, descent } = measureAtomsWidthHeight(stringBounder, built.atoms, resolveAtomImage);
+  return { width, height, descent };
 }
 
 /** Per-atom width only — upstream: `Neutron#getWidth(StringBounder)`,

@@ -12,6 +12,7 @@
  */
 import type { UrlInfo } from './class-url.js';
 import type { ClusterHeaderStereo } from './class-cluster-header.js';
+import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
 
 export interface NamespaceGeo {
   id: string;
@@ -103,4 +104,22 @@ export interface NamespaceGeo {
    *  draw site (`USymbolFolder#asBig`/`USymbolRectangle#asBig`/any other
    *  `USymbol#asBig`). Absent == `TextBlockUtils.empty(0, 0)`. */
   clusterHeaderStereo?: ClusterHeaderStereo;
+  /** cdd3-T21 (E3-1): the group's style-matching stereotype tags
+   *  (`splitStereotypeStyleTags(Namespace.stereotype)`) -- `Cluster#getStyle`
+   *  / `ClusterHeader#getStyle` resolve through `.withTOBECHANGED(group
+   *  .getStereotype())` (`Cluster.java:386-392`, `ClusterHeader.java:
+   *  144-150`), so a `package<Role><<label>>` skinparam reaches this group
+   *  only. Absent == no stereotype. */
+  stereotypeTags?: readonly string[];
+  /** cdd3-T31 (E1-5): a USymbol container's WHOLE drawn ink, local to
+   *  `(x, y)` -- a `LimitFinder` walk over the same `ClusterDecoration` the
+   *  renderer draws (`class-namespace-usymbol-shape.ts#namespaceUSymbolInk`).
+   *  When present it replaces the `inkShape` rules. */
+  symbolInk?: LeafSymbolInk;
+  /** cdd3-T31 (E1-2 = E2-8): the folder/rect title `UText` ink
+   *  (`LimitFinder.java:217-224`), local to `(x, y)` --
+   *  `class-namespace-title-ink.ts#namespaceTitleInk`. Added ON TOP of the
+   *  outline's `inkShape` rule. Absent for a USymbol container (its
+   *  `symbolInk` already walks the title) and an empty label. */
+  titleInk?: LeafSymbolInk;
 }

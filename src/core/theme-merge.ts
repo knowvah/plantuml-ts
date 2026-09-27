@@ -33,6 +33,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'actorStyle',
   'minimumWidth',
   'strictUml',
+  'genericDisplayOld', // cdd3-T25 (E3-3)
   'monochrome',
   'shadowing',
   'packageStyle',
@@ -49,6 +50,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'cardinalityFontSize',
   'cardinalityFontFamily', // T1 (edge-label-box-backlog, D3)
   'cardinalityFontColor', // SI26 T1 (D5)
+  'cardinalityFontStyle', // T11 (cdd3, Q-5)
   // `diagramMargin` is the one non-scalar here. It rides this list because the
   // merge is a whole-value replacement, which is exactly right for a margin:
   // a theme that sets one replaces all four sides, it does not blend with the

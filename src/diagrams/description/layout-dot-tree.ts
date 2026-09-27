@@ -23,6 +23,7 @@ import {
   EMPTY_CONTAINER_HEIGHT,
   GROUP_ANCHOR_SIZE,
   measureLeafNode,
+  measureLeafShield,
   computeContainerBbox,
   type EdgeContainerEndpoints,
   resolveEndpoint,
@@ -167,33 +168,28 @@ export function buildDotNodes(
     // shallow clone; returns the SAME node reference when nothing changes
     // (`visibleStereotypeLabels`'s own doc comment).
     const sizedNode = nodeWithVisibleStereotype(node, stereotypeRules);
-    const dims = measureLeafNode(
-      sizedNode,
-      fontSpec,
-      measurer,
-      {
-        componentStyle: ctx.componentStyle,
-        actorStyle: ctx.actorStyle,
-        minimumWidth: ctx.minimumWidthFor(node.symbol),
-        wrapWidth: ctx.wrapWidth,
-        guillemet: ctx.guillemet,
-        fontSize: ctx.fontSizeFor(node.symbol),
-        // S1L-tail G4: keyed off the FILTERED (`sizedNode`) stereotype list,
-        // not `node.stereotype` -- a `hide stereotype`d label reserves no
-        // block, so a name-scoped `<<tag>> { FontSize }` for a hidden label
-        // must not resize anything either. Same reasoning as `sizedNode`
-        // itself (see the comment above it).
-        stereotypeFontSize: ctx.stereotypeFontSizeFor(node.symbol, sizedNode.stereotype),
-        lineThickness: ctx.lineThicknessFor(node.symbol),
-        // Wave 3: without this the SIZER draws the platform-glyph fallback
-        // into `Footprint` while the RENDERER draws the real Twemoji artwork,
-        // so a `usecase "<:rocket:> ..."` ellipse is fitted to the wrong
-        // points (murava-69-tago286). `degenerateSingleLeaf` wires the same
-        // resolver for the no-link single-leaf path it owns.
-        emojiArtwork: ctx.emojiArtwork,
-      },
-      ctx.sprites,
-    );
+    const sizingOpts = {
+      componentStyle: ctx.componentStyle,
+      actorStyle: ctx.actorStyle,
+      minimumWidth: ctx.minimumWidthFor(node.symbol),
+      wrapWidth: ctx.wrapWidth,
+      guillemet: ctx.guillemet,
+      fontSize: ctx.fontSizeFor(node.symbol),
+      // S1L-tail G4: keyed off the FILTERED (`sizedNode`) stereotype list,
+      // not `node.stereotype` -- a `hide stereotype`d label reserves no
+      // block, so a name-scoped `<<tag>> { FontSize }` for a hidden label
+      // must not resize anything either. Same reasoning as `sizedNode`
+      // itself (see the comment above it).
+      stereotypeFontSize: ctx.stereotypeFontSizeFor(node.symbol, sizedNode.stereotype),
+      lineThickness: ctx.lineThicknessFor(node.symbol),
+      // Wave 3: without this the SIZER draws the platform-glyph fallback
+      // into `Footprint` while the RENDERER draws the real Twemoji artwork,
+      // so a `usecase "<:rocket:> ..."` ellipse is fitted to the wrong
+      // points (murava-69-tago286). `degenerateSingleLeaf` wires the same
+      // resolver for the no-link single-leaf path it owns.
+      emojiArtwork: ctx.emojiArtwork,
+    };
+    const dims = measureLeafNode(sizedNode, fontSpec, measurer, sizingOpts, ctx.sprites);
     if (node.symbol === 'port') {
       result.push(buildPortNode(id, node, dims, fontSpec, measurer));
       continue;
@@ -201,6 +197,12 @@ export function buildDotNodes(
     const dotNode: DotInputNode = { id, width: dims.width, height: dims.height };
     const shape = shapeForNode(node, links, fixCircle);
     if (shape !== undefined) dotNode.shape = shape;
+    // cdd3-T28 (E3-22): a shielded interface/circle (`plaintext`) reserves
+    // its `getShield` margins in the DOT node (SvekNode.java:245-267).
+    if (shape === 'plaintext') {
+      const m = measureLeafShield(sizedNode, fontSpec, measurer, sizingOpts, ctx.sprites);
+      dotNode.shieldMargins = { x1: m.getX1(), x2: m.getX2(), y1: m.getY1(), y2: m.getY2() };
+    }
     result.push(dotNode);
   }
   // Group-anchor nodes (ClusterDotString.java:149/177-184) — one per

@@ -165,7 +165,7 @@ function measuringFont(fc: FontConfiguration): FontConfiguration {
  * `calculateDimension` measures text via `measuringFont`. `drawU`'s baseline
  * shift mirrors `ypos` (java:213-215) -- its commented-out `getSpace()`
  * (java:212) confirms the altitude reaches the page via `Sea` alone (D2). */
-function descAtomOps(
+export function descAtomOps(
   resolveAtomImage: AtomImageResolver | undefined,
   resolveEmojiArtwork: EmojiArtworkResolver | undefined,
 ): AtomOps {

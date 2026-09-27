@@ -34,17 +34,17 @@ import { layoutGraph as layout } from '../../core/graph-layout.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { filterRemovedEntities, computeHiddenIds, computeRemovedRanks } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
-import { collapseEmptyNamespacesFinal } from './class-namespace.js';
+import { collapseEmptyNamespacesFinal, packedGroupRanksField } from './class-namespace.js';
 import { mapNoteGeos, type NoteGeo } from './note-layout.js';
 import { findFreestandingNoteConnectors } from './note-freestanding.js';
 import { measureClassifier, isMethodMember, type MeasuredClassifier } from './class-layout-helpers.js';
 import { measureCircleInterface } from './class-layout-leaf-shapes.js';
-import { buildDotGraph } from './class-dot-graph.js';
+import { buildDotGraph, inNodeMapOrder } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 import { computeClassDocumentDims, computeClassInkShift, computeClassRawInkDims } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
 import { applyTopUrlToClassifiers } from './class-url.js';
-import { resolveScaleFactor } from '../../core/scale-command.js';
+import { resolveClassScaleFactor } from './class-layout-scale-resolve.js';
 import { scaleClassGeometry } from './class-scale-geo.js';
 import { clusterClipRect } from './class-shield-helpers.js';
 import {
@@ -255,9 +255,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // Everything below — dot graph, note synthesis, geo building — sees only
   // the surviving entities, keeping edge-index alignment consistent.
   const effAst = filterRemovedEntities(pageAst);
-  // cdd-T3 (A1 SB5): the ranks that filtering just dropped -- jar burned them
-  // at parse time and only skips the entities at EXPORT time, so they stay as
-  // holes in its numbering (`computeRemovedRanks`'s own doc comment).
+  // cdd-T3 (A1 SB5): ranks filtering just dropped -- jar burned them at parse
+  // time, skipped only at EXPORT time (`computeRemovedRanks`'s doc comment).
   const removedRanks = computeRemovedRanks(pageAst);
 
   // Build dot graph (classifiers + notes flattened into root graph, D5)
@@ -297,7 +296,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // `class-edge-geo.ts#EdgeGeoTextContext`).
   const edges = buildEdgeGeos(
     effAst,
-    result,
+    inNodeMapOrder(result, dotGraph), // cdd3-T16: `Bibliotekon#allNodes`
     swappedEdges,
     {
       measurer,
@@ -342,7 +341,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // (`SvekEdge#drawU`'s `if (opale) return;`); a candidate that FAILED to
   // resolve (degenerate spline) keeps its ordinary edge draw, the same
   // safe fallback `buildOpaleNoteGeo ?? plainNoteGeo` already applies.
-  const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges, effAst.classifiers);
+  const freestandingConnectors = findFreestandingNoteConnectors(effAst.notes, edges);
   // cdd-T13 (M1): a `note <pos> of <package>` connector is upstream's OWN
   // ordinary `Link` (`CommandFactoryNoteOnEntity.java:342`), so its
   // `SvekEdge` gets the SAME `:671-672` clip -- threaded into `mapNoteGeos`
@@ -370,13 +369,18 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // slot counted in the dense-renumbering merge, even one that never draws.
   const markedEdges = edges.map((e) => (consumedEdgeIds.has(e.id) ? { ...e, consumedByOpaleNote: true as const } : e));
 
-  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, iconSizeOf(theme));
+  // T11 (cdd3, Q-5): `cardinalityFontSize` rides alongside `iconSize` now (5-param cap on the callee).
+  const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, {
+    iconSize: iconSizeOf(theme),
+    cardinalityFontSize: theme.cardinalityFontSize,
+  });
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
   // `effAst` the dot graph/geo builders above already read.
   return {
     ...assembled,
     ...(removedRanks.length > 0 ? { removedRanks } : {}),
+    ...packedGroupRanksField(effAst),
     leaves: orderLeaves(assembled.leaves, computeLeafDrawOrder(effAst)),
   };
   // #lizard forgives -- linear orchestration (empty-diagram guard,
@@ -405,10 +409,9 @@ function assembleShiftedGeometry(
   namespaces: NamespaceGeo[],
   edges: EdgeGeo[],
   notes: NoteGeo[],
-  // G9/T12: the resolved `classAttributeIconSize` — a `#`/`~` visibility
-  // icon is a `UPolygon`, whose ink `LimitFinder` pads by 10px on each side
-  // (see `class-ink-box.ts#addVisibilityIconInk`).
-  iconSize: number,
+  // G9/T12: `classAttributeIconSize` + T11's `cardinalityFontSize`, grouped
+  // (5-param cap) -- see `class-ink-box.ts#addVisibilityIconInk`/`buildInkBox`.
+  inkOptions: { iconSize?: number; cardinalityFontSize?: number | undefined },
 ): ClassGeometry {
   // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
   // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
@@ -428,12 +431,12 @@ function assembleShiftedGeometry(
   // shrank the canvas width from 293 (jar 277, before this fix) to 85 (jar
   // 277) -- classifier ink is NOT excluded upstream, only the cluster's.
   const inkNamespaces = namespaces.filter((n) => n.hidden !== true);
-  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, iconSize);
+  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, inkOptions);
   // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
-  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, iconSize);
-  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, iconSize);
+  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, inkOptions);
+  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, inkOptions);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
@@ -473,16 +476,14 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
 /**
  * Lay out a class diagram using the dot layout engine (synchronous).
  *
- * When the source contained `newpage` (`ast.pages` is set — see ast.ts), each
- * page is laid out independently via `layoutSinglePage` and the resulting
- * geometries are stacked vertically (`layoutMultiPage`); otherwise the single
- * top-level AST is laid out directly, unchanged from pre-T7 behavior.
+ * When the source contained `newpage` (`ast.pages` set — see ast.ts), each
+ * page is laid out independently via `layoutSinglePage` and stacked
+ * vertically (`layoutMultiPage`); otherwise laid out directly.
  *
  * cdd-T29 (D4): `scale ...` is resolved AFTER layout, from the diagram's
- * OWN final unscaled dimension (`resolveScaleFactor`'s own doc comment --
- * never a partial/intermediate one) — matches upstream's `UgDiagram.java:
- * 138`, which passes `scale` only to the exporter, never to svek/DOT
- * layout itself (`core/scale-command.ts`'s module doc, D4).
+ * OWN final dimension — matches `UgDiagram.java:138` (`core/scale-command
+ * .ts`'s module doc, D4; `resolveClassScaleFactor`'s doc comment for the
+ * fractional-vs-truncated basis, cdd3-T34).
  *
  * @param ast      - Parsed class diagram AST.
  * @param theme    - Visual theme for font metrics and sizing.
@@ -492,10 +493,8 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
 export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   const geo =
     ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
-  // cdd-T30: `theme.dpi` -- `skinParam.getDpi()`
-  // (`core/TextBlockExporter.java:206`), default 96 when `skinparam dpi` was
-  // never declared (`Theme.dpi`'s own doc comment). SAME `resolveScaleFactor`
-  // call as before T30 -- no second scale-resolution path.
-  const k = resolveScaleFactor(ast.scale, geo.totalWidth, geo.totalHeight, theme.dpi);
+  // cdd-T30/cdd3-T34 (C-10): `theme.dpi` default 96 (`Theme.dpi`'s doc
+  // comment); `resolveClassScaleFactor`'s own doc comment for the basis.
+  const k = resolveClassScaleFactor(geo, ast.scale, theme.dpi);
   return scaleClassGeometry(geo, k, theme.fontSize);
 }
