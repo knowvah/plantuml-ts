@@ -17,13 +17,9 @@
  * -> SVG string. No DOM, no async").
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/preprocessor.js';
+import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
 import type { ParseOptions } from '../../../src/core/dispatcher.js';
-import { resolveTheme } from '../../../src/core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
-import { applyStyleMap } from '../../../src/core/style-map-theme.js';
-import { applySkinLayer } from '../../../src/core/skin-loader.js';
-import { computeClassTagCascadeGenerations } from '../../../src/core/style-cascade-class.js';
+import { buildTheme } from '../../../src/core/build-theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
@@ -51,52 +47,6 @@ import { applyClassDocumentMargin } from '../../../src/diagrams/class/layout-ink
  * `registry.resolve(umlSource, { assetStore: options?.assetStore })`).
  */
 type FixtureClassOptions = PreprocessOptions & ParseOptions;
-
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  readonly styleMap: StyleMap;
-}
-
-function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAndStyles {
-  const base = resolveTheme(preprocessed.theme ?? 'default');
-  // mission skin-file-loading Batch 1 (D6) / deferred D3 item: mirrors
-  // src/index.ts#buildTheme's own Stage 1.5 -- applied BEFORE the
-  // document's own skinparam so the document always wins. Previously
-  // missing from this harness (only render-fixture-state.ts had it),
-  // so a `skin rose` class fixture never saw its loaded Shadowing value
-  // under this test pipeline even though production (`src/index.ts`)
-  // already resolved it correctly.
-  const withSkin = applySkinLayer(preprocessed, base);
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  const withStyleMap = applyStyleMap(styleMap, withStyles);
-
-  // G2 N39: mirrors src/index.ts#buildTheme's own Stage 3a extension --
-  // see that function's doc comment.
-  const classTagCascadeGenerations = computeClassTagCascadeGenerations(preprocessed.styles);
-  const theme =
-    classTagCascadeGenerations === undefined
-      ? withStyleMap
-      : {
-          ...withStyleMap,
-          colors: {
-            ...withStyleMap.colors,
-            graph: { ...withStyleMap.colors.graph, classTagCascadeGenerations },
-          },
-        };
-  return { theme, styleMap };
-}
 
 /** Renders a `.puml` fixture through the CLASS engine's low-level pipeline
  * with `measurer` injected at the layout stage. `options.includeStore`
@@ -141,7 +91,12 @@ export function layoutFixtureClass(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const { theme, styleMap } = buildThemeForFixture(preprocessed);
+  const rawSourceLines = first.rawSource.map((s) => s.getString());
+  // cdd4-T7b/cdd4-T13: the shipped `buildTheme`, not a copy of it -- a copy
+  // measured a path no shipped code takes once theme styling (declaration-
+  // order skinparam/`<style>` interleaving, root/document routing) moved
+  // into it.
+  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
   // cdd4-T4 (bidusa-22-jutu505): mirrors `classPlugin.parse(block, options)`
   // (`src/diagrams/class/index.ts:47-51`) -- `parseClass` was called with NO
@@ -197,7 +152,7 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
 
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
-  const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
   // cdd-T28: mirrors `index.ts#applyAnnotationChrome`'s `spritesOf(ast)`
   // -- chrome text is creole now, so a `<$sprite>` in a title/legend has to
   // resolve against the diagram's own registry here too, or this harness
