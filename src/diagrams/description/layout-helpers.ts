@@ -90,7 +90,7 @@ export {
   USECASE_HEIGHT,
   PORT_SIZE,
 } from '../../core/svek/image/leaf-sizing.js';
-export { measureTitleLabel, measureShadowAnchorDims } from './title-label-sizing.js';
+export { measureTitleLabel } from './title-label-sizing.js';
 
 // ---------------------------------------------------------------------------
 // Container membership

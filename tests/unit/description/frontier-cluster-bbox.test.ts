@@ -1,7 +1,8 @@
 /**
- * Unit tests for `frontier-cluster-bbox.ts` — wires `frontier-calculator
- * .ts` and `frontier-shadow-layout.ts` into the `Bbox` a port cluster's
- * `buildGeoNode` (layout.ts) uses in place of `computeContainerBbox`.
+ * Unit tests for `frontier-cluster-bbox.ts` -- `Cluster#manageEntryExitPoint`
+ * (`svek/Cluster.java:410-430`) seeded, as upstream is, with the cluster's
+ * own graphviz rect (`getRectangleArea()`, set by `DotStringFactory#solve`
+ * via `Cluster#setPosition`, `Cluster.java:511-512`).
  */
 import { describe, test, expect } from 'vitest';
 import {
@@ -10,6 +11,7 @@ import {
   type ClusterSpacing,
 } from '../../../src/diagrams/description/frontier-cluster-bbox.js';
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
+import type { RectangleArea } from '../../../src/core/svek/FrontierCalculator.js';
 
 function portGeo(id: string, x: number, y: number): DescriptionNodeGeo {
   return { id, symbol: 'port', display: id, x, y, width: 12, height: 12, children: [] };
@@ -19,92 +21,61 @@ function leafGeo(id: string, x: number, y: number, width: number, height: number
   return { id, symbol: 'component', display: id, x, y, width, height, children: [] };
 }
 
-const TB_SPACING: ClusterSpacing = { nodeSep: 35, rankSep: 60, rankdir: 'TB' };
+const TB: ClusterSpacing = { rankdir: 'TB' };
 
-describe('computePortClusterBbox (insides empty — gafegu-06-nito976 shape)', () => {
-  test("matches jar's exact 177x99 result once shifted to this cluster's own already-resolved port positions", () => {
-    // Mirrors gafegu-06's real, already-resolved (raw, pre-ink-shift) port
-    // x positions -- relative spacing (gaps of 47 = nodesep 35 + width 12)
-    // is what the real pipeline already gets right; only the cluster's own
-    // box needed FrontierCalculator. y arbitrary (23, distinct from the
-    // shadow calc's own internal frame -- the alignment step must not
-    // assume they coincide).
-    const children = [portGeo('p80', 23, 23), portGeo('p81', 70, 23), portGeo('p82', 117, 23), portGeo('p83', 164, 23)];
-    const info: PortClusterInfo = {
-      ranks: [{ rank: 'source', nodeIds: ['p80', 'p81', 'p82', 'p83'] }],
-      anchorWidth: 50,
-      anchorHeight: 17,
-      titleWidth: 50,
-      titleHeight: 17,
-    };
-    const bbox = computePortClusterBbox(children, info, TB_SPACING);
-    expect(bbox.width).toBe(177);
-    expect(bbox.height).toBe(99);
-  });
+function info(initial: RectangleArea, extra: Partial<PortClusterInfo> = {}): PortClusterInfo {
+  return { initial, clusterRects: new Map(), titleWidth: 0, titleHeight: 0, ...extra };
+}
 
-  test('is translation-invariant: shifting every port by the same (dx,dy) shifts the bbox by the same amount, not the size', () => {
-    const base = [portGeo('p80', 23, 23), portGeo('p81', 70, 23), portGeo('p82', 117, 23), portGeo('p83', 164, 23)];
-    const shifted = base.map((c) => ({ ...c, x: c.x + 1000, y: c.y + 500 }));
-    const info: PortClusterInfo = {
-      ranks: [{ rank: 'source', nodeIds: ['p80', 'p81', 'p82', 'p83'] }],
-      anchorWidth: 50,
-      anchorHeight: 17,
-      titleWidth: 50,
-      titleHeight: 17,
-    };
-    const bboxBase = computePortClusterBbox(base, info, TB_SPACING);
-    const bboxShifted = computePortClusterBbox(shifted, info, TB_SPACING);
-    expect(bboxShifted.width).toBe(bboxBase.width);
-    expect(bboxShifted.height).toBe(bboxBase.height);
-    expect(bboxShifted.x - bboxBase.x).toBeCloseTo(1000, 5);
-    expect(bboxShifted.y - bboxBase.y).toBeCloseTo(500, 5);
-  });
-
-  test('ensureMinWidth widens the box when the cluster title is wider than the port-driven box', () => {
-    const children = [portGeo('p0', 0, 0)];
-    const info: PortClusterInfo = {
-      ranks: [{ rank: 'source', nodeIds: ['p0'] }],
-      anchorWidth: 40,
-      anchorHeight: 16,
-      titleWidth: 500,
-      titleHeight: 16, // far wider than a single 12px port could drive
-    };
-    const bbox = computePortClusterBbox(children, info, TB_SPACING);
-    expect(bbox.width).toBeGreaterThanOrEqual(510); // titleWidth + 10 (java:427-428)
+describe('computePortClusterBbox -- sokevu-87-toce485 (node n, three portin)', () => {
+  test("reproduces the jar's 199.17x116 node box from the real cluster rect", () => {
+    // `layoutGraph(...).clusters` for the fixture: x -8, y 88, 231x142; the
+    // three port corners are the PORT cells' (cdd4-T6b). Jar in.svg draws the
+    // node from 16,119 to 215.17,235 in its own frame (ports at +28,+5).
+    const children = [portGeo('p', 0, 108), portGeo('firstportname', 65.17, 108), portGeo('nwd', 163.17, 108)];
+    const bbox = computePortClusterBbox(
+      children,
+      info({ minX: -8, minY: 88, maxX: 223, maxY: 230 }, { titleWidth: 67, titleHeight: 9 }),
+      TB,
+    );
+    expect(bbox.x).toBe(-12);
+    expect(bbox.y).toBe(114);
+    expect(bbox.width).toBeCloseTo(199.17, 10);
+    expect(bbox.height).toBe(116);
   });
 });
 
-describe('computePortClusterBbox (fallback cases)', () => {
-  test('falls back to the padded-union formula when the cluster has normal ("insides") children too', () => {
-    // component/cuxelu-66-zopu195 shape: `[API Server]` (normal) +
-    // `portout httpout` (port) in the SAME container -- regressed 26->27
-    // diffs when routed through the (approximated) shadow-calc path; see
-    // frontier-cluster-bbox.ts's own doc comment for why this case is
-    // scoped OUT of mechanism B for now.
-    const children = [leafGeo('api', 20, 20, 100, 40), portGeo('httpout', 150, 20)];
-    const info: PortClusterInfo = {
-      ranks: [{ rank: 'sink', nodeIds: ['httpout'] }],
-      anchorWidth: 40,
-      anchorHeight: 16,
-      titleWidth: 40,
-      titleHeight: 16,
-    };
-    const bbox = computePortClusterBbox(children, info, TB_SPACING);
-    // computeContainerBbox's own padded-union formula (layout-helpers.ts):
-    // x = minX - 16, y = minY - 28, width = span + 32, height = span + 44.
-    expect(bbox).toEqual({ x: 4, y: -8, width: 174, height: 84 });
+describe('computePortClusterBbox -- insides (Cluster.java:413-423)', () => {
+  const initial: RectangleArea = { minX: 0, minY: 0, maxX: 300, maxY: 200 };
+  const port = portGeo('out', 144, -6); // centre (150, 0)
+
+  test('a leaf child is an inside: its own box joins the core', () => {
+    // Core 50..150 x 0..60: the port touches maxX and minY, so both stay,
+    // and it sits on a corner within DELTA (18) of maxX -> pushMaxX
+    // (FrontierCalculator.java:101-137); the untouched sides snap to initial.
+    const bbox = computePortClusterBbox([leafGeo('leaf', 50, 50, 10, 10), port], info(initial), TB);
+    expect(bbox).toEqual({ x: 0, y: 0, width: 168, height: 200 });
   });
 
-  test('falls back to the padded-union formula when no configured port id resolves a real child', () => {
-    const children = [leafGeo('only', 0, 0, 50, 30)];
-    const info: PortClusterInfo = {
-      ranks: [{ rank: 'source', nodeIds: ['missing-port'] }],
-      anchorWidth: 40,
-      anchorHeight: 16,
-      titleWidth: 0,
-      titleHeight: 0,
-    };
-    const bbox = computePortClusterBbox(children, info, TB_SPACING);
-    expect(bbox).toEqual({ x: -16, y: -28, width: 82, height: 74 });
+  test('a child cluster contributes its graphviz rect, not its own drawn box', () => {
+    // Parent runs first (SvekResult#drawU walks allCluster() in creation
+    // order), so the child's rect is still graphviz's: 40..160 swallows the
+    // port's x, maxX is no longer touched and snaps to initial.
+    const child: DescriptionNodeGeo = { ...leafGeo('child', 50, 50, 10, 10), symbol: 'rectangle' };
+    const clusterRects = new Map([['child', { minX: 40, minY: 40, maxX: 160, maxY: 120 }]]);
+    const bbox = computePortClusterBbox([child, port], info(initial, { clusterRects }), TB);
+    expect(bbox).toEqual({ x: 0, y: 0, width: 300, height: 200 });
+  });
+
+  test('ensureMinWidth widens the box to titleWidth + 10 when the title is wider (java:427-428)', () => {
+    const bbox = computePortClusterBbox(
+      [portGeo('p0', 0, 0)],
+      info({ minX: 0, minY: 0, maxX: 40, maxY: 40 }, { titleWidth: 500, titleHeight: 16 }),
+      TB,
+    );
+    expect(bbox.width).toBe(510);
+    // FrontierCalculator.ensureMinWidth's `error` correction keeps minX
+    // from moving left of initial.minX.
+    expect(bbox.x).toBe(0);
   });
 });

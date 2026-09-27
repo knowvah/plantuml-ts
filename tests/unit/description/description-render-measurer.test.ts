@@ -61,4 +61,13 @@ describe('sokevu-87-toce485 description render measurer (E3-9)', () => {
     expect(svg).toContain('d="M111.59,22.74 C131.41,42.95 180.78,93.3 196.82,109.66"');
     expect(svg).toContain('d="M191.3,119 C171.17,119 137.4,119 119.49,119"');
   });
+
+  it('cdd4-T6b: the node frame is the frontier over the REAL cluster rect (jar polygon, 261x260 page)', () => {
+    // `Cluster#manageEntryExitPoint` seeds FrontierCalculator with
+    // `getRectangleArea()` (`Cluster.java:410-430`), graphviz's own cluster
+    // box (`Cluster#setPosition`, `:511-512`); the shadow graph gave 217.
+    const { svg } = renderCapturing();
+    expect(svg).toContain('points="16,129,26,119,215.17,119,215.17,225,205.17,235,16,235,16,129"');
+    expect(svg).toContain('width="261px" height="260px"');
+  });
 });
