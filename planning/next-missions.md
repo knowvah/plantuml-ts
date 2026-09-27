@@ -51,9 +51,12 @@ non-conformant class row is besepi. Follow-ons, by owner:
   - Fix: repoint the symlink and `pin.json` to one jar, then recapture
     every engine's cache and re-measure.
   - Maintainer ruling: not piecemeal (cdd4 journal 6–7; cdd1 D12).
-- **Stale acceptances.** moxobo-16-tipo829 and zikabo-17-gugi332 are
-  accepted in `oracle/accepted-divergences.json` but now render
-  conformant. Retire them, with a maintainer signature.
+- ~~**Stale acceptances.**~~ WITHDRAWN 2026-09-27: moxobo-16 and zikabo-17
+  are NOT stale. `compare.ts:374` exempts `<image>` href bytes, so the
+  accepted PNG-vs-SVG payload divergence is invisible to the survey by
+  design. Both entries now carry `surveyBlind`. The new ledger gate
+  (`emitter.golden.test.ts`) fails on any other in-force entry the survey
+  records as conformant.
 - **Description protection wrappers.** `description/layout-dot-tree.ts#buildDotClusters`
   never sets `innerMarginLevels`, so there are no a/i/p0/p1 wrapper
   clusters (`ClusterDotString.java:91-116,148-155`). Real dot sizes the
