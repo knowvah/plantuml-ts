@@ -154,8 +154,16 @@ function resolveOptionalColor(color: string | null | undefined): ResolvedColor |
  * `DriverPathSvg` then collapses `fore === back` to a strokeless flat fill
  * on its own, so an absent `stroke=` reproduces without this file (or the
  * draw sites) special-casing "no stroke" at all.
+ *
+ * Exported (cdd4-T9, lecelo-92-loma110): `class-member-atom-resolve.ts
+ * #resolveEmojiAtom` reuses this SAME "collect what would have been drawn"
+ * idiom to decompose Twemoji artwork (`Emoji#drawU`, `Emoji.java:154-181`)
+ * into `DrawablePrimitive[]` at LAYOUT time, exactly as this class already
+ * does for an SVG sprite -- both feed the identical `SvgNanoParser.drawU`
+ * decomposition, so one collector implementation serves both callers
+ * rather than a second copy.
  */
-class SpritePrimitiveCollector implements UGraphic {
+export class SpritePrimitiveCollector implements UGraphic {
   private constructor(
     private readonly translate: UTranslate,
     private readonly fore: Paint,

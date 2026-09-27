@@ -17,7 +17,6 @@ import { helperFor, censusClassFixtureOptions } from '../../../scripts/svg-confo
 import type { CensusResult } from '../../../scripts/svg-conformance-census.js';
 import { toCensusJson, jsonPathArg, runJsonMode, bucketOf } from '../../../scripts/svg-conformance-census-json.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
-import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 
 // ---------------------------------------------------------------------------
 // helperFor (AC1: activity dispatches to the activity helper)
@@ -44,7 +43,8 @@ describe('helperFor', () => {
 
 // ---------------------------------------------------------------------------
 // censusClassFixtureOptions (cdd4-T4: the census must thread the SAME
-// assetStore/includeStore the survey/ratchet use, not a fresh, empty one)
+// assetStore/includeStore the survey/ratchet use, not a fresh, empty one;
+// cdd4-T9: that assetStore now combines sprites WITH emoji artwork)
 // ---------------------------------------------------------------------------
 
 describe('censusClassFixtureOptions', () => {
@@ -52,8 +52,10 @@ describe('censusClassFixtureOptions', () => {
     expect(censusClassFixtureOptions().includeStore).toBe(fixtureIncludeStore());
   });
 
-  it('returns the SAME memoized assetStore the survey uses', () => {
-    expect(censusClassFixtureOptions().assetStore).toBe(buildSpriteAssetsStore());
+  it('returns an assetStore resolving BOTH the sprite bundle and the emoji bundle', () => {
+    const { assetStore } = censusClassFixtureOptions();
+    expect(assetStore.has('sprite:archimate/business-process.svg')).toBe(true);
+    expect(assetStore.has('emoji:1f527.svg')).toBe(true);
   });
 
   it('returns the identical store instances across two calls (both memoized singletons)', () => {

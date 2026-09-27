@@ -14,7 +14,8 @@ import type { FontConfiguration } from '../../../src/core/klimt/shape/UText.js';
 import { buildLineAtoms, buildStripeAtoms } from '../../../src/core/klimt/creole/legacy/StripeSimple.js';
 import { CreoleMode } from '../../../src/core/klimt/creole/CreoleMode.js';
 import { retrieveEmoji, emojiCharacter } from '../../../src/core/klimt/creole/Emoji.js';
-import { emojiFactor, emojiBoxDim } from '../../../src/core/klimt/creole/atom/AtomEmoji.js';
+import { emojiFactor, emojiBoxDim, emojiSquareDim } from '../../../src/core/klimt/creole/atom/AtomEmoji.js';
+import type { InternalEmojiStore } from '../../../src/core/internal-emoji-store.js';
 import {
   buildMemberAtoms,
   resolveMemberAtoms,
@@ -103,6 +104,62 @@ describe('resolveMemberAtoms — emoji sizing (AtomEmoji 36f box / 39f line)', (
 
   test('emojiBoxDim matches the ported constants', () => {
     expect(emojiBoxDim(14 / 24)).toEqual({ width: 21, height: 22.75 });
+  });
+});
+
+/** A minimal two-`<path>` Twemoji-shaped fragment -- structurally identical
+ *  to the real vendored artwork (bare `<path fill="#RRGGBB" d="...">`
+ *  elements, no `<svg>` root), content is fixture-only. */
+const FAKE_ARTWORK = '<path fill="#111111" d="M1,2 L3,4"/><path fill="#222222" d="M5,6 L7,8"/>';
+
+function emojiStoreWith(unicode: string, artwork: string): InternalEmojiStore {
+  return { get: (u: string): string | undefined => (u === unicode ? artwork : undefined) };
+}
+
+describe('resolveMemberAtoms — emoji ARTWORK (cdd4-T9, lecelo-92-loma110)', () => {
+  test('with artwork: resolves to a drawable atom decomposed from the SVG, box = 36f square', () => {
+    const sprites = createSpriteRegistry(undefined, emojiStoreWith('1f527', FAKE_ARTWORK));
+    const atoms = buildMemberAtoms('<:wrench:> wrench', FONT);
+    const build = resolveMemberAtoms(atoms, FONT, measurer, sprites);
+    const drawable = build.atoms[0];
+    if (drawable?.kind !== 'drawable') throw new Error('unreachable');
+    expect(drawable.primitives.length).toBe(2);
+    // 36*(14/24) = 21 -- SAME width AtomEmoji's box always reports, but the
+    // HEIGHT is the real 36f square (21), not the 39f line-height convenience
+    // `emojiBoxDim` returns for the platform-glyph fallback.
+    expect(emojiSquareDim(14 / 24)).toEqual({ width: 21, height: 21 });
+    expect(drawable.width).toBe(21);
+    expect(drawable.height).toBe(21);
+    // atomTopDy = altitude - height + maxSpan - reference = -1.75 - 21 +
+    // 22.75 - reference = -reference, where reference = baseFont.size -
+    // descent(baseFont, '') = 14 - 3.1111 = 10.8889 -- the SAME reference
+    // `class-member-svg-sprite.test.ts`'s sprite-drawable dy test uses.
+    expect(drawable.dy).toBeCloseTo(-10.8889, 3);
+  });
+
+  test('with artwork: the ROW height stays the SAME 39f-emergent value as the glyph fallback', () => {
+    const sprites = createSpriteRegistry(undefined, emojiStoreWith('1f527', FAKE_ARTWORK));
+    const atoms = buildMemberAtoms('<:wrench:> wrench', FONT);
+    const build = resolveMemberAtoms(atoms, FONT, measurer, sprites);
+    // Sea derives 39*(14/24)=22.75 from the real (-3f altitude, 36f height)
+    // pair on a line sharing a text atom -- the SAME number the fallback's
+    // pre-combined 39f convenience produced (module doc comment,
+    // `AtomEmoji.ts`'s "callers driving the real Sea pipeline" note).
+    expect(build.height).toBeCloseTo(22.75, 10);
+  });
+
+  test('a registered store with NO matching codepoint keeps the glyph fallback unchanged', () => {
+    const sprites = createSpriteRegistry(undefined, emojiStoreWith('1f3f7', FAKE_ARTWORK));
+    const atoms = buildMemberAtoms('<:wrench:> wrench', FONT);
+    const build = resolveMemberAtoms(atoms, FONT, measurer, sprites);
+    expect(build.atoms[0]).toMatchObject({ kind: 'text', text: '\u{1F527}', width: 21 });
+  });
+
+  test('no emoji store at all (registry present, .emoji undefined) keeps the glyph fallback', () => {
+    const sprites = createSpriteRegistry();
+    const atoms = buildMemberAtoms('<:wrench:> wrench', FONT);
+    const build = resolveMemberAtoms(atoms, FONT, measurer, sprites);
+    expect(build.atoms[0]).toMatchObject({ kind: 'text', text: '\u{1F527}', width: 21 });
   });
 });
 

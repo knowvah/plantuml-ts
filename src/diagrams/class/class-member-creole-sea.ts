@@ -12,10 +12,13 @@
  * latex). This module is a DELIBERATELY narrower, closed-form
  * specialization for the class engine: altitude is 0 for every atom EXCEPT
  * a `'text'` one carrying a non-NORMAL `FontPosition` -- `decisions.md#D2`'s
- * literal scope ("Text atoms report the getStartingAltitude"). Emoji/image/
- * vector/bullet atoms keep the class engine's PRE-SI30 altitude-0 treatment
- * unchanged (member rows never threaded emoji's own `-3*factor` altitude
- * before this mission, and note rows explicitly excluded 'vector' pending
+ * literal scope ("Text atoms report the getStartingAltitude") -- a
+ * `'vector'` OpenIconic glyph's own `-3*factor` (cdd3-T22) and cdd4-T9's
+ * emoji-artwork `'drawable'` (its own carried `altitude`, `class-member-
+ * render-atom.ts`'s doc comment) both report their REAL upstream altitude
+ * too, the same way. Image/bullet atoms (and the platform-glyph emoji
+ * fallback, an altitude-0 `'text'` run) keep the class engine's PRE-SI30
+ * altitude-0 treatment unchanged (note rows explicitly excluded 'vector' pending
  * verification, `note-layout-measure-rows.ts#noteLineHeight`'s own doc
  * comment) -- reusing the general `Sea` class here would silently widen that
  * scope as an unrequested side effect. For an all-NORMAL line every

@@ -3,9 +3,9 @@
  *
  * For each class-corpus slug under `test-results/dot-cache/class/<slug>/`:
  * renders through production `renderSync` exactly as
- * `scripts/svg-parity-survey.ts:268-271` does (`WidthTableMeasurer` +
- * `buildSpriteAssetsStore()`, store built ONCE per process — not per
- * fixture), writes `measurements/out/<slug>.ours.svg` and copies the cached
+ * `scripts/svg-parity-survey.ts` does (`WidthTableMeasurer` + sprites
+ * combined with emoji artwork, cdd4-T9, store built ONCE per process — not
+ * per fixture), writes `measurements/out/<slug>.ours.svg` and copies the cached
  * `in.svg` to `measurements/out/<slug>.jar.svg`, then prints the structural
  * and numeric diff counts from `tests/oracle/svg-conformance/
  * compare.ts#compareSvg` (tolerance class `'deterministic'`, per D3 /
@@ -24,7 +24,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderSync } from '../../../src/index.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
+import { combineAssetStores } from '../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../scripts/sprite-assets-store.js';
+// cdd4-T9: the jar always has its Twemoji artwork too (lecelo-92-loma110) --
+// same argument as the sprite store above.
+import { buildEmojiAssetsStore } from '../../../scripts/emoji-assets-store.js';
 import { compareSvg, type Diff } from '../../../tests/oracle/svg-conformance/compare.js';
 
 /** Repo root from this file's own location: `tools/` sits three directories
@@ -98,7 +102,7 @@ function main(): void {
   const repo = resolveRepoRoot(import.meta.url);
   const outDir = join(repo, 'plans', 'class-divergence-drive', 'measurements', 'out');
   mkdirSync(outDir, { recursive: true });
-  const store = buildSpriteAssetsStore();
+  const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
   for (const slug of slugs) runOne(repo, outDir, slug, store);
 }
 

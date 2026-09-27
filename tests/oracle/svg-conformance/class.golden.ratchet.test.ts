@@ -36,9 +36,20 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { combineAssetStores } from '../../../src/core/asset-store.js';
 import { compareSvg } from './compare.js';
 import { renderFixtureClass } from './render-fixture-class.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
+// cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
+// same argument as the sprite store above (lecelo-92-loma110). The
+// ratchet had NEITHER store before this task.
+import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
+
+// Shared by both AC1 and AC2's render calls below -- the jar always has
+// both, so a ratchet fixture using a `sprite $N jar:...` or a `<:name:>`
+// emoji must render with both to reach zero-diff.
+const RATCHET_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
 
 interface RatchetFixture {
   slug: string;
@@ -117,6 +128,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet (
       // cuzoga, jevuvi include `<tupadr3/common>`).
       const ours = renderFixtureClass(markup, new DeterministicMeasurer(), {
         includeStore: fixtureIncludeStore(),
+        assetStore: RATCHET_ASSET_STORE,
       });
       const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
       expect(
@@ -148,7 +160,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet â
 
     const golden = readGolden(target);
     const markup = readSource(target);
-    const ours = renderFixtureClass(markup, new DeterministicMeasurer());
+    const ours = renderFixtureClass(markup, new DeterministicMeasurer(), { assetStore: RATCHET_ASSET_STORE });
 
     // Confirm the untampered pair really is zero-diff first, so the
     // tampered-case failure below is attributable to the mutation alone.
