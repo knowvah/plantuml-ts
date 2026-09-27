@@ -35,7 +35,10 @@ export interface DotInputCluster {
   /** DOT id of this cluster's shared group-anchor node (`groupAnchorNodeId`
    *  / Svek's `Cluster.getSpecialPointId`) — required whenever `portRanks`
    *  is set; the last node of each rank-chain links to it
-   *  (`ClusterDotString.empty()`). Emitter-only. */
+   *  (`ClusterDotString.empty()`). Read by the text emitter AND, since
+   *  cdd4-T6, the layout builder: its presence (without
+   *  `portRanksLabelOnEe`) selects the `hasPort()` branch
+   *  (`graph-layout-build-portcluster.ts#isHasPortCluster`). */
   portAnchorId?: string;
   /** Mission A4/T4, mechanisms.md §2: state-diagram entry/exit border
    *  points (`EntityPosition.usePortP()` true for ENTRY_POINT/EXIT_POINT,

@@ -21,9 +21,10 @@ import { svekNodeCorner, svekY, svgDouble, type SvekFrame } from './graph-layout
  * Jar reconciles the two when it reads the layout back. `DotStringFactory
  * #solve:382-389` takes a `RECTANGLE_PORT`/`RECTANGLE_HTML_FOR_PORTS` node's
  * position from the `points="…"` polygon beside its `<title>` in graphviz's
- * own SVG — which is the PORT CELL's polygon, not the outer table's — and
- * graphviz centres that cell in the padded table. So the reported box is the
- * caller's declared symbol size, on the engine's own centre.
+ * own SVG — which is the PORT CELL's polygon, not the outer table's. Graphviz
+ * centres that cell in the padded table but WIDENS it (cdd4-T6b, see
+ * `portCellSize`), so the reported box is the caller's declared symbol size,
+ * drawn from the widened cell's corner.
  *
  * This is the seam `solve` occupies, so every consumer sees the corrected box:
  * before it moved here the state engine drew a 12x12 pin from a 12x12 layout
@@ -71,6 +72,14 @@ function isHtmlSized(d: DotInputNode): boolean {
 function htmlCellSize(v: number): number {
   return Math.trunc(v);
 }
+
+/** `SvekNode.java:198,202`: the port table's spacer rows are `COLSPAN="3"`. */
+const PORT_TABLE_COLSPAN = 3;
+
+/** `SvekNode.java:190-191`: `if (fullWidth < 10) fullWidth = 10;` -- the
+ *  same default `svek-dot-emit-labels.ts#portTable` writes when `portPad` is
+ *  unset. */
+const PORT_TABLE_MIN_FULL_WIDTH = 10;
 
 /**
  * cdd-T15 (D6), corrected cdd2-T11 (Q-3): the top-left corner OFFSET from
@@ -141,18 +150,45 @@ export function shieldCorner(d: DotInputNode | undefined, width: number, height:
  * Scoped to `portRows` only, matching the measured evidence
  * (`.agent-notes/class-html-node-corner-vs-quantized-width.md`: "both are
  * member-port diagrams… the other nine have no ports and take the engine
- * width"). The `isPort`-plaintext port SYMBOL (G9/T9, one function up) keeps
- * centring on its own small declared size inside graphviz's larger box —
- * jar reads THAT case from the port CELL's own polygon, a different
- * mechanism this fix does not touch.
+ * width"). The `isPort`-plaintext port SYMBOL (G9/T9) is read from the port
+ * CELL's own polygon instead -- `portCellSize` below (cdd4-T6b).
  *
  * @see ~/git/graphviz/lib/common/htmllex.c, lib/common/htmltable.c (HTML
  *      table cell sizing — the floor happens inside graphviz's own table
  *      layout, before `poly_init` ever sees a size)
  */
 export function cornerSize(d: DotInputNode | undefined, width: number, height: number): [number, number] {
+  if (d?.isPort === true && d.shape === 'plaintext') return portCellSize(d, width, height);
   if (d?.portRows === undefined) return [width, height];
   return [Math.floor(width), Math.floor(height)];
+}
+
+/**
+ * cdd4-T6b: the box of a wide-label port's `PORT="P"` cell as graphviz lays
+ * it out -- the polygon whose min XY the jar takes as the port's corner
+ * (`DotStringFactory.java:389-395`: `svgResult.substring(idx).extractList(
+ * SvgResult.POINTS_EQUALS)`, `getMinXY`, `node.moveDelta(min.getX(),
+ * min.getY())` for `ShapeType.RECTANGLE_PORT`).
+ *
+ * `SvekNode#appendLabelHtmlSpecialForPortHtml` (`SvekNode.java:189-204`)
+ * writes a 3x3 table: a `COLSPAN="3"` spacer of `WIDTH=fullWidth` above and
+ * below, and between them `<TD></TD>`, the `FIXEDSIZE` 12x12 P cell,
+ * `<TD></TD>`. Graphviz's `set_cell_widths` (`lib/common/htmltable.c`) sizes
+ * the columns from the single-span cells first (0, the truncated cell width,
+ * 0), then widens every spanned column by `(fullWidth - span) / colspan` when
+ * the spacer is wider, and finally sets each cell to its column width -- so
+ * the P cell grows to `w + (fullWidth - w) / 3` and stays centred (the two
+ * outer columns are equal). `pos_html_cell`'s FIXEDSIZE re-centring never
+ * shrinks it back: it compares against the already-widened `box.UR`. Rows
+ * carry no span, so the height is the cell's own. Real `dot -Tsvg`:
+ * fullWidth 41 -> 21.66 wide (`sokevu-87-toce485`'s `sh0011`), 59 -> 27.66.
+ * The jar still DRAWS the 12x12 symbol, from that corner.
+ */
+function portCellSize(d: DotInputNode, width: number, height: number): [number, number] {
+  const w = htmlCellSize(d.width);
+  const span = htmlCellSize(d.portPad ?? PORT_TABLE_MIN_FULL_WIDTH);
+  const cellW = span > w ? w + (span - w) / PORT_TABLE_COLSPAN : w;
+  return [cellW === w ? width : cellW, height];
 }
 
 /**
