@@ -87,7 +87,11 @@ import { assembleSvg, renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+// cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
+// same argument as the sprite store above (lecelo-92-loma110).
+import { buildEmojiAssetsStore } from './emoji-assets-store.js';
 import type { AssetStore } from '../src/core/asset-store.js';
+import { combineAssetStores } from '../src/core/asset-store.js';
 import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
@@ -100,6 +104,13 @@ import { bucketOf, type Bucket, jsonPathArg, runJsonMode } from './svg-conforman
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 const DEFAULT_TYPES = ['component', 'usecase'];
+// cdd4-T9: memoized once -- `combineAssetStores` builds a fresh wrapper
+// object per call, so `censusClassFixtureOptions()` must cache ITS OWN
+// combined instance (not just rely on `buildSpriteAssetsStore`/
+// `buildEmojiAssetsStore`'s own memoization) to keep returning the SAME
+// `assetStore` reference across calls -- the referential-identity contract
+// `censusClassFixtureOptions`'s own unit tests assert.
+const CLASS_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
 
 // ---------------------------------------------------------------------------
 // Theme resolution — mirrors src/index.ts#buildTheme (private, not exported).
@@ -260,7 +271,13 @@ export function helperFor(type: string): FixtureHelperName {
  * -- out of this task's declared scope, filed as a follow-on.
  */
 export function censusClassFixtureOptions(): { includeStore: IncludeStore; assetStore: AssetStore } {
-  return { includeStore: fixtureIncludeStore(), assetStore: buildSpriteAssetsStore() };
+  return {
+    includeStore: fixtureIncludeStore(),
+    // cdd4-T9: sprites + emoji artwork, the SAME combined store the survey
+    // now renders with (`scripts/svg-parity-survey.ts`) -- see this
+    // function's own doc comment for why the census must match the survey.
+    assetStore: CLASS_ASSET_STORE,
+  };
 }
 
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {

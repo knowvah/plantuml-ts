@@ -47,6 +47,10 @@ import { WidthTableMeasurer } from '../src/core/measurer.js';
 import type { DotInputGraph } from '../src/core/graph-layout.types.js';
 import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+// cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
+// same argument as the sprite store above (lecelo-92-loma110).
+import { buildEmojiAssetsStore } from './emoji-assets-store.js';
+import { combineAssetStores } from '../src/core/asset-store.js';
 // cdd-T32 (journal row 193): the vendored-stdlib store, so a `!include
 // <bundle/...>` fixture renders instead of tripping renderSync's include
 // guard and being surveyed as an error page -- the census already did this.
@@ -57,6 +61,8 @@ import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
+// cdd4-T9: sprites + emoji, shared by renderOneMode and renderFrame below.
+const SURVEY_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
 const PARITY_OUT = join(REPO, 'tests', 'oracle', 'svg-conformance', 'parity.json');
 const THIS_FILE = fileURLToPath(import.meta.url);
 const DEFAULT_TYPES = ['component', 'usecase'];
@@ -271,7 +277,7 @@ function renderOneMode(dir: string): void {
     // corpus, against a survey that runs for tens of minutes.
     svg = renderSync(markup, {
       measurer: new WidthTableMeasurer(),
-      assetStore: buildSpriteAssetsStore(),
+      assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });
   } catch (err) {
@@ -295,7 +301,7 @@ function renderFrame(dir: string): string {
   try {
     const svg = renderSync(markup, {
       measurer: new WidthTableMeasurer(),
-      assetStore: buildSpriteAssetsStore(),
+      assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });
     return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, inputs, oracleBlind), oracleBlind });
