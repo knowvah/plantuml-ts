@@ -70,6 +70,22 @@ its committed oracle SVG + `svek-N.dot`, committed as an explicit oracle
 change. Stop 8 is waived for this slug only. If the runs differ, HALT: that
 is jar nondeterminism, not a stale cache.
 
+### D5 amendment — premise disproved 2026-09-26 (T2, stop 3): HALTED for the maintainer
+The cache is NOT stale.
+- The pinned jar `~/git/plantuml/build/libs/plantuml-1.2026.7beta11.jar`
+  (the `pin.json` version) reproduces besepi's committed `in.svg` and
+  `svek-1.dot` byte-for-byte.
+- The "fresh jar" is `oracle/dist/plantuml-oracle.jar`, which symlinks to
+  `plantuml-1.2026.8beta1.jar` (the drift already filed in cdd1 D12). Three
+  renders with it are byte-identical to each other, and they flip the couple
+  edge orientation.
+- OUR render matches the 8beta1 output exactly (render-diff structural=0,
+  numeric=0 with the 8beta1 files swapped in temporarily).
+- So besepi's gap is jar-version drift. The port follows the newer Java
+  source (`~/git/plantuml` is past the pin) and the oracle is pinned older.
+- Re-rendering only besepi would make the cache inhomogeneous: one fixture
+  at 8beta1, the rest at 7beta11.
+
 ## D6 — Acceptances
 luzive-62-zote562, sadamo-18-siva346 (C-18: version-identity banner,
 `[From …]` strings, textLength) and zuduxu-90-kosi876 (E3-A: upstream NPE
