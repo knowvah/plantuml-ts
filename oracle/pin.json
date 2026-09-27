@@ -1,22 +1,30 @@
 {
   "upstreamRepo": "https://github.com/plantuml/plantuml",
   "upstreamRef": "master",
-  "upstreamSha": "11ed6720bd65b61f88d682ca3cb4e4ba3f4e90ee",
+  "upstreamSha": "97a5992201a7b1bc5d4063a81da609fe7387fede",
   "forkRepo": "https://github.com/sseely/plantuml",
-  "forkMasterSha": "ebbacfefebe19930e90f00475faef7610223ff42",
+  "forkMasterSha": "97a5992201a7b1bc5d4063a81da609fe7387fede",
   "forkTreeIdenticalToUpstream": true,
-  "plantumlVersion": "1.2026.7beta11",
+  "plantumlVersion": "1.2026.8beta1",
   "seamBranch": "dot-output",
-  "seamCommit": "de1f986f09253edb9bf6351808e1cdba99ec9e74",
+  "seamCommit": "377fbd12dce2b91846c5e92bc9ba550b36f9d8db",
   "seamCommitCount": 2,
   "patch": "patches/0001-oracle-dot-dump.patch",
   "dumpProperty": "PLANTUML_DUMP_DOT",
   "note": "Re-baseline DOT/SVG goldens whenever upstreamSha changes (sync master, rebase dot-output, rebuild jar). seamCommitCount is the number of oracle-only commits stacked on the pristine base -- build-oracle.sh derives the base as dot-output~seamCommitCount, so ADD TO IT when adding a seam commit or the drift guard silently stops working.",
   "previousPin": {
-    "upstreamSha": "59ddb5313f4680acea6198f1db7120c8d5258631",
-    "plantumlVersion": "1.2026.7beta3",
-    "retiredOn": "2026-08-07",
-    "why": "The checkout had drifted 59 commits ahead of this pin and a port task (S1L-f part 2b, SpriteSvg Math.ceil) implemented post-pin behaviour against a pre-pin oracle. Advancing the pin changed exactly 5 of 1194 DOT goldens; see plans/s1l-tail-fix/findings/svg-sprite-ceil-vs-floor.md.",
-    "svgSuitesNotRebaselined": "The svg-* suites (402 byte-compared goldens) were NOT re-baselined with this bump -- two 'reduce SVG output size' commits are in range. Tracked as its own follow-up."
+    "upstreamSha": "11ed6720bd65b61f88d682ca3cb4e4ba3f4e90ee",
+    "plantumlVersion": "1.2026.7beta11",
+    "forkMasterSha": "ebbacfefebe19930e90f00475faef7610223ff42",
+    "seamCommit": "de1f986f09253edb9bf6351808e1cdba99ec9e74",
+    "retiredOn": "2026-09-27",
+    "why": "cdd4 decision-journal rows 6-7 (besepi): the port matched 1.2026.8beta1 byte-for-byte while the oracle cache was captured with 7beta11, and the Java the port is read against is 97a5992 (8beta1). Re-pinned by class-divergence-drive-5 T0a so the oracle is homogeneous again.",
+    "previousPin": {
+      "upstreamSha": "59ddb5313f4680acea6198f1db7120c8d5258631",
+      "plantumlVersion": "1.2026.7beta3",
+      "retiredOn": "2026-08-07",
+      "why": "The checkout had drifted 59 commits ahead of this pin and a port task (S1L-f part 2b, SpriteSvg Math.ceil) implemented post-pin behaviour against a pre-pin oracle. Advancing the pin changed exactly 5 of 1194 DOT goldens; see plans/s1l-tail-fix/findings/svg-sprite-ceil-vs-floor.md.",
+      "svgSuitesNotRebaselined": "The svg-* suites (402 byte-compared goldens) were NOT re-baselined with this bump -- two 'reduce SVG output size' commits are in range. Tracked as its own follow-up."
+    }
   }
 }
