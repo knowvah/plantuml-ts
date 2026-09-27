@@ -10,7 +10,7 @@ run the close procedure (N=1).
 | [T1](T1-acceptances.md) | Sign luzive, sadamo, zuduxu | orchestrator | `oracle/accepted-divergences.json` | T0e | [x] |
 | [T2](T2-besepi-oracle.md) | Re-render besepi oracle (D5) | orchestrator | besepi oracle SVG + `test-results/dot-cache/class/besepi-37-rori892/` | T0e | [x] (closed open: jar drift, row 7) |
 | [T3](T3-tracker-residuals.md) | Re-verify still-open G rows, TRACKER | debugger (sonnet) | `docs/graphviz-issues/**` | T0e | [x] (n/a: no open G rows after T0d) |
-| [T4](T4-census-harness.md) | Census sprite store + popesa pipeline | typescript-pro (sonnet) | `scripts/svg-conformance-census.ts` + its unit test | T0e | [ ] |
+| [T4](T4-census-harness.md) | Census sprite store + popesa pipeline | typescript-pro (sonnet) | `scripts/svg-conformance-census.ts` + its unit test | T0e | [x] |
 | [T5](T5-diagnose-p-rows.md) | Diagnose jakapi, lecelo, gujigi | debugger (opus) | `diagnosis/*.md`, `diagnosis/scratch/` | T0e | [x] |
 | [T6](T6-sokevu-description.md) | E3-9 patch + E3-10b hasPort | typescript-pro (opus) | `src/diagrams/description/{index,layout-helpers-types,renderer}.ts`, `src/core/svek-dot-emit-clusters.ts`, tests | T0e | [ ] |
 | [T11](T11-unplaced-label-consumer.md) | gvi 25 consumer: skip unplaced edge label | typescript-pro (sonnet) | `src/core/graph-layout*.ts` (read), `class/class-edge-geo.ts`, tests | T0e | [x] |
