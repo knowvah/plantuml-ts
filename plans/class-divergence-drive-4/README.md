@@ -24,6 +24,8 @@ reachable without a dot-engine release. That means:
 Batch 0 first finishes cdd3 (its T-exit and T-close-out). The Java at
 `~/git/plantuml/src/main/java/net/` is the spec.
 
+**Baseline after batch 0 (T0e, dot-engine 1.6.1): 701 / 6 / 16** — 12 dot-engine rows closed by the bump. Exit target is therefore ≥ 707 (701 + gujigi, jakapi, lecelo, sokevu, mizupo, besepi), plus ririlu if its B-6 residual gets a mechanism.
+
 ## Exit bar (D1)
 
 - class conformant ≥ **695**; accepted divergences (class) = **17**
@@ -49,10 +51,10 @@ Batch closes add survey, census, render-all, pin-diff and pins; see
 
 | Batch | Group | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| [0](batch-0/overview.md) | close cdd3, cut branch, baseline | T0a · T0b · T0c · T0d | serial | [ ] |
-| [1](batch-1/overview.md) | acceptances, oracle, TRACKER, census, diagnosis, sokevu, theme port | T1–T7a | all ∥ | [ ] |
-| [2](batch-2/overview.md) | theme routing + fixes from T5 | T7b · T8–T10 | per overview | [ ] |
-| [3](batch-3/overview.md) | exit + close-out | T-exit · T-close-out | serial | [ ] |
+| [0](batch-0/overview.md) | close cdd3, cut branch, baseline | T0a · T0b · T0c · T0d · T0e | serial | [x] |
+| [1](batch-1/overview.md) | acceptances, oracle, TRACKER, census, diagnosis, sokevu, theme port | T1–T7a | all ∥ | [x] |
+| [2](batch-2/overview.md) | theme routing + fixes from T5 | T7b · T8–T10 | per overview | [x] |
+| [3](batch-3/overview.md) | exit + close-out | T-exit · T-close-out | serial | [x] |
 
 Inventory: [`fixtures.md`](fixtures.md). Journal:
 [`decision-journal.md`](decision-journal.md). Diagrams:
@@ -88,4 +90,28 @@ Inventory: [`fixtures.md`](fixtures.md). Journal:
 
 ## Status
 
-(filled by T-exit)
+Exit evaluated 2026-09-27 from `measurements/final.json` (= `b2.json`; no
+change after the batch-2 close, no residual with a fixable mechanism left).
+Start → end: **689 / 16 / 18 → 707 / 3 / 13** (planning survey → final).
+
+| Clause (D1) | Result | Met |
+|---|---|---|
+| class conformant ≥ 707 (701 after the dot-engine bump + 6 port rows; besepi excluded by the maintainer's ruling, journal 7) | **707** | met |
+| accepted divergences (class) = 17 | 17 (luzive, sadamo, zuduxu, nugecu added, `b105814a`) | met |
+| every dot-engine row fixed or mapped to a TRACKER entry | 13 conformant via dot-engine 1.6.1 (TRACKER 19/22/24/25/26 checked); nugecu accepted (TRACKER 23 = A3) | met |
+| bidusa, ruliki, popesa pinned | pinned cdd4-b2 (T4 census fix) | met |
+| zero conformant losses / unexplained rises (every engine) | 0 losses at b0 and b2; every rise journaled as a reveal with its mechanism | met |
+| class DOT parity green; four gates, collected = on-disk | green; 875 = 875, coverage 96.4/91.87/97.46/97.41 | met |
+
+Remaining class non-conformant (16): 15 accepted rows (11 older, including
+7 ELK, plus luzive/sadamo/zuduxu/nugecu accepted this mission) and
+**besepi**, the only unaccepted one. Two older accepted entries, moxobo-16
+and zikabo-17, now render CONFORMANT, so their acceptances are stale;
+retiring them is a maintainer act, flagged in next-missions. besepi is open on the oracle re-pin (the
+pinned jar is 7beta11, the oracle symlink 8beta1, and our render equals
+8beta1 exactly). Ratchet 686 → 706 (sokevu survey-conformant but not
+census-pinnable: class-only census cannot auto-dispatch it).
+
+Other engines, b0 → final: component, unknown, usecase +254 verdict
+improvements, 0 regressions, 0 `dotEqual` flips.
+

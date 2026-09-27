@@ -13,6 +13,7 @@ import type { DescriptiveLinkStyle, StereotypeSpriteRef } from './ast.js';
 import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Public output node type
@@ -223,6 +224,15 @@ export interface DescriptionGeometry {
    * diagram's own unscaled document dimension.
    */
   scale?: ScaleSpec;
+  /**
+   * cdd3-T28 (E3-9): the measurer that sized this layout, stashed by
+   * `descriptionPlugin.layoutSync` so `render(geo, theme)` draws text with
+   * the SAME one -- upstream builds and draws every image through a single
+   * `StringBounder` (`svek/GeneralImageBuilder.java`, `SvekResult#drawU`).
+   * Same seam as `class/index.ts#layoutSync`'s `measurer` field. Absent on
+   * hand-built geometries, where `renderDescription` keeps its default.
+   */
+  measurer?: StringMeasurer;
 }
 
 // ---------------------------------------------------------------------------

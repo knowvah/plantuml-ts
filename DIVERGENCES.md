@@ -649,16 +649,37 @@ that passthrough gone, a call to an undefined macro would have raised `Function
 not found` — an error for a function the document explicitly removed — so the
 trie is now rebuilt from the surviving functions.
 
-### `!theme` records the name; it does not execute the theme's source
+### `!theme` executes the theme; a residual summary fills four field families
 
 **Upstream:** loads the theme file and executes its lines through the
-preprocessor.
+preprocessor at the directive's position (`TContext.java:726-755`); its
+skinparam and `<style>` lines reach the one style store in document order,
+so a later document line wins.
 
-**This port:** the interpreter records the theme **name**;
-`src/core/theme.ts` resolves it. Surfaced as `PreprocessorResult.theme`.
+**This port:** the same (cdd4-T7a/T7b). The theme's lines run in place, the
+skinparam / `<style>` collector reads the finished result list, and
+`build-theme.ts` applies skinparam and `<style>` runs in declaration order.
+What remains of the precompiled summary (`scripts/compile-themes.py` ->
+`themes-builtin*.ts`, applied below everything as the named base theme) is
+kept only where the executed declarations do not yet reach the consumer the
+jar's do:
 
-**Why:** architectural — this port already resolves themes by name through
-`themes-builtin.ts` / `style-map-theme.ts`. **Category:** limitation.
+- `colors.text` from `<style> root { FontColor }` -- the sequence renderers
+  draw text with `colors.text` (`sequence/renderer.ts`,
+  `renderer-message.ts`, `renderer-participant-shapes.ts`); the style layer
+  has no `root` FontColor route to it.
+- `colors.arrow` / `colors.border` from `root { LineColor }` -- arrows and
+  borders default to these; no `root` LineColor route either.
+- `colors.graph.json` -- the json family reads only `jsonDiagram`-scoped
+  selectors (`style-map-json-diagram.ts`), not the `root` / bare `node`
+  cascade a theme writes.
+- MANUAL `fontFamily` / `colors.border` for eight reddress themes and a few
+  others whose values the script reads by hand; no corpus fixture measures
+  them.
+
+**Why:** each is a missing `root`-cascade route in the port's style layer,
+not a theme concern; routing `root` generally would move every document that
+writes a `<style> root { }` block. **Category:** limitation.
 
 ### File, environment, clock, and RNG builtins are inert by default
 

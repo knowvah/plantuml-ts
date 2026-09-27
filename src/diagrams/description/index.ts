@@ -72,14 +72,20 @@ export const descriptionPlugin: SyncPlugin<DescriptionDiagramAST, DescriptionGeo
     return { ...ast, seed: seedOf(reconstructSourceForSeed(block)) };
   },
 
+  // cdd3-T28 (E3-9): the layout measurer rides on the geometry so `render`
+  // draws `<text textLength>` with the measurer that sized the layout --
+  // `SyncPlugin#render(geo, theme)` has no measurer parameter (the class
+  // plugin carries it the same way, `class/index.ts#layoutSync`).
   layoutSync(ast, theme, measurer) {
-    return layoutDescription(ast, theme, measurer);
+    return { ...layoutDescription(ast, theme, measurer), measurer };
   },
 
   render(geo, theme): CompleteSvg {
     // klimt (renderDescription) emits a complete document itself and does
     // not route through the shared svgRoot assembler (decisions.md D2) —
     // its chrome, when T7 lands, applies inside its own klimt pipeline.
-    return { completeSvg: renderDescription(geo, theme) };
+    const svg =
+      geo.measurer === undefined ? renderDescription(geo, theme) : renderDescription(geo, theme, geo.measurer);
+    return { completeSvg: svg };
   },
 };

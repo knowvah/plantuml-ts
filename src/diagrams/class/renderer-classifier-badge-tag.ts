@@ -58,10 +58,21 @@ import {
  *  round's audit found (D4/journal row 175) -- split out purely to keep
  *  {@link renderBadge}'s own NLOC under this project's cap. */
 function scaledBadgeRadius(theme: ScaledTheme): number {
-  return (
-    resolveBadgeRadius(theme.colors.graph.circledCharacterFontSize, theme.colors.graph.circledCharacterRadius) *
-    theme.scaleK
-  );
+  return resolveBadgeRadius(circledCharacterFontSize(theme), theme.colors.graph.circledCharacterRadius) * theme.scaleK;
+}
+
+/**
+ * `FontParam.CIRCLED_CHARACTER`'s size as `SkinParam#getFontSize` resolves it
+ * (`SkinParam.java:450-455`): its own `circledCharacterFontSize`, else an
+ * EXPLICIT `defaultFontSize`, else its default 17. It sizes both the radius
+ * (`getCircledCharacterRadius`, `:557-559`) and the glyph
+ * (`EntityImageClassHeader.java:171`, `SkinParamUtils.getFont`) -- the tier
+ * `class-layout-helpers.ts#measureClassifier` already reads for layout; the
+ * draw path skipped it (cdd4-T7b: `!theme aws-orange`'s `defaultFontSize 12`,
+ * mizupo-59-zala765, drew radius 11 in a box sized for 10).
+ */
+function circledCharacterFontSize(theme: ScaledTheme): number | undefined {
+  return theme.colors.graph.circledCharacterFontSize ?? theme.defaultFontSize;
 }
 
 export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
@@ -120,7 +131,7 @@ export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
         badgeX,
         badgeY,
         geo.badgeChar,
-        theme.colors.graph.circledCharacterFontSize,
+        circledCharacterFontSize(theme),
         theme.colors.graph.circledCharacterFontFamily,
         theme.colors.graph.circledCharacterFontBold,
         theme.colors.graph.circledCharacterFontItalic,

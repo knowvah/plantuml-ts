@@ -65,11 +65,12 @@ describe('preprocessor', () => {
     expect(result).toEqual(['both']);
   });
 
-  it('!theme directive is stripped from output', () => {
-    const { lines, theme } = preprocess('!theme dark\nAlice -> Bob');
-    expect(lines).not.toContain('!theme dark');
-    expect(lines).toContain('Alice -> Bob');
-    expect(theme).toBe('dark');
+  it('!theme directive is stripped: its styling lines are collected, blank lines kept', () => {
+    // An upstream theme name: `dark` is not one, so the jar (and, since
+    // cdd4-T7a, this port) stops at `Cannot load theme dark`.
+    const { lines, theme } = preprocess('!theme plain\nAlice -> Bob');
+    expect(lines.filter((l) => l !== '')).toEqual(['Alice -> Bob']);
+    expect(theme).toBe('plain');
   });
 
   it('returns null theme when no !theme directive is present', () => {

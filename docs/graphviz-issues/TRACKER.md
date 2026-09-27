@@ -317,7 +317,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
         clip. -->
-- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- FIXED 2026-09-26 on
+- [x] 19-flat-edge-ignores-html-table-port.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): camuna, nafiki, coxose, mucoti, rifuzu, sefazi class-conformant; ririlu raw layout byte-matches real dot, its remaining SVG residual is the plantuml-ts B-6 Kal stall. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (022a21b7), NOT YET PUBLISHED. Mechanism: make_flat_adj_edges
         takes the rotated aux-graph path when either end has a DEFINED port; the
         port gated on port SIDE, so an interior HTML cell (side 0) fell to a stub
@@ -453,7 +453,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         un-consumed fix -- 03 is now unchecked and carries the work and the
         blast radius. Full artifact:
         .agent-notes/gvi17-splines-never-emitted.md -->
-- [ ] 22-sametail-port-plaintext-lr-clip-offset.md  <!-- FIXED 2026-09-26 on
+- [x] 22-sametail-port-plaintext-lr-clip-offset.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): pijiju class-conformant. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (b93b67b8), NOT YET PUBLISHED. Mechanism: sameport used a
         rect/ellipse approximation that always grew the boundary by penwidth/2;
         C's shape_clip uses poly_inside, which tests a peripheries=0 node's raw
@@ -480,7 +480,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         box-corridor shortest-path search (`make_flat_labeled_edge` /
         `routesplines`), not a constant offset. Re-verified against the
         pinned 1.6.0 with a 5-point width sweep. -->
-- [ ] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- FIXED 2026-09-26 on
+- [x] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): givoli, nadepi, tekena class-conformant. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (8c9579ea), NOT YET PUBLISHED. Mechanism: dot_splines_ routes
         flat edges in-loop at their edgecmp position; the port deferred every
         flat group until after all regular edges, so a later chain's
@@ -498,7 +498,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         exactly (probe: scratch/T6-c12-mirror-check.mts). Filed as a
         separate issue in the same feature area (flat labelled edge
         routing) rather than folded into 23. -->
-- [ ] 25-edge-label-published-when-unplaced.md  <!-- FIXED 2026-09-26 on
+- [x] 25-edge-label-published-when-unplaced.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): delasa class-conformant with no plantuml-ts change; the consumer half is verified by cdd4 T11. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (5932a793), NOT YET PUBLISHED. getLayout() now applies the
         same `set` gate to the centre label as to tail/head/xlabel; delasa's 3
         labels read back absent. Consumer half (class-edge-geo.ts skipping an
@@ -513,7 +513,7 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         draws 0 `<text>` in the 3 labels' colours; dot-engine's
         `getLayout()` returns a non-null `label` for all 3
         (scratch/T6-e3-12-label-gate.mts). -->
-- [ ] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- FIXED 2026-09-26 on
+- [x] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- CONSUMED 2026-09-26 via dot-engine 1.6.1 (cdd4 T0d): cobumi class-conformant. FIXED 2026-09-26 on
         dot-engine branch fix/plantuml-tracker-issues (52982142), NOT YET PUBLISHED. Mechanism: C's abomination
         adds the flat-label rank at index -1 and leaves ND_rank alone; the port
         renumbers +1, so dot_splines_'s literal `r > 0` (self-loop sizey,

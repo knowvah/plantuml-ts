@@ -5,9 +5,7 @@
  */
 import { describe, expect, test } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
-import { StringLocated } from '../../../src/core/tim/StringLocated.js';
 import {
-  dataListOf,
   loadInternal,
   mutateExpandsBreakline,
   patchBase64Line,
@@ -66,7 +64,7 @@ describe('umlSourceSeedLines — PSystemBuilder.java:232-240', () => {
   });
 });
 
-describe('dataListOf — TContext.java:455-472, the filter-consumed lines kept', () => {
+describe('dataLines — TContext.java:455-472, the collected lines kept', () => {
   test('skinparam and <style> lines stay in place, substituted, !define dropped', () => {
     const source = ['@startuml', '!define MyBlue #6192d1', 'skinparam class {', '  BackgroundColor white\\MyBlue', '}']
       .concat(['<style>', 'root { }', '</style>', 'class A', '@enduml'])
@@ -82,10 +80,5 @@ describe('dataListOf — TContext.java:455-472, the filter-consumed lines kept',
       'class A',
       '@enduml',
     ]);
-  });
-
-  test('a consumed line after the last result line is appended', () => {
-    const at = new StringLocated('skinparam x 1', undefined);
-    expect(dataListOf([new StringLocated('a', undefined)], [{ at: 1, line: at }])).toEqual(['a', 'skinparam x 1']);
   });
 });

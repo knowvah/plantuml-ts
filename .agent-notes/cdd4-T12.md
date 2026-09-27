@@ -1,0 +1,5 @@
+## Observation: class name lines stack by running Sea height; only 'image' needs the bottom anchor
+- **Context**: cdd4-T12, lecelo-92-loma110 lines 2/3 of a multi-line class name 8.75px high each.
+- **Finding**: Upstream stacks name stripes in `SheetBlock1#initMap` (`y += sea.getHeight()`, SheetBlock1.java:142-148); the port now does the same in `class-header-line-stacking.ts#headerLineTops`. The residual diagnosis also proposed widening `headerLineY`'s bottom-anchor gate from `'image'` to `'drawable'`/`'vector'` -- NOT done: line 1 (an emoji `'drawable'` line) was already byte-identical, because the text atoms on that line carry their own Sea `dy`; widening would double-shift it. An empty name line is 14 tall (a `" "` atom, StripeSimple.java:123-127), matching the TS metrics.
+- **Impact**: Any multi-line class name with a line taller than fontSize (emoji, sprite, sub-10pt floor) now stacks by real height. Class/object/unknown surveys moved only lecelo (structural-match -> conformant).
+- **Confidence**: High

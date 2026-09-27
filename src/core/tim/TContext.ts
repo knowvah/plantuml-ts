@@ -19,8 +19,9 @@
  *      store asynchronously first (`include-resolver.ts#prefetchIncludes`); a
  *      miss is a typed error naming the path, never a silent skip. See
  *      `IncludeStore.ts` and `IncludeExecutor.ts`.
- *   2. `!theme` records the theme NAME (this port resolves themes by name in
- *      `src/core/theme.ts`) instead of executing the theme's own source.
+ *   2. RETIRED (cdd4-T7b): `!theme` withheld the executed theme's skinparam /
+ *      style output; it now reaches the result list at the directive's
+ *      position, as upstream's does (`TContext.java:737-743`).
  *   3. Ambient I/O and non-determinism reach the builtins only through the
  *      injected `TimEnvironment` seam.
  *
@@ -41,18 +42,18 @@ import { EaterException } from './EaterException.js';
 import { EaterLog } from './EaterLog.js';
 import { EaterOption } from './EaterOption.js';
 import { EaterReturn } from './EaterReturn.js';
-import { EaterTheme } from './EaterTheme.js';
 import { EaterUndef } from './EaterUndef.js';
 import { FunctionsSet } from './FunctionsSet.js';
 import { IncludeExecutor } from './IncludeExecutor.js';
 import { IncludeError } from './IncludeStore.js';
 import { PreprocessingArtifact } from './PreprocessingArtifact.js';
 import { StringLocated, type LineLocation, type TLineType } from './StringLocated.js';
+import { ThemeExecutor, type ThemeMetadata } from './ThemeExecutor.js';
 import type { TContext as TContextInterface, TFunction, TPreprocessingArtifact } from './TFunction.js';
 import { applyFunctionsAndVariablesImpl } from './TContextSubstitution.js';
 import type { TFunctionSignature } from './TFunctionSignature.js';
 import { TFunctionType } from './TFunctionType.js';
-import type { FilteredLine, PlainLineFilter, TContextOptions } from './TContextOptions.js';
+import type { TContextOptions } from './TContextOptions.js';
 import type { TMemory } from './TMemory.js';
 import { createStandardFunctions } from './builtin/index.js';
 import { BLOCK_E1_NEWLINE } from './builtin/jaws-constants.js';
@@ -64,7 +65,7 @@ import { buildCodeIterator } from './iterator/buildCodeIterator.js';
 import type { CodeIterator } from './iterator/CodeIterator.js';
 import type { Sub } from './iterator/Sub.js';
 
-export type { FilteredLine, PlainLineFilter, TContextOptions } from './TContextOptions.js';
+export type { TContextOptions } from './TContextOptions.js';
 
 /** @see ~/git/plantuml/.../tim/TContext.java#ONLY_WHITESPACE_NON_EMPTY */
 const ONLY_WHITESPACE_NON_EMPTY = /^\s+$/u;
@@ -75,24 +76,24 @@ const RE_UNDEF_KEYWORD = /^!undef(ine)?/u;
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java */
 export class TContext implements TContextInterface {
   private readonly resultList: StringLocated[] = [];
-  private readonly filteredLines: FilteredLine[] = [];
   private readonly debug: StringLocated[] = [];
 
   readonly functionsSet = new FunctionsSet();
 
   private readonly subs = new Map<string, Sub>();
   private readonly preprocessingArtifact = new PreprocessingArtifact();
-  private readonly plainLineFilter: PlainLineFilter | undefined;
 
   /** Upstream's `PathSystem` + `filesUsedCurrent` + `DefinitionsContainer`, behind the sync seam. */
   private readonly includeExecutor: IncludeExecutor;
 
+  /** Upstream's `executeTheme` + `themeMetadata`. */
+  private readonly themeExecutor: ThemeExecutor;
+
   private pendingAdd: string | undefined;
-  private themeName: string | undefined;
 
   constructor(options: TContextOptions = {}) {
-    this.plainLineFilter = options.plainLineFilter;
     this.includeExecutor = new IncludeExecutor(this.subs, options.includeStore);
+    this.themeExecutor = new ThemeExecutor(options.includeStore);
     this.addStandardFunctions(options.env ?? createDefaultTimEnvironment());
   }
 
@@ -230,7 +231,7 @@ export class TContext implements TContextInterface {
     if (this.executeIncludeDirective(memory, s, type)) return true;
 
     if (type === 'THEME') {
-      this.executeTheme(memory, s);
+      this.themeExecutor.executeTheme(this, memory, s);
       return true;
     }
     if (type === 'DUMP_MEMORY') {
@@ -281,11 +282,6 @@ export class TContext implements TContextInterface {
 
   /** @see ~/git/plantuml/.../tim/TContext.java#addPlain */
   private addPlain(memory: TMemory, s: StringLocated): void {
-    if (this.plainLineFilter?.(s, (text) => this.substituteText(memory, s, text)) === true) {
-      this.recordFilteredLine(memory, s);
-      return;
-    }
-
     const tmp = this.applyFunctionsAndVariablesInternal(memory, s);
     if (tmp === undefined) return;
 
@@ -296,31 +292,9 @@ export class TContext implements TContextInterface {
     for (const line of tmp) this.resultList.push(line);
   }
 
-  /** Upstream's `addPlain` (`TContext.java:455-466`) keeps a consumed line, substituted. */
-  private recordFilteredLine(memory: TMemory, s: StringLocated): void {
-    for (const part of this.substituteText(memory, s, s.getString()).split('\n'))
-      this.filteredLines.push({ at: this.resultList.length, line: new StringLocated(part, s.getLocation()) });
-  }
-
   /** @see ~/git/plantuml/.../tim/TContext.java#simulatePlain */
   private simulatePlain(memory: TMemory, s: StringLocated): void {
     this.applyFunctionsAndVariablesInternal(memory, s);
-  }
-
-  /**
-   * The `substitute` half of {@link PlainLineFilter} -- runs macro/`$variable`
-   * substitution against `text` in ISOLATION (not the whole line `s`; `s` is
-   * only the location/error-context anchor). Falls back to `text` unchanged
-   * when substitution "consumes" it (a PROCEDURE / LEGACY_DEFINELONG call --
-   * see {@link applyFunctionsAndVariablesImpl}'s contract), which is not a
-   * meaningful shape for a single captured skinparam value.
-   * skin-reddress-variants Fix 1: lets `StyleAndSkinparamCollector` resolve a
-   * `!define`d / `!$var`-affected skinparam VALUE, mirroring upstream
-   * (`CommandSkinParam` parses the SAME post-TIM-substitution line stream as
-   * any other command -- there is no verbatim carve-out there).
-   */
-  private substituteText(memory: TMemory, s: StringLocated, text: string): string {
-    return applyFunctionsAndVariablesImpl(this, memory, new StringLocated(text, s.getLocation())) ?? text;
   }
 
   /**
@@ -340,21 +314,14 @@ export class TContext implements TContextInterface {
     this.functionsSet.removeFunctionsByName(name);
   }
 
-  /**
-   * PLANTUML-TS DIVERGENCE 2 (see file header): upstream loads the theme file
-   * and executes its lines. This port resolves themes by name in
-   * `src/core/theme.ts`, so the interpreter only records the name;
-   * `preprocess()` surfaces it as `PreprocessorResult.theme`.
-   */
-  private executeTheme(memory: TMemory, s: StringLocated): void {
-    const eater = new EaterTheme(s.getTrimmed());
-    eater.analyze(this, memory);
-    this.themeName = eater.getRealName();
+  /** The document's `!theme` name, if any -- `PreprocessorResult.theme`. */
+  getThemeName(): string | undefined {
+    return this.themeExecutor.getThemeName();
   }
 
-  /** The `!theme` name seen, if any. @see #executeTheme */
-  getThemeName(): string | undefined {
-    return this.themeName;
+  /** @see ~/git/plantuml/.../tim/TContext.java#getThemeMetadata */
+  getThemeMetadata(): ThemeMetadata {
+    return this.themeExecutor.getThemeMetadata();
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#applyFunctionsAndVariablesInternal */
@@ -438,11 +405,6 @@ export class TContext implements TContextInterface {
   /** @see ~/git/plantuml/.../tim/TContext.java#getResultList */
   getResultList(): readonly StringLocated[] {
     return this.resultList;
-  }
-
-  /** The lines the `plainLineFilter` consumed -- see `uml-source-lines.ts#dataListOf`. */
-  getFilteredLines(): readonly FilteredLine[] {
-    return this.filteredLines;
   }
 
   /** @see ~/git/plantuml/.../tim/TContext.java#getDebug */

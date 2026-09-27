@@ -12,6 +12,7 @@ import type { Command } from './command-table-types.js';
 import { startNewPage } from './parse-state.js';
 import { removeMatching, removeMatchingLinks } from './element-grammar.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
+import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
 import { cleanId } from './parse-helpers.js';
 import { openTogetherFrame } from './together.js';
 
@@ -170,6 +171,17 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
     execute() {
       /* ignored -- see rule 2e2's doc comment */
+    },
+  },
+
+  // 2e3. `!assume transparent dark|light` -- CommandAssumeTransparent, the
+  //      next addCommonCommands2 registration after CommandPragma
+  //      (CommonCommands.java:64-65); a no-op upstream. See
+  //      core/assume-transparent.ts.
+  {
+    pattern: RE_ASSUME_TRANSPARENT,
+    execute() {
+      /* ignored -- CommandAssumeTransparent.java:74-81 */
     },
   },
 

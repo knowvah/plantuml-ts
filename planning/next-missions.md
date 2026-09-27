@@ -35,6 +35,65 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-4` — DONE 2026-09-27 (T0a–T13, batches 0–3)
+
+Branch `feat/class-divergence-drive-4` (merge commit). Class survey
+689 / 16 / 18 → **707 / 3 / 13**. Ratchet 686 → 706. Accepted
+divergences 13 → 17. Every other engine: +254 verdict improvements, 0
+regressions, 0 `dotEqual` flips (journal rows 1–24). The only unaccepted
+non-conformant class row is besepi. Follow-ons, by owner:
+
+- **Oracle re-pin (besepi).** `oracle/dist/plantuml-oracle.jar` → 8beta1,
+  `pin.json` = 7beta11.
+  - The pinned 7beta11 reproduces besepi's cache byte-for-byte, and our
+    render equals 8beta1 byte-for-byte.
+  - The port follows the Java source, which is past the pin.
+  - Fix: repoint the symlink and `pin.json` to one jar, then recapture
+    every engine's cache and re-measure.
+  - Maintainer ruling: not piecemeal (cdd4 journal 6–7; cdd1 D12).
+- **Stale acceptances.** moxobo-16-tipo829 and zikabo-17-gugi332 are
+  accepted in `oracle/accepted-divergences.json` but now render
+  conformant. Retire them, with a maintainer signature.
+- **Description protection wrappers.** `description/layout-dot-tree.ts#buildDotClusters`
+  never sets `innerMarginLevels`, so there are no a/i/p0/p1 wrapper
+  clusters (`ClusterDotString.java:91-116,148-155`). Real dot sizes the
+  clusters wrong: repite-70 is 367×169 vs the jar's 383×177. This is
+  likely a wide description residual (cdd4 journal 17).
+- **Node declaration order.** `svek-dot-order.ts#firstEncounterOrder`
+  declares `sh0172`/`sh0170` after the lines0 edges; the jar declares
+  them first. Proven by a controlled experiment on the jar DOT: deroxu
+  width 53.1in vs 70.3in. The upstream walk is not yet identified
+  (journal 15).
+- **Census dispatch.** The class-only census cannot auto-dispatch. As a
+  result:
+  - sokevu is survey-conformant but unpinnable;
+  - luzive/sadamo differ from `renderSync` (entity-collision guard,
+    forced parser).
+  - Also, `render-fixture-{state,sequence,activity,json}.ts` do not
+    forward `assetStore` (cdd4 T4, T13).
+- **Theme summary fields kept.** `colors.text`, `colors.arrow`/`border`,
+  `colors.graph.json` and the reddress MANUAL `fontFamily` have no
+  root-cascade route to their consumers (`theme.ts`, `DIVERGENCES.md`;
+  cdd4 T7b). Separately, `%get_all_theme()` returns `[]` although the
+  sources are embedded.
+- **TRACKER 18.** Reclassified as plantuml-ts work. Its class fixtures
+  are conformant, but the other engines are not checked.
+- **Mission tooling.** The `plans/class-divergence-drive/tools` tests
+  pin stale examples: canuti-20 is now conformant and gatula is already
+  pinned. Pick new still-diverged examples.
+- **Flagged for review.**
+  - T7b exceeded its write-set without stopping (preprocessor, 7 engine
+    parsers for `!assume`, 3 harnesses; journal 18).
+  - T10's constraint-label ink duplicates `renderEdgeConstraint`
+    placement.
+  - The Kal-after-magnetic ordering is argued in a comment but untested.
+  - `mapEdges` matches on (tail, head) only, which is latent-unsafe
+    (8 invisible collisions today).
+  - Stale docs: `renderer-edge-extras.ts:151`,
+    `class-geo-types.ts:333-334`.
+  - `with-stdlib-build-lock` has a cross-process timing test that is
+    flaky under load.
+
 ## `class-divergence-drive-3` — DONE 2026-09-26 (T0–T35, T-D3, batches 0–5)
 
 Branch `feat/class-divergence-drive-3` (merge commit). Class survey

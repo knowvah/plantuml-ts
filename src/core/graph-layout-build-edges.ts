@@ -19,6 +19,10 @@ import { orderLines0Edges } from './svek-dot-lines0.js';
  *  the same box size jar's own `cardinalityFont` would. */
 export const CARDINALITY_FONT_SIZE = 13;
 
+/** `EntityPort.forPort`'s compass suffix (`abel/Link.java:227-231`), the same
+ *  `PORT="P"` cell name `svek-dot-emit-labels.ts#portTable` writes. */
+const PORT_P = 'P';
+
 /** Maps @knowvah/dot-engine (tail,head)-keyed edges back to our edge ids. */
 export interface EdgeIndex {
   /** (tail,head) → our edge ids, in input order (consumed left-to-right). */
@@ -57,6 +61,7 @@ function svekEdgeOrder(edges: readonly DotInputEdge[]): DotInputEdge[] {
 
 export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
   const nodeIds = new Set(input.nodes.map((n) => n.id));
+  const portIds = new Set(input.nodes.filter((n) => n.isPort === true).map((n) => n.id));
   const idQueues = new Map<string, string[]>();
   const inputEdgeById = new Map<string, DotInputEdge>();
   for (const e of svekEdgeOrder(input.edges)) {
@@ -96,6 +101,16 @@ export function addEdges(b: GvGraphBuilder, input: DotInputGraph): EdgeIndex {
     // attributes — the jar emits both suffixes on one statement
     // (`sh0006:p48c4…->sh0007:pcb85…`).
     if (a?.headport !== undefined) attrs.headport = a.headport;
+    // cdd4-T6 (E3-10b): `Link#getEntityPort` (abel/Link.java:227-231,
+    // `EntityPort.forPort` cucadiagram/EntityPort.java:54-56) --
+    // `if (leaf.getEntityPosition().usePortP()) return
+    // EntityPort.forPort(uid)`, i.e. `uid:P`, whatever port was asked for.
+    // Mirrors the text emitter's `edgeRef` (`svek-dot-emit.ts`), which checks
+    // `isPort` before any other port. On a plain-rect port graphviz and the
+    // engine both ignore the unknown `P`; on a PORT="P" table it clips the
+    // spline to the 12x12 port cell instead of the whole table.
+    if (portIds.has(e.from)) attrs.tailport = PORT_P;
+    if (portIds.has(e.to)) attrs.headport = PORT_P;
     // Not cosmetic: graphviz collapses every edge sharing a `sametail` value
     // onto ONE tail point. Verified on dot-engine 1.4.0 -- with it, an
     // inheritance group's edges all start at the identical point; without,

@@ -17,6 +17,7 @@
 
 import type { Command } from './sequence-parse-helpers.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
+import { RE_ASSUME_TRANSPARENT } from '../../core/assume-transparent.js';
 
 // 1. skinparam sequenceMessageAlign
 export const skinParamMessageAlignCommand: Command = {
@@ -44,6 +45,17 @@ export const pragmaCommand: Command = {
   pattern: /^!pragma\s+[A-Za-z_][A-Za-z_0-9]*(?:\s+.*)?$/,
   execute() {
     /* ignored — see doc comment above */
+  },
+};
+
+/** `!assume transparent dark|light` — `CommandAssumeTransparent`, the next
+ *  `addCommonCommands2` registration after `CommandPragma`
+ *  (`CommonCommands.java:64-65`); a no-op upstream (see
+ *  `core/assume-transparent.ts`). */
+export const assumeTransparentCommand: Command = {
+  pattern: RE_ASSUME_TRANSPARENT,
+  execute() {
+    /* ignored — CommandAssumeTransparent.java:74-81 */
   },
 };
 

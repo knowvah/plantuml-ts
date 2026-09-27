@@ -1,0 +1,16 @@
+pass0 lnk11: ink line (96.57, 265.5) -> (123.0, 332.0)
+pass0 lnk13: ink line (266.12, 91.0) -> (219.62, 209.0)
+lnk10: predicted ((96.57, 265.5), (130.0, 331.0))  jar ((96.57, 265.5), (130, 331))  match=True
+lnk11: predicted ((103.57, 264.5), (130.0, 331.0))  jar ((103.57, 264.5), (130, 331))  match=True
+lnk12: predicted ((266.12, 91.0), (226.62, 208.0))  jar ((266.12, 91), (226.62, 208))  match=True
+lnk13: predicted ((273.12, 95.0), (226.62, 208.0))  jar ((273.12, 95), (226.62, 208))  match=True
+control (untrimmed, unbiased, final frame):
+  lnk10: corner (5.0, 10.0) -> final (135.0, 331.0)
+  lnk11: corner (0.0, 10.0) -> final (103.57, 264.5)
+  lnk12: corner (0.0, 10.0) -> final (226.62, 213.0)
+  lnk13: corner (0.0, 10.0) -> final (273.12, 95.0)
+control 2 (trimmed, unbiased, one pass):
+  lnk10: corner (0.0, 10.0) -> final (130.0, 331.0)
+  lnk11: corner (0.0, 10.0) -> final (103.57, 264.5)
+  lnk12: corner (0.0, 5.0) -> final (226.62, 208.0)
+  lnk13: corner (0.0, 5.0) -> final (273.12, 90.0)

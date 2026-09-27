@@ -17,12 +17,9 @@
  * -> SVG string. No DOM, no async").
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/preprocessor.js';
-import { resolveTheme } from '../../../src/core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
-import { applyStyleMap } from '../../../src/core/style-map-theme.js';
-import { applySkinLayer } from '../../../src/core/skin-loader.js';
-import { computeClassTagCascadeGenerations } from '../../../src/core/style-cascade-class.js';
+import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
+import type { ParseOptions } from '../../../src/core/dispatcher.js';
+import { buildTheme } from '../../../src/core/build-theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
@@ -37,61 +34,28 @@ import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js'
 import { assembleSvg, renderSync } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
+import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { applyClassDocumentMargin } from '../../../src/diagrams/class/layout-ink-extent.js';
 
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  readonly styleMap: StyleMap;
-}
-
-function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAndStyles {
-  const base = resolveTheme(preprocessed.theme ?? 'default');
-  // mission skin-file-loading Batch 1 (D6) / deferred D3 item: mirrors
-  // src/index.ts#buildTheme's own Stage 1.5 -- applied BEFORE the
-  // document's own skinparam so the document always wins. Previously
-  // missing from this harness (only render-fixture-state.ts had it),
-  // so a `skin rose` class fixture never saw its loaded Shadowing value
-  // under this test pipeline even though production (`src/index.ts`)
-  // already resolved it correctly.
-  const withSkin = applySkinLayer(preprocessed, base);
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  const withStyleMap = applyStyleMap(styleMap, withStyles);
-
-  // G2 N39: mirrors src/index.ts#buildTheme's own Stage 3a extension --
-  // see that function's doc comment.
-  const classTagCascadeGenerations = computeClassTagCascadeGenerations(preprocessed.styles);
-  const theme =
-    classTagCascadeGenerations === undefined
-      ? withStyleMap
-      : {
-          ...withStyleMap,
-          colors: {
-            ...withStyleMap.colors,
-            graph: { ...withStyleMap.colors.graph, classTagCascadeGenerations },
-          },
-        };
-  return { theme, styleMap };
-}
+/**
+ * `layoutFixtureClass`/`renderFixtureClass`'s own options bag: `PreprocessOptions`
+ * (`includeStore`, forwarded to `buildBlockUmls`) UNION `ParseOptions`
+ * (`assetStore`, forwarded to `parseClass` — cdd4-T4). Deliberately one bag
+ * for this harness's callers' convenience; the two fields still route to
+ * different pipeline stages internally, exactly as production keeps them
+ * separate (`src/index.ts#prepareBlock`'s `buildTheme(...)` vs
+ * `registry.resolve(umlSource, { assetStore: options?.assetStore })`).
+ */
+type FixtureClassOptions = PreprocessOptions & ParseOptions;
 
 /** Renders a `.puml` fixture through the CLASS engine's low-level pipeline
- * with `measurer` injected at the layout stage. `options` (e.g. `{
- * includeStore }`) passes through to `buildBlockUmls` verbatim -- additive,
- * optional, mirrors `scripts/svg-conformance-census.ts`'s own stdlib-store
- * wiring for the description pipeline (SI5b/T9) so `<bundle/...>` class
- * fixtures can render instead of erroring. Throws if the markup contains no
- * diagram block.
+ * with `measurer` injected at the layout stage. `options.includeStore`
+ * passes through to `buildBlockUmls` verbatim -- additive, optional, mirrors
+ * `scripts/svg-conformance-census.ts`'s own stdlib-store wiring for the
+ * description pipeline (SI5b/T9) so `<bundle/...>` class fixtures can render
+ * instead of erroring. `options.assetStore` is forwarded separately to
+ * `parseClass` (cdd4-T4) -- see that call site's own comment. Throws if the
+ * markup contains no diagram block.
  *
  * G2 N28: multi-page (`newpage`) sources render ONLY the first page's
  * geometry -- this doc comment's own PRE-EXISTING claim ("same fidelity
@@ -119,7 +83,7 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): ResolvedThemeAn
 export function layoutFixtureClass(
   markup: string,
   measurer: StringMeasurer,
-  options?: PreprocessOptions,
+  options?: FixtureClassOptions,
 ): { geo: ClassGeometry; theme: Theme; styleMap: StyleMap; annotations: ClassDiagramAST['annotations'] } {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
@@ -127,9 +91,19 @@ export function layoutFixtureClass(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const { theme, styleMap } = buildThemeForFixture(preprocessed);
+  const rawSourceLines = first.rawSource.map((s) => s.getString());
+  // cdd4-T7b/cdd4-T13: the shipped `buildTheme`, not a copy of it -- a copy
+  // measured a path no shipped code takes once theme styling (declaration-
+  // order skinparam/`<style>` interleaving, root/document routing) moved
+  // into it.
+  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const fullAst = astOrThrow(parseClass(block), 'class');
+  // cdd4-T4 (bidusa-22-jutu505): mirrors `classPlugin.parse(block, options)`
+  // (`src/diagrams/class/index.ts:47-51`) -- `parseClass` was called with NO
+  // options at all here, so `ParseOptions.assetStore` never reached it and a
+  // `sprite $N jar:<path>` (`CommandSpriteFile.java:108-112`) always resolved
+  // to nothing, no matter what a caller passed to this function.
+  const fullAst = astOrThrow(parseClass(block, { assetStore: options?.assetStore }), 'class');
   // G2 N28: page-1-only view -- see this function's own doc comment.
   const { pages: _pages, ...firstPageAst } = fullAst;
   const spritesField = firstPageAst.sprites !== undefined ? { sprites: firstPageAst.sprites } : {};
@@ -137,7 +111,7 @@ export function layoutFixtureClass(
   return { geo, theme, styleMap, annotations: firstPageAst.annotations };
 }
 
-export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+export function renderFixtureClass(markup: string, measurer: StringMeasurer, options?: FixtureClassOptions): string {
   // cdd-close-b7: mirrors `index.ts#prepareBlock` exactly -- production
   // registers the recursive nested-diagram renderer (T27/B7FU-R2) and seeds
   // every `<linearGradient>`/`<filter>` id from the diagram source
@@ -145,10 +119,27 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // this harness measured 11 survey-conformant fixtures as census-diverged
   // on the close-b7 tree: the instrument, not the port.
   registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
-  const seed = seedOf(markup);
   const { geo, theme, styleMap, annotations } = layoutFixtureClass(markup, measurer, options);
   const blocks = buildBlockUmls(markup, options);
-  const preprocessed = blocks[0]!.ok ? blocks[0]!.preprocessed : undefined!;
+  const first = blocks[0]!;
+  const preprocessed = first.ok ? first.preprocessed : undefined!;
+  // cdd4-T4 (popesa-39-sobe866): mirrors `index.ts#umlSourceOfBlock` +
+  // `prepareBlock`'s `seed: seedOfUmlSource(umlSource)`
+  // (`src/index.ts:132-134,377`) exactly -- upstream `UmlSource#seed()`
+  // (`UmlSource.java:222-234`) hashes the POST-TIM lines
+  // (`BlockUmlBuilder.ts:223`'s `seedSource`), not the raw markup this
+  // function receives. `seedOf(markup)` hashed the PRE-TIM text, so any
+  // TIM-consuming line (`!define MyBlue ...`) minted a DIFFERENT
+  // `<linearGradient>`/`@id` than production and the jar --
+  // `assemble-svg.ts:534-539`'s own doc comment already names this exact
+  // fixture as the one case cdd3-T27 missed when it fixed `renderSync`.
+  const seed = first.ok
+    ? seedOfUmlSource({
+        lines: first.source.lines,
+        rawSourceLines: first.rawSource.map((s) => s.getString()),
+        seedSourceLines: first.seedSource,
+      })
+    : seedOf(markup);
   // SI14 T3/T4: mirrors `class/index.ts#classPlugin.layoutSync`'s own
   // post-layout `measurer`/`sprites` passthrough exactly -- `layoutClass`
   // itself does not set either field (T3's `SyncPlugin.render(geo, theme)`
@@ -161,7 +152,7 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
 
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
-  const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
   // cdd-T28: mirrors `index.ts#applyAnnotationChrome`'s `spritesOf(ast)`
   // -- chrome text is creole now, so a `<$sprite>` in a title/legend has to
   // resolve against the diagram's own registry here too, or this harness

@@ -10,7 +10,15 @@
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { emojiBoxDim, emojiRenderRun } from '../../core/klimt/creole/atom/AtomEmoji.js';
+import {
+  emojiBoxDim,
+  emojiRenderRun,
+  emojiSquareDim,
+  emojiStartingAltitude,
+} from '../../core/klimt/creole/atom/AtomEmoji.js';
+import { drawEmojiAtom } from '../../core/svek/image/EntityImageDescriptionEmoji.js';
+import { emojiArtworkResolverFor, type InternalEmojiStore } from '../../core/internal-emoji-store.js';
+import { SpritePrimitiveCollector } from '../../core/creole-atoms-image-resolver.js';
 import { type SpriteDimsLookup, type InlineAtomToken } from '../../core/creole-atoms.js';
 import { measureInlineAtom, spriteScale } from '../../core/creole-atoms-measure.js';
 import { isKnownOpenIconicGlyph, openIconicDims, openIconicFactor } from '../../core/openiconic-glyphs.js';
@@ -145,20 +153,51 @@ export function resolveInlineAtom(
 }
 
 /**
- * A2s R2i (lecelo-92-loma110): resolves a `<:name:>` emoji atom. Sizing is
- * `AtomEmoji`'s exact contract (`core/klimt/creole/atom/AtomEmoji.ts`): a
- * `36*factor` square box for width/x-advance, `39*factor` line height (box
- * + the 3*factor below-baseline hang). Rendered as a TEXT run of the
- * emoji's own unicode character (platform glyph) at font size `36*factor`
- * with `textLength = 36*factor` -- the Twemoji SVG artwork upstream draws
- * (`Emoji#drawU`) is not ported; the platform glyph is the closest
- * self-contained rendering, and every SIZING quantity (the golden-DOT
- * contract) comes from the ported constants, never from measuring the
- * glyph. A forced tint resolves onto the run's font color; untinted emoji
- * keep `color: null` (the renderer's default fill -- platform emoji glyphs
- * carry their own native colors).
+ * cdd4-T9 (lecelo-92-loma110): resolves a `<:name:>` emoji atom. With
+ * artwork available (`emojiStore`, `SpriteRegistry.emoji` -- the
+ * `RenderOptions.assetStore`'s `emoji:` namespace, `internal-emoji-store.ts`),
+ * decomposes the Twemoji SVG into `DrawablePrimitive[]` via the SAME
+ * "collect what would have been drawn" idiom `resolveSvgSpriteAtom` uses for
+ * an SVG sprite, replaying `EntityImageDescriptionEmoji.ts#drawEmojiAtom`
+ * (which already mirrors `Emoji#drawU`, `Emoji.java:154-181`) against a
+ * collecting `UGraphic` instead of a live one -- reused verbatim, not
+ * re-ported. The declared box is `AtomEmoji#calculateDimensionSlow`'s real
+ * `36*factor` SQUARE (`emojiSquareDim`), paired with the atom's real
+ * `getStartingAltitude` (`-3*factor`, `emojiStartingAltitude`) so
+ * `resolveMemberAtoms`'s `Sea` reduction derives the box's placement itself
+ * (`AtomEmoji.ts`'s own doc comment: callers driving the real `Sea` pipeline
+ * must report the square + altitude, never the pre-combined `39*factor`
+ * convenience `emojiBoxDim` returns for the OTHER (non-Sea) callers).
+ *
+ * Without artwork (`emojiStore` absent, or the codepoint's `.svg` missing
+ * from the store): the PRE-EXISTING platform-glyph `'text'` run, unchanged --
+ * `AtomEmoji`'s sizing contract (`36*factor` box / `39*factor` line height
+ * via `emojiBoxDim`), see this function's own history for the citation. A
+ * forced tint resolves onto that fallback run's font color; untinted emoji
+ * keep `color: null`.
  */
-export function resolveEmojiAtom(atom: Extract<CreoleAtom, { kind: 'emoji' }>): ResolvedMemberAtom {
+export function resolveEmojiAtom(
+  atom: Extract<CreoleAtom, { kind: 'emoji' }>,
+  emojiStore: InternalEmojiStore | undefined,
+): ResolvedMemberAtom {
+  const resolveArtwork = emojiArtworkResolverFor(emojiStore);
+  const artwork = resolveArtwork?.(atom.unicode);
+  if (artwork !== undefined) {
+    const box = emojiSquareDim(atom.factor);
+    const collector = SpritePrimitiveCollector.create();
+    drawEmojiAtom(collector, atom, resolveArtwork);
+    return {
+      atom: {
+        kind: 'drawable',
+        primitives: [...collector.collected()],
+        width: box.width,
+        height: box.height,
+        altitude: emojiStartingAltitude(atom.factor),
+      },
+      width: box.width,
+      lineHeight: box.height,
+    };
+  }
   const box = emojiBoxDim(atom.factor);
   const run = emojiRenderRun(atom);
   return {

@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-09-27T02:06:20.429Z",
+  "fixtures": [
+    {
+      "slug": "biluko-70-licu481",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 246,
+      "firstDiff": "svg/defs[1][childCount]",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "favasu-27-fesa452",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 262,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "gepuco-34-pira620",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 776,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    },
+    {
+      "slug": "gikaju-64-bari602",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 248.41199999999998,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+    },
+    {
+      "slug": "josimu-04-silu988",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 13.183000000000007,
+      "firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+    },
+    {
+      "slug": "kipive-74-lele070",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 326,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+    },
+    {
+      "slug": "ropexu-72-jecu171",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 807.3499999999999,
+      "firstDiff": "svg/g[1]/g[1]/@id",
+      "maxDeltaPath": "svg/g[1]/g[16]/polygon[1]/@points[0]"
+    },
+    {
+      "slug": "rosoga-84-vari641",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 16,
+      "firstDiff": "svg/g[1]/g[1]/path[1]/@stroke",
+      "maxDeltaPath": "svg/@height"
+    },
+    {
+      "slug": "vakasu-51-xiza794",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 444.567,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/g[3]/rect[1]/@x",
+      "oracleBlind": true
+    },
+    {
+      "slug": "xetego-25-dinu652",
+      "type": "c4",
+      "dotEqual": true,
+      "verdict": "structural-match",
+      "maxDelta": 16,
+      "maxDeltaPath": "svg/@height"
+    },
+    {
+      "slug": "xizifu-87-siti076",
+      "type": "c4",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 182,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/@viewBox[2]"
+    }
+  ]
+}

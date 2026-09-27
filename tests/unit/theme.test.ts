@@ -8,6 +8,8 @@ import {
   deepMergeTheme,
 } from '../../src/core/theme.js';
 import type { Theme, ThemeOverride } from '../../src/core/theme.js';
+import { buildTheme } from '../../src/core/build-theme.js';
+import { preprocess } from '../../src/core/preprocessor.js';
 
 // ---------------------------------------------------------------------------
 // defaultTheme
@@ -329,18 +331,19 @@ describe('resolveTheme', () => {
     expect(result).not.toBe(defaultTheme);
   });
 
-  it('resolves built-in theme "amiga" with blue background', () => {
+  it('resolves built-in theme "amiga" to its residue: the root-cascade colours only (cdd4-T7b)', () => {
     const result = resolveTheme('amiga');
-    expect(result.colors.background).toBe('#0B58A8');
     expect(result.colors.text).toBe('#FFFFFF');
     expect(result.colors.border).toBe('#FFFFFF');
     expect(result.colors.arrow).toBe('#FFFFFF');
-    expect(result.fontFamily).toBe('Verdana');
+    // Carried by the EXECUTED theme now, not the residue.
+    expect(result.colors.background).toBe(defaultTheme.colors.background);
+    expect(result.fontFamily).toBe(defaultTheme.fontFamily);
   });
 
-  it('resolves built-in theme "blueprint" with dark blue background', () => {
-    const result = resolveTheme('blueprint');
-    expect(result.colors.background).toBe('#003153');
+  it('an executed !theme blueprint carries its dark blue background', () => {
+    const { theme } = buildTheme(preprocess('@startuml\n!theme blueprint\n@enduml'));
+    expect(theme.colors.background).toBe('#003153');
   });
 
   it('falls back to defaultTheme for unknown theme names', () => {

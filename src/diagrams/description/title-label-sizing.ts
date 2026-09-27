@@ -43,10 +43,7 @@ const TITLE_SUPP_BY_SYMBOL: Partial<Record<USymbol, readonly [number, number]>> 
  *  `layout.ts#buildAnchorNode`'s real DOT-emission anchor
  *  (`ClusterDotString.empty()`'s `label=<TABLE...>` value) and
  *  `frontier-cluster-bbox.ts#ensureMinWidth`'s `getTitleAndAttributeWidth()
- *  + 10` floor (`Cluster.java:427-428`). NOT used for
- *  `frontier-shadow-layout.ts`'s isolated shadow-graph anchor node — see
- *  {@link measureShadowAnchorDims}'s doc comment for why that's a
- *  deliberately DIFFERENT (and NOT jar-faithful) value. */
+ *  + 10` floor (`Cluster.java:427-428`). */
 export function measureTitleLabel(
   display: string,
   symbol: USymbol,
@@ -58,42 +55,5 @@ export function measureTitleLabel(
   return {
     width: Math.floor(dimLabel.width + suppWidth),
     height: Math.floor(dimLabel.height + suppHeight) - TITLE_TABLE_HEIGHT_REDUCTION,
-  };
-}
-
-/** Legacy nominal padding this port's `frontier-shadow-layout.ts` isolated
- *  shadow graph needs fed as its OWN anchor node's declared width/height to
- *  reproduce jar's real cluster geometry — NOT jar's real anchor dims (see
- *  {@link measureTitleLabel} for those, jar-verified 34x9 for `component`
- *  "comp"). Mission G1b J3 instrumented this directly
- *  (`component/gafegu-06-nito976`, `scripts/_tmp-j3-shadow-probe.ts`,
- *  deleted): feeding the shadow graph the jar-exact anchor (34x9) yields
- *  `initial.maxY=113`, 8px SHORT of the value (121) a REAL `dot -Txdot`
- *  cross-check on jar's own full `svek-1.dot` text produces (decision-
- *  journal.md's J2 entry) — this legacy inflated height (16, +7 over jar's
- *  real 9) closes that exact 8px gap for gafegu-06/gocexi-61-biso565/
- *  rapaji-98-xato067 (all `computePortClusterBbox` height verified against
- *  jar: 98 vs jar's 99, a residual off-by-one, vs 91 with the jar-exact
- *  value — a regression, NOT an improvement). The 8px gap itself is real
- *  and NOT understood: the shadow graph mirrors ONLY the rank-chain+anchor
- *  subgraph structure (`svek-dot-emit.ts#portClusterBlock`'s core), not the
- *  FULL jar dot text's `protection0`/`protection1`/`thereALinkFromOrToGroup`
- *  wrapping subgraphs (`ClusterDotString.java`) — one of those is the most
- *  likely source of the missing 8px of real jar rank separation. Kept as
- *  its own named, deliberately DEFERRED divergence (ledger.md J3) pending a
- *  dedicated diagnosis of `frontier-shadow-layout.ts`'s own structural
- *  fidelity gap — swapping in the jar-exact anchor height here without
- *  first closing that gap would regress the 3 fixtures above. */
-const SHADOW_ANCHOR_H_PADDING = 20;
-const SHADOW_ANCHOR_HEIGHT = 16;
-
-export function measureShadowAnchorDims(
-  display: string,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
-): { width: number; height: number } {
-  return {
-    width: measurer.measure(display, fontSpec).width + SHADOW_ANCHOR_H_PADDING,
-    height: SHADOW_ANCHOR_HEIGHT,
   };
 }

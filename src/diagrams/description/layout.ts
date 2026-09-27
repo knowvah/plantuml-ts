@@ -28,7 +28,6 @@ import {
   shiftGeo,
   buildNodeGeoIndex,
   measureTitleLabel,
-  measureShadowAnchorDims,
   type DescriptionEdgeGeo,
   type DescriptionGeometry,
   degenerateSingleLeaf,
@@ -37,6 +36,7 @@ import {
 import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layout-geo-post.js';
 import { computeInkShift } from './layout-ink-shift.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
+import type { RectangleArea } from '../../core/svek/FrontierCalculator.js';
 import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
 import { spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { emojiArtworkResolverFor } from '../../core/internal-emoji-store.js';
@@ -79,41 +79,47 @@ import { applyDescriptionTogethers } from './together.js';
 // between the two surviving leaves of a 3-standalone chain; gezemu-34
 // demotes an emptied frame to a leaf).
 /** Builds the `PortClusterInfo` (frontier-cluster-bbox.ts) for every
- *  container that has port children. Two DIFFERENT title measurements feed
- *  it -- see `title-label-sizing.ts`'s doc comments for the full mechanism
- *  and why they must stay different: `titleWidth`/`titleHeight`
- *  (`measureTitleLabel`, jar-exact -- `ensureMinWidth`'s
- *  `getTitleAndAttributeWidth() + 10` floor, `Cluster.java:427-428`) vs
- *  `anchorWidth`/`anchorHeight` (`measureShadowAnchorDims`, a legacy
- *  compensating value the isolated shadow graph needs to reproduce jar's
- *  real cluster geometry -- G1b J3 found the jar-exact anchor dims REGRESS
- *  `computePortClusterBbox`'s result there, an 8px shadow-graph-only
- *  structural gap unrelated to this function). Kermor never builds a port
- *  anchor at all (`portAnchorId` stays unset, see `buildDotClusters`'s own
- *  comment) -- `manageEntryExitPoint`'s upstream call site is unconditional
- *  on kermor, but no kermor fixture in this port exercises a port cluster,
- *  so this is scoped to the non-kermor path pending real coverage. */
+ *  container with port children -- the clusters `Cluster#drawU` runs
+ *  `manageEntryExitPoint` for (`entityPositionsExceptNormal().size() > 0`,
+ *  `Cluster.java:344-345`). `initial` is the cluster's own graphviz rect from
+ *  THIS layout (`DotStringFactory.java:432-441` -> `Cluster#setPosition`,
+ *  `Cluster.java:511-512`), `clusterRects` every cluster's, for child
+ *  `insides`; `titleWidth`/`titleHeight` are `measureTitleLabel`'s jar-exact
+ *  `getTitleAndAttributeWidth/Height` (`Cluster.java:427-428`). Kermor never
+ *  builds a port anchor (`portAnchorId` stays unset, see `buildDotClusters`)
+ *  -- `manageEntryExitPoint`'s upstream call site is unconditional on
+ *  kermor, but no kermor fixture exercises a port cluster, so this stays
+ *  scoped to the non-kermor path. */
 function buildPortClusterInfoByAstId(
   ctx: ClassifyCtx,
   portRanksByCluster: ReadonlyMap<string, { rank: 'source' | 'sink'; nodeIds: string[] }[]>,
-  fontSpec: FontSpec,
-  measurer: StringMeasurer,
+  fonts: { fontSpec: FontSpec; measurer: StringMeasurer },
   kermor: boolean,
+  result: DotLayoutResult,
 ): Map<string, PortClusterInfo> {
   const out = new Map<string, PortClusterInfo>();
   if (kermor) return out;
+  const clusterRects = clusterRectsByAstId(ctx, result);
   for (const c of ctx.containers) {
-    const ranks = portRanksByCluster.get(c.clusterId);
-    if (ranks === undefined) continue;
-    const title = measureTitleLabel(c.display, c.symbol, fontSpec, measurer);
-    const anchor = measureShadowAnchorDims(c.display, fontSpec, measurer);
-    out.set(c.astId, {
-      ranks,
-      anchorWidth: anchor.width,
-      anchorHeight: anchor.height,
-      titleWidth: title.width,
-      titleHeight: title.height,
-    });
+    const initial = clusterRects.get(c.astId);
+    // No rect -> no `PortClusterInfo`: `buildGeoNode` keeps the padded-union
+    // box for that container, as it did before cdd4-T6b.
+    if (!portRanksByCluster.has(c.clusterId) || initial === undefined) continue;
+    const title = measureTitleLabel(c.display, c.symbol, fonts.fontSpec, fonts.measurer);
+    out.set(c.astId, { initial, clusterRects, titleWidth: title.width, titleHeight: title.height });
+  }
+  return out;
+}
+
+/** `DotLayoutResult.clusters` (keyed by `DotInputCluster.id`, the
+ *  container's `clusterId`) re-keyed by the geo id (`astId`) as
+ *  `RectangleArea`s. */
+function clusterRectsByAstId(ctx: ClassifyCtx, result: DotLayoutResult): Map<string, RectangleArea> {
+  const byClusterId = new Map((result.clusters ?? []).map((c) => [c.id, c]));
+  const out = new Map<string, RectangleArea>();
+  for (const c of ctx.containers) {
+    const r = byClusterId.get(c.clusterId);
+    if (r !== undefined) out.set(c.astId, { minX: r.x, minY: r.y, maxX: r.x + r.width, maxY: r.y + r.height });
   }
   return out;
 }
@@ -199,13 +205,20 @@ function runLayout(
   if (kermor) input.kermor = true;
   applyDescriptionTogethers(input, ast.togethers ?? [], ctx);
   applyShieldEdgePorts(input);
-  const portClusterInfoByAstId = buildPortClusterInfoByAstId(ctx, portRanksByCluster, fontSpec, measurer, kermor);
-  const spacing: ClusterSpacing = { nodeSep, rankSep, rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
+  const spacing: ClusterSpacing = { rankdir: ast.rankdir === 'LR' ? 'LR' : 'TB' };
+  const result = layoutGraph(input);
+  const portClusterInfoByAstId = buildPortClusterInfoByAstId(
+    ctx,
+    portRanksByCluster,
+    { fontSpec, measurer },
+    kermor,
+    result,
+  );
   // #lizard forgives -- NLOC 47, CCN 9 pre-existing (mission G5/C1
   // 500-line split, pure move); 8 params after this iteration's own
   // `edgeFontSpec` addition -- a flat sequence of DOT-input-assembly
   // steps (edges, clusters, nodes, spacing) with no new branching.
-  return { result: layoutGraph(input), edgeDotBuild, portClusterInfoByAstId, spacing };
+  return { result, edgeDotBuild, portClusterInfoByAstId, spacing };
 }
 
 /**
