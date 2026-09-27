@@ -217,7 +217,13 @@ function portClusterBlock(
   colors: Map<string, ClusterColors>,
 ): string[] {
   const cc = colors.get(cluster.id)!;
-  const attrs = cluster.labelWidth !== undefined ? 'labeljust="c";' : '';
+  // `ClusterDotString.java:121-130`: `labeljust` whenever `cluster.isLabel()`,
+  // the same condition that makes `label` a title table -- which this branch
+  // hangs on the `empty()` anchor (`:178-181`, `titleLabelWidth` here), so an
+  // anchor title counts too. cdd4-T6: description never sets `labelWidth`.
+  const anchor = nodeById.get(cluster.portAnchorId ?? '');
+  const isLabel = cluster.labelWidth !== undefined || anchor?.titleLabelWidth !== undefined;
+  const attrs = isLabel ? 'labeljust="c";' : '';
   // G9/T1: this family gets the "a"/"i" pair only — a border point forces
   // `protection0`/`protection1` off (`ClusterDotString.java:109-112`), so `w.p0`
   // and `w.p1` are false here by construction. "a" wraps the base cluster from
