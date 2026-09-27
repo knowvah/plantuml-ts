@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T13:42:12.608Z",
+  "generatedAt": "2026-09-27T17:36:45.188Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -1345,9 +1345,7 @@
       "slug": "gujigi-63-roki030",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 122,
-      "maxDeltaPath": "svg/g[1]/g[12]/line[1]/@y1"
+      "verdict": "conformant"
     },
     {
       "slug": "gukuda-51-fuju086",
@@ -1395,9 +1393,7 @@
       "slug": "jakapi-64-tine258",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 66.869,
-      "maxDeltaPath": "svg/g[1]/line[1]/@x2"
+      "verdict": "conformant"
     },
     {
       "slug": "jalexi-21-xoje231",
@@ -1899,9 +1895,7 @@
       "slug": "lecelo-92-loma110",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 17.5,
-      "maxDeltaPath": "svg/g[1]/g[3]/path[5]/@d[1]"
+      "verdict": "conformant"
     },
     {
       "slug": "ledepo-11-muto607",
@@ -2179,10 +2173,7 @@
       "slug": "mizupo-59-zala765",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 23,
-      "firstDiff": "svg/defs[1][childCount]",
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "mocoda-55-take697",
@@ -2964,9 +2955,7 @@
       "slug": "ririlu-13-zipi740",
       "type": "class",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 25.767999999999972,
-      "maxDeltaPath": "svg/g[1]/g[14]/path[1]/@d[0]"
+      "verdict": "conformant"
     },
     {
       "slug": "rivake-42-lole723",
@@ -3341,10 +3330,7 @@
       "slug": "sokevu-87-toce485",
       "type": "class",
       "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 23.730000000000018,
-      "firstDiff": "svg/g[1]/g[6]/path[1]/@d",
-      "maxDeltaPath": "svg/g[1]/g[9]/path[1]/@d[0]"
+      "verdict": "conformant"
     },
     {
       "slug": "sokole-95-zuxe354",

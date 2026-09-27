@@ -52,8 +52,8 @@ Batch closes add survey, census, render-all, pin-diff and pins; see
 | Batch | Group | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | close cdd3, cut branch, baseline | T0a · T0b · T0c · T0d · T0e | serial | [x] |
-| [1](batch-1/overview.md) | acceptances, oracle, TRACKER, census, diagnosis, sokevu, theme port | T1–T7a | all ∥ | [ ] |
-| [2](batch-2/overview.md) | theme routing + fixes from T5 | T7b · T8–T10 | per overview | [ ] |
+| [1](batch-1/overview.md) | acceptances, oracle, TRACKER, census, diagnosis, sokevu, theme port | T1–T7a | all ∥ | [x] |
+| [2](batch-2/overview.md) | theme routing + fixes from T5 | T7b · T8–T10 | per overview | [x] |
 | [3](batch-3/overview.md) | exit + close-out | T-exit · T-close-out | serial | [ ] |
 
 Inventory: [`fixtures.md`](fixtures.md). Journal:

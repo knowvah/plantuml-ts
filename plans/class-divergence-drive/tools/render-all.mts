@@ -29,6 +29,10 @@ import { renderSync } from '../../../src/index.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import type { AssetStore } from '../../../src/core/asset-store.js';
 import { buildSpriteAssetsStore } from '../../../scripts/sprite-assets-store.js';
+// cdd4-T9 / close-b2: the jar always has its Twemoji artwork too, so this
+// harness supplies the same combined store as render-diff and the survey.
+import { buildEmojiAssetsStore } from '../../../scripts/emoji-assets-store.js';
+import { combineAssetStores } from '../../../src/core/asset-store.js';
 import { compareSvg } from '../../../tests/oracle/svg-conformance/compare.js';
 import { diffVerdict, type Verdict } from '../../../scripts/svg-parity-survey.js';
 
@@ -113,7 +117,7 @@ function main(): void {
   const classDir = join(repo, 'test-results', 'dot-cache', 'class');
   const fixtures = listClassFixtureDirs(classDir);
   process.stderr.write(`rendering ${fixtures.length} class fixtures\n`);
-  const store = buildSpriteAssetsStore();
+  const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
   const rows: RenderAllRow[] = [];
   fixtures.forEach((f, i) => {
     rows.push(renderRow(f, store));

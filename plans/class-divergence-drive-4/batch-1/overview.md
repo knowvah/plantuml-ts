@@ -12,7 +12,7 @@ run the close procedure (N=1).
 | [T3](T3-tracker-residuals.md) | Re-verify still-open G rows, TRACKER | debugger (sonnet) | `docs/graphviz-issues/**` | T0e | [x] (n/a: no open G rows after T0d) |
 | [T4](T4-census-harness.md) | Census sprite store + popesa pipeline | typescript-pro (sonnet) | `scripts/svg-conformance-census.ts` + its unit test | T0e | [x] |
 | [T5](T5-diagnose-p-rows.md) | Diagnose jakapi, lecelo, gujigi | debugger (opus) | `diagnosis/*.md`, `diagnosis/scratch/` | T0e | [x] |
-| [T6](T6-sokevu-description.md) | E3-9 patch + E3-10b hasPort | typescript-pro (opus) | `src/diagrams/description/{index,layout-helpers-types,renderer}.ts`, `src/core/svek-dot-emit-clusters.ts`, tests | T0e | [ ] |
+| [T6](T6-sokevu-description.md) | E3-9 patch + E3-10b hasPort | typescript-pro (opus) | `src/diagrams/description/{index,layout-helpers-types,renderer}.ts`, `src/core/svek-dot-emit-clusters.ts`, tests | T0e | [x] |
 | [T11](T11-unplaced-label-consumer.md) | gvi 25 consumer: skip unplaced edge label | typescript-pro (sonnet) | `src/core/graph-layout*.ts` (read), `class/class-edge-geo.ts`, tests | T0e | [x] |
 | [T7a](T7a-theme-execution.md) | Theme sources + `executeTheme` port | typescript-pro (opus) | `scripts/build-theme-sources.ts` (new), `src/core/themes-source*.ts` (generated), `src/core/tim/{TContext,EaterTheme}.ts`, tests | T0e | [x] |
 
