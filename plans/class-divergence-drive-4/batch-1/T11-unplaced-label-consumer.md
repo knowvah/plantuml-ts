@@ -10,6 +10,8 @@
   `src/diagrams/class/class-edge-geo.ts:205` already returns on
   `labelX === undefined`.
 
+**T0d finding:** delasa is ALREADY conformant on 1.6.1 with no plantuml-ts change, so the read already maps an absent label to `undefined`. This task is now VERIFY + TEST: pin that behaviour with a unit test through the layout read, quote the jar path, and change no production code unless the test exposes a gap.
+
 **Task.** TDD.
 1. Trace how the layout read (`src/core/graph-layout*.ts`, including T-D3's
    `graph-layout-svek-read.ts`) maps `getLayout()`'s edge label into
