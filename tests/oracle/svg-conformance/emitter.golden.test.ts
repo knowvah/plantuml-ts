@@ -117,4 +117,46 @@ describe('oracle/accepted-divergences.json — ledger schema (AC4)', () => {
       expect((e.reason ?? '').length, 'entry needs a real reason').toBeGreaterThan(80);
     }
   });
+
+  // The ratchet only ever asked "did a pinned fixture regress?" -- never the
+  // converse, "does an accepted divergence still diverge?". When this test
+  // goes red, something went RIGHT: a fix made a fixture we had written off
+  // as won't-fix match the jar. The only failure is the bookkeeping -- we
+  // accepted a divergence we needn't have. Move the entry to `retired`
+  // (retiredAt/retiredBy, citing the fixing commit) and celebrate.
+  //
+  // Exception: a divergence the comparator deliberately cannot see reads
+  // conformant while it stands. Such entries say so in `surveyBlind`, naming
+  // the exemption -- moxobo-16 and zikabo-17 accept embedded-diagram payload
+  // bytes, which `compare.ts` skips for every `<image>` href.
+  test('no in-force entry names a fixture a fix has since made conformant', () => {
+    const dir = resolve(process.cwd(), 'tests/oracle/svg-conformance');
+    const ledger = JSON.parse(readFileSync(resolve(process.cwd(), 'oracle/accepted-divergences.json'), 'utf8')) as {
+      entries: { match: { id?: string }; surveyBlind?: string }[];
+    };
+    const verdicts = new Map<string, Map<string, string>>();
+    const verdictOf = (type: string, slug: string): string | undefined => {
+      if (!verdicts.has(type)) {
+        const survey = JSON.parse(readFileSync(resolve(dir, `parity-${type}.json`), 'utf8')) as {
+          fixtures: { slug: string; verdict: string }[];
+        };
+        verdicts.set(type, new Map(survey.fixtures.map((f) => [f.slug, f.verdict])));
+      }
+      return verdicts.get(type)!.get(slug);
+    };
+    for (const e of ledger.entries) {
+      if (e.surveyBlind !== undefined)
+        expect(e.surveyBlind.length, 'surveyBlind must name the exemption').toBeGreaterThan(40);
+    }
+    const nowConformant = ledger.entries
+      .filter((e) => e.surveyBlind === undefined)
+      .map((e) => /^svg-([^/]+)\/(.+)$/.exec(e.match.id ?? ''))
+      .filter((m): m is RegExpExecArray => m !== null)
+      .filter(([, type, slug]) => verdictOf(type!, slug!) === 'conformant')
+      .map(([id]) => id);
+    expect(
+      nowConformant,
+      'GOOD NEWS: these accepted divergences now render conformant -- a fix closed them. Retire each entry (move to `retired` with retiredAt/retiredBy and the fixing commit).',
+    ).toEqual([]);
+  });
 });

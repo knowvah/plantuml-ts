@@ -106,8 +106,10 @@ Start → end: **689 / 16 / 18 → 707 / 3 / 13** (planning survey → final).
 Remaining class non-conformant (16): 15 accepted rows (11 older, including
 7 ELK, plus luzive/sadamo/zuduxu/nugecu accepted this mission) and
 **besepi**, the only unaccepted one. Two older accepted entries, moxobo-16
-and zikabo-17, now render CONFORMANT, so their acceptances are stale;
-retiring them is a maintainer act, flagged in next-missions. besepi is open on the oracle re-pin (the
+and zikabo-17, read CONFORMANT because the comparator exempts `<image>`
+href bytes (`compare.ts:374`). Their divergence stands, so they now carry
+`surveyBlind` (corrected 2026-09-27; this line first called them stale).
+besepi is open on the oracle re-pin (the
 pinned jar is 7beta11, the oracle symlink 8beta1, and our render equals
 8beta1 exactly). Ratchet 686 → 706 (sokevu survey-conformant but not
 census-pinnable: class-only census cannot auto-dispatch it).
