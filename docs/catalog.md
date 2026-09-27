@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1239 modules · 4662 exported names.
+1238 modules · 4661 exported names.
 
 ## `src/`
 
@@ -64,7 +64,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `java-hash-set.ts` | `javaDoubleHashCode`, `javaHashSetOrder` | java-hash-set.ts — the iteration order of a `java.util.HashSet` built by successive `add` calls, for code upstream iterates straight out of a `HashSet` (e.g. |
 | `java-whitespace.ts` | `isJavaWhitespaceAt` | `Character.isWhitespace(char)`, enumerated. |
 | `latex.ts` | `measureNodeLabel`, `renderNodeLabel`, `LabelSpan`, `parseLatexLabel`, `measureLatex`, `renderLatexMathML`, `renderLatexAsImage` | LaTeX label parsing, sizing, and rendering utilities. |
-| `layout-epsilon.ts` | `absorbLayoutEpsilon` | Round away the sub-thousandth float noise this port's own unit conversion introduces, so it cannot flip a truncating integer cast. |
 | `magma.ts` | `computeBranch`, `MagmaGroupInput`, `buildMagmaEdges` | "Magma" standalone chaining — the shared cucadiagram/svek layout feature that arranges link-less ("standalone") leaves into a square grid of INVISIBLE edges so graphviz packs them compactly. |
 | `measurer-bounder.ts` | `MeasurerStringBounder` | measurer-bounder.ts — `StringMeasurer` -> `StringBounder` adapter (description-leaf-sizing-audit T6 / ADR-6). |
 | `measurer-deterministic.ts` | `DeterministicMeasurer` | Deterministic string measurer (dual-measurer conformance/ratchet seam). |

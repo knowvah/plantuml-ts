@@ -37,7 +37,6 @@
  * behaviour change wearing a consolidation's clothes.
  */
 
-import { absorbLayoutEpsilon } from './layout-epsilon.js';
 import {
   CUCA_DOCUMENT_MARGIN_TOP,
   CUCA_DOCUMENT_MARGIN_RIGHT,
@@ -55,10 +54,6 @@ export interface DocumentDims {
  * measured dimension, then apply `SvgGraphics#ensureVisible`'s truncating
  * `(int)(v + 1)` — which for a non-negative `v` is `Math.floor(v + 1)`.
  *
- * `absorbLayoutEpsilon` runs first, deliberately: a value that is a hair
- * under an integer from accumulated float error would otherwise truncate a
- * whole pixel down.
- *
  * Kept separate from {@link import('./svek/SvekResult.js').svekDimension} —
  * rather than folded into one call — because the class engine needs the two
  * halves independently: its chrome path re-applies the margin to a
@@ -69,7 +64,7 @@ export function applyCucaDocumentMargin(dims: DocumentDims): DocumentDims {
   const width = dims.width + CUCA_DOCUMENT_MARGIN_LEFT + CUCA_DOCUMENT_MARGIN_RIGHT;
   const height = dims.height + CUCA_DOCUMENT_MARGIN_TOP + CUCA_DOCUMENT_MARGIN_BOTTOM;
   return {
-    width: Math.floor(absorbLayoutEpsilon(width) + 1),
-    height: Math.floor(absorbLayoutEpsilon(height) + 1),
+    width: Math.floor(width + 1),
+    height: Math.floor(height + 1),
   };
 }
