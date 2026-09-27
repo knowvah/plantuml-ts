@@ -1,0 +1,126 @@
+rendering 723 class fixtures
+  25/723
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:312:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:174:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:217:10)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:312:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:174:42)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:226:10)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:434:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:324:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:237:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:495:44)
+    at renderDrawableToFragment (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/document-shell-fragment.ts:238:12)
+  50/723
+  75/723
+  100/723
+  125/723
+  150/723
+  175/723
+  200/723
+  225/723
+  250/723
+  275/723
+  300/723
+  325/723
+  350/723
+  375/723
+  400/723
+  425/723
+  450/723
+  475/723
+  500/723
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:312:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:174:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:217:10)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:312:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:174:42)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:226:10)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:434:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:324:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:237:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:495:44)
+    at renderDrawableToFragment (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/document-shell-fragment.ts:238:12)
+  525/723
+  550/723
+  575/723
+  600/723
+  625/723
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:379:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:468:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:425:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:432:57)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:379:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:395:38)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:411:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:468:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:425:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:432:57)
+  650/723
+  675/723
+  700/723
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost A B edge
+lost A B edge
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/render-all-class.json — 723 rows

@@ -1,0 +1,5 @@
+surveying 80 object fixtures (concurrency 6)
+  25/80
+  50/80
+  75/80
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-object.json — {"conformant":59,"structural-match":10,"diverged":11,"errored":0,"timeout":0,"oracle-error":0}
