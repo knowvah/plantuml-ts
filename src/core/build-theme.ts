@@ -13,6 +13,8 @@ import type { StyleMap } from './skinparam.js';
 import { applyStyleMap } from './style-map-theme.js';
 import { applySkinLayer } from './skin-loader.js';
 import { computeClassTagCascadeGenerations } from './style-cascade-class.js';
+import { styleSkinparamSegments, type StyleSkinparamSegment } from './style-skinparam-segments.js';
+import { parseClockwise } from './annotations/annotation-clockwise.js';
 
 /**
  * Five-stage theme resolution:
@@ -24,12 +26,14 @@ import { computeClassTagCascadeGenerations } from './style-cascade-class.js';
  *   skin-file-loading mission Batch 1). BELOW Stage 2/3 so the document's
  *   own skinparam/`<style>` always wins over the loaded skin.
  *
- * Stage 2 — Apply skinparam directives from source on top of the base theme.
- *
- * Stage 3 — Apply <style> blocks from source.
- *   3a. Merge all StyleMaps from all style blocks.
- *   3b. Top-level bare declarations ("" key) flow through resolveSkinparam.
- *   3c. Element-scoped entries (e.g. "actor", "class") go through applyStyleMap.
+ * Stages 2-3 — Apply the source's skinparam directives and <style> blocks in
+ *   DECLARATION order (cdd4-T7b): consecutive skinparams as one run through
+ *   resolveSkinparam; consecutive style blocks merged as one run, whose
+ *   top-level bare declarations ("" key) flow through resolveSkinparam and
+ *   whose element-scoped entries (e.g. "actor", "class") go through
+ *   applyStyleMap. A document whose styles all follow its skinparams sees
+ *   exactly the former two stages. Then the merged `root`/`document`
+ *   declarations reach `styleOverrides` / `diagramMargin`.
  *
  * Stage 4 — Caller Partial<Theme> wins over everything.
  *
@@ -73,26 +77,11 @@ export function buildTheme(
   // an unrecognized/preprocessor-grammar skin (D1).
   const withSkin = applySkinLayer(preprocessed, base, documentRawSourceLines);
 
-  // Stage 2: apply skinparam directives from source
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  // Stage 3: apply <style> blocks from source
-  // 3a. Merge all StyleMaps (last writer wins per selector+property)
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  // 3b. Top-level bare declarations ("" key) → resolveSkinparam (existing behavior)
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-
-  // 3c. Element-scoped entries → applyStyleMap
-  const withStyleMap = applyStyleMap(styleMap, withStyles);
+  // Stages 2-3: skinparam directives and <style> blocks, in declaration order
+  // (cdd4-T7b -- see `style-skinparam-segments.ts`).
+  const withDeclarations = styleSkinparamSegments(preprocessed).reduce(applySegment, withSkin);
+  const styleMap = mergedStyleMap(preprocessed.styles);
+  const withStyleMap = withDocumentStyle(withDeclarations, styleMap);
 
   // G2 N39: position-scoped classifier `.tagname` cascade generations --
   // see `preprocessed.stylePositions`'s doc comment for the mechanism.
@@ -121,4 +110,63 @@ export function buildTheme(
   // never flagged in index.ts because that file's 500-line gate short-
   // circuited the per-function check first.
   return { theme, styleMap };
+}
+
+/** Every `<style>` block merged: last writer per selector+property. */
+function mergedStyleMap(styles: readonly string[]): StyleMap {
+  return styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
+    m.forEach((props, selector) => {
+      const existing = acc.get(selector) ?? new Map<string, string>();
+      props.forEach((v, k) => existing.set(k, v));
+      acc.set(selector, existing);
+    });
+    return acc;
+  }, new Map());
+}
+
+/**
+ * One run of declarations onto the theme. A skinparam run goes through
+ * `resolveSkinparam`; a `<style>` run sends its top-level bare declarations
+ * (the `""` key) through `resolveSkinparam` too, then its element-scoped
+ * selectors through `applyStyleMap`.
+ */
+function applySegment(theme: Theme, segment: StyleSkinparamSegment): Theme {
+  if (segment.kind === 'skinparam') return resolveSkinparam(segment.entries, theme).theme;
+  const flatRoot = segment.styleMap.get('') ?? new Map<string, string>();
+  return applyStyleMap(segment.styleMap, resolveSkinparam(flatRoot, theme).theme);
+}
+
+/** A top-level `root` / `document` selector, or one nested under them. */
+function isRootOrDocumentSelector(selector: string): boolean {
+  return ['root', 'document'].some((name) => selector === name || selector.startsWith(`${name}.`));
+}
+
+/**
+ * The merged `<style>` map's `root` / `document` declarations, routed to the
+ * two `Theme` fields that carry them (cdd4-T7b; both were filled only by the
+ * precompiled theme summary before, so a document's own `root { Margin 5 }`
+ * never reached them either):
+ *
+ * - `styleOverrides` -- the selectors themselves. `root` and `document` are
+ *   members of every chrome element's `{root, document, <element>}` signature
+ *   (`StyleStorage#computeMergedStyle` matches by containment), which is what
+ *   `annotations/style.ts` and the activity text/line resolvers read.
+ * - `diagramMargin` -- `TextBlockExporter#calculateMargin`
+ *   (`core/TextBlockExporter.java:510-516`): the merged `{root, document}`
+ *   style's `Margin` when it has one, else `getDefaultMargins()` (left to the
+ *   engine). `document` is declared after `root` in every bundled theme, and
+ *   `computeMergedStyle` overwrites in declaration order, so it wins.
+ */
+function withDocumentStyle(theme: Theme, styleMap: StyleMap): Theme {
+  const picked = [...styleMap].filter(([selector]) => isRootOrDocumentSelector(selector));
+  if (picked.length === 0) return theme;
+  const styleOverrides = { ...theme.styleOverrides };
+  for (const [selector, props] of picked)
+    styleOverrides[selector] = { ...styleOverrides[selector], ...Object.fromEntries(props) };
+  const margin = styleMap.get('document')?.get('margin') ?? styleMap.get('root')?.get('margin');
+  return {
+    ...theme,
+    styleOverrides,
+    ...(margin !== undefined ? { diagramMargin: parseClockwise(margin) } : {}),
+  };
 }

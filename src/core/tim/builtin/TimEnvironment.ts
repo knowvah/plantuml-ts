@@ -7,8 +7,9 @@
  * (`new Random()`), `Getenv` (`System.getenv`/`System.getProperty`),
  * `FileExists`/`LoadJson` (`SFile`/`SURL`), `Dirpath`/`Filedate`/`Filename`/
  * `FilenameNoExtension` (`Defines#getEnvironmentValue`, itself populated
- * from the render invocation), and `GetStdlib`/`GetAllStdlib`/`GetAllTheme`/
- * `GetCurrentTheme` (`Stdlib`/`ThemeUtils` folder scans).
+ * from the render invocation), and `GetStdlib`/`GetAllStdlib`/`GetAllTheme`
+ * (`Stdlib`/`ThemeUtils` folder scans). (`GetCurrentTheme` reads the context's
+ * executed-theme metadata, as upstream does -- no seam.)
  *
  * `src/` must run in a browser and render reproducibly (CLAUDE.md: no
  * `fs`/`process.env`/`Date.now()`/`Math.random()` in rendering paths). Every
@@ -103,9 +104,6 @@ export interface TimEnvironment {
   /** Theme names for `%get_all_theme()`. */
   listThemeNames(): readonly string[];
 
-  /** `%get_current_theme()` metadata (an upstream `JsonObject`; here plain `JsonValue`). */
-  getCurrentThemeMetadata(): JsonValue;
-
   /** `%version` -- this build's version string. Not sourced from `package.json` at runtime (browser-safe). */
   getVersionString(): string;
 }
@@ -130,7 +128,6 @@ export function createDefaultTimEnvironment(): TimEnvironment {
     getStdlibMetadata: () => undefined,
     getStdlibJsonResource: () => undefined,
     listThemeNames: () => [],
-    getCurrentThemeMetadata: () => ({}),
     getVersionString: () => 'unknown',
   };
 }

@@ -31,7 +31,6 @@ describe('createDefaultTimEnvironment', () => {
     expect(env.fileExists('/etc/passwd')).toBe(false);
     expect(env.listStdlibFolderNames()).toEqual([]);
     expect(env.listThemeNames()).toEqual([]);
-    expect(env.getCurrentThemeMetadata()).toEqual({});
     expect(env.getVersionString()).toBe('unknown');
   });
 });
@@ -208,7 +207,6 @@ describe('GetAllStdlib / GetStdlib / GetAllTheme / GetCurrentTheme', () => {
     getStdlibMetadata: (name) =>
       name === 'aws' ? { version: '1.0', source: 'src1', entries: new Map([['author', 'a']]) } : undefined,
     listThemeNames: () => ['_none_', 'amiga'],
-    getCurrentThemeMetadata: () => ({ name: 'amiga' }),
   };
 
   it('GetAllStdlib() lists folder names', () => {
@@ -297,8 +295,9 @@ describe('GetAllStdlib / GetStdlib / GetAllTheme / GetCurrentTheme', () => {
     expect(result.toJson()).toEqual(['_none_', 'amiga']);
   });
 
-  it('GetCurrentTheme returns the seam metadata', () => {
-    const result = new GetCurrentTheme(env).executeReturnFunction(fakeContext(), NO_MEMORY, LOC, [], NO_NAMED);
+  it("GetCurrentTheme returns the context's theme metadata (GetCurrentTheme.java:65)", () => {
+    const context = fakeContext({ getThemeMetadata: () => ({ name: 'amiga' }) });
+    const result = new GetCurrentTheme().executeReturnFunction(context, NO_MEMORY, LOC, [], NO_NAMED);
     expect(result.toJson()).toEqual({ name: 'amiga' });
   });
 });

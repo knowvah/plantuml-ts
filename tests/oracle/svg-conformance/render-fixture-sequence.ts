@@ -53,13 +53,8 @@
  * appears in it), so there is no consumer to wire it into here.
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/preprocessor.js';
-import { resolveTheme } from '../../../src/core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
-import { applyStyleMap } from '../../../src/core/style-map-theme.js';
-import { applySkinLayer } from '../../../src/core/skin-loader.js';
-import type { Theme } from '../../../src/core/theme.js';
-import type { StyleMap } from '../../../src/core/skinparam.js';
+import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
+import { buildTheme } from '../../../src/core/build-theme.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
@@ -67,38 +62,6 @@ import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
-
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  readonly styleMap: StyleMap;
-}
-
-function buildThemeForFixture(
-  preprocessed: PreprocessorResult,
-  rawSourceLines?: readonly string[],
-): ResolvedThemeAndStyles {
-  const base = resolveTheme(preprocessed.theme ?? 'default');
-  // mirrors render-fixture-state.ts#buildThemeForFixture's own Stage 1.5 --
-  // see that function's doc comment for the rationale (applied BEFORE the
-  // document's own skinparam so the document always wins; rawSourceLines
-  // threads bare `!define` flags into a preprocessor-grammar skin).
-  const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  const theme = applyStyleMap(styleMap, withStyles);
-  return { theme, styleMap };
-}
 
 /** Renders a `.puml` fixture through the SEQUENCE engine's low-level
  * pipeline with `measurer` injected at the layout stage and reused
@@ -113,7 +76,9 @@ export function renderFixtureSequence(markup: string, measurer: StringMeasurer, 
 
   const preprocessed = first.preprocessed;
   const rawSourceLines = first.rawSource.map((s) => s.getString());
-  const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
+  // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
+  // path no shipped code takes once theme styling moved into it.
+  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
   const parsed = parseSequence(first.source.lines);
   // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
   // (D1). This harness bypasses `src/index.ts`'s production narrowing (it
@@ -130,7 +95,7 @@ export function renderFixtureSequence(markup: string, measurer: StringMeasurer, 
   const annotations = ast.annotations;
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
-  const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
   const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed);
 }

@@ -1,8 +1,8 @@
 /**
  * preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line
- * collector `preprocessor.ts` installs as the interpreter's
- * `PlainLineFilter`. Moved out of `preprocessor.ts` verbatim (line cap,
- * cdd3-T27); see that file's header for why it is not a TIM concept.
+ * collector `preprocessor.ts#resultOf` runs over the interpreter's finished
+ * result list. Moved out of `preprocessor.ts` (line cap, cdd3-T27); see that
+ * file's header for why it is not a TIM concept.
  */
 
 import type { StringLocated } from './tim/StringLocated.js';
@@ -94,23 +94,12 @@ const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
 /**
- * The `<style>` / `skinparam` collector: a {@link PlainLineFilter} that sees
- * every surviving content line RAW -- after comments and conditionals, before
- * macro/variable substitution -- and consumes the ones that are not diagram
- * content. Faithful to the pre-TIM loop's own ordering and regexes for
- * STRUCTURE (block open/close, selector, key) -- but a `skinparam` line's
- * VALUE is now run through `substitute` (skin-reddress-variants Fix 1) so
- * `!define ACCENT 1a66c2` / `!$ACCENT = "1a66c2"` resolve into a `skinparam
- * ... ACCENT` / `... $ACCENT` value, mirroring upstream's `CommandSkinParam`
- * (a `Command` dispatched over the SAME post-TIM-substitution line stream as
- * any other diagram-body line -- verified live-jar, see
- * `TContextOptions.ts#PlainLineFilter`). `<style>`-block CONTENT deliberately
- * still uses the raw, unsubstituted line (`tests/unit/preprocessor.test.ts`:
- * "style block content is collected verbatim (no define substitution)") --
- * KNOWN to diverge from the verified jar behavior above (same live-jar
- * evidence: `<style>document{BackgroundColor $ACCENT}</style>` DOES resolve
- * upstream); left unfixed here as an explicit mission boundary, not an
- * oversight. See `plans/skin-file-loading/decision-journal.md`.
+ * The `<style>` / `skinparam` / `skin` collector: `preprocessor.ts#resultOf`
+ * offers it every line of the FINISHED interpreter result list, in order --
+ * the fully-substituted stream upstream's `CommandSkinParam` /
+ * `CommandStyleMultilinesCSS` / `CommandSkin` dispatch over -- and it consumes
+ * the ones that are not diagram content. No value needs substituting here any
+ * more: `TContext#addPlain` already did (`TContext.java:455-466`).
  */
 export class StyleAndSkinparamCollector {
   readonly styles: string[] = [];
@@ -123,7 +112,22 @@ export class StyleAndSkinparamCollector {
    *  corpus fixture repeats the directive; mirrors `skinparam`'s own
    *  last-write-wins Map semantics for a repeated key). */
   skin: string | undefined;
+  /**
+   * cdd4-T7b: the DECLARATION ORDER of the two streams, which the maps above
+   * lose -- each key's last assignment and each `<style>` block's opening, on
+   * one counter. Upstream applies both to one `StyleBuilder` in document
+   * order (`SkinParam#setParam` converts a skinparam and mutes the style
+   * immediately, `SkinParam.java:227-234`; a `<style>` block mutes it where
+   * it is dispatched), so a later skinparam beats an earlier `<style>`
+   * declaration of the same property -- which matters once `!theme` puts a
+   * theme's `<style>` ahead of the document's own skinparams. Read by
+   * `style-skinparam-segments.ts`.
+   */
+  readonly skinparamOrder = new Map<string, number>();
+  /** Parallel to {@link styles}: each block's place on the same counter. */
+  readonly styleOrder: number[] = [];
 
+  private sequence = 0;
   private inStyleBlock = false;
   private readonly styleBuffer: string[] = [];
   /**
@@ -134,23 +138,24 @@ export class StyleAndSkinparamCollector {
    */
   private readonly skinparamStack: string[] = [];
 
-  /** True when the line was consumed (nothing is emitted for it). `substitute`
-   *  (macro/`$variable` substitution) is threaded to the skinparam-VALUE paths
-   *  AND `<style>`-block content -- both substitute upstream (jar-verified:
-   *  `CommandSkinParam`/`CommandStyleMultilinesCSS` both dispatch over the
-   *  post-substitution line stream; there is no verbatim carve-out in
-   *  `TContext.java#addPlain`). */
-  accept(line: StringLocated, substitute: (text: string) => string): boolean {
+  /**
+   * True when the line was consumed (it is not a diagram-body line).
+   * `position` is the line's place in the DOCUMENT (`preprocessor.ts
+   * #resultOf`), recorded for a `<style>` opening as its `stylePositions`
+   * entry.
+   */
+  accept(line: StringLocated, position: number | undefined): boolean {
     const raw = line.getString();
     const trimmed = raw.trim();
 
-    if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed, substitute);
+    if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed);
 
-    if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed, substitute);
+    if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed);
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
-      this.stylePositions.push(line.getLocation()?.getPosition());
+      this.stylePositions.push(position);
+      this.styleOrder.push(this.sequence++);
       return true;
     }
     const skinMatch = RE_SKIN_LINE.exec(trimmed);
@@ -158,10 +163,10 @@ export class StyleAndSkinparamCollector {
       this.skin = skinMatch[1]!.trim().toLowerCase();
       return true;
     }
-    return this.openSkinparam(trimmed, substitute);
+    return this.openSkinparam(trimmed);
   }
 
-  private collectStyleLine(raw: string, trimmed: string, substitute: (text: string) => string): boolean {
+  private collectStyleLine(raw: string, trimmed: string): boolean {
     if (RE_STYLE_CLOSE.test(trimmed)) {
       this.styles.push(this.styleBuffer.join('\n'));
       this.styleBuffer.length = 0;
@@ -172,7 +177,7 @@ export class StyleAndSkinparamCollector {
       // $ACCENT...` renders #1A66C2). CommandStyleMultilinesCSS dispatches over
       // the post-substitution stream, same as skinparam -- NOT verbatim.
       // @see ~/git/plantuml/.../tim/TContext.java#addPlain
-      this.styleBuffer.push(substitute(raw));
+      this.styleBuffer.push(raw);
     }
     return true;
   }
@@ -198,7 +203,7 @@ export class StyleAndSkinparamCollector {
    * and re-appends it at the END. So `object` + `<<Foo1>>` + `FontSize` keys
    * as `objectfontsize<<foo1>>`, exactly as before — see {@link cleanSkinKey}.
    */
-  private collectSkinparamBlockEntry(trimmed: string, substitute: (text: string) => string): boolean {
+  private collectSkinparamBlockEntry(trimmed: string): boolean {
     if (RE_SKINPARAM_BLOCK_CLOSE.test(trimmed)) {
       this.skinparamStack.pop();
       return true;
@@ -211,14 +216,14 @@ export class StyleAndSkinparamCollector {
     const entry = RE_SKINPARAM_BLOCK_ENTRY.exec(trimmed);
     if (entry !== null) {
       const key = this.skinparamStack.join('') + entry[1]!.trim();
-      this.skinparam.set(cleanSkinKey(key), substitute(entry[2]!).trim());
+      this.setSkinparam(cleanSkinKey(key), entry[2]!.trim());
     }
     return true;
   }
 
   /** Block-open forms are tested before the single-line form, which would
    *  otherwise capture `{` as the parameter name. */
-  private openSkinparam(trimmed: string, substitute: (text: string) => string): boolean {
+  private openSkinparam(trimmed: string): boolean {
     if (RE_SKINPARAM_BLOCK_OPEN.test(trimmed)) {
       this.skinparamStack.push('');
       return true;
@@ -230,9 +235,14 @@ export class StyleAndSkinparamCollector {
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.skinparam.set(single[1]!.trim().toLowerCase(), substitute(single[2]!).trim());
+      this.setSkinparam(single[1]!.trim().toLowerCase(), single[2]!.trim());
       return true;
     }
     return false;
+  }
+
+  private setSkinparam(key: string, value: string): void {
+    this.skinparam.set(key, value);
+    this.skinparamOrder.set(key, this.sequence++);
   }
 }

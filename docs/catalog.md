@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1241 modules · 4672 exported names.
+1242 modules · 4671 exported names.
 
 ## `src/`
 
@@ -77,8 +77,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
-| `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts` installs as the interpreter's `PlainLineFilter`. |
-| `preprocessor.ts` | `PreprocessorResult`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
+| `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
+| `preprocessor.ts` | `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
@@ -116,6 +116,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-theme.ts` | `applyStyleMap` | Selector → Theme field mapping (element-scoped <style> blocks). |
+| `style-skinparam-segments.ts` | `StyleSkinparamSegment`, `StyleSkinparamSource`, `styleSkinparamSegments` | The `skinparam` and `<style>` declarations of one block, back in the ONE order upstream applies them (cdd4-T7b). |
 | `svek-dot-emit-clusters.ts` | `inches`, `nodeLine`, `clusterBlock` | Node lines and cluster blocks for the Svek DOT emitter — split out of ./svek-dot-emit.ts for the 500-line file cap (G9/T1; pure move apart from the wrapper emission that motivated the split, see below). |
 | `svek-dot-emit-labels.ts` | `hex`, `round`, `trunc`, `labelTable`, `edgeLabelTable`, `shieldTable`, `portTable`, `rowPortTable` | Svek HTML-label table builders — the `label=<...>` values `svek-dot-emit.ts` writes into node, edge and cluster statements. |
 | `svek-dot-emit.ts` | `inches`, `wrapperLevels`, `WrapperLevels`, `toSvekDot` |  |
@@ -147,12 +148,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `theme-merge.ts` | `deepMergeTheme` | `deepMergeTheme` and its helpers — split out of `theme.ts` (mechanical extraction to keep that file under the project's 500-line cap, same rationale as `theme-graph-colors.ts`/`theme-element-resolve.ts`; a pure move, no behavior change). |
 | `theme-sequence-fields.ts` | `ThemeSequenceFields` | `Theme.sequence` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme.ts` | `ElementColors`, `ThemeGraphColors`, `ThemeColorFields`, `ThemeSequenceFields`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
-| `themes-builtin-a-m.ts` | `BUILTIN_THEMES_A_M` | Built-in PlantUML theme definitions (amiga .. |
-| `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme definitions (plain .. |
-| `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme definitions. |
+| `themes-builtin-a-m.ts` | `BUILTIN_THEMES_A_M` | Built-in PlantUML theme residue (amiga .. |
+| `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme residue (plain .. |
+| `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme residue: only the fields an executed `!theme` does not yet reach -- see scripts/compile-themes.py. |
 | `themes-source.ts` | `THEME_SOURCES` | GENERATED by `scripts/build-theme-sources.ts` -- do not edit by hand. |
 | `TitledDiagram.ts` | `DiagramType`, `UmlSource`, `Previous`, `TitledDiagram` |  |
-| `uml-source-lines.ts` | `dataListOf`, `mutateExpandsBreakline`, `loadInternal`, `patchBase64Line`, `umlSourceSeedLines` | The line list upstream's `UmlSource#seed()` walks -- `BlockUml#data` as `PSystemBuilder#createPSystem` turns it into a `UmlSource`. |
+| `uml-source-lines.ts` | `mutateExpandsBreakline`, `loadInternal`, `patchBase64Line`, `umlSourceSeedLines` | The line list upstream's `UmlSource#seed()` walks -- `BlockUml#data` as `PSystemBuilder#createPSystem` turns it into a `UmlSource`. |
 | `usymbol-shapes.ts` | `IconGeo`, `renderDatabaseIcon`, `renderComponentIcon`, `renderActorIcon`, `renderUseCaseIcon`, `renderUSymbolIcon` | Shared per-USymbol leaf-shape renderers — the SVG for a descriptive element's icon (component notch, database cylinder, actor stick-figure, usecase ellipse). |
 | `version.ts` | `VERSION`, `COMMIT`, `COMPILE_TIME_STRING`, `versionString`, `fullDescription` | The version banner the error diagram prints above the source listing. |
 
@@ -780,7 +781,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FunctionsSet.ts` | `FunctionsSet` | The TIM function registry: every builtin, every `!procedure` / `!function` / legacy `!define` / `!definelong`, plus the pending-function state machine the `CodeIterator*` chain drives while collecting a multi-line body. |
 | `IncludeExecutor.ts` | `IncludeExecutor` | `TContext#executeInclude` / `#executeIncludesub` / `#executeIncludeDef` / `#executeImport` -- the four directives that reach OUTSIDE the source being interpreted. |
 | `IncludeStore.ts` | `IncludeStore`, `stdlibPathOf`, `stdlibBundleOf`, `MapIncludeStore`, `EMPTY_INCLUDE_STORE`, `IncludeError`, `IncludeNotFoundError`, `StdlibNotBundledError` | The sync include seam. |
-| `index.ts` | `LineLocation`, `TLineType`, `StringLocated`, `EaterException`, `TMode`, `TVariableScope`, `lazzyParse`, `TFunctionType`, `isLegacyTFunctionType`, `TFunctionArgument`, `TFunctionSignature`, `Trie`, `TrieImpl`, `ExecutionContexts`, `ExecutionContextIf`, `ExecutionContextWhile`, `ExecutionContextForeach`, `TMemory`, `TMemoryGlobal`, `TMemoryLocal`, `TContext`, `TFunction`, `TWarning`, `TPreprocessingOptionStore`, `TPreprocessingArtifact`, `TFunctionImpl`, `FunctionsSet`, `PreprocessingArtifact`, `TContextImpl`, `PlainLineFilter`, `TContextOptions`, `getFromLineInternal`, `EaterDeclareProcedure`, `EaterFunctionCall`, `Eater`, `StringEater`, `VariableManager`, `EaterAffectation`, `EaterAffectationDefine`, `EaterAssert`, `EaterDeclareReturnFunction`, `EaterDumpMemory`, `EaterElseIf`, `EaterForeach`, `eaterForeachSize`, `EaterIf`, `EaterIfdef`, `EaterIfndef`, `EaterImport`, `EaterInclude`, `PreprocessorIncludeStrategy`, `EaterIncludeDef`, `EaterIncludeSprites`, `EaterIncludesub`, `EaterLegacyDefine`, `EaterLegacyDefineLong`, `EaterLog`, `EaterOption`, `OptionKey`, `optionKeyDefaultValue`, `EaterReturn`, `EaterStartsub`, `EaterTheme`, `EaterUndef`, `EaterWhile`, `* from ./iterator/index.js` | Barrel for `tim/`'s memory / scoping / function model (SI5a batch 2a) and the `CodeIterator` chain + `Eater*` directive parsers (SI5a batch 2b). |
+| `index.ts` | `LineLocation`, `TLineType`, `StringLocated`, `EaterException`, `TMode`, `TVariableScope`, `lazzyParse`, `TFunctionType`, `isLegacyTFunctionType`, `TFunctionArgument`, `TFunctionSignature`, `Trie`, `TrieImpl`, `ExecutionContexts`, `ExecutionContextIf`, `ExecutionContextWhile`, `ExecutionContextForeach`, `TMemory`, `TMemoryGlobal`, `TMemoryLocal`, `TContext`, `TFunction`, `TWarning`, `TPreprocessingOptionStore`, `TPreprocessingArtifact`, `TFunctionImpl`, `FunctionsSet`, `PreprocessingArtifact`, `TContextImpl`, `TContextOptions`, `getFromLineInternal`, `EaterDeclareProcedure`, `EaterFunctionCall`, `Eater`, `StringEater`, `VariableManager`, `EaterAffectation`, `EaterAffectationDefine`, `EaterAssert`, `EaterDeclareReturnFunction`, `EaterDumpMemory`, `EaterElseIf`, `EaterForeach`, `eaterForeachSize`, `EaterIf`, `EaterIfdef`, `EaterIfndef`, `EaterImport`, `EaterInclude`, `PreprocessorIncludeStrategy`, `EaterIncludeDef`, `EaterIncludeSprites`, `EaterIncludesub`, `EaterLegacyDefine`, `EaterLegacyDefineLong`, `EaterLog`, `EaterOption`, `OptionKey`, `optionKeyDefaultValue`, `EaterReturn`, `EaterStartsub`, `EaterTheme`, `EaterUndef`, `EaterWhile`, `* from ./iterator/index.js` | Barrel for `tim/`'s memory / scoping / function model (SI5a batch 2a) and the `CodeIterator` chain + `Eater*` directive parsers (SI5a batch 2b). |
 | `LineLocation.ts` | `LineLocation` | Where a line of source came from: its 0-based position, the resource that produced it, and — for a line pulled in by `!include` — the location of the `!include` line that pulled it. |
 | `LineLocationImpl.ts` | `LineLocationImpl` | The only `LineLocation` implementation, exactly as upstream: an immutable `(description, parent, position)` triple whose `oneLineRead()` returns the NEXT position rather than mutating. |
 | `PreprocessingArtifact.ts` | `PreprocessingArtifact` | `PreprocessingArtifact` + `ConfigurationStore<OptionKey>` -- the two `net.sourceforge.plantuml.preproc` types `EaterOption` (`!option`) needs. |
@@ -793,15 +794,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `StdlibStore.ts` | `BundleData`, `StdlibStore`, `stdlibStore`, `withStdlib` | The `<bundle/thing>` stdlib resolution seam. |
 | `StringEater.ts` | `StringEater` | A throwaway `Eater` used only to feed a bare string through the shared `Eater` character-cursor primitives (`eatAndGetQuotedString`, etc.) without a real source-line context. |
 | `StringLocated.ts` | `LineLocation`, `TLineType`, `StringLocated` | Minimal port of the surface this batch's write-set (`tim/` memory, function, and `Eater` primitives) actually calls on `net.sourceforge.plantuml.text.StringLocated` and `net.sourceforge.plantuml.utils.LineLocation`. |
-| `TContext.ts` | `FilteredLine`, `PlainLineFilter`, `TContextOptions`, `TContext` | The TIM interpreter: owns the function registry (`FunctionsSet`), builds the `CodeIterator` decorator chain, executes one line at a time, and performs inline `$variable` / `%function()` substitution. |
-| `TContextOptions.ts` | `PlainLineFilter`, `FilteredLine`, `TContextOptions` | Construction-time seams for {@link TContext}. |
+| `TContext.ts` | `TContextOptions`, `TContext` | The TIM interpreter: owns the function registry (`FunctionsSet`), builds the `CodeIterator` decorator chain, executes one line at a time, and performs inline `$variable` / `%function()` substitution. |
+| `TContextOptions.ts` | `TContextOptions` | Construction-time seams for {@link TContext}. |
 | `TContextSubstitution.ts` | `TContextSubstitutionHost`, `applyFunctionsAndVariablesImpl`, `getFunctionNameAt` | The inline `%function(...)` / `$variable` substitution engine used by `TContext#applyFunctionsAndVariables`. |
 | `TFunction.ts` | `TWarning`, `TPreprocessingOptionStore`, `TPreprocessingArtifact`, `TContext`, `TFunction` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunction.java |
 | `TFunctionArgument.ts` | `TFunctionArgument` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionArgument.java |
 | `TFunctionImpl.ts` | `MAX_CALL_DEPTH`, `TFunctionImpl` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionImpl.java |
 | `TFunctionSignature.ts` | `TFunctionSignature` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionSignature.java |
 | `TFunctionType.ts` | `TFunctionType`, `isLegacyTFunctionType` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TFunctionType.java |
-| `ThemeExecutor.ts` | `ThemeExecutor` | `TContext#executeTheme` and the state upstream's `TContext` keeps for it (`themeMetadata`), plus the name `preprocess()` surfaces as `PreprocessorResult.theme`. |
+| `ThemeExecutor.ts` | `ThemeMetadata`, `ThemeExecutor` | `TContext#executeTheme` and the state upstream's `TContext` keeps for it (`themeMetadata`), plus the name `preprocess()` surfaces as `PreprocessorResult.theme`. |
 | `TLineType.ts` | `getFromLineInternal`, `isQuote`, `isLatinDigit`, `isLetterOrEmojiOrUnderscoreOrDigit` | The `TLineType` CLASSIFIER -- the regex cascade that decides which TIM directive (if any) a raw source line is. |
 | `TMemory.ts` | `ExecutionContextIf`, `ExecutionContextWhile`, `ExecutionContextForeach`, `ExecutionContexts`, `TMemory` | The TIM variable-scoping contract (`TMemory`) plus the shared execution- context stack (`ExecutionContexts`) that both `TMemoryGlobal` and `TMemoryLocal` extend, plus the three `!if` / `!while` / `!foreach` execution-context value classes t |
 | `TMemoryGlobal.ts` | `TMemoryGlobal` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TMemoryGlobal.java |
@@ -840,7 +841,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FunctionExists.ts` | `FunctionExists` | `%function_exists(name)` -- true iff a function/procedure named `name` is registered. |
 | `GetAllStdlib.ts` | `GetAllStdlib` | `%get_all_stdlib()` -- JSON array of stdlib folder names; with one (ignored-value) argument, a JSON object mapping folder name to `{name, version, source}`. |
 | `GetAllTheme.ts` | `GetAllTheme` | `%get_all_theme()` -- JSON array of theme names. |
-| `GetCurrentTheme.ts` | `GetCurrentTheme` | `%get_current_theme()` -- JSON object describing the active theme. |
+| `GetCurrentTheme.ts` | `GetCurrentTheme` | `%get_current_theme()` -- JSON object describing the active theme: the YAML header of the last `!theme` executed, read off the context as upstream reads it (`GetCurrentTheme.java:65`, `context.getThemeMetadata()`). |
 | `Getenv.ts` | `Getenv` | `%getenv(name)` -- OS/process environment access, routed through the injected {@link TimEnvironment} (never real `process.env` access; also skips upstream's `SecurityUtils#canWeReadThisEnvironmentVariable` gate -- a host-level policy concer |
 | `GetJsonKey.ts` | `GetJsonKey` | `%get_json_keys(x)` -- for a JSON object, its key names; for a JSON array of objects, the concatenated key names of every member object. |
 | `GetJsonType.ts` | `GetJsonType` | `%get_json_type(x)` -- `"string"`/`"number"`/`"not_json"` for a plain `TValue`, else the JSON kind of the wrapped value (`"array"`/`"object"`/ `"boolean"`/`"number"`/`"string"`), falling back to `"json"` for a bare JSON `null`. |

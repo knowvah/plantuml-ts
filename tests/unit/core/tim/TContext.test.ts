@@ -141,10 +141,12 @@ describe('TContext — side-effect directives', () => {
     expect(output(context)).toEqual([]);
   });
 
-  it('!theme records the theme name and emits nothing', () => {
+  it("!theme records the theme name and emits the theme's lines in place", () => {
     const { context } = run(['!theme cerulean', 'class Foo']);
     expect(context.getThemeName()).toBe('cerulean');
-    expect(output(context)).toEqual(['class Foo']);
+    const lines = output(context);
+    expect(lines[lines.length - 1]).toBe('class Foo');
+    expect(lines).toContain('skinparam useBetaStyle false');
   });
 });
 

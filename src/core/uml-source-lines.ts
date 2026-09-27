@@ -23,8 +23,6 @@
  */
 
 import { DiagramType, findStartTypes } from './diagram-type-set.js';
-import type { FilteredLine } from './tim/TContextOptions.js';
-import type { StringLocated } from './tim/StringLocated.js';
 import { BLOCK_E1_BREAKLINE } from './tim/builtin/jaws-constants.js';
 import { endsWithBackslash } from './tim/ReadFilterMergeLines.js';
 import { SignatureUtils } from './utils/SignatureUtils.js';
@@ -36,24 +34,6 @@ const BASE64_TAG_START = 'data:image/png;base64,';
 const BASE64_TAG_REPLACEMENT = 'data:image/png;md5,';
 /** `UmlSource#isBase64Char` (`UmlSource.java:370-373`). */
 const RE_BASE64_CHAR = /[A-Za-z0-9+/=]/;
-
-/**
- * Upstream's own `TContext#getResultList()` (`TContext.java:455-472`): this
- * port's result list with every line its `plainLineFilter` consumed
- * (skinparam, `<style>`, `skin`) back in place. A consumed line sits before
- * the `resultList` entry that was next when it was read; `%retrieve_procedure`
- * and `appendToLastResult` act on this port's `resultList` alone.
- */
-export function dataListOf(resultList: readonly StringLocated[], filtered: readonly FilteredLine[]): string[] {
-  const out: string[] = [];
-  let k = 0;
-  resultList.forEach((line, i) => {
-    for (; k < filtered.length && filtered[k]!.at <= i; k++) out.push(filtered[k]!.line.getString());
-    out.push(line.getString());
-  });
-  for (; k < filtered.length; k++) out.push(filtered[k]!.line.getString());
-  return out;
-}
 
 /**
  * Split each line at every `BLOCK_E1_BREAKLINE` that is not inside a `{{...}}`

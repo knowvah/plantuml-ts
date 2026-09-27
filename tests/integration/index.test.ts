@@ -313,15 +313,17 @@ describe('three-stage theme resolution', () => {
     expect(svg).not.toContain('#ABC');
   });
 
-  it('skinparam backgroundColor overrides !theme dark background', async () => {
-    const source = ['!theme dark', 'skinparam backgroundColor #FFF', '@startuml', 'Alice -> Bob : hi', '@enduml'].join(
+  it('a skinparam after !theme overrides the theme background (TContext.java:737-743)', async () => {
+    // `puml-theme-amiga.puml` sets `<style> root { BackgroundColor #0B58A8 }`
+    // AND `skinparam BackgroundColor`; the document's later skinparam wins
+    // over both, in declaration order (cdd4-T7b).
+    const source = ['@startuml', '!theme amiga', 'skinparam backgroundColor #FFF', 'Alice -> Bob : hi', '@enduml'].join(
       '\n',
     );
     const svg = await render(source);
     expectNoErrorDiagram(svg);
-    // The skinparam value (#FFF) must win over dark theme default (#1E1E1E)
-    expect(svg).toContain('#FFF');
-    expect(svg).not.toContain('#1E1E1E');
+    expect(svg).toContain('background:#FFF');
+    expect(svg).not.toContain('background:#0B58A8');
   });
 
   it('caller Partial<Theme> overrides skinparam backgroundColor', async () => {

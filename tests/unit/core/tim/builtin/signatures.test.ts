@@ -218,7 +218,7 @@ const cases: readonly Case[] = [
   { label: 'GetAllTheme', fn: new GetAllTheme(env), name: '%get_all_theme', nbArg: 0, valid: [0], invalid: [1] },
   {
     label: 'GetCurrentTheme',
-    fn: new GetCurrentTheme(env),
+    fn: new GetCurrentTheme(),
     name: '%get_current_theme',
     nbArg: 0,
     valid: [0],
