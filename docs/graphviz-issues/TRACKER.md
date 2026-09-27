@@ -294,7 +294,13 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         though this entry wired the LABEL half. pavuzo-79-zodu430 closes
         when 03 does. See 17's second-pass block and
         .agent-notes/gvi17-splines-never-emitted.md. -->
-- [ ] 18-compound-clip-last-segment-shape-delta.md  <!-- FILED 2026-09-22
+- [~] 18-compound-clip-last-segment-shape-delta.md  <!-- RECLASSIFIED 2026-09-26: NOT
+        dot-engine. On the cached svek-1.dot of bejusa-95-gafo325 and
+        pecabi-95-demu756, dot-engine (main and branch), native graphviz 15.1 and
+        homebrew graphviz 16.1 emit IDENTICAL splines (0 pos diffs, all three).
+        The raw pre-clip curve is therefore not the variable; the ~20px/~4.9px
+        gap lives in the jar's own graphviz or in this repo's simulateCompound
+        clip. Work is ours. ORIGINAL NOTE FOLLOWS: FILED 2026-09-22
         (cdd-T13). `bejusa-95-gafo325`'s two cluster-anchored composition
         edges whose `simulateCompound` clip lands on their LAST bezier
         segment (`VCAN_DRV *-- PCAN_DRV`, `PCAN_DRV *-- Bus_Rx`) land ~20px
@@ -311,7 +317,12 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         file for the full elimination chain. Not chased (stop 8); a
         per-curve dot-engine routing delta, not a general defect in T13's
         clip. -->
-- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- RE-VERIFIED 2026-09-25
+- [ ] 19-flat-edge-ignores-html-table-port.md  <!-- FIXED 2026-09-26 on
+        dot-engine branch fix/plantuml-tracker-issues (022a21b7), NOT YET PUBLISHED. Mechanism: make_flat_adj_edges
+        takes the rotated aux-graph path when either end has a DEFINED port; the
+        port gated on port SIDE, so an interior HTML cell (side 0) fell to a stub
+        fitter ("triangulation failed"). All 7 edges (mucoti, sefazi, coxose x2,
+        ririlu x2, rifuzu) and camuna now byte-match native -Tdot. RE-VERIFIED 2026-09-25
         (cdd3-T5): still open, 7 class fixtures / 9 edges (coxose x2,
         ririlu x2, mucoti, sefazi, rifuzu; camuna + nafiki added
         2026-09-26 by cdd4 planning, same signature on sh0007:h->sh0009); dot-engine prints `triangulation
@@ -442,7 +453,11 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         un-consumed fix -- 03 is now unchecked and carries the work and the
         blast radius. Full artifact:
         .agent-notes/gvi17-splines-never-emitted.md -->
-- [ ] 22-sametail-port-plaintext-lr-clip-offset.md  <!-- FILED 2026-09-25
+- [ ] 22-sametail-port-plaintext-lr-clip-offset.md  <!-- FIXED 2026-09-26 on
+        dot-engine branch fix/plantuml-tracker-issues (b93b67b8), NOT YET PUBLISHED. Mechanism: sameport used a
+        rect/ellipse approximation that always grew the boundary by penwidth/2;
+        C's shape_clip uses poly_inside, which tests a peripheries=0 node's raw
+        vertices. Ported shape_clip; pijiju-95-xexi872 -Tdot now byte-matches. FILED 2026-09-25
         (cdd3-T6, from E2-6). `class/pijiju-95-xexi872`: a `sametail` group's
         shared start point on a `shape=plaintext` HTML-table node under
         `rankdir=LR` clips 1.5px outside the node boundary in dot-engine
@@ -452,7 +467,12 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         Re-verified against the pinned dot-engine 1.6.0. Not chased into
         dot-engine's own `sameport.c` source beyond the port-construction
         call site. -->
-- [ ] 23-flat-labelled-edge-mirrored-label-side.md  <!-- FILED 2026-09-25
+- [~] 23-flat-labelled-edge-mirrored-label-side.md  <!-- ACCEPTED DIVERGENCE
+        2026-09-26: another instance of dot-engine docs/known-divergences.md
+        A3 (spline-routing tie-break). A symmetric label corridor makes the
+        two candidate split corners an exact tie, and C and the port resolve
+        it on floating-point noise. No upstream fix to wait for.
+        ORIGINAL NOTE FOLLOWS: FILED 2026-09-25
         (cdd3-T6, from E2-7). `class/nugecu-04-tona107`: a flat (`minlen=0`)
         labelled edge routes via the mirrored side of its label box for
         SOME label widths (9, 20) and matches real graphviz exactly for
@@ -460,7 +480,13 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         box-corridor shortest-path search (`make_flat_labeled_edge` /
         `routesplines`), not a constant offset. Re-verified against the
         pinned 1.6.0 with a 5-point width sweep. -->
-- [ ] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- FILED 2026-09-25
+- [ ] 24-flat-labelled-minlen0-edge-spline-diverges.md  <!-- FIXED 2026-09-26 on
+        dot-engine branch fix/plantuml-tracker-issues (8c9579ea), NOT YET PUBLISHED. Mechanism: dot_splines_ routes
+        flat edges in-loop at their edgecmp position; the port deferred every
+        flat group until after all regular edges, so a later chain's
+        recover_slack/resize_vn had already moved sh0030's left vnode
+        (951->969), widening maximal_bbox by 18pt. givoli, tekena, nadepi now
+        byte-match native pos. FILED 2026-09-25
         (cdd3-T6, from C-12). `class/givoli-70-rade072` /
         `tekena-28-fobe713` / `nadepi-13-mufu566`: the flat labelled edge
         `sh0030->sh0014` routes with a spline up to 18px off real graphviz
@@ -472,7 +498,11 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         exactly (probe: scratch/T6-c12-mirror-check.mts). Filed as a
         separate issue in the same feature area (flat labelled edge
         routing) rather than folded into 23. -->
-- [ ] 25-edge-label-published-when-unplaced.md  <!-- FILED 2026-09-25
+- [ ] 25-edge-label-published-when-unplaced.md  <!-- FIXED 2026-09-26 on
+        dot-engine branch fix/plantuml-tracker-issues (5932a793), NOT YET PUBLISHED. getLayout() now applies the
+        same `set` gate to the centre label as to tail/head/xlabel; delasa's 3
+        labels read back absent. Consumer half (class-edge-geo.ts skipping an
+        absent label) still to do here. FILED 2026-09-25
         (cdd3-T6, from E3-12). `class/delasa-80-jusu462` (3 edges): real
         graphviz leaves some centre edge labels unplaced
         (`ED_label(e)->set` false, `lp="0,8"` sentinel, no `<text>` drawn),
@@ -483,7 +513,12 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         draws 0 `<text>` in the 3 labels' colours; dot-engine's
         `getLayout()` returns a non-null `label` for all 3
         (scratch/T6-e3-12-label-gate.mts). -->
-- [ ] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- FILED 2026-09-25
+- [ ] 26-self-loop-in-cluster-with-flat-labelled-edge.md  <!-- FIXED 2026-09-26 on
+        dot-engine branch fix/plantuml-tracker-issues (52982142), NOT YET PUBLISHED. Mechanism: C's abomination
+        adds the flat-label rank at index -1 and leaves ND_rank alone; the port
+        renumbers +1, so dot_splines_'s literal `r > 0` (self-loop sizey,
+        dotsplines.c:392) passed and sizey came off the label rank (159.5 vs
+        C's ND_ht 90). cobumi-83-bapu892 self-loop now byte-matches. FILED 2026-09-25
         (cdd3-T6, from E3-D1). `class/cobumi-83-bapu892`: a self-loop's
         spline is taller in dot-engine 1.6.0 than in real graphviz
         (uniform +-12.98px on non-centre-line points) when the looped node
