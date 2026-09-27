@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1240 modules · 4667 exported names.
+1240 modules · 4668 exported names.
 
 ## `src/`
 
@@ -29,7 +29,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change beyond skin-reddress-variants Fix 2, documented below). |
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
 | `color-override.ts` | `resolveBareOrBackColor` | Shared `#color`/`#back:color;...` background-override extraction — split out of `renderer-classifier-box.ts` (G2 N34) so `renderer-note.ts` can reuse the SAME bare/`back:`-component grammar for a note's own `#color` override (`ClassNote.col |
-| `creole-atoms-image-resolver.ts` | `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
+| `creole-atoms-image-resolver.ts` | `SpritePrimitiveCollector`, `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
 | `creole-atoms-measure.ts` | `measureInlineAtom`, `spriteScale`, `spriteAtomScale`, `measureLineWithAtoms`, `lineAtomHeightExcess` | Measurement (D9) for Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms — the scaled pixel dims each atom contributes to label measurement, and the per-line width/height composition built on top of them. |
 | `creole-atoms-openicon.ts` | `scanOpenIconSpans`, `matchOpenIconAt` | OpenIconic `<&glyph>` span recognizer -- split out of `creole-atoms.ts` purely to keep that file under this project's 500-line cap (G2 N41; mirrors the existing `class-layout-helpers.ts`/`class-member-rows.ts` split precedent). |
 | `creole-atoms.ts` | `ImgAtomToken`, `SpriteAtomToken`, `OpenIconicAtomToken`, `InlineAtomToken`, `RenderSegment`, `LineAtomScan`, `DrawablePrimitive`, `AtomImageResolver`, `SpriteDims`, `SpriteDimsLookup`, `SPRITE_NAME_PATTERN_SOURCE`, `SPRITE_PATTERN_SOURCE`, `parseScale`, `parseColorFromBlock`, `AtomSpan`, `scanLineForAtoms`, `AtomMatchAt`, `spanToMatch`, `matchAtomAt` | Creole `<img>` / `<$sprite>` / `<&openiconic>` inline atoms. |

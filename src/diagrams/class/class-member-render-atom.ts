@@ -105,6 +105,16 @@ export type MemberRenderAtom =
       readonly width: number;
       readonly height: number;
       readonly dy?: number;
+      /** cdd4-T9 (lecelo-92-loma110): `Atom#getStartingAltitude` for a
+       *  `'drawable'` built from Twemoji artwork (`resolveEmojiAtom`) --
+       *  `-3*factor` (`AtomEmoji.java:62-64`, `emojiStartingAltitude`).
+       *  `undefined`/absent for an SVG-sprite `'drawable'`
+       *  (`resolveSvgSpriteAtom`), which upstream's `AtomSprite` reports as
+       *  altitude 0 (`memberAtomAltitude`'s own `?? 0` fallback) -- the two
+       *  producers of this kind share the shape but not the altitude, so
+       *  this field distinguishes them without a second `MemberRenderAtom`
+       *  variant. */
+      readonly altitude?: number;
     }
   /** G2 N41: an OpenIconic `<&glyph>` atom -- `name`/`factor` feed
    *  `openiconic-glyphs.ts#buildOpenIconicPathD` at RENDER time (needs the

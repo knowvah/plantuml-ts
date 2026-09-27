@@ -219,16 +219,19 @@ function accumulateResolvedAtoms(
  * `Atom#getStartingAltitude` for a resolved member atom: `AtomText`'s
  * `FontPosition` space for a text run (`AtomText.java:321-323`; 0 when
  * NORMAL), `AtomOpenIconic`'s `-3 * factor` for a vector glyph
- * (`AtomOpenIconic.java:72-74`, cdd3-T22), and 0 for an img/sprite/latex
- * image (`AtomImg.java:242-244`, `AtomSprite.java:69-71`,
- * `AtomMath.java:73-75`). Emoji resolves to `'text'` here with no
- * `FontPosition` -- its own `-3*factor` (`AtomEmoji.java:62-64`) stays out
- * of this seam, unchanged.
+ * (`AtomOpenIconic.java:72-74`, cdd3-T22), an emoji-artwork `'drawable'`'s
+ * own carried `altitude` (`AtomEmoji.java:62-64`, `-3*factor`, cdd4-T9 --
+ * see that field's own doc comment, `class-member-render-atom.ts`), and 0
+ * for every other atom: the platform-glyph emoji fallback (resolves to
+ * `'text'` with no `FontPosition`), an SVG-sprite `'drawable'`
+ * (`AtomSprite.java:69-71`), and img/latex (`AtomImg.java:242-244`,
+ * `AtomMath.java:73-75`).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomOpenIconic.java:72-74
  */
 function memberAtomAltitude(atom: MemberRenderAtom): number {
   if (atom.kind === 'text') return fontPositionSpace(atom.font.fontPosition ?? FontPosition.NORMAL);
   if (atom.kind === 'vector') return openIconicStartingAltitude(atom.factor);
+  if (atom.kind === 'drawable') return atom.altitude ?? 0;
   return 0;
 }
 
@@ -303,7 +306,7 @@ export function resolveOneAtom(
   sprites: SpriteRegistry | undefined,
   spriteDims: SpriteDimsLookup | undefined,
 ): ResolvedMemberAtom | undefined {
-  if (atom.kind === 'emoji') return resolveEmojiAtom(atom);
+  if (atom.kind === 'emoji') return resolveEmojiAtom(atom, sprites?.emoji);
   if (atom.kind === 'text') {
     // SI30 D1: measure at the EFFECTIVE (muted) size -- `getFont(atom.font)`
     // shrinks a `<sup>`/`<sub>` run by 3 (floor 2) before either the layout
