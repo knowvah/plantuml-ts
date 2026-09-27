@@ -133,13 +133,68 @@ import type { NoteGeo } from './note-layout.js';
 // NOT apply `ensureVisible`, subtracting the border stroke instead, so it
 // cannot go through `applyCucaDocumentMargin`.
 import { buildInkBox } from './class-ink-box.js';
-import type { InkBoxOptions } from './class-ink-box.js';
+import type { InkBox, InkBoxOptions } from './class-ink-box.js';
+import { addPoint } from './class-ink-shapes.js';
+import { runSvekPass1, type SvekDrawState } from './class-svek-pass0.js';
 import {
   CUCA_DOCUMENT_MARGIN_TOP as DOCUMENT_MARGIN_TOP,
   CUCA_DOCUMENT_MARGIN_RIGHT as DOCUMENT_MARGIN_RIGHT,
   CUCA_DOCUMENT_MARGIN_BOTTOM as DOCUMENT_MARGIN_BOTTOM,
   CUCA_DOCUMENT_MARGIN_LEFT as DOCUMENT_MARGIN_LEFT,
 } from '../../core/atmp/CucaDiagram.js';
+
+/** `XDimension2D#delta(4, 2)`'s y (`svek/Kal.java:104`): Kal box height
+ *  minus its text height. */
+const KAL_DIM_DELTA_Y = 2;
+
+/**
+ * cdd4-T10: `buildInkBox`'s options plus the `SvekResult#drawU` pass-0
+ * state (`class-svek-pass0.ts`) -- the `LimitFinder` pass
+ * `calculateDimension` measures (`svek/SvekResult.java:130-134`).
+ */
+export interface ClassInkOptions extends InkBoxOptions {
+  readonly svek?: SvekDrawState | undefined;
+}
+
+/**
+ * cdd4-T10: `Kal#drawU` (`svek/Kal.java:134-144`) under `LimitFinder`, at
+ * the box's pass-0 position: the `URectangle(dim)` (`drawRectangle`'s `-1`
+ * corners, `klimt/drawing/LimitFinder.java`) and the text line at
+ * `UTranslate(2, 1)` through `drawText` (`y - (h - 1.5)` to `+ h`, `h` the
+ * text height, `dim` minus `delta(4, 2)`'s 2).
+ */
+function addKalInk(box: InkBox, edges: readonly EdgeGeo[]): void {
+  for (const e of edges) {
+    for (const k of [e.kalBox?.start, e.kalBox?.end]) {
+      if (k === undefined) continue;
+      addPoint(box, k.x - 1, k.y - 1);
+      addPoint(box, k.x + k.width - 1, k.y + k.height - 1);
+      const textHeight = k.height - KAL_DIM_DELTA_Y;
+      const top = k.textY - (textHeight - 1.5);
+      addPoint(box, k.textX, top);
+      addPoint(box, k.textX + k.textWidth, top + textHeight);
+    }
+  }
+}
+
+/** {@link buildInkBox} plus the two pass-0 ink terms it does not walk: the
+ *  Kal boxes and the `LinkConstraint#drawMe` that got past its early
+ *  returns (`svek.constraintInk`). */
+function classInkBox(
+  classifiers: readonly ClassifierGeo[],
+  namespaces: readonly NamespaceGeo[],
+  edges: readonly EdgeGeo[],
+  notes: readonly NoteGeo[],
+  options?: ClassInkOptions,
+): InkBox {
+  const box = buildInkBox(classifiers, namespaces, edges, notes, options);
+  addKalInk(
+    box,
+    edges.filter((e) => e.consumedByOpaleNote !== true),
+  );
+  for (const p of options?.svek?.constraintInk ?? []) addPoint(box, p.x, p.y);
+  return box;
+}
 
 export interface ClassDocumentDims {
   readonly width: number;
@@ -209,9 +264,9 @@ export function computeClassRawInkDims(
   notes: readonly NoteGeo[],
   // T11 (cdd3, Q-5): forwarded to `buildInkBox` -- see that function's own
   // doc comment (`InkBoxOptions`).
-  options?: InkBoxOptions,
+  options?: ClassInkOptions,
 ): ClassDocumentDims {
-  return svekDimension(buildInkBox(classifiers, namespaces, edges, notes, options));
+  return svekDimension(classInkBox(classifiers, namespaces, edges, notes, options));
 }
 
 /**
@@ -240,7 +295,7 @@ export function computeClassDocumentDims(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  options?: InkBoxOptions,
+  options?: ClassInkOptions,
 ): ClassDocumentDims {
   const raw = computeClassRawInkDims(classifiers, namespaces, edges, notes, options);
   // Empty diagram (no ink at all): stay {0, 0} rather than applying margin
@@ -277,9 +332,9 @@ export function computeClassInkShift(
   namespaces: readonly NamespaceGeo[],
   edges: readonly EdgeGeo[],
   notes: readonly NoteGeo[],
-  options?: InkBoxOptions,
+  options?: ClassInkOptions,
 ): InkShift {
-  return svekInkShift(buildInkBox(classifiers, namespaces, edges, notes, options));
+  return svekInkShift(classInkBox(classifiers, namespaces, edges, notes, options));
 }
 
 /**
@@ -301,7 +356,7 @@ export function assembleShiftedGeometry(
   notes: NoteGeo[],
   // G9/T12: `classAttributeIconSize` + T11's `cardinalityFontSize`, grouped
   // (5-param cap) -- see `class-ink-box.ts#addVisibilityIconInk`/`buildInkBox`.
-  inkOptions: { iconSize?: number; cardinalityFontSize?: number | undefined },
+  inkOptions: ClassInkOptions,
 ): ClassGeometry {
   // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
   // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
@@ -327,6 +382,9 @@ export function assembleShiftedGeometry(
   // instead of `documentDims`.
   const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, inkOptions);
   const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, inkOptions);
+  // cdd4-T10: `moveDelta` set every edge's `dx, dy`; the SVG pass resumes
+  // the pass-0 state in that frame (`class-svek-pass0.ts#runSvekPass1`).
+  if (inkOptions.svek !== undefined) runSvekPass1(inkOptions.svek, shift);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller

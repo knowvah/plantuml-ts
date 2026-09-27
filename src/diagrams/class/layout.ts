@@ -290,7 +290,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // the SAME font `class-layout-edge-labels.ts` measured the DOT box with;
   // tail/head cardinality labels stay at `theme.fontFamily` (see
   // `class-edge-geo.ts#EdgeGeoTextContext`).
-  const edges = buildEdgeGeos(
+  const { edges, svek } = buildEdgeGeos(
     effAst,
     inNodeMapOrder(result, dotGraph), // cdd3-T16: `Bibliotekon#allNodes`
     swappedEdges,
@@ -369,6 +369,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   const assembled = assembleShiftedGeometry(classifiers, namespaces, markedEdges, notes, {
     iconSize: iconSizeOf(theme),
     cardinalityFontSize: theme.cardinalityFontSize,
+    svek, // cdd4-T10: `SvekResult#drawU`'s pass-0 state (`class-svek-pass0.ts`)
   });
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
