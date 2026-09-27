@@ -117,6 +117,42 @@
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
       "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict."
+    },
+    {
+      "match": {
+        "id": "svg-class/luzive-62-zote562"
+      },
+      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+    },
+    {
+      "match": {
+        "id": "svg-class/sadamo-18-siva346"
+      },
+      "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+    },
+    {
+      "match": {
+        "id": "svg-class/zuduxu-90-kosi876"
+      },
+      "scope": "svg-conformance class ledger (upstream crash page -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "The jar's output for this fixture is a CRASH page, not a diagram: graphviz 16.1.0 loses both `sh0006->sh0008` edges (`lost ... edge`), so `SvekEdge.getStartContactPoint()` is null, and `groupInheritance 2` wraps A in `EntityImageProtected`, whose `Neighborhood.drawU` sametail loop feeds the null point into `intersection` and throws a NullPointerException (`Neighborhood.java:80`, `:151`). The port draws the diagram. Precedent: DIVERGENCES.md, upstream crashes (deliberate). Re-verified 2026-09-26 (cdd4 T1): the jar in.svg is the QR-code error page (childCount 50 vs 7). Evidence: plans/class-divergence-drive-3/diagnosis/E3.md#zuduxu-90-kosi876 (E3-A). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+    },
+    {
+      "match": {
+        "id": "svg-class/nugecu-04-tona107"
+      },
+      "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
+      "acceptedAt": "2026-09-26",
+      "acceptedBy": "maintainer",
+      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6)."
     }
   ],
   "retired": [

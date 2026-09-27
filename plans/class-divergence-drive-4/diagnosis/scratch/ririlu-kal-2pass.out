@@ -1,0 +1,8 @@
+one pass (ours): loop0: pair 1,2 push 45.3 | loop1: pair 1,2 push 2.842e-14 | loop2: pair 1,2 push 2.842e-14 -> boxX [466.307, 489.081, 528.718]
+pass 0: loop0: pair 1,2 push 45.3 | loop1: pair 1,2 push 2.842e-14 | loop2: pair 1,2 push 2.842e-14
+pass 1: loop0: pair 0,1 push 38.65 | loop1: stop -> boxX [440.54, 501.965, 541.602]
+edge start moved by pass0+pass1 diffs: [-40.868, -2.217, 43.085]
+ours-frame two-pass: loop0: pair 1,2 push 5.684e-14 | loop1: pair 1,2 push 5.684e-14 | loop2: pair 1,2 push 5.684e-14 -> final boxX [466.31, 489.079, 528.717]
+pass0 svek(+8), pass1 final(+7): pass1 loop0: pair 0,1 push 38.65 | loop1: stop -> final boxX [440.54, 501.965, 541.602]
+pass0 ours(+0), pass1 final(+7): pass1 loop0: pair 0,1 push 38.65 | loop1: stop -> final boxX [440.54, 501.965, 541.602]
+pass0 ours(+0), pass1 ours(+0) : pass1 loop0: pair 0,1 push 38.65 | loop1: pair 0,1 push 5.684e-14 | loop2: pair 0,1 push 5.684e-14 -> final boxX [440.54, 501.965, 541.602]

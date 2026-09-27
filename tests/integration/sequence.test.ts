@@ -279,12 +279,14 @@ describe('theme variants', () => {
   // preprocessor runs (SI7), so — as upstream — a TIM directive outside the
   // block is not part of any diagram and never executes.
   it('!theme directive in source is applied when no theme option given', () => {
+    // `amiga`, an upstream theme (root BackgroundColor #0B58A8): `dark` is not
+    // one, and since cdd4-T7a an unknown name is the jar's `Cannot load theme`.
     const source = `@startuml
-!theme dark
+!theme amiga
 Alice -> Bob: hi
 @enduml`;
     const svg = renderSync(source, { measurer: testMeasurer });
-    expect(svg).toContainText('#1E1E1E');
+    expect(svg).toContainText('#0B58A8');
   });
 
   it('explicit theme option overrides !theme directive', () => {

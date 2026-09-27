@@ -1,0 +1,12 @@
+diff --git a/src/diagrams/class/class-edge-geo.ts b/src/diagrams/class/class-edge-geo.ts
+index 087627bfd..1a984b6a9 100644
+--- a/src/diagrams/class/class-edge-geo.ts
++++ b/src/diagrams/class/class-edge-geo.ts
+@@ -387,6 +387,7 @@ export function buildEdgeGeos(
+   }
+   attachConstraints(constrained);
+   fixKalOverlaps(placedKals);
++  if (process.env.KAL2) fixKalOverlaps(placedKals);
+   for (const end of leafEnds) attachLeafContacts(end, text.protectedIds);
+   for (const { edgeGeo, startId, endId } of clusterEnds) {
+     edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
