@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1240 modules · 4667 exported names.
+1240 modules · 4668 exported names.
 
 ## `src/`
 
@@ -1277,7 +1277,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-url.ts` | `UrlInfo`, `applyTopUrl`, `parseUrlBracket`, `URL_BRACKET_RE`, `applyTopUrlToClassifiers` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
 | `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY`, `visibilityIconOriginYFromTop`, `rowIconTopOriginY` | Member-row visibility icon shape/color (G2 N6). |
 | `index.ts` | `classPlugin` | Class diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
-| `layout-ink-extent.ts` | `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
+| `layout-ink-extent.ts` | `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift`, `assembleShiftedGeometry` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
 | `layout.ts` | `formatMemberText`, `ROW_TEXT_LEFT_MARGIN`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `ClassGeometry`, `JsonBodyItem`, `ClassLeafGeo`, `layoutSinglePage`, `layoutMultiPage`, `classPageAst`, `classPageCount`, `sliceClassGeometryPage`, `layoutClass` | Class diagram layout engine. |
 | `note-freestanding.ts` | `findFreestandingNoteRelationshipIndices`, `findFreestandingNoteConnectors` | note-freestanding.ts — G2/N16 Kind B: a freestanding note (`note "text" as N1`, no host classifier/position) connected to a REAL classifier via a plain relationship line (`N1 .. |
 | `note-layout-groups.ts` | `OPALE_Y_SPACING`, `NoteGroup`, `groupNotes`, `buildNoteGraphParts` | Same-side/same-host note grouping + the seam nodes/edges that go into the svek dot graph. |

@@ -113,7 +113,8 @@
  * the shift is a PURE post-layout translation this port never applied,
  * independent of dot's own routing accuracy.
  */
-import type { ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
+import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
+import { shiftClassifierGeo, shiftEdgeGeo, shiftNamespaceGeo, shiftNoteGeo } from './class-layout-shift.js';
 import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
 import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
 import type { NoteGeo } from './note-layout.js';
@@ -279,4 +280,69 @@ export function computeClassInkShift(
   options?: InkBoxOptions,
 ): InkShift {
   return svekInkShift(buildInkBox(classifiers, namespaces, edges, notes, options));
+}
+
+/**
+ * G2/N11: dimensions first (translation-invariant, mirrors Java's own
+ * evaluation order — `SvekResult#calculateDimension` reads the PRE-shift
+ * `minMax`'s dimension before `moveDelta` ever runs), THEN apply the
+ * uniform ink shift (`moveDelta`) EVERY already-laid-out position needs —
+ * this port's raw graphviz-normalized positions were previously returned
+ * unshifted, off by a constant `(dx, dy)` per fixture (the "~7-8px
+ * multi-component/box position/margin residual" named since N7/N10 — see
+ * `layout-ink-extent.ts`'s own doc comment for the jar citation and
+ * derivation). Split out of `layoutSinglePage` to keep that function under
+ * the project's per-function size cap.
+ */
+export function assembleShiftedGeometry(
+  classifiers: ClassifierGeo[],
+  namespaces: NamespaceGeo[],
+  edges: EdgeGeo[],
+  notes: NoteGeo[],
+  // G9/T12: `classAttributeIconSize` + T11's `cardinalityFontSize`, grouped
+  // (5-param cap) -- see `class-ink-box.ts#addVisibilityIconInk`/`buildInkBox`.
+  inkOptions: { iconSize?: number; cardinalityFontSize?: number | undefined },
+): ClassGeometry {
+  // cdd-T31 round 2 (E5 defect b): a hidden NAMESPACE's own cluster
+  // decoration draws NOTHING -- `Cluster#drawU` (svek/Cluster.java:298-300)
+  // `return`s BEFORE any `draw()`/`apply()` call, so its border/title never
+  // reaches `LimitFinder` and contributes zero ink there. A hidden
+  // CLASSIFIER is different: `SvekResult.java:85` wraps its draw calls in
+  // `ug.apply(UHidden.HIDDEN)`, but `LimitFinder#apply` (klimt/drawing/
+  // LimitFinder.java:78-83) does not special-case `UHidden` at all -- the
+  // wrapped `draw()` calls still run and still accumulate ink; only the
+  // real SVG-emitting `UGraphic` (a different implementation) skips markup.
+  // So ONLY namespaces are filtered out of the ink walk here; classifiers
+  // keep contributing ink exactly as if visible, matching the jar. The
+  // FULL (unfiltered) `classifiers`/`namespaces` still get shifted and
+  // returned below -- layout/uid numbering is unaffected either way
+  // (`ClassifierGeo.hidden`'s own doc comment). Confirmed via senece-96-
+  // fomu913 (`hide Foo1`/`Foo3`/`util`): filtering classifiers too
+  // shrank the canvas width from 293 (jar 277, before this fix) to 85 (jar
+  // 277) -- classifier ink is NOT excluded upstream, only the cluster's.
+  const inkNamespaces = namespaces.filter((n) => n.hidden !== true);
+  const documentDims = computeClassDocumentDims(classifiers, inkNamespaces, edges, notes, inkOptions);
+  // G2 N46: raw (pre-margin, pre-quirk) ink dims -- see `ClassGeometry
+  // .rawWidth`'s own doc comment for why chrome centering needs this
+  // instead of `documentDims`.
+  const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, inkOptions);
+  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, inkOptions);
+
+  // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
+  // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
+  // reorders it into jar's real draw order via `orderLeaves` right after
+  // this function returns (kept out of here so this stays a pure
+  // shift/assemble step, unaware of AST-derived order).
+  return {
+    totalWidth: documentDims.width,
+    totalHeight: documentDims.height,
+    rawWidth: rawDims.width,
+    rawHeight: rawDims.height,
+    leaves: [
+      ...classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
+      ...notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),
+    ],
+    edges: edges.map((e) => shiftEdgeGeo(e, shift.dx, shift.dy)),
+    namespaces: namespaces.map((n) => shiftNamespaceGeo(n, shift.dx, shift.dy)),
+  };
 }
