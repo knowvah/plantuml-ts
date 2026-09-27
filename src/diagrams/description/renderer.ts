@@ -56,9 +56,11 @@
  *
  * `measurer` param (this task — dual-measurer conformance/ratchet seam,
  * decision-journal 2026-07-10 "DUAL MEASURER"): defaults to `jarMeasurer`
- * so the public plugin path (`descriptionPlugin.render`,
- * `src/index.ts#renderSync`) is byte-for-byte unchanged — neither calls
- * `renderDescription` with a 3rd argument. The conformance/ratchet render
+ * for hand-built geometries. cdd3-T28 (E3-9): the public plugin path
+ * (`descriptionPlugin.render`, `src/index.ts#renderSync`) now passes the
+ * layout's own measurer (`DescriptionGeometry.measurer`) -- the default had
+ * drawn `textLength` with `jarMeasurer` while layout used the renderSync
+ * measurer (`sokevu-87-toce485`: 92.962 vs the jar's 81.55). The conformance/ratchet render
  * path (survey/census scripts) calls `renderDescription(geo, theme,
  * new DeterministicMeasurer())` directly, bypassing the public
  * `SyncPlugin#render(geo, theme)` two-arg contract (which has no measurer
