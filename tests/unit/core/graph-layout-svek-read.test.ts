@@ -1,4 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parse, render, getLayout } from '@knowvah/dot-engine';
 import {
   edgeLabelTables,
   svekCluster,
@@ -9,6 +13,8 @@ import {
   svekY,
   svgDouble,
 } from '../../../src/core/graph-layout-svek-read.js';
+
+const CACHE = join(dirname(fileURLToPath(import.meta.url)), '../../../test-results/dot-cache/class');
 
 // cdd3-T-D3: the jar reads graphviz's `-Tsvg` text, not doubles
 // (svek/DotStringFactory.java:388-396, graphviz lib/gvc/gvdevice.c:513-528).
@@ -146,5 +152,76 @@ describe('svekEdge — SvekEdge#solveLine parsed values', () => {
   it('omits what the snapshot omits', () => {
     const e = svekEdge(FRAME, { tail: 'a', head: 'b', points: [] }, {});
     expect(e).toEqual({ tail: 'a', head: 'b', points: [] });
+  });
+});
+
+/**
+ * T11 (docs/graphviz-issues/25-edge-label-published-when-unplaced.md;
+ * cdd4 T0d already found delasa class-conformant on dot-engine 1.6.1 with
+ * no plantuml-ts change -- this pins that finding through the real read).
+ *
+ * Real graphviz's force-search (`searchsize`) can fail to find a spot for a
+ * centre edge label; when it does, `ED_label(e)->set` stays false and
+ * `emit.c#emit_edge_label` (real graphviz, cited at :2891 by the prior
+ * diagnosis pass, not re-read this pass) skips the `<text>` draw entirely --
+ * real `-Tsvg` never emits it. Upstream's OWN consumer recovers the
+ * placement the SAME way: `SvekEdge.java:741-748` calls
+ * `getXY(fullSvg, this.noteLabelColor)` (`:808-815`) to scan its OWN
+ * rendered `-Tsvg` for the `<text>` tagged with this edge's dedicated debug
+ * color; when graphviz drew nothing, `getIndexFromColor` returns -1,
+ * `getXY` returns `null`, `this.labelXY` stays `null`, and the draw at
+ * `:951` (`if (hasNoteLabelText() && this.labelXY != null ...)`) is
+ * skipped -- upstream's own drawing gate is "did the SVG text show up",
+ * not "was a label attribute given".
+ *
+ * `@knowvah/dot-engine` 1.6.1 applies the identical `set` gate directly
+ * inside its typed `getLayout()` (no SVG-scan needed in this port, unlike
+ * upstream's own mechanism above) -- `EdgeGeometry.label` comes back
+ * `undefined`, never a sentinel `{x,y}`, the SAME gate it already applied
+ * to `tailLabel`/`headLabel`/`xlabel`. `class/delasa-80-jusu462`'s cached
+ * DOT carries 3 real edges graphviz leaves unplaced this way -- read here
+ * with the SAME `parse`/`render`/`getLayout()` calls
+ * `core/graph-layout.ts#layoutGraph` makes (`engine: 'dot'`,
+ * `yAxis: 'up'`), then run through the SAME production `svekFrame`/
+ * `svekEdge` this repo's `mapEdges` calls -- no mocking, no synthesized
+ * absent-label shape.
+ */
+describe('svekEdge — an unplaced centre label reads back absent, not a sentinel (T11, issue 25)', () => {
+  const dot = readFileSync(join(CACHE, 'delasa-80-jusu462', 'svek-1.dot'), 'utf8');
+  const g = parse(dot);
+  render(g, 'svg', { engine: 'dot' });
+  const snap = getLayout(g, { yAxis: 'up' });
+  const frame = svekFrame(snap.bounds.height);
+  const byKey = new Map(snap.edges.map((e) => [`${e.tail}->${e.head}`, e]));
+
+  // The 3 edges docs/graphviz-issues/25 names: `sh0166->sh0253`,
+  // `sh0253->sh0168`, `sh0253->sh0185` (each carries a real `label=<<TABLE
+  // ...>>` in the cached DOT -- a label WAS requested, graphviz just never
+  // placed it).
+  it.each(['sh0166->sh0253', 'sh0253->sh0168', 'sh0253->sh0185'])(
+    '%s: getLayout omits label (requested but unplaced), svekEdge propagates the omission',
+    (key) => {
+      const ge = byKey.get(key);
+      expect(ge).toBeDefined();
+      // Absent, not a sentinel `{x, y}` -- the exact distinction issue 25
+      // is about: dot-engine 1.6.0 used to publish `{x:0, y:...}` here.
+      expect('label' in ge!).toBe(false);
+      expect(ge!.label).toBeUndefined();
+
+      const out = svekEdge(frame, ge!, {});
+      expect('label' in out).toBe(false);
+      expect(out.label).toBeUndefined();
+    },
+  );
+
+  it('contrast: a placed label on the SAME graph reads back a real point, not undefined', () => {
+    const ge = byKey.get('sh0166->sh0172');
+    expect(ge).toBeDefined();
+    expect(ge!.label).toBeDefined();
+
+    const out = svekEdge(frame, ge!, {});
+    expect(out.label).toBeDefined();
+    expect(Number.isFinite(out.label!.x)).toBe(true);
+    expect(Number.isFinite(out.label!.y)).toBe(true);
   });
 });
