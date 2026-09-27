@@ -92,3 +92,39 @@ describe('seedOfUmlSource — precedence used by the fix above', () => {
     expect(withSeedLines).toBe(viaRawSourceLines);
   });
 });
+
+// cdd4-T13: render-fixture-class.ts carried a PRIVATE copy of the pre-T7b
+// two-stage `buildTheme` (all skinparam, then all <style>, regardless of
+// true source order) and passed `resolveAnnotationStyles` a bare
+// `preprocessed.skinparam` map instead of the full `PreprocessorResult` --
+// so `segmentsOf` (`src/core/annotations/style.ts`) always fell back to the
+// two-stage order too. A `<style>` block followed by a LATER `skinparam`
+// touching the SAME annotation property must let the skinparam win
+// (declaration order, cdd4-T7b) -- the private copy let the style block
+// win instead, because it always treated `<style>` as coming after every
+// skinparam regardless of where it actually appeared in the source.
+describe('renderFixtureClass — theme building matches production (cdd4-T7b, cdd4-T13)', () => {
+  it('matches renderSync byte-for-byte when a <style> block is followed by a later skinparam on the same property', () => {
+    const markup = [
+      '@startuml',
+      'title MyTitle',
+      'class Foo',
+      '',
+      '<style>',
+      'title {',
+      '  FontColor red',
+      '}',
+      '</style>',
+      '',
+      'skinparam TitleFontColor blue',
+      '@enduml',
+      '',
+    ].join('\n');
+    const viaFixture = renderFixtureClass(markup, new DeterministicMeasurer());
+    const viaProduction = renderSync(markup, { measurer: new DeterministicMeasurer() });
+    expect(viaFixture).toBe(viaProduction);
+    // The later skinparam declaration wins: title text renders blue (#00F),
+    // not the earlier <style> block's red (#F00).
+    expect(viaFixture).toContain('fill="#00F"');
+  });
+});
