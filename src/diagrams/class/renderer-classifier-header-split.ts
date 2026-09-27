@@ -15,16 +15,21 @@ import { parseColor, type Paint } from '../../core/paint.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { classStereotypeBackground } from './renderer-classifier-colors.js';
 
-/** The `class`/`enum`/`interface`/`abstract` kinds `EntityImageClass
- *  #drawInternal`'s header-background split applies to -- disjoint from
- *  `renderer-classifier-box.ts#headerBackgroundPath`'s `object`/`map`/
- *  `json` gate (a DIFFERENT upstream image class/shape entirely, see that
- *  function's own doc comment). */
+/** The kinds `EntityImageClass#drawInternal`'s header-background split
+ *  applies to: every port kind in `LeafType#LIKE_CLASS`
+ *  (`abel/LeafType.java:85-91`), the set `GeneralImageBuilder.java:110-111`
+ *  draws with `EntityImageClass` -- `annotation` and `entity` too (cdd4-T7b:
+ *  mizupo-59-zala765's `annotation`s split under `!theme aws-orange`'s
+ *  gradient header). Disjoint from `renderer-classifier-box.ts
+ *  #headerBackgroundPath`'s `object`/`map`/`json` gate (a DIFFERENT upstream
+ *  image class/shape entirely, see that function's own doc comment). */
 export const CLASS_HEADER_SPLIT_KINDS: ReadonlySet<ClassifierGeo['kind']> = new Set([
   'class',
   'enum',
   'interface',
   'abstract',
+  'annotation',
+  'entity',
 ]);
 
 /**
