@@ -13,6 +13,7 @@ run the close procedure (N=1).
 | [T4](T4-census-harness.md) | Census sprite store + popesa pipeline | typescript-pro (sonnet) | `scripts/svg-conformance-census.ts` + its unit test | T0e | [ ] |
 | [T5](T5-diagnose-p-rows.md) | Diagnose jakapi, lecelo, gujigi | debugger (opus) | `diagnosis/*.md`, `diagnosis/scratch/` | T0e | [ ] |
 | [T6](T6-sokevu-description.md) | E3-9 patch + E3-10b hasPort | typescript-pro (opus) | `src/diagrams/description/{index,layout-helpers-types,renderer}.ts`, `src/core/svek-dot-emit-clusters.ts`, tests | T0e | [ ] |
+| [T11](T11-unplaced-label-consumer.md) | gvi 25 consumer: skip unplaced edge label | typescript-pro (sonnet) | `src/core/graph-layout*.ts` (read), `class/class-edge-geo.ts`, tests | T0e | [ ] |
 | [T7a](T7a-theme-execution.md) | Theme sources + `executeTheme` port | typescript-pro (opus) | `scripts/build-theme-sources.ts` (new), `src/core/themes-source*.ts` (generated), `src/core/tim/{TContext,EaterTheme}.ts`, tests | T0e | [ ] |
 
 T6's `svek-dot-emit-clusters.ts` is shared by no other batch-1 task. If T5's

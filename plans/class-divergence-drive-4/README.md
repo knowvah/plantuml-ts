@@ -15,7 +15,7 @@ uncommitted `absorbLayoutEpsilon` deletion) to the most conformant state
 reachable without a dot-engine release. That means:
 
 - close every port-side row (gujigi, jakapi, lecelo, sokevu, mizupo, besepi)
-- sign the three acceptances (luzive, sadamo, zuduxu)
+- sign the four acceptances (luzive, sadamo, zuduxu, nugecu)
 - fix the census harness so bidusa, ruliki and popesa can be pinned
 - leave each of the 14 dot-engine rows with a current, re-verified entry in
   `docs/graphviz-issues/TRACKER.md`, for the maintainer to take to
@@ -26,7 +26,7 @@ Batch 0 first finishes cdd3 (its T-exit and T-close-out). The Java at
 
 ## Exit bar (D1)
 
-- class conformant ≥ **695**; accepted divergences (class) = **16**
+- class conformant ≥ **695**; accepted divergences (class) = **17**
 - each of the 14 dot-engine rows maps to a re-verified TRACKER entry
 - bidusa, ruliki, popesa survey-conformant AND census 0-diff AND pinned
 - zero conformant losses (any engine), zero unexplained rises at every close

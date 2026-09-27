@@ -1,5 +1,7 @@
 # T0d — review dot-engine responses (D2 gate — may HALT)
 
+**Status at planning (2026-09-26):** responses are in and reviewed (D2 amendment). dot-engine 1.6.1 is published; bump to it. Only nugecu (D6) and T11 remain as adjustments.
+
 **Context.** Before execution, the maintainer works the TRACKER entries for
 issues 19, 22, 23, 24, 25, 26 (14 class fixtures: see `../fixtures.md`,
 ws G) in dot-engine. The responses must be READ and the plan adjusted

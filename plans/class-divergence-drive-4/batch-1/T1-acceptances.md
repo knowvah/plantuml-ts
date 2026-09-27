@@ -1,6 +1,6 @@
 # T1 — acceptances (D6)
 
-Add three entries to `oracle/accepted-divergences.json`, matching the
+Add four entries (the fourth is nugecu-04-tona107: cite `docs/graphviz-issues/TRACKER.md` entry 23 and dot-engine `docs/known-divergences.md` A3; re-measure its edge Δ on 1.6.1 first) to `oracle/accepted-divergences.json`, matching the
 existing class entries' shape (`match.id` = `svg-class/<slug>`, `scope`,
 `acceptedAt: 2026-09-26`, `acceptedBy: maintainer`, `reason`). Reasons are
 quoted from `plans/class-divergence-drive-3/diagnosis/C.md` (luzive, sadamo: C-18. The residual is
@@ -11,7 +11,7 @@ renders an NPE page from `Neighborhood.java:151`; precedent `DIVERGENCES.md`
 "upstream crashes (deliberate)"). Before committing, re-verify each
 reason on the current tree with `render-diff.mts <slug>`.
 
-**Acceptance.** Given the file, then there are 16 class entries and every
+**Acceptance.** Given the file, then there are 17 class entries and every
 test reading it passes. Given each reason, then it names the residual lines
 exactly.
 
