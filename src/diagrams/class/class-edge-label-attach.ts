@@ -32,6 +32,7 @@ import { labelMarginOf, type NoteBoxContext } from './class-layout-edge-labels.j
 import type { EdgeGeo } from './layout.js';
 import { labelOperandCenter } from './class-edge-note-box.js';
 import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
+import { drawnEdgePoints } from './class-ink-dot-path.js';
 
 /**
  * cdd3-T16: `SvekEdge#getArrowDirectionInRadianInternal` (`svek/SvekEdge.java
@@ -44,6 +45,29 @@ import { dotEdgeRunsReversed } from './class-dot-edge-order.js';
  */
 function dotPathOf(fromToPoints: Array<{ x: number; y: number }>, rel: Relationship): Array<{ x: number; y: number }> {
   return dotEdgeRunsReversed(rel) ? [...fromToPoints].reverse() : fromToPoints;
+}
+
+/**
+ * cdd4-T8 (jakapi-64-tine258, D8): `fromToPoints` is `buildEdgeGeos`'s RAW,
+ * pre-`solveLine` spline (`class-edge-geo.ts`'s `matchesFromTo ? pts :
+ * [...pts].reverse()`, `pts === edgeGeo.points`) -- but
+ * `getArrowDirectionInRadianInternal` (`SvekEdge.java:208-217`) reads
+ * `dotPath` AFTER `SvekEdge#getExtremitySimplier`'s decoration trim
+ * (`SvekEdge.java:558-562`'s `moveStartPoint`/`moveEndPoint`), the SAME
+ * trim `class-ink-dot-path.ts#drawnEdgePoints` already applies for the ink
+ * walk. `drawnEdgePoints(edgeGeo)` returns that trim in `edgeGeo.points`'
+ * own order (entity1->entity2); re-apply the identical from-to reversal
+ * `fromToPoints` used, detected by comparing the untrimmed first point's
+ * identity -- a trim only moves coordinates, it can never change WHICH end
+ * of the (still-shared, same-object) array is first.
+ */
+function trimmedFromToPoints(
+  edgeGeo: EdgeGeo,
+  fromToPoints: Array<{ x: number; y: number }>,
+): Array<{ x: number; y: number }> {
+  const trimmed = drawnEdgePoints(edgeGeo);
+  const sameOrder = fromToPoints[0] === edgeGeo.points[0];
+  return sameOrder ? trimmed : [...trimmed].reverse();
 }
 
 /**
@@ -226,7 +250,10 @@ export function attachEdgeLabel(
     center = placed.center;
   }
   const ctx: LabelAnchorContext = { center, measurer, labelFont };
-  const dotPath = dotPathOf(fromToPoints, rel);
+  // cdd4-T8: the TRIMMED path (see {@link trimmedFromToPoints}'s own doc
+  // comment) -- `dotPath` below is ONLY consumed by the magic-arrow angle
+  // formula (single-line and multi-line arms alike), never for placement.
+  const dotPath = dotPathOf(trimmedFromToPoints(edgeGeo, fromToPoints), rel);
   if (lines.length > 1) {
     // `NONE_OR_SEVERAL.reverse()` is itself (`LinkArrow.java:47-55`): the
     // per-line tokens are never flipped by an inverted link.

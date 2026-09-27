@@ -10,7 +10,9 @@ import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { computeClassRawInkDims } from '../../../src/diagrams/class/layout-ink-extent.js';
-import type { ClassifierGeo } from '../../../src/diagrams/class/layout.js';
+import { buildInkBox } from '../../../src/diagrams/class/class-ink-box.js';
+import { HACK_X_FOR_POLYGON } from '../../../src/diagrams/class/class-ink-shapes.js';
+import type { ClassifierGeo, EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
 function svgDims(markup: string): { width: string | undefined; height: string | undefined } {
   const svg = renderSync(markup, { measurer: new WidthTableMeasurer() });
@@ -89,5 +91,73 @@ describe('addRectInk — bodyInkHeight (cdd3-T7, R-VP)', () => {
     const hiddenBody = computeClassRawInkDims([leaf({ bodyInkHeight: 21 })], [], [], []);
     const shownBody = computeClassRawInkDims([leaf({})], [], [], []);
     expect(hiddenBody.width).toBe(shownBody.width);
+  });
+});
+
+/**
+ * cdd4-T8 (jakapi-64-tine258, D8): the magic-arrow glyph
+ * (`klimt/shape/TextBlockArrow2.java:62-77`) is a `UPolygon`, and
+ * `LimitFinder#drawUPolygon` (`klimt/drawing/LimitFinder.java:169-177`)
+ * pads every `UPolygon` by `HACK_X_FOR_POLYGON = 10` on BOTH x sides --
+ * `addPoint(x + shape.getMinX() - HACK_X_FOR_POLYGON, ...)` /
+ * `addPoint(x + shape.getMaxX() + HACK_X_FOR_POLYGON, ...)`. Pre-fix, the
+ * class ink walk added the glyph's raw vertices with no pad
+ * (`../diagnosis/jakapi-64-tine258.md`).
+ */
+function edgeWithGlyph(overrides: Partial<EdgeGeo>): EdgeGeo {
+  return {
+    id: 'e0',
+    // Held well inside the padded glyph's own x-range below so the
+    // straight path itself never becomes the min/max-X ink source --
+    // isolates the assertion to the glyph pad alone.
+    points: [{ x: 50, y: 50 }],
+    sourceDecor: 'none',
+    targetDecor: 'none',
+    dashed: false,
+    from: 'A',
+    to: 'B',
+    ...overrides,
+  };
+}
+
+describe('buildInkBox — magic-arrow glyph ink pads by HACK_X_FOR_POLYGON (cdd4-T8, D8)', () => {
+  it('arrowGlyph: ink min/max-X is the glyph min/max-X ∓ HACK_X_FOR_POLYGON', () => {
+    const edge = edgeWithGlyph({
+      arrowGlyph: {
+        points: [
+          { x: 60, y: 40 },
+          { x: 55, y: 45 },
+          { x: 65, y: 48 },
+        ],
+      },
+    });
+    const box = buildInkBox([], [], [edge], []);
+    expect(box.minX).toBe(55 - HACK_X_FOR_POLYGON);
+    expect(box.maxX).toBe(65 + HACK_X_FOR_POLYGON);
+  });
+
+  it('labelLines[i].glyph gets the SAME pad rule as arrowGlyph (SI25 D1)', () => {
+    const edge = edgeWithGlyph({
+      labelLines: [
+        {
+          text: 'l1',
+          // Held inside the padded glyph's own x-range (below), same as
+          // `points` above -- isolates the assertion to the glyph pad.
+          x: 50,
+          y: 50,
+          width: 1,
+          glyph: {
+            points: [
+              { x: 60, y: 40 },
+              { x: 55, y: 45 },
+              { x: 65, y: 48 },
+            ],
+          },
+        },
+      ],
+    });
+    const box = buildInkBox([], [], [edge], []);
+    expect(box.minX).toBe(55 - HACK_X_FOR_POLYGON);
+    expect(box.maxX).toBe(65 + HACK_X_FOR_POLYGON);
   });
 });

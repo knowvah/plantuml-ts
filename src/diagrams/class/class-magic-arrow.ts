@@ -198,9 +198,17 @@ export function isBareMagicArrowLabel(label: string): boolean {
  * NON-autolink: `Math.atan2(end.x-start.x, end.y-start.y)` over the
  * edge's OWN start/end points (a "compass" angle — 0 = straight down in
  * SVG's y-down space, NOT the usual `atan2(dy,dx)` math convention).
- * `start`/`end` are the ALREADY from-to-normalized spline endpoints
- * (`class-geo-builders.ts#normalizeEdgePoints`'s own doc comment — mirrors
- * jar's post-`solveLine` `dotPath`).
+ * `start`/`end` are the from-to-normalized spline's endpoints AFTER the
+ * caller's own decoration trim (cdd4-T8, jakapi-64-tine258, D8) --
+ * `class-edge-label-attach.ts`'s `trimmedFromToPoints` runs
+ * `class-ink-dot-path.ts#drawnEdgePoints` (`SvekEdge#getExtremitySimplier`'s
+ * `moveStartPoint`/`moveEndPoint`, `SvekEdge.java:558-562`) before calling
+ * this — the SAME trim `solveLine` leaves on `dotPath` in place, which is
+ * what `getArrowDirectionInRadianInternal` (`SvekEdge.java:208-217`) itself
+ * reads. Pre-fix this doc claimed the RAW, untrimmed `normalizeEdgePoints`
+ * output already mirrored the post-`solveLine` path; it did not (D8's
+ * causal chain: jakapi's Group->Activity glyph read a 0.04 rad stale
+ * angle).
  *
  * AUTOLINK (cdd-B10FU, `dorelu-66-lixu637`): `dotPath.getStartAngle()`
  * (`klimt/shape/DotPath.java:299-302`) — the FIRST bezier segment's start
@@ -208,13 +216,28 @@ export function isBareMagicArrowLabel(label: string): boolean {
  * order flips relative to the non-autolink branch above; jar's own
  * `getStartAngle`/`getArrowDirectionInRadianInternal` genuinely use two
  * different conventions, not a copy-paste of one). `points[0]`/`points[1]`
- * are the from-to-normalized spline's own start point and first control
- * point (`getStartTangeante`, `DotPath.java:303-311`): `dx = ctrlx1-x1`,
+ * are the SAME trimmed spline's own start point and first control point
+ * (`getStartTangeante`, `DotPath.java:303-311`): `dx = ctrlx1-x1`,
  * `dy = ctrly1-y1`, falling back to `points[3]-points[0]` (the first
  * bezier segment's OWN end point) when the control point coincides with
  * the start (a zero-length tangent — no corpus fixture reaches this arm,
  * ported for fidelity, not guessed at). Jar-verified byte-exact against
  * `dorelu-66-lixu637`'s golden triangle (all 3 vertices, sub-0.003px).
+ *
+ * cdd4-T8: the autolink tangent is (usually) invariant to the SAME trim
+ * that moves the non-autolink `start`/`end` above -- `DotPath#moveStartPoint`
+ * (`klimt/shape/DotPath.java:206-216`) shifts BOTH `x1`/`y1` (the point)
+ * AND `ctrlx1`/`ctrly1` (the control point) by the IDENTICAL `dx`/`dy`,
+ * so `getStartTangeante`'s `ctrlx1-x1`/`ctrly1-y1` difference cancels the
+ * shift out — UNLESS the move exceeds the first bezier's own chord length
+ * (`beziers.size() > 1 && sqrt(dx²+dy²) >= beziers.get(0).getLength()`,
+ * `:207`), which drops that whole bezier segment and reads the tangent
+ * from the (now-first) NEXT one instead — a structurally different
+ * curve, not just a translate. `movePointsStart`
+ * (`renderer-arrowhead-move.ts`) ports `moveStartPoint` verbatim,
+ * including this removal branch, so feeding it the SAME trimmed path as
+ * the non-autolink branch is correct either way, not merely harmless in
+ * the common case.
  *
  * BACKWARD adds `Math.PI` in EITHER branch (`getArrowDirectionInRadian`,
  * SvekEdge.java:201-206) — applied once, after the branch dispatch.
