@@ -8,10 +8,14 @@
  *  - `SvekNode#fixOverlap`/`fixHoverlap` (`svek/SvekNode.java:445-463`).
  *
  * Upstream runs it from `SvekResult#computeKal` (`svek/SvekResult.java:
- * 104-109`): first every edge's `computeKal` anchors its boxes (this port's
- * `class-edge-geo.ts#attachKalBoxes`), THEN every node's `fixOverlap`
- * spreads its DOWN list and its UP list. So {@link fixKalOverlaps} runs once,
- * after every edge is built.
+ * 104-109`): first every edge's `computeKal` anchors its boxes, THEN every
+ * node's `fixOverlap` spreads its DOWN list and its UP list. cdd4-T10:
+ * `SvekResult#drawU` calls it on EVERY draw pass (`:95`) and `drawU` runs
+ * twice -- the `calculateDimension` `LimitFinder` pass at `dx = dy = 0`
+ * (`:130-134`) and the SVG pass after `moveDelta` -- so {@link computeKal}
+ * runs twice, once per frame (`class-svek-pass0.ts`). Pass 1 resumes from
+ * pass 0: `moveX` moved `dotPathInit`, which `SvekEdge#computeKal` re-seeds
+ * every box from.
  *
  * `moveX` moves the box (`translate.compose(dx)`) and — only when the box's
  * entity is the link's `entity1` — the link's start point through
@@ -19,8 +23,9 @@
  * `DotPath#moveStartPoint`, removal branch included). An UP box (entity2)
  * moves alone; the link end stays put.
  */
+import type { Point2D } from '../../core/klimt/UTranslate.js';
 import type { EdgeGeo } from './layout.js';
-import type { Kal, KalBox, KalPosition } from './class-kal.js';
+import { kalBoxAt, type Kal, type KalBox, type KalPosition } from './class-kal.js';
 import { movePointsStart } from './renderer-arrowhead-move.js';
 
 /** `LineOfSegments.Segment` (`LineOfSegments.java:44-73`). */
@@ -128,53 +133,94 @@ export function kalOverlapX(self: Pick<KalBox, 'x' | 'width' | 'position'>, othe
   return 0;
 }
 
-/** One placed `Kal`: its box and the edge that owns it. */
+/** `SvekEdge#dotPathInit` (`svek/SvekEdge.java:658`): the routed spline
+ *  before `simulateCompound` and the extremity trim. Mutable, and shared by
+ *  both `Kal`s of one edge -- `SvekEdge#moveStartPoint` moves it
+ *  (`:1346-1349`). */
+export interface KalDotPathInit {
+  points: ReadonlyArray<Point2D>;
+}
+
+/** One placed `Kal`: the edge that owns it and that edge's `dotPathInit`. */
 export interface PlacedKal {
   readonly kal: Kal;
   readonly edge: EdgeGeo;
   /** `link.getEntity1() == entity` (`Kal.java:213`) — `kal1` always; `kal2`
    *  only on a self link. */
   readonly onEntity1: boolean;
+  readonly init: KalDotPathInit;
 }
 
-function boxOf(p: PlacedKal): KalBox {
-  const boxes = p.edge.kalBox!;
-  return (p.kal.end === 1 ? boxes.start : boxes.end)!;
-}
+/** The box of every placed `Kal` in the current pass's frame. */
+type FrameBoxes = Map<PlacedKal, KalBox>;
 
-/** `Kal#moveX` (`Kal.java:210-216`). */
-function kalMoveX(p: PlacedKal, dx: number): void {
+/** `Kal#moveX` (`Kal.java:210-216`): the box, and -- entity1 only --
+ *  `SvekEdge#moveStartPoint`, which moves `dotPath` AND `dotPathInit`. */
+function kalMoveX(p: PlacedKal, dx: number, boxes: FrameBoxes): void {
   if (dx === 0) return;
-  const box = boxOf(p);
-  const moved = { ...box, x: box.x + dx, textX: box.textX + dx };
-  p.edge.kalBox = p.kal.end === 1 ? { ...p.edge.kalBox, start: moved } : { ...p.edge.kalBox, end: moved };
-  if (p.onEntity1) p.edge.points = movePointsStart(p.edge.points, dx, 0);
+  const box = boxes.get(p)!;
+  boxes.set(p, { ...box, x: box.x + dx, textX: box.textX + dx });
+  if (!p.onEntity1) return;
+  p.edge.points = movePointsStart(p.edge.points, dx, 0);
+  p.init.points = movePointsStart(p.init.points, dx, 0);
 }
 
 /** `SvekNode#fixHoverlap` (`SvekNode.java:453-463`). */
-function fixHoverlap(list: readonly PlacedKal[]): void {
+function fixHoverlap(list: readonly PlacedKal[], boxes: FrameBoxes): void {
   const los = new LineOfSegments();
-  for (const p of list) los.addSegment(kalX1(boxOf(p)), kalX2(boxOf(p)));
+  for (const p of list) los.addSegment(kalX1(boxes.get(p)!), kalX2(boxes.get(p)!));
   const res = los.solveOverlaps();
-  list.forEach((p, i) => kalMoveX(p, res[i]! - kalX1(boxOf(p))));
+  list.forEach((p, i) => kalMoveX(p, res[i]! - kalX1(boxes.get(p)!), boxes));
 }
 
 const SPREAD_SIDES: readonly KalPosition[] = ['DOWN', 'UP'];
 
+/** `SvekEdge#computeKal` (`SvekEdge.java:1069-1077`): `kal1` on
+ *  `dotPathInit`'s start, `kal2` on its end, each `.compose(new
+ *  UTranslate(dx, dy))` -- `frame` is that `(dx, dy)` measured from this
+ *  port's layout frame. */
+function seedBox(p: PlacedKal, frame: Point2D): KalBox {
+  const pts = p.init.points;
+  const anchor = pts[p.kal.end === 1 ? 0 : pts.length - 1]!;
+  return kalBoxAt(p.kal, { x: anchor.x + frame.x, y: anchor.y + frame.y });
+}
+
+/** Stores a frame box back on its edge, in the layout frame. */
+function storeBox(p: PlacedKal, box: KalBox, frame: Point2D): void {
+  const moved = {
+    ...box,
+    x: box.x - frame.x,
+    y: box.y - frame.y,
+    textX: box.textX - frame.x,
+    textY: box.textY - frame.y,
+  };
+  p.edge.kalBox = p.kal.end === 1 ? { ...p.edge.kalBox, start: moved } : { ...p.edge.kalBox, end: moved };
+}
+
 /**
- * `SvekResult#computeKal`'s second loop (`SvekResult.java:107-108`):
- * `SvekNode#fixOverlap` (`SvekNode.java:445-451`) for every entity — its
- * DOWN list, then its UP list, each in `Entity#addKal` order (link order,
- * `kal1` before `kal2` — the order `placed` arrives in). Mutates each
- * edge's `kalBox` and, for an entity1 box, its `points`.
+ * `SvekResult#computeKal` (`SvekResult.java:104-109`) for one draw pass:
+ * every line's `SvekEdge#computeKal` re-seeds its boxes from `dotPathInit`
+ * in the pass's frame, then every node's `SvekNode#fixOverlap`
+ * (`SvekNode.java:445-451`) spreads its DOWN list, then its UP list, each in
+ * `Entity#addKal` order (link order, `kal1` before `kal2` -- the order
+ * `placed` arrives in). The solve runs in `frame` (the pass's `dx, dy` from
+ * the layout frame) because `LineOfSegments` is sensitive to float dust
+ * there (ririlu stalls on 2.84e-14 pushes in pass 0); the boxes are stored
+ * back in the layout frame. Mutates each edge's `kalBox` and, for an
+ * entity1 box, its `points` and its `dotPathInit`.
  *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekNode.java
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/SvekResult.java
  */
-export function fixKalOverlaps(placed: readonly PlacedKal[]): void {
+export function computeKal(placed: readonly PlacedKal[], frame: Point2D): void {
+  const boxes: FrameBoxes = new Map(placed.map((p) => [p, seedBox(p, frame)]));
   const entities = [...new Set(placed.map((p) => p.kal.entityId))];
   for (const entityId of entities) {
     for (const side of SPREAD_SIDES) {
-      fixHoverlap(placed.filter((p) => p.kal.entityId === entityId && p.kal.position === side));
+      fixHoverlap(
+        placed.filter((p) => p.kal.entityId === entityId && p.kal.position === side),
+        boxes,
+      );
     }
   }
+  for (const p of placed) storeBox(p, boxes.get(p)!, frame);
 }

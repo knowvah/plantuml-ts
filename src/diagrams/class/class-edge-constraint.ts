@@ -11,6 +11,10 @@
  * draws `ULine(x2 - x1, y2 - y1)` at `UTranslate(x1, y1)` under
  * `UStroke(3, 3, 1)` — the golden's `stroke-dasharray:3,3` — and centres
  * the constraint text on that line's midpoint.
+ *
+ * cdd4-T10: the pick runs once per `SvekResult#drawU` pass, on the drawn
+ * path (`todraw`), with the square offset by the pass's `dx, dy` —
+ * `class-svek-pass0.ts` owns that replay.
  */
 import type { Point2D } from '../../core/klimt/UTranslate.js';
 

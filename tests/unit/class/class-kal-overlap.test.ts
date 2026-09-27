@@ -12,7 +12,16 @@
  */
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
-import { LineOfSegments, kalOverlapX, kalX1, kalX2 } from '../../../src/diagrams/class/class-kal-overlap.js';
+import {
+  LineOfSegments,
+  computeKal,
+  kalOverlapX,
+  kalX1,
+  kalX2,
+  type PlacedKal,
+} from '../../../src/diagrams/class/class-kal-overlap.js';
+import type { Kal } from '../../../src/diagrams/class/class-kal.js';
+import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { layoutFixtureClass } from '../../oracle/svg-conformance/render-fixture-class.js';
 
@@ -110,5 +119,91 @@ describe('SvekNode#fixOverlap at fixture level — rilali-81-gifu188', () => {
       const b = e.kalBox!.end!;
       expect(e.points[e.points.length - 1]!.x).toBeCloseTo(b.x + W / 2, 2);
     }
+  });
+});
+
+/**
+ * cdd4-T10 — `SvekResult#computeKal` (`svek/SvekResult.java:104-109`) runs
+ * on BOTH `drawU` passes. `Kal#moveX` moves `dotPathInit`'s start too
+ * (`svek/SvekEdge.java:1346-1349`) and `SvekEdge#computeKal` re-seeds every
+ * box from it (`:1069-1077`), so pass 1 resumes from pass 0's result.
+ *
+ * Inputs are ririlu-13-zipi740's three DOWN boxes on `MoreComplex`
+ * (`diagnosis/ririlu-13-zipi740.md`): starts 500.12 / 512 / 523.88 in the
+ * layout frame, svek frame = +8, final frame = +7. Pass 0 stalls on
+ * 2.84e-14 pushes; pass 1 lands the jar's boxX 440.54 / 501.965 / 541.602.
+ */
+describe('computeKal — two draw passes (cdd4-T10, ririlu-13-zipi740)', () => {
+  const widths = [51.425, 29.6375, 64.725];
+  const starts = [500.12, 512, 523.88];
+
+  function placed(): PlacedKal[] {
+    return widths.map((width, i) => {
+      const pts = [
+        { x: starts[i]!, y: 100 },
+        { x: starts[i]!, y: 200 },
+      ];
+      const kal: Kal = {
+        entityId: 'MoreComplex',
+        relIndex: i,
+        end: 1,
+        text: 'q',
+        width,
+        height: 16,
+        textWidth: width - 4,
+        baselineOffset: 11,
+        position: 'DOWN',
+      };
+      return { kal, edge: { id: `e${i}`, points: pts } as EdgeGeo, onEntity1: true, init: { points: pts } };
+    });
+  }
+  const finalBoxX = (ps: PlacedKal[]) => ps.map((p) => p.edge.kalBox!.start!.x + 7);
+
+  it('pass 0 alone (svek frame) stalls: boxes 1 and 2 still overlap', () => {
+    const ps = placed();
+    computeKal(ps, { x: 8, y: 0 });
+    const [b0, b1, b2] = finalBoxX(ps);
+    expect(b0).toBeCloseTo(466.307, 3);
+    expect(b1).toBeCloseTo(489.081, 3);
+    expect(b2).toBeCloseTo(528.718, 3);
+  });
+
+  it('pass 1 (final frame) re-solves from the pass-0 dotPathInit to the jar boxX', () => {
+    const ps = placed();
+    computeKal(ps, { x: 8, y: 0 });
+    computeKal(ps, { x: 7, y: 0 });
+    const [b0, b1, b2] = finalBoxX(ps);
+    expect(b0).toBeCloseTo(440.54, 3);
+    expect(b1).toBeCloseTo(501.965, 3);
+    expect(b2).toBeCloseTo(541.602, 3);
+    // The edge start rides every move (Kal.java:213-214): box centre.
+    for (const p of ps) expect(p.edge.points[0]!.x).toBeCloseTo(p.edge.kalBox!.start!.x + p.kal.width / 2, 9);
+  });
+
+  it('keeps the box in the layout frame whatever frame it solved in', () => {
+    const ps = placed().slice(0, 1);
+    computeKal(ps, { x: 8, y: 3 });
+    const b = ps[0]!.edge.kalBox!.start!;
+    expect(b.x).toBeCloseTo(500.12 - widths[0]! / 2, 9);
+    expect(b.y).toBeCloseTo(100, 9);
+  });
+});
+
+describe('computeKal at fixture level — ririlu-13-zipi740 (cdd4-T10)', () => {
+  const geo = layoutFixtureClass(
+    readFileSync('test-results/dot-cache/class/ririlu-13-zipi740/in.puml', 'utf8'),
+    measurer,
+  ).geo;
+  const down = geo.edges
+    .map((e) => e.kalBox?.start)
+    .filter((b) => b !== undefined && b.position === 'DOWN' && b.text.includes(':'))
+    .map((b) => b!.x)
+    .sort((a, b) => a - b);
+
+  it("lands MoreComplex's three DOWN boxes on the jar's x", () => {
+    expect(down).toHaveLength(3);
+    expect(down[0]!).toBeCloseTo(440.54, 2);
+    expect(down[1]!).toBeCloseTo(501.965, 2);
+    expect(down[2]!).toBeCloseTo(541.602, 2);
   });
 });

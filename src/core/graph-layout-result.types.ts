@@ -57,6 +57,14 @@ export interface DotLayoutResult {
   }>;
   width: number;
   height: number;
+  /**
+   * cdd4-T10: the node/edge min `shiftToOrigin` subtracted, so `result +
+   * originShift` is the frame the layout was read in (the jar's svek frame
+   * under `read: 'svek'`) -- the frame `SvekResult#drawU`'s first
+   * (`LimitFinder`) pass draws in, at `dx = dy = 0`
+   * (`svek/SvekResult.java:130-134`). Absent only for the empty graph.
+   */
+  readonly originShift?: { readonly x: number; readonly y: number };
   /** G5 C2: real per-cluster bbox from graphviz's own subgraph-cluster
    *  layout (@knowvah/dot-engine's `getLayout().clusters`, see
    *  docs/graphviz-issues/06-cluster-bbox-not-in-getlayout.md's RESOLVED

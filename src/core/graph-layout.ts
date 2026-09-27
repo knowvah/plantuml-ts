@@ -241,7 +241,9 @@ function shiftEdge(e: OutEdges[number], minX: number, minY: number): void {
   }
 }
 
-function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters): void {
+/** Translates every node/edge/cluster so the node+edge min lands on the
+ *  origin, and returns the subtracted min (`DotLayoutResult.originShift`). */
+function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters): { x: number; y: number } {
   let minX = Math.min(...nodes.map((n) => n.x));
   let minY = Math.min(...nodes.map((n) => n.y));
   for (const e of edges) {
@@ -250,7 +252,7 @@ function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters)
       minY = Math.min(minY, p.y);
     }
   }
-  if (minX === 0 && minY === 0) return;
+  if (minX === 0 && minY === 0) return { x: 0, y: 0 };
   for (const n of nodes) {
     n.x -= minX;
     n.y -= minY;
@@ -270,6 +272,7 @@ function shiftToOrigin(nodes: OutNodes, edges: OutEdges, clusters?: OutClusters)
       }
     }
   }
+  return { x: minX, y: minY };
 }
 
 function canvasSize(nodes: OutNodes, edges: OutEdges): { width: number; height: number } {
@@ -341,10 +344,10 @@ export function layoutGraph(
   const nodes = mapNodes(snap, input, frame);
   const edges = mapEdges(snap, idx, frame);
   const clusters = mapClusters(snap, clusterIdx);
-  shiftToOrigin(nodes, edges, clusters);
+  const originShift = shiftToOrigin(nodes, edges, clusters);
   const { width, height } = canvasSize(nodes, edges);
 
-  return { nodes, edges, width, height, ...(clusters !== undefined ? { clusters } : {}) };
+  return { nodes, edges, width, height, originShift, ...(clusters !== undefined ? { clusters } : {}) };
 }
 
 export type {

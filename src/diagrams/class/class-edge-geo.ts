@@ -17,10 +17,10 @@ import { applyClusterMagneticBorders, clipClusterEdgeEnds, type ClipRect } from 
 import { attachPortLabels } from './class-edge-label-anchor.js';
 import { attachEdgeLabel, type EdgeGeoTextContext } from './class-edge-label-attach.js';
 import { computeEdgeNoteBox } from './class-edge-note-box.js';
-import { constraintAnchor } from './class-edge-constraint.js';
 import { edgeLabelAttrs } from './class-layout-edge-labels.js';
 import { kalBoxAt, type Kal } from './class-kal.js';
-import { fixKalOverlaps, type PlacedKal } from './class-kal-overlap.js';
+import { computeKal, type PlacedKal } from './class-kal-overlap.js';
+import { svekPass0, type ConstraintLink, type SvekDrawState } from './class-svek-pass0.js';
 import type { EdgeGeo } from './layout.js';
 import { dotEdgeId } from './class-link-order.js';
 import { drawnEdgePoints } from './class-ink-dot-path.js';
@@ -153,7 +153,8 @@ function normalizeEdgePoints(
  *
  * `pre` runs entity1 → entity2 (`normalizeEdgePoints`), so `kal.end` 1 is
  * the array's first point and 2 its last. Returns the placed boxes for
- * `class-kal-overlap.ts#fixKalOverlaps`.
+ * `class-kal-overlap.ts#computeKal`, sharing one copy of `pre` as the
+ * edge's mutable `dotPathInit` (cdd4-T10).
  */
 function attachKalBoxes(
   edgeGeo: EdgeGeo,
@@ -163,6 +164,7 @@ function attachKalBoxes(
 ): PlacedKal[] {
   const boxes: { start?: ReturnType<typeof kalBoxAt>; end?: ReturnType<typeof kalBoxAt> } = {};
   const placed: PlacedKal[] = [];
+  const init = { points: [...pre] };
   for (const kal of kals) {
     const anchor = pre[kal.end === 1 ? 0 : pre.length - 1];
     if (anchor === undefined) continue;
@@ -170,20 +172,15 @@ function attachKalBoxes(
     if (kal.end === 1) boxes.start = box;
     else boxes.end = box;
     // `Kal.java:213`: `link.getEntity1() == entity` — kal2 only on a self link.
-    placed.push({ kal, edge: edgeGeo, onEntity1: kal.end === 1 || rel.from === rel.to });
+    placed.push({ kal, edge: edgeGeo, onEntity1: kal.end === 1 || rel.from === rel.to, init });
   }
   if (boxes.start !== undefined || boxes.end !== undefined) edgeGeo.kalBox = boxes;
   return placed;
 }
 
-/** One end of a pending `constraint on links` pair -- the edge to stamp,
- *  the shared constraint record that identifies its partner, and the point
- *  `SvekEdge.java:998-1010` sampled for this end. */
-interface ConstraintEntry {
-  edgeGeo: EdgeGeo;
-  constraint: { text: string };
-  point: { x: number; y: number };
-}
+/** One end of a pending `constraint on links` pair, before its link role
+ *  is known (see {@link toConstraintLinks}). */
+type ConstraintEntry = Omit<ConstraintLink, 'isLink1'>;
 
 /**
  * The two label-box-derived mechanisms that need the note/theme context:
@@ -192,6 +189,12 @@ interface ConstraintEntry {
  * placed -- `SvekEdge.java:952-954` (note) and `:995-996` (constraint,
  * `x + labelXY.getPosition().getX()`), which is why the spot below is the
  * box's TOP-LEFT rather than the centre this port carries.
+ *
+ * cdd4-T10: `labelXY` is the min corner of graphviz's label TABLE polygon
+ * (`SvekEdge.java:808-815`), and that table is `(int)`-truncated on both
+ * axes (`appendTable`, `:504-507`), so the half-size is taken off the
+ * truncated box. The pick itself runs later, per draw pass
+ * (`class-svek-pass0.ts`).
  */
 function attachNoteAndConstraintSpot(
   edgeGeo: EdgeGeo,
@@ -210,35 +213,23 @@ function attachNoteAndConstraintSpot(
   const cardinalityFont = text.cardinalityFont ?? labelFont;
   const attrs = edgeLabelAttrs(rel, labelFont, cardinalityFont, measurer, noteCtx);
   const spot = {
-    x: center.x - (attrs.labelWidth ?? 0) / 2,
-    y: center.y - (attrs.labelHeight ?? 0) / 2,
+    x: center.x - Math.trunc(attrs.labelWidth ?? 0) / 2,
+    y: center.y - Math.trunc(attrs.labelHeight ?? 0) / 2,
   };
-  const point = constraintAnchor(edgeGeo.points, spot);
-  if (point !== undefined) constrained.push({ edgeGeo, constraint: rel.linkConstraint, point });
+  constrained.push({ edgeGeo, constraint: rel.linkConstraint, spot });
 }
 
 /**
- * Pair the collected ends and stamp each with the line `LinkConstraint
- * #drawMe` draws (`cucadiagram/LinkConstraint.java:93-95`: `ULine(x2 - x1,
- * y2 - y1)` translated to `(x1, y1)`).
- *
- * Both ends are stamped, each with its OWN point first -- measured, not
- * assumed: `gujigi-63-roki030`'s golden emits a dashed `<line>` inside BOTH
- * links of each constrained pair (`lnk10`/`lnk11` and `lnk12`/`lnk13`),
- * each starting at its own link's sampled corner. A literal reading of
- * `drawMe`'s `x2 == 0 && y2 == 0` early return would emit only one; the
- * golden disproves that reading, so the observed behaviour is ported and
- * the residual is journaled (cdd-T6) rather than guessed at.
+ * `link1` is the LATER link of the pair: `CucaDiagram#getTwoLastLinks`
+ * iterates from the last link (`atmp/CucaDiagram.java:682-695`) and
+ * `CommandConstraintOnLinks.java:102-107` passes `links.get(0)` as `link1`.
+ * Entries arrive in link (`allLines()`) order.
  */
-function attachConstraints(entries: readonly ConstraintEntry[]): void {
-  for (const entry of entries) {
-    const partner = entries.find((o) => o !== entry && o.constraint === entry.constraint);
-    if (partner === undefined) continue;
-    entry.edgeGeo.constraint = {
-      line: { x1: entry.point.x, y1: entry.point.y, x2: partner.point.x, y2: partner.point.y },
-      text: entry.constraint.text,
-    };
-  }
+function toConstraintLinks(entries: readonly ConstraintEntry[]): ConstraintLink[] {
+  return entries.map((e, i) => ({
+    ...e,
+    isLink1: !entries.slice(i + 1).some((o) => o.constraint === e.constraint),
+  }));
 }
 
 /** One edge awaiting {@link attachLeafContacts}. */
@@ -257,8 +248,10 @@ interface LeafEnd {
  * decoration trim (`svek/SvekEdge.java:560-563`), and before `drawU`'s
  * magnetic force, which moves only a copy (`svek/SvekEdge.java:907-941`).
  * {@link drawnEdgePoints} is exactly that path (the renderer's own trim), so
- * this runs after `fixKalOverlaps` (the Kal translate rides the same trim)
- * and before `applyClusterMagneticBorders`.
+ * this runs after pass 0's `computeKal` (the Kal translate rides the same
+ * trim) and before `applyClusterMagneticBorders`. The SVG pass draws its
+ * nodes BEFORE its own `computeKal` (`SvekResult.java:82-95`), so the
+ * contacts the jar emits see pass 0's moves only.
  */
 function attachLeafContacts(end: LeafEnd, protectedIds: ReadonlySet<string> | undefined): void {
   const contacts = computeLeafContacts(end.rel, protectedIds, end.grouped, drawnEdgePoints(end.edgeGeo));
@@ -278,7 +271,16 @@ function attachLeafContacts(end: LeafEnd, protectedIds: ReadonlySet<string> | un
  * NEVER drawn, matching upstream's own early-return for an invisible link
  * (`svek/SvekEdge.java#drawU`/`#solveLine`, both `if (link.isInvis())
  * return;` before emitting any `<g>`/comment/path at all).
+ *
+ * cdd4-T10: the geometry is left in `SvekResult#drawU`'s pass-0 state
+ * (`class-svek-pass0.ts`); `svek` resumes it once the ink shift is known
+ * (`layout-ink-extent.ts#assembleShiftedGeometry`).
  */
+export interface SvekEdgeGeos {
+  readonly edges: EdgeGeo[];
+  readonly svek: SvekDrawState;
+}
+
 export function buildEdgeGeos(
   ast: ClassDiagramAST,
   result: DotLayoutResult,
@@ -297,12 +299,12 @@ export function buildEdgeGeos(
   // N`) -- threaded through to `buildStrokeOverride` below; see that
   // function's own doc comment.
   defaultArrowThickness?: number,
-): EdgeGeo[] {
+): SvekEdgeGeos {
   const edges: EdgeGeo[] = [];
   // A2a/M9: `constraint on links` binds a PAIR of links through one shared
   // `LinkConstraint` object (`class-notes.ts#applyConstraintOnLinks` assigns
-  // the same record to both), so the line can only be resolved once both
-  // ends have been sampled -- collected here, paired below.
+  // the same record to both) -- collected here, replayed per draw pass by
+  // `class-svek-pass0.ts`.
   const constrained: ConstraintEntry[] = [];
   // Built once so the per-relationship lookup below is O(1) rather than an
   // O(n) `.find` repeated per relationship (code review 2026-09-21).
@@ -385,13 +387,15 @@ export function buildEdgeGeos(
     });
     edges.push(edgeGeo);
   }
-  attachConstraints(constrained);
-  fixKalOverlaps(placedKals);
+  // cdd4-T10: pass 0 draws at `dx = dy = 0`, the svek frame (layout + m).
+  const m = result.originShift ?? { x: 0, y: 0 };
+  computeKal(placedKals, m);
   for (const end of leafEnds) attachLeafContacts(end, text.protectedIds);
   for (const { edgeGeo, startId, endId } of clusterEnds) {
     edgeGeo.points = applyClusterMagneticBorders(edgeGeo.points, startId, endId, clusterRects);
   }
-  return edges;
+  const label = { measurer: text.measurer, font: text.labelFont };
+  return { edges, svek: svekPass0(m, placedKals, toConstraintLinks(constrained), label) };
   // #lizard forgives -- verbatim move from layout.ts (pre-existing code,
   // not touched this iteration); one EdgeGeo literal with 10 optional
   // jar-verified fields (G2 N2/N8/N9), each gated by its own `?? decor`/

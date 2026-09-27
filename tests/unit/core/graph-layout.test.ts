@@ -41,6 +41,18 @@ describe('layoutGraph — node and edge geometry', () => {
     expect(r.height).toBeGreaterThan(0);
   });
 
+  // cdd4-T10: `shiftToOrigin`'s subtracted min `m`, so a consumer can
+  // recover the jar's svek frame (`SvekResult#drawU` pass 0). Svek y is
+  // `-y + fullHeight`, fullHeight = bb height 108 (two 36px ranks + the
+  // 36px default ranksep) + 2 * pad 4 = 116; node `a`'s top edge sits at
+  // native y 108, so svek y 8. Native x starts at 0 (the pad lives in the
+  // SVG group translate the jar never reads).
+  it('reports the origin shift it subtracted (svek frame = result + originShift)', () => {
+    const r = layoutGraph(g);
+    expect(r.originShift).toEqual({ x: 0, y: 8 });
+    expect(Math.min(...r.nodes.map((n) => n.y))).toBe(0);
+  });
+
   it('re-keys the routed edge back to its input id with points', () => {
     const r = layoutGraph(g);
     expect(r.edges).toHaveLength(1);
