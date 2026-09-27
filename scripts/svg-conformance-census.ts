@@ -86,6 +86,9 @@ import { resolveAnnotationStyles } from '../src/core/annotations/style.js';
 import { assembleSvg, renderSync } from '../src/index.js';
 import { compareSvg } from '../tests/oracle/svg-conformance/compare.js';
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
+import { buildSpriteAssetsStore } from './sprite-assets-store.js';
+import type { AssetStore } from '../src/core/asset-store.js';
+import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
@@ -239,11 +242,32 @@ export function helperFor(type: string): FixtureHelperName {
  * upstream engine -- see the respective `render-fixture-*.ts` helper's own
  * doc comment).
  */
+/**
+ * The options the class fixtures render with in the census -- the SAME
+ * assetStore the survey uses (`svg-parity-survey.ts:272-276`'s
+ * `buildSpriteAssetsStore()`, forwarded there to `renderSync`) and the SAME
+ * includeStore the ratchet uses (`fixtureIncludeStore()`,
+ * `class.golden.ratchet.test.ts`). Without `assetStore`, a `sprite $N
+ * jar:<path>` (`sprite Netw jar:archimate/network` -- bidusa-22-jutu505,
+ * ruliki-78-biji661) resolved to nothing here even though the survey's own
+ * `renderSync` call resolved it -- the census and the survey were measuring
+ * two different populations for any class fixture using a jar-internal
+ * sprite (cdd4-T4). Exported so a unit test can assert the census threads
+ * the IDENTICAL (memoized) store instances without rendering a real
+ * fixture. Class-scoped only: `render-fixture-state.ts`/
+ * `render-fixture-sequence.ts`/`render-fixture-activity.ts`/
+ * `render-fixture-json.ts` do not yet accept an `assetStore` option at all
+ * -- out of this task's declared scope, filed as a follow-on.
+ */
+export function censusClassFixtureOptions(): { includeStore: IncludeStore; assetStore: AssetStore } {
+  return { includeStore: fixtureIncludeStore(), assetStore: buildSpriteAssetsStore() };
+}
+
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
   const opts = { includeStore: fixtureIncludeStore() };
   switch (helperFor(type)) {
     case 'class':
-      return renderFixtureClass(markup, measurer, opts);
+      return renderFixtureClass(markup, measurer, censusClassFixtureOptions());
     case 'state':
       return renderFixtureState(markup, measurer, opts);
     case 'sequence':
