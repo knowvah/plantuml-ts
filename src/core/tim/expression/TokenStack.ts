@@ -13,6 +13,7 @@ import { EaterException, type StringLocated, type TContext, type TMemory } from 
 import { ShuntingYard } from './ShuntingYard.js';
 import { ReversePolishInterpretor } from './ReversePolishInterpretor.js';
 import type { TValue } from './TValue.js';
+import { javaHashSetOrder } from '../../java-hash-set.js';
 
 export class TokenStack {
   private readonly tokens: Token[];
@@ -146,13 +147,19 @@ export class TokenStack {
    * ... + CLOSE_PAREN_MATH triples into FUNCTION_NAME + OPEN_PAREN_FUNC
    * (carrying the resolved argument count) + CLOSE_PAREN_FUNC, in place.
    *
-   * Paren-pairing note: upstream collects pairs into a `HashMap`, whose
-   * iteration order is unspecified; this port uses a `Map` (insertion-
-   * ordered) instead. This does not change the result: each pair's three
-   * mutated indices (`iopen - 1`, `iopen`, `iclose`) are disjoint across
-   * pairs (nesting or sequential parens never share a boundary index), so
-   * the order pairs are processed in has no effect on the final token
-   * array.
+   * Paren-pairing order: upstream collects pairs into a
+   * `HashMap<Integer, Integer>` (`TokenStack.java:162`) and iterates its
+   * `entrySet()` (`:173`). The order matters: `countFunctionArg` reads
+   * tokens that earlier iterations already rewrote, and
+   * `eatUntilCloseParenthesisOrComma` returns on ANY `CLOSE_PAREN_FUNC`
+   * whatever its nesting level (`:125-127`), so `$f($g(1), 2)` counts 2
+   * args only when the outer pair (lower open index) is visited first. A JS
+   * `Map` iterates in insertion order (inner pair first, since it closes
+   * first), so the Java key order is reproduced explicitly: a `HashMap`'s
+   * `entrySet()` walks the same table as its `keySet()`, and `Integer
+   * .hashCode()` is the value itself, so {@link javaHashSetOrder} over the
+   * open indices in `put` order is that iteration order (ascending for any
+   * table wider than the largest key).
    *
    * Malformed-input note: if `tokens` contains an unmatched `)` (more
    * closes than opens), upstream's `open.pollFirst()` returns `null` and
@@ -179,7 +186,13 @@ export class TokenStack {
       }
     }
 
-    for (const [iopen, iclose] of parens) {
+    const keyOrder = javaHashSetOrder(
+      [...parens.keys()],
+      (key) => key,
+      (a, b) => a === b,
+    );
+    for (const iopen of keyOrder) {
+      const iclose = parens.get(iopen)!;
       if (iopen > 0 && this.tokens[iopen - 1]!.getTokenType() === TokenType.PLAIN_TEXT) {
         this.tokens[iopen - 1] = new Token(this.tokens[iopen - 1]!.getSurface(), TokenType.FUNCTION_NAME, undefined);
         const nbArg = this.countFunctionArg(this.subTokenStack(iopen + 1).tokenIterator(), location);
