@@ -38,6 +38,7 @@ import { buildBadgeCharFields, buildHeaderLineMetrics, computeBadgeSpriteBox } f
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import type { ClassFontSpecs } from './class-layout-generic-classifier-types.js';
+import { mergeNameWithVisibility, attachHeaderVisibilityIcon } from './class-header-visibility-geo.js';
 
 export type { ClassFontSpecs };
 
@@ -136,7 +137,8 @@ export function computeHeaderNameGeo(
       maxWidth: headerMaxWidth,
     });
   const headerTextWidth = Math.max(...headerLineWidths);
-  const nameWidth = headerTextWidth + NAME_MARGIN_TOTAL;
+  // cdd5-T4b: nameWidth/nameBlockHeight are EntityImageClassHeader.java:120's merged block.
+  const merged = mergeNameWithVisibility(classifier, headerTextWidth + NAME_MARGIN_TOTAL, nameBlockHeight);
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
   const badgeSpriteBox = computeBadgeSpriteBox(classifier, sprites);
   // G2 N64 (item 45 corollary): a trailing `\n` split can produce a BLANK
@@ -151,12 +153,11 @@ export function computeHeaderNameGeo(
     badgeColorField,
     headerLines,
     headerDisplayLines,
-    nameBlockHeight,
+    ...merged,
     badgeSpriteBox,
     headerAlign,
     headerLineWidths,
     headerTextWidth,
-    nameWidth,
     blankLineRenderWidth,
     headerLineAtoms,
     headerLineHeights,
@@ -242,7 +243,13 @@ function resolveGenericDim(
   genericDisplayOld: boolean,
 ): GenericTagDim | undefined {
   if (genericDisplayOld) return undefined;
-  return measureGenericTagDim(classifier.typeParams ?? [], stereoFont.family, measurer, stereoFont.size, classifier.typeParamsRawText);
+  return measureGenericTagDim(
+    classifier.typeParams ?? [],
+    stereoFont.family,
+    measurer,
+    stereoFont.size,
+    classifier.typeParamsRawText,
+  );
 }
 
 /**
@@ -428,24 +435,24 @@ function buildHeaderNameRowsGeo(
   const { badgeRadius } = options;
   const { header: headerFont } = fonts;
   const { headerNameGeo, stereoGeo } = headerGeo;
-  const { h1, h2 } = slack;
   // G2 N64 item 45: `headerRowCount` now also grows for a multi-line NAME
   // (not just stacked stereotype rows) -- `nameRowCount` tells
   // `renderer-classifier-box.ts#buildHeaderPrimitive` how many of the
   // TRAILING header rows are name lines. A2s R2i: rows carry the DISPLAY
   // text (markup consumed, escapes/emoji decoded); widths stay the atom-
   // measured values, so a mono/emoji header renders at the correct width.
-  return buildHeaderRows({
+  // cdd5-T4b: text right of the visibility block, CENTER-offset in the merge.
+  const rows = buildHeaderRows({
     header: headerNameGeo.header,
     lines: headerNameGeo.headerDisplayLines,
     lineWidths: headerNameGeo.headerLineWidths,
     align: headerNameGeo.headerAlign,
-    circleWidth: stereoGeo.circleWidth,
+    circleWidth: stereoGeo.circleWidth + (headerNameGeo.visibilityBlock?.width ?? 0),
     widthStereoAndName: stereoGeo.widthStereoAndName,
     nameWidth: headerNameGeo.nameWidth,
-    h1,
-    h2,
-    nameTop,
+    h1: slack.h1,
+    h2: slack.h2,
+    nameTop: nameTop + headerNameGeo.nameTextDy,
     baselineOffset: stereoGeo.headerBaselineOffset,
     fontSpec: headerFont,
     headerTextWidth: headerNameGeo.headerTextWidth,
@@ -454,6 +461,7 @@ function buildHeaderNameRowsGeo(
     lineAtoms: headerNameGeo.headerLineAtoms,
     lineHeights: headerNameGeo.headerLineHeights,
   });
+  return attachHeaderVisibilityIcon(rows, headerNameGeo, nameTop);
 }
 
 /** Thin composition of {@link buildStereoRowsGeo} + {@link

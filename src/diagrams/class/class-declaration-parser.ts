@@ -5,7 +5,7 @@
  * parser.ts under the repo's 500-line-per-file cap.
  */
 
-import type { ClassifierKind, RelationshipType } from './ast.js';
+import type { Classifier, ClassifierKind, RelationshipType, Visibility } from './ast.js';
 import { parseMemberLine } from './class-member-parser.js';
 import {
   DESCRIPTIVE_LEAF_KEYWORDS,
@@ -16,6 +16,8 @@ import {
 import { ensureClassifier, type ParseState } from './parser.js';
 import { idLeaf } from './class-relationship-parser.js';
 import { type UrlInfo } from './class-url.js';
+import { refuse } from '../../core/parse-refusal.js';
+import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
 import { extractBody, extractDecorations, extractInheritance, parseIdDisplay } from './class-declaration-extractors.js';
 
 // ---------------------------------------------------------------------------
@@ -50,6 +52,9 @@ export interface ClassifierDecl {
   /** G2 N15: inline `[[url]]` suffix, see `ast.ts#Classifier.url`'s doc
    *  comment. */
   url?: UrlInfo;
+  /** cdd5-T4b: the leading VISIBILITY char -- see `Classifier.
+   *  visibilityModifier`'s own doc comment. */
+  visibilityModifier?: Visibility;
 }
 
 /**
@@ -75,11 +80,11 @@ export interface ClassifierDecl {
 // and `CommandCreateClassMultilines.java:100` carry
 // `new RegexLeaf(1, "VISIBILITY", "(" + regexForVisibilityCharacter() +
 // ")?")` immediately after `RegexLeaf.start()`, before `spaceZeroOrMore()`
-// and the TYPE keyword. Captured (group 1) and discarded: no render-side
-// field in this port consumes a classifier-level visibility marker today
-// (the jar draws a small header icon via `EntityImageClassHeader.java:109-
-// 121`, out of scope for a routing fix -- D3 only judges the diagram TYPE
-// the fixture lands on, not per-pixel header geometry).
+// and the TYPE keyword. cdd5-T4b: captured (group 1) into
+// `ClassifierDecl.visibilityModifier` -- `CommandCreateClass.java:172-175`:
+// "visibilityModifier = VisibilityModifier.getVisibilityModifier(
+// visibilityString + \"FOO\", false);", drawn by `EntityImageClassHeader.
+// java:109-121`.
 const VISIBILITY_PREFIX = '(?:([-#+~])\\s*)?';
 const DECL_KIND_RE = new RegExp(
   // `abstract\s+class` must precede the bare `abstract` alternative — JS
@@ -116,8 +121,12 @@ const DECL_KIND_RE = new RegExp(
   // geometry on `gegosa-79-mini423`'s golden (`diamond diamond1`, no `as`)
   // and `taboco-79-pire192`'s (`diamond diamond1 as "..."` -- the display
   // text is never drawn for either LeafType, confirmed absent from both
-  // goldens), so `diamond` reuses `kind: 'association'` rather than a new
-  // LeafType/renderer pair.
+  // goldens), so `diamond` reuses `kind: 'association'` for SIZE and DOT
+  // shape. cdd5-T4b: the two images are NOT identical in structure --
+  // `EntityImageBranch.java:86-94` opens an entity group ("group.put(
+  // UGroupType.CLASS, \"entity\"); ... ug.startGroup(group);") that
+  // `EntityImageAssociation#drawU` never does -- so the `diamond` keyword is
+  // kept as `usymbol` and `renderer.ts` wraps it.
   '^' +
     VISIBILITY_PREFIX +
     '(abstract\\s+class|static\\s+class|abstract|class|interface|enum|annotation|entity|circle|diamond|protocol|' +
@@ -132,19 +141,25 @@ const DESCRIPTIVE_LEAF_RE = new RegExp(`^(?:${DESCRIPTIVE_LEAF_KEYWORDS})$`, 'i'
 const USECASE_LEAF_RE = new RegExp(`^(?:${USECASE_LEAF_KEYWORDS})$`, 'i');
 
 /** Map a matched keyword to its ClassifierKind + optional descriptive usymbol.
- *  `usecase/` (business) collapses onto plain `usecase` — same ellipse; the
- *  double-border decoration is SVG-only and deferred (DOT parity first). */
+ *  cdd5-T4b: `usecase/` keeps its raw keyword as `usymbol` (the same raw-
+ *  keyword convention descriptive leaves use) -- `LeafType.USECASE_BUSINESS`,
+ *  `CommandCreateElementFull2.java:236-237`: "} else if (symbol
+ *  .equalsIgnoreCase(\"usecase/\")) { type = LeafType.USECASE_BUSINESS;". */
 function resolveDeclKind(rawKind: string): {
   kind: ClassifierKind;
   usymbol?: string;
 } {
-  if (USECASE_LEAF_RE.test(rawKind)) return { kind: 'usecase' };
+  if (USECASE_LEAF_RE.test(rawKind))
+    return rawKind === 'usecase/' ? { kind: 'usecase', usymbol: rawKind } : { kind: 'usecase' };
   if (rawKind === STATE_LEAF_KEYWORD) return { kind: 'state' };
   if (DESCRIPTIVE_LEAF_RE.test(rawKind)) return { kind: 'descriptive', usymbol: rawKind };
   if (rawKind === 'abstract class') return { kind: 'abstract' };
   // T3: see DECL_KIND_RE's own doc comment for both citations.
   if (rawKind === 'static class') return { kind: 'class' };
-  if (rawKind === 'diamond') return { kind: 'association' };
+  // cdd5-T4b: the keyword rides along as `usymbol` so the renderer can tell
+  // `EntityImageBranch` (grouped) from `<>`'s `EntityImageAssociation`
+  // (bare) -- see DECL_KIND_RE's comment.
+  if (rawKind === 'diamond') return { kind: 'association', usymbol: rawKind };
   return { kind: rawKind as ClassifierKind };
 }
 
@@ -153,8 +168,8 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   if (kindMatch === null) return null;
 
   // Strip the unconditional `mix_` prefix — it doesn't change kind/usymbol.
-  // group 1 = VISIBILITY_PREFIX's capture (discarded, see its own doc
-  // comment); group 2 = TYPE; group 3 = the rest of the line.
+  // group 1 = VISIBILITY_PREFIX's capture; group 2 = TYPE; group 3 = the
+  // rest of the line.
   const rawKind = kindMatch[2]!.replace(/\s+/, ' ').toLowerCase().replace(/^mix_/, '');
   const { kind, usymbol } = resolveDeclKind(rawKind);
 
@@ -164,7 +179,7 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   // extraction is anchored to the current end of the remainder.
   const { rest: afterInheritance, extendsIds, implementsIds } = extractInheritance(body);
   const { rest, stereotype, color, tags, url } = extractDecorations(afterInheritance);
-  const { id, display, typeParams, typeParamsRawText } = parseIdDisplay(rest);
+  const { id, display, typeParams, typeParamsRawText } = parseDeclIdDisplay(kind, rest);
   if (id === '' || display === '') return null;
 
   return {
@@ -182,7 +197,60 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
     ...(usymbol !== undefined ? { usymbol } : {}),
     ...(url !== undefined ? { url } : {}),
     ...(typeParamsRawText !== undefined ? { typeParamsRawText } : {}),
+    ...(kindMatch[1] !== undefined ? { visibilityModifier: kindMatch[1] as Visibility } : {}),
   };
+}
+
+/** The kinds `resolveDeclKind` maps from `CommandCreateElementFull2`'s
+ *  SYMBOL (`state|` + `CommandCreateElementFull.ALL_TYPES`), never from a
+ *  class-command TYPE. */
+const ELEMENT_FULL2_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>(['descriptive', 'usecase', 'state']);
+
+/** `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(String)`'s
+ *  one-arg format, `StringUtils.java:83-87`. */
+const ELEMENT_CODE_STRIP_FORMAT = '"([:';
+
+const QUOTED_CODE_RE = new RegExp(String.raw`^"[^"]*"$`);
+const AS_RE = new RegExp(String.raw`\s+as\s+`);
+/** CODE_CORE's decorated alternatives (`CommandCreateElementFull.java:126`):
+ *  one token even when an ` as ` sits inside them. */
+const DECORATED_CODE_RE = new RegExp(String.raw`^(?:\([^()]+\)|\[[^[\]]+\]|:[^:]+:)$`);
+/** `DISPLAY2 as CODE2` with a bare (unquoted) display. */
+const BARE_ALIAS_RE = new RegExp(String.raw`^[^"\s]\S*\s+as\s+[^"\s]\S*$`);
+
+function stripOnce(s: string): string {
+  return eventuallyRemoveStartingAndEndingDoubleQuote(s, ELEMENT_CODE_STRIP_FORMAT) ?? s;
+}
+
+/**
+ * cdd5-T4b: a descriptive/usecase/state leaf (`CommandCreateElementFull2`)
+ * strips its CODE and its DISPLAY once each with the `"([:` format --
+ * `CommandCreateElementFull2.java:201` ("displayRaw = StringUtils
+ * .eventuallyRemoveStartingAndEndingDoubleQuote(arg.getLazzy(\"DISPLAY\",
+ * 0))") and `:249-250` ("idShort = StringUtils.eventuallyRemoveStarting
+ * AndEndingDoubleQuote(codeRaw); ... displayRaw == null ? idShort :
+ * displayRaw"). `parseIdDisplay` already removed the quotes of a quoted
+ * token, so only a BARE token is stripped here: a lone quoted CODE1 and a
+ * quoted display keep whatever brackets were inside the quotes.
+ *
+ * Not ported: the `codeChar`/`codeDisplay` symbol override right above it
+ * (java:202-215 -- a `(`, `:` or `[` first char turns the leaf into a
+ * usecase, actor or component).
+ */
+function stripElementCode(rest: string, parsed: { id: string; display: string }): { id: string; display: string } {
+  const r = rest.trim();
+  if (QUOTED_CODE_RE.test(r)) return parsed;
+  const id = stripOnce(parsed.id);
+  const single = !AS_RE.test(r) || DECORATED_CODE_RE.test(r);
+  if (single) return { id, display: id };
+  return { id, display: BARE_ALIAS_RE.test(r) ? stripOnce(parsed.display) : parsed.display };
+}
+
+/** `parseIdDisplay`, then {@link stripElementCode} for a
+ *  `CommandCreateElementFull2` kind. */
+function parseDeclIdDisplay(kind: ClassifierKind, rest: string): ReturnType<typeof parseIdDisplay> {
+  const parsed = parseIdDisplay(rest);
+  return ELEMENT_FULL2_KINDS.has(kind) ? { ...parsed, ...stripElementCode(rest, parsed) } : parsed;
 }
 
 /**
@@ -263,15 +331,16 @@ export function parseTagTokens(raw: string): string[] {
  *      (reallyCreateLeaf only — no explicit setLastEntity)
  */
 export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alwaysSetLastEntity: boolean): void {
+  const before = state.ast.classifiers.length;
   const classifier = ensureClassifier(state, decl.id, decl.kind, decl.display);
-  if (alwaysSetLastEntity) state.lastEntity = classifier.id;
+  if (alwaysSetLastEntity) {
+    const existed = state.ast.classifiers.length === before && state.classifierIndex.has(classifier.id);
+    if (existed && refuseFailedMute(state, decl, classifier.kind)) return;
+    state.lastEntity = classifier.id;
+    applyVisibilityModifier(classifier, decl.visibilityModifier);
+  }
   classifier.kind = decl.kind;
-  if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
-  if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
-  if (decl.typeParamsRawText !== undefined) classifier.typeParamsRawText = decl.typeParamsRawText;
-  if (decl.stereotype !== undefined) classifier.stereotype = decl.stereotype;
-  if (decl.color !== undefined) classifier.color = decl.color;
-  if (decl.url !== undefined) classifier.url = decl.url;
+  copyDeclDecorations(classifier, decl);
   // Accumulate + dedup — upstream Entity#addStereotag adds into a Set, so a
   // re-declaration's tags join the earlier ones instead of replacing them.
   if (decl.tags.length > 0) {
@@ -283,6 +352,74 @@ export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alw
   }
   applyInheritanceClauses(state, classifier.id, decl);
   if (decl.opensBody) state.pendingBodyId = classifier.id;
+}
+
+/** The declaration's optional usymbol/generic/stereotype/color/url fields --
+ *  split out of {@link applyClassifierDecl} purely for its CCN cap (pure
+ *  move, no behaviour change). */
+function copyDeclDecorations(classifier: Classifier, decl: ClassifierDecl): void {
+  if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
+  if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
+  if (decl.typeParamsRawText !== undefined) classifier.typeParamsRawText = decl.typeParamsRawText;
+  if (decl.stereotype !== undefined) classifier.stereotype = decl.stereotype;
+  if (decl.color !== undefined) classifier.color = decl.color;
+  if (decl.url !== undefined) classifier.url = decl.url;
+}
+
+/** `Entity#muteToType`'s two whitelists (`abel/Entity.java:212-222`): the
+ *  kinds an existing entity may mute FROM, and (plus OBJECT) TO. Port kinds:
+ *  `abstract` is `LeafType.ABSTRACT_CLASS` (`LeafType.java:72-73`). */
+const MUTABLE_FROM: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
+  'annotation',
+  'abstract',
+  'class',
+  'enum',
+  'interface',
+  'record',
+  'dataclass',
+]);
+const MUTABLE_TO: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([...MUTABLE_FROM, 'object']);
+
+/** `CommandCreateClass.java:196` ("Bad name") and
+ *  `CommandCreateClassMultilines.java:246`'s message. */
+const BAD_NAME = 'Bad name';
+
+/**
+ * cdd5-T4b: an existing entity re-declared with another TYPE must pass
+ * `Entity#muteToType` (`abel/Entity.java:205-230`: "if (newType ==
+ * this.leafType) return true;" then both whitelists, else "return false;").
+ * On failure both class commands return an execution error before touching
+ * the entity -- the single-line one "Bad name" (`CommandCreateClass.java:
+ * 195-197`), the multi-line one "Cannot create " + idShort + " because it
+ * already exists" (`CommandCreateClassMultilines.java:245-246`). A `{ ... }`
+ * body or inline members mean the multi-line command matched.
+ *
+ * Not ported: the multi-line command's error is attributed to its block's
+ * LAST line (the whole block is one `BlocLines`); this refusal carries the
+ * opener's line, since the closing `}` is consumed in `parser.ts`.
+ */
+function refuseFailedMute(state: ParseState, decl: ClassifierDecl, oldKind: ClassifierKind): boolean {
+  if (oldKind === decl.kind) return false;
+  if (MUTABLE_FROM.has(oldKind) && MUTABLE_TO.has(decl.kind)) return false;
+  const multiline = decl.opensBody || decl.inlineMembers.length > 0;
+  const message = multiline ? `Cannot create ${decl.id} because it already exists` : BAD_NAME;
+  const line = state.currentLine ?? 0;
+  state.executionRefusal = refuse('execution', line, line, message, 0);
+  return true;
+}
+
+/**
+ * cdd5-T4b: `entity.setVisibilityModifier(visibilityModifier)` runs
+ * unconditionally after `setLastEntity` in both class commands, so a plain
+ * redeclaration clears an earlier marker (`null`). Descriptive leaves
+ * (`CommandCreateElementFull2`) have no VISIBILITY slot and never call it --
+ * hence gated on the same `alwaysSetLastEntity` flag.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandCreateClass.java:202-203
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandCreateClassMultilines.java:254-256
+ */
+function applyVisibilityModifier(classifier: Classifier, modifier: Visibility | undefined): void {
+  if (modifier === undefined) delete classifier.visibilityModifier;
+  else classifier.visibilityModifier = modifier;
 }
 
 /** `extends A, B` / `implements C`: create each parent (scope-local lookup —

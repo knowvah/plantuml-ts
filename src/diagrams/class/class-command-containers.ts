@@ -75,9 +75,12 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // the SAME bare/`back:` grammar `class-notes.ts` note commands already
   // reuse) is inserted ahead of the old trailing catch-all -- both read
   // onto the Namespace via setNamespaceUrl/setNamespaceColor below; the
-  // same-line-close brace group is 9. The trailing `(?:[#<][^{]*)?`
-  // catch-all is kept as a no-op safety net for whatever it used to
-  // silently absorb.
+  // same-line-close brace group is 9. cdd5-T4b: the trailing
+  // `(?:[#<][^{]*)?` catch-all is gone -- upstream has nothing after COLOR
+  // but `\s*\{` (`CommandPackage.java:92-96`), so a second `<<B>>` must
+  // widen the lazy STEREOTYPE group (`StereotypePattern.java:66-67`,
+  // "(\\<\\<.+?\\>\\>)") to `<<A>><<B>>`; the catch-all swallowed it
+  // instead (`mupavi-50-fijo192`).
   {
     pattern: new RegExp(
       String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
@@ -88,7 +91,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         // to zero-width so the catch-all below (whose `[^{]*` tolerates
         // the space) silently swallows the colour text instead, leaving
         // the capture group undefined (caught by this task's own tests).
-        String.raw`\s*(?:[#<][^{]*)?\{(\s*\})?\s*$`,
+        String.raw`\s*\{(\s*\})?\s*$`,
       'i',
     ),
     execute(state, match) {
@@ -172,11 +175,22 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
 
   // 5b''. `() "name"` interface lollipop (CommandCreateElementParenthesis) — a
   //       plaintext circle node (same svek shape as a `circle` element).
+  //       cdd5-T4b: groups 1/2 are the CODE3 `as` DISPLAY3 alternative
+  //       (`CommandCreateElementParenthesis.java:94-104`: "CODE3" CODE,
+  //       spaceOneOrMore, "as", spaceZeroOrMore, "DISPLAY3" DISPLAY) -- a
+  //       bare code followed by a quoted display, which the two earlier
+  //       alternatives cannot match. Tried first here: for that shape it is
+  //       the only alternative upstream accepts. The display is unquoted by
+  //       `eventuallyRemoveStartingAndEndingDoubleQuote` (java:197).
   {
-    pattern: /^\(\)\s+(?:"([^"]*)"|(\S+))(?:\s+as\s+(\S+))?\s*$/,
+    pattern: /^\(\)\s+(?:([\p{L}\p{N}_.]+)\s+as\s*"([^"]+)"|(?:"([^"]*)"|(\S+))(?:\s+as\s+(\S+))?)\s*$/u,
     execute(state, match) {
-      const name = match[1] ?? match[2]!;
-      ensureClassifier(state, match[3] ?? name, 'circle', name).kind = 'circle';
+      if (match[1] !== undefined) {
+        ensureClassifier(state, match[1], 'circle', match[2]).kind = 'circle';
+        return;
+      }
+      const name = match[3] ?? match[4]!;
+      ensureClassifier(state, match[5] ?? name, 'circle', name).kind = 'circle';
     },
   },
 

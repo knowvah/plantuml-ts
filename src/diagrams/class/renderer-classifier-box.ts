@@ -26,7 +26,7 @@ import { mapColumnDividerEntries } from './renderer-classifier-map-dividers.js';
 import { protectedInnerBox } from './class-dot-graph.js';
 import { hasBadge } from './class-badge.js';
 import { renderBadge, renderGenericTag, renderBadgeSpriteImage } from './renderer-classifier-badge-tag.js';
-import { renderVisibilityIcon, renderVisibilityUrlBackground } from './class-visibility-icon.js';
+import { renderVisibilityIcon, renderVisibilityUrlBackground, VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
 import { wrapClassifierBody, type UrlTaggedPrimitive } from './renderer-url.js';
 import {} from '../../core/svg.js';
 import {} from '../../core/klimt/shape/UText.js';
@@ -212,10 +212,30 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: ScaledTheme): UrlTagged
   // row's text fallback is '' -- `row.atoms` (when set) is still drawable.
   const firstNameRowIndex = headerRowCount - (geo.nameRowCount ?? 1);
   geo.rows.slice(0, headerRowCount).forEach((row, i) => {
+    if (i === firstNameRowIndex) body += renderHeaderVisibilityIcon(geo, headerRowCount, theme);
     if (row.text !== '' || row.atoms !== undefined) body += renderRowText(geo, row, theme, true, i < firstNameRowIndex);
   });
   if (geo.genericTag !== undefined) body += renderGenericTag(geo, geo.genericTag, theme);
   return { url: geo.url, body };
+}
+
+/** cdd5-T4b: the header's `VisibilityModifier#getUBlock` icon (METHOD
+ *  variant), `iconWidth` = raw `classAttributeIconSize + 1` left of the tagged
+ *  name row (`class-header-visibility-geo.ts`). No url: rare, unsurveyed.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClassHeader.java:109-121 */
+function renderHeaderVisibilityIcon(geo: ClassifierGeo, headerRowCount: number, theme: ScaledTheme): string {
+  const row = geo.rows.slice(0, headerRowCount).find((r) => r.visibilityIcon !== undefined);
+  if (row?.visibilityIcon === undefined) return '';
+  const iconWidth = ((theme.classAttributeIconSize ?? VISIBILITY_ICON_SIZE) + 1) * theme.scaleK;
+  const x = geo.x + row.indent - iconWidth;
+  return renderVisibilityIcon(
+    row.visibilityIcon,
+    false,
+    x,
+    geo.y + row.y + (row.visibilityBlockTopDy ?? 0),
+    undefined,
+    theme,
+  );
 }
 
 /**
