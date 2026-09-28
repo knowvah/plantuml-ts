@@ -32,7 +32,7 @@ import {
   leafPortion,
   renderGroupInheritanceNeighborhood,
 } from './renderer-group.js';
-import { renderAssocPoint, renderAssociationDiamond, renderLollipop } from './renderer-assoc-lollipop.js';
+import { renderAssocPoint, renderAssociationLeaf, renderLollipop } from './renderer-assoc-lollipop.js';
 import { renderClassifierBox } from './renderer-classifier-box.js';
 import {
   renderNamespaceFolder,
@@ -313,7 +313,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
       continue;
     }
     if (classifier.kind === 'association') {
-      children.push(renderAssociationDiamond(classifier, theme)); // cdd-T34
+      children.push(renderAssociationLeaf(classifier, theme, uidPlan.classifierUid.get(classifier.id))); // cdd-T34
       continue;
     }
     // G2 N33: a collapsed-empty package/namespace draws its folder-tab icon

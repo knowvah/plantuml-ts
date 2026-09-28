@@ -121,8 +121,12 @@ const DECL_KIND_RE = new RegExp(
   // geometry on `gegosa-79-mini423`'s golden (`diamond diamond1`, no `as`)
   // and `taboco-79-pire192`'s (`diamond diamond1 as "..."` -- the display
   // text is never drawn for either LeafType, confirmed absent from both
-  // goldens), so `diamond` reuses `kind: 'association'` rather than a new
-  // LeafType/renderer pair.
+  // goldens), so `diamond` reuses `kind: 'association'` for SIZE and DOT
+  // shape. cdd5-T4b: the two images are NOT identical in structure --
+  // `EntityImageBranch.java:86-94` opens an entity group ("group.put(
+  // UGroupType.CLASS, \"entity\"); ... ug.startGroup(group);") that
+  // `EntityImageAssociation#drawU` never does -- so the `diamond` keyword is
+  // kept as `usymbol` and `renderer.ts` wraps it.
   '^' +
     VISIBILITY_PREFIX +
     '(abstract\\s+class|static\\s+class|abstract|class|interface|enum|annotation|entity|circle|diamond|protocol|' +
@@ -152,7 +156,10 @@ function resolveDeclKind(rawKind: string): {
   if (rawKind === 'abstract class') return { kind: 'abstract' };
   // T3: see DECL_KIND_RE's own doc comment for both citations.
   if (rawKind === 'static class') return { kind: 'class' };
-  if (rawKind === 'diamond') return { kind: 'association' };
+  // cdd5-T4b: the keyword rides along as `usymbol` so the renderer can tell
+  // `EntityImageBranch` (grouped) from `<>`'s `EntityImageAssociation`
+  // (bare) -- see DECL_KIND_RE's comment.
+  if (rawKind === 'diamond') return { kind: 'association', usymbol: rawKind };
   return { kind: rawKind as ClassifierKind };
 }
 
