@@ -128,10 +128,12 @@ npx vitest run --config plans/class-divergence-drive/tools/vitest.config.mts
 ```
 
 `vitest.config.mts` pins `root` to its own directory (computed from
-`import.meta.url`, never a hardcoded path) so exactly the three
-`*.test.mts` files here are collected — a bare `include: ['**/*.test.ts']`
-without a scoped `root` matches from the invocation's cwd and pulled in the
-entire `tests/` tree (750+ files) the first time this was tried.
+`import.meta.url`, never a hardcoded path) so exactly the four
+`*.test.mts` files here are collected (pin-diff, pin-goldens, render-all,
+render-diff — T4 added the latter two) — a bare `include:
+['**/*.test.ts']` without a scoped `root` matches from the invocation's
+cwd and pulled in the entire `tests/` tree (750+ files) the first time
+this was tried.
 
 The test files use `.test.mts`, not the more usual `.test.ts`: the repo's
 `lint-staged` config (`package.json#lint-staged`) runs a typed `eslint --fix`

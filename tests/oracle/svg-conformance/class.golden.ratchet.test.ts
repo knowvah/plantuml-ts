@@ -11,11 +11,15 @@
  *
  *   1. Class fixtures have no `<type>` dimension (component vs usecase) —
  *      `oracle/goldens/svg-class/<slug>/`, not `<type>/<slug>/`; the
- *      manifest/parity shapes here drop the `type` field accordingly.
- *   2. `renderFixtureClass` (`render-fixture-class.ts`) replaces
- *      `renderFixture` (`render-fixture.ts`) as the render helper — the
- *      class engine's own pipeline (`parseClass` -> `layoutClass` ->
- *      `renderClass`), not description's.
+ *      manifest/parity shapes here drop the `type` field accordingly. A
+ *      manifest entry MAY instead carry `tree: 'unknown'` (cdd5-T2, D4), in
+ *      which case its golden lives at `svg-class/unknown/<slug>/` — a
+ *      CLASS-routed fixture our router currently misfiles as `unknown`.
+ *   2. `renderClassFixture` (`render-fixture-class.ts`, `renderSync` under
+ *      the hood — cdd5-T1/D3) replaces `renderFixture` (`render-fixture
+ *      .ts`) as the render helper — the class engine's own pipeline
+ *      (`parseClass` -> `layoutClass` -> `renderClass`), not description's,
+ *      reached the SAME way production reaches it.
  *
  * STARTS EMPTY (N0): the N0 family scan found the corpus-wide "SVG root
  * shell" gap (missing `xmlns:xlink`/`version`/`zoomAndPan`/
@@ -36,25 +40,29 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { combineAssetStores } from '../../../src/core/asset-store.js';
 import { compareSvg } from './compare.js';
-import { renderFixtureClass } from './render-fixture-class.js';
-import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
-import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
-// cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
-// same argument as the sprite store above (lecelo-92-loma110). The
-// ratchet had NEITHER store before this task.
-import { buildEmojiAssetsStore } from '../../helpers/emoji-assets-store.js';
-
-// Shared by both AC1 and AC2's render calls below -- the jar always has
-// both, so a ratchet fixture using a `sprite $N jar:...` or a `<:name:>`
-// emoji must render with both to reach zero-diff.
-const RATCHET_ASSET_STORE = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
+import { renderClassFixture } from './render-fixture-class.js';
+// cdd5-T2 (D4): the survey's own asset/include stores, shared through T1's
+// `censusClassFixtureOptions` -- imported, not re-combined locally. Before
+// this task the ratchet built its OWN `combineAssetStores(buildSprite...,
+// buildEmoji...)` instance here, a second copy of the exact wiring
+// `scripts/svg-conformance-census.ts#censusClassFixtureOptions` already
+// carries (itself lifted from `scripts/svg-parity-survey.ts`'s
+// `SURVEY_ASSET_STORE` + `fixtureIncludeStore()`) -- see that module's own
+// doc comment for why a duplicated measurement seam defeats the cross-check
+// between the ratchet, the census and the survey.
+import { censusClassFixtureOptions } from '../../../scripts/svg-conformance-census.js';
 
 interface RatchetFixture {
   slug: string;
   addedAt: string;
   source: string;
+  /** cdd5-T2 (D4): absent means 'class' -- the ratchet's original, and still
+   *  overwhelming, majority. 'unknown' fixtures are CLASS-routed corpus rows
+   *  our router currently misfiles as `unknown` (see `oracle/goldens/
+   *  svg-conformance/routing-baseline.json`'s `ourType`); their golden lives
+   *  one directory level deeper (`fixtureDir` below). */
+  tree?: 'class' | 'unknown';
 }
 
 interface RatchetManifest {
@@ -97,8 +105,15 @@ function findParityEntry(slug: string): ParityEntry | undefined {
   return parity.fixtures.find((f) => f.slug === slug);
 }
 
+/** cdd5-T2 (D4): `tree: 'unknown'` goldens live one level deeper
+ *  (`svg-class/unknown/<slug>/`); absent/`'class'` resolves at the flat
+ *  root, unchanged from before this task. Covered directly by the
+ *  tree-resolution unit test below -- a path-join is cheap to get wrong
+ *  silently (a typo'd segment still resolves to SOME path, just the wrong
+ *  one) and expensive to notice once 706 fixtures are already reading
+ *  through it. */
 function fixtureDir(f: RatchetFixture): string {
-  return join(GOLDENS_ROOT, f.slug);
+  return f.tree === 'unknown' ? join(GOLDENS_ROOT, 'unknown', f.slug) : join(GOLDENS_ROOT, f.slug);
 }
 
 function readGolden(f: RatchetFixture): string {
@@ -114,26 +129,45 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 }
 
 // ---------------------------------------------------------------------------
+// Tree resolution (D4) — a synthetic entry, never a real ratchet row, so this
+// never depends on any fixture actually being pinned.
+// ---------------------------------------------------------------------------
+
+describe('svg-class conformance ratchet — tree resolution (D4)', () => {
+  it('a "unknown" entry resolves under svg-class/unknown/<slug>/', () => {
+    const entry: RatchetFixture = { slug: 'synthetic-unknown-slug', addedAt: '2026-09-28', source: 'test', tree: 'unknown' };
+    expect(fixtureDir(entry)).toBe(join(GOLDENS_ROOT, 'unknown', 'synthetic-unknown-slug'));
+  });
+
+  it('an entry with no tree field resolves under the flat svg-class/<slug>/ root (class default)', () => {
+    const entry: RatchetFixture = { slug: 'synthetic-class-slug', addedAt: '2026-09-28', source: 'test' };
+    expect(fixtureDir(entry)).toBe(join(GOLDENS_ROOT, 'synthetic-class-slug'));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // AC1 — every locked fixture stays conformant.
 // ---------------------------------------------------------------------------
 
 describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet (AC1)', () => {
   for (const f of manifest.fixtures) {
-    it(`class/${f.slug}: stays zero-diff against the pinned golden`, () => {
+    const tree = f.tree ?? 'class';
+    it(`${tree}/${f.slug}: stays zero-diff against the pinned golden`, () => {
       const golden = readGolden(f);
       const markup = readSource(f);
-      // Same stdlib store the census renders with
-      // (`scripts/svg-conformance-census.ts`, SI5b), so a `<bundle/...>`
-      // fixture the census found zero-diff can be held here (cdd3 close-b3:
-      // cuzoga, jevuvi include `<tupadr3/common>`).
-      const ours = renderFixtureClass(markup, new DeterministicMeasurer(), {
-        includeStore: fixtureIncludeStore(),
-        assetStore: RATCHET_ASSET_STORE,
-      });
+      // cdd5-T2 (D3/D4): `renderClassFixture` (renderSync) replaces
+      // `renderFixtureClass`'s forced `parseClass` call -- the ratchet now
+      // renders through the SAME path the census/survey do, with the SAME
+      // shared asset/include stores (`censusClassFixtureOptions`), so a
+      // `<bundle/...>` fixture the census found zero-diff can be held here
+      // (cdd3 close-b3: cuzoga, jevuvi include `<tupadr3/common>`) and a
+      // `tree: 'unknown'` fixture (censusable only under D3) can ratchet at
+      // all.
+      const ours = renderClassFixture(markup, new DeterministicMeasurer(), censusClassFixtureOptions());
       const { pass, diffs } = compareSvg(ours, golden, 'deterministic');
       expect(
         pass,
-        `class/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+        `${tree}/${f.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
           ` — ${JSON.stringify(diffs[0])}`,
       ).toBe(true);
       expect(diffs).toEqual([]);
@@ -158,14 +192,15 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet �
     expect(f, 'expected at least one seeded fixture to exercise tamper detection').toBeDefined();
     const target = f!;
 
+    const targetTree = target.tree ?? 'class';
     const golden = readGolden(target);
     const markup = readSource(target);
-    const ours = renderFixtureClass(markup, new DeterministicMeasurer(), { assetStore: RATCHET_ASSET_STORE });
+    const ours = renderClassFixture(markup, new DeterministicMeasurer(), censusClassFixtureOptions());
 
     // Confirm the untampered pair really is zero-diff first, so the
     // tampered-case failure below is attributable to the mutation alone.
     const clean = compareSvg(ours, golden, 'deterministic');
-    expect(clean.pass, `class/${target.slug}: expected zero-diff baseline`).toBe(true);
+    expect(clean.pass, `${targetTree}/${target.slug}: expected zero-diff baseline`).toBe(true);
 
     // Mutate a numeric attribute in-memory — never touches disk.
     const tampered = golden.replace(/rect x="(\d+)"/, (_m, x: string) => `rect x="${Number(x) + 500}"`);
@@ -176,7 +211,7 @@ describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet �
     expect(diffs.length).toBeGreaterThan(0);
 
     const message =
-      `class/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
+      `${targetTree}/${target.slug}: conformance regression — first diff: ${firstDiffPath(diffs)}` +
       ` — ${JSON.stringify(diffs[0])}`;
     expect(message).toContain(target.slug);
     expect(message).toContain(diffs[0]!.path);
