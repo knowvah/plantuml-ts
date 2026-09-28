@@ -8,7 +8,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -17,7 +17,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -26,7 +26,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=19 numeric=257, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -35,7 +35,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=508, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -44,7 +44,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=168, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -53,7 +53,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=43 numeric=431, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -62,7 +62,7 @@
       "scope": "svg-conformance class ledger (ELK layout -- unsupported engine, DIVERGENCES.md)",
       "acceptedAt": "2026-09-21",
       "acceptedBy": "maintainer",
-      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`."
+      "reason": "`!pragma layout elk` is ruled unsupported (DIVERGENCES.md, `!pragma layout elk` -- not supported: one layout engine by choice, extending the 2026-08-09 ruling). The fixture lays out with @knowvah/dot-engine and will not match the Eclipse Layout Kernel geometry. Verified 2026-09-21: `in.puml` carries the pragma and there is no svek-N.dot dump for this slug in test-results/dot-cache/class/, so the jar never shelled out to graphviz and DOT parity has no oracle (oracleBlind). Declared, not special-cased (plans/class-divergence-drive/decisions.md D10); the survey and census still print it `diverged`. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=414, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -71,7 +71,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict.",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin.",
       "surveyBlind": "tests/oracle/svg-conformance/compare.ts:374 exempts <image> xlink:href bytes (DIVERGENCES.md, sprite and img rasters pass-through), so the survey reports this fixture conformant while the accepted PNG-vs-SVG payload divergence stands."
     },
     {
@@ -81,7 +81,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict.",
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin.",
       "surveyBlind": "tests/oracle/svg-conformance/compare.ts:374 exempts <image> xlink:href bytes (DIVERGENCES.md, sprite and img rasters pass-through), so the survey reports this fixture conformant while the accepted PNG-vs-SVG payload divergence stands."
     },
     {
@@ -91,7 +91,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict."
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -100,7 +100,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict."
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -109,7 +109,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict."
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=1 numeric=4, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -118,7 +118,7 @@
       "scope": "svg-conformance class ledger (embedded {{ }} payload bytes -- declared divergence, DIVERGENCES.md, D9)",
       "acceptedAt": "2026-09-23",
       "acceptedBy": "maintainer",
-      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict."
+      "reason": "Embedded `{{ ... }}` sub-diagram payload bytes: the jar rasterises the nested diagram and emits `<image xlink:href=\"data:image/png;base64,...\">` (`EmbeddedDiagram.java:165-195`); this port renders the nested source recursively with its own `renderSync` and emits the SVG source as `data:image/svg+xml;base64` (DIVERGENCES.md, `Embedded {{ }} sub-diagrams -- SVG source, not a re-encoded raster (deliberate, CDD T27)`; plans/class-divergence-drive/decisions.md D9). The `<image>` element, its position and its width/height are the target and are compared; only the href payload is declared. compare.ts already ignores data: hrefs, so this entry documents the declaration rather than excusing a verdict. Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=2, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -127,7 +127,7 @@
       "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -136,7 +136,7 @@
       "scope": "svg-conformance class ledger (error page version/source identity -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+      "reason": "Error-page identity lines only. The fixture's jar output is PlantUML's syntax-error page, and after class-divergence-drive-3 T29 every number on it is exact except the two identity strings and their textLength: the version banner (jar `PlantUML version $version$ / $git.commit.id$`, ours `plantuml-ts version 0.1.0 / unknown`) and the source-name line (jar `[From in.puml (line N) ]`, ours `[From string (line N) ]`, because the port renders from a string, not a file). Re-verified 2026-09-26 (cdd4 T1) with render-diff: structural=4, numeric=0, all four on those two <text> elements. Evidence: plans/class-divergence-drive-3/diagnosis/C.md (C-17, C-18). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=0, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     },
     {
       "match": {
@@ -145,7 +145,7 @@
       "scope": "svg-conformance class ledger (upstream crash page -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "The jar's output for this fixture is a CRASH page, not a diagram: graphviz 16.1.0 loses both `sh0006->sh0008` edges (`lost ... edge`), so `SvekEdge.getStartContactPoint()` is null, and `groupInheritance 2` wraps A in `EntityImageProtected`, whose `Neighborhood.drawU` sametail loop feeds the null point into `intersection` and throws a NullPointerException (`Neighborhood.java:80`, `:151`). The port draws the diagram. Precedent: DIVERGENCES.md, upstream crashes (deliberate). Re-verified 2026-09-26 (cdd4 T1): the jar in.svg is the QR-code error page (childCount 50 vs 7). Evidence: plans/class-divergence-drive-3/diagnosis/E3.md#zuduxu-90-kosi876 (E3-A). Signed by the maintainer 2026-09-26 (cdd4 D6)."
+      "reason": "The jar's output for this fixture is a CRASH page, not a diagram: graphviz 16.1.0 loses both `sh0006->sh0008` edges (`lost ... edge`), so `SvekEdge.getStartContactPoint()` is null, and `groupInheritance 2` wraps A in `EntityImageProtected`, whose `Neighborhood.drawU` sametail loop feeds the null point into `intersection` and throws a NullPointerException (`Neighborhood.java:80`, `:151`). The port draws the diagram. Precedent: DIVERGENCES.md, upstream crashes (deliberate). Re-verified 2026-09-26 (cdd4 T1): the jar in.svg is the QR-code error page (childCount 50 vs 7). Evidence: plans/class-divergence-drive-3/diagnosis/E3.md#zuduxu-90-kosi876 (E3-A). Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=4 numeric=6, identical to the 7beta11 measurement; the oracle's bytes changed only in the crash page's quote line, which QuoteUtils.java:340-349 draws by Collections.shuffle (random per run), so the premise stands."
     },
     {
       "match": {
@@ -154,7 +154,7 @@
       "scope": "svg-conformance class ledger (dot-engine known divergence A3 -- cdd4 D6)",
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
-      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6)."
+      "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
     }
   ],
   "retired": [
