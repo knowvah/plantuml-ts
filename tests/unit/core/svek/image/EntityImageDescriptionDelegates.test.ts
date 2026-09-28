@@ -32,6 +32,11 @@ import { basicSvgOption } from '../../../../../src/core/klimt/drawing/svg/svg-gr
 import type { StringBounder as DriverStringBounder } from '../../../../../src/core/klimt/drawing/svg/driver-text-svg.js';
 import { MeasurerStringBounder } from '../../../../../src/core/measurer-bounder.js';
 import { WidthTableMeasurer } from '../../../../../src/core/measurer.js';
+import { registerNestedDiagramRenderer } from '../../../../../src/core/nested-diagram-registry.js';
+import type { NestedDiagramRenderer } from '../../../../../src/core/EmbeddedDiagram.js';
+import type { TextBlock } from '../../../../../src/core/klimt/shape/TextBlock.js';
+import { XDimension2D } from '../../../../../src/core/klimt/geom/XDimension2D.js';
+import { UImage } from '../../../../../src/core/klimt/shape/UImage.js';
 
 const measurer = new WidthTableMeasurer();
 const driverBounder: DriverStringBounder = {
@@ -116,5 +121,68 @@ describe('descAtomOps (SI30/T2) — text-atom altitude + muted font via buildDes
     const block = buildDesc(noteSymbol, labels('<size:20>Big</size:20>'), paint());
     const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
     expect(dim.getHeight()).toBeCloseTo(20, 6);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd5-T4d: `{{ }}` inside a description label (kelefe-72-cefi192 et al.).
+// The jar SIZES the embed through `EmbeddedDiagram#calculateDimensionSlow`'s
+// non-SVG arm -- the oracle's `StringBounderFromWidthTable` never
+// `matchesProperty("SVG")` (`StringBounder.java:43-45` default false), so
+// `getImage` runs and the catch returns `new XDimension2D(42, 42)`
+// (`EmbeddedDiagram.java:126-152`) -- but DRAWS the real SVG image, since
+// `UGraphicSvg#matchesProperty("SVG")` is true (`EmbeddedDiagram.java:
+// 169-174`, `UGraphicSvg.java:175-179`).
+// ---------------------------------------------------------------------------
+
+/** A nested render whose own dims are the jar's drawn `file f1` image
+ *  (`test-results/dot-cache/unknown/kelefe-72-cefi192/in.svg`: 51x54). */
+function fakeNestedRenderer(sources: string[][]): NestedDiagramRenderer {
+  return {
+    render(source: readonly string[]): TextBlock {
+      sources.push([...source]);
+      return {
+        calculateDimension: () => new XDimension2D(51, 54),
+        drawU: (ug) => ug.draw(UImage.build(51, 54, 'data:image/svg+xml;base64,AA==')),
+      };
+    },
+  };
+}
+
+describe('buildDesc — {{ }} embed in a description label (cdd5-T4d)', () => {
+  test('sizes at the 42x42 catch fallback but draws the nested image at its own size', () => {
+    const sources: string[][] = [];
+    registerNestedDiagramRenderer(fakeNestedRenderer(sources));
+    const block = buildDesc(noteSymbol, labels('{{\nfile f1\n}}'), paint());
+    const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
+    expect(dim.getWidth()).toBe(42);
+    expect(dim.getHeight()).toBe(42);
+
+    const ug = newGraphic();
+    block.drawU(ug);
+    const svg = ug.getSvgString();
+    expect(/<image[^>]*>/.exec(svg)?.[0]).toMatch(/width="51" height="54" x="0" y="0"/);
+    expect(sources[0]).toEqual(['@startuml', 'file f1', '@enduml']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cdd5-T4d: `AtomText#drawU`'s tab tokenizer (`AtomText.java:210-231`) --
+// rizisu-50-liza998's `\ttext` / `\t\ttext` lines draw each token at the
+// advanced x: tab stop = `getSize2D() * 4` = 56 (java:270-275, the space
+// glyph measures 0 under the width table), so x = 56 and 112.
+// ---------------------------------------------------------------------------
+
+describe('descAtomOps — tab-indented text draws at tab stops (cdd5-T4d)', () => {
+  test('each non-tab token is drawn at the advanced x, tabs are not emitted', () => {
+    const block = buildDesc(noteSymbol, labels('text\n\ttext\n\t\ttext'), paint());
+    const ug = newGraphic();
+    block.drawU(ug);
+    const xs = [...ug.getSvgString().matchAll(/<text[^>]*x="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => [m[1], m[2]]);
+    expect(xs).toEqual([
+      ['0', 'text'],
+      ['56', 'text'],
+      ['112', 'text'],
+    ]);
   });
 });
