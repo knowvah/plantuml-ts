@@ -186,6 +186,15 @@ function dedentPendingRawBodyLines(state: ParseState): void {
  * (i.e. a body was open).
  */
 function handlePendingBodyLine(state: ParseState, line: string): boolean {
+  // cdd5-T5e: refused body, discarded until `}` (PSystemError.java:102-104).
+  if (state.pendingBodyRefusal !== undefined) {
+    if (/^\}\s*$/.test(line)) {
+      const at = state.currentLine ?? 0;
+      state.executionRefusal = refuse('execution', at, at, state.pendingBodyRefusal.message, 0);
+      state.pendingBodyRefusal = undefined;
+    }
+    return true;
+  }
   if (state.pendingBodyId === null) return false;
   if (/^\}\s*$/.test(line) && !isUnclosedJsonBody(state)) {
     closeJsonBodyIfPending(state);
@@ -372,7 +381,10 @@ export function parseClass(block: UmlSource, options?: ParseOptions): ClassDiagr
     state.currentRawLine = merged.rawLines[i];
     recordTogetherEvent(state);
     if (handlePendingNoteLine(state, line)) continue;
-    if (handlePendingBodyLine(state, line)) continue;
+    if (handlePendingBodyLine(state, line)) {
+      if (state.executionRefusal !== undefined) return state.executionRefusal;
+      continue;
+    }
     const multilineConsumed = continueMultilineElement(state, lines, merged.rawLines, i);
     if (multilineConsumed > 0) {
       i += multilineConsumed - 1;

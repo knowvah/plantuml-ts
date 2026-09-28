@@ -394,15 +394,24 @@ const BAD_NAME = 'Bad name';
  * already exists" (`CommandCreateClassMultilines.java:245-246`). A `{ ... }`
  * body or inline members mean the multi-line command matched.
  *
- * Not ported: the multi-line command's error is attributed to its block's
- * LAST line (the whole block is one `BlocLines`); this refusal carries the
- * opener's line, since the closing `}` is consumed in `parser.ts`.
+ * cdd5-T5e (redeclare-refusal-line): `PSystemError#getLineLocation`
+ * (`error/PSystemError.java:102-104`) is `getLastLine().getLocation()` --
+ * the whole multi-line `BlocLines` (opener through closing `}`) is ONE
+ * trace, so the refusal is attributed to the CLOSING line, not the opener.
+ * This port dispatches the opener and its body one line at a time, so the
+ * closer hasn't been read yet here -- deferred via `state.pendingBodyRefusal`,
+ * finalized by `parser.ts#handlePendingBodyLine` once it consumes the
+ * matching `}`.
  */
 function refuseFailedMute(state: ParseState, decl: ClassifierDecl, oldKind: ClassifierKind): boolean {
   if (oldKind === decl.kind) return false;
   if (MUTABLE_FROM.has(oldKind) && MUTABLE_TO.has(decl.kind)) return false;
   const multiline = decl.opensBody || decl.inlineMembers.length > 0;
   const message = multiline ? `Cannot create ${decl.id} because it already exists` : BAD_NAME;
+  if (decl.opensBody) {
+    state.pendingBodyRefusal = { message };
+    return true;
+  }
   const line = state.currentLine ?? 0;
   state.executionRefusal = refuse('execution', line, line, message, 0);
   return true;

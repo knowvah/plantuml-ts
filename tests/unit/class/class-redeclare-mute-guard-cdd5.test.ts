@@ -25,8 +25,11 @@ function kindOf(id: string, ...lines: string[]) {
 
 describe('classifier redeclaration: muteToType guard', () => {
   it('refuses CLASS -> STRUCT from the multi-line command (petiku-70-fogu777)', () => {
+    // cdd5-T5e: attributed to the block's CLOSING `}` (index 2), not the
+    // opener (index 1) -- PSystemError#getLineLocation's getLastLine()
+    // (error/PSystemError.java:102-104).
     const r = refusal('foo <-- bar', 'struct bar {', '}');
-    expect(r).toMatchObject({ kind: 'execution', line: 1, message: 'Cannot create bar because it already exists' });
+    expect(r).toMatchObject({ kind: 'execution', line: 2, message: 'Cannot create bar because it already exists' });
   });
 
   it('refuses CLASS -> STRUCT from the single-line command with "Bad name"', () => {
@@ -43,5 +46,15 @@ describe('classifier redeclaration: muteToType guard', () => {
 
   it('a same-type redeclaration of a non-mutable type is accepted', () => {
     expect(kindOf('bar', 'struct bar', 'struct bar {', '}')).toBe('struct');
+  });
+
+  it('cdd5-T5e: discards every interior body line, attributing to the closer', () => {
+    const r = refusal('foo <-- bar', 'struct bar {', '+ int x', '+ int y', '}');
+    expect(r).toMatchObject({ kind: 'execution', line: 4, message: 'Cannot create bar because it already exists' });
+  });
+
+  it('cdd5-T5e: the deferred refusal fires even with a blank interior line', () => {
+    const r = refusal('foo <-- bar', 'struct bar {', '', '}');
+    expect(r).toMatchObject({ kind: 'execution', line: 3, message: 'Cannot create bar because it already exists' });
   });
 });
