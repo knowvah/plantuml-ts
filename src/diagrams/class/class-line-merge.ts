@@ -22,6 +22,8 @@
  * silently dropped, so `class A`/`class B` parse with no active namespace
  * and land outside any cluster).
  */
+import { EmbeddedDiagram, getEmbeddedType } from '../../core/EmbeddedDiagram.js';
+
 export interface MergedLines {
   readonly lines: string[];
   /** G2 N9: parallel to `lines` -- the ORIGINAL (pre-merge) position of
@@ -42,6 +44,28 @@ export interface MergedLines {
   readonly rawLines: string[];
 }
 
+/**
+ * Nesting depth for a `{{ ... }}` embedded-diagram region, mirroring
+ * `EmbeddedDiagram#createAndSkip`'s own counter (java:97-115): a line that
+ * itself opens ANOTHER embed increments it, a bare `}}` line decrements it.
+ * Content inside an open embed -- JSON/YAML/sprite markup, including its
+ * own literal `{`/`}` lines -- is never a candidate for this file's
+ * standalone-bracket merge: upstream's `createAndSkip` consumes every such
+ * line into the embed's own block, untouched by `BlocLines
+ * #eventuallyMoveBracket` or any other line transform, until the OUTER
+ * `}}` closes (jixibu-01-xave465: `{{json` followed by a literal `{` is
+ * JSON syntax, not a class-body opener -- `mergeStandaloneBraces` used to
+ * merge it into `{{json {}}`, not an embed type upstream recognizes).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/EmbeddedDiagram.java:97-115
+ */
+function nextEmbedDepth(trimmed: string, depth: number): number {
+  if (depth > 0) {
+    if (getEmbeddedType(trimmed) !== null) return depth + 1;
+    return trimmed === EmbeddedDiagram.EMBEDDED_END ? depth - 1 : depth;
+  }
+  return getEmbeddedType(trimmed) !== null ? 1 : 0;
+}
+
 export function mergeStandaloneBraces(
   lines: readonly string[],
   positions: readonly (number | undefined)[] = [],
@@ -49,9 +73,12 @@ export function mergeStandaloneBraces(
   const merged: string[] = [];
   const mergedPositions: (number | undefined)[] = [];
   const mergedRaw: string[] = [];
+  let embedDepth = 0;
   for (let idx = 0; idx < lines.length; idx++) {
     const raw = lines[idx]!;
     const trimmed = raw.trim();
+    const wasInEmbed = embedDepth > 0;
+    embedDepth = nextEmbedDepth(trimmed, embedDepth);
     // A2s F-A / A3: blank lines are KEPT (they used to be dropped here) --
     // upstream keeps interior empty lines: a note's `subExtract(1, 1)` cuts
     // only opener/closer (CommandFactoryNoteOnEntity.java:236-238); a brace
@@ -59,7 +86,7 @@ export function mergeStandaloneBraces(
     // (CommandCreateClassMultilines.java:291,303-307). Jar-verified
     // `vivifa-42-mire839` / `pejone-71-tige404`. The main parse loop skips
     // blanks no open note/body claims, so command dispatch never sees one.
-    if (trimmed === '{') {
+    if (!wasInEmbed && trimmed === '{') {
       // Blanks between an opener and its standalone `{` were dropped
       // wholesale pre-A3 -- pop them so the merge still lands on the opener.
       while (merged.length > 0 && merged[merged.length - 1] === '') {
