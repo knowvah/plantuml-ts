@@ -31,6 +31,8 @@ export function bucketOf(diffCount: number): Bucket {
 
 export interface CensusJsonFixture {
   readonly slug: string;
+  /** cdd5 D4: the dot-cache tree the fixture came from; set only for class rows. */
+  readonly tree?: 'class' | 'unknown';
   readonly status: 'ok' | 'error';
   readonly diffCount: number | null;
   readonly bucket: Bucket | null;
@@ -51,10 +53,11 @@ export interface CensusJson {
 }
 
 function toCensusJsonFixture(r: CensusResult): CensusJsonFixture {
+  const id = { slug: r.slug, ...(r.tree !== undefined ? { tree: r.tree } : {}) };
   if (r.diffCount === 'error') {
-    return { slug: r.slug, status: 'error', diffCount: null, bucket: null, reason: r.reason ?? 'unknown error' };
+    return { ...id, status: 'error', diffCount: null, bucket: null, reason: r.reason ?? 'unknown error' };
   }
-  return { slug: r.slug, status: 'ok', diffCount: r.diffCount, bucket: bucketOf(r.diffCount) };
+  return { ...id, status: 'ok', diffCount: r.diffCount, bucket: bucketOf(r.diffCount) };
 }
 
 /**
