@@ -3,7 +3,7 @@ import {
   findFreestandingNoteRelationshipIndices,
   findFreestandingNoteConnectors,
 } from '../../../src/diagrams/class/note-freestanding.js';
-import type { ClassNote, Relationship } from '../../../src/diagrams/class/ast.js';
+import type { ClassNote, Namespace, Relationship } from '../../../src/diagrams/class/ast.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 
 // ---------------------------------------------------------------------------
@@ -16,6 +16,10 @@ function makeNote(id: string, overrides?: Partial<ClassNote>): ClassNote {
 
 function makeRelationship(from: string, to: string, overrides?: Partial<Relationship>): Relationship {
   return { from, to, type: 'association', ...overrides };
+}
+
+function makeNamespace(id: string): Namespace {
+  return { id, display: id, classifiers: [] };
 }
 
 function makeEdgeGeo(id: string, from: string, to: string): EdgeGeo {
@@ -98,6 +102,23 @@ describe('findFreestandingNoteRelationshipIndices', () => {
     const rels = [makeRelationship('N1', '__lol0')];
     expect(findFreestandingNoteRelationshipIndices(notes, rels)).toEqual(new Set([0]));
   });
+
+  // cdd5-T3c (freestanding-note-opale-group-endpoint): the "other end" must
+  // have a SvekNode (`GraphvizImageBuilder.java:245-251`'s `other != null`) --
+  // a package/namespace is drawn as an SvekCluster and has none.
+  it('EXCLUDES a relationship whose other endpoint is a package/namespace -- cikifu-97-pasu472', () => {
+    const notes = [makeNote('monolit')];
+    const rels = [makeRelationship('decoder_core', 'monolit')];
+    const namespaces = [makeNamespace('decoder_core')];
+    expect(findFreestandingNoteRelationshipIndices(notes, rels, namespaces).size).toBe(0);
+  });
+
+  it('still MATCHES when the other endpoint is an ordinary classifier, not a namespace id', () => {
+    const notes = [makeNote('N1')];
+    const rels = [makeRelationship('N1', 'Bar')];
+    const namespaces = [makeNamespace('SomeOtherPackage')];
+    expect(findFreestandingNoteRelationshipIndices(notes, rels, namespaces)).toEqual(new Set([0]));
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -142,5 +163,13 @@ describe('findFreestandingNoteConnectors', () => {
     const edges = [makeEdgeGeo('edge-0', 'N1', '__assoc0')];
     const result = findFreestandingNoteConnectors(notes, edges);
     expect(result.get('N1')).toBe(edges[0]);
+  });
+
+  // cdd5-T3c: see the matching PRE-layout test above.
+  it('EXCLUDES an edge whose other endpoint is a package/namespace -- cikifu-97-pasu472', () => {
+    const notes = [makeNote('monolit')];
+    const edges = [makeEdgeGeo('edge-0', 'decoder_core', 'monolit')];
+    const namespaces = [makeNamespace('decoder_core')];
+    expect(findFreestandingNoteConnectors(notes, edges, namespaces).size).toBe(0);
   });
 });

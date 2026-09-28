@@ -53,7 +53,7 @@
  * cap) and `layout.ts` (near cap).
  * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:133-148,245-263
  */
-import type { ClassNote, Relationship } from './ast.js';
+import type { ClassNote, Namespace, Relationship } from './ast.js';
 import type { EdgeGeo } from './layout.js';
 
 function freestandingNoteIds(notes: readonly ClassNote[]): ReadonlySet<string> {
@@ -68,10 +68,21 @@ function freestandingNoteIds(notes: readonly ClassNote[]): ReadonlySet<string> {
  * relationship the same way `buildEdgeGeos` already does for the
  * post-layout case (there, always `false` — `EdgeGeo[]` is ALREADY
  * invis-filtered).
+ *
+ * cdd5-T3c (freestanding-note-opale-group-endpoint): `groupIds` excludes a
+ * candidate whose OTHER (non-note) end is a namespace/package -- upstream's
+ * own gate, `other != null` (`GraphvizImageBuilder.java:245-251`), where
+ * `other` is `getNode(link.getEntity1())`: a GROUP entity (drawn as an
+ * SvekCluster) has no `SvekNode`, so `getNode` returns null and the link is
+ * never opalised. `decoder_core .. monolit` (cikifu-97-pasu472): the note's
+ * only connection is to the PACKAGE `decoder_core`, so it must draw as an
+ * ordinary link, not merge into the note's own outline.
+ * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:133-148,245-251
  */
 function findUniqueTouching<T>(
   items: readonly T[],
   noteIds: ReadonlySet<string>,
+  groupIds: ReadonlySet<string>,
   endpoints: (item: T) => readonly [string, string],
   isInvisible: (item: T) => boolean,
 ): Map<string, T> {
@@ -82,6 +93,8 @@ function findUniqueTouching<T>(
     const fromIsNote = noteIds.has(from);
     const toIsNote = noteIds.has(to);
     if (fromIsNote === toIsNote) continue; // both or neither -> not a candidate
+    const otherEnd = fromIsNote ? to : from;
+    if (groupIds.has(otherEnd)) continue; // other end has no SvekNode -- never opalisable
     const noteEnd = fromIsNote ? from : to;
     const list = touching.get(noteEnd) ?? [];
     list.push(item);
@@ -105,13 +118,19 @@ function findUniqueTouching<T>(
 export function findFreestandingNoteRelationshipIndices(
   notes: readonly ClassNote[],
   relationships: readonly Relationship[],
+  // cdd5-T3c: defaults to `[]` (no groups excluded) so every pre-existing
+  // caller/test that has no namespace concept is unaffected; the real
+  // caller (`class-dot-graph.ts`) passes `ast.namespaces`.
+  namespaces: readonly Namespace[] = [],
 ): ReadonlySet<number> {
   const noteIds = freestandingNoteIds(notes);
   if (noteIds.size === 0) return new Set();
+  const groupIds = new Set(namespaces.map((n) => n.id));
   const indexed = relationships.map((rel, i) => ({ rel, i }));
   const matched = findUniqueTouching(
     indexed,
     noteIds,
+    groupIds,
     (x) => [x.rel.from, x.rel.to],
     (x) => x.rel.invis === true,
   );
@@ -127,12 +146,17 @@ export function findFreestandingNoteRelationshipIndices(
 export function findFreestandingNoteConnectors(
   notes: readonly ClassNote[],
   edges: readonly EdgeGeo[],
+  // cdd5-T3c: see `findFreestandingNoteRelationshipIndices`'s identical
+  // parameter -- the real caller (`layout.ts`) passes `effAst.namespaces`.
+  namespaces: readonly Namespace[] = [],
 ): Map<string, EdgeGeo> {
   const noteIds = freestandingNoteIds(notes);
   if (noteIds.size === 0) return new Map();
+  const groupIds = new Set(namespaces.map((n) => n.id));
   return findUniqueTouching(
     edges,
     noteIds,
+    groupIds,
     (e) => [e.from, e.to],
     () => false,
   );
