@@ -137,13 +137,16 @@ const DESCRIPTIVE_LEAF_RE = new RegExp(`^(?:${DESCRIPTIVE_LEAF_KEYWORDS})$`, 'i'
 const USECASE_LEAF_RE = new RegExp(`^(?:${USECASE_LEAF_KEYWORDS})$`, 'i');
 
 /** Map a matched keyword to its ClassifierKind + optional descriptive usymbol.
- *  `usecase/` (business) collapses onto plain `usecase` — same ellipse; the
- *  double-border decoration is SVG-only and deferred (DOT parity first). */
+ *  cdd5-T4b: `usecase/` keeps its raw keyword as `usymbol` (the same raw-
+ *  keyword convention descriptive leaves use) -- `LeafType.USECASE_BUSINESS`,
+ *  `CommandCreateElementFull2.java:236-237`: "} else if (symbol
+ *  .equalsIgnoreCase(\"usecase/\")) { type = LeafType.USECASE_BUSINESS;". */
 function resolveDeclKind(rawKind: string): {
   kind: ClassifierKind;
   usymbol?: string;
 } {
-  if (USECASE_LEAF_RE.test(rawKind)) return { kind: 'usecase' };
+  if (USECASE_LEAF_RE.test(rawKind))
+    return rawKind === 'usecase/' ? { kind: 'usecase', usymbol: rawKind } : { kind: 'usecase' };
   if (rawKind === STATE_LEAF_KEYWORD) return { kind: 'state' };
   if (DESCRIPTIVE_LEAF_RE.test(rawKind)) return { kind: 'descriptive', usymbol: rawKind };
   if (rawKind === 'abstract class') return { kind: 'abstract' };

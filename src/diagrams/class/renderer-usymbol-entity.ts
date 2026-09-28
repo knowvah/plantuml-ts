@@ -113,7 +113,10 @@ const ELEMENT_ROUND_CORNER = 5.0;
  * pre-fix raw cast fed straight through as an invalid `USymbol` value).
  */
 function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
-  if (classifier.kind === 'usecase') return 'usecase';
+  // cdd5-T4b: a `usecase/` leaf carries its raw keyword and falls through to
+  // the `KEYWORD_TO_SYMBOL` normalizer below (`usecase/` -> `usecase-business`,
+  // `abel/Entity.java:412-413`).
+  if (classifier.kind === 'usecase' && classifier.usymbol === undefined) return 'usecase';
   if (classifier.kind === 'circle') return 'circle';
   const raw = classifier.usymbol;
   if (raw === undefined) return 'actor';
