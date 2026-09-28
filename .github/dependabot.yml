@@ -36,8 +36,14 @@ updates:
           - '@vitest/*'
       # One PR per week for routine bumps rather than one per package.
       # Majors stay separate; each deserves its own review.
+      # The vitest family is excluded: on 2026-09-28 this group took
+      # @vitest/coverage-v8 5.0.2 (#65) while the vitest group took vitest
+      # 5.0.2 alone (#64), splitting the pair and failing `npm ci` again.
       minor-and-patch:
         update-types: [minor, patch]
+        exclude-patterns:
+          - vitest
+          - '@vitest/*'
     ignore:
       # Dependabot cannot co-move the pair across a major: #46 bumped vitest
       # to 5.0.1 "in the vitest group" and left the provider at 4.1.11, and
