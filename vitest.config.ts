@@ -16,7 +16,10 @@ const REPO_ROOT = fileURLToPath(new URL('.', import.meta.url));
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    // src/ is DOM-free by rule, so jsdom is opt-in per file with a
+    // `// @vitest-environment jsdom` pragma (only measurer.test.ts needs it).
+    // A jsdom default built 893 environments per run: 48% of suite time.
+    environment: 'node',
     include: ['tests/**/*.test.ts'],
     // Generates `packages/*/generated/` once, before any worker starts.
     // Three test files read that tree and each used to rebuild it in its own

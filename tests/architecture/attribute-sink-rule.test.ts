@@ -17,7 +17,8 @@
  * The `@vitest-environment node` pragma above is load-bearing, not
  * cosmetic. `eslint.config.ts` computes `tsconfigRootDir` from
  * `fileURLToPath(new URL('.', import.meta.url))` at module-evaluation
- * time. Under this suite's default `jsdom` environment (vitest.config.ts),
+ * time. `node` is now the suite default (vitest.config.ts), but the pragma
+ * pins it should that default change: under `jsdom`,
  * a module's `import.meta.url` resolves against jsdom's fake
  * `http://localhost:3000/` document location, not a `file:` URL, so
  * `fileURLToPath` throws `ERR_INVALID_URL_SCHEME` on the mere act of

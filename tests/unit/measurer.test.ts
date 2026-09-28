@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { defaultTheme, darkTheme, resolveTheme } from '../../src/core/theme.js';
 import { FormulaMeasurer, CanvasMeasurer, FixedMeasurer, glyphWidth } from '../../src/core/measurer.js';
