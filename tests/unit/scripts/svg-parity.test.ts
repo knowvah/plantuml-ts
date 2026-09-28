@@ -159,7 +159,8 @@ describe('parityOutPath', () => {
 describe('routeConsoleToStderr (cdd5-T5)', () => {
   it('sends log/info/debug to the stderr sink so `!log` cannot corrupt a worker frame', () => {
     const lines: string[] = [];
-    const con = { log: () => 'stdout', info: () => 'stdout', debug: () => 'stdout' };
+    const stdout = (..._args: unknown[]): unknown => 'stdout';
+    const con = { log: stdout, info: stdout, debug: stdout };
     routeConsoleToStderr(con, (s) => lines.push(s));
     con.info('[Log] vlookup on', 'cm');
     con.log(42);
