@@ -87,11 +87,24 @@ function resolveUrlAndTooltip(inner: string): { url: string; tooltip: string } {
   return { url, tooltip: tooltipMatch?.[1] ?? url };
 }
 
+/**
+ * D3 (cdd6 T1b): upstream `FontConfiguration#hyperlink()`'s `withHyperlink()`
+ * (`FontConfiguration.java:253-256`) sets `currentColor = hyperlinkColor` --
+ * the field populated at THIS FontConfiguration's own construction time from
+ * `style.value(PName.HyperLinkColor)` (java:213-219, `Style.java:265`), a
+ * per-classifier/`<style>`-cascade value. `undefined` means no override
+ * reached construction, matching upstream's own `blue` default
+ * (`plantuml.skin:7,565`, `SkinParam.java:305-311`).
+ */
+function resolveHyperlinkColor(saved: FontConfiguration): string {
+  return saved.hyperlinkColor ?? HYPERLINK_COLOR;
+}
+
 function applyHyperlinkStyleAndPush(label: string, url: string, tooltip: string, stripe: StripeBuilder): void {
   const saved: FontConfiguration = stripe.getActualFontConfiguration();
   stripe.setActualFontConfiguration({
     ...saved,
-    color: HYPERLINK_COLOR,
+    color: resolveHyperlinkColor(saved),
     styles: new Set(saved.styles).add(FontStyle.UNDERLINE),
   });
   stripe.analyzeAndAddInlineWithUrl(label, url, tooltip);

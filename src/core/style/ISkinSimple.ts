@@ -97,6 +97,36 @@ import type { Sprite } from '../klimt/sprite/Sprite.js';
 import type { GuillemetPair } from '../text/Guillemet.js';
 import type { Pragma } from '../skin/Pragma.js';
 
+/**
+ * D3 (cdd6 T1b): the style-cascade-resolved hyperlink colour a `[[url]]`
+ * atom's initial `FontConfiguration` is built with (`StripeSimple.java
+ * :224-225` builds the url atom off the CURRENT `fontConfiguration`, whose
+ * `hyperlinkColor` field is populated by `FontConfiguration.create(skinParam,
+ * style, colors)` reading `style.value(PName.HyperLinkColor)`,
+ * `FontConfiguration.java:213-219` / `Style.java:265`).
+ *
+ * NOT named `getHyperlinkColor` (upstream's `ISkinSimple.java` itself has no
+ * such member at all — the style-based lookup lives inline in
+ * `FontConfiguration.create`, not on `ISkinSimple`): this port's
+ * `abel/ISkinParam.ts` ALREADY declares a REAL, consumed
+ * `getHyperlinkColor(): HColor` (`abel/Entity.ts:170`, feeding the SEPARATE
+ * "richer" `abel/FontConfiguration.ts` — decisions.md#D3's own "stays
+ * separate" carve-out) with an incompatible return type (`HColor` vs a
+ * resolved hex `string`). `MethodsOrFieldsAreaSkinParam`
+ * (`cucadiagram/MethodsOrFieldsAreaConfig.ts`) extends BOTH `ISkinParam` and
+ * `ISkinSimple` — reusing the same name there is a genuine TS2320 interface-
+ * merge conflict (two non-identical signatures for one property name),
+ * confirmed by a minimal repro (`interface C extends A, B` with differing
+ * `getHyperlinkColor` return types → `tsc` TS2320), not a style preference.
+ *
+ * Optional, mirroring `getPragma`'s own T10b precedent above: making this
+ * REQUIRED today would break every OTHER `ISkinSimple`-shaped test double in
+ * the tree (`StripeTree.test.ts`, `CreoleHorizontalLine.test.ts`,
+ * `CreoleParser.test.ts`, `Display.test.ts`, `StripeTable.test.ts`,
+ * `BodyEnhanced2.test.ts` — none in this task's write-set). A later closing
+ * task, once no sibling is in flight, should promote it to required and
+ * update those doubles, per `getPragma`'s own doc comment above.
+ */
 export interface ISkinSimple {
   // -- klimt/sprite/SpriteContainer.java (via extends) --
   getSprite(name: string): Sprite | null;
@@ -115,6 +145,9 @@ export interface ISkinSimple {
   getDpi(): number;
   copyAllFrom(other: ReadonlyMap<string, string>): void;
   getPragma(): Pragma;
+  /** See this interface's own file doc comment (D3, cdd6 T1b) for why this
+   *  is neither named `getHyperlinkColor` nor required. */
+  getStyleHyperlinkColor?(): string | null;
 
   sheet(
     fontConfiguration: FontConfiguration,
