@@ -52,6 +52,9 @@ Port: `src/diagrams/class/class-declaration-extractors.ts:398` — "const idThen
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b3 (journal row 66)
+- `unknown/fepoko-61-fona364` joins `member-double-bracket-url-stripped` as its primary residual after T3e fixed its badge glyph.
+
 ## Rows
 - `unknown/nepevi-24-dune081`
 - `unknown/potase-97-japa248`

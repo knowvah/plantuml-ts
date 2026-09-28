@@ -1,0 +1,8 @@
+@startuml
+metaclass meta1 {
+}
+
+stereotype ste1 {
+}
+
+@enduml

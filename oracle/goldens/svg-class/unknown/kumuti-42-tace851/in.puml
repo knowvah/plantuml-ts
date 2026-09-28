@@ -1,0 +1,5 @@
+@startuml
+legend
+Root
+end legend
+@enduml

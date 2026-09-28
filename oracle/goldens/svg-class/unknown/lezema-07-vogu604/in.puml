@@ -1,0 +1,9 @@
+@startuml
+file test [
+*a*
+**a*
+***a*
+***bold**
+****bold**
+]
+@enduml

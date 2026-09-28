@@ -40,6 +40,10 @@ Port: `src/diagrams/class/class-multiline-element.ts:212-213`: "const classifier
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b3 (journal row 66)
+- `unknown/pupoko-23-xubo613` is ALREADY conformant (fixed collaterally by T3b); drop it from this task.
+- `svg-sprite-stroke-scale` (new family): `unknown/jefidu-98-gisu131`, `unknown/sprite-SVG-Fill-Stroke-Combinatory-1`. Mechanism: `src/core/klimt/sprite/svg-nanoparser-shapes.ts` scales an SVG sprite `<path stroke-width>` to 1 where the jar emits 0.5 (S1 diagnosis note on jefidu). Read the upstream SVG sprite path (`klimt/sprite/SvgNanoParser.java` and its shape classes) and port the stroke scaling at its origin.
+
 ## Rows
 - `unknown/boguko-42-zuda981`
 - `unknown/fidaru-93-zumu093`
@@ -49,6 +53,7 @@ Port: `src/diagrams/class/class-multiline-element.ts:212-213`: "const classifier
 
 ## Write-set
 - `src/diagrams/class/class-multiline-element.ts`
+- `src/core/klimt/sprite/svg-nanoparser-shapes.ts`
 - their unit tests under `tests/`
 A pure type or file-cap move that extends this set is push-forward (journal it in
 your report). Anything else is stop 1: report instead of editing.

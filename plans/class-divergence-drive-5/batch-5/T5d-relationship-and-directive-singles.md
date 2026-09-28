@@ -52,6 +52,9 @@ Port: `src/diagrams/class/class-command-relationships.ts:81` — "pattern: /^(\"
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b3 (journal row 66)
+- `free-note-alias-not-quark-qualified` (moved from T3c, 4 rows): `unknown/pojeje-60-vata579`, `unknown/rexupa-61-nezi165`, `unknown/tamovu-79-fifo533`, `unknown/ticemi-41-laze086`. Upstream `CommandFactoryNote.java:192-197` resolves the alias with `quarkInContext(false, cleanId(idShort))`. T3c measured that qualifying ONLY the note id (class-notes.ts#addFreestandingNote) breaks 8 ratchet pins: the relationship-endpoint matcher (`class-command-relationships.ts` isNoteId callers, `class-assoc-couple.ts`) compares raw strings, misses the note, and auto-creates a phantom classifier that shifts every later uid. Fix both sides together through `class-namespace-resolve.ts#resolveReference`. See `.agent-notes/cdd5-T3c-note-alias-qualification-blocked.md`.
+
 ## Rows
 - `unknown/jititi-15-maxe512`
 - `unknown/xamive-55-lipi586`
@@ -65,6 +68,9 @@ Port: `src/diagrams/class/class-command-relationships.ts:81` — "pattern: /^(\"
 - `src/diagrams/class/class-arrow-grammar.ts`
 - `src/diagrams/class/class-command-relationships.ts`
 - `src/diagrams/class/class-directives-removal.ts`
+- `src/diagrams/class/class-notes.ts`
+- `src/diagrams/class/class-assoc-couple.ts`
+- `src/diagrams/class/class-namespace-resolve.ts`
 - their unit tests under `tests/`
 A pure type or file-cap move that extends this set is push-forward (journal it in
 your report). Anything else is stop 1: report instead of editing.

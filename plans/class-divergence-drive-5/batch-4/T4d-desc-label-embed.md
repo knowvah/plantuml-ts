@@ -40,6 +40,9 @@ Port: `src/core/svek/image/EntityImageDescriptionDelegates.ts:213-215`: "if (ato
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b3 (journal row 66)
+- `desc-label-embed-unported` rows revealed by T3b's dispatch: `unknown/gubeca-19-lemu434`, `unknown/jixibu-01-xave465`, `unknown/josebu-55-seje426`, `unknown/tefeco-12-rato895`. tefeco is a `label` leaf whose whole content is the embed: once the embed draws, `USymbolLabel#asSmall` (no border) should show it; its diff ROSE 1/2 -> 8/12 at close-b3 because the failed embed now leaves it empty.
+
 ## Rows
 - `unknown/kelefe-72-cefi192`
 - `unknown/komuvi-52-vave599`

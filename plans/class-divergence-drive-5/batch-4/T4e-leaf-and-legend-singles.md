@@ -64,6 +64,9 @@ Port: `src/diagrams/class/renderer-empty-package-leaf.ts:25-51` (builds `nsGeo` 
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b3 (journal row 66)
+- `desc-usymbol-ink-missing` (new family, 8 rows): `unknown/beboke-62-zofu377`, `unknown/febuli-89-dusi249`, `unknown/felixe-38-dilu011`, `unknown/fezaro-08-nopo877`, `unknown/fipezo-93-zimi512`, `unknown/gogisu-39-bepa573`, `unknown/jimizu-14-zole306`, `unknown/juzuno-58-gesi397`. All are structural 0 after T3b; the residual is the canvas (1–7px). Mechanism: `class-ink-box.ts:210-274#addClassifierInk` gives these descriptive usymbols the class-box `(x-1, y-1)` border ink; upstream measures the drawn `EntityImageDescription` shape through `LimitFinder` (`klimt/drawing/LimitFinder.java`), which has no such border. Mirror how the existing actor/usecase `symbolInk` branches do it. If the fix needs `class-layout-leaf-shapes.ts` (T4b's file) stop and report.
+
 ## Rows
 - `unknown/cepedu-19-namu934`
 - `unknown/cilibi-66-tasa181`
