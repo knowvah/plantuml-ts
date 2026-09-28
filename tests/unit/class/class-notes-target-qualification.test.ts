@@ -56,10 +56,7 @@ describe('addNote target qualification', () => {
         { id: 'p1', display: 'p1', classifiers: ['p1.A'] },
         { id: 'p2', display: 'p2', classifiers: ['p2.B'] },
       ],
-      classifiers: [
-        makeClassifier('p1.A', 'class', undefined, 'p1'),
-        makeClassifier('p2.B', 'class', undefined, 'p2'),
-      ],
+      classifiers: [makeClassifier('p1.A', 'class', undefined, 'p1'), makeClassifier('p2.B', 'class', undefined, 'p2')],
     });
     addNote(ast, 'left', 'A', 'note', { namespace: 'p1', implicitTarget: false, sep: '.' });
     expect(ast.notes[0]!.target).toBe('p1.A');

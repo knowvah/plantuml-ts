@@ -31,7 +31,9 @@ function imageAttrs(svg: string): Array<{ x: string; y: string; width: string; h
  *  placed the box itself (an accepted, out-of-scope divergence from the
  *  jar's own layout, per this project's dot-engine ruling). */
 function entityBadgeOffsets(svg: string): Array<{ dx: number; dy: number }> {
-  const entities = [...svg.matchAll(/<g class="entity"[^>]*><rect x="([^"]*)" y="([^"]*)"[^>]*\/><image[^>]*x="([^"]*)" y="([^"]*)"/g)];
+  const entities = [
+    ...svg.matchAll(/<g class="entity"[^>]*><rect x="([^"]*)" y="([^"]*)"[^>]*\/><image[^>]*x="([^"]*)" y="([^"]*)"/g),
+  ];
   return entities.map((m) => ({ dx: Number(m[3]) - Number(m[1]), dy: Number(m[4]) - Number(m[2]) }));
 }
 

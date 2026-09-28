@@ -43,7 +43,16 @@ function edgeResultFor(points: Array<{ x: number; y: number }>): DotLayoutResult
 }
 
 function baseEdge(overrides: Partial<EdgeGeo>): EdgeGeo {
-  return { id: 'e0', points: curvedPoints, sourceDecor: 'none', targetDecor: 'none', dashed: false, from: 'A', to: 'B', ...overrides };
+  return {
+    id: 'e0',
+    points: curvedPoints,
+    sourceDecor: 'none',
+    targetDecor: 'none',
+    dashed: false,
+    from: 'A',
+    to: 'B',
+    ...overrides,
+  };
 }
 
 describe('attachEdgeLabel — magic-arrow angle reads the TRIMMED dotPath (cdd4-T8, jakapi)', () => {

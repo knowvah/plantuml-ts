@@ -89,7 +89,7 @@ describe('classifier — `as` keyword is case-insensitive (Pattern2.java:112-114
 // only made the uppercase `AS` form reach it too.
 // ---------------------------------------------------------------------------
 
-describe('classifier — a quoted alias\'s own [[...]] text is not stripped as a decoration (T5b)', () => {
+describe("classifier — a quoted alias's own [[...]] text is not stripped as a decoration (T5b)", () => {
   it('class TRES as "[[url label]]" keeps the bracket text in display, not treated as a url decoration', () => {
     const c = firstClassifier('class TRES as "[[http://www.plantuml.com tres]]"');
     expect(c.id).toBe('TRES');
@@ -119,9 +119,7 @@ describe('classifier — a quoted alias\'s own [[...]] text is not stripped as a
   });
 
   it('the full jixipo-21-mefu703 TRES declaration (with stereotype + body) parses, no Syntax Error page', () => {
-    const ast = parse(
-      'class TRES AS "[[http://www.plantuml.com tres]]" <<otro>> {\n* aaa\n+ [[otro modelo]]\n- bb\n}',
-    );
+    const ast = parse('class TRES AS "[[http://www.plantuml.com tres]]" <<otro>> {\n* aaa\n+ [[otro modelo]]\n- bb\n}');
     expect(ast.classifiers).toHaveLength(1);
     expect(ast.classifiers[0]!.id).toBe('TRES');
     expect(ast.classifiers[0]!.display).toBe('[[http://www.plantuml.com tres]]');

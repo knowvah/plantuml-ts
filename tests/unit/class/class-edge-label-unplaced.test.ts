@@ -55,7 +55,13 @@ describe('attachEdgeLabel — an unplaced label attaches nothing (T11, issue 25)
   it('draws nothing when labelX/labelY are absent, even though rel.label is set', () => {
     // The exact `toEdgeEntry` output shape for a genuinely unplaced label:
     // no `labelX`/`labelY` keys (never a sentinel `{x: 0, y: ...}`).
-    const edgeResult: DotLayoutResult['edges'][number] = { id: 'e0', points: [{ x: 0, y: 0 }, { x: 20, y: 0 }] };
+    const edgeResult: DotLayoutResult['edges'][number] = {
+      id: 'e0',
+      points: [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+      ],
+    };
     const edgeGeo = makeEdgeGeo();
 
     attachEdgeLabel(edgeGeo, rel, edgeResult, text, edgeResult.points);
@@ -69,7 +75,10 @@ describe('attachEdgeLabel — an unplaced label attaches nothing (T11, issue 25)
   it('contrast: the SAME rel.label attaches a label once labelX/labelY are placed', () => {
     const edgeResult: DotLayoutResult['edges'][number] = {
       id: 'e0',
-      points: [{ x: 0, y: 0 }, { x: 20, y: 0 }],
+      points: [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+      ],
       labelX: 10,
       labelY: 5,
     };
@@ -84,7 +93,10 @@ describe('attachEdgeLabel — an unplaced label attaches nothing (T11, issue 25)
   it('draws nothing when rel.label is undefined, regardless of labelX/labelY (pre-existing guard)', () => {
     const edgeResult: DotLayoutResult['edges'][number] = {
       id: 'e0',
-      points: [{ x: 0, y: 0 }, { x: 20, y: 0 }],
+      points: [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+      ],
       labelX: 10,
       labelY: 5,
     };

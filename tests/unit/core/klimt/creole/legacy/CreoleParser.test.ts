@@ -429,7 +429,7 @@ describe('CreoleParser — %newline() (U+E100) split (T5a: creole-e1-newline-spl
     expect([...sheet]).toHaveLength(1);
   });
 
-  it('the LAST split stripe becomes lastStripe for the following display line\'s alignment lookup', () => {
+  it("the LAST split stripe becomes lastStripe for the following display line's alignment lookup", () => {
     const sheet = parser().createSheet(display([`a${E1_NEWLINE}b`, 'c']));
     const stripes = [...sheet];
     expect(stripes).toHaveLength(3);

@@ -521,7 +521,13 @@ describe('mapNoteGeos — note connector cluster magnetic border (cdd2-T19a, Sve
     const clusterRects = new Map<string, ClipRect>([
       ['pkg', { x: ns.x, y: ns.y, width: ns.width, height: ns.height, magneticBorder: border }],
     ]);
-    const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer }, { clusterRects });
+    const geos = mapNoteGeos(
+      [plain],
+      result,
+      { measurements, groups },
+      { theme: defaultTheme, measurer },
+      { clusterRects },
+    );
 
     const expectedDy = border.getForceAt(endPoint).getDy();
     expect(expectedDy).toBeGreaterThan(0);
@@ -561,7 +567,13 @@ describe('mapNoteGeos — note connector cluster magnetic border (cdd2-T19a, Sve
     const clusterRects = new Map<string, ClipRect>([
       ['pkg', { x: ns.x, y: ns.y, width: ns.width, height: ns.height, magneticBorder: border }],
     ]);
-    const geos = mapNoteGeos([plain], result, { measurements, groups }, { theme: defaultTheme, measurer }, { clusterRects });
+    const geos = mapNoteGeos(
+      [plain],
+      result,
+      { measurements, groups },
+      { theme: defaultTheme, measurer },
+      { clusterRects },
+    );
 
     // The start (outside the rect) is untouched; the end (inside the rect,
     // the actual cluster anchor) DID move -- proving the force logic ran at

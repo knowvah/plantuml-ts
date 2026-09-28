@@ -89,7 +89,7 @@ describe('chrome creole — terede-92-fuka839 (<style> legend { MaximumWidth } w
   const ours = chromeGroup(render('unknown', 'terede-92-fuka839'), 'legend');
   const jar = chromeGroup(golden('unknown', 'terede-92-fuka839'), 'legend');
 
-  it('wraps the paragraph into the jar\'s 142 <text> lines, not one unwrapped run', () => {
+  it("wraps the paragraph into the jar's 142 <text> lines, not one unwrapped run", () => {
     expect(childTags(jar).filter((t) => t === 'text').length).toBe(142);
     expect(childTags(ours).filter((t) => t === 'text').length).toBe(142);
   });
@@ -180,7 +180,7 @@ describe('chromeAtomOps#calculateDimension — AtomText min-height floor (unit)'
     };
   }
 
-  it('floors an 8px measured run to the jar\'s 10px minimum', () => {
+  it("floors an 8px measured run to the jar's 10px minimum", () => {
     const dim = chromeAtomOps(undefined, font).calculateDimension(textAtom, stubBounder(8));
     expect(dim.getHeight()).toBe(10);
   });

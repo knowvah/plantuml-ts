@@ -139,7 +139,12 @@ export function computeHeaderNameGeo(
     });
   const headerTextWidth = Math.max(...headerLineWidths);
   // cdd5-T4b: nameWidth/nameBlockHeight are EntityImageClassHeader.java:120's merged block.
-  const merged = mergeNameWithVisibility(classifier, headerTextWidth + NAME_MARGIN_TOTAL, nameBlockHeight, classAttributeIconSize);
+  const merged = mergeNameWithVisibility(
+    classifier,
+    headerTextWidth + NAME_MARGIN_TOTAL,
+    nameBlockHeight,
+    classAttributeIconSize,
+  );
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
   const badgeSpriteBox = computeBadgeSpriteBox(classifier, sprites);
   // G2 N64 (item 45 corollary): a trailing `\n` split can produce a BLANK

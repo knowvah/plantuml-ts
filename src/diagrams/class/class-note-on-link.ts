@@ -130,7 +130,10 @@ export function parseNoteOnLinkColors(spec: string | undefined): NoteOnLinkColor
   for (const token of data.split(';')) {
     if (token !== '') applyColorToken(token, state); // `StringTokenizer` yields no empty token
   }
-  return { ...(state.back !== undefined ? { back: state.back } : {}), ...(state.line !== undefined ? { line: state.line } : {}) };
+  return {
+    ...(state.back !== undefined ? { back: state.back } : {}),
+    ...(state.line !== undefined ? { line: state.line } : {}),
+  };
 }
 
 /** Parse an optional `left|right|top|bottom` capture, defaulting to BOTTOM

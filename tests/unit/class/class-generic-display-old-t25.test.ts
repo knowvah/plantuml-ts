@@ -92,7 +92,13 @@ describe('cdd3-T25: skinparam genericDisplay old (E3-3)', () => {
     expect(svg).not.toContain('stroke-dasharray="2,2"'); // the tag-box rect
     const [line1, line2] = texts(svg);
     // Line 1: the unchanged "coursGroupe:" run, 14pt, non-italic.
-    expect(line1).toMatchObject({ x: '45.481', y: '22.889', fontSize: '14', textLength: '84.7', content: 'coursGroupe:' });
+    expect(line1).toMatchObject({
+      x: '45.481',
+      y: '22.889',
+      fontSize: '14',
+      textLength: '84.7',
+      content: 'coursGroupe:',
+    });
     // Line 2: the generic clause folded INTO the name run, same 14pt font,
     // not the 12pt-italic tag-box font.
     expect(line2).toMatchObject({

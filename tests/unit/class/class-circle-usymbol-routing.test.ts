@@ -303,13 +303,7 @@ describe('renderClassUSymbolEntity draws circle and component through the faithf
       dividerYs: [],
       rows: [{ text: 'e1', y: 20, indent: 0 }],
     };
-    const withOverride = renderClassUSymbolEntity(
-      { ...withoutGeo, color: '#White' },
-      theme,
-      measurer,
-      undefined,
-      'U5',
-    );
+    const withOverride = renderClassUSymbolEntity({ ...withoutGeo, color: '#White' }, theme, measurer, undefined, 'U5');
     const without = renderClassUSymbolEntity(withoutGeo, theme, measurer, undefined, 'U6');
     // The override must actually change the emitted fill -- not merely be
     // present syntactically (assertion-quality: compares the two runs).

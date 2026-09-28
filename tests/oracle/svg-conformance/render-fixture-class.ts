@@ -193,10 +193,6 @@ export interface ClassFixtureRenderOptions {
  * around `renderSync` itself, so the census and the survey can no longer
  * diverge on ANYTHING but which measurer is injected.
  */
-export function renderClassFixture(
-  markup: string,
-  measurer: StringMeasurer,
-  opts?: ClassFixtureRenderOptions,
-): string {
+export function renderClassFixture(markup: string, measurer: StringMeasurer, opts?: ClassFixtureRenderOptions): string {
   return renderSync(markup, { measurer, ...opts });
 }

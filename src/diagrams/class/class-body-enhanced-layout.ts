@@ -262,7 +262,15 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   // visibility.ts#buildEnhancedRow` (isMethodMember bucketing,
   // visibilityBlockHeight/TopDy one-row-block rationale, own doc comment).
   const rows: ClassifierGeo['rows'] = members.map((m, i) => {
-    const row = buildEnhancedRow({ m, text: texts[i]!, build: builds[i]!, rowTop, indent, baselineOffset, bottomAnchor });
+    const row = buildEnhancedRow({
+      m,
+      text: texts[i]!,
+      build: builds[i]!,
+      rowTop,
+      indent,
+      baselineOffset,
+      bottomAnchor,
+    });
     rowTop += builds[i]!.height;
     return row;
   });

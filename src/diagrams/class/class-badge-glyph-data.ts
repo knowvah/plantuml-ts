@@ -84,25 +84,7 @@
  *     own H occurrences (cx/cy up to 224.764/736).
  */
 export type BadgeLetter =
-  | 'C'
-  | 'I'
-  | 'A'
-  | 'E'
-  | '@'
-  | 'P'
-  | 'M'
-  | 'F'
-  | '?'
-  | 'R'
-  | 'J'
-  | 'O'
-  | 'W'
-  | 'D'
-  | 'Q'
-  | 'S'
-  | 'X'
-  | 'T'
-  | 'H';
+  'C' | 'I' | 'A' | 'E' | '@' | 'P' | 'M' | 'F' | '?' | 'R' | 'J' | 'O' | 'W' | 'D' | 'Q' | 'S' | 'X' | 'T' | 'H';
 
 /** Reference badge center every {@link BADGE_GLYPH_D} entry is captured at. */
 export const REFERENCE_CX = 22;
