@@ -155,14 +155,14 @@ function measuringFont(fc: FontConfiguration): FontConfiguration {
   return { ...fc, size: getFont(fc).size };
 }
 
-/** `AtomText#calculateDimensionSlow` (java:183-184): a run containing a
- *  tabulation takes `#getWidth`'s tab-stop tokenizer instead of the plain
- *  `StringBounder` width — `atomTextWidth` is that tokenizer, and it
- *  short-circuits to the identical single measurement for a tab-free run
- *  (`EntityImageDescriptionTextBlock.ts#measureLine`'s own convention). */
+const ATOM_TEXT_MIN_HEIGHT = 10; // AtomText.java:180 "if (h < 10) h = 10;"
+
+/** `AtomText#calculateDimensionSlow` (java:180-184): height floors to
+ *  `ATOM_TEXT_MIN_HEIGHT`; a tabulation run instead takes `#getWidth`'s
+ *  tab-stop tokenizer (`atomTextWidth`) for width, per `measureLine`. */
 function textDim(atom: CreoleAtom & { kind: 'text' }, stringBounder: StringBounder): XDimension2D {
   const font = measuringFont(atom.font);
-  const height = stringBounder.calculateDimension(font, atom.text).getHeight();
+  const height = Math.max(stringBounder.calculateDimension(font, atom.text).getHeight(), ATOM_TEXT_MIN_HEIGHT);
   const width = atomTextWidth(atom.text, font.size, (t) => stringBounder.calculateDimension(font, t).getWidth());
   return new XDimension2D(width, height);
 }

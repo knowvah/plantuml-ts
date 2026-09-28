@@ -42,7 +42,7 @@ import { measureCircleInterface } from './class-layout-leaf-shapes.js';
 import { buildDotGraph, inNodeMapOrder } from './class-dot-graph.js';
 import { computeLeafDrawOrder } from './class-leaf-order.js';
 // cdd4-T10: `assembleShiftedGeometry` moved to `layout-ink-extent.ts` (500-line cap, pure move).
-import { assembleShiftedGeometry } from './layout-ink-extent.js';
+import { assembleShiftedGeometry, applyClassDocumentMargin } from './layout-ink-extent.js';
 import { iconSizeOf } from './class-visibility-icon.js';
 import { applyTopUrlToClassifiers } from './class-url.js';
 import { resolveClassScaleFactor } from './class-layout-scale-resolve.js';
@@ -69,6 +69,14 @@ export {
   type JsonBodyItem,
   type ClassLeafGeo,
 } from './class-geo-types.js';
+
+/**
+ * `GraphvizImageBuilder.EntityImageSimpleEmpty#calculateDimension`
+ * (`svek/GraphvizImageBuilder.java:168-169`): "return new XDimension2D(10,
+ * 10);" -- the fixed ink footprint of an empty class diagram (0 groups, 0
+ * links, 0 leafs), reserved even when nothing is drawn.
+ */
+const EMPTY_DIAGRAM_SIMPLE_EMPTY_SIZE = 10;
 
 // ---------------------------------------------------------------------------
 // Directive resolution helpers
@@ -204,14 +212,36 @@ function orderLeaves(leaves: readonly ClassLeafGeo[], order: readonly string[]):
 export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
   // Empty diagram (isDegeneratedWithFewEntities(0): 0 groups, 0 links, 0
   // leafs — leafs includes notes, so a lone freestanding note must NOT hit
-  // this shortcut or it would be silently dropped) — zero-size result.
+  // this shortcut or it would be silently dropped) --
+  // `GraphvizImageBuilder.buildImage:211-212` returns a 10x10
+  // `EntityImageSimpleEmpty` (`GraphvizImageBuilder.java:168-169`
+  // "public XDimension2D calculateDimension(...) { return new
+  // XDimension2D(10, 10); }"), NOT a 0x0 body -- an empty class diagram
+  // (only title/footer/legend, or truly nothing) still reserves a 10x10
+  // ink box that the document margin/`ensureVisible` truncation (`layout-
+  // ink-extent.ts#applyClassDocumentMargin`) and any chrome center
+  // against, exactly like `degenerateSingleClassifier`'s own `rawWidth`/
+  // `rawHeight` (`class-geo-builders.ts`, G2 N48). `rawWidth`/`rawHeight`
+  // are the PRE-margin 10x10 so a titled/legend'd no-entity diagram's
+  // chrome centers against the same raw value the main DOT-driven and
+  // degenerate paths already do.
   if (
     ast.namespaces.length === 0 &&
     ast.relationships.length === 0 &&
     ast.classifiers.length === 0 &&
     ast.notes.length === 0
   ) {
-    return { totalWidth: 0, totalHeight: 0, leaves: [], edges: [], namespaces: [] };
+    const rawDims = { width: EMPTY_DIAGRAM_SIMPLE_EMPTY_SIZE, height: EMPTY_DIAGRAM_SIMPLE_EMPTY_SIZE };
+    const totalDims = applyClassDocumentMargin(rawDims);
+    return {
+      totalWidth: totalDims.width,
+      totalHeight: totalDims.height,
+      rawWidth: rawDims.width,
+      rawHeight: rawDims.height,
+      leaves: [],
+      edges: [],
+      namespaces: [],
+    };
   }
 
   // Collapse any namespace left empty by parsing into a flat leaf classifier

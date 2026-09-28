@@ -73,14 +73,28 @@ describe('layoutClass — empty AST', () => {
     expect(result.namespaces).toEqual([]);
   });
 
-  it('totalWidth is 0', () => {
+  // T3a (empty-diagram-simple-empty-body, diagnosis/S4-style.md): upstream
+  // `GraphvizImageBuilder.buildImage:211-212` returns a 10x10
+  // `EntityImageSimpleEmpty` for a 0-entity diagram
+  // (`GraphvizImageBuilder.java:168-169` "return new XDimension2D(10,
+  // 10);"), NOT a 0x0 body -- the port previously returned 0x0 here
+  // (`unknown/lavoke-68-lezi492`, `unknown/sufura-56-muke185`: jar
+  // `svg/@width`/`@height` = 16, the port's own no-chrome margin recipe
+  // applied to 10x10: `10 + 5 -> floor(15 + 1) = 16`).
+  it('totalWidth is 16 (10 raw + 5 right margin, ensureVisible +1 truncation)', () => {
     const result = layoutClass(makeAST(), defaultTheme, measurer);
-    expect(result.totalWidth).toBe(0);
+    expect(result.totalWidth).toBe(16);
   });
 
-  it('totalHeight is 0', () => {
+  it('totalHeight is 16 (10 raw + 5 bottom margin, ensureVisible +1 truncation)', () => {
     const result = layoutClass(makeAST(), defaultTheme, measurer);
-    expect(result.totalHeight).toBe(0);
+    expect(result.totalHeight).toBe(16);
+  });
+
+  it('rawWidth/rawHeight are the PRE-margin 10x10 ink box (chrome centers against these)', () => {
+    const result = layoutClass(makeAST(), defaultTheme, measurer);
+    expect(result.rawWidth).toBe(10);
+    expect(result.rawHeight).toBe(10);
   });
 });
 
