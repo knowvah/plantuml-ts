@@ -14,10 +14,11 @@
  * jar-verified against the oracle DOT for `method3`, `__method1__`, `method2`,
  * `USA` and `3`.
  *
- * The `map`/`json` flat-sizer producers (`mapPortRows`, `mapPortName`) moved
- * out to ./class-map-port-rows.ts (S-B, ADR-4) for the 500-line cap; this
- * file imports {@link mapPortName}/{@link mapPortRows} back for
- * `edgePortAttrs`'/`applyShapeAndPorts`' own `map`/`json` needs.
+ * The `map`/`json` flat-sizer producers (`mapPortRows`, `mapPortName`,
+ * `shouldMarkPort`) moved out to ./class-map-port-rows.ts (S-B, ADR-4; T3d
+ * (cdd5) added `shouldMarkPort` to that move for the same 500-line cap) —
+ * this file imports them back for `edgePortAttrs`'/`applyShapeAndPorts`' own
+ * `map`/`json` needs.
  */
 
 import type { Classifier, ClassDiagramAST, ClassifierKind, Member } from './ast.js';
@@ -26,7 +27,7 @@ import { isRowPortKind } from './class-shield-helpers.js';
 import { formatObjectMemberText } from './class-object-fields.js';
 import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
-import { mapPortRows, mapPortName } from './class-map-port-rows.js';
+import { mapPortRows, mapPortName, shouldMarkPort } from './class-map-port-rows.js';
 import { MethodsOrFieldsArea } from '../../core/cucadiagram/MethodsOrFieldsArea.js';
 import type { Elected } from '../../core/cucadiagram/Elected.js';
 import { enhancedBodyPortRows } from './class-body-enhanced-ports.js';
@@ -73,26 +74,9 @@ const KIND_SHAPE: Partial<Record<ClassifierKind, DotInputNode['shape']>> = {
   lollipop: 'circle', // `Name ()-- Existing` (CommandLinkLollipop)
   map: 'plaintext', // `map Name { ... }` — EntityImageMap.getShapeType is
   // ALWAYS RECTANGLE_HTML_FOR_PORTS (never a plain rect, even with zero rows).
-  json: 'plaintext', // `json Name { ... }` — EntityImageJson.getShapeType is
-  // the SAME RECTANGLE_HTML_FOR_PORTS shape as map, ALWAYS (even scalar/empty).
+  json: 'plaintext', // same RECTANGLE_HTML_FOR_PORTS shape as map, ALWAYS
+  // (EntityImageJson.java:240-242, `json` branch below).
 };
-
-/**
- * A map/json's `shape=plaintext` is EntityImageMap/EntityImageJson's own
- * per-row shield table (svek's RECTANGLE_HTML_FOR_PORTS), NOT the qualifier/
- * `::member` port-shield mechanism this flag drives (svek-dot-emit.ts's
- * portTable — a single compass-point "P" cell, wrong shape for either). A map
- * row link (class-map-commands.ts) sets `fromPort` on its relationship purely
- * as row-target metadata; it must not flip this flag even though
- * shieldedClassifierIds sees the same relationship.
- */
-function shouldMarkPort(
-  shape: DotInputNode['shape'] | undefined,
-  isShieldedPort: boolean,
-  kind: ClassifierKind,
-): boolean {
-  return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
-}
 
 /**
  * T2 (SI17): adapts the publish-only `MeasuredClassifier.portMemberSections`
@@ -225,6 +209,10 @@ export function applyShapeAndPorts(
     // trailer row rather than a shield. `portRows` being PRESENT (not its
     // length) is what switches the emitter and the layout adapter over.
     node.portRows = mapPortRows(classifier, measured);
+  } else if (classifier.kind === 'json') {
+    // Same mechanism as `map` above (SvekNode.java:132-137: row table,
+    // never `:h`); no grammar names a json port, so bands are always empty.
+    node.portRows = [];
   } else if (portShortNames !== undefined && hasPortBands) {
     node.portRows = classFamilyPortRows(measured, portShortNames, classifier.kind);
   }

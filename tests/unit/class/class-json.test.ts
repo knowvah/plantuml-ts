@@ -20,6 +20,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import { layoutClass, classifierLeaves } from '../../../src/diagrams/class/layout.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { ClassDiagramAST, Classifier } from '../../../src/diagrams/class/ast.js';
@@ -234,11 +236,20 @@ describe('json header — display/code order, stereotype, color', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Duplicate name — silent no-op, body still consumed
+// Duplicate name — EXECUTION error, aborts the whole parse
 // ---------------------------------------------------------------------------
+//
+// `CommandCreateJson#executeNow` (CommandCreateJson.java:141-142) returns
+// `CommandExecutionResult.error("JSON already exists: " + CODE)` when the
+// quark already holds data (`:202-203`); `PSystemCommandFactory
+// #executeFewLines` then builds the EXECUTION_ERROR and `createSystem`
+// returns it immediately (`:180-186`, `:136-139`) -- the jar never renders
+// a diagram with the first `J`, it renders an error page (which then
+// crashes measuring the error text, an `accept-candidate:upstream-crash`
+// like zuduxu, cdd4 D6 -- out of scope for this port-side fix).
 
 describe('json — duplicate multiline name', () => {
-  it('leaves the first declaration untouched and consumes the second body', () => {
+  it('refuses execution with "JSON already exists: J" at the second declaration', () => {
     const source = `
 json J {
 "a": 1
@@ -248,17 +259,30 @@ json J {
 }
 class Next
 `;
-    const ast = parse(source);
-    // Only ONE json classifier — the duplicate is a silent no-op.
-    const jsonClassifiers = ast.classifiers.filter((c) => c.kind === 'json');
-    expect(jsonClassifiers).toHaveLength(1);
-    expect(jsonClassifiers[0]!.jsonValue).toEqual({
-      kind: 'object',
-      entries: [{ key: 'a', value: { kind: 'scalar', value: 1 } }],
-    });
-    // The duplicate's body ("b": 2) must not leak as a stray top-level line —
-    // `Next` still parses as its own class right after the consumed body.
-    expect(ast.classifiers.some((c) => c.id === 'Next')).toBe(true);
+    const lines = source
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    const block: UmlSource = { lines, type: 'class' };
+
+    const result = parseClassRaw(block);
+
+    expect(parseRefusalOf(result)).toEqual(
+      expect.objectContaining({ refused: true, kind: 'execution', message: 'JSON already exists: J' }),
+    );
+  });
+});
+
+describe('json — duplicate single-line name', () => {
+  it('refuses execution with "JSON already exists: K" at the second declaration', () => {
+    const lines = ['json K true', 'json K false'];
+    const block: UmlSource = { lines, type: 'class' };
+
+    const result = parseClassRaw(block);
+
+    expect(parseRefusalOf(result)).toEqual(
+      expect.objectContaining({ refused: true, kind: 'execution', message: 'JSON already exists: K' }),
+    );
   });
 });
 
@@ -323,11 +347,10 @@ describe('json — single-line form (CommandCreateJsonSingleLine)', () => {
     });
   });
 
-  it('duplicate single-line name is a silent no-op', () => {
-    const ast = parse('json J6 1\njson J6 2');
-    const jsonClassifiers = ast.classifiers.filter((c) => c.kind === 'json');
-    expect(jsonClassifiers).toHaveLength(1);
-    expect(jsonClassifiers[0]!.jsonValue).toEqual({ kind: 'scalar', value: 1 });
+  it('duplicate single-line name raises an execution error, not a silent no-op', () => {
+    // CommandCreateJsonSingleLine.java:134-135 -- see the "json — duplicate
+    // single-line name" describe above for the full mechanism.
+    expect(() => parse('json J6 1\njson J6 2')).toThrow('JSON already exists: J6');
   });
 });
 

@@ -16,6 +16,10 @@ import { formatMemberText } from '../../../src/diagrams/class/class-layout-helpe
 import { Ports } from '../../../src/core/svek/Ports.js';
 import type { ClassDiagramAST, ClassifierKind } from '../../../src/diagrams/class/ast.js';
 import { isRowPortKind } from '../../../src/diagrams/class/class-shield-helpers.js';
+import { renderSync } from '../../../src/index.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { setLayoutInputObserver, type DotInputGraph } from '../../../src/core/graph-layout.js';
+import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 
 /** T0's oracle header height for a plain single-line class header at
  *  default font -- `dimHeader.getHeight()` read off three independent
@@ -323,5 +327,60 @@ describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () =
 
   it('excludes descriptive, which owns the PORTIN/PORTOUT `:P` path (ADR-5)', () => {
     expect(isRowPortKind('descriptive')).toBe(false);
+  });
+});
+
+/**
+ * T3d (cdd5, json-node-shield): `applyShapeAndPorts`'s `json` branch --
+ * EntityImageJson is RECTANGLE_HTML_FOR_PORTS unconditionally
+ * (svek/image/EntityImageJson.java:240-242), the SAME mechanism `map`
+ * already had, checked BEFORE the shielded-RECTANGLE branch
+ * (svek/SvekNode.java:132-137). Before this fix, a json leaf had NO
+ * `portRows` at all, so `svek-dot-emit.ts#edgeRef` fell through to the
+ * generic ":h" shield every OTHER plaintext node without `portRows` gets --
+ * this is `bizasu-70-vaxa243`'s diagnosed defect
+ * (`plans/class-divergence-drive-5/diagnosis/S2-edge.md`): the packing
+ * (magma) edges between the two json leaves anchored at `:h` where the jar
+ * has plain endpoints, which narrowed and re-centred the graph.
+ */
+describe('applyShapeAndPorts — json leaf (T3d, json-node-shield)', () => {
+  function captureGraphs(puml: string): DotInputGraph[] {
+    const captured: DotInputGraph[] = [];
+    setLayoutInputObserver((g) => captured.push(g));
+    try {
+      renderSync(puml, { measurer: new WidthTableMeasurer() });
+    } finally {
+      setLayoutInputObserver(undefined);
+    }
+    return captured;
+  }
+
+  it('gives every json leaf portRows=[] (present, not undefined) and no isPort', () => {
+    // A single json leaf alone takes the degenerate no-DOT path
+    // (`class-geo-builders.ts#degenerateSingleClassifier`), which never
+    // reaches `applyShapeAndPorts` -- 3+ leaves force the real DOT graph.
+    const graphs = captureGraphs('@startuml\njson myJsonArray [1,2,3]\njson B 2\njson C 3\n@enduml');
+    const jsonNodes = graphs.flatMap((g) => g.nodes).filter((n) => n.shape === 'plaintext');
+
+    expect(jsonNodes).toHaveLength(3);
+    for (const node of jsonNodes) {
+      expect(node.portRows).toEqual([]);
+      expect(node.isPort).toBeUndefined();
+    }
+  });
+
+  it('emits the magma edges between json siblings WITHOUT a ":h" suffix on either endpoint', () => {
+    // bizasu-70-vaxa243's own shape: 3+ json siblings chained by magma
+    // (packing) edges, no user-declared link between them (2 siblings alone
+    // produce no magma edge at all -- `class-magma.ts`'s own chaining rule).
+    const graphs = captureGraphs('@startuml\njson A 1\njson B 2\njson C 3\n@enduml');
+    const dot = graphs.map(toSvekDot).join('\n');
+    const edgeLines = dot.split('\n').filter((l) => /^sh\d+->sh\d+\[/.test(l));
+
+    expect(edgeLines.length).toBeGreaterThan(0);
+    for (const line of edgeLines) {
+      expect(line).not.toMatch(/:h->/);
+      expect(line).not.toMatch(/->sh\d+:h/);
+    }
   });
 });

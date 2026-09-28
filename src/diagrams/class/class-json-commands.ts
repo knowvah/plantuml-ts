@@ -31,6 +31,16 @@ import { resolveReference } from './class-namespace.js';
 import { ensureClassifier, type ParseState } from './parser.js';
 import type { Command } from './class-command-types.js';
 import { jsonCommands, parseJsonNode, type JsonCommandHost } from '../../core/command/CommandCreateJson.js';
+import { refuse } from '../../core/parse-refusal.js';
+
+/** Upstream's own wording, verbatim, from BOTH duplicate-detection sites —
+ *  `CommandCreateJson#executeNow` ("JSON already exists: " + line0.getLazzy
+ *  ("CODE", 0), `CommandCreateJson.java:141-142`) and
+ *  `CommandCreateJsonSingleLine#executeArg` ("JSON already exists: " +
+ *  arg.get("NAME", 1), `CommandCreateJsonSingleLine.java:134-135`). Both
+ *  report the SAME raw id this adapter's `resolve` already receives as
+ *  `rawId` (CODE / NAME group 1 respectively), so one message suffices. */
+const JSON_ALREADY_EXISTS = 'JSON already exists: ';
 
 /**
  * Class-diagram host: resolve-or-create the leaf via the SAME
@@ -55,7 +65,20 @@ function adapt(state: ParseState): JsonCommandHost<Classifier> {
         classifiers: state.ast.classifiers,
         reuseExistingChild: reuseExisting,
       });
-      if (state.classifierIndex.has(id)) return undefined; // "JSON already exists"
+      if (state.classifierIndex.has(id)) {
+        // CommandCreateJson.java:141-142 / CommandCreateJsonSingleLine.java
+        // :134-135 -- entity1 is null (a duplicate quark, :202-203), so
+        // executeNow/executeArg return an EXECUTION error, which aborts the
+        // whole parse (parser.ts:398's `state.executionRefusal` check), not
+        // a silent no-op that keeps the first declaration.
+        state.executionRefusal = refuse(
+          'execution',
+          state.currentLine ?? 0,
+          state.currentLine ?? 0,
+          JSON_ALREADY_EXISTS + rawId,
+        );
+        return undefined;
+      }
 
       const classifier = ensureClassifier(state, rawId, 'json', rawDisplay, reuseExisting);
       if (stereotype !== undefined) classifier.stereotype = stereotype;
