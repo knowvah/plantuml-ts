@@ -16,6 +16,7 @@ import {
 import { ensureClassifier, type ParseState } from './parser.js';
 import { idLeaf } from './class-relationship-parser.js';
 import { type UrlInfo } from './class-url.js';
+import { refuse } from '../../core/parse-refusal.js';
 import { extractBody, extractDecorations, extractInheritance, parseIdDisplay } from './class-declaration-extractors.js';
 
 // ---------------------------------------------------------------------------
@@ -267,18 +268,16 @@ export function parseTagTokens(raw: string): string[] {
  *      (reallyCreateLeaf only — no explicit setLastEntity)
  */
 export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alwaysSetLastEntity: boolean): void {
+  const before = state.ast.classifiers.length;
   const classifier = ensureClassifier(state, decl.id, decl.kind, decl.display);
   if (alwaysSetLastEntity) {
+    const existed = state.ast.classifiers.length === before && state.classifierIndex.has(classifier.id);
+    if (existed && refuseFailedMute(state, decl, classifier.kind)) return;
     state.lastEntity = classifier.id;
     applyVisibilityModifier(classifier, decl.visibilityModifier);
   }
   classifier.kind = decl.kind;
-  if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
-  if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
-  if (decl.typeParamsRawText !== undefined) classifier.typeParamsRawText = decl.typeParamsRawText;
-  if (decl.stereotype !== undefined) classifier.stereotype = decl.stereotype;
-  if (decl.color !== undefined) classifier.color = decl.color;
-  if (decl.url !== undefined) classifier.url = decl.url;
+  copyDeclDecorations(classifier, decl);
   // Accumulate + dedup — upstream Entity#addStereotag adds into a Set, so a
   // re-declaration's tags join the earlier ones instead of replacing them.
   if (decl.tags.length > 0) {
@@ -290,6 +289,60 @@ export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alw
   }
   applyInheritanceClauses(state, classifier.id, decl);
   if (decl.opensBody) state.pendingBodyId = classifier.id;
+}
+
+/** The declaration's optional usymbol/generic/stereotype/color/url fields --
+ *  split out of {@link applyClassifierDecl} purely for its CCN cap (pure
+ *  move, no behaviour change). */
+function copyDeclDecorations(classifier: Classifier, decl: ClassifierDecl): void {
+  if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
+  if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
+  if (decl.typeParamsRawText !== undefined) classifier.typeParamsRawText = decl.typeParamsRawText;
+  if (decl.stereotype !== undefined) classifier.stereotype = decl.stereotype;
+  if (decl.color !== undefined) classifier.color = decl.color;
+  if (decl.url !== undefined) classifier.url = decl.url;
+}
+
+/** `Entity#muteToType`'s two whitelists (`abel/Entity.java:212-222`): the
+ *  kinds an existing entity may mute FROM, and (plus OBJECT) TO. Port kinds:
+ *  `abstract` is `LeafType.ABSTRACT_CLASS` (`LeafType.java:72-73`). */
+const MUTABLE_FROM: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([
+  'annotation',
+  'abstract',
+  'class',
+  'enum',
+  'interface',
+  'record',
+  'dataclass',
+]);
+const MUTABLE_TO: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>([...MUTABLE_FROM, 'object']);
+
+/** `CommandCreateClass.java:196` ("Bad name") and
+ *  `CommandCreateClassMultilines.java:246`'s message. */
+const BAD_NAME = 'Bad name';
+
+/**
+ * cdd5-T4b: an existing entity re-declared with another TYPE must pass
+ * `Entity#muteToType` (`abel/Entity.java:205-230`: "if (newType ==
+ * this.leafType) return true;" then both whitelists, else "return false;").
+ * On failure both class commands return an execution error before touching
+ * the entity -- the single-line one "Bad name" (`CommandCreateClass.java:
+ * 195-197`), the multi-line one "Cannot create " + idShort + " because it
+ * already exists" (`CommandCreateClassMultilines.java:245-246`). A `{ ... }`
+ * body or inline members mean the multi-line command matched.
+ *
+ * Not ported: the multi-line command's error is attributed to its block's
+ * LAST line (the whole block is one `BlocLines`); this refusal carries the
+ * opener's line, since the closing `}` is consumed in `parser.ts`.
+ */
+function refuseFailedMute(state: ParseState, decl: ClassifierDecl, oldKind: ClassifierKind): boolean {
+  if (oldKind === decl.kind) return false;
+  if (MUTABLE_FROM.has(oldKind) && MUTABLE_TO.has(decl.kind)) return false;
+  const multiline = decl.opensBody || decl.inlineMembers.length > 0;
+  const message = multiline ? `Cannot create ${decl.id} because it already exists` : BAD_NAME;
+  const line = state.currentLine ?? 0;
+  state.executionRefusal = refuse('execution', line, line, message, 0);
+  return true;
 }
 
 /**
