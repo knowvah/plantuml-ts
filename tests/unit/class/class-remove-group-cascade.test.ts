@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
 import { computeRemovedIds, filterRemovedEntities } from '../../../src/diagrams/class/class-directives.js';
+import { computeRemovedRanks } from '../../../src/diagrams/class/class-directives-remove-ranks.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
@@ -43,5 +44,21 @@ describe('remove folds over groups and cascades to their contents', () => {
   it('`remove @unlinked` removes a group only when every child is unlinked', () => {
     const ast = parse('package P {\nclass A\n}\npackage Q {\nclass B\n}\nclass C\nB -- C\nremove @unlinked');
     expect([...computeRemovedIds(ast)].sort()).toEqual(['P', 'P.A']);
+  });
+});
+
+describe('a removed group keeps its burned uid rank (cdd5 close-b5, xamive)', () => {
+  // `Entity`'s ctor assigns the shared uid counter at PARSE time
+  // (abel/Entity.java:171) and `remove` only skips the group at export
+  // (GraphvizImageBuilder printGroups:413), so a removed namespace leaves a
+  // hole in the numbering exactly like a removed leaf does.
+  it('re-injects the removed namespace creationIndex', () => {
+    const ast = parse('namespace Foo {\nnamespace Bar {\nclass Quz\n}\nclass Quz\n}\nnamespace Bar {}\nremove Foo.Bar');
+    const nsBar = ast.namespaces.find((n) => n.id === 'Foo.Bar');
+    const inner = ast.classifiers.find((c) => c.id === 'Foo.Bar.Quz');
+    expect(nsBar?.creationIndex).toBeDefined();
+    expect(computeRemovedRanks(ast).sort((a, b) => a - b)).toEqual(
+      [nsBar!.creationIndex!, inner!.creationIndex!].sort((a, b) => a - b),
+    );
   });
 });

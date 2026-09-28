@@ -55,6 +55,9 @@ export function computeRemovedRanks(ast: ClassDiagramAST): number[] {
   if (removed.size === 0) return [];
   const ranks: number[] = [];
   for (const c of ast.classifiers) if (removed.has(c.id)) pushRank(ranks, c.creationIndex);
+  // cdd5 close-b5 (xamive): a removed GROUP burned its rank at parse time
+  // too (abel/Entity.java:171) and is only skipped at export (printGroups:413).
+  for (const ns of ast.namespaces) if (removed.has(ns.id)) pushRank(ranks, ns.creationIndex);
   for (const n of ast.notes) pushNoteRanks(ranks, n, removed);
   for (const r of ast.relationships) pushRelationshipRanks(ranks, r, removed);
   return ranks;
