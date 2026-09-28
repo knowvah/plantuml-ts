@@ -1,7 +1,11 @@
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
+import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+// D6 (cdd6-T1c): shared with json/yaml -- see `jsonSpriteRegistryFor`'s own
+// doc comment (json/yaml/hcl already share `layoutJson`/`renderJson`).
+import { jsonSpriteRegistryFor } from '../json/parser.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 
@@ -306,12 +310,13 @@ function parseTerms(terms: HclTerm[]): unknown {
 // Public API — port of the Java entry point
 // ---------------------------------------------------------------------------
 
-export function parseHcl(source: UmlSource): JsonDiagramAST {
+export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
   const bodyLines: string[] = [];
   let scale: ScaleSpec | undefined;
   let inStyleBlock = false;
   const annotations = createAnnotations();
-  const sprites = createSpriteRegistry();
+  // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
+  const sprites = jsonSpriteRegistryFor(options);
   const lines = source.lines;
 
   for (let i = 0; i < lines.length; i++) {

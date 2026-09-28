@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1255 modules · 4731 exported names.
+1255 modules · 4732 exported names.
 
 ## `src/`
 
@@ -1433,7 +1433,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
 | `layout.ts` | `JsonRowGeo`, `JsonNodeGeo`, `JsonEdgeGeo`, `JsonGeometry`, `layoutJson` | JSON diagram layout engine. |
 | `Mirror.ts` | `setMirrorBadValueHandler`, `Mirror` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/Mirror.java Upstream lays a json diagram out on a TRANSPOSED graph and rotates the answer back. |
-| `parser.ts` | `parseJson` | Parser for PlantUML JSON diagrams (@startjson / @endjson). |
+| `parser.ts` | `jsonSpriteRegistryFor`, `parseJson` | Parser for PlantUML JSON diagrams (@startjson / @endjson). |
 | `renderer-pen.ts` | `PenInk`, `JsonPen`, `penFor` | The seam between "which shapes this diagram draws" and "how they are drawn". |
 | `renderer-style.ts` | `HighlightClassStyle`, `BoxStyleJson`, `TextStyleJson`, `NodeStyleJson`, `JSON_SKIN_BLACK`, `SVG_CORNER_DIVISOR`, `resolveNodeStyle` | The resolved `jsonDiagram.node` style — the whole skinparam/style cascade for the json family, collapsed once per diagram into plain values the renderer only reads. |
 | `renderer.ts` | `renderJson` | JSON diagram SVG renderer. |

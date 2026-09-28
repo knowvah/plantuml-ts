@@ -12,6 +12,9 @@
  */
 
 import type { SequenceDiagramAST } from './ast.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { matchSpriteBase64Command } from './command-sprite.js';
@@ -375,9 +378,13 @@ function runDispatchLoop(state: ParseState, lines: readonly string[]): ParseRefu
  *    `AbstractDiagram#checkFinalError` (`:161-163`), itself a hard-coded
  *    `return null`. The override never actually returns a non-null error.
  */
-export function parseSequence(lines: readonly string[]): SequenceDiagramAST | ParseRefusal {
+export function parseSequence(lines: readonly string[], options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
+  // D6 (cdd6-T1c): resolved ONCE, mirroring `class/parser.ts:326-327`'s own
+  // pair (`internalSpriteStoreFrom`/`internalEmojiStoreFrom`).
+  const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
+  const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
   const state: ParseState = {
-    ast: makeDefaultAST(),
+    ast: makeDefaultAST(internalSprites, internalEmoji),
     frameStack: [],
     participantIndex: new Map(),
     pendingNote: null,

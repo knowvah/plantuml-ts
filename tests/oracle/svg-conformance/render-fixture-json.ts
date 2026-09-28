@@ -26,6 +26,7 @@
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
+import type { ParseOptions } from '../../../src/core/dispatcher.js';
 import { buildTheme } from '../../../src/core/build-theme.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -40,11 +41,13 @@ import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js'
 import { assembleSvg } from '../../../src/index.js';
 
 /** The one per-type step. All three parsers share the signature
- *  `(UmlSource) => JsonDiagramAST`; everything after this is shared code. */
-function parseForType(block: UmlSource): JsonDiagramAST {
-  if (block.type === 'yaml') return parseYaml(block);
-  if (block.type === 'hcl') return parseHcl(block);
-  return parseJson(block);
+ *  `(UmlSource, ParseOptions?) => JsonDiagramAST`; everything after this is
+ *  shared code. `options` forwarded to each (D6, cdd6-T1c), mirroring
+ *  `json/index.ts`/`yaml/index.ts`/`hcl/index.ts`'s own `plugin.parse`. */
+function parseForType(block: UmlSource, options?: ParseOptions): JsonDiagramAST {
+  if (block.type === 'yaml') return parseYaml(block, options);
+  if (block.type === 'hcl') return parseHcl(block, options);
+  return parseJson(block, options);
 }
 
 /**
@@ -64,14 +67,21 @@ function shellTypeFor(block: UmlSource): string {
   return 'JSON';
 }
 
+/** `renderFixtureJson`'s own options bag: `PreprocessOptions` (forwarded to
+ *  `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
+ *  `parseForType` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
+ *  `FixtureClassOptions`. */
+type FixtureJsonOptions = PreprocessOptions & ParseOptions;
+
 /**
  * Renders a `.puml` fixture through the json-family low-level pipeline with
  * `measurer` injected at the layout stage. Handles `@startjson`, `@startyaml`
  * and `@starthcl` — dispatching only the parse, since the three share
  * `layoutJson`/`renderJson`. `options` passes through to `buildBlockUmls`
- * verbatim. Throws if the markup contains no diagram block.
+ * verbatim; `options.assetStore` is forwarded separately to `parseForType`
+ * (D6, cdd6-T1c). Throws if the markup contains no diagram block.
  */
-export function renderFixtureJson(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+export function renderFixtureJson(markup: string, measurer: StringMeasurer, options?: FixtureJsonOptions): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -84,7 +94,7 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
   const block: UmlSource = { ...first.source, rawStyles: preprocessed.styles };
 
-  const ast = parseForType(block);
+  const ast = parseForType(block, { assetStore: options?.assetStore });
   const geo = layoutJson(ast, theme, measurer);
   const fragment = { ...renderJson(geo, theme), diagramType: shellTypeFor(block) };
 
