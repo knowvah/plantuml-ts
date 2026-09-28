@@ -64,16 +64,29 @@ export const ELEMENT_BUCKET_SNAMES = new Set([
   // bucket mechanism, for FREE) AND the legacy flat `stereotype<X>
   // BackgroundColor`/`stereotype<X>BorderColor` skinparam form (X in
   // A/C/E/I/N -- `matchStereotypeSpotColorKey` below translates the letter
-  // to the SAME sname). Scoped to the 5 badge kinds this port's own
-  // `class-badge.ts#badgeFill` supports (class/abstract/interface/enum/
-  // annotation) -- upstream also has `spotRecord`/`spotDataClass`
-  // (stereotypeR/D), unsurveyed, no `ClassifierKind` member exists for
-  // either yet (narrower scope, matches `badgeFill`'s own precedent).
+  // to the SAME sname). Originally scoped to the 5 badge kinds this port's
+  // `class-badge.ts#badgeFill` surveyed first (class/abstract/interface/
+  // enum/annotation).
   'spotclass',
   'spotabstractclass',
   'spotinterface',
   'spotenum',
   'spotannotation',
+  // cdd5-T3e (badge-leaftype-spot-unported, `diagnosis/S1-text.md`): the
+  // remaining `SName.spot<Kind>` members (`style/SName.java:174-187`), now
+  // that `class-badge.ts#leafTypeSpotFill`/`leafTypeSpotSname` survey the
+  // `ClassifierKind` members reaching each (dataclass/struct/exception/
+  // metaclass/stereotype/record/protocol). No legacy `stereotype<X>` letter
+  // exists for any of these seven (`matchStereotypeSpotColorKey`'s own A/C/
+  // E/I/N set is exhaustive upstream) -- only the modern `<style>` selector
+  // spelling reaches them.
+  'spotdataclass',
+  'spotstruct',
+  'spotexception',
+  'spotmetaclass',
+  'spotstereotype',
+  'spotrecord',
+  'spotprotocol',
   // G2 N34: class-diagram note bucket (`<style> note { BackgroundColor ...
   // } </style>`, `EntityImageNote.java#getStyleSignature` -- `SName.note`
   // under `SName.element`) -- reachable for FREE via this same generic

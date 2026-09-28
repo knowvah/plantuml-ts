@@ -65,9 +65,44 @@
  * see `class-badge-sized-glyphs.ts` for the SAME letter captured at OTHER
  * font sizes (G2 N38: not a linear scale of this table, AWT hinting rounds
  * each point size's contour independently).
+ *
+ * cdd5-T3e (badge-glyph-letter-uncaptured, `diagnosis/S2-edge.md`
+ * `dedumo-33-paco879`/`fepoko-61-fona364`/`regodu-14-peve499`): T/H added --
+ * `<< (T,color) >>`/`<< (H,color) >>` custom stereotype-char badges
+ * (`EntityImageClassHeader.java:179-183`, `stereotype.getCharacter() != 0`)
+ * fell through `resolveBadgeLetter`'s captured-table check (`class-badge.ts`)
+ * to the kind's own default letter ('C') for want of an entry here, same
+ * mechanism T21 fixed for R/J/O/W/D/Q/S/X.
+ *   - T: `class user_role << (T,#FFAAAA) >>`, `dedumo-33-paco879/in.svg`
+ *     (`cx=30.522, cy=23`) -- cross-verified against 4 further occurrences
+ *     (`punofe-33-loji825` cx=76.956; `kexaba-26-kobu577` cx=41.696,cy=23
+ *     and cx=51.538,cy=173; `rexobo-28-rite508` 3 occurrences, cx/cy up to
+ *     309/291), every one reducing to this same reference-center `d` within
+ *     the standard 0.01 numeric tolerance.
+ *   - H: `class ... << (H,#E6FFE6) >>`, `fepoko-61-fona364/in.svg`
+ *     (`cx=60.856, cy=23`) -- cross-verified against `regodu-14-peve499`'s 5
+ *     own H occurrences (cx/cy up to 224.764/736).
  */
 export type BadgeLetter =
-  'C' | 'I' | 'A' | 'E' | '@' | 'P' | 'M' | 'F' | '?' | 'R' | 'J' | 'O' | 'W' | 'D' | 'Q' | 'S' | 'X';
+  | 'C'
+  | 'I'
+  | 'A'
+  | 'E'
+  | '@'
+  | 'P'
+  | 'M'
+  | 'F'
+  | '?'
+  | 'R'
+  | 'J'
+  | 'O'
+  | 'W'
+  | 'D'
+  | 'Q'
+  | 'S'
+  | 'X'
+  | 'T'
+  | 'H';
 
 /** Reference badge center every {@link BADGE_GLYPH_D} entry is captured at. */
 export const REFERENCE_CX = 22;
@@ -196,4 +231,10 @@ export const BADGE_GLYPH_D: Record<BadgeLetter, string> = {
   X:
     'M26.511,29.5 L23.98,29.5 L21.614,25.399 L19.256,29.5 L16.725,29.5 L20.36,23.208 ' +
     'L16.824,17.107 L19.356,17.107 L21.614,21.05 L23.88,17.107 L26.412,17.107 L22.892,23.208 Z',
+  T:
+    'M23.342,30.25 L20.893,30.25 L20.893,19.999 L17.747,19.999 L17.747,17.857 L26.488,17.857 ' +
+    'L26.488,19.999 L23.342,19.999 Z',
+  H:
+    'M17.637,17.107 L20.086,17.107 L20.086,21.83 L23.149,21.83 L23.149,17.107 L25.598,17.107 ' +
+    'L25.598,29.5 L23.149,29.5 L23.149,23.988 L20.086,23.988 L20.086,29.5 L17.637,29.5 Z',
 };
