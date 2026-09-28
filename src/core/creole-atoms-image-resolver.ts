@@ -172,13 +172,28 @@ export class SpritePrimitiveCollector implements UGraphic {
     private readonly primitives: DrawablePrimitive[],
   ) {}
 
-  static create(): SpritePrimitiveCollector {
-    // Defaults are inert: `SvgNanoParser.drawU`'s FIRST act is always
-    // `updateColor` (`ug.apply(new Fore(...)).apply(new Back(...))`,
+  /**
+   * D3 (cdd6 T1b, sprite-ambient-stroke): `ambientStroke` seeds the
+   * collector's initial stroke -- unlike fore/back (inert, see below),
+   * this ONE default is NOT inert: `SvgNanoParser.java:187-215`'s
+   * `applyFillAndStroke` calls `ugs.apply(stroke)` ONLY when the path
+   * declares its OWN `stroke-width` (`svg-nanoparser-shapes.ts
+   * #applyFillAndStroke`, matching); an unset path never overrides this
+   * seed, so it draws with whatever stroke the CALLER had active before
+   * entering `SvgNanoParser.drawU` (0.5 for a state/card body row, 1 for a
+   * note -- `plantuml.skin:93` `element { LineThickness 0.5 }` vs
+   * `root`'s own `1.0`, `:15` -- cdd5 T4c's disproved-mechanism finding).
+   * Defaults to `UStroke.simple()` -- the pre-D3 hardcoded value -- so
+   * every existing caller (none yet passes an ambient stroke) is
+   * byte-identical.
+   */
+  static create(ambientStroke: UStroke = UStroke.simple()): SpritePrimitiveCollector {
+    // Fore/back defaults ARE inert: `SvgNanoParser.drawU`'s FIRST act is
+    // always `updateColor` (`ug.apply(new Fore(...)).apply(new Back(...))`,
     // `UGraphicWithScale.create`), so every real `draw()` call sees an
     // explicitly-applied fore/back, never these fallbacks -- matching
-    // `UGraphicNo.getParam()`'s identical all-black/simple-stroke defaults.
-    return new SpritePrimitiveCollector(UTranslate.none(), 'black', 'black', UStroke.simple(), []);
+    // `UGraphicNo.getParam()`'s identical all-black default.
+    return new SpritePrimitiveCollector(UTranslate.none(), 'black', 'black', ambientStroke, []);
   }
 
   apply(change: UChange): UGraphic {
@@ -267,6 +282,7 @@ export function resolveSvgSpriteAtom(
   svg: string,
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
+  ambientStroke?: UStroke,
 ): ResolvedAtomImage {
   const dims = measureInlineAtom(atom, spriteDims, font.size);
   // G10: `spriteAtomScale`, not `spriteScale` — a sprite inside a `[[url
@@ -275,7 +291,7 @@ export function resolveSvgSpriteAtom(
   // above) and this decomposition must read the SAME number or the sprite
   // draws at a different size than it measures.
   const scale = spriteAtomScale(atom, font.size);
-  const collector = SpritePrimitiveCollector.create();
+  const collector = SpritePrimitiveCollector.create(ambientStroke);
   new SvgNanoParser(svg).drawU(
     collector,
     scale,
@@ -316,9 +332,10 @@ function resolveSpriteAtom(
   registry: SpriteRegistry,
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
+  ambientStroke?: UStroke,
 ): ResolvedAtomImage {
   const svgSprite = getSpriteSvg(registry, atom.name);
-  if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font);
+  if (svgSprite !== undefined) return resolveSvgSpriteAtom(atom, svgSprite.svg, spriteDims, font, ambientStroke);
   const sprite = getSpriteMonochrome(registry, atom.name);
   if (sprite === undefined) return resolveColorSpriteAtom(atom, registry, spriteDims, font);
   // `font.size` is threaded so the sprite picks up `CommandCreoleSprite`'s
@@ -364,6 +381,10 @@ function resolveSpriteAtom(
  */
 export function makeAtomImageResolverFor(
   registry: SpriteRegistry | undefined,
+  // D3 (cdd6 T1b, sprite-ambient-stroke): see `SpritePrimitiveCollector
+  // .create`'s own doc comment. `undefined` (every caller today) preserves
+  // the pre-D3 `UStroke.simple()` seed exactly.
+  ambientStroke?: UStroke,
 ): (font: FontConfiguration) => AtomImageResolver {
   const spriteDims = registry !== undefined ? spriteDimsLookupFor(registry) : undefined;
   return (font: FontConfiguration): AtomImageResolver => {
@@ -375,7 +396,7 @@ export function makeAtomImageResolverFor(
       // than guessing an unverified description-side render path.
       if (atom.kind === 'openiconic') return undefined;
       if (registry === undefined || spriteDims === undefined) return undefined;
-      return resolveSpriteAtom(atom, registry, spriteDims, font);
+      return resolveSpriteAtom(atom, registry, spriteDims, font, ambientStroke);
     };
   };
 }

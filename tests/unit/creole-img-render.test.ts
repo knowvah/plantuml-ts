@@ -52,6 +52,7 @@ import { encodePng, toBase64DataUri } from '../../src/core/klimt/sprite/png-enco
 import { pathBBox } from '../../src/core/klimt/sprite/svg-path-bbox.js';
 import { UPath } from '../../src/core/klimt/shape/UPath.js';
 import { UEllipse } from '../../src/core/klimt/shape/UEllipse.js';
+import { UStroke } from '../../src/core/klimt/UStroke.js';
 import { makeAtomImageResolverFor } from '../../src/core/creole-atoms-image-resolver.js';
 import { buildTextBlock } from '../../src/core/svek/image/EntityImageDescriptionSupport.js';
 import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
@@ -335,6 +336,56 @@ describe('makeAtomImageResolverFor — SVG sprite atoms resolve to kind: "drawab
 
     expect(svg).toContain('<path');
     expect(svg).not.toContain('<image');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D3/sprite-ambient-stroke (cdd6 T1b): the jar's unset sprite `stroke-width`
+// inherits the CALLER's ambient stroke (`SvgNanoParser.java:187-215` --
+// `applyFillAndStroke` only calls `ugs.apply(stroke)` when the path DOES
+// declare `stroke-width`; otherwise `ugs`'s stroke stays whatever the
+// caller last applied). This port's `SpritePrimitiveCollector` previously
+// seeded a hardcoded `UStroke.simple()` regardless of caller context
+// (`creole-atoms-image-resolver.ts:181`, cdd5 T4c). `makeAtomImageResolverFor`
+// now accepts an optional ambient stroke, threaded to the collector's seed --
+// still defaulting to `UStroke.simple()` when omitted, so every existing
+// caller (none of which pass one yet) is byte-identical.
+// ---------------------------------------------------------------------------
+
+describe('makeAtomImageResolverFor — ambient stroke threading (D3, sprite-ambient-stroke)', () => {
+  const STROKE_WIDTH_SVG =
+    '<svg width="10" height="10"><path d="M0 0L10 0L10 10L0 10Z" stroke="green" stroke-width="3"/></svg>';
+
+  test('a path with no stroke-width inherits the caller-supplied ambient stroke, not UStroke.simple()', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const ambient = UStroke.withThickness(0.5);
+    const resolve = makeAtomImageResolverFor(registry, ambient)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+    expect(result.primitives[0]!.stroke.getThickness()).toBe(0.5);
+  });
+
+  test('omitting the ambient stroke keeps the pre-existing UStroke.simple() default (no regression)', () => {
+    const registry = buildSpriteRegistryWithSvg('sq', SQUARE_SVG);
+    const resolve = makeAtomImageResolverFor(registry)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+    expect(result.primitives[0]!.stroke.getThickness()).toBe(UStroke.simple().getThickness());
+  });
+
+  test("a path's OWN stroke-width still wins over the ambient stroke (SvgNanoParser.java:187-215)", () => {
+    const registry = buildSpriteRegistryWithSvg('sq3', STROKE_WIDTH_SVG);
+    const ambient = UStroke.withThickness(0.5);
+    const resolve = makeAtomImageResolverFor(registry, ambient)(FONT);
+    const atom: InlineAtomToken = { kind: 'sprite', name: 'sq3', scale: 1 };
+    const result = resolve(atom);
+    if (result?.kind !== 'drawable') throw new Error('expected the drawable variant');
+    // scale is the collector's own initial scale (1 for a 14px font vs the
+    // sprite's native 13px baseline is NOT 1:1 -- read back the ambient
+    // fallback case's own thickness unit instead of hand-computing one).
+    expect(result.primitives[0]!.stroke.getThickness()).not.toBe(0.5);
   });
 });
 
