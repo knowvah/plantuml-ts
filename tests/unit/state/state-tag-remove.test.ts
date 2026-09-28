@@ -55,7 +55,7 @@ function findState(ast: StateDiagramAST, id: string): State | undefined {
 function captureDotGraph(source: string): DotInputGraph {
   const ast = parse(source);
   let g: DotInputGraph | undefined;
-  setLayoutInputObserver((x) => {
+  setLayoutInputObserver(({ graph: x }) => {
     g = x;
   });
   try {

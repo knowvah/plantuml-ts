@@ -42,10 +42,9 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { renderSync } from '../src/index.js';
-import { setLayoutInputObserver } from '../src/core/graph-layout.js';
+import { setLayoutInputObserver, type LayoutInputEvent } from '../src/core/graph-layout.js';
 import { WidthTableMeasurer } from '../src/core/measurer.js';
-import type { DotInputGraph } from '../src/core/graph-layout.types.js';
-import { parseSvekDot, dotInputToStructural, compareStructural } from '../tests/oracle/svek-dot.js';
+import { computeDotEqual, hasActiveSmetanaPragma } from './lib/survey-dot-equal.js';
 import { buildSpriteAssetsStore } from './sprite-assets-store.js';
 // cdd4-T9 (journal row 11): the jar always has its Twemoji artwork too --
 // same argument as the sprite store above (lecelo-92-loma110).
@@ -106,10 +105,6 @@ const RENDER_TIMEOUT_MS = Number(process.env.SVG_PARITY_TIMEOUT_MS ?? 60_000);
 const CONCURRENCY = Number(process.env.SVG_PARITY_CONCURRENCY ?? 6);
 /** Lizard-safe (no regex literals in flagged positions): svek-<N>.dot dumps. */
 const SVEK_DOT_RE = new RegExp('^svek-([0-9]+)\\.dot$');
-/** Oracle-blind fixtures (`!pragma layout smetana|elk`): the jar only dumps
- *  svek DOT on the graphviz path, so DOT-parity has no oracle to compare
- *  against — mirrors scripts/dot-sync-report.ts's oracleBlind bucket. */
-const PRAGMA_LAYOUT_RE = /!pragma\s+layout\s+/i;
 
 // ---------------------------------------------------------------------------
 // Public types — the interface contract consumed by the dashboard + T18/T19.
@@ -127,7 +122,8 @@ export interface FixtureRow {
   maxDeltaPath?: string;
   errMsg?: string;
   /** `!pragma layout smetana|elk` — DOT-parity has no oracle; dotEqual is a
-   *  safe `false` rather than a real judgment. See PRAGMA_LAYOUT_RE. */
+   *  safe `false` rather than a real judgment. See `hasActiveSmetanaPragma`
+   *  (scripts/lib/survey-dot-equal.ts). */
   oracleBlind?: boolean;
 }
 
@@ -194,20 +190,6 @@ export function diffVerdict(
   return { verdict: 'structural-match', maxDelta, ...pathField };
 }
 
-/** DOT-level parity: mirrors scripts/dot-sync-report.ts's analyzeFixture. Both
- *  sides skipping graphviz (degenerate single-leaf/empty diagrams) IS
- *  agreement; a count mismatch or a structural check failure is not. */
-export function computeDotEqual(dots: string[], inputs: DotInputGraph[], oracleBlind: boolean): boolean {
-  if (oracleBlind) return false;
-  if (dots.length === 0 && inputs.length === 0) return true;
-  if (inputs.length === 0) return false;
-  if (dots.length !== inputs.length) return false;
-  return dots.every((dot, i) => {
-    const diff = compareStructural(parseSvekDot(dot), dotInputToStructural(inputs[i]!));
-    return diff.structurallyEqual;
-  });
-}
-
 // ---------------------------------------------------------------------------
 // Fixture discovery
 // ---------------------------------------------------------------------------
@@ -262,10 +244,10 @@ function readSvekDots(dir: string): string[] {
  *  `__RENDER_ERROR__` sentinel to stderr and exits nonzero. */
 function renderOneMode(dir: string): void {
   const markup = readFileSync(join(dir, 'in.puml'), 'utf-8');
-  const oracleBlind = PRAGMA_LAYOUT_RE.test(markup);
+  const oracleBlind = hasActiveSmetanaPragma(markup);
   const svekDots = readSvekDots(dir);
-  const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  const events: LayoutInputEvent[] = [];
+  setLayoutInputObserver((e) => events.push(e));
   let svg: string;
   try {
     // The jar always has its internal sprites available, so a survey that
@@ -286,7 +268,7 @@ function renderOneMode(dir: string): void {
     process.exit(1);
   }
   setLayoutInputObserver(undefined);
-  const dotEqual = computeDotEqual(svekDots, inputs, oracleBlind);
+  const dotEqual = computeDotEqual(svekDots, events, oracleBlind, markup);
   process.stdout.write(JSON.stringify({ svg, dotEqual, oracleBlind }));
 }
 
@@ -294,17 +276,17 @@ function renderOneMode(dir: string): void {
  *  reusable half of {@link renderOneMode}. */
 function renderFrame(dir: string): string {
   const markup = readFileSync(join(dir, 'in.puml'), 'utf-8');
-  const oracleBlind = PRAGMA_LAYOUT_RE.test(markup);
+  const oracleBlind = hasActiveSmetanaPragma(markup);
   const svekDots = readSvekDots(dir);
-  const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  const events: LayoutInputEvent[] = [];
+  setLayoutInputObserver((e) => events.push(e));
   try {
     const svg = renderSync(markup, {
       measurer: new WidthTableMeasurer(),
       assetStore: SURVEY_ASSET_STORE,
       includeStore: fixtureIncludeStore(),
     });
-    return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, inputs, oracleBlind), oracleBlind });
+    return JSON.stringify({ svg, dotEqual: computeDotEqual(svekDots, events, oracleBlind, markup), oracleBlind });
   } catch (err) {
     return JSON.stringify({ error: errText(err).split('\n')[0] });
   } finally {

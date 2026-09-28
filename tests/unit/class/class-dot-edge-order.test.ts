@@ -115,7 +115,7 @@ describe('class-dot-edge-order.ts getOrderedLinks — wired into class-dot-graph
 
   function captureGraphs(puml: string): DotInputGraph[] {
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       renderSync(puml, { measurer });
     } finally {

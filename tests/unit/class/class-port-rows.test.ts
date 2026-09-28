@@ -346,7 +346,7 @@ describe('row-port kind set is pinned (isRowPortKind <-> electionTextFor)', () =
 describe('applyShapeAndPorts — json leaf (T3d, json-node-shield)', () => {
   function captureGraphs(puml: string): DotInputGraph[] {
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       renderSync(puml, { measurer: new WidthTableMeasurer() });
     } finally {

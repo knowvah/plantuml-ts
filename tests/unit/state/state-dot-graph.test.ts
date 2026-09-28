@@ -29,7 +29,7 @@ const measurer = new WidthTableMeasurer();
 
 function captureFirst(puml: string): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured ??= g;
   });
   try {

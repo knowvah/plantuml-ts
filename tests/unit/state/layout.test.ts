@@ -957,7 +957,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -986,7 +986,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1012,7 +1012,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1037,7 +1037,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1074,7 +1074,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1108,7 +1108,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1130,7 +1130,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1162,7 +1162,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {
@@ -1186,7 +1186,7 @@ describe('layoutState -- cluster title table HEIGHT seam (G6 T2, mechanism 16 ve
       transitions: [{ from: 'Child', to: 'External' }],
     };
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutState(ast, theme, measurer);
     } finally {

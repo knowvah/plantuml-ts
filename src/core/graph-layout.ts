@@ -54,10 +54,39 @@ type OutClusters = NonNullable<DotLayoutResult['clusters']>;
 // compare against the oracle's svek-*.dot. Undefined (no-op) by default and in
 // every production path. See oracle/README.md and tests/oracle/.
 // Code review: layoutInputObserver is a shared module-level global set via setLayoutInputObserver; concurrent render() calls from the same process that both install an observer will race. Revisit if oracle/parity tests are ever parallelized within a single worker.
-let layoutInputObserver: ((input: DotInputGraph) => void) | undefined;
+export interface LayoutInputEvent {
+  graph: DotInputGraph;
+  /** How many `{{ }}` embeds (`EmbeddedDiagram.ts#getInternalTextBlock`)
+   *  enclose this layout call, 0 at the top level. cdd6-T0b/D9: the jar's
+   *  nested json/yaml embeds go through Smetana and dump no svek DOT
+   *  (CLAUDE.md's "One layout engine" ruling), so a DOT-parity consumer
+   *  must compare only `nestedDepth === 0` graphs against the oracle's
+   *  svek-*.dot dumps — see `scripts/lib/survey-dot-equal.ts`. */
+  nestedDepth: number;
+}
 
-export function setLayoutInputObserver(fn: ((input: DotInputGraph) => void) | undefined): void {
+let layoutInputObserver: ((event: LayoutInputEvent) => void) | undefined;
+
+export function setLayoutInputObserver(fn: ((event: LayoutInputEvent) => void) | undefined): void {
   layoutInputObserver = fn;
+}
+
+/** Bumped by `EmbeddedDiagram.ts#getInternalTextBlock` around its one call to
+ *  the injected `NestedDiagramRenderer` (try/finally), so every layout the
+ *  nested render triggers reports the correct {@link LayoutInputEvent.nestedDepth}.
+ *  Module-level rather than per-call-site, matching `class-nested-diagram-
+ *  renderer.ts`'s own `embedDepth` precedent (its own doc comment explains why
+ *  a per-instance counter cannot work here: JS's single-threaded, fully
+ *  synchronous `renderSync` call chain makes one shared counter safe and
+ *  correct). */
+let nestedLayoutDepth = 0;
+
+export function enterNestedDiagramLayout(): void {
+  nestedLayoutDepth++;
+}
+
+export function exitNestedDiagramLayout(): void {
+  nestedLayoutDepth--;
 }
 
 /** graphviz reports node centre coords; renderers expect the top-left corner.
@@ -314,7 +343,7 @@ export function layoutGraph(
   // does. Marking after this point would emit a faithful DOT from a graph the
   // layout never saw -- the exact split `sametail` had before it was fixed.
   input = withSameContainerConstraints(input);
-  layoutInputObserver?.(input);
+  layoutInputObserver?.({ graph: input, nestedDepth: nestedLayoutDepth });
   if (input.nodes.length === 0) {
     return { nodes: [], edges: [], width: 0, height: 0 };
   }

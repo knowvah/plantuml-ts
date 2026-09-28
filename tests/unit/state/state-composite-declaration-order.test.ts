@@ -29,7 +29,7 @@ import type { DotInputGraph } from '../../../src/core/graph-layout.js';
  *  nested (autonom/region) passes fire before their containing pass. */
 function capturePasses(src: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(src);
   } finally {

@@ -107,7 +107,7 @@ function emitterLevels(input: DotInputGraph): Map<string, WrapperLevels> {
 }
 
 let captured: DotInputGraph[] = [];
-beforeAll(() => setLayoutInputObserver((g) => captured.push(g)));
+beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
 for (const { label, dir, fixtures } of CORPORA) {

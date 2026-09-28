@@ -239,7 +239,7 @@ class B {
 A <|-- B
 @enduml`;
     const graphs: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => graphs.push(g));
+    setLayoutInputObserver(({ graph: g }) => graphs.push(g));
     try {
       renderSync(src, { measurer });
     } finally {

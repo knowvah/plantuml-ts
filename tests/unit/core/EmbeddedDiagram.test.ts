@@ -5,7 +5,7 @@
  * line-collection algorithm (including the nested-`{{ }}` case), and the
  * `Line`/`Atom` surface bound to an injected `NestedDiagramRenderer`.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import { EmbeddedDiagram, getEmbeddedType, type NestedDiagramRenderer } from '../../../src/core/EmbeddedDiagram.js';
 import { HorizontalAlignment } from '../../../src/core/klimt/geom/HorizontalAlignment.js';
 import { XDimension2D } from '../../../src/core/klimt/geom/XDimension2D.js';
@@ -17,6 +17,7 @@ import type { UGraphic } from '../../../src/core/klimt/UGraphic.js';
 import type { UShape } from '../../../src/core/klimt/UShape.js';
 import type { StringBounder } from '../../../src/core/klimt/font/StringBounder.js';
 import type { ISkinSimple } from '../../../src/core/style/ISkinSimple.js';
+import { layoutGraph, setLayoutInputObserver, type LayoutInputEvent } from '../../../src/core/graph-layout.js';
 
 class FakeStringBounder implements StringBounder {
   calculateDimension(): XDimension2D {
@@ -301,6 +302,62 @@ describe('EmbeddedDiagram.calculateDimensionSlow (java:126-152, TeaVM branch)', 
     expect(diagram.calculateDimension(sb)).toEqual(new XDimension2D(42, 42));
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     consoleSpy.mockRestore();
+  });
+});
+
+// cdd6-T0b (D9): getInternalTextBlock brackets its one call to
+// `this.renderer.render(...)` with graph-layout.ts's nested-diagram depth
+// counter, so any layoutGraph() call the renderer triggers (a real nested
+// renderSync, here simulated directly) reports LayoutInputEvent.nestedDepth
+// >= 1 -- the survey's dotEqual comparison (scripts/lib/survey-dot-equal.ts)
+// relies on this to exclude a {{ }} embed's own graphs (unknown/gubeca-19,
+// jixibu-01) from the outer diagram's DOT-parity comparison.
+describe('EmbeddedDiagram.getInternalTextBlock — nested layout depth (cdd6-T0b/D9)', () => {
+  const box = (id: string) => ({ id, width: 72, height: 36 });
+
+  afterEach(() => setLayoutInputObserver(undefined));
+
+  it('a layoutGraph call made inside renderer.render reports nestedDepth 1', () => {
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    const diagram = EmbeddedDiagram.from(null, ['@startuml', '@enduml'], {
+      render: () => {
+        // Stands in for a nested `renderSync` call, which would trigger its
+        // own layoutGraph() call(s) at this exact point in the call stack.
+        layoutGraph({ nodes: [box('A')], edges: [] });
+        return fakeTextBlock(1, 1);
+      },
+    });
+    diagram.calculateDimension(sb);
+    expect(events).toHaveLength(1);
+    expect(events[0]!.nestedDepth).toBe(1);
+  });
+
+  it('a layoutGraph call AFTER calculateDimension (outside the bracket) reports nestedDepth 0', () => {
+    const events: LayoutInputEvent[] = [];
+    const diagram = EmbeddedDiagram.from(null, ['@startuml', '@enduml'], {
+      render: () => fakeTextBlock(1, 1),
+    });
+    diagram.calculateDimension(sb);
+    setLayoutInputObserver((e) => events.push(e));
+    layoutGraph({ nodes: [box('A')], edges: [] });
+    expect(events).toHaveLength(1);
+    expect(events[0]!.nestedDepth).toBe(0);
+  });
+
+  it('a renderer that throws still resets the depth counter (try/finally)', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const diagram = EmbeddedDiagram.from(null, ['@startuml', '@enduml'], {
+      render: () => {
+        throw new Error('boom');
+      },
+    });
+    diagram.calculateDimension(sb); // degrades to (42, 42); depth must unwind
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    layoutGraph({ nodes: [box('A')], edges: [] });
+    expect(events[0]!.nestedDepth).toBe(0);
+    vi.restoreAllMocks();
   });
 });
 

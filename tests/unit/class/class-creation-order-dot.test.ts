@@ -28,7 +28,7 @@ const measurer = new WidthTableMeasurer();
 
 function capture(puml: string): { graph: DotInputGraph; svg: string } {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   let svg: string;
   try {
     svg = renderSync(puml, { measurer });

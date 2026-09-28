@@ -57,7 +57,7 @@ function makeAST(rel: Relationship): ClassDiagramAST {
 
 function captureGraph(ast: ClassDiagramAST): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured = g;
   });
   try {
@@ -115,7 +115,7 @@ describe('T11 — quantifier pair follows the swapped DOT tail/head (DOT reserva
   it('givoli-70-rade072: taillabel 19x13, headlabel 7x13 on the affected edge', () => {
     const puml = readFileSync(join(CACHE, 'givoli-70-rade072', 'in.puml'), 'utf8');
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       renderSync(puml, { measurer: new WidthTableMeasurer() });
     } finally {
@@ -196,7 +196,7 @@ describe('T17 fix — role pair follows the swapped DOT tail/head (fallback rese
   it('probe (no jar oracle — asserts the ported rule, not a golden): a synthetic reversed role-only relationship renders with roles reserved on the correct DOT ends', () => {
     const puml = '@startuml\nclass A\nclass B\nA /owner <-up- /child B\n@enduml';
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       renderSync(puml, { measurer: new WidthTableMeasurer() });
     } finally {

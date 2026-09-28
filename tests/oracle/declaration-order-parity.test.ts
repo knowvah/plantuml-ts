@@ -65,7 +65,7 @@ function textCreationOrder(dot: string): string[] {
 }
 
 let captured: DotInputGraph[] = [];
-beforeAll(() => setLayoutInputObserver((g) => captured.push(g)));
+beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
 describe.skipIf(fixtures.length === 0)('declaration order — builder and emitter agree', () => {

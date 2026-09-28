@@ -50,7 +50,7 @@ describe('description together membership (CucaDiagram.java:188-194,232,339-353)
 
   it('the DOT input carries the membership', () => {
     const inputs: DotInputGraph[] = [];
-    setLayoutInputObserver((input) => inputs.push(input));
+    setLayoutInputObserver(({ graph: input }) => inputs.push(input));
     try {
       renderSync('@startuml\ncomponent A\ntogether {\ncomponent B\n}\nA --> B\n@enduml\n', {
         measurer: new WidthTableMeasurer(),

@@ -70,7 +70,7 @@ function parse(puml: string): StateDiagramAST {
 /** One layoutInputObserver capture of a full-document `renderSync` call. */
 function captureOne(puml: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(puml, { measurer });
   } finally {

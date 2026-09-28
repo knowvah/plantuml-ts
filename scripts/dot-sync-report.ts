@@ -141,7 +141,7 @@ const STDLIB_WIRED_TYPES = new Set(['component', 'usecase']);
  *  wired into every render this report drives for `STDLIB_WIRED_TYPES`. */
 function ourInputs(type: string, markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),

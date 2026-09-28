@@ -77,7 +77,7 @@ const JAR_PARENT = { width: 1.463061, height: 1.375 };
 
 function declaredScopes(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer() });
   } finally {

@@ -67,7 +67,7 @@ function statementOrder(dot: string): string[] {
 
 function captureClass(puml: string): DotInputGraph {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(puml, { measurer: new WidthTableMeasurer() });
   } finally {

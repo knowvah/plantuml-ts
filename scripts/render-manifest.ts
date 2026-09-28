@@ -99,7 +99,7 @@ export function discoverFixtures(only: readonly string[] | undefined): string[] 
  *  error message is still identity. */
 export function renderFixture(markup: string): ManifestEntry {
   const graphs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => graphs.push(g));
+  setLayoutInputObserver(({ graph: g }) => graphs.push(g));
   try {
     const svg = renderSync(markup, { measurer: new DeterministicMeasurer(), includeStore: fixtureIncludeStore() });
     const entry: { svg: string; dot?: string } = { svg: sha256(svg) };

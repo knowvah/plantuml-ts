@@ -34,7 +34,7 @@ describe('layoutJson arrow attributes', () => {
   // the engine report `bezier.ep` at all.
   it('sets arrowsize/arrowtail/arrowhead on every edge', () => {
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutJson(makeAst({ a: { b: 1 }, c: 2 }), defaultTheme, measurer);
     } finally {
@@ -53,7 +53,7 @@ describe('layoutJson arrow attributes', () => {
   // `rowIndex >= 0` guard — declaring one must not have dropped the other.
   it('keeps the tailport alongside the arrow attrs', () => {
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       layoutJson(makeAst({ a: { b: 1 } }), defaultTheme, measurer);
     } finally {
