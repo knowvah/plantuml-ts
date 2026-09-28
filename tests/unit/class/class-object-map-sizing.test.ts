@@ -506,7 +506,7 @@ describe('map DOT emission', () => {
     );
 
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {

@@ -71,7 +71,7 @@ function diagram(body: string): string {
  *  throwaway second element and one edge. */
 function dotNodeDims(markup: string): { width: number; height: number }[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer() });
   } finally {

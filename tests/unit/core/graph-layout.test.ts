@@ -1,6 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { layoutGraph } from '../../../src/core/graph-layout.js';
-import type { DotInputGraph, DotLayoutResult } from '../../../src/core/graph-layout.js';
+import { describe, it, expect, afterEach } from 'vitest';
+import {
+  layoutGraph,
+  setLayoutInputObserver,
+  enterNestedDiagramLayout,
+  exitNestedDiagramLayout,
+} from '../../../src/core/graph-layout.js';
+import type { DotInputGraph, DotLayoutResult, LayoutInputEvent } from '../../../src/core/graph-layout.js';
 
 // Box sizes in px; the adapter divides by 72 (inches) on the way into graphviz
 // and getLayout returns points (= the original px), so widths round-trip.
@@ -727,5 +732,67 @@ describe('layoutGraph — shield corner reads the truncated h cell (cdd2-T11 Q-3
     const r = layoutGraph(shielded(0, 0));
     const a = r.nodes.find((n) => n.id === 'sh0006')!;
     expect(r.edges[0]!.points[0]!.x - a.x).toBeCloseTo(36, 6);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// setLayoutInputObserver / nestedDepth — cdd6-T0b (D9). EmbeddedDiagram.ts
+// brackets its one nested-render call with enterNestedDiagramLayout/
+// exitNestedDiagramLayout; graph-layout.ts itself has no notion of what a
+// "nested diagram" is, only the counter these two functions maintain.
+// ---------------------------------------------------------------------------
+describe('setLayoutInputObserver — LayoutInputEvent.nestedDepth', () => {
+  afterEach(() => setLayoutInputObserver(undefined));
+
+  it('reports nestedDepth 0 for an ordinary top-level layoutGraph call', () => {
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    layoutGraph({ nodes: [box('A')], edges: [] });
+    expect(events).toHaveLength(1);
+    expect(events[0]!.nestedDepth).toBe(0);
+  });
+
+  it('reports nestedDepth 1 for a layoutGraph call made inside one enter/exit bracket', () => {
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    enterNestedDiagramLayout();
+    try {
+      layoutGraph({ nodes: [box('A')], edges: [] });
+    } finally {
+      exitNestedDiagramLayout();
+    }
+    expect(events).toHaveLength(1);
+    expect(events[0]!.nestedDepth).toBe(1);
+  });
+
+  it('returns to nestedDepth 0 once the bracket exits, even after a nested error', () => {
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    enterNestedDiagramLayout();
+    try {
+      throw new Error('nested render failed');
+    } catch {
+      // matches EmbeddedDiagram.ts's own try/finally shape around a
+      // renderer that can throw.
+    } finally {
+      exitNestedDiagramLayout();
+    }
+    layoutGraph({ nodes: [box('A')], edges: [] });
+    expect(events).toHaveLength(1);
+    expect(events[0]!.nestedDepth).toBe(0);
+  });
+
+  it('nests correctly for a doubly-embedded diagram (depth 2)', () => {
+    const events: LayoutInputEvent[] = [];
+    setLayoutInputObserver((e) => events.push(e));
+    enterNestedDiagramLayout();
+    enterNestedDiagramLayout();
+    try {
+      layoutGraph({ nodes: [box('A')], edges: [] });
+    } finally {
+      exitNestedDiagramLayout();
+      exitNestedDiagramLayout();
+    }
+    expect(events[0]!.nestedDepth).toBe(2);
   });
 });

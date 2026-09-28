@@ -64,7 +64,7 @@ function makeClassifier(id: string, overrides?: Partial<Classifier>): Classifier
 function layoutAndCount(ast: ClassDiagramAST): { geo: ReturnType<typeof layoutClass>; captured: number } {
   let captured = 0;
   const graphs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured++;
     graphs.push(g);
   });

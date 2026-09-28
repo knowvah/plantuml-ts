@@ -9,13 +9,7 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  isWellFormedSvg,
-  diffVerdict,
-  computeDotEqual,
-  parityOutPath,
-  parseSurveyArgs,
-} from '../../../scripts/svg-parity-survey.js';
+import { isWellFormedSvg, diffVerdict, parityOutPath, parseSurveyArgs } from '../../../scripts/svg-parity-survey.js';
 import { routeConsoleToStderr } from '../../../scripts/svg-parity-workers.js';
 import type { FixtureRow, ParityReport } from '../../../scripts/svg-parity-survey.js';
 import {
@@ -34,8 +28,6 @@ import {
   buildMarkdown,
   parseDashboardArgs,
 } from '../../../scripts/svg-parity-dashboard.js';
-import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
-import type { DotInputGraph } from '../../../src/core/graph-layout.types.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const SVG_CONFORMANCE_DIR = join(REPO, 'tests', 'oracle', 'svg-conformance');
@@ -109,42 +101,9 @@ describe('diffVerdict', () => {
 });
 
 // ---------------------------------------------------------------------------
-// computeDotEqual
+// computeDotEqual — moved to tests/unit/scripts/survey-dot-equal.test.ts
+// (cdd6-T0b/D9), alongside scripts/lib/survey-dot-equal.ts.
 // ---------------------------------------------------------------------------
-
-describe('computeDotEqual', () => {
-  const graph: DotInputGraph = { nodes: [{ id: 'A', width: 72, height: 36 }], edges: [] };
-
-  it('true when both sides skip graphviz (degenerate diagrams)', () => {
-    expect(computeDotEqual([], [], false)).toBe(true);
-  });
-
-  it('false when the oracle dumped DOT but we fed no candidate graph', () => {
-    expect(computeDotEqual([toSvekDot(graph)], [], false)).toBe(false);
-  });
-
-  it('false on a graph-count mismatch', () => {
-    expect(computeDotEqual([toSvekDot(graph), toSvekDot(graph)], [graph], false)).toBe(false);
-  });
-
-  it('false when oracleBlind, even if both sides trivially agree', () => {
-    expect(computeDotEqual([], [], true)).toBe(false);
-    expect(computeDotEqual([toSvekDot(graph)], [graph], true)).toBe(false);
-  });
-
-  it('true when the emitted DOT is structurally equal to the oracle DOT', () => {
-    expect(computeDotEqual([toSvekDot(graph)], [graph], false)).toBe(true);
-  });
-
-  it('false when node shape diverges structurally', () => {
-    const oracleDot = toSvekDot(graph);
-    const differentGraph: DotInputGraph = {
-      nodes: [{ id: 'A', width: 200, height: 36, shape: 'diamond' }],
-      edges: [],
-    };
-    expect(computeDotEqual([oracleDot], [differentGraph], false)).toBe(false);
-  });
-});
 
 // ---------------------------------------------------------------------------
 // parityOutPath / parseSurveyArgs (pdr-T3 survey planner)

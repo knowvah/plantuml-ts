@@ -42,7 +42,7 @@ const measurer = new WidthTableMeasurer();
 
 function captureFirst(puml: string): DotInputGraph {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(puml, { measurer });
   } finally {
@@ -108,7 +108,7 @@ describe('D3 fallback — routes ortho from ast.linetype ALONE, theme.linetype u
     expect(ast.linetype).toBe('ortho');
 
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {

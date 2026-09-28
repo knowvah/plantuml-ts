@@ -48,7 +48,7 @@ function svekFilePaths(dir: string): string[] {
 
 function captureInputs(puml: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(puml, { measurer: new WidthTableMeasurer() });
   } catch {

@@ -165,7 +165,7 @@ export function formatStats(label: string, s: Stats): string {
  *  three ratchets render with the measurer alone. */
 function captureGraphs(type: BacklogType, markup: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),

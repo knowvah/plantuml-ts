@@ -74,7 +74,7 @@ function captureTopLevelGraph(ast: StateDiagramAST): DotInputGraph {
  *  comment). */
 function captureAllGraphs(ast: StateDiagramAST): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     layoutState(ast, theme, measurer);
   } finally {

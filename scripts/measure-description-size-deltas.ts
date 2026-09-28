@@ -178,7 +178,7 @@ export interface DeltaResult {
  *  sprite/`!include` fixtures render identically). */
 function captureGraphs(markup: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),

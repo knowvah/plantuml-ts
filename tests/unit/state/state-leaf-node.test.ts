@@ -44,7 +44,7 @@ function makeCtx(overrides: Partial<LeafNodeCtx> = {}): LeafNodeCtx {
 
 function captureFirst(puml: string): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured ??= g;
   });
   try {

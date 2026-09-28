@@ -60,7 +60,7 @@ function makeTransition(from: string, to: string, overrides: Partial<Transition>
 
 function captureFirst(ast: StateDiagramAST): DotInputGraph {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     layoutState(ast, theme, measurer);
   } finally {

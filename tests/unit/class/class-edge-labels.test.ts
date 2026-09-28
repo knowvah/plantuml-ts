@@ -44,7 +44,7 @@ function makeAST(overrides?: Partial<ClassDiagramAST>): ClassDiagramAST {
 
 function captureGraph(ast: ClassDiagramAST, theme = defaultTheme): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured = g;
   });
   try {

@@ -84,7 +84,7 @@ export interface DeltaResult {
  *  `state-dot-parity.test.ts`'s `beforeAll`/`afterAll` observer pattern). */
 function captureBacklogGraphs(dir: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(readFileSync(join(dir, 'input.puml'), 'utf8'), {
       measurer: new WidthTableMeasurer(),
