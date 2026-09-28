@@ -1,0 +1,45 @@
+{
+ "same": 865,
+ "differ": [
+  [
+   "oracle/goldens/svg-dot/bemepi-16-kuzo249",
+   "test-results/dot-cache/dot/bemepi-16-kuzo249/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-dot/ciditi-21-xacu710",
+   "test-results/dot-cache/dot/ciditi-21-xacu710/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-dot/cluster-nested",
+   "test-results/dot-cache/dot/cluster-nested/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-dot/chain-expansion",
+   "test-results/dot-cache/dot/chain-expansion/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-dot/cluster-basic",
+   "test-results/dot-cache/dot/cluster-basic/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-description/usecase/sprite-svg-bootstrap-0",
+   "test-results/dot-cache/usecase/sprite-svg-bootstrap-0/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-description/usecase/sprite-svg-archimate-0",
+   "test-results/dot-cache/usecase/sprite-svg-archimate-0/in.svg"
+  ],
+  [
+   "oracle/goldens/svg-description/usecase/sprite-svg-multiline-0",
+   "test-results/dot-cache/usecase/sprite-svg-multiline-0/in.svg"
+  ]
+ ],
+ "nocache": [
+  "oracle/goldens/svg-class/class-actor-bare-no-allowmixing",
+  "oracle/goldens/svg-conformance/gradient-fill",
+  "oracle/goldens/svg-conformance/class-boxes-and-link",
+  "oracle/goldens/svg-conformance/database-cylinder-dashed",
+  "oracle/goldens/svg-conformance/delta-shadow",
+  "oracle/goldens/svg-skin/rose/rose-node-shadow"
+ ]
+}

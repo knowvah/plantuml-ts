@@ -1,0 +1,7 @@
+surveying 142 mindmap fixtures (concurrency 6)
+  25/142
+  50/142
+  75/142
+  100/142
+  125/142
+wrote plans/class-divergence-drive-5/measurements/b0-8beta1/parity-mindmap.json — {"conformant":0,"structural-match":0,"diverged":142,"errored":0,"timeout":0,"oracle-error":0}

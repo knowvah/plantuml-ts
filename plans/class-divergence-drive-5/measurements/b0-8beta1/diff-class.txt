@@ -1,0 +1,2 @@
+besepi-37-rori892: verdict diverged -> conformant, dotEqual false -> true
+1 transition(s)
