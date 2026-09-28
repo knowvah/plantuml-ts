@@ -13,14 +13,18 @@
  * that path). This module owns the flat-sizer recipe only.
  *
  * `edgePortAttrs` and `applyShapeAndPorts` stay in `class-port-rows.ts` and
- * import {@link mapPortRows}/{@link mapPortName} back from here.
+ * import {@link mapPortRows}/{@link mapPortName}/{@link shouldMarkPort} back
+ * from here. T3d (cdd5) added {@link shouldMarkPort} to this file (a pure
+ * file-cap move, same rationale as the module doc above) — it is map/json's
+ * own qualifier-shield exclusion, not a row-port producer, but it names both
+ * kinds explicitly, same as everything else here.
  *
  * @see ~/git/plantuml/.../cucadiagram/TextBlockMap.java
  */
 
-import type { Classifier } from './ast.js';
+import type { Classifier, ClassifierKind } from './ast.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
-import type { DotInputPortRow } from '../../core/graph-layout.types.js';
+import type { DotInputNode, DotInputPortRow } from '../../core/graph-layout.types.js';
 import { Ports } from '../../core/svek/Ports.js';
 import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
 
@@ -68,4 +72,21 @@ export function mapPortRows(classifier: Classifier, measured: MeasuredClassifier
  *  @see cucadiagram/TextBlockMap.java:82-84 */
 export function mapPortName(key: string): string {
   return VisibilityModifier.isVisibilityCharacter(key) ? key.substring(1) : key;
+}
+
+/**
+ * A map/json's `shape=plaintext` is EntityImageMap/EntityImageJson's own
+ * per-row shield table (svek's RECTANGLE_HTML_FOR_PORTS), NOT the qualifier/
+ * `::member` port-shield mechanism this flag drives (svek-dot-emit.ts's
+ * portTable — a single compass-point "P" cell, wrong shape for either). A map
+ * row link (class-map-commands.ts) sets `fromPort` purely as row-target
+ * metadata; it must not flip this flag even though shieldedClassifierIds sees
+ * the same relationship.
+ */
+export function shouldMarkPort(
+  shape: DotInputNode['shape'] | undefined,
+  isShieldedPort: boolean,
+  kind: ClassifierKind,
+): boolean {
+  return shape === 'plaintext' && isShieldedPort && kind !== 'map' && kind !== 'json';
 }
