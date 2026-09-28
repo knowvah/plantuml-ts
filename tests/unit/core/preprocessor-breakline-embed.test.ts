@@ -60,6 +60,52 @@ describe('preprocessor: %breakline() split before collection (Jaws.mutateExpands
   });
 });
 
+describe('preprocessor: skinparam inside an embedded {{ }} diagram stays with the embed', () => {
+  it('leaves an embedded skinparam in the body and out of the outer map', () => {
+    const result = run([
+      'rectangle A [',
+      '{{',
+      'skinparam BackgroundColor #Transparent',
+      'rectangle B',
+      '}}',
+      ']',
+      'skinparam BackgroundColor #CCCCFF',
+    ]);
+    expect(result.skinparam.get('backgroundcolor')).toBe('#CCCCFF');
+    expect(result.lines).toEqual([
+      'rectangle A [',
+      '{{',
+      'skinparam BackgroundColor #Transparent',
+      'rectangle B',
+      '}}',
+      ']',
+    ]);
+  });
+
+  it('tracks nested and typed {{ openers, resuming collection after the outermost }}', () => {
+    const result = run([
+      'rectangle A [',
+      '  {{uml',
+      '  {{',
+      '  skinparam ArrowColor red',
+      '  }}',
+      '  skinparam ClassFontSize 20',
+      ' }}',
+      ']',
+      'skinparam ClassFontSize 9',
+    ]);
+    expect(result.skinparam.get('classfontsize')).toBe('9');
+    expect(result.skinparam.has('arrowcolor')).toBe(false);
+    expect(result.lines).toContain('  skinparam ClassFontSize 20');
+  });
+
+  it('leaves an embedded <style> block to the embed', () => {
+    const result = run(['rectangle A [', '{{', '<style>', 'root { FontSize 30 }', '</style>', '}}', ']']);
+    expect(result.styles).toEqual([]);
+    expect(result.lines).toContain('<style>');
+  });
+});
+
 describe('preprocessor: CommandSkinParam NAME accepts a mid-name stereotype (T1a)', () => {
   // Upstream NAME `([\w.]*(?:\<\<[^<>]*\>\>)?[\w.]*)` (`CommandSkinParam.java:60`).
   it('collects `frame<<x>>BackgroundColor`, keyed with the stereotype moved to the end', () => {

@@ -5,6 +5,7 @@
  * file's header for why it is not a TIM concept.
  */
 
+import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 import type { StringLocated } from './tim/StringLocated.js';
 
 const RE_STYLE_OPEN = /^<style>$/i;
@@ -100,6 +101,17 @@ function cleanSkinKey(key: string): string {
   const stereos = [...lower.matchAll(/<<([^<>]*)>>/g)].map((m) => `<<${m[1]!}>>`);
   return lower.replace(/<<[^<>]*>>/g, '') + stereos.join('');
 }
+/** `StringUtils.trim2(CharSequence)` (`StringUtils.java:537-567`): trims
+ *  characters `<= ' '` from both ends. Local copy, as in
+ *  `EmbeddedDiagram.ts` / `BodyEnhanced2.ts` (each keeps its own). */
+function trim2(s: string): string {
+  let start = 0;
+  let end = s.length;
+  while (start < end && s.charCodeAt(start) <= 0x20) start++;
+  while (end > start && s.charCodeAt(end - 1) <= 0x20) end--;
+  return s.slice(start, end);
+}
+
 const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
@@ -147,6 +159,19 @@ export class StyleAndSkinparamCollector {
    * concatenated plus the entry name (`getFullParam()`, `:70-76`).
    */
   private readonly skinparamStack: string[] = [];
+  /**
+   * `EmbeddedDiagram#createAndSkip`'s `nested` counter
+   * (`EmbeddedDiagram.java:100`): how many `{{` embeds enclose the current
+   * line. Upstream never dispatches an embed's lines as outer commands -- the
+   * enclosing multiline command (a `[ ... ]` description, a note, a class
+   * body) consumes them as display text, and `createAndSkip`
+   * (`EmbeddedDiagram.java:97-114`, reached from `BodyEnhanced2.java:91-94`)
+   * hands them to the nested diagram's own `BlockUml`. So a `skinparam` or
+   * `<style>` inside `{{ }}` styles the nested diagram only; hoisting it made
+   * the embed's `BackgroundColor` the OUTER document's (dezobu-62-vuzu421,
+   * rozugu-82-pera583).
+   */
+  private embeddedNested = 0;
 
   /**
    * True when the line was consumed (it is not a diagram-body line).
@@ -161,6 +186,11 @@ export class StyleAndSkinparamCollector {
     if (this.inStyleBlock) return this.collectStyleLine(raw, trimmed);
 
     if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed);
+
+    if (this.embeddedNested > 0 || getEmbeddedType(raw) !== null) {
+      this.skipEmbedded(raw);
+      return false;
+    }
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
@@ -229,6 +259,16 @@ export class StyleAndSkinparamCollector {
       this.setSkinparam(cleanSkinKey(key), entry[2]!.trim());
     }
     return true;
+  }
+
+  /**
+   * `EmbeddedDiagram#createAndSkip`'s loop (`EmbeddedDiagram.java:101-110`):
+   * any `{{`-typed line opens one more level, a line that `trim2`s to `}}`
+   * closes one. The line itself stays diagram content.
+   */
+  private skipEmbedded(raw: string): void {
+    if (getEmbeddedType(raw) !== null) this.embeddedNested++;
+    else if (trim2(raw) === EmbeddedDiagram.EMBEDDED_END) this.embeddedNested--;
   }
 
   /** Block-open forms are tested before the single-line form, which would
