@@ -733,7 +733,10 @@ describe('refusal coverage — baseline shape', () => {
     // 269 -> 267 because unknown/xuloxo-85-vibu502 and c4/gikaju-64-bari602
     // now preprocess and render (cdd5-T5d TokenStack pair order).
     // Derivation: 5657 + 267 = 5924.
-    expect(manifest.fixtures.length).toBe(5924);
+    // 5924 -> 5926 at cdd6/close-b0: 2 unknown-tree golden rows (racujo,
+    // xicili; cdd6-T0b's dotEqual instrument fix made them pin-eligible).
+    // Derivation: 5659 + 267 = 5926.
+    expect(manifest.fixtures.length).toBe(5926);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -762,7 +765,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5553 -> 5607 at cdd5/close-b3 (54 unknown-tree svg-class clones).
     // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
-    expect(pinnedRendering.length).toBe(5657);
+    // 5657 -> 5659 at cdd6/close-b0 (2 unknown-tree svg-class clones).
+    expect(pinnedRendering.length).toBe(5659);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

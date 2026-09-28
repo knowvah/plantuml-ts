@@ -18,20 +18,38 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    `degenerateClassifierDims` (`class-geo-builders.ts`) consumes the LimitFinder-style
    `symbolInk` (`LimitFinder.java:217-225`) and gets 46. Add an ensureVisible extent
    beside `symbolInk`, used only by the degenerate path.
-2. Empty `usymbol { }` containers (beboke, febuli, fezaro): apply T0d's verified
-   mechanism (which builder draws them and where the ink diverges).
+2. Empty `usymbol { }` containers (beboke, febuli, fezaro) — T0d amended, NOT an
+   ink defect (`diagnosis/verify.md` "empty usymbol containers"):
+   A. the degenerate gate `class-geo-builders.ts:472` reads `rawNamespaceCount`
+      after `class-container.ts:198-204` collapsed the usymbol group at parse time;
+      upstream `DotData.java:69-70` counts it as a group (the mute to EMPTY_PACKAGE
+      happens later, `GraphvizImageBuilder.java:416-418`) and runs svek. A probe
+      counting `collapsedGroup` leaves as groups made febuli and fezaro conformant.
+   B. beboke's remaining 2 numerics: `USymbolQueue.ts:67`'s closing cap is fitted to
+      the 1.2026.7beta3 jar; `USymbolQueue.java:87` is
+      `closing.cubicTo(width - dx * 2, height, width - dx, height, width - dx, height)`
+      and 25/25 cached queue caps use that form. Port the Java line; update
+      `symbols-solids.test.ts`'s `QUEUE_GOLDEN`. Cross-engine (component, object,
+      sequence participants): report every mover with this mechanism (D7).
+3. josebu (b) (T0d): the degenerate canvas takes `symbolInk`'s `x + w - 1`
+   (`class-geo-builders.ts:426-430`) where the jar's ensureVisible uses the drawn
+   image corner `x + w` (`SvgGraphics.java:1033-1034,129-131`; 129 vs 115 wide today,
+   1px once T3e fixes the nested image). Same channel as item 1.
 
 ## Rows
 - `unknown/rupigu-89-xabo757` (circle-interface-ink-y)
 - `unknown/vabobu-24-temi990` (circle-interface-ink-y)
-- `unknown/beboke-62-zofu377` (empty-usymbol-container-ink)
-- `unknown/febuli-89-dusi249` (empty-usymbol-container-ink)
-- `unknown/fezaro-08-nopo877` (empty-usymbol-container-ink)
+- `unknown/beboke-62-zofu377` (empty-usymbol-container-ink; T0d: degenerate gate + queue cap)
+- `unknown/febuli-89-dusi249` (empty-usymbol-container-ink; T0d: degenerate gate)
+- `unknown/fezaro-08-nopo877` (empty-usymbol-container-ink; T0d: degenerate gate)
+- `unknown/josebu-55-seje426` — sub-mechanism (b) only; the row is owned by T3e
 
 ## Write-set
 - `src/diagrams/class/class-geo-builders.ts`
 - `src/diagrams/class/class-layout-leaf-shapes.ts`
 - `src/diagrams/class/class-container.ts`
+- `src/core/decoration/symbol/USymbolQueue.ts` (added at T0e: item 2B)
+- `tests/unit/core/decoration/symbols-solids.test.ts` (added at T0e: item 2B)
 - their unit tests under `tests/`
 
 ## Read-set

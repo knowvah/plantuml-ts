@@ -25,11 +25,21 @@ verified mechanism (cdd5 S4 `mainframe-svek-unnormalized`, controlled jar experi
 - `unknown/rivino-95-midu088` (mainframe-svek-unnormalized)
 - `unknown/soseka-43-riru110` (mainframe-svek-unnormalized)
 
+T0d VERIFIED (`diagnosis/verify.md` "mainframe svek not normalized"): rivino's
+jar numbers (body 11,43; frame height 204) are reproduced exactly from the raw svek
+coordinates a(0,8) b(0,116) with NO moveDelta, style `mainframe { Padding 1 5;
+LineThickness 1.5; Margin 10 5 }` (`plantuml.skin:85-89`), title height 14, and
+`BigFrame.java:80,88` (`ww = minX >= 0 ? maxX : width`) over raw LimitFinder extents
+with `computeDelta` (`DiagramChromeFactory.java:332-337`). Port `big-frame.ts:165-174`
+takes the ink-normalized `svekDimension` (+15) as `ww`/`hh` and asserts delta away
+(`:70-77`). Hand BigFrame the raw, un-shifted class geometry and extents.
+
 ## Write-set
 - `src/core/klimt/shape/big-frame.ts`
 - `src/core/annotations/chrome.ts`
-- `src/diagrams/class/layout-ink-extent.ts`
+- `src/diagrams/class/layout-ink-extent.ts` (T2b touches it in batch 2; build on that)
 - `src/index.ts`
+- `src/diagrams/class/layout.ts` (added at T0e: only if the raw geometry must be handed off from the class layout)
 - their unit tests under `tests/`
 
 ## Read-set

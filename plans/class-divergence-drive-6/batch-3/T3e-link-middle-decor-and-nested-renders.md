@@ -14,22 +14,34 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
 
 ## Task (TDD)
 1. link middle decor (sejube): cdd5 S2 `link-middle-decor-partial`.
-2. Nested-render gaps behind desc-embed rows (per T0d): josebu's nested sequence
-   `queue "<$sprite>"` is drawn as text (`src/diagrams/sequence/renderer-participant-symbol.ts`,
-   `USymbolQueue#asSmall(getTextBlock())`); tefeco's nested description `note right:`
-   is not opale (`src/diagrams/description/parse-state.ts:370-380` vs
-   `GraphvizImageBuilder.java:245-249` `setOpaleLine`). These are non-class engine
-   files: report every movement in those engines (D7).
+2. josebu (a) (amended at T0e from T0d, `diagnosis/verify.md` "nested renders —
+   josebu"): the nested sequence image is 107x87 vs the jar's 92x162 because every
+   sequence label drops any non-text atom to literal text —
+   `src/diagrams/sequence/sequence-creole.ts:347-350` (`if (atoms.some((a) => a.kind
+   !== 'text' && a.kind !== 'latex')) return [textAtomRun(literal)]`) — where the
+   jar's `display.create0(..., CreoleMode.FULL)` (`AbstractTextualComponent.java:80-92`)
+   yields an `AtomSprite` (`StripeSimple.java:228-235`). NOT
+   `renderer-participant-symbol.ts` (the queue draws correctly around any block;
+   probes: participant/queue/database/actor all fail identically). Port an
+   image-carrying run (`latexAtomRun` / `TextRun.image` is the in-repo precedent) so
+   the participant head grows to the sprite (jar 162 tall). This is sequence-wide:
+   report every sequence-corpus mover with its mechanism (D7). If the change is
+   wider than these three files, STOP and report `open -> cdd7` (sequence inline
+   image runs) instead of editing further. josebu (b), the 1px degenerate canvas,
+   is T2c's. tefeco's nested note (never opale in the description engine,
+   `renderer-entity.ts:364-373`) is `open -> cdd7`, not this task's.
 
 ## Rows
 - `unknown/sejube-03-bote542` (link-middle-decor-partial)
+- `unknown/josebu-55-seje426` (desc-embed-ink-missing → sequence label sprite atoms; (a) here, (b) T2c)
 
 ## Write-set
 - `src/diagrams/class/class-layout-edge-labels.ts`
 - `src/diagrams/class/class-edge-note-box.ts`
 - `src/diagrams/class/renderer-arrowhead-middle.ts`
-- `src/diagrams/sequence/renderer-participant-symbol.ts`
-- `src/diagrams/description/parse-state.ts`
+- `src/diagrams/sequence/sequence-creole.ts` (T0e: replaces renderer-participant-symbol.ts)
+- `src/diagrams/sequence/sequence-text.ts` (T0e)
+- `src/diagrams/sequence/sequence-layout-participant-sizing.ts` (T0e)
 - their unit tests under `tests/`
 
 ## Read-set

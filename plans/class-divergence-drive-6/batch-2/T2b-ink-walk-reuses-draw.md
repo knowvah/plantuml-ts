@@ -22,23 +22,48 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    (`class-layout-description-leaf-ink.ts:102`) because `measureFolderLeaf` builds
    different geometry; give them their own walk mirroring its `mergeTB`/`getMargin`
    (`leaf-sizing-folder.ts`, `USymbolFolder.java`).
-3. Apply T0d's verdict for rojida's (+3,+1) shift and the nested residuals of josebu/
-   tefeco (those nested-engine parts are T3e's).
+3. rojida (T0d, `diagnosis/verify.md` "(+3,+1) shift"): three mechanisms, not a
+   shift. (1) package leaves take `addRectInk`'s (x-1, y-1) where the jar bounds the
+   folder outline itself (`USymbolFolder.java:104-123`, `LimitFinder.java:164-166`);
+   (2) `leaf-sizing-folder.ts:82` measures a `{{ }}` label as text lines where the jar
+   sizes the embed 42x42 (`EmbeddedDiagram.java:126-152` catch, reached via
+   `EntityImageDescription.java:188-191`) — route the folder label through the same
+   embed sizing T4d used, do not hard-code 42; (3) the drawn label embed never
+   reaches the canvas (`SvgGraphics.java:1033-1034` ensureVisible on the image
+   corner, `:129-131` `(int)(v+1)`), which also is tefeco's Δ12 (see 5).
+4. json 1px (bizasu, meramo, momada; T0d amended, re-slotted from T3a): a primitive
+   json leaf draws only `URectangle` + text, so `LimitFinder.java:184-186` bounds it
+   at `x + w - 1` (`EntityImageJson.java:192`); `class-ink-box.ts:273` falls through
+   to `addRectInk`'s `x + w`. Object bodies / multi-element arrays draw `hline`s to
+   `x + w` (`TextBlockCucaJSon.java:168,174,215-220`) — dispatch per body shape.
+5. tefeco (a): the drawn label embed enters our LimitFinder ink
+   (`EntityImageDescriptionDelegates.ts:150` draws unconditionally; measured
+   `symbolInk` maxX 217) where the jar's ink pass draws nothing
+   (`EmbeddedDiagram.java:180,191`; `LimitFinder.java:99-100` matchesProperty false)
+   and the canvas comes from ensureVisible. Exclude the embed from ink; add the
+   ensureVisible image-corner max to the class canvas (`layout-ink-extent.ts`).
+   tefeco (b), the nested description note not being opale, is `open -> cdd7`
+   (description-wide); state it as the residual. josebu moved to T3e/T2c (T0d).
 
 ## Rows
 - `unknown/gubeca-19-lemu434` (desc-embed-ink-missing)
 - `unknown/jixibu-01-xave465` (desc-embed-ink-missing)
-- `unknown/josebu-55-seje426` (desc-embed-ink-missing)
-- `unknown/rojida-14-fuli428` (desc-embed-ink-missing)
-- `unknown/tefeco-12-rato895` (desc-embed-ink-missing)
+- `unknown/rojida-14-fuli428` (desc-embed-ink-missing; T0d: three mechanisms)
+- `unknown/tefeco-12-rato895` (desc-embed-ink-missing; (a) only, (b) open -> cdd7)
 - `unknown/cepedu-19-namu934` (folder-tab-ink)
 - `unknown/fipezo-93-zimi512` (folder-tab-ink)
+- `unknown/bizasu-70-vaxa243` (json-canvas-width-1px; re-slotted from T3a at T0e)
+- `unknown/meramo-02-vasu175` (json-canvas-width-1px; re-slotted from T3a at T0e)
+- `unknown/momada-03-zeka599` (json-canvas-width-1px; re-slotted from T3a at T0e)
 
 ## Write-set
 - `src/core/svek/image/leaf-sizing-entity.ts`
 - `src/diagrams/class/class-layout-description-leaf-ink.ts`
 - `src/diagrams/class/class-ink-box.ts`
 - `src/core/svek/image/leaf-sizing-folder.ts`
+- `src/diagrams/class/class-ink-shapes.ts` (added at T0e: json body-shape ink rule)
+- `src/diagrams/class/layout-ink-extent.ts` (added at T0e: ensureVisible canvas channel for drawn label embeds; T3b builds on it in batch 3)
+- `src/core/svek/image/EntityImageDescriptionDelegates.ts` (added at T0e: embed excluded from the ink pass; T1b's batch-1 edits land first)
 - their unit tests under `tests/`
 
 ## Read-set

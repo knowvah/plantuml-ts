@@ -21,10 +21,21 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    (`class-namespace-title-table.ts#namespaceTitleTableDims`, `class-dot-clusters.ts:100`),
    and the package command drops the visibility char (`CommandPackage.java:189-192`).
    Reuse `class-visibility-icon.ts` / `class-header-visibility-geo.ts`.
+3. zasuxe (added at T0e; T0d amended, re-slotted from T3a, `diagnosis/verify.md`
+   "node order inside cluster abc"): upstream prints a group's own leaves first and
+   its muted empty child packages after (`GraphvizImageBuilder.java:431-433`
+   `printEntities(g.leafs()); printGroups(g)`, `:416-418`); the port pushes a
+   collapsed package onto the parent's `classifiers` in source order
+   (`class-namespace.ts:117`) and `class-dot-clusters.ts:81` copies that into
+   `nodeIds`, so `def`/`ghj` precede `abc-service` in the subgraph and both engines
+   put the component rightmost. Order `nodeIds` as non-collapsed leaves, then
+   `collapsedGroup` leaves in child-group order. Do not touch the draw-side
+   `collapsedGroup` order (`class-leaf-order.ts`, xitobu/daxeno).
 
 ## Rows
 - `unknown/bonaco-71-xefu608` (class-portin-unported)
 - `unknown/topave-65-ceso890` (package-visibility-icon)
+- `unknown/zasuxe-15-lugo662` (cluster-node-order; re-slotted from T3a at T0e)
 
 ## Write-set
 - `src/diagrams/class/class-dot-clusters.ts`
@@ -33,6 +44,7 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
 - `src/diagrams/class/class-namespace-title-table.ts`
 - `src/diagrams/class/class-command-containers.ts`
 - `src/diagrams/class/class-namespace-shape.ts`
+- `src/diagrams/class/class-namespace.ts` (added at T0e: only if zasuxe is fixed at the push site)
 - their unit tests under `tests/`
 
 ## Read-set

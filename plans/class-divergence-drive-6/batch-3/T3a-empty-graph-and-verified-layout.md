@@ -17,17 +17,13 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    still runs graphviz and `svek/SvekResult.java:130-135` returns
    `minMax.getDimension().delta(15, 15)` (21x21 for `class A / class B / remove *`,
    oracle-checked in cdd5 T5d).
-2. json 1px and zasuxe: apply T0d's verdict (`diagnosis/verify.md`). If T0d proved
-   a dot-engine cause, do NOT edit dot-engine: confirm the filed issue and set
-   `final = open -> dot-engine TRACKER <n>` in your report. The T0e close may have
-   amended this task's write-set; follow the amended spec.
+2. (Amended at T0e.) T0d verified that neither the json 1px rows nor zasuxe is a
+   dot-engine or `graph-layout.ts` defect (real `dot` = dot-engine on both DOTs):
+   json 1px is a class ink rule (re-slotted to T2b) and zasuxe is the class engine's
+   cluster `nodeIds` order (re-slotted to T3d). This task owns jititi only.
 
 ## Rows
 - `unknown/jititi-15-maxe512` (empty-graph-svek-dimension)
-- `unknown/bizasu-70-vaxa243` (json-canvas-width-1px)
-- `unknown/meramo-02-vasu175` (json-canvas-width-1px)
-- `unknown/momada-03-zeka599` (json-canvas-width-1px)
-- `unknown/zasuxe-15-lugo662` (cluster-node-order)
 
 ## Write-set
 - `src/core/graph-layout.ts`

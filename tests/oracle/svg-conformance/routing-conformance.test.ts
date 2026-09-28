@@ -776,10 +776,16 @@ describe('routing conformance — jar-error classification', () => {
     // known-misroute -> agree (cdd5-T5d: CommandAddMethod.java:64-68 needs
     // spaces around ':', so it now routes STATE like the jar).
     // Derivation: 4768 + 1051 + 105 = 5924.
-    expect(pinnedAgree.length).toBe(4768);
+    //
+    // 4768 -> 4770 / 5924 -> 5926 at cdd6/close-b0 (2026-09-28): 2
+    // unknown-tree svg-class golden rows (racujo-01-veme537,
+    // xicili-92-foke737), pin-eligible once the survey's dotEqual stopped
+    // counting a commented `!pragma` / a second newpage page (cdd6-T0b, D9).
+    // Derivation: 4770 + 1051 + 105 = 5926.
+    expect(pinnedAgree.length).toBe(4770);
     expect(pinnedMisroutes.length).toBe(1051);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5924);
+    expect(manifest.fixtures.length).toBe(5926);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

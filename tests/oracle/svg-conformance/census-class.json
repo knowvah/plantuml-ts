@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-28T17:40:27.336Z",
-  "measuredAgainstCommit": "8aed68473",
+  "generatedAt": "2026-09-28T22:28:12.804Z",
+  "measuredAgainstCommit": "6a4402aed",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -6951,13 +6951,6 @@
     {
       "slug": "zogari-39-ziza794",
       "tree": "class",
-      "status": "ok",
-      "diffCount": 0,
-      "bucket": "0"
-    },
-    {
-      "slug": "zolaza-45-sepi570",
-      "tree": "unknown",
       "status": "ok",
       "diffCount": 0,
       "bucket": "0"
