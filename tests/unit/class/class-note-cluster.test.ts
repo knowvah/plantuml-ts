@@ -107,7 +107,8 @@ describe('note-in-package cluster membership', () => {
   it('(d) an attached `note left of A: x` inside a package lands in the SAME cluster as A', () => {
     const { ast, graph } = captureDotGraph(['package p {', '  class A', '  note left of A: x', '}'].join('\n'));
     const note = ast.notes[0];
-    expect(note).toMatchObject({ target: 'A', position: 'left', text: 'x', namespace: 'p' });
+    // cdd5-T3c: qualified host, per CommandFactoryNoteOnEntity.java:303.
+    expect(note).toMatchObject({ target: 'p.A', position: 'left', text: 'x', namespace: 'p' });
 
     const cluster = clusterByLabel(graph, 'p');
     expect(cluster).toBeDefined();
@@ -120,7 +121,7 @@ describe('note-in-package cluster membership', () => {
       ['package p {', '  class A', '  note left of A', '  hi', '  end note', '}'].join('\n'),
     );
     const note = ast.notes[0];
-    expect(note).toMatchObject({ target: 'A', position: 'left', namespace: 'p' });
+    expect(note).toMatchObject({ target: 'p.A', position: 'left', namespace: 'p' });
 
     const cluster = clusterByLabel(graph, 'p');
     expect(cluster!.nodeIds).toContain(note!.id);
