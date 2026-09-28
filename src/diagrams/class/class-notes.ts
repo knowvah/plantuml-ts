@@ -8,7 +8,8 @@
 import type { ClassDiagramAST, NotePosition } from './ast.js';
 import type { UrlInfo } from './class-url.js';
 import { registerInNamespace } from './class-namespace.js';
-import { resolveReference } from './class-namespace-resolve.js';
+import { resolveReference, type ResolvedRef } from './class-namespace-resolve.js';
+import { noteSeparator } from './class-note-endpoint.js';
 import { applyNoteOnLink } from './class-note-on-link.js';
 import { splitEndpointPort, stripQuotes } from './class-relationship-parser.js';
 import type { ParseState } from './class-parse-state.js';
@@ -236,7 +237,14 @@ export function addNote(
   // T3c: `sep` is the diagram's active `set separator`
   // (`ParseState.namespaceSeparator`) -- see `resolveNoteHostId`'s doc
   // comment for why the target needs it.
-  opts: { namespace: string | null; implicitTarget: boolean; sep: string | null; color?: string; stereotype?: string; url?: UrlInfo },
+  opts: {
+    namespace: string | null;
+    implicitTarget: boolean;
+    sep: string | null;
+    color?: string;
+    stereotype?: string;
+    url?: UrlInfo;
+  },
   counter?: NoteCreationCounter,
   tipGroupsSeen?: TipGroupSeenSet,
 ): string {
@@ -309,28 +317,32 @@ export function addNote(
 }
 
 /**
- * T3c (free-note-alias-not-quark-qualified): NOT ported. Upstream
- * `CommandFactoryNote` resolves a freestanding note's own alias via
- * `diagram.quarkInContext(false, cleanId(idShort))`, the SAME reference
- * resolver a classifier reference uses -- but doing so here changes the
- * note's own `id` (its lookup key), and this port's relationship-endpoint
- * resolver (`class-command-relationships.ts#isNoteId` callers) matches a
- * bare note reference against that id via raw string equality, NOT through
- * `resolveReference`. Qualifying only the note's creation side (this file's
- * write-set) desyncs the two: a same-scope `N4 .> DrawableAdapter` right
- * after `note as N4` no longer finds the note (`ent0002` `EWS Top-level`
- * fixture family), so it auto-creates a phantom classifier `N4` instead --
- * measured regression: 8 previously-conformant ratchet rows (none in this
- * task's 9), all showing a shifted creation-order uid cascade. Closing
- * `free-note-alias-not-quark-qualified` (pojeje-60-vata579,
- * rexupa-61-nezi165, tamovu-79-fifo533, ticemi-41-laze086) needs the SAME
- * fix mirrored in `class-command-relationships.ts` (and
- * `class-assoc-couple.ts`, same `isNoteId` import) so a bare relationship
- * endpoint also resolves via `resolveReference` before the `isNoteId` check
- * -- outside this task's write-set. Left as a residual; see this task's
- * final report.
+ * cdd5-T5d (free-note-alias-not-quark-qualified): the note's own id is its
+ * alias resolved against the current group, exactly like a declared
+ * classifier's -- "final Quark<Entity> quark = diagram.quarkInContext(false,
+ * diagram.cleanId(idShort));" -- so `note as _n` in packages `x` and `y` is
+ * `x._n` and `y._n`, and `note as X.n` at root is child `n` of group `X`
+ * (the chain `resolveReference` registers). The separator is the diagram's
+ * live `set separator` (`ast.namespaceSeparator`, kept in step with
+ * `ParseState` by `class-command-directives.ts`). Relationship endpoints
+ * find the qualified id through `class-note-endpoint.ts#resolveNoteEndpoint`.
  * @see ~/git/plantuml/.../command/note/CommandFactoryNote.java:192-197
  */
+/** `quarkInContext(false, cleanId(idShort))` for a freestanding note's
+ *  alias (`CommandFactoryNote.java:192`), split out of
+ *  {@link addFreestandingNote} for the function-length cap. */
+function resolveFreestandingNoteId(ast: ClassDiagramAST, alias: string, namespace: string | null): ResolvedRef {
+  return resolveReference({
+    namespaces: ast.namespaces,
+    sep: noteSeparator(ast),
+    activeNamespace: namespace,
+    name: stripQuotes(alias),
+    display: undefined,
+    classifiers: ast.classifiers,
+    reuseExistingChild: false,
+  });
+}
+
 export function addFreestandingNote(
   ast: ClassDiagramAST,
   alias: string,
@@ -340,7 +352,7 @@ export function addFreestandingNote(
   counter?: NoteCreationCounter,
   stereotype?: string,
 ): string {
-  const id = stripQuotes(alias);
+  const { id, nsId } = resolveFreestandingNoteId(ast, alias, namespace);
   // G2 N15: `CommandFactoryNote` (freestanding) has no GMN call — only the
   // `Entity` ctor's own slot is consumed, one increment.
   let creationIndex: number | undefined;
@@ -351,12 +363,12 @@ export function addFreestandingNote(
   ast.notes.push({
     id,
     text,
-    ...(namespace !== null ? { namespace } : {}),
+    ...(nsId !== null ? { namespace: nsId } : {}),
     ...(creationIndex !== undefined ? { creationIndex } : {}),
     ...(color !== undefined ? { color } : {}),
     ...(stereotype !== undefined ? { stereotype } : {}),
   });
-  registerInNamespace(ast.namespaces, namespace, id);
+  registerInNamespace(ast.namespaces, nsId, id);
   return id;
 }
 

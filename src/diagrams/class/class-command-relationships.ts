@@ -7,7 +7,7 @@
  * third in COMMANDS, right after the container group).
  */
 import { dropsAsSingleDuplicate } from '../../core/cucadiagram/linkDedup.js';
-import { isNoteId } from './class-notes.js';
+import { resolveNoteEndpoint } from './class-note-endpoint.js';
 import { applyLollipop, LOLLIPOP_RE } from './class-lollipop.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { parseObjectField } from './class-object-commands.js';
@@ -30,17 +30,21 @@ import { refuse } from '../../core/parse-refusal.js';
  * `ent1String`, `ent2String`: source-text order).
  */
 function resolveRelationshipEndpoints(state: ParseState, first: string, second: string): [string, string] {
-  const firstIsNote = isNoteId(state.ast, first);
-  const secondIsNote = isNoteId(state.ast, second);
-  const ref1 = firstIsNote ? undefined : resolveClassifierRef(state, first, undefined, true);
+  // cdd5-T5d: a note endpoint is found through the same quark resolution
+  // as a classifier (`class-note-endpoint.ts#resolveNoteEndpoint`), since a
+  // freestanding note's id is now group-qualified (`CommandFactoryNote.java:192`).
+  const note1 = resolveNoteEndpoint(state.ast, first, state.activeNamespace);
+  const note2 = resolveNoteEndpoint(state.ast, second, state.activeNamespace);
+  const ref1 = note1 !== undefined ? undefined : resolveClassifierRef(state, first, undefined, true);
   const pending1 = ref1 === undefined ? undefined : registerPendingLeaf(state, ref1);
-  const ref2 = secondIsNote
-    ? undefined
-    : resolveClassifierRef(state, second, undefined, true, pending1 === undefined ? [] : [pending1]);
+  const ref2 =
+    note2 !== undefined
+      ? undefined
+      : resolveClassifierRef(state, second, undefined, true, pending1 === undefined ? [] : [pending1]);
   // `quark2` IS `quark1` when both name the same new leaf: registered once.
   const pending2 = ref2 === undefined || ref2.id === ref1?.id ? undefined : registerPendingLeaf(state, ref2);
-  const id1 = ref1 === undefined ? first : materializeClassifier(state, ref1, 'class', pending1 !== undefined).id;
-  const id2 = ref2 === undefined ? second : materializeClassifier(state, ref2, 'class', pending2 !== undefined).id;
+  const id1 = ref1 === undefined ? note1! : materializeClassifier(state, ref1, 'class', pending1 !== undefined).id;
+  const id2 = ref2 === undefined ? note2! : materializeClassifier(state, ref2, 'class', pending2 !== undefined).id;
   return [id1, id2];
 }
 
