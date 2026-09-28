@@ -10,35 +10,51 @@ scripts` only — `plans/` reaches none of these. Invoke every tool as
 root (`tsx` is not installed in this repo; `jiti` is, at `node_modules/
 .bin/jiti`).
 
+## Tree-qualified slugs (T4)
+
+Both tools address a fixture as `<tree>/<slug>`, where a bare `<slug>` (no
+`/`) means `class/<slug>` — this preserves every pre-T4 invocation
+unchanged. `<tree>` selects the corpus directory:
+`test-results/dot-cache/<tree>/<slug>/`. Today the two live trees are
+`class` (the class corpus) and `unknown` (fixtures our router currently
+misclassifies as `unknown` whose jar type is `CLASS` — see `--tree unknown`
+below); any other directory name under `test-results/dot-cache/` also
+resolves, since neither tool special-cases the tree name itself.
+
 ## render-diff.mts
 
 ```
 npx jiti plans/class-divergence-drive/tools/render-diff.mts <slug...>
 ```
 
-For each class-corpus slug (a directory name under
-`test-results/dot-cache/class/<slug>/`): reads `in.puml`, renders it through
-the exact production call `scripts/svg-parity-survey.ts:268-271` uses
+For each `<slug>` argument (tree-qualified or bare, see above): reads
+`in.puml` from its fixture directory, renders it through the exact
+production call `scripts/svg-parity-survey.ts:268-271` uses
 (`renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore:
 buildSpriteAssetsStore() })`, with the asset store built ONCE per process),
-writes the result to `measurements/out/<slug>.ours.svg`, copies the cached
-`in.svg` to `measurements/out/<slug>.jar.svg`, then compares the two with
-`tests/oracle/svg-conformance/compare.ts#compareSvg` (tolerance class
-`'deterministic'`) and prints the structural diff count, the numeric diff
-count, and every individual diff line (`S`/`N` prefixed). Ported from the
-diagnosis seed `diagnosis/scratch-render-one.ts`, with the seed's hardcoded
-`REPO` constant replaced by a location-relative resolution
-(`resolveRepoRoot`, exported and tested).
+writes the result to `measurements/out/<tree>__<slug>.ours.svg`, copies the
+cached `in.svg` to `measurements/out/<tree>__<slug>.jar.svg`, then compares
+the two with `tests/oracle/svg-conformance/compare.ts#compareSvg` (tolerance
+class `'deterministic'`) and prints the structural diff count, the numeric
+diff count, and every individual diff line (`S`/`N` prefixed). Ported from
+the diagnosis seed `diagnosis/scratch-render-one.ts`, with the seed's
+hardcoded `REPO` constant replaced by a location-relative resolution
+(`resolveRepoRoot`, exported and tested). The `<tree>__<slug>` output stem
+(`outputBaseName`, exported and tested) applies uniformly, including to a
+bare slug (`class__<slug>`) — only the filename prefix changed from the
+pre-T4 `<slug>.*.svg` form; the rendered bytes and printed diff counts for a
+bare slug are unchanged.
 
 ## render-all.mts
 
 ```
-npx jiti plans/class-divergence-drive/tools/render-all.mts <out.json>
+npx jiti plans/class-divergence-drive/tools/render-all.mts <out.json> [--tree class|unknown|all]
 ```
 
-Renders every cached class fixture the same way `render-diff.mts` does and
-classifies each one with `scripts/svg-parity-survey.ts#diffVerdict` (imported
-directly — its CLI dispatch is guarded by an `import.meta.url ===
+Renders every cached fixture in the selected `--tree` the same way
+`render-diff.mts` does and classifies each one with
+`scripts/svg-parity-survey.ts#diffVerdict` (imported directly — its CLI
+dispatch is guarded by an `import.meta.url ===
 pathToFileURL(process.argv[1]).href` check, so importing it runs no
 top-level side effect). Writes a `RenderAllRow[]` array, sorted by slug, to
 `<out.json>`:
@@ -46,12 +62,26 @@ top-level side effect). Writes a `RenderAllRow[]` array, sorted by slug, to
 ```ts
 interface RenderAllRow {
   slug: string;
+  tree: string;
   verdict: 'conformant' | 'structural-match' | 'diverged' | 'errored' | 'timeout';
   structural: number;
   numeric: number;
   firstDiff?: string;
 }
 ```
+
+`--tree` (default `class`, preserving the pre-T4 behaviour and row count —
+723 fixtures):
+
+- `class` — every cached fixture under `test-results/dot-cache/class/`.
+- `unknown` — fixtures under `test-results/dot-cache/unknown/` whose
+  `oracle/goldens/svg-conformance/routing-baseline.json` row has
+  `type: 'unknown'` (our router didn't recognize the diagram type) AND
+  `ourType === 'CLASS'` (the jar's own type was class) — 288 rows at time of
+  writing (`loadUnknownClassSlugs`, exported and tested against the live
+  ledger, not a hardcoded count).
+- `all` — the union of both, each row tagged with its source `tree`
+  (1011 rows at time of writing).
 
 Fixture discovery mirrors `listFixtureDirs`
 (`scripts/svg-parity-survey.ts:211-224`): a directory counts only if `.done`,
@@ -61,7 +91,14 @@ subprocesses under a per-fixture timeout, `svg-parity-workers.ts`), this tool
 renders every fixture IN-PROCESS with no timeout or isolation — a hang
 upstream hangs this tool, and a crash produces an `errored` row via a
 try/catch rather than corrupting the run (measured: 723 fixtures in ~8.6s on
-the reference machine).
+the reference machine; 1011 across both trees in ~16s).
+
+`pin-diff.mts` reads `RenderAllRow[]` by `slug` alone (see below) — the
+`class` and `unknown` trees are disjoint slug sets today (verified against
+the live corpus), so `--tree all` output carries no slug collisions. A
+future third tree must preserve that disjointness for `pin-diff.mts`'s
+comparison to stay meaningful, or `pin-diff.mts` itself will need to key on
+`(tree, slug)`.
 
 ## pin-diff.mts
 

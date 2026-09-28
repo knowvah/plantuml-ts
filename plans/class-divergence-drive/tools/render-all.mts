@@ -1,14 +1,23 @@
 /**
- * `npx jiti plans/class-divergence-drive/tools/render-all.mts <out.json>`
+ * `npx jiti plans/class-divergence-drive/tools/render-all.mts <out.json> [--tree class|unknown|all]`
  *
- * Renders every cached class-corpus fixture the same way `render-diff.mts`
- * does (`WidthTableMeasurer` + one process-wide `buildSpriteAssetsStore()`)
- * and classifies each with `scripts/svg-parity-survey.ts#diffVerdict`,
- * imported directly rather than re-derived — its CLI dispatch is guarded by
- * `import.meta.url === pathToFileURL(process.argv[1]).href`, so importing
- * it as a module runs no top-level side effect (verified; see
- * `.agent-notes/cdd-T0b.md`). Writes `RenderAllRow[]`, sorted by slug, to
- * `<out.json>`.
+ * Renders every cached fixture in the selected tree the same way
+ * `render-diff.mts` does (`WidthTableMeasurer` + one process-wide
+ * `buildSpriteAssetsStore()`) and classifies each with
+ * `scripts/svg-parity-survey.ts#diffVerdict`, imported directly rather than
+ * re-derived — its CLI dispatch is guarded by `import.meta.url ===
+ * pathToFileURL(process.argv[1]).href`, so importing it as a module runs no
+ * top-level side effect (verified; see `.agent-notes/cdd-T0b.md`). Writes
+ * `RenderAllRow[]`, sorted by slug, to `<out.json>`.
+ *
+ * `--tree` selects the corpus:
+ * - `class` (default, preserves the original behaviour): every cached fixture
+ *   under `test-results/dot-cache/class/`.
+ * - `unknown`: fixtures under `test-results/dot-cache/unknown/` whose
+ *   `oracle/goldens/svg-conformance/routing-baseline.json` row has
+ *   `type: 'unknown'` AND `ourType === 'CLASS'` — the class fixtures our
+ *   router currently misclassifies (cdd5 T4).
+ * - `all`: the union of both, each row tagged with its source `tree`.
  *
  * Fixture discovery mirrors `listFixtureDirs`
  * (`scripts/svg-parity-survey.ts:211-224`): a dir counts only if `.done`,
@@ -40,8 +49,11 @@ export function resolveRepoRoot(fileUrl: string): string {
   return join(dirname(fileURLToPath(fileUrl)), '..', '..', '..');
 }
 
+export type Tree = 'class' | 'unknown' | 'all';
+
 export interface RenderAllRow {
   slug: string;
+  tree: string;
   verdict: 'conformant' | 'structural-match' | 'diverged' | 'errored' | 'timeout';
   structural: number;
   numeric: number;
@@ -51,6 +63,10 @@ export interface RenderAllRow {
 interface FixtureDir {
   slug: string;
   dir: string;
+}
+
+interface TreeFixture extends FixtureDir {
+  tree: 'class' | 'unknown';
 }
 
 /** Mirrors `listFixtureDirs` (`scripts/svg-parity-survey.ts:211-224`). */
@@ -65,6 +81,47 @@ export function listClassFixtureDirs(classDir: string): FixtureDir[] {
     out.push({ slug, dir });
   }
   return out.sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
+interface RoutingRow {
+  type: string;
+  ourType: string;
+  slug: string;
+}
+
+/** Slugs whose `routing-baseline.json` row is `type: 'unknown'` (our router
+ *  failed to detect a diagram type) but the jar's own type was `CLASS`
+ *  (`ourType` records the jar's classification in this ledger — cdd5 T4). */
+export function loadUnknownClassSlugs(routingBaselinePath: string): Set<string> {
+  const data = JSON.parse(readFileSync(routingBaselinePath, 'utf-8')) as { fixtures: RoutingRow[] };
+  const slugs = new Set<string>();
+  for (const row of data.fixtures) {
+    if (row.type === 'unknown' && row.ourType === 'CLASS') slugs.add(row.slug);
+  }
+  return slugs;
+}
+
+/** `test-results/dot-cache/unknown/` fixtures filtered to the routing-baseline
+ *  CLASS rows (see `loadUnknownClassSlugs`). */
+export function listUnknownClassFixtureDirs(repo: string): FixtureDir[] {
+  const unknownDir = join(repo, 'test-results', 'dot-cache', 'unknown');
+  const routingPath = join(repo, 'oracle', 'goldens', 'svg-conformance', 'routing-baseline.json');
+  const allowed = loadUnknownClassSlugs(routingPath);
+  return listClassFixtureDirs(unknownDir).filter((f) => allowed.has(f.slug));
+}
+
+function taggedFixtures(fixtures: FixtureDir[], tree: 'class' | 'unknown'): TreeFixture[] {
+  return fixtures.map((f) => ({ ...f, tree }));
+}
+
+/** Fixtures for the selected `--tree`, each tagged with its source tree.
+ *  `all` is the union of both, re-sorted by slug (T4). */
+export function collectFixtures(repo: string, tree: Tree): TreeFixture[] {
+  const classFixtures = (): TreeFixture[] => taggedFixtures(listClassFixtureDirs(join(repo, 'test-results', 'dot-cache', 'class')), 'class');
+  const unknownFixtures = (): TreeFixture[] => taggedFixtures(listUnknownClassFixtureDirs(repo), 'unknown');
+  if (tree === 'class') return classFixtures();
+  if (tree === 'unknown') return unknownFixtures();
+  return [...classFixtures(), ...unknownFixtures()].sort((a, b) => a.slug.localeCompare(b.slug));
 }
 
 /** `diffVerdict`'s own return type is the full six-member `Verdict` union,
@@ -87,12 +144,12 @@ export function countDiffs(ours: string, oracle: string): { structural: number; 
   return { structural, numeric };
 }
 
-function errorRow(slug: string, e: unknown): RenderAllRow {
+function errorRow(slug: string, tree: string, e: unknown): RenderAllRow {
   const message = e instanceof Error ? e.message : String(e);
-  return { slug, verdict: 'errored', structural: 0, numeric: 0, firstDiff: message };
+  return { slug, tree, verdict: 'errored', structural: 0, numeric: 0, firstDiff: message };
 }
 
-export function renderRow(f: FixtureDir, store: AssetStore): RenderAllRow {
+export function renderRow(f: FixtureDir, store: AssetStore, tree: string): RenderAllRow {
   try {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const oracle = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
@@ -100,27 +157,48 @@ export function renderRow(f: FixtureDir, store: AssetStore): RenderAllRow {
     const { structural, numeric } = countDiffs(svg, oracle);
     const v = diffVerdict(svg, oracle);
     const firstDiff = v.firstDiff !== undefined ? { firstDiff: v.firstDiff } : {};
-    return { slug: f.slug, verdict: toRowVerdict(v.verdict), structural, numeric, ...firstDiff };
+    return { slug: f.slug, tree, verdict: toRowVerdict(v.verdict), structural, numeric, ...firstDiff };
   } catch (e) {
-    return errorRow(f.slug, e);
+    return errorRow(f.slug, tree, e);
   }
 }
 
+export type ParsedArgs = { out: string; tree: Tree } | { error: string };
+
+const USAGE = 'usage: render-all.mts <out.json> [--tree class|unknown|all]';
+
+function isTree(v: string | undefined): v is Tree {
+  return v === 'class' || v === 'unknown' || v === 'all';
+}
+
+/** Parses `<out.json> [--tree class|unknown|all]`; returns `{ error }` for
+ *  a missing `out` path or an unrecognized `--tree` value rather than
+ *  throwing — an expected CLI-input failure, not a programmer error
+ *  (error-handling.md: return, don't throw, for caller-recoverable cases). */
+export function parseArgs(argv: readonly string[]): ParsedArgs {
+  const out = argv[0];
+  if (out === undefined) return { error: USAGE };
+  const treeIdx = argv.indexOf('--tree');
+  const treeArg = treeIdx === -1 ? 'class' : argv[treeIdx + 1];
+  if (!isTree(treeArg)) return { error: `invalid --tree value: ${String(treeArg)}\n${USAGE}` };
+  return { out, tree: treeArg };
+}
+
 function main(): void {
-  const out = process.argv[2];
-  if (out === undefined) {
-    console.error('usage: render-all.mts <out.json>');
+  const parsed = parseArgs(process.argv.slice(2));
+  if ('error' in parsed) {
+    console.error(parsed.error);
     process.exitCode = 2;
     return;
   }
+  const { out, tree } = parsed;
   const repo = resolveRepoRoot(import.meta.url);
-  const classDir = join(repo, 'test-results', 'dot-cache', 'class');
-  const fixtures = listClassFixtureDirs(classDir);
-  process.stderr.write(`rendering ${fixtures.length} class fixtures\n`);
+  const fixtures = collectFixtures(repo, tree);
+  process.stderr.write(`rendering ${fixtures.length} ${tree} fixtures\n`);
   const store = combineAssetStores(buildSpriteAssetsStore(), buildEmojiAssetsStore());
   const rows: RenderAllRow[] = [];
   fixtures.forEach((f, i) => {
-    rows.push(renderRow(f, store));
+    rows.push(renderRow(f, store, f.tree));
     if ((i + 1) % 25 === 0) process.stderr.write(`  ${i + 1}/${fixtures.length}\n`);
   });
   mkdirSync(dirname(out), { recursive: true });
