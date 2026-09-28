@@ -14,11 +14,13 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../src/index.js';
 import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
-import { chromeAtomOps } from '../../src/core/annotations/blocks-creole.js';
+import { chromeAtomOps, buildChromeTextBlock } from '../../src/core/annotations/blocks-creole.js';
 import { XDimension2D } from '../../src/core/klimt/geom/XDimension2D.js';
 import type { StringBounder } from '../../src/core/klimt/font/StringBounder.js';
 import type { CreoleAtom } from '../../src/core/klimt/creole/atom/Atom.js';
 import type { FontConfiguration } from '../../src/core/klimt/shape/UText.js';
+import type { AnnotationBoxStyle } from '../../src/core/annotations/annotation-style-types.js';
+import { HorizontalAlignment } from '../../src/core/klimt/geom/HorizontalAlignment.js';
 
 function markup(engine: string, slug: string): string {
   return readFileSync(`test-results/dot-cache/${engine}/${slug}/in.puml`, 'utf8');
@@ -204,6 +206,60 @@ describe('chrome creole — unknown/cimono-94-ximu187 (legend <size:8>, S4-style
     expect(/<rect[^>]*height="([\d.]+)"/.exec(jar)?.[1]).toBe('20');
     expect(/<rect[^>]* y="([\d.]+)"/.exec(ours)?.[1]).toBe('22');
     expect(/<rect[^>]* y="([\d.]+)"/.exec(jar)?.[1]).toBe('22');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D3 (cdd6 T1b): `ChromeTextPaint.hyperlinkColor` -- the write-set-owned half
+// of the hyperlink-colour mechanism (see `UText.ts`'s `FontConfiguration
+// .hyperlinkColor` / `CommandCreoleUrl.ts`'s own doc comments for the
+// upstream citation). `buildAnnotationBlock` (`blocks.ts`) and
+// `buildMainframeTitleBlock` (`chrome.ts`) -- the two REAL `ChromeTextPaint`
+// constructors -- do not populate this field (neither is in this task's
+// write-set, and `AnnotationBoxStyle` itself has no such field to read it
+// from), so this is a unit test of the plumbing, not an end-to-end oracle
+// fixture: reported as an open residual in the mission report.
+// ---------------------------------------------------------------------------
+
+describe('buildChromeTextBlock — ChromeTextPaint.hyperlinkColor (D3, unit)', () => {
+  const style: AnnotationBoxStyle = {
+    fontSize: 14,
+    fontStyle: 'plain',
+    fontColor: '#000000',
+    fontFamily: 'sans-serif',
+    backgroundColor: null,
+    lineColor: null,
+    roundCorner: 0,
+    lineThickness: 1,
+    documentBackground: '#FFFFFF',
+    padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    margin: { top: 0, right: 0, bottom: 0, left: 0 },
+    horizontalAlignment: HorizontalAlignment.CENTER,
+  };
+  const measurer = new DeterministicMeasurer();
+
+  it('an injected hyperlinkColor overrides the #0000FF default for a [[url]] chrome line', () => {
+    const block = buildChromeTextBlock(
+      { uid: 'title', color: '#000000', hyperlinkColor: '#FF0000' },
+      ['[[http://example.com label]]'],
+      style,
+      measurer,
+    );
+    // `DriverTextSvg`'s own hex-shorthand minification (`#FF0000` -> `#F00`)
+    // matches the jar's own SVG output convention (jixipo-21-mefu703.jar.svg
+    // draws the same `<style> root { HyperlinkColor #FF0000 }` as `fill="#F00"`).
+    expect(block.body).toContain('fill="#F00"');
+    expect(block.body).not.toContain('fill="#00F"');
+  });
+
+  it('omitting hyperlinkColor keeps the #0000FF default (no mover elsewhere)', () => {
+    const block = buildChromeTextBlock(
+      { uid: 'title', color: '#000000' },
+      ['[[http://example.com label]]'],
+      style,
+      measurer,
+    );
+    expect(block.body).toContain('fill="#00F"');
   });
 });
 

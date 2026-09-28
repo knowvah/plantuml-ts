@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1254 modules · 4727 exported names.
+1255 modules · 4731 exported names.
 
 ## `src/`
 
@@ -215,6 +215,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `annotation-skinparam.ts` | `applySkinparamOverrides` | skinparam overrides — FromSkinparamToStyle.java:87-176. |
 | `annotation-style-overrides.ts` | `applyStyleOverrides` | `<style>` overrides — parseStyleBlock's already-parsed StyleMap. |
 | `annotation-style-types.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `ANNOTATION_ELEMENTS` | Shared types for annotation chrome style resolution — see `style.ts`'s module doc comment for the full layering/design rationale these types support. |
+| `blocks-creole-atoms.ts` | `isCreoleAtomData`, `atomDim`, `drawAtom`, `fontOfAtom` | blocks-creole-atoms.ts — cdd6 T1b: the per-atom measure/draw helpers `chromeAtomOps` (`blocks-creole.ts`) composes, split out so `blocks-creole.ts` stays under this project's 500-line cap after D3's `ChromeTextPaint.hyperlinkColor` addition |
 | `blocks-creole.ts` | `ChromeTextPaint`, `ChromeTextBlock`, `chromeFontConfiguration`, `chromeAtomOps`, `buildChromeCreoleBlock`, `buildChromeTextBlock` | blocks-creole.ts — cdd-T28: the creole half of `Style #createTextBlockBordered` (`style/Style.java:353-369`), split out of `blocks.ts` (which stays the BORDER/margin half, `TextBlockBordered` + `TextBlockMarged`) to keep both files under th |
 | `blocks.ts` | `AnnotationBlock`, `buildAnnotationBlock` | blocks.ts — mission G0b / T4: the drawable half of `Style .createTextBlockBordered` (`style/Style.java:315-332`) + `TextBlockBordered` (`klimt/shape/TextBlockBordered.java`) + `TextBlockMarged` (`klimt/shape/TextBlockMarged.java`, applied v |
 | `chrome.ts` | `AnnotationStyles`, `mergeTB`, `getTextX`, `applyChrome` | chrome.ts — mission G0b / T4: `DiagramChromeFactory.create`'s warnings-less half (mainframe → legend → title → caption → header/footer, header/footer outermost — decisions.md D1/D9) plus `DecorateEntityImage`'s vertical-stack composition ma |

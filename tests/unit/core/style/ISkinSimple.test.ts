@@ -98,3 +98,20 @@ describe('ISkinSimple.getPragma (REQUIRED — mirrors ISkinSimple.java:75)', () 
     expect(skin.getPragma().getValue(PragmaKey.RATIO)).toBeNull();
   });
 });
+
+// D3 (cdd6 T1b): `getStyleHyperlinkColor` is OPTIONAL (see this member's own
+// doc comment in ISkinSimple.ts for why it is neither required nor named
+// `getHyperlinkColor`) — a minimal fake need not implement it at all, and an
+// implementor that does returns the style-cascade-resolved hex string.
+describe('ISkinSimple.getStyleHyperlinkColor (OPTIONAL, D3)', () => {
+  it('a fake omitting it entirely still satisfies the interface', () => {
+    const skin = fakeSkinSimple();
+    expect(typeof skin.getStyleHyperlinkColor).toBe('undefined');
+  });
+
+  it('an implementor supplying it returns the resolved hex colour', () => {
+    const getStyleHyperlinkColor = (): string => '#FF0000';
+    const skin: ISkinSimple = { ...fakeSkinSimple(), getStyleHyperlinkColor };
+    expect(skin.getStyleHyperlinkColor?.()).toBe('#FF0000');
+  });
+});
