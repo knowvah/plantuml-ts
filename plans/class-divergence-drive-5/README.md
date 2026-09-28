@@ -123,3 +123,15 @@ Measurement commands:
   batch-parallelism-needs-worktrees, subagent-handback-single-shot,
   dot-engine-blame-needs-real-dot, svg-survey-positional-arg-writes-parity-json,
   coverage-tmp-silent-undercollect, vitest-filter-can-collect-nothing
+
+## Status (T-exit, 2026-09-28)
+
+| clause | result | met |
+|---|---|---|
+| every CLASS row in fixtures.md has a mechanism and a final | 184 rows: 103 fixed, 62 open -> cdd6, 15 accepted (in force), 4 accept-candidate; 0 empty | met |
+| zero conformant losses vs b1 (CLASS) and vs b0-8beta1 (every other engine) | 0 CLASS losses; 0 non-class losses | met |
+| zero unexplained rises | 7 CLASS rises vs b1, each journaled: 6 structural falls with numeric rises (beboke, fipezo, kexaba, rojida, sapofa, xagomi) and dezobu (T4d draws its label embed, revealing embedded-skinparam-hoisted; journal 77). 12 non-class movers vs b0-8beta1, all gains or reveals with mechanisms (journal 69, 77, 86) | met |
+| class DOT parity green; four gates green; collected = on-disk | green; 893 = 893; coverage 96.43/91.88/97.46/97.43 (`npm test --maxWorkers=6`, journal 19) | met |
+| numeric target: b1 CLASS conformant 830 + 142 scheduled = 972 | final 933 (class 708 + unknown-tree 225; 932 CLASS-routed, zolaza now routes STATE like the jar). Short by 39: every one is a scheduled row whose fix revealed a deeper mechanism, journaled per row in fixtures.md (style-map theme gaps 10, desc-embed ink 5, circle ink 2, hyperlink colour 2, …) | not met; accepted by D6's own proviso (each short row journaled) |
+
+Before -> after: class bucket 707/3/13 -> 708/3/12 (all 15 non-conformant are in-force acceptances); unknown-tree CLASS (288) 122/50/116 at b1 (51/35/196 per the stale 2026-09-21 file, journal 5) -> 225/26/37. Ratchet 706 -> 930 (224 pins: 2 class + 222 unknown-tree). Oracle 1.2026.7beta11 -> 1.2026.8beta1.
