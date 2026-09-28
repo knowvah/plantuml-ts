@@ -31,6 +31,12 @@ oracle/goldens/svg-class/
     in.puml                    <- fixture source (committed, offline)
     golden.svg                 <- committed jar SVG, copied verbatim from
                                    test-results/dot-cache/class/<slug>/in.svg
+  unknown/
+    <slug>/
+      in.puml                  <- copied from
+                                   test-results/dot-cache/unknown/<slug>/in.puml
+      golden.svg                <- copied from
+                                   test-results/dot-cache/unknown/<slug>/in.svg
 ```
 
 Class fixtures have no `<type>` subdirectory level (unlike svg-description's
@@ -38,6 +44,23 @@ Class fixtures have no `<type>` subdirectory level (unlike svg-description's
 type `class`. `in.puml` and `golden.svg` are committed copies so the ratchet
 test runs fully offline — no dependency on the gitignored, regenerable
 `test-results/dot-cache/` tree at test time.
+
+### The `unknown` tree (D4, cdd5-T2)
+
+A `ratchet.json` entry may carry `tree: 'unknown'`; absent means `tree:
+'class'` (unchanged — every pre-cdd5 entry stays as-is, no rewrite). An
+`unknown` entry's golden lives one directory level deeper, under
+`svg-class/unknown/<slug>/`, and its source cache dir is
+`test-results/dot-cache/unknown/<slug>/` rather than `.../class/<slug>/`.
+
+The tree exists to reach fixtures our router currently misclassifies as
+`unknown` whose jar diagram type is actually CLASS (`oracle/goldens/
+svg-conformance/routing-baseline.json`'s `type: 'unknown'` rows carrying
+`ourType: 'CLASS'`) — D3's `renderSync`-based census makes these fixtures
+censusable with no new pipeline, and D4 gives them a ratchet home without
+mixing them into the `class`-tree corpus's own slug space. `pin-goldens.mts
+--tree unknown <source-tag> <close-label> <slug...>` pins them; it refuses a
+slug whose routing row is not `ourType: 'CLASS'` before writing anything.
 
 ## Current state (G2/N4, 2026-07-16)
 
@@ -56,7 +79,8 @@ the current code, `conformant:23, structural-match:45, diverged:650`).
 A fixture may be added to `ratchet.json` only when **both** hold:
 
 1. **Conformant** — rendering the fixture's `in.puml` through
-   `renderFixtureClass` with `DeterministicMeasurer` produces an SVG that is
+   `renderClassFixture` (`render-fixture-class.ts`, `renderSync` under the
+   hood — cdd5-T1/D3) with `DeterministicMeasurer` produces an SVG that is
    zero-diff (`compareSvg(ours, golden, 'deterministic').pass === true`)
    against the jar's `in.svg`.
 2. **DOT-EQUAL** — the fixture's DOT emission is structurally `EQUAL`
