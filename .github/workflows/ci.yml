@@ -164,12 +164,15 @@ jobs:
       # — a slow green build is still green, and a gate that cries wolf on
       # runner variance gets ignored.
       #
-      # Budget is ~2x the SLOW end of the observed range, not 2x the fastest
-      # run. Measured: 4.0 min cold (30702971624, test 2.45) and 5.8 min warm
-      # (30703745724, test 3.88) — the warm run was slower, so that 45% spread
-      # is runner variance, not caching. Sizing off the 4.0 sample alone would
-      # have fired on an ordinary slow runner, which is how a soft check earns
-      # its way into being ignored.
+      # Budget re-set 2026-09-28 from ONE sample: 8.3 min (36483497258, test
+      # 5.65), after the vitest default moved from jsdom to node. The old
+      # 4.0-5.8 range (30702971624, 30703745724) predates suite growth to
+      # ~23.6k tests; the jsdom default had pushed runs to 12.8 min.
+      #
+      # 12 min = the sample plus the 45% runner spread measured between those
+      # two old runs -- not the earlier ~2x rule, which on 8.3 would be 17 and
+      # would stay silent if the jsdom regression (12.8) came back. Re-derive
+      # from the slow end once a few more runs exist.
       #
       # Cold vs warm is NOT split: vendoring the 285 MB tree measured 0.18 min,
       # an order of magnitude below the variance it would be trying to explain.
@@ -177,15 +180,15 @@ jobs:
       - name: flag a slow run
         if: always()
         env:
-          BUDGET_MIN: 10
+          BUDGET_MIN: 12
         run: |
           set -euo pipefail
           elapsed=$(( $(date +%s) - ${{ steps.timer.outputs.start }} ))
           mins=$(awk "BEGIN {printf \"%.1f\", $elapsed/60}")
-          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, observed 4.0-5.8)" \
+          echo "CI wall clock: **${mins} min** (budget ${BUDGET_MIN} min, observed 8.3, one sample)" \
             >> "$GITHUB_STEP_SUMMARY"
           if [ "$elapsed" -gt $(( BUDGET_MIN * 60 )) ]; then
-            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (observed range 4.0-5.8 min). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
+            echo "::warning title=Slow CI run::${mins} min, over the ${BUDGET_MIN} min soft budget (observed 8.3 min, one sample). Check the step timings before raising the budget — the usual causes are a growing suite or a cache that stopped hitting."
           fi
 
   # Publishes line coverage to GitHub Code Quality (PR comment + main baseline).
