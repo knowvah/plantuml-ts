@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1249 modules · 4705 exported names.
+1250 modules · 4707 exported names.
 
 ## `src/`
 
@@ -1135,6 +1135,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-body-enhanced-geometry.ts` | `ELEMENT_DEFAULT_LINE_THICKNESS`, `BODY_ENHANCED_MARGIN_X`, `DecorateHeightOffsets`, `ClassifierBodyGeometry`, `memberLineCount` | class-body-enhanced-geometry.ts — ADR-7's "one owner" bridge: derives `BodyEnhancedAbstract#decorate`'s Y-axis geometry (content top, divider y, total height) for `class-body-enhanced-layout.ts`'s plain/titled divider branches by running th |
 | `class-body-enhanced-layout.ts` | `EmbeddedBlockGeo`, `EnhancedLayoutCtx`, `EnhancedDividerPart`, `EnhancedRowsPart`, `EnhancedTreePart`, `EnhancedBodyPart`, `EnhancedBodyGeo`, `measureEnhancedBody` | class-body-enhanced-layout.ts — assembles a classifier's `EnhancedBodyBlock` list (`class-body-enhanced.ts#splitEnhancedBlocks`) into absolute, LOCAL- to-body draw geometry: `ClassifierGeo['rows']`-shaped text rows (reusing the SAME `render |
 | `class-body-enhanced-ports.ts` | `EnhancedPortMemberInput`, `buildPortMembers`, `translatePortMembers`, `enhancedBodyPortRows` | class-body-enhanced-ports.ts — CDD B7FU-R2 item (a) (coordinator, journal row 161): the enhanced-body half of the `::member` port-election seam `class-port-rows.ts` already ports for the CLASSIC (fields/methods) path. |
+| `class-body-enhanced-visibility.ts` | `EnhancedRowInput`, `buildEnhancedRow` | `visibilityIcon`/`visibilityBlockHeight`/`visibilityBlockTopDy` for one enhanced-body row -- split out of `class-body-enhanced-layout.ts` purely to keep that file under the project's 500-line cap (cdd5-T4e). |
 | `class-body-enhanced.ts` | `BlockSeparatorSpec`, `EnhancedRowsBlock`, `EnhancedTreeCell`, `EnhancedTreeBlock`, `EnhancedBodyBlock`, `isEnhancedBody`, `splitEnhancedBlocks`, `dedentRawLines` | class-body-enhanced.ts — pure raw-line splitting for a classifier's "enhanced body" (upstream `BodyEnhancedAbstract`/`BodyEnhanced1`): the alternate render strategy upstream uses whenever a classifier body contains a `--`/`==`/`..`/`__` blo |
 | `class-body-tree.ts` | `TreeCellRow`, `TreeLayout`, `measureTreeCells`, `TreeConnector`, `computeTreeConnectors` | class-body-tree.ts — `AtomTree`/`Skeleton2` port: measures a `\|_` tree-list run's cells (one creole text row per cell, indented by level) and computes the bullet/hline/vline tree-connector geometry that draws beside them. |
 | `class-classifier-ast.ts` | `ClassifierKind`, `Classifier` | Class-diagram Classifier AST types. |
