@@ -5,7 +5,12 @@
  * comment-stripping primitive they share.
  */
 import { describe, it, expect } from 'vitest';
-import { nonCommentLines, hasActiveSmetanaPragma, hasNewpage, computeDotEqual } from '../../../scripts/lib/survey-dot-equal.js';
+import {
+  nonCommentLines,
+  hasActiveSmetanaPragma,
+  hasNewpage,
+  computeDotEqual,
+} from '../../../scripts/lib/survey-dot-equal.js';
 import { toSvekDot } from '../../../src/core/svek-dot-emit.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.types.js';
 import type { LayoutInputEvent } from '../../../src/core/graph-layout.js';
@@ -34,6 +39,12 @@ describe('nonCommentLines', () => {
 
   it('drops every line inside a multi-line block comment, inclusive', () => {
     expect(nonCommentLines("/' start\nmiddle\nend '/\nfoo")).toEqual(['foo']);
+  });
+
+  it("keeps a line that opens AND closes a block comment mid-line (java:70: opener only when no '/ follows)", () => {
+    // ReadFilterQuoteComment.java:70 — `trim.startsWith("/'") && trim.contains("'/") == false`
+    // opens the long comment; a `/' x '/ foo` line reaches removeInnerComment and is kept.
+    expect(nonCommentLines("/' x '/ foo\nbar")).toEqual(["/' x '/ foo", 'bar']);
   });
 
   it('folds tabs to spaces before trimming, matching the jar', () => {

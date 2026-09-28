@@ -66,7 +66,9 @@ export function nonCommentLines(markup: string): string[] {
     }
     if (trim.startsWith("'")) continue;
     if (trim.startsWith("/'") && trim.endsWith("'/")) continue;
-    if (trim.startsWith("/'")) {
+    // java:70 — the opener fires only when no `'/` follows on the same line;
+    // a `/' x '/ foo` line falls through to removeInnerComment and is kept.
+    if (trim.startsWith("/'") && !trim.includes("'/")) {
       longComment = true;
       continue;
     }
