@@ -156,6 +156,33 @@ export function parseDeclarationColors(color: string | undefined): DeclarationCo
   return out;
 }
 
+/**
+ * T5b (jixipo-21-mefu703/zivenu-37-nace681 secondary, found while verifying
+ * the case-insensitive `as` fix above): true when `index` sits inside an
+ * ODD count of `"` characters counted from the start of `s` -- i.e. inside
+ * an open quoted span. Guards {@link extractDecorations}'s `[[...]]`
+ * url-decoration strip from matching a bracket that is part of a QUOTED
+ * ALIAS's own display text (`class TRES as "[[http://x tres]]"`) rather
+ * than the classifier's OWN trailing url decoration. Upstream's grammar
+ * never lets the two overlap: `DISPLAY_WITH_GENERIC`'s lazy `(.+?)` capture
+ * (`command/NameAndCodeParser.java:47`) consumes the ENTIRE quoted span --
+ * brackets included -- as ONE atomic token, deterministically, before
+ * `UrlBuilder.OPTIONAL` (which sits to the RIGHT of TAGS2, i.e. AFTER the
+ * alias is already fully consumed) ever runs. This port instead free-text-
+ * scans decorations off the whole remainder BEFORE splitting id/display, so
+ * without this guard a `[[...]]` inside the quotes was stripped as if it
+ * were the decoration, leaving `id as ""` -- an empty display that
+ * `parseClassifierDecl`'s `id === '' || display === ''` guard then rejects
+ * outright, orphaning every later body line (the "Syntax Error?" page).
+ * @see ~/git/plantuml/.../command/NameAndCodeParser.java:47,52-67
+ * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java:108-116 (TAGS1/STEREO/TAGS2/URL/COLOR order, all AFTER the alias)
+ */
+function isInsideQuotedSpan(s: string, index: number): boolean {
+  let quoteCount = 0;
+  for (let i = 0; i < index; i++) if (s.charAt(i) === '"') quoteCount++;
+  return quoteCount % 2 === 1;
+}
+
 /** Strip a `[[url]]` (G2 N15: captured and parsed, not just discarded — see
  *  {@link parseUrlBracket}), a `<< stereotype >>`, any `$tag` tokens (the
  *  TAGS1/TAGS2 slots — see {@link TAG_TOKEN_RE}), and a trailing color spec
@@ -172,8 +199,10 @@ export function extractDecorations(rest: string): {
   url: UrlInfo | undefined;
 } & DeclarationColors {
   const urlMatch = URL_BRACKET_RE.exec(rest);
-  const url = urlMatch !== null ? parseUrlBracket(urlMatch[0]) : undefined;
-  let out = rest.replace(/\s*\[\[[^\]]*\]\]/g, '').trim();
+  const url = urlMatch !== null && !isInsideQuotedSpan(rest, urlMatch.index) ? parseUrlBracket(urlMatch[0]) : undefined;
+  let out = rest
+    .replace(/\s*\[\[[^\]]*\]\]/g, (m, offset: number) => (isInsideQuotedSpan(rest, offset) ? m : ''))
+    .trim();
   let stereotype: string | undefined;
   // Greedy — stacked stereotypes (`<<A>><<B>>`) capture to the LAST `>>` as one blob, else the mis-split id spawns phantom nodes (gabejo-44-juki791).
   const stereoMatch = /<<\s*(.+)\s*>>/.exec(out);
@@ -359,7 +388,16 @@ export function parseIdDisplay(rest: string): {
   // branch which kept the raw quotes in the display. CODE is upstream's own
   // `[^\s{}%g<>]+` (NameAndCodeParser.java:49), not `\S+` -- a quoted
   // alias (`a as "b"`) must fall through to the CODE-as-DISPLAY branch.
-  const quotedAlias = /^"(.+?)"\s+as\s+([^\s{}"<>]+)$/.exec(rest);
+  // T5b (jixipo-21-mefu703/zivenu-37-nace681 secondary, class-decl-as-case-
+  // sensitive): every regex-DSL `RegexLeaf` literal (upstream's "as" keyword
+  // included, `command/NameAndCodeParser.java:57,63,76,81`) compiles
+  // case-insensitively -- `regex/Pattern2.java:112-114`:
+  // "Pattern.compile(regex, Pattern.CASE_INSENSITIVE)". `class TRES AS "…"`
+  // must match the SAME alias grammar as `class TRES as "…"`; the three `as`
+  // regexes below were case-sensitive, so an upper/mixed-case `AS` fell
+  // through to no alias match at all (id became the literal `"TRES AS \"\""`
+  // text via the final bareword fallback).
+  const quotedAlias = /^"(.+?)"\s+as\s+([^\s{}"<>]+)$/i.exec(rest);
   if (quotedAlias !== null) {
     const { display, typeParams, typeParamsRawText } = extractGenericFromDisplay(quotedAlias[1]!);
     return {
@@ -376,7 +414,8 @@ export function parseIdDisplay(rest: string): {
   // NOT run through `extractGenericFromDisplay` -- no jar evidence for this
   // form (unlike `quotedAlias` below, jar-verified `zaxate-23-xifa551`/
   // `nesuti-69-giza389`), narrower scope than guessing.
-  const codeAsQuotedDisplay = /^(\S+)\s+as\s+"([^"]*)"$/.exec(rest);
+  // T5b: case-insensitive "as", see {@link quotedAlias}'s doc comment above.
+  const codeAsQuotedDisplay = /^(\S+)\s+as\s+"([^"]*)"$/i.exec(rest);
   if (codeAsQuotedDisplay !== null)
     return {
       id: codeAsQuotedDisplay[1]!,
@@ -387,15 +426,26 @@ export function parseIdDisplay(rest: string): {
   // Bareword-both-sides: invalid upstream syntax, kept as leniency (see
   // doc comment above) — NOT the upstream-correct id/display assignment.
   // G2 N32: NOT run through `extractGenericFromDisplay`, same reasoning.
-  const unquotedAlias = /^(\S+)\s+as\s+(\S+)$/.exec(rest);
+  // T5b: case-insensitive "as", see {@link quotedAlias}'s doc comment above.
+  const unquotedAlias = /^(\S+)\s+as\s+(\S+)$/i.exec(rest);
   if (unquotedAlias !== null) return { display: unquotedAlias[1]!, id: unquotedAlias[2]!, typeParams: [] };
 
-  // `id<generic>` — upstream's CODE never includes `<`/`>` (it stops at the
-  // first `<`), so the id is split off first; the remaining `<...>` suffix is
-  // matched against the bounded-nesting generic-body pattern (handles nested
-  // generics like `Foo<List <? extends GENERIC>>`, not just single-level).
-  // @see ~/git/plantuml/.../classdiagram/command/CommandCreateClass.java:89-91
-  const idThenGeneric = /^([^\s<>]+)(<.*>)$/.exec(rest.trim());
+  // `id<generic>` / `id <generic>` — upstream's CODE never includes `<`/`>`
+  // (it stops at the first `<`), so the id is split off first; the
+  // remaining `<...>` suffix is matched against the bounded-nesting
+  // generic-body pattern (handles nested generics like `Foo<List <?
+  // extends GENERIC>>`, not just single-level). T5b (nepevi-24-dune081,
+  // generic-space-before-angle): the CODE regex leaf is followed by an
+  // OPTIONAL `RegexConcat(spaceZeroOrMore(), GENERIC)` clause -- zero or
+  // more spaces are allowed (not required) between the id and `<` --  so
+  // `class Person <Eloquent>` must split the same as `class Person<Eloquent>`.
+  // The previous pattern anchored the `<` directly onto the id with no `\s*`
+  // between the two capture groups, so a spaced form matched NEITHER group
+  // and fell through to the bareword id `"Person <Eloquent>"`, which then
+  // duplicated `Person` as a second, phantom classifier once `PersonRich
+  // extends Person` referenced the correctly-spelled id.
+  // @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java:106-107 (RegexOptional(RegexConcat(spaceZeroOrMore(), GENERIC)))
+  const idThenGeneric = /^([^\s<>]+)\s*(<.*>)$/.exec(rest.trim());
   if (idThenGeneric !== null) {
     const genericMatch = GENERIC_CLAUSE_RE.exec(idThenGeneric[2]!);
     if (genericMatch !== null) {
