@@ -271,7 +271,20 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
   // the RAW ast: upstream's isDegeneratedWithFewEntities counts getLeafs()/
   // getLinks() UNFILTERED, so removed entities still count here (a graph
   // reduced to one node by `remove` still runs graphviz — pijode-83).
-  const degenerate = degenerateSingleClassifier(pageAst, measuredMap);
+  // cdd5-T4a (degenerate-check-after-group-mute): the GROUP count is ALSO
+  // read pre-collapse -- `ast.namespaces.length`, NOT `pageAst.namespaces
+  // .length`. `entityFactory.groups().size()` (`dot/DotData.java:69-70`) is
+  // read BEFORE the empty-package mute-to-leaf, which upstream defers to
+  // DOT export time (`svek/GraphvizImageBuilder.java:416-418`); this port's
+  // `collapseEmptyNamespacesFinal` runs the equivalent mute at LAYOUT time
+  // (above, before measurement), so `pageAst.namespaces` already excludes
+  // an empty package by the time this check would otherwise see it. When
+  // `ast.namespaces.length === 0` (nothing to collapse) `pageAst === ast`
+  // (its own doc comment), so this changes nothing for every fixture
+  // outside this exact case (jar-verified conformant: `baleco-37-lili752`
+  // `package foo1 {`, `catigu-77-keje426` `package test {}`, `daroli-95-
+  // remo515` nested `together {}`).
+  const degenerate = degenerateSingleClassifier(pageAst, measuredMap, ast.namespaces.length, theme, measurer);
   if (degenerate !== undefined) return degenerate;
 
   // remove/restore exclusion at the layout-input boundary — the port's

@@ -120,19 +120,55 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(captured).toBe(1);
   });
 
-  it('single freestanding note, zero classifiers -- falls through to normal layout (not dropped)', () => {
+  it('single freestanding note, zero classifiers -- degenerate (cdd5-T4a degenerate-excludes-notes)', () => {
     // GraphvizImageBuilder.java's isDegeneratedWithFewEntities(1) counts notes
     // as leafs too (DotData.java:69-71 -- getLeafs() includes LeafType.NOTE),
-    // so upstream *would* treat a lone note as degenerate. This port only
-    // special-cases the single-classifier leaf (see degenerateSingleClassifier
-    // in src/diagrams/class/layout.ts): a lone note goes through the normal
-    // dot path instead of a dedicated direct-placement path -- it must still
-    // be rendered (not silently dropped by the 0-entity shortcut above it).
+    // and GeneralImageBuilder.java:118-119 routes the single NOTE leaf
+    // through EntityImageNote, wrapped in the SAME EntityImageDegenerated
+    // (delta=7) translate as a single classifier -- see
+    // `degenerateNoteGeo` (class-geo-builders-degenerate-note.ts).
     const note: ClassNote = { id: 'N1', text: 'alone' };
     const ast = makeAST({ notes: [note] });
     const { geo, captured } = layoutAndCount(ast);
-    expect(captured).toBe(1);
+    expect(captured).toBe(0);
     expect(noteLeaves(geo.leaves)).toHaveLength(1);
+    expect(noteLeaves(geo.leaves)[0]?.x).toBe(7);
+    expect(noteLeaves(geo.leaves)[0]?.y).toBe(7);
+    expect(noteLeaves(geo.leaves)[0]?.connector).toEqual([]);
+    expect(geo.totalWidth).toBeGreaterThan(0);
+    expect(geo.totalHeight).toBeGreaterThan(0);
+  });
+
+  it('single empty package, zero classifiers -- NOT degenerate (group counted pre-collapse mute)', () => {
+    // cdd5-T4a degenerate-check-after-group-mute: DotData.java:69-70 reads
+    // entityFactory.groups().size() BEFORE the empty-package mute-to-leaf,
+    // which upstream defers to DOT-export time
+    // (GraphvizImageBuilder.java:416-418). This port's own equivalent mute
+    // (collapseEmptyNamespacesFinal) runs at layout time, before this
+    // check -- so the raw (pre-collapse) namespace count must gate it, not
+    // the post-collapse one. `package foo1 { }`-shaped AST: one namespace,
+    // zero classifiers before collapse.
+    const ns: Namespace = { id: 'foo1', display: 'foo1', classifiers: [] };
+    const ast = makeAST({ namespaces: [ns] });
+    const { captured } = layoutAndCount(ast);
+    expect(captured).toBe(1);
+  });
+
+  it('single circle classifier -- canvas grows to fit the label drawn below the icon (ensureVisible)', () => {
+    // cdd5-T4a degenerate-text-ensurevisible: SvgGraphics.java:757-758,
+    // :129-133 -- a circle/`() "name"` interface's label is drawn BELOW its
+    // fixed 18x18 icon (measureCircleInterfaceInk); the degenerate path's
+    // box-only rawDims must widen/heighten to the label's real ink corner,
+    // the same `Math.floor(v)+1` truncation the embed-overflow case uses.
+    const ast = makeAST({ classifiers: [makeClassifier('A', { kind: 'circle' })] });
+    const { geo, captured } = layoutAndCount(ast);
+    expect(captured).toBe(0);
+    const leaf = classifierLeaves(geo.leaves)[0]!;
+    expect(leaf.x).toBe(7);
+    expect(leaf.y).toBe(7);
+    // The 18x18 icon alone would total 7+18+13=38; the label drawn below it
+    // must push the canvas taller than that box-only figure.
+    expect(geo.totalHeight).toBeGreaterThan(38);
   });
 
   it('empty diagram (0 classifiers, 0 namespaces) -- 0 graphs, 10x10 EntityImageSimpleEmpty geometry', () => {
