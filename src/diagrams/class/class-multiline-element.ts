@@ -107,19 +107,31 @@ function removeStartingSpaces(s: string, nb: number): string {
   return i === 0 ? s : s.slice(i);
 }
 
-/** TYPE1's dedent-relative-to-first-body-line step (`BlocLines#trimSmart(1)`). */
+/** TYPE1's dedent-relative-to-first-body-line step (`BlocLines#trimSmart(1)`).
+ *  Every interior line is kept, blank ones included — mirrors
+ *  `executeNow`'s `lines.subExtract(1, 1); Display display = lines.toDisplay();`
+ *  (`CommandCreateElementMultilines.java:192-193`), which builds `display`
+ *  from EVERY line `BlocLines` handed it; only the block's own opener/closer
+ *  lines are dropped (`subExtract`), never a blank interior one
+ *  (`MultilinesStrategy.REMOVE_STARTING_QUOTE` only strips a leading `'`
+ *  line, an unrelated case). A blank line un-conditionally survives
+ *  `removeStartingSpaces` too (`BlocLines.java:330-332`: a zero-length
+ *  `StringLocated` is returned as-is). */
 function pushDedentedBodyLine(pending: PendingMultilineElement, raw: string): void {
   if (pending.baseIndent === undefined) pending.baseIndent = nbStartingSpace(raw);
-  const t = stripFullWrap(removeStartingSpaces(raw, pending.baseIndent));
-  if (t.trim() !== '') pending.lines.push(t);
+  pending.lines.push(stripFullWrap(removeStartingSpaces(raw, pending.baseIndent)));
 }
 
 /** One raw body line of an open block — TYPE1 dedents relative to its own
  *  first body line; TYPE0 keeps the line as-is (`expandsNewline(false)`, no
- *  dedent upstream either). Mirrors `pushElementBody`. */
+ *  dedent upstream either). Mirrors `pushElementBody`. Every line is kept,
+ *  blank ones included — see {@link pushDedentedBodyLine}'s citation, which
+ *  applies identically here: `executeNow` never distinguishes TYPE0/TYPE1
+ *  when it turns the interior `BlocLines` into `display`.
+ *  @see ~/git/plantuml/.../descdiagram/command/CommandCreateElementMultilines.java:192-193 */
 function pushBodyLine(pending: PendingMultilineElement, raw: string): void {
   if (pending.terminator === 'quote') {
-    if (raw.trim() !== '') pending.lines.push(raw);
+    pending.lines.push(raw);
     return;
   }
   pushDedentedBodyLine(pending, raw);
