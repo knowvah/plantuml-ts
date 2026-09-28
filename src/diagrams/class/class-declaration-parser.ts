@@ -17,6 +17,7 @@ import { ensureClassifier, type ParseState } from './parser.js';
 import { idLeaf } from './class-relationship-parser.js';
 import { type UrlInfo } from './class-url.js';
 import { refuse } from '../../core/parse-refusal.js';
+import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
 import { extractBody, extractDecorations, extractInheritance, parseIdDisplay } from './class-declaration-extractors.js';
 
 // ---------------------------------------------------------------------------
@@ -168,7 +169,7 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   // extraction is anchored to the current end of the remainder.
   const { rest: afterInheritance, extendsIds, implementsIds } = extractInheritance(body);
   const { rest, stereotype, color, tags, url } = extractDecorations(afterInheritance);
-  const { id, display, typeParams, typeParamsRawText } = parseIdDisplay(rest);
+  const { id, display, typeParams, typeParamsRawText } = parseDeclIdDisplay(kind, rest);
   if (id === '' || display === '') return null;
 
   return {
@@ -188,6 +189,58 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
     ...(typeParamsRawText !== undefined ? { typeParamsRawText } : {}),
     ...(kindMatch[1] !== undefined ? { visibilityModifier: kindMatch[1] as Visibility } : {}),
   };
+}
+
+/** The kinds `resolveDeclKind` maps from `CommandCreateElementFull2`'s
+ *  SYMBOL (`state|` + `CommandCreateElementFull.ALL_TYPES`), never from a
+ *  class-command TYPE. */
+const ELEMENT_FULL2_KINDS: ReadonlySet<ClassifierKind> = new Set<ClassifierKind>(['descriptive', 'usecase', 'state']);
+
+/** `StringUtils.eventuallyRemoveStartingAndEndingDoubleQuote(String)`'s
+ *  one-arg format, `StringUtils.java:83-87`. */
+const ELEMENT_CODE_STRIP_FORMAT = '"([:';
+
+const QUOTED_CODE_RE = new RegExp(String.raw`^"[^"]*"$`);
+const AS_RE = new RegExp(String.raw`\s+as\s+`);
+/** CODE_CORE's decorated alternatives (`CommandCreateElementFull.java:126`):
+ *  one token even when an ` as ` sits inside them. */
+const DECORATED_CODE_RE = new RegExp(String.raw`^(?:\([^()]+\)|\[[^[\]]+\]|:[^:]+:)$`);
+/** `DISPLAY2 as CODE2` with a bare (unquoted) display. */
+const BARE_ALIAS_RE = new RegExp(String.raw`^[^"\s]\S*\s+as\s+[^"\s]\S*$`);
+
+function stripOnce(s: string): string {
+  return eventuallyRemoveStartingAndEndingDoubleQuote(s, ELEMENT_CODE_STRIP_FORMAT) ?? s;
+}
+
+/**
+ * cdd5-T4b: a descriptive/usecase/state leaf (`CommandCreateElementFull2`)
+ * strips its CODE and its DISPLAY once each with the `"([:` format --
+ * `CommandCreateElementFull2.java:201` ("displayRaw = StringUtils
+ * .eventuallyRemoveStartingAndEndingDoubleQuote(arg.getLazzy(\"DISPLAY\",
+ * 0))") and `:249-250` ("idShort = StringUtils.eventuallyRemoveStarting
+ * AndEndingDoubleQuote(codeRaw); ... displayRaw == null ? idShort :
+ * displayRaw"). `parseIdDisplay` already removed the quotes of a quoted
+ * token, so only a BARE token is stripped here: a lone quoted CODE1 and a
+ * quoted display keep whatever brackets were inside the quotes.
+ *
+ * Not ported: the `codeChar`/`codeDisplay` symbol override right above it
+ * (java:202-215 -- a `(`, `:` or `[` first char turns the leaf into a
+ * usecase, actor or component).
+ */
+function stripElementCode(rest: string, parsed: { id: string; display: string }): { id: string; display: string } {
+  const r = rest.trim();
+  if (QUOTED_CODE_RE.test(r)) return parsed;
+  const id = stripOnce(parsed.id);
+  const single = !AS_RE.test(r) || DECORATED_CODE_RE.test(r);
+  if (single) return { id, display: id };
+  return { id, display: BARE_ALIAS_RE.test(r) ? stripOnce(parsed.display) : parsed.display };
+}
+
+/** `parseIdDisplay`, then {@link stripElementCode} for a
+ *  `CommandCreateElementFull2` kind. */
+function parseDeclIdDisplay(kind: ClassifierKind, rest: string): ReturnType<typeof parseIdDisplay> {
+  const parsed = parseIdDisplay(rest);
+  return ELEMENT_FULL2_KINDS.has(kind) ? { ...parsed, ...stripElementCode(rest, parsed) } : parsed;
 }
 
 /**
