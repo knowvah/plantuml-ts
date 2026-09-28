@@ -1535,10 +1535,10 @@
       "type": "activity",
       "slug": "labala-74-juki864",
       "status": "baseline",
-      "weightedScore": 134,
-      "diffCount": 134,
-      "measuredAt": "2026-09-10",
-      "measuredAgainstCommit": "63f73489"
+      "weightedScore": 132,
+      "diffCount": 132,
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "type": "activity",

@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-27T17:46:38.951Z",
-  "measuredAgainstCommit": "682a54ce4",
-  "type": "class+tests/oracle/svg-conformance/census-class.json",
+  "generatedAt": "2026-09-28T00:21:46.619Z",
+  "measuredAgainstCommit": "ce0e8c71e",
+  "type": "class+plans/class-divergence-drive-5/measurements/b0-8beta1/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
     {
@@ -79,8 +79,8 @@
     {
       "slug": "besepi-37-rori892",
       "status": "ok",
-      "diffCount": 669,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "bicabi-42-coto932",

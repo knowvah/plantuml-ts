@@ -42513,12 +42513,12 @@
       "tree": "dot-cache",
       "type": "gantt",
       "slug": "votofi-06-rolo321",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": false,
       "engine": "none",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -48685,12 +48685,12 @@
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-monoline-def-0-3",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": false,
       "engine": "none",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -48850,23 +48850,23 @@
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-14",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": false,
       "engine": "none",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-15",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": false,
       "engine": "none",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -48938,12 +48938,12 @@
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-21",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": false,
       "engine": "none",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -58336,13 +58336,12 @@
       "tree": "dot-cache",
       "type": "unknown",
       "slug": "zodude-13-tito074",
-      "jarRendered": true,
+      "jarRendered": false,
       "weErrored": true,
       "engine": "class",
-      "status": "known-gap",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd",
-      "reason": "PSystemError#getTextBlock prepends the Welcome tutorial whenever source.getTotalLineCountLessThan5() (PSystemError.java:217-218) plus, here, a large donation-ad PNG (addMessageDedication/addMessagePatreon, PSystemError.java:221-229). Both push the diagnostic 'PlantUML version ...' signature (PSystemError.java:148) and the jar's own 'Syntax Error? (Assumed diagram type: sequence)' on the unported 'block Hello' block-diagram syntax past this repo's 4096-byte HEAD_BYTES head-read window (pin-corpus-tree-measure.ts's own HEAD_BYTES, mirrored from refusal-coverage.test.ts's; measured offset 7443 of 15192 total bytes), so isJarErrorPage misreads a genuine jar ErrorUml page as jarErrored=false. Measurement-tool limitation, not an unported feature -- this port also refuses the same source (as class, not sequence, but both are refusals)."
+      "status": "ok",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",

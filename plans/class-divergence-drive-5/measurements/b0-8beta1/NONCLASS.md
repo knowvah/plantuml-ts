@@ -40,3 +40,18 @@ Movers are counted over verdict + dotEqual only (the survey's gating fields).
   (`15.1.0 (20260618.0150)` -> `16.1.0 (20260904.0139)`), which compare.ts does not read.
 - The changed-oracle counts (93 cache files in total) are upstream movement on already-diverged fixtures;
   they are not classified individually because D2 classifies movers, and there are none.
+
+## Baseline and pin movers found at T0e (not verdict movers)
+
+| engine | fixture | what moved | classification |
+|---|---|---|---|
+| sequence | dipazo-97-namu310 | diff-baseline weightedScore 54 -> 55 | upstream change: teoz (`GlobalConfig.java:47` FORCE_TEOZ) 3f6c93c5, `GroupingTile.java` / `CommunicationTileSelf.java` / `ComponentRoseSelfArrow#getDrawnWidth` (self-message groups 7px narrower) |
+| sequence | susati-64-lako047 | diff-baseline weightedScore 147 -> 171 | upstream change: 98059a25 / 3f6c93c5, teoz `GroupingTile.java` + `NoteTile.java` (participants after alt+note shift 20.125px) |
+| gantt | votofi-06-rolo321 | routing agree -> jar-error; refusal jarRendered true -> false | capture artifact, not upstream: old golden captured in a PSystemError.java:218-228 decoration minute |
+| wbs | WBS-monoline-def-0-3, WBS-multiline-def-1-{14,15,21} | same | same |
+| unknown | zodude-13-tito074 | same; refusal known-gap -> ok | same |
+| sequence | soxata-16-kafi688 | routing known-misroute -> agree | reveal (port already routes it SEQUENCE; measured by repin-sequence-baselines) |
+| activity | labala-74-juki864 | diff-baseline 134 -> 132 | fall (earlier port work); no rises |
+
+Both sequence rises were confirmed as jar-side by rendering through `oracle-render.sh`'s flags with the
+retained 7beta11 jar: byte-identical to the old cache. No `src/` fix (D2).

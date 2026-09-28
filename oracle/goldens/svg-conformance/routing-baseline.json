@@ -19811,10 +19811,10 @@
       "type": "sequence",
       "slug": "soxata-16-kafi688",
       "jarType": "SEQUENCE",
-      "ourType": "CLASS",
-      "status": "known-misroute",
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
+      "ourType": "SEQUENCE",
+      "status": "agree",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9",
       "reason": "the SEQUENCE engine refuses this source, so CLASS claimed it instead. refuses to parse -- source line 2: `skinParam CaptionFontSize 10`. The preprocessor strip RE_SKINPARAM_LINE (preprocessor.ts:107) has no `i` flag, so the camel-case spelling survives to the command list, where this port registers only skinParamMessageAlignCommand. Upstream matches every skinparam name in any case: CommandSkinParam is a SingleLineCommand2 (command/CommandSkinParam.java:57-63; CommonCommands.java:66). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
@@ -39041,10 +39041,11 @@
       "type": "gantt",
       "slug": "votofi-06-rolo321",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -45086,10 +45087,11 @@
       "type": "wbs",
       "slug": "WBS-monoline-def-0-3",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -45250,20 +45252,22 @@
       "type": "wbs",
       "slug": "WBS-multiline-def-1-14",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
       "type": "wbs",
       "slug": "WBS-multiline-def-1-15",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -45336,10 +45340,11 @@
       "type": "wbs",
       "slug": "WBS-multiline-def-1-21",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "27ed6346"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",
@@ -54002,10 +54007,11 @@
       "type": "unknown",
       "slug": "zodude-13-tito074",
       "jarType": "NONE",
+      "jarErrored": true,
       "ourType": "NONE",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd"
+      "status": "jar-error",
+      "measuredAt": "2026-09-27",
+      "measuredAgainstCommit": "689f66a9"
     },
     {
       "tree": "dot-cache",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T12:31:47.667Z",
+  "generatedAt": "2026-09-28T00:16:31.392Z",
   "fixtures": [
     {
       "slug": "bafilu-92-tafa086",
@@ -1356,8 +1356,8 @@
       "type": "gantt",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 110.94999999999999,
-      "firstDiff": "svg/@background",
+      "maxDelta": 111,
+      "firstDiff": "svg/g[1]/rect[1]/@stroke-width",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1770,7 +1770,7 @@
       "type": "gantt",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 20186,
+      "maxDelta": 20298,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@width"
     },
@@ -2112,7 +2112,7 @@
       "type": "gantt",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256,
+      "maxDelta": 130,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },

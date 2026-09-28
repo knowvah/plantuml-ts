@@ -1,0 +1,19 @@
+[Log] value is 3
+[MemLocal] Start of memory_dump 
+[MemGlobal] Number of variable(s) : 0
+[MemLocal] Number of overridden variable(s) : 1
+[MemLocal] $string = 3
+[MemLocal] Number of local variable(s) : 1
+[MemLocal] $val = 3
+[MemGlobal] End of memory_dump
+[MemGlobal] Start of memory_dump EOF
+[MemGlobal] Number of variable(s) : 1
+[MemGlobal] unused = foo
+[MemGlobal] End of memory_dump
+[Log] var=4
+[Log] Calling bold function with bold. The result is <b>bold</b>
+[Log] Calling bold function with a second call. The result is <b>a second call</b>
+[Log] foo $with_details
+[Log] value is 2
+[Log] value is 3
+wrote 1141 rows (1126 measured) to plans/class-divergence-drive-5/measurements/b0-8beta1/seq-snapshot.json

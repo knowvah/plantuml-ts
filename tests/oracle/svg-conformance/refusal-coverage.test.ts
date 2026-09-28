@@ -718,8 +718,13 @@ describe('refusal coverage — baseline shape', () => {
     // 5680 -> 5700 / 5411 -> 5431 at class-divergence-drive-4/close-b2
     // (2026-09-27): 20 more svg-class golden rows, same procedure
     // (ratchet 686 -> 706). Derivation: 5431 + 269 = 5700.
+    // 99 -> 105 jar errors at cdd5-T0e (2026-09-27): gantt/votofi-06-rolo321,
+    // four wbs/WBS-*-def-* and unknown/zodude-13-tito074 were always jar error
+    // pages; their old goldens carried PSystemError.java:218-228's time-based
+    // donation banner, which hid the error signature from the head-read.
+    // Recaptured in a plain minute. Erroring/rendering splits unchanged.
     expect(manifest.fixtures.length).toBe(5700);
-    expect(pinnedJarErrors.length).toBe(99);
+    expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -793,7 +798,12 @@ describe('refusal coverage — baseline shape', () => {
     // derivation above).
     // 138 -> 137 at unknown-bucket-routing-repair/T11: recani retired.
     // 137 -> 198 at unknown-bucket-routing-repair/T14: 61 unknown gaps.
-    expect(gaps.length).toBe(198);
+    // 198 -> 197 at cdd5-T0e (2026-09-27): `unknown/zodude-13-tito074`'s gap
+    // excused a MEASUREMENT artifact -- its golden was captured in a minute
+    // where PSystemError.java:218-228 adds a time-based donation banner,
+    // pushing the error signature past HEAD_BYTES. Recaptured in a plain
+    // minute it reads jarRendered: false, so it is no defect to excuse.
+    expect(gaps.length).toBe(197);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

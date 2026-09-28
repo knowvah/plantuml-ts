@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T12:33:25.084Z",
+  "generatedAt": "2026-09-28T00:19:54.970Z",
   "fixtures": [
     {
       "slug": "bejilu-38-kaje288",
@@ -42,7 +42,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 120.10000000000002,
+      "maxDelta": 123,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -69,8 +69,8 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 241.05,
-      "firstDiff": "svg/@background",
+      "maxDelta": 241,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -87,9 +87,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 388.954,
+      "maxDelta": 365.556,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/text[1]/@y"
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
     },
     {
       "slug": "cecoju-52-ziva745",
@@ -150,7 +150,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 3640.9,
+      "maxDelta": 3638,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -159,9 +159,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 220.222,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "fepalu-24-sadi657",
@@ -195,7 +195,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 150.10000000000002,
+      "maxDelta": 153,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -249,16 +249,16 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 166.88700000000003,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDelta": 116,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
     },
     {
       "slug": "fuzego-03-loke498",
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 119.10000000000002,
+      "maxDelta": 122,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -267,7 +267,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 4344.9,
+      "maxDelta": 4342,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -276,7 +276,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 150.10000000000002,
+      "maxDelta": 153,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -321,8 +321,8 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 247.05,
-      "firstDiff": "svg/@background",
+      "maxDelta": 247,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -375,7 +375,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 123.10000000000002,
+      "maxDelta": 126,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -402,7 +402,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 187.10000000000002,
+      "maxDelta": 190,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -447,8 +447,8 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 54.89999999999998,
-      "firstDiff": "svg/@background",
+      "maxDelta": 52,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -492,7 +492,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 158.10000000000002,
+      "maxDelta": 161,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -519,7 +519,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 708.423,
+      "maxDelta": 704.556,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/g[1]/text[5]/@y"
     },
@@ -537,7 +537,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 162.10000000000002,
+      "maxDelta": 165,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -609,27 +609,27 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 139.398,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/text[1]/@y"
+      "maxDelta": 130,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
     },
     {
       "slug": "pebexo-15-kago195",
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 186.247,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "pefana-89-modi000",
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 87.574,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@height"
+      "maxDelta": 141.23700000000002,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
     },
     {
       "slug": "pevaca-23-bado084",
@@ -753,9 +753,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 265.398,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/text[1]/@y"
+      "maxDelta": 256,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
     },
     {
       "slug": "sogoca-93-faja981",
@@ -780,7 +780,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 150.10000000000002,
+      "maxDelta": 153,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -861,18 +861,18 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 220.222,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "Timing-short-alias-4",
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 220.222,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "tivese-10-xoki588",
@@ -906,7 +906,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 200.10000000000002,
+      "maxDelta": 203,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -924,7 +924,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 155.10000000000002,
+      "maxDelta": 158,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -933,18 +933,18 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 169.86200000000002,
-      "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDelta": 130,
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
+      "maxDeltaPath": "svg/g[1]/text[2]/@y"
     },
     {
       "slug": "vukuru-10-miva837",
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 136.247,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "xebovu-06-dixo004",
@@ -969,7 +969,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 213.449,
+      "maxDelta": 219,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },
@@ -987,9 +987,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 256.1,
+      "maxDelta": 117.497,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@width"
+      "maxDeltaPath": "svg/g[1]/text[6]/@x"
     },
     {
       "slug": "xubugu-65-fima109",
@@ -1032,9 +1032,9 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 134.90099999999998,
+      "maxDelta": 126,
       "firstDiff": "svg/@background",
-      "maxDeltaPath": "svg/g[1]/text[5]/@y"
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "zezomi-36-dujo188",
@@ -1050,7 +1050,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 155.10000000000002,
+      "maxDelta": 158,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -1077,8 +1077,8 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 241.05,
-      "firstDiff": "svg/@background",
+      "maxDelta": 241,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -1104,7 +1104,7 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 170.10000000000002,
+      "maxDelta": 173,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
@@ -1113,8 +1113,8 @@
       "type": "timing",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 241.05,
-      "firstDiff": "svg/@background",
+      "maxDelta": 241,
+      "firstDiff": "svg/g[1]/text[1]/@fill",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {

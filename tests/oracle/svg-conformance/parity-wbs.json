@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T12:33:58.982Z",
+  "generatedAt": "2026-09-28T00:21:01.377Z",
   "fixtures": [
     {
       "slug": "bacole-35-fiki903",
@@ -1365,7 +1365,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 213,
+      "maxDelta": 61,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@width"
     },
@@ -1500,7 +1500,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 228,
+      "maxDelta": 102,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },
@@ -1509,7 +1509,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 228,
+      "maxDelta": 102,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },
@@ -1572,7 +1572,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 228,
+      "maxDelta": 102,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },
@@ -1770,7 +1770,7 @@
       "type": "wbs",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 364,
+      "maxDelta": 238,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },

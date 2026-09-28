@@ -748,9 +748,19 @@ describe('routing conformance — jar-error classification', () => {
     // 4528 -> 4548 / 5680 -> 5700 at class-divergence-drive-4/close-b2
     // (2026-09-27): 20 more svg-class golden rows, same procedure.
     // Derivation: 4548 + 1053 + 99 = 5700.
-    expect(pinnedAgree.length).toBe(4548);
-    expect(pinnedMisroutes.length).toBe(1053);
-    expect(pinnedJarErrors.length).toBe(99);
+    //
+    // 4548 -> 4543 / 1053 -> 1052 / 99 -> 105 at cdd5-T0e (2026-09-27), total
+    // unchanged. Six rows go agree -> jar-error: gantt/votofi-06-rolo321, four
+    // wbs/WBS-*-def-* and unknown/zodude-13-tito074. Their jar was ALWAYS
+    // erroring; the old goldens were captured in a minute where
+    // PSystemError.java:218-228 adds a time-based donation banner, which hid
+    // the error signature from the head-read. Recaptured in a plain minute.
+    // One row goes known-misroute -> agree: sequence/soxata-16-kafi688 now
+    // routes SEQUENCE (measured by repin-sequence-baselines.ts at the re-pin).
+    // Derivation: 4543 + 1052 + 105 = 5700.
+    expect(pinnedAgree.length).toBe(4543);
+    expect(pinnedMisroutes.length).toBe(1052);
+    expect(pinnedJarErrors.length).toBe(105);
     expect(manifest.fixtures.length).toBe(5700);
   });
 
@@ -801,7 +811,8 @@ describe('routing conformance — jar-error classification', () => {
     // 986 -> 985 at unknown-bucket-routing-repair/T11: recani retired.
     // 985 -> 942 at unknown-bucket-routing-repair/T10: 43 activity retirements.
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
-    expect(censused.length).toBe(1052);
+    // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
+    expect(censused.length).toBe(1051);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }
