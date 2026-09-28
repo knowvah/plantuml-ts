@@ -14,6 +14,11 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { renderSync } from '../../src/index.js';
 import { DeterministicMeasurer } from '../../src/core/measurer-deterministic.js';
+import { chromeAtomOps } from '../../src/core/annotations/blocks-creole.js';
+import { XDimension2D } from '../../src/core/klimt/geom/XDimension2D.js';
+import type { StringBounder } from '../../src/core/klimt/font/StringBounder.js';
+import type { CreoleAtom } from '../../src/core/klimt/creole/atom/Atom.js';
+import type { FontConfiguration } from '../../src/core/klimt/shape/UText.js';
 
 function markup(engine: string, slug: string): string {
   return readFileSync(`test-results/dot-cache/${engine}/${slug}/in.puml`, 'utf8');
@@ -139,6 +144,52 @@ describe('chrome creole — rusuzi-21-kile910 (<font size=18> in a title)', () =
     expect(/font-size="(\d+)"/.exec(ours)?.[1]).toBe('18');
     expect(textContents(ours)).toEqual(textContents(jar));
     expect(textLengths(ours)).toEqual(textLengths(jar));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T3a (chrome-atomtext-min-height, diagnosis/S4-style.md): `AtomText
+// #calculateDimensionSlow` (`klimt/creole/legacy/AtomText.java:179-181`)
+// floors a run's measured height to 10 -- a <size:8> legend line was
+// previously drawn at its raw 8px measurement, 2px short of the jar's own
+// floored box.
+// ---------------------------------------------------------------------------
+
+describe('chromeAtomOps#calculateDimension — AtomText min-height floor (unit)', () => {
+  const font: FontConfiguration = { family: 'sans-serif', size: 8, color: null, styles: new Set() };
+  const textAtom: CreoleAtom = { kind: 'text', text: 'x', font };
+
+  function stubBounder(height: number): StringBounder {
+    return {
+      calculateDimension: () => new XDimension2D(1, height),
+      getDescent: () => 0,
+    };
+  }
+
+  it('floors an 8px measured run to the jar\'s 10px minimum', () => {
+    const dim = chromeAtomOps(undefined, font).calculateDimension(textAtom, stubBounder(8));
+    expect(dim.getHeight()).toBe(10);
+  });
+
+  it('leaves a 14px measured run unfloored (already above the minimum)', () => {
+    const dim = chromeAtomOps(undefined, font).calculateDimension(textAtom, stubBounder(14));
+    expect(dim.getHeight()).toBe(14);
+  });
+
+  it('floors a run that measures exactly at the boundary (10px) to itself', () => {
+    const dim = chromeAtomOps(undefined, font).calculateDimension(textAtom, stubBounder(10));
+    expect(dim.getHeight()).toBe(10);
+  });
+});
+
+describe('chrome creole — unknown/cimono-94-ximu187 (legend <size:8>, S4-style T3a)', () => {
+  it("floors the <size:8> legend line to the jar's 20px rect height (10 text + margins)", () => {
+    const ours = chromeGroup(render('unknown', 'cimono-94-ximu187'), 'legend');
+    const jar = chromeGroup(golden('unknown', 'cimono-94-ximu187'), 'legend');
+    expect(/<rect[^>]*height="([\d.]+)"/.exec(ours)?.[1]).toBe('20');
+    expect(/<rect[^>]*height="([\d.]+)"/.exec(jar)?.[1]).toBe('20');
+    expect(/<rect[^>]* y="([\d.]+)"/.exec(ours)?.[1]).toBe('22');
+    expect(/<rect[^>]* y="([\d.]+)"/.exec(jar)?.[1]).toBe('22');
   });
 });
 

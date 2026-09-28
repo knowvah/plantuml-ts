@@ -135,11 +135,19 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(noteLeaves(geo.leaves)).toHaveLength(1);
   });
 
-  it('empty diagram (0 classifiers, 0 namespaces) -- 0 graphs, zero-size geometry', () => {
+  it('empty diagram (0 classifiers, 0 namespaces) -- 0 graphs, 10x10 EntityImageSimpleEmpty geometry', () => {
+    // T3a (empty-diagram-simple-empty-body, diagnosis/S4-style.md):
+    // `GraphvizImageBuilder.buildImage:211-212` returns a 10x10
+    // `EntityImageSimpleEmpty` for this case (`GraphvizImageBuilder.java:
+    // 168-169`), not a 0x0 body -- `totalWidth`/`totalHeight` are that 10x10
+    // margined (`layout-ink-extent.ts#applyClassDocumentMargin`: 10+5 ->
+    // floor(15+1) = 16), and `rawWidth`/`rawHeight` are the pre-margin 10x10.
     const { geo, captured } = layoutAndCount(makeAST());
     expect(captured).toBe(0);
-    expect(geo.totalWidth).toBe(0);
-    expect(geo.totalHeight).toBe(0);
+    expect(geo.totalWidth).toBe(16);
+    expect(geo.totalHeight).toBe(16);
+    expect(geo.rawWidth).toBe(10);
+    expect(geo.rawHeight).toBe(10);
     expect(classifierLeaves(geo.leaves)).toHaveLength(0);
   });
 
