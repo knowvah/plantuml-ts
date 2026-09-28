@@ -53,13 +53,18 @@ export function headerVisibilityBlock(
 /** `mergeLR(uBlock, name, CENTER)`'s dimension: widths add, heights max.
  *  `nameTextDy` is the name text's own CENTER offset inside the merged
  *  block. Field names match `computeHeaderNameGeo`'s return, which spreads
- *  this in. */
+ *  this in. `iconSize` cdd5-T5e: the raw `classAttributeIconSize` override
+ *  (`skinparam classAttributeIconSize N`) -- omitted defaults to
+ *  {@link headerVisibilityBlock}'s own `VISIBILITY_ICON_SIZE`, matching the
+ *  RENDERER's `renderer-classifier-box.ts#renderHeaderVisibilityIcon`,
+ *  which already reads the real themed size. */
 export function mergeNameWithVisibility(
   classifier: Classifier,
   nameWidth: number,
   nameHeight: number,
+  iconSize?: number,
 ): { nameWidth: number; nameBlockHeight: number; nameTextDy: number; visibilityBlock?: HeaderVisibilityBlock } {
-  const visibilityBlock = headerVisibilityBlock(classifier);
+  const visibilityBlock = headerVisibilityBlock(classifier, iconSize);
   if (visibilityBlock === undefined) return { nameWidth, nameBlockHeight: nameHeight, nameTextDy: 0 };
   const merged = Math.max(nameHeight, visibilityBlock.height);
   return {
