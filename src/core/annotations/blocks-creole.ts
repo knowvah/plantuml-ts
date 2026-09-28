@@ -423,17 +423,11 @@ function blockedEmbeddedRenderer(): NestedDiagramRenderer {
  * arrive already split one-per-source-line from `commands.ts`, the same
  * reason `buildDesc` documents for its own `Display.create`.
  *
- * `lineBreak` is `LineBreakStrategy.NONE` for every element:
- * `DiagramChromeFactory` passes `NONE` literally for title/caption
- * (java:349-350,369-370) and `DisplayPositioned#createRibbon` does the
- * same for header/footer (java:123-124); `EntityImageLegend` passes
- * `style.wrapWidth()` (java:54), which reads `PName.MaximumWidth`
- * (`Style.java:330-333`) — a property `plantuml.skin` never declares for
- * any selector (grep-verified: zero `MaximumWidth` occurrences in the
- * skin) and whose only skinparam source is `wrapWidth` at `SName.element`
- * (`FromSkinparamToStyle.java:250`), never `SName.legend`. So legend's
- * resolved strategy is the empty one too. A future `skinparam wrapWidth`
- * cascade into chrome would thread its value in here.
+ * `lineBreak` is the caller's own `LineBreakStrategy` (see
+ * {@link buildChromeTextBlock}): `NONE` for title/caption (java:349-350,
+ * 369-370) and header/footer (java:123-124); `EntityImageLegend` passes
+ * `style.wrapWidth()` (java:54, `PName.MaximumWidth`) -- only `<style>
+ * legend { MaximumWidth N } }` sets it (cdd5-T4e).
  */
 export function buildChromeCreoleBlock(
   lines: readonly string[],
@@ -474,7 +468,13 @@ export function buildChromeTextBlock(
   style: AnnotationBoxStyle,
   measurer: StringMeasurer,
 ): ChromeTextBlock {
-  const block = buildChromeCreoleBlock(lines, style, LineBreakStrategy.NONE, paint.sprites);
+  // cdd5-T4e: only `legend` reads wrapWidth() upstream; `paint.uid` IS the
+  // element name at every call site (`blocks.ts`'s `uid: kind`, etc.).
+  const lineBreak =
+    paint.uid === 'legend' && style.maximumWidth !== undefined
+      ? new LineBreakStrategy(String(style.maximumWidth))
+      : LineBreakStrategy.NONE;
+  const block = buildChromeCreoleBlock(lines, style, lineBreak, paint.sprites);
   const dim = block.calculateDimension(new MeasurerStringBounder(measurer));
   const width = dim.getWidth();
   const height = dim.getHeight();

@@ -253,6 +253,37 @@ describe('resolveAnnotationStyles — skinparam overrides', () => {
 });
 
 // ---------------------------------------------------------------------------
+// bare `skinparam BackgroundColor` document-level cascade (cdd5-T4e,
+// legend-document-background-cascade, unknown/tonake-05-zibo183)
+// ---------------------------------------------------------------------------
+describe('resolveAnnotationStyles — bare skinparam BackgroundColor cascade', () => {
+  it('a bare `skinparam BackgroundColor` sets legend.backgroundColor with no legend-specific override', () => {
+    const styles = resolve(new Map([['BackgroundColor', 'transparent']]));
+    expect(styles.legend.backgroundColor).toBeNull();
+  });
+
+  it('cascades to every chrome element (title/header/footer/caption/legend), like the <style> document {} cascade', () => {
+    const styles = resolve(new Map([['BackgroundColor', 'yellow']]));
+    expect(styles.title.backgroundColor).toBe('yellow');
+    expect(styles.header.backgroundColor).toBe('yellow');
+    expect(styles.footer.backgroundColor).toBe('yellow');
+    expect(styles.caption.backgroundColor).toBe('yellow');
+    expect(styles.legend.backgroundColor).toBe('yellow');
+  });
+
+  it('a legend-specific LegendBackgroundColor still wins over the bare document-level cascade', () => {
+    const styles = resolve(
+      new Map([
+        ['BackgroundColor', 'orange'],
+        ['LegendBackgroundColor', 'green'],
+      ]),
+    );
+    expect(styles.legend.backgroundColor).toBe('green');
+    expect(styles.title.backgroundColor).toBe('orange');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // <style> overrides
 // ---------------------------------------------------------------------------
 describe('resolveAnnotationStyles — <style> overrides', () => {

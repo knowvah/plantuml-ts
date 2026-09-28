@@ -52,6 +52,18 @@ export interface AnnotationBoxStyle {
    *  quirk belongs to T9's draw-time geometry, not to resolution here. This
    *  field always carries the faithfully-resolved skin/skinparam/style value. */
   horizontalAlignment: HorizontalAlignment;
+  /** cdd5-T4e (legend-style-maximumwidth-ignored): `PName.MaximumWidth`
+   *  (`Style#wrapWidth`, `style/Style.java:330-333`), a `<style> <element>
+   *  { MaximumWidth N } }` selector's raw pixel value — no upstream skin
+   *  selector or skinparam key ever sets it (`blocks-creole.ts
+   *  #buildChromeCreoleBlock`'s own doc comment), so `<style>` is its ONLY
+   *  source. Resolved uniformly for every element (style merging does not
+   *  care which one), but only `legend`'s draw call site actually consumes
+   *  it (`blocks-creole.ts#buildChromeTextBlock`) — title/caption/header/
+   *  footer hard-code `LineBreakStrategy.NONE` at their OWN upstream draw
+   *  sites regardless of this value, the same D8-shaped quirk as
+   *  `horizontalAlignment` above. */
+  maximumWidth?: number;
 }
 
 export type AnnotationElement = 'title' | 'caption' | 'header' | 'footer' | 'legend' | 'mainframe';
