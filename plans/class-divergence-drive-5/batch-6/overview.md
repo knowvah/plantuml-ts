@@ -5,8 +5,8 @@ the last scheduled batch.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T-exit | final measurement; evaluate D6 clause by clause | orchestrator | `measurements/final.json`, README Status table, journal | last close | [ ] |
-| T-close-out | ledger finals, records, memory, merge | orchestrator | see below | T-exit | [ ] |
+| T-exit | final measurement; evaluate D6 clause by clause | orchestrator | `measurements/final.json`, README Status table, journal | last close | [x] |
+| T-close-out | ledger finals, records, memory, merge | orchestrator | see below | T-exit | [x] |
 
 ## T-exit
 1. On the merged tree, run the full close-procedure steps 2–9, measuring every

@@ -35,6 +35,99 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-5` — DONE 2026-09-28 (T0a–T5e, batches 0–5)
+
+Branch `feat/class-divergence-drive-5` (merge commit, not pushed). Brief and
+journal: `plans/class-divergence-drive-5/` (88 journal rows, `fixtures.md` row
+ledger, README Status table).
+
+- **Oracle re-pinned 1.2026.7beta11 -> 1.2026.8beta1** (`97a5992`): fork cleaned
+  (backup ref `dot-output-pre-cdd5`), rebuilt jar class-identical, every cache
+  recaptured. Only one verdict moved across 28 engines: besepi -> conformant.
+- **Class bucket** 707/3/13 -> 708/3/12; all 15 non-conformant rows are in-force
+  acceptances. **Unknown-bucket CLASS rows** (288, `ourType` CLASS): 122/50/116
+  at b1 -> **225/26/37**. CLASS conformant, both trees: 830 -> **933**
+  (D6 target 972 not met; 39 short rows each journaled with the mechanism that
+  stopped them). 0 conformant losses in any engine.
+- **Ratchet** 706 -> **930** (2 class + 222 unknown-tree pins under
+  `oracle/goldens/svg-class/unknown/`, ratchet entries carry `tree`).
+- **Census** now renders through `renderSync` (D3): survey and census agree on
+  all 1011 CLASS rows.
+- **Findings worth keeping:** jar error pages depend on the capture minute
+  (`PSystemError.java:218-228`; `.agent-notes/cdd5-T0e-*`); the survey worker's
+  stdout frames were corrupted by `!log` (fixed); default-worker `npm test`
+  drops files at load 80+ (`--maxWorkers=6` is clean).
+
+### Open -> cdd6 (62 rows), by family
+
+- **Style values never reach the class Theme (10):** cluster-style-signature-
+  unmerged 8 (catana, cevoti, fepiko, gigoru, guxico, juzica, noxebo, tobevo),
+  group-linestyle-dropped 2 (palida, zivilu). One src/core item:
+  `style-map-element.ts#collectElementStyleBuckets` (LineStyle, `.label`
+  FontColor, `<sname>.stereotype` beyond fontsize, `<sname>.title`),
+  `skinparam-stereo-keys.ts:179`, a BorderStyle handler, `ElementColors` fields.
+- **Canvas ink (12):** desc-embed-ink-missing 5 (gubeca, jixibu, josebu, rojida,
+  tefeco: the ink walk's rebuilt EntityImageDescription disagrees with the real
+  draw, `leaf-sizing-entity.ts`), empty-usymbol-container-ink 3 (beboke, febuli,
+  fezaro), folder-tab-ink 2 (cepedu, fipezo), circle-interface-ink-y 2 (rupigu,
+  vabobu: degenerate canvas needs `SvgGraphics` ensureVisible on the text
+  baseline, a separate channel in `class-geo-builders.ts`).
+- **Smetana/geometry:** smetana-pragma-ignored 4 (fakone, japode, tikiti,
+  xagomi), json-canvas-width-1px 3 (bizasu, meramo, momada: dot-engine
+  attribution UNVERIFIED, run real dot first), mainframe-svek-unnormalized 3
+  (L), cluster-node-order 1 (zasuxe: feed our DOT to real dot before blaming
+  dot-engine).
+- **Embedded diagrams:** embedded-engine-unported 2 (mindmap/salt), embedded-
+  skinparam-hoisted 1 (dezobu, shared primitive), embedded-block-skinparam-leak 1
+  (rozugu).
+- **Creole/text:** creole-url-hyperlink-color-hardcoded 2 (jixipo, zivenu: needs a
+  hyperlinkColor on UText's FontConfiguration + ISkinSimple), edge-label-not-
+  creole 2 (kexaba, rimeca).
+- **Singles:** skinparam-gradient-flattened 2, class-note-text-alignment-
+  unported 2, sprite-ambient-stroke 2 (jefidu + combinatory: diagnosis disproved,
+  lead = `creole-atoms-image-resolver.ts:181` synthetic stroke), empty-package-
+  leaf-legend, class-portin-unported (L), class-note-table-bespoke, descriptive-
+  leaf-with-members (felixe), package-borderstyle-unported, package-visibility-
+  icon (topave: DOT title table dims), empty-graph-svek-dimension (jititi, core
+  `graph-layout.ts:318-320` vs `SvekResult.java:130-135`), json-duplicate-state-
+  fallthrough (kokofa, state engine), json-leaf-maximumwidth-ignored, desc-
+  separator-thickness-cleararea, link-middle-decor-partial, reversecolor-mapper-
+  unported, class-head-arrow-triangle (xuloxo; also reveals c4/gikaju: `>>` head
+  missing from `class-relationship-parser.ts:116`, plus C4 `$bl()` lines
+  collected unsplit, `preprocessor.ts:306-308` vs `BlockUml.java:153`).
+- **Harness:** pragma-regex-matches-comment (xicili), newpage-dot-page-count
+  (racujo), dotequal-counts-nested-embeds (gubeca, jixibu: the survey's layout
+  observer counts nested-embed graphs), and a capture rule for error pages in
+  undecorated minutes (`rebaseline-svg-goldens.ts`, `capture-oracle-cache.ts`).
+- **Non-class (D2, no src fix here):** state/sequence/activity/json plugins ignore
+  `ParseOptions.assetStore` (jar: sprites resolve); state-json duplicate id never
+  refused; nested sequence queue `<$sprite>` drawn as text; nested description
+  note not opale.
+
+### Non-class re-pin movers (D2)
+
+Re-pin alone: 0 verdict/dotEqual movers in any non-class engine
+(`b0-8beta1/NONCLASS.md`). Baselines: sequence dipazo 54->55 and susati
+147->171 are jar-side teoz changes (3f6c93c5, 98059a25); 6 routing/refusal pins
+became jar-error (old goldens captured in a decoration minute). Over the
+mission: 12 non-class movers, all gains or reveals (sequence 6 `!log`
+survey fix, object 4, c4 xetego, c4 gikaju reveal).
+
+### Accept-candidates (D7, not signed) and flags
+
+- accept-candidates: vakovo (smetana geometry), rubebe (upstream crash), sapofa
+  (latex image size, `DIVERGENCES.md:317-339`), petiku (error-page identity
+  strings, same class as luzive/sadamo).
+- The 17 in-force acceptances were re-verified on 8beta1: premises unchanged
+  (each reason gained one dated sentence).
+- **Flags for review:** agents twice used a Serena edit tool that wrote to the
+  MAIN checkout (T4e, T5e; both reverted, verified before merge); T3b used
+  `git stash` (shared across worktrees; stash verified empty); T5d's
+  `"0"` head -> `CIRCLE` in `renderer-arrowhead.ts` is a behaviour-bearing
+  write-set extension; the unknown-tree `zolaza` now routes STATE (left the
+  CLASS set by design); the T10 target counted zolaza/xuloxo although their
+  fixes move them across the CLASS boundary.
+
 ## `class-divergence-drive-4` — DONE 2026-09-27 (T0a–T13, batches 0–3)
 
 Branch `feat/class-divergence-drive-4` (merge commit). Class survey
@@ -43,7 +136,7 @@ divergences 13 → 17. Every other engine: +254 verdict improvements, 0
 regressions, 0 `dotEqual` flips (journal rows 1–24). The only unaccepted
 non-conformant class row is besepi. Follow-ons, by owner:
 
-- **Oracle re-pin (besepi).** `oracle/dist/plantuml-oracle.jar` → 8beta1,
+- ~~**Oracle re-pin (besepi).**~~ DONE by class-divergence-drive-5 (2026-09-28). `oracle/dist/plantuml-oracle.jar` → 8beta1,
   `pin.json` = 7beta11.
   - The pinned 7beta11 reproduces besepi's cache byte-for-byte, and our
     render equals 8beta1 byte-for-byte.
@@ -67,7 +160,7 @@ non-conformant class row is besepi. Follow-ons, by owner:
   them first. Proven by a controlled experiment on the jar DOT: deroxu
   width 53.1in vs 70.3in. The upstream walk is not yet identified
   (journal 15).
-- **Census dispatch.** The class-only census cannot auto-dispatch. As a
+- ~~**Census dispatch.**~~ DONE by cdd5 T1 (census renders via `renderSync`); the `assetStore` half is a src/ gap, filed under cdd5. The class-only census cannot auto-dispatch. As a
   result:
   - sokevu is survey-conformant but unpinnable;
   - luzive/sadamo differ from `renderSync` (entity-collision guard,
@@ -81,7 +174,7 @@ non-conformant class row is besepi. Follow-ons, by owner:
   sources are embedded.
 - **TRACKER 18.** Reclassified as plantuml-ts work. Its class fixtures
   are conformant, but the other engines are not checked.
-- **Mission tooling.** The `plans/class-divergence-drive/tools` tests
+- ~~**Mission tooling.**~~ DONE by cdd5 T2/T4 (run-time and synthetic examples). The `plans/class-divergence-drive/tools` tests
   pin stale examples: canuti-20 is now conformant and gatula is already
   pinned. Pick new still-diverged examples.
 - **Flagged for review.**
