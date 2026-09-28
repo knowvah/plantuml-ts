@@ -47,6 +47,88 @@ describe('classifier — `"DISPLAY" as CODE` (quoted-display-first)', () => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// T5b (jixipo-21-mefu703/zivenu-37-nace681 secondary, class-decl-as-case-
+// sensitive): every regex-DSL `RegexLeaf` literal compiles case-insensitively
+// (`regex/Pattern2.java:112-114`, `Pattern.compile(regex,
+// Pattern.CASE_INSENSITIVE)`) -- upstream's "as" keyword literal
+// (`command/NameAndCodeParser.java:57,63,76,81`) matches "AS"/"As"/"aS" too.
+// ---------------------------------------------------------------------------
+
+describe('classifier — `as` keyword is case-insensitive (Pattern2.java:112-114)', () => {
+  it('class TRES AS "something" (uppercase AS, quoted-display-second)', () => {
+    const c = firstClassifier('class TRES AS "something"');
+    expect(c.id).toBe('TRES');
+    expect(c.display).toBe('something');
+  });
+
+  it('class "something" AS TRES (uppercase AS, quoted-display-first)', () => {
+    const c = firstClassifier('class "something" AS TRES');
+    expect(c.id).toBe('TRES');
+    expect(c.display).toBe('something');
+  });
+
+  it('mixed-case "As" is also recognized', () => {
+    const c = firstClassifier('class Code1 As "Display One"');
+    expect(c.id).toBe('Code1');
+    expect(c.display).toBe('Display One');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T5b regression (jixipo-21-mefu703, found while verifying the case-
+// insensitive fix above): a quoted alias display containing its OWN literal
+// `[[...]]` text (a creole url the classifier-level display draws later)
+// must NOT be treated as the classifier's own trailing url decoration --
+// `extractDecorations`'s un-anchored `[[...]]` strip previously matched it
+// anywhere in the remainder, including inside the quotes, emptying the
+// display to `""` and tripping `parseClassifierDecl`'s `display === ''`
+// rejection -- which orphaned every later body line ("Syntax Error?").
+// Before this fix, `class TRES as "..."` (lowercase "as", ALREADY
+// reachable pre-T5b) hit this same defect; the case-insensitive fix above
+// only made the uppercase `AS` form reach it too.
+// ---------------------------------------------------------------------------
+
+describe('classifier — a quoted alias\'s own [[...]] text is not stripped as a decoration (T5b)', () => {
+  it('class TRES as "[[url label]]" keeps the bracket text in display, not treated as a url decoration', () => {
+    const c = firstClassifier('class TRES as "[[http://www.plantuml.com tres]]"');
+    expect(c.id).toBe('TRES');
+    expect(c.display).toBe('[[http://www.plantuml.com tres]]');
+    expect(c.url).toBeUndefined();
+  });
+
+  it('a REAL trailing url decoration (outside quotes) is still extracted', () => {
+    const c = firstClassifier('class Foo [[http://example.com]]');
+    expect(c.id).toBe('Foo');
+    expect(c.url).toEqual({
+      url: 'http://example.com',
+      tooltip: 'http://example.com',
+      label: 'http://example.com',
+    });
+  });
+
+  it('a real url decoration after a quoted-display-first alias is still extracted', () => {
+    const c = firstClassifier('class "Display" as Code [[http://example.com]]');
+    expect(c.id).toBe('Code');
+    expect(c.display).toBe('Display');
+    expect(c.url).toEqual({
+      url: 'http://example.com',
+      tooltip: 'http://example.com',
+      label: 'http://example.com',
+    });
+  });
+
+  it('the full jixipo-21-mefu703 TRES declaration (with stereotype + body) parses, no Syntax Error page', () => {
+    const ast = parse(
+      'class TRES AS "[[http://www.plantuml.com tres]]" <<otro>> {\n* aaa\n+ [[otro modelo]]\n- bb\n}',
+    );
+    expect(ast.classifiers).toHaveLength(1);
+    expect(ast.classifiers[0]!.id).toBe('TRES');
+    expect(ast.classifiers[0]!.display).toBe('[[http://www.plantuml.com tres]]');
+    expect(ast.classifiers[0]!.members).toHaveLength(3);
+  });
+});
+
 describe('classifier — `CODE as "DISPLAY"` (quoted-display-second)', () => {
   it('class Code1 as "Display One" → id=Code1, display=Display One', () => {
     const c = firstClassifier('class Code1 as "Display One"');

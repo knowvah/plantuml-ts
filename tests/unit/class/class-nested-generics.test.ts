@@ -107,4 +107,33 @@ describe('nested-generic classifier declarations', () => {
     expect(decl?.display).toBe('Foo<int>');
     expect(decl?.typeParams).toEqual([]);
   });
+
+  // T5b (nepevi-24-dune081, generic-space-before-angle): upstream's
+  // classifier-name grammar allows zero-or-more spaces between the CODE and
+  // the `<generic>` clause (`RegexOptional(RegexConcat(spaceZeroOrMore(),
+  // GENERIC))`, CommandCreateClassMultilines.java:106-107) -- a space-before-
+  // `<` form must split exactly like the touching form, not fall through to
+  // a bareword id carrying the literal space and angle brackets.
+  describe('T5b: space allowed between id and <generic> (generic-space-before-angle)', () => {
+    it('class Person <Eloquent> splits id/generic exactly like class Person<Eloquent>', () => {
+      const spaced = parseClassifierDecl('class Person <Eloquent>');
+      const touching = parseClassifierDecl('class Person<Eloquent>');
+      expect(spaced?.id).toBe('Person');
+      expect(spaced?.display).toBe('Person');
+      expect(spaced?.typeParams).toEqual(['Eloquent']);
+      expect(spaced).toEqual(touching);
+    });
+
+    it('multiple spaces before <generic> still split correctly', () => {
+      const decl = parseClassifierDecl('class Person   <Eloquent>');
+      expect(decl?.id).toBe('Person');
+      expect(decl?.typeParams).toEqual(['Eloquent']);
+    });
+
+    it('a spaced generic clause still supports nested/multi params', () => {
+      const decl = parseClassifierDecl('class Pair <Map<K, V>, W>');
+      expect(decl?.id).toBe('Pair');
+      expect(decl?.typeParams).toEqual(['Map<K, V>', 'W']);
+    });
+  });
 });

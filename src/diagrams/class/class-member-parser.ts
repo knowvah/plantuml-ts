@@ -26,7 +26,12 @@ function withVisibilityFlag(member: Omit<Member, 'visibilityExplicit'>, explicit
   return explicit ? { ...member, visibilityExplicit: true } : member;
 }
 
-const TRAILING_URL_RE = /\s*(\[{2,3}[^\]]*\]{2,3})\s*$/;
+/** T5b (fepoko-61-fona364, jixipo-21-mefu703, zivenu-37-nace681): matches
+ *  ONLY a genuine triple-bracket member-url suffix -- see {@link
+ *  stripUrlSuffix}'s doc comment for why a bare double-bracket suffix must
+ *  NOT match here at all (previously `\[{2,3}...\]{2,3}`, which matched
+ *  both and stripped both). */
+const TRAILING_URL_RE = /\s*(\[{3}[^\]]*\]{3})\s*$/;
 
 /** G2 N31: `undefined` capture-group-2 (bare name, no type at all) maps to
  *  `{}` (no field -- `formatMemberText` has nothing to separate); the
@@ -40,34 +45,47 @@ function typeSeparatorField(rawSeparator: string | undefined): { typeSeparator?:
 }
 
 /**
- * G2 N16: strips a trailing `[[url]]`/`[[[url]]]` (optionally `{label}`-
- * suffixed) link suffix from a member line AND parses its bracket content
- * into a real `UrlInfo` (N15 only detected presence via a boolean).
- * Upstream's `Member` constructor does this UNCONDITIONALLY for a
- * class/interface/enum member (`manageModifier=true`, `Member.java`'s own
- * `URL` pattern -- `^(.*?)(?:\[(` + `UrlBuilder`'s own `[[...]]` grammar +
- * `)\])?$`, i.e. member-level url syntax wraps `UrlBuilder`'s normal
- * `[[...]]` bracket in ONE more `[...]` layer, always triple-bracket
- * (`[[[...]]]`) end to end) before ANY display/name decomposition --
- * stripped BEFORE the structured method/attr regexes run so a URL-suffixed
- * method line (e.g. `methods1() [[[url{label}]]]`, `gizini-87-vuve916`)
- * still matches the structured shape instead of falling to the raw-display
- * fallback with the bracket syntax embedded literally (a real DOT
- * node-size regression, caught via `tests/oracle/object-dot-parity.test
- * .ts`). G2 N12. Stripping exactly one outer `[`/`]` layer off the
- * captured suffix recovers the SAME `[[...]]` text `class-url.ts
- * #parseUrlBracket` already parses for classifier-level urls. A bare
- * double-bracket suffix (`[[...]]`, `{2,3}` in the detection regexp also
- * matches it for display-text-stripping purposes) has no outer layer to
- * strip and is not upstream's real member-url grammar -- display text is
- * still stripped either way; only the PARSED url is `undefined`.
+ * G2 N16: strips a trailing `[[[url]]]` (optionally `{label}`-suffixed)
+ * link suffix from a member line AND parses its bracket content into a
+ * real `UrlInfo` (N15 only detected presence via a boolean). Upstream's
+ * `Member` constructor does this UNCONDITIONALLY for a class/interface/enum
+ * member (`manageModifier=true`) via its own `URL` pattern:
+ * `^(.*?)(?:\[(` + `UrlBuilder.getRegexp()` + `)\])?$`
+ * (`cucadiagram/Member.java:93`). `UrlBuilder.getRegexp()` (`url/UrlBuilder
+ * .java:82-85`) is built from 5 alternatives whose START_PART/END_PART are
+ * THEMSELVES `\[\[...` / `...\]\]` (`UrlBuilder.java:51-52`) -- so Member's
+ * own pattern wraps ONE MORE `[`/`]` layer around a string that already
+ * requires `[[...]]`, i.e. a real member url is ALWAYS triple-bracket
+ * (`[[[...]]]`) end to end. Stripped BEFORE the structured method/attr
+ * regexes run so a URL-suffixed method line (e.g. `methods1()
+ * [[[url{label}]]]`, `gizini-87-vuve916`) still matches the structured
+ * shape instead of falling to the raw-display fallback with the bracket
+ * syntax embedded literally (a real DOT node-size regression, caught via
+ * `tests/oracle/object-dot-parity.test.ts`). G2 N12. Stripping exactly one
+ * outer `[`/`]` layer off the captured suffix recovers the SAME `[[...]]`
+ * text `class-url.ts#parseUrlBracket` already parses for classifier-level
+ * urls.
+ *
+ * T5b (fepoko-61-fona364, jixipo-21-mefu703/zivenu-37-nace681 secondary): a
+ * BARE double-bracket suffix (`[[...]]`, e.g. member `+ [[modelo normal]]`)
+ * is NOT this grammar at all -- Member's own `URL` group requires the
+ * THIRD, outer bracket layer, and since that group is OPTIONAL
+ * (`(?:...)?`), a non-matching suffix leaves the WHOLE original text as
+ * `tmpDisplay` (group 1's lazy `.*?` absorbs it when the optional
+ * alternative fails), untouched, brackets included -- upstream does NOT
+ * strip a shape it does not recognize as its own url syntax. That text
+ * then reaches the SAME shared creole engine every member row goes through
+ * (`class-member-creole.ts#buildMemberAtoms` -> `StripeSimple.ts`'s
+ * `[[url]]` inline-link atom, `klimt/creole/legacy/StripeSimple.java:224-
+ * 226`), which recognizes ordinary `[[...]]` as an inline hyperlink -- the
+ * PREVIOUS version of this function stripped a double-bracket suffix from
+ * the display anyway (comment removed), silently dropping that link.
  */
 function stripUrlSuffix(line: string): { line: string; ownUrl: UrlInfo | undefined } {
   const match = TRAILING_URL_RE.exec(line);
   if (match === null) return { line, ownUrl: undefined };
-  const bracket = match[1]!.trim();
-  const ownUrl =
-    bracket.startsWith('[[[') && bracket.endsWith(']]]') ? parseUrlBracket(bracket.slice(1, -1)) : undefined;
+  const bracket = match[1]!;
+  const ownUrl = parseUrlBracket(bracket.slice(1, -1));
   return { line: line.replace(TRAILING_URL_RE, ''), ownUrl };
 }
 
@@ -169,8 +187,23 @@ interface MemberBase {
 
 /** Method form: `name(params): ReturnType` or `name(params)` -- split out of
  *  `parseMemberLine` for the same CCN-budget reason as {@link
- *  stripModifiers}; pure move, no behavior change (including the nested
- *  `.map`/`.filter` param-list decomposition). */
+ *  stripModifiers}. `params`/`type`/`name` stay for CLASSIFICATION only
+ *  (`isMethodMember`, badges); DISPLAY is `rawDisplay` (T5b, potase-97-
+ *  japa248/zaxavo-08-rake498): upstream's `Member` constructor never
+ *  decomposes a method into name/params/type at all -- `this.display` is
+ *  the verbatim source text (post tag/url/modifier/visibility strip, pre-
+ *  guillemet), trimmed at the ENDS only (`StringUtils.trin`, no internal
+ *  whitespace normalisation). `formatMemberText` (`class-layout-helpers.ts`)
+ *  previously rebuilt the text from `params.join(', ')`, which collapses
+ *  `__construct( FOORepositoryInterface )`'s internal padding to
+ *  `__construct(FOORepositoryInterface)` -- `rawDisplay` (already the
+ *  established precedence field for the G2 N12 raw-fallback shape, see
+ *  {@link rawDisplayFallback}) makes `formatMemberText` return the ORIGINAL
+ *  text unconditionally, matching upstream for every method regardless of
+ *  internal spacing.
+ * @see ~/git/plantuml/.../cucadiagram/Member.java:133-137 (display = trin(manageGuillemet(displayClean.substring(1))))
+ * @see ~/git/plantuml/.../StringUtils.java:505-521 (trin -- ends only, not `String#trim`)
+ */
 function tryParseMethod(line: string, base: MemberBase): Omit<Member, 'visibilityExplicit'> | undefined {
   const methodMatch = /^(\w+)\(([^)]*)\)(?:(\s*:\s*)(\S+))?$/.exec(line);
   if (methodMatch === null) return undefined;
@@ -190,6 +223,7 @@ function tryParseMethod(line: string, base: MemberBase): Omit<Member, 'visibilit
     isStatic: base.isStatic,
     isAbstract: base.isAbstract,
     params,
+    rawDisplay: line,
     ...(returnType !== undefined ? { type: returnType } : {}),
     ...typeSeparatorField(methodMatch[3]),
     ...(base.ownUrl !== undefined ? { ownUrl: base.ownUrl } : {}),
