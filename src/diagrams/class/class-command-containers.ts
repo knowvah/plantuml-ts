@@ -75,9 +75,12 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // the SAME bare/`back:` grammar `class-notes.ts` note commands already
   // reuse) is inserted ahead of the old trailing catch-all -- both read
   // onto the Namespace via setNamespaceUrl/setNamespaceColor below; the
-  // same-line-close brace group is 9. The trailing `(?:[#<][^{]*)?`
-  // catch-all is kept as a no-op safety net for whatever it used to
-  // silently absorb.
+  // same-line-close brace group is 9. cdd5-T4b: the trailing
+  // `(?:[#<][^{]*)?` catch-all is gone -- upstream has nothing after COLOR
+  // but `\s*\{` (`CommandPackage.java:92-96`), so a second `<<B>>` must
+  // widen the lazy STEREOTYPE group (`StereotypePattern.java:66-67`,
+  // "(\\<\\<.+?\\>\\>)") to `<<A>><<B>>`; the catch-all swallowed it
+  // instead (`mupavi-50-fijo192`).
   {
     pattern: new RegExp(
       String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
@@ -88,7 +91,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
         // to zero-width so the catch-all below (whose `[^{]*` tolerates
         // the space) silently swallows the colour text instead, leaving
         // the capture group undefined (caught by this task's own tests).
-        String.raw`\s*(?:[#<][^{]*)?\{(\s*\})?\s*$`,
+        String.raw`\s*\{(\s*\})?\s*$`,
       'i',
     ),
     execute(state, match) {
