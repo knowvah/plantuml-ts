@@ -19,7 +19,9 @@ import type { SpriteDimsLookup, DrawablePrimitive } from '../../core/creole-atom
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomFontSpec } from './class-member-creole-sea.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
-import { text, image } from '../../core/svg.js';
+import { text, image, linkWrap } from '../../core/svg.js';
+import { manageGuillemet } from '../../core/text/Guillemet.js';
+import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
 import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 import { isTransparentColor } from '../../core/paint.js';
 
@@ -95,7 +97,14 @@ export function packageTitleFontSpec(theme: Theme): FontSpec {
  *  residual round: the previously-skipped `'inline'` `CreoleAtom` gap,
  *  now resolved via the SAME `resolveInlineAtom` member rows use). */
 export type NamespaceTitleRun =
-  | { readonly kind: 'text'; readonly text: string; readonly font: FontConfiguration }
+  | {
+      readonly kind: 'text';
+      readonly text: string;
+      readonly font: FontConfiguration;
+      /** cdd5-T5c: set on a `[[url label]]` run (`CommandCreoleUrl`); the
+       *  draw wraps it in `<a>` (`SvgGraphics#openLink`). */
+      readonly url?: CreoleAtomUrl;
+    }
   | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
   /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` title run -- the SAME
    *  `'drawable'` kind `class-member-render-atom.ts#MemberRenderAtom` now
@@ -146,7 +155,16 @@ export type NamespaceTitleRun =
  * title-runs.test.ts`'s sprite/img-data fixtures for the atom-level
  * coverage this narrow gap now has.
  *
+ * cdd5-T5c: the label is a full creole `Display` (`ClusterHeader.java:128`
+ * `label.create(fontConfiguration, alignment, g.getSkinParam())`), so each
+ * line first goes through `CreoleParser`'s `manageGuillemet` (`<<x>>` ->
+ * `«x»`), and a `[[url label]]` atom keeps its url for the draw. The
+ * default guillemet pair is upstream's `Guillemet.GUILLEMET` (no
+ * `skinparam guillemet` threading here: `class-member-creole.ts
+ * #buildMemberAtoms`'s identical seam).
+ *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomImg.java:171-177
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/CreoleParser.java:175
  */
 export function namespaceTitleRuns(
   label: string,
@@ -156,9 +174,14 @@ export function namespaceTitleRuns(
 ): readonly NamespaceTitleRun[] {
   const font = titleFontConfiguration(theme);
   const runs: NamespaceTitleRun[] = [];
-  for (const atom of buildLineAtoms(label, font).atoms) {
+  for (const atom of buildLineAtoms(manageGuillemet(label), font).atoms) {
     if (atom.kind === 'text') {
-      runs.push({ kind: 'text', text: atom.text, font: atom.font });
+      runs.push({
+        kind: 'text',
+        text: atom.text,
+        font: atom.font,
+        ...(atom.url !== undefined ? { url: atom.url } : {}),
+      });
       continue;
     }
     if (atom.kind === 'inline') {
@@ -363,15 +386,19 @@ export function renderNamespaceTitleRuns(
 function renderTextRun(x: number, y: number, run: Extract<NamespaceTitleRun, { kind: 'text' }>, width: number): string {
   const fill = run.font.color ?? '#000000';
   if (isTransparentColor(fill)) return '';
-  return text(x, y, run.text, {
+  const drawn = text(x, y, run.text, {
     fontFamily: run.font.family,
     fontSize: run.font.size,
     ...(run.font.styles.has(FontStyle.BOLD) ? { fontWeight: '700' } : {}),
     ...(run.font.styles.has(FontStyle.ITALIC) ? { fontStyle: 'italic' as const } : {}),
+    // cdd5-T5c: `CommandCreoleUrl`'s UNDERLINE (`DriverTextSvg` writes
+    // `text-decoration="underline"`).
+    ...(run.font.styles.has(FontStyle.UNDERLINE) ? { textDecoration: 'underline' } : {}),
     fill,
     lengthAdjust: 'spacing' as const,
     textLength: width,
   });
+  return run.url !== undefined ? linkWrap(drawn, run.url) : drawn;
 }
 
 /** {@link renderNamespaceTitleAuto}'s label/theme/measurer/block-top bundle
@@ -418,13 +445,18 @@ export function renderNamespaceTitleAuto(
   const { label, theme, measurer, blockTopY } = input;
   const lines = measurer === undefined ? [] : namespaceTitleLines(measurer, theme, label);
   const soleRun = lines.length <= 1 ? lines[0]?.runs[0] : undefined;
-  const isPlainSingleRun = (lines[0]?.runs.length ?? 0) <= 1 && (soleRun === undefined || soleRun.kind === 'text');
+  // cdd5-T5c: a url run carries its own colour/underline/link, so it takes
+  // the run path; a plain run draws its guillemet-managed text.
+  const isPlainSingleRun =
+    (lines[0]?.runs.length ?? 0) <= 1 &&
+    (soleRun === undefined || (soleRun.kind === 'text' && soleRun.url === undefined));
   if (lines.length <= 1 && isPlainSingleRun) {
     // cdd3-T21: a transparent title draws nothing (`DriverTextSvg.java:
     // 92-94`); `packageFontStyle` picks the face (E3-5).
     if (isTransparentColor(fallback.fontColor)) return '';
     const faces = packageTitleFaces(theme);
-    return text(fallback.x, fallback.y, label, {
+    const drawnText = soleRun?.kind === 'text' ? soleRun.text : label;
+    return text(fallback.x, fallback.y, drawnText, {
       fontFamily: fallback.fontFamily,
       fontSize: fallback.fontSize,
       ...(faces.bold ? { fontWeight: '700' as const } : {}),
