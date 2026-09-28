@@ -14,7 +14,9 @@
  *
  * The three link-scanning helpers were further split out to
  * `EntityImageDescriptionLinkScan.ts` (same 500-line reason), re-exported
- * here unchanged for `EntityImageDescription.ts`'s own import.
+ * here unchanged for `EntityImageDescription.ts`'s own import; so were
+ * `computeShieldMargins`/`hideTextOffsets`/`requireGroups`, to
+ * `EntityImageDescriptionShield.ts` (cdd5-T4d, same reason).
  */
 import type { UGraphic } from '../../klimt/UGraphic.js';
 import type { StringBounder } from '../../klimt/font/StringBounder.js';
@@ -25,7 +27,13 @@ import { Fore } from '../../klimt/Fore.js';
 import { Back } from '../../klimt/Back.js';
 import type { FontConfiguration } from '../../klimt/shape/UText.js';
 import { UText, getFont } from '../../klimt/shape/UText.js';
-import { atomTextStartingAltitude } from '../../klimt/creole/legacy/AtomText.js';
+import {
+  TAB_STRING,
+  advanceToTabStop,
+  atomTextStartingAltitude,
+  tabStopWidth,
+  tokenizeOnTabs,
+} from '../../klimt/creole/legacy/AtomText.js';
 import { UImage } from '../../klimt/shape/UImage.js';
 import type { TextBlock } from '../../klimt/shape/TextBlock.js';
 import { TextBlockUtils } from '../../klimt/shape/TextBlockUtils.js';
@@ -33,8 +41,7 @@ import type { AtomImageResolver, SpriteDimsLookup } from '../../creole-atoms.js'
 import type { ResolvedColor } from '../../klimt/color/HColorSet.js';
 import { SvgNanoParser } from '../../klimt/sprite/SvgNanoParser.js';
 import type { USymbol } from '../../decoration/symbol/USymbol.js';
-import type { UGraphicWithGroups } from '../DecorateEntityImage.js';
-import { Margins, buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
+import { buildTextBlock, measureLine } from './EntityImageDescriptionSupport.js';
 import { emojiSquareDim, emojiStartingAltitude } from '../../klimt/creole/atom/AtomEmoji.js';
 import { drawEmojiAtom, type EmojiArtworkResolver } from './EntityImageDescriptionEmoji.js';
 import type {
@@ -48,6 +55,7 @@ import {
   hasSomeHorizontalLinkDoubleDecorated,
 } from './EntityImageDescriptionLinkScan.js';
 export { hasSomeHorizontalLinkVisible, isThereADoubleLink, hasSomeHorizontalLinkDoubleDecorated };
+export { computeShieldMargins, hideTextOffsets, requireGroups } from './EntityImageDescriptionShield.js';
 import { BodyFactory } from '../../cucadiagram/BodyFactory.js';
 import { Display } from '../../klimt/creole/Display.js';
 import { Pragma } from '../../skin/Pragma.js';
@@ -62,6 +70,7 @@ import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
+import { getNestedDiagramRenderer } from '../../nested-diagram-registry.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -112,20 +121,34 @@ type ResolvedAtomImageWithRaster =
  *  is upstream's own real cascade result, not a fitted constant. */
 const ROOT_LINE_THICKNESS = 1.0;
 
-/** `EmbeddedDiagram`'s real caller needs a `NestedDiagramRenderer` (T10f's own
- *  seam); a description entity's `desc` text embedding a nested `{{ ... }}`
- *  diagram is a genuinely separate, unbuilt feature here (no caller anywhere
- *  in `src/diagrams/` constructs one) -- cited, thrown, matching this file's
- *  own `requireGroups`/`EntityImageDescription.ts#drawU`'s URL-not-supported
- *  precedent, not a silent drop. */
-function blockedEmbeddedRenderer(): NestedDiagramRenderer {
+/**
+ * `EmbeddedDiagram`'s two arms for a description label, split the way the
+ * oracle jar splits them. SIZE: `calculateDimensionSlow` takes the SVG arm
+ * only when `stringBounder.matchesProperty("SVG")` (java:129); the oracle's
+ * `StringBounderFromWidthTable` (`FileFormat.java:185-187`) keeps
+ * `StringBounder.java:43-45`'s `false`, so the raster `getImage` arm runs
+ * (java:138-139) -- no raster here -- and the catch returns `(42, 42)`
+ * (java:148-152): the dimension below throws into that same catch. DRAW:
+ * `UGraphicSvg#matchesProperty("SVG")` is true (`UGraphicSvg.java:175-179`),
+ * so `drawU` draws the real nested SVG (java:169-174) -- the registered
+ * renderer's own `drawU`. Nothing registered (a unit test bypassing
+ * `src/index.ts`): both arms fall to their catch.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/EmbeddedDiagram.java:126-152,165-175
+ */
+function descEmbeddedRenderer(): NestedDiagramRenderer {
   return {
-    render(): TextBlock {
-      throw new Error(
-        'EntityImageDescriptionDelegates: embedded diagrams ({{ ... }}) inside a description ' +
-          'label are not supported -- this port has no caller that constructs a nested-diagram ' +
-          'renderer for description text (EmbeddedDiagram.ts#NestedDiagramRenderer is the seam).',
-      );
+    render(source, skinParam): TextBlock {
+      const registered = getNestedDiagramRenderer();
+      if (registered === undefined) {
+        throw new Error('EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}');
+      }
+      const drawn = registered.render(source, skinParam);
+      return {
+        calculateDimension(): XDimension2D {
+          throw new Error('EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported');
+        },
+        drawU: (ug) => drawn.drawU(ug),
+      };
     },
   };
 }
@@ -154,6 +177,27 @@ function isCreoleAtomData(x: CreoleAtom | Atom): x is CreoleAtom {
  *  mutes again at render time (`driver-text-svg.ts:135`, SI30). */
 function measuringFont(fc: FontConfiguration): FontConfiguration {
   return { ...fc, size: getFont(fc).size };
+}
+
+/** `AtomText#drawU`'s tokenizer loop (`AtomText.java:210-231`): the baseline
+ *  `ypos` is the WHOLE run's `height - descent`; each tab advances `x` to the
+ *  next stop (`getTabSize`, java:270-275), each other token draws at `x` and
+ *  advances by its own width. An empty run has no token and draws nothing. */
+function drawTextAtom(ug: UGraphic, atom: Extract<CreoleAtom, { kind: 'text' }>): void {
+  const stringBounder = ug.getStringBounder();
+  const font = measuringFont(atom.font);
+  const m = measureLine(stringBounder, atom.text, font);
+  const widthOf = (s: string): number => stringBounder.calculateDimension(font, s).getWidth();
+  const tabSize = tabStopWidth(widthOf(TAB_STRING), font.size);
+  let x = 0;
+  for (const token of tokenizeOnTabs(atom.text)) {
+    if (token.isTab) {
+      x = advanceToTabStop(x, tabSize);
+      continue;
+    }
+    ug.apply(new UTranslate(x, m.height - m.descent)).draw(UText.build(token.text, atom.font));
+    x += widthOf(token.text);
+  }
 }
 
 /**
@@ -211,8 +255,7 @@ export function descAtomOps(
         return;
       }
       if (atom.kind === 'text') {
-        const m = measureLine(ug.getStringBounder(), atom.text, measuringFont(atom.font));
-        ug.apply(new UTranslate(0, m.height - m.descent)).draw(UText.build(atom.text, atom.font));
+        drawTextAtom(ug, atom);
         return;
       }
       if (atom.kind === 'latex') {
@@ -296,7 +339,7 @@ export function descAtomOps(
  *  so a `StripeTable`/`StripeTree`/`CreoleHorizontalLine` constructed deeper
  *  in the `CreoleParser` dispatch sees the SAME capability object back. */
 function buildLocalSkinSimple(guillemet: GuillemetPair | undefined, atomOps: AtomOps, pragma: Pragma): ISkinSimple {
-  const renderer = blockedEmbeddedRenderer();
+  const renderer = descEmbeddedRenderer();
   const skin: ISkinSimple = {
     getSprite: () => null, // no SpriteRegistry reachable from ISkinSimple here (DisplayCreole.ts's own T9c note)
     guillemet: () => guillemet ?? GUILLEMET_DEFAULT,
@@ -441,55 +484,4 @@ export function buildStereo(
   const text = stereotypeLabels.map((label) => `«${label}»`).join('\n');
   const block = buildTextBlock(text, fontStereo, HorizontalAlignment.CENTER, resolveAtomImage);
   return TextBlockUtils.withMargin(block, 1, 1, 0, 0);
-}
-
-/** Upstream: the dimension math inside `getShield` (after the four
- *  early-return guards). */
-export function computeShieldMargins(
-  stereo: TextBlock,
-  desc: TextBlock,
-  asSmall: TextBlock,
-  stringBounder: StringBounder,
-): Margins {
-  const dimStereo = stereo.calculateDimension(stringBounder);
-  const dimDesc = desc.calculateDimension(stringBounder);
-  const dimSmall = asSmall.calculateDimension(stringBounder);
-  const x = Math.max(dimStereo.getWidth(), dimDesc.getWidth());
-  const dimSmallWidth = dimSmall.getWidth();
-  let suppX = x - dimSmallWidth;
-  if (suppX < 1) suppX = 1;
-  const y = Math.max(1, dimDesc.getHeight(), dimStereo.getHeight());
-  return new Margins(suppX / 2, suppX / 2, y, y);
-}
-
-/** Shared `posx1`/`posx2` (+ the three dimensions they derive from) —
- *  upstream duplicates this exact computation once in `drawU`'s
- *  `hideText` block and once in `getOverscanX`; both still read
- *  upstream's own `(dimSmall.getWidth() - dimX.getWidth()) / 2` formula
- *  unchanged. */
-export function hideTextOffsets(
-  asSmall: TextBlock,
-  desc: TextBlock,
-  stereo: TextBlock,
-  stringBounder: StringBounder,
-): { posx1: number; posx2: number; dimSmall: XDimension2D; dimDesc: XDimension2D; dimStereo: XDimension2D } {
-  const dimSmall = asSmall.calculateDimension(stringBounder);
-  const dimDesc = desc.calculateDimension(stringBounder);
-  const dimStereo = stereo.calculateDimension(stringBounder);
-  const dimSmallWidth = dimSmall.getWidth();
-  const posx1 = (dimSmallWidth - dimDesc.getWidth()) / 2;
-  const posx2 = (dimSmallWidth - dimStereo.getWidth()) / 2;
-  return { posx1, posx2, dimSmall, dimDesc, dimStereo };
-}
-
-/** Narrows `ug` to `UGraphicWithGroups` — duplicated locally per
- *  `DecorateEntityImage.ts`'s/`Cluster.ts`'s own one-local-helper-
- *  per-call-site convention (that module's own `requireGroups` is not
- *  exported). */
-export function requireGroups(ug: UGraphic): UGraphicWithGroups {
-  const candidate = ug as Partial<UGraphicWithGroups>;
-  if (typeof candidate.startGroup !== 'function' || typeof candidate.closeGroup !== 'function') {
-    throw new Error('EntityImageDescription: ug does not support startGroup/closeGroup (see UGraphicSvg)');
-  }
-  return ug as UGraphicWithGroups;
 }
