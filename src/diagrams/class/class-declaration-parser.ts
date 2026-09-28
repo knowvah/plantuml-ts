@@ -5,7 +5,7 @@
  * parser.ts under the repo's 500-line-per-file cap.
  */
 
-import type { ClassifierKind, RelationshipType } from './ast.js';
+import type { Classifier, ClassifierKind, RelationshipType, Visibility } from './ast.js';
 import { parseMemberLine } from './class-member-parser.js';
 import {
   DESCRIPTIVE_LEAF_KEYWORDS,
@@ -50,6 +50,9 @@ export interface ClassifierDecl {
   /** G2 N15: inline `[[url]]` suffix, see `ast.ts#Classifier.url`'s doc
    *  comment. */
   url?: UrlInfo;
+  /** cdd5-T4b: the leading VISIBILITY char -- see `Classifier.
+   *  visibilityModifier`'s own doc comment. */
+  visibilityModifier?: Visibility;
 }
 
 /**
@@ -75,11 +78,11 @@ export interface ClassifierDecl {
 // and `CommandCreateClassMultilines.java:100` carry
 // `new RegexLeaf(1, "VISIBILITY", "(" + regexForVisibilityCharacter() +
 // ")?")` immediately after `RegexLeaf.start()`, before `spaceZeroOrMore()`
-// and the TYPE keyword. Captured (group 1) and discarded: no render-side
-// field in this port consumes a classifier-level visibility marker today
-// (the jar draws a small header icon via `EntityImageClassHeader.java:109-
-// 121`, out of scope for a routing fix -- D3 only judges the diagram TYPE
-// the fixture lands on, not per-pixel header geometry).
+// and the TYPE keyword. cdd5-T4b: captured (group 1) into
+// `ClassifierDecl.visibilityModifier` -- `CommandCreateClass.java:172-175`:
+// "visibilityModifier = VisibilityModifier.getVisibilityModifier(
+// visibilityString + \"FOO\", false);", drawn by `EntityImageClassHeader.
+// java:109-121`.
 const VISIBILITY_PREFIX = '(?:([-#+~])\\s*)?';
 const DECL_KIND_RE = new RegExp(
   // `abstract\s+class` must precede the bare `abstract` alternative — JS
@@ -153,8 +156,8 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
   if (kindMatch === null) return null;
 
   // Strip the unconditional `mix_` prefix — it doesn't change kind/usymbol.
-  // group 1 = VISIBILITY_PREFIX's capture (discarded, see its own doc
-  // comment); group 2 = TYPE; group 3 = the rest of the line.
+  // group 1 = VISIBILITY_PREFIX's capture; group 2 = TYPE; group 3 = the
+  // rest of the line.
   const rawKind = kindMatch[2]!.replace(/\s+/, ' ').toLowerCase().replace(/^mix_/, '');
   const { kind, usymbol } = resolveDeclKind(rawKind);
 
@@ -182,6 +185,7 @@ export function parseClassifierDecl(line: string): ClassifierDecl | null {
     ...(usymbol !== undefined ? { usymbol } : {}),
     ...(url !== undefined ? { url } : {}),
     ...(typeParamsRawText !== undefined ? { typeParamsRawText } : {}),
+    ...(kindMatch[1] !== undefined ? { visibilityModifier: kindMatch[1] as Visibility } : {}),
   };
 }
 
@@ -264,7 +268,10 @@ export function parseTagTokens(raw: string): string[] {
  */
 export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alwaysSetLastEntity: boolean): void {
   const classifier = ensureClassifier(state, decl.id, decl.kind, decl.display);
-  if (alwaysSetLastEntity) state.lastEntity = classifier.id;
+  if (alwaysSetLastEntity) {
+    state.lastEntity = classifier.id;
+    applyVisibilityModifier(classifier, decl.visibilityModifier);
+  }
   classifier.kind = decl.kind;
   if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
   if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
@@ -283,6 +290,20 @@ export function applyClassifierDecl(state: ParseState, decl: ClassifierDecl, alw
   }
   applyInheritanceClauses(state, classifier.id, decl);
   if (decl.opensBody) state.pendingBodyId = classifier.id;
+}
+
+/**
+ * cdd5-T4b: `entity.setVisibilityModifier(visibilityModifier)` runs
+ * unconditionally after `setLastEntity` in both class commands, so a plain
+ * redeclaration clears an earlier marker (`null`). Descriptive leaves
+ * (`CommandCreateElementFull2`) have no VISIBILITY slot and never call it --
+ * hence gated on the same `alwaysSetLastEntity` flag.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandCreateClass.java:202-203
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/classdiagram/command/CommandCreateClassMultilines.java:254-256
+ */
+function applyVisibilityModifier(classifier: Classifier, modifier: Visibility | undefined): void {
+  if (modifier === undefined) delete classifier.visibilityModifier;
+  else classifier.visibilityModifier = modifier;
 }
 
 /** `extends A, B` / `implements C`: create each parent (scope-local lookup —
