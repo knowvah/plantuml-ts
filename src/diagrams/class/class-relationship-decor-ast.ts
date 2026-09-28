@@ -53,13 +53,23 @@ export type RelationshipType =
  * glyphs `<||`/`||>` and `<|:`/`:|>` — both `isExtendsLike()` upstream like
  * plain EXTENDS, but each a DISTINCT enum member with its own extremity
  * shape, `core/svek/extremity/link-decor.ts`'s `ExtremityFactoryExtendsLike`
- * built for both already). `arrowTriangle`/`circleFill`/`circleConnect`/
- * `halfArrowUp`/`halfArrowDown` (`LinkDecor.ARROW_TRIANGLE`/`.CIRCLE_FILL`/
- * `.CIRCLE_CONNECT`/`.HALF_ARROW_UP`/`.HALF_ARROW_DOWN`) are NOT added: none
- * of their glyphs (`<<`/`>>`, `@`, head-position `0)`/`(0`, `\\`/`//`) is
- * reachable through this port's current `HEAD1_SAFE`/`HEAD2_CHARS` arrow
- * grammar (`class-relationship-parser.ts`) — see `class-arrow-decor-map.ts`'s
- * own doc comment for the full reasoning.
+ * built for both already). `circleFill`/`circleConnect`/`halfArrowUp`/
+ * `halfArrowDown` (`LinkDecor.CIRCLE_FILL`/`.CIRCLE_CONNECT`/
+ * `.HALF_ARROW_UP`/`.HALF_ARROW_DOWN`) are NOT added: none of their glyphs
+ * (`@`, head-position `0)`/`(0`, `\\`/`//`) is reachable through this port's
+ * current `HEAD1_SAFE`/`HEAD2_CHARS` arrow grammar
+ * (`class-relationship-parser.ts`) — see `class-arrow-decor-map.ts`'s own
+ * doc comment for the full reasoning.
+ *
+ * T1d (cdd6): `arrowTriangle` ADDED (`LinkDecor.ARROW_TRIANGLE`, glyphs
+ * `<<`/`>>` — `decoration/LinkDecor.java:87`:
+ * `ARROW_TRIANGLE(decors1("<<"), decors2(">>"), 10, true, 0.8)`).
+ * `class-relationship-parser.ts`'s `HEAD1_SAFE`/`HEAD2_CHARS` now carry
+ * both glyphs (unknown/xuloxo-85-vibu502, c4/gikaju-64-bari602); the
+ * extremity shape (`core/svek/extremity/link-decor.ts#BUILDERS
+ * .ARROW_TRIANGLE`, a filled triangle: `ExtremityFactoryTriangle(null, 8,
+ * 3, 8)`, `LinkDecor.java:187`) was already built for description's
+ * link-grammar — only the class-side glyph→name wiring was missing.
  * @see ~/git/plantuml/.../decoration/LinkDecor.java:70-104
  */
 export type LinkDecor =
@@ -80,4 +90,6 @@ export type LinkDecor =
   | 'definedBy'
   // cdd5-T5d: LinkDecor.CIRCLE (`0`), decoration/LinkDecor.java:90.
   | 'circle'
+  // T1d (cdd6): LinkDecor.ARROW_TRIANGLE (`<<`/`>>`), LinkDecor.java:87.
+  | 'arrowTriangle'
   | 'none';

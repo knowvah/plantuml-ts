@@ -112,8 +112,14 @@ const ARROW_BODY = String.raw`[-.=]+(?:${ARROW_STYLE})?(?:${ARROW_DIR})?(?:${ARR
 // digit, not a `\b`-wrapped word char like `o`/`x` (`buildRegexFromDecorKeys`
 // only wraps keys that literally start/end with the LETTER "o"), so it needs
 // no WORD_HEAD-style collision guard.
-const HEAD1_SAFE = String.raw`(?:<\|\||<\|:|<\||<_|<|\*|\+|\)|\^|#|\}o|0)?`;
-const HEAD2_CHARS = String.raw`\|\|>|:\|>|\|>|_>|>|\*|o\{|o|x|\+|\^|#|\(|0`;
+// T1d (cdd6): `<<` (LinkDecor.ARROW_TRIANGLE's decors1, `decoration/
+// LinkDecor.java:87`: `ARROW_TRIANGLE(decors1("<<"), decors2(">>"), 10,
+// true, 0.8)`) inserted before the bare `<` alternative -- JS alternation
+// tries alternatives left-to-right (not longest-match), so `<<` MUST
+// precede `<` or the second `<` is left dangling and the rest of the line
+// fails to match (xuloxo-85-vibu502, c4/gikaju-64-bari602).
+const HEAD1_SAFE = String.raw`(?:<\|\||<\|:|<\||<_|<<|<|\*|\+|\)|\^|#|\}o|0)?`;
+const HEAD2_CHARS = String.raw`\|\|>|:\|>|\|>|_>|>>|>|\*|o\{|o|x|\+|\^|#|\(|0`;
 const HEAD2 = String.raw`(?:${HEAD2_CHARS})?`;
 const HEAD2_REQUIRED = String.raw`(?:${HEAD2_CHARS})`;
 // `o` (AGGREGATION) and `x` (NOT_NAVIGABLE) are word characters, so a BARE
