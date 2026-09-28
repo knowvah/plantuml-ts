@@ -23,6 +23,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { ORACLE_JAR_TIMEOUT_MS } from './lib/oracle-jar-timeout.js';
+import { runInPlainMinute, type GuardClock, type GuardSleep } from './lib/oracle-minute-guard.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_DIR = join(REPO, 'tests', 'visual', 'data');
@@ -49,6 +50,15 @@ export interface CaptureResult {
   captured: string[];
   jarFailed: string[];
   renamed: string[];
+}
+
+/** Injectable clock/sleep for `runInPlainMinute` (D9: PSystemError.java's
+ *  time-based error-page decorations). Both undefined in production --
+ *  `runInPlainMinute` then defaults to real `Date.now`/a real timer; tests
+ *  inject fakes so a decorated minute never causes a real sleep. */
+export interface GuardDeps {
+  now?: GuardClock;
+  sleep?: GuardSleep;
 }
 
 /** Judges render success from the output directory's contents, never from
@@ -84,18 +94,26 @@ function doneSlugs(typeDir: string, manifest: Fixture[]): Set<string> {
   return done;
 }
 
-/** Writes `in.puml` and renders through the pinned oracle jar. The jar's exit
- *  code is ignored on purpose (aoh-T0.md Finding 1) — the catch is not an
- *  error swallow, it is the documented success signal. */
-function renderFixture(dir: string, markup: string): ClassifyResult {
+/** Writes `in.puml` and renders through the pinned oracle jar, guarded
+ *  against PSystemError.java's time-based error-page decorations (D9) --
+ *  see scripts/lib/oracle-minute-guard.ts. The jar's exit code is ignored
+ *  on purpose (aoh-T0.md Finding 1) — the catch is not an error swallow,
+ *  it is the documented success signal. */
+function renderFixture(dir: string, markup: string, guard: GuardDeps): Promise<ClassifyResult> {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'in.puml'), markup, 'utf-8');
-  try {
-    execFileSync(ORACLE_RENDER, [dir, join(dir, 'in.puml')], { stdio: 'ignore', timeout: ORACLE_JAR_TIMEOUT_MS });
-  } catch {
-    /* non-zero exit does not mean render failure; classifyOutput decides */
-  }
-  return classifyOutput(dir);
+  return runInPlainMinute(
+    () => {
+      try {
+        execFileSync(ORACLE_RENDER, [dir, join(dir, 'in.puml')], { stdio: 'ignore', timeout: ORACLE_JAR_TIMEOUT_MS });
+      } catch {
+        /* non-zero exit does not mean render failure; classifyOutput decides */
+      }
+      return classifyOutput(dir);
+    },
+    guard.now,
+    guard.sleep,
+  );
 }
 
 interface ResultBuckets {
@@ -116,12 +134,13 @@ function recordResult(slug: string, result: ClassifyResult, dir: string, buckets
   }
 }
 
-export function captureOracleCache(
+export async function captureOracleCache(
   type: string,
   manifest: Fixture[],
   opts: PlanOptions,
   cacheRoot: string = CACHE_DIR,
-): CaptureResult {
+  guard: GuardDeps = {},
+): Promise<CaptureResult> {
   const typeDir = join(cacheRoot, type);
   const toRender = planEntries(manifest, doneSlugs(typeDir, manifest), opts);
   const buckets: ResultBuckets = { captured: [], jarFailed: [], renamed: [] };
@@ -129,7 +148,7 @@ export function captureOracleCache(
   for (const f of toRender) {
     console.error(`[capture-oracle-cache] rendering ${type}/${f.slug}`);
     const dir = join(typeDir, f.slug);
-    recordResult(f.slug, renderFixture(dir, f.markup), dir, buckets);
+    recordResult(f.slug, await renderFixture(dir, f.markup, guard), dir, buckets);
   }
 
   return { type, ...buckets };
@@ -151,15 +170,18 @@ function parseArgs(argv: string[]): { type: string; opts: PlanOptions } {
   return { type, opts: only ? { rebuild, only } : { rebuild } };
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const { type, opts } = parseArgs(process.argv.slice(2));
-  const result = captureOracleCache(type, readManifest(type), opts);
+  const result = await captureOracleCache(type, readManifest(type), opts);
   console.log(JSON.stringify(result));
 }
 
 /* v8 ignore start -- CLI entry point; exercised by real runs, not the unit
  * suite (matches scripts/dot-sync-report.ts's guard). */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  main();
+  main().catch((err: unknown) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
 }
 /* v8 ignore stop */

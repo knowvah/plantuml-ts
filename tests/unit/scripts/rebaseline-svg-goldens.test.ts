@@ -1,12 +1,17 @@
 /**
  * Unit tests for `scripts/rebaseline-svg-goldens.ts`'s pure functions (T2,
- * mission svg-output-size-reduction). Only `compareCapture`/`summarize`/
- * `formatSummaryLine`/`formatOutcomeLine`/`evaluateDrift` are exercised
- * here -- the jar-capture and git-plumbing I/O are exercised by the manual
- * report-only run documented in the task's return report, not by a JVM- or
- * git-dependent test.
+ * mission svg-output-size-reduction). Most of the jar-capture and
+ * git-plumbing I/O is exercised by the manual report-only run documented in
+ * the task's return report, not by a JVM- or git-dependent test --
+ * `captureBatch` is the one exception, exercised below with a mocked
+ * `spawnSync` to prove it routes through the D9 minute guard (cdd6 T0c).
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
+import type * as ChildProcess from 'node:child_process';
 import {
   compareCapture,
   summarize,
@@ -15,8 +20,18 @@ import {
   describeOutcome,
   evaluateDrift,
   parseErroredFiles,
+  captureBatch,
   type FixtureOutcome,
 } from '../../../scripts/rebaseline-svg-goldens.js';
+
+vi.mock('node:child_process', async (importOriginal) => ({
+  ...(await importOriginal<typeof ChildProcess>()),
+  spawnSync: vi.fn(),
+}));
+
+afterEach(() => {
+  vi.mocked(spawnSync).mockReset();
+});
 
 describe('compareCapture', () => {
   it('is SAME for byte-identical buffers', () => {
@@ -172,5 +187,75 @@ describe('evaluateDrift', () => {
       ok: true,
       reason: 'ORACLE_ALLOW_DRIFT=1 override',
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// captureBatch — proves the jar call is routed through the D9 minute guard
+// (cdd6 T0c). spawnSync is mocked; no jar output is produced, so the
+// resulting Capture is always `{ bytes: undefined, exitCode: 0 }` here --
+// only the guard wiring is under test.
+// ---------------------------------------------------------------------------
+
+describe('captureBatch', () => {
+  let tmp: string;
+
+  beforeEach(() => {
+    tmp = mkdtempSync(join(tmpdir(), 'rsg-t0c-'));
+  });
+
+  afterEach(() => {
+    rmSync(tmp, { recursive: true, force: true });
+  });
+
+  function makeFixtureDir(name: string): string {
+    const dir = join(tmp, 'src', name);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'in.puml'), '@startuml\n@enduml\n', 'utf-8');
+    return dir;
+  }
+
+  function mockCleanJarRun(): void {
+    vi.mocked(spawnSync).mockReturnValue({
+      stderr: '',
+      stdout: '',
+      status: 0,
+      signal: null,
+      pid: 1,
+      output: [],
+    });
+  }
+
+  it('waits out a decorated start minute before calling the jar (D9)', async () => {
+    mockCleanJarRun();
+    const fixtureDir = makeFixtureDir('foo');
+    let now = 30 * 60_000; // minute 30 -- decorated (dedication banner)
+    const sleep = vi.fn((): Promise<void> => {
+      now = 31 * 60_000; // plain
+      return Promise.resolve();
+    });
+
+    const result = await captureBatch([{ relPath: 'svg-class/foo', fixtureDir }], join(tmp, 'scratch'), {
+      now: () => now,
+      sleep,
+    });
+
+    expect(sleep).toHaveBeenCalledTimes(1);
+    expect(spawnSync).toHaveBeenCalledTimes(1);
+    expect(result.get('svg-class/foo')).toEqual({ bytes: undefined, exitCode: 0 });
+  });
+
+  it('calls the jar without waiting when the minute is already plain', async () => {
+    mockCleanJarRun();
+    const fixtureDir = makeFixtureDir('bar');
+    const sleep = vi.fn((): Promise<void> => Promise.resolve());
+
+    await captureBatch([{ relPath: 'svg-class/bar', fixtureDir }], join(tmp, 'scratch2'), {
+      now: () => 10 * 60_000,
+      sleep,
+    });
+
+    expect(sleep).not.toHaveBeenCalled();
+    expect(spawnSync).toHaveBeenCalledTimes(1);
   });
 });
