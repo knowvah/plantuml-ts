@@ -10,6 +10,9 @@ import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import { isMethodMember } from '../../../src/diagrams/class/class-member-rows.js';
+import { parseClass as parseClassRaw } from '../../../src/diagrams/class/parser.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
+import { renderSync } from '../../../src/index.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
   const lines = source
@@ -51,5 +54,25 @@ describe('standalone member syntax — quoted class name (dibinu-95-kavo178)', (
     const ast = parse('"a b" *-- "c d"');
     expect(ast.relationships).toHaveLength(1);
     expect(ast.classifiers.every((c) => c.members.length === 0)).toBe(true);
+  });
+});
+
+describe('standalone member syntax — whitespace on both sides of ":" (zolaza-45-sepi570)', () => {
+  // CommandAddMethod.java:63-68: NAME, RegexLeaf.spaceOneOrMore(), ":",
+  // RegexLeaf.spaceOneOrMore(), DATA -- `[%s]+` both sides (RegexLeaf.java:85-86).
+  it('adds a member when ":" is surrounded by spaces', () => {
+    const ast = parse('class A\nA : foo()');
+    expect(ast.classifiers[0]!.members.map((m) => m.name)).toEqual(['foo']);
+  });
+
+  it.each(['A:foo()', 'A :foo()', 'A: foo()'])('refuses %s as a syntax error (no class command matches)', (line) => {
+    const refusal = parseRefusalOf(parseClassRaw({ lines: ['class A', line], type: 'class' }));
+    expect(refusal?.kind).toBe('syntax');
+    expect(refusal?.line).toBe(1); // 0-based: the second line
+  });
+
+  it('routes a lone "A:foo" block to the state engine, as the jar does', () => {
+    const svg = renderSync('@startuml\nA:foo\n@enduml');
+    expect(svg).toContain('data-diagram-type="STATE"');
   });
 });

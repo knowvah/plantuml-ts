@@ -77,8 +77,13 @@ export const RELATIONSHIP_COMMANDS: readonly Command[] = [
   //    already uses two lines earlier in the same fixture
   //    (`class-relationship-parser.ts`'s `ID_ATOM`) -- widened to match,
   //    `u` flag added for `\p{}` support.
+  //    cdd5-T5d (zolaza-45-sepi570): whitespace is REQUIRED on both sides
+  //    of the `:` -- `RegexLeaf.spaceOneOrMore()` twice
+  //    (`CommandAddMethod.java:65,67`; `[%s]+`, `RegexLeaf.java:85-86`).
+  //    `A:foo` matches no class command upstream, so the class factory
+  //    refuses the block and the state factory claims it.
   {
-    pattern: /^("[^"]+"|[\p{L}\p{N}_.]+)\s*:(?!:)\s*(.+)$/u,
+    pattern: /^("[^"]+"|[\p{L}\p{N}_.]+)\s+:\s+(.+)$/u,
     execute(state, match) {
       const classId = match[1]!;
       const memberStr = match[2]!.trim();
