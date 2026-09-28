@@ -17,13 +17,13 @@
  * SIZING; this is the matching DRAW half, ADR-1/ADR-2).
  *
  * Deliberately NOT threaded (same scope as the pre-T4 icon renderers,
- * zero behavior change): `classifier.color` (inline `usecase Foo #red`
- * override — the old `renderUseCaseIcon`/`renderActorIcon` never read it
- * either), stereotype labels (class-diagram usecase/actor carries none),
- * `deltaShadow` (class-geo-types.ts's own `ClassifierGeo.shadowing` doc
- * comment: jar draws no shadow for an `EntityImageDescription`-family
- * shape here) and `hexagonPolygon` (neither symbol is a hexagon). Entity
- * hyperlinks ARE threaded (cdd3-T10, S-11: `classifier.url`).
+ * zero behavior change): stereotype labels (class-diagram usecase/actor
+ * carries none) and `deltaShadow` (class-geo-types.ts's own `ClassifierGeo
+ * .shadowing` doc comment: jar draws no shadow for an
+ * `EntityImageDescription`-family shape here). Entity hyperlinks ARE
+ * threaded (cdd3-T10, S-11: `classifier.url`); `classifier.color` IS
+ * threaded (cdd5-T3b, see {@link resolveBackcolor}); `hexagonPolygon` is
+ * always `null` (cdd5-T3b, see {@link buildUSymbolEntityParams}).
  *
  * @see ~/git/plantuml/.../svek/image/EntityImageDescription.java
  * @see plans/si14-usymbol-measurement-sharing/decisions.md (ADR-1, ADR-2)
@@ -51,7 +51,10 @@ import {
   resolveActorStyle,
 } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
-import type { USymbol } from '../../core/descriptive-keywords.js';
+import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords.js';
+import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { parseColor, type Paint } from '../../core/paint.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 
 /** Jar default line thickness for an `EntityImageDescription`-family shape
  *  with no `LineThickness` skinparam override — see `renderer-entity.ts
@@ -90,16 +93,31 @@ const ELEMENT_ROUND_CORNER = 5.0;
  * `EntityImageDescriptionParams.symbol.keyword` for one class-diagram leaf
  * routed through this file: `usecase`/`descriptive`+`actor` (SI14 T4),
  * plus cdd-T22's `circle` (E8) and `descriptive`+`component` (cacoma)
- * additions, plus cdd3-T12's `descriptive`+`rectangle` (sijisi) addition.
- * The cast on the `descriptive` fallback documents a caller-enforced
- * invariant (`renderer.ts`'s own dispatch gate forwards ONLY `usymbol ===
- * 'actor' | 'component' | 'database' | 'node' | 'rectangle' | 'package'` here, never a raw
- * business-suffix keyword) — not an external-data guess.
+ * additions, plus cdd3-T12's `descriptive`+`rectangle` (sijisi) addition,
+ * plus cdd5-T3b's every-other-descriptive-usymbol widening (see
+ * {@link usesClassUSymbolEntity}).
+ *
+ * `classifier.usymbol` (`Classifier.usymbol`, `ast.ts`) carries the RAW
+ * matched keyword text, not the canonical `USymbol` spelling -- a business
+ * variant keeps its trailing slash (`actor/`, not `actor-business`;
+ * `class-declaration-parser.ts#resolveDeclKind`'s `usymbol: rawKind`, and
+ * `class-multiline-element.ts`'s `open[1]!.toLowerCase()`, both store the
+ * literal source token). `KEYWORD_TO_SYMBOL` (`core/descriptive-keywords
+ * .ts`, the SAME table `ALL_TYPES`/`DESCRIPTIVE_LEAF_KEYWORDS` are derived
+ * from) is the one normalizer for that keyword -> `USymbol` mapping
+ * (`actor/` -> `actor-business`, `portin`/`portout` -> `port`, `archimate`
+ * -> `rectangle`, identity for every other entry) -- mirrors upstream's own
+ * single `USymbols.fromString` factory (`decoration/symbol/USymbols.java:
+ * 60-95`), so this reads it rather than re-deriving a second, hand-picked
+ * mapping (cdd5-T3b fixed `fepulu-27-soci473`'s `actor/` leaf, which the
+ * pre-fix raw cast fed straight through as an invalid `USymbol` value).
  */
 function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
   if (classifier.kind === 'usecase') return 'usecase';
   if (classifier.kind === 'circle') return 'circle';
-  return (classifier.usymbol as USymbol | undefined) ?? 'actor';
+  const raw = classifier.usymbol;
+  if (raw === undefined) return 'actor';
+  return KEYWORD_TO_SYMBOL.get(raw) ?? (raw as USymbol);
 }
 
 /**
@@ -139,6 +157,27 @@ function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
   return symbolKeyword === 'usecase' ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT;
 }
 
+/**
+ * cdd5-T3b (`usymbol-leaf-entity-color-dropped`, `jimizu-14-zole306`):
+ * `EntityImageDescription.java:164-166` -- `HColor backcolor =
+ * colors.getColor(ColorType.BACK); if (backcolor == null) backcolor =
+ * styleTitle.value(PName.BackGroundColor)...`. The leaf's OWN inline
+ * `#color` decoration (`Classifier.color` / `ClassifierGeo.color`, the SAME
+ * field `class Foo #White { ... }` populates) wins over the theme/style
+ * default `resolveElementPaint` supplies. Reuses the bare/`back:`-token
+ * extraction (`resolveBareOrBackColor`) plus the gradient/hex resolution
+ * `renderer-classifier-colors.ts#classifierFill` already established for
+ * this identical field (`resolveBareOrBackColor` -> `parseColor` ->
+ * `resolveColorToSvgHex` for a plain color, the `Gradient` object
+ * unchanged for a compound one) -- one shared grammar, two draw paths.
+ */
+function resolveBackcolor(classifier: ClassifierGeo, theme: ScaledTheme, symbolKeyword: USymbol): Paint {
+  const override = resolveBareOrBackColor(classifier.color);
+  if (override === undefined) return resolveElementPaint(theme, symbolKeyword, 'background');
+  const parsed = parseColor(override);
+  return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+}
+
 function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
   theme: ScaledTheme,
@@ -167,7 +206,7 @@ function buildUSymbolEntityParams(
     labels: { codeName: classifier.id, displayText: display, stereotypeLabels: [] },
     paint: {
       forecolor: resolveElementPaint(theme, symbolKeyword, 'border'),
-      backcolor: resolveElementPaint(theme, symbolKeyword, 'background'),
+      backcolor: resolveBackcolor(classifier, theme, symbolKeyword),
       roundCorner,
       diagonalCorner: 0,
       deltaShadow: 0,
@@ -186,6 +225,25 @@ function buildUSymbolEntityParams(
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
     atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // cdd5-T3b (`xagomi-49-caki729`): `EntityImageDescription.java:334-341`'s
+    // `drawHexagon` -- `bibliotekon.getNode(entity).getPolygon()` -- is
+    // upstream's OWN "no computed shape for this node" state (`if (hexagon
+    // != null) { ... }`, silently drawing nothing further), not the
+    // `bibliotekon == null` defensive throw one line above it (dead
+    // upstream: `GeneralImageBuilder.createEntityImageBlock`'s only two
+    // callers, `GraphvizImageBuilder`/`CucaDiagramFileMakerSmetana#getBibliotekon`,
+    // both always pass a real object). This engine has never threaded the
+    // DOT-computed node polygon onto `ClassifierGeo` (would need
+    // `class-dot-graph.ts`/`layout.ts`, outside this task's write-set), so
+    // `null` is the honest, currently-true state for EVERY hexagon leaf this
+    // engine draws -- not a fitted value chosen to dodge the throw. Verified
+    // against `xagomi-49-caki729`'s golden (`!pragma layout smetana`, where
+    // Smetana's own node has no stored polygon either): the jar draws ONLY
+    // the label text, no hexagon outline, exactly what `hexagonPolygon:
+    // null` produces here. A non-Smetana hexagon leaf still lacks its
+    // outline after this fix -- an accepted, reported residual, not a new
+    // regression (pre-fix, EVERY hexagon leaf drew as a wrong class box).
+    hexagonPolygon: null,
   };
 }
 // #lizard forgives -- straight-line params-object assembly plus one ternary,
@@ -231,22 +289,45 @@ function buildUSymbolEntityParams(
  *  `LeafType.DESCRIPTION` entity with `USymbols.PACKAGE`, which
  *  `GeneralImageBuilder.java:160-167` hands to `EntityImageDescription`
  *  (`USymbolFolder` tab path + bold title), not the class box. Exported so
- *  `renderer.ts`'s own dispatch (over its 500-line cap) stays a single call. */
+ *  `renderer.ts`'s own dispatch (over its 500-line cap) stays a single call.
+ *
+ *  cdd5-T3b (`desc-leaf-classbox-fallback` = S2 `descriptive-usymbol-render-
+ *  allowlist`, 20+ rows): widened from the hand-picked 6-symbol list above
+ *  to EVERY remaining `descriptive` usymbol, mirroring upstream's actual
+ *  rule instead of growing the list one fixture at a time --
+ *  `GeneralImageBuilder.java:160-167`'s `LeafType.DESCRIPTION` branch (every
+ *  non-usecase/state/native-class leaf a `USymbol` keyword produces,
+ *  `CommandCreateElementMultilines.java:182-187`/`CommandCreateElementFull2
+ *  .java`) routes to `EntityImageDescription` UNCONDITIONALLY -- there is no
+ *  per-USymbol allowlist upstream, and the `USE_INTERFACE_EYE1`/`EYE2`
+ *  globals that would otherwise intercept it are both `false`
+ *  (`GlobalConfig.java:45-46`). The SAME unconditional-DESCRIPTION rule
+ *  ALSO covers `GeneralImageBuilder.java:200-204`'s `LeafType.EMPTY_PACKAGE`
+ *  branch (`if (leaf.getUSymbol() != null) return new
+ *  EntityImageDescription(...)`) -- a collapsed-empty container that
+ *  carries a USymbol (`queue Q { }`, `frame F { }`, `package P <<Frame>>
+ *  { }`) is ALSO a `descriptive`-kind `ClassifierGeo` with that usymbol
+ *  stamped on it by `class-container.ts#closeContainer` (`leaf.usymbol =
+ *  usymbol`) -- one gate covers both upstream branches, no separate
+ *  EMPTY_PACKAGE check needed here.
+ *
+ *  `port` (normalized from `port`/`portin`/`portout`) stays excluded -- a
+ *  SEPARATE, already-diagnosed, out-of-this-task's-write-set family.
+ *  Upstream checks `LeafType.PORTIN`/`PORTOUT` BEFORE `DESCRIPTION`
+ *  (`GeneralImageBuilder.java:122-127`) and draws `EntityImagePort`, a
+ *  third image class this port has never built (`class-portin-unported`,
+ *  `bonaco-71-xefu608`, S3 diagnosis) -- excluded so this leaf keeps
+ *  falling to the SAME `renderClassifierBox` fallback it already used, not
+ *  a newly-wrong `EntityImageDescription` draw.
+ *
+ *  `hexagon` IS included (cdd5-T3b, `xagomi-49-caki729`) -- see
+ *  {@link buildUSymbolEntityParams}'s `hexagonPolygon: null` for why that
+ *  is faithful rather than a crash-avoidance shortcut.
+ */
 export function usesClassUSymbolEntity(classifier: ClassifierGeo): boolean {
   if (classifier.kind === 'usecase' || classifier.kind === 'circle') return true;
-  return (
-    classifier.kind === 'descriptive' &&
-    (classifier.usymbol === 'actor' ||
-      classifier.usymbol === 'component' ||
-      classifier.usymbol === 'database' ||
-      // cdd3-T31 (C-8): a `node` leaf is the same `EntityImageDescription`
-      // with `USymbols.NODE` (`USymbolNode#asSmall` -> `drawNode`,
-      // `USymbolNode.java:71-92`): jar draws the `<polygon>` + fold lines,
-      // never the class box this fell through to.
-      classifier.usymbol === 'node' ||
-      classifier.usymbol === 'rectangle' ||
-      classifier.usymbol === 'package')
-  );
+  if (classifier.kind !== 'descriptive' || classifier.usymbol === undefined) return false;
+  return KEYWORD_TO_SYMBOL.get(classifier.usymbol) !== 'port';
 }
 
 /**
