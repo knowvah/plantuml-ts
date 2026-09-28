@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1251 modules · 4711 exported names.
+1251 modules · 4712 exported names.
 
 ## `src/`
 
@@ -456,7 +456,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AtomTextUtils.ts` | `createListNumber` | AtomTextUtils — upstream's factory helpers around the legacy `AtomText`. |
 | `CommandCreoleBuilder.ts` | `CREOLE_COMMANDS`, `CREOLE_COMMANDS_OTHER` | CommandCreoleBuilder — builds the `starter prefix -> Command[]` map `StripeSimple#searchCommand` looks up against. |
 | `CreoleParser.ts` | `CreoleTextStyle`, `CreoleParserAdapters`, `CreoleParser` | CreoleParser — the ONLY upstream implementor of `SheetBuilder`: turns a `Display` into a `Sheet` of `Stripe`s, one physical display line at a time, dispatching each line to a table/tree/code/latex/plain-text classifier. |
-| `CreoleStripeSimpleParser.ts` | `StripeClassification`, `classifyStripeLine` | CreoleStripeSimpleParser — classifies ONE already-`\n`-split display line into a `StripeStyleType` + its content, per upstream's regex cascade. |
+| `CreoleStripeSimpleParser.ts` | `StripeClassification`, `splitOnNewlineSentinel`, `classifyStripeLine` | CreoleStripeSimpleParser — classifies ONE already-`\n`-split display line into a `StripeStyleType` + its content, per upstream's regex cascade. |
 | `StripeCode.ts` | `StripeCode` | StripeCode — one `<code>...</code>` fenced block: a "raw" continuation stripe that accumulates every physical line between `<code>` and `</code>` verbatim (no creole markup parsing inside the fence) and draws them top-to-bottom in one `Font |
 | `StripeLatex.ts` | `StripeLatex` | StripeLatex — one `<latex>...</latex>` block: a "raw" continuation stripe that accumulates every physical line between `<latex>` and `</latex>` verbatim, then lazily builds a single `AtomMath` wrapping the whole accumulated formula. |
 | `StripeRaw.ts` | `StripeRaw` | StripeRaw — upstream: klimt/creole/legacy/StripeRaw.java (`interface StripeRaw extends Stripe, Atom`). |
