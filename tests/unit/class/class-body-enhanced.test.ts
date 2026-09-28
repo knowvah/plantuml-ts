@@ -296,3 +296,59 @@ describe('measureEnhancedBody — row y bottom-anchor is gated on an image atom'
     expect(spritePart.rows[0]!.y).not.toBe(plainPart.rows[0]!.y);
   });
 });
+
+// ---------------------------------------------------------------------------
+// cdd5-T4e (enhanced-body-icon-block-height, unknown/rinidi-95-neko205):
+// `class-member-rows.ts#iconRowFields` sets `visibilityBlockHeight`/
+// `visibilityBlockTopDy` on an icon-bearing row; the enhanced-body builder
+// omitted both, so `renderer-classifier-rows.ts`'s `row.visibilityBlockHeight
+// ?? fontSize` fallback centred the icon on the 14px font instead of the
+// row's own (possibly `<size:N>`-inflated) height --
+// `PlacementStrategyVisibility.java:62-67`'s `(maxHeight12 - height1) / 2`.
+// `visibilityBlockTopDy` is `blockTop - y` (`y` the row's BASELINE) exactly
+// like `class-member-rows.ts#buildOneRow` -- NOT 0 (a first, jar-disproven
+// attempt hardcoded 0 and shifted every OTHER icon row in the diagram by
+// `baselineOffset`, since `rowIconTopOriginY` reads it as an absolute
+// baseline-relative offset). For a non-image row, `y = rowTop +
+// baselineOffset`, so `blockTop - y = rowTop - (rowTop + baselineOffset) =
+// -baselineOffset`.
+// ---------------------------------------------------------------------------
+describe('measureEnhancedBody — visibilityBlockHeight/visibilityBlockTopDy on an icon row', () => {
+  const baselineOffset = 11;
+
+  function ctx() {
+    return {
+      fontSpec: { family: 'sans-serif', size: 14 },
+      measurer: new WidthTableMeasurer(),
+      sprites: undefined,
+      baselineOffset,
+      bodyTop: 0,
+    };
+  }
+
+  function rowsOf(rawLines: readonly string[]): EnhancedRowsPart {
+    const part = measureEnhancedBody(rawLines, ctx()).parts.find((p): p is EnhancedRowsPart => p.kind === 'rows');
+    if (part === undefined) throw new Error('no rows part built');
+    return part;
+  }
+
+  it('a <size:30> icon row carries its OWN 30px height, not the 14px font floor', () => {
+    const part = rowsOf(['{method}{static} + <size:30>instance', '{method} + myOperation']);
+    expect(part.rows[0]!.visibilityIcon).toBe('+');
+    expect(part.rows[0]!.visibilityBlockHeight).toBe(30);
+    expect(part.rows[0]!.visibilityBlockTopDy).toBe(-baselineOffset);
+  });
+
+  it('a plain icon row carries its own 14px height (no `<size:N>` inflation)', () => {
+    const part = rowsOf(['{method} + myOperation']);
+    expect(part.rows[0]!.visibilityBlockHeight).toBe(14);
+    expect(part.rows[0]!.visibilityBlockTopDy).toBe(-baselineOffset);
+  });
+
+  it('a non-icon row (no explicit visibility) carries neither field', () => {
+    const part = rowsOf(['plain text, no visibility char']);
+    expect(part.rows[0]!.visibilityIcon).toBeUndefined();
+    expect(part.rows[0]!.visibilityBlockHeight).toBeUndefined();
+    expect(part.rows[0]!.visibilityBlockTopDy).toBeUndefined();
+  });
+});
