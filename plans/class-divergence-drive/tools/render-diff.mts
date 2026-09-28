@@ -1,13 +1,15 @@
 /**
  * `npx jiti plans/class-divergence-drive/tools/render-diff.mts <slug...>`
  *
- * For each class-corpus slug under `test-results/dot-cache/class/<slug>/`:
- * renders through production `renderSync` exactly as
- * `scripts/svg-parity-survey.ts` does (`WidthTableMeasurer` + sprites
- * combined with emoji artwork, cdd4-T9, store built ONCE per process — not
- * per fixture), writes `measurements/out/<slug>.ours.svg` and copies the cached
- * `in.svg` to `measurements/out/<slug>.jar.svg`, then prints the structural
- * and numeric diff counts from `tests/oracle/svg-conformance/
+ * Each `<slug>` argument is `<tree>/<slug>`, or a bare `<slug>` meaning
+ * `class/<slug>` (T4). For each: reads `test-results/dot-cache/<tree>/<slug>/
+ * in.puml`, renders it through the exact production call
+ * `scripts/svg-parity-survey.ts:268-271` uses (`renderSync(markup, {
+ * measurer: new WidthTableMeasurer(), assetStore: buildSpriteAssetsStore()
+ * })`, with the asset store built ONCE per process), writes the result to
+ * `measurements/out/<tree>__<slug>.ours.svg`, copies the cached `in.svg` to
+ * `measurements/out/<tree>__<slug>.jar.svg`, then prints the structural and
+ * numeric diff counts from `tests/oracle/svg-conformance/
  * compare.ts#compareSvg` (tolerance class `'deterministic'`, per D3 /
  * docs/parity-report.md).
  *
@@ -40,6 +42,29 @@ export function resolveRepoRoot(fileUrl: string): string {
   return join(dirname(fileURLToPath(fileUrl)), '..', '..', '..');
 }
 
+const DEFAULT_TREE = 'class';
+
+/** Splits a CLI slug argument into its tree and bare slug: `<tree>/<slug>`,
+ *  or a bare `<slug>` (no `/`) meaning `class/<slug>` (T4). Only the FIRST
+ *  `/` is a separator — a slug may not itself contain one, matching
+ *  `test-results/dot-cache/<tree>/<slug>/` directory naming. */
+export function parseTreeSlug(arg: string): { tree: string; slug: string } {
+  const slashIdx = arg.indexOf('/');
+  if (slashIdx === -1) return { tree: DEFAULT_TREE, slug: arg };
+  return { tree: arg.slice(0, slashIdx), slug: arg.slice(slashIdx + 1) };
+}
+
+/** `test-results/dot-cache/<tree>/<slug>/`, the fixture directory a
+ *  tree-qualified slug addresses. */
+export function fixtureDir(repo: string, tree: string, slug: string): string {
+  return join(repo, 'test-results', 'dot-cache', tree, slug);
+}
+
+/** `<tree>__<slug>`, the output file stem `measurements/out/` uses (T4). */
+export function outputBaseName(tree: string, slug: string): string {
+  return `${tree}__${slug}`;
+}
+
 /** Splits `compareSvg`'s diff list the way `diffVerdict`
  *  (`scripts/svg-parity-survey.ts:166-186`) does: a structural diff has
  *  `delta === undefined`, a numeric diff carries one. */
@@ -68,28 +93,34 @@ interface FixtureFiles {
   oracle: string;
 }
 
-function readFixtureFiles(repo: string, slug: string): FixtureFiles {
-  const dir = join(repo, 'test-results', 'dot-cache', 'class', slug);
+/** Reads a fixture directory's `in.puml`/`in.svg` pair. Takes the resolved
+ *  directory (see `fixtureDir`) rather than `(repo, tree, slug)` so it is
+ *  directly testable against a synthetic directory, not only the real
+ *  corpus (T4). */
+export function readFixtureFiles(dir: string): FixtureFiles {
   return {
     markup: readFileSync(join(dir, 'in.puml'), 'utf-8'),
     oracle: readFileSync(join(dir, 'in.svg'), 'utf-8'),
   };
 }
 
-function printDiffs(slug: string, pass: boolean, diffs: readonly Diff[]): void {
+function printDiffs(label: string, pass: boolean, diffs: readonly Diff[]): void {
   const { structural, numeric } = splitDiffs(diffs);
-  console.log(`\n### ${slug}  pass=${pass} structural=${structural.length} numeric=${numeric.length}`);
+  console.log(`\n### ${label}  pass=${pass} structural=${structural.length} numeric=${numeric.length}`);
   for (const d of structural) console.log(formatDiffLine(d));
   for (const d of numeric) console.log(formatDiffLine(d));
 }
 
-function runOne(repo: string, outDir: string, slug: string, store: AssetStore): void {
-  const { markup, oracle } = readFixtureFiles(repo, slug);
+function runOne(repo: string, outDir: string, arg: string, store: AssetStore): void {
+  const { tree, slug } = parseTreeSlug(arg);
+  const dir = fixtureDir(repo, tree, slug);
+  const { markup, oracle } = readFixtureFiles(dir);
   const svg = renderFixture(markup, store);
-  writeFileSync(join(outDir, `${slug}.ours.svg`), svg);
-  copyFileSync(join(repo, 'test-results', 'dot-cache', 'class', slug, 'in.svg'), join(outDir, `${slug}.jar.svg`));
+  const base = outputBaseName(tree, slug);
+  writeFileSync(join(outDir, `${base}.ours.svg`), svg);
+  copyFileSync(join(dir, 'in.svg'), join(outDir, `${base}.jar.svg`));
   const { pass, diffs } = compareSvg(svg, oracle, 'deterministic');
-  printDiffs(slug, pass, diffs);
+  printDiffs(`${tree}/${slug}`, pass, diffs);
 }
 
 function main(): void {
