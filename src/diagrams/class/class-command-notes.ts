@@ -99,6 +99,7 @@ export const NOTE_COMMANDS: readonly Command[] = [
         implicitTarget: match[2] === undefined,
         textLines: [],
         namespace: state.activeNamespace,
+        sep: state.namespaceSeparator,
         // G2 N37: NOTE_STEREO_CAPTURE is now capturing (group 3) -- COLOR
         // shifted from match[3] to match[4].
         ...(match[3] !== undefined ? { stereotype: match[3] } : {}),
@@ -146,6 +147,7 @@ export const NOTE_COMMANDS: readonly Command[] = [
         {
           namespace: state.activeNamespace,
           implicitTarget: match[2] === undefined,
+          sep: state.namespaceSeparator,
           ...(match[3] !== undefined ? { stereotype: match[3] } : {}),
           ...(match[4] !== undefined ? { color: match[4] } : {}),
           ...(url !== undefined ? { url } : {}),
