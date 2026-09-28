@@ -25,4 +25,28 @@ describe('business usecase', () => {
     expect(svg).toContain('<line x1="109.071" y1="15.488" x2="95.14" y2="29.419"');
     expect(svg).toContain('width="126px"');
   });
+
+  // cdd5-T5c (usecase-business-alignment, gejuvu-17-vufu851): the title
+  // signature is `{root, element, <diagram>, usecase, business, title}`
+  // (`EntityImageDescription.java:147-148` + `USymbolUsecase.java:67-70`),
+  // which `plantuml.skin:452-454`'s `usecase { HorizontalAlignment center }`
+  // matches by subsequence -- so each line is centred, not left-flush. Jar:
+  // "test 15" at x=75.3, "multiline with alias" at x=41.7.
+  it('centres every title line of a business usecase', () => {
+    const svg = renderSync(
+      ['@startuml', 'usecase/ test15 #cccccc as "', '    test 15', '    multiline with alias', '"', '@enduml'].join(
+        '\n',
+      ),
+      { measurer: new WidthTableMeasurer() },
+    );
+    const texts = [...svg.matchAll(/<text x="([\d.]+)"[^>]*textLength="([\d.]+)"[^>]*>([^<]*)<\/text>/g)].map((m) => ({
+      mid: Number(m[1]) + Number(m[2]) / 2,
+      x: Number(m[1]),
+      label: m[3],
+    }));
+    const first = texts.find((t) => t.label === 'test 15');
+    const second = texts.find((t) => t.label === 'multiline with alias');
+    expect(first?.x).toBeGreaterThan(second!.x + 30);
+    expect(first?.mid).toBeCloseTo(second!.mid, 3);
+  });
 });
