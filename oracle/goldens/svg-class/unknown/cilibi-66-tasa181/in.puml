@@ -1,0 +1,9 @@
+@startuml
+!pragma useNewPackage
+set separator none
+namespace f1 {
+  namespace f2 {
+    class f3
+  }
+}
+@enduml

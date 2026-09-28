@@ -40,6 +40,10 @@ Port: `src/core/klimt/creole/command/CommandCreoleUrl.ts:60`: "const HYPERLINK_C
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b4 (journal row 78)
+- `unknown/pavozu-43-tone454` — `creole-titled-horizontal-line-literal`: `..title..` / `--title--` horizontal lines render as literal text. Java `CreoleStripeSimpleParser.java:112-116` (+ the horizontal-line command), port `src/core/klimt/creole/legacy/CreoleStripeSimpleParser.ts:120-122` (`bareOrLiteral`), `src/core/klimt/creole/CreoleHorizontalLine.ts`.
+- `unknown/boguko-42-zuda981` is now primarily `creole-e1-newline-split` (T4c kept its blank row; the remaining 14px is the U+E100 split).
+
 ## Rows
 - `unknown/buitin-newline-chr-0`
 - `unknown/jixipo-21-mefu703`
@@ -49,6 +53,8 @@ Port: `src/core/klimt/creole/command/CommandCreoleUrl.ts:60`: "const HYPERLINK_C
 ## Write-set
 - `src/core/klimt/creole/command/CommandCreoleUrl.ts`
 - `src/core/klimt/creole/legacy/CreoleParser.ts`
+- `src/core/klimt/creole/legacy/CreoleStripeSimpleParser.ts`
+- `src/core/klimt/creole/CreoleHorizontalLine.ts`
 - their unit tests under `tests/`
 A pure type or file-cap move that extends this set is push-forward (journal it in
 your report). Anything else is stop 1: report instead of editing.

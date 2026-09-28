@@ -1,0 +1,7 @@
+@startuml
+entity EFG
+entity ABC [
+ details1
+ details2
+]
+@enduml

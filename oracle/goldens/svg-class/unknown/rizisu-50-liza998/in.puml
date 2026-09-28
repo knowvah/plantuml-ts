@@ -1,0 +1,8 @@
+@startuml
+skinparam tabSize 20
+rectangle test_indent [
+text
+\ttext
+\t\ttext
+]
+@enduml

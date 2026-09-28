@@ -52,6 +52,10 @@ Port: `src/diagrams/class/class-namespace-title-runs.ts:159`: "for (const atom o
    collected count), `npm run typecheck`, `npx eslint <changed files>`. The
    orchestrator runs the full suite after merge.
 
+## Added at close-b4 (journal row 78)
+- `package-visibility-icon` — `unknown/topave-65-ceso890` (T4b fixed its class headers; the package half remains): `ClusterHeader.java:130-139` merges `VisibilityModifier#getUBlock` left of the cluster title (drawn at the cluster stroke 1.5), set only when present by `CommandPackage.java:189-192`. Port: the package pattern in `class-command-containers.ts` discards the char; the title width is `class-geo-builders.ts:218` (`getWTitle`), the drawing `class-namespace-shape.ts`. Reuse `class-visibility-icon.ts` / `class-header-visibility-geo.ts` (T4b) for the icon block.
+- `usecase-business-alignment` — `unknown/gejuvu-17-vufu851`: `EntityImageDescription.java:143-149`'s style signature `{…, usecase, business, title}` matches `plantuml.skin:452-454` `usecase { HorizontalAlignment center }` by subsequence; `renderer-usymbol-entity.ts#titleAlignmentFor` checks the literal `usecase`. (Its tiny sizing residual lives in `class-layout-helpers.ts:344`, T5b's file: report, do not edit.)
+
 ## Rows
 - `unknown/catana-32-licu332`
 - `unknown/cevoti-40-jeco305`
@@ -76,6 +80,8 @@ Port: `src/diagrams/class/class-namespace-title-runs.ts:159`: "for (const atom o
 - `src/diagrams/class/class-package-style.ts`
 - `src/diagrams/class/renderer-usymbol-entity.ts`
 - `src/diagrams/class/renderer.ts`
+- `src/diagrams/class/class-command-containers.ts`
+- `src/diagrams/class/class-geo-builders.ts`
 - their unit tests under `tests/`
 A pure type or file-cap move that extends this set is push-forward (journal it in
 your report). Anything else is stop 1: report instead of editing.

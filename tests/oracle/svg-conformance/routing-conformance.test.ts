@@ -767,10 +767,13 @@ describe('routing conformance — jar-error classification', () => {
     // 4665 -> 4719 / 5822 -> 5876 at cdd5/close-b3 (2026-09-28): 54
     // unknown-tree svg-class golden rows (`unknown/<slug>`, D4).
     // Derivation: 4719 + 1052 + 105 = 5876.
-    expect(pinnedAgree.length).toBe(4719);
+    //
+    // 4719 -> 4749 / 5876 -> 5906 at cdd5/close-b4 (2026-09-28): 30
+    // unknown-tree svg-class golden rows. Derivation: 4749 + 1052 + 105 = 5906.
+    expect(pinnedAgree.length).toBe(4749);
     expect(pinnedMisroutes.length).toBe(1052);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5876);
+    expect(manifest.fixtures.length).toBe(5906);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
