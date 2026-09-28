@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T00:20:24.674Z",
+  "generatedAt": "2026-09-28T13:21:59.043Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -1185,9 +1185,8 @@
     {
       "slug": "dovoxo-68-sufa237",
       "type": "unknown",
-      "verdict": "errored",
-      "dotEqual": false,
-      "errMsg": "unparseable worker frame: [Log] B.BRIEF"
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "dufaka-77-jine221",
@@ -4312,9 +4311,8 @@
     {
       "slug": "puvako-69-suxo633",
       "type": "unknown",
-      "verdict": "errored",
-      "dotEqual": false,
-      "errMsg": "unparseable worker frame: [Log] vlookup on cm"
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "racemi-48-ceni130",
@@ -4955,9 +4953,10 @@
     {
       "slug": "sufura-56-muke185",
       "type": "unknown",
-      "verdict": "errored",
-      "dotEqual": false,
-      "errMsg": "unparseable worker frame: [Log] SUBMODULE _not_ defined"
+      "dotEqual": true,
+      "verdict": "structural-match",
+      "maxDelta": 16,
+      "maxDeltaPath": "svg/@height"
     },
     {
       "slug": "sukazu-57-zozi807",
@@ -5309,7 +5308,7 @@
       "dotEqual": true,
       "verdict": "diverged",
       "maxDelta": 213,
-      "firstDiff": "svg/@background",
+      "firstDiff": "svg/g[1]/text[1]/@textLength",
       "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
@@ -6343,7 +6342,7 @@
       "type": "unknown",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 194,
+      "maxDelta": 102,
       "firstDiff": "svg/@background",
       "maxDeltaPath": "svg/@height"
     },

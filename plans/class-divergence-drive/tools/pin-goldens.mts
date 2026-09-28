@@ -87,14 +87,24 @@ const writeJson = (root: string, rel: string, data: unknown): void =>
  *  (`class` or `unknown`), matching the baseline rows' own `type` field —
  *  see `routing-baseline.json`'s `type: 'unknown'` rows (D4). */
 export function findTwin(b: Baseline, slug: string, treeArg: Tree, okStatus: string, file: string): Row {
-  if (b.fixtures.some((r) => r.tree === 'goldens' && r.slug === slug)) {
-    throw new Error(`${file}: ${slug} already has a goldens row`);
+  const goldensSlug = goldensRowSlug(treeArg, slug);
+  if (b.fixtures.some((r) => r.tree === 'goldens' && r.slug === goldensSlug)) {
+    throw new Error(`${file}: ${goldensSlug} already has a goldens row`);
   }
   const twins = b.fixtures.filter((r) => r.tree === 'dot-cache' && r.type === treeArg && r.slug === slug);
   if (twins.length !== 1) throw new Error(`${file}: ${slug} has ${twins.length} dot-cache twins`);
   const twin = twins[0]!;
   if (twin.status !== okStatus) throw new Error(`${file}: ${slug} twin status ${twin.status}`);
   return twin;
+}
+
+/** The goldens-row `slug` the routing/refusal gates derive from disk: the
+ *  path from `oracle/goldens/svg-class/` to the fixture dir
+ *  (`routing-conformance.test.ts#walk`, the same rule that gives
+ *  `svg-description` its `component/<slug>` rows). An unknown-tree golden
+ *  lives at `svg-class/unknown/<slug>/`, so its row slug is `unknown/<slug>`. */
+export function goldensRowSlug(tree: Tree, slug: string): string {
+  return tree === 'unknown' ? `unknown/${slug}` : slug;
 }
 
 /** `--tree unknown` guard (D4): refuses a slug whose routing-baseline row is
@@ -113,9 +123,9 @@ export function assertRoutedAsClass(routing: Baseline, slug: string): void {
 function validate(o: PinOptions, ratchet: Ratchet): void {
   if (o.slugs.length === 0) throw new Error('no slugs given');
   if (new Set(o.slugs).size !== o.slugs.length) throw new Error('duplicate slug in arguments');
-  const pinned = new Set(ratchet.fixtures.map((f) => f.slug));
+  const pinned = new Set(ratchet.fixtures.map((f) => `${f.tree ?? 'class'}/${f.slug}`));
   for (const slug of o.slugs) {
-    if (pinned.has(slug)) throw new Error(`${slug} is already in the ratchet`);
+    if (pinned.has(`${o.tree}/${slug}`)) throw new Error(`${slug} is already in the ratchet`);
     for (const f of ['in.svg', 'in.puml']) {
       if (!existsSync(join(o.root, cacheDir(o.tree), slug, f))) throw new Error(`${slug}: missing ${f}`);
     }
@@ -148,6 +158,7 @@ export function pinGoldens(o: PinOptions): number {
       ...findTwin(data, slug, o.tree, spec.okStatus, spec.file),
       tree: 'goldens',
       type: 'svg-class',
+      slug: goldensRowSlug(o.tree, slug),
       measuredAt: o.date,
       measuredAgainstCommit: o.commit,
     })),

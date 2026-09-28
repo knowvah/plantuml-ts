@@ -1,0 +1,9 @@
+@startuml
+namespace testNS {
+note as N1
+   test
+end note
+
+test .. N1
+}
+@enduml

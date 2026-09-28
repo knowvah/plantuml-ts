@@ -1,0 +1,4 @@
+@startuml
+Bob |o--|{ Alice : hello
+Ted |o-[thickness=5]-|{ Alice : hello
+@enduml

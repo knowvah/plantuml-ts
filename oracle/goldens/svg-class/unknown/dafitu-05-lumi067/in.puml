@@ -1,0 +1,6 @@
+@startuml
+!pragma svek_trace on
+namespace Vehicles {
+   Toyota --|> Car : implements
+}
+@enduml

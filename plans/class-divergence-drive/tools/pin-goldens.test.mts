@@ -107,7 +107,12 @@ describe('pinGoldens --tree unknown (D4)', () => {
     const r = json(RATCHET).fixtures;
     expect(r[1]).toEqual({ slug: 'unk-slug', addedAt: '2026-09-28', source: 'cdd5-b0', tree: 'unknown' });
     const rows = json(ROUTING).fixtures.filter((x: any) => x.tree === 'goldens');
-    expect(rows).toEqual([{ tree: 'goldens', type: 'svg-class', slug: 'unk-slug', jarType: 'CLASS', ourType: 'CLASS', status: 'agree', measuredAt: '2026-09-28', measuredAgainstCommit: 'abcd1234' }]);
+    // The gates derive a goldens row's slug from its path under svg-class/
+    // (routing-conformance.test.ts#walk), so an unknown-tree pin is keyed
+    // `unknown/<slug>` -- a bare slug made 122 real pins read as unpinned.
+    expect(rows).toEqual([{ tree: 'goldens', type: 'svg-class', slug: 'unknown/unk-slug', jarType: 'CLASS', ourType: 'CLASS', status: 'agree', measuredAt: '2026-09-28', measuredAgainstCommit: 'abcd1234' }]);
+    const refusal = json(REFUSAL).fixtures.filter((x: any) => x.tree === 'goldens');
+    expect(refusal.map((x: any) => x.slug)).toEqual(['unknown/unk-slug']);
   });
 
   test('a non-CLASS-routed slug aborts before any file is written', () => {

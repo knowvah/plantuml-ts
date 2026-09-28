@@ -1,0 +1,10 @@
+@startuml
+ 	class SomeClass
+    
+    note top of SomeClass
+      Monitors the workspace and collects all changed files
+    end note
+    
+    footer Rendered with PlantUML version
+ 
+@enduml

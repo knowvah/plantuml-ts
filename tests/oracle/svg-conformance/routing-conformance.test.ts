@@ -758,10 +758,15 @@ describe('routing conformance — jar-error classification', () => {
     // One row goes known-misroute -> agree: sequence/soxata-16-kafi688 now
     // routes SEQUENCE (measured by repin-sequence-baselines.ts at the re-pin).
     // Derivation: 4543 + 1052 + 105 = 5700.
-    expect(pinnedAgree.length).toBe(4543);
+    //
+    // 4543 -> 4665 / 5700 -> 5822 at cdd5/close-b1 (2026-09-28): 122 svg-class
+    // golden rows, 2 class (besepi, sokevu) + 120 unknown-tree pins keyed
+    // `unknown/<slug>` (D4; their goldens live at svg-class/unknown/<slug>/).
+    // Derivation: 4665 + 1052 + 105 = 5822.
+    expect(pinnedAgree.length).toBe(4665);
     expect(pinnedMisroutes.length).toBe(1052);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5700);
+    expect(manifest.fixtures.length).toBe(5822);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

@@ -8,11 +8,11 @@ before T2. T5 is the orchestrator's close.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T1](T1-census-rendersync.md) | class census renders via renderSync (D3); unknown CLASS rows in the census | typescript-pro (sonnet) | `render-fixture-class.ts` (+test), `scripts/svg-conformance-census.ts` | — | [ ] |
-| [T2](T2-ratchet-tree.md) | ratchet `tree` field + `pin-goldens --tree` (D4) | typescript-pro (sonnet) | `class.golden.ratchet.test.ts`, `oracle/goldens/svg-class/{ratchet.json,README.md}`, `$T/pin-goldens.mts` (+test) | T1 (contract) | [ ] |
-| [T3](T3-assetstore-forwarding.md) | forward `assetStore` in 4 fixture renderers | typescript-pro (sonnet) | `render-fixture-{state,sequence,activity,json}.ts` (+tests) | — | [ ] |
-| [T4](T4-tools-tree.md) | render-all/render-diff take tree-qualified slugs; fresh test examples | typescript-pro (sonnet) | `$T/render-all.mts`, `$T/render-diff.mts` (+tests), `$T/README.md` | — | [ ] |
-| [T5](T5-close-b1.md) | close: census both buckets, pin, `b1.json` baseline, re-seed `fixtures.md` | orchestrator | per close-procedure | T1–T4 | [ ] |
+| [T1](T1-census-rendersync.md) | class census renders via renderSync (D3); unknown CLASS rows in the census | typescript-pro (sonnet) | `render-fixture-class.ts` (+test), `scripts/svg-conformance-census.ts` | — | [x] |
+| [T2](T2-ratchet-tree.md) | ratchet `tree` field + `pin-goldens --tree` (D4) | typescript-pro (sonnet) | `class.golden.ratchet.test.ts`, `oracle/goldens/svg-class/{ratchet.json,README.md}`, `$T/pin-goldens.mts` (+test) | T1 (contract) | [x] |
+| [T3](T3-assetstore-forwarding.md) | forward `assetStore` in 4 fixture renderers | typescript-pro (sonnet) | `render-fixture-{state,sequence,activity,json}.ts` (+tests) | — | [x] |
+| [T4](T4-tools-tree.md) | render-all/render-diff take tree-qualified slugs; fresh test examples | typescript-pro (sonnet) | `$T/render-all.mts`, `$T/render-diff.mts` (+tests), `$T/README.md` | — | [x] |
+| [T5](T5-close-b1.md) | close: census both buckets, pin, `b1.json` baseline, re-seed `fixtures.md` | orchestrator | per close-procedure | T1–T4 | [x] |
 
 `$T` = `plans/class-divergence-drive/tools/`.
 

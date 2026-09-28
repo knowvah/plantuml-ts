@@ -101,8 +101,13 @@ const parity = JSON.parse(
   readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'parity-class.json'), 'utf8'),
 ) as ParityReport;
 
-function findParityEntry(slug: string): ParityEntry | undefined {
-  return parity.fixtures.find((f) => f.slug === slug);
+// cdd5-T5 (D4): an unknown-tree pin's survey row lives in parity-unknown.json.
+const parityUnknown = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'parity-unknown.json'), 'utf8'),
+) as ParityReport;
+
+function findParityEntry(slug: string, tree: 'class' | 'unknown' = 'class'): ParityEntry | undefined {
+  return (tree === 'unknown' ? parityUnknown : parity).fixtures.find((f) => f.slug === slug);
 }
 
 /** cdd5-T2 (D4): `tree: 'unknown'` goldens live one level deeper
@@ -135,7 +140,12 @@ function firstDiffPath(diffs: readonly { path: string }[]): string {
 
 describe('svg-class conformance ratchet — tree resolution (D4)', () => {
   it('a "unknown" entry resolves under svg-class/unknown/<slug>/', () => {
-    const entry: RatchetFixture = { slug: 'synthetic-unknown-slug', addedAt: '2026-09-28', source: 'test', tree: 'unknown' };
+    const entry: RatchetFixture = {
+      slug: 'synthetic-unknown-slug',
+      addedAt: '2026-09-28',
+      source: 'test',
+      tree: 'unknown',
+    };
     expect(fixtureDir(entry)).toBe(join(GOLDENS_ROOT, 'unknown', 'synthetic-unknown-slug'));
   });
 
@@ -231,9 +241,10 @@ if (manifest.fixtures.length === 0) {
 describe.skipIf(manifest.fixtures.length === 0)('svg-class conformance ratchet — eligibility (AC3)', () => {
   it('every manifest slug has a dotEqual=true parity-class.json entry', () => {
     for (const f of manifest.fixtures) {
-      const entry = findParityEntry(f.slug);
-      expect(entry, `class/${f.slug}: no parity-class.json entry found`).toBeDefined();
-      expect(entry!.dotEqual, `class/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
+      const tree = f.tree ?? 'class';
+      const entry = findParityEntry(f.slug, tree);
+      expect(entry, `${tree}/${f.slug}: no parity-${tree}.json entry found`).toBeDefined();
+      expect(entry!.dotEqual, `${tree}/${f.slug}: manifest entry is not DOT-EQUAL — ineligible for the ratchet`).toBe(
         true,
       );
     }

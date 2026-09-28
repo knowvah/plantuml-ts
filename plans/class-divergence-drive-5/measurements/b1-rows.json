@@ -1,0 +1,1450 @@
+[
+{
+"tree": "unknown",
+"slug": "baleco-37-lili752",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "basoto-36-resu245",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "beboke-62-zofu377",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "bijufi-98-xafa015",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/text[1]/@font-weight",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "bikavu-22-rago633",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "bisefo-56-dumu120",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/defs[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "bixogo-47-xulu385",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "bizasu-70-vaxa243",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[3]/rect[1]/@x",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "bogide-54-buco992",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "boguko-42-zuda981",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[2]/@font-size",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "bonaco-71-xefu608",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[2]/rect[1]/@rx",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "buitin-newline-chr-0",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "class",
+"slug": "cadutu-02-lazu601",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "catana-32-licu332",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "catigu-77-keje426",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "cejegu-93-kobo234",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[4]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "cenucu-07-mepi600",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "cepedu-19-namu934",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "cevoti-40-jeco305",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/path[1]/@stroke",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "cikifu-97-pasu472",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[4]/@class",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "cilibi-66-tasa181",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "cimono-94-ximu187",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "class",
+"slug": "cirojo-62-dubo306",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@class",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-0",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-1",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-2",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-3",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-4",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "Class-visibility-5",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "colede-79-give418",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/line[1]/@stroke-width",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "daroli-95-remo515",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "dedumo-33-paco879",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "deployment-last-name-multi-line-0",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "dezobu-62-vuzu421",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/@background",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "dilese-24-neku812",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "doboco-09-doba683",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "fakone-16-boro774",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[3]/path[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "febuli-89-dusi249",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/ellipse[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "felixe-38-dilu011",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "fepiko-26-vobi566",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@stroke",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "fepoko-61-fona364",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fepudo-00-ziro735",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fepulu-27-soci473",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "fetajo-61-sesi146",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fezaro-08-nopo877",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[2]/rect[1]/@stroke",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fidaru-93-zumu093",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "fipezo-93-zimi512",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fokudi-24-limo685",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/path[1]/@stroke-dasharray",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "fukegu-14-zona532",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/text[3]/@x",
+"shard": "S1"
+},
+{
+"tree": "class",
+"slug": "gadufu-56-votu808",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/image[1]/@width",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "galata-74-luka487",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "gasevo-58-ciso782",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "gegosa-79-mini423",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/polygon[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "gejuvu-17-vufu851",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "gemigi-37-safi979",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "gigoru-88-naze087",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[3]/rect[1]/@stroke",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "girapu-90-pise235",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "gogisu-39-bepa573",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "class",
+"slug": "gokoru-18-daba136",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@class",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "gubeca-19-lemu434",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "guxico-27-bofu708",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@stroke",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "jadamo-76-xabi141",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "jajebe-95-jomo899",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[2]/image[1]/@x",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "japode-92-famo984",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[9]/path[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "jefidu-98-gisu131",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "jimizu-14-zole306",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "jititi-15-maxe512",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "jixibu-01-xave465",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "jixipo-21-mefu703",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/a[1]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "jodasa-29-zara935",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "josebu-55-seje426",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "juzica-68-kava475",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "juzuno-58-gesi397",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@font-weight",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "kacecu-90-pudi895",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/defs[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "kefuna-77-kago547",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[3]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "kelefe-72-cefi192",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "kexaba-26-kobu577",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "kokofa-47-deni140",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "komuvi-52-vave599",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "kumuti-42-tace851",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "class",
+"slug": "lagudi-03-rucu383",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "latilu-49-jebu021",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "lavoke-68-lezi492",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "lezema-07-vogu604",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "liboma-63-gamu743",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "lijota-92-sove350",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "lirumo-81-jega996",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "locoge-06-luki835",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "logavi-03-mita108",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/text[3]/@x",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "lubicu-73-fule059",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "luzive-62-zote562",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "maxure-10-temu215",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "meramo-02-vasu175",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[3]/rect[1]/@x",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "miveni-64-rexo238",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@viewBox[2]",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "momada-03-zeka599",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[3]/rect[1]/@x",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "mupavi-50-fijo192",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@font-style",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "muvici-42-dumo371",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[4]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "nadedo-37-nesa665",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[2]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "negupo-97-loro420",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[3]/text[1]/@x",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "nepevi-24-dune081",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@class",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "nilimi-64-xeco438",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "noxebo-98-foga433",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "class",
+"slug": "nugecu-04-tona107",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[4]/path[1]/@d[5]",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "nulevu-49-bovi390",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "nuveji-19-jabi587",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[6]/@stroke-width",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "palida-11-pexu992",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@stroke-dasharray",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "pavozu-43-tone454",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "pefigi-94-raxa740",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "petiku-70-fogu777",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/@background",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "petuju-02-zino378",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "pijugo-91-jilo150",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "pojeje-60-vata579",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@id",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "potase-97-japa248",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[5]/text[3]/text()[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "pugesu-08-cove285",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "punofe-33-loji825",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "pupoko-23-xubo613",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/ellipse[1]/@stroke-width",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "ragudu-37-poxi589",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "regodu-14-peve499",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "rexobo-28-rite508",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "rexupa-61-nezi165",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@id",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "rilere-84-seba785",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[4]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "rimeca-17-gice904",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[3]/text[1]/@text-decoration",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "rinidi-95-neko205",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[2]/g[2]/ellipse[1]/@cy",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "rirelu-80-tagi213",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "rivino-95-midu088",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "rizisu-50-liza998",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/text[3]/@x",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "rojida-14-fuli428",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "roxosu-00-pini153",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "rozugu-82-pera583",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/@background",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "rubebe-45-sura795",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "rufala-47-nosa835",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "rukate-37-jabu394",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "rupigu-89-xabo757",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "class",
+"slug": "rutefe-49-xeju709",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "sadamo-18-siva346",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "sapofa-97-gizu737",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "sejube-03-bote542",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[3]/ellipse[1]/@fill",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "semutu-45-zeno907",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "sofobo-48-meme531",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "soseka-43-riru110",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "sprite-SVG-fill-management-0",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "sprite-SVG-fill-management-1",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "sprite-SVG-fill-management-4",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "sprite-SVG-Fill-Stroke-Combinatory-1",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "sufura-56-muke185",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "taboco-79-pire192",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/polygon[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "tamovu-79-fifo533",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[3]/@id",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "tefeco-12-rato895",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[3][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "tegefa-14-koxo759",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@class",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "temofi-63-vega763",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "tenava-30-cele768",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "tenule-05-fovi294",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[4]/path[1]/@d",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "terede-92-fuka839",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "ticemi-41-laze086",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@id",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "tikiti-02-bagu049",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[4]/a[1]/path[1]/@codeLine",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "tivezu-91-bevu722",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/image[1]/@y",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "tobevo-04-mata128",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "tonake-05-zibo183",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "topave-65-ceso890",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "toxore-88-ruso838",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[2]/@font-size",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "tozizu-96-voka262",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/@background",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "vabobu-24-temi990",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "vakovo-25-licu237",
+"verdict": "structural-match",
+"dotEqual": false,
+"firstDiff": "maxDelta@svg/g[1]/g[1]/path[1]/@d[23]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "vugime-87-zabe159",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/defs[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "class",
+"slug": "xadado-92-lazo250",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@viewBox[2]",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "xagomi-49-caki729",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/rect[1]",
+"shard": "S2"
+},
+{
+"tree": "unknown",
+"slug": "xamive-55-lipi586",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/@class",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "xisora-84-faca166",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "xukono-55-nezi535",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "xusuxi-66-zaci221",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zasuxe-15-lugo662",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1]/text[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zaxavo-08-rake498",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[5]/text[3]/text()[1]",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zefefo-37-xigo245",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[3][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "zelura-55-pasa982",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[2]/ellipse[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zeraje-11-semu839",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/text[1]/@textLength",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zivebo-26-nagu813",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zivenu-37-nace681",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/a[1]/text[1]/@fill",
+"shard": "S1"
+},
+{
+"tree": "unknown",
+"slug": "zivilu-35-leja732",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/g[1]/rect[1]/@stroke-dasharray",
+"shard": "S4"
+},
+{
+"tree": "unknown",
+"slug": "zolaza-45-sepi570",
+"verdict": "diverged",
+"dotEqual": false,
+"firstDiff": "svg/g[1]/g[1][childCount]",
+"shard": "S3"
+},
+{
+"tree": "unknown",
+"slug": "zovojo-65-gocu245",
+"verdict": "structural-match",
+"dotEqual": true,
+"firstDiff": "maxDelta@svg/@height",
+"shard": "S4"
+},
+{
+"tree": "class",
+"slug": "zuduxu-90-kosi876",
+"verdict": "diverged",
+"dotEqual": true,
+"firstDiff": "svg/g[1]/text[1]/@font-size",
+"shard": "S1"
+}
+]

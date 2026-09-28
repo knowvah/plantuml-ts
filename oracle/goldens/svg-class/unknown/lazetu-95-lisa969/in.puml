@@ -1,0 +1,7 @@
+@startuml
+package a {
+	package ddf.content  {
+		interface ContentFramework
+	}
+}
+@enduml

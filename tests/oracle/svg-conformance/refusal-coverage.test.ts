@@ -723,7 +723,9 @@ describe('refusal coverage — baseline shape', () => {
     // pages; their old goldens carried PSystemError.java:218-228's time-based
     // donation banner, which hid the error signature from the head-read.
     // Recaptured in a plain minute. Erroring/rendering splits unchanged.
-    expect(manifest.fixtures.length).toBe(5700);
+    // 5700 -> 5822 at cdd5/close-b1 (2026-09-28): 122 svg-class golden rows,
+    // 2 class + 120 unknown-tree (D4). Derivation: 5553 + 269 = 5822.
+    expect(manifest.fixtures.length).toBe(5822);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -748,7 +750,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5380 -> 5392 at class-divergence-drive-3/close-b4 (12 svg-class clones).
     // 5392 -> 5411 at class-divergence-drive-3/close-b5 (19 svg-class clones).
     // 5411 -> 5431 at class-divergence-drive-4/close-b2 (20 svg-class clones).
-    expect(pinnedRendering.length).toBe(5431);
+    // 5431 -> 5553 at cdd5/close-b1 (2 class + 120 unknown-tree svg-class clones).
+    expect(pinnedRendering.length).toBe(5553);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
