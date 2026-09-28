@@ -64,6 +64,7 @@ interface HeaderGeoOptions {
    *  override (item 5) sizes its spot box off the registry. `undefined` for
    *  a diagram with no `sprite` definitions. */
   sprites: SpriteRegistry | undefined;
+  classAttributeIconSize?: number | undefined; // cdd5-T5e: -> mergeNameWithVisibility
 }
 
 /** Resolved-once options for the stereotype/generic-tag/header-row geometry
@@ -116,7 +117,7 @@ export function computeHeaderNameGeo(
   measurer: StringMeasurer,
   options: HeaderGeoOptions,
 ) {
-  const { strictUml, headerMaxWidth, sprites, genericDisplayOld } = options;
+  const { strictUml, headerMaxWidth, sprites, genericDisplayOld, classAttributeIconSize } = options;
   const badgeShown = hasBadge(classifier.kind) && classifier.hideCircle !== true && !strictUml;
   // R2c (sovuxo-25 dummy): each member row advances by its creole line
   // height, floored at 10px (`AtomText.java:179-181` via `MethodsOrFields
@@ -138,7 +139,7 @@ export function computeHeaderNameGeo(
     });
   const headerTextWidth = Math.max(...headerLineWidths);
   // cdd5-T4b: nameWidth/nameBlockHeight are EntityImageClassHeader.java:120's merged block.
-  const merged = mergeNameWithVisibility(classifier, headerTextWidth + NAME_MARGIN_TOTAL, nameBlockHeight);
+  const merged = mergeNameWithVisibility(classifier, headerTextWidth + NAME_MARGIN_TOTAL, nameBlockHeight, classAttributeIconSize);
   // A2s R2i (item 5): the `<<($sprite)>>` badge override's spot-box dims.
   const badgeSpriteBox = computeBadgeSpriteBox(classifier, sprites);
   // G2 N64 (item 45 corollary): a trailing `\n` split can produce a BLANK

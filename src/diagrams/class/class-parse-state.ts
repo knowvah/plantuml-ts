@@ -63,6 +63,20 @@ export interface ParseState {
    * it does not record and continue.
    */
   executionRefusal?: ParseRefusal | undefined;
+  /**
+   * cdd5-T5e (redeclare-refusal-line, write-set push-forward -- this file
+   * is outside T5e's write-set, a narrow additive field): set by
+   * `class-declaration-parser.ts#refuseFailedMute` when a redeclared
+   * classifier's body-opening command fails `Entity#muteToType`. Upstream
+   * attributes the error to the multi-line block's LAST line
+   * (`PSystemError#getLineLocation`, `error/PSystemError.java:102-104`),
+   * which this port cannot know until it reaches the closing `}` --
+   * `parser.ts#handlePendingBodyLine` silently consumes the intervening
+   * body lines (no member is ever applied, matching upstream's own
+   * before-execution abort) and turns this into `executionRefusal` at that
+   * closing line. `undefined` in the overwhelming majority of parses.
+   */
+  pendingBodyRefusal?: { readonly message: string } | undefined;
   gatedLeafSeen: boolean;
   /** 0-indexed source line of the FIRST gated descriptive leaf, so a refusal
    *  can be attributed where upstream attributes it rather than to the

@@ -83,3 +83,36 @@ describe('classifier visibility modifier: merged block taller than the name (jar
     expect(svg).toMatch(/<text x="130.55" y="29.222"[^>]*>BarBaz<\/text>/);
   });
 });
+
+/**
+ * cdd5-T5e (classAttributeIconSize in the header): `class-layout-
+ * generic-classifier.ts#buildHeaderAndStereoGeo` already resolves
+ * `options.classAttributeIconSize` (from `theme.classAttributeIconSize`,
+ * `skinparam classAttributeIconSize N`) but never passed it on to
+ * `computeHeaderNameGeo` -- `mergeNameWithVisibility` always sized the
+ * reserved header-icon block off the hardcoded `VISIBILITY_ICON_SIZE`
+ * (10) default, while the renderer (`renderer-classifier-box.ts
+ * #renderHeaderVisibilityIcon`) already drew the icon at the REAL themed
+ * size -- so a non-default size mis-sized the header box by `N - 10`.
+ *
+ * Oracle: `scripts/oracle-render.sh` on `skinparam classAttributeIconSize
+ * 16` + `+class A` (1.2026.8beta1): `width:78px;height:68px`, box
+ * `width="58.363"`, icon `cx="44"`, name `text x="53"`.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClassHeader.java:109-121
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java:554-556
+ */
+describe('classifier visibility modifier: classAttributeIconSize in the header (jar-rendered)', () => {
+  it('widens the header box by (N - 10) and shifts the icon/name with it', () => {
+    const svg = render('skinparam classAttributeIconSize 16', '+class A');
+    expect(svg).toContain('style="width:78px;height:68px;background:#FFFFFF;"');
+    expect(svg).toContain('<rect x="7" y="7" width="58.363" height="48"');
+    expect(svg).toContain('<ellipse cx="44" cy="24.5" rx="6" ry="6" fill="#84BE84"');
+    expect(svg).toMatch(/<text x="53" y="26.889"[^>]*>A<\/text>/);
+  });
+
+  it('the default (unset) size still matches the pre-existing 10px golden', () => {
+    const svg = render('+class A');
+    expect(svg).toContain('<rect x="7" y="7" width="52.363" height="48"');
+  });
+});
