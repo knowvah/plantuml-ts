@@ -1,0 +1,23 @@
+boguko-42-zuda981: verdict diverged -> conformant
+buitin-newline-chr-0: verdict diverged -> conformant
+dilese-24-neku812: verdict diverged -> conformant
+fepoko-61-fona364: verdict diverged -> conformant
+gejuvu-17-vufu851: verdict structural-match -> conformant
+jititi-15-maxe512: verdict diverged -> structural-match
+jixibu-01-xave465: verdict diverged -> structural-match
+nepevi-24-dune081: verdict diverged -> conformant
+pavozu-43-tone454: verdict diverged -> conformant
+pijugo-91-jilo150: verdict diverged -> conformant
+pojeje-60-vata579: verdict diverged -> conformant
+potase-97-japa248: verdict diverged -> conformant
+rexupa-61-nezi165: verdict diverged -> conformant
+tamovu-79-fifo533: verdict diverged -> conformant
+ticemi-41-laze086: verdict diverged -> conformant
+xamive-55-lipi586: verdict diverged -> conformant
+xukono-55-nezi535: verdict diverged -> conformant
+zasuxe-15-lugo662: verdict diverged -> structural-match
+zaxavo-08-rake498: verdict diverged -> conformant
+zefefo-37-xigo245: verdict diverged -> conformant
+zeraje-11-semu839: verdict diverged -> conformant
+zolaza-45-sepi570: verdict diverged -> conformant
+22 transition(s)

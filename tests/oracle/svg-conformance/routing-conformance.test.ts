@@ -770,10 +770,16 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 4719 -> 4749 / 5876 -> 5906 at cdd5/close-b4 (2026-09-28): 30
     // unknown-tree svg-class golden rows. Derivation: 4749 + 1052 + 105 = 5906.
-    expect(pinnedAgree.length).toBe(4749);
-    expect(pinnedMisroutes.length).toBe(1052);
+    //
+    // 4749 -> 4768 / 1052 -> 1051 / 5906 -> 5924 at cdd5/close-b5 (2026-09-28):
+    // 18 unknown-tree svg-class golden rows, plus unknown/zolaza-45-sepi570
+    // known-misroute -> agree (cdd5-T5d: CommandAddMethod.java:64-68 needs
+    // spaces around ':', so it now routes STATE like the jar).
+    // Derivation: 4768 + 1051 + 105 = 5924.
+    expect(pinnedAgree.length).toBe(4768);
+    expect(pinnedMisroutes.length).toBe(1051);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5906);
+    expect(manifest.fixtures.length).toBe(5924);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -824,7 +830,8 @@ describe('routing conformance — jar-error classification', () => {
     // 985 -> 942 at unknown-bucket-routing-repair/T10: 43 activity retirements.
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
     // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
-    expect(censused.length).toBe(1051);
+    // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
+    expect(censused.length).toBe(1050);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

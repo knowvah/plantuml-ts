@@ -95,7 +95,7 @@ Measurement commands:
 | [2](batch-2/overview.md) | diagnosis of every non-conformant CLASS row | T6–T10 | T6–T9 ∥ | [x] |
 | [3](batch-3/overview.md) | empty diagram, desc-leaf dispatch, note qualification, json shield, badges (78 rows) | T3a–T3e | all ∥ (worktrees) | [x] |
 | [4](batch-4/overview.md) | degenerate layout, classifier declaration, multiline, desc-label embed, leaf/legend singles (38 rows) | T4a–T4e | all ∥ (worktrees) | [x] |
-| [5](batch-5/overview.md) | creole, member parsing, cluster style + namespace title, relationship/directive singles, class ink/layout residuals (26 + 21 reassigned rows) | T5a–T5e | all ∥ (worktrees) | [ ] |
+| [5](batch-5/overview.md) | creole, member parsing, cluster style + namespace title, relationship/directive singles, class ink/layout residuals (26 + 21 reassigned rows) | T5a–T5e | all ∥ (worktrees) | [x] |
 | [6](batch-6/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 
 ## Documents
