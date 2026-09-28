@@ -129,6 +129,44 @@ describe('TokenStack.guessFunctions', () => {
   });
 });
 
+describe('TokenStack.guessFunctions pair order (TokenStack.java:162,173 HashMap<Integer,Integer>)', () => {
+  it('counts an outer call before its inner call is rewritten: $f($g(1), 2) has 2 args', () => {
+    // Inner pair closes first (insertion order [3, 1]); Java's HashMap
+    // iterates key 1 before key 3, so the outer arg count is read while the
+    // inner parens are still OPEN/CLOSE_PAREN_MATH.
+    const stack = stackOf(TEXT('$f'), OPEN(), TEXT('$g'), OPEN(), NUM('1'), CLOSE(), COMMA(), NUM('2'), CLOSE());
+    stack.guessFunctions(LOC);
+    const it = stack.tokenIterator();
+    it.nextToken();
+    expect(it.nextToken()!.getSurface()).toBe('2');
+    it.nextToken();
+    expect(it.nextToken()!.getSurface()).toBe('1');
+  });
+
+  it('visits a wrapped bucket first once an open index reaches the table capacity', () => {
+    // Outer open at 15 (bucket 15), inner open at 17 (bucket 17 & 15 = 1):
+    // Java visits the inner pair first, so the outer count stops at the
+    // inner CLOSE_PAREN_FUNC and reads 1 -- upstream's behaviour, mirrored.
+    const pad = Array.from({ length: 14 }, () => SPACE());
+    const stack = stackOf(
+      ...pad,
+      TEXT('$f'),
+      OPEN(),
+      TEXT('$g'),
+      OPEN(),
+      NUM('1'),
+      CLOSE(),
+      COMMA(),
+      NUM('2'),
+      CLOSE(),
+    );
+    stack.guessFunctions(LOC);
+    const it = stack.tokenIterator();
+    for (let i = 0; i < 15; i++) it.nextToken();
+    expect(it.nextToken()!.getSurface()).toBe('1');
+  });
+});
+
 describe('TokenStack.tokenIterator', () => {
   it('nextToken returns null once exhausted', () => {
     const stack = stackOf(NUM('1'));

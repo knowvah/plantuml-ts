@@ -243,6 +243,18 @@ export function eventuallyBuildPhantomGroups(
   }
 }
 
+/**
+ * cdd5-T5d: what the unique-name reuse lookup reads off a registered entity
+ * -- its qualified id and enclosing group. Upstream keeps ONE quark tree for
+ * every entity (`Plasma#countByName` counts leaf classifiers and NOTE leaves
+ * alike), so a note-endpoint probe passes classifiers AND notes here
+ * (`class-notes.ts#resolveNoteEndpoint`).
+ */
+export interface QuarkRef {
+  readonly id: string;
+  readonly namespace?: string | undefined;
+}
+
 export interface ResolveInput {
   namespaces: Namespace[];
   sep: string | null;
@@ -253,7 +265,7 @@ export interface ResolveInput {
   display: string | undefined;
   /** All classifiers declared so far in the diagram — read by the
    *  unique-match reuse lookup below (`countByName`/`firstWithName`). */
-  classifiers: Classifier[];
+  classifiers: readonly QuarkRef[];
   /**
    * Mirrors upstream `quarkInContext(reuseExistingChild, full)`
    * (`CucaDiagram.java:244-245`): true at relation-endpoint resolution sites
@@ -314,7 +326,7 @@ function leafName(id: string, sep: string | null): string {
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:923-925
  * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:104-108
  */
-export function countByName(classifiers: Classifier[], sep: string | null, name: string): number {
+export function countByName(classifiers: readonly QuarkRef[], sep: string | null, name: string): number {
   return classifiers.filter((c) => leafName(c.id, sep) === name).length;
 }
 
@@ -324,11 +336,11 @@ export function countByName(classifiers: Classifier[], sep: string | null, name:
  * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:919-921
  * @see ~/git/plantuml/.../net/sourceforge/plantuml/plasma/Plasma.java:96-100
  */
-export function firstWithName(
-  classifiers: readonly Classifier[],
+export function firstWithName<T extends QuarkRef>(
+  classifiers: readonly T[],
   sep: string | null,
   name: string,
-): Classifier | undefined {
+): T | undefined {
   return classifiers.find((c) => leafName(c.id, sep) === name);
 }
 

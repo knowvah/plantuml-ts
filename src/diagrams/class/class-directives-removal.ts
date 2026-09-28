@@ -8,7 +8,7 @@
 
 import type { ClassDiagramAST, ClassNote, HideTarget } from './ast.js';
 import { isMethodMember } from './class-layout-helpers.js';
-import { NEVER_UNLINKED, cascadeHidden } from './class-directives-hide-cascade.js';
+import { NEVER_UNLINKED, buildGroupUnlinkedPredicate, cascadeHidden } from './class-directives-hide-cascade.js';
 
 /**
  * cdd-T31 (E5 defect a): `ast.namespaceSeparator`'s DEFAULT is `"."`
@@ -261,8 +261,7 @@ interface PatternDirective<A extends string> {
   /** cdd-T31 (E5 defect c): present only for {@link HideShowPatternDirective}
    *  (`RemoveRestoreDirective` has no such field, structurally `undefined`
    *  here -- `remove`/`restore`'s own in-package `fixWhat` prefix stays
-   *  unported, matching `filterRemovedEntities`'s pre-existing "group
-   *  removal not implemented" note). */
+   *  unported). */
   scopeNsId?: string;
 }
 
@@ -349,11 +348,11 @@ function foldNotesInto<A extends string>(
 }
 
 /**
- * Compute the set of removed entity ids (classifiers AND notes) for the
- * accumulated `remove`/`restore` directives. Pure — evaluated once at the
- * layout-input boundary (mirroring upstream's export-time evaluation; by then
- * all parsing is done, which is what makes `@unlinked` see the final link
- * set).
+ * Compute the set of removed entity ids (classifiers, namespaces AND notes,
+ * ancestor-cascaded) for the accumulated `remove`/`restore` directives.
+ * Pure — evaluated once at the layout-input boundary (mirroring upstream's
+ * export-time evaluation; by then all parsing is done, which is what makes
+ * `@unlinked` see the final link set).
  *
  * `Entity#isAloneAndUnlinked`: an entity is unlinked when every one of its
  * non-invisible links connects to an entity already removed by a
@@ -372,9 +371,15 @@ export function computeRemovedIds(ast: ClassDiagramAST): Set<string> {
   const noteIds = new Set(ast.notes.map((n) => n.id));
   const unlinked = buildUnlinkedPredicate(ast, dirs, links, 'remove', sep);
 
+  // cdd5-T5d: groups fold too; `Entity#isRemoved()` (abel/Entity.java:443-455)
+  // is the same parent-first walk as `isHidden()`, so `cascadeHidden` serves.
+  const groupUnlinked = buildGroupUnlinkedPredicate(ast, unlinked);
+  for (const ns of ast.namespaces) {
+    if (foldDirectives(dirs, ns, true, groupUnlinked, 'remove', sep)) removed.add(ns.id);
+  }
   foldClassifiersInto(removed, ast, dirs, unlinked, 'remove', sep);
   foldNotesInto(removed, ast, dirs, links, noteIds, unlinked, 'remove', sep);
-  return removed;
+  return cascadeHidden(ast, removed);
 }
 
 /**
@@ -465,10 +470,10 @@ function buildUnlinkedPredicate<A extends string>(
  * (printEntities / printGroups / link.isRemoved()). Returns the SAME object
  * when nothing is removed so the common no-directive path costs nothing.
  *
- * Group (namespace) removal — `remove aPackageName` — is not implemented:
- * `Namespace` carries no tags and no fixture in the current group exercises
- * it; membership lists are still filtered so clusters shrink with their
- * removed members.
+ * cdd5-T5d: a removed group (`remove aPackageName`, or `remove *`) is
+ * dropped with everything inside it ({@link computeRemovedIds}'s cascade);
+ * surviving groups' membership lists are filtered so clusters shrink with
+ * their removed members.
  */
 export function filterRemovedEntities(ast: ClassDiagramAST): ClassDiagramAST {
   const removed = computeRemovedIds(ast);
@@ -478,10 +483,12 @@ export function filterRemovedEntities(ast: ClassDiagramAST): ClassDiagramAST {
     classifiers: ast.classifiers.filter((c) => !removed.has(c.id)),
     notes: ast.notes.filter((n) => !removed.has(n.id)),
     relationships: ast.relationships.filter((r) => !removed.has(r.from) && !removed.has(r.to)),
-    namespaces: ast.namespaces.map((ns) => ({
-      ...ns,
-      classifiers: ns.classifiers.filter((id) => !removed.has(id)),
-    })),
+    namespaces: ast.namespaces
+      .filter((ns) => !removed.has(ns.id))
+      .map((ns) => ({
+        ...ns,
+        classifiers: ns.classifiers.filter((id) => !removed.has(id)),
+      })),
   };
 }
 

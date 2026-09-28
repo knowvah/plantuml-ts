@@ -60,3 +60,29 @@ export function cascadeHidden(ast: ClassDiagramAST, own: ReadonlySet<string>): S
   for (const id of allIds) if (resolve(id)) hidden.add(id);
   return hidden;
 }
+
+/** `Entity#isAloneAndUnlinked()`'s GROUP branch: "for (Quark<Entity>
+ *  quarkChild : getQuark().getChildren()) { … if (child.isAloneAndUnlinked()
+ *  == false) return false; } return true;" -- every direct child (classifier,
+ *  note, or nested group) must itself be unlinked; an empty group is.
+ *  cdd5-T5d: consumed by `class-directives-removal.ts#computeRemovedIds`;
+ *  placed here (file-cap move) beside the other container-tree walk.
+ *  @see ~/git/plantuml/.../abel/Entity.java:457-465 */
+export function buildGroupUnlinkedPredicate(
+  ast: ClassDiagramAST,
+  unlinked: (id: string) => boolean,
+): (nsId: string) => boolean {
+  const memo = new Map<string, boolean>();
+  const resolve = (nsId: string): boolean => {
+    const cached = memo.get(nsId);
+    if (cached !== undefined) return cached;
+    memo.set(nsId, true); // cycle guard while this group is being resolved
+    const result =
+      ast.classifiers.every((c) => c.namespace !== nsId || unlinked(c.id)) &&
+      ast.notes.every((n) => n.namespace !== nsId || unlinked(n.id)) &&
+      ast.namespaces.every((ns) => ns.parentId !== nsId || resolve(ns.id));
+    memo.set(nsId, result);
+    return result;
+  };
+  return resolve;
+}
