@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1246 modules · 4693 exported names.
+1247 modules · 4700 exported names.
 
 ## `src/`
 
@@ -1187,6 +1187,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-geo-row-types.ts` | `ClassifierRowGeo` | cdd3-T7: `ClassifierGeo['rows'][number]`'s element type, split out of `class-geo-types.ts` when the new `bodyInkHeight` field pushed that file past the project's 500-line hook cap -- a pure move (every consumer keys off `ClassifierGeo['rows |
 | `class-geo-types.ts` | `ClassifierRowGeo`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassLeafGeo`, `EdgeConstraintGeo`, `EdgeNoteBoxGeo`, `EdgeNoteLine`, `QuantifierLineGeo`, `QuantifierLinesGeo`, `RoleLinesGeo`, `SametailGeo`, `VisibilityIconGeo`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `EdgeKalBoxes`, `KalBox`, `ClassGeometry`, `ClassPageBoundary`, `JsonBodyItem` | Public geometry types for the class-diagram layout engine. |
 | `class-header-line-stacking.ts` | `headerLineY`, `headerLineTops` | Vertical placement of a classifier NAME's physical lines -- split out of `class-stereotype-layout.ts#buildHeaderRows` (500-line cap) when cdd4-T12 replaced the flat `i * fontSize` step with upstream's per-stripe running sum. |
+| `class-header-visibility-geo.ts` | `HEADER_VISIBILITY_TOP_MARGIN`, `HeaderVisibilityBlock`, `headerVisibilityBlock`, `mergeNameWithVisibility`, `MergedNameGeo`, `attachHeaderVisibilityIcon` | cdd5-T4b (entity-visibility-icon-dropped): the class header's visibility icon block. |
 | `class-hideshow-ast.ts` | `HideTarget`, `HideShowDirective`, `HideStereotypeDirective`, `RemoveRestoreDirective`, `HideShowPatternDirective`, `HideShowEntityDirective`, `HideShowKindDirective`, `HideShowVisibilityDirective` | Hide/show + remove/restore directive AST types, split out of `ast.ts` (line cap) -- re-exported from it so every `import { ... |
 | `class-hideshow-dispatch.ts` | `executeHideShow` | `hide`/`show` directive dispatch (rule 3 of class-commands.ts's COMMANDS table) — CommandHideShow2 / CommandHideShowByGender / CommandHideShowByVisibility upstream. |
 | `class-hidetext-shield.ts` | `hideTextShieldMarginsByEntity` | cdd-T22b: `SvekNode.java:220-267`'s `shield()`/`appendLabelHtml` -- reserves DOT-node margins around a `hideText` leaf's icon cell (jar: `EntityImageDescription#getShield`, `EntityImageDescription.java:239-262`) so graphviz ranks around the |
@@ -1302,7 +1303,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-arrowhead-middle.ts` | `buildMiddleDecorMarkup` | renderer-arrowhead-middle.ts — cdd-T7 (A5/M4, A2a/M6): mid-link decoration (`-0)-` etc.), `MiddleCircle`/`MiddleCircleCircled#drawU`. |
 | `renderer-arrowhead-move.ts` | `movePointsStart`, `movePointsEnd`, `kalEndTranslate`, `plus` | renderer-arrowhead-move.ts — `DotPath#moveStartPoint`/`#moveEndPoint` on the flat `EdgeGeo.points` list, split out of `renderer-arrowhead.ts` (cdd2-T12, pre-authorised split, re-exported from there) so the three class-side callers of the SA |
 | `renderer-arrowhead.ts` | `decorName`, `EdgeArrowheads`, `EdgeArrowheadOptions`, `buildEdgeArrowheads`, `applyDecorTrim`, `movePointsStart`, `movePointsEnd`, `kalEndTranslate`, `EdgeExtremityInk`, `edgeExtremityInk`, `buildMiddleDecorMarkup` | renderer-arrowhead.ts — mission G2 N1, mechanism 2 ("SVG root shell"), part C: replaces `class/renderer.ts`'s SVG-`<marker>`-reference arrowheads (`arrowHeadRef` + `markerEnd`/`markerStart`) with the SAME inline-polygon extremity shapes the |
-| `renderer-assoc-lollipop.ts` | `renderAssocPoint`, `renderAssociationDiamond`, `renderLollipop` | renderer-assoc-lollipop.ts — the association-class-couple "point" entity (`(A,B) .. |
+| `renderer-assoc-lollipop.ts` | `renderAssocPoint`, `renderAssociationDiamond`, `renderAssociationLeaf`, `renderLollipop` | renderer-assoc-lollipop.ts — the association-class-couple "point" entity (`(A,B) .. |
 | `renderer-body-enhanced.ts` | `buildEnhancedBodyPrimitives` | renderer-body-enhanced.ts — draws a classifier's `EnhancedBodyGeo` (`class-body-enhanced-layout.ts`) primitives in EXACT jar draw order — NOT the classic path's Y-sort merge (`renderer-classifier-box.ts #buildBodyPrimitives`'s own doc comme |
 | `renderer-bullet-atom.ts` | `renderBulletAtom` | `renderBulletAtom` -- the creole bullet marker (`klimt/creole/atom/ Bullet.java`), split out of `renderer-note.ts` purely to keep that file under this project's 500-line cap. |
 | `renderer-classifier-badge-tag.ts` | `renderBadge`, `renderBadgeSpriteImage`, `renderGenericTag` | `renderBadge` (the kind badge in a classifier's header) and `renderGenericTag` (`class Foo<T>`'s generic type-parameter tag box) -- split out of `renderer-classifier-box.ts` purely to keep that file under this project's 500-line cap. |
