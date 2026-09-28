@@ -313,3 +313,54 @@ describe('namespaceTitleRuns — sprite/img-data in a namespace title (no oracle
     expect(svg).toContain(`xlink:href="${TINY_PNG_DATA_URI}"`);
   });
 });
+
+// cdd5-T5c (namespace-title-bypasses-creole): a cluster title is a full
+// creole `Display` (`ClusterHeader.java:128` `label.create(...)`), so
+// `CreoleParser.java:175`'s per-line `manageGuillemet` rewrites `<<x>>` to
+// `«x»` and `CommandCreoleUrl` turns `[[url label]]` into a linked,
+// underlined, #00F run. Jar-verified: pijugo-91-jilo150 draws
+// `«profile» profile` at textLength 91.875; zasuxe-15-lugo662 draws
+// `<a href="link" ...><text ... fill="#00F" ... text-decoration="underline">
+// to confluence page</text></a>`.
+describe('namespace title creole (cdd5-T5c)', () => {
+  const GUILLEMET_LABEL = '<<profile>> profile';
+  const URL_LABEL = '[[link to confluence page]]';
+
+  it('rewrites <<x>> to «x» before lexing (CreoleParser.java:175)', () => {
+    const runs = namespaceTitleRuns(GUILLEMET_LABEL, defaultTheme);
+    expect(runs).toHaveLength(1);
+    expect(asText(runs[0]).text).toBe('«profile» profile');
+    expect(namespaceTitleWidth(measurer, defaultTheme, GUILLEMET_LABEL)).toBeCloseTo(91.875, 3);
+  });
+
+  it('draws the guillemet-managed text, not the raw label', () => {
+    const geo: NamespaceGeo = {
+      ...jabamaGeo(),
+      label: GUILLEMET_LABEL,
+      wtitle: getWTitle(measurer, defaultTheme, GUILLEMET_LABEL, 0),
+    };
+    const svg = renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer);
+    expect(svg).toMatch(/<text x="10" y="18.889"[^>]*textLength="91.875">«profile» profile<\/text>/u);
+  });
+
+  it('keeps a [[url label]] run as a linked, underlined run', () => {
+    const runs = namespaceTitleRuns(URL_LABEL, defaultTheme);
+    expect(runs).toHaveLength(1);
+    const run = asText(runs[0]);
+    expect(run.text).toBe('to confluence page');
+    expect(run.url).toEqual({ url: 'link', tooltip: 'link' });
+  });
+
+  it('wraps the url run in <a> with the hyperlink colour and underline', () => {
+    const geo: NamespaceGeo = {
+      ...jabamaGeo(),
+      label: URL_LABEL,
+      wtitle: getWTitle(measurer, defaultTheme, URL_LABEL, 0),
+    };
+    const svg = renderNamespaceFolder(geo, scaleClassTheme(defaultTheme, 1), measurer);
+    expect(svg).toContain('<a target="_top" href="link" xlink:href="link"');
+    expect(svg).toMatch(/<a [^>]*><text x="10" y="18.889"[^>]*>to confluence page<\/text><\/a>/u);
+    expect(svg).toMatch(/fill="#00F" text-decoration="underline"/u);
+    expect(svg).not.toContain('[[link');
+  });
+});

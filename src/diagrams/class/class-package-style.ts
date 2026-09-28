@@ -110,9 +110,19 @@ export function packageTitleFontColor(theme: Theme, tags: readonly string[]): st
 }
 
 /** Cluster border (`Cluster.java:316-320`): `packageBorderColor<<label>>`,
- *  then `packageBorderColor`, then the caller's style default. */
+ *  then `packageBorderColor`, then `<style> package { LineColor }` (cdd5-T5c:
+ *  the folder signature `{..., group, package_}`, `Cluster.java:291` with
+ *  `USymbols.PACKAGE`, `:386-388`, matches the `package` selector -- jar
+ *  cevoti-40/guxico-27), then the caller's style default. The relative
+ *  rank of the two plain tiers is not jar-verified (no fixture sets both). */
 export function packageBorderColor(theme: Theme, tags: readonly string[], fallback: string): string {
-  return byStereo(packageBucket(theme)?.borderByStereo, tags) ?? theme.colors.graph.packageBorder ?? fallback;
+  const styled = packageBucket(theme)?.border;
+  return (
+    byStereo(packageBucket(theme)?.borderByStereo, tags) ??
+    theme.colors.graph.packageBorder ??
+    (typeof styled === 'string' ? styled : undefined) ??
+    fallback
+  );
 }
 
 /** Cluster stroke (`Cluster#getStrokeInternal` -> `style.getStroke()`):

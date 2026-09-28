@@ -157,7 +157,13 @@ function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
  * before this task, and jar-verified correct by its own selector).
  */
 function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
-  return symbolKeyword === 'usecase' ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT;
+  // cdd5-T5c (gejuvu-17-vufu851): `USymbolUsecase#getSNames` is `{usecase,
+  // business}` for the business variant (`USymbolUsecase.java:67-70`), so
+  // its title signature contains `usecase` too and the same skin rule
+  // centres it.
+  return symbolKeyword === 'usecase' || symbolKeyword === 'usecase-business'
+    ? HorizontalAlignment.CENTER
+    : HorizontalAlignment.LEFT;
 }
 
 /**
