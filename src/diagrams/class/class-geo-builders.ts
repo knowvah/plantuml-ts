@@ -19,6 +19,7 @@ import { resolveStyleStereotypeTags, splitStereotypeStyleTags } from './class-st
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
+import { degenerateNoteGeo, DEGENERATE_NEAR_MARGIN } from './class-geo-builders-degenerate-note.js';
 import {
   inkBodyFields,
   badgeFields,
@@ -321,58 +322,32 @@ const FOLDER_FAMILY_KEYWORDS: ReadonlySet<string> = new Set(['package', 'folder'
 export { buildEdgeGeos } from './class-edge-geo.js';
 
 /**
- * `GraphvizImageBuilder.buildImage:211-223` gates graphviz entirely on
- * `dotData.isDegeneratedWithFewEntities(nb)` (`dot/DotData.java:69-71`):
- * `entityFactory.groups().size() == 0 && getLinks().size() == 0 &&
- * getLeafs().size() == nb`. "Groups" means ANY declared namespace/package —
- * even an empty one still creates a group entity, so `ast.namespaces` (never
- * filtered for emptiness — see `Namespace` in ast.ts) is the exact raw-group
- * proxy; no "non-empty namespace" filtering like `buildDotClusters` applies
- * here. "Leafs" (`CucaDiagram#leafs()`) counts every non-group entity,
- * INCLUDING notes (`LeafType.NOTE` created via `reallyCreateLeaf`) — so a
- * class with one attached or floating note is NOT degenerate (2 leafs).
- *
- * We only special-case the single-*classifier* leaf here (the `nb === 1`
- * path: `createEntityImageBlock` + the hexagon guard at
- * `GraphvizImageBuilder.java:217`, `single.getUSymbol() instanceof
- * USymbolHexagon == false`). A lone freestanding note (zero classifiers, one
- * note) falls through to the normal dot path — out of scope for this port;
- * see the T5 task report for the rationale.
+ * `EntityImageDegenerated.java`: `delta = 7`, applied as a translate on
+ * BOTH edges (`drawU`: `orig.drawU(ug.apply(new UTranslate(delta,
+ * delta)))`, then an empty `(delta, delta)` block appended at the far
+ * corner) -- so `calculateDimension` grows by `delta*2 = 14` total. A
+ * FURTHER flat +6 (both axes) is added upstream of `GraphvizImageBuilder`
+ * (page-level margin; exact Java origin not pinned this iteration): total
+ * near-edge margin (left/top) = 7; far-edge margin (right/bottom) = 13.
+ * Jar's own canvas `width`/`height`/`viewBox` are whole-pixel, even though
+ * internal element geometry stays fractional -- G2 N4: the whole-pixel
+ * conversion is TRUNCATION (`Math.floor`), NOT rounding -- N3's own
+ * `Math.round` was verified against only integer/near-integer totals (68
+ * exactly, twice) and one width whose fractional part happened to be < 0.5,
+ * masking the direction; jar-verified with ZERO residual against 7 fresh
+ * fixtures whose fractional part is >= 0.5 (e.g. `dimile-20-saki799`:
+ * `54.575 + 20 = 74.575` -> jar `74`, NOT the `75` `Math.round` would
+ * produce -- `plans/g2-class-svg/ledger.md` N4). G2 N48: the far-edge
+ * margin (13 = near-edge delta 7 + `applyClassDocumentMargin`'s own `5 + 1`
+ * recipe) is no longer a separate literal -- computed via
+ * `applyClassDocumentMargin` directly in {@link degenerateClassifierDims},
+ * the SAME shared recipe the main DOT-driven path uses (see that
+ * function's own return-statement doc comment for the value-preserving
+ * proof). Split out of {@link degenerateSingleClassifier} purely to keep
+ * that function under the project's per-function NLOC cap (R2j precedent).
  */
-export function degenerateSingleClassifier(
-  ast: ClassDiagramAST,
-  measuredMap: Map<string, MeasuredClassifier>,
-): ClassGeometry | undefined {
-  if (ast.namespaces.length !== 0) return undefined;
-  if (ast.relationships.length !== 0) return undefined;
-  if (ast.classifiers.length !== 1 || ast.notes.length !== 0) return undefined;
-  const classifier = ast.classifiers[0]!;
-  if (classifier.kind === 'descriptive' && classifier.usymbol === 'hexagon') return undefined;
-  const measured = measuredMap.get(classifier.id)!;
-
-  // `EntityImageDegenerated.java`: `delta = 7`, applied as a translate on
-  // BOTH edges (`drawU`: `orig.drawU(ug.apply(new UTranslate(delta,
-  // delta)))`, then an empty `(delta, delta)` block appended at the far
-  // corner) -- so `calculateDimension` grows by `delta*2 = 14` total. A
-  // FURTHER flat +6 (both axes) is added upstream of `GraphvizImageBuilder`
-  // (page-level margin; exact Java origin not pinned this iteration): total
-  // near-edge margin (left/top) = 7; far-edge margin (right/bottom) = 13.
-  // Jar's own canvas `width`/`height`/`viewBox` are whole-pixel, even
-  // though internal element geometry stays fractional -- G2 N4: the
-  // whole-pixel conversion is TRUNCATION (`Math.floor`), NOT rounding --
-  // N3's own `Math.round` was verified against only integer/near-integer
-  // totals (68 exactly, twice) and one width whose fractional part
-  // happened to be < 0.5, masking the direction; jar-verified with ZERO
-  // residual against 7 fresh fixtures whose fractional part is >= 0.5
-  // (e.g. `dimile-20-saki799`: `54.575 + 20 = 74.575` -> jar `74`, NOT the
-  // `75` `Math.round` would produce -- `plans/g2-class-svg/ledger.md` N4).
-  // G2 N48: the far-edge margin (13 = near-edge delta 7 + `applyClass
-  // DocumentMargin`'s own `5 + 1` recipe) is no longer a separate literal
-  // -- computed below via `applyClassDocumentMargin` directly, the SAME
-  // shared recipe the main DOT-driven path uses (see this function's own
-  // return-statement doc comment for the value-preserving proof).
-  const DEGENERATE_NEAR_MARGIN = 7;
-  const geo: ClassifierGeo = {
+function buildDegenerateClassifierLeaf(classifier: Classifier, measured: MeasuredClassifier): ClassifierGeo {
+  return {
     id: classifier.id,
     kind: classifier.kind,
     x: DEGENERATE_NEAR_MARGIN,
@@ -396,58 +371,113 @@ export function degenerateSingleClassifier(
     ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
     ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
   };
-  // G2 N48 (item 24): expose `rawWidth`/`rawHeight` (the PRE-`applyClass
-  // DocumentMargin` ink dims, `ClassGeometry.rawWidth`'s own doc comment)
-  // so a titled/legend'd/etc degenerate-single-classifier diagram's chrome
-  // centers against the SAME raw value the main DOT-driven path already
-  // does (N46) instead of silently falling back to the POST-margin
-  // `totalWidth`/`totalHeight` -- jar-verified `dipune-93-sare489`/
-  // `farinu-74-fuco238`/`takeze-87-zuge906` (all single-classifier, titled):
-  // centering the title against the OLD `totalWidth` produced `x=18.7875`,
-  // 2.8937px right of jar's real `x=15.8938`; `rawWidth` here reuses the
-  // EXACT SAME `applyClassDocumentMargin` recipe the main path calls, so
-  // `totalWidth`/`totalHeight`'s OWN numeric value is unchanged (provably:
-  // `applyClassDocumentMargin({w: measured.width + 2*DEGENERATE_NEAR_MARGIN,
-  // ...}).width === Math.floor(measured.width + 20)` (the OLD literal
-  // formula) for every input, since the old far-edge constant 13 =
-  // `DEGENERATE_NEAR_MARGIN` (7) + the margin recipe's own `5 + 1`
-  // constant) -- a value-preserving refactor for every already-passing
-  // no-chrome degenerate fixture (jar-verified unchanged: `bovuze-89-
-  // noja934`).
+}
+
+/**
+ * G2 N48 (item 24): expose `rawWidth`/`rawHeight` (the PRE-`applyClass
+ * DocumentMargin` ink dims, `ClassGeometry.rawWidth`'s own doc comment) so a
+ * titled/legend'd/etc degenerate-single-classifier diagram's chrome centers
+ * against the SAME raw value the main DOT-driven path already does (N46)
+ * instead of silently falling back to the POST-margin `totalWidth`/
+ * `totalHeight` -- jar-verified `dipune-93-sare489`/`farinu-74-fuco238`/
+ * `takeze-87-zuge906` (all single-classifier, titled): centering the title
+ * against the OLD `totalWidth` produced `x=18.7875`, 2.8937px right of
+ * jar's real `x=15.8938`; `rawWidth` here reuses the EXACT SAME
+ * `applyClassDocumentMargin` recipe the main path calls, so `totalWidth`/
+ * `totalHeight`'s OWN numeric value is unchanged for every no-chrome
+ * degenerate fixture (jar-verified unchanged: `bovuze-89-noja934`).
+ *
+ * CDD B7FU-R2 item (e): a body whose DRAWN embedded `{{ }}` diagram
+ * overflows its own (42,42)-fallback-sized row reservation still pushes the
+ * canvas out to its real footprint -- `SvgGraphics#svgImageUnsecure`'s own
+ * `ensureVisible` calls (`klimt/drawing/svg/SvgGraphics.java:987-999`) track
+ * a drawn embed's REAL absolute corner directly, `Math.floor(v)+1`,
+ * independent of the `CucaDiagram`-margin recipe `applyClassDocumentMargin`
+ * folds into `totalDims` -- so the embed's contribution is a MAX against
+ * the box-driven total, never routed through that recipe a second time
+ * (jar-verified `zikabo-17-gugi332`/`gadufu-56-votu808`). `drawnEnhanced
+ * BodyEmbeds` returns `[]` (a no-op) for every classifier with no drawn
+ * embed -- the overwhelming majority of degenerate diagrams.
+ *
+ * cdd5-T4a (degenerate-text-ensurevisible): the SAME `ensureVisible`
+ * mechanism (`klimt/drawing/svg/SvgGraphics.java:757-758`, `:129-133`:
+ * `"ensureVisible(x, y); ensureVisible(x + textLength, y);"` /
+ * `"if (y > maxY) maxY = (int) (y + 1);"`) ALSO tracks a `symbolInk`-
+ * bearing leaf's own real drawn corner -- e.g. a `circle`/`() "name"`
+ * interface's label, drawn BELOW its fixed 18x18 icon
+ * (`measureCircleInterfaceInk`'s own doc comment, `class-layout-leaf-
+ * shapes.ts`) -- which the box-only `rawDims` below never sees. Folded into
+ * the SAME embed-right/embed-bottom max as a second candidate, `undefined`
+ * `symbolInk` (the common case) contributing `0` -- a no-op, exactly
+ * `drawnEnhancedBodyEmbeds`'s own established contract. `rawWidth`/
+ * `rawHeight` stay box-only for this too: no fixture in this corpus
+ * combines a title/chrome with a symbolInk overflow, so extending them the
+ * same way would be unverified (same posture as the embed case above).
+ */
+function degenerateClassifierDims(geo: ClassifierGeo, measured: MeasuredClassifier): ClassGeometry {
   const rawDims = {
     width: measured.width + DEGENERATE_NEAR_MARGIN * 2,
     height: measured.height + DEGENERATE_NEAR_MARGIN * 2,
   };
   const totalDims = applyClassDocumentMargin(rawDims);
-  // CDD B7FU-R2 item (e): a body whose DRAWN embedded `{{ }}` diagram
-  // overflows its own (42,42)-fallback-sized row reservation still pushes
-  // the canvas out to its real footprint -- `SvgGraphics#svgImageUnsecure`'s
-  // own `ensureVisible` calls (`klimt/drawing/svg/SvgGraphics.java:987-999`)
-  // track a drawn embed's REAL absolute corner directly, `Math.floor(v)+1`,
-  // independent of the `CucaDiagram`-margin recipe `applyClassDocumentMargin`
-  // folds into `totalDims` above -- so the embed's contribution is a MAX
-  // against the box-driven total, never routed through that recipe a
-  // second time (jar-verified `zikabo-17-gugi332`/`gadufu-56-votu808`: the
-  // embed's own absolute corner, truncated this way, lands EXACTLY on the
-  // jar's real canvas dims). `drawnEnhancedBodyEmbeds` returns `[]` (this
-  // max is a no-op, byte-identical) for every classifier with no enhanced
-  // body / no drawn embed -- the overwhelming majority of degenerate
-  // diagrams. `rawWidth`/`rawHeight` (chrome-centering inputs, G2 N48's own
-  // doc comment) stay the box-only value: no fixture in this corpus
-  // combines a title/chrome with an overflowing embed, so extending them
-  // the same way would be unverified.
   const embeds = drawnEnhancedBodyEmbeds(geo);
   const embedRight = Math.max(0, ...embeds.map((e) => e.x + e.width));
   const embedBottom = Math.max(0, ...embeds.map((e) => e.y + e.height));
+  const inkRight = measured.symbolInk !== undefined ? geo.x + measured.symbolInk.maxX : 0;
+  const inkBottom = measured.symbolInk !== undefined ? geo.y + measured.symbolInk.maxY : 0;
   return {
-    totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1),
-    totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1),
+    totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1, Math.floor(inkRight) + 1),
+    totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1, Math.floor(inkBottom) + 1),
     rawWidth: rawDims.width,
     rawHeight: rawDims.height,
     leaves: [geo],
     edges: [],
     namespaces: [],
   };
+}
+
+/**
+ * `GraphvizImageBuilder.buildImage:211-223` gates graphviz entirely on
+ * `dotData.isDegeneratedWithFewEntities(nb)` (`dot/DotData.java:69-71`):
+ * `entityFactory.groups().size() == 0 && getLinks().size() == 0 &&
+ * getLeafs().size() == nb`. "Groups" means ANY declared namespace/package —
+ * even an empty one still creates a group entity -- `rawNamespaceCount`
+ * (`ast.namespaces.length`, read BEFORE this port's `collapseEmptyNamespaces
+ * Final`, layout.ts's own call-site doc comment) is the exact raw-group
+ * proxy; no "non-empty namespace" filtering like `buildDotClusters` applies
+ * here, and unlike `ast.namespaces.length` on the (possibly-collapsed) `ast`
+ * param below, it stays accurate for a namespace this port's parse-time
+ * collapse has already muted to a leaf (cdd5-T4a degenerate-check-after-
+ * group-mute — upstream defers the SAME mute to DOT-export time,
+ * `svek/GraphvizImageBuilder.java:416-418`, strictly AFTER this gate).
+ * "Leafs" (`CucaDiagram#leafs()`) counts every non-group entity, INCLUDING
+ * notes (`LeafType.NOTE` created via `reallyCreateLeaf`) -- so a class with
+ * one attached or floating note is NOT degenerate (2 leafs), but a LONE
+ * note (0 classifiers, 1 note) IS (cdd5-T4a degenerate-excludes-notes):
+ * see {@link degenerateNoteGeo}.
+ *
+ * The single-*classifier* leaf case (the `nb === 1` path:
+ * `createEntityImageBlock` + the hexagon guard at
+ * `GraphvizImageBuilder.java:217`, `single.getUSymbol() instanceof
+ * USymbolHexagon == false`) delegates to {@link buildDegenerateClassifierLeaf}
+ * + {@link degenerateClassifierDims}.
+ */
+export function degenerateSingleClassifier(
+  ast: ClassDiagramAST,
+  measuredMap: Map<string, MeasuredClassifier>,
+  rawNamespaceCount: number,
+  theme: Theme,
+  measurer: StringMeasurer,
+): ClassGeometry | undefined {
+  if (rawNamespaceCount !== 0) return undefined;
+  if (ast.relationships.length !== 0) return undefined;
+  if (ast.classifiers.length + ast.notes.length !== 1) return undefined;
+  if (ast.notes.length === 1) return degenerateNoteGeo(ast.notes[0]!, theme, measurer);
+  const classifier = ast.classifiers[0]!;
+  if (classifier.kind === 'descriptive' && classifier.usymbol === 'hexagon') return undefined;
+  const measured = measuredMap.get(classifier.id)!;
+  const geo = buildDegenerateClassifierLeaf(classifier, measured);
+  return degenerateClassifierDims(geo, measured);
   // #lizard forgives — flat chain of early-return guards encoding upstream's
   // single conjunctive predicate (isDegeneratedWithFewEntities) plus the
   // hexagon exclusion, mirroring description's degenerateSingleLeaf; not
