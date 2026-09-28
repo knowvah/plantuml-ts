@@ -8,13 +8,13 @@
  * deterministic-text.patch`). component/usecase route through the
  * description engine's LOW-LEVEL pipeline (`parseDescription` ->
  * `layoutDescription` -> `renderDescription`, via
- * `renderFixtureDescription`); `class` AND `object` both route through the
- * CLASS engine's OWN pipeline (`parseClass` -> `layoutClass` ->
- * `renderClass`, via `render-fixture-class.ts#renderFixtureClass` — G2/N0,
- * G3/O0) — object diagrams have no separate engine upstream
- * (`ClassDiagramFactory` registers the object/map commands alongside the
- * class ones; see `tests/unit/object/renderer.test.ts`'s own doc comment),
- * so reusing the identical helper is correct, not a shortcut. `state` routes
+ * `renderFixtureDescription`); `class` (+ CLASS-routed `unknown`) AND
+ * `object` both route through the CLASS engine's OWN pipeline (`parseClass`
+ * -> `layoutClass` -> `renderClass` — G2/N0, G3/O0; object has no separate
+ * upstream engine, see `tests/unit/object/renderer.test.ts`'s doc comment).
+ * `object` renders via `render-fixture-class.ts#renderFixtureClass` (forces
+ * `parseClass`); `class` renders via that file's `renderClassFixture`
+ * (`renderSync` — D3, cdd5-T1). `state` routes
  * through its OWN dedicated engine (`parseState` -> `layoutState` ->
  * `renderState`, via `render-fixture-state.ts#renderFixtureState` — G4/S0):
  * unlike object, state diagrams DO have a separate upstream package
@@ -94,16 +94,20 @@ import type { AssetStore } from '../src/core/asset-store.js';
 import { combineAssetStores } from '../src/core/asset-store.js';
 import type { IncludeStore } from '../src/core/tim/IncludeStore.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
-import { renderFixtureClass } from '../tests/oracle/svg-conformance/render-fixture-class.js';
+import { renderFixtureClass, renderClassFixture } from '../tests/oracle/svg-conformance/render-fixture-class.js';
 import { renderFixtureState } from '../tests/oracle/svg-conformance/render-fixture-state.js';
 import { renderFixtureSequence } from '../tests/oracle/svg-conformance/render-fixture-sequence.js';
 import { renderFixtureActivity } from '../tests/oracle/svg-conformance/render-fixture-activity.js';
 import { renderFixtureJson } from '../tests/oracle/svg-conformance/render-fixture-json.js';
 import { bucketOf, type Bucket, jsonPathArg, runJsonMode } from './svg-conformance-census-json.js';
+import type { RoutingBaselineRow } from './pin-corpus-tree.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CACHE_DIR = join(REPO, 'test-results', 'dot-cache');
 const DEFAULT_TYPES = ['component', 'usecase'];
+// cdd5-T1 (D3/D4): CLASS-routed `dot-cache/unknown/` slugs live here, keyed
+// by `type: 'unknown'` + `ourType: 'CLASS'` -- invisible to a type-keyed walk.
+const ROUTING_BASELINE_PATH = join(REPO, 'oracle', 'goldens', 'svg-conformance', 'routing-baseline.json');
 // cdd4-T9: memoized once -- `combineAssetStores` builds a fresh wrapper
 // object per call, so `censusClassFixtureOptions()` must cache ITS OWN
 // combined instance (not just rely on `buildSpriteAssetsStore`/
@@ -162,20 +166,33 @@ interface FixtureDir {
   slug: string;
   type: string;
   dir: string;
+  /** cdd5-T1 (D3/D4): 'class' | CLASS-routed 'unknown'; absent elsewhere. */
+  tree?: 'class' | 'unknown';
 }
 
 function listFixtureDirs(type: string): FixtureDir[] {
   const typeDir = join(CACHE_DIR, type);
   if (!existsSync(typeDir)) return [];
   const out: FixtureDir[] = [];
+  const treeField = type === 'class' ? ({ tree: 'class' } as const) : {};
   for (const slug of readdirSync(typeDir)) {
     const dir = join(typeDir, slug);
     if (!statSync(dir).isDirectory()) continue;
     if (!existsSync(join(dir, '.done'))) continue;
     if (!existsSync(join(dir, 'in.puml')) || !existsSync(join(dir, 'in.svg'))) continue;
-    out.push({ slug, type, dir });
+    out.push({ slug, type, dir, ...treeField });
   }
   return out.sort((a, b) => a.slug.localeCompare(b.slug));
+}
+
+/** `dot-cache/unknown/` dirs the port classifies CLASS (D3/D4, keyed by
+ *  routing-baseline's `type:'unknown'`+`ourType:'CLASS'` rows), tagged `tree: 'unknown'`. */
+function listUnknownClassFixtureDirs(): FixtureDir[] {
+  const raw = JSON.parse(readFileSync(ROUTING_BASELINE_PATH, 'utf-8')) as { fixtures: readonly RoutingBaselineRow[] };
+  const slugs = new Set(raw.fixtures.filter((f) => f.type === 'unknown' && f.ourType === 'CLASS').map((f) => f.slug));
+  return listFixtureDirs('unknown')
+    .filter((f) => slugs.has(f.slug))
+    .map((f) => ({ ...f, type: 'class', tree: 'unknown' as const }));
 }
 
 // ---------------------------------------------------------------------------
@@ -284,7 +301,11 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
   const opts = { includeStore: fixtureIncludeStore() };
   switch (helperFor(type)) {
     case 'class':
-      return renderFixtureClass(markup, measurer, censusClassFixtureOptions());
+      // cdd5-T1 (D3): object still forces parseClass; class (+ unknown/CLASS)
+      // now goes through renderSync, like the survey.
+      return type === 'object'
+        ? renderFixtureClass(markup, measurer, censusClassFixtureOptions())
+        : renderClassFixture(markup, measurer, censusClassFixtureOptions());
     case 'state':
       return renderFixtureState(markup, measurer, opts);
     case 'sequence':
@@ -326,6 +347,8 @@ export interface CensusResult {
   /** set only on error rows; the render/compare failure that caused it
    * (pdr-T2: carried into census-<type>.json's per-fixture `reason`) */
   reason?: string;
+  /** cdd5-T1 (D3/D4): forwarded from the source `FixtureDir.tree`. */
+  tree?: 'class' | 'unknown';
 }
 
 function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): CensusResult[] {
@@ -333,22 +356,18 @@ function census(fixtures: readonly FixtureDir[], measurer: StringMeasurer): Cens
   for (const f of fixtures) {
     const markup = readFileSync(join(f.dir, 'in.puml'), 'utf-8');
     const jarSvg = readFileSync(join(f.dir, 'in.svg'), 'utf-8');
+    const base = { slug: f.slug, type: f.type, ...(f.tree !== undefined ? { tree: f.tree } : {}) };
     try {
       if (!isWellFormed(jarSvg)) {
-        results.push({ slug: f.slug, type: f.type, diffCount: 'error', reason: 'malformed jar golden SVG' });
+        results.push({ ...base, diffCount: 'error', reason: 'malformed jar golden SVG' });
         continue;
       }
       const oursSvg = renderFixtureFor(f.type, markup, measurer);
       const { diffs } = compareSvg(oursSvg, jarSvg, 'deterministic');
-      results.push({
-        slug: f.slug,
-        type: f.type,
-        diffCount: diffs.length,
-        paths: diffs.map((d) => d.path),
-      });
+      results.push({ ...base, diffCount: diffs.length, paths: diffs.map((d) => d.path) });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      results.push({ slug: f.slug, type: f.type, diffCount: 'error', reason });
+      results.push({ ...base, diffCount: 'error', reason });
     }
   }
   return results;
@@ -443,7 +462,9 @@ function printFamilies(results: readonly CensusResult[]): void {
 function main(): void {
   const types = process.argv.slice(2).filter((a) => !a.startsWith('--'));
   const requested = types.length > 0 ? types : DEFAULT_TYPES;
-  const fixtures = requested.flatMap((t) => listFixtureDirs(t));
+  const fixtures = requested.flatMap((t) =>
+    t === 'class' ? [...listFixtureDirs(t), ...listUnknownClassFixtureDirs()] : listFixtureDirs(t),
+  );
   console.log(`Loaded ${fixtures.length} fixtures across types: ${requested.join(', ')}`);
 
   const deterministicResults = census(fixtures, new DeterministicMeasurer());
