@@ -95,10 +95,13 @@ function renderNamespace(geo: NamespaceGeo, theme: ScaledTheme, measurer: String
       backColor: namespaceFill(geo, theme),
       // `plantuml.skin:102-114` scopes the cluster's `LineColor black` /
       // `LineThickness 1.5` to the FOLDER family only; every other group
-      // USymbol keeps the generic element default. A per-symbol `<style>
-      // node { LineColor ... }` override is NOT modeled (no corpus sample;
-      // named remainder, `.agent-notes/cdd-T12.md`).
-      borderColor: theme.colors.border,
+      // USymbol keeps the generic element default. cdd5-T5c: the cluster
+      // signature carries `group` (`Cluster.java:291`), and `skinparam
+      // packageBorderColor` is a `group` LineColor (`FromSkinparamToStyle
+      // .java:128`), so it reaches every USymbol cluster (jar gigoru-88).
+      // The per-symbol tier (`elements[<usymbol>].border`) still outranks it
+      // (`class-namespace-usymbol-shape.ts#resolveClusterUSymbolPaint`).
+      borderColor: theme.colors.graph.packageBorder ?? theme.colors.border,
       // cdd-B8FU: renderNamespaceUSymbol draws through renderDrawableToFragment
       // at scale=1 (no SvgOption.scale threading, class-namespace-usymbol-
       // shape.ts's own citation) -- this literal needs its own scaleK factor.
