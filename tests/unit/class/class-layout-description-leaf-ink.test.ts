@@ -1,14 +1,17 @@
 /**
- * cdd3-T8 (R-LEAF): `descriptionLeafSymbolInk` gates `symbolInk` to the two
- * USymbols a `descriptive` classifier ALSO draws through
- * `EntityImageDescription.drawU` at render time
- * (`renderer-usymbol-entity.ts#usesClassUSymbolEntity`'s `component`/
- * `database` arms) -- every other symbol falls through to
- * `class-ink-box.ts#addClassifierInk`'s existing `addRectInk` box rule
- * unchanged, and the per-element `opts.fontSize` cascade (`leaf-sizing.ts:
- * 117`'s collapse, reproduced here) must match what `measureLeafNode`
- * itself measured the BOX with, or ink and box would size to two different
- * fonts.
+ * cdd5-T4e (`desc-usymbol-ink-missing`, close-b3): `descriptionLeafSymbolInk`
+ * now gates `symbolInk` to a DENYLIST (`port`/`note`/`folder`/`package`/
+ * `interface`/`circle`/`hexagon`) instead of the old hand-picked 3-symbol
+ * allowlist (`component`/`database`/`node`) -- mirroring `leaf-sizing.ts
+ * #measureLeafNode`'s OWN dispatch: a symbol whose `Dim` (box) comes from
+ * `measureEntityLeaf` (the SAME `EntityImageDescription`-based construction
+ * this file's `measureEntityLeafInk` walks) is safe to ink generically;
+ * the denylisted symbols size their `Dim` through a DIFFERENT, non-generic
+ * construction (or, for `hexagon`, outright throw) and stay excluded -- see
+ * `class-layout-description-leaf-ink.ts`'s own doc comment for the
+ * per-symbol Java citation, the jar-verified regression (`package` widened
+ * `unknown/cepedu-19-namu934`'s width Δ from a wrong shift into a Δ32
+ * blowout), and the crash (`hexagon`) the denylist avoids.
  */
 import { describe, expect, test } from 'vitest';
 import { descriptionLeafSymbolInk } from '../../../src/diagrams/class/class-layout-description-leaf-ink.js';
@@ -43,8 +46,17 @@ describe('descriptionLeafSymbolInk (cdd3-T8, R-LEAF gate)', () => {
     expect(ink).not.toBeUndefined();
   });
 
-  test.each(['folder', 'package', 'note', 'rectangle', 'interface', 'circle', 'actor'] as const)(
-    '%s -- no ink (renders through a DIFFERENT path, not EntityImageDescription.drawU)',
+  test.each(['rectangle', 'queue', 'frame', 'stack', 'entity', 'card'] as const)(
+    '%s -- ink present (cdd5-T4e: sizes via measureEntityLeaf, leaf-sizing.ts default case, so ink and box now agree)',
+    (symbol) => {
+      expect(
+        descriptionLeafSymbolInk(node(symbol), symbol, baseFont, { opts: emptyOpts, sprites: undefined, measurer }),
+      ).not.toBeUndefined();
+    },
+  );
+
+  test.each(['port', 'note', 'folder', 'package', 'interface', 'circle', 'hexagon'] as const)(
+    '%s -- no ink (leaf-sizing.ts sizes its Dim through a DIFFERENT, non-generic construction; walking the generic one would disagree with the box)',
     (symbol) => {
       expect(
         descriptionLeafSymbolInk(node(symbol), symbol, baseFont, { opts: emptyOpts, sprites: undefined, measurer }),

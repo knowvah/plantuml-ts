@@ -142,7 +142,9 @@ export function openNamespaceBlock(state: ParseState, id: string, display: strin
       state.creationCounter.value += 1;
       creationIndex = state.creationCounter.value;
     }
-    ns.push({ id: effectiveId, display, classifiers: [], creationIndex });
+    // cdd5-T4e: nest under the current group when `sep === null` too (CucaDiagram.java:252-256).
+    const parentId = enclosing !== null ? { parentId: enclosing } : {};
+    ns.push({ id: effectiveId, display, classifiers: [], creationIndex, ...parentId });
   }
   // #lizard forgives -- pre-existing 32 NLOC / 7 CCN (unchanged by A2s F-G;
   // the branch structure ports CucaDiagram#quarkInContextSafe + G2 N8's

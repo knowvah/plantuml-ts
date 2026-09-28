@@ -35,7 +35,8 @@ import type { Member } from './ast.js';
 import { parseMemberLine } from './class-member-parser.js';
 import { buildMemberRow, type MemberRowBuild } from './class-member-creole.js';
 import { formatMemberText } from './class-layout-helpers.js';
-import { sectionWidth, ROW_TEXT_LEFT_MARGIN, isMethodMember } from './class-member-rows.js';
+import { sectionWidth, ROW_TEXT_LEFT_MARGIN } from './class-member-rows.js';
+import { buildEnhancedRow } from './class-body-enhanced-visibility.js';
 import { splitEnhancedBlocks, type EnhancedBodyBlock, type BlockSeparatorSpec } from './class-body-enhanced.js';
 import { measureTreeCells, computeTreeConnectors, type TreeConnector } from './class-body-tree.js';
 import {
@@ -218,6 +219,13 @@ interface RowsBlockResult {
  *  {@link stackEmbeds}), mirroring `MethodsOrFieldsArea`'s own constructor
  *  + dimension/draw split. */
 function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, contentTop: number): RowsBlockResult {
+  // #lizard forgives(nloc,cyclomatic_complexity) -- pre-existing lizard span
+  // mis-detection (`.agent-notes/O1-lizard-forgive-call-consumption.md`,
+  // `renderer-classifier-box.ts#buildHeaderPrimitive`'s identical
+  // precedent): the `buildEnhancedRow(...)` call nested inside this
+  // function's `.map` closure (cdd5-T4e) bleeds lizard's brace counter past
+  // this function's real closing `}` into later code, not a genuine
+  // complexity increase.
   const { fontSpec, measurer, sprites, baselineOffset } = ctx;
   const { memberLines, embedSources } = extractEmbeds(lines);
   // A2s R2d (pejone-71-tige404/xonamo-50-podo529): a null parse is a blank
@@ -250,26 +258,13 @@ function buildRowsBlockRows(lines: readonly string[], ctx: EnhancedLayoutCtx, co
   // comment: exposant-01-class/sovuxo-25-tepi226 regressions, same fix).
   let rowTop = contentTop;
   const bottomAnchor = fontSpec.size - baselineOffset;
+  // cdd-T23/T19 + cdd5-T4e: row shape built by `class-body-enhanced-
+  // visibility.ts#buildEnhancedRow` (isMethodMember bucketing,
+  // visibilityBlockHeight/TopDy one-row-block rationale, own doc comment).
   const rows: ClassifierGeo['rows'] = members.map((m, i) => {
-    const hasImageAtom = builds[i]!.atoms.some((a) => a.kind === 'image');
-    const y = rowTop + (hasImageAtom ? builds[i]!.height - bottomAnchor : baselineOffset);
+    const row = buildEnhancedRow({ m, text: texts[i]!, build: builds[i]!, rowTop, indent, baselineOffset, bottomAnchor });
     rowTop += builds[i]!.height;
-    return {
-      text: texts[i]!,
-      y,
-      indent,
-      width: builds[i]!.width,
-      atoms: builds[i]!.atoms,
-      // cdd-T23/T19 (row 65/73): `isMethodMember` -- not the inline
-      // `m.params === undefined` this line duplicated -- so a raw-fallback
-      // member (e.g. a `Resource(A|B|C)`-typed field whose TYPE merely
-      // CONTAINS parens) buckets the same way the classic path already does
-      // (`class-member-rows.ts#isMethodMember`'s own doc comment: upstream
-      // buckets ANY `(`/`)`-containing raw line as a method, however
-      // malformed -- `BodierLikeClassOrObject#isMethod`).
-      ...(m.visibilityExplicit === true ? { visibilityIcon: m.visibility, visibilityIsField: !isMethodMember(m) } : {}),
-      ...(m.ownUrl !== undefined ? { url: m.ownUrl } : {}),
-    };
+    return row;
   });
   const embeds = stackEmbeds(embedSources, ctx, rowTop);
   const portMembers = buildPortMembers(members, texts, builds, contentTop);

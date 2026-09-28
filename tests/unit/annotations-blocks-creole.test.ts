@@ -85,6 +85,20 @@ describe('chrome creole — kacico-91-bati232 (legend: creole table + creole tre
   });
 });
 
+describe('chrome creole — terede-92-fuka839 (<style> legend { MaximumWidth } wraps the legend)', () => {
+  const ours = chromeGroup(render('unknown', 'terede-92-fuka839'), 'legend');
+  const jar = chromeGroup(golden('unknown', 'terede-92-fuka839'), 'legend');
+
+  it('wraps the paragraph into the jar\'s 142 <text> lines, not one unwrapped run', () => {
+    expect(childTags(jar).filter((t) => t === 'text').length).toBe(142);
+    expect(childTags(ours).filter((t) => t === 'text').length).toBe(142);
+  });
+
+  it('ends the wrapped paragraph on "facilisi." like the jar', () => {
+    expect(textContents(ours).at(-1)).toBe('facilisi.');
+  });
+});
+
 describe('chrome creole — manube-50-xora983 (legend table with <back:> swatch cells)', () => {
   const ours = chromeGroup(render('class', 'manube-50-xora983'), 'legend');
   const jar = chromeGroup(golden('class', 'manube-50-xora983'), 'legend');
