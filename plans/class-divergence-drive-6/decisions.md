@@ -22,8 +22,12 @@ second style path into the renderer. Escape hatch = stop 13.
 
 ## D3: hyperlink colour lives on the creole FontConfiguration
 Add optional `hyperlinkColor` to `UText.ts`'s `FontConfiguration` and a
-`getHyperlinkColor` accessor to `src/core/style/ISkinSimple`, populated by the
-skin-simple builders (`EntityImageDescriptionDelegates.ts`,
+`getStyleHyperlinkColor` accessor to `src/core/style/ISkinSimple` (**amended at
+T1b, 2026-09-28, flagged for review**: the brief said `getHyperlinkColor`, but
+`src/core/abel/ISkinParam.ts:80` already declares a consumed
+`getHyperlinkColor(): HColor` and `MethodsOrFieldsAreaSkinParam extends ISkinParam,
+ISkinSimple`, so the same name with an incompatible type is a TS2320 error —
+journal row 28), populated by the skin-simple builders (`EntityImageDescriptionDelegates.ts`,
 `EntityImageDescriptionName.ts`, `blocks-creole.ts`). Upstream:
 `StripeSimple.java:224-225`, `FontConfiguration.java:213-219`. The richer
 `abel/FontConfiguration` stays separate.
