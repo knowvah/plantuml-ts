@@ -197,7 +197,7 @@ function buildHeaderPrimitive(geo: ClassifierGeo, theme: ScaledTheme): UrlTagged
   if (geo.hideCircle !== true && hasBadge(geo.kind) && theme.strictUml !== true) {
     body +=
       geo.badgeSpriteImage !== undefined
-        ? renderBadgeSpriteImage(geo, geo.badgeSpriteImage, theme.scaleK)
+        ? renderBadgeSpriteImage(geo, geo.badgeSpriteImage, theme)
         : renderBadge(geo, theme);
   }
   const headerRowCount = geo.headerRowCount ?? 1;

@@ -40,6 +40,7 @@ import { paintToSvg, type Paint } from '../../core/paint.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { lookupSizedGlyph } from './class-badge-sized-glyphs.js';
 import { type BadgeLetter, BADGE_GLYPH_D, REFERENCE_CX, REFERENCE_CY } from './class-badge-glyph-data.js';
+import { leafTypeBadgeLetter, leafTypeSpotFill, leafTypeSpotSname } from './class-badge-leaftype.js';
 
 /** `SkinParam#getCircledCharacterRadius()` default (fontSize 17 -> formula
  *  below). Retained as the module's own default constant -- every call site
@@ -161,13 +162,16 @@ export function hasBadge(kind: ClassifierKind): boolean {
  * `spot<Kind>` style class -- jar-verified against 146+ `class`-badge
  * occurrences (`fill="#ADD1B2"`) across the corpus, none of which matched
  * this function's PREVIOUS constants (G2 N4). `object`/`map`/`json` never
- * reach this function ({@link hasBadge} gates them out first). `ClassifierKind`
- * has several OTHER badge-bearing members this iteration did not survey
- * against the jar (`entity`/`circle`/`descriptive`/`usecase`/`state`/
- * association-diamond kinds, `ast.ts`) -- the `default` case preserves
- * their PRE-EXISTING (unverified, possibly also wrong) fallback rather than
- * silently reassigning them `spotClass`'s color without jar evidence;
- * narrower scope than auditing the whole enum this iteration.
+ * reach this function ({@link hasBadge} gates them out first).
+ * dataclass/struct/exception/metaclass/stereotype/record (cdd5-T3e,
+ * `diagnosis/S1-text.md` badge-leaftype-spot-unported) are now surveyed via
+ * {@link leafTypeSpotFill}. `ClassifierKind` has several OTHER badge-bearing
+ * members this port still has not surveyed against the jar (`entity`/
+ * `circle`/`descriptive`/`usecase`/`state`/association-diamond kinds,
+ * `ast.ts`) -- the `default` case preserves their PRE-EXISTING (unverified,
+ * possibly also wrong) fallback rather than silently reassigning them
+ * `spotClass`'s color without jar evidence; narrower scope than auditing
+ * the whole enum this iteration.
  */
 export function badgeFill(kind: ClassifierKind): string {
   switch (kind) {
@@ -182,7 +186,7 @@ export function badgeFill(kind: ClassifierKind): string {
     case 'annotation':
       return '#E3664A'; // spotAnnotation
     default:
-      return '#ADD1B2'; // spotClass -- default/unsurveyed kinds
+      return leafTypeSpotFill(kind) ?? '#ADD1B2'; // spotClass -- unsurveyed kinds
   }
 }
 
@@ -257,12 +261,15 @@ export function resolveBadgeGlyphColor(
 /**
  * `ClassifierKind` -> the `spot<Kind>` element-bucket SName
  * (`skinparam.ts#ELEMENT_BUCKET_SNAMES`'s own doc comment for the upstream
- * `spotStyleSignature` mapping) -- `undefined` for every kind this port's
- * `badgeFill` above does not individually distinguish (they share
+ * `spotStyleSignature` mapping) -- `undefined` for every kind neither this
+ * function nor {@link leafTypeSpotSname} distinguishes (they share
  * `spotClass`'s default there, but have no OWN override bucket -- narrower
  * scope than `badgeFill`'s existing "default" precedent, matches this
  * iteration's "survey reach, land the tractable ones" instruction rather
- * than guessing an override bucket name for an unsurveyed kind).
+ * than guessing an override bucket name for an unsurveyed kind). cdd5-T3e:
+ * dataclass/struct/exception/metaclass/stereotype/record/protocol now
+ * resolve via {@link leafTypeSpotSname} -- see that function's own doc
+ * comment.
  */
 export function spotSnameForKind(kind: ClassifierKind): string | undefined {
   switch (kind) {
@@ -277,7 +284,7 @@ export function spotSnameForKind(kind: ClassifierKind): string | undefined {
     case 'annotation':
       return 'spotannotation';
     default:
-      return undefined;
+      return leafTypeSpotSname(kind);
   }
 }
 
@@ -305,8 +312,15 @@ export function spotSnameForKind(kind: ClassifierKind): string | undefined {
  * `xidura-26-teki974/in.svg`'s `ENTITY` badge `<path d="M379.614,137.5 ...">`,
  * byte-identical (after the standard center-translation) to this table's
  * pre-existing `E` entry (`class-badge-glyph-data.ts`).
+ *
+ * cdd5-T3e (badge-leaftype-spot-unported, `diagnosis/S1-text.md`):
+ * struct/exception/metaclass/stereotype/dataclass/record were the SAME gap
+ * this doc comment's own precedent already names ("needs its own captured
+ * badge-glyph outline") -- {@link leafTypeBadgeLetter} now covers all six
+ * (`class-classifier-ast.ts`'s own doc comment on `'struct'` is the one
+ * that flagged this as deliberately unported).
  */
-export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' | 'P' {
+export function badgeLetter(kind: ClassifierKind): BadgeLetter {
   switch (kind) {
     case 'interface':
       return 'I';
@@ -328,7 +342,7 @@ export function badgeLetter(kind: ClassifierKind): 'C' | 'I' | 'A' | 'E' | '@' |
     case 'entity':
       return 'E';
     default:
-      return 'C';
+      return leafTypeBadgeLetter(kind) ?? 'C';
   }
 }
 
