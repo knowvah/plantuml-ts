@@ -9,7 +9,8 @@
  * change, no runtime import — this is a type-only declaration).
  */
 
-import type { Paint } from './paint.js';
+import type { Gradient, Paint } from './paint.js';
+import type { LineStyleDash } from './style-line-style.js';
 import type { ThemeGraphColorsA } from './theme-graph-colors-a.js';
 import type { ThemeGraphColorsB } from './theme-graph-colors-b.js';
 import type { ThemeGraphColorsC } from './theme-graph-colors-c.js';
@@ -178,8 +179,12 @@ export interface ElementColors {
    * `:396-408` `addStyle` -> `addPriorityForStereotype` +
    * `sig.addStereotype`). Keyed by the CLEANED label (`StyleSignatureBasic
    * #clean`: lowercase, `[_.]` stripped), exactly as
-   * {@link backgroundColorByStereo}. Populated for `package` only
-   * (`skinparam-stereo-keys.ts#applyPackageByStereo`).
+   * {@link backgroundColorByStereo}. Populated for every group USymbol
+   * that has an `addMagic` registration (`skinparam-stereo-keys.ts
+   * #applyGroupByStereo`, cdd6 T1a). `fontByStereo` is also written by the
+   * `<style> <sname> { .label { FontColor X } }` sub-selector
+   * (`style-map-element.ts#collectTagFontColor`) -- the same
+   * `sig.addStereotype` signature the skinparam front-end builds.
    */
   borderByStereo?: Readonly<Record<string, string>>;
   fontByStereo?: Readonly<Record<string, string>>;
@@ -188,13 +193,44 @@ export interface ElementColors {
   /** cdd3-T21 (E3-2): `skinparam <sname>StereotypeFontColor X` -- `addMagic`
    *  (`FromSkinparamToStyle.java:283`) -> `FontColor` on `{stereotype,
    *  <sname>}`; also the legacy `FontParam.<SNAME>_STEREOTYPE` colour
-   *  (`SkinParam.java:484-505`). Populated for `package` only. */
+   *  (`SkinParam.java:484-505`). Populated for `package` only by skinparam;
+   *  cdd6 T1a: also written for any bucket SName by `<style> <sname> {
+   *  stereotype { FontColor X } }` (`ClusterHeader.java:209-215`,
+   *  `forStereotypeItself`). */
   stereotypeFont?: string;
   /** cdd3-T21 (E3-5): `skinparam <sname>FontName X` / `<sname>FontStyle X`
    *  -- `addConFont(cleanName, sname)` (`FromSkinparamToStyle.java:278`) ->
    *  `FontName`/`FontStyle` on `{<sname>}`. Populated for `package` only. */
   fontFamily?: string;
   fontStyle?: { readonly bold: boolean; readonly italic: boolean };
+  /**
+   * cdd6 T1a (D2): `PName.LineStyle` on `{<sname>}` -- the dash half of the
+   * element's / cluster's stroke (`Style#getStroke`, `Style.java:299-320`;
+   * the cluster draws it via `Cluster#getStrokeInternal`,
+   * `Cluster.java:402-407`). Written by `<style> <sname> { LineStyle N }`
+   * and by `skinparam <sname>BorderStyle X` (`FromSkinparamToStyle.java:277`
+   * registers BorderStyle AS LineStyle; `dashed`/`dotted` rewrite to
+   * `7;7`/`1;3` first, `:321-326`). `group` carries the cluster-wide value
+   * (`Cluster.java:291`'s signature holds `group` beside the USymbol SName).
+   * `{0, 0}` = an explicit solid stroke; absent = no LineStyle declared.
+   */
+  lineStyle?: LineStyleDash;
+  /** cdd6 T1a: `skinparam <sname>BorderStyle<<label>> X` -- the
+   *  stereotype-re-signed {@link lineStyle} (`FromSkinparamToStyle.java
+   *  :292-302,396-408`), keyed like {@link borderByStereo}. */
+  lineStyleByStereo?: Readonly<Record<string, LineStyleDash>>;
+  /** cdd6 T1a: `<style> <sname> { title { FontColor X } }` -- the
+   *  `{..., <sname>, composite|package_, title}` header signature
+   *  (`ClusterHeader.java:151-165`; `EntityImageEmptyPackage.java:88`;
+   *  `EntityImageDescription.java:146-149`). */
+  titleFont?: Paint;
+  /** cdd6 T1a: `skinparam packageBackgroundColor A<sep>B` when the value
+   *  parses as a gradient (`HColorSet.java:107-116`). `packageBackgroundColor`
+   *  registers on `{group}` and `{package_}` (`FromSkinparamToStyle.java
+   *  :127,129` -> `:272`); `theme.colors.graph.packageBackground` keeps the
+   *  flattened solid string, so the gradient is carried here. Absent for a
+   *  solid value. */
+  backgroundGradient?: Gradient;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;

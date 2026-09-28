@@ -166,10 +166,17 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.actorStroke = color;
     },
   ],
+  // cdd6 T1a: a gradient value (`HColorSet.java:107-116`) is ALSO kept, as
+  // a Paint, in the `package` bucket -- `packageBackgroundColor` registers on
+  // `{group}` and `{package_}` (`FromSkinparamToStyle.java:127,129`), and
+  // `packageBackground` above holds only the flattened solid string. A later
+  // solid value clears it (last registration wins).
   [
     ['packagebackgroundcolor'],
-    (acc, _v, color) => {
+    (acc, _v, color, paint) => {
       acc.packageBackground = color;
+      if (typeof paint !== 'string') (acc.elements['package'] ??= {}).backgroundGradient = paint;
+      else if (acc.elements['package'] !== undefined) delete acc.elements['package'].backgroundGradient;
     },
   ],
   [
