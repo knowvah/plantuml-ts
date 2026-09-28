@@ -27,7 +27,17 @@ const RE_STYLE_CLOSE = /^<\/style>$/i;
 // an ordinary skinparam line upstream, while this port's case-SENSITIVE
 // spelling dropped the whole line silently (`repuga-78-xora226`: every
 // caption skinparam ignored, `preprocess()` returning an empty map).
-const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/i;
+// cdd6-T1e: the NAME group is upstream's own, `[\w.]*(?:<<[^<>]*>>)?[\w.]*`
+// (`command/CommandSkinParam.java:60`) -- the name may CONTINUE after the
+// stereotype. C4's `$defineSkinparams` emits `skinparam
+// package<<boundary>>StereotypeFontColor transparent`; while `$bl()` lines
+// went unsplit that text was buried in a block blob, but split
+// (`Jaws.mutateExpands1`, `preprocessor.ts#mutateExpands1`) the former
+// `\w+(?:<<[^<>]+>>)?` failed it and it leaked into the diagram body. The
+// VALUE group is upstream's too, `([^{}]*)` (`CommandSkinParam.java:62`):
+// with an optional-empty NAME, `.+` would read `skinparam <<verb>> {` (a
+// block opener no block form here accepts yet) as key `<<verb>>`, value `{`.
+const RE_SKINPARAM_LINE = /^skinparam\s+([\w.]*(?:<<[^<>]*>>)?[\w.]*)\s+([^{}]*)$/i;
 /** mission skin-file-loading Batch 1: `skin <name>` -- mirrors upstream's
  *  `CommandSkin` grammar (`^skin\\s+([\\w.]+)$`, see `skins-builtin.ts`'s
  *  own doc comment). The `\\s+` after the literal `skin` prefix means this
@@ -235,7 +245,7 @@ export class StyleAndSkinparamCollector {
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.setSkinparam(single[1]!.trim().toLowerCase(), single[2]!.trim());
+      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim());
       return true;
     }
     return false;
