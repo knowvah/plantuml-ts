@@ -17,8 +17,11 @@ import { renderState } from './renderer.js';
 export const statePlugin: SyncPlugin<StateDiagramAST, StateGeometry> = {
   type: 'state',
 
-  parse(block) {
-    return parseState(block);
+  // D6 (cdd6-T1c): forwards `options.assetStore` to `parseState`, mirroring
+  // `class/parser.ts:317-318` / `description/index.ts:59-67` — see
+  // `.agent-notes/cdd5-T3-assetstore-gap.md` for the gap this closes.
+  parse(block, options) {
+    return parseState(block, options);
   },
 
   layoutSync(ast, theme, measurer) {

@@ -24,6 +24,7 @@
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
+import type { ParseOptions } from '../../../src/core/dispatcher.js';
 import { buildTheme } from '../../../src/core/build-theme.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
@@ -34,13 +35,22 @@ import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
+/** `renderFixtureState`'s own options bag: `PreprocessOptions` (forwarded to
+ *  `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
+ *  `parseState` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
+ *  `FixtureClassOptions`. */
+type FixtureStateOptions = PreprocessOptions & ParseOptions;
+
 /** Renders a `.puml` fixture through the STATE engine's low-level pipeline
  * with `measurer` injected at the layout stage. `options` (e.g. `{
  * includeStore }`) passes through to `buildBlockUmls` verbatim — additive,
  * optional, mirrors `render-fixture-class.ts`'s own stdlib-store wiring so
- * `<bundle/...>` state fixtures can render instead of erroring. Throws if
- * the markup contains no diagram block. */
-export function renderFixtureState(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+ * `<bundle/...>` state fixtures can render instead of erroring.
+ * `options.assetStore` is forwarded separately to `parseState` (D6,
+ * cdd6-T1c), mirroring `parseState`'s own call site in
+ * `state/index.ts#statePlugin.parse`. Throws if the markup contains no
+ * diagram block. */
+export function renderFixtureState(markup: string, measurer: StringMeasurer, options?: FixtureStateOptions): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -52,7 +62,7 @@ export function renderFixtureState(markup: string, measurer: StringMeasurer, opt
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles };
-  const ast = astOrThrow(parseState(block), 'state');
+  const ast = astOrThrow(parseState(block, { assetStore: options?.assetStore }), 'state');
   const geo = layoutState(ast, theme, measurer);
   const fragment = renderState(geo, theme);
 

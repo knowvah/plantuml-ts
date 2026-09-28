@@ -54,6 +54,7 @@
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
+import type { ParseOptions } from '../../../src/core/dispatcher.js';
 import { buildTheme } from '../../../src/core/build-theme.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
@@ -63,12 +64,24 @@ import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
+/** `renderFixtureSequence`'s own options bag: `PreprocessOptions` (forwarded
+ *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
+ *  `parseSequence` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
+ *  `FixtureClassOptions`. */
+type FixtureSequenceOptions = PreprocessOptions & ParseOptions;
+
 /** Renders a `.puml` fixture through the SEQUENCE engine's low-level
  * pipeline with `measurer` injected at the layout stage and reused
  * (never recreated) for the chrome stage. `options` (e.g. `{
- * includeStore }`) passes through to `buildBlockUmls` verbatim. Throws if
+ * includeStore }`) passes through to `buildBlockUmls` verbatim.
+ * `options.assetStore` is forwarded separately to `parseSequence` (D6,
+ * cdd6-T1c), mirroring `sequence/index.ts#sequencePlugin.parse`. Throws if
  * the markup contains no diagram block. */
-export function renderFixtureSequence(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+export function renderFixtureSequence(
+  markup: string,
+  measurer: StringMeasurer,
+  options?: FixtureSequenceOptions,
+): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -79,7 +92,7 @@ export function renderFixtureSequence(markup: string, measurer: StringMeasurer, 
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
-  const parsed = parseSequence(first.source.lines);
+  const parsed = parseSequence(first.source.lines, { assetStore: options?.assetStore });
   // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
   // (D1). This harness bypasses `src/index.ts`'s production narrowing (it
   // drives the engine directly), so a refusal surfaces the same way

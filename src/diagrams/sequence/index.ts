@@ -3,7 +3,7 @@
  * for use with the DiagramRegistry dispatcher.
  */
 
-import type { DiagramPlugin, RenderFragment } from '../../core/dispatcher.js';
+import type { DiagramPlugin, ParseOptions, RenderFragment } from '../../core/dispatcher.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { SequenceDiagramAST, SequenceGeometry } from './ast.js';
@@ -21,9 +21,11 @@ export const sequencePlugin: DiagramPlugin<SequenceDiagramAST, SequenceGeometry>
 
   // T4: widened to match `DiagramPlugin.parse`'s `AST | ParseRefusal`
   // contract (D1) now that `parseSequence` can return a `ParseRefusal`.
-  // `accepts()` above is untouched -- T12 owns dispatch/routing.
-  parse(source: UmlSource): SequenceDiagramAST | ParseRefusal {
-    return parseSequence(source.lines);
+  // `accepts()` above is untouched -- T12 owns dispatch/routing. D6
+  // (cdd6-T1c): forwards `options.assetStore`, mirroring
+  // `class/parser.ts:317-318` / `description/index.ts:59-67`.
+  parse(source: UmlSource, options?: ParseOptions): SequenceDiagramAST | ParseRefusal {
+    return parseSequence(source.lines, options);
   },
 
   layout(ast: SequenceDiagramAST, theme, measurer): Promise<SequenceGeometry> {

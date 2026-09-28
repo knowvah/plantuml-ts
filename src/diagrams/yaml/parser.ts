@@ -1,7 +1,12 @@
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
+import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { HighlightDirective, JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+// D6 (cdd6-T1c): shared with json/hcl -- see that function's own doc comment
+// for why this is imported rather than re-inlined (json/yaml/hcl already
+// share `layoutJson`/`renderJson`, `yaml/index.ts`; this is the same trio).
+import { jsonSpriteRegistryFor } from '../json/parser.js';
 import { parseYamlLines } from './yaml-parser.js';
 import { monomorphToJson } from './monomorph.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
@@ -40,13 +45,14 @@ function parseYamlHighlightLine(line: string): HighlightDirective {
   return { path, styleClass };
 }
 
-export function parseYaml(source: UmlSource): JsonDiagramAST {
+export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
   const highlights: HighlightDirective[] = [];
   const bodyLines: string[] = [];
   let scale: ScaleSpec | undefined;
   let inStyleBlock = false;
   const annotations = createAnnotations();
-  const sprites = createSpriteRegistry();
+  // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
+  const sprites = jsonSpriteRegistryFor(options);
   const lines = source.lines;
 
   for (let i = 0; i < lines.length; i++) {

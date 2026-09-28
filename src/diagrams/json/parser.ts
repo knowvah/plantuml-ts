@@ -9,6 +9,9 @@ import { parse as parseJsonc, type ParseError } from 'jsonc-parser';
 import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
 import { createSpriteRegistry, matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { HighlightDirective, JsonDiagramAST } from './ast.js';
@@ -69,19 +72,33 @@ function parseHighlightLine(raw: string): HighlightDirective {
 // ---------------------------------------------------------------------------
 
 /**
+ * D6 (cdd6-T1c): resolves `options.assetStore` into the `createSpriteRegistry`
+ * pair, mirroring `class/parser.ts:326-327` -- split out (not inlined at the
+ * call site, unlike class/description's precedent) purely to keep
+ * `parseJson`'s own pre-existing NLOC/CCN from moving (that function is
+ * ALREADY over this project's complexity-hook budget, a pre-existing
+ * condition this task does not own fixing).
+ */
+export function jsonSpriteRegistryFor(options?: ParseOptions): ReturnType<typeof createSpriteRegistry> {
+  const store = options?.assetStore;
+  if (store === undefined) return createSpriteRegistry();
+  return createSpriteRegistry(internalSpriteStoreFrom(store), internalEmojiStoreFrom(store));
+}
+
+/**
  * Parses a JSON diagram source into a JsonDiagramAST.
  *
  * Lines starting with "#highlight " are treated as highlight directives;
  * all other non-empty lines form the JSON body. The body is joined with
  * newlines and passed to JSON.parse. A SyntaxError yields root = null.
  */
-export function parseJson(source: UmlSource): JsonDiagramAST {
+export function parseJson(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
   const highlights: HighlightDirective[] = [];
   let scale: ScaleSpec | undefined;
   const bodyLines: string[] = [];
   let inStyleBlock = false;
   const annotations = createAnnotations();
-  const sprites = createSpriteRegistry();
+  const sprites = jsonSpriteRegistryFor(options);
   const lines = source.lines;
 
   for (let i = 0; i < lines.length; i++) {

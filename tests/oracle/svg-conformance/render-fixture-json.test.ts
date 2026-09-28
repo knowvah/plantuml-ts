@@ -15,6 +15,7 @@ import { describe, it, expect } from 'vitest';
 
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
 import { renderFixtureJson } from './render-fixture-json.js';
+import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 
 const NOT_JSON = 'does not sound like JSON';
 
@@ -70,5 +71,28 @@ describe('renderFixtureJson — parse dispatch (AC4)', () => {
 
   it('throws a named error when the markup holds no diagram block', () => {
     expect(() => render('not a diagram')).toThrow(/no diagram block found/);
+  });
+});
+
+// json's chrome (title) is the ONLY sprite consumer for this engine family
+// (no `.sprites` token anywhere in `json/renderer.ts`), so the title is
+// where D6's forwarding has to surface. Empirically probed: without
+// `options.assetStore`, `<$Netw>` resolves to nothing and
+// `<g class="title">` renders completely empty; with it, the resolved
+// sprite draws real vector geometry (a `<path>`) inside that same group.
+describe('renderFixtureJson — assetStore forwarding (D6, cdd6-T1c)', () => {
+  const EMPTY_TITLE = /<g class="title"><\/g>/;
+  const MARKUP = '@startjson\nsprite Netw jar:archimate/network\ntitle <$Netw>\n{"a": 1}\n@endjson';
+
+  it('without an assetStore, the jar: archimate glyph never reaches the SVG (documents the starting state)', () => {
+    const svg = renderFixtureJson(MARKUP, new DeterministicMeasurer());
+    expect(svg).toMatch(EMPTY_TITLE);
+  });
+
+  it('with an assetStore, the archimate glyph (a real <path>) is present in the title', () => {
+    const assetStore = buildSpriteAssetsStore();
+    const svg = renderFixtureJson(MARKUP, new DeterministicMeasurer(), { assetStore });
+    expect(svg).not.toMatch(EMPTY_TITLE);
+    expect(svg).toMatch(/<g class="title"><path/);
   });
 });

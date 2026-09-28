@@ -271,21 +271,17 @@ export function helperFor(type: string): FixtureHelperName {
  * doc comment).
  */
 /**
- * The options the class fixtures render with in the census -- the SAME
- * assetStore the survey uses (`svg-parity-survey.ts:272-276`'s
- * `buildSpriteAssetsStore()`, forwarded there to `renderSync`) and the SAME
- * includeStore the ratchet uses (`fixtureIncludeStore()`,
- * `class.golden.ratchet.test.ts`). Without `assetStore`, a `sprite $N
- * jar:<path>` (`sprite Netw jar:archimate/network` -- bidusa-22-jutu505,
- * ruliki-78-biji661) resolved to nothing here even though the survey's own
- * `renderSync` call resolved it -- the census and the survey were measuring
- * two different populations for any class fixture using a jar-internal
- * sprite (cdd4-T4). Exported so a unit test can assert the census threads
- * the IDENTICAL (memoized) store instances without rendering a real
- * fixture. Class-scoped only: `render-fixture-state.ts`/
- * `render-fixture-sequence.ts`/`render-fixture-activity.ts`/
- * `render-fixture-json.ts` do not yet accept an `assetStore` option at all
- * -- out of this task's declared scope, filed as a follow-on.
+ * The options every non-description/dot fixture family renders with in the
+ * census -- the SAME assetStore the survey uses
+ * (`svg-parity-survey.ts:272-276`'s `buildSpriteAssetsStore()`) and the SAME
+ * includeStore the ratchet uses (`fixtureIncludeStore()`). Without
+ * `assetStore`, a `sprite $N jar:<path>` resolved to nothing here even
+ * though the survey's own `renderSync` call resolved it (cdd4-T4). Despite
+ * the name (kept for `class.golden.ratchet.test.ts`'s own import site), this
+ * bag is no longer class-scoped: D6 (cdd6-T1c) closed the
+ * `render-fixture-{state,sequence,activity,json}.ts` `assetStore` gap this
+ * doc used to flag as a follow-on -- `renderFixtureFor` now passes this SAME
+ * bag to every one of them too.
  */
 export function censusClassFixtureOptions(): { includeStore: IncludeStore; assetStore: AssetStore } {
   return {
@@ -298,7 +294,6 @@ export function censusClassFixtureOptions(): { includeStore: IncludeStore; asset
 }
 
 function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer): string {
-  const opts = { includeStore: fixtureIncludeStore() };
   switch (helperFor(type)) {
     case 'class':
       // cdd5-T1 (D3): object still forces parseClass; class (+ unknown/CLASS)
@@ -307,17 +302,19 @@ function renderFixtureFor(type: string, markup: string, measurer: StringMeasurer
         ? renderFixtureClass(markup, measurer, censusClassFixtureOptions())
         : renderClassFixture(markup, measurer, censusClassFixtureOptions());
     case 'state':
-      return renderFixtureState(markup, measurer, opts);
+      // D6 (cdd6-T1c): assetStore now threads through, closing the gap
+      // `censusClassFixtureOptions`'s own doc comment used to name.
+      return renderFixtureState(markup, measurer, censusClassFixtureOptions());
     case 'sequence':
-      return renderFixtureSequence(markup, measurer, opts);
+      return renderFixtureSequence(markup, measurer, censusClassFixtureOptions());
     case 'activity':
-      return renderFixtureActivity(markup, measurer, opts);
+      return renderFixtureActivity(markup, measurer, censusClassFixtureOptions());
     case 'json':
       // Mission A5. ONE helper serves all three: yaml and hcl have no layout
       // or renderer of their own (`yaml/index.ts` and `hcl/index.ts` both
       // import `layoutJson`/`renderJson`), so only the parse differs and
       // `renderFixtureJson` dispatches that internally on the block type.
-      return renderFixtureJson(markup, measurer, opts);
+      return renderFixtureJson(markup, measurer, censusClassFixtureOptions());
     case 'dot':
       // Mission D14. The ONE type with no low-level pipeline to dispatch to,
       // and no `measurer` to inject: `@startdot` is a passthrough to

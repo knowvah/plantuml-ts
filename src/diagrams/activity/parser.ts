@@ -11,6 +11,9 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
@@ -80,7 +83,10 @@ function countParenDepth(s: string): number {
  * refusal existed; only the previously-silent unrecognized-line case now
  * surfaces as a `ParseRefusal` instead of being dropped.
  */
-export function parseActivity(block: UmlSource): ActivityDiagramAST | ParseRefusal {
+export function parseActivity(block: UmlSource, options?: ParseOptions): ActivityDiagramAST | ParseRefusal {
+  // D6 (cdd6-T1c): resolved ONCE, mirroring `class/parser.ts:326-327`.
+  const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
+  const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
   const joinedLines = joinUnbalancedLines(block.lines);
   const ctx: ParseContext = {
     lines: joinedLines,
@@ -88,7 +94,7 @@ export function parseActivity(block: UmlSource): ActivityDiagramAST | ParseRefus
     swimlaneSet: new Set(),
     currentSwimlane: undefined,
     annotations: createAnnotations(),
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(internalSprites, internalEmoji),
   };
 
   const result = parseNodes(ctx, 0, []);
