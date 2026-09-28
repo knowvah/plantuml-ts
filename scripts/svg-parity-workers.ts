@@ -40,6 +40,26 @@ export interface RenderedFixture {
 export type WorkerOutcome =
   { kind: 'ok'; rendered: RenderedFixture } | { kind: 'timeout' } | { kind: 'errored'; message: string };
 
+type ConsoleSink = Record<'log' | 'info' | 'debug', (...args: unknown[]) => unknown>;
+
+/**
+ * Enforces the header's "stdout carries the protocol and NOTHING else" inside
+ * the worker (cdd5-T5). Renderer console output on stdout corrupts a frame,
+ * and `!log` produces exactly that by design (`src/core/tim/EaterLog.ts`, a
+ * faithful port of upstream's EaterLog): its `[Log] ...` line reached the
+ * parent as the frame and surfaced as `errored: unparseable worker frame`
+ * (unknown/puvako-69-suxo633, sufura-56-muke185). Routes the console methods
+ * that write to stdout into the stderr sink instead.
+ */
+export function routeConsoleToStderr(con: ConsoleSink, write: (s: string) => void): void {
+  const toStderr = (...args: unknown[]): void => {
+    write(`${args.map(String).join(' ')}\n`);
+  };
+  con.log = toStderr;
+  con.info = toStderr;
+  con.debug = toStderr;
+}
+
 export interface PoolOptions {
   /** Fixture directories, in output order. */
   dirs: string[];

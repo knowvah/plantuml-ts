@@ -55,7 +55,7 @@ import { combineAssetStores } from '../src/core/asset-store.js';
 // <bundle/...>` fixture renders instead of tripping renderSync's include
 // guard and being surveyed as an error page -- the census already did this.
 import { fixtureIncludeStore } from '../tests/helpers/fixture-include-store.js';
-import { runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
+import { routeConsoleToStderr, runPersistentPool, type WorkerOutcome } from './svg-parity-workers.js';
 import { compareSvg, type Diff } from '../tests/oracle/svg-conformance/compare.js';
 import { normalizeSvg } from '../tests/oracle/svg-conformance/normalize.js';
 
@@ -318,6 +318,7 @@ function renderFrame(dir: string): string {
  * See `svg-parity-workers.ts` for the protocol and the isolation trade.
  */
 function renderManyMode(): void {
+  routeConsoleToStderr(console, (s) => process.stderr.write(s));
   let buf = '';
   process.stdin.setEncoding('utf-8');
   process.stdin.on('data', (chunk: string) => {
