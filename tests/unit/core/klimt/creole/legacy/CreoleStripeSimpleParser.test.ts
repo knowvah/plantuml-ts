@@ -1,10 +1,15 @@
 /**
  * CreoleStripeSimpleParser.test.ts — E2r/L1: `classifyStripeLine`'s regex
  * cascade (HORIZONTAL_LINE bare/empty, LITERAL non-empty-captured, HEADING,
- * NORMAL fallback).
+ * NORMAL fallback), plus (T5a) `splitOnNewlineSentinel`'s `%newline()`
+ * (U+E100) split.
  */
 import { describe, expect, test } from 'vitest';
-import { classifyStripeLine } from '../../../../../../src/core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
+import {
+  classifyStripeLine,
+  splitOnNewlineSentinel,
+} from '../../../../../../src/core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
+import { BackSlash } from '../../../../../../src/core/text/BackSlash.js';
 
 describe('classifyStripeLine — HORIZONTAL_LINE (bare, empty capture)', () => {
   test('a bare "----" classifies as HORIZONTAL_LINE style "-"', () => {
@@ -33,16 +38,28 @@ describe('classifyStripeLine — HORIZONTAL_LINE (bare, empty capture)', () => {
 });
 
 describe('classifyStripeLine — LITERAL (non-empty-captured separator shape)', () => {
-  test('"--Header--" classifies as LITERAL with the full original line', () => {
-    expect(classifyStripeLine('--Header--')).toEqual({ type: 'LITERAL', content: '--Header--' });
+  test('"--Header--" classifies as LITERAL with the full original line, plus its titled-HR data (T5a)', () => {
+    expect(classifyStripeLine('--Header--')).toEqual({
+      type: 'LITERAL',
+      content: '--Header--',
+      titledHorizontalLine: { style: '-', title: 'Header' },
+    });
   });
 
-  test('"==Header==" classifies as LITERAL with the full original line', () => {
-    expect(classifyStripeLine('==Header==')).toEqual({ type: 'LITERAL', content: '==Header==' });
+  test('"==Header==" classifies as LITERAL with the full original line, plus its titled-HR data (T5a)', () => {
+    expect(classifyStripeLine('==Header==')).toEqual({
+      type: 'LITERAL',
+      content: '==Header==',
+      titledHorizontalLine: { style: '=', title: 'Header' },
+    });
   });
 
-  test('"..Header.." classifies as LITERAL with the full original line', () => {
-    expect(classifyStripeLine('..Header..')).toEqual({ type: 'LITERAL', content: '..Header..' });
+  test('"..Header.." classifies as LITERAL with the full original line, plus its titled-HR data (T5a)', () => {
+    expect(classifyStripeLine('..Header..')).toEqual({
+      type: 'LITERAL',
+      content: '..Header..',
+      titledHorizontalLine: { style: '.', title: 'Header' },
+    });
   });
 });
 
@@ -87,5 +104,25 @@ describe('classifyStripeLine — NORMAL fallback', () => {
 
   test('"**bold**" classifies as NORMAL (style commands are a StripeSimple concern, not classification)', () => {
     expect(classifyStripeLine('**bold**')).toEqual({ type: 'NORMAL', content: '**bold**' });
+  });
+});
+
+describe('splitOnNewlineSentinel (T5a, java:164)', () => {
+  const E1_NEWLINE = BackSlash.hiddenNewLine();
+
+  test('a sentinel-free string is a single-element, unchanged array', () => {
+    expect(splitOnNewlineSentinel('plain text')).toEqual(['plain text']);
+  });
+
+  test('one sentinel splits into two pieces (unknown/buitin-newline-chr-0 shape)', () => {
+    expect(splitOnNewlineSentinel(`test 4${E1_NEWLINE}test44`)).toEqual(['test 4', 'test44']);
+  });
+
+  test('two sentinels split into three pieces', () => {
+    expect(splitOnNewlineSentinel(`a${E1_NEWLINE}b${E1_NEWLINE}c`)).toEqual(['a', 'b', 'c']);
+  });
+
+  test('an empty string is a single-element array containing the empty string', () => {
+    expect(splitOnNewlineSentinel('')).toEqual(['']);
   });
 });

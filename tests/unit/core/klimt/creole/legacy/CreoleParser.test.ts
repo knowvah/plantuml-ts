@@ -19,9 +19,11 @@ import { CreoleMode } from '../../../../../../src/core/klimt/creole/CreoleMode.j
 import { HorizontalAlignment } from '../../../../../../src/core/klimt/geom/HorizontalAlignment.js';
 import type { ISkinSimple } from '../../../../../../src/core/style/ISkinSimple.js';
 import { GUILLEMET_DEFAULT, type GuillemetPair } from '../../../../../../src/core/text/Guillemet.js';
-import type { DisplayLike, DisplayLine } from '../../../../../../src/core/klimt/creole/SheetBuilder.js';
+import type { DisplayLike, DisplayLine, SheetBuilder } from '../../../../../../src/core/klimt/creole/SheetBuilder.js';
 import type { CreoleAtom } from '../../../../../../src/core/klimt/creole/atom/Atom.js';
 import type { Stripe, StripeAtom } from '../../../../../../src/core/klimt/creole/Stripe.js';
+import { Sheet } from '../../../../../../src/core/klimt/creole/Sheet.js';
+import { BackSlash } from '../../../../../../src/core/text/BackSlash.js';
 import { ClockwiseTopRightBottomLeft } from '../../../../../../src/core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { FontConfiguration } from '../../../../../../src/core/klimt/shape/UText.js';
 import { Pragma } from '../../../../../../src/core/skin/Pragma.js';
@@ -72,7 +74,25 @@ function fakeRenderer(
   };
 }
 
-function fakeSkin(guillemet: GuillemetPair = GUILLEMET_DEFAULT): ISkinSimple {
+/** T5a: a minimal, REAL `SheetBuilder` for `CreoleHorizontalLine.getTitle()`
+ *  to call (via `fakeSkin`'s own `sheet()`) when a test exercises a
+ *  NON-EMPTY titled horizontal line -- one text stripe per `DisplayLike`
+ *  line, joined by a space. Same shape as `CreoleHorizontalLine.test.ts`'s
+ *  own `realSheetBuilder` (proving `getTitle()`'s real chain without
+ *  needing a second, nested `CreoleParser`). */
+function realSheetBuilder(): SheetBuilder {
+  return {
+    createSheet(titleDisplay: DisplayLike): Sheet {
+      const titleSheet = new Sheet(HorizontalAlignment.LEFT);
+      const text = [...titleDisplay].map((l) => (typeof l === 'string' ? l : String(l))).join(' ');
+      const atom: CreoleAtom = { kind: 'text', text, font: FONT };
+      titleSheet.add({ getLHeader: () => null, getAtoms: () => [atom] });
+      return titleSheet;
+    },
+  };
+}
+
+function fakeSkin(guillemet: GuillemetPair = GUILLEMET_DEFAULT, sheetBuilder?: SheetBuilder): ISkinSimple {
   return {
     getSprite: () => null,
     guillemet: () => guillemet,
@@ -87,7 +107,8 @@ function fakeSkin(guillemet: GuillemetPair = GUILLEMET_DEFAULT): ISkinSimple {
     copyAllFrom: () => undefined,
     getPragma: () => Pragma.createEmpty(),
     sheet: () => {
-      throw new Error('not exercised in this test');
+      if (sheetBuilder === undefined) throw new Error('not exercised in this test');
+      return sheetBuilder;
     },
   };
 }
@@ -375,9 +396,62 @@ describe('CreoleParser — horizontal-line dispatch (java:113-114, T10g)', () =>
     expect(atom.calculateDimension(sb)).toEqual(new XDimension2D(10, 10)); // empty-line fast path
   });
 
-  it('a labelled "--Header--" line classifies as LITERAL, not HORIZONTAL_LINE (jar-verified divergence, unaffected by T10g)', () => {
-    const sheet = parser().createSheet(display(['--Header--']));
-    expect(textOf([...sheet][0]!.getAtoms())).toBe('--Header--');
+  it('a labelled "--Header--" line builds a REAL titled CreoleHorizontalLine atom (T5a: creole-titled-horizontal-line-literal)', () => {
+    const skin = fakeSkin(GUILLEMET_DEFAULT, realSheetBuilder());
+    const sheet = parser(skin).createSheet(display(['--Header--']));
+    const stripes = [...sheet];
+    expect(stripes).toHaveLength(1);
+    const atom = blockAtomOf(stripes[0]!) as { constructor: { name: string } };
+    expect(atom.constructor.name).toBe('CreoleHorizontalLine');
+  });
+
+  it('"..My title.." (pavozu-43-tone454 shape) also dispatches to a titled CreoleHorizontalLine, not literal text', () => {
+    const skin = fakeSkin(GUILLEMET_DEFAULT, realSheetBuilder());
+    const sheet = parser(skin).createSheet(display(['..My title..']));
+    const atom = blockAtomOf([...sheet][0]!) as { constructor: { name: string } };
+    expect(atom.constructor.name).toBe('CreoleHorizontalLine');
+  });
+});
+
+describe('CreoleParser — %newline() (U+E100) split (T5a: creole-e1-newline-split)', () => {
+  const E1_NEWLINE = BackSlash.hiddenNewLine();
+
+  it('a NORMAL line containing one %newline() sentinel produces TWO stripes (unknown/buitin-newline-chr-0)', () => {
+    const sheet = parser().createSheet(display([`test 4${E1_NEWLINE}test44`]));
+    const stripes = [...sheet];
+    expect(stripes).toHaveLength(2);
+    expect(textOf(stripes[0]!.getAtoms())).toBe('test 4');
+    expect(textOf(stripes[1]!.getAtoms())).toBe('test44');
+  });
+
+  it('a sentinel-free line still produces exactly one stripe (no behavior change)', () => {
+    const sheet = parser().createSheet(display(['plain']));
+    expect([...sheet]).toHaveLength(1);
+  });
+
+  it('the LAST split stripe becomes lastStripe for the following display line\'s alignment lookup', () => {
+    const sheet = parser().createSheet(display([`a${E1_NEWLINE}b`, 'c']));
+    const stripes = [...sheet];
+    expect(stripes).toHaveLength(3);
+    expect(textOf(stripes[2]!.getAtoms())).toBe('c');
+  });
+
+  it('a bare "====" line with a %newline() in its (empty) title still yields one empty-title stripe (title is empty, nothing to split)', () => {
+    const sheet = parser().createSheet(display(['====']));
+    expect([...sheet]).toHaveLength(1);
+  });
+
+  it('a titled "--A%newline()B--" splits into two titled CreoleHorizontalLine stripes, each its own piece', () => {
+    const skin = fakeSkin(GUILLEMET_DEFAULT, realSheetBuilder());
+    const sheet = parser(skin).createSheet(display([`--A${E1_NEWLINE}B--`]));
+    const stripes = [...sheet];
+    expect(stripes).toHaveLength(2);
+    expect((blockAtomOf(stripes[0]!) as { constructor: { name: string } }).constructor.name).toBe(
+      'CreoleHorizontalLine',
+    );
+    expect((blockAtomOf(stripes[1]!) as { constructor: { name: string } }).constructor.name).toBe(
+      'CreoleHorizontalLine',
+    );
   });
 });
 
