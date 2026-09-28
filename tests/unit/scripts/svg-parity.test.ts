@@ -16,6 +16,7 @@ import {
   parityOutPath,
   parseSurveyArgs,
 } from '../../../scripts/svg-parity-survey.js';
+import { routeConsoleToStderr } from '../../../scripts/svg-parity-workers.js';
 import type { FixtureRow, ParityReport } from '../../../scripts/svg-parity-survey.js';
 import {
   pct,
@@ -152,6 +153,19 @@ describe('computeDotEqual', () => {
 describe('parityOutPath', () => {
   it('derives tests/oracle/svg-conformance/parity-<type>.json', () => {
     expect(parityOutPath('class')).toBe(join(SVG_CONFORMANCE_DIR, 'parity-class.json'));
+  });
+});
+
+describe('routeConsoleToStderr (cdd5-T5)', () => {
+  it('sends log/info/debug to the stderr sink so `!log` cannot corrupt a worker frame', () => {
+    const lines: string[] = [];
+    const stdout = (..._args: unknown[]): unknown => 'stdout';
+    const con = { log: stdout, info: stdout, debug: stdout };
+    routeConsoleToStderr(con, (s) => lines.push(s));
+    con.info('[Log] vlookup on', 'cm');
+    con.log(42);
+    con.debug('d');
+    expect(lines).toEqual(['[Log] vlookup on cm\n', '42\n', 'd\n']);
   });
 });
 

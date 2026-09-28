@@ -1,0 +1,4 @@
+@startuml
+package packagé {
+Classé *-- çlasse : évidement
+@enduml

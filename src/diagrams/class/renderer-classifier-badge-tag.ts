@@ -142,39 +142,52 @@ export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
   );
 }
 
-/** `withMargin(4, 0, 5, 5)`'s top/bottom margin -- see `class-layout-header-
- *  creole.ts#computeBadgeSpriteBox`'s own doc comment (same value, small
- *  constant duplicated across the layout/render module family, matching
- *  this project's established convention rather than crossing a module
- *  boundary for one number). */
-const BADGE_SPRITE_TOP_MARGIN = 5;
-
 /**
- * CDD B7FU-R2 item (c-b): `class Foo <<($sprite[,color])>>`'s SPRITE badge
- * -- drawn in place of {@link renderBadge}'s default circled-character
- * badge whenever `geo.badgeSpriteImage` is set (`renderer-classifier-
- * box.ts#buildHeaderPrimitive`'s own dispatch). Position: jar-verified
- * rotisi-30-loge424 `class zz <<($bug16,red)>>` -- the image sits at
- * `geo.x + BADGE_LEFT_MARGIN(4), geo.y + BADGE_SPRITE_TOP_MARGIN(5)`
- * (box `x=287.5,y=116.114`, image `x=291.5,y=121.114`, both offsets
- * exact), i.e. flush against the classifier box's OWN top-left corner --
- * NOT vertically centered in `headerH` the way the char badge's `<ellipse>`
- * is (`Stereotype#getSprite`'s `withMargin(4,0,5,5)`-wrapped block is the
- * FIRST element `HeaderLayout`'s ctor places, at a fixed top offset, unlike
- * the circled-character badge's own vertical-center placement rule).
+ * CDD B7FU-R2 item (c-b) / cdd5-T3e (sprite-badge-headerlayout-offset,
+ * `diagnosis/S4-style.md`): `class Foo <<($sprite[,color])>>`'s SPRITE
+ * badge -- drawn in place of {@link renderBadge}'s default circled-
+ * character badge whenever `geo.badgeSpriteImage` is set (`renderer-
+ * classifier-box.ts#buildHeaderPrimitive`'s own dispatch).
+ *
+ * `getCircledCharacter` returns the sprite TextBlock in place of the
+ * `CircledCharacter` (`EntityImageClassHeader.java:166-169`), which the
+ * ctor then wraps with the SAME `withMargin(_, 4, 0, 5, 5)` every char
+ * badge gets (`EntityImageClassHeader.java:159`) -- so the sprite is
+ * positioned by the SAME `HeaderLayout#drawU` formula as the char badge's
+ * ellipse (`HeaderLayout.java:93-100`): `xCircle = h1`, `yCircle = (height
+ * - circleDim.height) / 2`, then the margin's own left/top inset (4, 5)
+ * places the sprite itself inside that block -- `spriteX = boxX + h1 + 4`,
+ * `spriteY = boxY + yCircle + 5`. Substituting `circleDim.height =
+ * spriteHeight + 10` (top+bottom margin) collapses `yCircle + 5` to
+ * `(headerH - spriteHeight) / 2` -- the sprite centers in the header row
+ * exactly like the char badge's ellipse centers on `headerH / 2` regardless
+ * of `circleDim.height` ({@link renderBadge}'s own doc comment).
+ *
+ * The PREVIOUS fixed `(geo.x + 4, geo.y + 5)` placement was only the
+ * `h1 === 0` special case (`rotisi-30-loge424`'s own citation, and
+ * `jajebe-95-jomo899`'s/`tivezu-91-bevu722`'s OWN `Foo2` classifiers,
+ * every one coincidentally zero-slack) -- wrong whenever the box is wider
+ * than its header content (`jajebe`'s `Foo`: h1=28.781; `tivezu`'s `Foo`:
+ * h1=1.4755, arithmetic-exact against the oracle's `image/@x=12.475,
+ * @y=14`). `badgeIndent` (`class-stereotype-layout.ts#buildHeaderRows`)
+ * already bakes in `h1 + BADGE_LEFT_MARGIN + badgeRadius` using the SAME
+ * `h1` (computed from the sprite's own `circleWidth`, `class-layout-
+ * header-geo.ts#computeStereoBlockGeo`'s `badgeSpriteBox` branch) --
+ * subtracting the identically-scaled char-badge radius back out recovers
+ * `(h1 + BADGE_LEFT_MARGIN) * k` without a second layout-side field.
  */
 export function renderBadgeSpriteImage(
   geo: ClassifierGeo,
   sprite: { href: string; width: number; height: number },
-  k: number,
+  theme: ScaledTheme,
 ): string {
-  return image(
-    geo.x + BADGE_LEFT_MARGIN * k,
-    geo.y + BADGE_SPRITE_TOP_MARGIN * k,
-    sprite.width,
-    sprite.height,
-    sprite.href,
-  );
+  const headerH = geo.dividerYs[0] ?? geo.height;
+  const nameRowIndex = (geo.headerRowCount ?? 1) - 1;
+  const badgeRadius = scaledBadgeRadius(theme);
+  const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN * theme.scaleK + badgeRadius;
+  const spriteX = geo.x + badgeIndent - badgeRadius;
+  const spriteY = geo.y + (headerH - sprite.height) / 2;
+  return image(spriteX, spriteY, sprite.width, sprite.height, sprite.href);
 }
 
 /**

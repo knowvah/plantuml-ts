@@ -1,0 +1,2 @@
+surveying 3 network fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-8beta1/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}

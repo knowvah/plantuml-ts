@@ -748,10 +748,38 @@ describe('routing conformance — jar-error classification', () => {
     // 4528 -> 4548 / 5680 -> 5700 at class-divergence-drive-4/close-b2
     // (2026-09-27): 20 more svg-class golden rows, same procedure.
     // Derivation: 4548 + 1053 + 99 = 5700.
-    expect(pinnedAgree.length).toBe(4548);
-    expect(pinnedMisroutes.length).toBe(1053);
-    expect(pinnedJarErrors.length).toBe(99);
-    expect(manifest.fixtures.length).toBe(5700);
+    //
+    // 4548 -> 4543 / 1053 -> 1052 / 99 -> 105 at cdd5-T0e (2026-09-27), total
+    // unchanged. Six rows go agree -> jar-error: gantt/votofi-06-rolo321, four
+    // wbs/WBS-*-def-* and unknown/zodude-13-tito074. Their jar was ALWAYS
+    // erroring; the old goldens were captured in a minute where
+    // PSystemError.java:218-228 adds a time-based donation banner, which hid
+    // the error signature from the head-read. Recaptured in a plain minute.
+    // One row goes known-misroute -> agree: sequence/soxata-16-kafi688 now
+    // routes SEQUENCE (measured by repin-sequence-baselines.ts at the re-pin).
+    // Derivation: 4543 + 1052 + 105 = 5700.
+    //
+    // 4543 -> 4665 / 5700 -> 5822 at cdd5/close-b1 (2026-09-28): 122 svg-class
+    // golden rows, 2 class (besepi, sokevu) + 120 unknown-tree pins keyed
+    // `unknown/<slug>` (D4; their goldens live at svg-class/unknown/<slug>/).
+    // Derivation: 4665 + 1052 + 105 = 5822.
+    //
+    // 4665 -> 4719 / 5822 -> 5876 at cdd5/close-b3 (2026-09-28): 54
+    // unknown-tree svg-class golden rows (`unknown/<slug>`, D4).
+    // Derivation: 4719 + 1052 + 105 = 5876.
+    //
+    // 4719 -> 4749 / 5876 -> 5906 at cdd5/close-b4 (2026-09-28): 30
+    // unknown-tree svg-class golden rows. Derivation: 4749 + 1052 + 105 = 5906.
+    //
+    // 4749 -> 4768 / 1052 -> 1051 / 5906 -> 5924 at cdd5/close-b5 (2026-09-28):
+    // 18 unknown-tree svg-class golden rows, plus unknown/zolaza-45-sepi570
+    // known-misroute -> agree (cdd5-T5d: CommandAddMethod.java:64-68 needs
+    // spaces around ':', so it now routes STATE like the jar).
+    // Derivation: 4768 + 1051 + 105 = 5924.
+    expect(pinnedAgree.length).toBe(4768);
+    expect(pinnedMisroutes.length).toBe(1051);
+    expect(pinnedJarErrors.length).toBe(105);
+    expect(manifest.fixtures.length).toBe(5924);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -801,7 +829,9 @@ describe('routing conformance — jar-error classification', () => {
     // 986 -> 985 at unknown-bucket-routing-repair/T11: recani retired.
     // 985 -> 942 at unknown-bucket-routing-repair/T10: 43 activity retirements.
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
-    expect(censused.length).toBe(1052);
+    // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
+    // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
+    expect(censused.length).toBe(1050);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

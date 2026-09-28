@@ -1,0 +1,9 @@
+@startuml
+dataclass AngleData <<lombok>> {
+  - aimingPitch : double
+  - aimingYaw : double
+  - aimingFinished : boolean
+  - lastAimed : long
+  - timestampAimingMode : long
+}
+@enduml

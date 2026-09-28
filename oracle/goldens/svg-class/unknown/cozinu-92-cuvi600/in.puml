@@ -1,0 +1,10 @@
+@startuml
+skinparam classFontSize 20
+skinparam packageFontSize 20
+package company {
+    class Employee {
+        id: Long
+        name: String
+    }
+}
+@enduml

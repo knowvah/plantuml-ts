@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
  * this file's own directory (computed, never a hardcoded absolute path —
  * T0b correction 3) so a bare `vitest run --config
  * plans/class-divergence-drive/tools/vitest.config.mts` collects exactly the
- * three files here, not the whole repo (a plain `include` glob without a
+ * four test files here, not the whole repo (a plain `include` glob without a
  * scoped `root` matches from the invocation cwd, which silently pulled in
  * all 750+ files in `tests/` during T0b's own tooling — see
  * `.agent-notes/cdd-T0b.md`).

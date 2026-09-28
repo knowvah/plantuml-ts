@@ -29,7 +29,7 @@
  *
  * The couple's C endpoint may be a pre-existing NOTE id (`note as N1` /
  * `N1 .. (A,B)`, temise-16-neco018) — reused directly instead of spawning a
- * phantom classifier, mirroring the relationship dispatcher's `isNoteId`
+ * phantom classifier, via the dispatcher's `resolveNoteEndpoint` probe
  * check (class-commands.ts rule 6).
  *
  * The multi-couple shared-circle form (`R1..(A,B)` + `(A,B)..R2`, bunuce/
@@ -48,7 +48,7 @@
  */
 
 import type { ClassDiagramAST, Classifier, Relationship } from './ast.js';
-import { isNoteId } from './class-notes.js';
+import { resolveNoteEndpoint } from './class-note-endpoint.js';
 import { stripQuotes } from './class-relationship-parser.js';
 import { resolveArrow, parseArrowDecors } from './class-arrow-grammar.js';
 import { EDGE_DECORATION_MAP } from './class-dot-edges.js';
@@ -100,7 +100,7 @@ export function applyAssocCouple(
   // G2 N19: the C endpoint may already be a declared NOTE (`note as N1` then
   // `N1 .. (A,B)`, temise-16-neco018) — reuse its id directly rather than
   // spawning a phantom classifier (mirrors class-commands.ts rule 6's
-  // isNoteId check for plain relationship endpoints). Resolved BEFORE the
+  // resolveNoteEndpoint probe for plain endpoints). Resolved BEFORE the
   // circle is synthesised: `CommandLinkClass#executeArgSpecial1/2` resolves
   // ALL THREE quarks (A, B, then C) before ever calling `associationClass`
   // -- jar-verified via `buvake-41-vulu531`'s creation order (`class A;
@@ -108,7 +108,7 @@ export function applyAssocCouple(
   // circle's own "apoint4" name burn) -- so a NEWLY auto-created C must get
   // its `creationIndex` before the circle's phantom-slot burns below.
   const cName = stripQuotes(c);
-  const cId = isNoteId(ast, cName) ? cName : ensure(c).id;
+  const cId = resolveNoteEndpoint(ast, cName, null) ?? ensure(c).id; // cdd5-T5d: quark-resolved
   const { circleId, classEdgeLength, forceCircleToClass, circle, invisSiblingEdges } = makeCoupleCircle(
     ast,
     ensure,

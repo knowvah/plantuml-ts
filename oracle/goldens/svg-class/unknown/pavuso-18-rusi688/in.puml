@@ -1,0 +1,5 @@
+@startuml
+package Some {
+}
+Some --|> Some
+@enduml

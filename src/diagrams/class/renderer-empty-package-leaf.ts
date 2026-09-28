@@ -7,6 +7,7 @@ import type { ScaledTheme } from './class-scale-geo.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { renderEmptyPackageIcon } from './class-namespace-shape.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
+import { linkWrap } from '../../core/svg.js';
 
 /**
  * G2 N33: a collapsed-empty `package`/`namespace` leaf (`ClassifierGeo
@@ -47,5 +48,12 @@ export function renderEmptyPackageLeaf(
   // cdd3-T21 (E3-6): the measured stereo block + packageStyle symbol, and
   // the entity's style tags (`EntityImageEmptyPackage#getStyle`'s
   // `withTOBECHANGED(stereotype)`, `EntityImageEmptyPackage.java:88-91`).
-  return renderEmptyPackageIcon(nsGeo, theme, measurer, { tab: folderTab, tags: geo.stereotypeLabels ?? [] });
+  const icon = renderEmptyPackageIcon(nsGeo, theme, measurer, { tab: folderTab, tags: geo.stereotypeLabels ?? [] });
+  // cdd5-T4e (empty-package-leaf-url-dropped): `EntityImageEmptyPackage
+  // .java:148-149,168-169` brackets the drawn shapes in `ug.startUrl(url)`/
+  // `closeUrl()` -- a raw `<a>`, no `<g>`, matching this leaf's existing
+  // unwrapped-sibling draw structure (`geo.url` already carries the
+  // `[[url]]`, copied from `Namespace.url` at collapse time,
+  // `class-namespace.ts:113`).
+  return geo.url !== undefined ? linkWrap(icon, geo.url) : icon;
 }

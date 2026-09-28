@@ -23,6 +23,8 @@ import { buildTheme } from '../../../src/core/build-theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
+import type { AssetStore } from '../../../src/core/asset-store.js';
+import type { IncludeStore } from '../../../src/core/tim/IncludeStore.js';
 import type { ClassDiagramAST } from '../../../src/diagrams/class/ast.js';
 import type { ClassGeometry } from '../../../src/diagrams/class/layout.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
@@ -167,4 +169,34 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   if (fragment.preChromeWidth === undefined) return assembleSvg(chromed, seed);
   const margined = applyClassDocumentMargin({ width: chromed.width, height: chromed.height });
   return assembleSvg({ ...chromed, width: margined.width, height: margined.height }, seed);
+}
+
+/**
+ * cdd5-T1 (D3): `renderFixtureClass`'s options bag, restricted to the two
+ * fields a census caller may pass -- the same types `RenderOptions.assetStore`
+ * /`RenderOptions.includeStore` take (`src/core/render-options.ts`).
+ */
+export interface ClassFixtureRenderOptions {
+  assetStore?: AssetStore;
+  includeStore?: IncludeStore;
+}
+
+/**
+ * Census = survey minus the measurer (D3). `renderFixtureClass` above forces
+ * `parseClass` directly and skips the dispatcher's entity-collision guard
+ * (`src/index.ts`'s `render`/`renderSync` route every source through the
+ * block dispatcher FIRST), which disagreed with the survey's own
+ * `renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore,
+ * includeStore })` (`scripts/svg-parity-survey.ts:278-282`) on any fixture an
+ * entity-collision guard or a parse refusal touches (luzive, sadamo, sokevu
+ * -- cdd4 journal 22-23, T4, T13). `renderClassFixture` is a thin wrapper
+ * around `renderSync` itself, so the census and the survey can no longer
+ * diverge on ANYTHING but which measurer is injected.
+ */
+export function renderClassFixture(
+  markup: string,
+  measurer: StringMeasurer,
+  opts?: ClassFixtureRenderOptions,
+): string {
+  return renderSync(markup, { measurer, ...opts });
 }

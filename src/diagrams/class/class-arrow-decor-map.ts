@@ -84,6 +84,12 @@ const HEAD_TO_DECOR: Record<string, LinkDecor> = {
   '<|:': 'definedBy',
   ':|>': 'definedBy',
   '^': 'triangle',
+  // cdd5-T5d (zefefo-37-xigo245): LinkDecor.CIRCLE -- `CIRCLE(decors1("0"),
+  // decors2("0"), 0, false, 0.5)` (`decoration/LinkDecor.java:90`). The glyph
+  // was already a head token (class-arrow-grammar.ts HEAD1_KIND/HEAD2_KIND)
+  // but decorated nothing, so no circle was drawn and `bothNone()` wrongly
+  // yielded `data-link-type="association"` (`LinkType.java:301-307`).
+  '0': 'circle',
 };
 
 // '' → no standard marker (D6 scope note: DOT parity only, not SVG rendering).

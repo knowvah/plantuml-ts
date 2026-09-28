@@ -26,6 +26,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+import { renderSync } from '../../../src/index.js';
 import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import type { NamespaceGeo } from '../../../src/diagrams/class/layout.js';
 import { renderNamespaceUSymbol } from '../../../src/diagrams/class/class-namespace-usymbol-shape.js';
@@ -256,5 +257,45 @@ describe('renderNamespaceUSymbol — <<Database>> per-symbol paint + multi-line 
     // wider line's `@x`, never equal to it (which LEFT alignment would
     // produce for two differently-sized lines).
     expect(xs[0]).toBeGreaterThan(xs[1]!);
+  });
+});
+
+// cdd5-T5c (cluster-style-signature-unmerged, the border half that already
+// reaches the Theme): `Cluster.java:291` "StyleSignatureBasic.of(SName.root,
+// SName.element, diagramStyleName, SName.group, symbol.getSNames())" puts
+// `group` in every USymbol cluster signature, and `FromSkinparamToStyle.java
+// :128` "addConvert(\"packageBorderColor\", PName.LineColor, SName.group)"
+// makes `skinparam packageBorderColor` a group LineColor -- so it strokes a
+// `rectangle` cluster too (jar gigoru-88-naze087: `stroke:#F00`). A folder
+// cluster (`{group, package_}`) also takes `<style> package { LineColor }`
+// (jar cevoti-40-jeco305 / guxico-27-bofu708).
+describe('cluster border reaches the merged group style (cdd5-T5c)', () => {
+  it('strokes a rectangle cluster with skinparam packageBorderColor', () => {
+    const svg = renderSync(
+      ['@startuml', 'skinparam packageBorderColor red', 'rectangle R {', 'class b', '}', '@enduml'].join('\n'),
+      { measurer: new WidthTableMeasurer() },
+    );
+    expect(svg).toContain('<rect x="7" y="7" width="72" height="97" fill="none" style="stroke:#F00;stroke-width:1;"');
+  });
+
+  it('strokes a folder cluster with <style> package { LineColor }', () => {
+    const svg = renderSync(
+      [
+        '@startuml',
+        '<style>',
+        'package {',
+        '  LineColor red',
+        '}',
+        '</style>',
+        'package P {',
+        'class a',
+        '}',
+        '@enduml',
+      ].join('\n'),
+      { measurer: new WidthTableMeasurer() },
+    );
+    expect(svg).toMatch(
+      /<path d="M8\.5,[^"]*" fill="none" stroke="#F00" stroke-width="1\.5"\/><line [^>]*stroke="#F00"/u,
+    );
   });
 });

@@ -59,14 +59,14 @@ describe('note-in-package cluster membership', () => {
     const { ast, graph } = captureDotGraph(
       ['package p {', '  class A', '  note as N', '  hi', '  end note', '}'].join('\n'),
     );
-    const note = ast.notes.find((n) => n.id === 'N');
-    expect(note).toMatchObject({ id: 'N', namespace: 'p' });
+    // cdd5-T5d: the alias is group-qualified like a classifier's id
+    // (`quarkInContext(false, …)`, CommandFactoryNote.java:192).
+    const note = ast.notes.find((n) => n.id === 'p.N');
+    expect(note).toMatchObject({ id: 'p.N', namespace: 'p' });
 
     const cluster = clusterByLabel(graph, 'p');
     expect(cluster).toBeDefined();
-    expect(cluster!.nodeIds).toContain('N');
-    // Classifier ids inside a package are namespace-qualified (`p.A`); the
-    // note's DOT node id stays bare (`N`) — see class-dot-graph.ts.
+    expect(cluster!.nodeIds).toContain('p.N');
     expect(cluster!.nodeIds).toContain('p.A');
   });
 
@@ -93,21 +93,22 @@ describe('note-in-package cluster membership', () => {
         '}',
       ].join('\n'),
     );
-    const note = ast.notes.find((n) => n.id === 'N');
+    const note = ast.notes.find((n) => n.id === 'outer.inner.N');
     expect(note?.namespace).toBe('outer.inner');
 
     const innerCluster = clusterByLabel(graph, 'inner');
     const outerCluster = clusterByLabel(graph, 'outer');
     expect(innerCluster).toBeDefined();
     expect(outerCluster).toBeDefined();
-    expect(innerCluster!.nodeIds).toContain('N');
-    expect(outerCluster!.nodeIds).not.toContain('N');
+    expect(innerCluster!.nodeIds).toContain('outer.inner.N');
+    expect(outerCluster!.nodeIds).not.toContain('outer.inner.N');
   });
 
   it('(d) an attached `note left of A: x` inside a package lands in the SAME cluster as A', () => {
     const { ast, graph } = captureDotGraph(['package p {', '  class A', '  note left of A: x', '}'].join('\n'));
     const note = ast.notes[0];
-    expect(note).toMatchObject({ target: 'A', position: 'left', text: 'x', namespace: 'p' });
+    // cdd5-T3c: qualified host, per CommandFactoryNoteOnEntity.java:303.
+    expect(note).toMatchObject({ target: 'p.A', position: 'left', text: 'x', namespace: 'p' });
 
     const cluster = clusterByLabel(graph, 'p');
     expect(cluster).toBeDefined();
@@ -120,7 +121,7 @@ describe('note-in-package cluster membership', () => {
       ['package p {', '  class A', '  note left of A', '  hi', '  end note', '}'].join('\n'),
     );
     const note = ast.notes[0];
-    expect(note).toMatchObject({ target: 'A', position: 'left', namespace: 'p' });
+    expect(note).toMatchObject({ target: 'p.A', position: 'left', namespace: 'p' });
 
     const cluster = clusterByLabel(graph, 'p');
     expect(cluster!.nodeIds).toContain(note!.id);

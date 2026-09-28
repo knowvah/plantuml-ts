@@ -1,0 +1,40 @@
+Class-visibility-0: verdict diverged -> conformant
+Class-visibility-1: verdict diverged -> conformant
+Class-visibility-2: verdict diverged -> conformant
+Class-visibility-3: verdict diverged -> conformant
+Class-visibility-4: verdict diverged -> conformant
+Class-visibility-5: verdict diverged -> conformant
+baleco-37-lili752: verdict structural-match -> conformant
+boguko-42-zuda981: diff count rose 17 -> 20
+catigu-77-keje426: verdict structural-match -> conformant
+cilibi-66-tasa181: verdict diverged -> conformant
+daroli-95-remo515: verdict structural-match -> conformant
+dezobu-62-vuzu421: diff count rose 13 -> 16
+fetajo-61-sesi146: verdict structural-match -> conformant
+fidaru-93-zumu093: verdict diverged -> conformant
+galata-74-luka487: verdict structural-match -> conformant
+gasevo-58-ciso782: verdict structural-match -> conformant
+gegosa-79-mini423: verdict diverged -> conformant
+gogisu-39-bepa573: verdict structural-match -> conformant
+gubeca-19-lemu434: verdict diverged -> structural-match
+jimizu-14-zole306: verdict structural-match -> conformant
+josebu-55-seje426: verdict diverged -> structural-match, diff count rose 5 -> 6
+juzuno-58-gesi397: verdict structural-match -> conformant
+kelefe-72-cefi192: verdict diverged -> conformant
+komuvi-52-vave599: verdict diverged -> conformant
+latilu-49-jebu021: verdict structural-match -> conformant
+mupavi-50-fijo192: verdict diverged -> conformant
+petiku-70-fogu777: diff count rose 6 -> 38
+rinidi-95-neko205: verdict structural-match -> conformant
+rizisu-50-liza998: verdict structural-match -> conformant
+rojida-14-fuli428: verdict diverged -> structural-match, diff count rose 200 -> 204
+rozugu-82-pera583: diff count rose 7 -> 8
+rukate-37-jabu394: verdict diverged -> conformant
+sapofa-97-gizu737: verdict diverged -> structural-match, diff count rose 8 -> 11
+taboco-79-pire192: verdict diverged -> conformant
+tefeco-12-rato895: verdict diverged -> structural-match
+terede-92-fuka839: verdict diverged -> conformant
+tonake-05-zibo183: verdict diverged -> conformant
+toxore-88-ruso838: verdict diverged -> conformant
+xisora-84-faca166: verdict diverged -> conformant
+39 transition(s)

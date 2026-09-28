@@ -41,7 +41,8 @@ describe('computeLeafDrawOrder (T2, leaf-draw-order)', () => {
       const pA = ast.classifiers.find((c) => c.display === 'A' && c.namespace === 'P')!;
       expect(pA.id).toBe('P.A');
       const order = computeLeafDrawOrder(ast);
-      expect(order).toEqual([pA.id, 'N', 'X', 'Y', '__note_1']);
+      // cdd5-T5d: the freestanding note's alias is group-qualified (jar `P.N`).
+      expect(order).toEqual([pA.id, 'P.N', 'X', 'Y', '__note_1']);
     },
   );
 

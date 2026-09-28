@@ -2168,7 +2168,8 @@ describe('renderClass — leaf draw order (mission leaf-draw-order T4)', () => {
         new DeterministicMeasurer(),
       );
       const order = [...svg.matchAll(/data-qualified-name="([^"]*)"/g)].map((m) => m[1]);
-      expect(order).toEqual(['P', 'P.A', 'N', 'X', 'Y', '__note_1']);
+      // cdd5-T5d: `P.N` -- the freestanding alias is group-qualified, as in jar.
+      expect(order).toEqual(['P', 'P.A', 'P.N', 'X', 'Y', '__note_1']);
     },
   );
 });

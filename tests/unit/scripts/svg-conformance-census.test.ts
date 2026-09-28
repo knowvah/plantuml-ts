@@ -118,6 +118,18 @@ describe('toCensusJson', () => {
     expect(json.fixtures[0]?.reason).toBe('unknown error');
   });
 
+  it('carries a row tree through to the JSON fixture (cdd5 D4)', () => {
+    const treed: CensusResult[] = [
+      { slug: 'kkk', type: 'class', tree: 'unknown', diffCount: 0, paths: [] },
+      { slug: 'jjj', type: 'class', tree: 'class', diffCount: 'error', reason: 'x' },
+    ];
+    const json = toCensusJson('class', treed, { generatedAt: 't1', measuredAgainstCommit: 'abc123' });
+    expect(json.fixtures).toEqual([
+      { slug: 'jjj', tree: 'class', status: 'error', diffCount: null, bucket: null, reason: 'x' },
+      { slug: 'kkk', tree: 'unknown', status: 'ok', diffCount: 0, bucket: '0' },
+    ]);
+  });
+
   it('is identical across two calls except meta.generatedAt (AC4)', () => {
     const a = toCensusJson('activity', rows, { generatedAt: 't1', measuredAgainstCommit: 'abc123' });
     const b = toCensusJson('activity', rows, { generatedAt: 't2', measuredAgainstCommit: 'abc123' });

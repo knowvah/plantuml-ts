@@ -23,7 +23,8 @@ import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-comm
 import type { Theme } from '../../core/theme.js';
 import { resolveElementFontSize } from '../../core/theme-element-resolve.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { sizingAtomImageResolverFor } from '../../core/svek/image/leaf-sizing-entity.js';
+import { sizingAtomImageResolverFor, measureEntityLeaf } from '../../core/svek/image/leaf-sizing-entity.js';
+import { KEYWORD_TO_SYMBOL } from '../../core/descriptive-keywords.js';
 import { DEFAULT_SIZING_STROKE_THICKNESS } from '../../core/svek/image/leaf-sizing-consts.js';
 import {
   EntityImageDescription,
@@ -37,6 +38,31 @@ import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.j
 import { UStroke } from '../../core/klimt/UStroke.js';
 import type { FontStyle } from '../../core/klimt/shape/UText.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
+
+/**
+ * cdd5-T4b: a `usecase/` leaf is `LeafType.USECASE_BUSINESS`, whose USymbol
+ * is `USECASE_BUSINESS` (`abel/Entity.java:412-413`: "if (getLeafType() ==
+ * LeafType.USECASE_BUSINESS) return USymbols.USECASE_BUSINESS;"), sized by
+ * the same `EntityImageDescription` as a plain usecase
+ * (`svek/GeneralImageBuilder.java:173-174`). `measureUsecaseOrActorLeaf`
+ * only takes the two plain symbols, so this calls the shared
+ * `measureEntityLeaf` it wraps, with the same `opts: undefined` / no
+ * min-width floor. Every other usecase/actor keeps the plain entry point.
+ */
+function measureUsecaseOrActorDim(
+  classifier: Classifier,
+  symbol: 'usecase' | 'actor',
+  fontSpec: { family: string; size: number },
+  measurer: StringMeasurer,
+  sprites: SpriteDimsLookup | undefined,
+): { width: number; height: number } {
+  if (classifier.kind !== 'usecase' || classifier.usymbol === undefined) {
+    return measureUsecaseOrActorLeaf(classifier.display, symbol, fontSpec, measurer, sprites);
+  }
+  const business = KEYWORD_TO_SYMBOL.get(classifier.usymbol) ?? 'usecase-business';
+  const subject = { id: '', display: classifier.display, symbol: business };
+  return measureEntityLeaf(subject, fontSpec, { opts: undefined, sprites, measurer }, false);
+}
 
 /**
  * Measure the usecase/actor USymbol box — the two allowmixing kinds whose
@@ -64,7 +90,7 @@ export function measureUsecaseOrActor(
 ): MeasuredClassifier {
   const symbol = classifier.kind === 'usecase' ? 'usecase' : 'actor';
   const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
-  const dim = measureUsecaseOrActorLeaf(classifier.display, symbol, fontSpec, measurer, spriteDims);
+  const dim = measureUsecaseOrActorDim(classifier, symbol, fontSpec, measurer, spriteDims);
   // The DRAWN ink extent, carried through to `class-ink-box.ts
   // #addClassifierInk` so an actor's ink is its own head/body/label union
   // rather than `addRectInk`'s `(x - 1, y - 1)` box corner — which sits 1.5

@@ -78,4 +78,6 @@ export type LinkDecor =
   | 'notNavigable'
   | 'redefines'
   | 'definedBy'
+  // cdd5-T5d: LinkDecor.CIRCLE (`0`), decoration/LinkDecor.java:90.
+  | 'circle'
   | 'none';

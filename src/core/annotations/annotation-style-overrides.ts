@@ -90,6 +90,17 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
       }
     },
   ],
+  [
+    // cdd5-T4e (legend-style-maximumwidth-ignored): `PName.MaximumWidth`
+    // (`Style.java:330-333`) -- only `<style>` sets it, no skin selector or
+    // skinparam key does (`AnnotationBoxStyle.maximumWidth`'s own doc
+    // comment); only `legend`'s draw call site consumes it.
+    'maximumwidth',
+    (s, v) => {
+      const n = Number.parseInt(v.trim(), 10);
+      if (Number.isFinite(n)) s.maximumWidth = n;
+    },
+  ],
 ];
 
 function applyDeclarations(

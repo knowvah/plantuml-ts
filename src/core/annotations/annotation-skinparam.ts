@@ -109,12 +109,32 @@ const SKINPARAM_PREFIXES: Partial<Record<AnnotationElement, string>> = {
   legend: 'legend',
 };
 
+// cdd5-T4e (legend-document-background-cascade): the ONE bare (unprefixed)
+// document-level skinparam key upstream's conversion table knows --
+// `FromSkinparamToStyle.java:180`: "addConvert(\"BackgroundColor\",
+// PName.BackGroundColor, SName.document);". Every chrome element's own
+// style signature includes `SName.document` (`EntityImageLegend.java:49-51`
+// for legend; `DiagramChromeFactory.java:284,368,388,414,425` for
+// mainframe/title/caption/header/footer), so a bare `skinparam
+// BackgroundColor` cascades to ALL of them, exactly like the already-ported
+// `<style> document { BackGroundColor ... }` cascade
+// (`annotation-style-overrides.ts#applyStyleOverrides`'s own `documentBare`
+// term, G2 N51) -- applied FIRST so a more specific per-element key (below)
+// still overwrites it, mirroring that sibling function's precedence.
+const BARE_DOCUMENT_BACKGROUND_KEY = 'backgroundcolor';
+
 export function applySkinparamOverrides(
   element: AnnotationElement,
   style: AnnotationBoxStyle,
   skinparam: ReadonlyMap<string, string>,
   documentBackgroundHex: string,
 ): void {
+  for (const [rawKey, value] of skinparam) {
+    if (normaliseAnnotationKey(rawKey) === BARE_DOCUMENT_BACKGROUND_KEY) {
+      style.backgroundColor = resolveChromeColor(value);
+    }
+  }
+
   const prefix = SKINPARAM_PREFIXES[element];
   if (prefix === undefined) return;
 

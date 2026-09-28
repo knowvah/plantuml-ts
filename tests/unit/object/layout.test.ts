@@ -105,11 +105,16 @@ describe('layoutClass with object diagram — multiple objects', () => {
 // ---------------------------------------------------------------------------
 
 describe('layoutClass with object diagram — empty', () => {
-  it('returns zero-size geometry for empty diagram', () => {
+  // cdd5-T3a: an entity-less object diagram takes the same svek path as
+  // class, so its body is upstream's 10x10 EntityImageSimpleEmpty
+  // (GraphvizImageBuilder.java:210-211, :168) plus the document margin.
+  it('returns the 10x10 simple-empty body for an empty diagram', () => {
     const ast = parseClass(src([]));
     const geo = layoutClass(ast, theme, measurer);
-    expect(geo.totalWidth).toBe(0);
-    expect(geo.totalHeight).toBe(0);
+    expect(geo.rawWidth).toBe(10);
+    expect(geo.rawHeight).toBe(10);
+    expect(geo.totalWidth).toBe(16);
+    expect(geo.totalHeight).toBe(16);
     expect(classifierLeaves(geo.leaves)).toHaveLength(0);
     expect(geo.edges).toHaveLength(0);
   });

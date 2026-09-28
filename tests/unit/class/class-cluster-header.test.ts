@@ -243,3 +243,39 @@ describe('draw sites place the header block (USymbolFolder / USymbolRectangle #a
     expect(Number(title?.[1])).toBeCloseTo(77 + 12.889, 6);
   });
 });
+
+// cdd5-T5c (cluster-header-sprite-stereotype): `ClusterHeader.java:199-201`
+// "final TextBlock tmp = stereotype.getSprite(skinParam); if (tmp != null)
+// return tmp;" -- a `<<$sprite>>` group stereotype IS the stereo block.
+// Jar dilese-24-neku812 (`database MyApp <<$java>>`, a 48x48 sprite):
+// `<image width="48" height="48" x="50" y="28" ...>`, no «$java» text, DOT
+// title table WIDTH="48" HEIGHT="72".
+describe('sprite stereotype on a cluster (ClusterHeader.java:199-201)', () => {
+  function spriteLines(): string[] {
+    const rows = Array.from({ length: 4 }, () => '0F0F');
+    return ['sprite $box [4x4/16] {', ...rows, '}'];
+  }
+
+  it('draws the sprite as the whole stereo block, sized sprite dims x scale', () => {
+    const ast = parse([...spriteLines(), 'package P <<$box>> {', 'class Y', '}']);
+    const header = buildClusterHeaderStereo(ns(ast, 'P'), ast, defaultTheme, measurer);
+    expect(header?.width).toBe(4);
+    expect(header?.height).toBe(4);
+    expect(header?.body).toMatch(/^<image [^>]*width="4" height="4"[^>]*x="0" y="0"|^<image /u);
+    expect(header?.body).toContain('data:image/png;base64,');
+    expect(header?.body).not.toContain('«');
+  });
+
+  it('honours the stereotype sprite scale (<<$box{scale=2}>>)', () => {
+    const ast = parse([...spriteLines(), 'package P <<$box{scale=2}>> {', 'class Y', '}']);
+    const header = buildClusterHeaderStereo(ns(ast, 'P'), ast, defaultTheme, measurer);
+    expect(header?.width).toBe(8);
+    expect(header?.height).toBe(8);
+  });
+
+  it('falls back to the «label» block when the sprite name is unknown', () => {
+    const ast = parse(['package P <<$nope>> {', 'class Y', '}']);
+    const header = buildClusterHeaderStereo(ns(ast, 'P'), ast, defaultTheme, measurer);
+    expect(header?.body).toContain('«$nope»');
+  });
+});

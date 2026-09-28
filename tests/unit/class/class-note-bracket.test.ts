@@ -79,7 +79,9 @@ describe('brace-terminated note on entity: `note <pos> [of X] {` … `}`', () =>
       }
     `);
     expect(ast.notes).toHaveLength(1);
-    expect(ast.notes[0]).toMatchObject({ target: 'Inside', text: 'body text', namespace: 'ns' });
+    // cdd5-T3c: the host id is namespace-qualified, as upstream's
+    // `quarkInContext(true, idShort)` resolves it (CommandFactoryNoteOnEntity.java:303).
+    expect(ast.notes[0]).toMatchObject({ target: 'ns.Inside', text: 'body text', namespace: 'ns' });
     expect(ast.classifiers.find((c) => c.display === 'Inside')).toBeDefined();
   });
 

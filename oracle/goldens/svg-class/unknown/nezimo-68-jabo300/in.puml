@@ -1,0 +1,4 @@
+@startuml
+title regular
+thing1 -- thing2 [[{This is shown on hover}]]: " "
+@enduml

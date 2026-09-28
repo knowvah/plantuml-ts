@@ -1,0 +1,9 @@
+@startuml
+folder test2 [
+TEXT
+]
+
+folder test2 [
+TEXT
+]
+@enduml

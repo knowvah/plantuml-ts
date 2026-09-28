@@ -1,0 +1,2 @@
+surveying 11 c4 fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-8beta1/parity-c4.json — {"conformant":0,"structural-match":1,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}

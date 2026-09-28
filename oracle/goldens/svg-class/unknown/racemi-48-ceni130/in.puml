@@ -1,0 +1,6 @@
+@startuml
+A +-- B
+A +-- E
+C --+ D
+
+@enduml

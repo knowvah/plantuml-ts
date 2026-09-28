@@ -1,0 +1,8 @@
+@startuml
+namespace net {
+}
+
+namespace fr.site {
+}
+
+@enduml

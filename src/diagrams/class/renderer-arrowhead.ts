@@ -100,6 +100,10 @@ const DECOR_TO_NAME: Record<Exclude<LinkDecor, 'none'>, LinkDecorName> = {
   // this file's own dispatch just needed the two new decor names named.
   redefines: 'REDEFINES',
   definedBy: 'DEFINEDBY',
+  // cdd5-T5d: exhaustiveness entry for the new `circle` member
+  // (LinkDecor.CIRCLE, `decoration/LinkDecor.java:90`); the extremity is the
+  // already-built `link-decor.ts#BUILDERS.CIRCLE`.
+  circle: 'CIRCLE',
 };
 
 export function decorName(decor: LinkDecor): LinkDecorName | undefined {

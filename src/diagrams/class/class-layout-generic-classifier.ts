@@ -162,16 +162,14 @@ export interface MeasureGenericClassifierOptions {
    *  Optional; absent/0 = no floor (upstream's own default).
    *  @see ~/git/plantuml/.../svek/image/EntityImageClass.java:104-106 */
   minClassWidth?: number;
-  /** A2s F-G mechanism A13: `skinparam classAttributeIconSize`
+  /** A2s F-G mechanism A13 / cdd5-T5e: `skinparam classAttributeIconSize`
    *  (`SkinParam#classAttributeIconSize()` = `getAsInt(..., 10)`,
    *  SkinParam.java:554-556) -- pre-resolved by the caller
    *  (`measureClassifier`, from `theme.classAttributeIconSize`), mirroring
-   *  `badgeRadius`'s precedent. ONLY the value `0` changes behavior
-   *  (`MethodsOrFieldsArea#hasSmallIcon` java:125-127 returns false
-   *  outright; `#createTextBlock` java:244-246 keeps the visibility char in
-   *  the member text instead). Absent = upstream default 10 = icons on.
-   *  `| undefined` for exactOptionalPropertyTypes: the caller passes
-   *  `theme.classAttributeIconSize` through unconditionally. */
+   *  `badgeRadius`'s precedent. `0` disables a member row's small icon
+   *  (`MethodsOrFieldsArea#hasSmallIcon` java:125-127); ALSO threaded to
+   *  the header's OWN icon reservation (`class-layout-header-geo.ts`).
+   *  Absent = upstream default 10 = icons on. */
   classAttributeIconSize?: number | undefined;
   /** cdd2-T11 (Q-1): the two floors `EntityImageClass#calculateDimensionSlow`
    *  applies AFTER `minClassWidth` -- `paramSameClassWidth` and
@@ -210,6 +208,7 @@ function buildHeaderAndStereoGeo(
     headerMaxWidth,
     sprites,
     genericDisplayOld,
+    classAttributeIconSize: options.classAttributeIconSize, // cdd5-T5e: was resolved but never threaded on
   });
   const stereoGeo = computeStereoAndTagGeo(classifier, fonts, measurer, headerNameGeo, {
     guillemet,

@@ -49,6 +49,12 @@
  * sentinel as `in.puml` and as `object.puml` — byte-identical), which is what
  * lets all sentinels share a single JVM start below.
  *
+ * **Re-pinned to 1.2026.8beta1 (`97a5992`) by cdd5 T0c, 2026-09-27.** Every
+ * cached type was recaptured in place (4825 dirs, 0 jar failures); 93 cache
+ * files moved and none of the sentinels below is among them, so the sentinel
+ * list and {@link EMISSION_FORM_PROBES} carry over unchanged. The chronology
+ * sentinel still renders the "Diagram not supported" page under 8beta1.
+ *
  * Costs ONE JVM start (~1–2s) for the whole set rather than one per type.
  * Runs in `npm test` rather than as a census preflight so that CI executes it
  * on every change, not only when someone chooses to run the census.

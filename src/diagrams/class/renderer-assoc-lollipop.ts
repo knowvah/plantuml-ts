@@ -12,6 +12,7 @@ import type { ScaledTheme } from './class-scale-geo.js';
 import { ASSOC_POINT_SIZE, LOLLIPOP_SIZE } from './class-lollipop.js';
 import { renderRow } from './renderer-classifier-box.js';
 import { classifierFill, classBorderLine, classBorderStrokeWidth } from './renderer-classifier-colors.js';
+import { leafPortion, wrapEntity } from './renderer-group.js';
 
 /**
  * `(A,B) .. C`'s tiny circle connector — G2 N8, `EntityImageAssociationPoint
@@ -78,6 +79,21 @@ export function renderAssociationDiamond(geo: ClassifierGeo, theme: ScaledTheme)
     stroke: classBorderLine(geo, theme),
     strokeWidth: classBorderStrokeWidth(geo, theme),
   });
+}
+
+/**
+ * cdd5-T4b: the `kind: 'association'` leaf as drawn -- `<> X`
+ * (`EntityImageAssociation`) bare, `diamond X` (`LeafType.STATE_CHOICE`,
+ * `EntityImageBranch`, marked by its `usymbol` keyword) inside the entity
+ * group `EntityImageBranch.java:86-94` opens ("group.put(UGroupType.CLASS,
+ * \"entity\"); ... ug.startGroup(group);"), with no `<!--class-->` comment
+ * (that `drawU` draws no `UComment`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageBranch.java:86-94
+ */
+export function renderAssociationLeaf(geo: ClassifierGeo, theme: ScaledTheme, uid: string | undefined): string {
+  const diamond = renderAssociationDiamond(geo, theme);
+  if (geo.usymbol !== 'diamond') return diamond;
+  return wrapEntity(leafPortion(geo.id), uid ?? '', geo.id, false, diamond);
 }
 
 /**

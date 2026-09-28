@@ -1,0 +1,6 @@
+@startuml
+hide empty attributes
+hide empty methods
+
+Menu -- "*" MenuItem
+@enduml

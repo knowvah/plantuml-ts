@@ -1,0 +1,7 @@
+@startuml
+skinparam svek true
+hide members
+hide class circled
+TopLinkSessionMgr "*" -- TopLinkService
+
+@enduml

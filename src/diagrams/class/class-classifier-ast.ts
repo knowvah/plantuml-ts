@@ -4,7 +4,7 @@
  * `import type { Classifier, ClassifierKind } from './ast.js'` sites work.
  */
 
-import type { Member } from './class-member-ast.js';
+import type { Member, Visibility } from './class-member-ast.js';
 import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { UrlInfo } from './class-url.js';
 import type { MapRow } from './ast.js';
@@ -213,14 +213,14 @@ export interface Classifier {
    * @see ~/git/plantuml/.../abel/Entity.java:262-281 getUrl99/addUrl
    */
   url?: UrlInfo;
-  /**
-   * `$tag` names attached via a classifier declaration (`class Foo $a $b`) —
-   * upstream `Entity#stereotags()` (`Set<Stereotag>`). Consulted by
-   * `remove`/`restore $tag` directives (class-directives.ts#computeRemovedIds).
+  /** `$tag` names from `class Foo $a $b` — upstream `Entity#stereotags()`;
+   *  read by `remove`/`restore $tag` (class-directives.ts#computeRemovedIds).
    * @see ~/git/plantuml/.../stereo/Stereotag.java
-   * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java#addTags
-   */
+   * @see ~/git/plantuml/.../classdiagram/command/CommandCreateClassMultilines.java#addTags */
   tags?: string[];
+  /** cdd5-T4b: `+class A`'s VISIBILITY char (`Entity#setVisibilityModifier`, METHOD variant).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageClassHeader.java:109-121 */
+  visibilityModifier?: Visibility;
   /** Set to true by hide/show post-processing when the circle badge should be suppressed. */
   hideCircle?: boolean;
   /**

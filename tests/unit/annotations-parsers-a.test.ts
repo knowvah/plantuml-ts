@@ -81,15 +81,16 @@ describe('class — annotation commands land in ast.annotations', () => {
     expect(ast.classifiers.map((c) => c.id)).toEqual(['foo', 'bar']);
   });
 
-  it('a `title:`/`header:` colon-form line at top level is member-addition (CommandAddMethod), not chrome — matches upstream registration order', () => {
-    // ClassDiagramFactory registers CommonCommands.addTitleCommands LAST
-    // (line 168 of ~170), AFTER the generic `CODE : text` member rule (line
-    // 109) -- so `header: text` creates/appends to a classifier literally
-    // named `header`, exactly like real upstream output (see parser.ts's
-    // doc). Only the space-separated form (no colon) is unambiguous.
+  it('a `header:` colon-form line at top level is chrome, not member-addition — CommandAddMethod needs spaces around the colon', () => {
+    // CommandAddMethod (classdiagram/command/CommandAddMethod.java:64-68) is
+    // NAME, spaceOneOrMore, ":", spaceOneOrMore, DATA, so `header: text` never
+    // matches it and falls to the header command. Oracle-checked (cdd5
+    // close-b5): the jar draws "not a chrome directive" as the header and
+    // creates no classifier named `header`. This test used to pin the old
+    // lenient member regex (fixed by cdd5-T5d).
     const ast = parseClassSource('header: not a chrome directive');
-    expect(isDisplayPositionedNull(ast.annotations!.header)).toBe(true);
-    expect(ast.classifiers.map((c) => c.id)).toEqual(['header']);
+    expect(isDisplayPositionedNull(ast.annotations!.header)).toBe(false);
+    expect(ast.classifiers.map((c) => c.id)).toEqual([]);
   });
 
   it('annotation-free input: annotations is empty and classifiers/relationships are unaffected', () => {

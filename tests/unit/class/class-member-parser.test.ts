@@ -34,6 +34,7 @@ describe('parseMemberLine — structured shapes', () => {
       isStatic: false,
       isAbstract: false,
       params: ['a', 'b'],
+      rawDisplay: 'getName(a, b): String',
       type: 'String',
       visibilityExplicit: true,
     });
@@ -70,6 +71,7 @@ describe('parseMemberLine — structured shapes', () => {
       visibility: '+',
       name: 'getName',
       params: [],
+      rawDisplay: 'getName():String',
       type: 'String',
       typeSeparator: ':',
       isStatic: false,
@@ -246,9 +248,24 @@ describe('parseMemberLine — G2 N16 ownUrl parsing', () => {
     expect(Object.keys(parseMemberLine('foo')!)).not.toContain('ownUrl');
   });
 
-  it('strips a bare double-bracket suffix from display text but does not parse it as ownUrl (member-level url grammar is always triple-bracket)', () => {
+  // T5b (fepoko-61-fona364): reversed from the prior expectation -- a bare
+  // double-bracket suffix is NOT this grammar at all (Member.java:93 needs a
+  // THIRD, outer bracket layer), so upstream leaves it in the display
+  // untouched, to be drawn as an ordinary inline creole link downstream (see
+  // stripUrlSuffix's own doc comment).
+  it('does not strip a bare double-bracket suffix (member-level url grammar is always triple-bracket) — it stays in the display for the creole engine to draw as a link', () => {
     const member = parseMemberLine('name[[http://field]]');
-    expect(member).toMatchObject({ name: 'name' });
+    expect(member).toMatchObject({ name: 'name[[http://field]]', rawDisplay: 'name[[http://field]]' });
+    expect(member!.ownUrl).toBeUndefined();
+  });
+
+  it('does not strip a bare double-bracket suffix on a member with a leading visibility char (fepoko-61-fona364: "+ [[modelo normal]]")', () => {
+    const member = parseMemberLine('+ [[modelo normal]]');
+    expect(member).toMatchObject({
+      name: '[[modelo normal]]',
+      rawDisplay: '[[modelo normal]]',
+      visibilityExplicit: true,
+    });
     expect(member!.ownUrl).toBeUndefined();
   });
 });
@@ -282,6 +299,7 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       visibility: '+',
       name: 'run',
       params: [],
+      rawDisplay: 'run()',
       isStatic: false,
       isAbstract: false,
       visibilityExplicit: true,
@@ -341,6 +359,7 @@ describe('parseMemberLine — B1 {method}/{field}/{static}/{classifier}/{abstrac
       visibility: '+',
       name: 'compute',
       params: [],
+      rawDisplay: 'compute()',
       isStatic: false,
       isAbstract: true,
       visibilityExplicit: true,

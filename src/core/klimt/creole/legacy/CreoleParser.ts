@@ -49,11 +49,21 @@
  * is the "wire it through `createSheetSlow`'s embedded branch" instruction
  * this task's brief poses; nothing above `src/core/klimt/` is imported to
  * do so (a caller supplies both, exactly as `EmbeddedDiagram.ts`'s own doc
- * comment describes). Neither parameter has a real production caller yet
- * (ADR-8: `Display`/T9c has not landed, so nothing constructs a
- * `CreoleParser` in a live diagram path today) — both are exercised here
- * only via test doubles, matching every other seam this batch threads
- * ahead of its first live caller.
+ * comment describes).
+ *
+ * UPDATE (T5a, found while diagnosing `creole-e1-newline-split`): the
+ * ADR-8 claim directly above this paragraph — "neither parameter has a
+ * real production caller yet" — is now FALSE and was left stale by
+ * whichever task wired the first caller. `new CreoleParser(...)` is
+ * constructed by THREE live `ISkinSimple.sheet(...)` factories today:
+ * `EntityImageDescriptionDelegates.ts#buildLocalSkinSimple` (class/
+ * description body text, `buildDesc` -> `BodyFactory.create3`),
+ * `EntityImageDescriptionName.ts` (the class/entity title), and
+ * `blocks-creole.ts#chromeSkinSimple` (legend/chrome text). `createStripes`
+ * (below) is reachable from all three, which is exactly why `T5a`'s two
+ * families (`creole-e1-newline-split`, `creole-titled-horizontal-line-
+ * literal`) cite THIS file's `createStripes` as their live mechanism, not
+ * dead code.
  *
  * The constructor groups `creoleMode`/`stereotype` into {@link
  * CreoleTextStyle} and `atomOps`/`renderer` into {@link
@@ -70,7 +80,7 @@ import { CreoleContext } from '../CreoleContext.js';
 import { StripeStyle } from '../StripeStyle.js';
 import { StripeStyleType } from '../StripeStyleType.js';
 import type { Atom } from '../SheetBlock1.js';
-import type { StripeClassification } from './CreoleStripeSimpleParser.js';
+import { classifyStripeLine, splitOnNewlineSentinel, type StripeClassification } from './CreoleStripeSimpleParser.js';
 import type { CreoleMode } from '../CreoleMode.js';
 import type { SheetBuilder, DisplayLike, DisplayLine } from '../SheetBuilder.js';
 import { isNullDisplay } from '../SheetBuilder.js';
@@ -78,7 +88,8 @@ import type { FontConfiguration } from '../../shape/UText.js';
 import type { HorizontalAlignment } from '../../geom/HorizontalAlignment.js';
 import type { ISkinSimple } from '../../../style/ISkinSimple.js';
 import { manageGuillemet } from '../../../text/Guillemet.js';
-import { buildLineAtoms } from './StripeSimple.js';
+import { buildStripeAtoms, fontConfigurationForHeading } from './StripeSimple.js';
+import { resolveTextEscapes } from '../../../text-escapes.js';
 import type { CreoleAtom } from '../atom/Atom.js';
 import { isTreeStart, isCodeStart, isLatexStart, MONOSPACED } from '../Parser.js';
 import type { AtomOps } from '../Sea.js';
@@ -117,6 +128,17 @@ function trim2(s: string): string {
   }
   if (start > end) return '';
   return s.slice(start, end + 1);
+}
+
+/** Upstream: `AtomText`'s constructor `<U+XXXX>`/`&#NNN;` decode
+ *  (`AtomText.java:79-81`, `manageSpecialChars`), applied per text atom.
+ *  Duplicated from `StripeSimple.ts`'s private `decodeAtomEscapes` (the
+ *  SAME "small utility, cite it" precedent as `trim2` above): T5a's
+ *  per-`%newline()`-piece atom building (below) cannot reuse
+ *  `buildLineAtoms`'s own internal call to it, since that function only
+ *  ever builds one (unsplit) piece's atoms. */
+function decodeTextAtoms(atoms: readonly CreoleAtom[]): readonly CreoleAtom[] {
+  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(a.text) } : a));
 }
 
 /** `Iterator<DisplayLine>` -> `Iterator<string>` adapter —
@@ -403,19 +425,65 @@ export class CreoleParser implements SheetBuilder {
       return [new StripeLatex(fontConfiguration)];
     }
 
-    // java:108-114.
+    // java:108-114, extended by java:162-171 (T5a: `CreoleStripeSimpleParser
+    // #createStripes`'s own `%newline()`/U+E100 split -- one Stripe per
+    // resulting piece, every piece sharing this line's ONE classification).
     const align = isSimpleStripe(lastStripe) ? lastStripe.cellAlignment : this.horizontalAlignment;
-    const build = buildLineAtoms(line, fontConfiguration);
-    if (build.classification.type === 'HORIZONTAL_LINE') {
-      const atom = CreoleHorizontalLine.create(
-        fontConfiguration,
-        '',
-        build.classification.style,
-        this.skinParam,
-        this.atomOps,
-      );
-      return [createSimpleStripe([atom], align, null)];
+    const classification = classifyStripeLine(line);
+
+    if (classification.type === 'HORIZONTAL_LINE') {
+      return this.buildHorizontalLineStripes('', classification.style, fontConfiguration, align);
     }
-    return [createSimpleStripe(build.atoms, align, listHeader(build.classification, fontConfiguration, context))];
+    if (classification.type === 'LITERAL') {
+      // T5a (`creole-titled-horizontal-line-literal`): a non-empty-captured
+      // `--X--`/`==X==`/`..X..` line IS `StripeStyleType.HORIZONTAL_LINE`
+      // upstream (java:92-117) -- `CreoleParser` is the one consumer wired
+      // to build the real titled atom for it (see `CreoleStripeSimpleParser
+      // .ts`'s own "T5a" doc comment for which OTHER consumers keep the
+      // pre-existing literal-text rendering unchanged).
+      const { style, title } = classification.titledHorizontalLine;
+      return this.buildHorizontalLineStripes(title, style, fontConfiguration, align);
+    }
+
+    return this.buildTextStripes(classification, fontConfiguration, align, context);
+  }
+
+  /** java:154-155's `CreoleHorizontalLine.create(fontConfiguration, line,
+   *  style.getStyle(), skinParam)`, called once per `%newline()`-split
+   *  piece of the (possibly empty, possibly titled) horizontal-line text. */
+  private buildHorizontalLineStripes(
+    title: string,
+    style: '-' | '=' | '.',
+    fontConfiguration: FontConfiguration,
+    align: HorizontalAlignment,
+  ): readonly Stripe<StripeAtom>[] {
+    return splitOnNewlineSentinel(title).map((piece) =>
+      createSimpleStripe(
+        [CreoleHorizontalLine.create(fontConfiguration, piece, style, this.skinParam, this.atomOps)],
+        align,
+        null,
+      ),
+    );
+  }
+
+  /** java:139-159's `analyzeAndAdd`/`modifyStripe` (HEADING/LIST/NORMAL),
+   *  called once per `%newline()`-split piece of the classified content. */
+  private buildTextStripes(
+    classification: Exclude<StripeClassification, { type: 'HORIZONTAL_LINE' } | { type: 'LITERAL' }>,
+    fontConfiguration: FontConfiguration,
+    align: HorizontalAlignment,
+    context: CreoleContext,
+  ): readonly Stripe<StripeAtom>[] {
+    const lineFont =
+      classification.type === 'HEADING'
+        ? fontConfigurationForHeading(fontConfiguration, classification.order)
+        : fontConfiguration;
+    return splitOnNewlineSentinel(classification.content).map((piece) =>
+      createSimpleStripe(
+        decodeTextAtoms(buildStripeAtoms(piece, lineFont)),
+        align,
+        listHeader(classification, fontConfiguration, context),
+      ),
+    );
   }
 }

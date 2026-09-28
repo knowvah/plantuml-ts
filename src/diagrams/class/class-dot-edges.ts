@@ -236,7 +236,10 @@ export function buildDotEdges(
   render: DotEdgesRenderCtx,
 ): DotInputEdge[] {
   const { font, cardinalityFont, measurer, linetype, noteCtx, classPortShortNames } = render;
-  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships);
+  // cdd5-T3c: `ast.namespaces` excludes a package/namespace endpoint from
+  // opalisability -- see `note-freestanding.ts#findUniqueTouching`'s doc
+  // comment.
+  const kindBIndices = findFreestandingNoteRelationshipIndices(ast.notes, ast.relationships, ast.namespaces);
   // ADR-3: unconditional whenever the TARGET carries row bands at all -- a
   // `map` (its own flat-sizer bands) or an `isRowPortKind` leaf -- class
   // family or object -- with a declared port-name set (T2's

@@ -1,0 +1,69 @@
+basoto-36-resu245: verdict structural-match -> conformant
+beboke-62-zofu377: verdict diverged -> structural-match, diff count rose 12 -> 50
+bikavu-22-rago633: verdict structural-match -> conformant
+bogide-54-buco992: verdict structural-match -> conformant
+cejegu-93-kobo234: verdict diverged -> conformant
+cenucu-07-mepi600: verdict structural-match -> conformant
+cikifu-97-pasu472: verdict diverged -> conformant
+cimono-94-ximu187: verdict structural-match -> conformant
+dedumo-33-paco879: verdict diverged -> conformant
+deployment-last-name-multi-line-0: verdict diverged -> conformant
+doboco-09-doba683: verdict diverged -> conformant
+febuli-89-dusi249: verdict diverged -> structural-match
+felixe-38-dilu011: verdict diverged -> structural-match
+fepoko-61-fona364: diff count rose 12 -> 23
+fepudo-00-ziro735: verdict diverged -> conformant
+fepulu-27-soci473: verdict diverged -> conformant
+fezaro-08-nopo877: verdict diverged -> structural-match
+fipezo-93-zimi512: verdict diverged -> structural-match, diff count rose 66 -> 73
+gejuvu-17-vufu851: verdict diverged -> structural-match, diff count rose 4 -> 12
+gemigi-37-safi979: verdict structural-match -> conformant
+girapu-90-pise235: verdict diverged -> conformant
+gogisu-39-bepa573: verdict diverged -> structural-match
+jadamo-76-xabi141: verdict structural-match -> conformant
+jajebe-95-jomo899: verdict structural-match -> conformant
+jimizu-14-zole306: verdict diverged -> structural-match
+jixibu-01-xave465: diff count rose 8 -> 17
+jodasa-29-zara935: verdict diverged -> conformant
+juzuno-58-gesi397: verdict diverged -> structural-match
+kefuna-77-kago547: verdict diverged -> conformant
+kexaba-26-kobu577: diff count rose 28 -> 34
+kumuti-42-tace851: verdict structural-match -> conformant
+lavoke-68-lezi492: verdict structural-match -> conformant
+lezema-07-vogu604: verdict diverged -> conformant
+liboma-63-gamu743: verdict structural-match -> conformant
+lijota-92-sove350: verdict structural-match -> conformant
+lirumo-81-jega996: verdict structural-match -> conformant
+locoge-06-luki835: verdict structural-match -> conformant
+maxure-10-temu215: verdict diverged -> conformant
+muvici-42-dumo371: verdict diverged -> conformant
+negupo-97-loro420: verdict structural-match -> conformant
+nilimi-64-xeco438: verdict structural-match -> conformant
+nulevu-49-bovi390: verdict structural-match -> conformant
+pefigi-94-raxa740: verdict structural-match -> conformant
+petuju-02-zino378: verdict diverged -> conformant
+pugesu-08-cove285: verdict diverged -> conformant
+punofe-33-loji825: verdict diverged -> conformant
+pupoko-23-xubo613: verdict diverged -> conformant
+ragudu-37-poxi589: verdict structural-match -> conformant
+regodu-14-peve499: verdict diverged -> conformant
+rexobo-28-rite508: verdict diverged -> conformant
+rilere-84-seba785: verdict diverged -> conformant
+rirelu-80-tagi213: verdict structural-match -> conformant
+rufala-47-nosa835: verdict structural-match -> conformant
+sofobo-48-meme531: verdict structural-match -> conformant
+sprite-SVG-fill-management-0: verdict structural-match -> conformant
+sprite-SVG-fill-management-1: verdict structural-match -> conformant
+sprite-SVG-fill-management-4: verdict structural-match -> conformant
+sufura-56-muke185: verdict structural-match -> conformant
+tefeco-12-rato895: diff count rose 3 -> 20
+tenava-30-cele768: verdict structural-match -> conformant
+tenule-05-fovi294: verdict diverged -> conformant
+tivezu-91-bevu722: verdict structural-match -> conformant
+vugime-87-zabe159: verdict diverged -> conformant
+xagomi-49-caki729: verdict diverged -> structural-match, diff count rose 11 -> 12
+xusuxi-66-zaci221: verdict diverged -> conformant
+zelura-55-pasa982: verdict diverged -> conformant
+zivebo-26-nagu813: verdict diverged -> conformant
+zovojo-65-gocu245: verdict structural-match -> conformant
+68 transition(s)

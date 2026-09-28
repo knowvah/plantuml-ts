@@ -1,0 +1,8 @@
+CHANGED svg-class/class-actor-bare-no-allowmixing: jar exit 200 (error diagram)
+CHANGED svg-dot/bemepi-16-kuzo249
+CHANGED svg-dot/chain-expansion
+CHANGED svg-dot/ciditi-21-xacu710
+CHANGED svg-dot/cluster-basic
+CHANGED svg-dot/cluster-nested
+SAME=869 CHANGED=6 FAILED=0
+ERROR-DIAGRAM=1 (svg-class/class-actor-bare-no-allowmixing)

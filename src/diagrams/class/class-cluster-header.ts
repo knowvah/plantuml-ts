@@ -27,11 +27,15 @@
  * {@link clusterHeaderStereoTextBlock} (`undefined` -> `TextBlockUtils.empty(0,
  * 0)`, `ClusterHeader.java:189`).
  *
- * Not modelled: a sprite stereotype (`stereotype.getSprite(skinParam)`,
- * `ClusterHeader.java:199-201`) and user `skinparam legend*`/`<style>
- * legend` overrides on a GROUP legend (this layer sees only the `Theme`, not
- * the skinparam map `index.ts#applyAnnotationChrome` resolves the root
- * legend's style from) -- no corpus fixture combines either with a group.
+ * A `<<$sprite>>` stereotype (`stereotype.getSprite(skinParam)`,
+ * `ClusterHeader.java:199-201`) replaces the label block (cdd5-T5c,
+ * {@link buildStereoSprite}); an SVG sprite there is not drawn (the block is a
+ * pre-built string, and the SVG sprite path draws through a klimt
+ * `UGraphic`) -- it degrades to the label block. Not modelled: user
+ * `skinparam legend*`/`<style> legend` overrides on a GROUP legend (this
+ * layer sees only the `Theme`, not the skinparam map
+ * `index.ts#applyAnnotationChrome` resolves the root legend's style from) --
+ * no corpus fixture combines it with a group.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/DecorateEntityImage.java
@@ -52,11 +56,18 @@ import { VerticalAlignment } from '../../core/klimt/geom/VerticalAlignment.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { UComment } from '../../core/klimt/shape/UComment.js';
 import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
-import { text } from '../../core/svg.js';
+import { text, image } from '../../core/svg.js';
+import { StereotypeDecoration, cutLabels, GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
+import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { getSpriteMonochrome, getSpriteColor4096 } from '../../core/sprite-registry.js';
+import {
+  spriteMonochromeAsLike,
+  spriteToPngDataUri,
+  spriteColor4096ToPngDataUri,
+} from '../../core/klimt/sprite/sprite-raster.js';
 import { escapeComment } from '../../core/svg-format.js';
 import {
   isStereotypeLabelHidden,
-  splitStereotypeLabels,
   splitStereotypeStyleTags,
   wrapGuillemet,
   type GuillemetPair,
@@ -81,13 +92,47 @@ export interface ClusterHeaderStereo {
  * every label of the group's stereotype that no `hide|show [<<label>>]
  * stereotype` directive hides -- the SAME last-matching-rule fold
  * `class-stereotype.ts#isStereotypeLabelHidden` applies to classifiers.
+ *
+ * cdd5-T5c: a group's stereotype is `Stereotype.build(stereotype)`
+ * (`CommandPackage.java:196`) -> `StereotypeDecoration.buildSimple`, which
+ * keeps the label RAW, and `Stereotype#getLabels` is `cutLabels(label,
+ * guillemet)` (`Stereotype.java:177-183`, `StereotypeDecoration.java:
+ * 186-195`) -- no `($sprite)`/`(C)` decoration strip, unlike a classifier's
+ * `buildComplex`. So an unresolved `<<$nope>>` still shows `«$nope»`.
  */
 export function visibleNamespaceStereotypeLabels(
   ns: Namespace,
   directives: readonly HideStereotypeDirective[],
 ): string[] {
   if (ns.stereotype === undefined) return [];
-  return splitStereotypeLabels(ns.stereotype).filter((l) => !isStereotypeLabelHidden(l, directives));
+  return cutLabels(`<<${ns.stereotype}>>`, GUILLEMET_NONE).filter((l) => !isStereotypeLabelHidden(l, directives));
+}
+
+/**
+ * `Stereotype#getSprite` (`Stereotype.java:108-117`) for a group: the
+ * `buildSimple` decoration's sprite (`<<$name>>`/`<<$name{scale=N}>>`,
+ * `StereotypeDecoration.java:129-141`), drawn as `Sprite#asTextBlock(
+ * getHtmlColor(), null, spriteScale, null)` -- `buildSimple` sets no colour.
+ * A monochrome or 4096-colour sprite rasterises exactly as the classifier
+ * badge sprite does (`class-layout-header-creole.ts#resolveBadgeSpriteImage`);
+ * `SpriteMonochrome#asTextBlock` sizes it `getWidth() * scale` x
+ * `getHeight() * scale` (`SpriteMonochrome.java:221-225`). `undefined` when
+ * the name does not resolve (upstream's `null`, so the labels run).
+ */
+function buildStereoSprite(ns: Namespace, sprites: SpriteRegistry | undefined): ClusterHeaderStereo | undefined {
+  if (ns.stereotype === undefined || sprites === undefined) return undefined;
+  const deco = StereotypeDecoration.buildSimple(`<<${ns.stereotype}>>`);
+  if (deco.spriteName === undefined) return undefined;
+  const mono = getSpriteMonochrome(sprites, deco.spriteName);
+  const color4096 = mono === undefined ? getSpriteColor4096(sprites, deco.spriteName) : undefined;
+  const png =
+    mono !== undefined
+      ? spriteToPngDataUri(spriteMonochromeAsLike(mono), undefined, undefined, deco.spriteScale)
+      : color4096 !== undefined
+        ? spriteColor4096ToPngDataUri(color4096, deco.spriteScale)
+        : undefined;
+  if (png === undefined) return undefined;
+  return { width: png.width, height: png.height, body: image(0, 0, png.width, png.height, png.dataUri) };
 }
 
 /** `skinparam guillemet` -- the same resolution
@@ -134,6 +179,9 @@ function stereoFontColor(ns: Namespace, theme: Theme): string {
  * class package title, `plantuml.skin:94-98`). `undefined` == `empty(0,0)`.
  */
 function buildStereoText(ns: Namespace, ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer) {
+  // `ClusterHeader.java:199-201`: the sprite is tried before the labels.
+  const sprite = buildStereoSprite(ns, ast.sprites);
+  if (sprite !== undefined) return sprite;
   const labels = visibleNamespaceStereotypeLabels(ns, ast.hideStereotypeDirectives ?? []);
   if (labels.length === 0) return undefined;
   const font = stereoFont(theme, ns);

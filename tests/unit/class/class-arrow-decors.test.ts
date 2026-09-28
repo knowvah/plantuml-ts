@@ -15,6 +15,8 @@ import { describe, it, expect } from 'vitest';
 import { parseClass } from './parse-helper.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { parseArrowDecors, parseArrowDecorsRaw } from '../../../src/diagrams/class/class-arrow-decor-map.js';
+import { renderSync } from '../../../src/index.js';
 
 function parse(source: string): ReturnType<typeof parseClass> {
   const lines = source
@@ -280,5 +282,20 @@ describe('regressions on already-working arrow forms', () => {
     const ast = parse('A |o--o| B\nC ||--|| D\nE }o--o{ F\nG }|--|{ H\nfoo1 }-- foo2');
     expect(ast.relationships).toHaveLength(5);
     expect(ast.relationships.every((r) => r.type === 'association')).toBe(true);
+  });
+});
+
+describe('LinkDecor.CIRCLE ("0") — zefefo-37-xigo245', () => {
+  // LinkDecor.java:90: CIRCLE(decors1("0"), decors2("0"), 0, false, 0.5)
+  it.each(['0--0', '0-[dashed]--0'])('maps both `0` heads of %s to circle', (arrow) => {
+    expect(parseArrowDecors(arrow, false)).toEqual({ sourceDecor: 'circle', targetDecor: 'circle' });
+    expect(parseArrowDecorsRaw(arrow)).toEqual({ decor1: 'circle', decor2: 'circle' });
+  });
+
+  it('draws two circle extremities and no data-link-type (LinkType.java:301-307 returns null)', () => {
+    const svg = renderSync('@startuml\nclass a\nclass b\na 0--0 b\n@enduml');
+    const link = /<g class="link"[^>]*>[\s\S]*?<\/g>/.exec(svg)![0];
+    expect(link).not.toContain('data-link-type');
+    expect(link.match(/<ellipse /g)).toHaveLength(2);
   });
 });

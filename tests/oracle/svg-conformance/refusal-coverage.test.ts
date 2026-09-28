@@ -718,8 +718,23 @@ describe('refusal coverage — baseline shape', () => {
     // 5680 -> 5700 / 5411 -> 5431 at class-divergence-drive-4/close-b2
     // (2026-09-27): 20 more svg-class golden rows, same procedure
     // (ratchet 686 -> 706). Derivation: 5431 + 269 = 5700.
-    expect(manifest.fixtures.length).toBe(5700);
-    expect(pinnedJarErrors.length).toBe(99);
+    // 99 -> 105 jar errors at cdd5-T0e (2026-09-27): gantt/votofi-06-rolo321,
+    // four wbs/WBS-*-def-* and unknown/zodude-13-tito074 were always jar error
+    // pages; their old goldens carried PSystemError.java:218-228's time-based
+    // donation banner, which hid the error signature from the head-read.
+    // Recaptured in a plain minute. Erroring/rendering splits unchanged.
+    // 5700 -> 5822 at cdd5/close-b1 (2026-09-28): 122 svg-class golden rows,
+    // 2 class + 120 unknown-tree (D4). Derivation: 5553 + 269 = 5822.
+    // 5822 -> 5876 at cdd5/close-b3: 54 unknown-tree golden rows.
+    // Derivation: 5607 + 269 = 5876.
+    // 5876 -> 5906 at cdd5/close-b4: 30 unknown-tree golden rows.
+    // Derivation: 5637 + 269 = 5906.
+    // 5906 -> 5924 at cdd5/close-b5: 18 unknown-tree golden rows; erroring
+    // 269 -> 267 because unknown/xuloxo-85-vibu502 and c4/gikaju-64-bari602
+    // now preprocess and render (cdd5-T5d TokenStack pair order).
+    // Derivation: 5657 + 267 = 5924.
+    expect(manifest.fixtures.length).toBe(5924);
+    expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -731,7 +746,7 @@ describe('refusal coverage — baseline shape', () => {
     // `weErrored: true`) whose activity3 constructs now parse render here
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
-    expect(pinnedErroring.length).toBe(269);
+    expect(pinnedErroring.length).toBe(267);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -743,7 +758,11 @@ describe('refusal coverage — baseline shape', () => {
     // 5380 -> 5392 at class-divergence-drive-3/close-b4 (12 svg-class clones).
     // 5392 -> 5411 at class-divergence-drive-3/close-b5 (19 svg-class clones).
     // 5411 -> 5431 at class-divergence-drive-4/close-b2 (20 svg-class clones).
-    expect(pinnedRendering.length).toBe(5431);
+    // 5431 -> 5553 at cdd5/close-b1 (2 class + 120 unknown-tree svg-class clones).
+    // 5553 -> 5607 at cdd5/close-b3 (54 unknown-tree svg-class clones).
+    // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
+    // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
+    expect(pinnedRendering.length).toBe(5657);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -793,7 +812,14 @@ describe('refusal coverage — baseline shape', () => {
     // derivation above).
     // 138 -> 137 at unknown-bucket-routing-repair/T11: recani retired.
     // 137 -> 198 at unknown-bucket-routing-repair/T14: 61 unknown gaps.
-    expect(gaps.length).toBe(198);
+    // 198 -> 197 at cdd5-T0e (2026-09-27): `unknown/zodude-13-tito074`'s gap
+    // excused a MEASUREMENT artifact -- its golden was captured in a minute
+    // where PSystemError.java:218-228 adds a time-based donation banner,
+    // pushing the error signature past HEAD_BYTES. Recaptured in a plain
+    // minute it reads jarRendered: false, so it is no defect to excuse.
+    // 197 -> 196 at cdd5/close-b5: unknown/xuloxo-85-vibu502's Tim gap is
+    // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
+    expect(gaps.length).toBe(196);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

@@ -1,0 +1,3 @@
+@startuml
+json myJsonObject {"a": 1}
+@enduml

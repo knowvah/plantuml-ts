@@ -1,0 +1,13 @@
+@startuml
+namespace N1 {
+  class A {
+    - prop1
+  }
+  together {
+    class TC {
+      - prop1
+    }
+    TC - A
+  }
+}
+@enduml

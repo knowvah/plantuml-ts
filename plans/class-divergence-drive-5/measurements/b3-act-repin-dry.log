@@ -1,0 +1,3 @@
+CHANGED style-baseline letare-59-gore448
+SKIP diff-census.json (no gate exists for it; narrative report, never re-derived -- see file doc comment)
+0 promotion(s) error -> baseline; 2 change(s) across diff-baseline/style-baseline/text-baseline/swimlane-baseline

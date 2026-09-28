@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T17:36:45.188Z",
+  "generatedAt": "2026-09-28T17:39:53.583Z",
   "fixtures": [
     {
       "slug": "bajotu-30-soku184",
@@ -76,11 +76,8 @@
     {
       "slug": "besepi-37-rori892",
       "type": "class",
-      "dotEqual": false,
-      "verdict": "diverged",
-      "maxDelta": 874.885,
-      "firstDiff": "svg/g[1]/g[20]/path[1]/@d",
-      "maxDeltaPath": "svg/g[1]/g[1]/line[1]/@x2"
+      "dotEqual": true,
+      "verdict": "conformant"
     },
     {
       "slug": "bicabi-42-coto932",
@@ -4355,7 +4352,7 @@
       "type": "class",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 615,
+      "maxDelta": 634,
       "firstDiff": "svg/g[1]/text[1]/@font-size",
       "maxDeltaPath": "svg/@viewBox[2]"
     },

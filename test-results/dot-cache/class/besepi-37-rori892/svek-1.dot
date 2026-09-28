@@ -43,7 +43,7 @@ sh0011->sh0013[arrowtail=none,arrowhead=none,minlen=1,color="#000052",label=<<TA
 sh0014->sh0023[arrowtail=none,arrowhead=none,minlen=1,color="#000056",label=<<TABLE BGCOLOR="#000057" FIXEDSIZE="TRUE" WIDTH="147" HEIGHT="28"><TR><TD></TD></TR></TABLE>>];
 sh0017->sh0007[arrowtail=none,arrowhead=none,minlen=1,color="#00005E",label=<<TABLE BGCOLOR="#00005F" FIXEDSIZE="TRUE" WIDTH="155" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
 sh0021->sh0024[arrowtail=none,arrowhead=none,minlen=1,color="#000062",label=<<TABLE BGCOLOR="#000063" FIXEDSIZE="TRUE" WIDTH="135" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
-sh0008->sh0025[arrowtail=none,arrowhead=none,minlen=1,color="#000066",label=<<TABLE BGCOLOR="#000067" FIXEDSIZE="TRUE" WIDTH="126" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
-sh0025->sh0018[arrowtail=none,arrowhead=none,minlen=1,color="#00006A"];
+sh0018->sh0025[arrowtail=none,arrowhead=none,minlen=1,color="#000066",label=<<TABLE BGCOLOR="#000067" FIXEDSIZE="TRUE" WIDTH="126" HEIGHT="15"><TR><TD></TD></TR></TABLE>>];
+sh0025->sh0008[arrowtail=none,arrowhead=none,minlen=1,color="#00006A"];
 
 }

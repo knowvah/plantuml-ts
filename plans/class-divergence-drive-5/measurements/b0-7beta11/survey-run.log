@@ -1,0 +1,112 @@
+== activity 18:11  up 12 days, 10:30, 2 users, load averages: 6.34 4.67 4.26
+exit 0
+  350/373
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-activity.json — {"conformant":0,"structural-match":4,"diverged":369,"errored":0,"timeout":0,"oracle-error":0}
+== board 18:12  up 12 days, 10:31, 2 users, load averages: 6.46 4.77 4.30
+exit 0
+surveying 4 board fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 18:12  up 12 days, 10:31, 2 users, load averages: 5.98 4.76 4.30
+exit 0
+surveying 11 c4 fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-c4.json — {"conformant":0,"structural-match":1,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}
+== chart 18:12  up 12 days, 10:31, 2 users, load averages: 6.30 4.90 4.36
+exit 0
+  25/29
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 18:13  up 12 days, 10:32, 2 users, load averages: 7.02 5.15 4.47
+exit 0
+surveying 1 chronology fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 18:13  up 12 days, 10:32, 2 users, load averages: 6.62 5.13 4.47
+exit 0
+  700/723
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-class.json — {"conformant":707,"structural-match":3,"diverged":13,"errored":0,"timeout":0,"oracle-error":0}
+== component 18:13  up 12 days, 10:32, 2 users, load averages: 7.04 5.30 4.54
+exit 0
+  250/266
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-component.json — {"conformant":64,"structural-match":66,"diverged":136,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 18:14  up 12 days, 10:32, 2 users, load averages: 6.48 5.27 4.55
+exit 0
+@#[line:9,col:240]
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 18:14  up 12 days, 10:32, 2 users, load averages: 6.04 5.20 4.52
+exit 0
+surveying 5 dot fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 18:14  up 12 days, 10:33, 2 users, load averages: 5.81 5.19 4.53
+exit 0
+  25/44
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 18:14  up 12 days, 10:33, 2 users, load averages: 5.65 5.18 4.54
+exit 0
+surveying 1 files fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 18:14  up 12 days, 10:33, 2 users, load averages: 5.02 5.06 4.51
+exit 0
+  250/265
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 18:15  up 12 days, 10:34, 2 users, load averages: 4.86 5.01 4.50
+exit 0
+surveying 3 hcl fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 18:15  up 12 days, 10:34, 2 users, load averages: 4.46 4.91 4.47
+exit 0
+  50/50
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-json.json — {"conformant":12,"structural-match":23,"diverged":15,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 18:15  up 12 days, 10:34, 2 users, load averages: 4.87 4.98 4.51
+exit 0
+  125/142
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-mindmap.json — {"conformant":0,"structural-match":0,"diverged":142,"errored":0,"timeout":0,"oracle-error":0}
+== network 18:15  up 12 days, 10:34, 2 users, load averages: 5.50 5.11 4.56
+exit 0
+surveying 3 network fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 18:16  up 12 days, 10:35, 2 users, load averages: 5.66 5.15 4.58
+exit 0
+  75/80
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-object.json — {"conformant":59,"structural-match":10,"diverged":11,"errored":0,"timeout":0,"oracle-error":0}
+== packet 18:16  up 12 days, 10:35, 2 users, load averages: 5.30 5.10 4.58
+exit 0
+surveying 6 packet fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 18:16  up 12 days, 10:35, 2 users, load averages: 5.40 5.12 4.60
+exit 0
+  25/46
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 18:17  up 12 days, 10:35, 2 users, load averages: 6.70 5.41 4.71
+exit 0
+  50/51
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 18:17  up 12 days, 10:36, 2 users, load averages: 6.50 5.43 4.72
+exit 0
+  1125/1141
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1135,"errored":6,"timeout":0,"oracle-error":0}
+== state 18:17  up 12 days, 10:36, 2 users, load averages: 7.11 5.66 4.83
+exit 0
+  250/273
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}
+== timing 18:18  up 12 days, 10:37, 2 users, load averages: 6.42 5.59 4.82
+exit 0
+  125/126
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 18:18  up 12 days, 10:37, 2 users, load averages: 6.34 5.61 4.84
+exit 0
+@#[line:1,col:1361]
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-unknown.json — {"conformant":174,"structural-match":102,"diverged":546,"errored":3,"timeout":0,"oracle-error":0}
+== usecase 18:18  up 12 days, 10:37, 2 users, load averages: 5.52 5.47 4.82
+exit 0
+  75/93
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-usecase.json — {"conformant":28,"structural-match":19,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 18:19  up 12 days, 10:38, 2 users, load averages: 5.75 5.52 4.85
+exit 0
+  200/204
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+== wire 18:19  up 12 days, 10:38, 2 users, load averages: 5.74 5.53 4.87
+exit 0
+surveying 18 wire fixtures (concurrency 6)
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 18:19  up 12 days, 10:38, 2 users, load averages: 5.70 5.52 4.87
+exit 0
+  25/39
+wrote plans/class-divergence-drive-5/measurements/b0-7beta11/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}

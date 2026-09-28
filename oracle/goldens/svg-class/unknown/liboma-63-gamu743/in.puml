@@ -1,0 +1,8 @@
+@startuml
+legend
+!$labelWithDetails = "12345"
+!$brPos = 3
+!$line = "A" + %substr($labelWithDetails, 4) + "B"
+$line
+endlegend
+@enduml
