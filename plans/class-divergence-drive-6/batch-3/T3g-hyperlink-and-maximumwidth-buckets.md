@@ -43,7 +43,18 @@ only): `FontConfiguration.hyperlinkColor?` (UText.ts), `ISkinSimple.getStyleHype
    `theme-graph-colors.ts:150`, `theme-element-resolve.ts:139-141`), read it in
    `class-json-sizing.ts` and wrap the cells.
 
+4. **noteTextAlignment (fukegu, logavi; from T2d, journal rows 44–45).**
+   `FromSkinparamToStyle.java:178` maps `skinparam noteTextAlignment` to
+   `PName.HorizontalAlignment` on `SName.note`; `EntityImageNote.java:112` reads it.
+   The port drops the key into `acc.unknown` (`skinparam-key-handlers.ts:130`). Add
+   a handler (`skinparam-key-handlers-table-b.ts`), the accumulator field, a `note`
+   bucket field (`ElementColors`, D2), and consume it in `renderer-note.ts` where the
+   body lines are placed. `.agent-notes/T2d-note-text-alignment-blocked.md` has the
+   jar-verified formula cross-checked against both fixtures' oracle numbers.
+
 ## Rows
+- `unknown/fukegu-14-zona532` (class-note-text-alignment-unported)
+- `unknown/logavi-03-mita108` (class-note-text-alignment-unported)
 - `unknown/jixipo-21-mefu703` (creole-url-hyperlink-color-hardcoded)
 - `unknown/zivenu-37-nace681` (creole-url-hyperlink-color-hardcoded)
 - `unknown/nadedo-37-nesa665` (json-leaf-maximumwidth-ignored)
@@ -56,17 +67,19 @@ only): `FontConfiguration.hyperlinkColor?` (UText.ts), `ISkinSimple.getStyleHype
 - `src/core/decoration/symbol/usymbol-resolve.ts`
 - `src/core/annotations/annotation-style-overrides.ts`
 - `src/diagrams/class/class-json-sizing.ts`
+- `src/core/skinparam-accumulator.ts`, `src/core/skinparam-key-handlers-table-b.ts`, `src/diagrams/class/renderer-note.ts` (item 4)
 - their unit tests under `tests/`
 
 ## Read-set
 `.agent-notes/cdd6-T1b.md`; T1a's `tests/unit/core/style-map-buckets-cdd6.test.ts`; T2f's commits cffad2792, ab9b94959; `Style.java:265,330-332`, `FontConfiguration.java:213-219`, `StripeSimple.java:224-235`, `TextBlockCucaJSon.java:184-190`.
 
 ## Interface contracts
-`ElementColors` gains `hyperlinkColor?`, `hyperlinkColorByStereo?`, `maximumWidth?` only (D2, Java cite on each).
+`ElementColors` gains `hyperlinkColor?`, `hyperlinkColorByStereo?`, `maximumWidth?`, `horizontalAlignment?` only (D2, Java cite on each).
 
 ## Acceptance
 - Given jixipo and zivenu, then every `a/text/@fill` diff closes (4/0 → 0/0 or a stated residual).
 - Given nadedo, then svg width/height equal the jar's (510x100) or the residual is stated.
+- Given fukegu and logavi, then the note body x positions equal the jar's (SM 0/n → 0/0 or a stated residual).
 - Given the non-class ratchets (shared bucket files), then every mover is reported with its mechanism.
 
 ## Architecture decisions (locked)

@@ -59,7 +59,13 @@ journal row 36 (T2e's diagnosis, every `file:line`).
    `UHorizontalLine.java` title arm). The thickness half (element 0.5) is T2b's
    (journal row 37); measure after the b2 close.
 
+5. **colede table cell alignment (T2d residual, journal row 45).** A `|<r>...|`
+   cell's alignment marker is parsed and stripped but never applied to the drawn x
+   (`NoteTableCell` doc in `note-layout-measure-table.ts`); port `AtomTable.java`'s
+   per-cell horizontal alignment (quote the lines). Δ1.462 on one text x.
+
 ## Rows
+- `unknown/colede-79-give418` (class-note-table-bespoke; alignment residual only)
 - `unknown/fokudi-24-limo685` (package-borderstyle-unported; folder-leaf dash, T2a row 39)
 - `unknown/dezobu-62-vuzu421` (embedded-skinparam-hoisted; TYPE1 colour + stereotype sprite, T2a row 39; embed size is T2b's)
 - `unknown/tozizu-96-voka262` (reversecolor-mapper-unported)
@@ -71,6 +77,7 @@ journal row 36 (T2e's diagnosis, every `file:line`).
 - `src/diagrams/class/class-declaration-parser.ts`, `src/diagrams/class/class-parse-state.ts`, `src/diagrams/class/class-layout-generic-classifier.ts` (item 3)
 - `src/core/klimt/shape/UHorizontalLine.ts`, `src/diagrams/class/renderer-usymbol-entity.ts`, `src/diagrams/class/note-layout-measure-rows.ts`, `src/diagrams/class/note-layout-measure.ts`, `src/diagrams/class/renderer-note-lines.ts` (item 4)
 - `src/diagrams/class/class-namespace-folder-outline.ts` (fokudi), `src/diagrams/class/class-multiline-element.ts` (dezobu)
+- `src/diagrams/class/note-layout-measure-table.ts` (colede)
 - their unit tests under `tests/`
 
 ## Read-set
