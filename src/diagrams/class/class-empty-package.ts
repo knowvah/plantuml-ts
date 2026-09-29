@@ -49,6 +49,8 @@ import {
   emptyPackageThickness,
   emptyPackageStereoFontColor,
   isNoPaint,
+  elementLineStyle,
+  dashArrayOf,
 } from './class-package-style.js';
 
 /**
@@ -182,19 +184,39 @@ export function measureEmptyPackageLeafDim(
 function emptyPackagePaint(
   theme: ScaledTheme,
   tags: readonly string[],
-): { strokeWidth: number; border: string; fill: Paint } {
+): { strokeWidth: number; border: string; fill: Paint; dash: string | undefined } {
   const pkg = theme.colors.elements?.package;
   const plainBorder =
     typeof pkg?.border === 'string' ? pkg.border : (theme.colors.graph.packageBorder ?? theme.colors.border);
+  // cdd6 T2a (D2): `style.getStroke(colors)` (`EntityImageEmptyPackage
+  // .java:108`) carries the LineStyle dash too; cdd-B8FU scales it with the
+  // thickness.
+  const dash = elementLineStyle(theme, ['package'], tags);
+  const k = theme.scaleK;
   return {
     // cdd-B8FU: both tiers scaled.
-    strokeWidth: emptyPackageThickness(theme, tags, EMPTY_PACKAGE_STROKE_WIDTH) * theme.scaleK,
+    strokeWidth: emptyPackageThickness(theme, tags, EMPTY_PACKAGE_STROKE_WIDTH) * k,
     border: emptyPackageBorder(theme, tags, plainBorder),
-    fill:
-      typeof pkg?.background === 'string'
-        ? pkg.background
-        : (theme.colors.graph.packageBackground ?? theme.colors.graph.classBackground),
+    fill: emptyPackageFill(theme),
+    dash: dashArrayOf(
+      dash === undefined ? undefined : { dashVisible: dash.dashVisible * k, dashSpace: dash.dashSpace * k },
+    ),
   };
+}
+
+/**
+ * The leaf's `style.value(PName.BackGroundColor)` (`EntityImageEmptyPackage
+ * .java:111-112`): `<style> package { BackgroundColor }`, then `skinparam
+ * packageBackgroundColor` -- carried as T1a's `backgroundGradient` when it
+ * parses as a gradient (`HColorSet.java:107-116`; `{package_}` registration,
+ * `FromSkinparamToStyle.java:129`), else the flattened solid string -- then
+ * the class default. Jar kacecu-90: `BackgroundColor red-green` fills the
+ * leaf `url(#…)` over `#F00`..`#008000`.
+ */
+function emptyPackageFill(theme: ScaledTheme): Paint {
+  const pkg = theme.colors.elements?.package;
+  if (typeof pkg?.background === 'string') return pkg.background;
+  return pkg?.backgroundGradient ?? theme.colors.graph.packageBackground ?? theme.colors.graph.classBackground;
 }
 
 /** The leaf entity's own draw inputs beyond its box: the measured stereo
@@ -304,11 +326,12 @@ function renderFolderLeaf(
  */
 function renderRectLeaf(draw: EmptyPackageLeafDraw, theme: ScaledTheme, measurer: StringMeasurer | undefined): string {
   const { geo } = draw;
-  const { strokeWidth, border, fill } = emptyPackagePaint(theme, draw.tags);
+  const { strokeWidth, border, fill, dash } = emptyPackagePaint(theme, draw.tags);
   const corner = (PACKAGE_ROUND_CORNER * theme.scaleK) / 2;
   const outline = rect(geo.x, geo.y, geo.width, geo.height, {
     stroke: isNoPaint(border) ? PAINT_NONE : border, // SvgGraphics.java:539-540 fixColor
     strokeWidth,
+    ...(dash !== undefined ? { strokeDasharray: dash } : {}),
     fill: geo.color !== undefined ? parseColor(geo.color) : fill,
     rx: corner,
     ry: corner,

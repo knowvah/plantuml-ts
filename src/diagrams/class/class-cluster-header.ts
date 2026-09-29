@@ -74,6 +74,7 @@ import {
 } from './class-stereotype.js';
 import {
   clusterStereoFontColor,
+  elementStereoFontColor,
   isNoPaint,
   isFolderFamilyUSymbol,
   DEFAULT_GROUP_FONT_COLOR,
@@ -166,11 +167,15 @@ function stereoFont(theme: Theme, ns: Namespace): FontSpec {
  * ({@link clusterStereoFontColor}).
  */
 function stereoFontColor(ns: Namespace, theme: Theme): string {
+  const tags = ns.stereotype === undefined ? [] : splitStereotypeStyleTags(ns.stereotype);
   if (ns.usymbol !== undefined && !isFolderFamilyUSymbol(ns.usymbol)) {
-    const own = theme.colors.elements?.[ns.usymbol]?.font;
-    return typeof own === 'string' ? own : DEFAULT_GROUP_FONT_COLOR;
+    // cdd6 T2a (D2): `forStereotypeItself` adds `stereotype` + the label to
+    // `{..., group, <usymbol>}` (`ClusterHeader.java:211-213`), so the
+    // by-stereo and `<usymbol> { stereotype { FontColor } }` tiers reach it
+    // (jar catana-32 / noxebo-98 / cevoti-40 / juzica-68).
+    return elementStereoFontColor(theme, ns.usymbol, tags) ?? DEFAULT_GROUP_FONT_COLOR;
   }
-  return clusterStereoFontColor(theme, ns.stereotype === undefined ? [] : splitStereotypeStyleTags(ns.stereotype));
+  return clusterStereoFontColor(theme, tags);
 }
 
 /**
