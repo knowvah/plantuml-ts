@@ -55,7 +55,7 @@ import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords
 import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { parseColor, isTransparentColor, type Paint } from '../../core/paint.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { byStereo, elementLineStyle, elementStereoFontColor, elementTitleFontColor } from './class-package-style.js';
 
 /** Jar default line thickness for an `EntityImageDescription`-family shape
@@ -90,6 +90,10 @@ const ENTITY_STROKE_WIDTH = 0.5;
  *  golden `foo3` leaf: `<rect ... rx="2.5" ry="2.5"/>`). cdd-B8FU:
  *  multiplied by `theme.scaleK` at its one call site below. */
 const ELEMENT_ROUND_CORNER = 5.0;
+
+/** `fcStereo`'s face (`EntityImageDescription.java:155-157,174`):
+ *  `plantuml.skin:79-82` `stereotype { FontStyle italic }`. */
+const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
 
 /**
  * `EntityImageDescriptionParams.symbol.keyword` for one class-diagram leaf
@@ -273,8 +277,10 @@ function resolveLeafFonts(classifier: ClassifierGeo, theme: ScaledTheme, symbolK
       elementTitleFontColor(theme, symbolKeyword, tags),
     ),
     fontBody: recolor(textFont(theme, symbolKeyword), byLabel),
+    // `plantuml.skin:79-82` `stereotype { FontStyle italic }` -- the same
+    // STEREOTYPE_STYLES `description/renderer-entity.ts:82,214` passes.
     fontStereo: recolor(
-      textFont(theme, symbolKeyword, 0, undefined, 'stereotype'),
+      textFont(theme, symbolKeyword, 0, STEREOTYPE_STYLES, 'stereotype'),
       elementStereoFontColor(theme, symbolKeyword, tags),
     ),
   };
