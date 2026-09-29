@@ -1,5 +1,12 @@
 # T3f: class-singles-verified
 
+(Re-balanced at the b2 close, journal row 41: nadedo moved to T3g. Also on fokudi
+(T2a residual, row 39): `class-namespace-folder-outline.ts#FolderTabPaint` has no
+dasharray field — add it, `emptyPackagePaint` already computes `dash`; and dezobu's
+TYPE1 colour (`class-multiline-element.ts:196` `applyDecorations(..., false)` vs
+`CommandCreateElementMultilines.java:117,233-234`) + the `<<$archimate/…>>` sprite
+dropped by `extractNodeStereotype` — both added below.)
+
 Added at the b2 close (journal rows 36–37). T2e diagnosed its four rows to HIGH
 confidence and stopped: none is fixable in T2e's write-set. This task carries the
 diagnosed write-sets. Independent families, one commit each; a family whose fix
@@ -19,14 +26,8 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
 journal row 36 (T2e's diagnosis, every `file:line`).
 
 ## Task (TDD)
-1. **json MaximumWidth (nadedo).** `Style.java:330-332` `wrapWidth()` reads
-   `PName.MaximumWidth`; `FromSkinparamToStyle.java:250` maps the skinparam;
-   `BodierJSon.java:85` passes `style.wrapWidth()` to `TextBlockCucaJSon`, whose
-   `getTextBlock` (`:184-190`) wraps BOTH key and scalar-value cells through
-   `Display#create0`. Add a `maximumWidth` bucket mirroring the existing
-   `minimumWidth` (D2: `style-map-element.ts#collectElementStyleBuckets`,
-   `ElementColors`, `theme-element-resolve.ts#resolveElementMinimumWidth:139-141`
-   precedent), then read it in `class-json-sizing.ts` and wrap the cells.
+1. (Moved to T3g at the b2 re-balance, journal row 41: nadedo's MaximumWidth bucket
+   shares T3g's bucket files.)
 2. **reversecolor mapper (tozizu).** `TitledDiagram.java:301-312` `muteColorMapper`:
    `reversecolor dark` → `ColorMapper.LIGTHNESS_INVERSE` (`ColorMapper.java:74`,
    `ColorUtils.getReversed`, `ColorUtils.java:139-166`), which round-trips through
@@ -59,26 +60,26 @@ journal row 36 (T2e's diagnosis, every `file:line`).
    (journal row 37); measure after the b2 close.
 
 ## Rows
-- `unknown/nadedo-37-nesa665` (json-leaf-maximumwidth-ignored)
+- `unknown/fokudi-24-limo685` (package-borderstyle-unported; folder-leaf dash, T2a row 39)
+- `unknown/dezobu-62-vuzu421` (embedded-skinparam-hoisted; TYPE1 colour + stereotype sprite, T2a row 39; embed size is T2b's)
 - `unknown/tozizu-96-voka262` (reversecolor-mapper-unported)
 - `unknown/felixe-38-dilu011` (descriptive-leaf-with-members)
 - `unknown/nuveji-19-jabi587` (desc-separator-thickness-cleararea; (b)(c) here)
 
 ## Write-set
-- `src/core/style-map-element.ts`, `src/core/theme-graph-colors.ts`, `src/core/theme-element-resolve.ts`, `src/diagrams/class/class-json-sizing.ts` (item 1)
 - new `src/core/klimt/color/HUSLColorConverter.ts`, new `src/core/klimt/color/ColorOrder.ts`, `src/core/theme.ts`, `src/diagrams/class/class-monochrome.ts`, `src/diagrams/class/renderer.ts` (item 2)
 - `src/diagrams/class/class-declaration-parser.ts`, `src/diagrams/class/class-parse-state.ts`, `src/diagrams/class/class-layout-generic-classifier.ts` (item 3)
 - `src/core/klimt/shape/UHorizontalLine.ts`, `src/diagrams/class/renderer-usymbol-entity.ts`, `src/diagrams/class/note-layout-measure-rows.ts`, `src/diagrams/class/note-layout-measure.ts`, `src/diagrams/class/renderer-note-lines.ts` (item 4)
+- `src/diagrams/class/class-namespace-folder-outline.ts` (fokudi), `src/diagrams/class/class-multiline-element.ts` (dezobu)
 - their unit tests under `tests/`
 
 ## Read-set
 journal row 36; T2e's transcript is gone — the mechanisms above are the record; `.agent-notes/cdd5-*.md`; T1a's `tests/unit/core/style-map-buckets-cdd6.test.ts` (bucket pattern).
 
 ## Interface contracts
-`ElementColors` gains `maximumWidth?: number` only (D2, Java cite on the field).
+none (the bucket model is T3g's).
 
 ## Acceptance
-- Given nadedo, then svg width/height equal the jar's (510x100) or the residual is stated.
 - Given tozizu, then every mapped colour equals the jar's (`svg/@background` #010101 …) or the residual is stated.
 - Given felixe, then the leaf is 72 high (or the residual is stated).
 - Given nuveji, then the clear rect and the titled separators are drawn (childCount 14 / 12).
