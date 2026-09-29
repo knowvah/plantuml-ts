@@ -36,7 +36,7 @@ function layout(lines: string[]) {
   }
 }
 
-const TOPAVE = ['- package foo {', '- class alice', '}', '+ package Dummy {', '+ class Bob', '}'];
+const TOPAVE = ['- package foo {', '- class alice', '}', '+ package Dummy {', '+ class Bob {', '- field', '}', '}'];
 
 describe('package visibility modifier', () => {
   it('stores the modifier on the namespace', () => {
@@ -79,5 +79,18 @@ describe('package visibility modifier', () => {
     expect(rect).not.toBeNull();
     expect(Number(text![1]) - Number(rect![1])).toBeCloseTo(ICON_W - 2, 6);
     expect(svg).toContain('data-visibility-modifier="PUBLIC_METHOD"');
+  });
+
+  it('draws the title icon with the cluster stroke, member icons with the default', () => {
+    // USymbolFolder.java:224 applies symbolContext (the 1.5 border) before
+    // :228 draws the title; VisibilityModifier#drawInternal sets no UStroke.
+    const svg = renderSync(['@startuml', ...TOPAVE, '@enduml'].join('\n'), { measurer });
+    const clusters = svg.match(/<g class="cluster".*?<\/text><\/g>/gs) ?? [];
+    const headerIcons = clusters.flatMap((c) => c.match(/<g data-visibility-modifier="[A-Z_]+">.*?<\/g>/g) ?? []);
+    expect(headerIcons).toHaveLength(2);
+    for (const icon of headerIcons) expect(icon).toContain('stroke-width:1.5;');
+    const memberIcons = svg.match(/<g data-visibility-modifier="[A-Z_]+_FIELD">.*?<\/g>/g) ?? [];
+    expect(memberIcons.length).toBeGreaterThan(0);
+    for (const icon of memberIcons) expect(icon).toContain('stroke-width:1;');
   });
 });
