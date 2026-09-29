@@ -119,7 +119,12 @@ function folderBlockDims(
   measurer: StringMeasurer,
   opts: BoxSizingOpts | undefined,
   sprites: SpriteDimsLookup | undefined,
-): { showTitle: boolean; title: readonly [number, number]; label: readonly [number, number]; stereo: readonly [number, number] } {
+): {
+  showTitle: boolean;
+  title: readonly [number, number];
+  label: readonly [number, number];
+  stereo: readonly [number, number];
+} {
   const symbol = node.symbol;
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
   const showTitle = FOLDER_FAMILY_SHOW_TITLE[symbol] === true;

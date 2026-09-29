@@ -41,7 +41,7 @@ describe('computeClassDocumentDims', () => {
       '(`SvekResult.java:130-135` `minMax.getDimension().delta(15,15)` is ' +
       'unconditional, not skipped for an empty `LimitFinder` walk — `MinMax' +
       '.getEmpty(true)` is `(0,0,0,0)`, not a sentinel that bypasses `.delta`), ' +
-      'then `CucaDiagram` margin (0,5,5,0) then `SvgGraphics#ensureVisible`\'s ' +
+      "then `CucaDiagram` margin (0,5,5,0) then `SvgGraphics#ensureVisible`'s " +
       'truncating `+1`: 0+15=15, +0+5=20, floor(20+1)=21. Jar-verified ' +
       '`unknown/jititi-15-maxe512` (`class A / class B / remove *; restore A`, ' +
       'post-cdd5-T5d cascade fix all three entities removed): real jar SVG ' +

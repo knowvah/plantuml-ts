@@ -30,8 +30,6 @@ describe('renderFixtureActivity — assetStore forwarding (D6, cdd6-T1c)', () =>
   });
 
   it('throws a named error when the markup holds no diagram block', () => {
-    expect(() => renderFixtureActivity('not a diagram', new DeterministicMeasurer())).toThrow(
-      /no diagram block found/,
-    );
+    expect(() => renderFixtureActivity('not a diagram', new DeterministicMeasurer())).toThrow(/no diagram block found/);
   });
 });

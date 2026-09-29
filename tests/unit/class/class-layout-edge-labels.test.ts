@@ -118,12 +118,7 @@ describe('T3e — link-middle-decor label shield (SvekEdge.java:353-356,437-441)
   });
 
   it('the shield also widens the CONSTRAINT_SPOT arm (SvekEdge.java:437-441 applies to both dimNote sources)', () => {
-    const attrs = edgeLabelAttrs(
-      rel({ linkConstraint: { text: 'x' }, middleDecor: 'circle' }),
-      font,
-      font,
-      measurer,
-    );
+    const attrs = edgeLabelAttrs(rel({ linkConstraint: { text: 'x' }, middleDecor: 'circle' }), font, font, measurer);
     expect(attrs.labelWidth).toBe(10 + 14);
     expect(attrs.labelHeight).toBe(10 + 14);
   });

@@ -5,7 +5,10 @@
  * (`<U>agregation</U>`).
  */
 import { describe, it, expect } from 'vitest';
-import { computeMeasuredLabelAttrs, resolveLoneSpriteLabel } from '../../../src/diagrams/class/class-edge-label-measure.js';
+import {
+  computeMeasuredLabelAttrs,
+  resolveLoneSpriteLabel,
+} from '../../../src/diagrams/class/class-edge-label-measure.js';
 import { attachEdgeLabel, type EdgeGeoTextContext } from '../../../src/diagrams/class/class-edge-label-attach.js';
 import { renderEdgeMainLabel, arrowLabelTextAttrs } from '../../../src/diagrams/class/renderer-edge-label.js';
 import type { Relationship } from '../../../src/diagrams/class/ast.js';

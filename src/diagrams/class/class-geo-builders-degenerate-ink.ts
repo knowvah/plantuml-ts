@@ -44,9 +44,7 @@ import type { MeasuredClassifier } from './class-layout-helpers.js';
  *    never wins the `Math.max` against `totalDims`, so this fallback is a
  *    no-op for it regardless of the `+1`.
  */
-export function degenerateEnsureVisibleInk(
-  measured: MeasuredClassifier,
-): { maxX: number; maxY: number } | undefined {
+export function degenerateEnsureVisibleInk(measured: MeasuredClassifier): { maxX: number; maxY: number } | undefined {
   if (measured.ensureVisibleInk !== undefined) return measured.ensureVisibleInk;
   if (measured.symbolInk === undefined) return undefined;
   return { maxX: measured.symbolInk.maxX + 1, maxY: measured.symbolInk.maxY + 1 };

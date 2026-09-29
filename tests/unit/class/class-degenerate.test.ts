@@ -154,7 +154,7 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(captured).toBe(1);
   });
 
-  it('single circle classifier -- canvas grows to the label\'s ensureVisible baseline, not LimitFinder ink (cdd6-T2c item 1)', () => {
+  it("single circle classifier -- canvas grows to the label's ensureVisible baseline, not LimitFinder ink (cdd6-T2c item 1)", () => {
     // cdd5-T4a/cdd6-T2c degenerate-text-ensurevisible: SvgGraphics.java:
     // 757-758,:129-133 -- a circle/`() "name"` interface's label is drawn
     // BELOW its fixed 18x18 icon (measureCircleInterfaceInk); the degenerate
@@ -214,7 +214,7 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(svg).toContain('A');
   });
 
-  it('end-to-end: a frame with an embedded nested diagram grows the degenerate canvas to the DRAWN image corner, not LimitFinder\'s shrunk-by-1 ink (cdd6-T2c item 3)', () => {
+  it("end-to-end: a frame with an embedded nested diagram grows the degenerate canvas to the DRAWN image corner, not LimitFinder's shrunk-by-1 ink (cdd6-T2c item 3)", () => {
     // `frame X [ {{ nested }} ]` is a single descriptive leaf, no
     // relationships, no namespaces -- degenerate in both this port and the
     // jar (no svek-*.dot). Its embedded raster is drawn through the SAME

@@ -166,9 +166,7 @@ function sizingFontConfig(fontSpec: FontSpec, size: number): FontConfiguration {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageDescription.java:175,183-191
  */
 function titleAlignmentFor(symbol: LeafSizingSubject['symbol']): HorizontalAlignment {
-  return symbol === 'usecase' || symbol === 'usecase-business'
-    ? HorizontalAlignment.CENTER
-    : HorizontalAlignment.LEFT;
+  return symbol === 'usecase' || symbol === 'usecase-business' ? HorizontalAlignment.CENTER : HorizontalAlignment.LEFT;
 }
 
 /** `EntityImageDescriptionPaint` assembly, split out to keep
