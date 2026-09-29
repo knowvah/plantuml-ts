@@ -11,6 +11,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { SpriteDimsLookup } from '../../core/creole-atoms.js';
 import type { BoxSizingOpts } from '../../core/svek/image/leaf-sizing.js';
 import { measureEntityLeafInk, type LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
+import { measureFolderLeafInk } from '../../core/svek/image/leaf-sizing-folder.js';
 import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.js';
 
 /**
@@ -56,18 +57,21 @@ import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.
  *   practice -- notes are `NoteGeo`, not `ClassifierGeo` -- but excluded
  *   here to keep this function's contract accurate to its sibling's own
  *   dispatch table, not merely "happens to be unreachable today").
- * - `folder`/`package`: `leaf-sizing.ts:142-155` dispatches to
- *   `measureFolderLeaf` (`leaf-sizing-folder.ts`) -- `USymbolFolder.asSmall
- *   .calculateDimension`'s OWN `mergeTB(dimStereo, dimLabel)` composition
- *   with its own `getMargin()`, a construction `measureEntityLeafInk`'s
- *   `EntityImageDescription`/`buildSizingEntityParams` walk does not
- *   reproduce. Jar-verified regression: widening to include `package`
- *   turned `unknown/cepedu-19-namu934`'s already-wrong `+1,+1` shift into a
- *   `svg/@width` 430 -> 462 (Δ32) blowout -- the generic walk's title/
- *   margin math simply measures a DIFFERENT box than `measureFolderLeaf`
- *   sized. (`unknown/fipezo-93-zimi512`'s package rows are unaffected either
- *   way -- they nest CHILD packages, so they never reach
- *   `tryMeasureDescriptionLeaf` at all; its Δ10 residual is a namespace/
+ * - `folder`/`package`: NO LONGER in {@link DESCRIPTION_LEAF_INK_EXCLUDED_SYMBOLS}
+ *   (T2b, ink-walk-reuses-draw) -- `leaf-sizing.ts:142-155` dispatches its
+ *   BOX to `measureFolderLeaf` (`leaf-sizing-folder.ts`) --
+ *   `USymbolFolder.asSmall.calculateDimension`'s OWN `mergeTB(dimStereo,
+ *   dimLabel)` composition with its own `getMargin()`, a construction
+ *   `measureEntityLeafInk`'s `EntityImageDescription`/
+ *   `buildSizingEntityParams` walk does not reproduce (jar-verified
+ *   regression: widening the OLD denylist to include `package` here turned
+ *   `unknown/cepedu-19-namu934`'s already-wrong `+1,+1` shift into a
+ *   `svg/@width` 430 -> 462 (Δ32) blowout). `measureFolderLeafInk`
+ *   (see {@link FOLDER_FAMILY_SYMBOLS}) walks the SAME `USymbolFolder`
+ *   construction `measureFolderLeaf` sizes instead, so ink and box agree.
+ *   (`unknown/fipezo-93-zimi512`'s package rows are unaffected either way
+ *   -- they nest CHILD packages, so they never reach
+ *   `tryMeasureDescriptionLeaf` at all; its Δ1 residual is a namespace/
  *   cluster-layout issue, out of this function's reach.)
  * - `hexagon`: `EntityImageDescription.ts:423-425` throws
  *   `"no hexagon geometry supplied"` when `hexagonPolygon === undefined` --
@@ -102,12 +106,19 @@ import type { LeafSizingSubject } from '../../core/svek/image/LeafSizingSubject.
 const DESCRIPTION_LEAF_INK_EXCLUDED_SYMBOLS: ReadonlySet<LeafSizingSubject['symbol']> = new Set([
   'port',
   'note',
-  'folder',
-  'package',
   'interface',
   'circle',
   'hexagon',
 ]);
+
+/** `folder`/`package` route to their OWN ink walk (T2b, ink-walk-reuses-
+ *  draw): `leaf-sizing-folder.ts#measureFolderLeafInk`, a `LimitFinder`
+ *  walk over the REAL `USymbolFolder.ts#asSmall` fed the SAME title/label/
+ *  stereo dims `measureFolderLeaf`'s box sizing derives -- NOT the generic
+ *  `measureEntityLeafInk` below, which `cepedu-19-namu934` jar-verified
+ *  regresses (Δ32: a different box than `measureFolderLeaf` sized, see
+ *  `measureFolderLeafInk`'s own doc comment). */
+const FOLDER_FAMILY_SYMBOLS: ReadonlySet<LeafSizingSubject['symbol']> = new Set(['folder', 'package']);
 
 /**
  * `measureEntityLeafInk`'s `fontSpec` param must be the SAME per-element
@@ -122,9 +133,8 @@ const DESCRIPTION_LEAF_INK_EXCLUDED_SYMBOLS: ReadonlySet<LeafSizingSubject['symb
  * existing `addRectInk` box rule for those (`class-ink-box.ts
  * #addClassifierInk`'s `c.symbolInk !== undefined` gate) -- the box rule is
  * still the wrong shape for them too, but no WORSE than before this task,
- * and fixing it needs each one's own non-generic ink walk (`folder`/
- * `package`'s own `mergeTB` geometry, `interface`/`circle`'s fixed square),
- * out of this file's write-set.
+ * and fixing it needs each one's own non-generic ink walk
+ * (`interface`/`circle`'s fixed square), out of this file's write-set.
  */
 export function descriptionLeafSymbolInk(
   node: LeafSizingSubject,
@@ -132,7 +142,10 @@ export function descriptionLeafSymbolInk(
   baseFont: { family: string; size: number },
   ctx: { opts: BoxSizingOpts; sprites: SpriteDimsLookup | undefined; measurer: StringMeasurer },
 ): LeafSymbolInk | undefined {
-  if (DESCRIPTION_LEAF_INK_EXCLUDED_SYMBOLS.has(symbol)) return undefined;
   const fontSpec = ctx.opts.fontSize === undefined ? baseFont : { ...baseFont, size: ctx.opts.fontSize };
+  if (FOLDER_FAMILY_SYMBOLS.has(symbol)) {
+    return measureFolderLeafInk(node, fontSpec, ctx.measurer, ctx.opts, ctx.sprites);
+  }
+  if (DESCRIPTION_LEAF_INK_EXCLUDED_SYMBOLS.has(symbol)) return undefined;
   return measureEntityLeafInk(node, fontSpec, ctx);
 }

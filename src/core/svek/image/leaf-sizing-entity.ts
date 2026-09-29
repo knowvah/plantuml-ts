@@ -140,12 +140,44 @@ function sizingFontConfig(fontSpec: FontSpec, size: number): FontConfiguration {
   return { family: fontSpec.family, size, color: null, styles: SIZING_FONT_STYLES };
 }
 
+/**
+ * `EntityImageDescription.java:175,183-191`'s title-alignment cascade --
+ * `plantuml.skin:452-454`'s bare `usecase { HorizontalAlignment center }`
+ * selector matches only a usecase title signature (`getSNames()` containing
+ * `usecase`, upstream's subsequence cascade); every other description-family
+ * symbol falls through to `root { HorizontalAlignment left }`
+ * (`plantuml.skin:12`).
+ *
+ * T2b (ink-walk-reuses-draw, D5): the SIZING construction hardcoded CENTER
+ * unconditionally before this fix, while the DRAW-time construction
+ * (`renderer-usymbol-entity.ts#titleAlignmentFor`) already resolved this
+ * symbol-scoped cascade correctly. `unknown/gubeca-19-lemu434`'s `file`
+ * leaf (LEFT at draw, wrongly CENTER at sizing/ink) is the jar-verified
+ * regression this closed: a `{{ }}` embed inside `desc` sits centered
+ * within the composed title/desc/stereo width when CENTER, flush left when
+ * LEFT -- the ink walk's embed position (52.04, 24) vs the drawn (17, 31)
+ * traces to exactly this divergence, not a shift in the embed's own size.
+ *
+ * Duplicated rather than imported (same "algorithm, not binding" call as
+ * `EmbeddedDiagram.ts`'s own `getEmbeddedType` duplication note):
+ * `renderer-usymbol-entity.ts` is a class-render file outside this task's
+ * write-set, and its copy is module-private.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageDescription.java:175,183-191
+ */
+function titleAlignmentFor(symbol: LeafSizingSubject['symbol']): HorizontalAlignment {
+  return symbol === 'usecase' || symbol === 'usecase-business'
+    ? HorizontalAlignment.CENTER
+    : HorizontalAlignment.LEFT;
+}
+
 /** `EntityImageDescriptionPaint` assembly, split out to keep
  *  `buildSizingEntityParams` under the NLOC/CCN ceiling. */
 function sizingPaint(
   font: FontConfiguration,
   fontStereo: FontConfiguration,
   opts: BoxSizingOpts | undefined,
+  symbol: LeafSizingSubject['symbol'],
 ): EntityImageDescriptionParams['paint'] {
   return {
     forecolor: SIZING_PLACEHOLDER_COLOR,
@@ -161,11 +193,20 @@ function sizingPaint(
     stroke: UStroke.withThickness(opts?.lineThickness ?? DEFAULT_SIZING_STROKE_THICKNESS),
     fontTitle: font,
     fontStereo,
-    titleAlignment: HorizontalAlignment.CENTER,
+    titleAlignment: titleAlignmentFor(symbol),
     stereotypeAlignment: HorizontalAlignment.CENTER,
     minimumWidth: opts?.minimumWidth ?? 0,
     wrapWidth: opts?.wrapWidth ?? 0,
     guillemet: opts?.guillemet ?? GUILLEMET_DEFAULT,
+    // T2e/T2b follow-up: `BodyEnhancedAbstract.java:121-123`
+    // `getDefaultThickness()` reads `style.value(LineThickness)` off the
+    // SAME per-element style cascade `opts.lineThickness` already resolves
+    // for `stroke` above (`plantuml.skin:91-93`'s `element { LineThickness
+    // 0.5 }` beats `root`'s `1.0` for every description-family symbol) --
+    // one resolved value, two upstream consumers (the border stroke and
+    // `BodyFactory.create3`'s block-separator thickness). Absent = `buildDesc`'s
+    // own `ROOT_LINE_THICKNESS` fallback (`EntityImageDescriptionDelegates.ts`).
+    ...(opts?.lineThickness === undefined ? {} : { defaultThickness: opts.lineThickness }),
   };
 }
 
@@ -237,7 +278,7 @@ function buildSizingEntityParams(
       // `«label»` block.
       ...spriteLabel(node, ctx.sprites),
     },
-    paint: sizingPaint(font, sizingFontConfig(fontSpec, fontStereoSize), ctx.opts),
+    paint: sizingPaint(font, sizingFontConfig(fontSpec, fontStereoSize), ctx.opts, node.symbol),
     links: [],
     fixCircleLabelOverlapping: false,
     atomImageResolverFor: sizingAtomImageResolverFor(ctx.sprites),

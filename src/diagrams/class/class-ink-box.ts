@@ -26,6 +26,7 @@ import {
   addNamespaceRectInk,
   addClassicRectInk,
   addEmbedImageInk,
+  addJsonBodyInk,
 } from './class-ink-shapes.js';
 import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
 import { protectedInnerBox } from './class-dot-graph.js';
@@ -99,6 +100,12 @@ function addLollipopRowInk(box: InkBox, c: ClassifierGeo): void {
  * distinguishes the two empty-body states from each other.
  */
 function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
+  // T2b (json-canvas-width-1px): `kind: 'json'` dispatches per body shape
+  // -- see `addJsonBodyInk`'s own doc comment.
+  if (c.kind === 'json') {
+    addJsonBodyInk(box, c);
+    return;
+  }
   // B5/M6: `kind: 'object'` whose field list is empty but still SHOWN --
   // upstream's `TextBlockEmpty(10, 16)` placeholder branch.
   if (c.kind === 'object' && c.emptyFieldPlaceholder === true) {
