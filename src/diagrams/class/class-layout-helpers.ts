@@ -325,6 +325,8 @@ function tryMeasureNonGenericClassifier(
       theme,
       classifier.display,
       resolveVisibleStereotypeLabels(classifier),
+      // cdd6-T3d (bijufi): the group legend is the stereo block (java:121-124).
+      classifier.legend,
     );
     // `rows[0].text` carries the label for `renderer.ts#renderEmptyPackageLeaf`
     // (mirrors `tryRenderUSymbol`'s identical `rows[0]?.text ?? id` convention)
