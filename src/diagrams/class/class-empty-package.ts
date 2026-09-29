@@ -24,6 +24,11 @@ import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './layout.js';
 import { rect, text, PAINT_NONE } from '../../core/svg.js';
 import { parseColor, type Paint } from '../../core/paint.js';
+import type { DisplayPositioned } from '../../core/annotations/index.js';
+import { buildAnnotationBlock } from '../../core/annotations/index.js';
+import { isDisplayPositionedNull } from '../../core/annotations/model.js';
+import { resolveAnnotationStyles } from '../../core/annotations/style.js';
+import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
 import { stereoBlockDim, wrapGuillemet, type GuillemetPair } from './class-stereotype.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
 import { namespaceTitleInk, folderTitlePlacement, rectTitlePlacement } from './class-namespace-title-ink.js';
@@ -92,7 +97,14 @@ export interface EmptyPackageLeafDim {
   htitle: number;
   baselineOffset: number;
   /** cdd3-T21 (E3-6): the leaf's `stereoBlock`; absent == `empty(0, 0)`. */
-  stereo?: { readonly width: number; readonly height: number; readonly lines: readonly EmptyPackageStereoLine[] };
+  stereo?: {
+    readonly width: number;
+    readonly height: number;
+    readonly lines: readonly EmptyPackageStereoLine[];
+    /** cdd6-T3d (bijufi): a legend stereo block's pre-rendered SVG fragment,
+     *  local to the block's top-left (`lines` is then empty). */
+    readonly body?: string;
+  };
   /** cdd3-T31 (E1-2): the title `UText` ink (`LimitFinder.java:217-224`),
    *  local to the leaf -- `class-namespace-title-ink.ts#namespaceTitleInk`
    *  at the leaf's own folder/rect title placement. Absent for an empty
@@ -143,6 +155,37 @@ function buildStereo(measurer: StringMeasurer, theme: Theme, labels: readonly st
 }
 
 /**
+ * cdd6-T3d (bijufi-98-xafa015): `if (legend != null) stereoBlock =
+ * EntityImageLegend.create(legend.getDisplay(), getSkinParam())` -- the
+ * group's own legend REPLACES the stereotype block. `EntityImageLegend
+ * .create` is the bordered legend block the root legend draws, the same
+ * `buildAnnotationBlock` `class-cluster-header.ts` uses for a titled
+ * cluster's legend.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageEmptyPackage.java:121-124
+ */
+function buildLegendStereo(
+  legend: DisplayPositioned,
+  theme: Theme,
+  measurer: StringMeasurer,
+): EmptyPackageLeafDim['stereo'] {
+  if (isDisplayPositionedNull(legend)) return undefined;
+  const style = resolveAnnotationStyles(theme, new Map(), new Map()).legend;
+  const block = buildAnnotationBlock('legend', legend.display!, style, measurer);
+  return { width: block.width, height: block.height, lines: [], body: (block.extraDefs ?? '') + block.body };
+}
+
+/** The leaf's `stereoBlock`: the legend when present, else the stereotype
+ *  labels (`EntityImageEmptyPackage.java:121-137`). */
+function leafStereoBlock(
+  measurer: StringMeasurer,
+  theme: Theme,
+  labels: readonly string[],
+  legend: DisplayPositioned | undefined,
+): EmptyPackageLeafDim['stereo'] {
+  return legend !== undefined ? buildLegendStereo(legend, theme, measurer) : buildStereo(measurer, theme, labels);
+}
+
+/**
  * `EntityImageEmptyPackage#calculateDimensionSlow` (G2 N33; A2s F-D A8):
  * `mergeTB(desc, stereoBlock, LEFT).atLeast(0, 2*dimDesc.height)
  * .delta(2*MARGIN)` -- jar-verified `gatula-10-bifu561` ("foo" 39.425x48)
@@ -154,12 +197,12 @@ export function measureEmptyPackageLeafDim(
   theme: Theme,
   label: string,
   stereotypeLabels: readonly string[] = [],
+  legend?: DisplayPositioned,
 ): EmptyPackageLeafDim {
   const dim = measurer.measure(label, titleFont(theme));
-  const stereo = buildStereo(measurer, theme, stereotypeLabels);
-  const sw = stereo?.width ?? 0;
+  const stereo = leafStereoBlock(measurer, theme, stereotypeLabels, legend);
   const sh = stereo?.height ?? 0;
-  const width = Math.max(dim.width, sw) + EMPTY_PACKAGE_MARGIN * 2;
+  const width = Math.max(dim.width, stereo?.width ?? 0) + EMPTY_PACKAGE_MARGIN * 2;
   const wtitle = getWTitle(measurer, theme, label, 0);
   const baselineOffset = getTitleBaselineOffset(measurer, theme, label);
   const place =
@@ -238,6 +281,8 @@ interface EmptyPackageLeafDraw {
  *  (`DriverTextSvg.java:92-94`). */
 function drawStereo(draw: EmptyPackageLeafDraw, theme: ScaledTheme, x0: number, y0: number): string {
   const stereo = draw.tab.stereo;
+  // cdd6-T3d: a legend block draws itself (its own style colours).
+  if (stereo?.body !== undefined) return shiftFragmentBody(stereo.body, x0, y0);
   const fill = emptyPackageStereoFontColor(theme, draw.tags);
   if (stereo === undefined || isNoPaint(fill)) return '';
   return stereo.lines

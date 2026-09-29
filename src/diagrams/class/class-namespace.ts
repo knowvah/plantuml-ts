@@ -43,6 +43,33 @@ export function makeClassifier(
 }
 
 /**
+ * The fields the collapsed leaf inherits because upstream's mute to
+ * EMPTY_PACKAGE keeps the SAME entity (`Entity#muteToType`): its stereotype,
+ * colours, url and legend. Split out of `collapseEmptyNamespace` (cdd6-T3d)
+ * to keep that function under the CCN cap; each assignment keeps its own
+ * citation.
+ */
+function copyMutedEntityFields(ns: Namespace, classifier: Classifier): void {
+  // A2s F-G mechanism A8: the group's stereotype survives the mute to
+  // EMPTY_PACKAGE -- upstream reads `entity.getStereotype()` off the SAME
+  // entity when building the leaf's stereo block, so the collapsed leaf
+  // inherits it verbatim (widens the node via `measureEmptyPackageLeafDim`).
+  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-137
+  if (ns.stereotype !== undefined) classifier.stereotype = ns.stereotype;
+  // cdd3-T9 S-12: likewise the entity's own colours -- the mute keeps the
+  // SAME entity, whose BACK colour `EntityImageEmptyPackage` reads first.
+  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:97,109-112
+  if (ns.color !== undefined) classifier.color = ns.color;
+  // cdd3-T10 (S-11): and its url (`Entity#addUrl`, `CommandPackageWithUSymbol
+  // .java:212`) -- the SAME entity draws it after the mute.
+  if (ns.url !== undefined) classifier.url = ns.url;
+  // cdd6-T3d (bijufi): and its legend, `((Entity) entity).getLegend()`,
+  // which becomes the leaf's stereo block.
+  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:121-124
+  if (ns.legend !== undefined) classifier.legend = ns.legend;
+}
+
+/**
  * Collapse a namespace/package into a plain rect leaf classifier when it is
  * empty, mirroring upstream `CommandNamespaceEmpty`/`CommandPackageEmpty`'s
  * `gotoGroup` + immediate `endGroup()` pair. Two callers, both immediate
@@ -98,19 +125,7 @@ export function collapseEmptyNamespace(
   // `xitobu-41-lame230`: `package package {}` before `class foo` in source
   // draws the folder icon FIRST).
   if (ns.creationIndex !== undefined) classifier.creationIndex = ns.creationIndex;
-  // A2s F-G mechanism A8: the group's stereotype survives the mute to
-  // EMPTY_PACKAGE -- upstream reads `entity.getStereotype()` off the SAME
-  // entity when building the leaf's stereo block, so the collapsed leaf
-  // inherits it verbatim (widens the node via `measureEmptyPackageLeafDim`).
-  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:126-137
-  if (ns.stereotype !== undefined) classifier.stereotype = ns.stereotype;
-  // cdd3-T9 S-12: likewise the entity's own colours -- the mute keeps the
-  // SAME entity, whose BACK colour `EntityImageEmptyPackage` reads first.
-  // @see ~/git/plantuml/.../svek/image/EntityImageEmptyPackage.java:97,109-112
-  if (ns.color !== undefined) classifier.color = ns.color;
-  // cdd3-T10 (S-11): and its url (`Entity#addUrl`, `CommandPackageWithUSymbol
-  // .java:212`) -- the SAME entity draws it after the mute.
-  if (ns.url !== undefined) classifier.url = ns.url;
+  copyMutedEntityFields(ns, classifier);
   classifierIndex.set(nsId, classifiers.length);
   classifiers.push(classifier);
   if (parentId !== null) {
