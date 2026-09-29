@@ -23,7 +23,7 @@ import { UText } from '../shape/UText.js';
 import type { FontConfiguration } from '../shape/UText.js';
 import { UTranslate } from '../UTranslate.js';
 import type { ResolvedColor } from '../color/HColorSet.js';
-import { parseSimpleColor, toSvgHex } from '../color/HColorSet.js';
+import { parseColor, toSvgHex } from '../color/HColorSet.js';
 import { extract, applyTransformAttribute } from './svg-nanoparser-transform.js';
 
 /**
@@ -70,16 +70,18 @@ const STYLE_FONT_SIZE = new RegExp('font-size' + COLON_SOMETHING);
 const STYLE_FONT_FAMILY = new RegExp('font-family' + COLON_SOMETHING);
 
 /**
- * `HColorSet#getColorOrWhite`, scoped to the single-token hex/named-color
- * path a raw `<text>` `fill=`/`style="fill:..."` value uses -- same scope
- * decision `ColorResolver.ts`'s own private `getColorOrWhite` documents
- * (not upstream's full gradient-separator `parseColor`). `undefined`
- * (attribute absent) resolves to white, matching `HColorSet#parseColor
- * (null)` -> `null` -> `getColorOrWhite`'s `WHITE` fallback.
+ * `HColorSet#getColorOrWhite` -> `HColorSet#parseColor` (T3h follow-up),
+ * scoped to the single-token hex/named-color/`"transparent"`/
+ * `"background"` path a raw `<text>` `fill=`/`style="fill:..."` value
+ * uses -- same scope decision `ColorResolver.ts`'s own private
+ * `getColorOrWhite` documents (not `parseColor`'s gradient-separator/`#?`
+ * scheme tail). `undefined` (attribute absent) resolves to white, matching
+ * `HColorSet#parseColor(null)` -> `null` -> `getColorOrWhite`'s `WHITE`
+ * fallback.
  */
 function getColorOrWhite(code: string | undefined): ResolvedColor {
   if (code === undefined) return WHITE;
-  return parseSimpleColor(code) ?? WHITE;
+  return parseColor(code) ?? WHITE;
 }
 
 /** @see SvgNanoParser.java#getFillString */

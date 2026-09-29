@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parseSimpleColor, toSvgHex, resolveColorToSvgHex } from '../../../../../src/core/klimt/color/HColorSet.js';
+import {
+  parseSimpleColor,
+  parseColor,
+  toSvgHex,
+  resolveColorToSvgHex,
+} from '../../../../../src/core/klimt/color/HColorSet.js';
 
 describe('parseSimpleColor', () => {
   it('parses the 1/3/6/8-hex-digit forms, with or without a leading #', () => {
@@ -36,6 +41,34 @@ describe('parseSimpleColor', () => {
   it('returns undefined for an invalid-length token that is not a registered name', () => {
     expect(parseSimpleColor('#12')).toBeUndefined();
     expect(parseSimpleColor('a&b<c')).toBeUndefined();
+  });
+
+  it('returns undefined for "transparent"/"background" -- upstream\'s PRIVATE parseSimpleColor has no keyword check and ColorTrieNode has no such entry (T3h follow-up, HColorSet.java:122-157)', () => {
+    expect(parseSimpleColor('transparent')).toBeUndefined();
+    expect(parseSimpleColor('background')).toBeUndefined();
+  });
+});
+
+describe('parseColor', () => {
+  it('resolves "transparent"/"background" to the HColors.none() sentinel (alpha 0), case-insensitively, with or without a leading #', () => {
+    // T3h follow-up: ported from the HEAD of the PUBLIC `parseColor`
+    // (`HColorSet.java:78-92`), not `parseSimpleColor` -- java:79-80 strips
+    // a leading `#` unconditionally BEFORE the java:82-83 keyword check, so
+    // it fires for "#transparent" too. `HColors.none()` IS
+    // `HColors.transparent()` (`HColors.java:129-135`, the one
+    // `XColor(0,0,0,0)` singleton), which is why the resolved value is
+    // alpha-0 black, not a distinct sentinel.
+    expect(parseColor('transparent')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+    expect(parseColor('TRANSPARENT')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+    expect(parseColor('#Transparent')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+    expect(parseColor('background')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+    expect(parseColor('Background')).toEqual({ r: 0, g: 0, b: 0, a: 0 });
+  });
+
+  it('delegates to parseSimpleColor for anything that is not a "transparent"/"background" keyword', () => {
+    expect(parseColor('#FF0000')).toEqual({ r: 255, g: 0, b: 0, a: 255 });
+    expect(parseColor('red')).toEqual({ r: 255, g: 0, b: 0, a: 255 });
+    expect(parseColor('notacolor')).toBeUndefined();
   });
 });
 

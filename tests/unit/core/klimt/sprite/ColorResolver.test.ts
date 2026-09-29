@@ -65,6 +65,13 @@ describe('ColorResolver#getTrueColor', () => {
     expect(resolver.getTrueColor('not-a-real-color')).toEqual(WHITE);
   });
 
+  it('resolves the "transparent"/"background" keywords to the HColors.none() sentinel, not the WHITE fallback (T3h, ColorResolver.java:68-69 -> HColorSet.java:82-83)', () => {
+    const resolver = new ColorResolver(undefined, undefined, grayLevelRange(0, 255));
+    expect(resolver.getTrueColor('transparent')).toEqual(NONE);
+    expect(resolver.getTrueColor('TRANSPARENT')).toEqual(NONE);
+    expect(resolver.getTrueColor('background')).toEqual(NONE);
+  });
+
   it('collapses to plain YIQ greyscale when forcedColor is itself gray', () => {
     const resolver = new ColorResolver(undefined, GRAY_MID, grayLevelRange(0, 255));
     // YIQ: trunc((255*299 + 0*587 + 0*114) / 1000) = 76
