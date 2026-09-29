@@ -102,7 +102,7 @@ export interface Theme {
    *  #getReversed`, an HSLuv lightness flip), a `ColorOrder` name ->
    *  `ColorMapper.reverse(order)`, anything else -> no mapping. Class only,
    *  applied by the same post-process (`class-monochrome.ts#colorMapperOf`).
-   *  The skinparam key itself is not yet read (skinparam-accumulator.ts). */
+   *  Read by `skinparam-key-handlers-table-b.ts`'s `reversecolor` row. */
   reverseColor?: string;
   /** G2 N18: `skinparam style strictuml` -- a global sharp-corner toggle,
    *  checked by `USymbolFolder#drawFolder`'s `roundCorner=0` `UPolygon`

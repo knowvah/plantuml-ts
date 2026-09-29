@@ -65,6 +65,8 @@ export interface SkinparamAccumulator {
    *  mechanism and `skinparam-theme-builder.ts#buildThemePartial`'s gate. */
   mode: 'dark' | undefined;
   monochrome: 'true' | 'reverse' | undefined;
+  /** Raw `skinparam reversecolor` (`TitledDiagram.java:301`). */
+  reverseColor: string | undefined;
   packageStyle: 'rect' | undefined;
   fixCircleLabelOverlapping: boolean | undefined;
   shadowing: number | undefined;
@@ -242,6 +244,7 @@ const SCALAR_FIELD_NAMES = [
   'handwritten',
   'mode',
   'monochrome',
+  'reverseColor',
   'packageStyle',
   'fixCircleLabelOverlapping',
   'shadowing',

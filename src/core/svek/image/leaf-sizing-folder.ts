@@ -192,7 +192,10 @@ function folderTextBlock(
   const lineH = fontSpec.size * LINE_HEIGHT_FACTOR;
   return [
     maxLineWidth(text, fontSpec, measurer, sprites),
-    textBlockHeight(text, lineH) + atomHeightBonus(text, fontSpec, sprites),
+    // cdd6 T3f (cepedu-19-namu934): each line at its OWN tallest font --
+    // a `=` heading is `fontConfiguration.bigger(4).bold()` (StripeSimple
+    // .java:199-202), which the flat `lineH` never saw.
+    textBlockHeight(text, lineH, fontSpec, measurer) + atomHeightBonus(text, fontSpec, sprites),
   ];
 }
 
