@@ -173,11 +173,17 @@ function collectTagFontColor(
 /**
  * cdd6 T3g (D2): the bare-bucket properties added for T3g, split out of
  * {@link collectElementStyleBuckets} (already over the complexity limits):
- * `HyperLinkColor` (`Style.java:265`).
+ * `HyperLinkColor` (`Style.java:265`) and `MaximumWidth` (`Style.java
+ * :330-332` `wrapWidth`, parsed like `MinimumWidth`).
  */
 function collectT3gBucketProps(props: ReadonlyMap<string, string>, bucket: ElementColors): void {
   const hc = props.get('hyperlinkcolor');
   if (hc !== undefined) bucket.hyperlinkColor = resolveColor(hc);
+  const mx = props.get('maximumwidth');
+  if (mx !== undefined) {
+    const maxWidth = Number.parseFloat(mx);
+    if (Number.isFinite(maxWidth)) bucket.maximumWidth = maxWidth;
+  }
 }
 
 /**

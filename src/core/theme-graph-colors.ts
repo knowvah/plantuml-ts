@@ -243,6 +243,12 @@ export interface ElementColors {
    *  #withTOBECHANGED`, the same signature `fontByStereo`'s `<style>` form
    *  uses), keyed by the CLEANED label like {@link fontByStereo}. */
   hyperlinkColorByStereo?: Readonly<Record<string, string>>;
+  /** cdd6 T3g: `PName.MaximumWidth` on `{<sname>}` -- `Style#wrapWidth`
+   *  (`Style.java:330-332`), the word-wrap width `BodierJSon.java:85` hands
+   *  to `TextBlockCucaJSon` (`:184-190` wraps every key and scalar cell).
+   *  Written by `<style> <sname> { MaximumWidth N }`; mirrors
+   *  {@link minimumWidth}. See `resolveElementMaximumWidth`. */
+  maximumWidth?: number;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;
