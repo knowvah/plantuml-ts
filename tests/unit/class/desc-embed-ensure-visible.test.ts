@@ -1,0 +1,85 @@
+/**
+ * desc-embed-ensure-visible.test.ts — cdd6 T3b (journal row 47): a
+ * description-label `{{ }}` embed reaches the canvas ONLY through
+ * `SvgGraphics#ensureVisible` (`SvgGraphics.java:129-133,1033-1034`:
+ * `(int)(x + w + 1)`), never through the `LimitFinder` ink pass, whose
+ * `matchesProperty("SVG")` is false (`LimitFinder.java:99-100`), so
+ * `EmbeddedDiagram#drawU`'s raster arm throws and its catch draws nothing
+ * (`EmbeddedDiagram.java:169-193`).
+ *
+ * Jar canvases (`test-results/dot-cache/unknown/<slug>/in.svg`):
+ * rozugu-82 190x136 (image y 17 + h 118 -> 136); rojida-14 475x382 (image
+ * 231.65 + 243 -> 475, 311 + 70 -> 382).
+ */
+import { describe, it, expect } from 'vitest';
+import { renderSync } from '../../../src/index.js';
+import { WidthTableMeasurer } from '../../../src/core/measurer.js';
+
+const measurer = new WidthTableMeasurer();
+
+function canvas(svg: string): string {
+  return /width="(\d+)px" height="(\d+)px"/.exec(svg)!.slice(1, 3).join('x');
+}
+
+const ROZUGU = [
+  '@startuml',
+  'rectangle A [',
+  '{{',
+  'skinparam BackgroundColor #Transparent',
+  'rectangle FailCase [',
+  '**Fail Case**',
+  '----',
+  'åäöÅÄÖ',
+  'test 1 %newline()This is a newline :-)',
+  'test 2',
+  ']',
+  '}}',
+  ']',
+  'rectangle OkCase [',
+  '**OK Case**',
+  '----',
+  'åäöÅÄÖ',
+  ']',
+  '@enduml',
+].join('\n');
+
+const ROJIDA = [
+  '@startuml',
+  'package Application [',
+  '{{',
+  '  class class',
+  '}}',
+  ']',
+  'package ClientInterface [',
+  '{{',
+  '  class class1',
+  '}}',
+  ']',
+  'package LibraryInterface [',
+  '{{',
+  '  interface interface1',
+  '  interface interface2',
+  '}}',
+  ']',
+  'package LibraryImplementation [',
+  '{{',
+  '  class class2',
+  '  class class3',
+  '}}',
+  ']',
+  'Application ..> ClientInterface',
+  'ClientInterface .down.> LibraryInterface',
+  'ClientInterface .down.> LibraryImplementation',
+  'LibraryImplementation .right.> LibraryInterface',
+  '@enduml',
+].join('\n');
+
+describe('description-label embed: canvas via ensureVisible, not ink', () => {
+  it('unknown/rozugu-82: the embed is not in the ink (height 136, not ink + 15 + 5)', () => {
+    expect(canvas(renderSync(ROZUGU, { measurer }))).toBe('190x136');
+  });
+
+  it('unknown/rojida-14: package-leaf embeds stretch the canvas to (int)(x + w + 1)', () => {
+    expect(canvas(renderSync(ROJIDA, { measurer }))).toBe('475x382');
+  });
+});
