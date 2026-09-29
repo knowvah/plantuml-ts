@@ -35,7 +35,6 @@ import {
   ELEMENT_MULTILINE_OPEN_TYPE0_RE,
   extractColor,
   extractNodeStereotype,
-  stripFullWrap,
 } from '../description/parse-helpers.js';
 import { getEmbeddedType } from '../../core/EmbeddedDiagram.js';
 import { scanEmbeddedElementBlock } from './class-embedded-block.js';
@@ -70,25 +69,29 @@ import type { PendingMultilineElement } from './class-parse-state.js';
 const NATIVE_DECL_KEYWORDS = new Set(['interface']);
 
 /** Apply the opener's captured STEREO/COLOR run, mirroring the description
- *  engine's `applyElementDecorations` — TYPE0-only for COLOR (its slot sits
- *  before `as`; TYPE1's own color slot is a separate, unmeasured gap, same
- *  posture the description port already carries for TYPE1). */
-function applyDecorations(state: ParseState, classifierId: string, run: string, withColor: boolean): void {
+ *  engine's `applyElementDecorations`. BOTH types parse COLOR: TYPE0 before
+ *  `as`, TYPE1 before `[` -- `ColorParser.exp1()` sits in both concats
+ *  (`CommandCreateElementMultilines.java:98-122`) and `executeNow` sets the
+ *  colors unconditionally (:233-234); cdd6 T3f, dezobu-62-vuzu421's
+ *  `#Motivation`. */
+function applyDecorations(state: ParseState, classifierId: string, run: string): void {
   if (run.trim() === '') return;
   const idx = state.classifierIndex.get(classifierId);
   const classifier = idx !== undefined ? state.ast.classifiers[idx] : undefined;
   if (classifier === undefined) return;
   const sr = extractNodeStereotype(run);
   if (sr !== undefined) classifier.stereotype = sr.stereotypes.join(', ');
-  if (!withColor) return;
   const cr = extractColor(sr === undefined ? run : sr.remainder);
   if (cr !== undefined) classifier.color = cr.color;
 }
 
 /** A display row from the opener's own tail or the closer's pre-terminator
- *  prefix — pushed only when non-empty, mirroring `pushElementEdgeText`. */
+ *  prefix — pushed only when non-empty, mirroring `pushElementEdgeText`.
+ *  Never quote/bracket-unwrapped: `display.addFirst(descStart)` /
+ *  `display.add(lineLast.get(0))` take the regex groups as-is
+ *  (`CommandCreateElementMultilines.java:194-199`; cdd6 T3f). */
 function pushEdgeText(pending: PendingMultilineElement, text: string): void {
-  const t = pending.terminator === 'quote' ? text : stripFullWrap(text.trim());
+  const t = pending.terminator === 'quote' ? text : text.trim();
   if (t.trim() !== '') pending.lines.push(t);
 }
 
@@ -119,7 +122,9 @@ function removeStartingSpaces(s: string, nb: number): string {
  *  `StringLocated` is returned as-is). */
 function pushDedentedBodyLine(pending: PendingMultilineElement, raw: string): void {
   if (pending.baseIndent === undefined) pending.baseIndent = nbStartingSpace(raw);
-  pending.lines.push(stripFullWrap(removeStartingSpaces(raw, pending.baseIndent)));
+  // cdd6 T3f: verbatim -- `Display.createFoo` -> `Display.create` never
+  // unwraps (jar probe: `"q"`, `(p)`, `:c:` body lines draw as written).
+  pending.lines.push(removeStartingSpaces(raw, pending.baseIndent));
 }
 
 /** One raw body line of an open block — TYPE1 dedents relative to its own
@@ -193,7 +198,7 @@ function tryType1(state: ParseState, line: string): boolean {
   const code = open[2]!;
   const classifier = ensureClassifier(state, code, 'descriptive', code);
   classifier.usymbol = usymbol;
-  applyDecorations(state, classifier.id, open[3]!, false);
+  applyDecorations(state, classifier.id, open[3]!);
   const pending: PendingMultilineElement = { classifierId: classifier.id, terminator: 'bracket', lines: [] };
   state.pendingMultilineElement = pending;
   const desc = open[4]!;
@@ -223,7 +228,7 @@ function tryType0(state: ParseState, lines: readonly string[], i: number, line: 
   const code = open[2]!;
   const classifier = ensureClassifier(state, code, 'descriptive', code);
   classifier.usymbol = usymbol;
-  applyDecorations(state, classifier.id, open[3]!, true);
+  applyDecorations(state, classifier.id, open[3]!);
   const pending: PendingMultilineElement = { classifierId: classifier.id, terminator: 'quote', lines: [] };
   state.pendingMultilineElement = pending;
   pushEdgeText(pending, open[4]!);
