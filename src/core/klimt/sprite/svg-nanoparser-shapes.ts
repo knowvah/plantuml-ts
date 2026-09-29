@@ -14,7 +14,6 @@
  */
 
 import type { UGraphicWithScale } from '../UGraphicWithScale.js';
-import type { Paint } from '../../paint.js';
 import { UStroke } from '../UStroke.js';
 import { Fore } from '../Fore.js';
 import { Back } from '../Back.js';
@@ -24,7 +23,7 @@ import { UText } from '../shape/UText.js';
 import type { FontConfiguration } from '../shape/UText.js';
 import { UTranslate } from '../UTranslate.js';
 import type { ResolvedColor } from '../color/HColorSet.js';
-import { parseSimpleColor, toSvgHex } from '../color/HColorSet.js';
+import { parseColor, toSvgHex } from '../color/HColorSet.js';
 import { extract, applyTransformAttribute } from './svg-nanoparser-transform.js';
 
 /**
@@ -35,17 +34,6 @@ import { extract, applyTransformAttribute } from './svg-nanoparser-transform.js'
  * `SvgNanoParser.ts`'s own copy.
  */
 const WHITE: ResolvedColor = { r: 255, g: 255, b: 255, a: 255 };
-
-/**
- * `HColors.none()` stand-in, matching the established convention at
- * `AbstractCommonUGraphic.ts`/`StripeTree.ts` (`Paint` has no explicit
- * "unset" variant, so the SVG paint keyword `'none'` is used directly).
- * `applyFillAndStroke`'s `"none".equals(fillString)` branch applies this
- * as a background ONLY (`HColors.none().bg()`) -- not via `getTrueColor`,
- * which is why this is a literal sentinel rather than a call through the
- * color resolver.
- */
-const NONE_PAINT: Paint = 'none';
 
 /** `P_TEXT = "\<text[^<>]*\>(.*?)\</text\>"` -- unchanged, no dotAll flag
  *  (matches Java's default `.` semantics). */
@@ -82,16 +70,18 @@ const STYLE_FONT_SIZE = new RegExp('font-size' + COLON_SOMETHING);
 const STYLE_FONT_FAMILY = new RegExp('font-family' + COLON_SOMETHING);
 
 /**
- * `HColorSet#getColorOrWhite`, scoped to the single-token hex/named-color
- * path a raw `<text>` `fill=`/`style="fill:..."` value uses -- same scope
- * decision `ColorResolver.ts`'s own private `getColorOrWhite` documents
- * (not upstream's full gradient-separator `parseColor`). `undefined`
- * (attribute absent) resolves to white, matching `HColorSet#parseColor
- * (null)` -> `null` -> `getColorOrWhite`'s `WHITE` fallback.
+ * `HColorSet#getColorOrWhite` -> `HColorSet#parseColor` (T3h follow-up),
+ * scoped to the single-token hex/named-color/`"transparent"`/
+ * `"background"` path a raw `<text>` `fill=`/`style="fill:..."` value
+ * uses -- same scope decision `ColorResolver.ts`'s own private
+ * `getColorOrWhite` documents (not `parseColor`'s gradient-separator/`#?`
+ * scheme tail). `undefined` (attribute absent) resolves to white, matching
+ * `HColorSet#parseColor(null)` -> `null` -> `getColorOrWhite`'s `WHITE`
+ * fallback.
  */
 function getColorOrWhite(code: string | undefined): ResolvedColor {
   if (code === undefined) return WHITE;
-  return parseSimpleColor(code) ?? WHITE;
+  return parseColor(code) ?? WHITE;
 }
 
 /** @see SvgNanoParser.java#getFillString */
@@ -138,7 +128,33 @@ export function applyFillAndStroke(ugs: UGraphicWithScale, s: string, stackG: re
   }
 
   if (fillString === 'none') {
-    ugs = ugs.apply(new Back(NONE_PAINT));
+    // T3h fix (cdd6): route through `getTrueColor` -- the SAME channel the
+    // stroke branch above uses -- rather than a locally-literal `'none'`
+    // Paint string. Upstream's `"none".equals(fillString)` branch applies
+    // `HColors.none().bg()` (java:204-205) and `ColorResolver#getTrueColor`
+    // special-cases `"none"` to the SAME `HColors.none()` singleton
+    // (`ColorResolver.java:68-69`, `HColors.java:133-135`: `none()` IS
+    // `transparent()`, the one `XColor(0,0,0,0)` instance) -- there is no
+    // separate "none sentinel" HColor upstream at all, so a stroke="none"
+    // and a fill="none" on the SAME element resolve to the identical
+    // object, and `DriverPathSvg#draw`'s `color.equals(back)` fires,
+    // taking the fast path that drops the redundant `stroke`/`stroke-width`
+    // attributes (`DriverPathSvg.java`). This port's stroke branch already
+    // resolves `strokeString === 'none'` to `'#00000000'` via
+    // `ColorResolver.getTrueColor`/`colorResolverToSvgHex` (`ColorResolver
+    // .ts`); a fill-side literal `'none'` Paint string previously produced
+    // a DIFFERENT string than the stroke side's `'#00000000'`, so
+    // `driver-path-svg.ts#paintsEqual` (`===` on two strings, read-only in
+    // this task's write-set) never saw them as equal. Using the same
+    // resolver call here makes both sides agree on one canonical
+    // representation, restoring the fast-path identity `paintsEqual`
+    // already implements correctly. The general (non-equal) path is
+    // unaffected: `SvgGraphicsCore#fixColor` (`svg-graphics-core.ts`,
+    // mirroring `SvgGraphics.java`'s `fixColor`) collapses `'#00000000'`
+    // back to the literal `fill="none"`/`stroke="none"` SVG attribute at
+    // the emission layer regardless of which of the two equivalent forms
+    // reaches it.
+    ugs = ugs.apply(new Back(ugs.getTrueColor('none')));
   } else {
     const fill = fillString === undefined ? ugs.getDefaultColor() : ugs.getTrueColor(fillString);
 

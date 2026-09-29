@@ -521,7 +521,7 @@ describe('SvgNanoParser#applyFillAndStroke (T8, acceptance criteria 2 and 3)', (
     expect(backs[1]!.getBackColor()).toBe('#000000');
   });
 
-  it('fill="none" applies ONLY a background of the "none" sentinel, no foreground change', () => {
+  it('fill="none" applies ONLY a background of #00000000 -- the SAME resolved value getTrueColor("none") gives the stroke path, not a distinct "none" string literal', () => {
     const svg = `<svg width="16" height="16">\n  <path fill="none" d="${BI_GLOBE_D}"/>\n</svg>`;
     const parser = new SvgNanoParser(svg);
     const ug = new FakeUGraphic();
@@ -534,7 +534,21 @@ describe('SvgNanoParser#applyFillAndStroke (T8, acceptance criteria 2 and 3)', (
     // "none" branch (it applies Back only).
     expect(fores).toHaveLength(1);
     expect(backs).toHaveLength(2);
-    expect(backs[1]!.getBackColor()).toBe('none');
+    expect(backs[1]!.getBackColor()).toBe('#00000000');
+  });
+
+  it('fill="none" AND stroke="none" resolve to the IDENTICAL Paint value -- the fast-path identity DriverPathSvg#paintsEqual/HColor#equals needs (SvgNanoParser.java:187-215, HColors.none() is one singleton on both sides)', () => {
+    const svg = `<svg width="16" height="16">\n  <path fill="none" stroke="none" d="${BI_GLOBE_D}"/>\n</svg>`;
+    const parser = new SvgNanoParser(svg);
+    const ug = new FakeUGraphic();
+    parser.drawU(ug, 1, undefined, undefined);
+
+    const changes = ug.drawnChanges[0]!;
+    const fore = changes.filter((c): c is Fore => c instanceof Fore).at(-1);
+    const back = changes.filter((c): c is Back => c instanceof Back).at(-1);
+    expect(fore?.getColor()).toBe('#00000000');
+    expect(back?.getBackColor()).toBe('#00000000');
+    expect(fore?.getColor()).toBe(back?.getBackColor());
   });
 });
 
