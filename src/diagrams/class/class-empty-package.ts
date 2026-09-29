@@ -295,9 +295,12 @@ function renderFolderLeaf(
   measurer: StringMeasurer | undefined,
 ): string {
   const { geo } = draw;
-  const { strokeWidth, border, fill } = emptyPackagePaint(theme, draw.tags);
+  const { strokeWidth, border, fill, dash } = emptyPackagePaint(theme, draw.tags);
   const { outline, hline } = renderFolderTabShape(geo, {
     strictUml: false,
+    // cdd6-T3d (fokudi-24-limo685): `style.getStroke(colors)`'s LineStyle
+    // dash (EntityImageEmptyPackage.java:108) reaches the tab too.
+    ...(dash !== undefined ? { strokeDasharray: dash } : {}),
     border,
     strokeWidth,
     fill: geo.color !== undefined ? parseColor(geo.color) : fill, // S-12: EntityImageEmptyPackage.java:97,109-112
