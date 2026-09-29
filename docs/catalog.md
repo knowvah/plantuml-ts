@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1262 modules · 4795 exported names.
+1263 modules · 4800 exported names.
 
 ## `src/`
 
@@ -1297,7 +1297,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-together.ts` | `TogetherFrame`, `TogetherEvent`, `currentTogether`, `openTogetherBlock`, `closeBraceScope`, `recordTogetherEvent`, `togetherAt`, `joinGroupTogether`, `resolveTogetherMembers` | `together { }` for the class parser (cdd3-T18): which entities a together block holds. |
 | `class-url-command.ts` | `URL_STATEMENT_RE`, `applyUrlStatement` | The standalone `url [of\|for] <Code> [is] [[url]]` statement — attaches a url to an already-declared classifier (`classdiagram/command/ CommandUrl.java`). |
 | `class-url.ts` | `UrlInfo`, `applyTopUrl`, `parseUrlBracket`, `URL_BRACKET_RE`, `applyTopUrlToClassifiers` | `[[url]]` link grammar — G2 N15 (README item #7, deferred since N6). |
-| `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `renderVisibilityUrlBackground`, `visibilityIconOriginY`, `visibilityIconOriginYFromTop`, `rowIconTopOriginY` | Member-row visibility icon shape/color (G2 N6). |
+| `class-visibility-icon-shapes.ts` | `STROKE_WIDTH`, `IconShapeCtx`, `drawIconShape` | The visibility icon's shape primitives (`VisibilityModifier#drawSquare`/ `drawCircle`/`drawDiamond`/`drawTriangle`) -- moved out of ./class-visibility-icon.ts unchanged (cdd6-T3d, 500-line cap) when the caller's ambient stroke was threaded |
+| `class-visibility-icon.ts` | `VISIBILITY_ICON_SIZE`, `iconSizeOf`, `colorsFor`, `visibilityModifierName`, `renderVisibilityIcon`, `VisibilityIconAmbient`, `renderVisibilityIconAt`, `renderVisibilityUrlBackground`, `visibilityIconOriginY`, `visibilityIconOriginYFromTop`, `rowIconTopOriginY` | Member-row visibility icon shape/color (G2 N6). |
 | `index.ts` | `classPlugin` | Class diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `layout-ink-extent.ts` | `ClassInkOptions`, `ClassDocumentDims`, `computeClassBorderRectDims`, `computeClassRawInkDims`, `applyClassDocumentMargin`, `computeClassDocumentDims`, `InkShift`, `computeClassInkShift`, `assembleShiftedGeometry` | layout-ink-extent.ts — G2/N5: the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/TextBlockExporter.java:200-202,751-753), ported for CLASS's own pure-string layout (no klimt `UGraphic`, so `re |
 | `layout.ts` | `formatMemberText`, `ROW_TEXT_LEFT_MARGIN`, `isNoteGeo`, `isClassifierGeo`, `classifierLeaves`, `noteLeaves`, `ClassifierGeo`, `EdgeGeo`, `NamespaceGeo`, `ClassGeometry`, `JsonBodyItem`, `ClassLeafGeo`, `layoutSinglePage`, `layoutMultiPage`, `classPageAst`, `classPageCount`, `sliceClassGeometryPage`, `layoutClass` | Class diagram layout engine. |

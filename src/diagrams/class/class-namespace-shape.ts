@@ -43,7 +43,7 @@ import { rect, PAINT_NONE } from '../../core/svg.js';
 import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
 import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
-import { renderVisibilityIcon } from './class-visibility-icon.js';
+import { renderVisibilityIconAt } from './class-visibility-icon.js';
 import {
   renderNamespaceTitleAuto,
   TITLE_LOCAL_TOP_OFFSET,
@@ -297,7 +297,11 @@ function renderTitleVisibility(
   if (v === undefined) return { icon: '', dx: 0 };
   const k = theme.scaleK;
   const y = blockTopY + (TOP + (geo.visibilityIconDy ?? 0)) * k;
-  return { icon: renderVisibilityIcon(v.modifier, false, blockX, y, undefined, theme), dx: v.width * k };
+  // The icon inherits the cluster ug's stroke (USymbolFolder.java:224 before
+  // :228) -- the same thickness the outline draws with, unscaled here.
+  const strokeWidth = packageBorderThickness(theme, geo.stereotypeTags ?? [], PACKAGE_STROKE_WIDTH);
+  const icon = renderVisibilityIconAt(v.modifier, false, { x: blockX, y }, { theme, strokeWidth });
+  return { icon, dx: v.width * k };
 }
 
 /** cdd2-T19b: the pre-built `ClusterHeader` stereo block
