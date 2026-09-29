@@ -2,7 +2,8 @@
  * cdd6 T3g (D2): the `ElementColors` fields T3g adds, filled by
  * `collectElementStyleBuckets` from `<style> <sname> { ... }`.
  *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Style.java:265,330-332
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Style.java:265,330-332,345-347
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/HorizontalAlignment.java:49-60
  */
 import { describe, it, expect } from 'vitest';
 import { collectElementStyleBuckets } from '../../../src/core/style-map-element.js';
@@ -37,6 +38,12 @@ describe('collectElementStyleBuckets — T3g fields', () => {
       maximumWidth: 200,
       minimumWidth: 200,
     });
+  });
+
+  it('<sname> { HorizontalAlignment } -> upper-case token; an unknown value is dropped', () => {
+    expect(buckets('note {\n  HorizontalAlignment center\n}').note?.horizontalAlignment).toBe('CENTER');
+    expect(buckets('note {\n  HorizontalAlignment Right\n}').note?.horizontalAlignment).toBe('RIGHT');
+    expect(buckets('note {\n  HorizontalAlignment middle\n}').note).toBeUndefined();
   });
 });
 

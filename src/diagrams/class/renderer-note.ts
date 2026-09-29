@@ -228,6 +228,24 @@ function renderNoteLineAtoms(
   return out;
 }
 
+/**
+ * cdd6 T3g: the note body's `PName.HorizontalAlignment` (`EntityImageNote
+ * .java:112`, `skinparam noteTextAlignment` via `FromSkinparamToStyle.java
+ * :178`, or `<style> note { HorizontalAlignment }`). Every stripe inherits
+ * the sheet alignment (`CreoleParser.java:110-113`) and `SheetBlock1#initMap`
+ * (`SheetBlock1.java:155-170`) shifts it by `(maxWidth - width) / coef`,
+ * coef 2 = CENTER, 1 = RIGHT, 0 = LEFT/none (`:181-193`). `maxWidth` is the
+ * widest line (`note.lineWidths`, already scaled). Per-line `<l>`/`<c>`/`<r>`
+ * cell markers (`StripeSimple.java:168-195`) are not modelled here.
+ */
+function noteLineAlignDx(note: NoteGeo, i: number, theme: ScaledTheme): number {
+  const alignment = theme.colors.elements?.['note']?.horizontalAlignment;
+  const coef = alignment === 'CENTER' ? 2 : alignment === 'RIGHT' ? 1 : 0;
+  if (coef === 0) return 0;
+  const maxWidth = Math.max(...note.lineWidths);
+  return (maxWidth - note.lineWidths[i]!) / coef;
+}
+
 /** Per-row layout inputs {@link renderNoteLineContent} needs -- bundled to
  *  stay under this project's per-function param cap. */
 interface NoteLineRowCtx {
@@ -249,10 +267,11 @@ function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, t
   // scaling this call site does not touch that file) -- `note.x` is already
   // scaled (`class-scale-geo-note.ts`), so the margin must be too.
   const marginX1 = NOTE_MARGIN_X1 * theme.scaleK;
+  const startX = note.x + marginX1 + noteLineAlignDx(note, i, theme);
   if (note.lineAtoms !== undefined) {
-    return renderNoteLineAtoms(note.lineAtoms[i]!, note.x + marginX1, lineTop, lineHeight, theme, baselineOffset);
+    return renderNoteLineAtoms(note.lineAtoms[i]!, startX, lineTop, lineHeight, theme, baselineOffset);
   }
-  return text(note.x + marginX1, lineTop + baselineOffset, ln, {
+  return text(startX, lineTop + baselineOffset, ln, {
     fontFamily: theme.fontFamily,
     fontSize,
     // G2 N67 item 49: SAME cascade fallback tier renderNoteLineAtoms

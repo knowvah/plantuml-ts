@@ -11,6 +11,7 @@
 
 import type { Gradient, Paint } from './paint.js';
 import type { LineStyleDash } from './style-line-style.js';
+import type { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 import type { ThemeGraphColorsA } from './theme-graph-colors-a.js';
 import type { ThemeGraphColorsB } from './theme-graph-colors-b.js';
 import type { ThemeGraphColorsC } from './theme-graph-colors-c.js';
@@ -249,6 +250,12 @@ export interface ElementColors {
    *  Written by `<style> <sname> { MaximumWidth N }`; mirrors
    *  {@link minimumWidth}. See `resolveElementMaximumWidth`. */
   maximumWidth?: number;
+  /** cdd6 T3g: `PName.HorizontalAlignment` on `{<sname>}` -- written by
+   *  `<style> <sname> { HorizontalAlignment X }` and, for `note`, by
+   *  `skinparam noteTextAlignment X` (`FromSkinparamToStyle.java:178`).
+   *  `EntityImageNote.java:112` reads it for the note body lines. Stored
+   *  as the upper-case `HorizontalAlignment` token. */
+  horizontalAlignment?: HorizontalAlignment;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;

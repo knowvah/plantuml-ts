@@ -13,6 +13,7 @@ import { resolveColor, ELEMENT_BUCKET_SNAMES } from './skinparam.js';
 import { parseColor } from './paint.js';
 import { lineStyleDash } from './style-line-style.js';
 import { cleanStereotypeToken } from './style-map-tag-cascade.js';
+import { parseHorizontalAlignment } from './skinparam-key-handlers-table-b.js';
 
 /** `<sname>.stereotype` selector suffix (`<style> <sname> { stereotype {
  *  FontSize N } } }`) — G1 I4b. The per-stereotype-NAME sub-selector nested
@@ -173,8 +174,9 @@ function collectTagFontColor(
 /**
  * cdd6 T3g (D2): the bare-bucket properties added for T3g, split out of
  * {@link collectElementStyleBuckets} (already over the complexity limits):
- * `HyperLinkColor` (`Style.java:265`) and `MaximumWidth` (`Style.java
- * :330-332` `wrapWidth`, parsed like `MinimumWidth`).
+ * `HyperLinkColor` (`Style.java:265`), `MaximumWidth` (`Style.java:330-332`
+ * `wrapWidth`, parsed like `MinimumWidth`) and `HorizontalAlignment`
+ * (`Style.java:345-347`, read by `EntityImageNote.java:112`).
  */
 function collectT3gBucketProps(props: ReadonlyMap<string, string>, bucket: ElementColors): void {
   const hc = props.get('hyperlinkcolor');
@@ -184,6 +186,9 @@ function collectT3gBucketProps(props: ReadonlyMap<string, string>, bucket: Eleme
     const maxWidth = Number.parseFloat(mx);
     if (Number.isFinite(maxWidth)) bucket.maximumWidth = maxWidth;
   }
+  const ha = props.get('horizontalalignment');
+  const alignment = ha === undefined ? undefined : parseHorizontalAlignment(ha);
+  if (alignment !== undefined) bucket.horizontalAlignment = alignment;
 }
 
 /**
