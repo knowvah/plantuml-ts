@@ -143,6 +143,15 @@ describe('planEntries', () => {
 // mocked execFileSync (the jar is never invoked in this suite)
 // ---------------------------------------------------------------------------
 
+// cdd6 b2 gates (journal row 51): the default guard is the REAL clock, so a
+// test that omits it sleeps through any decoration minute (1, 8, 13, 15, 30,
+// 39, 48, 55 -- PSystemError.java:221-229) and trips vitest's 5 s timeout.
+// Minute 10 is plain; the sleep must never be reached.
+const PLAIN_MINUTE_GUARD = {
+  now: () => 10 * 60_000,
+  sleep: (): Promise<void> => Promise.reject(new Error('plain minute: sleep must not be called')),
+};
+
 describe('captureOracleCache', () => {
   it('captures via in.svg despite execFileSync throwing (non-zero exit) — AC1', async () => {
     const dir = join(tmp, 'cache-nonzero-exit', 'activity', 'alpha');
@@ -157,6 +166,7 @@ describe('captureOracleCache', () => {
       [{ slug: 'alpha', markup: '@startuml\nstart\nstop\n@enduml\n' }],
       { rebuild: false },
       join(tmp, 'cache-nonzero-exit'),
+      PLAIN_MINUTE_GUARD,
     );
 
     expect(result).toEqual({ type: 'activity', captured: ['alpha'], jarFailed: [], renamed: [] });
@@ -177,6 +187,7 @@ describe('captureOracleCache', () => {
       [{ slug: 'bravo', markup: '@startuml Test\nstart\nstop\n@enduml\n' }],
       { rebuild: false },
       root,
+      PLAIN_MINUTE_GUARD,
     );
 
     expect(result).toEqual({ type: 'activity', captured: ['bravo'], jarFailed: [], renamed: ['bravo'] });
@@ -197,6 +208,7 @@ describe('captureOracleCache', () => {
       [{ slug: 'charlie', markup: 'garbage' }],
       { rebuild: false },
       root,
+      PLAIN_MINUTE_GUARD,
     );
 
     expect(result).toEqual({ type: 'activity', captured: [], jarFailed: ['charlie'], renamed: [] });
@@ -209,7 +221,13 @@ describe('captureOracleCache', () => {
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, '.done'), '', 'utf-8');
 
-    const result = await captureOracleCache('activity', [{ slug: 'delta', markup: 'X' }], { rebuild: false }, root);
+    const result = await captureOracleCache(
+      'activity',
+      [{ slug: 'delta', markup: 'X' }],
+      { rebuild: false },
+      root,
+      PLAIN_MINUTE_GUARD,
+    );
 
     expect(result).toEqual({ type: 'activity', captured: [], jarFailed: [], renamed: [] });
     expect(execFileSync).not.toHaveBeenCalled();
