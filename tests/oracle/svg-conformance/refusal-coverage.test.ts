@@ -738,7 +738,9 @@ describe('refusal coverage — baseline shape', () => {
     // Derivation: 5659 + 267 = 5926.
     // 5926 -> 5946 at cdd6/close-b2: 20 unknown-tree golden rows (the
     // batch-2 fixes). Derivation: 5678 + 268 = 5946.
-    expect(manifest.fixtures.length).toBe(5946);
+    // 5946 -> 5967 at cdd6/close-b3: 21 unknown-tree golden rows (the
+    // batch-3 fixes). Derivation: 5699 + 268 = 5967.
+    expect(manifest.fixtures.length).toBe(5967);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -777,7 +779,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5657 -> 5659 at cdd6/close-b0 (2 unknown-tree svg-class clones).
     // 5659 -> 5658 at cdd6/close-b1 (kokofa now errors, see above).
     // 5658 -> 5678 at cdd6/close-b2 (20 unknown-tree svg-class clones).
-    expect(pinnedRendering.length).toBe(5678);
+    // 5678 -> 5699 at cdd6/close-b3 (21 unknown-tree svg-class clones).
+    expect(pinnedRendering.length).toBe(5699);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

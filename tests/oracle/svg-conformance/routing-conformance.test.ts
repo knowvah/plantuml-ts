@@ -794,10 +794,18 @@ describe('routing conformance — jar-error classification', () => {
     // consumers, degenerate gate + queue cap, json/folder ink, creole edge
     // labels, and the residual-round leaf stereotype/thickness/stroke).
     // Derivation: 4791 + 1050 + 105 = 5946.
-    expect(pinnedAgree.length).toBe(4791);
+    //
+    // 4791 -> 4812 / 5946 -> 5967 at cdd6/close-b3 (2026-09-29): 21
+    // unknown-tree svg-class golden rows (the batch-3 fixes: empty-graph
+    // delta, mainframe svek frame + ensureVisible canvas, cluster leaf
+    // order, package visibility icon, collapsed legend, folder dash and
+    // heading font, note separators/table alignment, reversecolor,
+    // hyperlink and maximumwidth buckets, sprite paint none/transparent).
+    // Derivation: 4812 + 1050 + 105 = 5967.
+    expect(pinnedAgree.length).toBe(4812);
     expect(pinnedMisroutes.length).toBe(1050);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5946);
+    expect(manifest.fixtures.length).toBe(5967);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
