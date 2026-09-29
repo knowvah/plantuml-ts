@@ -20,6 +20,7 @@ import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
 import { degenerateNoteGeo, DEGENERATE_NEAR_MARGIN } from './class-geo-builders-degenerate-note.js';
+import { degenerateEnsureVisibleInk } from './class-geo-builders-degenerate-ink.js';
 import {
   inkBodyFields,
   badgeFields,
@@ -399,20 +400,18 @@ function buildDegenerateClassifierLeaf(classifier: Classifier, measured: Measure
  * BodyEmbeds` returns `[]` (a no-op) for every classifier with no drawn
  * embed -- the overwhelming majority of degenerate diagrams.
  *
- * cdd5-T4a (degenerate-text-ensurevisible): the SAME `ensureVisible`
- * mechanism (`klimt/drawing/svg/SvgGraphics.java:757-758`, `:129-133`:
- * `"ensureVisible(x, y); ensureVisible(x + textLength, y);"` /
- * `"if (y > maxY) maxY = (int) (y + 1);"`) ALSO tracks a `symbolInk`-
- * bearing leaf's own real drawn corner -- e.g. a `circle`/`() "name"`
- * interface's label, drawn BELOW its fixed 18x18 icon
- * (`measureCircleInterfaceInk`'s own doc comment, `class-layout-leaf-
- * shapes.ts`) -- which the box-only `rawDims` below never sees. Folded into
- * the SAME embed-right/embed-bottom max as a second candidate, `undefined`
- * `symbolInk` (the common case) contributing `0` -- a no-op, exactly
- * `drawnEnhancedBodyEmbeds`'s own established contract. `rawWidth`/
- * `rawHeight` stay box-only for this too: no fixture in this corpus
- * combines a title/chrome with a symbolInk overflow, so extending them the
- * same way would be unverified (same posture as the embed case above).
+ * cdd5-T4a/cdd6-T2c (D4, degenerate-text-ensurevisible): the SAME
+ * `ensureVisible` mechanism (`SvgGraphics.java:129-133`,`:757-758`) ALSO
+ * tracks a `symbolInk`-bearing leaf's own real drawn corner -- e.g. a
+ * `circle`/`() "name"` interface's label drawn BELOW its fixed 18x18 icon
+ * (`measureCircleInterfaceInk`), or a `frame X [ {{ nested }} ]`'s embedded
+ * raster -- which the box-only `rawDims` below never sees. Folded into the
+ * SAME embed-right/embed-bottom max via {@link degenerateEnsureVisibleInk}
+ * (NOT `symbolInk` directly -- see that function's own doc comment for why
+ * the two disagree); `undefined` contributes `0`, a no-op matching
+ * `drawnEnhancedBodyEmbeds`'s established contract. `rawWidth`/`rawHeight`
+ * stay box-only: no fixture combines a title/chrome with a symbolInk
+ * overflow, so extending them the same way would be unverified.
  */
 function degenerateClassifierDims(geo: ClassifierGeo, measured: MeasuredClassifier): ClassGeometry {
   const rawDims = {
@@ -423,8 +422,9 @@ function degenerateClassifierDims(geo: ClassifierGeo, measured: MeasuredClassifi
   const embeds = drawnEnhancedBodyEmbeds(geo);
   const embedRight = Math.max(0, ...embeds.map((e) => e.x + e.width));
   const embedBottom = Math.max(0, ...embeds.map((e) => e.y + e.height));
-  const inkRight = measured.symbolInk !== undefined ? geo.x + measured.symbolInk.maxX : 0;
-  const inkBottom = measured.symbolInk !== undefined ? geo.y + measured.symbolInk.maxY : 0;
+  const ensureVisible = degenerateEnsureVisibleInk(measured);
+  const inkRight = ensureVisible !== undefined ? geo.x + ensureVisible.maxX : 0;
+  const inkBottom = ensureVisible !== undefined ? geo.y + ensureVisible.maxY : 0;
   return {
     totalWidth: Math.max(totalDims.width, Math.floor(embedRight) + 1, Math.floor(inkRight) + 1),
     totalHeight: Math.max(totalDims.height, Math.floor(embedBottom) + 1, Math.floor(inkBottom) + 1),
@@ -456,6 +456,20 @@ function degenerateClassifierDims(geo: ClassifierGeo, measured: MeasuredClassifi
  * note (0 classifiers, 1 note) IS (cdd5-T4a degenerate-excludes-notes):
  * see {@link degenerateNoteGeo}.
  *
+ * cdd6-T2c (D4, mechanism A, `empty usymbol { }` containers): a `queue`/
+ * `frame`/`stack`/etc container with NO members is collapsed to a LEAF at
+ * PARSE time by this port (`class-container.ts#closeContainer` ->
+ * `class-namespace.ts`'s `collapseEmptyNamespace`, stamping
+ * `Classifier.collapsedGroup = true`), so it is already gone from
+ * `ast.namespaces` here and `rawNamespaceCount` alone misses it. Upstream
+ * counts it as a GROUP regardless -- `dot/DotData.java:69-70` reads the
+ * group count BEFORE the mute to `EMPTY_PACKAGE`, deferred to DOT-export
+ * time (`svek/GraphvizImageBuilder.java:416-418`, strictly AFTER this
+ * gate) -- so `collapsedGroup === true` is the "was a group pre-collapse"
+ * proxy. Jar-verified: febuli-89/fezaro-08 become byte-conformant once
+ * excluded (`diagnosis/verify.md`'s "empty usymbol containers"); beboke-62
+ * needs this PLUS its own queue-cap residual (`USymbolQueue.ts`).
+ *
  * The single-*classifier* leaf case (the `nb === 1` path:
  * `createEntityImageBlock` + the hexagon guard at
  * `GraphvizImageBuilder.java:217`, `single.getUSymbol() instanceof
@@ -470,6 +484,7 @@ export function degenerateSingleClassifier(
   measurer: StringMeasurer,
 ): ClassGeometry | undefined {
   if (rawNamespaceCount !== 0) return undefined;
+  if (ast.classifiers.some((c) => c.collapsedGroup === true)) return undefined;
   if (ast.relationships.length !== 0) return undefined;
   if (ast.classifiers.length + ast.notes.length !== 1) return undefined;
   if (ast.notes.length === 1) return degenerateNoteGeo(ast.notes[0]!, theme, measurer);
