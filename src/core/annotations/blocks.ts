@@ -226,7 +226,22 @@ export function buildAnnotationBlock(
   // (`noBorder()`, java:114-119, the same branch {@link buildBorderRect}
   // reads) and a null one becomes `HColors.none()`.
   const color = style.lineThickness === 0 ? resolveBoxFill(style) : (style.lineColor ?? 'none');
-  const textBlock = buildChromeTextBlock({ uid: kind, color, sprites }, displayLines, style, measurer);
+  // D3 (cdd6 T2f): forward the resolved chrome HyperlinkColor (currently
+  // always `undefined` -- see `AnnotationBoxStyle.hyperlinkColor`'s own doc
+  // comment for the unwired producer) into the SAME `ChromeTextPaint` seam
+  // `blocks-creole.ts#chromeFontConfiguration` already threads to
+  // `CommandCreoleUrl.ts`.
+  const textBlock = buildChromeTextBlock(
+    {
+      uid: kind,
+      color,
+      sprites,
+      ...(style.hyperlinkColor === undefined ? {} : { hyperlinkColor: style.hyperlinkColor }),
+    },
+    displayLines,
+    style,
+    measurer,
+  );
 
   const textWidth = textBlock.width + style.padding.left + style.padding.right;
   const textHeight = textBlock.height + style.padding.top + style.padding.bottom;

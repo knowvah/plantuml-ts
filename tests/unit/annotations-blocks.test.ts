@@ -354,3 +354,34 @@ describe('buildAnnotationBlock — Creole inline markup (G2 N45: one sibling <te
     expect(xs).toEqual([0, 60]);
   });
 });
+
+// ---------------------------------------------------------------------------
+// D3 (cdd6 T2f): `AnnotationBoxStyle.hyperlinkColor` forwarded into the
+// `ChromeTextPaint` seam `blocks-creole.ts#chromeFontConfiguration` already
+// threads to `CommandCreoleUrl.ts` (T1b). `resolveAnnotationStyles` itself
+// never populates this field yet (`annotation-style-overrides.ts` has no
+// `hyperlinkcolor` setter -- outside this task's write-set), so this pins
+// the CONSUMER half only: a caller-supplied `style.hyperlinkColor` reaches
+// the drawn `[[url]]` atom's `fill`, exactly as `blocks-creole.ts`'s own
+// `hyperlinkColor` unit test pins one layer down.
+// ---------------------------------------------------------------------------
+
+describe('buildAnnotationBlock — AnnotationBoxStyle.hyperlinkColor forwarding (D3, cdd6 T2f)', () => {
+  const measurer = new FixedMeasurer(10, 14);
+
+  it('a set style.hyperlinkColor overrides the #0000FF default for a [[url]] chrome line', () => {
+    const style = makeStyle({ hyperlinkColor: '#FF0000' });
+    const block = buildAnnotationBlock('title', ['[[test link]]'], style, measurer);
+    // `DriverTextSvg`'s own hex-shorthand minification (`#FF0000` -> `#F00`),
+    // matching jixipo-21-mefu703.jar.svg's title `<a>` fill under
+    // `<style> root { HyperlinkColor #FF0000 }`.
+    expect(block.body).toContain('fill="#F00"');
+    expect(block.body).not.toContain('fill="#00F"');
+  });
+
+  it('an absent style.hyperlinkColor keeps the #0000FF default (no mover elsewhere)', () => {
+    const style = makeStyle();
+    const block = buildAnnotationBlock('title', ['[[test link]]'], style, measurer);
+    expect(block.body).toContain('fill="#00F"');
+  });
+});
