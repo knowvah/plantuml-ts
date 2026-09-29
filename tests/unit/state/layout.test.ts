@@ -828,8 +828,13 @@ describe('layoutState — empty states with transitions', () => {
     const result = layoutState(ast, theme, measurer);
     expect(result.states).toHaveLength(0);
     expect(result.transitions).toHaveLength(0);
-    expect(result.totalWidth).toBe(0);
-    expect(result.totalHeight).toBe(0);
+    // cdd6-T3a: an empty ink walk is still sized. LimitFinder.java:217-221
+    // collapses the empty sentinel to MinMax.getEmpty(true) = (0,0,0,0) and
+    // SvekResult.java:130-135 adds .delta(15, 15) unconditionally; the
+    // (0,5,5,0) margin + ensureVisible's (int)(v+1) give 21. The jar draws
+    // `state A / state B / A --> B / remove *` at 21x21 (oracle probe).
+    expect(result.totalWidth).toBe(21);
+    expect(result.totalHeight).toBe(21);
   });
 });
 
