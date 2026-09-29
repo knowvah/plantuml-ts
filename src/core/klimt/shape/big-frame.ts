@@ -69,12 +69,14 @@ export interface BigFrameStyle {
  * `originalX`/`originalY`).
  *
  * `delta` (`decorateWithFrame`'s local, java:331-335: `dx =
- * originalMinMax.getMinX() < 0 ? -minX : 0`, same for `dy`) is not
- * modelled: every `AnnotationBlock` this port's chrome pipeline composes
- * already starts at `(0,0)` by construction (`chrome.ts`'s own module doc
- * comment) — `original`'s ink can never have a negative minX/minY here,
- * so `delta` is always `(0,0)` and the term is omitted rather than
- * threaded as two always-zero parameters.
+ * originalMinMax.getMinX() < 0 ? -minX : 0`, same for `dy`) is applied by
+ * the PRODUCER of `original`, not here: `original` arrives with its ink min
+ * already at or past `(0,0)`, so `delta` is `(0,0)` at this point. cdd6 T3b:
+ * class hands over its UN-normalized svek body (no `moveDelta` under a
+ * mainframe, `svek/SvekResult.java:130-135`) with `delta` folded into its
+ * placement and `originalDim` = BigFrame's `ww`/`hh` (`diagrams/class/
+ * layout-ink-extent.ts#mainframePlacement`). Every other engine still hands
+ * over a `(0,0)`-origin block whose footprint is its ink.
  */
 export interface BigFrameLayout {
   /** The frame's own footprint (rect + title cutout), NOT including the
@@ -121,10 +123,10 @@ const SVG_ROUND_CORNER_DIVISOR = 2;
  * text itself and the outer `margin` wrap, both left to `chrome.ts`.
  *
  * `ww`/`hh` (java:81,89: `originalMinMax.getMinX() >= 0 ? maxX : width`)
- * reduce to `originalDim.width`/`.height` outright: `chrome.ts`'s ink
- * always starts at `(0,0)` (see {@link BigFrameLayout}'s doc comment), so
- * `minX`/`minY` are always `>= 0` and `maxX === width` (its whole footprint
- * IS its ink, `AnnotationBlock` carries no separate ink-vs-box distinction).
+ * ARE `originalDim.width`/`.height`: the producer resolves that ternary
+ * (see {@link BigFrameLayout}'s doc comment) -- for class, over the raw
+ * `LimitFinder` extent of the un-normalized svek body; for every other
+ * engine the block's footprint is its ink from `(0,0)`, so `maxX === width`.
  *
  * The `computeHeight`/`computeWidth` "add `dimTitle.height` again on top of
  * `effectivePadding.top`, which already added it once" is not a bug to
