@@ -100,7 +100,7 @@ Measurement:
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch + ledger, survey harness, minute guard, verify doubtful rows, b0 | T0a–T0e | T0b–T0d ∥ | [x] |
-| [1](batch-1/overview.md) | shared foundations: style buckets, hyperlink colour, assetStore, `>>` head, preprocessor | T1a–T1e | all ∥ | [ ] |
+| [1](batch-1/overview.md) | shared foundations: style buckets, hyperlink colour, assetStore, `>>` head, preprocessor | T1a–T1e | all ∥ | [x] |
 | [2](batch-2/overview.md) | class style consumers, ink walk, degenerate canvas, class text, singles | T2a–T2e | all ∥ | [ ] |
 | [3](batch-3/overview.md) | empty graph + verified layout rows, mainframe, smetana structure, portin/title table, link-middle + nested renders | T3a–T3e | all ∥ | [ ] |
 | [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |

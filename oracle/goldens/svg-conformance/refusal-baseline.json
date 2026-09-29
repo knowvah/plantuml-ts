@@ -53094,11 +53094,11 @@
       "type": "unknown",
       "slug": "kokofa-47-deni140",
       "jarRendered": false,
-      "weErrored": false,
+      "weErrored": true,
       "engine": "class",
       "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "31f579dd"
+      "measuredAt": "2026-09-28",
+      "measuredAgainstCommit": "2a2e11e7"
     },
     {
       "tree": "dot-cache",
@@ -57861,10 +57861,10 @@
       "slug": "xuloxo-85-vibu502",
       "jarRendered": true,
       "weErrored": false,
-      "engine": "description",
+      "engine": "class",
       "status": "ok",
       "measuredAt": "2026-09-28",
-      "measuredAgainstCommit": "43cecf5a"
+      "measuredAgainstCommit": "2a2e11e7"
     },
     {
       "tree": "dot-cache",

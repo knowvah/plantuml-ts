@@ -749,7 +749,14 @@ describe('refusal coverage — baseline shape', () => {
     // `weErrored: true`) whose activity3 constructs now parse render here
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
-    expect(pinnedErroring.length).toBe(267);
+    //
+    // 267 -> 268 / 5659 -> 5658 at cdd6/close-b1 (2026-09-28):
+    // unknown/kokofa-47-deni140 now errors ("JSON already exists", the state
+    // engine refuses a duplicate json id like class does, cdd6-T1c,
+    // CommandCreateJson.java:141-142); jarRendered is false (the jar's own
+    // crash page), so it stays outside SLI 2. Re-pinned `weErrored: true`,
+    // engine class, from a fresh measurement.
+    expect(pinnedErroring.length).toBe(268);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -766,7 +773,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
     // 5657 -> 5659 at cdd6/close-b0 (2 unknown-tree svg-class clones).
-    expect(pinnedRendering.length).toBe(5659);
+    // 5659 -> 5658 at cdd6/close-b1 (kokofa now errors, see above).
+    expect(pinnedRendering.length).toBe(5658);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

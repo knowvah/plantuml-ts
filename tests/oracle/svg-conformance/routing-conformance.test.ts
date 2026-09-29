@@ -782,8 +782,14 @@ describe('routing conformance — jar-error classification', () => {
     // xicili-92-foke737), pin-eligible once the survey's dotEqual stopped
     // counting a commented `!pragma` / a second newpage page (cdd6-T0b, D9).
     // Derivation: 4770 + 1051 + 105 = 5926.
-    expect(pinnedAgree.length).toBe(4770);
-    expect(pinnedMisroutes.length).toBe(1051);
+    //
+    // 4770 -> 4771 / 1051 -> 1050 at cdd6/close-b1 (2026-09-28):
+    // unknown/xuloxo-85-vibu502 known-misroute -> agree (cdd6-T1d ported the
+    // `>>` head, LinkDecor.java:87 ARROW_TRIANGLE, so it routes CLASS like
+    // the jar). Re-pinned from a fresh measurement.
+    // Derivation: 4771 + 1050 + 105 = 5926.
+    expect(pinnedAgree.length).toBe(4771);
+    expect(pinnedMisroutes.length).toBe(1050);
     expect(pinnedJarErrors.length).toBe(105);
     expect(manifest.fixtures.length).toBe(5926);
   });
@@ -837,7 +843,8 @@ describe('routing conformance — jar-error classification', () => {
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
     // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
     // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
-    expect(censused.length).toBe(1050);
+    // 1050 -> 1049 at cdd6/close-b1: unknown/xuloxo-85-vibu502 now agrees.
+    expect(censused.length).toBe(1049);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }
