@@ -91,3 +91,45 @@ describe('cdd3-T32 (E3-13) — an EMPTY-text label still hands the engine its bo
     expect(attrs.labelBoxHeight).toBe(10);
   });
 });
+
+// T3e (sejube-03-bote542, link-middle-decor-partial): `SvekEdge.java:353-356`
+// sets `labelShield = 7` whenever the link carries a middle decor (`-(0-`
+// and its siblings), then `:437-441`'s `dimNote.delta(2 * labelShield)`
+// widens the FINAL reserved label block by 14 on BOTH axes, regardless of
+// whether the block is a plain measured label or the note-merge/constraint
+// arm (`decision-journal.md`/`fixtures.md` row 69). Oracle-verified: jar's
+// own DOT box for `something -right(0- anything : description` is 78x29
+// against this port's pre-fix 64.8875x15 (`Math.floor(64.8875 + 14) = 78`,
+// `15 + 14 = 29`) -- `WidthTableMeasurer.measure('description', font)`
+// reproduces the unshielded 64.8875 independently (not fitted).
+describe('T3e — link-middle-decor label shield (SvekEdge.java:353-356,437-441)', () => {
+  it('sejube-03-bote542 shape: a middle-decor edge widens its plain label box by 2*7', () => {
+    const plain = edgeLabelAttrs(rel({ label: 'description' }), font, font, measurer);
+    const decorated = edgeLabelAttrs(rel({ label: 'description', middleDecor: 'circleCircled' }), font, font, measurer);
+    expect(plain.labelWidth).toBeCloseTo(64.8875);
+    expect(plain.labelHeight).toBe(15);
+    expect(decorated.labelWidth).toBeCloseTo(64.8875 + 14);
+    expect(decorated.labelHeight).toBe(15 + 14);
+    // `withLayoutBox` carries the float through unfloored -- the DOT emitter
+    // floors at `graph-layout-build-edges.ts`'s own `appendTable` mirror,
+    // outside this file (SvekEdge.java:504-507's `(int)` cast).
+    expect(decorated.labelBoxWidth).toBeCloseTo(64.8875 + 14);
+    expect(decorated.labelBoxHeight).toBe(29);
+  });
+
+  it('the shield also widens the CONSTRAINT_SPOT arm (SvekEdge.java:437-441 applies to both dimNote sources)', () => {
+    const attrs = edgeLabelAttrs(
+      rel({ linkConstraint: { text: 'x' }, middleDecor: 'circle' }),
+      font,
+      font,
+      measurer,
+    );
+    expect(attrs.labelWidth).toBe(10 + 14);
+    expect(attrs.labelHeight).toBe(10 + 14);
+  });
+
+  it('no middle decor leaves the box unshielded (regression guard)', () => {
+    const attrs = edgeLabelAttrs(rel({ label: 'description' }), font, font, measurer);
+    expect(attrs.labelWidth).toBeCloseTo(64.8875);
+  });
+});
