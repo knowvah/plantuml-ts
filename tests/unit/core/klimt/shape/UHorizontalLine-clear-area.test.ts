@@ -45,7 +45,9 @@ describe('UHorizontalLine#drawTitleInternal clearArea', () => {
     const marker = svg.indexOf('width="1" height="1"');
     expect(clear).toBeGreaterThan(-1);
     expect(marker).toBeGreaterThan(clear);
-    expect(svg.slice(clear, marker)).toContain('fill="#F1F1F1" style="stroke:#181818;stroke-width:1;stroke-dasharray:1,2;"');
+    expect(svg.slice(clear, marker)).toContain(
+      'fill="#F1F1F1" style="stroke:#181818;stroke-width:1;stroke-dasharray:1,2;"',
+    );
   });
 
   it('draws no pre-clear rect when clearArea is false', () => {
