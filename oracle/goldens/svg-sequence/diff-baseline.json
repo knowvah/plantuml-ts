@@ -7450,10 +7450,10 @@
       "type": "sequence",
       "slug": "selasi-04-leto875",
       "status": "baseline",
-      "weightedScore": 189,
-      "diffCount": 169,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "weightedScore": 197,
+      "diffCount": 157,
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "ade13fbc"
     },
     {
       "type": "sequence",
