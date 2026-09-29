@@ -11,6 +11,7 @@
 
 import type { Gradient, Paint } from './paint.js';
 import type { LineStyleDash } from './style-line-style.js';
+import type { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 import type { ThemeGraphColorsA } from './theme-graph-colors-a.js';
 import type { ThemeGraphColorsB } from './theme-graph-colors-b.js';
 import type { ThemeGraphColorsC } from './theme-graph-colors-c.js';
@@ -231,6 +232,30 @@ export interface ElementColors {
    *  flattened solid string, so the gradient is carried here. Absent for a
    *  solid value. */
   backgroundGradient?: Gradient;
+  /** cdd6 T3g (D2): `PName.HyperLinkColor` on `{<sname>}` -- `Style.java:265`
+   *  / `FontConfiguration.java:213-219` build the element's
+   *  `FontConfiguration` with it, and `StripeSimple.java:224-225`
+   *  (`addUrl`) draws a `[[url]]` atom from that configuration. Written by
+   *  `<style> <sname> { HyperLinkColor X }`; absent = the `#0000FF`
+   *  fallback (`CommandCreoleUrl.ts`). */
+  hyperlinkColor?: string;
+  /** cdd6 T3g: `<style> <sname> { .label { HyperLinkColor X } }` -- the
+   *  stereotype-re-signed {@link hyperlinkColor} (`StyleSignatureBasic
+   *  #withTOBECHANGED`, the same signature `fontByStereo`'s `<style>` form
+   *  uses), keyed by the CLEANED label like {@link fontByStereo}. */
+  hyperlinkColorByStereo?: Readonly<Record<string, string>>;
+  /** cdd6 T3g: `PName.MaximumWidth` on `{<sname>}` -- `Style#wrapWidth`
+   *  (`Style.java:330-332`), the word-wrap width `BodierJSon.java:85` hands
+   *  to `TextBlockCucaJSon` (`:184-190` wraps every key and scalar cell).
+   *  Written by `<style> <sname> { MaximumWidth N }`; mirrors
+   *  {@link minimumWidth}. See `resolveElementMaximumWidth`. */
+  maximumWidth?: number;
+  /** cdd6 T3g: `PName.HorizontalAlignment` on `{<sname>}` -- written by
+   *  `<style> <sname> { HorizontalAlignment X }` and, for `note`, by
+   *  `skinparam noteTextAlignment X` (`FromSkinparamToStyle.java:178`).
+   *  `EntityImageNote.java:112` reads it for the note body lines. Stored
+   *  as the upper-case `HorizontalAlignment` token. */
+  horizontalAlignment?: HorizontalAlignment;
 }
 
 export type ThemeGraphColors = ThemeGraphColorsA & ThemeGraphColorsB & ThemeGraphColorsC;

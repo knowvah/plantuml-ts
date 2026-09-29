@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1260 modules · 4756 exported names.
+1260 modules · 4759 exported names.
 
 ## `src/`
 
@@ -88,7 +88,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
 | `skinparam-key-handlers-table-a.ts` | `KEY_HANDLERS_A` | Key -> handler table, half A (entries 1-36 of 73: backgroundcolor through style) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this project's 5 |
-| `skinparam-key-handlers-table-b.ts` | `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
+| `skinparam-key-handlers-table-b.ts` | `parseHorizontalAlignment`, `KEY_HANDLERS_B` | Key -> handler table, half B (entries 37-73 of 73: footbox through swimlanebordercolor) -- split out of skinparam-key-handlers.ts (itself already the split target of skinparam.ts) because the table alone formats to 527 lines, over this proj |
 | `skinparam-key-handlers.ts` | `resolveColorPaint`, `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
 | `skinparam-key-normalize.ts` | `UNPARSEABLE_COLOR`, `isColorSpec`, `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
 | `skinparam-stereo-keys.ts` | `applyStereoOverride` | Stereotype-qualified skinparam key handling (`key.includes('<<')` branch). |
@@ -144,7 +144,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
-| `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
+| `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `resolveElementMaximumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
 | `theme-graph-colors-a.ts` | `ThemeGraphColorsA` | theme-graph-colors-a.ts — first half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-b.ts` | `ThemeGraphColorsB` | theme-graph-colors-b.ts — second half of `ThemeGraphColors` (split further out of ./theme-graph-colors.ts to keep every file under the project's 500-line cap; combined back via intersection in that module). |
 | `theme-graph-colors-c.ts` | `ThemeGraphColorsC` | theme-graph-colors-c.ts — third slice of `ThemeGraphColors`, split out because `theme-graph-colors-a.ts`/`-b.ts` are both at the project's 500-line cap (cdd2-T8) — mirrors the `-a`/`-b` split precedent exactly (combined back via intersectio |
@@ -392,7 +392,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
-| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
 
 ## `src/core/klimt/creole/`
 

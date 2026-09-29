@@ -19,6 +19,7 @@ import {
 } from './skinparam-key-handlers-shared.js';
 import { parseShadowingValue } from './skinparam-element-buckets.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+import { HorizontalAlignment } from './klimt/geom/HorizontalAlignment.js';
 
 /** `skinparam classFontColor automatic` / `AttributeFontColor automatic`
  *  (`nisune-86-faji869`) -- A3 M2's own diagnosis named this a THIRD,
@@ -34,6 +35,16 @@ import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
  *  it, tracked as a follow-on, not a regression (same silent-drop behavior
  *  as before this task). */
 const AUTOMATIC_FONT_COLOR = 'automatic';
+
+/** cdd6 T3g: `HorizontalAlignment.fromString(s)` (`HorizontalAlignment.java
+ *  :49-60`, reached through `ValueImpl#asHorizontalAlignment`, `:202-204`):
+ *  case-insensitive LEFT/CENTER/RIGHT; anything else is unrecognized
+ *  (`undefined`). Shared with `style-map-element.ts`'s `<style>` bucket. */
+export function parseHorizontalAlignment(raw: string): HorizontalAlignment | undefined {
+  const upper = raw.trim().toUpperCase();
+  if (upper === HorizontalAlignment.LEFT || upper === HorizontalAlignment.CENTER) return upper;
+  return upper === HorizontalAlignment.RIGHT ? upper : undefined;
+}
 function isAutomaticFontColor(color: string): boolean {
   return color.trim().toLowerCase() === AUTOMATIC_FONT_COLOR;
 }
@@ -202,6 +213,16 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     ['packagestereotypefontcolor'],
     (acc, _v, color) => {
       (acc.elements['package'] ??= {}).stereotypeFont = color;
+    },
+  ],
+  // cdd6 T3g: `addConvert("noteTextAlignment", PName.HorizontalAlignment,
+  // SName.note)` (`FromSkinparamToStyle.java:178`) -- the note bucket's
+  // `horizontalAlignment`, read by `EntityImageNote.java:112`.
+  [
+    ['notetextalignment'],
+    (acc, value) => {
+      const alignment = parseHorizontalAlignment(value);
+      if (alignment !== undefined) (acc.elements['note'] ??= {}).horizontalAlignment = alignment;
     },
   ],
   [

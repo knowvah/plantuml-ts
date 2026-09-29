@@ -13,6 +13,7 @@ import { resolveColor, ELEMENT_BUCKET_SNAMES } from './skinparam.js';
 import { parseColor } from './paint.js';
 import { lineStyleDash } from './style-line-style.js';
 import { cleanStereotypeToken } from './style-map-tag-cascade.js';
+import { parseHorizontalAlignment } from './skinparam-key-handlers-table-b.js';
 
 /** `<sname>.stereotype` selector suffix (`<style> <sname> { stereotype {
  *  FontSize N } } }`) — G1 I4b. The per-stereotype-NAME sub-selector nested
@@ -154,11 +155,40 @@ function collectTagFontColor(
   if (idx <= 0) return false;
   const sname = resolveElementBucketSelector(selector.slice(0, idx));
   const tag = cleanStereotypeToken(selector.slice(idx + TAG_SELECTOR_INFIX.length));
+  if (sname === undefined || tag === '') return true;
   const fc = props.get('fontcolor');
-  if (sname === undefined || tag === '' || fc === undefined) return true;
-  const prev = elements[sname]?.fontByStereo;
-  elements[sname] = { ...elements[sname], fontByStereo: { ...prev, [tag]: resolveColor(fc) } };
+  if (fc !== undefined) {
+    const prev = elements[sname]?.fontByStereo;
+    elements[sname] = { ...elements[sname], fontByStereo: { ...prev, [tag]: resolveColor(fc) } };
+  }
+  // cdd6 T3g: the same re-signed style's `PName.HyperLinkColor`
+  // (`Style.java:265`) -> `hyperlinkColorByStereo`.
+  const hc = props.get('hyperlinkcolor');
+  if (hc !== undefined) {
+    const prev = elements[sname]?.hyperlinkColorByStereo;
+    elements[sname] = { ...elements[sname], hyperlinkColorByStereo: { ...prev, [tag]: resolveColor(hc) } };
+  }
   return true;
+}
+
+/**
+ * cdd6 T3g (D2): the bare-bucket properties added for T3g, split out of
+ * {@link collectElementStyleBuckets} (already over the complexity limits):
+ * `HyperLinkColor` (`Style.java:265`), `MaximumWidth` (`Style.java:330-332`
+ * `wrapWidth`, parsed like `MinimumWidth`) and `HorizontalAlignment`
+ * (`Style.java:345-347`, read by `EntityImageNote.java:112`).
+ */
+function collectT3gBucketProps(props: ReadonlyMap<string, string>, bucket: ElementColors): void {
+  const hc = props.get('hyperlinkcolor');
+  if (hc !== undefined) bucket.hyperlinkColor = resolveColor(hc);
+  const mx = props.get('maximumwidth');
+  if (mx !== undefined) {
+    const maxWidth = Number.parseFloat(mx);
+    if (Number.isFinite(maxWidth)) bucket.maximumWidth = maxWidth;
+  }
+  const ha = props.get('horizontalalignment');
+  const alignment = ha === undefined ? undefined : parseHorizontalAlignment(ha);
+  if (alignment !== undefined) bucket.horizontalAlignment = alignment;
 }
 
 /**
@@ -304,6 +334,7 @@ export function collectElementStyleBuckets(styleMap: StyleMap): Record<string, E
       // cdd6 T1a: `PName.LineStyle`, parsed as `Style#getStroke` does.
       const ls = props.get('linestyle');
       if (ls !== undefined) bucket.lineStyle = lineStyleDash(ls);
+      collectT3gBucketProps(props, bucket);
       if (Object.keys(bucket).length > 0) {
         elements[bucketName] = { ...elements[bucketName], ...bucket };
       }
