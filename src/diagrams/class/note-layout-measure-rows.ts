@@ -12,22 +12,14 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { getFont } from '../../core/klimt/shape/UText.js';
 import { FontPosition, fontPositionSpace } from '../../core/klimt/font/FontPosition.js';
-import { resolveTextEscapes } from '../../core/text-escapes.js';
-import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
-import { buildMemberAtoms, resolveMemberAtoms, memberBaseFont, type MemberRenderAtom } from './class-member-creole.js';
+import type { MemberRenderAtom } from './class-member-creole.js';
+import type { NoteTableDraw } from './note-layout-measure-table.js';
 import { atomTextLineHeight } from './class-stereotype-layout.js';
 import { EmbeddedDiagram, type NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import { getClassNestedDiagramRenderer } from './class-nested-diagram-renderer.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
-
-/** `StripeTable.java:85` — `new AtomWithMargin(table, 2, 2)`: the whole
- *  table grid carries a 2px top + 2px bottom margin. */
-const TABLE_MARGIN_Y = 2;
-/** `StringUtils.PRIVATE_BLOCK` (`StripeTable.java:128`) — escaped `\|`
- *  cells hide the bar behind this sentinel during tokenization. */
-const HIDDEN_BAR = '\u{e000}';
 
 /** One assembled render row (post block/table/bullet resolution). */
 export interface NoteRow {
@@ -108,37 +100,12 @@ function separatorStrokeExtras(char: string): { strokeDasharray?: string; double
   return {};
 }
 
-/** T10: one table cell's own drawable content, relative to the TABLE
- *  row's own origin (`colBounds[col]`/`rowBounds[row]` below already carry
- *  the absolute-within-row offset; a cell's atoms draw at exactly
- *  `(colBounds[col], rowBounds[row] + baselineOffset)` for its FIRST
- *  subline -- `AtomTable.ts#drawCell`'s LEFT-alignment default, the only
- *  alignment this corpus reaches, `<r>`-right-align stays a named,
- *  pre-existing, zero-reach gap in {@link tableRowCellDims} unchanged by
- *  this task). `lines` holds one entry per `\n`-split subline within the
- *  cell (`splitTableCellLines`) -- `y` is each subline's own cumulative
- *  offset from the cell's (and so the row's) own top. */
-export interface NoteTableCell {
-  readonly col: number;
-  readonly row: number;
-  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
-}
-
-/** T10: one creole-table grid's full draw geometry -- `AtomTable.ts`'s own
- *  `getStartingX`/`getStartingY` cumulative-sum convention (col/row N's
- *  start is the sum of every earlier col/row's own max width/height),
- *  computed ONCE at layout time (measurer-free at render time, matching
- *  every other `NoteGeo` field's "measured once, drawn many" contract).
- *  Bounds are relative to the TABLE's own origin: `colBounds[0] === 0`
- *  (flush with the row's left margin, `note.x + NOTE_MARGIN_X1`, same as
- *  plain text) and `rowBounds[0] === TABLE_MARGIN_Y` (the grid's own top
- *  margin, `StripeTable.java:85`'s `AtomWithMargin(table, 2, 2)`). */
-export interface NoteTableDraw {
-  readonly colBounds: readonly number[];
-  readonly rowBounds: readonly number[];
-  readonly lineColor: string;
-  readonly cells: readonly NoteTableCell[];
-}
+// T2d (500-line cap): the creole-table grid types + builders moved to
+// `note-layout-measure-table.ts` (`<#color>` capture pushed this file over)
+// -- re-exported here so no consumer's import path changed (pure move,
+// same "split purely for size" precedent this whole file family follows).
+export type { NoteTableCell, NoteTableDraw } from './note-layout-measure-table.js';
+export { buildTableRow } from './note-layout-measure-table.js';
 
 /** Per-line build inputs the row builders need (one bundled param). */
 export interface NoteLineBuildContext {
@@ -224,140 +191,6 @@ function noteLineHeightEntry(atom: MemberRenderAtom): { altitude: number; height
   }
   if (atom.kind === 'image') return { altitude: 0, height: atom.height };
   return undefined;
-}
-
-/**
- * A12: one creole-table grid row — the flat measurement-side port of
- * `StripeTable#analyzeAndAddInternal` (java:130-163) + `AtomTable
- * #calculateDimensionSlow` (java:91-96: width = sum of per-column max cell
- * widths, height = sum of per-row max cell heights) + the grid's own
- * `AtomWithMargin(table, 2, 2)` (java:85). NOT wired through the klimt
- * `StripeTable`/`SheetBlock1` object model: this file is class's flat
- * `MemberRenderAtom` adapter over the SAME shared creole primitives
- * (`class-member-creole.ts`'s own module doc comment precedent — a second,
- * structurally different adapter, not a re-port). Jar-verified against
- * `jovigo-38-tuni063` + F-C probe `table` (<0.01px). Cell text is NOT
- * trimmed (upstream tokenizes raw between `|`s), `=`-prefixed cells are
- * bold headers, `\|` escapes hide behind `StringUtils.PRIVATE_BLOCK`, and
- * `<#color>` prefixes strip through the first `>` (size-inert).
- */
-export function buildTableRow(runLines: readonly string[], ctx: NoteLineBuildContext): NoteRow {
-  const cellDims: TableCellDims[][] = runLines.map((line) => tableRowCellDims(line, ctx));
-  const { colBounds, rowBounds, cells } = tableGridBounds(cellDims);
-  const width = colBounds[colBounds.length - 1]!;
-  const height = rowBounds[rowBounds.length - 1]! - TABLE_MARGIN_Y;
-  // `StripeTable.java:79-82`'s `getBackOrFrontColor(line, 1)` per-table
-  // `<#color>` override (checked against the FIRST run line only) is a
-  // named, zero-corpus-reach gap (`jovigo-38-tuni063` carries none) -- the
-  // grid always falls back to `fontConfiguration.getColor()`, i.e. this
-  // row's own resolved font color, mirroring the SAME `?? '#000000'`
-  // fallback `renderNoteLineAtoms`'s text fill already applies.
-  const lineColor = ctx.font.color ?? '#000000';
-  return {
-    text: runLines.join('\n'),
-    width,
-    atoms: [],
-    height: height + TABLE_MARGIN_Y * 2,
-    table: { colBounds, rowBounds, lineColor, cells },
-  };
-}
-
-/** {@link buildTableRow}'s own `AtomTable.ts#getStartingX`/`getStartingY`
- *  cumulative-sum + cell-flattening pass, split out purely to keep that
- *  function's own NLOC under this project's complexity cap. */
-function tableGridBounds(cellDims: readonly (readonly TableCellDims[])[]): {
-  colBounds: number[];
-  rowBounds: number[];
-  cells: NoteTableCell[];
-} {
-  const nbCols = cellDims.reduce((max, row) => Math.max(max, row.length), 0);
-  const colBounds = [0];
-  for (let c = 0; c < nbCols; c++) {
-    const colW = cellDims.reduce((max, row) => Math.max(max, row[c]?.w ?? 0), 0);
-    colBounds.push(colBounds[c]! + colW);
-  }
-  const rowBounds = [TABLE_MARGIN_Y];
-  for (const row of cellDims) {
-    const rowH = row.reduce((max, cell) => Math.max(max, cell.h), 0);
-    rowBounds.push(rowBounds[rowBounds.length - 1]! + rowH);
-  }
-  const cells: NoteTableCell[] = [];
-  cellDims.forEach((row, r) => row.forEach((cell, c) => cells.push({ col: c, row: r, lines: cell.lines })));
-  return { colBounds, rowBounds, cells };
-}
-
-interface TableCellDims {
-  readonly w: number;
-  readonly h: number;
-  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
-}
-
-/** One table line's cell dims — `StripeTable#analyzeAndAddInternal`'s
- *  tokenizer (`StringTokenizer(line, "|")` skips empty tokens) with the
- *  `\|`-hiding, line/cell `<#color>` strips, `=` header detection, and
- *  per-cell literal-`\n` split (`getWithNewlinesInternal`, java:166-197).
- *  T10: now also captures each subline's own resolved `atoms` (`build
- *  .atoms`, already computed by the SAME `resolveMemberAtoms` call this
- *  function always made -- previously discarded, keeping only its `width`/
- *  `noteLineHeight`) so {@link buildTableRow} can hand the renderer
- *  something to actually draw, not just a cell's reserved box. */
-function tableRowCellDims(line: string, ctx: NoteLineBuildContext): TableCellDims[] {
-  let l = line.split('\\|').join(HIDDEN_BAR);
-  if (CreoleParser.doesStartByColor(l)) l = l.slice(l.indexOf('>') + 1);
-  const tokens = l.split('|').filter((t) => t !== '');
-  return tokens.map((token) => {
-    let v = token.split(HIDDEN_BAR).join('|');
-    const header = v.startsWith('=');
-    if (header) v = v.slice(1);
-    if (CreoleParser.doesStartByColor(v)) v = v.slice(v.indexOf('>') + 1);
-    const cellFont = header ? memberBaseFont({ ...ctx.fontSpec, bold: true }, {}) : ctx.font;
-    let w = 0;
-    let h = 0;
-    const lines: { y: number; atoms: readonly MemberRenderAtom[] }[] = [];
-    for (let s of splitTableCellLines(v)) {
-      // `<r>`-right-alignment stays UNAPPLIED at draw time (pre-existing gap,
-      // unchanged by this task -- see `NoteTableCell`'s own doc comment);
-      // the marker is still stripped so it never leaks into the drawn text.
-      if (s.startsWith('<r>')) s = s.slice('<r>'.length);
-      const build = resolveMemberAtoms(
-        buildMemberAtoms(resolveTextEscapes(s), cellFont),
-        cellFont,
-        ctx.measurer,
-        ctx.sprites,
-      );
-      lines.push({ y: h, atoms: build.atoms });
-      w = Math.max(w, build.width);
-      h += noteLineHeight(build.atoms, ctx.fontSize);
-    }
-    return { w, h, lines };
-  });
-}
-
-/** `StripeTable#getWithNewlinesInternal` (java:166-197, legacy branch):
- *  `\n` breaks the cell into sub-lines, `\\` is a literal backslash, any
- *  other `\x` keeps both chars. */
-function splitTableCellLines(s: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  for (let i = 0; i < s.length; i++) {
-    const c = s.charAt(i);
-    if (c === '\\' && i < s.length - 1) {
-      const c2 = s.charAt(i + 1);
-      i++;
-      if (c2 === 'n') {
-        result.push(current);
-        current = '';
-      } else if (c2 === '\\') {
-        current += c2;
-      } else {
-        current += c + c2;
-      }
-    } else {
-      current += c;
-    }
-  }
-  result.push(current);
-  return result;
 }
 
 /**

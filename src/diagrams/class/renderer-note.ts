@@ -40,7 +40,7 @@ import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 // function's own doc comment. `renderer-note-lines.ts` owns the pure
 // per-row/per-cell drawing primitives (`NoteDividerDraw`/`NoteTableDraw`
 // consumers); it imports nothing from this file, so this is not a cycle.
-import { renderNoteRowExtra } from './renderer-note-lines.js';
+import { renderNoteRowExtra, FREESTANDING_TABLE_STROKE_WIDTH } from './renderer-note-lines.js';
 
 /** `Opale.java`'s `cornersize` -- the folded-corner triangle size, shared by
  *  BOTH the plain fold (this file) and the zigzag-notch tip outline
@@ -286,7 +286,18 @@ function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, t
  *  OWN `textLength`, so a multi-line note whose lines have different widths
  *  (the common case) previously emitted the SAME (longest-line) value on
  *  every row; jar-verified against `sisolu-74-minu975`. */
-export function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
+export function renderNoteText(
+  note: NoteGeo,
+  theme: ScaledTheme,
+  // T2d (colede-79-give418): the note's OWN inherited table-grid stroke --
+  // `FREESTANDING_TABLE_STROKE_WIDTH * theme.scaleK` from `renderPlainNote`,
+  // `resolveNoteStroke(theme).strokeWidth` from `renderTipNote`/
+  // `renderOpaleNote` (`renderer-note-lines.ts`'s own doc comment on that
+  // constant has the jar-verified derivation). Defaults to the freestanding
+  // value so every pre-existing hand-built `NoteGeo` test literal (which
+  // never carries a table) keeps compiling unchanged.
+  tableStrokeWidth: number = FREESTANDING_TABLE_STROKE_WIDTH * theme.scaleK,
+): string {
   const parts: string[] = [];
   // G2 N39: `<style> note { FontSize N }` / `skinparam noteFontSize N`
   // override -- see `NOTE_FONT_SIZE`'s own doc comment. `baselineOffset`'s
@@ -320,7 +331,7 @@ export function renderNoteText(note: NoteGeo, theme: ScaledTheme): string {
     // draws immediately before its own block's content, not after the
     // whole note). `renderNoteRowExtra` is a no-op ('') for every row
     // that carries neither `lineDividers[i]` nor `lineTables[i]`.
-    parts.push(renderNoteRowExtra(note, lineTop, i, baselineOffset, theme));
+    parts.push(renderNoteRowExtra(note, { lineTop, i, baselineOffset }, theme, tableStrokeWidth));
     lineTop += lineHeight;
   });
   return parts.join('');
@@ -404,7 +415,7 @@ export function renderTipNote(note: NoteGeo, tip: TipShape, theme: ScaledTheme):
       strokeWidth: ns.strokeWidth,
     }),
   ];
-  parts.push(renderNoteText(note, theme));
+  parts.push(renderNoteText(note, theme, ns.strokeWidth));
   return parts.join('');
 }
 
@@ -457,6 +468,6 @@ export function renderOpaleNote(note: NoteGeo, theme: ScaledTheme): string {
       strokeWidth: ns.strokeWidth,
     }),
   ];
-  parts.push(renderNoteText(note, theme));
+  parts.push(renderNoteText(note, theme, ns.strokeWidth));
   return parts.join('');
 }
