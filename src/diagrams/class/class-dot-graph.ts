@@ -24,6 +24,7 @@ export { applyKalWidthFloor, applySameClassWidthFloor, type ThemeSameClassWidth 
 // cdd-T22b: the cluster builder moved to its own module for the same
 // 500-line-cap reason as the width floors above (pure move).
 import { nonEmptyNamespaceIds, buildDotClusters } from './class-dot-clusters.js';
+import { applyEntityPortShapes, mergePortAnchorNodes } from './class-entity-port.js';
 import { hideTextShieldMarginsByEntity } from './class-hidetext-shield.js';
 import { LOLLIPOP_SIZE, ASSOC_POINT_SIZE } from './class-lollipop.js';
 import { applyShapeAndPorts, classPortShortNamesById } from './class-port-rows.js';
@@ -469,7 +470,11 @@ export function buildDotGraph(
   const ordered = creationOrderedDotParts(ast, { dotNodes, dotEdges }, noteParts, ast.relationships.length);
 
   const clusterParts = buildDotClusters(ast, anchors, theme, measurer);
-  const dotGraph = assembleDotInputGraph(ast, theme, ordered.nodes, ordered.edges, clusterParts);
+  // cdd6-T3d: each port cluster's `empty()` anchor, and PORTIN/PORTOUT
+  // leaves as `RECTANGLE_PORT` nodes (class-entity-port.ts).
+  const nodes = mergePortAnchorNodes(ordered.nodes, clusterParts?.portAnchorNodes ?? []);
+  applyEntityPortShapes(nodes, ast.classifiers, theme, measurer);
+  const dotGraph = assembleDotInputGraph(ast, theme, nodes, ordered.edges, clusterParts);
   dotGraph.printGroupsOrder = printGroupsOrderOf(ast, clusterParts?.clusterIdByNs);
 
   const clusterIdByNs = clusterParts?.clusterIdByNs ?? new Map<string, string>();
