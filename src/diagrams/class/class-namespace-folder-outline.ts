@@ -125,6 +125,9 @@ export function renderFolderPolygon(
   stroke: string,
   strokeWidth: number,
   fill: Paint,
+  // cdd6 T3f: `SvgGraphics#styleMe` writes the dash after the width,
+  // before the polygon's own linejoin suffix.
+  strokeDasharray?: string,
 ): string {
   const d3 = DEFAULT_SVG_DECIMALS;
   const pts = points.map(([x, y]) => `${formatDecimal(x, d3)},${formatDecimal(y, d3)}`).join(',');
@@ -132,7 +135,8 @@ export function renderFolderPolygon(
   // #applyStrokeColor` (`:97-110`) writes the MAPPED colour (`toSvg(mapper)`),
   // never the raw token -- the same `resolvePaint` the `path()`/`line()`
   // siblings below apply (`White` -> `#FFF`, guxode-39-dobi371).
-  const style = `stroke:${resolvePaint(stroke).value ?? ''};stroke-width:${formatDecimal(strokeWidth, d3)};stroke-linejoin:miter;stroke-miterlimit:10;`;
+  const dash = strokeDasharray !== undefined ? `stroke-dasharray:${strokeDasharray};` : '';
+  const style = `stroke:${resolvePaint(stroke).value ?? ''};stroke-width:${formatDecimal(strokeWidth, d3)};${dash}stroke-linejoin:miter;stroke-miterlimit:10;`;
   // CDD T18: `DriverPolygonSvg#draw` (java:63-64) delegates its fill to
   // `DriverRectangleSvg.applyFillColor`, so a `UPolygon` gets the SAME
   // `createSvgGradient` + `url(#…)` treatment a `URectangle` does.
@@ -160,6 +164,11 @@ export interface FolderTabPaint {
   readonly fill: Paint;
   readonly roundCorner: number;
   readonly marginX3: number;
+  /** cdd6 T3f (fokudi-24-limo685): the resolved LineStyle dash
+   *  (`style.getStroke(colors)`, `EntityImageEmptyPackage.java:108` /
+   *  `Cluster.java:385-390`), already scaled -- `USymbolFolder#drawFolder`
+   *  strokes the outline AND the tab line with it. Absent = solid. */
+  readonly strokeDasharray?: string;
 }
 
 /** `USymbolFolder#asBig`'s outline path + tab hline, shared by
@@ -173,7 +182,7 @@ export interface FolderTabPaint {
  *  it back over the 500-line hook cap -- a pure move plus the new
  *  `roundCorner`/`marginX3` scaling this task adds. */
 export function renderFolderTabShape(geo: NamespaceGeo, paint: FolderTabPaint): { outline: string; hline: string } {
-  const { strictUml, border, strokeWidth, fill, roundCorner, marginX3 } = paint;
+  const { strictUml, border, strokeWidth, fill, roundCorner, marginX3, strokeDasharray } = paint;
   const tabGeo: FolderTabGeo = {
     ox: geo.x,
     oy: geo.y,
@@ -187,13 +196,15 @@ export function renderFolderTabShape(geo: NamespaceGeo, paint: FolderTabPaint): 
   // line draws `stroke:none` (dojanu-92 p2's `packageBorderColor<<Layout>>
   // Transparent`), not the `#00000000` hex `resolvePaint` would emit.
   const stroke = isTransparentColor(border) ? PAINT_NONE : border;
+  const dash = strokeDasharray !== undefined ? { strokeDasharray } : {};
   const outline =
     strictUml === true
-      ? renderFolderPolygon(folderPolygonPoints(tabGeo), border, strokeWidth, fill)
-      : folderPath(folderPathD(tabGeo, roundCorner), stroke, strokeWidth, fill);
+      ? renderFolderPolygon(folderPolygonPoints(tabGeo), border, strokeWidth, fill, strokeDasharray)
+      : folderPath(folderPathD(tabGeo, roundCorner), { stroke, strokeWidth, ...dash }, fill);
   const hline = line(geo.x, geo.y + geo.htitle, geo.x + geo.wtitle + marginX3, geo.y + geo.htitle, {
     stroke,
     strokeWidth,
+    ...dash,
   });
   return { outline, hline };
 }
@@ -206,7 +217,12 @@ export function renderFolderTabShape(geo: NamespaceGeo, paint: FolderTabPaint): 
  * fill="none"/>`). Otherwise fill + stroke + thickness as usual.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverPathSvg.java:57-78
  */
-function folderPath(d: string, stroke: string, strokeWidth: number, fill: Paint): string {
-  if (typeof fill === 'string' && resolvePaint(fill).value === resolvePaint(stroke).value) return path(d, { fill });
-  return path(d, { stroke, strokeWidth, fill });
+function folderPath(
+  d: string,
+  stroke: { stroke: string; strokeWidth: number; strokeDasharray?: string },
+  fill: Paint,
+): string {
+  if (typeof fill === 'string' && resolvePaint(fill).value === resolvePaint(stroke.stroke).value)
+    return path(d, { fill });
+  return path(d, { ...stroke, fill });
 }
