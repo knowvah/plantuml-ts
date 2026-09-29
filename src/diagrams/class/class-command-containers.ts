@@ -36,6 +36,57 @@ import { parseTagTokens } from './class-declaration-parser.js';
 /**
  * Order matters: patterns are tested top-to-bottom; first match wins.
  */
+/** `%g` -- PlantUML's double-quote class (`"`, U+201C, U+201D, U+E121;
+ *  the same set `core/url/UrlBuilder.ts` expands). */
+const G = String.raw`["\u201C\u201D\uE121]`;
+const NOT_G = String.raw`[^"\u201C\u201D\uE121]`;
+const NOT_G_CODE = String.raw`[^#\s{}"\u201C\u201D\uE121]`;
+
+/**
+ * cdd6-T3d (xuloxo-85-vibu502): `CommandPackageWithUSymbol`'s name head, the
+ * RegexOr of five alternatives tried left to right, eleven capture groups
+ * (match indices 2-12 after the SYMBOL group):
+ *
+ *   DISPLAY1 `[%g].+?[%g]` [STEREOTYPE1] `as` CODE1 `[^#%s{}]+`       (2,3,4)
+ *   CODE2 `[^#%s{}%g]+` [STEREOTYPE2] `as` DISPLAY2 `[%g].+?[%g]`     (5,6,7)
+ *   DISPLAY3 `[^#%s{}%g]+` [STEREOTYPE3] `as` CODE3 `[^#%s{}%g]+`     (8,9,10)
+ *   CODE8 `[%g][^%g]+[%g]`                                          (11)
+ *   CODE9 `[^#%s{}%g]*`                                             (12)
+ *
+ * The stereotype may therefore sit BEFORE `as` (C4's `rectangle "D"
+ * <<person>> as X {`); the old head accepted `as` only before it and the
+ * trailing `[#<][^{]*` swallowed `<<person>> as X`, losing both the
+ * stereotype and the alias. Quoted displays are captured inside their
+ * quotes (`eventuallyRemoveStartingAndEndingDoubleQuote`, java:180,183).
+ * CODE9 is ported as `+`, not `*`: the empty-code branch
+ * (`getUniqueSequence("##")`, display null, java:181-188) is not ported.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/descdiagram/command/CommandPackageWithUSymbol.java:79-116
+ */
+const USYMBOL_CONTAINER_HEAD =
+  `(?:${G}(.+?)${G}(?:\\s+(<<.+>>))?\\s*as\\s+([^#\\s{}]+)` +
+  `|(${NOT_G_CODE}+)(?:\\s+(<<.+>>))?\\s*as\\s+${G}(.+?)${G}` +
+  `|(${NOT_G_CODE}+)(?:\\s+(<<.+>>))?\\s*as\\s+(${NOT_G_CODE}+)` +
+  `|${G}(${NOT_G}+)${G}` +
+  `|(${NOT_G_CODE}+))`;
+
+/**
+ * The head's `getLazzy("CODE")`/`getLazzy("DISPLAY")`/`getLazzy("STEREOTYPE")`
+ * reads (`CommandPackageWithUSymbol.java:178-205`): `display` falls back to
+ * the code when no DISPLAY alternative matched (`ident.getName()`, java:186).
+ * `stereotype` is the in-head STEREOTYPEn; the caller falls back to the
+ * trailing STEREOTYPE group. When both are present `getLazzy` walks a
+ * HashMap (`RegexComposed.java:84`), so that order is unspecified upstream.
+ */
+function usymbolContainerHead(match: RegExpExecArray): { code: string; display: string; stereotype?: string } {
+  const first = (groups: readonly number[]): string | undefined =>
+    groups.map((g) => match[g]).find((v) => v !== undefined);
+  // CODE1, CODE2, CODE3, CODE8, CODE9 -- exactly one alternative matched.
+  const code = first([4, 5, 10, 11, 12])!;
+  const display = first([2, 7, 8]) ?? code;
+  const stereotype = first([3, 6, 9]);
+  return stereotype !== undefined ? { code, display, stereotype } : { code, display };
+}
+
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 4. Closing brace — ends a pending body, together block, or namespace
   //    block (LIFO; see closeBraceScope in class-together.ts).
@@ -142,34 +193,35 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       // the nested body's own lines were then never re-dispatched through
       // the per-line/allowmixing gate at all.
       new RegExp(
-        String.raw`^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+(?:"([^"]*)"|([^\s{]+))(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+        String.raw`^(rectangle|node|component|folder|frame|cloud|database|storage|artifact|file|card|queue|stack|hexagon|agent|action|process)\s+` +
+          USYMBOL_CONTAINER_HEAD +
+          String.raw`((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
           NOTE_COLOR +
           String.raw`\s*(?:[#<][^{]*)?\{\s*$`,
         'i',
       ),
     execute(state, match) {
       const usymbol = match[1]!.toLowerCase();
-      const name = match[2] !== undefined ? match[2] : match[3]!;
-      const id = match[4] ?? name;
-      const effectiveId = openNamespaceBlock(state, id, name);
+      const head = usymbolContainerHead(match);
+      const effectiveId = openNamespaceBlock(state, head.code, head.display);
       state.descriptiveContainers.set(effectiveId, usymbol);
       // cdd2-T19b: `if (stereotype != null) p.setStereotype(Stereotype
       // .build(stereotype, false))` -- UNGATED (the SYMBOL token already
       // named the shape), so the stereotype is displayed in the cluster
       // header (`CommandPackageWithUSymbol.java:204-206`).
-      setNamespaceStereotype(state, effectiveId, match[6], false);
+      setNamespaceStereotype(state, effectiveId, head.stereotype ?? match[14], false);
       // `addTags(p, arg.getLazzy("TAGS", 0))` -- upstream applies BOTH tag
       // runs to the group it just created (`CommandPackageWithUSymbol
       // .java:214`). `remove $tag` / `restore $tag` resolve against them, so
       // discarding them here would leave `component a $a {}` un-removable
       // (kokebo-27-vafi688).
-      const tags = parseTagTokens(`${match[5] ?? ''} ${match[7] ?? ''}`);
+      const tags = parseTagTokens(`${match[13] ?? ''} ${match[15] ?? ''}`);
       if (tags.length > 0) state.pendingContainerTags.set(effectiveId, tags);
       // cdd3-T10 (S-11): `p.addUrl(url)` (`CommandPackageWithUSymbol.java:
       // 208-213`) and `p.setColors(color().getColor(...))` with
       // `ColorType.BACK` (`:215-216`, `color()` at `:132-134`).
-      setNamespaceUrl(state, effectiveId, match[8]);
-      setNamespaceColor(state, effectiveId, match[9]);
+      setNamespaceUrl(state, effectiveId, match[16]);
+      setNamespaceColor(state, effectiveId, match[17]);
     },
   },
 

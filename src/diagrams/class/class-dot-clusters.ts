@@ -11,10 +11,11 @@
 import type { ClassDiagramAST, Namespace } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { DotInputCluster } from '../../core/graph-layout.js';
+import type { DotInputCluster, DotInputNode } from '../../core/graph-layout.js';
 import { clusterWrapperLevel } from './class-cluster-levels.js';
 import { namespaceTitleTableDims } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
+import { clusterPortRanks, type ClassPortRank } from './class-entity-port.js';
 
 /**
  * The set of namespace ids that must emit a cluster: any namespace whose
@@ -53,6 +54,59 @@ function unpackedParentId(ns: Namespace, byId: ReadonlyMap<string, Namespace>): 
 }
 
 /**
+ * A cluster's direct members in upstream print order: the group's own leaves
+ * first, then its muted empty child packages (`collapsedGroup` leaves), each
+ * part keeping its relative order. The parse-time collapse
+ * (class-namespace.ts#collapseEmptyNamespace) pushes a muted package onto the
+ * parent's `classifiers` in SOURCE order; upstream instead prints
+ * `printEntities(g.leafs())` then `printGroups(g)`, and `printGroups` mutes an
+ * empty PACKAGE and prints it as an entity in child-group order.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GraphvizImageBuilder.java:431-433
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GraphvizImageBuilder.java:416-418
+ */
+function clusterMemberPrintOrder(ns: Namespace, ast: ClassDiagramAST): string[] {
+  const muted = new Set(ast.classifiers.filter((c) => c.collapsedGroup === true).map((c) => c.id));
+  const leafs = ns.classifiers.filter((id) => !muted.has(id));
+  const groups = ns.classifiers.filter((id) => muted.has(id));
+  return [...leafs, ...groups];
+}
+
+/**
+ * cdd6-T3d (bonaco-71-xefu608): `ClusterDotString`'s `hasPort()` branch for
+ * a cluster whose direct members include PORTIN/PORTOUT leaves.
+ * `entityPositionsExceptNormal().size() > 0` forces `protection0`/
+ * `protection1` off (java:107-112), so no `innerMarginLevels`; the cluster
+ * prints no `label=` of its own (only `labeljust`, java:121-123) -- the
+ * title table goes onto the `empty()` anchor instead, declared last inside
+ * `ee` (java:177-181), which `printRanks` chains each rank to (java:266-282).
+ * The anchor reuses the package-endpoint anchor id when the group is also a
+ * link endpoint (`Cluster.getSpecialPointId`, re-declared first, java:148-149),
+ * else takes the same `zaent-` id scheme (`class-shield-helpers.ts
+ * #packageEndpointAnchors`). Returns the anchor node for the caller to add.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterDotString.java:107-184
+ */
+function applyPortBranch(
+  cluster: DotInputCluster,
+  ns: Namespace,
+  portRanks: ClassPortRank[],
+  anchor: { anchorId: string | undefined; dims: { width: number; height: number } | undefined },
+): DotInputNode {
+  const portAnchorId = anchor.anchorId ?? `zaent-${ns.id}`;
+  delete cluster.innerMarginLevels;
+  cluster.portRanks = portRanks;
+  cluster.portAnchorId = portAnchorId;
+  if (anchor.anchorId === undefined) cluster.nodeIds = [...cluster.nodeIds, portAnchorId];
+  if (ns.display.length > 0) cluster.label = ns.display;
+  const node: DotInputNode = { id: portAnchorId, width: 1, height: 1, shape: 'rect' };
+  if (anchor.dims !== undefined) {
+    node.titleLabelWidth = anchor.dims.width;
+    node.titleLabelHeight = anchor.dims.height;
+  }
+  if (anchor.anchorId !== undefined) node.groupAnchorAlsoPoint = true;
+  return node;
+}
+
+/**
  * Build one `DotInputCluster` per non-empty package/namespace, nesting via
  * `parentId` for dotted/nested names (mirrors the description engine's
  * `buildDotClusters` in ../description/layout.ts). `id` is a synthetic
@@ -68,17 +122,19 @@ export function buildDotClusters(
   anchors: Map<string, string>,
   theme: Theme,
   measurer: StringMeasurer,
-): { clusters: DotInputCluster[]; clusterIdByNs: Map<string, string> } | undefined {
+): { clusters: DotInputCluster[]; clusterIdByNs: Map<string, string>; portAnchorNodes: DotInputNode[] } | undefined {
   const keep = nonEmptyNamespaceIds(ast);
   if (keep.size === 0) return undefined;
   const kept = ast.namespaces.filter((ns) => keep.has(ns.id));
   const clusterIdByNs = new Map(kept.map((ns, i) => [ns.id, `cluster${i}`] as const));
   const byId = new Map(ast.namespaces.map((n) => [n.id, n] as const));
+  const portAnchorNodes: DotInputNode[] = [];
   const clusters = kept.map((ns, i) => {
     // A package used as a relationship endpoint carries its point anchor as an
     // extra direct member of its own cluster (svek ClusterDotString).
     const anchorId = anchors.get(ns.id);
-    const nodeIds = anchorId !== undefined ? [...ns.classifiers, anchorId] : ns.classifiers;
+    const members = clusterMemberPrintOrder(ns, ast);
+    const nodeIds = anchorId !== undefined ? [...members, anchorId] : members;
     const cluster: DotInputCluster = { id: `cluster${i}`, nodeIds };
     // T4: `protection0`/`protection1` (ClusterDotString.java:107-115) are
     // unconditional for a non-swimlane, non-`USymbols.NODE` group -- NOT
@@ -91,7 +147,12 @@ export function buildDotClusters(
     // (`ClusterHeader.java:80`) covers `mergeTB(stereo, title)`, so a header
     // stereo block (displayed stereotype / group legend) counts too.
     const header = buildClusterHeaderStereo(ns, ast, theme, measurer);
-    if (ns.display.length > 0 || header !== undefined) {
+    const isLabel = ns.display.length > 0 || header !== undefined;
+    const portRanks = clusterPortRanks(members, ast);
+    if (portRanks.length > 0) {
+      const dims = isLabel ? namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol, header) : undefined;
+      portAnchorNodes.push(applyPortBranch(cluster, ns, portRanks, { anchorId, dims }));
+    } else if (isLabel) {
       cluster.label = ns.display;
       // cdd-T12 (A2b E3): `ns.usymbol` feeds `ClusterHeader`'s per-USymbol
       // `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` supplement
@@ -114,5 +175,5 @@ export function buildDotClusters(
     if (parentClusterId !== undefined) cluster.parentId = parentClusterId;
     return cluster;
   });
-  return { clusters, clusterIdByNs };
+  return { clusters, clusterIdByNs, portAnchorNodes };
 }
