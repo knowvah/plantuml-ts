@@ -53,6 +53,24 @@ function unpackedParentId(ns: Namespace, byId: ReadonlyMap<string, Namespace>): 
 }
 
 /**
+ * A cluster's direct members in upstream print order: the group's own leaves
+ * first, then its muted empty child packages (`collapsedGroup` leaves), each
+ * part keeping its relative order. The parse-time collapse
+ * (class-namespace.ts#collapseEmptyNamespace) pushes a muted package onto the
+ * parent's `classifiers` in SOURCE order; upstream instead prints
+ * `printEntities(g.leafs())` then `printGroups(g)`, and `printGroups` mutes an
+ * empty PACKAGE and prints it as an entity in child-group order.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GraphvizImageBuilder.java:431-433
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/GraphvizImageBuilder.java:416-418
+ */
+function clusterMemberPrintOrder(ns: Namespace, ast: ClassDiagramAST): string[] {
+  const muted = new Set(ast.classifiers.filter((c) => c.collapsedGroup === true).map((c) => c.id));
+  const leafs = ns.classifiers.filter((id) => !muted.has(id));
+  const groups = ns.classifiers.filter((id) => muted.has(id));
+  return [...leafs, ...groups];
+}
+
+/**
  * Build one `DotInputCluster` per non-empty package/namespace, nesting via
  * `parentId` for dotted/nested names (mirrors the description engine's
  * `buildDotClusters` in ../description/layout.ts). `id` is a synthetic
@@ -78,7 +96,8 @@ export function buildDotClusters(
     // A package used as a relationship endpoint carries its point anchor as an
     // extra direct member of its own cluster (svek ClusterDotString).
     const anchorId = anchors.get(ns.id);
-    const nodeIds = anchorId !== undefined ? [...ns.classifiers, anchorId] : ns.classifiers;
+    const members = clusterMemberPrintOrder(ns, ast);
+    const nodeIds = anchorId !== undefined ? [...members, anchorId] : members;
     const cluster: DotInputCluster = { id: `cluster${i}`, nodeIds };
     // T4: `protection0`/`protection1` (ClusterDotString.java:107-115) are
     // unconditional for a non-swimlane, non-`USymbols.NODE` group -- NOT
