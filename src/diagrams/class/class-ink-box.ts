@@ -273,6 +273,12 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   // font/sprite context already exist — SI14's "share the measurement
   // OBJECT" shape. See `ClassifierGeo.symbolInk`.
   if (c.symbolInk !== undefined) {
+    // cdd6 T3b: a leaf whose ink pass drew nothing (a description label that
+    // is only a `{{ }}` embed -- `EntityImageDescriptionEmbed.ts`) reports
+    // `LimitFinder`'s untouched `±MAX_VALUE` sentinel, minX > maxX. Upstream
+    // it adds nothing to the one shared `SvekResult` walk
+    // (`svek/SvekResult.java:130-135`).
+    if (c.symbolInk.minX > c.symbolInk.maxX) return;
     addPoint(box, c.x + c.symbolInk.minX, c.y + c.symbolInk.minY);
     addPoint(box, c.x + c.symbolInk.maxX, c.y + c.symbolInk.maxY);
     return;

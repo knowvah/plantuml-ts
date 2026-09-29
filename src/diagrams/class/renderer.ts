@@ -450,8 +450,11 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     // `theme.monochrome` is `undefined` (every fixture that doesn't set this
     // skinparam is byte-identical to pre-N61 output).
     body: applyColorMapperToFragment(children.join(''), colorMapper),
-    width: geo.totalWidth,
-    height: geo.totalHeight,
+    // cdd6 T3b: `SvgGraphics#ensureVisible` (`SvgGraphics.java:129-133,
+    // 1033-1034`) -- each USymbol leaf fragment's own `UGraphicSvg` extent,
+    // which carries a `{{ }}` label embed the ink walk never sees.
+    width: Math.max(geo.totalWidth, ...usymbolEntityFragments.map((f) => f.width)),
+    height: Math.max(geo.totalHeight, ...usymbolEntityFragments.map((f) => f.height)),
     background: canonicalBackground,
     ...(extraDefs.length > 0 ? { extraDefs } : {}),
     // G2 N46: pre-margin/pre-quirk ink dims, present only when

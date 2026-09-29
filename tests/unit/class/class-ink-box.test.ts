@@ -161,3 +161,23 @@ describe('buildInkBox — magic-arrow glyph ink pads by HACK_X_FOR_POLYGON (cdd4
     expect(box.maxX).toBe(65 + HACK_X_FOR_POLYGON);
   });
 });
+
+describe('addClassifierInk — a symbolInk leaf that drew nothing adds no ink (cdd6 T3b)', () => {
+  // `LimitFinder.ts` starts at `±Number.MAX_VALUE` (Java's `Double.MAX_VALUE`),
+  // so an embed-only description leaf whose ink pass drew nothing reports
+  // minX > maxX. Upstream that leaf simply adds nothing to the one shared
+  // `SvekResult` LimitFinder walk (`svek/SvekResult.java:130-135`).
+  it('the empty leaf does not poison the extent of its neighbour', () => {
+    const empty = { minX: Number.MAX_VALUE, minY: Number.MAX_VALUE, maxX: -Number.MAX_VALUE, maxY: -Number.MAX_VALUE };
+    const dims = computeClassRawInkDims(
+      [
+        leaf({ id: 'E', kind: 'descriptive', x: 100, y: 100, symbolInk: empty }),
+        leaf({ id: 'A', kind: 'assoc-circle', x: 10, y: 20, width: 4, height: 4 }),
+      ],
+      [],
+      [],
+      [],
+    );
+    expect(dims).toEqual({ width: 3 + 15, height: 3 + 15 });
+  });
+});
