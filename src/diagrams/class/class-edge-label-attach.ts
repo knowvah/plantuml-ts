@@ -23,9 +23,9 @@ import {
   type MagicArrowDirection,
   type MagicArrowLabel,
 } from './class-magic-arrow.js';
-import { applyGuillemet } from '../../core/edge-label-box.js';
+import { applyGuillemet, stripCreoleMarkup } from '../../core/edge-label-box.js';
 import { resolveTextEscapes } from '../../core/text-escapes.js';
-import { resolveMagicArrowText } from './class-edge-label-measure.js';
+import { resolveMagicArrowText, resolveLoneSpriteLabel } from './class-edge-label-measure.js';
 import { stripEdgeLabelVisibility, visibilityBlockAnchor } from './class-edge-visibility.js';
 import type { Kal } from './class-kal.js';
 import { labelMarginOf, type NoteBoxContext } from './class-layout-edge-labels.js';
@@ -277,7 +277,70 @@ export function attachEdgeLabel(
     return;
   }
 
-  edgeGeo.label = portLabelAnchor(resolvedLabel, center, measurer, labelFont);
+  attachPlainLabel(edgeGeo, resolvedLabel, center, text);
+}
+
+/** {@link attachEdgeLabel}'s trailing plain (non-magic-arrow) single-line
+ *  arm -- split out purely to keep that function's own NLOC/CCN under the
+ *  project's per-function caps. Takes the whole {@link EdgeGeoTextContext}
+ *  (rather than its `measurer`/`labelFont`/`noteCtx.sprites` fields
+ *  separately) to stay under the per-function param cap. */
+function attachPlainLabel(
+  edgeGeo: EdgeGeo,
+  resolvedLabel: string,
+  center: { x: number; y: number },
+  text: EdgeGeoTextContext,
+): void {
+  const { measurer, labelFont } = text;
+  // kexaba-26-kobu577: a label that is PURELY one `<$sprite>` atom draws as
+  // the resolved PNG `<image>` (`class-edge-label-measure.ts
+  // #resolveLoneSpriteLabel`'s own doc comment -- the SAME detection the
+  // DOT-box reservation already applies), not literal text.
+  const sprite = resolveLoneSpriteLabel(resolvedLabel, labelFont, text.noteCtx?.sprites);
+  if (sprite !== undefined) {
+    edgeGeo.labelImage = spriteLabelAnchor(sprite, center);
+    return;
+  }
+  // rimeca-17-gice904: an inline `<u>...</u>` creole tag draws as
+  // `text-decoration:underline` (see `EdgeGeo.label.underline`'s own doc
+  // comment), never as literal `<U>...</U>` glyphs -- detected BEFORE
+  // stripping (the strip removes the very tag this checks for).
+  const underline = UNDERLINE_TAG.test(resolvedLabel);
+  const anchor = portLabelAnchor(stripCreoleMarkup(resolvedLabel), center, measurer, labelFont);
+  edgeGeo.label = underline ? { ...anchor, underline: true } : anchor;
+}
+
+/** {@link EdgeGeo.label}'s `underline` field -- `core/edge-label-box.ts
+ *  #stripCreoleMarkup`'s own `u` alternative, tested standalone so the
+ *  render side can recover "the tag WAS there" after the measurement side
+ *  already strips it for width. `rimeca-17-gice904` (`<U>agregation</U>`)
+ *  is the sole corpus fixture -- scoped to the tag's PRESENCE anywhere on
+ *  the (already single-line) label, matching a real creole TextBlock's
+ *  formatting for this whole-line-wrapped case; a PARTIAL-run underline
+ *  (only part of the line) has zero corpus reach and is not reproduced. */
+const UNDERLINE_TAG = /<\/?u(?:[:\s][^>]*)?>/i;
+
+/**
+ * {@link EdgeGeo.labelImage}'s anchor -- the SAME box-corner formula
+ * `portLabelAnchor` uses (`center.x/y` minus half the TRUNCATED dimension,
+ * `class-edge-label-anchor.ts`'s own doc comment), minus that function's
+ * baseline offset: an atom draws at its box's TOP-LEFT corner (altitude 0,
+ * `renderer-note.ts#renderNoteLineAtoms`'s identical `'image'` placement),
+ * never a text baseline. No collision pass -- `attachEdgeLabel` never
+ * threads `collisionNodes` for the main label either (only tail/head ports
+ * do, `class-edge-label-anchor.ts#attachPortLabels`).
+ */
+function spriteLabelAnchor(
+  sprite: { href: string; width: number; height: number },
+  center: { x: number; y: number },
+): NonNullable<EdgeGeo['labelImage']> {
+  return {
+    href: sprite.href,
+    width: sprite.width,
+    height: sprite.height,
+    x: center.x - Math.trunc(sprite.width) / 2,
+    y: center.y - Math.trunc(sprite.height) / 2,
+  };
 }
 
 /**

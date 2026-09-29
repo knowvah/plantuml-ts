@@ -266,7 +266,25 @@ export interface EdgeGeo {
      *  tag (the overwhelming majority), which renders at the SAME base
      *  `labelFontAttrs.fontSize` as before this field existed. */
     fontSize?: number;
+    /** T2d (rimeca-17-gice904, `<U>agregation</U>`): the raw label carried
+     *  an inline `<u>...</u>` creole tag -- a real creole TextBlock RENDERS
+     *  it as underline formatting rather than literal glyphs
+     *  (`SvekEdge.java:298-299`'s `create0(..., CreoleMode.SIMPLE_LINE,
+     *  ...)`), matching {@link labelLines}' own `bold` precedent for the
+     *  SAME "creole formatting the render side must still apply" gap.
+     *  `undefined` (the overwhelming majority) renders with no
+     *  `text-decoration`, unchanged. */
+    underline?: boolean;
   };
+  /** T2d (kexaba-26-kobu577): present INSTEAD OF {@link label} when the
+   *  relationship's text is ENTIRELY one `<$sprite>` inline atom
+   *  (`class-edge-label-measure.ts#resolveLoneSpriteLabel`'s own doc
+   *  comment) -- draws as the resolved PNG `<image>` a member row's inline
+   *  `<$name>` already produces, positioned at its own box's TOP-LEFT
+   *  corner (an atom's `getStartingAltitude() === 0`, never a text
+   *  baseline) rather than `label`'s baseline anchor. Mutually exclusive
+   *  with `label` and `labelLines` (`attachEdgeLabel` sets at most one). */
+  labelImage?: { href: string; x: number; y: number; width: number; height: number };
   /** G2 item 43: present INSTEAD OF {@link label} when the relationship's
    *  text carried a `\n`/`\l`/`\r` line-break escape sequence
    *  (`class-layout-helpers.ts#splitEdgeLabelLines`) -- one entry per line,

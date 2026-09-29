@@ -4,7 +4,7 @@
  * `renderer-edge.ts` (cdd3-T33, 500-line hook cap) — a pure move,
  * re-exported from that file so no consumer's import path changed.
  */
-import { text, attrs } from '../../core/svg.js';
+import { text, attrs, image } from '../../core/svg.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import type { ScaledTheme } from './class-scale-geo.js';
@@ -131,7 +131,19 @@ export function renderEdgeMainLabel(
     );
   }
   if (geo.label !== undefined) parts.push(renderEdgeSingleLabel(geo.label, labelFontAttrs, labelColor));
+  // T2d (kexaba-26-kobu577): mutually exclusive with `geo.label` --
+  // `attachEdgeLabel` sets at most one (`EdgeGeo.labelImage`'s own doc
+  // comment).
+  if (geo.labelImage !== undefined) parts.push(renderEdgeLabelImage(geo.labelImage));
   return parts;
+}
+
+/** {@link EdgeGeo.labelImage} -- a lone-sprite label's resolved PNG, drawn
+ *  the SAME 5-attribute shape `core/svg.ts#image` already produces for a
+ *  member row's inline `<$name>` (`renderer-note.ts#renderNoteLineAtoms`'s
+ *  identical call shape). */
+function renderEdgeLabelImage(img: NonNullable<EdgeGeo['labelImage']>): string {
+  return image(img.x, img.y, img.width, img.height, img.href);
 }
 
 /** {@link renderEdgeMainLabel}'s single-line `geo.label` arm, split out
@@ -151,6 +163,8 @@ export function renderEdgeSingleLabel(
     fill: labelColor,
     ...labelFontAttrs,
     ...(label.fontSize !== undefined ? { fontSize: label.fontSize } : {}),
+    // T2d (rimeca-17-gice904): `EdgeGeo.label.underline`'s own doc comment.
+    ...(label.underline === true ? { textDecoration: 'underline' } : {}),
     lengthAdjust: 'spacing',
     textLength: label.width,
   });

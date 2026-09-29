@@ -131,15 +131,31 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
     ]);
   });
 
+  // T2d (colede-79-give418, `renderer-note-lines.ts
+  // #FREESTANDING_TABLE_STROKE_WIDTH`'s own doc comment): this describe
+  // block exercises `renderNote`/`renderPlainNote` (the FREESTANDING code
+  // path) on jovigo's table CONTENT for convenience -- it does not exercise
+  // jovigo's own real production dispatch (an attached `note right of B`
+  // resolves to `renderOpaleNote`, see the sibling describe block below for
+  // THAT path's 0.5 stroke). The freestanding path's own jar-verified value
+  // is 1 (`colede-79-give418`), not jovigo's 0.5 -- corrected from the
+  // former shared (and wrong, for this path) 0.5 constant.
   it('draws the jar-exact grid lines and cell text', () => {
     const geo = geoAt(JOVIGO, 82.94, 6);
     const svg = renderNote(geo, theme);
-    expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="0.5"/>');
-    expect(svg).toContain('<line x1="88.94" y1="52" x2="141.428" y2="52" stroke="#000" stroke-width="0.5"/>');
-    expect(svg).toContain('<line x1="88.94" y1="13" x2="88.94" y2="52" stroke="#000" stroke-width="0.5"/>');
+    expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="1"/>');
+    expect(svg).toContain('<line x1="88.94" y1="52" x2="141.428" y2="52" stroke="#000" stroke-width="1"/>');
+    expect(svg).toContain('<line x1="88.94" y1="13" x2="88.94" y2="52" stroke="#000" stroke-width="1"/>');
     expect(svg).toContain('<text x="88.94" y="23.111" font-size="13" fill="#000">A</text>');
     expect(svg).toContain('<text x="128.509" y="23.111" font-size="13" fill="#000">B</text>');
     expect(svg).toContain('<text x="88.94" y="49.111" font-size="13" fill="#000" textLength="39.569">P(C|D)</text>');
+  });
+
+  it('T2d: renderTipNote (the opale path) draws the SAME table at 0.5 -- the note style stroke', () => {
+    const geo = geoAt(JOVIGO, 82.94, 6);
+    const tip = { direction: 'left' as const, pp1: { x: 0, y: 10 }, pp2: { x: -5, y: 15 } };
+    const svg = renderTipNote(geo, tip, theme);
+    expect(svg).toContain('<line x1="88.94" y1="13" x2="141.428" y2="13" stroke="#000" stroke-width="0.5"/>');
   });
 
   it('draws the markdown-separator row as struck creole text, not a skipped row', () => {
@@ -154,19 +170,39 @@ describe('renderNoteText wiring fix — creole table (jovigo-38-tuni063)', () =>
 describe('renderNoteRowExtra — primitives', () => {
   it('produces empty string for a row with neither a divider nor a table', () => {
     const geo = geoAt('plain text', 0, 0);
-    expect(renderNoteRowExtra(geo, 0, 0, NOTE_BASELINE_OFFSET, theme)).toBe('');
+    expect(renderNoteRowExtra(geo, { lineTop: 0, i: 0, baselineOffset: NOTE_BASELINE_OFFSET }, theme, 1)).toBe('');
   });
 
   it('dashes a .. separator and double-draws a == separator', () => {
     const dotted = geoAt('a\n..\nb', 0, 0);
     const dottedRow = dotted.lineDividers?.findIndex((d) => d !== undefined) ?? -1;
     expect(dottedRow).toBeGreaterThanOrEqual(0);
-    const dottedSvg = renderNoteRowExtra(dotted, 0, dottedRow, NOTE_BASELINE_OFFSET, theme);
+    const dottedSvg = renderNoteRowExtra(
+      dotted,
+      { lineTop: 0, i: dottedRow, baselineOffset: NOTE_BASELINE_OFFSET },
+      theme,
+      1,
+    );
     expect(dottedSvg).toContain('stroke-dasharray="1,2"');
 
     const doubled = geoAt('a\n==\nb', 0, 0);
     const doubledRow = doubled.lineDividers?.findIndex((d) => d !== undefined) ?? -1;
-    const doubledSvg = renderNoteRowExtra(doubled, 0, doubledRow, NOTE_BASELINE_OFFSET, theme);
+    const doubledSvg = renderNoteRowExtra(
+      doubled,
+      { lineTop: 0, i: doubledRow, baselineOffset: NOTE_BASELINE_OFFSET },
+      theme,
+      1,
+    );
     expect(doubledSvg.match(/<line /g)).toHaveLength(2); // one row, drawn TWICE
+  });
+
+  it('T2d: table grid stroke-width comes from the caller, not a hardcoded constant', () => {
+    const geo = geoAt('| a | b |\n| c | d |', 0, 0);
+    const row = geo.lineTables?.findIndex((t) => t !== undefined) ?? -1;
+    expect(row).toBeGreaterThanOrEqual(0);
+    const at1 = renderNoteRowExtra(geo, { lineTop: 0, i: row, baselineOffset: NOTE_BASELINE_OFFSET }, theme, 1);
+    const at0_5 = renderNoteRowExtra(geo, { lineTop: 0, i: row, baselineOffset: NOTE_BASELINE_OFFSET }, theme, 0.5);
+    expect(at1).toContain('stroke-width="1"');
+    expect(at0_5).toContain('stroke-width="0.5"');
   });
 });
