@@ -132,6 +132,26 @@ export const DIRECTIVE_COMMANDS: readonly Command[] = [
     },
   },
 
+  // 2c-ter-pre. `!pragma layout smetana` (T3c, D8 `smetana-pragma-ignored`)
+  //     -- `CommandPragma#executeArg` (case-insensitive on both NAME and
+  //     VALUE) calls `system.setUseSmetana(true)` for this ONE name/value
+  //     pair, which `CucaDiagram#getCucaDiagramFileMaker` later reads
+  //     (`net/atmp/CucaDiagram.java:480-481`) to swap the WHOLE document
+  //     onto `CucaDiagramFileMakerSmetana`/`SmetanaEdge`. Captured onto
+  //     `state.ast.layoutEngine` (see `ast.ts`'s doc comment) BEFORE the
+  //     general `!pragma` no-op below so a real value survives -- same
+  //     precedent as `useIntermediatePackages` above. `!pragma layout elk`/
+  //     `vizjs`/anything else still falls through to the general no-op
+  //     (T14's "recognised, no modeled effect" posture) since neither the
+  //     Elk layout engine nor VizJS-in-browser has a port here.
+  //     @see ~/git/plantuml/.../command/CommandPragma.java:104-117
+  {
+    pattern: /^!pragma\s+layout\s+smetana\s*$/i,
+    execute(state) {
+      state.ast.layoutEngine = 'smetana';
+    },
+  },
+
   // 2c-bis. `!pragma NAME [VALUE]` general form (CommandPragma) — registered
   //     on EVERY factory via CommonCommands.addCommonCommands2 ->
   //     addCommonCommands1 (ClassDiagramFactory.java:169). T14
