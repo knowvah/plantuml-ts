@@ -29,22 +29,18 @@ import type { SymbolContext } from './SymbolContext.js';
  * the class's own inset constant (left/right cap depth) — ported as the
  * `QUEUE_DX` module constant.
  *
- * Reported source/jar version drift (this task's own finding, flagged
- * for human review): the `~/git/plantuml` checkout's
- * `USymbolQueue.java:86` reads `closing.cubicTo(width - dx * 2, height,
- * width - dx, height, width - dx, height);` — but the real
- * `plantuml-1.2026.7beta3.jar` (`java -jar ... -tsvg -pipe` on `queue
- * "Q1" as Q1`, see this task's test file for the exact fragment) draws
- * the closing cap's second cubic as `cubicTo(width - dx * 2, height / 2,
- * width - dx * 2, height, width - dx, height)` instead — a smooth mirror
- * of the FIRST cubic's `(0, height/2, height/2)` progression, matching
- * every one of the jar's own printed coordinates exactly (verified by
- * hand — see the test file's `QUEUE_GOLDEN` provenance comment). Ported
- * to match the JAR (the conformance oracle and what real users receive)
- * rather than the checked-out source text, which may be stale or
- * patched relative to the commit `beta3` was built from. Flagged here
- * for a human to reconcile the checkout against the jar's actual
- * `USymbolQueue.class` bytecode.
+ * cdd6-T2c (D4/D7, item 2B): the closing cap's second `cubicTo` below
+ * ported `USymbolQueue.java:86`'s LITERAL text (`"cubicTo(width - dx * 2,
+ * height / 2, width - dx * 2, height, width - dx, height)"`) rather than
+ * `:87` (`"cubicTo(width - dx * 2, height, width - dx, height, width -
+ * dx, height)"`) -- a cdd5 finding that itself turned out to be fitted to
+ * a STALE `plantuml-1.2026.7beta3.jar` capture (its own doc comment cited
+ * that jar's printed coordinates over the checked-out source text).
+ * Re-verified against the CURRENT `1.2026.8beta1` conformance oracle:
+ * every cached `queue`-using fixture's closing cap (25/25 scanned --
+ * component/object/sequence participants + unknown, `diagnosis/verify.md`'s
+ * "empty usymbol containers" mechanism B) draws the `:87` SOURCE form, 0
+ * the old beta3 form. Ported to `:87` (`getClosingPath` below).
  *
  * Seam — `MyUGraphicQueue` (T3b realignment): restored below, now that
  * `AbstractUGraphicHorizontalLine`/`UHorizontalLine`/`Stencil` are
@@ -55,16 +51,16 @@ import type { SymbolContext } from './SymbolContext.js';
 
 const QUEUE_DX = 5;
 
-/** Upstream: `USymbolQueue#getClosingPath` — the small cubic "hump"
- * drawn `2*dx` inset from the right edge, back-colored `none`. See the
- * module doc comment's "reported source/jar version drift" entry: the
- * second `cubicTo` call below matches the real jar's output, not the
- * `~/git/plantuml` checkout's literal text. */
+/** Upstream: `USymbolQueue#getClosingPath` (`USymbolQueue.java:83-88`) —
+ * the small cubic "hump" drawn `2*dx` inset from the right edge,
+ * back-colored `none`. See the module doc comment (cdd6-T2c item 2B) for
+ * why the second `cubicTo` below is `:87`'s literal text, not the older
+ * beta3-jar-fitted form it replaces. */
 export function getClosingPath(width: number, height: number): UPath {
   const closing = UPath.none();
   closing.moveTo(width - QUEUE_DX, 0);
   closing.cubicTo(width - QUEUE_DX * 2, 0, width - QUEUE_DX * 2, height / 2, width - QUEUE_DX * 2, height / 2);
-  closing.cubicTo(width - QUEUE_DX * 2, height / 2, width - QUEUE_DX * 2, height, width - QUEUE_DX, height);
+  closing.cubicTo(width - QUEUE_DX * 2, height, width - QUEUE_DX, height, width - QUEUE_DX, height);
   return closing;
 }
 

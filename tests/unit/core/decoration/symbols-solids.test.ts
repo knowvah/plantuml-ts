@@ -218,31 +218,26 @@ describe('USymbolDatabase (AC1/AC2)', () => {
 // ---------------------------------------------------------------------------
 
 /**
- * Provenance: `java -jar ~/git/plantuml/build/libs/plantuml-1.2026.7beta3
- * .jar -tsvg -pipe` on:
- *   @startuml
- *   rectangle R1
- *   queue "Q1" as Q1
- *   @enduml
- * (a bare top-level `queue "Q1" as Q1` is ambiguous with the sequence-
- * diagram "queue" participant shape and gets misinterpreted as one; the
- * preceding `rectangle R1` disambiguates to a DESCRIPTION diagram). The
- * jar's own Q1 fragment:
- *   <path d="M84.99,12 L114.7185,12 C119.7185,12 119.7185,25.2441
- *   119.7185,25.2441 C119.7185,25.2441 119.7185,38.4883 114.7185,38.4883
- *   L84.99,38.4883 C79.99,38.4883 79.99,25.2441 79.99,25.2441
- *   C79.99,25.2441 79.99,12 84.99,12" style="stroke:#181818;
- *   stroke-width:0.5;" fill="#F1F1F1"/>
- *   <path d="M114.7185,12 C109.7185,12 109.7185,25.2441 109.7185,25.2441
- *   C109.7185,25.2441 109.7185,38.4883 114.7185,38.4883"
- *   style="stroke:#181818;stroke-width:0.5;" fill="none"/>
+ * Provenance (cdd6-T2c item 2B, re-derived from the CURRENT
+ * `1.2026.8beta1` conformance oracle, not the beta3 capture this golden
+ * used before): `test-results/dot-cache/unknown/beboke-62-zofu377/in.svg`'s
+ * cached jar output for a queue with no visible content --
+ *   <path d="M11,6 L56,6 C61,6 61,18 61,18 C61,18 61,30 56,30 L11,30
+ *   C6,30 6,18 6,18 C6,18 6,6 11,6" .../>
+ *   <path d="M56,6 C51,6 51,18 51,18 C51,30 56,30 56,30" .../>
  * Solving `drawQueue`'s formula (`dx=5`) against these coordinates:
- * `translate=(x0=79.99, y0=12)`, `width=39.7285`, `height=26.4883`
- * (`x0+dx=84.99` ✓, `x0+width-dx=114.7185` ✓, `x0+width=119.7185` ✓,
- * `y0+height/2=25.2441` ✓, `y0+height=38.4883` ✓). The wrapper below is
- * this port's own already-proven `SvgGraphicsCore` algorithm applied to
- * these two literal jar paths in isolation (not the original 2-entity
- * diagram's own viewBox).
+ * `translate=(x0=6, y0=6)`, `width=55`, `height=24` (`x0+dx=11` ✓,
+ * `x0+width-dx=56` ✓, `x0+width=61` ✓, `y0+height/2=18` ✓,
+ * `y0+height=30` ✓); re-scaled to this test's own pre-existing
+ * `translate=(79.99, 12)`/`width=39.7285`/`height=26.4883` fixture so only
+ * the closing cap's SECOND cubic segment changes from the old golden
+ * (`USymbolQueue.java:87`: `cubicTo(width - dx*2, height, width - dx,
+ * height, width - dx, height)` -> local `(29.7285,26.4883)`,
+ * `(34.7285,26.4883)`, `(34.7285,26.4883)` -> global `(109.7185,38.4883)`,
+ * `(114.7185,38.4883)`, `(114.7185,38.4883)`). The wrapper below is this
+ * port's own already-proven `SvgGraphicsCore` algorithm applied to these
+ * two literal jar-derived paths in isolation (not a real diagram's own
+ * viewBox).
  */
 const QUEUE_GOLDEN =
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
@@ -251,7 +246,7 @@ const QUEUE_GOLDEN =
   '<path d="M84.99,12 L114.7185,12 C119.7185,12 119.7185,25.2441 119.7185,25.2441 ' +
   'C119.7185,25.2441 119.7185,38.4883 114.7185,38.4883 L84.99,38.4883 C79.99,38.4883 79.99,25.2441 ' +
   '79.99,25.2441 C79.99,25.2441 79.99,12 84.99,12" style="stroke:#181818;stroke-width:0.5;" fill="#F1F1F1"/>' +
-  '<path d="M114.7185,12 C109.7185,12 109.7185,25.2441 109.7185,25.2441 C109.7185,25.2441 109.7185,38.4883 ' +
+  '<path d="M114.7185,12 C109.7185,12 109.7185,25.2441 109.7185,25.2441 C109.7185,38.4883 114.7185,38.4883 ' +
   '114.7185,38.4883" style="stroke:#181818;stroke-width:0.5;" fill="none"/></g></svg>';
 
 describe('USymbolQueue (AC1)', () => {

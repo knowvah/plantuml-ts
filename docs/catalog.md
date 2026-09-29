@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1255 modules · 4732 exported names.
+1256 modules · 4733 exported names.
 
 ## `src/`
 
@@ -1184,6 +1184,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE0/TYPE1 body (`class-multiline- element.ts`'s `continueMultilineElement`): while an open multi-line element block is accumulating |
 | `class-empty-package.ts` | `EmptyPackageStereoLine`, `EmptyPackageLeafDim`, `measureEmptyPackageLeafDim`, `EmptyPackageLeafExtras`, `renderEmptyPackageIcon` | class-empty-package.ts — `EntityImageEmptyPackage`: a collapsed-empty `package`/`namespace` leaf (G2 N33, `class-magma.ts#isCollapsedGroup`). |
 | `class-ensure-classifier.ts` | `ClassifierRef`, `resolveClassifierRef`, `registerPendingLeaf`, `materializeClassifier`, `ensureClassifier` | `ensureClassifier` — the class parser's single classifier-creation chokepoint — split out of `parser.ts` (which sat exactly at the 500-line module cap) and re-exported from it, so every existing `import { ensureClassifier } from './parser.j |
+| `class-geo-builders-degenerate-ink.ts` | `degenerateEnsureVisibleInk` | class-geo-builders-degenerate-ink.ts — the `symbolInk` -> `ensureVisible` translation for the degenerate-single-classifier canvas, split out of `class-geo-builders.ts` purely to keep that file under the project's 500-line cap (cdd6-T2c, mir |
 | `class-geo-builders-degenerate-note.ts` | `DEGENERATE_NEAR_MARGIN`, `degenerateNoteGeo` | class-geo-builders-degenerate-note.ts — the single-freestanding-note branch of the degenerate-diagram skip, split out of `class-geo- builders.ts` purely to keep that file under the project's 500-line cap (cdd5-T4a, mirrors the existing `cla |
 | `class-geo-builders-fields.ts` | `inkBodyFields`, `badgeFields`, `protectedBorderField`, `assocCircleBookkeepingFields` | class-geo-builders-fields.ts — small pure `Partial<ClassifierGeo>` field-builder helpers used by `buildClassifierGeos`/ `degenerateSingleClassifier` (`class-geo-builders.ts`), split out purely to keep that file under the project's per-file |
 | `class-geo-builders.ts` | `ClassifierGeoOptions`, `buildClassifierGeos`, `NamespaceGeoInputs`, `buildNamespaceGeos`, `buildEdgeGeos`, `degenerateSingleClassifier` | class-geo-builders.ts — pure `ClassifierGeo`/`NamespaceGeo`/`EdgeGeo` builders + the degenerate single-classifier skip, split out of `layout.ts` to keep that file under the project's per-file size cap (mirrors the existing `class-layout-hel |
