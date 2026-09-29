@@ -54,29 +54,39 @@ export interface NoteDividerDraw {
   /** Offset from this row's own top where the `<line>` actually draws -- 0
    *  for an UNTITLED separator (`BodyEnhancedAbstract#decorate`'s
    *  `TextBlockLineBefore#drawU`: the line draws BEFORE any margin
-   *  translate). Always 0: a note/legend TITLED separator (`--Header--`)
-   *  is a NAMED, scoped-out remainder of this task -- zero corpus reach
-   *  (grep-verified: every `class-divergence-drive` fixture with a
-   *  non-empty-captured `--...--`/`==...==` line is a CLASS BODY separator,
-   *  `class-body-enhanced-layout.ts`'s own existing mechanism, never a note
-   *  or legend body) and its content-draws-before-divider/title-baseline
-   *  draw order (`renderer-body-enhanced.ts`'s own module doc comment) is
-   *  real extra complexity with nothing to jar-verify it against here --
-   *  `appendDecoratedBlock` below leaves a titled note separator UNCHANGED
-   *  from its pre-T10 behavior (reserved height only, no `<line>`, matching
-   *  every OTHER unreached branch's "named, not built" convention) rather
-   *  than guess the formula. */
+   *  translate). For a TITLED separator the draw sits on the block's
+   *  TRAILING row (`TextBlockLineBefore.java:90-100` draws the block FIRST,
+   *  then the titled line), so the offset is NEGATIVE: it points back up to
+   *  the line's own y (cdd6 T3f, nuveji-19-jabi587 -- the "zero corpus
+   *  reach" belief this field's doc once carried is disproved by that row). */
   readonly dividerYOffset: number;
   readonly strokeWidth: number;
   readonly strokeDasharray?: string;
   readonly doubleLine?: boolean;
+  /** cdd6 T3f: a titled separator's own label -- `UHorizontalLine
+   *  #drawLineInternal`'s title arm (`UHorizontalLine.java:92-97`). */
+  readonly title?: NoteDividerTitle;
+}
+
+/** A titled separator's measured label (`BodyEnhancedAbstract#getTitle`,
+ *  java:94-100: `Display.getWithNewlines(...).create(titleConfig, LEFT)`):
+ *  its block size plus each line's own atoms at its top offset `y`. */
+export interface NoteDividerTitle {
+  readonly width: number;
+  readonly height: number;
+  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
 }
 
 /** `note-layout-measure.ts#appendDecoratedBlock`'s own untitled-separator
  *  draw-metadata build -- kept here (not there) purely for that file's
  *  500-line cap. */
-export function buildDividerDraw(char: string, dividerYOffset: number): NoteDividerDraw {
-  return { dividerYOffset, strokeWidth: separatorStrokeWidth(char), ...separatorStrokeExtras(char) };
+export function buildDividerDraw(char: string, dividerYOffset: number, title?: NoteDividerTitle): NoteDividerDraw {
+  return {
+    dividerYOffset,
+    strokeWidth: separatorStrokeWidth(char),
+    ...separatorStrokeExtras(char),
+    ...(title !== undefined ? { title } : {}),
+  };
 }
 
 /** `UHorizontalLine#getStroke`: `'-'`/`'='` -> thickness 1; `'.'` -> thickness

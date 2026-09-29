@@ -37,6 +37,7 @@ import {
   type NoteRow,
   type NoteLineBuildContext,
   type NoteDividerDraw,
+  type NoteDividerTitle,
   type NoteTableDraw,
   buildTableRow,
   buildDividerDraw,
@@ -91,8 +92,7 @@ export interface NoteMeasurement {
   /** G2 N55: see `NoteGeo.lineAtoms`'s own doc comment -- ALWAYS populated
    *  here (this is the one production builder, unlike the geo's own optional
    *  field which also serves hand-built test literals). A block-separator
-   *  or table row carries `[]` (nothing to draw at the row's own x/y; the
-   *  divider/grid strokes are a renderer follow-up, journaled). */
+   *  or table row carries `[]` (its strokes live in `lineDividers`). */
   lineAtoms: readonly (readonly MemberRenderAtom[])[];
   /** G2 N56: see `NoteGeo.lineHeights`'s own doc comment -- ALWAYS populated
    *  here, same "production builder always sets it" contract as `lineAtoms`
@@ -226,17 +226,17 @@ function separatorTitleText(s: string): string | undefined {
 /** A titled separator's own measured label (`BodyEnhancedAbstract#getTitle`
  *  routes it through `Display.getWithNewlines` + the same creole engine).
  *  `undefined` for a bare `--`/`----` separator (java:94-96). */
-function measureSeparatorTitle(
-  separator: string,
-  ctx: NoteLineBuildContext,
-): { width: number; height: number } | undefined {
+function measureSeparatorTitle(separator: string, ctx: NoteLineBuildContext): NoteDividerTitle | undefined {
   const titleText = separatorTitleText(separator);
   if (titleText === undefined) return undefined;
   const titleRows = buildBlockRows(splitNoteDisplayLines(titleText), ctx);
-  return {
-    width: titleRows.reduce((max, r) => Math.max(max, r.width), 0),
-    height: titleRows.reduce((sum, r) => sum + r.height, 0),
-  };
+  let y = 0;
+  const lines = titleRows.map((r) => {
+    const line = { y, atoms: r.atoms };
+    y += r.height;
+    return line;
+  });
+  return { width: titleRows.reduce((max, r) => Math.max(max, r.width), 0), height: y, lines };
 }
 
 /**
@@ -266,10 +266,7 @@ const UNTITLED_SEPARATOR_MARGIN = 4;
  * per-row Y, `Δ4` on every row of the block). `decorated.contentTop` is
  * NOT the leading margin here (it silently reads 0 for a NOTE specifically
  * — see the agent notes); {@link UNTITLED_SEPARATOR_MARGIN} is the
- * upstream source literal instead. The TITLED branch (`--Header--`) is
- * UNCHANGED (zero corpus reach in any note/legend body, grep-verified) --
- * one reserved-height row, no `divider` metadata, rather than guess an
- * unverifiable split.
+ * upstream source literal instead. TITLED: {@link appendTitledSeparatorBlock}.
  */
 /** Shared inputs both of {@link appendDecoratedBlock}'s separator branches
  *  need — bundled to stay under this project's per-function param cap. */
@@ -299,23 +296,28 @@ function appendDecoratedBlock(
   const char = separator.charAt(0);
   const title = measureSeparatorTitle(separator, ctx);
   const decorated = NOTE_BODY_GEOMETRY.deriveHeightOffsets(innerH, char, title?.height);
-  if (title !== undefined) appendTitledSeparatorBlock(sepCtx, title, decorated.totalHeight);
+  if (title !== undefined) appendTitledSeparatorBlock(sepCtx, title, decorated);
   else appendUntitledSeparatorBlock(sepCtx, char, decorated);
 }
 
-/** {@link appendDecoratedBlock}'s TITLED-separator branch, split out purely
- *  to keep that function's own NLOC under this project's complexity cap --
- *  zero corpus reach (see that function's own doc comment), pre-T10 shape
- *  unchanged: one reserved-height row, no `divider` metadata. */
+/** {@link appendDecoratedBlock}'s TITLED-separator branch (cdd6 T3f,
+ *  nuveji-19-jabi587): a LEADING row down to the block content
+ *  (`decorated.contentTop` = outer `titleH/2` + inner `titleH/2`,
+ *  `BodyEnhancedAbstract.java:117-119`), the block rows, then a TRAILING row
+ *  carrying the titled line -- drawn after the block
+ *  (`TextBlockLineBefore.java:90-100`) at `decorated.dividerY`. */
 function appendTitledSeparatorBlock(
   ctx: SeparatorBlockCtx,
-  title: { width: number; height: number },
-  totalHeight: number,
+  title: NoteDividerTitle,
+  decorated: { totalHeight: number; contentTop: number; dividerY: number },
 ): void {
   const sepWidth = title.width + TITLED_SEPARATOR_TITLE_PAD;
-  ctx.out.rows.push({ text: ctx.separator, width: sepWidth, atoms: [], height: totalHeight - ctx.innerH });
+  const trailTop = decorated.contentTop + ctx.innerH;
+  const divider = buildDividerDraw(ctx.separator.charAt(0), decorated.dividerY - trailTop, title);
+  ctx.out.rows.push({ text: ctx.separator, width: sepWidth, atoms: [], height: decorated.contentTop });
   ctx.out.blockWidths.push(Math.max(ctx.innerW + TITLED_SEPARATOR_MARGIN_X2, sepWidth));
   ctx.out.rows.push(...ctx.blockRows);
+  ctx.out.rows.push({ text: '', width: 0, atoms: [], height: decorated.totalHeight - trailTop, divider });
 }
 
 /** {@link appendDecoratedBlock}'s UNTITLED-separator branch — see that
