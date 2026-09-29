@@ -426,7 +426,8 @@ export interface FlatMemberRows {
 export function buildWrappedSectionRowBuilds(
   members: Classifier['members'],
   texts: readonly string[],
-  fontSpec: { readonly family: string; readonly size: number; readonly bold?: boolean; readonly italic?: boolean },
+  // cdd6 T3g: `hyperlinkColor` reaches `memberBaseFont` (FontConfiguration.java:213-219).
+  fontSpec: Parameters<typeof buildWrappedMemberRows>[2],
   measurer: StringMeasurer,
   maxWidth: number,
   sprites: SpriteRegistry | undefined,

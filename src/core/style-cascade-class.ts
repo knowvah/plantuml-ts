@@ -38,6 +38,8 @@ export type GraphCascadeOverride = Pick<
   | 'genericCascadeBorder'
   | 'classCascadeFontColor'
   | 'classCascadeHeaderFontColor'
+  | 'classCascadeHyperlinkColor'
+  | 'classCascadeHeaderHyperlinkColor'
   | 'classCascadeHeaderBackground'
   | 'classCascadeQualifiedBackground'
   | 'classCascadeQualifiedBorder'
@@ -160,6 +162,10 @@ function classTagCascadeEntry(
   if (border !== undefined) entry.border = border;
   const fontColor = cascadeHex(styleMap, CLASS_SNAMES, 'fontcolor', [tag]);
   if (fontColor !== undefined) entry.fontColor = fontColor;
+  // cdd6 T3g: `PName.HyperLinkColor` on the tag-re-signed class style
+  // (`Style.java:265`, `FontConfiguration.java:213-219`).
+  const hyperlinkColor = cascadeHex(styleMap, CLASS_SNAMES, 'hyperlinkcolor', [tag]);
+  if (hyperlinkColor !== undefined) entry.hyperlinkColor = hyperlinkColor;
   const roundCornerRaw = resolveStyleCascade(styleMap, CLASS_SNAMES, 'roundcorner', [tag]);
   if (roundCornerRaw !== undefined) {
     const n = Number(roundCornerRaw);
@@ -357,6 +363,11 @@ function applyColorCascadeOverrides(styleMap: StyleMap, override: Partial<GraphC
   if (fontColor !== undefined) override.classCascadeFontColor = fontColor;
   const headerFontColor = cascadeFontColorHex(styleMap, HEADER_SNAMES, localBg);
   if (headerFontColor !== undefined) override.classCascadeHeaderFontColor = headerFontColor;
+  // cdd6 T3g: `PName.HyperLinkColor` -- see `classCascadeHyperlinkColor`.
+  const hyperlink = cascadeHex(styleMap, CLASS_SNAMES, 'hyperlinkcolor');
+  if (hyperlink !== undefined) override.classCascadeHyperlinkColor = hyperlink;
+  const headerHyperlink = cascadeHex(styleMap, HEADER_SNAMES, 'hyperlinkcolor');
+  if (headerHyperlink !== undefined) override.classCascadeHeaderHyperlinkColor = headerHyperlink;
   // cdd2-T8 (S-5): `EntityImageClassHeader.java:93-101`/`EntityImageClass
   // .java:204-208` -- the HEADER_SNAMES sibling of `background` above, feeding
   // `resolveClassHeaderFill`'s header-band split (`renderer-classifier-

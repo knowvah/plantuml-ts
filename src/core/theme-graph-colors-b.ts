@@ -166,6 +166,7 @@ export interface ThemeGraphColorsB {
         background?: string;
         border?: string;
         fontColor?: string;
+        hyperlinkColor?: string; // cdd6 T3g: `.tag { HyperLinkColor }`, Style.java:265
         roundCorner?: number;
         fontBold?: boolean;
         fontItalic?: boolean;

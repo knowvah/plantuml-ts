@@ -103,6 +103,11 @@ export function memberBaseFont(
      *  classifier with no such skinparam override (zero behavior change). */
     readonly bold?: boolean;
     readonly italic?: boolean;
+    /** cdd6 T3g: the classifier style's `PName.HyperLinkColor`
+     *  (`FontConfiguration.java:213-219`), resolved by
+     *  `class-layout-fonts.ts`; `StripeSimple.java:224-225` draws a
+     *  `[[url]]` atom in it (`CommandCreoleUrl.ts`). */
+    readonly hyperlinkColor?: string;
   },
   member: { readonly isAbstract?: boolean; readonly isStatic?: boolean },
 ): FontConfiguration {
@@ -122,7 +127,8 @@ export function memberBaseFont(
   // face; `{abstract}`/`{static}` are per-MEMBER creole-level styles, not
   // face properties, so they stay out of it.
   const fontFace = { cssWeight: fontSpec.bold === true ? 700 : 400, italic: fontSpec.italic === true };
-  return { family: fontSpec.family, size: fontSpec.size, color: null, styles, fontFace };
+  const base: FontConfiguration = { family: fontSpec.family, size: fontSpec.size, color: null, styles, fontFace };
+  return fontSpec.hyperlinkColor === undefined ? base : { ...base, hyperlinkColor: fontSpec.hyperlinkColor };
 }
 
 /**
@@ -415,7 +421,7 @@ export function buildMemberRow(
 export function buildWrappedMemberRows(
   text: string,
   member: { readonly isAbstract?: boolean; readonly isStatic?: boolean },
-  fontSpec: { readonly family: string; readonly size: number; readonly bold?: boolean; readonly italic?: boolean },
+  fontSpec: Parameters<typeof memberBaseFont>[0],
   measurer: StringMeasurer,
   maxWidth: number,
   sprites?: SpriteRegistry,

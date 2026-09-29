@@ -77,4 +77,15 @@ export interface ThemeGraphColorsC {
    *  Absent = `theme.colors.border`.
    *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageNote.java:108 */
   noteCascadeBorder?: string;
+  /** cdd6 T3g: `PName.HyperLinkColor` over `EntityImageClass`'s own
+   *  `{root,element,classDiagram,class_}` signature (`CLASS_SNAMES`) -- the
+   *  member rows' `FontConfiguration.create(skinParam, style, colors)`
+   *  reads it (`FontConfiguration.java:213-219`) and `StripeSimple.java
+   *  :224-225` (`addUrl`) draws a `[[url]]` atom in it. SVG-ready hex.
+   *  Absent = `CommandCreoleUrl.ts`'s `#0000FF`. */
+  classCascadeHyperlinkColor?: string;
+  /** cdd6 T3g: the same over the header signature (`HEADER_SNAMES`,
+   *  `EntityImageClassHeader.java:93-101`'s `styleHeader`) -- the classifier
+   *  NAME's links. */
+  classCascadeHeaderHyperlinkColor?: string;
 }
