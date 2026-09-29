@@ -32,6 +32,21 @@ import { measureLinkNoteDim } from './class-note-link-box.js';
 const CONSTRAINT_SPOT = 10;
 
 /**
+ * T3e (sejube-03-bote542, link-middle-decor-partial): `SvekEdge.java:353-356`
+ * -- `labelShield = link.getType().getMiddleDecor() == LinkMiddleDecor.NONE
+ * ? 0 : 7`. `:437-441`'s `dimNote = (hasNoteLabelText() ? labelText
+ * .calculateDimension(sb) : CONSTRAINT_SPOT); dimNote = dimNote.delta(2 *
+ * labelShield)` then widens THAT final block -- plain measured label, note
+ * merge, OR the constraint spot, whichever `dimNote` came from -- by 14 on
+ * BOTH axes. `middleDecor` is now a ported concept (`class-arrow-middle-
+ * decor.ts#MiddleDecor`, `Relationship.middleDecor`) -- the stale "this port
+ * has no LinkMiddleDecor concept" premise {@link computeNoteMergedLabelAttrs}
+ * used to carry (below) predates that port and is corrected alongside this
+ * constant, which the note-merge arm's own `hasMiddleDecor` flag also reads.
+ */
+const LABEL_SHIELD = 7;
+
+/**
  * `plantuml.skin`'s `arrow { FontSize 13 }` block (`svek/GraphvizImageBuilder
  * .java#getStyleArrowCardinality` resolves the `arrow.cardinality` style,
  * which falls through to the plain `arrow` block) -- the DEFAULT only.
@@ -192,6 +207,29 @@ function withLabelMargin(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxC
 }
 
 /**
+ * T3e (sejube-03-bote542): `SvekEdge.java:437-441`'s `dimNote.delta(2 *
+ * labelShield)` widens the FINAL reserved block -- `withLabelMargin`'s
+ * output for a plain measured label, OR the untouched `CONSTRAINT_SPOT`
+ * pair (`computeRelLabelAttrs`'s `linkConstraint` arm, which
+ * {@link withLabelMargin} deliberately leaves unmargined but upstream's OWN
+ * `dimNote` ternary still shields, `:440`) -- by {@link LABEL_SHIELD} on
+ * BOTH axes whenever the link carries a middle decor. Skipped for the
+ * note-merge arm (same `rel.linkNote !== undefined && noteCtx !== undefined`
+ * guard {@link withLabelMargin} uses, same reason: {@link
+ * computeNoteMergedLabelAttrs} already bakes the identical shield into the
+ * MERGED block internally via `computeMergedLabelBox`'s own `hasMiddleDecor`
+ * -- applying it twice would double it, exactly {@link withLabelMargin}'s
+ * own precedent for `marginLabel`).
+ */
+function withLabelShield(attrs: LabelAttrs, rel: Relationship, noteCtx: NoteBoxContext | undefined): LabelAttrs {
+  if (attrs.labelWidth === undefined || attrs.labelHeight === undefined) return attrs;
+  if (rel.middleDecor === undefined) return attrs;
+  if (rel.linkNote !== undefined && noteCtx !== undefined) return attrs;
+  const shield = 2 * LABEL_SHIELD;
+  return { ...attrs, labelWidth: attrs.labelWidth + shield, labelHeight: attrs.labelHeight + shield };
+}
+
+/**
  * Theme + sprites needed to size a note merged into an edge label
  * (`rel.linkNote`) -- threaded from `class-dot-graph.ts`, which already
  * holds both when it builds the DOT edges (`buildNoteGraphParts` a few
@@ -237,18 +275,19 @@ function computeNoteMergedLabelAttrs(
     // ordinary `note on link` carries NORMAL and stays unhalved
     // (SvekEdge.java:314-317,280-285).
     halfWidth: rel.linkNoteHalfWidth ?? false,
-    // This port has no `LinkMiddleDecor` concept: the `0`/`(0`/`0)`/`(0)`
-    // mid-arrow "INSIDE" syntax (`CommandLinkClass.java:490-509`) is a
-    // surveyed-and-deferred, unbuilt feature (class-relationship-ast.ts's
-    // own `LinkDecor` doc comment -- "CIRCLE_CONNECT ... deferred"). Every
-    // `RelationshipType`/`LinkDecor` this port can construct therefore takes
-    // `LinkType`'s default constructor, which is `LinkMiddleDecor.NONE`
-    // (`decoration/LinkType.java:73`) -- so `labelShield` is always 0
-    // (`SvekEdge.java:353-356`). T10 item 2: for `lozego-15-coci435`'s `--{`
-    // specifically, the crowfoot `{` is parsed from `ARROW_HEAD2`, a
-    // DIFFERENT regex group from `INSIDE` (`CommandLinkClass.java:132-139`),
-    // so it cannot set a middle decor even if this port modeled one.
-    hasMiddleDecor: false,
+    // T3e (was: "this port has no LinkMiddleDecor concept" -- stale since
+    // `class-arrow-middle-decor.ts#MiddleDecor`/`Relationship.middleDecor`
+    // landed): `labelShield = 7` whenever the link's `LinkMiddleDecor !=
+    // NONE` (`SvekEdge.java:353-356`), REGARDLESS of which arm built
+    // `labelText` -- `rel.middleDecor !== undefined` is this port's own
+    // "not NONE" (`class-arrow-middle-decor.ts#MiddleDecor` has no `NONE`
+    // member; absence of the field IS upstream's `NONE`). T10 item 2's
+    // `lozego-15-coci435` note stays true unchanged: `--{`'s crowfoot is a
+    // DIFFERENT `ARROW_HEAD2` regex group from `INSIDE`
+    // (`CommandLinkClass.java:132-139`), so a crowfoot-only relationship
+    // still carries no `middleDecor` and this reads `false` for it, same as
+    // before.
+    hasMiddleDecor: rel.middleDecor !== undefined,
     font,
     measurer,
   });
@@ -394,10 +433,14 @@ export function edgeLabelAttrs(
     // `computeRelLabelAttrs` so it lands exactly once, on whichever branch
     // produced the block — mirroring upstream, where `addVisibilityModifier`
     // wraps the finished `block` at a single call site (`SvekEdge.java:302`).
-    // The `linkConstraint` spot deliberately keeps its raw 10x10: upstream
-    // reaches it through the `CONSTRAINT_SPOT` arm at `SvekEdge.java:440`,
-    // which never builds a `labelText` and so never sees the margin.
-    ...withLabelMargin(computeRelLabelAttrs(rel, font, measurer, noteCtx), rel, noteCtx),
+    // The `linkConstraint` spot deliberately keeps its raw 10x10 through the
+    // MARGIN step: upstream reaches it through the `CONSTRAINT_SPOT` arm at
+    // `SvekEdge.java:440`, which never builds a `labelText` and so never sees
+    // `marginLabel`. It DOES still see the SHIELD (`withLabelShield`, T3e):
+    // upstream's `dimNote.delta(2 * labelShield)` at `:441` runs on `dimNote`
+    // regardless of which ternary arm (`hasNoteLabelText()` vs
+    // `CONSTRAINT_SPOT`) produced it.
+    ...withLabelShield(withLabelMargin(computeRelLabelAttrs(rel, font, measurer, noteCtx), rel, noteCtx), rel, noteCtx),
     ...computeMultiplicityAttrs(rel, cardinalityFont, measurer),
   });
 }

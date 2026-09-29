@@ -115,10 +115,13 @@ function mergedLayout(
     // `eventuallyDivideByTwo` (`SvekEdge.java:440-442`): the table graphviz
     // centres on `labelX` is the halved one for both HALF_* strategies.
     halfWidth: rel.linkNoteHalfWidth ?? false,
-    // Always `LinkMiddleDecor.NONE` in this port -- see
-    // `class-layout-edge-labels.ts#computeNoteMergedLabelAttrs`'s own
-    // derivation of the same `hasMiddleDecor: false`.
-    hasMiddleDecor: false,
+    // T3e: mirrors `class-layout-edge-labels.ts#computeNoteMergedLabelAttrs`'s
+    // own `hasMiddleDecor` (`rel.middleDecor !== undefined` is this port's
+    // "not `LinkMiddleDecor.NONE`") -- this recovery MUST reproduce the same
+    // merged box the reservation call built (this file's own header doc
+    // comment: "the box graphviz laid out"), so a stale copy of that flag
+    // here would silently re-diverge the two.
+    hasMiddleDecor: rel.middleDecor !== undefined,
     font,
     measurer,
   });
