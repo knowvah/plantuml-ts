@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1259 modules · 4751 exported names.
+1261 modules · 4783 exported names.
 
 ## `src/`
 
@@ -391,8 +391,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HUSLColorConverter.ts` | `xyzToRgb`, `rgbToXyz`, `xyzToLuv`, `luvToXyz`, `luvToLch`, `lchToLuv`, `hsluvToLch`, `lchToHsluv`, `hpluvToLch`, `lchToHpluv`, `rgbToHex`, `hexToRgb`, `lchToRgb`, `rgbToLch`, `hsluvToRgb`, `rgbToHsluv`, `hpluvToRgb`, `rgbToHpluv`, `hsluvToHex`, `hpluvToHex`, `hexToHsluv`, `hexToHpluv` | HUSLColorConverter -- the HSLuv / HPLuv colour-space conversions (Alexei Boronine's reference implementation, as vendored upstream). |
 
 ## `src/core/klimt/creole/`
 
@@ -1244,7 +1246,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-member-render-atom.ts` | `MemberRenderAtom`, `MemberRowBuild` | class-member-render-atom.ts — `MemberRenderAtom`/`MemberRowBuild`, the render-ready shapes `class-member-creole.ts#resolveMemberAtoms` produces. |
 | `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds`, `annotateWrappedMembers` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
 | `class-member-sprite-render.ts` | `renderMemberRowDrawable` | class-member-sprite-render.ts — draws a member row's `'drawable'` atom (C-4, cdd3-T23): the `DrawablePrimitive[]` decomposition `class-member-atom-resolve.ts#resolveSpriteAtom` already resolved at LAYOUT time, placed at the row's own RENDER |
-| `class-monochrome.ts` | `MonochromeMode`, `applyMonochromeHex`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
+| `class-monochrome.ts` | `MonochromeMode`, `ClassColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |
 | `class-namespace-decorations.ts` | `setNamespaceUrl`, `setNamespaceColor` | `Namespace.url` / `Namespace.color` setters, split out of `class-container.ts` to keep that file under the project's 500-line cap (T11) -- re-exported there so `import { setNamespaceUrl } from './class-container.js'` call sites are unaffect |
 | `class-namespace-folder-outline.ts` | `FolderTabGeo`, `folderPathD`, `folderPolygonPoints`, `renderFolderPolygon`, `FolderTabPaint`, `renderFolderTabShape` | class-namespace-folder-outline.ts — the folder-tab OUTLINE shape builders (`USymbolFolder#drawFolder`'s two branches: the default rounded-arc `UPath`, and the `skinparam style strictuml` sharp-corner `UPolygon`). |
@@ -1301,8 +1303,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `note-freestanding.ts` | `findFreestandingNoteRelationshipIndices`, `findFreestandingNoteConnectors` | note-freestanding.ts — G2/N16 Kind B: a freestanding note (`note "text" as N1`, no host classifier/position) connected to a REAL classifier via a plain relationship line (`N1 .. |
 | `note-layout-groups.ts` | `OPALE_Y_SPACING`, `NoteGroup`, `groupNotes`, `buildNoteGraphParts` | Same-side/same-host note grouping + the seam nodes/edges that go into the svek dot graph. |
 | `note-layout-measure-list.ts` | `buildPlainRows`, `matchNumberedLine`, `buildNumberedListRows` | `buildPlainRows` + C-2's `#`-prefixed numbered-list row builder — split out of `note-layout-measure.ts` purely to keep that file under this project's 500-line cap (T26; mirrors that file's own `note-layout- measure-rows.ts` split precedent, |
-| `note-layout-measure-rows.ts` | `NoteRow`, `NoteDividerDraw`, `buildDividerDraw`, `NoteTableCell`, `NoteTableDraw`, `buildTableRow`, `NoteLineBuildContext`, `noteLineHeight`, `consumeEmbeddedRow` | Row builders split out of `note-layout-measure.ts` (500-line module cap): the shared row/context types + per-row height rule, the A12 creole-table grid row (`StripeTable`/`AtomTable` geometry), and the R2b `{{ ... |
-| `note-layout-measure-table.ts` | `NoteTableCell`, `NoteTableDraw`, `buildTableRow` | The A12 creole-table grid row (`StripeTable`/`AtomTable` geometry), split out of `note-layout-measure-rows.ts` (500-line module cap, T2d) -- a pure move for every symbol except the `<#color>` capture the module doc comment on {@link NoteTab |
+| `note-layout-measure-rows.ts` | `NoteRow`, `NoteDividerDraw`, `NoteDividerTitle`, `buildDividerDraw`, `NoteTableCell`, `NoteTableDraw`, `buildTableRow`, `NoteLineBuildContext`, `noteLineHeight`, `consumeEmbeddedRow` | Row builders split out of `note-layout-measure.ts` (500-line module cap): the shared row/context types + per-row height rule, the A12 creole-table grid row (`StripeTable`/`AtomTable` geometry), and the R2b `{{ ... |
+| `note-layout-measure-table.ts` | `NoteTableCell`, `NoteTableDraw`, `buildTableRow`, `TableCellLine` | The A12 creole-table grid row (`StripeTable`/`AtomTable` geometry), split out of `note-layout-measure-rows.ts` (500-line module cap, T2d) -- a pure move for every symbol except the `<#color>` capture the module doc comment on {@link NoteTab |
 | `note-layout-measure.ts` | `NoteMeasurement`, `measureNote` | Note text measurement — a clean leaf of the note-layout module family. |
 | `note-layout-tip.ts` | `mapNoteGeos` | Note geo building: maps a completed dot layout back to `NoteGeo[]` for the two draw passes (`mapNoteGeos`, the entry point), one geo per ORIGINAL note, stacked within its group's laid-out box. |
 | `note-layout-types.ts` | `NoteLeafType`, `NoteGeo`, `TipRequest`, `ClassifierAnchor` | Shared types for the note-on-entity layout module family (`note-layout.ts` + siblings). |
