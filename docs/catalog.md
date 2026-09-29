@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1258 modules · 4747 exported names.
+1259 modules · 4750 exported names.
 
 ## `src/`
 
@@ -218,6 +218,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `blocks-creole-atoms.ts` | `isCreoleAtomData`, `atomDim`, `drawAtom`, `fontOfAtom` | blocks-creole-atoms.ts — cdd6 T1b: the per-atom measure/draw helpers `chromeAtomOps` (`blocks-creole.ts`) composes, split out so `blocks-creole.ts` stays under this project's 500-line cap after D3's `ChromeTextPaint.hyperlinkColor` addition |
 | `blocks-creole.ts` | `ChromeTextPaint`, `ChromeTextBlock`, `chromeFontConfiguration`, `chromeAtomOps`, `buildChromeCreoleBlock`, `buildChromeTextBlock` | blocks-creole.ts — cdd-T28: the creole half of `Style #createTextBlockBordered` (`style/Style.java:353-369`), split out of `blocks.ts` (which stays the BORDER/margin half, `TextBlockBordered` + `TextBlockMarged`) to keep both files under th |
 | `blocks.ts` | `AnnotationBlock`, `buildAnnotationBlock` | blocks.ts — mission G0b / T4: the drawable half of `Style .createTextBlockBordered` (`style/Style.java:315-332`) + `TextBlockBordered` (`klimt/shape/TextBlockBordered.java`) + `TextBlockMarged` (`klimt/shape/TextBlockMarged.java`, applied v |
+| `chrome-mainframe.ts` | `ChromeTextContext`, `nonNullDisplay`, `addMainframe` | chrome-mainframe.ts — `DiagramChromeFactory.decorateWithFrame` (cdd-T34), split out of `chrome.ts` (cdd6 T2f, 500-line file cap) — a pure move, not a refactor: every function below is verbatim from that file, along with the shared {@link Ch |
 | `chrome.ts` | `AnnotationStyles`, `mergeTB`, `getTextX`, `applyChrome` | chrome.ts — mission G0b / T4: `DiagramChromeFactory.create`'s warnings-less half (mainframe → legend → title → caption → header/footer, header/footer outermost — decisions.md D1/D9) plus `DecorateEntityImage`'s vertical-stack composition ma |
 | `commands.ts` | `matchAnnotationCommand` | `matchAnnotationCommand` — the line-oriented matcher parsers call at their own command-dispatch position (decisions.md D3: extraction inside each parser, never a textual pre-pass, so a `title`-shaped line inside a `note ... |
 | `coord-shift.ts` | `shiftFragmentBody` | coord-shift.ts — mission G1d: the eager-arithmetic equivalent of upstream's `UGraphic.apply(new UTranslate(dx, dy))` coordinate-context threading (`klimt/UGraphic.java`/`UTranslate.java`, already ported at `src/core/klimt/UTranslate.ts` and |

@@ -64,6 +64,21 @@ export interface AnnotationBoxStyle {
    *  sites regardless of this value, the same D8-shaped quirk as
    *  `horizontalAlignment` above. */
   maximumWidth?: number;
+  /** D3 (cdd6 T1b/T2f): style-cascade-resolved `PName.HyperLinkColor`
+   *  (`Style.java:265`, `FontConfiguration.java:213-219`) for a `[[url]]`
+   *  atom inside this chrome element's own text — the SAME value
+   *  `blocks-creole.ts#ChromeTextPaint.hyperlinkColor` already threads down
+   *  to `CommandCreoleUrl.ts`. No upstream skinparam key sets it (absent
+   *  from the `FromSkinparamToStyle.java:87-176` Font{Size,Style,Color,Name}
+   *  key list `style.ts`'s module doc cites), so `<style> <element> {
+   *  HyperlinkColor } }` is its ONLY source — `annotation-style-overrides.ts`
+   *  would need a `hyperlinkcolor` setter to populate it (T2f residual: that
+   *  file is outside this task's write-set, so this field stays `undefined`
+   *  from every real `resolveAnnotationStyles` call; `blocks.ts
+   *  #buildAnnotationBlock`/`chrome.ts#buildMainframeTitleBlock` forward it
+   *  when present, matching `undefined`/`null`'s documented `#0000FF`
+   *  fallback). */
+  hyperlinkColor?: string | null;
 }
 
 export type AnnotationElement = 'title' | 'caption' | 'header' | 'footer' | 'legend' | 'mainframe';

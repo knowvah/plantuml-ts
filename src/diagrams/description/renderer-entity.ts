@@ -212,6 +212,17 @@ function buildEntityParams(
   const fontTitle = textFont(theme, node.symbol, 0, entityTitleStyles(node.symbol));
   const fontBody = textFont(theme, node.symbol);
   const fontStereo = textFont(theme, node.symbol, 0, STEREOTYPE_STYLES, 'stereotype');
+  // D3 (cdd6 T1b/T2f): this entity's own resolved LineThickness -- the SAME
+  // value `paint.stroke` below draws the body's border with -- doubles as
+  // the sprite decomposition's ambient stroke seed (`SvgNanoParser.java
+  // :187-215#applyFillAndStroke` only overrides the CALLER's active stroke
+  // when the path declares its own `stroke-width`; `plantuml.skin:93`
+  // `element { LineThickness 0.5 }` for a card/state body, `:15`'s root
+  // `1.0` for a note -- `SpritePrimitiveCollector.create`'s own doc
+  // comment). Computed ONCE and reused by both `paint.stroke` and
+  // `atomImageResolverFor` below, so the body border and its own sprite
+  // atoms can never disagree on this entity's ambient thickness.
+  const lineThickness = resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH;
   return {
     entity: { name: node.id, uid: '', qualifiedName: node.id, location: null, url: null },
     symbol: {
@@ -249,10 +260,7 @@ function buildEntityParams(
       // shared `getStyle().getShadowing()` read. Jar-verified
       // malado-53-noso561.
       deltaShadow: resolveElementShadowing(theme, node.symbol),
-      stroke: overrideStroke(
-        override.lineStyle,
-        resolveElementLineThickness(theme, node.symbol) ?? ENTITY_STROKE_WIDTH,
-      ),
+      stroke: overrideStroke(override.lineStyle, lineThickness),
       fontTitle: override.text !== undefined ? { ...fontTitle, color: override.text } : fontTitle,
       fontBody: override.text !== undefined ? { ...fontBody, color: override.text } : fontBody,
       fontStereo: override.text !== undefined ? { ...fontStereo, color: override.text } : fontStereo,
@@ -266,7 +274,10 @@ function buildEntityParams(
     },
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
-    atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // D3 (cdd6 T1b/T2f): forward this entity's own resolved LineThickness
+    // as the sprite decomposition's ambient stroke -- see `lineThickness`'s
+    // own doc comment above.
+    atomImageResolverFor: makeAtomImageResolverFor(sprites, UStroke.withThickness(lineThickness)),
     // Same store the sizer measured through (`layout-helpers.ts`), off the
     // same registry — a one-sided wiring would draw a glyph the ellipse was
     // not fitted to (`planning/sizer-renderer-parity.md`).
