@@ -26,16 +26,16 @@ const HIDDEN_BAR = '\u{e000}';
  *  row's own origin (`colBounds[col]`/`rowBounds[row]` below already carry
  *  the absolute-within-row offset; a cell's atoms draw at exactly
  *  `(colBounds[col], rowBounds[row] + baselineOffset)` for its FIRST
- *  subline -- `AtomTable.ts#drawCell`'s LEFT-alignment default, the only
- *  alignment this corpus reaches, `<r>`-right-align stays a named,
- *  pre-existing, zero-reach gap in {@link tableRowCellDims} unchanged by
- *  this task). `lines` holds one entry per `\n`-split subline within the
+ *  subline, shifted by its own `dx` when a `<r>`/`<c>` marker aligns it --
+ *  cdd6 T3f, colede-79-give418). `lines` holds one entry per `\n`-split subline within the
  *  cell (`splitTableCellLines`) -- `y` is each subline's own cumulative
  *  offset from the cell's (and so the row's) own top. */
 export interface NoteTableCell {
   readonly col: number;
   readonly row: number;
-  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
+  /** `dx` (cdd6 T3f): the line's own horizontal-alignment shift from the
+   *  cell's left edge -- see {@link cellLineShifts}; absent means 0. */
+  readonly lines: readonly TableCellLine[];
   /** T2d (colede-79-give418): this cell's OWN leading `<#color>` tag
    *  (`AtomTable.java:120,124-125`'s `line.cellsBackColor.get(j)`) -- an
    *  already-resolved SVG hex, NOT the raw color name/token, matching
@@ -137,16 +137,87 @@ function tableGridBounds(cellDims: readonly (readonly TableCellDims[])[]): {
   }
   const cells: NoteTableCell[] = [];
   cellDims.forEach((row, r) =>
-    row.forEach((cell, c) => cells.push({ col: c, row: r, lines: cell.lines, ...(cell.backColor !== undefined ? { backColor: cell.backColor } : {}) })),
+    row.forEach((cell, c) => {
+      const lines = cell.alignRight === true ? rightAlignedLines(cell, colBounds[c + 1]! - colBounds[c]!) : cell.lines;
+      cells.push({ col: c, row: r, lines, ...(cell.backColor !== undefined ? { backColor: cell.backColor } : {}) });
+    }),
   );
+
   return { colBounds, rowBounds, cells };
+}
+
+/** One `\n`-split subline of a table cell (a `StripeSimple` of the cell's
+ *  `SheetBlock1`, `StripeTable.java:143-153`). */
+export interface TableCellLine {
+  readonly y: number;
+  readonly atoms: readonly MemberRenderAtom[];
+  readonly dx?: number;
+}
+
+/** `AtomTable.java:128-133`: a single-line RIGHT cell draws at
+ *  `dx = cellWidth - dimCell.getWidth()` inside its column. */
+function rightAlignedLines(cell: TableCellDims, colWidth: number): readonly TableCellLine[] {
+  const dx = colWidth - cell.w;
+  return dx > 0 ? cell.lines.map((l) => ({ ...l, dx })) : cell.lines;
 }
 
 interface TableCellDims {
   readonly w: number;
   readonly h: number;
-  readonly lines: readonly { readonly y: number; readonly atoms: readonly MemberRenderAtom[] }[];
+  readonly lines: readonly TableCellLine[];
   readonly backColor?: string;
+  /** A single-line `RIGHT` cell: `AtomTable.java:119-133`'s column-level
+   *  `dx = cellWidth - dimCell.getWidth()`, applied once the column width
+   *  is known ({@link tableGridBounds}). */
+  readonly alignRight?: true;
+}
+
+type CellAlign = 'left' | 'center' | 'right';
+
+/** `StripeSimple#manageCellAlignment` (`StripeSimple.java:161-197`): ONE
+ *  leading `<l>`/`<left>`/`<c>`/`<center>`/`<r>`/`<right>` marker is
+ *  stripped and overrides the alignment (if/else chain -- only one). */
+const CELL_ALIGN_MARKERS: readonly (readonly [string, CellAlign])[] = [
+  ['<l>', 'left'],
+  ['<left>', 'left'],
+  ['<center>', 'center'],
+  ['<c>', 'center'],
+  ['<right>', 'right'],
+  ['<r>', 'right'],
+];
+
+/** One cell subline's alignment: `StripeTable.java:147-150` strips a
+ *  leading `<r>` (RIGHT) before `StripeSimple#analyzeAndAdd`'s own
+ *  `manageCellAlignment` (`StripeSimple.java:148`) may strip one more. */
+function cellLineAlignment(line: string): { align: CellAlign; text: string } {
+  let align: CellAlign = 'left';
+  let text = line;
+  if (text.startsWith('<r>')) {
+    align = 'right';
+    text = text.slice('<r>'.length);
+  }
+  const marker = CELL_ALIGN_MARKERS.find(([m]) => text.startsWith(m));
+  return marker === undefined ? { align, text } : { align: marker[1], text: text.slice(marker[0].length) };
+}
+
+/** `SheetBlock1#getCoef` (`SheetBlock1.java:172-193`): CENTER 2, RIGHT 1. */
+function alignCoef(align: CellAlign): number {
+  if (align === 'center') return 2;
+  return align === 'right' ? 1 : 0;
+}
+
+/** Intra-cell shifts of a MULTI-line cell: `SheetBlock1#initMap`
+ *  (`SheetBlock1.java:160-170`) moves each stripe right by
+ *  `(maxWidth - stripeWidth) / coef`. A single-line cell has no intra-cell
+ *  diff; its RIGHT alignment is `AtomTable`'s column shift instead
+ *  (`SheetBlock1#getCellAlignment` returns LEFT unless there is exactly one
+ *  stripe, `SheetBlock1.java:101-110`). */
+function cellLineShifts(lines: readonly { width: number; align: CellAlign }[], w: number): number[] {
+  if (lines.length === 1) return [0];
+  return lines.map((l) => {
+    const coef = alignCoef(l.align);
+    return coef > 0 && w > l.width ? (w - l.width) / coef : 0;
+  });
 }
 
 /**
@@ -175,10 +246,7 @@ function leadingColorTag(s: string): string | undefined {
  *  discarded, keeping only its `width`/`noteLineHeight`) so
  *  {@link buildTableRow} can hand the renderer something to actually draw,
  *  not just a cell's reserved box. */
-function tableRowCellDims(
-  line: string,
-  ctx: NoteLineBuildContext,
-): { cells: TableCellDims[]; lineBackColor?: string } {
+function tableRowCellDims(line: string, ctx: NoteLineBuildContext): { cells: TableCellDims[]; lineBackColor?: string } {
   let l = line.split('\\|').join(HIDDEN_BAR);
   // T2d: captured BEFORE stripping -- `CreoleParser.doesStartByColor(l)`
   // gates the SAME strip this line always performed.
@@ -199,20 +267,47 @@ function tableCellDimsOf(token: string, ctx: NoteLineBuildContext): TableCellDim
   const backColor = CreoleParser.doesStartByColor(v) ? leadingColorTag(v) : undefined;
   if (CreoleParser.doesStartByColor(v)) v = v.slice(v.indexOf('>') + 1);
   const cellFont = header ? memberBaseFont({ ...ctx.fontSpec, bold: true }, {}) : ctx.font;
+  const { w, h, built } = buildCellLines(v, cellFont, ctx);
+  const shifts = cellLineShifts(built, w);
+  const lines = built.map((b, i) =>
+    shifts[i]! > 0 ? { y: b.y, atoms: b.atoms, dx: shifts[i]! } : { y: b.y, atoms: b.atoms },
+  );
+  return {
+    w,
+    h,
+    lines,
+    ...(backColor !== undefined ? { backColor } : {}),
+    ...(built.length === 1 && built[0]!.align === 'right' ? { alignRight: true as const } : {}),
+  };
+}
+
+/** {@link tableCellDimsOf}'s per-subline build (one `StripeSimple` each,
+ *  `StripeTable.java:143-153`): alignment marker, atoms, width, height. */
+function buildCellLines(
+  v: string,
+  cellFont: NoteLineBuildContext['font'],
+  ctx: NoteLineBuildContext,
+): {
+  w: number;
+  h: number;
+  built: { y: number; atoms: readonly MemberRenderAtom[]; width: number; align: CellAlign }[];
+} {
   let w = 0;
   let h = 0;
-  const lines: { y: number; atoms: readonly MemberRenderAtom[] }[] = [];
-  for (let s of splitTableCellLines(v)) {
-    // `<r>`-right-alignment stays UNAPPLIED at draw time (pre-existing gap,
-    // unchanged by this task -- see `NoteTableCell`'s own doc comment);
-    // the marker is still stripped so it never leaks into the drawn text.
-    if (s.startsWith('<r>')) s = s.slice('<r>'.length);
-    const build = resolveMemberAtoms(buildMemberAtoms(resolveTextEscapes(s), cellFont), cellFont, ctx.measurer, ctx.sprites);
-    lines.push({ y: h, atoms: build.atoms });
+  const built: { y: number; atoms: readonly MemberRenderAtom[]; width: number; align: CellAlign }[] = [];
+  for (const raw of splitTableCellLines(v)) {
+    const { align, text } = cellLineAlignment(raw);
+    const build = resolveMemberAtoms(
+      buildMemberAtoms(resolveTextEscapes(text), cellFont),
+      cellFont,
+      ctx.measurer,
+      ctx.sprites,
+    );
+    built.push({ y: h, atoms: build.atoms, width: build.width, align });
     w = Math.max(w, build.width);
     h += noteLineHeight(build.atoms, ctx.fontSize);
   }
-  return backColor === undefined ? { w, h, lines } : { w, h, lines, backColor };
+  return { w, h, built };
 }
 
 /** `StripeTable#getWithNewlinesInternal` (java:166-197, legacy branch):

@@ -28,7 +28,7 @@
  * here).
  */
 import type { NoteGeo } from './note-layout-types.js';
-import type { NoteDividerDraw, NoteTableDraw } from './note-layout-measure-rows.js';
+import type { NoteDividerDraw, NoteDividerTitle, NoteTableDraw } from './note-layout-measure-rows.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import { line, text, linkWrap, attrs } from '../../core/svg.js';
@@ -73,12 +73,32 @@ function lineAtomDecoration(styles: ReadonlySet<FontStyle>): string | undefined 
   return parts.length > 0 ? parts.join(' ') : undefined;
 }
 
+/** One `UHorizontalLine#drawHLine` (`UHorizontalLine.java:143-147`): the
+ *  `[x1, x2]` rule at `y`, plus its `doubleLine` twin 2px below for `==`. */
+function hline(x1: number, x2: number, y: number, d: NoteDividerDraw, theme: ScaledTheme): string {
+  const style = {
+    stroke: theme.colors.border,
+    strokeWidth: d.strokeWidth,
+    ...(d.strokeDasharray !== undefined ? { strokeDasharray: d.strokeDasharray } : {}),
+  };
+  const one = line(x1, y, x2, y, style);
+  return d.doubleLine === true ? one + line(x1, y + 2, x2, y + 2, style) : one;
+}
+
 /** Draws one block-separator's `<line>` (plus its `doubleLine` twin for a
  *  `==` separator, `UHorizontalLine#drawHLine`'s style=='=' branch) at
  *  `rowTop + dividerYOffset` -- `note.x + 1` / `note.x + note.width - 1`
  *  matches `class-body-enhanced-layout.ts#renderDividerPart`'s identical
- *  1px inset, jar-verified against `sodizo-26-salo123`. */
-function renderDividerLine(note: NoteGeo, rowTop: number, d: NoteDividerDraw, theme: ScaledTheme): string {
+ *  1px inset, jar-verified against `sodizo-26-salo123` (`UHorizontalLine
+ *  .infinite(th, 1, 1, ...)`'s skipAtStart/skipAtEnd, `TextBlockLineBefore
+ *  .java:91,99`). A titled one goes through {@link renderTitledDivider}. */
+function renderDividerLine(
+  note: NoteGeo,
+  rowTop: number,
+  d: NoteDividerDraw,
+  theme: ScaledTheme,
+  baselineOffset: number,
+): string {
   // cdd-B8FU: the 1px inset is a render-time pixel-literal constant, not
   // geo-sourced -- scaled here like `class-body-enhanced-layout.ts
   // #renderDividerPart`'s identical inset (`renderer-classifier-box.ts`,
@@ -86,11 +106,34 @@ function renderDividerLine(note: NoteGeo, rowTop: number, d: NoteDividerDraw, th
   const x1 = note.x + theme.scaleK;
   const x2 = note.x + note.width - theme.scaleK;
   const y = rowTop + d.dividerYOffset;
-  const dashField = d.strokeDasharray !== undefined ? { strokeDasharray: d.strokeDasharray } : {};
-  const one = line(x1, y, x2, y, { stroke: theme.colors.border, strokeWidth: d.strokeWidth, ...dashField });
-  return d.doubleLine === true
-    ? one + line(x1, y + 2, x2, y + 2, { stroke: theme.colors.border, strokeWidth: d.strokeWidth, ...dashField })
-    : one;
+  if (d.title !== undefined) return renderTitledDivider({ x1, x2, y, baselineOffset }, d, d.title, theme);
+  return hline(x1, x2, y, d, theme);
+}
+
+/**
+ * cdd6 T3f (nuveji-19-jabi587): `UHorizontalLine#drawLineInternal`'s title
+ * arm (`UHorizontalLine.java:84-98`) -- `firstHalf` rule, the title at
+ * `drawTitleInternal`'s `x1 = start + (end - start - titleW) / 2`,
+ * `y1 = y - titleH / 2 - 0.5` (`:154-166`, `clearArea` false here), then the
+ * `secondHalf` rule, in that order. Title lines baseline at their own top +
+ * the note's `baselineOffset` (same creole engine and font as a note row).
+ * The title's width/height/atoms are layout-time values: `class-scale-geo-
+ * note.ts#scaleLineDivider` does not scale them (outside cdd6 T3f's
+ * write-set; exact at scale 1).
+ */
+function renderTitledDivider(
+  at: { x1: number; x2: number; y: number; baselineOffset: number },
+  d: NoteDividerDraw,
+  title: NoteDividerTitle,
+  theme: ScaledTheme,
+): string {
+  const len = (at.x2 - at.x1 - title.width) / 2;
+  const titleX = at.x1 + len;
+  const titleTop = at.y - title.height / 2 - 0.5;
+  let out = hline(at.x1, at.x1 + len, at.y, d, theme);
+  for (const sub of title.lines)
+    out += renderTableCellLine(titleX, titleTop + sub.y + at.baselineOffset, sub.atoms, theme);
+  return out + hline(at.x2 - len, at.x2, at.y, d, theme);
 }
 
 /** `atom.font.styles` -> the optional-spread fields {@link
@@ -212,7 +255,7 @@ function renderTableCells(
         out += tableBackRect(cellX, cellTop, w, h, cell.backColor);
       }
       for (const sub of cell.lines) {
-        out += renderTableCellLine(cellX, cellTop + sub.y + baselineOffset, sub.atoms, theme);
+        out += renderTableCellLine(cellX + (sub.dx ?? 0), cellTop + sub.y + baselineOffset, sub.atoms, theme);
       }
     }
   }
@@ -269,7 +312,7 @@ export function renderNoteRowExtra(
   const { lineTop, i, baselineOffset } = pos;
   const divider = note.lineDividers?.[i];
   const table = note.lineTables?.[i];
-  const dividerOut = divider !== undefined ? renderDividerLine(note, lineTop, divider, theme) : '';
+  const dividerOut = divider !== undefined ? renderDividerLine(note, lineTop, divider, theme, baselineOffset) : '';
   const tableOut =
     table !== undefined
       ? renderTableCells(note, lineTop, table, baselineOffset, theme) +

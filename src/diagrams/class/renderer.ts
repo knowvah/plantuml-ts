@@ -20,7 +20,7 @@ import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { applyMonochromeHex, applyMonochromeToFragment } from './class-monochrome.js';
+import { applyColorMapperToFragment, colorMapperOf } from './class-monochrome.js';
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
@@ -198,9 +198,11 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // `documentBackgroundRect` derivation below) sees the already-mapped
   // value, matching `class-monochrome.ts`'s own "single choke point"
   // design (see that file's header doc comment).
+  // cdd6 T3f: the mapper is `muteColorMapper`'s whole choice --
+  // `monochrome`, else `reversecolor` (`class-monochrome.ts#colorMapperOf`).
+  const colorMapper = colorMapperOf(theme);
   const resolvedBackground = resolveColorToSvgHex(theme.colors.background);
-  const canonicalBackground =
-    theme.monochrome !== undefined ? applyMonochromeHex(resolvedBackground, theme.monochrome) : resolvedBackground;
+  const canonicalBackground = colorMapper !== undefined ? colorMapper(resolvedBackground) : resolvedBackground;
   const children: string[] = [];
   let extraDefs = '';
   // SI14 T4: per-node fragments (ADR-2) -- collected so their OWN
@@ -216,8 +218,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // than routing through klimt. Jar-verified `dasagu-52-vani172`.
   if (theme.colors.graph.pathHoverColor !== undefined) {
     const resolvedHoverHex = resolveColorToSvgHex(theme.colors.graph.pathHoverColor);
-    const hoverHex =
-      theme.monochrome !== undefined ? applyMonochromeHex(resolvedHoverHex, theme.monochrome) : resolvedHoverHex;
+    const hoverHex = colorMapper !== undefined ? colorMapper(resolvedHoverHex) : resolvedHoverHex;
     extraDefs += `<style type="text/css"><![CDATA[path:hover { stroke: ${hoverHex} !important;}]]></style>`;
   }
 
@@ -448,7 +449,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     // mirror of jar's real universal `ColorMapper` semantics. No-op when
     // `theme.monochrome` is `undefined` (every fixture that doesn't set this
     // skinparam is byte-identical to pre-N61 output).
-    body: applyMonochromeToFragment(children.join(''), theme.monochrome),
+    body: applyColorMapperToFragment(children.join(''), colorMapper),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: canonicalBackground,
