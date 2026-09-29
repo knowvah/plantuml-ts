@@ -64,6 +64,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['footbox', (acc) => acc.footbox],
   ['handwritten', (acc) => acc.handwritten],
   ['monochrome', (acc) => acc.monochrome],
+  ['reverseColor', (acc) => acc.reverseColor],
   ['packageStyle', (acc) => acc.packageStyle],
   ['fixCircleLabelOverlapping', (acc) => acc.fixCircleLabelOverlapping],
   ['shadowing', (acc) => acc.shadowing],

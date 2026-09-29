@@ -76,6 +76,16 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [
+    ['reversecolor'],
+    (acc, value) => {
+      // `TitledDiagram#muteColorMapper` reads the RAW value
+      // (`getSkinParam().getValue("reversecolor")`, `TitledDiagram.java:301`)
+      // and interprets it itself (`dark` / a `ColorOrder` name) -- so does
+      // `class-monochrome.ts#colorMapperOf`.
+      acc.reverseColor = value.trim();
+    },
+  ],
+  [
     ['mode'],
     (acc, value) => {
       // cdd-T33: `SkinParam.isDark` (`skin/SkinParam.java:114-116`) --

@@ -35,6 +35,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'strictUml',
   'genericDisplayOld', // cdd3-T25 (E3-3)
   'monochrome',
+  'reverseColor',
   'shadowing',
   'packageStyle',
   'nodeSep',
