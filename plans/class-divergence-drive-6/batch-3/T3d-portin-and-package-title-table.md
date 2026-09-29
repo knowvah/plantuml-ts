@@ -32,7 +32,21 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    `collapsedGroup` leaves in child-group order. Do not touch the draw-side
    `collapsedGroup` order (`class-leaf-order.ts`, xitobu/daxeno).
 
+4. bijufi (T2a residual, journal row 39): the collapse at `class-namespace.ts:106-113`
+   copies stereotype/colour/url but not `ns.legend`; `Classifier` has no legend field
+   and `class-layout-helpers.ts:309` passes stereotype labels only. Upstream uses the
+   legend as the leaf's stereoBlock (`EntityImageEmptyPackage.java:121-124`). Carry
+   the legend through the collapse and size/draw it as the stereo block.
+5. xuloxo (T2a residual, journal row 39, corrects row 25): `class-command-containers.ts:146`
+   accepts `as` only BEFORE the stereotype and its trailing `(?:[#<][^{]*)?` swallows
+   `<<person>> as alias`, so C4's `rectangle "D" <<person>> as X {` loses the
+   stereotype and the link endpoints create new classes. Port `CommandPackageWithUSymbol.java:82-91`'s
+   `DISPLAY [STEREOTYPE] as CODE` order. The C4 colours then flow through T2a's
+   consumers; report the residual (layout geometry) with its mechanism.
+
 ## Rows
+- `unknown/bijufi-98-xafa015` (empty-package-leaf-legend; re-slotted from T2a, row 39)
+- `unknown/xuloxo-85-vibu502` (class-head-arrow-triangle → container `as` order; re-slotted from T2a, row 39)
 - `unknown/bonaco-71-xefu608` (class-portin-unported)
 - `unknown/topave-65-ceso890` (package-visibility-icon)
 - `unknown/zasuxe-15-lugo662` (cluster-node-order; re-slotted from T3a at T0e)
@@ -44,7 +58,8 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
 - `src/diagrams/class/class-namespace-title-table.ts`
 - `src/diagrams/class/class-command-containers.ts`
 - `src/diagrams/class/class-namespace-shape.ts`
-- `src/diagrams/class/class-namespace.ts` (added at T0e: only if zasuxe is fixed at the push site)
+- `src/diagrams/class/class-namespace.ts` (T0e; also bijufi's legend collapse)
+- `src/diagrams/class/class-layout-helpers.ts`, `src/diagrams/class/ast.ts` is T3c's — if `Classifier` needs a `legend` field, STOP and report (a type-only addition may be requested from the orchestrator)
 - their unit tests under `tests/`
 
 ## Read-set
