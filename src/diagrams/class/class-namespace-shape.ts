@@ -43,6 +43,7 @@ import { rect, PAINT_NONE } from '../../core/svg.js';
 import { shiftFragmentBody } from '../../core/annotations/coord-shift.js';
 import { isTransparentColor, parseColor, type Paint } from '../../core/paint.js';
 import { renderFolderTabShape } from './class-namespace-folder-outline.js';
+import { renderVisibilityIcon } from './class-visibility-icon.js';
 import {
   renderNamespaceTitleAuto,
   TITLE_LOCAL_TOP_OFFSET,
@@ -185,9 +186,12 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
   // X1 + X2 for a non-empty label, `getWTitle`); omitted for the empty-label
   // `max(30, width/4)` fallback. cdd-B8FU: `geo.wtitle` is already scaled,
   // so the margin literals subtracted back out take their own scaleK.
+  // cdd6-T3d: the visibility icon sits at the title block's left, the text
+  // after it (`ClusterHeader.java:138` mergeLR); `wtitle` includes the icon.
+  const vis = renderTitleVisibility(geo, geo.x + TITLE_X_OFFSET * theme.scaleK, geo.y, theme);
   const titleTextLength =
-    geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
-  const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK;
+    geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK - vis.dx : undefined;
+  const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK + vis.dx;
   const label = renderNamespaceTitleAuto(
     { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
     {
@@ -204,7 +208,7 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
   // getHTitle(dimTitle))))`, `posStereo = (width - dimStereo.w) / 2`
   // (`USymbolFolder.java` `asBig`); `geo.htitle` IS `getHTitle`.
   const stereo = placeHeaderStereo(geo, geo.x + TITLE_X_OFFSET * theme.scaleK, geo.y + TOP * theme.scaleK + geo.htitle);
-  return outline + hline + label + stereo.body;
+  return outline + hline + vis.icon + label + stereo.body;
   // #lizard forgives -- pre-existing (unchanged by A2s F-D): linear jar-verified draw sequence (G2 N17/N18); splitting would refactor faithfully-ported geometry mid-port.
 }
 
@@ -252,6 +256,9 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
   if (geo.label.length === 0) return outline + stereo.body;
   const rawTextWidth = geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK;
   const posTitle = (geo.width - rawTextWidth) / 2;
+  // cdd6-T3d: `rawTextWidth` is the merged icon+text block; the text follows the icon.
+  const vis = renderTitleVisibility(geo, geo.x + posTitle, geo.y + stereo.height, theme);
+  const textWidth = rawTextWidth - vis.dx;
   // cdd-T26 residual round: each physical line is centred against
   // `geo.width` independently -- the exact per-line generalization of this
   // function's own pre-existing single-line `posTitle` formula (`(width -
@@ -260,16 +267,37 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
   const label = renderNamespaceTitleAuto(
     { label: geo.label, theme, measurer, blockTopY: geo.y + stereo.height + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
     {
-      x: geo.x + posTitle,
+      x: geo.x + posTitle + vis.dx,
       y: geo.y + stereo.height + geo.baselineOffset,
       fontFamily: packageTitleFontFamily(theme),
       fontSize: packageTitleFontSize(theme),
       fontColor: packageTitleFontColor(theme, tags),
-      textLength: rawTextWidth,
+      textLength: textWidth,
     },
-    (line) => geo.x + (geo.width - line.width) / 2,
+    (line) => geo.x + posTitle + vis.dx + (textWidth - line.width) / 2,
   );
-  return outline + stereo.body + label;
+  return outline + stereo.body + vis.icon + label;
+}
+
+/**
+ * cdd6-T3d (topave-65-ceso890): `ClusterHeader#getTitleBlock`'s
+ * `modifier.getUBlock(size, fore, back, false)` -- the METHOD icon variant
+ * (`isField` false), drawn at the title block's left edge `blockX`, its top
+ * `TOP + visibilityIconDy` below `blockTopY` (`asBig`'s `(4, 2)`/`(x, 2)`
+ * title translate). `dx` is the icon block's width, the text's offset.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:130-138
+ */
+function renderTitleVisibility(
+  geo: NamespaceGeo,
+  blockX: number,
+  blockTopY: number,
+  theme: ScaledTheme,
+): { icon: string; dx: number } {
+  const v = geo.visibilityBlock;
+  if (v === undefined) return { icon: '', dx: 0 };
+  const k = theme.scaleK;
+  const y = blockTopY + (TOP + (geo.visibilityIconDy ?? 0)) * k;
+  return { icon: renderVisibilityIcon(v.modifier, false, blockX, y, undefined, theme), dx: v.width * k };
 }
 
 /** cdd2-T19b: the pre-built `ClusterHeader` stereo block

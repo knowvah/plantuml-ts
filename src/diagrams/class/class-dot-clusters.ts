@@ -13,7 +13,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { DotInputCluster, DotInputNode } from '../../core/graph-layout.js';
 import { clusterWrapperLevel } from './class-cluster-levels.js';
-import { namespaceTitleTableDims } from './class-namespace-title-table.js';
+import { namespaceTitleTableDimsFor } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
 import { clusterPortRanks, type ClassPortRank } from './class-entity-port.js';
 
@@ -150,7 +150,7 @@ export function buildDotClusters(
     const isLabel = ns.display.length > 0 || header !== undefined;
     const portRanks = clusterPortRanks(members, ast);
     if (portRanks.length > 0) {
-      const dims = isLabel ? namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol, header) : undefined;
+      const dims = isLabel ? namespaceTitleTableDimsFor(ns, theme, measurer, header) : undefined;
       portAnchorNodes.push(applyPortBranch(cluster, ns, portRanks, { anchorId, dims }));
     } else if (isLabel) {
       cluster.label = ns.display;
@@ -158,7 +158,7 @@ export function buildDotClusters(
       // `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` supplement
       // (`class-namespace-title-table.ts`) -- a `<<Node>>` package's label
       // table is 60px wider / 5px taller than its bare title text.
-      const dims = namespaceTitleTableDims(ns.display, theme, measurer, ns.usymbol, header);
+      const dims = namespaceTitleTableDimsFor(ns, theme, measurer, header);
       // Same pair, two consumers (cluster-title-table.ts's own
       // `computeTitleTableHeight` doc comment): `labelWidth`/`labelHeight`
       // feed the DOT-TEXT emitter's `label=<TABLE...>` (svek-dot-emit-

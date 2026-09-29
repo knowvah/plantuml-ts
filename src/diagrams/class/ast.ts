@@ -141,6 +141,14 @@ export interface Namespace {
    */
   stereotype?: string;
   /**
+   * cdd6-T3d (topave-65-ceso890): the header's leading visibility char
+   * (`CommandPackage.java:74,189-192`, `Entity#setVisibilityModifier`).
+   * `ClusterHeader#getTitleBlock` merges its icon block left of the title
+   * (`ClusterHeader.java:130-138`), widening the DOT title table and the
+   * folder tab. Absent == no modifier.
+   */
+  visibilityModifier?: Visibility;
+  /**
    * T11 (diagnosis A2b E4): the header's own `[[url]]` bracket --
    * upstream wraps the cluster's ENTIRE contents in an `<a>`
    * (`svek/Cluster.java:337-341`, `ug.startUrl(url)` before the

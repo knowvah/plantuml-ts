@@ -13,7 +13,7 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { MeasuredClassifier } from './class-layout-helpers.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
+import { namespaceFolderTitle } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
 import { resolveStyleStereotypeTags, stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
@@ -217,9 +217,8 @@ function namespaceGeoFromBox(
     width: box.width,
     height: box.height,
     label: ns.display,
-    wtitle: getWTitle(measurer, theme, ns.display, 0),
-    htitle: getHTitle(measurer, theme, ns.display),
-    baselineOffset: getTitleBaselineOffset(measurer, theme, ns.display),
+    // cdd6-T3d: over `ClusterHeader#getTitle()` (icon + text, java:130-138).
+    ...namespaceFolderTitle(ns, theme, measurer),
     ...(ns.creationIndex !== undefined ? { creationIndex: ns.creationIndex } : {}),
     ...(inkShape !== undefined ? { inkShape } : {}),
     // cdd-T12/cdd3-T21: carry-only copies -- see `class-geo-namespace-types.ts`.

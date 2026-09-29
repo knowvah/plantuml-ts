@@ -10,6 +10,8 @@
 import { applyAssocCouple, ASSOC_COUPLE_RE, ASSOC_DOUBLE_COUPLE_RE } from './class-assoc-couple.js';
 import { applyDoubleCouple } from './class-assoc-double-couple.js';
 import type { Command } from './class-command-types.js';
+import type { Visibility } from './ast.js';
+import type { ParseState } from './parser.js';
 import {
   openNamespaceBlock,
   setNamespaceStereotype,
@@ -87,6 +89,20 @@ function usymbolContainerHead(match: RegExpExecArray): { code: string; display: 
   return stereotype !== undefined ? { code, display, stereotype } : { code, display };
 }
 
+/**
+ * cdd6-T3d (topave-65-ceso890): `CommandPackage.executeArg`'s
+ * `p.setVisibilityModifier(VisibilityModifier.getVisibilityModifier(
+ * visibilityString + "FOO", false))` -- the char alone selects the modifier
+ * (`[-#+~]`, `VisibilityModifier.java:75-77`); `false` is the METHOD
+ * variant, which the drawn `<g data-visibility-modifier>` names.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandPackage.java:189-192
+ */
+function setNamespaceVisibility(state: ParseState, nsId: string, visibility: string | undefined): void {
+  if (visibility === undefined) return;
+  const ns = state.ast.namespaces.find((n) => n.id === nsId);
+  if (ns !== undefined) ns.visibilityModifier = visibility as Visibility;
+}
+
 export const CONTAINER_COMMANDS: readonly Command[] = [
   // 4. Closing brace — ends a pending body, together block, or namespace
   //    block (LIFO; see closeBraceScope in class-together.ts).
@@ -119,9 +135,10 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // T3 (unknown-bucket-routing-repair): optional leading VISIBILITY char
   // (`CommandPackage.java:74`, the SAME `VisibilityModifier
   // .regexForVisibilityCharacter()` prefix `class-declaration-parser.ts`'s
-  // `DECL_KIND_RE` carries) -- captured by the non-capturing `(?:...)` group
-  // and discarded, matching that command's own posture (no render-side
-  // field consumes a package's visibility marker either).
+  // `DECL_KIND_RE` carries). cdd6-T3d: now CAPTURED (group 1) and stored
+  // (`CommandPackage.java:189-192`) -- `ClusterHeader.java:130-138` draws it
+  // left of the title, so every later group index below is +1 from the
+  // numbers the older notes in this comment give.
   // T11 (E4/M3): the `[[url]]` group (7) is CAPTURING and NOTE_COLOR (8,
   // the SAME bare/`back:` grammar `class-notes.ts` note commands already
   // reuse) is inserted ahead of the old trailing catch-all -- both read
@@ -134,7 +151,7 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
   // instead (`mupavi-50-fijo192`).
   {
     pattern: new RegExp(
-      String.raw`^(?:[-#+~]\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
+      String.raw`^(?:([-#+~])\s*)?package\b\s*(?:"([^"]*)"|([^\s#<{]+))?(?:\s+as\s+([^\s{]+))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(<<.+?>>))?((?:\s+\$[^\s{}"'<>$]+)*)(?:\s*(\[\[[^\]]*\]\]))?\s*` +
         NOTE_COLOR +
         // T11: a `\s*` gap here is load-bearing -- without it, a trailing
         // space before `{` (e.g. `#DDD {`) makes the whole match fail at
@@ -146,19 +163,21 @@ export const CONTAINER_COMMANDS: readonly Command[] = [
       'i',
     ),
     execute(state, match) {
-      const name = match[1] ?? match[2];
+      const name = match[2] ?? match[3];
       let effectiveId: string;
       if (name !== undefined) {
-        effectiveId = openNamespaceBlock(state, match[3] ?? name, name);
+        effectiveId = openNamespaceBlock(state, match[4] ?? name, name);
       } else {
         const id = '__pkg' + String(state.ast.namespaces.length);
         effectiveId = openNamespaceBlock(state, id, '');
       }
-      setNamespaceStereotype(state, effectiveId, match[5], true);
-      setNamespaceTags(state, effectiveId, `${match[4] ?? ''} ${match[6] ?? ''}`);
-      setNamespaceUrl(state, effectiveId, match[7]);
-      setNamespaceColor(state, effectiveId, match[8]);
-      if (match[9] !== undefined) {
+      setNamespaceStereotype(state, effectiveId, match[6], true);
+      setNamespaceTags(state, effectiveId, `${match[5] ?? ''} ${match[7] ?? ''}`);
+      setNamespaceUrl(state, effectiveId, match[8]);
+      setNamespaceColor(state, effectiveId, match[9]);
+      // cdd6-T3d: `p.setVisibilityModifier(...)` (CommandPackage.java:189-192).
+      setNamespaceVisibility(state, effectiveId, match[1]);
+      if (match[10] !== undefined) {
         state.ast.namespaces = collapseEmptyNamespace(
           state.ast.namespaces,
           state.classifierIndex,
