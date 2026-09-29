@@ -369,6 +369,16 @@ export function buildEdgeGeos(
       ...(rel.labelTextColor !== undefined ? { labelTextColor: rel.labelTextColor } : {}),
       ...resolved.strokeExtra,
       ...(grouped?.sametail !== undefined ? { sametail: grouped.sametail } : {}),
+      // T3c (D8, `smetana-pragma-ignored`): carry-only copy of
+      // `ast.layoutEngine === 'smetana'` (`!pragma layout smetana`, `ast.ts`'s
+      // doc comment) -- `CucaDiagram#getCucaDiagramFileMaker` dispatches the
+      // WHOLE document onto `CucaDiagramFileMakerSmetana`/`SmetanaEdge` for
+      // this one pragma. `renderer-edge.ts#renderEdge` reads this to mirror
+      // `SmetanaEdge#drawU`'s structural draw shape instead of
+      // `SvekEdge#drawU`'s (`class-geo-types.ts#EdgeGeo.smetana`'s doc
+      // comment).
+      // @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:480-481
+      ...(ast.layoutEngine === 'smetana' ? { smetana: true as const } : {}),
     };
 
     if (relKals.length > 0) placedKals.push(...attachKalBoxes(edgeGeo, relKals, normalizedPts, rel));

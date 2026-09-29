@@ -383,6 +383,23 @@ export interface EdgeGeo {
    *  (`link.getEntity2()`), the id nearest `points[points.length - 1]`. */
   targetContactId?: string;
   dashed: boolean;
+  /**
+   * T3c (D8, `smetana-pragma-ignored`): `true` iff the diagram carried
+   * `!pragma layout smetana` (`ClassDiagramAST.layoutEngine`, `ast.ts`'s
+   * doc comment) -- `renderer-edge.ts#renderEdge` reads this to mirror
+   * `SmetanaEdge#drawU`'s STRUCTURAL draw shape (extremities before the
+   * connecting path, no `id`/`codeLine` on the path, a narrower url wrap)
+   * instead of `SvekEdge#drawU`'s. Pure carry-only channel, same precedent
+   * as {@link hidden}/{@link url} above (`renderClass(geo, theme)` has no
+   * AST access) -- populating it is a ONE-LINE addition in
+   * `class-edge-geo.ts#buildEdgeGeos`'s `edgeGeo` literal (that function
+   * already receives `ast: ClassDiagramAST` as its first parameter, same
+   * spot as the `hidden`/`url` carry-only copies), outside this file's
+   * write-set; named remainder, T3c's own report. Absent = the pre-existing
+   * SvekEdge draw shape, unchanged.
+   * @see ~/git/plantuml/.../sdot/SmetanaEdge.java:106-253
+   */
+  smetana?: true;
   /** G2 N2 (mechanism 3): copied from `Relationship.creationIndex`. */
   creationIndex?: number;
   /** G2 N2 (mechanism 3): the relationship's raw AST endpoints, for the

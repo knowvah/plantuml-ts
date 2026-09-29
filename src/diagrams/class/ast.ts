@@ -366,4 +366,25 @@ export interface ClassDiagramAST {
   scale?: ScaleSpec;
   /** cdd3-T18: every `together { }` block, in opening order. Absent = none. */
   togethers?: ClassTogether[];
+  /**
+   * T3c (D8, `smetana-pragma-ignored`): `!pragma layout smetana` --
+   * upstream's `CommandPragma#executeArg` calls `system.setUseSmetana(true)`
+   * for this one name/value pair (case-insensitive on both), later read by
+   * `CucaDiagram#getCucaDiagramFileMaker` to swap in
+   * `CucaDiagramFileMakerSmetana`/`SmetanaEdge` for the WHOLE document. This
+   * port still lays out with @knowvah/dot-engine regardless (CLAUDE.md "One
+   * layout engine" ruling 2026-08-09) -- only an edge's STRUCTURAL draw
+   * shape (element order, emitted attributes) is meant to mirror
+   * `SmetanaEdge#drawU`; numeric geometry stays the accepted Smetana-
+   * arithmetic delta. Absent = the svek/SvekEdge draw shape (today's
+   * behavior, unchanged). Threading this flag onto `EdgeGeo.smetana`
+   * (`class-geo-types.ts`'s doc comment) -- so a real `parseClass()` render
+   * actually exercises the smetana draw shape -- is a one-line addition in
+   * `class-edge-geo.ts#buildEdgeGeos` (already receives `ast` as its first
+   * parameter), outside this file's write-set; named remainder, T3c's own
+   * report.
+   * @see ~/git/plantuml/.../command/CommandPragma.java:104-117
+   * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java:480-481
+   */
+  layoutEngine?: 'smetana';
 }
