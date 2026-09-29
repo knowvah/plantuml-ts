@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1257 modules · 4739 exported names.
+1257 modules · 4744 exported names.
 
 ## `src/`
 
@@ -1268,7 +1268,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-object-map-sizing.ts` | `Dim`, `titleDimension`, `measureStereo`, `headerRows`, `baselineOffsetFor`, `floorAtMinimumWidth`, `objectBodyReportsPorts` | `skinparam minClassWidth` floor — SHARED by object/map/json (`kind:'object'` boxed leaves) in the class diagram layout engine (./layout.ts). |
 | `class-object-member-creole.ts` | `ObjectMemberRun`, `ObjectMemberRow`, `buildObjectMemberRow` | An object leaf's member rows, built through the creole engine — with tab stops preserved. |
 | `class-object-sizing.ts` | `measureObjectClassifier` | Object classifier sizing — the `kind:'object'`-SPECIFIC field/body math for the class diagram layout engine (./layout.ts). |
-| `class-package-style.ts` | `MARGIN_TITLE_X1`, `MARGIN_TITLE_X2`, `MARGIN_TITLE_X3`, `PACKAGE_ROUND_CORNER`, `DEFAULT_GROUP_FONT_COLOR`, `isFolderFamilyUSymbol`, `isNoPaint`, `titleFont`, `titleFontColor`, `packageTitleFontColor`, `packageBorderColor`, `packageBorderThickness`, `emptyPackageThickness`, `emptyPackageBorder`, `clusterStereoFontColor`, `emptyPackageStereoFontColor`, `getHTitle`, `getWTitle`, `getTitleBaselineOffset` | class-package-style.ts — the package title metrics (`USymbolFolder`'s `getWTitle`/`getHTitle`, the title font) and the package style values a cluster (`Cluster#drawU`) and a collapsed-empty package leaf (`EntityImageEmptyPackage`) resolve a |
+| `class-package-style.ts` | `MARGIN_TITLE_X1`, `MARGIN_TITLE_X2`, `MARGIN_TITLE_X3`, `PACKAGE_ROUND_CORNER`, `DEFAULT_GROUP_FONT_COLOR`, `isFolderFamilyUSymbol`, `byStereo`, `isNoPaint`, `titleFont`, `titleFontColor`, `packageTitleFontColor`, `elementTitleFontColor`, `elementStereoFontColor`, `elementLineStyle`, `dashArrayOf`, `packageBorderColor`, `packageBorderThickness`, `emptyPackageThickness`, `emptyPackageBorder`, `clusterStereoFontColor`, `emptyPackageStereoFontColor`, `getHTitle`, `getWTitle`, `getTitleBaselineOffset` | class-package-style.ts — the package title metrics (`USymbolFolder`'s `getWTitle`/`getHTitle`, the title font) and the package style values a cluster (`Cluster#drawU`) and a collapsed-empty package leaf (`EntityImageEmptyPackage`) resolve a |
 | `class-parse-state.ts` | `ParseState`, `PendingMultilineElement` | Mutable class-parser state (local to each `parseClass` call). |
 | `class-port-rows.ts` | `edgePortAttrs`, `applyShapeAndPorts`, `PortRowMemberInput`, `PortRowCompartmentInput`, `classPortRows`, `classifierPortShortNames`, `classPortShortNamesById` | `Ports` production for the class engine's `RECTANGLE_HTML_FOR_PORTS` leaves — the DOT-input half of `SvekNode#appendLabelHtmlSpecialForLink`'s `((WithPorts) image).getPorts(stringBounder)` call (svek/SvekNode.java:269). |
 | `class-relationship-ast.ts` | `MiddleDecor`, `RelationshipType`, `LinkDecor`, `Relationship` | Class-diagram Relationship AST types. |
