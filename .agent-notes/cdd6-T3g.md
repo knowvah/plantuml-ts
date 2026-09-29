@@ -35,3 +35,23 @@
 - **Impact**: another instance of compareSvg's non-monotonic count; the
   json font-style bucket and map MaximumWidth are the next movers.
 - **Confidence**: High (measured before/after with render-diff).
+
+## Observation: T3g follow-up STOPPED before editing — producer is class-layout-fonts.ts
+- **Context**: T3g follow-up (classifier name/member hyperlink colour, jixipo/zivenu),
+  worktree at ccb4a3761.
+- **Finding**: the classifier fonts are built in
+  `src/diagrams/class/class-layout-fonts.ts#resolveAttributeFont` (:76-102) and
+  `#resolveHeaderFont` (:169-191), called from `class-layout-helpers.ts
+  #resolveMeasureFonts` (:386-394, T3d's file). They are the only sites with `theme`
+  plus the resolved `tagCascadeEntry`. Everything downstream
+  (`class-layout-generic-classifier*.ts`, `class-layout-header-geo.ts`,
+  `class-member-rows.ts`, `class-member-creole.ts`, `class-layout-header-creole.ts`)
+  receives only the `ClassFontSpecs` object (`class-layout-generic-classifier-types.ts
+  :12-15`) and has no theme access. The value cannot enter the approved write-set
+  without a behavioral edit to class-layout-fonts.ts (return `hyperlinkColor` from
+  `tagCascadeEntry?.hyperlinkColor ?? theme.colors.graph.classCascadeHyperlinkColor`)
+  plus a type-only optional field on `ClassFontSpecs`.
+- **Impact**: needed write-set extension = `class-layout-fonts.ts` (behavioral, 2
+  return objects) + `class-layout-generic-classifier-types.ts` (type-only). With those,
+  no edit to T3d's class-layout-helpers.ts is required.
+- **Confidence**: High (call chain read at ccb4a3761).
