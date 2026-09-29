@@ -112,8 +112,8 @@ function splitHeaderLines(headerText: string): {
  */
 export function computeHeaderNameGeo(
   classifier: Classifier,
-  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
-  fontSpec: { family: string; size: number },
+  headerFont: ClassFontSpecs['header'],
+  fontSpec: ClassFontSpecs['attribute'],
   measurer: StringMeasurer,
   options: HeaderGeoOptions,
 ) {

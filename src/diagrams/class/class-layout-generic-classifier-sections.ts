@@ -53,7 +53,7 @@ interface MemberSectionsOptions {
  */
 export function computeMemberSectionsGeo(
   classifier: Classifier,
-  fontSpec: { family: string; size: number },
+  fontSpec: { family: string; size: number; hyperlinkColor?: string },
   measurer: StringMeasurer,
   options: MemberSectionsOptions,
 ) {
@@ -115,7 +115,7 @@ export function computeMemberSectionsGeo(
  */
 export function computeEnhancedBodyGeo(
   classifier: Classifier,
-  fontSpec: { family: string; size: number },
+  fontSpec: { family: string; size: number; hyperlinkColor?: string },
   measurer: StringMeasurer,
   stereoGeo: ReturnType<typeof computeStereoAndTagGeo>,
   options: { sprites: SpriteRegistry | undefined; suppress: MemberSuppression },

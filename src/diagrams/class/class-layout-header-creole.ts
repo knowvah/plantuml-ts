@@ -256,7 +256,7 @@ export interface HeaderLineMetricsOptions {
  *  `buildHeaderRows` (the sole caller) already expects. */
 export function buildHeaderLineMetrics(
   headerLines: readonly string[],
-  headerFont: { family: string; size: number; bold: boolean; italic: boolean },
+  headerFont: { family: string; size: number; bold: boolean; italic: boolean; hyperlinkColor?: string },
   measurer: StringMeasurer,
   options: HeaderLineMetricsOptions,
 ): HeaderLineMetrics {
@@ -279,8 +279,16 @@ export function buildHeaderLineMetrics(
   // the kind-derived half rides in through `memberBaseFont`'s `isAbstract`
   // member flag (that function's ONLY styles-without-face italic input, and
   // exactly upstream's `italic()` semantics) rather than through `fontSpec`.
+  // cdd6 T3g: the header style's HyperLinkColor rides along
+  // (`class-layout-fonts.ts#resolveHeaderFont`).
   const font = memberBaseFont(
-    { family: headerFont.family, size: headerFont.size, bold: headerFont.bold, italic: headerFont.italic },
+    {
+      family: headerFont.family,
+      size: headerFont.size,
+      bold: headerFont.bold,
+      italic: headerFont.italic,
+      ...(headerFont.hyperlinkColor === undefined ? {} : { hyperlinkColor: headerFont.hyperlinkColor }),
+    },
     { isAbstract: headerItalic },
   );
   const builds = headerLines.flatMap((l) => buildWrappedHeaderLine(l, font, measurer, sprites, maxWidth));
