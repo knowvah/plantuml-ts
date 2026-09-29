@@ -55,12 +55,30 @@ describe('descriptionLeafSymbolInk (cdd3-T8, R-LEAF gate)', () => {
     },
   );
 
-  test.each(['port', 'note', 'folder', 'package', 'interface', 'circle', 'hexagon'] as const)(
+  test.each(['port', 'note', 'interface', 'circle', 'hexagon'] as const)(
     '%s -- no ink (leaf-sizing.ts sizes its Dim through a DIFFERENT, non-generic construction; walking the generic one would disagree with the box)',
     (symbol) => {
       expect(
         descriptionLeafSymbolInk(node(symbol), symbol, baseFont, { opts: emptyOpts, sprites: undefined, measurer }),
       ).toBeUndefined();
+    },
+  );
+
+  test.each(['folder', 'package'] as const)(
+    '%s -- ink present (T2b: routes to measureFolderLeafInk, not the generic EntityImageDescription walk)',
+    (symbol) => {
+      const ink = descriptionLeafSymbolInk(node(symbol), symbol, baseFont, {
+        opts: emptyOpts,
+        sprites: undefined,
+        measurer,
+      });
+      expect(ink).toBeDefined();
+      // `USymbolFolder.ts#folderPath`'s arced outline bbox is exactly
+      // (0,0)-(width,height) -- no `addRectInk`-style `-1` inset corner.
+      expect(ink?.minX).toBe(0);
+      expect(ink?.minY).toBe(0);
+      expect(ink?.maxX).toBeGreaterThan(0);
+      expect(ink?.maxY).toBeGreaterThan(0);
     },
   );
 
