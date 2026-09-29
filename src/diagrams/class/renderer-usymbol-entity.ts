@@ -299,6 +299,7 @@ function buildUSymbolEntityParams(
   // too (the jar's `A2.5,2.5` arcs on gujigi-63-roki030).
   const roundCorner = ELEMENT_ROUND_CORNER * theme.scaleK;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
+  const stroke = resolveStroke(classifier, theme, symbolKeyword);
   return {
     // cdd3-T10 (S-11): the entity's own url (`getUrl99()`), drawn by
     // `EntityImageDescription#drawU`'s `startUrl`/`closeUrl` pair.
@@ -310,14 +311,24 @@ function buildUSymbolEntityParams(
     },
     // cdd3-T28 (E3-14): `codeDisplay` is `entity.getName()` (java:180) -- the
     // leaf id, as the sizer's `measureShownFolderTitle(node.id, ...)` reads.
-    labels: { codeName: classifier.id, displayText: display, stereotypeLabels: [] },
+    // cdd6 b2 (journal row 39): `EntityImageDescription.java:198`
+    // `portionShower.getVisibleStereotypeLabels(entity)` -- was `[]`.
+    labels: {
+      codeName: classifier.id,
+      displayText: display,
+      stereotypeLabels: classifier.visibleStereotypeLabels ?? [],
+    },
     paint: {
       forecolor: resolveForecolor(classifier, theme, symbolKeyword),
       backcolor: resolveBackcolor(classifier, theme, symbolKeyword),
       roundCorner,
       diagonalCorner: 0,
       deltaShadow: 0,
-      stroke: resolveStroke(classifier, theme, symbolKeyword),
+      stroke,
+      // cdd6 b2 (journal row 46): `BodyEnhancedAbstract.java:121-123`
+      // `getDefaultThickness()` = the entity's own `LineThickness` -- the
+      // border stroke's value (`plantuml.skin:91-93`), not root's 1.0.
+      defaultThickness: stroke.getThickness(),
       fontTitle,
       // `fc` (`style`, not `styleTitle`, java:173) -- the `desc` font when the
       // display differs from the code name, so a package's bold title style
@@ -329,7 +340,9 @@ function buildUSymbolEntityParams(
     },
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
-    atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // cdd6 b2 (journal row 40): `SvgNanoParser.java:187-215` -- an unset
+    // sprite `stroke-width` inherits the entity's own ambient stroke.
+    atomImageResolverFor: makeAtomImageResolverFor(sprites, stroke),
     // cdd5-T3b (`xagomi-49-caki729`): `EntityImageDescription.java:334-341`'s
     // `drawHexagon` -- `bibliotekon.getNode(entity).getPolygon()` -- is
     // upstream's OWN "no computed shape for this node" state (`if (hexagon

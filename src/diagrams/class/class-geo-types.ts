@@ -168,6 +168,13 @@ export interface ClassifierGeo {
    *  `class-stereotype.ts#splitStereotypeTokens`'s own doc comment. Omitted
    *  for every classifier with no stereotype at all. */
   stereotypeLabels?: readonly string[];
+  /** cdd6 b2 (journal row 39): the `hide|show stereotype`-FILTERED labels
+   *  (`class-stereotype.ts#resolveVisibleStereotypeLabels`) -- what
+   *  `EntityImageDescription.java:193-202` draws as a USymbol leaf's `stereo`
+   *  block (`portionShower.getVisibleStereotypeLabels(entity)`), distinct
+   *  from {@link stereotypeLabels}' unfiltered style-matching list. Omitted
+   *  with it. */
+  visibleStereotypeLabels?: readonly string[];
   /** G2 N39: copied unchanged from `Classifier.styleGeneration` (`ast.ts`'s
    *  doc comment) -- feeds `style-cascade-class.ts#resolveClassTagCascadeEntry`'s
    *  position-scoped `.tagname` cascade lookup alongside {@link

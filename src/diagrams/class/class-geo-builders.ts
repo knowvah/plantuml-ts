@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { getHTitle, getWTitle, getTitleBaselineOffset } from './class-namespace-shape.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
-import { resolveStyleStereotypeTags, splitStereotypeStyleTags } from './class-stereotype.js';
+import { resolveStyleStereotypeTags, stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
@@ -130,7 +130,7 @@ export function buildClassifierGeos(
       ...(classifier.noUidSlot === true ? { noUidSlot: true as const } : {}),
       ...assocCircleBookkeepingFields(classifier),
       ...(options.hiddenIds.has(classifier.id) ? { hidden: true } : {}),
-      ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
+      ...stereotypeLabelFields(classifier),
       ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
       // mission skin-file-loading (deferred D3 item): see
       // `ClassifierGeo.shadowing`'s doc comment (class-geo-types.ts) for the

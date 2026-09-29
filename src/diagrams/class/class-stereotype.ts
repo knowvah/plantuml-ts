@@ -311,3 +311,23 @@ export function resolveVisibleStereotypeLabels(classifier: Classifier): string[]
 export function resolveStyleStereotypeTags(classifier: Classifier): string[] {
   return classifier.stereotype !== undefined ? splitStereotypeStyleTags(classifier.stereotype) : [];
 }
+
+/**
+ * cdd6 b2 residual round (journal row 39): both stereotype-label lists a
+ * `ClassifierGeo` carries, as one spread for `class-geo-builders.ts` --
+ * {@link resolveStyleStereotypeTags} for `.tagname` cascade matching and
+ * {@link resolveVisibleStereotypeLabels} for what is DRAWN
+ * (`EntityImageDescription.java:193-202`:
+ * `portionShower.getVisibleStereotypeLabels(entity)` feeds the leaf's
+ * `stereo` block, so `hide stereotype` empties it). Empty for a classifier
+ * with no stereotype, matching the builder's pre-existing omission.
+ */
+export function stereotypeLabelFields(
+  classifier: Classifier,
+): { stereotypeLabels: string[]; visibleStereotypeLabels: string[] } | Record<string, never> {
+  if (classifier.stereotype === undefined) return {};
+  return {
+    stereotypeLabels: resolveStyleStereotypeTags(classifier),
+    visibleStereotypeLabels: resolveVisibleStereotypeLabels(classifier),
+  };
+}
