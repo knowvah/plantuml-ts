@@ -20,7 +20,26 @@ the mainframe path (`core/DiagramChromeFactory.java:278-337`,
 `klimt/shape/BigFrame.java:80-90`) bypasses it. Port the normalization per T0d's
 verified mechanism (cdd5 S4 `mainframe-svek-unnormalized`, controlled jar experiment).
 
+**Added at the b2 close (journal row 47) — the ensureVisible canvas channel.** The
+jar's canvas is the union of LimitFinder ink AND `SvgGraphics#ensureVisible` on every
+real draw (`SvgGraphics.java:129-133,981-982,1033-1034`); a description-label `{{ }}`
+embed draws NOTHING in the ink pass (`LimitFinder.java:99-100` matchesProperty false →
+`EmbeddedDiagram.java:169,180,191-193`) and reaches the canvas only through
+ensureVisible. The port derives the whole canvas from the ink walk
+(`layout-ink-extent.ts#computeClassDocumentDims`); `EntityImageDescriptionEmbed.ts`
+draws unconditionally so the embed enters the ink instead. T2b tried and reverted two
+fixes (row 47: gating the embed out of the ink pass collapses embed-only leaves to an
+empty MinMax → Infinity canvas; a UEmpty reservation is off by the UImage x+w-1
+rule). Build a real-draw extent beside the ink extent — T2c's
+`MeasuredClassifier.ensureVisibleInk` (row 43) is the precedent — fed by the drawn
+embed corner (`x + w`, `y + h`, then `(int)(v+1)`), and union it into the canvas.
+Rows: rojida (canvas 475x382 vs 382x393 today → after T2b 0/4 canvas-only), tefeco
+(a) (267 vs 279), rozugu (136 vs 149). Verify gubeca/jixibu do not move.
+
 ## Rows
+- `unknown/rojida-14-fuli428` (desc-embed-ink-missing; canvas channel, row 47)
+- `unknown/tefeco-12-rato895` (desc-embed-ink-missing; (a) canvas; (b) open -> cdd7)
+- `unknown/rozugu-82-pera583` (embedded-block-skinparam-leak; canvas residual)
 - `unknown/miveni-64-rexo238` (mainframe-svek-unnormalized)
 - `unknown/rivino-95-midu088` (mainframe-svek-unnormalized)
 - `unknown/soseka-43-riru110` (mainframe-svek-unnormalized)
@@ -40,6 +59,7 @@ takes the ink-normalized `svekDimension` (+15) as `ww`/`hh` and asserts delta aw
 - `src/diagrams/class/layout-ink-extent.ts` (T2b touches it in batch 2; build on that)
 - `src/index.ts`
 - `src/diagrams/class/layout.ts` (added at T0e: only if the raw geometry must be handed off from the class layout)
+- `src/core/svek/image/EntityImageDescriptionEmbed.ts`, `src/diagrams/class/class-ink-box.ts` (added at b2, row 47)
 - their unit tests under `tests/`
 
 ## Read-set

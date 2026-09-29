@@ -64,7 +64,13 @@ journal row 36 (T2e's diagnosis, every `file:line`).
    (`NoteTableCell` doc in `note-layout-measure-table.ts`); port `AtomTable.java`'s
    per-cell horizontal alignment (quote the lines). Δ1.462 on one text x.
 
+6. **cepedu heading font (T2b residual, journal row 46).** `StripeSimple.java:199-202`:
+   a creole `=` heading line takes `fontConfiguration.bigger(4).bold()` (order 0);
+   `leaf-sizing-text.ts` measures plain line height, leaving a uniform Δ2. Port the
+   heading font bump in the folder-leaf label measurement.
+
 ## Rows
+- `unknown/cepedu-19-namu934` (folder-tab-ink; heading residual)
 - `unknown/colede-79-give418` (class-note-table-bespoke; alignment residual only)
 - `unknown/fokudi-24-limo685` (package-borderstyle-unported; folder-leaf dash, T2a row 39)
 - `unknown/dezobu-62-vuzu421` (embedded-skinparam-hoisted; TYPE1 colour + stereotype sprite, T2a row 39; embed size is T2b's)
@@ -78,6 +84,7 @@ journal row 36 (T2e's diagnosis, every `file:line`).
 - `src/core/klimt/shape/UHorizontalLine.ts`, `src/diagrams/class/renderer-usymbol-entity.ts`, `src/diagrams/class/note-layout-measure-rows.ts`, `src/diagrams/class/note-layout-measure.ts`, `src/diagrams/class/renderer-note-lines.ts` (item 4)
 - `src/diagrams/class/class-namespace-folder-outline.ts` (fokudi), `src/diagrams/class/class-multiline-element.ts` (dezobu)
 - `src/diagrams/class/note-layout-measure-table.ts` (colede)
+- `src/core/svek/image/leaf-sizing-text.ts` (cepedu)
 - their unit tests under `tests/`
 
 ## Read-set
