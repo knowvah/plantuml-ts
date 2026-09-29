@@ -35,10 +35,22 @@ function makeClassifierGeo(overrides?: Partial<ClassifierGeo>): ClassifierGeo {
 }
 
 describe('computeClassDocumentDims', () => {
-  it('returns {width:0, height:0} for an empty diagram (no ink at all)', () => {
-    const dims = computeClassDocumentDims([], [], [], []);
-    expect(dims).toEqual({ width: 0, height: 0 });
-  });
+  it(
+    'returns 21x21 for an empty diagram (no ink at all) — T3a/jititi: jar still ' +
+      'runs the SvekResult/TextBlockExporter/SvgGraphics recipe over zero ink ' +
+      '(`SvekResult.java:130-135` `minMax.getDimension().delta(15,15)` is ' +
+      'unconditional, not skipped for an empty `LimitFinder` walk — `MinMax' +
+      '.getEmpty(true)` is `(0,0,0,0)`, not a sentinel that bypasses `.delta`), ' +
+      'then `CucaDiagram` margin (0,5,5,0) then `SvgGraphics#ensureVisible`\'s ' +
+      'truncating `+1`: 0+15=15, +0+5=20, floor(20+1)=21. Jar-verified ' +
+      '`unknown/jititi-15-maxe512` (`class A / class B / remove *; restore A`, ' +
+      'post-cdd5-T5d cascade fix all three entities removed): real jar SVG ' +
+      '`width="21px" height="21px" viewBox="0 0 21 21"`.',
+    () => {
+      const dims = computeClassDocumentDims([], [], [], []);
+      expect(dims).toEqual({ width: 21, height: 21 });
+    },
+  );
 
   it('reproduces jar-verified dims for two side-by-side classifiers, no edges (jalexi-21-xoje231)', () => {
     // Jar: `<rect x="7" y="7" width="59.2125" height="48"/>` twice, second at
