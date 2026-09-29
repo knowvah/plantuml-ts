@@ -736,7 +736,9 @@ describe('refusal coverage — baseline shape', () => {
     // 5924 -> 5926 at cdd6/close-b0: 2 unknown-tree golden rows (racujo,
     // xicili; cdd6-T0b's dotEqual instrument fix made them pin-eligible).
     // Derivation: 5659 + 267 = 5926.
-    expect(manifest.fixtures.length).toBe(5926);
+    // 5926 -> 5946 at cdd6/close-b2: 20 unknown-tree golden rows (the
+    // batch-2 fixes). Derivation: 5678 + 268 = 5946.
+    expect(manifest.fixtures.length).toBe(5946);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -774,7 +776,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
     // 5657 -> 5659 at cdd6/close-b0 (2 unknown-tree svg-class clones).
     // 5659 -> 5658 at cdd6/close-b1 (kokofa now errors, see above).
-    expect(pinnedRendering.length).toBe(5658);
+    // 5658 -> 5678 at cdd6/close-b2 (20 unknown-tree svg-class clones).
+    expect(pinnedRendering.length).toBe(5678);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

@@ -1,0 +1,5 @@
+@startuml
+queue "name" as code {
+
+}
+@enduml

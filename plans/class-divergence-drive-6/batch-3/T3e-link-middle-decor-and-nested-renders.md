@@ -31,7 +31,16 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
    is T2c's. tefeco's nested note (never opale in the description engine,
    `renderer-entity.ts:364-373`) is `open -> cdd7`, not this task's.
 
+3. kexaba (b2 close, journal row 50; T2d's dot-engine attribution was DISPROVED by
+   real dot — layout is identical, this is draw-side): a lone `<$sprite>` edge label
+   is drawn as an `<image>` at the label box origin + marginLabel (1,1) where the jar
+   draws it at +8,+8 (image 59.5,107 vs jar 66.5,114; box 19x14, `lp="68,127"`).
+   Read `SvekEdge.java`'s label draw (`getLabelPosition`/`drawU` around :298-330) and
+   `AtomSprite.java` / the creole `TextBlock` the label becomes, quote the offset's
+   origin, and port it in `renderer-edge-label.ts` (T2d's `labelImage` arm).
+
 ## Rows
+- `unknown/kexaba-26-kobu577` (edge-label-not-creole; lone-sprite image offset, row 50)
 - `unknown/sejube-03-bote542` (link-middle-decor-partial)
 - `unknown/josebu-55-seje426` (desc-embed-ink-missing → sequence label sprite atoms; (a) here, (b) T2c)
 
@@ -39,6 +48,7 @@ first ("READ THE JAVA FIRST", "Never fit a value", "Do not refactor while portin
 - `src/diagrams/class/class-layout-edge-labels.ts`
 - `src/diagrams/class/class-edge-note-box.ts`
 - `src/diagrams/class/renderer-arrowhead-middle.ts`
+- `src/diagrams/class/renderer-edge-label.ts` (b2: kexaba)
 - `src/diagrams/sequence/sequence-creole.ts` (T0e: replaces renderer-participant-symbol.ts)
 - `src/diagrams/sequence/sequence-text.ts` (T0e)
 - `src/diagrams/sequence/sequence-layout-participant-sizing.ts` (T0e)

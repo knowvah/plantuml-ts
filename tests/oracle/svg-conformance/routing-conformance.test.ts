@@ -788,10 +788,16 @@ describe('routing conformance — jar-error classification', () => {
     // `>>` head, LinkDecor.java:87 ARROW_TRIANGLE, so it routes CLASS like
     // the jar). Re-pinned from a fresh measurement.
     // Derivation: 4771 + 1050 + 105 = 5926.
-    expect(pinnedAgree.length).toBe(4771);
+    //
+    // 4771 -> 4791 / 5926 -> 5946 at cdd6/close-b2 (2026-09-29): 20
+    // unknown-tree svg-class golden rows (the batch-2 fixes: style
+    // consumers, degenerate gate + queue cap, json/folder ink, creole edge
+    // labels, and the residual-round leaf stereotype/thickness/stroke).
+    // Derivation: 4791 + 1050 + 105 = 5946.
+    expect(pinnedAgree.length).toBe(4791);
     expect(pinnedMisroutes.length).toBe(1050);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5926);
+    expect(manifest.fixtures.length).toBe(5946);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
