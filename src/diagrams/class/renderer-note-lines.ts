@@ -255,7 +255,7 @@ function renderTableCells(
         out += tableBackRect(cellX, cellTop, w, h, cell.backColor);
       }
       for (const sub of cell.lines) {
-        out += renderTableCellLine(cellX, cellTop + sub.y + baselineOffset, sub.atoms, theme);
+        out += renderTableCellLine(cellX + (sub.dx ?? 0), cellTop + sub.y + baselineOffset, sub.atoms, theme);
       }
     }
   }
