@@ -174,11 +174,17 @@ export function textFont(
   role: 'title' | 'stereotype' = 'title',
 ): FontConfiguration {
   const sizeOverride = resolveElementFontSize(theme, symbol, role);
+  // cdd6 T3g (D3): `FontConfiguration.create(skinParam, style, colors)`
+  // reads `style.value(PName.HyperLinkColor)` (`FontConfiguration.java
+  // :213-219`) -- the element's own `<style> <sname> { HyperLinkColor }`
+  // bucket; absent leaves `CommandCreoleUrl.ts`'s `#0000FF` fallback.
+  const hyperlinkColor = theme.colors.elements?.[symbol]?.hyperlinkColor;
   return {
     family: theme.fontFamily,
     size: sizeOverride ?? theme.fontSize + sizeDelta,
     color: textFontColor(theme, symbol),
     styles,
+    ...(hyperlinkColor === undefined ? {} : { hyperlinkColor }),
   };
 }
 
