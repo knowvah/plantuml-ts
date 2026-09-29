@@ -31,6 +31,7 @@ import type { ClassDiagramAST, Classifier } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as layout } from '../../core/graph-layout.js';
+import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import { filterRemovedEntities, computeHiddenIds, computeRemovedRanks } from './class-directives.js';
 import { foldEffectiveActions } from './class-directives-removal.js';
@@ -416,6 +417,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
     iconSize: iconSizeOf(theme),
     cardinalityFontSize: theme.cardinalityFontSize,
     svek, // cdd4-T10: `SvekResult#drawU`'s pass-0 state (`class-svek-pass0.ts`)
+    // cdd6 T3b: no `moveDelta` under a mainframe (`layout-ink-extent.ts#mainframePlacement`).
+    mainframe: ast.annotations !== undefined && !isDisplayPositionedNull(ast.annotations.mainFrame),
   });
   // T4 (D3): `leaves` built by `assembleShiftedGeometry` in concatenation
   // order -- reorder into jar's real draw order here, over the SAME
