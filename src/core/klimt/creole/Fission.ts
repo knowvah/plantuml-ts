@@ -76,7 +76,6 @@
  * independent for this mechanism, not just by construction.
  */
 import type { CreoleAtom } from './atom/Atom.js';
-import type { FontConfiguration } from '../shape/UText.js';
 
 /** Upstream: `klimt/creole/NeutronType.java` (`enum`). As-const string
  *  union per project convention (no `const enum`). */
@@ -138,17 +137,24 @@ function getNeutronsForAtom(atom: CreoleAtom): AtomNeutron[] {
   for (let i = 1; i < text.length; i++) {
     const currentType = neutronTypeFromChar(text[i] as string);
     if (pendingType !== currentType || pendingType === 'CJK_IDEOGRAPH') {
-      pushTextNeutron(result, text.slice(pendingStart, i), pendingType, atom.font);
+      pushTextNeutron(result, withText(atom, text.slice(pendingStart, i)), pendingType);
       pendingStart = i;
       pendingType = currentType;
     }
   }
-  pushTextNeutron(result, text.slice(pendingStart), pendingType, atom.font);
+  pushTextNeutron(result, withText(atom, text.slice(pendingStart)), pendingType);
   return result;
 }
 
-function pushTextNeutron(result: AtomNeutron[], piece: string, type: NeutronType, font: FontConfiguration): void {
-  const subAtom: CreoleAtom = { kind: 'text', text: piece, font };
+/** Upstream: `AtomText#withText` — a copy of the atom with only its text
+ *  replaced, so every neutron keeps the run's font AND its `url`
+ *  (`[[url]]` label runs stay linked after a `MaximumWidth` wrap).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:169-171 */
+function withText(atom: CreoleAtom & { kind: 'text' }, text: string): CreoleAtom {
+  return { ...atom, text };
+}
+
+function pushTextNeutron(result: AtomNeutron[], subAtom: CreoleAtom, type: NeutronType): void {
   const isBreakable = type === 'WHITESPACE' || type === 'CJK_IDEOGRAPH';
   if (isBreakable) result.push(ZWSP);
   result.push({ type, atom: subAtom });
