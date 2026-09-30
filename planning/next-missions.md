@@ -89,6 +89,40 @@ journaled rises; 0 losses in any engine at any close.
   dezobu/rozugu, mmp T6g for semutu); cdd6's implementation kept, both tests green.
 - cdd5's bullets resolved here: struck below in the cdd5 section where they were listed.
 
+## `salt-engine-port` — proposed (cdd7 D9, 2026-09-30)
+
+Hand-off from `class-divergence-drive-7` (`plans/class-divergence-drive-7/decisions.md#D9`):
+the port has no `@startsalt` engine, and the one class-corpus row that needs it is
+genuinely large and separable — a tracked mission, not a deferral.
+
+- **Corpus row:** `unknown/lubicu-73-fule059` (`embedded-engine-unported`, cdd6 ledger).
+  A description diagram whose rectangle label, note body and body row each embed a
+  `{{salt ...}}` block. render-diff 2026-09-30: structural 2 / numeric 0, both diffs
+  `childCount` on the two leaf groups — the three embed slots draw nothing.
+- **Java measurement (2026-09-30):** 62 files / 5,669 lines under
+  `net/sourceforge/plantuml/salt/`, `salt/element/`, `salt/factory/`
+  (`find … -name '*.java' | wc -l`; `xargs cat | wc -l`). Entry: `PSystemSaltFactory`
+  → `PSystemSalt` → `DataSourceImpl`/`SaltDictionary` → `factory/*` builds
+  `element/*` (`ElementPyramid`, `ElementTree`, `ElementButton`, `ElementMenuBar`, …),
+  `Positionner2` places them, `TableStrategy` sizes them, and every element draws
+  through klimt `UGraphic` — no graphviz, so no DOT-parity gate; the harness is
+  SVG-only.
+- **Harness shape:** `mindmap-engine-port` T0b — a `render-fixture-salt.ts` helper, a
+  golden ratchet (`salt.golden.ratchet.test.ts`, `oracle/goldens/svg-salt/`) and a
+  diff-baseline ratchet, pinned from the routed salt bucket of `~/git/pdiff/`
+  (`python3 scripts/populate-corpus.py` classifies it) before any drawing lands.
+- **Embed seams, measured 2026-09-30 (stderr of the lubicu render):** the description
+  *label* embed and the *body-row* embed already reach the registered
+  `class-nested-diagram-renderer` and fail only because the nested `@startsalt` renders
+  to the "unknown diagram type" SVG (no `viewBox`). The description *note* embed does
+  NOT: it hits `note-layout-measure-rows.ts:220-226`'s `UNWIRED_NESTED_RENDERER`
+  ("no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet").
+  Wiring that seam is in this mission's scope; it is the same recursion the label
+  path already performs. (The cdd7 T0a spec said both seams were wired; the note one
+  is not — cdd7 journal.)
+- **Exit bar (draft):** lubicu conformant and pinned; the salt bucket's conformant count
+  ≥ the mindmap-engine-port ratio (137/142) or every short row mechanised.
+
 ## `mindmap-engine-port` — DONE 2026-09-30 (T0a–T6i + T-exit/T-close-out, batches 0–7)
 
 Branch `feat/mindmap-engine-port` (off main `2f59882a6`, merge commit at close; never

@@ -155,6 +155,79 @@
       "acceptedAt": "2026-09-26",
       "acceptedBy": "maintainer",
       "reason": "One flat labelled `minlen=0` edge (`sh0006->sh0007`) routes around the mirrored side of its label box. docs/graphviz-issues/23 / TRACKER 23: dot-engine accepted this as an instance of its docs/known-divergences.md A3 (spline-routing tie-break). A symmetric label corridor makes the two candidate split corners an exact tie, and C graphviz and the port resolve the tie on floating-point noise, so there is no upstream fix to wait for. Re-verified 2026-09-26 (cdd4 T1) on dot-engine 1.6.1: render-diff structural=0, numeric=23, all on that edge's path and arrowhead polygon (max Δ16.06, label side mirrored); every other element exact. Signed by the maintainer 2026-09-26 (cdd4 D6). Re-verified 2026-09-27 against 1.2026.8beta1 (cdd5 T0f): render-diff structural=0 numeric=23, identical to the 7beta11 measurement; oracle bytes unchanged by the re-pin."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/fakone-16-boro774"
+      },
+      "scope": "svg-conformance unknown ledger (!pragma layout smetana numeric residue -- cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "`in.puml` carries `!pragma layout smetana`, so the jar laid this diagram out with its in-JVM graphviz-2.38 transpile while this port lays it out with @knowvah/dot-engine (ruling 2026-08-09; DIVERGENCES.md `!pragma layout smetana|vizjs`). Structural match was reached in cdd6 T3c c5426277d (edges take the SmetanaEdge draw order: extremities first, bare path, no `<!--link-->` comment) -- render-diff structural=0 since c5426277d; height 178 vs 160 is the Smetana rank separation. The remaining diffs are numeric only and are Smetana arithmetic, which is not a target: a Smetana-specific number is never chased (CLAUDE.md, one layout engine). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30, 'approve all eleven'), carrying cdd6 D8 and the cdd6 ledger row (`plans/class-divergence-drive-6/fixtures.md`, final `accept-candidate (D8 smetana numeric residue)`). The survey and census keep printing the row's real verdict; this entry records the decision, it does not change the bars."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/japode-92-famo984"
+      },
+      "scope": "svg-conformance unknown ledger (!pragma layout smetana numeric residue -- cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "`in.puml` carries `!pragma layout smetana`, so the jar laid this diagram out with its in-JVM graphviz-2.38 transpile while this port lays it out with @knowvah/dot-engine (ruling 2026-08-09; DIVERGENCES.md `!pragma layout smetana|vizjs`). Structural match was reached in cdd6 T3c c5426277d (edges take the SmetanaEdge draw order: extremities first, bare path, no `<!--link-->` comment) -- render-diff structural=0 since c5426277d; the residue is Smetana node placement. The remaining diffs are numeric only and are Smetana arithmetic, which is not a target: a Smetana-specific number is never chased (CLAUDE.md, one layout engine). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30, 'approve all eleven'), carrying cdd6 D8 and the cdd6 ledger row (`plans/class-divergence-drive-6/fixtures.md`, final `accept-candidate (D8 smetana numeric residue)`). The survey and census keep printing the row's real verdict; this entry records the decision, it does not change the bars."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/tikiti-02-bagu049"
+      },
+      "scope": "svg-conformance unknown ledger (!pragma layout smetana numeric residue -- cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "`in.puml` carries `!pragma layout smetana`, so the jar laid this diagram out with its in-JVM graphviz-2.38 transpile while this port lays it out with @knowvah/dot-engine (ruling 2026-08-09; DIVERGENCES.md `!pragma layout smetana|vizjs`). Structural match was reached in cdd6 T3c c5426277d (edges take the SmetanaEdge draw order: extremities first, bare path, no `<!--link-->` comment) -- render-diff structural=0 since c5426277d; the residue is Smetana node placement and spline control points. The remaining diffs are numeric only and are Smetana arithmetic, which is not a target: a Smetana-specific number is never chased (CLAUDE.md, one layout engine). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30, 'approve all eleven'), carrying cdd6 D8 and the cdd6 ledger row (`plans/class-divergence-drive-6/fixtures.md`, final `accept-candidate (D8 smetana numeric residue)`). The survey and census keep printing the row's real verdict; this entry records the decision, it does not change the bars."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/xagomi-49-caki729"
+      },
+      "scope": "svg-conformance unknown ledger (!pragma layout smetana numeric residue -- cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "`in.puml` carries `!pragma layout smetana`, so the jar laid this diagram out with its in-JVM graphviz-2.38 transpile while this port lays it out with @knowvah/dot-engine (ruling 2026-08-09; DIVERGENCES.md `!pragma layout smetana|vizjs`). Structural match was reached in cdd6 T3c c5426277d (edges take the SmetanaEdge draw order: extremities first, bare path, no `<!--link-->` comment) -- structural-match since cdd6 T3b/T3c (dispatch fixed by T3b, edge order by T3c); the residue is Smetana geometry. The remaining diffs are numeric only and are Smetana arithmetic, which is not a target: a Smetana-specific number is never chased (CLAUDE.md, one layout engine). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30, 'approve all eleven'), carrying cdd6 D8 and the cdd6 ledger row (`plans/class-divergence-drive-6/fixtures.md`, final `accept-candidate (D8 smetana numeric residue)`). The survey and census keep printing the row's real verdict; this entry records the decision, it does not change the bars."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/gubeca-19-lemu434"
+      },
+      "scope": "svg-conformance unknown ledger (nested {{yaml}} image size -- Smetana path, cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for gubeca (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/jixibu-01-xave465"
+      },
+      "scope": "svg-conformance unknown ledger (nested {{yaml}} image size -- Smetana path, cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "The description leaf embeds a `{{yaml ...}}` sub-diagram. cdd6 T2b made the outer canvas exact (0/5 -> 0/3, `svg/@width` 211 = jar) and cdd6 T3b/T5e closed the ink family; the residual is the embedded `<image>` width/height, off by 1 px, which is the nested yaml diagram's OWN size. `@startyaml` is a JsonDiagram laid out by Smetana in the jar and by @knowvah/dot-engine here (CLAUDE.md, one layout engine, ruling 2026-08-09; DIVERGENCES.md `Smetana-backed diagram types`), so the delta is the accepted Smetana geometry delta of the nested diagram, surfaced through the embed slot -- not a class or description defect. Mechanism: cdd6 decision-journal row 73 (T3b) and the cdd6 ledger row for jixibu (`open -> cdd7 (nested yaml image Δ1, Smetana path)`). Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30). The survey keeps printing `structural-match`; a fix in the yaml engine that makes the row conformant retires this entry via the ledger gate."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/kokofa-47-deni140"
+      },
+      "scope": "svg-conformance unknown ledger (upstream crash page -- same identity class as rubebe, cdd4 D6; cdd7 D8)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "The source declares the same JSON name twice. The jar throws on the duplicate (`CommandCreateJson.java:141-142,199-203` -> `IllegalStateException`) and emits its Java crash page (~60 text elements of stack trace). cdd6 T1c 11d12ed60 ported the refusal: `state-json-commands.ts#stateAlreadyExists` refuses the duplicate in pass one and the class refusal wins `mergeRefusals`, so this port renders its own `JSON already exists` error page. The two error pages can never byte-match: a JVM stack trace is not reproducible output (same identity class as `unknown/rubebe-45-sura795`, cdd4 D6 `upstream-crash`; DIVERGENCES.md `Refusal error page: shape and attributed engine`). render-diff 47/14 with `dotEqual` true (both sides skip graphviz). Mechanism: cdd6 ledger row kokofa (`accept-candidate`) and cdd6 T1c. Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30)."
+    },
+    {
+      "match": {
+        "id": "svg-unknown/semutu-45-zeno907"
+      },
+      "scope": "svg-conformance unknown ledger (embedded {{mindmap}} slot -- oracle deterministic-text seam reserves 42x42, cdd7 D8; REVOCABLE)",
+      "acceptedAt": "2026-09-30",
+      "acceptedBy": "maintainer",
+      "reason": "The title embeds a `{{ }}` mindmap. Since mindmap-engine-port the embedded diagram renders (structural 0); the remaining 4 numeric diffs are a 16x26 px canvas gap. Under `-DPLANTUML_DETERMINISTIC_TEXT=true` the fork's `StringBounderFromWidthTable` inherits `matchesProperty` = false (`klimt/font/StringBounder.java:43-45`), so `EmbeddedDiagram#calculateDimensionSlow` takes the PNG branch, throws at `EmbeddedDiagram.java:139` and reserves `42x42` (`:150-152`) while `drawU` draws the real image; the stock jar reserves the real size, as this port does. This is an instrument artefact of the oracle render, not a port divergence (mindmap-engine-port journal row 36; memory oracle-seam-embedded-42x42; DIVERGENCES.md `Embedded {{ }} diagram slots`). It is never fitted. Signed by the maintainer's approval of plans/class-divergence-drive-7/decisions.md#D8 (2026-09-30), citing the cdd6 ledger row semutu (`accept-candidate`). Revocable: see `until`.",
+      "until": "oracle seam fixed in fork; re-render goldens with embedded {{ }} diagrams"
     }
   ],
   "retired": [
