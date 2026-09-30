@@ -68,3 +68,10 @@ catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function,
 cited and what the tests pin. No attribution lines.
 
 **Observability:** N/A — no new observable operations. **Rollback:** Reversible (new files; revert the commit).
+
+## Orchestrator note (added at the b1 T1d merge, journal row 14)
+T1d left `MindMapDiagram` as a standalone class: it must `extend TitledDiagram` here (D5), which
+requires a concrete `ISkinParam` (`getSkinParam()` is abstract on `src/core/TitledDiagram.ts`;
+see `CucaDiagramBase.ts:66` for the precedent) and `CommandRankDir` wired to it instead of the
+local `rankdir` field (`MindMapDiagram.java:76`, `CommandRankDir.java:76-79`). Reconcile the
+opaque `UmlSource` brand in `TitledDiagram.ts` with `block-extractor.ts`'s concrete `UmlSource`.
