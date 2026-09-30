@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1312 modules · 4824 exported names.
+1321 modules · 4836 exported names.
 
 ## `src/`
 
@@ -387,7 +387,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `ColorMapper.ts` | `ColorMapper`, `mapPaint` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
+| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
 | `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
 | `HColors.ts` | `HColors` |  |
 | `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
@@ -486,6 +488,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `HandJiggle.ts` | `HandPoint`, `HandCubic`, `HandJiggle` | @see ~/git/plantuml/.../klimt/drawing/hand/HandJiggle.java The wobble every handwritten shape is built from: walk a straight run in ~10-unit segments and push each intermediate point sideways by a random offset, PERPENDICULAR to the run. |
 | `JavaRandom.ts` | `JavaRandom` | `java.util.Random`, reproduced bit-for-bit. |
 | `shapes.ts` | `rectangleHand`, `lineHand`, `polygonHand`, `ellipseHand`, `HandSegment`, `HandRun`, `pathHand` | The six shape builders `UGraphicHandwritten` dispatches to, ported together because each is a few lines over {@link HandJiggle} and they share one `JavaRandom`. |
+| `UDotPathHand.ts` | `UDotPathHand` |  |
+| `UEllipseHand.ts` | `UEllipseHand` |  |
+| `UGraphicHandwritten.ts` | `UGraphicHandwritten` |  |
+| `ULineHand.ts` | `ULineHand` |  |
+| `UPathHand.ts` | `UPathHand` |  |
+| `UPolygonHand.ts` | `UPolygonHand` |  |
+| `URectangleHand.ts` | `URectangleHand` |  |
 
 ## `src/core/klimt/drawing/svg/`
 
