@@ -9,5 +9,5 @@ close (journal rows 13, 14, 19). The batch closes via
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T2a](T2a-port-leaf-draw.md) | bonaco: `FrontierCalculator` wired into `buildNamespaceGeos`; `EntityImagePort` draw (D4) | typescript-pro (opus) | `class/class-entity-port.ts`, `class/class-geo-builders.ts` (+helper split), new `class/renderer-entity-port.ts`, `class/renderer.ts` (dispatch), `docs/catalog.md` (+tests) | b1 close | [ ] |
-| [T2b](T2b-stereotype-sprite-leaf-style.md) | dezobu stereotype sprite chain; xuloxo RoundCorner/alignment keys + edge-label word-wrap | typescript-pro (opus) | seven `class/` parse/size/stereo files, six `core/skinparam*`/`theme*` files, four edge-label files (see spec) | b1 close | [ ] |
+| [T2a](T2a-port-leaf-draw.md) | bonaco: `FrontierCalculator` wired into `buildNamespaceGeos`; `EntityImagePort` draw (D4) | typescript-pro (opus) | `class/class-entity-port.ts`, `class/class-geo-builders.ts` (+helper split), new `class/renderer-entity-port.ts`, `class/renderer.ts` (dispatch), `docs/catalog.md` (+tests) | b1 close | [x] |
+| [T2b](T2b-stereotype-sprite-leaf-style.md) | dezobu stereotype sprite chain; xuloxo RoundCorner/alignment keys + edge-label word-wrap | typescript-pro (opus) | seven `class/` parse/size/stereo files, six `core/skinparam*`/`theme*` files, four edge-label files (see spec) | b1 close | [x] |

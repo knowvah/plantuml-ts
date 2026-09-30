@@ -816,10 +816,14 @@ describe('routing conformance — jar-error classification', () => {
     // batch-1 pins (bisefo, fepiko, josebu, kexaba, sejube), each the
     // byte-identical twin of its dot-cache row (all `agree`, CLASS/CLASS).
     // Derivation: 5095 + 909 + 105 = 6109.
-    expect(pinnedAgree.length).toBe(5095);
+    //
+    // 5095 -> 5099 / 6109 -> 6113 at class-divergence-drive-7/close-b2
+    // (2026-09-30): 4 more clone rows (bonaco, rojida, tefeco, xuloxo), same
+    // shape. Derivation: 5099 + 909 + 105 = 6113.
+    expect(pinnedAgree.length).toBe(5099);
     expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6109);
+    expect(manifest.fixtures.length).toBe(6113);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

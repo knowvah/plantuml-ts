@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-30T19:24:51.176Z",
-  "measuredAgainstCommit": "e42ba1225",
+  "generatedAt": "2026-09-30T23:31:47.701Z",
+  "measuredAgainstCommit": "1ead924b1",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -281,8 +281,8 @@
       "slug": "bonaco-71-xefu608",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 39,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "bopusi-74-bifa012",
@@ -1037,7 +1037,7 @@
       "slug": "dezobu-62-vuzu421",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 10,
+      "diffCount": 6,
       "bucket": "4-10"
     },
     {
@@ -5601,8 +5601,8 @@
       "slug": "tefeco-12-rato895",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 3,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "tegefa-14-koxo759",
@@ -6630,8 +6630,8 @@
       "slug": "xuloxo-85-vibu502",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 43,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "xumeli-52-keso732",

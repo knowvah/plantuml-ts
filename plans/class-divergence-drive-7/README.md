@@ -105,8 +105,8 @@ Measurement:
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch + ledger + signed acceptances + salt hand-off; b0 on all engines | T0a, T0b | — | [x] |
-| [1](batch-1/overview.md) | edge paint, edge labels, usymbol leaf, stereo-key order, description note opale, sequence sprite atoms, rojida pin exemption | T1a–T1g | all ∥ | [x] (T1e, T1g pending maintainer: rows 10, 11) |
-| [2](batch-2/overview.md) | port leaf draw (bonaco); stereotype sprite + leaf style + edge-label wrap (dezobu, xuloxo) | T2a, T2b | both ∥ | [ ] |
+| [1](batch-1/overview.md) | edge paint, edge labels, usymbol leaf, stereo-key order, description note opale, sequence sprite atoms, rojida pin exemption | T1a–T1g | all ∥ | [x] (T1e′, T1g′ landed in batch 2) |
+| [2](batch-2/overview.md) | port leaf draw (bonaco); stereotype sprite + leaf style + edge-label wrap (dezobu, xuloxo) | T2a, T2b | both ∥ | [x] |
 | [3](batch-3/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 
 ## Documents
