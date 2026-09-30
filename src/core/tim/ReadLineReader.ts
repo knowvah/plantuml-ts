@@ -37,6 +37,16 @@ import { StringLocated } from './StringLocated.js';
 export const SOURCE_STRING_DESCRIPTION = 'string';
 
 /**
+ * `BufferedReader#readLine`'s line terminators: "a line feed ('\n'), a
+ * carriage return ('\r'), or a carriage return followed immediately by a
+ * linefeed" -- none is part of the line. Splitting on '\n' alone left the
+ * '\r' of every CRLF line in place, which the preprocessor's former blanket
+ * `trimEnd()` hid (T6i: empty-mindmap-0's `@startmindmap\r`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/preproc/ReadLineReader.java:90
+ */
+const RE_LINE_TERMINATOR = /\r\n|\r|\n/u;
+
+/**
  * @param description the resource the lines came from (defaults to `"string"`,
  *                    upstream's description for source read from a string).
  * @param parent      location of the `!include` line that pulled this resource
@@ -51,7 +61,7 @@ export function readLines(
   const texts = source
     .replace(/\u2013/gu, '-')
     .replace(/^\uFEFF/u, '')
-    .split('\n');
+    .split(RE_LINE_TERMINATOR);
   // `BufferedReader#readLine` (`ReadLineReader.java:85`): a terminator ENDS a
   // line, it never opens one -- `"a\n"` reads as one line, not `["a", ""]`.
   // `split` leaves that phantom empty tail, and it counts: a bundled theme

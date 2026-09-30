@@ -151,7 +151,18 @@ const RE_NEWLINE_CALL_ANY_CASE = /%n\(\)|%newline\(\)/gi;
  *    alias (pinned by `tests/unit/preprocessor.test.ts`) reaches this far, and
  *    it is split here.
  *
- * Then: right-trim each line. Blank lines are KEPT (A2s): upstream emits
+ * Trailing whitespace is KEPT (T6i): upstream's preprocessor never trims a
+ * line (`ReadLineReader.java:89-115` reads it verbatim, `TimLoader` hands the
+ * result list on); each command decides. `SingleLineCommand2#myTrim2`
+ * (`SingleLineCommand2.java:74-79`) trims only when `doTrim`, and the
+ * `super(false, …)` commands (`CommandMindMapOrgmode.java:55`,
+ * `CommandMindMapPlus`, `CommandWBSItemNew/Old`, `CommandBoardPlus`, …) see
+ * the trailing space: `* **1** ` draws bold `1` plus a ` ` atom
+ * (kijaru-67-buco967). Only the segments of the port-only case-folded `%N()`
+ * split above are right-trimmed, as before -- that split has no upstream
+ * counterpart.
+ *
+ * Blank lines are KEPT (A2s): upstream emits
  * blank lines and the command layer decides per-construct — a blank in a
  * `note`/class body is CONTENT (`CommandFactoryNoteOnEntity.java:236-238`;
  * `BodierLikeClassOrObject.java:114-172`). Dropping them here silently
@@ -162,9 +173,9 @@ function flatten(resultList: readonly StringLocated[]): { lines: string[]; posit
   const positions: (number | undefined)[] = [];
   for (const located of resultList) {
     const position = located.getLocation()?.getPosition();
-    for (const segment of located.getString().split(RE_NEWLINE_CALL_ANY_CASE)) {
-      const finalLine = segment.trimEnd();
-      lines.push(finalLine);
+    const segments = located.getString().split(RE_NEWLINE_CALL_ANY_CASE);
+    for (const segment of segments) {
+      lines.push(segments.length === 1 ? segment : segment.trimEnd());
       positions.push(position);
     }
   }
