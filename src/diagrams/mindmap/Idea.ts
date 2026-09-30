@@ -1,8 +1,32 @@
 import type { HColor } from '../../core/abel/Colors.js';
-import type { StyleBuilder } from '../../core/abel/ISkinParam.js';
 import type { Display } from '../../core/klimt/creole/Display.js';
 import type { Stereotype } from '../../core/stereo/Stereotype.js';
-import type { IdeaShape } from './IdeaShape.js';
+import { MergeStrategy } from '../../core/style/MergeStrategy.js';
+import type { Style } from '../../core/style/Style.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
+import { IdeaShape } from './IdeaShape.js';
+
+/**
+ * `WElement.STEP_BY_PARENT` (`1000_1000`), which `Idea` aliases.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/wbs/WElement.java:110
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/Idea.java:94
+ */
+export const STEP_BY_PARENT = 10001000;
+
+/**
+ * `int deltaPriority = STEP_BY_PARENT * 1000` in Java `int` arithmetic:
+ * 10001000 * 1000 overflows to 1411065408 (the jar's own priorities read
+ * back at 1411065408 + stored). `Math.imul` is the 32-bit multiply.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/Idea.java:97
+ */
+const FIRST_DELTA_PRIORITY = Math.imul(STEP_BY_PARENT, 1000);
+
+/** Java dereferences a `null` merged style (an NPE); the port throws at the same point. */
+function requireStyle(style: Style | undefined, what: string): Style {
+  if (style === undefined) throw new Error(`NullPointerException: no ${what} style in the StyleBuilder`);
+  return style;
+}
 
 /**
  * The four upstream constructor fields that are supplied per-node by a
@@ -34,18 +58,8 @@ export interface IdeaDecoration extends IdeaContent {
  * links, its shape/background-color/stereotype decorations, and the
  * `StyleBuilder` in effect when it was created.
  *
- * Tree-part-only port (this task's scope): the constructor, the two
- * creation factories, and every plain getter. `getStyle()`/`getStyleArrow()`
- * (java:96-113, `StyleBuilder.getMergedStyleSpecial`/`getMergedStyle` plus
- * the `getDefaultStyleDefinitionNode` signature builder) are T4a's — they
- * read `styleBuilder` through the real style engine (`src/core/style/`,
- * landing in a parallel batch) plus `SName`/`StyleSignatureBasic`, neither
- * of which this task imports (D1: mindmap gets the full style engine, but
- * not from this file). `styleBuilder` itself is kept as the existing
- * `StyleBuilder` opaque stand-in (`core/abel/ISkinParam.ts`, already `type
- * StyleBuilder = object` for exactly this "consumed later" reason) rather
- * than widened to a real class here — T4a fills in `getStyle()`/
- * `getStyleArrow()` against it without changing this field's type.
+ * `styleBuilder` is the real style engine's builder (`core/style/`, D1);
+ * `getStyle`/`getStyleArrow` resolve the node and link styles from it.
  *
  * Upstream's class (and `Branch`, `MindMap`) is package-private
  * (`net.sourceforge.plantuml.mindmap`, no `public`); this port's module
@@ -61,7 +75,7 @@ export class Idea {
   private readonly children: Idea[] = [];
   private readonly shape: IdeaShape;
   private readonly backColor: HColor | undefined;
-  /** T4a's `getStyle()`/`getStyleArrow()` read this; see file doc. */
+  /** @see Idea.java:62 */
   private readonly styleBuilder: StyleBuilder;
   private readonly stereotype: Stereotype | undefined;
 
@@ -74,6 +88,70 @@ export class Idea {
     this.parent = parent;
     this.shape = decoration.shape;
     this.stereotype = decoration.stereotype;
+  }
+
+  /**
+   * The node signature: root / leaf / boxless variants, each with the
+   * stereotype and `level` added. `level` is the CALLER's level, not this
+   * idea's (`getStyle` walks the parents with the child's level).
+   * @see Idea.java:65-92
+   */
+  private getDefaultStyleDefinitionNode(level: number): StyleSignatureBasic {
+    if (level === 0)
+      if (this.shape === IdeaShape.NONE)
+        return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node', 'rootNode', 'boxless')
+          .addStereotype(this.stereotype)
+          .addLevel(level);
+      else
+        return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node', 'rootNode')
+          .addStereotype(this.stereotype)
+          .addLevel(level);
+
+    if (this.shape === IdeaShape.NONE && this.children.length === 0)
+      return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node', 'leafNode', 'boxless')
+        .addStereotype(this.stereotype)
+        .addLevel(level);
+
+    if (this.shape === IdeaShape.NONE)
+      return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node', 'boxless')
+        .addStereotype(this.stereotype)
+        .addLevel(level);
+
+    if (this.children.length === 0)
+      return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node', 'leafNode')
+        .addStereotype(this.stereotype)
+        .addLevel(level);
+
+    return StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'node')
+      .addStereotype(this.stereotype)
+      .addLevel(level);
+  }
+
+  /**
+   * The own node's special merge at `STEP_BY_PARENT * 1000`, then every
+   * ancestor's definition AT THIS NODE'S LEVEL, starred, one
+   * `STEP_BY_PARENT` lower each, merged over it (`OVERWRITE_EXISTING_VALUE`).
+   * `| 0` keeps the subtraction in Java `int` arithmetic.
+   * @see Idea.java:96-106
+   */
+  getStyle(): Style {
+    let deltaPriority = FIRST_DELTA_PRIORITY;
+    let result = this.styleBuilder.getMergedStyleSpecial(this.getDefaultStyleDefinitionNode(this.level), deltaPriority);
+    for (let up = this.parent; up !== undefined; up = up.parent) {
+      const ss = up.getDefaultStyleDefinitionNode(this.level).addStar();
+      deltaPriority = (deltaPriority - STEP_BY_PARENT) | 0;
+      const styleParent = this.styleBuilder.getMergedStyleSpecial(ss, deltaPriority);
+      result = requireStyle(result, 'node').mergeWith(styleParent, MergeStrategy.OVERWRITE_EXISTING_VALUE);
+    }
+    return requireStyle(result, 'node');
+  }
+
+  /** @see Idea.java:108-113 */
+  getStyleArrow(): Style {
+    const defaultStyleDefinitionArrow = StyleSignatureBasic.of('root', 'element', 'mindmapDiagram', 'arrow')
+      .addStereotype(this.stereotype)
+      .addLevel(this.level);
+    return requireStyle(defaultStyleDefinitionArrow.getMergedStyle(this.styleBuilder), 'arrow');
   }
 
   /** @see Idea.java:115-118 */

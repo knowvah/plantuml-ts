@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1306 modules · 4808 exported names.
+1309 modules · 4812 exported names.
 
 ## `src/`
 
@@ -546,6 +546,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Positionable.ts` | `Positionable` |  |
 | `PositionableImpl.ts` | `PositionableImpl` |  |
 | `PositionableUtils.ts` | `intersect`, `addMargin`, `moveAwayFrom` |  |
+| `Rankdir.ts` | `Rankdir` | Rankdir — the layout direction a `SkinParam` carries (`left to right direction` / `top to bottom direction`, `CommandRankDir`). |
 | `ULayoutGroup.ts` | `ULayoutGroup` |  |
 | `VerticalAlignment.ts` | `VerticalAlignment` | VerticalAlignment — the 3-way alignment `TextBlockHorizontal` uses to position each block within the merged row's height (top/center/bottom). |
 | `XDimension2D.ts` | `XDimension2D` |  |
@@ -1506,9 +1507,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CommandMindMapOrgmodeMultiline.ts` | `ORGMODE_MULTILINE_START_RE`, `ORGMODE_MULTILINE_END_RE`, `OrgmodeMultilineBlock`, `collectOrgmodeMultilineBlock`, `applyMindMapOrgmodeMultiline` |  |
 | `CommandMindMapPlus.ts` | `PLUS_RE`, `applyMindMapPlus` |  |
 | `CommandMindMapRoot.ts` | `ROOT_RE`, `applyMindMapRoot` |  |
-| `Idea.ts` | `IdeaContent`, `IdeaDecoration`, `Idea` |  |
+| `Finger.ts` | `Finger` |  |
+| `FingerImpl.ts` | `FingerImpl` |  |
+| `Idea.ts` | `STEP_BY_PARENT`, `IdeaContent`, `IdeaDecoration`, `Idea` |  |
 | `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
-| `MindMap.ts` | `MindMapStyleSource`, `MindMap` |  |
+| `MindMap.ts` | `MindMapSkinParam`, `MindMap` |  |
 | `MindMapDiagram.ts` | `MindMapDiagram` |  |
 | `MindMapDiagramFactory.ts` | `MindMapDiagramOptions`, `createMindMapDiagram` |  |
 | `Stripe.ts` | `Stripe` | A single stripe of a `StripeFrontier`: a horizontal x-range `[x1, x2]` (inclusive both ends, per `contains`) holding the highest y the packed `Tetris` frontier has reached across that range. |
