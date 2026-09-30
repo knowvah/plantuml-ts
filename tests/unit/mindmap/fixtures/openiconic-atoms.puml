@@ -1,0 +1,6 @@
+@startmindmap
+* <&x{scale=2,color=#FF0000}>A
+** <color:blue><&flag></color>B
+** <&nosuch>C
+** <&euro>D
+@endmindmap

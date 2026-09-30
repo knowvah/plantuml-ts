@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1311 modules · 4817 exported names.
+1312 modules · 4820 exported names.
 
 ## `src/`
 
@@ -75,7 +75,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
 | `nested-diagram-registry.ts` | `registerNestedDiagramRenderer`, `getNestedDiagramRenderer` | nested-diagram-registry.ts — CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome `{{ }}`-embed registration slot, moved here FROM `src/diagrams/class/class-nested-diagram-renderer.ts` so that `src/core/annotations/block |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
-| `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
+| `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
@@ -428,6 +428,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Atom.ts` | `CreoleAtomUrl`, `CreoleAtom` | Atom — one drawable/measurable piece of a creole `Stripe` (one physical display line). |
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
+| `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |

@@ -84,6 +84,7 @@ import { renderDrawableToFragment } from '../klimt/document-shell.js';
 import type { AtomOps } from '../klimt/creole/Sea.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
+import { asAtomOpenIconic } from '../klimt/creole/atom/AtomOpenIconic.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
 import type { UDrawable } from '../klimt/shape/UDrawable.js';
@@ -295,31 +296,29 @@ function drawAtom(atom: CreoleAtom, ug: UGraphic, resolveAtomImage: AtomImageRes
   drawAtomImage(atomImageOf(atom, resolveAtomImage), ug);
 }
 
-/**
- * Chrome's own `AtomOps` — see this module's doc comment for why it is
- * local. `getStartingAltitude` for a text atom is
- * `AtomText#getStartingAltitude` (java:321-323, this port's
- * `atomTextStartingAltitude`), `AtomEmoji`'s own `-3 * factor`
- * (`AtomEmoji.java:62-64`) for an emoji, and 0 for everything else
- * (upstream `AtomImg`/`AtomSprite`/`AtomMath` all `return 0`); a composite
- * `Atom` answers all three itself.
- */
+/** Chrome's own `AtomOps` (local: see this module's doc comment). A text
+ * atom's `getStartingAltitude` is `AtomText#getStartingAltitude` (java:321-323,
+ * `atomTextStartingAltitude`), an emoji's `AtomEmoji`'s `-3 * factor`
+ * (`AtomEmoji.java:62-64`), everything else 0 (upstream `AtomImg`/`AtomSprite`/
+ * `AtomMath` all `return 0`); a composite `Atom` — and a `<&glyph>` token, as
+ * `AtomOpenIconic` — answers all three. */
 export function chromeAtomOps(sprites: SpriteRegistry | undefined, baseFont: FontConfiguration): AtomOps {
   const resolverFor = makeAtomImageResolverFor(sprites);
+  const polymorphic = (a: CreoleAtom): CreoleAtom | Atom => asAtomOpenIconic(a, baseFont) ?? a;
   return {
     calculateDimension(creoleAtom: CreoleAtom, stringBounder: StringBounder): XDimension2D {
-      const atom = creoleAtom as CreoleAtom | Atom;
+      const atom = polymorphic(creoleAtom);
       if (!isCreoleAtomData(atom)) return atom.calculateDimension(stringBounder);
       return atomDim(atom, stringBounder, resolverFor(fontOfAtom(atom, baseFont)));
     },
     getStartingAltitude(creoleAtom: CreoleAtom, stringBounder: StringBounder): number {
-      const atom = creoleAtom as CreoleAtom | Atom;
+      const atom = polymorphic(creoleAtom);
       if (!isCreoleAtomData(atom)) return atom.getStartingAltitude(stringBounder);
       if (atom.kind === 'emoji') return emojiStartingAltitude(atom.factor);
       return atom.kind === 'text' ? atomTextStartingAltitude(atom.font) : 0;
     },
     drawU(creoleAtom: CreoleAtom, ug: UGraphic): void {
-      const atom = creoleAtom as CreoleAtom | Atom;
+      const atom = polymorphic(creoleAtom);
       if (!isCreoleAtomData(atom)) {
         atom.drawU(ug);
         return;
