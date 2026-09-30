@@ -16,16 +16,21 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:153-203
  */
 import { isEmpty } from '../../core/annotations/index.js';
+import { addWarnings } from '../../core/annotations/WarningBannerBlock.js';
 import type { RenderFragment, SyncPlugin } from '../../core/dispatcher.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
+import { UGraphicHandwritten } from '../../core/klimt/drawing/hand/UGraphicHandwritten.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { ColorMapper, mapPaint } from '../../core/klimt/color/ColorMapper.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
+import { BODY_ANCHOR } from '../../core/TextBlockExporter.js';
 import { createMindMapDiagram } from './MindMapDiagramFactory.js';
 import type { MindMapDiagram } from './MindMapDiagram.js';
 
@@ -51,7 +56,7 @@ function driverBounderFor(measurer: StringMeasurer): DriverStringBounder {
 
 function textBlockDimension(diagram: MindMapDiagram, measurer: StringMeasurer): XDimension2D {
   const probe = UGraphicSvg.build(0, basicSvgOption(), VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);
-  return diagram.getTextBlock().calculateDimension(probe.getStringBounder());
+  return exportedTextBlock(diagram).calculateDimension(probe.getStringBounder());
 }
 
 /**
@@ -72,6 +77,30 @@ function muteColorMapper(diagram: MindMapDiagram): ColorMapper {
   return ColorMapper.IDENTITY;
 }
 
+/**
+ * `TitledDiagram#isHandwritten`: `skinParam.handwritten()` — `isTrue`, i.e.
+ * `"true".equalsIgnoreCase(getValue("handwritten"))` — else
+ * `UgDiagram#isHandwritten`'s `!option handwritten true`, which this port's
+ * mindmap does not see (the factory's `PreprocessingArtifact` is a fresh,
+ * empty one).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:114-119
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java:347-353,1075-1078
+ */
+function isHandwritten(diagram: MindMapDiagram): boolean {
+  return diagram.getSkinParam().getValue('handwritten')?.toLowerCase() === 'true';
+}
+
+/**
+ * The block the export draws before the string-composed chrome:
+ * `DiagramChromeFactory.create`'s first step, `addWarnings`
+ * (DiagramChromeFactory.java:128), over `getTextBlock`. A no-op (the same
+ * block) when the diagram has no warning.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:469-477
+ */
+function exportedTextBlock(diagram: MindMapDiagram): TextBlock {
+  return addWarnings(diagram.getTextBlock(), diagram.getWarnings(), muteColorMapper(diagram));
+}
+
 /** One klimt pass over the text block: `minDim`, `scale`, and where the
  *  block is drawn. */
 interface DrawPass {
@@ -87,15 +116,8 @@ interface DrawPass {
  *
  *  The background goes through the muted colour mapper
  *  (`backcolor.toSvg(option.getColorMapper())`, SvgGraphics.java:176-188).
- *
- *  Not yet wired: `if (isHandwritten) ug = new UGraphicHandwritten(ug)`
- *  after the margin translate (TextBlockExporter.java:173-175). The
- *  decorator is ported (`klimt/drawing/hand/UGraphicHandwritten.ts`), but
- *  every `skinparam handwritten` diagram also carries the deprecation
- *  banner (CommandSkinParam.java:92-93 → DiagramChromeFactory.java:176-200)
- *  that shifts the drawing down, and without it the exact hand shapes
- *  score worse than the plain ones — see
- *  `tests/unit/mindmap/handwritten-monochrome.test.ts`. */
+ *  After the translate, `if (isHandwritten) ug = new UGraphicHandwritten(ug)`
+ *  (TextBlockExporter.java:173-175), so the warnings banner jiggles too. */
 function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: DrawPass): RenderFragment {
   const backcolor = mapPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
   const option = basicSvgOption({
@@ -105,7 +127,9 @@ function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: D
     rootAttributes: new Map([['data-diagram-type', DIAGRAM_TYPE_MINDMAP]]),
   });
   const ug = UGraphicSvg.build(0, option, VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);
-  diagram.getTextBlock().drawU(ug.apply(pass.translate));
+  let drawn: UGraphic = ug.apply(pass.translate);
+  if (isHandwritten(diagram)) drawn = new UGraphicHandwritten(drawn);
+  exportedTextBlock(diagram).drawU(drawn);
 
   const svg = ug.getSvgString();
   const { width, height } = extractViewBoxDims(svg);
@@ -145,27 +169,33 @@ function exportTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): Ren
 /**
  * With chrome, upstream decorates the RAW text block
  * (`TitledDiagram#addChrome` → `DiagramChromeFactory.create`) and only then
- * exports it with the margins. The fragment is the raw block at the origin,
- * sized by its exact `calculateDimension`, which `applyChrome` composes
- * around; `core/TextBlockExporter.ts#finalizeTitledDiagramFragment` applies
- * the margin afterwards. `scale` is not applied HERE: the chrome is composed
- * outside klimt, so a scale here would shrink the diagram but not its title.
- * The unresolved `scaleSpec`/`dpi` ride on the fragment and
- * `finalizeTitledDiagramFragment` resolves the factor against the
- * chrome-included dimension, as `TextBlockExporter#computeScaleFactor` reads
- * `calculateFinalDimension()` (TextBlockExporter.java:184-188).
+ * exports it with the margins, drawing the whole chromed document through
+ * ONE `UGraphic` carrying `option.scale` (TextBlockExporter.java:159-176).
+ * The chrome is composed outside klimt here, so the fragment is sized by
+ * the raw block's exact `calculateDimension` and its body is only
+ * `BODY_ANCHOR`: `applyChrome` composes around it, and
+ * `core/TextBlockExporter.ts#finalizeTitledDiagramFragment` resolves the
+ * factor against the chrome-included dimension (`computeScaleFactor` reads
+ * `calculateFinalDimension()`, TextBlockExporter.java:184-188), then calls
+ * `drawBodyAt` with it and the anchor's final translate — the block drawn
+ * through klimt at that scale, so its numbers are rounded once. The first
+ * pass at scale 1 only supplies the background and `<defs>`.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:469-477
  */
 function rawTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): RenderFragment {
   const dim = textBlockDimension(diagram, measurer);
   const fragment = drawFragment(diagram, measurer, { minDim: dim, scale: 1, translate: new UTranslate(0, 0) });
-  const scaled: RenderFragment = {
+  const drawBodyAt = (scale: number, dx: number, dy: number): string =>
+    drawFragment(diagram, measurer, { minDim: dim, scale, translate: new UTranslate(dx, dy) }).body;
+  const anchored: RenderFragment = {
     ...fragment,
+    body: BODY_ANCHOR,
     width: dim.getWidth(),
     height: dim.getHeight(),
     dpi: diagram.getSkinParam().getDpi(),
+    drawBodyAt,
   };
-  return diagram.scale === undefined ? scaled : { ...scaled, scaleSpec: diagram.scale };
+  return diagram.scale === undefined ? anchored : { ...anchored, scaleSpec: diagram.scale };
 }
 
 /** The diagram as the fragment `src/index.ts` chromes and assembles. */

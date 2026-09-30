@@ -4,9 +4,9 @@
  *
  * `handwritten` is exercised by drawing `MindMapDiagram#getTextBlock`
  * through `UGraphicHandwritten` exactly as `TextBlockExporter#exportTo` does
- * (margin translate, then the decorator, java:173-175) — the export does not
- * wire it yet, because both goldens also need the deprecation banner (below)
- * that the port's chrome does not draw.
+ * (margin translate, then the decorator, java:173-175), without the
+ * deprecation banner (below); the wired export, banner included, is pinned
+ * in `warnings-banner.test.ts`.
  *
  * - `handwritten`: `TextBlockExporter#exportTo` wraps the export graphic in
  *   `UGraphicHandwritten` (TextBlockExporter.java:174-175), whose `apply`
@@ -21,8 +21,8 @@
  * Both goldens also carry the `skinparam handwritten` deprecation banner
  * (CommandSkinParam.java:92-93 → DiagramChromeFactory.java:176-200), drawn
  * ABOVE the diagram, which shifts every diagram shape down by the banner
- * height. The banner is not this export path; the shapes are compared with
- * that shift removed. `BANNER_HEIGHT` is `WarningBannerBlock#calculateDimension`
+ * height. These tests draw the bare text block; the shapes are compared
+ * with that shift removed. `BANNER_HEIGHT` is `WarningBannerBlock#calculateDimension`
  * (DiagramChromeFactory.java:252-266): one monospace-10 line (the golden's
  * banner text baseline sits at y 22 = margin 10 + translate 2 + line 10)
  * plus 10 — then times the dpi factor `300 / 96` (TextBlockExporter.java:207)

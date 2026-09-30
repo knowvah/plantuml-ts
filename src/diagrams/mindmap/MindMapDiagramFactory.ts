@@ -18,6 +18,7 @@ import {
 } from '../../core/style/mindmap-style-builder.js';
 import { StyleParsingException } from '../../core/style/parser/StyleParser.js';
 import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
+import { Warning } from '../../core/warning/Warning.js';
 import { applyMindMapDirection, MINDMAP_DIRECTION_RE } from './CommandMindMapDirection.js';
 import {
   applyMindMapOrgmodeMultiline,
@@ -47,6 +48,15 @@ const START_END_RE = /^@(start|end)mindmap\s*$/i;
  * (`((SkinParam) diagram.getSkinParam()).setRankdir(...)`).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandRankDir.java:56-65
  */
+/** The `new Warning(…)` texts `CommandSkinParam#executeArg` adds, keyed by
+ *  the lower-cased skin parameter name.
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:92-99 */
+const SKINPARAM_WARNINGS: ReadonlyMap<string, string> = new Map([
+  ['handwritten', "Please use '!option handwritten true' to enable handwritten "],
+  ['participantpadding', 'Please use CSS style instead of skinparam ParticipantPadding'],
+  ['padding', 'Please use CSS style instead of skinparam padding'],
+]);
+
 const RANKDIR_RE = /^(left\s+to\s+right|top\s+to\s+bottom)\s+direction\s*$/i;
 
 interface DispatchOutcome {
@@ -220,10 +230,27 @@ export function createMindMapDiagram(source: UmlSource): MindMapDiagram | ParseR
     pragma: Pragma.createEmpty(),
   });
   const diagram = new MindMapDiagram(source, new PreprocessingArtifact(), skinParam);
+  addSkinParamWarnings(diagram, dispatch.skinparam);
   const refusal = executeCommands(diagram, source, dispatch);
   if (refusal !== null) return refusal;
   // Declarations after the last command still mute the builder the render reads.
   return executeDeclarationsBefore(dispatch, Number.POSITIVE_INFINITY) ?? diagram;
+}
+
+/**
+ * `CommandSkinParam#executeArg`'s deprecation warnings, one per `skinparam`
+ * the preprocessor collected, in source order: `handwritten`,
+ * `ParticipantPadding` and `padding` (`equalsIgnoreCase` on the name,
+ * whatever the value). The collector keeps no line form, so a top-level
+ * `skinparam { … }` block entry warns too, where upstream's
+ * `CommandSkinParamMultilines` does not.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandSkinParam.java:88-99
+ */
+function addSkinParamWarnings(diagram: MindMapDiagram, skinparam: ReadonlyMap<string, string>): void {
+  for (const name of skinparam.keys()) {
+    const message = SKINPARAM_WARNINGS.get(name.toLowerCase());
+    if (message !== undefined) diagram.addWarning(new Warning(message));
+  }
 }
 
 /** `PSystemCommandFactory#createSystem`'s loop over the source lines. */
