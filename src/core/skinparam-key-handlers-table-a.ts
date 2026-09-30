@@ -112,6 +112,15 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.arrow = color;
     },
   ],
+  // cdd7-T1a (D2): `ColorParam.arrowLollipop` (`ColorParam.java:71`), read
+  // with no default by `SvekEdge.java:266-268` (`getHtmlColor(ColorParam
+  // .arrowLollipop, null, false)`, null when unset -> backgroundColor).
+  [
+    ['arrowlollipopcolor'],
+    (acc, _v, color) => {
+      acc.arrowLollipopColor = color;
+    },
+  ],
   // `FontParam.ARROW` size override. Sibling of arrowcolor above, NOT a
   // bucket key -- `ELEMENT_BUCKET_SNAMES` has no 'arrow' entry and does not
   // need one (D3: extend the existing model, do not restructure it).

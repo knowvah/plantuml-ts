@@ -423,6 +423,7 @@ export type ThemeOverride = {
     border?: string;
     text?: string;
     arrow?: string;
+    arrowLollipopColor?: string;
     note?: string;
     noteBackground?: string;
     lifeline?: string;

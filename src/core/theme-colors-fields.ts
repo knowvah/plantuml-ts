@@ -36,6 +36,10 @@ export interface ThemeColorFields {
   border: string;
   text: string;
   arrow: string;
+  /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` (`ColorParam
+   *  .arrowLollipop`). Absent means `SvekEdge.java:266-268`'s fallback --
+   *  the diagram background -- applied at draw time. */
+  arrowLollipopColor?: string;
   note: string;
   // NOTE: upstream default is '#FBFB77' (HColors.COL_FBFB77 in ColorParam.java).
   // This value intentionally diverges. Tracked in plans/skinparam/decision-journal.md.

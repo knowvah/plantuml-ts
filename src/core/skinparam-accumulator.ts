@@ -74,6 +74,9 @@ export interface SkinparamAccumulator {
   border: string | undefined;
   text: string | undefined;
   arrow: string | undefined;
+  /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` --
+   *  `ColorParam.arrowLollipop`, read by `SvekEdge.java:266-268`. */
+  arrowLollipopColor: string | undefined;
   noteBackground: string | undefined;
   classBackground: Paint | undefined;
   /** T11 (cdd3, Q-4 probe c): set alongside `classBackground` -- see
@@ -252,6 +255,7 @@ const SCALAR_FIELD_NAMES = [
   'border',
   'text',
   'arrow',
+  'arrowLollipopColor',
   'noteBackground',
   'classBackground',
   'classBackgroundExplicit',

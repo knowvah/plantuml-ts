@@ -402,7 +402,12 @@ export function renderEdge(
     trimmedPoints,
     geo.middleDecor,
     strokeColor,
-    theme.colors.background,
+    // cdd7-T1a (D2): `SvekEdge.java:266-268` -- `arrowLollipopColor`, or
+    // the diagram background when the skinparam is unset.
+    {
+      backColor: theme.colors.arrowLollipopColor ?? theme.colors.background,
+      diagramBackColor: theme.colors.background,
+    },
     theme.scaleK,
   );
   let extraDefs = arrowheads.extraDefs + noteBoxResult.extraDefs;
