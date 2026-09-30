@@ -8891,10 +8891,10 @@
       "type": "sequence",
       "slug": "vofupo-09-gafe466",
       "status": "baseline",
-      "weightedScore": 197,
-      "diffCount": 147,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "weightedScore": 98,
+      "diffCount": 72,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "2ee4fedd"
     },
     {
       "type": "sequence",

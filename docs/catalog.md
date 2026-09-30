@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1335 modules · 4932 exported names.
+1336 modules · 4941 exported names.
 
 ## `src/`
 
@@ -1601,10 +1601,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `inclination1Of`, `inclination2Of`, `inclinationAngle1`, `inclinationAngle2`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
 | `sequence-color-grammar.ts` | `SEQUENCE_COLOR_ATOM`, `SEQUENCE_COLOR_COMPOUND`, `SEQUENCE_COLOR` | `ColorParser`'s two grammars (`COLOR_REGEXP`/`PART2`, combined as `COLORS_REGEXP`), shared by every sequence command that carries a `ColorParser.exp1()`/`simpleColor(...)` tail: the note-command family (`command-note-factory.ts`) AND the pa |
 | `sequence-command-registry.ts` | `SequenceCommand`, `SEQUENCE_COMMANDS` | THE sequence command list — one registration-ordered array, tried top-to-bottom with first match winning, mirroring `PSystemCommandFactory#getCandidate` (`:225-246`), which walks the single `cmds` list `SequenceDiagramFactory#initCommandsLi |
-| `sequence-creole.ts` | `CreoleOrigin`, `sequenceCreoleFont`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
+| `sequence-creole.ts` | `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
 | `sequence-layout-events.ts` | `ActivationStack`, `EventProcessingContext`, `EventCursor`, `processEvents`, `pushActivation`, `openActivation`, `activationLevel`, `flushOpenActivations`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
 | `sequence-layout-exo.ts` | `handleMessageExoEvent`, `exoRightExtent`, `anchorExoBorders` | Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …). |
 | `sequence-layout-message.ts` | `handleMessageEvent`, `messageTileAdvance` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |
+| `sequence-layout-participant-label.ts` | `ParticipantLayoutCtx`, `visibleStereotypeLines`, `labelRows`, `resolveParticipantBackground`, `resolveParticipantBorder`, `BADGE_GAP`, `anyBadgeFor`, `buildLabelRuns` | sequence-layout-participant-label.ts — a participant head's LABEL: its stereotype rows, its creole runs (sprites included, cdd7 T1f), its badge and the paints its box is filled and stroked with. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight`, `participantLabelCy`, `participantBadgeGeo` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout`, `headSlackOf` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
 | `sequence-layout-shared.ts` | `fontSpecOf`, `ARROW_FONT_SIZE`, `arrowFontSpecOf`, `NOTE_FONT_SIZE`, `noteFontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X`, `TOP_MARGIN`, `PLAYING_SPACE_STARTING_Y`, `PLAYING_SPACE_TAIL_Y`, `BOTTOM_MARGIN` | Small shared leaf utilities for sequence diagram layout. |
