@@ -5,7 +5,7 @@ Sequential, orchestrator, after batch 3's close.
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
 | T-exit | final measurement; D10 clause by clause | orchestrator | `measurements/final*`, README Status, journal | b3 close | [x] |
-| T-close-out | ledger finals, records, memory, merge | orchestrator | see below | T-exit | [ ] |
+| T-close-out | ledger finals, records, memory, merge | orchestrator | see below | T-exit | [x] |
 
 ## T-exit
 1. On the final tree, run close-procedure steps 3–9; CLASS against `b0.json`,

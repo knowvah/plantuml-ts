@@ -35,6 +35,60 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-6` — DONE 2026-09-30 (T0a–T3e + T-exit/T-close-out, batches 0–4)
+
+Branch `feat/class-divergence-drive-6` (merge commit, not pushed). Brief and journal:
+`plans/class-divergence-drive-6/` (85 journal rows, `fixtures.md` 61 rows, every `final`
+set). main (with `mindmap-engine-port`) was merged into the branch before the exit
+measurement (journal row 84), so its merge to main is a fast, conflict-free superset.
+
+**Counts.** CLASS conformant (both trees, CLASS-routed) **932 → 974** (class 708/3/12
+unchanged since b1 — the drive was the unknown tree: 224 → 266); unknown 279/79/467 (b0,
+per mmp's b0-eng) → 321/65/439; **ratchet 930 → 973**; routing 4907+… → agree 5090 /
+misroute 909 / jar-error 105 = 6104 rows after the mindmap union. D10 target 990 missed by
+16 with every short row mechanised (README `## Status`). Non-class movers vs b0: component
+codabo (→ structural-match), gutute (→ conformant), object gapisu (→ conformant), all
+journaled rises; 0 losses in any engine at any close.
+
+### Open -> cdd7 (14 rows), by family
+
+- **desc-embed-ink-missing (5):** gubeca-19-lemu434, jixibu-01-xave465 (nested yaml image
+  Δ1, Smetana path); josebu-55-seje426 (a: nested sequence participant sprite runs);
+  rojida-14-fuli428 (conformant, unpinned: `dotEqual` false); tefeco-12-rato895 (b:
+  description notes not opale).
+- **class-portin-unported:** bonaco-71-xefu608 — DOT fixed 1019c3c1b; `EntityImagePort`
+  draw + `FrontierCalculator` unwired.
+- **class-head-arrow-triangle:** xuloxo-85-vibu502 — parse fixed 022801178; usymbol-leaf
+  alignment/RoundCorner/wrapWidth + edge-label creole remain.
+- **link-middle-decor-partial:** sejube-03-bote542 — shield fixed 7aae7e829;
+  `arrowLollipopColor` unported.
+- **edge-label-not-creole:** kexaba-26-kobu577 — main label `lp` Δ(7,7); compare dot-engine
+  `lp` with real dot first ([[dot-engine-blame-needs-real-dot]]).
+- **embedded-skinparam-hoisted:** dezobu-62-vuzu421 — partial d9f38d3fe; classifier
+  stereotype-sprite channel.
+- **embedded-engine-unported:** lubicu-73-fule059 (`{{salt}}`).
+- **skinparam-gradient-flattened:** bisefo-56-dumu120 — `HColorGradient` is now ported
+  (mmp T6a) for the klimt substrate; the class engine's skinparam path still flattens it.
+- **cluster-style-signature-unmerged:** fepiko-26-vobi566.
+
+### Accept-candidates (D12, unsigned)
+
+- **smetana-pragma-ignored (4):** fakone, japode, tikiti (structural fixed c5426277d T3c),
+  xagomi (structural-match) — numeric residue is the `!pragma layout smetana` geometry
+  (D8; the one-layout-engine ruling).
+- **json-duplicate-state-fallthrough:** kokofa-47-deni140 — the jar crashes on a duplicate
+  state; accept once class refuses the duplicate.
+- **embedded-engine-unported → resolved by mindmap-engine-port:** semutu-45-zeno907 renders
+  its embedded mindmap; the remaining 16×26 canvas gap is the oracle deterministic-text seam
+  reserving 42×42 for `{{ }}` images (mmp journal row 36) — accept until the seam is fixed
+  in the fork.
+
+### Flags
+
+- Journal row 84: `preprocessor-collector.ts`'s `{{ }}` nesting was ported twice (cdd6 for
+  dezobu/rozugu, mmp T6g for semutu); cdd6's implementation kept, both tests green.
+- cdd5's bullets resolved here: struck below in the cdd5 section where they were listed.
+
 ## `mindmap-engine-port` — DONE 2026-09-30 (T0a–T6i + T-exit/T-close-out, batches 0–7)
 
 Branch `feat/mindmap-engine-port` (off main `2f59882a6`, merge commit at close; never
@@ -105,7 +159,7 @@ ledger, README Status table).
   stdout frames were corrupted by `!log` (fixed); default-worker `npm test`
   drops files at load 80+ (`--maxWorkers=6` is clean).
 
-### Open -> cdd6 (62 rows), by family
+### Open -> cdd6 (62 rows), by family — ~~resolved by cdd6~~ (2026-09-30: 41 fixed, 6 accept-candidate, 14 `open -> cdd7`; see the `class-divergence-drive-6` section for the survivors, everything else below is struck)
 
 - **Style values never reach the class Theme (10):** cluster-style-signature-
   unmerged 8 (catana, cevoti, fepiko, gigoru, guxico, juzica, noxebo, tobevo),
