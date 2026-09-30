@@ -78,3 +78,13 @@ opaque `UmlSource` brand in `TitledDiagram.ts` with `block-extractor.ts`'s concr
 - (journal row 22) `<style>` parse errors surface as `StyleParsingException` from
   `buildMindmapStyleBuilder`; map them to the command error page as
   `CommandStyleMultilinesCSS.java:92-93` does.
+- (journal row 24) T4a left a parse-only placeholder skin param in `MindMapDiagram.ts` /
+  `MindMapDiagramFactory.ts` (`getCurrentStyleBuilder` → `new StyleBuilder()`, everything else
+  throws): replace it with the real `MindMapSkinParam` (`ISkinParamWithSimple` +
+  `getCurrentStyleBuilder()` from `buildMindmapStyleBuilder(pre)` + `getRankdir()`), and pass
+  `AtomOps` (`new MindMap(skinParam, atomOps)`). The `[#color]` commands
+  (`CommandMindMapPlus.ts:23`, `CommandMindMapOrgmode.ts:24`, `CommandMindMapOrgmodeMultiline.ts:75`)
+  must resolve through `getIHtmlColorSet().getColor()` → `HColorSimple`
+  (CommandMindMapOrgmode.java:107); today they store a plain `parseSimpleColor` object and
+  `FtileBoxOld.ts#paintOf` throws on it (6 `[#color]` fixtures). These files are in your
+  write-set for this reason.
