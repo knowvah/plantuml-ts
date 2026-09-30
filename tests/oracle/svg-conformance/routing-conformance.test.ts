@@ -796,10 +796,16 @@ describe('routing conformance — jar-error classification', () => {
     // the clone of its byte-identical dot-cache twin (`golden.svg` ==
     // `in.svg`, verified with filecmp), exactly how every svg-class golden
     // row was pinned. Derivation: 5034 + 912 + 105 = 6051.
-    expect(pinnedAgree.length).toBe(5034);
-    expect(pinnedMisroutes.length).toBe(912);
+    //
+    // 5034 -> 5046 / 912 -> 910 / 6051 -> 6061 at mindmap-engine-port/close-b6
+    // (2026-09-30): nukose-24-funi267 and vacofo-66-puno159 known-misroute ->
+    // agree (HColorGradient ported in T6a; they render and route MINDMAP),
+    // plus 10 svg-mindmap golden rows appended for the batch-6 pins (127 ->
+    // 137), byte-identical dot-cache twins. Derivation: 5046 + 910 + 105 = 6061.
+    expect(pinnedAgree.length).toBe(5046);
+    expect(pinnedMisroutes.length).toBe(910);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6051);
+    expect(manifest.fixtures.length).toBe(6061);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -855,7 +861,8 @@ describe('routing conformance — jar-error classification', () => {
     // mindmap + 2 c4, derivation above); the 2 remaining mindmap misroutes
     // carry their reason. The uncensused remainder is STILL exactly
     // sequence/nuvoja-46-dezu541: 912 - 1 = 911.
-    expect(censused.length).toBe(911);
+    // 911 -> 909 at mindmap-engine-port/close-b6: nukose, vacofo retired.
+    expect(censused.length).toBe(909);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

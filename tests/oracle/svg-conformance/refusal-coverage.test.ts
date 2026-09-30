@@ -745,7 +745,11 @@ describe('refusal coverage — baseline shape', () => {
     // close, fa9db8748): 127 svg-mindmap golden rows appended, clones of
     // their byte-identical dot-cache twins (see the sibling gate's
     // derivation); all render on both sides. Derivation: 5782 + 269 = 6051.
-    expect(manifest.fixtures.length).toBe(6051);
+    // 6051 -> 6061 / 5782 -> 5794 / 269 -> 267 at mindmap-engine-port/close-b6
+    // (2026-09-30): nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok
+    // (HColorGradient ported in T6a), plus 10 svg-mindmap golden clones.
+    // Derivation: 5794 + 267 = 6061.
+    expect(manifest.fixtures.length).toBe(6061);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -759,7 +763,8 @@ describe('refusal coverage — baseline shape', () => {
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
     // 267 -> 269 at mindmap-engine-port/close-b5 (derivation above).
-    expect(pinnedErroring.length).toBe(269);
+    // 269 -> 267 at mindmap-engine-port/close-b6 (nukose, vacofo render).
+    expect(pinnedErroring.length).toBe(267);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -777,7 +782,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
     // 5657 -> 5655 at mindmap-engine-port/close-b5 (derivation above).
     // 5655 -> 5782 at mindmap-engine-port/close-b5 (127 svg-mindmap clones).
-    expect(pinnedRendering.length).toBe(5782);
+    // 5782 -> 5794 at mindmap-engine-port/close-b6 (2 gradient rows + 10 clones).
+    expect(pinnedRendering.length).toBe(5794);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -836,7 +842,8 @@ describe('refusal coverage — baseline shape', () => {
     // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
     // 196 -> 198 at mindmap-engine-port/close-b5: nukose-24-funi267 and
     // vacofo-66-puno159 (unported HColorGradient, HColorSet.java:81-104).
-    expect(gaps.length).toBe(198);
+    // 198 -> 196 at mindmap-engine-port/close-b6: nukose, vacofo retired.
+    expect(gaps.length).toBe(196);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //
