@@ -99,7 +99,7 @@ Measurement:
 | [4](batch-4/overview.md) | Idea styles + FingerImpl + MindMap/Branch drawing | T4a | — | [x] |
 | [5](batch-5/overview.md) | plugin, registration, chrome; first measurement | T5a | — | [x] |
 | [6](batch-6/overview.md) | residual round: 7 families (written at the b5 close) | T6a–T6i | T6a–T6e ∥, then T6f–T6i ∥ | [x] |
-| [7](batch-7/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
+| [7](batch-7/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [x] |
 
 ## Docs
 
@@ -108,3 +108,23 @@ Measurement:
 [diagrams/data-flow.md](diagrams/data-flow.md) ·
 [diagrams/component-map.md](diagrams/component-map.md) ·
 [decision-journal.md](decision-journal.md)
+
+## Mission summary (2026-09-30)
+
+- **Tasks:** 22 of 22 planned tasks completed (T0a–T0d, T1a–T1d, T2a, T3a–T3c, T4a, T5a,
+  T6a–T6g, T-exit, T-close-out) plus two batch-6 tasks written from findings (T6h, T6i):
+  24 of 24. One task (T6c) stopped-and-reported correctly and was completed by T6h.
+- **Result:** `@startmindmap` 0/0/142 → **137/1/4** conformant/structural/diverged;
+  **137 goldens pinned**; D9 target 137/137 met exactly. Accepted: femiba, fogari (error-page
+  version text), fovule, gukofo (`<latex>`). Open: susipa (CrashImage page → follow-on).
+- **Decisions:** 45 journal rows. Flagged for review: row 3 (branched off main while cdd6 is
+  unmerged — the eventual merge order), row 12/16 (HColor port extension), row 21
+  (`FontConfigurationBridge` adapter; `SheetBlock1` overload), row 27 (D9 target
+  derivation), row 36 (semutu accepted as an oracle artefact), row 38 (T6f premise
+  corrected), row 39 (global preprocessor trim change, surveyed clean).
+- **Quality gates at exit:** npm test 943/943 collected, 24177 passed, 0 failed, coverage
+  ≥ 90/90/90; typecheck, lint, build exit 0; catalog up to date; prettier clean; all-engine
+  survey 0 losses (28 engines), non-mindmap movers: semutu, rozugu (both rises with
+  mechanisms).
+- **Known issues / follow-ons:** `planning/next-missions.md` "mindmap-engine-port" (8
+  items); `DIVERGENCES.md` "Mindmap" (three entries).
