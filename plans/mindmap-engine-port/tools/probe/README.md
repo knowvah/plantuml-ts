@@ -110,8 +110,12 @@ This is the exact `<style>` block from corpus fixture
 non-starred signature from `Idea.getDefaultStyleDefinitionNode`
 (level 2, shape `BOX`, has children -> `SName.node` only, no
 `leafNode`/`boxless`) and `Idea.getStyle()`'s own-node
-`deltaPriority` (`WElement.STEP_BY_PARENT * 1000` = 3000,
-`mindmap/Idea.java:96-98`):
+`deltaPriority`. NOTE (corrected by T2a): `WElement.STEP_BY_PARENT * 1000` is
+`10001000 * 1000` in Java `int` arithmetic, which overflows to **1411065408**
+(`WElement.java:110`, `Idea.java:97`; the jar stores a level-2 value at 326 and
+reads it back at 1411065734). The `--delta 3000` below was a T0c stand-in that
+happens to give the same match set for this snippet; use `--delta 1411065408`
+for jar-exact priorities. The port must use `Math.imul(10001000, 1000)`.
 
 ```
 $ run-probe.sh StyleProbe snippet-depth.txt special \
@@ -268,3 +272,10 @@ size).
   (`Idea.getStyleArrow()`'s consumer, `FingerImpl.getLinkColor`/
   `getUStroke`) -- use `StyleProbe` with signature
   `root,element,mindmapDiagram,arrow` for that (see worked example 2).
+
+## DumpProbe (T2a)
+
+`run-probe.sh DumpProbe <mode> <puml>` with mode `dump` (the StyleBuilder's storage with
+priorities after the source's skin + `<style>` blocks), `ideas` (every `Idea.getStyle()`
+result) or `getters`. Its `dump`/`ideas` output is what
+`tests/unit/core/style/fixtures/{plantuml-skin-storage,mindmap-idea-styles}.json` pin.
