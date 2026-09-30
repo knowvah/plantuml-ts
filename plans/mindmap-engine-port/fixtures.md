@@ -39,10 +39,10 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/empty-root-mindmap-3 | diverged → conformant (b5) | boxless, +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/empty-root-mindmap-4 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/fapobe-56-dopo421 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/femiba-70-duvi238 | jar-error → diverged (b5) | +/- | jar-fallback-page | T6f | open -> T6f |
+| mindmap/femiba-70-duvi238 | jar-error → diverged (b5) | +/- | jar-fallback-page | T6f | accepted (error page: the version text and `[From string]` source name are permanent; line attribution fixed by T6f b83479c7e, journal row 38) |
 | mindmap/ferume-00-vobi687 | diverged → conformant (b5) | style, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/fobofo-46-xevi400 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/fogari-75-febu345 | jar-error → diverged (b5) | — | jar-fallback-page | T6f | open -> T6f |
+| mindmap/fogari-75-febu345 | jar-error → diverged (b5) | — | jar-fallback-page | T6f | accepted (error page: the version text and `[From string]` source name are permanent; line attribution fixed by T6f b83479c7e, journal row 38) |
 | mindmap/fojafo-57-davo773 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/fovule-12-noze408 | diverged → diverged (b5) | orgmode | latex | — | accepted (<latex> permanent divergence, [[latex-math-is-permanent-divergence]]) |
 | mindmap/fupani-26-luco022 | diverged → conformant (b5) | style, *{, boxless, stereotype, skinparam |  | — | fixed (fa9db8748, pinned close-b5) |
@@ -65,9 +65,9 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/jopuxi-09-cozi456 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/kabidu-52-jaro063 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/kapoze-75-zati796 | diverged → conformant (b5) | left side |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/kelome-99-naso291 | diverged → diverged (b5) | style | label-creole | T6e | open -> T6e |
+| mindmap/kelome-99-naso291 | diverged → diverged (b5) → conformant (b6) | style | label-creole | T6e | fixed (T6e 3e9c01460, pinned close-b6) |
 | mindmap/kijafe-43-tati619 | diverged → conformant (b5) | style, orgmode, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/kijaru-67-buco967 | diverged → diverged (b5) | — | label-creole | T6e | open -> T6e |
+| mindmap/kijaru-67-buco967 | diverged → diverged (b5) → conformant (b6) | — | label-creole | T6e | fixed (T6i 2427a37ab, pinned close-b6) |
 | mindmap/kixuba-47-texi176 | diverged → conformant (b5) | style, chrome |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/kuzura-59-feso980 | diverged → conformant (b5) | skinparam |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/lomobo-90-tacu965 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
@@ -94,14 +94,14 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/noleko-05-maju508 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/novega-82-fane133 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/nufibe-93-litu124 | diverged → conformant (b5) | style, chrome |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/nukose-24-funi267 | diverged → diverged (b5) | theme | gradient | T6a | open -> T6a |
+| mindmap/nukose-24-funi267 | diverged → diverged (b5) → conformant (b6) | theme | gradient | T6a | fixed (T6a 603157e6b+0d35d75da, pinned close-b6) |
 | mindmap/nuleci-01-sidu915 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/nutove-44-zove663 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/pebonu-12-sana537 | diverged → conformant (b5) | style, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/pedesu-31-tesu526 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/pesava-19-pafo393 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/pesope-57-micu861 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/petoda-11-duza898 | diverged → diverged (b5) | style | style-position | T6b | open -> T6b |
+| mindmap/petoda-11-duza898 | diverged → diverged (b5) → conformant (b6) | style | style-position | T6b | fixed (T6b 8cc7ffcbc, pinned close-b6) |
 | mindmap/picipa-74-musu968 | diverged → conformant (b5) | style, :depth, *{ |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/pofimu-70-xoba026 | diverged → conformant (b5) | style, boxless, +/-, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/poxujo-42-cito478 | diverged → conformant (b5) | left side, skinparam, chrome |  | — | fixed (fa9db8748, pinned close-b5) |
@@ -114,7 +114,7 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/raxobo-05-zeje898 | diverged → conformant (b5) | boxless |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/renopo-92-xipi220 | diverged → conformant (b5) | style, chrome |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/ricafe-07-fomi979 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/rinamu-56-tabi421 | diverged → diverged (b5) | orgmode | label-creole | T6e | open -> T6e |
+| mindmap/rinamu-56-tabi421 | diverged → diverged (b5) → conformant (b6) | orgmode | label-creole | T6e | fixed (T6e 3e9c01460, pinned close-b6) |
 | mindmap/rixudo-24-teru887 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/rogozo-02-deze241 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/rotaco-06-mace855 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
@@ -122,18 +122,18 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/sajeji-86-piga774 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/sinapo-42-xege788 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/sogixu-03-rixu603 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/somife-42-levu771 | diverged → diverged (b5) | style | style-position | T6b | open -> T6b |
+| mindmap/somife-42-levu771 | diverged → diverged (b5) → conformant (b6) | style | style-position | T6b | fixed (T6b 8cc7ffcbc, pinned close-b6) |
 | mindmap/sotali-22-vexo962 | diverged → conformant (b5) | boxless, left side |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/sufuli-69-rezu371 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/sumati-11-kela688 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/susipa-95-tedu015 | jar-error → diverged (b5) | style | jar-fallback-page | T6f | open -> T6f |
+| mindmap/susipa-95-tedu015 | jar-error → diverged (b5) | style | jar-fallback-page | T6f | open -> follow-on mission: render-time CrashImage page (UgDiagram.java:96, QR code) + index.ts parse/render catch split (journal row 38) |
 | mindmap/tarato-41-cada051 | diverged → conformant (b5) | [#color], +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/taraxo-09-xalu713 | diverged → conformant (b5) | style, chrome |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/ticuga-10-vufu526 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/timozo-41-puno814 | diverged → conformant (b5) | boxless, +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/tojora-67-taku662 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/turoca-19-lece026 | diverged → conformant (b5) | — |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/vacofo-66-puno159 | diverged → diverged (b5) | style, orgmode, stereotype | gradient | T6a | open -> T6a |
+| mindmap/vacofo-66-puno159 | diverged → diverged (b5) → conformant (b6) | style, orgmode, stereotype | gradient | T6a | fixed (T6a 603157e6b+0d35d75da, pinned close-b6) |
 | mindmap/vagapi-25-benu796 | diverged → conformant (b5) | boxless, [#color] |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/vikaku-89-noso154 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/vinuji-50-mife349 | diverged → conformant (b5) | style, *{, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
@@ -146,9 +146,9 @@ the b5 close (batch-6 grouping); `final` is `fixed (<commit>)`, `accepted (<reas
 | mindmap/xuceti-39-nugu723 | diverged → conformant (b5) | style, +/-, stereotype |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/zarage-93-sire269 | diverged → conformant (b5) | boxless, +/- |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/zasori-23-laja126 | diverged → conformant (b5) | style, boxless |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/zature-18-vidu755 | diverged → diverged (b5) | skinparam | export-skinparam | T6c | open -> T6c |
+| mindmap/zature-18-vidu755 | diverged → diverged (b5) → conformant (b6) | skinparam | export-skinparam | T6c | fixed (T6h e501c97fe, pinned close-b6) |
 | mindmap/zavina-17-dena407 | diverged → conformant (b5) | +/- |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/zebuzi-73-koxu022 | diverged → diverged (b5) | boxless, [#color], left side, chrome, scale | scale+chrome | T6d | open -> T6d |
+| mindmap/zebuzi-73-koxu022 | diverged → diverged (b5) → conformant (b6) | boxless, [#color], left side, chrome, scale | scale+chrome | T6d | fixed (T6d b510dc9c9+T6h e501c97fe, pinned close-b6) |
 | mindmap/zenigi-93-gofu307 | diverged → conformant (b5) | [#color] |  | — | fixed (fa9db8748, pinned close-b5) |
 | mindmap/zezafi-76-poto168 | diverged → conformant (b5) | style |  | — | fixed (fa9db8748, pinned close-b5) |
-| mindmap/zirabo-51-lera821 | diverged → diverged (b5) | [#color], skinparam | export-skinparam | T6c | open -> T6c |
+| mindmap/zirabo-51-lera821 | diverged → diverged (b5) → conformant (b6) | [#color], skinparam | export-skinparam | T6c | fixed (T6h e501c97fe, pinned close-b6) |

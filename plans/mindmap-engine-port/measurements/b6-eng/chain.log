@@ -1,0 +1,13 @@
+wait load 8.87
+== activity 09:40:35 { 6.21 8.53 8.00 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-activity.json — {"conformant":0,"structural-match":4,"diverged":369,"errored":0,"timeout":0,"oracle-error":0}
+== board 09:41:02 { 6.10 8.30 7.93 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 09:41:26 { 6.35 8.17 7.89 }
+[xmldom fatalError]	comment is not well-formed at position 1041 
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-c4.json — {"conformant":1,"structural-match":0,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}
+== chart 09:41:54 { 5.84 7.86 7.79 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 09:42:21 { 5.60 7.64 7.70 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 09:42:41 { 4.64 7.29 7.58 }
