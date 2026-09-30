@@ -92,7 +92,7 @@ Measurement:
 
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| [0](batch-0/overview.md) | branch + ledger + b0, oracle harness, jar probes, jar skin | T0a–T0d | T0b–T0d ∥ | [ ] |
+| [0](batch-0/overview.md) | branch + ledger + b0, oracle harness, jar probes, jar skin | T0a–T0d | T0b–T0d ∥ | [x] |
 | [1](batch-1/overview.md) | style values, signatures, packing geometry, parsing | T1a–T1d | all ∥ | [ ] |
 | [2](batch-2/overview.md) | Style + StyleStorage + StyleBuilder | T2a | — | [ ] |
 | [3](batch-3/overview.md) | style parser + loader, skinparam bridge, FtileBoxOld | T3a–T3c | all ∥ | [ ] |
