@@ -61,8 +61,10 @@ import type { MeasuredClassifier } from './class-layout-helpers.js';
 import { titleDimension, measureStereo, headerRows, baselineOffsetFor } from './class-object-map-sizing.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms } from './class-member-creole.js';
+import { buildMemberAtoms, memberBaseFont, resolveMemberAtoms, resolveOneAtom } from './class-member-creole.js';
 import { floorAtMinimumWidth } from './class-object-map-sizing.js';
+import { getSplitted } from '../../core/klimt/creole/Fission.js';
+import { resolveElementMaximumWidth } from '../../core/theme-element-resolve.js';
 import {
   JSON_CELL_MARGIN_X,
   JSON_CELL_MARGIN_Y,
@@ -85,23 +87,37 @@ const EMPTY_OBJECT_NODE: JsonNode = { kind: 'object', entries: [] };
 // Recursive dimension measurement (TextBlockCucaJSon#calculateDimension)
 // ---------------------------------------------------------------------------
 
+/** One drawn line of a cell -- a `Fission` stripe (`Fission.java:62-94`)
+ *  when `MaximumWidth` wraps, else the cell's single line. */
+interface JsonCellLine {
+  text: string;
+  rawWidth: number;
+  height: number;
+  atoms: readonly MemberRenderAtom[];
+}
+
+/** What every cell build needs: the cell `FontConfiguration`, the measurer
+ *  and the `wordWrap` width (`TextBlockCucaJSon.java:66`, `BodierJSon.java:85`
+ *  `style.wrapWidth()`; 0 = no wrap). Bundled to stay under the 5-param cap. */
+interface JsonCellContext {
+  font: FontConfiguration;
+  measurer: StringMeasurer;
+  maxWidth: number;
+}
+
 type JsonDimNode =
   | {
       kind: 'scalar';
-      text: string;
       width: number;
       height: number;
-      rawWidth: number;
-      atoms: readonly MemberRenderAtom[];
+      lines: JsonCellLine[];
     }
   | { kind: 'array'; items: JsonDimNode[]; width: number; height: number }
   | {
       kind: 'object';
       members: {
-        key: string;
         keyDim: Dim;
-        keyRawWidth: number;
-        keyAtoms: readonly MemberRenderAtom[];
+        keyLines: JsonCellLine[];
         value: JsonDimNode;
       }[];
       width1: number;
@@ -123,17 +139,38 @@ type JsonDimNode =
  * previous bare `measurer.measure` — see `class-member-creole.ts`'s own
  * "measurement-identity guarantee" module note.
  */
-function measureJsonCell(
-  text: string,
-  font: FontConfiguration,
-  measurer: StringMeasurer,
-): { dim: Dim; rawWidth: number; atoms: readonly MemberRenderAtom[] } {
-  const build = resolveMemberAtoms(buildMemberAtoms(text, font), font, measurer);
+function measureJsonCell(text: string, ctx: JsonCellContext): { dim: Dim; lines: JsonCellLine[] } {
+  const { font, measurer } = ctx;
+  const lines = splitJsonCell(buildMemberAtoms(text, font), ctx).map((atoms) => {
+    const build = resolveMemberAtoms(atoms, font, measurer);
+    return { text: cellText(build.atoms, text), rawWidth: build.width, height: build.height, atoms: build.atoms };
+  });
+  const width = Math.max(...lines.map((l) => l.rawWidth));
+  const height = lines.reduce((sum, l) => sum + l.height, 0);
   return {
-    dim: { width: build.width + JSON_CELL_MARGIN_X * 2, height: build.height + JSON_CELL_MARGIN_Y * 2 },
-    rawWidth: build.width,
-    atoms: build.atoms,
+    dim: { width: width + JSON_CELL_MARGIN_X * 2, height: height + JSON_CELL_MARGIN_Y * 2 },
+    lines,
   };
+}
+
+/**
+ * cdd6 T3g: `Display#create0(..., wordWrap, ...)` (`TextBlockCucaJSon.java
+ * :184-190`) runs each stripe through `Fission#getSplitted`
+ * (`Fission.java:62-94`) -- a no-op for `getMaxWidth() == 0`, otherwise a
+ * neutron-level split even when the line fits (jar `nadedo-37-nesa665`
+ * draws `a`, ` `, `min.`, ` `, `test` as five texts). The width callback is
+ * the same per-atom measure `buildWrappedMemberRows` hands to Fission.
+ */
+function splitJsonCell(
+  atoms: ReturnType<typeof buildMemberAtoms>,
+  ctx: JsonCellContext,
+): readonly ReturnType<typeof buildMemberAtoms>[] {
+  if (ctx.maxWidth === 0) return [atoms];
+  return getSplitted(
+    atoms,
+    ctx.maxWidth,
+    (a) => resolveOneAtom(a, ctx.font, ctx.measurer, undefined, undefined)?.width ?? 0,
+  );
 }
 
 /** `getTextBlockValue`'s scalar display text: a JSON string shows unquoted
@@ -147,20 +184,9 @@ function scalarText(node: { kind: 'scalar'; value: string | number | boolean | n
   return v;
 }
 
-function measureScalarNode(
-  node: JsonNode & { kind: 'scalar' },
-  font: FontConfiguration,
-  measurer: StringMeasurer,
-): JsonDimNode {
-  const cell = measureJsonCell(scalarText(node), font, measurer);
-  return {
-    kind: 'scalar',
-    text: cellText(cell.atoms, scalarText(node)),
-    width: cell.dim.width,
-    height: cell.dim.height,
-    rawWidth: cell.rawWidth,
-    atoms: cell.atoms,
-  };
+function measureScalarNode(node: JsonNode & { kind: 'scalar' }, ctx: JsonCellContext): JsonDimNode {
+  const cell = measureJsonCell(scalarText(node), ctx);
+  return { kind: 'scalar', width: cell.dim.width, height: cell.dim.height, lines: cell.lines };
 }
 
 /** The DRAWN label of a built cell — the creole-stripped run text, falling
@@ -173,12 +199,8 @@ function cellText(atoms: readonly MemberRenderAtom[], fallback: string): string 
 
 /** `TextBlockArray#calculateDimensionSlow`: `mergeTB` per element — width =
  *  max, height = sum (stacked top-to-bottom, no column split). */
-function measureArrayNode(
-  node: JsonNode & { kind: 'array' },
-  font: FontConfiguration,
-  measurer: StringMeasurer,
-): JsonDimNode {
-  const items = node.items.map((i) => measureJsonNode(i, font, measurer));
+function measureArrayNode(node: JsonNode & { kind: 'array' }, ctx: JsonCellContext): JsonDimNode {
+  const items = node.items.map((i) => measureJsonNode(i, ctx));
   const width = items.length === 0 ? 0 : Math.max(...items.map((i) => i.width));
   const height = items.reduce((sum, i) => sum + i.height, 0);
   return { kind: 'array', items, width, height };
@@ -187,20 +209,10 @@ function measureArrayNode(
 /** `TextBlockJson#calculateDimensionSlow`: width = width1 (max key cell
  *  width) + width2 (max value cell/sub-table width); height = sum of
  *  per-member `max(keyDim.height, valueDim.height)`. */
-function measureObjectNode(
-  node: JsonNode & { kind: 'object' },
-  font: FontConfiguration,
-  measurer: StringMeasurer,
-): JsonDimNode {
+function measureObjectNode(node: JsonNode & { kind: 'object' }, ctx: JsonCellContext): JsonDimNode {
   const members = node.entries.map((e) => {
-    const key = measureJsonCell(e.key, font, measurer);
-    return {
-      key: cellText(key.atoms, e.key),
-      keyDim: key.dim,
-      keyRawWidth: key.rawWidth,
-      keyAtoms: key.atoms,
-      value: measureJsonNode(e.value, font, measurer),
-    };
+    const key = measureJsonCell(e.key, ctx);
+    return { keyDim: key.dim, keyLines: key.lines, value: measureJsonNode(e.value, ctx) };
   });
   const width1 = members.length === 0 ? 0 : Math.max(...members.map((m) => m.keyDim.width));
   const width2 = members.length === 0 ? 0 : Math.max(...members.map((m) => m.value.width));
@@ -208,10 +220,10 @@ function measureObjectNode(
   return { kind: 'object', members, width1, width2, width: width1 + width2, height };
 }
 
-function measureJsonNode(node: JsonNode, font: FontConfiguration, measurer: StringMeasurer): JsonDimNode {
-  if (node.kind === 'scalar') return measureScalarNode(node, font, measurer);
-  if (node.kind === 'array') return measureArrayNode(node, font, measurer);
-  return measureObjectNode(node, font, measurer);
+function measureJsonNode(node: JsonNode, ctx: JsonCellContext): JsonDimNode {
+  if (node.kind === 'scalar') return measureScalarNode(node, ctx);
+  if (node.kind === 'array') return measureArrayNode(node, ctx);
+  return measureObjectNode(node, ctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -236,18 +248,28 @@ interface JsonDrawCursor {
  *  file doc); every cell also carries its OWN `rawWidth` for `textLength`,
  *  never a shared column width. */
 function buildScalarItems(node: JsonDimNode & { kind: 'scalar' }, cur: JsonDrawCursor): JsonBodyItem[] {
-  return [
-    {
+  return buildCellItems(node.lines, cur);
+}
+
+/** One text row per cell line, each line stacked under the previous one by
+ *  its own height (the `Sheet`'s stripes, `TextBlockCucaJSon.java:184-190`);
+ *  a single-line cell yields exactly the pre-T3g row. */
+function buildCellItems(lines: readonly JsonCellLine[], cur: JsonDrawCursor): JsonBodyItem[] {
+  let lineTop = cur.y;
+  return lines.map((line) => {
+    const item: JsonBodyItem = {
       kind: 'text',
       row: {
-        text: node.text,
-        y: cur.y + JSON_CELL_MARGIN_Y + cur.baselineOffset,
+        text: line.text,
+        y: lineTop + JSON_CELL_MARGIN_Y + cur.baselineOffset,
         indent: cur.x + JSON_CELL_MARGIN_X,
-        width: node.rawWidth,
-        atoms: node.atoms,
+        width: line.rawWidth,
+        atoms: line.atoms,
       },
-    },
-  ];
+    };
+    lineTop += line.height;
+    return item;
+  });
 }
 
 /** `TextBlockArray#drawU` (`TextBlockCucaJSon.java:213-224`): an hline
@@ -280,16 +302,7 @@ function buildObjectItems(node: JsonDimNode & { kind: 'object' }, cur: JsonDrawC
   let curY = cur.y;
   for (const m of node.members) {
     out.push({ kind: 'hline', x: cur.x, y: curY, width: cur.totalWidth });
-    out.push({
-      kind: 'text',
-      row: {
-        text: m.key,
-        y: curY + JSON_CELL_MARGIN_Y + cur.baselineOffset,
-        indent: cur.x + JSON_CELL_MARGIN_X,
-        width: m.keyRawWidth,
-        atoms: m.keyAtoms,
-      },
-    });
+    out.push(...buildCellItems(m.keyLines, { ...cur, y: curY }));
     out.push(
       ...buildJsonItems(m.value, {
         ...cur,
@@ -312,6 +325,18 @@ function buildJsonItems(node: JsonDimNode, cur: JsonDrawCursor): JsonBodyItem[] 
 // ---------------------------------------------------------------------------
 // Public entry point
 // ---------------------------------------------------------------------------
+
+/** The cell context for {@link measureJsonNode}: the base cell font
+ *  (`memberBaseFont`, no member modifiers on a json entry) and cdd6 T3g's
+ *  wrap width -- `BodierJSon.java:85` passes `style.wrapWidth()`
+ *  (`resolveElementMaximumWidth`; absent = 0 = no wrap). */
+function jsonCellContext(
+  theme: Theme,
+  fontSpec: { family: string; size: number },
+  measurer: StringMeasurer,
+): JsonCellContext {
+  return { font: memberBaseFont(fontSpec, {}), measurer, maxWidth: resolveElementMaximumWidth(theme, 'json') ?? 0 };
+}
 
 /**
  * Measure a `json` leaf (EntityImageJson#calculateDimensionSlow). Unlike
@@ -337,8 +362,8 @@ export function measureJsonClassifier(
   // carries the base `FontConfiguration` rather than the bare `FontSpec`
   // the header still uses. A json entry has no `{abstract}`/`{static}`
   // member modifiers, hence the empty member.
-  const cellFont = memberBaseFont(fontSpec, {});
-  const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, cellFont, measurer);
+  const cellCtx = jsonCellContext(theme, fontSpec, measurer);
+  const dimNode = measureJsonNode(classifier.jsonValue ?? EMPTY_OBJECT_NODE, cellCtx);
   const fieldsHeight = dimNode.height === 0 ? JSON_EMPTY_HEIGHT_FALLBACK : dimNode.height;
 
   // B25/M27: `EntityImageJson.java:127-132` clamps here, identically to

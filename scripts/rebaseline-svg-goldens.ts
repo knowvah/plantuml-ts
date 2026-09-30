@@ -30,6 +30,7 @@ import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync, execFileSync } from 'node:child_process';
 import { oracleJarBatchTimeoutMs } from './lib/oracle-jar-timeout.js';
+import { runInPlainMinute, type GuardClock, type GuardSleep } from './lib/oracle-minute-guard.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const GOLDENS_ROOT = join(REPO, 'oracle', 'goldens');
@@ -199,6 +200,15 @@ function findSvgGoldenTypeDirs(): string[] {
     .map((e) => join(GOLDENS_ROOT, e.name));
 }
 
+/** Injectable clock/sleep for `runInPlainMinute` (D9: PSystemError.java's
+ *  time-based error-page decorations). Both undefined in production --
+ *  `runInPlainMinute` then defaults to real `Date.now`/a real timer; tests
+ *  inject fakes so a decorated minute never causes a real sleep. */
+export interface GuardDeps {
+  now?: GuardClock;
+  sleep?: GuardSleep;
+}
+
 export interface Capture {
   bytes: Buffer | undefined;
   /** The jar's exit status. Non-zero means the jar reported a diagram error
@@ -241,36 +251,45 @@ export function parseErroredFiles(stderr: string): ReadonlySet<string> {
  *  trade worth making for an oracle. */
 const BATCH_SIZE = 120;
 
-/** Captures a batch of fixtures in ONE jar invocation.
+/** Captures a batch of fixtures in ONE jar invocation, guarded against
+ *  PSystemError.java's time-based error-page decorations (D9) -- see
+ *  scripts/lib/oracle-minute-guard.ts.
  *
  *  Each fixture's `in.puml` is mirrored into the scratch tree first, and
  *  `-o` is passed RELATIVE (`cap`) so the jar writes beside each input
  *  rather than into one shared directory -- with a shared `-o`, 446 files
  *  all named `in.svg` would overwrite each other. */
-function captureBatch(
+export function captureBatch(
   fixtures: readonly { relPath: string; fixtureDir: string }[],
   scratchRoot: string,
-): Map<string, Capture> {
+  guard: GuardDeps = {},
+): Promise<Map<string, Capture>> {
   for (const f of fixtures) {
     mkdirSync(join(scratchRoot, f.relPath), { recursive: true });
     copyFileSync(join(f.fixtureDir, 'in.puml'), join(scratchRoot, f.relPath, 'in.puml'));
   }
   const inputs = fixtures.map((f) => join(scratchRoot, f.relPath, 'in.puml'));
-  const proc = spawnSync(
-    'java',
-    ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', 'cap', ...inputs],
-    { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: oracleJarBatchTimeoutMs(fixtures.length) },
+  return runInPlainMinute(
+    () => {
+      const proc = spawnSync(
+        'java',
+        ['-DPLANTUML_DETERMINISTIC_TEXT=true', '-jar', JAR_PATH, '-tsvg', '-o', 'cap', ...inputs],
+        { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: oracleJarBatchTimeoutMs(fixtures.length) },
+      );
+      const errored = parseErroredFiles(proc.stderr ?? '');
+      const out = new Map<string, Capture>();
+      for (const f of fixtures) {
+        const outDir = join(scratchRoot, f.relPath, 'cap');
+        const svgs = existsSync(outDir) ? readdirSync(outDir).filter((n) => n.endsWith('.svg')) : [];
+        const bytes = svgs.length === 0 ? undefined : readFileSync(join(outDir, svgs[0]!));
+        const inPuml = join(scratchRoot, f.relPath, 'in.puml');
+        out.set(f.relPath, { bytes, exitCode: errored.has(inPuml) ? 200 : 0 });
+      }
+      return out;
+    },
+    guard.now,
+    guard.sleep,
   );
-  const errored = parseErroredFiles(proc.stderr ?? '');
-  const out = new Map<string, Capture>();
-  for (const f of fixtures) {
-    const outDir = join(scratchRoot, f.relPath, 'cap');
-    const svgs = existsSync(outDir) ? readdirSync(outDir).filter((n) => n.endsWith('.svg')) : [];
-    const bytes = svgs.length === 0 ? undefined : readFileSync(join(outDir, svgs[0]!));
-    const inPuml = join(scratchRoot, f.relPath, 'in.puml');
-    out.set(f.relPath, { bytes, exitCode: errored.has(inPuml) ? 200 : 0 });
-  }
-  return out;
 }
 
 function evaluateFixture(fixtureDir: string, scratchRoot: string, write: boolean, captured: Capture): FixtureOutcome {
@@ -313,13 +332,13 @@ function checkPreconditions(write: boolean): string | undefined {
 
 /** Captures + compares every fixture, printing a line per non-SAME result
  *  as it goes, and returns the full outcome list for the final summary. */
-function runFixtures(scratchRoot: string, write: boolean): FixtureOutcome[] {
+async function runFixtures(scratchRoot: string, write: boolean, guard: GuardDeps = {}): Promise<FixtureOutcome[]> {
   const fixtureDirs = findSvgGoldenTypeDirs().flatMap((typeDir) => findFixtureDirs(typeDir));
   const all = fixtureDirs.map((d) => ({ fixtureDir: d, relPath: relative(GOLDENS_ROOT, d) }));
   const outcomes: FixtureOutcome[] = [];
   for (let i = 0; i < all.length; i += BATCH_SIZE) {
     const batch = all.slice(i, i + BATCH_SIZE);
-    const captures = captureBatch(batch, scratchRoot);
+    const captures = await captureBatch(batch, scratchRoot, guard);
     for (const f of batch) {
       const captured = captures.get(f.relPath) ?? { bytes: undefined, exitCode: -1 };
       const outcome = evaluateFixture(f.fixtureDir, scratchRoot, write, captured);
@@ -333,7 +352,7 @@ function runFixtures(scratchRoot: string, write: boolean): FixtureOutcome[] {
 
 /* v8 ignore start -- CLI entry point; pure functions above are exercised
  * directly by tests/unit/scripts/rebaseline-svg-goldens.test.ts. */
-function main(): void {
+async function main(): Promise<void> {
   const write = process.argv.includes('--write');
 
   const precondition = checkPreconditions(write);
@@ -344,7 +363,7 @@ function main(): void {
   }
 
   const scratchRoot = mkdtempSync(join(tmpdir(), 'rebaseline-svg-goldens-'));
-  const outcomes = runFixtures(scratchRoot, write);
+  const outcomes = await runFixtures(scratchRoot, write);
 
   const summary = summarize(outcomes);
   process.stdout.write(`${formatSummaryLine(summary)}\n`);
@@ -358,6 +377,9 @@ function main(): void {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
-  main();
+  main().catch((err: unknown) => {
+    console.error(err);
+    process.exitCode = 1;
+  });
 }
 /* v8 ignore stop */

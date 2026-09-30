@@ -98,7 +98,17 @@ export function resolveAttributeFont(
       theme.colors.graph.classAttributeFontItalic,
       false,
     ),
+    ...hyperlinkColorField(tagCascadeEntry?.hyperlinkColor ?? theme.colors.graph.classCascadeHyperlinkColor),
   };
+}
+
+/** cdd6 T3g: the classifier font's `hyperlinkColor` --
+ *  `FontConfiguration.create(skinParam, style, colors)` reads
+ *  `style.value(PName.HyperLinkColor)` (`FontConfiguration.java:213-219`);
+ *  the `.tag` re-signed style wins over the plain class cascade. Absent =
+ *  no key (`CommandCreoleUrl.ts`'s `#0000FF` fallback). */
+function hyperlinkColorField(color: string | undefined): { hyperlinkColor?: string } {
+  return color === undefined ? {} : { hyperlinkColor: color };
 }
 
 /**
@@ -187,6 +197,7 @@ export function resolveHeaderFont(
       theme.colors.graph.classFontItalic,
       attributeFont.italic,
     ),
+    ...hyperlinkColorField(tagCascadeEntry?.hyperlinkColor ?? theme.colors.graph.classCascadeHeaderHyperlinkColor),
   };
 }
 

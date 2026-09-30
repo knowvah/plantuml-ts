@@ -11,6 +11,7 @@
  * follow).
  */
 import type { UrlInfo } from './class-url.js';
+import type { NamespaceVisibilityBlock } from './class-namespace-title-table.js';
 import type { ClusterHeaderStereo } from './class-cluster-header.js';
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
 
@@ -31,6 +32,13 @@ export interface NamespaceGeo {
   /** G2 N17: pre-computed title baseline Y offset (relative to `y`) --
    *  see `class-namespace-shape.ts#getTitleBaselineOffset`'s doc comment. */
   baselineOffset: number;
+  /** cdd6-T3d (topave-65-ceso890): the package's visibility icon block
+   *  (`ClusterHeader.java:130-138`), UNSCALED -- `wtitle`/`htitle`/
+   *  `baselineOffset` above already include it. Absent == no modifier. */
+  visibilityBlock?: NamespaceVisibilityBlock;
+  /** cdd6-T3d: the icon glyph's top, local to the title block's top
+   *  (`class-namespace-title-table.ts#namespaceFolderTitle`), UNSCALED. */
+  visibilityIconDy?: number;
   /** G2 N2 (mechanism 3): parse-time creation order, copied unchanged from
    *  `Namespace.creationIndex`. */
   creationIndex?: number;

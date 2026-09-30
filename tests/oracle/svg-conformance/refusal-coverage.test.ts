@@ -733,23 +733,19 @@ describe('refusal coverage — baseline shape', () => {
     // 269 -> 267 because unknown/xuloxo-85-vibu502 and c4/gikaju-64-bari602
     // now preprocess and render (cdd5-T5d TokenStack pair order).
     // Derivation: 5657 + 267 = 5924.
-    // 267 -> 269 at mindmap-engine-port/close-b5 (2026-09-30): the mindmap
-    // plugin registered (T5a); 137 mindmap rows keep weErrored false (they
-    // rendered as the sentinel page before and render as mindmaps now), and
-    // 2 (nukose-24-funi267, vacofo-66-puno159) now error on a gradient
-    // colour the T2a colour port left unported (HColorSet.java:81-104) --
-    // pinned known-gap with that mechanism, owner batch 6. Not a new
-    // refusal of a command the jar accepts: the source parses; the colour
-    // set throws. Derivation: 5655 + 269 = 5924.
-    // 5924 -> 6051 / 5655 -> 5782 at mindmap-engine-port/close-b5 (same
-    // close, fa9db8748): 127 svg-mindmap golden rows appended, clones of
-    // their byte-identical dot-cache twins (see the sibling gate's
-    // derivation); all render on both sides. Derivation: 5782 + 269 = 6051.
-    // 6051 -> 6061 / 5782 -> 5794 / 269 -> 267 at mindmap-engine-port/close-b6
-    // (2026-09-30): nukose-24-funi267 and vacofo-66-puno159 known-gap -> ok
-    // (HColorGradient ported in T6a), plus 10 svg-mindmap golden clones.
-    // Derivation: 5794 + 267 = 6061.
-    expect(manifest.fixtures.length).toBe(6061);
+    // 5924 -> 5926 at cdd6/close-b0: 2 unknown-tree golden rows (racujo,
+    // xicili; cdd6-T0b's dotEqual instrument fix made them pin-eligible).
+    // Derivation: 5659 + 267 = 5926.
+    // 5926 -> 5946 at cdd6/close-b2: 20 unknown-tree golden rows (the
+    // batch-2 fixes). Derivation: 5678 + 268 = 5946.
+    // 5946 -> 5967 at cdd6/close-b3: 21 unknown-tree golden rows (the
+    // batch-3 fixes). Derivation: 5699 + 268 = 5967.
+    // 5967 -> 6104 / 5699 -> 5836 / 268 -> 268 at the cdd6 <- main merge
+    // (2026-09-30): mindmap-engine-port's 137 svg-mindmap clone rows (all
+    // render on both sides); its two gradient gaps were opened and closed
+    // within that mission, so erroring/gaps are unchanged. Derivation:
+    // 5836 + 268 = 6104.
+    expect(manifest.fixtures.length).toBe(6104);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -762,9 +758,14 @@ describe('refusal coverage — baseline shape', () => {
     // `weErrored: true`) whose activity3 constructs now parse render here
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
-    // 267 -> 269 at mindmap-engine-port/close-b5 (derivation above).
-    // 269 -> 267 at mindmap-engine-port/close-b6 (nukose, vacofo render).
-    expect(pinnedErroring.length).toBe(267);
+    //
+    // 267 -> 268 / 5659 -> 5658 at cdd6/close-b1 (2026-09-28):
+    // unknown/kokofa-47-deni140 now errors ("JSON already exists", the state
+    // engine refuses a duplicate json id like class does, cdd6-T1c,
+    // CommandCreateJson.java:141-142); jarRendered is false (the jar's own
+    // crash page), so it stays outside SLI 2. Re-pinned `weErrored: true`,
+    // engine class, from a fresh measurement.
+    expect(pinnedErroring.length).toBe(268);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -780,10 +781,12 @@ describe('refusal coverage — baseline shape', () => {
     // 5553 -> 5607 at cdd5/close-b3 (54 unknown-tree svg-class clones).
     // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
-    // 5657 -> 5655 at mindmap-engine-port/close-b5 (derivation above).
-    // 5655 -> 5782 at mindmap-engine-port/close-b5 (127 svg-mindmap clones).
-    // 5782 -> 5794 at mindmap-engine-port/close-b6 (2 gradient rows + 10 clones).
-    expect(pinnedRendering.length).toBe(5794);
+    // 5657 -> 5659 at cdd6/close-b0 (2 unknown-tree svg-class clones).
+    // 5659 -> 5658 at cdd6/close-b1 (kokofa now errors, see above).
+    // 5658 -> 5678 at cdd6/close-b2 (20 unknown-tree svg-class clones).
+    // 5678 -> 5699 at cdd6/close-b3 (21 unknown-tree svg-class clones).
+    // 5699 -> 5836 at the cdd6 <- main merge (137 svg-mindmap clones).
+    expect(pinnedRendering.length).toBe(5836);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -840,9 +843,6 @@ describe('refusal coverage — baseline shape', () => {
     // minute it reads jarRendered: false, so it is no defect to excuse.
     // 197 -> 196 at cdd5/close-b5: unknown/xuloxo-85-vibu502's Tim gap is
     // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
-    // 196 -> 198 at mindmap-engine-port/close-b5: nukose-24-funi267 and
-    // vacofo-66-puno159 (unported HColorGradient, HColorSet.java:81-104).
-    // 198 -> 196 at mindmap-engine-port/close-b6: nukose, vacofo retired.
     expect(gaps.length).toBe(196);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.

@@ -25,7 +25,7 @@ const measurer = new WidthTableMeasurer();
 
 function captureAll(puml: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(puml, { measurer });
   } finally {

@@ -5,8 +5,8 @@
  * file's header for why it is not a TIM concept.
  */
 
-import type { StringLocated } from './tim/StringLocated.js';
 import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
+import type { StringLocated } from './tim/StringLocated.js';
 
 const RE_STYLE_OPEN = /^<style>$/i;
 const RE_STYLE_CLOSE = /^<\/style>$/i;
@@ -28,7 +28,17 @@ const RE_STYLE_CLOSE = /^<\/style>$/i;
 // an ordinary skinparam line upstream, while this port's case-SENSITIVE
 // spelling dropped the whole line silently (`repuga-78-xora226`: every
 // caption skinparam ignored, `preprocess()` returning an empty map).
-const RE_SKINPARAM_LINE = /^skinparam\s+(\w+(?:<<[^<>]+>>)?)\s+(.+)$/i;
+// cdd6-T1e: the NAME group is upstream's own, `[\w.]*(?:<<[^<>]*>>)?[\w.]*`
+// (`command/CommandSkinParam.java:60`) -- the name may CONTINUE after the
+// stereotype. C4's `$defineSkinparams` emits `skinparam
+// package<<boundary>>StereotypeFontColor transparent`; while `$bl()` lines
+// went unsplit that text was buried in a block blob, but split
+// (`Jaws.mutateExpands1`, `preprocessor.ts#mutateExpands1`) the former
+// `\w+(?:<<[^<>]+>>)?` failed it and it leaked into the diagram body. The
+// VALUE group is upstream's too, `([^{}]*)` (`CommandSkinParam.java:62`):
+// with an optional-empty NAME, `.+` would read `skinparam <<verb>> {` (a
+// block opener no block form here accepts yet) as key `<<verb>>`, value `{`.
+const RE_SKINPARAM_LINE = /^skinparam\s+([\w.]*(?:<<[^<>]*>>)?[\w.]*)\s+([^{}]*)$/i;
 /** mission skin-file-loading Batch 1: `skin <name>` -- mirrors upstream's
  *  `CommandSkin` grammar (`^skin\\s+([\\w.]+)$`, see `skins-builtin.ts`'s
  *  own doc comment). The `\\s+` after the literal `skin` prefix means this
@@ -91,6 +101,17 @@ function cleanSkinKey(key: string): string {
   const stereos = [...lower.matchAll(/<<([^<>]*)>>/g)].map((m) => `<<${m[1]!}>>`);
   return lower.replace(/<<[^<>]*>>/g, '') + stereos.join('');
 }
+/** `StringUtils.trim2(CharSequence)` (`StringUtils.java:537-567`): trims
+ *  characters `<= ' '` from both ends. Local copy, as in
+ *  `EmbeddedDiagram.ts` / `BodyEnhanced2.ts` (each keeps its own). */
+function trim2(s: string): string {
+  let start = 0;
+  let end = s.length;
+  while (start < end && s.charCodeAt(start) <= 0x20) start++;
+  while (end > start && s.charCodeAt(end - 1) <= 0x20) end--;
+  return s.slice(start, end);
+}
+
 const RE_SKINPARAM_BLOCK_ENTRY = /^\s*(\w+(?:<<[^<>]+>>)?)\s+(.+)$/;
 const RE_SKINPARAM_BLOCK_CLOSE = /^\s*\}\s*$/;
 
@@ -139,18 +160,18 @@ export class StyleAndSkinparamCollector {
    */
   private readonly skinparamStack: string[] = [];
   /**
-   * mmp-T6g: open `{{…` embedded-diagram depth. Upstream never dispatches
-   * the lines of an embedded block as outer-diagram commands: a multi-line
-   * command accumulating its lines takes everything from a `{{…` line to
-   * the matching `}}` verbatim, nested blocks counted
-   * (`PSystemCommandFactory.java:288-306`,
-   * `addOneSingleLineManageEmbedded2`), and `EmbeddedDiagram.createAndSkip`
-   * (`EmbeddedDiagram.java:97-115`) hands them to the INNER diagram. So a
-   * `<style>`/`skinparam` inside `{{ }}` styles the embedded render, not the
-   * outer document (`class/semutu-45-zeno907`). Tracked only outside a
-   * `<style>`/`skinparam` block, whose bodies never carry `{{`.
+   * `EmbeddedDiagram#createAndSkip`'s `nested` counter
+   * (`EmbeddedDiagram.java:100`): how many `{{` embeds enclose the current
+   * line. Upstream never dispatches an embed's lines as outer commands -- the
+   * enclosing multiline command (a `[ ... ]` description, a note, a class
+   * body) consumes them as display text, and `createAndSkip`
+   * (`EmbeddedDiagram.java:97-114`, reached from `BodyEnhanced2.java:91-94`)
+   * hands them to the nested diagram's own `BlockUml`. So a `skinparam` or
+   * `<style>` inside `{{ }}` styles the nested diagram only; hoisting it made
+   * the embed's `BackgroundColor` the OUTER document's (dezobu-62-vuzu421,
+   * rozugu-82-pera583).
    */
-  private embeddedNesting = 0;
+  private embeddedNested = 0;
 
   /**
    * True when the line was consumed (it is not a diagram-body line).
@@ -166,7 +187,10 @@ export class StyleAndSkinparamCollector {
 
     if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed);
 
-    if (this.skipEmbeddedLine(raw, trimmed)) return false;
+    if (this.embeddedNested > 0 || getEmbeddedType(raw) !== null) {
+      this.skipEmbedded(raw);
+      return false;
+    }
 
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
@@ -180,21 +204,6 @@ export class StyleAndSkinparamCollector {
       return true;
     }
     return this.openSkinparam(trimmed);
-  }
-
-  /**
-   * True while `raw` is part of an embedded `{{ … }}` block (its opening and
-   * closing lines included): the nesting count of
-   * `PSystemCommandFactory.java:291-303`.
-   */
-  private skipEmbeddedLine(raw: string, trimmed: string): boolean {
-    if (getEmbeddedType(raw) !== null) {
-      this.embeddedNesting++;
-      return true;
-    }
-    if (this.embeddedNesting === 0) return false;
-    if (trimmed === EmbeddedDiagram.EMBEDDED_END) this.embeddedNesting--;
-    return true;
   }
 
   private collectStyleLine(raw: string, trimmed: string): boolean {
@@ -252,6 +261,16 @@ export class StyleAndSkinparamCollector {
     return true;
   }
 
+  /**
+   * `EmbeddedDiagram#createAndSkip`'s loop (`EmbeddedDiagram.java:101-110`):
+   * any `{{`-typed line opens one more level, a line that `trim2`s to `}}`
+   * closes one. The line itself stays diagram content.
+   */
+  private skipEmbedded(raw: string): void {
+    if (getEmbeddedType(raw) !== null) this.embeddedNested++;
+    else if (trim2(raw) === EmbeddedDiagram.EMBEDDED_END) this.embeddedNested--;
+  }
+
   /** Block-open forms are tested before the single-line form, which would
    *  otherwise capture `{` as the parameter name. */
   private openSkinparam(trimmed: string): boolean {
@@ -266,7 +285,7 @@ export class StyleAndSkinparamCollector {
     }
     const single = RE_SKINPARAM_LINE.exec(trimmed);
     if (single !== null) {
-      this.setSkinparam(single[1]!.trim().toLowerCase(), single[2]!.trim());
+      this.setSkinparam(cleanSkinKey(single[1]!.trim()), single[2]!.trim());
       return true;
     }
     return false;

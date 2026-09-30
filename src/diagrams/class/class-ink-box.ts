@@ -26,6 +26,7 @@ import {
   addNamespaceRectInk,
   addClassicRectInk,
   addEmbedImageInk,
+  addJsonBodyInk,
 } from './class-ink-shapes.js';
 import { BODY_ENHANCED_MARGIN_X } from './class-body-enhanced-geometry.js';
 import { protectedInnerBox } from './class-dot-graph.js';
@@ -99,6 +100,12 @@ function addLollipopRowInk(box: InkBox, c: ClassifierGeo): void {
  * distinguishes the two empty-body states from each other.
  */
 function addClassifierBoxInk(box: InkBox, c: ClassifierGeo): void {
+  // T2b (json-canvas-width-1px): `kind: 'json'` dispatches per body shape
+  // -- see `addJsonBodyInk`'s own doc comment.
+  if (c.kind === 'json') {
+    addJsonBodyInk(box, c);
+    return;
+  }
   // B5/M6: `kind: 'object'` whose field list is empty but still SHOWN --
   // upstream's `TextBlockEmpty(10, 16)` placeholder branch.
   if (c.kind === 'object' && c.emptyFieldPlaceholder === true) {
@@ -266,6 +273,12 @@ function addClassifierInk(box: InkBox, outerC: ClassifierGeo, iconSize: number):
   // font/sprite context already exist — SI14's "share the measurement
   // OBJECT" shape. See `ClassifierGeo.symbolInk`.
   if (c.symbolInk !== undefined) {
+    // cdd6 T3b: a leaf whose ink pass drew nothing (a description label that
+    // is only a `{{ }}` embed -- `EntityImageDescriptionEmbed.ts`) reports
+    // `LimitFinder`'s untouched `±MAX_VALUE` sentinel, minX > maxX. Upstream
+    // it adds nothing to the one shared `SvekResult` walk
+    // (`svek/SvekResult.java:130-135`).
+    if (c.symbolInk.minX > c.symbolInk.maxX) return;
     addPoint(box, c.x + c.symbolInk.minX, c.y + c.symbolInk.minY);
     addPoint(box, c.x + c.symbolInk.maxX, c.y + c.symbolInk.maxY);
     return;

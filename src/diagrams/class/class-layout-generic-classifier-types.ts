@@ -10,6 +10,7 @@
  * cascade `measureClassifier` builds this from.
  */
 export interface ClassFontSpecs {
-  header: { family: string; size: number; bold: boolean; italic: boolean };
-  attribute: { family: string; size: number; bold: boolean; italic: boolean };
+  // cdd6 T3g: `hyperlinkColor` -- `class-layout-fonts.ts#hyperlinkColorField`.
+  header: { family: string; size: number; bold: boolean; italic: boolean; hyperlinkColor?: string };
+  attribute: { family: string; size: number; bold: boolean; italic: boolean; hyperlinkColor?: string };
 }

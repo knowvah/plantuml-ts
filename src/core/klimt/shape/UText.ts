@@ -108,6 +108,17 @@ export interface FontConfiguration {
    *  stay valid unchanged, which is why it is optional rather than required.
    */
   readonly fontPosition?: FontPosition;
+  /** Upstream's `hyperlinkColor` field (`FontConfiguration.java:144`),
+   *  populated at construction time from `style.value(PName.HyperLinkColor)`
+   *  (`FontConfiguration.java:213-219`, `Style.java:265`) — a resolved
+   *  `#RRGGBB` string, matching {@link color}'s own already-resolved
+   *  adaptation. Read by `FontConfiguration#hyperlink()`'s `withHyperlink()`
+   *  (java:253-256), which copies it onto {@link color}; this port's mirror
+   *  is `CommandCreoleUrl.ts`'s `applyHyperlinkStyleAndPush`. `undefined`
+   *  means no `<style>`/skinparam override reached this configuration — the
+   *  caller falls back to upstream's own `blue` default
+   *  (`plantuml.skin:7,565`, `SkinParam.java:305-311`). decisions.md#D3. */
+  readonly hyperlinkColor?: string;
 }
 
 /**

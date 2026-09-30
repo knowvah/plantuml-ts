@@ -38,7 +38,7 @@
 
 import type { State } from './ast.js';
 import type { Command } from './state-commands.js';
-import { type ParseState, type Pass, makeState } from './state-parse-state.js';
+import { type ParseState, type Pass, makeState, currentScope } from './state-parse-state.js';
 import { declareState } from './state-parse-resolve.js';
 import {
   JSON_MULTILINE_DECL_RE,
@@ -71,6 +71,36 @@ export function isJsonCloser(line: string): boolean {
   return /^\s*\}\s*$/.test(line);
 }
 
+/** Upstream's own wording, verbatim, from the duplicate-detection site
+ *  (`CommandCreateJson#executeNow`, "JSON already exists: " +
+ *  line0.getLazzy("CODE", 0), `CommandCreateJson.java:141-142`) — the SAME
+ *  string `class-json-commands.ts`'s own `JSON_ALREADY_EXISTS` carries. */
+const JSON_ALREADY_EXISTS = 'JSON already exists: ';
+
+/**
+ * Peek-only mirror of `state-parse-resolve.ts#resolveExistingState`'s TWO
+ * lookup branches (diagram-wide `globalByName` when the id is globally
+ * unique, else the CURRENT scope's own index) -- returns a boolean instead
+ * of the `State`, so the duplicate check below can run BEFORE `makeState`/
+ * `declareState` ever mutate anything, mirroring
+ * `class-json-commands.ts#adapt`'s own pre-creation `state.classifierIndex
+ * .has(id)` check. Duplicated here (not imported from
+ * `state-parse-resolve.ts`) per this project's own "duplicated here rather
+ * than imported across engine boundaries" convention
+ * (`description/index.ts#annotationLines`'s doc) -- this file already owns
+ * the ONE call site that needs a peek rather than a resolve-or-create.
+ * Dotted (namespace-separator) ids are out of scope: no fixture in the
+ * corpus declares a `json` leaf with a dotted id, duplicate or otherwise, so
+ * `declareState`'s existing dotted-path branch is left untouched -- this
+ * check only guards the flat-id branch it shares with everything else.
+ * @see ~/git/plantuml/.../net/atmp/CucaDiagram.java#quarkInContextSafe
+ */
+function stateAlreadyExists(ps: ParseState, id: string): boolean {
+  const globalMatches = ps.globalByName.get(id);
+  if (globalMatches !== undefined && globalMatches.length === 1) return true;
+  return currentScope(ps).stateIndex.has(id);
+}
+
 // ---------------------------------------------------------------------------
 // Host adapter — state's scope-stack `declareState`/`makeState` in place of
 // class's flat `Classifier` index. Bound to ONE pass, unlike class (which has
@@ -81,17 +111,34 @@ export function isJsonCloser(line: string): boolean {
 // `jsonValue` write is gated to pass ONE (mirrors `declareState`'s own
 // `applyDeclaredContent` pass gate — every other single-line state
 // declaration in this parser follows the same convention, so a pass-TWO
-// replay is a safe no-op re-resolve rather than a double-apply). State never
-// rejects a duplicate id the way class does (`reuseExisting` is accepted but
-// unused) — `declareState` always resolves back to the canonical object,
-// which is required for pass-TWO to replay the SAME declaration rather than
-// collide with it; no fixture in the corpus exercises a genuine duplicate
-// `json` declaration in a state diagram.
+// replay is a safe no-op re-resolve rather than a double-apply).
+//
+// D6/T1c (kokofa-47-deni140): state now DOES reject a duplicate id, like
+// class (`class-json-commands.ts`'s own `resolve`) — but the check only runs
+// on pass 'one'. `parseState` never reaches pass 'two' once pass 'one'
+// refuses (`parser.ts`'s `if (refusalOne !== null) return refusalOne;`), and
+// `ParseState.globalByName` starts EMPTY at the top of every fresh parse
+// (`initParseState`) and is never reset between passes -- so every hit this
+// check finds during pass 'one' was necessarily created by an EARLIER
+// command in this SAME pass 'one' walk, never a legitimate pass-TWO replay
+// of the SAME source line. Skipping the check on pass 'two' therefore loses
+// no genuine duplicate: pass 'two' only ever runs once pass 'one' already
+// approved every `json` declaration in the document.
 // ---------------------------------------------------------------------------
 
 function adapt(ps: ParseState, pass: Pass): JsonCommandHost<State> {
   return {
     resolve(rawId, rawDisplay, stereotype, color) {
+      if (pass === 'one' && stateAlreadyExists(ps, rawId)) {
+        // CommandCreateJson.java:141-142 / CommandCreateJsonSingleLine.java
+        // :134-135 -- entity1 is null (a duplicate quark,
+        // CommandCreateJson.java:199-203), so executeNow/executeArg return
+        // an EXECUTION error that aborts the whole parse
+        // (parser.ts#dispatchCommand's `ps.executionError` check), not a
+        // silent no-op that keeps the first declaration.
+        ps.executionError = JSON_ALREADY_EXISTS + rawId;
+        return undefined;
+      }
       const s = makeState(rawId, rawDisplay ?? rawId, 'json', {
         ...(color !== undefined ? { color } : {}),
         ...(stereotype !== undefined ? { stereotype } : {}),
@@ -99,6 +146,14 @@ function adapt(ps: ParseState, pass: Pass): JsonCommandHost<State> {
       return declareState(ps, s, pass);
     },
     beginBody(entity) {
+      // A duplicate still "opens" (and immediately discards) a multi-line
+      // body -- `ps.pendingJson` stays `null`, but that is harmless here:
+      // `resolve` already set `ps.executionError`, and
+      // `parser.ts#dispatchCommand` returns the refusal immediately after
+      // THIS command's `execute` call, before the body's own lines are ever
+      // reached (mirrors `class-json-commands.ts#adapt`'s own
+      // `beginBody`/`state.pendingBodyId = ''` comment, minus the sentinel
+      // this engine does not need for the same reason).
       ps.pendingJson = entity !== undefined ? { target: entity, lines: [] } : null;
     },
     setJsonValue(entity, value) {

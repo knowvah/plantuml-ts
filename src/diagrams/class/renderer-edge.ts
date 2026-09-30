@@ -238,6 +238,65 @@ function resolveStrokeAndArrowheads(
 }
 
 /**
+ * T3c (D8, `smetana-pragma-ignored`): the connecting `<path>`'s stroke/dash
+ * attributes, plus (SvekEdge draw shape only) `id`/`codeLine` --
+ * `linkId === undefined` for a smetana edge, since `SmetanaEdge#drawU`
+ * never calls `Link#idCommentForSvg()` at all (no equivalent anywhere in
+ * its body) and this port's caller ({@link renderEdge}) skips computing one
+ * -- upstream never reserves an id-collision slot for it either.
+ */
+interface EdgePathStyle {
+  readonly strokeColor: string;
+  readonly edgeStrokeWidth: number;
+  readonly linkId: string | undefined;
+}
+
+/**
+ * The connecting `<path>` element, or `''` for a degenerate/empty point
+ * list (see {@link buildPathData}'s own doc comment). Split out of
+ * {@link renderEdge} (T3c) so the id/codeLine computation -- SvekEdge-only,
+ * see {@link EdgePathStyle}'s doc comment -- stays a single, easily-gated
+ * spot rather than an inline branch inside the `path()` call.
+ * @see ~/git/plantuml/.../sdot/SmetanaEdge.java:215-217
+ */
+function buildEdgePathMarkup(d: string, geo: EdgeGeo, theme: ScaledTheme, style: EdgePathStyle): string {
+  if (d === '') return '';
+  const { strokeColor, edgeStrokeWidth, linkId } = style;
+  return path(d, {
+    // G2 N8: `strokeWidth: 1` (was `1.5`) and `strokeDasharray: '7,7'`
+    // (was `'5 5'`) -- discovered while jar-verifying the `(A,B)` couple
+    // fixture's own edges (bosiki-11-xaza958), then corpus-surveyed
+    // (`test-results/dot-cache/class/*/in.svg`, every `<g class="link">`
+    // edge's own inline `style`): 504/510 sampled edges carry
+    // `stroke-width:1` (the handful of others are explicit
+    // `[thickness=N]` skinparam overrides, out of scope here) and
+    // 383/388 dashed edges carry `stroke-dasharray:7,7` exactly (comma,
+    // no space -- `compareSvg`'s attribute comparator treats
+    // `stroke-dasharray` as a plain string, not a numeric-tolerant
+    // list, so the literal separator must match too).
+    //
+    // G2 N26: `geo.strokeWidth`/`.strokeDasharray`/`.colorOverride` --
+    // set ONLY when the relationship carried a `-[...]->` bracket
+    // override (`class-geo-builders.ts#buildStrokeOverride`); absent
+    // for every other edge, so the `?? 1`/`geo.dashed` fallbacks below
+    // reproduce this comment's own jar-verified defaults unchanged.
+    stroke: strokeColor,
+    strokeWidth: edgeStrokeWidth,
+    ...(geo.strokeDasharray !== undefined
+      ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
+      : geo.dashed
+        ? { strokeDasharray: scaleDashArrayString('7,7', theme.scaleK) }
+        : {}),
+    // G2 N9 / T3c D8: `id`/`codeLine` -- see `linkIdForSvg`'s doc comment
+    // and {@link EdgePathStyle}'s own doc comment for why `linkId` is
+    // `undefined` (both attributes vanish) on a smetana edge.
+    ...(linkId !== undefined
+      ? { id: linkId, ...(geo.sourceLine !== undefined ? { codeLine: String(geo.sourceLine) } : {}) }
+      : {}),
+  });
+}
+
+/**
  * cdd-T7: `ids`/`syntheticNames` (pre-existing) plus `measurer` (new,
  * optional) folded into one options object -- a bare 5th positional
  * parameter would have crossed this repo's hook-enforced param cap.
@@ -260,6 +319,14 @@ export function renderEdge(
   ctx: RenderEdgeContext,
 ): { body: string; extraDefs: string } {
   const { ids, syntheticNames, measurer, contactRects } = ctx;
+  // T3c (D8, `smetana-pragma-ignored`): `!pragma layout smetana` swaps the
+  // whole document onto `SmetanaEdge#drawU`, whose STRUCTURAL draw shape
+  // differs from `SvekEdge#drawU`'s in exactly the two ways gated below --
+  // see {@link EdgePathStyle} and the `core`/`rest` split's own doc
+  // comments. `geo.smetana` is a carry-only copy of
+  // `ClassDiagramAST.layoutEngine === 'smetana'` (`class-geo-types.ts`'s
+  // doc comment).
+  const smetana = geo.smetana === true;
   const parts: string[] = [];
   // G2 N28: arrowheads must be resolved BEFORE the path is built -- the
   // connecting `<path>` is shortened by each decor's own trim delta
@@ -271,43 +338,21 @@ export function renderEdge(
   const { strokeColor, edgeStrokeWidth, arrowheads } = resolveStrokeAndArrowheads(geo, theme, contactRects);
   const trimmedPoints = applyDecorTrim(geo.points, arrowheads.tailTrim, arrowheads.headTrim);
   const d = buildPathData(trimmedPoints);
-  if (d !== '') {
-    parts.push(
-      path(d, {
-        // G2 N8: `strokeWidth: 1` (was `1.5`) and `strokeDasharray: '7,7'`
-        // (was `'5 5'`) -- discovered while jar-verifying the `(A,B)` couple
-        // fixture's own edges (bosiki-11-xaza958), then corpus-surveyed
-        // (`test-results/dot-cache/class/*/in.svg`, every `<g class="link">`
-        // edge's own inline `style`): 504/510 sampled edges carry
-        // `stroke-width:1` (the handful of others are explicit
-        // `[thickness=N]` skinparam overrides, out of scope here) and
-        // 383/388 dashed edges carry `stroke-dasharray:7,7` exactly (comma,
-        // no space -- `compareSvg`'s attribute comparator treats
-        // `stroke-dasharray` as a plain string, not a numeric-tolerant
-        // list, so the literal separator must match too). Neither value was
-        // ever jar-verified before this iteration -- no ratchet-pinned
-        // fixture exercises an edge at all (grepped `oracle/goldens/
-        // svg-class/`).
-        //
-        // G2 N26: `geo.strokeWidth`/`.strokeDasharray`/`.colorOverride` --
-        // set ONLY when the relationship carried a `-[...]->` bracket
-        // override (`class-geo-builders.ts#buildStrokeOverride`); absent
-        // for every other edge, so the `?? 1`/`geo.dashed` fallbacks below
-        // reproduce this comment's own jar-verified defaults unchanged.
-        stroke: strokeColor,
-        strokeWidth: edgeStrokeWidth,
-        ...(geo.strokeDasharray !== undefined
-          ? { strokeDasharray: `${geo.strokeDasharray[0]},${geo.strokeDasharray[1]}` }
-          : geo.dashed
-            ? { strokeDasharray: scaleDashArrayString('7,7', theme.scaleK) }
-            : {}),
-        // G2 N9: `id`/`codeLine` -- see `linkIdForSvg`'s doc comment.
-        id: linkIdForSvg(geo, ids, syntheticNames),
-        ...(geo.sourceLine !== undefined ? { codeLine: String(geo.sourceLine) } : {}),
-      }),
-    );
-  }
-  parts.push(arrowheads.tail, arrowheads.head);
+  // G2 N9 / T3c D8: a smetana edge never reserves an id-collision slot --
+  // see {@link EdgePathStyle}'s doc comment.
+  const linkId = smetana ? undefined : linkIdForSvg(geo, ids, syntheticNames);
+  const pathMarkup = buildEdgePathMarkup(d, geo, theme, { strokeColor, edgeStrokeWidth, linkId });
+  // T3c (D8): `SmetanaEdge#drawU` draws BOTH extremities BEFORE the
+  // connecting path (`printExtremityAtStart`/`printExtremityAtEnd` precede
+  // `ug.apply(stroke).apply(color).draw(dotPath)`,
+  // `sdot/SmetanaEdge.java:215-217`); `SvekEdge#drawU` draws the path
+  // first (unchanged default). `core` is this engine-ordered pair, kept
+  // separate from `rest` below so the SAME pair -- and only that pair --
+  // is the url wrap's operand for a smetana edge (see the return
+  // statement's own doc comment).
+  const core = smetana
+    ? arrowheads.tail + arrowheads.head + pathMarkup
+    : pathMarkup + arrowheads.tail + arrowheads.head;
   // cdd-T7 (A2a/M2): the label's own visibility-modifier icon -- drawn
   // right after the extremities and BEFORE the label text, matching
   // `canuti-20-jotu614`'s golden child order (`SvekEdge.java:302`'s
@@ -372,15 +417,23 @@ export function renderEdge(
   // `SvekEdge.java:1015-1019`'s `kal1.drawU(ug)`/`kal2.drawU(ug)`
   // immediately before `ug.closeGroup()`.
   parts.push(renderEdgeKalBoxes(geo, theme));
-  const body = parts.join('');
-  // cdd-T7 (A2a/M3): `[[url]]` on the relationship -- wraps the ENTIRE
-  // group body (path, arrowheads, label, note, constraint -- everything
-  // already emitted above) in ONE `<a>`, matching `SvekEdge.java:859-861`'s
-  // `ug.startUrl(url)` immediately after `ug.startGroup(...)` and `:990-991`'s
-  // `closeUrl()` immediately before `ug.closeGroup()` -- i.e. the url spans
-  // the group's FULL lifetime, not just one primitive.
+  const rest = parts.join('');
+  // cdd-T7 (A2a/M3): `[[url]]` on the relationship. SvekEdge wraps the
+  // ENTIRE group body (path, arrowheads, label, note, constraint --
+  // everything already emitted above) in ONE `<a>`, matching
+  // `SvekEdge.java:859-861`'s `ug.startUrl(url)` immediately after
+  // `ug.startGroup(...)` and `:990-991`'s `closeUrl()` immediately before
+  // `ug.closeGroup()` -- i.e. the url spans the group's FULL lifetime, not
+  // just one primitive. T3c (D8): SmetanaEdge wraps ONLY `core`
+  // (extremities+path) -- `ug.startUrl(url)` / `printExtremityAtStart/End`
+  // / `draw(dotPath)` / `ug.closeUrl()` (`sdot/SmetanaEdge.java:200-220`)
+  // all run BEFORE the label is drawn (`:223-224`), so the label (and every
+  // other `rest` piece) sits OUTSIDE the `<a>`, unlike SvekEdge's full-body
+  // wrap.
+  const wrapTarget = smetana ? core : core + rest;
+  const wrapped = geo.url !== undefined ? linkWrap(wrapTarget, geo.url) : wrapTarget;
   return {
-    body: geo.url !== undefined ? linkWrap(body, geo.url) : body,
+    body: smetana ? wrapped + rest : wrapped,
     extraDefs,
   };
   // #lizard forgives -- pre-existing (unrelated to T3): the
@@ -392,7 +445,10 @@ export function renderEdge(
   // renderEdgeCardinalityLabels} -- see their own doc comments. cdd-T7
   // added six sequential, independent primitive emissions (icon/note/
   // middle-decor/constraint/url) mirroring `SvekEdge#drawU`'s own linear
-  // draw-call sequence one-for-one -- not a new branch, no CCN growth.
+  // draw-call sequence one-for-one -- not a new branch, no CCN growth. T3c
+  // added the smetana core/rest split + wrap-target gate (comments above);
+  // net CCN is roughly unchanged since the id/codeLine ternary chain moved
+  // out to {@link buildEdgePathMarkup}.
 }
 
 // ---------------------------------------------------------------------------

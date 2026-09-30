@@ -96,6 +96,14 @@ export interface Theme {
    *  #applyMonochromeToFragment`) -- class only; `SkinParam.isDark(...)`'s
    *  own DARK_MODE branch (ahead of `monochrome`) is unmodeled. */
   monochrome?: 'true' | 'reverse';
+  /** cdd6 T3f: the RAW `skinparam reversecolor` value, read by the same
+   *  `muteColorMapper` AFTER `monochrome` (`TitledDiagram.java:301-312`):
+   *  `dark` (any case) -> `ColorMapper.LIGTHNESS_INVERSE` (`ColorUtils
+   *  #getReversed`, an HSLuv lightness flip), a `ColorOrder` name ->
+   *  `ColorMapper.reverse(order)`, anything else -> no mapping. Class only,
+   *  applied by the same post-process (`class-monochrome.ts#colorMapperOf`).
+   *  Read by `skinparam-key-handlers-table-b.ts`'s `reversecolor` row. */
+  reverseColor?: string;
   /** G2 N18: `skinparam style strictuml` -- a global sharp-corner toggle,
    *  checked by `USymbolFolder#drawFolder`'s `roundCorner=0` `UPolygon`
    *  branch (jar-verified `jinibe-02-tebi269`). Class-only consumer
@@ -388,20 +396,11 @@ export type ThemeOverride = {
   strictUml?: boolean;
   /** See {@link Theme.genericDisplayOld}'s own doc comment. */
   genericDisplayOld?: boolean;
-  /**
-   * `skinparam handwritten true` — draw every primitive through the sketchy
-   * renderer (`core/klimt/drawing/hand/`).
-   * `JsonDiagram#drawU` and its siblings open with
-   * `if (handwritten) ug = new UGraphicHandwritten(ug)`, a decorator that
-   * turns rectangles and ellipses into jiggled polygons and lines and paths
-   * into jiggled polylines. Deterministic: the jitter comes from a single
-   * `new Random(424242L)` per diagram.
-   * Honoured by the json family so far; other engines need their draw order
-   * confirmed against the jar before it can be switched on there, because the
-   * random stream is shared and sequential across every shape.
-   */
+  /** See {@link Theme.handwritten}'s own doc comment. */
   handwritten?: boolean;
   monochrome?: 'true' | 'reverse';
+  /** See {@link Theme.reverseColor}. */
+  reverseColor?: string;
   /** See `Theme.shadowing`'s own doc comment. */
   shadowing?: number;
   packageStyle?: 'rect';

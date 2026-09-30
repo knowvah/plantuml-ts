@@ -156,6 +156,7 @@ import type { StringBounder } from './klimt/font/StringBounder.js';
 import type { Atom } from './klimt/creole/SheetBlock1.js';
 import type { ISkinSimple } from './style/ISkinSimple.js';
 import type { Paint } from './paint.js';
+import { enterNestedDiagramLayout, exitNestedDiagramLayout } from './graph-layout.js';
 
 /** `klimt/shape/Line.java` (5 lines), ported inline — see the module doc
  *  comment's "`Line`" section for why this is not a separate file. */
@@ -389,10 +390,26 @@ export class EmbeddedDiagram extends TextBlockMemoized implements Line, Atom {
    * it distinct from, see the module doc comment). Memoizes the
    * renderer's result exactly once per `EmbeddedDiagram` instance,
    * matching upstream's `if (textBlock == null) { ... }` guard.
+   *
+   * cdd6-T0b/D9: `this.renderer.render(...)` is a full recursive
+   * `renderSync` of the collected `@start.../@end...` lines (no upstream
+   * citation — port-introduced instrumentation, not a jar behavior) —
+   * bracketed with `graph-layout.ts#enterNestedDiagramLayout`/
+   * `exitNestedDiagramLayout` (try/finally) so every `layoutGraph()` call
+   * the nested render triggers, however many, reports `nestedDepth >= 1`
+   * to the oracle DOT-parity observer. The jar's own nested json/yaml
+   * embeds go through Smetana and dump no `svek-*.dot` (CLAUDE.md's "One
+   * layout engine" ruling), so a DOT-parity consumer must exclude these —
+   * see `scripts/lib/survey-dot-equal.ts`.
    */
   private getInternalTextBlock(): TextBlock {
     if (this.textBlock === undefined) {
-      this.textBlock = this.renderer.render(this.lines, this.skinParam);
+      enterNestedDiagramLayout();
+      try {
+        this.textBlock = this.renderer.render(this.lines, this.skinParam);
+      } finally {
+        exitNestedDiagramLayout();
+      }
     }
     return this.textBlock;
   }

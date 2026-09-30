@@ -14,7 +14,38 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { resolveDescriptionUSymbol } from '../../core/svek/image/EntityImageDescription.js';
 import { resolveActorStyle, mapComponentStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
-import { namespaceTitleWidth, namespaceTitleLines, packageTitleFontSpec } from './class-namespace-title-runs.js';
+import {
+  namespaceTitleWidth,
+  namespaceTitleLines,
+  namespaceTitleHeight,
+  packageTitleFontSpec,
+} from './class-namespace-title-runs.js';
+import type { Namespace, Visibility } from './ast.js';
+import { HEADER_VISIBILITY_TOP_MARGIN } from './class-header-visibility-geo.js';
+import { VISIBILITY_ICON_SIZE } from './class-visibility-icon.js';
+import { getHTitle, getTitleBaselineOffset, getWTitle } from './class-package-style.js';
+
+/** cdd6-T3d (topave-65-ceso890): `ClusterHeader#getTitleBlock`'s icon block,
+ *  `TextBlockUtils.withMargin(modifier.getUBlock(classAttributeIconSize, fore,
+ *  back, false), 0, 0, 4, 0)` -- `getUBlock` is RAW `size + 1` square
+ *  (`VisibilityModifier.java:100-102`), and the `4` is a TOP margin
+ *  (`withMargin(tb, x1, x2, y1, y2)`, the same pair `EntityImageClassHeader`
+ *  uses, `class-header-visibility-geo.ts`).
+ *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:130-138 */
+export interface NamespaceVisibilityBlock {
+  modifier: Visibility;
+  width: number;
+  height: number;
+}
+
+export function namespaceVisibilityBlock(
+  ns: Pick<Namespace, 'visibilityModifier'>,
+  theme: Theme,
+): NamespaceVisibilityBlock | undefined {
+  if (ns.visibilityModifier === undefined) return undefined;
+  const size = theme.classAttributeIconSize ?? VISIBILITY_ICON_SIZE;
+  return { modifier: ns.visibilityModifier, width: size + 1, height: size + 1 + HEADER_VISIBILITY_TOP_MARGIN };
+}
 
 /**
  * cdd-T12 (diagnosis A2b E3): `ClusterHeader`'s per-USymbol title-table
@@ -118,9 +149,55 @@ export function namespaceTitleTableDims(
   usymbol?: string,
   stereo?: { readonly width: number; readonly height: number },
 ): { width: number; height: number } {
+  return titleTableDims(display, { theme, measurer }, { usymbol, stereo, visibility: undefined });
+}
+
+/**
+ * {@link namespaceTitleTableDims} read off the namespace itself, including
+ * cdd6-T3d's visibility icon: `title = mergeLR(uBlock, title, CENTER)`
+ * (`ClusterHeader.java:138`) -- widths add, heights max -- BEFORE the
+ * `mergeTB(stereo, title)` stack (`:78`). Jar-verified `topave-65-ceso890`:
+ * `- package foo` emits `WIDTH="30" HEIGHT="10"` (`floor(19.425 + 11)`,
+ * `max(14, 15) - 5`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/ClusterHeader.java:78-90
+ */
+export function namespaceTitleTableDimsFor(
+  ns: Pick<Namespace, 'display' | 'usymbol' | 'visibilityModifier'>,
+  theme: Theme,
+  measurer: StringMeasurer,
+  stereo?: { readonly width: number; readonly height: number },
+): { width: number; height: number } {
+  const visibility = namespaceVisibilityBlock(ns, theme);
+  return titleTableDims(ns.display, { theme, measurer }, { usymbol: ns.usymbol, stereo, visibility });
+}
+
+/** cdd6-T3d: the title term of `mergeTB(stereo, title)` -- per-line heights,
+ *  or, once the visibility icon is merged LEFT of them (`mergeLR`,
+ *  `ClusterHeader.java:138`), the single `max(sum(lines), icon)` height. */
+function mergedTitleHeights(lineHeights: number[], visibility: NamespaceVisibilityBlock | undefined): number[] {
+  if (visibility === undefined) return lineHeights;
+  return [
+    Math.max(
+      visibility.height,
+      lineHeights.reduce((a, b) => a + b, 0),
+    ),
+  ];
+}
+
+function titleTableDims(
+  display: string,
+  ctx: { theme: Theme; measurer: StringMeasurer },
+  opts: {
+    usymbol: string | undefined;
+    stereo: { readonly width: number; readonly height: number } | undefined;
+    visibility: NamespaceVisibilityBlock | undefined;
+  },
+): { width: number; height: number } {
+  const { theme, measurer } = ctx;
+  const { stereo, visibility } = opts;
   const font = namespaceTitleFont(theme);
   const lines = namespaceTitleLines(measurer, theme, display);
-  const width = namespaceTitleWidth(measurer, theme, display);
+  const width = namespaceTitleWidth(measurer, theme, display) + (visibility?.width ?? 0);
   // `nominalFontSize` (declared), never `fontSize` (measured) --
   // `ClusterHeader.java:78`'s formula is `fontSize`-based, not a measured
   // pixel height; see `NamespaceTitleLine`'s own doc comment.
@@ -128,15 +205,57 @@ export function namespaceTitleTableDims(
   // 78-79`) -- the header stereo block (`class-cluster-header.ts`, displayed
   // stereotype + the group's own legend) stacks ABOVE the title: its height
   // joins the per-line sum, its width the max.
-  const lineHeights = [...(stereo !== undefined ? [stereo.height] : []), ...lines.map((l) => l.nominalFontSize)];
+  const titleHeights = mergedTitleHeights(
+    lines.map((l) => l.nominalFontSize),
+    visibility,
+  );
+  const lineHeights = [...(stereo !== undefined ? [stereo.height] : []), ...titleHeights];
   // cdd-T12: `suppWidthBecauseOfShape`/`suppHeightBecauseOfShape` -- see
   // {@link titleSupp}'s own doc comment for the ClusterHeader citation.
-  const supp = titleSupp(usymbol, theme);
+  const supp = titleSupp(opts.usymbol, theme);
   // `font.size` still feeds the (always-0 here) `stereoLines`/`attrLines`
   // terms -- see `titleAndAttributeHeight`'s own doc comment; `lineHeights`
   // (the array form) supplies the title term directly, per-line.
   return {
     width: Math.max(width, stereo?.width ?? 0) + supp.width,
     height: computeTitleTableHeight(lineHeights, 0, 0, font.size) + supp.height,
+  };
+}
+
+/**
+ * cdd6-T3d (topave-65-ceso890): the folder tab's `getWTitle`/`getHTitle` and
+ * title baseline for a namespace, over `ClusterHeader#getTitle()` -- the
+ * SAME merged icon+title block the DOT table sizes (`Cluster.java:368`
+ * passes `clusterHeader.getTitle()` to `USymbolFolder#asBig`). With a
+ * visibility icon the tab widens by the block width, heightens to
+ * `max(text, icon)`, and the text is centred on the merged height
+ * (`TextBlockHorizontal`'s CENTER). `visibilityIconDy` is the icon glyph's top, local
+ * to the title block's top (`(merged - icon) / 2` + the 4px top margin).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/decoration/symbol/USymbolFolder.java
+ */
+export function namespaceFolderTitle(
+  ns: Pick<Namespace, 'display' | 'visibilityModifier'>,
+  theme: Theme,
+  measurer: StringMeasurer,
+): {
+  wtitle: number;
+  htitle: number;
+  baselineOffset: number;
+  visibilityBlock?: NamespaceVisibilityBlock;
+  visibilityIconDy?: number;
+} {
+  const wtitle = getWTitle(measurer, theme, ns.display, 0);
+  const htitle = getHTitle(measurer, theme, ns.display);
+  const baselineOffset = getTitleBaselineOffset(measurer, theme, ns.display);
+  const visibility = namespaceVisibilityBlock(ns, theme);
+  if (visibility === undefined) return { wtitle, htitle, baselineOffset };
+  const textH = namespaceTitleHeight(measurer, theme, ns.display);
+  const merged = Math.max(textH, visibility.height);
+  return {
+    wtitle: wtitle + visibility.width,
+    htitle: htitle + merged - textH,
+    baselineOffset: baselineOffset + (merged - textH) / 2,
+    visibilityBlock: visibility,
+    visibilityIconDy: (merged - visibility.height) / 2 + HEADER_VISIBILITY_TOP_MARGIN,
   };
 }

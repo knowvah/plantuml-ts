@@ -1,0 +1,64 @@
+wait load  23.61 9.29 5.38
+wait load  16.46 8.94 5.39
+wait load  10.62 8.24 5.26
+== class 07:08:38  7.27 7.66 5.15
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-class.json — {"conformant":708,"structural-match":3,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 07:09:06  6.82 7.48 5.17
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-unknown.json — {"conformant":299,"structural-match":73,"diverged":453,"errored":0,"timeout":0,"oracle-error":0}
+== census 07:09:34
+    - class/zuropa-39-cada269
+== render-all 07:09:51
+wrote plans/class-divergence-drive-6/measurements/b2.json — 1010 rows
+== activity 07:10:09  4.60 6.74 5.05
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-activity.json — {"conformant":0,"structural-match":4,"diverged":369,"errored":0,"timeout":0,"oracle-error":0}
+== board 07:10:32  7.29 7.20 5.26
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 07:10:54  6.09 6.91 5.21
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-c4.json — {"conformant":1,"structural-match":0,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}
+== chart 07:11:21  7.07 7.06 5.32
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 07:11:45  6.94 7.03 5.35
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== component 07:12:04  6.17 6.85 5.32
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-component.json — {"conformant":64,"structural-match":66,"diverged":136,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 07:12:30  6.62 6.91 5.39
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 07:12:40  6.06 6.78 5.36
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 07:13:02  5.59 6.61 5.34
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 07:13:25  5.59 6.52 5.34
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 07:13:43  4.87 6.31 5.28
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 07:14:07  5.37 6.29 5.30
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 07:14:28  4.84 6.11 5.26
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-json.json — {"conformant":12,"structural-match":23,"diverged":15,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 07:14:51  5.73 6.19 5.31
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-mindmap.json — {"conformant":0,"structural-match":0,"diverged":142,"errored":0,"timeout":0,"oracle-error":0}
+== network 07:15:14  5.76 6.14 5.32
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 07:15:35  5.16 5.97 5.28
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 07:15:59  5.19 5.91 5.27
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 07:16:22  5.21 5.84 5.26
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 07:16:45  5.66 5.89 5.29
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 07:17:09  5.76 5.88 5.31
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1141,"errored":0,"timeout":0,"oracle-error":0}
+== state 07:17:37  6.18 5.95 5.34
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}
+== timing 07:17:55  6.32 5.98 5.37
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 07:18:12  6.05 5.93 5.36
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-usecase.json — {"conformant":28,"structural-match":19,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 07:18:31  6.04 5.94 5.38
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+== wire 07:18:48  6.53 6.04 5.42
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 07:19:05  6.50 6.06 5.44
+wrote plans/class-divergence-drive-6/measurements/b2-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 07:19:22

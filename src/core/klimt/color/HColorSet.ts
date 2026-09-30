@@ -93,6 +93,13 @@ const HEX_PARSERS_BY_LENGTH: ReadonlyMap<number, (s: string) => ResolvedColor | 
 ]);
 
 /**
+ * `HColors.none()`/`HColors.transparent()` -- the ONE `XColor(0, 0, 0, 0)`
+ * singleton both static factories return (`HColors.java:129-135`: `none()`
+ * literally returns the SAME `TRANSPARENT` field `transparent()` does).
+ */
+const TRANSPARENT: ResolvedColor = { r: 0, g: 0, b: 0, a: 0 };
+
+/**
  * `HColorSet#parseSimpleColor`: strip an optional leading `#`, try the hex
  * forms by exact length (1/3/6/8 digits), then fall back to the named-color
  * table -- for ANY length, including 1/3/6/8 when the hex parse itself
@@ -100,6 +107,18 @@ const HEX_PARSERS_BY_LENGTH: ReadonlyMap<number, (s: string) => ResolvedColor | 
  * if/else-if chain only returns early on a SUCCESSFUL hex parse, so it
  * still falls through to `ColorTrieNode.INSTANCE.getColor(s)` afterward --
  * java:122-157). `undefined` where upstream returns `null`.
+ *
+ * No `"transparent"`/`"background"` keyword handling here -- upstream's
+ * PRIVATE `parseSimpleColor(String s)` (java:122-157) has none either, and
+ * `ColorTrieNode` has no `"transparent"` entry, so
+ * `HColorSet#parseSimpleColor("transparent")` is `null` upstream too. That
+ * keyword collapse belongs one level up, in {@link parseColor} (mirroring
+ * the PUBLIC `parseColor(String s)`, java:78-92) -- seeing it here was a
+ * structural mismatch (T3h follow-up): `parseColor` also calls this
+ * function on each half of a `-`/`\`/`|`/`/`-separated gradient or a `#?`
+ * scheme (java:95-117), so a keyword check here would have made
+ * `"transparent-red"` parse as a two-stop gradient where the jar returns
+ * `null` for the whole token.
  */
 export function parseSimpleColor(sIn: string): ResolvedColor | undefined {
   const s = sIn.startsWith('#') ? sIn.slice(1) : sIn;
@@ -107,6 +126,41 @@ export function parseSimpleColor(sIn: string): ResolvedColor | undefined {
   if (hexResult !== undefined) return hexResult;
   const named = getColor(s);
   return named === undefined ? undefined : { ...named, a: 255 };
+}
+
+/**
+ * `HColorSet#parseColor` -- ported HEAD ONLY (`HColorSet.java:78-92`):
+ * strip a leading `#` unconditionally, collapse the `"transparent"`/
+ * `"background"` keywords (case-insensitive) to {@link TRANSPARENT}
+ * (`HColors.none()`, java:82-83), otherwise delegate to
+ * {@link parseSimpleColor} (java:91-93, `HColors.simple(result)` --
+ * this port has no `HColor` wrapper, so the plain `ResolvedColor` IS the
+ * return value, matching every other klimt seam). NOT ported: the
+ * `"automatic"` `HColorAutomagic` branch (java:85-86 -- out of scope, no
+ * fixture exercises it, same as this module's header doc already notes)
+ * and its immediately-following SECOND `"transparent"` check (java:88-89,
+ * dead code upstream -- unreachable, since java:82-83 above it already
+ * returns for that exact condition first), the `#?light:dark[:transparent]`
+ * scheme grammar (java:95-107, already
+ * ported separately as {@link parseConditionalColor}/
+ * {@link resolveConditionalColor}), and the gradient-separator scan
+ * (java:109-117, already ported separately as `paint.ts#parseColor`/
+ * `isPlainColor`) -- see this module's own header doc comment for why
+ * those three are out of scope for this file.
+ *
+ * `emoji/ColorResolver.java#getTrueColor` reaches this exact function via
+ * `HColorSet.instance().getColorOrWhite(code)` -> `parseColor(s)`
+ * (java:60-64,71), so `ColorResolver.ts`'s and `svg-nanoparser-shapes.ts`'s
+ * own `getColorOrWhite` helpers call this, not {@link parseSimpleColor}
+ * directly, to resolve `fill="transparent"`/`stroke="transparent"` the
+ * same way.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:78-92
+ */
+export function parseColor(sIn: string): ResolvedColor | undefined {
+  const s = sIn.startsWith('#') ? sIn.slice(1) : sIn;
+  const lower = s.toLowerCase();
+  if (lower === 'transparent' || lower === 'background') return TRANSPARENT;
+  return parseSimpleColor(s);
 }
 
 /**
@@ -130,14 +184,13 @@ export function toSvgHex(c: ResolvedColor): string {
  * this port's SVG-emission layer runs through (`paint.ts#paintToSvg`,
  * `svg-graphics-core.ts`'s `fixColor`/`createSvgGradient`/`setupBackcolor`).
  *
- * Mirrors `HColor#toSvg`'s own two-step shape: the `"transparent"`/
- * `"background"` keyword collapse from the front of `HColorSet#parseColor`
- * (java:82-83, case-insensitive) happens BEFORE hex/name resolution, then
- * {@link parseSimpleColor} + {@link toSvgHex}. A token that resolves to
- * neither -- not a recognized keyword, not valid hex, not a registered
- * name -- is returned UNCHANGED rather than falling back to a default
- * color: unlike upstream (whose `getColorOrWhite`/`getColorOrNull` run at
- * the SkinParam/ColorParser parse boundary, well before an `HColor`
+ * Mirrors `HColor#toSvg`'s own two-step shape: {@link parseColor} (the
+ * `"transparent"`/`"background"` keyword collapse, `HColorSet.java:82-83`,
+ * happens BEFORE hex/name resolution there) then {@link toSvgHex}. A token
+ * that resolves to neither -- not a recognized keyword, not valid hex, not
+ * a registered name -- is returned UNCHANGED rather than falling back to a
+ * default color: unlike upstream (whose `getColorOrWhite`/`getColorOrNull`
+ * run at the SkinParam/ColorParser parse boundary, well before an `HColor`
  * reaches `SvgGraphics`), this port defers color resolution to the final
  * SVG-emission layer (`paint.ts`'s own "stored verbatim, interpreted late"
  * design), so a WHITE fallback HERE would risk clobbering any
@@ -147,8 +200,7 @@ export function toSvgHex(c: ResolvedColor): string {
  * see `plans/g1c-hcolorset/decision-journal.md`.
  */
 export function resolveColorToSvgHex(raw: string): string {
-  if (raw.toLowerCase() === 'transparent' || raw.toLowerCase() === 'background') return '#00000000';
-  const parsed = parseSimpleColor(raw);
+  const parsed = parseColor(raw);
   return parsed === undefined ? raw : toSvgHex(parsed);
 }
 

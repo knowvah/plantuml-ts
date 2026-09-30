@@ -44,7 +44,7 @@ function makeClassifier(id: string, overrides?: Partial<Classifier>): Classifier
 function layoutAndCount(ast: ClassDiagramAST): { geo: ReturnType<typeof layoutClass>; captured: number } {
   let captured = 0;
   const graphs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured++;
     graphs.push(g);
   });
@@ -154,12 +154,15 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(captured).toBe(1);
   });
 
-  it('single circle classifier -- canvas grows to fit the label drawn below the icon (ensureVisible)', () => {
-    // cdd5-T4a degenerate-text-ensurevisible: SvgGraphics.java:757-758,
-    // :129-133 -- a circle/`() "name"` interface's label is drawn BELOW its
-    // fixed 18x18 icon (measureCircleInterfaceInk); the degenerate path's
-    // box-only rawDims must widen/heighten to the label's real ink corner,
-    // the same `Math.floor(v)+1` truncation the embed-overflow case uses.
+  it("single circle classifier -- canvas grows to the label's ensureVisible baseline, not LimitFinder ink (cdd6-T2c item 1)", () => {
+    // cdd5-T4a/cdd6-T2c degenerate-text-ensurevisible: SvgGraphics.java:
+    // 757-758,:129-133 -- a circle/`() "name"` interface's label is drawn
+    // BELOW its fixed 18x18 icon (measureCircleInterfaceInk); the degenerate
+    // path's box-only rawDims must widen/heighten to the label's real
+    // ensureVisible corner. `symbolInk.maxY` alone overshoots by
+    // LimitFinder's own text-height hack (LimitFinder.java:217, `y -=
+    // dim.getHeight() - 1.5`) -- jar-verified 44, not the un-corrected 46
+    // (`unknown/rupigu-89-xabo757`/`unknown/vabobu-24-temi990`).
     const ast = makeAST({ classifiers: [makeClassifier('A', { kind: 'circle' })] });
     const { geo, captured } = layoutAndCount(ast);
     expect(captured).toBe(0);
@@ -167,8 +170,26 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     expect(leaf.x).toBe(7);
     expect(leaf.y).toBe(7);
     // The 18x18 icon alone would total 7+18+13=38; the label drawn below it
-    // must push the canvas taller than that box-only figure.
+    // must push the canvas taller than that box-only figure, to the EXACT
+    // ensureVisible-corrected value, not the LimitFinder-ink-derived 46.
     expect(geo.totalHeight).toBeGreaterThan(38);
+    expect(geo.totalHeight).toBe(44);
+  });
+
+  it('single collapsed-empty usymbol container -- NOT degenerate (mechanism A: a group before its own parse-time leaf collapse, cdd6-T2c item 2A)', () => {
+    // dot/DotData.java:69-70 counts a group BEFORE the mute-to-leaf that
+    // upstream defers to DOT-export time (svek/GraphvizImageBuilder.java:
+    // 416-418); this port's `usymbol X { }` collapse happens at PARSE time
+    // instead (class-container.ts#closeContainer), stamping
+    // `Classifier.collapsedGroup = true` -- the gate must read THAT flag,
+    // since the collapsed container is already gone from `ast.namespaces`.
+    // Jar-verified: `unknown/febuli-89-dusi249`/`unknown/fezaro-08-nopo877`
+    // (diagnosis/verify.md's "empty usymbol containers").
+    const ast = makeAST({
+      classifiers: [makeClassifier('A', { kind: 'descriptive', usymbol: 'queue', collapsedGroup: true })],
+    });
+    const { captured } = layoutAndCount(ast);
+    expect(captured).toBe(1);
   });
 
   it('empty diagram (0 classifiers, 0 namespaces) -- 0 graphs, 10x10 EntityImageSimpleEmpty geometry', () => {
@@ -191,5 +212,29 @@ describe('layoutClass -- degenerate diagram skip (T5)', () => {
     const svg = renderFixture('@startuml\nclass A\n@enduml');
     expect(svg).toContain('<svg');
     expect(svg).toContain('A');
+  });
+
+  it("end-to-end: a frame with an embedded nested diagram grows the degenerate canvas to the DRAWN image corner, not LimitFinder's shrunk-by-1 ink (cdd6-T2c item 3)", () => {
+    // `frame X [ {{ nested }} ]` is a single descriptive leaf, no
+    // relationships, no namespaces -- degenerate in both this port and the
+    // jar (no svek-*.dot). Its embedded raster is drawn through the SAME
+    // generic EntityImageDescription walk `descriptionLeafSymbolInk`/
+    // `measureEntityLeafInk` uses for `frame`'s own label ink -- LimitFinder's
+    // `drawImage` rule shrinks the tracked corner by 1 on both axes
+    // (LimitFinder.java:198-201), which SvgGraphics#ensureVisible does NOT
+    // (SvgGraphics.java:1033-1034/987-999). This fixture isolates that "+1"
+    // channel from `unknown/josebu-55-seje426`'s own unrelated (a) defect
+    // (T3e's nested-SEQUENCE-image-size bug) by nesting a plain CLASS
+    // diagram instead -- diagnosis/verify.md's "nested renders — josebu"
+    // section, sub-mechanism (b).
+    const src = '@startuml\nframe FooBar [\n{{\nclass Foo\n}}\n]\n@enduml';
+    const svg = renderFixture(src);
+    const height = /height="(\d+)px"/.exec(svg)?.[1];
+    const width = /width="(\d+)px"/.exec(svg)?.[1];
+    // Width stays box-dominated (102) regardless of the correction -- only
+    // height is ink-dominated for this fixture, moving 95 -> 96 once the
+    // embed's drawn corner (not its LimitFinder-shrunk ink) is used.
+    expect(width).toBe('102');
+    expect(height).toBe('96');
   });
 });

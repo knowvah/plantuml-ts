@@ -67,6 +67,7 @@
  */
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
 import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/preprocessor.js';
+import type { ParseOptions } from '../../../src/core/dispatcher.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
 import { applyStyleMap } from '../../../src/core/style-map-theme.js';
@@ -114,12 +115,24 @@ function buildThemeForFixture(
   return { theme, styleMap };
 }
 
+/** `renderFixtureActivity`'s own options bag: `PreprocessOptions` (forwarded
+ *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
+ *  `parseActivity` — D6, cdd6-T1c). Mirrors `render-fixture-class.ts`'s
+ *  `FixtureClassOptions`. */
+type FixtureActivityOptions = PreprocessOptions & ParseOptions;
+
 /** Renders a `.puml` fixture through the ACTIVITY engine's low-level
  * pipeline with `measurer` injected at the layout stage and reused (never
  * recreated) for the chrome stage. `options` (e.g. `{ includeStore }`)
- * passes through to `buildBlockUmls` verbatim. Throws if the markup contains
+ * passes through to `buildBlockUmls` verbatim. `options.assetStore` is
+ * forwarded separately to `parseActivity` (D6, cdd6-T1c), mirroring
+ * `activity/index.ts#activityPlugin.parse`. Throws if the markup contains
  * no diagram block. */
-export function renderFixtureActivity(markup: string, measurer: StringMeasurer, options?: PreprocessOptions): string {
+export function renderFixtureActivity(
+  markup: string,
+  measurer: StringMeasurer,
+  options?: FixtureActivityOptions,
+): string {
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
@@ -129,7 +142,7 @@ export function renderFixtureActivity(markup: string, measurer: StringMeasurer, 
   const rawSourceLines = first.rawSource.map((s) => s.getString());
   const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const ast = astOrThrow(parseActivity(block), 'activity');
+  const ast = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
   const geo = layoutActivity(ast, theme, measurer);
   const fragment = renderActivity(geo, theme);
 

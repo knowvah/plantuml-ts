@@ -45,6 +45,9 @@
  */
 
 import type { UmlSource } from '../../core/block-extractor.js';
+import type { ParseOptions } from '../../core/dispatcher.js';
+import { internalSpriteStoreFrom } from '../../core/internal-sprite-store.js';
+import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import type { StateDiagramAST } from './ast.js';
 import { COMMANDS } from './state-commands.js';
 import { finalizePendingNote, isNoteCloser, type PendingNote } from './state-notes.js';
@@ -305,14 +308,20 @@ function runPass(ps: ParseState, block: UmlSource, pass: Pass): ParseRefusal | n
 
 /** Fresh `ast`/`ps` pair for a brand-new parse -- split out of `parseState`
  *  to stay under the complexity hook's 30-NLOC cap (T8 added two early-return
- *  refusal checks to what was previously a straight-line function). */
-function initParseState(): { ast: StateDiagramAST; ps: ParseState } {
+ *  refusal checks to what was previously a straight-line function). D6
+ *  (cdd6-T1c): `internalSprites`/`internalEmoji` resolved ONCE here, the SAME
+ *  point `class/parser.ts#parseClass`/`description/index.ts`'s own plugin
+ *  resolve their pair -- see `ParseOptions.assetStore`'s doc
+ *  (`core/dispatcher.ts`). */
+function initParseState(options?: ParseOptions): { ast: StateDiagramAST; ps: ParseState } {
+  const internalSprites = options?.assetStore === undefined ? undefined : internalSpriteStoreFrom(options.assetStore);
+  const internalEmoji = options?.assetStore === undefined ? undefined : internalEmojiStoreFrom(options.assetStore);
   const ast: StateDiagramAST = {
     states: [],
     transitions: [],
     notes: [],
     annotations: createAnnotations(),
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(internalSprites, internalEmoji),
   };
   const topScope = makeScope(null);
   const ps: ParseState = {
@@ -340,10 +349,12 @@ function initParseState(): { ast: StateDiagramAST; ps: ParseState } {
  * some line matches no registered command, or the finished diagram fails
  * {@link checkFinalError}. A successful (non-refused) parse is byte-identical
  * to what this function produced before T8 — refusal is strictly additive,
- * never changing what a fully-recognised source parses to.
+ * never changing what a fully-recognised source parses to. D6 (cdd6-T1c):
+ * `options.assetStore` reaches `initParseState` the same way `parseClass`/
+ * `parseDescription` thread it, mirroring `class/parser.ts:317-318`.
  */
-export function parseState(block: UmlSource): StateDiagramAST | ParseRefusal {
-  const { ast, ps } = initParseState();
+export function parseState(block: UmlSource, options?: ParseOptions): StateDiagramAST | ParseRefusal {
+  const { ast, ps } = initParseState(options);
   const topScope = ps.scopeStack[0];
 
   // PASS ONE: declaration-family commands only — builds the complete tree.

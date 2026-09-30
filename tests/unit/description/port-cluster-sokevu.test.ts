@@ -31,7 +31,7 @@ const SOKEVU = [
 
 function renderCapturing(): { svg: string; inputs: DotInputGraph[] } {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     return { svg: renderSync(SOKEVU, { measurer: new WidthTableMeasurer() }), inputs };
   } finally {

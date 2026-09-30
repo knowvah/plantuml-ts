@@ -32,8 +32,13 @@ const DIAGRAM_TYPE_YAML = 'YAML';
 export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'yaml',
 
-  parse(source) {
-    return parseYaml(source);
+  // D6 (cdd6-T1c, write-set extension -- see this task's own report: D6's
+  // task text names yaml's `plugin.parse` explicitly, but only
+  // `yaml/parser.ts` was listed; `yaml/index.ts` is the one remaining call
+  // site needed to actually thread `options.assetStore` through, mirroring
+  // `json/index.ts`'s identical change (already in-scope) one file over).
+  parse(source, options) {
+    return parseYaml(source, options);
   },
 
   layoutSync(ast, theme, measurer) {

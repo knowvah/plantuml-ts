@@ -299,3 +299,60 @@ describe('LinkDecor.CIRCLE ("0") — zefefo-37-xigo245', () => {
     expect(link.match(/<ellipse /g)).toHaveLength(2);
   });
 });
+
+// T1d (cdd6, unknown/xuloxo-85-vibu502 + c4/gikaju-64-bari602):
+// `decoration/LinkDecor.java:87`: `ARROW_TRIANGLE(decors1("<<"),
+// decors2(">>"), 10, true, 0.8)`. Before this fix `class-relationship-
+// parser.ts`'s `HEAD1_SAFE`/`HEAD2_CHARS` had no `<<`/`>>` alternative, so
+// `A -->> B` failed to match REL_DISPATCH_RE and the class engine refused
+// the line entirely -- the diagram fell through to DESCRIPTION routing.
+describe('LinkDecor.ARROW_TRIANGLE ("<<"/">>") — xuloxo-85-vibu502, gikaju-64-bari602', () => {
+  it('parses a target-side `-->>` head instead of refusing the line', () => {
+    const rel = parseRelationshipLine('A -->> B');
+    expect(rel).not.toBeNull();
+    expect(rel?.from).toBe('A');
+    expect(rel?.to).toBe('B');
+    expect(rel?.type).toBe('association');
+    expect(rel?.length).toBe(2);
+  });
+
+  // Mirrors the bare `A <-- B` precedent (parser.test.ts:1094, from=B/to=A):
+  // `<<` is a direction-kind decor (isDirectionKind('arrow')) with nothing
+  // opposing it, so `resolveArrow`'s decorSwap flips from/to exactly like
+  // the plain ARROW head does.
+  it('parses a source-side `<<--` head (mirror direction, from/to swap)', () => {
+    const rel = parseRelationshipLine('A <<-- B');
+    expect(rel).not.toBeNull();
+    expect(rel?.from).toBe('B');
+    expect(rel?.to).toBe('A');
+    expect(rel?.type).toBe('association');
+    expect(rel?.length).toBe(2);
+  });
+
+  it('resolves both heads to the arrowTriangle decor, independent of side', () => {
+    expect(parseArrowDecors('-->>', false)).toEqual({ sourceDecor: 'none', targetDecor: 'arrowTriangle' });
+    expect(parseArrowDecors('<<--', false)).toEqual({ sourceDecor: 'arrowTriangle', targetDecor: 'none' });
+    expect(parseArrowDecorsRaw('-->>')).toEqual({ decor1: 'none', decor2: 'arrowTriangle' });
+  });
+
+  it('auto-creates both endpoints via full parseClass (routes CLASS, not DESCRIPTION)', () => {
+    const ast = parse('foo -->> bar');
+    expect(ast.classifiers.map((c) => c.id).sort()).toEqual(['bar', 'foo']);
+    expect(ast.relationships).toHaveLength(1);
+    expect(ast.relationships[0]?.type).toBe('association');
+  });
+
+  it('draws a filled triangle head and a dependency data-link-type (LinkType.java:292)', () => {
+    const svg = renderSync('@startuml\nclass a\nclass b\na -->> b\n@enduml');
+    const link = /<g class="link"[^>]*>[\s\S]*?<\/g>/.exec(svg)![0];
+    expect(link).toContain('data-link-type="dependency"');
+    expect(link.match(/<polygon /g)).toHaveLength(1);
+  });
+
+  it('does not disturb the plain ARROW glyphs it shares a prefix with (regression)', () => {
+    expect(parseRelationshipLine('A --> B')).toMatchObject({ from: 'A', to: 'B', type: 'association' });
+    // parser.test.ts:1094: bare left-pointing arrow swaps from/to.
+    expect(parseRelationshipLine('A <-- B')).toMatchObject({ from: 'B', to: 'A', type: 'association' });
+    expect(parseRelationshipLine('A --_> B')).toMatchObject({ from: 'A', to: 'B', type: 'association' });
+  });
+});

@@ -1,0 +1,17 @@
+@startuml
+
+<style>
+rectangle {
+  Stereotype {
+    FontColor red
+  }
+
+}
+</style>
+
+rectangle "R1" as r1 <<foo1>>  {
+  rectangle "R2" as r2 <<foo1>> {
+  }
+}
+
+@enduml

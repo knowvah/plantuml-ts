@@ -33,6 +33,17 @@ const STYLE_PROPERTY_SETTERS: ReadonlyArray<readonly [key: string, apply: StyleS
     },
   ],
   [
+    // cdd6 T3g (D3): `PName.HyperLinkColor` -- `Style.java:265` /
+    // `FontConfiguration.java:213-219` build the element's FontConfiguration
+    // with it; `StripeSimple.java:224-225` (`addUrl`) draws the `[[url]]`
+    // atom from that FontConfiguration. Stored like `fontcolor`; a `#?`
+    // conditional value is re-resolved in `applyDeclarations`.
+    'hyperlinkcolor',
+    (s, v) => {
+      s.hyperlinkColor = expandGrayShorthand(v.trim());
+    },
+  ],
+  [
     'fontname',
     (s, v) => {
       s.fontFamily = v.trim();
@@ -125,6 +136,13 @@ function applyDeclarations(
   if (fontColorRaw !== undefined) {
     const conditional = resolveConditionalColor(fontColorRaw.trim(), documentBackgroundHex);
     if (conditional !== undefined) style.fontColor = conditional;
+  }
+  // cdd6 T3g: the same `#?light:dark` re-resolution for HyperLinkColor --
+  // `Style.java:265` resolves it through the same `asColor(set)` as FontColor.
+  const hyperlinkRaw = declarations.get('hyperlinkcolor');
+  if (hyperlinkRaw !== undefined) {
+    const conditional = resolveConditionalColor(hyperlinkRaw.trim(), documentBackgroundHex);
+    if (conditional !== undefined) style.hyperlinkColor = conditional;
   }
 }
 

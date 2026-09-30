@@ -26,8 +26,10 @@ const DIAGRAM_TYPE_HCL = 'HCL';
 export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'hcl',
 
-  parse(source) {
-    return parseHcl(source);
+  // D6 (cdd6-T1c, write-set extension -- see `yaml/index.ts`'s identical
+  // note): the same one-file gap, for hcl.
+  parse(source, options) {
+    return parseHcl(source, options);
   },
 
   layoutSync(ast, theme, measurer) {

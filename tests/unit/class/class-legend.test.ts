@@ -93,7 +93,7 @@ describe('end-to-end: bixogo/roxosu-shaped fixture renders as a degenerate 0-gra
     const ast = parse(['class foo', 'legend', ...SALT_LEGEND_BODY, 'endlegend'].join('\n'));
     let captured = 0;
     const graphs: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured++;
       graphs.push(g);
     });

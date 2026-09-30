@@ -141,6 +141,19 @@ export function resolveElementMinimumWidth(theme: Theme, sname: string): number 
 }
 
 /**
+ * cdd6 T3g: one element's own `Style#wrapWidth` (`Style.java:330-332`,
+ * `PName.MaximumWidth`) -- the SName bucket (`<style> <sname> { MaximumWidth
+ * N }`) over `skinparam wrapWidth`, which `FromSkinparamToStyle.java:250`
+ * registers on `SName.element` (a member of every element signature, e.g.
+ * `EntityImageJson.java:140`'s `{root, element, objectDiagram, json}`).
+ * `undefined` = no wrap (`LineBreakStrategy#getMaxWidth` 0,
+ * `LineBreakStrategy.java:61-66`). Mirrors {@link resolveElementMinimumWidth}.
+ */
+export function resolveElementMaximumWidth(theme: Theme, sname: string): number | undefined {
+  return theme.colors.elements?.[sname]?.maximumWidth ?? theme.wrapWidth;
+}
+
+/**
  * Fold a theme's own bare `root`/`element` `BackgroundColor` (a builtin
  * theme's pre-parsed `styleOverrides`, e.g. `puml-theme-plain.puml:35-37`
  * `root { BackgroundColor $BGCOLOR }`) into `colors.participantBackground`.

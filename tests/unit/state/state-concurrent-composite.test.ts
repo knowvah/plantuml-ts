@@ -310,7 +310,7 @@ state D {
 
   function declaredScopes(markup: string): DotInputGraph[] {
     const inputs: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => inputs.push(g));
+    setLayoutInputObserver(({ graph: g }) => inputs.push(g));
     try {
       renderSync(markup, { measurer: new WidthTableMeasurer() });
     } finally {
@@ -361,7 +361,7 @@ describe('note-only concurrent region sizes from SvekResult margin, not raw canv
 
   function captureAll(): DotInputGraph[] {
     const captured: DotInputGraph[] = [];
-    setLayoutInputObserver((g) => captured.push(g));
+    setLayoutInputObserver(({ graph: g }) => captured.push(g));
     try {
       renderSync(readFileSync(join(CACHE, 'in.puml'), 'utf8'), { measurer: new WidthTableMeasurer() });
     } finally {

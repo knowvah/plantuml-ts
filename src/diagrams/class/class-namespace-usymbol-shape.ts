@@ -35,6 +35,7 @@
 import type { Paint } from '../../core/paint.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
+import type { ElementColors } from '../../core/theme-graph-colors.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { NamespaceGeo } from './class-geo-namespace-types.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
@@ -54,7 +55,13 @@ import { clusterHeaderStereoTextBlock } from './class-cluster-header.js';
 import { LimitFinder } from '../../core/klimt/drawing/LimitFinder.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing-entity.js';
-import { PACKAGE_ROUND_CORNER, DEFAULT_GROUP_FONT_COLOR } from './class-package-style.js';
+import {
+  PACKAGE_ROUND_CORNER,
+  DEFAULT_GROUP_FONT_COLOR,
+  byStereo,
+  elementLineStyle,
+  elementTitleFontColor,
+} from './class-package-style.js';
 
 /** `FontParam.PACKAGE`'s `getDefaultFontFace` returns `UFontFace.bold()`
  *  for every group title regardless of the container's own keyword
@@ -72,6 +79,17 @@ const TITLE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.BOLD]);
  *  `dativu-93-pona469`'s `<<Node>>` clusters (`stroke:#181818;
  *  stroke-width:1`). */
 const GROUP_STROKE_WIDTH = 1;
+
+/** The stroke {@link namespaceUSymbolInk} walks with: paint and stroke do not
+ *  reach `LimitFinder`, so the ink keeps the unstyled group default. */
+const INK_STROKE = UStroke.withThickness(GROUP_STROKE_WIDTH);
+
+/** The `ClusterDecoration` {@link namespaceUSymbolInk} walks: the drawn one
+ *  with default paint and stroke ({@link INK_STROKE}). */
+function inkDecoration(geo: NamespaceGeo, symbol: UpstreamUSymbol, theme: Theme): ClusterDecoration {
+  const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);
+  return buildDecoration(geo, symbol, clusterTitleFont(theme, DEFAULT_GROUP_FONT_COLOR), INK_STROKE, header.block);
+}
 
 /** The folder-family keywords `ClusterDecoration` would resolve to a
  *  `USymbolFolder` (`USymbols.ts`: `FOLDER`/`PACKAGE` are both
@@ -151,7 +169,7 @@ function buildDecoration(
   geo: NamespaceGeo,
   symbol: UpstreamUSymbol,
   titleFont: FontConfiguration,
-  scaleK: number,
+  stroke: UStroke,
   stereo: TextBlock,
 ): ClusterDecoration {
   // cdd-T26 residual round (`daxeno-00-kasu166`): `buildTextBlock`'s own
@@ -196,11 +214,31 @@ function buildDecoration(
     title,
     stereo,
     { position: new UTranslate(geo.x, geo.y), width: geo.width, height: geo.height },
-    // cdd-B8FU: GROUP_STROKE_WIDTH is a raw literal (jar's unscaled
-    // thickness-1 default); `geo.x/y/width/height` are already scaled
-    // (`scaleNamespaceGeo`), so the stroke needs its own scaleK factor.
-    UStroke.withThickness(GROUP_STROKE_WIDTH * scaleK),
+    stroke,
   );
+}
+
+/**
+ * cdd6 T2a (D2): `Cluster#getStrokeInternal` -> `style.getStroke()`
+ * (`Cluster.java:361,402-407`; `Style.java:299-320`) over the cluster
+ * signature `{root, element, <diagram>, group, <usymbol>}` + the group's
+ * stereotype (`Cluster.java:291,385-390`): LineThickness from `<usymbol>
+ * BorderThickness<<label>>`, then `<usymbol>BorderThickness` / `<style>
+ * <usymbol> { LineThickness }`, then `plantuml.skin:102-104`'s `group {
+ * LineThickness 1.0 }` (jar probe: `rectangleBorderThickness<<t>> 3` / `2`
+ * draw 3 / 2); LineStyle from the `<usymbol>` tiers, then `<style> group {
+ * LineStyle }` (jar probe: `group { LineStyle 3 }` dashes a rectangle
+ * cluster 3,3). cdd-B8FU: `geo` is already scaled (`scaleNamespaceGeo`) and
+ * this draw runs at scale 1, so thickness and dash take their own `scaleK`
+ * (`SvgGraphics#format` scales both, `svg-graphics-core.ts:380-384`).
+ */
+function resolveClusterUSymbolStroke(theme: ScaledTheme, geo: NamespaceGeo, keyword: string): UStroke {
+  const tags = geo.stereotypeTags ?? [];
+  const own = theme.colors.elements?.[keyword];
+  const thickness = byStereo(own?.lineThicknessByStereo, tags) ?? own?.lineThickness ?? GROUP_STROKE_WIDTH;
+  const dash = elementLineStyle(theme, [keyword, 'group'], tags) ?? { dashVisible: 0, dashSpace: 0 };
+  const k = theme.scaleK;
+  return new UStroke(dash.dashVisible * k, dash.dashSpace * k, thickness * k);
 }
 
 /**
@@ -234,6 +272,10 @@ function buildDecoration(
  * `NamespaceGeo` (T12's own "not modeled" note, `.agent-notes/cdd-T12.md`),
  * so those two roles apply the element-bucket override unconditionally.
  */
+function clusterUSymbolBackColor(specific: ElementColors | undefined, geo: NamespaceGeo, fallback: Paint): Paint {
+  return geo.color === undefined && specific?.background !== undefined ? specific.background : fallback;
+}
+
 function resolveClusterUSymbolPaint(
   theme: Theme,
   geo: NamespaceGeo,
@@ -241,10 +283,16 @@ function resolveClusterUSymbolPaint(
   fallback: NamespaceUSymbolPaint,
 ): NamespaceUSymbolPaint {
   const specific = theme.colors.elements?.[keyword];
-  const backColor =
-    geo.color === undefined && specific?.background !== undefined ? specific.background : fallback.backColor;
-  const borderColor = specific?.border ?? fallback.borderColor;
-  const fontColor = typeof specific?.font === 'string' ? specific.font : fallback.fontColor;
+  const tags = geo.stereotypeTags ?? [];
+  const backColor = clusterUSymbolBackColor(specific, geo, fallback.backColor);
+  // cdd6 T2a (D2): the `<usymbol>BorderColor<<label>>` tier (+1000,
+  // `FromSkinparamToStyle.java:292-302,396-408`) over the plain one --
+  // `Cluster.java:316-320` reads LineColor off the stereotype-signed style
+  // (`:385-390`). Jar fepiko-26: `rectangle<<boundary>> BorderColor green`.
+  const borderColor = byStereo(specific?.borderByStereo, tags) ?? specific?.border ?? fallback.borderColor;
+  // cdd6 T2a: `elementTitleFontColor` adds the by-stereo / `title {}` tiers
+  // (`ClusterHeader.java:120-122,146-147,158-160`) ahead of the plain font.
+  const fontColor = elementTitleFontColor(theme, keyword, tags) ?? fallback.fontColor;
   return { backColor, borderColor, roundCorner: fallback.roundCorner, fontColor };
 }
 
@@ -284,8 +332,7 @@ export function namespaceUSymbolInk(
 ): LeafSymbolInk | undefined {
   const symbol = resolveNamespaceUSymbol(geo, theme);
   if (symbol === undefined) return undefined;
-  const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);
-  const decoration = buildDecoration(geo, symbol, clusterTitleFont(theme, DEFAULT_GROUP_FONT_COLOR), 1, header.block);
+  const decoration = inkDecoration(geo, symbol, theme);
   const finder = LimitFinder.create(new MeasurerStringBounder(measurer), false);
   const roundCorner = theme.strictUml === true ? 0 : PACKAGE_ROUND_CORNER;
   decoration.drawU(
@@ -320,7 +367,8 @@ export function renderNamespaceUSymbol(
   const resolvedPaint = resolveClusterUSymbolPaint(theme, geo, keyword, paint);
   const header = clusterHeaderStereoTextBlock(geo.clusterHeaderStereo);
   const titleFont = clusterTitleFont(theme, resolvedPaint.fontColor);
-  const decoration = buildDecoration(geo, symbol, titleFont, theme.scaleK, header.block);
+  const stroke = resolveClusterUSymbolStroke(theme, geo, keyword);
+  const decoration = buildDecoration(geo, symbol, titleFont, stroke, header.block);
   const fragment = renderDrawableToFragment(
     {
       drawU(ug) {

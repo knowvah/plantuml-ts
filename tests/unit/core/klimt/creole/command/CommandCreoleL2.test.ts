@@ -254,4 +254,33 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
     const atoms = buildStripeAtoms('[[a,b],[c,d]]', PLAIN);
     expect(atoms.some((a) => a.kind === 'text' && a.url !== undefined)).toBe(false);
   });
+
+  /**
+   * D3 (cdd6 T1b): `StripeSimple.java:224-225` builds the url atom off the
+   * CURRENT `fontConfiguration`, whose `hyperlinkColor` field
+   * (`FontConfiguration.java:144`) is populated at construction time from
+   * `style.value(PName.HyperLinkColor)` (`FontConfiguration.java:213-219`
+   * / `Style.java:265`) -- a per-classifier/`<style>`-cascade value, NOT
+   * always upstream's `blue` default. `CommandCreoleUrl.ts`'s
+   * `applyHyperlinkStyleAndPush` must read `hyperlinkColor` off the
+   * active `FontConfiguration` rather than a hardcoded constant.
+   */
+  test('an explicit hyperlinkColor on the active FontConfiguration overrides the #0000FF default', () => {
+    const styled: FontConfiguration = { ...PLAIN, hyperlinkColor: '#FF0000' };
+    const atoms = buildStripeAtoms('[[http://www.google.com]]', styled);
+    expect(atoms.map(textOf)).toEqual([
+      {
+        text: 'http://www.google.com',
+        size: 14,
+        color: '#FF0000',
+        family: 'sans-serif',
+        styles: [FontStyle.UNDERLINE],
+      },
+    ]);
+  });
+
+  test('no hyperlinkColor on the active FontConfiguration falls back to #0000FF', () => {
+    const atoms = buildStripeAtoms('[[http://www.google.com]]', PLAIN);
+    expect(atoms.map(textOf)[0]?.color).toBe('#0000FF');
+  });
 });

@@ -1,0 +1,11 @@
+@startuml
+'!pragma layout smetana
+'breaks
+a |o-- b
+'works
+c ||-- d
+'breaks
+e }o-- f
+'works
+g }|-- h
+@enduml

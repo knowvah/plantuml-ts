@@ -6,6 +6,7 @@ import type { UGraphic } from '../UGraphic.js';
 import type { StringBounder } from '../font/StringBounder.js';
 import type { TextBlock } from './TextBlock.js';
 import { ULine } from './ULine.js';
+import { URectangle } from './URectangle.js';
 
 /**
  * UHorizontalLine — an infinite (stencil-clipped) horizontal rule, with
@@ -117,19 +118,21 @@ export class UHorizontalLine implements UShape {
     this.drawHLine(UHorizontalLine.secondHalf(stencil, dimTitle.getWidth()), y, ugStroke);
   }
 
-  drawTitleInternal(ug: UGraphic, startingX: number, endingX: number, y: number, _clearArea: boolean): void {
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/UHorizontalLine.java:154-166 */
+  drawTitleInternal(ug: UGraphic, startingX: number, endingX: number, y: number, clearArea: boolean): void {
     if (this.f.title === null || this.f.blankTitle) return;
     const widthToUse = endingX - startingX;
     const dimTitle = this.f.title.calculateDimension(ug.getStringBounder());
     const space = (widthToUse - dimTitle.getWidth()) / 2;
     const x1 = startingX + space;
     const y1 = y - dimTitle.getHeight() / 2 - 0.5;
-    this.f.title.drawU(ug.apply(new UTranslate(x1, y1)));
-    // `clearArea` (upstream: a pre-clear `URectangle` fill via
-    // `ug.apply(getStroke()).draw(URectangle.build(dimTitle))`) is
-    // dropped: no caller in this port ever passes `true` — every
-    // `drawTitleInternal` call site here (`drawLineInternal`) hard-codes
-    // `false`, matching upstream's own only call site.
+    const ugTitle = ug.apply(new UTranslate(x1, y1));
+    // `if (clearArea) ug.apply(getStroke()).draw(URectangle.build(dimTitle));`
+    // (:162-164) -- only `USymbolDatabase.java:111` / `USymbolNode.java:116`
+    // pass `true`; the rect takes the enclosing ug's back colour (cdd6 T3f,
+    // nuveji `..My title..`).
+    if (clearArea) ugTitle.apply(this.getStroke()).draw(URectangle.build(dimTitle.getWidth(), dimTitle.getHeight()));
+    this.f.title.drawU(ugTitle);
   }
 
   drawMe(ug: UGraphic): void {

@@ -168,6 +168,13 @@ export interface ClassifierGeo {
    *  `class-stereotype.ts#splitStereotypeTokens`'s own doc comment. Omitted
    *  for every classifier with no stereotype at all. */
   stereotypeLabels?: readonly string[];
+  /** cdd6 b2 (journal row 39): the `hide|show stereotype`-FILTERED labels
+   *  (`class-stereotype.ts#resolveVisibleStereotypeLabels`) -- what
+   *  `EntityImageDescription.java:193-202` draws as a USymbol leaf's `stereo`
+   *  block (`portionShower.getVisibleStereotypeLabels(entity)`), distinct
+   *  from {@link stereotypeLabels}' unfiltered style-matching list. Omitted
+   *  with it. */
+  visibleStereotypeLabels?: readonly string[];
   /** G2 N39: copied unchanged from `Classifier.styleGeneration` (`ast.ts`'s
    *  doc comment) -- feeds `style-cascade-class.ts#resolveClassTagCascadeEntry`'s
    *  position-scoped `.tagname` cascade lookup alongside {@link
@@ -266,7 +273,25 @@ export interface EdgeGeo {
      *  tag (the overwhelming majority), which renders at the SAME base
      *  `labelFontAttrs.fontSize` as before this field existed. */
     fontSize?: number;
+    /** T2d (rimeca-17-gice904, `<U>agregation</U>`): the raw label carried
+     *  an inline `<u>...</u>` creole tag -- a real creole TextBlock RENDERS
+     *  it as underline formatting rather than literal glyphs
+     *  (`SvekEdge.java:298-299`'s `create0(..., CreoleMode.SIMPLE_LINE,
+     *  ...)`), matching {@link labelLines}' own `bold` precedent for the
+     *  SAME "creole formatting the render side must still apply" gap.
+     *  `undefined` (the overwhelming majority) renders with no
+     *  `text-decoration`, unchanged. */
+    underline?: boolean;
   };
+  /** T2d (kexaba-26-kobu577): present INSTEAD OF {@link label} when the
+   *  relationship's text is ENTIRELY one `<$sprite>` inline atom
+   *  (`class-edge-label-measure.ts#resolveLoneSpriteLabel`'s own doc
+   *  comment) -- draws as the resolved PNG `<image>` a member row's inline
+   *  `<$name>` already produces, positioned at its own box's TOP-LEFT
+   *  corner (an atom's `getStartingAltitude() === 0`, never a text
+   *  baseline) rather than `label`'s baseline anchor. Mutually exclusive
+   *  with `label` and `labelLines` (`attachEdgeLabel` sets at most one). */
+  labelImage?: { href: string; x: number; y: number; width: number; height: number };
   /** G2 item 43: present INSTEAD OF {@link label} when the relationship's
    *  text carried a `\n`/`\l`/`\r` line-break escape sequence
    *  (`class-layout-helpers.ts#splitEdgeLabelLines`) -- one entry per line,
@@ -358,6 +383,23 @@ export interface EdgeGeo {
    *  (`link.getEntity2()`), the id nearest `points[points.length - 1]`. */
   targetContactId?: string;
   dashed: boolean;
+  /**
+   * T3c (D8, `smetana-pragma-ignored`): `true` iff the diagram carried
+   * `!pragma layout smetana` (`ClassDiagramAST.layoutEngine`, `ast.ts`'s
+   * doc comment) -- `renderer-edge.ts#renderEdge` reads this to mirror
+   * `SmetanaEdge#drawU`'s STRUCTURAL draw shape (extremities before the
+   * connecting path, no `id`/`codeLine` on the path, a narrower url wrap)
+   * instead of `SvekEdge#drawU`'s. Pure carry-only channel, same precedent
+   * as {@link hidden}/{@link url} above (`renderClass(geo, theme)` has no
+   * AST access) -- populating it is a ONE-LINE addition in
+   * `class-edge-geo.ts#buildEdgeGeos`'s `edgeGeo` literal (that function
+   * already receives `ast: ClassDiagramAST` as its first parameter, same
+   * spot as the `hidden`/`url` carry-only copies), outside this file's
+   * write-set; named remainder, T3c's own report. Absent = the pre-existing
+   * SvekEdge draw shape, unchanged.
+   * @see ~/git/plantuml/.../sdot/SmetanaEdge.java:106-253
+   */
+  smetana?: true;
   /** G2 N2 (mechanism 3): copied from `Relationship.creationIndex`. */
   creationIndex?: number;
   /** G2 N2 (mechanism 3): the relationship's raw AST endpoints, for the

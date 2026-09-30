@@ -8,6 +8,7 @@ import type { Member, Visibility } from './class-member-ast.js';
 import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { UrlInfo } from './class-url.js';
 import type { MapRow } from './ast.js';
+import type { DisplayPositioned } from '../../core/annotations/index.js';
 
 export type ClassifierKind =
   | 'class'
@@ -270,6 +271,13 @@ export interface Classifier {
    * fixture `daxeno-00-kasu166`. Never set by any declaration path.
    */
   collapsedGroup?: true;
+  /**
+   * cdd6-T3d (bijufi-98-xafa015): a collapsed group's OWN legend
+   * (`Namespace.legend`, copied by `class-namespace.ts#collapseEmptyNamespace`
+   * -- the mute keeps the SAME entity). `EntityImageEmptyPackage` draws it as
+   * the leaf's stereo block (`EntityImageEmptyPackage.java:121-124`).
+   */
+  legend?: DisplayPositioned;
   /**
    * For `kind: 'lollipop'` only — `'half'` (required interface / socket, a
    * half-circle notch) vs `'full'` (provided interface, a full circle), from

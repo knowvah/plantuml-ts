@@ -32,7 +32,7 @@ const ast: ClassDiagramAST = {
 /** Run layoutClass with the given theme, returning the captured DotInputGraph. */
 function captureDotGraph(theme: typeof defaultTheme): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured = g;
   });
   try {

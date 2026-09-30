@@ -53,8 +53,10 @@ import {
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords.js';
 import { resolveBareOrBackColor } from '../../core/color-override.js';
-import { parseColor, type Paint } from '../../core/paint.js';
+import { parseColor, isTransparentColor, type Paint } from '../../core/paint.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { FontStyle, type FontConfiguration } from '../../core/klimt/shape/UText.js';
+import { byStereo, elementLineStyle, elementStereoFontColor, elementTitleFontColor } from './class-package-style.js';
 
 /** Jar default line thickness for an `EntityImageDescription`-family shape
  *  with no `LineThickness` skinparam override — see `renderer-entity.ts
@@ -88,6 +90,10 @@ const ENTITY_STROKE_WIDTH = 0.5;
  *  golden `foo3` leaf: `<rect ... rx="2.5" ry="2.5"/>`). cdd-B8FU:
  *  multiplied by `theme.scaleK` at its one call site below. */
 const ELEMENT_ROUND_CORNER = 5.0;
+
+/** `fcStereo`'s face (`EntityImageDescription.java:155-157,174`):
+ *  `plantuml.skin:79-82` `stereotype { FontStyle italic }`. */
+const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
 
 /**
  * `EntityImageDescriptionParams.symbol.keyword` for one class-diagram leaf
@@ -181,10 +187,103 @@ function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
  * unchanged for a compound one) -- one shared grammar, two draw paths.
  */
 function resolveBackcolor(classifier: ClassifierGeo, theme: ScaledTheme, symbolKeyword: USymbol): Paint {
-  const override = resolveBareOrBackColor(classifier.color);
-  if (override === undefined) return resolveElementPaint(theme, symbolKeyword, 'background');
-  const parsed = parseColor(override);
+  // cdd6 T2a (D2): below the inline colour, `styleTitle`'s BackGroundColor
+  // is stereotype-signed (`withTOBECHANGED`, `EntityImageDescription.java
+  // :151-153`), so `<sname>BackgroundColor<<label>>` (+1000) outranks the
+  // plain tier -- jar probe `rectangle<<person>> { BackgroundColor #08427B }`.
+  const own = theme.colors.elements?.[symbolKeyword];
+  const byLabel = byStereo(own?.backgroundColorByStereo, leafTags(classifier));
+  const override = resolveBareOrBackColor(classifier.color) ?? byLabel;
+  if (override !== undefined) return resolvedPaint(override);
+  if (own?.background !== undefined || symbolKeyword !== 'package') {
+    return resolveElementPaint(theme, symbolKeyword, 'background');
+  }
+  // `skinparam packageBackgroundColor` also registers on `{package_}`
+  // (`addMagic`, `FromSkinparamToStyle.java:127,129`), so a `package` leaf's
+  // styleTitle reads it (jar probe: `packageBackgroundColor yellow` fills
+  // the leaf `#FF0`); a gradient value is T1a's `backgroundGradient`.
+  const skin = own?.backgroundGradient ?? theme.colors.graph.packageBackground;
+  return skin === undefined ? resolveElementPaint(theme, symbolKeyword, 'background') : resolvedPaint(skin);
+}
+
+/** A raw colour/gradient spec as a drawable `Paint` -- `parseColor`, then
+ *  the `HColorSet` hex for a plain colour (cdd5-T3b's grammar above). */
+function resolvedPaint(spec: string | Paint): Paint {
+  const parsed = typeof spec === 'string' ? parseColor(spec) : spec;
   return typeof parsed === 'string' ? resolveColorToSvgHex(parsed) : parsed;
+}
+
+/** The leaf's style-matching stereotype labels (`withTOBECHANGED(stereotype)`
+ *  matches every label, `StyleSignatureBasic.java:119-132`). */
+function leafTags(classifier: ClassifierGeo): readonly string[] {
+  return classifier.stereotypeLabels ?? [];
+}
+
+/** `styleTitle.value(PName.LineColor)` (`EntityImageDescription.java:162`):
+ *  the `<sname>BorderColor<<label>>` tier over the plain one (jar probe
+ *  `rectangle<<person>> { BorderColor #073B6F }`; fepiko-26). */
+function resolveForecolor(classifier: ClassifierGeo, theme: ScaledTheme, symbolKeyword: USymbol): Paint {
+  const own = theme.colors.elements?.[symbolKeyword];
+  const byLabel = byStereo(own?.borderByStereo, leafTags(classifier));
+  if (byLabel !== undefined) return byLabel;
+  // `skinparam packageBorderColor` likewise reaches a `package` leaf through
+  // `addMagic(SName.package_)` (`FromSkinparamToStyle.java:128-129`) -- jar
+  // gigoru-88 / probe: `packageBorderColor red` strokes the leaf `#F00`.
+  const skin = symbolKeyword === 'package' && own?.border === undefined ? theme.colors.graph.packageBorder : undefined;
+  return skin ?? resolveElementPaint(theme, symbolKeyword, 'border');
+}
+
+/**
+ * `styleTitle.getStroke(colors)` (`EntityImageDescription.java:170`,
+ * `Style.java:299-320`): LineThickness from `<sname>BorderThickness<<label>>`,
+ * then the plain element tier, then {@link ENTITY_STROKE_WIDTH}; the dash
+ * from T1a's `lineStyle` tiers (jar palida-11 / zivilu-35: `7,7`; probe
+ * `rectangle { LineStyle 5-3; LineThickness 2 }`). cdd-B8FU: both halves
+ * scale with `theme.scaleK` (`SvgGraphics#format` scales the dasharray too).
+ */
+function resolveStroke(classifier: ClassifierGeo, theme: ScaledTheme, symbolKeyword: USymbol): UStroke {
+  const tags = leafTags(classifier);
+  const byLabel = byStereo(theme.colors.elements?.[symbolKeyword]?.lineThicknessByStereo, tags);
+  const thickness =
+    (byLabel ?? resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH) * theme.scaleK;
+  const dash = elementLineStyle(theme, [symbolKeyword], tags);
+  if (dash === undefined) return UStroke.withThickness(thickness);
+  return new UStroke(dash.dashVisible * theme.scaleK, dash.dashSpace * theme.scaleK, thickness);
+}
+
+/** `font` with its colour replaced by `color` when an element tier set one;
+ *  a transparent colour elides the text (`DriverTextSvg.java:92-94`,
+ *  `usymbol-resolve.ts#textFontColor`'s identical `null`). */
+function recolor(font: FontConfiguration, color: string | undefined): FontConfiguration {
+  if (color === undefined) return font;
+  return { ...font, color: isTransparentColor(color) ? null : color };
+}
+
+/**
+ * The leaf's three text fonts (`EntityImageDescription.java:172-174`), each
+ * through its own signature's T1a tiers: `fcTitle` (`{<sname>, title}`,
+ * {@link elementTitleFontColor}), `fc` (`{<sname>}` withTOBECHANGED: the
+ * `FontColor<<label>>` tier over the plain font `textFont` already reads),
+ * `fcStereo` (`{<sname>, stereotype}` forStereotypeItself,
+ * {@link elementStereoFontColor}). Jar probe: `Foo` (display == code) draws
+ * `title { FontColor red }`, `"Some Bar" as Bar` draws the plain orange.
+ */
+function resolveLeafFonts(classifier: ClassifierGeo, theme: ScaledTheme, symbolKeyword: USymbol) {
+  const tags = leafTags(classifier);
+  const byLabel = byStereo(theme.colors.elements?.[symbolKeyword]?.fontByStereo, tags);
+  return {
+    fontTitle: recolor(
+      textFont(theme, symbolKeyword, 0, entityTitleStyles(symbolKeyword)),
+      elementTitleFontColor(theme, symbolKeyword, tags),
+    ),
+    fontBody: recolor(textFont(theme, symbolKeyword), byLabel),
+    // `plantuml.skin:79-82` `stereotype { FontStyle italic }` -- the same
+    // STEREOTYPE_STYLES `description/renderer-entity.ts:82,214` passes.
+    fontStereo: recolor(
+      textFont(theme, symbolKeyword, 0, STEREOTYPE_STYLES, 'stereotype'),
+      elementStereoFontColor(theme, symbolKeyword, tags),
+    ),
+  };
 }
 
 function buildUSymbolEntityParams(
@@ -194,13 +293,13 @@ function buildUSymbolEntityParams(
 ): EntityImageDescriptionParams {
   const symbolKeyword = resolveSymbolKeyword(classifier);
   const display = classifier.rows[0]?.text ?? classifier.id;
-  const fontTitle = textFont(theme, symbolKeyword, 0, entityTitleStyles(symbolKeyword));
-  const fontStereo = textFont(theme, symbolKeyword, 0, undefined, 'stereotype');
+  const { fontTitle, fontBody, fontStereo } = resolveLeafFonts(classifier, theme, symbolKeyword);
   // cdd3-T28 (E3-14): unconditional, as upstream computes it (see
   // ELEMENT_ROUND_CORNER's doc) -- `package`'s `USymbolFolder` tab reads it
   // too (the jar's `A2.5,2.5` arcs on gujigi-63-roki030).
   const roundCorner = ELEMENT_ROUND_CORNER * theme.scaleK;
   const titleAlignment = titleAlignmentFor(symbolKeyword);
+  const stroke = resolveStroke(classifier, theme, symbolKeyword);
   return {
     // cdd3-T10 (S-11): the entity's own url (`getUrl99()`), drawn by
     // `EntityImageDescription#drawU`'s `startUrl`/`closeUrl` pair.
@@ -212,28 +311,38 @@ function buildUSymbolEntityParams(
     },
     // cdd3-T28 (E3-14): `codeDisplay` is `entity.getName()` (java:180) -- the
     // leaf id, as the sizer's `measureShownFolderTitle(node.id, ...)` reads.
-    labels: { codeName: classifier.id, displayText: display, stereotypeLabels: [] },
+    // cdd6 b2 (journal row 39): `EntityImageDescription.java:198`
+    // `portionShower.getVisibleStereotypeLabels(entity)` -- was `[]`.
+    labels: {
+      codeName: classifier.id,
+      displayText: display,
+      stereotypeLabels: classifier.visibleStereotypeLabels ?? [],
+    },
     paint: {
-      forecolor: resolveElementPaint(theme, symbolKeyword, 'border'),
+      forecolor: resolveForecolor(classifier, theme, symbolKeyword),
       backcolor: resolveBackcolor(classifier, theme, symbolKeyword),
       roundCorner,
       diagonalCorner: 0,
       deltaShadow: 0,
-      stroke: UStroke.withThickness(
-        (resolveElementLineThickness(theme, symbolKeyword) ?? ENTITY_STROKE_WIDTH) * theme.scaleK,
-      ),
+      stroke,
+      // cdd6 b2 (journal row 46): `BodyEnhancedAbstract.java:121-123`
+      // `getDefaultThickness()` = the entity's own `LineThickness` -- the
+      // border stroke's value (`plantuml.skin:91-93`), not root's 1.0.
+      defaultThickness: stroke.getThickness(),
       fontTitle,
       // `fc` (`style`, not `styleTitle`, java:173) -- the `desc` font when the
       // display differs from the code name, so a package's bold title style
       // does not leak into its label (`buildDesc`).
-      fontBody: textFont(theme, symbolKeyword),
+      fontBody,
       fontStereo,
       titleAlignment,
       stereotypeAlignment: HorizontalAlignment.CENTER,
     },
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
-    atomImageResolverFor: makeAtomImageResolverFor(sprites),
+    // cdd6 b2 (journal row 40): `SvgNanoParser.java:187-215` -- an unset
+    // sprite `stroke-width` inherits the entity's own ambient stroke.
+    atomImageResolverFor: makeAtomImageResolverFor(sprites, stroke),
     // cdd5-T3b (`xagomi-49-caki729`): `EntityImageDescription.java:334-341`'s
     // `drawHexagon` -- `bibliotekon.getNode(entity).getPolygon()` -- is
     // upstream's OWN "no computed shape for this node" state (`if (hexagon

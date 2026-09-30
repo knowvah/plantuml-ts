@@ -25,7 +25,8 @@
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import type { ElementColors } from '../../core/theme-graph-colors.js';
-import { isTransparentColor } from '../../core/paint.js';
+import { isTransparentColor, type Paint } from '../../core/paint.js';
+import type { LineStyleDash } from '../../core/style-line-style.js';
 import { namespaceTitleWidth, namespaceTitleHeight, packageTitleFontSpec } from './class-namespace-title-runs.js';
 
 // marginTitleX1/X2/X3/Y1/Y2 — upstream's own field names
@@ -70,7 +71,7 @@ function cleanStyleTag(tag: string): string {
 /** The stereotype tier: the LAST of `tags` with a value wins, mirroring the
  *  merge's last-registered-wins rule (`renderer-classifier-colors.ts
  *  #resolveElementBackground`'s identical convention). */
-function byStereo<T>(map: Readonly<Record<string, T>> | undefined, tags: readonly string[]): T | undefined {
+export function byStereo<T>(map: Readonly<Record<string, T>> | undefined, tags: readonly string[]): T | undefined {
   if (map === undefined) return undefined;
   let hit: T | undefined;
   for (const tag of tags) {
@@ -106,7 +107,86 @@ export function titleFontColor(theme: Theme): string {
  *  .withTOBECHANGED(stereotype)` -- the `packageFontColor<<label>>` tier
  *  first (E3-1), then the plain one. */
 export function packageTitleFontColor(theme: Theme, tags: readonly string[]): string {
-  return byStereo(packageBucket(theme)?.fontByStereo, tags) ?? titleFontColor(theme);
+  // cdd6 T2a: `<style> package { title { FontColor } }` (T1a's `titleFont`)
+  // matches the `{..., package_, title}` signature too (`ClusterHeader.java
+  // :161-162`; `EntityImageEmptyPackage.java:88`) -- jar juzica-68.
+  const pkg = packageBucket(theme);
+  return byStereo(pkg?.fontByStereo, tags) ?? plainString(pkg?.titleFont) ?? titleFontColor(theme);
+}
+
+/** A `Paint` narrowed to the plain colour a text fill can carry (the
+ *  `text()` primitive has no gradient path, {@link titleFontColor}). */
+function plainString(paint: Paint | undefined): string | undefined {
+  return typeof paint === 'string' ? paint : undefined;
+}
+
+/**
+ * cdd6 T2a (D2): the title colour of a USymbol cluster (`ClusterHeader
+ * #getTitleBlock`, `ClusterHeader.java:120-122` over the `{root, element,
+ * <diagram>, <usymbol>, composite, title}` signature `:158-160`,
+ * `.withTOBECHANGED(stereotype)` `:146-147`) or of an `EntityImageDescription`
+ * leaf's `fcTitle` (`EntityImageDescription.java:147-153,172`): the
+ * `<sname>FontColor<<label>>` / `.label { FontColor }` tier, then `<sname> {
+ * title { FontColor } }`, then `<sname> { FontColor }`. `undefined` = no
+ * element tier (the caller keeps its own default). Jar catana-32 / juzica-68.
+ */
+export function elementTitleFontColor(theme: Theme, sname: string, tags: readonly string[]): string | undefined {
+  const b = theme.colors.elements?.[sname];
+  return byStereo(b?.fontByStereo, tags) ?? plainString(b?.titleFont) ?? plainString(b?.font);
+}
+
+/**
+ * cdd6 T2a (D2): the stereotype colour of a USymbol cluster
+ * (`ClusterHeader.java:211-215`, `Cluster.getDefaultStyleDefinition(...)
+ * .forStereotypeItself(stereotype)` = `{..., group, <usymbol>, stereotype}`
+ * + the label, `StyleSignatureBasic.java:134-148`) or an
+ * `EntityImageDescription` leaf's `fcStereo` (`EntityImageDescription.java
+ * :155-157,174`). Both +1000 tiers match that signature: `<sname>
+ * StereotypeFontColor<<label>>` ({stereotype, <sname>} + label) and
+ * `<sname>FontColor<<label>>` ({<sname>} + label); upstream keeps whichever
+ * was REGISTERED LATER (`DarkString.java:54-57`, priority = declaration
+ * counter), which the flat maps do not record -- the stereotype tier goes
+ * first, as {@link clusterStereoFontColor} already orders it (jar probe:
+ * `FontColor` then `StereotypeFontColor<<person>>` draws the stereo red).
+ * Then `<sname> { stereotype { FontColor } }`, then `<sname> { FontColor }`.
+ */
+export function elementStereoFontColor(theme: Theme, sname: string, tags: readonly string[]): string | undefined {
+  const b = theme.colors.elements?.[sname];
+  return (
+    byStereo(b?.stereotypeFontByStereo, tags) ??
+    byStereo(b?.fontByStereo, tags) ??
+    b?.stereotypeFont ??
+    plainString(b?.font)
+  );
+}
+
+/**
+ * cdd6 T2a (D2): the dash half of `Style#getStroke` (`Style.java:299-320`)
+ * for a signature holding each of `snames` (in the caller's precedence
+ * order) plus the entity's stereotype labels: every `<sname>BorderStyle
+ * <<label>>` tier first (+1000, `FromSkinparamToStyle.java:292-302,396-408`),
+ * then every plain `<sname> { LineStyle }`. `undefined` = no LineStyle
+ * declared (solid).
+ */
+export function elementLineStyle(
+  theme: Theme,
+  snames: readonly string[],
+  tags: readonly string[],
+): LineStyleDash | undefined {
+  const buckets = snames.map((s) => theme.colors.elements?.[s]);
+  for (const b of buckets) {
+    const hit = byStereo(b?.lineStyleByStereo, tags);
+    if (hit !== undefined) return hit;
+  }
+  return buckets.find((b) => b?.lineStyle !== undefined)?.lineStyle;
+}
+
+/** `UStroke(dashVisible, dashSpace, thickness)` -> the SVG
+ *  `stroke-dasharray` value (`SvgGraphics` writes `visible,space`), or
+ *  `undefined` for a solid stroke (`{0, 0}`, `UStroke.withThickness`). */
+export function dashArrayOf(dash: LineStyleDash | undefined): string | undefined {
+  if (dash === undefined || (dash.dashVisible === 0 && dash.dashSpace === 0)) return undefined;
+  return `${String(dash.dashVisible)},${String(dash.dashSpace)}`;
 }
 
 /** Cluster border (`Cluster.java:316-320`): `packageBorderColor<<label>>`,

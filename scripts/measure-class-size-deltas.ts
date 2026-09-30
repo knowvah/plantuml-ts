@@ -51,7 +51,7 @@ const GOLDENS = join(REPO, 'oracle', 'goldens', 'class');
  *  zero-vs-zero EQUAL). */
 function captureGraphs(markup: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer() });
   } finally {

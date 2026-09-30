@@ -64,7 +64,7 @@ import type { Theme } from '../../core/theme.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import { linkWrap, attrs, resolvePaint } from '../../core/svg.js';
 import type { Paint } from '../../core/paint.js';
-import { fmt, formatDecimal, shortenColor, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
+import { STROKE_WIDTH, drawIconShape, type IconShapeCtx } from './class-visibility-icon-shapes.js';
 
 /** `SkinParam#classAttributeIconSize()`'s own default (skin/SkinParam.java
  *  :554-556). `skinparam classAttributeIconSize N` overrides it -- resolved
@@ -213,112 +213,6 @@ function isFilled(icon: Visibility, memberIsField: boolean): boolean {
   return icon === '*' ? true : !memberIsField;
 }
 
-/** cdd-B8FU: jar's `format()` scales EVERY emitted numeral
- *  (`SvgGraphics.java:466-472,557`), this glyph's own `stroke-width`
- *  included -- multiplied by `k` at every `draw*` call site below (T29's
- *  `ScaledTheme` thread already scales `originX`/`originY`/`size`, the
- *  row-geometry inputs; this is the one remaining render-time literal). */
-const STROKE_WIDTH = 1;
-
-/** `stroke:X;stroke-width:Y;<suffix>` -- the ONE combined `style=` value
- *  real `SvgGraphics#styleMe` emits for every shape (`rect`/`ellipse`/
- *  `polygon`), confirmed byte-for-byte against `test-results/dot-cache/
- *  class/lufide-34-cexu026/in.svg`'s eight visibility-icon shapes (T7b --
- *  before this task these three builders emitted DISCRETE `stroke`/
- *  `stroke-width` attributes, which jar never does). */
-/** Rule 2 applies inside a `style=` string exactly as it does to a `stroke=`
- *  attribute -- the jar shortens both, and the conformance normalizer
- *  resolves `style` declarations into attributes, so an unshortened color
- *  here surfaces as an `@stroke` diff.
- *  @see .../klimt/drawing/svg/SvgGraphics.java#styleMe */
-function styleAttr(stroke: string, strokeWidth: number, suffix = ''): string {
-  return `stroke:${shortenColor(stroke)};stroke-width:${formatDecimal(strokeWidth, DEFAULT_SVG_DECIMALS)};${suffix}`;
-}
-
-/** Shared shape-draw inputs -- bundled to stay inside this project's
- *  per-function param-count cap (mirrors `renderer-arrowhead.ts
- *  #ExtremityDrawCtx`'s identical rationale, cdd-T29 round 2). */
-interface IconShapeCtx {
-  readonly fill: string;
-  readonly stroke: string;
-  readonly size: number;
-  readonly k: number;
-}
-
-function polygonTag(points: ReadonlyArray<readonly [number, number]>, fill: string, stroke: string, k: number): string {
-  const pts = points.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(',');
-  const style = styleAttr(stroke, STROKE_WIDTH * k, 'stroke-linejoin:miter;stroke-miterlimit:10;');
-  return `<polygon${attrs([
-    ['points', pts],
-    ['fill', fill],
-    ['style', style],
-  ])}/>`;
-}
-
-/**
- * `VisibilityModifier#drawSquare`: translate(x+2,y+2), size-4 square --
- * cdd3-T34 (E1-8): `x`/`y`/`ctx.size` already carry `k` (scaled row
- * position, `iconSizeOf(theme) * k`), but the RAW local constants `2`/`4`
- * do not -- upstream draws this whole shape inside ONE ambient
- * scale-wrapped `UGraphic` (`TextBlockExporter.java:205-208`), so every
- * local numeral scales too, not just `size`. `ctx.size - 4` would leave
- * the raw `4` unscaled (`(rawSize*k) - 4` instead of `(rawSize - 4) * k`);
- * multiplying the local `2`/`4` by `ctx.k` reproduces the single ambient
- * transform.
- */
-function drawSquare(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 4 * ctx.k;
-  return `<rect${attrs([
-    ['x', x + 2 * ctx.k],
-    ['y', y + 2 * ctx.k],
-    ['width', s],
-    ['height', s],
-    ['fill', ctx.fill],
-    ['style', styleAttr(ctx.stroke, STROKE_WIDTH * ctx.k)],
-  ])}/>`;
-}
-
-/** `VisibilityModifier#drawCircle`: translate(x+2,y+2), size-4 diameter --
- *  same `k`-scaling rationale as {@link drawSquare}. */
-function drawCircle(x: number, y: number, ctx: IconShapeCtx): string {
-  const r = (ctx.size - 4 * ctx.k) / 2;
-  return `<ellipse${attrs([
-    ['cx', x + 2 * ctx.k + r],
-    ['cy', y + 2 * ctx.k + r],
-    ['rx', r],
-    ['ry', r],
-    ['fill', ctx.fill],
-    ['style', styleAttr(ctx.stroke, STROKE_WIDTH * ctx.k)],
-  ])}/>`;
-}
-
-/** `VisibilityModifier#drawDiamond`: size-2 diamond, translate(x+1,y) --
- *  same `k`-scaling rationale as {@link drawSquare}. */
-function drawDiamond(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2 * ctx.k;
-  const ox = x + 1 * ctx.k;
-  const points: Array<[number, number]> = [
-    [ox + s / 2, y],
-    [ox + s, y + s / 2],
-    [ox + s / 2, y + s],
-    [ox, y + s / 2],
-  ];
-  return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
-}
-
-/** `VisibilityModifier#drawTriangle`: size-2 triangle, translate(x+1,y) --
- *  same `k`-scaling rationale as {@link drawSquare}. */
-function drawTriangle(x: number, y: number, ctx: IconShapeCtx): string {
-  const s = ctx.size - 2 * ctx.k;
-  const ox = x + 1 * ctx.k;
-  const points: Array<[number, number]> = [
-    [ox + s / 2, y + 1 * ctx.k],
-    [ox, y + s - 1 * ctx.k],
-    [ox + s, y + s - 1 * ctx.k],
-  ];
-  return polygonTag(points, ctx.fill, ctx.stroke, ctx.k);
-}
-
 /**
  * Renders one member row's visibility icon (shape + color + `<g
  * data-visibility-modifier>` wrapper), given the icon block's own origin
@@ -333,11 +227,34 @@ export function renderVisibilityIcon(
   url?: UrlInfo,
   theme?: ScaledTheme,
 ): string {
-  // CDD T18: `icon*Color` is a `Paint` since D8 widened the theme fields,
-  // so resolve both here -- the ONE place either becomes an attribute
-  // value -- and carry any `<linearGradient>` def out with the shape
-  // (`svg.ts#extractGradientDefs` lifts it into the document `<defs>`).
-  // The `draw*` helpers below keep their plain-string signatures.
+  return renderVisibilityIconAt(icon, isField, { x: originX, y: originY }, { url, theme });
+  // #lizard forgives -- pre-existing 6-param signature (icon/isField/
+  // originX/originY/url?/theme?); see renderVisibilityIconAt.
+}
+
+/** The ambient drawing context a {@link renderVisibilityIconAt} caller
+ *  supplies: the row's url, the (scaled) theme, and the ug's current stroke
+ *  thickness (UNSCALED; default {@link STROKE_WIDTH}, a member row's). */
+export interface VisibilityIconAmbient {
+  readonly url?: UrlInfo | undefined;
+  readonly theme?: ScaledTheme | undefined;
+  readonly strokeWidth?: number;
+}
+
+/**
+ * {@link renderVisibilityIcon} with the caller's ambient stroke -- cdd6-T3d
+ * (topave-65-ceso890): a package title's icon draws inside the cluster's
+ * stroked ug (`USymbolFolder.java:224` applies `symbolContext` before `:228`
+ * draws the title) and `VisibilityModifier#drawInternal` sets no `UStroke`
+ * of its own (`VisibilityModifier.java:127-176`), so it inherits the
+ * border's 1.5 where a member row's icon keeps 1.
+ */
+/** The icon's resolved line/fill paints and any gradient defs. */
+function iconPaints(
+  icon: Visibility,
+  isField: boolean,
+  theme: ScaledTheme | undefined,
+): { line: string; fill: string; paintDefs: string } {
   const paints = colorsFor(icon, theme);
   const linePaint = resolvePaint(paints.line);
   const backgroundPaint = resolvePaint(paints.background);
@@ -351,16 +268,43 @@ export function renderVisibilityIcon(
   // here, at the one render-time site that turns it into local shape
   // geometry (mirrors `class-badge.ts#BADGE_RADIUS`'s identical gap, T29
   // round 2).
+  return { line, fill, paintDefs };
+}
+
+/** The icon's resolved paints and shape context (split out of
+ *  {@link renderVisibilityIconAt} for the complexity cap). */
+function iconShapeCtx(
+  icon: Visibility,
+  isField: boolean,
+  ambient: VisibilityIconAmbient,
+): { ctx: IconShapeCtx; paintDefs: string } {
+  const { theme } = ambient;
+  // CDD T18: `icon*Color` is a `Paint` since D8 widened the theme fields,
+  // so resolve both here -- the ONE place either becomes an attribute
+  // value -- and carry any `<linearGradient>` def out with the shape
+  // (`svg.ts#extractGradientDefs` lifts it into the document `<defs>`).
+  // The `draw*` helpers below keep their plain-string signatures.
+  const { line, fill, paintDefs } = iconPaints(icon, isField, theme);
   const k = theme?.scaleK ?? 1;
-  const ctx: IconShapeCtx = { fill, stroke: line, size: iconSizeOf(theme) * k, k };
-  const shape =
-    icon === '-'
-      ? drawSquare(originX, originY, ctx)
-      : icon === '#'
-        ? drawDiamond(originX, originY, ctx)
-        : icon === '~'
-          ? drawTriangle(originX, originY, ctx)
-          : drawCircle(originX, originY, ctx); // '+' and '*'
+  const ctx: IconShapeCtx = {
+    fill,
+    stroke: line,
+    size: iconSizeOf(theme) * k,
+    k,
+    strokeWidth: ambient.strokeWidth ?? STROKE_WIDTH,
+  };
+  return { ctx, paintDefs };
+}
+
+export function renderVisibilityIconAt(
+  icon: Visibility,
+  isField: boolean,
+  origin: { readonly x: number; readonly y: number },
+  ambient: VisibilityIconAmbient,
+): string {
+  const { url } = ambient;
+  const { ctx, paintDefs } = iconShapeCtx(icon, isField, ambient);
+  const shape = drawIconShape(icon, origin, ctx);
   // G2 N21: `SvgGraphics#startGroup`/`closeGroup` flush the ACTIVE `<a>`
   // link on every nested group boundary (`renderer-url.ts`'s own module
   // doc comment) -- this icon's own `<g data-visibility-modifier>` wrapper
@@ -370,10 +314,6 @@ export function renderVisibilityIcon(
   // + two icon-bearing member rows).
   const inner = url !== undefined ? linkWrap(shape, url) : shape;
   return `${paintDefs}<g${attrs([['data-visibility-modifier', visibilityModifierName(icon, isField)]])}>${inner}</g>`;
-  // #lizard forgives -- pre-existing 6-param signature (icon/isField/
-  // originX/originY/url?/theme?), unrelated to T7b; url/theme were added by
-  // earlier G2 N21/N54 work. Collapsing to an options object is a public-
-  // API change outside this task's write-set.
 }
 
 /**

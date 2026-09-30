@@ -118,7 +118,7 @@ function overlaps(
 /** Capture the DotInputGraph layoutDescription hands to layoutGraph(). */
 function captureGraphInput(ast: DescriptionDiagramAST, m: StringMeasurer = measurer): DotInputGraph {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured = g;
   });
   try {
@@ -1961,7 +1961,7 @@ describe('layoutDescription — fixCircleLabelOverlapping shield', () => {
       [{ from: 'I', to: 'A', style: 'solid', arrowHead: 'none', length: 1 }],
     );
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -1978,7 +1978,7 @@ describe('layoutDescription — fixCircleLabelOverlapping shield', () => {
       [{ from: 'I', to: 'A', style: 'solid', arrowHead: 'none', length: 1 }],
     );
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {

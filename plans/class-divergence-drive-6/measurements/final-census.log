@@ -1,0 +1,1688 @@
+Loaded 1010 fixtures across types: class, tests/oracle/svg-conformance/census-class.json
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:168:413)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:168:413)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:451:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:172:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:330:44)
+    at renderDrawableToFragment (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/document-shell-fragment.ts:238:12)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:168:413)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:168:413)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:224:10)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:451:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:172:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/annotations/blocks-creole.ts:330:44)
+    at renderDrawableToFragment (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/document-shell-fragment.ts:238:12)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:222:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:311:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:427:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:433:57)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:222:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:311:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:427:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:433:57)
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+triangulation failed
+in routesplines, Pshortestpath failed
+lost A B edge
+lost A B edge
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+Warning: no hard-coded metrics for 'Times,serif'.  Falling back to 'Times' metrics
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockVertical.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockVertical.ts:51:30)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockVertical.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockVertical.ts:51:30)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockVertical.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockVertical.ts:51:30)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at TextBlockMarged.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:49:32)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:308)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:308)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:308)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:451:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:240:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at TextBlockMarged.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:58:22)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: note-layout-measure: no NestedDiagramRenderer wired for {{...}} embedded-diagram note regions yet (see EmbeddedDiagram.ts#NestedDiagramRenderer, the seam to implement)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:222:11)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:311:24)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:427:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:433:57)
+consumeEmbeddedRow: nested-diagram render failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at Object.guardedRender [as renderImage] (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at buildEmbeddedNoteImageAtom (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:335:26)
+    at consumeEmbeddedRow (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure-rows.ts:313:17)
+    at buildBlockRows (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:427:70)
+    at flushBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:130:31)
+    at measureNote (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-measure.ts:141:3)
+    at buildNoteGraphParts (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/note-layout-groups.ts:203:90)
+    at buildDotGraph (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-dot-graph.ts:433:57)
+    at layoutSinglePage (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/layout.ts:600:146)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:308)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:19)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+EmbeddedDiagram.drawU: renderer failed Error: class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure
+    at readSvgDimensions (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:143:122)
+    at guardedRender (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:211:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-nested-diagram-renderer.ts:220:19)
+    at Object.render (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:308)
+    at EmbeddedDiagram.getInternalTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:409:40)
+    at EmbeddedDiagram.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:451:12)
+    at Object.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:240:14)
+    at SheetBlock1.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:235:22)
+    at SheetBlock2.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:83:16)
+    at TextBlockMarged.drawU (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMarged.ts:58:22)
+[Log] vlookup on cm
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:148:36)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:159:54)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:99:47)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeafInk (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:303:16)
+    at descriptionLeafSymbolInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-description-leaf-ink.ts:147:55)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:100:81)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:148:36)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:159:54)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:99:47)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeafInk (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:303:16)
+    at descriptionLeafSymbolInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-description-leaf-ink.ts:147:55)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:100:81)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:148:36)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:159:54)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:99:47)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeafInk (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:303:16)
+    at descriptionLeafSymbolInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-description-leaf-ink.ts:147:55)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:100:81)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:148:36)
+    at measureLeafNode (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing.ts:159:54)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:99:47)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at embeddedLabelDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:216:24)
+    at folderTextBlock (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:190:20)
+    at folderBlockDims (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:135:17)
+    at measureFolderLeafInk (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/leaf-sizing-folder.ts:303:16)
+    at descriptionLeafSymbolInk (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-description-leaf-ink.ts:147:55)
+    at tryMeasureDescriptionLeaf (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-generic-classifier.ts:100:81)
+    at tryMeasureNonGenericClassifier (/Users/scottseely/git/knowvah/plantuml-ts/src/diagrams/class/class-layout-helpers.ts:369:80)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+[Log] SUBMODULE _not_ defined
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+EmbeddedDiagram.calculateDimensionSlow: renderer failed Error: EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionEmbed.ts:84:371)
+    at EmbeddedDiagram.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/EmbeddedDiagram.ts:428:42)
+    at EmbeddedDiagram.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at Object.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/svek/image/EntityImageDescriptionDelegates.ts:224:48)
+    at Sea.add (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/Sea.ts:74:26)
+    at SheetBlock1.initMap (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:172:42)
+    at SheetBlock1.calculateDimensionSlow (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock1.ts:215:10)
+    at SheetBlock1.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/shape/TextBlockMemoized.ts:30:35)
+    at SheetBlock2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/klimt/creole/SheetBlock2.ts:67:23)
+    at BodyEnhanced2.calculateDimension (/Users/scottseely/git/knowvah/plantuml-ts/src/core/cucadiagram/BodyEnhancedAbstract.ts:93:40)
+
+=== DeterministicMeasurer (ratchet metric) (1010 fixtures) ===
+  0 diffs:     974
+  1-3 diffs:   9
+  4-10 diffs:  11
+  11-30 diffs: 3
+  31+ diffs:   13
+  errors:      0
+  zero-diff fixtures:
+    - class/bajotu-30-soku184
+    - class/bajula-59-puxi485
+    - class/baneru-00-kuro607
+    - class/bavoxa-34-keje375
+    - class/bedogi-86-kala547
+    - class/befasi-62-vimu310
+    - class/begico-70-guva302
+    - class/bejeli-39-sina124
+    - class/bejusa-95-gafo325
+    - class/bemuvo-33-jofa419
+    - class/benemi-22-dufo622
+    - class/beruje-75-jimu270
+    - class/besepi-37-rori892
+    - class/bicabi-42-coto932
+    - class/bidusa-22-jutu505
+    - class/bifisu-79-palu304
+    - class/bijeru-39-vefi741
+    - class/bijevi-38-duza931
+    - class/bikuka-40-pezi068
+    - class/bipudo-23-xavu432
+    - class/bisisi-31-xasa026
+    - class/bisome-32-bevo992
+    - class/bitove-03-sanu160
+    - class/bivevo-25-xara984
+    - class/bivize-12-xiko303
+    - class/boduli-27-zufa581
+    - class/bopusi-74-bifa012
+    - class/boseba-99-zopo693
+    - class/bosiki-11-xaza958
+    - class/bososa-44-fipu544
+    - class/bovuze-89-noja934
+    - class/bufogi-69-naba929
+    - class/bugeli-63-mixa543
+    - class/bujedi-30-cize673
+    - class/bulena-06-xutu087
+    - class/bumuma-72-zoka383
+    - class/bunuce-10-vere519
+    - class/buvake-41-vulu531
+    - class/buxuso-47-tara486
+    - class/caboco-62-jula911
+    - class/cacoma-43-poxu615
+    - class/cadani-60-zile435
+    - class/cafuja-81-biki106
+    - class/cagace-55-libu760
+    - class/cajicu-52-cego765
+    - class/camiba-14-java616
+    - class/camuna-58-veca254
+    - class/camupi-97-gezi072
+    - class/canoca-50-rufa568
+    - class/canuti-20-jotu614
+    - class/capode-04-jeka075
+    - class/cejili-77-gepe377
+    - class/cekanu-78-sezu718
+    - class/cenubi-27-xova754
+    - class/cexibu-81-bize688
+    - class/cezaka-60-jado323
+    - class/cezazo-40-raja394
+    - class/cicovi-23-zipe215
+    - class/cidepu-54-bemo048
+    - class/cifeta-62-xodi576
+    - class/cikeni-99-kojo447
+    - class/cilaba-36-zogi212
+    - class/cixote-08-vope282
+    - class/class-allowmixing-usecase-mix
+    - class/class-inheritance-interface-assoc
+    - class/class-missing-label-URL-SVG-0
+    - class/class-usecase-inline-img
+    - class/class-usecase-inline-sprite
+    - class/cobumi-83-bapu892
+    - class/cocube-46-tusu692
+    - class/cojixe-63-vejo525
+    - class/cokeje-99-gede231
+    - class/comaxe-39-goza236
+    - class/conara-44-fisa089
+    - class/conija-14-nuta580
+    - class/corine-48-pemu761
+    - class/cotacu-63-jisi866
+    - class/covopi-80-sejo503
+    - class/coxose-20-nifu136
+    - class/cudugo-42-desi127
+    - class/cukaze-78-zija070
+    - class/cunavo-77-filo788
+    - class/curupe-50-kibu120
+    - class/cutasu-32-zete658
+    - class/cuxaji-51-fozu735
+    - class/cuxebo-14-babu885
+    - class/cuxuni-25-doxi736
+    - class/cuzoga-39-tufu259
+    - class/dacisu-77-paca840
+    - class/dacixi-46-lina038
+    - class/danozo-79-nunu375
+    - class/dareti-67-siti389
+    - class/dasagu-52-vani172
+    - class/dativu-93-pona469
+    - class/datugo-88-sote552
+    - class/daxeno-00-kasu166
+    - class/deboga-81-zuza232
+    - class/defipi-14-xunu847
+    - class/dejuse-14-pule208
+    - class/dekaba-54-fafi485
+    - class/delano-03-xino845
+    - class/delasa-80-jusu462
+    - class/depulu-53-xoca727
+    - class/desoro-94-viti994
+    - class/dibinu-95-kavo178
+    - class/dicezo-86-cigi240
+    - class/difuxu-77-rumu307
+    - class/dijafu-60-diji895
+    - class/dijuce-52-rilu751
+    - class/dimesa-45-ruju320
+    - class/dimile-20-saki799
+    - class/dimisi-54-dula946
+    - class/dipune-93-sare489
+    - class/diroxo-41-zezo954
+    - class/diseka-11-gozu390
+    - class/ditapa-46-bete946
+    - class/dizuse-83-dabi909
+    - class/dofima-22-kofe334
+    - class/dojanu-92-vizo468
+    - class/dojuvi-07-duja723
+    - class/dokego-92-zilu832
+    - class/domeki-03-zaga732
+    - class/dopuzi-50-muxo994
+    - class/dorafa-63-soba922
+    - class/dorelu-66-lixu637
+    - class/doseko-41-mavu661
+    - class/dozude-05-jeve029
+    - class/dozugo-00-jado141
+    - class/duceso-27-koco023
+    - class/ducoka-05-cuce457
+    - class/dudimi-83-mimo845
+    - class/dujinu-38-badu006
+    - class/dulavu-67-falo747
+    - class/dumubu-48-zagi954
+    - class/dupulu-73-cero610
+    - class/duraci-96-rugu254
+    - class/duruga-39-lani451
+    - class/duvuti-29-lugi970
+    - class/exposant-01-class
+    - class/fabuje-68-gona310
+    - class/famizo-04-joxe063
+    - class/farina-07-foti023
+    - class/farinu-74-fuco238
+    - class/faxoga-34-moja699
+    - class/fecolo-08-gepu579
+    - class/fexedu-26-dira713
+    - class/fexuta-62-piko653
+    - class/fezugi-39-fujo327
+    - class/fibamu-81-zimo884
+    - class/fidova-32-dige682
+    - class/fijali-69-pina030
+    - class/filoxo-23-fafi328
+    - class/fimega-47-xigi097
+    - class/finono-05-cuvu171
+    - class/fipezi-47-jafu042
+    - class/fipoke-21-suno116
+    - class/fitini-85-kupo803
+    - class/focabu-31-kide232
+    - class/focaci-80-suzu938
+    - class/fogexa-30-zupo141
+    - class/foguga-43-nafe816
+    - class/fokudo-49-xiki231
+    - class/fomofi-36-lova857
+    - class/fopose-13-kase592
+    - class/foraso-61-gesu813
+    - class/foxata-81-miva542
+    - class/foxiki-17-kosa114
+    - class/foxosa-41-bono202
+    - class/fugexa-12-zoti674
+    - class/fumalu-64-vude116
+    - class/funagu-04-dako081
+    - class/fupope-12-zoku847
+    - class/fuxoju-95-xuko052
+    - class/gabejo-44-juki791
+    - class/gajena-70-vili331
+    - class/gajudo-04-lere501
+    - class/galili-87-zivo129
+    - class/gamevo-26-runo973
+    - class/ganika-12-pane511
+    - class/ganola-90-cuco343
+    - class/garizu-98-nixo496
+    - class/garumi-63-vuze973
+    - class/gateja-70-losi738
+    - class/gatula-10-bifu561
+    - class/gavimi-70-nuju057
+    - class/gaxipe-22-maxa852
+    - class/gazimo-19-tebe871
+    - class/gekofe-43-lufa479
+    - class/gekope-01-ricu859
+    - class/gerima-02-fade831
+    - class/getufo-87-xeca508
+    - class/gevuci-69-fafe469
+    - class/gidabo-27-juza410
+    - class/gikipi-69-pepo172
+    - class/gipeze-49-vevo740
+    - class/giraca-14-xome136
+    - class/girebu-21-keva371
+    - class/giruzo-13-daga579
+    - class/givofi-11-xumu978
+    - class/givoli-70-rade072
+    - class/gixesa-28-feri809
+    - class/gobuco-16-ruke239
+    - class/goceso-49-pega905
+    - class/gojadi-30-tame684
+    - class/gojatu-01-jibo986
+    - class/gojofu-46-xaci340
+    - class/gojole-09-solo793
+    - class/goloxu-09-nero458
+    - class/gomafo-73-duta005
+    - class/gopalo-51-leje047
+    - class/gotefu-91-zime541
+    - class/govavo-22-kose066
+    - class/goveba-73-tixi419
+    - class/gubola-32-lofa138
+    - class/gufife-94-ropa486
+    - class/gujigi-63-roki030
+    - class/gukuda-51-fuju086
+    - class/gupire-42-xege904
+    - class/guxode-39-dobi371
+    - class/jabama-09-kago823
+    - class/jabeme-35-logi109
+    - class/jajebo-21-dada557
+    - class/jakaja-15-faze022
+    - class/jakapi-64-tine258
+    - class/jalexi-21-xoje231
+    - class/jaloja-18-tisu915
+    - class/janeba-15-duja043
+    - class/jarigi-34-nage684
+    - class/jasaja-47-mifo886
+    - class/jatome-90-pire087
+    - class/jaxebi-71-nanu771
+    - class/jecopa-66-vepe168
+    - class/jecori-24-pona893
+    - class/jegefa-93-daza492
+    - class/jerime-86-note748
+    - class/jevuvi-65-dipo437
+    - class/jezepa-12-padu194
+    - class/jibili-77-vatu959
+    - class/jiceke-84-xoze695
+    - class/jigafa-29-cusa565
+    - class/jijovu-48-gole133
+    - class/jikase-93-tipa633
+    - class/jinema-90-laga721
+    - class/jinibe-02-tebi269
+    - class/jinoba-14-firi471
+    - class/jiramo-39-xuze087
+    - class/jireze-84-loti743
+    - class/jisanu-32-gado231
+    - class/jiveta-48-palo127
+    - class/jixamu-89-ribo225
+    - class/jobeto-69-dutu189
+    - class/jobubo-97-resa133
+    - class/jobuco-44-zife032
+    - class/jocapi-44-lova378
+    - class/jocozo-25-coke152
+    - class/jodeto-41-valo558
+    - class/joguva-54-tevo966
+    - class/jojime-80-savu279
+    - class/josazo-53-bode013
+    - class/jovaxe-68-bube754
+    - class/jovigo-38-tuni063
+    - class/jubobo-22-fapu993
+    - class/julixi-10-jide878
+    - class/jumefo-83-zaba339
+    - class/juxora-90-fisu720
+    - class/kabune-49-xace122
+    - class/kacico-91-bati232
+    - class/kademi-64-futi437
+    - class/kadifi-56-bili996
+    - class/kamame-64-taka759
+    - class/katori-46-dobu700
+    - class/kejeka-49-kofa156
+    - class/kejivu-76-mipe227
+    - class/kepado-34-risa735
+    - class/kevoda-64-mije856
+    - class/kexaca-03-situ523
+    - class/kexati-85-zupa495
+    - class/kexecu-14-xesa311
+    - class/kicolo-81-sidi387
+    - class/kicuna-39-riki626
+    - class/kidugi-68-noje040
+    - class/kikera-73-zoxa983
+    - class/kipure-14-suli112
+    - class/kixeku-82-tesa924
+    - class/kixiso-09-lezo371
+    - class/kogifo-65-xotu512
+    - class/koloba-22-bolo151
+    - class/konaju-10-sopa054
+    - class/konomi-00-gico141
+    - class/kopida-02-vaje995
+    - class/koxoco-29-moke425
+    - class/kugasi-68-josu446
+    - class/kujiji-68-cujo036
+    - class/kupetu-36-kive480
+    - class/kutazo-40-texe886
+    - class/kuxato-79-muno809
+    - class/kuxosa-67-keko885
+    - class/labele-71-gudo044
+    - class/lacote-58-sozu269
+    - class/lafama-65-zoci799
+    - class/lafosa-17-buvu129
+    - class/laluve-92-raxu863
+    - class/lapoma-04-vaga142
+    - class/lasave-44-dofa269
+    - class/lazeju-60-boki114
+    - class/lecelo-92-loma110
+    - class/ledepo-11-muto607
+    - class/lejoga-79-poji465
+    - class/lelabe-72-zate295
+    - class/lenunu-95-bame774
+    - class/libobe-85-veli517
+    - class/lifuki-73-bito214
+    - class/likivi-72-liki123
+    - class/lilura-67-cati343
+    - class/lipazi-06-care921
+    - class/lobofa-60-vexe031
+    - class/lojepe-37-liri985
+    - class/lojiga-09-meka859
+    - class/lonota-83-xeco891
+    - class/lorajo-00-dagu828
+    - class/lozego-15-coci435
+    - class/lozijo-52-pesu023
+    - class/lufide-34-cexu026
+    - class/lujaje-96-vafu961
+    - class/lukexe-74-moco323
+    - class/lurevi-57-reku842
+    - class/luriko-97-neko149
+    - class/macere-24-loci805
+    - class/macira-65-mugu751
+    - class/maguju-11-copu137
+    - class/majoge-68-zuji574
+    - class/majuva-44-luta965
+    - class/makoko-44-mapu988
+    - class/makumi-60-peri797
+    - class/malara-55-moce209
+    - class/manube-50-xora983
+    - class/maziju-71-cava125
+    - class/mebake-99-vifa562
+    - class/mebezo-52-votu818
+    - class/medexe-08-ledo064
+    - class/medosa-71-ligu412
+    - class/mefaca-83-lebu193
+    - class/mefike-75-vova900
+    - class/menejo-70-tazo448
+    - class/meriso-72-tika033
+    - class/mexaka-52-gati860
+    - class/mezucu-18-lozi106
+    - class/miliju-79-moti992
+    - class/mimode-03-fupa211
+    - class/minuko-19-pobo264
+    - class/mizupo-59-zala765
+    - class/mocoda-55-take697
+    - class/modube-37-jiru720
+    - class/momaku-69-duxe918
+    - class/momoba-92-bole393
+    - class/monoda-73-guto455
+    - class/mopelo-04-fose807
+    - class/mopesi-01-gapo101
+    - class/morile-94-muda826
+    - class/moxobo-16-tipo829
+    - class/mububu-79-nalu431
+    - class/mucoti-34-seve858
+    - class/mucuxi-36-beku683
+    - class/mudune-38-kide806
+    - class/mugobo-34-fede498
+    - class/mujopi-06-lusi222
+    - class/mujopi-30-zadi566
+    - class/mulafo-23-tove961
+    - class/mumefa-23-xoxe715
+    - class/munepa-74-lebe963
+    - class/mupuzo-63-femu686
+    - class/murifo-42-fepu514
+    - class/murotu-83-cebo380
+    - class/nacuzu-17-bepi660
+    - class/nadaba-37-zaku242
+    - class/nadepi-13-mufu566
+    - class/nadono-22-gidu983
+    - class/nafiki-56-jixu680
+    - class/nagega-30-poso418
+    - class/najuxe-66-nuzi850
+    - class/nebovu-26-caxe550
+    - class/nedeka-26-xora993
+    - class/nekali-92-loda300
+    - class/nenepe-70-keri784
+    - class/nenexe-35-zere033
+    - class/neruke-07-ruce381
+    - class/nesivu-99-cexu403
+    - class/nesuti-69-giza389
+    - class/niboti-81-guja450
+    - class/niduni-65-bujo175
+    - class/nifiso-26-radi616
+    - class/nijeli-04-ponu844
+    - class/nikasi-18-niba407
+    - class/nikoxo-78-dega884
+    - class/ninuma-44-giza562
+    - class/nipaci-26-mupo236
+    - class/nirija-04-veti140
+    - class/nisune-86-faji869
+    - class/nitemi-09-nuza697
+    - class/nivemi-28-cixe274
+    - class/nixema-71-tuke505
+    - class/nomeza-10-laba367
+    - class/nopaca-69-voda316
+    - class/novaro-13-socu897
+    - class/nubisa-82-tuji339
+    - class/nucido-62-nodu514
+    - class/nucite-98-kuga991
+    - class/nufini-44-jofo787
+    - class/nujiga-81-peno983
+    - class/nuvake-96-gofe203
+    - class/nuxoni-26-xala894
+    - class/pabuma-15-zuga254
+    - class/paburu-52-feso968
+    - class/pacagu-24-nune023
+    - class/pacuve-18-gaso238
+    - class/padapo-73-beke177
+    - class/padera-25-gite580
+    - class/pafare-13-raje687
+    - class/pajoka-72-reju527
+    - class/pajuba-83-roji161
+    - class/pakemi-72-cani346
+    - class/paletu-13-done030
+    - class/paluca-39-desa696
+    - class/pareli-69-cixe116
+    - class/paroxa-83-lofa387
+    - class/pasova-33-toze386
+    - class/paziji-13-jede796
+    - class/pazipa-18-fevi111
+    - class/pecabi-95-demu756
+    - class/pecigo-88-bubu786
+    - class/pegeso-72-mana305
+    - class/pejone-71-tige404
+    - class/petune-47-raxa157
+    - class/pexivi-54-ceri875
+    - class/pibifa-14-leno075
+    - class/picija-82-jebu272
+    - class/pidagu-83-dopu070
+    - class/pijiju-95-xexi872
+    - class/pijode-83-tiba954
+    - class/pijoji-10-tazo455
+    - class/pisake-59-jugi837
+    - class/pisobo-93-sipa138
+    - class/pixexi-81-sete111
+    - class/pofabe-33-kizo628
+    - class/pofebo-79-nape407
+    - class/pofime-55-nana952
+    - class/ponaxo-71-muze275
+    - class/ponoko-58-sane430
+    - class/ponono-25-fevo574
+    - class/popesa-39-sobe866
+    - class/pucebe-24-xebi219
+    - class/pudata-29-vuze753
+    - class/pukomu-34-poju929
+    - class/pukuzu-30-zode181
+    - class/pumocu-32-fiji248
+    - class/puvono-84-doro361
+    - class/puvugo-38-nuku299
+    - class/radavi-85-samu213
+    - class/ragona-89-fadi984
+    - class/rakici-44-tivo701
+    - class/rakopi-21-sufa571
+    - class/rakuci-96-tuti371
+    - class/redamu-00-guki879
+    - class/refeku-65-gapu585
+    - class/rejedu-76-moxu546
+    - class/rekazo-16-jola519
+    - class/remanu-84-sega129
+    - class/remulu-24-zadi546
+    - class/renezi-40-jupi466
+    - class/repipi-06-dike782
+    - class/repuga-78-xora226
+    - class/rexexi-22-soga527
+    - class/rezoba-58-xaze387
+    - class/ribomo-92-naco581
+    - class/ribove-58-tefu515
+    - class/rideze-59-lizu265
+    - class/rifuzu-80-nixo780
+    - class/rilaki-69-cuni337
+    - class/rilali-81-gifu188
+    - class/ririlu-13-zipi740
+    - class/rivake-42-lole723
+    - class/rizazi-13-sepe706
+    - class/rizexu-84-xujo903
+    - class/rizufo-14-dadi153
+    - class/rocere-18-faza042
+    - class/rofijo-47-masa695
+    - class/rojoxi-79-vimu822
+    - class/romuco-53-sesu052
+    - class/ronume-32-pexo538
+    - class/ropera-76-jico895
+    - class/ropola-55-ketu141
+    - class/roputo-88-fuxo199
+    - class/rotebe-88-nise503
+    - class/rotisi-30-loge424
+    - class/rozudo-79-zavu288
+    - class/rubecu-40-cixu870
+    - class/rubuxe-58-peba652
+    - class/rudigu-21-lici107
+    - class/rudoxi-65-cegi339
+    - class/rujace-11-vaci539
+    - class/ruliki-78-biji661
+    - class/rulite-35-muno361
+    - class/runane-30-vena766
+    - class/rusuzi-21-kile910
+    - class/ruzibe-92-doti700
+    - class/sabaku-38-jeli592
+    - class/sacacu-34-dobo091
+    - class/sacala-27-firo431
+    - class/salupu-93-neja895
+    - class/sanixi-31-nofa193
+    - class/sanusa-54-keda128
+    - class/sapodo-57-voda654
+    - class/sarovo-87-roza701
+    - class/sasito-46-padu855
+    - class/satuli-54-jija827
+    - class/sefazi-02-defe499
+    - class/sejuzo-42-fini523
+    - class/sekame-22-meze147
+    - class/senece-96-fomu913
+    - class/sevaxa-72-pudi231
+    - class/sicazi-62-duco028
+    - class/sicege-73-zete701
+    - class/sicile-99-pefa679
+    - class/sigoji-75-mojo941
+    - class/sijisi-94-ripu606
+    - class/sijoba-16-rari847
+    - class/siluti-87-sefa007
+    - class/sipeke-79-zibi282
+    - class/sipigu-91-baku027
+    - class/sipimu-09-joma900
+    - class/sirati-17-kuje089
+    - class/sisolu-74-minu975
+    - class/siteza-47-lixe343
+    - class/soboro-52-pevi612
+    - class/sodizo-26-salo123
+    - class/sofagu-98-fezi999
+    - class/sojave-47-pura962
+    - class/sokevu-87-toce485
+    - class/sokole-95-zuxe354
+    - class/sonoci-68-ciza059
+    - class/sosono-24-vuro518
+    - class/sotepe-41-semo054
+    - class/sovuxo-25-tepi226
+    - class/style-stereotype-on-arrow-4
+    - class/sufide-66-sanu583
+    - class/sugifi-33-xefe083
+    - class/sumocu-27-vubo674
+    - class/sumule-00-pefa744
+    - class/sutedi-60-rigi770
+    - class/tabaxa-70-pomu341
+    - class/taceve-49-mezi408
+    - class/tacezi-12-rica461
+    - class/tagofo-84-nuti362
+    - class/takeze-87-zuge906
+    - class/takove-63-tizi841
+    - class/tamixa-86-jiku308
+    - class/taxemo-34-buro609
+    - class/tebito-30-cozi447
+    - class/tebore-53-tese080
+    - class/tedeba-19-lisi250
+    - class/tegoxa-17-kudo421
+    - class/tejena-50-nodo558
+    - class/tekena-28-fobe713
+    - class/teluve-08-moco846
+    - class/temise-16-neco018
+    - class/tenobo-24-liga464
+    - class/tenomi-61-ceta987
+    - class/tepazu-23-zapo261
+    - class/tetedu-79-jame815
+    - class/tibatu-28-jiro743
+    - class/ticote-50-neno681
+    - class/ticuxa-26-tixo262
+    - class/tiguma-69-tovu135
+    - class/tijira-61-fere730
+    - class/tikovu-50-gale862
+    - class/tilipa-86-suxi130
+    - class/tipude-10-tizi427
+    - class/tobigu-87-raci272
+    - class/tokegi-55-doko929
+    - class/tolavi-09-jovu646
+    - class/tomoje-73-xoti295
+    - class/tomuxi-86-juje957
+    - class/topige-52-fiku910
+    - class/tucesi-19-xato263
+    - class/tugema-78-comi533
+    - class/tuguku-78-zega630
+    - class/tukaru-29-gopa708
+    - class/tunelu-64-xica833
+    - class/tuzipo-08-tixa575
+    - class/vacole-77-vivo236
+    - class/vafaka-92-xose973
+    - class/vavure-50-gako950
+    - class/vaxaza-84-gune985
+    - class/vaxeku-10-peko225
+    - class/vazizu-95-sari356
+    - class/vebini-34-gapu710
+    - class/vegubu-29-bomu147
+    - class/vekime-22-buru589
+    - class/verufu-58-jile750
+    - class/vevoju-56-medu197
+    - class/vezato-03-rafu718
+    - class/vicuro-37-tese143
+    - class/vileca-45-melo541
+    - class/vilobu-97-leto330
+    - class/vinujo-78-kapo329
+    - class/vipejo-56-nubi928
+    - class/vivifa-42-mire839
+    - class/vivoca-57-pexu854
+    - class/vofatu-71-garo486
+    - class/vofuni-60-pepo292
+    - class/vofuvu-97-juto275
+    - class/vokati-75-gude769
+    - class/vokulo-90-fado357
+    - class/volexu-59-luva429
+    - class/voluca-76-fosu617
+    - class/vonago-16-zime449
+    - class/vorimi-67-gudu296
+    - class/vubofi-17-dedi529
+    - class/vuciba-84-toke217
+    - class/vudepo-27-cuvo793
+    - class/vufuko-05-lapu034
+    - class/vukonu-92-coto378
+    - class/vukugu-90-kafo811
+    - class/vumofo-35-vece504
+    - class/vuneta-67-gija125
+    - class/vuresa-33-kumu160
+    - class/vusute-48-xono099
+    - class/vutaki-77-seta063
+    - class/vuvico-92-keza999
+    - class/vuzeka-73-celo405
+    - class/vuzesi-45-vuvu678
+    - class/vuzoro-99-kizi978
+    - class/xabije-20-xusi569
+    - class/xacavi-18-leca211
+    - class/xajefo-97-julu315
+    - class/xakatu-11-tapu041
+    - class/xalaco-64-vuzu312
+    - class/xamule-03-jeda376
+    - class/xefeme-77-fagu709
+    - class/xekeje-31-taba218
+    - class/xemife-30-cada335
+    - class/xemupo-45-misi775
+    - class/xenere-07-kuji864
+    - class/xeriju-13-gika499
+    - class/xexapu-93-kuto175
+    - class/xexaza-01-bane080
+    - class/xexido-15-paxa075
+    - class/xibibe-37-regi626
+    - class/xicipi-57-bibe032
+    - class/xidura-26-teki974
+    - class/xifuza-00-paze682
+    - class/ximuza-91-gena795
+    - class/xitobu-41-lame230
+    - class/xodopa-41-tazo512
+    - class/xofumu-51-jozi528
+    - class/xogixe-78-zuro619
+    - class/xokipa-29-rafu481
+    - class/xonamo-50-podo529
+    - class/xopuku-46-nefa571
+    - class/xosisa-09-tine238
+    - class/xosiza-60-sobu480
+    - class/xosupo-71-jeso490
+    - class/xoteci-81-jena668
+    - class/xoxega-30-vuju324
+    - class/xoxuni-96-fere626
+    - class/xucajo-42-fibe366
+    - class/xumeli-52-keso732
+    - class/xumofu-43-fode658
+    - class/zadova-38-xamu320
+    - class/zakufi-53-sofe736
+    - class/zakuta-81-pese010
+    - class/zalazo-34-livu931
+    - class/zaloza-02-toti585
+    - class/zapibo-38-kope984
+    - class/zaxate-23-xifa551
+    - class/zebama-63-xoza192
+    - class/zebumi-72-cuba614
+    - class/zegeso-35-xiko243
+    - class/zejize-00-vivu578
+    - class/zekexu-80-beco451
+    - class/zekona-69-sifo120
+    - class/zepeki-75-pifo352
+    - class/zerofa-77-caro506
+    - class/zeveme-09-reki569
+    - class/zevupa-35-juto545
+    - class/zijaso-54-gova798
+    - class/zijupe-74-sake513
+    - class/zikabo-17-gugi332
+    - class/ziparo-17-joku307
+    - class/ziripa-77-zizo842
+    - class/ziromu-57-mima164
+    - class/zirori-93-jefo337
+    - class/ziruni-05-fona846
+    - class/zofabi-70-core205
+    - class/zofoji-16-mixu665
+    - class/zogari-39-ziza794
+    - class/zomeli-47-cote112
+    - class/zomidu-04-fizu253
+    - class/zosaxa-86-mora157
+    - class/zosero-71-camu332
+    - class/zubevi-64-fume582
+    - class/zucedi-63-rugu584
+    - class/zudogo-24-vefe793
+    - class/zukice-84-tedu426
+    - class/zuramo-86-liku129
+    - class/zuvidi-97-dabu702
+    - class/zuxore-81-ruti283
+    - class/zuxoxu-54-pejo512
+    - class/baleco-37-lili752
+    - class/basoto-36-resu245
+    - class/beboke-62-zofu377
+    - class/bezapo-02-xixu443
+    - class/bibeja-29-goxu033
+    - class/bidafa-53-lufi179
+    - class/bijufi-98-xafa015
+    - class/bikavu-22-rago633
+    - class/bizasu-70-vaxa243
+    - class/bogide-54-buco992
+    - class/boguko-42-zuda981
+    - class/buitin-newline-chr-0
+    - class/catana-32-licu332
+    - class/catigu-77-keje426
+    - class/cececu-91-ruje022
+    - class/cejegu-93-kobo234
+    - class/cenucu-07-mepi600
+    - class/cepedu-19-namu934
+    - class/cevoti-40-jeco305
+    - class/cikifu-97-pasu472
+    - class/cilibi-66-tasa181
+    - class/cimono-94-ximu187
+    - class/cisipo-98-dire511
+    - class/Class-visibility-0
+    - class/Class-visibility-1
+    - class/Class-visibility-2
+    - class/Class-visibility-3
+    - class/Class-visibility-4
+    - class/Class-visibility-5
+    - class/colede-79-give418
+    - class/copono-56-kuci969
+    - class/cozinu-92-cuvi600
+    - class/cuzedo-79-geju664
+    - class/dafitu-05-lumi067
+    - class/dajela-44-zovi778
+    - class/daroli-95-remo515
+    - class/dedumo-33-paco879
+    - class/deployment-last-name-multi-line-0
+    - class/dilese-24-neku812
+    - class/doboco-09-doba683
+    - class/dufaka-77-jine221
+    - class/dupifu-56-firi787
+    - class/duvoxu-73-jine816
+    - class/febuli-89-dusi249
+    - class/felixe-38-dilu011
+    - class/fepoko-61-fona364
+    - class/fepudo-00-ziro735
+    - class/fepulu-27-soci473
+    - class/fetajo-61-sesi146
+    - class/fezaro-08-nopo877
+    - class/fidaru-93-zumu093
+    - class/finume-86-gada330
+    - class/fipezo-93-zimi512
+    - class/fokudi-24-limo685
+    - class/fukegu-14-zona532
+    - class/gaceme-16-dezo748
+    - class/galata-74-luka487
+    - class/gasevo-58-ciso782
+    - class/gasivu-43-gono952
+    - class/gegosa-79-mini423
+    - class/gejuvu-17-vufu851
+    - class/gemepu-46-dido441
+    - class/gemigi-37-safi979
+    - class/gigoru-88-naze087
+    - class/girapu-90-pise235
+    - class/gisuvu-77-suti527
+    - class/godego-76-casa114
+    - class/gogisu-39-bepa573
+    - class/gunoxa-58-vico685
+    - class/gusola-40-gaco027
+    - class/guxico-27-bofu708
+    - class/jadamo-76-xabi141
+    - class/jadavu-33-cono513
+    - class/jajebe-95-jomo899
+    - class/jamupa-36-duni483
+    - class/jatujo-12-done231
+    - class/jefidu-98-gisu131
+    - class/jimizu-14-zole306
+    - class/jititi-15-maxe512
+    - class/jixipo-21-mefu703
+    - class/jodasa-29-zara935
+    - class/judelo-10-teca860
+    - class/juvopu-66-pipu000
+    - class/juxeji-51-todu651
+    - class/juzica-68-kava475
+    - class/juzuno-58-gesi397
+    - class/kacecu-90-pudi895
+    - class/kacura-85-tulu518
+    - class/kaneke-33-nili717
+    - class/kefuna-77-kago547
+    - class/kelefe-72-cefi192
+    - class/kevegu-65-zagi834
+    - class/kigazu-20-ticu127
+    - class/kojuja-62-xesu266
+    - class/komuvi-52-vave599
+    - class/kumuti-42-tace851
+    - class/kupofu-67-cupo145
+    - class/laboji-96-jone338
+    - class/lakivi-73-vuko958
+    - class/latilu-49-jebu021
+    - class/lavoke-68-lezi492
+    - class/lazetu-95-lisa969
+    - class/lazuxa-86-dizu716
+    - class/lejenu-55-paso269
+    - class/leluza-90-kece237
+    - class/lezema-07-vogu604
+    - class/liboma-63-gamu743
+    - class/liciru-76-ruse157
+    - class/lidoxa-65-nusu138
+    - class/lijota-92-sove350
+    - class/likinu-77-pepo298
+    - class/lirumo-81-jega996
+    - class/lobana-68-baji893
+    - class/locoge-06-luki835
+    - class/logavi-03-mita108
+    - class/lufano-46-xise868
+    - class/lupano-18-jibi678
+    - class/lusila-47-xiba216
+    - class/maxure-10-temu215
+    - class/mepemu-15-bitu955
+    - class/meramo-02-vasu175
+    - class/mijape-37-doka854
+    - class/mileba-84-rike349
+    - class/miveni-64-rexo238
+    - class/mocute-04-lori647
+    - class/molove-42-koxu080
+    - class/momada-03-zeka599
+    - class/mujega-45-mexi048
+    - class/mupavi-50-fijo192
+    - class/muvici-42-dumo371
+    - class/nadedo-37-nesa665
+    - class/nakola-11-naga420
+    - class/naluge-13-mefo624
+    - class/namumi-26-zisi487
+    - class/navapo-58-soto151
+    - class/necixe-44-rina124
+    - class/negupo-97-loro420
+    - class/nepevi-24-dune081
+    - class/neticu-06-bafo691
+    - class/nezimo-68-jabo300
+    - class/nidezo-51-xevi604
+    - class/nilimi-64-xeco438
+    - class/niraji-17-gipi481
+    - class/nonaja-03-zoki801
+    - class/noxebo-98-foga433
+    - class/nufike-34-rila935
+    - class/nulevu-49-bovi390
+    - class/nuveji-19-jabi587
+    - class/pacako-16-vudu147
+    - class/padefe-05-bemu901
+    - class/palida-11-pexu992
+    - class/pavozu-43-tone454
+    - class/pavuso-18-rusi688
+    - class/pebara-08-raja604
+    - class/peboza-00-roze848
+    - class/pefigi-94-raxa740
+    - class/petexo-14-zoju957
+    - class/petuju-02-zino378
+    - class/pevefe-09-zaro044
+    - class/pezini-79-mupi337
+    - class/pijugo-91-jilo150
+    - class/pivexe-31-bade269
+    - class/pocoko-23-jupa184
+    - class/pocube-36-teja768
+    - class/pojeje-60-vata579
+    - class/poluve-80-mire025
+    - class/potase-97-japa248
+    - class/potefu-34-jilu183
+    - class/pucazu-91-paxe635
+    - class/pucozi-74-zilo936
+    - class/pugesu-08-cove285
+    - class/punofe-33-loji825
+    - class/pupoko-23-xubo613
+    - class/puvako-69-suxo633
+    - class/racemi-48-ceni130
+    - class/racujo-01-veme537
+    - class/rafaci-22-fiki075
+    - class/ragudu-37-poxi589
+    - class/regodu-14-peve499
+    - class/rexobo-28-rite508
+    - class/rexupa-61-nezi165
+    - class/rezide-10-dulu504
+    - class/ridofi-55-lexe637
+    - class/rilere-84-seba785
+    - class/rimeca-17-gice904
+    - class/rinidi-95-neko205
+    - class/rirelu-80-tagi213
+    - class/rivino-95-midu088
+    - class/rixeje-01-gava056
+    - class/rizisu-50-liza998
+    - class/rodubi-28-vuxi527
+    - class/rojida-14-fuli428
+    - class/rozugu-82-pera583
+    - class/rufala-47-nosa835
+    - class/rukate-37-jabu394
+    - class/runufe-74-dico475
+    - class/rupigu-89-xabo757
+    - class/saduse-90-jama680
+    - class/samutu-03-jude646
+    - class/sasafi-70-gano653
+    - class/saxomu-54-deza117
+    - class/seloni-75-tuze396
+    - class/sezupe-60-neko208
+    - class/sofobo-48-meme531
+    - class/soseka-43-riru110
+    - class/sprite-SVG-fill-management-0
+    - class/sprite-SVG-fill-management-1
+    - class/sprite-SVG-fill-management-4
+    - class/sprite-SVG-Fill-Stroke-Combinatory-1
+    - class/sufura-56-muke185
+    - class/taboco-79-pire192
+    - class/tamovu-79-fifo533
+    - class/tejevu-11-rafo563
+    - class/tenava-30-cele768
+    - class/tenule-05-fovi294
+    - class/terede-92-fuka839
+    - class/ticemi-41-laze086
+    - class/tivezu-91-bevu722
+    - class/tivifi-47-limi217
+    - class/tobevo-04-mata128
+    - class/tonake-05-zibo183
+    - class/topave-65-ceso890
+    - class/toxore-88-ruso838
+    - class/tozizu-96-voka262
+    - class/vabobu-24-temi990
+    - class/vacapo-27-kizu746
+    - class/vajaru-64-loni744
+    - class/venofe-94-vopu657
+    - class/vijuce-20-xapo285
+    - class/vivoba-16-deze072
+    - class/vovipa-79-gapu674
+    - class/vozeco-89-kune515
+    - class/vozubi-21-seto654
+    - class/vugime-87-zabe159
+    - class/vuxexo-42-fija881
+    - class/xadudi-62-pupa491
+    - class/xagabo-19-cege045
+    - class/xalivi-74-gonu283
+    - class/xamive-55-lipi586
+    - class/xariko-97-zuno323
+    - class/xemeke-75-copu190
+    - class/xicili-92-foke737
+    - class/xigumi-63-ranu028
+    - class/xisora-84-faca166
+    - class/xukofa-63-ropa738
+    - class/xukono-55-nezi535
+    - class/xusuxi-66-zaci221
+    - class/zaburu-47-dala032
+    - class/zasuxe-15-lugo662
+    - class/zaxavo-08-rake498
+    - class/zecate-11-guta563
+    - class/zefefo-37-xigo245
+    - class/zeleni-35-xuzo854
+    - class/zeluge-00-cofi214
+    - class/zelura-55-pasa982
+    - class/zeraje-11-semu839
+    - class/zexaxa-41-kaki432
+    - class/ziruri-42-maxo237
+    - class/zivebo-26-nagu813
+    - class/zivenu-37-nace681
+    - class/zivilu-35-leja732
+    - class/zodeja-60-gide950
+    - class/zovojo-65-gocu245
+    - class/zozale-62-xene777
+    - class/zupagu-81-pona636
+    - class/zuropa-39-cada269

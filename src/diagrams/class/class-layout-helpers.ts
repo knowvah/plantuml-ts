@@ -146,6 +146,20 @@ export interface MeasuredClassifier {
    *  (cdd2-T17/cdd3-T8, R-LEAF)). Read by `class-ink-box.ts
    *  #addClassifierInk` in place of `addRectInk`'s box rule. */
   symbolInk?: LeafSymbolInk;
+  /** cdd6-T2c (D4): the DEGENERATE canvas's OWN `ensureVisible` extent for
+   *  this SAME drawn ink -- `SvgGraphics#ensureVisible`
+   *  (`SvgGraphics.java:129-133`) does not always record the same corner
+   *  `LimitFinder` does (`LimitFinder.java:217-225`'s own text-height
+   *  hack, `y -= dim.getHeight() - 1.5`, vs `SvgGraphics.java:757-758`'s
+   *  un-adjusted baseline `ensureVisible(x, y); ensureVisible(x +
+   *  textLength, y)`), so `symbolInk` cannot be reused as-is. Populated
+   *  today only by `class-layout-leaf-shapes.ts#measureCircleInterface`
+   *  (a `circle`/`() "name"` interface's label, drawn below its fixed
+   *  18x18 icon). Read ONLY by `class-geo-builders-degenerate-ink.ts
+   *  #degenerateEnsureVisibleInk` -- `symbolInk` itself stays
+   *  `LimitFinder`-shaped for `class-ink-box.ts#addClassifierInk`'s
+   *  non-degenerate consumer. */
+  ensureVisibleInk?: { maxX: number; maxY: number };
   rows: ClassifierGeo['rows'];
   dividerYs: number[];
   /** G2 N24: number of LEADING `rows[]` entries that belong to the header
@@ -311,6 +325,8 @@ function tryMeasureNonGenericClassifier(
       theme,
       classifier.display,
       resolveVisibleStereotypeLabels(classifier),
+      // cdd6-T3d (bijufi): the group legend is the stereo block (java:121-124).
+      classifier.legend,
     );
     // `rows[0].text` carries the label for `renderer.ts#renderEmptyPackageLeaf`
     // (mirrors `tryRenderUSymbol`'s identical `rows[0]?.text ?? id` convention)

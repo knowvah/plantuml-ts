@@ -34,6 +34,9 @@
  */
 
 import { shortenColor } from '../../core/svg-format.js';
+import type { RgbTriple } from '../../core/klimt/color/ColorTrieNode.js';
+import { rgbToHsluv, hsluvToRgb } from '../../core/klimt/color/HUSLColorConverter.js';
+import { fromString as colorOrderFromString, getReverse } from '../../core/klimt/color/ColorOrder.js';
 
 export type MonochromeMode = 'true' | 'reverse';
 
@@ -75,6 +78,26 @@ function expandShortHex(hex: string): string {
  *  byte-comparing oracle -- would be a self-inflicted, purely-textual diff. */
 const FULLY_TRANSPARENT_ALPHA = '00';
 
+/** One mapped colour: `#RRGGBB`/`#RRGGBBAA`/`#RGB` in, the mapped hex out
+ *  (anything else unchanged) -- the class stand-in for a `ColorMapper`
+ *  (`klimt/color/ColorMapper.java`). */
+export type ClassColorMapper = (hex: string) => string;
+
+/** Run `f` over the RGB channels of one hex colour, keeping its alpha. Any
+ *  other shape (`"none"`, an unresolved token) passes through unchanged --
+ *  mirrors `resolveColorToSvgHex`'s own "not recognized -> unchanged"
+ *  contract; a fully-transparent colour is left alone (see
+ *  {@link FULLY_TRANSPARENT_ALPHA}). */
+function mapHexChannels(hex: string, f: (c: RgbTriple) => RgbTriple): string {
+  const m = HEX_COLOR_RE.exec(expandShortHex(hex));
+  if (m === null) return hex;
+  const [, rHex, gHex, bHex, alphaHex] = m as unknown as [string, string, string, string, string | undefined];
+  if (alphaHex === FULLY_TRANSPARENT_ALPHA) return hex;
+  const out = f({ r: Number.parseInt(rHex, 16), g: Number.parseInt(gHex, 16), b: Number.parseInt(bHex, 16) });
+  const ch = (v: number): string => v.toString(16).padStart(2, '0').toUpperCase();
+  return `#${ch(out.r)}${ch(out.g)}${ch(out.b)}${alphaHex ?? ''}`;
+}
+
 /**
  * Convert one `#RRGGBB`/`#RRGGBBAA` (jar's + `toSvgHex`'s own uppercase
  * convention) hex color through the grayscale transform. Any other shape
@@ -82,16 +105,60 @@ const FULLY_TRANSPARENT_ALPHA = '00';
  * mirrors `resolveColorToSvgHex`'s own "not recognized -> unchanged" contract.
  */
 export function applyMonochromeHex(hex: string, mode: MonochromeMode): string {
-  const m = HEX_COLOR_RE.exec(expandShortHex(hex));
-  if (m === null) return hex;
-  const [, rHex, gHex, bHex, alphaHex] = m as unknown as [string, string, string, string, string | undefined];
-  if (alphaHex === FULLY_TRANSPARENT_ALPHA) return hex;
-  const r = Number.parseInt(rHex, 16);
-  const g = Number.parseInt(gHex, 16);
-  const b = Number.parseInt(bHex, 16);
-  const gray = grayscaleChannel(r, g, b, mode);
-  const grayHex = gray.toString(16).padStart(2, '0').toUpperCase();
-  return `#${grayHex}${grayHex}${grayHex}${alphaHex ?? ''}`;
+  return mapHexChannels(hex, ({ r, g, b }) => {
+    const gray = grayscaleChannel(r, g, b, mode);
+    return { r: gray, g: gray, b: gray };
+  });
+}
+
+/** `ColorUtils#to255` (`ColorUtils.java:169-177`): `(int) (255 * value)`
+ *  (truncation), clamped to `[0, 255]`. */
+function to255(value: number): number {
+  // `(int)` cast: truncation toward zero, and never a JS `-0` (`| 0`).
+  const result = (255 * value) | 0;
+  if (result < 0) return 0;
+  return result > 255 ? 255 : result;
+}
+
+/**
+ * `ColorUtils#getReversed` (`ColorUtils.java:139-167`), the
+ * `ColorMapper.LIGTHNESS_INVERSE` body (`ColorMapper.java:74-79`): HSLuv
+ * round trip (channels `/ 256.0`, not 255 -- upstream's), lightness flipped
+ * (`l -> 100 - l`, or `+-50` when saturation is in `(40, 60)`).
+ */
+export function getReversed(color: RgbTriple): RgbTriple {
+  const hsluv = rgbToHsluv([color.r / 256.0, color.g / 256.0, color.b / 256.0]);
+  const h = hsluv[0]!;
+  const s = hsluv[1]!;
+  let l = hsluv[2]!;
+  if (s > 40 && s < 60) {
+    if (l > 50) l -= 50;
+    else if (l < 50) l += 50;
+  } else {
+    l = 100 - l;
+  }
+  const rgb = hsluvToRgb([h, s, l]);
+  return { r: to255(rgb[0]!), g: to255(rgb[1]!), b: to255(rgb[2]!) };
+}
+
+/**
+ * `TitledDiagram#muteColorMapper` (`TitledDiagram.java:292-313`) minus its
+ * first `SkinParam.isDark` arm (unmodeled): `monochrome true|reverse`, else
+ * `reversecolor dark` (case-insensitive) -> {@link getReversed}, else a
+ * `ColorOrder` name -> `ColorMapper.reverse(order)` (`ColorMapper.java:
+ * 93-100`), else `undefined` (upstream's `init`, the identity here).
+ */
+export function colorMapperOf(theme: {
+  readonly monochrome?: MonochromeMode | undefined;
+  readonly reverseColor?: string | undefined;
+}): ClassColorMapper | undefined {
+  const { monochrome, reverseColor } = theme;
+  if (monochrome !== undefined) return (hex) => applyMonochromeHex(hex, monochrome);
+  if (reverseColor === undefined) return undefined;
+  if (reverseColor.toLowerCase() === 'dark') return (hex) => mapHexChannels(hex, getReversed);
+  const order = colorOrderFromString(reverseColor);
+  if (order === undefined) return undefined;
+  return (hex) => mapHexChannels(hex, (c) => getReverse(order, c));
 }
 
 /** Matches every `fill`/`stroke`/`stop-color` color VALUE this port's class
@@ -112,18 +179,23 @@ const COLOR_PROPERTY_RE =
 
 /**
  * The single post-processing choke point: run once, over the WHOLE assembled
- * class-diagram SVG fragment, right before `renderClass` returns it. `mode
- * === undefined` (no `skinparam monochrome` set) is a strict no-op -- zero
- * risk to any fixture that doesn't opt in.
+ * class-diagram SVG fragment, right before `renderClass` returns it. No
+ * mapper (neither `monochrome` nor a recognised `reversecolor`) is a strict
+ * no-op -- zero risk to any fixture that doesn't opt in.
  */
-export function applyMonochromeToFragment(svg: string, mode: MonochromeMode | undefined): string {
-  if (mode === undefined) return svg;
-  // shortenColor is applied HERE and not in `applyMonochromeHex`: this is
-  // an emission site (rule 2's domain), whereas `applyMonochromeHex` is also
-  // called on `resolvedBackground`, a value the renderer then COMPARES.
-  // Shortening that one flipped a background-rect decision and changed the
-  // root `style="background:"` the jar emits in full 6-digit form.
+export function applyColorMapperToFragment(svg: string, mapper: ClassColorMapper | undefined): string {
+  if (mapper === undefined) return svg;
+  // shortenColor is applied HERE and not in the mapper: this is an emission
+  // site (rule 2's domain), whereas the mapper is also called on
+  // `resolvedBackground`, a value the renderer then COMPARES. Shortening
+  // that one flipped a background-rect decision and changed the root
+  // `style="background:"` the jar emits in full 6-digit form.
   return svg.replace(COLOR_PROPERTY_RE, (_full, prefix: string, hex: string) => {
-    return `${prefix}${shortenColor(applyMonochromeHex(`#${hex}`, mode))}`;
+    return `${prefix}${shortenColor(mapper(`#${hex}`))}`;
   });
+}
+
+/** {@link applyColorMapperToFragment} for `skinparam monochrome` alone. */
+export function applyMonochromeToFragment(svg: string, mode: MonochromeMode | undefined): string {
+  return applyColorMapperToFragment(svg, mode === undefined ? undefined : colorMapperOf({ monochrome: mode }));
 }

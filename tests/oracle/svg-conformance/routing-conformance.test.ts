@@ -777,35 +777,43 @@ describe('routing conformance — jar-error classification', () => {
     // spaces around ':', so it now routes STATE like the jar).
     // Derivation: 4768 + 1051 + 105 = 5924.
     //
-    // 4768 -> 4907 / 1051 -> 912 at mindmap-engine-port/close-b5 (2026-09-30):
-    // the mindmap plugin registered (T5a, `src/index.ts`), so 137 mindmap
-    // rows pinned known-misroute (MINDMAP -> NONE, no engine) now route
-    // MINDMAP and were re-pinned agree from a fresh measurement
-    // (`plans/mindmap-engine-port/measurements/b5/repin-routing-refusal.mts`);
-    // 2 mindmap rows (nukose-24-funi267, vacofo-66-puno159) stay
-    // known-misroute because their render is a crash page with no
-    // data-diagram-type (unported HColorGradient, HColorSet.java:81-104).
-    // Plus the gate's two other [FIXED] lines, c4/favasu-27-fesa452 and
-    // c4/xizifu-87-siti076: stale pins that already routed DESCRIPTION on
-    // the pre-T5a branch (the Tim nested-call gap they cited was fixed
-    // earlier). Derivation: 4907 + 912 + 105 = 5924.
+    // 4768 -> 4770 / 5924 -> 5926 at cdd6/close-b0 (2026-09-28): 2
+    // unknown-tree svg-class golden rows (racujo-01-veme537,
+    // xicili-92-foke737), pin-eligible once the survey's dotEqual stopped
+    // counting a commented `!pragma` / a second newpage page (cdd6-T0b, D9).
+    // Derivation: 4770 + 1051 + 105 = 5926.
     //
-    // 4907 -> 5034 / 5924 -> 6051 at mindmap-engine-port/close-b5 (same
-    // close, fa9db8748): 127 `goldens:svg-mindmap/<slug>` rows appended when
-    // the mindmap ratchet pinned its first 127 fixtures (0 -> 127). Each is
-    // the clone of its byte-identical dot-cache twin (`golden.svg` ==
-    // `in.svg`, verified with filecmp), exactly how every svg-class golden
-    // row was pinned. Derivation: 5034 + 912 + 105 = 6051.
+    // 4770 -> 4771 / 1051 -> 1050 at cdd6/close-b1 (2026-09-28):
+    // unknown/xuloxo-85-vibu502 known-misroute -> agree (cdd6-T1d ported the
+    // `>>` head, LinkDecor.java:87 ARROW_TRIANGLE, so it routes CLASS like
+    // the jar). Re-pinned from a fresh measurement.
+    // Derivation: 4771 + 1050 + 105 = 5926.
     //
-    // 5034 -> 5046 / 912 -> 910 / 6051 -> 6061 at mindmap-engine-port/close-b6
-    // (2026-09-30): nukose-24-funi267 and vacofo-66-puno159 known-misroute ->
-    // agree (HColorGradient ported in T6a; they render and route MINDMAP),
-    // plus 10 svg-mindmap golden rows appended for the batch-6 pins (127 ->
-    // 137), byte-identical dot-cache twins. Derivation: 5046 + 910 + 105 = 6061.
-    expect(pinnedAgree.length).toBe(5046);
-    expect(pinnedMisroutes.length).toBe(910);
+    // 4771 -> 4791 / 5926 -> 5946 at cdd6/close-b2 (2026-09-29): 20
+    // unknown-tree svg-class golden rows (the batch-2 fixes: style
+    // consumers, degenerate gate + queue cap, json/folder ink, creole edge
+    // labels, and the residual-round leaf stereotype/thickness/stroke).
+    // Derivation: 4791 + 1050 + 105 = 5946.
+    //
+    // 4791 -> 4812 / 5946 -> 5967 at cdd6/close-b3 (2026-09-29): 21
+    // unknown-tree svg-class golden rows (the batch-3 fixes: empty-graph
+    // delta, mainframe svek frame + ensureVisible canvas, cluster leaf
+    // order, package visibility icon, collapsed legend, folder dash and
+    // heading font, note separators/table alignment, reversecolor,
+    // hyperlink and maximumwidth buckets, sprite paint none/transparent).
+    // Derivation: 4812 + 1050 + 105 = 5967.
+    //
+    // 4812 -> 5090 / 1050 -> 909 / 5967 -> 6104 at the cdd6 <- main merge
+    // (2026-09-30): main carries mindmap-engine-port's rows -- 139 mindmap
+    // known-misroute -> agree (137 at its close-b5 + nukose/vacofo at close-b6),
+    // 2 stale c4 pins (favasu, xizifu) -> agree, and 137 `goldens:svg-mindmap`
+    // clone rows appended (see that mission's derivations in its own copy of
+    // this comment block). Row-level three-way union, no row changed on both
+    // sides. Derivation: 5090 + 909 + 105 = 6104.
+    expect(pinnedAgree.length).toBe(5090);
+    expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6061);
+    expect(manifest.fixtures.length).toBe(6104);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -857,12 +865,9 @@ describe('routing conformance — jar-error classification', () => {
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
     // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
     // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
-    // 1050 -> 911 at mindmap-engine-port/close-b5: 139 retirements (137
-    // mindmap + 2 c4, derivation above); the 2 remaining mindmap misroutes
-    // carry their reason. The uncensused remainder is STILL exactly
-    // sequence/nuvoja-46-dezu541: 912 - 1 = 911.
-    // 911 -> 909 at mindmap-engine-port/close-b6: nukose, vacofo retired.
-    expect(censused.length).toBe(909);
+    // 1050 -> 1049 at cdd6/close-b1: unknown/xuloxo-85-vibu502 now agrees.
+    // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
+    expect(censused.length).toBe(908);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

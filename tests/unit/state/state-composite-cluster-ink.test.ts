@@ -97,7 +97,7 @@ const PX_PER_INCH = 72;
 
 function declaredScopes(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer() });
   } finally {

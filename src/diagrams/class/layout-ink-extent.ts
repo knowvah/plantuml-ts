@@ -115,7 +115,7 @@
  */
 import type { ClassGeometry, ClassifierGeo, EdgeGeo, NamespaceGeo } from './layout.js';
 import { shiftClassifierGeo, shiftEdgeGeo, shiftNamespaceGeo, shiftNoteGeo } from './class-layout-shift.js';
-import { svekDimension, svekInkShift } from '../../core/svek/SvekResult.js';
+import { svekDimension, svekInkShift, type InkExtent } from '../../core/svek/SvekResult.js';
 import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
 import type { NoteGeo } from './note-layout.js';
 
@@ -154,6 +154,10 @@ const KAL_DIM_DELTA_Y = 2;
  */
 export interface ClassInkOptions extends InkBoxOptions {
   readonly svek?: SvekDrawState | undefined;
+  /** cdd6 T3b: the diagram carries a `mainframe`, so `SvekResult
+   *  #calculateDimension` (and its `moveDelta`) never runs -- see
+   *  {@link mainframePlacement}. */
+  readonly mainframe?: boolean | undefined;
 }
 
 /**
@@ -337,6 +341,56 @@ export function computeClassInkShift(
   return svekInkShift(classInkBox(classifiers, namespaces, edges, notes, options));
 }
 
+/** Where the class body is drawn, and the size the chrome frames it at. */
+interface SvekPlacement {
+  /** Layout frame -> drawn frame, applied to every geometry. */
+  readonly shift: InkShift;
+  /** The frame `runSvekPass1` replays the second draw in (the moveDelta'd
+   *  frame normally; the raw svek frame under a mainframe). */
+  readonly drawFrame: InkShift;
+  /** The body size `BigFrame` reads (`ww`/`hh`), under a mainframe only;
+   *  otherwise the chrome reads `computeClassRawInkDims`. */
+  readonly raw?: ClassDocumentDims;
+}
+
+/**
+ * cdd6 T3b: `DiagramChromeFactory#decorateWithFrame` over an UN-normalized
+ * `SvekResult`. Nothing on the mainframe path calls `SvekResult
+ * #calculateDimension` (`UgDiagram.java:124-128` -> `DiagramChromeFactory
+ * .java:129`; the wrapper's own `calculateDimension` asks only `frame
+ * .calculateDimension`, `:317-321`), so its `moveDelta(6 - minX, 6 - minY)`
+ * (`svek/SvekResult.java:130-135`) never runs: the body is drawn in the raw
+ * svek frame (this port's layout frame + `m`, `DotLayoutResult
+ * .originShift`), translated by `computeDelta` (`:332-337`: `dx = minX < 0 ?
+ * -minX : 0`, same for `dy`) inside `margin + padding` (`:301`). `BigFrame`
+ * sizes it from the same raw `LimitFinder` extent (`klimt/shape/BigFrame
+ * .java:81,89`: `ww = minX >= 0 ? maxX : width`, `hh` likewise). `delta` is
+ * folded into `shift` here, so the frame sees a body whose ink min is never
+ * negative and whose `ww`/`hh` are handed over as `raw` -- `big-frame.ts`
+ * then places it at `padding` exactly as `margin + padding + delta`.
+ */
+function mainframePlacement(box: InkExtent, m: { readonly x: number; readonly y: number }): SvekPlacement {
+  const drawFrame = { dx: m.x, dy: m.y };
+  if (!Number.isFinite(box.minX)) return { shift: drawFrame, drawFrame, raw: { width: 0, height: 0 } };
+  const minX = box.minX + m.x;
+  const minY = box.minY + m.y;
+  const maxX = box.maxX + m.x;
+  const maxY = box.maxY + m.y;
+  const dx = minX < 0 ? -minX : 0;
+  const dy = minY < 0 ? -minY : 0;
+  const ww = minX >= 0 ? maxX : maxX - minX;
+  const hh = minY >= 0 ? maxY : maxY - minY;
+  return { shift: { dx: m.x + dx, dy: m.y + dy }, drawFrame, raw: { width: ww, height: hh } };
+}
+
+/** `SvekResult#calculateDimension`'s `moveDelta` (the normal path) or its
+ *  absence under a mainframe ({@link mainframePlacement}). */
+function svekPlacement(box: InkExtent, options: ClassInkOptions): SvekPlacement {
+  if (options.mainframe === true) return mainframePlacement(box, options.svek?.m ?? { x: 0, y: 0 });
+  const shift = svekInkShift(box);
+  return { shift, drawFrame: shift };
+}
+
 /**
  * G2/N11: dimensions first (translation-invariant, mirrors Java's own
  * evaluation order — `SvekResult#calculateDimension` reads the PRE-shift
@@ -381,10 +435,11 @@ export function assembleShiftedGeometry(
   // .rawWidth`'s own doc comment for why chrome centering needs this
   // instead of `documentDims`.
   const rawDims = computeClassRawInkDims(classifiers, inkNamespaces, edges, notes, inkOptions);
-  const shift = computeClassInkShift(classifiers, inkNamespaces, edges, notes, inkOptions);
+  const placement = svekPlacement(classInkBox(classifiers, inkNamespaces, edges, notes, inkOptions), inkOptions);
+  const shift = placement.shift;
   // cdd4-T10: `moveDelta` set every edge's `dx, dy`; the SVG pass resumes
   // the pass-0 state in that frame (`class-svek-pass0.ts#runSvekPass1`).
-  if (inkOptions.svek !== undefined) runSvekPass1(inkOptions.svek, shift);
+  if (inkOptions.svek !== undefined) runSvekPass1(inkOptions.svek, placement.drawFrame);
 
   // T3/T4 (mission leaf-draw-order): `leaves` here is still the plain
   // classifiers-then-notes concatenation -- `layoutSinglePage`'s caller
@@ -394,8 +449,8 @@ export function assembleShiftedGeometry(
   return {
     totalWidth: documentDims.width,
     totalHeight: documentDims.height,
-    rawWidth: rawDims.width,
-    rawHeight: rawDims.height,
+    rawWidth: placement.raw?.width ?? rawDims.width,
+    rawHeight: placement.raw?.height ?? rawDims.height,
     leaves: [
       ...classifiers.map((c) => shiftClassifierGeo(c, shift.dx, shift.dy)),
       ...notes.map((n) => shiftNoteGeo(n, shift.dx, shift.dy)),

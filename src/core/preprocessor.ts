@@ -28,6 +28,8 @@ import { TMemoryGlobal } from './tim/TMemoryGlobal.js';
 import { TValue } from './tim/expression/TValue.js';
 import { TVariableScope } from './tim/TVariableScope.js';
 import { StyleAndSkinparamCollector } from './preprocessor-collector.js';
+import { BLOCK_E1_BREAKLINE } from './tim/builtin/jaws-constants.js';
+import { mutateExpandsBreakline } from './uml-source-lines.js';
 
 export interface PreprocessorResult {
   readonly lines: readonly string[];
@@ -315,8 +317,9 @@ export function preprocessLinesOrError(
  */
 function resultOf(context: TContext): PreprocessorResult {
   const collector = new StyleAndSkinparamCollector();
-  const positions = documentPositions(context.getResultList());
-  const kept = context.getResultList().filter((line, i) => !collector.accept(line, positions[i]));
+  const data = mutateExpands1(context.getResultList());
+  const positions = documentPositions(data);
+  const kept = data.filter((line, i) => !collector.accept(line, positions[i]));
   const flattened = flatten(kept);
   return {
     lines: flattened.lines,
@@ -329,6 +332,30 @@ function resultOf(context: TContext): PreprocessorResult {
     skinparam: collector.skinparam,
     declarationOrder: { skinparam: collector.skinparamOrder, styles: collector.styleOrder },
   };
+}
+
+/**
+ * `BlockUml`'s constructor runs `Jaws.mutateExpands1(tmp)` on the TIM result
+ * list (`BlockUml.java:153`) before any command sees it: every
+ * `BLOCK_E1_BREAKLINE` (`%breakline()`, C4's `$bl()`) outside a `{{...}}`
+ * embed splits the line, each piece keeping the line's location and
+ * preprocessor error (`jaws/Jaws.java:65-120`). Collecting before this split
+ * read C4's `$defineSkinparams` output -- several `skinparam X { }` blocks on
+ * one line -- as ONE single-line skinparam whose value was the whole blob
+ * (cdd6 verify.md, "C4 `>>` head + `$bl()` split"). The per-line split is
+ * {@link mutateExpandsBreakline}'s; this re-wraps its pieces as located lines.
+ * `mergeTripleMarkBlocks` is not run: `JawsFlags.PARSE_NEW_MULTILINE_TRIPLE_MARKS`
+ * is `false` (`JawsFlags.java:41`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jaws/Jaws.java:59-63
+ */
+function mutateExpands1(lines: readonly StringLocated[]): StringLocated[] {
+  return lines.flatMap((sl) => {
+    const s = sl.getString();
+    if (!s.includes(BLOCK_E1_BREAKLINE)) return [sl];
+    return mutateExpandsBreakline([s]).map(
+      (piece) => new StringLocated(piece, sl.getLocation(), undefined, sl.getPreprocessorError()),
+    );
+  });
 }
 
 /** The root of a line's location chain: an included line's `!include` line. */

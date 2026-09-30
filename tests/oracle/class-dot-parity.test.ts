@@ -91,7 +91,7 @@ function svekFiles(name: string): string[] {
 }
 
 let captured: DotInputGraph[] = [];
-beforeAll(() => setLayoutInputObserver((g) => captured.push(g)));
+beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
 describe('oracle DOT parity harness — class diagrams', () => {

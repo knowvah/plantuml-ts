@@ -19,6 +19,8 @@ import { resolveColor } from './skinparam-key-normalize.js';
 // re-exports it -- that barrel imports THIS file, so the barrel spelling
 // would close an ESM import cycle.
 import { ELEMENT_BUCKET_SNAMES } from './skinparam-element-buckets.js';
+import type { ElementColors } from './theme-graph-colors.js';
+import { convertBorderStyleValue, lineStyleDash } from './style-line-style.js';
 
 // G2 N51: `skinparam classBorderThickness<<X>>` -- the ONE stereotype-
 // qualified skinparam key this port models (see this module's own doc
@@ -167,31 +169,55 @@ const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(
  * preprocessor normalizes both to `package<role><<label>>`). Upstream needs
  * no per-key matcher: `FromSkinparamToStyle`'s ctor strips `<<label>>` off
  * ANY key (`:292-302`), `convertNow` resolves the base key's registrations
- * (`addMagic(SName.package_)`, `:129` -> `:272-283`: `packageBorderColor` ->
+ * (`addMagic(SName.package_)`, `:129` -> `:270-283`: `packageBorderColor` ->
  * `LineColor`, `packageBorderThickness` -> `LineThickness`, `addConFont` ->
  * `FontColor`, `packageStereotypeFontColor` -> `FontColor` on `{stereotype,
  * package_}`), and `addStyle` re-signs each with the label at +1000 priority
  * (`:396-408`). Same allowlist divergence (M22) as
- * {@link applyElementBackgroundColorByStereo}; scoped to the four roles the
- * package cluster/leaf renderers consume.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:127-129,272-283,292-302,396-408
+ * {@link applyElementBackgroundColorByStereo}.
+ *
+ * cdd6 T1a: widened from `package` to every group USymbol
+ * (`CommandPackageWithUSymbol.java:77-78`'s SYMBOL alternation) that has an
+ * `addMagic` registration (`FromSkinparamToStyle.java:84,129,211-225`) --
+ * `action`/`process` have none, so upstream's `knowledge.get(key)` is null
+ * for them and the key is dropped (`:328-336`); they stay unknown here. Adds
+ * the `BorderStyle` role (`:277`, `PName.LineStyle`), converted exactly as
+ * the plain key is (`style-line-style.ts#convertBorderStyleValue`).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:127-129,270-283,292-302,396-408
  */
-const PACKAGE_BY_STEREO_RE = new RegExp('^package(bordercolor|fontcolor|borderthickness|stereotypefontcolor)<<(.+)>>$');
+const GROUP_BY_STEREO_RE = new RegExp(
+  '^(package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|database|storage|component|card|queue|stack)' +
+    '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle)<<(.+)>>$',
+);
 
-function applyPackageByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
-  const m = PACKAGE_BY_STEREO_RE.exec(key);
+/** The `borderstyle` role: only the LineStyle half of `convertNow` is
+ *  stereotype-keyed here (the `bold`/`text:` side effects of a complex value
+ *  have no `*ByStereo` field). */
+function applyBorderStyleByStereo(bucket: ElementColors, label: string, value: string): void {
+  const { lineStyle } = convertBorderStyleValue(value.trim());
+  if (lineStyle === undefined) return;
+  bucket.lineStyleByStereo = { ...bucket.lineStyleByStereo, [label]: lineStyleDash(lineStyle) };
+}
+
+function applyGroupByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
+  const m = GROUP_BY_STEREO_RE.exec(key);
   if (m === null) return false;
-  const label = m[2]!.trim();
-  const bucket = (acc.elements['package'] ??= {});
-  if (m[1] === 'borderthickness') {
+  const role = m[2]!;
+  const label = m[3]!.trim();
+  const bucket = (acc.elements[m[1]!] ??= {});
+  if (role === 'borderstyle') {
+    applyBorderStyleByStereo(bucket, label, value);
+    return true;
+  }
+  if (role === 'borderthickness') {
     const v = Number.parseFloat(value.trim());
     if (!Number.isFinite(v)) return false;
     bucket.lineThicknessByStereo = { ...bucket.lineThicknessByStereo, [label]: v };
     return true;
   }
   const color = resolveColor(value);
-  if (m[1] === 'bordercolor') bucket.borderByStereo = { ...bucket.borderByStereo, [label]: color };
-  else if (m[1] === 'fontcolor') bucket.fontByStereo = { ...bucket.fontByStereo, [label]: color };
+  if (role === 'bordercolor') bucket.borderByStereo = { ...bucket.borderByStereo, [label]: color };
+  else if (role === 'fontcolor') bucket.fontByStereo = { ...bucket.fontByStereo, [label]: color };
   else bucket.stereotypeFontByStereo = { ...bucket.stereotypeFontByStereo, [label]: color };
   return true;
 }
@@ -376,7 +402,7 @@ function applyElementBackgroundColorByStereo(acc: SkinparamAccumulator, key: str
  */
 export function applyStereoOverride(acc: SkinparamAccumulator, key: string, value: string): void {
   if (applyElementStereotypeFontSize(acc, key, value)) return;
-  if (applyPackageByStereo(acc, key, value)) return;
+  if (applyGroupByStereo(acc, key, value)) return;
   for (const [re, handler] of STEREO_KEY_MATCHERS) {
     const m = re.exec(key);
     if (m !== null) {

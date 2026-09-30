@@ -50,15 +50,32 @@ export interface InkExtent {
  * `SvekResult#calculateDimension`'s return: the ink extent plus
  * {@link INK_DELTA} on each axis.
  *
- * `{width: 0, height: 0}` for an empty extent rather than `NaN` from an
- * unbounded `Infinity` box — the guard both the class and state engines
- * already had, kept here so neither has to repeat it.
+ * T3a/jititi (`unknown/jititi-15-maxe512`, `class A / class B / remove *;
+ * restore A` — cdd5-T5d's cascade fix leaves ALL three entities removed):
+ * an empty ink box is NOT a `{width: 0, height: 0}` sentinel. Upstream's
+ * `LimitFinder#getMinMax` (`klimt/drawing/LimitFinder.java:217-221`)
+ * converts the "nothing drawn" infinity sentinel to `MinMax.getEmpty(true)`
+ * = `(0,0,0,0)`, and `SvekResult#calculateDimension` (`svek/SvekResult.java
+ * :130-135`) applies `.delta(15, 15)` to THAT unconditionally — there is no
+ * Java branch that skips the delta for an empty walk. So the real jar
+ * result for zero ink is `(15, 15)`, not `(0, 0)` — confirmed against
+ * jititi's own oracle SVG (`width="21px" height="21px" viewBox="0 0 21
+ * 21"`: `(15,15)` ink + `CucaDiagram`'s `(0,5,5,0)` margin +
+ * `SvgGraphics#ensureVisible`'s truncating `+1` = `21x21`, `core/
+ * TextBlockExporter.ts#applyCucaDocumentMargin`). Both `class` and `state`
+ * (the two consumers) previously hand-rolled the WRONG `{0, 0}` early
+ * return here (to dodge `NaN` from an unbounded `Infinity` box) — this
+ * substitutes the same `(0,0,0,0)` MinMax the jar itself falls back to,
+ * so `.delta`/`INK_DELTA` still applies, matching upstream exactly.
  */
 export function svekDimension(box: InkExtent): { width: number; height: number } {
-  if (!Number.isFinite(box.minX)) return { width: 0, height: 0 };
+  const minX = Number.isFinite(box.minX) ? box.minX : 0;
+  const minY = Number.isFinite(box.minY) ? box.minY : 0;
+  const maxX = Number.isFinite(box.maxX) ? box.maxX : 0;
+  const maxY = Number.isFinite(box.maxY) ? box.maxY : 0;
   return {
-    width: box.maxX - box.minX + INK_DELTA,
-    height: box.maxY - box.minY + INK_DELTA,
+    width: maxX - minX + INK_DELTA,
+    height: maxY - minY + INK_DELTA,
   };
 }
 

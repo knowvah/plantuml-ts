@@ -26,8 +26,10 @@ const DIAGRAM_TYPE_JSON = 'JSON';
 export const jsonPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   type: 'json',
 
-  parse(source) {
-    return parseJson(source);
+  // D6 (cdd6-T1c): forwards `options.assetStore`, mirroring
+  // `class/parser.ts:317-318` / `description/index.ts:59-67`.
+  parse(source, options) {
+    return parseJson(source, options);
   },
 
   layoutSync(ast, theme, measurer) {

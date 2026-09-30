@@ -17,6 +17,7 @@ import { describe, it, expect } from 'vitest';
 import { statePlugin } from '../../../src/diagrams/state/index.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 import { isJsonCloser } from '../../../src/diagrams/state/state-json-commands.js';
+import { parseRefusalOf } from '../../../src/core/dispatcher.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { StateDiagramAST, State } from '../../../src/diagrams/state/ast.js';
 
@@ -170,6 +171,18 @@ describe('json multiline declaration (CommandCreateJson)', () => {
     `);
     expect(findState(ast, 'foo2')).toBeUndefined();
     expect(ast.states.map((s) => s.id)).toEqual(['foo1']);
+  });
+
+  it('a duplicate json id refuses the parse with "JSON already exists: <id>" (kokofa-47-deni140 shape, D6/T1c)', () => {
+    const block: UmlSource = {
+      type: 'state',
+      lines: ['json J {', '"a":42', '}', 'json J {', '"a":43', '}'],
+    };
+    const parsed = statePlugin.parse(block);
+    const refusal = parseRefusalOf(parsed);
+    expect(refusal).toBeDefined();
+    expect(refusal?.kind).toBe('execution');
+    expect(refusal?.message).toBe('JSON already exists: J');
   });
 
   it('pass-two replay does not duplicate the json leaf or its parsed value', () => {

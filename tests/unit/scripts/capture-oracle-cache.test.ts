@@ -143,8 +143,17 @@ describe('planEntries', () => {
 // mocked execFileSync (the jar is never invoked in this suite)
 // ---------------------------------------------------------------------------
 
+// cdd6 b2 gates (journal row 51): the default guard is the REAL clock, so a
+// test that omits it sleeps through any decoration minute (1, 8, 13, 15, 30,
+// 39, 48, 55 -- PSystemError.java:221-229) and trips vitest's 5 s timeout.
+// Minute 10 is plain; the sleep must never be reached.
+const PLAIN_MINUTE_GUARD = {
+  now: () => 10 * 60_000,
+  sleep: (): Promise<void> => Promise.reject(new Error('plain minute: sleep must not be called')),
+};
+
 describe('captureOracleCache', () => {
-  it('captures via in.svg despite execFileSync throwing (non-zero exit) — AC1', () => {
+  it('captures via in.svg despite execFileSync throwing (non-zero exit) — AC1', async () => {
     const dir = join(tmp, 'cache-nonzero-exit', 'activity', 'alpha');
     vi.mocked(execFileSync).mockImplementation(() => {
       mkdirSync(dir, { recursive: true });
@@ -152,18 +161,19 @@ describe('captureOracleCache', () => {
       throw new Error('jar exited 200');
     });
 
-    const result = captureOracleCache(
+    const result = await captureOracleCache(
       'activity',
       [{ slug: 'alpha', markup: '@startuml\nstart\nstop\n@enduml\n' }],
       { rebuild: false },
       join(tmp, 'cache-nonzero-exit'),
+      PLAIN_MINUTE_GUARD,
     );
 
     expect(result).toEqual({ type: 'activity', captured: ['alpha'], jarFailed: [], renamed: [] });
     expect(existsSync(join(dir, '.done'))).toBe(true);
   });
 
-  it('adopts and renames a lone named-block svg — AC2', () => {
+  it('adopts and renames a lone named-block svg — AC2', async () => {
     const root = join(tmp, 'cache-renamed');
     const dir = join(root, 'activity', 'bravo');
     vi.mocked(execFileSync).mockImplementation(() => {
@@ -172,11 +182,12 @@ describe('captureOracleCache', () => {
       return '';
     });
 
-    const result = captureOracleCache(
+    const result = await captureOracleCache(
       'activity',
       [{ slug: 'bravo', markup: '@startuml Test\nstart\nstop\n@enduml\n' }],
       { rebuild: false },
       root,
+      PLAIN_MINUTE_GUARD,
     );
 
     expect(result).toEqual({ type: 'activity', captured: ['bravo'], jarFailed: [], renamed: ['bravo'] });
@@ -184,7 +195,7 @@ describe('captureOracleCache', () => {
     expect(existsSync(join(dir, '.done'))).toBe(true);
   });
 
-  it('marks jarFailed and writes no .done when no svg is produced — AC3', () => {
+  it('marks jarFailed and writes no .done when no svg is produced — AC3', async () => {
     const root = join(tmp, 'cache-jar-failed');
     const dir = join(root, 'activity', 'charlie');
     vi.mocked(execFileSync).mockImplementation(() => {
@@ -192,21 +203,61 @@ describe('captureOracleCache', () => {
       return '';
     });
 
-    const result = captureOracleCache('activity', [{ slug: 'charlie', markup: 'garbage' }], { rebuild: false }, root);
+    const result = await captureOracleCache(
+      'activity',
+      [{ slug: 'charlie', markup: 'garbage' }],
+      { rebuild: false },
+      root,
+      PLAIN_MINUTE_GUARD,
+    );
 
     expect(result).toEqual({ type: 'activity', captured: [], jarFailed: ['charlie'], renamed: [] });
     expect(existsSync(join(dir, '.done'))).toBe(false);
   });
 
-  it('skips a fixture whose .done already exists and never calls execFileSync — AC4', () => {
+  it('skips a fixture whose .done already exists and never calls execFileSync — AC4', async () => {
     const root = join(tmp, 'cache-skip-done');
     const dir = join(root, 'activity', 'delta');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, '.done'), '', 'utf-8');
 
-    const result = captureOracleCache('activity', [{ slug: 'delta', markup: 'X' }], { rebuild: false }, root);
+    const result = await captureOracleCache(
+      'activity',
+      [{ slug: 'delta', markup: 'X' }],
+      { rebuild: false },
+      root,
+      PLAIN_MINUTE_GUARD,
+    );
 
     expect(result).toEqual({ type: 'activity', captured: [], jarFailed: [], renamed: [] });
     expect(execFileSync).not.toHaveBeenCalled();
+  });
+
+  it('routes the jar call through the minute guard: waits out a decorated start minute (D9)', async () => {
+    const root = join(tmp, 'cache-guard-decorated-start');
+    const dir = join(root, 'activity', 'echo');
+    vi.mocked(execFileSync).mockImplementation(() => {
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'in.svg'), '<svg/>', 'utf-8');
+      return '';
+    });
+
+    let now = 30 * 60_000; // minute 30 -- decorated (dedication banner)
+    const sleep = vi.fn((): Promise<void> => {
+      now = 31 * 60_000; // plain
+      return Promise.resolve();
+    });
+
+    const result = await captureOracleCache(
+      'activity',
+      [{ slug: 'echo', markup: '@startuml\nstart\nstop\n@enduml\n' }],
+      { rebuild: false },
+      root,
+      { now: () => now, sleep },
+    );
+
+    expect(sleep).toHaveBeenCalledTimes(1);
+    expect(execFileSync).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ type: 'activity', captured: ['echo'], jarFailed: [], renamed: [] });
   });
 });

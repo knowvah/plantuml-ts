@@ -31,6 +31,7 @@ import {
   setTitle,
   setCaption,
   setLegend,
+  setMainFrame,
   updateHeader,
   updateFooter,
   singleDisplayPositioned,
@@ -306,5 +307,33 @@ describe('applyChrome — preserves fragment.background/extraDefs', () => {
     const result = applyChrome(fragment, a, plainStyles(), MEASURER);
     expect(result.background).toBe('#FFFFFF');
     expect(result.extraDefs).toBe('<marker/>');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// D3 (cdd6 T2f): mainframe's own AnnotationBoxStyle.hyperlinkColor forward
+// -- `chrome-mainframe.ts#buildMainframeTitleBlock`'s `ChromeTextPaint` seam.
+// Same unpopulated-producer caveat as `annotations-blocks.test.ts`'s own
+// hyperlinkColor describe block: `resolveAnnotationStyles` never sets this
+// field yet, so this pins the CONSUMER half only.
+// ---------------------------------------------------------------------------
+
+describe('applyChrome — mainframe AnnotationBoxStyle.hyperlinkColor forwarding (D3, cdd6 T2f)', () => {
+  it('a set styles.mainframe.hyperlinkColor overrides the #0000FF default for a [[url]] mainframe title', () => {
+    const a = createAnnotations();
+    setMainFrame(a, singleDisplayPositioned(['[[test link]]'], null, null));
+    const fragment = makeFragment(100, 50);
+    const styles = plainStyles({ mainframe: { hyperlinkColor: '#FF0000' } });
+    const result = applyChrome(fragment, a, styles, MEASURER);
+    expect(result.body).toContain('fill="#F00"');
+    expect(result.body).not.toContain('fill="#00F"');
+  });
+
+  it('an absent styles.mainframe.hyperlinkColor keeps the #0000FF default', () => {
+    const a = createAnnotations();
+    setMainFrame(a, singleDisplayPositioned(['[[test link]]'], null, null));
+    const fragment = makeFragment(100, 50);
+    const result = applyChrome(fragment, a, plainStyles(), MEASURER);
+    expect(result.body).toContain('fill="#00F"');
   });
 });

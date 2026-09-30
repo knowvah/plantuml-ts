@@ -73,7 +73,7 @@ function svekFiles(name: string): string[] {
 }
 
 let captured: DotInputGraph[] = [];
-beforeAll(() => setLayoutInputObserver((g) => captured.push(g)));
+beforeAll(() => setLayoutInputObserver(({ graph: g }) => captured.push(g)));
 afterAll(() => setLayoutInputObserver(undefined));
 
 describe.skipIf(fixtures.length === 0)('oracle DOT-parity ratchet — description diagrams', () => {

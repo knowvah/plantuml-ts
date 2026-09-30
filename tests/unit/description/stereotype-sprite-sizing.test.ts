@@ -20,7 +20,7 @@ import { buildSpriteAssetsStore } from '../../helpers/sprite-assets-store.js';
 /** `DotInputGraph` node dims are already in PIXELS (not inches). */
 function nodeDims(markup: string): { width: number; height: number }[] {
   const graphs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => graphs.push(g));
+  setLayoutInputObserver(({ graph: g }) => graphs.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer(), assetStore: buildSpriteAssetsStore() });
   } finally {

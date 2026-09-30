@@ -17,8 +17,10 @@ import { renderActivity } from './renderer.js';
 export const activityPlugin: SyncPlugin<ActivityDiagramAST, ActivityGeometry> = {
   type: 'activity',
 
-  parse(block) {
-    return parseActivity(block);
+  // D6 (cdd6-T1c): forwards `options.assetStore`, mirroring
+  // `class/parser.ts:317-318` / `description/index.ts:59-67`.
+  parse(block, options) {
+    return parseActivity(block, options);
   },
 
   layoutSync(ast, theme, measurer) {

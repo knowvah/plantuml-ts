@@ -36,7 +36,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/ColorUtils.java#grayToColor
  */
 
-import { parseSimpleColor, toSvgHex } from '../color/HColorSet.js';
+import { parseColor, toSvgHex } from '../color/HColorSet.js';
 import type { ResolvedColor } from '../color/HColorSet.js';
 import { grayScale } from '../../tim/builtin/color-utils.js';
 
@@ -66,12 +66,18 @@ const WHITE: ResolvedColor = { r: 255, g: 255, b: 255, a: 255 };
  */
 const NONE: ResolvedColor = { r: 0, g: 0, b: 0, a: 0 };
 
-/** `HColorSet#getColorOrWhite`, scoped to the single-token hex/named-color
- * path real sprite `fill=`/`stroke=` values use (not upstream's full
- * gradient-separator `parseColor`, out of scope for an SVG attribute
- * value — see `HColorSet.ts`'s own documented scope). */
+/** `HColorSet#getColorOrWhite` (java:60-64) -> `HColorSet#parseColor`
+ * (T3h follow-up): `emoji/ColorResolver.java#getTrueColor:71` reaches
+ * `HColorSet.instance().getColorOrWhite(code)`, the SAME public
+ * `parseColor` `HColorSet.ts#parseColor` ports the head of, so this
+ * calls THAT (not the lower-level `parseSimpleColor`) to resolve
+ * `"transparent"`/`"background"` to `HColors.none()` instead of falling
+ * through to the `WHITE` fallback below. Still scoped to `parseColor`'s
+ * single-token head, not its gradient-separator/`#?` scheme tail
+ * (out of scope for an SVG attribute value — see `HColorSet.ts`'s own
+ * documented scope). */
 function getColorOrWhite(code: string): ResolvedColor {
-  return parseSimpleColor(code) ?? WHITE;
+  return parseColor(code) ?? WHITE;
 }
 
 /** `HColorSimple#isGray`. */

@@ -211,6 +211,15 @@ const HEAD1_KIND: Record<string, DecorKind> = {
   '<|': 'extends',
   '<_': 'arrow',
   '<': 'arrow',
+  // T1d (cdd6): LinkDecor.ARROW_TRIANGLE (`decors1("<<")`,
+  // `decoration/LinkDecor.java:87`) folds into the same 'arrow' kind as
+  // plain ARROW for TYPE/direction resolution -- `LinkType
+  // .getLinkTypeName()` treats both identically
+  // (`hasAny(LinkDecor.ARROW, LinkDecor.ARROW_TRIANGLE)` ->
+  // "dependency", `decoration/LinkType.java:292`); only the RENDERED
+  // marker shape differs (open vs filled triangle,
+  // `class-arrow-decor-map.ts`'s `HEAD_TO_DECOR`).
+  '<<': 'arrow',
   '*': 'composition',
   o: 'aggregation',
   x: 'notNavigable',
@@ -231,6 +240,9 @@ const HEAD2_KIND: Record<string, DecorKind> = {
   '|>': 'extends',
   '_>': 'arrow',
   '>': 'arrow',
+  // T1d (cdd6): see HEAD1_KIND's own `<<` doc comment (decors2 mirror,
+  // `decoration/LinkDecor.java:87`).
+  '>>': 'arrow',
   '*': 'composition',
   o: 'aggregation',
   x: 'notNavigable',

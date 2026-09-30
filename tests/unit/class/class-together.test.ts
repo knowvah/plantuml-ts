@@ -67,7 +67,7 @@ describe('class together membership (CucaDiagram.java:188-194,232,339-353)', () 
 
   it('the DOT input carries the membership on nodes and on the group cluster', () => {
     const inputs: DotInputGraph[] = [];
-    setLayoutInputObserver((input) => inputs.push(input));
+    setLayoutInputObserver(({ graph: input }) => inputs.push(input));
     try {
       renderSync('@startuml\nclass A\ntogether {\nclass t1\npackage p1 {\nclass pp1\n}\n}\n@enduml\n', {
         measurer: new WidthTableMeasurer(),

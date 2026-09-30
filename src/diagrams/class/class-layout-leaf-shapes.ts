@@ -312,6 +312,40 @@ function measureCircleInterfaceInk(
 }
 
 /**
+ * `LimitFinder#drawText`'s own text-height hack (`LimitFinder.java:217`:
+ * `"y -= dim.getHeight() - 1.5;"`) shifts a `UText` draw's tracked `maxY`
+ * to `baselineY + 1.5` -- NOT the raw baseline `SvgGraphics#drawText`
+ * itself `ensureVisible`s (`SvgGraphics.java:757-758`: `"ensureVisible(x,
+ * y); ensureVisible(x + textLength, y);"`, `y` un-adjusted). Undoing this
+ * CITED constant (not fitting one) recovers the real degenerate-canvas
+ * `ensureVisible` maxY.
+ */
+const LIMIT_FINDER_TEXT_MAXY_ADJUST = 1.5;
+
+/**
+ * cdd6-T2c (D4, item 1): {@link measureCircleInterfaceInk}'s `symbolInk` is
+ * a `LimitFinder` walk, so its `maxY` carries the text-height hack above --
+ * a `circle`/`() "name"` interface's label always sits BELOW the fixed
+ * 18x18 icon (whose own drawn corner ends well above it), so the label's
+ * `UText` draw always dominates `symbolInk.maxY`, making the `-1.5`
+ * correction safe for every caller (jar-verified `rupigu-89-xabo757`/
+ * `vabobu-24-temi990`, `.agent-notes/cdd5-T4a-circle-interface-ink-gap.md`).
+ * `maxX` needs NO correction -- `LimitFinder#drawText` never shrinks the
+ * width side (`addPoint(x + dim.getWidth(), ...)`, matching `SvgGraphics`'s
+ * own `x + textLength`) -- jar-verified against `vabobu-24-temi990`'s own
+ * conformant width. Consumed ONLY by `class-geo-builders-degenerate-ink.ts
+ * #degenerateEnsureVisibleInk` (the degenerate canvas); `symbolInk` itself
+ * stays unchanged for `class-ink-box.ts#addClassifierInk`'s non-degenerate
+ * consumer.
+ */
+function measureCircleInterfaceEnsureVisible(
+  symbolInk: LeafSymbolInk | undefined,
+): { maxX: number; maxY: number } | undefined {
+  if (symbolInk === undefined) return undefined;
+  return { maxX: symbolInk.maxX, maxY: symbolInk.maxY - LIMIT_FINDER_TEXT_MAXY_ADJUST };
+}
+
+/**
  * Measure a `kind: 'circle'` classifier -- `() "Name"`/`circle X`
  * (`LeafType.CIRCLE`). E8 (`diagnosis/A2b-entity-groups.md`): upstream
  * routes it to `EntityImageDescription` with `USymbols.INTERFACE`
@@ -353,6 +387,7 @@ export function measureCircleInterface(
     spriteDims,
   );
   const symbolInk = measureCircleInterfaceInk(classifier.display, theme, measurer, spriteDims);
+  const ensureVisibleInk = measureCircleInterfaceEnsureVisible(symbolInk);
   const row = { text: classifier.display, y: dim.height / 2, indent: 0, italic: false };
   return {
     width: dim.width,
@@ -360,6 +395,7 @@ export function measureCircleInterface(
     rows: [row],
     dividerYs: [],
     ...(symbolInk !== undefined ? { symbolInk } : {}),
+    ...(ensureVisibleInk !== undefined ? { ensureVisibleInk } : {}),
   };
 }
 

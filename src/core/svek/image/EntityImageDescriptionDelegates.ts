@@ -69,8 +69,7 @@ import type { ISkinSimple } from '../../style/ISkinSimple.js';
 import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
-import type { NestedDiagramRenderer } from '../../EmbeddedDiagram.js';
-import { getNestedDiagramRenderer } from '../../nested-diagram-registry.js';
+import { descEmbeddedRenderer } from './EntityImageDescriptionEmbed.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -114,44 +113,31 @@ type ResolvedAtomImageWithRaster =
 // interface is satisfied in full rather than partially stubbed.
 // ---------------------------------------------------------------------------
 
-/** `plantuml.skin:15`, `root { LineThickness 1.0 }` -- no description-family
- *  selector (`component`/`usecase`/`rectangle`/`interface`/`folder`/
- *  `package`/`note`, `AbstractTextualComponent`'s callers) overrides it
- *  (grep-verified against `~/git/plantuml/.../skin/plantuml.skin`), so this
- *  is upstream's own real cascade result, not a fitted constant. */
-const ROOT_LINE_THICKNESS = 1.0;
-
 /**
- * `EmbeddedDiagram`'s two arms for a description label, split the way the
- * oracle jar splits them. SIZE: `calculateDimensionSlow` takes the SVG arm
- * only when `stringBounder.matchesProperty("SVG")` (java:129); the oracle's
- * `StringBounderFromWidthTable` (`FileFormat.java:185-187`) keeps
- * `StringBounder.java:43-45`'s `false`, so the raster `getImage` arm runs
- * (java:138-139) -- no raster here -- and the catch returns `(42, 42)`
- * (java:148-152): the dimension below throws into that same catch. DRAW:
- * `UGraphicSvg#matchesProperty("SVG")` is true (`UGraphicSvg.java:175-179`),
- * so `drawU` draws the real nested SVG (java:169-174) -- the registered
- * renderer's own `drawU`. Nothing registered (a unit test bypassing
- * `src/index.ts`): both arms fall to their catch.
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/EmbeddedDiagram.java:126-152,165-175
+ * `plantuml.skin:15`, `root { LineThickness 1.0 }` -- this function's OWN
+ * last-resort fallback, used only when a caller leaves `paint.defaultThickness`
+ * unset.
+ *
+ * T2e/T2b correction: an earlier version of this doc comment claimed no
+ * description-family selector overrides `LineThickness` -- WRONG.
+ * `plantuml.skin:91-93`'s `element { LineThickness 0.5 }` is a closer
+ * ancestor than `root` for every description-family symbol
+ * (`BodyEnhancedAbstract.java:121-123` `getDefaultThickness()` reads
+ * `style.value(LineThickness)` off the entity's OWN resolved style, not
+ * this file's hardcoded fallback) -- `unknown/nuveji-19-jabi587`
+ * (`database`, jar-verified: its `____` strong-line separator draws
+ * `stroke-width:0.5`, not `1`) is the regression this caused. The CALLER
+ * must resolve and pass `paint.defaultThickness` (this file has neither
+ * `Theme` nor a per-symbol resolver to do it itself) -- `leaf-sizing-
+ * entity.ts#sizingPaint` now does, mirroring `opts.lineThickness`'s
+ * existing `stroke` thread. `renderer-usymbol-entity.ts#buildUSymbolEntityParams`
+ * (the class engine's DRAW-time construction) needs the identical one-line
+ * addition -- `defaultThickness: (resolveElementLineThickness(theme,
+ * symbolKeyword) ?? ENTITY_STROKE_WIDTH) * theme.scaleK`, mirroring its own
+ * `paint.stroke` line immediately above -- but that file is outside this
+ * task's write-set; reported as a residual rather than edited.
  */
-function descEmbeddedRenderer(): NestedDiagramRenderer {
-  return {
-    render(source, skinParam): TextBlock {
-      const registered = getNestedDiagramRenderer();
-      if (registered === undefined) {
-        throw new Error('EntityImageDescriptionDelegates: no nested-diagram renderer registered for {{ ... }}');
-      }
-      const drawn = registered.render(source, skinParam);
-      return {
-        calculateDimension(): XDimension2D {
-          throw new Error('EmbeddedDiagram.java:138-139: a non-SVG StringBounder reads a raster -- unported');
-        },
-        drawU: (ug) => drawn.drawU(ug),
-      };
-    },
-  };
-}
+const ROOT_LINE_THICKNESS = 1.0;
 
 /** `Stripe<A extends StripeAtom>`'s `StripeAtom = CreoleAtom | Atom`
  *  (`Stripe.ts`) -- `Sea`/`SheetBlock1` are typed over bare `CreoleAtom`

@@ -15,6 +15,48 @@ import { applyVisibilityIcon, applyGuillemet, stripCreoleMarkup, resolveLineFont
 import { resolveTextEscapes } from '../../core/text-escapes.js';
 import { parseMagicArrowLabel, hasSeveralGuideLines, computeGuideLinesBox } from './class-magic-arrow.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { scanLineForAtoms } from '../../core/creole-atoms.js';
+import { resolveInlineAtom } from './class-member-atom-resolve.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
+import type { FontStyle } from '../../core/klimt/shape/UText.js';
+
+/**
+ * `SvekEdge.java:298-299`'s `create0(..., CreoleMode.SIMPLE_LINE, ...)`
+ * resolves creole ATOM tokens even in single-line mode (`SIMPLE_LINE` only
+ * suppresses block-level constructs -- bullets/tables/`\n`-driven wrapping
+ * -- never atom scanning, `CreoleStripeSimpleParser`'s ONE `scanLine`
+ * pipeline runs regardless of mode). A label that is ENTIRELY one
+ * `<$sprite>` token therefore measures as the resolved sprite's own
+ * declared box, not the literal `<$name>` glyphs -- `kexaba-26-kobu577`
+ * (`sprite $pk [17x12/16z] ...`, `id:int(11)<$pk>` reserves 19x14 =
+ * 17x12 + 2*marginLabel, `svek-1.dot`'s own `WIDTH="19" HEIGHT="14"`).
+ * Reuses the SAME pixel-sprite resolver a member row's inline `<$name>`
+ * already goes through (`class-member-atom-resolve.ts#resolveInlineAtom`)
+ * rather than re-deriving sprite-to-PNG conversion here.
+ *
+ * Scoped to the raster (`'image'`-kind) sprite path only -- an
+ * SVG-registered sprite's `'drawable'` decomposition has zero corpus reach
+ * on an edge label (every sampled fixture with an SVG sprite places it on a
+ * member row or a classifier symbol, never a relationship label) and is
+ * left unhandled here, falling through to the plain-text path below.
+ * `undefined` for a line carrying any text alongside the atom, more than
+ * one atom, an unresolvable/unknown sprite name, or no registry at all.
+ */
+export function resolveLoneSpriteLabel(
+  text: string,
+  font: { family: string; size: number },
+  sprites: SpriteRegistry | undefined,
+): { href: string; width: number; height: number } | undefined {
+  if (sprites === undefined) return undefined;
+  const scan = scanLineForAtoms(text);
+  if (scan.atoms.length !== 1 || scan.textWithoutAtoms.length > 0) return undefined;
+  const atom = scan.atoms[0]!;
+  if (atom.kind !== 'sprite') return undefined;
+  const baseFont = { family: font.family, size: font.size, color: null, styles: new Set<FontStyle>() };
+  const resolved = resolveInlineAtom(atom, baseFont, sprites, spriteDimsLookupFor(sprites));
+  if (resolved === undefined || resolved.kind !== 'image') return undefined;
+  return { href: resolved.href, width: resolved.width, height: resolved.height };
+}
 
 /** {@link computeMeasuredLabelAttrs}'s magic-arrow arm, factored out to keep
  *  that function's NLOC under the project's per-function cap -- resolves a
@@ -48,6 +90,11 @@ export function computeMeasuredLabelAttrs(
   font: { family: string; size: number },
   measurer: StringMeasurer,
   classAttributeIconSize?: number,
+  // kexaba-26-kobu577: threaded through from `class-layout-edge-labels.ts
+  // #computeRelLabelAttrs`'s own `noteCtx?.sprites` (the SAME registry
+  // `computeNoteMergedLabelAttrs` already reads on the sibling branch) --
+  // see {@link resolveLoneSpriteLabel}'s own doc comment.
+  sprites?: SpriteRegistry,
 ): LabelAttrs {
   const { lines } = splitDisplayLines(label);
   if (lines.length > 1) {
@@ -103,12 +150,37 @@ export function computeMeasuredLabelAttrs(
     // #withLabelMargin`, not here.
     return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
   }
+  return computeSingleLinePlainLabelAttrs(label, font, measurer, classAttributeIconSize, sprites);
+}
+
+/** {@link computeMeasuredLabelAttrs}'s trailing single-line, non-magic-arrow
+ *  arm -- split out purely to keep that function's own NLOC under the
+ *  project's per-function cap. */
+function computeSingleLinePlainLabelAttrs(
+  label: string,
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+  classAttributeIconSize: number | undefined,
+  sprites: SpriteRegistry | undefined,
+): LabelAttrs {
   const vis = applyVisibilityIcon(label, classAttributeIconSize);
+  // kexaba-26-kobu577: a label that is PURELY one `<$sprite>` atom sizes to
+  // the resolved sprite's own declared box (`resolveLoneSpriteLabel`'s own
+  // doc comment) -- checked BEFORE the guillemet/strip text path below,
+  // which would otherwise measure the literal `<$name>` glyphs.
+  const sprite = resolveLoneSpriteLabel(vis.text, font, sprites);
+  if (sprite !== undefined) {
+    return { label, labelWidth: sprite.width + vis.iconWidth, labelHeight: Math.max(sprite.height, vis.iconHeight) };
+  }
   // M4 cause C: `<<x>>` -> `«x»` BEFORE measuring (`core/edge-label-box.ts
   // #applyGuillemet`, `Guillemet.java:78-88`) -- runs AFTER the visibility
   // strip, mirroring `Display.manageGuillemet`'s per-line order
   // (`Display.java:415-418`: strip first, guillemet second, same line).
-  // Escape decode runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
-  const m = measurer.measure(resolveTextEscapes(applyGuillemet(vis.text)), font);
+  // rimeca-17-gice904: an inline formatting tag (`<u>`/`<color:..>`/...)
+  // contributes NO width to a real creole TextBlock -- `stripCreoleMarkup`
+  // runs BEFORE measuring here too, mirroring the multi-line branch above
+  // (which already stripped; this single-line arm never did). Escape decode
+  // runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
+  const m = measurer.measure(resolveTextEscapes(stripCreoleMarkup(applyGuillemet(vis.text))), font);
   return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
 }

@@ -91,7 +91,7 @@ interface Row {
 
 function ourInputs(markup: string): DotInputGraph[] {
   const inputs: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => inputs.push(g));
+  setLayoutInputObserver(({ graph: g }) => inputs.push(g));
   try {
     renderSync(markup, { measurer: new WidthTableMeasurer() });
   } catch {

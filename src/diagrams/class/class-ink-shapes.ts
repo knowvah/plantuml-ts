@@ -371,3 +371,39 @@ export function addClassicRectInk(box: InkBox, x: number, y: number, w: number, 
   addPoint(box, x - 1, y - 1);
   addPoint(box, x + w + 1, y + h + 1);
 }
+
+/**
+ * T2b (json-canvas-width-1px, `unknown/bizasu-70-vaxa243`/`unknown/meramo-
+ * 02-vasu175`/`unknown/momada-03-zeka599`): `kind: 'json'`'s own body-shape
+ * dispatch, replacing the generic `addRectInk`'s `bodyInkWidth ?? c.width`
+ * fallback (which always took `c.width`, i.e. `x+w`, for every json leaf --
+ * `class-ink-shapes.ts`'s own doc comment above names json/map as "left
+ * unmeasured deliberately").
+ *
+ * A json leaf whose root value is a PRIMITIVE (or a single-element array)
+ * draws only `URectangle` + text -- `LimitFinder#drawRectangle` bounds it
+ * at `x+w-1` (`EntityImageJson.java:192`; the name block stops 5px inside
+ * the right edge, `xMarginCircle`, `EntityImageJson.java:95-96,124`).
+ * OBJECT bodies always draw a per-member `ULine.hline(jsonTotalWidth)`
+ * (`cucadiagram/TextBlockCucaJSon.java:168,174`) and ARRAY bodies with >= 2
+ * elements draw one BETWEEN elements (`:215-220`) -- both reaching `x+w`,
+ * `LimitFinder#drawULine`'s own un-inset rule. `c.jsonBody` (`class-json-
+ * sizing.ts#buildJsonItems`) already carries this exact operation list --
+ * `kind: 'hline'` items exist if and only if upstream would have drawn one
+ * (`buildObjectItems` unconditionally, `buildArrayItems` only `if (i > 0)`)
+ * -- so its presence is read directly rather than re-deriving the json
+ * value's shape a second time.
+ *
+ * The Y rule is untouched (`bodyInkHeight` is never set for `kind:'json'`,
+ * so `addRectInk`'s own fallback already gave `y+h` -- this task's own
+ * measured residual is width-only).
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/svek/image/EntityImageJson.java:192
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/cucadiagram/TextBlockCucaJSon.java:168,174,215-220
+ */
+export function addJsonBodyInk(box: InkBox, c: ClassifierGeo): void {
+  addPoint(box, c.x - 1, c.y - 1);
+  const hasHline = (c.jsonBody ?? []).some((item) => item.kind === 'hline');
+  const maxX = hasHline ? c.x + c.width : c.x + c.width - 1;
+  addPoint(box, maxX, c.y + c.height);
+}

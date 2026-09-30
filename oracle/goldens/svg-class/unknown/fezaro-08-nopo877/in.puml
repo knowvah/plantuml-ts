@@ -1,0 +1,6 @@
+@startuml
+skinparam BackgroundColor transparent
+title Test **KO** BackgroundColor **transparent**\n and **SVG** Shadowing for empty stack
+stack stack2 {
+}
+@enduml

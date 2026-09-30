@@ -44,7 +44,7 @@ function classifier(ast: ReturnType<typeof parseClass>, id: string): Classifier 
 /** Layout the AST and return the captured DOT input graph's nodes. */
 function captureNodes(ast: ReturnType<typeof parseClass>): DotInputNode[] {
   let captured: DotInputGraph | undefined;
-  setLayoutInputObserver((g) => {
+  setLayoutInputObserver(({ graph: g }) => {
     captured = g;
   });
   try {

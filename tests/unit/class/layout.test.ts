@@ -116,7 +116,7 @@ describe('layoutClass — graph-attr parity (ADR-6)', () => {
 
   it('feeds nodeSep=35 and rankSep=60 into the DOT input graph', () => {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -144,7 +144,7 @@ describe('layoutClass — edge label attributes (labelOk)', () => {
 
   it('emits label + tail/head label sizes from label and multiplicities', () => {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -163,7 +163,7 @@ describe('layoutClass — edge label attributes (labelOk)', () => {
 describe('layoutClass — qualifier/port nodes render as plaintext (shapeOk)', () => {
   function captureNodes(ast: ClassDiagramAST) {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -256,7 +256,7 @@ describe('layoutClass — class ::member port rows wired end-to-end (T2, SI17)',
 
   function captureGraph(ast: ClassDiagramAST): DotInputGraph {
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -386,7 +386,7 @@ describe('layoutClass — package used as a relationship endpoint (zaent anchor)
 
   function capture() {
     let g: DotInputGraph | undefined;
-    setLayoutInputObserver((x) => {
+    setLayoutInputObserver(({ graph: x }) => {
       g = x;
     });
     try {
@@ -634,7 +634,7 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       ],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -655,7 +655,7 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       namespaces: [{ id: 'NS', display: 'MyNamespace', classifiers: ['Alpha', 'Beta'] }],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -681,7 +681,7 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       ],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {
@@ -707,7 +707,7 @@ describe('layoutClass — DotInputGraph.clusters (B1)', () => {
       namespaces: [{ id: 'NS', display: 'NS', classifiers: ['Alpha'] }],
     });
     let captured: DotInputGraph | undefined;
-    setLayoutInputObserver((g) => {
+    setLayoutInputObserver(({ graph: g }) => {
       captured = g;
     });
     try {

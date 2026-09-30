@@ -25,6 +25,8 @@ import type { Command as CoreCommand } from '../../core/command/Command.js';
 import type { ParticipantUrl } from './sequence-participant-declaration.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
+import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
+import type { InternalEmojiStore } from '../../core/internal-emoji-store.js';
 
 // ---------------------------------------------------------------------------
 // Mutable parse state (local to each parseSequence call)
@@ -115,7 +117,8 @@ export class SequenceCommandRefusal extends Error {}
 // Helpers
 // ---------------------------------------------------------------------------
 
-export function makeDefaultAST(): SequenceDiagramAST {
+/** D6 (cdd6-T1c): mirrors `class/parser.ts:326-329`'s own pair. */
+export function makeDefaultAST(internal?: InternalSpriteStore, emoji?: InternalEmojiStore): SequenceDiagramAST {
   return {
     participants: [],
     events: [],
@@ -126,7 +129,7 @@ export function makeDefaultAST(): SequenceDiagramAST {
     },
     boxes: [],
     annotations: createAnnotations(),
-    sprites: createSpriteRegistry(),
+    sprites: createSpriteRegistry(internal, emoji),
   };
 }
 

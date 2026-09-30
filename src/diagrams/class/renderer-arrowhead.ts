@@ -104,6 +104,11 @@ const DECOR_TO_NAME: Record<Exclude<LinkDecor, 'none'>, LinkDecorName> = {
   // (LinkDecor.CIRCLE, `decoration/LinkDecor.java:90`); the extremity is the
   // already-built `link-decor.ts#BUILDERS.CIRCLE`.
   circle: 'CIRCLE',
+  // T1d (cdd6): exhaustiveness entry for the new `arrowTriangle` member
+  // (LinkDecor.ARROW_TRIANGLE, `decoration/LinkDecor.java:87`); the
+  // extremity is the already-built
+  // `link-decor.ts#BUILDERS.ARROW_TRIANGLE`.
+  arrowTriangle: 'ARROW_TRIANGLE',
 };
 
 export function decorName(decor: LinkDecor): LinkDecorName | undefined {

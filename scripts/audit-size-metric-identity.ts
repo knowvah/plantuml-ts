@@ -248,7 +248,7 @@ export function classifyAudit(sortedMax: number, pairMax: number, structurallyEq
 
 function captureGraphs(markup: string): DotInputGraph[] {
   const captured: DotInputGraph[] = [];
-  setLayoutInputObserver((g) => captured.push(g));
+  setLayoutInputObserver(({ graph: g }) => captured.push(g));
   try {
     renderSync(markup, {
       measurer: new WidthTableMeasurer(),
