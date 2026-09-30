@@ -134,4 +134,12 @@ Measurement:
 
 ## Status
 
-Filled by T-exit: `| clause | result | met |`, one row per D10 clause.
+T-exit 2026-09-30 (final tree = b2 close 43440f37b; `measurements/final.json`,
+`final-eng/`, diffed against `b0.json` / `b0-eng/`).
+
+| clause | result | met |
+|---|---|---|
+| Every in-scope row has a `final` ∈ {fixed, accepted (D8), open -> cdd8, open -> salt-engine-port, open -> dot-engine} | 19 rows, 0 empty: **10 fixed** (bisefo, sejube, kexaba, fepiko, josebu, bonaco, tefeco, xuloxo, rojida + dezobu's class half), **8 accepted (D8)**, **1 `open -> salt-engine-port`** (lubicu), **1 `open -> cdd8`** (dezobu: nested description embed, `CommandArchimate.java:146-152` icon → sprite rewrite) | yes |
+| 0 conformant losses in any engine; 0 unexplained rises | b0 → final: 0 verdict/`dotEqual` movers in 27 engines; unknown: 9 rises to conformant + dezobu diverged → structural-match + rojida `dotEqual` false → true, each with a journal row; 0 losses. Non-class diff-baseline re-pins: sequence vofupo (fall, T1f), component xufexu (rise 12 → 27, mechanism row 28) | yes |
+| Four gates green, collected = on-disk, class DOT parity green | b2 close: test 1001/1001 collected, 24624 tests, 0 failed; typecheck, lint, build exit 0; `class-dot-parity` green (xuloxo `dotEqual` now true too) | yes |
+| Target **984 CLASS conformant**, ratchet 984 | **982 / 982** (974 + 8 of 9 fix rows; rojida was already conformant at b0, so the brief's 984 double-counted it — journal row 7 derived 983 / 984). Short: dezobu (`open -> cdd8`, description engine, mechanised) | miss by 2 (journaled) |
