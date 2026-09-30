@@ -5,6 +5,7 @@ import { Fore } from '../../../../core/klimt/Fore.js';
 import type { UGraphic } from '../../../../core/klimt/UGraphic.js';
 import { UStroke } from '../../../../core/klimt/UStroke.js';
 import { UTranslate } from '../../../../core/klimt/UTranslate.js';
+import { HColorGradient } from '../../../../core/klimt/color/HColorGradient.js';
 import { HColorSimple } from '../../../../core/klimt/color/HColorSimple.js';
 import { HColors } from '../../../../core/klimt/color/HColors.js';
 import { CreoleMode } from '../../../../core/klimt/creole/CreoleMode.js';
@@ -35,8 +36,8 @@ const SHEET_BLOCK2_THICKNESS = 1;
  * `HColor#toSvg(ColorMapper.IDENTITY)`. Java's checked cast otherwise.
  */
 function paintOf(color: HColor): Paint {
-  if (!(color instanceof HColorSimple)) throw new Error('ClassCastException: box colour is not an HColorSimple');
-  return color.asPaint();
+  if (color instanceof HColorSimple || color instanceof HColorGradient) return color.asPaint();
+  throw new Error('ClassCastException: box colour is not an HColorSimple');
 }
 
 /**
