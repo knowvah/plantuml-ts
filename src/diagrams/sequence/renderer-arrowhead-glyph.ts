@@ -18,6 +18,7 @@ import type { Theme } from '../../core/theme.js';
 import { line, polygon, ellipse } from '../../core/svg.js';
 import type { ArrowCircle, ArrowHeadKind, ArrowSegment, HeadGeometry } from './sequence-arrowhead.js';
 import { scaleHeadGeometry } from './scale-geo.js';
+import { noGradient } from '../../core/paint.js';
 
 /**
  * The two colours `drawDressing1`/`drawDressing2` reach for:
@@ -58,7 +59,8 @@ interface ArrowPaint {
 const ARROW_STYLE_BACKGROUND = '#000000';
 
 export function paintOf(theme: Theme): ArrowPaint {
-  return { color: theme.colors.arrow, background: ARROW_STYLE_BACKGROUND };
+  // cdd7-T1a (D3): `colors.arrow` is a Paint; the glyph draws flat.
+  return { color: noGradient(theme.colors.arrow), background: ARROW_STYLE_BACKGROUND };
 }
 
 /**

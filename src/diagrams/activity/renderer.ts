@@ -15,6 +15,7 @@ import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { arrowDirection, arrowHeadPoints, type ArrowDir } from './arrows-regular.js';
+import { noGradient } from '../../core/paint.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -198,7 +199,8 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
 
-  const edgeColor = theme.colors.arrow;
+  // cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer draws flat.
+  const edgeColor = noGradient(theme.colors.arrow);
   // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
   // `Worm#drawInternalOneColor` takes the LINE's stroke from
   // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`

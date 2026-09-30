@@ -409,3 +409,4 @@ export { edgeExtremityInk } from './renderer-arrowhead-ink.js';
 // threading (C-11) pushed it back over the 500-line hook cap -- a pure
 // move, re-exported so no consumer's import path changed.
 export { buildMiddleDecorMarkup } from './renderer-arrowhead-middle.js';
+export type { MiddleDecorColors } from './renderer-arrowhead-middle.js';

@@ -75,6 +75,71 @@ export function resolveMagicArrowText(
   return { text: resolveTextEscapes(resolved.text), font: resolved.font };
 }
 
+// cdd7 T2b: `stripCreoleShorthand` moved to `class-edge-label-lines.ts`
+// (so the wrapped anchor can share it without an import cycle) -- a pure
+// move, re-exported here.
+import { stripCreoleShorthand, wrappedLabelRows } from './class-edge-label-lines.js';
+export { stripCreoleShorthand };
+
+/**
+ * {@link computeMeasuredLabelAttrs}'s multi-line arm -- split out purely to
+ * keep that function's NLOC under the project's per-function cap (T1b, the
+ * {@link stripCreoleShorthand} addition pushed it over). D6
+ * (`SvekEdge.java:290-297`): a multi-line label whose lines include a
+ * leading/trailing `< `/`> `/` <`/` >` guide-line token takes the PER-LINE
+ * arrow path (`Display.hasSeveralGuideLines`, `klimt/creole/Display.java
+ * :715-740`) instead of the plain stacked-text formula below -- see
+ * {@link hasSeveralGuideLines}/{@link computeGuideLinesBox}'s own doc
+ * comments. M4 cause C applies to EVERY line, unconditionally
+ * (`Display.manageGuillemet`'s loop body, `Display.java:413-419` -- no
+ * `first`-only gate on the guillemet call, unlike the visibility strip).
+ * T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream RENDERS
+ * `<b>..</b>` as bold formatting rather than measuring the tag as glyphs
+ * (`Display.java:413-419` runs at Display-construction time, BEFORE the
+ * later `create()`/`create9()` creole render this port stands in for via
+ * {@link stripCreoleMarkup}) -- so the strip runs AFTER guillemet,
+ * mirroring that same construct-then-render order. Bold/italic contribute
+ * no width delta in deterministic mode either way:
+ * `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
+ * /StringBounderFromWidthTable.java:63-79`) derives width from `font
+ * .getSize2D()` and a fixed per-codepoint table alone -- no branch on
+ * `FontStyle`/bold/italic exists in that class -- so stop 10 does not fire
+ * here. Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
+ * own per-line-not-whole-string ordering. T1b (xuloxo-85-vibu502): strip
+ * `**`/`//` BEFORE guillemet/stripCreoleMarkup -- {@link
+ * stripCreoleShorthand}'s own doc comment. cdd7 T2b: word-wrap at the label
+ * wrap width (`SvekEdge.java:288-299`, `Display#create0` -> Fission) sizes
+ * the box from the PHYSICAL rows ({@link wrappedLabelRows}, the SAME rows
+ * `multiLineLabelAnchorWrapped` draws); `maxWidth <= 0` is one row per line.
+ */
+function measureMultiLineLabel(
+  label: string,
+  lines: readonly string[],
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+  maxWidth: number,
+): LabelAttrs {
+  if (hasSeveralGuideLines(lines)) {
+    const box = computeGuideLinesBox(lines, font, measurer);
+    return { label, labelWidth: box.width, labelHeight: box.height };
+  }
+  const rows = wrappedLabelRows(lines, font, maxWidth, measurer);
+  const lineHeight = measurer.measure(rows[0]?.atoms.join('') ?? '', font).height;
+  return { label, labelWidth: Math.max(...rows.map((r) => r.width)), labelHeight: lineHeight * rows.length };
+}
+
+/** {@link computeMeasuredLabelAttrs}' optional inputs. */
+export interface MeasuredLabelOptions {
+  /** `bugeli-63-mixa543` guard: an icon-size-0 override must reach here as 0. */
+  readonly classAttributeIconSize?: number | undefined;
+  /** kexaba-26-kobu577: `class-layout-edge-labels.ts#computeRelLabelAttrs`'s
+   *  own `noteCtx?.sprites` -- see {@link resolveLoneSpriteLabel}. */
+  readonly sprites?: SpriteRegistry | undefined;
+  /** cdd7 T2b: the label wrap width (`theme.maxMessageSize`, `SvekEdge.java
+   *  :290-294`); absent/0 = no wrap. Multi-line labels only. */
+  readonly maxWidth?: number | undefined;
+}
+
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
  *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
@@ -89,47 +154,10 @@ export function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
   measurer: StringMeasurer,
-  classAttributeIconSize?: number,
-  // kexaba-26-kobu577: threaded through from `class-layout-edge-labels.ts
-  // #computeRelLabelAttrs`'s own `noteCtx?.sprites` (the SAME registry
-  // `computeNoteMergedLabelAttrs` already reads on the sibling branch) --
-  // see {@link resolveLoneSpriteLabel}'s own doc comment.
-  sprites?: SpriteRegistry,
+  opts: MeasuredLabelOptions = {},
 ): LabelAttrs {
   const { lines } = splitDisplayLines(label);
-  if (lines.length > 1) {
-    // D6 (`SvekEdge.java:290-297`): a multi-line label whose lines include a
-    // leading/trailing `< `/`> `/` <`/` >` guide-line token takes the
-    // PER-LINE arrow path (`Display.hasSeveralGuideLines`,
-    // `klimt/creole/Display.java:715-740`) instead of the plain stacked-text
-    // formula below -- see {@link hasSeveralGuideLines}/
-    // {@link computeGuideLinesBox}'s own doc comments.
-    if (hasSeveralGuideLines(lines)) {
-      const box = computeGuideLinesBox(lines, font, measurer);
-      return { label, labelWidth: box.width, labelHeight: box.height };
-    }
-    // M4 cause C applies to EVERY line, unconditionally
-    // (`Display.manageGuillemet`'s loop body, `Display.java:413-419` --
-    // no `first`-only gate on the guillemet call, unlike the visibility
-    // strip). T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream
-    // RENDERS `<b>..</b>` as bold formatting rather than measuring the tag
-    // as glyphs (`Display.java:413-419` runs at Display-construction time,
-    // BEFORE the later `create()`/`create9()` creole render this port
-    // stands in for via {@link stripCreoleMarkup}) -- so the strip runs
-    // AFTER guillemet, mirroring that same construct-then-render order.
-    // Bold contributes no width delta in deterministic mode either way:
-    // `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
-    // /StringBounderFromWidthTable.java:63-79`) derives width from `font
-    // .getSize2D()` and a fixed per-codepoint table alone -- no branch on
-    // `FontStyle`/bold/italic exists in that class -- so stop 10 does not
-    // fire here.
-    // Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
-    // own per-line-not-whole-string ordering (see that function's comment).
-    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup).map(resolveTextEscapes);
-    const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
-    const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
-    return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
-  }
+  if (lines.length > 1) return measureMultiLineLabel(label, lines, font, measurer, opts.maxWidth ?? 0);
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
     // A leading `<size:N>` tag on the remaining text rewrites the TEXT's
@@ -150,7 +178,7 @@ export function computeMeasuredLabelAttrs(
     // #withLabelMargin`, not here.
     return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
   }
-  return computeSingleLinePlainLabelAttrs(label, font, measurer, classAttributeIconSize, sprites);
+  return computeSingleLinePlainLabelAttrs(label, font, measurer, opts.classAttributeIconSize, opts.sprites);
 }
 
 /** {@link computeMeasuredLabelAttrs}'s trailing single-line, non-magic-arrow
@@ -183,4 +211,42 @@ function computeSingleLinePlainLabelAttrs(
   // runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
   const m = measurer.measure(resolveTextEscapes(stripCreoleMarkup(applyGuillemet(vis.text))), font);
   return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
+}
+
+/**
+ * cdd7-T1b (kexaba-26-kobu577, cdd6 rows 50/63, D5): a lone-sprite
+ * (`'image'`-only) edge label's `<image>` anchor inside its reserved box --
+ * moved here from `class-edge-label-attach.ts` (pure relocation). D5 step 1
+ * (real `dot -Tdot` on the cached `svek-1.dot`): `lp="68,127"` is IDENTICAL
+ * between real graphviz and this port's own DOT -- dot-engine blame ruled
+ * out (`dot-engine-blame-needs-real-dot`).
+ *
+ * The formula is exactly the Java: box-origin (`center - reservedDim/2`,
+ * `SvekEdge.java:745-747,808-814`'s `getXY`) + `marginLabel`
+ * (`:372-373,951-954`, `TextBlockMarged`, `klimt/shape/TextBlockUtils.java
+ * :64-68`) -- `marginLabel` stays explicit (not collapsed into
+ * `Math.trunc(sprite.width)/2`, algebraically identical for an integer
+ * sprite) so a self-loop's `marginLabel === 6` (`class-layout-edge-labels
+ * .ts#labelMarginOf`) is Java-traceable here too.
+ *
+ * An earlier revision diagnosed a FALSE "+7 residual beyond marginLabel"
+ * and fitted a `+8` constant here (see git history): `center` is dot-
+ * engine's RAW pre-shift output, but `class-layout-shift.ts
+ * #shiftEdgeExtras` / `class-scale-geo-edge.ts#scaleEdgeGeoLabels` -- which
+ * move every OTHER `EdgeGeo` label field into the final frame -- never
+ * touched `labelImage`; the missing shift (fixed there) was mistaken for a
+ * draw offset. `.agent-notes/kexaba-sprite-label-inset.md` has the mechanism.
+ */
+export function spriteLabelAnchor(
+  sprite: { width: number; height: number },
+  center: { x: number; y: number },
+  marginLabel: number,
+): { x: number; y: number } {
+  // WIDTH-only floor (`computeReservedLabelBox`, `SvekEdge.java:504-507`).
+  const reservedWidth = Math.floor(sprite.width + 2 * marginLabel);
+  const reservedHeight = sprite.height + 2 * marginLabel;
+  return {
+    x: center.x - reservedWidth / 2 + marginLabel,
+    y: center.y - reservedHeight / 2 + marginLabel,
+  };
 }

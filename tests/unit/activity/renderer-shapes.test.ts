@@ -9,6 +9,7 @@
  * upstream's start/end/kill nodes are all `<ellipse>` (`DriverEllipseSvg`),
  * never `<circle>` (`plans/activity-element-granularity/decisions.md` D2).
  */
+import { noGradient } from '../../../src/core/paint.js';
 import { describe, it, expect } from 'vitest';
 import {
   renderAction,
@@ -465,6 +466,6 @@ describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
   it('stroke-width is 1.5 (FtileThinSplit.java:95), colour is the theme arrow colour', () => {
     const svg = renderSplitLine(makeNode({ kind: 'split-join-bar', x: 0, y: 0, width: 40 }), theme);
     expect(svg).toContain('stroke-width="1.5"');
-    expect(svg).toContain(`stroke="${theme.colors.arrow}"`);
+    expect(svg).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
   });
 });

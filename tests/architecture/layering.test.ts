@@ -97,6 +97,19 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       '(mission unknown-bucket-routing-repair, T7 / T4 mechanism A).',
   },
   {
+    from: 'src/diagrams/class/class-declaration-parser.ts',
+    to: 'src/diagrams/description/parse-helpers.ts',
+    why:
+      'upstream parses a <<$sprite>> stereotype in ONE shared class, ' +
+      'net.sourceforge.plantuml.stereo.Stereotype (Stereotype.java:108-117 ' +
+      'getSprite, consumed by EntityImageDescription.java:192-194 for class ' +
+      'and description leaves alike). The port keeps that parser at ' +
+      'description/parse-helpers(-strings).ts#extractNodeStereotype, already ' +
+      'the source for class-multiline-element.ts above; the single-line class ' +
+      'declaration parser reuses it for the same sprite ref rather than ' +
+      're-spelling the stereotype grammar (cdd7 T2b, dezobu; journal row 29).',
+  },
+  {
     from: 'src/diagrams/mindmap/',
     to: 'src/diagrams/activity/ftile/',
     why:

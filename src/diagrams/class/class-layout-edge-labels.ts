@@ -325,7 +325,12 @@ function computeRelLabelAttrs(
   // T2d (kexaba-26-kobu577): `noteCtx?.sprites` -- the SAME registry
   // `computeNoteMergedLabelAttrs` above already reads -- threaded one more
   // argument for `resolveLoneSpriteLabel` (`class-edge-label-measure.ts`).
-  return computeMeasuredLabelAttrs(rel.label, font, measurer, noteCtx?.theme.classAttributeIconSize, noteCtx?.sprites);
+  return computeMeasuredLabelAttrs(rel.label, font, measurer, {
+    classAttributeIconSize: noteCtx?.theme.classAttributeIconSize,
+    sprites: noteCtx?.sprites,
+    // cdd7 T2b: `SvekEdge.java:290-294`'s label wrap width.
+    maxWidth: noteCtx?.theme.maxMessageSize,
+  });
 }
 
 /** The `rel.fromMultiplicity`/`rel.toMultiplicity` half of

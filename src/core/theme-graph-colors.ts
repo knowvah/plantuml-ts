@@ -190,7 +190,33 @@ export interface ElementColors {
   borderByStereo?: Readonly<Record<string, string>>;
   fontByStereo?: Readonly<Record<string, string>>;
   lineThicknessByStereo?: Readonly<Record<string, number>>;
+  /** cdd7 T2b (xuloxo-85): `skinparam <sname>RoundCorner<<label>>` /
+   *  `<sname>DiagonalCorner<<label>>` -- the same +1000 re-signing as
+   *  {@link borderByStereo} (`FromSkinparamToStyle.java:275-276,396-408`);
+   *  RAW unhalved values, as {@link roundCorner}. Read by the class usymbol
+   *  leaf draw (`EntityImageDescription.java:168-169`). */
+  roundCornerByStereo?: Readonly<Record<string, number>>;
+  diagonalCornerByStereo?: Readonly<Record<string, number>>;
   stereotypeFontByStereo?: Readonly<Record<string, string>>;
+  /**
+   * T1d (fepiko-26-vobi566): the DECLARATION-ORDER-RESOLVED `PName.FontColor`
+   * for a group USymbol's stereotype-TEXT render node. `<sname>FontColor
+   * <<label>>` (`{<sname>}`, `addConFont`) and `<sname>StereotypeFontColor
+   * <<label>>` (`{stereotype, <sname>}`, `addMagic` `FromSkinparamToStyle
+   * .java:283`) both re-sign at the SAME `+DELTA_PRIORITY_FOR_STEREOTYPE`
+   * tier (`:396-408`) and BOTH match that node; two same-tier Style entries
+   * resolve by which was PARSED LATER (`DarkString#mergeWith`,
+   * `DarkString.java:54-57`), not by which property is more specific.
+   * `skinparam-stereo-keys.ts#applyGroupByStereo` writes this field from
+   * BOTH branches, in source order, so the plain object's last-write-wins
+   * semantics reproduce that tie-break for free. Consulted ahead of
+   * {@link stereotypeFontByStereo}/{@link fontByStereo} by
+   * `class-package-style.ts#elementStereoFontColor` only — the folder-family
+   * empty-package leaf's stereotype colour is a DIFFERENT, non-Style-cascade
+   * legacy lookup (`emptyPackageStereoFontColor`'s own doc comment) that
+   * must keep reading {@link stereotypeFontByStereo} alone.
+   */
+  stereoTextFontByStereo?: Readonly<Record<string, string>>;
   /** cdd3-T21 (E3-2): `skinparam <sname>StereotypeFontColor X` -- `addMagic`
    *  (`FromSkinparamToStyle.java:283`) -> `FontColor` on `{stereotype,
    *  <sname>}`; also the legacy `FontParam.<SNAME>_STEREOTYPE` colour

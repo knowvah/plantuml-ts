@@ -45,6 +45,11 @@ export function parseHorizontalAlignment(raw: string): HorizontalAlignment | und
   if (upper === HorizontalAlignment.LEFT || upper === HorizontalAlignment.CENTER) return upper;
   return upper === HorizontalAlignment.RIGHT ? upper : undefined;
 }
+/** `PName.HorizontalAlignment` on `sname`'s bucket, when the value parses. */
+function setAlignment(acc: Parameters<KeyHandler>[0], sname: string, value: string): void {
+  const alignment = parseHorizontalAlignment(value);
+  if (alignment !== undefined) (acc.elements[sname] ??= {}).horizontalAlignment = alignment;
+}
 function isAutomaticFontColor(color: string): boolean {
   return color.trim().toLowerCase() === AUTOMATIC_FONT_COLOR;
 }
@@ -225,16 +230,11 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
       (acc.elements['package'] ??= {}).stereotypeFont = color;
     },
   ],
-  // cdd6 T3g: `addConvert("noteTextAlignment", PName.HorizontalAlignment,
-  // SName.note)` (`FromSkinparamToStyle.java:178`) -- the note bucket's
-  // `horizontalAlignment`, read by `EntityImageNote.java:112`.
-  [
-    ['notetextalignment'],
-    (acc, value) => {
-      const alignment = parseHorizontalAlignment(value);
-      if (alignment !== undefined) (acc.elements['note'] ??= {}).horizontalAlignment = alignment;
-    },
-  ],
+  // `addConvert(.., PName.HorizontalAlignment, ..)`: cdd6 T3g noteTextAlignment
+  // -> SName.note (`FromSkinparamToStyle.java:178`, `EntityImageNote.java:112`);
+  // cdd7 T2b defaulttextalignment -> SName.root (`:155`).
+  [['notetextalignment'], (acc, value) => setAlignment(acc, 'note', value)],
+  [['defaulttextalignment'], (acc, value) => setAlignment(acc, 'root', value)],
   [
     ['packagefontname'],
     (acc, value) => {

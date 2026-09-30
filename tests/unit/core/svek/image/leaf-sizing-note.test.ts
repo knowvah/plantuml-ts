@@ -206,12 +206,28 @@ function render(style: string): string {
   });
 }
 
-/** The note's own `<rect>` — `drawFallbackBox` is the only `fill="#FEFECE"`
- *  rect in these fixtures. */
+/** The note's own box. A note with exactly one link to a non-note entity
+ *  (this fixture's `N .. UC`) is OPALE since cdd7 T1e
+ *  (`GraphvizImageBuilder.java:245-260 isOpalisable`, drawn by
+ *  `EntityImageNote.java:207-243` via `Opale.java:104-125`): its outline is
+ *  a `<path>` whose `M x,y` is the box's top-left corner and whose points
+ *  span the box (`Opale#getPolygonNormal`), so the box is the outline's
+ *  extent minus the connector tip. A free-standing note still draws
+ *  `drawFallbackBox`'s `<rect>`; both are the only `fill="#FEFECE"` shapes. */
 function noteRect(svg: string): { x: number; y: number; width: number; height: number } {
-  const m = /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#FEFECE"/.exec(svg);
-  if (m === null) throw new Error('no note rect in SVG');
-  return { x: Number(m[1]), y: Number(m[2]), width: Number(m[3]), height: Number(m[4]) };
+  const r = /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#FEFECE"/.exec(svg);
+  if (r !== null) return { x: Number(r[1]), y: Number(r[2]), width: Number(r[3]), height: Number(r[4]) };
+  const o = /<path d="(M[^"]*)"[^>]*fill="#FEFECE"/.exec(svg);
+  if (o === null) throw new Error('no note rect or opale outline in SVG');
+  // `M x0,y0 L x0,y1 ... L x1,y1 ... L x1,y0+fold L x1-fold,y0 L x0,y0`: the
+  // box is the outline's own corners; the connector tip (`pp1`/`pp2`, the
+  // only points off the box edge) is the one point outside that span.
+  const pts = [...o[1]!.matchAll(/[ML](-?[\d.]+),(-?[\d.]+)/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]) }));
+  const x0 = pts[0]!.x;
+  const y0 = pts[0]!.y;
+  const y1 = pts[1]!.y; // the first `L` runs down the left edge
+  const x1 = Math.max(...pts.filter((p) => p.y === y0 || p.y === y1).map((p) => p.x));
+  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
 }
 
 describe('F1-a — the note RENDERER builds its block the same way the sizer does', () => {

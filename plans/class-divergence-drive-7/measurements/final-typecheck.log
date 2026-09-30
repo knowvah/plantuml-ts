@@ -1,0 +1,5 @@
+
+> @knowvah/plantuml-ts@0.2.0 typecheck
+> tsc --noEmit && tsc --project tsconfig.node.json --noEmit
+
+typecheck EXIT 0

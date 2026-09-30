@@ -19,6 +19,7 @@ import { type UrlInfo } from './class-url.js';
 import { refuse } from '../../core/parse-refusal.js';
 import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
 import { extractBody, extractDecorations, extractInheritance, parseIdDisplay } from './class-declaration-extractors.js';
+import { extractNodeStereotype } from '../description/parse-helpers.js';
 
 // ---------------------------------------------------------------------------
 // Classifier declaration parser
@@ -361,7 +362,14 @@ function copyDeclDecorations(classifier: Classifier, decl: ClassifierDecl): void
   if (decl.usymbol !== undefined) classifier.usymbol = decl.usymbol;
   if (decl.typeParams.length > 0) classifier.typeParams = decl.typeParams;
   if (decl.typeParamsRawText !== undefined) classifier.typeParamsRawText = decl.typeParamsRawText;
-  if (decl.stereotype !== undefined) classifier.stereotype = decl.stereotype;
+  if (decl.stereotype !== undefined) {
+    classifier.stereotype = decl.stereotype;
+    // cdd7 T2b: the sprite half of the run (`Stereotype#getSprite`,
+    // `Stereotype.java:108-117`); `decl.stereotype` is the text between the
+    // outer `<<`/`>>` (`extractDecorations`), so re-wrapping restores the run.
+    const sprite = extractNodeStereotype(`<<${decl.stereotype}>>`)?.sprite;
+    if (sprite !== undefined) classifier.stereotypeSprite = sprite;
+  }
   if (decl.color !== undefined) classifier.color = decl.color;
   if (decl.url !== undefined) classifier.url = decl.url;
 }

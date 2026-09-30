@@ -38,6 +38,7 @@
 import type { Classifier, ClassDiagramAST, HideStereotypeDirective } from './ast.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { ClassifierGeo } from './layout.js';
+import type { LeafSizingStereotypeSprite } from '../../core/svek/image/LeafSizingSubject.js';
 
 /** `FontParam.CLASS_STEREOTYPE`'s hardcoded DEFAULT size (12, italic) --
  *  independent of `theme.fontSize`/`AttributeFontSize` (a DIFFERENT
@@ -322,12 +323,21 @@ export function resolveStyleStereotypeTags(classifier: Classifier): string[] {
  * `stereo` block, so `hide stereotype` empties it). Empty for a classifier
  * with no stereotype, matching the builder's pre-existing omission.
  */
-export function stereotypeLabelFields(
-  classifier: Classifier,
-): { stereotypeLabels: string[]; visibleStereotypeLabels: string[] } | Record<string, never> {
+export function stereotypeLabelFields(classifier: Classifier): StereotypeLabelFields | Record<string, never> {
   if (classifier.stereotype === undefined) return {};
+  const sprite = classifier.stereotypeSprite;
   return {
     stereotypeLabels: resolveStyleStereotypeTags(classifier),
     visibleStereotypeLabels: resolveVisibleStereotypeLabels(classifier),
+    ...(sprite === undefined ? {} : { stereotypeSprite: sprite }),
   };
+}
+
+/** {@link stereotypeLabelFields}' spread. cdd7 T2b: `stereotypeSprite` is
+ *  the classifier's `<<$name>>` ref (`Classifier.stereotypeSprite`), which
+ *  `EntityImageDescription.java:192-194` draws INSTEAD of the labels. */
+export interface StereotypeLabelFields {
+  stereotypeLabels: string[];
+  visibleStereotypeLabels: string[];
+  stereotypeSprite?: LeafSizingStereotypeSprite;
 }

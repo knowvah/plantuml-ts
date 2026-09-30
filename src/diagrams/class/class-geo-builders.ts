@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { namespaceFolderTitle } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
-import { resolveStyleStereotypeTags, stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
+import { stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
@@ -28,6 +28,8 @@ import {
   assocCircleBookkeepingFields,
 } from './class-geo-builders-fields.js';
 import type { ClassifierGeo, NamespaceGeo, ClassGeometry } from './layout.js';
+import { clusterFrontierBox, graphvizClusterBoxes, stampEntityPortLeaves } from './class-geo-builders-port.js';
+import { resolveNamespaceInkShape } from './class-namespace-ink-shape.js';
 
 /**
  * The drawn box for a laid-out leaf — `SvekNode#getRectangleArea()`
@@ -240,6 +242,10 @@ export interface NamespaceGeoInputs {
    *  comment -- same `computeHiddenIds` set `buildClassifierGeos` already
    *  consumes, just also threaded here. */
   hiddenIds: ReadonlySet<string>;
+  /** cdd7-T2a: the laid-out leaves (`buildClassifierGeos`) -- the port
+   *  frontier's `insides`/`points` (`Cluster.java:412-417`); port leaves get
+   *  `entityPortUp`/`symbolInk` stamped (`class-geo-builders-port.ts`). */
+  leaves?: readonly ClassifierGeo[];
 }
 
 /**
@@ -256,67 +262,26 @@ export interface NamespaceGeoInputs {
  * (T6 proves no namespace draws a box while having no cluster).
  */
 export function buildNamespaceGeos(ast: ClassDiagramAST, inputs: NamespaceGeoInputs): NamespaceGeo[] {
-  const { theme, measurer, clusters, clusterIdByNs, hiddenIds } = inputs;
-  const clusterById = new Map<string, ClusterBox>((clusters ?? []).map((c) => [c.id, c]));
+  const { theme, measurer, hiddenIds } = inputs;
+  const leaves = inputs.leaves ?? [];
+  // cdd7-T2a: `Cluster.rectangleArea` per namespace, as mutated so far.
+  const boxes = graphvizClusterBoxes(ast, inputs.clusters ?? [], inputs.clusterIdByNs);
   const namespaces: NamespaceGeo[] = [];
   for (const ns of ast.namespaces) {
-    const clusterId = clusterIdByNs.get(ns.id);
-    const box = clusterId !== undefined ? clusterById.get(clusterId) : undefined;
-    if (box === undefined) continue;
+    const graphvizBox = boxes.get(ns.id);
+    if (graphvizBox === undefined) continue;
+    // cdd7-T2a (D4): `Cluster.java:344-345` -- see `class-geo-builders-port.ts`.
+    const box = clusterFrontierBox(ns, graphvizBox, { ast, boxes, leaves, theme, measurer });
+    boxes.set(ns.id, box);
     const geo = namespaceGeoFromBox(ns, box, theme, measurer, resolveNamespaceInkShape(theme, ns.usymbol));
     const header = buildClusterHeaderStereo(ns, ast, theme, measurer); // cdd2-T19b: ClusterHeader#getStereo
     if (header !== undefined) geo.clusterHeaderStereo = header;
     Object.assign(geo, namespaceDrawnInk(geo, theme, measurer)); // cdd3-T31: E1-2/E2-8, E1-5
     namespaces.push(hiddenIds.has(ns.id) ? { ...geo, hidden: true } : geo);
   }
+  stampEntityPortLeaves(ast, leaves, namespaces, { theme, measurer });
   return namespaces;
 }
-
-/**
- * G2 N60 (item 42): mirrors `renderer.ts#renderNamespace`'s own
- * `theme.packageStyle === 'rect' ? renderNamespaceRect : renderNamespaceFolder`
- * dispatch, and `renderNamespaceFolder`'s own `theme.strictUml === true ?
- * <polygon> : <path>` branch inside that -- see `NamespaceGeo.inkShape`'s
- * own doc comment (`layout.ts`) for the jar-verified `LimitFinder` ink-rule
- * consequence of each shape. Resolved ONCE per diagram (every namespace in
- * a class diagram shares the SAME theme-level `packageStyle`/`strictUml` --
- * this port has no per-group `PackageStyle` override yet, matching
- * `renderer.ts`'s own established scope note) rather than per-namespace.
- */
-function resolveNamespaceInkShape(theme: Theme, usymbol: string | undefined): NamespaceGeo['inkShape'] {
-  // cdd-T12 (A2b E3): an explicit group `USymbol` wins over the diagram-wide
-  // `packageStyle` fallback -- `ClusterDecoration#guess`
-  // (`svek/ClusterDecoration.java:66-71`) only consults the `PackageStyle`
-  // when `symbol == null`, so a `<<Node>>`/`<<Rectangle>>` container's ink
-  // rule follows ITS shape, not `theme.packageStyle`/`theme.strictUml`.
-  const bySymbol = usymbol !== undefined ? USYMBOL_INK_SHAPE[usymbol] : undefined;
-  if (bySymbol !== undefined) return bySymbol;
-  if (usymbol !== undefined && !FOLDER_FAMILY_KEYWORDS.has(usymbol)) return undefined;
-  if (theme.packageStyle === 'rect') return 'rect';
-  if (theme.strictUml === true) return 'polygon';
-  return undefined;
-}
-
-/** Group-`USymbol` keyword -> `LimitFinder` ink rule, for the shapes whose
- *  `asBig` draws something other than a plain `UPath` -- see
- *  `class-geo-namespace-types.ts#NamespaceGeo.inkShape` and
- *  `class-ink-shapes.ts` for the per-rule upstream citations. Every keyword
- *  absent here (`cloud`, `card`, `frame`, `artifact`, ...) draws a `UPath`,
- *  which is the plain rule (`undefined`). `rectangle`/`agent`/`archimate`/
- *  the rectangle-faced `component` all resolve to `USymbolRectangle`, whose
- *  `drawRect` emits a `URectangle` (`LimitFinder#drawRectangle`). */
-const USYMBOL_INK_SHAPE: Readonly<Record<string, NamespaceGeo['inkShape']>> = {
-  node: 'node',
-  database: 'database',
-  rectangle: 'rect',
-  agent: 'rect',
-  archimate: 'rect',
-};
-
-/** `USymbols.FOLDER`/`USymbols.PACKAGE` are both `USymbolFolder` instances,
- *  i.e. the shapes `renderNamespaceFolder` still draws -- so they keep the
- *  pre-cdd-T12 `theme.packageStyle`/`theme.strictUml` dispatch. */
-const FOLDER_FAMILY_KEYWORDS: ReadonlySet<string> = new Set(['package', 'folder']);
 
 // Edge geometry moved to a sibling module (line cap); re-exported.
 export { buildEdgeGeos } from './class-edge-geo.js';
@@ -368,7 +333,7 @@ function buildDegenerateClassifierLeaf(classifier: Classifier, measured: Measure
     ...(classifier.usymbol !== undefined ? { usymbol: classifier.usymbol } : {}),
     ...(classifier.url !== undefined ? { url: classifier.url } : {}),
     ...(classifier.color !== undefined ? { color: classifier.color } : {}),
-    ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
+    ...stereotypeLabelFields(classifier),
     ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
   };
 }

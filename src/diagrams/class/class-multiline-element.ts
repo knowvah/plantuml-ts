@@ -81,6 +81,9 @@ function applyDecorations(state: ParseState, classifierId: string, run: string):
   if (classifier === undefined) return;
   const sr = extractNodeStereotype(run);
   if (sr !== undefined) classifier.stereotype = sr.stereotypes.join(', ');
+  // cdd7 T2b: `Stereotype#getSprite` (`Stereotype.java:108-117`) -- the
+  // sprite REPLACES the stereo block (`EntityImageDescription.java:192-194`).
+  if (sr?.sprite !== undefined) classifier.stereotypeSprite = sr.sprite;
   const cr = extractColor(sr === undefined ? run : sr.remainder);
   if (cr !== undefined) classifier.color = cr.color;
 }

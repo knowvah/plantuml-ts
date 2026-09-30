@@ -7,6 +7,7 @@
  * the same way, to theme-graph-colors.ts).
  */
 
+import type { Paint } from './paint.js';
 import type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 
 export interface ThemeColorFields {
@@ -35,7 +36,14 @@ export interface ThemeColorFields {
   participantBackground: string;
   border: string;
   text: string;
-  arrow: string;
+  /** cdd7-T1a (D3): a `Paint` -- `skinparam arrowColor Red|Green` is an
+   *  `HColorGradient` upstream (`HColorSet.java:109-116`); consumers that
+   *  draw flat call `paint.ts#noGradient`. */
+  arrow: Paint;
+  /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` (`ColorParam
+   *  .arrowLollipop`). Absent means `SvekEdge.java:266-268`'s fallback --
+   *  the diagram background -- applied at draw time. */
+  arrowLollipopColor?: string;
   note: string;
   // NOTE: upstream default is '#FBFB77' (HColors.COL_FBFB77 in ColorParam.java).
   // This value intentionally diverges. Tracked in plans/skinparam/decision-journal.md.

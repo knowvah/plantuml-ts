@@ -12,13 +12,13 @@
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { type GuideLine, type MagicArrowDirection, magicArrowGlyphPoints } from './class-magic-arrow.js';
-import { applyGuillemet, computeQuantifierBox, stripCreoleMarkup } from '../../core/edge-label-box.js';
-import { resolveTextEscapes } from '../../core/text-escapes.js';
+import { computeQuantifierBox } from '../../core/edge-label-box.js';
 import type { QuantifierLineGeo } from './class-geo-edge-extras.js';
 import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/PositionableUtils.js';
+import { stripLabelLines } from './class-edge-label-lines.js';
 
 /**
  * G2 item 43: lay out a `\n`/`\l`/`\r`-split edge label as one `<text>`
@@ -62,18 +62,6 @@ import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/Positi
  * for any non-integer width -- `portLabelAnchor` already used
  * `Math.trunc(width)/2`; nothing here matched it. `text/@x` Δ0.369 -> 0.
  */
-/**
- * S-8 (cdd2-T7, vuresa-33-kumu160): `<b>...</b>` (creole BOLD), the same tag
- * family {@link stripCreoleMarkup}'s `CREOLE_FORMAT_TAG_SOURCE` strips --
- * detected BEFORE stripping so a per-line bold flag survives the strip for
- * {@link multiLineLabelAnchor}'s caller (`renderer-edge.ts
- * #renderEdgeMainLabel`) to apply as `font-weight="700"` on that line's own
- * `<text>`, mirroring `Display.java:413-419`'s per-line creole processing
- * (already cited by `class-edge-label-measure.ts`'s sibling LAYOUT path,
- * which strips but has no reason to track bold -- box RESERVATION doesn't
- * draw text).
- */
-const BOLD_TAG_RE = /<\/?b(?::[^>]*|\s[^>]*)?>/i;
 
 export function multiLineLabelAnchor(
   lines: string[],
@@ -81,15 +69,9 @@ export function multiLineLabelAnchor(
   center: { x: number; y: number },
   measurer: StringMeasurer,
   labelFont: FontSpec,
-): Array<{ text: string; x: number; y: number; width: number; bold?: boolean }> {
+): Array<{ text: string; x: number; y: number; width: number; bold?: boolean; italic?: boolean }> {
   const font = labelFont;
-  // S-8: mirrors `class-edge-label-measure.ts#computeMeasuredLabelAttrs`'s
-  // own `applyGuillemet` -> `stripCreoleMarkup` -> `resolveTextEscapes`
-  // pipeline (its own doc comment cites `Display.java:413-419`) -- the
-  // RENDER/ANCHOR path here previously measured and emitted the RAW,
-  // un-stripped line text.
-  const bold = lines.map((l) => BOLD_TAG_RE.test(l));
-  const stripped = lines.map((l) => resolveTextEscapes(stripCreoleMarkup(applyGuillemet(l))));
+  const { stripped, bold, italic } = stripLabelLines(lines);
   const widths = stripped.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
   const blockLeft = center.x - Math.floor(maxWidth) / 2;
@@ -107,6 +89,7 @@ export function multiLineLabelAnchor(
       y: blockTop + baselineOffset + i * font.size,
       width,
       ...(bold[i] === true ? { bold: true as const } : {}),
+      ...(italic[i] === true ? { italic: true as const } : {}),
     };
   });
 }
@@ -118,6 +101,10 @@ export interface LabelAnchorContext {
   readonly center: { x: number; y: number };
   readonly measurer: StringMeasurer;
   readonly labelFont: FontSpec;
+  /** cdd7 T2b: the label wrap width (`SvekEdge.java:290-294`,
+   *  `theme.maxMessageSize`) -- read by `class-edge-label-lines.ts
+   *  #multiLineLabelAnchorWrapped`; absent/0 = no wrap. */
+  readonly maxWidth?: number | undefined;
 }
 
 /** One positioned line of a multi-line edge label -- `EdgeGeo.labelLines[i]`. */
@@ -459,3 +446,8 @@ export function quantifierLineAnchors(
 // split re-export) -- a pure move, re-exported below so no consumer's
 // import path changed. See that file's own header for the split rationale.
 export { roleLabelAnchors, attachPortLabels } from './class-edge-role-label-anchor.js';
+
+// cdd7 T2b: `spriteLabelAnchor` moved to `class-edge-label-measure.ts`,
+// beside the lone-sprite measure it mirrors (500-line cap) -- a pure move,
+// re-exported so no consumer's import path changed.
+export { spriteLabelAnchor } from './class-edge-label-measure.js';

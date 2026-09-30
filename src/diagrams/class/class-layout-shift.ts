@@ -83,6 +83,14 @@ function shiftEdgeExtras(edge: EdgeGeo, dx: number, dy: number): Partial<EdgeGeo
     ...(edge.visibilityIcon !== undefined
       ? { visibilityIcon: { ...edge.visibilityIcon, x: edge.visibilityIcon.x + dx, y: edge.visibilityIcon.y + dy } }
       : {}),
+    // T1b (kexaba-26-kobu577): a lone-sprite label's resolved `<image>` is
+    // absolute, exactly like `label`/`labelLines` above -- this was the ONE
+    // field cdd-T6's list above missed, so it never left dot-engine's raw
+    // pre-shift frame (`class-edge-label-anchor.ts#spriteLabelAnchor`'s own
+    // doc comment has the full mechanism).
+    ...(edge.labelImage !== undefined
+      ? { labelImage: { ...edge.labelImage, x: edge.labelImage.x + dx, y: edge.labelImage.y + dy } }
+      : {}),
     ...(edge.quantifierLines !== undefined
       ? {
           quantifierLines: [

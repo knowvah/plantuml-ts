@@ -1,0 +1,9 @@
+@startuml
+allowmixing
+
+Package Pa {
+    portin Pi
+    component C {
+    }
+}
+@enduml

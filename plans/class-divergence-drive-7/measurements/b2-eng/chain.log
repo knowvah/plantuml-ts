@@ -1,0 +1,65 @@
+== class 18:17:58 { 5.38 7.11 6.65 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-class.json — {"conformant":708,"structural-match":3,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 18:18:29 { 6.18 7.15 6.67 }
+[xmldom fatalError]	comment is not well-formed at position 1360 
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-unknown.json — {"conformant":329,"structural-match":63,"diverged":433,"errored":0,"timeout":0,"oracle-error":0}
+== activity 18:19:00 { 6.56 7.12 6.68 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-activity.json — {"conformant":0,"structural-match":4,"diverged":369,"errored":0,"timeout":0,"oracle-error":0}
+== board 18:19:27 { 6.12 6.95 6.63 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 18:19:51 { 6.18 6.89 6.62 }
+[xmldom fatalError]	comment is not well-formed at position 1041 
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-c4.json — {"conformant":1,"structural-match":0,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}
+== chart 18:20:20 { 5.99 6.77 6.58 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.33
+== chronology 18:21:15 { 7.78 7.20 6.75 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 18:21:36 { 6.63 6.97 6.68 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-class.json — {"conformant":708,"structural-match":3,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}
+== component 18:22:05 { 7.22 7.06 6.72 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-component.json — {"conformant":65,"structural-match":67,"diverged":134,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 18:22:33 { 6.07 6.77 6.63 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 18:22:43 { 5.44 6.61 6.57 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 18:23:08 { 5.27 6.46 6.51 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 18:23:34 { 5.25 6.34 6.47 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 18:23:54 { 5.03 6.23 6.43 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 18:24:21 { 5.37 6.20 6.41 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 18:24:44 { 4.74 5.98 6.32 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-json.json — {"conformant":12,"structural-match":23,"diverged":15,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 18:25:11 { 5.38 6.01 6.32 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-mindmap.json — {"conformant":137,"structural-match":1,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== network 18:25:37 { 5.30 5.92 6.28 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 18:26:00 { 5.36 5.88 6.25 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-object.json — {"conformant":63,"structural-match":8,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 18:26:26 { 5.45 5.84 6.22 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 18:26:52 { 6.05 5.92 6.24 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 18:27:18 { 6.80 6.09 6.29 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 18:27:46 { 6.44 6.06 6.27 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1141,"errored":0,"timeout":0,"oracle-error":0}
+== state 18:28:18 { 6.76 6.16 6.30 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}
+== timing 18:28:45 { 6.70 6.18 6.30 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 18:29:11 { 6.70 6.24 6.32 }
+[xmldom fatalError]	comment is not well-formed at position 3144 
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-usecase.json — {"conformant":28,"structural-match":19,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 18:29:40 { 6.25 6.16 6.28 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+== wire 18:30:06 { 6.44 6.18 6.29 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 18:30:32 { 7.01 6.33 6.33 }
+wrote plans/class-divergence-drive-7/measurements/b2-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 18:30:58

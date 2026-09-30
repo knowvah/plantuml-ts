@@ -9,11 +9,12 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
   guideLinesAnchor,
-  multiLineLabelAnchor,
   portLabelAnchor,
+  spriteLabelAnchor,
   type LabelAnchorContext,
 } from './class-edge-label-anchor.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { multiLineLabelAnchorWrapped } from './class-edge-label-lines.js';
 import {
   hasSeveralGuideLines,
   magicArrowAngle,
@@ -249,7 +250,9 @@ export function attachEdgeLabel(
     edgeGeo.visibilityIcon = placed.icon;
     center = placed.center;
   }
-  const ctx: LabelAnchorContext = { center, measurer, labelFont };
+  // cdd7 T2b: `SvekEdge.java:290-294` -- the label wrap width
+  // (`skinParam.maxMessageSize()`), the SAME value the reservation wraps at.
+  const ctx: LabelAnchorContext = { center, measurer, labelFont, maxWidth: text.noteCtx?.theme.maxMessageSize };
   // cdd4-T8: the TRIMMED path (see {@link trimmedFromToPoints}'s own doc
   // comment) -- `dotPath` below is ONLY consumed by the magic-arrow angle
   // formula (single-line and multi-line arms alike), never for placement.
@@ -277,19 +280,23 @@ export function attachEdgeLabel(
     return;
   }
 
-  attachPlainLabel(edgeGeo, resolvedLabel, center, text);
+  attachPlainLabel(edgeGeo, resolvedLabel, center, text, rel);
 }
 
 /** {@link attachEdgeLabel}'s trailing plain (non-magic-arrow) single-line
  *  arm -- split out purely to keep that function's own NLOC/CCN under the
  *  project's per-function caps. Takes the whole {@link EdgeGeoTextContext}
  *  (rather than its `measurer`/`labelFont`/`noteCtx.sprites` fields
- *  separately) to stay under the per-function param cap. */
+ *  separately) to stay under the per-function param cap. `rel` is threaded
+ *  through ONLY for {@link labelMarginOf} (T1b: the lone-sprite arm's own
+ *  reserved-box math, `class-edge-label-anchor.ts#spriteLabelAnchor`'s own
+ *  doc comment). */
 function attachPlainLabel(
   edgeGeo: EdgeGeo,
   resolvedLabel: string,
   center: { x: number; y: number },
   text: EdgeGeoTextContext,
+  rel: Relationship,
 ): void {
   const { measurer, labelFont } = text;
   // kexaba-26-kobu577: a label that is PURELY one `<$sprite>` atom draws as
@@ -298,7 +305,8 @@ function attachPlainLabel(
   // DOT-box reservation already applies), not literal text.
   const sprite = resolveLoneSpriteLabel(resolvedLabel, labelFont, text.noteCtx?.sprites);
   if (sprite !== undefined) {
-    edgeGeo.labelImage = spriteLabelAnchor(sprite, center);
+    const pos = spriteLabelAnchor(sprite, center, labelMarginOf(rel));
+    edgeGeo.labelImage = { href: sprite.href, width: sprite.width, height: sprite.height, ...pos };
     return;
   }
   // rimeca-17-gice904: an inline `<u>...</u>` creole tag draws as
@@ -319,29 +327,6 @@ function attachPlainLabel(
  *  formatting for this whole-line-wrapped case; a PARTIAL-run underline
  *  (only part of the line) has zero corpus reach and is not reproduced. */
 const UNDERLINE_TAG = /<\/?u(?:[:\s][^>]*)?>/i;
-
-/**
- * {@link EdgeGeo.labelImage}'s anchor -- the SAME box-corner formula
- * `portLabelAnchor` uses (`center.x/y` minus half the TRUNCATED dimension,
- * `class-edge-label-anchor.ts`'s own doc comment), minus that function's
- * baseline offset: an atom draws at its box's TOP-LEFT corner (altitude 0,
- * `renderer-note.ts#renderNoteLineAtoms`'s identical `'image'` placement),
- * never a text baseline. No collision pass -- `attachEdgeLabel` never
- * threads `collisionNodes` for the main label either (only tail/head ports
- * do, `class-edge-label-anchor.ts#attachPortLabels`).
- */
-function spriteLabelAnchor(
-  sprite: { href: string; width: number; height: number },
-  center: { x: number; y: number },
-): NonNullable<EdgeGeo['labelImage']> {
-  return {
-    href: sprite.href,
-    width: sprite.width,
-    height: sprite.height,
-    x: center.x - Math.trunc(sprite.width) / 2,
-    y: center.y - Math.trunc(sprite.height) / 2,
-  };
-}
 
 /**
  * SI25 D3/D4: the multi-line branch. A label `hasSeveralGuideLines`
@@ -365,7 +350,7 @@ function attachMultiLineLabel(
     edgeGeo.labelLines = guideLinesAnchor(walk, align, angleOf, ctx);
     return;
   }
-  edgeGeo.labelLines = multiLineLabelAnchor(lines, align, ctx.center, ctx.measurer, ctx.labelFont);
+  edgeGeo.labelLines = multiLineLabelAnchorWrapped(lines, align, ctx);
 }
 
 /**

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-09-30T15:42:02.041Z",
-  "measuredAgainstCommit": "2703d6ef5",
+  "generatedAt": "2026-09-30T23:31:47.701Z",
+  "measuredAgainstCommit": "1ead924b1",
   "type": "class+tests/oracle/svg-conformance/census-class.json",
   "measurer": "deterministic",
   "fixtures": [
@@ -204,8 +204,8 @@
       "slug": "bisefo-56-dumu120",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "bisisi-31-xasa026",
@@ -281,8 +281,8 @@
       "slug": "bonaco-71-xefu608",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 39,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "bopusi-74-bifa012",
@@ -1037,7 +1037,7 @@
       "slug": "dezobu-62-vuzu421",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 10,
+      "diffCount": 6,
       "bucket": "4-10"
     },
     {
@@ -1387,8 +1387,8 @@
       "slug": "fepiko-26-vobi566",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "fepoko-61-fona364",
@@ -2479,8 +2479,8 @@
       "slug": "josebu-55-seje426",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 6,
-      "bucket": "4-10"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "jovaxe-68-bube754",
@@ -2675,8 +2675,8 @@
       "slug": "kexaba-26-kobu577",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 2,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "kexaca-03-situ523",
@@ -5202,8 +5202,8 @@
       "slug": "sejube-03-bote542",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 1,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "sejuzo-42-fini523",
@@ -5601,8 +5601,8 @@
       "slug": "tefeco-12-rato895",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 3,
-      "bucket": "1-3"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "tegefa-14-koxo759",
@@ -6630,8 +6630,8 @@
       "slug": "xuloxo-85-vibu502",
       "tree": "unknown",
       "status": "ok",
-      "diffCount": 79,
-      "bucket": "31+"
+      "diffCount": 0,
+      "bucket": "0"
     },
     {
       "slug": "xumeli-52-keso732",

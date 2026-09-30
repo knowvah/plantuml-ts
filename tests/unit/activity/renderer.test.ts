@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { noGradient } from '../../../src/core/paint.js';
 import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
 import { assembleSvg } from '../../../src/index.js';
 import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
@@ -210,7 +211,7 @@ describe('renderActivity — split-bar / split-join-bar node', () => {
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('<line');
-    expect(result).toContain(`stroke="${theme.colors.arrow}"`);
+    expect(result).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
   });
 });
 

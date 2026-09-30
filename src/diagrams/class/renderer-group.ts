@@ -58,6 +58,7 @@ import { javaDoubleHashCode, javaHashSetOrder } from '../../core/java-hash-set.j
 import { protectedInnerBox } from './class-dot-graph.js';
 import type { ClassifierGeo, EdgeGeo } from './layout.js';
 import type { Theme } from '../../core/theme.js';
+import { noGradient } from '../../core/paint.js';
 
 /** Leaf (unqualified) portion of a dotted `Classifier.id`/`Relationship
  *  .from`/`.to` — the jar entity comment (`<!--class NAME-->`) and link
@@ -372,7 +373,8 @@ export function renderGroupInheritanceNeighborhood(
   if (contacts.length === 0 && others.length === 0) return [];
   const rect = protectedInnerBox(geo);
   const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-  const color = theme.colors.arrow;
+  // cdd7-T1a (D3): `colors.arrow` is a Paint; these stubs draw flat.
+  const color = noGradient(theme.colors.arrow);
   const out: string[] = [];
   for (const pt of contacts) {
     const inter = rectSegmentIntersect(rect, center, pt);

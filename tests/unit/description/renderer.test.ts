@@ -18,6 +18,7 @@
  * `tests/integration/description.test.ts`.
  */
 
+import { noGradient } from '../../../src/core/paint.js';
 import { describe, it, expect } from 'vitest';
 import { renderDescription, unwrapKlimtSvg } from '../../../src/diagrams/description/renderer.js';
 import type { DescriptionGeometry, DescriptionEdgeGeo } from '../../../src/diagrams/description/layout.js';
@@ -1111,7 +1112,7 @@ describe('renderDescription — edges', () => {
 
   it('edge path uses theme arrow color (emitted in the style attribute, not a bare stroke= attr)', () => {
     const svg = renderDescription(twoNodeGeo(), defaultTheme);
-    expect(svg).toContain(`stroke:${defaultTheme.colors.arrow};`);
+    expect(svg).toContain(`stroke:${noGradient(defaultTheme.colors.arrow)};`);
   });
 
   it('edge with an explicit label renders the label text', () => {

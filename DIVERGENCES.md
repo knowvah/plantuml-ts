@@ -99,6 +99,21 @@ the one we implement).
 **See also:** `!pragma layout elk` — **not supported**, below. It is not a
 graphviz copy and is not covered by this entry.
 
+**Ledgered rows (cdd7 D8, 2026-09-30):** four unknown-tree fixtures were
+captured *with* the pragma (they predate the G0 re-capture) and can never
+match the jar numerically; their edge structure was made SmetanaEdge-shaped
+in cdd6 T3c (`c5426277d`). They are signed in `oracle/accepted-divergences.json`
+as `svg-unknown/fakone-16-boro774`, `svg-unknown/japode-92-famo984`,
+`svg-unknown/tikiti-02-bagu049`, `svg-unknown/xagomi-49-caki729`. Two more
+carry the same ruling one level down: `svg-unknown/gubeca-19-lemu434` and
+`svg-unknown/jixibu-01-xave465` embed a `{{yaml}}` diagram whose 1 px
+`<image>` size delta is the nested JsonDiagram's Smetana geometry (cdd6
+journal row 73). `svg-unknown/kokofa-47-deni140` is signed alongside them
+under the upstream-crash identity class (duplicate JSON name: the jar prints a
+JVM stack trace, this port its `JSON already exists` page — same class as
+rubebe, cdd4 D6). None of these entries changes a bar: the survey and census
+keep printing the rows' real verdicts.
+
 ### `!pragma layout elk` — not supported
 
 **Upstream:** `!pragma layout elk` lays the diagram out with the Eclipse Layout
@@ -1588,3 +1603,11 @@ port does. `unknown/semutu-45-zeno907`'s 16×26 px canvas gap is that slot;
 it is accepted until the seam is fixed in the fork and the affected goldens
 re-rendered (a maintainer change: fork edits and oracle re-renders are
 mission stops).
+
+**Ledgered (cdd7 D8, 2026-09-30, revocable):** `svg-unknown/semutu-45-zeno907`
+is signed in `oracle/accepted-divergences.json` with
+`until: "oracle seam fixed in fork; re-render goldens with embedded {{ }}
+diagrams"`. The entry is withdrawn — moved to `retired` — the moment the fork's
+`StringBounderFromWidthTable` reports `matchesProperty` correctly and the
+goldens with embedded `{{ }}` diagrams are re-rendered; it is the only entry
+in the ledger that names its own expiry.

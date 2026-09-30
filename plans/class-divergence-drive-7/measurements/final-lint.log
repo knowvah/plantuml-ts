@@ -1,0 +1,5 @@
+
+> @knowvah/plantuml-ts@0.2.0 lint
+> eslint --no-error-on-unmatched-pattern src tests demo scripts
+
+lint EXIT 0
