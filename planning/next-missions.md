@@ -35,6 +35,81 @@ post-D7 measurements.
 
 ---
 
+## `class-divergence-drive-7` — DONE 2026-09-30 (T0a–T2b + T1e′/T1g′ + T-exit/T-close-out, batches 0–3)
+
+Branch `feat/class-divergence-drive-7` off main `bfa8d8e09` (merge commit, not pushed).
+Brief and journal: `plans/class-divergence-drive-7/` (33 journal rows, `fixtures.md` 19
+rows, every `final` set). Halted once (stop 14, rojida) and resumed by the maintainer
+("your recommendations are fine": fix the harness normaliser, extend T1e's write-set,
+confirm the `Theme.colors.arrow: Paint` widening and the T2b re-slot).
+
+**Counts.** CLASS conformant (both trees, CLASS-routed) **974 → 982** (class 708/3/12
+unchanged; unknown 266/12/9 → 274/10/3 CLASS-routed; the unknown survey 321/65/439 →
+329/63/433); **ratchet 973 → 982**; routing 5090/909/105 → 5099/909/105 = 6113; refusal
+5836+268 → 5845+268. D10 target 984 missed by 2 (rojida double-counted in the brief;
+dezobu open). 0 conformant losses in any of the 28 engines at every close.
+
+**Fixed (10 rows).** bisefo (gradient `arrowColor` through the klimt `createSvgGradient`
+path; `acc.arrow`/`Theme.colors.arrow` are `Paint`), sejube (`arrowLollipopColor`,
+`MiddleCircleCircled.java:76,88`), kexaba (`labelImage` was missing from the class
+document shift — the "+7" was a frame artefact), fepiko (`DarkString` declaration-order
+tie-break), josebu (sequence labels keep sprite atoms, `AtomSprite`), bonaco
+(`EntityImagePort` 1:1 + `FrontierCalculator` cluster frontier through the port centres),
+tefeco (description notes opale via the shared `Opale.ts`), xuloxo (wrapWidth, creole
+shorthand, stereotype font, RoundCorner/`defaultTextAlignment` by stereotype, Fission
+edge-label atoms), rojida (`computeDotEqual` matches graphviz-routed nested embeds as
+deduplicated structural sets — pinned with no exemption), dezobu's class half (the
+`<<$sprite>>` stereotype chain parse → Classifier → sizer → draw, incl. the degenerate
+single-leaf path).
+
+### Open -> cdd8
+
+- **dezobu-62-vuzu421** (structural-match 0/6): the nested `{{ }}` description embed
+  is 565×69 vs the jar's 367×75 — `CommandArchimate.java:146-152` rewrites
+  `archimate … <<icon>>` to a `<<$archimate/icon>>` sprite stereotype; the description
+  engine draws the «motivation-principle» label instead (standalone probe: jar
+  105.575×54 with the sprite, ours 158.238×48 with the label). Description engine, not
+  class.
+
+### Follow-ons filed here (no class row; mechanisms in the journal)
+
+- **Description:** `theme.colors.noteBackground` #FEFECE vs the jar's #FEFFDD for every
+  note (T1e′); `strictuml` not threaded to the opale gate; a note's text drawn outside its
+  `<g class="entity">`; no port of the `(0` middle decor (`CommandLinkElement.java:157`).
+- **Component xufexu-38-fola855** diff-baseline 12 → 27 after the opale note: a uniform
+  Δ1 in `computeInkShift`'s origin (rect −1 inset → UPath, `LimitFinder.java:164-166`);
+  the agent's dot-engine attribution is UNVERIFIED with real dot — measure first.
+- **Sequence** (T1f, seven mechanised residuals): queue label x+5
+  (`ComponentRoseQueue.java:72-78`, ~14 fixtures); database label y
+  (`ComponentRoseDatabase.java:74-90`, ~34); lifeline `<title>` via `Display#toTooltipText`
+  (`ComponentRoseLine.java:82`); SVG `<img data:image/svg+xml>` decode in shared creole;
+  OpenIconic/SVG sprites in heads need vector `TextRun`s; message/note/frame/divider labels
+  pass no atom context; `resolveSpriteAtom` backColor/forcedColor order vs
+  `SpriteMonochrome.java:216-217` (PNG bytes only).
+- **Class:** port `##linecolor` not extracted (`EntityImagePort.java:123-127`,
+  `color-override.ts` BACK only); multi-line port labels unverified; DiagonalCorner ink
+  1 px (`class-layout-description-leaf-ink.ts` reserves rect ink); single-line/guide-line
+  edge labels not wrapped under `maxMessageSize`; `<style> arrow { MaximumWidth }`
+  precedence (no Theme field); `rectangle "a\nb" as P` draws a literal `\n`;
+  `ClassifierGeo.entityPortUp` lives in a `declare module` augmentation in
+  `class-entity-port.ts` — fold into `class-geo-types.ts` at its next split; three
+  pre-existing lizard overages in `sequence-layout-participants.ts`.
+- **Harness:** `computeDotEqual` still excludes ALL nested graphs when any json/yaml/hcl
+  embed is present (conservative; no mixed-type fixture); `compareStructural` ignores node
+  sizes (`svek-dot.ts:434`), so same-topology embeds of different size share a bucket.
+- **Security (outside this mission):** code-scanning alert #23 `js/polynomial-redos`,
+  `src/core/TextBlockExporter.ts:233` `BODY_ANCHOR_RE` (unanchored `[^,]+`/`[^)]+` over
+  library input) — fix candidates: numeric-format captures, or `indexOf` + parse.
+
+### Flags
+
+- `Theme.colors.arrow` widened `string → Paint` (reachable via `RenderOptions.theme`):
+  confirmed by the maintainer (journal rows 16, 24); no external consumers.
+- Journal row 18/19: a fitted constant (`+8`) was rejected and replaced by the mechanism;
+  the rejected commit stays in history (fc557e81d → 8fedc7112).
+- The brief's cdd6 row count (14/20) was a miscount (13/19), row 1; `mkwt.sh` must be the
+  mission's own copy (the brief cited cdd5's, hard-coded to its branch), row 8.
+
 ## `class-divergence-drive-6` — DONE 2026-09-30 (T0a–T3e + T-exit/T-close-out, batches 0–4)
 
 Branch `feat/class-divergence-drive-6` (merge commit, not pushed). Brief and journal:
@@ -50,7 +125,7 @@ misroute 909 / jar-error 105 = 6104 rows after the mindmap union. D10 target 990
 codabo (→ structural-match), gutute (→ conformant), object gapisu (→ conformant), all
 journaled rises; 0 losses in any engine at any close.
 
-### Open -> cdd7 (14 rows), by family
+### ~~Open -> cdd7 (14 rows), by family~~ — RESOLVED by class-divergence-drive-7 (2026-09-30; 13 rows in fact, see that section)
 
 - **desc-embed-ink-missing (5):** gubeca-19-lemu434, jixibu-01-xave465 (nested yaml image
   Δ1, Smetana path); josebu-55-seje426 (a: nested sequence participant sprite runs);
@@ -71,7 +146,7 @@ journaled rises; 0 losses in any engine at any close.
   (mmp T6a) for the klimt substrate; the class engine's skinparam path still flattens it.
 - **cluster-style-signature-unmerged:** fepiko-26-vobi566.
 
-### Accept-candidates (D12, unsigned)
+### ~~Accept-candidates (D12, unsigned)~~ — SIGNED by class-divergence-drive-7 D8 (2026-09-30, `oracle/accepted-divergences.json`)
 
 - **smetana-pragma-ignored (4):** fakone, japode, tikiti (structural fixed c5426277d T3c),
   xagomi (structural-match) — numeric residue is the `!pragma layout smetana` geometry
