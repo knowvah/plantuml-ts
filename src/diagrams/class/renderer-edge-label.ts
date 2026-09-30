@@ -121,10 +121,11 @@ export function renderEdgeMainLabel(
       text(line.x, line.y, line.text, {
         fill: labelColor,
         ...labelFontAttrs,
-        // S-8 (cdd2-T7): a per-line `<b>` override wins over the shared
-        // arrow-font weight -- see `EdgeGeo.labelLines[].bold`'s own doc
-        // comment (class-geo-types.ts).
+        // S-8 (cdd2-T7): a per-line `<b>`/`**` override wins over the
+        // shared arrow-font weight/style -- see `EdgeGeo.labelLines[]
+        // .bold`/`.italic`'s own doc comments (class-geo-types.ts).
         ...(line.bold === true ? { fontWeight: '700' as const } : {}),
+        ...(line.italic === true ? { fontStyle: 'italic' as const } : {}),
         lengthAdjust: 'spacing',
         textLength: line.width,
       }),

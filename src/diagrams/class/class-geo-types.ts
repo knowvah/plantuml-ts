@@ -309,12 +309,19 @@ export interface EdgeGeo {
     y: number;
     width: number;
     glyph?: { points: Array<{ x: number; y: number }> };
-    /** S-8 (cdd2-T7): this line's raw creole carried a `<b>...</b>` wrap --
-     *  see `class-edge-label-anchor.ts#multiLineLabelAnchor`'s own doc
-     *  comment. Consumed by `renderer-edge.ts#renderEdgeMainLabel` as a
-     *  per-line `font-weight="700"` override (base `labelFontAttrs` is
-     *  shared across every line otherwise). */
+    /** S-8 (cdd2-T7): this line's raw creole carried a `<b>...</b>` wrap
+     *  (or, T1b, a `**...**` shorthand wrap) -- see `class-edge-label-
+     *  anchor.ts#multiLineLabelAnchor`'s own doc comment. Consumed by
+     *  `renderer-edge-label.ts#renderEdgeMainLabel` as a per-line
+     *  `font-weight="700"` override (base `labelFontAttrs` is shared
+     *  across every line otherwise). */
     bold?: boolean;
+    /** T1b (xuloxo-85-vibu502): this line's raw creole carried a `//...//`
+     *  shorthand wrap (`class-edge-label-anchor.ts#multiLineLabelAnchor`'s
+     *  own doc comment, `stripCreoleShorthand`). Consumed by
+     *  `renderer-edge-label.ts#renderEdgeMainLabel` as a per-line
+     *  `font-style="italic"` override. */
+    italic?: boolean;
   }>;
   /** G2 item 44: the magic-arrow glyph (`class-magic-arrow.ts`) -- a small
    *  filled triangle drawn ALONGSIDE `label` (present together when the

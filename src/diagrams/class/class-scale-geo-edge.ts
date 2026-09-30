@@ -146,6 +146,21 @@ function scaleEdgeGeoLabels(edge: EdgeGeo, k: number): Partial<EdgeGeo> {
     ...(edge.quantifierLines !== undefined ? { quantifierLines: scaleQuantifierLines(edge.quantifierLines, k) } : {}),
     ...(edge.roleLines !== undefined ? { roleLines: scaleRoleLines(edge.roleLines, k) } : {}),
     ...(edge.visibilityIcon !== undefined ? { visibilityIcon: scaleVisibilityIcon(edge.visibilityIcon, k) } : {}),
+    // T1b (kexaba-26-kobu577): a lone-sprite label's `<image>` -- same
+    // absolute-coordinate treatment as every sibling above, plus its own
+    // width/height (an image's rendered size IS its attributes, unlike a
+    // text label's `width`, which is redundant with `textLength`).
+    ...(edge.labelImage !== undefined
+      ? {
+          labelImage: {
+            ...edge.labelImage,
+            x: edge.labelImage.x * k,
+            y: edge.labelImage.y * k,
+            width: edge.labelImage.width * k,
+            height: edge.labelImage.height * k,
+          },
+        }
+      : {}),
   };
 }
 

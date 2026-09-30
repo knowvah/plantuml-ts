@@ -19,6 +19,7 @@ import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/PositionableUtils.js';
+import { stripCreoleShorthand } from './class-edge-label-measure.js';
 
 /**
  * G2 item 43: lay out a `\n`/`\l`/`\r`-split edge label as one `<text>`
@@ -64,14 +65,12 @@ import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/Positi
  */
 /**
  * S-8 (cdd2-T7, vuresa-33-kumu160): `<b>...</b>` (creole BOLD), the same tag
- * family {@link stripCreoleMarkup}'s `CREOLE_FORMAT_TAG_SOURCE` strips --
- * detected BEFORE stripping so a per-line bold flag survives the strip for
- * {@link multiLineLabelAnchor}'s caller (`renderer-edge.ts
- * #renderEdgeMainLabel`) to apply as `font-weight="700"` on that line's own
- * `<text>`, mirroring `Display.java:413-419`'s per-line creole processing
- * (already cited by `class-edge-label-measure.ts`'s sibling LAYOUT path,
- * which strips but has no reason to track bold -- box RESERVATION doesn't
- * draw text).
+ * family {@link stripCreoleMarkup} strips -- detected BEFORE stripping so a
+ * per-line bold flag survives for {@link multiLineLabelAnchor}'s caller to
+ * apply `font-weight="700"`. T1b (xuloxo-85-vibu502): {@link
+ * stripCreoleShorthand} (`class-edge-label-measure.ts`) covers the SAME
+ * BOLD, plus ITALIC, for `**`/`//` shorthand -- its own strip IS the
+ * italic detector, so it is not re-implemented here.
  */
 const BOLD_TAG_RE = /<\/?b(?::[^>]*|\s[^>]*)?>/i;
 
@@ -81,15 +80,16 @@ export function multiLineLabelAnchor(
   center: { x: number; y: number },
   measurer: StringMeasurer,
   labelFont: FontSpec,
-): Array<{ text: string; x: number; y: number; width: number; bold?: boolean }> {
+): Array<{ text: string; x: number; y: number; width: number; bold?: boolean; italic?: boolean }> {
   const font = labelFont;
   // S-8: mirrors `class-edge-label-measure.ts#computeMeasuredLabelAttrs`'s
-  // own `applyGuillemet` -> `stripCreoleMarkup` -> `resolveTextEscapes`
-  // pipeline (its own doc comment cites `Display.java:413-419`) -- the
-  // RENDER/ANCHOR path here previously measured and emitted the RAW,
-  // un-stripped line text.
-  const bold = lines.map((l) => BOLD_TAG_RE.test(l));
-  const stripped = lines.map((l) => resolveTextEscapes(stripCreoleMarkup(applyGuillemet(l))));
+  // own `stripCreoleShorthand` -> `applyGuillemet` -> `stripCreoleMarkup` ->
+  // `resolveTextEscapes` pipeline -- the RENDER/ANCHOR path here must strip
+  // the SAME markers the box RESERVATION measured, or ink and box drift.
+  const shorthand = lines.map(stripCreoleShorthand);
+  const bold = lines.map((l, i) => BOLD_TAG_RE.test(l) || shorthand[i]!.bold);
+  const italic = shorthand.map((s) => s.italic);
+  const stripped = shorthand.map((s) => resolveTextEscapes(stripCreoleMarkup(applyGuillemet(s.text))));
   const widths = stripped.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
   const blockLeft = center.x - Math.floor(maxWidth) / 2;
@@ -107,6 +107,7 @@ export function multiLineLabelAnchor(
       y: blockTop + baselineOffset + i * font.size,
       width,
       ...(bold[i] === true ? { bold: true as const } : {}),
+      ...(italic[i] === true ? { italic: true as const } : {}),
     };
   });
 }
@@ -459,3 +460,41 @@ export function quantifierLineAnchors(
 // split re-export) -- a pure move, re-exported below so no consumer's
 // import path changed. See that file's own header for the split rationale.
 export { roleLabelAnchors, attachPortLabels } from './class-edge-role-label-anchor.js';
+
+/**
+ * cdd7-T1b (kexaba-26-kobu577, cdd6 rows 50/63, D5): a lone-sprite
+ * (`'image'`-only) edge label's `<image>` anchor inside its reserved box --
+ * moved here from `class-edge-label-attach.ts` (pure relocation). D5 step 1
+ * (real `dot -Tdot` on the cached `svek-1.dot`): `lp="68,127"` is IDENTICAL
+ * between real graphviz and this port's own DOT -- dot-engine blame ruled
+ * out (`dot-engine-blame-needs-real-dot`).
+ *
+ * The formula is exactly the Java: box-origin (`center - reservedDim/2`,
+ * `SvekEdge.java:745-747,808-814`'s `getXY`) + `marginLabel`
+ * (`:372-373,951-954`, `TextBlockMarged`, `klimt/shape/TextBlockUtils.java
+ * :64-68`) -- `marginLabel` stays explicit (not collapsed into
+ * `Math.trunc(sprite.width)/2`, algebraically identical for an integer
+ * sprite) so a self-loop's `marginLabel === 6` (`class-layout-edge-labels
+ * .ts#labelMarginOf`) is Java-traceable here too.
+ *
+ * An earlier revision diagnosed a FALSE "+7 residual beyond marginLabel"
+ * and fitted a `+8` constant here (see git history): `center` is dot-
+ * engine's RAW pre-shift output, but `class-layout-shift.ts
+ * #shiftEdgeExtras` / `class-scale-geo-edge.ts#scaleEdgeGeoLabels` -- which
+ * move every OTHER `EdgeGeo` label field into the final frame -- never
+ * touched `labelImage`; the missing shift (fixed there) was mistaken for a
+ * draw offset. `.agent-notes/kexaba-sprite-label-inset.md` has the mechanism.
+ */
+export function spriteLabelAnchor(
+  sprite: { width: number; height: number },
+  center: { x: number; y: number },
+  marginLabel: number,
+): { x: number; y: number } {
+  // WIDTH-only floor (`computeReservedLabelBox`, `SvekEdge.java:504-507`).
+  const reservedWidth = Math.floor(sprite.width + 2 * marginLabel);
+  const reservedHeight = sprite.height + 2 * marginLabel;
+  return {
+    x: center.x - reservedWidth / 2 + marginLabel,
+    y: center.y - reservedHeight / 2 + marginLabel,
+  };
+}

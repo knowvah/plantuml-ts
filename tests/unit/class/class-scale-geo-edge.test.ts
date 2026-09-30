@@ -156,4 +156,12 @@ describe('scaleEdgeGeo — box/decoration variants', () => {
     expect(scaled.sametail).toEqual({ parentId: 'p1', contact: { x: 2, y: 4 } });
     expect(scaled.leafContacts).toEqual([{ parentId: 'p1', contact: { x: 6, y: 8 } }]);
   });
+
+  it('T1b (kexaba-26-kobu577): scales labelImage x/y/width/height (a lone-sprite edge label was previously left unscaled)', () => {
+    const edge = makeEdge({
+      labelImage: { href: 'data:image/png;base64,AAA', x: 10, y: 20, width: 17, height: 12 },
+    });
+    const scaled = scaleEdgeGeo(edge, 2);
+    expect(scaled.labelImage).toEqual({ href: 'data:image/png;base64,AAA', x: 20, y: 40, width: 34, height: 24 });
+  });
 });
