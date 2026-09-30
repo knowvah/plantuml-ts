@@ -1,18 +1,13 @@
 /**
- * SName — minimal consumed slice of the unported style-name enum
- * (ADR-2; `style/SName.java` is a 217-member enum). Values are the
- * Java enum CONSTANT names verbatim (trailing underscores included) —
- * upstream's `StyleSignatureBasic#clean` lowercases and strips `_`/`.`
- * when matching, so the constant name is the identity to preserve.
- * Currently only the eight names `VisibilityModifier#getStyleSignature`
- * emits; widen this union as later ports consume more of `SName.java`.
- * Split out of `VisibilityModifier.ts` along the upstream file boundary
- * (500-line cap; SI1 push-forward, journaled).
+ * SName — re-exported from its own module (`./SName.ts`, the full
+ * 157-constant `style/SName.java` union), where the eight-name slice this
+ * file used to declare was widened.
  *
  * @see net/sourceforge/plantuml/style/SName.java
  */
-export type SName =
-  'root' | 'element' | 'visibilityIcon' | 'IEMandatory' | 'public_' | 'private_' | 'protected_' | 'package_';
+import type { SName } from './SName.js';
+
+export type { SName };
 
 /**
  * StyleSignatureBasic — minimal consumed interface for the unported
