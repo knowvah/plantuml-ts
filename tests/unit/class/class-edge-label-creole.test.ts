@@ -83,13 +83,13 @@ describe('T2d — resolveLoneSpriteLabel', () => {
 
 describe('T2d — computeMeasuredLabelAttrs sizes a lone-sprite label to its sprite box', () => {
   it('kexaba-26-kobu577: 17x12, not the literal "<$pk>" glyphs', () => {
-    const attrs = computeMeasuredLabelAttrs('<$pk>', labelFont, measurer, undefined, registryWith17x12('pk'));
+    const attrs = computeMeasuredLabelAttrs('<$pk>', labelFont, measurer, { sprites: registryWith17x12('pk') });
     expect(attrs.labelWidth).toBe(17);
     expect(attrs.labelHeight).toBe(12);
   });
 
   it('falls back to measuring literal text without a registry', () => {
-    const attrs = computeMeasuredLabelAttrs('<$pk>', labelFont, measurer, undefined, undefined);
+    const attrs = computeMeasuredLabelAttrs('<$pk>', labelFont, measurer, {});
     const literal = measurer.measure('<$pk>', labelFont);
     expect(attrs.labelWidth).toBeCloseTo(literal.width, 6);
   });

@@ -190,6 +190,13 @@ export interface ElementColors {
   borderByStereo?: Readonly<Record<string, string>>;
   fontByStereo?: Readonly<Record<string, string>>;
   lineThicknessByStereo?: Readonly<Record<string, number>>;
+  /** cdd7 T2b (xuloxo-85): `skinparam <sname>RoundCorner<<label>>` /
+   *  `<sname>DiagonalCorner<<label>>` -- the same +1000 re-signing as
+   *  {@link borderByStereo} (`FromSkinparamToStyle.java:275-276,396-408`);
+   *  RAW unhalved values, as {@link roundCorner}. Read by the class usymbol
+   *  leaf draw (`EntityImageDescription.java:168-169`). */
+  roundCornerByStereo?: Readonly<Record<string, number>>;
+  diagonalCornerByStereo?: Readonly<Record<string, number>>;
   stereotypeFontByStereo?: Readonly<Record<string, string>>;
   /**
    * T1d (fepiko-26-vobi566): the DECLARATION-ORDER-RESOLVED `PName.FontColor`
