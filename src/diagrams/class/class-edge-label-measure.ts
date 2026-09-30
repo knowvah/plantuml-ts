@@ -75,35 +75,11 @@ export function resolveMagicArrowText(
   return { text: resolveTextEscapes(resolved.text), font: resolved.font };
 }
 
-/**
- * cdd7-T1b (xuloxo-85-vibu502): creole shorthand `stripCreoleMarkup`
- * (`core/edge-label-box.ts`) doesn't reach -- `**bold**`/`//italic//`
- * (`FontStyle.java:207-224`'s `getUbrexCreoleSyntax`), active even in
- * `CreoleMode.SIMPLE_LINE` (the edge-label mode, `SvekEdge.java:298-299`):
- * `CommandCreoleBuilder`'s constructor (`klimt/creole/legacy/
- * CommandCreoleBuilder.java`) adds BOLD's and ITALIC's creole form
- * UNCONDITIONALLY, unlike UNDERLINE's `__`, which is FULL-mode-only (this
- * port's `<U>` precedent, `rimeca-17-gice904`, stays on the XML-tag path
- * `stripCreoleMarkup` already handles). C4's `Rel(...)` template emits
- * `**Label**`/`//[Optional Technology]//` for xuloxo's relationship label.
- * Local to the class edge-label measure/anchor pair (not folded into the
- * SHARED `stripCreoleMarkup`) to avoid changing every other consumer
- * (state/sequence/description engines) for a class-edge-label-only need.
- * Non-greedy (`.*?`) and unclosed-safe: an unmatched `**`/`//` leaves the
- * text (and its own literal marker) untouched, matching `RegExp#test`/
- * `#replace` finding no pair to act on.
- */
-const BOLD_MARK = /\*\*(.*?)\*\*/g;
-const ITALIC_MARK = /\/\/(.*?)\/\//g;
-
-export function stripCreoleShorthand(text: string): { text: string; bold: boolean; italic: boolean } {
-  const bold = BOLD_MARK.test(text);
-  BOLD_MARK.lastIndex = 0;
-  const italic = ITALIC_MARK.test(text);
-  ITALIC_MARK.lastIndex = 0;
-  const stripped = text.replace(BOLD_MARK, '$1').replace(ITALIC_MARK, '$1');
-  return { text: stripped, bold, italic };
-}
+// cdd7 T2b: `stripCreoleShorthand` moved to `class-edge-label-lines.ts`
+// (so the wrapped anchor can share it without an import cycle) -- a pure
+// move, re-exported here.
+import { stripCreoleShorthand, wrappedLabelRows } from './class-edge-label-lines.js';
+export { stripCreoleShorthand };
 
 /**
  * {@link computeMeasuredLabelAttrs}'s multi-line arm -- split out purely to
@@ -131,29 +107,37 @@ export function stripCreoleShorthand(text: string): { text: string; bold: boolea
  * here. Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
  * own per-line-not-whole-string ordering. T1b (xuloxo-85-vibu502): strip
  * `**`/`//` BEFORE guillemet/stripCreoleMarkup -- {@link
- * stripCreoleShorthand}'s own doc comment. Word-wrap of an OVER-WIDTH line
- * (jar's `[Optional Technology]` -> `[Optional`/`Technology]`, a
- * `LineBreakStrategy`/Fission concern) is NOT ported here -- see
- * `.agent-notes/xuloxo-edge-label-creole.md`.
+ * stripCreoleShorthand}'s own doc comment. cdd7 T2b: word-wrap at the label
+ * wrap width (`SvekEdge.java:288-299`, `Display#create0` -> Fission) sizes
+ * the box from the PHYSICAL rows ({@link wrappedLabelRows}, the SAME rows
+ * `multiLineLabelAnchorWrapped` draws); `maxWidth <= 0` is one row per line.
  */
 function measureMultiLineLabel(
   label: string,
   lines: readonly string[],
   font: { family: string; size: number },
   measurer: StringMeasurer,
+  maxWidth: number,
 ): LabelAttrs {
   if (hasSeveralGuideLines(lines)) {
     const box = computeGuideLinesBox(lines, font, measurer);
     return { label, labelWidth: box.width, labelHeight: box.height };
   }
-  const guillemetLines = lines
-    .map((l) => stripCreoleShorthand(l).text)
-    .map(applyGuillemet)
-    .map(stripCreoleMarkup)
-    .map(resolveTextEscapes);
-  const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
-  const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
-  return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
+  const rows = wrappedLabelRows(lines, font, maxWidth, measurer);
+  const lineHeight = measurer.measure(rows[0]?.atoms.join('') ?? '', font).height;
+  return { label, labelWidth: Math.max(...rows.map((r) => r.width)), labelHeight: lineHeight * rows.length };
+}
+
+/** {@link computeMeasuredLabelAttrs}' optional inputs. */
+export interface MeasuredLabelOptions {
+  /** `bugeli-63-mixa543` guard: an icon-size-0 override must reach here as 0. */
+  readonly classAttributeIconSize?: number | undefined;
+  /** kexaba-26-kobu577: `class-layout-edge-labels.ts#computeRelLabelAttrs`'s
+   *  own `noteCtx?.sprites` -- see {@link resolveLoneSpriteLabel}. */
+  readonly sprites?: SpriteRegistry | undefined;
+  /** cdd7 T2b: the label wrap width (`theme.maxMessageSize`, `SvekEdge.java
+   *  :290-294`); absent/0 = no wrap. Multi-line labels only. */
+  readonly maxWidth?: number | undefined;
 }
 
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
@@ -170,15 +154,10 @@ export function computeMeasuredLabelAttrs(
   label: string,
   font: { family: string; size: number },
   measurer: StringMeasurer,
-  classAttributeIconSize?: number,
-  // kexaba-26-kobu577: threaded through from `class-layout-edge-labels.ts
-  // #computeRelLabelAttrs`'s own `noteCtx?.sprites` (the SAME registry
-  // `computeNoteMergedLabelAttrs` already reads on the sibling branch) --
-  // see {@link resolveLoneSpriteLabel}'s own doc comment.
-  sprites?: SpriteRegistry,
+  opts: MeasuredLabelOptions = {},
 ): LabelAttrs {
   const { lines } = splitDisplayLines(label);
-  if (lines.length > 1) return measureMultiLineLabel(label, lines, font, measurer);
+  if (lines.length > 1) return measureMultiLineLabel(label, lines, font, measurer, opts.maxWidth ?? 0);
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
     // A leading `<size:N>` tag on the remaining text rewrites the TEXT's
@@ -199,7 +178,7 @@ export function computeMeasuredLabelAttrs(
     // #withLabelMargin`, not here.
     return { label, labelWidth: font.size + m.width, labelHeight: Math.max(font.size, m.height) };
   }
-  return computeSingleLinePlainLabelAttrs(label, font, measurer, classAttributeIconSize, sprites);
+  return computeSingleLinePlainLabelAttrs(label, font, measurer, opts.classAttributeIconSize, opts.sprites);
 }
 
 /** {@link computeMeasuredLabelAttrs}'s trailing single-line, non-magic-arrow
@@ -232,4 +211,42 @@ function computeSingleLinePlainLabelAttrs(
   // runs LAST (`AtomText.java:120-133`) -- `nagega-30-poso418`.
   const m = measurer.measure(resolveTextEscapes(stripCreoleMarkup(applyGuillemet(vis.text))), font);
   return { label, labelWidth: m.width + vis.iconWidth, labelHeight: Math.max(m.height, vis.iconHeight) };
+}
+
+/**
+ * cdd7-T1b (kexaba-26-kobu577, cdd6 rows 50/63, D5): a lone-sprite
+ * (`'image'`-only) edge label's `<image>` anchor inside its reserved box --
+ * moved here from `class-edge-label-attach.ts` (pure relocation). D5 step 1
+ * (real `dot -Tdot` on the cached `svek-1.dot`): `lp="68,127"` is IDENTICAL
+ * between real graphviz and this port's own DOT -- dot-engine blame ruled
+ * out (`dot-engine-blame-needs-real-dot`).
+ *
+ * The formula is exactly the Java: box-origin (`center - reservedDim/2`,
+ * `SvekEdge.java:745-747,808-814`'s `getXY`) + `marginLabel`
+ * (`:372-373,951-954`, `TextBlockMarged`, `klimt/shape/TextBlockUtils.java
+ * :64-68`) -- `marginLabel` stays explicit (not collapsed into
+ * `Math.trunc(sprite.width)/2`, algebraically identical for an integer
+ * sprite) so a self-loop's `marginLabel === 6` (`class-layout-edge-labels
+ * .ts#labelMarginOf`) is Java-traceable here too.
+ *
+ * An earlier revision diagnosed a FALSE "+7 residual beyond marginLabel"
+ * and fitted a `+8` constant here (see git history): `center` is dot-
+ * engine's RAW pre-shift output, but `class-layout-shift.ts
+ * #shiftEdgeExtras` / `class-scale-geo-edge.ts#scaleEdgeGeoLabels` -- which
+ * move every OTHER `EdgeGeo` label field into the final frame -- never
+ * touched `labelImage`; the missing shift (fixed there) was mistaken for a
+ * draw offset. `.agent-notes/kexaba-sprite-label-inset.md` has the mechanism.
+ */
+export function spriteLabelAnchor(
+  sprite: { width: number; height: number },
+  center: { x: number; y: number },
+  marginLabel: number,
+): { x: number; y: number } {
+  // WIDTH-only floor (`computeReservedLabelBox`, `SvekEdge.java:504-507`).
+  const reservedWidth = Math.floor(sprite.width + 2 * marginLabel);
+  const reservedHeight = sprite.height + 2 * marginLabel;
+  return {
+    x: center.x - reservedWidth / 2 + marginLabel,
+    y: center.y - reservedHeight / 2 + marginLabel,
+  };
 }
