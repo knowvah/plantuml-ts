@@ -135,10 +135,31 @@ export function drawClusters(
   }
 }
 
+/**
+ * T1e (opale note port) write-set expansion (journaled): finds the ONE
+ * `consumedByOpaleNote` edge touching `node`, if any -- `layout-geo-post.ts
+ * #applyOpaleNote`'s own "exactly one touching link" invariant guarantees
+ * at most one match. Linear scan (not a prebuilt `Map`): a description
+ * diagram's note count is small, and the SAME "no note has more than one
+ * link" invariant means only note-symbol nodes ever query this at all.
+ */
+function findOpale(node: DescriptionNodeGeo, edges: readonly DescriptionEdgeGeo[]): DescriptionNodeGeo['opale'] {
+  if (node.symbol !== 'note') return undefined;
+  const edge = edges.find((e) => e.consumedByOpaleNote === true && (e.from === node.id || e.to === node.id));
+  return edge?.opale;
+}
+
 /** `SvekResult#drawU`'s second loop — every leaf entity, translated to
  *  its absolute layout position by `renderer-entity.ts#drawEntity`. Text
  *  measurement is NOT threaded here — `ug` already carries the active
- *  measurer via `getStringBounder()` (see `renderer.ts`'s doc comment). */
+ *  measurer via `getStringBounder()` (see `renderer.ts`'s doc comment).
+ *
+ *  T1e write-set expansion (journaled): `edges` added so a `symbol ===
+ *  'note'` leaf can look up its own Opale connector (`findOpale` above)
+ *  and draw it instead of a plain box (`renderer-entity.ts#drawEntity` ->
+ *  `drawNoteFallback`) -- `drawEntity`'s own 5-param signature stays
+ *  unchanged; the resolved connector is copied onto a shallow node copy
+ *  instead. */
 export function drawEntities(
   ug: UGraphic,
   leaves: readonly DescriptionNodeGeo[],
@@ -146,6 +167,7 @@ export function drawEntities(
   plan: UidPlan,
   sprites: DescriptionGeometry['sprites'],
   respectHidden: boolean,
+  edges: readonly DescriptionEdgeGeo[],
 ): void {
   for (const node of leaves) {
     // G1 I-hideshow: see `drawClusters`'s doc comment for the
@@ -156,12 +178,14 @@ export function drawEntities(
     // draw call outright (this port emits no XML-comment equivalent of
     // jar's `<!--entity X-->`, so there is nothing else to preserve).
     if (respectHidden && node.hidden === true) continue;
-    drawEntity(ug, node, theme, plan.nodeUid.get(node.id)!, sprites);
+    const opale = findOpale(node, edges);
+    const drawNode = opale !== undefined ? { ...node, opale } : node;
+    drawEntity(ug, drawNode, theme, plan.nodeUid.get(node.id)!, sprites);
   }
   // Faithful 1:1 port of `SvekResult#drawU`'s second loop signature --
   // PARAM count mirrors the real per-shape draw dependencies (ug, node
-  // list, theme, uid plan, sprite registry, hide/show gate), all load-
-  // bearing per this function's own doc comment above.
+  // list, theme, uid plan, sprite registry, hide/show gate, edges [T1e]),
+  // all load-bearing per this function's own doc comment above.
   // #lizard forgives
 }
 
@@ -216,6 +240,14 @@ export function drawEdges(
     // ink-measured). uid assignment (`plan.edgeUid`, above) already ran
     // unconditionally.
     if (respectHidden && edge.hidden === true) return;
+    // T1e (opale note port): `SvekEdge#drawU`'s `if (opale) return;` --
+    // this edge's note end already drew the connector as part of its own
+    // Opale outline (`renderer-entity.ts#drawEntity` -> `drawOpaleShape`);
+    // drawing it again here would duplicate the connector as a separate
+    // `<g class="link">`, which the jar never emits for an opalised note
+    // (`class/renderer.ts:398`'s identical check is this port's own
+    // precedent for the class engine).
+    if (edge.consumedByOpaleNote === true) return;
     try {
       drawEdge(ug, edge, theme, plan.edgeUid[i]!, plan.nodeUid, sharedIds);
     } catch (err) {

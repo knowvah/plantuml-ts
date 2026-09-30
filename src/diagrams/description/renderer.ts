@@ -184,7 +184,10 @@ export function renderDescription(
   // single shared `SvekResult#drawU` call site for both purposes.
   const draw = (target: UGraphic, respectHidden: boolean): void => {
     drawClusters(target, containers, theme, plan, respectHidden);
-    drawEntities(target, leaves, theme, plan, geo.sprites, respectHidden);
+    // T1e write-set expansion (journaled): `geo.edges` threaded through so
+    // a note leaf can find its own Opale connector — see
+    // `renderer-draw-sequence.ts#drawEntities`'s own doc comment.
+    drawEntities(target, leaves, theme, plan, geo.sprites, respectHidden, geo.edges);
     drawEdges(target, geo.edges, theme, plan, respectHidden);
   };
 
