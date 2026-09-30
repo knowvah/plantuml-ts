@@ -76,3 +76,13 @@ catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function,
 cited and what the tests pin. No attribution lines.
 
 **Observability:** N/A — no new observable operations. **Rollback:** Reversible (new files; revert the commit).
+
+## Orchestrator note (added at the b3 T3c merge, journal rows 17, 21)
+- `FtileBoxOld.createMindMap/createWbs(style, skinParam: ISkinParamWithSimple, label, atomOps: AtomOps)`
+  — the port's `SheetBlock1` needs `AtomOps` (ADR-9). `SkinParamColors` takes an
+  `ISkinParamWithSimple` (`src/core/abel/ISkinParam.ts`). `src/core/klimt/font/FontConfigurationBridge.ts`
+  maps the style engine's abel `FontConfiguration` to the `UText` one the SVG text driver reads.
+- `Idea.getStyle()`: `STEP_BY_PARENT * 1000` overflows Java `int` to 1411065408 — use
+  `Math.imul(10001000, 1000)` (journal row 17); the parent walk queries ancestors at the CHILD's
+  level (Idea.java:100). `[#color]` entries in `Colors` must be `HColorSimple`
+  (`HColorSet.instance().getColor(...)`).
