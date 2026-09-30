@@ -2,8 +2,10 @@
  * The mindmap engine's `SkinParam` — the slice of upstream's
  * `skin/SkinParam.java` a `MindMapDiagram` reaches through
  * `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole
- * sheets read, `getIHtmlColorSet`, the real style engine's builder
- * (`buildMindmapStyleBuilder`, decision D2) and the rankdir the
+ * sheets read, `getIHtmlColorSet`, the real style engine's CURRENT builder
+ * (the style half of `SkinParam`, `mindmap-style-builder.ts`, decision
+ * D2 — replaced by every skinparam/`<style>` the parse dispatches,
+ * SkinParam.java:164-167) and the rankdir the
  * `MindMapDiagram` constructor and `CommandRankDir` set.
  *
  * `params` is filled from the preprocessor's skinparam map exactly as
@@ -39,7 +41,7 @@ import type { UStroke } from '../../core/klimt/UStroke.js';
 import { getNestedDiagramRenderer } from '../../core/nested-diagram-registry.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
 import { getSprite, type SpriteRegistry } from '../../core/sprite-registry.js';
-import { cleanForKeySlow } from '../../core/style/mindmap-style-builder.js';
+import { cleanForKeySlow, type SkinParam as StyleSkinParam } from '../../core/style/mindmap-style-builder.js';
 import { trin } from '../../core/style/parser/StyleParser.js';
 import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
@@ -76,8 +78,9 @@ function nestedRenderer(): NestedDiagramRenderer {
 
 /** What {@link SkinParam} is built from. */
 export interface SkinParamSource {
-  /** The builder `buildMindmapStyleBuilder` produced (D2). */
-  readonly styleBuilder: StyleBuilder;
+  /** The style half of `SkinParam` (D2), muted as the parse dispatches
+   *  each skinparam/`<style>` (`MindMapDiagramFactory.ts`). */
+  readonly style: StyleSkinParam;
   /** The preprocessor's skinparam map (key as written, value untrimmed). */
   readonly skinparam: ReadonlyMap<string, string>;
   readonly sprites: SpriteRegistry;
@@ -93,18 +96,18 @@ export class SkinParam implements MindMapSkinParam {
   private readonly params = new Map<string, string>();
   /** @see SkinParam.java:208 (`Rankdir.TOP_TO_BOTTOM`) */
   private rankdir: Rankdir = Rankdir.TOP_TO_BOTTOM;
-  private readonly styleBuilder: StyleBuilder;
+  private readonly style: StyleSkinParam;
   private readonly sprites: SpriteRegistry;
   private readonly pragma: Pragma;
   /** The creole atom capability every sheet shares (ADR-9). */
   readonly atomOps: AtomOps;
 
   constructor(source: SkinParamSource) {
-    this.styleBuilder = source.styleBuilder;
+    this.style = source.style;
     this.sprites = source.sprites;
     this.pragma = source.pragma;
     for (const [key, value] of source.skinparam) this.setParam(key, value);
-    this.atomOps = chromeAtomOps(source.sprites, rootFont(source.styleBuilder));
+    this.atomOps = lazyAtomOps(() => chromeAtomOps(source.sprites, rootFont(this.getCurrentStyleBuilder())));
   }
 
   /** The `params` half of `setParam`. @see SkinParam.java:227-234 */
@@ -112,8 +115,9 @@ export class SkinParam implements MindMapSkinParam {
     for (const key2 of cleanForKeySlow(key)) this.params.set(key2, trin(value));
   }
 
+  /** @see SkinParam.java:155-161 */
   getCurrentStyleBuilder(): StyleBuilder {
-    return this.styleBuilder;
+    return this.style.getCurrentStyleBuilder();
   }
 
   /** @see SkinParam.java:1022-1024 */
@@ -250,6 +254,22 @@ export class SkinParam implements MindMapSkinParam {
   strictUmlStyle(): boolean {
     return unported('strictUmlStyle');
   }
+}
+
+/**
+ * PORT-ONLY (ADR-9): the shared `AtomOps`, built on first use. Its base
+ * font is the root style of the builder current THEN — atoms are only
+ * measured and drawn after the parse has dispatched every declaration, so
+ * that is the final builder, as when it was built from the up-front one.
+ */
+function lazyAtomOps(create: () => AtomOps): AtomOps {
+  let atomOps: AtomOps | undefined;
+  const get = (): AtomOps => (atomOps ??= create());
+  return {
+    calculateDimension: (atom, stringBounder) => get().calculateDimension(atom, stringBounder),
+    getStartingAltitude: (atom, stringBounder) => get().getStartingAltitude(atom, stringBounder),
+    drawU: (atom, ug) => get().drawU(atom, ug),
+  };
 }
 
 /** The root style's font — the base configuration the shared `AtomOps`
