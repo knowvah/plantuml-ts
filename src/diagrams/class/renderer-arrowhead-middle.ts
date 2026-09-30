@@ -108,6 +108,18 @@ function drawMiddleDecorShape(
 }
 
 /**
+ * cdd7-T1a (D2): `LinkMiddleDecor#getMiddleFactory(backColor,
+ * diagramBackColor)`'s two colours (`LinkMiddleDecor.java:49-60`).
+ * `SvekEdge.java:986` passes `(arrowLollipopColor, backgroundColor)`:
+ * `backColor` fills the inner circle (`MiddleCircleCircled.java:76,88`),
+ * `diagramBackColor` paints the BOTH-mode knock-out disc (`:71-73`).
+ */
+export interface MiddleDecorColors {
+  readonly backColor: Paint;
+  readonly diagramBackColor: Paint;
+}
+
+/**
  * Builds the arc+ellipse markup for `edge.middleDecor` (`-0)-` and its
  * three siblings), or `undefined` when the edge carries none or its point
  * list cannot support a real `DotPath` (fewer than 4 points, or not a
@@ -124,7 +136,7 @@ export function buildMiddleDecorMarkup(
   points: EdgeGeo['points'],
   middleDecor: MiddleDecor | undefined,
   strokeColor: Paint,
-  backgroundColor: Paint,
+  colors: MiddleDecorColors,
   // cdd-B8FU (D4/journal row 175): defaults to 1 so every pre-existing
   // caller (this file's own unit tests) is unaffected; `renderer-edge.ts`
   // passes the diagram's real resolved factor.
@@ -137,8 +149,8 @@ export function buildMiddleDecorMarkup(
   const angleDeg = (-middle.angle * 180) / Math.PI;
   return drawMiddleDecorShape(middleDecor, middle.point, angleDeg - 45, {
     strokeColor,
-    backColor: backgroundColor,
-    diagramBackColor: backgroundColor,
+    backColor: colors.backColor,
+    diagramBackColor: colors.diagramBackColor,
     k,
   });
 }

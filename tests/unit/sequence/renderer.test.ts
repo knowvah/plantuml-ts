@@ -34,6 +34,7 @@ import {
   DIVIDER_LABEL_DELTA_X,
 } from '../../../src/diagrams/sequence/divider-style.js';
 import { HEADER_PADDING, HEADER_FONT_SIZE, GROUP_FONT_SIZE } from '../../../src/diagrams/sequence/frame-style.js';
+import { noGradient } from '../../../src/core/paint.js';
 
 /** Decode an 8-bit RGBA PNG's pixels. `zlib` is a TEST oracle only -- the
  *  encoder itself stays browser-safe. */
@@ -562,8 +563,8 @@ describe('renderSequence -- head placement mirrors drawInternalU (T3 AC2)', () =
     const svg = assembleSvg(renderSequence(jarGeo(), defaultTheme));
     expect(svg).toContain(
       '<polygon points="121.231,62,131.231,66,121.231,70,125.231,66" ' +
-        `fill="${shortenColor(defaultTheme.colors.arrow)}" ` +
-        `stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1"`,
+        `fill="${shortenColor(noGradient(defaultTheme.colors.arrow))}" ` +
+        `stroke="${shortenColor(noGradient(defaultTheme.colors.arrow))}" stroke-width="1"`,
     );
   });
 
@@ -631,7 +632,8 @@ describe('renderSequence -- self-message heads (T3 AC3)', () => {
       `<line x1="${SELF_X}" y1="${LOOP_BOTTOM_Y}" x2="${LOOP_RIGHT_X}" y2="${LOOP_BOTTOM_Y}"`,
     ]) {
       expect(svg).toContain(
-        `${seg} stroke="${shortenColor(defaultTheme.colors.arrow)}" stroke-width="1" ` + 'stroke-dasharray="5,5"',
+        `${seg} stroke="${shortenColor(noGradient(defaultTheme.colors.arrow))}" stroke-width="1" ` +
+          'stroke-dasharray="5,5"',
       );
     }
   });

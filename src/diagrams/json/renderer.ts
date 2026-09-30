@@ -35,6 +35,7 @@ import {
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import type { JsonGeometry, JsonNodeGeo, JsonEdgeGeo, JsonRowGeo } from './layout.js';
+import { noGradient } from '../../core/paint.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -278,7 +279,7 @@ function renderEdge(edge: JsonEdgeGeo, theme: Theme, pen: JsonPen, k: number): s
   if (d === '') return '';
 
   const json = theme.colors.graph.json;
-  const stroke = canonicalColor(json?.arrowColor ?? theme.colors.arrow);
+  const stroke = canonicalColor(json?.arrowColor ?? noGradient(theme.colors.arrow));
   const strokeWidth = (json?.arrowThickness ?? 1) * k;
   // `yamlDiagram,jsonDiagram { arrow { LineStyle 3-3 } }` (`skin/plantuml.skin`
   // :449-451), emitted comma-separated — see `style-map-json-diagram.ts`.

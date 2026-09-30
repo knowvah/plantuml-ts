@@ -15,6 +15,11 @@ import {
 } from '../../../src/diagrams/class/renderer-arrowhead.js';
 import type { EdgeGeo } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';
+import type { MiddleDecorColors } from '../../../src/diagrams/class/renderer-arrowhead.js';
+
+/** cdd7-T1a: no lollipop colour -- both middle-decor colours are the
+ *  white diagram background (`SvekEdge.java:266-268`'s fallback). */
+const WHITE_BACK: MiddleDecorColors = { backColor: '#FFFFFF', diagramBackColor: '#FFFFFF' };
 
 function makeEdgeGeo(overrides?: Partial<EdgeGeo>): EdgeGeo {
   return {
@@ -253,11 +258,11 @@ describe('buildMiddleDecorMarkup', () => {
   ];
 
   it('returns undefined when middleDecor is absent', () => {
-    expect(buildMiddleDecorMarkup(cenubiPoints, undefined, '#181818', '#FFFFFF')).toBeUndefined();
+    expect(buildMiddleDecorMarkup(cenubiPoints, undefined, '#181818', WHITE_BACK)).toBeUndefined();
   });
 
   it('returns undefined for a point list too short/malformed to build a DotPath from', () => {
-    expect(buildMiddleDecorMarkup([{ x: 0, y: 0 }], 'circleCircled1', '#181818', '#FFFFFF')).toBeUndefined();
+    expect(buildMiddleDecorMarkup([{ x: 0, y: 0 }], 'circleCircled1', '#181818', WHITE_BACK)).toBeUndefined();
     expect(
       buildMiddleDecorMarkup(
         [
@@ -266,7 +271,7 @@ describe('buildMiddleDecorMarkup', () => {
         ],
         'circleCircled1',
         '#181818',
-        '#FFFFFF',
+        WHITE_BACK,
       ),
     ).toBeUndefined();
   });
@@ -279,7 +284,7 @@ describe('buildMiddleDecorMarkup', () => {
     // floating-point residue from deriving a 3rd-decimal value off a
     // 2-decimal-verified input, not a mechanism defect (`toBeCloseTo(.., 1)`
     // below matches `compareSvg`'s own numeric tolerance class).
-    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled1', '#181818', '#FFFFFF');
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled1', '#181818', WHITE_BACK);
     expect(result).toBeDefined();
     const d = /M([\d.]+),([\d.]+) A10,10 0 0 0 ([\d.]+) ([\d.]+)/.exec(result!.body);
     expect(d).not.toBeNull();
@@ -299,20 +304,30 @@ describe('buildMiddleDecorMarkup', () => {
   });
 
   it('draws only the filled circle for plain `circle`, no arc', () => {
-    const result = buildMiddleDecorMarkup(cenubiPoints, 'circle', '#181818', '#FFFFFF');
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circle', '#181818', WHITE_BACK);
     expect(result!.body).not.toContain('<path');
     expect(result!.body).toContain('<ellipse');
     expect(result!.body).toContain('rx="6"');
   });
 
   it('draws both arcs for circleCircled (MODE BOTH)', () => {
-    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled', '#181818', '#FFFFFF');
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled', '#181818', WHITE_BACK);
     const arcCount = (result!.body.match(/<path/g) ?? []).length;
     expect(arcCount).toBe(2);
   });
 
+  it('fills the inner circle with backColor and the BOTH disc with diagramBackColor (cdd7-T1a)', () => {
+    const colors: MiddleDecorColors = { backColor: '#FF0000', diagramBackColor: '#EEEEEE' };
+    const body = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled', '#181818', colors)!.body;
+    const fills = [...body.matchAll(/<ellipse[^>]*rx="(\d+)"[^>]*fill="([^"]+)"/g)].map((m) => [m[1], m[2]]);
+    expect(fills).toEqual([
+      ['10', '#EEE'],
+      ['6', '#F00'],
+    ]);
+  });
+
   it('draws the mirrored arc for circleCircled2', () => {
-    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled2', '#181818', '#FFFFFF');
+    const result = buildMiddleDecorMarkup(cenubiPoints, 'circleCircled2', '#181818', WHITE_BACK);
     const arcCount = (result!.body.match(/<path/g) ?? []).length;
     expect(arcCount).toBe(1);
     expect(result!.body).not.toContain('A10,10 0 0 0 43.681,92.104');

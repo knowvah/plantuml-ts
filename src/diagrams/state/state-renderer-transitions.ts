@@ -28,6 +28,7 @@ import { renderNoteOnLink } from './renderer-note.js';
 import {} from './state-shadow.js';
 
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
+import { noGradient } from '../../core/paint.js';
 
 /**
  * mission G4 S8 (mechanism 19): `TransitionGeo.points` is a well-formed
@@ -182,8 +183,8 @@ function buildTransitionInnerMarkup(
   // mission G4 S16: <style> stateDiagram { arrow { LineColor HeadColor
   // } } } -- see state-render-colors.ts#resolveStateArrowLineColor's own
   // doc comment.
-  const arrowLineColor = resolveStateArrowLineColor(theme, theme.colors.arrow);
-  const arrowHeadColor = resolveStateArrowHeadColor(theme, theme.colors.arrow);
+  const arrowLineColor = resolveStateArrowLineColor(theme, noGradient(theme.colors.arrow));
+  const arrowHeadColor = resolveStateArrowHeadColor(theme, noGradient(theme.colors.arrow));
   const arrowhead = buildTransitionArrowhead(transition, arrowHeadColor, 1);
   const points = applyHeadTrim(transition.points, arrowhead.trim);
   const d = buildPathD(points);

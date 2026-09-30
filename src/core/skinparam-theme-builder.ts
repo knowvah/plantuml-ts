@@ -179,6 +179,7 @@ function hasColorsOverride(acc: SkinparamAccumulator): boolean {
     acc.border !== undefined ||
     acc.text !== undefined ||
     acc.arrow !== undefined ||
+    acc.arrowLollipopColor !== undefined ||
     acc.noteBackground !== undefined ||
     Object.keys(acc.elements).length > 0 ||
     hasGraphOverride(acc)
@@ -206,6 +207,7 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   if (acc.border !== undefined) colorsOverride.border = acc.border;
   if (acc.text !== undefined) colorsOverride.text = acc.text;
   if (acc.arrow !== undefined) colorsOverride.arrow = acc.arrow;
+  if (acc.arrowLollipopColor !== undefined) colorsOverride.arrowLollipopColor = acc.arrowLollipopColor;
   if (acc.noteBackground !== undefined) colorsOverride.noteBackground = acc.noteBackground;
   if (Object.keys(acc.elements).length > 0) colorsOverride.elements = acc.elements;
   if (hasGraphOverride(acc)) colorsOverride.graph = buildGraphOverride(acc);
