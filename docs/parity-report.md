@@ -18,7 +18,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
 | chronology | chronology | 1 | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) | n/a (plantuml-ts only) |
 | class | class | 768 | 723 | 710/711 (100%) | 708 / 3 / 12 | 979 | 978 | n/a (no diff-baseline yet) | 720/723 | 723/723 |
-| component | description | 384 | 266 | 259/263 (98%) | 0 / 13 / 253 | 44 | 32 | 15 · 853 | 266/266 | 266/266 |
+| component | description | 384 | 266 | 259/263 (98%) | 0 / 13 / 253 | 44 | 32 | 15 · 868 | 266/266 | 266/266 |
 | ditaa | n/a (no engine (D8 todo)) | 2 | 2 | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) | n/a (no engine (D8 todo)) |
 | dot | dot | 62 | 5 | n/a (no DOT stage (non-svek)) | 5 / 0 / 0 | 5 | 5 | n/a (no diff-baseline yet) | 5/5 | 5/5 |
 | ebnf | n/a (no engine (D10 todo)) | 44 | 44 | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) | n/a (no engine (D10 todo)) |
@@ -51,7 +51,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 | chart | — | 2026-09-28T00:14:28.408Z | — | — | — | 2026-09-20 | 2026-09-20 |
 | chronology | — | — | — | — | — | — | — |
 | class | 2026-09-21T01:49:10.211Z | 2026-09-30T19:17:59.957Z | 2026-09-30T19:24:51.176Z | 2026-09-30 | — | 2026-08-24 | 2026-08-24 |
-| component | 2026-09-21T01:49:10.211Z | 2026-09-21T12:34:26.597Z | 2026-09-20T18:49:14.773Z | 2026-07-15 | 2026-09-03 | 2026-08-26 | 2026-08-26 |
+| component | 2026-09-21T01:49:10.211Z | 2026-09-21T12:34:26.597Z | 2026-09-20T18:49:14.773Z | 2026-07-15 | 2026-09-30 | 2026-08-26 | 2026-08-26 |
 | ditaa | — | — | — | — | — | — | — |
 | dot | — | 2026-09-28T00:15:43.373Z | 2026-09-20T18:50:23.645Z | 2026-08-08 | — | 2026-08-23 | 2026-08-24 |
 | ebnf | — | — | — | — | — | — | — |
