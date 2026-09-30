@@ -1,74 +1,54 @@
-## Observation: kexaba lone-sprite edge label draws at box-origin+8, Java trace predicts +1
+## Observation: kexaba's "+7 residual" was a missing shift/scale field, not a draw-offset
 
 - **Context**: T1b (mission cdd7), kexaba-26-kobu577 (`edge-label-not-creole`,
   cdd6 rows 50/63, D5). Fixing the lone-sprite `<image>` draw offset for a
   class-diagram edge label that is entirely one `<$sprite>` atom.
-- **Finding**: D5 step 1 confirms `lp="68,127"` is IDENTICAL between real
-  `dot -Tdot` fed the jar's cached `svek-1.dot` and real `dot -Tdot` fed this
-  port's own captured DOT (dot-engine blame ruled out). Using that `lp` and
-  the DOT's declared `WIDTH="19" HEIGHT="14"` box, the reserved label box's
-  top-left corner computes to `(58.5,106)` in this port's own coordinate
-  frame. This was cross-validated two independent ways:
-  1. From the jar's real `dot -Tsvg` output: the `fill="#000009"` polygon's
-     raw points, converted via this port's own `x` unchanged / `y = 240 -
-     raw_y` transform (graph height 240, `svek-1.dot`'s own bounding box).
-  2. Algebraically from `lp` + box dims directly (same transform).
-  Both agree, AND this port's own `edgeResult.tailLabelX/Y` (48, 82.63)
-  matches real dot's raw `tail_lp="48,157.37"` exactly under the SAME
-  transform, proving the shared coordinate frame (not just this one box) is
-  correct — this rules out a dot-engine coordinate-mapping bug.
+- **Finding (SUPERSEDES this note's original version)**: The first pass at
+  this fix diagnosed a "+7 residual beyond `marginLabel`" between
+  `spriteLabelAnchor`'s formula (predicting box-origin+`(1,1)`) and the
+  jar's oracle SVG (drawing at box-origin+`(8,8)`), and "fixed" it by
+  fitting a `SPRITE_LABEL_IMAGE_INSET = 8` constant. That diagnosis was
+  WRONG: it compared `spriteLabelAnchor`'s input (`center`, which is
+  `edgeResult.labelX/Y` — dot-engine's RAW, PRE-shift layout output) against
+  the jar's FINAL, post-shift document-frame SVG. The two are not in the
+  same coordinate frame, so the "+7" was never a real formula defect.
 
-  A full Java trace of the label draw path (`SvekEdge.java`):
-  - `:372-373` `addVisibilityModifier`'s `marginLabel` wrap
-    (`TextBlockUtils.withMargin(block, 1, 1)` for a non-self-loop link,
-    `startUid.equalsId(endUid) ? 6 : 1`).
-  - `:353-356` `labelShield` — confirmed `0` for kexaba: `--{ ` parses to
-    `LinkDecor.CROWFOOT` (`decoration/LinkDecor.java:80`), an END decor
-    (`decor1`/`decor2`), never a `LinkMiddleDecor` (`LinkMiddleDecor.java`
-    has no CROWFOOT case at all).
-  - `:745-747` `labelXY = TextBlockUtils.asPositionable(labelText, ...,
-    getXY(fullSvg, noteLabelColor))` — `getXY` (`:808-814`) returns the raw
-    MIN x/y of the label's own rendered polygon, no re-centring.
-  - `:951-954` draw translate = `labelXY.getPosition() + labelShield` (both
-    axes).
-  - `TextBlockMarged.drawU` (`klimt/shape/TextBlockUtils.java:64-68,
-    82-89`) then translates the wrapped sprite by `(left=1, top=1)` before
-    drawing it.
+  The actual mechanism: `class-layout-shift.ts#shiftEdgeGeo` (and its
+  helper `shiftEdgeExtras`) translate EVERY `EdgeGeo` label field
+  (`label`, `labelLines`, `tailLabel`/`headLabel`, `visibilityIcon`,
+  `quantifierLines`, `roleLines`, `noteBox`, `constraint`, `kalBox`,
+  `sametail`, `leafContacts`) from dot-engine's raw frame into the final
+  document frame by a uniform `(dx, dy)` — for kexaba, `(7, 7)`.
+  `class-scale-geo-edge.ts#scaleEdgeGeoLabels` does the equivalent for the
+  diagram-wide `scale` multiplier `k`. `EdgeGeo.labelImage` (added in cdd6
+  T2d for the lone-sprite case) was never added to either function's field
+  list, so it silently stayed in the raw dot-engine frame while every
+  sibling field moved — a genuine `(dx, dy)` = `(7, 7)` gap for kexaba,
+  which is exactly the "+7" previously (mis)diagnosed as a draw-offset.
 
-  Every one of these predicts a final draw position of box-origin + `(1,1)`
-  = `(59.5,107)` — which IS this port's pre-existing (pre-fix) output, and
-  IS algebraically what the OLD `spriteLabelAnchor` computed
-  (`center.x - Math.trunc(sprite.width)/2`, collapsing `reservedWidth/2 -
-  marginLabel` since `reservedWidth = spriteWidth + 2*marginLabel`).
-
-  The jar's own oracle SVG
-  (`test-results/dot-cache/unknown/kexaba-26-kobu577/in.svg`) instead draws
-  the `<image>` at `(66.5,114)` = box-origin + `(8,8)`, a residual `+7`
-  beyond every one of the above. Ruled out as the source of that `+7`:
-  - `SkinParam.getPadding()` (`skin/SkinParam.java:1146-1150`, reads the
-    `skinparam padding` value via `getAsDouble`, defaults to `0` when unset)
-    — this fixture never sets `skinparam padding`, so
-    `Display.java:697`'s `SheetBlock1(sheet, maxMessageSize, padding, ...)`
-    padding is `(0,0,0,0)`.
-  - `AtomSprite` (`klimt/creole/atom/AtomSprite.java`) — `drawU` calls
-    `sprite.asTextBlock(...).drawU(ug)` directly, no translate.
-  - `AtomWithMargin` (`klimt/creole/atom/AtomWithMargin.java`) — not on this
-    path (that class is for cardinality visibility icons, not sprites).
-  - A second `labelShield`-like constant near the draw site — none found;
-    `grep -n "= 7\|= 8" SvekEdge.java` surfaces only `labelShield = 7` (the
-    middle-decor case, ruled out above) and the unrelated
-    `useShieldForQuantifier()` node-margin branch (`:232-239`, affects node
-    `ensureMargins`, not label draw).
-- **Impact**: The fix (`class-edge-label-anchor.ts#spriteLabelAnchor`)
-  implements the EMPIRICALLY CONFIRMED `+8,+8` inset (matching D5's own
-  stated expectation and cdd6 T3e's prior finding, independently
-  reproduced this session with a fresh `dot -Tdot`/`-Tsvg` run and an
-  instrumented render), but the precise Java statement contributing the
-  extra `+7` beyond `marginLabel` was NOT found within this session's
-  budget. If a future sprite-edge-label fixture regresses or a self-loop
-  lone-sprite label (`marginLabel === 6`) needs this formula, re-open this
-  diagnosis before assuming `marginLabel + 7` generalizes — it has not been
-  verified against a `marginLabel === 6` fixture.
-- **Confidence**: High (the `+8,+8` value itself, cross-validated twice
-  against the oracle and this port's own proven-correct coordinate frame);
-  Low (the exact Java line producing the extra `+7` — not found).
+  Verified twice, this session:
+  1. `spriteLabelAnchor({width:17,height:12}, {x:68,y:113}, 1)` (kexaba's
+     real `edgeResult.labelX/Y`, marginLabel=1) returns `(59.5,107)` — the
+     RAW pre-shift anchor. Adding the missing `(7,7)` shift gives
+     `(66.5,114)`, the jar's exact oracle position.
+  2. A self-loop probe (`person --> person : <$pk>`, marginLabel=6,
+     rendered via `scripts/oracle-render.sh`): jar's `<image>` is at
+     `(122.79,25)`. This port's own dot-engine `labelX/Y` for that edge is
+     `(124.29,24)` (instrumented render). `spriteLabelAnchor(..., 6)`
+     returns `(115.79,18)`; `+ (7,7)` = `(122.79,25)` — exact match. A full
+     `renderSync` of this fixture (now that the shift/scale fix is wired
+     in) is byte-identical to the oracle's `<image>` element.
+- **Fix (at the origin)**: `spriteLabelAnchor` (`class-edge-label-anchor
+  .ts`) keeps the un-fitted Java-traced formula (box-origin + `marginLabel`,
+  `SvekEdge.java:372-373,745-747,808-814,951-954`); `class-layout-shift.ts
+  #shiftEdgeExtras` and `class-scale-geo-edge.ts#scaleEdgeGeoLabels` now
+  also translate/scale `labelImage`, matching every sibling field.
+- **Impact**: A single missing field in a shift/scale helper silently
+  broke ONE render path (lone-sprite edge labels) while every text-based
+  label field on the same edge rendered correctly — a reminder to check
+  ALL post-layout transform passes (shift, scale, and any future ones)
+  whenever a NEW absolute-coordinate `EdgeGeo` field is added, not just the
+  attach/anchor/render trio.
+- **Confidence**: High — cross-checked against two independent oracle
+  renders (kexaba, marginLabel=1; a fresh self-loop probe, marginLabel=6)
+  and the full `renderSync` pipeline, not fitted to either number.

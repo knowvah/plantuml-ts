@@ -203,18 +203,42 @@ describe('S-8 (cdd2-T7) — multiLineLabelAnchor strips creole and reports bold'
   });
 });
 
-describe('T1b (D5) — spriteLabelAnchor draws a lone-sprite image at box-origin+8', () => {
-  it('kexaba-26-kobu577: jar-verified against the oracle in.svg (image x=66.5,y=114)', () => {
-    // center = edgeResult.labelX/Y this port's own dot-engine reports for
-    // kexaba's real edge (68,113, this session's instrumented render);
-    // marginLabel=1 (non-self-loop, `labelMarginOf`).
+describe('T1b (D5) — spriteLabelAnchor: box-origin + marginLabel, RAW pre-shift frame', () => {
+  it("kexaba-26-kobu577: center = this port's own dot-engine labelX/Y (68,113), marginLabel=1 (non-self-loop)", () => {
+    // PRE-shift value: `class-layout-shift.ts#shiftEdgeGeo`'s later
+    // (dx,dy)=(7,7) reaches this fixture's jar-verified final (66.5,114) --
+    // `class-layout-shift.test.ts` asserts that half.
     const pos = spriteLabelAnchor({ width: 17, height: 12 }, { x: 68, y: 113 }, 1);
-    expect(pos).toEqual({ x: 66.5, y: 114 });
+    expect(pos).toEqual({ x: 59.5, y: 107 });
   });
 
-  it('box-origin is center minus half the reserved (sprite + 2*marginLabel) box, then +8', () => {
+  it('box-origin is center minus half the reserved (sprite + 2*marginLabel) box, then + marginLabel', () => {
     const pos = spriteLabelAnchor({ width: 10, height: 10 }, { x: 50, y: 50 }, 1);
-    // reserved = 10 + 2*1 = 12; origin = 50 - 6 = 44; +8 = 52.
-    expect(pos).toEqual({ x: 52, y: 52 });
+    // reserved = 10 + 2*1 = 12; origin = 50 - 6 = 44; + marginLabel(1) = 45.
+    expect(pos).toEqual({ x: 45, y: 45 });
+  });
+
+  it('a self-loop marginLabel=6 (SvekEdge.java:372-373) cancels algebraically to the same result', () => {
+    const pos = spriteLabelAnchor({ width: 10, height: 10 }, { x: 50, y: 50 }, 6);
+    // reserved = 10 + 2*6 = 22; origin = 50 - 11 = 39; + marginLabel(6) = 45
+    // -- identical to marginLabel=1's (45,45): the marginLabel term cancels
+    // for an integer sprite width (spriteLabelAnchor's own doc comment).
+    expect(pos).toEqual({ x: 45, y: 45 });
+  });
+
+  it('self-loop probe (T1b, `scripts/oracle-render.sh`): `person --> person : <$pk>`, marginLabel=6', () => {
+    // Oracle-rendered via `scripts/oracle-render.sh` (`sprite $pk [17x12/16z]
+    // ...; class person; person --> person : <$pk>`): jar's own <image>
+    // lands at (122.79,25). This port's own dot-engine `labelX/Y` for that
+    // SAME self-loop edge is (124.29,24) (instrumented render, this
+    // session). `spriteLabelAnchor` returns the RAW pre-shift anchor;
+    // `class-layout-shift.ts#shiftEdgeGeo`'s (dx,dy)=(7,7) for this fixture
+    // reaches the jar-verified (122.79,25) -- confirmed end-to-end via a
+    // full `renderSync` of the same fixture, byte-identical to the oracle's
+    // <image> element.
+    const pos = spriteLabelAnchor({ width: 17, height: 12 }, { x: 124.29, y: 24 }, 6);
+    expect(pos).toEqual({ x: 115.79, y: 18 });
+    expect(pos.x + 7).toBeCloseTo(122.79, 6);
+    expect(pos.y + 7).toBeCloseTo(25, 6);
   });
 });

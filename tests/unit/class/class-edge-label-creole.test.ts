@@ -5,6 +5,7 @@
  * (`<U>agregation</U>`).
  */
 import { describe, it, expect } from 'vitest';
+import { renderSync } from '../../../src/index.js';
 import {
   computeMeasuredLabelAttrs,
   resolveLoneSpriteLabel,
@@ -118,12 +119,14 @@ describe('T2d — attachEdgeLabel draws a lone-sprite label as an image, not tex
     expect(edgeGeo.labelImage).toBeDefined();
     expect(edgeGeo.labelImage?.width).toBe(17);
     expect(edgeGeo.labelImage?.height).toBe(12);
-    // T1b (D5): box-origin (`center - reservedDim/2`, reservedDim =
-    // sprite + 2*marginLabel, marginLabel=1 for a non-self-loop) + the
-    // oracle-verified `+8,+8` inset -- see `class-edge-label-anchor.ts
-    // #spriteLabelAnchor`'s own doc comment for the full derivation.
-    expect(edgeGeo.labelImage?.x).toBe(edgeResult.labelX! - (17 + 2 * 1) / 2 + 8);
-    expect(edgeGeo.labelImage?.y).toBe(edgeResult.labelY! - (12 + 2 * 1) / 2 + 8);
+    // T1b (D5): this is the RAW pre-shift anchor -- box-origin
+    // (`center - reservedDim/2`, reservedDim = sprite + 2*marginLabel,
+    // marginLabel=1 for a non-self-loop) + marginLabel -- algebraically
+    // `center - Math.trunc(width)/2`. `class-layout-shift.ts#shiftEdgeGeo`
+    // applies the later (dx,dy) ink-shift that reaches the jar's final
+    // document-frame position (`class-layout-shift.test.ts`).
+    expect(edgeGeo.labelImage?.x).toBe(edgeResult.labelX! - Math.trunc(17) / 2);
+    expect(edgeGeo.labelImage?.y).toBe(edgeResult.labelY! - Math.trunc(12) / 2);
   });
 
   it('without a sprite registry the label draws as literal text (unchanged)', () => {
@@ -238,5 +241,19 @@ describe('T1b — renderEdgeMainLabel draws font-weight/font-style for bold/ital
     const [svg] = renderEdgeMainLabel(geo, fontAttrs, '#000000');
     expect(svg).toContain('font-style="italic"');
     expect(svg).toContain('>[Optional Technology]<');
+  });
+});
+
+describe('T1b (D5) — self-loop lone-sprite label end-to-end (marginLabel=6)', () => {
+  it('person --> person : <$pk> draws the sprite at the oracle-verified (122.79,25) (scripts/oracle-render.sh probe, this session)', () => {
+    const markup = [
+      '@startuml',
+      'sprite $pk [17x12/16z] bSY53GC13CNGS7waxhzkZvcVqAOp4R5j8evrSoS6RISRZ2VP3VoWQf6eVa0SBY9cAG5gGRe425sEnq1hLKKVD',
+      'class person',
+      'person --> person : <$pk>',
+      '@enduml',
+    ].join('\n');
+    const svg = renderSync(markup, { measurer });
+    expect(svg).toContain('<image width="17" height="12" x="122.79" y="25"');
   });
 });
