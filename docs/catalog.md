@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1300 modules · 4789 exported names.
+1306 modules · 4808 exported names.
 
 ## `src/`
 
@@ -670,11 +670,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FromSkinparamToStyle.ts` | `convertSkinparam` | FromSkinparamToStyle — the `skinparam key value` -> `Style[]` converter: one flat static table (`key -> [{propertyName, styleNames}]`, built once at module load exactly as upstream's `static {}` block builds `knowledge`) plus `convertNow`'s |
 | `ISkinSimple.ts` | `ISkinSimple` | ISkinSimple — the skin-parameter capability interface `Display`/ `CreoleParser` (and, once ported, `StripeTable`/`StripeTree`/ `EmbeddedDiagram`) consume to reach fonts, sprites, guillemets, and a `SheetBuilder`. |
 | `MergeStrategy.ts` | `MergeStrategy` | MergeStrategy — how `Style#mergeWith` treats an existing value whose priority is above `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (Style.java:121-135). |
+| `mindmap-style-builder.ts` | `DEFAULT_SKIN`, `ConvertSkinparam`, `MindmapStyleSource`, `cleanForKeySlow`, `buildMindmapStyleBuilder` | The mindmap's `StyleBuilder`: the style half of upstream's `SkinParam` (java:155-265) replayed over a preprocessed source (decision D2). |
 | `PName.ts` | `PNAMES`, `PName`, `getFromName` | PName — every style property name of `style/PName.java` (1.2026.8beta1), constant names verbatim, as a readonly declaration-order array plus the string-literal union it induces (no `const enum`, project convention). |
 | `SName.ts` | `SNAMES`, `SName`, `retrieve` | SName — every style-element name of `style/SName.java` (1.2026.8beta1), the enum constant names verbatim (trailing underscores included: `class_`, `goto_`, `interface_`, `package_`, `private_`, `protected_`, `public_` -- Java keywords upstr |
 | `Style.ts` | `DELTA_PRIORITY_FOR_STEREOTYPE`, `Style` |  |
 | `StyleBuilder.ts` | `StyleBuilder` |  |
 | `StyleKey.ts` | `enumSetOrder`, `StyleKey` | StyleKey — the sname set, depth level and star flag of a style signature; the key `StyleStorage` files stereotype-free styles under (`StyleStorage.java:69-70,81-82`). |
+| `StyleLoader.ts` | `DELTA_PRIORITY_FOR_STEREOTYPE`, `NoStyleAvailableException`, `loadSkin`, `getInputStreamForStyle`, `getMissingRootProperties`, `addPriorityForStereotype` |  |
 | `StyleSignature.ts` | `STAR`, `StyleSignature` | StyleSignature — the common interface of a single signature ({@link StyleSignatureBasic}) and a fan-out list of them ({@link StyleSignatures}). |
 | `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | StyleSignatureBasic — a {@link StyleKey} plus a set of cleaned stereotype names: both the selector a `<style>` rule is stored under (built by `style/parser/Context.java:70-99`) and the query an element resolves its style with (e.g. |
 | `StyleSignatures.ts` | `StyleSignatures` | StyleSignatures — an ordered list of {@link StyleSignature}, the fan-out `StyleSignatureBasic#withTOBECHANGED`/`forStereotypeItself` build (one member per stereotype label). |
@@ -684,6 +686,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ValueColor.ts` | `ValueColor` |  |
 | `ValueImpl.ts` | `ValueImpl` |  |
 | `ValueNull.ts` | `ValueNull` |  |
+
+## `src/core/style/parser/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Context.ts` | `Context` |  |
+| `CssVariables.ts` | `CssVariables` | CssVariables — the `--name value` declarations of one style text, and the `var(--name)` lookup a value goes through (StyleParser.java:123,126). |
+| `StyleParser.ts` | `StyleParsingException`, `trin`, `StyleParser`, `readLines`, `parseStyles` |  |
+| `StyleScheme.ts` | `StyleScheme` | StyleScheme — which half of a `DarkString` a parsed value fills: `REGULAR` before an `@media` block, `DARK` from it on (StyleParser.java:128-129, 150-152). |
 
 ## `src/core/style/skins/`
 
