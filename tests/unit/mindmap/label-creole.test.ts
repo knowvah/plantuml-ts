@@ -114,3 +114,33 @@ describe('mindmap label: [[url]] under MaximumWidth (Fission keeps the url)', ()
     expect(diffPaths('kelome-99-naso291')).toEqual([]);
   });
 });
+
+// Authored `fixtures/trailing-space.puml`, jar output via
+// `scripts/oracle-render.sh` (1.2026.8beta1). `CommandMindMapOrgmode.java:55`
+// is `super(false, …)` (doTrim=false, SingleLineCommand2.java:74-79), so the
+// label is `**1** ` and the jar draws bold `1` then a separate ` ` atom of
+// width 0 (no textLength) — kijaru-67-buco967.
+describe('doTrim=false keeps the trailing space (T6i)', () => {
+  it('draws bold 1 plus a width-0 space text, equal to the authored jar oracle', () => {
+    const svg = renderSync(readFileSync(`${FIXTURES}/trailing-space.puml`, 'utf8'), { measurer });
+    const jar = readFileSync(`${FIXTURES}/trailing-space.jar.svg`, 'utf8');
+    // The jar writes the space as U+00A0 (no textLength: width 0).
+    expect(svg).toContain('<text x="27.788" y="40.889" fill="#000" font-size="14">\u00a0</text>');
+    expect(compareSvg(svg, jar, 'deterministic').diffs).toEqual([]);
+  });
+
+  // Authored `fixtures/trailing-space-root.puml`, same jar. `CommandMindMapRoot`
+  // is `super(getRegexConcat())` (doTrim=true, CommandMindMapRoot.java:52): the
+  // jar trims `0 **r** ` and draws no space atom; `CommandMindMapPlus` is
+  // `super(false, …)` (CommandMindMapPlus.java:55) and keeps it for `+`/`-`.
+  it('trims the doTrim=true root form, keeps the doTrim=false plus form (authored jar oracle)', () => {
+    const svg = renderSync(readFileSync(`${FIXTURES}/trailing-space-root.puml`, 'utf8'), { measurer });
+    const jar = readFileSync(`${FIXTURES}/trailing-space-root.jar.svg`, 'utf8');
+    expect(svg.match(/>\u00a0<\/text>/g)).toHaveLength(2);
+    expect(compareSvg(svg, jar, 'deterministic').diffs).toEqual([]);
+  });
+
+  it('kijaru-67-buco967 equals the jar golden', () => {
+    expect(diffPaths('kijaru-67-buco967')).toEqual([]);
+  });
+});

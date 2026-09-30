@@ -20,4 +20,17 @@ describe('readLines: BufferedReader#readLine line ends', () => {
   it('numbers the lines it keeps from 0', () => {
     expect(readLines('a\nb\n').map((l) => l.getLocation()?.getPosition())).toEqual([0, 1]);
   });
+
+  // `BufferedReader#readLine`: "A line is considered to be terminated by any one
+  // of a line feed ('\n'), a carriage return ('\r'), or a carriage return
+  // followed immediately by a linefeed." The terminator is never part of the
+  // line -- the preprocessor no longer right-trims (T6i), so a CRLF source must
+  // not leave a '\r' on any line (empty-mindmap-0).
+  it('ends a line at CRLF, CR or LF and keeps no terminator', () => {
+    expect(texts('a\r\nb \r\n\r\nc\rd\n')).toEqual(['a', 'b ', '', 'c', 'd']);
+  });
+
+  it('drops only the empty tail after a final CRLF', () => {
+    expect(texts('a\r\n')).toEqual(['a']);
+  });
 });
