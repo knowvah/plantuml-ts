@@ -71,6 +71,14 @@
  * {@link sequenceCreoleRuns} for the measured case. Giving those atoms real
  * sequence geometry needs a new geo kind and a renderer branch.
  *
+ * Raster `<img>`/`<$sprite>` LEFT that set for any caller passing a
+ * {@link SequenceAtomContext} (cdd7 T1f; today the participant head): they
+ * resolve through the shared `makeAtomImageResolverFor` and ride
+ * `TextRun.image` exactly as `'latex'` does. What stays literal is vector
+ * ink — OpenIconic, SVG sprites, emoji — whose primitives `TextRun` has no
+ * field for, and every `'inline'` atom on a context-less caller (message,
+ * note, frame, divider labels).
+ *
  * `<math>`/`<latex>` LEFT that set: a `'latex'` atom resolves to a measured,
  * drawable image through `core/latex.ts#renderLatexAsImage` — the one
  * renderer `AtomMath.ts` and the description engine already go through — so
@@ -99,6 +107,9 @@ import { CharHidder } from '../../core/utils/CharHidder.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
 import type { TextRun } from './text-block-geo.js';
 import { renderLatexAsImage } from '../../core/latex.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { AtomImageResolver } from '../../core/creole-atoms.js';
+import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 
 /** Where a line's first run starts: `DriverTextSvg`'s own `x` (a LEFT edge)
  *  and `y` (a BASELINE), the same two quantities a `TextRun` carries. Every
@@ -215,41 +226,151 @@ function textAtomRun(
 }
 
 /**
- * One `'latex'` atom as a placed, measured `TextRun` carrying an image and no
- * text — `AtomMath#calculateDimensionSlow` measures the rendered image's own
- * box and `#drawU` draws that same image (`AtomMath.java:64-97`), which
- * `core/latex.ts#renderLatexAsImage` answers in one call, so the measured and
- * the drawn box agree by construction.
+ * An atom whose box is an IMAGE, placed: the run carries no text, advances x
+ * by the image's measured width, and bottom-aligns the box with the text
+ * boxes beside it.
  *
- * `descent` bottom-aligns the image box against the line's text boxes:
+ * Both image atoms this seam draws have a starting altitude of 0 --
+ * `AtomMath#getStartingAltitude` (`AtomMath.java:73-75`) and
+ * `AtomSprite#getStartingAltitude` (`AtomSprite.java:69-71`) -- and
  * `Sea#doAlign` drops every atom to `y = -height + getStartingAltitude`
- * (`Sea.java:72-80`) and `AtomMath#getStartingAltitude` is 0
- * (`AtomMath.java:73-75`), so an image shares its BOTTOM edge with the text
- * beside it — and a text box's bottom is its baseline plus its descent.
+ * (`Sea.java:72-80`), while `AtomText`'s altitude is its `FontPosition`
+ * space, 0 for a NORMAL run (`AtomText.java:321-323`). So an image shares
+ * its BOTTOM edge with the text beside it, and a text box's bottom is its
+ * baseline plus its descent.
+ *
+ * `textAscent` is therefore the box's height ABOVE the baseline, `height -
+ * descent`: it is the run's line-box top-to-baseline distance, the quantity
+ * `sequence-layout-participants.ts#labelRows` stacks a row by. Jar-pinned on
+ * a 25.846-tall sprite beside 14pt text: the row is 25.846 tall and the
+ * text's baseline sits 22.735 = 25.846 - 3.111 below its top
+ * (`tests/unit/sequence/sequence-creole-sprite.test.ts`).
+ *
+ * `drawn` is what the `<image>` element states, which may differ from the
+ * measured `box`: a raster sprite/img is EMITTED `Math.round`ed while its box
+ * keeps the raw scaled size (`driver-image-svg.ts`, jar-verified).
+ */
+function imageAtomRun(
+  box: { readonly href: string; readonly width: number; readonly height: number },
+  drawn: { readonly width: number; readonly height: number },
+  origin: CreoleOrigin,
+  descent: number,
+): TextRun {
+  return {
+    text: '',
+    x: origin.leftX,
+    y: origin.baselineY,
+    textWidth: box.width,
+    textAscent: box.height - descent,
+    textLineHeight: box.height,
+    image: { href: box.href, width: drawn.width, height: drawn.height, y: origin.baselineY + descent - box.height },
+  };
+}
+
+/**
+ * One `'latex'` atom as an image run -- `AtomMath#calculateDimensionSlow`
+ * measures the rendered image's own box and `#drawU` draws that same image
+ * (`AtomMath.java:64-97`), which `core/latex.ts#renderLatexAsImage` answers
+ * in one call, so the measured and the drawn box agree by construction.
  *
  * The colour is `XColor.BLACK`, `AtomMath#getColor`'s own default when the
  * atom's `foreground` is not an `HColorSimple` (`AtomMath.java:88,100-106`);
  * a `<color:…>` around the formula sets the atom's own.
- *
- * `textAscent`/`textLineHeight` report the IMAGE's height: they are the run's
- * line-box metrics, and this run's box is the image.
  */
-function latexAtomRun(
-  atom: Extract<CreoleAtom, { kind: 'latex' }>,
-  x: number,
-  baselineY: number,
-  descent: number,
-): TextRun {
+function latexAtomRun(atom: Extract<CreoleAtom, { kind: 'latex' }>, origin: CreoleOrigin, descent: number): TextRun {
   const drawn = renderLatexAsImage(atom.expr, atom.color ?? ATOM_MATH_DEFAULT_COLOR);
-  return {
-    text: '',
-    x,
-    y: baselineY,
-    textWidth: drawn.width,
-    textAscent: drawn.height,
-    textLineHeight: drawn.height,
-    image: { href: drawn.href, width: drawn.width, height: drawn.height, y: baselineY + descent - drawn.height },
-  };
+  return imageAtomRun(drawn, drawn, origin, descent);
+}
+
+/**
+ * What a sequence label needs to resolve `<$sprite>`/`<img>` atoms: the
+ * diagram's sprite registry (`skinParam.getSprite(src)`,
+ * `StripeSimple.java:229`) and the label's own font colour, which
+ * `StripeSimple#addSprite` hands `AtomSprite` as its `fontColor`
+ * (`fontConfiguration.getColor()`, `StripeSimple.java:233`) and a monochrome
+ * sprite tints with (`SpriteMonochrome.java:216-217`).
+ */
+export interface SequenceAtomContext {
+  readonly sprites: SpriteRegistry;
+  readonly fontColor: string;
+}
+
+/** A resolved raster `'inline'` atom -- an `<img>` or a monochrome/4096-colour
+ *  sprite, both drawn as one `<image>`. */
+interface RasterAtom {
+  readonly kind: 'raster';
+  readonly href: string;
+  readonly width: number;
+  readonly height: number;
+  readonly rasterWidth?: number;
+  readonly rasterHeight?: number;
+}
+
+/** The atoms a line can DRAW here, in order. */
+type DrawableAtom = Extract<CreoleAtom, { kind: 'text' } | { kind: 'latex' }> | RasterAtom;
+
+/** Marks a line that must fall back to its whole literal text. */
+const LITERAL_LINE = 'literal';
+
+/**
+ * One `'inline'` atom through the SHARED resolver every description/usecase
+ * textblock uses (`core/creole-atoms-image-resolver.ts
+ * #makeAtomImageResolverFor`): `<img>` -> its data URI, a monochrome or
+ * 4096-colour sprite -> a rasterised PNG, both at the `CommandCreoleSprite`
+ * `fc.getSize2D() / 13.0` scale of the font active AT THE ATOM
+ * (`ambientFont`, `CommandCreoleSprite.java:82`).
+ *
+ * - `undefined` -- an unknown sprite name. `StripeSimple#addSprite` adds NO
+ *   atom when `skinParam.getSprite(src)` is null (`StripeSimple.java:228-
+ *   235`), so the atom contributes nothing at all.
+ * - {@link LITERAL_LINE} -- an OpenIconic glyph or an SVG sprite, which draw
+ *   vector primitives this engine's `TextRun` has no field for (the named
+ *   remainder in this module's doc comment).
+ */
+function resolveInlineAtom(
+  atom: Extract<CreoleAtom, { kind: 'inline' }>,
+  resolverFor: (font: FontConfiguration) => AtomImageResolver,
+  lineFont: FontConfiguration,
+  fontColor: string,
+): RasterAtom | undefined | typeof LITERAL_LINE {
+  if (atom.atom.kind === 'openiconic') return LITERAL_LINE;
+  const resolved = resolverFor({ ...(atom.ambientFont ?? lineFont), color: fontColor })(atom.atom);
+  if (resolved === undefined) return undefined;
+  if (resolved.kind === 'drawable') return LITERAL_LINE;
+  return { ...resolved, kind: 'raster' };
+}
+
+/**
+ * The line's atoms as the drawable sequence, or `undefined` when the line
+ * holds an atom this engine cannot draw and must stay wholly literal. Without
+ * a {@link SequenceAtomContext} every `'inline'` atom is undrawable, which is
+ * the behaviour every caller outside the participant head still relies on.
+ */
+function drawableAtoms(
+  atoms: readonly CreoleAtom[],
+  lineFont: FontConfiguration,
+  context: SequenceAtomContext | undefined,
+): readonly DrawableAtom[] | undefined {
+  const resolverFor = context === undefined ? undefined : makeAtomImageResolverFor(context.sprites);
+  const out: DrawableAtom[] = [];
+  for (const atom of atoms) {
+    if (atom.kind === 'text' || atom.kind === 'latex') {
+      out.push(atom);
+      continue;
+    }
+    if (atom.kind !== 'inline' || resolverFor === undefined || context === undefined) return undefined;
+    const raster = resolveInlineAtom(atom, resolverFor, lineFont, context.fontColor);
+    if (raster === LITERAL_LINE) return undefined;
+    if (raster !== undefined) out.push(raster);
+  }
+  return out;
+}
+
+/** `DriverImageSvg`'s emitted size: `Math.round` when a real raster backs the
+ *  image, the declared size otherwise (`driver-image-svg.ts`, jar-verified). */
+function rasterDrawnSize(atom: RasterAtom): { readonly width: number; readonly height: number } {
+  if (atom.rasterWidth === undefined || atom.rasterHeight === undefined) return atom;
+  return { width: atom.rasterWidth, height: atom.rasterHeight };
 }
 
 /** `AtomMath#getColor`'s own `XColor.BLACK` default (`AtomMath.java:88`) --
@@ -277,6 +398,7 @@ export function sequenceCreoleRuns(
   font: FontConfiguration,
   origin: CreoleOrigin,
   measurer: StringMeasurer,
+  atomContext?: SequenceAtomContext,
 ): readonly TextRun[] {
   // GUILLEMETS, which upstream rewrites on the DISPLAY LINE before any
   // classification happens:
@@ -338,31 +460,38 @@ export function sequenceCreoleRuns(
   // `zimoci-54-sedi066`) the jar draws the sprite as a `<path>`, this port
   // draws neither path nor text, and the resulting 12-against-13 child count
   // short-circuits the comparator above the other twelve elements. The literal
-  // run is wrong in CONTENT and right in COUNT; emitting nothing is wrong in
-  // both, and also silently discards the fact that a sprite was asked for.
-  //
-  // This is a REMAINDER, not a design: it retires the day sequence geometry
-  // gains a kind that carries an `<image>`, which is the follow-on
-  // `.agent-notes/C1-sequence-creole-seam.md` files.
-  if (atoms.some((a) => a.kind !== 'text' && a.kind !== 'latex')) {
+  // run is wrong in CONTENT and right in COUNT. cdd7 T1f narrowed the fallback
+  // to vector atoms and context-less callers (named remainders above).
+  const drawable = drawableAtoms(atoms, built.lineFont, atomContext);
+  if (drawable === undefined) {
     const literal = { kind: 'text' as const, text: manageGuillemet(line), font: built.lineFont };
     return [textAtomRun(literal, origin.leftX, origin.baselineY, measurer)];
   }
+  return placeDrawableAtoms(drawable, origin, measurer, measurer.getDescent(atomFontSpec(built.lineFont), 'M'));
+}
 
+/**
+ * The drawable atoms, placed left to right on one baseline.
+ *
+ * `lineDescent` is the LINE's own descent, which every image atom's box
+ * bottom is measured from -- `Sea` aligns the boxes, not the glyphs
+ * (`Sea.java:72-80`). Read once, off the line font, for the same reason
+ * `messageLabelBlock` reads it once.
+ */
+function placeDrawableAtoms(
+  atoms: readonly DrawableAtom[],
+  origin: CreoleOrigin,
+  measurer: StringMeasurer,
+  lineDescent: number,
+): readonly TextRun[] {
   const runs: TextRun[] = [];
   let x = origin.leftX;
-  // The LINE's own descent, which every atom's box bottom is measured from --
-  // `Sea` aligns the boxes, not the glyphs (`Sea.java:72-80`). Read once, off
-  // the line font, for the same reason `messageLabelBlock` reads it once.
-  const lineDescent = measurer.getDescent(atomFontSpec(built.lineFont), 'M');
   for (const atom of atoms) {
-    // Every atom here is a `'text'` or a `'latex'` atom: the guard above
-    // returned for any line that held anything else.
-    if (atom.kind !== 'text' && atom.kind !== 'latex') continue;
-    const run =
-      atom.kind === 'latex'
-        ? latexAtomRun(atom, x, origin.baselineY, lineDescent)
-        : textAtomRun(atom, x, origin.baselineY, measurer);
+    const at = { leftX: x, baselineY: origin.baselineY };
+    let run: TextRun;
+    if (atom.kind === 'latex') run = latexAtomRun(atom, at, lineDescent);
+    else if (atom.kind === 'raster') run = imageAtomRun(atom, rasterDrawnSize(atom), at, lineDescent);
+    else run = textAtomRun(atom, x, origin.baselineY, measurer);
     runs.push(run);
     x += run.textWidth;
   }
