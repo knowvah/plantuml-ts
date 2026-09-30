@@ -145,14 +145,18 @@ export function elementTitleFontColor(theme: Theme, sname: string, tags: readonl
  * StereotypeFontColor<<label>>` ({stereotype, <sname>} + label) and
  * `<sname>FontColor<<label>>` ({<sname>} + label); upstream keeps whichever
  * was REGISTERED LATER (`DarkString.java:54-57`, priority = declaration
- * counter), which the flat maps do not record -- the stereotype tier goes
- * first, as {@link clusterStereoFontColor} already orders it (jar probe:
- * `FontColor` then `StereotypeFontColor<<person>>` draws the stereo red).
- * Then `<sname> { stereotype { FontColor } }`, then `<sname> { FontColor }`.
+ * counter). T1d (fepiko-26-vobi566): the skinparam front-end now records
+ * that tie-break itself in `stereoTextFontByStereo`
+ * (`skinparam-stereo-keys.ts#applyFontColorByStereo`), so it is read FIRST;
+ * `stereotypeFontByStereo`/`fontByStereo` remain as the fallback for a value
+ * set by the `<style>` block front-end alone (`style-map-element.ts
+ * #collectTagFontColor`), which does not populate the merged field. Then
+ * `<sname> { stereotype { FontColor } }`, then `<sname> { FontColor } }`.
  */
 export function elementStereoFontColor(theme: Theme, sname: string, tags: readonly string[]): string | undefined {
   const b = theme.colors.elements?.[sname];
   return (
+    byStereo(b?.stereoTextFontByStereo, tags) ??
     byStereo(b?.stereotypeFontByStereo, tags) ??
     byStereo(b?.fontByStereo, tags) ??
     b?.stereotypeFont ??
