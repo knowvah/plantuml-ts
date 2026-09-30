@@ -1,5 +1,6 @@
 import json,re,collections
-rows=json.load(open('/tmp/cdd5-rowfam.json'))
+from pathlib import Path
+rows=json.loads(Path('/tmp/cdd5-rowfam.json').read_text())
 def prim(v): return re.split(r'\s*\(\+|\s+\+\s', v[0][1])[0].strip()
 MERGE={'descriptive-usymbol-render-allowlist':'desc-leaf-classbox-fallback','json-node-edge-shield-port':'json-node-emitted-as-shield'}
 P={s:MERGE.get(prim(v),prim(v)) for s,v in rows.items()}
@@ -27,4 +28,4 @@ if __name__=='__main__':
     for t in sorted(TASKS): print(t,TASKS[t][0],len(sched[t]))
     print('scheduled',sum(len(v) for v in sched.values()),'deferred',sum(len(v) for v in deferred.values()))
     for f,v in sorted(deferred.items()): print('  defer',f,len(v))
-    json.dump({'P':P,'sched':sched,'deferred':deferred,'TASKS':TASKS},open('/tmp/cdd5-sched.json','w'),indent=1)
+    Path('/tmp/cdd5-sched.json').write_text(json.dumps({'P':P,'sched':sched,'deferred':deferred,'TASKS':TASKS},indent=1))

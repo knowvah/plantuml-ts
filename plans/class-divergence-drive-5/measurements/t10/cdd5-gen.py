@@ -1,10 +1,11 @@
 import json,re,collections,os
-exec(open('/tmp/cdd5-schedule.py').read().split("if __name__")[0])
+from pathlib import Path
+exec(Path('/tmp/cdd5-schedule.py').read_text().split("if __name__")[0])
 D='plans/class-divergence-drive-5/diagnosis/'
 # per-row sections
 sec={}
 for f in ['S1-text','S2-edge','S3-structure','S4-style']:
-    txt=open(D+f+'.md').read()
+    txt=Path(D+f+'.md').read_text()
     parts=re.split(r'^### ',txt,flags=re.M)[1:]
     for p in parts:
         head=p.split('\n',1)[0]; m=re.match(r'((?:class|unknown)/\S+) — (.+)',head)
@@ -15,7 +16,7 @@ for f in ['S1-text','S2-edge','S3-structure','S4-style']:
             mm=re.match(r'- (first diff|Java|port|mechanism|confidence|Java / port / mechanism)[^:]*: ?(.*)',l)
             if mm: fld[mm.group(1)]=mm.group(2).strip()
         fld['shard']=f; sec[m.group(1)]=fld
-famtab=json.load(open('/tmp/cdd5-famtab.json'))
+famtab=json.loads(Path('/tmp/cdd5-famtab.json').read_text())
 def fam_mech(fam):
     for s,f in P.items():
         if f==fam and sec[s].get('mechanism') and not sec[s]['mechanism'].lower().startswith('as '):
@@ -28,7 +29,7 @@ def row_mech(s):
     if not m or re.match(r'(?i)as \w',m):
         _,f=fam_mech(P[s]); m=(f.get('mechanism') or m)
     return m.replace('|','/')
-json.dump({'sec':sec},open('/tmp/cdd5-sec.json','w'))
+Path('/tmp/cdd5-sec.json').write_text(json.dumps({'sec':sec}))
 
 import subprocess
 ALL=subprocess.check_output(['git','ls-files','src','scripts']).decode().split()
@@ -77,9 +78,9 @@ for f in allfams:
     bt=f'T{task}' if task else ('accept-candidate' if f.startswith('accept-candidate') else ('harness -> cdd6' if f.startswith('harness') else 'open -> cdd6'))
     lines.append(f"| {f} | {rs} | {'; '.join(java_refs([f]))[:220]} | {', '.join(ws_files([f]+[k for k,v in MERGE.items() if v==f]))} | {size_of([f])} | {conf[0][0] if conf and conf[0][0] else '—'} | {bt} |")
 lines+=['',f'Scheduled: 14 tasks, {sum(len(v) for v in sched.values())} rows. Deferred: {sum(len(v) for v in deferred.values())} rows (see fixtures.md `final`).']
-open(D+'families.md','w').write('\n'.join(lines)+'\n')
+Path(D+'families.md').write_text('\n'.join(lines)+'\n')
 # ---- fixtures.md
-fx=open('plans/class-divergence-drive-5/fixtures.md').read().split('\n')
+fx=Path('plans/class-divergence-drive-5/fixtures.md').read_text().split('\n')
 out=[]
 for l in fx:
     if l.startswith('| class/') or l.startswith('| unknown/'):
@@ -92,7 +93,7 @@ for l in fx:
             c[6]=' '+row_mech(s)+' '; c[7]=' '+f+' '; c[8]=' '+fin+' '
             l='|'.join(c)
     out.append(l)
-open('plans/class-divergence-drive-5/fixtures.md','w').write('\n'.join(out))
+Path('plans/class-divergence-drive-5/fixtures.md').write_text('\n'.join(out))
 print('ok')
 
 EXTRA={'4b':['src/diagrams/class/renderer.ts','src/diagrams/class/renderer-classifier-header-split.ts','src/diagrams/class/renderer-classifier-box.ts']}
@@ -108,7 +109,7 @@ NOTES={
 tmpl_rows=lambda t: '\n'.join(f'- `{s}`' for s in sorted(sched[t]))
 def famnote(f):
     for sh in ['S1-text','S2-edge','S3-structure','S4-style']:
-        txt=open(D+sh+'.md').read()
+        txt=Path(D+sh+'.md').read_text()
         m=re.search(r'\*\*'+re.escape(f)+r'[^*]*\*\*\s*(.+?)(?:\n\n|$)',txt,re.S)
         if m: return sh,m.group(1).strip().replace('\n',' ')
     return None,None
@@ -217,6 +218,6 @@ and the rows moved. No attribution lines.
 
 **Observability:** N/A — no new observable operations. **Rollback:** Reversible.
 """
-        open(f'plans/class-divergence-drive-5/batch-{b}/{fn}','w').write(spec)
-    open(f'plans/class-divergence-drive-5/batch-{b}/overview.md','w').write('\n'.join(ov)+'\n')
+        Path(f'plans/class-divergence-drive-5/batch-{b}/{fn}').write_text(spec)
+    Path(f'plans/class-divergence-drive-5/batch-{b}/overview.md').write_text('\n'.join(ov)+'\n')
 print('specs written')
