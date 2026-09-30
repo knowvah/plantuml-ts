@@ -24,6 +24,7 @@
 
 import { getColor } from './ColorTrieNode.js';
 import type { RgbTriple } from './ColorTrieNode.js';
+import type { GradientPolicy, HColorGradient } from './HColorGradient.js';
 import { HColors } from './HColors.js';
 import type { HColorSimple } from './HColorSimple.js';
 import { NoSuchColorException } from './NoSuchColorException.js';
@@ -222,7 +223,7 @@ export function resolveConditionalColor(raw: string, localBackgroundHex: string)
   return resolveColorToSvgHex(dark ? spec.dark : spec.light);
 }
 
-/** The gradient policy characters `HColorSet#parseColor` scans for (HColorSet.java:98). */
+/** The gradient policy characters `HColorSet#parseColor` scans for (HColorSet.java:111). */
 const GRADIENT_POLICIES = new Set(['-', '\\', '|', '/']);
 
 /**
@@ -249,24 +250,33 @@ function parseScheme(s: string): void {
   if (parseSimpleColor(colors[2] as string) !== undefined) throw unported('HColorScheme', s);
 }
 
-/** The gradient scan of `HColorSet#parseColor` (java:97-104); `HColorGradient` is not ported. */
-function parseGradient(s: string): void {
+/**
+ * The gradient scan of `HColorSet#parseColor`: the first separator, in
+ * position order, whose two halves both parse as simple colours.
+ * @see HColorSet.java:109-117
+ */
+function parseGradient(s: string): HColorGradient | undefined {
   for (let i = 0; i < s.length; i++) {
-    if (!GRADIENT_POLICIES.has(s.charAt(i))) continue;
-    if (parseSimpleColor(s.substring(0, i)) !== undefined && parseSimpleColor(s.substring(i + 1)) !== undefined)
-      throw unported('HColorGradient', s);
+    const c = s.charAt(i);
+    if (!GRADIENT_POLICIES.has(c)) continue;
+    const col0 = parseSimpleColor(s.substring(0, i));
+    const col1 = parseSimpleColor(s.substring(i + 1));
+    if (col0 !== undefined && col1 !== undefined)
+      return HColors.gradient(HColors.simple(col0), HColors.simple(col1), c as GradientPolicy);
   }
+  return undefined;
 }
 
 /**
  * HColorSet — the colour-name/hex resolver as upstream's singleton class,
  * layered over this module's {@link parseSimpleColor} (the private
- * `HColorSet#parseSimpleColor`, java:109-148). Resolves to
- * {@link HColorSimple}; the `automatic`, `?light:dark` and gradient forms
- * (`HColorAutomagic`, `HColorScheme`, `HColorGradient`) are not ported and
- * throw. `names()` is not ported. Stateless.
+ * `HColorSet#parseSimpleColor`, java:122-157). Resolves to
+ * {@link HColorSimple}, or {@link HColorGradient} for a `c1<policy>c2`
+ * token (java:109-117). The `automatic` and `?light:dark` forms
+ * (`HColorAutomagic`, `HColorScheme`) are not ported and throw: no mindmap
+ * fixture reaches either (b6-T6a). `names()` is not ported. Stateless.
  *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:43-107
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:43-120
  */
 export class HColorSet {
   /** @see HColorSet.java:45 */
@@ -281,17 +291,17 @@ export class HColorSet {
   private constructor() {}
 
   /** `parseColor(s)`, else `HColors.WHITE`. @see HColorSet.java:58-63 */
-  getColorOrWhite(s: string): HColorSimple {
+  getColorOrWhite(s: string): HColorSimple | HColorGradient {
     return this.parseColor(s) ?? HColors.WHITE;
   }
 
   /** `undefined` where upstream returns `null`. @see HColorSet.java:65-67 */
-  getColorOrNull(s: string): HColorSimple | undefined {
+  getColorOrNull(s: string): HColorSimple | HColorGradient | undefined {
     return this.parseColor(s);
   }
 
   /** @see HColorSet.java:69-76 */
-  getColor(s: string): HColorSimple {
+  getColor(s: string): HColorSimple | HColorGradient {
     const result = this.parseColor(s);
     if (result === undefined) throw new NoSuchColorException();
     return result;
@@ -301,9 +311,9 @@ export class HColorSet {
    * Upstream's second `equalsIgnoreCase("transparent")` test (java:84-85)
    * is unreachable after the first (java:78-79) and is not repeated.
    *
-   * @see HColorSet.java:78-107
+   * @see HColorSet.java:78-120
    */
-  private parseColor(sIn: string): HColorSimple | undefined {
+  private parseColor(sIn: string): HColorSimple | HColorGradient | undefined {
     const s = sIn.startsWith('#') ? sIn.substring(1) : sIn;
     const lower = s.toLowerCase();
     if (lower === 'transparent' || lower === 'background') return HColors.none();
@@ -313,7 +323,6 @@ export class HColorSet {
     if (result !== undefined) return HColors.simple(result);
 
     if (s.startsWith('?')) parseScheme(s);
-    parseGradient(s);
-    return undefined;
+    return parseGradient(s);
   }
 }

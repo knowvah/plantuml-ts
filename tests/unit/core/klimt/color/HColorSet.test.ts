@@ -5,6 +5,7 @@ import {
   toSvgHex,
   resolveColorToSvgHex,
 } from '../../../../../src/core/klimt/color/HColorSet.js';
+import { HColorSimple } from '../../../../../src/core/klimt/color/HColorSimple.js';
 import { HColors } from '../../../../../src/core/klimt/color/HColors.js';
 import { NoSuchColorException } from '../../../../../src/core/klimt/color/NoSuchColorException.js';
 
@@ -93,16 +94,21 @@ describe('resolveColorToSvgHex', () => {
   });
 });
 
-describe('HColorSet class (HColorSet.java:43-107)', () => {
+describe('HColorSet class (HColorSet.java:43-120)', () => {
   const set = HColorSet.instance();
+  const simple = (s: string): HColorSimple => {
+    const c = set.getColorOrWhite(s);
+    if (!(c instanceof HColorSimple)) throw new Error(`not simple: ${s}`);
+    return c;
+  };
 
   it('instance() is a singleton', () => {
     expect(HColorSet.instance()).toBe(set);
   });
 
   it('getColorOrWhite: hex, names, a leading #; WHITE for an unknown token', () => {
-    expect(set.getColorOrWhite('#181818').toString()).toBe('[r=24,g=24,b=24,a=255] α=255');
-    expect(set.getColorOrWhite('lightGreen').toString()).toBe('[r=144,g=238,b=144,a=255] α=255');
+    expect(simple('#181818').toString()).toBe('[r=24,g=24,b=24,a=255] α=255');
+    expect(simple('lightGreen').toString()).toBe('[r=144,g=238,b=144,a=255] α=255');
     expect(set.getColorOrWhite('#8').asString()).toBe('#888888');
     expect(set.getColorOrWhite('nosuchcolour')).toBe(HColors.WHITE);
   });
@@ -123,11 +129,14 @@ describe('HColorSet class (HColorSet.java:43-107)', () => {
     expect(set.getColor('blue').asString()).toBe('#0000FF');
   });
 
-  it('the unported HColorAutomagic / HColorScheme / HColorGradient results throw rather than resolve', () => {
+  it('the unported HColorAutomagic / HColorScheme results throw rather than resolve', () => {
     expect(() => set.getColorOrWhite('automatic')).toThrow('HColorAutomagic');
     expect(() => set.getColorOrWhite('#?red:blue')).toThrow('HColorScheme');
     expect(() => set.getColorOrWhite('#?red:blue:green')).toThrow('HColorScheme');
-    expect(() => set.getColorOrWhite('red-blue')).toThrow('HColorGradient');
+  });
+
+  it('a c1<policy>c2 token is an HColorGradient (java:109-117), asString "?HColorGradient" (HColor.java:113-115)', () => {
+    expect(set.getColorOrWhite('red-blue').asString()).toBe('?HColorGradient');
   });
 
   it('`?` with an unparsable 2-part scheme reads colors[2]: ArrayIndexOutOfBounds (java:88-94)', () => {
