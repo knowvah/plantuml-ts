@@ -29,7 +29,7 @@ Brief: `plans/mindmap-engine-port/` (README, decisions.md D1–D12).
 2. Fix each at its origin; no fix without the stated mechanism.
 
 ## Write-set
-`src/diagrams/mindmap/{FingerImpl,mindmap-skin-param}.ts` (label/AtomOps path), `src/diagrams/activity/ftile/vertical/FtileBoxOld.ts` (sheet call only), creole modules ONLY as a cited port of an unported branch (name them in the report; D11 gates them), tests under `tests/unit/mindmap/`.
+`src/diagrams/mindmap/FingerImpl.ts` (label/AtomOps path; `mindmap-skin-param.ts` is T6b's — a needed `getSprite` hook is reported, not edited), `src/diagrams/activity/ftile/vertical/FtileBoxOld.ts` (sheet call only), creole modules ONLY as a cited port of an unported branch (name them in the report; D11 gates them), tests under `tests/unit/mindmap/`.
 
 ## Read-set
 `CommandMindMapOrgmode.java:59-64`, `FingerImpl.java:200-236`, `FtileBoxOld.java:148-176`, `klimt/creole/{Sheet,StripeSimple,SheetBlock1,atom/*}.java`, `openiconic` sprite loading in `SkinParam.java`; `src/core/klimt/creole/*`, `src/core/annotations/blocks-creole.ts:340`.
