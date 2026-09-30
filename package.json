@@ -45,6 +45,7 @@
     "build": "vite build",
     "catalog": "jiti scripts/generate-catalog.ts",
     "catalog:check": "jiti scripts/generate-catalog.ts --check",
+    "skin:extract": "jiti scripts/extract-jar-skin.ts",
     "build:demo": "vite build --config demo/vite.config.ts",
     "build:stdlib": "npm run build && jiti scripts/build-stdlib-packages.ts && npm run typecheck --workspaces --if-present",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.node.json --noEmit",
