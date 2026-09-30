@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1252 modules · 4715 exported names.
+1263 modules · 4740 exported names.
 
 ## `src/`
 
@@ -167,7 +167,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Colors.ts` | `HColor`, `Colors` |  |
 | `ColorType.ts` | `ColorType`, `getType` | ColorType — which slot of an element's color set a color applies to (`klimt/color/ColorType.java`). |
 | `CucaNote.ts` | `CucaNote` |  |
-| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar` | Direction — the four-way direction selector (`utils/Direction.java`). |
+| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf` | Direction — the four-way direction selector (`utils/Direction.java`). |
 | `DisplayPositioned.ts` | `DisplayPositioned` |  |
 | `Entity.ts` | `Entity` |  |
 | `EntityBase.ts` | `EntityBase` |  |
@@ -1442,6 +1442,22 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `TextBlockJson.ts` | `JsonRowGeo`, `CellAtom`, `MeasuredNode`, `buildRows`, `measureNode`, `recordLabelFor` | Node sizing for the json family — the port of upstream's `TextBlockJson`. |
+
+## `src/diagrams/mindmap/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Branch.ts` | `Branch` |  |
+| `CommandMindMapDirection.ts` | `MINDMAP_DIRECTION_RE`, `applyMindMapDirection` |  |
+| `CommandMindMapOrgmode.ts` | `ORGMODE_RE`, `applyMindMapOrgmode` |  |
+| `CommandMindMapOrgmodeMultiline.ts` | `ORGMODE_MULTILINE_START_RE`, `ORGMODE_MULTILINE_END_RE`, `OrgmodeMultilineBlock`, `collectOrgmodeMultilineBlock`, `applyMindMapOrgmodeMultiline` |  |
+| `CommandMindMapPlus.ts` | `PLUS_RE`, `applyMindMapPlus` |  |
+| `CommandMindMapRoot.ts` | `ROOT_RE`, `applyMindMapRoot` |  |
+| `Idea.ts` | `IdeaContent`, `IdeaDecoration`, `Idea` |  |
+| `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
+| `MindMap.ts` | `MindMapStyleSource`, `MindMap` |  |
+| `MindMapDiagram.ts` | `MindMapDiagram` |  |
+| `MindMapDiagramFactory.ts` | `MindMapDiagramOptions`, `createMindMapDiagram` |  |
 
 ## `src/diagrams/packetdiag/`
 
