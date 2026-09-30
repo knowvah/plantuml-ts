@@ -1,0 +1,3062 @@
+{
+  "authored-nesting": {
+    "source": "@startmindmap\n<style>\n/* block comment */\nmindmapDiagram {\n  --accent: #ABCDEF;\n  node {\n    Padding 12\n    :depth(1) {\n      BackGroundColor var(--accent)\n      leafNode {\n        FontColor red\n        LineColor \"#123456\"\n      }\n    }\n  }\n  .hot, .cold {\n    BackGroundColor pink\n  }\n  boxless * {\n    FontSize 18\n  }\n  arrow, rootNode {\n    LineThickness 3.0; LineStyle 4-2\n  }\n  :depth(2) * {\n    FontStyle bold\n  }\n}\n// line comment\n@media (prefers-color-scheme:dark) {\n  mindmapDiagram {\n    node { BackGroundColor black }\n  }\n}\n</style>\n* r\n** a <<hot>>\n*** b\n@endmindmap\n",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["hot"],
+        "values": {
+          "BackGroundColor": ["pink", null, 1330]
+        }
+      },
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["cold"],
+        "values": {
+          "BackGroundColor": ["pink", null, 1330]
+        }
+      }
+    ],
+    "plainLength": 131,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": [null, "black", 335],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["12", null, 326],
+          "Margin": ["10", null, 154]
+        }
+      },
+      "75": {
+        "snames": ["arrow", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["3.0", null, 332],
+          "LineStyle": ["4-2", null, 333]
+        }
+      },
+      "126": {
+        "snames": ["leafNode", "mindmapDiagram", "node"],
+        "level": 1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["red", null, 328],
+          "LineColor": ["#123456", null, 329]
+        }
+      },
+      "127": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": 1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#ABCDEF", null, 327]
+        }
+      },
+      "128": {
+        "snames": ["boxless", "mindmapDiagram"],
+        "level": -1,
+        "star": true,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["18", null, 331]
+        }
+      },
+      "129": {
+        "snames": ["mindmapDiagram", "rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["3.0", null, 332],
+          "LineStyle": ["4-2", null, 333]
+        }
+      },
+      "130": {
+        "snames": ["mindmapDiagram"],
+        "level": 2,
+        "star": true,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["bold", null, 334]
+        }
+      }
+    }
+  },
+  "authored-skin-debug": {
+    "source": "@startmindmap\nskin debug\n* r\n@endmindmap\n",
+    "full": [
+      {
+        "snames": ["root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 12],
+          "FontName": ["SansSerif", null, 1],
+          "FontColor": ["green", null, 3],
+          "FontSize": ["19", null, 4],
+          "FontStyle": ["plain", null, 5],
+          "BackGroundColor": ["#AAA", null, 11],
+          "RoundCorner": ["15", null, 7],
+          "LineThickness": ["4", null, 10],
+          "DiagonalCorner": ["0", null, 8],
+          "HyperLinkColor": ["red", null, 2],
+          "LineColor": ["#3600A8", null, 9],
+          "HorizontalAlignment": ["left", null, 6]
+        }
+      },
+      {
+        "snames": ["stereotype"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 13],
+          "FontSize": ["8", null, 14],
+          "FontStyle": ["bold", null, 15]
+        }
+      },
+      {
+        "snames": ["title"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 18],
+          "FontSize": ["24", null, 17],
+          "HorizontalAlignment": ["right", null, 16]
+        }
+      },
+      {
+        "snames": ["header"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["purple", null, 21],
+          "FontSize": ["26", null, 20],
+          "HorizontalAlignment": ["center", null, 19]
+        }
+      },
+      {
+        "snames": ["footer"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["red", null, 24],
+          "FontSize": ["28", null, 23],
+          "HorizontalAlignment": ["left", null, 22]
+        }
+      },
+      {
+        "snames": ["legend"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["30", null, 25],
+          "BackGroundColor": ["yellow", null, 26],
+          "Padding": ["50", null, 28],
+          "Margin": ["30", null, 27]
+        }
+      },
+      {
+        "snames": ["caption"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["32", null, 29]
+        }
+      },
+      {
+        "snames": ["element"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#CEFEFE", null, 30]
+        }
+      },
+      {
+        "snames": ["group"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["red", null, 36],
+          "FontSize": ["12", null, 34],
+          "FontStyle": ["italic", null, 35],
+          "BackGroundColor": ["MistyRose", null, 32],
+          "LineThickness": ["3.5", null, 31],
+          "LineColor": ["DarkOrange", null, 33]
+        }
+      },
+      {
+        "snames": ["groupHeader"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 42],
+          "FontSize": ["18", null, 40],
+          "FontStyle": ["bold", null, 41],
+          "BackGroundColor": ["tan", null, 37],
+          "LineThickness": ["0.5", null, 38],
+          "LineColor": ["yellow", null, 39]
+        }
+      },
+      {
+        "snames": ["lifeLine"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 43]
+        }
+      },
+      {
+        "snames": ["destroy"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["red", null, 44]
+        }
+      },
+      {
+        "snames": ["reference"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 48],
+          "FontSize": ["10", null, 46],
+          "FontStyle": ["bold", null, 47],
+          "BackGroundColor": ["gold", null, 49],
+          "LineColor": ["red", null, 45],
+          "HorizontalAlignment": ["right", null, 50]
+        }
+      },
+      {
+        "snames": ["box"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["Maroon", null, 56],
+          "FontSize": ["12", null, 54],
+          "FontStyle": ["italic", null, 55],
+          "BackGroundColor": ["PowderBlue", null, 53],
+          "LineThickness": ["4", null, 51],
+          "LineColor": ["FireBrick", null, 52]
+        }
+      },
+      {
+        "snames": ["separator"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["white", null, 61],
+          "FontSize": ["16", null, 59],
+          "FontStyle": ["bold", null, 60],
+          "BackGroundColor": ["green", null, 58],
+          "LineColor": ["red", null, 57]
+        }
+      },
+      {
+        "snames": ["delay"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["22", null, 62],
+          "FontStyle": ["italic", null, 63]
+        }
+      },
+      {
+        "snames": ["newpage"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["fuchsia", null, 64]
+        }
+      },
+      {
+        "snames": ["participant"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 65]
+        }
+      },
+      {
+        "snames": ["actor"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 66]
+        }
+      },
+      {
+        "snames": ["boundary"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 67]
+        }
+      },
+      {
+        "snames": ["control"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 68]
+        }
+      },
+      {
+        "snames": ["entity"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 69]
+        }
+      },
+      {
+        "snames": ["queue"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 70]
+        }
+      },
+      {
+        "snames": ["database"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 71]
+        }
+      },
+      {
+        "snames": ["collections"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["4", null, 72]
+        }
+      },
+      {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 73],
+          "LineColor": ["Lime", null, 74]
+        }
+      },
+      {
+        "snames": ["note"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["GoldenRod", null, 75]
+        }
+      },
+      {
+        "snames": ["activity"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontName": ["arial", null, 78],
+          "FontColor": ["#888", null, 77],
+          "BackGroundColor": ["#33668E", null, 76]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "diamond"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontName": ["arial", null, 81],
+          "FontColor": ["red", null, 80],
+          "FontSize": ["5", null, 82],
+          "BackGroundColor": ["#dae4f1", null, 79]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontName": ["arial", null, 84],
+          "FontColor": ["gold", null, 83],
+          "FontSize": ["15", null, 85]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "partition"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["green", null, 87],
+          "RoundCorner": ["30", null, 88],
+          "LineColor": ["red", null, 86]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "note"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["Blue", null, 89],
+          "LineColor": ["yellow", null, 90]
+        }
+      },
+      {
+        "snames": ["circle"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["yellow", null, 91]
+        }
+      },
+      {
+        "snames": ["activityBar"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["lightGreen", null, 92]
+        }
+      },
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["10", null, 93],
+          "Margin": ["10", null, 94]
+        }
+      }
+    ]
+  },
+  "authored-skin-rose": {
+    "source": "@startmindmap\nskin rose\n<style>\nmindmapDiagram {\n  node {\n    BackGroundColor lightblue\n  }\n}\n</style>\n* r\n** a\n@endmindmap\n",
+    "full": [
+      {
+        "snames": ["root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 13],
+          "FontName": ["SansSerif", null, 1],
+          "FontColor": ["black", null, 4],
+          "FontSize": ["14", null, 5],
+          "FontStyle": ["plain", null, 6],
+          "BackGroundColor": ["#FEFECE", null, 12],
+          "RoundCorner": ["0", null, 8],
+          "LineThickness": ["1.0", null, 10],
+          "DiagonalCorner": ["0", null, 9],
+          "HyperLinkColor": ["blue", null, 2],
+          "HyperlinkUnderlineThickness": ["1", null, 3],
+          "LineColor": ["#A80036", null, 11],
+          "HorizontalAlignment": ["left", null, 7]
+        }
+      },
+      {
+        "snames": ["document", "header"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["#8", null, 17],
+          "FontSize": ["10", null, 16],
+          "BackGroundColor": ["transparent", null, 18],
+          "LineColor": ["transparent", null, 19],
+          "HorizontalAlignment": ["right", null, 15]
+        }
+      },
+      {
+        "snames": ["document", "title"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["14", null, 21],
+          "FontStyle": ["bold", null, 22],
+          "BackGroundColor": ["transparent", null, 26],
+          "LineColor": ["transparent", null, 25],
+          "Padding": ["5", null, 23],
+          "Margin": ["5", null, 24],
+          "HorizontalAlignment": ["center", null, 20]
+        }
+      },
+      {
+        "snames": ["document", "footer"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["#8", null, 29],
+          "FontSize": ["10", null, 28],
+          "BackGroundColor": ["transparent", null, 30],
+          "LineColor": ["transparent", null, 31],
+          "HorizontalAlignment": ["center", null, 27]
+        }
+      },
+      {
+        "snames": ["document", "legend"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["14", null, 34],
+          "BackGroundColor": ["#d", null, 33],
+          "RoundCorner": ["15", null, 35],
+          "LineColor": ["black", null, 32],
+          "Padding": ["6", null, 36],
+          "Margin": ["8", null, 37]
+        }
+      },
+      {
+        "snames": ["caption", "document"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["14", null, 39],
+          "BackGroundColor": ["transparent", null, 43],
+          "LineColor": ["transparent", null, 42],
+          "Padding": ["0", null, 40],
+          "Margin": ["1", null, 41],
+          "HorizontalAlignment": ["center", null, 38]
+        }
+      },
+      {
+        "snames": ["document", "frame"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 45],
+          "LineColor": ["black", null, 44]
+        }
+      },
+      {
+        "snames": ["document"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 14]
+        }
+      },
+      {
+        "snames": ["stereotype"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["italic", null, 46]
+        }
+      },
+      {
+        "snames": ["composite", "element", "title"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["bold", null, 48]
+        }
+      },
+      {
+        "snames": ["element"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["4.0", null, 47]
+        }
+      },
+      {
+        "snames": ["artifact"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["4.0", null, 49]
+        }
+      },
+      {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["2.0", null, 50]
+        }
+      },
+      {
+        "snames": ["person"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["2.0", null, 51]
+        }
+      },
+      {
+        "snames": ["queue"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["2.0", null, 52],
+          "LineThickness": ["2.0", null, 136],
+          "HorizontalAlignment": ["center", null, 137]
+        }
+      },
+      {
+        "snames": ["rectangle"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 53]
+        }
+      },
+      {
+        "snames": ["stack"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 54]
+        }
+      },
+      {
+        "snames": ["storage"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 55]
+        }
+      },
+      {
+        "snames": ["boundary"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["4.0", null, 56],
+          "LineThickness": ["2.0", null, 130],
+          "HorizontalAlignment": ["center", null, 131]
+        }
+      },
+      {
+        "snames": ["card"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 57]
+        }
+      },
+      {
+        "snames": ["cloud"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 58]
+        }
+      },
+      {
+        "snames": ["collections"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 59],
+          "LineThickness": ["1.5", null, 139],
+          "HorizontalAlignment": ["center", null, 140]
+        }
+      },
+      {
+        "snames": ["component"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["4.0", null, 60]
+        }
+      },
+      {
+        "snames": ["database"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 61],
+          "HorizontalAlignment": ["center", null, 138]
+        }
+      },
+      {
+        "snames": ["file"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 62]
+        }
+      },
+      {
+        "snames": ["frame"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 63]
+        }
+      },
+      {
+        "snames": ["folder"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 64]
+        }
+      },
+      {
+        "snames": ["group", "package_"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 65],
+          "LineColor": ["black", null, 66]
+        }
+      },
+      {
+        "snames": ["folder", "group"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 67],
+          "LineColor": ["black", null, 68]
+        }
+      },
+      {
+        "snames": ["group"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["transparent", null, 69]
+        }
+      },
+      {
+        "snames": ["componentDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 71],
+          "LineColor": ["black", null, 70]
+        }
+      },
+      {
+        "snames": ["componentDiagram", "rectangle"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 71],
+          "LineColor": ["black", null, 70]
+        }
+      },
+      {
+        "snames": ["group", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 74],
+          "FontStyle": ["bold", null, 75],
+          "LineThickness": ["2.0", null, 73],
+          "LineColor": ["black", null, 72]
+        }
+      },
+      {
+        "snames": ["groupHeader", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 78],
+          "FontStyle": ["bold", null, 79],
+          "BackGroundColor": ["#e", null, 76],
+          "LineColor": ["black", null, 77]
+        }
+      },
+      {
+        "snames": ["lifeLine", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineStyle": ["5", null, 80]
+        }
+      },
+      {
+        "snames": ["activationBox", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 81]
+        }
+      },
+      {
+        "snames": ["reference", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 82],
+          "BackGroundColor": ["white", null, 84],
+          "LineThickness": ["2.0", null, 85],
+          "LineColor": ["black", null, 83],
+          "HorizontalAlignment": ["center", null, 86]
+        }
+      },
+      {
+        "snames": ["referenceHeader", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["black", null, 89],
+          "FontSize": ["13", null, 90],
+          "FontStyle": ["bold", null, 91],
+          "BackGroundColor": ["#e", null, 88],
+          "LineThickness": ["2.0", null, 92],
+          "LineColor": ["black", null, 87]
+        }
+      },
+      {
+        "snames": ["box", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 94],
+          "FontStyle": ["bold", null, 95],
+          "BackGroundColor": ["#d", null, 93]
+        }
+      },
+      {
+        "snames": ["separator", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 99],
+          "FontStyle": ["bold", null, 100],
+          "BackGroundColor": ["#e", null, 98],
+          "LineThickness": ["2.0", null, 97],
+          "LineColor": ["black", null, 96],
+          "Padding": ["4", null, 101]
+        }
+      },
+      {
+        "snames": ["participant", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["actor", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["boundary", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["control", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["entity", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["queue", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["database", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["collections", "sequenceDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 102]
+        }
+      },
+      {
+        "snames": ["visibilityIcon", "public_"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#84BE84", null, 104],
+          "LineColor": ["#038048", null, 103]
+        }
+      },
+      {
+        "snames": ["visibilityIcon", "private_"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#F24D5C", null, 106],
+          "LineColor": ["#C82930", null, 105]
+        }
+      },
+      {
+        "snames": ["visibilityIcon", "protected_"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#FFFF44", null, 108],
+          "LineColor": ["#B38D22", null, 107]
+        }
+      },
+      {
+        "snames": ["package_", "visibilityIcon"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#4177AF", null, 110],
+          "LineColor": ["#1963A0", null, 109]
+        }
+      },
+      {
+        "snames": ["visibilityIcon", "IEMandatory"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 112],
+          "LineColor": ["black", null, 111]
+        }
+      },
+      {
+        "snames": ["spot", "spotAnnotation"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#E3664A", null, 113]
+        }
+      },
+      {
+        "snames": ["spot", "spotAbstractClass"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#A9DCDF", null, 114]
+        }
+      },
+      {
+        "snames": ["spot", "spotClass"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#ADD1B2", null, 115]
+        }
+      },
+      {
+        "snames": ["spot", "spotInterface"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#B4A7E5", null, 116]
+        }
+      },
+      {
+        "snames": ["spot", "spotEnum"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#EB937F", null, 117]
+        }
+      },
+      {
+        "snames": ["spot", "spotEntity"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#ADD1B2", null, 118]
+        }
+      },
+      {
+        "snames": ["stateDiagram", "state"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["25", null, 119]
+        }
+      },
+      {
+        "snames": ["element", "stateDiagram", "title"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["plain", null, 120]
+        }
+      },
+      {
+        "snames": ["circle", "start", "stateDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 122],
+          "LineColor": ["black", null, 121]
+        }
+      },
+      {
+        "snames": ["circle", "stop", "stateDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 122],
+          "LineColor": ["black", null, 121]
+        }
+      },
+      {
+        "snames": ["circle", "end", "stateDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 122],
+          "LineColor": ["black", null, 121]
+        }
+      },
+      {
+        "snames": ["delay"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 123],
+          "FontStyle": ["plain", null, 124],
+          "HorizontalAlignment": ["center", null, 125]
+        }
+      },
+      {
+        "snames": ["participant"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 126],
+          "HorizontalAlignment": ["center", null, 127]
+        }
+      },
+      {
+        "snames": ["actor"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["2.0", null, 128],
+          "HorizontalAlignment": ["center", null, 129]
+        }
+      },
+      {
+        "snames": ["control"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["2.0", null, 132],
+          "HorizontalAlignment": ["center", null, 133]
+        }
+      },
+      {
+        "snames": ["entity"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["2.0", null, 134],
+          "HorizontalAlignment": ["center", null, 135]
+        }
+      },
+      {
+        "snames": ["swimlane"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["18", null, 144],
+          "BackGroundColor": ["transparent", null, 141],
+          "LineThickness": ["2", null, 143],
+          "LineColor": ["black", null, 142]
+        }
+      },
+      {
+        "snames": ["diamond"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 145]
+        }
+      },
+      {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 146],
+          "BackGroundColor": ["black", null, 147]
+        }
+      },
+      {
+        "snames": ["note"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 148],
+          "BackGroundColor": ["#FBFB77", null, 149]
+        }
+      },
+      {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["lightblue", null, 242],
+          "RoundCorner": ["25", null, 152],
+          "LineThickness": ["1.5", null, 153],
+          "Padding": ["10", null, 150],
+          "Margin": ["10", null, 151]
+        }
+      },
+      {
+        "snames": ["arrow", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.0", null, 154]
+        }
+      },
+      {
+        "snames": ["wbsDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 159],
+          "RoundCorner": ["0", null, 157],
+          "LineThickness": ["1.5", null, 158],
+          "Padding": ["10", null, 155],
+          "Margin": ["15", null, 156]
+        }
+      },
+      {
+        "snames": ["activityDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 160]
+        }
+      },
+      {
+        "snames": ["activity", "activityDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 163],
+          "RoundCorner": ["25", null, 164],
+          "LineThickness": ["1.5", null, 161],
+          "Padding": ["10", null, 162]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "composite"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["transparent", null, 166],
+          "LineColor": ["black", null, 165]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "diamond"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 167]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 168]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "circle", "start"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 170],
+          "LineColor": ["black", null, 169]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "circle", "stop"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 170],
+          "LineColor": ["black", null, 169]
+        }
+      },
+      {
+        "snames": ["activityDiagram", "circle", "end"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["black", null, 170],
+          "LineColor": ["black", null, 169]
+        }
+      },
+      {
+        "snames": ["activityBar", "activityDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["3.0", null, 171],
+          "BackGroundColor": ["black", null, 172]
+        }
+      },
+      {
+        "snames": ["task"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 173]
+        }
+      },
+      {
+        "snames": ["milestone"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 174],
+          "BackGroundColor": ["black", null, 175],
+          "LineColor": ["black", null, 176]
+        }
+      },
+      {
+        "snames": ["arrow", "ganttDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.5", null, 177]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "note"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 179],
+          "FontSize": ["9", null, 178]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "separator"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 180],
+          "FontStyle": ["plain", null, 181],
+          "BackGroundColor": ["transparent", null, 182],
+          "Padding": ["5", null, 184],
+          "Margin": ["5", null, 183]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "timeline"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["transparent", null, 185],
+          "LineColor": ["#C0C0C0", null, 186]
+        }
+      },
+      {
+        "snames": ["closed", "ganttDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["#909898", null, 188],
+          "BackGroundColor": ["#E0E8E8", null, 187]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "task"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["0", null, 189],
+          "Padding": ["0", null, 191],
+          "Margin": ["2 2 2 2", null, 190]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "undone"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 192]
+        }
+      },
+      {
+        "snames": ["ganttDiagram", "milestone"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["3", null, 194],
+          "Margin": ["2", null, 193]
+        }
+      },
+      {
+        "snames": ["usecase"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "HorizontalAlignment": ["center", null, 195]
+        }
+      },
+      {
+        "snames": ["arrow", "yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1", null, 199],
+          "LineStyle": ["3-3", null, 200]
+        }
+      },
+      {
+        "snames": ["arrow", "jsonDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1", null, 199],
+          "LineStyle": ["3-3", null, 200]
+        }
+      },
+      {
+        "snames": ["node", "separator", "yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1", null, 203]
+        }
+      },
+      {
+        "snames": ["jsonDiagram", "node", "separator"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1", null, 203]
+        }
+      },
+      {
+        "snames": ["header", "node", "yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["bold", null, 204]
+        }
+      },
+      {
+        "snames": ["header", "jsonDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["bold", null, 204]
+        }
+      },
+      {
+        "snames": ["highlight", "node", "yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#ccff02", null, 205]
+        }
+      },
+      {
+        "snames": ["highlight", "jsonDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#ccff02", null, 205]
+        }
+      },
+      {
+        "snames": ["node", "yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["10", null, 202],
+          "LineThickness": ["1.5", null, 201]
+        }
+      },
+      {
+        "snames": ["jsonDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["10", null, 202],
+          "LineThickness": ["1.5", null, 201]
+        }
+      },
+      {
+        "snames": ["yamlDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["black", null, 197],
+          "BackGroundColor": ["white", null, 196],
+          "LineColor": ["black", null, 198]
+        }
+      },
+      {
+        "snames": ["jsonDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["black", null, 197],
+          "BackGroundColor": ["white", null, 196],
+          "LineColor": ["black", null, 198]
+        }
+      },
+      {
+        "snames": ["timeline", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 211],
+          "FontStyle": ["plain", null, 210]
+        }
+      },
+      {
+        "snames": ["arrow", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontName": ["Serif", null, 212],
+          "FontColor": ["darkblue", null, 215],
+          "FontSize": ["14", null, 213],
+          "FontStyle": ["plain", null, 214],
+          "LineThickness": ["1.5", null, 217],
+          "LineColor": ["darkblue", null, 216]
+        }
+      },
+      {
+        "snames": ["constraintArrow", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["darkred", null, 220],
+          "FontSize": ["12", null, 218],
+          "FontStyle": ["plain", null, 219],
+          "LineThickness": ["1.5", null, 222],
+          "LineColor": ["darkred", null, 221]
+        }
+      },
+      {
+        "snames": ["clock", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["darkgreen", null, 223]
+        }
+      },
+      {
+        "snames": ["concise", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 224],
+          "BackGroundColor": ["#c", null, 226],
+          "LineThickness": ["1.5", null, 227],
+          "LineColor": ["darkgreen", null, 225]
+        }
+      },
+      {
+        "snames": ["robust", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 229],
+          "FontStyle": ["plain", null, 228],
+          "BackGroundColor": ["#c", null, 232],
+          "LineThickness": ["2", null, 231],
+          "LineColor": ["darkgreen", null, 230]
+        }
+      },
+      {
+        "snames": ["highlight", "timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["#e", null, 233],
+          "LineThickness": ["2", null, 234],
+          "LineStyle": ["4-4", null, 235]
+        }
+      },
+      {
+        "snames": ["timingDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["#3", null, 207],
+          "FontStyle": ["bold", null, 208],
+          "LineThickness": ["1.5", null, 209],
+          "LineColor": ["#3", null, 206]
+        }
+      },
+      {
+        "snames": ["network", "nwdiagDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["1.0", null, 237],
+          "FontSize": ["12", null, 236]
+        }
+      },
+      {
+        "snames": ["nwdiagDiagram", "server"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 238]
+        }
+      },
+      {
+        "snames": ["group", "nwdiagDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 239],
+          "BackGroundColor": ["#ddd", null, 240]
+        }
+      },
+      {
+        "snames": ["arrow", "nwdiagDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["11", null, 241]
+        }
+      }
+    ]
+  },
+  "authored-skinparam-then-style": {
+    "source": "@startmindmap\nskinparam hyperlinkColor red\n<style>\nroot {\n  HyperLinkColor green\n}\n</style>\n* r\n@endmindmap\n",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "0": {
+        "snames": ["root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 13],
+          "FontName": ["SansSerif", null, 1],
+          "FontColor": ["black", "white", 4],
+          "FontSize": ["14", null, 5],
+          "FontStyle": ["plain", null, 6],
+          "BackGroundColor": ["#f1f1f1", "#313139", 12],
+          "RoundCorner": ["0", null, 8],
+          "LineThickness": ["1.0", null, 10],
+          "DiagonalCorner": ["0", null, 9],
+          "HyperLinkColor": ["green", null, 327],
+          "HyperlinkUnderlineThickness": ["1", null, 3],
+          "LineColor": ["#181818", "#e7e7e7", 11],
+          "HorizontalAlignment": ["left", null, 7]
+        }
+      }
+    }
+  },
+  "authored-stereo-space": {
+    "source": "@startmindmap\n<style>\n.big stuff {\n  FontSize 20\n}\nmindmapDiagram {\n  .sel * {\n    LineColor orange\n  }\n  node, arrow {\n    MaximumWidth 80\n  }\n}\n</style>\n* r <<sel>>\n@endmindmap\n",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["big stuff"],
+        "values": {
+          "FontSize": ["20", null, 1326]
+        }
+      },
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": true,
+        "stereotypes": ["sel"],
+        "values": {
+          "LineColor": ["orange", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154],
+          "MaximumWidth": ["80", null, 328]
+        }
+      },
+      "75": {
+        "snames": ["arrow", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.0", null, 157],
+          "MaximumWidth": ["80", null, 328]
+        }
+      }
+    }
+  },
+  "authored-strictuml": {
+    "source": "@startmindmap\n<style>\nelement {\n  Shadowing 4.0\n}\n</style>\nskinparam style strictuml\n* r\n@endmindmap\n",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "0": {
+        "snames": ["root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 327],
+          "FontName": ["SansSerif", null, 1],
+          "FontColor": ["black", "white", 4],
+          "FontSize": ["14", null, 5],
+          "FontStyle": ["plain", null, 6],
+          "BackGroundColor": ["#f1f1f1", "#313139", 12],
+          "RoundCorner": ["0", null, 8],
+          "LineThickness": ["1.0", null, 10],
+          "DiagonalCorner": ["0", null, 9],
+          "HyperLinkColor": ["blue", "blue", 2],
+          "HyperlinkUnderlineThickness": ["1", null, 3],
+          "LineColor": ["#181818", "#e7e7e7", 11],
+          "HorizontalAlignment": ["left", null, 7]
+        }
+      },
+      "14": {
+        "snames": ["element"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 328],
+          "LineThickness": ["0.5", null, 54]
+        }
+      }
+    }
+  },
+  "authored-style-then-skinparam": {
+    "source": "@startmindmap\n<style>\nroot {\n  HyperLinkColor green\n}\n</style>\nskinparam hyperlinkColor red\n* r\n@endmindmap\n",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "0": {
+        "snames": ["root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 13],
+          "FontName": ["SansSerif", null, 1],
+          "FontColor": ["black", "white", 4],
+          "FontSize": ["14", null, 5],
+          "FontStyle": ["plain", null, 6],
+          "BackGroundColor": ["#f1f1f1", "#313139", 12],
+          "RoundCorner": ["0", null, 8],
+          "LineThickness": ["1.0", null, 10],
+          "DiagonalCorner": ["0", null, 9],
+          "HyperLinkColor": ["red", null, 327],
+          "HyperlinkUnderlineThickness": ["1", null, 3],
+          "LineColor": ["#181818", "#e7e7e7", 11],
+          "HorizontalAlignment": ["left", null, 7]
+        }
+      }
+    }
+  },
+  "corpus-cejije-94-xibi793": {
+    "source": "@startmindmap\n<style>\n:depth(2) * {\n  FontColor red\n  BackGroundColor blue\n}\n</style>\n* r0\n** a\n*** a1\n**** a11\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": [],
+        "level": 2,
+        "star": true,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["red", null, 326],
+          "BackGroundColor": ["blue", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-colave-62-kuke565": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n    node {\n        BackgroundColor Red\n    }\n    .lol {\n        BackgroundColor Green\n    }\n}\n</style>\n* root\n** not root <<lol>>\n@endmindmap",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["lol"],
+        "values": {
+          "BackGroundColor": ["Green", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["Red", null, 326],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      }
+    }
+  },
+  "corpus-cufaxi-14-cani934": {
+    "source": "@startmindmap\nscale 1.5\n<style>\nmindmapDiagram {\n  document {\n  \tBackGroundColor blue\n  }\n  element {\n  \tBackGroundColor red\n  }\n}\n</style>\n* a\n** a11\n** a22\n@endmindmap",
+    "legacy": [],
+    "plainLength": 128,
+    "plainChanged": {
+      "126": {
+        "snames": ["document", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["blue", null, 326]
+        }
+      },
+      "127": {
+        "snames": ["element", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["red", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-docige-13-jaka644": {
+    "source": "@startmindmap\n\n\n<style>\nnode {\n    Padding 12\n    Margin 15\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n    RoundCorner 40\n}\n\nrootNode {\n    LineStyle 8.0-3.0\n    LineColor red\n    BackgroundColor white\n    LineThickness 1.0\n    RoundCorner 0\n    Shadowing 0.0\n}\n\nleafNode {\n    LineColor gold\n    RoundCorner 0\n    Padding 3\n}\n\narrow {\n    LineStyle 4\n    LineThickness 0.5\n    LineColor green\n}\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 129,
+    "plainChanged": {
+      "72": {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 147],
+          "BackGroundColor": ["black", null, 149],
+          "LineThickness": ["0.5", null, 343],
+          "LineColor": ["green", null, 344],
+          "LineStyle": ["4", null, 342]
+        }
+      },
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 331],
+          "RoundCorner": ["40", null, 332],
+          "LineThickness": ["3.0", null, 330],
+          "LineColor": ["blue", null, 329],
+          "Padding": ["12", null, 326],
+          "Margin": ["15", null, 327],
+          "HorizontalAlignment": ["center", null, 328]
+        }
+      },
+      "127": {
+        "snames": ["rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 338],
+          "BackGroundColor": ["white", null, 335],
+          "RoundCorner": ["0", null, 337],
+          "LineThickness": ["1.0", null, 336],
+          "LineColor": ["red", null, 334],
+          "LineStyle": ["8.0-3.0", null, 333]
+        }
+      },
+      "128": {
+        "snames": ["leafNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["0", null, 340],
+          "LineColor": ["gold", null, 339],
+          "Padding": ["3", null, 341]
+        }
+      }
+    }
+  },
+  "corpus-dojilo-60-cufe274": {
+    "source": "@startmindmap\nscale 1.5\n<style>\nmindmapDiagram {\n  BackGroundColor red\n  document {\n  \tBackGroundColor blue\n  }\n}\n</style>\n* a\n** a11\n** a22\n@endmindmap",
+    "legacy": [],
+    "plainLength": 128,
+    "plainChanged": {
+      "126": {
+        "snames": ["document", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["blue", null, 327]
+        }
+      },
+      "127": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["red", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-ferume-00-vobi687": {
+    "source": "@startmindmap\n<style>\n.s1 {\n  BackgroundColor #E74C3C\n}\n.s2 {\n  BackgroundColor #E74C3C\n}\n</style>\n\n* Mqwerty\\npoint\n** Qwerty\\npoint <<s1>>\n** Dummy\\npoint <<s2>>\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["s1"],
+        "values": {
+          "BackGroundColor": ["#E74C3C", null, 1326]
+        }
+      },
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["s2"],
+        "values": {
+          "BackGroundColor": ["#E74C3C", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-gafupu-88-xamo144": {
+    "source": "@startmindmap\nscale 1.5\n<style>\nmindmapDiagram {\n  document {\n  \tBackGroundColor transparent\n  }\n  element {\n  \tBackGroundColor red\n  }\n}\n</style>\n* a\n** a11\n** a22\n@endmindmap",
+    "legacy": [],
+    "plainLength": 128,
+    "plainChanged": {
+      "126": {
+        "snames": ["document", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["transparent", null, 326]
+        }
+      },
+      "127": {
+        "snames": ["element", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["red", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-gageno-43-kofi317": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  BackGroundColor transparent\n}\n</style>\n* a\n** a1\n** a2\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["transparent", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-galiro-74-tocu638": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  FontColor blue\n  FontStyle bold  \n  FontSize 13\n\n  node {\n  BackGroundColor palegreen\n  LineThickness 1.0\n  }\n  \n  boxless {\n\t  FontColor green\n\t  FontStyle italic \n      MaximumWidth 40\n  }\n  \n  leafNode {\n\t  FontSize 9\n  }\n\n  rootNode {\n\t  BackGroundColor yellow\n  }\n}\n</style>\n+ the partner workpackage\n++ blue\n+++ blue workpackage\n+++_ blue boxless workpackage \n++ red\n+++ red workpackage\n+++_ red boxless workpackage\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 130,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["palegreen", null, 329],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.0", null, 330],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      },
+      "126": {
+        "snames": ["boxless", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["green", null, 331],
+          "FontStyle": ["italic", null, 332],
+          "MaximumWidth": ["40", null, 333]
+        }
+      },
+      "127": {
+        "snames": ["leafNode", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["9", null, 334]
+        }
+      },
+      "128": {
+        "snames": ["mindmapDiagram", "rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["yellow", null, 335]
+        }
+      },
+      "129": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 326],
+          "FontSize": ["13", null, 328],
+          "FontStyle": ["bold", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-govunu-72-kicu781": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram, wbsDiagram {\n  root {\n    BackgroundColor yellow\n    FontColor blue\n    LineColor red\n    LineThickness 1\n    Margin 10\n    Padding 6\n    Shadowing 0.0\n  }\n  element {\n    BackgroundColor white\n    LineThickness 1\n  }\n}\n</style>\n\n* Business Process Modelling WBS\n** Launch the project\n*** Complete Stakeholder Research\n*** Initial Implementation Plan\n** Design phase\n*** Model of AsIs Processes Completed\n**** Model of AsIs Processes Completed1\n**** Model of AsIs Processes Completed2\n*** Measure AsIs performance metrics\n*** Identify Quick Wins\n** Complete innovate phase\n@endmindmap",
+    "legacy": [],
+    "plainLength": 130,
+    "plainChanged": {
+      "126": {
+        "snames": ["mindmapDiagram", "root"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 332],
+          "FontColor": ["blue", null, 327],
+          "BackGroundColor": ["yellow", null, 326],
+          "LineThickness": ["1", null, 329],
+          "LineColor": ["red", null, 328],
+          "Padding": ["6", null, 331],
+          "Margin": ["10", null, 330]
+        }
+      },
+      "127": {
+        "snames": ["root", "wbsDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 332],
+          "FontColor": ["blue", null, 327],
+          "BackGroundColor": ["yellow", null, 326],
+          "LineThickness": ["1", null, 329],
+          "LineColor": ["red", null, 328],
+          "Padding": ["6", null, 331],
+          "Margin": ["10", null, 330]
+        }
+      },
+      "128": {
+        "snames": ["element", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 333],
+          "LineThickness": ["1", null, 334]
+        }
+      },
+      "129": {
+        "snames": ["element", "wbsDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 333],
+          "LineThickness": ["1", null, 334]
+        }
+      }
+    }
+  },
+  "corpus-jebini-99-lisu010": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  .myStyle * {\n    BackGroundColor lightblue\n    LineColor lightblue\n  }\n}\n</style>\n* root\n** node 1 <<myStyle>>\n*** subNode 1\n*** subNode 2\n**** subSubNode\n\n** node 2\n@endmindmap",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": true,
+        "stereotypes": ["mystyle"],
+        "values": {
+          "BackGroundColor": ["lightblue", null, 1326],
+          "LineColor": ["lightblue", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-jogetu-97-culi829": {
+    "source": "@startmindmap\n<style>\nrootNode {\n    FontName 黑体\n    FontStyle bold\n    FontSize 18\n    LineStyle 8.0-3.0\n    LineColor red\n    BackgroundColor orange\n    LineThickness 1.0\n    RoundCorner 0\n    Shadowing 0.5\n    HorizontalAlignment Center\n}\n</style>\n* root node\n** some first level node\n*** second level node\n*** another second level node\n** another first level node\n* another root node\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.5", null, 334],
+          "FontName": ["黑体", null, 326],
+          "FontSize": ["18", null, 328],
+          "FontStyle": ["bold", null, 327],
+          "BackGroundColor": ["orange", null, 331],
+          "RoundCorner": ["0", null, 333],
+          "LineThickness": ["1.0", null, 332],
+          "LineColor": ["red", null, 330],
+          "LineStyle": ["8.0-3.0", null, 329],
+          "HorizontalAlignment": ["Center", null, 335]
+        }
+      }
+    }
+  },
+  "corpus-kelome-99-naso291": {
+    "source": "@startmindmap\n<style>\nnode {\nMaximumWidth 300\n}\n</style>\n\n* Bidouille\n** Qwant\n*** https://www.qwant.com/?r=FR&sr=fr&l=fr_fr&h=0&s=0&a=1&b=1&hc=1&smartNews=1&smartVideos=1&smartSocial=1&theme=0&i=1&client=brz-vivaldi&q=%s\n*** [[https://www.qwant.com/?r=FR&sr=fr&l=fr_fr&h=0&s=0&a=1&b=1&hc=1&smartNews=1&smartVideos=1&smartSocial=1&theme=0&i=1&client=brz-vivaldi&q=%s]]\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "MaximumWidth": ["300", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-kijafe-43-tati619": {
+    "source": "@startmindmap\n<style>\n.test {\n  LineColor blue\n  BackgroundColor lightCyan\n  LineThickness 1.0\n  ArrowThickness 0.5\n  FontName Arial Narrow\n  FontColor green\n  FontSize 11\n  FontStyle bold\n}\n</style>\n* a \n** b\n** <<test9>>:b(Not yet ;-));\n**: c\n(OK); <<test>>\n** d (OK) <<test>>\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["test"],
+        "values": {
+          "FontName": ["Arial Narrow", null, 1329],
+          "FontColor": ["green", null, 1330],
+          "FontSize": ["11", null, 1331],
+          "FontStyle": ["bold", null, 1332],
+          "BackGroundColor": ["lightCyan", null, 1327],
+          "LineThickness": ["1.0", null, 1328],
+          "LineColor": ["blue", null, 1326]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-kixuba-47-texi176": {
+    "source": "@startmindmap\n\n\n<style>\nnode {\n    Padding 0\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n    RoundCorner 40\n}\n\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 330],
+          "RoundCorner": ["40", null, 331],
+          "LineThickness": ["3.0", null, 329],
+          "LineColor": ["blue", null, 328],
+          "Padding": ["0", null, 326],
+          "HorizontalAlignment": ["center", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-lomobo-90-tacu965": {
+    "source": "@startmindmap\n\n<style>\nnode {\n    HorizontalAlignment right\n    MinimumWidth 300\n}\n</style>\n* Hi\n** some\n** short\n** ideas\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "MinimumWidth": ["300", null, 327],
+          "HorizontalAlignment": ["right", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-lovono-00-desa891": {
+    "source": "@startmindmap\ntop to bottom direction\n<style>\nnode {\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n}\n\narrow {\n    LineThickness 0.5\n    LineColor red\n}\n\ncaption {\n  HorizontalAlignment center\n}\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 128,
+    "plainChanged": {
+      "72": {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 147],
+          "BackGroundColor": ["black", null, 149],
+          "LineThickness": ["0.5", null, 330],
+          "LineColor": ["red", null, 331]
+        }
+      },
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 329],
+          "LineThickness": ["3.0", null, 328],
+          "LineColor": ["blue", null, 327],
+          "HorizontalAlignment": ["center", null, 326]
+        }
+      },
+      "127": {
+        "snames": ["caption"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "HorizontalAlignment": ["center", null, 332]
+        }
+      }
+    }
+  },
+  "corpus-melicu-94-kuku736": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n    node {\n        BackgroundColor lightGreen\n    }\n    :depth(1) {\n      BackGroundColor white\n    }\n}\n</style>\n* Linux\n** NixOS\n** Debian\n*** Ubuntu\n**** Linux Mint\n**** Kubuntu\n**** Lubuntu\n**** KDE Neon\n*** SolydXKxxxxxx\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["lightGreen", null, 326],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      },
+      "126": {
+        "snames": ["mindmapDiagram"],
+        "level": 1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-mikivo-30-cepi007": {
+    "source": "@startmindmap\n<style>\n.b * {linecolor blue}\n.r * {linecolor red}\n</style>\n\n* Root\n** Blue <<b>>\n*** B1\n*** B2\n** Red <<r>>\n*** R1\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": true,
+        "stereotypes": ["b"],
+        "values": {
+          "LineColor": ["blue", null, 1326]
+        }
+      },
+      {
+        "snames": [],
+        "level": -1,
+        "star": true,
+        "stereotypes": ["r"],
+        "values": {
+          "LineColor": ["red", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-mugozi-44-xibu600": {
+    "source": "@startmindmap\n\n<style>\nnode {\n    HorizontalAlignment right\n    MinimumWidth 300\n}\n</style>\n* Hi\n** some\n** short but nice\n** ideas\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "MinimumWidth": ["300", null, 327],
+          "HorizontalAlignment": ["right", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-muleji-62-gevo561": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n    boxless {\n        FontColor darkgreen\n        FontSize 30\n    }\n}\n</style>\n*_ root\n** a1\n***_ a2\n**_ b1\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["boxless", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["darkgreen", null, 326],
+          "FontSize": ["30", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-noleko-05-maju508": {
+    "source": "@startmindmap\n\n<style>\nnode {\n    HorizontalAlignment right\n}\n</style>\n* Hi\n** some\n** short but nice\n** ideas\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "HorizontalAlignment": ["right", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-nufibe-93-litu124": {
+    "source": "@startmindmap\n\n<style>\nnode {\n  Padding 2\n  Margin 30\n}\n</style>\n\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["2", null, 326],
+          "Margin": ["30", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-pebonu-12-sana537": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  .myStyle {\n    BackGroundColor lightblue\n    LineColor lightblue\n  }\n}\n</style>\n* root\n** node 1 <<myStyle>>\n*** subNode 1\n*** subNode 2\n**** subSubNode\n\n** node 2\n@endmindmap",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["mystyle"],
+        "values": {
+          "BackGroundColor": ["lightblue", null, 1326],
+          "LineColor": ["lightblue", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-pesope-57-micu861": {
+    "source": "@startmindmap\n\n<style>\nnode {\n    MinimumWidth 300\n}\n</style>\n* Hi\n** some\n** short but nice\n** ideas\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "MinimumWidth": ["300", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-petoda-11-duza898": {
+    "source": "@startmindmap\n\n<style>\nmindmapDiagram {\n  node {\n    Padding 5\n    Margin 15\n    BackGroundColor white\n  }\n  rootNode {\n    Padding 15\n    FontStyle Italic\n    BackGroundColor green\n  }\n  leafNode {\n    Padding 1\n    BackGroundColor yellow\n    FontColor blue\n    FontSize 15\n  }\n}\n</style>\n* World\n** America\n*** Canada\n*** Mexico\n*** USA\n<style>\n  node {\n    BackGroundColor lightBlue\n  }\n</style>\n** Europe\n*** England\n*** Germany\n*** Spain\n@endmindmap",
+    "legacy": [],
+    "plainLength": 129,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["white", null, 328],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["5", null, 326],
+          "Margin": ["15", null, 327]
+        }
+      },
+      "126": {
+        "snames": ["mindmapDiagram", "rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["Italic", null, 330],
+          "BackGroundColor": ["green", null, 331],
+          "Padding": ["15", null, 329]
+        }
+      },
+      "127": {
+        "snames": ["leafNode", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 334],
+          "FontSize": ["15", null, 335],
+          "BackGroundColor": ["yellow", null, 333],
+          "Padding": ["1", null, 332]
+        }
+      },
+      "128": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["lightBlue", null, 336]
+        }
+      }
+    }
+  },
+  "corpus-picipa-74-musu968": {
+    "source": "@startmindmap\n<style>\n:depth(3) * {\n  FontColor blue\n  LineColor transparent\n  BackGroundColor transparent\n  Padding 2\n}\n</style>\n* r0\n** a\n*** a1\n**** a11\n*** a2\n**** a21\n***** <color:red>a211\n****** a211\n** b\n*** b1\n**** b11\n**** b12\n*** b2\n** c\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": [],
+        "level": 3,
+        "star": true,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 326],
+          "BackGroundColor": ["transparent", null, 328],
+          "LineColor": ["transparent", null, 327],
+          "Padding": ["2", null, 329]
+        }
+      }
+    }
+  },
+  "corpus-pofimu-70-xoba026": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  FontColor blue\n  FontStyle bold  \n  FontSize 13\n\nnode {\n  BackGroundColor palegreen\n  LineThickness 1.0\n}\n  .red {\n    FontColor red\n    FontStyle bold  \n    FontSize 13\n    MaximumWidth 40\n  }\n}\n</style>\n+ the partner workpackage\n++ blue\n+++ blue workpackage\n+++_ blue boxless workpackage \n++ red <<red>>\n+++ red workpackage <<red>>\n+++_ red boxless workpackage <<red>>\n\n@endmindmap",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["red"],
+        "values": {
+          "FontColor": ["red", null, 1331],
+          "FontSize": ["13", null, 1333],
+          "FontStyle": ["bold", null, 1332],
+          "MaximumWidth": ["40", null, 1334]
+        }
+      }
+    ],
+    "plainLength": 127,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["palegreen", null, 329],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.0", null, 330],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      },
+      "126": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["blue", null, 326],
+          "FontSize": ["13", null, 328],
+          "FontStyle": ["bold", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-racizo-58-jajo565": {
+    "source": "@startmindmap\n<style>\nleafNode {\n  FontSize 12\n}\n</style>\n* Bidouille\n** https://www.qwant.com/?r=FR&sr=fr&l=fr_fr&h=0&s=0&a=1&b=1&hc=1&smartNews=1&smartVideos=1&smartSocial=1&theme=0&i=1&client=brz-vivaldi&q=%s\n*** https://www.qwant.com/?r=FR&sr=fr&l=fr_fr&h=0&s=0&a=1&b=1&hc=1&smartNews=1&smartVideos=1&smartSocial=1&theme=0&i=1&client=brz-vivaldi&q=%s\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["leafNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["12", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-renopo-92-xipi220": {
+    "source": "@startmindmap\n\n\n<style>\nnode {\n    Padding 6\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n    RoundCorner 40\n}\n\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 330],
+          "RoundCorner": ["40", null, 331],
+          "LineThickness": ["3.0", null, 329],
+          "LineColor": ["blue", null, 328],
+          "Padding": ["6", null, 326],
+          "HorizontalAlignment": ["center", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-rixudo-24-teru887": {
+    "source": "@startmindmap\n<style>\nrootNode {\n    HorizontalAlignment Center\n}\n</style>\n* root node\n* another root node\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "HorizontalAlignment": ["Center", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-rupule-31-tage102": {
+    "source": "@startmindmap\n<style>\n.green {\n  BackgroundColor lightgreen\n}\n.pink {\n  BackgroundColor pink\n}\n.dotted {\n  LineStyle 10\n}\n</style>\n* Colors\n** Green <<green>>\n** Pink <<pink>>\n** Dotted  <<dotted>>\n** pink + dotted \\n(KO on 1.2024.6)<<pink>> <<dotted>>\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["green"],
+        "values": {
+          "BackGroundColor": ["lightgreen", null, 1326]
+        }
+      },
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["pink"],
+        "values": {
+          "BackGroundColor": ["pink", null, 1327]
+        }
+      },
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["dotted"],
+        "values": {
+          "LineStyle": ["10", null, 1328]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-sajeji-86-piga774": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n  node {\n    FontColor #2FA4E7\n    LineColor #2FA4E7\n    BackGroundColor transparent\n  }\n  arrow {\n    LineColor #2FA4E7\n  }\n}\n</style>\n\n* a\n** b\n*** c\n@endmindmap",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["#2FA4E7", null, 326],
+          "BackGroundColor": ["transparent", null, 328],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "LineColor": ["#2FA4E7", null, 327],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      },
+      "75": {
+        "snames": ["arrow", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineThickness": ["1.0", null, 157],
+          "LineColor": ["#2FA4E7", null, 329]
+        }
+      }
+    }
+  },
+  "corpus-sogixu-03-rixu603": {
+    "source": "@startmindmap\n\n\n<style>\nnode {\n    Padding 12\n    Margin 3\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n    RoundCorner 40\n    MaximumWidth 100\n}\n\nrootNode {\n    LineStyle 8.0-3.0\n    LineColor red\n    BackgroundColor white\n    LineThickness 1.0\n    RoundCorner 0\n    Shadowing 0.0\n}\n\nleafNode {\n    LineColor gold\n    RoundCorner 0\n    Padding 3\n}\n\narrow {\n    LineStyle 4\n    LineThickness 0.5\n    LineColor green\n}\n</style>\n\n* Hi =)\n\t* sometimes i have node in wich i want to write a long text\n\t\t* this results in really huge diagram\n\t\t\t* of course, i can explicit split with a\\nnew line\n\t\t\t* but it could be cool if PlantUML was able to split long lines, maybe with an option who specify the maximum width of a node\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 129,
+    "plainChanged": {
+      "72": {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 147],
+          "BackGroundColor": ["black", null, 149],
+          "LineThickness": ["0.5", null, 344],
+          "LineColor": ["green", null, 345],
+          "LineStyle": ["4", null, 343]
+        }
+      },
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 331],
+          "RoundCorner": ["40", null, 332],
+          "LineThickness": ["3.0", null, 330],
+          "LineColor": ["blue", null, 329],
+          "Padding": ["12", null, 326],
+          "Margin": ["3", null, 327],
+          "MaximumWidth": ["100", null, 333],
+          "HorizontalAlignment": ["center", null, 328]
+        }
+      },
+      "127": {
+        "snames": ["rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0.0", null, 339],
+          "BackGroundColor": ["white", null, 336],
+          "RoundCorner": ["0", null, 338],
+          "LineThickness": ["1.0", null, 337],
+          "LineColor": ["red", null, 335],
+          "LineStyle": ["8.0-3.0", null, 334]
+        }
+      },
+      "128": {
+        "snames": ["leafNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "RoundCorner": ["0", null, 341],
+          "LineColor": ["gold", null, 340],
+          "Padding": ["3", null, 342]
+        }
+      }
+    }
+  },
+  "corpus-somife-42-levu771": {
+    "source": "@startmindmap\n\n<style>\nmindmapDiagram {\n  node {\n    BackgroundColor white\n  }\n}\n</style>\n* Hi\n<style>\nmindmapDiagram {\n  node {\n    BackgroundColor yellow\n  }\n}\n</style>\n** some\n** short\n** ideas\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["yellow", null, 327],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1.5", null, 156],
+          "Padding": ["10", null, 153],
+          "Margin": ["10", null, 154]
+        }
+      }
+    }
+  },
+  "corpus-susipa-95-tedu015": {
+    "source": "@startmindmap\n<style>\nnode {\n    MaximumWidth 300\n}\n\nfirstNode {\n\tFontSize 50\n}\n\nleafNode {\n}\n\narrow {\n}\n</style>\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["firstnode"],
+        "values": {
+          "FontSize": ["50", null, 1327]
+        }
+      }
+    ],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "MaximumWidth": ["300", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-taraxo-09-xalu713": {
+    "source": "@startmindmap\n\n\n<style>\ncaption {\n    Padding 1\n    Margin 15\n    HorizontalAlignment left\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n    RoundCorner 40\n}\n</style>\n\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["caption"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 331],
+          "RoundCorner": ["40", null, 332],
+          "LineThickness": ["3.0", null, 330],
+          "LineColor": ["blue", null, 329],
+          "Padding": ["1", null, 326],
+          "Margin": ["15", null, 327],
+          "HorizontalAlignment": ["left", null, 328]
+        }
+      }
+    }
+  },
+  "corpus-tojora-67-taku662": {
+    "source": "@startmindmap\n<style>\nmindMapDiagram {\n  shadowing 0\n  BackGroundColor transparent\n}\n</style>\n\n* Debian\n** Ubuntu\n*** Linux Mint\n*** Kubuntu\n*** Lubuntu\n*** KDE Neon\n** LMDE\n** SolydXK\n** SteamOS\n** Raspbian with a very long name\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Shadowing": ["0", null, 326],
+          "BackGroundColor": ["transparent", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-vacofo-66-puno159": {
+    "source": "@startmindmap\n<style>\n  mindmapDiagram {\n  Scale 10\n  LineColor Black\n   node {\n    FontName Roboto\n    Padding 5\n    Margin 15\n   ' RoundCorner 11\n    LineColor black\n    BackgroundColor #cc33cc-#0c33ac\n    FontColor white\n    LineStyle 0\n    LineThickness 1\n    DiagonalCorner 50\n  }\n  rootNode {\n   Padding 10\n   FontStyle  Italic\n}\n  leafNode {\n    Padding 7\n }\n  .n1 {\n    BackgroundColor white\n    FontStyle  Bold\n    FontColor black\n    Shadowing 0\n  }\n}\n</style>\n* Class Templates\n** foo <<n1>>\n**:template typename T1\nclass cname{\nvoid f1()\n...\n}; <<n1>>\n**:template typename T2\nclass cname{\nvoid f2()\n...\n};\n@endmindmap",
+    "legacy": [
+      {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["n1"],
+        "values": {
+          "Shadowing": ["0", null, 1342],
+          "FontColor": ["black", null, 1341],
+          "FontStyle": ["Bold", null, 1340],
+          "BackGroundColor": ["white", null, 1339]
+        }
+      }
+    ],
+    "plainLength": 129,
+    "plainChanged": {
+      "74": {
+        "snames": ["mindmapDiagram", "node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontName": ["Roboto", null, 327],
+          "FontColor": ["white", null, 332],
+          "BackGroundColor": ["#cc33cc-#0c33ac", null, 331],
+          "RoundCorner": ["25", null, 155],
+          "LineThickness": ["1", null, 334],
+          "DiagonalCorner": ["50", null, 335],
+          "LineColor": ["black", null, 330],
+          "LineStyle": ["0", null, 333],
+          "Padding": ["5", null, 328],
+          "Margin": ["15", null, 329]
+        }
+      },
+      "126": {
+        "snames": ["mindmapDiagram", "rootNode"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontStyle": ["Italic", null, 337],
+          "Padding": ["10", null, 336]
+        }
+      },
+      "127": {
+        "snames": ["leafNode", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "Padding": ["7", null, 338]
+        }
+      },
+      "128": {
+        "snames": ["mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "LineColor": ["Black", null, 326]
+        }
+      }
+    }
+  },
+  "corpus-vinuji-50-mife349": {
+    "source": "@startmindmap\n<style>\n.mexicoStyle * {\n     BackgroundColor lightblue\n     FontColor Blue\n     RoundCorner 10\n}\n</style>\n* World\n** America\n*** Canada\n*** Mexico <<mexicoStyle>>\n**** Chihuahua\n*** USA\n**** Texas\n*** New York\n** Europe\n*** England\n*** Germany\n*** Spain\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": true,
+        "stereotypes": ["mexicostyle"],
+        "values": {
+          "FontColor": ["Blue", null, 1327],
+          "BackGroundColor": ["lightblue", null, 1326],
+          "RoundCorner": ["10", null, 1328]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-vosote-32-xuna031": {
+    "source": "@startmindmap\n\n<style>\nnode {\n    HorizontalAlignment center\n    LineColor blue\n    LineThickness 3.0\n    BackgroundColor gold\n}\n\narrow {\n    LineThickness 0.5\n    LineColor red\n}\n\ncaption {\n  HorizontalAlignment center\n}\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\ncaption caption\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 128,
+    "plainChanged": {
+      "72": {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 147],
+          "BackGroundColor": ["black", null, 149],
+          "LineThickness": ["0.5", null, 330],
+          "LineColor": ["red", null, 331]
+        }
+      },
+      "126": {
+        "snames": ["node"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "BackGroundColor": ["gold", null, 329],
+          "LineThickness": ["3.0", null, 328],
+          "LineColor": ["blue", null, 327],
+          "HorizontalAlignment": ["center", null, 326]
+        }
+      },
+      "127": {
+        "snames": ["caption"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "HorizontalAlignment": ["center", null, 332]
+        }
+      }
+    }
+  },
+  "corpus-xuceti-39-nugu723": {
+    "source": "@startmindmap\n<style>\n.s1 {\n    horizontalalignment center\n}\n</style>\n\n+ Qwerty\n++ Ytrewq\\npoiuytrewq<<s1>>\n+++ Mnbvcx\n\n@endmindmap",
+    "legacy": [
+      {
+        "snames": [],
+        "level": -1,
+        "star": false,
+        "stereotypes": ["s1"],
+        "values": {
+          "HorizontalAlignment": ["center", null, 1326]
+        }
+      }
+    ],
+    "plainLength": 126,
+    "plainChanged": {}
+  },
+  "corpus-zasori-23-laja126": {
+    "source": "@startmindmap\n<style>\nmindmapDiagram {\n    boxless {\n        FontColor darkgreen\n        FontSize 30\n    }\n}\n</style>\n*_ root\n** a1\n***_ a21\n**_ b1\n@endmindmap",
+    "legacy": [],
+    "plainLength": 127,
+    "plainChanged": {
+      "126": {
+        "snames": ["boxless", "mindmapDiagram"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontColor": ["darkgreen", null, 326],
+          "FontSize": ["30", null, 327]
+        }
+      }
+    }
+  },
+  "corpus-zezafi-76-poto168": {
+    "source": "@startmindmap\n\n<style>\narrow {\n    LineColor red\n}\n</style>\n\n* New style\n** New features\n** Template Files\n*** They are \\ngreat and \\n should have them!\n\n@endmindmap",
+    "legacy": [],
+    "plainLength": 126,
+    "plainChanged": {
+      "72": {
+        "snames": ["arrow"],
+        "level": -1,
+        "star": false,
+        "stereotypes": [],
+        "values": {
+          "FontSize": ["13", null, 147],
+          "BackGroundColor": ["black", null, 149],
+          "LineThickness": ["1.0", null, 148],
+          "LineColor": ["red", null, 326]
+        }
+      }
+    }
+  }
+}

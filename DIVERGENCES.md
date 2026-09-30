@@ -1525,3 +1525,66 @@ NODES only today (edge labels are a filed residual,
 two disagree, the lane is narrower here by the label overhang.
 
 **Category:** deliberate structural divergence, arithmetic preserved.
+
+## Mindmap
+
+### Two style paths: mindmap resolves styles through the ported style engine, every other engine through the flat `StyleMap`
+
+**Category:** limitation (transitional architecture), recorded 2026-09-30 by
+`mindmap-engine-port` (D1, `plans/mindmap-engine-port/decisions.md`).
+
+**Upstream:** every diagram resolves styles through one engine —
+`style/StyleBuilder.getMergedStyle(StyleSignatureBasic)` over a
+`StyleStorage` loaded from `plantuml.skin` and muted, in source order, by
+each `skinparam` and `<style>` block (`skin/SkinParam.java:155-265`). Mindmap
+needs the parts the port's flat map cannot express: `:depth(n)` levels,
+`*` starred selectors, stereotype signatures and the `STEP_BY_PARENT`
+priority walk up the parents (`mindmap/Idea.java:96-104`, `wbs/WElement.java:110`).
+
+**This port:** `src/core/style/` is a faithful port of that engine
+(`PName`, `SName`, `Value*`, `DarkString`, `StyleSignatureBasic`, `StyleKey`,
+`Style`, `StyleStorage`, `StyleBuilder`, `parser/StyleParser`, `StyleLoader`,
+`FromSkinparamToStyle`), seeded from the oracle jar's `skin/plantuml.skin`
+embedded verbatim (`src/core/style/skins/plantuml-skin.ts`, drift-gated
+against the jar). **Only the mindmap engine consumes it**
+(`src/core/style/mindmap-style-builder.ts`, `src/diagrams/mindmap/`). Every
+other engine still resolves styles through the flat `StyleMap`
+(`src/core/skinparam-style-block.ts` and the `style-cascade-*` modules),
+which drops `:depth(n)`/`*` selectors and refuses nesting deeper than two
+levels.
+
+**Consequences.** A `<style>` block is parsed twice on a multi-diagram source
+(once per path). The two paths agree on the 142-fixture mindmap corpus and on
+every other engine's ratchet (the all-engine survey moved no non-mindmap
+fixture at any batch close), but a skinparam that both paths read can in
+principle diverge; none does today.
+
+**Migration path (a later mission per engine):** build the engine's
+`StyleBuilder` with `buildMindmapStyleBuilder`'s sibling for that engine,
+replace its `StyleMap` reads with `getMergedStyle(signature)` calls at the
+`SName` signatures upstream uses, and retire the flat cascade for that
+engine. WBS is first (it shares `IdeaShape`, `FtileBoxOld.createWbs` and
+`WElement.STEP_BY_PARENT`), then the cuca family.
+
+### Error pages print this port's version, and the source name is `string`
+
+**Category:** limitation. `fogari-75-febu345` / `femiba-70-duvi238` render the
+jar's `PSystemError` page kind, colours and layout, but the first line reads
+`plantuml-ts version 0.1.0 / unknown [Unknown compile time]` where the jar
+prints its own version, and `[From string (line N) ]` where the jar, invoked
+on a file, prints `[From in.puml (line N) ]` (`renderSync` receives markup,
+never a path; `src/core/error/error-renderer.ts:29`). The line number itself
+matches since T6f (`refusalLineOf`, `MindMapDiagramFactory.ts`).
+
+### Embedded `{{ }}` diagram slots: the deterministic-text oracle reserves 42×42
+
+**Category:** measurement artefact, not a port divergence. Under
+`-DPLANTUML_DETERMINISTIC_TEXT=true` the fork's `StringBounderFromWidthTable`
+inherits `matchesProperty` = false (`klimt/font/StringBounder.java:43-45`), so
+`EmbeddedDiagram#calculateDimensionSlow` takes the PNG branch, throws at
+`EmbeddedDiagram.java:139` and returns `42×42` (`:150-152`) while `drawU`
+still draws the real image. The stock jar reserves the real size, as this
+port does. `unknown/semutu-45-zeno907`'s 16×26 px canvas gap is that slot;
+it is accepted until the seam is fixed in the fork and the affected goldens
+re-rendered (a maintainer change: fork edits and oracle re-renders are
+mission stops).

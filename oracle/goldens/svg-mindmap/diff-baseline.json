@@ -1,0 +1,49 @@
+{
+  "fixtures": [
+    {
+      "type": "mindmap",
+      "slug": "femiba-70-duvi238",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "c5dc64471"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fogari-75-febu345",
+      "status": "baseline",
+      "weightedScore": 7,
+      "diffCount": 7,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "c5dc64471"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fovule-12-noze408",
+      "status": "baseline",
+      "weightedScore": 40,
+      "diffCount": 31,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "c5dc64471"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gukofo-85-vira895",
+      "status": "baseline",
+      "weightedScore": 41,
+      "diffCount": 41,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "c5dc64471"
+    },
+    {
+      "type": "mindmap",
+      "slug": "susipa-95-tedu015",
+      "status": "baseline",
+      "weightedScore": 318,
+      "diffCount": 133,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "c5dc64471"
+    }
+  ]
+}

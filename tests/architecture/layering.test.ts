@@ -96,6 +96,16 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       'description port of its opener grammar rather than re-spelling it ' +
       '(mission unknown-bucket-routing-repair, T7 / T4 mechanism A).',
   },
+  {
+    from: 'src/diagrams/mindmap/',
+    to: 'src/diagrams/activity/ftile/',
+    why:
+      'upstream FingerImpl.java:41 imports ' +
+      'net.sourceforge.plantuml.activitydiagram3.ftile.vertical.FtileBoxOld ' +
+      '(createMindMap, FtileBoxOld.java:139-146) -- the mindmap node box IS ' +
+      "the activity engine's FtileBoxOld, kept at its upstream path " +
+      '(mission mindmap-engine-port D4; wbs ITFLeaf.java:38 shares it).',
+  },
 ];
 
 /** Measured 2026-08-17 at 321bfb8b (T0): 13 edges, each naming the task

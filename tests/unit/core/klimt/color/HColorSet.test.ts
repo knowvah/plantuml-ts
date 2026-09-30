@@ -1,10 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  HColorSet,
   parseSimpleColor,
   parseColor,
   toSvgHex,
   resolveColorToSvgHex,
 } from '../../../../../src/core/klimt/color/HColorSet.js';
+import { HColorSimple } from '../../../../../src/core/klimt/color/HColorSimple.js';
+import { HColors } from '../../../../../src/core/klimt/color/HColors.js';
+import { NoSuchColorException } from '../../../../../src/core/klimt/color/NoSuchColorException.js';
 
 describe('parseSimpleColor', () => {
   it('parses the 1/3/6/8-hex-digit forms, with or without a leading #', () => {
@@ -116,5 +120,59 @@ describe('resolveColorToSvgHex', () => {
     expect(resolveColorToSvgHex('url(#g0)')).toBe('url(#g0)');
     expect(resolveColorToSvgHex('none')).toBe('none');
     expect(resolveColorToSvgHex('a&b<c')).toBe('a&b<c');
+  });
+});
+
+describe('HColorSet class (HColorSet.java:43-120)', () => {
+  const set = HColorSet.instance();
+  const simple = (s: string): HColorSimple => {
+    const c = set.getColorOrWhite(s);
+    if (!(c instanceof HColorSimple)) throw new Error(`not simple: ${s}`);
+    return c;
+  };
+
+  it('instance() is a singleton', () => {
+    expect(HColorSet.instance()).toBe(set);
+  });
+
+  it('getColorOrWhite: hex, names, a leading #; WHITE for an unknown token', () => {
+    expect(simple('#181818').toString()).toBe('[r=24,g=24,b=24,a=255] α=255');
+    expect(simple('lightGreen').toString()).toBe('[r=144,g=238,b=144,a=255] α=255');
+    expect(set.getColorOrWhite('#8').asString()).toBe('#888888');
+    expect(set.getColorOrWhite('nosuchcolour')).toBe(HColors.WHITE);
+  });
+
+  it('transparent / background (any case, # optional) are HColors.none()', () => {
+    expect(set.getColorOrWhite('transparent')).toBe(HColors.none());
+    expect(set.getColorOrWhite('#BackGround')).toBe(HColors.none());
+  });
+
+  it('getColorOrNull returns undefined for an unknown token', () => {
+    expect(set.getColorOrNull('nosuchcolour')).toBeUndefined();
+    expect(set.getColorOrNull('red')?.asString()).toBe('#FF0000');
+  });
+
+  it('getColor throws NoSuchColorException for an unknown token', () => {
+    expect(() => set.getColor('nosuchcolour')).toThrow(NoSuchColorException);
+    expect(() => set.getColor('nosuchcolour')).toThrow('NoSuchColorException');
+    expect(set.getColor('blue').asString()).toBe('#0000FF');
+  });
+
+  it('the unported HColorAutomagic / HColorScheme results throw rather than resolve', () => {
+    expect(() => set.getColorOrWhite('automatic')).toThrow('HColorAutomagic');
+    expect(() => set.getColorOrWhite('#?red:blue')).toThrow('HColorScheme');
+    expect(() => set.getColorOrWhite('#?red:blue:green')).toThrow('HColorScheme');
+  });
+
+  it('a c1<policy>c2 token is an HColorGradient (java:109-117), asString "?HColorGradient" (HColor.java:113-115)', () => {
+    expect(set.getColorOrWhite('red-blue').asString()).toBe('?HColorGradient');
+  });
+
+  it('`?` with an unparsable 2-part scheme reads colors[2]: ArrayIndexOutOfBounds (java:88-94)', () => {
+    expect(() => set.getColorOrWhite('?red:nosuch')).toThrow('ArrayIndexOutOfBoundsException');
+  });
+
+  it('`?` with an unparsable 3rd part falls through to the gradient scan and then null', () => {
+    expect(set.getColorOrNull('?red:blue:nosuch')).toBeUndefined();
   });
 });

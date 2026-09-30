@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { preprocess } from '../../src/core/preprocessor.js';
+import { BLOCK_E1_NEWLINE } from '../../src/core/tim/builtin/jaws-constants.js';
 
 /**
  * Helper: build a source string from an array of lines, then run preprocess.
@@ -460,5 +461,26 @@ describe('skin <name> directive -- skin-file-loading mission Batch 1', () => {
   it('last skin line wins when the directive repeats', () => {
     const result = preprocess('@startuml\nskin rose\nskin debug\nstate a\n@enduml');
     expect(result.skin).toBe('debug');
+  });
+});
+
+// Upstream's preprocessor keeps trailing whitespace (ReadLineReader.java:89-115
+// reads the line verbatim; TimLoader.getResultList hands it on); each command
+// decides — `SingleLineCommand2#myTrim2` (SingleLineCommand2.java:74-79) trims
+// only when `doTrim`, and `CommandMindMapOrgmode.java:55` is `super(false, …)`.
+describe('trailing whitespace reaches the command layer (T6i)', () => {
+  it('keeps a trailing space and a trailing tab on a plain line', () => {
+    const r = preprocess('@startmindmap\n* **1** \n** a\t\n@endmindmap');
+    expect(r.lines).toEqual(['@startmindmap', '* **1** ', '** a\t', '@endmindmap']);
+  });
+
+  it('keeps the trailing space on a line carrying the inline %n() sentinel', () => {
+    const { lines } = preprocess('@startuml\n:hello %n() world; \n@enduml');
+    expect(lines).toContain(`:hello ${BLOCK_E1_NEWLINE} world; `);
+  });
+
+  it('still right-trims the segments of the port-only case-folded %N() split', () => {
+    const { lines } = preprocess('@startuml\n:a %N() b; \n@enduml');
+    expect(lines).toEqual(['@startuml', ':a', ' b;', '@enduml']);
   });
 });

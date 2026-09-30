@@ -1,0 +1,11 @@
+@startmindmap
+<style>
+mindmapDiagram {
+  rootNode {
+    HorizontalAlignment center
+    MinimumWidth 200
+  }
+}
+</style>
+* first node
+@endmindmap

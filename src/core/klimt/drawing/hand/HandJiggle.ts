@@ -10,6 +10,8 @@
  * for why that sharing makes the port all-or-nothing.
  */
 
+import { UPath } from '../../shape/UPath.js';
+import { UPolygon } from '../../shape/UPolygon.js';
 import type { JavaRandom } from './JavaRandom.js';
 
 export interface HandPoint {
@@ -165,5 +167,28 @@ export class HandJiggle {
 
   getPoints(): readonly HandPoint[] {
     return this.points;
+  }
+
+  /** Every point, in order. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/hand/HandJiggle.java:134-140 */
+  toUPolygon(): UPolygon {
+    return new UPolygon(this.points);
+  }
+
+  /** The first point a `moveTo`, every later one a `lineTo`; no point is an
+   *  `IllegalStateException` (unreachable: the constructor adds the start).
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/hand/HandJiggle.java:142-156 */
+  toUPath(): UPath {
+    const path = UPath.none();
+    const [first, ...rest] = this.points;
+    if (first === undefined) throw new Error('IllegalStateException: HandJiggle#toUPath on no points');
+    path.moveTo(first.x, first.y);
+    for (const p of rest) path.lineTo(p.x, p.y);
+    return path;
+  }
+
+  /** `lineTo` EVERY point, the start included.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/hand/HandJiggle.java:158-162 */
+  appendTo(result: UPath): void {
+    for (const p of this.points) result.lineTo(p.x, p.y);
   }
 }

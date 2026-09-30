@@ -1,0 +1,17 @@
+@startmindmap
+<style>
+mindmapDiagram {
+  .myStyle * {
+    BackGroundColor lightblue
+    LineColor lightblue
+  }
+}
+</style>
+* root
+** node 1 <<myStyle>>
+*** subNode 1
+*** subNode 2
+**** subSubNode
+
+** node 2
+@endmindmap

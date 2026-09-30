@@ -1,0 +1,20 @@
+@startmindmap
+!$foo = { "company": "Skynet", "employees" : [
+  {"name" : "alice", "salary": 100 },
+  {"name" : "bob", "salary": 50} ]
+}
+
+!$index=1
+
+* The salary of  
+!foreach $emp in $foo.employees
+  ** **$index** 
+  *** **$emp.name** 
+  **** is 
+  ***** **$emp.salary**
+  !$index = $index+1
+!endfor
+** %size("company")
+** %size($foo.employees)
+** %size($foo)
+@endmindmap

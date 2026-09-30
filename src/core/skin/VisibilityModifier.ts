@@ -11,7 +11,7 @@ import { UEllipse } from '../klimt/shape/UEllipse.js';
 import { UPolygon } from '../klimt/shape/UPolygon.js';
 import { XDimension2D } from '../klimt/geom/XDimension2D.js';
 import { ColorParam } from './ColorParam.js';
-import type { StyleSignatureBasic } from '../style/StyleSignatureBasic.js';
+import { StyleSignatureBasic } from '../style/StyleSignatureBasic.js';
 
 export { ColorParam } from './ColorParam.js';
 export type { SName, StyleSignatureBasic } from '../style/StyleSignatureBasic.js';
@@ -452,19 +452,19 @@ export class VisibilityModifier {
   /** @see net/sourceforge/plantuml/skin/VisibilityModifier.java#getStyleSignature */
   getStyleSignature(): StyleSignatureBasic {
     if (this === VisibilityModifier.IE_MANDATORY)
-      return { names: ['root', 'element', 'visibilityIcon', 'IEMandatory'] };
+      return StyleSignatureBasic.of('root', 'element', 'visibilityIcon', 'IEMandatory');
 
     if (this === VisibilityModifier.PUBLIC_FIELD || this === VisibilityModifier.PUBLIC_METHOD)
-      return { names: ['root', 'element', 'visibilityIcon', 'public_'] };
+      return StyleSignatureBasic.of('root', 'element', 'visibilityIcon', 'public_');
 
     if (this === VisibilityModifier.PRIVATE_FIELD || this === VisibilityModifier.PRIVATE_METHOD)
-      return { names: ['root', 'element', 'visibilityIcon', 'private_'] };
+      return StyleSignatureBasic.of('root', 'element', 'visibilityIcon', 'private_');
 
     if (this === VisibilityModifier.PROTECTED_FIELD || this === VisibilityModifier.PROTECTED_METHOD)
-      return { names: ['root', 'element', 'visibilityIcon', 'protected_'] };
+      return StyleSignatureBasic.of('root', 'element', 'visibilityIcon', 'protected_');
 
     if (this === VisibilityModifier.PACKAGE_PRIVATE_FIELD || this === VisibilityModifier.PACKAGE_PRIVATE_METHOD)
-      return { names: ['root', 'element', 'visibilityIcon', 'package_'] };
+      return StyleSignatureBasic.of('root', 'element', 'visibilityIcon', 'package_');
 
     // #lizard forgives -- faithful port of upstream's five paired-constant
     // if chains (VisibilityModifier.java#getStyleSignature);

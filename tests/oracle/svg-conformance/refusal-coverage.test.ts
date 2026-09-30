@@ -740,7 +740,12 @@ describe('refusal coverage — baseline shape', () => {
     // batch-2 fixes). Derivation: 5678 + 268 = 5946.
     // 5946 -> 5967 at cdd6/close-b3: 21 unknown-tree golden rows (the
     // batch-3 fixes). Derivation: 5699 + 268 = 5967.
-    expect(manifest.fixtures.length).toBe(5967);
+    // 5967 -> 6104 / 5699 -> 5836 / 268 -> 268 at the cdd6 <- main merge
+    // (2026-09-30): mindmap-engine-port's 137 svg-mindmap clone rows (all
+    // render on both sides); its two gradient gaps were opened and closed
+    // within that mission, so erroring/gaps are unchanged. Derivation:
+    // 5836 + 268 = 6104.
+    expect(manifest.fixtures.length).toBe(6104);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -780,7 +785,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5659 -> 5658 at cdd6/close-b1 (kokofa now errors, see above).
     // 5658 -> 5678 at cdd6/close-b2 (20 unknown-tree svg-class clones).
     // 5678 -> 5699 at cdd6/close-b3 (21 unknown-tree svg-class clones).
-    expect(pinnedRendering.length).toBe(5699);
+    // 5699 -> 5836 at the cdd6 <- main merge (137 svg-mindmap clones).
+    expect(pinnedRendering.length).toBe(5836);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

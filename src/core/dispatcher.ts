@@ -27,6 +27,7 @@ import { rect, text } from './svg.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
+import type { ScaleSpec } from './scale-command.js';
 
 /**
  * The per-render inputs a plugin's `parse()` may need beyond the source
@@ -156,6 +157,43 @@ export interface RenderFragment {
    * diagrams with no such skinparam.
    */
   diagramBorderColor?: string;
+  /**
+   * T6d (mission mindmap-engine-port, batch 6): the diagram's OWN `scale
+   * ...` directive (`ScaleSpec`, unresolved) and `skinparam dpi`, for a
+   * `bodyWrapped` MINDMAP fragment whose producer could NOT resolve (let
+   * alone bake into its klimt draw pass) a scale FACTOR yet, because
+   * chrome (title) is composed OUTSIDE klimt as a string splice
+   * (`core/annotations/chrome.ts#applyChrome`) — upstream resolves the
+   * factor against the CHROME-INCLUDED, margin-included dimension
+   * (`TextBlockExporter#computeScaleFactor` reads `calculateFinalDimension()`,
+   * `TextBlockExporter.java:198-209`), which does not exist until AFTER
+   * chrome has composed the title (jar-verified: resolving against the
+   * pre-chrome body dimension alone gives zebuzi 1.682, not the golden's
+   * 1.495 — the title widens the box `ScaleWidthAndHeight`'s ratio is
+   * computed against). So `TextBlockExporter.ts#finalizeTitledDiagramFragment`
+   * resolves `resolveScaleFactor(scaleSpec, unscaledWidth, unscaledHeight,
+   * dpi)` itself, using the SAME post-chrome/post-margin dimension it
+   * already computes for `width`/`height` — then applies the result
+   * numerically to the composed body, matching upstream's "scale the
+   * whole chromed document" ordering without redrawing chrome through
+   * klimt. `scaleSpec === undefined` is a no-op (dpi-only factor, or 1 at
+   * dpi 96) — every non-MINDMAP fragment, and every mindmap fragment
+   * without a `scale` directive, is unaffected.
+   *
+   * Set by `src/diagrams/mindmap/index.ts#rawTextBlock`.
+   */
+  scaleSpec?: ScaleSpec;
+  dpi?: number;
+  /**
+   * T6h: the raw text block drawn through ONE klimt `UGraphic` at the
+   * resolved `scale`, translated by `(dx, dy)` BEFORE the scale
+   * (TextBlockExporter.java:165-176) — for a MINDMAP fragment whose `body`
+   * is only the `TextBlockExporter.ts#BODY_ANCHOR` placeholder. Chrome
+   * composes around the anchor; `finalizeTitledDiagramFragment` reads the
+   * anchor's shifted translate as `(dx, dy)` and swaps in this draw, so the
+   * body's numbers are rounded once, after the scale. Returns the flat body.
+   */
+  drawBodyAt?: (scale: number, dx: number, dy: number) => string;
 }
 
 /**

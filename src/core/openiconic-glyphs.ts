@@ -363,7 +363,7 @@ function absolutizeOne(letter: string, args: readonly number[], cursor: Absolute
 
 const PARSED_CACHE = new Map<string, readonly OpenIconicOp[]>();
 
-function parsedOpsFor(name: string): readonly OpenIconicOp[] | undefined {
+export function parsedOpsFor(name: string): readonly OpenIconicOp[] | undefined {
   const cached = PARSED_CACHE.get(name);
   if (cached !== undefined) return cached;
   const raw = RAW_GLYPHS[name];

@@ -802,10 +802,18 @@ describe('routing conformance — jar-error classification', () => {
     // heading font, note separators/table alignment, reversecolor,
     // hyperlink and maximumwidth buckets, sprite paint none/transparent).
     // Derivation: 4812 + 1050 + 105 = 5967.
-    expect(pinnedAgree.length).toBe(4812);
-    expect(pinnedMisroutes.length).toBe(1050);
+    //
+    // 4812 -> 5090 / 1050 -> 909 / 5967 -> 6104 at the cdd6 <- main merge
+    // (2026-09-30): main carries mindmap-engine-port's rows -- 139 mindmap
+    // known-misroute -> agree (137 at its close-b5 + nukose/vacofo at close-b6),
+    // 2 stale c4 pins (favasu, xizifu) -> agree, and 137 `goldens:svg-mindmap`
+    // clone rows appended (see that mission's derivations in its own copy of
+    // this comment block). Row-level three-way union, no row changed on both
+    // sides. Derivation: 5090 + 909 + 105 = 6104.
+    expect(pinnedAgree.length).toBe(5090);
+    expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5967);
+    expect(manifest.fixtures.length).toBe(6104);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -858,7 +866,8 @@ describe('routing conformance — jar-error classification', () => {
     // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
     // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
     // 1050 -> 1049 at cdd6/close-b1: unknown/xuloxo-85-vibu502 now agrees.
-    expect(censused.length).toBe(1049);
+    // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
+    expect(censused.length).toBe(908);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }
