@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T15:40:43.696Z",
+  "generatedAt": "2026-09-29T15:42:54.354Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -4501,9 +4501,10 @@
       "slug": "semutu-45-zeno907",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 26,
-      "maxDeltaPath": "svg/@height"
+      "verdict": "diverged",
+      "maxDelta": 155,
+      "firstDiff": "svg/g[1]/g[1][childCount]",
+      "maxDeltaPath": "svg/@viewBox[2]"
     },
     {
       "slug": "sezupe-60-neko208",

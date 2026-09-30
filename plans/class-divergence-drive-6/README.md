@@ -126,3 +126,12 @@ Measurement:
   verify-agent-claims-si31, dot-engine-blame-needs-real-dot,
   comparesvg-count-not-monotonic, conformant-is-not-divergence-gone,
   coverage-tmp-silent-undercollect, subagent-handback-single-shot
+
+## Status (T-exit, 2026-09-30, on 2703d6ef5 = cdd6 + main/mindmap-engine-port)
+
+| clause | result | met |
+|---|---|---|
+| Every in-scope row has a mechanism and a `final` ∈ {fixed, open -> cdd7, accept-candidate} | 61 rows, 0 empty; 41 fixed, 14 `open -> cdd7`, 6 `accept-candidate` (after normalising six mechanism-carrying finals to the vocabulary) | yes |
+| 0 conformant losses in any engine; 0 unexplained rises | `final-eng/` vs `b3-eng/`: 0 losses; movers = 138 mindmap rises (mindmap-engine-port) + unknown/semutu diverged → structural-match (embedded mindmap renders). vs `b0-eng/`: 188 rises, 0 losses; the non-class movers (component codabo, gutute; object gapisu) were journaled at the b1/b2 closes | yes |
+| Four gates green, collected = on-disk, class DOT parity green | npm test 987/987 collected, 24509 passed; typecheck/lint/build exit 0; DOT-parity in the suite green | yes |
+| Target 990 CLASS conformant (T0e: 932 + 58 scheduled) | **974** (class 708 + unknown 266 CLASS-routed; survey = census (974 zero-diff of 1010) = render-all); ratchet 973. Short by 16: 14 `open -> cdd7` rows (bonaco, xuloxo, sejube, kexaba, josebu(a), tefeco(b), dezobu, lubicu, rojida-unpinned, …) and 2 `accept-candidate` rows beyond the 4 smetana ones already excused at T0e — each with a journaled mechanism | miss, journaled |

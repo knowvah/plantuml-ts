@@ -4,7 +4,7 @@ Sequential, orchestrator, after batch 3's close.
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| T-exit | final measurement; D10 clause by clause | orchestrator | `measurements/final*`, README Status, journal | b3 close | [ ] |
+| T-exit | final measurement; D10 clause by clause | orchestrator | `measurements/final*`, README Status, journal | b3 close | [x] |
 | T-close-out | ledger finals, records, memory, merge | orchestrator | see below | T-exit | [ ] |
 
 ## T-exit
