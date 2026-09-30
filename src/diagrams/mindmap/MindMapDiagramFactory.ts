@@ -9,9 +9,14 @@ import { matchScaleCommand } from '../../core/scale-command.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { createSpriteRegistry } from '../../core/sprite-registry.js';
-import { buildMindmapStyleBuilder } from '../../core/style/mindmap-style-builder.js';
+import {
+  createMindmapSkinParam,
+  executeDeclaration,
+  positionedDeclarationsOf,
+  type PositionedDeclaration,
+  type SkinParam as StyleSkinParam,
+} from '../../core/style/mindmap-style-builder.js';
 import { StyleParsingException } from '../../core/style/parser/StyleParser.js';
-import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
 import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
 import { applyMindMapDirection, MINDMAP_DIRECTION_RE } from './CommandMindMapDirection.js';
 import {
@@ -110,8 +115,9 @@ function dispatchOrgmodeMultiline(
  * (title/mainframe/caption/legend/footer/header), `!assume transparent` and
  * the sprite definitions of `addCommonCommands2`, then `addCommonScaleCommands`. `skinparam`,
  * `<style>`, `skin` and `!pragma` never reach here: the preprocessor
- * collected them (see `buildSkinParam`). Returns the lines consumed, or
- * `null` when none of them matches line `i`.
+ * collected them (`skinparam`/`<style>` are replayed between the lines,
+ * `createStyleDispatch`). Returns the lines consumed, or `null` when none
+ * of them matches line `i`.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommonCommands.java:56-61
  */
 function dispatchCommonCommand(diagram: MindMapDiagram, lines: readonly string[], i: number): number | null {
@@ -137,28 +143,57 @@ const EMPTY_STYLE_SOURCE: NonNullable<UmlSource['styleSource']> = {
 };
 
 /**
- * The diagram's `SkinParam`: upstream's `TitledDiagram` constructor builds
- * one and every `skinparam`/`<style>` command then mutes its style builder
- * in source order (decision D2, `buildMindmapStyleBuilder`). A `<style>`
- * block the parser rejects is `CommandStyleMultilinesCSS`'s command error
- * ("Error in style definition: …", java:92-93); the preprocessor keeps no
- * line for it, so the refusal is reported at line 0.
+ * The `skinparam`/`<style>` commands the preprocessor pulled out of the
+ * source, still to be dispatched: upstream executes each where it occurs
+ * among the mindmap commands (`CommonCommands.addCommonCommands2`), muting
+ * the diagram's style builder (SkinParam.java:164-167, 227-252;
+ * `CommandStyleMultilinesCSS.java:85-90`) — so every `Idea` captures the
+ * builder current at its own line (MindMap.java:124-125,139).
  */
-function buildSkinParam(source: UmlSource): SkinParam | ParseRefusal {
+interface StyleDispatch {
+  readonly style: StyleSkinParam;
+  readonly skinparam: ReadonlyMap<string, string>;
+  /** Source order; the head is the next to execute. Mutated by {@link executeDeclarationsBefore}. */
+  readonly pending: PositionedDeclaration[];
+}
+
+function createStyleDispatch(source: UmlSource): StyleDispatch {
   const styleSource = source.styleSource ?? EMPTY_STYLE_SOURCE;
-  let styleBuilder: StyleBuilder;
-  try {
-    styleBuilder = buildMindmapStyleBuilder(styleSource);
-  } catch (e) {
-    if (!(e instanceof StyleParsingException)) throw e;
-    return refuse('execution', 0, 0, `Error in style definition: ${e.message}`);
-  }
-  return new SkinParam({
-    styleBuilder,
+  return {
+    style: createMindmapSkinParam(styleSource),
     skinparam: styleSource.skinparam,
-    sprites: createSpriteRegistry(),
-    pragma: Pragma.createEmpty(),
-  });
+    pending: positionedDeclarationsOf(styleSource, source.stylePositions ?? []),
+  };
+}
+
+/**
+ * Executes every pending declaration placed before document line
+ * `position`. A `<style>` block the parser rejects is
+ * `CommandStyleMultilinesCSS`'s command error ("Error in style definition:
+ * …", java:92-93); the preprocessor keeps no line for it in `lines`, so
+ * the refusal is reported at line 0.
+ */
+function executeDeclarationsBefore(dispatch: StyleDispatch, position: number): ParseRefusal | null {
+  while (dispatch.pending.length > 0 && dispatch.pending[0]!.position < position) {
+    const declaration = dispatch.pending.shift()!;
+    try {
+      executeDeclaration(dispatch.style, declaration, dispatch.skinparam);
+    } catch (e) {
+      if (!(e instanceof StyleParsingException)) throw e;
+      return refuse('execution', 0, 0, `Error in style definition: ${e.message}`);
+    }
+  }
+  return null;
+}
+
+/**
+ * Line `i`'s document position. A hand-built source with no positions
+ * reads as every declaration before its first line; a line the reader
+ * never located dispatches nothing new.
+ */
+function positionOf(source: UmlSource, i: number): number {
+  if (source.linePositions === undefined) return Number.POSITIVE_INFINITY;
+  return source.linePositions[i] ?? -1;
 }
 
 /**
@@ -177,13 +212,28 @@ function buildSkinParam(source: UmlSource): SkinParam | ParseRefusal {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/MindMapDiagramFactory.java:50-74
  */
 export function createMindMapDiagram(source: UmlSource): MindMapDiagram | ParseRefusal {
-  const skinParam = buildSkinParam(source);
-  if ('refused' in skinParam) return skinParam;
+  const dispatch = createStyleDispatch(source);
+  const skinParam = new SkinParam({
+    style: dispatch.style,
+    skinparam: dispatch.skinparam,
+    sprites: createSpriteRegistry(),
+    pragma: Pragma.createEmpty(),
+  });
   const diagram = new MindMapDiagram(source, new PreprocessingArtifact(), skinParam);
+  const refusal = executeCommands(diagram, source, dispatch);
+  if (refusal !== null) return refusal;
+  // Declarations after the last command still mute the builder the render reads.
+  return executeDeclarationsBefore(dispatch, Number.POSITIVE_INFINITY) ?? diagram;
+}
+
+/** `PSystemCommandFactory#createSystem`'s loop over the source lines. */
+function executeCommands(diagram: MindMapDiagram, source: UmlSource, dispatch: StyleDispatch): ParseRefusal | null {
   const lines = source.lines;
   let i = 0;
 
   while (i < lines.length) {
+    const styleRefusal = executeDeclarationsBefore(dispatch, positionOf(source, i));
+    if (styleRefusal !== null) return styleRefusal;
     const trimmed = lines[i]!.trim();
     if (trimmed === '' || START_END_RE.test(trimmed)) {
       i++;
@@ -203,6 +253,5 @@ export function createMindMapDiagram(source: UmlSource): MindMapDiagram | ParseR
     }
     i = outcome.nextIndex;
   }
-
-  return diagram;
+  return null;
 }
