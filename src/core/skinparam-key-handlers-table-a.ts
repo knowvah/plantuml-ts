@@ -108,8 +108,11 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
   ],
   [
     ['arrowcolor', 'defaultarrowcolor'],
-    (acc, _v, color) => {
-      acc.arrow = color;
+    // cdd7-T1a (D3): the Paint, not the flattened `color` -- upstream keeps
+    // the `HColorGradient` (`HColorSet.java:109-116`) all the way to
+    // `DriverRectangleSvg#applyStrokeColor` (java:103-107).
+    (acc, _v, _color, paint) => {
+      acc.arrow = paint;
     },
   ],
   // cdd7-T1a (D2): `ColorParam.arrowLollipop` (`ColorParam.java:71`), read

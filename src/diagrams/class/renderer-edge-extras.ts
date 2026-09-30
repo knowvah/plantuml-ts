@@ -17,6 +17,11 @@ import { VisibilityModifier } from '../../core/skin/VisibilityModifier.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import type { Paint } from '../../core/paint.js';
+import { buildDotPathFromSplinePoints } from '../../core/svek/svek-edge-geometry.js';
 import { extractFlatContent } from '../../core/klimt/document-shell.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { resolveArrowLabelFont, resolveCardinalityFont } from '../../core/arrow-label-font.js';
@@ -305,4 +310,63 @@ export function renderEdgeKalBoxes(geo: EdgeGeo, theme: ScaledTheme): string {
     );
   }
   return parts.join('');
+}
+
+/** {@link renderEdgeDotPath}'s stroke inputs: the colour and the
+ *  ALREADY-scaled thickness `renderer-edge.ts#buildEdgePathMarkup` writes
+ *  onto its flat `<path>`, the link id (`undefined` on a smetana edge, see
+ *  that module's `EdgePathStyle`), and the scale factor for the dash. */
+export interface EdgeDotPathStroke {
+  readonly color: Paint;
+  readonly thickness: number;
+  readonly linkId: string | undefined;
+  readonly k: number;
+}
+
+/** `LinkStyle#getStroke3`'s DASHED stroke, `new UStroke(7, 7, ...)`
+ *  (`decoration/LinkStyle.java:99-100`) -- the same 7,7 the flat arm
+ *  writes as `'7,7'` (scaled by `k` there too). */
+const DASHED_EDGE = 7;
+
+/** The edge's dash: a `-[dashed]->`-style bracket override's own pair,
+ *  else the dashed link style's scaled 7,7, else solid. */
+function edgeDash(geo: EdgeGeo, k: number): readonly [number, number] {
+  if (geo.strokeDasharray !== undefined) return geo.strokeDasharray;
+  return geo.dashed ? [DASHED_EDGE * k, DASHED_EDGE * k] : [0, 0];
+}
+
+/**
+ * cdd7-T1a (D3, bisefo-56-dumu120): the connecting line drawn the way
+ * `SvekEdge#drawU` draws it -- `ug.apply(HColors.none().bg()).apply(color)`,
+ * `.apply(stroke)`, `todraw.setCommentAndCodeLine(...)`, then
+ * `drawRainbow`'s `ug.draw(todraw)` (`SvekEdge.java:895,906,944,1110`) --
+ * through `DriverDotPathSvg#draw`, whose `DriverRectangleSvg
+ * #applyStrokeColor` turns an `HColorGradient` into `svg.createSvgGradient
+ * (color1, color2, policy)` + `stroke:url(#id)` (`DriverRectangleSvg.java:
+ * 103-107`). The def's vector is `SvgGraphics#createSvgGradient`'s own
+ * policy table (`SvgGraphics.java:367-394`: `'|'` -> x1=0% y1=50% x2=100%
+ * y2=50%); its id is renumbered to the diagram seed at assembly
+ * (`svg-defs-seeded.ts`).
+ *
+ * Built at `scale: 1` over already-scaled inputs, so no value is scaled
+ * twice. `undefined` when `points` is not a `1 + 3*n` spline (only a
+ * hand-built geometry; the caller keeps its flat `<path>` there).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverDotPathSvg.java
+ */
+export function renderEdgeDotPath(
+  geo: EdgeGeo,
+  points: EdgeGeo['points'],
+  stroke: EdgeDotPathStroke,
+): { body: string; extraDefs: string } | undefined {
+  if (points.length < 4 || (points.length - 1) % 3 !== 0) return undefined;
+  const dotPath = buildDotPathFromSplinePoints(points);
+  const codeLine = stroke.linkId !== undefined && geo.sourceLine !== undefined ? String(geo.sourceLine) : null;
+  dotPath.setCommentAndCodeLine(stroke.linkId ?? null, codeLine);
+  const [dashVisible, dashSpace] = edgeDash(geo, stroke.k);
+  const ug = UGraphicSvg.build(0, basicSvgOption(), '$version$', NO_TEXT_BOUNDER);
+  ug.apply(new Back('none'))
+    .apply(new Fore(stroke.color))
+    .apply(new UStroke(dashVisible, dashSpace, stroke.thickness))
+    .draw(dotPath);
+  return extractFlatContent(ug.getSvgString());
 }

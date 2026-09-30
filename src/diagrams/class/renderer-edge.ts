@@ -34,7 +34,10 @@ import {
   renderEdgeConstraint,
   renderEdgeCardinalityLabels,
   renderEdgeKalBoxes,
+  renderEdgeDotPath,
 } from './renderer-edge-extras.js';
+import type { Paint } from '../../core/paint.js';
+import { noGradient } from '../../core/paint.js';
 
 /**
  * G2 N5: `EdgeGeo.points` is a well-formed `1 + 3*n` cubic-bezier spline
@@ -222,7 +225,7 @@ function resolveStrokeAndArrowheads(
   geo: EdgeGeo,
   theme: ScaledTheme,
   contactRects: ReadonlyMap<string, ContactRect> | undefined,
-): { strokeColor: string; edgeStrokeWidth: number; arrowheads: ReturnType<typeof buildEdgeArrowheads> } {
+): { strokeColor: Paint; edgeStrokeWidth: number; arrowheads: ReturnType<typeof buildEdgeArrowheads> } {
   const tagStyle = resolveArrowTagStyle(geo.stereotypeTags, theme);
   const strokeColor =
     geo.colorOverride !== undefined
@@ -246,9 +249,11 @@ function resolveStrokeAndArrowheads(
  * -- upstream never reserves an id-collision slot for it either.
  */
 interface EdgePathStyle {
-  readonly strokeColor: string;
+  readonly strokeColor: Paint;
   readonly edgeStrokeWidth: number;
   readonly linkId: string | undefined;
+  /** cdd7-T1a: the trimmed spline -- {@link renderEdgeDotPath}'s input. */
+  readonly points: EdgeGeo['points'];
 }
 
 /**
@@ -259,8 +264,28 @@ interface EdgePathStyle {
  * spot rather than an inline branch inside the `path()` call.
  * @see ~/git/plantuml/.../sdot/SmetanaEdge.java:215-217
  */
-function buildEdgePathMarkup(d: string, geo: EdgeGeo, theme: ScaledTheme, style: EdgePathStyle): string {
-  if (d === '') return '';
+function buildEdgePathMarkup(
+  d: string,
+  geo: EdgeGeo,
+  theme: ScaledTheme,
+  style: EdgePathStyle,
+): { body: string; extraDefs: string } {
+  if (d === '') return { body: '', extraDefs: '' };
+  const { strokeColor, edgeStrokeWidth, linkId } = style;
+  // cdd7-T1a (D3): a gradient stroke is drawn through the klimt
+  // `DriverDotPathSvg` path, which owns `createSvgGradient` -- see
+  // {@link renderEdgeDotPath}. A flat colour keeps the byte-identical
+  // `path()` emission below.
+  if (typeof strokeColor !== 'string') {
+    const stroke = { color: strokeColor, thickness: edgeStrokeWidth, linkId, k: theme.scaleK };
+    const drawn = renderEdgeDotPath(geo, style.points, stroke);
+    if (drawn !== undefined) return drawn;
+  }
+  return { body: buildFlatEdgePath(d, geo, theme, { ...style, strokeColor: noGradient(strokeColor) }), extraDefs: '' };
+}
+
+/** {@link buildEdgePathMarkup}'s flat-colour arm (pre-cdd7 body, unchanged). */
+function buildFlatEdgePath(d: string, geo: EdgeGeo, theme: ScaledTheme, style: EdgePathStyle): string {
   const { strokeColor, edgeStrokeWidth, linkId } = style;
   return path(d, {
     // G2 N8: `strokeWidth: 1` (was `1.5`) and `strokeDasharray: '7,7'`
@@ -341,7 +366,12 @@ export function renderEdge(
   // G2 N9 / T3c D8: a smetana edge never reserves an id-collision slot --
   // see {@link EdgePathStyle}'s doc comment.
   const linkId = smetana ? undefined : linkIdForSvg(geo, ids, syntheticNames);
-  const pathMarkup = buildEdgePathMarkup(d, geo, theme, { strokeColor, edgeStrokeWidth, linkId });
+  const pathMarkup = buildEdgePathMarkup(d, geo, theme, {
+    strokeColor,
+    edgeStrokeWidth,
+    linkId,
+    points: trimmedPoints,
+  });
   // T3c (D8): `SmetanaEdge#drawU` draws BOTH extremities BEFORE the
   // connecting path (`printExtremityAtStart`/`printExtremityAtEnd` precede
   // `ug.apply(stroke).apply(color).draw(dotPath)`,
@@ -351,8 +381,8 @@ export function renderEdge(
   // is the url wrap's operand for a smetana edge (see the return
   // statement's own doc comment).
   const core = smetana
-    ? arrowheads.tail + arrowheads.head + pathMarkup
-    : pathMarkup + arrowheads.tail + arrowheads.head;
+    ? arrowheads.tail + arrowheads.head + pathMarkup.body
+    : pathMarkup.body + arrowheads.tail + arrowheads.head;
   // cdd-T7 (A2a/M2): the label's own visibility-modifier icon -- drawn
   // right after the extremities and BEFORE the label text, matching
   // `canuti-20-jotu614`'s golden child order (`SvekEdge.java:302`'s
@@ -410,7 +440,7 @@ export function renderEdge(
     },
     theme.scaleK,
   );
-  let extraDefs = arrowheads.extraDefs + noteBoxResult.extraDefs;
+  let extraDefs = pathMarkup.extraDefs + arrowheads.extraDefs + noteBoxResult.extraDefs;
   if (middleDecor !== undefined) {
     parts.push(middleDecor.body);
     extraDefs += middleDecor.extraDefs;

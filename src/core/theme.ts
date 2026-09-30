@@ -13,6 +13,7 @@ import type { ElementColors } from './theme-graph-colors.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 import { deepMergeTheme } from './theme-merge.js';
 import type { ThemeColorFields } from './theme-colors-fields.js';
+import type { Paint } from './paint.js';
 import type { ThemeSequenceFields } from './theme-sequence-fields.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
@@ -422,7 +423,8 @@ export type ThemeOverride = {
     participantBackground?: string;
     border?: string;
     text?: string;
-    arrow?: string;
+    /** cdd7-T1a (D3): see `ThemeColorFields.arrow`. */
+    arrow?: Paint;
     arrowLollipopColor?: string;
     note?: string;
     noteBackground?: string;

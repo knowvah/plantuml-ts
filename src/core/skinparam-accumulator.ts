@@ -73,7 +73,10 @@ export interface SkinparamAccumulator {
   background: string | undefined;
   border: string | undefined;
   text: string | undefined;
-  arrow: string | undefined;
+  /** cdd7-T1a (D3): a `Paint`, mirroring upstream's `HColor` -- a
+   *  `Red|Green` value is an `HColorGradient` (`HColorSet.java:109-116`),
+   *  not a flattened string. */
+  arrow: Paint | undefined;
   /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` --
    *  `ColorParam.arrowLollipop`, read by `SvekEdge.java:266-268`. */
   arrowLollipopColor: string | undefined;
