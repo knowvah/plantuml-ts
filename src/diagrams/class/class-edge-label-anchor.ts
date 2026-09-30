@@ -19,6 +19,7 @@ import type { Positionable } from '../../core/klimt/geom/Positionable.js';
 import { PositionableImpl } from '../../core/klimt/geom/PositionableImpl.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/PositionableUtils.js';
+import { stripCreoleShorthand } from './class-edge-label-measure.js';
 
 /**
  * G2 item 43: lay out a `\n`/`\l`/`\r`-split edge label as one `<text>`
@@ -64,14 +65,12 @@ import { addMargin, intersect, moveAwayFrom } from '../../core/klimt/geom/Positi
  */
 /**
  * S-8 (cdd2-T7, vuresa-33-kumu160): `<b>...</b>` (creole BOLD), the same tag
- * family {@link stripCreoleMarkup}'s `CREOLE_FORMAT_TAG_SOURCE` strips --
- * detected BEFORE stripping so a per-line bold flag survives the strip for
- * {@link multiLineLabelAnchor}'s caller (`renderer-edge.ts
- * #renderEdgeMainLabel`) to apply as `font-weight="700"` on that line's own
- * `<text>`, mirroring `Display.java:413-419`'s per-line creole processing
- * (already cited by `class-edge-label-measure.ts`'s sibling LAYOUT path,
- * which strips but has no reason to track bold -- box RESERVATION doesn't
- * draw text).
+ * family {@link stripCreoleMarkup} strips -- detected BEFORE stripping so a
+ * per-line bold flag survives for {@link multiLineLabelAnchor}'s caller to
+ * apply `font-weight="700"`. T1b (xuloxo-85-vibu502): {@link
+ * stripCreoleShorthand} (`class-edge-label-measure.ts`) covers the SAME
+ * BOLD, plus ITALIC, for `**`/`//` shorthand -- its own strip IS the
+ * italic detector, so it is not re-implemented here.
  */
 const BOLD_TAG_RE = /<\/?b(?::[^>]*|\s[^>]*)?>/i;
 
@@ -81,15 +80,16 @@ export function multiLineLabelAnchor(
   center: { x: number; y: number },
   measurer: StringMeasurer,
   labelFont: FontSpec,
-): Array<{ text: string; x: number; y: number; width: number; bold?: boolean }> {
+): Array<{ text: string; x: number; y: number; width: number; bold?: boolean; italic?: boolean }> {
   const font = labelFont;
   // S-8: mirrors `class-edge-label-measure.ts#computeMeasuredLabelAttrs`'s
-  // own `applyGuillemet` -> `stripCreoleMarkup` -> `resolveTextEscapes`
-  // pipeline (its own doc comment cites `Display.java:413-419`) -- the
-  // RENDER/ANCHOR path here previously measured and emitted the RAW,
-  // un-stripped line text.
-  const bold = lines.map((l) => BOLD_TAG_RE.test(l));
-  const stripped = lines.map((l) => resolveTextEscapes(stripCreoleMarkup(applyGuillemet(l))));
+  // own `stripCreoleShorthand` -> `applyGuillemet` -> `stripCreoleMarkup` ->
+  // `resolveTextEscapes` pipeline -- the RENDER/ANCHOR path here must strip
+  // the SAME markers the box RESERVATION measured, or ink and box drift.
+  const shorthand = lines.map(stripCreoleShorthand);
+  const bold = lines.map((l, i) => BOLD_TAG_RE.test(l) || shorthand[i]!.bold);
+  const italic = shorthand.map((s) => s.italic);
+  const stripped = shorthand.map((s) => resolveTextEscapes(stripCreoleMarkup(applyGuillemet(s.text))));
   const widths = stripped.map((l) => measurer.measure(l, font).width);
   const maxWidth = Math.max(...widths);
   const blockLeft = center.x - Math.floor(maxWidth) / 2;
@@ -107,6 +107,7 @@ export function multiLineLabelAnchor(
       y: blockTop + baselineOffset + i * font.size,
       width,
       ...(bold[i] === true ? { bold: true as const } : {}),
+      ...(italic[i] === true ? { italic: true as const } : {}),
     };
   });
 }
@@ -480,8 +481,7 @@ export { roleLabelAnchors, attachPortLabels } from './class-edge-role-label-anch
  * draws at box-origin+`(8,8)`. RULED OUT for the `+7`: `skinparam padding`
  * (`SkinParam.java:1147-1150`, unset here); `AtomSprite`/`AtomWithMargin`
  * (no margin of their own). Confirmed against the oracle, not fitted --
- * exact Java statement not pinned within budget (`.agent-notes/kexaba-
- * sprite-label-inset.md`). Scoped to `marginLabel === 1` (untested for `6`).
+ * exact Java statement not pinned within budget (`.agent-notes/kexaba-sprite-label-inset.md`). Scoped to `marginLabel === 1` (untested for `6`).
  */
 const SPRITE_LABEL_IMAGE_INSET = 8;
 

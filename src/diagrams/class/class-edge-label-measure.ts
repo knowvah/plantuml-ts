@@ -75,6 +75,87 @@ export function resolveMagicArrowText(
   return { text: resolveTextEscapes(resolved.text), font: resolved.font };
 }
 
+/**
+ * cdd7-T1b (xuloxo-85-vibu502): creole shorthand `stripCreoleMarkup`
+ * (`core/edge-label-box.ts`) doesn't reach -- `**bold**`/`//italic//`
+ * (`FontStyle.java:207-224`'s `getUbrexCreoleSyntax`), active even in
+ * `CreoleMode.SIMPLE_LINE` (the edge-label mode, `SvekEdge.java:298-299`):
+ * `CommandCreoleBuilder`'s constructor (`klimt/creole/legacy/
+ * CommandCreoleBuilder.java`) adds BOLD's and ITALIC's creole form
+ * UNCONDITIONALLY, unlike UNDERLINE's `__`, which is FULL-mode-only (this
+ * port's `<U>` precedent, `rimeca-17-gice904`, stays on the XML-tag path
+ * `stripCreoleMarkup` already handles). C4's `Rel(...)` template emits
+ * `**Label**`/`//[Optional Technology]//` for xuloxo's relationship label.
+ * Local to the class edge-label measure/anchor pair (not folded into the
+ * SHARED `stripCreoleMarkup`) to avoid changing every other consumer
+ * (state/sequence/description engines) for a class-edge-label-only need.
+ * Non-greedy (`.*?`) and unclosed-safe: an unmatched `**`/`//` leaves the
+ * text (and its own literal marker) untouched, matching `RegExp#test`/
+ * `#replace` finding no pair to act on.
+ */
+const BOLD_MARK = /\*\*(.*?)\*\*/g;
+const ITALIC_MARK = /\/\/(.*?)\/\//g;
+
+export function stripCreoleShorthand(text: string): { text: string; bold: boolean; italic: boolean } {
+  const bold = BOLD_MARK.test(text);
+  BOLD_MARK.lastIndex = 0;
+  const italic = ITALIC_MARK.test(text);
+  ITALIC_MARK.lastIndex = 0;
+  const stripped = text.replace(BOLD_MARK, '$1').replace(ITALIC_MARK, '$1');
+  return { text: stripped, bold, italic };
+}
+
+/**
+ * {@link computeMeasuredLabelAttrs}'s multi-line arm -- split out purely to
+ * keep that function's NLOC under the project's per-function cap (T1b, the
+ * {@link stripCreoleShorthand} addition pushed it over). D6
+ * (`SvekEdge.java:290-297`): a multi-line label whose lines include a
+ * leading/trailing `< `/`> `/` <`/` >` guide-line token takes the PER-LINE
+ * arrow path (`Display.hasSeveralGuideLines`, `klimt/creole/Display.java
+ * :715-740`) instead of the plain stacked-text formula below -- see
+ * {@link hasSeveralGuideLines}/{@link computeGuideLinesBox}'s own doc
+ * comments. M4 cause C applies to EVERY line, unconditionally
+ * (`Display.manageGuillemet`'s loop body, `Display.java:413-419` -- no
+ * `first`-only gate on the guillemet call, unlike the visibility strip).
+ * T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream RENDERS
+ * `<b>..</b>` as bold formatting rather than measuring the tag as glyphs
+ * (`Display.java:413-419` runs at Display-construction time, BEFORE the
+ * later `create()`/`create9()` creole render this port stands in for via
+ * {@link stripCreoleMarkup}) -- so the strip runs AFTER guillemet,
+ * mirroring that same construct-then-render order. Bold/italic contribute
+ * no width delta in deterministic mode either way:
+ * `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
+ * /StringBounderFromWidthTable.java:63-79`) derives width from `font
+ * .getSize2D()` and a fixed per-codepoint table alone -- no branch on
+ * `FontStyle`/bold/italic exists in that class -- so stop 10 does not fire
+ * here. Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
+ * own per-line-not-whole-string ordering. T1b (xuloxo-85-vibu502): strip
+ * `**`/`//` BEFORE guillemet/stripCreoleMarkup -- {@link
+ * stripCreoleShorthand}'s own doc comment. Word-wrap of an OVER-WIDTH line
+ * (jar's `[Optional Technology]` -> `[Optional`/`Technology]`, a
+ * `LineBreakStrategy`/Fission concern) is NOT ported here -- see
+ * `.agent-notes/xuloxo-edge-label-creole.md`.
+ */
+function measureMultiLineLabel(
+  label: string,
+  lines: readonly string[],
+  font: { family: string; size: number },
+  measurer: StringMeasurer,
+): LabelAttrs {
+  if (hasSeveralGuideLines(lines)) {
+    const box = computeGuideLinesBox(lines, font, measurer);
+    return { label, labelWidth: box.width, labelHeight: box.height };
+  }
+  const guillemetLines = lines
+    .map((l) => stripCreoleShorthand(l).text)
+    .map(applyGuillemet)
+    .map(stripCreoleMarkup)
+    .map(resolveTextEscapes);
+  const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
+  const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
+  return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
+}
+
 /** The plain (non-note, non-constraint-spot) measured label -- multi-line,
  *  magic-arrow, or a single plain string. Plain single-line now ports M4
  *  causes A+B+C ({@link applyVisibilityIcon}, {@link applyGuillemet},
@@ -97,39 +178,7 @@ export function computeMeasuredLabelAttrs(
   sprites?: SpriteRegistry,
 ): LabelAttrs {
   const { lines } = splitDisplayLines(label);
-  if (lines.length > 1) {
-    // D6 (`SvekEdge.java:290-297`): a multi-line label whose lines include a
-    // leading/trailing `< `/`> `/` <`/` >` guide-line token takes the
-    // PER-LINE arrow path (`Display.hasSeveralGuideLines`,
-    // `klimt/creole/Display.java:715-740`) instead of the plain stacked-text
-    // formula below -- see {@link hasSeveralGuideLines}/
-    // {@link computeGuideLinesBox}'s own doc comments.
-    if (hasSeveralGuideLines(lines)) {
-      const box = computeGuideLinesBox(lines, font, measurer);
-      return { label, labelWidth: box.width, labelHeight: box.height };
-    }
-    // M4 cause C applies to EVERY line, unconditionally
-    // (`Display.manageGuillemet`'s loop body, `Display.java:413-419` --
-    // no `first`-only gate on the guillemet call, unlike the visibility
-    // strip). T4 (`vuresa-33-kumu160`): a real creole TextBlock upstream
-    // RENDERS `<b>..</b>` as bold formatting rather than measuring the tag
-    // as glyphs (`Display.java:413-419` runs at Display-construction time,
-    // BEFORE the later `create()`/`create9()` creole render this port
-    // stands in for via {@link stripCreoleMarkup}) -- so the strip runs
-    // AFTER guillemet, mirroring that same construct-then-render order.
-    // Bold contributes no width delta in deterministic mode either way:
-    // `StringBounderFromWidthTable#calculateDimension` (`klimt/drawing/font
-    // /StringBounderFromWidthTable.java:63-79`) derives width from `font
-    // .getSize2D()` and a fixed per-codepoint table alone -- no branch on
-    // `FontStyle`/bold/italic exists in that class -- so stop 10 does not
-    // fire here.
-    // Decode LAST, per line -- mirrors `StripeSimple.ts#decodeAtomEscapes`'s
-    // own per-line-not-whole-string ordering (see that function's comment).
-    const guillemetLines = lines.map(applyGuillemet).map(stripCreoleMarkup).map(resolveTextEscapes);
-    const widths = guillemetLines.map((l) => measurer.measure(l, font).width);
-    const lineHeight = measurer.measure(guillemetLines[0] ?? '', font).height;
-    return { label, labelWidth: Math.max(...widths), labelHeight: lineHeight * lines.length };
-  }
+  if (lines.length > 1) return measureMultiLineLabel(label, lines, font, measurer);
   const magic = parseMagicArrowLabel(label);
   if (magic !== undefined) {
     // A leading `<size:N>` tag on the remaining text rewrites the TEXT's
