@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1311 modules · 4822 exported names.
+1312 modules · 4824 exported names.
 
 ## `src/`
 
@@ -388,6 +388,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
+| `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
 | `HColors.ts` | `HColors` |  |
 | `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
 | `HColorSimple.ts` | `HColorSimple` |  |
