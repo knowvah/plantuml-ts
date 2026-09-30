@@ -94,7 +94,7 @@ Measurement:
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch + ledger + b0, oracle harness, jar probes, jar skin | T0a–T0d | T0b–T0d ∥ | [x] |
 | [1](batch-1/overview.md) | style values, signatures, packing geometry, parsing | T1a–T1d | all ∥ | [x] |
-| [2](batch-2/overview.md) | Style + StyleStorage + StyleBuilder | T2a | — | [ ] |
+| [2](batch-2/overview.md) | Style + StyleStorage + StyleBuilder | T2a | — | [x] |
 | [3](batch-3/overview.md) | style parser + loader, skinparam bridge, FtileBoxOld | T3a–T3c | all ∥ | [ ] |
 | [4](batch-4/overview.md) | Idea styles + FingerImpl + MindMap/Branch drawing | T4a | — | [ ] |
 | [5](batch-5/overview.md) | plugin, registration, chrome; first measurement | T5a | — | [ ] |

@@ -1,0 +1,64 @@
+== activity 21:28:19 { 7.02 6.51 6.63 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-activity.json — {"conformant":0,"structural-match":4,"diverged":369,"errored":0,"timeout":0,"oracle-error":0}
+wait load 9.28
+wait load 8.08
+== board 21:29:46 { 5.67 6.58 6.67 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== c4 21:30:08 { 5.06 6.36 6.59 }
+[xmldom fatalError]	comment is not well-formed at position 1041 
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-c4.json — {"conformant":1,"structural-match":0,"diverged":10,"errored":0,"timeout":0,"oracle-error":0}
+== chart 21:30:38 { 7.72 6.81 6.74 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-chart.json — {"conformant":0,"structural-match":0,"diverged":29,"errored":0,"timeout":0,"oracle-error":0}
+== chronology 21:31:02 { 7.07 6.70 6.70 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== class 21:31:20 { 5.50 6.37 6.58 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-class.json — {"conformant":708,"structural-match":3,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}
+== component 21:31:47 { 6.14 6.42 6.59 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-component.json — {"conformant":64,"structural-match":66,"diverged":136,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 21:32:13 { 6.52 6.46 6.60 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 21:32:22 { 5.99 6.35 6.55 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 21:32:45 { 5.60 6.22 6.50 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 21:33:08 { 5.06 6.05 6.43 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 21:33:27 { 4.04 5.75 6.32 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 21:33:51 { 4.58 5.73 6.29 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 21:34:12 { 4.39 5.60 6.23 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-json.json — {"conformant":12,"structural-match":23,"diverged":15,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 21:34:35 { 4.53 5.52 6.18 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-mindmap.json — {"conformant":0,"structural-match":0,"diverged":142,"errored":0,"timeout":0,"oracle-error":0}
+== network 21:34:59 { 4.50 5.44 6.13 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 21:35:20 { 4.32 5.32 6.07 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-object.json — {"conformant":62,"structural-match":9,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 21:35:44 { 4.43 5.27 6.03 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 21:36:07 { 4.37 5.17 5.97 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 21:36:30 { 5.69 5.38 6.02 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 21:36:55 { 4.95 5.22 5.94 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1141,"errored":0,"timeout":0,"oracle-error":0}
+== state 21:37:24 { 5.63 5.33 5.96 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}
+== timing 21:37:48 { 5.96 5.42 5.98 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 21:38:12 { 5.45 5.33 5.92 }
+[xmldom fatalError]	comment is not well-formed at position 1360 
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-unknown.json — {"conformant":279,"structural-match":79,"diverged":467,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 21:38:41 { 5.00 5.23 5.87 }
+[xmldom fatalError]	comment is not well-formed at position 3144 
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-usecase.json — {"conformant":28,"structural-match":19,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 21:39:07 { 5.14 5.23 5.85 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+== wire 21:39:30 { 5.30 5.25 5.83 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 21:39:53 { 5.26 5.23 5.81 }
+wrote plans/mindmap-engine-port/measurements/b2-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 21:40:16
