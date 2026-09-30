@@ -58,6 +58,7 @@ import {
 import { type SpriteRegistry, spriteDimsLookupFor } from '../../core/sprite-commands.js';
 import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
+import { drawOpaleShape } from './renderer-note-opale.js';
 import { buildNoteBody } from '../../core/svek/image/leaf-sizing.js';
 import { NOTE_FONT_SIZE } from '../../core/svek/image/leaf-sizing-consts.js';
 
@@ -372,9 +373,16 @@ function noteFont(theme: Theme): FontConfiguration {
  * separator rule span the note's full width (jar: `x1="7" x2="90.4313"` on a
  * box spanning 6..91.43) instead of stopping at the text.
  *
- * The note's own BOX shape (upstream: `Opale`'s folded-corner polygon) stays
- * out of scope — `drawFallbackBox` still draws a plain rect, a pre-existing,
- * separately-ledgered divergence.
+ * The note's own BOX shape (upstream: `Opale`'s folded-corner polygon) is a
+ * plain rect UNLESS `node.opale` resolved (T1e, `layout-geo-post.ts
+ * #applyOpaleNote` + `renderer-draw-sequence.ts#drawEntities` copying the
+ * connector from the note's attachment edge onto the node) — then
+ * `renderer-note-opale.ts#drawOpaleShape` draws the fold-outline + corner
+ * triangle instead, mirroring `EntityImageNote.java:207-243`'s opale
+ * branch. The text-drawing half below (stencil + `NOTE_MARGIN_X`/`_Y`
+ * translate) is UNCHANGED for both branches — `Opale.java:221`'s
+ * `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))` applies
+ * the identical margin regardless of shape.
  */
 function drawNoteFallback(
   ug: UGraphic,
@@ -383,7 +391,11 @@ function drawNoteFallback(
   uid: string,
   sprites: SpriteRegistry | undefined,
 ): void {
-  drawFallbackBox(ug, node, uid, theme.colors.noteBackground, theme.colors.border);
+  if (node.opale !== undefined) {
+    drawOpaleShape(ug, node, uid, theme, node.opale);
+  } else {
+    drawFallbackBox(ug, node, uid, theme.colors.noteBackground, theme.colors.border);
+  }
   const block = buildNoteBody(node.display, noteFont(theme), {
     wrapWidth: theme.wrapWidth,
     guillemet: {

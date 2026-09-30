@@ -24,6 +24,7 @@ import {
   LAYOUT_MARGIN,
 } from './layout-helpers.js';
 import { clipSplineStart, clipSplineEnd } from '../../core/spline-clip.js';
+import { resolveOpaleConnector } from '../../core/svek/image/Opale.js';
 
 /** One edge from the graphviz layout result. */
 export type ResultEdge = DotLayoutResult['edges'][number];
@@ -111,6 +112,55 @@ function addEdgeLabel(geo: DescriptionEdgeGeo, link: DescriptiveLink, re: Result
   geo.label = { text: link.label, ...edgeLabelGeo(re, geo.points, dx, dy) };
 }
 
+/**
+ * `GraphvizImageBuilder.java#isOpalisable`/`:245-260` (strictUml gate
+ * excluded -- see the doc comment below): when exactly one end of `link`
+ * is a `symbol === 'note'` leaf that touches no OTHER link, and the other
+ * end is not itself a note, resolve the Opale connector
+ * (`Opale.ts#resolveOpaleConnector`, the SAME call `class/note-opale.ts
+ * #buildOpaleNoteGeo` makes for the class engine's own note renderer)
+ * against the note's own box + this edge's routed (already clip-processed)
+ * points, and mark `geo` so `renderer-draw-sequence.ts#drawEdges` skips
+ * drawing it (`SvekEdge#drawU`'s `if (opale) return;`) and
+ * `renderer-entity.ts#drawEntity` draws the note's folded-corner+notch
+ * outline instead of the plain box.
+ *
+ * `isOpalisable`'s FIRST guard (`dotData.getSkinParam().strictUmlStyle()`)
+ * is NOT applied here: `EdgeMapping` carries no `Theme` (this module is
+ * deliberately theme-free, `decision-journal.md` G1b/J1) and no
+ * description-corpus fixture in this task's scope exercises `skinparam
+ * style strictuml` together with an on-entity note. Documented residual
+ * (cdd7-T1e report), not a silent drop -- threading `Theme` into
+ * `EdgeMapping` from `layout.ts` is a follow-up, outside this task's
+ * write-set. `entity.isGroup()` (Java's second guard) needs no explicit
+ * check: a `symbol === 'note'` leaf is never `declaredAsGroup`/has
+ * children in this AST.
+ *
+ * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java#isOpalisable (:133-146)
+ * @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java:245-260
+ */
+function applyOpaleNote(
+  geo: DescriptionEdgeGeo,
+  link: DescriptiveLink,
+  pts: Array<{ x: number; y: number }>,
+  allLinks: readonly DescriptiveLink[],
+  m: EdgeMapping,
+): void {
+  const fromNode = m.geoIndex.get(link.from);
+  const toNode = m.geoIndex.get(link.to);
+  const noteNode = fromNode?.symbol === 'note' ? fromNode : toNode?.symbol === 'note' ? toNode : undefined;
+  if (noteNode === undefined) return;
+  const otherNode = noteNode === fromNode ? toNode : fromNode;
+  if (otherNode === undefined || otherNode.symbol === 'note') return;
+  const touchingLinks = allLinks.filter((l) => l.from === noteNode.id || l.to === noteNode.id);
+  if (touchingLinks.length !== 1) return;
+  const origin = { x: noteNode.x + m.dx, y: noteNode.y + m.dy };
+  const resolved = resolveOpaleConnector({ width: noteNode.width, height: noteNode.height }, origin, pts);
+  if (resolved === undefined) return;
+  geo.consumedByOpaleNote = true;
+  geo.opale = resolved;
+}
+
 export function buildEdgeGeos(
   links: readonly DescriptiveLink[],
   resultEdges: ResultEdge[],
@@ -127,6 +177,7 @@ export function buildEdgeGeos(
     const pts = clipped.map((p) => ({ x: p.x + m.dx, y: p.y + m.dy }));
     const geo = assembleEdgeGeo(linkIdx, link, pts, hidden);
     addEdgeLabel(geo, link, re, m.dx, m.dy);
+    applyOpaleNote(geo, link, pts, links, m);
     byIdx.set(linkIdx, geo);
   }
   return [...byIdx.entries()].sort(([a], [b]) => a - b).map(([, g]) => g);

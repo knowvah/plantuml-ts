@@ -14,6 +14,7 @@ import type { USymbol } from '../../core/descriptive-keywords.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { StringMeasurer } from '../../core/measurer.js';
+import type { OpaleDirection, OpalePoint } from '../../core/svek/image/Opale.js';
 
 // ---------------------------------------------------------------------------
 // Public output node type
@@ -79,6 +80,23 @@ export interface DescriptionNodeGeo {
    *  `#drawEntities` to skip the node entirely; absent means visible
    *  (every non-hide fixture never sets it). */
   hidden?: true;
+  /** T1e (opale note port): the resolved Opale connector for THIS
+   *  `symbol === 'note'` leaf, copied onto the node by
+   *  `renderer-draw-sequence.ts#drawEntities` from the matching
+   *  `DescriptionEdgeGeo.opale` (set by `layout-geo-post.ts
+   *  #applyOpaleNote`) -- NOT set by layout itself. Mirrors
+   *  `class/note-layout-tip.ts`'s `NoteGeo.opale` (same
+   *  `Opale.ts#resolveOpaleConnector` call), but this engine's
+   *  note-attachment edge is an ordinary `DescriptionEdgeGeo` (not a
+   *  separate synthetic dot-graph edge kind the way class's freestanding/
+   *  on-entity connector is), so the geometry naturally resolves on the
+   *  edge first; copying it onto the node at draw time keeps
+   *  `renderer-entity.ts#drawEntity`'s own 5-param signature unchanged.
+   *  Absent on every non-note node, and on a note with no resolved
+   *  connector (`drawNoteFallback`'s plain folded-corner box + separately-
+   *  drawn edge, its pre-existing default).
+   *  @see ~/git/plantuml/.../svek/image/EntityImageNote.java:207-243 */
+  opale?: { direction: OpaleDirection; pp1: OpalePoint; pp2: OpalePoint };
 }
 
 // ---------------------------------------------------------------------------
@@ -189,6 +207,21 @@ export interface DescriptionEdgeGeo {
    *  a LimitFinder-adjacent mechanism out of a bracket-modifier-parsing
    *  iteration's scope. */
   hidden?: true;
+  /** T1e (opale note port): `true` when this edge attaches exactly one
+   *  `symbol === 'note'` leaf (touching no other link) to a non-note
+   *  entity and its connector resolved via Opale (`opale` below) --
+   *  mirrors `class/class-geo-types.ts`'s `EdgeGeo.consumedByOpaleNote`.
+   *  Set by `layout-geo-post.ts#applyOpaleNote`; kept in `edges` (never
+   *  filtered out) so `renderer-uid.ts` still counts its `creationIndex`
+   *  slot, but `renderer-draw-sequence.ts#drawEdges` must never draw its
+   *  own `<g class="link">` (`SvekEdge#drawU`'s `if (opale) return;`). */
+  consumedByOpaleNote?: true;
+  /** T1e (opale note port): the resolved connector geometry, present iff
+   *  `consumedByOpaleNote` is `true` -- `renderer-draw-sequence.ts
+   *  #drawEntities` copies this onto the note's own `DescriptionNodeGeo
+   *  .opale` for `renderer-entity.ts#drawEntity` to draw.
+   *  @see ~/git/plantuml/.../svek/GraphvizImageBuilder.java#isOpalisable (:133-146) */
+  opale?: { direction: OpaleDirection; pp1: OpalePoint; pp2: OpalePoint };
 }
 
 export interface DescriptionGeometry {

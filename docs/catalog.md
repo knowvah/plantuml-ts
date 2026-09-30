@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1336 modules · 4947 exported names.
+1337 modules · 4948 exported names.
 
 ## `src/`
 
@@ -1467,6 +1467,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-edge.ts` | `drawEdge` | renderer-edge.ts — T17: adapts one `DescriptionEdgeGeo` (this port's layout output) into `SvekEdgeInput` (T13's decoupled drawing-half contract — see `SvekEdge.ts`'s "Adapter boundary" doc comment, which explicitly names this as a later tas |
 | `renderer-entity.ts` | `drawEntity` | renderer-entity.ts — T17: assembles `EntityImageDescription` (T14) for one leaf `DescriptionNodeGeo` and draws it through klimt, translated to its absolute layout position (`SvekResult.java:87`'s `image.drawU(ug2.apply(new UTranslate(minX, |
 | `renderer-ink-extent.ts` | `runInkWalk`, `driverBounderFor`, `DocumentDimResult`, `computeDocumentDims` | renderer-ink-extent.ts — G0/T3 (LimitFinder mission): the SvekResult document-dimension recipe (svek/SvekResult.java:70-140), lifted out of `renderer.ts` to keep that file under the project's complexity cap. |
+| `renderer-note-opale.ts` | `drawOpaleShape` | renderer-note-opale.ts — T1e (opale note port): draws a `symbol === 'note'` leaf's Opale fold-outline + corner triangle instead of a plain box, when `DescriptionNodeGeo.opale` resolved (`layout-geo-post.ts#applyOpaleNote`, the SAME `Opale.t |
 | `renderer-uid.ts` | `UidPlan`, `buildUidPlan` | renderer-uid.ts — entity/cluster/link uid assignment for the klimt-backed description renderer. |
 | `renderer.ts` | `renderDescription`, `unwrapKlimtSvg` | renderer.ts — T17: klimt-backed public entry point for the description (component/use-case/deployment) diagram engine. |
 | `title-label-sizing.ts` | `measureTitleLabel` | Title-bar dims for a cluster's own display name — split out of layout-helpers.ts (500-line cap) as its own module, mirroring that file's existing leaf-sizing.js split. |

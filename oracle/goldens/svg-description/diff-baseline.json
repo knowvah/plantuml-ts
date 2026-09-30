@@ -117,9 +117,10 @@
       "slug": "xufexu-38-fola855",
       "group": 2,
       "status": "baseline",
-      "diffCount": 12,
-      "measuredAt": "2026-09-03",
-      "measuredAgainstCommit": "804232d4"
+      "diffCount": 27,
+      "measuredAt": "2026-09-30",
+      "measuredAgainstCommit": "6d8ff65c",
+      "note": "cdd7-T1e: the `note left` on `foo` is now opale (GraphvizImageBuilder.java:245-260, EntityImageNote.java:207-243) -- was 12 (pre-existing id/color/childCount diffs). Opale draws via UPath (no LimitFinder min-corner inset, LimitFinder.ts#drawUPath / LimitFinder.java:164-166) instead of the old plain URectangle (-1 inset, LimitFinder.ts's drawRectangle), which changes this fixture's global ink-extent-derived shift/width (layout-ink-shift.ts#computeInkShift, renderer-ink-extent.ts#computeDocumentDims) by a uniform 1px, surfacing a pre-existing @knowvah/dot-engine-vs-real-graphviz arithmetic delta for this graph that the old rect's inset happened to mask. Verified: every new numeric diff is the SAME Δ1 on every coordinate (viewBox/width plus every ellipse/text/path value) -- not a shape-specific defect. The note itself is now structurally MORE faithful (opale outline, no stray dashed edge) — see the commit body."
     },
     {
       "type": "usecase",
