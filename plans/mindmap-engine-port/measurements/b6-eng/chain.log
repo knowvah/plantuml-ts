@@ -11,3 +11,53 @@ wrote plans/mindmap-engine-port/measurements/b6-eng/parity-chart.json — {"conf
 == chronology 09:42:21 { 5.60 7.64 7.70 }
 wrote plans/mindmap-engine-port/measurements/b6-eng/parity-chronology.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
 == class 09:42:41 { 4.64 7.29 7.58 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-class.json — {"conformant":708,"structural-match":3,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}
+== component 09:43:09 { 5.15 7.19 7.53 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-component.json — {"conformant":64,"structural-match":66,"diverged":136,"errored":0,"timeout":0,"oracle-error":0}
+== ditaa 09:43:36 { 5.33 7.05 7.47 }
+[xmldom error]	element parse error: Error: invalid tagName:�GFF���0���^__�wQ`�`�����|�:wvvpXPP�vCC����%$$�|��ouu�|���$y 
+[xmldom fatalError]	Unescaped '<' not allowed in attributes values 
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-ditaa.json — {"conformant":0,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":2}
+== dot 09:43:46 { 4.74 6.86 7.40 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== ebnf 09:44:10 { 4.48 6.62 7.29 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-ebnf.json — {"conformant":0,"structural-match":0,"diverged":44,"errored":0,"timeout":0,"oracle-error":0}
+== files 09:44:36 { 4.94 6.54 7.25 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-files.json — {"conformant":0,"structural-match":0,"diverged":1,"errored":0,"timeout":0,"oracle-error":0}
+== gantt 09:44:55 { 4.43 6.32 7.15 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-gantt.json — {"conformant":0,"structural-match":0,"diverged":265,"errored":0,"timeout":0,"oracle-error":0}
+== hcl 09:45:21 { 4.88 6.25 7.10 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-hcl.json — {"conformant":1,"structural-match":2,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}
+== json 09:45:43 { 5.90 6.36 7.12 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-json.json — {"conformant":12,"structural-match":23,"diverged":15,"errored":0,"timeout":0,"oracle-error":0}
+== mindmap 09:46:07 { 5.41 6.19 7.03 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-mindmap.json — {"conformant":137,"structural-match":1,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+== network 09:46:32 { 6.05 6.24 7.02 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-network.json — {"conformant":0,"structural-match":0,"diverged":3,"errored":0,"timeout":0,"oracle-error":0}
+== object 09:46:54 { 5.05 6.00 6.92 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-object.json — {"conformant":62,"structural-match":9,"diverged":9,"errored":0,"timeout":0,"oracle-error":0}
+== packet 09:47:20 { 5.79 6.11 6.93 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
+== regex 09:47:44 { 5.40 5.98 6.86 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-regex.json — {"conformant":0,"structural-match":0,"diverged":46,"errored":0,"timeout":0,"oracle-error":0}
+== salt 09:48:09 { 5.51 5.93 6.81 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}
+== sequence 09:48:35 { 5.05 5.77 6.72 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-sequence.json — {"conformant":0,"structural-match":0,"diverged":1141,"errored":0,"timeout":0,"oracle-error":0}
+== state 09:49:05 { 4.85 5.63 6.64 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}
+== timing 09:49:31 { 4.71 5.52 6.57 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}
+== unknown 09:49:56 { 7.54 6.06 6.73 }
+[xmldom fatalError]	comment is not well-formed at position 1360 
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-unknown.json — {"conformant":279,"structural-match":81,"diverged":465,"errored":0,"timeout":0,"oracle-error":0}
+== usecase 09:50:27 { 6.49 5.94 6.66 }
+[xmldom fatalError]	comment is not well-formed at position 3144 
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-usecase.json — {"conformant":28,"structural-match":19,"diverged":46,"errored":0,"timeout":0,"oracle-error":1}
+== wbs 09:50:54 { 6.17 5.88 6.62 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-wbs.json — {"conformant":0,"structural-match":0,"diverged":204,"errored":0,"timeout":0,"oracle-error":0}
+== wire 09:51:18 { 5.64 5.77 6.55 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-wire.json — {"conformant":0,"structural-match":0,"diverged":18,"errored":0,"timeout":0,"oracle-error":0}
+== yaml 09:51:43 { 5.50 5.71 6.51 }
+wrote plans/mindmap-engine-port/measurements/b6-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
+DONE 09:52:08
