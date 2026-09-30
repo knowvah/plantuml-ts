@@ -31,7 +31,7 @@
 import type { ClassifierGeo } from './class-geo-types.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import type { UDrawable } from '../../core/klimt/shape/UDrawable.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
@@ -40,7 +40,9 @@ import { renderDrawableToFragment, type DrawableFragment } from '../../core/klim
 import {
   EntityImageDescription,
   type EntityImageDescriptionParams,
+  type EntityImageDescriptionStereotypeSprite,
 } from '../../core/svek/image/EntityImageDescription.js';
+import { resolveStereotypeSprite } from '../../core/svek/image/EntityImageDescriptionDelegates.js';
 import { upstreamKeyword, mapComponentStyle, resolveActorStyle } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords.js';
@@ -104,6 +106,24 @@ function resolveSymbolKeyword(classifier: ClassifierGeo): USymbol {
  * this task). `diagonalCorner: 0` for all four (unused by every shape this
  * file reaches).
  */
+/**
+ * cdd7 T2b (dezobu-62-vuzu421): `EntityImageDescription.java:192-194` --
+ * a `<<$name>>` stereotype whose `Stereotype#getSprite`
+ * (`Stereotype.java:108-117`) resolves REPLACES the stereo block. Resolved
+ * through the SAME `resolveStereotypeSprite` + `spriteDimsLookupFor`
+ * narrowing the sizer (`leaf-sizing-entity.ts#spriteLabel`) uses, so the
+ * drawn sprite cannot differ from the measured one -- the class twin of
+ * `description/renderer-entity.ts#spriteLabel`.
+ */
+function stereotypeSpriteLabel(
+  classifier: ClassifierGeo,
+  sprites: SpriteRegistry | undefined,
+): { stereotypeSprite?: EntityImageDescriptionStereotypeSprite } {
+  const lookup = sprites === undefined ? undefined : spriteDimsLookupFor(sprites);
+  const resolved = resolveStereotypeSprite(classifier.stereotypeSprite, lookup);
+  return resolved === undefined ? {} : { stereotypeSprite: resolved };
+}
+
 function buildUSymbolEntityParams(
   classifier: ClassifierGeo,
   theme: ScaledTheme,
@@ -135,6 +155,7 @@ function buildUSymbolEntityParams(
       codeName: classifier.id,
       displayText: display,
       stereotypeLabels: classifier.visibleStereotypeLabels ?? [],
+      ...stereotypeSpriteLabel(classifier, sprites),
     },
     paint: {
       forecolor: resolveForecolor(classifier, theme, symbolKeyword),

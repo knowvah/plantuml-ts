@@ -9,6 +9,7 @@ import type { JsonNode } from '../../core/command/JsonNode.js';
 import type { UrlInfo } from './class-url.js';
 import type { MapRow } from './ast.js';
 import type { DisplayPositioned } from '../../core/annotations/index.js';
+import type { LeafSizingStereotypeSprite } from '../../core/svek/image/LeafSizingSubject.js';
 
 // cdd7 T2b: `ClassifierKind` moved to `class-classifier-kind.ts` (500-line
 // cap) -- a pure move, re-exported so no consumer's import path changed.
@@ -52,6 +53,13 @@ export interface Classifier {
    * `splitStereotypeLabels(stereotype)` unfiltered in that case.
    */
   visibleStereotypeLabels?: string[];
+  /**
+   * cdd7 T2b (dezobu-62-vuzu421): the sprite half of the `<<$name{scale}>>`
+   * run (`Stereotype#getSprite`, `stereo/Stereotype.java:108-117`) -- a
+   * resolving sprite REPLACES a USymbol leaf's stereotype block
+   * (`EntityImageDescription.java:192-194`). Resolved at size/draw time.
+   */
+  stereotypeSprite?: LeafSizingStereotypeSprite;
   /**
    * G2 N31: the trailing background/border-color spec off a classifier
    * declaration (`class-declaration-parser.ts#extractDecorations`'s own doc

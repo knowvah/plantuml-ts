@@ -86,13 +86,7 @@ export function tryMeasureDescriptionLeaf(
   const symbol = KEYWORD_TO_SYMBOL.get(classifier.usymbol);
   if (symbol === undefined || symbol === 'actor') return undefined;
   if (classifier.members.some((m) => m.hidden !== true)) return undefined;
-  const stereotype = resolveVisibleStereotypeLabels(classifier);
-  const node: LeafSizingSubject = {
-    id: classifier.id,
-    display: classifier.display,
-    symbol,
-    ...(stereotype.length > 0 ? { stereotype } : {}),
-  };
+  const node = leafSizingSubjectOf(classifier, symbol);
   const baseFont = { family: theme.fontFamily, size: theme.fontSize };
   const opts = buildDescriptionLeafOpts(theme, symbol);
   const spriteDims = sprites !== undefined ? spriteDimsLookupFor(sprites) : undefined;
@@ -106,6 +100,23 @@ export function tryMeasureDescriptionLeaf(
     dividerYs: [],
     rows: [{ text: classifier.display, y: dim.height / 2, indent: 0, italic: false }],
     ...(symbolInk !== undefined ? { symbolInk } : {}),
+  };
+}
+
+/** The `LeafSizingSubject` {@link tryMeasureDescriptionLeaf} sizes: visible
+ *  stereotype labels plus (cdd7 T2b, dezobu-62-vuzu421) the `<<$name>>`
+ *  sprite ref, which `EntityImageDescription.java:192-194` draws INSTEAD of
+ *  the labels -- without it the box was one sprite height short (jar 96 vs
+ *  76). Same fields `description/layout-dot-tree.ts` hands `measureLeafNode`. */
+function leafSizingSubjectOf(classifier: Classifier, symbol: LeafSizingSubject['symbol']): LeafSizingSubject {
+  const stereotype = resolveVisibleStereotypeLabels(classifier);
+  const sprite = classifier.stereotypeSprite;
+  return {
+    id: classifier.id,
+    display: classifier.display,
+    symbol,
+    ...(stereotype.length > 0 ? { stereotype } : {}),
+    ...(sprite === undefined ? {} : { stereotypeSprite: sprite }),
   };
 }
 

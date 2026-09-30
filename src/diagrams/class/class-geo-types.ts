@@ -4,6 +4,7 @@
  * project's 500-line cap — mirrors `state/state-geo-types.ts`'s split.
  */
 import type { LeafSymbolInk } from '../../core/svek/image/leaf-sizing.js';
+import type { LeafSizingStereotypeSprite } from '../../core/svek/image/LeafSizingSubject.js';
 import type { ClassifierKind, UrlInfo } from './ast.js';
 import type { GenericTagGeo } from './class-stereotype.js';
 import type { EmptyPackageLeafDim } from './class-namespace-shape.js';
@@ -164,6 +165,11 @@ export interface ClassifierGeo {
    *  from {@link stereotypeLabels}' unfiltered style-matching list. Omitted
    *  with it. */
   visibleStereotypeLabels?: readonly string[];
+  /** cdd7 T2b (dezobu-62-vuzu421): copied from `Classifier.stereotypeSprite`
+   *  by `class-stereotype.ts#stereotypeLabelFields` -- resolved at draw time
+   *  (`resolveStereotypeSprite`); a hit REPLACES the stereo block
+   *  (`EntityImageDescription.java:192-194`). Omitted with it. */
+  stereotypeSprite?: LeafSizingStereotypeSprite;
   /** G2 N39: copied unchanged from `Classifier.styleGeneration` (`ast.ts`'s
    *  doc comment) -- feeds `style-cascade-class.ts#resolveClassTagCascadeEntry`'s
    *  position-scoped `.tagname` cascade lookup alongside {@link
