@@ -75,3 +75,6 @@ requires a concrete `ISkinParam` (`getSkinParam()` is abstract on `src/core/Titl
 see `CucaDiagramBase.ts:66` for the precedent) and `CommandRankDir` wired to it instead of the
 local `rankdir` field (`MindMapDiagram.java:76`, `CommandRankDir.java:76-79`). Reconcile the
 opaque `UmlSource` brand in `TitledDiagram.ts` with `block-extractor.ts`'s concrete `UmlSource`.
+- (journal row 22) `<style>` parse errors surface as `StyleParsingException` from
+  `buildMindmapStyleBuilder`; map them to the command error page as
+  `CommandStyleMultilinesCSS.java:92-93` does.
