@@ -23,9 +23,9 @@ in order:
    symbol at `x = -(descWidth - 2*RADIUS)/2`, then `drawSymbol` with stroke
    thickness 1.5 and the entity's BACK/LINE colours falling back to the style's
    `LineColor`/`BackGroundColor` (`EntityPosition.RADIUS`, `EntityPosition.java`).
-   Port it 1:1 as `renderer-entity-port.ts`; dispatch from the class renderer
-   where usymbol leaves are dispatched today (`renderer-usymbol-entity.ts`, T1c's
-   merged version, or `renderer.ts` — read both and name which).
+   Port it 1:1 as `renderer-entity-port.ts`; dispatch from `renderer.ts`'s classifier
+   loop (`renderer.ts:351-356`, a port branch before the usymbol one) — NOT from
+   `renderer-usymbol-entity.ts`, which T2b owns this batch (b1 close decision).
 
 Consume T1c's `ClassifierGeo.stereotypeSprite` in `class-geo-builders.ts` only
 if the spread through `stereotypeLabelFields` left a gap (report it either way).
@@ -37,7 +37,7 @@ if the spread through `stereotypeLabelFields` left a gap (report it either way).
 - `src/diagrams/class/class-entity-port.ts`
 - `src/diagrams/class/class-geo-builders.ts` (+ the helper split module)
 - new `src/diagrams/class/renderer-entity-port.ts`
-- the class renderer dispatch file (`renderer-usymbol-entity.ts` or `renderer.ts`)
+- `src/diagrams/class/renderer.ts` (dispatch only; `renderer-usymbol-entity.ts` is T2b's)
 - `docs/catalog.md` (new module)
 - their unit tests under `tests/unit/class/`
 
