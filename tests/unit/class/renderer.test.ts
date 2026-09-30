@@ -246,8 +246,8 @@ describe('renderClass — association-class-couple "point" entity (G2 N8)', () =
       ],
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
-    expect(svg).toContain(`fill="${defaultTheme.colors.arrow}"`);
-    expect(svg).toContain(`stroke="${defaultTheme.colors.arrow}"`);
+    expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.arrow)}"`);
+    expect(svg).toContain(`stroke="${noGradient(defaultTheme.colors.arrow)}"`);
   });
 
   it('a hidden assoc-circle classifier draws nothing (hide/show still ' + 'applies to point entities)', () => {
@@ -1036,7 +1036,7 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<polygon');
-    expect(svg).toContain(`fill="${defaultTheme.colors.arrow}"`);
+    expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.arrow)}"`);
     expect(svg).not.toContain('marker-end');
   });
 
@@ -1046,7 +1046,7 @@ describe('renderClass — edges', () => {
     });
     const svg = assembleSvg(renderClass(geo, defaultTheme));
     expect(svg).toContain('<polygon');
-    expect(svg).toContain(`fill="${defaultTheme.colors.arrow}"`);
+    expect(svg).toContain(`fill="${noGradient(defaultTheme.colors.arrow)}"`);
     expect(svg).not.toContain('marker-start');
   });
 
