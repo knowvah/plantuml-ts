@@ -229,6 +229,11 @@ describe('stereotype-keyed buckets for every group USymbol (FromSkinparamToStyle
     expect(elements(body).rectangle).toEqual({
       stereotypeFontByStereo: { boundary: 'red' },
       fontByStereo: { boundary: 'blue' },
+      // T1d: `FontColor` is declared AFTER `StereotypeFontColor` in this
+      // block, so it wins the merged stereotype-text tier
+      // (`DarkString.java:54-57`, `skinparam-stereo-keys.ts
+      // #applyFontColorByStereo`) -- jar-verified 0/0 on this exact fixture.
+      stereoTextFontByStereo: { boundary: 'blue' },
       borderByStereo: { boundary: 'green' },
       lineStyleByStereo: { boundary: DASH_7_7 },
     });

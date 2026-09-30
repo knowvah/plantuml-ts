@@ -199,6 +199,22 @@ function applyBorderStyleByStereo(bucket: ElementColors, label: string, value: s
   bucket.lineStyleByStereo = { ...bucket.lineStyleByStereo, [label]: lineStyleDash(lineStyle) };
 }
 
+/**
+ * The `fontcolor`/`stereotypefontcolor` roles: each keeps its own specific
+ * field (other consumers -- title font, the folder-family empty-package
+ * leaf -- need the UNMERGED value), but BOTH also write `stereoTextFontByStereo`,
+ * the SAME merged key, so the LATER of the two source lines wins by ordinary
+ * last-write-wins object assignment. This reproduces `DarkString#mergeWith`'s
+ * declaration-order tie-break (T1d, fepiko-26-vobi566, `DarkString.java:
+ * 54-57`; see `theme-graph-colors.ts#stereoTextFontByStereo`'s own doc
+ * comment) without upstream's exact `AutomaticCounter`/`DarkString` machinery.
+ */
+function applyFontColorByStereo(bucket: ElementColors, role: string, label: string, color: string): void {
+  if (role === 'fontcolor') bucket.fontByStereo = { ...bucket.fontByStereo, [label]: color };
+  else bucket.stereotypeFontByStereo = { ...bucket.stereotypeFontByStereo, [label]: color };
+  bucket.stereoTextFontByStereo = { ...bucket.stereoTextFontByStereo, [label]: color };
+}
+
 function applyGroupByStereo(acc: SkinparamAccumulator, key: string, value: string): boolean {
   const m = GROUP_BY_STEREO_RE.exec(key);
   if (m === null) return false;
@@ -217,8 +233,7 @@ function applyGroupByStereo(acc: SkinparamAccumulator, key: string, value: strin
   }
   const color = resolveColor(value);
   if (role === 'bordercolor') bucket.borderByStereo = { ...bucket.borderByStereo, [label]: color };
-  else if (role === 'fontcolor') bucket.fontByStereo = { ...bucket.fontByStereo, [label]: color };
-  else bucket.stereotypeFontByStereo = { ...bucket.stereotypeFontByStereo, [label]: color };
+  else applyFontColorByStereo(bucket, role, label, color);
   return true;
 }
 
