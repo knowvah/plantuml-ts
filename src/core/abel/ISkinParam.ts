@@ -3,6 +3,8 @@ import type { UStroke } from '../klimt/UStroke.js';
 import type { Pragma } from '../skin/Pragma.js';
 import type { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import type { HColor } from './Colors.js';
+import type { ISkinSimple } from '../style/ISkinSimple.js';
+import type { HColorSet } from '../klimt/color/HColorSet.js';
 
 /**
  * ADR-2 consumed-interface stubs for the style/skinparam seam
@@ -113,4 +115,23 @@ export interface ISkinParam {
    * extends both).
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java (getValue) */
   getValue(key: string): string | null;
+}
+
+/**
+ * ISkinParamWithSimple — `ISkinParam` together with the upstream supertype
+ * this slice defers (`public interface ISkinParam extends ISkinSimple`,
+ * ISkinParam.java:69) plus `getIHtmlColorSet()` (ISkinSimple.java:63; the
+ * port's `ISkinSimple.ts` predates the `HColorSet` class and omits it).
+ * Declared as a derived interface rather than widening `ISkinParam` in place:
+ * adding required members there breaks every existing `ISkinParam` double
+ * (the `MethodsOrFieldsAreaSkinParam` precedent, MethodsOrFieldsAreaConfig.ts).
+ * Consumed by `FtileBoxOld` (`getIHtmlColorSet`, AbstractFtile.java:80-82;
+ * `sheet`, FtileBoxOld.java:171) and implemented by `SkinParamDelegator`.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinParam.java:69
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinSimple.java:63
+ */
+export interface ISkinParamWithSimple extends ISkinParam, ISkinSimple {
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/ISkinSimple.java:63 */
+  getIHtmlColorSet(): HColorSet;
 }
