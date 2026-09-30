@@ -100,13 +100,17 @@ type ResolvedAtomImage =
       readonly rasterWidth?: number;
       readonly rasterHeight?: number;
     }
-  | {
-      readonly kind: 'drawable';
-      readonly primitives: readonly DrawablePrimitive[];
-      readonly width: number;
-      readonly height: number;
-    }
+  | ResolvedDrawableAtom
   | undefined;
+
+/** The `'drawable'` arm of {@link ResolvedAtomImage}, named so
+ *  {@link resolveSvgSpriteAtom} can declare its always-drawable return. */
+export type ResolvedDrawableAtom = {
+  readonly kind: 'drawable';
+  readonly primitives: readonly DrawablePrimitive[];
+  readonly width: number;
+  readonly height: number;
+};
 
 /** `parseSimpleColor`, tolerant of `null`/`undefined` (font color/forced
  *  color are both optional at this seam) -- an unresolvable token collapses
@@ -267,7 +271,7 @@ export function resolveSvgSpriteAtom(
   svg: string,
   spriteDims: SpriteDimsLookup,
   font: FontConfiguration,
-): ResolvedAtomImage {
+): ResolvedDrawableAtom {
   const dims = measureInlineAtom(atom, spriteDims, font.size);
   // G10: `spriteAtomScale`, not `spriteScale` — a sprite inside a `[[url
   // label]]` takes its RAW parsed scale upstream (`AtomTextUtils

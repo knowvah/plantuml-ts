@@ -20,6 +20,9 @@ import { describe, it, expect } from 'vitest';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { createSpriteRegistry, addSprite } from '../../../src/core/sprite-commands.js';
 import { SpriteSvg } from '../../../src/core/klimt/sprite/SpriteSvg.js';
+import { getSpriteSvg, spriteDimsLookupFor } from '../../../src/core/sprite-registry.js';
+import type { SpriteAtomToken } from '../../../src/core/creole-atoms.js';
+import { resolveSvgSpriteAtom } from '../../../src/core/creole-atoms-image-resolver.js';
 import {
   buildMemberAtoms,
   memberBaseFont,
@@ -88,4 +91,18 @@ describe('C-4 — resolveMemberAtoms resolves a registered SVG sprite to a drawa
       expect(text.dy).toBeCloseTo(7.538, 2);
     },
   );
+});
+
+describe('resolveSvgSpriteAtom always yields a drawable atom (code-quality finding 12)', () => {
+  it('returns kind drawable with the declared box, never an image or undefined', () => {
+    const sprites = registryWithNetworkLikeSprite('Netw');
+    const sprite: SpriteAtomToken = { kind: 'sprite', name: 'Netw', scale: 1 };
+    const svg = getSpriteSvg(sprites, 'Netw');
+    if (svg === undefined) throw new Error('test fixture sprite is not SVG-backed');
+    const resolved = resolveSvgSpriteAtom(sprite, svg.svg, spriteDimsLookupFor(sprites), FONT);
+    expect(resolved.kind).toBe('drawable');
+    expect(resolved.primitives.length).toBe(1);
+    expect(resolved.width).toBeCloseTo((20 * 14) / 13, 4);
+    expect(resolved.height).toBeCloseTo((20 * 14) / 13, 4);
+  });
 });

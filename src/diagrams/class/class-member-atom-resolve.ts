@@ -85,13 +85,9 @@ export interface ResolvedMemberAtom {
  * `resolveSvgSpriteAtom` the description/usecase engines call
  * (`core/creole-atoms-image-resolver.ts`, ADR-2's shared decomposition
  * seam) -- reused rather than re-ported, per that module's own doc
- * comment ("ONE shared place"). `resolveSvgSpriteAtom`'s declared return
- * type is the wider `image | drawable | undefined` union (its OTHER
- * caller, `makeAtomImageResolverFor`, dispatches an `img` atom to a
- * SIBLING function first), but its own body has exactly one `return`
- * statement and it is always the `'drawable'` shape -- the runtime check
- * below narrows for the type checker, not a defensive "should not occur"
- * guard against a real second branch.
+ * comment ("ONE shared place"). `resolveSvgSpriteAtom` is declared to
+ * return `ResolvedDrawableAtom` (its body has exactly one `return`, always
+ * the `'drawable'` shape), so no runtime narrowing is needed here.
  */
 function resolveSvgSpriteAtomForRow(
   atom: Extract<InlineAtomToken, { kind: 'sprite' }>,
@@ -100,9 +96,7 @@ function resolveSvgSpriteAtomForRow(
   baseFont: FontConfiguration,
 ): Extract<MemberRenderAtom, { kind: 'drawable' }> | undefined {
   if (spriteDims === undefined) return undefined; // should not occur: paired 1:1 with `sprites` by the caller.
-  const resolved = resolveSvgSpriteAtom(atom, svg, spriteDims, baseFont);
-  if (resolved === undefined || resolved.kind !== 'drawable') return undefined;
-  return { kind: 'drawable', primitives: resolved.primitives, width: resolved.width, height: resolved.height };
+  return resolveSvgSpriteAtom(atom, svg, spriteDims, baseFont);
 }
 
 function resolveSpriteAtom(
