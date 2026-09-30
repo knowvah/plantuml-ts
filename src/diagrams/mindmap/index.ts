@@ -148,15 +148,24 @@ function exportTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): Ren
  * exports it with the margins. The fragment is the raw block at the origin,
  * sized by its exact `calculateDimension`, which `applyChrome` composes
  * around; `core/TextBlockExporter.ts#finalizeTitledDiagramFragment` applies
- * the margin afterwards. `scale` is not applied on this path: the chrome is
- * composed outside klimt, so a scale here would shrink the diagram but not
- * its title.
+ * the margin afterwards. `scale` is not applied HERE: the chrome is composed
+ * outside klimt, so a scale here would shrink the diagram but not its title.
+ * The unresolved `scaleSpec`/`dpi` ride on the fragment and
+ * `finalizeTitledDiagramFragment` resolves the factor against the
+ * chrome-included dimension, as `TextBlockExporter#computeScaleFactor` reads
+ * `calculateFinalDimension()` (TextBlockExporter.java:184-188).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:469-477
  */
 function rawTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): RenderFragment {
   const dim = textBlockDimension(diagram, measurer);
   const fragment = drawFragment(diagram, measurer, { minDim: dim, scale: 1, translate: new UTranslate(0, 0) });
-  return { ...fragment, width: dim.getWidth(), height: dim.getHeight() };
+  const scaled: RenderFragment = {
+    ...fragment,
+    width: dim.getWidth(),
+    height: dim.getHeight(),
+    dpi: diagram.getSkinParam().getDpi(),
+  };
+  return diagram.scale === undefined ? scaled : { ...scaled, scaleSpec: diagram.scale };
 }
 
 /** The diagram as the fragment `src/index.ts` chromes and assembles. */
