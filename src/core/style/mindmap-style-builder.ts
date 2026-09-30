@@ -22,6 +22,7 @@ import { readLines, StyleParser, StyleParsingException, trin } from './parser/St
 import { STRICTUML_SKIN } from './skins/plantuml-skin.js';
 import type { Style } from './Style.js';
 import type { StyleBuilder } from './StyleBuilder.js';
+import { convertSkinparam as convertSkinparamDefault } from './FromSkinparamToStyle.js';
 import { getMissingRootProperties, loadSkin, NoStyleAvailableException } from './StyleLoader.js';
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/skin/SkinParam.java:121 */
@@ -35,13 +36,6 @@ const SKIN_EXTENSION = '.skin';
  * `getStyles()` — T3b's `convertSkinparam` (`FromSkinparamToStyle.ts`).
  */
 export type ConvertSkinparam = (key: string, value: string, builder: StyleBuilder) => Style[];
-
-/**
- * Stand-in until T3b's `convertSkinparam` merges (batch 3): converts no
- * key, which is `convertNow` for a key with no table row
- * (FromSkinparamToStyle.java:328-335). The merge replaces this default.
- */
-const convertNoSkinparam: ConvertSkinparam = () => [];
 
 /** What the builder reads from a `PreprocessorResult`. */
 export type MindmapStyleSource = Pick<PreprocessorResult, 'skin' | 'skinparam' | 'styles' | 'declarationOrder'>;
@@ -188,7 +182,7 @@ function loadSkinCommand(skinParam: SkinParam, newSkin: string): void {
  */
 export function buildMindmapStyleBuilder(
   pre: MindmapStyleSource,
-  convertSkinparam: ConvertSkinparam = convertNoSkinparam,
+  convertSkinparam: ConvertSkinparam = convertSkinparamDefault,
 ): StyleBuilder {
   const skinParam = new SkinParam(convertSkinparam);
   if (pre.skin !== undefined) loadSkinCommand(skinParam, pre.skin);

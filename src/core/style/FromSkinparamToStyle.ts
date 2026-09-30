@@ -45,13 +45,11 @@ import type { AutomaticCounter } from './AutomaticCounter.js';
 import type { PName } from './PName.js';
 import type { SName } from './SName.js';
 import { Style } from './Style.js';
+import { addPriorityForStereotype } from './StyleLoader.js';
 import { StyleSignatureBasic } from './StyleSignatureBasic.js';
 import type { StyleBuilder } from './StyleBuilder.js';
 import type { Value } from './Value.js';
 import { ValueImpl } from './ValueImpl.js';
-
-/** `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (`style/StyleLoader.java:178`). */
-const DELTA_PRIORITY_FOR_STEREOTYPE = 1000;
 
 interface Data {
   readonly propertyName: PName;
@@ -329,22 +327,6 @@ function javaTokenize(s: string, delimiters: string): string[] {
   }
   if (current.length > 0) tokens.push(current);
   return tokens;
-}
-
-/**
- * `StyleLoader.addPriorityForStereotype` (`style/StyleLoader.java:180-186`):
- * local copy, not an import -- `StyleLoader.ts` is T3a's write-set and does
- * not exist yet. No corpus/theme fixture exercises a `<<stereotype>>`-keyed
- * skinparam, so this path is ported for fidelity but untested here; dedupe
- * against `StyleLoader.ts#addPriorityForStereotype` once T3a lands.
- */
-function addPriorityForStereotype(map: ReadonlyMap<PName, Value>): Map<PName, Value> {
-  const result = new Map<PName, Value>();
-  for (const [name, value] of map) {
-    if (!(value instanceof ValueImpl)) throw new Error('ClassCastException: value is not a ValueImpl');
-    result.set(name, value.addPriority(DELTA_PRIORITY_FOR_STEREOTYPE));
-  }
-  return result;
 }
 
 /** @see FromSkinparamToStyle.java:396-408 */
