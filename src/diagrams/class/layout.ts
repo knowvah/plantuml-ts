@@ -318,6 +318,7 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
     clusters: result.clusters,
     clusterIdByNs,
     hiddenIds,
+    leaves: classifiers, // cdd7-T2a: port frontier + EntityImagePort (class-geo-builders-port.ts)
   });
   // cdd-T13 (M1): the real graphviz cluster box for every cluster-anchored
   // edge endpoint -- `NamespaceGeo.x/y/width/height` is `box` VERBATIM

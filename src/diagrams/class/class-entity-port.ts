@@ -16,8 +16,8 @@
  *   the `empty()` anchor, and moves the cluster's title table onto that
  *   anchor (`:177-181`).
  *
- * The drawing half (`EntityImagePort`, the port on the cluster border) and
- * the post-layout cluster frontier are NOT here -- see the T3d report.
+ * The drawing half is `renderer-entity-port.ts` (`EntityImagePort`), the
+ * post-layout cluster frontier `class-geo-builders-port.ts` (cdd7-T2a).
  */
 
 import type { ClassDiagramAST, Classifier } from './ast.js';
@@ -25,6 +25,21 @@ import type { DotInputNode } from '../../core/graph-layout.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+
+declare module './class-geo-types.js' {
+  interface ClassifierGeo {
+    /**
+     * cdd7-T2a: `EntityImagePort#upPosition()` for a port leaf -- `true` when
+     * the node's `minY` is above its parent cluster's post-frontier centre
+     * (`svek/image/EntityImagePort.java:75-81`). Set at layout time by
+     * `class-geo-builders-port.ts#stampEntityPortLeaves`, where both the
+     * node and the frontier exist; read by `renderer-entity-port.ts`.
+     * Declared here by module augmentation because `class-geo-types.ts` is
+     * at its 500-line cap and owned by a sibling task this batch.
+     */
+    entityPortUp?: boolean;
+  }
+}
 
 /** One `printRanks` call's members: rank and node ids in declaration order. */
 export interface ClassPortRank {
