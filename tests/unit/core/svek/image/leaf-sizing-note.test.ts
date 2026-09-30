@@ -222,7 +222,7 @@ function noteRect(svg: string): { x: number; y: number; width: number; height: n
   // `M x0,y0 L x0,y1 ... L x1,y1 ... L x1,y0+fold L x1-fold,y0 L x0,y0`: the
   // box is the outline's own corners; the connector tip (`pp1`/`pp2`, the
   // only points off the box edge) is the one point outside that span.
-  const pts = [...o[1].matchAll(/[ML](-?[\d.]+),(-?[\d.]+)/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]) }));
+  const pts = [...o[1]!.matchAll(/[ML](-?[\d.]+),(-?[\d.]+)/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]) }));
   const x0 = pts[0]!.x;
   const y0 = pts[0]!.y;
   const y1 = pts[1]!.y; // the first `L` runs down the left edge
