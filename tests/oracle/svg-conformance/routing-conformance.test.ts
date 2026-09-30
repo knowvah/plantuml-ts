@@ -776,8 +776,21 @@ describe('routing conformance — jar-error classification', () => {
     // known-misroute -> agree (cdd5-T5d: CommandAddMethod.java:64-68 needs
     // spaces around ':', so it now routes STATE like the jar).
     // Derivation: 4768 + 1051 + 105 = 5924.
-    expect(pinnedAgree.length).toBe(4768);
-    expect(pinnedMisroutes.length).toBe(1051);
+    //
+    // 4768 -> 4907 / 1051 -> 912 at mindmap-engine-port/close-b5 (2026-09-30):
+    // the mindmap plugin registered (T5a, `src/index.ts`), so 137 mindmap
+    // rows pinned known-misroute (MINDMAP -> NONE, no engine) now route
+    // MINDMAP and were re-pinned agree from a fresh measurement
+    // (`plans/mindmap-engine-port/measurements/b5/repin-routing-refusal.mts`);
+    // 2 mindmap rows (nukose-24-funi267, vacofo-66-puno159) stay
+    // known-misroute because their render is a crash page with no
+    // data-diagram-type (unported HColorGradient, HColorSet.java:81-104).
+    // Plus the gate's two other [FIXED] lines, c4/favasu-27-fesa452 and
+    // c4/xizifu-87-siti076: stale pins that already routed DESCRIPTION on
+    // the pre-T5a branch (the Tim nested-call gap they cited was fixed
+    // earlier). Derivation: 4907 + 912 + 105 = 5924.
+    expect(pinnedAgree.length).toBe(4907);
+    expect(pinnedMisroutes.length).toBe(912);
     expect(pinnedJarErrors.length).toBe(105);
     expect(manifest.fixtures.length).toBe(5924);
   });
@@ -831,7 +844,11 @@ describe('routing conformance — jar-error classification', () => {
     // 942 -> 1052 at unknown-bucket-routing-repair/T14: 110 unknown misroutes.
     // 1052 -> 1051 at cdd5-T0e: sequence/soxata-16-kafi688 now agrees.
     // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
-    expect(censused.length).toBe(1050);
+    // 1050 -> 911 at mindmap-engine-port/close-b5: 139 retirements (137
+    // mindmap + 2 c4, derivation above); the 2 remaining mindmap misroutes
+    // carry their reason. The uncensused remainder is STILL exactly
+    // sequence/nuvoja-46-dezu541: 912 - 1 = 911.
+    expect(censused.length).toBe(911);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

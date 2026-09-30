@@ -733,6 +733,14 @@ describe('refusal coverage — baseline shape', () => {
     // 269 -> 267 because unknown/xuloxo-85-vibu502 and c4/gikaju-64-bari602
     // now preprocess and render (cdd5-T5d TokenStack pair order).
     // Derivation: 5657 + 267 = 5924.
+    // 267 -> 269 at mindmap-engine-port/close-b5 (2026-09-30): the mindmap
+    // plugin registered (T5a); 137 mindmap rows keep weErrored false (they
+    // rendered as the sentinel page before and render as mindmaps now), and
+    // 2 (nukose-24-funi267, vacofo-66-puno159) now error on a gradient
+    // colour the T2a colour port left unported (HColorSet.java:81-104) --
+    // pinned known-gap with that mechanism, owner batch 6. Not a new
+    // refusal of a command the jar accepts: the source parses; the colour
+    // set throws. Derivation: 5655 + 269 = 5924.
     expect(manifest.fixtures.length).toBe(5924);
     expect(pinnedJarErrors.length).toBe(105);
     //
@@ -746,7 +754,8 @@ describe('refusal coverage — baseline shape', () => {
     // `weErrored: true`) whose activity3 constructs now parse render here
     // (see the sibling gate's derivation); `weErrored` re-pinned false from
     // a fresh measurement, gaps unchanged at 137.
-    expect(pinnedErroring.length).toBe(267);
+    // 267 -> 269 at mindmap-engine-port/close-b5 (derivation above).
+    expect(pinnedErroring.length).toBe(269);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -762,7 +771,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5553 -> 5607 at cdd5/close-b3 (54 unknown-tree svg-class clones).
     // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
-    expect(pinnedRendering.length).toBe(5657);
+    // 5657 -> 5655 at mindmap-engine-port/close-b5 (derivation above).
+    expect(pinnedRendering.length).toBe(5655);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -819,7 +829,9 @@ describe('refusal coverage — baseline shape', () => {
     // minute it reads jarRendered: false, so it is no defect to excuse.
     // 197 -> 196 at cdd5/close-b5: unknown/xuloxo-85-vibu502's Tim gap is
     // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
-    expect(gaps.length).toBe(196);
+    // 196 -> 198 at mindmap-engine-port/close-b5: nukose-24-funi267 and
+    // vacofo-66-puno159 (unported HColorGradient, HColorSet.java:81-104).
+    expect(gaps.length).toBe(198);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //
