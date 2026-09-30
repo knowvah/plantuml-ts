@@ -1,0 +1,1424 @@
+{
+  "fixtures": [
+    {
+      "type": "mindmap",
+      "slug": "WBS-easter-egg-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "WBS-easter-egg-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "bepinu-34-tiji715",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "bibipu-24-laxe462",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "cejije-94-xibi793",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "celugu-23-toji527",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "cilala-42-naso533",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "colave-62-kuke565",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "cufaxi-14-cani934",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "cusomu-40-fuke604",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "desuzu-64-vobo007",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "dezuza-88-gige110",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "dirava-16-ride716",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "docige-13-jaka644",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "dojilo-60-cufe274",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-5",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-6",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-mindmap-7",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-root-mindmap-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-root-mindmap-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-root-mindmap-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-root-mindmap-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "empty-root-mindmap-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fapobe-56-dopo421",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "femiba-70-duvi238",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error (oracle/goldens/svg-conformance/routing-baseline.json: jarErrored=true). The cached in.svg is the jar's fallback \"PlantUML version $version$\" banner (black background, green text) -- the oracle produced no mindmap image for this source, so there is no real geometry to compare fidelity against. The port also renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) for this fixture today (no mindmap plugin registered -- src/index.ts:108-121), so both sides are degenerate.",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "ferume-00-vobi687",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fobofo-46-xevi400",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fogari-75-febu345",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error (oracle/goldens/svg-conformance/routing-baseline.json: jarErrored=true). The cached in.svg is the jar's fallback \"PlantUML version $version$\" banner (black background, green text) -- the oracle produced no mindmap image for this source, so there is no real geometry to compare fidelity against. The port also renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) for this fixture today (no mindmap plugin registered -- src/index.ts:108-121), so both sides are degenerate.",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fojafo-57-davo773",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fovule-12-noze408",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "fupani-26-luco022",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gaferi-23-mute427",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gafote-90-jaca901",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gafupu-88-xamo144",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gageno-43-kofi317",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "galiro-74-tocu638",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "geketu-70-xegu078",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gipupe-27-gila839",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gotovo-15-tibu204",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "govunu-72-kicu781",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gukofo-85-vira895",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "gunuco-29-sizu788",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "guvive-85-zipe702",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "jalega-12-tina159",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "jebini-99-lisu010",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "jisagu-99-rofi372",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "jogetu-97-culi829",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "jopuxi-09-cozi456",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kabidu-52-jaro063",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kapoze-75-zati796",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kelome-99-naso291",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kijafe-43-tati619",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kijaru-67-buco967",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kixuba-47-texi176",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "kuzura-59-feso980",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "lomobo-90-tacu965",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "lovono-00-desa891",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "majagu-52-lumi685",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "melicu-94-kuku736",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "mikivo-30-cepi007",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-0",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-1",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-2",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-3",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-4",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "minimal-mindmap-5",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "mokugu-38-jozu296",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "mugozi-44-xibu600",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "muleji-62-gevo561",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "munica-13-foko269",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "napimu-36-duxe621",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nazixa-45-jope715",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "negola-68-vona263",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nemame-08-kaje843",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nevona-73-zabu940",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nizepu-01-dusu688",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "noleko-05-maju508",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "novega-82-fane133",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nufibe-93-litu124",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nukose-24-funi267",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nuleci-01-sidu915",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "nutove-44-zove663",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pebonu-12-sana537",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pedesu-31-tesu526",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pesava-19-pafo393",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pesope-57-micu861",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "petoda-11-duza898",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "picipa-74-musu968",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pofimu-70-xoba026",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "poxujo-42-cito478",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pumeze-93-licu653",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "pusifu-47-jolu778",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "racizo-58-jajo565",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "ragine-69-gusa872",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "ramaro-47-jaxa538",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rasofu-54-nunu541",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "raxobo-05-zeje898",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "renopo-92-xipi220",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "ricafe-07-fomi979",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rinamu-56-tabi421",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rixudo-24-teru887",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rogozo-02-deze241",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rotaco-06-mace855",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "rupule-31-tage102",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sajeji-86-piga774",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sinapo-42-xege788",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sogixu-03-rixu603",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "somife-42-levu771",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sotali-22-vexo962",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sufuli-69-rezu371",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "sumati-11-kela688",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "susipa-95-tedu015",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "jar-error (oracle/goldens/svg-conformance/routing-baseline.json: jarErrored=true). The cached in.svg is a jar stack-trace page: \"java.lang.NullPointerException: Cannot invoke \\\"net.sourceforge.plantuml.mindmap.Idea.hasChildren()\\\" because \\\"this.root\\\" is null\" -- a source with only a <style> block and no root node crashes the oracle's own MindMapDiagram construction, so there is no real geometry to compare fidelity against. The port also renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) for this fixture today (no mindmap plugin registered -- src/index.ts:108-121), so both sides are degenerate.",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "tarato-41-cada051",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "taraxo-09-xalu713",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "ticuga-10-vufu526",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "timozo-41-puno814",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "tojora-67-taku662",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "turoca-19-lece026",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vacofo-66-puno159",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vagapi-25-benu796",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vikaku-89-noso154",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vinuji-50-mife349",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "viveno-69-zopi622",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vosote-32-xuna031",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "vuvedi-39-navo294",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "xamizo-49-bisu952",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "xilovu-05-fizo673",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "xozepe-31-kupe513",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "xuceti-39-nugu723",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zarage-93-sire269",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zasori-23-laja126",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zature-18-vidu755",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zavina-17-dena407",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zebuzi-73-koxu022",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zenigi-93-gofu307",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zezafi-76-poto168",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    },
+    {
+      "type": "mindmap",
+      "slug": "zirabo-51-lera821",
+      "status": "error",
+      "weightedScore": null,
+      "diffCount": null,
+      "reason": "port renders src/core/dispatcher.ts's ERROR_SENTINEL (:252-267) -- no mindmap plugin is registered (src/index.ts:108-121 lists eleven registry.register(...) calls; mindmap is absent), so DiagramRegistry.resolve (dispatcher.ts:316-326) finds zero attempts and resolveAllRefused (:341-345) falls through to the fixed 300x60 \"Error: unknown diagram type\" placeholder. Comparing that placeholder against a real jar mindmap render would pin a meaningless weightedScore; this fixture becomes baseline-eligible once a mindmap plugin registers (D6/D7, plans/mindmap-engine-port/decisions.md).",
+      "measuredAt": "2026-09-29",
+      "measuredAgainstCommit": "70ae18dcc"
+    }
+  ]
+}
