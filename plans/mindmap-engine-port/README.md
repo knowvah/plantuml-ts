@@ -96,7 +96,7 @@ Measurement:
 | [1](batch-1/overview.md) | style values, signatures, packing geometry, parsing | T1a–T1d | all ∥ | [x] |
 | [2](batch-2/overview.md) | Style + StyleStorage + StyleBuilder | T2a | — | [x] |
 | [3](batch-3/overview.md) | style parser + loader, skinparam bridge, FtileBoxOld | T3a–T3c | all ∥ | [x] |
-| [4](batch-4/overview.md) | Idea styles + FingerImpl + MindMap/Branch drawing | T4a | — | [ ] |
+| [4](batch-4/overview.md) | Idea styles + FingerImpl + MindMap/Branch drawing | T4a | — | [x] |
 | [5](batch-5/overview.md) | plugin, registration, chrome; first measurement | T5a | — | [ ] |
 | [6](batch-6/overview.md) | residual round (written at the b5 close) | T6x | ∥ | [ ] |
 | [7](batch-7/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
