@@ -3,11 +3,7 @@
  * ({@link StyleSignatureBasic}) and a fan-out list of them
  * ({@link StyleSignatures}).
  *
- * Members not carried yet:
- * - `getMergedStyle(StyleBuilder)` (StyleSignature.java:46) — `Style` and
- *   `StyleBuilder` are T2a's port; T2a adds it here and on both
- *   implementors (StyleSignatureBasic.java:253-259,
- *   StyleSignatures.java:59-73).
+ * Member not carried yet:
  * - the `default withTOBECHANGED(Stereogroup)` overload
  *   (StyleSignature.java:50-54) — `stereo/Stereogroup.java` has no port;
  *   it is `stereogroup == null ? this : withTOBECHANGED(stereogroup
@@ -17,6 +13,8 @@
  */
 import type { Stereotype } from '../stereo/Stereotype.js';
 import type { Stereostyles } from '../abel/Stereostyles.js';
+import type { Style } from './Style.js';
+import type { StyleBuilder } from './StyleBuilder.js';
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleSignature.java:44 */
 export const STAR = '*';
@@ -27,6 +25,8 @@ export interface StyleSignature {
    *  (StyleSignatureBasic.java:59-62, StyleSignatures.java:54-57). */
   toString(): string;
 
+  /** `undefined` where upstream returns `null`. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleSignature.java:46 */
+  getMergedStyle(styleBuilder: StyleBuilder | undefined): Style | undefined;
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleSignature.java:48 */
   withTOBECHANGED(stereotype: Stereotype | undefined): StyleSignature;
 

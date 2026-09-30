@@ -13,9 +13,6 @@
  *   canonical string for JS `Map` keys.
  * - Java's `addStereotype(String)`/`addStereotype(Stereotype)` and the
  *   three `of` overloads are single methods dispatching on argument shape.
- * - `getMergedStyle(StyleBuilder)` (java:253-259: `styleBuilder == null ?
- *   null : styleBuilder.getMergedStyle(this)`) is T2a's, with `Style` and
- *   `StyleBuilder`.
  *
  * SName is re-exported here for `skin/VisibilityModifier.ts`, which
  * imports it from this module.
@@ -31,6 +28,8 @@ import type { Stereotype } from '../stereo/Stereotype.js';
 import { GUILLEMET_NONE } from '../stereo/StereotypeDecoration.js';
 import type { Stereostyles } from '../abel/Stereostyles.js';
 import type { Url } from '../url/Url.js';
+import type { Style } from './Style.js';
+import type { StyleBuilder } from './StyleBuilder.js';
 
 export type { SName };
 
@@ -240,6 +239,12 @@ export class StyleSignatureBasic implements StyleSignature {
       return new StyleSignatureBasic(this.key.mergeWith(others.key), result2);
     }
     return others.reduce<StyleSignatureBasic>((result, other) => result.mergeWith(other.getSignature()), this);
+  }
+
+  /** `undefined` for a missing builder. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleSignatureBasic.java:253-259 */
+  getMergedStyle(styleBuilder: StyleBuilder | undefined): Style | undefined {
+    if (styleBuilder === undefined) return undefined;
+    return styleBuilder.getMergedStyle(this);
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleSignatureBasic.java:261-263 */

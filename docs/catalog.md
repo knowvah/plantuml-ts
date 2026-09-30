@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1280 modules · 4766 exported names.
+1292 modules · 4780 exported names.
 
 ## `src/`
 
@@ -370,6 +370,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CopyForegroundColorToBackgroundColor.ts` | `CopyForegroundColorToBackgroundColor` |  |
 | `document-shell-fragment.ts` | `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `RenderDrawableToFragmentOptions`, `DrawableFragment`, `renderDrawableToFragment`, `mergeFragmentDefs` | document-shell-fragment.ts — the disassembly half of `document-shell.ts` (SVG-fragment extraction and per-drawable klimt emission), split out (CDD T32) purely to keep `document-shell.ts` under the 500-line hook cap after widening `assembleD |
 | `document-shell.ts` | `DQUOTE`, `VERSION_PLACEHOLDER`, `DIAGRAM_TYPE_ATTR`, `ShellFragment`, `CONTENT_G_OPEN_RE`, `CONTENT_G_CLOSE`, `EMPTY_CONTENT_G_RE`, `assembleDocumentShell`, `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `renderDrawableToFragment`, `mergeFragmentDefs`, `RenderDrawableToFragmentOptions`, `DrawableFragment` | document-shell.ts — shared klimt-document-shell assembly/disassembly helpers. |
+| `Fashion.ts` | `Fashion` |  |
 | `Fore.ts` | `Fore` |  |
 | `LineBreakStrategy.ts` | `LineBreakStrategy` | LineBreakStrategy — wraps the raw `wrapWidth`/`maxMessageSize` skinparam string value (`"auto"`, a signed-integer pixel width, or unset/`null` meaning "no wrapping") and exposes it as `isAuto()`/`getMaxWidth()`. |
 | `UBackground.ts` | `UBackground` |  |
@@ -387,7 +388,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
-| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColors.ts` | `HColors` |  |
+| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColorSimple.ts` | `HColorSimple` |  |
+| `NoSuchColorException.ts` | `NoSuchColorException` | NoSuchColorException — thrown by `HColorSet#getColor` for a token that resolves to no colour. |
 
 ## `src/core/klimt/creole/`
 
@@ -510,7 +514,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `FontParam.ts` | `ARROW_LABEL_FONT_SIZE`, `NOTE_FONT_SIZE` | `FontParam` — the fixed per-element font sizes upstream declares as enum entries, each independent of the diagram's own default font size. |
 | `FontPosition.ts` | `FontPosition`, `fontPositionSpace`, `muteFontSize`, `fontPositionHtmlTag` | FontPosition — where a creole text run sits relative to the normal baseline: NORMAL, EXPOSANT (`<sup>`) or INDICE (`<sub>`). |
+| `FontStack.ts` | `FontStack` | FontStack — a comma-separated font-family definition (`FontName`), as the SVG and PDF back ends name it. |
 | `StringBounder.ts` | `StringBounder` |  |
+| `UFont.ts` | `UFont` |  |
+| `UFontFactory.ts` | `UFontFactory` |  |
 
 ## `src/core/klimt/geom/`
 
@@ -654,15 +661,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AutomaticCounter.ts` | `AutomaticCounter` | AutomaticCounter — the source of style-value priorities: each parsed value takes the next int (`ValueImpl.regular/dark`, ValueImpl.java:50-60). |
+| `AutomaticCounterBasic.ts` | `AutomaticCounterBasic` |  |
 | `DarkString.ts` | `DarkString` | DarkString — a style value's regular (`value1`) and `@media dark` (`value2`) strings plus its priority. |
 | `ISkinSimple.ts` | `ISkinSimple` | ISkinSimple — the skin-parameter capability interface `Display`/ `CreoleParser` (and, once ported, `StripeTable`/`StripeTree`/ `EmbeddedDiagram`) consume to reach fonts, sprites, guillemets, and a `SheetBuilder`. |
 | `MergeStrategy.ts` | `MergeStrategy` | MergeStrategy — how `Style#mergeWith` treats an existing value whose priority is above `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (Style.java:121-135). |
 | `PName.ts` | `PNAMES`, `PName`, `getFromName` | PName — every style property name of `style/PName.java` (1.2026.8beta1), constant names verbatim, as a readonly declaration-order array plus the string-literal union it induces (no `const enum`, project convention). |
 | `SName.ts` | `SNAMES`, `SName`, `retrieve` | SName — every style-element name of `style/SName.java` (1.2026.8beta1), the enum constant names verbatim (trailing underscores included: `class_`, `goto_`, `interface_`, `package_`, `private_`, `protected_`, `public_` -- Java keywords upstr |
+| `Style.ts` | `DELTA_PRIORITY_FOR_STEREOTYPE`, `Style` |  |
+| `StyleBuilder.ts` | `StyleBuilder` |  |
 | `StyleKey.ts` | `enumSetOrder`, `StyleKey` | StyleKey — the sname set, depth level and star flag of a style signature; the key `StyleStorage` files stereotype-free styles under (`StyleStorage.java:69-70,81-82`). |
 | `StyleSignature.ts` | `STAR`, `StyleSignature` | StyleSignature — the common interface of a single signature ({@link StyleSignatureBasic}) and a fan-out list of them ({@link StyleSignatures}). |
 | `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | StyleSignatureBasic — a {@link StyleKey} plus a set of cleaned stereotype names: both the selector a `<style>` rule is stored under (built by `style/parser/Context.java:70-99`) and the query an element resolves its style with (e.g. |
 | `StyleSignatures.ts` | `StyleSignatures` | StyleSignatures — an ordered list of {@link StyleSignature}, the fan-out `StyleSignatureBasic#withTOBECHANGED`/`forStereotypeItself` build (one member per stereotype label). |
+| `StyleStorage.ts` | `StyleStorage` |  |
 | `Value.ts` | `HColor`, `HColorSet`, `Value` |  |
 | `ValueAbstract.ts` | `ValueAbstract` |  |
 | `ValueColor.ts` | `ValueColor` |  |

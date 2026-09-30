@@ -38,6 +38,9 @@ import { Stereotype } from '../../../../src/core/stereo/Stereotype.js';
 import { Stereostyles } from '../../../../src/core/abel/Stereostyles.js';
 import { Url } from '../../../../src/core/url/Url.js';
 import type { SName } from '../../../../src/core/style/SName.js';
+import { Style } from '../../../../src/core/style/Style.js';
+import { StyleBuilder } from '../../../../src/core/style/StyleBuilder.js';
+import { ValueImpl } from '../../../../src/core/style/ValueImpl.js';
 
 const NODE: readonly SName[] = ['root', 'element', 'mindmapDiagram', 'node'];
 const query = (level: number): StyleSignatureBasic => StyleSignatureBasic.of(...NODE).addLevel(level);
@@ -239,5 +242,16 @@ describe('StyleSignatureBasic stereotype fan-out (java:92-148)', () => {
     expect(nodeDecl.forStereotypeItself(undefined)).toBe(nodeDecl);
     const r = nodeDecl.forStereotypeItself(Stereotype.build('<<A>>'));
     expect(r.toString()).toBe('[[node, stereotype]  [a]]');
+  });
+});
+
+describe('StyleSignatureBasic.getMergedStyle (StyleSignatureBasic.java:253-259)', () => {
+  it("undefined builder -> undefined; else the builder's getMergedStyle(this)", () => {
+    const sig = StyleSignatureBasic.of('root');
+    const builder = new StyleBuilder().muteStyle([new Style(sig, new Map([['FontSize', ValueImpl.regular('9', 1)]]))]);
+    expect(sig.getMergedStyle(undefined)).toBeUndefined();
+    const query = StyleSignatureBasic.of('root', 'element').addLevel(0);
+    expect(query.getMergedStyle(builder)).toBe(builder.getMergedStyle(query));
+    expect(query.getMergedStyle(builder)?.value('FontSize').asString()).toBe('9');
   });
 });
