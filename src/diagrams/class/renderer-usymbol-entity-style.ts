@@ -55,6 +55,28 @@ const ENTITY_STROKE_WIDTH = 0.5;
  *  multiplied by `theme.scaleK` at its one call site below. */
 export const ELEMENT_ROUND_CORNER = 5.0;
 
+/**
+ * cdd7 T2b (xuloxo-85-vibu502): `EntityImageDescription.java:168-169` --
+ * `styleTitle.value(PName.RoundCorner/DiagonalCorner)`, where `styleTitle`
+ * is stereotype-signed (`withTOBECHANGED`, `:151-153`), so the
+ * `<sname>RoundCorner<<label>>` / `<sname>DiagonalCorner<<label>>` tier
+ * (`FromSkinparamToStyle.java:275-276`, +1000 at `:396-408`) outranks
+ * {@link ELEMENT_ROUND_CORNER} and the `0` diagonal default. C4's
+ * `rectangle<<person>> { RoundCorner 0 }` squares its leaves. cdd-B8FU:
+ * both scale with `theme.scaleK`, as the constant did at its call site.
+ */
+export function resolveCorners(
+  classifier: ClassifierGeo,
+  theme: ScaledTheme,
+  symbolKeyword: USymbol,
+): { roundCorner: number; diagonalCorner: number } {
+  const own = theme.colors.elements?.[symbolKeyword];
+  const tags = leafTags(classifier);
+  const round = byStereo(own?.roundCornerByStereo, tags) ?? ELEMENT_ROUND_CORNER;
+  const diagonal = byStereo(own?.diagonalCornerByStereo, tags) ?? 0;
+  return { roundCorner: round * theme.scaleK, diagonalCorner: diagonal * theme.scaleK };
+}
+
 /** `fcStereo`'s face (`EntityImageDescription.java:155-157,174`):
  *  `plantuml.skin:79-82` `stereotype { FontStyle italic }`. */
 const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
@@ -76,14 +98,16 @@ const STEREOTYPE_STYLES: ReadonlySet<FontStyle> = new Set([FontStyle.ITALIC]);
  * NOT what the golden SVG shows. `usecase` keeps CENTER (unchanged from
  * before this task, and jar-verified correct by its own selector).
  */
-export function titleAlignmentFor(symbolKeyword: USymbol): HorizontalAlignment {
+export function titleAlignmentFor(symbolKeyword: USymbol, theme: ScaledTheme): HorizontalAlignment {
   // cdd5-T5c (gejuvu-17-vufu851): `USymbolUsecase#getSNames` is `{usecase,
   // business}` for the business variant (`USymbolUsecase.java:67-70`), so
   // its title signature contains `usecase` too and the same skin rule
   // centres it.
-  return symbolKeyword === 'usecase' || symbolKeyword === 'usecase-business'
-    ? HorizontalAlignment.CENTER
-    : HorizontalAlignment.LEFT;
+  if (symbolKeyword === 'usecase' || symbolKeyword === 'usecase-business') return HorizontalAlignment.CENTER;
+  // cdd7 T2b (xuloxo-85): `skinparam defaultTextAlignment X` is
+  // `PName.HorizontalAlignment` on `SName.root` (`FromSkinparamToStyle.java
+  // :155`), overriding `plantuml.skin:12`'s root LEFT for every other symbol.
+  return theme.colors.elements?.root?.horizontalAlignment ?? HorizontalAlignment.LEFT;
 }
 
 /**

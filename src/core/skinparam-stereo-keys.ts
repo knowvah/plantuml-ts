@@ -187,8 +187,30 @@ const ELEMENT_BACKGROUND_COLOR_STEREO_RE = new RegExp('^(\\w+)backgroundcolor<<(
  */
 const GROUP_BY_STEREO_RE = new RegExp(
   '^(package|rectangle|hexagon|node|artifact|folder|file|frame|cloud|database|storage|component|card|queue|stack)' +
-    '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle)<<(.+)>>$',
+    '(bordercolor|fontcolor|borderthickness|stereotypefontcolor|borderstyle|roundcorner|diagonalcorner)<<(.+)>>$',
 );
+
+/** The numeric roles and their `*ByStereo` field. cdd7 T2b (xuloxo-85):
+ *  `roundcorner`/`diagonalcorner` are `addMagic`'s `PName.RoundCorner`/
+ *  `PName.DiagonalCorner` (`FromSkinparamToStyle.java:275-276`), read by
+ *  `EntityImageDescription.java:168-169` off the stereotype-signed
+ *  `styleTitle`. */
+const NUMERIC_BY_STEREO_FIELD = {
+  borderthickness: 'lineThicknessByStereo',
+  roundcorner: 'roundCornerByStereo',
+  diagonalcorner: 'diagonalCornerByStereo',
+} as const;
+
+/** A numeric role: `undefined` when `role` is not one, else whether the value
+ *  parsed (an unparsable value leaves the key unknown). */
+function applyNumericByStereo(bucket: ElementColors, role: string, label: string, value: string): boolean | undefined {
+  if (!Object.hasOwn(NUMERIC_BY_STEREO_FIELD, role)) return undefined;
+  const field = NUMERIC_BY_STEREO_FIELD[role as keyof typeof NUMERIC_BY_STEREO_FIELD];
+  const v = Number.parseFloat(value.trim());
+  if (!Number.isFinite(v)) return false;
+  bucket[field] = { ...bucket[field], [label]: v };
+  return true;
+}
 
 /** The `borderstyle` role: only the LineStyle half of `convertNow` is
  *  stereotype-keyed here (the `bold`/`text:` side effects of a complex value
@@ -225,12 +247,8 @@ function applyGroupByStereo(acc: SkinparamAccumulator, key: string, value: strin
     applyBorderStyleByStereo(bucket, label, value);
     return true;
   }
-  if (role === 'borderthickness') {
-    const v = Number.parseFloat(value.trim());
-    if (!Number.isFinite(v)) return false;
-    bucket.lineThicknessByStereo = { ...bucket.lineThicknessByStereo, [label]: v };
-    return true;
-  }
+  const numeric = applyNumericByStereo(bucket, role, label, value);
+  if (numeric !== undefined) return numeric;
   const color = resolveColor(value);
   if (role === 'bordercolor') bucket.borderByStereo = { ...bucket.borderByStereo, [label]: color };
   else applyFontColorByStereo(bucket, role, label, color);

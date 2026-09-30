@@ -48,7 +48,7 @@ import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver
 import { KEYWORD_TO_SYMBOL, type USymbol } from '../../core/descriptive-keywords.js';
 // cdd7 T2b: the style-resolution helpers moved to a sibling (500-line cap).
 import {
-  ELEMENT_ROUND_CORNER,
+  resolveCorners,
   titleAlignmentFor,
   resolveBackcolor,
   resolveForecolor,
@@ -134,9 +134,10 @@ function buildUSymbolEntityParams(
   const { fontTitle, fontBody, fontStereo } = resolveLeafFonts(classifier, theme, symbolKeyword);
   // cdd3-T28 (E3-14): unconditional, as upstream computes it (see
   // ELEMENT_ROUND_CORNER's doc) -- `package`'s `USymbolFolder` tab reads it
-  // too (the jar's `A2.5,2.5` arcs on gujigi-63-roki030).
-  const roundCorner = ELEMENT_ROUND_CORNER * theme.scaleK;
-  const titleAlignment = titleAlignmentFor(symbolKeyword);
+  // too (the jar's `A2.5,2.5` arcs on gujigi-63-roki030). cdd7 T2b: plus the
+  // stereotype-signed tier (`resolveCorners`).
+  const { roundCorner, diagonalCorner } = resolveCorners(classifier, theme, symbolKeyword);
+  const titleAlignment = titleAlignmentFor(symbolKeyword, theme);
   const stroke = resolveStroke(classifier, theme, symbolKeyword);
   return {
     // cdd3-T10 (S-11): the entity's own url (`getUrl99()`), drawn by
@@ -161,7 +162,7 @@ function buildUSymbolEntityParams(
       forecolor: resolveForecolor(classifier, theme, symbolKeyword),
       backcolor: resolveBackcolor(classifier, theme, symbolKeyword),
       roundCorner,
-      diagonalCorner: 0,
+      diagonalCorner,
       deltaShadow: 0,
       stroke,
       // cdd6 b2 (journal row 46): `BodyEnhancedAbstract.java:121-123`
