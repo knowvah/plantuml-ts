@@ -180,16 +180,20 @@ export interface RenderFragment {
    * dpi 96) — every non-MINDMAP fragment, and every mindmap fragment
    * without a `scale` directive, is unaffected.
    *
-   * NOT YET SET by any producer (`src/diagrams/mindmap/index.ts#rawTextBlock`
-   * still omits both fields) — wiring them is `src/diagrams/mindmap/
-   * index.ts`'s own write-set, not this task's (T6d's write-set is
-   * `TextBlockExporter.ts` + `assemble-svg.ts`'s MINDMAP arm only). The
-   * exact hook: `rawTextBlock` should attach `scaleSpec: diagram.scale`
-   * and `dpi: diagram.getSkinParam().getDpi()` to the fragment it
-   * returns — no factor resolution belongs there.
+   * Set by `src/diagrams/mindmap/index.ts#rawTextBlock`.
    */
   scaleSpec?: ScaleSpec;
   dpi?: number;
+  /**
+   * T6h: the raw text block drawn through ONE klimt `UGraphic` at the
+   * resolved `scale`, translated by `(dx, dy)` BEFORE the scale
+   * (TextBlockExporter.java:165-176) — for a MINDMAP fragment whose `body`
+   * is only the `TextBlockExporter.ts#BODY_ANCHOR` placeholder. Chrome
+   * composes around the anchor; `finalizeTitledDiagramFragment` reads the
+   * anchor's shifted translate as `(dx, dy)` and swaps in this draw, so the
+   * body's numbers are rounded once, after the scale. Returns the flat body.
+   */
+  drawBodyAt?: (scale: number, dx: number, dy: number) => string;
 }
 
 /**

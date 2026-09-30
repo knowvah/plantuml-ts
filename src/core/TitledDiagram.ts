@@ -1,6 +1,7 @@
 import type { ISkinParam } from './abel/ISkinParam.js';
 import type { Pragma } from './skin/Pragma.js';
 import type { PreprocessingArtifact } from './tim/PreprocessingArtifact.js';
+import { Warning } from './warning/Warning.js';
 import { ClockwiseTopRightBottomLeft } from './klimt/geom/ClockwiseTopRightBottomLeft.js';
 import type { XDimension2D } from './klimt/geom/XDimension2D.js';
 
@@ -214,6 +215,27 @@ export abstract class TitledDiagram {
    * @see TitledDiagram.java:316-318 */
   getPragma(): Pragma {
     return this.getSkinParam().getPragma();
+  }
+
+  /** @see TitledDiagram.java:320-323 */
+  addWarning(warning: Warning): void {
+    this.getPragma().addWarning(warning);
+  }
+
+  /** `join(getPreprocessingArtifact().getWarnings(), getPragma().getWarnings())`
+   *  — a `LinkedHashSet`: preprocessing first, then the pragma's, duplicates
+   *  dropped by `Warning#equals`.
+   *  @see TitledDiagram.java:325-335 */
+  getWarnings(): readonly Warning[] {
+    const result: Warning[] = [];
+    const joined = [
+      ...this.preprocessing.getWarnings().map((w) => new Warning(...w.message)),
+      ...this.getPragma().getWarnings(),
+    ];
+    for (const warning of joined) {
+      if (!result.some((w) => w.equals(warning))) result.push(warning);
+    }
+    return result;
   }
 
   /** @see TitledDiagram.java:273-276 */

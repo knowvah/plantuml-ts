@@ -209,6 +209,36 @@ export function scaleFragmentBody(body: string, factor: number): string {
 }
 
 /**
+ * T6h: the placeholder a MINDMAP producer puts where its raw text block
+ * goes when it hands the block over as {@link RenderFragment.drawBodyAt}.
+ * Chrome composition (`annotations/coord-shift.ts#shiftFragmentBody`)
+ * shifts its `translate` exactly (unrounded `String(a + dx)`), so after the
+ * margin shift it carries the block's final `(dx, dy)` in the document.
+ */
+export const BODY_ANCHOR = '<g data-body-anchor="" transform="translate(0,0)"/>';
+const BODY_ANCHOR_RE = /<g data-body-anchor="" transform="translate\(([^,]+),([^)]+)\)"\/>/;
+
+/**
+ * The margin-shifted, scaled chromed body. With a
+ * {@link RenderFragment.drawBodyAt} producer the chrome strings around
+ * {@link BODY_ANCHOR} are post-multiplied, and the anchor is replaced by the
+ * raw text block drawn through klimt at `scale` from the anchor's
+ * translate — upstream draws the whole chromed document through one scaled
+ * `UGraphic` (TextBlockExporter.java:165-176), so the body's numbers are
+ * rounded once, after the scale.
+ */
+function scaleChromedBody(fragment: RenderFragment, scale: number): string {
+  const shifted = shiftFragmentBody(fragment.body, TITLED_DIAGRAM_MARGIN, TITLED_DIAGRAM_MARGIN);
+  if (fragment.drawBodyAt === undefined) return scaleFragmentBody(shifted, scale);
+  const anchor = BODY_ANCHOR_RE.exec(shifted);
+  if (anchor === null) throw new Error('finalizeTitledDiagramFragment: drawBodyAt set but the body anchor is missing');
+  const before = shifted.slice(0, anchor.index);
+  const after = shifted.slice(anchor.index + anchor[0].length);
+  const body = fragment.drawBodyAt(scale, Number(anchor[1]), Number(anchor[2]));
+  return scaleFragmentBody(before, scale) + body + scaleFragmentBody(after, scale);
+}
+
+/**
  * The `TextBlockExporter#exportTo` tail for a `TitledDiagram` fragment:
  *
  * - no chrome (`bodyWrapped` unset): the engine already exported its text
@@ -243,7 +273,6 @@ export function scaleFragmentBody(body: string, factor: number): string {
  */
 export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderFragment {
   if (fragment.bodyWrapped !== true) return { ...fragment, body: group(fragment.body) };
-  const shifted = shiftFragmentBody(fragment.body, TITLED_DIAGRAM_MARGIN, TITLED_DIAGRAM_MARGIN);
   const dimWidth = fragment.width + 2 * TITLED_DIAGRAM_MARGIN;
   const dimHeight = fragment.height + 2 * TITLED_DIAGRAM_MARGIN;
   const unscaledWidth = Math.trunc(dimWidth + ENSURE_VISIBLE_BUMP);
@@ -251,7 +280,7 @@ export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderF
   const scale = resolveScaleFactor(fragment.scaleSpec, dimWidth, dimHeight, fragment.dpi);
   return {
     ...fragment,
-    body: scaleFragmentBody(shifted, scale),
+    body: scaleChromedBody(fragment, scale),
     width: unscaledWidth * scale,
     height: unscaledHeight * scale,
   };

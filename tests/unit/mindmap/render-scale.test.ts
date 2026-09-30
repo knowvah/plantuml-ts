@@ -27,7 +27,7 @@
  * `test-results/dot-cache/mindmap/*\/in.svg`) ever carries.
  */
 import { describe, expect, it } from 'vitest';
-import { finalizeTitledDiagramFragment, scaleFragmentBody } from '../../../src/core/TextBlockExporter.js';
+import { BODY_ANCHOR, finalizeTitledDiagramFragment, scaleFragmentBody } from '../../../src/core/TextBlockExporter.js';
 import type { RenderFragment } from '../../../src/core/dispatcher.js';
 import type { ScaleSpec } from '../../../src/core/scale-command.js';
 
@@ -161,5 +161,32 @@ describe('finalizeTitledDiagramFragment — scale applied AFTER the margin shift
     expect(result.body).toBe('<g><rect x="10" y="20" width="30" height="15"/></g>');
     expect(result.width).toBe(100);
     expect(result.height).toBe(50);
+  });
+});
+
+describe('finalizeTitledDiagramFragment — klimt-drawn body at the anchor (T6h)', () => {
+  const chromeTitle = '<g class="title"><text x="5" y="5" textLength="10"/></g>';
+
+  it('scales the chrome strings, and draws the body at the anchor translate (margin included) at the scale', () => {
+    const calls: [number, number, number][] = [];
+    const fragment = wrappedFragment({
+      body: `${chromeTitle}<g data-body-anchor="" transform="translate(2.5,7)"/>`,
+      scaleSpec: simpleScale(2),
+      drawBodyAt: (scale, dx, dy) => {
+        calls.push([scale, dx, dy]);
+        return '<rect x="1" y="1" width="1" height="1"/>';
+      },
+    });
+    const result = finalizeTitledDiagramFragment(fragment);
+    expect(calls).toEqual([[2, 12.5, 17]]);
+    expect(result.body).toBe(
+      '<g class="title"><text x="30" y="30" textLength="20"/></g><rect x="1" y="1" width="1" height="1"/>',
+    );
+  });
+
+  it('the anchor is BODY_ANCHOR, and a missing anchor is a broken invariant', () => {
+    expect(BODY_ANCHOR).toBe('<g data-body-anchor="" transform="translate(0,0)"/>');
+    const fragment = wrappedFragment({ body: chromeTitle, drawBodyAt: () => '' });
+    expect(() => finalizeTitledDiagramFragment(fragment)).toThrow('body anchor is missing');
   });
 });
