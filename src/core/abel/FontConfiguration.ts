@@ -2,6 +2,9 @@ import type { UStroke } from '../klimt/UStroke.js';
 import type { HColor } from './Colors.js';
 import type { ISkinParam, Style, UFont } from './ISkinParam.js';
 
+/** The tab size the 4-arg `create` passes on. @see FontConfiguration.java:231 */
+const DEFAULT_TAB_SIZE = 8;
+
 /**
  * FontConfiguration — ADR-2 consumed-slice LOCAL port of
  * `klimt/font/FontConfiguration.java` (a ~470-line class). `Entity`
@@ -39,6 +42,13 @@ export class FontConfiguration {
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:57-61 (5-arg)
    * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:209-211 (skinParam+style) */
   static create(skinParam: ISkinParam, style: Style): FontConfiguration;
+  /** Tab size 8. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java:229-232 */
+  static create(
+    font: UFont,
+    color: HColor,
+    hyperlinkColor: HColor,
+    hyperlinkUnderlineStroke: UStroke,
+  ): FontConfiguration;
   static create(
     font: UFont,
     color: HColor,
@@ -60,7 +70,13 @@ export class FontConfiguration {
         'deferred per SI1/ADR-2: FontConfiguration.create(ISkinParam, Style) needs the style value-resolution machinery (style/Style#value, PName) not yet ported',
       );
     }
-    return new FontConfiguration(a, b, hyperlinkColor, hyperlinkUnderlineStroke as UStroke, tabSize as number);
+    return new FontConfiguration(
+      a,
+      b,
+      hyperlinkColor,
+      hyperlinkUnderlineStroke as UStroke,
+      tabSize ?? DEFAULT_TAB_SIZE,
+    );
   }
 
   /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/font/FontConfiguration.java (getFont) */

@@ -1,5 +1,6 @@
 import { horizontalAlignmentFromString, type HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
 import { NORMAL_FONT_FACE, type FontFace } from '../klimt/shape/UText.js';
+import type { AutomaticCounter } from './AutomaticCounter.js';
 import { DarkString } from './DarkString.js';
 import type { HColor, HColorSet, Value } from './Value.js';
 import { ValueColor } from './ValueColor.js';
@@ -16,14 +17,6 @@ const TRANSPARENT_CODE = '#00000000';
 const JAVA_DOUBLE_OF_DIGITS_AND_DOTS = /^(\d+\.?\d*|\.\d+)$/;
 /** `Integer.parseInt` over ASCII: optional sign, then digits. */
 const JAVA_INT = /^[+-]?\d+$/;
-
-/**
- * The consumed slice of `style/AutomaticCounter.java` (`getNextInt()`,
- * AutomaticCounter.java:40), structural until T2a ports that file.
- */
-interface AutomaticCounterSlice {
-  getNextInt(): number;
-}
 
 /** `Integer.parseInt(s)`; throws `NumberFormatException` past int range. */
 function javaParseInt(s: string): number {
@@ -88,12 +81,12 @@ export class ValueImpl implements Value {
   private constructor(private readonly value: DarkString) {}
 
   /** A `@media dark` value: `value2`, priority from the counter. @see ValueImpl.java:50-52 */
-  static dark(value: string, counter: AutomaticCounterSlice): ValueImpl {
+  static dark(value: string, counter: AutomaticCounter): ValueImpl {
     return new ValueImpl(new DarkString(null, value, counter.getNextInt()));
   }
 
   /** A regular value: `value1`, priority from the counter or given. @see ValueImpl.java:54-60 */
-  static regular(value: string, counterOrPriority: AutomaticCounterSlice | number): ValueImpl {
+  static regular(value: string, counterOrPriority: AutomaticCounter | number): ValueImpl {
     const priority = typeof counterOrPriority === 'number' ? counterOrPriority : counterOrPriority.getNextInt();
     return new ValueImpl(new DarkString(value, null, priority));
   }

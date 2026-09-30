@@ -48,6 +48,8 @@ export interface HColorSet {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/Value.java:43-67
  */
 export interface Value {
+  /** `Object#toString`; `ValueImpl` prints its `DarkString` (ValueImpl.java:83-86), read by `Style#toString`. */
+  toString(): string;
   /** @see Value.java:45 */
   asString(): string | null;
   /** @see Value.java:47 */
