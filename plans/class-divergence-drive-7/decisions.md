@@ -46,6 +46,17 @@ gains `dotEqualExempt: "oracle-seam-42x42"`, `pin-goldens.mts` accepts it and
 visible and is retired when the seam is fixed in the fork. Any other delta is a
 port defect: fix or `open -> cdd8`. Stop 14 guards the boundary.
 
+**Amended 2026-09-30 (stop 14 halt, journal row 10; maintainer: "your recommendations
+are fine").** rojida's delta is neither arm: our outer DOT is structurally equal to the
+jar's `svek-3.dot` and our nested `{{ class }}` DOTs are byte-identical to `svek-1/2`;
+`computeDotEqual` fails only on the dump COUNT (`survey-dot-equal.ts:121`) because
+`outerGraphs()` discards every nested layout on the false premise that nested embeds
+are always Smetana-routed. The exemption path is NOT used: T1g′ fixes the normaliser
+(`scripts/lib/survey-dot-equal.ts` + test enter its write-set) so `dotEqual` is computed
+over graphviz-routed nested embeds too, and rojida pins with no `dotEqualExempt`. The
+instrument change is measured by an all-engine `dotEqual` diff at the b2 close; every
+flip is journaled (D7 style).
+
 ## D7: cross-engine fixes are measured by the all-engine close and re-pin only rows they moved
 tefeco (b): description notes become opale (`GraphvizImageBuilder.java:245-257`,
 `EntityImageNote.java:235-243`). josebu (a): sequence labels keep sprite atoms
