@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1252 modules · 4715 exported names.
+1257 modules · 4720 exported names.
 
 ## `src/`
 
@@ -1442,6 +1442,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `TextBlockJson.ts` | `JsonRowGeo`, `CellAtom`, `MeasuredNode`, `buildRows`, `measureNode`, `recordLabelFor` | Node sizing for the json family — the port of upstream's `TextBlockJson`. |
+
+## `src/diagrams/mindmap/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Stripe.ts` | `Stripe` | A single stripe of a `StripeFrontier`: a horizontal x-range `[x1, x2]` (inclusive both ends, per `contains`) holding the highest y the packed `Tetris` frontier has reached across that range. |
+| `StripeFrontier.ts` | `StripeFrontier` |  |
+| `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |
+| `SymetricalTeePositioned.ts` | `SymetricalTeePositioned` |  |
+| `Tetris.ts` | `Tetris` |  |
 
 ## `src/diagrams/packetdiag/`
 
