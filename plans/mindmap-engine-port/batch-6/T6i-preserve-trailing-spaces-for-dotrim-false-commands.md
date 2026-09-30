@@ -1,4 +1,4 @@
-# T6f: jar fallback page for factory throws
+# T6i: preserve trailing spaces for doTrim false commands
 
 Return only the structured report: commit sha(s), files changed, per-check or per-fixture
 before → after, residuals with mechanisms (Java + port `file:line`), write-set extensions,
@@ -15,35 +15,37 @@ from the T0c probes (`plans/mindmap-engine-port/tools/probe/`), never from guess
 Brief: `plans/mindmap-engine-port/` (README, decisions.md D1–D12).
 
 ## Rows
-`fogari-75-febu345` (indented `*` levels → `getSmartLevel` throws `UnsupportedOperationException`), `femiba-70-duvi238` (`++ """` triple-quote lines), `susipa-95-tedu015` (`<style>`-only source → NPE in `Branch.hasChildren`, Branch.java:112): the jar renders a fallback page. femiba/fogari: the black `PlantUML version …` banner (`PSystemVersion`); susipa: the stack-trace error page.
+`kijaru-67-buco967` (ws 44): the jar draws bold `1` PLUS a separate `<text> </text>` because `CommandMindMapOrgmode.java:55` is `super(false, …)` (`doTrim=false`, SingleLineCommand2.java:60-78) and the label keeps its trailing space (`  ** **$index** `); the port's `src/core/preprocessor.ts:166` `trimEnd()`s every line for every engine before any command runs (journal row 34).
 
 ## Task (TDD)
-1. Read `PSystemBuilder.java:270-285` (the catch around `createPSystem`) and what page each
-   throw becomes (`PSystemVersion.createShowVersion`? / `PSystemError`?) — quote it. Read
-   the three goldens' `<text>` content and colours (`#33FF02` on `#000000`).
-2. Make the mindmap plugin's factory/render path throw where upstream throws (D6: T1d's
-   `getSmartLevel` throw, the unguarded `Branch.hasChildren`, and whatever femiba's `"""`
-   lines hit — diagnose) and route the throw to the same page the jar draws, through
-   `src/core/error/error-diagrams.ts` (port the version-banner page at its upstream path if
-   absent). The version TEXT is a permanent divergence (`plantuml-ts version 0.1.0` vs the
-   jar's) — record it in `DIVERGENCES.md`; layout, colours, `textLength` of the shared
-   lines and the stack-trace structure are targets.
-3. T6b and T6c have merged; T6h runs in parallel and owns `index.ts`.
+1. Read `SingleLineCommand2.java:55-80` (`doTrim`) and `BlocLines`/`StringUtils.trin` to
+   establish exactly what upstream trims and where (the preprocessor keeps trailing
+   whitespace; each command decides). Grep every `super(false` / `super(true` under
+   `src/main/java/net/` to list the doTrim=false commands the port has ported.
+2. Fix at the origin: stop the global `trimEnd()` in `preprocessor.ts:166` (or move the trim
+   to where upstream trims) so a doTrim=false command sees the trailing space. This is a
+   GLOBAL change: run the all-engine survey (`plans/mindmap-engine-port/measurements/chain.sh
+   T6i-eng` after `uptime` load < 8, then `python3 measurements/T6i-eng/engdiff.py b5-eng`
+   with `engdiff.py` copied in) and every golden/diff ratchet; every non-mindmap mover needs a
+   mechanism in the report (D11) — a loss is a stop.
+3. kijaru render-diff 11/4 → 0/0 with a test pinned on the authored oracle T6e made
+   (`* **1** ` → bold `1` + `<text> </text>` of width 0).
 
 ## Write-set
-`src/core/error/error-diagrams.ts` (+ a `PSystemVersion` page module at its upstream path if absent), `src/diagrams/mindmap/MindMapDiagramFactory.ts` (throw routing only — T6h edits the same file's warnings artifact: different hunk; `src/diagrams/mindmap/index.ts` is T6h's — report a needed catch there), `DIVERGENCES.md`, tests `tests/unit/mindmap/render-error-page.test.ts`.
+`src/core/preprocessor.ts` (and the exact trim site the Java names, if different), tests `tests/unit/preprocessor.test.ts` additions + `tests/unit/mindmap/`.
 
 ## Read-set
-`PSystemBuilder.java:260-290`, `PSystemVersion.java`, `PSystemError.java:140-235`, `MindMapDiagram.java:136-159`, `Branch.java:105-115`; the three goldens.
+`SingleLineCommand2.java:55-80`, `CommandMindMapOrgmode.java:55`, `BlocLines.java`, `StringUtils.java:500-520`; `src/core/preprocessor.ts:150-175`, `src/core/BlockUmlBuilder.ts`.
 
 ## Acceptance
-- Given each of the three sources, then the port renders the same page KIND with the same colours and layout; render-diff residue is only the version text (documented).
+- Given kijaru, then render-diff is 0/0.
+- Given the all-engine survey vs b5-eng, then every mover has a mechanism and none is a loss.
 
 ## Architecture decisions (locked)
-D6, D8.
+D6, D8, D11.
 
 ## Quality bar
-TDD (failing test first, specific values). Targeted `npx vitest run` over `tests/unit/mindmap/`, `tests/unit/core/error*`
+TDD (failing test first, specific values). Targeted `npx vitest run` over `tests/unit/preprocessor.test.ts`, `tests/unit/mindmap/`, `tests/unit/class/`, `tests/unit/sequence/`, `tests/unit/activity/`, `tests/unit/description/`, all golden + diff ratchets
 (report the collected file count). `npm run typecheck`; `npx eslint <changed files>`;
 `npx prettier --check <changed files>`. No full `npm test`. New src module ⇒ `npm run
 catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function, CCN ≤10,
@@ -63,7 +65,7 @@ catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function,
   flat `StyleMap` or any existing engine's style resolution.
 
 ## Commit
-`feat(mindmap): route factory throws to the jar's fallback page`: conventional, lowercase, ≤72 chars, one per task; body with the Java
+`fix(preprocessor): keep trailing spaces for doTrim=false commands`: conventional, lowercase, ≤72 chars, one per task; body with the Java
 cited and what the tests pin. No attribution lines.
 
 **Observability:** N/A — no new observable operations. **Rollback:** Reversible (revert the commit).
