@@ -28,3 +28,18 @@ export const HorizontalAlignment = {
 } as const;
 
 export type HorizontalAlignment = (typeof HorizontalAlignment)[keyof typeof HorizontalAlignment];
+
+/**
+ * `HorizontalAlignment.fromString(String)` (single-argument overload): the
+ * constant whose `name()` equals `s` ignoring case, else `undefined`
+ * (upstream `null`, including for a `null` argument --
+ * `equalsIgnoreCase(null)` is false). The two-argument overload
+ * (java:62-73) is not ported here.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/geom/HorizontalAlignment.java:49-60
+ */
+export function horizontalAlignmentFromString(s: string | null): HorizontalAlignment | undefined {
+  if (s === null) return undefined;
+  const upper = s.toUpperCase();
+  if (upper === 'LEFT' || upper === 'CENTER' || upper === 'RIGHT') return HorizontalAlignment[upper];
+  return undefined;
+}

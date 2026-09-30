@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1252 modules · 4715 exported names.
+1261 modules · 4731 exported names.
 
 ## `src/`
 
@@ -521,7 +521,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ClockwiseTopRightBottomLeft.ts` | `ClockwiseTopRightBottomLeft` |  |
 | `CoordinateChange.ts` | `CoordinateChange` |  |
 | `EnsureVisible.ts` | `EnsureVisible` | EnsureVisible — the callback surface a clickable region (`Url`) exposes so drivers can report every point they actually painted for it; the accumulated bounding box becomes the image-map/SVG link geometry. |
-| `HorizontalAlignment.ts` | `HorizontalAlignment` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
+| `HorizontalAlignment.ts` | `HorizontalAlignment`, `horizontalAlignmentFromString` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
 | `MagneticBorder.ts` | `MagneticBorder` |  |
 | `MagneticBorderNone.ts` | `MagneticBorderNone` |  |
 | `MinMax.ts` | `MinMax` |  |
@@ -654,8 +654,17 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `DarkString.ts` | `DarkString` | DarkString — a style value's regular (`value1`) and `@media dark` (`value2`) strings plus its priority. |
 | `ISkinSimple.ts` | `ISkinSimple` | ISkinSimple — the skin-parameter capability interface `Display`/ `CreoleParser` (and, once ported, `StripeTable`/`StripeTree`/ `EmbeddedDiagram`) consume to reach fonts, sprites, guillemets, and a `SheetBuilder`. |
-| `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | SName — minimal consumed slice of the unported style-name enum (ADR-2; `style/SName.java` is a 217-member enum). |
+| `MergeStrategy.ts` | `MergeStrategy` | MergeStrategy — how `Style#mergeWith` treats an existing value whose priority is above `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (Style.java:121-135). |
+| `PName.ts` | `PNAMES`, `PName`, `getFromName` | PName — every style property name of `style/PName.java` (1.2026.8beta1), constant names verbatim, as a readonly declaration-order array plus the string-literal union it induces (no `const enum`, project convention). |
+| `SName.ts` | `SNAMES`, `SName`, `retrieve` | SName — every style-element name of `style/SName.java` (1.2026.8beta1), the enum constant names verbatim (trailing underscores included: `class_`, `goto_`, `interface_`, `package_`, `private_`, `protected_`, `public_` -- Java keywords upstr |
+| `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | SName — re-exported from its own module (`./SName.ts`, the full 157-constant `style/SName.java` union), where the eight-name slice this file used to declare was widened. |
+| `Value.ts` | `HColor`, `HColorSet`, `Value` |  |
+| `ValueAbstract.ts` | `ValueAbstract` |  |
+| `ValueColor.ts` | `ValueColor` |  |
+| `ValueImpl.ts` | `ValueImpl` |  |
+| `ValueNull.ts` | `ValueNull` |  |
 
 ## `src/core/style/skins/`
 
