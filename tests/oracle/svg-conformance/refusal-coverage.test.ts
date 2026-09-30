@@ -745,7 +745,11 @@ describe('refusal coverage — baseline shape', () => {
     // render on both sides); its two gradient gaps were opened and closed
     // within that mission, so erroring/gaps are unchanged. Derivation:
     // 5836 + 268 = 6104.
-    expect(manifest.fixtures.length).toBe(6104);
+    // 6104 -> 6109 / 5836 -> 5841 / 268 -> 268 at class-divergence-drive-7/
+    // close-b1 (2026-09-30): 5 unknown-tree golden rows (the batch-1 fixes:
+    // bisefo, fepiko, josebu, kexaba, sejube; all render on both sides).
+    // Derivation: 5841 + 268 = 6109.
+    expect(manifest.fixtures.length).toBe(6109);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -786,7 +790,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5658 -> 5678 at cdd6/close-b2 (20 unknown-tree svg-class clones).
     // 5678 -> 5699 at cdd6/close-b3 (21 unknown-tree svg-class clones).
     // 5699 -> 5836 at the cdd6 <- main merge (137 svg-mindmap clones).
-    expect(pinnedRendering.length).toBe(5836);
+    // 5836 -> 5841 at cdd7/close-b1 (5 unknown-tree svg-class clones).
+    expect(pinnedRendering.length).toBe(5841);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

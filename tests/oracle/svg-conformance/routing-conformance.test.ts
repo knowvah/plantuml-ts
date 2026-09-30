@@ -810,10 +810,16 @@ describe('routing conformance — jar-error classification', () => {
     // clone rows appended (see that mission's derivations in its own copy of
     // this comment block). Row-level three-way union, no row changed on both
     // sides. Derivation: 5090 + 909 + 105 = 6104.
-    expect(pinnedAgree.length).toBe(5090);
+    //
+    // 5090 -> 5095 / 6104 -> 6109 at class-divergence-drive-7/close-b1
+    // (2026-09-30): 5 `goldens:svg-class/unknown/<slug>` clone rows for the
+    // batch-1 pins (bisefo, fepiko, josebu, kexaba, sejube), each the
+    // byte-identical twin of its dot-cache row (all `agree`, CLASS/CLASS).
+    // Derivation: 5095 + 909 + 105 = 6109.
+    expect(pinnedAgree.length).toBe(5095);
     expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6104);
+    expect(manifest.fixtures.length).toBe(6109);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

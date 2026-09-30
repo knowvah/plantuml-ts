@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T19:16:07.694Z",
+  "generatedAt": "2026-09-30T17:49:19.719Z",
   "fixtures": [
     {
       "slug": "activity-legacy1-example-0",
@@ -293,7 +293,9 @@
       "slug": "bisefo-56-dumu120",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "conformant"
+      "verdict": "diverged",
+      "maxDelta": 0,
+      "firstDiff": "svg/defs[1][childCount]"
     },
     {
       "slug": "bitabu-34-lota947",
@@ -1254,7 +1256,9 @@
       "slug": "fepiko-26-vobi566",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "conformant"
+      "verdict": "diverged",
+      "maxDelta": 0,
+      "firstDiff": "svg/g[1]/g[1]/text[1]/@fill"
     },
     {
       "slug": "fepoko-61-fona364",
@@ -2095,9 +2099,9 @@
       "type": "unknown",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 21.84700000000001,
+      "maxDelta": 78.38499999999999,
       "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
-      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+      "maxDeltaPath": "svg/g[1]/text[4]/@y"
     },
     {
       "slug": "jizilu-55-jexu697",
@@ -2190,7 +2194,9 @@
       "slug": "josebu-55-seje426",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "conformant"
+      "verdict": "structural-match",
+      "maxDelta": 75,
+      "maxDeltaPath": "svg/@height"
     },
     {
       "slug": "jubaba-44-tole509",
@@ -2455,7 +2461,9 @@
       "slug": "kexaba-26-kobu577",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "conformant"
+      "verdict": "structural-match",
+      "maxDelta": 7,
+      "maxDeltaPath": "svg/g[1]/g[3]/image[1]/@x"
     },
     {
       "slug": "kibilo-60-fado726",
@@ -4461,7 +4469,9 @@
       "slug": "sejube-03-bote542",
       "type": "unknown",
       "dotEqual": true,
-      "verdict": "conformant"
+      "verdict": "diverged",
+      "maxDelta": 0,
+      "firstDiff": "svg/g[1]/g[3]/ellipse[1]/@fill"
     },
     {
       "slug": "selapa-88-lopi279",
@@ -4559,9 +4569,9 @@
       "type": "unknown",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 21.84700000000001,
+      "maxDelta": 78.385,
       "firstDiff": "svg/g[1]/g[1]/title[1]/text()[1]",
-      "maxDeltaPath": "svg/g[1]/text[2]/@y"
+      "maxDeltaPath": "svg/g[1]/text[4]/@y"
     },
     {
       "slug": "soseka-43-riru110",
@@ -5849,11 +5859,11 @@
     {
       "slug": "xuloxo-85-vibu502",
       "type": "unknown",
-      "dotEqual": true,
+      "dotEqual": false,
       "verdict": "diverged",
       "maxDelta": 61.119,
       "firstDiff": "svg/g[1]/g[1]/rect[1]/@rx",
-      "maxDeltaPath": "svg/g[1]/g[1]/text[3]/@x"
+      "maxDeltaPath": "svg/g[1]/g[2]/text[2]/@x"
     },
     {
       "slug": "xupiko-87-dafi146",
