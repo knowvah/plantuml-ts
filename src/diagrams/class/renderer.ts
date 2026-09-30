@@ -46,6 +46,7 @@ import type { StringMeasurer } from '../../core/measurer.js';
 import {} from './class-layout-helpers.js';
 import { buildClassShadowFilterDef } from './class-shadow.js';
 import { renderClassUSymbolEntity, usesClassUSymbolEntity } from './renderer-usymbol-entity.js';
+import { renderClassEntityPort, isClassEntityPort } from './renderer-entity-port.js';
 import { mergeFragmentDefs, type DrawableFragment } from '../../core/klimt/document-shell.js';
 
 /** `net.sourceforge.plantuml.core.DiagramType#CLASS` -- verified against
@@ -348,9 +349,12 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
     // carries EntityImageDescription's OWN `<!--entity NAME-->` wrap
     // (`renderer-usymbol-entity.ts`) -- push UNWRAPPED, never through
     // `wrapEntity` (wrong `<!--class NAME-->` comment).
-    if (usesClassUSymbolEntity(classifier) && geo.measurer !== undefined) {
+    const port = isClassEntityPort(classifier); // cdd7-T2a: before DESCRIPTION, GeneralImageBuilder.java:122-127
+    if ((port || usesClassUSymbolEntity(classifier)) && geo.measurer !== undefined) {
       const entityUid = uidPlan.classifierUid.get(classifier.id) ?? '';
-      const fragment = renderClassUSymbolEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
+      const fragment = port
+        ? renderClassEntityPort(classifier, theme, geo.measurer, entityUid)
+        : renderClassUSymbolEntity(classifier, theme, geo.measurer, geo.sprites, entityUid);
       usymbolEntityFragments.push(fragment);
       children.push(fragment.body);
       continue;
