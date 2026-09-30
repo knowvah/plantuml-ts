@@ -1,0 +1,11 @@
+@startmindmap
+* root
+	* Lorem ipsum dolor sit amet
+		* Lorem ipsum dolor sit amet
+		* Lorem ipsum dolor sit amet
+		* Lorem ipsum dolor sit amet
+		* Lorem ipsum dolor sit amet
+	* Lorem ipsu dolor sit amet
+		* ---
+			* ---
+@endmindmap

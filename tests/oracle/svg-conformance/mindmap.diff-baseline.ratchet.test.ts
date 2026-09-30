@@ -189,13 +189,24 @@ describe('svg-mindmap weighted-score baseline ratchet — corpus presence and ma
     ).toEqual([]);
   });
 
-  it('the manifest has exactly one row per cached mindmap slug (142)', () => {
+  // Since mindmap-engine-port/close-b5 (2026-09-30) the population is split
+  // exactly the way description's is: a fixture is EITHER a diff-baseline row
+  // (still diverging, or a jar-side error page) OR a golden-ratchet pin
+  // (conformant, 0 diffs), never both -- so the two manifests together are
+  // one row per cached slug, disjoint.
+  it('diff-baseline rows and ratchet pins together are exactly one row per cached mindmap slug (142), disjoint', () => {
     const cachedSlugs = readdirSync(MINDMAP_CACHE_DIR)
       .filter((f) => statSync(join(MINDMAP_CACHE_DIR, f)).isDirectory())
       .sort();
-    const manifestSlugs = manifest.fixtures.map((f) => f.slug).sort();
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: { slug: string }[] };
+    const pinned = ratchet.fixtures.map((f) => f.slug);
+    const manifestSlugs = manifest.fixtures.map((f) => f.slug);
     expect(cachedSlugs).toHaveLength(142);
-    expect(manifestSlugs).toEqual(cachedSlugs);
+    expect(
+      manifestSlugs.filter((s) => pinned.includes(s)),
+      'a pinned fixture must not also carry a diff-baseline row (the golden ratchet owns it)',
+    ).toEqual([]);
+    expect([...manifestSlugs, ...pinned].sort()).toEqual(cachedSlugs);
   });
 });
 
@@ -223,8 +234,16 @@ describe('svg-mindmap weighted-score baseline ratchet', () => {
     });
   }
 
-  it('has no baselined fixtures yet (all 142 are status "error") — see header doc comment', () => {
-    expect(baselineFixtures).toHaveLength(0);
+  // 0 -> 15 at mindmap-engine-port/close-b5 (2026-09-30): the plugin
+  // registered (T5a) and the first measurement pinned 127 conformant
+  // fixtures into ratchet.json; the 12 still-diverging rows and the 3 rows
+  // whose ORACLE is a jar error page (femiba, fogari, susipa -- the port
+  // renders them, so `measure()` is measurable and their scores are pinned
+  // against the error page: a fall there would mean the port started to
+  // error like the jar, which AC3 then records deliberately) stay here.
+  it('every row is a measured baseline (no status "error" rows remain after close-b5)', () => {
+    expect(baselineFixtures).toHaveLength(manifest.fixtures.length);
+    expect(errorFixtures).toHaveLength(0);
   });
 });
 
@@ -256,12 +275,15 @@ describe('svg-mindmap weighted-score baseline ratchet — branch discrimination'
     expect(checkNoRise(sample, 9, 7).ok).toBe(true);
   });
 
-  it('the ERROR_SENTINEL marker check fires against a REAL fixture, not only fabricated strings', () => {
+  // Until close-b5 this case fired against a REAL fixture (every mindmap
+  // rendered the sentinel). The plugin now registers, so the sentinel path is
+  // exercised on the marker text itself; a real render must NOT trip it.
+  it('the ERROR_SENTINEL marker check no longer fires against a real fixture once the plugin renders', () => {
     const real = manifest.fixtures[0];
     expect(real, 'expected at least one manifest fixture').toBeDefined();
     const result = measure(real!);
-    expect(result.errored).toBe(true);
-    expect((result as { errored: true; reason: string }).reason).toContain('ERROR_SENTINEL');
+    expect(result.errored).toBe(false);
+    expect(ERROR_SENTINEL_MARKER).toBe('Error: unknown diagram type');
   });
 });
 

@@ -1,0 +1,14 @@
+@startmindmap
+
+<style>
+arrow {
+    LineColor red
+}
+</style>
+
+* New style
+** New features
+** Template Files
+*** They are \ngreat and \n should have them!
+
+@endmindmap
