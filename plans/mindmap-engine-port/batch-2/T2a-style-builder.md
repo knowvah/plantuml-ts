@@ -81,3 +81,11 @@ catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function,
 cited and what the tests pin. No attribution lines.
 
 **Observability:** N/A — no new observable operations. **Rollback:** Reversible (new files; revert the commit).
+
+## Orchestrator note (added at the b1 T1a merge, journal rows 11–12)
+The T1a port corrected the value-layer contract to the Java: `ValueImpl.regular/dark` statics,
+`ValueImpl#mergeWith(Value)` (no strategy; `MergeStrategy` is read in `Style#mergeWith`,
+Style.java:121-135), `asFontFace()`/`asHorizontalAlignment()`, `asString(): string | null`, no
+`ValueNull.COLOR`. `src/core/style/Value.ts` declares minimal `HColor`/`HColorSet` interfaces
+(`getColorOrWhite`, `withDark`) because the port has no concrete `HColorSet`; the test double is
+`tests/unit/core/style/helpers/hcolor-set.ts`. Read `src/core/style/*.ts` before starting.
