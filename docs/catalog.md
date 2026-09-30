@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1311 modules · 4817 exported names.
+1311 modules · 4818 exported names.
 
 ## `src/`
 
@@ -138,7 +138,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-text-font.ts` | `textFontFamily`, `emittedTextForm` | Text emission rules that depend on the FONT FAMILY — the SVG-safe family string, PlantUML's `monospaced` -> CSS `monospace` rename, and the two NBSP substitutions. |
 | `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `foreignObject`, `decorationLines`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
-| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
+| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `scaleFragmentBody`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
 | `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
