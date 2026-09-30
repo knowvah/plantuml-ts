@@ -21,6 +21,7 @@ import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../
 import type { StringBounder as DriverStringBounder } from '../../core/klimt/drawing/svg/driver-text-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics-core.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
+import { ColorMapper, mapPaint } from '../../core/klimt/color/ColorMapper.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
@@ -53,6 +54,24 @@ function textBlockDimension(diagram: MindMapDiagram, measurer: StringMeasurer): 
   return diagram.getTextBlock().calculateDimension(probe.getStringBounder());
 }
 
+/**
+ * `TitledDiagram#muteColorMapper` over the export's `ColorMapper.IDENTITY`
+ * (`FileFormatOption`'s default): `mode dark` → `DARK_MODE`, `monochrome
+ * true` → `MONOCHROME`, `monochrome reverse` → `MONOCHROME_REVERSE`. The
+ * `reversecolor` arms (java:300-311, `LIGTHNESS_INVERSE` /
+ * `ColorMapper.reverse(ColorOrder)`) are not ported and fall to the
+ * identity.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:291-311
+ */
+function muteColorMapper(diagram: MindMapDiagram): ColorMapper {
+  const skinParam = diagram.getSkinParam();
+  if (skinParam.getValue('mode')?.toLowerCase() === 'dark') return ColorMapper.DARK_MODE;
+  const monochrome = skinParam.getValue('monochrome');
+  if (monochrome === 'true') return ColorMapper.MONOCHROME;
+  if (monochrome === 'reverse') return ColorMapper.MONOCHROME_REVERSE;
+  return ColorMapper.IDENTITY;
+}
+
 /** One klimt pass over the text block: `minDim`, `scale`, and where the
  *  block is drawn. */
 interface DrawPass {
@@ -64,9 +83,21 @@ interface DrawPass {
 /** Draws the text block per `pass` and unwraps the document to a fragment
  *  sized by `size` (the viewBox when undefined). The graphic's seed only
  *  names gradient/shadow ids, which `assemble-svg.ts#assembleSvg` re-mints
- *  from the block's own seed. */
+ *  from the block's own seed.
+ *
+ *  The background goes through the muted colour mapper
+ *  (`backcolor.toSvg(option.getColorMapper())`, SvgGraphics.java:176-188).
+ *
+ *  Not yet wired: `if (isHandwritten) ug = new UGraphicHandwritten(ug)`
+ *  after the margin translate (TextBlockExporter.java:173-175). The
+ *  decorator is ported (`klimt/drawing/hand/UGraphicHandwritten.ts`), but
+ *  every `skinparam handwritten` diagram also carries the deprecation
+ *  banner (CommandSkinParam.java:92-93 → DiagramChromeFactory.java:176-200)
+ *  that shifts the drawing down, and without it the exact hand shapes
+ *  score worse than the plain ones — see
+ *  `tests/unit/mindmap/handwritten-monochrome.test.ts`. */
 function drawFragment(diagram: MindMapDiagram, measurer: StringMeasurer, pass: DrawPass): RenderFragment {
-  const backcolor = diagram.calculateBackColor();
+  const backcolor = mapPaint(diagram.calculateBackColor(), muteColorMapper(diagram));
   const option = basicSvgOption({
     minDim: { width: pass.minDim.getWidth(), height: pass.minDim.getHeight() },
     backcolor,
