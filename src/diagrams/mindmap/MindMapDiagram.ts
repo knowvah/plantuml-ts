@@ -2,19 +2,52 @@ import { Direction } from '../../core/abel/Direction.js';
 import type { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import type { IdeaContent } from './Idea.js';
-import type { MindMapStyleSource } from './MindMap.js';
+import type { AtomOps } from '../../core/klimt/creole/Sea.js';
+import { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import type { MindMapSkinParam } from './MindMap.js';
 import { MindMap } from './MindMap.js';
 
+function unsupplied(member: string): never {
+  throw new Error(`MindMapDiagram: no skin param was supplied, ${member} is unavailable`);
+}
+
 /**
- * Placeholder `MindMapStyleSource` used when a caller does not supply a
- * real `ISkinParam` (this port has no concrete implementation of the full
- * interface yet — see `MindMap.ts`'s own doc comment). `getCurrentStyleBuilder`
- * returns an empty object, satisfying the opaque `StyleBuilder` stand-in
- * (`core/abel/ISkinParam.ts`) without resolving any real style. T4a/T5a
- * replace this default once a concrete `ISkinParam` lands.
+ * Placeholder `MindMapSkinParam` used when a caller does not supply one
+ * (this port has no concrete `ISkinParam` for mindmap yet; T5a wires the
+ * real one through `TitledDiagram`). Parsing reads only
+ * `getCurrentStyleBuilder`, answered with an empty builder; every drawing
+ * member throws.
  */
-const DEFAULT_STYLE_SOURCE: MindMapStyleSource = {
-  getCurrentStyleBuilder: () => ({}),
+const DEFAULT_STYLE_SOURCE: MindMapSkinParam = {
+  getCurrentStyleBuilder: () => new StyleBuilder(),
+  getRankdir: () => unsupplied('getRankdir'),
+  getIHtmlColorSet: () => unsupplied('getIHtmlColorSet'),
+  sheet: () => unsupplied('sheet'),
+  getSprite: () => unsupplied('getSprite'),
+  guillemet: () => unsupplied('guillemet'),
+  getFromMd5: () => unsupplied('getFromMd5'),
+  transformStringForSizeHack: () => unsupplied('transformStringForSizeHack'),
+  getValue: () => unsupplied('getValue'),
+  values: () => unsupplied('values'),
+  getPadding: () => unsupplied('getPadding'),
+  getMonospacedFamily: () => unsupplied('getMonospacedFamily'),
+  getTabSize: () => unsupplied('getTabSize'),
+  getDpi: () => unsupplied('getDpi'),
+  copyAllFrom: () => unsupplied('copyAllFrom'),
+  getPragma: () => unsupplied('getPragma'),
+  getFontHtmlColor: () => unsupplied('getFontHtmlColor'),
+  getFont: () => unsupplied('getFont'),
+  getHyperlinkColor: () => unsupplied('getHyperlinkColor'),
+  useUnderlineForHyperlink: () => unsupplied('useUnderlineForHyperlink'),
+  getDefaultTextAlignment: () => unsupplied('getDefaultTextAlignment'),
+  strictUmlStyle: () => unsupplied('strictUmlStyle'),
+};
+
+/** Placeholder `AtomOps` paired with {@link DEFAULT_STYLE_SOURCE}: drawing only. */
+const DEFAULT_ATOM_OPS: AtomOps = {
+  calculateDimension: () => unsupplied('atomOps'),
+  getStartingAltitude: () => unsupplied('atomOps'),
+  drawU: () => unsupplied('atomOps'),
 };
 
 /**
@@ -40,7 +73,8 @@ const DEFAULT_STYLE_SOURCE: MindMapStyleSource = {
 export class MindMapDiagram {
   private readonly mindmaps: MindMap[];
   private readonly pragma = Pragma.createEmpty();
-  private readonly skinParam: MindMapStyleSource;
+  private readonly skinParam: MindMapSkinParam;
+  private readonly atomOps: AtomOps;
   /** @see MindMapDiagram.java:64 */
   private defaultDirection = true;
   /** @see MindMapDiagram.java:76 (`setRankdir(Rankdir.LEFT_TO_RIGHT)` in the
@@ -53,9 +87,10 @@ export class MindMapDiagram {
   private first: string | undefined;
 
   /** @see MindMapDiagram.java:74-78 */
-  constructor(skinParam: MindMapStyleSource = DEFAULT_STYLE_SOURCE) {
+  constructor(skinParam: MindMapSkinParam = DEFAULT_STYLE_SOURCE, atomOps: AtomOps = DEFAULT_ATOM_OPS) {
     this.skinParam = skinParam;
-    this.mindmaps = [new MindMap(skinParam)];
+    this.atomOps = atomOps;
+    this.mindmaps = [new MindMap(skinParam, atomOps)];
   }
 
   /** @see MindMapDiagram.java:66-68 */
@@ -72,7 +107,7 @@ export class MindMapDiagram {
     return this.pragma;
   }
 
-  getSkinParam(): MindMapStyleSource {
+  getSkinParam(): MindMapSkinParam {
     return this.skinParam;
   }
 
@@ -110,7 +145,7 @@ export class MindMapDiagram {
    */
   addIdea(content: IdeaContent, level: number, direction: boolean = this.defaultDirection): CommandExecutionResult {
     const resolved = content.stereotype === undefined ? extractEndingStereotype(content) : content;
-    if (this.last().isFull(level)) this.mindmaps.push(new MindMap(this.skinParam));
+    if (this.last().isFull(level)) this.mindmaps.push(new MindMap(this.skinParam, this.atomOps));
     return this.last().addIdeaInternal(resolved, level, direction);
   }
 

@@ -11,11 +11,14 @@ import {
 import { applyMindMapOrgmode, ORGMODE_RE } from './CommandMindMapOrgmode.js';
 import { applyMindMapPlus, PLUS_RE } from './CommandMindMapPlus.js';
 import { applyMindMapRoot, ROOT_RE } from './CommandMindMapRoot.js';
-import type { MindMapStyleSource } from './MindMap.js';
+import type { AtomOps } from '../../core/klimt/creole/Sea.js';
+import type { MindMapSkinParam } from './MindMap.js';
 import { MindMapDiagram } from './MindMapDiagram.js';
 
 export interface MindMapDiagramOptions {
-  readonly skinParam?: MindMapStyleSource;
+  readonly skinParam?: MindMapSkinParam;
+  /** ADR-9's creole capability for the drawing (`MindMap`/`FingerImpl`). */
+  readonly atomOps?: AtomOps;
 }
 
 /** `@startmindmap`/`@endmindmap` — `UmlSource.lines` is documented as
@@ -117,7 +120,7 @@ export function createMindMapDiagram(
   source: UmlSource,
   options?: MindMapDiagramOptions,
 ): MindMapDiagram | ParseRefusal {
-  const diagram = new MindMapDiagram(options?.skinParam);
+  const diagram = new MindMapDiagram(options?.skinParam, options?.atomOps);
   const lines = source.lines;
   let i = 0;
 
