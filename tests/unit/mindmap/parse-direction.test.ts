@@ -10,6 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { Rankdir } from '../../../src/core/klimt/geom/Rankdir.js';
 import { createMindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagramFactory.js';
 import type { MindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagram.js';
 
@@ -26,7 +27,7 @@ function parseOk(lines: string[]): MindMapDiagram {
 describe('createMindMapDiagram — direction and rankdir', () => {
   it('defaults to rankdir LR and the regular (right) branch (MindMapDiagram.java:76)', () => {
     const diagram = parseOk(['* root', '** child']);
-    expect(diagram.getRankdir()).toBe('LR');
+    expect(diagram.getSkinParam().getRankdir()).toBe(Rankdir.LEFT_TO_RIGHT);
     const mindmap = diagram.getMindmaps()[0]!;
     expect(mindmap.getRegular().getRoot()!.hasChildren()).toBe(true);
     expect(mindmap.getReverse().getRoot()!.hasChildren()).toBe(false);
@@ -49,7 +50,7 @@ describe('createMindMapDiagram — direction and rankdir', () => {
     // direction=-1 -- Direction.UP is neither RIGHT nor DOWN, so
     // `setDefaultDirection` computes `false` the same as `left side` does.
     const diagram = parseOk(['top to bottom direction', 'top side', '', '* count with a very long name', '** 100']);
-    expect(diagram.getRankdir()).toBe('TB');
+    expect(diagram.getSkinParam().getRankdir()).toBe(Rankdir.TOP_TO_BOTTOM);
     const mindmap = diagram.getMindmaps()[0]!;
     expect(mindmap.getReverse().getRoot()!.hasChildren()).toBe(true);
     expect(mindmap.getRegular().getRoot()!.hasChildren()).toBe(false);
@@ -57,6 +58,6 @@ describe('createMindMapDiagram — direction and rankdir', () => {
 
   it('`left to right direction` sets rankdir LR explicitly (redundant with the default, still observable)', () => {
     const diagram = parseOk(['left to right direction', '* root']);
-    expect(diagram.getRankdir()).toBe('LR');
+    expect(diagram.getSkinParam().getRankdir()).toBe(Rankdir.LEFT_TO_RIGHT);
   });
 });

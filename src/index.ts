@@ -23,6 +23,7 @@ import { filesPlugin } from './diagrams/files/index.js';
 import { packetdiagPlugin } from './diagrams/packetdiag/index.js';
 import { chartPlugin } from './diagrams/chart/index.js';
 import { dotPlugin } from './diagrams/dot/index.js';
+import { mindmapPlugin } from './diagrams/mindmap/index.js';
 import type { Theme } from './core/theme.js';
 import type { StyleMap } from './core/skinparam.js';
 import type { StringMeasurer } from './core/measurer.js';
@@ -119,16 +120,15 @@ registry.register(filesPlugin);
 registry.register(packetdiagPlugin);
 registry.register(chartPlugin);
 registry.register(dotPlugin);
+registry.register(mindmapPlugin);
 
-/**
- * The block's preprocessed interior, carrying the `<style>` blocks the
- * interpreter pulled out of THAT block (upstream keeps them inside it).
- */
+/** The block's preprocessed interior plus the style sources the interpreter pulled out of THAT block. */
 function umlSourceOfBlock(block: BlockUmlOk): UmlSource {
   return {
     ...block.source,
     rawStyles: block.preprocessed.styles,
     stylePositions: block.preprocessed.stylePositions,
+    styleSource: block.preprocessed,
     // The seed inputs -- see `UmlSource.seedSourceLines`/`rawSourceLines`.
     rawSourceLines: block.rawSource.map((s) => s.getString()),
     seedSourceLines: block.seedSource,

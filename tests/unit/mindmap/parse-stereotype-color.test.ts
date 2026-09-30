@@ -9,6 +9,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { HColorSimple } from '../../../src/core/klimt/color/HColorSimple.js';
 import { createMindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagramFactory.js';
 import type { MindMapDiagram } from '../../../src/diagrams/mindmap/MindMapDiagram.js';
 import type { ParseRefusal } from '../../../src/core/parse-refusal.js';
@@ -33,7 +34,12 @@ describe('createMindMapDiagram — [#color] and <<stereotype>>', () => {
   it('`[#color]` on a `+` node resolves to a real HColor', () => {
     const diagram = parseOk(['+ root', '++[#FF0000] red child']);
     const child = diagram.getMindmaps()[0]!.getRegular().getRoot()!.getChildren()[0]!;
-    expect(child.getBackColor()).toEqual({ r: 255, g: 0, b: 0, a: 255 });
+    // `getIHtmlColorSet().getColor(stringColor)` -> an `HColorSimple`
+    // (CommandMindMapOrgmode.java:107, CommandMindMapPlus.java:99), which
+    // `FtileBoxOld#paintOf` casts; a plain `{r,g,b,a}` threw at draw time.
+    const backColor = child.getBackColor();
+    expect(backColor).toBeInstanceOf(HColorSimple);
+    expect((backColor as HColorSimple).asPaint()).toBe('#FF0000');
     expect(child.getLabel().toString()).toBe('[red child]');
   });
 

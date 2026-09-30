@@ -1,96 +1,113 @@
 import { Direction } from '../../core/abel/Direction.js';
+import type { DiagramAnnotations } from '../../core/annotations/index.js';
+import { createAnnotations } from '../../core/annotations/index.js';
 import type { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
-import { Pragma } from '../../core/skin/Pragma.js';
+import { HColorSimple } from '../../core/klimt/color/HColorSimple.js';
+import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
+import { Rankdir } from '../../core/klimt/geom/Rankdir.js';
+import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import type { Paint } from '../../core/paint.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import { StyleSignatureBasic } from '../../core/style/StyleSignatureBasic.js';
+import { TitledDiagram } from '../../core/TitledDiagram.js';
+import type { UmlSource } from '../../core/TitledDiagram.js';
+import type { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
 import type { IdeaContent } from './Idea.js';
-import type { AtomOps } from '../../core/klimt/creole/Sea.js';
-import { StyleBuilder } from '../../core/style/StyleBuilder.js';
-import type { MindMapSkinParam } from './MindMap.js';
 import { MindMap } from './MindMap.js';
+import type { SkinParam } from './mindmap-skin-param.js';
 
-function unsupplied(member: string): never {
-  throw new Error(`MindMapDiagram: no skin param was supplied, ${member} is unavailable`);
-}
-
-/**
- * Placeholder `MindMapSkinParam` used when a caller does not supply one
- * (this port has no concrete `ISkinParam` for mindmap yet; T5a wires the
- * real one through `TitledDiagram`). Parsing reads only
- * `getCurrentStyleBuilder`, answered with an empty builder; every drawing
- * member throws.
- */
-const DEFAULT_STYLE_SOURCE: MindMapSkinParam = {
-  getCurrentStyleBuilder: () => new StyleBuilder(),
-  getRankdir: () => unsupplied('getRankdir'),
-  getIHtmlColorSet: () => unsupplied('getIHtmlColorSet'),
-  sheet: () => unsupplied('sheet'),
-  getSprite: () => unsupplied('getSprite'),
-  guillemet: () => unsupplied('guillemet'),
-  getFromMd5: () => unsupplied('getFromMd5'),
-  transformStringForSizeHack: () => unsupplied('transformStringForSizeHack'),
-  getValue: () => unsupplied('getValue'),
-  values: () => unsupplied('values'),
-  getPadding: () => unsupplied('getPadding'),
-  getMonospacedFamily: () => unsupplied('getMonospacedFamily'),
-  getTabSize: () => unsupplied('getTabSize'),
-  getDpi: () => unsupplied('getDpi'),
-  copyAllFrom: () => unsupplied('copyAllFrom'),
-  getPragma: () => unsupplied('getPragma'),
-  getFontHtmlColor: () => unsupplied('getFontHtmlColor'),
-  getFont: () => unsupplied('getFont'),
-  getHyperlinkColor: () => unsupplied('getHyperlinkColor'),
-  useUnderlineForHyperlink: () => unsupplied('useUnderlineForHyperlink'),
-  getDefaultTextAlignment: () => unsupplied('getDefaultTextAlignment'),
-  strictUmlStyle: () => unsupplied('strictUmlStyle'),
-};
-
-/** Placeholder `AtomOps` paired with {@link DEFAULT_STYLE_SOURCE}: drawing only. */
-const DEFAULT_ATOM_OPS: AtomOps = {
-  calculateDimension: () => unsupplied('atomOps'),
-  getStartingAltitude: () => unsupplied('atomOps'),
-  drawU: () => unsupplied('atomOps'),
-};
+/** `getTextBlock`'s extra width. @see MindMapDiagram.java:100 (`width + 10`) */
+const TEXT_BLOCK_EXTRA_WIDTH = 10;
 
 /**
- * MindMapDiagram — parse-time state for one `@startmindmap` block: the list
- * of `MindMap` trees it contains (more than one when the source declares a
- * second level-0 root), the default left/right-or-up/down placement new
- * ideas get, and the org-mode "smart level" scanner.
+ * MindMapDiagram — one `@startmindmap` block: the list of `MindMap` trees
+ * it contains (more than one when the source declares a second level-0
+ * root), the default left/right-or-up/down placement new ideas get, the
+ * org-mode "smart level" scanner, and the `TitledDiagram` state the common
+ * commands fill (title/caption/legend/header/footer/mainframe, sprites,
+ * scale).
  *
- * Parse-part-only port (this task's scope): `setDefaultDirection`, the
- * three `addIdea` overloads (merged into one TS method — see {@link
- * addIdea}'s own doc comment), `getSmartLevel`. `getTextBlock` (java:80-104,
- * the chrome/drawing entry point) and extending `TitledDiagram` are D5's
- * (chrome-wiring batch): this class is a plain, standalone object here
- * rather than a `TitledDiagram` subclass, because `TitledDiagram`'s
- * abstract `getSkinParam(): ISkinParam` would force implementing font/
- * color/style members this task's boundary explicitly excludes ("no
- * style-engine imports", brief). `rankdir` (`CommandRankDir`'s target,
- * upstream `((SkinParam) getSkinParam()).setRankdir(...)`) is stored as a
- * local field for the same reason, rather than through a real `SkinParam`.
+ * The skin param is built by `MindMapDiagramFactory` (it needs the
+ * preprocessor's style sources and the diagram's sprite registry) where
+ * upstream's `TitledDiagram` constructor builds it; the constructor then
+ * sets its rankdir to LEFT_TO_RIGHT exactly as upstream does (java:76).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/MindMapDiagram.java:60-159
  */
-export class MindMapDiagram {
+export class MindMapDiagram extends TitledDiagram {
   private readonly mindmaps: MindMap[];
-  private readonly pragma = Pragma.createEmpty();
-  private readonly skinParam: MindMapSkinParam;
-  private readonly atomOps: AtomOps;
+  private readonly skinParam: SkinParam;
   /** @see MindMapDiagram.java:64 */
   private defaultDirection = true;
-  /** @see MindMapDiagram.java:76 (`setRankdir(Rankdir.LEFT_TO_RIGHT)` in the
-   *  constructor) — the ONLY diagram type in this port whose default is LR,
-   *  not TB; see class doc for why this is a local field, not a real
-   *  `SkinParam`. */
-  private rankdir: 'LR' | 'TB' = 'LR';
   /** `getSmartLevel`'s own memo of the first TYPE string it ever saw.
    * @see MindMapDiagram.java:134 */
   private first: string | undefined;
+  /** `TitledDiagram`'s title/caption/legend/header/footer/mainframe
+   *  (`CommonCommands.addTitleCommands`), read by `src/index.ts`'s chrome
+   *  step. @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java */
+  readonly annotations: DiagramAnnotations = createAnnotations();
+  /** `CommandScale*`'s target (`UmlDiagram#setScale`). */
+  scale: ScaleSpec | undefined = undefined;
 
   /** @see MindMapDiagram.java:74-78 */
-  constructor(skinParam: MindMapSkinParam = DEFAULT_STYLE_SOURCE, atomOps: AtomOps = DEFAULT_ATOM_OPS) {
+  constructor(source: UmlSource, preprocessing: PreprocessingArtifact, skinParam: SkinParam) {
+    super(source, 'MINDMAP', undefined, preprocessing);
     this.skinParam = skinParam;
-    this.atomOps = atomOps;
-    this.mindmaps = [new MindMap(skinParam, atomOps)];
+    this.skinParam.setRankdir(Rankdir.LEFT_TO_RIGHT);
+    this.mindmaps = [new MindMap(skinParam, skinParam.atomOps)];
+  }
+
+  getSkinParam(): SkinParam {
+    return this.skinParam;
+  }
+
+  /** The skin param's sprites (`SkinParam#addSprite`'s map), read by the
+   *  sprite commands and `src/index.ts`'s chrome step. */
+  get sprites(): SpriteRegistry {
+    return this.skinParam.getSprites();
+  }
+
+  /** @see MindMapDiagram.java:80-104 */
+  getTextBlock(): TextBlock {
+    const mindmaps = this.mindmaps;
+    return {
+      drawU(ug: UGraphic): void {
+        for (const mindmap of mindmaps) {
+          mindmap.drawU(ug);
+          const dim = mindmap.calculateDimension(ug.getStringBounder());
+          ug = ug.apply(UTranslate.dy(dim.getHeight()));
+        }
+      },
+      calculateDimension(stringBounder: StringBounder): XDimension2D {
+        let width = 0;
+        let height = 0;
+        for (const mindmap of mindmaps) {
+          const dim = mindmap.calculateDimension(stringBounder);
+          height += dim.getHeight();
+          width = Math.max(width, dim.getWidth());
+        }
+        return new XDimension2D(width + TEXT_BLOCK_EXTRA_WIDTH, height);
+      },
+    };
+  }
+
+  /**
+   * The `document` background (`TitledDiagram#calculateBackColor`), as the
+   * klimt `Paint` the SVG root carries.
+   * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:279-289
+   */
+  calculateBackColor(): Paint {
+    const style = StyleSignatureBasic.of('root', 'document', 'mindmapDiagram').getMergedStyle(
+      this.skinParam.getCurrentStyleBuilder(),
+    );
+    const backgroundColor = style?.value('BackGroundColor').asColor(this.skinParam.getIHtmlColorSet());
+    if (!(backgroundColor instanceof HColorSimple))
+      throw new Error('ClassCastException: backcolor is not an HColorSimple');
+    return backgroundColor.asPaint();
   }
 
   /** @see MindMapDiagram.java:66-68 */
@@ -98,26 +115,9 @@ export class MindMapDiagram {
     this.defaultDirection = direction === Direction.RIGHT || direction === Direction.DOWN;
   }
 
-  /** Consumed by T5a's chrome wiring (`getTextBlock`, java:81-104). */
+  /** Consumed by the tests (upstream's `mindmaps` is private). */
   getMindmaps(): readonly MindMap[] {
     return this.mindmaps;
-  }
-
-  getPragma(): Pragma {
-    return this.pragma;
-  }
-
-  getSkinParam(): MindMapSkinParam {
-    return this.skinParam;
-  }
-
-  /** `CommandRankDir`'s target — see class doc. */
-  setRankdir(rankdir: 'LR' | 'TB'): void {
-    this.rankdir = rankdir;
-  }
-
-  getRankdir(): 'LR' | 'TB' {
-    return this.rankdir;
   }
 
   /** @see MindMapDiagram.java:110-112 */
@@ -145,7 +145,7 @@ export class MindMapDiagram {
    */
   addIdea(content: IdeaContent, level: number, direction: boolean = this.defaultDirection): CommandExecutionResult {
     const resolved = content.stereotype === undefined ? extractEndingStereotype(content) : content;
-    if (this.last().isFull(level)) this.mindmaps.push(new MindMap(this.skinParam, this.atomOps));
+    if (this.last().isFull(level)) this.mindmaps.push(new MindMap(this.skinParam, this.skinParam.atomOps));
     return this.last().addIdeaInternal(resolved, level, direction);
   }
 
