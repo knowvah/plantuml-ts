@@ -22,6 +22,7 @@ import {
   attachPortLabels,
   placeQuantifierBox,
   multiLineLabelAnchor,
+  spriteLabelAnchor,
 } from '../../../src/diagrams/class/class-edge-label-anchor.js';
 import { WidthTableMeasurer } from '../../../src/core/measurer.js';
 import { parseRelationshipLine } from '../../../src/diagrams/class/class-relationship-parser.js';
@@ -199,5 +200,21 @@ describe('S-8 (cdd2-T7) — multiLineLabelAnchor strips creole and reports bold'
     const [rawLine] = multiLineLabelAnchor(['<b>Person-Meeting</b>'], 'center', { x: 0, y: 0 }, measurer, font);
     const [strippedLine] = multiLineLabelAnchor(['Person-Meeting'], 'center', { x: 0, y: 0 }, measurer, font);
     expect(rawLine?.width).toBe(strippedLine?.width);
+  });
+});
+
+describe('T1b (D5) — spriteLabelAnchor draws a lone-sprite image at box-origin+8', () => {
+  it('kexaba-26-kobu577: jar-verified against the oracle in.svg (image x=66.5,y=114)', () => {
+    // center = edgeResult.labelX/Y this port's own dot-engine reports for
+    // kexaba's real edge (68,113, this session's instrumented render);
+    // marginLabel=1 (non-self-loop, `labelMarginOf`).
+    const pos = spriteLabelAnchor({ width: 17, height: 12 }, { x: 68, y: 113 }, 1);
+    expect(pos).toEqual({ x: 66.5, y: 114 });
+  });
+
+  it('box-origin is center minus half the reserved (sprite + 2*marginLabel) box, then +8', () => {
+    const pos = spriteLabelAnchor({ width: 10, height: 10 }, { x: 50, y: 50 }, 1);
+    // reserved = 10 + 2*1 = 12; origin = 50 - 6 = 44; +8 = 52.
+    expect(pos).toEqual({ x: 52, y: 52 });
   });
 });

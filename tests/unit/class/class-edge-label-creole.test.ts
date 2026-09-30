@@ -116,8 +116,12 @@ describe('T2d — attachEdgeLabel draws a lone-sprite label as an image, not tex
     expect(edgeGeo.labelImage).toBeDefined();
     expect(edgeGeo.labelImage?.width).toBe(17);
     expect(edgeGeo.labelImage?.height).toBe(12);
-    expect(edgeGeo.labelImage?.x).toBe(edgeResult.labelX! - Math.trunc(17) / 2);
-    expect(edgeGeo.labelImage?.y).toBe(edgeResult.labelY! - Math.trunc(12) / 2);
+    // T1b (D5): box-origin (`center - reservedDim/2`, reservedDim =
+    // sprite + 2*marginLabel, marginLabel=1 for a non-self-loop) + the
+    // oracle-verified `+8,+8` inset -- see `class-edge-label-anchor.ts
+    // #spriteLabelAnchor`'s own doc comment for the full derivation.
+    expect(edgeGeo.labelImage?.x).toBe(edgeResult.labelX! - (17 + 2 * 1) / 2 + 8);
+    expect(edgeGeo.labelImage?.y).toBe(edgeResult.labelY! - (12 + 2 * 1) / 2 + 8);
   });
 
   it('without a sprite registry the label draws as literal text (unchanged)', () => {

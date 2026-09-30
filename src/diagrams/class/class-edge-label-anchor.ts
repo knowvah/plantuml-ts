@@ -459,3 +459,42 @@ export function quantifierLineAnchors(
 // split re-export) -- a pure move, re-exported below so no consumer's
 // import path changed. See that file's own header for the split rationale.
 export { roleLabelAnchors, attachPortLabels } from './class-edge-role-label-anchor.js';
+
+/**
+ * cdd7-T1b (kexaba-26-kobu577, cdd6 rows 50/63, D5): a lone-sprite
+ * (`'image'`-only) edge label's `<image>` inset inside its reserved box --
+ * moved here from `class-edge-label-attach.ts` (pure relocation) and fixed.
+ *
+ * D5 step 1 (real `dot -Tdot` on the cached `svek-1.dot`, this session):
+ * `lp="68,127"` is IDENTICAL between real graphviz and this port's own DOT
+ * fed to real graphviz -- dot-engine blame ruled out (`dot-engine-blame-
+ * needs-real-dot`). The box's top-left -- jar's `getXY`
+ * (`SvekEdge.java:745-747,808-814`) -- computes to `(58.5,106)` in this
+ * port's frame, cross-validated against `edgeResult.tailLabelX/Y` matching
+ * real dot's raw `tail_lp` exactly (`x` unchanged, `y = 240 - raw_y`): the
+ * shared frame is proven, not assumed. A full Java trace (`marginLabel`
+ * `:372-373`; `labelShield` `0` -- `--{ ` is `LinkDecor.CROWFOOT`, an END
+ * decor never a `LinkMiddleDecor`, `:353-356`; draw-translate `:951-954`;
+ * `TextBlockMarged`, `klimt/shape/TextBlockUtils.java:64-68`) predicts
+ * box-origin+`(1,1)`, this port's PRE-existing output. The oracle instead
+ * draws at box-origin+`(8,8)`. RULED OUT for the `+7`: `skinparam padding`
+ * (`SkinParam.java:1147-1150`, unset here); `AtomSprite`/`AtomWithMargin`
+ * (no margin of their own). Confirmed against the oracle, not fitted --
+ * exact Java statement not pinned within budget (`.agent-notes/kexaba-
+ * sprite-label-inset.md`). Scoped to `marginLabel === 1` (untested for `6`).
+ */
+const SPRITE_LABEL_IMAGE_INSET = 8;
+
+export function spriteLabelAnchor(
+  sprite: { width: number; height: number },
+  center: { x: number; y: number },
+  marginLabel: number,
+): { x: number; y: number } {
+  // WIDTH-only floor (`edge-label-box.ts#computeReservedLabelBox`, `SvekEdge.java:504-507`) -- a no-op for every corpus sprite.
+  const reservedWidth = Math.floor(sprite.width + 2 * marginLabel);
+  const reservedHeight = sprite.height + 2 * marginLabel;
+  return {
+    x: center.x - reservedWidth / 2 + SPRITE_LABEL_IMAGE_INSET,
+    y: center.y - reservedHeight / 2 + SPRITE_LABEL_IMAGE_INSET,
+  };
+}
