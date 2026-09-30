@@ -82,3 +82,33 @@ describe('computeMeasuredLabelAttrs -- the reservation measures the wrapped line
     expect(attrs.labelHeight).toBe(26);
   });
 });
+
+// b2 residual round (journal row 29): the wrapped rows and atom anchors are
+// WIRED at the anchor call site (`class-edge-label-attach.ts`) and the DOT
+// reservation (`class-layout-edge-labels.ts`) -- both read
+// `theme.maxMessageSize` (`SvekEdge.java:290-299`: the arrow style's
+// `wrapWidth`, else `skinParam.maxMessageSize()`). Values: oracle probe of
+// this exact source (1.2026.8beta1, deterministic text).
+describe('end to end -- maxMessageSize wraps a class edge label into Fission atoms', () => {
+  it('draws word/space atoms per physical row at the jar coordinates', async () => {
+    const { renderSync } = await import('../../../src/index.js');
+    const { WidthTableMeasurer } = await import('../../../src/core/measurer.js');
+    const src = [
+      '@startuml',
+      'skinparam maxMessageSize 60',
+      'class A',
+      'class B',
+      'A --> B : alpha beta\\ngamma delta epsilon',
+      '@enduml',
+    ].join('\n');
+    const svg = renderSync(src, { measurer: new WidthTableMeasurer() });
+    expect(svg).toContain('width="101px" height="232px"');
+    expect(svg).toContain('<text x="28.68" y="96.111" font-size="13" fill="#000" textLength="31.85">alpha</text>');
+    // The space atom is U+00A0 on both sides (the jar's `AtomText` emits nbsp).
+    expect(svg).toContain('<text x="60.53" y="96.111" font-size="13" fill="#000">\u00a0</text>');
+    expect(svg).toContain('<text x="60.53" y="96.111" font-size="13" fill="#000" textLength="25.269">beta</text>');
+    expect(svg).toContain('<text x="35.586" y="109.111" font-size="13" fill="#000" textLength="43.306">gamma</text>');
+    expect(svg).toContain('<text x="43.143" y="122.111" font-size="13" fill="#000" textLength="28.194">delta</text>');
+    expect(svg).toContain('<text x="36.602" y="135.111" font-size="13" fill="#000" textLength="41.275">epsilon</text>');
+  });
+});

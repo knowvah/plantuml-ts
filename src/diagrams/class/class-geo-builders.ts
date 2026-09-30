@@ -15,7 +15,7 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { namespaceFolderTitle } from './class-namespace-title-table.js';
 import { buildClusterHeaderStereo } from './class-cluster-header.js';
-import { resolveStyleStereotypeTags, stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
+import { stereotypeLabelFields, splitStereotypeStyleTags } from './class-stereotype.js';
 import { applyClassDocumentMargin } from './layout-ink-extent.js';
 import { drawnEnhancedBodyEmbeds } from './class-ink-box.js';
 import { namespaceDrawnInk } from './class-namespace-title-ink.js';
@@ -333,7 +333,7 @@ function buildDegenerateClassifierLeaf(classifier: Classifier, measured: Measure
     ...(classifier.usymbol !== undefined ? { usymbol: classifier.usymbol } : {}),
     ...(classifier.url !== undefined ? { url: classifier.url } : {}),
     ...(classifier.color !== undefined ? { color: classifier.color } : {}),
-    ...(classifier.stereotype !== undefined ? { stereotypeLabels: resolveStyleStereotypeTags(classifier) } : {}),
+    ...stereotypeLabelFields(classifier),
     ...(classifier.styleGeneration !== undefined ? { styleGeneration: classifier.styleGeneration } : {}),
   };
 }

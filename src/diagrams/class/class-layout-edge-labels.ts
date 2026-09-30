@@ -328,6 +328,8 @@ function computeRelLabelAttrs(
   return computeMeasuredLabelAttrs(rel.label, font, measurer, {
     classAttributeIconSize: noteCtx?.theme.classAttributeIconSize,
     sprites: noteCtx?.sprites,
+    // cdd7 T2b: `SvekEdge.java:290-294`'s label wrap width.
+    maxWidth: noteCtx?.theme.maxMessageSize,
   });
 }
 

@@ -68,6 +68,19 @@ describe('class USymbol leaf stereotype sprite (EntityImageDescription.java:192-
     expect(svg).toContain('width="137px" height="75px"');
   });
 
+  // b2 residual round (journal row 29): a SINGLE-classifier diagram takes
+  // `class-geo-builders.ts#buildDegenerateClassifierLeaf`, which copied only
+  // `stereotypeLabels` and so lost the sprite (dezobu stayed 1/9 after the
+  // chain landed). It now spreads `stereotypeLabelFields` like the general
+  // path. Values: oracle probe of this exact source.
+  it('keeps the sprite on the degenerate single-leaf path', () => {
+    const svg = render(['@startuml', `rectangle X <<$${SPRITE}>>`, '@enduml'].join('\n'));
+    expect(svg).toContain('width="60px" height="74px"');
+    expect(svg).toContain('<rect x="7" y="7" width="40" height="54"');
+    expect(svg).toContain('<path d="M26.896,17.95 ');
+    expect(svg).toContain('<text x="22.319" y="47.889" fill="#000" font-size="14">X</text>');
+  });
+
   it('draws the sprite, not the «label» text, for a multi-line leaf', () => {
     const leaf = leafOf(render(MULTI), 'Y');
     expect(leaf).toContain('<rect x="83.57" y="7" width="40.213" height="68"');

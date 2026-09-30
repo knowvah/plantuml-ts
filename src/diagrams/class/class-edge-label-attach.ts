@@ -9,12 +9,12 @@ import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
   guideLinesAnchor,
-  multiLineLabelAnchor,
   portLabelAnchor,
   spriteLabelAnchor,
   type LabelAnchorContext,
 } from './class-edge-label-anchor.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
+import { multiLineLabelAnchorWrapped } from './class-edge-label-lines.js';
 import {
   hasSeveralGuideLines,
   magicArrowAngle,
@@ -250,7 +250,9 @@ export function attachEdgeLabel(
     edgeGeo.visibilityIcon = placed.icon;
     center = placed.center;
   }
-  const ctx: LabelAnchorContext = { center, measurer, labelFont };
+  // cdd7 T2b: `SvekEdge.java:290-294` -- the label wrap width
+  // (`skinParam.maxMessageSize()`), the SAME value the reservation wraps at.
+  const ctx: LabelAnchorContext = { center, measurer, labelFont, maxWidth: text.noteCtx?.theme.maxMessageSize };
   // cdd4-T8: the TRIMMED path (see {@link trimmedFromToPoints}'s own doc
   // comment) -- `dotPath` below is ONLY consumed by the magic-arrow angle
   // formula (single-line and multi-line arms alike), never for placement.
@@ -348,7 +350,7 @@ function attachMultiLineLabel(
     edgeGeo.labelLines = guideLinesAnchor(walk, align, angleOf, ctx);
     return;
   }
-  edgeGeo.labelLines = multiLineLabelAnchor(lines, align, ctx.center, ctx.measurer, ctx.labelFont);
+  edgeGeo.labelLines = multiLineLabelAnchorWrapped(lines, align, ctx);
 }
 
 /**
