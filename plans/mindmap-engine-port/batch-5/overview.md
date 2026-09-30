@@ -6,4 +6,4 @@ the D9 numeric target, first pins, and batch-6 specs written from measured famil
 
 | ID | Description | Agent | Writes | Depends On | Done |
 |---|---|---|---|---|---|
-| [T5a](T5a-plugin-registration-chrome.md) | MindMapDiagram TextBlock + plugin index, registration in src/index.ts, chrome + root attribute, semutu check | typescript-pro (opus) | `src/diagrams/mindmap/{MindMapDiagram,index}.ts`, `src/index.ts` (+tests) | T4a | [ ] |
+| [T5a](T5a-plugin-registration-chrome.md) | MindMapDiagram TextBlock + plugin index, registration in src/index.ts, chrome + root attribute, semutu check | typescript-pro (opus) | `src/diagrams/mindmap/{MindMapDiagram,index}.ts`, `src/index.ts` (+tests) | T4a | [x] |

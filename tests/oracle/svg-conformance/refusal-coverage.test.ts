@@ -741,7 +741,11 @@ describe('refusal coverage — baseline shape', () => {
     // pinned known-gap with that mechanism, owner batch 6. Not a new
     // refusal of a command the jar accepts: the source parses; the colour
     // set throws. Derivation: 5655 + 269 = 5924.
-    expect(manifest.fixtures.length).toBe(5924);
+    // 5924 -> 6051 / 5655 -> 5782 at mindmap-engine-port/close-b5 (same
+    // close, fa9db8748): 127 svg-mindmap golden rows appended, clones of
+    // their byte-identical dot-cache twins (see the sibling gate's
+    // derivation); all render on both sides. Derivation: 5782 + 269 = 6051.
+    expect(manifest.fixtures.length).toBe(6051);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -772,7 +776,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5607 -> 5637 at cdd5/close-b4 (30 unknown-tree svg-class clones).
     // 5637 -> 5657 at cdd5/close-b5 (18 clones + xuloxo, gikaju now render).
     // 5657 -> 5655 at mindmap-engine-port/close-b5 (derivation above).
-    expect(pinnedRendering.length).toBe(5655);
+    // 5655 -> 5782 at mindmap-engine-port/close-b5 (127 svg-mindmap clones).
+    expect(pinnedRendering.length).toBe(5782);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

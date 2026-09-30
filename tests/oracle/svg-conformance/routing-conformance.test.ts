@@ -789,10 +789,17 @@ describe('routing conformance — jar-error classification', () => {
     // c4/xizifu-87-siti076: stale pins that already routed DESCRIPTION on
     // the pre-T5a branch (the Tim nested-call gap they cited was fixed
     // earlier). Derivation: 4907 + 912 + 105 = 5924.
-    expect(pinnedAgree.length).toBe(4907);
+    //
+    // 4907 -> 5034 / 5924 -> 6051 at mindmap-engine-port/close-b5 (same
+    // close, fa9db8748): 127 `goldens:svg-mindmap/<slug>` rows appended when
+    // the mindmap ratchet pinned its first 127 fixtures (0 -> 127). Each is
+    // the clone of its byte-identical dot-cache twin (`golden.svg` ==
+    // `in.svg`, verified with filecmp), exactly how every svg-class golden
+    // row was pinned. Derivation: 5034 + 912 + 105 = 6051.
+    expect(pinnedAgree.length).toBe(5034);
     expect(pinnedMisroutes.length).toBe(912);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(5924);
+    expect(manifest.fixtures.length).toBe(6051);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
