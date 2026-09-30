@@ -135,6 +135,11 @@ function buildDescriptionLeafOpts(theme: Theme, symbol: LeafSizingSubject['symbo
       end: theme.colors.graph.guillemetEnd ?? '»',
     },
     fontSize: resolveElementFontSize(theme, symbol, 'title'),
+    // cdd7 T2b (xuloxo-85): `fcStereo` (`EntityImageDescription.java:155-157,
+    // 174`) -- `<sname>StereotypeFontSize` (`FromSkinparamToStyle.java:280`).
+    // The SAME resolution the draw's `resolveLeafFonts` makes, so the node
+    // and the drawn stereo line agree (C4's `StereotypeFontSize 12`: +2px).
+    stereotypeFontSize: resolveElementFontSize(theme, symbol, 'stereotype'),
   };
 }
 
