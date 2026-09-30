@@ -72,6 +72,11 @@ export type DiagramType =
 export interface UmlSource {
   /** TS-only nominal brand; never assigned. No member is consumed. */
   readonly __umlSourceBrand?: never;
+  /** The one member it shares with the render pipeline's concrete
+   *  `block-extractor.ts#UmlSource`, so a diagram built from a real block
+   *  (`MindMapDiagram`) can hand it to this constructor: an all-optional
+   *  brand with no member in common is a TS "weak type" and rejects it. */
+  readonly lines?: readonly string[];
 }
 
 /**

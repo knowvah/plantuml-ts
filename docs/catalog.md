@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1309 modules · 4812 exported names.
+1311 modules · 4817 exported names.
 
 ## `src/`
 
@@ -138,7 +138,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-text-font.ts` | `textFontFamily`, `emittedTextForm` | Text emission rules that depend on the FONT FAMILY — the SVG-safe family string, PlantUML's `monospaced` -> CSS `monospace` rename, and the two NBSP substitutions. |
 | `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `foreignObject`, `decorationLines`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
-| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
+| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
 | `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
@@ -1511,9 +1511,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `FingerImpl.ts` | `FingerImpl` |  |
 | `Idea.ts` | `STEP_BY_PARENT`, `IdeaContent`, `IdeaDecoration`, `Idea` |  |
 | `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
+| `index.ts` | `MindMapGeometry`, `renderMindMap`, `mindmapPlugin` | Mindmap diagram plugin — `MindMapDiagramFactory` (parse, with the style engine built from the block's own skin/skinparam/`<style>` sources, D2), then `TextBlockExporter`'s export of `MindMapDiagram#getTextBlock` on the klimt substrate (D3): |
+| `mindmap-skin-param.ts` | `SkinParamSource`, `SkinParam` | The mindmap engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `MindMapDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, the real style engine' |
 | `MindMap.ts` | `MindMapSkinParam`, `MindMap` |  |
 | `MindMapDiagram.ts` | `MindMapDiagram` |  |
-| `MindMapDiagramFactory.ts` | `MindMapDiagramOptions`, `createMindMapDiagram` |  |
+| `MindMapDiagramFactory.ts` | `createMindMapDiagram` |  |
 | `Stripe.ts` | `Stripe` | A single stripe of a `StripeFrontier`: a horizontal x-range `[x1, x2]` (inclusive both ends, per `contains`) holding the highest y the packed `Tetris` frontier has reached across that range. |
 | `StripeFrontier.ts` | `StripeFrontier` |  |
 | `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |

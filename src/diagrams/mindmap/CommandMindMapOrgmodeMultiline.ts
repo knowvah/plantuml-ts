@@ -1,5 +1,6 @@
 import { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
-import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
+import type { HColor } from '../../core/abel/Colors.js';
+import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
 import { Display } from '../../core/klimt/creole/Display.js';
 import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { StringLocated } from '../../core/tim/StringLocated.js';
@@ -72,8 +73,14 @@ export function applyMindMapOrgmodeMultiline(
 ): CommandExecutionResult {
   const type = startMatch[1]!;
   const colorToken = startMatch[2];
-  const backColor = colorToken === undefined ? undefined : parseSimpleColor(colorToken);
-  if (colorToken !== undefined && backColor === undefined) return CommandExecutionResult.badColor();
+  let backColor: HColor | undefined;
+  try {
+    if (colorToken !== undefined) backColor = diagram.getSkinParam().getIHtmlColorSet().getColor(colorToken);
+  } catch (e) {
+    // The command's own `catch (NoSuchColorException e) { return badColor(); }` (CommandMultilines2.java:117-121).
+    if (e instanceof NoSuchColorException) return CommandExecutionResult.badColor();
+    throw e;
+  }
 
   const label = Display.createFoo(block.displayLines.map((line) => new StringLocated(line, undefined)));
   const stereotype = block.stereotypeToken === undefined ? undefined : Stereotype.build(block.stereotypeToken);

@@ -43,6 +43,9 @@ import {
   CUCA_DOCUMENT_MARGIN_BOTTOM,
   CUCA_DOCUMENT_MARGIN_LEFT,
 } from './atmp/CucaDiagram.js';
+import { shiftFragmentBody } from './annotations/coord-shift.js';
+import type { RenderFragment } from './dispatcher.js';
+import { group } from './svg.js';
 
 export interface DocumentDims {
   width: number;
@@ -66,5 +69,38 @@ export function applyCucaDocumentMargin(dims: DocumentDims): DocumentDims {
   return {
     width: Math.floor(width + 1),
     height: Math.floor(height + 1),
+  };
+}
+
+/** `TitledDiagram#getDefaultMargins()` — `ClockwiseTopRightBottomLeft.same(10)`
+ *  (`TitledDiagram.java:274-277`), the margin every non-cuca `TitledDiagram`
+ *  (mindmap) exports with. */
+const TITLED_DIAGRAM_MARGIN = 10;
+
+/** `SvgGraphics#ensureVisible`'s `maxX = (int) (x + 1)` bump
+ *  (`klimt/drawing/svg/SvgGraphics.java:129-135`); `document-shell.ts`
+ *  truncates. */
+const ENSURE_VISIBLE_BUMP = 1;
+
+/**
+ * The `TextBlockExporter#exportTo` tail for a `TitledDiagram` fragment:
+ *
+ * - no chrome (`bodyWrapped` unset): the engine already exported its text
+ *   block through klimt (margin translate, `calculateFinalDimension`,
+ *   scale), so only the single content `<g>` is added;
+ * - chrome composed (`annotations/chrome.ts#applyChrome` wrapped the body):
+ *   the engine handed chrome its RAW text block, as upstream's
+ *   `DiagramChromeFactory.create` receives it, and the margin comes after —
+ *   `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))`
+ *   (`TextBlockExporter.java:173`) and `calculateFinalDimension`
+ *   (`:198-202`), then `ensureVisible`.
+ */
+export function finalizeTitledDiagramFragment(fragment: RenderFragment): RenderFragment {
+  if (fragment.bodyWrapped !== true) return { ...fragment, body: group(fragment.body) };
+  return {
+    ...fragment,
+    body: shiftFragmentBody(fragment.body, TITLED_DIAGRAM_MARGIN, TITLED_DIAGRAM_MARGIN),
+    width: fragment.width + 2 * TITLED_DIAGRAM_MARGIN + ENSURE_VISIBLE_BUMP,
+    height: fragment.height + 2 * TITLED_DIAGRAM_MARGIN + ENSURE_VISIBLE_BUMP,
   };
 }

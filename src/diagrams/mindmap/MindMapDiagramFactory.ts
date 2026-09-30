@@ -1,7 +1,18 @@
+import { matchAnnotationCommand } from '../../core/annotations/index.js';
+import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
+import { Rankdir } from '../../core/klimt/geom/Rankdir.js';
 import { refuse } from '../../core/parse-refusal.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import { matchScaleCommand } from '../../core/scale-command.js';
+import { Pragma } from '../../core/skin/Pragma.js';
+import { matchSpriteCommand } from '../../core/sprite-commands.js';
+import { createSpriteRegistry } from '../../core/sprite-registry.js';
+import { buildMindmapStyleBuilder } from '../../core/style/mindmap-style-builder.js';
+import { StyleParsingException } from '../../core/style/parser/StyleParser.js';
+import type { StyleBuilder } from '../../core/style/StyleBuilder.js';
+import { PreprocessingArtifact } from '../../core/tim/PreprocessingArtifact.js';
 import { applyMindMapDirection, MINDMAP_DIRECTION_RE } from './CommandMindMapDirection.js';
 import {
   applyMindMapOrgmodeMultiline,
@@ -11,15 +22,8 @@ import {
 import { applyMindMapOrgmode, ORGMODE_RE } from './CommandMindMapOrgmode.js';
 import { applyMindMapPlus, PLUS_RE } from './CommandMindMapPlus.js';
 import { applyMindMapRoot, ROOT_RE } from './CommandMindMapRoot.js';
-import type { AtomOps } from '../../core/klimt/creole/Sea.js';
-import type { MindMapSkinParam } from './MindMap.js';
 import { MindMapDiagram } from './MindMapDiagram.js';
-
-export interface MindMapDiagramOptions {
-  readonly skinParam?: MindMapSkinParam;
-  /** ADR-9's creole capability for the drawing (`MindMap`/`FingerImpl`). */
-  readonly atomOps?: AtomOps;
-}
+import { SkinParam } from './mindmap-skin-param.js';
 
 /** `@startmindmap`/`@endmindmap` — `UmlSource.lines` is documented as
  *  already directive-stripped for a render-pipeline-built source, but a
@@ -34,9 +38,8 @@ const START_END_RE = /^@(start|end)mindmap\s*$/i;
  * (every other diagram type that reaches this directive re-implements the
  * same two-phrase match locally too, e.g.
  * `src/diagrams/description/command-table-directives.ts`); implemented
- * here, inline, for the same reason. Sets {@link MindMapDiagram}'s local
- * `rankdir` field — see that class's own doc comment for why this is not a
- * real `SkinParam.setRankdir` call.
+ * here, inline, for the same reason. Sets the diagram skin param's rankdir
+ * (`((SkinParam) diagram.getSkinParam()).setRankdir(...)`).
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommandRankDir.java:56-65
  */
 const RANKDIR_RE = /^(left\s+to\s+right|top\s+to\s+bottom)\s+direction\s*$/i;
@@ -85,7 +88,8 @@ function dispatchMindMapLine(diagram: MindMapDiagram, lines: readonly string[], 
 
 /** @see CommandRankDir.java:76-79 */
 function applyRankdir(diagram: MindMapDiagram, match: RegExpExecArray): CommandExecutionResult {
-  diagram.setRankdir(match[1]!.toLowerCase().startsWith('left') ? 'LR' : 'TB');
+  const rankdir = match[1]!.toLowerCase().startsWith('left') ? Rankdir.LEFT_TO_RIGHT : Rankdir.TOP_TO_BOTTOM;
+  diagram.getSkinParam().setRankdir(rankdir);
   return CommandExecutionResult.ok();
 }
 
@@ -101,12 +105,68 @@ function dispatchOrgmodeMultiline(
 }
 
 /**
+ * `CommonCommands.addCommonCommands1` (java:56-61), registered BEFORE the
+ * mindmap commands (MindMapDiagramFactory.java:57): the title commands
+ * (title/mainframe/caption/legend/footer/header), `!assume transparent` and
+ * the sprite definitions of `addCommonCommands2`, then `addCommonScaleCommands`. `skinparam`,
+ * `<style>`, `skin` and `!pragma` never reach here: the preprocessor
+ * collected them (see `buildSkinParam`). Returns the lines consumed, or
+ * `null` when none of them matches line `i`.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/CommonCommands.java:56-61
+ */
+function dispatchCommonCommand(diagram: MindMapDiagram, lines: readonly string[], i: number): number | null {
+  const annotation = matchAnnotationCommand(lines, i, diagram.annotations);
+  if (annotation !== null) return annotation.consumed;
+
+  // `CommandAssumeTransparent#executeArg` is a no-op (CommandAssumeTransparent.java:75-81).
+  if (isAssumeTransparent(lines[i]!)) return 1;
+
+  const sprite = matchSpriteCommand(lines, i, diagram.sprites);
+  if (sprite !== null) return sprite.consumed;
+
+  const scale = matchScaleCommand(lines[i]!.trim());
+  if (scale === undefined) return null;
+  diagram.scale = scale;
+  return 1;
+}
+
+/** A hand-built source's style sources: no skin, no skinparam, no style. */
+const EMPTY_STYLE_SOURCE: NonNullable<UmlSource['styleSource']> = {
+  skinparam: new Map<string, string>(),
+  styles: [],
+};
+
+/**
+ * The diagram's `SkinParam`: upstream's `TitledDiagram` constructor builds
+ * one and every `skinparam`/`<style>` command then mutes its style builder
+ * in source order (decision D2, `buildMindmapStyleBuilder`). A `<style>`
+ * block the parser rejects is `CommandStyleMultilinesCSS`'s command error
+ * ("Error in style definition: …", java:92-93); the preprocessor keeps no
+ * line for it, so the refusal is reported at line 0.
+ */
+function buildSkinParam(source: UmlSource): SkinParam | ParseRefusal {
+  const styleSource = source.styleSource ?? EMPTY_STYLE_SOURCE;
+  let styleBuilder: StyleBuilder;
+  try {
+    styleBuilder = buildMindmapStyleBuilder(styleSource);
+  } catch (e) {
+    if (!(e instanceof StyleParsingException)) throw e;
+    return refuse('execution', 0, 0, `Error in style definition: ${e.message}`);
+  }
+  return new SkinParam({
+    styleBuilder,
+    skinparam: styleSource.skinparam,
+    sprites: createSpriteRegistry(),
+    pragma: Pragma.createEmpty(),
+  });
+}
+
+/**
  * `MindMapDiagramFactory` — the top-level parse entry point for one
  * `@startmindmap` block. Mirrors `MindMapDiagramFactory#createEmptyDiagram`
- * plus `PSystemCommandFactory#createSystem`'s per-line dispatch loop
- * (upstream's `CommonCommands.addCommonCommands1` chrome commands —
- * title/caption/legend/header/footer/scale/hide — are D5's chrome-wiring
- * batch, not this one; see `MindMapDiagram.ts`'s class doc).
+ * plus `PSystemCommandFactory#createSystem`'s per-line dispatch loop: the
+ * common commands first ({@link dispatchCommonCommand}), then the mindmap
+ * commands in `initCommandsList` order.
  *
  * `getSmartLevel`'s `UnsupportedOperationException` (D6) is NOT caught
  * here — it propagates out of this function as a plain `Error`, matching
@@ -116,11 +176,10 @@ function dispatchOrgmodeMultiline(
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/MindMapDiagramFactory.java:50-74
  */
-export function createMindMapDiagram(
-  source: UmlSource,
-  options?: MindMapDiagramOptions,
-): MindMapDiagram | ParseRefusal {
-  const diagram = new MindMapDiagram(options?.skinParam, options?.atomOps);
+export function createMindMapDiagram(source: UmlSource): MindMapDiagram | ParseRefusal {
+  const skinParam = buildSkinParam(source);
+  if ('refused' in skinParam) return skinParam;
+  const diagram = new MindMapDiagram(source, new PreprocessingArtifact(), skinParam);
   const lines = source.lines;
   let i = 0;
 
@@ -128,6 +187,12 @@ export function createMindMapDiagram(
     const trimmed = lines[i]!.trim();
     if (trimmed === '' || START_END_RE.test(trimmed)) {
       i++;
+      continue;
+    }
+
+    const common = dispatchCommonCommand(diagram, lines, i);
+    if (common !== null) {
+      i += common;
       continue;
     }
 

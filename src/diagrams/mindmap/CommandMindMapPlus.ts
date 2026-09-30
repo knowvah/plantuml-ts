@@ -1,5 +1,6 @@
 import { CommandExecutionResult } from '../../core/command/CommandExecutionResult.js';
-import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
+import type { HColor } from '../../core/abel/Colors.js';
+import { NoSuchColorException } from '../../core/klimt/color/NoSuchColorException.js';
 import { Display } from '../../core/klimt/creole/Display.js';
 import { fromDesc } from './IdeaShape.js';
 import type { MindMapDiagram } from './MindMapDiagram.js';
@@ -20,8 +21,14 @@ export function applyMindMapPlus(diagram: MindMapDiagram, match: RegExpExecArray
   const colorToken = match[2];
   const label = match[4] ?? '';
 
-  const backColor = colorToken === undefined ? undefined : parseSimpleColor(colorToken);
-  if (colorToken !== undefined && backColor === undefined) return CommandExecutionResult.badColor();
+  let backColor: HColor | undefined;
+  try {
+    if (colorToken !== undefined) backColor = diagram.getSkinParam().getIHtmlColorSet().getColor(colorToken);
+  } catch (e) {
+    // The command's own `catch (NoSuchColorException e) { return badColor(); }` (SingleLineCommand2.java:174-178).
+    if (e instanceof NoSuchColorException) return CommandExecutionResult.badColor();
+    throw e;
+  }
 
   const direction = !type.includes('-');
   return diagram.addIdea(
