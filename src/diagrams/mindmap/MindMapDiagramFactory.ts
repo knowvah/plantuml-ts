@@ -197,6 +197,38 @@ function positionOf(source: UmlSource, i: number): number {
 }
 
 /**
+ * The DOCUMENT-relative line number a refusal at interior index `i` names.
+ *
+ * `source.lines` is the directive-stripped interior (`block-extractor.ts
+ * #UmlSource.lines` doc: `@start`/`@end` and every directive line already
+ * removed), but `errorSvg`'s own trace is `readLines()` over the FULL raw
+ * document (`core/error/error-diagrams.ts#errorSvg`), `@startmindmap`
+ * included — the same convention `tests/unit/dispatch/
+ * parse-refusal-wiring.test.ts` pins (`REFUSED_LINE` names a document line,
+ * not an interior one). Passing the bare interior `i` to `refuse(...)`
+ * therefore named the line ONE BEFORE the one that actually refused for any
+ * single-`@startmindmap`-line document — jar-observed
+ * (`test-results/dot-cache/mindmap/{fogari-75-febu345,femiba-70-duvi238}/
+ * in.svg`): the wavy underline landed on the line before the real offender,
+ * and `errorSvg`'s `listing = trace.slice(0, at + 1)` dropped the offender
+ * off the end of the source listing entirely.
+ *
+ * `source.linePositions[i]` (`preprocessor.ts
+ * #PreprocessorResult.linePositions` doc: "0-indexed source-file line
+ * position... parallel to `lines`") is the render pipeline's own record of
+ * that document line number. A hand-built `UmlSource` with no
+ * `linePositions` (every `tests/unit/mindmap/*.test.ts` call to
+ * `createMindMapDiagram({ lines: [...] })` directly) never had an
+ * `@startmindmap` line to strip out of `lines` in the first place, so `i`
+ * already IS the document index there — the `?? i` fallback, not
+ * `positionOf`'s `-1`/`Infinity` sentinels (those exist for style-ordering
+ * comparisons, not for naming a source line on the rendered page).
+ */
+function refusalLineOf(source: UmlSource, i: number): number {
+  return source.linePositions?.[i] ?? i;
+}
+
+/**
  * `MindMapDiagramFactory` — the top-level parse entry point for one
  * `@startmindmap` block. Mirrors `MindMapDiagramFactory#createEmptyDiagram`
  * plus `PSystemCommandFactory#createSystem`'s per-line dispatch loop: the
@@ -247,9 +279,9 @@ function executeCommands(diagram: MindMapDiagram, source: UmlSource, dispatch: S
     }
 
     const outcome = dispatchMindMapLine(diagram, lines, i);
-    if (outcome === null) return refuse('syntax', i, i, 'Syntax Error?');
+    if (outcome === null) return refuse('syntax', refusalLineOf(source, i), i, 'Syntax Error?');
     if (outcome.result.isOk() === false) {
-      return refuse('execution', i, i, outcome.result.getError(), outcome.result.getScore());
+      return refuse('execution', refusalLineOf(source, i), i, outcome.result.getError(), outcome.result.getScore());
     }
     i = outcome.nextIndex;
   }
