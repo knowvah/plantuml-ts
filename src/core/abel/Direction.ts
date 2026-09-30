@@ -10,7 +10,9 @@
  * As-const object + string union per project convention
  * (`src/core/skin/ActorStyle.ts`).
  *
- * Ported members: the 4 values, `getInv`, `getShortCode`, `fromChar`.
+ * Ported members: the 4 values, `getInv`, `getShortCode`, `fromChar`,
+ * `lazzyValueOf` (added by mindmap-engine-port T1d — CommandMindMapDirection's
+ * only Direction consumer).
  * Omitted (batch-1 blocked-member precedent, revisit when consumers land):
  * `getWBSDirection` (needs `regex/RegexResult` + `utils/Constant`, both
  * unported preprocessor/regex machinery).
@@ -60,4 +62,22 @@ export function fromChar(c: string): Direction {
     default:
       return Direction.DOWN;
   }
+}
+
+/**
+ * `Direction.lazzyValueOf(String)` — `TOP`/`BOTTOM` are `CommandMindMapDirection`'s
+ * user-facing spelling for `UP`/`DOWN`; anything else falls through to
+ * `Direction.valueOf(String)` (an enum's generated name lookup), which
+ * throws `IllegalArgumentException` for a name matching none of the 4
+ * values. `s` is upper-cased first (`toUpperCase()`, upstream), so a
+ * lower/mixed-case enum NAME (not `TOP`/`BOTTOM`) still resolves.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/utils/Direction.java:132-139
+ */
+export function lazzyValueOf(s: string): Direction {
+  const upper = s.toUpperCase();
+  if (upper === 'TOP') return Direction.UP;
+  if (upper === 'BOTTOM') return Direction.DOWN;
+  if (upper === Direction.RIGHT || upper === Direction.LEFT || upper === Direction.DOWN || upper === Direction.UP)
+    return upper;
+  throw new Error(`No enum constant utils.Direction.${upper}`);
 }

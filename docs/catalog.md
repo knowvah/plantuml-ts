@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1269 modules · 4741 exported names.
+1280 modules · 4766 exported names.
 
 ## `src/`
 
@@ -167,7 +167,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Colors.ts` | `HColor`, `Colors` |  |
 | `ColorType.ts` | `ColorType`, `getType` | ColorType — which slot of an element's color set a color applies to (`klimt/color/ColorType.java`). |
 | `CucaNote.ts` | `CucaNote` |  |
-| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar` | Direction — the four-way direction selector (`utils/Direction.java`). |
+| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf` | Direction — the four-way direction selector (`utils/Direction.java`). |
 | `DisplayPositioned.ts` | `DisplayPositioned` |  |
 | `Entity.ts` | `Entity` |  |
 | `EntityBase.ts` | `EntityBase` |  |
@@ -1459,6 +1459,17 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `Branch.ts` | `Branch` |  |
+| `CommandMindMapDirection.ts` | `MINDMAP_DIRECTION_RE`, `applyMindMapDirection` |  |
+| `CommandMindMapOrgmode.ts` | `ORGMODE_RE`, `applyMindMapOrgmode` |  |
+| `CommandMindMapOrgmodeMultiline.ts` | `ORGMODE_MULTILINE_START_RE`, `ORGMODE_MULTILINE_END_RE`, `OrgmodeMultilineBlock`, `collectOrgmodeMultilineBlock`, `applyMindMapOrgmodeMultiline` |  |
+| `CommandMindMapPlus.ts` | `PLUS_RE`, `applyMindMapPlus` |  |
+| `CommandMindMapRoot.ts` | `ROOT_RE`, `applyMindMapRoot` |  |
+| `Idea.ts` | `IdeaContent`, `IdeaDecoration`, `Idea` |  |
+| `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
+| `MindMap.ts` | `MindMapStyleSource`, `MindMap` |  |
+| `MindMapDiagram.ts` | `MindMapDiagram` |  |
+| `MindMapDiagramFactory.ts` | `MindMapDiagramOptions`, `createMindMapDiagram` |  |
 | `Stripe.ts` | `Stripe` | A single stripe of a `StripeFrontier`: a horizontal x-range `[x1, x2]` (inclusive both ends, per `contains`) holding the highest y the packed `Tetris` frontier has reached across that range. |
 | `StripeFrontier.ts` | `StripeFrontier` |  |
 | `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |
