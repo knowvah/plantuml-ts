@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1292 modules · 4780 exported names.
+1293 modules · 4781 exported names.
 
 ## `src/`
 
@@ -664,6 +664,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `AutomaticCounter.ts` | `AutomaticCounter` | AutomaticCounter — the source of style-value priorities: each parsed value takes the next int (`ValueImpl.regular/dark`, ValueImpl.java:50-60). |
 | `AutomaticCounterBasic.ts` | `AutomaticCounterBasic` |  |
 | `DarkString.ts` | `DarkString` | DarkString — a style value's regular (`value1`) and `@media dark` (`value2`) strings plus its priority. |
+| `FromSkinparamToStyle.ts` | `convertSkinparam` | FromSkinparamToStyle — the `skinparam key value` -> `Style[]` converter: one flat static table (`key -> [{propertyName, styleNames}]`, built once at module load exactly as upstream's `static {}` block builds `knowledge`) plus `convertNow`'s |
 | `ISkinSimple.ts` | `ISkinSimple` | ISkinSimple — the skin-parameter capability interface `Display`/ `CreoleParser` (and, once ported, `StripeTable`/`StripeTree`/ `EmbeddedDiagram`) consume to reach fonts, sprites, guillemets, and a `SheetBuilder`. |
 | `MergeStrategy.ts` | `MergeStrategy` | MergeStrategy — how `Style#mergeWith` treats an existing value whose priority is above `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (Style.java:121-135). |
 | `PName.ts` | `PNAMES`, `PName`, `getFromName` | PName — every style property name of `style/PName.java` (1.2026.8beta1), constant names verbatim, as a readonly declaration-order array plus the string-literal union it induces (no `const enum`, project convention). |
