@@ -49,15 +49,6 @@ catalog` and commit `docs/catalog.md`. Complexity hook: ≤30 NLOC per function,
 
 ## Boundaries
 - Always: quote the Java before claiming parity; `@see` the Java origin on every ported
-  symbol and a `file:line` on every constant; keep upstream names.
-- Stop and report (do not edit): a needed file outside the write-set (beyond a pure
-  type/file-cap move or a small unported helper on this path that no other task owns),
-  or Java that contradicts the stated mechanism or a D-decision.
-- Never: fit a value, touch the oracle jar/cache, dot-engine or the fork, push, edit the
-  flat `StyleMap` or any existing engine's style resolution.
-
-## Boundaries
-- Always: quote the Java before claiming parity; `@see` the Java origin on every ported
   symbol and a `file:line` on every constant; keep upstream names. Measure with
   `npx jiti plans/class-divergence-drive/tools/render-diff.mts mindmap/<slug>` before and
   after; run `mindmap.golden.ratchet` + `mindmap.diff-baseline.ratchet` (never edit either
