@@ -35,6 +35,53 @@ post-D7 measurements.
 
 ---
 
+## `mindmap-engine-port` — DONE 2026-09-30 (T0a–T6i + T-exit/T-close-out, batches 0–7)
+
+Branch `feat/mindmap-engine-port` (off main `2f59882a6`, merge commit at close; never
+pushed). `@startmindmap` renders: **137 / 1 / 4 of 142** conformant / structural / diverged,
+**137 goldens pinned** (`oracle/goldens/svg-mindmap/`), diff-baseline 5 rows (Σ 413). Ported:
+the upstream style engine (`src/core/style/`, D1 — mindmap-only consumer, see
+`DIVERGENCES.md` "Two style paths"), `FtileBoxOld` at its upstream path, `FingerImpl`/
+`Tetris` packing, the five commands, titled chrome with the warnings banner, handwritten
+export, gradient fills, klimt-scaled bodies. Routing 139 `MINDMAP -> NONE` rows → agree;
+refusal 0 mindmap gaps. Journal: `plans/mindmap-engine-port/decision-journal.md` (45 rows).
+
+### Follow-ons (filed at close-out)
+
+1. **WBS engine** — reuses `FtileBoxOld.createWbs`, `IdeaShape`, `SkinParamColors` and the
+   style engine (`WElement.java:110` shares `STEP_BY_PARENT`; `ITFLeaf.java:38`,
+   `ITFComposed.java:42` import `FtileBoxOld`). Corpus: `test-results/dot-cache/wbs/` 204
+   fixtures, survey 0/0/204. The same harness shape as T0b (golden ratchet + diff-baseline).
+2. **Migrate the other engines to the style engine**, one engine per mission, WBS first then
+   the cuca family — see `DIVERGENCES.md` "Two style paths" for the migration path.
+3. **`susipa-95-tedu015` crash page** — a RENDER-time throw (`Branch.hasChildren` NPE,
+   Branch.java:112) reaches `UgDiagram.exportDiagram`'s catch (UgDiagram.java:96) →
+   `CrashReportHandler`/`CrashImage` (QR code, JVM fields). Needs a parse/render catch split
+   in `src/index.ts#renderPagesSync` and a `CrashImage` port; large and separable (journal
+   row 38). Also unported: the parse-time "Fatal crash error, you should send a mail…"
+   wrapper (PSystemBuilder.java:274-278), no fixture.
+4. **Oracle seam: embedded 42×42** — fix `StringBounderFromWidthTable.matchesProperty("SVG")`
+   in the fork and re-render every golden with an embedded `{{ }}` diagram (journal row 36,
+   memory `oracle-seam-embedded-42x42`). Maintainer-only (stops 8/9).
+5. **Embedded mindmap in engines other than class** (D12 scoped it to `semutu`): the
+   description/sequence/activity `{{mindmap}}` paths are unmeasured.
+6. **Description labels with `<&glyph>`** draw nothing (`descAtomOps` resolver returns
+   undefined for openiconic, `creole-atoms-image-resolver.ts:376`): unknown/cakutu, nixeka,
+   pacope, gukibi, usecase/ridola. T6e left it to avoid non-mindmap movers (row 34).
+7. **Smaller gaps, no fixture** (rows 22, 31, 33, 37, 39): late `skin` line ordering and a
+   skinparam set twice with a `<style>` between (collector keeps last value/position);
+   `skin sonyxperiadev` (extend `SKIN_EXPORTS` in `scripts/extract-jar-skin.ts`); block-form
+   `skinparam { handwritten }` also warns; `!option handwritten true` not honoured (empty
+   `PreprocessingArtifact`); monochrome maps the background only (the SVG layer dropped
+   `ColorMapper`, `u-graphic-svg.ts:72`); titled+handwritten chrome not jiggled; scale-1
+   `<defs>` on the chrome path; board/chart parsers trim although upstream is doTrim=false;
+   multiline-orgmode body lines keep their trailing space upstream; a per-command `myTrim2`
+   in `MindMapDiagramFactory.ts` (Root trims via `trin` today); `parity-dashboard.ts` does
+   not read the svg-mindmap ratchet/diff-baseline ("no ratchet yet" on the mindmap row).
+8. **Comparator blind spots** (not port defects): root `width="1299px"` vs the jar's
+   `1299.111px` on every scaled fixture (`svg-graphics-core.ts#finalizeRootAttributes`);
+   `compareSvg` exempts image href bytes, so an embedded render's content is invisible.
+
 ## `class-divergence-drive-5` — DONE 2026-09-28 (T0a–T5e, batches 0–5)
 
 Branch `feat/class-divergence-drive-5` (merge commit, not pushed). Brief and

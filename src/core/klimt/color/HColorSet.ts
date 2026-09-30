@@ -24,6 +24,10 @@
 
 import { getColor } from './ColorTrieNode.js';
 import type { RgbTriple } from './ColorTrieNode.js';
+import type { GradientPolicy, HColorGradient } from './HColorGradient.js';
+import { HColors } from './HColors.js';
+import type { HColorSimple } from './HColorSimple.js';
+import { NoSuchColorException } from './NoSuchColorException.js';
 
 /** Stand-in for `net.sourceforge.plantuml.klimt.awt.XColor` (RGBA, 8-bit channels). */
 export interface ResolvedColor extends RgbTriple {
@@ -217,4 +221,108 @@ export function resolveConditionalColor(raw: string, localBackgroundHex: string)
   const bg = parseSimpleColor(localBackgroundHex);
   const dark = bg !== undefined && isDarkResolved(bg);
   return resolveColorToSvgHex(dark ? spec.dark : spec.light);
+}
+
+/** The gradient policy characters `HColorSet#parseColor` scans for (HColorSet.java:111). */
+const GRADIENT_POLICIES = new Set(['-', '\\', '|', '/']);
+
+/**
+ * A `parseColor` result whose `HColor` class is not ported: thrown rather
+ * than silently resolved, so a caller never draws a wrong colour.
+ */
+function unported(className: string, s: string): Error {
+  return new Error(`unported: ${className} for color "${s}" (klimt/color/${className}.java)`);
+}
+
+/**
+ * The `?light:dark[:transparent]` branch of `HColorSet#parseColor`
+ * (java:86-95): `HColorScheme` is not ported, so a scheme that upstream
+ * would build throws. A 2-part spec with an unparsable half reads
+ * `colors[2]` -- upstream's `ArrayIndexOutOfBoundsException`, kept.
+ */
+function parseScheme(s: string): void {
+  const colors = s.substring(1).split(':');
+  if (colors.length !== 2 && colors.length !== 3) return;
+  const col0 = parseSimpleColor(colors[0] as string);
+  const col1 = parseSimpleColor(colors[1] as string);
+  if (colors.length === 2 && col0 !== undefined && col1 !== undefined) throw unported('HColorScheme', s);
+  if (colors.length === 2) throw new Error('ArrayIndexOutOfBoundsException: Index 2 out of bounds for length 2');
+  if (parseSimpleColor(colors[2] as string) !== undefined) throw unported('HColorScheme', s);
+}
+
+/**
+ * The gradient scan of `HColorSet#parseColor`: the first separator, in
+ * position order, whose two halves both parse as simple colours.
+ * @see HColorSet.java:109-117
+ */
+function parseGradient(s: string): HColorGradient | undefined {
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i);
+    if (!GRADIENT_POLICIES.has(c)) continue;
+    const col0 = parseSimpleColor(s.substring(0, i));
+    const col1 = parseSimpleColor(s.substring(i + 1));
+    if (col0 !== undefined && col1 !== undefined)
+      return HColors.gradient(HColors.simple(col0), HColors.simple(col1), c as GradientPolicy);
+  }
+  return undefined;
+}
+
+/**
+ * HColorSet — the colour-name/hex resolver as upstream's singleton class,
+ * layered over this module's {@link parseSimpleColor} (the private
+ * `HColorSet#parseSimpleColor`, java:122-157). Resolves to
+ * {@link HColorSimple}, or {@link HColorGradient} for a `c1<policy>c2`
+ * token (java:109-117). The `automatic` and `?light:dark` forms
+ * (`HColorAutomagic`, `HColorScheme`) are not ported and throw: no mindmap
+ * fixture reaches either (b6-T6a). `names()` is not ported. Stateless.
+ *
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/color/HColorSet.java:43-120
+ */
+export class HColorSet {
+  /** @see HColorSet.java:45 */
+  private static readonly singleton = new HColorSet();
+
+  /** @see HColorSet.java:47-49 */
+  static instance(): HColorSet {
+    return HColorSet.singleton;
+  }
+
+  /** @see HColorSet.java:55-56 */
+  private constructor() {}
+
+  /** `parseColor(s)`, else `HColors.WHITE`. @see HColorSet.java:58-63 */
+  getColorOrWhite(s: string): HColorSimple | HColorGradient {
+    return this.parseColor(s) ?? HColors.WHITE;
+  }
+
+  /** `undefined` where upstream returns `null`. @see HColorSet.java:65-67 */
+  getColorOrNull(s: string): HColorSimple | HColorGradient | undefined {
+    return this.parseColor(s);
+  }
+
+  /** @see HColorSet.java:69-76 */
+  getColor(s: string): HColorSimple | HColorGradient {
+    const result = this.parseColor(s);
+    if (result === undefined) throw new NoSuchColorException();
+    return result;
+  }
+
+  /**
+   * Upstream's second `equalsIgnoreCase("transparent")` test (java:84-85)
+   * is unreachable after the first (java:78-79) and is not repeated.
+   *
+   * @see HColorSet.java:78-120
+   */
+  private parseColor(sIn: string): HColorSimple | HColorGradient | undefined {
+    const s = sIn.startsWith('#') ? sIn.substring(1) : sIn;
+    const lower = s.toLowerCase();
+    if (lower === 'transparent' || lower === 'background') return HColors.none();
+    if (lower === 'automatic') throw unported('HColorAutomagic', s);
+
+    const result = parseSimpleColor(s);
+    if (result !== undefined) return HColors.simple(result);
+
+    if (s.startsWith('?')) parseScheme(s);
+    return parseGradient(s);
+  }
 }

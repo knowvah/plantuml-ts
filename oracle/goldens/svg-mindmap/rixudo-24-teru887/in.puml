@@ -1,0 +1,9 @@
+@startmindmap
+<style>
+rootNode {
+    HorizontalAlignment Center
+}
+</style>
+* root node
+* another root node
+@endmindmap

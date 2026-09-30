@@ -6,6 +6,7 @@
  */
 
 import type { StringLocated } from './tim/StringLocated.js';
+import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 
 const RE_STYLE_OPEN = /^<style>$/i;
 const RE_STYLE_CLOSE = /^<\/style>$/i;
@@ -137,6 +138,19 @@ export class StyleAndSkinparamCollector {
    * concatenated plus the entry name (`getFullParam()`, `:70-76`).
    */
   private readonly skinparamStack: string[] = [];
+  /**
+   * mmp-T6g: open `{{…` embedded-diagram depth. Upstream never dispatches
+   * the lines of an embedded block as outer-diagram commands: a multi-line
+   * command accumulating its lines takes everything from a `{{…` line to
+   * the matching `}}` verbatim, nested blocks counted
+   * (`PSystemCommandFactory.java:288-306`,
+   * `addOneSingleLineManageEmbedded2`), and `EmbeddedDiagram.createAndSkip`
+   * (`EmbeddedDiagram.java:97-115`) hands them to the INNER diagram. So a
+   * `<style>`/`skinparam` inside `{{ }}` styles the embedded render, not the
+   * outer document (`class/semutu-45-zeno907`). Tracked only outside a
+   * `<style>`/`skinparam` block, whose bodies never carry `{{`.
+   */
+  private embeddedNesting = 0;
 
   /**
    * True when the line was consumed (it is not a diagram-body line).
@@ -152,6 +166,8 @@ export class StyleAndSkinparamCollector {
 
     if (this.skinparamStack.length > 0) return this.collectSkinparamBlockEntry(trimmed);
 
+    if (this.skipEmbeddedLine(raw, trimmed)) return false;
+
     if (RE_STYLE_OPEN.test(trimmed)) {
       this.inStyleBlock = true;
       this.stylePositions.push(position);
@@ -164,6 +180,21 @@ export class StyleAndSkinparamCollector {
       return true;
     }
     return this.openSkinparam(trimmed);
+  }
+
+  /**
+   * True while `raw` is part of an embedded `{{ … }}` block (its opening and
+   * closing lines included): the nesting count of
+   * `PSystemCommandFactory.java:291-303`.
+   */
+  private skipEmbeddedLine(raw: string, trimmed: string): boolean {
+    if (getEmbeddedType(raw) !== null) {
+      this.embeddedNesting++;
+      return true;
+    }
+    if (this.embeddedNesting === 0) return false;
+    if (trimmed === EmbeddedDiagram.EMBEDDED_END) this.embeddedNesting--;
+    return true;
   }
 
   private collectStyleLine(raw: string, trimmed: string): boolean {

@@ -13,6 +13,7 @@
 import { stripSpriteRegions } from './descriptive-keywords.js';
 
 import { DiagramType as UpstreamDiagramType, findStartTypes } from './diagram-type-set.js';
+import type { PreprocessorResult } from './preprocessor.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -96,6 +97,18 @@ export interface UmlSource {
    * {@link rawSourceLines} by every seed site; `BlockUmlOk#seedSource`.
    */
   readonly seedSourceLines?: readonly string[];
+  /**
+   * The block's preprocessor-collected style sources (`skin`, the skinparam
+   * map, the `<style>` blocks and their declaration order) -- upstream
+   * executes `skinparam`/`<style>` as COMMANDS during the parse
+   * (`CommonCommands.addCommonCommands2`), so an engine that builds its
+   * style engine while parsing (mindmap, `mindmap-style-builder.ts`, D2)
+   * needs them at `parse()` time, where the directive-stripped
+   * {@link lines} no longer carry them. Populated by
+   * `index.ts#umlSourceOfBlock`; absent for a hand-built literal fixture,
+   * which reads as "no skin, no skinparam, no style".
+   */
+  readonly styleSource?: Pick<PreprocessorResult, 'skin' | 'skinparam' | 'styles' | 'declarationOrder'>;
 }
 
 // ---------------------------------------------------------------------------

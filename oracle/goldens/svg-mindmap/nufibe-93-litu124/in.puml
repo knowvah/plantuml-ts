@@ -1,0 +1,18 @@
+@startmindmap
+
+<style>
+node {
+  Padding 2
+  Margin 30
+}
+</style>
+
+
+* New style
+** New features
+** Template Files
+*** They are \ngreat and \n should have them!
+
+caption caption
+
+@endmindmap

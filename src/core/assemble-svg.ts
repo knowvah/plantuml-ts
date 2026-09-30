@@ -45,7 +45,7 @@ import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { shortenColor } from './svg-format.js';
-import { applyCucaDocumentMargin } from './TextBlockExporter.js';
+import { applyCucaDocumentMargin, finalizeTitledDiagramFragment } from './TextBlockExporter.js';
 import {
   CUCA_DOCUMENT_MARGIN_TOP,
   CUCA_DOCUMENT_MARGIN_RIGHT,
@@ -53,13 +53,9 @@ import {
   CUCA_DOCUMENT_MARGIN_LEFT,
 } from './atmp/CucaDiagram.js';
 
-/** `net.sourceforge.plantuml.core.DiagramType` values this module dispatches
- *  on — each verified against `DiagramType.java:45` and every cached jar
- *  fixture's `data-diagram-type` root attribute (mirrors the identical
- *  per-engine constants `class/renderer.ts`/`state/renderer.ts`/`description
- *  /renderer.ts`/`json/index.ts`/`yaml/index.ts`/`hcl/index.ts` each declare
- *  independently to SET `RenderFragment.diagramType`; this module's own
- *  copies are for DISPATCH, not production). */
+/** `DiagramType` values this module dispatches on (`DiagramType.java:45`, every cached jar fixture's
+ *  root `data-diagram-type`). Each engine declares its own copy to SET `RenderFragment.diagramType`
+ *  (`class/renderer.ts`, `json/index.ts`, `mindmap/index.ts`, ...); these are for DISPATCH only. */
 const DIAGRAM_TYPE_CLASS = 'CLASS';
 const DIAGRAM_TYPE_STATE = 'STATE';
 const DIAGRAM_TYPE_JSON = 'JSON';
@@ -67,6 +63,7 @@ const DIAGRAM_TYPE_YAML = 'YAML';
 const DIAGRAM_TYPE_HCL = 'HCL';
 const DIAGRAM_TYPE_SEQUENCE = 'SEQUENCE';
 const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
+const DIAGRAM_TYPE_MINDMAP = 'MINDMAP';
 
 // ---------------------------------------------------------------------------
 // class finalize (formerly class/renderer-shell.ts#assembleClassShell)
@@ -474,6 +471,8 @@ function finalizeShellFragment(fragment: RenderFragment): RenderFragment {
     case DIAGRAM_TYPE_YAML:
     case DIAGRAM_TYPE_HCL:
       return finalizeJsonFragment(fragment);
+    case DIAGRAM_TYPE_MINDMAP:
+      return finalizeTitledDiagramFragment(fragment);
     default:
       return fragment;
   }

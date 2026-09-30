@@ -1,0 +1,13 @@
+@startmindmap
+<style>
+.b * {linecolor blue}
+.r * {linecolor red}
+</style>
+
+* Root
+** Blue <<b>>
+*** B1
+*** B2
+** Red <<r>>
+*** R1
+@endmindmap

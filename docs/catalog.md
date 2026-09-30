@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1251 modules · 4712 exported names.
+1323 modules · 4843 exported names.
 
 ## `src/`
 
@@ -75,7 +75,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `measurer.ts` | `FontSpec`, `StringMeasurer`, `glyphWidth`, `FormulaMeasurer`, `WidthTableMeasurer`, `CanvasMeasurer`, `FixedMeasurer` | String measurement implementations for plantuml-ts. |
 | `nested-diagram-registry.ts` | `registerNestedDiagramRenderer`, `getNestedDiagramRenderer` | nested-diagram-registry.ts — CDD B7FU-R2 (coordinator design correction, journal row 160): the chrome `{{ }}`-embed registration slot, moved here FROM `src/diagrams/class/class-nested-diagram-renderer.ts` so that `src/core/annotations/block |
 | `openiconic-glyphs-data.ts` | `RawGlyph`, `RAW_GLYPHS` | `RAW_GLYPHS` -- the OpenIconic glyph data table, split out of `openiconic-glyphs.ts` purely to keep that file under this project's 500-line cap (F1-c, S1L tail-fix G11; mirrors the existing `svg.ts`->`svg-markers.ts` / `style-map-theme.ts`- |
-| `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
+| `openiconic-glyphs.ts` | `OPENICONIC_NATURAL_SIZE`, `isKnownOpenIconicGlyph`, `OpenIconicOp`, `parsedOpsFor`, `openIconicFactor`, `openIconicDims`, `openIconicStartingAltitude`, `openIconicOriginY`, `buildOpenIconicPathD` | OpenIconic `<&glyph>` inline icons (G2 N41, extended to the full upstream set F1-c). |
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
@@ -138,7 +138,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `svg-text-font.ts` | `textFontFamily`, `emittedTextForm` | Text emission rules that depend on the FONT FAMILY — the SVG-safe family string, PlantUML's `monospaced` -> CSS `monospace` rename, and the two NBSP substitutions. |
 | `svg.ts` | `arrowHead`, `arrowHeadRef`, `ALL_ARROW_TYPES`, `ArrowType`, `BoxStyle`, `LineStyle`, `TextStyle`, `SvgAttrs`, `escapeXml`, `escapeXmlText`, `attrs`, `attrsFromRecord`, `SvgAttrsPaint`, `resolvePaint`, `resolvePaintAttrs`, `PAINT_NONE`, `ROOT_FONT_FAMILY`, `ROOT_GROUP_OPEN`, `ROOT_GROUP_CLOSE`, `strokeDecorationOf`, `rect`, `line`, `text`, `multilineText`, `tspan`, `image`, `path`, `ellipse`, `circle`, `diamond`, `polygon`, `polyline`, `noteBox`, `emittedTextForm`, `foreignObject`, `decorationLines`, `NoteBoxStyle`, `group`, `linkWrap`, `defs`, `extractGradientDefs`, `extractFilterDefs`, `backColorFilterId`, `backColorFilterDef`, `collapseDuplicateFilterDefs`, `collectDocumentDefs`, `svgRoot` | SVG primitive builders — pure string functions, no DOM API. |
 | `text-escapes.ts` | `resolveTextEscapes` | Shared text-escape resolution — `<U+XXXX>`/`<U+XXXXX>` unicode-codepoint escapes and `&#NNN;` HTML numeric character references, resolved to their literal glyph. |
-| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
+| `TextBlockExporter.ts` | `DocumentDims`, `applyCucaDocumentMargin`, `scaleFragmentBody`, `BODY_ANCHOR`, `finalizeTitledDiagramFragment` | `TextBlockExporter#calculateFinalDimension` — the diagram's outer margin applied to whatever the inner `TextBlock` measured, plus the truncating `+1` `SvgGraphics` applies when it sizes the canvas. |
 | `theme-colors-fields.ts` | `ThemeColorFields` | `Theme.colors` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
 | `theme-dark.ts` | `DARK_MODE_DEFAULTS` | `skinparam mode dark` default-color table (cdd-T33). |
 | `theme-element-resolve.ts` | `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth`, `foldRootBackgroundIntoSequence` | Per-element (SName) resolution helpers for {@link Theme} — the color, font-size, and shadowing cascades each element's renderer reads. |
@@ -167,7 +167,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Colors.ts` | `HColor`, `Colors` |  |
 | `ColorType.ts` | `ColorType`, `getType` | ColorType — which slot of an element's color set a color applies to (`klimt/color/ColorType.java`). |
 | `CucaNote.ts` | `CucaNote` |  |
-| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar` | Direction — the four-way direction selector (`utils/Direction.java`). |
+| `Direction.ts` | `Direction`, `getInv`, `getShortCode`, `fromChar`, `lazzyValueOf` | Direction — the four-way direction selector (`utils/Direction.java`). |
 | `DisplayPositioned.ts` | `DisplayPositioned` |  |
 | `Entity.ts` | `Entity` |  |
 | `EntityBase.ts` | `EntityBase` |  |
@@ -183,7 +183,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `GroupType.ts` | `GroupType` | GroupType — the 8-value group-entity kind selector of the abel model: which kind of container a group Entity is (package, state region, activity partition, ...). |
 | `Hideable.ts` | `Hideable` | Hideable — implemented by anything a `hide` command can hide. |
 | `IEntityImage.ts` | `IEntityImage` | IEntityImage — ADR-2 consumed-interface stub for `svek/IEntityImage.java` (the rendered-block contract every svek leaf image implements). |
-| `ISkinParam.ts` | `UFont`, `StyleBuilder`, `Style`, `FontParam`, `ISkinParam` |  |
+| `ISkinParam.ts` | `UFont`, `StyleBuilder`, `Style`, `FontParam`, `ISkinParam`, `ISkinParamWithSimple` |  |
 | `Kal.ts` | `Kal` |  |
 | `LeafType.ts` | `LeafType`, `getLeafType`, `isLikeClass`, `toHtml` | LeafType — the 51-value leaf-entity kind selector of the abel model: which kind of leaf a `Quark`'s Entity is (class-family, usecase, activity, state, Chen-ER, ports, ...). |
 | `LineConfigurable.ts` | `LineConfigurable` |  |
@@ -220,6 +220,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `DisplayPositioned`, `DiagramAnnotations`, `createAnnotations`, `horizontalAlignmentFromString`, `horizontalAlignmentFromStringOrDefault`, `isDisplayPositionedNull`, `isEmpty`, `noneDisplayPositioned`, `setCaption`, `setLegend`, `setMainFrame`, `setTitle`, `singleDisplayPositioned`, `updateFooter`, `updateHeader`, `verticalAlignmentFromString`, `withDisplay`, `withHorizontalAlignment`, `withLocation`, `matchAnnotationCommand`, `AnnotationBlock`, `buildAnnotationBlock`, `AnnotationStyles`, `applyChrome`, `getTextX`, `mergeTB` | Public surface of the annotation model + command matcher (mission G0b). |
 | `model.ts` | `DisplayPositioned`, `noneDisplayPositioned`, `singleDisplayPositioned`, `isDisplayPositionedNull`, `withDisplay`, `withHorizontalAlignment`, `withLocation`, `horizontalAlignmentFromString`, `horizontalAlignmentFromStringOrDefault`, `verticalAlignmentFromString`, `DiagramAnnotations`, `createAnnotations`, `isEmpty`, `setTitle`, `setCaption`, `setLegend`, `setMainFrame`, `updateHeader`, `updateFooter` | DisplayPositioned + DiagramAnnotations — the shared chrome model ported from upstream `TitledDiagram`'s title/caption/legend/header/footer/ mainFrame fields. |
 | `style.ts` | `BoxSides`, `AnnotationBoxStyle`, `AnnotationElement`, `expandGrayShorthand`, `parseClockwise`, `resolveAnnotationStyles` | Annotation chrome style resolution. |
+| `WarningBannerBlock.ts` | `WarningBannerBlock`, `addWarnings` | `DiagramChromeFactory#addWarnings` and its `WarningBannerBlock` — the yellow banner `DiagramChromeFactory.create` draws ABOVE the raw text block (its first step, before the mainframe/legend/title/caption/header/footer `chrome.ts` composes), |
 
 ## `src/core/atmp/`
 
@@ -370,6 +371,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `CopyForegroundColorToBackgroundColor.ts` | `CopyForegroundColorToBackgroundColor` |  |
 | `document-shell-fragment.ts` | `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `RenderDrawableToFragmentOptions`, `DrawableFragment`, `renderDrawableToFragment`, `mergeFragmentDefs` | document-shell-fragment.ts — the disassembly half of `document-shell.ts` (SVG-fragment extraction and per-drawable klimt emission), split out (CDD T32) purely to keep `document-shell.ts` under the 500-line hook cap after widening `assembleD |
 | `document-shell.ts` | `DQUOTE`, `VERSION_PLACEHOLDER`, `DIAGRAM_TYPE_ATTR`, `ShellFragment`, `CONTENT_G_OPEN_RE`, `CONTENT_G_CLOSE`, `EMPTY_CONTENT_G_RE`, `assembleDocumentShell`, `extractViewBoxDims`, `extractDefs`, `extractBody`, `unwrapContentG`, `extractFlatContent`, `renderDrawableToFragment`, `mergeFragmentDefs`, `RenderDrawableToFragmentOptions`, `DrawableFragment` | document-shell.ts — shared klimt-document-shell assembly/disassembly helpers. |
+| `Fashion.ts` | `Fashion` |  |
 | `Fore.ts` | `Fore` |  |
 | `LineBreakStrategy.ts` | `LineBreakStrategy` | LineBreakStrategy — wraps the raw `wrapWidth`/`maxMessageSize` skinparam string value (`"auto"`, a signed-integer pixel width, or unset/`null` meaning "no wrapping") and exposes it as `isAuto()`/`getMaxWidth()`. |
 | `UBackground.ts` | `UBackground` |  |
@@ -386,8 +388,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `ColorMapper.ts` | `ColorMapper`, `mapPaint` |  |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
-| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
+| `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
+| `HColors.ts` | `HColors` |  |
+| `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
+| `HColorSimple.ts` | `HColorSimple` |  |
+| `NoSuchColorException.ts` | `NoSuchColorException` | NoSuchColorException — thrown by `HColorSet#getColor` for a token that resolves to no colour. |
 
 ## `src/core/klimt/creole/`
 
@@ -424,6 +432,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Atom.ts` | `CreoleAtomUrl`, `CreoleAtom` | Atom — one drawable/measurable piece of a creole `Stripe` (one physical display line). |
 | `AtomEmoji.ts` | `EMOJI_MAGIC`, `EMOJI_BOX_FACTOR`, `EMOJI_ALTITUDE_FACTOR`, `EMOJI_LINE_HEIGHT_FACTOR`, `emojiLineHeightFactor`, `emojiFactor`, `emojiBoxDim`, `emojiSquareDim`, `emojiStartingAltitude`, `emojiRenderRun` | AtomEmoji — sizing constants for one `<:name:>` creole emoji atom. |
 | `AtomMath.ts` | `AtomMath` | AtomMath — upstream: klimt/creole/atom/AtomMath.java (`extends AbstractAtom implements Atom`, 107 lines). |
+| `AtomOpenIconic.ts` | `AtomOpenIconic`, `asAtomOpenIconic` | `AtomOpenIconic` — an OpenIconic `<&name>` glyph inside a creole line (`StripeSimple#addOpenIcon`, StripeSimple.java:239-243), as the polymorphic `Atom` `Sea`/`SheetBlock1` lay out: `calculateDimensionSlow` (`openIconic.asTextBlock` padded |
 | `AtomTable.ts` | `AtomTable` | AtomTable — the drawable/measurable creole table `StripeTable` builds: a grid of `Atom` cells (each itself a `SheetBlock1` wrapping one cell's own nested `Sheet`), laid out column-width/row-height-first (every cell in a column shares that c |
 | `AtomTree.ts` | `AtomTree` | AtomTree — a stack of `Atom` cells, each tagged with an integer nesting `level`, measured/drawn top-to-bottom with a `Skeleton2` bullet/hline/ vline connector drawn beside each cell at its own vertical midpoint. |
 | `AtomWithMargin.ts` | `AtomWithMargin` | AtomWithMargin — wraps another `Atom`, adding a fixed top/bottom margin to its measured height (`marginY1`/`marginY2`) and translating it down by `marginY1` at draw time. |
@@ -481,6 +490,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `HandJiggle.ts` | `HandPoint`, `HandCubic`, `HandJiggle` | @see ~/git/plantuml/.../klimt/drawing/hand/HandJiggle.java The wobble every handwritten shape is built from: walk a straight run in ~10-unit segments and push each intermediate point sideways by a random offset, PERPENDICULAR to the run. |
 | `JavaRandom.ts` | `JavaRandom` | `java.util.Random`, reproduced bit-for-bit. |
 | `shapes.ts` | `rectangleHand`, `lineHand`, `polygonHand`, `ellipseHand`, `HandSegment`, `HandRun`, `pathHand` | The six shape builders `UGraphicHandwritten` dispatches to, ported together because each is a few lines over {@link HandJiggle} and they share one `JavaRandom`. |
+| `UDotPathHand.ts` | `UDotPathHand` |  |
+| `UEllipseHand.ts` | `UEllipseHand` |  |
+| `UGraphicHandwritten.ts` | `UGraphicHandwritten` |  |
+| `ULineHand.ts` | `ULineHand` |  |
+| `UPathHand.ts` | `UPathHand` |  |
+| `UPolygonHand.ts` | `UPolygonHand` |  |
+| `URectangleHand.ts` | `URectangleHand` |  |
 
 ## `src/core/klimt/drawing/svg/`
 
@@ -508,9 +524,13 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `FontConfigurationBridge.ts` | `bridgeFontConfiguration` |  |
 | `FontParam.ts` | `ARROW_LABEL_FONT_SIZE`, `NOTE_FONT_SIZE` | `FontParam` — the fixed per-element font sizes upstream declares as enum entries, each independent of the diagram's own default font size. |
 | `FontPosition.ts` | `FontPosition`, `fontPositionSpace`, `muteFontSize`, `fontPositionHtmlTag` | FontPosition — where a creole text run sits relative to the normal baseline: NORMAL, EXPOSANT (`<sup>`) or INDICE (`<sub>`). |
+| `FontStack.ts` | `FontStack` | FontStack — a comma-separated font-family definition (`FontName`), as the SVG and PDF back ends name it. |
 | `StringBounder.ts` | `StringBounder` |  |
+| `UFont.ts` | `UFont` |  |
+| `UFontFactory.ts` | `UFontFactory` |  |
 
 ## `src/core/klimt/geom/`
 
@@ -521,7 +541,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ClockwiseTopRightBottomLeft.ts` | `ClockwiseTopRightBottomLeft` |  |
 | `CoordinateChange.ts` | `CoordinateChange` |  |
 | `EnsureVisible.ts` | `EnsureVisible` | EnsureVisible — the callback surface a clickable region (`Url`) exposes so drivers can report every point they actually painted for it; the accumulated bounding box becomes the image-map/SVG link geometry. |
-| `HorizontalAlignment.ts` | `HorizontalAlignment` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
+| `HorizontalAlignment.ts` | `HorizontalAlignment`, `horizontalAlignmentFromString` | HorizontalAlignment — the 3-way text/label alignment `USymbol#asSmall`/ `asBig` (decoration/symbol/USymbol.java) take for the stereotype and, for `asBig`, the label too (see `USymbolRectangle.java`'s `asBig`, which branches on `labelAlignme |
 | `MagneticBorder.ts` | `MagneticBorder` |  |
 | `MagneticBorderNone.ts` | `MagneticBorderNone` |  |
 | `MinMax.ts` | `MinMax` |  |
@@ -538,6 +558,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Positionable.ts` | `Positionable` |  |
 | `PositionableImpl.ts` | `PositionableImpl` |  |
 | `PositionableUtils.ts` | `intersect`, `addMargin`, `moveAwayFrom` |  |
+| `Rankdir.ts` | `Rankdir` | Rankdir — the layout direction a `SkinParam` carries (`left to right direction` / `top to bottom direction`, `CommandRankDir`). |
 | `ULayoutGroup.ts` | `ULayoutGroup` |  |
 | `VerticalAlignment.ts` | `VerticalAlignment` | VerticalAlignment — the 3-way alignment `TextBlockHorizontal` uses to position each block within the merged row's height (top/center/bottom). |
 | `XDimension2D.ts` | `XDimension2D` |  |
@@ -641,6 +662,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorParam.ts` | `ColorParam` |  |
 | `Pragma.ts` | `Pragma` | Pragma — the resolved `!pragma <key> <value>` table for one diagram, plus the `WarningHandler` capability every pragma-aware command shares. |
 | `PragmaKey.ts` | `PragmaKey`, `pragmaKeyDefaultValue`, `pragmaKeyLazyFrom` | PragmaKey — the fixed set of `!pragma <key> <value>` keys `Pragma` stores. |
+| `SkinParamColors.ts` | `SkinParamColors` |  |
+| `SkinParamDelegator.ts` | `SkinParamDelegator` |  |
 | `VisibilityModifier.ts` | `ColorParam`, `SName`, `StyleSignatureBasic`, `VisibilityModifier` |  |
 
 ## `src/core/stereo/`
@@ -654,8 +677,43 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `AutomaticCounter.ts` | `AutomaticCounter` | AutomaticCounter — the source of style-value priorities: each parsed value takes the next int (`ValueImpl.regular/dark`, ValueImpl.java:50-60). |
+| `AutomaticCounterBasic.ts` | `AutomaticCounterBasic` |  |
+| `DarkString.ts` | `DarkString` | DarkString — a style value's regular (`value1`) and `@media dark` (`value2`) strings plus its priority. |
+| `FromSkinparamToStyle.ts` | `convertSkinparam` | FromSkinparamToStyle — the `skinparam key value` -> `Style[]` converter: one flat static table (`key -> [{propertyName, styleNames}]`, built once at module load exactly as upstream's `static {}` block builds `knowledge`) plus `convertNow`'s |
 | `ISkinSimple.ts` | `ISkinSimple` | ISkinSimple — the skin-parameter capability interface `Display`/ `CreoleParser` (and, once ported, `StripeTable`/`StripeTree`/ `EmbeddedDiagram`) consume to reach fonts, sprites, guillemets, and a `SheetBuilder`. |
-| `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | SName — minimal consumed slice of the unported style-name enum (ADR-2; `style/SName.java` is a 217-member enum). |
+| `MergeStrategy.ts` | `MergeStrategy` | MergeStrategy — how `Style#mergeWith` treats an existing value whose priority is above `StyleLoader.DELTA_PRIORITY_FOR_STEREOTYPE` (Style.java:121-135). |
+| `mindmap-style-builder.ts` | `DEFAULT_SKIN`, `ConvertSkinparam`, `MindmapStyleSource`, `PositionedDeclaration`, `positionedDeclarationsOf`, `cleanForKeySlow`, `SkinParam`, `buildMindmapStyleBuilder`, `createMindmapSkinParam`, `executeDeclaration` | The mindmap's `StyleBuilder`: the style half of upstream's `SkinParam` (java:155-265) replayed over a preprocessed source (decision D2). |
+| `PName.ts` | `PNAMES`, `PName`, `getFromName` | PName — every style property name of `style/PName.java` (1.2026.8beta1), constant names verbatim, as a readonly declaration-order array plus the string-literal union it induces (no `const enum`, project convention). |
+| `SName.ts` | `SNAMES`, `SName`, `retrieve` | SName — every style-element name of `style/SName.java` (1.2026.8beta1), the enum constant names verbatim (trailing underscores included: `class_`, `goto_`, `interface_`, `package_`, `private_`, `protected_`, `public_` -- Java keywords upstr |
+| `Style.ts` | `DELTA_PRIORITY_FOR_STEREOTYPE`, `Style` |  |
+| `StyleBuilder.ts` | `StyleBuilder` |  |
+| `StyleKey.ts` | `enumSetOrder`, `StyleKey` | StyleKey — the sname set, depth level and star flag of a style signature; the key `StyleStorage` files stereotype-free styles under (`StyleStorage.java:69-70,81-82`). |
+| `StyleLoader.ts` | `DELTA_PRIORITY_FOR_STEREOTYPE`, `NoStyleAvailableException`, `loadSkin`, `getInputStreamForStyle`, `getMissingRootProperties`, `addPriorityForStereotype` |  |
+| `StyleSignature.ts` | `STAR`, `StyleSignature` | StyleSignature — the common interface of a single signature ({@link StyleSignatureBasic}) and a fan-out list of them ({@link StyleSignatures}). |
+| `StyleSignatureBasic.ts` | `SName`, `StyleSignatureBasic` | StyleSignatureBasic — a {@link StyleKey} plus a set of cleaned stereotype names: both the selector a `<style>` rule is stored under (built by `style/parser/Context.java:70-99`) and the query an element resolves its style with (e.g. |
+| `StyleSignatures.ts` | `StyleSignatures` | StyleSignatures — an ordered list of {@link StyleSignature}, the fan-out `StyleSignatureBasic#withTOBECHANGED`/`forStereotypeItself` build (one member per stereotype label). |
+| `StyleStorage.ts` | `StyleStorage` |  |
+| `Value.ts` | `HColor`, `HColorSet`, `Value` |  |
+| `ValueAbstract.ts` | `ValueAbstract` |  |
+| `ValueColor.ts` | `ValueColor` |  |
+| `ValueImpl.ts` | `ValueImpl` |  |
+| `ValueNull.ts` | `ValueNull` |  |
+
+## `src/core/style/parser/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Context.ts` | `Context` |  |
+| `CssVariables.ts` | `CssVariables` | CssVariables — the `--name value` declarations of one style text, and the `var(--name)` lookup a value goes through (StyleParser.java:123,126). |
+| `StyleParser.ts` | `StyleParsingException`, `trin`, `StyleParser`, `readLines`, `parseStyles` |  |
+| `StyleScheme.ts` | `StyleScheme` | StyleScheme — which half of a `DarkString` a parsed value fills: `REGULAR` before an `@media` block, `DARK` from it on (StyleParser.java:128-129, 150-152). |
+
+## `src/core/style/skins/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `plantuml-skin.ts` | `SKIN_JAR_VERSION`, `PLANTUML_SKIN`, `STRICTUML_SKIN` | GENERATED by `scripts/extract-jar-skin.ts` -- do not edit by hand. |
 
 ## `src/core/svek/`
 
@@ -990,6 +1048,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
 | `switch-dispatch.ts` | `tryOpenSwitch` | `switch (test) / case (v) / endswitch` dispatch (mission ubrr-T10 M2). |
+
+## `src/diagrams/activity/ftile/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractFtile.ts` | `AbstractFtile` |  |
+| `BoxStyle.ts` | `BoxStyle` |  |
+| `FtileGeometry.ts` | `FtileGeometry` |  |
+
+## `src/diagrams/activity/ftile/vertical/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `FtileBoxOld.ts` | `FtileBoxOld` |  |
 
 ## `src/diagrams/activity/layout/`
 
@@ -1436,6 +1508,31 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `TextBlockJson.ts` | `JsonRowGeo`, `CellAtom`, `MeasuredNode`, `buildRows`, `measureNode`, `recordLabelFor` | Node sizing for the json family — the port of upstream's `TextBlockJson`. |
+
+## `src/diagrams/mindmap/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `Branch.ts` | `Branch` |  |
+| `CommandMindMapDirection.ts` | `MINDMAP_DIRECTION_RE`, `applyMindMapDirection` |  |
+| `CommandMindMapOrgmode.ts` | `ORGMODE_RE`, `applyMindMapOrgmode` |  |
+| `CommandMindMapOrgmodeMultiline.ts` | `ORGMODE_MULTILINE_START_RE`, `ORGMODE_MULTILINE_END_RE`, `OrgmodeMultilineBlock`, `collectOrgmodeMultilineBlock`, `applyMindMapOrgmodeMultiline` |  |
+| `CommandMindMapPlus.ts` | `PLUS_RE`, `applyMindMapPlus` |  |
+| `CommandMindMapRoot.ts` | `ROOT_RE`, `applyMindMapRoot` |  |
+| `Finger.ts` | `Finger` |  |
+| `FingerImpl.ts` | `FingerImpl` |  |
+| `Idea.ts` | `STEP_BY_PARENT`, `IdeaContent`, `IdeaDecoration`, `Idea` |  |
+| `IdeaShape.ts` | `IdeaShape`, `fromDesc` | IdeaShape — whether a mindmap node draws a box around its label, no box at all ("boxless"), or a pseudo shape. |
+| `index.ts` | `MindMapGeometry`, `renderMindMap`, `mindmapPlugin` | Mindmap diagram plugin — `MindMapDiagramFactory` (parse, with the style engine built from the block's own skin/skinparam/`<style>` sources, D2), then `TextBlockExporter`'s export of `MindMapDiagram#getTextBlock` on the klimt substrate (D3): |
+| `mindmap-skin-param.ts` | `SkinParamSource`, `SkinParam` | The mindmap engine's `SkinParam` — the slice of upstream's `skin/SkinParam.java` a `MindMapDiagram` reaches through `TitledDiagram#getSkinParam()`: the `ISkinSimple` members the creole sheets read, `getIHtmlColorSet`, the real style engine' |
+| `MindMap.ts` | `MindMapSkinParam`, `MindMap` |  |
+| `MindMapDiagram.ts` | `MindMapDiagram` |  |
+| `MindMapDiagramFactory.ts` | `createMindMapDiagram` |  |
+| `Stripe.ts` | `Stripe` | A single stripe of a `StripeFrontier`: a horizontal x-range `[x1, x2]` (inclusive both ends, per `contains`) holding the highest y the packed `Tetris` frontier has reached across that range. |
+| `StripeFrontier.ts` | `StripeFrontier` |  |
+| `SymetricalTee.ts` | `SymetricalTee` | The packing shape `Tetris.add` places: a "tee" of two rectangular arms — (`thickness1`, `elongation1`) then (`thickness2`, `elongation2`) — laid end to end along x, each arm's own thickness centred on the tee's y. |
+| `SymetricalTeePositioned.ts` | `SymetricalTeePositioned` |  |
+| `Tetris.ts` | `Tetris` |  |
 
 ## `src/diagrams/packetdiag/`
 

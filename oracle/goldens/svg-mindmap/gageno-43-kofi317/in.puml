@@ -1,0 +1,10 @@
+@startmindmap
+<style>
+mindmapDiagram {
+  BackGroundColor transparent
+}
+</style>
+* a
+** a1
+** a2
+@endmindmap
