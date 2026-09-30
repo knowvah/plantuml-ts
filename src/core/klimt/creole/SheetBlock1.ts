@@ -16,6 +16,7 @@ import { HorizontalAlignment } from '../geom/HorizontalAlignment.js';
 import type { UGraphic } from '../UGraphic.js';
 import { UTranslate } from '../UTranslate.js';
 import type { StringBounder } from '../font/StringBounder.js';
+import { Style } from '../../style/Style.js';
 
 /**
  * Atom — upstream: klimt/creole/atom/Atom.java (`interface Atom extends
@@ -68,19 +69,10 @@ interface SplitLine {
  * faithfully, not dropped, per this project's "don't refactor while
  * porting" rule.
  *
- * NOT ported: the `SheetBlock1(Sheet, LineBreakStrategy, Style)` overload
- * — it needs `style.getPadding()`/`style.value(PName.MinimumWidth)`, and
- * this port has no `Style`/`PName` style-resolution cascade anywhere yet
- * (`ClockwiseTopRightBottomLeft.ts`'s own precedent: its `marginForDocument
- * (StyleBuilder)` was dropped for the identical reason). Every call site
- * this mission's roadmap reaches (`Display.java:699`, T9's own target —
- * confirmed via `grep -rn "new SheetBlock1("`) uses the 5-arg
- * `(sheet, maxWidth, padding, marginX1, marginX2)` overload, which IS
- * ported; the other real upstream callers of the `Style` overload
- * (`FtileBoxOld.java`, activity-diagram `vcompact`/`gtile` machinery) are
- * diagram types/subsystems this port has not reached yet — when one of
- * them is ported, the `Style`-overload gap re-opens as ITS prerequisite,
- * not this task's.
+ * The `SheetBlock1(Sheet, LineBreakStrategy, Style)` overload (java:78-81,
+ * `style.getPadding()` + `style.value(PName.MinimumWidth).asDouble()`) is
+ * the `padding` argument given a `Style` (mindmap-engine-port T3c, for
+ * `FtileBoxOld.java:173`).
  *
  * Architecture note on the CONSTRUCTOR'S EXTRA `atomOps` PARAMETER: see
  * `Sea.ts`'s `AtomOps` doc comment. This is the one place this port's
@@ -95,6 +87,7 @@ export class SheetBlock1 extends TextBlockMemoized implements Atom, Stencil {
   private readonly marginX1: number;
   private readonly marginX2: number;
   private readonly atomOps: AtomOps;
+  /** Set only by the `Style` overload. @see SheetBlock1.java:72,78-81 */
   private readonly minimumWidth: number = 0;
 
   private stripes: readonly SplitLine[] | undefined;
@@ -108,7 +101,7 @@ export class SheetBlock1 extends TextBlockMemoized implements Atom, Stencil {
     sheet: Sheet,
     maxWidth: LineBreakStrategy,
     atomOps: AtomOps,
-    padding: ClockwiseTopRightBottomLeft | number = ClockwiseTopRightBottomLeft.none(),
+    padding: ClockwiseTopRightBottomLeft | number | Style = ClockwiseTopRightBottomLeft.none(),
     marginX1 = 0,
     marginX2 = 0,
   ) {
@@ -116,7 +109,12 @@ export class SheetBlock1 extends TextBlockMemoized implements Atom, Stencil {
     this.sheet = sheet;
     this.maxWidth = maxWidth;
     this.atomOps = atomOps;
-    this.padding = typeof padding === 'number' ? ClockwiseTopRightBottomLeft.same(padding) : padding;
+    if (padding instanceof Style) {
+      this.padding = padding.getPadding();
+      this.minimumWidth = padding.value('MinimumWidth').asDouble();
+    } else {
+      this.padding = typeof padding === 'number' ? ClockwiseTopRightBottomLeft.same(padding) : padding;
+    }
     this.marginX1 = marginX1;
     this.marginX2 = marginX2;
   }

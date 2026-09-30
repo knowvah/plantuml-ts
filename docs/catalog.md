@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1293 modules · 4781 exported names.
+1300 modules · 4789 exported names.
 
 ## `src/`
 
@@ -183,7 +183,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `GroupType.ts` | `GroupType` | GroupType — the 8-value group-entity kind selector of the abel model: which kind of container a group Entity is (package, state region, activity partition, ...). |
 | `Hideable.ts` | `Hideable` | Hideable — implemented by anything a `hide` command can hide. |
 | `IEntityImage.ts` | `IEntityImage` | IEntityImage — ADR-2 consumed-interface stub for `svek/IEntityImage.java` (the rendered-block contract every svek leaf image implements). |
-| `ISkinParam.ts` | `UFont`, `StyleBuilder`, `Style`, `FontParam`, `ISkinParam` |  |
+| `ISkinParam.ts` | `UFont`, `StyleBuilder`, `Style`, `FontParam`, `ISkinParam`, `ISkinParamWithSimple` |  |
 | `Kal.ts` | `Kal` |  |
 | `LeafType.ts` | `LeafType`, `getLeafType`, `isLikeClass`, `toHtml` | LeafType — the 51-value leaf-entity kind selector of the abel model: which kind of leaf a `Quark`'s Entity is (class-family, usecase, activity, state, Chen-ER, ports, ...). |
 | `LineConfigurable.ts` | `LineConfigurable` |  |
@@ -512,6 +512,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `FontConfigurationBridge.ts` | `bridgeFontConfiguration` |  |
 | `FontParam.ts` | `ARROW_LABEL_FONT_SIZE`, `NOTE_FONT_SIZE` | `FontParam` — the fixed per-element font sizes upstream declares as enum entries, each independent of the diagram's own default font size. |
 | `FontPosition.ts` | `FontPosition`, `fontPositionSpace`, `muteFontSize`, `fontPositionHtmlTag` | FontPosition — where a creole text run sits relative to the normal baseline: NORMAL, EXPOSANT (`<sup>`) or INDICE (`<sub>`). |
 | `FontStack.ts` | `FontStack` | FontStack — a comma-separated font-family definition (`FontName`), as the SVG and PDF back ends name it. |
@@ -648,6 +649,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorParam.ts` | `ColorParam` |  |
 | `Pragma.ts` | `Pragma` | Pragma — the resolved `!pragma <key> <value>` table for one diagram, plus the `WarningHandler` capability every pragma-aware command shares. |
 | `PragmaKey.ts` | `PragmaKey`, `pragmaKeyDefaultValue`, `pragmaKeyLazyFrom` | PragmaKey — the fixed set of `!pragma <key> <value>` keys `Pragma` stores. |
+| `SkinParamColors.ts` | `SkinParamColors` |  |
+| `SkinParamDelegator.ts` | `SkinParamDelegator` |  |
 | `VisibilityModifier.ts` | `ColorParam`, `SName`, `StyleSignatureBasic`, `VisibilityModifier` |  |
 
 ## `src/core/stereo/`
@@ -1021,6 +1024,20 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
 | `switch-dispatch.ts` | `tryOpenSwitch` | `switch (test) / case (v) / endswitch` dispatch (mission ubrr-T10 M2). |
+
+## `src/diagrams/activity/ftile/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `AbstractFtile.ts` | `AbstractFtile` |  |
+| `BoxStyle.ts` | `BoxStyle` |  |
+| `FtileGeometry.ts` | `FtileGeometry` |  |
+
+## `src/diagrams/activity/ftile/vertical/`
+
+| Module | Exports | Purpose |
+|---|---|---|
+| `FtileBoxOld.ts` | `FtileBoxOld` |  |
 
 ## `src/diagrams/activity/layout/`
 
