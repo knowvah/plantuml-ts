@@ -337,6 +337,13 @@ function buildUSymbolEntityParams(
       fontStereo,
       titleAlignment,
       stereotypeAlignment: HorizontalAlignment.CENTER,
+      // cdd7 T1c (xuloxo-85): `style.wrapWidth()` -> `desc`
+      // (`EntityImageDescription.java:185-189`); `skinparam wrapWidth` is
+      // `PName.MaximumWidth` on `SName.element` (`FromSkinparamToStyle.java
+      // :250`). The sizer already reads it (`class-layout-generic-classifier
+      // .ts#buildDescriptionLeafOpts`); without it the draw re-measured the
+      // unwrapped line and drew a wider rect than the layout reserved.
+      wrapWidth: theme.wrapWidth ?? 0,
     },
     links: [],
     fixCircleLabelOverlapping: theme.fixCircleLabelOverlapping === true,
