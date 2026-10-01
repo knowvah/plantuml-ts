@@ -35,3 +35,52 @@
   `node-dispatch.ts`, `ast.ts`, `InstructionRepeat.java`,
   `InstructionWhile.java`, `ActivityDiagram3.java`, and confirmed by the
   0-movement measurement above.
+
+## Observation: node-dispatch.ts corrupts every single-line `backward:LABEL;`
+- **Context**: Orchestrator push-forward extended T3h's write-set to
+  `tile-layout.ts` to wire the seam above. After wiring, 15 of 19 backward
+  corpus fixtures regressed (weighted score rose) and 2 improved -- NOT a
+  geometry defect in the new wiring.
+- **Finding**: `node-dispatch.ts#parseNodes` (`:475-482`) strips a trailing
+  `;` off any line that does not start with `:`, written for bare
+  control-flow keywords (`start;`, `endif;`) but guarded ONLY by
+  `!line.startsWith(':')` -- which `backward:LABEL;` also satisfies. After
+  the strip, `RE_BACKWARD` (`dispatch-support.ts:67`, requires a literal
+  `;`) fails to match; `tryBackward` (`list-backward-dispatch.ts:37-52`)
+  falls through to its multiline branch (`RE_BACKWARD_HEAD` + `readMulti
+  lineActionBody`), which reads `ctx.lines` RAW (unaffected by the strip,
+  since that mutates a local `line` variable, never `ctx.lines` itself)
+  and swallows every subsequent source line -- the repeat/while's own
+  closer (`repeat while (...)`/`endwhile`), any lane-closer, and any
+  trailing top-level node (e.g. `stop`) -- into the backward label, until
+  it finds a RAW line that happens to end in `;` (which can be an
+  UNRELATED line, as in `debofa-60-mude568`'s second `backward:` line,
+  whose own `;` accidentally looks like a valid closer one line early) or
+  reaches EOF. Net effect: the swallowed `stop`/closer nodes are entirely
+  ABSENT from the AST (confirmed: `kemedu-83-vipa115`'s rendered SVG has
+  no stop ellipse at all), and the repeat/while's own `condition`/
+  `yesLabel`/`outLabel` are lost (`condition: ""` for every affected
+  fixture). Verified directly: parsed the AST for `kemedu-83-vipa115`,
+  `xizola-97-sizu458`, `niviji-21-maco613`, `debofa-60-mude568`,
+  `liteza-62-nopo771` (5 fixtures, repeat and while, single- and
+  multi-line forms, with and without swimlanes) and traced the exact
+  regex/stripping interaction by hand; also confirmed `liteza`'s SECOND
+  repeat loop (a genuinely multiline `backward:`) parses its own
+  `condition` correctly, isolating the trigger to the single-line form
+  specifically.
+- **Impact**: This is a PRE-EXISTING defect (both `node-dispatch.ts` and
+  `dispatch-support.ts` are untouched by every commit on this branch) that
+  has silently affected EVERY corpus fixture using `backward:LABEL;` on
+  one line, since before this mission started -- invisible until now only
+  because `backward`'s tile was always dropped. It very likely affects
+  ANY OTHER `keyword:content;` construct sharing this port's dispatch
+  convention (not investigated further -- scope creep beyond T3h). Did
+  NOT re-pin any of the 15 risers/2 fallers this exposed (would freeze a
+  known-corrupted parse into the goldens, D7/`weightedscore-can-rise-on-
+  a-correct-fix`). `node-dispatch.ts` is outside every write-set granted
+  to this branch so far.
+- **Confidence**: High -- root-caused by reading `node-dispatch.ts:461-
+  496` directly (not inferred from the diff), reproduced the exact
+  swallow chain by hand for 5 fixtures, and confirmed the fix location
+  with a standalone regex test isolating the single variable (strip vs.
+  no-strip).
