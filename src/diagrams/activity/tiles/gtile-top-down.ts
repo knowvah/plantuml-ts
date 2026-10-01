@@ -3,7 +3,7 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
-import { NODE_MARGIN_Y } from '../activity-layout-constants.js';
+import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
 
 export class GtileTopDown extends TileComposite {
   readonly kind = 'gtile-top-down' as const;
@@ -28,6 +28,13 @@ export class GtileTopDown extends TileComposite {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:48-82,190-192
    *   -- a tile's `left` IS its in/out x: `pointIn = (left, inY)`,
    *   `pointOut = (left, outY)`.
+   *
+   * The per-pair vertical gap itself ({@link SEQUENTIAL_ASSEMBLY_GAP}) is
+   * NOT from `FtileAssemblySimple` (a zero-gap merge) -- it is
+   * `Swimlanes`'s single `FtileFactoryDelegatorAssembly` decorator, which
+   * wraps the WHOLE factory once and so applies to every `assembly()` call
+   * this n-ary flattening represents. See that constant's own doc comment
+   * for the full mechanism (raw 35, then a global compression pass).
    */
   constructor(children: Tile[], _bounder: StringBounder, _theme: Theme) {
     super();
@@ -49,10 +56,10 @@ export class GtileTopDown extends TileComposite {
     let y = 0;
     for (const child of children) {
       offsets.push(y);
-      y += child.height + NODE_MARGIN_Y;
+      y += child.height + SEQUENTIAL_ASSEMBLY_GAP;
     }
     this.childOffsets = offsets;
-    this.height = y - NODE_MARGIN_Y;
+    this.height = y - SEQUENTIAL_ASSEMBLY_GAP;
   }
 
   getCoord(hook: HookName): GPoint {
