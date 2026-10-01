@@ -17,6 +17,7 @@ import { activityFontSize, activityLineThickness } from './activity-style-defaul
 import { activityFontColor } from './activity-text-style.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -255,6 +256,35 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   return segments + arrow + midArrowEl + labelEl;
 }
 
+/**
+ * T3j (journal row 36): `geo.totalWidth`/`totalHeight` are the MARGINED
+ * (document-margin-included) canvas dims `canvas-origin.ts#computeCanvasOrigin`
+ * computes -- `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL`,
+ * where `CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_
+ * MARGIN`. The RAW (pre-margin) dims chrome centres against are the
+ * arithmetic inverse of the margin/ceil half of that recipe: subtract the
+ * margin (both sides) and the ceil bump this function adds back.
+ *
+ * KNOWN LIMITATION (not silently dropped): this subtracts from the
+ * ALREADY-FLOORED `totalWidth`/`totalHeight`, not from the ink span itself
+ * -- exact only when that ink span already lands on the integer grid at
+ * this stage. Getting the un-floored raw dims exactly (matching class's own
+ * `computeClassRawInkDims`, independent of `computeClassDocumentDims`)
+ * would mean threading a new field through `assign-coordinates-full.ts`
+ * #assembleFromFinal`/`ActivityGeometry` -- outside this task's write-set;
+ * re-slotted. Measured against the T3j acceptance corpus (cifafo, bigide):
+ * the residual gap on every chrome-bearing fixture checked traces to a
+ * SEPARATE, pre-existing defect (chrome title-text width measurement
+ * precision, or body-ink width for an unrelated construct) -- not to this
+ * subtraction -- but an un-exercised fractional-ink-span fixture could
+ * still expose it. `RenderFragment.preChromeWidth`'s own doc comment names
+ * the general mechanism this value feeds.
+ */
+function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
+  return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -297,11 +327,19 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     children.push(renderSwimlaneTitles(geo, theme));
   }
 
+  const raw = preChromeDims(geo);
   return {
     body: children.join(''),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
     diagramType: DIAGRAM_TYPE_ACTIVITY,
+    // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
+    // document-margin shift baked into `body` above, composes chrome around
+    // the result at these RAW dims, then re-applies the margin to the
+    // chrome-decorated whole -- see `preChromeDims`'s own doc comment for
+    // the exact inverse this subtracts.
+    preChromeWidth: raw.width,
+    preChromeHeight: raw.height,
   };
 }

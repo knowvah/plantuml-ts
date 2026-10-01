@@ -169,32 +169,61 @@ export const DIAMOND_LABEL_PAD = 10;
 // ---------------------------------------------------------------------------
 
 /**
- * The near-corner shift every node/edge/swimlane receives, regardless of
- * shape: upstream's symmetric document margin (`same(10)`) PLUS `Recentred`'s
- * own fixed inner pad. `Recentred#drawU` translates its child by
- * `(-minMax.getMinX() + 5, -minMax.getMinY() + 5)` BEFORE the document
- * margin's own `(10, 10)` translate wraps it
- * (`TextBlockExporter#exportTo`'s `ug.apply(new UTranslate(margin.getLeft(),
- * margin.getTop()))`) -- the two compose to `10 + 5 = 15` on the near side.
- * @see net/sourceforge/plantuml/TitledDiagram.java:275 -- `getDefaultMargins()`
- *   returns `ClockwiseTopRightBottomLeft.same(10)`; `ActivityDiagram3`
- *   declares no override.
- * @see net/sourceforge/plantuml/core/TextBlockExporter.java:172-173,199-202,510-516
+ * `Recentred#drawU`'s own fixed inner pad -- it translates its child by
+ * `(-minMax.getMinX() + 5, -minMax.getMinY() + 5)`, independent of (and
+ * BEFORE) the document margin's own translate.
  * @see net/sourceforge/plantuml/activitydiagram3/Recentred.java:47-59
  */
-export const CANVAS_ORIGIN_SHIFT = 15;
+export const RECENTRED_PAD = 5;
+
+/**
+ * `Recentred#getMinMax`'s own `enlarge(15, 15)` -- grows the ink box's FAR
+ * corner by 15 on each axis (the near corner, read by `drawU`'s translate
+ * above, is untouched by `enlarge`), so `Recentred`'s OWN reported size is
+ * `(M - m) + RECENTRED_ENLARGE` -- this is `RenderFragment.preChromeWidth`/
+ * `preChromeHeight`'s target value (T3j): the size jar's `DiagramChromeFactory
+ * .create` receives as the diagram's "original" `TextBlock`, BEFORE the
+ * document margin wraps the chrome-decorated result.
+ * @see net/sourceforge/plantuml/activitydiagram3/Recentred.java:56
+ */
+export const RECENTRED_ENLARGE = 15;
+
+/**
+ * `TitledDiagram#getDefaultMargins()` -- `ClockwiseTopRightBottomLeft
+ * .same(10)`; `ActivityDiagram3` declares no override. T3j (journal row 36):
+ * unlike `CucaDiagram`'s asymmetric `(0, 5, 5, 0)` (`class/layout-ink-
+ * extent.ts`), this margin is symmetric on every side, so wrapping it around
+ * an already-composed (chrome-included) block requires an explicit SHIFT of
+ * that block's body by `(ACTIVITY_DOCUMENT_MARGIN, ACTIVITY_DOCUMENT_MARGIN)`
+ * -- not just a pad of the declared width/height -- see
+ * `canvas-origin.ts#applyActivityDocumentMargin`.
+ * @see net/sourceforge/plantuml/TitledDiagram.java:275
+ * @see net/sourceforge/plantuml/core/TextBlockExporter.java:172-173,199-202,510-516
+ */
+export const ACTIVITY_DOCUMENT_MARGIN = 10;
+
+/**
+ * The near-corner shift every node/edge/swimlane receives, regardless of
+ * shape: `RECENTRED_PAD` (`Recentred#drawU`'s own fixed inner pad) PLUS
+ * upstream's symmetric document margin (`ACTIVITY_DOCUMENT_MARGIN`),
+ * composed in that order by `TextBlockExporter#exportTo`'s outer
+ * `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))` -- `5 + 10 =
+ * 15` on the near side. T3j: this is the MARGINED (post-chrome-wrap) shift
+ * every fixture's body is drawn at by default (`finalizeGeometry`, unchanged
+ * -- correct for every chrome-less fixture, since there the document margin
+ * wraps the raw body directly, with nothing in between).
+ */
+export const CANVAS_ORIGIN_SHIFT = RECENTRED_PAD + ACTIVITY_DOCUMENT_MARGIN;
 
 /**
  * The constant term in `totalDimension = (M - m) + CANVAS_PADDING_TOTAL`,
  * where `M`/`m` are the ink's own (fudged) max/min per axis
- * (`computeCanvasOrigin`): `Recentred#getMinMax`'s `enlarge(15, 15)` grows
- * the FAR corner by 15 (leaving the near corner, `m`, untouched), then the
- * document margin's `same(10)` adds 10 on BOTH sides
+ * (`computeCanvasOrigin`): `RECENTRED_ENLARGE` grows the FAR corner by 15,
+ * then `ACTIVITY_DOCUMENT_MARGIN` adds 10 on BOTH sides
  * (`TextBlockExporter#calculateFinalDimension`) -- `15 + 10 + 10 = 35`.
- * @see net/sourceforge/plantuml/activitydiagram3/Recentred.java:56 -- `enlarge(15, 15)`
  * @see net/sourceforge/plantuml/core/TextBlockExporter.java:199-202
  */
-export const CANVAS_PADDING_TOTAL = 35;
+export const CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_MARGIN;
 
 /**
  * `SvgGraphics#ensureVisible`'s own `(int)(x + 1)` cast: the FIRST point it
