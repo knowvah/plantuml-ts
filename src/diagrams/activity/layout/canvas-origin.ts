@@ -71,8 +71,14 @@ import { CANVAS_ORIGIN_SHIFT, CANVAS_PADDING_TOTAL, SVG_CANVAS_CEIL } from '../a
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
- *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. */
-interface ShapeFudge {
+ *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
+ *  (T3i, `swimlane-context.ts#measureLaneExtents`): `Swimlanes
+ *  .computeDrawingWidths` (`Swimlanes.java:379-395`) measures each lane's
+ *  own content extent through this SAME `LimitFinder` class -- a lane's
+ *  `getMinMax()` is not the raw node box, it is the SAME fudged ink this
+ *  module already computes for the whole-canvas scan. One fudge table, two
+ *  consumers, never re-derived. */
+export interface ShapeFudge {
   readonly near: number;
   readonly far: number;
 }
@@ -111,11 +117,11 @@ const POLYGON_X_KINDS = new Set(['diamond', 'if-split', 'if-merge', 'while-heade
  *  `case 'break'` returns `''`) -- excluded from the ink scan entirely,
  *  rather than assigned a fudge, so an all-break diagram never collapses
  *  the min/max reduction onto a phantom shape. */
-function isInkless(kind: string): boolean {
+export function isInkless(kind: string): boolean {
   return kind === 'break';
 }
 
-function fudgeX(kind: string): ShapeFudge {
+export function fudgeX(kind: string): ShapeFudge {
   if (ELLIPSE_KINDS.has(kind)) return ELLIPSE_FUDGE;
   if (RECT_KINDS.has(kind)) return RECT_FUDGE;
   if (POLYGON_X_KINDS.has(kind)) return POLYGON_FUDGE_X;

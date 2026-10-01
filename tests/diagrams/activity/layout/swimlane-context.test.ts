@@ -27,7 +27,7 @@ describe('SWIMLANE_HALF_MISSING_SPACE', () => {
 });
 
 describe('measureLaneExtents', () => {
-  it('computes minX/maxX per lane from assigned items', () => {
+  it('computes minX/maxX per lane from assigned items (no kind -- no fudge)', () => {
     const items: LaneItem[] = [
       { swimlane: 'A', x: 10, width: 20 }, // 10..30
       { swimlane: 'A', x: 40, width: 5 }, // 40..45
@@ -62,6 +62,29 @@ describe('measureLaneExtents', () => {
   it('returns an empty map for no lanes and no items, without throwing', () => {
     expect(() => measureLaneExtents([], [])).not.toThrow();
     expect(measureLaneExtents([], []).size).toBe(0);
+  });
+
+  // T3i: a lane's own `getMinMax()` is measured through the SAME
+  // `LimitFinder` the whole-canvas scan uses (`canvas-origin.ts#fudgeX`'s
+  // own doc), so a boundary item's per-shape fudge shifts the lane's own
+  // content extent -- `jakuco-69-dari135`'s lane content landed exactly
+  // `RECT_FUDGE.near` (1) too far right before this was ported.
+  it("fudges an 'action' (rect) item's extent by RECT_FUDGE (near 1, far -1)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'action', x: 10, width: 20 }]; // raw 10..30
+    const extents = measureLaneExtents(items, ['A']);
+    expect(extents.get('A')).toEqual({ minX: 9, maxX: 29 });
+  });
+
+  it("does not fudge a 'start' (ellipse) item's near corner (ELLIPSE_FUDGE near 0)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'start', x: 10, width: 20 }]; // raw 10..30
+    const extents = measureLaneExtents(items, ['A']);
+    expect(extents.get('A')).toEqual({ minX: 10, maxX: 29 });
+  });
+
+  it("excludes a 'break' item's ink entirely (isInkless)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'break', x: 10, width: 20 }];
+    const extents = measureLaneExtents(items, ['A']);
+    expect(extents.get('A')).toEqual({ minX: 0, maxX: 0 });
   });
 });
 

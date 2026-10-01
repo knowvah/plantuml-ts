@@ -9,6 +9,8 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java
  */
 
+import { fudgeX, isInkless } from './canvas-origin.js';
+
 export interface SwimlaneContext {
   name: string;
   x: number;
@@ -27,9 +29,17 @@ export function buildSwimlaneContexts(laneNames: string[], startX: number, laneW
 // Content extents
 // ---------------------------------------------------------------------------
 
-/** A single placed item bucketed into a lane by its `swimlane` field. */
+/**
+ * A single placed item bucketed into a lane by its `swimlane` field.
+ * `kind` (T3i, mirrors `ActivityNodeGeo.kind`) selects the SAME per-shape
+ * `LimitFinder` fudge {@link measureLaneExtents} applies -- optional so
+ * existing call sites/tests that pass a bare box (no fudge, matching the
+ * pre-T3i behavior) are unaffected; every production caller
+ * (`swimlane-placement.ts#measureLanes`) supplies it.
+ */
 export interface LaneItem {
   readonly swimlane?: string;
+  readonly kind?: string;
   readonly x: number;
   readonly width: number;
 }
@@ -56,8 +66,15 @@ export interface LaneExtent {
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:379-395
  *   -- `computeDrawingWidths`, the LimitFinder-per-lane draw-interception
- *   pass this diverges from per D1 (our own geometry, not draw
- *   interception -- our engine already holds every node's coordinates).
+ *   pass. D1 diverged from this (our own geometry, not draw interception --
+ *   our engine already holds every node's coordinates), but a lane's own
+ *   `getMinMax()` is populated by the SAME `LimitFinder` class the whole-
+ *   canvas scan uses (`klimt/drawing/LimitFinder.java:170-211`), so its
+ *   per-shape fudge (`canvas-origin.ts#fudgeX`) applies here too -- a raw
+ *   node box is 1-2px off every lane whose boundary item is a
+ *   rect/ellipse/polygon kind (T3i, `jakuco-69-dari135`/`sikino-19-
+ *   vuca111`/others: box content landed exactly `RECT_FUDGE.near` too far
+ *   left because this function read the raw box edge, not its ink).
  */
 export function measureLaneExtents(items: readonly LaneItem[], laneNames: readonly string[]): Map<string, LaneExtent> {
   const extents = new Map<string, LaneExtent>();
@@ -65,9 +82,10 @@ export function measureLaneExtents(items: readonly LaneItem[], laneNames: readon
     let minX = Number.POSITIVE_INFINITY;
     let maxX = Number.NEGATIVE_INFINITY;
     for (const item of items) {
-      if (item.swimlane !== name) continue;
-      minX = Math.min(minX, item.x);
-      maxX = Math.max(maxX, item.x + item.width);
+      if (item.swimlane !== name || isInkless(item.kind ?? '')) continue;
+      const fudge = fudgeX(item.kind ?? '');
+      minX = Math.min(minX, item.x - fudge.near);
+      maxX = Math.max(maxX, item.x + item.width + fudge.far);
     }
     extents.set(name, minX === Number.POSITIVE_INFINITY ? { minX: 0, maxX: 0 } : { minX, maxX });
   }

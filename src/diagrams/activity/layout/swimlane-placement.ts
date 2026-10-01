@@ -351,7 +351,9 @@ function measureLanes(
   theme: Theme,
 ): { widths: Map<string, LaneWidth>; min: number } {
   const items: LaneItem[] = nodes.map((n) =>
-    n.swimlane !== undefined ? { swimlane: n.swimlane, x: n.x, width: n.width } : { x: n.x, width: n.width },
+    n.swimlane !== undefined
+      ? { swimlane: n.swimlane, kind: n.kind, x: n.x, width: n.width }
+      : { kind: n.kind, x: n.x, width: n.width },
   );
   const extents = measureLaneExtents(items, laneNames);
 
