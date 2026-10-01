@@ -469,6 +469,40 @@ describe('activityFontColor — root style-override tier (T4b, D3 amended)', () 
   });
 });
 
+describe('activityFontColor — arrow reads graph.arrowFontColor (T2c, suzuci-53-biku826)', () => {
+  it('`skinparam arrowFontColor`/`activityArrowFontColor` colours only the arrow label', () => {
+    // `activityArrowFontColor` normalises to `arrowfontcolor`
+    // (`skinparam-key-normalize.ts#normaliseKey` step 3, folding the
+    // `activity`/`class`/`component`/... diagram-type arrow prefixes to
+    // plain `arrow`, mirroring `SkinParam.java:cleanForKeySlow`), which the
+    // `arrowfontcolor` key handler already resolves into
+    // `theme.colors.graph.arrowFontColor` (`skinparam-key-handlers-table-a
+    // .ts:161-167`, `FromSkinparamToStyle.java:149` `addConFont("arrow",
+    // SName.arrow)`) -- the SAME field `arrow-label-font.ts
+    // #resolveArrowLabelFont` already reads for every OTHER diagram type's
+    // edge label. This is activity's own reader of it.
+    const theme: Theme = { ...DEFAULT, colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, arrowFontColor: '#FF0000' } } };
+    expect(activityFontColor(theme, 'arrow')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'activity')).toBe(ACTIVITY_FONT_COLOR);
+  });
+
+  it('an activity{arrow{FontColor}} bucket override still wins (more specific)', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: {
+        ...DEFAULT.colors,
+        graph: { ...DEFAULT.colors.graph, arrowFontColor: '#FF0000' },
+        elements: { ...DEFAULT.colors.elements, arrow: { font: 'blue' } },
+      },
+    };
+    expect(activityFontColor(theme, 'arrow')).toBe('#0000FF');
+  });
+
+  it('no graph.arrowFontColor set leaves the arrow default (black) unmoved', () => {
+    expect(activityFontColor(DEFAULT, 'arrow')).toBe(ACTIVITY_FONT_COLOR);
+  });
+});
+
 describe('activityHorizontalAlignment (mission activity-min-box-width, T1, D2)', () => {
   it('the default theme resolves the root `HorizontalAlignment left` (plantuml.skin:12)', () => {
     expect(activityHorizontalAlignment(DEFAULT)).toBe('left');
