@@ -156,16 +156,22 @@ function assembleFromFinal(
   };
 }
 
+/** {@link pass1Assemble}'s own inputs, bundled to keep that function under
+ *  the file's 5-parameter limit (T3i's `theme` would be a 6th). */
+interface Pass1AssembleInput {
+  placed: PlacementResult;
+  reservations: Reservation[];
+  bounds: { maxX: number; maxY: number };
+  baseY: number;
+  titlesHeight: number;
+  theme: Theme;
+}
+
 /** {@link assignCoordinatesFull}'s `compress: false` half -- the pass-1
  *  geometry, assembled the same way `compressAndAssemble` does but with no
  *  transform applied and `removed` zeroed. */
-function pass1Assemble(
-  placed: PlacementResult,
-  reservations: Reservation[],
-  bounds: { maxX: number; maxY: number },
-  baseY: number,
-  titlesHeight: number,
-): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+function pass1Assemble(input: Pass1AssembleInput): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+  const { placed, reservations, bounds, baseY, titlesHeight, theme } = input;
   const final = finalizeGeometry({
     nodes: placed.nodes,
     edges: placed.edges,
@@ -174,6 +180,7 @@ function pass1Assemble(
     bounds,
     baseY,
     titlesHeight,
+    theme,
   });
   return assembleFromFinal(final, { x: 0, y: 0 });
 }
@@ -198,6 +205,7 @@ function compressAndAssemble(input: CompressAndAssembleInput): Omit<AssignCoordi
     bounds: compressed.bounds,
     baseY,
     titlesHeight,
+    theme,
   });
   return assembleFromFinal(final, compressed.removed);
 }
@@ -241,7 +249,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
 
   if (!compress) {
-    const result = pass1Assemble(placed, allReservations, bounds, baseY, titlesHeight);
+    const result = pass1Assemble({ placed, reservations: allReservations, bounds, baseY, titlesHeight, theme });
     return inLanePassOrder(result, placed.edgeMeta, ast.swimlanes);
   }
   const result = compressAndAssemble({

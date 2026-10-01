@@ -130,6 +130,21 @@ export interface PlacementResult {
  * chrome renderer (band rect height) so both measure the exact same value
  * -- D2 forbids a second, independent implementation of this number.
  */
+/**
+ * The ASCENT fraction a title's baseline sits at within the band, from
+ * `StringBounder#getDescent` = `size / 4.5` (`klimt/font/StringBounder
+ * .java:47`) -- the SAME ratio `activity-renderer-shapes.ts#ASCENT_FRACTION`
+ * uses for every other activity label. Lives here (not the renderer) so
+ * `canvas-origin.ts#extendForSwimlaneTitles` (T3i) can share the exact
+ * baseline-Y the renderer draws at, rather than re-deriving it -- layout
+ * owns shared geometric constants, the renderer only consumes them.
+ * Verified against two pinned fixtures: `sikino-19-vuca111`
+ * (`SwimlaneTitleFontSize 8`, band y=16) -> baseline 22.222 = 16 + 8*7/9;
+ * `pakema-21-xema183` (default 18, band y=17.5) -> baseline 31.5 = 17.5 +
+ * 18*7/9. Both exact.
+ */
+export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
+
 export function measureSwimlaneTitlesHeight(
   laneNames: readonly string[],
   bounder: StringBounder,
