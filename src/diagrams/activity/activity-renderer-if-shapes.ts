@@ -25,9 +25,17 @@ import { drawActivityText } from './activity-renderer-text.js';
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
  * `Hexagon.asPolygon(shadowing)` (`vertical/FtileDiamond.java:89`), a
- * 4-point rhombus (`Hexagon.java:49-56`: `(12,0) (24,12) (12,24) (0,12)`)
- * translated to the node's own `(x, y)` -- the walker places the node so
- * this 24x24 box is exactly the drawn extent (D2's interface contract).
+ * 4-point rhombus translated to the node's own `(x, y)` -- the walker
+ * places the node so this 24x24 box is exactly the drawn extent (D2's
+ * interface contract). `Hexagon.asPolygon(double)` (`Hexagon.java:48-55`)
+ * calls `addPoint` FIVE times, re-adding `(12,0)` as the closing point
+ * after `(0,12)` (`Hexagon.java:51,55`: `diams.addPoint(hexagonHalfSize,
+ * 0)` opens and closes the list) -- `UPolygon` does not close itself on
+ * draw (T2f mechanism 1, `daxare-39-buci637`: jar `points="...,68.725,119,
+ * 80.725,107"` repeats the first pair). `svg-shapes.ts#polygon` only joins
+ * the points it is given (no implicit closing), so the activity side
+ * repeats the first point explicitly, same as the hexagon
+ * ({@link renderHexagon}).
  * Same fill/stroke pair `renderDiamond` draws with, plus the explicit
  * `diamond` bucket's line thickness (`FtileDiamond.java:89`'s
  * `.apply(getStyle().getStroke())` -- the diamond style's own stroke,
@@ -37,12 +45,14 @@ import { drawActivityText } from './activity-renderer-text.js';
  */
 export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
+  const first = { x: node.x + 12, y: node.y };
   return polygon(
     [
-      { x: node.x + 12, y: node.y },
+      first,
       { x: node.x + 24, y: node.y + 12 },
       { x: node.x + 12, y: node.y + 24 },
       { x: node.x, y: node.y + 12 },
+      first,
     ],
     { fill: c.diamondFill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );

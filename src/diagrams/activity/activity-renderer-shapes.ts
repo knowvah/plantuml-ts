@@ -291,14 +291,21 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
   const dent = h / 2;
+  // `Hexagon.asPolygon(shadowing, width, height)` (`Hexagon.java:65-74`)
+  // calls `addPoint` SEVEN times, re-adding the first point `(hexagonHalf
+  // Size, 0)` as the closing point after `(0, height/2)`
+  // (`Hexagon.java:68,74`) -- `UPolygon` does not close itself on draw
+  // (T2f mechanism 1, same as {@link renderIfMerge}).
+  const first = { x: x + dent, y: y };
   const shape = polygon(
     [
-      { x: x + dent, y: y },
+      first,
       { x: x + w - dent, y: y },
       { x: x + w, y: y + h / 2 },
       { x: x + w - dent, y: y + h },
       { x: x + dent, y: y + h },
       { x: x, y: y + h / 2 },
+      first,
     ],
     { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
