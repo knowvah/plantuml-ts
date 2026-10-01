@@ -495,6 +495,16 @@ describe('renderActivity — if-label node', () => {
     expect(Number(textMatch![1])).toBe(10);
     expect(Number(textMatch![2])).toBeCloseTo(20 + 11 * (1 - 1 / 4.5), 2);
   });
+
+  // T1b follow-up (D1): if-label now draws through `drawActivityText`, so
+  // its 3-char "yes" label carries a real textLength (upstream's own
+  // `text.length() > 1` guard) instead of core/svg.ts#text's unset one.
+  it('carries a real textLength (D1 — routed through DriverTextSvg)', () => {
+    const node = makeNode({ kind: 'if-label', label: 'yes', x: 10, y: 20 });
+    const geo = makeGeo({ nodes: [node] });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>yes<\/text>/);
+  });
 });
 
 // ---------------------------------------------------------------------------

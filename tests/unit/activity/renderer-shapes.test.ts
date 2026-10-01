@@ -466,6 +466,32 @@ describe('T1b — klimt text driver (D1)', () => {
     expect(svg).not.toContain('dominant-baseline');
     expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>test<\/text>/);
   });
+
+  // Follow-up push-forward: activity-renderer-signal-shapes.ts's chevron/
+  // parallelogram single-line labels carried the SAME `dominant-baseline:
+  // 'central'` / `cy + boxSize/3` approximations as the action/diamond
+  // boxes above -- fixed identically (same file, same mechanism, D1/D9).
+  it('a chevron (<<input>>) label carries textLength and no dominant-baseline', () => {
+    const node = makeNode({ kind: 'action', label: 'go now', stereotype: 'input', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderChevronLeft(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>go now<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12; // activityFontSize(theme, 'activity')
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
+
+  it('a parallelogram (<<save>>) label carries textLength and no dominant-baseline/box-centre hack', () => {
+    const node = makeNode({ kind: 'action', label: 'store', stereotype: 'save', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderParallelogram(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>store<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12;
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
 });
 
 // ---------------------------------------------------------------------------

@@ -158,4 +158,23 @@ describe('renderSwimlaneTitles', () => {
     const { swimlaneBand: _omit, ...geo } = makeGeo();
     expect(renderSwimlaneTitles(geo, theme)).toBe('');
   });
+
+  // T1b follow-up (D1: no second text path) -- the title now draws through
+  // `drawActivityText`/`DriverTextSvg`, so a multi-char name carries a real
+  // `textLength` (upstream's own `text.length() > 1` guard, SvgGraphics
+  // .java's applyTextLengthAdjust) where the single-char 'A'/'B' fixture
+  // above cannot exercise it.
+  it('a multi-char lane title carries textLength, unaffected baseline math', () => {
+    const geo = makeGeo({
+      swimlanes: [{ name: 'Alice', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 }],
+    });
+    const out = renderSwimlaneTitles(geo, theme);
+    expect(out).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>Alice<\/text>/);
+    // TITLE_ASCENT_FRACTION math is untouched by T1b -- still
+    // band.y + fontSize * (1 - 1/4.5), jar-verified in this module's own
+    // doc comment (sikino-19-vuca111 / pakema-21-xema183).
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(out)?.[1]);
+    const fontSize = 18; // SWIMLANE_FONT_SIZE default
+    expect(y).toBeCloseTo(17.5 + fontSize * (1 - 1 / 4.5), 2);
+  });
 });
