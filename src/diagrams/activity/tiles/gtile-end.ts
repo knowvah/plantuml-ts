@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
 
-import { STOP_OUTER_RADIUS as OUTER_RADIUS } from '../activity-layout-constants.js';
+import { END_OUTER_RADIUS as OUTER_RADIUS } from '../activity-layout-constants.js';
 
 export class GtileEnd extends TileLeaf {
   readonly kind = 'gtile-end' as const;
@@ -31,9 +31,9 @@ export class GtileEnd extends TileLeaf {
 
   /**
    * No out point.
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:121
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:119-121
    *   -- `calculateDimensionFtile` uses the four-argument `FtileGeometry`
-   *   constructor (no `outY`).
+   *   constructor (no `outY`), `SIZE = 20` (`:61`).
    */
   hasPointOut(): boolean {
     return false;

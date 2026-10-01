@@ -31,9 +31,10 @@ export class GtileStop extends TileLeaf {
 
   /**
    * No out point. Also what `detach` builds (`tile-layout.ts:73`).
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:93
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:92-94
    *   -- `calculateDimensionFtile` uses the four-argument `FtileGeometry`
-   *   constructor (no `outY`).
+   *   constructor (no `outY`), `SIZE = 22` (`:55`), delegated to
+   *   `svek/image/CircleEnd.java:55` for the drawn geometry (T1c, D3).
    */
   hasPointOut(): boolean {
     return false;

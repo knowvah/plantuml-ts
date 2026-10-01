@@ -10,7 +10,70 @@ export const START_STOP_RADIUS = 10;
  *  three were once spelled `RADIUS` — and different again from json's
  *  own `SPOT_RADIUS = 3`, which is why this one is not called that. */
 export const CONNECTOR_SPOT_RADIUS = 8;
-export const STOP_OUTER_RADIUS = 14;
+
+/**
+ * `stop`'s outer (bullseye) ellipse radius. `FtileCircleStop#drawU`
+ * (`:87-89`) delegates ALL drawing to a `CircleEnd` field, never drawing
+ * anything itself; `CircleEnd` has its OWN `SIZE = 22` (`:55`) -- the SAME
+ * number `FtileCircleStop#calculateDimensionFtile` (`:92-94`,
+ * `new FtileGeometry(SIZE, SIZE, SIZE/2, 0)`) uses for the TILE, so tile
+ * diameter and the drawn outer ellipse's diameter are one constant by
+ * construction, not two independently-chosen numbers. Was an unsourced 14
+ * (T1c, `plans/activity-divergence-drive`, D3) shared with `kill`'s own
+ * now-decoupled {@link KILL_OUTER_RADIUS}.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:55,87-94
+ * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:55,72-73
+ */
+export const STOP_OUTER_RADIUS = 11;
+
+/**
+ * `CircleEnd#drawU`'s inner (filled) ellipse: `delta = 5` (`:88`) insets
+ * the small ellipse on every side, so its diameter is `SIZE - delta*2` and
+ * its radius is the outer radius minus this same `delta` -- not an
+ * independent fraction of the outer radius (the port's old `* 0.55` was
+ * unsourced and is deleted).
+ * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:88-89
+ */
+export const STOP_INNER_DELTA = 5;
+
+/**
+ * `end`'s outer ellipse radius. `FtileCircleEndCross` draws itself (no
+ * delegate, unlike `stop`): own `SIZE = 20` (`:61`), reused unchanged by
+ * `calculateDimensionFtile` (`:119-121`) for the tile.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:61,98-121
+ */
+export const END_OUTER_RADIUS = 10;
+
+/**
+ * `end`'s cross stroke thickness -- hardcoded in `drawU` (`:110`),
+ * independent of the style's own `LineThickness` ({@link
+ * CIRCLE_END_LINE_THICKNESS} in `activity-style-defaults.ts`, which strokes
+ * only the outer ellipse). Drives the inset diagonals: `size2 = (SIZE -
+ * thickness) / sqrt(2)` (`:111`), `delta = (SIZE - size2) / 2` (`:112`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:109-115
+ */
+export const END_CROSS_THICKNESS = 2.5;
+
+/**
+ * `kill`'s own terminal radius -- decoupled from {@link STOP_OUTER_RADIUS}
+ * at T1c (`plans/activity-divergence-drive`, decisions.md#D3 amended,
+ * journal row 18). Both constants held the SAME unsourced value (14) before
+ * T1c corrected `stop` to the Java-cited 11; `kill` is intentionally left
+ * UNCHANGED here -- its own upstream mechanism (`FtileKilled` /
+ * `FtileCircleKill`) was not read this task and is T2b's (detach/kill)
+ * scope, not this one's. This constant exists only so `kill`'s pixels stay
+ * byte-identical while `stop`'s become correct.
+ */
+export const KILL_OUTER_RADIUS = 14;
+
+/**
+ * `kill`'s inner/outer ratio -- the PRE-EXISTING, UNSOURCED fit (`0.55`)
+ * `renderStop` used for both `stop` and `kill` before T1c split them.
+ * Relocated here (named, not a bare literal in the renderer) rather than
+ * re-derived: changing it would change `kill`'s rendered pixels, which is
+ * explicitly out of this task's scope (see {@link KILL_OUTER_RADIUS}).
+ */
+export const KILL_INNER_RATIO = 0.55;
 /** The note box's own horizontal padding. Split out of the former
  *  `ACTION_H_PAD` by `activity-style-defaults` T4, which replaced that
  *  constant's ACTION-box uses with the resolved `activityPadding`.

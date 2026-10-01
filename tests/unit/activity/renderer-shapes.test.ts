@@ -18,6 +18,7 @@ import {
   renderDiamond,
   renderEnd,
   renderHexagon,
+  renderKill,
   renderLabel,
   renderNote,
   renderParallelogram,
@@ -89,36 +90,48 @@ describe('renderStart', () => {
 });
 
 describe('renderStop', () => {
+  // `FtileCircleStop#drawU` (`:87-89`) delegates to `CircleEnd`
+  // (`svek/image/CircleEnd.java:55,72-103`): tile SIZE=22 (`gtile-stop.ts`),
+  // outer r=11, inner delta=5 so inner r=6 (T1c, D3) -- not the old
+  // unsourced `outerR * 0.55`.
   it('emits exactly two <ellipse> elements (bullseye), never a <circle>', () => {
-    const node = makeNode({ kind: 'stop', width: 28, height: 28 });
+    const node = makeNode({ kind: 'stop', width: 22, height: 22 });
     const svg = renderStop(node, theme);
     expect(svg).not.toContain('<circle');
     expect((svg.match(/<ellipse/g) ?? []).length).toBe(2);
   });
 
-  it('outer ellipse is unfilled and stroked in the resolved circle ink; inner is filled', () => {
+  it('outer ellipse is unfilled and stroked in the resolved circle ink; inner is filled AND stroked the same', () => {
     // `activityDiagram { circle { start, stop, end { LineColor #2;
     // BackgroundColor #2; LineThickness 1 } } }` (plantuml.skin:378-380).
     // Was `theme.colors.border` (#181818) at stroke-width 2, neither of
     // which came from upstream. `#2` resolves through HColorSet to
     // #222222, which the SVG layer shortens to #222 -- the exact spelling
     // the jar emits (SvgGraphics#shortenColor).
-    const node = makeNode({ kind: 'stop', width: 28, height: 28 });
+    //
+    // The inner ellipse ALSO carries this stroke -- jar-verified against
+    // `bareka-88-fusu160`/`numalo-91-pole243`'s own oracle SVGs, both of
+    // which show `stroke:#222;stroke-width:1` on BOTH ellipses, not fill
+    // alone on the inner one (`CircleEnd.java:102`'s own chain reads as
+    // bare, but the rendered bytes settle it).
+    const node = makeNode({ kind: 'stop', width: 22, height: 22 });
     const svg = renderStop(node, theme);
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('fill="#222"');
-    expect(svg).toContain('stroke="#222"');
-    expect(svg).toContain('stroke-width="1"');
+    expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
+    expect((svg.match(/stroke-width="1"/g) ?? []).length).toBe(2);
     expect(svg).not.toContain('stroke-width="2"');
   });
 
-  it('inner radius is 0.55x the outer, both cx/cy centered on the node', () => {
-    const node = makeNode({ kind: 'stop', x: 50, y: 50, width: 28, height: 28 });
+  it('outer radius is 11, inner is 6 (outer - delta 5), both cx/cy centered on the node', () => {
+    const node = makeNode({ kind: 'stop', x: 50, y: 50, width: 22, height: 22 });
     const svg = renderStop(node, theme);
-    expect(svg).toContain('cx="64"');
-    expect(svg).toContain('cy="64"');
-    expect(svg).toContain('rx="14"');
-    expect(svg).toContain('rx="7.7"');
+    expect(svg).toContain('cx="61"');
+    expect(svg).toContain('cy="61"');
+    expect(svg).toContain('rx="11"');
+    expect(svg).toContain('rx="6"');
+    expect(svg).not.toContain('rx="14"');
+    expect(svg).not.toContain('rx="7.7"');
   });
 
   it('resolves a named theme color to hex on both ellipses', () => {
@@ -134,7 +147,36 @@ describe('renderStop', () => {
   });
 });
 
+describe('renderKill', () => {
+  // `kill` is decoupled from `stop` at T1c (D3): it keeps the PRE-FIX
+  // unsourced `outerR * 0.55` ratio (now `KILL_INNER_RATIO`) at its own
+  // unchanged tile size (28), so its pixels stay byte-identical across
+  // this task. `kill`'s own upstream mechanism is out of scope (T2b).
+  it('emits exactly two <ellipse> elements (bullseye), never a <circle>', () => {
+    const node = makeNode({ kind: 'kill', width: 28, height: 28 });
+    const svg = renderKill(node, theme);
+    expect(svg).not.toContain('<circle');
+    expect((svg.match(/<ellipse/g) ?? []).length).toBe(2);
+  });
+
+  it('preserves the pre-T1c outer=14/inner=7.7 geometry, unchanged by the stop fix', () => {
+    const node = makeNode({ kind: 'kill', x: 50, y: 50, width: 28, height: 28 });
+    const svg = renderKill(node, theme);
+    expect(svg).toContain('cx="64"');
+    expect(svg).toContain('cy="64"');
+    expect(svg).toContain('rx="14"');
+    expect(svg).toContain('rx="7.7"');
+    expect(svg).toContain('fill="none"');
+    expect(svg).toContain('stroke="#222"');
+    expect(svg).toContain('stroke-width="1"');
+  });
+});
+
 describe('renderEnd', () => {
+  // `FtileCircleEndCross#drawU` (`:98-117`) draws itself: SIZE=20 (`:61`),
+  // outer r=10; cross `thickness=2.5` (hardcoded, `:110`),
+  // `size2=(SIZE-thickness)/sqrt(2)`, `delta=(SIZE-size2)/2` (`:111-112`) --
+  // not the old unsourced `r * SQRT1_2` tip-to-border construction.
   it('emits one <ellipse> border plus two crossing <line>s, never a <circle>', () => {
     const node = makeNode({ kind: 'end', width: 20, height: 20 });
     const svg = renderEnd(node, theme);
@@ -149,6 +191,30 @@ describe('renderEnd', () => {
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('rx="10"');
     expect(svg).toContain('ry="10"');
+    expect(svg).toContain('stroke-width="1.5"');
+  });
+
+  it('the cross is inset by delta=3.813 from the bounding box, size2=12.374 per side', () => {
+    // size=20, thickness=2.5: size2=(20-2.5)/sqrt(2)=12.374368...,
+    // delta=(20-size2)/2=3.812815... -- jar-cited formula, not fitted.
+    const node = makeNode({ kind: 'end', x: 50, y: 50, width: 20, height: 20 });
+    const svg = renderEnd(node, theme);
+    const lines = [...svg.matchAll(/<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/g)];
+    expect(lines).toHaveLength(2);
+    const [l1, l2] = lines as [RegExpMatchArray, RegExpMatchArray];
+    expect(Number(l1[1])).toBeCloseTo(53.813, 3);
+    expect(Number(l1[2])).toBeCloseTo(53.813, 3);
+    expect(Number(l1[3])).toBeCloseTo(66.187, 3);
+    expect(Number(l1[4])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[1])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[2])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[3])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[4])).toBeCloseTo(53.813, 3);
+  });
+
+  it('cross stroke-width is 2.5, independent of the ellipse stroke-width 1.5', () => {
+    const svg = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
+    expect(svg).toContain('stroke-width="2.5"');
     expect(svg).toContain('stroke-width="1.5"');
   });
 });
@@ -204,9 +270,9 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     // The `start, stop, end` block sets LineThickness 1 (:378); `end`
     // ALONE overrides it to 1.5 (:383), and upstream gives the two
     // distinct StyleSignatures (VCompactFactory.java:97 vs :101).
-    const end = renderEnd(makeNode({ kind: 'end', width: 28, height: 28 }), theme);
+    const end = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
     expect(end).toContain('stroke-width="1.5"');
-    const stop = renderStop(makeNode({ kind: 'stop', width: 28, height: 28 }), theme);
+    const stop = renderStop(makeNode({ kind: 'stop', width: 22, height: 22 }), theme);
     expect(stop).toContain('stroke-width="1"');
     expect(stop).not.toContain('stroke-width="1.5"');
   });
