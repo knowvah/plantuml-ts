@@ -711,6 +711,34 @@ describe('renderActivity — edge with emphasize', () => {
     const hasMidpointTip = polygons.some((p) => p.includes('0,15'));
     expect(hasMidpointTip).toBe(true);
   });
+
+  // T3a: `Worm#drawInternalOneColor`'s per-segment loop (`ftile/Worm.java:
+  // 134-144`) draws the emphasize decoration BEFORE the matching segment's
+  // OWN `ULine`, interleaved with the other plain segment lines -- never
+  // before or after the whole run. The terminal (`endDecoration`) draw sits
+  // BELOW that loop (`:164-171`), after every segment.
+  it('draws the emphasis arrowhead before its own segment, terminal arrowhead last', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+            { x: 50, y: 30 },
+            { x: 50, y: 90 },
+          ],
+          emphasize: 'down',
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const tags = [...content.matchAll(/<(line|polygon)/g)].map((m) => m[1]);
+    // emphasize polygon, THEN its segment's line, THEN the other two
+    // segment lines, THEN the terminal polygon -- never segments-then-both-
+    // arrowheads.
+    expect(tags).toEqual(['polygon', 'line', 'line', 'line', 'polygon']);
+  });
 });
 
 // ---------------------------------------------------------------------------
