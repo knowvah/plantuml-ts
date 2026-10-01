@@ -456,11 +456,16 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     const tile = new GtileWhile(header, body, bounder, theme);
     const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
-    // action1->brk, brk->action2 (the body's OWN internal sibling edges,
-    // pushed while walking the body, before the while's own connections),
-    // then In, Back (action2 still has a point out), Out, Out2, then the
-    // weld LAST -- 7 edges total.
-    expect(geo.edges).toHaveLength(7);
+    // action1->brk (the body's OWN internal sibling edge, pushed while
+    // walking the body, before the while's own connections). brk->action2
+    // is NOT drawn: `GtileBreak.hasPointOut()` is `false`
+    // (`FtileBreak.java:63`, `calculateDimensionEmpty().withoutPointOut()`)
+    // -- a break has no fall-through, so the gtile-top-down sibling edge
+    // gate (T3b, `FtileFactoryDelegatorAssembly.java:67-70`) skips it. Then
+    // In, Back (action2 still has a point out), Out, Out2, then the weld
+    // LAST -- 6 edges total (was 7 before the gate fix; this test pinned
+    // the pre-fix phantom brk->action2 edge).
+    expect(geo.edges).toHaveLength(6);
     const breakNode = geo.nodes.find((n) => n.kind === 'break')!;
     const weld = geo.edges[geo.edges.length - 1]!;
     // T1a (D2): the weld's own target x sits on the while's own exit
@@ -919,5 +924,55 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
     expect(splitBar.swimlane).toBe('LaneA');
     expect(joinLine.swimlane).toBe('LaneB');
+  });
+});
+
+// T3b (`FtileFactoryDelegatorAssembly.java:67-70`): the gtile-top-down
+// sibling edge is skipped when the PRECEDING child has no out point --
+// mirrors the fork/split/while/repeat walkers, which already gate their
+// own sibling edges on `hasPointOut()` (see the `fork/split branch
+// connectors` describe block above).
+describe('assignCoordinates — gtile-top-down sibling edge gated on hasPointOut() (T3b)', () => {
+  function deadEndStub(label: string): Tile {
+    return {
+      kind: 'stub-dead-end',
+      width: 40,
+      height: 20,
+      getCoord: (hook) => (hook === NORTH_HOOK ? { x: 20, y: 0 } : { x: 20, y: 20 }),
+      hasPointOut: () => false,
+      swimlane: label,
+    };
+  }
+
+  it('a dead-ended first child gets no out-edge into its sibling', () => {
+    const dead = deadEndStub('dead');
+    const next = new GtileAction({ kind: 'action' as const, label: 'after' }, bounder, theme);
+    const root = new GtileTopDown([dead, next], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes).toHaveLength(2);
+    expect(geo.edges).toHaveLength(0);
+  });
+
+  it('a, dead, c: only a->dead is drawn (dead->c is gated out)', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const dead = deadEndStub('dead');
+    const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
+    const root = new GtileTopDown([a, dead, c], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.nodes).toHaveLength(3);
+    expect(geo.edges).toHaveLength(1);
+    const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
+    expect(geo.edges[0]!.points[0]).toEqual(expect.objectContaining({ y: aBottom }));
+  });
+
+  it('a live first child still gets its out-edge (control: gate does not over-fire)', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+    const root = new GtileTopDown([a, b], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+
+    expect(geo.edges).toHaveLength(1);
   });
 });
