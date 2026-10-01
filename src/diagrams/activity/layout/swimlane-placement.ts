@@ -174,8 +174,12 @@ export interface SwimlaneChrome {
 /**
  * Derives the band rect and the divider Y-range from the already-placed
  * lane geometry ({@link placeSwimlanes}'s own `swimlanes` output) plus the
- * block's own top (`baseY`) and content bottom (`contentBottomY`, the
- * `totalHeight - LAYOUT_MARGIN` upstream's own divider height uses).
+ * block's own top (`baseY`) and content bottom (`contentBottomY` -- the
+ * real content's own bottom edge, `bounds.maxY` shifted by the SAME
+ * `canvas-origin.ts#computeCanvasOrigin` translate `baseY` itself already
+ * carries; T1a (D2) replaced the flat `totalHeight - LAYOUT_MARGIN` this
+ * used to be with that dynamic shift -- see `assign-coordinates-full.ts
+ * #finalizeGeometry`, the one caller).
  *
  * Band x/width: `Swimlanes#drawTitlesBackground` (`:358-367`) draws at
  * `ug.apply(dx(5))` with `width = swimlanesSpecial().last().getTranslate()

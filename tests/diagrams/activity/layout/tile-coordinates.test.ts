@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assignCoordinates, LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
+import { assignCoordinates } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
 import { dedupeAdjacentPoints } from '../../../../src/diagrams/activity/layout/edge-point-dedupe.js';
 import { GtileAction } from '../../../../src/diagrams/activity/tiles/gtile-action.js';
@@ -34,6 +34,46 @@ const bounder: StringBounder = {
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
 const emptyAst: ActivityDiagramAST = { nodes: [], swimlanes: [] };
+// T1a (D2): `LAYOUT_MARGIN` was deleted from production -- the canvas
+// origin is now computed dynamically from the placed geometry's own ink
+// extent (`assign-coordinates-full.ts#computeCanvasOrigin`,
+// `canvas-origin.ts`), which makes the ABSOLUTE value of the `baseX`/
+// `baseY` passed into `assignCoordinates` below unobservable (the dynamic
+// shift cancels whatever base is passed). Kept as a local, arbitrary
+// non-zero base purely to catch an accidental hardcoded-zero regression in
+// `walkTile`. Assertions that used to read `LAYOUT_MARGIN` as an ABSOLUTE
+// expected position now use the node's own shape-fudge origin instead
+// (`RECT_ORIGIN`/`ELLIPSE_ORIGIN` below, `canvas-origin.ts`'s own
+// `RECT_FUDGE`/`ELLIPSE_FUDGE`); assertions that only used it as a shared
+// additive term between two RELATIVE node positions are unaffected (the
+// uniform shift cancels in a difference) and are left exactly as they were.
+const LAYOUT_MARGIN = 12;
+/** `CANVAS_ORIGIN_SHIFT`(15) + `RECT_FUDGE.near`(1) -- the absolute near-
+ *  corner origin of a lone `action`/`group`/`partition`/bar-kind node. */
+const RECT_ORIGIN = 16;
+/** `CANVAS_ORIGIN_SHIFT`(15) + `NO_FUDGE.near`(0) (same value as
+ *  `ELLIPSE_FUDGE.near`(0), since neither fudges its near corner -- no
+ *  fixture below happens to pin a lone ellipse-kind node's absolute
+ *  position, so only this name is needed): the weld-edge and fork/split
+ *  fixtures below whose own ink minimum is a `ULine`/`stub-branch`
+ *  (`NO_FUDGE`), not an ellipse. */
+const NO_FUDGE_ORIGIN = 15;
+/** A `GtileSplit` composite has no full-width bar (unlike `GtileFork`'s
+ *  `fork-bar`) -- its own `PARALLEL_X_MARGIN` gap before the first branch
+ *  (`AbstractParallelFtilesBuilder.java:130`) is genuinely empty, so the
+ *  ink minimum is branch0's own box (`stub-branch`, `NO_FUDGE`) at local x
+ *  `LAYOUT_MARGIN + branchOffsets[0]`, not anything at local x=0. The
+ *  resulting shift (`CANVAS_ORIGIN_SHIFT(15) - LAYOUT_MARGIN(12) -
+ *  branchOffsets[0]`) is `-11` for both split fixtures below (both use
+ *  three identically-sized 80x60 branches, so `branchOffsets[0]` -- which
+ *  depends only on branch dimensions, never on `hasPointOut` -- is the same
+ *  in both); replacing `LAYOUT_MARGIN`(12) with `12 + (-11) = 1` in each of
+ *  THIS file's own `LAYOUT_MARGIN + branchOffsets[i] + …`-shaped formulas
+ *  reproduces the shifted absolute value exactly (confirmed: `npx vitest
+ *  run` against both tests' `splitBar.x`/`joinLine.x` assertions). Not a
+ *  general law -- a different branch shape would need its own
+ *  `branchOffsets[0]` re-derived the same way. */
+const SPLIT_BRANCH_ORIGIN = 1;
 
 const actionNode = { kind: 'action' as const, label: 'Hello', swimlane: 'default' };
 const NODE_MARGIN_Y = 20;
@@ -54,20 +94,24 @@ describe('assignCoordinates — single GtileAction', () => {
     expect(geo.nodes[0]!.kind).toBe('action');
   });
 
-  it('node geo x === LAYOUT_MARGIN', () => {
-    expect(geo.nodes[0]!.x).toBe(LAYOUT_MARGIN);
+  // T1a (D2): a lone `action` node is `RECT_FUDGE`'s own kind -- its near
+  // corner lands at `RECT_ORIGIN` (16), not the deleted `LAYOUT_MARGIN`.
+  it('node geo x === RECT_ORIGIN (canvas-origin.ts RECT_FUDGE)', () => {
+    expect(geo.nodes[0]!.x).toBe(RECT_ORIGIN);
   });
 
-  it('node geo y === LAYOUT_MARGIN', () => {
-    expect(geo.nodes[0]!.y).toBe(LAYOUT_MARGIN);
+  it('node geo y === RECT_ORIGIN (canvas-origin.ts RECT_FUDGE)', () => {
+    expect(geo.nodes[0]!.y).toBe(RECT_ORIGIN);
   });
 
-  it('totalWidth >= tile.width + 2 * LAYOUT_MARGIN', () => {
-    expect(geo.totalWidth).toBeGreaterThanOrEqual(tile.width + 2 * LAYOUT_MARGIN);
+  // M - m = tile.width exactly for a single rect-kind node: `RECT_FUDGE`'s
+  // `near`(1) and `far`(-1) cancel (`canvas-origin.ts`'s own module doc).
+  it('totalWidth === floor(tile.width + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
+    expect(geo.totalWidth).toBe(Math.floor(tile.width + 35) + 1);
   });
 
-  it('totalHeight >= tile.height + 2 * LAYOUT_MARGIN', () => {
-    expect(geo.totalHeight).toBeGreaterThanOrEqual(tile.height + 2 * LAYOUT_MARGIN);
+  it('totalHeight === floor(tile.height + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
+    expect(geo.totalHeight).toBe(Math.floor(tile.height + 35) + 1);
   });
 
   it('no swimlanes for empty ast', () => {
@@ -89,20 +133,22 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
     expect(geo.edges).toHaveLength(1);
   });
 
-  it('node[0].y === LAYOUT_MARGIN (first child at top)', () => {
-    expect(geo.nodes[0]!.y).toBe(LAYOUT_MARGIN);
+  // T1a (D2): node[0] (the topmost `action`) still defines the ink's own Y
+  // minimum, so the same `RECT_ORIGIN` origin applies.
+  it('node[0].y === RECT_ORIGIN (first child at top)', () => {
+    expect(geo.nodes[0]!.y).toBe(RECT_ORIGIN);
   });
 
-  it('node[1].y === LAYOUT_MARGIN + action0.height + NODE_MARGIN_Y', () => {
-    expect(geo.nodes[1]!.y).toBe(LAYOUT_MARGIN + action0.height + NODE_MARGIN_Y);
+  it('node[1].y === RECT_ORIGIN + action0.height + NODE_MARGIN_Y', () => {
+    expect(geo.nodes[1]!.y).toBe(RECT_ORIGIN + action0.height + NODE_MARGIN_Y);
   });
 
-  it('totalWidth >= tile.width + 2 * LAYOUT_MARGIN', () => {
-    expect(geo.totalWidth).toBeGreaterThanOrEqual(tile.width + 2 * LAYOUT_MARGIN);
+  it('totalWidth === floor(tile.width + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
+    expect(geo.totalWidth).toBe(Math.floor(tile.width + 35) + 1);
   });
 
-  it('totalHeight >= tile.height + 2 * LAYOUT_MARGIN', () => {
-    expect(geo.totalHeight).toBeGreaterThanOrEqual(tile.height + 2 * LAYOUT_MARGIN);
+  it('totalHeight === floor(tile.height + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
+    expect(geo.totalHeight).toBe(Math.floor(tile.height + 35) + 1);
   });
 });
 
@@ -413,9 +459,13 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     expect(geo.edges).toHaveLength(7);
     const breakNode = geo.nodes.find((n) => n.kind === 'break')!;
     const weld = geo.edges[geo.edges.length - 1]!;
+    // T1a (D2): the weld's own target x is the while's own exit column,
+    // which this composite's own ink minimum touches directly (confirmed
+    // against this fixture's own computed geometry) -- `NO_FUDGE_ORIGIN`
+    // (15), not `LAYOUT_MARGIN`'s old `+12` offset.
     expect(weld.points).toEqual([
       { x: breakNode.x, y: breakNode.y },
-      { x: LAYOUT_MARGIN + 12, y: breakNode.y },
+      { x: NO_FUDGE_ORIGIN, y: breakNode.y },
     ]);
     expect(weld.emphasize).toBeUndefined();
     expect(weld.arrowhead).toBeUndefined();
@@ -681,8 +731,11 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
 
     expect(geo.edges).toHaveLength(2);
     const [inEdge, outEdge] = geo.edges;
-    const bX = LAYOUT_MARGIN + tile.branchOffsets[0]!;
-    const bY = LAYOUT_MARGIN + tile.branchTopYs[0]!;
+    // T1a (D2): `GtileFork`'s own `fork-bar` is the composite's leftmost AND
+    // topmost element (a real `URectangle`, `RECT_FUDGE`) -- `RECT_ORIGIN`
+    // replaces `LAYOUT_MARGIN` as the absolute base both axes share.
+    const bX = RECT_ORIGIN + tile.branchOffsets[0]!;
+    const bY = RECT_ORIGIN + tile.branchTopYs[0]!;
     // T5 (compress): the bar's own ignoreX end-reservation
     // (`URectangle#drawWhenCompressed`'s `UEmpty(2,h)`,
     // `klimt/shape/URectangle.java:193-199`) is a raw slot `[12,14]`; the
@@ -696,10 +749,10 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     const REMOVED_LEADING = 2;
 
     expect(inEdge!.points).toHaveLength(2);
-    expect(inEdge!.points[0]).toEqual({ x: bX + 7 - REMOVED_LEADING, y: LAYOUT_MARGIN + tile.barHeight });
+    expect(inEdge!.points[0]).toEqual({ x: bX + 7 - REMOVED_LEADING, y: RECT_ORIGIN + tile.barHeight });
     expect(inEdge!.points[1]).toEqual({ x: bX + 7 - REMOVED_LEADING, y: bY });
 
-    const joinBarY = LAYOUT_MARGIN + tile.height - tile.barHeight;
+    const joinBarY = RECT_ORIGIN + tile.height - tile.barHeight;
     expect(outEdge!.points).toHaveLength(2);
     expect(outEdge!.points[0]).toEqual({ x: bX + 11 - REMOVED_LEADING, y: bY + 60 });
     expect(outEdge!.points[1]).toEqual({ x: bX + 11 - REMOVED_LEADING, y: joinBarY });
@@ -771,7 +824,10 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     expect(forkBar.width).toBe(tile.barWidth - REMOVED_X);
     expect(forkBar.height).toBe(tile.barHeight);
     expect(joinBar.width).toBe(tile.barWidth - REMOVED_X);
-    expect(joinBar.y).toBe(LAYOUT_MARGIN + tile.height - tile.barHeight - REMOVED_Y);
+    // T1a (D2): the fork-bar spans the FULL composite width/height from its
+    // own local (0, 0) -- it is the ink minimum on both axes (`RECT_FUDGE`),
+    // same as the single-branch fork test above.
+    expect(joinBar.y).toBe(RECT_ORIGIN + tile.height - tile.barHeight - REMOVED_Y);
   });
 
   it('split top line spans the first..last branch north-hook x over EVERY branch, unconditional', () => {
@@ -782,8 +838,8 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
     const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
-    const first = LAYOUT_MARGIN + tile.branchOffsets[0]! + 7;
-    const last = LAYOUT_MARGIN + tile.branchOffsets[2]! + 7;
+    const first = SPLIT_BRANCH_ORIGIN + tile.branchOffsets[0]! + 7;
+    const last = SPLIT_BRANCH_ORIGIN + tile.branchOffsets[2]! + 7;
     // T5 (compress): `split-bar` is a `ULine` (T3: `FtileThinSplit.java
     // :87-96`), so it never occupies (`NO_SHAPE_KINDS`, `shapes-of.ts`) --
     // but it IS transformed like any other node (`RECT_WIDTH_KINDS`). Its
@@ -807,8 +863,8 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
     const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
-    const centreX = LAYOUT_MARGIN + tile.width / 2;
-    const b2South = LAYOUT_MARGIN + tile.branchOffsets[2]! + 11;
+    const centreX = SPLIT_BRANCH_ORIGIN + tile.width / 2;
+    const b2South = SPLIT_BRANCH_ORIGIN + tile.branchOffsets[2]! + 11;
     // The only continuing branch's x is on the far side of centre, so the
     // NEAR end clamps to centreX (ParallelBuilderSplit.java:171-176) --
     // the line still reaches the composite's own centre, not just b2's x.

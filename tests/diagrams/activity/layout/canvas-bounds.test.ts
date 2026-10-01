@@ -69,22 +69,35 @@ describe('assignCoordinates — the canvas contains what is drawn', () => {
     }
   });
 
+  // T1a (D2): the flat `LAYOUT_MARGIN(12)` this regression guard was pinned
+  // against is gone -- the canvas origin is now dynamic
+  // (`assign-coordinates-full.ts#computeCanvasOrigin`), so `totalWidth -
+  // nodesRight` is no longer a fixed 12. It IS still bounded above by
+  // `CANVAS_PADDING_TOTAL(35) + SVG_CANVAS_CEIL(1) = 36`
+  // (`canvas-origin.ts`'s own module doc): that's the full per-axis span
+  // `(M - m) + 36` minus the real content span `(M - m)`, and every shape's
+  // own near-corner fudge (`RECT_FUDGE`/`ELLIPSE_FUDGE`/`POLYGON_FUDGE_X`'s
+  // `near`) is non-negative, so it can only shrink this gap, never grow it
+  // past 36. Still a meaningful guard: it catches an accidental EXTRA
+  // margin stacked on top of D2's own mechanism.
   it('a diagram with NO swimlanes is unaffected — the bound is untouched when the array is empty', () => {
     const geo = layout('@startuml\nstart\n:a;\nstop\n@enduml');
     expect(geo.swimlanes).toEqual([]);
     expect(geo.totalWidth).toBeGreaterThanOrEqual(drawnRight(geo));
-    // The regression guard: a nodes-only diagram must not have GAINED width.
+    // The regression guard: a nodes-only diagram must not have GAINED width
+    // beyond D2's own canvas-origin mechanism.
     const nodesRight = Math.max(...geo.nodes.map((n) => n.x + n.width));
-    expect(geo.totalWidth - nodesRight).toBeLessThanOrEqual(12);
+    expect(geo.totalWidth - nodesRight).toBeLessThanOrEqual(36);
   });
 
   it('Y is deliberately NOT widened by lanes', () => {
     // A lane draws its divider from y=0 to totalHeight and its title inside
     // SWIMLANE_HEADER_H, so it can never extend past a bound Y already
     // covers. Pinned so a later change does not "symmetrise" the fix and
-    // silently grow every swimlane diagram's height.
+    // silently grow every swimlane diagram's height. Bound is 36, not 12,
+    // for the same reason as the sibling test above (D2).
     const withLanes = layout('@startuml\n|A|\n:a;\n|B|\n:b;\n@enduml');
     const bottom = Math.max(...withLanes.nodes.map((n) => n.y + n.height));
-    expect(withLanes.totalHeight - bottom).toBeLessThanOrEqual(12);
+    expect(withLanes.totalHeight - bottom).toBeLessThanOrEqual(36);
   });
 });
