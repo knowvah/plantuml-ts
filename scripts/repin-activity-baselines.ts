@@ -44,6 +44,20 @@
  * named in `--accept-rises` with a journal row -- never per task, which
  * would destroy the attribution D6 exists to buy.
  *
+ * "PINNED" ROWS ARE SKIPPED BY CONSTRUCTION (add1-T0b, D5 of
+ * `plans/activity-divergence-drive/decisions.md`): once `plans/
+ * activity-divergence-drive/tools/pin-goldens.mts` flips a `diff-
+ * baseline.json` row to `status: "pinned"` (frozen into `activity.golden
+ * .ratchet.test.ts`'s byte-freeze ratchet), `measureDiffBaseline`'s own
+ * `f.status !== 'baseline'` filter below already excludes it -- the exact
+ * same condition that already excludes `error`/`jar-error` rows. No new
+ * filter was added for this; `status: "pinned"` just isn't `"baseline"`.
+ * `style`/`swimlane`/`text`-baseline.json are unaffected: each is gated by
+ * `activity.{style,swimlane,text}-baseline.test.ts`, which reads its OWN
+ * file and its OWN independent `status` field (verified: `grep -n
+ * 'diff-baseline'` across all three finds no file read, only doc-comment
+ * mentions) -- a `diff-baseline.json` pin has no bearing on them.
+ *
  * Usage:
  *   npx tsx scripts/repin-activity-baselines.ts [--write]
  *     [--accept-rises a,b] [--slugs-file <path>]
@@ -166,6 +180,16 @@ interface RepinContext {
 // Pure functions -- unit-tested without a filesystem or a render.
 // ---------------------------------------------------------------------------
 
+/** `diff-baseline.json`'s re-measure pass only ever touches `"baseline"`
+ * rows -- `"error"`, `"jar-error"` and `"pinned"` (add1-T0b, D5) are all
+ * excluded by this ONE condition, never a per-status allowlist. Extracted
+ * so the exclusion is directly testable without a fixture-corpus render
+ * (`measureDiffBaseline` below is I/O-bound and exercised only by the
+ * manual acceptance run, per this file's own test's header comment). */
+export function isBaselineStatus(status: string): boolean {
+  return status === 'baseline';
+}
+
 /** `weightedScore` never falls back to a tolerance band: any rise is a
  * regression, any fall is progress (D2, `activity.diff-baseline.ratchet
  * .test.ts`'s own `checkNoRise`). */
@@ -249,13 +273,16 @@ function getCommit(): string {
 // ---------------------------------------------------------------------------
 
 /** Re-measures every `status: "baseline"` entry through the ratchet gate's
- * own `renderFixtureActivity`/`compareSvg`/`weightedScore` seam. */
+ * own `renderFixtureActivity`/`compareSvg`/`weightedScore` seam. A
+ * `"pinned"` row (add1-T0b, D5) is excluded by this SAME condition, same as
+ * `"error"`/`"jar-error"` -- `pin-goldens.mts` owns its golden ratchet from
+ * here on, never this re-measure pass. */
 function measureDiffBaseline(fixtures: readonly DiffBaselineFixture[]): DiffBaselineMeasurements {
   const pinned: Record<string, number> = {};
   const measured: Record<string, number> = {};
   const diffCounts = new Map<string, number>();
   for (const f of fixtures) {
-    if (f.status !== 'baseline' || f.weightedScore === undefined) continue;
+    if (!isBaselineStatus(f.status) || f.weightedScore === undefined) continue;
     const { markup, golden } = readFixture(f.slug);
     const { diffs } = compareSvg(renderOurs(markup), golden, 'deterministic');
     pinned[f.slug] = f.weightedScore;
