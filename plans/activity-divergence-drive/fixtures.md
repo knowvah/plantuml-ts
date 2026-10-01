@@ -5,6 +5,11 @@ every `status: "baseline"` fixture with `weightedScore` <= 100 — **75 rows**. 
 re-measures on the branch (`b0`) and corrects any row whose score moved; the
 cohort is re-cut at every close (D6: rows with ws <= 100 at the latest close).
 
+**b0 (branch `dd5e93af9`, 2026-09-30):** every row's ws, family set and shift
+pair are identical to planning on all 311 baseline rows (`measurements/
+b0-classify.json` vs `plan-classify.json`, 0 mismatches); cohort = the same 75
+rows, so no `ws (b0)` column is needed and no row was added.
+
 `families` is the diff-family set at planning: `canvas` (svg/@width|height|viewBox),
 `pos` (positional attrs, polygon points, textLength), `circle` (ellipse rx/ry/stroke),
 `childCount`, `draw-order/text` (text()/font-size swaps), `stroke` (stroke-width),
