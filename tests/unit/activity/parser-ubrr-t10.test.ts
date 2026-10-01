@@ -17,6 +17,7 @@ import type {
   ActivityBackward,
   ActivityGroup,
   ActivityIf,
+  ActivityNote,
   ActivityRepeat,
   ActivityWhile,
   ActivityNode,
@@ -111,6 +112,82 @@ describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
     expect(node.kind).toBe('action');
     expect(node.label).toBe('Generate diagrams1');
     expect(node.stereotype).toBe('save');
+  });
+
+  // Regression (mission `activity-divergence-drive` T3h): the two tests
+  // above never exercised `backward:LABEL;` followed by REAL trailing
+  // content ending in `;` of its own -- a standalone line has nothing
+  // after it to swallow, and the `<<stereo>>`-suffixed lines never end in
+  // a literal `;` at all, so neither shape triggered `parseNodes`'s own
+  // semicolon strip (`node-dispatch.ts:475-489`). This is the shape that
+  // did: `kemedu-83-vipa115`'s own single-line `backward:This is
+  // backward;` followed by its `repeat while (...)` closer and a trailing
+  // `stop` -- all three were silently swallowed into the backward label
+  // before the fix.
+  it('a single-line backward: inside a real repeat body parses cleanly, closer and trailing stop intact (kemedu-83-vipa115 shape)', () => {
+    const ast = parse([
+      'start',
+      'repeat :foo as starting label;',
+      '  :read data;',
+      'backward:This is backward;',
+      'repeat while (more data?)',
+      'stop',
+    ]);
+    expect(ast.nodes.map((n) => n.kind)).toEqual(['start', 'repeat', 'stop']);
+    const repeat = ast.nodes[1] as ActivityRepeat;
+    expect(repeat.condition).toBe('more data?');
+    expect(repeat.body.map((n) => n.kind)).toEqual(['action', 'backward']);
+    expect((repeat.body[1] as ActivityBackward).label).toBe('This is backward');
+  });
+
+  it('a single-line backward: inside a while body parses cleanly, endwhile is not swallowed (kenizo-43-siro273 shape)', () => {
+    const ast = parse(['while(a)is(b)', ':do sometyhing;', 'backward: test;', 'endwhile']);
+    const node = firstNode(ast) as ActivityWhile;
+    expect(node.kind).toBe('while');
+    expect(node.body.map((n) => n.kind)).toEqual(['action', 'backward']);
+    expect((node.body[1] as ActivityBackward).label).toBe('test');
+  });
+
+  it('two single-line backward: statements: the second (last) wins, closer still parses (debofa-60-mude568 shape)', () => {
+    const ast = parse([
+      'repeat',
+      '  :Do something;',
+      '  backward: first statement is overridden;',
+      '  backward: second statement replaces first statement;',
+      'repeat while (you want to)',
+      'end',
+    ]);
+    expect(ast.nodes.map((n) => n.kind)).toEqual(['repeat', 'end']);
+    const repeat = ast.nodes[0] as ActivityRepeat;
+    expect(repeat.condition).toBe('you want to');
+    const backwards = repeat.body.filter((n): n is ActivityBackward => n.kind === 'backward');
+    expect(backwards).toHaveLength(2);
+    expect(backwards[1]!.label).toBe('second statement replaces first statement');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseNodes's trailing-`;` strip (`node-dispatch.ts:475-489`): bare
+// keywords still get it (`CommandStart3.java:58-63`'s own `";?"`); any
+// line containing a colon does not (`CommandBackward3.java:75-79`,
+// `CommandNote3.java:75-80` -- a colon-content command owns its own `;`).
+// ---------------------------------------------------------------------------
+describe('parseNodes trailing-`;` strip: bare keywords vs. colon-content commands', () => {
+  it('"start;" still strips to a bare start node (bare keyword, no colon)', () => {
+    const ast = parse(['start;']);
+    expect(firstNode(ast).kind).toBe('start');
+  });
+
+  it('"stop;" still strips to a bare stop node', () => {
+    const ast = parse(['stop;']);
+    expect(firstNode(ast).kind).toBe('stop');
+  });
+
+  it('a single-line note keeps its own trailing `;` as literal content (CommandNote3.java:75-80 has no semicolon in its grammar at all, jageti-56-kume076 shape)', () => {
+    const ast = parse([':Step;', 'note right: - first line\\n- second line;']);
+    const note = ast.nodes[1] as ActivityNote;
+    expect(note.kind).toBe('note');
+    expect(note.text).toBe('- first line\\n- second line;');
   });
 });
 
