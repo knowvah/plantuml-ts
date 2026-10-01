@@ -414,6 +414,28 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   return body + labelEl;
 }
 
+/** The root `composite { LineColor black; BackgroundColor transparent;
+ *  LineThickness 1.5 }` block (`plantuml.skin:364-368`) -- a `partition`/
+ *  `package`/`rectangle`/`card`/`group` frame (`group-dispatch.ts`'s
+ *  `GROUP_TYPES`, all mapped to ONE `composite` SName by `FromSkinparam
+ *  ToStyle.java:131-132`'s `PartitionBorderColor`/`PartitionBackground
+ *  Color` converts). `node.kind` had no case here at all, so every group/
+ *  partition fell through `renderNode`'s `default:` fallback and drew the
+ *  generic node fill/border instead (T2f mechanism 6, `caciva-80-
+ *  kene990`: ours `fill="#F1F1F1" stroke="#181818"`, jar `fill="none"
+ *  stroke="#000"`). No `skinparam Partition*Color` override hook exists
+ *  yet (would need a `core/theme-graph-colors-b.ts` field, out of this
+ *  task's write-set) -- the plain default is drawn unconditionally, which
+ *  is also what every cohort row needs (none sets that skinparam).
+ */
+function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
+  return rect(node.x, node.y, node.width, node.height, {
+    fill: 'none',
+    stroke: '#000',
+    strokeWidth: activityLineThickness(theme, 'composite'),
+  });
+}
+
 export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
   switch (node.kind) {
     case 'start':
@@ -454,6 +476,9 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderIfLabel(node, theme);
     case 'note':
       return renderNote(node, theme);
+    case 'group':
+    case 'partition':
+      return renderComposite(node, theme);
     default: {
       // Unknown kind: render a plain rect as a fallback
       const c = actColors(theme);

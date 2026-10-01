@@ -20,6 +20,7 @@ import {
   renderHexagon,
   renderKill,
   renderLabel,
+  renderNode,
   renderNote,
   renderParallelogram,
   renderStart,
@@ -697,5 +698,29 @@ describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
     const svg = renderSplitLine(makeNode({ kind: 'split-join-bar', x: 0, y: 0, width: 40 }), theme);
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2f mechanism 6 -- `group`/`partition` frame (plantuml.skin:364-368's
+// root `composite` block). `renderNode` had no case for either kind, so
+// both fell through the `default:` fallback and drew the generic node
+// fill/border instead of the composite frame.
+// ---------------------------------------------------------------------------
+
+describe('renderNode -- group/partition frame (composite SName)', () => {
+  it('partition: unfilled rect, black stroke, LineThickness 1.5 -- not the generic node fill', () => {
+    const node = makeNode({ kind: 'partition', x: 16, y: 45, width: 138.4, height: 122 });
+    const svg = renderNode(node, theme);
+    expect(svg).toBe('<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>');
+  });
+
+  it('group: same composite styling as partition (FromSkinparamToStyle.java:131-132, ONE SName for both)', () => {
+    const node = makeNode({ kind: 'group', x: 0, y: 0, width: 50, height: 50 });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('fill="none"');
+    expect(svg).toContain('stroke="#000"');
+    expect(svg).toContain('stroke-width="1.5"');
+    expect(svg).not.toContain(theme.colors.nodeBackground);
   });
 });
