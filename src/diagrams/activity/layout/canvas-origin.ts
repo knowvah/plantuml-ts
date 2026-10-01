@@ -199,20 +199,43 @@ function arrowheadTips(edge: ActivityEdgeGeo): Array<{ x: number; y: number; dir
   return tips;
 }
 
-function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
-  // `ULine` segments (`LimitFinder#drawULine`, exact).
+/**
+ * The X-only half of an edge's own ink (`ULine` points, exact, plus every
+ * arrowhead `UPolygon`'s `POLYGON_FUDGE_X`-padded span) -- split out and
+ * exported (T3i, `swimlane-context.ts#measureLaneExtents`) so a same-lane
+ * edge's arrowhead can widen its lane's content extent the SAME way
+ * `Swimlanes#computeDrawingWidths`'s per-lane `LimitFinder` would (it scans
+ * every draw call in that lane's content, edges included, not just node
+ * boxes). Y is deliberately omitted -- no lane-sizing consumer needs it;
+ * {@link extendForEdge} keeps its own exact Y accumulation inline.
+ */
+export function edgeInkX(edge: ActivityEdgeGeo): { minX: number; maxX: number } {
+  let minX = Infinity;
+  let maxX = -Infinity;
   for (const p of edge.points) {
-    acc.minX = Math.min(acc.minX, p.x);
-    acc.maxX = Math.max(acc.maxX, p.x);
+    minX = Math.min(minX, p.x);
+    maxX = Math.max(maxX, p.x);
+  }
+  for (const tip of arrowheadTips(edge)) {
+    const ext = arrowHeadExtents(tip.dir);
+    minX = Math.min(minX, tip.x + ext.minX - POLYGON_FUDGE_X.near);
+    maxX = Math.max(maxX, tip.x + ext.maxX + POLYGON_FUDGE_X.far);
+  }
+  return { minX, maxX };
+}
+
+function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
+  const { minX, maxX } = edgeInkX(edge);
+  acc.minX = Math.min(acc.minX, minX);
+  acc.maxX = Math.max(acc.maxX, maxX);
+  // `ULine` segments (`LimitFinder#drawULine`, exact) and arrowhead
+  // `UPolygon`s (Y exact, `LimitFinder.java:169-176`'s own Y-exact corners).
+  for (const p of edge.points) {
     acc.minY = Math.min(acc.minY, p.y);
     acc.maxY = Math.max(acc.maxY, p.y);
   }
-  // Arrowhead `UPolygon`s: `drawUPolygon` pads X ONLY by `HACK_X_FOR_POLYGON`
-  // (`POLYGON_FUDGE_X`'s own doc; `LimitFinder.java:169-176`), Y exact.
   for (const tip of arrowheadTips(edge)) {
     const ext = arrowHeadExtents(tip.dir);
-    acc.minX = Math.min(acc.minX, tip.x + ext.minX - POLYGON_FUDGE_X.near);
-    acc.maxX = Math.max(acc.maxX, tip.x + ext.maxX + POLYGON_FUDGE_X.far);
     acc.minY = Math.min(acc.minY, tip.y + ext.minY);
     acc.maxY = Math.max(acc.maxY, tip.y + ext.maxY);
   }

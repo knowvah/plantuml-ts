@@ -149,14 +149,49 @@ describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {
   });
 });
 
+// T3i, bulasi-17-vafa634: `Swimlanes#ensureSizeComputed` only runs the
+// origin-loop/translate mechanism `if (swimlanes().size() > 1)`
+// (`Swimlanes.java:224-226`) -- a SINGLE named lane gets the same
+// byte-identical passthrough as zero lanes, never a non-zero `delta`.
+describe('placeSwimlanes — a single named lane is also a byte-identical passthrough', () => {
+  it('returns the same node content unshifted, empty swimlanes', () => {
+    const nodes = [node('n1', 12, 40, 'Swimlane 1')];
+    const edges = [{ points: [{ x: 12, y: 0 }, { x: 12, y: 30 }] }];
+    const result = placeSwimlanes({
+      nodes,
+      edges,
+      edgeMeta: [{ lane1: 'Swimlane 1', lane2: 'Swimlane 1', shape: 'default' }],
+      laneNames: ['Swimlane 1'],
+      baseX: 12,
+      baseY: 12,
+      bounder: { getDimension: () => ({ width: 0, height: 0 }) },
+      theme,
+    });
+    expect(result.swimlanes).toEqual([]);
+    expect(result.nodes).toEqual(nodes);
+    expect(result.edges).toEqual(edges);
+  });
+});
+
 /**
- * Reproduces the `pakema-21-xema183` hand-check from the mission's prior
- * observations: two lanes, content width 26.675 each (the golden's own
- * `a`/`b` action-box widths), title widths 28.338 / 300.937 (solved from
- * the golden's own observed divider positions 20, 58.338, 369.275 -- a
- * uniform +15 diagram margin the swimlane arithmetic itself does not
- * produce, so the expected RELATIVE positions are 5, 43.338, 354.275).
- * `min = 0` throughout (the `swimlaneWidth` skinparam default).
+ * A `halfMissingSpace`-overflow arithmetic check, NOT a literal
+ * reproduction of `pakema-21-xema183`'s own geometry -- a prior mission's
+ * "hand-check" fit `TITLE_A = 28.338` to match the golden's observed
+ * divider positions 20, 58.338, 369.275, but that number is not lane A's
+ * real title width (`"A"` at `SwimlaneTitleFontSize` default 18 measures
+ * ~12.04; `swimlane-context.test.ts#"widens a lane's extent by a
+ * same-lane edge's arrowhead ink"`). T3i found the REAL mechanism: lane
+ * A's own `start -> a` edge draws an arrowhead `UPolygon` whose
+ * `POLYGON_FUDGE_X`-padded ink (`canvas-origin.ts#edgeInkX`) extends 1.663
+ * past the action box's own ink, widening lane A's content span to
+ * 28.338 -- a coincidental MATCH to this test's fitted title-overflow
+ * number, not the actual cause. This `place()` passes `edges: []`, so it
+ * is exercising `halfMissingSpace`'s overflow formula in isolation (a
+ * legitimate, independently-correct check) under a since-corrected
+ * premise -- left as-is rather than rewritten, since the arithmetic it
+ * verifies is still exact. The two lanes' content width 26.675 each (the
+ * golden's own `a`/`b` action-box widths) and `min = 0` (the
+ * `swimlaneWidth` skinparam default) are real.
  */
 describe('placeSwimlanes — worked-example arithmetic (pakema-21-xema183)', () => {
   const CONTENT_WIDTH = 26.675;
