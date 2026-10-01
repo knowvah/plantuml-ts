@@ -1091,6 +1091,44 @@ describe('renderActivity — arrowhead is ArrowsRegular (akc-T1)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T1b (decisions.md#D4) — `skinparam style strictuml` selects `ArrowsTriangle`
+// (SkinParam.java:1306-1309): a 3-point polygon, byte-identical in every
+// OTHER regard (fill/stroke/stroke-width) to the ArrowsRegular draw above.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — ArrowsTriangle under skinparam style strictuml (D4)', () => {
+  const edge = {
+    points: [
+      { x: 10, y: 10 },
+      { x: 10, y: 60 },
+    ],
+  };
+
+  it('a downward edge draws the 3-point asToDown triangle translated to the tip (10,60)', () => {
+    // asToDown relative to the tip: (-4,-10),(4,-10),(0,0) (ArrowsTriangle
+    // .java:57-61); translated by the tip (10,60): (6,50),(14,50),(10,60).
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,14,50,10,60');
+  });
+
+  it('three points, not ArrowsRegular\'s four, under strictuml', () => {
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
+    expect(coordCount).toBe(6); // 3 points x (x, y)
+  });
+
+  it('a non-strictuml fixture keeps the byte-identical ArrowsRegular 4-point draw', () => {
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,10,60,14,50,10,54');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // amb-T4 — edge labels resolve `activityFontColor(theme, 'arrow')` (D3),
 // never `theme.colors.text`. `ftile/vcompact/FtileFactoryDelegator.java:84`
 // resolves an activity edge label through `of(root, element,
