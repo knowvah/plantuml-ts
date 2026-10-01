@@ -110,7 +110,7 @@ Measurement (activity has NO DOT gate — it never emits `svek-N.dot`):
 
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| [0](batch-0/overview.md) | branch + b0 + ledger + classify tool; freeze gate + pin tool | T0a, T0b | both ∥ | [ ] |
+| [0](batch-0/overview.md) | branch + b0 + ledger + classify tool; freeze gate + pin tool | T0a, T0b | both ∥ | [x] |
 | [1](batch-1/overview.md) | canvas origin (D2); text via klimt driver + strictuml arrows (D1/D4) | T1a, T1b | both ∥ | [ ] |
 | [1b](batch-1b/overview.md) | stop/end circles (D3) after b1 | T1c | — | [ ] |
 | [2](batch-2/overview.md) | drive round 1 on the b1b cohort; pin round 1 | T2a–T2d (+T2x), T2-close | all ∥ | [ ] |
