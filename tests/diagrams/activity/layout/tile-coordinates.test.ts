@@ -60,20 +60,24 @@ const RECT_ORIGIN = 16;
 const NO_FUDGE_ORIGIN = 15;
 /** A `GtileSplit` composite has no full-width bar (unlike `GtileFork`'s
  *  `fork-bar`) -- its own `PARALLEL_X_MARGIN` gap before the first branch
- *  (`AbstractParallelFtilesBuilder.java:130`) is genuinely empty, so the
- *  ink minimum is branch0's own box (`stub-branch`, `NO_FUDGE`) at local x
- *  `LAYOUT_MARGIN + branchOffsets[0]`, not anything at local x=0. The
- *  resulting shift (`CANVAS_ORIGIN_SHIFT(15) - LAYOUT_MARGIN(12) -
- *  branchOffsets[0]`) is `-11` for both split fixtures below (both use
- *  three identically-sized 80x60 branches, so `branchOffsets[0]` -- which
- *  depends only on branch dimensions, never on `hasPointOut` -- is the same
- *  in both); replacing `LAYOUT_MARGIN`(12) with `12 + (-11) = 1` in each of
- *  THIS file's own `LAYOUT_MARGIN + branchOffsets[i] + …`-shaped formulas
- *  reproduces the shifted absolute value exactly (confirmed: `npx vitest
- *  run` against both tests' `splitBar.x`/`joinLine.x` assertions). Not a
- *  general law -- a different branch shape would need its own
- *  `branchOffsets[0]` re-derived the same way. */
-const SPLIT_BRANCH_ORIGIN = 1;
+ *  (`AbstractParallelFtilesBuilder.java:130`) is genuinely empty, so BEFORE
+ *  T2e the ink minimum was branch0's own box (`stub-branch`, `NO_FUDGE`) at
+ *  local x `LAYOUT_MARGIN + branchOffsets[0]` (giving a `-11` shift; see
+ *  git history for that derivation).
+ *
+ *  T2e (`canvas-origin.ts#extendForEdge`, `LimitFinder.java:169-176`
+ *  `HACK_X_FOR_POLYGON`): branch0's own in-edge draws a DOWN terminal
+ *  arrowhead at the SAME local x branch0's box starts at (both fixtures
+ *  below give every branch `hasPointOut: true` or leave branch0 with its
+ *  default in-edge). A down decoration's own `minX` is `-4`
+ *  (`arrows-regular.ts#arrowHeadPoints('down')`), so `LimitFinder`'s
+ *  recorded near corner is `tipX - 4 - 10 = tipX - 14` -- 7px LOWER than
+ *  branch0's own box (`tipX - 0`, `NO_FUDGE`), which was the previous ink
+ *  minimum. The arrowhead now sets the global min instead, shifting the
+ *  whole composite uniformly by `+7` (confirmed with `computeCanvasOrigin`
+ *  called directly on this exact fixture's pass-1 geometry: shiftX moved
+ *  `-11 -> -4`). `12 + (-11 + 7) = 8`. */
+const SPLIT_BRANCH_ORIGIN = 8;
 
 const actionNode = { kind: 'action' as const, label: 'Hello', swimlane: 'default' };
 const NODE_MARGIN_Y = 20;
@@ -459,13 +463,25 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     expect(geo.edges).toHaveLength(7);
     const breakNode = geo.nodes.find((n) => n.kind === 'break')!;
     const weld = geo.edges[geo.edges.length - 1]!;
-    // T1a (D2): the weld's own target x is the while's own exit column,
-    // which this composite's own ink minimum touches directly (confirmed
-    // against this fixture's own computed geometry) -- `NO_FUDGE_ORIGIN`
-    // (15), not `LAYOUT_MARGIN`'s old `+12` offset.
+    // T1a (D2): the weld's own target x sits on the while's own exit
+    // column, which was this composite's ink minimum under T1a alone --
+    // `NO_FUDGE_ORIGIN` (15).
+    //
+    // T2e (`canvas-origin.ts#extendForEdge`): the while's OWN entry
+    // connector (`arrowhead: false`, `emphasize: 'down'`) draws its
+    // emphasis arrowhead at the midpoint of its first DOWN segment, which
+    // sits on this SAME exit column. A down decoration's own `minX` is
+    // `-4` (`arrows-regular.ts#arrowHeadPoints('down')`), so `LimitFinder`
+    // records `tipX - 4 - 10 = tipX - 14` (`HACK_X_FOR_POLYGON`,
+    // `LimitFinder.java:169-176`) -- 14px lower than the exit column's own
+    // exact point, which was the previous ink minimum. The arrowhead now
+    // sets the global min instead, shifting the whole composite by `+14`
+    // (confirmed with `computeCanvasOrigin` called directly on this exact
+    // fixture's compressed geometry: shiftX moved `-9 -> 5`).
+    const WHILE_ENTRY_ARROWHEAD_SHIFT = 14;
     expect(weld.points).toEqual([
       { x: breakNode.x, y: breakNode.y },
-      { x: NO_FUDGE_ORIGIN, y: breakNode.y },
+      { x: NO_FUDGE_ORIGIN + WHILE_ENTRY_ARROWHEAD_SHIFT, y: breakNode.y },
     ]);
     expect(weld.emphasize).toBeUndefined();
     expect(weld.arrowhead).toBeUndefined();

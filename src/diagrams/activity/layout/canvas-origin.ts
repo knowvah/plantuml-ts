@@ -38,6 +38,17 @@
  *     wraps that in the symmetric document margin, `same(10)`
  *     (`TitledDiagram.java:275`, confirmed no `root.document` style override
  *     in `plantuml.skin`) -- `+10` on every side.
+ * T2e (`plans/activity-divergence-drive`, journal rows 9-10): step 1's own
+ * dispatch was missing two shape kinds the ink scan never fed it --
+ * `drawUPolygon` for every edge's arrowhead decoration (not modelled in
+ * `ActivityNodeGeo`/`ActivityEdgeGeo` at all; now read from `arrows-
+ * regular.ts` by {@link arrowheadTips}/`extendForEdge`) and `drawEmpty`/
+ * `drawRectangle` for the `Reservation`s `placeSwimlanes` already computes
+ * for the compressor (the lane divider's own `UEmpty(x1+x2,1)`,
+ * `LaneDivider.java:91`, and the swimlane title band's `URectangle`,
+ * `Swimlanes.java:358-367`) but {@link computeCanvasOrigin} never folded
+ * into the ink scan (see {@link extendForReservation}).
+ *
  * Composing (1)+(2)'s translate+(3): a node's own near-corner coordinate
  * `p` ends up drawn at `p - m + 15` where `m` is the GLOBAL ink min (every
  * node/edge's own fudged near corner, reduced by `Math.min`) and `15 = 10
@@ -57,6 +68,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { computeSwimlaneChrome } from './swimlane-placement.js';
 import type { SwimlaneChrome } from './swimlane-placement.js';
 import { CANVAS_ORIGIN_SHIFT, CANVAS_PADDING_TOTAL, SVG_CANVAS_CEIL } from '../activity-layout-constants.js';
+import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. */
@@ -133,16 +145,93 @@ function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo): void {
   acc.maxY = Math.max(acc.maxY, node.y + node.height + fy.far);
 }
 
+/**
+ * One `UPolygon` arrowhead decoration this edge draws, tip + direction --
+ * mirrors `renderer.ts#renderEdge`'s three decoration sites (terminal,
+ * `emphasize`, `midArrowAt`) exactly, but reads only `arrows-regular.ts`
+ * (`arrowDirection`/`arrowHeadExtents`), never `renderer.ts` itself (T2e's
+ * own write-set excludes the renderer; `arrowHeadExtents`'s own doc proves
+ * the `ArrowsRegular`/`ArrowsTriangle` bounding boxes are identical per
+ * direction, so no `Theme` is needed here to pick the right box).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:138-183
+ */
+function arrowheadTips(edge: ActivityEdgeGeo): Array<{ x: number; y: number; dir: ArrowDir }> {
+  const tips: Array<{ x: number; y: number; dir: ArrowDir }> = [];
+  const { points } = edge;
+  if (points.length < 2) return tips;
+
+  // Terminal decoration: `renderer.ts#renderEdge`'s `arrow` (`:230-234`).
+  if (edge.arrowhead !== false) {
+    const last = points[points.length - 1]!;
+    const prev = points[points.length - 2]!;
+    tips.push({ x: last.x, y: last.y, dir: arrowDirection(last.x - prev.x, last.y - prev.y) });
+  }
+
+  // Emphasized mid-segment decoration: the FIRST segment whose direction
+  // matches `edge.emphasize`, same search as `renderer.ts#findEmphasisSegment`.
+  if (edge.emphasize !== undefined) {
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i]!;
+      const p2 = points[i + 1]!;
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      if (arrowDirection(dx, dy) === edge.emphasize) {
+        tips.push({ x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, dir: edge.emphasize });
+        break;
+      }
+    }
+  }
+
+  // D4 (`activity-loop-lane-translate`): the translate shape's own extra
+  // decoration, `renderer.ts#renderMidArrow`.
+  if (edge.midArrowAt !== undefined) {
+    tips.push({ x: edge.midArrowAt.x, y: edge.midArrowAt.y, dir: edge.midArrowAt.dir });
+  }
+
+  return tips;
+}
+
 function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
-  // `ULine` segments only (`LimitFinder#drawULine`, exact) -- the terminal
-  // arrowhead `UPolygon` this edge draws is a renderer-level concern not
-  // modelled in `ActivityEdgeGeo` (T1b); deferred, open mechanism (report).
+  // `ULine` segments (`LimitFinder#drawULine`, exact).
   for (const p of edge.points) {
     acc.minX = Math.min(acc.minX, p.x);
     acc.maxX = Math.max(acc.maxX, p.x);
     acc.minY = Math.min(acc.minY, p.y);
     acc.maxY = Math.max(acc.maxY, p.y);
   }
+  // Arrowhead `UPolygon`s: `drawUPolygon` pads X ONLY by `HACK_X_FOR_POLYGON`
+  // (`POLYGON_FUDGE_X`'s own doc; `LimitFinder.java:169-176`), Y exact.
+  for (const tip of arrowheadTips(edge)) {
+    const ext = arrowHeadExtents(tip.dir);
+    acc.minX = Math.min(acc.minX, tip.x + ext.minX - POLYGON_FUDGE_X.near);
+    acc.maxX = Math.max(acc.maxX, tip.x + ext.maxX + POLYGON_FUDGE_X.far);
+    acc.minY = Math.min(acc.minY, tip.y + ext.minY);
+    acc.maxY = Math.max(acc.maxY, tip.y + ext.maxY);
+  }
+}
+
+/**
+ * The two `Reservation` kinds `placeSwimlanes`/`assignCoordinatesFull` emit
+ * (D5, `activity-klimt-compress`): a `UEmpty` -- the lane divider's own
+ * `UEmpty(x1 + x2, 1)` (`LaneDivider.java:91`) and the hexagon loop-back
+ * placeholder (`hexagon-reservations.ts`) -- dispatches through
+ * `LimitFinder#drawEmpty` (exact, `NO_FUDGE`); a `URectangle` -- the
+ * swimlane title band's background (`Swimlanes.java:358-367`,
+ * `.ignoreForCompressionOnX().ignoreForCompressionOnY()`, the ONLY
+ * reservation kind that sets `ignoreX`/`ignoreY`, per `hexagon-
+ * reservations.ts#Reservation`'s own doc) -- dispatches through
+ * `drawRectangle` (`RECT_FUDGE`). Both were already threaded into
+ * `finalizeGeometry`'s `reservations` param (`activity-klimt-compress` T3)
+ * for the compressor; this is the first LimitFinder-ink consumer of them
+ * (journal row 9: the jar's `20` first-divider-x IS this UEmpty's left
+ * edge, not the visible line).
+ */
+function extendForReservation(acc: MutableInkBounds, r: Reservation): void {
+  const fudge = r.ignoreX === true || r.ignoreY === true ? RECT_FUDGE : NO_FUDGE;
+  acc.minX = Math.min(acc.minX, r.x - fudge.near);
+  acc.maxX = Math.max(acc.maxX, r.x + r.width + fudge.far);
+  acc.minY = Math.min(acc.minY, r.y - fudge.near);
+  acc.maxY = Math.max(acc.maxY, r.y + r.height + fudge.far);
 }
 
 function extendForSwimlane(acc: MutableInkBounds, lane: SwimlaneGeo): void {
@@ -164,11 +253,13 @@ function computeCanvasOrigin(
   nodes: readonly ActivityNodeGeo[],
   edges: readonly ActivityEdgeGeo[],
   swimlanes: readonly SwimlaneGeo[],
+  reservations: readonly Reservation[],
 ): CanvasOrigin {
   const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
   for (const n of nodes) extendForNode(acc, n);
   for (const e of edges) extendForEdge(acc, e);
   for (const s of swimlanes) extendForSwimlane(acc, s);
+  for (const r of reservations) extendForReservation(acc, r);
   if (!Number.isFinite(acc.minX)) {
     acc.minX = 0;
     acc.minY = 0;
@@ -238,7 +329,7 @@ export interface FinalizedGeometry {
 
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight } = input;
-  const origin = computeCanvasOrigin(nodes, edges, swimlanes);
+  const origin = computeCanvasOrigin(nodes, edges, swimlanes, reservations);
   const shiftedNodes = nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY));
   const shiftedEdges = edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY));
   const shiftedSwimlanes = swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX));
