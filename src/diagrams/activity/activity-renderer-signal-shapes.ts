@@ -22,11 +22,12 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { text, polygon } from '../../core/svg.js';
+import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
-import { actColors, renderMultilineText, renderLabel } from './activity-renderer-shapes.js';
+import { actColors, centeredFirstBaselineY, renderMultilineText, renderLabel } from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
 
 export function renderSignalLabel(label: string, x: number, width: number, cy: number, theme: Theme): string {
   // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
@@ -40,11 +41,15 @@ export function renderSignalLabel(label: string, x: number, width: number, cy: n
   if (lines.length === 1) {
     const lineWidth = measureLineWidth(theme, size, label);
     const lx = activityTextLineX(theme, cx, lineWidth, opts);
-    return text(lx, cy, label, {
+    // D1: no `dominant-baseline` (the driver emits none) -- the chevron is
+    // sized by the SAME `tiles/gtile-action.ts` FtileBox model the plain
+    // action box uses (this function's own doc comment, `FtileBox.java
+    // :97-99,146`), so its single-line baseline reduces to the identical
+    // N=1 `centeredFirstBaselineY` already jar-verified for that box.
+    return drawActivityText(lx, centeredFirstBaselineY(cy, size, 1), label, {
       fill: activityFontColor(theme, 'activity'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      dominantBaseline: 'central',
     });
   }
   return renderMultilineText(lines, cx, cy, theme, opts);
@@ -120,6 +125,15 @@ export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string
         // it resolves `SName.activity` like the plain box (`FtileBox.java
         // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
         renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize, width: w })
-      : renderLabel(node.label ?? '', cx, cy + boxSize / 3, theme, { sname: 'activity', fontSize: boxSize, width: w });
+      : // Same `cy + boxSize/3` box-centre approximation T1b already replaced
+        // on the action/diamond/hexagon single-line paths (0.667px off at
+        // size 12) -- `BoxStyle.SDL_SAVE` is still an `FtileBox` (this
+        // function's own comment above), so the identical N=1
+        // `centeredFirstBaselineY` reduction applies here too.
+        renderLabel(node.label ?? '', cx, centeredFirstBaselineY(cy, boxSize, 1), theme, {
+          sname: 'activity',
+          fontSize: boxSize,
+          width: w,
+        });
   return shape + labelEl;
 }

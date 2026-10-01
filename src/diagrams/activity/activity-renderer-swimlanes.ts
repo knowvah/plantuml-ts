@@ -17,8 +17,9 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { line, rect, text } from '../../core/svg.js';
+import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
 import {
   swimlaneBorderColor,
   swimlaneBorderThickness,
@@ -122,7 +123,7 @@ export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): strin
     const contentX = lane.contentX ?? lane.x;
     const contentWidth = lane.contentWidth ?? lane.width;
     const titleX = contentX + (contentWidth - (lane.titleWidth ?? 0)) / 2;
-    out += text(titleX, baselineY, lane.name, { fontFamily: theme.fontFamily, fontSize, fill });
+    out += drawActivityText(titleX, baselineY, lane.name, { fontFamily: theme.fontFamily, fontSize, fill });
   }
   return out;
 }

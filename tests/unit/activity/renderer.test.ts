@@ -495,6 +495,16 @@ describe('renderActivity — if-label node', () => {
     expect(Number(textMatch![1])).toBe(10);
     expect(Number(textMatch![2])).toBeCloseTo(20 + 11 * (1 - 1 / 4.5), 2);
   });
+
+  // T1b follow-up (D1): if-label now draws through `drawActivityText`, so
+  // its 3-char "yes" label carries a real textLength (upstream's own
+  // `text.length() > 1` guard) instead of core/svg.ts#text's unset one.
+  it('carries a real textLength (D1 — routed through DriverTextSvg)', () => {
+    const node = makeNode({ kind: 'if-label', label: 'yes', x: 10, y: 20 });
+    const geo = makeGeo({ nodes: [node] });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>yes<\/text>/);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -1087,6 +1097,44 @@ describe('renderActivity — arrowhead is ArrowsRegular (akc-T1)', () => {
     const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
     const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
     expect(coordCount).toBe(8); // 4 points x (x, y)
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T1b (decisions.md#D4) — `skinparam style strictuml` selects `ArrowsTriangle`
+// (SkinParam.java:1306-1309): a 3-point polygon, byte-identical in every
+// OTHER regard (fill/stroke/stroke-width) to the ArrowsRegular draw above.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — ArrowsTriangle under skinparam style strictuml (D4)', () => {
+  const edge = {
+    points: [
+      { x: 10, y: 10 },
+      { x: 10, y: 60 },
+    ],
+  };
+
+  it('a downward edge draws the 3-point asToDown triangle translated to the tip (10,60)', () => {
+    // asToDown relative to the tip: (-4,-10),(4,-10),(0,0) (ArrowsTriangle
+    // .java:57-61); translated by the tip (10,60): (6,50),(14,50),(10,60).
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,14,50,10,60');
+  });
+
+  it('three points, not ArrowsRegular\'s four, under strictuml', () => {
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
+    expect(coordCount).toBe(6); // 3 points x (x, y)
+  });
+
+  it('a non-strictuml fixture keeps the byte-identical ArrowsRegular 4-point draw', () => {
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,10,60,14,50,10,54');
   });
 });
 

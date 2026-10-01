@@ -427,6 +427,74 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T1b (decisions.md#D1/#D4) — every activity `<text>` goes through the
+// klimt `DriverTextSvg`: `textLength` is real, and the single-line baseline
+// is `rect.y + padding + fontSize * ASCENT_FRACTION`, jar-verified on
+// `rarodo-65-fudu505` (`rect.y=55`, `fontSize=12`: `text.y=74.333`, i.e.
+// `rect.y + 19.333`) -- NOT the old `cy + fontSize/3` (would give +20).
+// ---------------------------------------------------------------------------
+
+describe('T1b — klimt text driver (D1)', () => {
+  it('a single-line action label carries textLength and sits at rect.y + 19.333 (rarodo-65-fudu505)', () => {
+    // Height 32 = fontSize(12) + 2*padding(10), matching `textNodeHeight`'s
+    // own formula -- the SAME box shape `rarodo` sizes its action at.
+    const node = makeNode({ kind: 'action', label: 'first', x: 16, y: 55, width: 39.275, height: 32 });
+    const svg = renderAction(node, theme);
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>first<\/text>/);
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    expect(y - node.y).toBeCloseTo(19.333, 2);
+  });
+
+  it('a single-char label carries no textLength (upstream text.length() > 1 guard)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'a', x: 0, y: 0, width: 30, height: 32 }), theme);
+    expect(svg).not.toContain('textLength');
+  });
+
+  it('a diamond label carries no dominant-baseline, baseline from centeredFirstBaselineY', () => {
+    const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, y: 40, width: 40, height: 40 });
+    const svg = renderDiamond(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const fontSize = 11; // plantuml.skin:370
+    expect(y).toBeCloseTo(cy + fontSize * (7 / 9 - 0.5), 2);
+  });
+
+  it('a hexagon condition label carries textLength and no dominant-baseline', () => {
+    const node = makeNode({ kind: 'diamond', label: 'test', x: 0, y: 0, width: 48, height: 24 });
+    const svg = renderHexagon(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>test<\/text>/);
+  });
+
+  // Follow-up push-forward: activity-renderer-signal-shapes.ts's chevron/
+  // parallelogram single-line labels carried the SAME `dominant-baseline:
+  // 'central'` / `cy + boxSize/3` approximations as the action/diamond
+  // boxes above -- fixed identically (same file, same mechanism, D1/D9).
+  it('a chevron (<<input>>) label carries textLength and no dominant-baseline', () => {
+    const node = makeNode({ kind: 'action', label: 'go now', stereotype: 'input', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderChevronLeft(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>go now<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12; // activityFontSize(theme, 'activity')
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
+
+  it('a parallelogram (<<save>>) label carries textLength and no dominant-baseline/box-centre hack', () => {
+    const node = makeNode({ kind: 'action', label: 'store', stereotype: 'save', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderParallelogram(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>store<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12;
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // renderBar / renderSplitLine (apc-T3, activity-renderer-bars.ts) --
 // FtileBlackBlock.java:101-110 (fork/join bar) vs FtileThinSplit.java
 // :87-96 (split top/join line): two different shapes for two different

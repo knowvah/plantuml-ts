@@ -8,13 +8,14 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, polygon } from '../../core/svg.js';
+import { rect, line, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode } from './activity-renderer-shapes.js';
+import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { arrowDirection, arrowHeadPoints, type ArrowDir } from './arrows-regular.js';
+import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 
 // ---------------------------------------------------------------------------
@@ -35,16 +36,26 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 // ---------------------------------------------------------------------------
 
 /**
- * Draw the `ArrowsRegular` decoration (`arrows-regular.ts`) at the tip
- * `(x, y)`, oriented by the segment direction `(dx, dy)`.
+ * Draw the `ArrowsRegular`/`ArrowsTriangle` decoration (`arrows-regular.ts`,
+ * D4) at `tip`, oriented by the segment direction `vector`. Bundled into
+ * two point-shaped params (rather than four numbers) to stay under this
+ * file's 5-param complexity limit once `theme` (D4's strictuml selector)
+ * joined `color`.
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:154-168
  * (`drawInternalOneColor`'s `startDecoration`/`endDecoration` draw).
  */
-function arrowTip(x: number, y: number, dx: number, dy: number, color: string): string {
+function arrowTip(
+  tip: { x: number; y: number },
+  vector: { dx: number; dy: number },
+  color: string,
+  theme: Theme,
+): string {
+  const { x, y } = tip;
+  const { dx, dy } = vector;
   if (dx === 0 && dy === 0) return '';
   const dir = arrowDirection(dx, dy);
-  const points = arrowHeadPoints(dir).map((p) => ({ x: x + p.x, y: y + p.y }));
+  const points = arrowHeadPointsFor(theme, dir).map((p) => ({ x: x + p.x, y: y + p.y }));
   return polygon(
     points,
     // The arrow DECORATION draws through `.apply(UStroke.simple())`
@@ -86,18 +97,20 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
     // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
     // function's own padding, two lines up), so the centring offset that
     // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
-    // algebra on the existing estimate, not a new guess.
-    const labelEl = text(pillX + 4, midY, label, {
+    // algebra on the existing estimate, not a new guess. D1: no `dominant-
+    // baseline` either (the driver emits none) -- `centeredFirstBaselineY`
+    // is the same N=1 ascent-centred baseline `activity-renderer-shapes.ts`
+    // uses for every other box/hexagon/diamond single-line label.
+    const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
       fill: activityFontColor(theme, 'arrow'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      dominantBaseline: 'central',
     });
     return background + labelEl;
   }
 
   // No color: plain text label offset slightly from the midpoint
-  return text(midX + 4, midY - 4, label, {
+  return drawActivityText(midX + 4, midY - 4, label, {
     fill: activityFontColor(theme, 'arrow'),
     fontFamily: theme.fontFamily,
     fontSize: size,
@@ -189,10 +202,9 @@ const DIR_VECTOR: Record<ArrowDir, { dx: number; dy: number }> = {
 /** D4: the extra arrowhead a translate shape places at its own point,
  *  split out of {@link renderEdge} to keep that function under the file's
  *  NLOC limit. */
-function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string): string {
+function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string, theme: Theme): string {
   const { x, y, dir } = midArrowAt;
-  const { dx, dy } = DIR_VECTOR[dir];
-  return arrowTip(x, y, dx, dy, edgeColor);
+  return arrowTip({ x, y }, DIR_VECTOR[dir], edgeColor, theme);
 }
 
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
@@ -219,7 +231,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last.x, last.y, dx, dy, edgeColor);
+  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, edgeColor, theme);
 
   // Emphasized mid-segment arrowhead (`Snake#emphasizeDirection`, D6) --
   // drawn IN ADDITION to the terminal arrowhead, never instead of it
@@ -229,14 +241,14 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   if (edge.emphasize !== undefined) {
     const seg = findEmphasisSegment(pts, edge.emphasize);
     if (seg !== undefined) {
-      emphasizeEl = arrowTip(seg.mid.x, seg.mid.y, seg.dx, seg.dy, edgeColor);
+      emphasizeEl = arrowTip(seg.mid, { dx: seg.dx, dy: seg.dy }, edgeColor, theme);
     }
   }
 
   // D4: an explicit extra arrowhead at a translate shape's own point (see
   // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after `emphasize`,
   // never instead of the terminal arrowhead.
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor);
+  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor, theme);
 
   // Optional edge label near midpoint
   let labelEl = '';

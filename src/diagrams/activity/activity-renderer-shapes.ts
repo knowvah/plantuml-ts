@@ -8,19 +8,9 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import {
-  rect,
-  text,
-  diamond,
-  noteBox,
-  ellipse,
-  line,
-  path,
-  polygon,
-  resolvePaint,
-  type TextStyle,
-} from '../../core/svg.js';
+import { rect, diamond, noteBox, ellipse, line, path, polygon, resolvePaint } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
+import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
 import { NOTE_FOLD } from './activity-layout-constants.js';
 import {
   ACTIVITY_BAR_FILL,
@@ -98,14 +88,20 @@ export function textLines(
   x: number,
   firstBaselineY: number,
   lineHeight: number,
-  style: TextStyle,
+  style: ActivityTextStyle,
 ): string {
-  return lines.map((ln, i) => text(x, firstBaselineY + lineHeight * i, ln, style)).join('');
+  return drawActivityTextLines(lines, x, firstBaselineY, lineHeight, style);
 }
 
 /** First baseline Y so an N-line block is vertically centred around `cy`,
- *  using the cited advance/ascent above instead of the old `lh * 0.8`. */
-function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
+ *  using the cited advance/ascent above instead of the old `lh * 0.8`.
+ *  `lineCount = 1` is this same formula's reduction to a SINGLE centred
+ *  line (`cy + lineHeight * (ASCENT_FRACTION - 1/2)`) -- jar-verified
+ *  against `rerovo-62-nazo755`'s hexagon label (`cy=27`, `fontSize=11`:
+ *  jar `y=30.056`, exactly `27 + 11 * 5/18`) and `rarodo-65-fudu505`'s
+ *  action-box label once expressed relative to `rect.y` (D1, exported for
+ *  `renderer.ts`'s edge-label use, which centres on the same formula). */
+export function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
 }
 
@@ -120,7 +116,7 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
   const lineWidth = measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
-  return text(x, cy, label, {
+  return drawActivityText(x, cy, label, {
     fontFamily: theme.fontFamily,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
@@ -141,7 +137,7 @@ export function renderMultilineText(
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return text(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+      return drawActivityText(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
     })
     .join('');
 }
@@ -275,17 +271,26 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
       .map((ln, i) => {
         const w = measureMonoLineWidth(actionSize, ln);
         const x = activityTextLineX(theme, cx, w, opts);
-        return text(x, lineY + actionSize * i, ln, { fontFamily: 'monospace', fontSize: actionSize, fill: codeFill });
+        return drawActivityText(x, lineY + actionSize * i, ln, {
+          fontFamily: 'monospace',
+          fontSize: actionSize,
+          fill: codeFill,
+        });
       })
       .join('');
     return box + labelText;
   }
 
   const lines = label.split('\n');
+  // D1/D9: the single-line baseline is the N=1 case of the SAME
+  // `centeredFirstBaselineY` the multi-line branch already uses, not the
+  // old `cy + actionSize / 3` hand-rounding (`rarodo-65-fudu505`: box
+  // `rect.y + 19.333` reduces to `cy + actionSize * 5/18` here, not
+  // `cy + actionSize/3` -- a 0.667px error at `actionSize=12`).
   const labelEl =
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
-      : renderLabel(label, cx, cy + actionSize / 3, theme, opts);
+      : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
   return box + labelEl;
 }
 
@@ -305,13 +310,31 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   // dimLabel.width) / 2` in this node's own frame.
   const fontSize = activityFontSize(theme, 'diamond');
   const lineWidth = measureLineWidth(theme, fontSize, node.label);
-  const label = text(centeredLineX(cx, lineWidth), cy, node.label, {
+  // D1: no `dominant-baseline` (the driver emits none, and no cached jar
+  // SVG carries one) -- the real baseline is the same N=1 reduction of
+  // `centeredFirstBaselineY` `renderHexagon`'s single-line branch uses.
+  const label = drawActivityText(centeredLineX(cx, lineWidth), centeredFirstBaselineY(cy, fontSize, 1), node.label, {
     fontFamily: theme.fontFamily,
     fontSize,
     fill: activityFontColor(theme, 'diamond'),
-    dominantBaseline: 'middle',
   });
   return shape + label;
+}
+
+/** The hexagon condition label, split out of {@link renderHexagon} to stay
+ *  under this file's per-function NLOC limit. Multi-line: `GtileIfHexagon
+ *  .java:184`/`GtileHexagonInside.java:64` resolve `of(root, element,
+ *  activityDiagram, activity, diamond)`, the diamond SName (`FontSize 11`,
+ *  plantuml.skin:370). Single-line: jar-verified on `rerovo-62-nazo755`'s
+ *  "test" hexagon (`cy=27`, `fontSize=11`): `y=30.056 === cy + 11 * 5/18`,
+ *  the SAME N=1 reduction of `centeredFirstBaselineY` -- not the old
+ *  `cy + condSize/3` (would give 30.667, 0.611px off). */
+function renderHexagonLabel(label: string | undefined, cx: number, cy: number, theme: Theme, condSize: number): string {
+  const lines = (label ?? '').split('\n');
+  const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
+  return lines.length > 1
+    ? renderMultilineText(lines, cx, cy, theme, opts)
+    : renderLabel(label ?? '', cx, centeredFirstBaselineY(cy, condSize, 1), theme, opts);
 }
 
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
@@ -333,15 +356,7 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const cx = x + w / 2;
   const cy = y + h / 2;
   const condSize = activityFontSize(theme, 'diamond');
-  const lines = (node.label ?? '').split('\n');
-  const labelEl =
-    lines.length > 1
-      ? // A labelled condition: `GtileIfHexagon.java:184`/`GtileHexagonInside
-        // .java:64` resolve `of(root, element, activityDiagram, activity,
-        // diamond)`, the diamond SName -- `FontSize 11` (plantuml.skin:370).
-        renderMultilineText(lines, cx, cy, theme, { sname: 'diamond', fontSize: condSize })
-      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, { sname: 'diamond', fontSize: condSize });
-  return shape + labelEl;
+  return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }
 
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
@@ -409,7 +424,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
       fill: activityFontColor(theme, 'note'),
     });
   } else {
-    labelEl = text(labelX, y + NOTE_FOLD + noteSize, label, {
+    labelEl = drawActivityText(labelX, y + NOTE_FOLD + noteSize, label, {
       fill: activityFontColor(theme, 'note'),
       fontFamily: theme.fontFamily,
       fontSize: noteSize,

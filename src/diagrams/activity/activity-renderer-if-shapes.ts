@@ -16,10 +16,11 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { text, polygon } from '../../core/svg.js';
+import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { actColors, ASCENT_FRACTION, textLines } from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -70,5 +71,5 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
   if (lines.length > 1) {
     return textLines(lines, node.x, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
   }
-  return text(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+  return drawActivityText(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
 }
