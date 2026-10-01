@@ -133,3 +133,38 @@ export function activityTextLineX(theme: Theme, cx: number, lineWidth: number, o
   const padding = activityPadding('activity');
   return boxLineX(cx - opts.width / 2, opts.width, lineWidth, padding, theme);
 }
+
+// ---------------------------------------------------------------------------
+// Creole table rows (T3e) -- a `|cell|cell|` physical line, the SINGLE-ROW
+// slice of `StripeTable#analyzeAndAddInternal`'s own `StringTokenizer(line,
+// "|")` cell split (`StripeTable.java:137-159`) that this mission's two
+// assigned rows (`activity-creole-table`, `niletu-83-lego826`) exercise: one
+// column, no `<#color>` prefix, no nested creole markup inside a cell, no
+// header `=` styling beyond stripping the marker. Shared between
+// `tiles/gtile-action.ts` (sizing) and `activity-renderer-text.ts`
+// (drawing) so both measure/draw the SAME stripped cell text.
+//
+// NOT ported here (both call sites' own doc comments repeat this): the
+// `AtomTable` GRID -- per-column width maxed across every row of the merged
+// table, row-boundary `<line>` rules spanning the whole block
+// (`AtomTable.java:150-158`) -- because drawing it needs the renderer's
+// per-node call site (`activity-renderer-shapes.ts#renderAction`, T3f),
+// outside this task's write-set.
+// ---------------------------------------------------------------------------
+
+/** `CreoleParser.java:117` `TABLE_LINE_PATTERN`
+ *  (`"^(\\<#\\w+(,#?\\w+)?\\>)?\\|(\\=)?.*\\|$"`), the color-prefix arm
+ *  omitted -- no row this task owns uses `<#color>|...`. */
+export function isTableRowLine(line: string): boolean {
+  return /^\|.*\|$/.test(line.trim());
+}
+
+/** `StripeTable.java:137-148`'s cell split: tokenize on `|`, drop the empty
+ *  leading/trailing segments a `|`-delimited line produces, strip a leading
+ *  `=` header marker (`:140-143`), trim. */
+export function tableRowCellsOf(line: string): readonly string[] {
+  const segments = line.trim().split('|');
+  segments.shift();
+  if (segments.length > 0 && segments[segments.length - 1]?.trim() === '') segments.pop();
+  return segments.map((seg) => (seg.startsWith('=') ? seg.slice(1) : seg).trim());
+}

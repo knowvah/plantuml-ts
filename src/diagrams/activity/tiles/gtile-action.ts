@@ -6,6 +6,57 @@ import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityBoxHeight, activityFontSize, activityPadding } from '../activity-style-defaults.js';
 import { activityMinimumWidth } from '../activity-text-style.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import type { StringMeasurer, FontSpec } from '../../../core/measurer.js';
+import { isTableRowLine, tableRowCellsOf } from '../activity-text-placement.js';
+
+/** `StripeTable.java:82`: `new AtomWithMargin(table, 2, 2)` -- the merged
+ *  creole table's own +2-top/+2-bottom margin, added ONCE per `FtileBox`
+ *  whose entire label is a single `StripeTable` stripe (this task's two
+ *  assigned rows, `activity-creole-table`/`niletu-83-lego826`, are both
+ *  all-table labels; a label MIXING table and plain-text physical lines
+ *  needs per-stripe margin accounting this constructor does not attempt).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomWithMargin.java:49 */
+const TABLE_BLOCK_MARGIN_Y = 4;
+
+/** `WidthTableMeasurer`-shaped adapter over this tile's own injected
+ *  `StringBounder` (`tile.js`'s `getDimension(text, fontSizePt)`) -- the
+ *  seam `creoleTextLines` needs ({@link StringMeasurer}'s
+ *  `measure(text, font)`) is a different, wider shape. `getDescent`'s
+ *  `size/4.5` is `StringBounder.java:47`'s own documented default, already
+ *  cited by `activity-renderer-shapes.ts#ASCENT_FRACTION`; the seam only
+ *  reads it for a `<back:gradient>` patch no row this task owns reaches. */
+function measurerAdapterOf(bounder: StringBounder): StringMeasurer {
+  return {
+    measure: (text, font) => bounder.getDimension(text, font.size),
+    getDescent: (font) => font.size / 4.5,
+  };
+}
+
+/**
+ * One physical line's content width -- the RESOLVED creole width, not the
+ * literal (bracket/pipe-including) source text: `FtileBox
+ * #calculateDimensionFtile` (`ftile/vertical/FtileBox.java:237-243`) sizes
+ * the box from the `Display#create8`-built `TextBlock`, which for a
+ * `[[url]]` line is `CommandCreoleUrl`'s resolved label/url/trailing-text
+ * run sequence (`CommandCreoleUrl.ts`, consumed by `creoleTextLines` via
+ * `buildLineAtoms`) and for a `|cell|` line is `StripeTable`'s own stripped
+ * cell content (`activity-text-placement.ts#tableRowCellsOf`,
+ * `StripeTable.java:137-159`) -- every other line (the overwhelming
+ * majority of this port's corpus) keeps the pre-existing literal-text
+ * measurement unchanged.
+ */
+function creoleLineWidth(line: string, bounder: StringBounder, theme: Theme, fontSize: number): number {
+  if (line.includes('[[')) {
+    const font: FontSpec = { family: theme.fontFamily, size: fontSize };
+    const built = creoleTextLines(line, font, measurerAdapterOf(bounder));
+    return built[0]?.width ?? 0;
+  }
+  if (isTableRowLine(line)) {
+    return tableRowCellsOf(line).reduce((sum, cell) => sum + bounder.getDimension(cell, fontSize).width, 0);
+  }
+  return bounder.getDimension(line, fontSize).width;
+}
 
 export class GtileAction extends TileLeaf {
   readonly kind = 'gtile-action' as const;
@@ -41,7 +92,7 @@ export class GtileAction extends TileLeaf {
     const monoCharWidth = fontSize * 0.6;
     const maxWidth = isCodeBlock
       ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
-      : Math.max(...lines.map((l) => bounder.getDimension(l, fontSize).width));
+      : Math.max(...lines.map((l) => creoleLineWidth(l, bounder, theme, fontSize)));
     // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
     // :237-243`) adds the resolved `Padding` to BOTH axes and floors the
     // WIDTH only -- `atLeast(minimumWidth, 0)`, a literal 0 for the height.
@@ -58,7 +109,11 @@ export class GtileAction extends TileLeaf {
     // (`style/ValueNull.java:61-63`) -- so by default this box imposes no
     // width floor at all, matching the jar.
     this.width = Math.max(maxWidth + 2 * pad, activityMinimumWidth(theme));
-    this.height = activityBoxHeight(lineHeight * lineCount, 'activity');
+    // `StripeTable.java:82`'s `AtomWithMargin(table, 2, 2)` -- see
+    // `TABLE_BLOCK_MARGIN_Y`'s own doc comment for the all-table-lines scope.
+    const isAllTableRows = !isCodeBlock && lineCount > 0 && lines.every((l) => isTableRowLine(l));
+    const textHeight = lineHeight * lineCount + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0);
+    this.height = activityBoxHeight(textHeight, 'activity');
   }
 
   getCoord(hook: HookName): GPoint {
