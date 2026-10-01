@@ -98,6 +98,37 @@ function applyLastEdgeLabel(out: Out, label: string | undefined): void {
   if (label !== undefined && label !== '') out.edges[out.edges.length - 1]!.label = label;
 }
 
+/**
+ * The `gtile-top-down` sibling edge, gated on the preceding child's own
+ * out point. Extracted out of `walkTile`'s `'gtile-top-down'` arm purely
+ * to keep that function's own CCN off the complexity hook's ratchet (the
+ * switch itself is `#lizard forgives`d; a new branch inside one arm is
+ * not).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorAssembly.java:67-70
+ *   -- `geo = tile1.calculateDimension(...)`, `if (geo.hasPointOut() ==
+ *   false) return result`: no connection is added when the PRECEDING
+ *   sibling has no out point (a stop/kill/break, or a branch that
+ *   dead-ends in one). Every other walker in this file already gates its
+ *   own sibling/branch edges on `hasPointOut()` (`walk-fork-branches.ts`,
+ *   `walk-while-branch.ts`, `walk-repeat.ts`); this was the one push left
+ *   ungated (T2b row 28, piruxe-91-zivi081 residual).
+ */
+interface TopDownSiblingLink {
+  readonly prevChild: Tile;
+  readonly prev: GPoint;
+  readonly child: Tile;
+  readonly next: GPoint;
+  readonly myLane: string | undefined;
+}
+
+function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
+  const { prevChild, prev, child, next, myLane } = link;
+  if (!prevChild.hasPointOut()) return;
+  const from = { x: prev.x + prevChild.getCoord(SOUTH_HOOK).x, y: prev.y + prevChild.getCoord(SOUTH_HOOK).y };
+  const to = { x: next.x + child.getCoord(NORTH_HOOK).x, y: next.y + child.getCoord(NORTH_HOOK).y };
+  pushEdge(out, new GConnectionVerticalDown().getPoints(from, to), laneOut(prevChild, myLane), laneIn(child, myLane));
+}
+
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
   const { kindHint, lane } = hints;
   const myLane = laneAt(tile, lane);
@@ -203,15 +234,15 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         const childY = y + t.childOffsets[i]!;
         const childX = x + t.childOffsetsX[i]!;
         walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
+        // `hasPointOut()` gate: see `pushTopDownSiblingEdge`'s own doc.
         if (prevChild !== null) {
-          const from = { x: prevX + prevChild.getCoord(SOUTH_HOOK).x, y: prevY + prevChild.getCoord(SOUTH_HOOK).y };
-          const to = { x: childX + child.getCoord(NORTH_HOOK).x, y: childY + child.getCoord(NORTH_HOOK).y };
-          pushEdge(
-            out,
-            new GConnectionVerticalDown().getPoints(from, to),
-            laneOut(prevChild, myLane),
-            laneIn(child, myLane),
-          );
+          pushTopDownSiblingEdge(out, {
+            prevChild,
+            prev: { x: prevX, y: prevY },
+            child,
+            next: { x: childX, y: childY },
+            myLane,
+          });
         }
         prevChild = child;
         prevX = childX;
