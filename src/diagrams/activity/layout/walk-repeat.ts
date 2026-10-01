@@ -112,22 +112,18 @@ function pushRepeatEntry(
 
 /**
  * The `'gtile-repeat'` case's condition hexagon: pushed directly (never
- * through `walkTile`'s generic dispatch, same as `if`'s own `diamond1`,
- * `walk-if-down.ts#pushDiamond1`), then its own side labels -- east is the
- * "is"/entry label, south is the "not"/exit label (default, no `backward`,
- * D1). Split out of the `'gtile-repeat'` case only to keep `walkTile`'s own
- * NLOC from growing (the case itself is unchanged besides this call).
- * `laneAt` resolves the condition's OWN `.swimlane` (`tileRepeat`'s
- * `outLane(node.swimlaneOut, node.swimlane)`, `FtileRepeat.java:149,152`)
- * over the parent's inherited `myLane` -- the same resolution `walkTile`'s
- * own dispatch (`:117-118`) applies to every tile it walks; bypassing
- * `walkTile` to push directly means this helper must apply it itself, or a
- * laned repeat's condition silently renders in the wrong lane. The pushed
- * node's `height` is the hexagon-ALONE height (`condition.getCoord(SOUTH_
- * HOOK).y`), not `condition.height` (which would add a north label's height
- * below it) -- the repeat condition never sets a north label (D1), so the
- * two are equal today, but this keeps the walker correct if one ever does.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ * through `walkTile`'s generic dispatch), then its own side labels --
+ * south is always the "not"/exit label; east is the "is"/entry label
+ * unless `backwardExitsOnLeft`, which moves it to west (mission
+ * `activity-divergence-drive` T3h, `tile-layout-backward.ts`).
+ * `emitDiamondLabels` no-ops a side `labelAt` never set (`diamond-
+ * labels.ts:40-41`), so passing all three sides unconditionally is safe
+ * -- `repeatConditionLabels` picks east XOR west, never both. `laneAt`
+ * resolves the condition's OWN `.swimlane` over the parent's inherited
+ * `myLane`, same as `walkTile`'s own dispatch. The pushed node's `height`
+ * is the hexagon-ALONE height, not `condition.height` (which would add a
+ * north label's height, never set here, D1).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151,210-219
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:87-89
  */
 function pushRepeatCondition(
@@ -151,7 +147,7 @@ function pushRepeatCondition(
     },
     hexLane,
   );
-  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east'], hexLane, out);
+  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east', 'west'], hexLane, out);
 }
 
 /** Copy of `walk-while-branch.ts`'s own `pushEdgeFlagged` (that file is

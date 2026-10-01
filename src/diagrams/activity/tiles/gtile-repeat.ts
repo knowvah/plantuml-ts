@@ -44,7 +44,7 @@ export interface GtileRepeatContext {
    * `undefined` for every repeat that has none, which is every call site
    * until that seam is wired.
    */
-  readonly backward?: Tile;
+  readonly backward?: Tile | undefined;
 }
 
 /**
