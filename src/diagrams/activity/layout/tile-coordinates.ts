@@ -115,10 +115,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       pushNode(out, { id: out.nextId('end'), kind: 'end', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
-    case 'gtile-kill':
-      pushNode(out, { id: out.nextId('kill'), kind: 'kill', x, y, width: tile.width, height: tile.height }, myLane);
-      return;
-
     case 'gtile-break':
       pushNode(out, { id: out.nextId('break'), kind: 'break', x, y, width: tile.width, height: tile.height }, myLane);
       return;

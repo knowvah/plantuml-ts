@@ -8,7 +8,7 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
-import { END_CROSS_THICKNESS, KILL_INNER_RATIO, STOP_INNER_DELTA } from './activity-layout-constants.js';
+import { END_CROSS_THICKNESS, STOP_INNER_DELTA } from './activity-layout-constants.js';
 import { CIRCLE_END_LINE_THICKNESS, CIRCLE_INK, CIRCLE_LINE_THICKNESS } from './activity-style-defaults.js';
 import { actColors } from './activity-renderer-shapes.js';
 
@@ -84,34 +84,6 @@ export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
 }
 
 /**
- * `kill`'s bullseye glyph -- historically drawn by the SAME code path as
- * `stop` (both dispatched to the pre-T1c `renderStop`), sharing its old
- * unsourced `outerR * 0.55` inner ratio. T1c (D3) corrected `stop` to the
- * Java-cited `CircleEnd` geometry above, which would have changed `kill`'s
- * pixels too since `kill`'s own tile height differs from `stop`'s post-fix
- * height -- so `kill` keeps its OWN copy of the pre-fix formula here,
- * decoupled from `stop`, via the renamed `KILL_INNER_RATIO` constant
- * (`activity-layout-constants.ts`). `kill`'s own upstream mechanism
- * (`FtileKilled`/`FtileCircleKill`) was not read this task; this function
- * exists only to keep its rendered output byte-identical until T2b
- * (detach/kill) sources it properly.
- */
-export function renderKill(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const outerR = node.height / 2;
-  const innerR = outerR * KILL_INNER_RATIO;
-  const c = actColors(theme);
-  return (
-    ellipse(cx, cy, outerR, outerR, {
-      fill: 'none',
-      stroke: resolvePaint(c.endFill).value,
-      'stroke-width': CIRCLE_LINE_THICKNESS,
-    }) + ellipse(cx, cy, innerR, innerR, { fill: resolvePaint(c.endFill).value })
-  );
-}
-
-/**
  * Every `<line>` the jar's activity engine emits has `y1 <= y2` --
  * `ActivityDiagram3.java` wraps the WHOLE diagram's drawing `UGraphic` in
  * `CompressionXorYBuilder`'s pair of `UGraphicCompressOnXorY` (ON_X then
@@ -162,6 +134,12 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
       'stroke-width': CIRCLE_END_LINE_THICKNESS,
     }) +
     orderedLine(node.x + delta, node.y + delta, node.x + delta + size2, node.y + delta + size2, crossStyle) +
-    orderedLine(node.x + delta, node.y + size - delta, node.x + delta + size2, node.y + size - delta - size2, crossStyle)
+    orderedLine(
+      node.x + delta,
+      node.y + size - delta,
+      node.x + delta + size2,
+      node.y + size - delta - size2,
+      crossStyle,
+    )
   );
 }

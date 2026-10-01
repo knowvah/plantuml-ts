@@ -29,7 +29,7 @@ import {
   renderChevronRight,
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
-import { renderStart, renderStop, renderKill, renderEnd } from './activity-renderer-terminals.js';
+import { renderStart, renderStop, renderEnd } from './activity-renderer-terminals.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -45,7 +45,7 @@ export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParalle
 // now live in `activity-renderer-terminals.ts`, which imports `actColors`
 // BACK from this file (same circular-but-safe shape as the signal-shapes
 // re-export above) -- existing importers of these four names are unchanged.
-export { renderStart, renderStop, renderKill, renderEnd };
+export { renderStart, renderStop, renderEnd };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -183,7 +183,7 @@ export function actColors(theme: Theme): ActivityColors {
 // ---------------------------------------------------------------------------
 // Node shape renderers
 // ---------------------------------------------------------------------------
-// `renderStart`/`renderStop`/`renderKill`/`renderEnd` live in
+// `renderStart`/`renderStop`/`renderEnd` live in
 // `activity-renderer-terminals.ts` (T1c, 500-line hook) -- re-exported
 // above.
 
@@ -442,8 +442,6 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderStart(node, theme);
     case 'stop':
       return renderStop(node, theme);
-    case 'kill':
-      return renderKill(node, theme);
     case 'end':
       return renderEnd(node, theme);
     case 'action':

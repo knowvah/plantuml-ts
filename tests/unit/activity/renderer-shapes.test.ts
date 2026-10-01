@@ -18,7 +18,6 @@ import {
   renderDiamond,
   renderEnd,
   renderHexagon,
-  renderKill,
   renderLabel,
   renderNode,
   renderNote,
@@ -153,31 +152,6 @@ describe('renderStop', () => {
     expect(svg).not.toContain('#FF0');
     expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
     expect(svg).toContain('fill="#222"');
-  });
-});
-
-describe('renderKill', () => {
-  // `kill` is decoupled from `stop` at T1c (D3): it keeps the PRE-FIX
-  // unsourced `outerR * 0.55` ratio (now `KILL_INNER_RATIO`) at its own
-  // unchanged tile size (28), so its pixels stay byte-identical across
-  // this task. `kill`'s own upstream mechanism is out of scope (T2b).
-  it('emits exactly two <ellipse> elements (bullseye), never a <circle>', () => {
-    const node = makeNode({ kind: 'kill', width: 28, height: 28 });
-    const svg = renderKill(node, theme);
-    expect(svg).not.toContain('<circle');
-    expect((svg.match(/<ellipse/g) ?? []).length).toBe(2);
-  });
-
-  it('preserves the pre-T1c outer=14/inner=7.7 geometry, unchanged by the stop fix', () => {
-    const node = makeNode({ kind: 'kill', x: 50, y: 50, width: 28, height: 28 });
-    const svg = renderKill(node, theme);
-    expect(svg).toContain('cx="64"');
-    expect(svg).toContain('cy="64"');
-    expect(svg).toContain('rx="14"');
-    expect(svg).toContain('rx="7.7"');
-    expect(svg).toContain('fill="none"');
-    expect(svg).toContain('stroke="#222"');
-    expect(svg).toContain('stroke-width="1"');
   });
 });
 

@@ -1,0 +1,13 @@
+@startuml
+start;
+if (t1) then (no)
+  if (t2) then (yes)
+    :A;
+  else (no);
+    :B;
+  endif;
+else (yes)
+  :C;
+endif;
+:FIN;
+@enduml

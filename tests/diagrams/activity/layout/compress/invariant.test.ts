@@ -501,8 +501,11 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // dump: both hexagons' right edge exactly equals their own `ja`/east
     // label's `x` (`283.37187500000005 + 267.30625000000003 ===
     // 550.678125`; `500.1250000000001 + 131.1125 === 631.2375`).
-    'boxoto-53-sifo232 [28,30] polygon×text',
-    'boxoto-53-sifo232 [39,41] polygon×text',
+    // add1-T2a: back to `[27,29]`/`[38,40]` -- `walkRepeat` now draws the
+    // repeat body BEFORE its entry diamond (`FtileRepeat#drawU`), so both
+    // if-split hexagons inside the body sit one index earlier. Same pairs.
+    'boxoto-53-sifo232 [27,29] polygon×text',
+    'boxoto-53-sifo232 [38,40] polygon×text',
     // `lopone-15-xiki477 [7,20]` -- see this constant's own doc comment
     // above ("RESOLVED by T1a"): no longer produced, so no longer listed.
     // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,

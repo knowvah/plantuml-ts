@@ -395,10 +395,10 @@ describe('renderActivity — action node with custom color', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 9: end and kill nodes render two circles like stop
+// Test 9: end nodes render a crossed circle; kill/detach draw nothing (T2b)
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — end and kill nodes', () => {
+describe('renderActivity — end nodes', () => {
   it('end renders a circle with an X (two diagonal lines)', () => {
     const node = makeNode({ kind: 'end', id: 'end-0', x: 50, y: 50, width: 28, height: 28 });
     const geo = makeGeo({ nodes: [node] });
@@ -409,15 +409,6 @@ describe('renderActivity — end and kill nodes', () => {
     // end = single bordered circle with 2 crossing lines (the X)
     expect(ellipseCount).toBeGreaterThanOrEqual(1);
     expect(lineCount).toBeGreaterThanOrEqual(2);
-  });
-
-  it('kill renders two circles like stop', () => {
-    const node = makeNode({ kind: 'kill', id: 'kill-0', x: 50, y: 50, width: 28, height: 28 });
-    const geo = makeGeo({ nodes: [node] });
-    const result = assembleSvg(renderActivity(geo, theme));
-    const content = contentAfterDefs(result);
-    const ellipseCount = (content.match(/<ellipse/g) ?? []).length;
-    expect(ellipseCount).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -1140,7 +1131,7 @@ describe('renderActivity — ArrowsTriangle under skinparam style strictuml (D4)
     expect(pointsMatch?.[1]).toBe('6,50,14,50,10,60');
   });
 
-  it('three points, not ArrowsRegular\'s four, under strictuml', () => {
+  it("three points, not ArrowsRegular's four, under strictuml", () => {
     const strictTheme = { ...theme, strictUml: true };
     const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
     const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);

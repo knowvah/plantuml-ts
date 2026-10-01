@@ -19,8 +19,8 @@ export const CONNECTOR_SPOT_RADIUS = 8;
  * `new FtileGeometry(SIZE, SIZE, SIZE/2, 0)`) uses for the TILE, so tile
  * diameter and the drawn outer ellipse's diameter are one constant by
  * construction, not two independently-chosen numbers. Was an unsourced 14
- * (T1c, `plans/activity-divergence-drive`, D3) shared with `kill`'s own
- * now-decoupled {@link KILL_OUTER_RADIUS}.
+ * (T1c, `plans/activity-divergence-drive`, D3) shared with the former
+ * `GtileKill` tile (deleted by T2b: kill/detach draw nothing).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:55,87-94
  * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:55,72-73
  */
@@ -54,26 +54,6 @@ export const END_OUTER_RADIUS = 10;
  */
 export const END_CROSS_THICKNESS = 2.5;
 
-/**
- * `kill`'s own terminal radius -- decoupled from {@link STOP_OUTER_RADIUS}
- * at T1c (`plans/activity-divergence-drive`, decisions.md#D3 amended,
- * journal row 18). Both constants held the SAME unsourced value (14) before
- * T1c corrected `stop` to the Java-cited 11; `kill` is intentionally left
- * UNCHANGED here -- its own upstream mechanism (`FtileKilled` /
- * `FtileCircleKill`) was not read this task and is T2b's (detach/kill)
- * scope, not this one's. This constant exists only so `kill`'s pixels stay
- * byte-identical while `stop`'s become correct.
- */
-export const KILL_OUTER_RADIUS = 14;
-
-/**
- * `kill`'s inner/outer ratio -- the PRE-EXISTING, UNSOURCED fit (`0.55`)
- * `renderStop` used for both `stop` and `kill` before T1c split them.
- * Relocated here (named, not a bare literal in the renderer) rather than
- * re-derived: changing it would change `kill`'s rendered pixels, which is
- * explicitly out of this task's scope (see {@link KILL_OUTER_RADIUS}).
- */
-export const KILL_INNER_RATIO = 0.55;
 /** The note box's own horizontal padding. Split out of the former
  *  `ACTION_H_PAD` by `activity-style-defaults` T4, which replaced that
  *  constant's ACTION-box uses with the resolved `activityPadding`.

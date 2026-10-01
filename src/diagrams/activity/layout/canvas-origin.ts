@@ -94,7 +94,7 @@ const NO_FUDGE: ShapeFudge = { near: 0, far: 0 };
 
 /** `FtileCircleStart`/`Stop`/`EndCross` + the connector spot -- all circles.
  * @see net/sourceforge/plantuml/svek/image/CircleStart.java:73-74 */
-const ELLIPSE_KINDS = new Set(['start', 'stop', 'end', 'kill', 'spot']);
+const ELLIPSE_KINDS = new Set(['start', 'stop', 'end', 'spot']);
 /** `action` is `FtileBox` (a real `URectangle`); `group`/`partition`'s own
  *  outer box is too (confirmed: the oracle's `t-partition` probe places its
  *  rect at the SAME fudged offset as a bare action box); `fork-bar`/
