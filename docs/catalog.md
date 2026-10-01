@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1346 modules · 5006 exported names.
+1345 modules · 5005 exported names.
 
 ## `src/`
 
@@ -1135,7 +1135,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
 | `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
-| `gtile-kill.ts` | `GtileKill` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
 | `gtile-note.ts` | `GtileNote` |  |
 | `gtile-partition.ts` | `GtilePartition` |  |
