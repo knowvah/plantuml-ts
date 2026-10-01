@@ -293,7 +293,7 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
   // (D5). Checking the four counts sum to the manifest length -- rather
   // than only checking `manifest.fixtures.length` above -- also catches an
   // unrecognized fifth status silently falling through every filter below
-  // unexamined (today: 268 + 82 + 23 + 0 = 373; T0b pins no real row).
+  // unexamined (at b0: 311 + 39 + 23 + 0 = 373; T0b pins no real row).
   it('jar-error + error + baseline + pinned accounts for every one of the 373 fixtures', () => {
     expect(jarErrorFixtures.length + errorFixtures.length + baselineFixtures.length + pinnedFixtures.length).toBe(
       manifest.fixtures.length,
@@ -313,8 +313,24 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
 describe('svg-activity weighted-score baseline ratchet — "pinned" rows are skipped (AC5, synthetic)', () => {
   it('a "pinned" row is excluded from baselineFixtures by the exact production filter', () => {
     const fabricated: BaselineFixture[] = [
-      { type: 'activity', slug: 'was-baseline', status: 'baseline', weightedScore: 0, diffCount: 0, measuredAt: 'x', measuredAgainstCommit: 'y' },
-      { type: 'activity', slug: 'now-pinned', status: 'pinned', weightedScore: 0, diffCount: 0, measuredAt: 'x', measuredAgainstCommit: 'y' },
+      {
+        type: 'activity',
+        slug: 'was-baseline',
+        status: 'baseline',
+        weightedScore: 0,
+        diffCount: 0,
+        measuredAt: 'x',
+        measuredAgainstCommit: 'y',
+      },
+      {
+        type: 'activity',
+        slug: 'now-pinned',
+        status: 'pinned',
+        weightedScore: 0,
+        diffCount: 0,
+        measuredAt: 'x',
+        measuredAgainstCommit: 'y',
+      },
     ];
     expect(fabricated.filter((f) => f.status === 'baseline').map((f) => f.slug)).toEqual(['was-baseline']);
     expect(fabricated.filter((f) => f.status === 'pinned').map((f) => f.slug)).toEqual(['now-pinned']);
