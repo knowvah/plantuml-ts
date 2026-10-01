@@ -500,6 +500,87 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T2f mechanism 3 -- note body path order, fold, and first-line baseline
+// (Opale.java). `Opale#getPolygonNormal` (`:149-157`, no link, roundCorner
+// 0): top-left -> bottom-left -> bottom-right -> right-edge-below-fold ->
+// fold-top -> close -- the OPPOSITE traversal of the old `noteBox()`-backed
+// emission. The fold is Opale#getCorner (`:134-147`), drawn as its OWN
+// filled `<path>` unconditionally -- never unfilled border lines.
+// ---------------------------------------------------------------------------
+
+describe('renderNote -- body path order and baseline (Opale.java)', () => {
+  it('standalone (no link): body path visits TL, BL, BR, right-below-fold, fold-top, close', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    // NOTE_CORNER_SIZE = 10 (Opale.java:53), not the old NOTE_FOLD = 8.
+    expect(bodyD).toBe('M15,15 L15,38 L85,38 L85,25 L75,15 L15,15');
+  });
+
+  it('standalone: fold is a second filled <path>, not unfilled <line>s', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    expect((svg.match(/<path /g) ?? []).length).toBe(2);
+    expect(svg).not.toContain('<line');
+    const foldD = [...svg.matchAll(/<path d="([^"]+)"/g)][1]?.[1];
+    expect(foldD).toBe('M75,15 L75,25 L85,25 L75,15');
+  });
+
+  it('standalone: first-line baseline is y + marginY(5) + fontSize * ASCENT_FRACTION(7/9)', () => {
+    // Jar-verified on volefo-41-tolo996: y=15, fontSize=13 -> 30.111, not
+    // the old unsourced `y + NOTE_FOLD(8) + fontSize` (= 36).
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const textY = svg.match(/<text[^>]*\by="([\d.]+)"/)?.[1];
+    expect(Number(textY)).toBeCloseTo(30.111, 2);
+  });
+
+  it('spike right (notePosition "left"): zero-radius arcs follow the two corner lineTos', () => {
+    // Opale#getPolygonRight (`:198-219`): y1's floor is `cornersize`.
+    // Jar-verified byte-exact against cubida-55-meku256.
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'left',
+      spikeTip: { x: 118.156, y: 71 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,77.5 L118.156,71 L98.156,69.5 L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+
+  it('spike left (notePosition "right"): y1 floor is 0, not cornersize', () => {
+    // Opale#getPolygonLeft (`:175-196`) -- mirror of getPolygonRight, with
+    // the spike and the fold on OPPOSITE edges so y1's floor stays 0.
+    // spike.y=64.5 -> relY=5, y1=relY-delta(4)=1 (unclamped, within [0,15]).
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'right',
+      spikeTip: { x: -20, y: 64.5 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,60.5 L-20,64.5 L15,68.5 ' +
+        'L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // T1b (decisions.md#D1/#D4) — every activity `<text>` goes through the
 // klimt `DriverTextSvg`: `textLength` is real, and the single-line baseline
 // is `rect.y + padding + fontSize * ASCENT_FRACTION`, jar-verified on

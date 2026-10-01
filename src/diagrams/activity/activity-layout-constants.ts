@@ -88,6 +88,26 @@ export const KILL_INNER_RATIO = 0.55;
  *  `activity-note-width-overscan` mission, not by this one. */
 export const NOTE_H_PAD = 16;
 export const NOTE_FOLD = 8;
+/** `Opale.java:53` -- `private static final int cornersize = 10;`, the
+ *  note balloon's dog-ear fold triangle size, used by BOTH the no-link
+ *  path (`getPolygonNormal`, `:149-171`) and every spiked direction
+ *  (`getPolygonLeft/Right/Up/Down`, `:175-265`) for their shared
+ *  `lineTo(width, cornersize)` / `lineTo(width - cornersize, 0)` pair and
+ *  by `getCorner` (`:134-147`) for the fold triangle itself. A DIFFERENT
+ *  number from {@link NOTE_FOLD} (which sizes the note TILE, `gtile-
+ *  note.ts`, filed separately as `activity-note-width-overscan`) -- the
+ *  renderer's fold geometry is correct against the jar regardless of
+ *  whether the tile's own width/height are. */
+export const NOTE_CORNER_SIZE = 10;
+/** `Opale.java:173` -- `private final double delta = 4;`, the spike's
+ *  vertical half-span at the note edge it leaves from. */
+export const NOTE_SPIKE_DELTA = 4;
+/** `Opale.java:58` -- `private final int marginY = 5;`, the text block's
+ *  own top inset (`Opale#drawU`, `:127`:
+ *  `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`). Was
+ *  an unsourced `NOTE_FOLD` (8) reused for the label baseline, which
+ *  landed 5.889px low on `volefo-41-tolo996`'s single-line note. */
+export const NOTE_MARGIN_Y = 5;
 /** The fork's black join bar's height. `GtileSplit` overrides with
  *  {@link THIN_SPLIT_HEIGHT} instead (`gtile-split.ts`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:64
