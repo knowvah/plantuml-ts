@@ -151,8 +151,18 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
     expect(geo.totalWidth).toBe(Math.floor(tile.width + 35) + 1);
   });
 
-  it('totalHeight === floor(tile.height + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
-    expect(geo.totalHeight).toBe(Math.floor(tile.height + 35) + 1);
+  // T3c: `tile.height` is the RAW (pre-compression) height -- it now bakes
+  // in `SEQUENTIAL_ASSEMBLY_GAP` (35), not the compressed `NODE_MARGIN_Y`
+  // (20) `node[1].y` above asserts. `geo.totalHeight` is POST-compression
+  // (`assignCoordinatesFull`'s default `compress: true`), so it is derived
+  // from the compressed ink extent (`node[1].y + action1.height`), not from
+  // `tile.height` directly -- this isolated 2-action pair has no sibling
+  // ink in its Y-band, so the real `CompressionXorYBuilder` pass this
+  // exercises (unlike before T3c, when compression had nothing to do)
+  // shrinks its 35px raw gap back down to 20, same as the jar.
+  it('totalHeight === floor((node[1].y - RECT_ORIGIN + action1.height) + 35) + 1 (CANVAS_PADDING_TOTAL + SVG_CANVAS_CEIL)', () => {
+    const inkHeight = geo.nodes[1]!.y - RECT_ORIGIN + action1.height;
+    expect(geo.totalHeight).toBe(Math.floor(inkHeight + 35) + 1);
   });
 });
 

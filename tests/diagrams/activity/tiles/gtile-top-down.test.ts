@@ -90,10 +90,16 @@ describe('GtileTopDown — 1 child', () => {
   });
 });
 
+// T3c: the per-pair gap is `SEQUENTIAL_ASSEMBLY_GAP = 35`
+// (`FtileFactoryDelegatorAssembly.java:58`, `Swimlanes.java:145`'s single
+// shared decorator), NOT the unsourced `NODE_MARGIN_Y = 20` this test used
+// to assert -- see that constant's doc comment for the full raw-then-
+// compress mechanism (compression itself runs later, in
+// `assign-coordinates-full.ts#compressAndAssemble`, not inside this class).
 describe('GtileTopDown — 2 children', () => {
-  // child0: w=100, h=50 → offset=0; after: y=70
-  // child1: w=80,  h=30 → offset=70; after: y=120
-  // height = 120 - 20 = 100
+  // child0: w=100, h=50 → offset=0; after: y=85
+  // child1: w=80,  h=30 → offset=85; after: y=150
+  // height = 150 - 35 = 115
   const child0 = stubTile(100, 50);
   const child1 = stubTile(80, 30);
   const tile = new GtileTopDown([child0, child1], bounder, theme);
@@ -102,12 +108,12 @@ describe('GtileTopDown — 2 children', () => {
     expect(tile.width).toBe(100);
   });
 
-  it('height === 100', () => {
-    expect(tile.height).toBe(100);
+  it('height === 115', () => {
+    expect(tile.height).toBe(115);
   });
 
-  it('childOffsets === [0, 70]', () => {
-    expect(tile.childOffsets).toEqual([0, 70]);
+  it('childOffsets === [0, 85]', () => {
+    expect(tile.childOffsets).toEqual([0, 85]);
   });
 });
 

@@ -4,6 +4,45 @@
 
 export const NODE_MARGIN_Y = 20;
 export const NODE_MARGIN_X = 40;
+
+/**
+ * The RAW (pre-compression) vertical gap `FtileFactoryDelegatorAssembly
+ * #assembly` inserts between EVERY pair of sequentially-joined tiles --
+ * top-level, inside a fork/split branch, an if-branch, a switch-case body,
+ * a repeat body, anywhere `Swimlanes`'s single shared factory decorator
+ * runs (`Swimlanes.java:145`: `factory = new
+ * FtileFactoryDelegatorAssembly(factory)`, applied once, for the whole
+ * diagram). A second, labelled-arrow term (`height += textBlock
+ * .calculateDimension(...).getHeight()`, `:59-62`) is 0 here because
+ * `GtileTopDown`'s children carry no in-link-rendering label today (no
+ * fixture in this mission's cohort needs one); add it at this constant's
+ * call site, not as a second constant, when that lands.
+ *
+ * This raw gap is NEVER the rendered number by itself: `ActivityDiagram3
+ * #getTextBlock` (`:209-210`) always runs `CompressionXorYBuilder.build
+ * (ON_X, ...)` then `build(ON_Y, ...)` over the WHOLE assembled diagram
+ * afterward (ported as {@link compressGeometry}, wired by
+ * `assign-coordinates-full.ts#compressAndAssemble`). Compression scans ink
+ * GLOBALLY on the Y axis (every shape's y-extent, independent of x,
+ * `SlotFinder.java:111-162`) and removes any ink-free Y-band wider than
+ * `2 * margin` (`CompressionXorYBuilder.java:66`'s `smaller(5.0)`) down to
+ * exactly that `2 * margin = 10` px. A top-level gap with no sibling ink in
+ * its Y-band compresses 35 -> 20 (verified: `scripts/oracle-render.sh` on
+ * `:A;\n:B;` renders boxes 32px apart with NOTHING else in that band but a
+ * 10px trailing arrowhead, exactly `2*5 + 10`); a fork/split-branch gap
+ * whose Y-band is occupied by a sibling branch's box stays the full raw 35
+ * (verified on a two-branch fork with one branch carrying two sequential
+ * actions: 35px gap, uncompressed, not a different constant -- the SAME
+ * raw value, the SAME compression pass, a different outcome only because
+ * the ink differs). Was an unsourced flat `NODE_MARGIN_Y = 20` baked
+ * directly into the pre-compression layout in `gtile-top-down.ts`, which
+ * happened to reproduce the (degenerate, saturated) top-level answer by
+ * coincidence while leaving every branch-internal gap 15px short.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorAssembly.java:58-62
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:145
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:204-213
+ */
+export const SEQUENTIAL_ASSEMBLY_GAP = 35;
 export const START_STOP_RADIUS = 10;
 /** The connector-spot circle (`gtile-spot`). A DIFFERENT circle from
  *  {@link START_STOP_RADIUS} and from `abel/EntityPosition.RADIUS` — all
