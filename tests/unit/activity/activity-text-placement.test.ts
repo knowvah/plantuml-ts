@@ -8,6 +8,8 @@ import {
   measureMonoLineWidth,
   centeredLineX,
   activityTextLineX,
+  isTableRowLine,
+  tableRowCellsOf,
 } from '../../../src/diagrams/activity/activity-text-placement.js';
 import { resolveTheme } from '../../../src/core/theme.js';
 
@@ -54,5 +56,34 @@ describe('activityTextLineX', () => {
 
   it('activity sname without width throws (broken caller contract)', () => {
     expect(() => activityTextLineX(theme, 100, 20, { sname: 'activity' })).toThrow(/width is required/);
+  });
+});
+
+// T3e: shared creole-table-row helpers (`CreoleParser.java:117`,
+// `StripeTable.java:137-159`) -- both `tiles/gtile-action.ts` (sizing) and
+// `activity-renderer-text.ts` (drawing) consume these two functions, so the
+// two stages can never drift apart on what a `|cell|` line resolves to.
+describe('isTableRowLine', () => {
+  it('matches a bracket-free `|cell|` line (activity-creole-table fixture)', () => {
+    expect(isTableRowLine('|Creole Table Line1|')).toBe(true);
+  });
+
+  it('rejects a line with no leading/trailing pipe', () => {
+    expect(isTableRowLine('foo1')).toBe(false);
+    expect(isTableRowLine('|unterminated')).toBe(false);
+  });
+});
+
+describe('tableRowCellsOf', () => {
+  it('strips the outer pipes and trims (single column, StripeTable.java:137-159)', () => {
+    expect(tableRowCellsOf('|Creole Table Line1|')).toEqual(['Creole Table Line1']);
+  });
+
+  it('strips a leading `=` header marker (StripeTable.java:140-143)', () => {
+    expect(tableRowCellsOf('|=Header|')).toEqual(['Header']);
+  });
+
+  it('splits multiple cells on `|`', () => {
+    expect(tableRowCellsOf('|a|b|c|')).toEqual(['a', 'b', 'c']);
   });
 });
