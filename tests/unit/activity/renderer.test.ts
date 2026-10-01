@@ -884,10 +884,17 @@ describe('renderActivity — activity theme colors', () => {
     expect(svg).toContain('fill="#00F"');
   });
 
-  it('stop node uses activityEndColor', () => {
-    const geo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
-    const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="#FF0"');
+  it('end node uses activityEndColor; stop does NOT (separate skinparam targets)', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` ->
+    // `SName.circle, SName.end`; `activityStopColor` -> `SName.circle,
+    // SName.stop` (own, unwired skinparam). T2f mechanism 7.
+    const endGeo = makeGeo({ nodes: [makeNode({ kind: 'end', width: 16, height: 16 })] });
+    const endSvg = assembleSvg(renderActivity(endGeo, activityTheme));
+    expect(endSvg).toContain('#FF0');
+
+    const stopGeo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
+    const stopSvg = assembleSvg(renderActivity(stopGeo, activityTheme));
+    expect(stopSvg).not.toContain('#FF0');
   });
 
   it('action node uses activityBackgroundColor', () => {

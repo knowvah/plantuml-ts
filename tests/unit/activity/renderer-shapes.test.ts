@@ -134,7 +134,14 @@ describe('renderStop', () => {
     expect(svg).not.toContain('rx="7.7"');
   });
 
-  it('resolves a named theme color to hex on both ellipses', () => {
+  it('does NOT inherit `ActivityEndColor` -- `activityStopColor` is a separate skinparam target', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` converts to
+    // `PName.LineColor` on `SName.circle, SName.end`; `activityStopColor`
+    // converts to the SAME `PName` but on `SName.circle, SName.stop` --
+    // two independent style targets. Reusing `actColors(theme).endFill`
+    // here made `stop` wrongly red under `skinparam ActivityEndColor red`
+    // with no `ActivityStopColor` set (T2f mechanism 7, jar-verified on
+    // `poraji-17-goke817`: `stop` stays `#222`).
     const activityTheme = deepMergeTheme(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
@@ -142,8 +149,9 @@ describe('renderStop', () => {
       },
     });
     const svg = renderStop(makeNode({ kind: 'stop' }), activityTheme);
-    expect(svg).toContain('stroke="#FF0"');
-    expect(svg).toContain('fill="#FF0"');
+    expect(svg).not.toContain('#FF0');
+    expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill="#222"');
   });
 });
 

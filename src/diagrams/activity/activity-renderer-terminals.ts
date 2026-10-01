@@ -9,7 +9,7 @@ import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, KILL_INNER_RATIO, STOP_INNER_DELTA } from './activity-layout-constants.js';
-import { CIRCLE_END_LINE_THICKNESS, CIRCLE_LINE_THICKNESS } from './activity-style-defaults.js';
+import { CIRCLE_END_LINE_THICKNESS, CIRCLE_INK, CIRCLE_LINE_THICKNESS } from './activity-style-defaults.js';
 import { actColors } from './activity-renderer-shapes.js';
 
 export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
@@ -22,10 +22,16 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   // `extraAttrs` only shortens an ALREADY-hex string, not a named CSS
   // colour, the way `circle()` did via `paintToSvg`. `LineThickness 1` on
   // the start/stop/end block (plantuml.skin:378): the jar fills AND
-  // strokes the start terminal in the same colour; this port drew a fill
-  // only, so the ellipse was a hair small.
-  const ink = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS });
+  // strokes the start terminal, but NOT in the same colour --
+  // `FromSkinparamToStyle.java:137`: `addConvert("activityStartColor",
+  // PName.BackGroundColor, SName.circle, SName.start)` -- `ActivityStart
+  // Color` maps ONLY to the FILL, never `LineColor`. The stroke is always
+  // the circle block's own default (`CIRCLE_INK`); it was wrongly reusing
+  // the resolved fill colour, which painted the border red along with the
+  // fill under `skinparam ActivityStartColor red` (T2f mechanism 7,
+  // `poraji-17-goke817`).
+  const fill = resolvePaint(actColors(theme).startFill).value;
+  return ellipse(cx, cy, r, r, { fill, stroke: CIRCLE_INK, 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
 
 /**
@@ -49,13 +55,25 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:55,87-94
  * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:55,72-103
  */
-export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
+// `theme` is unused now that `stop`'s ink is the plain circle-block
+// default (see the mechanism-7 comment below) -- kept for signature
+// parity with every other `render*(node, theme)` dispatch target.
+export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const outerR = node.height / 2;
   const innerR = outerR - STOP_INNER_DELTA;
-  const c = actColors(theme);
-  const ink = resolvePaint(c.endFill).value;
+  // `FromSkinparamToStyle.java:139`: `addConvert("activityStopColor",
+  // PName.LineColor, SName.circle, SName.stop)` -- `stop` has its OWN
+  // skinparam target, distinct from `end`'s `activityEndColor` (`:138`,
+  // `SName.circle, SName.end`). Reusing `actColors(theme).endFill` here
+  // made `stop` incorrectly inherit `ActivityEndColor` (T2f mechanism 7,
+  // `poraji-17-goke817`: `ActivityEndColor red` left `stop` red). No
+  // `ActivityStopColor`-reading theme field exists yet (would need a
+  // `core/theme-graph-colors-b.ts` addition, out of this task's write-set
+  // -- reported, not added), so this reads the plain circle-block
+  // default unconditionally, same as the jar does absent that skinparam.
+  const ink = CIRCLE_INK;
   return (
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',
