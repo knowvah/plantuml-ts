@@ -22,6 +22,8 @@ import { pinGoldens, findBaselineRow, renderIsZeroDiff } from './pin-goldens.mts
 
 const RATCHET = 'oracle/goldens/svg-activity/ratchet.json';
 const DIFF_BASELINE = 'oracle/goldens/svg-activity/diff-baseline.json';
+const ROUTING = 'oracle/goldens/svg-conformance/routing-baseline.json';
+const REFUSAL = 'oracle/goldens/svg-conformance/refusal-baseline.json';
 const MARKUP = '@startuml\n:Step one;\n:Step two;\n@enduml\n';
 
 function renderMarkup(): string {
@@ -44,6 +46,16 @@ const baselineRow = (slug: string, status = 'baseline') => ({
   measuredAgainstCommit: 'abcd1234',
 });
 
+/** Seeds both corpus baselines with one `dot-cache`/`activity` twin row per
+ *  slug (status overridable to exercise the twin guard). */
+function seedCorpus(slugs: readonly string[], routingStatus = 'agree'): void {
+  const row = (slug: string, status: string, extra: object) => ({
+    tree: 'dot-cache', type: 'activity', slug, ...extra, status, measuredAt: '2026-09-02', measuredAgainstCommit: '0cf15e23',
+  });
+  put(ROUTING, JSON.stringify({ $comment: 'r.', fixtures: slugs.map((s) => row(s, routingStatus, { jarType: 'ACTIVITY', ourType: 'ACTIVITY' })) }));
+  put(REFUSAL, JSON.stringify({ $comment: 'f.', fixtures: slugs.map((s) => row(s, 'ok', { jarRendered: true, weErrored: false, engine: 'none' })) }));
+}
+
 /** Seeds a slug whose cached render is zero-diff against its own cached
  *  golden — the pinnable case. */
 function seedZeroDiff(slug: string, status = 'baseline'): void {
@@ -52,6 +64,7 @@ function seedZeroDiff(slug: string, status = 'baseline'): void {
   put(DIFF_BASELINE, JSON.stringify({ fixtures: [baselineRow(slug, status)] }));
   put(`test-results/dot-cache/activity/${slug}/in.svg`, svg);
   put(`test-results/dot-cache/activity/${slug}/in.puml`, MARKUP);
+  seedCorpus([slug]);
 }
 
 /** Seeds a slug whose cached golden deliberately does NOT match the live
@@ -73,7 +86,7 @@ afterEach(() => {
 describe('pinGoldens', () => {
   test('copies byte-identical files, appends ratchet unsorted, flips diff-baseline status to "pinned"', () => {
     seedZeroDiff('aaa-slug');
-    expect(pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['aaa-slug'], date: '2026-09-30' })).toBe(1);
+    expect(pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['aaa-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toBe(1);
 
     const g = join(root, 'oracle/goldens/svg-activity/aaa-slug');
     const expectedSvg = renderMarkup();
@@ -92,11 +105,36 @@ describe('pinGoldens', () => {
     // that number).
     expect(row.weightedScore).toBe(42);
     expect(row.diffCount).toBe(12);
+
+    // Step 5: clone rows in both corpus baselines, appended after the twin.
+    for (const [file, status] of [[ROUTING, 'agree'], [REFUSAL, 'ok']] as const) {
+      const data = json(file);
+      expect(data.fixtures).toHaveLength(2);
+      expect(data.fixtures[1]).toMatchObject({
+        tree: 'goldens', type: 'svg-activity', slug: 'aaa-slug', status,
+        measuredAt: '2026-09-30', measuredAgainstCommit: 'abc123456',
+      });
+      expect(data.$comment).toContain('activity-divergence-drive / close-test');
+    }
+  });
+
+  test('a twin row that is absent or not ok is refused before any file is written', () => {
+    seedZeroDiff('ddd-slug');
+    seedCorpus(['ddd-slug'], 'known-misroute');
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['ddd-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
+      'twin status known-misroute',
+    );
+    seedCorpus([]);
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['ddd-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
+      'has 0 dot-cache twins',
+    );
+    expect(existsSync(join(root, 'oracle/goldens/svg-activity/ddd-slug'))).toBe(false);
+    expect(json(DIFF_BASELINE).fixtures[0].status).toBe('baseline');
   });
 
   test('a non-zero-diff slug is refused before any file is written', () => {
     seedNonZeroDiff('bad-slug');
-    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['bad-slug'], date: '2026-09-30' })).toThrow(
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['bad-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
       'not zero-diff',
     );
     expect(existsSync(join(root, 'oracle/goldens/svg-activity/bad-slug'))).toBe(false);
@@ -106,19 +144,19 @@ describe('pinGoldens', () => {
 
   test('an already-ratcheted slug, a duplicate argument, or no slugs is refused', () => {
     seedZeroDiff('zzz-first');
-    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['zzz-first'], date: '2026-09-30' })).toThrow(
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['zzz-first'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
       'already in the ratchet',
     );
-    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['a', 'a'], date: '2026-09-30' })).toThrow(
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['a', 'a'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
       'duplicate slug',
     );
-    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: [], date: '2026-09-30' })).toThrow('no slugs');
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: [], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow('no slugs');
   });
 
   test('a missing cache file is refused', () => {
     seedZeroDiff('ccc-slug');
     rmSync(join(root, 'test-results/dot-cache/activity/ccc-slug/in.puml'));
-    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['ccc-slug'], date: '2026-09-30' })).toThrow(
+    expect(() => pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['ccc-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' })).toThrow(
       'missing in.puml',
     );
   });
@@ -129,7 +167,7 @@ describe('pinGoldens', () => {
     put('test-results/dot-cache/activity/no-row-slug/in.svg', '<svg/>');
     put('test-results/dot-cache/activity/no-row-slug/in.puml', MARKUP);
     expect(() =>
-      pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['no-row-slug'], date: '2026-09-30' }),
+      pinGoldens({ root, sourceTag: 'add1-b0', slugs: ['no-row-slug'], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' }),
     ).toThrow('no diff-baseline.json row');
   });
 
@@ -138,7 +176,7 @@ describe('pinGoldens', () => {
       root = mkdtempSync(join(tmpdir(), 'activity-pin-goldens-'));
       seedZeroDiff(`status-${status}-slug`, status);
       expect(() =>
-        pinGoldens({ root, sourceTag: 'add1-b0', slugs: [`status-${status}-slug`], date: '2026-09-30' }),
+        pinGoldens({ root, sourceTag: 'add1-b0', slugs: [`status-${status}-slug`], date: '2026-09-30', commit: 'abc123456', closeLabel: 'close-test' }),
       ).toThrow(`expected "baseline"`);
       rmSync(root, { recursive: true, force: true });
     }

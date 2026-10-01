@@ -1,0 +1,13 @@
+@startuml
+!procedure $foo($arg)
+!if $arg==0
+:foo0;
+!else
+:foo1;
+!endif
+!endprocedure
+
+:a;
+$foo(0)
+$foo(1)
+@enduml

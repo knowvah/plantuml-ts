@@ -1,0 +1,5 @@
+@startuml
+: test: %lighten("#fff", 20) ;
+: test: %lighten("white", 20);
+: test: %lighten("#999", 99) ;
+@enduml

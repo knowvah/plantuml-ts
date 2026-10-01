@@ -336,14 +336,13 @@ describe('svg-activity weighted-score baseline ratchet — "pinned" rows are ski
     expect(fabricated.filter((f) => f.status === 'pinned').map((f) => f.slug)).toEqual(['now-pinned']);
   });
 
-  it('no real row is pinned yet, so ratchet.json ships empty and the live run exits with zero AC1 regressions', () => {
-    // Today's state: T0b pins nothing real (boundary). Once a close pins a
-    // slug, this count (and AC1's loop size) will shrink by exactly one per
-    // pin -- never silently, since AC0's arithmetic check above re-verifies
-    // the total every run.
-    expect(pinnedFixtures).toEqual([]);
+  it('every "pinned" row has exactly one ratchet.json entry, and vice versa', () => {
+    // add1-b1 pinned the first real rows (D5). A pinned row is owned by
+    // activity.golden.ratchet.test.ts; this check keeps the two files in
+    // lockstep so a row can never be gated by neither test (or by both).
     const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly { slug: string }[] };
-    expect(ratchet.fixtures).toEqual([]);
+    const ratchetSlugs = ratchet.fixtures.map((f) => f.slug).sort();
+    expect(pinnedFixtures.map((f) => f.slug).sort()).toEqual(ratchetSlugs);
   });
 });
 
@@ -517,8 +516,9 @@ describe('svg-activity weighted-score baseline ratchet — promotion is never au
     ).toEqual([]);
   });
 
-  it('ratchet.json ships empty -- the promotion path exists but starts empty', () => {
-    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly unknown[] };
-    expect(ratchet.fixtures).toEqual([]);
+  it('ratchet.json holds no slug that is still a "baseline" row -- promotion flips the status', () => {
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly { slug: string }[] };
+    const baselineSlugs = new Set(baselineFixtures.map((f) => f.slug));
+    expect(ratchet.fixtures.filter((f) => baselineSlugs.has(f.slug)).map((f) => f.slug)).toEqual([]);
   });
 });

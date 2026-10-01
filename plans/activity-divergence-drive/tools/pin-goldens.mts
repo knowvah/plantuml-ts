@@ -1,15 +1,15 @@
 /**
  * `npx jiti plans/activity-divergence-drive/tools/pin-goldens.mts
- *   <source-tag> <slug...>`
+ *   <source-tag> <close-label> <slug...>`
  *
  * Freezes zero-diff activity fixtures into the svg-activity golden ratchet
  * (T0b, D5 of `plans/activity-divergence-drive/decisions.md`). Adapted from
  * `plans/class-divergence-drive/tools/pin-goldens.mts`, but SINGLE TREE (no
  * `--tree` option — activity has no router-misclassification case this
- * mission needs to reach, unlike class's `unknown` tree) and with NO
- * routing/refusal baseline clone step (class's twin-row mechanism has no
- * activity equivalent; activity's only other pinned-fixture ledger is
- * `diff-baseline.json` itself, handled below).
+ * mission needs to reach, unlike class's `unknown` tree). The routing/refusal
+ * clone step IS needed (add1-b1, journal row 17): `routing-conformance` and
+ * `refusal-coverage` walk every `oracle/goldens/svg-*` dir, so a golden dir
+ * without its `goldens`/`svg-activity` clone rows turns both gates red.
  *
  * Per slug:
  *
@@ -29,7 +29,13 @@
  *    to `status: "pinned"`, leaving its `weightedScore`/`diffCount` exactly
  *    as last measured — `scripts/repin-activity-baselines.ts` owns
  *    re-deriving those numbers (it only re-measures `status: "baseline"`
- *    rows), never this tool.
+ *    rows), never this tool;
+ * 5. clones the slug's `dot-cache`/`activity` twin row in
+ *    `routing-baseline.json` (`agree`) and `refusal-baseline.json` (`ok`)
+ *    as `tree: goldens, type: svg-activity`, fresh `measuredAt` /
+ *    `measuredAgainstCommit`, and extends each file's `$comment` (the
+ *    class tool's step 3, `plans/class-divergence-drive/tools/
+ *    pin-goldens.mts:149-180`).
  *
  * Everything is validated before anything is written: an already-pinned
  * slug, a missing cache file, a missing or non-`"baseline"` diff-baseline
@@ -54,6 +60,17 @@ const CACHE_DIR = 'test-results/dot-cache/activity';
 const GOLDEN_DIR = 'oracle/goldens/svg-activity';
 const RATCHET = `${GOLDEN_DIR}/ratchet.json`;
 const DIFF_BASELINE = `${GOLDEN_DIR}/diff-baseline.json`;
+const MISSION = 'activity-divergence-drive';
+const CORPUS_BASELINES = [
+  { file: 'oracle/goldens/svg-conformance/routing-baseline.json', okStatus: 'agree' },
+  { file: 'oracle/goldens/svg-conformance/refusal-baseline.json', okStatus: 'ok' },
+] as const;
+
+type CorpusRow = Record<string, unknown> & { tree: string; type: string; slug: string; status: string };
+interface CorpusBaseline {
+  $comment: string;
+  fixtures: CorpusRow[];
+}
 
 interface DiffBaselineRow extends Record<string, unknown> {
   slug: string;
@@ -76,6 +93,8 @@ export interface PinOptions {
   readonly sourceTag: string;
   readonly slugs: readonly string[];
   readonly date: string;
+  readonly commit: string;
+  readonly closeLabel: string;
 }
 
 const readJson = <T,>(root: string, rel: string): T => JSON.parse(readFileSync(join(root, rel), 'utf8')) as T;
@@ -141,10 +160,38 @@ function copyVerified(root: string, slug: string): void {
 }
 
 /** Pins `o.slugs`; returns the number pinned. */
+/** The slug's single `dot-cache`/`activity` row in a corpus baseline, which
+ *  must carry the file's ok status — the clone inherits it verbatim. */
+export function findCorpusTwin(data: CorpusBaseline, slug: string, okStatus: string, file: string): CorpusRow {
+  const twins = data.fixtures.filter((r) => r.tree === 'dot-cache' && r.type === 'activity' && r.slug === slug);
+  if (twins.length !== 1) throw new Error(`${file}: ${slug} has ${twins.length} dot-cache twins`);
+  const twin = twins[0]!;
+  if (twin.status !== okStatus) throw new Error(`${file}: ${slug} twin status ${twin.status}`);
+  return twin;
+}
+
+/** Reads both corpus baselines and builds every clone row, throwing before
+ *  anything is written if a twin is absent or not ok. */
+function buildCorpusClones(o: PinOptions): { file: string; data: CorpusBaseline; clones: CorpusRow[] }[] {
+  return CORPUS_BASELINES.map(({ file, okStatus }) => {
+    const data = readJson<CorpusBaseline>(o.root, file);
+    const clones = o.slugs.map((slug) => ({
+      ...findCorpusTwin(data, slug, okStatus, file),
+      tree: 'goldens',
+      type: 'svg-activity',
+      slug,
+      measuredAt: o.date,
+      measuredAgainstCommit: o.commit,
+    }));
+    return { file, data, clones };
+  });
+}
+
 export function pinGoldens(o: PinOptions): number {
   const ratchet = readJson<Ratchet>(o.root, RATCHET);
   const diffBaseline = readJson<DiffBaselineFile>(o.root, DIFF_BASELINE);
   validate(o.root, ratchet, diffBaseline, o);
+  const corpus = buildCorpusClones(o);
 
   for (const slug of o.slugs) copyVerified(o.root, slug);
   for (const slug of o.slugs) ratchet.fixtures.push({ slug, addedAt: o.date, source: o.sourceTag });
@@ -157,20 +204,28 @@ export function pinGoldens(o: PinOptions): number {
     row.status = 'pinned';
   }
   writeJson(o.root, DIFF_BASELINE, diffBaseline);
+
+  const note = ` Re-pinned ${o.date} at ${o.commit} by ${MISSION} / ${o.closeLabel}, ADDITIVE ONLY (${o.slugs.length} "svg-activity" golden rows appended, clones of their byte-identical dot-cache twins).`;
+  for (const { file, data, clones } of corpus) {
+    data.fixtures.push(...clones);
+    data.$comment += note;
+    writeJson(o.root, file, data);
+  }
   return o.slugs.length;
 }
 
 /* v8 ignore start -- CLI entry point; exercised via the acceptance run. */
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const argv = process.argv.slice(2);
-  const [sourceTag, ...slugs] = argv;
-  if (!sourceTag || slugs.length === 0) {
-    console.error('usage: pin-goldens.mts <source-tag> <slug...>');
+  const [sourceTag, closeLabel, ...slugs] = argv;
+  if (!sourceTag || !closeLabel || slugs.length === 0) {
+    console.error('usage: pin-goldens.mts <source-tag> <close-label> <slug...>');
     process.exit(2);
   }
+  const commit = execFileSync('git', ['rev-parse', '--short=9', 'HEAD'], { encoding: 'utf8' }).trim();
   const d = new Date();
   const date = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  const n = pinGoldens({ root: process.cwd(), sourceTag, slugs, date });
+  const n = pinGoldens({ root: process.cwd(), sourceTag, slugs, date, commit, closeLabel });
   console.log(`pinned ${n} fixture(s) as ${sourceTag}`);
 }
 /* v8 ignore stop */

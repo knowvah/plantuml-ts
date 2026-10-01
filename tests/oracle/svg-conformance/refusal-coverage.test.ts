@@ -752,7 +752,11 @@ describe('refusal coverage — baseline shape', () => {
     // 6109 -> 6113 / 5841 -> 5845 / 268 at class-divergence-drive-7/close-b2
     // (2026-09-30): 4 unknown-tree golden rows (bonaco, rojida, tefeco,
     // xuloxo; all render on both sides). Derivation: 5845 + 268 = 6113.
-    expect(manifest.fixtures.length).toBe(6113);
+    // 6113 -> 6148 / 5845 -> 5880 / 268 at activity-divergence-drive/close-b1
+    // (2026-09-30): 35 `goldens:svg-activity/<slug>` clone rows, the first
+    // activity golden-ratchet pins (all render on both sides). Derivation:
+    // 5880 + 268 = 6148.
+    expect(manifest.fixtures.length).toBe(6148);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -795,7 +799,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5699 -> 5836 at the cdd6 <- main merge (137 svg-mindmap clones).
     // 5836 -> 5841 at cdd7/close-b1 (5 unknown-tree svg-class clones).
     // 5841 -> 5845 at cdd7/close-b2 (4 unknown-tree svg-class clones).
-    expect(pinnedRendering.length).toBe(5845);
+    // 5845 -> 5880 at add1/close-b1 (35 svg-activity clones).
+    expect(pinnedRendering.length).toBe(5880);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

@@ -1,0 +1,22 @@
+@startuml
+!$data={"participants" :[ 
+{"id": "cm" ,"label": "customer master","desc": "manages customers"},
+{"id": "tm" ,"label": "transaction manager","desc": "manages transactions"},
+{"id": "am" ,"label": "account master","desc": "manages accounts"}
+]
+}
+
+!unquoted function $lookup($id)
+
+!foreach $part in $data.participants
+  !if $part.id == $id
+    !return "ao"
+  !endif
+
+!endfor
+!return "nothing"
+!endfunction
+
+!$desc = $lookup("cm")
+:$desc;
+@enduml

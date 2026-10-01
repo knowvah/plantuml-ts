@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1344 modules · 4991 exported names.
+1345 modules · 4996 exported names.
 
 ## `src/`
 
@@ -1035,7 +1035,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD` | Layout constants for the activity diagram layout engine. |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `START_STOP_RADIUS`, `CONNECTOR_SPOT_RADIUS`, `STOP_OUTER_RADIUS`, `NOTE_H_PAD`, `NOTE_FOLD`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderIfLabel` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderStart`, `renderStop`, `renderEnd`, `renderAction`, `renderDiamond`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
@@ -1077,6 +1077,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
+| `canvas-origin.ts` | `FinalizeInput`, `FinalizedGeometry`, `finalizeGeometry` | Canvas origin (D2, mission `activity-divergence-drive` T1a): ports `Recentred` + the document margin + `LimitFinder` -- replaces the flat `LAYOUT_MARGIN` `assign-coordinates-full.ts#computeBounds` used to add on top of its own maxX/maxY. |
 | `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `isMainLaneSmallerThanAllOthers`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `diamond-labels.ts` | `emitDiamondLabels` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
@@ -1089,7 +1090,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-loop-translate-while.ts` | `routeWhileBack` | `while`'s one translatable back-edge shape (mission `activity-loop-lane-translate`, T2). |
 | `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `repeatEdgeMeta`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
-| `tile-coordinates.ts` | `LAYOUT_MARGIN`, `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
+| `tile-coordinates.ts` | `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
