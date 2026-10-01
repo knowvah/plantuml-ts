@@ -545,8 +545,18 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // floating-point addition applied independently to each shape, not a
     // geometry defect. `[5,13]` is the same hexagon/arrowhead pair one
     // swimlane row down (`y` differs, `x` identical).
-    'vamazo-19-tufu812 [1,18] polygon×polygon',
-    'vamazo-19-tufu812 [5,13] polygon×polygon',
+    //
+    // RESOLVED by T2e (`canvas-origin.ts#extendForEdge`/`#extendForReservation`
+    // now folding arrowhead polygons and divider/band reservations into the
+    // ink scan): the GLOBAL ink minimum this fixture's canvas shift is
+    // derived from moved to a different shape, which changes the THIRD
+    // transform's own floating-point input enough that both pairs land
+    // bit-identical again (confirmed with a direct dump of `after`: `[1]`
+    // hexagon `x(112.3875) + width(24) === 136.3875`, `[18]` arrowhead
+    // `x === 136.3875` -- exact, no gap at all now, not merely sub-epsilon;
+    // `[5,13]` the same one swimlane row down) -- neither pair appears in
+    // `overlaps(after)` any more, so both are REMOVED here rather than
+    // carried forward (same precedent as `lopone-15-xiki477` above).
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
