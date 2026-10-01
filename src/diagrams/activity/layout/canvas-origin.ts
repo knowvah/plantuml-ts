@@ -65,14 +65,22 @@
 
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { computeSwimlaneChrome } from './swimlane-placement.js';
+import { computeSwimlaneChrome, TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import type { SwimlaneChrome } from './swimlane-placement.js';
 import { CANVAS_ORIGIN_SHIFT, CANVAS_PADDING_TOTAL, SVG_CANVAS_CEIL } from '../activity-layout-constants.js';
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
+import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
+import type { Theme } from '../../../core/theme.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
- *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. */
-interface ShapeFudge {
+ *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
+ *  (T3i, `swimlane-context.ts#measureLaneExtents`): `Swimlanes
+ *  .computeDrawingWidths` (`Swimlanes.java:379-395`) measures each lane's
+ *  own content extent through this SAME `LimitFinder` class -- a lane's
+ *  `getMinMax()` is not the raw node box, it is the SAME fudged ink this
+ *  module already computes for the whole-canvas scan. One fudge table, two
+ *  consumers, never re-derived. */
+export interface ShapeFudge {
   readonly near: number;
   readonly far: number;
 }
@@ -111,11 +119,11 @@ const POLYGON_X_KINDS = new Set(['diamond', 'if-split', 'if-merge', 'while-heade
  *  `case 'break'` returns `''`) -- excluded from the ink scan entirely,
  *  rather than assigned a fudge, so an all-break diagram never collapses
  *  the min/max reduction onto a phantom shape. */
-function isInkless(kind: string): boolean {
+export function isInkless(kind: string): boolean {
   return kind === 'break';
 }
 
-function fudgeX(kind: string): ShapeFudge {
+export function fudgeX(kind: string): ShapeFudge {
   if (ELLIPSE_KINDS.has(kind)) return ELLIPSE_FUDGE;
   if (RECT_KINDS.has(kind)) return RECT_FUDGE;
   if (POLYGON_X_KINDS.has(kind)) return POLYGON_FUDGE_X;
@@ -191,20 +199,43 @@ function arrowheadTips(edge: ActivityEdgeGeo): Array<{ x: number; y: number; dir
   return tips;
 }
 
-function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
-  // `ULine` segments (`LimitFinder#drawULine`, exact).
+/**
+ * The X-only half of an edge's own ink (`ULine` points, exact, plus every
+ * arrowhead `UPolygon`'s `POLYGON_FUDGE_X`-padded span) -- split out and
+ * exported (T3i, `swimlane-context.ts#measureLaneExtents`) so a same-lane
+ * edge's arrowhead can widen its lane's content extent the SAME way
+ * `Swimlanes#computeDrawingWidths`'s per-lane `LimitFinder` would (it scans
+ * every draw call in that lane's content, edges included, not just node
+ * boxes). Y is deliberately omitted -- no lane-sizing consumer needs it;
+ * {@link extendForEdge} keeps its own exact Y accumulation inline.
+ */
+export function edgeInkX(edge: ActivityEdgeGeo): { minX: number; maxX: number } {
+  let minX = Infinity;
+  let maxX = -Infinity;
   for (const p of edge.points) {
-    acc.minX = Math.min(acc.minX, p.x);
-    acc.maxX = Math.max(acc.maxX, p.x);
+    minX = Math.min(minX, p.x);
+    maxX = Math.max(maxX, p.x);
+  }
+  for (const tip of arrowheadTips(edge)) {
+    const ext = arrowHeadExtents(tip.dir);
+    minX = Math.min(minX, tip.x + ext.minX - POLYGON_FUDGE_X.near);
+    maxX = Math.max(maxX, tip.x + ext.maxX + POLYGON_FUDGE_X.far);
+  }
+  return { minX, maxX };
+}
+
+function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
+  const { minX, maxX } = edgeInkX(edge);
+  acc.minX = Math.min(acc.minX, minX);
+  acc.maxX = Math.max(acc.maxX, maxX);
+  // `ULine` segments (`LimitFinder#drawULine`, exact) and arrowhead
+  // `UPolygon`s (Y exact, `LimitFinder.java:169-176`'s own Y-exact corners).
+  for (const p of edge.points) {
     acc.minY = Math.min(acc.minY, p.y);
     acc.maxY = Math.max(acc.maxY, p.y);
   }
-  // Arrowhead `UPolygon`s: `drawUPolygon` pads X ONLY by `HACK_X_FOR_POLYGON`
-  // (`POLYGON_FUDGE_X`'s own doc; `LimitFinder.java:169-176`), Y exact.
   for (const tip of arrowheadTips(edge)) {
     const ext = arrowHeadExtents(tip.dir);
-    acc.minX = Math.min(acc.minX, tip.x + ext.minX - POLYGON_FUDGE_X.near);
-    acc.maxX = Math.max(acc.maxX, tip.x + ext.maxX + POLYGON_FUDGE_X.far);
     acc.minY = Math.min(acc.minY, tip.y + ext.minY);
     acc.maxY = Math.max(acc.maxY, tip.y + ext.maxY);
   }
@@ -239,6 +270,50 @@ function extendForSwimlane(acc: MutableInkBounds, lane: SwimlaneGeo): void {
   acc.maxX = Math.max(acc.maxX, lane.x + lane.width);
 }
 
+/**
+ * T3i: the per-lane title TEXT's own ink. `Swimlanes#drawTitles` (`:369-
+ * 377`) draws a `CenteredText`, which `LimitFinder.draw` itself ignores
+ * (`klimt/drawing/LimitFinder.java:139-142`, `// Ignored`) -- but every
+ * swimlane draw call is wrapped by TWO `CompressionXorYBuilder` layers
+ * (`ActivityDiagram3.java:206-209`), and `UGraphicCompressOnXorY#draw`
+ * (`klimt/compress/UGraphicCompressOnXorY.java:100-113`) special-cases
+ * `CenteredText` by unwrapping it and calling `text.drawU(...)` on the
+ * wrapped `TextBlock` directly -- so the title's actual glyphs DO reach
+ * the ink-scanning `LimitFinder` as plain `UText` draws, via `drawText`
+ * (`:220-226`): `y -= dim.getHeight() - 1.5`, i.e. near corner `y0 - (H -
+ * 1.5)`, far corner `y0 + 1.5`, where `H` is the RAW (un-floored) title
+ * height -- `drawText` measures the glyph directly, never `AtomText`'s own
+ * `h < 10 ? 10 : h` floor (`measureSwimlaneTitlesHeight`'s own doc) --
+ * and `y0` is the SAME local baseline the renderer draws at
+ * (`activity-renderer-swimlanes.ts#renderSwimlaneTitles`:
+ * `band.y + fontSize * TITLE_ASCENT_FRACTION`, `band.y` here being the
+ * UNSHIFTED `baseY` every reservation in this module already uses).
+ * `Swimlanes.java:275`'s own `size() > 1` guard applies (mirrored already
+ * by `resolveSwimlaneVertical`/`computeSwimlaneChrome`): a single lane
+ * draws no title at all.
+ *
+ * Verified against `jakuco-69-dari135` (`SwimlaneTitleFontSize` default,
+ * 18): `y0 = 0 + 18 * 7/9 = 14`; near `= 14 - (18 - 1.5) = -2.5`, more
+ * negative than the title band rect's own `RECT_FUDGE.near`-derived `-1`
+ * (`extendForReservation`) -- the title text, not the band, sets the
+ * diagram's own top ink for every `SwimlaneTitleFontSize >= ~3`. At
+ * `SwimlaneTitleFontSize 8` (`sikino-19-vuca111`): `y0 = 6.222`, near
+ * `= 6.222 - 6.5 = -0.278`, LESS negative than the band rect's `-1` -- the
+ * band stays dominant, matching that fixture's unchanged canvas top.
+ */
+function extendForSwimlaneTitles(
+  acc: MutableInkBounds,
+  swimlanes: readonly SwimlaneGeo[],
+  baseY: number,
+  theme: Theme,
+): void {
+  if (swimlanes.length <= 1) return;
+  const fontSize = swimlaneTitleFontSize(theme);
+  const y0 = baseY + fontSize * TITLE_ASCENT_FRACTION;
+  acc.minY = Math.min(acc.minY, y0 - (fontSize - 1.5));
+  acc.maxY = Math.max(acc.maxY, y0 + 1.5);
+}
+
 interface CanvasOrigin {
   readonly shiftX: number;
   readonly shiftY: number;
@@ -246,20 +321,28 @@ interface CanvasOrigin {
   readonly totalHeight: number;
 }
 
+/** {@link computeCanvasOrigin}'s own inputs, bundled to keep that function
+ *  under the file's 5-parameter limit (T3i added `theme` as a 6th). */
+interface CanvasOriginInput {
+  readonly nodes: readonly ActivityNodeGeo[];
+  readonly edges: readonly ActivityEdgeGeo[];
+  readonly swimlanes: readonly SwimlaneGeo[];
+  readonly reservations: readonly Reservation[];
+  readonly baseY: number;
+  readonly theme: Theme;
+}
+
 /** The module doc's mechanism, applied: reduces every node/edge/swimlane's
  *  own (fudged) span into one global ink `MinMax`, then derives the uniform
  *  near-corner shift and the final (ceiled) canvas size from it. */
-function computeCanvasOrigin(
-  nodes: readonly ActivityNodeGeo[],
-  edges: readonly ActivityEdgeGeo[],
-  swimlanes: readonly SwimlaneGeo[],
-  reservations: readonly Reservation[],
-): CanvasOrigin {
+function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
+  const { nodes, edges, swimlanes, reservations, baseY, theme } = input;
   const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
   for (const n of nodes) extendForNode(acc, n);
   for (const e of edges) extendForEdge(acc, e);
   for (const s of swimlanes) extendForSwimlane(acc, s);
   for (const r of reservations) extendForReservation(acc, r);
+  extendForSwimlaneTitles(acc, swimlanes, baseY, theme);
   if (!Number.isFinite(acc.minX)) {
     acc.minX = 0;
     acc.minY = 0;
@@ -315,6 +398,9 @@ export interface FinalizeInput {
   bounds: { maxX: number; maxY: number };
   baseY: number;
   titlesHeight: number;
+  /** T3i: the title's own font size (`extendForSwimlaneTitles`) needs the
+   *  theme every other swimlane-sizing call site already threads through. */
+  theme: Theme;
 }
 
 export interface FinalizedGeometry {
@@ -328,8 +414,8 @@ export interface FinalizedGeometry {
 }
 
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
-  const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight } = input;
-  const origin = computeCanvasOrigin(nodes, edges, swimlanes, reservations);
+  const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight, theme } = input;
+  const origin = computeCanvasOrigin({ nodes, edges, swimlanes, reservations, baseY, theme });
   const shiftedNodes = nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY));
   const shiftedEdges = edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY));
   const shiftedSwimlanes = swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX));

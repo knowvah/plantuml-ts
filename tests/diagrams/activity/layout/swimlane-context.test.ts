@@ -7,8 +7,10 @@ import {
   resolveSwimlaneMinWidth,
   SWIMLANE_HALF_MISSING_SPACE,
   SWIMLANE_WIDTH_SAME,
+  type LaneEdge,
   type LaneItem,
 } from '../../../../src/diagrams/activity/layout/swimlane-context.js';
+import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 
 describe('buildSwimlaneContexts — unchanged', () => {
   it('still builds equal-width contexts from a start x', () => {
@@ -27,13 +29,13 @@ describe('SWIMLANE_HALF_MISSING_SPACE', () => {
 });
 
 describe('measureLaneExtents', () => {
-  it('computes minX/maxX per lane from assigned items', () => {
+  it('computes minX/maxX per lane from assigned items (no kind -- no fudge)', () => {
     const items: LaneItem[] = [
       { swimlane: 'A', x: 10, width: 20 }, // 10..30
       { swimlane: 'A', x: 40, width: 5 }, // 40..45
       { swimlane: 'B', x: 100, width: 50 }, // 100..150
     ];
-    const extents = measureLaneExtents(items, ['A', 'B']);
+    const extents = measureLaneExtents(items, [], ['A', 'B']);
     expect(extents.get('A')).toEqual({ minX: 10, maxX: 45 });
     expect(extents.get('B')).toEqual({ minX: 100, maxX: 150 });
   });
@@ -43,25 +45,68 @@ describe('measureLaneExtents', () => {
       { x: 0, width: 1000 }, // no swimlane -- must not pollute A or B
       { swimlane: 'A', x: 10, width: 20 },
     ];
-    const extents = measureLaneExtents(items, ['A', 'B']);
+    const extents = measureLaneExtents(items, [], ['A', 'B']);
     expect(extents.get('A')).toEqual({ minX: 10, maxX: 30 });
     expect(extents.get('B')).toEqual({ minX: 0, maxX: 0 });
   });
 
   it('excludes items assigned to a lane not in laneNames', () => {
     const items: LaneItem[] = [{ swimlane: 'ghost', x: 10, width: 20 }];
-    const extents = measureLaneExtents(items, ['A']);
+    const extents = measureLaneExtents(items, [], ['A']);
     expect(extents.get('A')).toEqual({ minX: 0, maxX: 0 });
   });
 
   it('reports an empty lane as { minX: 0, maxX: 0 }, mirroring MinMax.getEmpty(true)', () => {
-    const extents = measureLaneExtents([], ['A']);
+    const extents = measureLaneExtents([], [], ['A']);
     expect(extents.get('A')).toEqual({ minX: 0, maxX: 0 });
   });
 
   it('returns an empty map for no lanes and no items, without throwing', () => {
-    expect(() => measureLaneExtents([], [])).not.toThrow();
-    expect(measureLaneExtents([], []).size).toBe(0);
+    expect(() => measureLaneExtents([], [], [])).not.toThrow();
+    expect(measureLaneExtents([], [], []).size).toBe(0);
+  });
+
+  // T3i: a lane's own `getMinMax()` is measured through the SAME
+  // `LimitFinder` the whole-canvas scan uses (`canvas-origin.ts#fudgeX`'s
+  // own doc), so a boundary item's per-shape fudge shifts the lane's own
+  // content extent -- `jakuco-69-dari135`'s lane content landed exactly
+  // `RECT_FUDGE.near` (1) too far right before this was ported.
+  it("fudges an 'action' (rect) item's extent by RECT_FUDGE (near 1, far -1)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'action', x: 10, width: 20 }]; // raw 10..30
+    const extents = measureLaneExtents(items, [], ['A']);
+    expect(extents.get('A')).toEqual({ minX: 9, maxX: 29 });
+  });
+
+  it("does not fudge a 'start' (ellipse) item's near corner (ELLIPSE_FUDGE near 0)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'start', x: 10, width: 20 }]; // raw 10..30
+    const extents = measureLaneExtents(items, [], ['A']);
+    expect(extents.get('A')).toEqual({ minX: 10, maxX: 29 });
+  });
+
+  it("excludes a 'break' item's ink entirely (isInkless)", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'break', x: 10, width: 20 }];
+    const extents = measureLaneExtents(items, [], ['A']);
+    expect(extents.get('A')).toEqual({ minX: 0, maxX: 0 });
+  });
+
+  // T3i: a same-lane edge's own arrowhead `UPolygon` ink can widen a lane
+  // beyond its node boxes -- `pakema-21-xema183` lane `A`: box ink
+  // `[25, 51.675]`, arrowhead ink (`POLYGON_FUDGE_X` +-10 around an
+  // 8px-wide polygon at x=35.338..43.338) `[25.338, 53.338]` -- the
+  // arrowhead's far corner (53.338) widens the lane's own extent past the
+  // box's own far corner (51.675).
+  it("widens a lane's extent by a same-lane edge's arrowhead ink", () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'action', x: 26, width: 26.675 }]; // ink 25..51.675
+    const edge: ActivityEdgeGeo = { points: [{ x: 39.338, y: 60.5 }, { x: 39.338, y: 80.5 }] };
+    const edges: LaneEdge[] = [{ swimlane: 'A', edge }];
+    const extents = measureLaneExtents(items, edges, ['A']);
+    expect(extents.get('A')!.maxX).toBeCloseTo(53.338, 5);
+  });
+
+  it('excludes a cross-lane edge (not passed as a LaneEdge) from any lane extent', () => {
+    const items: LaneItem[] = [{ swimlane: 'A', kind: 'action', x: 26, width: 26.675 }]; // ink 25..51.675
+    const extents = measureLaneExtents(items, [], ['A']);
+    expect(extents.get('A')).toEqual({ minX: 25, maxX: 51.675 });
   });
 });
 
@@ -164,7 +209,7 @@ describe('halfMissingSpace', () => {
 
 describe('no swimlanes / empty diagram', () => {
   it('measureLaneExtents and computeLaneWidths compute nothing for an empty diagram', () => {
-    const extents = measureLaneExtents([], []);
+    const extents = measureLaneExtents([], [], []);
     const widths = computeLaneWidths(extents, new Map(), 0);
     expect(extents.size).toBe(0);
     expect(widths.size).toBe(0);

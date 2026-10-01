@@ -20,6 +20,7 @@ import type { Theme } from '../../core/theme.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
+import { TITLE_ASCENT_FRACTION } from './layout/swimlane-placement.js';
 import {
   swimlaneBorderColor,
   swimlaneBorderThickness,
@@ -27,17 +28,6 @@ import {
   swimlaneTitleFontColor,
   swimlaneTitleFontSize,
 } from './activity-style-defaults.js';
-
-/**
- * The ASCENT fraction a title's baseline sits at within the band, from
- * `StringBounder#getDescent` = `size / 4.5` (`klimt/font/StringBounder
- * .java:47`) -- the SAME ratio `activity-renderer-shapes.ts#ASCENT_FRACTION`
- * uses for every other activity label. Verified against two pinned
- * fixtures: `sikino-19-vuca111` (`SwimlaneTitleFontSize 8`, band y=16) ->
- * baseline 22.222 = 16 + 8*7/9; `pakema-21-xema183` (default 18, band
- * y=17.5) -> baseline 31.5 = 17.5 + 18*7/9. Both exact.
- */
-const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 
 /**
  * The transparent (or user-coloured) title-band rect (D3). Emits

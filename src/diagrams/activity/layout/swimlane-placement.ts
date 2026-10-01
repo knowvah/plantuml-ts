@@ -43,6 +43,7 @@ import {
   computeLaneWidths,
   measureLaneExtents,
   resolveSwimlaneMinWidth,
+  type LaneEdge,
   type LaneItem,
   type LaneWidth,
 } from './swimlane-context.js';
@@ -130,6 +131,21 @@ export interface PlacementResult {
  * chrome renderer (band rect height) so both measure the exact same value
  * -- D2 forbids a second, independent implementation of this number.
  */
+/**
+ * The ASCENT fraction a title's baseline sits at within the band, from
+ * `StringBounder#getDescent` = `size / 4.5` (`klimt/font/StringBounder
+ * .java:47`) -- the SAME ratio `activity-renderer-shapes.ts#ASCENT_FRACTION`
+ * uses for every other activity label. Lives here (not the renderer) so
+ * `canvas-origin.ts#extendForSwimlaneTitles` (T3i) can share the exact
+ * baseline-Y the renderer draws at, rather than re-deriving it -- layout
+ * owns shared geometric constants, the renderer only consumes them.
+ * Verified against two pinned fixtures: `sikino-19-vuca111`
+ * (`SwimlaneTitleFontSize 8`, band y=16) -> baseline 22.222 = 16 + 8*7/9;
+ * `pakema-21-xema183` (default 18, band y=17.5) -> baseline 31.5 = 17.5 +
+ * 18*7/9. Both exact.
+ */
+export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
+
 export function measureSwimlaneTitlesHeight(
   laneNames: readonly string[],
   bounder: StringBounder,
@@ -337,6 +353,33 @@ export interface PlacementInput {
   readonly theme: Theme;
 }
 
+/** {@link measureLanes}'s own inputs, bundled to keep that function under
+ *  the file's 5-parameter limit (T3i's same-lane `edges`/`edgeMeta` would
+ *  be a 5th/6th). */
+interface MeasureLanesInput {
+  readonly nodes: readonly ActivityNodeGeo[];
+  readonly edges: readonly ActivityEdgeGeo[];
+  readonly edgeMeta: readonly EdgeMeta[];
+  readonly laneNames: readonly string[];
+  readonly bounder: StringBounder;
+  readonly theme: Theme;
+}
+
+/** Every SAME-lane edge (T3i, {@link LaneEdge}'s own doc: a cross-lane
+ *  edge draws through the separate `Cross` class and never enters a
+ *  lane's own `getMinMax()`), zipped from `edges`/`edgeMeta` -- the two
+ *  arrays `placeSwimlanes` already keeps index-aligned (`PlacementResult
+ *  .edgeMeta`'s own doc). */
+function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly EdgeMeta[]): LaneEdge[] {
+  const out: LaneEdge[] = [];
+  for (let i = 0; i < edges.length; i++) {
+    const meta = edgeMeta[i]!;
+    if (meta.lane1 === undefined || meta.lane1 !== meta.lane2) continue;
+    out.push({ swimlane: meta.lane1, edge: edges[i]! });
+  }
+  return out;
+}
+
 /**
  * `computeDrawingWidths` (`Swimlanes.java:379-395`) plus the `min`
  * resolution step from `computeSizeInternal` (`:399-403`) -- measures
@@ -344,16 +387,14 @@ export interface PlacementInput {
  * width floor once so both `computeLaneWidths` and the origin loop reuse
  * the SAME resolved value (upstream does too, `:399` then `:409,441`).
  */
-function measureLanes(
-  nodes: readonly ActivityNodeGeo[],
-  laneNames: readonly string[],
-  bounder: StringBounder,
-  theme: Theme,
-): { widths: Map<string, LaneWidth>; min: number } {
+function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
+  const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
   const items: LaneItem[] = nodes.map((n) =>
-    n.swimlane !== undefined ? { swimlane: n.swimlane, x: n.x, width: n.width } : { x: n.x, width: n.width },
+    n.swimlane !== undefined
+      ? { swimlane: n.swimlane, kind: n.kind, x: n.x, width: n.width }
+      : { kind: n.kind, x: n.x, width: n.width },
   );
-  const extents = measureLaneExtents(items, laneNames);
+  const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
@@ -373,15 +414,25 @@ function measureLanes(
  * `assignCoordinates` after the pass-1 single-column walk. Returns
  * pass-1's `nodes`/`edges` byte-identical (same array contents, new
  * arrays) when there are no swimlanes -- acceptance criterion "no
- * swimlanes -> byte-identical geometry".
+ * swimlanes -> byte-identical geometry". A SINGLE named lane gets the
+ * same passthrough (T3i, `bulasi-17-vafa634`): `Swimlanes#ensureSizeComputed`
+ * only runs `computeSizeInternal` -- the ENTIRE origin-loop/translate
+ * mechanism this function ports -- `if (swimlanes().size() > 1)`
+ * (`Swimlanes.java:224-226`); `drawU`'s own `size() > 1` guard (`:253`)
+ * then skips `drawWhenSwimlanes` too, so a one-lane diagram draws through
+ * the plain `full.drawU(ug)` branch with no swimlane translate applied at
+ * all -- the SAME `<= 1` convention `resolveSwimlaneVertical`/
+ * `computeSwimlaneChrome` (this file) already use. Before this fix, a
+ * single named lane still ran the full origin loop, giving it a non-zero
+ * `delta` no upstream diagram ever gets.
  */
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
-  if (laneNames.length === 0) {
+  if (laneNames.length <= 1) {
     return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
   }
 
-  const { widths, min } = measureLanes(nodes, laneNames, bounder, theme);
+  const { widths, min } = measureLanes({ nodes, edges, edgeMeta, laneNames, bounder, theme });
   const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
 
   const deltas = new Map<string, number>();
