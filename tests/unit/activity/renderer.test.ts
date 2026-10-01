@@ -315,12 +315,18 @@ describe('renderActivity — diamond node (if-split)', () => {
     const content = contentAfterDefs(result);
     expect(content).toContain('Ready?');
     expect(content).toContain('<text');
-    // Hexagon has 6 coordinate pairs; diamond has 4. The attribute is FLAT
-    // comma-separated, as the jar writes it (`svg-shapes.ts#polygon`), so the
-    // pairs are counted from the number of values rather than from spaces.
+    // Hexagon has 6 DISTINCT coordinate pairs, but `Hexagon.asPolygon(
+    // shadowing, width, height)` (`Hexagon.java:65-74`) calls `addPoint`
+    // SEVEN times, re-adding the first point `(hexagonHalfSize, 0)` as the
+    // closing point after `(0, height/2)` (`Hexagon.java:68,74`) --
+    // `UPolygon` does not close itself on draw, so the emitted `points`
+    // carries 7 pairs (T2f mechanism 1, `daxare-39-buci637`). The attribute
+    // is FLAT comma-separated, as the jar writes it (`svg-shapes.ts
+    // #polygon`), so the pairs are counted from the number of values
+    // rather than from spaces.
     const pointsMatch = content.match(/points="([^"]+)"/);
     const values = pointsMatch?.[1]?.trim().split(',').length ?? 0;
-    expect(values / 2).toBe(6);
+    expect(values / 2).toBe(7);
   });
 });
 
@@ -458,13 +464,17 @@ describe('renderActivity — edge with label', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — if-merge node', () => {
-  it('renders one rhombus polygon at (x+12,y) (x+24,y+12) (x+12,y+24) (x,y+12)', () => {
+  it('renders one rhombus polygon at (x+12,y) (x+24,y+12) (x+12,y+24) (x,y+12), closed', () => {
     const node = makeNode({ kind: 'if-merge', x: 10, y: 20, width: 24, height: 24 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     const pointsMatch = content.match(/points="([^"]+)"/);
-    expect(pointsMatch?.[1]).toBe('22,20,34,32,22,44,10,32');
+    // `Hexagon.asPolygon(double)` (`Hexagon.java:48-55`) calls `addPoint`
+    // FIVE times, re-adding `(12,0)` as the closing point after `(0,12)`
+    // (`Hexagon.java:51,55`) -- `UPolygon` does not close itself on draw
+    // (T2f mechanism 1, `daxare-39-buci637`).
+    expect(pointsMatch?.[1]).toBe('22,20,34,32,22,44,10,32,22,20');
   });
 
   it('carries the diamond bucket line thickness (`activityLineThickness(theme, "diamond")`)', () => {
@@ -874,10 +884,17 @@ describe('renderActivity — activity theme colors', () => {
     expect(svg).toContain('fill="#00F"');
   });
 
-  it('stop node uses activityEndColor', () => {
-    const geo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
-    const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="#FF0"');
+  it('end node uses activityEndColor; stop does NOT (separate skinparam targets)', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` ->
+    // `SName.circle, SName.end`; `activityStopColor` -> `SName.circle,
+    // SName.stop` (own, unwired skinparam). T2f mechanism 7.
+    const endGeo = makeGeo({ nodes: [makeNode({ kind: 'end', width: 16, height: 16 })] });
+    const endSvg = assembleSvg(renderActivity(endGeo, activityTheme));
+    expect(endSvg).toContain('#FF0');
+
+    const stopGeo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
+    const stopSvg = assembleSvg(renderActivity(stopGeo, activityTheme));
+    expect(stopSvg).not.toContain('#FF0');
   });
 
   it('action node uses activityBackgroundColor', () => {

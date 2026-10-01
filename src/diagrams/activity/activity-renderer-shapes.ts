@@ -8,10 +8,10 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, diamond, noteBox, line, path, polygon } from '../../core/svg.js';
+import { rect, diamond, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
-import { NOTE_FOLD } from './activity-layout-constants.js';
+import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import {
   ACTIVITY_BAR_FILL,
   CIRCLE_INK,
@@ -291,14 +291,21 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
   const dent = h / 2;
+  // `Hexagon.asPolygon(shadowing, width, height)` (`Hexagon.java:65-74`)
+  // calls `addPoint` SEVEN times, re-adding the first point `(hexagonHalf
+  // Size, 0)` as the closing point after `(0, height/2)`
+  // (`Hexagon.java:68,74`) -- `UPolygon` does not close itself on draw
+  // (T2f mechanism 1, same as {@link renderIfMerge}).
+  const first = { x: x + dent, y: y };
   const shape = polygon(
     [
-      { x: x + dent, y: y },
+      first,
       { x: x + w - dent, y: y },
       { x: x + w, y: y + h / 2 },
       { x: x + w - dent, y: y + h },
       { x: x + dent, y: y + h },
       { x: x, y: y + h / 2 },
+      first,
     ],
     { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
@@ -306,6 +313,59 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const cy = y + h / 2;
   const condSize = activityFontSize(theme, 'diamond');
   return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
+}
+
+/** `Opale#getCorner` (`:134-147`, `roundCorner=0`): the fold triangle,
+ *  identical for every body variant (`getPolygonNormal`/`Left`/`Right`) --
+ *  `Opale#drawU` (`:126`) draws it unconditionally, as its own filled
+ *  `<path>`, never as unfilled border lines. */
+function noteFoldPath(x: number, y: number, w: number): string {
+  const d = NOTE_CORNER_SIZE;
+  return `M${x + w - d},${y} L${x + w - d},${y + d} L${x + w},${y + d} L${x + w - d},${y}`;
+}
+
+/** `Opale#getPolygonNormal` (`:149-157`, no link, `roundCorner=0`): top-left
+ *  -> bottom-left -> bottom-right -> right-edge-below-fold -> fold-top ->
+ *  close. Was top-left -> fold-top -> right-edge-below-fold -> bottom-right
+ *  -> bottom-left -> close, the opposite traversal (T2f mechanism 3). */
+function noteBodyNormal(x: number, y: number, w: number, h: number): string {
+  const d = NOTE_CORNER_SIZE;
+  return `M${x},${y} L${x},${y + h} L${x + w},${y + h} L${x + w},${y + d} L${x + w - d},${y} L${x},${y}`;
+}
+
+/** A degenerate `arcTo(point, roundCorner/2=0, 0, 0)` -- `Opale
+ *  #getPolygonLeft`/`Right` ALWAYS emit an `A` command there, even at
+ *  radius 0 (T2f mechanism 3, verified byte-exact against `cubida-55-
+ *  meku256`'s jar SVG: `A0,0 0 0 0 <samepoint>` immediately follows the
+ *  `L` that already reached that point). */
+function zeroArc(x: number, y: number): string {
+  return `A0,0 0 0 0 ${x},${y}`;
+}
+
+/** `Opale#getPolygonRight` (`:198-219`): spike on the RIGHT edge (the
+ *  note sits LEFT of its target). `y1`'s floor is `cornersize` (`:208`)
+ *  -- the spike may not rise into the fold's own corner. */
+function noteBodySpikeRight(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
+  const d = NOTE_CORNER_SIZE;
+  const y1 = Math.max(d, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
+  return (
+    `M${x},${y} L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
+    `L${x + w},${y + y1 + 2 * NOTE_SPIKE_DELTA} L${spike.x},${spike.y} L${x + w},${y + y1} ` +
+    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
+  );
+}
+
+/** `Opale#getPolygonLeft` (`:175-196`): spike on the LEFT edge (the note
+ *  sits RIGHT of its target). `y1`'s floor is `0` (`:180`), not
+ *  `cornersize` -- the fold is on the OPPOSITE (right) edge here. */
+function noteBodySpikeLeft(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
+  const d = NOTE_CORNER_SIZE;
+  const y1 = Math.max(0, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
+  return (
+    `M${x},${y} L${x},${y + y1} L${spike.x},${spike.y} L${x},${y + y1 + 2 * NOTE_SPIKE_DELTA} ` +
+    `L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
+    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
+  );
 }
 
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
@@ -317,47 +377,22 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // (`FtileWithNoteOpale.java:89`, `FtileNoteAlone.java:77`), which declares
   // no `note` override, so root stands -- the size `gtile-note.ts` measured.
   const noteSize = activityFontSize(theme, 'note');
-  // Opale balloon spike geometry (matches Opale.java: delta=4, cornersize=NOTE_FOLD)
-  const DELTA = 4;
   const spike = node.spikeTip;
-  let bodyPath = '';
+  const paint = { fill: noteFill, stroke, strokeWidth: NOTE_LINE_THICKNESS };
+  // `node.notePosition === 'left'` means the NOTE sits left of its target,
+  // so the spike protrudes from the note's RIGHT edge (`getPolygonRight`);
+  // `'right'` is the mirror (`getPolygonLeft`, spike on the LEFT edge).
+  let bodyD: string;
   if (spike !== undefined && node.notePosition === 'left') {
-    // Note is LEFT of action → spike protrudes from the RIGHT side of the box
-    const relY = spike.y - y;
-    const y1 = Math.max(NOTE_FOLD, Math.min(relY - DELTA, h - 2 * DELTA));
-    bodyPath =
-      `M${x},${y} ` +
-      `L${x},${y + h} ` +
-      `L${x + w},${y + h} ` +
-      `L${x + w},${y + y1 + 2 * DELTA} ` +
-      `L${spike.x},${spike.y} ` +
-      `L${x + w},${y + y1} ` +
-      `L${x + w},${y + NOTE_FOLD} ` +
-      `L${x + w - NOTE_FOLD},${y} Z`;
+    bodyD = noteBodySpikeRight(x, y, w, h, spike);
   } else if (spike !== undefined && node.notePosition === 'right') {
-    // Note is RIGHT of action → spike protrudes from the LEFT side of the box
-    const relY = spike.y - y;
-    const y1 = Math.max(0, Math.min(relY - DELTA, h - 2 * DELTA));
-    bodyPath =
-      `M${x},${y} ` +
-      `L${x},${y + y1} ` +
-      `L${spike.x},${spike.y} ` +
-      `L${x},${y + y1 + 2 * DELTA} ` +
-      `L${x},${y + h} ` +
-      `L${x + w},${y + h} ` +
-      `L${x + w},${y + NOTE_FOLD} ` +
-      `L${x + w - NOTE_FOLD},${y} Z`;
+    bodyD = noteBodySpikeLeft(x, y, w, h, spike);
+  } else {
+    bodyD = noteBodyNormal(x, y, w, h);
   }
-  // Build the note body — spike cases use the custom path; standalone uses the shared primitive
-  const body =
-    spike === undefined
-      ? noteBox(x, y, w, h, { fill: noteFill, stroke, dogEar: NOTE_FOLD, strokeWidth: NOTE_LINE_THICKNESS })
-      : path(bodyPath, { fill: noteFill, stroke, strokeWidth: NOTE_LINE_THICKNESS }) +
-        line(x + w - NOTE_FOLD, y, x + w - NOTE_FOLD, y + NOTE_FOLD, { stroke, strokeWidth: NOTE_LINE_THICKNESS }) +
-        line(x + w - NOTE_FOLD, y + NOTE_FOLD, x + w, y + NOTE_FOLD, {
-          stroke,
-          strokeWidth: NOTE_LINE_THICKNESS,
-        });
+  // `Opale#drawU` (`:126`) draws the fold as its OWN filled `<path>`
+  // unconditionally -- same shape whether or not the note has a spike.
+  const body = path(bodyD, paint) + path(noteFoldPath(x, y, w), paint);
 
   const label = node.label ?? '';
   const lines = label.split('\n');
@@ -365,21 +400,40 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
   // unsourced `x + 4`.
   const labelX = x + 6;
-  let labelEl: string;
-  if (lines.length > 1) {
-    labelEl = textLines(lines, labelX, y + NOTE_FOLD + noteSize, noteSize, {
-      fontFamily: theme.fontFamily,
-      fontSize: noteSize,
-      fill: activityFontColor(theme, 'note'),
-    });
-  } else {
-    labelEl = drawActivityText(labelX, y + NOTE_FOLD + noteSize, label, {
-      fill: activityFontColor(theme, 'note'),
-      fontFamily: theme.fontFamily,
-      fontSize: noteSize,
-    });
-  }
+  // `Opale.java:58`'s `marginY = 5` is the text BLOCK's own top inset; the
+  // first line's baseline is that same ascent-based reduction every other
+  // single/multi-line label in this file uses (`ASCENT_FRACTION`, D1/D9) --
+  // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
+  // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
+  const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
+  const textStyle = { fontFamily: theme.fontFamily, fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const labelEl =
+    lines.length > 1
+      ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)
+      : drawActivityText(labelX, firstBaselineY, label, textStyle);
   return body + labelEl;
+}
+
+/** The root `composite { LineColor black; BackgroundColor transparent;
+ *  LineThickness 1.5 }` block (`plantuml.skin:364-368`) -- a `partition`/
+ *  `package`/`rectangle`/`card`/`group` frame (`group-dispatch.ts`'s
+ *  `GROUP_TYPES`, all mapped to ONE `composite` SName by `FromSkinparam
+ *  ToStyle.java:131-132`'s `PartitionBorderColor`/`PartitionBackground
+ *  Color` converts). `node.kind` had no case here at all, so every group/
+ *  partition fell through `renderNode`'s `default:` fallback and drew the
+ *  generic node fill/border instead (T2f mechanism 6, `caciva-80-
+ *  kene990`: ours `fill="#F1F1F1" stroke="#181818"`, jar `fill="none"
+ *  stroke="#000"`). No `skinparam Partition*Color` override hook exists
+ *  yet (would need a `core/theme-graph-colors-b.ts` field, out of this
+ *  task's write-set) -- the plain default is drawn unconditionally, which
+ *  is also what every cohort row needs (none sets that skinparam).
+ */
+function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
+  return rect(node.x, node.y, node.width, node.height, {
+    fill: 'none',
+    stroke: '#000',
+    strokeWidth: activityLineThickness(theme, 'composite'),
+  });
 }
 
 export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
@@ -422,6 +476,9 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderIfLabel(node, theme);
     case 'note':
       return renderNote(node, theme);
+    case 'group':
+    case 'partition':
+      return renderComposite(node, theme);
     default: {
       // Unknown kind: render a plain rect as a fallback
       const c = actColors(theme);

@@ -20,6 +20,7 @@ import {
   renderHexagon,
   renderKill,
   renderLabel,
+  renderNode,
   renderNote,
   renderParallelogram,
   renderStart,
@@ -134,7 +135,14 @@ describe('renderStop', () => {
     expect(svg).not.toContain('rx="7.7"');
   });
 
-  it('resolves a named theme color to hex on both ellipses', () => {
+  it('does NOT inherit `ActivityEndColor` -- `activityStopColor` is a separate skinparam target', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` converts to
+    // `PName.LineColor` on `SName.circle, SName.end`; `activityStopColor`
+    // converts to the SAME `PName` but on `SName.circle, SName.stop` --
+    // two independent style targets. Reusing `actColors(theme).endFill`
+    // here made `stop` wrongly red under `skinparam ActivityEndColor red`
+    // with no `ActivityStopColor` set (T2f mechanism 7, jar-verified on
+    // `poraji-17-goke817`: `stop` stays `#222`).
     const activityTheme = deepMergeTheme(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
@@ -142,8 +150,9 @@ describe('renderStop', () => {
       },
     });
     const svg = renderStop(makeNode({ kind: 'stop' }), activityTheme);
-    expect(svg).toContain('stroke="#FF0"');
-    expect(svg).toContain('fill="#FF0"');
+    expect(svg).not.toContain('#FF0');
+    expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill="#222"');
   });
 });
 
@@ -206,10 +215,17 @@ describe('renderEnd', () => {
     expect(Number(l1[2])).toBeCloseTo(53.813, 3);
     expect(Number(l1[3])).toBeCloseTo(66.187, 3);
     expect(Number(l1[4])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[1])).toBeCloseTo(53.813, 3);
-    expect(Number(l2[2])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[3])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[4])).toBeCloseTo(53.813, 3);
+    // The second diagonal's `dy` is negative (`-size2`): the jar's own
+    // compress pass (`UGraphicCompressOnXorY#drawLine`,
+    // `klimt/compress/UGraphicCompressOnXorY.java:142-148`) swaps a
+    // line's endpoints whenever `y1 > y2` before drawing, so the emitted
+    // `x1`/`y1` is the point with the SMALLER y, not the translate
+    // origin (T2f mechanism 2, verified byte-exact against
+    // `fabexi-81-dife869`'s jar SVG).
+    expect(Number(l2[1])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[2])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[3])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[4])).toBeCloseTo(66.187, 3);
   });
 
   it('cross stroke-width is 2.5, independent of the ellipse stroke-width 1.5', () => {
@@ -493,6 +509,87 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T2f mechanism 3 -- note body path order, fold, and first-line baseline
+// (Opale.java). `Opale#getPolygonNormal` (`:149-157`, no link, roundCorner
+// 0): top-left -> bottom-left -> bottom-right -> right-edge-below-fold ->
+// fold-top -> close -- the OPPOSITE traversal of the old `noteBox()`-backed
+// emission. The fold is Opale#getCorner (`:134-147`), drawn as its OWN
+// filled `<path>` unconditionally -- never unfilled border lines.
+// ---------------------------------------------------------------------------
+
+describe('renderNote -- body path order and baseline (Opale.java)', () => {
+  it('standalone (no link): body path visits TL, BL, BR, right-below-fold, fold-top, close', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    // NOTE_CORNER_SIZE = 10 (Opale.java:53), not the old NOTE_FOLD = 8.
+    expect(bodyD).toBe('M15,15 L15,38 L85,38 L85,25 L75,15 L15,15');
+  });
+
+  it('standalone: fold is a second filled <path>, not unfilled <line>s', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    expect((svg.match(/<path /g) ?? []).length).toBe(2);
+    expect(svg).not.toContain('<line');
+    const foldD = [...svg.matchAll(/<path d="([^"]+)"/g)][1]?.[1];
+    expect(foldD).toBe('M75,15 L75,25 L85,25 L75,15');
+  });
+
+  it('standalone: first-line baseline is y + marginY(5) + fontSize * ASCENT_FRACTION(7/9)', () => {
+    // Jar-verified on volefo-41-tolo996: y=15, fontSize=13 -> 30.111, not
+    // the old unsourced `y + NOTE_FOLD(8) + fontSize` (= 36).
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const textY = svg.match(/<text[^>]*\by="([\d.]+)"/)?.[1];
+    expect(Number(textY)).toBeCloseTo(30.111, 2);
+  });
+
+  it('spike right (notePosition "left"): zero-radius arcs follow the two corner lineTos', () => {
+    // Opale#getPolygonRight (`:198-219`): y1's floor is `cornersize`.
+    // Jar-verified byte-exact against cubida-55-meku256.
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'left',
+      spikeTip: { x: 118.156, y: 71 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,77.5 L118.156,71 L98.156,69.5 L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+
+  it('spike left (notePosition "right"): y1 floor is 0, not cornersize', () => {
+    // Opale#getPolygonLeft (`:175-196`) -- mirror of getPolygonRight, with
+    // the spike and the fold on OPPOSITE edges so y1's floor stays 0.
+    // spike.y=64.5 -> relY=5, y1=relY-delta(4)=1 (unclamped, within [0,15]).
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'right',
+      spikeTip: { x: -20, y: 64.5 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,60.5 L-20,64.5 L15,68.5 ' +
+        'L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
 // T1b (decisions.md#D1/#D4) — every activity `<text>` goes through the
 // klimt `DriverTextSvg`: `textLength` is real, and the single-line baseline
 // is `rect.y + padding + fontSize * ASCENT_FRACTION`, jar-verified on
@@ -601,5 +698,29 @@ describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
     const svg = renderSplitLine(makeNode({ kind: 'split-join-bar', x: 0, y: 0, width: 40 }), theme);
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2f mechanism 6 -- `group`/`partition` frame (plantuml.skin:364-368's
+// root `composite` block). `renderNode` had no case for either kind, so
+// both fell through the `default:` fallback and drew the generic node
+// fill/border instead of the composite frame.
+// ---------------------------------------------------------------------------
+
+describe('renderNode -- group/partition frame (composite SName)', () => {
+  it('partition: unfilled rect, black stroke, LineThickness 1.5 -- not the generic node fill', () => {
+    const node = makeNode({ kind: 'partition', x: 16, y: 45, width: 138.4, height: 122 });
+    const svg = renderNode(node, theme);
+    expect(svg).toBe('<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>');
+  });
+
+  it('group: same composite styling as partition (FromSkinparamToStyle.java:131-132, ONE SName for both)', () => {
+    const node = makeNode({ kind: 'group', x: 0, y: 0, width: 50, height: 50 });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('fill="none"');
+    expect(svg).toContain('stroke="#000"');
+    expect(svg).toContain('stroke-width="1.5"');
+    expect(svg).not.toContain(theme.colors.nodeBackground);
   });
 });
