@@ -639,7 +639,10 @@ describe('T1b — klimt text driver (D1)', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
-  it('renders a rounded rect, fill only, no stroke attribute', () => {
+  // T3a (garuga-34-debe901): `ug.apply(colorBar).apply(colorBar.bg())
+  // .draw(rect)` (`FtileBlackBlock.java:110`) strokes AND fills the rect in
+  // the SAME resolved colour -- stroke is never absent.
+  it('renders a rounded rect, stroked AND filled in the same colour', () => {
     const svg = renderBar(makeNode({ kind: 'fork-bar', x: 10, y: 20, width: 100, height: 6 }), theme);
     expect(svg).toContain('<rect');
     expect(svg).toContain('x="10"');
@@ -648,12 +651,15 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
     expect(svg).toContain('height="6"');
     expect(svg).toContain('rx="2.5"');
     expect(svg).toContain('ry="2.5"');
-    expect(svg).not.toContain('stroke=');
+    expect(svg).toContain('fill="#555"');
+    expect(svg).toContain('stroke="#555"');
+    expect(svg).toContain('stroke-width="1"');
   });
 
-  it('fill defaults to the resolved activityBar colour, not theme.colors.border', () => {
+  it('fill AND stroke default to the resolved activityBar colour, not theme.colors.border', () => {
     const svg = renderBar(makeNode({ kind: 'join-bar', width: 50, height: 6 }), theme);
     expect(svg).toContain('fill="#555"');
+    expect(svg).toContain('stroke="#555"');
     expect(svg).not.toContain(`fill="${theme.colors.border}"`);
   });
 });

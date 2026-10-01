@@ -119,15 +119,22 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
 
 /**
  * The edge path, drawn as ONE `<line>` PER SEGMENT -- never one `<polyline>`
- * and never one `<path>`.
+ * and never one `<path>`. The matching `emphasize` segment's arrowhead is
+ * interleaved INTO this same loop, drawn immediately before that segment's
+ * own line -- never before the whole run, never after it.
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:134-183.
- * `Worm#drawInternal` walks its own points with
+ * `Worm#drawInternalOneColor` walks its own points with
  * `for (int i = 0; i < size() - 1; i++)` (`:134`), taking `getPoint(i)` and
- * `getPoint(i + 1)` as one `XLine2D` per iteration, and its `drawLine`
- * helper bottoms out at `ug.draw(new ULine(x2 - x1, y2 - y1))` (`:183`) --
- * one `ULine` per segment, no aggregate shape anywhere in the call.
- * `DriverLineSvg#draw`
+ * `getPoint(i + 1)` as one `XLine2D` per iteration. Per iteration (`:138-143`):
+ * `if (drawn == false && emphasizeDirection != null &&
+ * Direction.fromVector(p1, p2) == emphasizeDirection) { drawLine(ug, line,
+ * emphasizeDirection); drawn = true; } else { drawLine(ug, line, null); }`
+ * -- `drawn` latches after the FIRST match, so later segments sharing the
+ * same direction draw no decoration. `drawLine`'s own body (`:178-184`)
+ * draws the passed-`direction` arrowhead at the segment's midpoint BEFORE
+ * `ug.draw(new ULine(x2 - x1, y2 - y1))` -- one `ULine` per segment, no
+ * aggregate shape anywhere in the call. `DriverLineSvg#draw`
  * (`klimt/drawing/svg/DriverLineSvg.java:54`) renders each one as a single
  * `<line>`.
  *
@@ -149,44 +156,33 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * (`ba68279df92`, `4f3a0dcc63b`, both on `SvgGraphics.java`) and STILL emits
  * one `ULine` per segment -- per-segment lines are what an output-size-
  * conscious upstream chose. Do not re-introduce a polyline "optimisation".
+ *
+ * Direction classification (including the diagonal/zero-length cases
+ * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
+ * `Direction.fromVector` (`utils/Direction.java:110-128`).
  */
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
   edgeColor: string,
   strokeWidth: number,
+  emphasize: ArrowDir | undefined,
+  theme: Theme,
 ): string {
   let out = '';
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p1 = pts[i]!;
-    const p2 = pts[i + 1]!;
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
-  }
-  return out;
-}
-
-/**
- * The FIRST segment whose direction equals `emphasize`, and its midpoint --
- * `Worm#drawInternalOneColor`'s `drawn == false && Direction.fromVector(p1,
- * p2) == emphasizeDirection` guard (`ftile/Worm.java:138-139`), which fires
- * at most once per Worm regardless of how many later segments also match.
- * Direction classification (including the diagonal/zero-length cases
- * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
- * `Direction.fromVector` (`utils/Direction.java:110-128`).
- */
-function findEmphasisSegment(
-  pts: ReadonlyArray<{ x: number; y: number }>,
-  emphasize: ArrowDir,
-): { mid: { x: number; y: number }; dx: number; dy: number } | undefined {
+  let emphasisDrawn = false;
   for (let i = 0; i < pts.length - 1; i++) {
     const p1 = pts[i]!;
     const p2 = pts[i + 1]!;
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
-    if (arrowDirection(dx, dy) === emphasize) {
-      return { mid: { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, dx, dy };
+    if (!emphasisDrawn && emphasize !== undefined && arrowDirection(dx, dy) === emphasize) {
+      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      out += arrowTip(mid, { dx, dy }, edgeColor, theme);
+      emphasisDrawn = true;
     }
+    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
   }
-  return undefined;
+  return out;
 }
 
 /** Canonical unit vector per {@link ArrowDir}, so {@link arrowTip}'s own
@@ -222,32 +218,30 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // `.apply(UStroke.simple())` (`:159`, `:166`), which is thickness 1.0
   // (`klimt/UStroke.java:75-77`), so the 1.5 never reaches any output at
   // all. This port had generalised it to every segment of every edge.
-  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'));
+  //
+  // The `emphasize` arrowhead (`Snake#emphasizeDirection`, D6) is
+  // interleaved INTO this segment run, immediately before its matching
+  // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
+  // exact `Worm.java:138-143` loop body this ports.
+  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'), edge.emphasize, theme);
 
-  // Arrowhead at last point, direction from second-to-last to last.
-  // `edge.arrowhead === false` mirrors a `null` end decoration
-  // (`ftile/Worm.java:161-168`'s `if (endDecoration != null)` never firing).
+  // Terminal arrowhead, drawn AFTER the full segment loop --
+  // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
+  // sit below the `for` loop that draws every segment (`ftile/Worm.java:
+  // 134-171`), never interleaved with it. Direction is second-to-last point
+  // to last. `edge.arrowhead === false` mirrors a `null` end decoration
+  // (`:161-168`'s `if (endDecoration != null)` never firing).
   const last = pts[pts.length - 1]!;
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
   const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, edgeColor, theme);
 
-  // Emphasized mid-segment arrowhead (`Snake#emphasizeDirection`, D6) --
-  // drawn IN ADDITION to the terminal arrowhead, never instead of it
-  // (`Worm.java:138-183`: the loop's `drawn` flag and the post-loop
-  // `endDecoration` draw are independent).
-  let emphasizeEl = '';
-  if (edge.emphasize !== undefined) {
-    const seg = findEmphasisSegment(pts, edge.emphasize);
-    if (seg !== undefined) {
-      emphasizeEl = arrowTip(seg.mid, { dx: seg.dx, dy: seg.dy }, edgeColor, theme);
-    }
-  }
-
   // D4: an explicit extra arrowhead at a translate shape's own point (see
-  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after `emphasize`,
-  // never instead of the terminal arrowhead.
+  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
+  // decoration; this is a port-specific extension with no `Worm` draw-order
+  // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
+  // and is now interleaved above).
   const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor, theme);
 
   // Optional edge label near midpoint
@@ -258,7 +252,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
   }
 
-  return segments + arrow + emphasizeEl + midArrowEl + labelEl;
+  return segments + arrow + midArrowEl + labelEl;
 }
 
 // ---------------------------------------------------------------------------
