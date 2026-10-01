@@ -84,3 +84,54 @@
   swallow chain by hand for 5 fixtures, and confirmed the fix location
   with a standalone regex test isolating the single variable (strip vs.
   no-strip).
+
+## Observation: the fix landed; one residual has its own distinct mechanism
+- **Context**: Second push-forward extended the write-set to
+  `node-dispatch.ts`/`dispatch-support.ts`. Narrowed the strip
+  (`!line.startsWith(':') && !line.includes(':') && line.endsWith(';')`)
+  to match the Java's actual per-command grammar split -- a bare keyword
+  never has a colon in its own regex (`CommandStart3.java:58-63`'s
+  `";?"`), a `keyword:content;` command pairs colon+`;` as one mandatory
+  unit (`CommandBackward3.java:75-79`, `CommandRepeat3.java:68-73`).
+- **Finding**: Full corpus 46762 -> 45748 (-1014); 16 of 17 fixtures fell
+  or matched. The one remaining riser, `gokagi-91-mise154` (231->246),
+  has ITS OWN mechanism, confirmed by rendered-SVG diff against the
+  oracle: `note left: Note3` immediately after a `backward:` line
+  attaches to the backward activity in the jar (`InstructionRepeat.java
+  :220-228`'s `addNote` override -- once `backward` is set, every
+  subsequent `note()` call in that repeat's own parse scope goes to
+  `backwardNotes`, not the body's regular note list; drawn via
+  `FtileRepeat`'s `getFtileBackward:183-184`). Our port has never
+  modeled this: the note now parses as a REAL node (previously it was
+  swallowed into the corrupted backward label and never existed at all,
+  so this mis-attachment was invisible before this fix), but attaches to
+  whichever body tile now immediately precedes it instead of to
+  `backward`. Porting it needs `ast.ts` (a `notes` field on
+  `ActivityBackward` or equivalent), `list-backward-dispatch.ts`/
+  `node-dispatch.ts` (parse-time note-after-backward association),
+  `tile-layout-backward.ts` (attach the note tile to `backward`'s own
+  tile), and `tile-coordinates.ts` (note positioning, not owned by any
+  write-set granted so far) -- a genuinely separate, cross-cutting
+  feature, not a semicolon-strip issue.
+- **Secondary finding**: `fukika-81-gite897` (recorded `error`, an
+  unrelated-looking "line 9 syntax" refusal) now renders (ws=265): the
+  corrupted backward label had already swallowed the diagram's own
+  `if`/`endif`, so the real `else` that followed landed with no matching
+  `if` and the parser refused. Same root mechanism, different visible
+  symptom. D8: this is an error->baseline promotion candidate, not
+  silently counted; not promoted here (no `oracle/**` writes from this
+  branch).
+- **Tertiary finding (checked per the orchestrator's instruction to
+  audit every other `keyword:content;` command)**: `CommandNote3.java:
+  69-80` has NO semicolon anywhere in its own grammar (colon then `(.*)`
+  to end-of-line) -- a literal trailing `;` in note text was previously
+  silently dropped by the old blanket strip and is now correctly kept
+  (`jageti-56-kume076`, ws unchanged 189->189, confirming no measurable
+  behavioral cost either way for that fixture, just now-correct content).
+  `CommandActivityLong3`/`CommandBackwardLong3` (multiline openers) have
+  no trailing `;` on their own opening line, so the strip's own
+  `endsWith(';')` guard never touched them regardless.
+- **Confidence**: High for all of the above -- gokagi's mechanism
+  verified by diffing our rendered SVG against the committed oracle SVG
+  byte-for-byte (not inferred from the ws delta alone); fukika and
+  jageti confirmed via direct AST/SVG inspection before and after.
