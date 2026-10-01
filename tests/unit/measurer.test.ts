@@ -38,7 +38,8 @@ describe('defaultTheme', () => {
   });
 
   it('has correct noteBackground color', () => {
-    expect(defaultTheme.colors.noteBackground).toBe('#FEFECE');
+    // T3d: plantuml.skin:3,324 root note{BackGroundColor:var(--note-background)}
+    expect(defaultTheme.colors.noteBackground).toBe('#FEFFDD');
   });
 
   it('has correct lifeline color', () => {

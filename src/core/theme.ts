@@ -259,7 +259,7 @@ export const defaultTheme: Theme = {
     text: '#181818',
     arrow: '#181818',
     note: '#FEFECE',
-    noteBackground: '#FEFECE',
+    noteBackground: '#FEFFDD', // T3d: plantuml.skin:3,324 root note{} (light mode; not :678-680's dark-media override)
     lifeline: '#181818',
     activation: '#DDDDDD',
     frame: '#000000', // plantuml.skin:117 (sequenceDiagram.group LineColor)
