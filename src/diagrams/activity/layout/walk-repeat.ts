@@ -390,13 +390,12 @@ function pushRepeatBack(frame: RepeatFrame): void {
 export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
   const [entry, body, condition] = t.children;
 
-  const entryX = x + t.entryOffsetX;
-  const entryY = y + t.entryOffsetY;
-  if (entry.kind === 'gtile-repeat-entry') {
-    pushRepeatEntry(entry, entryX, entryY, myLane, out);
-  } else {
-    walkTile(entry, entryX, entryY, { kindHint: null, lane: myLane }, out);
-  }
+  // `FtileRepeat#drawU` (`FtileRepeat.java:685-692`) draws `repeat` (the
+  // body) FIRST, then `diamond1` (the entry) SECOND, then `diamond2` (the
+  // condition) THIRD -- `getMyChildren` (`:88-90`) returns the same
+  // `[repeat, diamond1, diamond2]` order. The walk below mirrors that;
+  // it is NOT `entry, body, condition` (this file's own prior order,
+  // corrected here -- mission `activity-divergence-drive` T2a).
 
   // Each child sits so its OWN `left` lands under the tile's merged `left`
   // (`FtileRepeat.java:730-765`), never centred by `width / 2` -- except
@@ -406,13 +405,24 @@ export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string 
   const bodyY = y + t.bodyOffsetY;
   walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
 
+  const entryX = x + t.entryOffsetX;
+  const entryY = y + t.entryOffsetY;
+  if (entry.kind === 'gtile-repeat-entry') {
+    pushRepeatEntry(entry, entryX, entryY, myLane, out);
+  } else {
+    walkTile(entry, entryX, entryY, { kindHint: null, lane: myLane }, out);
+  }
+
   const condX = x + t.conditionOffsetX;
   const condY = y + t.conditionOffsetY;
   pushRepeatCondition(condition, condX, condY, myLane, out);
 
-  // D7: every child's own nodes first (entry, body's own walk, condition),
-  // then this tile's own edges -- `In`, the selected `Back`, `Out`, in that
-  // order (`FtileRepeat.java:170-203`).
+  // Every child's own nodes first (body, entry, condition, per `drawU`
+  // above), then this tile's own edges -- `In`, the selected `Back`,
+  // `Out`, in that order (`FtileRepeat.java:170-203`'s `conns` list,
+  // appended after `drawU`'s own three `draw()` calls via
+  // `FtileUtils.addConnection`/`FtileWithConnection#drawU`,
+  // `FtileWithConnection.java:69-74`).
   const frame = buildRepeatFrame({
     t,
     x,
