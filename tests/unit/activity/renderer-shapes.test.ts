@@ -206,10 +206,17 @@ describe('renderEnd', () => {
     expect(Number(l1[2])).toBeCloseTo(53.813, 3);
     expect(Number(l1[3])).toBeCloseTo(66.187, 3);
     expect(Number(l1[4])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[1])).toBeCloseTo(53.813, 3);
-    expect(Number(l2[2])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[3])).toBeCloseTo(66.187, 3);
-    expect(Number(l2[4])).toBeCloseTo(53.813, 3);
+    // The second diagonal's `dy` is negative (`-size2`): the jar's own
+    // compress pass (`UGraphicCompressOnXorY#drawLine`,
+    // `klimt/compress/UGraphicCompressOnXorY.java:142-148`) swaps a
+    // line's endpoints whenever `y1 > y2` before drawing, so the emitted
+    // `x1`/`y1` is the point with the SMALLER y, not the translate
+    // origin (T2f mechanism 2, verified byte-exact against
+    // `fabexi-81-dife869`'s jar SVG).
+    expect(Number(l2[1])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[2])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[3])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[4])).toBeCloseTo(66.187, 3);
   });
 
   it('cross stroke-width is 2.5, independent of the ellipse stroke-width 1.5', () => {

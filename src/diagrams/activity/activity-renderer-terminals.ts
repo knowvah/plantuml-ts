@@ -7,7 +7,7 @@
  */
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { ellipse, line, resolvePaint } from '../../core/svg.js';
+import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, KILL_INNER_RATIO, STOP_INNER_DELTA } from './activity-layout-constants.js';
 import { CIRCLE_END_LINE_THICKNESS, CIRCLE_LINE_THICKNESS } from './activity-style-defaults.js';
 import { actColors } from './activity-renderer-shapes.js';
@@ -94,6 +94,27 @@ export function renderKill(node: ActivityNodeGeo, theme: Theme): string {
 }
 
 /**
+ * Every `<line>` the jar's activity engine emits has `y1 <= y2` --
+ * `ActivityDiagram3.java` wraps the WHOLE diagram's drawing `UGraphic` in
+ * `CompressionXorYBuilder`'s pair of `UGraphicCompressOnXorY` (ON_X then
+ * ON_Y, per the project's own `activity-klimt-compress` mission), and
+ * THAT class's private `drawLine(x1,y1,x2,y2)` (`UGraphicCompressOnXorY
+ * .java:142-148`) swaps the endpoints whenever `y1 > y2` before drawing:
+ * `if (y1 > y2) { drawLine(x2, y2, x1, y1); return; }`. A `ULine` with a
+ * NEGATIVE `dy` (e.g. `FtileCircleEndCross`'s second diagonal, `size2,
+ * -size2`) therefore serialises with its start/end swapped relative to
+ * the raw `UTranslate`+`ULine` arithmetic (T2f mechanism 2, verified
+ * against `fabexi-81-dife869`'s jar SVG byte-for-byte: the two points are
+ * identical, only the x1/y1 vs x2/y2 assignment is transposed). This
+ * compress wrapper lives under `core/klimt/**`, which T2f may not edit
+ * (D7) -- the activity side normalises the one line it draws with a
+ * negative `dy` instead of depending on a ported compress pass.
+ */
+function orderedLine(x1: number, y1: number, x2: number, y2: number, style: LineStyle): string {
+  return y1 > y2 ? line(x2, y2, x1, y1, style) : line(x1, y1, x2, y2, style);
+}
+
+/**
  * Renders an `end` node: an unfilled, stroked circle plus an inset X --
  * `FtileCircleEndCross#drawU` (`:98-117`), which draws itself (no
  * delegate, unlike `stop`). Outer ellipse: `SIZE = 20` (`:61`), stroked at
@@ -103,7 +124,8 @@ export function renderKill(node: ActivityNodeGeo, theme: Theme): string {
  * sqrt(2)`, `delta = (SIZE - size2) / 2` -- two diagonals inset `delta`
  * from the tile's own bounding box, NOT tip-to-border lines through the
  * centre at the outer radius (the old `r * SQRT1_2` construction was
- * unsourced and is deleted).
+ * unsourced and is deleted). The second diagonal's `dy` is negative
+ * (`-size2`), so it goes through {@link orderedLine} (T2f mechanism 2).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleEndCross.java:61,98-121
  */
 export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
@@ -114,19 +136,14 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
   const size2 = (size - END_CROSS_THICKNESS) / Math.SQRT2;
   const delta = (size - size2) / 2;
   const endFill = actColors(theme).endFill;
+  const crossStyle = { stroke: endFill, strokeWidth: END_CROSS_THICKNESS };
   return (
     ellipse(cx, cy, r, r, {
       fill: 'none',
       stroke: resolvePaint(endFill).value,
       'stroke-width': CIRCLE_END_LINE_THICKNESS,
     }) +
-    line(node.x + delta, node.y + delta, node.x + delta + size2, node.y + delta + size2, {
-      stroke: endFill,
-      strokeWidth: END_CROSS_THICKNESS,
-    }) +
-    line(node.x + delta, node.y + size - delta, node.x + delta + size2, node.y + size - delta - size2, {
-      stroke: endFill,
-      strokeWidth: END_CROSS_THICKNESS,
-    })
+    orderedLine(node.x + delta, node.y + delta, node.x + delta + size2, node.y + delta + size2, crossStyle) +
+    orderedLine(node.x + delta, node.y + size - delta, node.x + delta + size2, node.y + size - delta - size2, crossStyle)
   );
 }
