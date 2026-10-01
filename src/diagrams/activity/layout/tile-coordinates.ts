@@ -20,7 +20,7 @@ import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
-import { dedupeAdjacentPoints, mergeTouchingEdges } from './edge-point-dedupe.js';
+import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
 import { walkRepeat } from './walk-repeat.js';
@@ -121,47 +121,6 @@ interface TopDownSiblingLink {
   readonly myLane: string | undefined;
 }
 
-/**
- * `FtileWithNoteOpale.java:76`: `private final double suppSpace = 20;` --
- * the gap between the note balloon's near edge and the spike's outer tip,
- * the same constant on both the `LEFT` and `RIGHT` branches of
- * `FtileWithNoteOpale#drawU` (`FtileWithNoteOpale.java:177-191`).
- */
-const NOTE_SPIKE_SUPPLEMENTARY_SPACE = 20;
-
-/**
- * `FtileWithNoteOpale#drawU`'s `pp2` (`FtileWithNoteOpale.java:179-188`):
- * the spike's outer tip, `suppSpace` past the note's near edge, vertically
- * centred on the note -- `Opale#setOpale`'s `pp1`/`pp2` pair, of which only
- * the outer point (`pp2`) is the tip `renderNote`'s Opale branch needs.
- * `pp1`/`pp2` are local to the note's own bounding box in the jar; `x, y`
- * here are already the note's FINAL absolute origin (every translate on
- * the walk down to this tile has already been composed), so the local
- * offset is simply added on top.
- */
-function noteSpikeTip(x: number, y: number, t: GtileNote): GPoint {
-  const tipX = t.side === 'left' ? x + t.width + NOTE_SPIKE_SUPPLEMENTARY_SPACE : x - NOTE_SPIKE_SUPPLEMENTARY_SPACE;
-  return { x: tipX, y: y + t.height / 2 };
-}
-
-function pushNoteNode(out: Out, t: GtileNote, x: number, y: number, myLane: string | undefined): void {
-  pushNode(
-    out,
-    {
-      id: out.nextId('note'),
-      kind: 'note',
-      x,
-      y,
-      width: t.width,
-      height: t.height,
-      label: t.text,
-      notePosition: t.side,
-      spikeTip: noteSpikeTip(x, y, t),
-    },
-    myLane,
-  );
-}
-
 function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
   const { prevChild, prev, child, next, myLane } = link;
   if (!prevChild.hasPointOut()) return;
@@ -207,9 +166,24 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
     }
 
-    case 'gtile-note':
-      pushNoteNode(out, tile as unknown as GtileNote, x, y, myLane);
+    case 'gtile-note': {
+      const t = tile as unknown as GtileNote;
+      pushNode(
+        out,
+        {
+          id: out.nextId('note'),
+          kind: 'note',
+          x,
+          y,
+          width: t.width,
+          height: t.height,
+          label: t.text,
+          notePosition: t.side,
+        },
+        myLane,
+      );
       return;
+    }
 
     case 'gtile-diamond': {
       const t = tile as unknown as GtileDiamond;
@@ -399,11 +373,5 @@ export function assignCoordinates(
   bounder: StringBounder,
   theme: Theme,
 ): ActivityGeometry {
-  const geometry = assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
-  // `UGraphicForSnake#flushUg` (`svek/UGraphicForSnake.java:151-157`):
-  // the jar never draws two edges that touch end-to-start as separate
-  // polylines -- see `mergeTouchingEdges`'s own doc. Applied once here, on
-  // the FINAL (post-swimlane, post-compress, post-draw-order) edge list,
-  // since that is the draw-order state the jar's own merge intercepts.
-  return { ...geometry, edges: mergeTouchingEdges(geometry.edges) };
+  return assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
 }
