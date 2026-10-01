@@ -44,3 +44,13 @@ gtile-top-down.ts`, `src/diagrams/activity/node-dispatch.ts`,
 Quality bar: targeted vitest + typecheck + eslint. Boundaries: layout walkers
 (T2a) and renderer files (T2c) read-only. Observability: N/A. Rollback:
 Reversible.
+
+
+## Assigned at the b1b close (2026-10-01, journal row 21) — supersedes the write-set above
+
+Rows by named next mechanism:
+- **kill/detach as mutation (InstructionSimple.kill)**: `piruxe-91-zivi081`, `simuti-16-lece058`
+
+Source write-set: `src/diagrams/activity/layout/tile-layout.ts`, `src/diagrams/activity/tiles/{gtile-top-down,gtile-kill}.ts`, `src/diagrams/activity/{node-dispatch,dispatch-support}.ts`, plus the tests exercising those files and new tests. Rules: see `overview.md` (no Serena edits, no baseline writes, risers shown from the diff).
+
+The note-sibling-links mechanism has no cohort row at b1b — out of scope this round.

@@ -41,3 +41,20 @@ Quality bar: targeted vitest + typecheck + eslint. Boundaries: shapes.ts
 (T2d may need tiles only — but shapes.ts is NOT in any batch-2 write-set;
 re-slot if needed), layout files read-only. Observability: N/A. Rollback:
 Reversible.
+
+
+## Assigned at the b1b close (2026-10-01, journal row 21) — supersedes the write-set above
+
+Rows by named next mechanism:
+- **arrowhead fill/stroke from arrow colour skinparam**: `farexi-86-xanu521`, `zanudo-86-seco241`, `fofele-65-lozo631`, `naroji-40-nuke022`
+- **arrow font colour on edge label text**: `suzuci-53-biku826`
+- **arrow thickness on line stroke-width**: `fonebe-54-save009`
+- **svg root preserveAspectRatio option**: `setecu-78-cuko533`
+- **activityDiamond FontSize style on diamond label**: `dulezi-77-sana210`
+- **creole [[url{tip}label]] link label in action text**: `laxibe-66-teme800`, `zamagu-75-vape137`, `gaxezi-48-zesa921`, `nisexe-68-vabu320`, `pekuxe-00-bovi270`
+- **creole table / %n() / ____ separator in action text**: `activity-creole-table`, `niletu-83-lego826`, `fabule-54-pili300`
+- **multiline condition/branch label: one <text> per line**: `bazuma-86-metu353`
+
+Source write-set: `src/diagrams/activity/{renderer,activity-renderer-text,activity-renderer-bars,activity-style-defaults,activity-text-style,activity-text-placement,arrows-regular,parser}.ts` (`activity-renderer-swimlanes.ts` moved to T2e), plus the tests exercising those files and new tests. Rules: see `overview.md` (no Serena edits, no baseline writes, risers shown from the diff).
+
+The emphasize-tip order and `line/@stroke-width 2.5` families have no cohort row at b1b — only if an assigned row's dump lands on them.

@@ -39,3 +39,13 @@ Repeat.java:110-130`, `FtileFactoryDelegatorWhile.java:95-116`,
 Quality bar: targeted vitest + typecheck + eslint. Boundaries: `gtile-top-
 down.ts` is T2b's; `tile-coordinates.ts`/`walk-repeat.ts` are T2a's; renderer
 files are T2c's. Observability: N/A. Rollback: Reversible.
+
+
+## Assigned at the b1b close (2026-10-01, journal row 21) — supersedes the write-set above
+
+Rows by named next mechanism:
+- **if-with-links geometry (-96 y / arrowhead line-vs-polygon)**: `gakelo-29-neno787`, `vozane-63-kepe177`, `fonabu-93-xama593`, `ziboco-73-kazu841`, `livigo-47-negi605`, `nusajo-97-bemo713`, `zukori-83-fiso705`, `nimusa-16-tiku252`
+- **split tile geometry with long branch**: `fomapa-90-bore251`, `xenofo-81-rame803`, `zizaki-04-guvi945`
+- **end inside an if branch (tile/out-point)**: `becaje-01-vaji284`, `jecoxu-17-zama003`, `bocaga-53-nale241`
+
+Source write-set: `src/diagrams/activity/tiles/gtile-*.ts` except `gtile-{top-down,kill,note,partition}`, `src/diagrams/activity/layout/{walk-if-with-links,walk-while-branch,walk-fork-branches}.ts`, `src/diagrams/activity/{activity-layout-constants,if-dispatch,parallel-dispatch}.ts`, plus the tests exercising those files and new tests. Rules: see `overview.md` (no Serena edits, no baseline writes, risers shown from the diff).

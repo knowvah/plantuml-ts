@@ -826,10 +826,13 @@ describe('routing conformance — jar-error classification', () => {
     // activity golden-ratchet pins, each the byte-identical twin of its
     // dot-cache row (all `agree`, ACTIVITY/ACTIVITY). Derivation:
     // 5134 + 909 + 105 = 6148.
-    expect(pinnedAgree.length).toBe(5134);
+    //
+    // 5134 -> 5138 / 6148 -> 6152 at add1/close-b1b (2026-10-01): 4 more
+    // svg-activity clone rows, same shape. Derivation: 5138 + 909 + 105 = 6152.
+    expect(pinnedAgree.length).toBe(5138);
     expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6148);
+    expect(manifest.fixtures.length).toBe(6152);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

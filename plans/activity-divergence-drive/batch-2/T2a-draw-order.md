@@ -40,3 +40,12 @@ T1.md` (Q3/Q4); `layout/edge-draw-order.ts` (whole, 124); `tile-coordinates.ts
 
 Quality bar: targeted vitest + typecheck + eslint. Boundaries: tiles/,
 renderer files read-only. Observability: N/A. Rollback: Reversible.
+
+
+## Assigned at the b1b close (2026-10-01, journal row 21) — supersedes the write-set above
+
+Rows by named next mechanism:
+- **if branch-label / connector draw order (FtileIfLongHorizontal/FtileIfDown conns)**: `tamaxe-36-mono574`, `cagoze-40-tete366`, `lacuci-13-nogo718`, `pedoco-30-mose082`, `rerovo-62-nazo755`, `rosizo-69-mera514`, `carapo-31-bisi880`, `nonusu-50-nute147`, `novata-87-muti352`, `secepo-00-febi326`, `vaxuta-95-cico162`, `vimako-25-mega336`
+- **repeat connector draw order (FtileRepeat.java:172-204)**: `debofa-60-mude568`, `guceja-66-tola192`, `biguku-39-voxu233`, `bozuro-33-celo170`
+
+Source write-set: `src/diagrams/activity/layout/{tile-coordinates,walk-repeat,edge-draw-order,walk-if-down,walk-if-long-horizontal,diamond-labels,conditional-builder}.ts`, plus the tests exercising those files and new tests. Rules: see `overview.md` (no Serena edits, no baseline writes, risers shown from the diff).

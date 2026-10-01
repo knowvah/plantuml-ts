@@ -1,0 +1,14 @@
+@startuml
+start
+:Initialisation;
+:Next;
+:other;
+:right1;
+:right2;
+:right3;
+:right4;
+:right5;
+:this is
+directed to up;
+stop
+@enduml

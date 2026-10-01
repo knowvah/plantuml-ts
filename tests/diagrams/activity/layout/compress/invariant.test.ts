@@ -357,8 +357,9 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // both pairs are `hard=false` (`occupiesOn(a, 'x')` is false on the
     // `empty` shape in both), so this is the pinned non-hard class, not a
     // hard violation.
-    'lukoxa-16-cecu095 [10,14] empty×centeredText',
-    'lukoxa-16-cecu095 [11,14] empty×centeredText',
+    // add1-T1c (b1b close): both lukoxa pairs are no longer produced -- the
+    // stop tile shrank 28 -> 22 (`FtileCircleStop.java:55,93`), so the
+    // `empty` ignoreX rects no longer project onto the title's y-span.
   ].sort();
 
   /**
