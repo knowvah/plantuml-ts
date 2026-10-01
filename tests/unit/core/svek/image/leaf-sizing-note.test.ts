@@ -213,11 +213,13 @@ function render(style: string): string {
  *  a `<path>` whose `M x,y` is the box's top-left corner and whose points
  *  span the box (`Opale#getPolygonNormal`), so the box is the outline's
  *  extent minus the connector tip. A free-standing note still draws
- *  `drawFallbackBox`'s `<rect>`; both are the only `fill="#FEFECE"` shapes. */
+ *  `drawFallbackBox`'s `<rect>`; both are the only `fill="#FEFFDD"` shapes
+ *  (T3d: `theme.colors.noteBackground` corrected from the unsourced
+ *  `#FEFECE` to `plantuml.skin:3,324`'s root `note{}` default). */
 function noteRect(svg: string): { x: number; y: number; width: number; height: number } {
-  const r = /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#FEFECE"/.exec(svg);
+  const r = /<rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)" fill="#FEFFDD"/.exec(svg);
   if (r !== null) return { x: Number(r[1]), y: Number(r[2]), width: Number(r[3]), height: Number(r[4]) };
-  const o = /<path d="(M[^"]*)"[^>]*fill="#FEFECE"/.exec(svg);
+  const o = /<path d="(M[^"]*)"[^>]*fill="#FEFFDD"/.exec(svg);
   if (o === null) throw new Error('no note rect or opale outline in SVG');
   // `M x0,y0 L x0,y1 ... L x1,y1 ... L x1,y0+fold L x1-fold,y0 L x0,y0`: the
   // box is the outline's own corners; the connector tip (`pp1`/`pp2`, the
