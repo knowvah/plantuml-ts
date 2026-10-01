@@ -179,15 +179,43 @@ A fixture may be added to `ratchet.json` only when:
 (There is no second, DOT-equal condition -- see "Why there is no AC3"
 above.)
 
-To add a slug:
+## Pinned (golden ratchet)
 
-1. Confirm the condition above, e.g. via
-   `npx vitest run tests/oracle/svg-conformance/activity.diff-baseline.ratchet.test.ts`
-   and check for a `[PROMOTION READY]` log line naming the slug.
-2. Copy `test-results/dot-cache/activity/<slug>/in.puml` and `in.svg` into
-   `oracle/goldens/svg-activity/<slug>/` (renaming `in.svg` to
-   `golden.svg`).
-3. Append `{ slug, addedAt, source: "dot-cache" }` to `ratchet.json`.
+`tests/oracle/svg-conformance/activity.golden.ratchet.test.ts` (add1-T0b,
+D5 of `plans/activity-divergence-drive/decisions.md`) is the byte-freeze
+gate `ratchet.json` feeds: it renders every pinned slug's committed
+`in.puml` and asserts the result stays zero-diff against its own committed
+`golden.svg`, forever. It mirrors `mindmap.golden.ratchet.test.ts`
+procedurally -- no DOT clause, no `unknown` tree (activity has neither, see
+"Why there is no AC3" above and the `README`'s own population note).
+
+**The Add rule above is now satisfied through a tool, not by hand.** To
+pin a slug:
+
+```
+npx jiti plans/activity-divergence-drive/tools/pin-goldens.mts <source-tag> <slug...>
+```
+
+Per slug, `pin-goldens.mts` (its own file doc comment has the full
+contract):
+
+1. re-renders `test-results/dot-cache/activity/<slug>/in.puml` through the
+   EXACT seam the golden ratchet gate uses and compares it against the
+   cached `in.svg` with the SAME comparator -- refusing (writing nothing)
+   if the render is not zero-diff;
+2. copies `in.svg`/`in.puml` into `oracle/goldens/svg-activity/<slug>/
+   {golden.svg,in.puml}`, re-reading both to prove byte equality;
+3. appends `{ slug, addedAt, source }` to `ratchet.json` (never re-sorted);
+4. flips the slug's row in `diff-baseline.json` to `status: "pinned"`,
+   leaving its `weightedScore`/`diffCount` exactly as last measured --
+   `scripts/repin-activity-baselines.ts` and `scripts/repin-activity-
+   promote.ts` both skip a `"pinned"` row by the same condition that
+   already skips `"error"`/`"jar-error"` rows (see each tool's own file
+   doc comment), and `activity.diff-baseline.ratchet.test.ts` excludes it
+   from `baselineFixtures` the identical way.
+
+Pinning is **orchestrator-only, at batch closes** (D5, D10) -- never per
+task.
 
 ## Remove rule
 
