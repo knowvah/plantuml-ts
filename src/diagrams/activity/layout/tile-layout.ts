@@ -30,7 +30,7 @@ import { GtileSwitch } from '../tiles/gtile-switch.js';
 import { GtileGroup } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
-import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
+import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 
@@ -284,7 +284,14 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   const bounder = makeBounder(measurer, theme);
   const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
   const root = new GtileTopDown(tiles, bounder, theme);
-  return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  // D2 (`plans/activity-divergence-drive/decisions.md`): the root Ftile's
+  // own local coordinates start at the true origin -- upstream never bakes
+  // a margin into the Ftile tree itself (`InstructionList#createFtile`
+  // returns the bare root tile, no wrapping translate). The canvas's own
+  // origin/size is derived AFTER layout, dynamically, from the placed
+  // geometry's own ink extent (`assign-coordinates-full.ts
+  // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
+  return assignCoordinates(root, ast, 0, 0, bounder, theme);
 }
 
 type SimpleLeafKind = 'start' | 'stop' | 'end' | 'kill' | 'detach' | 'break' | 'action' | 'note';

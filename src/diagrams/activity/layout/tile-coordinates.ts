@@ -33,8 +33,6 @@ import type { Reservation } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
 
-export const LAYOUT_MARGIN = 12;
-
 /**
  * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
  * `while-header`, `repeat-cond`) for `ActivityNodeGeo.kind`; `lane` is the

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { buildIf } from '../../../../src/diagrams/activity/layout/conditional-builder.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
-import { LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST, ActivityIf } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -13,6 +12,10 @@ const measurer = new FormulaMeasurer();
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 const emptyAst: ActivityDiagramAST = { nodes: [], swimlanes: [] };
 const bounder: StringBounder = { getDimension: (t: string) => ({ width: t.length * 7, height: 14 }) };
+// T1a (D2): see `edge-draw-order.test.ts`'s own identical comment -- the
+// dynamic canvas-origin shift makes this value's absolute effect
+// unobservable; kept only to catch a hardcoded-zero regression.
+const LAYOUT_MARGIN = 12;
 
 describe('layoutActivity — down: plain/swap merge case, no optionalStop', () => {
   const ast: ActivityDiagramAST = {

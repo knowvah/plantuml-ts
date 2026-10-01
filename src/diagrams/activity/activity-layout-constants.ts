@@ -56,3 +56,52 @@ export const SPACE_AROUND_BLACK_BAR = 20;
 
 export const DIAMOND_MIN = 20;
 export const DIAMOND_LABEL_PAD = 10;
+
+// ---------------------------------------------------------------------------
+// Canvas origin (T1a, D2) -- `Recentred` + the document margin + the SVG
+// writer's own ceiling. Replaces the flat `LAYOUT_MARGIN = 12` that used to
+// live in `layout/tile-coordinates.ts` (memory `activity-canvas-margin-
+// premise-was-false`: the 12 was measured off a golden, never read from the
+// Java). See `assign-coordinates-full.ts#computeCanvasOrigin` for the
+// algorithm these feed.
+// ---------------------------------------------------------------------------
+
+/**
+ * The near-corner shift every node/edge/swimlane receives, regardless of
+ * shape: upstream's symmetric document margin (`same(10)`) PLUS `Recentred`'s
+ * own fixed inner pad. `Recentred#drawU` translates its child by
+ * `(-minMax.getMinX() + 5, -minMax.getMinY() + 5)` BEFORE the document
+ * margin's own `(10, 10)` translate wraps it
+ * (`TextBlockExporter#exportTo`'s `ug.apply(new UTranslate(margin.getLeft(),
+ * margin.getTop()))`) -- the two compose to `10 + 5 = 15` on the near side.
+ * @see net/sourceforge/plantuml/TitledDiagram.java:275 -- `getDefaultMargins()`
+ *   returns `ClockwiseTopRightBottomLeft.same(10)`; `ActivityDiagram3`
+ *   declares no override.
+ * @see net/sourceforge/plantuml/core/TextBlockExporter.java:172-173,199-202,510-516
+ * @see net/sourceforge/plantuml/activitydiagram3/Recentred.java:47-59
+ */
+export const CANVAS_ORIGIN_SHIFT = 15;
+
+/**
+ * The constant term in `totalDimension = (M - m) + CANVAS_PADDING_TOTAL`,
+ * where `M`/`m` are the ink's own (fudged) max/min per axis
+ * (`computeCanvasOrigin`): `Recentred#getMinMax`'s `enlarge(15, 15)` grows
+ * the FAR corner by 15 (leaving the near corner, `m`, untouched), then the
+ * document margin's `same(10)` adds 10 on BOTH sides
+ * (`TextBlockExporter#calculateFinalDimension`) -- `15 + 10 + 10 = 35`.
+ * @see net/sourceforge/plantuml/activitydiagram3/Recentred.java:56 -- `enlarge(15, 15)`
+ * @see net/sourceforge/plantuml/core/TextBlockExporter.java:199-202
+ */
+export const CANVAS_PADDING_TOTAL = 35;
+
+/**
+ * `SvgGraphics#ensureVisible`'s own `(int)(x + 1)` cast: the FIRST point it
+ * is asked to keep visible is `option.getMinDim()` -- i.e. the floating-point
+ * dimension `TextBlockExporter#calculateFinalDimension` just computed -- so
+ * the emitted SVG `width`/`height` attribute is always one pixel larger than
+ * that computed dimension (confirmed against the oracle: `kodiji-34-mofe202`,
+ * a lone `start` circle, measures a 54×54 ink+margin box by the formula above
+ * but renders `width="55px" height="55px"`).
+ * @see net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java:129-136,142-143
+ */
+export const SVG_CANVAS_CEIL = 1;
