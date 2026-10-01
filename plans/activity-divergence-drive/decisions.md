@@ -36,6 +36,17 @@ stroke from `circle { stop { LineColor } }`); `FtileCircleEndCross` (r 10, cross
 ratio and is deleted. Tile size in `tiles/gtile-spot.ts` follows the same
 constants.
 
+**Amended 2026-09-30 (journal row 18, T1c stop-3 halt):** `gtile-spot.ts`
+sizes the AST `spot` node, not stop/end. Stop and end tiles are
+`tiles/gtile-stop.ts` and `tiles/gtile-end.ts`, both reading the single
+shared `STOP_OUTER_RADIUS = 14` (`activity-layout-constants.ts:13`, also read
+by `gtile-kill.ts`). The Java splits them: stop `SIZE = 22`
+(`FtileCircleStop.java:55,93`; drawn by `svek/image/CircleEnd.java:55-103`,
+inner `delta = 5` → r 6), end `SIZE = 20` (`FtileCircleEndCross.java:61,121`;
+cross `thickness = 2.5`, `size2 = (SIZE-thickness)/√2`, `:110-115`). The
+tile files and the constants module carry the fix; `gtile-kill.ts` keeps its
+current constant until T2b's `detach`/`kill` mechanism owns it.
+
 ## D4: `skinparam style strictuml` selects `ArrowsTriangle`
 `SkinParam.java:1306-1309`: `strictUmlStyle() ? new ArrowsTriangle() : new
 ArrowsRegular()`. `Theme.strictUml` already exists (`core/theme.ts:113`,
