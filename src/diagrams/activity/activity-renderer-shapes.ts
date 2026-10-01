@@ -8,7 +8,7 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, diamond, path, polygon } from '../../core/svg.js';
+import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
 import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
@@ -22,7 +22,7 @@ import {
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
-import { renderIfMerge, renderIfLabel } from './activity-renderer-if-shapes.js';
+import { renderIfMerge, renderIfLabel, renderDiamond } from './activity-renderer-if-shapes.js';
 import {
   renderSignalLabel,
   renderChevronLeft,
@@ -33,7 +33,6 @@ import { renderStart, renderStop, renderEnd } from './activity-renderer-terminal
 import {
   type ActivityTextOpts,
   activityTextLineX,
-  centeredLineX,
   measureLineWidth,
   measureMonoLineWidth,
 } from './activity-text-placement.js';
@@ -46,6 +45,12 @@ export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParalle
 // BACK from this file (same circular-but-safe shape as the signal-shapes
 // re-export above) -- existing importers of these four names are unchanged.
 export { renderStart, renderStop, renderEnd };
+// Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
+// `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
+// method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
+// BACK from this file (same circular-but-safe shape as the two re-exports
+// above) -- existing importers of this name are unchanged.
+export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -241,33 +246,6 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
       ? renderMultilineText(lines, cx, cy, theme, opts)
       : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
   return box + labelEl;
-}
-
-export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const size = node.width / 2;
-  const c = actColors(theme);
-  const shape = diamond(cx, cy, size, {
-    fill: c.diamondFill,
-    stroke: c.diamondBorder,
-  });
-  if (node.label === undefined || node.label === '') return shape;
-  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
-  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
-  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
-  // dimLabel.width) / 2` in this node's own frame.
-  const fontSize = activityFontSize(theme, 'diamond');
-  const lineWidth = measureLineWidth(theme, fontSize, node.label);
-  // D1: no `dominant-baseline` (the driver emits none, and no cached jar
-  // SVG carries one) -- the real baseline is the same N=1 reduction of
-  // `centeredFirstBaselineY` `renderHexagon`'s single-line branch uses.
-  const label = drawActivityText(centeredLineX(cx, lineWidth), centeredFirstBaselineY(cy, fontSize, 1), node.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fill: activityFontColor(theme, 'diamond'),
-  });
-  return shape + label;
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
