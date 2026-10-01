@@ -169,14 +169,19 @@ describe('renderActivity — fork-bar node', () => {
   // shortened by `svg-format.ts#shortenColor` to `#555` on emission, NOT
   // `theme.colors.border` (`#181818`, the jar's own outline colour;
   // apc-T3/D4). Was pinned to the wrong colour before this task.
-  it('fork bar fill is the resolved activityBar colour (#555), rounded, no stroke', () => {
+  //
+  // T3a (garuga-34-debe901): `FtileBlackBlock#drawU`'s `ug.apply(colorBar)
+  // .apply(colorBar.bg()).draw(rect)` (`FtileBlackBlock.java:110`) strokes
+  // AND fills in the SAME resolved colour -- stroke is never absent.
+  it('fork bar fill is the resolved activityBar colour (#555), rounded, stroked in the same colour', () => {
     const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 6 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     expect(result).toContain('fill="#555"');
     expect(result).toContain('rx="2.5"');
     expect(result).toContain('ry="2.5"');
-    expect(result).not.toContain('stroke=');
+    expect(result).toContain('stroke="#555"');
+    expect(result).toContain('stroke-width="1"');
   });
 });
 
