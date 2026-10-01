@@ -249,6 +249,23 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     expect(svg).not.toContain(`font-size="${theme.fontSize - 2}"`);
   });
 
+  it('closes the rhombus (5-point polygon, first point repeated) with stroke-width 0.5 and the shared miter join (FtileDiamond.java:89, Hexagon.java:48-55)', () => {
+    // `Hexagon.asPolygon(shadowing)` -- `FtileDiamond#drawU`'s shape for the
+    // repeat-entry node AND the label-less `if-split`/`while-header`
+    // diamond -- `addPoint`s the first corner again as the LAST point
+    // (`Hexagon.java:51,55`); `UPolygon` does not close itself on draw, and
+    // the shared `polygon()` emitter adds `stroke-linejoin:miter;
+    // stroke-miterlimit:10` unconditionally, matching every other closed
+    // activity polygon (`SvgGraphics.java:658`).
+    const svg = renderDiamond(makeNode({ kind: 'diamond', width: 24, height: 24 }), theme);
+    const points = /<polygon points="([^"]+)"/.exec(svg)?.[1]?.split(',') ?? [];
+    expect(points.length).toBe(10); // 5 points x,y pairs
+    expect([points[0], points[1]]).toEqual([points[8], points[9]]);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).toContain('stroke-linejoin="miter"');
+    expect(svg).toContain('stroke-miterlimit="10"');
+  });
+
   it('a note draws font-size 13 and stroke-width 0.5', () => {
     // The ROOT note block, plantuml.skin:323 and :325.
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);

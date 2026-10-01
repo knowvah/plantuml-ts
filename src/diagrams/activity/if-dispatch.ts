@@ -41,6 +41,55 @@ export function stripTrailingSemi(raw: string): string {
   return !raw.startsWith(':') && raw.endsWith(';') ? raw.slice(0, -1).trimEnd() : raw;
 }
 
+/**
+ * `\n`/`\t`/`\\` escapes inside a branch label's raw text, mirroring
+ * `Display#getWithNewlines`'s own backslash pass (`klimt/creole/Display
+ * .java:287-313`): `\n` ends the current line (joined back with a REAL
+ * newline here, since `renderIfLabel`'s `label.split('\n')` -- a literal
+ * newline character -- is what turns one line into many), `\t` appends a
+ * literal tab, `\\` appends a literal backslash, and any OTHER character
+ * after a `\` is kept verbatim (both characters) -- upstream's own
+ * trailing `else { current.append(c); current.append(c2); }`
+ * (`:311-313`), not a silent drop (`getWithNewlines3`'s shorter sibling
+ * DOES drop it, but that function is not the one any label here reaches).
+ * Before this (`bazuma-86-metu353`), an `else (...\n...)` label's literal
+ * two-character `\`+`n` reached `renderIfLabel` unconverted, so its
+ * `.split('\n')` (a real newline) never split it into multiple `<text>`
+ * lines and `gtile-diamond-inside.ts`'s own `measureLabel` summed every
+ * character's width (including the literal `\`/`n` glyphs) as ONE line,
+ * reserving neither the right width nor the right height in layout.
+ * `\r`/`\l` (`:291-296`, upstream's own right/left natural-alignment
+ * escapes) are a documented gap: no branch-label fixture in this task's
+ * cohort uses either, and porting them means threading a new per-label
+ * alignment override through `ActivityIf`/`ActivityElseIf` and
+ * `renderIfLabel` -- a separate mechanism from "multiline branch label",
+ * left for a fixture that actually needs it.
+ */
+function unescapeLabelNewlines(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]!;
+    if (c === '\\' && i < text.length - 1) {
+      const c2 = text[i + 1]!;
+      i++;
+      if (c2 === 'n') out += '\n';
+      else if (c2 === 't') out += '\t';
+      else if (c2 === '\\') out += '\\';
+      else out += c + c2;
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
+/** {@link unescapeLabelNewlines} applied only when the captured group
+ *  matched -- every call site below immediately follows an optional
+ *  regex-group `.trim()`. */
+function unescapeLabel(text: string | undefined): string | undefined {
+  return text === undefined ? text : unescapeLabelNewlines(text);
+}
+
 interface ElseifStep {
   cursor: number;
   branch: ActivityElseIf;
@@ -54,7 +103,7 @@ function consumeElseifClause(
   ifInnerStops: StopKeywords,
 ): ElseifStep | ParseRefusal {
   const elseifMatch = RE_ELSEIF.exec(clauseLine)!;
-  const eiLabel = elseifMatch[2]?.trim();
+  const eiLabel = unescapeLabel(elseifMatch[2]?.trim());
   const eiResult = parseNodes(ctx, cursor + 1, ifInnerStops);
   if (isRefusal(eiResult)) return eiResult;
   return {
@@ -123,13 +172,13 @@ function classifyClauseLine(ctx: ParseContext, cursor: number, ifInnerStops: Sto
   // `CommandElseLegacy1` (a distinct, separately-registered command).
   const legacyMatch = RE_ELSE_LEGACY.exec(clauseLine);
   if (legacyMatch !== null) {
-    const step = consumeElseClause(ctx, cursor, legacyMatch[1]!.trim());
+    const step = consumeElseClause(ctx, cursor, unescapeLabel(legacyMatch[1]!.trim()));
     if (isRefusal(step)) return step;
     return { kind: 'else', cursor: step.cursor, branch: step.branch, label: step.label };
   }
 
   if (RE_ELSE.test(clauseLine)) {
-    const step = consumeElseClause(ctx, cursor, RE_ELSE.exec(clauseLine)![1]?.trim());
+    const step = consumeElseClause(ctx, cursor, unescapeLabel(RE_ELSE.exec(clauseLine)![1]?.trim()));
     if (isRefusal(step)) return step;
     return { kind: 'else', cursor: step.cursor, branch: step.branch, label: step.label };
   }
@@ -201,11 +250,11 @@ interface IfHeader {
  */
 function matchIfHeader(line: string): IfHeader | null {
   const if4 = RE_IF4.exec(line);
-  if (if4 !== null) return { condition: if4[1]!.trim(), thenLabel: if4[2]?.trim() };
+  if (if4 !== null) return { condition: if4[1]!.trim(), thenLabel: unescapeLabel(if4[2]?.trim()) };
   const if2 = RE_IF.exec(line);
-  if (if2 !== null) return { condition: if2[1]!.trim(), thenLabel: if2[2]?.trim() };
+  if (if2 !== null) return { condition: if2[1]!.trim(), thenLabel: unescapeLabel(if2[2]?.trim()) };
   const legacy = RE_IF_LEGACY.exec(line);
-  if (legacy !== null) return { condition: legacy[1]!.trim(), thenLabel: legacy[2]!.trim() };
+  if (legacy !== null) return { condition: legacy[1]!.trim(), thenLabel: unescapeLabel(legacy[2]!.trim()) };
   return null;
 }
 

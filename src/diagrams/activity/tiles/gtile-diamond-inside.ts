@@ -26,13 +26,32 @@ interface LabelDim {
 /**
  * `TextBlockUtils.empty(0, 0)` for an unset label -- measured as a literal
  * 0x0 box, never handed to the bounder (an empty-string query on a real
- * bounder can still report a nonzero line height).
+ * bounder can still report a nonzero line height). A multi-line label
+ * (real `\n`s, already unescaped by `if-dispatch.ts#unescapeLabelNewlines`
+ * before this constructor ever sees them -- D5, `bazuma-86-metu353`) is
+ * measured ONE LINE AT A TIME and folded to width=MAX, height=SUM, instead
+ * of a single `getDimension` call on the whole string (which summed every
+ * character's width on ONE reported line, including the two now-unescaped
+ * `\`/`n` glyphs, and never reserved room for the extra lines below).
+ * `renderIfLabel`'s own `textLines` draw pass already advances by exactly
+ * `fontSize` per line (`ASCENT_FRACTION`, `activity-renderer-shapes.ts`);
+ * summing each line's OWN reported height (every line here is `fontSize`
+ * per `measure`'s own `height: font.size`, `core/measurer.ts:190`)
+ * reproduces that same N*fontSize total without a second hard-coded
+ * constant. Jar-verified on `bazuma-86-metu353`'s 6-line else label: its
+ * `<text>` elements sit 11.0 apart (== `fontSize`), one `y` step per line.
  */
 function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): LabelDim {
   const t = text ?? '';
   if (t === '') return { text: t, width: 0, height: 0 };
-  const dim = bounder.getDimension(t, fontSize);
-  return { text: t, width: dim.width, height: dim.height };
+  let width = 0;
+  let height = 0;
+  for (const line of t.split('\n')) {
+    const dim = bounder.getDimension(line, fontSize);
+    if (dim.width > width) width = dim.width;
+    height += dim.height;
+  }
+  return { text: t, width, height };
 }
 
 /**
