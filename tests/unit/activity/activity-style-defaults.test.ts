@@ -256,6 +256,41 @@ describe('activityLineThickness — root style-override tier (T4b, D4 amended)',
   });
 });
 
+describe('activityLineThickness — arrow inherits the activity bucket (T2c, fonebe-54-save009)', () => {
+  it('`skinparam ActivityBorderThickness 10` moves the edge stroke too, not only the box', () => {
+    // `StyleSignatureBasic.activityArrow()` is `{root,element,
+    // activityDiagram,activity,arrow}` (StyleSignatureBasic.java:275-277) --
+    // nested UNDER `activity`, so a stored `activity`-scoped LineThickness
+    // rule is a SUBSET match for the arrow lookup too
+    // (`matchAllImpl`/`containsAll`, StyleSignatureBasic.java:211) and wins
+    // the OVERWRITE_EXISTING_VALUE merge over the un-nested base-skin
+    // default `activityDiagram { arrow { LineThickness 1 } }`
+    // (plantuml.skin:374).
+    expect(activityLineThickness(themeWithBucket('activity', { lineThickness: 10 }), 'arrow')).toBe(10);
+  });
+
+  it('the arrow bucket, when set, still wins over the inherited activity value (more specific)', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: {
+        ...DEFAULT.colors,
+        elements: { ...DEFAULT.colors.elements, activity: { lineThickness: 10 }, arrow: { lineThickness: 4 } },
+      },
+    };
+    expect(activityLineThickness(theme, 'arrow')).toBe(4);
+  });
+
+  it('no activity bucket set leaves the arrow default (1) unmoved', () => {
+    expect(activityLineThickness(DEFAULT, 'arrow')).toBe(1);
+  });
+
+  it('the activity-bucket tier is arrow-only -- it does not leak into other SNames', () => {
+    const theme = themeWithBucket('activity', { lineThickness: 10 });
+    expect(activityLineThickness(theme, 'note')).toBe(0.5);
+    expect(activityLineThickness(theme, 'composite')).toBe(1.5);
+  });
+});
+
 describe('activityRoundCorner — default tier, RAW and unhalved', () => {
   it('an action box is 25; callers halve it onto both rx and ry (D4)', () => {
     expect(activityRoundCorner(DEFAULT, 'activity')).toBe(25);
