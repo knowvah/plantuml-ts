@@ -2,8 +2,17 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
 
-import { STOP_OUTER_RADIUS as OUTER_RADIUS } from '../activity-layout-constants.js';
+import { KILL_OUTER_RADIUS as OUTER_RADIUS } from '../activity-layout-constants.js';
 
+/**
+ * `kill`'s size is intentionally decoupled from `stop`'s own
+ * {@link OUTER_RADIUS -- see `STOP_OUTER_RADIUS`} (T1c,
+ * `plans/activity-divergence-drive`, decisions.md#D3 amended, journal row
+ * 18): `kill`'s own upstream mechanism (`FtileKilled`/`FtileCircleKill`)
+ * was not read this task and is T2b's (detach/kill) scope -- this class's
+ * rendered pixels must stay unchanged, so it keeps the pre-T1c value via
+ * its own named constant rather than following `stop`'s correction.
+ */
 export class GtileKill extends TileLeaf {
   readonly kind = 'gtile-kill' as const;
   readonly width = OUTER_RADIUS * 2;

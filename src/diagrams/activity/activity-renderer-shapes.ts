@@ -8,15 +8,13 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, diamond, noteBox, ellipse, line, path, polygon, resolvePaint } from '../../core/svg.js';
+import { rect, diamond, noteBox, line, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
 import { NOTE_FOLD } from './activity-layout-constants.js';
 import {
   ACTIVITY_BAR_FILL,
-  CIRCLE_END_LINE_THICKNESS,
   CIRCLE_INK,
-  CIRCLE_LINE_THICKNESS,
   NOTE_LINE_THICKNESS,
   activityFontSize,
   activityLineThickness,
@@ -31,6 +29,7 @@ import {
   renderChevronRight,
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
+import { renderStart, renderStop, renderKill, renderEnd } from './activity-renderer-terminals.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -42,6 +41,11 @@ import {
 // Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
 // importers of these four symbols working unchanged.
 export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
+// Pure-move re-export (500-line split, T1c): the terminal-circle renderers
+// now live in `activity-renderer-terminals.ts`, which imports `actColors`
+// BACK from this file (same circular-but-safe shape as the signal-shapes
+// re-export above) -- existing importers of these four names are unchanged.
+export { renderStart, renderStop, renderKill, renderEnd };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -179,64 +183,9 @@ export function actColors(theme: Theme): ActivityColors {
 // ---------------------------------------------------------------------------
 // Node shape renderers
 // ---------------------------------------------------------------------------
-
-export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const r = node.height / 2;
-  // @see DriverEllipseSvg.java -- upstream's start/end/kill circles are all
-  // UEllipse shapes, never a dedicated circle driver. `resolvePaint` here
-  // replicates `circle()`'s own pipeline byte-identically: `ellipse()`'s
-  // `extraAttrs` only shortens an ALREADY-hex string, not a named CSS
-  // colour, the way `circle()` did via `paintToSvg`. `LineThickness 1` on
-  // the start/stop/end block (plantuml.skin:378): the jar fills AND
-  // strokes the start terminal in the same colour; this port drew a fill
-  // only, so the ellipse was a hair small.
-  const ink = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS });
-}
-
-export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const outerR = node.height / 2;
-  const innerR = outerR * 0.55;
-  const c = actColors(theme);
-  return (
-    // `stop` takes the block's own `LineThickness 1` (plantuml.skin:378);
-    // `end` alone overrides to 1.5 (:383) -- two DISTINCT StyleSignatures
-    // (`VCompactFactory.java:97` vs `:101`).
-    ellipse(cx, cy, outerR, outerR, {
-      fill: 'none',
-      stroke: resolvePaint(c.endFill).value,
-      'stroke-width': CIRCLE_LINE_THICKNESS,
-    }) + ellipse(cx, cy, innerR, innerR, { fill: resolvePaint(c.endFill).value })
-  );
-}
-
-/**
- * Renders an `end` node as a circle with an X through it, matching upstream
- * PlantUML's distinction between `stop` (bullseye) and `end` (crossed circle).
- */
-export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const r = node.height / 2;
-  // Diagonal length so the X tips reach the circle border at 45°
-  const d = r * Math.SQRT1_2;
-  const endFill = actColors(theme).endFill;
-  return (
-    // `circle { end { LineThickness 1.5 } }` (plantuml.skin:383) -- `end`
-    // alone overrides the start/stop/end block's 1.
-    ellipse(cx, cy, r, r, {
-      fill: 'none',
-      stroke: resolvePaint(endFill).value,
-      'stroke-width': CIRCLE_END_LINE_THICKNESS,
-    }) +
-    line(cx - d, cy - d, cx + d, cy + d, { stroke: endFill, strokeWidth: CIRCLE_END_LINE_THICKNESS }) +
-    line(cx - d, cy + d, cx + d, cy - d, { stroke: endFill, strokeWidth: CIRCLE_END_LINE_THICKNESS })
-  );
-}
+// `renderStart`/`renderStop`/`renderKill`/`renderEnd` live in
+// `activity-renderer-terminals.ts` (T1c, 500-line hook) -- re-exported
+// above.
 
 const CODE_BLOCK_RE = /^<code>([\s\S]*?)<\/code>$/i;
 
@@ -438,8 +387,9 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'start':
       return renderStart(node, theme);
     case 'stop':
-    case 'kill':
       return renderStop(node, theme);
+    case 'kill':
+      return renderKill(node, theme);
     case 'end':
       return renderEnd(node, theme);
     case 'action':

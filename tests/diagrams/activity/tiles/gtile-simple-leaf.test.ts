@@ -54,81 +54,87 @@ describe('GtileStart', () => {
 });
 
 describe('GtileStop', () => {
+  // `STOP_OUTER_RADIUS = 11` (T1c, D3): `FtileCircleStop.java:55` `SIZE =
+  // 22`, delegated for drawing to `svek/image/CircleEnd.java:55`'s OWN
+  // `SIZE = 22` -- tile diameter 22, not the old unsourced 28.
   const tile = new GtileStop();
 
-  it('has width = 28', () => {
-    expect(tile.width).toBe(28);
+  it('has width = 22', () => {
+    expect(tile.width).toBe(22);
   });
 
-  it('has height = 28', () => {
-    expect(tile.height).toBe(28);
+  it('has height = 22', () => {
+    expect(tile.height).toBe(22);
   });
 
-  it('NORTH_HOOK → { x: 14, y: 0 }', () => {
-    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 14, y: 0 });
+  it('NORTH_HOOK → { x: 11, y: 0 }', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 11, y: 0 });
   });
 
-  it('SOUTH_HOOK → { x: 14, y: 28 }', () => {
-    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 14, y: 28 });
+  it('SOUTH_HOOK → { x: 11, y: 22 }', () => {
+    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 11, y: 22 });
   });
 
-  it('EAST_HOOK → { x: 28, y: 14 }', () => {
-    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 28, y: 14 });
+  it('EAST_HOOK → { x: 22, y: 11 }', () => {
+    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 22, y: 11 });
   });
 
-  it('WEST_HOOK → { x: 0, y: 14 }', () => {
-    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 14 });
+  it('WEST_HOOK → { x: 0, y: 11 }', () => {
+    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 11 });
   });
 
   it('NORTH_BORDER → same as NORTH_HOOK', () => {
-    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 14, y: 0 });
+    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 11, y: 0 });
   });
 
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
-    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 14, y: 28 });
+    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 11, y: 22 });
   });
 
-  it('hasPointOut() === false (FtileCircleStop.java:93, 4-arg ctor); also what detach builds', () => {
+  it('hasPointOut() === false (FtileCircleStop.java:92-94, 4-arg ctor); also what detach builds', () => {
     expect(tile.hasPointOut()).toBe(false);
   });
 });
 
 describe('GtileEnd', () => {
+  // `END_OUTER_RADIUS = 10` (T1c, D3): `FtileCircleEndCross.java:61` `SIZE
+  // = 20` -- tile diameter 20, not the old unsourced 28 (which `GtileStop`
+  // used to share with this tile via one `STOP_OUTER_RADIUS` constant).
   const tile = new GtileEnd();
 
-  it('has width = 28', () => {
-    expect(tile.width).toBe(28);
+  it('has width = 20', () => {
+    expect(tile.width).toBe(20);
   });
 
-  it('has height = 28', () => {
-    expect(tile.height).toBe(28);
+  it('has height = 20', () => {
+    expect(tile.height).toBe(20);
   });
 
-  it('NORTH_HOOK → { x: 14, y: 0 }', () => {
-    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 14, y: 0 });
+  it('NORTH_HOOK → { x: 10, y: 0 }', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 10, y: 0 });
   });
 
-  it('SOUTH_HOOK → { x: 14, y: 28 }', () => {
-    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 14, y: 28 });
+  it('SOUTH_HOOK → { x: 10, y: 20 }', () => {
+    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 10, y: 20 });
   });
 
-  it('EAST_HOOK → { x: 28, y: 14 }', () => {
-    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 28, y: 14 });
+  it('EAST_HOOK → { x: 20, y: 10 }', () => {
+    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 20, y: 10 });
   });
 
-  it('WEST_HOOK → { x: 0, y: 14 }', () => {
-    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 14 });
+  it('WEST_HOOK → { x: 0, y: 10 }', () => {
+    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 10 });
   });
 
   it('NORTH_BORDER → same as NORTH_HOOK', () => {
-    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 14, y: 0 });
+    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 10, y: 0 });
   });
 
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
-    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 14, y: 28 });
+    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 10, y: 20 });
   });
 
-  it('hasPointOut() === false (FtileCircleEndCross.java:121, 4-arg ctor)', () => {
+  it('hasPointOut() === false (FtileCircleEndCross.java:119-121, 4-arg ctor)', () => {
     expect(tile.hasPointOut()).toBe(false);
   });
 });
@@ -174,6 +180,10 @@ describe('GtileBreak', () => {
 });
 
 describe('GtileKill', () => {
+  // Deliberately UNCHANGED by T1c (D3): `kill` was decoupled from `stop`'s
+  // corrected `STOP_OUTER_RADIUS` into its own `KILL_OUTER_RADIUS`, which
+  // keeps the same pre-T1c value (28) -- `kill`'s own upstream mechanism
+  // (`FtileKilled`/`FtileCircleKill`) is T2b's (detach/kill) scope.
   const tile = new GtileKill();
 
   it('has width = 28', () => {
