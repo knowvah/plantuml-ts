@@ -20,7 +20,7 @@ import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
-import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
+import { dedupeAdjacentPoints, mergeTouchingEdges } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
 import { walkRepeat } from './walk-repeat.js';
@@ -373,5 +373,11 @@ export function assignCoordinates(
   bounder: StringBounder,
   theme: Theme,
 ): ActivityGeometry {
-  return assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
+  const geometry = assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
+  // `UGraphicForSnake#flushUg` (`svek/UGraphicForSnake.java:151-157`):
+  // the jar never draws two edges that touch end-to-start as separate
+  // polylines -- see `mergeTouchingEdges`'s own doc. Applied once here, on
+  // the FINAL (post-swimlane, post-compress, post-draw-order) edge list,
+  // since that is the draw-order state the jar's own merge intercepts.
+  return { ...geometry, edges: mergeTouchingEdges(geometry.edges) };
 }
