@@ -38,6 +38,7 @@ import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
 import { emitDiamondLabels } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import { pushWhileBackwardConnections } from './walk-while-backward.js';
 
 /**
  * The hexagon node then its own side labels, pushed as one atomic unit
@@ -154,7 +155,7 @@ function buildWhileBackLoop(
  *  exactly `dimDiamond1.getInY() + (outY - inY) / 2` with `inY === 0`
  *  (`FtileDiamondInside.java:106-116`), so no separate `half` term is
  *  needed here. */
-interface WhileFrame {
+export interface WhileFrame {
   readonly out: Out;
   readonly header: GtileDiamondInside;
   readonly body: Tile;
@@ -178,6 +179,20 @@ interface WhileFrame {
   readonly headerInLane: string | undefined;
   readonly bodyInLane: string | undefined;
   readonly bodyOutLane: string | undefined;
+  /**
+   * `FtileWhile`'s own `backward` field (`FtileWhile.java:85,110-121`),
+   * carried here so `pushWhileBack`/`pushWhileBackNonEmpty`/`walk-while-
+   * backward.ts` never need `t: GtileWhile` as a separate parameter
+   * (mission `activity-divergence-drive` T3h). `backPos`/`backInLane`/
+   * `backOutLane` are always computed (never `undefined` themselves, even
+   * when {@link backward} is), mirroring `GtileWhile.backwardOffsetX/Y`'s
+   * own always-computed style -- unread whenever {@link backward} is
+   * unset.
+   */
+  readonly backward: Tile | undefined;
+  readonly backPos: GPoint;
+  readonly backInLane: string | undefined;
+  readonly backOutLane: string | undefined;
 }
 
 /**
@@ -186,9 +201,13 @@ interface WhileFrame {
  * (`ConnectionBackSimple`'s own `drawU` returns early, drawing nothing, not
  * even the reservation, when `getP1` returns `null`, `:229-232`, e.g. a
  * body ending in `stop`) -- the back edge, tagged with D2's `WhileBackLoop`
- * record so a cross-lane placement can retarget it (T2). Split out of
- * {@link pushWhileBack} to keep that function's own NLOC under the file's
- * limit.
+ * record so a cross-lane placement can retarget it (T2). When
+ * `frame.backward` is set, `ConnectionBackBackward1`/`Backward2`
+ * (`walk-while-backward.ts`) REPLACE `ConnectionBackSimple` entirely
+ * (`FtileWhile.create`, `:154-161`: `backward == null` picks Simple, else
+ * both Backward connectors) -- `ConnectionIn` itself is unaffected either
+ * way. Split out of {@link pushWhileBack} to keep that function's own NLOC
+ * under the file's limit.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
 function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
@@ -196,6 +215,11 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
   const { headerOutLane, headerInLane, bodyInLane, bodyOutLane } = frame;
   const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
   pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
+
+  if (frame.backward !== undefined) {
+    pushWhileBackwardConnections(frame);
+    return;
+  }
   if (!body.hasPointOut()) return;
 
   const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
@@ -325,6 +349,10 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     headerInLane: laneIn(header, myLane),
     bodyInLane: laneIn(body, myLane),
     bodyOutLane: laneOut(body, myLane),
+    backward: t.backward,
+    backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
+    backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
+    backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
   };
 }
 
@@ -349,7 +377,14 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
 
   const frame = buildWhileFrame({ t, x, y, hX, hY, bX, bY, header, body, myLane, out });
 
-  // D7: In/Back(Simple|Empty), then Out, then break weldings.
+  // `drawU` draws `backward` LAST among nodes, only when set
+  // (`FtileWhile.java:561-562`) -- `walkTile`'s generic dispatch is
+  // correct here, same reason `walk-repeat.ts#pushRepeatBackwardNode`
+  // cites: `backward` is always a plain action box
+  // (`InstructionWhile.java:121-122`, `factory.activity`).
+  if (t.backward !== undefined) walkTile(t.backward, frame.backPos.x, frame.backPos.y, { kindHint: null, lane: myLane }, out);
+
+  // D7: In/Back(Simple|Empty|Backward), then Out, then break weldings.
   pushWhileBack(frame);
   pushWhileOut(frame);
   pushWhileWeldings(out, bodyNodeStart, bodyNodeEnd, frame.elbowX);

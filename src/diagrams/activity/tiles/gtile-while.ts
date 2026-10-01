@@ -33,6 +33,27 @@ export class GtileWhile extends TileComposite {
   readonly headerOffsetX: number;
   /** `left - body.left`: the body's x inside the tile. */
   readonly bodyOffsetX: number;
+  /**
+   * `FtileWhile`'s own `backward` field (`FtileWhile.java:85,110-121`): the
+   * `backward:LABEL;` activity drawn on the loop's own return edge, when
+   * the while body has one (`InstructionWhile.java:83,121-122` --
+   * `factory.activity(...)`, the same call every ordinary action tile
+   * uses). `tile-layout.ts#tileWhile` is the seam that extracts the
+   * `backward` AST node from `node.body` and builds this tile -- outside
+   * this task's write-set (overview.md, mission `activity-divergence-
+   * drive` T3h, "report the seam rather than editing"). `undefined` for
+   * every while that has none, which is every call site until that seam is
+   * wired. Excluded from {@link children}, mirroring `FtileWhile
+   * .getMyChildren()` (`:88-94`) itself never listing it even though
+   * `drawU` draws it (`:561-562`).
+   */
+  readonly backward: Tile | undefined;
+  /** `getTranslateBackward`'s `x`/`y` (`FtileWhile.java:566-573`): `x =
+   *  dimTotal.width - backward.width`, `y = (dimTotal.height -
+   *  backward.height) / 2` -- flush to the tile's own right edge,
+   *  vertically centred. `0` when {@link backward} is unset. */
+  readonly backwardOffsetX: number;
+  readonly backwardOffsetY: number;
 
   /**
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:575-596
@@ -40,9 +61,11 @@ export class GtileWhile extends TileComposite {
    *   `height = geo.getHeight() + 4 * hexagonHalfSize + suppHeightForLabel`
    *   (`:585`); the returned `FtileGeometry`'s `width = geo.getWidth() + dx +
    *   hexagonHalfSize` and `left = geo.getLeft() + dx`, `dx = 2 *
-   *   hexagonHalfSize` (`:586,591-593`) -- with `backward == null` (D2) and
-   *   `specialOut == null` (D3 `plans/activity-loop-tile-port/decisions.md`),
-   *   both of which are otherwise added into `width`/`left`.
+   *   hexagonHalfSize` (`:586,591-593`) -- with `specialOut == null` (D3
+   *   `plans/activity-loop-tile-port/decisions.md`, still out of scope) and
+   *   `backward`'s own `+= backward.w` term (`:587-589`, mission
+   *   `activity-divergence-drive` T3h) ported below; `specialOut`'s own
+   *   `xDeltaBecauseSpecial` term is not.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:42-56
    *   -- `appendBottom`: `left = max(left1, left2)`, `width = max(w1 +
    *   (left - left1), w2 + (left - left2))`, `height = h1 + h2`.
@@ -58,8 +81,9 @@ export class GtileWhile extends TileComposite {
    *   own `calculateDimensionAlone` (`vertical/FtileDiamondInside.java:106-
    *   116`) always returns `inY = 0`, so the tile's `NORTH_HOOK.y` is 0.
    */
-  constructor(header: GtileDiamondInside, body: Tile, _bounder: StringBounder, _theme: Theme) {
+  constructor(header: GtileDiamondInside, body: Tile, _bounder: StringBounder, _theme: Theme, backward?: Tile) {
     super();
+    this.backward = backward;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
     const geoLeft = Math.max(headerLeft, bodyLeft);
@@ -69,12 +93,15 @@ export class GtileWhile extends TileComposite {
     const geoHeight = header.height + body.height;
 
     this.left = geoLeft + 2 * HEXAGON_HALF_SIZE;
-    this.width = geoWidth + 2 * HEXAGON_HALF_SIZE + HEXAGON_HALF_SIZE;
+    this.width = geoWidth + 2 * HEXAGON_HALF_SIZE + HEXAGON_HALF_SIZE + (backward?.width ?? 0);
     this.height = geoHeight + 4 * HEXAGON_HALF_SIZE + this.labelHeight;
 
     this.headerOffsetX = this.left - headerLeft;
     this.bodyOffsetX = this.left - bodyLeft;
     this.bodyOffsetY = header.height + (this.height - header.height - body.height - this.labelHeight) / 2;
+
+    this.backwardOffsetX = backward !== undefined ? this.width - backward.width : 0;
+    this.backwardOffsetY = backward !== undefined ? (this.height - backward.height) / 2 : 0;
 
     this.children = [header, body];
   }

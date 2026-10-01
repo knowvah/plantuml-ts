@@ -36,6 +36,7 @@ import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { emitDiamondLabels } from './diamond-labels.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import { pushRepeatBackwardConnections } from './walk-repeat-backward.js';
 
 /** Every absolute-frame value {@link pushRepeatIn}/{@link pushRepeatBack}/
  *  {@link pushRepeatOut} share, computed once so those functions stay
@@ -44,7 +45,7 @@ import type { LoopTranslate } from './swimlane-loop-translate.js';
  *  (Lizard's TypeScript reader otherwise folds a trailing interface into
  *  the NLOC of whichever function precedes it -- `tile-layout.ts`'s own
  *  `tileNode` doc explains the same reader quirk). */
-interface RepeatFrame {
+export interface RepeatFrame {
   readonly out: Out;
   readonly entry: Tile;
   readonly body: Tile;
@@ -111,22 +112,18 @@ function pushRepeatEntry(
 
 /**
  * The `'gtile-repeat'` case's condition hexagon: pushed directly (never
- * through `walkTile`'s generic dispatch, same as `if`'s own `diamond1`,
- * `walk-if-down.ts#pushDiamond1`), then its own side labels -- east is the
- * "is"/entry label, south is the "not"/exit label (default, no `backward`,
- * D1). Split out of the `'gtile-repeat'` case only to keep `walkTile`'s own
- * NLOC from growing (the case itself is unchanged besides this call).
- * `laneAt` resolves the condition's OWN `.swimlane` (`tileRepeat`'s
- * `outLane(node.swimlaneOut, node.swimlane)`, `FtileRepeat.java:149,152`)
- * over the parent's inherited `myLane` -- the same resolution `walkTile`'s
- * own dispatch (`:117-118`) applies to every tile it walks; bypassing
- * `walkTile` to push directly means this helper must apply it itself, or a
- * laned repeat's condition silently renders in the wrong lane. The pushed
- * node's `height` is the hexagon-ALONE height (`condition.getCoord(SOUTH_
- * HOOK).y`), not `condition.height` (which would add a north label's height
- * below it) -- the repeat condition never sets a north label (D1), so the
- * two are equal today, but this keeps the walker correct if one ever does.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
+ * through `walkTile`'s generic dispatch), then its own side labels --
+ * south is always the "not"/exit label; east is the "is"/entry label
+ * unless `backwardExitsOnLeft`, which moves it to west (mission
+ * `activity-divergence-drive` T3h, `tile-layout-backward.ts`).
+ * `emitDiamondLabels` no-ops a side `labelAt` never set (`diamond-
+ * labels.ts:40-41`), so passing all three sides unconditionally is safe
+ * -- `repeatConditionLabels` picks east XOR west, never both. `laneAt`
+ * resolves the condition's OWN `.swimlane` over the parent's inherited
+ * `myLane`, same as `walkTile`'s own dispatch. The pushed node's `height`
+ * is the hexagon-ALONE height, not `condition.height` (which would add a
+ * north label's height, never set here, D1).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151,210-219
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:87-89
  */
 function pushRepeatCondition(
@@ -150,7 +147,7 @@ function pushRepeatCondition(
     },
     hexLane,
   );
-  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east'], hexLane, out);
+  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east', 'west'], hexLane, out);
 }
 
 /** Copy of `walk-while-branch.ts`'s own `pushEdgeFlagged` (that file is
@@ -387,58 +384,109 @@ function pushRepeatBack(frame: RepeatFrame): void {
   pushEdgeFlagged(out, points, [conditionOutLane, entryInLane], { emphasize: 'up', loop });
 }
 
-export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
+/**
+ * The entry's own node push: the label-less `gtile-repeat-entry` diamond
+ * via {@link pushRepeatEntry}, or -- for an inline `repeat :label;` entry
+ * -- generic `walkTile` dispatch, same as every other real action tile.
+ * Split out of {@link walkRepeat} to keep that function's own NLOC under
+ * the file's limit.
+ */
+function pushRepeatEntryNode(entry: Tile, x: number, y: number, myLane: string | undefined, out: Out): void {
+  if (entry.kind === 'gtile-repeat-entry') {
+    pushRepeatEntry(entry, x, y, myLane, out);
+  } else {
+    walkTile(entry, x, y, { kindHint: null, lane: myLane }, out);
+  }
+}
+
+/**
+ * `drawU` draws `backward` LAST among nodes, only when set
+ * (`FtileRepeat.java:690-691`) -- flush to the tile's own right edge
+ * (`backwardOffsetX`/`Y`, `GtileRepeat`'s own class doc). `walkTile`'s
+ * generic dispatch (not a dedicated `pushRepeatXxx`, unlike `entry`'s
+ * `gtile-repeat-entry` case) is correct here: `backward` is always a plain
+ * action box (`InstructionRepeat.java:182`, `factory.activity`), the same
+ * leaf kind `walkTile`'s own `'gtile-action'` case already handles for
+ * every ordinary body step. Split out of {@link walkRepeat} to keep that
+ * function's own NLOC under the file's limit.
+ */
+function pushRepeatBackwardNode(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
+  if (t.backward === undefined) return;
+  const backX = x + t.backwardOffsetX;
+  const backY = y + t.backwardOffsetY;
+  walkTile(t.backward, backX, backY, { kindHint: null, lane: myLane }, out);
+}
+
+/**
+ * `FtileRepeat.create` (`:181-196`): `backward != null` is checked BEFORE
+ * `backConnection`'s own simple1/simple2/complex1 selection ever runs --
+ * `ConnectionBackBackward1`/`Backward2` REPLACE it entirely, never add to
+ * it. Split out of {@link walkRepeat} for the same reason as
+ * {@link pushRepeatBackwardNode}.
+ */
+function pushRepeatBackDispatch(t: GtileRepeat, frame: RepeatFrame, x: number, y: number, myLane: string | undefined): void {
+  if (t.backward === undefined) {
+    pushRepeatBack(frame);
+    return;
+  }
+  const backPos = { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY };
+  pushRepeatBackwardConnections(frame, t.backward, backPos, {
+    backIn: laneIn(t.backward, myLane),
+    backOut: laneOut(t.backward, myLane),
+  });
+}
+
+/**
+ * `FtileRepeat#drawU` (`FtileRepeat.java:685-692`) draws `repeat` (the
+ * body) FIRST, then `diamond1` (the entry) SECOND, then `diamond2` (the
+ * condition) THIRD, then `backward` (when set) LAST -- `getMyChildren`
+ * (`:88-90`) returns the same `[repeat, diamond1, diamond2]` order. The
+ * walk below mirrors that; it is NOT `entry, body, condition` (this
+ * file's own prior order, corrected here -- mission `activity-divergence-
+ * drive` T2a). Returns the built {@link RepeatFrame} so {@link walkRepeat}
+ * can push this tile's own edges on top of it. Split out of
+ * {@link walkRepeat} to keep that function's own NLOC under the file's
+ * limit.
+ *
+ * Each child sits so its OWN `left` lands under the tile's merged `left`
+ * (`FtileRepeat.java:730-765`), never centred by `width / 2` -- except the
+ * entry, whose OWN `width / 2` is used even when it is asymmetric
+ * (`:744-748`, `GtileRepeat`'s own class doc).
+ */
+function pushRepeatNodesAndBuildFrame(
+  t: GtileRepeat,
+  x: number,
+  y: number,
+  myLane: string | undefined,
+  out: Out,
+): RepeatFrame {
   const [entry, body, condition] = t.children;
-
-  // `FtileRepeat#drawU` (`FtileRepeat.java:685-692`) draws `repeat` (the
-  // body) FIRST, then `diamond1` (the entry) SECOND, then `diamond2` (the
-  // condition) THIRD -- `getMyChildren` (`:88-90`) returns the same
-  // `[repeat, diamond1, diamond2]` order. The walk below mirrors that;
-  // it is NOT `entry, body, condition` (this file's own prior order,
-  // corrected here -- mission `activity-divergence-drive` T2a).
-
-  // Each child sits so its OWN `left` lands under the tile's merged `left`
-  // (`FtileRepeat.java:730-765`), never centred by `width / 2` -- except
-  // the entry, whose OWN `width / 2` is used even when it is asymmetric
-  // (`:744-748`, `GtileRepeat`'s own class doc).
   const bodyX = x + t.bodyOffsetX;
   const bodyY = y + t.bodyOffsetY;
   walkTile(body, bodyX, bodyY, { kindHint: null, lane: myLane }, out);
 
   const entryX = x + t.entryOffsetX;
   const entryY = y + t.entryOffsetY;
-  if (entry.kind === 'gtile-repeat-entry') {
-    pushRepeatEntry(entry, entryX, entryY, myLane, out);
-  } else {
-    walkTile(entry, entryX, entryY, { kindHint: null, lane: myLane }, out);
-  }
+  pushRepeatEntryNode(entry, entryX, entryY, myLane, out);
 
   const condX = x + t.conditionOffsetX;
   const condY = y + t.conditionOffsetY;
   pushRepeatCondition(condition, condX, condY, myLane, out);
+  pushRepeatBackwardNode(t, x, y, myLane, out);
 
-  // Every child's own nodes first (body, entry, condition, per `drawU`
-  // above), then this tile's own edges -- `In`, the selected `Back`,
-  // `Out`, in that order (`FtileRepeat.java:170-203`'s `conns` list,
-  // appended after `drawU`'s own three `draw()` calls via
-  // `FtileUtils.addConnection`/`FtileWithConnection#drawU`,
-  // `FtileWithConnection.java:69-74`).
-  const frame = buildRepeatFrame({
-    t,
-    x,
-    entryX,
-    entryY,
-    bodyX,
-    bodyY,
-    condX,
-    condY,
-    entry,
-    body,
-    condition,
-    myLane,
-    out,
-  });
+  return buildRepeatFrame({ t, x, entryX, entryY, bodyX, bodyY, condX, condY, entry, body, condition, myLane, out });
+}
+
+/**
+ * Every child's own nodes first (body, entry, condition, backward, per
+ * `drawU` above), then this tile's own edges -- `In`, the selected `Back`,
+ * `Out`, in that order (`FtileRepeat.java:170-203`'s `conns` list,
+ * appended after `drawU`'s own draw() calls via `FtileUtils.addConnection`/
+ * `FtileWithConnection#drawU`, `FtileWithConnection.java:69-74`).
+ */
+export function walkRepeat(t: GtileRepeat, x: number, y: number, myLane: string | undefined, out: Out): void {
+  const frame = pushRepeatNodesAndBuildFrame(t, x, y, myLane, out);
   pushRepeatIn(frame);
-  pushRepeatBack(frame);
+  pushRepeatBackDispatch(t, frame, x, y, myLane);
   pushRepeatOut(frame);
 }

@@ -1,6 +1,8 @@
 import type {
   ActivityDiagramAST,
   ActivityNode,
+  ActivityAction,
+  ActivityBackward,
   ActivityIf,
   ActivityWhile,
   ActivityRepeat,
@@ -32,6 +34,7 @@ import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
+import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -146,9 +149,31 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrde
 }
 
 /**
+ * `backward`'s own tile: built through the SAME action-tile path an
+ * `:action;` body step uses (`tileSimpleLeaf`'s own `'action'` case) --
+ * `InstructionRepeat.java:182`/`InstructionWhile.java:121-122` both
+ * resolve `backward` via `factory.activity(backward, swimlane, boxStyle,
+ * ...)`, the identical `FtileFactory#activity` call site every ordinary
+ * action resolves to. `ActivityBackward` carries no `color`/`stereotype`
+ * (base-form-only port, `ast.ts`'s own doc), so the synthetic
+ * `ActivityAction` below never sets either. Kept here (not in
+ * `tile-layout-backward.ts` with {@link extractBackward}/
+ * {@link backwardExitsOnLeft}) since it needs `tileSimpleLeaf`, private to
+ * this file.
+ */
+function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, theme: Theme): Tile {
+  const action: ActivityAction =
+    node.swimlane !== undefined
+      ? { kind: 'action', label: node.label, swimlane: node.swimlane }
+      : { kind: 'action', label: node.label };
+  return tileSimpleLeaf(action, bounder, theme);
+}
+
+/**
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
  *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
- *   the "is not"/exit label sits west.
+ *   the "is not"/exit label sits west, UNAFFECTED by `backward` (the Java
+ *   `create` builds `diamond1` before `backward` is ever read).
  */
 function tileWhile(
   node: ActivityWhile,
@@ -160,9 +185,11 @@ function tileWhile(
   if (node.yesLabel !== undefined) labels.north = node.yesLabel;
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
   const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const { rest, backward } = extractBackward(node.body);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  return withSwimlane(new GtileWhile(header, body, bounder, theme), node.swimlane);
+  const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
+  return withSwimlane(new GtileWhile(header, body, bounder, theme, backwardTile), node.swimlane);
 }
 
 /**
@@ -231,18 +258,21 @@ function tileRepeat(
   laneOrder: readonly string[],
 ): GtileRepeat {
   const entry = tileRepeatEntry(node, bounder, theme, laneOrder);
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const { rest, backward } = extractBackward(node.body);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  const labels: { east?: string; south?: string } = {};
-  if (node.yesLabel !== undefined) labels.east = node.yesLabel;
-  if (node.outLabel !== undefined) labels.south = node.outLabel;
+  const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
+  const labels = repeatConditionLabels(node, backward, laneOrder);
   const condition = withSwimlane(
     new GtileDiamondInside(node.condition, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
   );
   const backConnection = selectRepeatBackConnection(node, laneOrder);
   return withSwimlaneOut(
-    withSwimlane(new GtileRepeat(entry, body, condition, backConnection, { bounder, theme }), node.swimlane),
+    withSwimlane(
+      new GtileRepeat(entry, body, condition, backConnection, { bounder, theme, backward: backwardTile }),
+      node.swimlane,
+    ),
     node.swimlaneOut,
   );
 }
@@ -365,10 +395,16 @@ function isSimpleLeaf(node: ActivityNode): node is Extract<ActivityNode, { kind:
 }
 
 /**
- * Kinds that always produce no tile of their own: `arrow-label` (mission
- * ubrr-T10, no geometry of its own), `backward` (base-form-only port,
- * filed as `activity-loop-backward`), and `kill`/`detach` (T2b -- see
- * {@link SimpleLeafKind}'s doc; `tileNodes` consumes these before
+ * Kinds that always produce no tile of their own HERE: `arrow-label`
+ * (mission ubrr-T10, no geometry of its own), `backward` (mission
+ * `activity-divergence-drive` T3h: `tileRepeat`/`tileWhile`'s own
+ * `extractBackward` pulls it OUT of a repeat/while body before `tileNodes`
+ * ever sees it there -- this branch is the fallback for a `backward:`
+ * found OUTSIDE that context, e.g. nested in an `if`/`fork` inside the
+ * loop body or at top level, both of which the jar itself refuses to
+ * parse, `ActivityDiagram3.java:390` `"Cannot find repeat"` -- an `error`
+ * row, D8, not reached by any baseline fixture), and `kill`/`detach` (T2b
+ * -- see {@link SimpleLeafKind}'s doc; `tileNodes` consumes these before
  * `tileNode` ever runs, so this branch is a direct-call safety net, not a
  * live path). Pulled out of `tileNode`'s own switch (mirroring
  * {@link isSimpleLeaf} immediately above) so adding `kill`/`detach` here

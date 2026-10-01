@@ -472,12 +472,16 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
       continue;
     }
 
-    // PlantUML accepts a trailing `;` on most control-flow keywords
-    // (`start;`, `endif;`, `else (yes);`, etc.). Strip it for non-action
-    // lines so the rest of the parser can match them as bare keywords.
-    // Action lines themselves use `:label;` syntax — we must not touch
-    // those, so this only applies to lines that do not start with `:`.
-    if (!line.startsWith(':') && line.endsWith(';')) {
+    // Upstream has no ONE generic strip: a bare keyword's own regex ends
+    // `";?"` (`CommandStart3.java:58-63`) -- emulated here, once, for
+    // every bare keyword. `keyword:content;` pairs colon+`;` as ONE
+    // mandatory unit instead (`CommandBackward3.java:75-79`,
+    // `CommandRepeat3.java:68-73`'s inline form) -- stripping THAT `;`
+    // corrupts it (`RE_BACKWARD`, `dispatch-support.ts:67`, then misses a
+    // single-line `backward:LABEL;`, falling to its multiline reader,
+    // swallowing following lines). A colon ANYWHERE means some command
+    // owns that `;` -- bare keywords never contain one.
+    if (!line.startsWith(':') && !line.includes(':') && line.endsWith(';')) {
       line = line.slice(0, -1).trimEnd();
     }
 
