@@ -205,6 +205,92 @@ describe('layoutActivity — existing renderer tests still work', () => {
     expect(kinds).not.toContain('join-bar');
   });
 
+  // D12/T1p-c: `fork ... end merge` (`ForkStyle.MERGE`) draws a fork-bar
+  // (same `FtileBlackBlock` top, `ParallelBuilderMerge.doStep1` mirrors
+  // `ParallelBuilderFork.doStep1`) plus an `if-merge` diamond -- NEVER a
+  // join-bar (that's `ForkStyle.FORK`'s own shape).
+  it('fork with style "merge" produces fork-bar and if-merge nodes, no join-bar', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const kinds = geo.nodes.map((n) => n.kind);
+    expect(kinds).toContain('fork-bar');
+    expect(kinds).toContain('if-merge');
+    expect(kinds).not.toContain('join-bar');
+    const diamond = geo.nodes.find((n) => n.kind === 'if-merge');
+    expect(diamond).toMatchObject({ width: 24, height: 24 });
+  });
+
+  // D12/T1p-c: `ConnectionHorizontalThenVertical#arrivalOnDiamond`
+  // (`ParallelBuilderMerge.java:174-189`) -- 3 EQUAL-width branches (same
+  // label length, mirroring the corpus fixture `mepeze-15-nuge493`): the
+  // middle branch's own exit x coincides (within double-precision noise --
+  // `131.15` vs `131.14999999999998` on this measurer's own arithmetic
+  // path; `dedupeAdjacentPoints` intentionally applies NO tolerance,
+  // mirroring `Worm#addPoint`'s exact `==`, so whether this collapses to 2
+  // points or stays 3 is itself measurer-path-dependent, not asserted
+  // here) with the diamond's centre -- the NORTH-vertex case, landing at
+  // `(centerX, diamond.y)`; the outer two keep their 3-point horizontal-
+  // then-vertical shape, landing on the WEST/EAST vertex at the diamond's
+  // own vertical midline.
+  it('merge: middle of 3 equal branches drops straight in; outer two jog sideways', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [
+            [{ kind: 'action', label: 'action 1' }],
+            [{ kind: 'action', label: 'action 2' }],
+            [{ kind: 'action', label: 'action 3' }],
+          ],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const diamond = geo.nodes.find((n) => n.kind === 'if-merge')!;
+    const centerX = diamond.x + diamond.width / 2;
+    const midlineY = diamond.y + diamond.height / 2;
+
+    const outEdges = geo.edges.filter(
+      (e) => e.points[e.points.length - 1]!.y === midlineY || e.points[e.points.length - 1]!.y === diamond.y,
+    );
+    expect(outEdges).toHaveLength(3);
+
+    // Distinguished by the LAST point's y (not point count -- see above).
+    const northEdges = outEdges.filter((e) => e.points[e.points.length - 1]!.y === diamond.y);
+    const sideEdges = outEdges.filter((e) => e.points[e.points.length - 1]!.y === midlineY);
+    expect(northEdges).toHaveLength(1);
+    expect(sideEdges).toHaveLength(2);
+
+    const middle = northEdges[0]!;
+    const middleFirst = middle.points[0]!;
+    const middleLast = middle.points[middle.points.length - 1]!;
+    expect(middleLast.x).toBeCloseTo(centerX, 9);
+    expect(middleLast.y).toBe(diamond.y);
+    for (const p of middle.points) expect(p.x).toBeCloseTo(middleFirst.x, 9);
+
+    for (const edge of sideEdges) {
+      expect(edge.points).toHaveLength(3);
+      const [p1, p2, p3] = edge.points as [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }];
+      expect(p2.x).toBe(p1.x);
+      expect(p2.y).toBe(p3.y);
+      expect(p3.y).toBe(midlineY);
+    }
+    // One lands on the west vertex, the other on the east vertex.
+    const landingXs = sideEdges.map((e) => e.points[2]!.x).sort((a, b) => a - b);
+    expect(landingXs).toEqual([diamond.x, diamond.x + diamond.width]);
+  });
+
   it('split with every branch detached (stop) produces split-bar but NO split-join-bar', () => {
     const ast: ActivityDiagramAST = {
       nodes: [

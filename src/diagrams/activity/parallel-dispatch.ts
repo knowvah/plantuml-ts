@@ -25,27 +25,36 @@ import { parseNodes } from './node-dispatch.js';
 // ---------------------------------------------------------------------------
 // fork / fork again / end fork
 // ---------------------------------------------------------------------------
-const FORK_STOPS: StopKeywords = ['fork again', 'end fork'];
+const FORK_STOPS: StopKeywords = ['fork again', 'end fork', 'end merge'];
 
 interface ForkBranches {
   cursor: number;
   branches: ActivityNode[][];
   swimlaneOut: string | undefined;
+  /** D12/T1p-c: set when the closer was `end merge` (`ForkStyle.MERGE`). */
+  style: 'merge' | undefined;
 }
 
 /**
  * Collects every `fork`/`fork again`-delimited branch up to and including
- * `end fork`, re-reading `swimlaneOut` at each separator.
+ * `end fork`/`end merge`, re-reading `swimlaneOut` at each separator.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
  *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
- *   -- `setStyle` re-reads `swimlaneOut` at `end fork`.
+ *   -- `setStyle` re-reads `swimlaneOut` at `end fork`/`end merge` alike
+ *   (`ActivityDiagram3.endFork` calls `setStyle` the same way for either
+ *   `ForkStyle`, `ActivityDiagram3.java:236-244`).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkEnd3.java:57-81
+ *   -- the `STYLE` regex alternation: `end fork` | `fork end` | `end merge`.
+ *   `fork end` (the reversed synonym) is a separate, pre-existing gap --
+ *   out of scope here (D12 scopes this task to `end merge` only).
  */
 function collectForkBranches(ctx: ParseContext, startIdx: number): ForkBranches | ParseRefusal {
   const { lines } = ctx;
   let cursor = startIdx;
   const branches: ActivityNode[][] = [];
   let swimlaneOut = ctx.currentSwimlane;
+  let style: 'merge' | undefined;
   let done = false;
   while (!done) {
     const branchResult = parseNodes(ctx, cursor, FORK_STOPS);
@@ -54,8 +63,9 @@ function collectForkBranches(ctx: ParseContext, startIdx: number): ForkBranches 
     cursor = branchResult.nextIdx;
     if (cursor >= lines.length) break;
     const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end fork') {
+    if (sep === 'end fork' || sep === 'end merge') {
       swimlaneOut = ctx.currentSwimlane;
+      if (sep === 'end merge') style = 'merge';
       cursor++;
       done = true;
     } else if (sep === 'fork again') {
@@ -65,7 +75,7 @@ function collectForkBranches(ctx: ParseContext, startIdx: number): ForkBranches 
       done = true;
     }
   }
-  return { cursor, branches, swimlaneOut };
+  return { cursor, branches, swimlaneOut, style };
 }
 
 /**
@@ -92,6 +102,7 @@ export function tryFork(
     branches: result.branches,
     ...openerSwimlane,
     ...(result.swimlaneOut !== undefined ? { swimlaneOut: result.swimlaneOut } : {}),
+    ...(result.style !== undefined ? { style: result.style } : {}),
   };
   return { idx: result.cursor, node };
 }

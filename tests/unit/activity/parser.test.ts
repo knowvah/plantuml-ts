@@ -330,6 +330,33 @@ describe('parses fork / fork again / end fork', () => {
     const node = firstNode(ast) as ActivityFork;
     expect((node.branches[1]?.[0] as ActivityAction).label).toBe('B');
   });
+
+  it('plain "end fork" leaves style unset (D12/T1p-c regression guard)', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end fork']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.style).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 8b — parses fork / fork again / end merge (D12/T1p-c, ForkStyle.MERGE)
+// ---------------------------------------------------------------------------
+
+describe('parses fork / fork again / end merge', () => {
+  it('produces a fork node tagged style "merge"', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end merge']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.kind).toBe('fork');
+    expect(node.style).toBe('merge');
+  });
+
+  it('has two branches, same shape as "end fork"', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end merge']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.branches).toHaveLength(2);
+    expect((node.branches[0]?.[0] as ActivityAction).label).toBe('A');
+    expect((node.branches[1]?.[0] as ActivityAction).label).toBe('B');
+  });
 });
 
 // ---------------------------------------------------------------------------
