@@ -1,0 +1,16 @@
+@startuml
+start
+if(t0) then (true)
+    if (t2) then (true)
+        stop
+    else (false)
+        if (t3) then (true)
+            stop
+        else (false)
+            stop
+        endif
+    endif
+else (false)
+    stop
+endif
+@enduml
