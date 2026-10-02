@@ -89,9 +89,34 @@ function pushDiamondLabel(
   );
 }
 
-/** `diamond1` node plus its west/east `if-label` children -- `drawU`'s own
- *  order (hexagon, condition text baked into the node, then west, then
- *  east). @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102 */
+/** `diamond1`'s own label, pushed as its own `'if-own-label'` node (T3k,
+ *  companion fix -- see {@link pushDiamond1}'s own doc). No-ops on an empty
+ *  label, same guard `walk-if-down.ts#pushDiamondOwnLabel` documents. */
+function pushDiamondOwnLabel(diamond: GtileDiamondInside, origin: GPoint, lane: string | undefined, out: Out): void {
+  if (diamond.label === '') return;
+  const node = {
+    id: out.nextId('if-own-label'),
+    kind: 'if-own-label',
+    ...origin,
+    width: diamond.width,
+    height: diamond.height,
+    label: diamond.label,
+  };
+  pushNode(out, node, lane);
+}
+
+/** `diamond1`'s polygon, then its own label, then its west/east children --
+ *  `FtileDiamondInside#drawU`'s own order (hexagon, north/south -- never
+ *  set for this builder, `conditional-builder.ts` only ever calls
+ *  `.withWest`/`.withEast` on this diamond -- then the own label, then
+ *  west, then east). T3k companion fix: `activity-renderer-shapes.ts`'s
+ *  `renderNode` dispatcher now draws the `'if-split'` kind as the polygon
+ *  ALONE (the own label moved to its own node) when labelled, for every
+ *  `'if-split'` producer, including this one -- not listed in T3k's own
+ *  write-set, but unclaimed by any other `batch-3` task and required so
+ *  this walker's own label keeps drawing at all after that shared
+ *  dispatcher change.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102 */
 function pushDiamond1(ctx: IfLinksCtx): void {
   const { t, x, y, myLane, out } = ctx;
   const dX = x + t.diamond1X;
@@ -110,6 +135,7 @@ function pushDiamond1(ctx: IfLinksCtx): void {
     myLane,
   );
   const origin = { x: dX, y: dY };
+  pushDiamondOwnLabel(t.diamond1, origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'west', origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'east', origin, myLane, out);
 }

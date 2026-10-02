@@ -39,8 +39,8 @@ describe('tile-layout — repeat backward: unset (regression safety)', () => {
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('produces no extra action node beyond start/read-data/repeat-start/repeat-cond', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'repeat-start', 'repeat-cond']);
+  it('produces no extra action node beyond start/read-data/repeat-start/condition (T3k: repeat-cond + if-own-label)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'repeat-start', 'repeat-cond', 'if-own-label']);
   });
 });
 
@@ -55,8 +55,15 @@ describe('tile-layout — repeat backward: set (FtileRepeat.java:84,181-187,685-
   const geo = layoutActivity(ast, theme, measurer);
 
   it('the backward node is pulled OUT of the body and pushed as its own action node, LAST (drawU order)', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['start', 'action', 'repeat-start', 'repeat-cond', 'action']);
-    expect(geo.nodes[4]!.label).toBe('go back');
+    expect(geo.nodes.map((n) => n.kind)).toEqual([
+      'start',
+      'action',
+      'repeat-start',
+      'repeat-cond',
+      'if-own-label',
+      'action',
+    ]);
+    expect(geo.nodes[5]!.label).toBe('go back');
   });
 
   it('the body tile itself never receives the backward node (only read-data remains)', () => {
@@ -96,6 +103,10 @@ describe('tile-layout — repeat condition label side: default east/south (backw
     swimlanes: [],
   };
   const geo = layoutActivity(ast, theme, measurer);
+  // T3k: the condition's polygon node (`'repeat-cond'`, now polygon only
+  // -- the own label draws through a sibling `'if-own-label'` node).
+  // `cond.label` is still set on the polygon node (shape-selection
+  // carries it), same text.
   const cond = geo.nodes.find((n) => n.kind === 'repeat-cond')!;
 
   it('east label text renders ("yes") -- the condition hexagon keeps its default side', () => {
@@ -144,8 +155,8 @@ describe('tile-layout — while backward: unset (regression safety)', () => {
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('produces no extra action node beyond while-header/step', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'action']);
+  it('produces no extra action node beyond while-header/step (T3k: while-header + if-own-label)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action']);
   });
 });
 
@@ -157,8 +168,8 @@ describe('tile-layout — while backward: set (FtileWhile.java:85,154-161,561-56
   const geo = layoutActivity(ast, theme, measurer);
 
   it('the backward node is pulled OUT of the body and pushed as its own action node, LAST', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'action', 'action']);
-    expect(geo.nodes[2]!.label).toBe('go back');
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action', 'action']);
+    expect(geo.nodes[3]!.label).toBe('go back');
   });
 
   it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (5 edges: In, Backward1, Backward2, Out x2)', () => {

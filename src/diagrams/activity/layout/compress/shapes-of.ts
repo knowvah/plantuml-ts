@@ -158,6 +158,28 @@ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
 }
 
 /**
+ * `if-own-label`'s text box (T3k, companion fix -- see `shapeForNode`'s own
+ * doc) -- `renderHexagonOwnLabel`'s own `cx`/`cy`/`condSize` geometry
+ * (`activity-renderer-if-shapes.ts`), CENTERED horizontally (unlike {@link
+ * ifLabelShape}'s left-aligned `node.x`), single-line reduction of
+ * `centeredFirstBaselineY` for the baseline (the SAME `ASCENT_FRACTION`
+ * {@link ifLabelShape} already uses, under this file's own name). Before
+ * T3k split the own label into its own node, this text was baked into the
+ * SAME node as the polygon and so had no separate `CompressShape` at all
+ * (`conditionBox`'s hexagon box already bounds it); this restores that
+ * coverage so compression's own overlap invariant (`invariant.test.ts`,
+ * stop 11) still sees it.
+ */
+function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
+  const condSize = activityFontSize(theme, 'diamond');
+  const cx = node.x + node.width / 2;
+  const cy = node.y + node.height / 2;
+  const dim = bounder.getDimension(node.label ?? '', condSize);
+  const baselineY = cy - condSize / 2 + condSize * TITLE_BASELINE_ASCENT;
+  return { kind: 'text', x: cx - dim.width / 2, y: baselineY, width: dim.width, height: dim.height };
+}
+
+/**
  * Maps one `ActivityNodeGeo` to the `CompressShape` `renderNode`
  * (`activity-renderer-shapes.ts`) actually draws for it, or `null` for a
  * kind that draws nothing.
@@ -181,6 +203,8 @@ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
  *   draws `Hexagon.asPolygon(shadowing)`'s 4-point rhombus, whose bounding
  *   box is exactly `[x, x+24] x [y, y+24]`, `Hexagon.java:49-56`).
  * - `if-label` -> `text`, {@link ifLabelShape} (D3).
+ * - `if-own-label` -> `text`, {@link ifOwnLabelShape} (T3k, companion fix
+ *   -- the hexagon's own label, now its own node, see that function's doc).
  * - `note` -> `polygon`, {@link noteBox} (Opale is a `UPath`; `SlotFinder
  *   #drawPath` uses min/max, same as `drawPolygon`).
  * - everything else (start/stop/end/kill/spot/action/group/partition/
@@ -201,6 +225,7 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
     return { kind: 'polygon', x: node.x, y: node.y, width: node.width, height: node.height };
   }
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
+  if (node.kind === 'if-own-label') return ifOwnLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }

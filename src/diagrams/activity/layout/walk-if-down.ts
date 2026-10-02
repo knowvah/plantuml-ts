@@ -59,7 +59,7 @@ function pushEmphasizedEdge(
   if (emphasize !== undefined) out.edges[out.edges.length - 1]!.emphasize = emphasize;
 }
 
-function pushDiamondLabel(ctx: IfDownCtx, side: 'south' | 'west' | 'east', origin: GPoint): void {
+function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'east', origin: GPoint): void {
   const { t, myLane, out } = ctx;
   const l = t.diamond1.labelAt(side);
   if (l === null) return;
@@ -78,11 +78,47 @@ function pushDiamondLabel(ctx: IfDownCtx, side: 'south' | 'west' | 'east', origi
   );
 }
 
-/** `diamond1` node plus its south/west/east `if-label` children --
- *  `FtileDiamondInside#drawU`'s own order (hexagon, south, west, east).
- *  Down never sets `west` pre-swap; post-`swapEastWest()` (`useElse1`) the
- *  side label moves into the `west` slot, so all three are checked
- *  uniformly ({@link pushDiamondLabel} no-ops on an unset slot).
+/** `diamond1`'s own label, pushed as its own `'if-own-label'` node (T3k) --
+ *  {@link pushDiamond1}'s own doc for why it is a separate push, not baked
+ *  into the polygon node. No-ops on an empty label -- the OLD combined push
+ *  relied on `renderNode`'s own `node.label !== ''` dispatch to skip the
+ *  text (`renderDiamond`'s unlabelled shape has no text at all); now that
+ *  the label is its own node, this walker must apply that same guard
+ *  itself, or an empty `<text>` would appear where upstream's unlabelled
+ *  `FtileDiamond` (a different class, no label slot) draws nothing. */
+function pushDiamondOwnLabel(ctx: IfDownCtx, dX: number, dY: number): void {
+  const { t, myLane, out } = ctx;
+  if (t.diamond1.label === '') return;
+  pushNode(
+    out,
+    {
+      id: out.nextId('if-own-label'),
+      kind: 'if-own-label',
+      x: dX,
+      y: dY,
+      width: t.diamond1.width,
+      height: t.diamond1.height,
+      label: t.diamond1.label,
+    },
+    myLane,
+  );
+}
+
+/** `diamond1`'s polygon, then its north/south/own-label/west/east children,
+ *  in `FtileDiamondInside#drawU`'s own order (T3k) -- the polygon and the
+ *  own label are two SEPARATE draw calls upstream, not one combined blob
+ *  (`renderNode`'s own `'if-split'` case draws the polygon only when
+ *  labelled; the own label draws through the `'if-own-label'` node below).
+ *  Still pushed under the ORIGINAL `'if-split'` kind (not a dedicated one)
+ *  so `canvas-origin.ts`'s polygon fudge and `shapes-of.ts`'s condition-box
+ *  treatment, both already keyed on that name, apply unchanged; the SAME
+ *  kind also covers the label-less case (`renderNode`'s own ternary falls
+ *  to `renderDiamond`). Down never sets `west` pre-swap; post-
+ *  `swapEastWest()` (`useElse1`) the side label moves into the `west`
+ *  slot, so all three sides are checked uniformly ({@link pushDiamondLabel}
+ *  no-ops an unset slot); `north` is never set for `diamond1` today
+ *  (`gtile-if-down.ts` only calls `.withSouth`), kept for parity with
+ *  upstream's own unconditional `north.drawU` call.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102 */
 function pushDiamond1(ctx: IfDownCtx): void {
   const { t, x, y, myLane, out } = ctx;
@@ -102,7 +138,9 @@ function pushDiamond1(ctx: IfDownCtx): void {
     myLane,
   );
   const origin = { x: dX, y: dY };
+  pushDiamondLabel(ctx, 'north', origin);
   pushDiamondLabel(ctx, 'south', origin);
+  pushDiamondOwnLabel(ctx, dX, dY);
   pushDiamondLabel(ctx, 'west', origin);
   pushDiamondLabel(ctx, 'east', origin);
 }

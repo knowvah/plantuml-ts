@@ -341,9 +341,13 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // shapes ahead of this triple in `shapesOf`'s flat list. Coordinates
     // dumped directly and confirmed byte-identical to the numbers above
     // (`(467.8749999999999, 591)`, `polygonSkipMode: 'x'` on both sides).
-    'tobajo-64-mipi810 [77,78] polygon×polygon',
-    'tobajo-64-mipi810 [77,79] polygon×polygon',
-    'tobajo-64-mipi810 [78,79] polygon×polygon',
+    // add1-T3k: indices +7 (77->84) -- each labelled condition hexagon's
+    // own label is now its own `'if-own-label'` node ahead of this triple
+    // in `shapesOf`'s flat list (7 new shapes measured directly). Same
+    // coincident triple, same coordinates, only the index shifted.
+    'tobajo-64-mipi810 [84,85] polygon×polygon',
+    'tobajo-64-mipi810 [84,86] polygon×polygon',
+    'tobajo-64-mipi810 [85,86] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -494,8 +498,18 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // shape ahead of this pair in `shapesOf`'s flat list. Coordinates
     // dumped directly and confirmed byte-identical to the numbers above
     // (`264.65625 + 73.3625 === 338.01875` vs `338.01874999999995`).
-    'tobajo-64-mipi810 [17,18] polygon×text',
-    'kitupi-32-jexo155 [0,1] polygon×text',
+    // add1-T3k: `[19,21]` (was `[17,18]`) -- the own label is now its own
+    // `'if-own-label'` node (same split as the `boxoto` entries below),
+    // inserting one new shape ahead of this pair. Same pair, confirmed
+    // byte-identical (`268.65625 + 73.3625 === 342.01875` vs
+    // `342.01874999999995`).
+    'tobajo-64-mipi810 [19,21] polygon×text',
+    // add1-T3k: `[0,2]` (was `[0,1]`) -- the own label is now its own
+    // `'if-own-label'` node, landing at index 1 (between the hexagon and
+    // its west `if-label`), which pushes the west label from index 1 to
+    // 2. Same pair, same mechanism, confirmed byte-identical (hexagon.x
+    // `163.21562499999993` vs label.x+width `163.21562499999995`).
+    'kitupi-32-jexo155 [0,2] polygon×text',
     // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
     // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
     // dump: both hexagons' right edge exactly equals their own `ja`/east
@@ -504,8 +518,20 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // add1-T2a: back to `[27,29]`/`[38,40]` -- `walkRepeat` now draws the
     // repeat body BEFORE its entry diamond (`FtileRepeat#drawU`), so both
     // if-split hexagons inside the body sit one index earlier. Same pairs.
-    'boxoto-53-sifo232 [27,29] polygon×text',
-    'boxoto-53-sifo232 [38,40] polygon×text',
+    // add1-T3k: `[31,33]`/`[43,45]` (were `[27,29]`/`[38,40]`) -- the own
+    // label is now its own `'if-own-label'` node (`FtileDiamondInside
+    // .java:84-102`'s own polygon/label split), inserting one new shape
+    // ahead of each repeat-cond hexagon in `shapesOf`'s flat list. Same
+    // pairs, confirmed byte-identical to the numbers above (polygon width
+    // `267.30625000000003`/`131.1125`, text `x` touching the polygon's
+    // right edge to within 5e-14).
+    // add1-T3k: `[32,35]`/`[45,48]` (were `[31,33]`/`[43,45]`) -- re-measured
+    // after the kind reverted from `'if-shape'` back to `'if-split'`
+    // (`walk-repeat.ts`'s own `'repeat-cond'` copy, same split mechanism).
+    // Same pairs, same coordinates (polygon width `267.30625000000003`/
+    // `131.1125`, text touching the polygon's right edge to within 5e-14).
+    'boxoto-53-sifo232 [32,35] polygon×text',
+    'boxoto-53-sifo232 [45,48] polygon×text',
     // `lopone-15-xiki477 [7,20]` -- see this constant's own doc comment
     // above ("RESOLVED by T1a"): no longer produced, so no longer listed.
     // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,
@@ -532,7 +558,13 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // through four producers, `transformEdge`, `shapes-of.ts` AND
     // `renderer.ts` -- filed as the follow-on mission
     // `activity-emphasize-arrow-atomic-anchor` (planning/next-missions.md).
-    'nerete-42-save418 [22,25] polygon×polygon',
+    // add1-T3k: `[26,29]` (was `[22,25]`) -- the while-header's own label
+    // is now its own `'if-own-label'` node, inserting one new shape ahead
+    // of this pair (`walk-while-branch.ts`'s own `pushWhileHeader`
+    // doc). Same pair and same mechanism, unrelated to this task's own
+    // draw-order fix -- still owned by the `activity-emphasize-arrow-
+    // atomic-anchor` follow-on above.
+    'nerete-42-save418 [26,29] polygon×polygon',
     // `vamazo-19-tufu812 [1,18]`/`[5,13] polygon×polygon` (T1a, mission
     // `activity-divergence-drive`, D2): the SAME "touching becomes an
     // epsilon overlap after a second independent transform" class as

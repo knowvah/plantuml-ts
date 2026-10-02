@@ -61,8 +61,42 @@ function pushDiamondLabel(ctx: LhCtx, diamond: GtileDiamondInside2, side: Diamon
   );
 }
 
-/** Branch `i`'s hexagon node plus its north/west/east `if-label` children
- *  -- `FtileDiamondInside2#drawU`'s own draw order.
+/** Branch `i`'s own label, pushed as its own `'if-own-label'` node (T3k) --
+ *  {@link pushDiamondNode}'s own doc for why it is a separate push, not
+ *  baked into the polygon node. No-ops on an empty label -- the OLD
+ *  combined push relied on `renderNode`'s own `node.label !== ''` dispatch
+ *  to skip the text (`renderDiamond`'s unlabelled shape has no text at
+ *  all); now that the label is its own node, this walker must apply that
+ *  same guard itself. */
+function pushDiamondOwnLabel(ctx: LhCtx, diamond: GtileDiamondInside2, origin: GPoint): void {
+  if (diamond.label === '') return;
+  pushNode(
+    ctx.out,
+    {
+      id: ctx.out.nextId('if-own-label'),
+      kind: 'if-own-label',
+      x: origin.x,
+      y: origin.y,
+      width: diamond.hexWidth,
+      height: diamond.hexHeight,
+      label: diamond.label,
+    },
+    ctx.myLane,
+  );
+}
+
+/** Branch `i`'s polygon, then its north/own-label/west/east children, in
+ *  `FtileDiamondInside2#drawU`'s own order (T3k) -- the polygon and the
+ *  own label are two SEPARATE draw calls upstream, not one combined blob
+ *  (`renderNode`'s own `'if-split'` case draws the polygon only when
+ *  labelled; the own label draws through the `'if-own-label'` node
+ *  above). Still pushed under the ORIGINAL `'if-split'` kind (not a
+ *  dedicated one) so `canvas-origin.ts`'s polygon fudge and
+ *  `shapes-of.ts`'s condition-box treatment, both already keyed on that
+ *  name, apply unchanged; the SAME kind also covers the label-less case
+ *  (`renderNode`'s own ternary falls to `renderDiamond`). `south` is never
+ *  populated on this tile (`gtile-diamond-inside2.ts`'s own doc), so it is
+ *  not called here, unlike `walk-if-down.ts`'s copy.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside2.java:79-99 */
 function pushDiamondNode(ctx: LhCtx, i: number): void {
   const diamond = ctx.t.diamonds[i]!;
@@ -81,6 +115,7 @@ function pushDiamondNode(ctx: LhCtx, i: number): void {
     ctx.myLane,
   );
   pushDiamondLabel(ctx, diamond, 'north', origin);
+  pushDiamondOwnLabel(ctx, diamond, origin);
   pushDiamondLabel(ctx, diamond, 'west', origin);
   pushDiamondLabel(ctx, diamond, 'east', origin);
 }

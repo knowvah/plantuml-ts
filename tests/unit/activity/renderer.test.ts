@@ -314,8 +314,22 @@ describe('renderActivity — diamond node (if-split)', () => {
   });
 
   it('renders a hexagon (6-point polygon) with label text when label is provided', () => {
+    // T3k: the own label is its own `'if-own-label'` node (a REAL walker
+    // -- `walk-if-down.ts#pushDiamondOwnLabel` et al. -- always pushes one
+    // alongside a labelled `'if-split'`); this test provides that sibling
+    // directly rather than through a walker, same scope as the rest of
+    // this file's node-level renderer tests.
     const node = makeNode({ kind: 'if-split', id: 'if-split-1', label: 'Ready?', x: 50, y: 50, width: 80, height: 40 });
-    const geo = makeGeo({ nodes: [node] });
+    const ownLabel = makeNode({
+      kind: 'if-own-label',
+      id: 'if-own-label-1',
+      label: 'Ready?',
+      x: 50,
+      y: 50,
+      width: 80,
+      height: 40,
+    });
+    const geo = makeGeo({ nodes: [node, ownLabel] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('Ready?');
