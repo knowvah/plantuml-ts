@@ -35,6 +35,66 @@ post-D7 measurements.
 
 ---
 
+## `activity-divergence-drive` (add1) — DONE 2026-10-02 (T0a–T3k + T-exit/T-close-out, batches 0–4)
+
+Branch `feat/activity-divergence-drive` off main `d4e29cc8c` (merge commit, not pushed).
+Brief, journal (53 rows) and ledger (134 rows, every `final` set):
+`plans/activity-divergence-drive/`. Halted once (stop 3, D3 named the spot tile;
+the maintainer approved the stop/end-tile write-set) and otherwise ran on push-forwards.
+
+**Counts.** Activity Σ weightedScore over un-pinned baseline rows **60988 → 31111**
+(−49.0%); survey **0/4/369 → 67/56/250**; **67 fixtures byte-frozen** in the new
+`activity.golden.ratchet` (D10 target 30); `error` rows 39 → 38 (fukika promoted).
+Swimlane divider Σ|ours−jar| 4444 → 1795. 0 conformant losses in any engine at four
+closes; 12 non-activity gains (`unknown` activity-syntax fixtures, one class embed).
+The shared note background regenerates `svg-sequence/diff-census.json` (196 fall).
+
+**Fixed (mechanism, Java).** Canvas origin: `TitledDiagram` same(10) + `Recentred`
++5/enlarge(15) + per-shape `LimitFinder` corners incl. `HACK_X_FOR_POLYGON` arrowheads,
+`LaneDivider` `UEmpty`, swimlane title glyphs, `ensureVisible` +1 — and the margin wraps
+the CHROME (`TextBlockExporter.java:159-203`). Text through `DriverTextSvg`; creole
+`[[url]]`/tables in action text. `ArrowsTriangle` under strictuml. `FtileCircleStop`/
+`FtileCircleEndCross` 1:1. kill/detach mutate the previous instruction. `Worm` edge
+order (emphasize before its segment, terminal last). Closed diamonds/hexagons
+(`Hexagon.asPolygon`), own label between south and west (`FtileDiamondInside`; the
+`Gtile*` path is dead, `USE_GTILE=false`). Raw 35 assembly gap + real ON_Y compression
+(the unsourced `NODE_MARGIN_Y=20` is gone). `backward:` box + connectors; keyword `;`
+strip narrowed; repeat-while closer `;?`. `hasPointOut` gate on top-down siblings.
+Per-lane `LimitFinder` lane extents. Bar stroke+fill. Note Opale body/fold, note
+background `#FEFFDD`. `activityDiamond` font handlers. Partition composite frame.
+
+### Open -> add2 (67 rows, by family; mechanisms in `fixtures.md`)
+
+- **Snake.merge** (touching edges fuse; needs a per-edge `MergeStrategy` through the
+  if/while builders, `FtileIfDown.java:512`): becaje, bocaga, jecoxu; backward-connector
+  stroke counts (citire, delide, gokagi).
+- **Opale note spike** (`FtileWithNoteOpale.java:177-191`) + compression reservation;
+  backward note (`InstructionRepeat.addNote`, gokagi); partition title on the group tile.
+- **ConditionStyle InsideDiamond / ConditionEndStyle hline** (`FtileDiamondSquare`,
+  `ConditionalBuilder.getShape2`): carapo, novata, perate, saxeku.
+- **Style core:** ArrowHeadColor (`skinparam-accumulator.ts` field), gradient activity
+  background (`Paint` type), `defaultTextAlignment` (molexa), `ArrowFontSize` inside
+  `skinparam activity{}` (kafevi), `hyperlinkUnderline`/`svgLinkTarget`, url tooltip in
+  `creole-text-lines.ts`.
+- **klimt (stop 8):** `preserveAspectRatio` hardcoded in `document-shell.ts:197` (setecu);
+  `CommandCreoleUrl` `{tooltip}` regex lacks a whitespace boundary (laxibe).
+- **Geometry residuals:** if-with-links label height (bazuma, vimako), cross-lane elbow
+  +5 under compression (7 lane rows), split-bar width (gevaxi), nested assembly order
+  (fivama), table grid lines + `%n()` drawing in `renderAction`.
+- **Instrument:** embedded `{{ }}` 42x42 oracle slot (gufuma, fikuki).
+
+### Flags
+
+- D3 amended mid-mission (journal 18-19). T3j's three title-width risers were
+  conformance-harness drift (`render-fixture-activity.ts` lacked the activity chrome
+  branch), retracted at the b3 close (journal 52).
+- Five agents broke the no-Serena-edit / no-stash rule; three wrote the main checkout,
+  one reported it untouched when it was not. Every instance was a redundant copy of
+  committed work or an empty stash, verified before merging (journal 7, 32, 44, 49).
+- `src/index.ts` is 531 lines (523 on main before this mission) — over the 500-line hook.
+
+---
+
 ## `class-divergence-drive-7` — DONE 2026-09-30 (T0a–T2b + T1e′/T1g′ + T-exit/T-close-out, batches 0–3)
 
 Branch `feat/class-divergence-drive-7` off main `bfa8d8e09` (merge commit, not pushed).
@@ -74,7 +134,7 @@ single-leaf path).
 ### Follow-ons filed here (no class row; mechanisms in the journal)
 
 - **Description:** `theme.colors.noteBackground` #FEFECE vs the jar's #FEFFDD for every
-  note (T1e′); `strictuml` not threaded to the opale gate; a note's text drawn outside its
+  note (T1e′) — **DONE 2026-10-02 by add1-T3d** (`plantuml.skin:3,322-324`); `strictuml` not threaded to the opale gate; a note's text drawn outside its
   `<g class="entity">`; no port of the `(0` middle decor (`CommandLinkElement.java:157`).
 - **Component xufexu-38-fola855** diff-baseline 12 → 27 after the opale note: a uniform
   Δ1 in `computeInkShift`'s origin (rect −1 inset → UPath, `LimitFinder.java:164-166`);
