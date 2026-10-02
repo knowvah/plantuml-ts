@@ -99,6 +99,7 @@ main is clean before every merge; merges, then runs the four gates.
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, ledger, element census tool; harness-parity gate | T0a, T0b | both ∥ | [x] |
+| [1p](batch-1p/overview.md) | missing builders before the merge port (D3 amendment, D12) | T1p-a,c,d,e → T1p-b | wave ∥ | [ ] |
 | [1](batch-1/overview.md) | connector-merge port (D1–D3) | T1a → T1b | serial | [ ] |
 | [2a](batch-2a/overview.md) · [2b](batch-2b/overview.md) | six families (ConditionStyle, Opale/compress, style core, klimt, parser, geometry) | T2a–T2f, T2-close | all ∥ | [ ] |
 | [3](batch-3/overview.md) | drive round on the b2 cohort (ws ≤ 150) | written at b2 close | ∥ | [ ] |

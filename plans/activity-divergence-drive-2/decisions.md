@@ -81,3 +81,29 @@ a core skinparam handler + theme field, surveyed across all engines.
 add1's worktree rules plus: no Serena MCP tools at all (read included); no
 `git stash`; scratch files carry the task ID; orchestrator checks `git status` on
 main before every merge; merge commit at close; never push.
+
+## D3 amendment (2026-10-02, user option 2 after stop-12 halt, journal row 5)
+T1a's census found 17 Java connections with no walker counterpart. They are
+ported BEFORE T1b, as batch **1p** (D12), so the merge port covers every live
+connection. After 1p, T1b re-runs T1a's MISSING list against the code: any
+site still MISSING is stop 12 again.
+
+## D12: missing builders are ported 1:1 in batch 1p
+Each builder is mirrored from its Java class (structure, names, connection
+classes, `withMerge` strategy recorded as a comment citing file:line for T1b
+to wire — T1b owns the `mergeable` field). Scope, from
+`measurements/connection-census.md` §1:
+- T1p-a `ConditionEndStyle.HLINE` (`FtileIfDown.java:409-522`,
+  `FtileIfWithLinks.java:421-537`) + its skinparam (D9: core handler + theme).
+- T1p-b `FtileIfLongVertical` (`vcompact/FtileIfLongVertical.java`, gated by
+  `!pragma useVerticalIf`, `FtileFactoryDelegatorIf.java:85-89`).
+- T1p-c `ParallelBuilderMerge` (`fork … end merge`,
+  `FtileFactoryDelegatorCreateParallel.java:60`) incl. parser acceptance.
+- T1p-d `FtileFactoryDelegatorRepeat` break welding + `FtileRepeat.java:308-329`
+  cross-swimlane `ConnectionOut`.
+- T1p-e `FtileSwitchWithManyLinks.java:297-end` cross-swimlane connections.
+No corpus fixture exercises vertical-if (dulate's pragma is commented out);
+where the corpus has none, authored `.puml` + jar oracle SVG live in
+`tests/fixtures/activity/<task>/` (CLAUDE.md: the corpus is not a ceiling).
+Authored fixtures are NOT added to the gated activity corpus (memory:
+new-corpus-tree-trips-two-gates).

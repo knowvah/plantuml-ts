@@ -8,6 +8,10 @@ Agent: typescript-pro, worktree `add2-T1b`. Commits per mechanism:
 interface input — every strategy assignment cites the Java line it records).
 
 ## Task
+0. Re-check T1a's §1 MISSING list against the code after batch 1p; any site
+   still MISSING is stop 12. Re-verify the two flagged sites (FtileIfWithLinks
+   ConnectionVerticalOut, FtileWhile ConnectionOutSpecial) and test the
+   FtileGroup scope boundary in isolation (T1a merge case F was confounded).
 1. `ActivityEdgeGeo.mergeable: 'FULL' | 'LIMITED' | 'NONE'` (default FULL) and
    whatever text/decoration flags `Snake.merge` reads.
 2. NEW `src/diagrams/activity/layout/snake-merge.ts`: pure port of
