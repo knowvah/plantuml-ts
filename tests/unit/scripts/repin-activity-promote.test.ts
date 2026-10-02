@@ -46,8 +46,23 @@ describe('promoteErrorRows', () => {
     { slug: 'still-errors', status: 'error', reason: 'r1' },
     { slug: 'now-renders', status: 'error', reason: 'r2' },
     { slug: 'already', status: 'baseline', weightedScore: 7 },
+    { slug: 'frozen', status: 'pinned', weightedScore: 0, diffCount: 0 },
   ];
   const measure = (slug: string) => (slug === 'now-renders' ? { weightedScore: 9, diffCount: 1 } : undefined);
+
+  // add1-T0b (D5): a "pinned" row is skipped by the SAME `status !== 'error'`
+  // guard that already skips "baseline" rows -- no new condition exists for
+  // it, so this proves the skip rather than assuming it from the absence of
+  // an "error" status match.
+  it('a "pinned" row (golden ratchet already owns it) is never touched or measured', () => {
+    const fixtures = rows();
+    const measureSpy = vi.fn(measure);
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    promoteErrorRows(fixtures, measureSpy, DATES, { label: 'diff-baseline', write: true });
+    log.mockRestore();
+    expect(measureSpy).not.toHaveBeenCalledWith('frozen');
+    expect(fixtures[3]).toEqual({ slug: 'frozen', status: 'pinned', weightedScore: 0, diffCount: 0 });
+  });
 
   it('promotes only the error row that now measures, and only when write is true', () => {
     const fixtures = rows();

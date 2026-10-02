@@ -1,0 +1,7 @@
+@startuml
+!$list = %splitstr("abc~def", "~")
+start
+!foreach $item in $list
+:$item;
+!endfor
+@enduml

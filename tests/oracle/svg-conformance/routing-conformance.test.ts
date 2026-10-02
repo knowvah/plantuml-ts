@@ -820,10 +820,25 @@ describe('routing conformance — jar-error classification', () => {
     // 5095 -> 5099 / 6109 -> 6113 at class-divergence-drive-7/close-b2
     // (2026-09-30): 4 more clone rows (bonaco, rojida, tefeco, xuloxo), same
     // shape. Derivation: 5099 + 909 + 105 = 6113.
-    expect(pinnedAgree.length).toBe(5099);
+    //
+    // 5099 -> 5134 / 6113 -> 6148 at activity-divergence-drive/close-b1
+    // (2026-09-30): 35 `goldens:svg-activity/<slug>` clone rows for the first
+    // activity golden-ratchet pins, each the byte-identical twin of its
+    // dot-cache row (all `agree`, ACTIVITY/ACTIVITY). Derivation:
+    // 5134 + 909 + 105 = 6148.
+    //
+    // 5134 -> 5138 / 6148 -> 6152 at add1/close-b1b (2026-10-01): 4 more
+    // svg-activity clone rows, same shape. Derivation: 5138 + 909 + 105 = 6152.
+    //
+    // 5138 -> 5154 / 6152 -> 6168 at add1/close-b2 (2026-10-01): 16 more
+    // svg-activity clone rows, same shape. Derivation: 5154 + 909 + 105 = 6168.
+    //
+    // 5154 -> 5166 / 6168 -> 6180 at add1/close-b3 (2026-10-02): 12 more
+    // svg-activity clone rows, same shape. Derivation: 5166 + 909 + 105 = 6180.
+    expect(pinnedAgree.length).toBe(5166);
     expect(pinnedMisroutes.length).toBe(909);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6113);
+    expect(manifest.fixtures.length).toBe(6180);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

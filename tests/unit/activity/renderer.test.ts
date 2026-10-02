@@ -169,14 +169,19 @@ describe('renderActivity — fork-bar node', () => {
   // shortened by `svg-format.ts#shortenColor` to `#555` on emission, NOT
   // `theme.colors.border` (`#181818`, the jar's own outline colour;
   // apc-T3/D4). Was pinned to the wrong colour before this task.
-  it('fork bar fill is the resolved activityBar colour (#555), rounded, no stroke', () => {
+  //
+  // T3a (garuga-34-debe901): `FtileBlackBlock#drawU`'s `ug.apply(colorBar)
+  // .apply(colorBar.bg()).draw(rect)` (`FtileBlackBlock.java:110`) strokes
+  // AND fills in the SAME resolved colour -- stroke is never absent.
+  it('fork bar fill is the resolved activityBar colour (#555), rounded, stroked in the same colour', () => {
     const node = makeNode({ kind: 'fork-bar', id: 'fork-bar-0', x: 50, y: 50, width: 200, height: 6 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     expect(result).toContain('fill="#555"');
     expect(result).toContain('rx="2.5"');
     expect(result).toContain('ry="2.5"');
-    expect(result).not.toContain('stroke=');
+    expect(result).toContain('stroke="#555"');
+    expect(result).toContain('stroke-width="1"');
   });
 });
 
@@ -309,18 +314,38 @@ describe('renderActivity — diamond node (if-split)', () => {
   });
 
   it('renders a hexagon (6-point polygon) with label text when label is provided', () => {
+    // T3k: the own label is its own `'if-own-label'` node (a REAL walker
+    // -- `walk-if-down.ts#pushDiamondOwnLabel` et al. -- always pushes one
+    // alongside a labelled `'if-split'`); this test provides that sibling
+    // directly rather than through a walker, same scope as the rest of
+    // this file's node-level renderer tests.
     const node = makeNode({ kind: 'if-split', id: 'if-split-1', label: 'Ready?', x: 50, y: 50, width: 80, height: 40 });
-    const geo = makeGeo({ nodes: [node] });
+    const ownLabel = makeNode({
+      kind: 'if-own-label',
+      id: 'if-own-label-1',
+      label: 'Ready?',
+      x: 50,
+      y: 50,
+      width: 80,
+      height: 40,
+    });
+    const geo = makeGeo({ nodes: [node, ownLabel] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     expect(content).toContain('Ready?');
     expect(content).toContain('<text');
-    // Hexagon has 6 coordinate pairs; diamond has 4. The attribute is FLAT
-    // comma-separated, as the jar writes it (`svg-shapes.ts#polygon`), so the
-    // pairs are counted from the number of values rather than from spaces.
+    // Hexagon has 6 DISTINCT coordinate pairs, but `Hexagon.asPolygon(
+    // shadowing, width, height)` (`Hexagon.java:65-74`) calls `addPoint`
+    // SEVEN times, re-adding the first point `(hexagonHalfSize, 0)` as the
+    // closing point after `(0, height/2)` (`Hexagon.java:68,74`) --
+    // `UPolygon` does not close itself on draw, so the emitted `points`
+    // carries 7 pairs (T2f mechanism 1, `daxare-39-buci637`). The attribute
+    // is FLAT comma-separated, as the jar writes it (`svg-shapes.ts
+    // #polygon`), so the pairs are counted from the number of values
+    // rather than from spaces.
     const pointsMatch = content.match(/points="([^"]+)"/);
     const values = pointsMatch?.[1]?.trim().split(',').length ?? 0;
-    expect(values / 2).toBe(6);
+    expect(values / 2).toBe(7);
   });
 });
 
@@ -389,10 +414,10 @@ describe('renderActivity — action node with custom color', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Test 9: end and kill nodes render two circles like stop
+// Test 9: end nodes render a crossed circle; kill/detach draw nothing (T2b)
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — end and kill nodes', () => {
+describe('renderActivity — end nodes', () => {
   it('end renders a circle with an X (two diagonal lines)', () => {
     const node = makeNode({ kind: 'end', id: 'end-0', x: 50, y: 50, width: 28, height: 28 });
     const geo = makeGeo({ nodes: [node] });
@@ -403,15 +428,6 @@ describe('renderActivity — end and kill nodes', () => {
     // end = single bordered circle with 2 crossing lines (the X)
     expect(ellipseCount).toBeGreaterThanOrEqual(1);
     expect(lineCount).toBeGreaterThanOrEqual(2);
-  });
-
-  it('kill renders two circles like stop', () => {
-    const node = makeNode({ kind: 'kill', id: 'kill-0', x: 50, y: 50, width: 28, height: 28 });
-    const geo = makeGeo({ nodes: [node] });
-    const result = assembleSvg(renderActivity(geo, theme));
-    const content = contentAfterDefs(result);
-    const ellipseCount = (content.match(/<ellipse/g) ?? []).length;
-    expect(ellipseCount).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -458,13 +474,17 @@ describe('renderActivity — edge with label', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — if-merge node', () => {
-  it('renders one rhombus polygon at (x+12,y) (x+24,y+12) (x+12,y+24) (x,y+12)', () => {
+  it('renders one rhombus polygon at (x+12,y) (x+24,y+12) (x+12,y+24) (x,y+12), closed', () => {
     const node = makeNode({ kind: 'if-merge', x: 10, y: 20, width: 24, height: 24 });
     const geo = makeGeo({ nodes: [node] });
     const result = assembleSvg(renderActivity(geo, theme));
     const content = contentAfterDefs(result);
     const pointsMatch = content.match(/points="([^"]+)"/);
-    expect(pointsMatch?.[1]).toBe('22,20,34,32,22,44,10,32');
+    // `Hexagon.asPolygon(double)` (`Hexagon.java:48-55`) calls `addPoint`
+    // FIVE times, re-adding `(12,0)` as the closing point after `(0,12)`
+    // (`Hexagon.java:51,55`) -- `UPolygon` does not close itself on draw
+    // (T2f mechanism 1, `daxare-39-buci637`).
+    expect(pointsMatch?.[1]).toBe('22,20,34,32,22,44,10,32,22,20');
   });
 
   it('carries the diamond bucket line thickness (`activityLineThickness(theme, "diamond")`)', () => {
@@ -494,6 +514,16 @@ describe('renderActivity — if-label node', () => {
     expect(textMatch).not.toBeNull();
     expect(Number(textMatch![1])).toBe(10);
     expect(Number(textMatch![2])).toBeCloseTo(20 + 11 * (1 - 1 / 4.5), 2);
+  });
+
+  // T1b follow-up (D1): if-label now draws through `drawActivityText`, so
+  // its 3-char "yes" label carries a real textLength (upstream's own
+  // `text.length() > 1` guard) instead of core/svg.ts#text's unset one.
+  it('carries a real textLength (D1 — routed through DriverTextSvg)', () => {
+    const node = makeNode({ kind: 'if-label', label: 'yes', x: 10, y: 20 });
+    const geo = makeGeo({ nodes: [node] });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect(content).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>yes<\/text>/);
   });
 });
 
@@ -695,6 +725,34 @@ describe('renderActivity — edge with emphasize', () => {
     const hasMidpointTip = polygons.some((p) => p.includes('0,15'));
     expect(hasMidpointTip).toBe(true);
   });
+
+  // T3a: `Worm#drawInternalOneColor`'s per-segment loop (`ftile/Worm.java:
+  // 134-144`) draws the emphasize decoration BEFORE the matching segment's
+  // OWN `ULine`, interleaved with the other plain segment lines -- never
+  // before or after the whole run. The terminal (`endDecoration`) draw sits
+  // BELOW that loop (`:164-171`), after every segment.
+  it('draws the emphasis arrowhead before its own segment, terminal arrowhead last', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+            { x: 50, y: 30 },
+            { x: 50, y: 90 },
+          ],
+          emphasize: 'down',
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const tags = [...content.matchAll(/<(line|polygon)/g)].map((m) => m[1]);
+    // emphasize polygon, THEN its segment's line, THEN the other two
+    // segment lines, THEN the terminal polygon -- never segments-then-both-
+    // arrowheads.
+    expect(tags).toEqual(['polygon', 'line', 'line', 'line', 'polygon']);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -864,10 +922,17 @@ describe('renderActivity — activity theme colors', () => {
     expect(svg).toContain('fill="#00F"');
   });
 
-  it('stop node uses activityEndColor', () => {
-    const geo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
-    const svg = assembleSvg(renderActivity(geo, activityTheme));
-    expect(svg).toContain('fill="#FF0"');
+  it('end node uses activityEndColor; stop does NOT (separate skinparam targets)', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` ->
+    // `SName.circle, SName.end`; `activityStopColor` -> `SName.circle,
+    // SName.stop` (own, unwired skinparam). T2f mechanism 7.
+    const endGeo = makeGeo({ nodes: [makeNode({ kind: 'end', width: 16, height: 16 })] });
+    const endSvg = assembleSvg(renderActivity(endGeo, activityTheme));
+    expect(endSvg).toContain('#FF0');
+
+    const stopGeo = makeGeo({ nodes: [makeNode({ kind: 'stop', width: 16, height: 16 })] });
+    const stopSvg = assembleSvg(renderActivity(stopGeo, activityTheme));
+    expect(stopSvg).not.toContain('#FF0');
   });
 
   it('action node uses activityBackgroundColor', () => {
@@ -1087,6 +1152,44 @@ describe('renderActivity — arrowhead is ArrowsRegular (akc-T1)', () => {
     const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
     const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
     expect(coordCount).toBe(8); // 4 points x (x, y)
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T1b (decisions.md#D4) — `skinparam style strictuml` selects `ArrowsTriangle`
+// (SkinParam.java:1306-1309): a 3-point polygon, byte-identical in every
+// OTHER regard (fill/stroke/stroke-width) to the ArrowsRegular draw above.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — ArrowsTriangle under skinparam style strictuml (D4)', () => {
+  const edge = {
+    points: [
+      { x: 10, y: 10 },
+      { x: 10, y: 60 },
+    ],
+  };
+
+  it('a downward edge draws the 3-point asToDown triangle translated to the tip (10,60)', () => {
+    // asToDown relative to the tip: (-4,-10),(4,-10),(0,0) (ArrowsTriangle
+    // .java:57-61); translated by the tip (10,60): (6,50),(14,50),(10,60).
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,14,50,10,60');
+  });
+
+  it("three points, not ArrowsRegular's four, under strictuml", () => {
+    const strictTheme = { ...theme, strictUml: true };
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), strictTheme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    const coordCount = pointsMatch?.[1]?.split(',').length ?? 0;
+    expect(coordCount).toBe(6); // 3 points x (x, y)
+  });
+
+  it('a non-strictuml fixture keeps the byte-identical ArrowsRegular 4-point draw', () => {
+    const content = contentAfterDefs(assembleSvg(renderActivity(makeGeo({ edges: [edge] }), theme)));
+    const pointsMatch = content.match(/<polygon[^>]*points="([^"]+)"/);
+    expect(pointsMatch?.[1]).toBe('6,50,10,60,14,50,10,54');
   });
 });
 

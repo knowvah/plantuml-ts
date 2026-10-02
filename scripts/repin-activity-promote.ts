@@ -16,6 +16,13 @@
  * supplied by the caller as `measure`) returns instead of throwing. A row
  * that still throws is untouched. Nothing is written unless `write` is
  * true; every promotion is printed as `PROMOTED <file> <slug>` either way.
+ *
+ * A `"pinned"` row (add1-T0b, D5 of `plans/activity-divergence-drive/
+ * decisions.md`) is skipped by the SAME `f.status !== 'error'` guard below
+ * that already skips `"baseline"`/`"jar-error"` rows -- `"pinned"` is
+ * never `"error"`, so no new condition was needed to keep this promotion
+ * pass from touching a row `pin-goldens.mts` already froze into the golden
+ * ratchet.
  */
 
 /** The fields a promoted row gains; the file decides which are present. */

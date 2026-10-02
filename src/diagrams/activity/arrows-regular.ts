@@ -1,17 +1,21 @@
 /**
- * `ArrowsRegular` — the default activity-diagram arrowhead decoration.
+ * `ArrowsRegular`/`ArrowsTriangle` — the activity-diagram arrowhead
+ * decorations, selected on `skinparam style strictuml` (D4).
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/ArrowsRegular.java:41-86
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/ArrowsTriangle.java:41-82
  * @see net/sourceforge/plantuml/klimt/Arrows.java:52-66 (`asTo` dispatch)
  * @see net/sourceforge/plantuml/utils/Direction.java:110-128 (`fromVector`)
+ * @see net/sourceforge/plantuml/skin/SkinParam.java:1306-1309 (`arrows()`'s
+ *      `strictUmlStyle() ? new ArrowsTriangle() : new ArrowsRegular()`)
  *
- * `ArrowsRegular` is the default arrow decoration
- * (`skin/SkinParam.java:1308-1309`); `ArrowsTriangle` is only reachable
- * under a style and stays filed (unported). Occupancy for the
- * `activity-klimt-compress` mission's slot finder (D3, batch-1 T1) depends
- * on this polygon's extents, so it is ported first and shared between the
- * renderer and (in T3) the slot finder.
+ * `ArrowsRegular` is the default arrow decoration; `ArrowsTriangle` is
+ * reachable only under `skinparam style strictuml` (decisions.md#D4).
+ * Occupancy for the `activity-klimt-compress` mission's slot finder (D3,
+ * batch-1 T1) depends on `ArrowsRegular`'s extents, so that one stays the
+ * un-themed default `arrowHeadPoints`/`arrowHeadExtents` below resolve to.
  */
+import type { Theme } from '../../core/theme.js';
 
 /** One of the four axis-aligned arrow directions `Arrows#asTo` dispatches
  *  on (`klimt/Arrows.java:52-66`). Upstream's `Direction` enum also has
@@ -64,6 +68,59 @@ export function arrowHeadPoints(dir: ArrowDir): ReadonlyArray<{ x: number; y: nu
         { x: DELTA1 - 4, y: 0 },
       ];
   }
+}
+
+/**
+ * `ArrowsTriangle`'s four direction points (`ArrowsTriangle.java:41-82`) --
+ * the SAME `delta1`/`delta2` dispatch as {@link arrowHeadPoints}, but a
+ * 3-point polygon each (tip + two base corners, no waist point). Point
+ * INSERTION ORDER matches the Java exactly, since the `points=` attribute
+ * preserves it (same acceptance contract as `arrowHeadPoints`'s own doc
+ * comment) -- note `asToDown`'s order is `(-4,-10),(4,-10),(0,0)`, NOT
+ * `(-4,-10),(0,0),(4,-10)` the way `arrowHeadPoints('down')` orders it.
+ */
+export function arrowHeadPointsTriangle(dir: ArrowDir): ReadonlyArray<{ x: number; y: number }> {
+  switch (dir) {
+    // asToUp: (-4,10),(0,0),(4,10) -- ArrowsTriangle.java:48-52
+    case 'up':
+      return [
+        { x: -DELTA2, y: DELTA1 },
+        { x: 0, y: 0 },
+        { x: DELTA2, y: DELTA1 },
+      ];
+    // asToDown: (-4,-10),(4,-10),(0,0) -- ArrowsTriangle.java:57-61
+    case 'down':
+      return [
+        { x: -DELTA2, y: -DELTA1 },
+        { x: DELTA2, y: -DELTA1 },
+        { x: 0, y: 0 },
+      ];
+    // asToRight: (-10,-4),(0,0),(-10,4) -- ArrowsTriangle.java:66-70
+    case 'right':
+      return [
+        { x: -DELTA1, y: -DELTA2 },
+        { x: 0, y: 0 },
+        { x: -DELTA1, y: DELTA2 },
+      ];
+    // asToLeft: (10,-4),(0,0),(10,4) -- ArrowsTriangle.java:75-79
+    case 'left':
+      return [
+        { x: DELTA1, y: -DELTA2 },
+        { x: 0, y: 0 },
+        { x: DELTA1, y: DELTA2 },
+      ];
+  }
+}
+
+/**
+ * `SkinParam.java:1306-1309`: `arrows()` returns `new ArrowsTriangle()`
+ * under `skinparam style strictuml`, else `new ArrowsRegular()` (D4).
+ * `theme.strictUml` is the same flag `skinparam-key-handlers-table-a.ts`
+ * already sets for `skinparam style strictuml` (`core/theme.ts:113`) --
+ * no new theme field.
+ */
+export function arrowHeadPointsFor(theme: Theme, dir: ArrowDir): ReadonlyArray<{ x: number; y: number }> {
+  return theme.strictUml === true ? arrowHeadPointsTriangle(dir) : arrowHeadPoints(dir);
 }
 
 /**

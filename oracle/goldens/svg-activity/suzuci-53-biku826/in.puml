@@ -1,0 +1,9 @@
+@startuml
+skinparam activityArrowFontColor red
+start
+if (foo) then (foo1)
+:bar1;
+else (foo2)
+:bar2;
+endif
+@enduml

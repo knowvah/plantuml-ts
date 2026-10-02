@@ -9,6 +9,9 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java
  */
 
+import { edgeInkX, fudgeX, isInkless } from './canvas-origin.js';
+import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
+
 export interface SwimlaneContext {
   name: string;
   x: number;
@@ -27,11 +30,33 @@ export function buildSwimlaneContexts(laneNames: string[], startX: number, laneW
 // Content extents
 // ---------------------------------------------------------------------------
 
-/** A single placed item bucketed into a lane by its `swimlane` field. */
+/**
+ * A single placed item bucketed into a lane by its `swimlane` field.
+ * `kind` (T3i, mirrors `ActivityNodeGeo.kind`) selects the SAME per-shape
+ * `LimitFinder` fudge {@link measureLaneExtents} applies -- optional so
+ * existing call sites/tests that pass a bare box (no fudge, matching the
+ * pre-T3i behavior) are unaffected; every production caller
+ * (`swimlane-placement.ts#measureLanes`) supplies it.
+ */
 export interface LaneItem {
   readonly swimlane?: string;
+  readonly kind?: string;
   readonly x: number;
   readonly width: number;
+}
+
+/**
+ * One same-lane edge (T3i): both endpoints resolve to the SAME lane, so
+ * its arrowhead ink widens exactly that lane's own extent -- mirrors
+ * `Swimlanes#computeDrawingWidths`'s per-lane `LimitFinder` seeing every
+ * draw call a lane's own content makes, edges included. A cross-lane edge
+ * is never passed here: upstream draws those through the SEPARATE `Cross`
+ * class (`Swimlanes.java:184-212`) AFTER `computeDrawingWidths` has
+ * already run, so it contributes to no lane's own `getMinMax()`.
+ */
+export interface LaneEdge {
+  readonly swimlane: string;
+  readonly edge: ActivityEdgeGeo;
 }
 
 /**
@@ -46,6 +71,47 @@ export interface LaneExtent {
   readonly maxX: number;
 }
 
+/** `{ minX, maxX }` accumulation starting point -- a pure identity value
+ *  for {@link mergeExtent} so each contributor pass reduces the same way. */
+const EMPTY_EXTENT: LaneExtent = { minX: Number.POSITIVE_INFINITY, maxX: Number.NEGATIVE_INFINITY };
+
+function mergeExtent(acc: LaneExtent, next: LaneExtent): LaneExtent {
+  return { minX: Math.min(acc.minX, next.minX), maxX: Math.max(acc.maxX, next.maxX) };
+}
+
+/** This lane's own items' extent, fudged per {@link fudgeX}. Split from
+ *  {@link laneExtentOf} only to keep that function's own complexity under
+ *  the file's limit (T3i added the sibling edge pass). */
+function itemsExtentOf(name: string, items: readonly LaneItem[]): LaneExtent {
+  let acc = EMPTY_EXTENT;
+  for (const item of items) {
+    if (item.swimlane !== name || isInkless(item.kind ?? '')) continue;
+    const fudge = fudgeX(item.kind ?? '');
+    acc = mergeExtent(acc, { minX: item.x - fudge.near, maxX: item.x + item.width + fudge.far });
+  }
+  return acc;
+}
+
+/** This lane's own same-lane edges' extent (T3i, {@link LaneEdge}'s own
+ *  doc). Split from {@link laneExtentOf} for the same reason as
+ *  {@link itemsExtentOf}. */
+function edgesExtentOf(name: string, edges: readonly LaneEdge[]): LaneExtent {
+  let acc = EMPTY_EXTENT;
+  for (const laneEdge of edges) {
+    if (laneEdge.swimlane !== name) continue;
+    acc = mergeExtent(acc, edgeInkX(laneEdge.edge));
+  }
+  return acc;
+}
+
+/** One lane's extent over its own items plus its own same-lane edges,
+ *  split from {@link measureLaneExtents} only to keep that function's own
+ *  complexity under the file's limit (T3i added the edge pass). */
+function laneExtentOf(name: string, items: readonly LaneItem[], edges: readonly LaneEdge[]): LaneExtent {
+  const merged = mergeExtent(itemsExtentOf(name, items), edgesExtentOf(name, edges));
+  return merged.minX === Number.POSITIVE_INFINITY ? { minX: 0, maxX: 0 } : merged;
+}
+
 /**
  * Measures each named lane's content extent from a flat list of placed
  * items (nodes today; edges/labels are a listed follow-on). An item whose
@@ -56,21 +122,29 @@ export interface LaneExtent {
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:379-395
  *   -- `computeDrawingWidths`, the LimitFinder-per-lane draw-interception
- *   pass this diverges from per D1 (our own geometry, not draw
- *   interception -- our engine already holds every node's coordinates).
+ *   pass. D1 diverged from this (our own geometry, not draw interception --
+ *   our engine already holds every node's coordinates), but a lane's own
+ *   `getMinMax()` is populated by the SAME `LimitFinder` class the whole-
+ *   canvas scan uses (`klimt/drawing/LimitFinder.java:170-211`), so its
+ *   per-shape fudge (`canvas-origin.ts#fudgeX`) applies here too -- a raw
+ *   node box is 1-2px off every lane whose boundary item is a
+ *   rect/ellipse/polygon kind (T3i, `jakuco-69-dari135`/`sikino-19-
+ *   vuca111`/others: box content landed exactly `RECT_FUDGE.near` too far
+ *   left because this function read the raw box edge, not its ink). A
+ *   same-lane edge's own arrowhead `UPolygon` ink ({@link LaneEdge},
+ *   `canvas-origin.ts#edgeInkX`) can ALSO widen a lane beyond its node
+ *   boxes (T3i, `pakema-21-xema183` lane `A`: box ink `[25, 51.675]`,
+ *   arrowhead ink (`POLYGON_FUDGE_X` +-10) `[25.338, 53.338]` -- the
+ *   arrowhead's far corner wins, widening the lane's own content span by
+ *   1.663 to exactly match the jar).
  */
-export function measureLaneExtents(items: readonly LaneItem[], laneNames: readonly string[]): Map<string, LaneExtent> {
+export function measureLaneExtents(
+  items: readonly LaneItem[],
+  edges: readonly LaneEdge[],
+  laneNames: readonly string[],
+): Map<string, LaneExtent> {
   const extents = new Map<string, LaneExtent>();
-  for (const name of laneNames) {
-    let minX = Number.POSITIVE_INFINITY;
-    let maxX = Number.NEGATIVE_INFINITY;
-    for (const item of items) {
-      if (item.swimlane !== name) continue;
-      minX = Math.min(minX, item.x);
-      maxX = Math.max(maxX, item.x + item.width);
-    }
-    extents.set(name, minX === Number.POSITIVE_INFINITY ? { minX: 0, maxX: 0 } : { minX, maxX });
-  }
+  for (const name of laneNames) extents.set(name, laneExtentOf(name, items, edges));
   return extents;
 }
 

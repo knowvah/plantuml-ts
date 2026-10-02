@@ -16,6 +16,7 @@ import {
   parseFiniteNumber,
   parseFiniteInt,
   parseNonZeroInt,
+  parseFontStyleFlags,
 } from './skinparam-key-handlers-shared.js';
 import { ActorStyle } from './skin/ActorStyle.js';
 import type { ElementColors } from './theme-graph-colors.js';
@@ -423,6 +424,48 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
     ['genericdisplay'],
     (acc, value) => {
       if (value.trim().toLowerCase() === 'old') acc.genericDisplayOld = true;
+    },
+  ],
+  // T3d: `addConFont("activityDiamond", SName.diamond)`
+  // (`FromSkinparamToStyle.java:147`) registers all four FontSize/FontStyle/
+  // FontColor/FontName keys on `SName.diamond` -- the SAME `diamond` bucket
+  // `activityFontSize`/`activityFontColor` (`activity-style-defaults.ts`,
+  // `activity-text-style.ts`) already read via `theme.colors.elements
+  // .diamond`, unlike the BackgroundColor/BorderColor pair (table-b.ts,
+  // dedicated accumulator fields predating this bucket). `diamond` is
+  // already an `ELEMENT_BUCKET_SNAMES` member, but the COMPOUND
+  // `activitydiamond*` key never reaches the generic
+  // `matchElementFontSizeKey` fallback (its suffix-strip would leave
+  // `activitydiamond`, not `diamond`), so each needs its own dedicated
+  // entry, mirroring `applyBorderStyle`'s `acc.elements[sname] ??= {}`
+  // shape. Placed here (table-a, not table-b) only to stay under the
+  // 500-line hook -- these are brand-new keys with no prior entry to stay
+  // in source order relative to, so appending here cannot reorder
+  // anything (cdd6 T1a precedent, same file, line above).
+  // @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:147,424-429
+  [
+    ['activitydiamondfontsize'],
+    (acc, value) => {
+      const size = parseFiniteNumber(value);
+      if (size !== undefined) (acc.elements['diamond'] ??= {}).fontSize = size;
+    },
+  ],
+  [
+    ['activitydiamondfontstyle'],
+    (acc, value) => {
+      (acc.elements['diamond'] ??= {}).fontStyle = parseFontStyleFlags(value);
+    },
+  ],
+  [
+    ['activitydiamondfontcolor'],
+    (acc, _v, _color, paint) => {
+      (acc.elements['diamond'] ??= {}).font = paint;
+    },
+  ],
+  [
+    ['activitydiamondfontname'],
+    (acc, value) => {
+      (acc.elements['diamond'] ??= {}).fontFamily = value;
     },
   ],
   // cdd6 T1a: `<sname>BorderStyle` for every addMagic SName (new keys, so

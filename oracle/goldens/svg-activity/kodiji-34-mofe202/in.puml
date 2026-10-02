@@ -1,0 +1,4 @@
+@startuml
+skinparam backgroundColor transparent
+start
+@enduml

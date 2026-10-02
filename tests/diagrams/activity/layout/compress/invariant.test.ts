@@ -54,7 +54,6 @@ import {
   assignCoordinatesFull,
   type AssignCoordinatesResult,
 } from '../../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
-import { LAYOUT_MARGIN } from '../../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import { shapesOf, type CompressShape } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import { occupiesOn, overlaps } from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
@@ -72,6 +71,15 @@ interface BaselineFixture {
 interface DiffBaselineManifest {
   readonly fixtures: readonly BaselineFixture[];
 }
+
+// T1a (D2): see `edge-draw-order.test.ts`'s own identical comment -- the
+// dynamic canvas-origin shift makes this value's absolute effect
+// unobservable; kept only to catch a hardcoded-zero regression. "before"
+// and "after" each compute their OWN shift independently (ink extent can
+// differ pre/post compression), which is fine here: this file's own
+// assertions (`occupiesOn`/`overlaps`) are about RELATIVE shape adjacency,
+// invariant to either run's uniform translation.
+const LAYOUT_MARGIN = 12;
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as DiffBaselineManifest;
 const baselineFixtures = manifest.fixtures.filter((f) => f.status === 'baseline');
@@ -333,9 +341,13 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // shapes ahead of this triple in `shapesOf`'s flat list. Coordinates
     // dumped directly and confirmed byte-identical to the numbers above
     // (`(467.8749999999999, 591)`, `polygonSkipMode: 'x'` on both sides).
-    'tobajo-64-mipi810 [77,78] polygon×polygon',
-    'tobajo-64-mipi810 [77,79] polygon×polygon',
-    'tobajo-64-mipi810 [78,79] polygon×polygon',
+    // add1-T3k: indices +7 (77->84) -- each labelled condition hexagon's
+    // own label is now its own `'if-own-label'` node ahead of this triple
+    // in `shapesOf`'s flat list (7 new shapes measured directly). Same
+    // coincident triple, same coordinates, only the index shifted.
+    'tobajo-64-mipi810 [84,85] polygon×polygon',
+    'tobajo-64-mipi810 [84,86] polygon×polygon',
+    'tobajo-64-mipi810 [85,86] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -349,8 +361,9 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // both pairs are `hard=false` (`occupiesOn(a, 'x')` is false on the
     // `empty` shape in both), so this is the pinned non-hard class, not a
     // hard violation.
-    'lukoxa-16-cecu095 [10,14] empty×centeredText',
-    'lukoxa-16-cecu095 [11,14] empty×centeredText',
+    // add1-T1c (b1b close): both lukoxa pairs are no longer produced -- the
+    // stop tile shrank 28 -> 22 (`FtileCircleStop.java:55,93`), so the
+    // `empty` ignoreX rects no longer project onto the title's y-span.
   ].sort();
 
   /**
@@ -455,6 +468,18 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    *   116.05555555555556) + height(10) === 126.05555555555556` -- a
    *   ~1.8e-14 gap, same two-independent-transform-calls mechanism as
    *   `kitupi-32-jexo155` above, not a geometry defect.
+   *
+   * RESOLVED by T1a (mission `activity-divergence-drive`, D2): the new
+   * `canvas-origin.ts` shift is a THIRD transform in this same chain, and
+   * for this specific pair its own floating-point arithmetic happens to
+   * land the two `y` values bit-identical again (confirmed with a direct
+   * dump: both sides report `129.05555555555554` exactly) -- the pair no
+   * longer appears in `overlaps(after)` at all, so it is REMOVED from
+   * {@link ALLOWED_HARD_OVERLAPS} below rather than carried forward
+   * (the array must equal exactly what `overlaps` produces, per this
+   * test's own `toEqual`). Not evidence the general mechanism is gone --
+   * `vamazo-19-tufu812` below shows the identical class surfacing fresh,
+   * from the same third transform, the other direction.
    */
   const ALLOWED_HARD_OVERLAPS = [
     // `tobajo-64-mipi810 [16,17]` (mission `activity-loop-tile-port`, T2):
@@ -473,16 +498,42 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // shape ahead of this pair in `shapesOf`'s flat list. Coordinates
     // dumped directly and confirmed byte-identical to the numbers above
     // (`264.65625 + 73.3625 === 338.01875` vs `338.01874999999995`).
-    'tobajo-64-mipi810 [17,18] polygon×text',
-    'kitupi-32-jexo155 [0,1] polygon×text',
+    // add1-T3k: `[19,21]` (was `[17,18]`) -- the own label is now its own
+    // `'if-own-label'` node (same split as the `boxoto` entries below),
+    // inserting one new shape ahead of this pair. Same pair, confirmed
+    // byte-identical (`268.65625 + 73.3625 === 342.01875` vs
+    // `342.01874999999995`).
+    'tobajo-64-mipi810 [19,21] polygon×text',
+    // add1-T3k: `[0,2]` (was `[0,1]`) -- the own label is now its own
+    // `'if-own-label'` node, landing at index 1 (between the hexagon and
+    // its west `if-label`), which pushes the west label from index 1 to
+    // 2. Same pair, same mechanism, confirmed byte-identical (hexagon.x
+    // `163.21562499999993` vs label.x+width `163.21562499999995`).
+    'kitupi-32-jexo155 [0,2] polygon×text',
     // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
     // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
     // dump: both hexagons' right edge exactly equals their own `ja`/east
     // label's `x` (`283.37187500000005 + 267.30625000000003 ===
     // 550.678125`; `500.1250000000001 + 131.1125 === 631.2375`).
-    'boxoto-53-sifo232 [28,30] polygon×text',
-    'boxoto-53-sifo232 [39,41] polygon×text',
-    'lopone-15-xiki477 [7,20] polygon×polygon',
+    // add1-T2a: back to `[27,29]`/`[38,40]` -- `walkRepeat` now draws the
+    // repeat body BEFORE its entry diamond (`FtileRepeat#drawU`), so both
+    // if-split hexagons inside the body sit one index earlier. Same pairs.
+    // add1-T3k: `[31,33]`/`[43,45]` (were `[27,29]`/`[38,40]`) -- the own
+    // label is now its own `'if-own-label'` node (`FtileDiamondInside
+    // .java:84-102`'s own polygon/label split), inserting one new shape
+    // ahead of each repeat-cond hexagon in `shapesOf`'s flat list. Same
+    // pairs, confirmed byte-identical to the numbers above (polygon width
+    // `267.30625000000003`/`131.1125`, text `x` touching the polygon's
+    // right edge to within 5e-14).
+    // add1-T3k: `[32,35]`/`[45,48]` (were `[31,33]`/`[43,45]`) -- re-measured
+    // after the kind reverted from `'if-shape'` back to `'if-split'`
+    // (`walk-repeat.ts`'s own `'repeat-cond'` copy, same split mechanism).
+    // Same pairs, same coordinates (polygon width `267.30625000000003`/
+    // `131.1125`, text touching the polygon's right edge to within 5e-14).
+    'boxoto-53-sifo232 [32,35] polygon×text',
+    'boxoto-53-sifo232 [45,48] polygon×text',
+    // `lopone-15-xiki477 [7,20]` -- see this constant's own doc comment
+    // above ("RESOLVED by T1a"): no longer produced, so no longer listed.
     // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,
     // T10b, 2026-09-20): UNLIKE every entry above, this is a REAL 3.47 px
     // collision, recorded here as an honest, diagnosed defect with a filed
@@ -507,7 +558,40 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // through four producers, `transformEdge`, `shapes-of.ts` AND
     // `renderer.ts` -- filed as the follow-on mission
     // `activity-emphasize-arrow-atomic-anchor` (planning/next-missions.md).
-    'nerete-42-save418 [22,25] polygon×polygon',
+    // add1-T3k: `[26,29]` (was `[22,25]`) -- the while-header's own label
+    // is now its own `'if-own-label'` node, inserting one new shape ahead
+    // of this pair (`walk-while-branch.ts`'s own `pushWhileHeader`
+    // doc). Same pair and same mechanism, unrelated to this task's own
+    // draw-order fix -- still owned by the `activity-emphasize-arrow-
+    // atomic-anchor` follow-on above.
+    'nerete-42-save418 [26,29] polygon×polygon',
+    // `vamazo-19-tufu812 [1,18]`/`[5,13] polygon×polygon` (T1a, mission
+    // `activity-divergence-drive`, D2): the SAME "touching becomes an
+    // epsilon overlap after a second independent transform" class as
+    // `kitupi-32-jexo155`/`tobajo-64-mipi810` above, now with a THIRD
+    // transform in the chain -- `assign-coordinates-full.ts`'s own
+    // compression PLUS `canvas-origin.ts`'s new dynamic shift (`D2`'s own
+    // `Recentred`/`LimitFinder` port, replacing the flat `LAYOUT_MARGIN`).
+    // Confirmed with a direct dump (not assumed): `before`, shape 1 (a
+    // hexagon) `x(104.3875) + width(24) === 128.3875 === shape 18`
+    // (its own arrowhead) `.x` bit-identical -- touching, no overlap.
+    // `after`: `98.3875 + 24 === 122.3875` vs the arrowhead's own
+    // `122.38749999999999` -- a ~1.4e-14 gap from the shift's own
+    // floating-point addition applied independently to each shape, not a
+    // geometry defect. `[5,13]` is the same hexagon/arrowhead pair one
+    // swimlane row down (`y` differs, `x` identical).
+    //
+    // RESOLVED by T2e (`canvas-origin.ts#extendForEdge`/`#extendForReservation`
+    // now folding arrowhead polygons and divider/band reservations into the
+    // ink scan): the GLOBAL ink minimum this fixture's canvas shift is
+    // derived from moved to a different shape, which changes the THIRD
+    // transform's own floating-point input enough that both pairs land
+    // bit-identical again (confirmed with a direct dump of `after`: `[1]`
+    // hexagon `x(112.3875) + width(24) === 136.3875`, `[18]` arrowhead
+    // `x === 136.3875` -- exact, no gap at all now, not merely sub-epsilon;
+    // `[5,13]` the same one swimlane row down) -- neither pair appears in
+    // `overlaps(after)` any more, so both are REMOVED here rather than
+    // carried forward (same precedent as `lopone-15-xiki477` above).
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

@@ -100,12 +100,27 @@ export const ACTIVITY_FONT_COLOR = resolveColorToSvgHex('black');
  * `resolveSolidBucketColor` Paint-string-only handling -- a Gradient
  * `FontColor` falls through past the bucket rather than crashing.
  *
+ * `sname === 'arrow'` carries one more tier, between the bucket and the
+ * root override: `theme.colors.graph.arrowFontColor`. `skinparam
+ * arrowFontColor` / `skinparam activityArrowFontColor` (the latter folds
+ * to the former -- `skinparam-key-normalize.ts#normaliseKey` step 3,
+ * `SkinParam.java:cleanForKeySlow`) both register `PName.FontColor` on
+ * `SName.arrow` (`FromSkinparamToStyle.java:149`, `addConFont("arrow",
+ * SName.arrow)`), the signature `arrow-label-font.ts#resolveArrowLabelFont`
+ * already reads for class/sequence/usecase/state/component/object edges --
+ * this is activity's own reader of the SAME field, not a second cascade.
+ * `activity{arrow{FontColor}}`'s own bucket (checked first, above) is a
+ * MORE specific signature and so still wins when both are set.
+ *
  * Always a string (never `undefined`): supplying the default is this
  * module's job, matching every other `activity*` resolver's contract.
  */
 export function activityFontColor(theme: Theme, sname: ActivitySName): string {
   const bucket = resolveSolidBucketColor(theme.colors.elements?.[bucketKey(sname)]?.font);
   if (bucket !== undefined) return bucket;
+  if (sname === 'arrow' && theme.colors.graph.arrowFontColor !== undefined) {
+    return theme.colors.graph.arrowFontColor;
+  }
   const rootOverride = theme.styleOverrides?.['root']?.['fontcolor'];
   if (rootOverride !== undefined) return resolveColorToSvgHex(rootOverride);
   return ACTIVITY_FONT_COLOR;

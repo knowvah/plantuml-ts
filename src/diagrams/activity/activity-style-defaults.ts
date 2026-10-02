@@ -235,10 +235,34 @@ const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
  * For the `end` terminal specifically, use
  * {@link CIRCLE_END_LINE_THICKNESS} — it is a distinct upstream signature,
  * not a variant of `circle`.
+ *
+ * `sname === 'arrow'` carries one more tier, between the arrow bucket and
+ * the root override: `theme.colors.elements['activity'].lineThickness`
+ * (`skinparam ActivityBorderThickness`/`skinparam activity {
+ * BorderThickness }`, already wired by `skinparam-element-buckets.ts
+ * #matchElementLineThicknessKey` for the action box's own border). Jar
+ * mechanism: `Snake.create` resolves the edge's `Style` through
+ * `StyleSignatureBasic.activityArrow()`, whose SName set is `{root,
+ * element, activityDiagram, activity, arrow}` — nested UNDER `activity`,
+ * not a sibling of it (`style/StyleSignatureBasic.java:275-277`). A stored
+ * rule matches a lookup when the rule's own SName set is a SUBSET of the
+ * lookup's (`StyleSignatureBasic.java:211` `matchAllImpl`,
+ * `element.key.snames.containsAll(declaration.key.snames)`), so the
+ * `activity`-scoped `LineThickness` (declaration `{root,element,
+ * activityDiagram,activity}`) qualifies for the arrow lookup too, while
+ * the un-nested default `activityDiagram{arrow{LineThickness 1}}`
+ * (`plantuml.skin:374`) is a BASE-skin rule loaded before any user
+ * skinparam and so loses the `OVERWRITE_EXISTING_VALUE` merge
+ * (`style/StyleStorage.java:102-116`) once `ActivityBorderThickness` is
+ * set -- `fonebe-54-save009`'s edge draws at stroke-width 10, not 1.
  */
 export function activityLineThickness(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementLineThickness(theme, bucketKey(sname));
   if (bucket !== undefined) return bucket;
+  if (sname === 'arrow') {
+    const activityBucket = resolveElementLineThickness(theme, bucketKey('activity'));
+    if (activityBucket !== undefined) return activityBucket;
+  }
   const rootOverride = Number.parseFloat(theme.styleOverrides?.['root']?.['linethickness'] ?? '');
   if (Number.isFinite(rootOverride)) return rootOverride;
   return LINE_THICKNESS_DEFAULTS[sname];
@@ -375,29 +399,23 @@ export const CIRCLE_INK = resolveColorToSvgHex('#2');
 export const ACTIVITY_BAR_FILL = resolveColorToSvgHex('#5');
 
 // ---------------------------------------------------------------------------
-// Swimlane title & border (T2, D4)
+// Swimlane title & border (T2, D4) -- moved to activity-style-defaults-
+// swimlane.ts (T2c, D9's "helper splits forced by the 500-line hook are
+// push-forwards, journaled with the new file name") to keep this module
+// under the project's 500-line cap. Re-exported here so no import elsewhere
+// in the tree (`activity-renderer-swimlanes.ts`, test files) needed to
+// change.
 // ---------------------------------------------------------------------------
 
-/**
- * The root-level `swimlane { LineColor black }` block — the divider stroke
- * `LaneDivider#drawU` resolves via `getStyle().value(PName.LineColor)
- * .asColor(...)`, the same signature {@link swimlaneLineThickness} reads
- * `getStyle().getStroke()` from.
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:311
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/activitydiagram3/ftile/LaneDivider.java:94
- */
-export const SWIMLANE_BORDER_COLOR = resolveColorToSvgHex('black');
-
-/**
- * The ROOT `FontColor black` a swimlane title INHERITS: the `swimlane { }`
- * block (`:309-314`) declares BackGroundColor, LineColor, LineThickness and
- * FontSize but no FontColor of its own, so `Swimlanes#getTitle`'s
- * `getStyle().getFontConfiguration(...)` (`ftile/Swimlanes.java:287`)
- * resolves the ROOT block's value, not a swimlane-scoped one.
- * @see ~/git/plantuml/src/main/resources/skin/plantuml.skin:9
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:287
- */
-export const SWIMLANE_TITLE_FONT_COLOR = resolveColorToSvgHex('black');
+export {
+  SWIMLANE_BORDER_COLOR,
+  SWIMLANE_TITLE_FONT_COLOR,
+  swimlaneBorderColor,
+  swimlaneTitleFontColor,
+  swimlaneBorderThickness,
+  swimlaneTitleFontSize,
+  swimlaneHeaderBackground,
+} from './activity-style-defaults-swimlane.js';
 
 /**
  * A `Paint` value AS RESOLVED SVG HEX, or `undefined` when `paint` is a
@@ -407,80 +425,9 @@ export const SWIMLANE_TITLE_FONT_COLOR = resolveColorToSvgHex('black');
  * divider or title, so a Gradient here falls through to the next cascade
  * tier rather than the resolver throwing or drawing it. Exported for
  * `activity-text-style.ts`'s `activityFontColor` (mission
- * `activity-min-box-width`, T1, D3) — same `Paint`-string-only handling.
+ * `activity-min-box-width`, T1, D3) and `activity-style-defaults-swimlane
+ * .ts` (T2c split) — same `Paint`-string-only handling, one copy.
  */
 export function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
   return typeof paint === 'string' ? resolveColorToSvgHex(paint) : undefined;
-}
-
-/**
- * The resolved lane-divider stroke colour: T1's `graph.activity
- * .swimlaneBorder` (`SwimlaneBorderColor` -> `PName.LineColor`, D4) → the
- * shared `swimlane` bucket's own `LineColor` override (a `<style> swimlane {
- * LineColor ... } }` block, `style-map-element.ts:163-164`) → the
- * `plantuml.skin:311` constant. Bucket access is DIRECT (`theme.colors
- * .elements`), not `resolveElementPaint`: that helper's own `border` role
- * falls back to `theme.colors.border` (the diagram-wide generic default),
- * which is not this cascade's third tier.
- */
-export function swimlaneBorderColor(theme: Theme): string {
-  const override = theme.colors.graph.activity?.swimlaneBorder;
-  if (override !== undefined) return resolveColorToSvgHex(override);
-  return resolveSolidBucketColor(theme.colors.elements?.['swimlane']?.border) ?? SWIMLANE_BORDER_COLOR;
-}
-
-/**
- * The resolved lane-title text colour: T1's `graph.activity
- * .swimlaneTitleFontColor` (`SwimlaneTitleFontColor` -> `PName.FontColor`,
- * D4) → the shared `swimlane` bucket's own `FontColor` override (a `<style>
- * swimlane { FontColor ... } }` block, `style-map-element.ts:165-166`) →
- * the inherited ROOT `FontColor` constant. Same direct-bucket-access
- * reasoning as {@link swimlaneBorderColor}: `resolveElementPaint`'s `font`
- * role falls back to `theme.colors.text`, not this cascade's third tier.
- */
-export function swimlaneTitleFontColor(theme: Theme): string {
-  const override = theme.colors.graph.activity?.swimlaneTitleFontColor;
-  if (override !== undefined) return resolveColorToSvgHex(override);
-  return resolveSolidBucketColor(theme.colors.elements?.['swimlane']?.font) ?? SWIMLANE_TITLE_FONT_COLOR;
-}
-
-/**
- * The resolved divider stroke width: T1's `graph.activity
- * .swimlaneBorderThickness` (`SwimlaneBorderThickness` -> `PName
- * .LineThickness`, D4) → {@link swimlaneLineThickness}'s own bucket/constant
- * cascade. DELEGATES rather than restating the bucket lookup or the 1.5
- * constant — `swimlaneLineThickness` already owns that value.
- */
-export function swimlaneBorderThickness(theme: Theme): number {
-  return theme.colors.graph.activity?.swimlaneBorderThickness ?? swimlaneLineThickness(theme);
-}
-
-/**
- * The resolved lane-title font size: T1's `graph.activity
- * .swimlaneTitleFontSize` (`SwimlaneTitleFontSize` -> `PName.FontSize`, D4)
- * → {@link swimlaneFontSize}'s own bucket/constant cascade. DELEGATES rather
- * than restating the bucket lookup or the 18 constant — `swimlaneFontSize`
- * already owns that value (D2's `getTitlesHeight` MEASURES the title text
- * this size produces; this resolver supplies the size, not the height).
- */
-export function swimlaneTitleFontSize(theme: Theme): number {
-  return theme.colors.graph.activity?.swimlaneTitleFontSize ?? swimlaneFontSize(theme);
-}
-
-/**
- * The resolved title-band fill (T6, D3). T1's `graph.activity
- * .swimlaneHeaderBackground` (`SwimlaneTitleBackgroundColor` -> `PName
- * .BackGroundColor`, D4's "Amended at execution" note) → the shared
- * `swimlane` bucket's own `BackGroundColor` override → the ROOT
- * `plantuml.skin:310` default (`BackGroundColor transparent`). That
- * default is a non-null `HColor`, so `Swimlanes#drawTitlesBackground`
- * (`:358-367`) still draws the rect and paints nothing -- `'none'`, not a
- * resolved hex, mirroring `renderEdgeLabel`'s own `stroke: 'none'` "paint
- * nothing" convention rather than resolving `resolveColorToSvgHex
- * ('transparent')`'s `#00000000`, which the jar never emits for this rect.
- */
-export function swimlaneHeaderBackground(theme: Theme): string {
-  const override = theme.colors.graph.activity?.swimlaneHeaderBackground;
-  if (override !== undefined) return resolveColorToSvgHex(override);
-  return resolveSolidBucketColor(theme.colors.elements?.['swimlane']?.background) ?? 'none';
 }

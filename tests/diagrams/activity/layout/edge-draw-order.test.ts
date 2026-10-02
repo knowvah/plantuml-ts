@@ -9,7 +9,6 @@ import { describe, expect, it } from 'vitest';
 import { applyEdgeDrawOrder, lanePassOrder, passOf } from '../../../../src/diagrams/activity/layout/edge-draw-order.js';
 import type { EdgeMeta } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
-import { LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { NORTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
@@ -19,6 +18,15 @@ import { resolveTheme } from '../../../../src/core/theme.js';
 
 const bounder: StringBounder = { getDimension: () => ({ width: 60, height: 16 }) };
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+// T1a (D2): `LAYOUT_MARGIN` was deleted from production -- the canvas
+// origin is now computed dynamically from the placed geometry's own ink
+// extent (`assign-coordinates-full.ts#computeCanvasOrigin`), which makes
+// the ABSOLUTE value of `baseX`/`baseY` passed into `assignCoordinatesFull`
+// unobservable (the dynamic shift cancels whatever base is passed; proven
+// in `canvas-origin.ts`'s own module doc). Kept as a local, arbitrary
+// non-zero base purely to catch an accidental hardcoded-zero regression in
+// `walkTile`; no test below asserts an ABSOLUTE position against it.
+const LAYOUT_MARGIN = 12;
 
 /** `EdgeMeta` carries a third field (`shape`) neither ordering function
  * reads; fixed at `'default'` so a test row shows only its two lanes. */

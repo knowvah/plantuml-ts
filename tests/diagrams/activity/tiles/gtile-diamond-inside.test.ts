@@ -103,3 +103,32 @@ describe('GtileDiamondInside — hasPointOut()', () => {
     expect(new GtileDiamondInside('c', {}, bounder, theme).hasPointOut()).toBe(true);
   });
 });
+
+describe('GtileDiamondInside — multiline side label (D5, bazuma-86-metu353)', () => {
+  // A real `\n` (already unescaped upstream of this constructor by
+  // `if-dispatch.ts#unescapeLabelNewlines`) measures width=MAX and
+  // height=SUM over its own lines, not a single getDimension call on the
+  // whole string. Lines "ab" (2*7=14) / "cde" (3*7=21): width=21,
+  // height=14+14=28 -- NOT the pre-fix single-line reading (width
+  // 6*7=42 for "ab\ncde" as one literal string, height 14).
+  const tile = new GtileDiamondInside('', { east: 'ab\ncde' }, bounder, theme);
+
+  it('width is the widest line, not the whole string', () => {
+    expect(tile.labelAt('east')!.width).toBe(21);
+  });
+
+  it('height is the sum of every line, not one line', () => {
+    expect(tile.labelAt('east')!.height).toBe(28);
+  });
+
+  it('keeps the real newline in the returned label text (renderIfLabel splits on it)', () => {
+    expect(tile.labelAt('east')!.label).toBe('ab\ncde');
+  });
+});
+
+describe('GtileDiamondInside — single-line label is unaffected by the multiline fold', () => {
+  it('width/height equal the one getDimension call, as before', () => {
+    const tile = new GtileDiamondInside('', { west: 'single' }, bounder, theme);
+    expect(tile.labelAt('west')).toEqual({ x: -42, y: -2, width: 42, height: 14, label: 'single' });
+  });
+});

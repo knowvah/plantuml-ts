@@ -32,10 +32,19 @@ describe('layoutActivity — with-links: both branches non-empty, both continue'
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('nodes are if-split, if-label(yes), if-label(no), a, b, if-merge, in drawU order', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['if-split', 'if-label', 'if-label', 'action', 'action', 'if-merge']);
-    expect(geo.nodes[1]!.label).toBe('yes');
-    expect(geo.nodes[2]!.label).toBe('no');
+  it('nodes are if-split, if-own-label(c), if-label(yes), if-label(no), a, b, if-merge, in drawU order (T3k)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual([
+      'if-split',
+      'if-own-label',
+      'if-label',
+      'if-label',
+      'action',
+      'action',
+      'if-merge',
+    ]);
+    expect(geo.nodes[1]!.label).toBe('c');
+    expect(geo.nodes[2]!.label).toBe('yes');
+    expect(geo.nodes[3]!.label).toBe('no');
   });
 
   it('the merge rhombus is a 24x24 box', () => {

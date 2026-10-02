@@ -33,8 +33,6 @@ import type { Reservation } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
 
-export const LAYOUT_MARGIN = 12;
-
 /**
  * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
  * `while-header`, `repeat-cond`) for `ActivityNodeGeo.kind`; `lane` is the
@@ -70,6 +68,31 @@ export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefin
 }
 
 /**
+ * T3k companion fix: `renderNode`'s `'if-split'` case draws the polygon
+ * ALONE (the own label moved to its own `'if-own-label'` node,
+ * `activity-renderer-shapes.ts`'s own doc) for every `'if-split'`
+ * producer, including the switch condition diamond `walkTile`'s
+ * `'gtile-diamond'` case pushes (`tile-layout.ts:321`, `kindHint:
+ * 'if-split'`, this file's `'gtile-switch'` case). `GtileDiamond` has no
+ * north/south slots to land between (`tiles/gtile-diamond.ts`'s own
+ * fields), so the own label always sits immediately after the polygon --
+ * never pushed for `kind === 'if-merge'` (the merge diamond's own `label`
+ * is always `''`, `tile-layout.ts:326`, and `renderIfMerge` never draws
+ * text regardless).
+ */
+function pushDiamondCompanionLabel(
+  out: Out,
+  kind: string,
+  t: GtileDiamond,
+  origin: GPoint,
+  lane: string | undefined,
+): void {
+  if (kind !== 'if-split' || t.label === '') return;
+  const node = { id: out.nextId('if-own-label'), kind: 'if-own-label', ...origin, width: t.width, height: t.height, label: t.label };
+  pushNode(out, node, lane);
+}
+
+/**
  * `pushEdge`'s trailing parameter: a bare {@link EdgeShape} (every existing
  * call site -- fork/if-long-horizontal's three non-default shapes) or,
  * for a `while`/`repeat` back-edge that also carries a translate tag
@@ -100,6 +123,37 @@ function applyLastEdgeLabel(out: Out, label: string | undefined): void {
   if (label !== undefined && label !== '') out.edges[out.edges.length - 1]!.label = label;
 }
 
+/**
+ * The `gtile-top-down` sibling edge, gated on the preceding child's own
+ * out point. Extracted out of `walkTile`'s `'gtile-top-down'` arm purely
+ * to keep that function's own CCN off the complexity hook's ratchet (the
+ * switch itself is `#lizard forgives`d; a new branch inside one arm is
+ * not).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorAssembly.java:67-70
+ *   -- `geo = tile1.calculateDimension(...)`, `if (geo.hasPointOut() ==
+ *   false) return result`: no connection is added when the PRECEDING
+ *   sibling has no out point (a stop/kill/break, or a branch that
+ *   dead-ends in one). Every other walker in this file already gates its
+ *   own sibling/branch edges on `hasPointOut()` (`walk-fork-branches.ts`,
+ *   `walk-while-branch.ts`, `walk-repeat.ts`); this was the one push left
+ *   ungated (T2b row 28, piruxe-91-zivi081 residual).
+ */
+interface TopDownSiblingLink {
+  readonly prevChild: Tile;
+  readonly prev: GPoint;
+  readonly child: Tile;
+  readonly next: GPoint;
+  readonly myLane: string | undefined;
+}
+
+function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
+  const { prevChild, prev, child, next, myLane } = link;
+  if (!prevChild.hasPointOut()) return;
+  const from = { x: prev.x + prevChild.getCoord(SOUTH_HOOK).x, y: prev.y + prevChild.getCoord(SOUTH_HOOK).y };
+  const to = { x: next.x + child.getCoord(NORTH_HOOK).x, y: next.y + child.getCoord(NORTH_HOOK).y };
+  pushEdge(out, new GConnectionVerticalDown().getPoints(from, to), laneOut(prevChild, myLane), laneIn(child, myLane));
+}
+
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
   const { kindHint, lane } = hints;
   const myLane = laneAt(tile, lane);
@@ -115,10 +169,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
 
     case 'gtile-end':
       pushNode(out, { id: out.nextId('end'), kind: 'end', x, y, width: tile.width, height: tile.height }, myLane);
-      return;
-
-    case 'gtile-kill':
-      pushNode(out, { id: out.nextId('kill'), kind: 'kill', x, y, width: tile.width, height: tile.height }, myLane);
       return;
 
     case 'gtile-break':
@@ -164,7 +214,7 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       const t = tile as unknown as GtileDiamond;
       const k = kindHint !== null && !kindHint.startsWith('gtile-') ? kindHint : 'diamond';
       pushNode(out, { id: out.nextId(k), kind: k, x, y, width: t.width, height: t.height, label: t.label }, myLane);
-      return;
+      return pushDiamondCompanionLabel(out, k, t, { x, y }, myLane);
     }
 
     case 'gtile-spot':
@@ -209,15 +259,15 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         const childY = y + t.childOffsets[i]!;
         const childX = x + t.childOffsetsX[i]!;
         walkTile(child, childX, childY, { kindHint: null, lane: myLane }, out);
+        // `hasPointOut()` gate: see `pushTopDownSiblingEdge`'s own doc.
         if (prevChild !== null) {
-          const from = { x: prevX + prevChild.getCoord(SOUTH_HOOK).x, y: prevY + prevChild.getCoord(SOUTH_HOOK).y };
-          const to = { x: childX + child.getCoord(NORTH_HOOK).x, y: childY + child.getCoord(NORTH_HOOK).y };
-          pushEdge(
-            out,
-            new GConnectionVerticalDown().getPoints(from, to),
-            laneOut(prevChild, myLane),
-            laneIn(child, myLane),
-          );
+          pushTopDownSiblingEdge(out, {
+            prevChild,
+            prev: { x: prevX, y: prevY },
+            child,
+            next: { x: childX, y: childY },
+            myLane,
+          });
         }
         prevChild = child;
         prevX = childX;

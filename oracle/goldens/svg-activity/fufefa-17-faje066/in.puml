@@ -1,0 +1,21 @@
+@startuml
+!$partlen=2
+!$data={"partlen": "2", "game": "GamePlantuml", "participants" :[
+{"name": "XYZ" ,"as": "xyz"},
+{"name": "RST" ,"as": "rst"},
+{"name": "UVW" ,"as": "uvw"}
+]
+}
+!$partlen=$data.partlen
+!$i=0
+   
+:a;
+:$i;
+:$partlen;
+!foreach $part in $data.participants
+  :$part.name as $part.as;
+  !$b=$data.game + "_" + $part.name
+  :with var b: $b;
+!endfor
+:b;
+@enduml

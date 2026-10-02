@@ -8,6 +8,7 @@ import type { DiagramAnnotations } from './core/annotations/index.js';
 import { resolveAnnotationStyles } from './core/annotations/style.js';
 import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
 import { applyClassDocumentMargin } from './diagrams/class/layout-ink-extent.js';
+import { applyActivityChrome } from './diagrams/activity/layout/document-margin.js';
 import { sequencePlugin } from './diagrams/sequence/index.js';
 import { classPlugin } from './diagrams/class/index.js';
 import { registerNestedDiagramRenderers } from './diagrams/class/class-nested-diagram-renderer.js';
@@ -225,6 +226,13 @@ function applyAnnotationChrome(
   const sprites = spritesOf(ast);
 
   if (!('completeSvg' in fragment)) {
+    // T3j (journal row 36): activity's document margin (`same(10)`) is
+    // symmetric, unlike class's `(0,5,5,0)` -- its own near corner moves
+    // too, so it needs a dedicated shift+pad composition, not just the pad
+    // below. See `document-margin.ts#applyActivityChrome`'s own doc comment.
+    if (fragment.diagramType === 'ACTIVITY' && fragment.preChromeWidth !== undefined) {
+      return applyActivityChrome(fragment, annotations, styles, measurer, sprites);
+    }
     const chromed = applyChrome(fragment, annotations, styles, measurer, sprites);
     // G2 N46: class fragments center chrome text against the PRE-margin
     // ink dims (`fragment.preChromeWidth`/`preChromeHeight`, threaded

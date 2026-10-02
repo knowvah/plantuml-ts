@@ -1,0 +1,6 @@
+@startuml
+!$foo = { "company": "Skynet", "employees" : [  {"name" : "alice", "salary": 100 },  {"name" : "bob", "salary": 50} ] }
+start
+:This is $foo.company;
+:The salary of $foo.employees[0].name is $foo.employees[0].salary;
+@enduml

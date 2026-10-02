@@ -10,7 +10,7 @@
  * is a thin wrapper over this. Never merged into the public
  * `ActivityGeometry` (stop 9).
  *
- * Imports `walkTile`/`computeBounds`'s inputs and `Out`/`LAYOUT_MARGIN`
+ * Imports `walkTile`/`computeBounds`'s inputs and `Out`
  * back FROM `tile-coordinates.ts`, which in turn imports
  * `assignCoordinatesFull` from here for its own `assignCoordinates` --
  * a circular import between the two modules, safe the same way
@@ -30,12 +30,14 @@ import type { Tile } from '../tiles/tile.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { LAYOUT_MARGIN, walkTile } from './tile-coordinates.js';
+import { walkTile } from './tile-coordinates.js';
 import type { Out } from './tile-coordinates.js';
-import { computeSwimlaneChrome, placeSwimlanes, resolveSwimlaneVertical } from './swimlane-placement.js';
+import { placeSwimlanes, resolveSwimlaneVertical, computeSwimlaneChrome } from './swimlane-placement.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 import { compressGeometry } from './compress/compress-geometry.js';
 import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
+import { finalizeGeometry } from './canvas-origin.js';
+import type { FinalizedGeometry } from './canvas-origin.js';
 
 /**
  * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
@@ -132,29 +134,55 @@ interface CompressAndAssembleInput {
   theme: Theme;
 }
 
+/** Shared tail of {@link pass1Assemble}/{@link compressAndAssemble}: both
+ *  reduce to "finalize this (possibly compressed) placement, then wrap it
+ *  in the `AssignCoordinatesResult` shape" -- split out only to keep each
+ *  caller's own NLOC under the file's limit. */
+function assembleFromFinal(
+  final: FinalizedGeometry,
+  removed: { x: number; y: number },
+): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+  return {
+    geometry: {
+      totalWidth: final.totalWidth,
+      totalHeight: final.totalHeight,
+      nodes: final.nodes,
+      edges: final.edges,
+      swimlanes: final.swimlanes,
+      ...final.chrome,
+    },
+    reservations: final.reservations,
+    removed,
+  };
+}
+
+/** {@link pass1Assemble}'s own inputs, bundled to keep that function under
+ *  the file's 5-parameter limit (T3i's `theme` would be a 6th). */
+interface Pass1AssembleInput {
+  placed: PlacementResult;
+  reservations: Reservation[];
+  bounds: { maxX: number; maxY: number };
+  baseY: number;
+  titlesHeight: number;
+  theme: Theme;
+}
+
 /** {@link assignCoordinatesFull}'s `compress: false` half -- the pass-1
  *  geometry, assembled the same way `compressAndAssemble` does but with no
  *  transform applied and `removed` zeroed. */
-function pass1Assemble(
-  placed: PlacementResult,
-  reservations: Reservation[],
-  bounds: { maxX: number; maxY: number },
-  baseY: number,
-  titlesHeight: number,
-): Omit<AssignCoordinatesResult, 'edgeMeta'> {
-  const chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
-  return {
-    geometry: {
-      totalWidth: bounds.maxX + LAYOUT_MARGIN,
-      totalHeight: bounds.maxY + LAYOUT_MARGIN,
-      nodes: placed.nodes,
-      edges: placed.edges,
-      swimlanes: placed.swimlanes,
-      ...chrome,
-    },
+function pass1Assemble(input: Pass1AssembleInput): Omit<AssignCoordinatesResult, 'edgeMeta'> {
+  const { placed, reservations, bounds, baseY, titlesHeight, theme } = input;
+  const final = finalizeGeometry({
+    nodes: placed.nodes,
+    edges: placed.edges,
+    swimlanes: placed.swimlanes,
     reservations,
-    removed: { x: 0, y: 0 },
-  };
+    bounds,
+    baseY,
+    titlesHeight,
+    theme,
+  });
+  return assembleFromFinal(final, { x: 0, y: 0 });
 }
 
 function compressAndAssemble(input: CompressAndAssembleInput): Omit<AssignCoordinatesResult, 'edgeMeta'> {
@@ -169,19 +197,17 @@ function compressAndAssemble(input: CompressAndAssembleInput): Omit<AssignCoordi
     bounder,
     theme,
   });
-  const chrome = computeSwimlaneChrome(compressed.swimlanes, baseY, titlesHeight, compressed.bounds.maxY);
-  return {
-    geometry: {
-      totalWidth: compressed.bounds.maxX + LAYOUT_MARGIN,
-      totalHeight: compressed.bounds.maxY + LAYOUT_MARGIN,
-      nodes: compressed.nodes,
-      edges: compressed.edges,
-      swimlanes: compressed.swimlanes,
-      ...chrome,
-    },
+  const final = finalizeGeometry({
+    nodes: compressed.nodes,
+    edges: compressed.edges,
+    swimlanes: compressed.swimlanes,
     reservations: compressed.reservations,
-    removed: compressed.removed,
-  };
+    bounds: compressed.bounds,
+    baseY,
+    titlesHeight,
+    theme,
+  });
+  return assembleFromFinal(final, compressed.removed);
 }
 
 /**
@@ -223,7 +249,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
 
   if (!compress) {
-    const result = pass1Assemble(placed, allReservations, bounds, baseY, titlesHeight);
+    const result = pass1Assemble({ placed, reservations: allReservations, bounds, baseY, titlesHeight, theme });
     return inLanePassOrder(result, placed.edgeMeta, ast.swimlanes);
   }
   const result = compressAndAssemble({

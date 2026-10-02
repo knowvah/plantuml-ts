@@ -19,6 +19,7 @@ import {
   renderEnd,
   renderHexagon,
   renderLabel,
+  renderNode,
   renderNote,
   renderParallelogram,
   renderStart,
@@ -89,39 +90,58 @@ describe('renderStart', () => {
 });
 
 describe('renderStop', () => {
+  // `FtileCircleStop#drawU` (`:87-89`) delegates to `CircleEnd`
+  // (`svek/image/CircleEnd.java:55,72-103`): tile SIZE=22 (`gtile-stop.ts`),
+  // outer r=11, inner delta=5 so inner r=6 (T1c, D3) -- not the old
+  // unsourced `outerR * 0.55`.
   it('emits exactly two <ellipse> elements (bullseye), never a <circle>', () => {
-    const node = makeNode({ kind: 'stop', width: 28, height: 28 });
+    const node = makeNode({ kind: 'stop', width: 22, height: 22 });
     const svg = renderStop(node, theme);
     expect(svg).not.toContain('<circle');
     expect((svg.match(/<ellipse/g) ?? []).length).toBe(2);
   });
 
-  it('outer ellipse is unfilled and stroked in the resolved circle ink; inner is filled', () => {
+  it('outer ellipse is unfilled and stroked in the resolved circle ink; inner is filled AND stroked the same', () => {
     // `activityDiagram { circle { start, stop, end { LineColor #2;
     // BackgroundColor #2; LineThickness 1 } } }` (plantuml.skin:378-380).
     // Was `theme.colors.border` (#181818) at stroke-width 2, neither of
     // which came from upstream. `#2` resolves through HColorSet to
     // #222222, which the SVG layer shortens to #222 -- the exact spelling
     // the jar emits (SvgGraphics#shortenColor).
-    const node = makeNode({ kind: 'stop', width: 28, height: 28 });
+    //
+    // The inner ellipse ALSO carries this stroke -- jar-verified against
+    // `bareka-88-fusu160`/`numalo-91-pole243`'s own oracle SVGs, both of
+    // which show `stroke:#222;stroke-width:1` on BOTH ellipses, not fill
+    // alone on the inner one (`CircleEnd.java:102`'s own chain reads as
+    // bare, but the rendered bytes settle it).
+    const node = makeNode({ kind: 'stop', width: 22, height: 22 });
     const svg = renderStop(node, theme);
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('fill="#222"');
-    expect(svg).toContain('stroke="#222"');
-    expect(svg).toContain('stroke-width="1"');
+    expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
+    expect((svg.match(/stroke-width="1"/g) ?? []).length).toBe(2);
     expect(svg).not.toContain('stroke-width="2"');
   });
 
-  it('inner radius is 0.55x the outer, both cx/cy centered on the node', () => {
-    const node = makeNode({ kind: 'stop', x: 50, y: 50, width: 28, height: 28 });
+  it('outer radius is 11, inner is 6 (outer - delta 5), both cx/cy centered on the node', () => {
+    const node = makeNode({ kind: 'stop', x: 50, y: 50, width: 22, height: 22 });
     const svg = renderStop(node, theme);
-    expect(svg).toContain('cx="64"');
-    expect(svg).toContain('cy="64"');
-    expect(svg).toContain('rx="14"');
-    expect(svg).toContain('rx="7.7"');
+    expect(svg).toContain('cx="61"');
+    expect(svg).toContain('cy="61"');
+    expect(svg).toContain('rx="11"');
+    expect(svg).toContain('rx="6"');
+    expect(svg).not.toContain('rx="14"');
+    expect(svg).not.toContain('rx="7.7"');
   });
 
-  it('resolves a named theme color to hex on both ellipses', () => {
+  it('does NOT inherit `ActivityEndColor` -- `activityStopColor` is a separate skinparam target', () => {
+    // `FromSkinparamToStyle.java:138-139`: `activityEndColor` converts to
+    // `PName.LineColor` on `SName.circle, SName.end`; `activityStopColor`
+    // converts to the SAME `PName` but on `SName.circle, SName.stop` --
+    // two independent style targets. Reusing `actColors(theme).endFill`
+    // here made `stop` wrongly red under `skinparam ActivityEndColor red`
+    // with no `ActivityStopColor` set (T2f mechanism 7, jar-verified on
+    // `poraji-17-goke817`: `stop` stays `#222`).
     const activityTheme = deepMergeTheme(defaultTheme, {
       colors: {
         ...defaultTheme.colors,
@@ -129,12 +149,17 @@ describe('renderStop', () => {
       },
     });
     const svg = renderStop(makeNode({ kind: 'stop' }), activityTheme);
-    expect(svg).toContain('stroke="#FF0"');
-    expect(svg).toContain('fill="#FF0"');
+    expect(svg).not.toContain('#FF0');
+    expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill="#222"');
   });
 });
 
 describe('renderEnd', () => {
+  // `FtileCircleEndCross#drawU` (`:98-117`) draws itself: SIZE=20 (`:61`),
+  // outer r=10; cross `thickness=2.5` (hardcoded, `:110`),
+  // `size2=(SIZE-thickness)/sqrt(2)`, `delta=(SIZE-size2)/2` (`:111-112`) --
+  // not the old unsourced `r * SQRT1_2` tip-to-border construction.
   it('emits one <ellipse> border plus two crossing <line>s, never a <circle>', () => {
     const node = makeNode({ kind: 'end', width: 20, height: 20 });
     const svg = renderEnd(node, theme);
@@ -149,6 +174,37 @@ describe('renderEnd', () => {
     expect(svg).toContain('fill="none"');
     expect(svg).toContain('rx="10"');
     expect(svg).toContain('ry="10"');
+    expect(svg).toContain('stroke-width="1.5"');
+  });
+
+  it('the cross is inset by delta=3.813 from the bounding box, size2=12.374 per side', () => {
+    // size=20, thickness=2.5: size2=(20-2.5)/sqrt(2)=12.374368...,
+    // delta=(20-size2)/2=3.812815... -- jar-cited formula, not fitted.
+    const node = makeNode({ kind: 'end', x: 50, y: 50, width: 20, height: 20 });
+    const svg = renderEnd(node, theme);
+    const lines = [...svg.matchAll(/<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"/g)];
+    expect(lines).toHaveLength(2);
+    const [l1, l2] = lines as [RegExpMatchArray, RegExpMatchArray];
+    expect(Number(l1[1])).toBeCloseTo(53.813, 3);
+    expect(Number(l1[2])).toBeCloseTo(53.813, 3);
+    expect(Number(l1[3])).toBeCloseTo(66.187, 3);
+    expect(Number(l1[4])).toBeCloseTo(66.187, 3);
+    // The second diagonal's `dy` is negative (`-size2`): the jar's own
+    // compress pass (`UGraphicCompressOnXorY#drawLine`,
+    // `klimt/compress/UGraphicCompressOnXorY.java:142-148`) swaps a
+    // line's endpoints whenever `y1 > y2` before drawing, so the emitted
+    // `x1`/`y1` is the point with the SMALLER y, not the translate
+    // origin (T2f mechanism 2, verified byte-exact against
+    // `fabexi-81-dife869`'s jar SVG).
+    expect(Number(l2[1])).toBeCloseTo(66.187, 3);
+    expect(Number(l2[2])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[3])).toBeCloseTo(53.813, 3);
+    expect(Number(l2[4])).toBeCloseTo(66.187, 3);
+  });
+
+  it('cross stroke-width is 2.5, independent of the ellipse stroke-width 1.5', () => {
+    const svg = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
+    expect(svg).toContain('stroke-width="2.5"');
     expect(svg).toContain('stroke-width="1.5"');
   });
 });
@@ -193,6 +249,23 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     expect(svg).not.toContain(`font-size="${theme.fontSize - 2}"`);
   });
 
+  it('closes the rhombus (5-point polygon, first point repeated) with stroke-width 0.5 and the shared miter join (FtileDiamond.java:89, Hexagon.java:48-55)', () => {
+    // `Hexagon.asPolygon(shadowing)` -- `FtileDiamond#drawU`'s shape for the
+    // repeat-entry node AND the label-less `if-split`/`while-header`
+    // diamond -- `addPoint`s the first corner again as the LAST point
+    // (`Hexagon.java:51,55`); `UPolygon` does not close itself on draw, and
+    // the shared `polygon()` emitter adds `stroke-linejoin:miter;
+    // stroke-miterlimit:10` unconditionally, matching every other closed
+    // activity polygon (`SvgGraphics.java:658`).
+    const svg = renderDiamond(makeNode({ kind: 'diamond', width: 24, height: 24 }), theme);
+    const points = /<polygon points="([^"]+)"/.exec(svg)?.[1]?.split(',') ?? [];
+    expect(points.length).toBe(10); // 5 points x,y pairs
+    expect([points[0], points[1]]).toEqual([points[8], points[9]]);
+    expect(svg).toContain('stroke-width="0.5"');
+    expect(svg).toContain('stroke-linejoin="miter"');
+    expect(svg).toContain('stroke-miterlimit="10"');
+  });
+
   it('a note draws font-size 13 and stroke-width 0.5', () => {
     // The ROOT note block, plantuml.skin:323 and :325.
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
@@ -204,9 +277,9 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     // The `start, stop, end` block sets LineThickness 1 (:378); `end`
     // ALONE overrides it to 1.5 (:383), and upstream gives the two
     // distinct StyleSignatures (VCompactFactory.java:97 vs :101).
-    const end = renderEnd(makeNode({ kind: 'end', width: 28, height: 28 }), theme);
+    const end = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
     expect(end).toContain('stroke-width="1.5"');
-    const stop = renderStop(makeNode({ kind: 'stop', width: 28, height: 28 }), theme);
+    const stop = renderStop(makeNode({ kind: 'stop', width: 22, height: 22 }), theme);
     expect(stop).toContain('stroke-width="1"');
     expect(stop).not.toContain('stroke-width="1.5"');
   });
@@ -427,6 +500,155 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T2f mechanism 3 -- note body path order, fold, and first-line baseline
+// (Opale.java). `Opale#getPolygonNormal` (`:149-157`, no link, roundCorner
+// 0): top-left -> bottom-left -> bottom-right -> right-edge-below-fold ->
+// fold-top -> close -- the OPPOSITE traversal of the old `noteBox()`-backed
+// emission. The fold is Opale#getCorner (`:134-147`), drawn as its OWN
+// filled `<path>` unconditionally -- never unfilled border lines.
+// ---------------------------------------------------------------------------
+
+describe('renderNote -- body path order and baseline (Opale.java)', () => {
+  it('standalone (no link): body path visits TL, BL, BR, right-below-fold, fold-top, close', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    // NOTE_CORNER_SIZE = 10 (Opale.java:53), not the old NOTE_FOLD = 8.
+    expect(bodyD).toBe('M15,15 L15,38 L85,38 L85,25 L75,15 L15,15');
+  });
+
+  it('standalone: fold is a second filled <path>, not unfilled <line>s', () => {
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    expect((svg.match(/<path /g) ?? []).length).toBe(2);
+    expect(svg).not.toContain('<line');
+    const foldD = [...svg.matchAll(/<path d="([^"]+)"/g)][1]?.[1];
+    expect(foldD).toBe('M75,15 L75,25 L85,25 L75,15');
+  });
+
+  it('standalone: first-line baseline is y + marginY(5) + fontSize * ASCENT_FRACTION(7/9)', () => {
+    // Jar-verified on volefo-41-tolo996: y=15, fontSize=13 -> 30.111, not
+    // the old unsourced `y + NOTE_FOLD(8) + fontSize` (= 36).
+    const node = makeNode({ kind: 'note', label: 'n', x: 15, y: 15, width: 70, height: 23 });
+    const svg = renderNote(node, theme);
+    const textY = svg.match(/<text[^>]*\by="([\d.]+)"/)?.[1];
+    expect(Number(textY)).toBeCloseTo(30.111, 2);
+  });
+
+  it('spike right (notePosition "left"): zero-radius arcs follow the two corner lineTos', () => {
+    // Opale#getPolygonRight (`:198-219`): y1's floor is `cornersize`.
+    // Jar-verified byte-exact against cubida-55-meku256.
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'left',
+      spikeTip: { x: 118.156, y: 71 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,77.5 L118.156,71 L98.156,69.5 L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+
+  it('spike left (notePosition "right"): y1 floor is 0, not cornersize', () => {
+    // Opale#getPolygonLeft (`:175-196`) -- mirror of getPolygonRight, with
+    // the spike and the fold on OPPOSITE edges so y1's floor stays 0.
+    // spike.y=64.5 -> relY=5, y1=relY-delta(4)=1 (unclamped, within [0,15]).
+    const node = makeNode({
+      kind: 'note',
+      label: 'n',
+      x: 15,
+      y: 59.5,
+      width: 83.156,
+      height: 23,
+      notePosition: 'right',
+      spikeTip: { x: -20, y: 64.5 },
+    });
+    const svg = renderNote(node, theme);
+    const bodyD = svg.match(/<path d="([^"]+)"/)?.[1];
+    expect(bodyD).toBe(
+      'M15,59.5 L15,60.5 L-20,64.5 L15,68.5 ' +
+        'L15,82.5 A0,0 0 0 0 15,82.5 L98.156,82.5 A0,0 0 0 0 98.156,82.5 ' +
+        'L98.156,69.5 L88.156,59.5 L15,59.5 A0,0 0 0 0 15,59.5',
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T1b (decisions.md#D1/#D4) — every activity `<text>` goes through the
+// klimt `DriverTextSvg`: `textLength` is real, and the single-line baseline
+// is `rect.y + padding + fontSize * ASCENT_FRACTION`, jar-verified on
+// `rarodo-65-fudu505` (`rect.y=55`, `fontSize=12`: `text.y=74.333`, i.e.
+// `rect.y + 19.333`) -- NOT the old `cy + fontSize/3` (would give +20).
+// ---------------------------------------------------------------------------
+
+describe('T1b — klimt text driver (D1)', () => {
+  it('a single-line action label carries textLength and sits at rect.y + 19.333 (rarodo-65-fudu505)', () => {
+    // Height 32 = fontSize(12) + 2*padding(10), matching `textNodeHeight`'s
+    // own formula -- the SAME box shape `rarodo` sizes its action at.
+    const node = makeNode({ kind: 'action', label: 'first', x: 16, y: 55, width: 39.275, height: 32 });
+    const svg = renderAction(node, theme);
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>first<\/text>/);
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    expect(y - node.y).toBeCloseTo(19.333, 2);
+  });
+
+  it('a single-char label carries no textLength (upstream text.length() > 1 guard)', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'a', x: 0, y: 0, width: 30, height: 32 }), theme);
+    expect(svg).not.toContain('textLength');
+  });
+
+  it('a diamond label carries no dominant-baseline, baseline from centeredFirstBaselineY', () => {
+    const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, y: 40, width: 40, height: 40 });
+    const svg = renderDiamond(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const fontSize = 11; // plantuml.skin:370
+    expect(y).toBeCloseTo(cy + fontSize * (7 / 9 - 0.5), 2);
+  });
+
+  it('a hexagon condition label carries textLength and no dominant-baseline', () => {
+    const node = makeNode({ kind: 'diamond', label: 'test', x: 0, y: 0, width: 48, height: 24 });
+    const svg = renderHexagon(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>test<\/text>/);
+  });
+
+  // Follow-up push-forward: activity-renderer-signal-shapes.ts's chevron/
+  // parallelogram single-line labels carried the SAME `dominant-baseline:
+  // 'central'` / `cy + boxSize/3` approximations as the action/diamond
+  // boxes above -- fixed identically (same file, same mechanism, D1/D9).
+  it('a chevron (<<input>>) label carries textLength and no dominant-baseline', () => {
+    const node = makeNode({ kind: 'action', label: 'go now', stereotype: 'input', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderChevronLeft(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>go now<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12; // activityFontSize(theme, 'activity')
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
+
+  it('a parallelogram (<<save>>) label carries textLength and no dominant-baseline/box-centre hack', () => {
+    const node = makeNode({ kind: 'action', label: 'store', stereotype: 'save', x: 0, y: 0, width: 80, height: 32 });
+    const svg = renderParallelogram(node, theme);
+    expect(svg).not.toContain('dominant-baseline');
+    expect(svg).toMatch(/<text[^>]*textLength="[\d.]+"[^>]*>store<\/text>/);
+    const cy = node.y + node.height / 2;
+    const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
+    const size = 12;
+    expect(y).toBeCloseTo(cy + size * (7 / 9 - 0.5), 2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // renderBar / renderSplitLine (apc-T3, activity-renderer-bars.ts) --
 // FtileBlackBlock.java:101-110 (fork/join bar) vs FtileThinSplit.java
 // :87-96 (split top/join line): two different shapes for two different
@@ -434,7 +656,10 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
-  it('renders a rounded rect, fill only, no stroke attribute', () => {
+  // T3a (garuga-34-debe901): `ug.apply(colorBar).apply(colorBar.bg())
+  // .draw(rect)` (`FtileBlackBlock.java:110`) strokes AND fills the rect in
+  // the SAME resolved colour -- stroke is never absent.
+  it('renders a rounded rect, stroked AND filled in the same colour', () => {
     const svg = renderBar(makeNode({ kind: 'fork-bar', x: 10, y: 20, width: 100, height: 6 }), theme);
     expect(svg).toContain('<rect');
     expect(svg).toContain('x="10"');
@@ -443,12 +668,15 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
     expect(svg).toContain('height="6"');
     expect(svg).toContain('rx="2.5"');
     expect(svg).toContain('ry="2.5"');
-    expect(svg).not.toContain('stroke=');
+    expect(svg).toContain('fill="#555"');
+    expect(svg).toContain('stroke="#555"');
+    expect(svg).toContain('stroke-width="1"');
   });
 
-  it('fill defaults to the resolved activityBar colour, not theme.colors.border', () => {
+  it('fill AND stroke default to the resolved activityBar colour, not theme.colors.border', () => {
     const svg = renderBar(makeNode({ kind: 'join-bar', width: 50, height: 6 }), theme);
     expect(svg).toContain('fill="#555"');
+    expect(svg).toContain('stroke="#555"');
     expect(svg).not.toContain(`fill="${theme.colors.border}"`);
   });
 });
@@ -467,5 +695,29 @@ describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
     const svg = renderSplitLine(makeNode({ kind: 'split-join-bar', x: 0, y: 0, width: 40 }), theme);
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2f mechanism 6 -- `group`/`partition` frame (plantuml.skin:364-368's
+// root `composite` block). `renderNode` had no case for either kind, so
+// both fell through the `default:` fallback and drew the generic node
+// fill/border instead of the composite frame.
+// ---------------------------------------------------------------------------
+
+describe('renderNode -- group/partition frame (composite SName)', () => {
+  it('partition: unfilled rect, black stroke, LineThickness 1.5 -- not the generic node fill', () => {
+    const node = makeNode({ kind: 'partition', x: 16, y: 45, width: 138.4, height: 122 });
+    const svg = renderNode(node, theme);
+    expect(svg).toBe('<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>');
+  });
+
+  it('group: same composite styling as partition (FromSkinparamToStyle.java:131-132, ONE SName for both)', () => {
+    const node = makeNode({ kind: 'group', x: 0, y: 0, width: 50, height: 50 });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('fill="none"');
+    expect(svg).toContain('stroke="#000"');
+    expect(svg).toContain('stroke-width="1.5"');
+    expect(svg).not.toContain(theme.colors.nodeBackground);
   });
 });

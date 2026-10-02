@@ -39,8 +39,18 @@
  *     slug list. A fixture whose OWN render also errors AND whose golden is
  *     a jar-error page is recorded as `jar-error`, not `error` -- D12: "the
  *     jar's failure makes our own outcome unevidential either way."
+ *   - **pinned** (frozen into the byte-freeze golden ratchet) ->
+ *     `status: "pinned"` (add1-T0b, D5 of `plans/activity-divergence-drive/
+ *     decisions.md`). `plans/activity-divergence-drive/tools/pin-goldens
+ *     .mts` flips a `"baseline"` row to `"pinned"` IN PLACE (never removed
+ *     from this file) once a close freezes the fixture into
+ *     `activity.golden.ratchet.test.ts`'s `oracle/goldens/svg-activity/
+ *     ratchet.json`; its `weightedScore`/`diffCount` are left exactly as
+ *     last measured and read by nothing here. A pinned row is excluded from
+ *     `baselineFixtures` by the SAME `=== 'baseline'` filter that already
+ *     excludes `error`/`jar-error` rows (no new filter needed) -- see AC5.
  *
- * TWO DELIBERATE DIVERGENCES from the sequence sibling:
+ * THREE DELIBERATE DIVERGENCES from the sequence sibling:
  *
  *   1. A THIRD STATUS, `jar-error` (D12). Sequence's population has no jar
  *      error pages in its baselined set worth carving out this way; the
@@ -57,6 +67,12 @@
  *      CLAUDE.md's code-principles rule forbids ("no config knobs with one
  *      caller"). If a future capture grows a fixture past this file's
  *      current sizes, add the mechanism then.
+ *   3. A FOURTH STATUS, `pinned` (add1-T0b, D5). `pin-goldens.mts` flips a
+ *      `"baseline"` row to `"pinned"` in place once a close freezes the
+ *      fixture into `activity.golden.ratchet.test.ts`'s byte-freeze
+ *      ratchet. This file's `BaselineFixture.status` union carries the
+ *      fourth member so an unrecognized status can never fall through
+ *      AC0's arithmetic check unexamined.
  *
  * NO `describe.skipIf(!cacheAvailable)` (D4). `test-results/dot-cache/` is
  * committed (`.gitignore:25` re-includes it), so an absent tree means a
@@ -88,10 +104,21 @@ import { renderFixtureActivity } from './render-fixture-activity.js';
 interface BaselineFixture {
   readonly type: string;
   readonly slug: string;
-  readonly status: 'baseline' | 'error' | 'jar-error';
+  /** A FOURTH status, `"pinned"` (add1-T0b, D5 of
+   * `plans/activity-divergence-drive/decisions.md`): `plans/
+   * activity-divergence-drive/tools/pin-goldens.mts` flips a `"baseline"`
+   * row to `"pinned"` in place (the row is never removed from this file)
+   * once the fixture is frozen into `activity.golden.ratchet.test.ts`'s
+   * byte-freeze ratchet. A pinned row is EXCLUDED from `baselineFixtures`
+   * below (the same `=== 'baseline'` filter that already excludes `error`/
+   * `jar-error` rows, unchanged) -- the golden ratchet test owns it from
+   * here on, never this gate. */
+  readonly status: 'baseline' | 'error' | 'jar-error' | 'pinned';
   /** The GATED quantity (D2). Present only on `status: "baseline"` entries;
    * an entry without one fails loudly rather than falling back to
-   * `diffCount`, which is a different unit. */
+   * `diffCount`, which is a different unit. A `"pinned"` row KEEPS its
+   * last-measured `weightedScore`/`diffCount` (D5) -- they are
+   * informational once pinned, read by nothing in this file. */
   readonly weightedScore?: number;
   /** Informational only, per D2 -- never gated. `null` for `error` and
    * `jar-error` entries (D8, D12): neither carries a meaningful count. */
@@ -241,6 +268,7 @@ function progressLog(f: FixtureRef, baseline: number, live: number): string | un
 const baselineFixtures = manifest.fixtures.filter((f) => f.status === 'baseline');
 const errorFixtures = manifest.fixtures.filter((f) => f.status === 'error');
 const jarErrorFixtures = manifest.fixtures.filter((f) => f.status === 'jar-error');
+const pinnedFixtures = manifest.fixtures.filter((f) => f.status === 'pinned');
 
 // ---------------------------------------------------------------------------
 // AC0 -- the committed corpus is present and complete. Absence means a
@@ -258,6 +286,63 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
         `than pruning diff-baseline.json to match it. Missing: ${missing.slice(0, 10).join(', ')}`,
     ).toEqual([]);
     expect(manifest.fixtures.length).toBe(373);
+  });
+
+  // add1-T0b: the three-status arithmetic (D8's README note) extends to a
+  // FOURTH bucket once a close starts pinning rows via `pin-goldens.mts`
+  // (D5). Checking the four counts sum to the manifest length -- rather
+  // than only checking `manifest.fixtures.length` above -- also catches an
+  // unrecognized fifth status silently falling through every filter below
+  // unexamined (at b0: 311 + 39 + 23 + 0 = 373; T0b pins no real row).
+  it('jar-error + error + baseline + pinned accounts for every one of the 373 fixtures', () => {
+    expect(jarErrorFixtures.length + errorFixtures.length + baselineFixtures.length + pinnedFixtures.length).toBe(
+      manifest.fixtures.length,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC5 (add1-T0b, D5) -- a "pinned" row is excluded from every gate in this
+// file and owned exclusively by `activity.golden.ratchet.test.ts` from then
+// on. Exercised in-memory against a FABRICATED manifest (never a real
+// diff-baseline.json edit -- pinning a real slug is orchestrator-only, at
+// batch closes) to prove the exclusion mechanically, not by inference from
+// today's zero-pinned-rows state.
+// ---------------------------------------------------------------------------
+
+describe('svg-activity weighted-score baseline ratchet — "pinned" rows are skipped (AC5, synthetic)', () => {
+  it('a "pinned" row is excluded from baselineFixtures by the exact production filter', () => {
+    const fabricated: BaselineFixture[] = [
+      {
+        type: 'activity',
+        slug: 'was-baseline',
+        status: 'baseline',
+        weightedScore: 0,
+        diffCount: 0,
+        measuredAt: 'x',
+        measuredAgainstCommit: 'y',
+      },
+      {
+        type: 'activity',
+        slug: 'now-pinned',
+        status: 'pinned',
+        weightedScore: 0,
+        diffCount: 0,
+        measuredAt: 'x',
+        measuredAgainstCommit: 'y',
+      },
+    ];
+    expect(fabricated.filter((f) => f.status === 'baseline').map((f) => f.slug)).toEqual(['was-baseline']);
+    expect(fabricated.filter((f) => f.status === 'pinned').map((f) => f.slug)).toEqual(['now-pinned']);
+  });
+
+  it('every "pinned" row has exactly one ratchet.json entry, and vice versa', () => {
+    // add1-b1 pinned the first real rows (D5). A pinned row is owned by
+    // activity.golden.ratchet.test.ts; this check keeps the two files in
+    // lockstep so a row can never be gated by neither test (or by both).
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly { slug: string }[] };
+    const ratchetSlugs = ratchet.fixtures.map((f) => f.slug).sort();
+    expect(pinnedFixtures.map((f) => f.slug).sort()).toEqual(ratchetSlugs);
   });
 });
 
@@ -431,8 +516,9 @@ describe('svg-activity weighted-score baseline ratchet — promotion is never au
     ).toEqual([]);
   });
 
-  it('ratchet.json ships empty -- the promotion path exists but starts empty', () => {
-    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly unknown[] };
-    expect(ratchet.fixtures).toEqual([]);
+  it('ratchet.json holds no slug that is still a "baseline" row -- promotion flips the status', () => {
+    const ratchet = JSON.parse(readFileSync(RATCHET_PATH, 'utf8')) as { fixtures: readonly { slug: string }[] };
+    const baselineSlugs = new Set(baselineFixtures.map((f) => f.slug));
+    expect(ratchet.fixtures.filter((f) => baselineSlugs.has(f.slug)).map((f) => f.slug)).toEqual([]);
   });
 });

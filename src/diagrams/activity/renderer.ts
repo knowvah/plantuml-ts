@@ -8,14 +8,16 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, text, polygon } from '../../core/svg.js';
+import { rect, line, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode } from './activity-renderer-shapes.js';
+import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { arrowDirection, arrowHeadPoints, type ArrowDir } from './arrows-regular.js';
+import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -35,16 +37,26 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 // ---------------------------------------------------------------------------
 
 /**
- * Draw the `ArrowsRegular` decoration (`arrows-regular.ts`) at the tip
- * `(x, y)`, oriented by the segment direction `(dx, dy)`.
+ * Draw the `ArrowsRegular`/`ArrowsTriangle` decoration (`arrows-regular.ts`,
+ * D4) at `tip`, oriented by the segment direction `vector`. Bundled into
+ * two point-shaped params (rather than four numbers) to stay under this
+ * file's 5-param complexity limit once `theme` (D4's strictuml selector)
+ * joined `color`.
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:154-168
  * (`drawInternalOneColor`'s `startDecoration`/`endDecoration` draw).
  */
-function arrowTip(x: number, y: number, dx: number, dy: number, color: string): string {
+function arrowTip(
+  tip: { x: number; y: number },
+  vector: { dx: number; dy: number },
+  color: string,
+  theme: Theme,
+): string {
+  const { x, y } = tip;
+  const { dx, dy } = vector;
   if (dx === 0 && dy === 0) return '';
   const dir = arrowDirection(dx, dy);
-  const points = arrowHeadPoints(dir).map((p) => ({ x: x + p.x, y: y + p.y }));
+  const points = arrowHeadPointsFor(theme, dir).map((p) => ({ x: x + p.x, y: y + p.y }));
   return polygon(
     points,
     // The arrow DECORATION draws through `.apply(UStroke.simple())`
@@ -86,18 +98,20 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
     // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
     // function's own padding, two lines up), so the centring offset that
     // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
-    // algebra on the existing estimate, not a new guess.
-    const labelEl = text(pillX + 4, midY, label, {
+    // algebra on the existing estimate, not a new guess. D1: no `dominant-
+    // baseline` either (the driver emits none) -- `centeredFirstBaselineY`
+    // is the same N=1 ascent-centred baseline `activity-renderer-shapes.ts`
+    // uses for every other box/hexagon/diamond single-line label.
+    const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
       fill: activityFontColor(theme, 'arrow'),
       fontFamily: theme.fontFamily,
       fontSize: size,
-      dominantBaseline: 'central',
     });
     return background + labelEl;
   }
 
   // No color: plain text label offset slightly from the midpoint
-  return text(midX + 4, midY - 4, label, {
+  return drawActivityText(midX + 4, midY - 4, label, {
     fill: activityFontColor(theme, 'arrow'),
     fontFamily: theme.fontFamily,
     fontSize: size,
@@ -106,15 +120,22 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
 
 /**
  * The edge path, drawn as ONE `<line>` PER SEGMENT -- never one `<polyline>`
- * and never one `<path>`.
+ * and never one `<path>`. The matching `emphasize` segment's arrowhead is
+ * interleaved INTO this same loop, drawn immediately before that segment's
+ * own line -- never before the whole run, never after it.
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:134-183.
- * `Worm#drawInternal` walks its own points with
+ * `Worm#drawInternalOneColor` walks its own points with
  * `for (int i = 0; i < size() - 1; i++)` (`:134`), taking `getPoint(i)` and
- * `getPoint(i + 1)` as one `XLine2D` per iteration, and its `drawLine`
- * helper bottoms out at `ug.draw(new ULine(x2 - x1, y2 - y1))` (`:183`) --
- * one `ULine` per segment, no aggregate shape anywhere in the call.
- * `DriverLineSvg#draw`
+ * `getPoint(i + 1)` as one `XLine2D` per iteration. Per iteration (`:138-143`):
+ * `if (drawn == false && emphasizeDirection != null &&
+ * Direction.fromVector(p1, p2) == emphasizeDirection) { drawLine(ug, line,
+ * emphasizeDirection); drawn = true; } else { drawLine(ug, line, null); }`
+ * -- `drawn` latches after the FIRST match, so later segments sharing the
+ * same direction draw no decoration. `drawLine`'s own body (`:178-184`)
+ * draws the passed-`direction` arrowhead at the segment's midpoint BEFORE
+ * `ug.draw(new ULine(x2 - x1, y2 - y1))` -- one `ULine` per segment, no
+ * aggregate shape anywhere in the call. `DriverLineSvg#draw`
  * (`klimt/drawing/svg/DriverLineSvg.java:54`) renders each one as a single
  * `<line>`.
  *
@@ -136,44 +157,33 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * (`ba68279df92`, `4f3a0dcc63b`, both on `SvgGraphics.java`) and STILL emits
  * one `ULine` per segment -- per-segment lines are what an output-size-
  * conscious upstream chose. Do not re-introduce a polyline "optimisation".
+ *
+ * Direction classification (including the diagonal/zero-length cases
+ * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
+ * `Direction.fromVector` (`utils/Direction.java:110-128`).
  */
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
   edgeColor: string,
   strokeWidth: number,
+  emphasize: ArrowDir | undefined,
+  theme: Theme,
 ): string {
   let out = '';
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p1 = pts[i]!;
-    const p2 = pts[i + 1]!;
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
-  }
-  return out;
-}
-
-/**
- * The FIRST segment whose direction equals `emphasize`, and its midpoint --
- * `Worm#drawInternalOneColor`'s `drawn == false && Direction.fromVector(p1,
- * p2) == emphasizeDirection` guard (`ftile/Worm.java:138-139`), which fires
- * at most once per Worm regardless of how many later segments also match.
- * Direction classification (including the diagonal/zero-length cases
- * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
- * `Direction.fromVector` (`utils/Direction.java:110-128`).
- */
-function findEmphasisSegment(
-  pts: ReadonlyArray<{ x: number; y: number }>,
-  emphasize: ArrowDir,
-): { mid: { x: number; y: number }; dx: number; dy: number } | undefined {
+  let emphasisDrawn = false;
   for (let i = 0; i < pts.length - 1; i++) {
     const p1 = pts[i]!;
     const p2 = pts[i + 1]!;
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
-    if (arrowDirection(dx, dy) === emphasize) {
-      return { mid: { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, dx, dy };
+    if (!emphasisDrawn && emphasize !== undefined && arrowDirection(dx, dy) === emphasize) {
+      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      out += arrowTip(mid, { dx, dy }, edgeColor, theme);
+      emphasisDrawn = true;
     }
+    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
   }
-  return undefined;
+  return out;
 }
 
 /** Canonical unit vector per {@link ArrowDir}, so {@link arrowTip}'s own
@@ -189,10 +199,9 @@ const DIR_VECTOR: Record<ArrowDir, { dx: number; dy: number }> = {
 /** D4: the extra arrowhead a translate shape places at its own point,
  *  split out of {@link renderEdge} to keep that function under the file's
  *  NLOC limit. */
-function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string): string {
+function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string, theme: Theme): string {
   const { x, y, dir } = midArrowAt;
-  const { dx, dy } = DIR_VECTOR[dir];
-  return arrowTip(x, y, dx, dy, edgeColor);
+  return arrowTip({ x, y }, DIR_VECTOR[dir], edgeColor, theme);
 }
 
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
@@ -210,33 +219,31 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // `.apply(UStroke.simple())` (`:159`, `:166`), which is thickness 1.0
   // (`klimt/UStroke.java:75-77`), so the 1.5 never reaches any output at
   // all. This port had generalised it to every segment of every edge.
-  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'));
+  //
+  // The `emphasize` arrowhead (`Snake#emphasizeDirection`, D6) is
+  // interleaved INTO this segment run, immediately before its matching
+  // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
+  // exact `Worm.java:138-143` loop body this ports.
+  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'), edge.emphasize, theme);
 
-  // Arrowhead at last point, direction from second-to-last to last.
-  // `edge.arrowhead === false` mirrors a `null` end decoration
-  // (`ftile/Worm.java:161-168`'s `if (endDecoration != null)` never firing).
+  // Terminal arrowhead, drawn AFTER the full segment loop --
+  // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
+  // sit below the `for` loop that draws every segment (`ftile/Worm.java:
+  // 134-171`), never interleaved with it. Direction is second-to-last point
+  // to last. `edge.arrowhead === false` mirrors a `null` end decoration
+  // (`:161-168`'s `if (endDecoration != null)` never firing).
   const last = pts[pts.length - 1]!;
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last.x, last.y, dx, dy, edgeColor);
-
-  // Emphasized mid-segment arrowhead (`Snake#emphasizeDirection`, D6) --
-  // drawn IN ADDITION to the terminal arrowhead, never instead of it
-  // (`Worm.java:138-183`: the loop's `drawn` flag and the post-loop
-  // `endDecoration` draw are independent).
-  let emphasizeEl = '';
-  if (edge.emphasize !== undefined) {
-    const seg = findEmphasisSegment(pts, edge.emphasize);
-    if (seg !== undefined) {
-      emphasizeEl = arrowTip(seg.mid.x, seg.mid.y, seg.dx, seg.dy, edgeColor);
-    }
-  }
+  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, edgeColor, theme);
 
   // D4: an explicit extra arrowhead at a translate shape's own point (see
-  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after `emphasize`,
-  // never instead of the terminal arrowhead.
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor);
+  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
+  // decoration; this is a port-specific extension with no `Worm` draw-order
+  // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
+  // and is now interleaved above).
+  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor, theme);
 
   // Optional edge label near midpoint
   let labelEl = '';
@@ -246,7 +253,36 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
   }
 
-  return segments + arrow + emphasizeEl + midArrowEl + labelEl;
+  return segments + arrow + midArrowEl + labelEl;
+}
+
+/**
+ * T3j (journal row 36): `geo.totalWidth`/`totalHeight` are the MARGINED
+ * (document-margin-included) canvas dims `canvas-origin.ts#computeCanvasOrigin`
+ * computes -- `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL`,
+ * where `CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_
+ * MARGIN`. The RAW (pre-margin) dims chrome centres against are the
+ * arithmetic inverse of the margin/ceil half of that recipe: subtract the
+ * margin (both sides) and the ceil bump this function adds back.
+ *
+ * KNOWN LIMITATION (not silently dropped): this subtracts from the
+ * ALREADY-FLOORED `totalWidth`/`totalHeight`, not from the ink span itself
+ * -- exact only when that ink span already lands on the integer grid at
+ * this stage. Getting the un-floored raw dims exactly (matching class's own
+ * `computeClassRawInkDims`, independent of `computeClassDocumentDims`)
+ * would mean threading a new field through `assign-coordinates-full.ts`
+ * #assembleFromFinal`/`ActivityGeometry` -- outside this task's write-set;
+ * re-slotted. Measured against the T3j acceptance corpus (cifafo, bigide):
+ * the residual gap on every chrome-bearing fixture checked traces to a
+ * SEPARATE, pre-existing defect (chrome title-text width measurement
+ * precision, or body-ink width for an unrelated construct) -- not to this
+ * subtraction -- but an un-exercised fractional-ink-span fixture could
+ * still expose it. `RenderFragment.preChromeWidth`'s own doc comment names
+ * the general mechanism this value feeds.
+ */
+function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
+  return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
 }
 
 // ---------------------------------------------------------------------------
@@ -291,11 +327,19 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     children.push(renderSwimlaneTitles(geo, theme));
   }
 
+  const raw = preChromeDims(geo);
   return {
     body: children.join(''),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
     diagramType: DIAGRAM_TYPE_ACTIVITY,
+    // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
+    // document-margin shift baked into `body` above, composes chrome around
+    // the result at these RAW dims, then re-applies the margin to the
+    // chrome-decorated whole -- see `preChromeDims`'s own doc comment for
+    // the exact inverse this subtracts.
+    preChromeWidth: raw.width,
+    preChromeHeight: raw.height,
   };
 }

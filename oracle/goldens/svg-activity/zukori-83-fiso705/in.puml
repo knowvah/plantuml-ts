@@ -1,0 +1,13 @@
+@startuml
+start;
+:Hello;
+if (test) then
+  :Action10;
+  if (test) then
+    :Action11;
+  endif;
+  :Action20;
+endif
+:Action50;
+:Action60;
+@enduml

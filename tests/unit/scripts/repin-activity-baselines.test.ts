@@ -8,6 +8,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+  isBaselineStatus,
   classifyChange,
   plannedWrites,
   unacceptedRises,
@@ -16,6 +17,15 @@ import {
   formatChangedLine,
   type PlannedWrite,
 } from '../../../scripts/repin-activity-baselines.js';
+
+describe('isBaselineStatus', () => {
+  it('is true only for "baseline", excluding "error", "jar-error" and "pinned" (add1-T0b, D5)', () => {
+    expect(isBaselineStatus('baseline')).toBe(true);
+    expect(isBaselineStatus('error')).toBe(false);
+    expect(isBaselineStatus('jar-error')).toBe(false);
+    expect(isBaselineStatus('pinned')).toBe(false);
+  });
+});
 
 describe('classifyChange', () => {
   it('is "rose" when the measured value exceeds the pin', () => {

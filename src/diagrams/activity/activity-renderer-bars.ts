@@ -35,13 +35,31 @@ const FORK_BAR_CORNER_RADIUS = 2.5;
 const SPLIT_LINE_THICKNESS = 1.5;
 
 /**
- * Fork/join bar: a filled, ROUNDED rect, no stroke (`FtileBlackBlock
- * .java:101-110` also strokes the rect in the same colour as the fill --
- * a separately filed defect, not reproduced here per this task's brief).
+ * `UStroke.simple()` -- thickness 1.0, no dash (`UStroke.java:75-77`). The
+ * default canvas stroke in force when `FtileBlackBlock#drawU` draws its rect
+ * (no `UStroke.withThickness` call precedes it, unlike the `Worm` decoration
+ * draws at `Worm.java:157,165`); confirmed against the `garuga-34-debe901`
+ * golden's `stroke-width:1`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:110
+ */
+const FORK_BAR_STROKE_WIDTH = 1;
+
+/**
+ * Fork/join bar: a ROUNDED rect, stroked AND filled in the resolved bar
+ * colour.
+ *
+ * `ug.apply(colorBar).apply(colorBar.bg()).draw(rect)` -- `colorBar` sets
+ * the foreground (stroke) ink, `colorBar.bg()` the SAME colour as the fill;
+ * both reach the SVG as one `<rect fill="..." stroke="..."/>` in identical
+ * values, never fill-only.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:110
  */
 export function renderBar(node: ActivityNodeGeo, theme: Theme): string {
+  const fill = actColors(theme).barFill;
   return rect(node.x, node.y, node.width, node.height, {
-    fill: actColors(theme).barFill,
+    fill,
+    stroke: fill,
+    strokeWidth: FORK_BAR_STROKE_WIDTH,
     rx: FORK_BAR_CORNER_RADIUS,
     ry: FORK_BAR_CORNER_RADIUS,
   });

@@ -439,8 +439,13 @@ describe('walkRepeat — back connection: complex1 (ConnectionBackComplex1#drawS
   });
 });
 
-describe('walkRepeat — draw order: every child’s own node first, then In, Back, Out (D7)', () => {
-  it('pushes 3 nodes (entry, body, condition) before any of the repeat’s own 3 edges', () => {
+describe('walkRepeat — draw order: body, entry, condition, then In, Back, Out (FtileRepeat.java:685-692)', () => {
+  it('pushes 3 nodes (body, entry, condition) before any of the repeat’s own 3 edges', () => {
+    // `FtileRepeat#drawU` draws `repeat` (body) FIRST, then `diamond1`
+    // (entry) SECOND, then `diamond2` (condition) THIRD
+    // (`FtileRepeat.java:685-692`, `getMyChildren` `:88-90`) -- NOT
+    // entry-then-body, which this file pushed before mission
+    // `activity-divergence-drive` T2a corrected it.
     const entry = makeLeaf('stub-entry', 24, 24, 12);
     const body = makeLeaf('stub-body', 40, 60, 12);
     const condition = makeCondition(50, 40);
@@ -460,7 +465,7 @@ describe('walkRepeat — draw order: every child’s own node first, then In, Ba
     const out = makeOut();
     walkRepeat(tile, 0, 0, undefined, out);
 
-    expect(out.nodes.map((n) => n.kind)).toEqual(['stub-entry', 'stub-body', 'repeat-cond']);
+    expect(out.nodes.map((n) => n.kind)).toEqual(['stub-body', 'stub-entry', 'repeat-cond']);
     expect(out.edges).toHaveLength(3);
     // In: entry -> body, not emphasized.
     expect(out.edges[0]!.emphasize).toBeUndefined();

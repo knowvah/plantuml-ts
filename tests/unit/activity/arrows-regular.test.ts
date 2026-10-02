@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { arrowDirection, arrowHeadExtents, arrowHeadPoints } from '../../../src/diagrams/activity/arrows-regular.js';
+import {
+  arrowDirection,
+  arrowHeadExtents,
+  arrowHeadPoints,
+  arrowHeadPointsTriangle,
+  arrowHeadPointsFor,
+} from '../../../src/diagrams/activity/arrows-regular.js';
+import { resolveTheme } from '../../../src/core/theme.js';
 
 // ---------------------------------------------------------------------------
 // arrowHeadPoints — the four ArrowsRegular.java methods, point order
@@ -127,5 +134,70 @@ describe('arrowDirection', () => {
   // polygon (renderer.ts#arrowTip's `dx === 0 && dy === 0` guard).
   it("a zero vector returns down rather than upstream's null", () => {
     expect(arrowDirection(0, 0)).toBe('down');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// arrowHeadPointsTriangle / arrowHeadPointsFor — D4: `skinparam style
+// strictuml` selects `ArrowsTriangle` (SkinParam.java:1306-1309), a
+// 3-point polygon per direction (ArrowsTriangle.java:41-82), never the
+// 4-point `ArrowsRegular` waist-point shape.
+// ---------------------------------------------------------------------------
+
+describe('arrowHeadPointsTriangle', () => {
+  it('asToUp: (-4,10), (0,0), (4,10) -- ArrowsTriangle.java:48-52', () => {
+    expect(arrowHeadPointsTriangle('up')).toEqual([
+      { x: -4, y: 10 },
+      { x: 0, y: 0 },
+      { x: 4, y: 10 },
+    ]);
+  });
+
+  it('asToDown: (-4,-10), (4,-10), (0,0) -- ArrowsTriangle.java:57-61', () => {
+    expect(arrowHeadPointsTriangle('down')).toEqual([
+      { x: -4, y: -10 },
+      { x: 4, y: -10 },
+      { x: 0, y: 0 },
+    ]);
+  });
+
+  it('asToRight: (-10,-4), (0,0), (-10,4) -- ArrowsTriangle.java:66-70', () => {
+    expect(arrowHeadPointsTriangle('right')).toEqual([
+      { x: -10, y: -4 },
+      { x: 0, y: 0 },
+      { x: -10, y: 4 },
+    ]);
+  });
+
+  it('asToLeft: (10,-4), (0,0), (10,4) -- ArrowsTriangle.java:75-79', () => {
+    expect(arrowHeadPointsTriangle('left')).toEqual([
+      { x: 10, y: -4 },
+      { x: 0, y: 0 },
+      { x: 10, y: 4 },
+    ]);
+  });
+
+  it('every direction is a 3-point polygon, never ArrowsRegular\'s 4-point shape', () => {
+    for (const dir of ['up', 'down', 'left', 'right'] as const) {
+      expect(arrowHeadPointsTriangle(dir)).toHaveLength(3);
+      expect(arrowHeadPoints(dir)).toHaveLength(4);
+    }
+  });
+});
+
+describe('arrowHeadPointsFor — SkinParam.java:1306-1309 strictuml selector', () => {
+  it('resolves to ArrowsTriangle under skinparam style strictuml', () => {
+    const theme = { ...resolveTheme('default'), strictUml: true };
+    expect(arrowHeadPointsFor(theme, 'down')).toEqual(arrowHeadPointsTriangle('down'));
+  });
+
+  it('resolves to ArrowsRegular (byte-identical) when strictUml is unset', () => {
+    const theme = resolveTheme('default');
+    expect(arrowHeadPointsFor(theme, 'down')).toEqual(arrowHeadPoints('down'));
+  });
+
+  it('resolves to ArrowsRegular when strictUml is explicitly false', () => {
+    const theme = { ...resolveTheme('default'), strictUml: false };
+    expect(arrowHeadPointsFor(theme, 'up')).toEqual(arrowHeadPoints('up'));
   });
 });

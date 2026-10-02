@@ -1,0 +1,7 @@
+@startuml
+start
+if (test) then
+ :foo1;
+endif
+:foo2;
+@enduml

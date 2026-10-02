@@ -8,25 +8,13 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
-import {
-  rect,
-  text,
-  diamond,
-  noteBox,
-  ellipse,
-  line,
-  path,
-  polygon,
-  resolvePaint,
-  type TextStyle,
-} from '../../core/svg.js';
+import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import { NOTE_FOLD } from './activity-layout-constants.js';
+import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
+import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import {
   ACTIVITY_BAR_FILL,
-  CIRCLE_END_LINE_THICKNESS,
   CIRCLE_INK,
-  CIRCLE_LINE_THICKNESS,
   NOTE_LINE_THICKNESS,
   activityFontSize,
   activityLineThickness,
@@ -34,17 +22,23 @@ import {
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
-import { renderIfMerge, renderIfLabel } from './activity-renderer-if-shapes.js';
+import {
+  renderIfMerge,
+  renderIfLabel,
+  renderDiamond,
+  renderHexagonPolygon,
+  renderHexagonOwnLabel,
+} from './activity-renderer-if-shapes.js';
 import {
   renderSignalLabel,
   renderChevronLeft,
   renderChevronRight,
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
+import { renderStart, renderStop, renderEnd } from './activity-renderer-terminals.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
-  centeredLineX,
   measureLineWidth,
   measureMonoLineWidth,
 } from './activity-text-placement.js';
@@ -52,6 +46,17 @@ import {
 // Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
 // importers of these four symbols working unchanged.
 export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
+// Pure-move re-export (500-line split, T1c): the terminal-circle renderers
+// now live in `activity-renderer-terminals.ts`, which imports `actColors`
+// BACK from this file (same circular-but-safe shape as the signal-shapes
+// re-export above) -- existing importers of these four names are unchanged.
+export { renderStart, renderStop, renderEnd };
+// Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
+// `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
+// method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
+// BACK from this file (same circular-but-safe shape as the two re-exports
+// above) -- existing importers of this name are unchanged.
+export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
  *  25 } }` (plantuml.skin:362) makes both axes 12.5 -- was a bare unsourced
@@ -98,14 +103,20 @@ export function textLines(
   x: number,
   firstBaselineY: number,
   lineHeight: number,
-  style: TextStyle,
+  style: ActivityTextStyle,
 ): string {
-  return lines.map((ln, i) => text(x, firstBaselineY + lineHeight * i, ln, style)).join('');
+  return drawActivityTextLines(lines, x, firstBaselineY, lineHeight, style);
 }
 
 /** First baseline Y so an N-line block is vertically centred around `cy`,
- *  using the cited advance/ascent above instead of the old `lh * 0.8`. */
-function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
+ *  using the cited advance/ascent above instead of the old `lh * 0.8`.
+ *  `lineCount = 1` is this same formula's reduction to a SINGLE centred
+ *  line (`cy + lineHeight * (ASCENT_FRACTION - 1/2)`) -- jar-verified
+ *  against `rerovo-62-nazo755`'s hexagon label (`cy=27`, `fontSize=11`:
+ *  jar `y=30.056`, exactly `27 + 11 * 5/18`) and `rarodo-65-fudu505`'s
+ *  action-box label once expressed relative to `rect.y` (D1, exported for
+ *  `renderer.ts`'s edge-label use, which centres on the same formula). */
+export function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
 }
 
@@ -120,7 +131,7 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
   const lineWidth = measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
-  return text(x, cy, label, {
+  return drawActivityText(x, cy, label, {
     fontFamily: theme.fontFamily,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
@@ -141,7 +152,7 @@ export function renderMultilineText(
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return text(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+      return drawActivityText(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
     })
     .join('');
 }
@@ -183,64 +194,9 @@ export function actColors(theme: Theme): ActivityColors {
 // ---------------------------------------------------------------------------
 // Node shape renderers
 // ---------------------------------------------------------------------------
-
-export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const r = node.height / 2;
-  // @see DriverEllipseSvg.java -- upstream's start/end/kill circles are all
-  // UEllipse shapes, never a dedicated circle driver. `resolvePaint` here
-  // replicates `circle()`'s own pipeline byte-identically: `ellipse()`'s
-  // `extraAttrs` only shortens an ALREADY-hex string, not a named CSS
-  // colour, the way `circle()` did via `paintToSvg`. `LineThickness 1` on
-  // the start/stop/end block (plantuml.skin:378): the jar fills AND
-  // strokes the start terminal in the same colour; this port drew a fill
-  // only, so the ellipse was a hair small.
-  const ink = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS });
-}
-
-export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const outerR = node.height / 2;
-  const innerR = outerR * 0.55;
-  const c = actColors(theme);
-  return (
-    // `stop` takes the block's own `LineThickness 1` (plantuml.skin:378);
-    // `end` alone overrides to 1.5 (:383) -- two DISTINCT StyleSignatures
-    // (`VCompactFactory.java:97` vs `:101`).
-    ellipse(cx, cy, outerR, outerR, {
-      fill: 'none',
-      stroke: resolvePaint(c.endFill).value,
-      'stroke-width': CIRCLE_LINE_THICKNESS,
-    }) + ellipse(cx, cy, innerR, innerR, { fill: resolvePaint(c.endFill).value })
-  );
-}
-
-/**
- * Renders an `end` node as a circle with an X through it, matching upstream
- * PlantUML's distinction between `stop` (bullseye) and `end` (crossed circle).
- */
-export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const r = node.height / 2;
-  // Diagonal length so the X tips reach the circle border at 45°
-  const d = r * Math.SQRT1_2;
-  const endFill = actColors(theme).endFill;
-  return (
-    // `circle { end { LineThickness 1.5 } }` (plantuml.skin:383) -- `end`
-    // alone overrides the start/stop/end block's 1.
-    ellipse(cx, cy, r, r, {
-      fill: 'none',
-      stroke: resolvePaint(endFill).value,
-      'stroke-width': CIRCLE_END_LINE_THICKNESS,
-    }) +
-    line(cx - d, cy - d, cx + d, cy + d, { stroke: endFill, strokeWidth: CIRCLE_END_LINE_THICKNESS }) +
-    line(cx - d, cy + d, cx + d, cy - d, { stroke: endFill, strokeWidth: CIRCLE_END_LINE_THICKNESS })
-  );
-}
+// `renderStart`/`renderStop`/`renderEnd` live in
+// `activity-renderer-terminals.ts` (T1c, 500-line hook) -- re-exported
+// above.
 
 const CODE_BLOCK_RE = /^<code>([\s\S]*?)<\/code>$/i;
 
@@ -275,43 +231,51 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
       .map((ln, i) => {
         const w = measureMonoLineWidth(actionSize, ln);
         const x = activityTextLineX(theme, cx, w, opts);
-        return text(x, lineY + actionSize * i, ln, { fontFamily: 'monospace', fontSize: actionSize, fill: codeFill });
+        return drawActivityText(x, lineY + actionSize * i, ln, {
+          fontFamily: 'monospace',
+          fontSize: actionSize,
+          fill: codeFill,
+        });
       })
       .join('');
     return box + labelText;
   }
 
   const lines = label.split('\n');
+  // D1/D9: the single-line baseline is the N=1 case of the SAME
+  // `centeredFirstBaselineY` the multi-line branch already uses, not the
+  // old `cy + actionSize / 3` hand-rounding (`rarodo-65-fudu505`: box
+  // `rect.y + 19.333` reduces to `cy + actionSize * 5/18` here, not
+  // `cy + actionSize/3` -- a 0.667px error at `actionSize=12`).
   const labelEl =
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
-      : renderLabel(label, cx, cy + actionSize / 3, theme, opts);
+      : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
   return box + labelEl;
 }
 
-export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const size = node.width / 2;
-  const c = actColors(theme);
-  const shape = diamond(cx, cy, size, {
-    fill: c.diamondFill,
-    stroke: c.diamondBorder,
-  });
-  if (node.label === undefined || node.label === '') return shape;
-  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
-  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
-  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
-  // dimLabel.width) / 2` in this node's own frame.
-  const fontSize = activityFontSize(theme, 'diamond');
-  const lineWidth = measureLineWidth(theme, fontSize, node.label);
-  const label = text(centeredLineX(cx, lineWidth), cy, node.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fill: activityFontColor(theme, 'diamond'),
-    dominantBaseline: 'middle',
-  });
-  return shape + label;
+/** The hexagon condition label, split out of {@link renderHexagon} to stay
+ *  under this file's per-function NLOC limit. Multi-line: `GtileIfHexagon
+ *  .java:184`/`GtileHexagonInside.java:64` resolve `of(root, element,
+ *  activityDiagram, activity, diamond)`, the diamond SName (`FontSize 11`,
+ *  plantuml.skin:370). Single-line: jar-verified on `rerovo-62-nazo755`'s
+ *  "test" hexagon (`cy=27`, `fontSize=11`): `y=30.056 === cy + 11 * 5/18`,
+ *  the SAME N=1 reduction of `centeredFirstBaselineY` -- not the old
+ *  `cy + condSize/3` (would give 30.667, 0.611px off). Exported (T3k) so
+ *  `activity-renderer-if-shapes.ts`'s `renderHexagonOwnLabel` (this file
+ *  was already at the 500-line cap) can draw the own label separately. */
+export function renderHexagonLabel(
+  label: string | undefined,
+  cx: number,
+  cy: number,
+  theme: Theme,
+  condSize: number,
+): string {
+  const lines = (label ?? '').split('\n');
+  const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
+  return lines.length > 1
+    ? renderMultilineText(lines, cx, cy, theme, opts)
+    : renderLabel(label ?? '', cx, centeredFirstBaselineY(cy, condSize, 1), theme, opts);
 }
 
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
@@ -319,29 +283,81 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
   const dent = h / 2;
+  // `Hexagon.asPolygon(shadowing, width, height)` (`Hexagon.java:65-74`)
+  // calls `addPoint` SEVEN times, re-adding the first point `(hexagonHalf
+  // Size, 0)` as the closing point after `(0, height/2)`
+  // (`Hexagon.java:68,74`) -- `UPolygon` does not close itself on draw
+  // (T2f mechanism 1, same as {@link renderIfMerge}).
+  const first = { x: x + dent, y: y };
   const shape = polygon(
     [
-      { x: x + dent, y: y },
+      first,
       { x: x + w - dent, y: y },
       { x: x + w, y: y + h / 2 },
       { x: x + w - dent, y: y + h },
       { x: x + dent, y: y + h },
       { x: x, y: y + h / 2 },
+      first,
     ],
     { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
   const cx = x + w / 2;
   const cy = y + h / 2;
   const condSize = activityFontSize(theme, 'diamond');
-  const lines = (node.label ?? '').split('\n');
-  const labelEl =
-    lines.length > 1
-      ? // A labelled condition: `GtileIfHexagon.java:184`/`GtileHexagonInside
-        // .java:64` resolve `of(root, element, activityDiagram, activity,
-        // diamond)`, the diamond SName -- `FontSize 11` (plantuml.skin:370).
-        renderMultilineText(lines, cx, cy, theme, { sname: 'diamond', fontSize: condSize })
-      : renderLabel(node.label ?? '', cx, cy + condSize / 3, theme, { sname: 'diamond', fontSize: condSize });
-  return shape + labelEl;
+  return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
+}
+
+/** `Opale#getCorner` (`:134-147`, `roundCorner=0`): the fold triangle,
+ *  identical for every body variant (`getPolygonNormal`/`Left`/`Right`) --
+ *  `Opale#drawU` (`:126`) draws it unconditionally, as its own filled
+ *  `<path>`, never as unfilled border lines. */
+function noteFoldPath(x: number, y: number, w: number): string {
+  const d = NOTE_CORNER_SIZE;
+  return `M${x + w - d},${y} L${x + w - d},${y + d} L${x + w},${y + d} L${x + w - d},${y}`;
+}
+
+/** `Opale#getPolygonNormal` (`:149-157`, no link, `roundCorner=0`): top-left
+ *  -> bottom-left -> bottom-right -> right-edge-below-fold -> fold-top ->
+ *  close. Was top-left -> fold-top -> right-edge-below-fold -> bottom-right
+ *  -> bottom-left -> close, the opposite traversal (T2f mechanism 3). */
+function noteBodyNormal(x: number, y: number, w: number, h: number): string {
+  const d = NOTE_CORNER_SIZE;
+  return `M${x},${y} L${x},${y + h} L${x + w},${y + h} L${x + w},${y + d} L${x + w - d},${y} L${x},${y}`;
+}
+
+/** A degenerate `arcTo(point, roundCorner/2=0, 0, 0)` -- `Opale
+ *  #getPolygonLeft`/`Right` ALWAYS emit an `A` command there, even at
+ *  radius 0 (T2f mechanism 3, verified byte-exact against `cubida-55-
+ *  meku256`'s jar SVG: `A0,0 0 0 0 <samepoint>` immediately follows the
+ *  `L` that already reached that point). */
+function zeroArc(x: number, y: number): string {
+  return `A0,0 0 0 0 ${x},${y}`;
+}
+
+/** `Opale#getPolygonRight` (`:198-219`): spike on the RIGHT edge (the
+ *  note sits LEFT of its target). `y1`'s floor is `cornersize` (`:208`)
+ *  -- the spike may not rise into the fold's own corner. */
+function noteBodySpikeRight(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
+  const d = NOTE_CORNER_SIZE;
+  const y1 = Math.max(d, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
+  return (
+    `M${x},${y} L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
+    `L${x + w},${y + y1 + 2 * NOTE_SPIKE_DELTA} L${spike.x},${spike.y} L${x + w},${y + y1} ` +
+    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
+  );
+}
+
+/** `Opale#getPolygonLeft` (`:175-196`): spike on the LEFT edge (the note
+ *  sits RIGHT of its target). `y1`'s floor is `0` (`:180`), not
+ *  `cornersize` -- the fold is on the OPPOSITE (right) edge here. */
+function noteBodySpikeLeft(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
+  const d = NOTE_CORNER_SIZE;
+  const y1 = Math.max(0, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
+  return (
+    `M${x},${y} L${x},${y + y1} L${spike.x},${spike.y} L${x},${y + y1 + 2 * NOTE_SPIKE_DELTA} ` +
+    `L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
+    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
+  );
 }
 
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
@@ -353,47 +369,22 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // (`FtileWithNoteOpale.java:89`, `FtileNoteAlone.java:77`), which declares
   // no `note` override, so root stands -- the size `gtile-note.ts` measured.
   const noteSize = activityFontSize(theme, 'note');
-  // Opale balloon spike geometry (matches Opale.java: delta=4, cornersize=NOTE_FOLD)
-  const DELTA = 4;
   const spike = node.spikeTip;
-  let bodyPath = '';
+  const paint = { fill: noteFill, stroke, strokeWidth: NOTE_LINE_THICKNESS };
+  // `node.notePosition === 'left'` means the NOTE sits left of its target,
+  // so the spike protrudes from the note's RIGHT edge (`getPolygonRight`);
+  // `'right'` is the mirror (`getPolygonLeft`, spike on the LEFT edge).
+  let bodyD: string;
   if (spike !== undefined && node.notePosition === 'left') {
-    // Note is LEFT of action → spike protrudes from the RIGHT side of the box
-    const relY = spike.y - y;
-    const y1 = Math.max(NOTE_FOLD, Math.min(relY - DELTA, h - 2 * DELTA));
-    bodyPath =
-      `M${x},${y} ` +
-      `L${x},${y + h} ` +
-      `L${x + w},${y + h} ` +
-      `L${x + w},${y + y1 + 2 * DELTA} ` +
-      `L${spike.x},${spike.y} ` +
-      `L${x + w},${y + y1} ` +
-      `L${x + w},${y + NOTE_FOLD} ` +
-      `L${x + w - NOTE_FOLD},${y} Z`;
+    bodyD = noteBodySpikeRight(x, y, w, h, spike);
   } else if (spike !== undefined && node.notePosition === 'right') {
-    // Note is RIGHT of action → spike protrudes from the LEFT side of the box
-    const relY = spike.y - y;
-    const y1 = Math.max(0, Math.min(relY - DELTA, h - 2 * DELTA));
-    bodyPath =
-      `M${x},${y} ` +
-      `L${x},${y + y1} ` +
-      `L${spike.x},${spike.y} ` +
-      `L${x},${y + y1 + 2 * DELTA} ` +
-      `L${x},${y + h} ` +
-      `L${x + w},${y + h} ` +
-      `L${x + w},${y + NOTE_FOLD} ` +
-      `L${x + w - NOTE_FOLD},${y} Z`;
+    bodyD = noteBodySpikeLeft(x, y, w, h, spike);
+  } else {
+    bodyD = noteBodyNormal(x, y, w, h);
   }
-  // Build the note body — spike cases use the custom path; standalone uses the shared primitive
-  const body =
-    spike === undefined
-      ? noteBox(x, y, w, h, { fill: noteFill, stroke, dogEar: NOTE_FOLD, strokeWidth: NOTE_LINE_THICKNESS })
-      : path(bodyPath, { fill: noteFill, stroke, strokeWidth: NOTE_LINE_THICKNESS }) +
-        line(x + w - NOTE_FOLD, y, x + w - NOTE_FOLD, y + NOTE_FOLD, { stroke, strokeWidth: NOTE_LINE_THICKNESS }) +
-        line(x + w - NOTE_FOLD, y + NOTE_FOLD, x + w, y + NOTE_FOLD, {
-          stroke,
-          strokeWidth: NOTE_LINE_THICKNESS,
-        });
+  // `Opale#drawU` (`:126`) draws the fold as its OWN filled `<path>`
+  // unconditionally -- same shape whether or not the note has a spike.
+  const body = path(bodyD, paint) + path(noteFoldPath(x, y, w), paint);
 
   const label = node.label ?? '';
   const lines = label.split('\n');
@@ -401,21 +392,40 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
   // unsourced `x + 4`.
   const labelX = x + 6;
-  let labelEl: string;
-  if (lines.length > 1) {
-    labelEl = textLines(lines, labelX, y + NOTE_FOLD + noteSize, noteSize, {
-      fontFamily: theme.fontFamily,
-      fontSize: noteSize,
-      fill: activityFontColor(theme, 'note'),
-    });
-  } else {
-    labelEl = text(labelX, y + NOTE_FOLD + noteSize, label, {
-      fill: activityFontColor(theme, 'note'),
-      fontFamily: theme.fontFamily,
-      fontSize: noteSize,
-    });
-  }
+  // `Opale.java:58`'s `marginY = 5` is the text BLOCK's own top inset; the
+  // first line's baseline is that same ascent-based reduction every other
+  // single/multi-line label in this file uses (`ASCENT_FRACTION`, D1/D9) --
+  // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
+  // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
+  const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
+  const textStyle = { fontFamily: theme.fontFamily, fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const labelEl =
+    lines.length > 1
+      ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)
+      : drawActivityText(labelX, firstBaselineY, label, textStyle);
   return body + labelEl;
+}
+
+/** The root `composite { LineColor black; BackgroundColor transparent;
+ *  LineThickness 1.5 }` block (`plantuml.skin:364-368`) -- a `partition`/
+ *  `package`/`rectangle`/`card`/`group` frame (`group-dispatch.ts`'s
+ *  `GROUP_TYPES`, all mapped to ONE `composite` SName by `FromSkinparam
+ *  ToStyle.java:131-132`'s `PartitionBorderColor`/`PartitionBackground
+ *  Color` converts). `node.kind` had no case here at all, so every group/
+ *  partition fell through `renderNode`'s `default:` fallback and drew the
+ *  generic node fill/border instead (T2f mechanism 6, `caciva-80-
+ *  kene990`: ours `fill="#F1F1F1" stroke="#181818"`, jar `fill="none"
+ *  stroke="#000"`). No `skinparam Partition*Color` override hook exists
+ *  yet (would need a `core/theme-graph-colors-b.ts` field, out of this
+ *  task's write-set) -- the plain default is drawn unconditionally, which
+ *  is also what every cohort row needs (none sets that skinparam).
+ */
+function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
+  return rect(node.x, node.y, node.width, node.height, {
+    fill: 'none',
+    stroke: '#000',
+    strokeWidth: activityLineThickness(theme, 'composite'),
+  });
 }
 
 export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
@@ -423,7 +433,6 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'start':
       return renderStart(node, theme);
     case 'stop':
-    case 'kill':
       return renderStop(node, theme);
     case 'end':
       return renderEnd(node, theme);
@@ -448,15 +457,28 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderSplitLine(node, theme);
     case 'if-split':
     case 'while-header':
-      return node.label !== undefined && node.label !== '' ? renderHexagon(node, theme) : renderDiamond(node, theme);
+      // T3k: the shape ALONE -- the own label now draws through its own
+      // `'if-own-label'` node, pushed by every `'if-split'`/`'while-
+      // header'` producer immediately after this polygon (or after
+      // north/south when the walker has one, `FtileDiamondInside.java:
+      // 84-102`'s own draw order). `renderDiamond`'s unlabelled shape is
+      // unaffected -- it never had an own-label node to begin with.
+      return node.label !== undefined && node.label !== ''
+        ? renderHexagonPolygon(node, theme)
+        : renderDiamond(node, theme);
     case 'repeat-cond':
-      return renderHexagon(node, theme);
+      return renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);
     case 'if-label':
       return renderIfLabel(node, theme);
+    case 'if-own-label':
+      return renderHexagonOwnLabel(node, theme);
     case 'note':
       return renderNote(node, theme);
+    case 'group':
+    case 'partition':
+      return renderComposite(node, theme);
     default: {
       // Unknown kind: render a plain rect as a fallback
       const c = actColors(theme);

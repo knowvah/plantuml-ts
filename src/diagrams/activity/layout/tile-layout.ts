@@ -1,6 +1,8 @@
 import type {
   ActivityDiagramAST,
   ActivityNode,
+  ActivityAction,
+  ActivityBackward,
   ActivityIf,
   ActivityWhile,
   ActivityRepeat,
@@ -15,7 +17,6 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileStart } from '../tiles/gtile-start.js';
 import { GtileStop } from '../tiles/gtile-stop.js';
 import { GtileEnd } from '../tiles/gtile-end.js';
-import { GtileKill } from '../tiles/gtile-kill.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
@@ -30,9 +31,10 @@ import { GtileSwitch } from '../tiles/gtile-switch.js';
 import { GtileGroup } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
-import { assignCoordinates, LAYOUT_MARGIN } from './tile-coordinates.js';
+import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
+import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -73,6 +75,46 @@ function outLane(swimlaneOut: string | undefined, swimlane: string | undefined):
   return swimlaneOut ?? swimlane;
 }
 
+/**
+ * Mirrors `FtileKilled` wrapping `InstructionSimple`'s own tile (mission
+ * `activity-divergence-drive` T2b): mutated IN PLACE, same pattern as
+ * {@link withSwimlane}/{@link withSwimlaneOut} above -- `tile`'s `kind`,
+ * geometry and every per-kind field the walker reads are untouched; only
+ * its out point is stripped. `FtileKilled.drawU` draws nothing of its
+ * own (`ug.draw(tile)`, the wrapped tile verbatim) and its dimension
+ * constructor drops `outY` (the 3-arg `FtileGeometry` ctor), so `kill`/
+ * `detach` must never contribute a separate drawn shape -- only mark the
+ * PRECEDING tile.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileKilled.java:44-74
+ *   -- the whole class: `getMyChildren`/`drawU` delegate to the wrapped
+ *   tile verbatim; `calculateDimensionFtile` rebuilds the geometry via
+ *   the 3-arg `FtileGeometry(dim, left, inY)` ctor, which carries no
+ *   `outY`.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionSimple.java:111-116,123-127
+ *   -- `kill()` just sets `this.killed = true`; `createFtile` wraps in
+ *   `FtileKilled` only when that flag is set.
+ */
+function withKilled<T extends Tile>(tile: T): T {
+  tile.hasPointOut = () => false;
+  return tile;
+}
+
+/**
+ * `kill`/`detach` (`CommandKill3.java:52-56` -- one regex, `kill|detach`,
+ * both call `diagram.kill()`) never add an `Instruction`/tile of their
+ * own: `InstructionList.kill()` mutates `getLast()` and returns a
+ * boolean; `all.add(...)` is never called for the keyword itself. This
+ * loop is the TS equivalent of that mutation -- `kill`/`detach` nodes
+ * are intercepted here, BEFORE `tileNode`, and never produce a tile;
+ * they instead mark the tile already pushed for the PRECEDING sibling
+ * (`withKilled`). A `kill`/`detach` with nothing preceding mirrors
+ * `InstructionList.java:170-171`'s `if (all.size() == 0) return false`
+ * (`current().kill()` then returns the "kill cannot be used here" parse
+ * error, `ActivityDiagram3.java:415-416`) -- out of scope here (D8, an
+ * `error` row), so it is a silent no-op rather than a thrown error.
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:169-174
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionSimple.java:123-127
+ */
 export function tileNodes(
   nodes: ActivityNode[],
   bounder: StringBounder,
@@ -81,6 +123,11 @@ export function tileNodes(
 ): Tile[] {
   const tiles: Tile[] = [];
   for (const node of nodes) {
+    if (node.kind === 'kill' || node.kind === 'detach') {
+      const last = tiles[tiles.length - 1];
+      if (last !== undefined) withKilled(last);
+      continue;
+    }
     const t = tileNode(node, bounder, theme, laneOrder);
     if (t !== null) tiles.push(t);
   }
@@ -102,9 +149,31 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrde
 }
 
 /**
+ * `backward`'s own tile: built through the SAME action-tile path an
+ * `:action;` body step uses (`tileSimpleLeaf`'s own `'action'` case) --
+ * `InstructionRepeat.java:182`/`InstructionWhile.java:121-122` both
+ * resolve `backward` via `factory.activity(backward, swimlane, boxStyle,
+ * ...)`, the identical `FtileFactory#activity` call site every ordinary
+ * action resolves to. `ActivityBackward` carries no `color`/`stereotype`
+ * (base-form-only port, `ast.ts`'s own doc), so the synthetic
+ * `ActivityAction` below never sets either. Kept here (not in
+ * `tile-layout-backward.ts` with {@link extractBackward}/
+ * {@link backwardExitsOnLeft}) since it needs `tileSimpleLeaf`, private to
+ * this file.
+ */
+function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, theme: Theme): Tile {
+  const action: ActivityAction =
+    node.swimlane !== undefined
+      ? { kind: 'action', label: node.label, swimlane: node.swimlane }
+      : { kind: 'action', label: node.label };
+  return tileSimpleLeaf(action, bounder, theme);
+}
+
+/**
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
  *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
- *   the "is not"/exit label sits west.
+ *   the "is not"/exit label sits west, UNAFFECTED by `backward` (the Java
+ *   `create` builds `diamond1` before `backward` is ever read).
  */
 function tileWhile(
   node: ActivityWhile,
@@ -116,9 +185,11 @@ function tileWhile(
   if (node.yesLabel !== undefined) labels.north = node.yesLabel;
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
   const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const { rest, backward } = extractBackward(node.body);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  return withSwimlane(new GtileWhile(header, body, bounder, theme), node.swimlane);
+  const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
+  return withSwimlane(new GtileWhile(header, body, bounder, theme, backwardTile), node.swimlane);
 }
 
 /**
@@ -187,18 +258,21 @@ function tileRepeat(
   laneOrder: readonly string[],
 ): GtileRepeat {
   const entry = tileRepeatEntry(node, bounder, theme, laneOrder);
-  const bodyTiles = tileNodes(node.body, bounder, theme, laneOrder);
+  const { rest, backward } = extractBackward(node.body);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
-  const labels: { east?: string; south?: string } = {};
-  if (node.yesLabel !== undefined) labels.east = node.yesLabel;
-  if (node.outLabel !== undefined) labels.south = node.outLabel;
+  const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
+  const labels = repeatConditionLabels(node, backward, laneOrder);
   const condition = withSwimlane(
     new GtileDiamondInside(node.condition, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
   );
   const backConnection = selectRepeatBackConnection(node, laneOrder);
   return withSwimlaneOut(
-    withSwimlane(new GtileRepeat(entry, body, condition, backConnection, { bounder, theme }), node.swimlane),
+    withSwimlane(
+      new GtileRepeat(entry, body, condition, backConnection, { bounder, theme, backward: backwardTile }),
+      node.swimlane,
+    ),
     node.swimlaneOut,
   );
 }
@@ -284,17 +358,28 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   const bounder = makeBounder(measurer, theme);
   const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
   const root = new GtileTopDown(tiles, bounder, theme);
-  return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  // D2 (`plans/activity-divergence-drive/decisions.md`): the root Ftile's
+  // own local coordinates start at the true origin -- upstream never bakes
+  // a margin into the Ftile tree itself (`InstructionList#createFtile`
+  // returns the bare root tile, no wrapping translate). The canvas's own
+  // origin/size is derived AFTER layout, dynamically, from the placed
+  // geometry's own ink extent (`assign-coordinates-full.ts
+  // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
+  return assignCoordinates(root, ast, 0, 0, bounder, theme);
 }
 
-type SimpleLeafKind = 'start' | 'stop' | 'end' | 'kill' | 'detach' | 'break' | 'action' | 'note';
+// `kill`/`detach` are NOT simple leaves (T2b): `tileNodes` intercepts and
+// consumes them before either of these ever sees one -- see `withKilled`
+// and its call site above. They stay out of this set so that invariant
+// is enforced at the type level too (a direct `tileNode` call on one
+// falls through to the `kill`/`detach` no-op case in its own switch,
+// below).
+type SimpleLeafKind = 'start' | 'stop' | 'end' | 'break' | 'action' | 'note';
 
 const SIMPLE_LEAF_KINDS: ReadonlySet<string> = new Set<SimpleLeafKind>([
   'start',
   'stop',
   'end',
-  'kill',
-  'detach',
   'break',
   'action',
   'note',
@@ -310,12 +395,38 @@ function isSimpleLeaf(node: ActivityNode): node is Extract<ActivityNode, { kind:
 }
 
 /**
+ * Kinds that always produce no tile of their own HERE: `arrow-label`
+ * (mission ubrr-T10, no geometry of its own), `backward` (mission
+ * `activity-divergence-drive` T3h: `tileRepeat`/`tileWhile`'s own
+ * `extractBackward` pulls it OUT of a repeat/while body before `tileNodes`
+ * ever sees it there -- this branch is the fallback for a `backward:`
+ * found OUTSIDE that context, e.g. nested in an `if`/`fork` inside the
+ * loop body or at top level, both of which the jar itself refuses to
+ * parse, `ActivityDiagram3.java:390` `"Cannot find repeat"` -- an `error`
+ * row, D8, not reached by any baseline fixture), and `kill`/`detach` (T2b
+ * -- see {@link SimpleLeafKind}'s doc; `tileNodes` consumes these before
+ * `tileNode` ever runs, so this branch is a direct-call safety net, not a
+ * live path). Pulled out of `tileNode`'s own switch (mirroring
+ * {@link isSimpleLeaf} immediately above) so adding `kill`/`detach` here
+ * does not grow that switch's own branch count -- `tileNode`'s doc
+ * explains why it must stay small.
+ */
+const NULL_RESULT_KINDS: ReadonlySet<string> = new Set(['arrow-label', 'backward', 'kill', 'detach']);
+
+function isNullResultKind(
+  node: ActivityNode,
+): node is Extract<ActivityNode, { kind: 'arrow-label' | 'backward' | 'kill' | 'detach' }> {
+  return NULL_RESULT_KINDS.has(node.kind);
+}
+
+/**
  * Every leaf tile with no nested body and no `null` result: `start`/
- * `stop`/`end`/`kill`/`detach`/`break` (no bounder/theme needed) plus
- * `action`/`note` (need both). Extracted from `tileNode` (mission
- * ubrr-T10) to keep ITS OWN switch under the complexity hook's cap once
- * `backward` (M3) became a 15th case there -- placed ABOVE `tileNode` per
- * that function's own "add new builders above" doc.
+ * `stop`/`end`/`break` (no bounder/theme needed) plus `action`/`note`
+ * (need both). `kill`/`detach` are NOT here -- see {@link SimpleLeafKind}'s
+ * own doc. Extracted from `tileNode` (mission ubrr-T10) to keep ITS OWN
+ * switch under the complexity hook's cap once `backward` (M3) became a
+ * 15th case there -- placed ABOVE `tileNode` per that function's own "add
+ * new builders above" doc.
  */
 function tileSimpleLeaf(
   node: Extract<ActivityNode, { kind: SimpleLeafKind }>,
@@ -329,10 +440,6 @@ function tileSimpleLeaf(
       return withSwimlane(new GtileStop(), node.swimlane);
     case 'end':
       return withSwimlane(new GtileEnd(), node.swimlane);
-    case 'kill':
-      return withSwimlane(new GtileKill(), node.swimlane);
-    case 'detach':
-      return withSwimlane(new GtileStop(), node.swimlane);
     case 'break':
       return withSwimlane(new GtileBreak(), node.swimlane);
     case 'action':
@@ -354,12 +461,10 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
   if (isSimpleLeaf(node)) {
     return tileSimpleLeaf(node, bounder, theme);
   }
+  if (isNullResultKind(node)) {
+    return null;
+  }
   switch (node.kind) {
-    // `backward` (mission ubrr-T10 M3, `ActivityBackward`'s own doc,
-    // ast.ts): base-form-only port, geometry filed as `activity-loop-backward`.
-    case 'arrow-label':
-    case 'backward':
-      return null;
     case 'if':
       return tileIf(node, bounder, theme, laneOrder);
     case 'while':

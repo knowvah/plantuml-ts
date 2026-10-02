@@ -1,0 +1,6 @@
+@startuml
+skinparam ActivityFontColor yellow
+skinparam ActivityBackgroundColor lightGreen
+start
+:too;
+@enduml

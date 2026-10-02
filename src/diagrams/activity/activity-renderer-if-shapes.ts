@@ -16,17 +16,33 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { text, polygon } from '../../core/svg.js';
+import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { actColors, ASCENT_FRACTION, textLines } from './activity-renderer-shapes.js';
+import {
+  actColors,
+  ASCENT_FRACTION,
+  centeredFirstBaselineY,
+  renderHexagonLabel,
+  textLines,
+} from './activity-renderer-shapes.js';
+import { drawActivityText } from './activity-renderer-text.js';
+import { centeredLineX, measureLineWidth } from './activity-text-placement.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
  * `Hexagon.asPolygon(shadowing)` (`vertical/FtileDiamond.java:89`), a
- * 4-point rhombus (`Hexagon.java:49-56`: `(12,0) (24,12) (12,24) (0,12)`)
- * translated to the node's own `(x, y)` -- the walker places the node so
- * this 24x24 box is exactly the drawn extent (D2's interface contract).
+ * 4-point rhombus translated to the node's own `(x, y)` -- the walker
+ * places the node so this 24x24 box is exactly the drawn extent (D2's
+ * interface contract). `Hexagon.asPolygon(double)` (`Hexagon.java:48-55`)
+ * calls `addPoint` FIVE times, re-adding `(12,0)` as the closing point
+ * after `(0,12)` (`Hexagon.java:51,55`: `diams.addPoint(hexagonHalfSize,
+ * 0)` opens and closes the list) -- `UPolygon` does not close itself on
+ * draw (T2f mechanism 1, `daxare-39-buci637`: jar `points="...,68.725,119,
+ * 80.725,107"` repeats the first pair). `svg-shapes.ts#polygon` only joins
+ * the points it is given (no implicit closing), so the activity side
+ * repeats the first point explicitly, same as the hexagon
+ * ({@link renderHexagon}).
  * Same fill/stroke pair `renderDiamond` draws with, plus the explicit
  * `diamond` bucket's line thickness (`FtileDiamond.java:89`'s
  * `.apply(getStyle().getStroke())` -- the diamond style's own stroke,
@@ -36,12 +52,14 @@ import { actColors, ASCENT_FRACTION, textLines } from './activity-renderer-shape
  */
 export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
   const c = actColors(theme);
+  const first = { x: node.x + 12, y: node.y };
   return polygon(
     [
-      { x: node.x + 12, y: node.y },
+      first,
       { x: node.x + 24, y: node.y + 12 },
       { x: node.x + 12, y: node.y + 24 },
       { x: node.x, y: node.y + 12 },
+      first,
     ],
     { fill: c.diamondFill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
   );
@@ -61,6 +79,59 @@ export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
  * baseline offset is Q5's convention (`.agent-notes/aitp-T1.md#q5`):
  * `y0 + ARROW_FONT_SIZE * ASCENT_FRACTION`.
  */
+/**
+ * The repeat-entry rhombus (`repeat-start`) and the label-less `if-split`/
+ * `while-header` diamond both resolve to `FtileDiamond#drawU`
+ * (`vertical/FtileDiamond.java:89`): `ug.apply(borderColor)
+ * .apply(getStyle().getStroke()).apply(backColor.bg())
+ * .draw(Hexagon.asPolygon(shadowing))` -- the SAME method as
+ * {@link renderIfMerge} above, just the entry diamond rather than the merge
+ * diamond. `Hexagon.asPolygon(double)` (`Hexagon.java:48-55`) calls
+ * `addPoint` FIVE times, re-adding `(12,0)` as the closing point after
+ * `(0,12)` -- `UPolygon` does not close itself on draw, and
+ * `SvgGraphics.java:658` unconditionally adds
+ * `stroke-linejoin:miter;stroke-miterlimit:10` to every polygon it draws.
+ * This was the one remaining caller of the generic `core/svg.ts#diamond`
+ * helper (open 4-point rhombus, no stroke-width/linejoin) -- the SAME
+ * open-polygon gap {@link renderIfMerge} already fixed for `diamond2` (T2f
+ * mechanism 1; this gap: `vaxuta-95-cico162` and the other repeat-entry
+ * rows, b2 journal row 34). Switched to the same `polygon()` emitter +
+ * closed 5-point list {@link renderIfMerge} uses, so a `diamond
+ * { LineThickness }` override reaches this rhombus too (`getStyle()
+ * .getStroke()` resolves the SAME `diamond` style bucket
+ * `activityLineThickness(theme, 'diamond')` already reads there).
+ * `core/svg.ts#diamond` keeps its other callers (state/chronology diagrams
+ * draw different Java shapes there) -- not touched.
+ */
+export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
+  const cx = node.x + node.width / 2;
+  const cy = node.y + node.height / 2;
+  const size = node.width / 2;
+  const c = actColors(theme);
+  const first = { x: cx, y: cy - size };
+  const shape = polygon([first, { x: cx + size, y: cy }, { x: cx, y: cy + size }, { x: cx - size, y: cy }, first], {
+    fill: c.diamondFill,
+    stroke: c.diamondBorder,
+    strokeWidth: activityLineThickness(theme, 'diamond'),
+  });
+  if (node.label === undefined || node.label === '') return shape;
+  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
+  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
+  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
+  // dimLabel.width) / 2` in this node's own frame.
+  const fontSize = activityFontSize(theme, 'diamond');
+  const lineWidth = measureLineWidth(theme, fontSize, node.label);
+  // D1: no `dominant-baseline` (the driver emits none, and no cached jar
+  // SVG carries one) -- the real baseline is the same N=1 reduction of
+  // `centeredFirstBaselineY` `renderHexagon`'s single-line branch uses.
+  const label = drawActivityText(centeredLineX(cx, lineWidth), centeredFirstBaselineY(cy, fontSize, 1), node.label, {
+    fontFamily: theme.fontFamily,
+    fontSize,
+    fill: activityFontColor(theme, 'diamond'),
+  });
+  return shape + label;
+}
+
 export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
   const fontSize = activityFontSize(theme, 'arrow');
   const label = node.label ?? '';
@@ -70,5 +141,50 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
   if (lines.length > 1) {
     return textLines(lines, node.x, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
   }
-  return text(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+  return drawActivityText(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+}
+
+/**
+ * The hexagon shape ALONE, no label -- `FtileDiamondInside#drawU` draws
+ * the polygon, then north/south, then the own label, then west/east, as
+ * FIVE separate draw calls, never one combined blob
+ * (`vertical/FtileDiamondInside.java:84-102`). Split out of `activity-
+ * renderer-shapes.ts#renderHexagon` (T3k, that file at the 500-line cap)
+ * so a walker can push the polygon and the own label as two separate
+ * nodes, landing the label between south and west in document order --
+ * `renderHexagon` itself is unchanged (still shape+label in one call) and
+ * stays the renderer that module's own tests exercise directly. Identical
+ * polygon math to `renderHexagon`'s own (not re-derived).
+ */
+export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): string {
+  const { x, y, width: w, height: h } = node;
+  const c = actColors(theme);
+  const fill = node.color ?? c.diamondFill;
+  const dent = h / 2;
+  const first = { x: x + dent, y: y };
+  return polygon(
+    [
+      first,
+      { x: x + w - dent, y: y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w - dent, y: y + h },
+      { x: x + dent, y: y + h },
+      { x: x, y: y + h / 2 },
+      first,
+    ],
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
+  );
+}
+
+/**
+ * The hexagon's OWN label alone, centered in the node's own box -- the
+ * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
+ * callable on its own so a walker can push it as its own `'if-own-label'`
+ * node (T3k, {@link renderHexagonPolygon}'s own doc).
+ */
+export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): string {
+  const cx = node.x + node.width / 2;
+  const cy = node.y + node.height / 2;
+  const condSize = activityFontSize(theme, 'diamond');
+  return renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }

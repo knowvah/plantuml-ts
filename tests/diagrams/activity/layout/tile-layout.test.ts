@@ -103,6 +103,28 @@ describe('layoutActivity — start → action → stop', () => {
   });
 });
 
+// T2b (`plans/activity-divergence-drive`): `layoutActivity`-level check
+// that `kill`/`detach` draw no separate shape -- see the `tileNodes`-level
+// describe below (after `bounder` is declared) for the full mechanism.
+// `piruxe-91-zivi081` (`:foo1;:foo2;kill:foo3;`) is the oracle fixture
+// this mirrors.
+describe('layoutActivity — kill draws no separate shape (T2b)', () => {
+  it('produces exactly 3 nodes, none of them a kill shape', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        { kind: 'action', label: 'foo1' },
+        { kind: 'action', label: 'foo2' },
+        { kind: 'kill' },
+        { kind: 'action', label: 'foo3' },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    expect(geo.nodes).toHaveLength(3);
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['action', 'action', 'action']);
+  });
+});
+
 describe('layoutActivity — if with two branches', () => {
   const ast: ActivityDiagramAST = {
     nodes: [
@@ -221,6 +243,62 @@ function parseAst(markup: string): ActivityDiagramAST {
   if (!first.ok) throw first.failure.cause;
   return astOrThrow(parseActivity(first.source), 'activity');
 }
+
+// T2b (`plans/activity-divergence-drive`): `kill`/`detach` mutate the
+// PRECEDING tile (strip its out point) rather than drawing a shape of
+// their own -- `InstructionList.kill()` (`:169-174`) never adds an
+// `Instruction`; it mutates `getLast()` and returns a boolean.
+// `InstructionSimple.kill()` (`:123-127`) just sets `this.killed = true`;
+// `createFtile` (`:111-116`) wraps the already-built tile in
+// `FtileKilled` only when that flag is set, and `FtileKilled.drawU`
+// (`FtileKilled.java:71-74`) draws only the wrapped tile, nothing of its
+// own.
+describe('tileNodes — kill/detach mutate the preceding tile (T2b)', () => {
+  it('kill contributes no tile of its own', () => {
+    const tiles = tileNodes(
+      [
+        { kind: 'action', label: 'foo1' },
+        { kind: 'action', label: 'foo2' },
+        { kind: 'kill' },
+        { kind: 'action', label: 'foo3' },
+      ],
+      bounder,
+      theme,
+    );
+    expect(tiles.map((t) => t.kind)).toEqual(['gtile-action', 'gtile-action', 'gtile-action']);
+  });
+
+  it("kill strips the PRECEDING tile's out point (FtileKilled.java:71-74)", () => {
+    const tiles = tileNodes(
+      [{ kind: 'action', label: 'foo1' }, { kind: 'action', label: 'foo2' }, { kind: 'kill' }],
+      bounder,
+      theme,
+    );
+    expect(tiles[0]!.hasPointOut()).toBe(true);
+    expect(tiles[1]!.hasPointOut()).toBe(false);
+  });
+
+  it('a kill with nothing preceding is a no-op (InstructionList.java:170-171)', () => {
+    const tiles = tileNodes([{ kind: 'kill' }], bounder, theme);
+    expect(tiles).toHaveLength(0);
+  });
+
+  it("detach shares kill's mechanism (CommandKill3.java:52-56, same regex)", () => {
+    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme);
+    expect(tiles).toHaveLength(1);
+    expect(tiles[0]!.hasPointOut()).toBe(false);
+  });
+
+  it('a GtileTopDown wrapping a killed last child reports hasPointOut() false', () => {
+    // Composite propagation already ported (T6b, `activity-loop-lane-
+    // translate`) -- this just confirms the killed LEAF feeds it correctly,
+    // the piece this fixes. Exercised for real by `simuti-16-lece058`
+    // (split branches ending in `detach`).
+    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme);
+    const branch = new GtileTopDown(tiles, bounder, theme);
+    expect(branch.hasPointOut()).toBe(false);
+  });
+});
 
 describe('tileNodes — swimlane threading (asr-T3)', () => {
   it('assigns each leaf tile the swimlane its node was parsed in', () => {

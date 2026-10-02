@@ -80,6 +80,7 @@ import { parseActivity } from '../../../src/diagrams/activity/parser.js';
 import { layoutActivity } from '../../../src/diagrams/activity/layout/tile-layout.js';
 import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
+import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
@@ -150,6 +151,13 @@ export function renderFixtureActivity(
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
+  // add1 b3 (journal row 52): mirror `src/index.ts#applyAnnotationChrome`'s
+  // activity branch -- the document margin wraps the chrome (T3j,
+  // `TextBlockExporter.java:159-203`), so this harness must compose the same
+  // way or it measures its own drift instead of the port.
+  if (fragment.preChromeWidth !== undefined) {
+    return assembleSvg(applyActivityChrome(fragment, annotations, styles, measurer, ast.sprites));
+  }
   const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed);
 }

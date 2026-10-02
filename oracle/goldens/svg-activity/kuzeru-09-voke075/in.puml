@@ -1,0 +1,14 @@
+@startuml
+!procedure $foo($arg)
+:start;
+!while $arg==1
+  :foo1;
+  !$arg = $arg - 1
+!endwhile
+:end;
+!endprocedure
+
+:a;
+$foo(0)
+$foo(1)
+@enduml

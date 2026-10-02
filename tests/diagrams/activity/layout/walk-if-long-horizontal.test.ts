@@ -31,23 +31,27 @@ const chainAst: ActivityDiagramAST = {
 describe('layoutActivity — long-horizontal: then/elseif/else chain', () => {
   const geo = layoutActivity(chainAst, theme, measurer);
 
-  it('nodes read hexagon c1 (+ north label 1), a, hexagon c2 (+ north 2, east 3), b, d, in drawU order', () => {
+  it('nodes read hexagon c1 (+ north 1, own c1), a, hexagon c2 (+ north 2, own c2, east 3), b, d, in drawU order (T3k)', () => {
     expect(geo.nodes.map((n) => n.kind)).toEqual([
       'if-split',
       'if-label',
+      'if-own-label',
       'action',
       'if-split',
       'if-label',
+      'if-own-label',
       'if-label',
       'action',
       'action',
     ]);
     expect(geo.nodes[1]!.label).toBe('1');
-    expect(geo.nodes[4]!.label).toBe('2');
-    expect(geo.nodes[5]!.label).toBe('3');
-    expect(geo.nodes[2]!.label).toBe('a');
-    expect(geo.nodes[6]!.label).toBe('b');
-    expect(geo.nodes[7]!.label).toBe('d');
+    expect(geo.nodes[2]!.label).toBe('c1');
+    expect(geo.nodes[5]!.label).toBe('2');
+    expect(geo.nodes[6]!.label).toBe('c2');
+    expect(geo.nodes[7]!.label).toBe('3');
+    expect(geo.nodes[3]!.label).toBe('a');
+    expect(geo.nodes[8]!.label).toBe('b');
+    expect(geo.nodes[9]!.label).toBe('d');
   });
 
   it('emits 9 edges: VerticalIn a, VerticalOut a, VerticalIn b, VerticalOut b, Horizontal, In, LastElseIn, LastElseOut, Hline', () => {
@@ -91,7 +95,16 @@ describe('layoutActivity — long-horizontal: every branch ends in stop', () => 
     expect(lastElseOut.points.length).toBe(3);
   });
 
-  it('the empty else emits no node of its own (GtileTopDown with zero children)', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['if-split', 'if-label', 'stop', 'if-split', 'if-label', 'stop']);
+  it('the empty else emits no node of its own (GtileTopDown with zero children) (T3k)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual([
+      'if-split',
+      'if-label',
+      'if-own-label',
+      'stop',
+      'if-split',
+      'if-label',
+      'if-own-label',
+      'stop',
+    ]);
   });
 });

@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
-  "measuredAt": "2026-09-20",
-  "measuredAgainstCommit": "f7154050",
+  "measuredAt": "2026-10-02",
+  "measuredAgainstCommit": "65b07a57",
   "fixtures": [
     {
       "type": "activity",
@@ -10,41 +10,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          78.35,
-          134.975
+          20,
+          81.35,
+          137.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "31.138",
+            "x": "34.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "90.125",
+            "x": "93.125",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 116.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 61.349999999999994
           },
           {
-            "x": 78.35,
+            "x": 81.35,
             "width": 56.625
           }
         ],
-        "width": "156",
-        "height": "359"
+        "width": "183",
+        "height": "366"
       },
       "jar": {
         "dividerXs": [
@@ -92,41 +92,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          112.163,
-          207.325
+          20,
+          115.163,
+          210.325
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "117.163",
+            "x": "120.163",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 189.325,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 95.1625
           },
           {
-            "x": 112.1625,
+            "x": 115.1625,
             "width": 95.16250000000002
           }
         ],
-        "width": "219",
-        "height": "263"
+        "width": "236",
+        "height": "276"
       },
       "jar": {
         "dividerXs": [
@@ -174,41 +174,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          115.7,
-          206.006
+          20,
+          118.7,
+          241.084
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "39.294",
+            "x": "42.294",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "133.797",
+            "x": "152.836",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 188.006,
+          "x": 20,
+          "y": 17.5,
+          "width": 220.084,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 98.7
           },
           {
-            "x": 115.7,
-            "width": 90.30625000000002
+            "x": 118.7,
+            "width": 122.38437500000002
           }
         ],
-        "width": "221",
-        "height": "259"
+        "width": "267",
+        "height": "264"
       },
       "jar": {
         "dividerXs": [
@@ -256,51 +256,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          126.35,
-          233.75,
-          391.925
+          20,
+          129.35,
+          236.75,
+          394.925
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "46.138",
+            "x": "49.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "154.513",
+            "x": "157.513",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "287.3",
+            "x": "290.3",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 373.925,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 109.35000000000002
           },
           {
-            "x": 126.35000000000002,
-            "width": 107.40000000000003
+            "x": 129.35000000000002,
+            "width": 107.39999999999998
           },
           {
-            "x": 233.75000000000006,
-            "width": 158.175
+            "x": 236.75,
+            "width": 158.17500000000007
           }
         ],
-        "width": "403",
-        "height": "131"
+        "width": "420",
+        "height": "144"
       },
       "jar": {
         "dividerXs": [
@@ -358,51 +358,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          142.35,
-          249.75,
-          440.575
+          20,
+          146.35,
+          253.75,
+          443.575
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "54.138",
+            "x": "57.638",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "170.513",
+            "x": "174.513",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "319.625",
+            "x": "323.125",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 422.575,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 125.35000000000002
+            "x": 20,
+            "width": 126.35000000000002
           },
           {
-            "x": 142.35000000000002,
-            "width": 107.40000000000003
+            "x": 146.35000000000002,
+            "width": 107.39999999999998
           },
           {
-            "x": 249.75000000000006,
-            "width": 190.82500000000005
+            "x": 253.75,
+            "width": 189.82499999999993
           }
         ],
-        "width": "452",
-        "height": "211"
+        "width": "469",
+        "height": "224"
       },
       "jar": {
         "dividerXs": [
@@ -462,14 +462,9 @@
         "dividerXs": [],
         "titles": [],
         "bandRect": null,
-        "lanes": [
-          {
-            "x": 17,
-            "width": 119.73125000000002
-          }
-        ],
-        "width": "160",
-        "height": "369"
+        "lanes": [],
+        "width": "176",
+        "height": "385"
       },
       "jar": {
         "dividerXs": [],
@@ -487,41 +482,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          143.675,
-          238.838
+          20,
+          171.675,
+          266.838
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "37.756",
+            "x": "53.256",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "148.675",
+            "x": "176.675",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 220.838,
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 126.67500000000001
+            "x": 20,
+            "width": 151.675
           },
           {
-            "x": 143.675,
+            "x": 171.675,
             "width": 95.16250000000002
           }
         ],
-        "width": "250",
-        "height": "307"
+        "width": "292",
+        "height": "322"
       },
       "jar": {
         "dividerXs": [
@@ -587,41 +582,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          266.45,
-          418.388
+          20,
+          269.45,
+          421.388
         ],
         "titles": [
           {
             "fontSize": "30",
-            "x": "70.756",
+            "x": "73.756",
             "anchor": "(absent)"
           },
           {
             "fontSize": "30",
-            "x": "271.45",
+            "x": "274.45",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 20.167,
           "width": 400.388,
           "height": 30,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 249.45000000000005
+            "x": 20,
+            "width": 249.45000000000002
           },
           {
-            "x": 266.45000000000005,
-            "width": 151.93750000000006
+            "x": 269.45000000000005,
+            "width": 151.93750000000003
           }
         ],
-        "width": "430",
-        "height": "439"
+        "width": "447",
+        "height": "455"
       },
       "jar": {
         "dividerXs": [
@@ -674,41 +669,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          51,
-          119.7
+          20,
+          88.7,
+          220.837
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22.975",
+            "x": "43.325",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "74.325",
+            "x": "143.744",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 101.7,
+          "x": 20,
+          "y": 17.5,
+          "width": 199.837,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 34
+            "x": 20,
+            "width": 68.69999999999999
           },
           {
-            "x": 51,
-            "width": 68.69999999999999
+            "x": 88.69999999999999,
+            "width": 132.1375
           }
         ],
-        "width": "131",
-        "height": "167"
+        "width": "246",
+        "height": "252"
       },
       "jar": {
         "dividerXs": [
@@ -757,41 +752,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          164.794,
-          292.131
+          20,
+          167.456,
+          293.469
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "48.316",
+            "x": "51.147",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "185.881",
+            "x": "187.881",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 47,
-          "width": 274.131,
+          "x": 20,
+          "y": 52.5,
+          "width": 272.469,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 147.79375
+            "x": 20,
+            "width": 147.45625
           },
           {
-            "x": 164.79375,
-            "width": 127.33750000000003
+            "x": 167.45625,
+            "width": 126.01250000000005
           }
         ],
-        "width": "304",
-        "height": "407"
+        "width": "319",
+        "height": "397"
       },
       "jar": {
         "dividerXs": [
@@ -838,41 +833,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          129.15,
-          247.375
+          20,
+          169.806,
+          377.931
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "43.828",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "134.15",
+            "x": "219.756",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 229.375,
+          "x": 20,
+          "y": 17.5,
+          "width": 356.931,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 112.15
+            "x": 20,
+            "width": 149.80625
           },
           {
-            "x": 129.15,
-            "width": 118.22500000000002
+            "x": 169.80625,
+            "width": 208.12500000000003
           }
         ],
-        "width": "259",
-        "height": "253"
+        "width": "403",
+        "height": "332"
       },
       "jar": {
         "dividerXs": [
@@ -921,51 +916,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          131.825,
-          246.65,
-          336.862
+          20,
+          134.825,
+          249.65,
+          339.862
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.306",
+            "x": "37.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "149.131",
+            "x": "152.131",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "251.65",
+            "x": "254.65",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 318.862,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 114.82499999999999
           },
           {
-            "x": 131.825,
+            "x": 134.825,
             "width": 114.82499999999999
           },
           {
-            "x": 246.64999999999998,
+            "x": 249.64999999999998,
             "width": 90.21249999999998
           }
         ],
-        "width": "348",
-        "height": "339"
+        "width": "365",
+        "height": "352"
       },
       "jar": {
         "dividerXs": [
@@ -1029,41 +1024,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          75,
-          124.038
+          20,
+          114,
+          163.038
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "26.481",
+            "x": "47.481",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "80",
+            "x": "119",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 106.038,
+          "x": 20,
+          "y": 17.5,
+          "width": 142.038,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 58
+            "x": 20,
+            "width": 94
           },
           {
-            "x": 75,
-            "width": 49.037499999999994
+            "x": 114,
+            "width": 49.03750000000002
           }
         ],
-        "width": "136",
-        "height": "295"
+        "width": "189",
+        "height": "308"
       },
       "jar": {
         "dividerXs": [
@@ -1111,41 +1106,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          121.1,
-          325.925
+          20,
+          124.413,
+          329.238
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "53.019",
+            "x": "56.175",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "203.938",
+            "x": "207.25",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 307.925,
+          "x": 20,
+          "y": 17.5,
+          "width": 308.238,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 104.10000000000001
+            "x": 20,
+            "width": 104.41250000000001
           },
           {
-            "x": 121.10000000000001,
+            "x": 124.41250000000001,
             "width": 204.825
           }
         ],
-        "width": "337",
-        "height": "417"
+        "width": "355",
+        "height": "467"
       },
       "jar": {
         "dividerXs": [
@@ -1193,41 +1188,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          279.413,
-          470.138
+          20,
+          282.413,
+          474.138
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "118.225",
+            "x": "121.225",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "350.756",
+            "x": "354.256",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 452.138,
+          "x": 20,
+          "y": 17.5,
+          "width": 453.138,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 262.4125
           },
           {
-            "x": 279.4125,
-            "width": 190.72500000000002
+            "x": 282.4125,
+            "width": 191.72500000000002
           }
         ],
-        "width": "482",
-        "height": "309"
+        "width": "500",
+        "height": "315"
       },
       "jar": {
         "dividerXs": [
@@ -1281,41 +1276,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          78.35,
-          134.975
+          20,
+          81.35,
+          137.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "31.138",
+            "x": "34.138",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "90.125",
+            "x": "93.125",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 116.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 61.349999999999994
           },
           {
-            "x": 78.35,
+            "x": 81.35,
             "width": 56.625
           }
         ],
-        "width": "156",
-        "height": "411"
+        "width": "183",
+        "height": "426"
       },
       "jar": {
         "dividerXs": [
@@ -1363,41 +1358,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          107.025,
-          258.375
+          20,
+          111.025,
+          262.375
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "57.006",
+            "x": "60.506",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "177.694",
+            "x": "181.694",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 240.375,
+          "x": 20,
+          "y": 17.5,
+          "width": 241.375,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 90.025
+            "x": 20,
+            "width": 91.025
           },
           {
-            "x": 107.025,
-            "width": 151.35
+            "x": 111.025,
+            "width": 151.34999999999997
           }
         ],
-        "width": "270",
-        "height": "363"
+        "width": "288",
+        "height": "385"
       },
       "jar": {
         "dividerXs": [
@@ -1445,41 +1440,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          327.937,
-          364.612
+          20,
+          330.937,
+          367.612
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "340.256",
+            "x": "343.256",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 346.612,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 310.9374999999999
           },
           {
-            "x": 327.9374999999999,
+            "x": 330.9374999999999,
             "width": 36.674999999999955
           }
         ],
-        "width": "376",
-        "height": "223"
+        "width": "393",
+        "height": "236"
       },
       "jar": {
         "dividerXs": [
@@ -1527,81 +1522,81 @@
       "laneCount": 6,
       "ours": {
         "dividerXs": [
-          17,
-          49.05,
-          251.175,
-          358.575,
-          741.6,
-          902.925,
-          934.975
+          20,
+          52.05,
+          255.175,
+          362.575,
+          745.6,
+          897.925,
+          929.975
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "139.088",
+            "x": "142.588",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "293.85",
+            "x": "297.85",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "421.444",
+            "x": "425.444",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "811.238",
+            "x": "810.738",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "907.925",
+            "x": "902.925",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 916.975,
+          "x": 20,
+          "y": 17.5,
+          "width": 908.975,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 32.05
           },
           {
-            "x": 49.05,
-            "width": 202.125
+            "x": 52.05,
+            "width": 203.125
           },
           {
-            "x": 251.175,
+            "x": 255.175,
             "width": 107.40000000000003
           },
           {
-            "x": 358.57500000000005,
+            "x": 362.57500000000005,
             "width": 383.025
           },
           {
-            "x": 741.6,
-            "width": 161.32500000000005
+            "x": 745.6,
+            "width": 152.32500000000005
           },
           {
-            "x": 902.9250000000001,
+            "x": 897.9250000000001,
             "width": 32.05000000000018
           }
         ],
-        "width": "946",
-        "height": "389"
+        "width": "955",
+        "height": "394"
       },
       "jar": {
         "dividerXs": [
@@ -1689,41 +1684,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          197.125,
-          323.925
+          20,
+          215.4,
+          333.2
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "93.506",
+            "x": "104.144",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "241.962",
+            "x": "255.738",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 305.925,
+          "x": 20,
+          "y": 17.5,
+          "width": 312.2,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 180.125
+            "x": 20,
+            "width": 195.4
           },
           {
-            "x": 197.125,
-            "width": 126.79999999999995
+            "x": 215.4,
+            "width": 117.80000000000004
           }
         ],
-        "width": "335",
-        "height": "306"
+        "width": "359",
+        "height": "311"
       },
       "jar": {
         "dividerXs": [
@@ -1771,41 +1766,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          319.175,
-          599.231
+          20,
+          322.175,
+          648.231
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "162.069",
+            "x": "165.069",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "453.184",
+            "x": "479.184",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 581.231,
+          "x": 20,
+          "y": 17.5,
+          "width": 627.231,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 302.175
+            "x": 20,
+            "width": 302.17500000000007
           },
           {
-            "x": 319.175,
-            "width": 280.05625000000003
+            "x": 322.17500000000007,
+            "width": 326.05625
           }
         ],
-        "width": "648",
-        "height": "625"
+        "width": "674",
+        "height": "653"
       },
       "jar": {
         "dividerXs": [
@@ -1853,41 +1848,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          79.988,
-          805.537
+          20,
+          82.988,
+          808.537
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "405.187",
+            "x": "408.187",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 787.537,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 62.98750000000001
+            "x": 20,
+            "width": 62.9875
           },
           {
-            "x": 79.98750000000001,
+            "x": 82.9875,
             "width": 725.5499999999993
           }
         ],
-        "width": "824",
-        "height": "307"
+        "width": "851",
+        "height": "320"
       },
       "jar": {
         "dividerXs": [
@@ -1937,14 +1932,9 @@
         "dividerXs": [],
         "titles": [],
         "bandRect": null,
-        "lanes": [
-          {
-            "x": 17,
-            "width": 91.35000000000001
-          }
-        ],
-        "width": "147",
-        "height": "304"
+        "lanes": [],
+        "width": "162",
+        "height": "309"
       },
       "jar": {
         "dividerXs": [],
@@ -1962,41 +1952,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          100.238,
-          196.388
+          20,
+          103.238,
+          199.388
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "113.775",
+            "x": "116.775",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 178.388,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17.000000000000004,
+            "x": 20,
             "width": 83.2375
           },
           {
-            "x": 100.2375,
+            "x": 103.2375,
             "width": 96.14999999999999
           }
         ],
-        "width": "208",
-        "height": "245"
+        "width": "225",
+        "height": "259"
       },
       "jar": {
         "dividerXs": [
@@ -2045,14 +2035,9 @@
         "dividerXs": [],
         "titles": [],
         "bandRect": null,
-        "lanes": [
-          {
-            "x": 17,
-            "width": 126.67500000000001
-          }
-        ],
-        "width": "164",
-        "height": "244"
+        "lanes": [],
+        "width": "274",
+        "height": "332"
       },
       "jar": {
         "dividerXs": [],
@@ -2071,41 +2056,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          -28.603,
-          127.153,
-          472.078
+          20,
+          213.756,
+          558.681
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "18.731",
+            "x": "86.334",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "241.172",
+            "x": "327.775",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": -28.603,
-          "y": 12,
-          "width": 499.681,
+          "x": 20,
+          "y": 17.5,
+          "width": 537.681,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": -28.603124999999963,
-            "width": 155.75625000000002
+            "x": 20,
+            "width": 193.75625000000002
           },
           {
-            "x": 127.15312500000006,
+            "x": 213.75625000000002,
             "width": 344.92499999999995
           }
         ],
-        "width": "484",
-        "height": "351"
+        "width": "584",
+        "height": "370"
       },
       "jar": {
         "dividerXs": [
@@ -2153,41 +2138,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          92.594,
-          204.644
+          20,
+          115.594,
+          227.644
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "29.766",
+            "x": "42.766",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "123.588",
+            "x": "146.588",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 186.644,
+          "x": 20,
+          "y": 17.5,
+          "width": 206.644,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 75.59375
+            "x": 20,
+            "width": 95.59375
           },
           {
-            "x": 92.59375,
+            "x": 115.59375,
             "width": 112.05000000000001
           }
         ],
-        "width": "216",
-        "height": "331"
+        "width": "253",
+        "height": "355"
       },
       "jar": {
         "dividerXs": [
@@ -2244,8 +2229,8 @@
         "titles": [],
         "bandRect": null,
         "lanes": [],
-        "width": "165",
-        "height": "288"
+        "width": "185",
+        "height": "312"
       },
       "jar": {
         "dividerXs": [],
@@ -2263,41 +2248,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          123,
-          228.063
+          20,
+          129,
+          234.063
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "21.456",
+            "x": "25.956",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "128",
+            "x": "134",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 210.063,
+          "x": 20,
+          "y": 17.5,
+          "width": 213.063,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 106
+            "x": 20,
+            "width": 109
           },
           {
-            "x": 123,
+            "x": 129,
             "width": 105.0625
           }
         ],
-        "width": "240",
-        "height": "237"
+        "width": "260",
+        "height": "248"
       },
       "jar": {
         "dividerXs": [
@@ -2344,41 +2329,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          86.963,
-          197.663
+          20,
+          138.05,
+          248.75
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "49.044",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "116.775",
+            "x": "167.862",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 179.663,
+          "x": 20,
+          "y": 17.5,
+          "width": 227.75,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 69.9625
+            "x": 20,
+            "width": 118.04999999999998
           },
           {
-            "x": 86.9625,
-            "width": 110.69999999999999
+            "x": 138.04999999999998,
+            "width": 110.70000000000002
           }
         ],
-        "width": "209",
-        "height": "265"
+        "width": "279",
+        "height": "369"
       },
       "jar": {
         "dividerXs": [
@@ -2427,41 +2412,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          107.213,
-          197.425
+          20,
+          114,
+          206
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "26.894",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "112.213",
+            "x": "119.894",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 179.425,
+          "x": 20,
+          "y": 17.5,
+          "width": 185,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 90.2125
+            "x": 20,
+            "width": 94
           },
           {
-            "x": 107.2125,
-            "width": 90.21249999999998
+            "x": 114,
+            "width": 92
           }
         ],
-        "width": "209",
-        "height": "493"
+        "width": "232",
+        "height": "506"
       },
       "jar": {
         "dividerXs": [
@@ -2509,41 +2494,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          141.05,
-          267.725
+          20,
+          144.05,
+          270.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.925",
+            "x": "37.925",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "160.288",
+            "x": "163.288",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 249.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 124.05000000000001
           },
           {
-            "x": 141.05,
+            "x": 144.05,
             "width": 126.67500000000001
           }
         ],
-        "width": "286",
-        "height": "315"
+        "width": "313",
+        "height": "332"
       },
       "jar": {
         "dividerXs": [
@@ -2591,41 +2576,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          131,
-          258.338
+          20,
+          143,
+          269.013
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "31.419",
+            "x": "38.919",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "152.087",
+            "x": "163.425",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 240.337,
+          "x": 20,
+          "y": 17.5,
+          "width": 248.013,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 114
+            "x": 20,
+            "width": 123
           },
           {
-            "x": 131,
-            "width": 127.33749999999998
+            "x": 143,
+            "width": 126.01250000000005
           }
         ],
-        "width": "270",
-        "height": "280"
+        "width": "295",
+        "height": "270"
       },
       "jar": {
         "dividerXs": [
@@ -2673,51 +2658,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          90.35,
-          211.7,
-          306.819
+          20,
+          93.35,
+          215.763,
+          330.881
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "27.688",
+            "x": "30.688",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "125.038",
+            "x": "128.569",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "232.766",
+            "x": "246.828",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 288.819,
+          "x": 20,
+          "y": 17.5,
+          "width": 309.881,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 73.35
           },
           {
-            "x": 90.35,
-            "width": 121.35
+            "x": 93.35,
+            "width": 122.4125
           },
           {
-            "x": 211.7,
-            "width": 95.11875000000003
+            "x": 215.7625,
+            "width": 115.11875000000003
           }
         ],
-        "width": "337",
-        "height": "477"
+        "width": "384",
+        "height": "485"
       },
       "jar": {
         "dividerXs": [
@@ -2775,51 +2760,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          104.831,
-          174.881,
-          244.931
+          20,
+          133.831,
+          203.881,
+          273.931
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.928",
+            "x": "50.928",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "113.869",
+            "x": "142.869",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "183.919",
+            "x": "212.919",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 226.931,
+          "x": 20,
+          "y": 17.5,
+          "width": 252.931,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 87.83125
+            "x": 20,
+            "width": 113.83125
           },
           {
-            "x": 104.83125,
-            "width": 70.05000000000003
+            "x": 133.83125,
+            "width": 70.05
           },
           {
-            "x": 174.88125000000002,
-            "width": 70.05000000000001
+            "x": 203.88125,
+            "width": 70.04999999999998
           }
         ],
-        "width": "256",
-        "height": "359"
+        "width": "299",
+        "height": "366"
       },
       "jar": {
         "dividerXs": [
@@ -2877,41 +2862,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          130.4,
-          243.8
+          20,
+          133.4,
+          246.8
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "15.256",
+            "x": "18.256",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "153.069",
+            "x": "156.069",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 225.8,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 113.4
           },
           {
-            "x": 130.4,
+            "x": 133.4,
             "width": 113.4
           }
         ],
-        "width": "255",
-        "height": "235"
+        "width": "272",
+        "height": "278"
       },
       "jar": {
         "dividerXs": [
@@ -2958,41 +2943,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          91.025,
-          214.363
+          20,
+          94.025,
+          219.066
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "42.988",
+            "x": "45.988",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "141.669",
+            "x": "145.52",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 196.363,
+          "x": 20,
+          "y": 17.5,
+          "width": 198.066,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 74.02499999999999
           },
           {
-            "x": 91.02499999999999,
-            "width": 123.33750000000002
+            "x": 94.02499999999999,
+            "width": 125.04062500000002
           }
         ],
-        "width": "226",
-        "height": "303"
+        "width": "245",
+        "height": "316"
       },
       "jar": {
         "dividerXs": [
@@ -3041,41 +3026,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          107.306,
-          206.006
+          20,
+          142.384,
+          241.084
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "35.603",
+            "x": "54.642",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "130.106",
+            "x": "165.184",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 188.006,
+          "x": 20,
+          "y": 17.5,
+          "width": 220.084,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 90.30625
+            "x": 20,
+            "width": 122.384375
           },
           {
-            "x": 107.30625,
+            "x": 142.384375,
             "width": 98.70000000000002
           }
         ],
-        "width": "218",
-        "height": "259"
+        "width": "267",
+        "height": "264"
       },
       "jar": {
         "dividerXs": [
@@ -3129,51 +3114,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          171.519,
-          336.969,
-          509.619
+          20,
+          210.519,
+          411.934,
+          584.584
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "81.266",
+            "x": "102.266",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "213.181",
+            "x": "270.164",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "392.75",
+            "x": "467.716",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 491.619,
+          "x": 20,
+          "y": 17.5,
+          "width": 563.584,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 154.51875000000004
+            "x": 20,
+            "width": 190.51875000000004
           },
           {
-            "x": 171.51875000000004,
-            "width": 165.45000000000002
+            "x": 210.51875000000004,
+            "width": 201.415625
           },
           {
-            "x": 336.96875000000006,
-            "width": 172.65000000000003
+            "x": 411.93437500000005,
+            "width": 172.6500000000001
           }
         ],
-        "width": "521",
-        "height": "1033"
+        "width": "610",
+        "height": "1053"
       },
       "jar": {
         "dividerXs": [
@@ -3231,41 +3216,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          272.813,
-          376.638
+          20,
+          275.813,
+          379.638
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "277.813",
+            "x": "280.813",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 358.638,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 255.8125000000001
+            "x": 20,
+            "width": 255.81250000000006
           },
           {
-            "x": 272.8125000000001,
+            "x": 275.81250000000006,
             "width": 103.82499999999999
           }
         ],
-        "width": "388",
-        "height": "219"
+        "width": "405",
+        "height": "226"
       },
       "jar": {
         "dividerXs": [
@@ -3318,41 +3303,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          266.45,
-          381.275
+          20,
+          269.45,
+          394.538
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "99.144",
+            "x": "102.144",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "281.281",
+            "x": "289.413",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 363.275,
+          "x": 20,
+          "y": 17.5,
+          "width": 373.538,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 249.45000000000005
           },
           {
-            "x": 266.45000000000005,
-            "width": 114.82499999999999
+            "x": 269.45000000000005,
+            "width": 125.08749999999998
           }
         ],
-        "width": "393",
-        "height": "427"
+        "width": "420",
+        "height": "440"
       },
       "jar": {
         "dividerXs": [
@@ -3399,41 +3384,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          112.188,
-          170.188
+          20,
+          151.188,
+          245.188
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "45.075",
+            "x": "66.075",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "122.119",
+            "x": "179.119",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 152.188,
+          "x": 20,
+          "y": 17.5,
+          "width": 224.188,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 95.1875
+            "x": 20,
+            "width": 131.1875
           },
           {
-            "x": 112.1875,
-            "width": 58
+            "x": 151.1875,
+            "width": 94
           }
         ],
-        "width": "195",
-        "height": "511"
+        "width": "295",
+        "height": "525"
       },
       "jar": {
         "dividerXs": [
@@ -3488,41 +3473,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          96.188,
-          228.187
+          20,
+          99.188,
+          269.188
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "127.594",
+            "x": "149.594",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 210.187,
+          "x": 20,
+          "y": 17.5,
+          "width": 248.187,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 79.1875
           },
           {
-            "x": 96.1875,
-            "width": 131.99999999999997
+            "x": 99.1875,
+            "width": 169.99999999999997
           }
         ],
-        "width": "259",
-        "height": "403"
+        "width": "295",
+        "height": "417"
       },
       "jar": {
         "dividerXs": [
@@ -3569,41 +3554,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          115.2,
-          213.4
+          20,
+          118.2,
+          216.4
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "120.2",
+            "x": "123.2",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 195.4,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 98.2
           },
           {
-            "x": 115.2,
+            "x": 118.2,
             "width": 98.19999999999997
           }
         ],
-        "width": "225",
-        "height": "273"
+        "width": "242",
+        "height": "295"
       },
       "jar": {
         "dividerXs": [
@@ -3652,41 +3637,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          81.05,
-          256.4
+          20,
+          84.05,
+          259.4
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "44.019",
+            "x": "47.019",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "163.719",
+            "x": "166.719",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 238.4,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 64.04999999999998
           },
           {
-            "x": 81.04999999999998,
+            "x": 84.04999999999998,
             "width": 175.35
           }
         ],
-        "width": "268",
-        "height": "375"
+        "width": "285",
+        "height": "397"
       },
       "jar": {
         "dividerXs": [
@@ -3734,81 +3719,81 @@
       "laneCount": 6,
       "ours": {
         "dividerXs": [
-          17,
-          49.05,
-          265.1,
-          341.75,
-          724.775,
-          849.425,
-          881.475
+          20,
+          52.05,
+          269.1,
+          345.75,
+          728.775,
+          844.425,
+          876.475
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "146.05",
+            "x": "149.55",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "292.4",
+            "x": "296.4",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "404.619",
+            "x": "408.619",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "776.075",
+            "x": "775.575",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "854.425",
+            "x": "849.425",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 863.475,
+          "x": 20,
+          "y": 17.5,
+          "width": 855.475,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 32.05
           },
           {
-            "x": 49.05,
-            "width": 216.05
+            "x": 52.05,
+            "width": 217.05
           },
           {
-            "x": 265.1,
-            "width": 76.64999999999998
+            "x": 269.1,
+            "width": 76.65
           },
           {
-            "x": 341.75,
+            "x": 345.75,
             "width": 383.025
           },
           {
-            "x": 724.775,
-            "width": 124.64999999999998
+            "x": 728.775,
+            "width": 115.64999999999998
           },
           {
-            "x": 849.425,
+            "x": 844.425,
             "width": 32.05000000000018
           }
         ],
-        "width": "893",
-        "height": "375"
+        "width": "902",
+        "height": "380"
       },
       "jar": {
         "dividerXs": [
@@ -3896,41 +3881,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          53.675,
-          364.612
+          20,
+          58.338,
+          369.275
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "29.319",
+            "x": "33.15",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "58.675",
+            "x": "63.338",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 346.612,
+          "x": 20,
+          "y": 17.5,
+          "width": 348.275,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 36.67499999999998
+            "x": 20,
+            "width": 38.337500000000006
           },
           {
-            "x": 53.67499999999998,
+            "x": 58.337500000000006,
             "width": 310.9374999999999
           }
         ],
-        "width": "376",
-        "height": "171"
+        "width": "395",
+        "height": "184"
       },
       "jar": {
         "dividerXs": [
@@ -3978,41 +3963,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          102.35,
-          177.725
+          20,
+          105.35,
+          180.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "36.613",
+            "x": "39.613",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "110.563",
+            "x": "113.563",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 159.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 85.35000000000001
           },
           {
-            "x": 102.35000000000001,
+            "x": 105.35000000000001,
             "width": 75.37500000000001
           }
         ],
-        "width": "189",
-        "height": "219"
+        "width": "206",
+        "height": "224"
       },
       "jar": {
         "dividerXs": [
@@ -4060,51 +4045,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          55.025,
-          137.038,
-          175.738
+          20,
+          59.013,
+          152.025,
+          190.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "31.006",
+            "x": "34.5",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "91.025",
+            "x": "100.513",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "151.381",
+            "x": "166.369",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 157.738,
+          "x": 20,
+          "y": 17.5,
+          "width": 169.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 38.02499999999999
+            "x": 20,
+            "width": 39.0125
           },
           {
-            "x": 55.02499999999999,
-            "width": 82.0125
+            "x": 59.0125,
+            "width": 93.0125
           },
           {
-            "x": 137.0375,
+            "x": 152.025,
             "width": 38.70000000000002
           }
         ],
-        "width": "187",
-        "height": "349"
+        "width": "216",
+        "height": "356"
       },
       "jar": {
         "dividerXs": [
@@ -4162,51 +4147,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          327.937,
-          638.875,
-          975.125
+          20,
+          330.937,
+          641.875,
+          978.125
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "332.937",
+            "x": "335.937",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "643.875",
+            "x": "646.875",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 957.125,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 310.9374999999999
           },
           {
-            "x": 327.9374999999999,
+            "x": 330.9374999999999,
             "width": 310.9374999999999
           },
           {
-            "x": 638.8749999999998,
+            "x": 641.8749999999998,
             "width": 336.25
           }
         ],
-        "width": "987",
-        "height": "223"
+        "width": "1004",
+        "height": "236"
       },
       "jar": {
         "dividerXs": [
@@ -4264,41 +4249,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          183.2,
-          290.287
+          20,
+          186.2,
+          308.244
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "66.069",
+            "x": "69.069",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "188.2",
+            "x": "198.678",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 272.287,
+          "x": 20,
+          "y": 17.5,
+          "width": 287.244,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 166.20000000000005
+            "x": 20,
+            "width": 166.20000000000002
           },
           {
-            "x": 183.20000000000005,
-            "width": 107.08749999999992
+            "x": 186.20000000000002,
+            "width": 122.04375000000002
           }
         ],
-        "width": "302",
-        "height": "301"
+        "width": "334",
+        "height": "323"
       },
       "jar": {
         "dividerXs": [
@@ -4346,51 +4331,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          159.15,
-          291.3,
-          433.45
+          20,
+          163.15,
+          295.3,
+          436.45
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "77.05",
+            "x": "80.55",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "214.2",
+            "x": "218.2",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "351.35",
+            "x": "354.85",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 415.45,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 142.14999999999998
+            "x": 20,
+            "width": 143.14999999999998
           },
           {
-            "x": 159.14999999999998,
+            "x": 163.14999999999998,
             "width": 132.1500000000001
           },
           {
-            "x": 291.30000000000007,
-            "width": 142.14999999999986
+            "x": 295.30000000000007,
+            "width": 141.14999999999986
           }
         ],
-        "width": "445",
-        "height": "115"
+        "width": "462",
+        "height": "130"
       },
       "jar": {
         "dividerXs": [
@@ -4448,41 +4433,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          131.825,
-          246.65
+          20,
+          134.825,
+          259.913
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.306",
+            "x": "37.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "149.131",
+            "x": "157.263",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 228.65,
+          "x": 20,
+          "y": 17.5,
+          "width": 238.913,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 114.82499999999999
           },
           {
-            "x": 131.825,
-            "width": 114.82499999999999
+            "x": 134.825,
+            "width": 125.0875
           }
         ],
-        "width": "258",
-        "height": "427"
+        "width": "285",
+        "height": "440"
       },
       "jar": {
         "dividerXs": [
@@ -4536,81 +4521,81 @@
       "laneCount": 6,
       "ours": {
         "dividerXs": [
-          17,
-          49.05,
-          265.1,
-          435.3,
-          818.325,
-          942.975,
-          975.025
+          20,
+          52.05,
+          269.1,
+          439.3,
+          822.325,
+          937.975,
+          970.025
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "146.05",
+            "x": "149.55",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "270.1",
+            "x": "274.1",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "498.169",
+            "x": "502.169",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "869.625",
+            "x": "869.125",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "947.975",
+            "x": "942.975",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 957.025,
+          "x": 20,
+          "y": 17.5,
+          "width": 949.025,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 32.05
           },
           {
-            "x": 49.05,
-            "width": 216.05
+            "x": 52.05,
+            "width": 217.05
           },
           {
-            "x": 265.1,
-            "width": 170.19999999999993
+            "x": 269.1,
+            "width": 170.19999999999996
           },
           {
-            "x": 435.29999999999995,
+            "x": 439.29999999999995,
             "width": 383.025
           },
           {
-            "x": 818.3249999999999,
-            "width": 124.64999999999986
+            "x": 822.3249999999999,
+            "width": 115.64999999999986
           },
           {
-            "x": 942.9749999999998,
+            "x": 937.9749999999998,
             "width": 32.05000000000018
           }
         ],
-        "width": "987",
-        "height": "375"
+        "width": "996",
+        "height": "380"
       },
       "jar": {
         "dividerXs": [
@@ -4704,51 +4689,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          179.7,
-          320.4,
-          431.75
+          20,
+          193.7,
+          334.4,
+          445.75
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "88.337",
+            "x": "96.837",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "240.037",
+            "x": "254.037",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "366.063",
+            "x": "380.063",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 413.75,
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 162.69999999999996
+            "x": 20,
+            "width": 173.69999999999996
           },
           {
-            "x": 179.69999999999996,
+            "x": 193.69999999999996,
             "width": 140.70000000000002
           },
           {
-            "x": 320.4,
+            "x": 334.4,
             "width": 111.35000000000002
           }
         ],
-        "width": "443",
-        "height": "607"
+        "width": "471",
+        "height": "542"
       },
       "jar": {
         "dividerXs": [
@@ -4805,41 +4790,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          64.325,
-          207.65
+          20,
+          67.325,
+          210.65
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "29.638",
+            "x": "32.638",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "124.963",
+            "x": "127.963",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 189.65,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 47.325
           },
           {
-            "x": 64.325,
+            "x": 67.325,
             "width": 143.325
           }
         ],
-        "width": "219",
-        "height": "355"
+        "width": "236",
+        "height": "368"
       },
       "jar": {
         "dividerXs": [
@@ -4888,41 +4873,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          235.281,
-          419.831
+          20,
+          252.281,
+          475.831
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "78.609",
+            "x": "88.609",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "279.013",
+            "x": "315.513",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 401.831,
+          "x": 20,
+          "y": 17.5,
+          "width": 454.831,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 218.28125
+            "x": 20,
+            "width": 232.28125
           },
           {
-            "x": 235.28125,
-            "width": 184.55000000000007
+            "x": 252.28125,
+            "width": 223.55000000000007
           }
         ],
-        "width": "450",
-        "height": "587"
+        "width": "529",
+        "height": "604"
       },
       "jar": {
         "dividerXs": [
@@ -4969,41 +4954,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          109.125,
-          172.112
+          20,
+          112.125,
+          239.212
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "114.125",
+            "x": "149.175",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 154.112,
+          "x": 20,
+          "y": 17.5,
+          "width": 218.212,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 92.125
           },
           {
-            "x": 109.125,
-            "width": 62.98749999999998
+            "x": 112.125,
+            "width": 127.08749999999998
           }
         ],
-        "width": "190",
-        "height": "245"
+        "width": "265",
+        "height": "332"
       },
       "jar": {
         "dividerXs": [
@@ -5052,41 +5037,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          140.513,
-          239.212
+          20,
+          144.513,
+          243.212
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "52.206",
+            "x": "55.706",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "163.313",
+            "x": "167.313",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 221.212,
+          "x": 20,
+          "y": 17.5,
+          "width": 222.212,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 123.51249999999999
+            "x": 20,
+            "width": 124.51249999999999
           },
           {
-            "x": 140.5125,
+            "x": 144.5125,
             "width": 98.69999999999999
           }
         ],
-        "width": "251",
-        "height": "245"
+        "width": "269",
+        "height": "250"
       },
       "jar": {
         "dividerXs": [
@@ -5139,41 +5124,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          61.7,
-          112.85
+          20,
+          64.7,
+          115.85
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "28.325",
+            "x": "31.325",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "76.25",
+            "x": "79.25",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 94.85,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 44.7
           },
           {
-            "x": 61.7,
+            "x": 64.7,
             "width": 51.150000000000006
           }
         ],
-        "width": "124",
-        "height": "253"
+        "width": "141",
+        "height": "260"
       },
       "jar": {
         "dividerXs": [
@@ -5222,41 +5207,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          63.65,
-          110.975
+          20,
+          66.65,
+          113.975
         ],
         "titles": [
           {
             "fontSize": "8",
-            "x": "30.525",
+            "x": "33.525",
             "anchor": "(absent)"
           },
           {
             "fontSize": "8",
-            "x": "77.513",
+            "x": "80.513",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 16,
           "width": 92.975,
           "height": 10,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 46.650000000000006
           },
           {
-            "x": 63.650000000000006,
+            "x": 66.65,
             "width": 47.325
           }
         ],
-        "width": "122",
-        "height": "123"
+        "width": "139",
+        "height": "135"
       },
       "jar": {
         "dividerXs": [
@@ -5304,41 +5289,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          65,
-          103
+          20,
+          64,
+          93
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.981",
+            "x": "35.981",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "77.981",
+            "x": "72.481",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 85,
+          "x": 20,
+          "y": 17.5,
+          "width": 72,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 48
+            "x": 20,
+            "width": 44
           },
           {
-            "x": 65,
-            "width": 38
+            "x": 64,
+            "width": 29
           }
         ],
-        "width": "115",
-        "height": "111"
+        "width": "119",
+        "height": "95"
       },
       "jar": {
         "dividerXs": [
@@ -5386,41 +5371,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          252.338,
-          487.675
+          20,
+          255.338,
+          490.675
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "257.338",
+            "x": "260.338",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 469.675,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 235.33750000000006
+            "x": 20,
+            "width": 235.3375000000001
           },
           {
-            "x": 252.33750000000006,
-            "width": 235.33750000000012
+            "x": 255.3375000000001,
+            "width": 235.33750000000015
           }
         ],
-        "width": "499",
-        "height": "427"
+        "width": "516",
+        "height": "440"
       },
       "jar": {
         "dividerXs": [
@@ -5469,14 +5454,9 @@
         "dividerXs": [],
         "titles": [],
         "bandRect": null,
-        "lanes": [
-          {
-            "x": 17,
-            "width": 128.54375
-          }
-        ],
-        "width": "157",
-        "height": "342"
+        "lanes": [],
+        "width": "154",
+        "height": "345"
       },
       "jar": {
         "dividerXs": [],
@@ -5495,41 +5475,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          327.937,
-          638.875
+          20,
+          330.937,
+          641.875
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "332.937",
+            "x": "335.937",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 620.875,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 310.9374999999999
           },
           {
-            "x": 327.9374999999999,
+            "x": 330.9374999999999,
             "width": 310.9374999999999
           }
         ],
-        "width": "650",
-        "height": "171"
+        "width": "667",
+        "height": "184"
       },
       "jar": {
         "dividerXs": [
@@ -5582,41 +5562,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          64.325,
-          207.65
+          20,
+          67.325,
+          210.65
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "29.638",
+            "x": "32.638",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "124.963",
+            "x": "127.963",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 189.65,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 47.325
           },
           {
-            "x": 64.325,
+            "x": 67.325,
             "width": 143.325
           }
         ],
-        "width": "219",
-        "height": "355"
+        "width": "236",
+        "height": "368"
       },
       "jar": {
         "dividerXs": [
@@ -5665,51 +5645,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          258.4,
-          439.875,
-          588.194
+          20,
+          261.4,
+          493.619,
+          621.937
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "118.237",
+            "x": "121.237",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "329.675",
+            "x": "358.047",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "495.078",
+            "x": "538.822",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 47,
-          "width": 570.194,
+          "x": 20,
+          "y": 52.5,
+          "width": 600.937,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 241.39999999999998
           },
           {
-            "x": 258.4,
-            "width": 181.4749999999999
+            "x": 261.4,
+            "width": 232.21875
           },
           {
-            "x": 439.8749999999999,
-            "width": 148.3187499999999
+            "x": 493.61875,
+            "width": 128.3187499999999
           }
         ],
-        "width": "600",
-        "height": "654"
+        "width": "647",
+        "height": "682"
       },
       "jar": {
         "dividerXs": [
@@ -5767,41 +5747,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          333.663,
-          707.025
+          20,
+          336.663,
+          709.025
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "165.319",
+            "x": "168.319",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "510.331",
+            "x": "512.831",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 689.025,
+          "x": 20,
+          "y": 17.5,
+          "width": 688.025,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 316.6625
           },
           {
-            "x": 333.6625,
-            "width": 373.36250000000007
+            "x": 336.6625,
+            "width": 372.36250000000007
           }
         ],
-        "width": "719",
-        "height": "441"
+        "width": "735",
+        "height": "455"
       },
       "jar": {
         "dividerXs": [
@@ -5861,41 +5841,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          131.825,
-          246.65
+          20,
+          134.825,
+          259.913
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "34.306",
+            "x": "37.306",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "149.131",
+            "x": "157.263",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 228.65,
+          "x": 20,
+          "y": 17.5,
+          "width": 238.913,
           "height": 18,
           "fill": "#EEE"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 114.82499999999999
           },
           {
-            "x": 131.825,
-            "width": 114.82499999999999
+            "x": 134.825,
+            "width": 125.0875
           }
         ],
-        "width": "258",
-        "height": "427"
+        "width": "285",
+        "height": "440"
       },
       "jar": {
         "dividerXs": [
@@ -5942,41 +5922,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          357.662,
-          674.325
+          20,
+          360.662,
+          677.325
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "177.319",
+            "x": "180.319",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "505.981",
+            "x": "508.981",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
+          "x": 20,
+          "y": 17.5,
           "width": 656.325,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 340.66249999999997
           },
           {
-            "x": 357.66249999999997,
+            "x": 360.66249999999997,
             "width": 316.66249999999997
           }
         ],
-        "width": "686",
-        "height": "282"
+        "width": "703",
+        "height": "325"
       },
       "jar": {
         "dividerXs": [
@@ -6025,51 +6005,51 @@
       "laneCount": 3,
       "ours": {
         "dividerXs": [
-          17,
-          160.45,
-          287.338,
-          365.4
+          20,
+          181.094,
+          307.981,
+          386.044
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "48.731",
+            "x": "60.553",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "165.45",
+            "x": "186.094",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "292.338",
+            "x": "312.981",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 347.4,
+          "x": 20,
+          "y": 17.5,
+          "width": 365.044,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
-            "width": 143.45000000000002
+            "x": 20,
+            "width": 161.09375
           },
           {
-            "x": 160.45000000000002,
-            "width": 126.88750000000002
+            "x": 181.09375,
+            "width": 126.88749999999993
           },
           {
-            "x": 287.33750000000003,
-            "width": 78.06250000000006
+            "x": 307.98124999999993,
+            "width": 78.06250000000011
           }
         ],
-        "width": "377",
-        "height": "327"
+        "width": "412",
+        "height": "341"
       },
       "jar": {
         "dividerXs": [
@@ -6126,41 +6106,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          109.125,
-          172.112
+          20,
+          112.125,
+          228.825
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "114.125",
+            "x": "143.981",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 154.112,
+          "x": 20,
+          "y": 17.5,
+          "width": 207.825,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 92.125
           },
           {
-            "x": 109.125,
-            "width": 62.98749999999998
+            "x": 112.125,
+            "width": 116.69999999999999
           }
         ],
-        "width": "190",
-        "height": "253"
+        "width": "254",
+        "height": "338"
       },
       "jar": {
         "dividerXs": [
@@ -6208,41 +6188,41 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          143.675,
-          241.875
+          20,
+          146.675,
+          355
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "36.238",
+            "x": "39.238",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "148.675",
+            "x": "206.738",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 223.875,
+          "x": 20,
+          "y": 17.5,
+          "width": 334,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 126.67500000000001
           },
           {
-            "x": 143.675,
-            "width": 98.19999999999999
+            "x": 146.675,
+            "width": 208.325
           }
         ],
-        "width": "272",
-        "height": "267"
+        "width": "381",
+        "height": "357"
       },
       "jar": {
         "dividerXs": [
@@ -6291,41 +6271,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          149.75,
-          298.306
+          20,
+          152.75,
+          346.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "44.394",
+            "x": "47.394",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "201.022",
+            "x": "226.731",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 280.306,
+          "x": 20,
+          "y": 17.5,
+          "width": 325.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 132.75
           },
           {
-            "x": 149.75,
-            "width": 148.55625000000003
+            "x": 152.75,
+            "width": 193.97500000000002
           }
         ],
-        "width": "317",
-        "height": "503"
+        "width": "372",
+        "height": "508"
       },
       "jar": {
         "dividerXs": [
@@ -6373,41 +6353,41 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          17,
-          143.6,
-          343.841
+          20,
+          146.6,
+          384.841
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "47.731",
+            "x": "50.731",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "194.614",
+            "x": "216.614",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 47,
-          "width": 325.841,
+          "x": 20,
+          "y": 52.5,
+          "width": 363.841,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 17,
+            "x": 20,
             "width": 126.60000000000002
           },
           {
-            "x": 143.60000000000002,
-            "width": 200.24062500000002
+            "x": 146.60000000000002,
+            "width": 238.24062500000002
           }
         ],
-        "width": "374",
-        "height": "574"
+        "width": "410",
+        "height": "583"
       },
       "jar": {
         "dividerXs": [
@@ -6460,51 +6440,51 @@
       "status": "baseline",
       "ours": {
         "dividerXs": [
-          17,
-          77.063,
-          205.606,
-          286.15
+          20,
+          80.063,
+          208.606,
+          309.15
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "22",
+            "x": "25",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "116.303",
+            "x": "119.303",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "220.847",
+            "x": "233.847",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 17,
-          "y": 12,
-          "width": 268.15,
+          "x": 20,
+          "y": 17.5,
+          "width": 288.15,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 16.999999999999996,
+            "x": 20,
             "width": 60.0625
           },
           {
-            "x": 77.0625,
-            "width": 128.54375
+            "x": 80.0625,
+            "width": 128.54375000000002
           },
           {
-            "x": 205.60625,
-            "width": 80.54374999999999
+            "x": 208.60625000000002,
+            "width": 100.54375000000002
           }
         ],
-        "width": "302",
-        "height": "417"
+        "width": "338",
+        "height": "437"
       },
       "jar": {
         "dividerXs": [

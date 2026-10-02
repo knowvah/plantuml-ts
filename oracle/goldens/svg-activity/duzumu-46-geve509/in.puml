@@ -1,0 +1,4 @@
+@startuml
+:foo;
+stop
+@enduml

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { buildIf } from '../../../../src/diagrams/activity/layout/conditional-builder.js';
 import { assignCoordinatesFull } from '../../../../src/diagrams/activity/layout/assign-coordinates-full.js';
-import { LAYOUT_MARGIN } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { ActivityDiagramAST, ActivityIf } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -13,6 +12,10 @@ const measurer = new FormulaMeasurer();
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 const emptyAst: ActivityDiagramAST = { nodes: [], swimlanes: [] };
 const bounder: StringBounder = { getDimension: (t: string) => ({ width: t.length * 7, height: 14 }) };
+// T1a (D2): see `edge-draw-order.test.ts`'s own identical comment -- the
+// dynamic canvas-origin shift makes this value's absolute effect
+// unobservable; kept only to catch a hardcoded-zero regression.
+const LAYOUT_MARGIN = 12;
 
 describe('layoutActivity — down: plain/swap merge case, no optionalStop', () => {
   const ast: ActivityDiagramAST = {
@@ -30,9 +33,10 @@ describe('layoutActivity — down: plain/swap merge case, no optionalStop', () =
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('nodes are a, if-split, if-label(yes, south only), if-merge, in drawU order', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['action', 'if-split', 'if-label', 'if-merge']);
+  it('nodes are a, if-shape, if-label(yes, south), if-own-label(c), if-merge, in drawU order (T3k)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['action', 'if-split', 'if-label', 'if-own-label', 'if-merge']);
     expect(geo.nodes[2]!.label).toBe('yes');
+    expect(geo.nodes[3]!.label).toBe('c');
   });
 
   it('emits exactly 3 edges: In, Else2 (4 points), Out', () => {
@@ -63,9 +67,10 @@ describe('layoutActivity — down: optionalStop (stop east of the hexagon)', () 
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('nodes are if-split, if-label(foo, east), stop -- no if-merge', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['if-split', 'if-label', 'stop']);
-    expect(geo.nodes[1]!.label).toBe('foo');
+  it('nodes are if-shape, if-own-label(dummy), if-label(foo, east), stop -- no if-merge (T3k)', () => {
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['if-split', 'if-own-label', 'if-label', 'stop']);
+    expect(geo.nodes[1]!.label).toBe('dummy');
+    expect(geo.nodes[2]!.label).toBe('foo');
   });
 
   it('the stop sits east of the hexagon', () => {

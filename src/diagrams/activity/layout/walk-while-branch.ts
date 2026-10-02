@@ -36,22 +36,34 @@ import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
-import { emitDiamondLabels } from './diamond-labels.js';
+import { emitDiamondLabels, emitDiamondOwnLabel } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import { pushWhileBackwardConnections } from './walk-while-backward.js';
 
 /**
- * The hexagon node then its own side labels, pushed as one atomic unit
- * (`diamond-labels.ts`'s own header cite for why). North is the "is"/entry
- * label, west is the "is not"/exit label. `laneAt` resolves the header's
- * OWN `.swimlane` over the parent's inherited `myLane` -- the same
- * resolution `walkTile`'s own dispatch (`tile-coordinates.ts:117-118`)
- * applies to every tile it walks; pushing a node directly (never through
- * `walkTile`, D1) means this helper must apply it itself. `tileWhile`
- * (`tile-layout.ts`) never calls `withSwimlane` on the header today, so
- * `header.swimlane` is always `undefined` here and `hexLane === myLane` --
- * kept for parity with `pushRepeatCondition`'s own fix and so a future
- * `tileWhile` change that DOES lane the header does not silently regress.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
+ * The hexagon node, then north, then the hexagon's OWN label, then west --
+ * `FtileDiamondInside#drawU`'s own order (T3k): the polygon and the own
+ * label are two SEPARATE draw calls upstream, never one combined blob, so
+ * the own label lands AFTER north, not baked into the polygon push
+ * (`renderNode`'s own `'while-header'` case draws the polygon only when
+ * labelled; the own label draws through the `'if-own-label'` node below).
+ * Still pushed under the ORIGINAL `'while-header'` kind (not a dedicated
+ * one) so `canvas-origin.ts`'s polygon fudge and `shapes-of.ts`'s
+ * condition-box treatment, both already keyed on that name, apply
+ * unchanged; the SAME kind also covers the label-less case (`renderNode`'s
+ * own ternary falls to `renderDiamond`). North is the "is"/entry label,
+ * west is the "is not"/exit label; south/east are never set on this tile
+ * (kept out, unlike `walk-repeat.ts`'s copy, which uses both). `laneAt`
+ * resolves the header's OWN `.swimlane` over the parent's inherited
+ * `myLane` -- the same resolution `walkTile`'s own dispatch
+ * (`tile-coordinates.ts:117-118`) applies to every tile it walks; pushing
+ * a node directly (never through `walkTile`, D1) means this helper must
+ * apply it itself. `tileWhile` (`tile-layout.ts`) never calls
+ * `withSwimlane` on the header today, so `header.swimlane` is always
+ * `undefined` here and `hexLane === myLane` -- kept for parity with
+ * `pushRepeatCondition`'s own fix and so a future `tileWhile` change that
+ * DOES lane the header does not silently regress.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
  */
 function pushWhileHeader(
   header: GtileDiamondInside,
@@ -61,25 +73,16 @@ function pushWhileHeader(
   out: Out,
 ): void {
   const hexLane = laneAt(header, myLane);
-  pushNode(
-    out,
-    {
-      id: out.nextId('while-header'),
-      kind: 'while-header',
-      x: hX,
-      y: hY,
-      width: header.width,
-      // The polygon is the hexagon ALONE: `drawU` draws
-      // `Hexagon.asPolygon(dimTotal)` with `dimTotal = calculateDimensionAlone`
-      // (`FtileDiamondInside.java:87-89`), while `header.height` is
-      // `calculateDimensionFtile`'s, which adds the north label below it
-      // (`:119-124`). `SOUTH_HOOK.y` is that alone height.
-      height: header.getCoord(SOUTH_HOOK).y,
-      label: header.label,
-    },
-    hexLane,
-  );
-  emitDiamondLabels(header, { x: hX, y: hY }, ['north', 'west'], hexLane, out);
+  // The polygon is the hexagon ALONE: `drawU` draws
+  // `Hexagon.asPolygon(dimTotal)` with `dimTotal = calculateDimensionAlone`
+  // (`FtileDiamondInside.java:87-89`), while `header.height` is
+  // `calculateDimensionFtile`'s, which adds the north label below it
+  // (`:119-124`). `SOUTH_HOOK.y` is that alone height.
+  const box = { x: hX, y: hY, width: header.width, height: header.getCoord(SOUTH_HOOK).y };
+  pushNode(out, { id: out.nextId('while-header'), kind: 'while-header', ...box, label: header.label }, hexLane);
+  emitDiamondLabels(header, { x: hX, y: hY }, ['north'], hexLane, out);
+  emitDiamondOwnLabel(header, box, hexLane, out);
+  emitDiamondLabels(header, { x: hX, y: hY }, ['west'], hexLane, out);
 }
 
 /** Pushes an edge, then overlays `emphasize`/`arrowhead: false` on the
@@ -154,7 +157,7 @@ function buildWhileBackLoop(
  *  exactly `dimDiamond1.getInY() + (outY - inY) / 2` with `inY === 0`
  *  (`FtileDiamondInside.java:106-116`), so no separate `half` term is
  *  needed here. */
-interface WhileFrame {
+export interface WhileFrame {
   readonly out: Out;
   readonly header: GtileDiamondInside;
   readonly body: Tile;
@@ -178,6 +181,20 @@ interface WhileFrame {
   readonly headerInLane: string | undefined;
   readonly bodyInLane: string | undefined;
   readonly bodyOutLane: string | undefined;
+  /**
+   * `FtileWhile`'s own `backward` field (`FtileWhile.java:85,110-121`),
+   * carried here so `pushWhileBack`/`pushWhileBackNonEmpty`/`walk-while-
+   * backward.ts` never need `t: GtileWhile` as a separate parameter
+   * (mission `activity-divergence-drive` T3h). `backPos`/`backInLane`/
+   * `backOutLane` are always computed (never `undefined` themselves, even
+   * when {@link backward} is), mirroring `GtileWhile.backwardOffsetX/Y`'s
+   * own always-computed style -- unread whenever {@link backward} is
+   * unset.
+   */
+  readonly backward: Tile | undefined;
+  readonly backPos: GPoint;
+  readonly backInLane: string | undefined;
+  readonly backOutLane: string | undefined;
 }
 
 /**
@@ -186,9 +203,13 @@ interface WhileFrame {
  * (`ConnectionBackSimple`'s own `drawU` returns early, drawing nothing, not
  * even the reservation, when `getP1` returns `null`, `:229-232`, e.g. a
  * body ending in `stop`) -- the back edge, tagged with D2's `WhileBackLoop`
- * record so a cross-lane placement can retarget it (T2). Split out of
- * {@link pushWhileBack} to keep that function's own NLOC under the file's
- * limit.
+ * record so a cross-lane placement can retarget it (T2). When
+ * `frame.backward` is set, `ConnectionBackBackward1`/`Backward2`
+ * (`walk-while-backward.ts`) REPLACE `ConnectionBackSimple` entirely
+ * (`FtileWhile.create`, `:154-161`: `backward == null` picks Simple, else
+ * both Backward connectors) -- `ConnectionIn` itself is unaffected either
+ * way. Split out of {@link pushWhileBack} to keep that function's own NLOC
+ * under the file's limit.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
 function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
@@ -196,6 +217,11 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
   const { headerOutLane, headerInLane, bodyInLane, bodyOutLane } = frame;
   const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
   pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
+
+  if (frame.backward !== undefined) {
+    pushWhileBackwardConnections(frame);
+    return;
+  }
   if (!body.hasPointOut()) return;
 
   const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
@@ -325,6 +351,10 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     headerInLane: laneIn(header, myLane),
     bodyInLane: laneIn(body, myLane),
     bodyOutLane: laneOut(body, myLane),
+    backward: t.backward,
+    backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
+    backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
+    backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
   };
 }
 
@@ -349,7 +379,15 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
 
   const frame = buildWhileFrame({ t, x, y, hX, hY, bX, bY, header, body, myLane, out });
 
-  // D7: In/Back(Simple|Empty), then Out, then break weldings.
+  // `drawU` draws `backward` LAST among nodes, only when set
+  // (`FtileWhile.java:561-562`) -- `walkTile`'s generic dispatch is
+  // correct here, same reason `walk-repeat.ts#pushRepeatBackwardNode`
+  // cites: `backward` is always a plain action box
+  // (`InstructionWhile.java:121-122`, `factory.activity`).
+  if (t.backward !== undefined)
+    walkTile(t.backward, frame.backPos.x, frame.backPos.y, { kindHint: null, lane: myLane }, out);
+
+  // D7: In/Back(Simple|Empty|Backward), then Out, then break weldings.
   pushWhileBack(frame);
   pushWhileOut(frame);
   pushWhileWeldings(out, bodyNodeStart, bodyNodeEnd, frame.elbowX);

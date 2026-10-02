@@ -1,0 +1,5 @@
+@startuml
+start
+:rounded rectangle;
+stop
+@enduml
