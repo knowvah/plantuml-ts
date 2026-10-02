@@ -177,9 +177,13 @@ export const RE_WHILE = /^while\s*\(([^)]*)\)\s*(?:(?:is|equals?)\s*\(([^)]*)\))
  */
 export const RE_ENDWHILE = /^(?:end\s*while|while\s*end)\s*(?:\(([^)]*)\))?\s*$/i;
 
-/** repeatwhile / repeat while (condition?) [is (yesLabel)] [not (noLabel)] */
+/** repeatwhile / repeat while (condition?) [is (yesLabel)] [not (noLabel)] [;]
+ * `parseRepeatClose` reads the RAW closer line (not the keyword-stripped
+ * one), so the optional trailing `;` is matched here.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandRepeatWhile3.java:101
+ *   -- `new RegexLeaf(";?")` before the end of the closer's regex. */
 export const RE_REPEATWHILE =
-  /^repeat\s*while(?:\s*\(([^)]*)\))?(?:\s*(?:is|equals?)\s*\(([^)]*)\))?(?:\s*not\s*\(([^)]*)\))?\s*$/i;
+  /^repeat\s*while(?:\s*\(([^)]*)\))?(?:\s*(?:is|equals?)\s*\(([^)]*)\))?(?:\s*not\s*\(([^)]*)\))?\s*;?\s*$/i;
 
 /**
  * Single-line note: "note (left|right)? : text"  — the direction is
