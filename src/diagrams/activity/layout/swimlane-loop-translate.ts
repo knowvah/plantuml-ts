@@ -31,6 +31,10 @@ import {
   routeRepeatSimple2,
   routeRepeatComplex1,
 } from './swimlane-loop-translate-repeat.js';
+import {
+  routeSwitchHorizontalThenVertical,
+  routeSwitchVerticalThenHorizontal,
+} from './swimlane-loop-translate-switch.js';
 
 /** `Hexagon.hexagonHalfSize`, re-exported so callers of this module never
  *  need a second import from `hexagon-reservations.ts` for the one
@@ -111,7 +115,44 @@ export interface RepeatComplex1Loop {
   readonly diamond2: { readonly width: number; readonly height: number };
 }
 
-export type LoopTranslate = WhileBackLoop | RepeatOutLoop | RepeatSimple1Loop | RepeatSimple2Loop | RepeatComplex1Loop;
+/**
+ * `FtileSwitchWithManyLinks.ConnectionHorizontalThenVerticalCrossSwimlane
+ * #drawTranslate` (`:318-339`): `p1`/`p2` are that method's own untranslated
+ * `getP1`/`getP2` (diamond1's `getPointOut()`, the case tile's
+ * `getPointIn()`); `diamond1` needs `width`/`height` (`:328`'s
+ * `dimDiamond1`, read for the half-width/half-height offsets at `:330-336`).
+ * Mission `activity-divergence-drive-2` T1p-e.
+ */
+export interface SwitchHorizontalThenVerticalCrossLoop {
+  readonly kind: 'switch-h-then-v-cross';
+  readonly p1: GPoint;
+  readonly p2: GPoint;
+  readonly diamond1: { readonly width: number; readonly height: number };
+}
+
+/**
+ * `FtileSwitchWithManyLinks.ConnectionVerticalThenHorizontalCrossSwimlane
+ * #drawTranslate` (`:363-393`): `p1`/`p2` untranslated (the origin tile's
+ * `getPointOut()`, diamond2's `getPointIn()`); `diamond2` needs
+ * `width`/`height` (`:368`'s `dimDiamond2`, read at `:384,387,389`). No
+ * label -- this connection never calls `withLabel`. Mission
+ * `activity-divergence-drive-2` T1p-e.
+ */
+export interface SwitchVerticalThenHorizontalCrossLoop {
+  readonly kind: 'switch-v-then-h-cross';
+  readonly p1: GPoint;
+  readonly p2: GPoint;
+  readonly diamond2: { readonly width: number; readonly height: number };
+}
+
+export type LoopTranslate =
+  | WhileBackLoop
+  | RepeatOutLoop
+  | RepeatSimple1Loop
+  | RepeatSimple2Loop
+  | RepeatComplex1Loop
+  | SwitchHorizontalThenVerticalCrossLoop
+  | SwitchVerticalThenHorizontalCrossLoop;
 
 /** D3/D4: every translate shape may emit more than one edge (the repeat
  *  exit's unarrowed-then-arrowed pair) and its own hexagon reservations,
@@ -145,5 +186,9 @@ export function routeLoopTranslate(
       return routeRepeatSimple2(loop, edge, dx1, dx2);
     case 'repeat-complex1':
       return routeRepeatComplex1(loop, edge, dx1, dx2);
+    case 'switch-h-then-v-cross':
+      return routeSwitchHorizontalThenVertical(loop, edge, dx1, dx2);
+    case 'switch-v-then-h-cross':
+      return routeSwitchVerticalThenHorizontal(loop, edge, dx1, dx2);
   }
 }
