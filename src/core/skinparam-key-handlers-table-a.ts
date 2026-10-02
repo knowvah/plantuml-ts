@@ -392,6 +392,18 @@ export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], ha
       if (v === 'uml2' || v === 'uml1' || v === 'rectangle') acc.componentStyle = v;
     },
   ],
+  // T1p-a: SkinParam.getConditionEndStyle (SkinParam.java:1007-1013) --
+  // ConditionEndStyle.fromString is case-insensitive (ConditionEndStyle
+  // .java:43-50); an unrecognized/absent value falls back to DIAMOND, so an
+  // unmatched token here is simply left unset (acc default `undefined`
+  // already reads as diamond downstream).
+  [
+    ['conditionendstyle'],
+    (acc, value) => {
+      const v = value.trim().toLowerCase();
+      if (v === 'diamond' || v === 'hline') acc.conditionEndStyle = v;
+    },
+  ],
   // SkinParam.java:1209-1218 `actorStyle()`: case-insensitive
   // `"awesome"`/`"hollow"`, else STICKMAN (verbatim -- an unrecognized value
   // falls through to STICKMAN, it is not rejected/unknown).

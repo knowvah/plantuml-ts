@@ -44,7 +44,7 @@ const diamond = () => new GtileDiamondInside('', {}, bounder, theme);
 describe('GtileIfWithLinks — both branches non-empty, both have a point out', () => {
   const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
-  const tile = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
 
   // innerMargin = max(120/2+80/2, 24+20) = 100; nude = {left:110,width:200,height:50}
   // geoA = appendBottom(diamond{left:12,w:24,h:24}, nude) = {left:110,width:200,height:74}
@@ -109,7 +109,7 @@ describe('GtileIfWithLinks — branch 1 is asymmetric (nested if, left != width/
   // ydelta1a=10, ydelta1b=6 -> totalHeight=114. No labels -> diffs/supp=0.
   const branch1: IfWithLinksBranch = { tile: stubTileAsym(100, 50, 70), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
-  const tile = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
 
   it('width === 200, height === 114, left === 120 (not 110, the symmetric value)', () => {
     expect(tile.width).toBe(200);
@@ -154,7 +154,7 @@ describe('GtileIfWithLinks — branch 1 is asymmetric (nested if, left != width/
 describe('GtileIfWithLinks — one branch lacks a point out (no merge rhombus)', () => {
   const branch1: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40, false), isEmpty: false };
-  const tile = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
 
   it('hasMerge is false (hasTwoBranches requires BOTH to have a point out)', () => {
     expect(tile.hasMerge).toBe(false);
@@ -168,7 +168,7 @@ describe('GtileIfWithLinks — one branch lacks a point out (no merge rhombus)',
 describe('GtileIfWithLinks — neither branch has a point out', () => {
   const branch1: IfWithLinksBranch = { tile: stubTile(60, 40, false), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40, false), isEmpty: false };
-  const tile = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
 
   it('hasPointOut() is false', () => {
     expect(tile.hasPointOut()).toBe(false);
@@ -178,8 +178,8 @@ describe('GtileIfWithLinks — neither branch has a point out', () => {
 describe('GtileIfWithLinks — laned (getSwimlanes().size() > 1) widens ydelta', () => {
   const branch1: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
-  const unlaned = new GtileIfWithLinks(diamond(), branch1, branch2, 0);
-  const laned = new GtileIfWithLinks(diamond(), branch1, branch2, 2);
+  const unlaned = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
+  const laned = GtileIfWithLinks.create(diamond(), branch1, branch2, 2);
 
   it('ydelta1a goes from 10 to 20, ydelta1b from 6 to 10 (net +14 height)', () => {
     expect(laned.height - unlaned.height).toBe(14);
@@ -187,5 +187,43 @@ describe('GtileIfWithLinks — laned (getSwimlanes().size() > 1) widens ydelta',
 
   it('branchY0 grows by the same 10px as ydelta1a', () => {
     expect(laned.branchY - unlaned.branchY).toBe(10);
+  });
+});
+
+describe('GtileIfWithLinks — T1p-a conditionEndStyle hline, both branches have a point out', () => {
+  // Same branches as the first describe block above, but `conditionEndStyle:
+  // 'hline'`: `getShape2`'s own early return wins over `hasTwoBranches()`,
+  // so the merge geometry is the `FtileEmpty(0, hexagonHalfSize)`
+  // placeholder (height 12) rather than the 24x24 rhombus, REGARDLESS of
+  // `hasTwoBranches` -- but `ydelta1b` (the shared base class's own
+  // `getYdelta1b`) still reads `hasTwoBranches` directly and is unaffected.
+  const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, 'hline');
+
+  // geoTotal = appendBottom(geoA{left:110,w:200,h:74}, merge{left:0,w:0,h:12})
+  //          = {left:110,w:200,h:86}. ydelta1a=10, ydelta1b=6 (hasTwoBranches
+  // still true) -> totalHeight=102.
+  it('width === 200, height === 102 (12px placeholder + ydelta1b(6), not the 24px rhombus)', () => {
+    expect(tile.width).toBe(200);
+    expect(tile.height).toBe(102);
+  });
+
+  it('hasMerge is false even though both branches have a point out', () => {
+    expect(tile.hasMerge).toBe(false);
+  });
+
+  it('conditionEndStyle is exposed for the walker to dispatch ConnectionVerticalOut/Hline', () => {
+    expect(tile.conditionEndStyle).toBe('hline');
+  });
+});
+
+describe('GtileIfWithLinks — conditionEndStyle defaults to diamond when omitted', () => {
+  const branch1: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0);
+
+  it('defaults conditionEndStyle to diamond', () => {
+    expect(tile.conditionEndStyle).toBe('diamond');
   });
 });

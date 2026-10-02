@@ -16,6 +16,8 @@ const MERGE_SIZE = 24;
 /** `ConditionalBuilder.java:306`: `FtileEmpty(0, Hexagon.hexagonHalfSize / 2)`
  *  -- the invisible placeholder when `!hasTwoBranches()`. */
 const MERGE_EMPTY_HEIGHT = 6;
+/** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
+const HEXAGON_HALF_SIZE = 12;
 
 export interface IfWithLinksBranch {
   readonly tile: Tile;
@@ -71,10 +73,28 @@ function appendBottomGeo(a: AlignedGeo, b: AlignedGeo): AlignedGeo {
   return { left, width, height: a.height + b.height };
 }
 
-/** `getShape2`'s `hasTwoBranches()` branch: a real 24x24 rhombus, or the
- *  invisible placeholder. @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:285-311 */
-function mergeGeo(hasTwoBranches: boolean): AlignedGeo {
-  if (hasTwoBranches) return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE };
+/** The two geometry-affecting flags {@link mergeGeo}/{@link
+ *  computeNudeAndMerge}/{@link computeCoreGeometry} all need, bundled so
+ *  none of those functions exceeds the file's 5-parameter limit (T1p-a
+ *  added `conditionEndStyle` to what was a lone `hasTwoBranches` flag). */
+interface IfLinksFlags {
+  readonly hasTwoBranches: boolean;
+  /** `createWithLinks`'s own `getShape2(branch1, branch2, false)`
+   *  (`ConditionalBuilder.java:221`) -- see {@link mergeGeo}'s own doc. */
+  readonly conditionEndStyle: 'diamond' | 'hline';
+}
+
+/**
+ * `getShape2`'s `hasTwoBranches()` branch: a real 24x24 rhombus, or the
+ * invisible placeholder -- EXCEPT `conditionEndStyle === 'hline'` (T1p-a),
+ * which takes `getShape2`'s own early return (`:287-288`, BEFORE the
+ * `hasTwoBranches()` check) regardless of `hasTwoBranches`: `FtileEmpty(0,
+ * hexagonHalfSize)`, twice the plain placeholder's height.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:285-311
+ */
+function mergeGeo(flags: IfLinksFlags): AlignedGeo {
+  if (flags.conditionEndStyle === 'hline') return { left: 0, width: 0, height: HEXAGON_HALF_SIZE };
+  if (flags.hasTwoBranches) return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE };
   return { left: 0, width: 0, height: MERGE_EMPTY_HEIGHT };
 }
 
@@ -93,12 +113,7 @@ interface NudeAndMerge {
 /** `d1.appendBottom(nude).appendBottom(d2)`, split out of
  *  {@link computeCoreGeometry} only to keep that function's own NLOC under
  *  the file's limit. @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:183-186 */
-function computeNudeAndMerge(
-  diamond1: GtileDiamondInside,
-  b1: BranchGeo,
-  b2: BranchGeo,
-  hasTwoBranches: boolean,
-): NudeAndMerge {
+function computeNudeAndMerge(diamond1: GtileDiamondInside, b1: BranchGeo, b2: BranchGeo, flags: IfLinksFlags): NudeAndMerge {
   const diamondLeft = diamond1.getCoord(SOUTH_HOOK).x;
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const diamondWidth = diamond1.width;
@@ -114,7 +129,7 @@ function computeNudeAndMerge(
     height: Math.max(b1.height, b2.height),
   };
   const geoA = appendBottomGeo({ left: diamondLeft, width: diamondWidth, height: diamondOutY }, nude);
-  const merge = mergeGeo(hasTwoBranches);
+  const merge = mergeGeo(flags);
   return { geoTotal: appendBottomGeo(geoA, merge), merge };
 }
 
@@ -140,16 +155,19 @@ function computeCoreGeometry(
   diamond1: GtileDiamondInside,
   b1: BranchGeo,
   b2: BranchGeo,
-  hasTwoBranches: boolean,
+  flags: IfLinksFlags,
   laneCount: number,
 ): CoreGeometry {
   const diamondLeft = diamond1.getCoord(SOUTH_HOOK).x;
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
-  const { geoTotal, merge } = computeNudeAndMerge(diamond1, b1, b2, hasTwoBranches);
+  const { geoTotal, merge } = computeNudeAndMerge(diamond1, b1, b2, flags);
 
-  // `getYdelta1a`/`getYdelta1b` (`FtileIfWithDiamonds.java:156-166`).
+  // `getYdelta1a`/`getYdelta1b` (`FtileIfWithDiamonds.java:156-166`) --
+  // UNAFFECTED by `conditionEndStyle` (the shared base class has no such
+  // field; only `diamond2`'s own geometry, folded into `merge` above,
+  // differs for `hline`).
   const ydelta1a = laneCount > 1 ? 20 : 10;
-  const ydelta1b = laneCount > 1 ? 10 : hasTwoBranches ? 6 : 0;
+  const ydelta1b = laneCount > 1 ? 10 : flags.hasTwoBranches ? 6 : 0;
 
   return {
     totalLeft: geoTotal.left,
@@ -158,7 +176,7 @@ function computeCoreGeometry(
     diamond1X0: geoTotal.left - diamondLeft,
     branchY0: diamondOutY + ydelta1a,
     tile2X0: geoTotal.width - b2.padded.outer,
-    hasTwoBranches,
+    hasTwoBranches: flags.hasTwoBranches,
     merge,
   };
 }
@@ -189,12 +207,64 @@ function computeLabelMargins(diamond1: GtileDiamondInside, core: CoreGeometry): 
   return { diff1, diff2, suppHeight };
 }
 
+/** Every field {@link GtileIfWithLinks}'s own constructor derives from
+ *  `core`/`margins` -- split into a pure function (not inlined in the
+ *  constructor) so T1p-a's new `conditionEndStyle` param did not push the
+ *  constructor's own NLOC over the file's limit; applied via
+ *  `Object.assign` (a plain object of `readonly`-named fields assigns onto
+ *  the instance's own `readonly` properties without TS complaint, since
+ *  `Object.assign`'s typing does not special-case `readonly`). */
+interface Placement {
+  readonly width: number;
+  readonly height: number;
+  readonly left: number;
+  readonly diamond1X: number;
+  readonly diamond1Y: number;
+  readonly tile1X: number;
+  readonly tile2X: number;
+  readonly branchY: number;
+  readonly hasMerge: boolean;
+  readonly mergeX: number;
+  readonly mergeY: number;
+}
+
+function computePlacement(b1: BranchGeo, b2: BranchGeo, core: CoreGeometry, margins: LabelMargins, flags: IfLinksFlags): Placement {
+  return {
+    width: core.totalWidth + margins.diff1 + margins.diff2,
+    height: core.totalHeight + margins.suppHeight,
+    left: core.totalLeft + margins.diff1,
+    diamond1X: core.diamond1X0 + margins.diff1,
+    diamond1Y: margins.suppHeight,
+    tile1X: margins.diff1 + b1.padded.contentDx,
+    tile2X: core.tile2X0 + margins.diff1 + b2.padded.contentDx,
+    branchY: core.branchY0 + margins.suppHeight,
+    hasMerge: core.hasTwoBranches && flags.conditionEndStyle !== 'hline',
+    mergeX: core.totalLeft - core.merge.width / 2 + margins.diff1,
+    mergeY: core.totalHeight - core.merge.height + margins.suppHeight,
+  };
+}
+
+/** Every value {@link GtileIfWithLinks}'s own (private) constructor needs,
+ *  pre-computed by {@link GtileIfWithLinks.create}. */
+interface GtileIfWithLinksFields extends Placement {
+  readonly diamond1: GtileDiamondInside;
+  readonly tile1: Tile;
+  readonly tile2: Tile;
+  readonly thenIsEmpty: boolean;
+  readonly elseIsEmpty: boolean;
+  readonly hasPointOut1: boolean;
+  readonly hasPointOut2: boolean;
+  readonly conditionEndStyle: 'diamond' | 'hline';
+}
+
 /**
  * `FtileIfWithLinks`/`FtileIfWithDiamonds`: a hexagon condition, two
  * branches wrapped in `FtileMinWidthCentered(_, 30)` +
  * `addHorizontalMargin(_, 10)`, and a merge rhombus reached only when both
  * branches have a point out. Geometry only -- `layout/walk-if-with-links.ts`
  * emits the nodes and the four `addLinks` connectors from these fields.
+ * Construct via {@link GtileIfWithLinks.create}, not `new` (T1p-a: the
+ * constructor itself is a dumb field-assignment sink -- see its own doc).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:213-232
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java
  */
@@ -221,37 +291,70 @@ export class GtileIfWithLinks extends TileComposite {
   readonly hasPointOut2: boolean;
   readonly thenIsEmpty: boolean;
   readonly elseIsEmpty: boolean;
+  /** T1p-a: `skinparam ConditionEndStyle` -- see `theme.ts
+   *  #conditionEndStyle`'s own doc comment. */
+  readonly conditionEndStyle: 'diamond' | 'hline';
 
-  constructor(diamond1: GtileDiamondInside, branch1: IfWithLinksBranch, branch2: IfWithLinksBranch, laneCount: number) {
+  /**
+   * All computation lives in {@link GtileIfWithLinks.create} (a static
+   * factory, T1p-a): this constructor does nothing but field assignment, so
+   * that a 5th constructor param (`conditionEndStyle`) forcing a multi-line
+   * signature never pushes an arithmetic-heavy function over the file's
+   * NLOC limit.
+   */
+  private constructor(f: GtileIfWithLinksFields) {
     super();
-    this.diamond1 = diamond1;
-    this.tile1 = branch1.tile;
-    this.tile2 = branch2.tile;
-    this.thenIsEmpty = branch1.isEmpty;
-    this.elseIsEmpty = branch2.isEmpty;
-    this.hasPointOut1 = branch1.tile.hasPointOut();
-    this.hasPointOut2 = branch2.tile.hasPointOut();
+    this.diamond1 = f.diamond1;
+    this.tile1 = f.tile1;
+    this.tile2 = f.tile2;
+    this.thenIsEmpty = f.thenIsEmpty;
+    this.elseIsEmpty = f.elseIsEmpty;
+    this.hasPointOut1 = f.hasPointOut1;
+    this.hasPointOut2 = f.hasPointOut2;
+    this.conditionEndStyle = f.conditionEndStyle;
+    this.width = f.width;
+    this.height = f.height;
+    this.left = f.left;
+    this.diamond1X = f.diamond1X;
+    this.diamond1Y = f.diamond1Y;
+    this.tile1X = f.tile1X;
+    this.tile2X = f.tile2X;
+    this.branchY = f.branchY;
+    this.hasMerge = f.hasMerge;
+    this.mergeX = f.mergeX;
+    this.mergeY = f.mergeY;
+    this.children = [f.diamond1, f.tile1, f.tile2];
+  }
 
+  /** @param conditionEndStyle `skinparam ConditionEndStyle` -- default
+   *    `'diamond'` (`SkinParam.java:1007-1013`). */
+  static create(
+    diamond1: GtileDiamondInside,
+    branch1: IfWithLinksBranch,
+    branch2: IfWithLinksBranch,
+    laneCount: number,
+    conditionEndStyle: 'diamond' | 'hline' | undefined = 'diamond',
+  ): GtileIfWithLinks {
+    const style = conditionEndStyle ?? 'diamond';
+    const hasPointOut1 = branch1.tile.hasPointOut();
+    const hasPointOut2 = branch2.tile.hasPointOut();
     const b1: BranchGeo = { padded: paddedWidth(branch1.tile), height: branch1.tile.height };
     const b2: BranchGeo = { padded: paddedWidth(branch2.tile), height: branch2.tile.height };
-    const hasTwoBranches = this.hasPointOut1 && this.hasPointOut2;
-    const core = computeCoreGeometry(diamond1, b1, b2, hasTwoBranches, laneCount);
+    const flags: IfLinksFlags = { hasTwoBranches: hasPointOut1 && hasPointOut2, conditionEndStyle: style };
+    const core = computeCoreGeometry(diamond1, b1, b2, flags, laneCount);
     const margins = computeLabelMargins(diamond1, core);
-
-    this.width = core.totalWidth + margins.diff1 + margins.diff2;
-    this.height = core.totalHeight + margins.suppHeight;
-    this.left = core.totalLeft + margins.diff1;
-
-    this.diamond1X = core.diamond1X0 + margins.diff1;
-    this.diamond1Y = margins.suppHeight;
-    this.tile1X = margins.diff1 + b1.padded.contentDx;
-    this.tile2X = core.tile2X0 + margins.diff1 + b2.padded.contentDx;
-    this.branchY = core.branchY0 + margins.suppHeight;
-    this.hasMerge = core.hasTwoBranches;
-    this.mergeX = core.totalLeft - core.merge.width / 2 + margins.diff1;
-    this.mergeY = core.totalHeight - core.merge.height + margins.suppHeight;
-
-    this.children = [diamond1, branch1.tile, branch2.tile];
+    const placement = computePlacement(b1, b2, core, margins, flags);
+    return new GtileIfWithLinks({
+      diamond1,
+      tile1: branch1.tile,
+      tile2: branch2.tile,
+      thenIsEmpty: branch1.isEmpty,
+      elseIsEmpty: branch2.isEmpty,
+      hasPointOut1,
+      hasPointOut2,
+      conditionEndStyle: style,
+      ...placement,
+    });
   }
 
   getCoord(hook: HookName): GPoint {

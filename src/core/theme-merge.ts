@@ -30,6 +30,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',
+  'conditionEndStyle', // T1p-a
   'actorStyle',
   'minimumWidth',
   'strictUml',
