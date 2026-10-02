@@ -19,7 +19,13 @@ import type { Theme } from '../../core/theme.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { actColors, ASCENT_FRACTION, centeredFirstBaselineY, textLines } from './activity-renderer-shapes.js';
+import {
+  actColors,
+  ASCENT_FRACTION,
+  centeredFirstBaselineY,
+  renderHexagonLabel,
+  textLines,
+} from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { centeredLineX, measureLineWidth } from './activity-text-placement.js';
 
@@ -136,4 +142,49 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
     return textLines(lines, node.x, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
   }
   return drawActivityText(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+}
+
+/**
+ * The hexagon shape ALONE, no label -- `FtileDiamondInside#drawU` draws
+ * the polygon, then north/south, then the own label, then west/east, as
+ * FIVE separate draw calls, never one combined blob
+ * (`vertical/FtileDiamondInside.java:84-102`). Split out of `activity-
+ * renderer-shapes.ts#renderHexagon` (T3k, that file at the 500-line cap)
+ * so a walker can push the polygon and the own label as two separate
+ * nodes, landing the label between south and west in document order --
+ * `renderHexagon` itself is unchanged (still shape+label in one call) and
+ * stays the renderer that module's own tests exercise directly. Identical
+ * polygon math to `renderHexagon`'s own (not re-derived).
+ */
+export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): string {
+  const { x, y, width: w, height: h } = node;
+  const c = actColors(theme);
+  const fill = node.color ?? c.diamondFill;
+  const dent = h / 2;
+  const first = { x: x + dent, y: y };
+  return polygon(
+    [
+      first,
+      { x: x + w - dent, y: y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w - dent, y: y + h },
+      { x: x + dent, y: y + h },
+      { x: x, y: y + h / 2 },
+      first,
+    ],
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
+  );
+}
+
+/**
+ * The hexagon's OWN label alone, centered in the node's own box -- the
+ * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
+ * callable on its own so a walker can push it as its own `'if-own-label'`
+ * node (T3k, {@link renderHexagonPolygon}'s own doc).
+ */
+export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): string {
+  const cx = node.x + node.width / 2;
+  const cy = node.y + node.height / 2;
+  const condSize = activityFontSize(theme, 'diamond');
+  return renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }

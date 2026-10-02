@@ -68,6 +68,31 @@ export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefin
 }
 
 /**
+ * T3k companion fix: `renderNode`'s `'if-split'` case draws the polygon
+ * ALONE (the own label moved to its own `'if-own-label'` node,
+ * `activity-renderer-shapes.ts`'s own doc) for every `'if-split'`
+ * producer, including the switch condition diamond `walkTile`'s
+ * `'gtile-diamond'` case pushes (`tile-layout.ts:321`, `kindHint:
+ * 'if-split'`, this file's `'gtile-switch'` case). `GtileDiamond` has no
+ * north/south slots to land between (`tiles/gtile-diamond.ts`'s own
+ * fields), so the own label always sits immediately after the polygon --
+ * never pushed for `kind === 'if-merge'` (the merge diamond's own `label`
+ * is always `''`, `tile-layout.ts:326`, and `renderIfMerge` never draws
+ * text regardless).
+ */
+function pushDiamondCompanionLabel(
+  out: Out,
+  kind: string,
+  t: GtileDiamond,
+  origin: GPoint,
+  lane: string | undefined,
+): void {
+  if (kind !== 'if-split' || t.label === '') return;
+  const node = { id: out.nextId('if-own-label'), kind: 'if-own-label', ...origin, width: t.width, height: t.height, label: t.label };
+  pushNode(out, node, lane);
+}
+
+/**
  * `pushEdge`'s trailing parameter: a bare {@link EdgeShape} (every existing
  * call site -- fork/if-long-horizontal's three non-default shapes) or,
  * for a `while`/`repeat` back-edge that also carries a translate tag
@@ -189,7 +214,7 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       const t = tile as unknown as GtileDiamond;
       const k = kindHint !== null && !kindHint.startsWith('gtile-') ? kindHint : 'diamond';
       pushNode(out, { id: out.nextId(k), kind: k, x, y, width: t.width, height: t.height, label: t.label }, myLane);
-      return;
+      return pushDiamondCompanionLabel(out, k, t, { x, y }, myLane);
     }
 
     case 'gtile-spot':

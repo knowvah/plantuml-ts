@@ -33,7 +33,7 @@ import type { Tile } from '../tiles/tile.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
-import { emitDiamondLabels } from './diamond-labels.js';
+import { emitDiamondLabels, emitDiamondOwnLabel } from './diamond-labels.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushRepeatBackwardConnections } from './walk-repeat-backward.js';
@@ -112,19 +112,29 @@ function pushRepeatEntry(
 
 /**
  * The `'gtile-repeat'` case's condition hexagon: pushed directly (never
- * through `walkTile`'s generic dispatch), then its own side labels --
- * south is always the "not"/exit label; east is the "is"/entry label
- * unless `backwardExitsOnLeft`, which moves it to west (mission
- * `activity-divergence-drive` T3h, `tile-layout-backward.ts`).
- * `emitDiamondLabels` no-ops a side `labelAt` never set (`diamond-
- * labels.ts:40-41`), so passing all three sides unconditionally is safe
- * -- `repeatConditionLabels` picks east XOR west, never both. `laneAt`
+ * through `walkTile`'s generic dispatch), then north/south, then the
+ * hexagon's OWN label, then its east/west side labels -- `FtileDiamond
+ * Inside#drawU`'s own order (T3k): the polygon and the own label are two
+ * SEPARATE draw calls upstream, never one combined blob, so the own label
+ * lands AFTER south, not baked into the polygon push (`renderNode`'s own
+ * `'repeat-cond'` case draws the polygon only; the own label draws through
+ * the `'if-own-label'` node below). Still pushed under the ORIGINAL
+ * `'repeat-cond'` kind (not a dedicated one) so `canvas-origin.ts`'s
+ * polygon fudge and `shapes-of.ts`'s condition-box treatment, both already
+ * keyed on that name, apply unchanged. South is always the "not"/exit
+ * label; east is the "is"/entry label unless `backwardExitsOnLeft`, which
+ * moves it to west (mission `activity-divergence-drive` T3h,
+ * `tile-layout-backward.ts`). `emitDiamondLabels` no-ops a side `labelAt`
+ * never set (`diamond-labels.ts:40-41`), so passing north and both
+ * east/west unconditionally is safe -- `repeatConditionLabels` picks east
+ * XOR west, never both, and north is never set on this tile (kept for
+ * parity with upstream's own unconditional `north.drawU` call). `laneAt`
  * resolves the condition's OWN `.swimlane` over the parent's inherited
  * `myLane`, same as `walkTile`'s own dispatch. The pushed node's `height`
  * is the hexagon-ALONE height, not `condition.height` (which would add a
  * north label's height, never set here, D1).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151,210-219
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:87-89
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
  */
 function pushRepeatCondition(
   condition: GtileDiamondInside,
@@ -134,20 +144,11 @@ function pushRepeatCondition(
   out: Out,
 ): void {
   const hexLane = laneAt(condition, myLane);
-  pushNode(
-    out,
-    {
-      id: out.nextId('repeat-cond'),
-      kind: 'repeat-cond',
-      x: condX,
-      y: condY,
-      width: condition.width,
-      height: condition.getCoord(SOUTH_HOOK).y,
-      label: condition.label,
-    },
-    hexLane,
-  );
-  emitDiamondLabels(condition, { x: condX, y: condY }, ['south', 'east', 'west'], hexLane, out);
+  const box = { x: condX, y: condY, width: condition.width, height: condition.getCoord(SOUTH_HOOK).y };
+  pushNode(out, { id: out.nextId('repeat-cond'), kind: 'repeat-cond', ...box, label: condition.label }, hexLane);
+  emitDiamondLabels(condition, { x: condX, y: condY }, ['north', 'south'], hexLane, out);
+  emitDiamondOwnLabel(condition, box, hexLane, out);
+  emitDiamondLabels(condition, { x: condX, y: condY }, ['east', 'west'], hexLane, out);
 }
 
 /** Copy of `walk-while-branch.ts`'s own `pushEdgeFlagged` (that file is
@@ -424,7 +425,13 @@ function pushRepeatBackwardNode(t: GtileRepeat, x: number, y: number, myLane: st
  * it. Split out of {@link walkRepeat} for the same reason as
  * {@link pushRepeatBackwardNode}.
  */
-function pushRepeatBackDispatch(t: GtileRepeat, frame: RepeatFrame, x: number, y: number, myLane: string | undefined): void {
+function pushRepeatBackDispatch(
+  t: GtileRepeat,
+  frame: RepeatFrame,
+  x: number,
+  y: number,
+  myLane: string | undefined,
+): void {
   if (t.backward === undefined) {
     pushRepeatBack(frame);
     return;

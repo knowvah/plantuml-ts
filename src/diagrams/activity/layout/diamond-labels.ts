@@ -54,3 +54,26 @@ export function emitDiamondLabels(
     );
   }
 }
+
+/**
+ * `diamond`'s OWN label, pushed as its own `'if-own-label'` node, so it
+ * lands between south and west in document order -- `FtileDiamondInside
+ * #drawU`'s polygon and own label are two SEPARATE draw calls upstream,
+ * never one combined blob (T3k, `FtileDiamondInside.java:84-102`). No-ops
+ * on an empty label: the OLD combined push relied on `renderNode`'s own
+ * `node.label !== ''` dispatch to skip the text (`renderDiamond`'s
+ * unlabelled shape has no text at all); now that the label is its own
+ * node, the caller must apply that same guard, which this function does
+ * once so `walk-repeat.ts`/`walk-while-branch.ts` do not each repeat it.
+ * `box` is the SAME `{x, y, width, height}` the polygon node itself was
+ * pushed with (`renderHexagonOwnLabel` centers on that box).
+ */
+export function emitDiamondOwnLabel(
+  diamond: GtileDiamondInside,
+  box: { x: number; y: number; width: number; height: number },
+  lane: string | undefined,
+  out: Out,
+): void {
+  if (diamond.label === '') return;
+  pushNode(out, { id: out.nextId('if-own-label'), kind: 'if-own-label', ...box, label: diamond.label }, lane);
+}

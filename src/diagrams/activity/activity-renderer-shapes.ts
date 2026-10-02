@@ -22,7 +22,13 @@ import {
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
-import { renderIfMerge, renderIfLabel, renderDiamond } from './activity-renderer-if-shapes.js';
+import {
+  renderIfMerge,
+  renderIfLabel,
+  renderDiamond,
+  renderHexagonPolygon,
+  renderHexagonOwnLabel,
+} from './activity-renderer-if-shapes.js';
 import {
   renderSignalLabel,
   renderChevronLeft,
@@ -255,8 +261,16 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
  *  plantuml.skin:370). Single-line: jar-verified on `rerovo-62-nazo755`'s
  *  "test" hexagon (`cy=27`, `fontSize=11`): `y=30.056 === cy + 11 * 5/18`,
  *  the SAME N=1 reduction of `centeredFirstBaselineY` -- not the old
- *  `cy + condSize/3` (would give 30.667, 0.611px off). */
-function renderHexagonLabel(label: string | undefined, cx: number, cy: number, theme: Theme, condSize: number): string {
+ *  `cy + condSize/3` (would give 30.667, 0.611px off). Exported (T3k) so
+ *  `activity-renderer-if-shapes.ts`'s `renderHexagonOwnLabel` (this file
+ *  was already at the 500-line cap) can draw the own label separately. */
+export function renderHexagonLabel(
+  label: string | undefined,
+  cx: number,
+  cy: number,
+  theme: Theme,
+  condSize: number,
+): string {
   const lines = (label ?? '').split('\n');
   const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
   return lines.length > 1
@@ -443,13 +457,23 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderSplitLine(node, theme);
     case 'if-split':
     case 'while-header':
-      return node.label !== undefined && node.label !== '' ? renderHexagon(node, theme) : renderDiamond(node, theme);
+      // T3k: the shape ALONE -- the own label now draws through its own
+      // `'if-own-label'` node, pushed by every `'if-split'`/`'while-
+      // header'` producer immediately after this polygon (or after
+      // north/south when the walker has one, `FtileDiamondInside.java:
+      // 84-102`'s own draw order). `renderDiamond`'s unlabelled shape is
+      // unaffected -- it never had an own-label node to begin with.
+      return node.label !== undefined && node.label !== ''
+        ? renderHexagonPolygon(node, theme)
+        : renderDiamond(node, theme);
     case 'repeat-cond':
-      return renderHexagon(node, theme);
+      return renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);
     case 'if-label':
       return renderIfLabel(node, theme);
+    case 'if-own-label':
+      return renderHexagonOwnLabel(node, theme);
     case 'note':
       return renderNote(node, theme);
     case 'group':

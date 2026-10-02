@@ -41,7 +41,10 @@ describe('walkWhile — backward unset: identical to the pre-T3h shape', () => {
     const out = makeOut();
     walkWhile(tile, 0, 0, undefined, out);
 
-    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'action']);
+    // T3k: `header` carries a real own label ('cond'), so `pushWhileHeader`
+    // pushes a `'while-header'` polygon-only node plus a sibling
+    // `'if-own-label'` text node, not a single combined node.
+    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action']);
     expect(out.edges).toHaveLength(4);
     expect(out.reservations).toHaveLength(1);
   });
@@ -60,8 +63,8 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
 
   it('pushes the backward node LAST among nodes (FtileWhile.java:561-562)', () => {
     const { out } = build();
-    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'action', 'action']);
-    expect(out.nodes[2]!.label).toBe('back');
+    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action', 'action']);
+    expect(out.nodes[3]!.label).toBe('back');
   });
 
   it('5 edges: ConnectionIn, Backward1, Backward2, then ConnectionOut x2 -- ConnectionBackSimple is replaced, not added to', () => {

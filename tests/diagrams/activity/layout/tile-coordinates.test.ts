@@ -188,14 +188,17 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
     // node order is unaffected by D7 -- draws are node-then-its-own-edges
-    // per compound, walk order is unchanged: a, header, body, c.
-    expect(geo.nodes).toHaveLength(4);
-    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'body', 'c']);
+    // per compound, walk order is unchanged: a, header(+its own label,
+    // T3k: a `'while-header'` polygon-only node plus a sibling
+    // `'if-own-label'` node, the header carries a real label 'cond' so it
+    // is no longer one combined node), body, c.
+    expect(geo.nodes).toHaveLength(5);
+    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'cond', 'body', 'c']);
     // altp-T4: In, Back, Out, Out2 (X's own internals) + a->X + X->c.
     expect(geo.edges).toHaveLength(6);
 
     const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
-    const cTop = geo.nodes[3]!.y;
+    const cTop = geo.nodes[4]!.y;
     // X's own origin y === the header's y (`GtileWhile.headerOffsetY === 0`).
     const xTop = geo.nodes[1]!.y;
     // Pre-compression upper bound (raw `whileTile.height`) -- compression
@@ -206,7 +209,7 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // Body's own (post-compression) bottom -- a safe floor for X's true
     // south-hook y, which sits at or below it (`GtileWhile`'s south hook is
     // the whole tile's exit, past the body by `NODE_MARGIN_Y`).
-    const bodyBottom = geo.nodes[2]!.y + geo.nodes[2]!.height;
+    const bodyBottom = geo.nodes[3]!.y + geo.nodes[3]!.height;
 
     // edges[0..3]: X's own internals (In, Back, Out, Out2) -- every point
     // stays strictly inside X's own vertical span, never touching a leaf
@@ -688,6 +691,8 @@ describe('layoutActivity — a laned repeat keeps the condition hexagon in its O
 
   it("repeat-cond and its side label carry the OUT lane, not the repeat's own entry lane", () => {
     const geo = layout('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x) is (y)\n@enduml');
+    // T3k: the condition's polygon node (`'repeat-cond'`, now polygon
+    // only -- the own label draws through a sibling `'if-own-label'`).
     const cond = geo.nodes.find((n) => n.kind === 'repeat-cond')!;
     expect(cond.swimlane).toBe('B');
     const label = geo.nodes.find((n) => n.kind === 'if-label')!;
@@ -984,5 +989,36 @@ describe('assignCoordinates — gtile-top-down sibling edge gated on hasPointOut
     const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
 
     expect(geo.edges).toHaveLength(1);
+  });
+});
+
+// T3k companion fix: `walkTile`'s `'gtile-diamond'` case (the switch
+// condition diamond, `kindHint: 'if-split'`) now pushes a sibling
+// `'if-own-label'` node after its polygon -- `renderNode`'s own
+// `'if-split'` case started drawing the polygon ALONE for every labelled
+// `'if-split'` producer (`activity-renderer-shapes.ts`'s own doc), and
+// `GtileSwitch`'s condition is the one OTHER `'if-split'` producer besides
+// `walk-if-down.ts`/`walk-if-with-links.ts`/`walk-if-long-horizontal.ts`
+// (`tile-layout.ts:321`, `GtileDiamond`, never a `GtileDiamondInside`).
+describe('layoutActivity — switch condition keeps its own label (T3k companion fix)', () => {
+  it('nodes read if-split (polygon), if-own-label(test), case1, case2, if-merge, in drawU order', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'switch',
+          condition: 'test',
+          cases: [
+            { label: 'v1', body: [{ kind: 'action', label: 'case1' }] },
+            { label: 'v2', body: [{ kind: 'action', label: 'case2' }] },
+          ],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, resolveTheme('default'), new DeterministicMeasurer());
+
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['if-split', 'if-own-label', 'action', 'action', 'if-merge']);
+    expect(geo.nodes[0]!.label).toBe('test');
+    expect(geo.nodes[1]!.label).toBe('test');
   });
 });
