@@ -19,7 +19,6 @@ import type { GtileGroup } from '../tiles/gtile-group.js';
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
-import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
 import { walkWhile } from './walk-while-branch.js';
@@ -27,6 +26,7 @@ import { walkRepeat } from './walk-repeat.js';
 import { walkIfWithLinks } from './walk-if-with-links.js';
 import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
+import { walkSwitch } from './walk-switch.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
@@ -113,14 +113,6 @@ export function pushEdge(
   const loop = typeof routing === 'string' ? undefined : routing.loop;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
   out.edgeMeta.push({ lane1, lane2, shape, ...(loop !== undefined ? { loop } : {}) });
-}
-
-/** Labels the edge `pushEdge` just pushed, when non-empty. Extracted out
- *  of `walkTile`'s `'gtile-switch'` arm (mission ubrr-T10 M2, `case
- *  (LABEL)`'s own label -- see `GtileSwitch.caseLabels`'s own doc) purely
- *  to keep `walkTile`'s own NLOC/CCN off the complexity hook's ratchet. */
-function applyLastEdgeLabel(out: Out, label: string | undefined): void {
-  if (label !== undefined && label !== '') out.edges[out.edges.length - 1]!.label = label;
 }
 
 /**
@@ -318,51 +310,12 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
     }
 
-    case 'gtile-switch': {
-      const t = tile as unknown as GtileSwitch;
-      const centerX = x + tile.width / 2;
-      const hasMerge = t.mergeOffsetY !== null;
-      const rawChildren = t.children;
-      const diamond = rawChildren[0]!;
-      const cases = hasMerge ? rawChildren.slice(1, -1) : rawChildren.slice(1);
-      const mergeDiamond = hasMerge ? rawChildren[rawChildren.length - 1]! : null;
-
-      const dX = centerX - diamond.width / 2;
-      const dY = y + t.diamondOffsetY;
-      walkTile(diamond, dX, dY, { kindHint: 'if-split', lane: myLane }, out);
-
-      for (let i = 0; i < cases.length; i++) {
-        const c = cases[i]!;
-        const cX = x + t.caseOffsets[i]!;
-        const cY = y + t.caseOffsetY;
-        walkTile(c, cX, cY, { kindHint: null, lane: myLane }, out);
-
-        const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
-        const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
-        const dcPts = new GConnectionSideThenVerticalThenSide().getPoints(from, to);
-        pushEdge(out, dcPts, laneOut(diamond, myLane), laneIn(c, myLane));
-        applyLastEdgeLabel(out, t.caseLabels[i]);
-        if (mergeDiamond !== null) {
-          const mX = centerX - mergeDiamond.width / 2;
-          const mY = y + t.mergeOffsetY!;
-          const mFrom = { x: cX + c.getCoord(SOUTH_HOOK).x, y: cY + c.getCoord(SOUTH_HOOK).y };
-          const mTo = { x: mX + mergeDiamond.getCoord(NORTH_HOOK).x, y: mY + mergeDiamond.getCoord(NORTH_HOOK).y };
-          pushEdge(
-            out,
-            new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
-            laneOut(c, myLane),
-            laneIn(mergeDiamond, myLane),
-          );
-        }
-      }
-
-      if (mergeDiamond !== null) {
-        const mX = centerX - mergeDiamond.width / 2;
-        const mY = y + t.mergeOffsetY!;
-        walkTile(mergeDiamond, mX, mY, { kindHint: 'if-merge', lane: myLane }, out);
-      }
+    case 'gtile-switch':
+      // D1/D5 (T1p-e step 1): `FtileSwitchWith{One,Many}Links`'s own
+      // walker, split into `walk-switch.ts` for the same reason
+      // `walkIfDown`/`walkIfWithLinks`/`walkRepeat` already are.
+      walkSwitch(tile as unknown as GtileSwitch, x, y, myLane, out);
       return;
-    }
 
     case 'gtile-group':
     case 'gtile-partition': {
