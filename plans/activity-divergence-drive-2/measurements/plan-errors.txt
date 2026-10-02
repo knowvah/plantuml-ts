@@ -1,0 +1,36 @@
+2 L14: while (foo) | cigagu-31-rime196 gudute-55-nulo344
+2 L5: :action with long name 2; | xoreko-43-noto860 zafoxu-20-xofe568
+1 L4: :generate diagrams; | boxefe-81-situ725
+1 L15: :Queue a build jobs for all packages in the archive; | caburo-70-buki284
+1 L10: } | cakeca-72-kara622
+1 L4: fork | cejupe-34-muti621
+1 L15: fork again | ciloke-34-pumi198
+1 L3: if (foo) then (ok3) | dulate-94-bupu593
+1 L3: :new Page; | fivone-96-nalo453
+1 L4: repeat | getene-72-dido571
+1 L3: note left: This is a note 1/4 | giteso-65-mefo026
+1 L5: :onStart; | jamana-83-gige126
+1 L8: :action 4; | jevofu-58-fazo194
+1 L5: :step 1; | jufefu-66-josa392
+1 L7: kill | ketajo-72-rula535
+1 L3: if (Cond 1?) then (yes) | kiceze-91-luke737
+1 L11: fork again | lapura-36-kavu144
+1 L6: :action 3; | mepeze-15-nuge493
+1 L31: ; | mufixi-71-koma752
+1 L10:  | ninago-40-dalo726
+1 L2: :foo1; | nipuxu-11-tefa314
+1 L3: :f1; | nolubo-93-rula384
+1 L2: :A; | pucinu-80-nopo009
+1 L6: stop | pufuzi-99-vone170
+1 L7: |laneTwo| | razuzu-32-faje125
+1 L8: :a3; | rirefa-62-kucu593
+1 L2:  | tajuxe-32-sexo680
+1 L6: :foo3; | ticeka-12-buli543
+1 L2: :AmSingleUserPrepayAction.prepay(request,response); | vexula-75-noko098
+1 L3: wishes he was blue; | vilecu-41-tete416
+1 L3: :Having Fun; | xolazi-74-vamu265
+1 L4: else | zaloze-31-jibo311
+1 L5: :Page.onInit(); | zaxati-90-xacu660
+1 L19: :a6; | zinelo-77-losu727
+1 L4: '=== starting === | zizumo-48-taku661
+1 L5: end | zokuni-21-sapu966
