@@ -1,5 +1,6 @@
 import type { GtileFork } from '../tiles/gtile-fork.js';
-import type { HookName } from '../tiles/points.js';
+import { GtileMerge, MERGE_DIAMOND_SIZE } from '../tiles/gtile-merge.js';
+import type { GPoint, HookName } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
@@ -237,6 +238,14 @@ function pushJoinBarOrLine(
  * README, "Push forward").
  */
 export function walkForkOrSplit(t: GtileFork, x: number, y: number, myLane: string | undefined, out: Out): void {
+  // D12/T1p-c: `GtileMerge` keeps the inherited `kind === 'gtile-fork'`
+  // (that file's own doc) purely so `tile-coordinates.ts`'s switch -- out
+  // of this task's write-set -- routes it here unchanged; branch out to
+  // `walkMerge` before any fork/split-specific logic runs.
+  if (t instanceof GtileMerge) {
+    walkMerge(t, x, y, myLane, out);
+    return;
+  }
   // Mission `activity-lane-capture` D1/T6/T7: both fork's and split's
   // bar-side OUT lane is the compound's own `swimlaneOut` (falling back to
   // `swimlane`/`myLane`) -- `laneOut(t, myLane)` short-circuits on the
@@ -248,4 +257,131 @@ export function walkForkOrSplit(t: GtileFork, x: number, y: number, myLane: stri
   const joinBarY = y + t.height - t.barHeight;
   walkForkBranches(t, { x, y, joinBarY, myLane, myLaneOut, barHeight: t.barHeight }, out);
   pushJoinBarOrLine(t, x, joinBarY, myLane, myLaneOut, out);
+}
+
+// ---------------------------------------------------------------------------
+// fork ... end merge (ForkStyle.MERGE, D12/T1p-c)
+// ---------------------------------------------------------------------------
+
+/** The join diamond's own geometry, computed once and threaded to every
+ *  branch's out-connector (`mergeArrival`) and the final node push. Bundles
+ *  `myLane` too, purely to keep `pushMergeOut` at the file's 5-parameter
+ *  limit (same device `ForkBranchContext` already uses above). */
+interface MergeDiamondGeo {
+  readonly centerX: number;
+  readonly top: number;
+  readonly myLane: string | undefined;
+}
+
+/**
+ * `ConnectionHorizontalThenVertical#arrivalOnDiamond`
+ * (`ParallelBuilderMerge.java:174-189`): a branch exiting left of the
+ * diamond's own west edge lands on the WEST vertex, right of the east edge
+ * on the EAST vertex, else (including exactly centred) the NORTH vertex.
+ * The decoration (`asToRight`/`asToLeft`/`asToDown`) is never stored
+ * explicitly in this port -- `arrows-regular.ts#arrowDirection` derives it
+ * from the edge's own final segment, which agrees with upstream's explicit
+ * choice for the WEST/EAST cases (the segment's sign necessarily matches
+ * which side `startX` fell on) and for an EXACTLY centred branch (the
+ * `(x1,y2)->(x2,y2)` segment collapses to zero length via
+ * `dedupeAdjacentPoints`, leaving a pure vertical drop, `arrowDirection`'s
+ * own `dx===0` -> `'down'` case). A branch within the diamond's span but
+ * NOT exactly centred (asymmetric branch widths) would derive `'left'`/
+ * `'right'` here against upstream's explicit `'down'` -- a known, narrow
+ * residual; no corpus/authored fixture in this task's cohort exercises it
+ * (confirmed against `mepeze-15-nuge493`'s exactly-centred middle branch).
+ */
+function mergeArrival(startX: number, diamond: MergeDiamondGeo): GPoint {
+  const a = diamond.centerX - MERGE_DIAMOND_SIZE / 2;
+  const b = diamond.centerX + MERGE_DIAMOND_SIZE / 2;
+  const midY = diamond.top + MERGE_DIAMOND_SIZE / 2;
+  if (startX < a) return { x: a, y: midY };
+  if (startX > b) return { x: b, y: midY };
+  return { x: diamond.centerX, y: diamond.top };
+}
+
+/**
+ * `ConnectionHorizontalThenVertical#drawU` (`ParallelBuilderMerge.java:
+ * 135-159`): branch south -> horizontal -> vertical into the diamond,
+ * gated on `hasPointOut()` exactly like `pushBranchOut`. Both edge
+ * endpoints share one lane (`laneOut(branch, myLane)`): the Java class
+ * does NOT implement `ConnectionTranslatable` (commented out,
+ * `ParallelBuilderMerge.java:121`), i.e. it has no cross-swimlane routing
+ * upstream -- tagging both ends with the same lane means `routeEdge`
+ * (`swimlane-placement.ts`) never treats this edge as lane-crossing,
+ * matching that absence rather than inventing support upstream never had.
+ */
+function pushMergeOut(branch: Tile, bX: number, bY: number, diamond: MergeDiamondGeo, out: Out): void {
+  if (!branch.hasPointOut()) return;
+  const south = branch.getCoord(SOUTH_HOOK);
+  const x1 = bX + south.x;
+  const y1 = bY + south.y;
+  const target = mergeArrival(x1, diamond);
+  const lane = laneOut(branch, diamond.myLane);
+  pushEdge(out, [{ x: x1, y: y1 }, { x: x1, y: target.y }, target], lane, lane);
+}
+
+/** The join diamond itself -- reuses the `'if-merge'` node kind (D12):
+ *  both are the SAME upstream class, a label-less `FtileDiamond`
+ *  (`vertical/FtileDiamond.java`), so the existing `renderIfMerge`/
+ *  `canvas-origin.ts`/`compress/shapes-of.ts` handling for that kind
+ *  already applies correctly, unmodified. `myLane` (not a distinct
+ *  `swimlaneOutForStep2()` descent): D12's merge builder reads
+ *  `list99.get(0).getSwimlaneIn()`/the base class's own
+ *  `swimlaneOutForStep2()` default internally rather than the
+ *  `InstructionFork`-captured fields `GtileFork`'s `withSwimlane`/
+ *  `withSwimlaneOut` set (`tile-layout.ts#tileFork`) -- the two coincide
+ *  whenever nothing changes lane between the fork opener/closer and the
+ *  first/last branch's own edge, true of every row in this task's cohort;
+ *  not re-derived from the branches here for that reason. */
+function pushMergeDiamondNode(diamond: MergeDiamondGeo, out: Out): void {
+  pushNode(
+    out,
+    {
+      id: out.nextId('if-merge'),
+      kind: 'if-merge',
+      x: diamond.centerX - MERGE_DIAMOND_SIZE / 2,
+      y: diamond.top,
+      width: MERGE_DIAMOND_SIZE,
+      height: MERGE_DIAMOND_SIZE,
+    },
+    diamond.myLane,
+  );
+}
+
+/**
+ * `fork ... end merge` (`ForkStyle.MERGE`, D12/T1p-c): the top bar and
+ * every branch's `ConnectionIn` are IDENTICAL to the fork case
+ * (`ParallelBuilderMerge.doStep1` is byte-for-byte `ParallelBuilderFork
+ * .doStep1`, both builders' own `ConnectionIn` classes share the same
+ * `drawU`/`drawTranslate` bodies) -- only the OUT side differs
+ * (`ConnectionHorizontalThenVertical` into a diamond, not `ConnectionOut`
+ * into a join bar), so this reuses `pushBranchIn` as-is and never calls
+ * `pushBranchOut`/`pushJoinBarOrLine`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderMerge.java:71-119
+ */
+export function walkMerge(t: GtileFork, x: number, y: number, myLane: string | undefined, out: Out): void {
+  pushNode(
+    out,
+    { id: out.nextId('fork-bar'), kind: 'fork-bar', x, y, width: t.barWidth, height: t.barHeight },
+    myLane,
+  );
+
+  const placed = t.children.map((branch, i) => ({
+    branch,
+    bX: x + t.branchOffsets[i]!,
+    bY: y + t.branchTopYs[i]!,
+  }));
+  const diamond: MergeDiamondGeo = {
+    centerX: x + t.getCoord(NORTH_HOOK).x,
+    top: y + t.height - MERGE_DIAMOND_SIZE,
+    myLane,
+  };
+  const inCtx: ForkBranchContext = { x, y, joinBarY: diamond.top, myLane, myLaneOut: myLane, barHeight: t.barHeight };
+
+  for (const p of placed) walkTile(p.branch, p.bX, p.bY, { kindHint: null, lane: myLane }, out);
+  for (const p of placed) pushBranchIn(p.branch, p.bX, p.bY, inCtx, out);
+  for (const p of placed) pushMergeOut(p.branch, p.bX, p.bY, diamond, out);
+
+  pushMergeDiamondNode(diamond, out);
 }

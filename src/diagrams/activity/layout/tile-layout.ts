@@ -26,6 +26,7 @@ import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
 import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
+import { GtileMerge } from '../tiles/gtile-merge.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileSwitch } from '../tiles/gtile-switch.js';
 import { GtileGroup } from '../tiles/gtile-group.js';
@@ -277,12 +278,20 @@ function tileRepeat(
   );
 }
 
+/**
+ * D12/T1p-c: `node.style === 'merge'` (`fork ... end merge`) builds a
+ * `GtileMerge` instead -- same branch tiling, different join shape
+ * (`gtile-merge.ts`'s own doc). `withSwimlane`/`withSwimlaneOut` reuse the
+ * AST's captured fields for both styles (`walk-fork-branches.ts
+ * #pushMergeDiamondNode`'s own doc covers the one divergence this elides).
+ */
 function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): GtileFork {
   const branches = node.branches.map((b) => {
     const tiles = tileNodes(b, bounder, theme, laneOrder);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  return withSwimlaneOut(withSwimlane(new GtileFork(branches, bounder), node.swimlane), node.swimlaneOut);
+  const built = node.style === 'merge' ? new GtileMerge(branches, bounder) : new GtileFork(branches, bounder);
+  return withSwimlaneOut(withSwimlane(built, node.swimlane), node.swimlaneOut);
 }
 
 function tileSplit(

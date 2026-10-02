@@ -158,6 +158,22 @@ export interface ActivityFork {
    *   -- `setStyle` re-reads `swimlaneOut` at `end fork`.
    */
   swimlaneOut?: string;
+  /**
+   * `ForkStyle.MERGE` (`fork ... end merge`) -- the branches converge into
+   * an un-synchronized diamond instead of the default `ForkStyle.FORK`
+   * synchronization bar. Omitted (not `'fork'`) for the default, mirroring
+   * `InstructionFork`'s own default field.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:70
+   *   -- `private ForkStyle style = ForkStyle.FORK;`.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkEnd3.java:92-95,107-108
+   *   -- `style.contains("merge") ? ForkStyle.MERGE : ForkStyle.FORK`. The
+   *   regex's optional trailing `{LABEL}` is parsed but never reaches
+   *   `ParallelBuilderMerge` (its constructor takes no label,
+   *   `FtileFactoryDelegatorCreateParallel.java:60` vs `:62`) -- a merge
+   *   join never carries a label upstream, so this port parses no label
+   *   for `end merge` either (matching upstream's own silent drop).
+   */
+  style?: 'merge';
 }
 
 export interface ActivitySplit {

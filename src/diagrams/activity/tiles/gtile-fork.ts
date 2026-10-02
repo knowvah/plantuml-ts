@@ -91,7 +91,22 @@ export class GtileFork extends TileComposite {
     const maxBranchH = Math.max(0, ...branches.map((b) => b.height));
     const fixedHeight = maxBranchH + 2 * SPACE_AROUND_BLACK_BAR;
     this.branchTopYs = branches.map((b) => barHeight + ymargin1 + (fixedHeight - b.height) / 2);
-    this.height = barHeight + ymargin1 + fixedHeight + ymargin2 + barHeight;
+    this.height = barHeight + ymargin1 + fixedHeight + ymargin2 + this.bottomBandHeight();
+  }
+
+  /**
+   * The composite's own bottom band height -- another `barHeight` band for
+   * fork/split's join bar/line (`doStep2` appends a second `FtileBlackBlock`/
+   * `FtileThinSplit`, the same height as the top one). `GtileMerge`
+   * (D12/T1p-c) overrides this: `ParallelBuilderMerge.doStep2` appends a
+   * 24x24 `FtileDiamond` instead, not another `barHeight` band.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:166-169
+   *   -- `build`: `doStep2(inner, doStep1(inner))`, the shared assembly
+   *   both `ParallelBuilderFork`/`ParallelBuilderSplit` (same-height join)
+   *   and `ParallelBuilderMerge` (diamond join) go through.
+   */
+  protected bottomBandHeight(): number {
+    return this.barHeight;
   }
 
   getCoord(hook: HookName): GPoint {
