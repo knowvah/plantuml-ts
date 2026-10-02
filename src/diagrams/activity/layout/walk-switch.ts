@@ -21,11 +21,13 @@
 
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
+import type { GPoint } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, walkTile } from './tile-coordinates.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
 
 /** Labels the edge `pushEdge` just pushed, when non-empty. Extracted out
  *  of `walkTile`'s `'gtile-switch'` arm (mission ubrr-T10 M2, `case
@@ -53,11 +55,44 @@ interface SwitchCaseArgs {
   readonly label: string | undefined;
 }
 
+interface CaseToMergeArgs {
+  readonly c: Tile;
+  readonly cPos: GPoint;
+  readonly mergeDiamond: Tile;
+  readonly mPos: GPoint;
+}
+
+/** The case-to-merge-diamond edge, tagged with `ConnectionVerticalThen
+ *  HorizontalCrossSwimlane`'s loop shape (`FtileSwitchWithManyLinks.java
+ *  :352-404`) -- extracted out of {@link walkSwitchCase} purely to keep
+ *  that function under the complexity hook's NLOC cap. */
+function pushCaseToMergeEdge(args: CaseToMergeArgs, myLane: string | undefined, out: Out): void {
+  const { c, cPos, mergeDiamond, mPos } = args;
+  const mFrom = { x: cPos.x + c.getCoord(SOUTH_HOOK).x, y: cPos.y + c.getCoord(SOUTH_HOOK).y };
+  const mTo = { x: mPos.x + mergeDiamond.getCoord(NORTH_HOOK).x, y: mPos.y + mergeDiamond.getCoord(NORTH_HOOK).y };
+  // `getP1`/`getP2` (`:395-403`) are the origin tile's `getPointOut()` (=
+  // our SOUTH_HOOK, same `mFrom`) and `diamond2`'s own `getPointIn()` (=
+  // our NORTH_HOOK, same `mTo`).
+  const vThenHLoop: LoopTranslate = {
+    kind: 'switch-v-then-h-cross',
+    p1: mFrom,
+    p2: mTo,
+    diamond2: { width: mergeDiamond.width, height: mergeDiamond.height },
+  };
+  pushEdge(
+    out,
+    new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
+    laneOut(c, myLane),
+    laneIn(mergeDiamond, myLane),
+    { loop: vThenHLoop },
+  );
+}
+
 /** One `case` tile's walk + its diamond-in edge + (when the switch has a
  *  merge diamond) its own case-to-merge edge. Extracted out of
  *  {@link walkSwitch}'s loop body purely to keep that function under the
  *  complexity hook's NLOC cap -- no behaviour change from the pre-split
- *  `tile-coordinates.ts` code. */
+ *  `tile-coordinates.ts` code (beyond the `loop` tags T1p-e adds). */
 function walkSwitchCase(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): void {
   const { diamond, dX, dY, mergeDiamond, centerX, mergeOffsetY, myLane, y } = step;
   const { c, cX, caseOffsetY, label } = args;
@@ -66,25 +101,26 @@ function walkSwitchCase(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): v
 
   const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
   const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
-  pushEdge(
-    out,
-    new GConnectionSideThenVerticalThenSide().getPoints(from, to),
-    laneOut(diamond, myLane),
-    laneIn(c, myLane),
-  );
+  // `ConnectionHorizontalThenVerticalCrossSwimlane` (`FtileSwitchWithManyLinks
+  // .java:297-350`): `getP1`/`getP2` (`:341-349`) are `diamond1`'s own
+  // `getPointOut()` (= our SOUTH_HOOK, same `from` the uniform shape above
+  // already uses) and the case tile's `getPointIn()` (= our NORTH_HOOK, same
+  // `to`) -- so this tag is attached to the SAME edge, not a second one;
+  // `routeEdge` (`swimlane-placement.ts`) only dispatches it when the two
+  // endpoints' lanes actually differ, same as every other `loop`-tagged edge.
+  const hThenVLoop: LoopTranslate = {
+    kind: 'switch-h-then-v-cross',
+    p1: from,
+    p2: to,
+    diamond1: { width: diamond.width, height: diamond.height },
+  };
+  const dcPts = new GConnectionSideThenVerticalThenSide().getPoints(from, to);
+  pushEdge(out, dcPts, laneOut(diamond, myLane), laneIn(c, myLane), { loop: hThenVLoop });
   applyLastEdgeLabel(out, label);
 
   if (mergeDiamond === null) return;
-  const mX = centerX - mergeDiamond.width / 2;
-  const mY = y + mergeOffsetY!;
-  const mFrom = { x: cX + c.getCoord(SOUTH_HOOK).x, y: cY + c.getCoord(SOUTH_HOOK).y };
-  const mTo = { x: mX + mergeDiamond.getCoord(NORTH_HOOK).x, y: mY + mergeDiamond.getCoord(NORTH_HOOK).y };
-  pushEdge(
-    out,
-    new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
-    laneOut(c, myLane),
-    laneIn(mergeDiamond, myLane),
-  );
+  const mPos = { x: centerX - mergeDiamond.width / 2, y: y + mergeOffsetY! };
+  pushCaseToMergeEdge({ c, cPos: { x: cX, y: cY }, mergeDiamond, mPos }, myLane, out);
 }
 
 export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: string | undefined, out: Out): void {
