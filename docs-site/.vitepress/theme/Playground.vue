@@ -52,6 +52,14 @@ const props = defineProps<{
 const source = ref(props.initial ?? DEFAULT_SOURCE);
 const svg = ref('');
 const error = ref('');
+const svgHost = ref<HTMLElement | null>(null);
+
+// Zoom-to-fit. The jar-faithful root carries preserveAspectRatio="none",
+// which stretches the drawing whenever the box's proportions differ from
+// the viewBox. Display-only: the library's output keeps the jar's value.
+function fitSvg(): void {
+  svgHost.value?.querySelector('svg')?.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+}
 
 // --- syntax-highlight overlay ---
 const highlighted = ref('');
@@ -119,6 +127,8 @@ onMounted(async () => {
   }
 });
 
+watch(svg, fitSvg, { flush: 'post' });
+
 watch(source, () => {
   paintHighlight();
   scheduleRender();
@@ -144,7 +154,7 @@ watch(source, () => {
       <div class="pu-output" aria-label="Rendered SVG">
         <pre v-if="error" class="pu-error">{{ error }}</pre>
         <!-- Code review: playground v-html has no CSP; only self-XSS reachable today (no URL-reflection or share-link mechanism found). Revisit immediately if a share/permalink feature is added, or once the javascript: href fix lands. -->
-        <div v-else class="pu-svg" v-html="svg"></div>
+        <div v-else ref="svgHost" class="pu-svg" v-html="svg"></div>
       </div>
     </div>
   </div>
@@ -215,9 +225,19 @@ watch(source, () => {
   padding: 0.75rem;
   background: #fff;
 }
+/* Zoom-to-fit: the SVG fills the pane both ways, up or down, keeping its
+   proportions (fitSvg() sets xMidYMid meet). !important is required: the
+   jar-faithful root sets width/height in an inline style attribute, which
+   outranks any stylesheet rule. On narrow screens the pane height is auto,
+   so height falls back to the viewBox aspect ratio. */
+.pu-svg {
+  width: 100%;
+  height: 100%;
+}
 .pu-svg :deep(svg) {
-  max-width: 100%;
-  height: auto;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 .pu-error {
   color: var(--vp-c-danger-1);
