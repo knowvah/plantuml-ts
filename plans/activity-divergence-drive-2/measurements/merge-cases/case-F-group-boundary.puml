@@ -1,0 +1,17 @@
+@startuml
+start
+:act1;
+if (cond ?) then (label1)
+  stop
+endif
+:act2;
+
+partition foo {
+  :act1;
+  if (cond ?) then (label1)
+    stop
+  endif
+  :act2;
+}
+stop
+@enduml

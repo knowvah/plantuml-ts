@@ -1,0 +1,9 @@
+@startuml
+start
+if (test) then (yes)
+  stop
+  note:foo
+else (no)
+endif
+stop
+@enduml
