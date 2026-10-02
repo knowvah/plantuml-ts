@@ -51,6 +51,58 @@ describe('layoutActivity — down: plain/swap merge case, no optionalStop', () =
   });
 });
 
+describe('layoutActivity — down: conditionEndStyle hline (T1p-a)', () => {
+  // Same shape as the first describe block above, but `hline`: no
+  // `if-merge` node (`getShape2`'s own early return wins over
+  // `hasTwoBranches()`), and `conns[1]` becomes TWO connectors
+  // (`ElseHline` + `Hline`, `FtileIfDown.java:147-150`) instead of one.
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenLabel: 'yes',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const hlineTheme: Theme = { ...theme, conditionEndStyle: 'hline' };
+  const geo = layoutActivity(ast, hlineTheme, measurer);
+
+  it('no if-merge node under hline', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-merge')).toBe(false);
+  });
+
+  it('emits exactly 4 edges: In, ElseHline, Hline, Out (one more than diamond -- two connectors, no merge node)', () => {
+    expect(geo.edges.length).toBe(4);
+  });
+
+  it('ElseHline keeps its default arrowhead; Hline has none (withMerge(NONE), no arrow arg)', () => {
+    expect(geo.edges[1]!.arrowhead).not.toBe(false);
+    expect(geo.edges[2]!.arrowhead).toBe(false);
+  });
+
+  it('neither ElseHline nor Hline is emphasized (unlike Else1/Else2 under diamond)', () => {
+    expect(geo.edges[1]!.emphasize).toBeUndefined();
+    expect(geo.edges[2]!.emphasize).toBeUndefined();
+  });
+
+  it('ElseHline has 3 points (bend, short of diamond2); Hline has 3 points (bend -> mid -> bottom)', () => {
+    expect(geo.edges[1]!.points.length).toBe(3);
+    expect(geo.edges[2]!.points.length).toBe(3);
+  });
+
+  it('ElseHline and Hline share the same bend point', () => {
+    const elseHlinePoints = geo.edges[1]!.points;
+    const elseHlineLast = elseHlinePoints[elseHlinePoints.length - 1]!;
+    const hlineFirst = geo.edges[2]!.points[0]!;
+    expect(elseHlineLast).toEqual(hlineFirst);
+  });
+});
+
 describe('layoutActivity — down: optionalStop (stop east of the hexagon)', () => {
   const ast: ActivityDiagramAST = {
     nodes: [

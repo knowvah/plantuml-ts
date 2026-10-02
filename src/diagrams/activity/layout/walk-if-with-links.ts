@@ -212,6 +212,52 @@ function pushOutConnectorsBoth(ctx: IfLinksCtx): void {
   });
 }
 
+/**
+ * `ConnectionVerticalOut` (`hline` only, T1p-a) -- `tile.pointOut` straight
+ * down to the tile's own total bottom. Default arrowhead (`asToDown`);
+ * UNLIKE `ConnectionVerticalThenHorizontal`, no `branchEmpty`-conditioned
+ * `emphasizeDirection` (the Java class takes no such parameter at all).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:369-418
+ */
+function connectionVerticalOut(ctx: IfLinksCtx, useTile1: boolean): void {
+  const { t, x, y, myLane, out } = ctx;
+  const origin = useTile1 ? { x: x + t.tile1X, y: y + t.branchY } : { x: x + t.tile2X, y: y + t.branchY };
+  const tile = useTile1 ? t.tile1 : t.tile2;
+  const p1 = absolutePoint(tile.getCoord(SOUTH_HOOK), origin.x, origin.y);
+  pushEdge(out, [p1, { x: p1.x, y: y + t.height }], laneOut(tile, myLane), myLane);
+}
+
+/**
+ * `ConnectionHline` (`hline` only, T1p-a, `withMerge(NONE)` -- T1b wires
+ * `mergeable` from this comment -- no arrowhead) -- a plain closing bar
+ * under both branches' own out-X. Swimlane-unaware (`getMinmaxSimple`),
+ * the same accepted approximation as `walk-if-long-horizontal.ts
+ * #connectionHline`'s own doc comment -- a laned diagram would need
+ * `getMinmax`'s pass-aware variant.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:421-500
+ */
+function connectionHlineLinks(ctx: IfLinksCtx): void {
+  const { t, x, y, myLane, out } = ctx;
+  const t1Origin = { x: x + t.tile1X, y: y + t.branchY };
+  const t2Origin = { x: x + t.tile2X, y: y + t.branchY };
+  const out1X = absolutePoint(t.tile1.getCoord(SOUTH_HOOK), t1Origin.x, t1Origin.y).x;
+  const out2X = absolutePoint(t.tile2.getCoord(SOUTH_HOOK), t2Origin.x, t2Origin.y).x;
+  const seed = x + t.width / 2;
+  const minX = Math.min(seed, out1X, out2X);
+  const maxX = Math.max(seed, out1X, out2X);
+  const h = y + t.height;
+  pushEdge(
+    out,
+    [
+      { x: minX, y: h },
+      { x: maxX, y: h },
+    ],
+    myLane,
+    myLane,
+  );
+  out.edges[out.edges.length - 1]!.arrowhead = false;
+}
+
 /** `ConnectionVerticalThenHorizontalDirect`, exactly one branch has a point
  *  out -- no arrowhead, terminates at the tile's own bottom-left.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:298-325 */
@@ -229,10 +275,24 @@ function pushDirectConnector(ctx: IfLinksCtx, useTile1: boolean): void {
   });
 }
 
+/** `hasPointOut1 && hasPointOut2` splits by `conditionEndStyle`
+ *  (`FtileIfWithLinks.java:546-550` vs `:539-540`) -- the single/one-sided
+ *  cases below are IDENTICAL in both branches of the Java's own `if`, so
+ *  {@link pushOutConnectors} does not re-check the style for them. */
+function pushOutConnectorsBothStyled(ctx: IfLinksCtx): void {
+  if (ctx.t.conditionEndStyle === 'hline') {
+    connectionVerticalOut(ctx, true);
+    connectionVerticalOut(ctx, false);
+    connectionHlineLinks(ctx);
+  } else {
+    pushOutConnectorsBoth(ctx);
+  }
+}
+
 function pushOutConnectors(ctx: IfLinksCtx): void {
   const { t } = ctx;
   if (t.hasPointOut1 && t.hasPointOut2) {
-    pushOutConnectorsBoth(ctx);
+    pushOutConnectorsBothStyled(ctx);
   } else if (t.hasPointOut1) {
     pushDirectConnector(ctx, true);
   } else if (t.hasPointOut2) {

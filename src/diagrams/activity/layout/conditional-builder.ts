@@ -175,7 +175,7 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   const branch1 = toBranchTile(node.thenBranch, bounder, theme, laneOrder);
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, laneOrder);
   const laneCount = countIfSwimlanes(node);
-  return new GtileIfWithLinks(diamond1, branch1, branch2, laneCount);
+  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, theme.conditionEndStyle);
 }
 
 interface LongHorizontalBranch {
@@ -309,6 +309,28 @@ function resolveIfDownParts(node: ActivityIf, swapped: boolean, thenTile: Tile, 
 }
 
 /**
+ * `useElse1`'s own gate, split out of {@link buildIfDown} only to keep that
+ * function's own NLOC/CCN under the file's limit. T1p-a: the swimlane-swap
+ * check only runs inside `FtileIfDown.java`'s own `conditionEndStyle ==
+ * DIAMOND` branch (`:139-146`) -- `hline` never swaps, regardless of lane
+ * order.
+ */
+function shouldUseElse1(
+  theme: Theme,
+  optionalStop: Tile | null,
+  parts: IfDownParts,
+  swimlane: string | undefined,
+  laneOrder: readonly string[],
+): boolean {
+  return (
+    theme.conditionEndStyle !== 'hline' &&
+    optionalStop === null &&
+    parts.mainTile.hasPointOut() &&
+    isMainLaneSmallerThanAllOthers(swimlane, parts.mainNodes, laneOrder)
+  );
+}
+
+/**
  * `createDown` (`ConditionalBuilder.java:170-191`) composed with
  * `FtileIfDown.create` (`:124-159`): a `withSouth(mainLabel)
  * .withEast(sideLabel)` hexagon, the main flow's own raw content, and
@@ -333,13 +355,14 @@ function buildIfDown(
 
   const optionalStop = dispatch.optionalStop === true ? parts.sideTile : null;
   const hasTwoBranches = thenTile.hasPointOut() && elseTile.hasPointOut();
-  const useElse1 =
-    optionalStop === null &&
-    parts.mainTile.hasPointOut() &&
-    isMainLaneSmallerThanAllOthers(node.swimlane, parts.mainNodes, laneOrder);
+  const useElse1 = shouldUseElse1(theme, optionalStop, parts, node.swimlane, laneOrder);
   if (useElse1) diamond1.swapEastWest();
 
-  const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, hasTwoBranches, useElse1);
+  const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, {
+    hasTwoBranches,
+    useElse1,
+    conditionEndStyle: theme.conditionEndStyle,
+  });
   if (optionalStop !== null) {
     const out = laneOut(parts.mainTile, undefined);
     if (out !== undefined) result.swimlaneOut = out;

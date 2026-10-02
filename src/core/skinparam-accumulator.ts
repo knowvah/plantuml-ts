@@ -45,6 +45,9 @@ export interface SkinparamAccumulator {
   tabSize: number | undefined;
   roundCorner: number | undefined;
   componentStyle: 'uml2' | 'uml1' | 'rectangle' | undefined;
+  /** T1p-a: `skinparam ConditionEndStyle hline` -- see `theme.ts
+   *  #conditionEndStyle`'s own doc comment. */
+  conditionEndStyle: 'diamond' | 'hline' | undefined;
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
@@ -242,6 +245,7 @@ const SCALAR_FIELD_NAMES = [
   'tabSize',
   'roundCorner',
   'componentStyle',
+  'conditionEndStyle',
   'actorStyle',
   'minimumWidth',
   'strictUml',

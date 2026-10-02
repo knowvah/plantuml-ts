@@ -73,6 +73,8 @@ export interface Theme {
    *  Default `uml2` draws the corner component icon; `uml1`/`rectangle` render
    *  components as plain boxes (changes node sizing). Absent = uml2. */
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** T1p-a: `skinparam ConditionEndStyle hline` (`svek/ConditionEndStyle.java`; `SkinParam.java:1007-1013`, default `diamond` on an absent/unrecognized value). Consumed by `conditional-builder.ts`'s `buildIfDown`/`buildIfWithLinks` (`FtileFactoryDelegatorIf.java:75`, `ConditionalBuilder.java:149,537,546`). */
+  conditionEndStyle?: 'diamond' | 'hline';
   /** `skinparam actorStyle awesome|hollow|stickman` (`SkinParam.java:1209-
    *  1218`'s `actorStyle()`: case-insensitive `getValue("actorstyle")`,
    *  `"awesome"` → `ActorStyle.AWESOME`, `"hollow"` → `ActorStyle.HOLLOW`,
@@ -392,6 +394,8 @@ export type ThemeOverride = {
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** See {@link Theme.conditionEndStyle}'s own doc comment (T1p-a). */
+  conditionEndStyle?: 'diamond' | 'hline';
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
@@ -462,21 +466,10 @@ export { deepMergeTheme } from './theme-merge.js';
  * - undefined / omitted: returns defaultTheme.
  */
 export function resolveTheme(option?: ThemeOverride | string): Theme {
-  if (option === undefined || option === 'default') {
-    return defaultTheme;
-  }
-
-  if (option === 'dark') {
-    return darkTheme;
-  }
-
-  if (option === 'sketchy') {
-    return sketchyTheme;
-  }
-
-  if (option === 'monochrome') {
-    return monochromeTheme;
-  }
+  if (option === undefined || option === 'default') return defaultTheme;
+  if (option === 'dark') return darkTheme;
+  if (option === 'sketchy') return sketchyTheme;
+  if (option === 'monochrome') return monochromeTheme;
 
   if (typeof option === 'string') {
     const builtin = BUILTIN_THEMES[option];
