@@ -115,7 +115,7 @@ Measurement (activity has NO DOT gate — it never emits `svek-N.dot`):
 | [1b](batch-1b/overview.md) | stop/end circles (D3) after b1 | T1c | — | [x] |
 | [2](batch-2/overview.md) | drive round 1 on the b1b cohort; pin round 1 | T2a–T2f, T2-close | all ∥ | [x] |
 | [3](batch-3/overview.md) | drive round 2 on the b2 cohort; pin round 2 | T3a–T3k, T3-close | all ∥ | [x] |
-| [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
+| [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [x] |
 
 ## Documents
 
@@ -146,4 +146,23 @@ Measurement (activity has NO DOT gate — it never emits `svek-N.dot`):
 
 ## Status
 
-(filled by T-exit)
+**DONE 2026-10-02** (T-exit). All batches 0–4 executed; tasks T0a–T0b,
+T1a–T1c, T2a–T2f, T3a–T3k (T3j/T3k push-forward), plus orchestrator close
+fixes (dead kill chain, repeat-while `;?`, conformance-harness chrome drift).
+
+| D10 clause | Measurement (b0 → final) | Met |
+|---|---|---|
+| Every `fixtures.md` row has a `final` | 134 rows: 67 `pinned (add1-bN)`, 67 `open -> add2 (<mechanism>)` | met |
+| Four gates green, collected = on-disk; golden ratchet green | 1016 = 1016; typecheck/lint/build exit 0; 67 goldens byte-equal | met |
+| 0 conformant losses in any engine | 0 at b1, b1b, b2, b3 (all-engine survey each close); 12 non-activity gains | met |
+| 0 unexplained rises | every riser at every close audited per family (journal 12, 21, 34, 46, 53) | met |
+| ≥ 30 activity fixtures pinned | **67** | met |
+| Σ weightedScore over un-pinned rows below b0's | **60988 → 31111** (−49.0%) | met |
+
+Activity survey 0 / 4 / 369 → **67 / 56 / 250** (conformant / structural /
+diverged); `error` rows 39 → 38 (fukika promoted, D8). Swimlane divider
+Σ|ours−jar| 4444 (b1b) → 1795. Flags for review: D3 amended (stop-3 halt,
+user-approved write-set, journal 18-19); five agents wrote the main checkout
+through Serena or used `git stash` despite the rule — every instance verified
+redundant/empty before merging (journal 7, 32, 44, 49); T3j's three
+'title width' risers were harness drift, retracted (journal 52).
