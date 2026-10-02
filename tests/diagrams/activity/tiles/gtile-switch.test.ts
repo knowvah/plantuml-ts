@@ -180,3 +180,62 @@ describe('GtileSwitch — diamond wider than cases', () => {
     expect(tile.width).toBe(300);
   });
 });
+
+// T1p-f: `isBigDiamond` ports `FtileSwitchWithDiamonds`'s constructor
+// (`vcompact/cond/FtileSwitchWithDiamonds.java:73-90`). `makeTile`'s stub
+// `getCoord` always returns `{x:0,y:0}`, so for every case tile here
+// `leftOf == 0` and `rightOf == width` -- the formula reduces to
+// `w13 = diamond.width - case0.width - 0` and (for > 2 cases) `w9 =
+// Σ(middle case widths)`.
+describe('GtileSwitch — isBigDiamond (w13 > w9)', () => {
+  it('is true for 2 cases when the diamond is wider than the first case (w9 is 0)', () => {
+    const tile = new GtileSwitch(
+      makeDiamond(300, 40),
+      [{ tile: makeTile(80, 100) }, { tile: makeTile(80, 60) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.isBigDiamond).toBe(true);
+  });
+
+  it('is false for 2 cases when the diamond is narrower than the first case', () => {
+    const tile = new GtileSwitch(
+      makeDiamond(60, 40),
+      [{ tile: makeTile(80, 100) }, { tile: makeTile(80, 60) }],
+      null,
+      bounder,
+      theme,
+    );
+    expect(tile.isBigDiamond).toBe(false);
+  });
+
+  it('is true for 3 cases when w13 exceeds the middle case width (w9)', () => {
+    const tile = new GtileSwitch(
+      makeDiamond(200, 40),
+      [{ tile: makeTile(50, 60) }, { tile: makeTile(30, 60) }, { tile: makeTile(50, 60) }],
+      null,
+      bounder,
+      theme,
+    );
+    // w13 = 200 - 50 - 0 = 150; w9 = 30 (the one middle case).
+    expect(tile.isBigDiamond).toBe(true);
+  });
+
+  it('is false for 3 cases when w13 does not exceed the middle case width (w9)', () => {
+    const tile = new GtileSwitch(
+      makeDiamond(50, 40),
+      [{ tile: makeTile(50, 60) }, { tile: makeTile(30, 60) }, { tile: makeTile(50, 60) }],
+      null,
+      bounder,
+      theme,
+    );
+    // w13 = 50 - 50 - 0 = 0; w9 = 30. 0 > 30 is false.
+    expect(tile.isBigDiamond).toBe(false);
+  });
+
+  it('is false for an empty case list (defensive -- no upstream switch has zero cases)', () => {
+    const tile = new GtileSwitch(makeDiamond(300, 40), [], null, bounder, theme);
+    expect(tile.isBigDiamond).toBe(false);
+  });
+});

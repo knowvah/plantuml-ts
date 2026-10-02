@@ -50,6 +50,7 @@ import {
 import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
+import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
 // `activity-lane-capture` T2, this file's 500-line hook); re-exported here
@@ -247,6 +248,27 @@ function shiftNode(node: ActivityNodeGeo, deltas: ReadonlyMap<string, number>): 
   return { ...node, x: node.x + delta };
 }
 
+/**
+ * T1p-f: a BIG_DIAMOND switch's leaf case tile (`switch-swimlane-
+ * duplicate.ts`'s own tag) is drawn once per lane, not shifted into its
+ * OWN lane alone -- `Swimlanes#drawWhenSwimlanes` re-walks the whole
+ * tree once per lane (module doc), and the case tile's bypassed draw
+ * call (`FtileSwitchWithDiamonds.java:136-138`) is reached, ungated, on
+ * EVERY one of those passes. One copy per `laneNames` entry, each at
+ * that lane's own delta from the SAME pre-shift `x` {@link shiftNode}
+ * would have used.
+ */
+function placeNode(
+  node: ActivityNodeGeo,
+  laneNames: readonly string[],
+  deltas: ReadonlyMap<string, number>,
+): ActivityNodeGeo[] {
+  if (!isBigDiamondDuplicate(node)) return [shiftNode(node, deltas)];
+  return laneNames.map((lane) =>
+    withoutBigDiamondDuplicateTag({ ...node, x: node.x + (deltas.get(lane) ?? 0), swimlane: lane }),
+  );
+}
+
 function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
   if (delta === 0) return [...points];
   return points.map((p) => ({ x: p.x + delta, y: p.y }));
@@ -381,6 +403,31 @@ function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly Edg
 }
 
 /**
+ * T1p-f: `computeDrawingWidths`'s own draw-interception pass
+ * (`Swimlanes.java:379-395`) measures widths through
+ * `UGraphicInterceptorAllSwimlanes` (`vcompact/
+ * UGraphicInterceptorAllSwimlanes.java:88-99`), which has the SAME
+ * bypass as the draw pass itself: `FtileSwitchWithDiamonds#drawU`'s
+ * direct `tile.drawU(...)` call (`switch-swimlane-duplicate.ts`'s own
+ * doc) skips `withActiveSwimlanes`' narrowing, so a bypassed case tile's
+ * own shapes get dispatched to EVERY still-active lane's `LimitFinder`,
+ * not just its own tag's -- widening every lane's measured content to
+ * fit the duplicate, not only the lane it is structurally tagged to.
+ * One {@link LaneItem} per {@link laneNames} entry for a tagged node,
+ * mirroring {@link placeNode}'s own per-lane fan-out.
+ */
+function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneItem[] {
+  if (!isBigDiamondDuplicate(node)) {
+    return [
+      node.swimlane !== undefined
+        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width }
+        : { kind: node.kind, x: node.x, width: node.width },
+    ];
+  }
+  return laneNames.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));
+}
+
+/**
  * `computeDrawingWidths` (`Swimlanes.java:379-395`) plus the `min`
  * resolution step from `computeSizeInternal` (`:399-403`) -- measures
  * each lane's content extent and title width, then resolves the lane
@@ -389,11 +436,7 @@ function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly Edg
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
   const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
-  const items: LaneItem[] = nodes.map((n) =>
-    n.swimlane !== undefined
-      ? { swimlane: n.swimlane, kind: n.kind, x: n.x, width: n.width }
-      : { kind: n.kind, x: n.x, width: n.width },
-  );
+  const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);
@@ -448,7 +491,7 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
   const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas));
 
   return {
-    nodes: nodes.map((n) => shiftNode(n, deltas)),
+    nodes: nodes.flatMap((n) => placeNode(n, laneNames, deltas)),
     edges: routed.flatMap((r) => r.edges),
     edgeMeta: routed.flatMap((r, i) => repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
