@@ -283,4 +283,25 @@ describe('CommandCreoleUrl ([[url]] atom-splitting)', () => {
     const atoms = buildStripeAtoms('[[http://www.google.com]]', PLAIN);
     expect(atoms.map(textOf)[0]?.color).toBe('#0000FF');
   });
+
+  /**
+   * add2 T2d (laxibe-66-teme800): a `{...}` glued to MORE non-whitespace
+   * text after its closing brace is never a tooltip -- upstream's lazy
+   * Link group can only stop at a `{` when everything past the matching
+   * `}` is either the end or a whitespace-led label (`UrlBuilder.java:
+   * 76-80`, this command's own `TOOLTIP_RE` doc comment). `{dd}sss` fails
+   * that boundary, so the jar keeps the whole thing as literal link text.
+   */
+  test('a {brace} glued to trailing text is not a tooltip -- stays literal in the url', () => {
+    const atoms = buildStripeAtoms('[[http://testLink1.com{dd}sss]]', PLAIN);
+    expect(atoms.map(textOf)).toEqual([
+      {
+        text: 'http://testLink1.com{dd}sss',
+        size: 14,
+        color: '#0000FF',
+        family: 'sans-serif',
+        styles: [FontStyle.UNDERLINE],
+      },
+    ]);
+  });
 });
