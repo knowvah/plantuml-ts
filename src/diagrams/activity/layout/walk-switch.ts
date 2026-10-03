@@ -23,11 +23,13 @@ import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { GPoint } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
+import { TileComposite } from '../tiles/tile.js';
 import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import { markBigDiamondDuplicate } from './switch-swimlane-duplicate.js';
 
 /** Labels the edge `pushEdge` just pushed, when non-empty. Extracted out
  *  of `walkTile`'s `'gtile-switch'` arm (mission ubrr-T10 M2, `case
@@ -48,11 +50,41 @@ interface SwitchCaseStep {
   readonly y: number;
 }
 
+/**
+ * Unwraps our single-child `GtileTopDown` -- `tile-layout.ts`'s case-body
+ * builder (`tileNodes`) ALWAYS wraps a case's body in one, even a single
+ * statement, but upstream's own list-to-Ftile fold
+ * (`FtileFactoryDelegatorAssembly#assembly`, `vcompact/
+ * FtileFactoryDelegatorAssembly.java:57`) calls `assembly()` N-1 times
+ * over an N-element list, so a SINGLE-statement body is never wrapped at
+ * all in the jar -- `tiles.get(i)` there IS the bare leaf. Our wrapper is
+ * a construction artifact with no Java counterpart; unwrap it so the
+ * leaf/composite check below sees what the jar actually dispatches on.
+ */
+function unwrapSingleChildTopDown(tile: Tile): Tile {
+  let current = tile;
+  while (current.kind === 'gtile-top-down' && current instanceof TileComposite && current.children.length === 1) {
+    current = current.children[0]!;
+  }
+  return current;
+}
+
 interface SwitchCaseArgs {
   readonly c: Tile;
   readonly cX: number;
   readonly caseOffsetY: number;
   readonly label: string | undefined;
+  /** `tile.isBigDiamond && !(c instanceof TileComposite)` -- see
+   *  `switch-swimlane-duplicate.ts`'s own doc for why only a BIG_DIAMOND
+   *  switch's LEAF case tiles get the per-lane redraw tag. */
+  readonly duplicatePerLane: boolean;
+}
+
+/** Tags every node {@link walkSwitchCase}'s `walkTile` call just pushed
+ *  (`out.nodes[nodeStart..]`) -- split out purely to keep that function's
+ *  own NLOC under the complexity hook's cap. */
+function tagDuplicateNodes(out: Out, nodeStart: number): void {
+  for (let i = nodeStart; i < out.nodes.length; i++) markBigDiamondDuplicate(out.nodes[i]!);
 }
 
 interface CaseToMergeArgs {
@@ -95,9 +127,11 @@ function pushCaseToMergeEdge(args: CaseToMergeArgs, myLane: string | undefined, 
  *  `tile-coordinates.ts` code (beyond the `loop` tags T1p-e adds). */
 function walkSwitchCase(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): void {
   const { diamond, dX, dY, mergeDiamond, centerX, mergeOffsetY, myLane, y } = step;
-  const { c, cX, caseOffsetY, label } = args;
+  const { c, cX, caseOffsetY, label, duplicatePerLane } = args;
   const cY = y + caseOffsetY;
+  const nodeStart = out.nodes.length;
   walkTile(c, cX, cY, { kindHint: null, lane: myLane }, out);
+  if (duplicatePerLane) tagDuplicateNodes(out, nodeStart);
 
   const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
   const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
@@ -123,12 +157,24 @@ function walkSwitchCase(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): v
   pushCaseToMergeEdge({ c, cPos: { x: cX, y: cY }, mergeDiamond, mPos }, myLane, out);
 }
 
+/** {@link walkSwitch}'s own case-tile loop, split out purely to keep that
+ *  function's NLOC under the complexity hook's cap -- no behaviour
+ *  change beyond the `duplicatePerLane` tag T1p-f adds. */
+function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out: Out): void {
+  const cases = tile.children.slice(1, 1 + tile.caseOffsets.length);
+  for (let i = 0; i < cases.length; i++) {
+    const c = cases[i]!;
+    const cX = x + tile.caseOffsets[i]!;
+    const duplicatePerLane = tile.isBigDiamond && !(unwrapSingleChildTopDown(c) instanceof TileComposite);
+    walkSwitchCase(step, { c, cX, caseOffsetY: tile.caseOffsetY, label: tile.caseLabels[i], duplicatePerLane }, out);
+  }
+}
+
 export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: string | undefined, out: Out): void {
   const centerX = x + tile.width / 2;
   const hasMerge = tile.mergeOffsetY !== null;
   const rawChildren = tile.children;
   const diamond = rawChildren[0]!;
-  const cases = hasMerge ? rawChildren.slice(1, -1) : rawChildren.slice(1);
   const mergeDiamond = hasMerge ? rawChildren[rawChildren.length - 1]! : null;
 
   const dX = centerX - diamond.width / 2;
@@ -145,10 +191,7 @@ export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: stri
     myLane,
     y,
   };
-  for (let i = 0; i < cases.length; i++) {
-    const cX = x + tile.caseOffsets[i]!;
-    walkSwitchCase(step, { c: cases[i]!, cX, caseOffsetY: tile.caseOffsetY, label: tile.caseLabels[i] }, out);
-  }
+  walkSwitchCases(tile, x, step, out);
 
   if (mergeDiamond !== null) {
     const mX = centerX - mergeDiamond.width / 2;

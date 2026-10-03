@@ -21,6 +21,37 @@ function layoutCaseOffsets(caseTiles: readonly Tile[]): { xOffsets: number[]; to
   return { xOffsets, totalWidth };
 }
 
+/** A tile's `FtileGeometry#getLeft()`/`getRight()` (`FtileGeometry.java:
+ *  162-168`): `getLeft()` is the tile's own `NORTH_HOOK` x-offset (its
+ *  `left`/`inY` pivot); `getRight()` is `width - left`. Every production
+ *  leaf tile's `NORTH_HOOK` sits at its horizontal center, matching the
+ *  Java's own symmetric leaves. */
+function leftOf(tile: Tile): number {
+  return tile.getCoord(NORTH_HOOK).x;
+}
+
+/**
+ * `Mode.BIG_DIAMOND` vs `Mode.SMALL_DIAMOND` (`FtileSwitchWithDiamonds`'s
+ * constructor, `vcompact/cond/FtileSwitchWithDiamonds.java:73-90`): `w13`
+ * is `diamond1`'s width minus the first case's `getRight()` minus the
+ * last case's `getLeft()`; `w9` sums the width of every case STRICTLY
+ * between the first and last (`:84-90` -- that loop's body is
+ * unreachable for <= 2 cases, so `w9` is 0 there and `mode` reduces to
+ * `w13 > 0`). `mode == BIG_DIAMOND` is what makes `drawU`'s per-case loop
+ * (`:136-138`) call `tile.drawU(...)` directly instead of the gated
+ * `ug.draw(tile)` `FtileSwitchNude#drawU` uses -- see `walk-switch.ts`'s
+ * own doc for why that only has a visible effect for a `TileLeaf` case.
+ */
+function computeIsBigDiamond(diamond: Tile, caseTiles: readonly Tile[]): boolean {
+  if (caseTiles.length === 0) return false;
+  const first = caseTiles[0]!;
+  const last = caseTiles[caseTiles.length - 1]!;
+  const w13 = diamond.width - (first.width - leftOf(first)) - leftOf(last);
+  let w9 = 0;
+  for (let i = 1; i < caseTiles.length - 1; i++) w9 += caseTiles[i]!.width;
+  return w13 > w9;
+}
+
 export class GtileSwitch extends TileComposite {
   readonly kind = 'gtile-switch' as const;
   readonly width: number;
@@ -37,6 +68,11 @@ export class GtileSwitch extends TileComposite {
    *  fiza931's golden `<text ...>condition A</text>` beside the vertical
    *  connector). */
   readonly caseLabels: readonly (string | undefined)[];
+  /** `Mode.BIG_DIAMOND` (vs. `SMALL_DIAMOND`), computed once in the
+   *  constructor exactly as upstream does -- see {@link computeIsBigDiamond}
+   *  for the citation. Consulted by `layout/walk-switch.ts` to decide
+   *  whether a leaf case tile's content redraws once per swimlane. */
+  readonly isBigDiamond: boolean;
 
   constructor(
     diamond: GtileDiamond,
@@ -48,6 +84,7 @@ export class GtileSwitch extends TileComposite {
     super();
     const caseTiles = cases.map((c) => c.tile);
     this.caseLabels = cases.map((c) => c.label);
+    this.isBigDiamond = computeIsBigDiamond(diamond, caseTiles);
     const { xOffsets, totalWidth: caseTotalWidth } = layoutCaseOffsets(caseTiles);
     this.caseOffsets = xOffsets;
     this.width = Math.max(diamond.width, caseTotalWidth);
