@@ -31,6 +31,7 @@ import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+import type { HlinePayload } from './swimlane-hline.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
 
 /**
@@ -96,11 +97,14 @@ function pushDiamondCompanionLabel(
  * `pushEdge`'s trailing parameter: a bare {@link EdgeShape} (every existing
  * call site -- fork/if-long-horizontal's three non-default shapes) or,
  * for a `while`/`repeat` back-edge that also carries a translate tag
- * (mission `activity-loop-lane-translate`, T2/T3), an object bundling both.
- * A single parameter keeps `pushEdge` at the file's 5-parameter limit
- * without touching the three call sites that already pass a bare shape.
+ * (mission `activity-loop-lane-translate`, T2/T3) or an `hline`-style
+ * `ConnectionHline` template (T1p-g), an object bundling the lot. A
+ * single parameter keeps `pushEdge` at the file's 5-parameter limit
+ * without touching the call sites that already pass a bare shape.
  */
-export type PushEdgeRouting = EdgeShape | { readonly shape?: EdgeShape; readonly loop?: LoopTranslate };
+export type PushEdgeRouting =
+  | EdgeShape
+  | { readonly shape?: EdgeShape; readonly loop?: LoopTranslate; readonly hline?: HlinePayload };
 
 export function pushEdge(
   out: Out,
@@ -111,8 +115,15 @@ export function pushEdge(
 ): void {
   const shape = typeof routing === 'string' ? routing : (routing.shape ?? 'default');
   const loop = typeof routing === 'string' ? undefined : routing.loop;
+  const hline = typeof routing === 'string' ? undefined : routing.hline;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
-  out.edgeMeta.push({ lane1, lane2, shape, ...(loop !== undefined ? { loop } : {}) });
+  out.edgeMeta.push({
+    lane1,
+    lane2,
+    shape,
+    ...(loop !== undefined ? { loop } : {}),
+    ...(hline !== undefined ? { hline } : {}),
+  });
 }
 
 /**

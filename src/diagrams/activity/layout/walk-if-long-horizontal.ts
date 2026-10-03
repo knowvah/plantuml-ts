@@ -22,6 +22,7 @@ import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import type { HlineCandidate } from './swimlane-hline.js';
 
 interface LhCtx {
   readonly t: GtileIfLongHorizontal;
@@ -230,13 +231,35 @@ function hlineOutXs(ctx: LhCtx): number[] {
   return xs;
 }
 
+/** Every branch/`tile2` out-point's own absolute X AND own outcome lane
+ *  (`laneOut`) -- the `hline` routing template's `candidates`, split out
+ *  of {@link connectionHline} to keep that function's own NLOC under the
+ *  file's limit. Parallels {@link hlineOutXs} exactly, index for index,
+ *  adding only the lane each entry already has available. */
+function hlineCandidates(ctx: LhCtx): HlineCandidate[] {
+  const { t, x, myLane } = ctx;
+  const candidates: HlineCandidate[] = [];
+  for (let i = 0; i < t.branches.length; i++) {
+    const b = t.branches[i]!;
+    if (b.hasPointOut) candidates.push({ x: x + b.coupleX + b.coupleLeft, lane: laneOut(t.tiles[i]!, myLane) });
+  }
+  if (t.hasTile2PointOut) candidates.push({ x: x + t.tile2X + t.tile2Left, lane: laneOut(t.tile2, myLane) });
+  return candidates;
+}
+
 /**
  * `ConnectionHline`, drawn only when `nbOut > 0` -- a plain, arrowless line
- * under the whole tile. Laned diagrams would need `getMinmax`'s pass-aware
- * variant (`:520-560`, the current lane pass); this port always emits the
- * UNLANED `getMinmaxSimple` extent instead (T5 spec's own sanctioned
- * approximation) -- journaled per-slug in the mission decision journal.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:476-570
+ * under the whole tile. The pushed edge is always the UNLANED
+ * `getMinmaxSimple` extent (byte-identical to before T1p-g); the `hline`
+ * routing template carries the per-lane data `swimlane-placement.ts
+ * #routeEdge` needs to replace it, under real swimlanes, with one
+ * `getMinmax`-derived edge per in-range lane (`swimlane-hline.ts
+ * #routeHline`) -- `leftOut` (`getLeftOut`, `:512-517`) becomes
+ * `unfiltered`, folded into every in-range lane unconditionally, exactly
+ * as the Java's own term is. `measureLanes` runs BEFORE routing and only
+ * ever sees this UNLANED edge, so lane-width measurement is unaffected
+ * (`swimlane-hline.ts`'s own doc).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:476-599
  */
 function connectionHline(ctx: LhCtx): void {
   const { t, x, y, myLane, out } = ctx;
@@ -253,6 +276,7 @@ function connectionHline(ctx: LhCtx): void {
     ],
     myLane,
     myLane,
+    { hline: { low: x, high: x + t.width, candidates: hlineCandidates(ctx), unfiltered: [leftOut] } },
   );
   out.edges[out.edges.length - 1]!.arrowhead = false;
 }
