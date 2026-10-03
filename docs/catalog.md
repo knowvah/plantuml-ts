@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1363 modules · 5078 exported names.
+1365 modules · 5082 exported names.
 
 ## `src/`
 
@@ -1087,6 +1087,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
+| `snake-merge-worm.ts` | `MergeStrategy`, `wormMerge` | `Worm#merge`'s corner-collapse fixed point (D1, T1b) -- the direction- pattern passes `Snake#merge` (`snake-merge.ts`) runs over a freshly concatenated point list, and nothing else: this module owns no notion of decorations, text, or strate |
+| `snake-merge.ts` | `MergedEdges`, `mergeSnakes` | `UGraphicForSnake`'s two-pass connector-merge mechanism (D1, T1b), ported as a pure function over the lane-pass-ordered edge list `assign- coordinates-full.ts` builds AFTER `placeSwimlanes` but BEFORE `compressGeometry` runs: merging reads |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneEdge`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-hline.ts` | `HlineCandidate`, `HlinePayload`, `RoutedHlineMeta`, `RoutedHline`, `routeHline` | Swimlane-aware extent for the `ConnectionHline` closing bar both `FtileIfWithLinks`/`FtileIfLongHorizontal` draw for `ConditionEndStyle .HLINE`: under swimlanes, `Swimlanes#drawWhenSwimlanes` redraws the WHOLE tree once per lane (`Swimlanes |
 | `swimlane-lane-origins.ts` | `LaneOrigins`, `DividerReservation`, `computeLaneOrigins` | The per-lane origin loop, split out of `swimlane-placement.ts` (this file's own 500-line hook -- mission `activity-loop-lane-translate` T1, same pure-move precedent as `swimlane-lanes.ts`, whose own header notes why: existing importers stay |
