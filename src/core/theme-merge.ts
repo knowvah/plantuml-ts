@@ -61,6 +61,9 @@ const OPTIONAL_SCALAR_KEYS = [
   'diagramMargin',
   'handwritten',
   'styleOverrides',
+  'hyperlinkUnderline', // add2 T3e
+  'svgLinkTarget', // add2 T3e
+  'preserveAspectRatio', // add2 T3e
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

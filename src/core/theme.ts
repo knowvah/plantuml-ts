@@ -15,12 +15,14 @@ import { deepMergeTheme } from './theme-merge.js';
 import type { ThemeColorFields } from './theme-colors-fields.js';
 import type { Paint } from './paint.js';
 import type { ThemeSequenceFields } from './theme-sequence-fields.js';
+import type { ThemeRootFields } from './theme-root-fields.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 export type { ThemeColorFields } from './theme-colors-fields.js';
 export type { ThemeSequenceFields } from './theme-sequence-fields.js';
+export type { ThemeRootFields } from './theme-root-fields.js';
 
-export interface Theme {
+export interface Theme extends ThemeRootFields {
   fontFamily: string;
   fontSize: number;
   /** GraphvizImageBuilder.java:124-126 cascade font (`getStyleArrowCardinality`); default 13 = plantuml.skin:307 arrow FontSize, family = root's SansSerif (plantuml.skin:6, arrow sets no FontName). Optional so pre-existing hand-built `Theme` literals elsewhere stay valid; `defaultTheme`/`darkTheme` always set both. No consumer yet — T5/T6, decisions.md#D3. */
@@ -59,7 +61,6 @@ export interface Theme {
    * is why `!theme amiga` drew a 14px title where the jar draws 22px.
    */
   styleOverrides?: Record<string, Record<string, string>>;
-
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -249,7 +250,6 @@ export interface Theme {
    *  split — pure move, see that module's own doc comment). */
   sequence: ThemeSequenceFields;
 }
-
 export const defaultTheme: Theme = {
   fontFamily: 'sans-serif',
   fontSize: 14,
@@ -382,7 +382,7 @@ export const monochromeTheme: Theme = {
  * fields may each be partially specified. deepMergeTheme accepts this type and
  * fills missing fields from the base.
  */
-export type ThemeOverride = {
+export type ThemeOverride = Partial<ThemeRootFields> & {
   fontFamily?: string;
   fontSize?: number;
   cardinalityFontSize?: number;

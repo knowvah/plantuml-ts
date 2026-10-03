@@ -27,4 +27,47 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       else if (v === 'inside' || v === 'insidehexagon') acc.conditionStyle = 'insideHexagon';
     },
   ],
+  // add2 T3e (family F): `SkinParam#useUnderlineForHyperlink()`
+  // (`skin/SkinParam.java:1056-1060`): underline stays ON unless the value
+  // is the case-insensitive literal "false" -- `valueIs` lower-cases
+  // neither side itself (`String#equalsIgnoreCase`), so this mirrors that
+  // exactly rather than a stricter `=== 'false'`.
+  [
+    ['hyperlinkunderline'],
+    (acc, value) => {
+      acc.hyperlinkUnderline = value.toLowerCase() !== 'false';
+    },
+  ],
+  // add2 T3e (family F): `SkinParam#getSvgLinkTarget()`
+  // (`skin/SkinParam.java:1080-1082`): `getValue("svglinktarget", "_top")`,
+  // a raw passthrough, no validation.
+  [
+    ['svglinktarget'],
+    (acc, value) => {
+      acc.svgLinkTarget = value;
+    },
+  ],
+  // add2 T3e (family G): `SkinParam#getPreserveAspectRatio()`
+  // (`skin/SkinParam.java:1085-1087`): `getValue("preserveaspectratio",
+  // DEFAULT_PRESERVE_ASPECT_RATIO)`, a raw passthrough, no validation.
+  [
+    ['preserveaspectratio'],
+    (acc, value) => {
+      acc.preserveAspectRatio = value;
+    },
+  ],
+  // add2 T3e (family K): `FromSkinparamToStyle.java:144`
+  // (`addConFont("activity", SName.activity)` registers the flat
+  // `activityFontName` key -> `PName.FontName` on `SName.activity`).
+  // `activity` is already a per-element bucket SName (D3,
+  // `skinparam-element-buckets.ts#ELEMENT_BUCKET_SNAMES`); diamond inherits
+  // it for free (`StyleSignatureBasic.java:271-273`: the diamond's own
+  // signature nests `SName.activity`), mirroring `activitydiamondfontname`
+  // below for the diamond's OWN bucket.
+  [
+    ['activityfontname'],
+    (acc, value) => {
+      (acc.elements['activity'] ??= {}).fontFamily = value;
+    },
+  ],
 ];
