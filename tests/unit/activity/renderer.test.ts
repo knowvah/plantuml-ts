@@ -753,6 +753,76 @@ describe('renderActivity — edge with emphasize', () => {
     // arrowheads.
     expect(tags).toEqual(['polygon', 'line', 'line', 'line', 'polygon']);
   });
+
+  // b3/T3a (family B/ORD): `UGraphicCompressOnXorY#drawLine`
+  // (`klimt/compress/UGraphicCompressOnXorY.java:142-146`) swaps a line's
+  // own endpoints whenever `y1 > y2`, unconditionally, for every line the
+  // activity engine draws -- not just the end-cross diagonal
+  // `activity-renderer-terminals.ts#orderedLine` already ported.
+  it('an upward segment (y1 > y2) is emitted with its endpoints swapped', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 10, y: 100 },
+            { x: 10, y: 20 },
+          ],
+          arrowhead: false,
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const line = content.match(/<line[^>]*\/>/)![0];
+    expect(line).toContain('y1="20"');
+    expect(line).toContain('y2="100"');
+  });
+
+  it('a downward segment (y1 <= y2) is emitted unchanged', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 10, y: 20 },
+            { x: 10, y: 100 },
+          ],
+          arrowhead: false,
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const line = content.match(/<line[^>]*\/>/)![0];
+    expect(line).toContain('y1="20"');
+    expect(line).toContain('y2="100"');
+  });
+
+  // b3/T3a (family C/EMMID): the emphasize arrow draws at `edge.emphasizeAt`
+  // (the PRE-compression segment midpoint, `compress-geometry.ts
+  // #withEmphasizeAnchor`'s own doc) when the geometry carries it, never a
+  // midpoint recomputed from `points` at render time.
+  it('places the emphasized arrow at emphasizeAt when present, not the segment midpoint', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+          emphasize: 'down',
+          emphasizeAt: { x: 0, y: 12 },
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const polygons = content.match(/<polygon[^>]*points="([^"]*)"/g) ?? [];
+    expect(polygons.length).toBe(2);
+    // `arrowHeadPoints('down')`'s own tip is its local (0,0), translated by
+    // `emphasizeAt` -- NOT the segment's own geometric midpoint (0, 15).
+    expect(polygons.some((p) => p.includes('0,12'))).toBe(true);
+    expect(polygons.some((p) => p.includes('0,15'))).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------

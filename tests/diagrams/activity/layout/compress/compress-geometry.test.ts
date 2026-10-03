@@ -188,6 +188,49 @@ describe('compressGeometry — midArrowAt moves with the edge (D4/T1b)', () => {
   });
 });
 
+describe('compressGeometry — emphasizeAt anchors the PRE-compression midpoint (b3/T3a, family C)', () => {
+  it('emphasizeAt is NOT the midpoint of the (already-compressed) output points', () => {
+    const top = node('a', 'start', 0, 0, 10, 30);
+    const bottom = node('b', 'start', 0, 58, 10, 30);
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 5, y: 15 },
+        { x: 5, y: 73 },
+      ],
+      emphasize: 'down',
+    };
+    const edgeMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const input = baseInput({ nodes: [top, bottom], edges: [edge], edgeMeta, bounds: { maxX: 10, maxY: 88 } });
+    const result = compressGeometry(input);
+    const edgeOut = result.edges[0]!;
+    // `Worm#drawLine` (`Worm.java:178-182`) anchors the mid-arrow at the
+    // PRE-compression midpoint `(15 + 73) / 2 = 44`, then maps it through
+    // `ct()` same as any point. Here `ct(44) = 44` (the micro-slot this
+    // gap keeps open, `removed.y`, sits below it), so `emphasizeAt.y`
+    // stays 44 even though the segment's own far endpoint compresses from
+    // 73 to 69 -- recomputing the midpoint from the (compressed) OUTPUT
+    // points would instead give `(15 + 69) / 2 = 42`, a different value.
+    expect(edgeOut.points[1]!.y).toBe(69);
+    expect(edgeOut.emphasizeAt).toEqual({ x: 5, y: 44 });
+    expect(edgeOut.emphasizeAt!.y).not.toBe((edgeOut.points[0]!.y + edgeOut.points[1]!.y) / 2);
+  });
+
+  it('an edge with no emphasize is unaffected (field stays absent)', () => {
+    const left = node('a', 'start', 0, 0, 30, 10);
+    const right = node('b', 'start', 58, 0, 30, 10);
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 15, y: 10 },
+        { x: 73, y: 10 },
+      ],
+    };
+    const edgeMeta: EdgeMeta[] = [{ lane1: undefined, lane2: undefined, shape: 'default' }];
+    const input = baseInput({ nodes: [left, right], edges: [edge], edgeMeta, bounds: { maxX: 88, maxY: 10 } });
+    const result = compressGeometry(input);
+    expect(result.edges[0]!.emphasizeAt).toBeUndefined();
+  });
+});
+
 describe('compressGeometry — lanes', () => {
   it("a lane's x + width and contentX + contentWidth follow the transform", () => {
     const left = node('a', 'start', 0, 0, 30, 10);

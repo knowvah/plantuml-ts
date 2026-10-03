@@ -8,9 +8,10 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, polygon } from '../../core/svg.js';
+import { rect, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { orderedLine } from './activity-renderer-terminals.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
@@ -168,11 +169,21 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * own `HeadColor` (`Worm.java:126-127` vs `:153-154` -- two DIFFERENT
  * `ug.apply` colors, never the same variable upstream either).
  */
+/**
+ * b3/T3a (family C/EMMID): `emphasis.at` -- when present -- is the
+ * PRE-compression segment midpoint, already mapped through `ct()` on
+ * each axis by `compress-geometry.ts#withEmphasizeAnchor`/`transformEdge`
+ * (`ActivityEdgeGeo.emphasizeAt`'s own doc). Drawn via {@link DIR_VECTOR}
+ * rather than the segment's own (possibly-compressed) `dx, dy` -- the
+ * direction is already known (`emphasis.dir`), and `arrowTip`'s own
+ * `arrowDirection(dx, dy)` call only ever needs to recover that SAME
+ * `dir` back out of whatever vector it is given.
+ */
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
   colors: { line: string; head: string },
   strokeWidth: number,
-  emphasize: ArrowDir | undefined,
+  emphasis: { dir: ArrowDir; at: { x: number; y: number } | undefined } | undefined,
   theme: Theme,
 ): string {
   let out = '';
@@ -182,12 +193,12 @@ function renderEdgeSegments(
     const p2 = pts[i + 1]!;
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
-    if (!emphasisDrawn && emphasize !== undefined && arrowDirection(dx, dy) === emphasize) {
-      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      out += arrowTip(mid, { dx, dy }, colors.head, theme);
+    if (!emphasisDrawn && emphasis !== undefined && arrowDirection(dx, dy) === emphasis.dir) {
+      const anchor = emphasis.at ?? { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.head, theme);
       emphasisDrawn = true;
     }
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
+    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
   }
   return out;
 }
@@ -237,11 +248,12 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // interleaved INTO this segment run, immediately before its matching
   // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
   // exact `Worm.java:138-143` loop body this ports.
+  const emphasis = edge.emphasize === undefined ? undefined : { dir: edge.emphasize, at: edge.emphasizeAt };
   const segments = renderEdgeSegments(
     pts,
     { line: edgeColor, head: headColor },
     activityLineThickness(theme, 'arrow'),
-    edge.emphasize,
+    emphasis,
     theme,
   );
 

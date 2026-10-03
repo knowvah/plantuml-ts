@@ -80,6 +80,22 @@ export interface ActivityEdgeGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:303-306
    */
   mergeable?: 'FULL' | 'LIMITED' | 'NONE';
+  /**
+   * b3/T3a (family C/EMMID): the PRE-compression midpoint of the first
+   * segment matching `emphasize`'s direction -- `Worm#drawLine`
+   * (`ftile/Worm.java:178-182`) computes the mid-arrow's anchor as
+   * `p1 + (p2-p1)/2` using the Worm's own (uncompressed) points, THEN
+   * draws through the compressing `UGraphic`, which maps that one anchor
+   * point through `ct()` on each axis exactly like any other point
+   * (`klimt/compress/UGraphicCompressOnXorY.java:117-126`'s `getTranslate`
+   * on the `draw(UShape)` non-`ULine`/non-`URectangle` branch) -- never by
+   * re-deriving a midpoint from the (already compressed) segment
+   * endpoints, which is a DIFFERENT point once X or Y compression removes
+   * unequal slack from each side. Populated once, pre-compression, by
+   * `compress-geometry.ts#withEmphasizeAnchor`; carried through both
+   * compress axes by `transformEdge`, same as {@link midArrowAt}.
+   */
+  emphasizeAt?: { x: number; y: number };
 }
 
 export interface SwimlaneGeo {

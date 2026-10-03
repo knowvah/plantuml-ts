@@ -108,10 +108,16 @@ export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
  * against `fabexi-81-dife869`'s jar SVG byte-for-byte: the two points are
  * identical, only the x1/y1 vs x2/y2 assignment is transposed). This
  * compress wrapper lives under `core/klimt/**`, which T2f may not edit
- * (D7) -- the activity side normalises the one line it draws with a
- * negative `dy` instead of depending on a ported compress pass.
+ * (D7) -- the activity side normalises every line it draws with this
+ * SAME helper, rather than depending on a ported compress pass.
+ *
+ * b3/T3a (family B/ORD): exported so `renderer.ts#renderEdgeSegments` can
+ * apply the IDENTICAL swap to every edge segment line, not just this
+ * file's end-cross diagonals -- one normalisation, every `<line>` draw
+ * site, matching `UGraphicCompressOnXorY.java:142-146`'s own unconditional
+ * scope (it wraps the WHOLE diagram, every `ULine`, not a chosen few).
  */
-function orderedLine(x1: number, y1: number, x2: number, y2: number, style: LineStyle): string {
+export function orderedLine(x1: number, y1: number, x2: number, y2: number, style: LineStyle): string {
   return y1 > y2 ? line(x2, y2, x1, y1, style) : line(x1, y1, x2, y2, style);
 }
 
