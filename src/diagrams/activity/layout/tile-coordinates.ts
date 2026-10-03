@@ -63,6 +63,13 @@ export interface Out {
    */
   reservations: Reservation[];
   nextId: (prefix: string) => string;
+  /**
+   * D1 (T1b): the `FtileGroup`/`partition` nesting stack `pushEdge` tags
+   * each new edge's `EdgeMeta.scope` with, joined (`[]` = top level) --
+   * see `swimlane-placement.ts`'s `EdgeMeta.scope` doc. Mutated only by
+   * `walkTile`'s `'gtile-group'`/`'gtile-partition'` case below.
+   */
+  groupScope: string[];
 }
 
 export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
@@ -124,6 +131,7 @@ export function pushEdge(
   const shape = typeof routing === 'string' ? routing : (routing.shape ?? 'default');
   const loop = typeof routing === 'string' ? undefined : routing.loop;
   const hline = typeof routing === 'string' ? undefined : routing.hline;
+  const scope = out.groupScope.length > 0 ? out.groupScope.join('>') : undefined;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
   out.edgeMeta.push({
     lane1,
@@ -131,6 +139,7 @@ export function pushEdge(
     shape,
     ...(loop !== undefined ? { loop } : {}),
     ...(hline !== undefined ? { hline } : {}),
+    ...(scope !== undefined ? { scope } : {}),
   });
 }
 
@@ -359,15 +368,9 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
 
     case 'gtile-group':
-    case 'gtile-partition': {
-      const t = tile as unknown as GtileGroup;
-      const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
-      pushNode(out, { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height }, myLane);
-      if (t.children.length > 0) {
-        walkTile(t.children[0]!, x + t.bodyOffsetX, y + t.bodyOffsetY, { kindHint: null, lane: myLane }, out);
-      }
+    case 'gtile-partition':
+      walkTileGroup(tile as unknown as GtileGroup, x, y, myLane, out);
       return;
-    }
 
     default:
       // #lizard forgives -- faithful port of the upstream tile-kind
@@ -384,13 +387,38 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
   }
 }
 
+/**
+ * The `'gtile-group'`/`'gtile-partition'` case, split out of `walkTile`'s
+ * own switch purely to keep that function's NLOC from growing (D1, T1b):
+ * pushes a new `groupScope` id before walking the group's own body, so
+ * `pushEdge` tags every edge inside with it, then pops it back off.
+ */
+function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: string | undefined, out: Out): void {
+  const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
+  pushNode(out, { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height }, myLane);
+  if (tile.children.length === 0) return;
+  // D1 (T1b): `FtileGroup` opens its own nested `UGraphicForSnake`
+  // (`decisions.md#D1`) -- a pushed scope id so `snake-merge.ts` never
+  // fuses an edge inside this group with one outside it.
+  out.groupScope.push(out.nextId('scope'));
+  walkTile(tile.children[0]!, x + tile.bodyOffsetX, y + tile.bodyOffsetY, { kindHint: null, lane: myLane }, out);
+  out.groupScope.pop();
+}
+
+/**
+ * T1b: `base` bundles the formerly-separate `baseX`/`baseY` positional pair
+ * -- a pre-existing parser blind spot in this file (`lizard` never parsed
+ * past the giant `walkTile` switch, so this 6th positional argument's own
+ * cap violation went undetected) surfaced once an unrelated edit let it
+ * parse the whole file; the two coordinates were always passed together at
+ * every call site, so bundling them is a reshape, not a behavior change.
+ */
 export function assignCoordinates(
   root: Tile,
   ast: ActivityDiagramAST,
-  baseX: number,
-  baseY: number,
+  base: GPoint,
   bounder: StringBounder,
   theme: Theme,
 ): ActivityGeometry {
-  return assignCoordinatesFull({ root, ast, baseX, baseY, bounder, theme }).geometry;
+  return assignCoordinatesFull({ root, ast, baseX: base.x, baseY: base.y, bounder, theme }).geometry;
 }

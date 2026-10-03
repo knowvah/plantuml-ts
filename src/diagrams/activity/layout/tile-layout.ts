@@ -300,7 +300,7 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   // origin/size is derived AFTER layout, dynamically, from the placed
   // geometry's own ink extent (`assign-coordinates-full.ts
   // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
-  return assignCoordinates(root, ast, 0, 0, bounder, theme);
+  return assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
 }
 
 // `kill`/`detach` are NOT simple leaves (T2b): `tileNodes` intercepts and

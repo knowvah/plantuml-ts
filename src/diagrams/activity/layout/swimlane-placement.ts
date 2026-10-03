@@ -85,6 +85,16 @@ export interface EdgeMeta {
    * `sameLaneEdges` (this module doc's own citation for why that keeps
    * measurement byte-identical to pre-T1p-g). */
   readonly hline?: HlinePayload;
+  /**
+   * T1b (D1): the `FtileGroup`/`partition` nesting active at `pushEdge`
+   * time (`undefined` = top level) -- a nested `UGraphicForSnake` flushes
+   * before its outer one, so two edges merge only when this matches.
+   * Read by `layout/snake-merge.ts`; propagated via `repeatEdgeMeta` for
+   * every routed edge except `routeHline`'s fan-out (always `NONE`
+   * strategy, so scope never matters there).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGroup.java
+   */
+  readonly scope?: string;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every

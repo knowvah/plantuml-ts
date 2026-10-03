@@ -84,7 +84,7 @@ const NODE_MARGIN_Y = 20;
 
 describe('assignCoordinates — single GtileAction', () => {
   const tile = new GtileAction(actionNode, bounder, theme);
-  const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
   it('produces exactly 1 node geo', () => {
     expect(geo.nodes).toHaveLength(1);
@@ -127,7 +127,7 @@ describe('assignCoordinates — GtileTopDown with 2 GtileAction children', () =>
   const action0 = new GtileAction(actionNode, bounder, theme);
   const action1 = new GtileAction({ kind: 'action' as const, label: 'World', swimlane: 'default' }, bounder, theme);
   const tile = new GtileTopDown([action0, action1], bounder, theme);
-  const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
   it('produces exactly 2 node geos', () => {
     expect(geo.nodes).toHaveLength(2);
@@ -185,7 +185,7 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     const whileTile = new GtileWhile(header, body, bounder, theme);
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, whileTile, c], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // node order is unaffected by D7 -- draws are node-then-its-own-edges
     // per compound, walk order is unchanged: a, header(+its own label,
@@ -235,7 +235,7 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, b, c], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'b', 'c']);
     expect(geo.edges).toHaveLength(2);
@@ -273,7 +273,7 @@ describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not cent
       hasPointOut: () => true,
     };
     const root = new GtileTopDown([start, ifLike], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes).toHaveLength(2);
     const startNode = geo.nodes[0]!;
@@ -292,7 +292,7 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
   const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
   const tile = new GtileWhile(header, body, bounder, theme);
-  const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
   it('produces at least 2 nodes (diamond + action)', () => {
     expect(geo.nodes.length).toBeGreaterThanOrEqual(2);
@@ -376,7 +376,7 @@ describe('assignCoordinates — GtileWhile with an empty body draws ConnectionBa
     const header = new GtileDiamondInside('loop?', {}, bounder, theme);
     const body = new GtileTopDown([], bounder, theme);
     const tile = new GtileWhile(header, body, bounder, theme);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(3);
     const backEdge = geo.edges.find((e) => e.points.length === 5)!;
@@ -417,7 +417,7 @@ describe('assignCoordinates — the while-header polygon is the hexagon-alone he
     const header = new GtileDiamondInside('loop?', { north: 'yes', west: 'no' }, bounder, theme);
     const body = new GtileTopDown([new GtileAction({ kind: 'action', label: 'a' }, bounder, theme)], bounder, theme);
     const tile = new GtileWhile(header, body, bounder, theme);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     const headerNode = geo.nodes.find((n) => n.kind === 'while-header')!;
     const aloneHeight = header.getCoord(SOUTH_HOOK).y;
@@ -467,7 +467,7 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     const action2 = new GtileAction({ kind: 'action' as const, label: 'after', swimlane: 'default' }, bounder, theme);
     const body = new GtileTopDown([action1, brk, action2], bounder, theme);
     const tile = new GtileWhile(header, body, bounder, theme);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // action1->brk (the body's OWN internal sibling edge, pushed while
     // walking the body, before the while's own connections). brk->action2
@@ -549,7 +549,7 @@ describe('assignCoordinatesFull — no reservations for a plain action', () => {
 describe('assignCoordinates — swimlane geometry', () => {
   const tile = new GtileAction(actionNode, bounder, theme);
   const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['Lane A', 'Lane B'] };
-  const geo = assignCoordinates(tile, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+  const geo = assignCoordinates(tile, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
   it('emits 2 swimlane geos', () => {
     expect(geo.swimlanes).toHaveLength(2);
@@ -572,7 +572,7 @@ describe('assignCoordinates — nodes are placed inside their own lane', () => {
     b.swimlane = 'BBBBBBBBBBBBBBBBBBBBBBBBB';
     const root = new GtileTopDown([a, b], bounder, theme);
     const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'BBBBBBBBBBBBBBBBBBBBBBBBB'] };
-    return assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    return assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
   }
 
   it("node 'a' sits inside lane A's bounds", () => {
@@ -605,7 +605,7 @@ describe('assignCoordinates — cross-lane vs same-lane edge shape', () => {
     b.swimlane = 'B';
     const root = new GtileTopDown([a, b], bounder, theme);
     const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
-    const geo = assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(1);
     const points = geo.edges[0]!.points;
@@ -621,7 +621,7 @@ describe('assignCoordinates — cross-lane vs same-lane edge shape', () => {
     a2.swimlane = 'A';
     const root = new GtileTopDown([a, a2], bounder, theme);
     const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
-    const geo = assignCoordinates(root, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(1);
     expect(geo.edges[0]!.points).toHaveLength(2);
@@ -638,12 +638,11 @@ describe('assignCoordinates — no swimlanes leaves geometry byte-identical', ()
     const withoutLanes = assignCoordinates(
       build(),
       { nodes: [], swimlanes: [] },
-      LAYOUT_MARGIN,
-      LAYOUT_MARGIN,
+      { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN },
       bounder,
       theme,
     );
-    const withEmptyAst = assignCoordinates(build(), emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const withEmptyAst = assignCoordinates(build(), emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
     expect(withoutLanes.nodes).toEqual(withEmptyAst.nodes);
     expect(withoutLanes.edges).toEqual(withEmptyAst.edges);
     expect(withoutLanes.swimlanes).toEqual([]);
@@ -763,7 +762,7 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
   it('a continuing branch gets a 2-point in-edge at its own north x and a 2-point out-edge to the join bar', () => {
     const branch = branchStub(80, 60, true);
     const tile = new GtileFork([branch], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(2);
     const [inEdge, outEdge] = geo.edges;
@@ -797,7 +796,7 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
   it('a detached branch (hasPointOut() === false) gets an in-edge and NO out-edge', () => {
     const branch = branchStub(80, 60, false);
     const tile = new GtileSplit([branch], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(1);
     expect(geo.edges[0]!.points).toHaveLength(2);
@@ -807,7 +806,7 @@ describe('assignCoordinates — fork/split branch connectors are vertical drops 
     const continuing = branchStub(80, 60, true);
     const detached = branchStub(80, 80, false);
     const tile = new GtileFork([continuing, detached], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // 2 in-edges + 1 out-edge (continuing branch only)
     expect(geo.edges).toHaveLength(3);
@@ -839,7 +838,7 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
 
   it('fork emits fork-bar then every branch then join-bar, both full barWidth, even when every branch is detached', () => {
     const tile = new GtileFork([branchStub(80, 60, false), branchStub(80, 80, false)], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes.map((n) => n.kind)).toEqual(['fork-bar', 'stub-branch', 'stub-branch', 'join-bar']);
     const forkBar = geo.nodes[0]!;
@@ -871,7 +870,7 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const b1 = branchStub(80, 60, true);
     const b2 = branchStub(80, 60, true);
     const tile = new GtileSplit([b0, b1, b2], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
     const first = SPLIT_BRANCH_ORIGIN + tile.branchOffsets[0]! + 7;
@@ -896,7 +895,7 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const b1 = branchStub(80, 60, false);
     const b2 = branchStub(80, 60, true);
     const tile = new GtileSplit([b0, b1, b2], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
     const centreX = SPLIT_BRANCH_ORIGIN + tile.width / 2;
@@ -921,7 +920,7 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
 
   it('split with every branch detached emits no split-join-bar node and no out-edges', () => {
     const tile = new GtileSplit([branchStub(80, 60, false), branchStub(80, 60, false)], bounder);
-    const geo = assignCoordinates(tile, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes.some((n) => n.kind === 'split-join-bar')).toBe(false);
     expect(geo.nodes.map((n) => n.kind)).toEqual(['split-bar', 'stub-branch', 'stub-branch']);
@@ -933,7 +932,7 @@ describe('assignCoordinates — fork/split bar and split-line geometry (D4)', ()
     const b1 = branchStub(80, 60, true, 'LaneB');
     const tile = new GtileSplit([b0, b1], bounder);
     const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['LaneA', 'LaneB'] };
-    const geo = assignCoordinates(tile, ast, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(tile, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     const splitBar = geo.nodes.find((n) => n.kind === 'split-bar')!;
     const joinLine = geo.nodes.find((n) => n.kind === 'split-join-bar')!;
@@ -963,7 +962,7 @@ describe('assignCoordinates — gtile-top-down sibling edge gated on hasPointOut
     const dead = deadEndStub('dead');
     const next = new GtileAction({ kind: 'action' as const, label: 'after' }, bounder, theme);
     const root = new GtileTopDown([dead, next], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes).toHaveLength(2);
     expect(geo.edges).toHaveLength(0);
@@ -974,7 +973,7 @@ describe('assignCoordinates — gtile-top-down sibling edge gated on hasPointOut
     const dead = deadEndStub('dead');
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, dead, c], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.nodes).toHaveLength(3);
     expect(geo.edges).toHaveLength(1);
@@ -986,7 +985,7 @@ describe('assignCoordinates — gtile-top-down sibling edge gated on hasPointOut
     const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
     const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
     const root = new GtileTopDown([a, b], bounder, theme);
-    const geo = assignCoordinates(root, emptyAst, LAYOUT_MARGIN, LAYOUT_MARGIN, bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     expect(geo.edges).toHaveLength(1);
   });

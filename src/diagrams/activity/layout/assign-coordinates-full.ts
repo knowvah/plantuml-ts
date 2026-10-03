@@ -20,12 +20,7 @@
  */
 
 import type { ActivityDiagramAST } from '../ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityGeometry,
-  ActivityNodeGeo,
-  SwimlaneBandGeo,
-} from '../activity-geometry.types.js';
+import type { ActivityGeometry, SwimlaneBandGeo } from '../activity-geometry.types.js';
 import type { Tile } from '../tiles/tile.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
@@ -232,14 +227,25 @@ function inLanePassOrder(
   };
 }
 
+/** Fresh, empty {@link Out} accumulator -- split out of {@link
+ *  assignCoordinatesFull} purely to keep that function's own NLOC under
+ *  the file's limit. */
+function buildOut(): Out {
+  let idCounter = 0;
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    nextId: (prefix: string) => `${prefix}-${++idCounter}`,
+    groupScope: [],
+  };
+}
+
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
-  const nodes: ActivityNodeGeo[] = [];
-  const edges: ActivityEdgeGeo[] = [];
-  const edgeMeta: EdgeMeta[] = [];
-  const reservations: Reservation[] = [];
-  let idCounter = 0;
-  const out: Out = { nodes, edges, edgeMeta, reservations, nextId: (prefix: string) => `${prefix}-${++idCounter}` };
+  const out = buildOut();
+  const { nodes, edges, edgeMeta, reservations } = out;
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
