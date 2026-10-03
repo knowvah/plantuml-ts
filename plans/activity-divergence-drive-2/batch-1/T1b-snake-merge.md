@@ -35,6 +35,8 @@ walk-repeat-backward,walk-fork-branches,assign-coordinates-full,canvas-origin}.t
 `src/diagrams/activity/renderer.ts`, their tests, new tests.
 
 ## Acceptance
+- Given journal row 14's six break-in-repeat rows (cixave, dacuga, mudobi,
+  bizono, dixiku, doziki), then their extra weld-join arrowheads/lines are gone.
 - Given becaje-01-vaji284, bocaga-53-nale241, jecoxu-17-zama003, then the
   duplicate line + arrowhead is gone (element counts equal the jar's).
 - Given a LIMITED or NONE site, then its snakes never fuse past the Java rule.
