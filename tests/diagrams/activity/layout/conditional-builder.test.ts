@@ -59,6 +59,26 @@ describe("ifBuilderOf — [action, kill] is Java's single killed instruction", (
   });
 });
 
+describe('ifBuilderOf — a bare or killed spot is stop-or-spot (zaloze, T3d)', () => {
+  // zaloze-31-jibo311: then=[action], else=[(A) spot, detach].
+  // InstructionSpot#isOnlySingleStopOrSpot is unconditionally true in the
+  // Java (InstructionList.java:98-99) -- killed or not.
+  it('[spot, detach] routes to down, not with-links', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }, { kind: 'detach' }]));
+    expect(result).toEqual({ builder: 'down', swapped: false, optionalStop: true });
+  });
+
+  it('[spot, kill] is the same command as detach', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }, { kind: 'kill' }]));
+    expect(result.builder).toBe('down');
+  });
+
+  it('a bare (unkilled) spot alone is also stop-or-spot', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }]));
+    expect(result).toEqual({ builder: 'down', swapped: false, optionalStop: true });
+  });
+});
+
 describe('ifBuilderOf — with-links', () => {
   it('both branches non-empty, neither a lone stop -> with-links', () => {
     expect(ifBuilderOf(makeIf([action('a')], [action('b')]))).toEqual({ builder: 'with-links' });
