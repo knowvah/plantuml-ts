@@ -8,6 +8,10 @@ import type { DiamondConditionTile, DiamondInsideLabels, DiamondSide } from './g
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d),
+ *  same constant as `gtile-diamond-inside.ts`'s own copy.
+ * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
+const ATOM_TEXT_MIN_HEIGHT = 10;
 
 interface LabelDim {
   readonly text: string;
@@ -29,7 +33,7 @@ function measureLabel(text: string | undefined, bounder: StringBounder, fontSize
   for (const line of t.split('\n')) {
     const dim = bounder.getDimension(line, fontSize);
     if (dim.width > width) width = dim.width;
-    height += dim.height;
+    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
   }
   return { text: t, width, height };
 }
@@ -70,7 +74,9 @@ export class GtileDiamondSquare extends TileLeaf implements DiamondConditionTile
     this.east = measureLabel(labels.east, bounder, arrowSize);
 
     const diamondSize = activityFontSize(theme, 'diamond');
-    const dimLabel = bounder.getDimension(label, diamondSize);
+    // IFNL-class fix (T3d): per-line fold, same reason as
+    // `gtile-diamond-inside.ts`'s own `dimLabel` fix.
+    const dimLabel = measureLabel(label, bounder, diamondSize);
     if (dimLabel.width === 0 || dimLabel.height === 0) {
       this.width = HEXAGON_HALF_SIZE * 2;
       this.height = HEXAGON_HALF_SIZE * 2;

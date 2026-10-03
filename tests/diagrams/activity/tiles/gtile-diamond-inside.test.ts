@@ -132,3 +132,39 @@ describe('GtileDiamondInside — single-line label is unaffected by the multilin
     expect(tile.labelAt('west')).toEqual({ x: -42, y: -2, width: 42, height: 14, label: 'single' });
   });
 });
+
+// `AtomText.java:179-181`'s 10px height floor (L, T3d, `dozaxu-98-xetu961`):
+// a small-font side label (e.g. ArrowFontSize 7) must still reserve 10px,
+// not its own smaller reported height.
+const smallFontBounder: StringBounder = {
+  getDimension: (text: string) => ({ width: text.length * 7, height: 7 }),
+};
+
+describe('GtileDiamondInside — side label height floor (L, dozaxu-98-xetu961)', () => {
+  it('a single small-font line floors to 10px, not 7px', () => {
+    const tile = new GtileDiamondInside('', { east: 'YES' }, smallFontBounder, theme);
+    expect(tile.labelAt('east')!.height).toBe(10);
+  });
+
+  it('each line of a multi-line small-font label floors independently', () => {
+    const tile = new GtileDiamondInside('', { east: 'a\nb' }, smallFontBounder, theme);
+    expect(tile.labelAt('east')!.height).toBe(20);
+  });
+});
+
+// IFNL (T3d, `vaxiki-78-nice114`): the condition's OWN label needs the
+// SAME per-line fold as the side labels -- a single `getDimension` call
+// on a real-`\n`-bearing condition reports one oversized line.
+describe('GtileDiamondInside — multiline condition label (IFNL, vaxiki-78-nice114)', () => {
+  it('width is the widest line of the condition, not the whole string', () => {
+    const tile = new GtileDiamondInside('dummy\non\nseveral', {}, bounder, theme);
+    // "dummy"=5*7=35, "on"=2*7=14, "several"=7*7=49 -> max=49; +24 pad.
+    expect(tile.width).toBe(73);
+  });
+
+  it('height sums every condition line, not one line', () => {
+    const tile = new GtileDiamondInside('dummy\non\nseveral', {}, bounder, theme);
+    // 3 lines * 14 = 42 (above the 24 floor).
+    expect(tile.height).toBe(42);
+  });
+});

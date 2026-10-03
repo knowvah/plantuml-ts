@@ -7,6 +7,13 @@ import { activityFontSize } from '../activity-style-defaults.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+/** `AtomText#calculateDimensionSlow`'s own height floor (L, T3d), same
+ *  constant as `gtile-diamond-inside.ts`'s own copy. This file's own
+ *  `measureLabel` has no multi-line split (no corpus fixture exercises a
+ *  multi-line label through `FtileDiamondInside2` -- left as-is, not
+ *  speculatively added here) but the single-line floor still applies.
+ * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
+const ATOM_TEXT_MIN_HEIGHT = 10;
 
 export type DiamondInside2Side = 'north' | 'west' | 'east';
 
@@ -28,7 +35,7 @@ function measureLabel(text: string | undefined, bounder: StringBounder, fontSize
   const t = text ?? '';
   if (t === '') return { text: t, width: 0, height: 0 };
   const dim = bounder.getDimension(t, fontSize);
-  return { text: t, width: dim.width, height: dim.height };
+  return { text: t, width: dim.width, height: Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT) };
 }
 
 /** Byte-identical to `gtile-diamond-inside.ts`'s own `hexagonAlone` (D5: no
