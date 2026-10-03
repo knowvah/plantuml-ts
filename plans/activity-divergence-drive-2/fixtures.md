@@ -12,7 +12,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 
 | slug | ws (b0) | element shape (b0) | add1 mechanism | task | mechanism | final |
 |---|---|---|---|---|---|---|
-| molexa-46-redi999 | 1 | exact {} | skinparam defaultTextAlignment center in action text; residual per journal row 40 |  |  |  |
+| molexa-46-redi999 | 1 | exact {} | skinparam defaultTextAlignment center in action text; residual per journal row 40 | T2c | T2c 1->0 | pinned (add2-b2) |
 | pekuxe-00-bovi270 | 1 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
 | setecu-78-cuko533 | 1 | exact {} | preserveAspectRatio hardcoded in src/core/klimt/document-shell.ts:197 (stop 8) | T2d | document-shell.ts/dispatcher.ts now thread `preserveAspectRatio` (default `SkinParam.java:119`, cascade `TextBlockExporter.java:380-386`); no `Theme` field exists to carry `skinparam preserveaspectratio` (`SkinParam.java:1086-1088`) into it -- that's a new skinparam key handler + `Theme` field, T2d's write-set excludes `core/theme.ts`/skinparam handlers | open -> add3 (new `Theme.preserveAspectRatio` field + skinparam key handler in `src/core/skinparam-key-handlers-table-{a,b}.ts` + `renderActivity`/other producers reading it off `theme`; owner: whichever task owns `src/core/theme.ts`) |
 | begivo-34-sicu289 | 2 | exact {} |  |  |  |  |
@@ -20,7 +20,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | bixefi-77-moki051 | 2 | exact {} |  |  |  |  |
 | cufega-65-beji958 | 2 | exact {} | Worm emphasize arrowhead before its segment, terminal decoration last (Worm.java:134-171); residual per journal row 37 |  |  |  |
 | dupopo-44-deto131 | 2 | exact {} |  |  |  |  |
-| farexi-86-xanu521 | 2 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 |  |  |  |
+| farexi-86-xanu521 | 2 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 | T2c | T2c 2->0 | pinned (add2-b2) |
 | firibi-00-puki721 | 2 | exact {} |  |  |  |  |
 | fomapa-90-bore251 | 2 | exact {} | assembly gap 35 (FtileFactoryDelegatorAssembly.java:58) then ON_Y compression; NODE_MARGIN_Y=20 is unsourced; residual per journal row 38 |  |  |  |
 | gaxezi-48-zesa921 | 2 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
@@ -37,12 +37,12 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | sikino-19-vuca111 | 2 | exact {} | swimlane title band height (+1..2 y, title text metrics); residual per journal row 45 |  |  |  |
 | sucice-41-pebi088 | 2 | exact {} |  |  |  |  |
 | tefuga-86-xefe850 | 2 | exact {} | swimlane title band height (+1..2 y, title text metrics); residual per journal row 45 |  |  |  |
-| zamagu-75-vape137 | 2 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
-| zanudo-86-seco241 | 2 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 |  |  |  |
+| zamagu-75-vape137 | 2 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 | T2c | T2c 2->0 | pinned (add2-b2) |
+| zanudo-86-seco241 | 2 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 | T2c | T2c 2->0 | pinned (add2-b2) |
 | ziboco-73-kazu841 | 2 | exact {} | repeat entry diamond: Hexagon.asPolygon(shadowing) closed, stroke 0.5; residual per journal row 42 |  |  |  |
-| fofele-65-lozo631 | 3 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 |  |  |  |
+| fofele-65-lozo631 | 3 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 | T2c | T2c 3->0 | pinned (add2-b2) |
 | livigo-47-negi605 | 3 | exact {} | Worm emphasize arrowhead before its segment, terminal decoration last (Worm.java:134-171); residual per journal row 37 |  |  |  |
-| naroji-40-nuke022 | 3 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 |  |  |  |
+| naroji-40-nuke022 | 3 | exact {} | ArrowHeadColor skinparam -> PName.HeadColor (Worm.java:146-154, FromSkinparamToStyle.java:153); residual per journal row 41 | T2c | T2c 3->0 | pinned (add2-b2) |
 | nusajo-97-bemo713 | 3 | exact {} | Worm emphasize arrowhead before its segment, terminal decoration last (Worm.java:134-171); residual per journal row 37 |  |  |  |
 | becanu-19-diti597 | 4 | exact {} |  |  |  |  |
 | cagoze-40-tete366 | 4 | exact {} | if own-label vs branch-label order (unresolved: GtileHexagonInsideLabelled vs jar SVG) — instrument first; residual per journal row 42 |  |  |  |
@@ -71,13 +71,13 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | fivama-51-cusa142 | 12 | exact {} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 | T1b | snake merge 12->0 | pinned (add2-b1) |
 | dakesa-98-mano758 | 13 | exact {} | gradient BackgroundColor (theme field typed string, not Paint); residual per journal row 41 |  |  |  |
 | fabule-54-pili300 | 22 | text-only {text: -2} | creole table / %n() / ____ in action text; residual per journal row 40 |  |  |  |
-| laxibe-66-teme800 | 26 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 | T2d | `CommandCreoleUrl.ts`'s tooltip strip had no boundary (`UrlBuilder.java:76-80`): a `{...}` glued to trailing non-whitespace text (`{dd}sss`) is never a tooltip upstream, only a Link char swallow; added the `(?=\s\|$)` lookahead | pinned (conformant) |
+| laxibe-66-teme800 | 26 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 | T2d+T2d | `CommandCreoleUrl.ts`'s tooltip strip had no boundary (`UrlBuilder.java:76-80`): a `{...}` glued to trailing non-whitespace text (`{dd}sss`) is never a tooltip upstream, only a Link char swallow; added the `(?=\s\|$)` lookahead; T2d 26->0 | pinned (add2-b2) |
 | volefo-41-tolo996 | 29 | exact {} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
 | maduja-30-xiri319 | 30 | extra line only {line: 2} |  |  |  |  |
 | samavi-13-fuku339 | 30 | extra line only {line: 2} |  |  |  |  |
 | vimako-25-mega336 | 34 | exact {} | if own-label vs branch-label order (unresolved: GtileHexagonInsideLabelled vs jar SVG) — instrument first; residual per journal row 42 |  |  |  |
-| activity-creole-table | 35 | mixed {line: -5} | creole table / %n() / ____ in action text; residual per journal row 40 |  |  |  |
-| niletu-83-lego826 | 35 | mixed {line: -5} | creole table / %n() / ____ in action text; residual per journal row 40 |  |  |  |
+| activity-creole-table | 35 | mixed {line: -5} | creole table / %n() / ____ in action text; residual per journal row 40 | T2f | T2f 35->0 | pinned (add2-b2) |
+| niletu-83-lego826 | 35 | mixed {line: -5} | creole table / %n() / ____ in action text; residual per journal row 40 | T2f | T2f 35->0 | pinned (add2-b2) |
 | kemedu-83-vipa115 | 36 | extra arrow only {polygon: 1} |  |  |  |  |
 | pujumu-36-nelo283 | 36 | extra arrow only {polygon: 1} |  |  |  |  |
 | todufa-81-gavo441 | 36 | extra arrow only {polygon: 1} |  |  |  |  |
@@ -119,17 +119,17 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | saxuro-16-tezu631 | 73 | exact {} |  | T1b | snake merge 73->61 |  |
 | carapo-31-bisi880 | 77 | exact {} | ConditionStyle InsideDiamond (unported style); residual per journal row 42 |  |  |  |
 | cubida-55-meku256 | 78 | extra line+arrow {polygon: 1, line: 1} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
-| dozaxu-98-xetu961 | 78 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 78->23 |  |
-| kafevi-44-tesu096 | 79 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 79->39 |  |
+| dozaxu-98-xetu961 | 78 | extra line+arrow {polygon: 1, line: 1} |  | T1b+T2c | snake merge 78->23; T2c 23->9 |  |
+| kafevi-44-tesu096 | 79 | extra line+arrow {polygon: 1, line: 1} |  | T1b+T2c | snake merge 79->39; T2c 39->7 |  |
 | katopo-68-xajo866 | 79 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 79->12 |  |
-| vimoxa-78-zucu656 | 80 | extra line+arrow {polygon: 1, line: 1, text: 1} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
+| vimoxa-78-zucu656 | 80 | extra line+arrow {polygon: 1, line: 1, text: 1} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 | T2e | T2e 80->84 (D7 reveal: endnote no longer text) |  |
 | vaxuta-95-cico162 | 81 | extra line+arrow {polygon: 1, line: 1} | if own-label vs branch-label order (unresolved: GtileHexagonInsideLabelled vs jar SVG) — instrument first; residual per journal row 42 | T1b | snake merge 81->0 | pinned (add2-b1) |
 | notuli-49-xugi698 | 82 | extra line only {rect: -1, line: 2, path: -2, text: -2} |  |  |  |  |
 | vupuse-73-nuso490 | 82 | extra arrow only {polygon: 2} |  | T1b | snake merge 82->55 |  |
 | jevoce-05-mumi686 | 83 | extra line only {line: 2} |  |  |  |  |
 | cemipu-87-dinu624 | 84 | exact {} |  |  |  |  |
 | norire-15-taka956 | 85 | exact {} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
-| fikuki-99-kulu790 | 88 | text-only {text: 10} | embedded {{ }} diagram: oracle 42x42 slot (memory oracle-seam-embedded-42x42) |  |  |  |
+| fikuki-99-kulu790 | 88 | text-only {text: 10} | embedded {{ }} diagram: oracle 42x42 slot (memory oracle-seam-embedded-42x42) | T2c | T2c 88->87 |  |
 | gevaxi-80-tone223 | 89 | extra line+arrow {polygon: 1, line: 1} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 | T1b | snake merge 89->34 |  |
 | lukoxa-16-cecu095 | 92 | extra line+arrow {polygon: 1, line: 3} |  |  |  |  |
 | cixave-47-milo698 | 97 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d+T1b | weld 97->165 (D7 reveal, journal 14); weld-join arrowheads -> T1b; snake merge 165->10 |  |
@@ -157,9 +157,9 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | maketa-43-juja264 | 123 | extra line+arrow {polygon: 1, line: 5} |  | T1b | snake merge 123->50 |  |
 | cujoni-21-somi079 | 124 | extra arrow only {polygon: 1} |  | T1b | snake merge 124->131 (D7 reveal: element counts now exact) |  |
 | decudi-92-bisu741 | 124 | extra line+arrow {polygon: 1, line: 5} |  | T1b | snake merge 124->51 |  |
-| copisa-69-xisi273 | 125 | text-only {text: -2} |  |  |  |  |
+| copisa-69-xisi273 | 125 | text-only {text: -2} |  | T2c | T2c 125->124 |  |
 | kijazo-83-kipu485 | 125 | extra line only {line: 2} |  | T1b | snake merge 125->222 (D7 reveal: element counts now exact) |  |
-| loxija-71-joku558 | 126 | exact {} |  |  |  |  |
+| loxija-71-joku558 | 126 | exact {} |  | T2c | T2c 126->121 |  |
 | lidefe-01-vaki092 | 128 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
 | lafilo-69-tuti771 | 131 | text-only {text: -2} |  |  |  |  |
 | vodobe-33-kefa909 | 133 | extra line+arrow {rect: -1, polygon: 1, line: 1, path: -2, text: -2} |  |  |  |  |
@@ -181,44 +181,44 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 
 | slug | refusal (diff-baseline reason) | task | mechanism | final |
 |---|---|---|---|---|
-| boxefe-81-situ725 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| caburo-70-buki284 | activity parser refused this source at line 15 (syntax): Syntax Error? |  |  |  |
-| cakeca-72-kara622 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
-| cejupe-34-muti621 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| cigagu-31-rime196 | activity parser refused this source at line 14 (syntax): Syntax Error? |  |  |  |
-| ciloke-34-pumi198 | activity parser refused this source at line 15 (syntax): Syntax Error? |  |  |  |
-| dulate-94-bupu593 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| fivone-96-nalo453 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| getene-72-dido571 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| giteso-65-mefo026 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| gudute-55-nulo344 | activity parser refused this source at line 14 (syntax): Syntax Error? |  |  |  |
-| jamana-83-gige126 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
-| jevofu-58-fazo194 | activity parser refused this source at line 8 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
-| jufefu-66-josa392 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
-| ketajo-72-rula535 | activity parser refused this source at line 7 (syntax): Syntax Error? |  |  |  |
-| kiceze-91-luke737 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| lapura-36-kavu144 | activity parser refused this source at line 11 (syntax): Syntax Error? |  |  |  |
-| mepeze-15-nuge493 | activity parser refused this source at line 6 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
-| mufixi-71-koma752 | activity parser refused this source at line 30 (syntax): Syntax Error? |  |  |  |
-| ninago-40-dalo726 | activity parser refused this source at line 10 (syntax): Syntax Error? |  |  |  |
-| nipuxu-11-tefa314 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
-| nolubo-93-rula384 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| pucinu-80-nopo009 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
-| pufuzi-99-vone170 | activity parser refused this source at line 6 (syntax): Syntax Error? |  |  |  |
-| razuzu-32-faje125 | activity parser refused this source at line 7 (syntax): Syntax Error? |  |  |  |
-| rirefa-62-kucu593 | activity parser refused this source at line 8 (syntax): Syntax Error? |  |  |  |
-| tajuxe-32-sexo680 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
-| ticeka-12-buli543 | activity parser refused this source at line 6 (syntax): Syntax Error? |  |  |  |
-| vexula-75-noko098 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
-| vilecu-41-tete416 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| xolazi-74-vamu265 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| xoreko-43-noto860 | activity parser refused this source at line 5 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
-| zafoxu-20-xofe568 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
-| zaloze-31-jibo311 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| zaxati-90-xacu660 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
-| zinelo-77-losu727 | activity parser refused this source at line 19 (syntax): Syntax Error? |  |  |  |
-| zizumo-48-taku661 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| zokuni-21-sapu966 | activity parser refused this source at line 5 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
+| boxefe-81-situ725 | activity parser refused this source at line 4 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 124 |  |
+| caburo-70-buki284 | activity parser refused this source at line 15 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 2 |  |
+| cakeca-72-kara622 | activity parser refused this source at line 2 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 515 |  |
+| cejupe-34-muti621 | activity parser refused this source at line 4 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 10 |  |
+| cigagu-31-rime196 | activity parser refused this source at line 14 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 95 |  |
+| ciloke-34-pumi198 | activity parser refused this source at line 15 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 16 |  |
+| dulate-94-bupu593 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 65 |  |
+| fivone-96-nalo453 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 8 |  |
+| getene-72-dido571 | activity parser refused this source at line 4 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 8 |  |
+| giteso-65-mefo026 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 605 |  |
+| gudute-55-nulo344 | activity parser refused this source at line 14 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 95 |  |
+| jamana-83-gige126 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 4 |  |
+| jevofu-58-fazo194 | activity parser refused this source at line 8 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b1p) |
+| jufefu-66-josa392 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 175 |  |
+| ketajo-72-rula535 | activity parser refused this source at line 7 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b2) |
+| kiceze-91-luke737 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 0 | pinned (add2-b2) |
+| lapura-36-kavu144 | activity parser refused this source at line 11 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 10 |  |
+| mepeze-15-nuge493 | activity parser refused this source at line 6 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b1p) |
+| mufixi-71-koma752 | activity parser refused this source at line 30 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 236 |  |
+| ninago-40-dalo726 | activity parser refused this source at line 10 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 2 |  |
+| nipuxu-11-tefa314 | activity parser refused this source at line 2 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 18 |  |
+| nolubo-93-rula384 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 65 |  |
+| pucinu-80-nopo009 | activity parser refused this source at line 2 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 8 |  |
+| pufuzi-99-vone170 | activity parser refused this source at line 6 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 70 |  |
+| razuzu-32-faje125 | activity parser refused this source at line 7 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 158 |  |
+| rirefa-62-kucu593 | activity parser refused this source at line 8 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 151 |  |
+| tajuxe-32-sexo680 | activity parser refused this source at line 2 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 96 |  |
+| ticeka-12-buli543 | activity parser refused this source at line 6 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b2) |
+| vexula-75-noko098 | activity parser refused this source at line 2 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 300 |  |
+| vilecu-41-tete416 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 18 |  |
+| xolazi-74-vamu265 | activity parser refused this source at line 3 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 208 |  |
+| xoreko-43-noto860 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b1p) |
+| zafoxu-20-xofe568 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 9 |  |
+| zaloze-31-jibo311 | activity parser refused this source at line 4 (syntax): Syntax Error? | T2e+T2g | renders (promoted b2), ws 137 |  |
+| zaxati-90-xacu660 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 12 |  |
+| zinelo-77-losu727 | activity parser refused this source at line 19 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 18 |  |
+| zizumo-48-taku661 | activity parser refused this source at line 4 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b2) |
+| zokuni-21-sapu966 | activity parser refused this source at line 5 (syntax): Syntax Error? | T2e | renders (promoted b2), ws 0 | pinned (add2-b1p) |
 
 
 ## Rows above ws 150 at b0 that moved in b1p
@@ -252,7 +252,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | japeru-28-guku001 | 495 | 347 | T1b | snake merge |  |
 | judatu-15-xize591 | 370 | 353 | T1b | snake merge |  |
 | jupivo-67-gidi531 | 263 | 209 | T1b | snake merge |  |
-| jupoxe-15-sugo110 | 1825 | 1822 | T1b | snake merge |  |
+| jupoxe-15-sugo110 | 1825 | 1822 | T1b+T2e/T2h | snake merge; T2e/T2h 1822->1238 |  |
 | kodaku-19-moni161 | 251 | 212 | T1b | snake merge |  |
 | leduvi-16-voli986 | 280 | 261 | T1b | snake merge |  |
 | levuma-67-cego489 | 197 | 101 | T1b | snake merge |  |

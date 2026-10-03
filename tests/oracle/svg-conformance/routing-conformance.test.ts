@@ -843,10 +843,15 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5175 -> 5187 / 6185 -> 6197 at add2/close-b1 (2026-10-03): 12 more
     // svg-activity clone rows, same shape. Derivation: 5187 + 905 + 105 = 6197.
-    expect(pinnedAgree.length).toBe(5187);
-    expect(pinnedMisroutes.length).toBe(905);
+    //
+    // 5187 -> 5234 / 905 -> 871 / 6197 -> 6210 at add2/close-b2 (2026-10-03):
+    // the 34 remaining activity parser-gap dot-cache rows render as ACTIVITY
+    // and are re-pinned `agree` (T2e/T2g), plus 13 svg-activity clone rows.
+    // Derivation: 5234 + 871 + 105 = 6210.
+    expect(pinnedAgree.length).toBe(5234);
+    expect(pinnedMisroutes.length).toBe(871);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6197);
+    expect(manifest.fixtures.length).toBe(6210);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -901,7 +906,8 @@ describe('routing conformance — jar-error classification', () => {
     // 1050 -> 1049 at cdd6/close-b1: unknown/xuloxo-85-vibu502 now agrees.
     // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
     // 908 -> 904 at add2/close-b1p: 4 `end merge` activity retirements.
-    expect(censused.length).toBe(904);
+    // 904 -> 870 at add2/close-b2: 34 activity parser-gap retirements.
+    expect(censused.length).toBe(870);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

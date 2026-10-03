@@ -1,0 +1,13 @@
+@startuml
+start
+:A;
+if (Cond 1?) then (yes)
+    label labB
+    : B;
+else 
+  if (Cond 2?) then (yes)
+    goto labB
+  endif
+endif
+:C;
+@enduml

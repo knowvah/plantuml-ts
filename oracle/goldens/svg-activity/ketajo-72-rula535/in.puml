@@ -1,0 +1,24 @@
+@startuml
+:start;
+fork
+  :foo1;
+  :foo2;
+fork again
+  :foo3;
+  kill
+endfork
+if (foo4) then
+  :foo5;
+  kill
+endif
+if (foo6) then
+  :foo7;
+else
+  :foo8;
+  kill
+endif
+:foo9;
+kill
+:foo10;
+stop
+@enduml

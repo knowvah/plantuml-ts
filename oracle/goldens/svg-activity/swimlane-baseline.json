@@ -560,20 +560,268 @@
     {
       "type": "activity",
       "slug": "caburo-70-buki284",
-      "status": "error",
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          520.475,
+          966.338
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "251.225",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "715.956",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 945.338,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 500.4750000000001
+          },
+          {
+            "x": 520.4750000000001,
+            "width": 445.8625
+          }
+        ],
+        "width": "992",
+        "height": "452"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          520.475,
+          966.338
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "251.225",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "715.956",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 945.338,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 500.475
+          },
+          {
+            "x": 520.475,
+            "width": 445.863
+          }
+        ],
+        "width": "992",
+        "height": "453"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
       "slug": "cakeca-72-kara622",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          733.6,
+          1121.88,
+          1485.55
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "307.669",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "910.188",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "1204.15",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 1464.55,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 713.6000000000001
+          },
+          {
+            "x": 733.6000000000001,
+            "width": 388.2750000000003
+          },
+          {
+            "x": 1121.8750000000005,
+            "width": 363.6750000000002
+          }
+        ],
+        "width": "1511",
+        "height": "1102"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          496.925,
+          918.738,
+          1317.41
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "189.331",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "690.281",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "1018.51",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 1296.41,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 476.925
+          },
+          {
+            "x": 496.925,
+            "width": 421.813
+          },
+          {
+            "x": 918.738,
+            "width": 398.672
+          }
+        ],
+        "width": "1343",
+        "height": "922"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",
       "slug": "cejupe-34-muti621",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          137.975,
+          236.175
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.887",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.975",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 215.175,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 117.975
+          },
+          {
+            "x": 137.975,
+            "width": 98.19999999999999
+          }
+        ],
+        "width": "262",
+        "height": "330"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          137.975,
+          236.175
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.887",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.975",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 215.175,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 117.975
+          },
+          {
+            "x": 137.975,
+            "width": 98.2
+          }
+        ],
+        "width": "262",
+        "height": "331"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -660,8 +908,84 @@
     {
       "type": "activity",
       "slug": "ciloke-34-pumi198",
-      "status": "error",
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          68.137,
+          323.238
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.619",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 302.238,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 48.13749999999999
+          },
+          {
+            "x": 68.13749999999999,
+            "width": 255.10000000000008
+          }
+        ],
+        "width": "349",
+        "height": "226"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          68.137,
+          339.238
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "184.619",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 318.238,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 48.137
+          },
+          {
+            "x": 68.137,
+            "width": 271.101
+          }
+        ],
+        "width": "365",
+        "height": "227"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -1266,8 +1590,84 @@
     {
       "type": "activity",
       "slug": "getene-72-dido571",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          171.675,
+          266.838
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "53.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.675",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 151.675
+          },
+          {
+            "x": 171.675,
+            "width": 95.16250000000002
+          }
+        ],
+        "width": "292",
+        "height": "324"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          171.675,
+          266.838
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "53.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.675",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 151.675
+          },
+          {
+            "x": 171.675,
+            "width": 95.163
+          }
+        ],
+        "width": "292",
+        "height": "325"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -3463,8 +3863,104 @@
     {
       "type": "activity",
       "slug": "ninago-40-dalo726",
-      "status": "error",
-      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          129.35,
+          208.7,
+          264.05
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "68.656",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "163.006",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "229.85",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 243.05,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109.34999999999998
+          },
+          {
+            "x": 129.34999999999997,
+            "width": 79.35000000000001
+          },
+          {
+            "x": 208.7,
+            "width": 55.349999999999966
+          }
+        ],
+        "width": "290",
+        "height": "184"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          129.35,
+          208.7,
+          264.05
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "68.656",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "163.006",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "229.85",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 243.05,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109.35
+          },
+          {
+            "x": 129.35,
+            "width": 79.35
+          },
+          {
+            "x": 208.7,
+            "width": 55.35
+          }
+        ],
+        "width": "290",
+        "height": "185"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",
@@ -4511,8 +5007,84 @@
     {
       "type": "activity",
       "slug": "razuzu-32-faje125",
-      "status": "error",
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          98.063,
+          547.081
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "288.484",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 526.081,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 78.0625
+          },
+          {
+            "x": 98.0625,
+            "width": 449.0187499999996
+          }
+        ],
+        "width": "573",
+        "height": "305"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          99.7,
+          288.556
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25.819",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "160.041",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 267.556,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 79.7
+          },
+          {
+            "x": 99.7,
+            "width": 188.856
+          }
+        ],
+        "width": "314",
+        "height": "295"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -6431,8 +7003,104 @@
     {
       "type": "activity",
       "slug": "zinelo-77-losu727",
-      "status": "error",
-      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          193.7,
+          334.4,
+          445.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "96.837",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.037",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "380.063",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 173.69999999999996
+          },
+          {
+            "x": 193.69999999999996,
+            "width": 140.70000000000002
+          },
+          {
+            "x": 334.4,
+            "width": 111.35000000000002
+          }
+        ],
+        "width": "471",
+        "height": "542"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          193.7,
+          334.4,
+          445.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "96.837",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.037",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "380.063",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 173.7
+          },
+          {
+            "x": 193.7,
+            "width": 140.7
+          },
+          {
+            "x": 334.4,
+            "width": 111.35
+          }
+        ],
+        "width": "471",
+        "height": "558"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",

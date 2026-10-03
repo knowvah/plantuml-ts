@@ -4,11 +4,11 @@
     {
       "type": "activity",
       "slug": "activity-creole-table",
-      "status": "baseline",
-      "weightedScore": 35,
-      "diffCount": 1,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -193,11 +193,11 @@
     {
       "type": "activity",
       "slug": "boxefe-81-situ725",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 70,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 124
     },
     {
       "type": "activity",
@@ -265,11 +265,11 @@
     {
       "type": "activity",
       "slug": "caburo-70-buki284",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 2,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 2
     },
     {
       "type": "activity",
@@ -292,11 +292,11 @@
     {
       "type": "activity",
       "slug": "cakeca-72-kara622",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 410,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 515
     },
     {
       "type": "activity",
@@ -328,11 +328,11 @@
     {
       "type": "activity",
       "slug": "cejupe-34-muti621",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 3,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 10
     },
     {
       "type": "activity",
@@ -382,20 +382,20 @@
     {
       "type": "activity",
       "slug": "cigagu-31-rime196",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 32,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 95
     },
     {
       "type": "activity",
       "slug": "ciloke-34-pumi198",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 16,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 16
     },
     {
       "type": "activity",
@@ -428,10 +428,10 @@
       "type": "activity",
       "slug": "copisa-69-xisi273",
       "status": "baseline",
-      "weightedScore": 125,
-      "diffCount": 112,
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "weightedScore": 124,
+      "diffCount": 111,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -617,10 +617,10 @@
       "type": "activity",
       "slug": "dozaxu-98-xetu961",
       "status": "baseline",
-      "weightedScore": 23,
-      "diffCount": 23,
+      "weightedScore": 9,
+      "diffCount": 9,
       "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f"
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -634,11 +634,11 @@
     {
       "type": "activity",
       "slug": "dulate-94-bupu593",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 59,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 65
     },
     {
       "type": "activity",
@@ -715,11 +715,11 @@
     {
       "type": "activity",
       "slug": "farexi-86-xanu521",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -779,10 +779,10 @@
       "type": "activity",
       "slug": "fikuki-99-kulu790",
       "status": "baseline",
-      "weightedScore": 88,
-      "diffCount": 15,
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "weightedScore": 87,
+      "diffCount": 14,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -823,20 +823,20 @@
     {
       "type": "activity",
       "slug": "fivone-96-nalo453",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 8,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 8
     },
     {
       "type": "activity",
       "slug": "fofele-65-lozo631",
-      "status": "baseline",
-      "weightedScore": 3,
-      "diffCount": 3,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1012,11 +1012,11 @@
     {
       "type": "activity",
       "slug": "getene-72-dido571",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 8,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 8
     },
     {
       "type": "activity",
@@ -1039,11 +1039,11 @@
     {
       "type": "activity",
       "slug": "giteso-65-mefo026",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 382,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 605
     },
     {
       "type": "activity",
@@ -1120,11 +1120,11 @@
     {
       "type": "activity",
       "slug": "gudute-55-nulo344",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 14 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 32,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 95
     },
     {
       "type": "activity",
@@ -1183,11 +1183,11 @@
     {
       "type": "activity",
       "slug": "jamana-83-gige126",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 4,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 4
     },
     {
       "type": "activity",
@@ -1327,11 +1327,11 @@
     {
       "type": "activity",
       "slug": "jufefu-66-josa392",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 103,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 175
     },
     {
       "type": "activity",
@@ -1355,19 +1355,19 @@
       "type": "activity",
       "slug": "jupoxe-15-sugo110",
       "status": "baseline",
-      "weightedScore": 1822,
-      "diffCount": 645,
+      "weightedScore": 1238,
+      "diffCount": 1191,
       "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f"
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
       "slug": "kafevi-44-tesu096",
       "status": "baseline",
-      "weightedScore": 39,
-      "diffCount": 39,
+      "weightedScore": 7,
+      "diffCount": 7,
       "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f"
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1426,11 +1426,11 @@
     {
       "type": "activity",
       "slug": "ketajo-72-rula535",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1444,11 +1444,11 @@
     {
       "type": "activity",
       "slug": "kiceze-91-luke737",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1570,20 +1570,20 @@
     {
       "type": "activity",
       "slug": "lapura-36-kavu144",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 11 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 10,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 10
     },
     {
       "type": "activity",
       "slug": "laxibe-66-teme800",
-      "status": "baseline",
-      "weightedScore": 26,
-      "diffCount": 26,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1688,10 +1688,10 @@
       "type": "activity",
       "slug": "loxija-71-joku558",
       "status": "baseline",
-      "weightedScore": 126,
-      "diffCount": 126,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "weightedScore": 121,
+      "diffCount": 121,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1840,11 +1840,11 @@
     {
       "type": "activity",
       "slug": "molexa-46-redi999",
-      "status": "baseline",
-      "weightedScore": 1,
-      "diffCount": 1,
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1867,11 +1867,11 @@
     {
       "type": "activity",
       "slug": "mufixi-71-koma752",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 30 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 32,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 236
     },
     {
       "type": "activity",
@@ -1912,11 +1912,11 @@
     {
       "type": "activity",
       "slug": "naroji-40-nuke022",
-      "status": "baseline",
-      "weightedScore": 3,
-      "diffCount": 3,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -1993,11 +1993,11 @@
     {
       "type": "activity",
       "slug": "niletu-83-lego826",
-      "status": "baseline",
-      "weightedScore": 35,
-      "diffCount": 1,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -2020,20 +2020,20 @@
     {
       "type": "activity",
       "slug": "ninago-40-dalo726",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 2,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 2
     },
     {
       "type": "activity",
       "slug": "nipuxu-11-tefa314",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 2,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 18
     },
     {
       "type": "activity",
@@ -2074,11 +2074,11 @@
     {
       "type": "activity",
       "slug": "nolubo-93-rula384",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 59,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 65
     },
     {
       "type": "activity",
@@ -2362,20 +2362,20 @@
     {
       "type": "activity",
       "slug": "pucinu-80-nopo009",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 8,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 8
     },
     {
       "type": "activity",
       "slug": "pufuzi-99-vone170",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 30,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 70
     },
     {
       "type": "activity",
@@ -2434,11 +2434,11 @@
     {
       "type": "activity",
       "slug": "razuzu-32-faje125",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 117,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 158
     },
     {
       "type": "activity",
@@ -2488,11 +2488,11 @@
     {
       "type": "activity",
       "slug": "rirefa-62-kucu593",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 76,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 151
     },
     {
       "type": "activity",
@@ -2812,11 +2812,11 @@
     {
       "type": "activity",
       "slug": "tajuxe-32-sexo680",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 53,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 96
     },
     {
       "type": "activity",
@@ -2857,11 +2857,11 @@
     {
       "type": "activity",
       "slug": "ticeka-12-buli543",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2974,11 +2974,11 @@
     {
       "type": "activity",
       "slug": "vexula-75-noko098",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 220,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 300
     },
     {
       "type": "activity",
@@ -2992,11 +2992,11 @@
     {
       "type": "activity",
       "slug": "vilecu-41-tete416",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 2,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 18
     },
     {
       "type": "activity",
@@ -3011,10 +3011,10 @@
       "type": "activity",
       "slug": "vimoxa-78-zucu656",
       "status": "baseline",
-      "weightedScore": 80,
-      "diffCount": 40,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "weightedScore": 84,
+      "diffCount": 37,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -3154,11 +3154,11 @@
     {
       "type": "activity",
       "slug": "xolazi-74-vamu265",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 3 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 147,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 208
     },
     {
       "type": "activity",
@@ -3190,11 +3190,11 @@
     {
       "type": "activity",
       "slug": "zafoxu-20-xofe568",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 3,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 9
     },
     {
       "type": "activity",
@@ -3208,38 +3208,38 @@
     {
       "type": "activity",
       "slug": "zaloze-31-jibo311",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 67,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 137
     },
     {
       "type": "activity",
       "slug": "zamagu-75-vape137",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
       "slug": "zanudo-86-seco241",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
       "slug": "zaxati-90-xacu660",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 12,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 12
     },
     {
       "type": "activity",
@@ -3263,10 +3263,10 @@
       "type": "activity",
       "slug": "zepima-96-peco612",
       "status": "baseline",
-      "weightedScore": 219,
-      "diffCount": 187,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "weightedScore": 214,
+      "diffCount": 182,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400"
     },
     {
       "type": "activity",
@@ -3289,11 +3289,11 @@
     {
       "type": "activity",
       "slug": "zinelo-77-losu727",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "baseline",
+      "diffCount": 12,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 18
     },
     {
       "type": "activity",
@@ -3316,11 +3316,11 @@
     {
       "type": "activity",
       "slug": "zizumo-48-taku661",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "66db7400",
+      "weightedScore": 0
     },
     {
       "type": "activity",

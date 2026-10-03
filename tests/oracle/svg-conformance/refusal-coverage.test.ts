@@ -772,7 +772,10 @@ describe('refusal coverage — baseline shape', () => {
     // 6185 -> 6197 / 5921 -> 5933 / 264 at add2/close-b1 (2026-10-03): 12
     // more svg-activity clone rows (all render on both sides). Derivation:
     // 5933 + 264 = 6197.
-    expect(manifest.fixtures.length).toBe(6197);
+    // 6197 -> 6210 / 5933 -> 5980 / 264 -> 230 at add2/close-b2 (2026-10-03):
+    // 13 svg-activity clone rows, and the 34 remaining activity parser-gap
+    // rows now render (T2e/T2g). Derivation: 5980 + 230 = 6210.
+    expect(manifest.fixtures.length).toBe(6210);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -793,7 +796,8 @@ describe('refusal coverage — baseline shape', () => {
     // crash page), so it stays outside SLI 2. Re-pinned `weErrored: true`,
     // engine class, from a fresh measurement.
     // 268 -> 264 at add2/close-b1p: the 4 `end merge` rows render.
-    expect(pinnedErroring.length).toBe(264);
+    // 264 -> 230 at add2/close-b2: the 34 remaining activity parser-gap rows render.
+    expect(pinnedErroring.length).toBe(230);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -823,7 +827,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5912 -> 5921 at add2/close-b1p (5 svg-activity clones + 4 `end merge`
     // dot-cache rows that now render).
     // 5921 -> 5933 at add2/close-b1 (12 svg-activity clones).
-    expect(pinnedRendering.length).toBe(5933);
+    // 5933 -> 5980 at add2/close-b2 (13 svg-activity clones + 34 rows that now render).
+    expect(pinnedRendering.length).toBe(5980);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -915,7 +920,8 @@ describe('refusal coverage — baseline shape', () => {
     // manifest derivation above).
     // 39 -> 35 at add2/close-b1p (2026-10-02): the 4 `end merge` rows render
     // (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java).
-    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(35);
+    // 35 -> 1 at add2/close-b2: the 34 remaining parser-gap rows render (T2e/T2g).
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(1);
   });
 });
 
