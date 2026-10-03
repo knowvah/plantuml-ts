@@ -60,6 +60,22 @@ export interface RepeatFrame {
   readonly tileX: number;
   readonly tileY: number;
   readonly tileWidth: number;
+  /** Raw, pre-`tileX`-fold local X offsets (`GtileRepeat.entryOffsetX`/
+   *  `bodyOffsetX`/`conditionOffsetX`, `gtile-repeat.ts:169-172`) -- kept
+   *  alongside the already-folded `entryX`/`bodyX`/`condX` above so edge
+   *  builders that need TWO tiles' x to agree bit-for-bit ({@link
+   *  pushRepeatIn}, {@link pushRepeatOut}) can resolve each side's own
+   *  local offset+hook round-trip FIRST and add `tileX` exactly once,
+   *  LAST -- the same regroup `tile-coordinates.ts#pushTopDownSiblingEdge`
+   *  already applies (`.agent-notes/T1b-snake-merge.md`'s AXIS_EPSILON
+   *  section): `(tileX + offsetX) + hook.x`, evaluated as two separate
+   *  large-magnitude adds, can round one ULP apart from the SAME
+   *  computation done for a sibling tile with a different offset/hook
+   *  pair, even though both are mathematically `tileX + left` upstream.
+   */
+  readonly entryOffsetX: number;
+  readonly bodyOffsetX: number;
+  readonly conditionOffsetX: number;
   readonly backConnection: RepeatBackConnection;
   readonly entryOutLane: string | undefined;
   readonly entryInLane: string | undefined;
@@ -215,6 +231,7 @@ function buildRepeatFrame(o: RepeatOrigins): RepeatFrame {
     tileX: x,
     tileY: y,
     tileWidth: t.width,
+    entryOffsetX: t.entryOffsetX, bodyOffsetX: t.bodyOffsetX, conditionOffsetX: t.conditionOffsetX,
     backConnection: t.backConnection,
     entryOutLane: laneOut(entry, myLane),
     entryInLane: laneIn(entry, myLane),
@@ -236,9 +253,9 @@ function buildRepeatFrame(o: RepeatOrigins): RepeatFrame {
  * `tileNode`'s own `'arrow-label'` case always returns `null` regardless).
  */
 function pushRepeatIn(frame: RepeatFrame): void {
-  const { out, entry, entryX, entryY, body, bodyX, bodyY, entryOutLane, bodyInLane } = frame;
-  const p1 = { x: entryX + entry.getCoord(SOUTH_HOOK).x, y: entryY + entry.getCoord(SOUTH_HOOK).y };
-  const p2 = { x: bodyX + body.getCoord(NORTH_HOOK).x, y: bodyY + body.getCoord(NORTH_HOOK).y };
+  const { out, entry, entryOffsetX, entryY, body, bodyOffsetX, bodyY, tileX, entryOutLane, bodyInLane } = frame;
+  const p1 = { x: tileX + (entryOffsetX + entry.getCoord(SOUTH_HOOK).x), y: entryY + entry.getCoord(SOUTH_HOOK).y };
+  const p2 = { x: tileX + (bodyOffsetX + body.getCoord(NORTH_HOOK).x), y: bodyY + body.getCoord(NORTH_HOOK).y };
   pushEdge(out, connectionInPoints(p1, p2), entryOutLane, bodyInLane);
 }
 
@@ -255,12 +272,29 @@ function pushRepeatIn(frame: RepeatFrame): void {
  * same as `drawU` reads -- so the `repeat-out` loop tag (mission
  * `activity-loop-lane-translate`, D2) carries these same two points
  * unchanged; only `routeLoopTranslate` ever applies a lane delta to them.
+ * T2h: `p1.x`/`p2.x` resolve the LOCAL `bodyOffsetX`/`conditionOffsetX` +
+ * hook round-trip first and fold `tileX` in exactly once, last -- the SAME
+ * regroup `tile-coordinates.ts#pushTopDownSiblingEdge` already applies
+ * (`.agent-notes/T1b-snake-merge.md`'s AXIS_EPSILON section): the old
+ * `bodyX + hook.x` (`bodyX` itself already `tileX + bodyOffsetX`) folded
+ * `tileX` in BEFORE the hook add, letting this edge's two ends -- each a
+ * DIFFERENT tile's own offset/hook pair -- round one ULP apart even though
+ * both are mathematically `tileX + left` upstream (`FtileRepeat.java:
+ * 285-293`'s own `getTranslateForRepeat`/`getTranslateDiamond2`, both
+ * local-only, with the caller's absolute origin composed as one OUTER
+ * translate afterward, never folded into this same sum). Reproduced on
+ * `jupoxe-15-sugo110`: `snake-merge-worm.ts#directionOf` threw on this
+ * exact pair, `(1421.58125,878)->(1421.5812500000002,926)`.
  */
 function pushRepeatOut(frame: RepeatFrame): void {
-  const { out, body, bodyX, bodyY, condition, condX, condY, bodyOutLane, conditionInLane } = frame;
+  const { out, body, bodyOffsetX, bodyY, condition, conditionOffsetX, condY, tileX, bodyOutLane, conditionInLane } =
+    frame;
   if (!body.hasPointOut()) return;
-  const p1 = { x: bodyX + body.getCoord(SOUTH_HOOK).x, y: bodyY + body.getCoord(SOUTH_HOOK).y };
-  const p2 = { x: condX + condition.getCoord(NORTH_HOOK).x, y: condY + condition.getCoord(NORTH_HOOK).y };
+  const p1 = { x: tileX + (bodyOffsetX + body.getCoord(SOUTH_HOOK).x), y: bodyY + body.getCoord(SOUTH_HOOK).y };
+  const p2 = {
+    x: tileX + (conditionOffsetX + condition.getCoord(NORTH_HOOK).x),
+    y: condY + condition.getCoord(NORTH_HOOK).y,
+  };
   const loop: LoopTranslate = { kind: 'repeat-out', p1, p2 };
   pushEdge(out, [p1, p2], bodyOutLane, conditionInLane, { loop });
 }

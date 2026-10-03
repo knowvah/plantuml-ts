@@ -183,15 +183,29 @@ function connectionVerticalIn(ctx: LvCtx, i: number): void {
  * same documented gap as `gtile-if-long-vertical.ts`'s own `WEST_MARGIN`
  * doc, so no label is ever attached.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:265-298
+ *
+ * T2h: `p1.x`/`p2.x` resolve each diamond's own LOCAL `diamondX` + hook
+ * round-trip first and fold `ctx.x` in exactly once, last -- NOT through
+ * {@link diamondOrigin}/{@link absolutePoint}'s two-step compose (`ctx.x +
+ * diamondX`, then `+ hook.x`), which can round one ULP apart per diamond
+ * even though both ends are mathematically `ctx.x + left` upstream
+ * (`getTranslateFor(ftile).getTranslated(p)`, local-only, `:287-294` --
+ * same regroup as `walk-repeat.ts#pushRepeatOut`, `.agent-notes/
+ * T1b-snake-merge.md`'s AXIS_EPSILON section). `o1.y`/`o2.y` still read
+ * through {@link diamondOrigin} -- only x needs the deferred fold; y is
+ * never required to match between the two diamonds here.
  */
 function connectionVertical(ctx: LvCtx, i: number): void {
-  const { t, myLane, out } = ctx;
+  const { t, x, myLane, out } = ctx;
   const d1 = t.diamonds[i]!;
   const d2 = t.diamonds[i + 1]!;
   const o1 = diamondOrigin(ctx, i);
   const o2 = diamondOrigin(ctx, i + 1);
-  const p1 = absolutePoint(d1.getCoord(SOUTH_HOOK), o1.x, o1.y);
-  const p2 = absolutePoint(d2.getCoord(NORTH_HOOK), o2.x, o2.y);
+  const p1 = { x: x + (t.branches[i]!.diamondX + d1.getCoord(SOUTH_HOOK).x), y: o1.y + d1.getCoord(SOUTH_HOOK).y };
+  const p2 = {
+    x: x + (t.branches[i + 1]!.diamondX + d2.getCoord(NORTH_HOOK).x),
+    y: o2.y + d2.getCoord(NORTH_HOOK).y,
+  };
   pushEdge(out, [p1, p2], laneOut(d1, myLane), laneIn(d2, myLane));
 }
 
