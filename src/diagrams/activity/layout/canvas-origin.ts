@@ -67,10 +67,16 @@ import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-
 import type { Reservation } from './hexagon-reservations.js';
 import { computeSwimlaneChrome, TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import type { SwimlaneChrome } from './swimlane-placement.js';
-import { CANVAS_ORIGIN_SHIFT, CANVAS_PADDING_TOTAL, SVG_CANVAS_CEIL } from '../activity-layout-constants.js';
+import {
+  CANVAS_ORIGIN_SHIFT,
+  CANVAS_PADDING_TOTAL,
+  RECENTRED_ENLARGE,
+  SVG_CANVAS_CEIL,
+} from '../activity-layout-constants.js';
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
+import { SPLIT_LINE_KINDS, extendForIfLabelText, extendForLaneDivider } from './canvas-origin-text-ink.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
@@ -136,19 +142,28 @@ function fudgeY(kind: string): ShapeFudge {
   return NO_FUDGE; // polygon fudge is X-only; every other kind is exact.
 }
 
-interface MutableInkBounds {
+export interface MutableInkBounds {
   minX: number;
   minY: number;
   maxX: number;
   maxY: number;
 }
 
-function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo): void {
+function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   if (isInkless(node.kind)) return;
   const fx = fudgeX(node.kind);
-  const fy = fudgeY(node.kind);
   acc.minX = Math.min(acc.minX, node.x - fx.near);
   acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
+  if (node.kind === 'if-label') {
+    extendForIfLabelText(acc, node, theme);
+    return;
+  }
+  if (SPLIT_LINE_KINDS.has(node.kind)) {
+    acc.minY = Math.min(acc.minY, node.y);
+    acc.maxY = Math.max(acc.maxY, node.y);
+    return;
+  }
+  const fy = fudgeY(node.kind);
   acc.minY = Math.min(acc.minY, node.y - fy.near);
   acc.maxY = Math.max(acc.maxY, node.y + node.height + fy.far);
 }
@@ -319,6 +334,10 @@ interface CanvasOrigin {
   readonly shiftY: number;
   readonly totalWidth: number;
   readonly totalHeight: number;
+  /** b3/T3a (family E): the un-floored, un-ceiled canvas span -- see
+   *  {@link ActivityGeometry.rawWidth}'s own doc for the consumer. */
+  readonly rawWidth: number;
+  readonly rawHeight: number;
 }
 
 /** {@link computeCanvasOrigin}'s own inputs, bundled to keep that function
@@ -330,30 +349,44 @@ interface CanvasOriginInput {
   readonly reservations: readonly Reservation[];
   readonly baseY: number;
   readonly theme: Theme;
+  /** b3/T3a (family A): the content's own pre-shift bottom -- the lane
+   *  divider's own ink reaches exactly this far (`extendForLaneDivider`). */
+  readonly contentMaxY: number;
 }
 
 /** The module doc's mechanism, applied: reduces every node/edge/swimlane's
  *  own (fudged) span into one global ink `MinMax`, then derives the uniform
  *  near-corner shift and the final (ceiled) canvas size from it. */
 function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
-  const { nodes, edges, swimlanes, reservations, baseY, theme } = input;
+  const { nodes, edges, swimlanes, reservations, baseY, theme, contentMaxY } = input;
   const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-  for (const n of nodes) extendForNode(acc, n);
+  for (const n of nodes) extendForNode(acc, n, theme);
   for (const e of edges) extendForEdge(acc, e);
   for (const s of swimlanes) extendForSwimlane(acc, s);
   for (const r of reservations) extendForReservation(acc, r);
   extendForSwimlaneTitles(acc, swimlanes, baseY, theme);
+  extendForLaneDivider(acc, swimlanes, baseY, contentMaxY);
   if (!Number.isFinite(acc.minX)) {
     acc.minX = 0;
     acc.minY = 0;
     acc.maxX = 0;
     acc.maxY = 0;
   }
+  // b3/T3a (family E): the `Recentred`-only span `preChromeWidth`/
+  // `preChromeHeight` must carry (`activity-layout-constants.ts
+  // #RECENTRED_ENLARGE`'s own doc: `(M - m) + RECENTRED_ENLARGE`, BEFORE
+  // the document margin's further `+ 2 * ACTIVITY_DOCUMENT_MARGIN`) --
+  // a DIFFERENT (smaller) padding term than `totalWidth`/`totalHeight`'s
+  // own `CANVAS_PADDING_TOTAL` below; never the same variable.
+  const rawWidth = acc.maxX - acc.minX + RECENTRED_ENLARGE;
+  const rawHeight = acc.maxY - acc.minY + RECENTRED_ENLARGE;
   return {
     shiftX: CANVAS_ORIGIN_SHIFT - acc.minX,
     shiftY: CANVAS_ORIGIN_SHIFT - acc.minY,
     totalWidth: Math.floor(acc.maxX - acc.minX + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
     totalHeight: Math.floor(acc.maxY - acc.minY + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
+    rawWidth,
+    rawHeight,
   };
 }
 
@@ -367,6 +400,11 @@ function shiftEdgeGeo(edge: ActivityEdgeGeo, dx: number, dy: number): ActivityEd
   const next: ActivityEdgeGeo = { ...edge, points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) };
   if (edge.midArrowAt !== undefined) {
     next.midArrowAt = { ...edge.midArrowAt, x: edge.midArrowAt.x + dx, y: edge.midArrowAt.y + dy };
+  }
+  // b3/T3a (family C/EMMID): `emphasizeAt` is the same kind of absolute
+  // anchor point as `midArrowAt` -- see `activity-geometry.types.ts`'s doc.
+  if (edge.emphasizeAt !== undefined) {
+    next.emphasizeAt = { x: edge.emphasizeAt.x + dx, y: edge.emphasizeAt.y + dy };
   }
   return next;
 }
@@ -406,6 +444,9 @@ export interface FinalizeInput {
 export interface FinalizedGeometry {
   totalWidth: number;
   totalHeight: number;
+  /** b3/T3a (family E) -- see {@link ActivityGeometry.rawWidth}'s own doc. */
+  rawWidth: number;
+  rawHeight: number;
   nodes: ActivityNodeGeo[];
   edges: ActivityEdgeGeo[];
   swimlanes: SwimlaneGeo[];
@@ -413,15 +454,35 @@ export interface FinalizedGeometry {
   chrome: Partial<SwimlaneChrome>;
 }
 
+/** {@link finalizeGeometry}'s own middle step, split out to keep that
+ *  function's NLOC under the file's limit: shifts every node/edge/
+ *  swimlane/reservation by the one `CanvasOrigin` translate. */
+function shiftAll(
+  input: Pick<FinalizeInput, 'nodes' | 'edges' | 'swimlanes' | 'reservations'>,
+  origin: CanvasOrigin,
+): Pick<FinalizedGeometry, 'nodes' | 'edges' | 'swimlanes' | 'reservations'> {
+  return {
+    nodes: input.nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY)),
+    edges: input.edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY)),
+    swimlanes: input.swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX)),
+    reservations: input.reservations.map((r) => shiftReservation(r, origin.shiftX, origin.shiftY)),
+  };
+}
+
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight, theme } = input;
-  const origin = computeCanvasOrigin({ nodes, edges, swimlanes, reservations, baseY, theme });
-  const shiftedNodes = nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY));
-  const shiftedEdges = edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY));
-  const shiftedSwimlanes = swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX));
-  const shiftedReservations = reservations.map((r) => shiftReservation(r, origin.shiftX, origin.shiftY));
+  const origin = computeCanvasOrigin({
+    nodes,
+    edges,
+    swimlanes,
+    reservations,
+    baseY,
+    theme,
+    contentMaxY: bounds.maxY,
+  });
+  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin);
   const chrome = computeSwimlaneChrome(
-    shiftedSwimlanes,
+    shifted.swimlanes,
     baseY + origin.shiftY,
     titlesHeight,
     bounds.maxY + origin.shiftY,
@@ -429,10 +490,9 @@ export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   return {
     totalWidth: origin.totalWidth,
     totalHeight: origin.totalHeight,
-    nodes: shiftedNodes,
-    edges: shiftedEdges,
-    swimlanes: shiftedSwimlanes,
-    reservations: shiftedReservations,
+    rawWidth: origin.rawWidth,
+    rawHeight: origin.rawHeight,
+    ...shifted,
     chrome,
   };
 }

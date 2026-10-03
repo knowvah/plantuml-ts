@@ -6,9 +6,8 @@
  * `Recentred` (`:212`) is NOT ported here -- filed as
  * `activity-canvas-margin` (mission `activity-klimt-compress` README).
  *
- * Not yet wired to any call site (T5, mission `activity-klimt-compress`
- * batch 4) -- the aggregate `weightedScore` MUST stay unmoved by this file
- * (mission README, stop condition 6) until it is.
+ * Wired in by T5 (mission `activity-klimt-compress` batch 4) at
+ * `assign-coordinates-full.ts#compressAndAssemble`, the one call site.
  *
  * @see net/sourceforge/plantuml/klimt/compress/CompressionXorYBuilder.java:52-69
  * @see net/sourceforge/plantuml/klimt/compress/UGraphicCompressOnXorY.java:86-135
@@ -24,6 +23,7 @@ import type { CompressionMode } from './slot.js';
 import { shapesOf } from './shapes-of.js';
 import { collectSlots } from './slot-finder.js';
 import { CompressionTransform, type PiecewiseAffineTransform } from './compression-transform.js';
+import { arrowDirection } from '../../arrows-regular.js';
 
 export interface CompressInput {
   nodes: ActivityNodeGeo[];
@@ -138,6 +138,12 @@ function transformNode(node: ActivityNodeGeo, ct: PiecewiseAffineTransform, mode
  * (`ug.apply(new UTranslate(xx, (y1 + y2) / 2)).draw(asToUp)`,
  * `FtileWhile.java:307`), so it transforms exactly as one of `edge.points`
  * would on the matching axis -- never left at its pre-compression value.
+ *
+ * b3/T3a (family C/EMMID): `emphasizeAt` (`withEmphasizeAnchor`'s own doc)
+ * is the SAME kind of absolute anchor point and transforms the same way --
+ * `Worm#drawLine`'s mid-arrow draw (`ftile/Worm.java:178-182`) reaches the
+ * identical `draw(UShape)` non-`ULine` branch `midArrowAt`'s `FtileWhile`
+ * draw does.
  */
 function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode: CompressionMode): ActivityEdgeGeo {
   const points = edge.points.map((p) =>
@@ -150,7 +156,38 @@ function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode
         ? { ...edge.midArrowAt, x: ct.transform(edge.midArrowAt.x) }
         : { ...edge.midArrowAt, y: ct.transform(edge.midArrowAt.y) };
   }
+  if (edge.emphasizeAt !== undefined) {
+    next.emphasizeAt =
+      mode === 'x'
+        ? { ...edge.emphasizeAt, x: ct.transform(edge.emphasizeAt.x) }
+        : { ...edge.emphasizeAt, y: ct.transform(edge.emphasizeAt.y) };
+  }
   return next;
+}
+
+/**
+ * b3/T3a (family C/EMMID): populates {@link ActivityEdgeGeo.emphasizeAt}
+ * from the edge's OWN pre-compression `points` -- run once, before the X
+ * compression pass, so every subsequent `transformEdge` call (X then Y)
+ * carries it through exactly like `midArrowAt`. Mirrors `renderer.ts`'s
+ * (pre-this-fix) `renderEdgeSegments` search for the first segment whose
+ * direction matches `emphasize` -- same search, run here instead, over the
+ * UNCOMPRESSED points.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:134-143,178-182
+ */
+function withEmphasizeAnchor(edges: readonly ActivityEdgeGeo[]): ActivityEdgeGeo[] {
+  return edges.map((edge) => {
+    if (edge.emphasize === undefined) return edge;
+    const { points } = edge;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i]!;
+      const p2 = points[i + 1]!;
+      if (arrowDirection(p2.x - p1.x, p2.y - p1.y) === edge.emphasize) {
+        return { ...edge, emphasizeAt: { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 } };
+      }
+    }
+    return edge;
+  });
 }
 
 /** @see isRectReservation */
@@ -242,7 +279,8 @@ function compressAxis(input: CompressInput, mode: CompressionMode): AxisResult {
  * (`ActivityDiagram3.java:209-210`). Never mutates `input`.
  */
 export function compressGeometry(input: CompressInput): CompressResult {
-  const x = compressAxis(input, 'x');
+  const withAnchors = { ...input, edges: withEmphasizeAnchor(input.edges) };
+  const x = compressAxis(withAnchors, 'x');
   const y = compressAxis(x.next, 'y');
   const { nodes, edges, swimlanes, reservations, bounds } = y.next;
   return { nodes, edges, swimlanes, reservations: [...reservations], bounds, removed: { x: x.removed, y: y.removed } };
