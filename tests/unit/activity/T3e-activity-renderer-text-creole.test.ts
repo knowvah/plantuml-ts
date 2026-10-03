@@ -41,6 +41,23 @@ describe('drawActivityText — `[[url]]`', () => {
     expect(svg).toContain('>foo1<');
     expect(svg).toContain('>end<');
   });
+
+  it('T2c: `[[url{tooltip} label]]` draws title/xlink:title as the TOOLTIP, not the url', () => {
+    // zamagu-75-vape137's own middle run, jar-verified:
+    // <a ... title="dd" xlink:title="dd"><text ...>sss</text></a> -- the
+    // creole command's `{dd}` tooltip, never `http://testLink1.com`.
+    const svg = drawActivityText(26, 87.333, '[[http://testLink1.com{dd} sss]]', STYLE);
+    expect(svg).toContain('title="dd"');
+    expect(svg).toContain('xlink:title="dd"');
+    expect(svg).not.toContain('title="http://testLink1.com"');
+    expect(svg).toContain('href="http://testLink1.com"');
+  });
+
+  it('`[[url label]]` with no `{tooltip}` still defaults the tooltip to the url', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('title="http://www.google.com"');
+    expect(svg).toContain('xlink:title="http://www.google.com"');
+  });
 });
 
 describe('drawActivityText — `|cell|` table row', () => {

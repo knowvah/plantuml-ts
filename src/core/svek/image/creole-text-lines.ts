@@ -126,6 +126,20 @@ export interface CreoleTextRun {
   readonly style: FontStyleFlags;
   readonly color?: string;
   readonly url?: string;
+  /** T2c: the `[[url{tooltip}label]]` tooltip half of {@link url} -- was
+   *  previously dropped at the single call site that builds this field
+   *  (`textAtomMeasured`, `atom.url.url` only), so every renderer reading
+   *  it fell back to the url itself for `title`/`xlink:title`
+   *  (`core/svg.ts#linkWrap`'s `tooltip` param). `CreoleAtomUrl` (`klimt
+   *  /creole/atom/Atom.ts`) already carries both halves correctly --
+   *  `CommandCreoleUrl.ts#resolveUrlAndTooltip` parses `{tooltip}` and
+   *  defaults it to the url when absent, matching upstream's
+   *  `resolveLabel` exactly. Consumed by `activity-renderer-text.ts
+   *  #drawCreoleUrlLine` (T2c); `state/renderer-box.ts#renderStateRuns`
+   *  (a different engine, outside this task's write-set) still passes
+   *  `run.url` as its own `tooltip` arg and is therefore UNCHANGED by
+   *  this field's mere existence. */
+  readonly tooltip?: string;
   /** The run's EFFECTIVE font size — `getFont(atom.font).size`
    *  (`FontConfiguration.java:98-104`), i.e. already muted by 3 for a
    *  `<sup>`/`<sub>` run (`FontPosition.java:51-60`) and equal to the
@@ -281,7 +295,7 @@ function textAtomMeasured(atom: Extract<CreoleAtom, { kind: 'text' }>, ctx: Meas
     text: atom.text,
     style: styleFlagsFromSet(atom.font.styles),
     ...(atom.font.color !== null ? { color: atom.font.color } : {}),
-    ...(atom.url !== undefined ? { url: atom.url.url } : {}),
+    ...(atom.url !== undefined ? { url: atom.url.url, tooltip: atom.url.tooltip } : {}),
     size,
   };
   return { run, width, height };
