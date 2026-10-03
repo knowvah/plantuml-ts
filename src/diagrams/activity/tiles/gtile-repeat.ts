@@ -5,6 +5,176 @@ import { TileComposite } from './tile.js';
 import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
+import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
+
+/**
+ * `FtileDiamond`'s own fixed box (`FtileDiamond.java:108-112`,
+ * `2*hexagonHalfSize` -- the SAME size `GtileRepeatEntry` already uses for
+ * the label-less entry diamond `FtileRepeat.create` builds when `entry ==
+ * null`), reused here for the break-weld target diamond
+ * (`FtileFactoryDelegatorRepeat.java:126`'s `diamondBreak`, D-new).
+ */
+const WELD_DIAMOND_SIZE = 2 * HEXAGON_HALF_SIZE;
+
+/** {@link computeWeldLayout}'s return: the merged `left`/`width`/`height`
+ *  every existing offset formula reads, the uniform horizontal `shiftX`
+ *  every existing child offset must add, and the weld-diamond's own
+ *  placement (`undefined` when this repeat has no breaks). Declared here,
+ *  before every function that reads it -- Lizard's TypeScript reader
+ *  otherwise folds a trailing interface into the NLOC of whichever
+ *  function precedes it (`walk-repeat.ts#RepeatFrame`'s own doc cites the
+ *  same reader quirk). */
+interface WeldLayout {
+  readonly left: number;
+  readonly width: number;
+  readonly height: number;
+  readonly shiftX: number;
+  readonly weldDiamond: { readonly offsetX: number; readonly offsetY: number } | undefined;
+}
+
+/** Every child's own `*OffsetX`/`*OffsetY` ({@link GtileRepeat}'s own
+ *  fields) -- split out of the constructor to keep it under the file's
+ *  NLOC cap; the formulas themselves are unchanged (`FtileRepeat.java:
+ *  744-765`'s `getTranslateDiamond1/2`, `:730-742`'s `getTranslateFor
+ *  Repeat`, `:750-757`'s `getTranslateBackward`), each now reading the
+ *  RAW (pre-weld) `left`/`height`/`width` plus {@link computeWeldLayout}'s
+ *  own uniform `shiftX` on every X term (D-new: a weld never moves a Y
+ *  offset, only ever adds the horizontal margin). Declared here for the
+ *  same reader-quirk reason as {@link WeldLayout}. */
+interface ChildOffsets {
+  readonly entryOffsetX: number;
+  readonly bodyOffsetX: number;
+  readonly bodyOffsetY: number;
+  readonly conditionOffsetX: number;
+  readonly conditionOffsetY: number;
+  readonly backwardOffsetX: number;
+  readonly backwardOffsetY: number;
+}
+
+/** {@link computeChildOffsets}'s own parameter bundle, kept at the file's
+ *  5-parameter cap. */
+interface ChildOffsetDims {
+  readonly rawLeft: number;
+  readonly rawWidth: number;
+  readonly rawHeight: number;
+  readonly bodyLeft: number;
+  readonly entry: Tile;
+  readonly body: Tile;
+  readonly condition: GtileDiamondInside;
+  readonly backward: Tile | undefined;
+  readonly shiftX: number;
+}
+
+/** {@link computeRawDims}'s return: the PRE-weld `left`/`width`/`height`
+ *  (`FtileRepeat.java:701-786`'s own `getLeft`/`getRight`/
+ *  `calculateDimensionInternal`, unchanged by D-new) plus `body`'s own
+ *  `NORTH_HOOK.x`, read by both {@link computeWeldLayout}'s caller and
+ *  {@link computeChildOffsets}. Declared here for the same reader-quirk
+ *  reason as {@link WeldLayout}. */
+interface RawDims {
+  readonly rawLeft: number;
+  readonly rawWidth: number;
+  readonly rawHeight: number;
+  readonly bodyLeft: number;
+}
+
+/**
+ * `FtileFactoryDelegatorRepeat.repeat()`'s own `repeat.getWeldingPoints()`
+ * read (`:123`), done here as a scan over `body`'s already-built Tile tree
+ * rather than a build-time `WeldingPoint` list (this port's `Tile`
+ * interface has no equivalent, and `tile-layout.ts#tileRepeat` -- the only
+ * seam that could thread such a list through -- is outside this task's
+ * write-set, common.md "stop and report instead"). Counts EVERY
+ * `'gtile-break'` leaf anywhere in the subtree, including inside a NESTED
+ * while/repeat -- `walk-repeat.ts#pushRepeatWeldings`'s own walk-time scan
+ * has the SAME limitation, documented there (mirroring `walk-while-
+ * branch.ts#pushWhileWeldings`'s own documented gap), so this count and
+ * that scan always agree with each other, even though neither matches the
+ * jar's true loop-boundary semantics for that double-nested case.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileBreak.java:65-68
+ */
+function countWeldingBreaks(tile: Tile): number {
+  if (tile.kind === 'gtile-break') return 1;
+  if (tile instanceof TileComposite) {
+    return tile.children.reduce((n, c) => n + countWeldingBreaks(c), 0);
+  }
+  return 0;
+}
+
+/**
+ * `FtileFactoryDelegatorRepeat.repeat()`'s own weld-diamond assembly
+ * (`:123-169`): `FtileUtils.addHorizontalMargin(result, 10, 0)` (`:127`)
+ * shifts the existing construct right by 10, then `assembly(...)`
+ * (`:127`) stacks `diamondBreak` below it and re-merges `left`/`width`
+ * via `FtileGeometryMerger`'s own `left = max(...)`/`width = max(dx-
+ * adjusted widths)` (`FtileGeometryMerger.java:38-49`) -- ported term for
+ * term since the LEFT-RAIL the first weld routes through (`tileX` in
+ * `walk-repeat.ts`) must land OUTSIDE every existing child shape.
+ * `SEQUENTIAL_ASSEMBLY_GAP` (35, RAW pre-compression) is the jar's own
+ * `FtileFactoryDelegatorAssembly#assembly` gap between ANY two
+ * sequentially-joined tiles (`:58`, `activity-layout-constants.ts`'s own
+ * doc) -- reused unchanged for the condition-exit-to-diamond-entry
+ * internal edge `walk-repeat.ts` draws, never re-derived, since the SAME
+ * compression pass that already collapses every OTHER top-level gap to
+ * 20px when its Y-band carries no sibling ink (`compress-geometry.ts`)
+ * applies here too.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorRepeat.java:123-169
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:38-49
+ */
+function computeWeldLayout(rawLeft: number, rawWidth: number, rawHeight: number, weldCount: number): WeldLayout {
+  if (weldCount === 0) {
+    return { left: rawLeft, width: rawWidth, height: rawHeight, shiftX: 0, weldDiamond: undefined };
+  }
+  const marginLeft = rawLeft + 10;
+  const marginWidth = rawWidth + 10;
+  const diamondLeft = WELD_DIAMOND_SIZE / 2;
+  const mergedLeft = Math.max(marginLeft, diamondLeft);
+  const dx1 = mergedLeft - marginLeft;
+  const dx2 = mergedLeft - diamondLeft;
+  const width = Math.max(marginWidth + dx1, WELD_DIAMOND_SIZE + dx2);
+  const height = rawHeight + SEQUENTIAL_ASSEMBLY_GAP + WELD_DIAMOND_SIZE;
+  return {
+    left: mergedLeft,
+    width,
+    height,
+    shiftX: mergedLeft - rawLeft,
+    weldDiamond: { offsetX: mergedLeft - diamondLeft, offsetY: rawHeight + SEQUENTIAL_ASSEMBLY_GAP },
+  };
+}
+
+/**
+ * `FtileRepeat.java:767-786`'s own `getLeft`/`getRight`, then
+ * `:701-717`'s `calculateDimensionInternal` -- split out of the
+ * constructor to keep it under the file's NLOC cap (D-new); formulas
+ * unchanged from before this task.
+ */
+function computeRawDims(entry: Tile, body: Tile, condition: GtileDiamondInside, backward: Tile | undefined): RawDims {
+  const bodyLeft = body.getCoord(NORTH_HOOK).x;
+  const entryHalf = entry.width / 2;
+  const conditionHalf = condition.width / 2;
+  const rawLeft = Math.max(bodyLeft, entryHalf, conditionHalf);
+  const right = Math.max(body.width - bodyLeft, entryHalf, conditionHalf);
+  const contentWidth = rawLeft + right;
+  let innerWidth = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE);
+  if (backward !== undefined) innerWidth += backward.width;
+  const rawWidth = innerWidth + 2 * HEXAGON_HALF_SIZE;
+  const rawHeight = entry.height + body.height + condition.height + 8 * HEXAGON_HALF_SIZE;
+  return { rawLeft, rawWidth, rawHeight, bodyLeft };
+}
+
+function computeChildOffsets(d: ChildOffsetDims): ChildOffsets {
+  const { rawLeft, rawWidth, rawHeight, bodyLeft, entry, body, condition, backward, shiftX } = d;
+  const space = rawHeight - entry.height - body.height - condition.height;
+  return {
+    entryOffsetX: rawLeft - entry.width / 2 + shiftX,
+    bodyOffsetX: rawLeft - bodyLeft + shiftX,
+    bodyOffsetY: entry.height + space / 2,
+    conditionOffsetX: rawLeft - condition.width / 2 + shiftX,
+    conditionOffsetY: rawHeight - condition.height,
+    backwardOffsetX: (backward !== undefined ? rawWidth - backward.width : 0) + shiftX,
+    backwardOffsetY: backward !== undefined ? (rawHeight - backward.height) / 2 : 0,
+  };
+}
 
 /**
  * `FtileRepeat.create`'s back-connection selection (`FtileRepeat.java:
@@ -92,6 +262,10 @@ export class GtileRepeat extends TileComposite {
    *  own always-computed style). */
   readonly backwardOffsetX: number;
   readonly backwardOffsetY: number;
+  /** {@link computeWeldLayout}'s own `weldDiamond`: the break-weld target
+   *  diamond's placement in THIS tile's own frame, `undefined` when this
+   *  repeat has no `break` (D-new, `countWeldingBreaks`). */
+  readonly weldDiamond: { readonly offsetX: number; readonly offsetY: number } | undefined;
 
   /**
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:767-775
@@ -136,26 +310,28 @@ export class GtileRepeat extends TileComposite {
     super();
     this.backConnection = backConnection;
     this.backward = ctx.backward;
-    const bodyLeft = body.getCoord(NORTH_HOOK).x;
-    const entryHalf = entry.width / 2;
-    const conditionHalf = condition.width / 2;
-    this.left = Math.max(bodyLeft, entryHalf, conditionHalf);
-    const right = Math.max(body.width - bodyLeft, entryHalf, conditionHalf);
-    const contentWidth = this.left + right;
-    let innerWidth = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE);
-    if (ctx.backward !== undefined) innerWidth += ctx.backward.width;
-    this.width = innerWidth + 2 * HEXAGON_HALF_SIZE;
-    this.height = entry.height + body.height + condition.height + 8 * HEXAGON_HALF_SIZE;
+    const dims = computeRawDims(entry, body, condition, ctx.backward);
+    const weld = computeWeldLayout(dims.rawLeft, dims.rawWidth, dims.rawHeight, countWeldingBreaks(body));
+    this.left = weld.left;
+    this.width = weld.width;
+    this.height = weld.height;
+    this.weldDiamond = weld.weldDiamond;
 
-    const space = this.height - entry.height - body.height - condition.height;
-    this.entryOffsetX = this.left - entryHalf;
-    this.bodyOffsetX = this.left - bodyLeft;
-    this.bodyOffsetY = entry.height + space / 2;
-    this.conditionOffsetX = this.left - conditionHalf;
-    this.conditionOffsetY = this.height - condition.height;
-
-    this.backwardOffsetX = ctx.backward !== undefined ? this.width - ctx.backward.width : 0;
-    this.backwardOffsetY = ctx.backward !== undefined ? (this.height - ctx.backward.height) / 2 : 0;
+    const offsets = computeChildOffsets({
+      ...dims,
+      entry,
+      body,
+      condition,
+      backward: ctx.backward,
+      shiftX: weld.shiftX,
+    });
+    this.entryOffsetX = offsets.entryOffsetX;
+    this.bodyOffsetX = offsets.bodyOffsetX;
+    this.bodyOffsetY = offsets.bodyOffsetY;
+    this.conditionOffsetX = offsets.conditionOffsetX;
+    this.conditionOffsetY = offsets.conditionOffsetY;
+    this.backwardOffsetX = offsets.backwardOffsetX;
+    this.backwardOffsetY = offsets.backwardOffsetY;
 
     this.children = [entry, body, condition];
   }
