@@ -19,6 +19,8 @@ import type { GtileFork } from '../tiles/gtile-fork.js';
 import type { GtileGroup } from '../tiles/gtile-group.js';
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
 import type { GtileLabel } from '../tiles/gtile-label.js';
+import type { GtileSpot } from '../tiles/gtile-spot.js';
+import type { GtileGoto } from '../tiles/gtile-goto.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { dedupeAdjacentPoints } from './edge-point-dedupe.js';
 import { walkForkOrSplit } from './walk-fork-branches.js';
@@ -290,15 +292,40 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return pushDiamondCompanionLabel(out, k, t, { x, y }, myLane);
     }
 
-    case 'gtile-spot':
-      pushNode(out, { id: out.nextId('spot'), kind: 'spot', x, y, width: tile.width, height: tile.height }, myLane);
+    // add2-T2g: `label: t.name` added so the renderer's `renderSpot`
+    // (`activity-renderer-terminals.ts`) has the circled character to
+    // draw -- the pre-existing case built the node without it (never
+    // wired to an `ActivityNode` of its own until this task). Reported
+    // per this task's write-set note (T2h owns this file).
+    case 'gtile-spot': {
+      const t = tile as unknown as GtileSpot;
+      const node: ActivityNodeGeo = { id: out.nextId('spot'), kind: 'spot', x, y, width: t.width, height: t.height, label: t.name };
+      if (t.color !== undefined) node.color = t.color;
+      pushNode(out, node, myLane);
       return;
+    }
 
     case 'gtile-label': {
       const t = tile as unknown as GtileLabel;
       pushNode(
         out,
         { id: out.nextId('label'), kind: 'label', x, y, width: t.width, height: t.height, label: t.name },
+        myLane,
+      );
+      return;
+    }
+
+    // add2-T2g: NEW case (`gtile-goto` did not exist before this task).
+    // Zero-size, same push shape as `gtile-label` immediately above --
+    // `renderNode`'s own `'goto'` case draws nothing (`FtileGoto` draws
+    // nothing, `ast.ts`'s own doc). Reported per this task's write-set
+    // note (T2h owns this file; a new case was unavoidable since no
+    // existing kind modeled "no out point").
+    case 'gtile-goto': {
+      const t = tile as unknown as GtileGoto;
+      pushNode(
+        out,
+        { id: out.nextId('goto'), kind: 'goto', x, y, width: t.width, height: t.height, label: t.name },
         myLane,
       );
       return;

@@ -159,19 +159,25 @@ describe('GtileNote — a note measures at note FontSize 13', () => {
   });
 });
 
-describe('GtileSpot and GtileGroup — kinds that INHERIT the root font', () => {
-  it('a connector spot measures at the root font, not root minus two', () => {
-    // `of(root, element, activityDiagram, circle, spot)` --
-    // VCompactFactory.java:103-105. The bare `circle { }` skin block is
-    // empty (plantuml.skin:331-332), so the label inherits root FontSize 14.
-    const { bounder, sizes } = recordingBounder();
-    // `ActivitySpot` is a file-local interface in `gtile-spot.ts` ("Local
-    // until ast.ts is extended"), so it is spelled inline here rather than
-    // imported.
-    new GtileSpot({ kind: 'spot', name: 'A' }, bounder, THEME);
-    expect(sizes).toEqual([14]);
+describe('GtileSpot — a fixed-size tile, NOT a sizer client', () => {
+  // mission add2-T2g: `GtileSpot` no longer takes a `bounder`/`theme` --
+  // `FtileCircleSpot`'s SIZE=20 is Java-hardcoded, never measured
+  // (`FtileCircleSpot.java:60,116-117`). The circled character's own
+  // font resolution (`of(root, element, activityDiagram, circle, spot)`
+  // -- root FontSize 14, the bare `circle { }` skin block being empty,
+  // `plantuml.skin:331-332`) moved to RENDER time and is covered by
+  // `tests/unit/activity/renderer-shapes.test.ts`'s `renderSpot` suite,
+  // not this file (whose own doc states its scope is the LIVE sizer).
+  it('is a fixed 20x20 circle, never measured', () => {
+    const { sizes } = recordingBounder();
+    const tile = new GtileSpot({ kind: 'spot', name: 'A' });
+    expect(sizes).toEqual([]);
+    expect(tile.width).toBe(20);
+    expect(tile.height).toBe(20);
   });
+});
 
+describe('GtileGroup — a kind that INHERITS the root font', () => {
   it('a group title measures at the root font, and follows a root override', () => {
     // `of(..., <symbol>, composite)` -- FtileGroup.java:89-92;
     // `activityDiagram { composite { ... } }` declares no FontSize.

@@ -35,7 +35,7 @@ import {
   renderChevronRight,
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
-import { renderStart, renderStop, renderEnd } from './activity-renderer-terminals.js';
+import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -50,7 +50,7 @@ export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParalle
 // now live in `activity-renderer-terminals.ts`, which imports `actColors`
 // BACK from this file (same circular-but-safe shape as the signal-shapes
 // re-export above) -- existing importers of these four names are unchanged.
-export { renderStart, renderStop, renderEnd };
+export { renderStart, renderStop, renderEnd, renderSpot };
 // Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
 // `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
 // method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
@@ -479,6 +479,11 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'group':
     case 'partition':
       return renderComposite(node, theme);
+    case 'spot':
+      return renderSpot(node, theme);
+    case 'label': // `FtileEmpty#drawU` is empty -- `ast.ts`'s own doc.
+    case 'goto':
+      return '';
     default: {
       // Unknown kind: render a plain rect as a fallback
       const c = actColors(theme);
