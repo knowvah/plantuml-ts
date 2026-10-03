@@ -7,11 +7,7 @@ import { activityFontSize } from '../activity-style-defaults.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
-/** `AtomText#calculateDimensionSlow`'s own height floor (L, T3d), same
- *  constant as `gtile-diamond-inside.ts`'s own copy. This file's own
- *  `measureLabel` has no multi-line split (no corpus fixture exercises a
- *  multi-line label through `FtileDiamondInside2` -- left as-is, not
- *  speculatively added here) but the single-line floor still applies.
+/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d).
  * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
 const ATOM_TEXT_MIN_HEIGHT = 10;
 
@@ -29,13 +25,28 @@ interface LabelDim {
   readonly height: number;
 }
 
-/** Same convention as `GtileDiamondInside`'s own `measureLabel`: an unset
- *  label is a literal 0x0 box, never handed to the bounder. */
+/**
+ * Same convention as `GtileDiamondInside`'s own `measureLabel`: an unset
+ * label is a literal 0x0 box, never handed to the bounder. MLJOIN/IFNL
+ * residual (T3d, `pekefu-66-mepa144`): a real-`\n`-bearing condition (now
+ * unescaped by `if-dispatch.ts#unescapeLabelNewlines`, the same upstream
+ * `Display.getWithNewlines` path `FtileIfLongHorizontal.java:174`'s own
+ * `branch.getLabelTest().create0(...)` routes through) needs the SAME
+ * per-line width=MAX/height=SUM fold `gtile-diamond-inside.ts`'s own copy
+ * uses -- a single `getDimension` call on the whole string reports one
+ * oversized line.
+ */
 function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): LabelDim {
   const t = text ?? '';
   if (t === '') return { text: t, width: 0, height: 0 };
-  const dim = bounder.getDimension(t, fontSize);
-  return { text: t, width: dim.width, height: Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT) };
+  let width = 0;
+  let height = 0;
+  for (const line of t.split('\n')) {
+    const dim = bounder.getDimension(line, fontSize);
+    if (dim.width > width) width = dim.width;
+    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
+  }
+  return { text: t, width, height };
 }
 
 /** Byte-identical to `gtile-diamond-inside.ts`'s own `hexagonAlone` (D5: no
@@ -110,7 +121,7 @@ export class GtileDiamondInside2 extends TileLeaf {
     this.east = measureLabel(labels.east, bounder, arrowSize);
 
     const diamondSize = activityFontSize(theme, 'diamond');
-    const dimLabel = bounder.getDimension(label, diamondSize);
+    const dimLabel = measureLabel(label, bounder, diamondSize);
     const hex = hexagonAlone(dimLabel);
     this.hexWidth = hex.width;
     this.hexHeight = hex.height;

@@ -34,8 +34,15 @@ import { isRefusal, type ParseContext } from './dispatch-support.js';
  * with subsequent lines until paren depth returns to zero.
  *
  * Lines that already balance or that are not control-flow openers are
- * returned unchanged. Newlines inside the joined text become spaces; this
- * matches upstream's behaviour where multi-line labels are flattened.
+ * returned unchanged. MLJOIN (T3d, `pekefu-66-mepa144`/`xabesu-51-dimi831`):
+ * upstream's own continuation join (`CommandDecoratorMultine.java:63`
+ * `toSingleLineWithHiddenNewLine`) keeps the line break as a HIDDEN
+ * sentinel, never a space -- a literal `\n` escape here (NOT a real
+ * newline: every opener regex's `(.*?)` capture groups lack the dotAll
+ * flag, so a real newline would truncate the match) survives those
+ * regexes unharmed and is later turned into a real line break by
+ * `if-dispatch.ts#unescapeLabelNewlines`, which every condition/label
+ * capture already routes through (IFNL, same task).
  */
 function joinUnbalancedLines(lines: readonly string[]): string[] {
   const RE_OPENER = /^\s*(?:if|elseif|while|else|repeatwhile|repeat\s+while|endwhile)\b/i;
@@ -52,7 +59,7 @@ function joinUnbalancedLines(lines: readonly string[]): string[] {
     let depth = countParenDepth(combined);
     let j = i + 1;
     while (depth > 0 && j < lines.length) {
-      combined += ' ' + lines[j]!.trim();
+      combined += '\\n' + lines[j]!.trim();
       depth = countParenDepth(combined);
       j++;
     }
