@@ -70,6 +70,9 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['packageStyle', (acc) => acc.packageStyle],
   ['fixCircleLabelOverlapping', (acc) => acc.fixCircleLabelOverlapping],
   ['shadowing', (acc) => acc.shadowing],
+  ['hyperlinkUnderline', (acc) => acc.hyperlinkUnderline], // add2 T3e
+  ['svgLinkTarget', (acc) => acc.svgLinkTarget], // add2 T3e
+  ['preserveAspectRatio', (acc) => acc.preserveAspectRatio], // add2 T3e
 ];
 
 const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [

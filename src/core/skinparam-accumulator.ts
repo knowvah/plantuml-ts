@@ -220,6 +220,12 @@ export interface SkinparamAccumulator {
   /** D4 amendment (T1): `SwimlaneTitleFontSize` -- see
    *  `theme-graph-colors-b.ts#swimlaneTitleFontSize`'s own doc comment. */
   swimlaneTitleFontSize: number | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.hyperlinkUnderline`. */
+  hyperlinkUnderline: boolean | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.svgLinkTarget`. */
+  svgLinkTarget: string | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.preserveAspectRatio`. */
+  preserveAspectRatio: string | undefined;
   /** Per-element (SName) color buckets — decision D4. */
   elements: Record<string, ElementColors>;
   unknown: string[];
@@ -342,6 +348,9 @@ const SCALAR_FIELD_NAMES = [
   'swimlaneBorderThickness',
   'swimlaneTitleFontColor',
   'swimlaneTitleFontSize',
+  'hyperlinkUnderline',
+  'svgLinkTarget',
+  'preserveAspectRatio',
 ] as const satisfies ReadonlyArray<Exclude<keyof SkinparamAccumulator, 'elements' | 'unknown'>>;
 
 /** Fresh accumulator with all optional fields unset. */

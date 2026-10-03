@@ -164,3 +164,31 @@ export function activityHorizontalAlignment(theme: Theme): 'left' | 'center' | '
   if (alignment === HorizontalAlignment.RIGHT) return 'right';
   return 'left';
 }
+
+// ---------------------------------------------------------------------------
+// Font family (add2 T3e, family K)
+// ---------------------------------------------------------------------------
+
+/**
+ * The resolved font family for one activity element kind: the user's
+ * bucket override (`<style> activityDiagram { <sname> { FontName ... } }`
+ * or the flat `skinparam activityFontName`/`skinparam activityDiamond
+ * FontName` form, `skinparam-key-handlers-table-{a,c}.ts`) if set, else
+ * `theme.fontFamily` -- the diagram-wide default every caller reads
+ * UNCONDITIONALLY today.
+ *
+ * `FromSkinparamToStyle.java:144` (`addConFont("activity", SName.activity)`
+ * registers `activityFontName` -> `PName.FontName` on `SName.activity`);
+ * diamond inherits the SAME bucket via its own style signature nesting
+ * `SName.activity` (`StyleSignatureBasic.java:271-273`, `kafevi-44-
+ * tesu096`'s own precedent for a different property). Shaped exactly like
+ * {@link activityFontColor}'s bucket tier.
+ *
+ * NOT YET CONSUMED, re-slotted (dozaxu-98-xetu961, family K): the two call
+ * sites that would read this instead of `theme.fontFamily` directly
+ * (`activity-renderer-shapes.ts:135,155`, `activity-renderer-if-shapes.ts
+ * :128,142,144`) are outside this task's write-set.
+ */
+export function activityFontFamily(theme: Theme, sname: ActivitySName): string {
+  return theme.colors.elements?.[bucketKey(sname)]?.fontFamily ?? theme.fontFamily;
+}

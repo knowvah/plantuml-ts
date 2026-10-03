@@ -60,6 +60,31 @@ describe('drawActivityText — `[[url]]`', () => {
   });
 });
 
+describe('drawActivityText — hyperlinkUnderline/svgLinkTarget (add2 T3e, family F)', () => {
+  it('a url run keeps the underline when hyperlinkUnderline is unset (upstream default true)', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('text-decoration="underline"');
+  });
+
+  it('hyperlinkUnderline: false strips the underline off a url run only', () => {
+    const svg = drawActivityText(26, 74.333, 'plain [[http://www.google.com]]', {
+      ...STYLE,
+      hyperlinkUnderline: false,
+    });
+    expect(svg).not.toContain('text-decoration="underline"');
+  });
+
+  it('svgLinkTarget forwards to the <a> wrapper\'s target attribute', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', { ...STYLE, svgLinkTarget: '_self' });
+    expect(svg).toContain('target="_self"');
+  });
+
+  it('svgLinkTarget unset falls through to linkWrap\'s own "_top" default', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('target="_top"');
+  });
+});
+
 describe('drawActivityText — `|cell|` table row', () => {
   it('strips the pipe delimiters — no literal `|` reaches the drawn text', () => {
     // activity-creole-table: jar text content is "Creole Table Line1",

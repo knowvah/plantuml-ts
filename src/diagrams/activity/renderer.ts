@@ -360,5 +360,13 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     // the exact inverse this subtracts.
     preChromeWidth: raw.width,
     preChromeHeight: raw.height,
+    // add2 T3e (family G): `theme.preserveAspectRatio` (`core/theme-root-
+    // fields.ts`) forwarded verbatim -- `RenderFragment.preserveAspectRatio`
+    // reaches `document-shell.ts#assembleDocumentShell` unchanged (add2 T2d
+    // plumbing; this is the first producer to set it). Omitted entirely
+    // (not `undefined`, `exactOptionalPropertyTypes`) when no `skinparam
+    // preserveAspectRatio` was declared, which already takes
+    // `DEFAULT_PRESERVE_ASPECT_RATIO` ('none') at that consumer.
+    ...(theme.preserveAspectRatio !== undefined ? { preserveAspectRatio: theme.preserveAspectRatio } : {}),
   };
 }

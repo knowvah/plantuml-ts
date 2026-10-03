@@ -81,6 +81,14 @@ export interface ActivityTextStyle {
   readonly fontFamily: string;
   readonly fontSize: number;
   readonly fill: string;
+  /** add2 T3e (family F): `theme.hyperlinkUnderline` (`core/theme-root-
+   *  fields.ts`), forwarded by the caller that resolved it. `undefined`
+   *  (no caller sets it yet) reads as `true` -- see {@link fontConfigForRun}. */
+  readonly hyperlinkUnderline?: boolean;
+  /** add2 T3e (family F): `theme.svgLinkTarget`, forwarded by the caller
+   *  that resolved it. `undefined` falls through to `core/svg.ts
+   *  #linkWrap`'s own `'_top'` parameter default. */
+  readonly svgLinkTarget?: string;
 }
 
 function toFontConfiguration(style: ActivityTextStyle): FontConfiguration {
@@ -164,13 +172,21 @@ export function renderCreoleTableGrid(
  *  `DriverTextSvg` reads -- the SAME four flags `state/renderer-box.ts
  *  #runDecoration` maps to `text-decoration`, applied here as
  *  `FontConfiguration.styles` instead since activity draws through the
- *  klimt driver directly (D1), not `core/svg.ts#text`'s own attribute bag. */
+ *  klimt driver directly (D1), not `core/svg.ts#text`'s own attribute bag.
+ *
+ * add2 T3e (family F): a url run's `run.style.underline` is set
+ * unconditionally by `CommandCreoleUrl.ts` (klimt, outside this task's
+ * write-set) -- `SkinParam#useUnderlineForHyperlink()` (`skin/
+ * SkinParam.java:1056-1060`) only turns it OFF, so the suppression belongs
+ * here, gated on `run.url !== undefined` so a user's own explicit creole
+ * underline on NON-link text is never touched. */
 function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontConfiguration {
   const styles = new Set<FontStyle>();
   if (run.style.bold) styles.add(FontStyle.BOLD);
   if (run.style.italic) styles.add(FontStyle.ITALIC);
   if (run.style.underline) styles.add(FontStyle.UNDERLINE);
   if (run.style.strike) styles.add(FontStyle.STRIKE);
+  if (run.url !== undefined && style.hyperlinkUnderline === false) styles.delete(FontStyle.UNDERLINE);
   return { family: style.fontFamily, size: run.size, color: run.color ?? style.fill, styles };
 }
 
@@ -193,17 +209,17 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * passes `run.url` as its own `tooltip` arg, so it is UNCHANGED by the
  * new field's mere existence -- not this task's row to fix.
  *
- * STILL NOT READ here, reported rather than fixed: `skinparam
- * hyperlinkUnderline`/`svgLinkTarget` -- both now have a `Theme` field
- * (`theme.ts#hyperlinkUnderline`/`#svgLinkTarget`, T2c), but every url
- * run still keeps `FontStyle.UNDERLINE` unconditionally
- * (`CommandCreoleUrl.ts`'s own unconditional
- * `.add(FontStyle.UNDERLINE)`) and `linkWrap`'s `target` keeps its own
- * `_top` default: `ActivityTextStyle` (this file) carries no `theme`
- * field, and the one call site that would need to supply it for an
- * ACTION node's label (`activity-renderer-shapes.ts#renderAction`) is
- * outside this task's write-set. Affects `gaxezi-48-zesa921`/
- * `nisexe-68-vabu320`/`pekuxe-00-bovi270`.
+ * add2 T3e (CORRECTED -- the prior version of this comment named `Theme`
+ * fields that did not yet exist): `hyperlinkUnderline`/`svgLinkTarget` now
+ * both read `theme`-derived values off {@link ActivityTextStyle}, applied
+ * by {@link fontConfigForRun} (underline) and below (`linkWrap`'s
+ * `target`). STILL NOT CLOSED, re-slotted: the one call site that would
+ * populate those two `ActivityTextStyle` fields for an ACTION node's label
+ * (`activity-renderer-shapes.ts#renderAction`) is outside this task's
+ * write-set, so both stay `undefined` (= upstream's own defaults, no
+ * behavior change) until that file forwards `theme.hyperlinkUnderline`/
+ * `theme.svgLinkTarget`. Affects `gaxezi-48-zesa921`/`nisexe-68-vabu320`/
+ * `pekuxe-00-bovi270`.
  */
 function drawCreoleUrlLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
@@ -217,7 +233,10 @@ function drawCreoleUrlLine(x: number, y: number, content: string, style: Activit
     // reaches a `[[url]]` line that also carries `<latex>`/`<math>`.
     if (run.text === '') continue;
     const drawn = drawRun(cx, y + run.dy, run.text, fontConfigForRun(run, style));
-    out += run.url !== undefined ? linkWrap(drawn, { url: run.url, tooltip: run.tooltip ?? run.url }) : drawn;
+    out +=
+      run.url !== undefined
+        ? linkWrap(drawn, { url: run.url, tooltip: run.tooltip ?? run.url }, style.svgLinkTarget)
+        : drawn;
     cx += MEASURER.measure(run.text, { family: style.fontFamily, size: run.size }).width;
   }
   return out;
