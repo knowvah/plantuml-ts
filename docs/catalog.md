@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1350 modules · 5037 exported names.
+1356 modules · 5053 exported names.
 
 ## `src/`
 
@@ -1090,18 +1090,22 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-lane-origins.ts` | `LaneOrigins`, `DividerReservation`, `computeLaneOrigins` | The per-lane origin loop, split out of `swimlane-placement.ts` (this file's own 500-line hook -- mission `activity-loop-lane-translate` T1, same pure-move precedent as `swimlane-lanes.ts`, whose own header notes why: existing importers stay |
 | `swimlane-lanes.ts` | `laneAt`, `laneIn`, `laneOut` | The `laneAt`/`laneIn`/`laneOut` lane-inheritance helpers, split out of `swimlane-placement.ts` (`plans/activity-lane-capture` T2) to keep that file under the 500-line hook. |
 | `swimlane-loop-translate-repeat.ts` | `routeRepeatOut`, `routeRepeatSimple1`, `routeRepeatSimple2`, `routeRepeatComplex1` | `repeat`'s four translatable back-edge shapes plus its exit connector (mission `activity-loop-lane-translate`, T3). |
+| `swimlane-loop-translate-switch.ts` | `routeSwitchHorizontalThenVertical`, `routeSwitchVerticalThenHorizontal` | `switch`'s two translatable cross-swimlane shapes (mission `activity-divergence-drive-2`, T1p-e), dispatched from `swimlane-loop-translate.ts#routeLoopTranslate`. |
 | `swimlane-loop-translate-while.ts` | `routeWhileBack` | `while`'s one translatable back-edge shape (mission `activity-loop-lane-translate`, T2). |
-| `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
+| `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `SwitchHorizontalThenVerticalCrossLoop`, `SwitchVerticalThenHorizontalCrossLoop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `TITLE_ASCENT_FRACTION`, `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `repeatEdgeMeta`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
+| `switch-cross-shapes.ts` | `DiamondHalfExtent`, `routeSwitchHorizontalThenVerticalCross`, `SwitchCrossDirection`, `SwitchVerticalThenHorizontalCrossResult`, `routeSwitchVerticalThenHorizontalCross` | Pure geometry for `FtileSwitchWithManyLinks`'s two cross-swimlane connectors (D12, mission `activity-divergence-drive-2` T1p-e). |
 | `tile-coordinates.ts` | `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout-backward.ts` | `extractBackward`, `backwardExitsOnLeft`, `repeatConditionLabels` | Pure AST-level helpers for `FtileRepeat`/`FtileWhile`'s optional `backward:LABEL;` activity, split out of `tile-layout.ts` only to keep that file under the project's 500-line cap (mission `activity- divergence-drive` T3h, push-forward -- th |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `tileNodes`, `layoutActivity` |  |
-| `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit` |  |
+| `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `walkForkBranches`, `walkForkOrSplit`, `walkMerge` |  |
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |
 | `walk-if-long-horizontal.ts` | `walkIfLongHorizontal` | The `'gtile-if-long-horizontal'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-down.ts`/`walk-if-with-links.ts` already are (mission `activity-if-tile-port` D5). |
+| `walk-if-long-vertical.ts` | `walkIfLongVertical` | The `'gtile-if-long-vertical'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-if-long-horizontal.ts`/`walk-if-down.ts` already are (D12/T1p-b). |
 | `walk-if-with-links.ts` | `walkIfWithLinks` | The `'gtile-if-with-links'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason `walk-fork-branches.ts`/`walk-while-branch.ts` already are (mission `activity-if-tile-port` D5: one walke |
 | `walk-repeat-backward.ts` | `pushRepeatBackwardConnections` | `FtileRepeat`'s `ConnectionBackBackward1`/`ConnectionBackBackward2` (`FtileRepeat.java:84,181-187,406-535`), split out of `walk-repeat.ts` only to keep that file under the project's 500-line cap (mission `activity-divergence-drive` T3h -- t |
 | `walk-repeat.ts` | `RepeatFrame`, `walkRepeat` | The `'gtile-repeat'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
+| `walk-switch.ts` | `walkSwitch` | The `'gtile-switch'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-backward.ts` | `pushWhileBackwardConnections` | `FtileWhile`'s `ConnectionBackBackward1`/`ConnectionBackBackward2` (`FtileWhile.java:85,154-161,313-408`), split out of `walk-while- branch.ts` only to keep that file under the project's 500-line cap (mission `activity-divergence-drive` T3h |
 | `walk-while-branch.ts` | `WhileFrame`, `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 
@@ -1139,8 +1143,10 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-group.ts` | `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
+| `gtile-if-long-vertical.ts` | `VerticalBranchLayout`, `GtileIfLongVertical` |  |
 | `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
+| `gtile-merge.ts` | `MERGE_DIAMOND_SIZE`, `GtileMerge` |  |
 | `gtile-note.ts` | `GtileNote` |  |
 | `gtile-partition.ts` | `GtilePartition` |  |
 | `gtile-repeat-entry.ts` | `GtileRepeatEntry` |  |
