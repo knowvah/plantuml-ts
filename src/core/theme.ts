@@ -429,6 +429,8 @@ export type ThemeOverride = {
     text?: string;
     /** cdd7-T1a (D3): see `ThemeColorFields.arrow`. */
     arrow?: Paint;
+    /** T2c: see `ThemeColorFields.arrowHead`'s own doc comment. */
+    arrowHead?: Paint;
     arrowLollipopColor?: string;
     note?: string;
     noteBackground?: string;

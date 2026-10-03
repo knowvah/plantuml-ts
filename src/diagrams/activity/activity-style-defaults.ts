@@ -431,3 +431,20 @@ export {
 export function resolveSolidBucketColor(paint: Paint | undefined): string | undefined {
   return typeof paint === 'string' ? resolveColorToSvgHex(paint) : undefined;
 }
+
+/**
+ * `skinparam ArrowHeadColor` -- `FromSkinparamToStyle.java:153` registers it
+ * as `PName.HeadColor` on `SName.arrow`. `Rainbow.build(Style, HColorSet)`
+ * (`decoration/Rainbow.java:84-95`) reads `style.value(PName.HeadColor)`;
+ * ABSENT means "track the arrow's own `LineColor`" (`colorHead = color` at
+ * `Rainbow.java:89`), never a fixed default -- so this resolver falls back
+ * to `theme.colors.arrow` itself, mirroring that exact branch, rather than
+ * a `LINE_THICKNESS_DEFAULTS`-style constant table.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Worm.java:146-154
+ *  (`drawInternalOneColor` switches to this color for the arrowhead
+ *  decoration only, AFTER the line segments already drew with the arrow's
+ *  own `LineColor`).
+ */
+export function activityArrowHeadColor(theme: Theme): Paint {
+  return theme.colors.arrowHead ?? theme.colors.arrow;
+}

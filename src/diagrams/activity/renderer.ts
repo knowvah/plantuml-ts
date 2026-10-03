@@ -13,7 +13,7 @@ import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
-import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
@@ -161,10 +161,16 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * Direction classification (including the diagonal/zero-length cases
  * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
  * `Direction.fromVector` (`utils/Direction.java:110-128`).
+ *
+ * `colors.line`/`colors.head` are bundled into one param (rather than two
+ * strings) to stay under this file's 5-param complexity limit now that
+ * T2c's `ArrowHeadColor` split the line's `LineColor` from the decoration's
+ * own `HeadColor` (`Worm.java:126-127` vs `:153-154` -- two DIFFERENT
+ * `ug.apply` colors, never the same variable upstream either).
  */
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
-  edgeColor: string,
+  colors: { line: string; head: string },
   strokeWidth: number,
   emphasize: ArrowDir | undefined,
   theme: Theme,
@@ -178,10 +184,10 @@ function renderEdgeSegments(
     const dy = p2.y - p1.y;
     if (!emphasisDrawn && emphasize !== undefined && arrowDirection(dx, dy) === emphasize) {
       const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      out += arrowTip(mid, { dx, dy }, edgeColor, theme);
+      out += arrowTip(mid, { dx, dy }, colors.head, theme);
       emphasisDrawn = true;
     }
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
+    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
   }
   return out;
 }
@@ -198,10 +204,12 @@ const DIR_VECTOR: Record<ArrowDir, { dx: number; dy: number }> = {
 
 /** D4: the extra arrowhead a translate shape places at its own point,
  *  split out of {@link renderEdge} to keep that function under the file's
- *  NLOC limit. */
-function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string, theme: Theme): string {
+ *  NLOC limit. Draws in the decoration's own `HeadColor` (T2c), never the
+ *  line's `LineColor` -- there is no line segment at a mid-arrow point to
+ *  draw in the other color. */
+function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, headColor: string, theme: Theme): string {
   const { x, y, dir } = midArrowAt;
-  return arrowTip({ x, y }, DIR_VECTOR[dir], edgeColor, theme);
+  return arrowTip({ x, y }, DIR_VECTOR[dir], headColor, theme);
 }
 
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
@@ -210,6 +218,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 
   // cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer draws flat.
   const edgeColor = noGradient(theme.colors.arrow);
+  // T2c: `skinparam ArrowHeadColor` -- `Worm#drawInternalOneColor` applies
+  // THIS color to the decoration only (`ftile/Worm.java:153-154`), AFTER
+  // the line segments already drew with `edgeColor` (`:126-127`). Absent
+  // -> tracks `edgeColor` itself (`activityArrowHeadColor`'s own doc).
+  const headColor = noGradient(activityArrowHeadColor(theme));
   // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
   // `Worm#drawInternalOneColor` takes the LINE's stroke from
   // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`
@@ -224,7 +237,13 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // interleaved INTO this segment run, immediately before its matching
   // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
   // exact `Worm.java:138-143` loop body this ports.
-  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'), edge.emphasize, theme);
+  const segments = renderEdgeSegments(
+    pts,
+    { line: edgeColor, head: headColor },
+    activityLineThickness(theme, 'arrow'),
+    edge.emphasize,
+    theme,
+  );
 
   // Terminal arrowhead, drawn AFTER the full segment loop --
   // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
@@ -236,14 +255,14 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, edgeColor, theme);
+  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
 
   // D4: an explicit extra arrowhead at a translate shape's own point (see
   // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
   // decoration; this is a port-specific extension with no `Worm` draw-order
   // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
   // and is now interleaved above).
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor, theme);
+  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, headColor, theme);
 
   // Optional edge label near midpoint
   let labelEl = '';

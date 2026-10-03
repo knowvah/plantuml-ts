@@ -80,6 +80,9 @@ export interface SkinparamAccumulator {
    *  `Red|Green` value is an `HColorGradient` (`HColorSet.java:109-116`),
    *  not a flattened string. */
   arrow: Paint | undefined;
+  /** T2c: `skinparam ArrowHeadColor` -- see `theme.ts
+   *  #ThemeColorFields.arrowHead`'s own doc comment. */
+  arrowHeadColor: Paint | undefined;
   /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` --
    *  `ColorParam.arrowLollipop`, read by `SvekEdge.java:266-268`. */
   arrowLollipopColor: string | undefined;
@@ -262,6 +265,7 @@ const SCALAR_FIELD_NAMES = [
   'border',
   'text',
   'arrow',
+  'arrowHeadColor',
   'arrowLollipopColor',
   'noteBackground',
   'classBackground',
