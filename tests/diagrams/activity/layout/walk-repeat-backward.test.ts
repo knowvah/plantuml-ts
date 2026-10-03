@@ -17,7 +17,7 @@ import type { Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
+  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}`, groupScope: []  };
 }
 
 function makeLeaf(kind: string, width: number, height: number, left = width / 2, hasPointOut = true): Tile {

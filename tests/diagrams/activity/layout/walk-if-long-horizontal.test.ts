@@ -134,13 +134,18 @@ describe('layoutActivity — long-horizontal: every branch ends in stop', () => 
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('no VerticalOut, no Hline: only VerticalIn x2, Horizontal, In, LastElseIn, LastElseOut', () => {
-    expect(geo.edges.length).toBe(6);
+  // T1b: `ConnectionLastElseIn`'s own exit point is exactly
+  // `ConnectionLastElseOut`'s own entry (both default FULL,
+  // `Snake.create`'s static overloads never call `.withMerge`) -- they
+  // fuse (`Snake#merge`, `Snake.java:303-327`): no VerticalOut, no
+  // Hline, VerticalIn x2, Horizontal, In, merged LastElseIn+LastElseOut.
+  it('no VerticalOut, no Hline: only VerticalIn x2, Horizontal, In, merged LastElseIn+LastElseOut', () => {
+    expect(geo.edges.length).toBe(5);
   });
 
-  it('LastElseOut (the last edge) carries the third point (W/2, H) since nbOut === 0', () => {
+  it('the merged LastElseIn+LastElseOut (last edge) carries 4 points (nbOut === 0)', () => {
     const lastElseOut = geo.edges[geo.edges.length - 1]!;
-    expect(lastElseOut.points.length).toBe(3);
+    expect(lastElseOut.points.length).toBe(4);
   });
 
   it('the empty else emits no node of its own (GtileTopDown with zero children) (T3k)', () => {

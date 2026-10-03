@@ -271,7 +271,9 @@ function connectionHline(ctx: IfDownCtx): void {
   const p2 = diamond2Point(t, x, y, t.offsets.diamond2Size, t.offsets.diamond2PointInY);
   const p3 = diamond2Point(t, x, y, t.offsets.diamond2Size, 2 * t.offsets.diamond2PointInY);
   pushEdge(out, [{ x: xmax, y: p2.y }, p2, p3], myLane, myLane);
-  out.edges[out.edges.length - 1]!.arrowhead = false;
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.arrowhead = false;
+  edge.mergeable = 'NONE';
 }
 
 /** `ConnectionElseNoDiamond` -- `Else2`'s own shape, but ending at the

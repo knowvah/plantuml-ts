@@ -172,7 +172,9 @@ describe('tile-layout — while backward: set (FtileWhile.java:85,154-161,561-56
     expect(geo.nodes[3]!.label).toBe('go back');
   });
 
-  it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (5 edges: In, Backward1, Backward2, Out x2)', () => {
-    expect(geo.edges).toHaveLength(5);
+  // T1b: `ConnectionOut`'s two snakes fuse (merge-case C, `Snake.java:
+  // 303-327`) -- 4 edges now.
+  it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (4 edges: In, Backward1, Backward2, merged Out)', () => {
+    expect(geo.edges).toHaveLength(4);
   });
 });

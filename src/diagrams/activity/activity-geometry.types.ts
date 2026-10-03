@@ -68,6 +68,18 @@ export interface ActivityEdgeGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:306-307
    */
   midArrowAt?: { x: number; y: number; dir: 'up' | 'down' | 'left' | 'right' };
+  /**
+   * The Java `MergeStrategy` this edge's own `Snake` was built with
+   * (`activitydiagram3/ftile/MergeStrategy.java:38-46`: `FULL < LIMITED <
+   * NONE`), read ONLY by `layout/snake-merge.ts` (D1/D2) before any
+   * compression runs; absent means the builder's own default `FULL`
+   * (`Snake.create`'s static overloads, `Snake.java:138-153`, never call
+   * `.withMerge(...)`). Walkers set this only at the few sites a `.withMerge`
+   * call actually appears upstream -- every other push is correctly left
+   * `undefined` rather than redundantly writing `'FULL'`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:303-306
+   */
+  mergeable?: 'FULL' | 'LIMITED' | 'NONE';
 }
 
 export interface SwimlaneGeo {

@@ -28,6 +28,7 @@ function makeOut(): Out {
     edgeMeta: [],
     reservations: [],
     nextId: (prefix: string) => `${prefix}${n++}`,
+    groupScope: [],
   };
 }
 
