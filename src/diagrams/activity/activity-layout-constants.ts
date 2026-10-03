@@ -44,11 +44,6 @@ export const NODE_MARGIN_X = 40;
  */
 export const SEQUENTIAL_ASSEMBLY_GAP = 35;
 export const START_STOP_RADIUS = 10;
-/** The connector-spot circle (`gtile-spot`). A DIFFERENT circle from
- *  {@link START_STOP_RADIUS} and from `abel/EntityPosition.RADIUS` — all
- *  three were once spelled `RADIUS` — and different again from json's
- *  own `SPOT_RADIUS = 3`, which is why this one is not called that. */
-export const CONNECTOR_SPOT_RADIUS = 8;
 
 /**
  * `stop`'s outer (bullseye) ellipse radius. `FtileCircleStop#drawU`
