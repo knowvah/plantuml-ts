@@ -1346,3 +1346,26 @@ describe('renderActivity — edge with ArrowHeadColor', () => {
     expect(polygons.every((p) => p.includes('fill="#F00"'))).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// add2 T3e (family G): theme.preserveAspectRatio -> RenderFragment -> root
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — preserveAspectRatio (add2 T3e, family G)', () => {
+  it('forwards theme.preserveAspectRatio onto the RenderFragment', () => {
+    const withRatio: typeof theme = { ...theme, preserveAspectRatio: 'xMinYMid slice' };
+    const fragment = renderActivity(makeGeo(), withRatio);
+    expect(fragment.preserveAspectRatio).toBe('xMinYMid slice');
+  });
+
+  it('omits the field entirely when the theme carries none (exactOptionalPropertyTypes)', () => {
+    const fragment = renderActivity(makeGeo(), theme);
+    expect('preserveAspectRatio' in fragment).toBe(false);
+  });
+
+  it('reaches the assembled root <svg> preserveAspectRatio attribute', () => {
+    const withRatio: typeof theme = { ...theme, preserveAspectRatio: 'xMinYMid slice' };
+    const svg = assembleSvg(renderActivity(makeGeo(), withRatio));
+    expect(svg).toContain('preserveAspectRatio="xMinYMid slice"');
+  });
+});
