@@ -58,6 +58,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['tabSize', (acc) => acc.tabSize],
   ['componentStyle', (acc) => acc.componentStyle],
   ['conditionEndStyle', (acc) => acc.conditionEndStyle], // T1p-a
+  ['conditionStyle', (acc) => acc.conditionStyle], // T2c
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
@@ -180,6 +181,7 @@ function hasColorsOverride(acc: SkinparamAccumulator): boolean {
     acc.border !== undefined ||
     acc.text !== undefined ||
     acc.arrow !== undefined ||
+    acc.arrowHeadColor !== undefined ||
     acc.arrowLollipopColor !== undefined ||
     acc.noteBackground !== undefined ||
     Object.keys(acc.elements).length > 0 ||
@@ -208,6 +210,7 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   if (acc.border !== undefined) colorsOverride.border = acc.border;
   if (acc.text !== undefined) colorsOverride.text = acc.text;
   if (acc.arrow !== undefined) colorsOverride.arrow = acc.arrow;
+  if (acc.arrowHeadColor !== undefined) colorsOverride.arrowHead = acc.arrowHeadColor;
   if (acc.arrowLollipopColor !== undefined) colorsOverride.arrowLollipopColor = acc.arrowLollipopColor;
   if (acc.noteBackground !== undefined) colorsOverride.noteBackground = acc.noteBackground;
   if (Object.keys(acc.elements).length > 0) colorsOverride.elements = acc.elements;

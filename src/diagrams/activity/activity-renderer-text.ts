@@ -184,21 +184,26 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * SAME string-emitting `<a>` wrapper every other engine's url runs use,
  * jar-verified byte-exact per that function's own doc comment).
  *
- * Two narrowed pieces, both reported rather than fixed here:
- *  - `tooltip: run.url` (not the creole command's own resolved
- *    `{tooltip}`) is `creole-text-lines.ts#textAtomMeasured`'s own gap --
- *    that SHARED seam's `CreoleTextRun.url` carries only the href, never
- *    `CreoleAtomUrl.tooltip` (`core/svek/image/creole-text-lines.ts`,
- *    outside this task's write-set); `state/renderer-box.ts
- *    #renderStateRuns` draws the SAME narrowed value, so this is an
- *    inherited gap, not a new one (affects `zamagu-75-vape137`'s `title`).
- *  - `skinparam hyperlinkUnderline`/`svgLinkTarget` are NOT read: neither
- *    has a `Theme` field in this port yet (`activity-text-style.ts
- *    #activityHorizontalAlignment`'s own identical "FILED, not
- *    implemented" precedent) -- `linkWrap`'s `target` keeps its own
- *    `_top` default and every url run keeps `FontStyle.UNDERLINE`
- *    (`CommandCreoleUrl.ts`'s own unconditional `.add(FontStyle.UNDERLINE)`),
- *    affecting `gaxezi-48-zesa921`/`nisexe-68-vabu320`/`pekuxe-00-bovi270`.
+ * T2c: `tooltip: run.tooltip ?? run.url` now carries the creole command's
+ * own resolved `{tooltip}` -- `creole-text-lines.ts#textAtomMeasured` was
+ * dropping `atom.url.tooltip` on the floor (`CreoleAtomUrl` already
+ * carried both halves correctly; only the copy into `CreoleTextRun` was
+ * narrowed). Fixes `zamagu-75-vape137`'s `title`/`xlink:title`.
+ * `state/renderer-box.ts#renderStateRuns` (a different engine) still
+ * passes `run.url` as its own `tooltip` arg, so it is UNCHANGED by the
+ * new field's mere existence -- not this task's row to fix.
+ *
+ * STILL NOT READ here, reported rather than fixed: `skinparam
+ * hyperlinkUnderline`/`svgLinkTarget` -- both now have a `Theme` field
+ * (`theme.ts#hyperlinkUnderline`/`#svgLinkTarget`, T2c), but every url
+ * run still keeps `FontStyle.UNDERLINE` unconditionally
+ * (`CommandCreoleUrl.ts`'s own unconditional
+ * `.add(FontStyle.UNDERLINE)`) and `linkWrap`'s `target` keeps its own
+ * `_top` default: `ActivityTextStyle` (this file) carries no `theme`
+ * field, and the one call site that would need to supply it for an
+ * ACTION node's label (`activity-renderer-shapes.ts#renderAction`) is
+ * outside this task's write-set. Affects `gaxezi-48-zesa921`/
+ * `nisexe-68-vabu320`/`pekuxe-00-bovi270`.
  */
 function drawCreoleUrlLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
@@ -212,7 +217,7 @@ function drawCreoleUrlLine(x: number, y: number, content: string, style: Activit
     // reaches a `[[url]]` line that also carries `<latex>`/`<math>`.
     if (run.text === '') continue;
     const drawn = drawRun(cx, y + run.dy, run.text, fontConfigForRun(run, style));
-    out += run.url !== undefined ? linkWrap(drawn, { url: run.url, tooltip: run.url }) : drawn;
+    out += run.url !== undefined ? linkWrap(drawn, { url: run.url, tooltip: run.tooltip ?? run.url }) : drawn;
     cx += MEASURER.measure(run.text, { family: style.fontFamily, size: run.size }).width;
   }
   return out;

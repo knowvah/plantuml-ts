@@ -48,6 +48,9 @@ export interface SkinparamAccumulator {
   /** T1p-a: `skinparam ConditionEndStyle hline` -- see `theme.ts
    *  #conditionEndStyle`'s own doc comment. */
   conditionEndStyle: 'diamond' | 'hline' | undefined;
+  /** T2c (ex-T2a): `skinparam ConditionStyle InsideDiamond` -- see
+   *  `theme.ts#conditionStyle`'s own doc comment. */
+  conditionStyle: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond' | undefined;
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
@@ -80,6 +83,9 @@ export interface SkinparamAccumulator {
    *  `Red|Green` value is an `HColorGradient` (`HColorSet.java:109-116`),
    *  not a flattened string. */
   arrow: Paint | undefined;
+  /** T2c: `skinparam ArrowHeadColor` -- see `theme.ts
+   *  #ThemeColorFields.arrowHead`'s own doc comment. */
+  arrowHeadColor: Paint | undefined;
   /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` --
    *  `ColorParam.arrowLollipop`, read by `SvekEdge.java:266-268`. */
   arrowLollipopColor: string | undefined;
@@ -246,6 +252,7 @@ const SCALAR_FIELD_NAMES = [
   'roundCorner',
   'componentStyle',
   'conditionEndStyle',
+  'conditionStyle',
   'actorStyle',
   'minimumWidth',
   'strictUml',
@@ -262,6 +269,7 @@ const SCALAR_FIELD_NAMES = [
   'border',
   'text',
   'arrow',
+  'arrowHeadColor',
   'arrowLollipopColor',
   'noteBackground',
   'classBackground',

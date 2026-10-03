@@ -17,6 +17,36 @@ export interface DiamondInsideLabels {
   east?: string;
 }
 
+/**
+ * The public contract `GtileIfDown`/`GtileIfWithLinks` need from an
+ * if-condition diamond tile, regardless of WHICH `ConditionStyle` built
+ * it. Upstream has no equivalent type -- `FtileDiamondInside` and
+ * `FtileDiamondSquare` are sibling subclasses of the abstract
+ * `FtileDiamondWIP` (`vertical/FtileDiamondWIP.java`), never one typed as
+ * the other -- but TypeScript's private-field nominal typing (`north`/
+ * `south`/`west`/`east` are `private` on both classes, so two classes
+ * with identically-shaped private members are NOT structurally
+ * assignable to each other) makes a formal interface the only way to let
+ * `GtileDiamondSquare` (T2c, `skinparam ConditionStyle InsideDiamond`)
+ * stand in wherever `GtileDiamondInside` is accepted today. Consumers
+ * (`gtile-if-down.ts`, `gtile-if-with-links.ts`) still type their
+ * `diamond1` param as the concrete `GtileDiamondInside` class as of this
+ * writing -- widening those two call sites to this interface is the
+ * follow-on that actually wires `InsideDiamond` end to end (re-slotted:
+ * both files are outside this task's write-set, one of them owned by a
+ * concurrent task). `GtileDiamondInside implements` it below so the
+ * surface is enforced at compile time the moment that widening lands.
+ */
+export interface DiamondConditionTile {
+  readonly label: string;
+  readonly width: number;
+  readonly height: number;
+  getCoord(hook: HookName): GPoint;
+  labelAt(side: DiamondSide): { x: number; y: number; width: number; height: number; label: string } | null;
+  swapEastWest(): void;
+  hasPointOut(): boolean;
+}
+
 interface LabelDim {
   readonly text: string;
   readonly width: number;
@@ -80,7 +110,7 @@ function hexagonAlone(dimLabel: { width: number; height: number }): { width: num
  * at the hexagon's own top/bottom edge regardless of the north label.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-125
  */
-export class GtileDiamondInside extends TileLeaf {
+export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile {
   readonly kind = 'gtile-diamond-inside' as const;
   readonly label: string;
   readonly width: number;
