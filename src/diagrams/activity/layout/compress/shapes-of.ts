@@ -266,9 +266,26 @@ function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape
     width: ext.maxX - ext.minX,
     height: ext.maxY - ext.minY,
   };
-  // `Worm.java:159-168`: a cross-lane fork/split decoration's
-  // `compressionMode` is set to `ON_X`, skipping it on X only.
-  if (meta.shape === 'parallel-in' || meta.shape === 'parallel-out') shape.polygonSkipMode = 'x';
+  // `ParallelBuilderFork.java:172,229`: `ConnectionIn`/`ConnectionOut`
+  // call `.ignoreForCompression()` ONLY in `drawTranslate` (the
+  // cross-lane path -- same-lane `drawU`, lines 151-163/202-217, never
+  // does). `Worm.java:159-168` then sets the decoration's
+  // `compressionMode` to `ON_X`. A same-lane fork/split connector (or
+  // one with an unlaned endpoint) must NOT skip X -- PARX family,
+  // gevaxi-80-tone223/ciloke-34-pumi198 (same-lane fork, ws -> 0/-14).
+  // KNOWN RESIDUAL (reported, not fixed here): `ParallelBuilderSplit
+  // .java:207-225,264-285`'s `drawTranslate` overloads NEVER call
+  // `.ignoreForCompression()`, so a CROSS-lane split connector (e.g.
+  // bugaja-31-jaso630) should also never skip X -- distinguishing a
+  // fork's cross-lane connector from a split's needs a discriminant
+  // this adapter does not have (`EdgeMeta` carries no builder-kind
+  // tag; adding one touches `swimlane-placement.ts`/`tile-
+  // coordinates.ts`, outside this task's write-set). See the task
+  // report for the re-slot.
+  const crossLane = meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2;
+  if ((meta.shape === 'parallel-in' || meta.shape === 'parallel-out') && crossLane) {
+    shape.polygonSkipMode = 'x';
+  }
   return shape;
 }
 
