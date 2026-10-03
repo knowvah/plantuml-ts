@@ -343,19 +343,24 @@ describe('M4c — CommandIfLegacy1/CommandElseLegacy1 (barada-07-veca157)', () =
 // M5 — CommandWhileEnd3: `end while` / `while end` spellings
 // ---------------------------------------------------------------------------
 describe('M5 — CommandWhileEnd3 two-word spellings', () => {
+  // WSPEC (mission add2-T3b): a bare `stop` right after the closer, with
+  // no `break` in the body, redirects into the while's own `specialOut`
+  // (`ActivityDiagram3#manageSpecialStopEndAfterEndWhile`) instead of
+  // landing as an `ast.nodes[1]` sibling.
   it('"end while" closes the loop (rucuga-83-tosu408 shape)', () => {
     const ast = parse(['while(more?)', '  :finalize;', 'end while', 'stop']);
     const node = firstNode(ast) as ActivityWhile;
     expect(node.kind).toBe('while');
     expect(node.body).toHaveLength(1);
-    expect(ast.nodes[1]?.kind).toBe('stop');
+    expect(ast.nodes).toHaveLength(1);
+    expect(node.specialOut?.kind).toBe('stop');
   });
 
   it('"while end" (reversed order) also closes the loop', () => {
     const ast = parse(['while(more?)', '  :finalize;', 'while end', 'stop']);
     const node = firstNode(ast) as ActivityWhile;
     expect(node.kind).toBe('while');
-    expect(ast.nodes[1]?.kind).toBe('stop');
+    expect(node.specialOut?.kind).toBe('stop');
   });
 
   it('one-word "endwhile" still works (no regression)', () => {

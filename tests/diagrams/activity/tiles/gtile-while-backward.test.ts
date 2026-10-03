@@ -44,7 +44,7 @@ const header = makeDiamond(60, 40);
 const body = makeTile(80, 80);
 
 describe('GtileWhile — backward unset: byte-identical to the pre-T3h shape', () => {
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
 
   it('backward is undefined', () => {
     expect(tile.backward).toBeUndefined();
@@ -61,9 +61,9 @@ describe('GtileWhile — backward unset: byte-identical to the pre-T3h shape', (
 // (`:592`), never `height` (`:585` has no backward term) or `left`
 // (`:593`).
 describe('GtileWhile — backward set (FtileWhile.java:587-589,566-573)', () => {
-  const noBackward = new GtileWhile(header, body, bounder, theme);
+  const noBackward = new GtileWhile(header, body, { bounder: bounder, theme: theme });
   const backward = makeTile(30, 20);
-  const tile = new GtileWhile(header, body, bounder, theme, backward);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme, backward: backward });
 
   it('width is the no-backward width plus backward.width', () => {
     expect(tile.width).toBe(noBackward.width + 30);

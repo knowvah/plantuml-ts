@@ -201,6 +201,17 @@ export interface WhileFrame {
   readonly backPos: GPoint;
   readonly backInLane: string | undefined;
   readonly backOutLane: string | undefined;
+  /**
+   * `FtileWhile`'s own `specialOut` field (`FtileWhile.java:84,120`,
+   * mission add2-T3b, family WSPEC): the while's `ConnectionOutSpecial`
+   * target, replacing `ConnectionOut` entirely when set. `specialPos` is
+   * `GtileWhile.specialOffsetX/Y` translated by this tile's own origin --
+   * always computed (`(0,0)` offsets when {@link specialOut} is unset),
+   * same always-computed style as {@link backPos}.
+   */
+  readonly specialOut: Tile | undefined;
+  readonly specialPos: GPoint;
+  readonly specialInLane: string | undefined;
 }
 
 /**
@@ -294,6 +305,25 @@ function pushWhileOut(frame: WhileFrame): void {
 }
 
 /**
+ * `ConnectionOutSpecial` (`FtileWhile.java:513-552`): REPLACES
+ * `ConnectionOut` entirely when `specialOut` is set (`FtileWhile.create`,
+ * `:163-166`). `p1 = translateDiamond1 + (0,0)`, `y1 = p1.y + inY + half`
+ * with `inY = 0` and `half = hexHeight / 2` -- exactly this port's
+ * `WEST_HOOK` (`frame.headerWest`, same mid-height point `pushWhileOut`
+ * reads). `p2` is the special tile's own `NORTH_HOOK`, translated by
+ * `frame.specialPos` (`getTranslateForSpecial`, `GtileWhile`'s own class
+ * doc). Draw: `(x1,y1) -> (x2,y1) -> (x2,y2)`, `asToDown`, no emphasize,
+ * default merge (FULL, `Snake.create(skinParam, color, arrow)`, `:533`).
+ * Mission add2-T3b, family WSPEC.
+ */
+function pushWhileOutSpecial(frame: WhileFrame): void {
+  const { out, headerWest, specialPos, specialOut, headerOutLane, specialInLane } = frame;
+  const special = specialOut!;
+  const p2 = { x: specialPos.x + special.getCoord(NORTH_HOOK).x, y: specialPos.y + special.getCoord(NORTH_HOOK).y };
+  pushEdge(out, [headerWest, { x: p2.x, y: headerWest.y }, p2], headerOutLane, specialInLane);
+}
+
+/**
  * One weld per `break` the body walk emitted, appended LAST (D3, D7).
  * `FtileWhile`'s own `getWeldingPoints()` is never overridden
  * (`AbstractFtile.java:100`'s empty-list default), so a `break` nested
@@ -336,6 +366,22 @@ interface WhileOrigins {
   readonly out: Out;
 }
 
+/** {@link WhileFrame}'s `specialOut`/`specialPos`/`specialInLane` trio --
+ *  split out of {@link buildWhileFrame} to keep that function's own NLOC
+ *  under the file's limit (D-new, mission add2-T3b, family WSPEC). */
+function buildWhileSpecialFields(
+  t: GtileWhile,
+  x: number,
+  y: number,
+  myLane: string | undefined,
+): Pick<WhileFrame, 'specialOut' | 'specialPos' | 'specialInLane'> {
+  return {
+    specialOut: t.specialOut,
+    specialPos: { x: x + t.specialOffsetX, y: y + t.specialOffsetY },
+    specialInLane: t.specialOut !== undefined ? laneIn(t.specialOut, myLane) : undefined,
+  };
+}
+
 /** Builds the {@link WhileFrame} every `Connection*` push reads from --
  *  split out of {@link walkWhile} only to keep that function's own NLOC
  *  under the file's limit. */
@@ -364,6 +410,7 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
     backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
     backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
+    ...buildWhileSpecialFields(t, x, y, myLane),
   };
 }
 
@@ -378,26 +425,36 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
   // the forward and back edges.
   const hX = x + t.headerOffsetX;
   const hY = y + t.headerOffsetY;
-  pushWhileHeader(header, hX, hY, myLane, out);
 
   const bX = x + t.bodyOffsetX;
   const bY = y + t.bodyOffsetY;
+  // D13 (WORD, mission add2-T3b): `drawU` draws `whileBlock` BEFORE
+  // `diamond1` (`FtileWhile.java:556-557`) -- the body's own nodes land
+  // first in document order, the header hexagon second. Only the NODE
+  // draw order moves; every geometry formula above is unaffected by which
+  // child is walked first.
   const bodyNodeStart = out.nodes.length;
   walkTile(body, bX, bY, { kindHint: null, lane: myLane }, out);
   const bodyNodeEnd = out.nodes.length;
 
+  pushWhileHeader(header, hX, hY, myLane, out);
+
   const frame = buildWhileFrame({ t, x, y, hX, hY, bX, bY, header, body, myLane, out });
 
-  // `drawU` draws `backward` LAST among nodes, only when set
-  // (`FtileWhile.java:561-562`) -- `walkTile`'s generic dispatch is
-  // correct here, same reason `walk-repeat.ts#pushRepeatBackwardNode`
-  // cites: `backward` is always a plain action box
-  // (`InstructionWhile.java:121-122`, `factory.activity`).
+  // `drawU` draws `specialOut` (if set) THEN `backward` (if set), both
+  // only ever as plain leaves (`FtileWhile.java:558-562`; `specialOut` is
+  // always a `stop`/`end`, `backward` always a plain action box,
+  // `InstructionWhile.java:121-122`) -- `walkTile`'s generic dispatch is
+  // correct for both, same reason `walk-repeat.ts#pushRepeatBackwardNode`
+  // cites.
+  if (t.specialOut !== undefined)
+    walkTile(t.specialOut, frame.specialPos.x, frame.specialPos.y, { kindHint: null, lane: myLane }, out);
   if (t.backward !== undefined)
     walkTile(t.backward, frame.backPos.x, frame.backPos.y, { kindHint: null, lane: myLane }, out);
 
-  // D7: In/Back(Simple|Empty|Backward), then Out, then break weldings.
+  // D7: In/Back(Simple|Empty|Backward), then Out(Special), then weldings.
   pushWhileBack(frame);
-  pushWhileOut(frame);
+  if (t.specialOut !== undefined) pushWhileOutSpecial(frame);
+  else pushWhileOut(frame);
   pushWhileWeldings(out, bodyNodeStart, bodyNodeEnd, frame.elbowX);
 }

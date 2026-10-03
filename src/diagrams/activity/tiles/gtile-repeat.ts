@@ -16,6 +16,59 @@ import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
  */
 const WELD_DIAMOND_SIZE = 2 * HEXAGON_HALF_SIZE;
 
+/**
+ * `FtileEmpty` (`ftile/FtileEmpty.java:60-93`): diamond2's degenerate
+ * form, substituted for the condition hexagon when the repeat has no test
+ * AND is the last instruction of its own parent list (`FtileRepeat.java:
+ * 143-144`, `if (noOut && Display.isNull(test)) diamond2 = new
+ * FtileEmpty(...)`; `noOut` = `InstructionRepeat.isLastOfTheParent()`,
+ * `InstructionRepeat.java:117-121,170`). A true 0x0 pass-through -- no
+ * polygon, no label, no space of its own (`calculateDimensionEmpty`:
+ * `width=height=0`, so every hook collapses to the origin, matching
+ * `FtileEmpty.drawU`'s own empty body). `kind` is the discriminant
+ * {@link RepeatConditionTile}'s two members narrow on; `'gtile-repeat-
+ * empty'` so it can never collide with a real tile kind elsewhere in the
+ * switch-based dispatchers this port already has.
+ */
+export class RepeatConditionEmpty implements Tile {
+  readonly kind = 'gtile-repeat-empty' as const;
+  readonly width = 0;
+  readonly height = 0;
+  readonly label = '';
+  /** `FtileEmpty`'s own `swimlane` field (`FtileEmpty.java:48,58-67`) is
+   *  always `null` at this class's only call site -- `FtileRepeat.create`
+   *  (`:143-144`) uses the swimlane-less `new FtileEmpty(skinParam, w, h)`
+   *  overload, never the `Swimlane`-carrying one. Declared explicitly
+   *  (not left absent) so {@link RepeatConditionTile}'s union still
+   *  exposes {@link Tile}'s own optional `swimlane`/`swimlaneOut` fields
+   *  to every reader that narrows on the union rather than on this class
+   *  alone. Mutable (not `readonly`), matching every other concrete tile
+   *  class -- `tile-layout.ts#withSwimlane`/`withSwimlaneOut` assign both
+   *  fields post-construction, the same build-time seam every other leaf
+   *  tile goes through. */
+  swimlane?: string = undefined;
+  swimlaneOut?: string = undefined;
+
+  getCoord(_hook: HookName): GPoint {
+    return { x: 0, y: 0 };
+  }
+
+  /** `FtileEmpty` builds its `FtileGeometry` via the five-argument
+   *  constructor (`calculateDimensionEmpty`: `outY = height = 0`, never
+   *  the `FtileKilled`-only two-argument overload that leaves `outY`
+   *  unset) -- `hasPointOut()` is `true`. */
+  hasPointOut(): boolean {
+    return true;
+  }
+}
+
+/**
+ * `FtileRepeat.create`'s diamond2 slot: the real condition hexagon, or
+ * {@link RepeatConditionEmpty} for the no-test/last-of-parent case
+ * (D-new, mission `add2-T3b`, family RNOOUT).
+ */
+export type RepeatConditionTile = GtileDiamondInside | RepeatConditionEmpty;
+
 /** {@link computeWeldLayout}'s return: the merged `left`/`width`/`height`
  *  every existing offset formula reads, the uniform horizontal `shiftX`
  *  every existing child offset must add, and the weld-diamond's own
@@ -60,7 +113,7 @@ interface ChildOffsetDims {
   readonly bodyLeft: number;
   readonly entry: Tile;
   readonly body: Tile;
-  readonly condition: GtileDiamondInside;
+  readonly condition: RepeatConditionTile;
   readonly backward: Tile | undefined;
   readonly shiftX: number;
 }
@@ -148,7 +201,7 @@ function computeWeldLayout(rawLeft: number, rawWidth: number, rawHeight: number,
  * constructor to keep it under the file's NLOC cap (D-new); formulas
  * unchanged from before this task.
  */
-function computeRawDims(entry: Tile, body: Tile, condition: GtileDiamondInside, backward: Tile | undefined): RawDims {
+function computeRawDims(entry: Tile, body: Tile, condition: RepeatConditionTile, backward: Tile | undefined): RawDims {
   const bodyLeft = body.getCoord(NORTH_HOOK).x;
   const entryHalf = entry.width / 2;
   const conditionHalf = condition.width / 2;
@@ -235,7 +288,7 @@ export class GtileRepeat extends TileComposite {
   readonly kind = 'gtile-repeat' as const;
   readonly width: number;
   readonly height: number;
-  readonly children: readonly [Tile, Tile, GtileDiamondInside];
+  readonly children: readonly [Tile, Tile, RepeatConditionTile];
   readonly entryOffsetX: number;
   readonly entryOffsetY = 0;
   readonly bodyOffsetX: number;
@@ -303,7 +356,7 @@ export class GtileRepeat extends TileComposite {
   constructor(
     entry: Tile,
     body: Tile,
-    condition: GtileDiamondInside,
+    condition: RepeatConditionTile,
     backConnection: RepeatBackConnection,
     ctx: GtileRepeatContext,
   ) {
