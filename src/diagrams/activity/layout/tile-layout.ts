@@ -17,6 +17,9 @@ import { GtileEnd } from '../tiles/gtile-end.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
+import { GtileSpot } from '../tiles/gtile-spot.js';
+import { GtileLabel } from '../tiles/gtile-label.js';
+import { GtileGoto } from '../tiles/gtile-goto.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
@@ -346,12 +349,52 @@ function isSimpleLeaf(node: ActivityNode): node is Extract<ActivityNode, { kind:
  * does not grow that switch's own branch count -- `tileNode`'s doc
  * explains why it must stay small.
  */
-const NULL_RESULT_KINDS: ReadonlySet<string> = new Set(['arrow-label', 'backward', 'kill', 'detach']);
+/**
+ * `arrow-label`/`backward` always produce no tile here (see this
+ * constant's own surrounding doc); `kill`/`detach` reach this branch only
+ * as a direct-call safety net (`tileNodes` intercepts the live path).
+ * mission add2-T2g adds `spot`/`label`/`goto`: a visible 20x20 circle and
+ * two zero-size pass-through tiles respectively -- see each type's own
+ * `ast.ts` doc for the Java/empirical basis. None of the seven needs a
+ * `bounder`/`theme` (unlike {@link tileSimpleLeaf}'s `action`/`note`), so
+ * they stay out of that set, and all seven share ONE type-predicate
+ * (rather than two) so `tileNode` keeps a SINGLE `if` here -- a second
+ * `if` would push that function's own CCN over the complexity hook's cap
+ * (`tileNode`'s own doc explains why its budget is tight).
+ */
+const EARLY_LEAF_KINDS: ReadonlySet<string> = new Set([
+  'arrow-label',
+  'backward',
+  'kill',
+  'detach',
+  'spot',
+  'label',
+  'goto',
+]);
 
-function isNullResultKind(
-  node: ActivityNode,
-): node is Extract<ActivityNode, { kind: 'arrow-label' | 'backward' | 'kill' | 'detach' }> {
-  return NULL_RESULT_KINDS.has(node.kind);
+type EarlyLeafNode = Extract<
+  ActivityNode,
+  { kind: 'arrow-label' | 'backward' | 'kill' | 'detach' | 'spot' | 'label' | 'goto' }
+>;
+
+function isEarlyLeafKind(node: ActivityNode): node is EarlyLeafNode {
+  return EARLY_LEAF_KINDS.has(node.kind);
+}
+
+function tileEarlyLeaf(node: EarlyLeafNode): Tile | null {
+  switch (node.kind) {
+    case 'arrow-label':
+    case 'backward':
+    case 'kill':
+    case 'detach':
+      return null;
+    case 'spot':
+      return withSwimlane(new GtileSpot(node), node.swimlane);
+    case 'label':
+      return withSwimlane(new GtileLabel(node), node.swimlane);
+    case 'goto':
+      return withSwimlane(new GtileGoto(node), node.swimlane);
+  }
 }
 
 /**
@@ -396,8 +439,8 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
   if (isSimpleLeaf(node)) {
     return tileSimpleLeaf(node, bounder, theme);
   }
-  if (isNullResultKind(node)) {
-    return null;
+  if (isEarlyLeafKind(node)) {
+    return tileEarlyLeaf(node);
   }
   switch (node.kind) {
     case 'if':

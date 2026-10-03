@@ -75,6 +75,77 @@ export interface ActivityBackward {
   swimlane?: string;
 }
 
+/**
+ * `(X)` / `#color:(X)` -- a single-character "circled spot" connector,
+ * drawn as a real 20x20 circle (`FtileCircleSpot.java:60` `SIZE = 20`,
+ * fixed regardless of the character's own measured width -- the upstream
+ * regex captures exactly one non-space character, never more). `color`
+ * overrides ONLY the fill (`addSpot(spot, color)`); the border is always
+ * the diagram's plain root ink, never themed through the `activity`
+ * skinparam bucket (`circle,spot`'s merged style has no skinparam convert
+ * at all -- verified by grep of `FromSkinparamToStyle.java`, unlike
+ * `circle,start/stop/end`, which DO).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCircleSpot3.java:56-62
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionSpot.java:66-74,84-90
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:60,96-117
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:144
+ *   -- registered right after Start3/Stop3.
+ */
+export interface ActivitySpot {
+  kind: 'spot';
+  /** The single circled character (upstream's `SPOT` regex group,
+   *  `\((\S)\)` -- always exactly one character). */
+  name: string;
+  color?: string;
+  swimlane?: string;
+}
+
+/**
+ * `label NAME` -- declares the target of a later `goto NAME` jump. Maps
+ * 1:1 to `FtileLabel`, which extends `FtileEmpty` with NO override of
+ * either `drawU` (empty -- draws nothing) or `calculateDimensionFtile`
+ * (inherited `calculateDimensionEmpty()`: `width = height = 0`, a normal
+ * out point). Verified empirically, not just read: a controlled
+ * `start; label X; :A; stop;` oracle render is BYTE-IDENTICAL to the same
+ * diagram with the `label X;` line deleted (`.agent-notes/T2g-spot-label-
+ * goto.md`) -- `tile-layout.ts#tileNode` must therefore build a REAL
+ * zero-size tile (not drop the node, the way `arrow-label`/`backward`
+ * do), and the existing generic zero-gap-merge + snake-merge machinery
+ * (D1, `layout/snake-merge.ts`) collapses its two adjacent links into the
+ * jar's own single one with no code change of its own.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandLabel.java:56-61
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionLabel.java:52-58
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileLabel.java:40-49
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:47,83,87-92
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:160
+ */
+export interface ActivityLabel {
+  kind: 'label';
+  name: string;
+  swimlane?: string;
+}
+
+/**
+ * `goto NAME` -- jumps to the `label NAME` declared elsewhere. Maps 1:1
+ * to `FtileGoto`, which extends `FtileEmpty` (zero size, draws nothing)
+ * and additionally overrides `calculateDimensionFtile` to
+ * `.withoutPointOut()` -- unlike {@link ActivityLabel}, a `goto` tile has
+ * NO out point, so no link is ever drawn FROM it to whatever sequential
+ * sibling follows (verified empirically: `start;:A;goto X;:B;stop;`
+ * renders `B` 10px lower than the same diagram with the `goto X;` line
+ * deleted, with no connecting line into that gap -- `.agent-notes/T2g-
+ * spot-label-goto.md`).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandGoto.java:56-61
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionGoto.java:52-58
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGoto.java:41-53
+ * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:161
+ */
+export interface ActivityGoto {
+  kind: 'goto';
+  name: string;
+  swimlane?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Composite node types
 // ---------------------------------------------------------------------------
@@ -267,6 +338,9 @@ export type ActivityNode =
   | ActivityBreak
   | ActivityArrowLabel
   | ActivityBackward
+  | ActivitySpot
+  | ActivityLabel
+  | ActivityGoto
   | ActivityIf
   | ActivityWhile
   | ActivityRepeat

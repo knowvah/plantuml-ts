@@ -5,7 +5,7 @@
  * `if-dispatch.ts`/`parallel-dispatch.ts`'s own split.
  */
 
-import type { ActivityAction, ActivityBackward } from './ast.js';
+import type { ActivityAction, ActivityBackward, ActivitySpot, ActivityLabel, ActivityGoto } from './ast.js';
 import {
   RE_ACTIVITY_LIST,
   RE_BACKWARD,
@@ -52,15 +52,11 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
 }
 
 // ---------------------------------------------------------------------------
-// `(X)` / `#color:(X)` circled-spot connector (mission add2-T2e, D6) and
-// `label NAME` / `goto NAME` (same mission). All three are consumed and
-// DROPPED -- no `ActivityNode` is returned -- same "parsed not drawn"
-// pattern `trySwimlane` (node-dispatch.ts) already uses for a line that
-// only mutates parse state. A real `ActivityNode` union member for any of
-// them would make `tile-layout.ts#tileNode`'s exhaustive switch (outside
-// this task's write-set) fail to compile; see this task's final report
-// for the re-slot (new node kind + layout/render builder, owner
-// `layout/tile-layout.ts` + `renderer.ts`).
+// `(X)` / `#color:(X)` circled-spot connector and `label NAME` /
+// `goto NAME` (mission add2-T2g, D6 follow-on): each now produces a real
+// `ActivityNode` (`ast.ts`'s own doc on each type names the Java/empirical
+// basis) -- T2e's original "consumed, parsed not drawn" shape is
+// superseded here.
 // @see net/sourceforge/plantuml/activitydiagram3/command/CommandCircleSpot3.java:56-62
 // @see net/sourceforge/plantuml/activitydiagram3/command/CommandLabel.java:56-61
 // @see net/sourceforge/plantuml/activitydiagram3/command/CommandGoto.java:56-61
@@ -69,26 +65,45 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
 //   Goto last, after ActivityList (this file's own `tryActivityList`).
 // ---------------------------------------------------------------------------
 
-/** `(X)` / `#color:(X)` -- a single-character "circled spot" connector. */
-const RE_CIRCLE_SPOT = /^(?:#\w+[-\\|/]?\w+:)?\(\S\)\s*;?\s*$/i;
+/**
+ * `(X)` / `#color:(X)` -- a single-character "circled spot" connector.
+ * Group 1 is the leading colour (with its own `#`, same capture shape as
+ * `ColorParser.exp4()`'s `(?:(COLOR):)?`, mirroring this file's own
+ * `RE_NOTE_SINGLE`/`RE_NOTE_MULTI` non-capturing form); group 2 is the
+ * single circled character.
+ * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46,101-103
+ */
+const RE_CIRCLE_SPOT = /^(?:(#\w+[-\\|/]?\w+):)?\((\S)\)\s*;?\s*$/i;
 
-export function tryCircleSpot(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!RE_CIRCLE_SPOT.test(line)) return null;
-  return { idx: idx + 1 };
+export function tryCircleSpot(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const m = RE_CIRCLE_SPOT.exec(line);
+  if (m === null) return null;
+  const color = m[1];
+  const node: ActivitySpot = {
+    kind: 'spot',
+    name: m[2]!,
+    ...(color !== undefined ? { color } : {}),
+    ...swimlaneSpread(ctx),
+  };
+  return { idx: idx + 1, node };
 }
 
 /** `label NAME` -- declares the target of a later `goto NAME` jump. */
 const RE_LABEL = /^label\s+([\w.]+)\s*;?\s*$/i;
 
-export function tryLabel(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!RE_LABEL.test(line)) return null;
-  return { idx: idx + 1 };
+export function tryLabel(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const m = RE_LABEL.exec(line);
+  if (m === null) return null;
+  const node: ActivityLabel = { kind: 'label', name: m[1]!, ...swimlaneSpread(ctx) };
+  return { idx: idx + 1, node };
 }
 
 /** `goto NAME` -- jumps to the `label NAME` declared elsewhere. */
 const RE_GOTO = /^goto\s+([\w.]+)\s*;?\s*$/i;
 
-export function tryGoto(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!RE_GOTO.test(line)) return null;
-  return { idx: idx + 1 };
+export function tryGoto(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const m = RE_GOTO.exec(line);
+  if (m === null) return null;
+  const node: ActivityGoto = { kind: 'goto', name: m[1]!, ...swimlaneSpread(ctx) };
+  return { idx: idx + 1, node };
 }

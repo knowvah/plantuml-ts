@@ -22,6 +22,7 @@ import {
   renderNode,
   renderNote,
   renderParallelogram,
+  renderSpot,
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
@@ -206,6 +207,50 @@ describe('renderEnd', () => {
     const svg = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
     expect(svg).toContain('stroke-width="2.5"');
     expect(svg).toContain('stroke-width="1.5"');
+  });
+});
+
+describe('renderSpot (mission add2-T2g)', () => {
+  // `FtileCircleSpot.java:60,84-109`: a fixed 20x20 circle, border/fill
+  // from the PLAIN root ink (no `circle,spot` skinparam convert exists --
+  // `activity-renderer-terminals.ts#renderSpot`'s own doc), stroke-width
+  // the ELEMENT tier (0.5), never `circle,start/stop/end`'s own 1.
+  it('emits a 20x20 ellipse at the plain root ink, stroke-width 0.5', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('rx="10"');
+    expect(svg).toContain('ry="10"');
+    expect(svg).toContain('cx="60"');
+    expect(svg).toContain('cy="60"');
+    expect(svg).toContain(`fill="${theme.colors.nodeBackground}"`);
+    expect(svg).toContain(`stroke="${theme.colors.border}"`);
+    expect(svg).toContain('stroke-width="0.5"');
+  });
+
+  it('an inline `color` overrides ONLY the fill, never the border', () => {
+    const node = makeNode({ kind: 'spot', width: 20, height: 20, label: 'B', color: '#00F' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('fill="#00F"');
+    expect(svg).toContain(`stroke="${theme.colors.border}"`);
+  });
+
+  it('draws the circled character as a <text>, centred, at the root font size 14', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('>A</text>');
+    expect(svg).toContain('font-size="14"');
+    // Centred: x = cx - charWidth/2, not the circle's own left edge.
+    const charWidth = measureLineWidth(theme, 14, 'A');
+    const expectedX = 60 - charWidth / 2;
+    const m = /<text x="([\d.]+)"/.exec(svg);
+    expect(m).not.toBeNull();
+    expect(Number(m![1])).toBeCloseTo(expectedX, 2);
+  });
+
+  it('draws no <text> at all when the character is empty', () => {
+    const node = makeNode({ kind: 'spot', width: 20, height: 20, label: '' });
+    const svg = renderSpot(node, theme);
+    expect(svg).not.toContain('<text');
   });
 });
 
