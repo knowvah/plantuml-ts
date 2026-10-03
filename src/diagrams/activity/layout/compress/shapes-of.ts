@@ -160,12 +160,44 @@ const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
  * `ConditionalBuilder.java:280`'s `HorizontalAlignment.LEFT`). The ascent
  * ratio is the same one {@link titleShapes} already cites
  * (`StringBounder#getDescent`, `klimt/font/StringBounder.java:47`).
+ *
+ * Multi-line (bazuma mechanism, `.agent-notes/T2f-geometry.md`):
+ * `renderIfLabel` draws a multi-line else/then label as `textLines` --
+ * one `<text>` per `\n`-split line, each its own `UText` draw, matching
+ * upstream's `LimitFinder.drawText`, called once PER line, not once for
+ * the whole label. The prior single-call `bounder.getDimension
+ * (wholeLabel, fontSize)` measured the string as ONE line, under-counting
+ * a multi-line label's height and letting `compress-geometry.ts` remove
+ * vertical space the drawn text still occupies (`bazuma-86-metu353`'s
+ * diamond1 +23.944 shift). This returns ONE combined box spanning the
+ * first line's own ink-top to the last line's own ink-bottom (max width
+ * across lines) rather than one `CompressShape` per line: `collectSlots`
+ * (`invariant.test.ts`, stop 11) index-matches `shapesOf`'s list 1:1
+ * between pre-/post-compression geometry for every OTHER node kind, and a
+ * variable per-line shape count would (a) shift every later shape's index
+ * for any OTHER task's fixture carrying a multi-line if-label and (b)
+ * introduce adjacent sibling-line boxes that can touch/overlap each other
+ * post-compression even though the SOURCE has never drawn a `UText` that
+ * overlaps its own neighbour -- confirmed by reproducing exactly that on
+ * `leduvi-16-voli986`/`jupoxe-15-sugo110` with the per-line array before
+ * reverting to this single envelope. Mirrors the per-line SUM
+ * `tiles/gtile-diamond-inside.ts#measureLabel` already uses for the
+ * SIZING side of this same label -- this is the matching envelope for the
+ * DRAWING/compression-bounds side.
  */
 function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
   const fontSize = activityFontSize(theme, 'arrow');
-  const baselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
-  const dim = bounder.getDimension(node.label ?? '', fontSize);
-  return { kind: 'text', x: node.x, y: baselineY, width: dim.width, height: dim.height };
+  const firstBaselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
+  const lines = (node.label ?? '').split('\n');
+  let width = 0;
+  let firstHeight = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const dim = bounder.getDimension(lines[i]!, fontSize);
+    if (dim.width > width) width = dim.width;
+    if (i === 0) firstHeight = dim.height;
+  }
+  const lastBaselineY = firstBaselineY + fontSize * (lines.length - 1);
+  return { kind: 'text', x: node.x, y: lastBaselineY, width, height: lastBaselineY - firstBaselineY + firstHeight };
 }
 
 /**
@@ -266,9 +298,26 @@ function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape
     width: ext.maxX - ext.minX,
     height: ext.maxY - ext.minY,
   };
-  // `Worm.java:159-168`: a cross-lane fork/split decoration's
-  // `compressionMode` is set to `ON_X`, skipping it on X only.
-  if (meta.shape === 'parallel-in' || meta.shape === 'parallel-out') shape.polygonSkipMode = 'x';
+  // `ParallelBuilderFork.java:172,229`: `ConnectionIn`/`ConnectionOut`
+  // call `.ignoreForCompression()` ONLY in `drawTranslate` (the
+  // cross-lane path -- same-lane `drawU`, lines 151-163/202-217, never
+  // does). `Worm.java:159-168` then sets the decoration's
+  // `compressionMode` to `ON_X`. A same-lane fork/split connector (or
+  // one with an unlaned endpoint) must NOT skip X -- PARX family,
+  // gevaxi-80-tone223/ciloke-34-pumi198 (same-lane fork, ws -> 0/-14).
+  // KNOWN RESIDUAL (reported, not fixed here): `ParallelBuilderSplit
+  // .java:207-225,264-285`'s `drawTranslate` overloads NEVER call
+  // `.ignoreForCompression()`, so a CROSS-lane split connector (e.g.
+  // bugaja-31-jaso630) should also never skip X -- distinguishing a
+  // fork's cross-lane connector from a split's needs a discriminant
+  // this adapter does not have (`EdgeMeta` carries no builder-kind
+  // tag; adding one touches `swimlane-placement.ts`/`tile-
+  // coordinates.ts`, outside this task's write-set). See the task
+  // report for the re-slot.
+  const crossLane = meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2;
+  if ((meta.shape === 'parallel-in' || meta.shape === 'parallel-out') && crossLane) {
+    shape.polygonSkipMode = 'x';
+  }
   return shape;
 }
 

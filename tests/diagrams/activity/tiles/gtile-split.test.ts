@@ -101,3 +101,21 @@ describe('GtileSplit — hasPointOut() is true iff any branch has one', () => {
     expect(tile.hasPointOut()).toBe(false);
   });
 });
+
+// S family (sopape-11-laxo488): `ParallelBuilderSplit.java:139-140` wraps an
+// all-detached split in `FtileKilled` with NO bottom `FtileThinSplit` at
+// all -- the composite's own height must not reserve a bottom band for a
+// line that is never built.
+describe('GtileSplit — bottomBandHeight is 0 when no branch has an out point', () => {
+  it('height omits the bottom 1.5 band when every branch is detached', () => {
+    const tile = new GtileSplit([stubTile(80, 60, false), stubTile(80, 80, false)], bounder);
+    // 1.5 (top line) + 0 + (80 + 2*20) + 0 + 0 (no bottom line) = 121.5,
+    // vs 123 for the same branches with an out point (top test above).
+    expect(tile.height).toBe(121.5);
+  });
+
+  it('height still reserves the bottom 1.5 band when at least one branch continues', () => {
+    const tile = new GtileSplit([stubTile(80, 60, true), stubTile(80, 80, false)], bounder);
+    expect(tile.height).toBe(123);
+  });
+});

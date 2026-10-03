@@ -600,6 +600,26 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `[5,13]` the same one swimlane row down) -- neither pair appears in
     // `overlaps(after)` any more, so both are REMOVED here rather than
     // carried forward (same precedent as `lopone-15-xiki477` above).
+    // `jupoxe-15-sugo110 [39,139] text×polygon` (mission
+    // `activity-divergence-drive-2`, T3c, bazuma family): shape 39 is the
+    // `(timeout\nor logout)` multi-line `if-label` -- node 39 directly,
+    // confirmed by direct dump -- newly measured as ONE box spanning both
+    // lines (`shapes-of.ts#ifLabelShape`'s per-line-sum fix; the prior
+    // single-line `getDimension` call undercounted its height, same bug as
+    // `bazuma-86-metu353`). Shape 139 is an edge's terminal arrowhead
+    // landing exactly at this label's own left edge. Same
+    // "touching-becomes-an-epsilon-overlap-after-a-transform" class as
+    // `kitupi-32-jexo155`/`tobajo-64-mipi810` above, confirmed with a
+    // direct dump: `before`, `text.x(1040.928125) === arrowhead.x(
+    // 1032.928125) + width(8)` -- bit-identical, no overlap (`overlaps`'s
+    // strict `<` requires one bound strictly less). `after`:
+    // `text.x(994.9281249999999)` vs `arrowhead.x(986.928125) +
+    // width(8) === 994.928125` -- a ~1e-13 gap from the label's taller box
+    // being re-derived through the same compression transform as every
+    // other shape, not a geometry defect; the label's text/x is unchanged
+    // by the height fix, only its height/y moved, which is what exposes
+    // the pre-existing rounding artifact at this exact-touch boundary.
+    'jupoxe-15-sugo110 [39,139] text×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

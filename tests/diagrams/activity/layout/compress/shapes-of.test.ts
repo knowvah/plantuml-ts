@@ -97,6 +97,17 @@ describe('shapesOf — if-merge and if-label (D2/D3)', () => {
     // (`activity-renderer-shapes.ts:76`).
     expect(shapes).toEqual([{ kind: 'text', x: 10, y: 20 + 11 * (1 - 1 / 4.5), width: 18, height: 11 }]);
   });
+
+  it('a multi-line if-label is ONE box spanning first-line-top to last-line-bottom (bazuma)', () => {
+    const n = node('if-label', { x: 10, y: 20, width: 12, height: 11, label: 'a\nbb\nccc' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    const ascent = 11 * (1 - 1 / 4.5);
+    // firstBaselineY = 20 + ascent; lastBaselineY = firstBaselineY + 11*2;
+    // y = lastBaselineY; height = (lastBaselineY - firstBaselineY) + 11 = 33;
+    // width = max line width = 'ccc'.length * 6 = 18 (longest line, not the
+    // single-call whole-string measurement the old code used).
+    expect(shapes).toEqual([{ kind: 'text', x: 10, y: 20 + ascent + 22, width: 18, height: 33 }]);
+  });
 });
 
 describe('shapesOf — note with spike', () => {
@@ -128,6 +139,7 @@ describe('shapesOf — plain box kinds', () => {
 });
 
 const meta = (shape: EdgeMeta['shape'] = 'default'): EdgeMeta => ({ lane1: undefined, lane2: undefined, shape });
+const metaCrossLane = (shape: EdgeMeta['shape']): EdgeMeta => ({ lane1: 'a', lane2: 'b', shape });
 
 describe('shapesOf — edges', () => {
   it('a plain edge contributes only its terminal arrowhead, never its segments', () => {
@@ -144,7 +156,29 @@ describe('shapesOf — edges', () => {
     expect(shapes[0]).toEqual({ kind: 'polygon', x: -4, y: 10, width: 8, height: 10 });
   });
 
-  it('a parallel-in edge tags its arrowhead polygonSkipMode: x', () => {
+  it('a CROSS-LANE parallel-in edge tags its arrowhead polygonSkipMode: x (ParallelBuilderFork.java:166-184 drawTranslate)', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+      ],
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [metaCrossLane('parallel-in')] }));
+    expect(shapes[0]!.polygonSkipMode).toBe('x');
+  });
+
+  it('a CROSS-LANE parallel-out edge also tags polygonSkipMode: x', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 0, y: 0 },
+        { x: 0, y: 20 },
+      ],
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [metaCrossLane('parallel-out')] }));
+    expect(shapes[0]!.polygonSkipMode).toBe('x');
+  });
+
+  it('a SAME-LANE parallel-in edge carries no polygonSkipMode (PARX: ParallelBuilderFork.java:151-163 drawU never ignoreForCompression)', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
@@ -152,10 +186,10 @@ describe('shapesOf — edges', () => {
       ],
     };
     const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta('parallel-in')] }));
-    expect(shapes[0]!.polygonSkipMode).toBe('x');
+    expect(shapes[0]!.polygonSkipMode).toBeUndefined();
   });
 
-  it('a parallel-out edge also tags polygonSkipMode: x', () => {
+  it('a SAME-LANE parallel-out edge carries no polygonSkipMode', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
@@ -163,17 +197,17 @@ describe('shapesOf — edges', () => {
       ],
     };
     const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta('parallel-out')] }));
-    expect(shapes[0]!.polygonSkipMode).toBe('x');
+    expect(shapes[0]!.polygonSkipMode).toBeUndefined();
   });
 
-  it('a default-shape edge carries no polygonSkipMode', () => {
+  it('a default-shape edge carries no polygonSkipMode even cross-lane', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
         { x: 0, y: 20 },
       ],
     };
-    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta('default')] }));
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [metaCrossLane('default')] }));
     expect(shapes[0]!.polygonSkipMode).toBeUndefined();
   });
 
