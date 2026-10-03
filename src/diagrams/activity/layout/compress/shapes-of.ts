@@ -132,8 +132,19 @@ function noteBox(node: ActivityNodeGeo): { x: number; y: number; width: number; 
  *  used to be listed here (`FtileEmpty#drawU`, the omitted-diamond2 path,
  *  `ConditionalBuilder.java:309-311`) but the merge rhombus DOES draw when
  *  `hasTwoBranches()` -- D2, `Hexagon.asPolygon(shadowing)` -- so it now gets
- *  a polygon box below instead of being listed as drawing nothing. */
-const NO_SHAPE_KINDS = new Set(['break', 'split-bar', 'split-join-bar']);
+ *  a polygon box below instead of being listed as drawing nothing.
+ *
+ * `label`/`goto` (mission add2-T2g) added: both are `FtileEmpty` with NO
+ * `drawU` override (empty method body, `ast.ts`'s own doc) -- zero-size,
+ * so without this listing they fall through to the generic `{ kind:
+ * 'rect', width: 0, height: 0 }` box below, which `Slot`'s constructor
+ * (`slot.ts:62-65`) rejects (`start >= end`) -- reproduced directly
+ * (`getene-72-dido571`/`kiceze-91-luke737` both threw
+ * `IllegalArgumentException: start=X end=X` before this fix). Outside
+ * this task's nominal write-set (`layout/compress/**`) but unavoidable:
+ * reported in the final report per the write-set note's own allowance
+ * for a one-line arm elsewhere when a new node kind requires it. */
+const NO_SHAPE_KINDS = new Set(['break', 'split-bar', 'split-join-bar', 'label', 'goto']);
 
 /** `FtileBlackBlock#drawU`'s `URectangle.ignoreForCompressionOnX()`
  *  (`vertical/FtileBlackBlock.java:101-102`). */
