@@ -18,6 +18,7 @@
 import type { Theme } from '../../core/theme.js';
 import { resolveElementMinimumWidth } from '../../core/theme-element-resolve.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import type { ActivitySName } from './activity-style-defaults.js';
 import { bucketKey, resolveSolidBucketColor } from './activity-style-defaults.js';
 
@@ -131,41 +132,35 @@ export function activityFontColor(theme: Theme, sname: ActivitySName): string {
 // ---------------------------------------------------------------------------
 
 /**
- * The resolved horizontal alignment for activity box text: the bucket's
- * own alignment, else the parsed `skinparam defaultTextAlignment`, else
- * the root `HorizontalAlignment left` (`plantuml.skin:12`).
+ * The resolved horizontal alignment for activity box text: the `root`
+ * bucket's own alignment, else `'left'` (`plantuml.skin:12`'s
+ * `HorizontalAlignment left`).
  *
  * `FtileBox`'s own field is `style.getHorizontalAlignment()`
- * (`FtileBox.java:86` declares the field, `:89` sets
- * `skinParam.getDefaultTextAlignment(horizontalAlignment)` for the creole
- * sheet) -- a per-element `Style` value cascading over the diagram's
- * `defaultTextAlignment` skinparam, itself falling back to the root
- * `HorizontalAlignment left` when neither is set.
+ * (`FtileBox.java:86` declares the field, `:89` passes it as the fallback
+ * to `skinParam.getDefaultTextAlignment(horizontalAlignment)` for the
+ * creole sheet) -- a per-element `Style` value whose `PName
+ * .HorizontalAlignment` is set, for the WHOLE diagram, by `skinparam
+ * defaultTextAlignment` (`FromSkinparamToStyle.java:155`: `addConvert
+ * ("defaulttextalignment", PName.HorizontalAlignment, SName.root)`).
+ * `FtileBox`'s style signature (`{root, element, activityDiagram,
+ * activity}`) inherits the `root`-tier value, so one skinparam line sets
+ * BOTH the per-line creole alignment (`SheetBlock1`'s stripe-coef split,
+ * see this module's own doc comment) and the outer block-level translate
+ * -- confirmed by `activity-text-placement.ts#boxLineX`'s algebra, which
+ * already collapses the two into one closed form per alignment.
  *
- * FILED, not implemented, because neither upstream tier exists in this
- * port today (verified this session, `src/core` is outside this task's
- * write-set):
- *   - the bucket tier: `ElementColors` (`theme-graph-colors.ts:21-171`)
- *     carries `background`, `border`, `font`, `fontSize`,
- *     `stereotypeFontSize`, `headerBackground`/`headerFont`/
- *     `headerFontSize`, `shadowing`, `lineThickness`, `minimumWidth` and
- *     `roundCorner` -- no alignment role. Add
- *     `ElementColors.horizontalAlignment?: 'left' | 'center' | 'right'`
- *     and its `<style>`/`skinparam` parse in `style-map-element.ts` when a
- *     fixture needs it.
- *   - the `skinparam defaultTextAlignment` tier: `rg -n -i
- *     'defaulttextalignment|horizontalalignment' src/core/` this session
- *     hits only the builtin skin TEXT of `skins-builtin-rose-2.ts` -- never
- *     a parser that reads it into `Theme`/`ThemeOverride`. Add the field
- *     and its parse to `theme.ts` when a fixture needs it.
- *
- * So today this resolver has exactly one reachable tier -- the root
- * `'left'` -- and always returns it. `theme` is still accepted: it is the
- * locked interface contract this task's spec fixes (`plans
- * /activity-min-box-width/batch-1/T1-resolvers.md`), and it is what either
- * filed tier will read once it lands, without changing the signature T2,
- * T4 and T5 depend on.
+ * UNLIKE T1's own era (this resolver's prior doc comment, now stale): both
+ * tiers landed since -- `ElementColors.horizontalAlignment`
+ * (`theme-graph-colors.ts:284`) and the `defaulttextalignment` ->
+ * `acc.elements['root'].horizontalAlignment` parse (`skinparam-key-
+ * handlers-table-b.ts#setAlignment`, cdd7 T2b) -- for a DIFFERENT
+ * consumer (`renderer-usymbol-entity-style.ts#rootHorizontalAlignment`,
+ * class). This resolver only had to start reading the same bucket.
  */
-export function activityHorizontalAlignment(_theme: Theme): 'left' | 'center' | 'right' {
+export function activityHorizontalAlignment(theme: Theme): 'left' | 'center' | 'right' {
+  const alignment = theme.colors.elements?.['root']?.horizontalAlignment;
+  if (alignment === HorizontalAlignment.CENTER) return 'center';
+  if (alignment === HorizontalAlignment.RIGHT) return 'right';
   return 'left';
 }

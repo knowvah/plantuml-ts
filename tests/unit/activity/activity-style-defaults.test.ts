@@ -538,22 +538,42 @@ describe('activityFontColor — arrow reads graph.arrowFontColor (T2c, suzuci-53
   });
 });
 
-describe('activityHorizontalAlignment (mission activity-min-box-width, T1, D2)', () => {
+describe('activityHorizontalAlignment (mission activity-min-box-width T1/D2; wired T2c, molexa-46-redi999)', () => {
   it('the default theme resolves the root `HorizontalAlignment left` (plantuml.skin:12)', () => {
     expect(activityHorizontalAlignment(DEFAULT)).toBe('left');
   });
 
   it('is unmoved by fields the alignment cascade does not read', () => {
-    // Neither cascade tier is reachable today (filed in the module's own
-    // doc comment): `ElementColors` carries no alignment role and
-    // `skinparam defaultTextAlignment` is unparsed anywhere in `src/core`.
-    // A bucket/minimumWidth change must not accidentally move alignment.
+    // `ElementColors.horizontalAlignment` is keyed by `root` (`skinparam
+    // defaultTextAlignment`'s own bucket, `FromSkinparamToStyle.java:155`)
+    // -- a DIFFERENT bucket's own fields (`activity`'s minimumWidth/font)
+    // or the root `minimumWidth` scalar must not accidentally move it.
     const theme: Theme = {
       ...DEFAULT,
       minimumWidth: 200,
       colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150, font: 'red' } } },
     };
     expect(activityHorizontalAlignment(theme)).toBe('left');
+  });
+
+  it('`skinparam defaultTextAlignment center` resolves via the root bucket (T2c)', () => {
+    // `defaulttextalignment` -> `acc.elements['root'].horizontalAlignment`
+    // (`skinparam-key-handlers-table-b.ts#setAlignment`) -- the SAME bucket
+    // `class/renderer-usymbol-entity-style.ts#rootHorizontalAlignment`
+    // already reads for a different diagram type.
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, root: { horizontalAlignment: 'CENTER' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('center');
+  });
+
+  it('`skinparam defaultTextAlignment right` resolves to right', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, root: { horizontalAlignment: 'RIGHT' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('right');
   });
 
   it('never returns undefined — supplying the default is this module’s job', () => {
