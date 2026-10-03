@@ -142,6 +142,10 @@ function assembleFromFinal(
     geometry: {
       totalWidth: final.totalWidth,
       totalHeight: final.totalHeight,
+      // b3/T3a (family E): the un-floored span `renderer.ts#preChromeDims`
+      // reads directly -- see `ActivityGeometry.rawWidth`'s own doc.
+      rawWidth: final.rawWidth,
+      rawHeight: final.rawHeight,
       nodes: final.nodes,
       edges: final.edges,
       swimlanes: final.swimlanes,

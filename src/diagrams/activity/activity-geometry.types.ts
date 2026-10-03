@@ -169,4 +169,23 @@ export interface ActivityGeometry {
   swimlanes: SwimlaneGeo[];
   swimlaneBand?: SwimlaneBandGeo;
   swimlaneDividerY?: SwimlaneDividerY;
+  /**
+   * b3/T3a (family E): the `Recentred`-only span, BEFORE the document
+   * margin -- `ink + RECENTRED_ENLARGE` (`activity-layout-constants.ts
+   * #RECENTRED_ENLARGE`'s own doc: `(M - m) + RECENTRED_ENLARGE`, the jar's
+   * `Recentred#getMinMax` size, which is exactly `RenderFragment
+   * .preChromeWidth`/`preChromeHeight`'s target value, T3j).
+   * `canvas-origin.ts#computeCanvasOrigin` computes this UN-floored, before
+   * `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL` derives
+   * {@link totalWidth}/{@link totalHeight} (the document-margin-included,
+   * floored, ceiled total). `renderer.ts#preChromeDims` reads it directly
+   * instead of reverse-subtracting a margin from the already-floored
+   * total, which loses the ink span's fractional part
+   * (`svek/DecorateEntityImage.java:144-150`'s `getTextX` centres chrome
+   * text against this un-floored span). Optional only for hand-built test
+   * fixtures that construct a bare `ActivityGeometry` literal without
+   * routing through `finalizeGeometry`.
+   */
+  rawWidth?: number;
+  rawHeight?: number;
 }

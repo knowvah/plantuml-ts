@@ -288,30 +288,23 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 }
 
 /**
- * T3j (journal row 36): `geo.totalWidth`/`totalHeight` are the MARGINED
- * (document-margin-included) canvas dims `canvas-origin.ts#computeCanvasOrigin`
- * computes -- `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL`,
- * where `CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_
- * MARGIN`. The RAW (pre-margin) dims chrome centres against are the
- * arithmetic inverse of the margin/ceil half of that recipe: subtract the
- * margin (both sides) and the ceil bump this function adds back.
- *
- * KNOWN LIMITATION (not silently dropped): this subtracts from the
- * ALREADY-FLOORED `totalWidth`/`totalHeight`, not from the ink span itself
- * -- exact only when that ink span already lands on the integer grid at
- * this stage. Getting the un-floored raw dims exactly (matching class's own
- * `computeClassRawInkDims`, independent of `computeClassDocumentDims`)
- * would mean threading a new field through `assign-coordinates-full.ts`
- * #assembleFromFinal`/`ActivityGeometry` -- outside this task's write-set;
- * re-slotted. Measured against the T3j acceptance corpus (cifafo, bigide):
- * the residual gap on every chrome-bearing fixture checked traces to a
- * SEPARATE, pre-existing defect (chrome title-text width measurement
- * precision, or body-ink width for an unrelated construct) -- not to this
- * subtraction -- but an un-exercised fractional-ink-span fixture could
- * still expose it. `RenderFragment.preChromeWidth`'s own doc comment names
- * the general mechanism this value feeds.
+ * T3j (journal row 36) / b3-T3a (family E): the RAW (pre-margin, pre-floor)
+ * dims chrome centres against -- `svek/DecorateEntityImage.java:144-150`'s
+ * `getTextX` aligns title/header/footer text against this exact un-floored
+ * span, not the floored `totalWidth`/`totalHeight`. `geo.rawWidth`/
+ * `rawHeight` (`canvas-origin.ts#computeCanvasOrigin`'s own `ink +
+ * RECENTRED_ENLARGE`, the SAME smaller pre-document-margin padding term
+ * `activity-layout-constants.ts#RECENTRED_ENLARGE`'s own doc cites) now
+ * carries that value exactly (`ActivityGeometry.rawWidth`'s own doc) --
+ * T3j's own margin-subtraction fallback (`totalWidth/Height - margin`,
+ * which loses the ink span's fractional part whenever it does not already
+ * land on the integer grid) is kept only for hand-built `ActivityGeometry`
+ * test fixtures that bypass `finalizeGeometry` and so never populate it.
  */
 function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+  if (geo.rawWidth !== undefined && geo.rawHeight !== undefined) {
+    return { width: geo.rawWidth, height: geo.rawHeight };
+  }
   const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
   return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
 }
