@@ -49,6 +49,7 @@ import {
 } from './swimlane-context.js';
 import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
+import { routeHline, type HlinePayload } from './swimlane-hline.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
 import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
@@ -74,6 +75,16 @@ export interface EdgeMeta {
    * the lanes differ, {@link routeEdge} delegates to `routeLoopTranslate`.
    * T1 never sets this from a walker -- scaffolding for T2/T3. */
   readonly loop?: LoopTranslate;
+  /** T1p-g: set only on `FtileIfWithLinks`/`FtileIfLongHorizontal`'s
+   * `ConnectionHline` (`walk-if-with-links.ts#connectionHlineLinks`,
+   * `walk-if-long-horizontal.ts#connectionHline`). When set, {@link
+   * routeEdge} delegates to `swimlane-hline.ts#routeHline` BEFORE the
+   * normal same/cross-lane dispatch -- this connector fans out to
+   * several lanes, never a single uniform shift. `lane1`/`lane2` stay
+   * the walker's own unlaned `myLane` tag, read only by `measureLanes`'
+   * `sameLaneEdges` (this module doc's own citation for why that keeps
+   * measurement byte-identical to pre-T1p-g). */
+  readonly hline?: HlinePayload;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
@@ -118,21 +129,6 @@ export interface PlacementResult {
 }
 
 /**
- * D2: the title band's height is the MAX, over lanes, of that lane's own
- * title `TextBlock`'s height (`Swimlanes#getTitlesHeight`, `:309-315`) --
- * never the raw `SwimlaneTitleFontSize` constant. Each title's own height
- * is floored at 10 by `AtomText#calculateDimensionSlow`
- * (`klimt/creole/legacy/AtomText.java:179-181`: `if (h < 10) h = 10;`),
- * which is why a small `SwimlaneTitleFontSize` does not shrink the band
- * proportionally. Confirmed against three pinned fixtures:
- * `SwimlaneTitleFontSize 8` -> band height 10 (`sikino-19-vuca111`, floored);
- * the default 18 -> 18 (`pakema-21-xema183`, already >= 10, unaffected);
- * `TitleFontSize 30` -> 30 (`cemipu-87-dinu624`, unaffected). Shared by
- * `tile-coordinates.ts` (vertical content reservation) and the swimlane
- * chrome renderer (band rect height) so both measure the exact same value
- * -- D2 forbids a second, independent implementation of this number.
- */
-/**
  * The ASCENT fraction a title's baseline sits at within the band, from
  * `StringBounder#getDescent` = `size / 4.5` (`klimt/font/StringBounder
  * .java:47`) -- the SAME ratio `activity-renderer-shapes.ts#ASCENT_FRACTION`
@@ -147,41 +143,13 @@ export interface PlacementResult {
  */
 export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 
-export function measureSwimlaneTitlesHeight(
-  laneNames: readonly string[],
-  bounder: StringBounder,
-  theme: Theme,
-): number {
-  const titleFontSize = swimlaneTitleFontSize(theme);
-  let max = 0;
-  for (const name of laneNames) {
-    max = Math.max(max, bounder.getDimension(name, titleFontSize).height);
-  }
-  return Math.max(max, 10);
-}
-
-export interface SwimlaneVertical {
-  readonly contentY: number;
-  readonly titlesHeight: number;
-}
-
-/**
- * `Swimlanes#drawU`'s own `swimlanes().size() > 1` guard (`:275`): a
- * single lane draws no chrome and reserves no vertical space; a real
- * multi-lane diagram pushes content down by `titlesHeight + 5`
- * (`getTitleHeightTranslate`, `:304-307`). Called once from
- * `assignCoordinates` before the pass-1 walk.
- */
-export function resolveSwimlaneVertical(
-  laneNames: readonly string[],
-  baseY: number,
-  bounder: StringBounder,
-  theme: Theme,
-): SwimlaneVertical {
-  if (laneNames.length <= 1) return { contentY: baseY, titlesHeight: 0 };
-  const titlesHeight = measureSwimlaneTitlesHeight(laneNames, bounder, theme);
-  return { contentY: baseY + titlesHeight + 5, titlesHeight };
-}
+// `measureSwimlaneTitlesHeight`/`SwimlaneVertical`/`resolveSwimlaneVertical`
+// moved to `swimlane-vertical.ts` (mission `activity-divergence-drive-2`
+// T1p-g, this file's own 500-line hook); re-exported below so existing
+// importers (`assign-coordinates-full.ts`, this file's own tests) are
+// untouched.
+export { measureSwimlaneTitlesHeight, resolveSwimlaneVertical } from './swimlane-vertical.js';
+export type { SwimlaneVertical } from './swimlane-vertical.js';
 
 export interface SwimlaneChrome {
   swimlaneBand: SwimlaneBandGeo;
@@ -300,10 +268,16 @@ function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
 }
 
 /** {@link routeEdge}'s return (D3): a non-loop path is one edge, no
- *  reservations; a dispatched translate shape may return more of either. */
+ *  reservations; a dispatched translate shape may return more of either.
+ *  `edgeMeta` (T1p-g): set only by the `hline` branch, one entry per
+ *  `edges` entry, each carrying ITS OWN lane -- `edge-draw-order.ts`
+ *  needs the per-edge lane, not the walker's original (now-stale)
+ *  `meta` tag every OTHER branch's caller still repeats via {@link
+ *  repeatEdgeMeta}. */
 interface RoutedEdge {
   readonly edges: ActivityEdgeGeo[];
   readonly reservations: Reservation[];
+  readonly edgeMeta?: EdgeMeta[];
 }
 
 /**
@@ -331,8 +305,21 @@ function isCrossLane(meta: EdgeMeta): boolean {
  * {@link LoopTranslate} (D1) delegates to `routeLoopTranslate`; any other
  * cross-lane edge draws the generic 4-point jog (module doc); only the
  * path's two endpoints matter, never the same-lane shape's interior elbow.
+ * `meta.hline` (T1p-g) dispatches FIRST, before either lane check: a
+ * `ConnectionHline` fans out to several lanes, each shifted by ITS OWN
+ * delta -- never the single uniform shift either branch below applies.
  */
-function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<string, number>): RoutedEdge {
+function routeEdge(
+  edge: ActivityEdgeGeo,
+  meta: EdgeMeta,
+  deltas: ReadonlyMap<string, number>,
+  laneNames: readonly string[],
+): RoutedEdge {
+  if (meta.hline !== undefined) {
+    const routed = routeHline(meta.hline, edge, laneNames, deltas);
+    return { edges: routed.edges, reservations: [], edgeMeta: routed.edgeMeta };
+  }
+
   const d1 = laneDelta(meta.lane1, deltas);
   const d2 = laneDelta(meta.lane2, deltas);
 
@@ -488,12 +475,12 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
 
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
   // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
-  const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas));
+  const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas, laneNames));
 
   return {
     nodes: nodes.flatMap((n) => placeNode(n, laneNames, deltas)),
     edges: routed.flatMap((r) => r.edges),
-    edgeMeta: routed.flatMap((r, i) => repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
+    edgeMeta: routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
     reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
   };

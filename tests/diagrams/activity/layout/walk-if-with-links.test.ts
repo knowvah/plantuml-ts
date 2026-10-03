@@ -207,3 +207,60 @@ describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and em
     expect(out2.emphasize).toBeUndefined();
   });
 });
+
+describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing template (T1p-g)', () => {
+  const bounder: StringBounder = { getDimension: (t: string) => ({ width: t.length * 7, height: 14 }) };
+  const diamond = new GtileDiamondInside('c', {}, bounder, theme);
+
+  function stubTile(width: number, height: number, lane: string): Tile {
+    return {
+      kind: 'stub',
+      width,
+      height,
+      swimlaneOut: lane,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK
+          ? { x: width / 2, y: 0 }
+          : hook === SOUTH_HOOK
+            ? { x: width / 2, y: height }
+            : { x: 0, y: 0 },
+      hasPointOut: () => true,
+    };
+  }
+
+  const branch1: IfWithLinksBranch = { tile: stubTile(40, 30, '2'), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 30, '3'), isEmpty: false };
+  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, 'hline');
+
+  function makeOut(): Out {
+    let n = 0;
+    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
+  }
+
+  it("the Hline edge's own meta carries both branches' out-x tagged with their own outcome lane", () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 0, 0, '2', out);
+    const hlineMeta = out.edgeMeta[out.edgeMeta.length - 1]!;
+    expect(hlineMeta.hline).toBeDefined();
+    const candidates = hlineMeta.hline!.candidates;
+    expect(candidates.map((c) => c.lane)).toEqual(['2', '3']);
+    expect(candidates.every((c) => Number.isFinite(c.x))).toBe(true);
+    expect(hlineMeta.hline!.unfiltered).toEqual([]);
+  });
+
+  it('`low`/`high` are the tile\'s own absolute left/right edge (x, x + width)', () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 5, 0, '2', out);
+    const hlineMeta = out.edgeMeta[out.edgeMeta.length - 1]!;
+    expect(hlineMeta.hline!.low).toBe(5);
+    expect(hlineMeta.hline!.high).toBe(5 + tile.width);
+  });
+
+  it('the pushed edge itself stays the UNLANED getMinmaxSimple extent (unchanged by the template)', () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 0, 0, '2', out);
+    const hline = out.edges[out.edges.length - 1]!;
+    expect(hline.points).toHaveLength(2);
+    expect(hline.arrowhead).toBe(false);
+  });
+});

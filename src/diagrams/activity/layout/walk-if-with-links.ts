@@ -227,21 +227,36 @@ function connectionVerticalOut(ctx: IfLinksCtx, useTile1: boolean): void {
   pushEdge(out, [p1, { x: p1.x, y: y + t.height }], laneOut(tile, myLane), myLane);
 }
 
+/** Both branches' own out-X, absolute, AND own outcome lane -- split out
+ *  of {@link connectionHlineLinks} purely to keep that function's own
+ *  NLOC under the file's limit; the `hline` routing template's own
+ *  `candidates`. */
+function hlineOutXsLinks(ctx: IfLinksCtx): { out1X: number; out2X: number } {
+  const { t, x, y } = ctx;
+  const t1Origin = { x: x + t.tile1X, y: y + t.branchY };
+  const t2Origin = { x: x + t.tile2X, y: y + t.branchY };
+  return {
+    out1X: absolutePoint(t.tile1.getCoord(SOUTH_HOOK), t1Origin.x, t1Origin.y).x,
+    out2X: absolutePoint(t.tile2.getCoord(SOUTH_HOOK), t2Origin.x, t2Origin.y).x,
+  };
+}
+
 /**
  * `ConnectionHline` (`hline` only, T1p-a, `withMerge(NONE)` -- T1b wires
  * `mergeable` from this comment -- no arrowhead) -- a plain closing bar
- * under both branches' own out-X. Swimlane-unaware (`getMinmaxSimple`),
- * the same accepted approximation as `walk-if-long-horizontal.ts
- * #connectionHline`'s own doc comment -- a laned diagram would need
- * `getMinmax`'s pass-aware variant.
+ * under both branches' own out-X. The pushed edge is always the UNLANED
+ * `getMinmaxSimple` extent (byte-identical to before T1p-g); the `hline`
+ * routing template carries the per-lane data `swimlane-placement.ts
+ * #routeEdge` needs to replace it, under real swimlanes, with one
+ * `getMinmax`-derived edge per in-range lane (`swimlane-hline.ts
+ * #routeHline`) -- `measureLanes` runs BEFORE routing and only ever sees
+ * this UNLANED edge, so lane-width measurement is unaffected (that
+ * module's own doc).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:421-500
  */
 function connectionHlineLinks(ctx: IfLinksCtx): void {
   const { t, x, y, myLane, out } = ctx;
-  const t1Origin = { x: x + t.tile1X, y: y + t.branchY };
-  const t2Origin = { x: x + t.tile2X, y: y + t.branchY };
-  const out1X = absolutePoint(t.tile1.getCoord(SOUTH_HOOK), t1Origin.x, t1Origin.y).x;
-  const out2X = absolutePoint(t.tile2.getCoord(SOUTH_HOOK), t2Origin.x, t2Origin.y).x;
+  const { out1X, out2X } = hlineOutXsLinks(ctx);
   const seed = x + t.width / 2;
   const minX = Math.min(seed, out1X, out2X);
   const maxX = Math.max(seed, out1X, out2X);
@@ -254,6 +269,17 @@ function connectionHlineLinks(ctx: IfLinksCtx): void {
     ],
     myLane,
     myLane,
+    {
+      hline: {
+        low: x,
+        high: x + t.width,
+        candidates: [
+          { x: out1X, lane: laneOut(t.tile1, myLane) },
+          { x: out2X, lane: laneOut(t.tile2, myLane) },
+        ],
+        unfiltered: [],
+      },
+    },
   );
   out.edges[out.edges.length - 1]!.arrowhead = false;
 }
