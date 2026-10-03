@@ -193,6 +193,39 @@ describe('activityFontSize — default tier', () => {
   });
 });
 
+describe('activityFontSize — arrow reads graph.arrowFontSize (T2c, kafevi-44-tesu096)', () => {
+  it('`skinparam ArrowFontSize`/`activity{ArrowFontSize}` sizes only the arrow label', () => {
+    // `skinparam activity { ArrowFontSize 20 }` normalises to the flat
+    // `arrowfontsize` key the SAME way `activityArrowFontColor` does
+    // (`skinparam-key-normalize.ts` step 3), landing in
+    // `theme.colors.graph.arrowFontSize` (`skinparam-theme-builder.ts`'s
+    // `GRAPH_OVERRIDE_FIELDS`) -- the SAME field `arrow-label-font.ts
+    // #resolveArrowLabelFont` reads for every OTHER diagram's edge label.
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, arrowFontSize: 20 } },
+    };
+    expect(activityFontSize(theme, 'arrow')).toBe(20);
+    expect(activityFontSize(theme, 'activity')).toBe(12);
+  });
+
+  it('an activity{arrow{FontSize}} bucket override still wins (more specific)', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: {
+        ...DEFAULT.colors,
+        graph: { ...DEFAULT.colors.graph, arrowFontSize: 20 },
+        elements: { ...DEFAULT.colors.elements, arrow: { fontSize: 30 } },
+      },
+    };
+    expect(activityFontSize(theme, 'arrow')).toBe(30);
+  });
+
+  it('no graph.arrowFontSize set leaves the arrow default (11) unmoved', () => {
+    expect(activityFontSize(DEFAULT, 'arrow')).toBe(ARROW_FONT_SIZE);
+  });
+});
+
 describe('activityLineThickness — default tier', () => {
   it('an arrow is 1, not the 1.5 the port emitted for 2503 of 2702 lines', () => {
     expect(activityLineThickness(DEFAULT, 'arrow')).toBe(1);

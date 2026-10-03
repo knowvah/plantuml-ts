@@ -150,9 +150,31 @@ export function swimlaneFontSize(theme: Theme): number {
 /** The resolved text size for one activity element kind: the user's bucket
  * override if any, else this module's `plantuml.skin` default, else — for a
  * kind that declares none upstream — the inherited root `theme.fontSize`
- * (D2). Always a number; supplying the fallback is this module's job. */
+ * (D2). Always a number; supplying the fallback is this module's job.
+ *
+ * T2c: `sname === 'arrow'` carries one more tier, between the (D3-forbidden,
+ * always-absent-for-activity) bucket and the `plantuml.skin` default --
+ * `skinparam ArrowFontSize 20` / `skinparam activity { ArrowFontSize 20 }`
+ * (the latter normalises to the SAME flat `arrowfontsize` key,
+ * `skinparam-key-normalize.ts` step 3) lands in `theme.colors.graph
+ * .arrowFontSize` (`skinparam-theme-builder.ts`'s `GRAPH_OVERRIDE_FIELDS`),
+ * the SAME field `arrow-label-font.ts#resolveArrowLabelFont` reads for
+ * every other diagram's arrow label. Activity cannot delegate to that
+ * resolver wholesale -- its OWN unset default is 11
+ * ({@link ARROW_FONT_SIZE}), not the generic resolver's 13
+ * (`klimt/font/FontParam.java:54`) -- so this tier reads the SAME override
+ * field but keeps activity's own default below it.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style
+ *  /FromSkinparamToStyle.java (`addConFont("arrow", SName.arrow)` registers
+ *  `arrowFontSize` as `PName.FontSize` on `SName.arrow`)
+ */
 export function activityFontSize(theme: Theme, sname: ActivitySName): number {
-  return resolveElementFontSize(theme, bucketKey(sname), 'title') ?? FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
+  const bucket = resolveElementFontSize(theme, bucketKey(sname), 'title');
+  if (bucket !== undefined) return bucket;
+  if (sname === 'arrow' && theme.colors.graph.arrowFontSize !== undefined) {
+    return theme.colors.graph.arrowFontSize;
+  }
+  return FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
 }
 
 // ---------------------------------------------------------------------------
