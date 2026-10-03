@@ -33,6 +33,7 @@ import { compressGeometry } from './compress/compress-geometry.js';
 import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
 import { finalizeGeometry } from './canvas-origin.js';
 import type { FinalizedGeometry } from './canvas-origin.js';
+import { mergeSnakes } from './snake-merge.js';
 
 /**
  * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
@@ -227,6 +228,21 @@ function inLanePassOrder(
   };
 }
 
+/**
+ * D1 (T1b): `layout/snake-merge.ts`'s two-pass connector merge, run on
+ * raw pre-compression coordinates, in the jar's own lane-pass draw order
+ * (`edge-draw-order.ts#lanePassOrder` -- the SAME order `inLanePassOrder`
+ * re-derives post-compression below, so that later call is a stable
+ * no-op here, not a second reordering). Returns the same
+ * {@link PlacementResult} with `edges`/`edgeMeta` replaced.
+ */
+function mergeBeforeCompress(placed: PlacementResult, laneNames: readonly string[]): PlacementResult {
+  const order = lanePassOrder(placed.edgeMeta, laneNames);
+  const ordered = applyEdgeDrawOrder(placed.edges, placed.edgeMeta, order);
+  const merged = mergeSnakes(ordered.edges, ordered.edgeMeta);
+  return { ...placed, edges: merged.edges, edgeMeta: merged.edgeMeta };
+}
+
 /** Fresh, empty {@link Out} accumulator -- split out of {@link
  *  assignCoordinatesFull} purely to keep that function's own NLOC under
  *  the file's limit. */
@@ -249,7 +265,8 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
-  const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const placed = mergeBeforeCompress(placedRaw, ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);

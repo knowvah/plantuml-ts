@@ -194,8 +194,15 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // is no longer one combined node), body, c.
     expect(geo.nodes).toHaveLength(5);
     expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'cond', 'body', 'c']);
-    // altp-T4: In, Back, Out, Out2 (X's own internals) + a->X + X->c.
-    expect(geo.edges).toHaveLength(6);
+    // altp-T4: In, Back, Out, Out2 (X's own internals) + a->X + X->c, SIX
+    // pushes -- but T1b's `layout/snake-merge.ts` now fuses two pairs of
+    // those end-to-start, down to 4 edges: `ConnectionOut`'s own two
+    // snakes merge first (merge-case C), then that result's own last
+    // point -- X's `SOUTH_HOOK` -- touches X->c's own first point (the
+    // SAME sibling-edge-shares-a-hook mechanism the T1p-b vertical-if
+    // residual test fixed, mirrored here on the EXIT side), so X->c
+    // fuses into it too (`Snake#merge`, `Snake.java:303-327`).
+    expect(geo.edges).toHaveLength(4);
 
     const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
     const cTop = geo.nodes[4]!.y;
@@ -206,28 +213,28 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // compressed y can only be <= this raw estimate, never past it; used
     // below only as a `<=` ceiling, never as an exact expected value.
     const xBottomRaw = xTop + whileTile.height;
-    // Body's own (post-compression) bottom -- a safe floor for X's true
-    // south-hook y, which sits at or below it (`GtileWhile`'s south hook is
-    // the whole tile's exit, past the body by `NODE_MARGIN_Y`).
-    const bodyBottom = geo.nodes[3]!.y + geo.nodes[3]!.height;
 
-    // edges[0..3]: X's own internals (In, Back, Out, Out2) -- every point
-    // stays strictly inside X's own vertical span, never touching a leaf
-    // sibling.
-    for (const edgeIndex of [0, 1, 2, 3]) {
+    // edges[0..1]: X's own In/Back -- every point stays strictly inside
+    // X's own vertical span, never touching a leaf sibling (the exit
+    // connector, formerly also in this range, now extends past it --
+    // see edges[2] below).
+    for (const edgeIndex of [0, 1]) {
       for (const p of geo.edges[edgeIndex]!.points) {
         expect(p.y).toBeGreaterThanOrEqual(xTop);
         expect(p.y).toBeLessThanOrEqual(xBottomRaw);
       }
     }
 
-    // edges[4]: a -> X, pushed only AFTER X's own internals above.
-    expect(geo.edges[4]!.points.some((p) => p.y === aBottom)).toBe(true);
-    expect(geo.edges[4]!.points.every((p) => p.y <= xTop)).toBe(true);
+    // edges[2]: the fused Out+Out2+X->c -- starts inside X's own span
+    // (the while-header's own exit, ABOVE the body -- the elbow routes
+    // around it, not through `bodyBottom`) and ends at c's own entry.
+    expect(geo.edges[2]!.points[0]!.y).toBeGreaterThanOrEqual(xTop);
+    expect(geo.edges[2]!.points.some((p) => p.y === cTop)).toBe(true);
+    expect(geo.edges[2]!.points[geo.edges[2]!.points.length - 1]!.y).toBe(cTop);
 
-    // edges[5]: X -> c (c has no internals of its own to precede it).
-    expect(geo.edges[5]!.points.some((p) => p.y === cTop)).toBe(true);
-    expect(geo.edges[5]!.points.every((p) => p.y >= bodyBottom)).toBe(true);
+    // edges[3]: a -> X, pushed only AFTER X's own internals above.
+    expect(geo.edges[3]!.points.some((p) => p.y === aBottom)).toBe(true);
+    expect(geo.edges[3]!.points.every((p) => p.y <= xTop)).toBe(true);
   });
 
   it('leaves-only sequence (a, b, c) keeps identity walk order, unaffected by D7', () => {
@@ -299,9 +306,12 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
   });
 
   // altp-T4 (D7): ConnectionIn, ConnectionBackSimple, ConnectionOut (x2) --
-  // this body has no `break`, so no welding edges.
-  it('produces exactly 4 edges (In, Back, Out, Out2)', () => {
-    expect(geo.edges).toHaveLength(4);
+  // this body has no `break`, so no welding edges. T1b: `ConnectionOut`'s
+  // two snakes (`snake` LIMITED, `snake2` FULL) touch end-to-start at the
+  // elbow and fuse into one (`Snake#merge`, `Snake.java:303-327`,
+  // `connection-census.md` merge-case C) -- 3 edges now.
+  it('produces exactly 3 edges (In, Back, merged Out)', () => {
+    expect(geo.edges).toHaveLength(3);
   });
 
   it('back-edge has exactly 5 waypoints and is emphasized up (ConnectionBackSimple)', () => {
@@ -322,9 +332,12 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
 
   // `ConnectionOut`'s BOTH snakes use the undecorated `Snake.create
   // (skinParam, color)` overload (`Snake.java:138-142`) -- neither has a
-  // terminal arrowhead.
-  it('exactly two edges carry arrowhead: false (both ConnectionOut snakes)', () => {
-    expect(geo.edges.filter((e) => e.arrowhead === false)).toHaveLength(2);
+  // terminal arrowhead, and T1b's merge keeps it that way: `oneOf`
+  // (`Snake.java:313`) falls back to the head's own `null` decoration
+  // when the tail's is also `null`, so the fused edge still carries
+  // `arrowhead: false`, just as ONE edge rather than two.
+  it('exactly one edge carries arrowhead: false (the merged ConnectionOut)', () => {
+    expect(geo.edges.filter((e) => e.arrowhead === false)).toHaveLength(1);
   });
 });
 
@@ -372,13 +385,14 @@ describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () 
 // == 0`) gets ONLY `ConnectionBackEmpty` -- no `ConnectionIn` is added at
 // all (`FtileWhile.java:148-168,150`).
 describe('assignCoordinates — GtileWhile with an empty body draws ConnectionBackEmpty', () => {
-  it('emits exactly 3 edges (BackEmpty, Out, Out2), no ConnectionIn', () => {
+  it('emits exactly 2 edges (BackEmpty, merged Out), no ConnectionIn', () => {
     const header = new GtileDiamondInside('loop?', {}, bounder, theme);
     const body = new GtileTopDown([], bounder, theme);
     const tile = new GtileWhile(header, body, bounder, theme);
     const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
-    expect(geo.edges).toHaveLength(3);
+    // T1b: `ConnectionOut`'s two snakes fuse (merge-case C) -- 2 edges.
+    expect(geo.edges).toHaveLength(2);
     const backEdge = geo.edges.find((e) => e.points.length === 5)!;
     expect(backEdge).toBeDefined();
     expect(backEdge.emphasize).toBe('up');
@@ -449,8 +463,9 @@ describe('assignCoordinates — GtileWhile with a body that has no point out (en
       theme,
     });
 
-    // In, Out, Out2 -- no Back, so no 5-point edge and no reservation.
-    expect(full.geometry.edges).toHaveLength(3);
+    // In, merged Out (T1b: Out+Out2 fuse, merge-case C) -- no Back, so no
+    // 5-point edge and no reservation.
+    expect(full.geometry.edges).toHaveLength(2);
     expect(full.geometry.edges.some((e) => e.points.length === 5)).toBe(false);
     expect(full.reservations).toHaveLength(0);
   });
@@ -476,11 +491,17 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     // -- a break has no fall-through, so the gtile-top-down sibling edge
     // gate (T3b, `FtileFactoryDelegatorAssembly.java:67-70`) skips it. Then
     // In, Back (action2 still has a point out), Out, Out2, then the weld
-    // LAST -- 6 edges total (was 7 before the gate fix; this test pinned
-    // the pre-fix phantom brk->action2 edge).
-    expect(geo.edges).toHaveLength(6);
+    // LAST -- 6 pushes. T1b's merge engine fuses TWO pairs of those,
+    // both FULL by default: `ConnectionOut`'s own two snakes (merge-case
+    // C), AND -- since `action1->brk`'s own target IS the weld's own
+    // source (both land on the break node's entry point) -- the weld
+    // fuses BACKWARD into the EARLIER-pending sibling edge
+    // (`Snake#merge`, `Snake.java:303-327`; the pending slot a later
+    // snake merges into never moves, `UGraphicForSnake.java:146-156`).
+    // 4 edges: [action1->brk+weld fused], In, Back, merged Out.
+    expect(geo.edges).toHaveLength(4);
     const breakNode = geo.nodes.find((n) => n.kind === 'break')!;
-    const weld = geo.edges[geo.edges.length - 1]!;
+    const weld = geo.edges[0]!;
     // T1a (D2): the weld's own target x sits on the while's own exit
     // column, which was this composite's ink minimum under T1a alone --
     // `NO_FUDGE_ORIGIN` (15).
@@ -497,10 +518,18 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     // (confirmed with `computeCanvasOrigin` called directly on this exact
     // fixture's compressed geometry: shiftX moved `-9 -> 5`).
     const WHILE_ENTRY_ARROWHEAD_SHIFT = 14;
-    expect(weld.points).toEqual([
+    // Only the fused edge's own LAST two points are the weld's own shape
+    // (`removeRedondantDirection` does not collapse the corner at the
+    // break's own entry point, since the sibling edge arrives from ABOVE
+    // and the weld departs to the LEFT -- a real corner, not a straight
+    // run).
+    expect(weld.points.slice(-2)).toEqual([
       { x: breakNode.x, y: breakNode.y },
       { x: NO_FUDGE_ORIGIN + WHILE_ENTRY_ARROWHEAD_SHIFT, y: breakNode.y },
     ]);
+    // `emphasize`/`arrowhead` resolve to the sibling edge's own (head)
+    // values, since the weld (tail) carries neither override --
+    // unchanged from the weld's own pre-merge expectation.
     expect(weld.emphasize).toBeUndefined();
     expect(weld.arrowhead).toBeUndefined();
   });

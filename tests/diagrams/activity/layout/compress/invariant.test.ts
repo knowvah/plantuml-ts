@@ -564,7 +564,15 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // doc). Same pair and same mechanism, unrelated to this task's own
     // draw-order fix -- still owned by the `activity-emphasize-arrow-
     // atomic-anchor` follow-on above.
-    'nerete-42-save418 [26,29] polygon×polygon',
+    // T1b: RESOLVED, no longer listed. `layout/snake-merge.ts` fuses
+    // `pushWhileOut`'s LIMITED `snake` into the touching `break`'s own
+    // terminal-arrowhead snake wherever their endpoints coincide
+    // (`Snake#merge`, `Snake.java:303-327`) -- one of this pair's own two
+    // polygons is now a single merged shape, so the collision this
+    // entry recorded can no longer occur (confirmed: `nerete-42-save418`
+    // falls 64 -> 20 on the probe; polygon count drops accordingly). The
+    // underlying atomic-anchor defect this entry names is unrelated and
+    // still open for whichever pair it next surfaces on.
     // `vamazo-19-tufu812 [1,18]`/`[5,13] polygon×polygon` (T1a, mission
     // `activity-divergence-drive`, D2): the SAME "touching becomes an
     // epsilon overlap after a second independent transform" class as

@@ -131,8 +131,15 @@ describe('layoutActivity — down: optionalStop (stop east of the hexagon)', () 
     expect(stop.x).toBeGreaterThan(split.x + split.width);
   });
 
-  it('emits exactly 3 edges: In, Horizontal, Out', () => {
-    expect(geo.edges.length).toBe(3);
+  // T1b: `mainTile` here is a near-zero-height filler (the then-branch's
+  // whole content is the `stop` `optionalStop` diverts east), so
+  // `ConnectionIn`'s own target and `ConnectionOut`'s own source touch
+  // within `Snake.same()`'s `0.001` tolerance (`Snake.java:299-301`) --
+  // both FULL by default, they merge (`Snake.java:303-327`), and the
+  // straight-through point collapses too (`Worm#removeRedondantDirection`,
+  // `Worm.java:407-417`, both segments run DOWN): one 2-point edge.
+  it('emits exactly 2 edges: merged In+Out, Horizontal', () => {
+    expect(geo.edges.length).toBe(2);
   });
 });
 

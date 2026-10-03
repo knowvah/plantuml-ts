@@ -79,44 +79,63 @@ function entryMergeDeltas(slug: string): { childCountDelta: number; heightDelta:
   const cc = diffs.find((d) => d.path.includes('childCount'));
   const height = diffs.find((d) => d.path === 'svg/@viewBox[3]');
   return {
-    childCountDelta: Number(cc?.actual) - Number(cc?.expected),
-    heightDelta: Number(height?.actual) - Number(height?.expected),
+    childCountDelta: cc === undefined ? 0 : Number(cc.actual) - Number(cc.expected),
+    heightDelta: height === undefined ? 0 : Number(height.actual) - Number(height.expected),
   };
 }
 
+/**
+ * T1b (D1) closed the residual this file's own doc comment above
+ * diagnosed: `layout/snake-merge.ts` now fuses `connectionIn` with the
+ * generic `GtileTopDown` sibling edge at their shared `NORTH_HOOK`
+ * (`Snake#merge`, `Snake.java:303-327`) -- every `childCountDelta`/
+ * `heightDelta` below is `0`. `diffCount` FELL on every fixture (the
+ * fused run's own corner-collapse now matches the jar's), but
+ * `weightedScore` ROSE: with `childCount` now EQUAL, `compareSvg`
+ * switches from LCS-style alignment to positional pairing (decisions.md
+ * D7's own reveal class) and exposes a SEPARATE, pre-existing draw-order
+ * divergence (our `if-split`'s own polygon/label pair sits at a
+ * different index than the jar's `rect`/`text` chrome pair) that the
+ * count mismatch previously hid. Confirmed by reading the raw diff list:
+ * every entry pairs an `actual` tag against an `expected` tag of a
+ * DIFFERENT kind (`polygon` vs `rect`, `text` vs `polygon`) at the same
+ * index -- an index-shift artifact, not a coordinate error in the merge
+ * itself. Out of scope here (a `GtileIfLongVertical`/node-order concern,
+ * not `snake-merge.ts`'s); re-pinned, not chased.
+ */
 describe('activity T1p-b fixtures — FtileIfLongVertical (!pragma useVerticalIf true)', () => {
-  it('vertical-if-2way: pinned at the current, diagnosed residual (childCount +2, height +20)', () => {
-    expect(entryMergeDeltas('vertical-if-2way')).toEqual({ childCountDelta: 2, heightDelta: 20 });
+  it('vertical-if-2way: snake-merge closes the residual (childCount/height now exact)', () => {
+    expect(entryMergeDeltas('vertical-if-2way')).toEqual({ childCountDelta: 0, heightDelta: 0 });
     const { diffCount, weightedScore } = renderAndMeasure('vertical-if-2way');
-    expect(diffCount).toBe(164);
-    expect(weightedScore).toBe(267);
+    expect(diffCount).toBe(108);
+    expect(weightedScore).toBe(354);
   });
 
-  it('vertical-if-3way: SAME residual, unaffected by the extra elseif branch (childCount +2, height +20)', () => {
-    expect(entryMergeDeltas('vertical-if-3way')).toEqual({ childCountDelta: 2, heightDelta: 20 });
+  it('vertical-if-3way: SAME closed residual, unaffected by the extra elseif branch', () => {
+    expect(entryMergeDeltas('vertical-if-3way')).toEqual({ childCountDelta: 0, heightDelta: 0 });
     const { diffCount, weightedScore } = renderAndMeasure('vertical-if-3way');
-    expect(diffCount).toBe(210);
-    expect(weightedScore).toBe(347);
+    expect(diffCount).toBe(132);
+    expect(weightedScore).toBe(514);
   });
 
-  it('vertical-if-elseif-labels: SAME residual, unaffected by longer branch labels (childCount +2, height +20)', () => {
-    expect(entryMergeDeltas('vertical-if-elseif-labels')).toEqual({ childCountDelta: 2, heightDelta: 20 });
+  it('vertical-if-elseif-labels: SAME closed residual, unaffected by longer branch labels', () => {
+    expect(entryMergeDeltas('vertical-if-elseif-labels')).toEqual({ childCountDelta: 0, heightDelta: 0 });
     const { diffCount, weightedScore } = renderAndMeasure('vertical-if-elseif-labels');
-    expect(diffCount).toBe(168);
-    expect(weightedScore).toBe(271);
+    expect(diffCount).toBe(108);
+    expect(weightedScore).toBe(354);
   });
 
-  it('vertical-if-nested: SAME residual, unaffected by the nested ordinary if/else (childCount +2, height +20)', () => {
-    expect(entryMergeDeltas('vertical-if-nested')).toEqual({ childCountDelta: 2, heightDelta: 20 });
+  it('vertical-if-nested: SAME closed residual, unaffected by the nested ordinary if/else', () => {
+    expect(entryMergeDeltas('vertical-if-nested')).toEqual({ childCountDelta: 0, heightDelta: 0 });
     const { diffCount, weightedScore } = renderAndMeasure('vertical-if-nested');
-    expect(diffCount).toBe(222);
-    expect(weightedScore).toBe(339);
+    expect(diffCount).toBe(137);
+    expect(weightedScore).toBe(396);
   });
 
-  it('vertical-if-swimlanes: SAME residual, unaffected by the single swimlane (childCount +2, height +20)', () => {
-    expect(entryMergeDeltas('vertical-if-swimlanes')).toEqual({ childCountDelta: 2, heightDelta: 20 });
+  it('vertical-if-swimlanes: SAME closed residual, unaffected by the single swimlane', () => {
+    expect(entryMergeDeltas('vertical-if-swimlanes')).toEqual({ childCountDelta: 0, heightDelta: 0 });
     const { diffCount, weightedScore } = renderAndMeasure('vertical-if-swimlanes');
-    expect(diffCount).toBe(164);
-    expect(weightedScore).toBe(267);
+    expect(diffCount).toBe(108);
+    expect(weightedScore).toBe(354);
   });
 });

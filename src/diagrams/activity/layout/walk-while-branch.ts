@@ -97,12 +97,18 @@ function pushEdgeFlagged(
   out: Out,
   points: GPoint[],
   lanes: readonly [string | undefined, string | undefined],
-  flags: { emphasize?: 'up' | 'down'; arrowhead?: false; loop?: LoopTranslate },
+  flags: {
+    emphasize?: 'up' | 'down';
+    arrowhead?: false;
+    loop?: LoopTranslate;
+    mergeable?: 'LIMITED' | 'NONE';
+  },
 ): void {
   pushEdge(out, points, lanes[0], lanes[1], flags.loop !== undefined ? { loop: flags.loop } : 'default');
   const edge = out.edges[out.edges.length - 1]!;
   if (flags.emphasize !== undefined) edge.emphasize = flags.emphasize;
   if (flags.arrowhead === false) edge.arrowhead = false;
+  if (flags.mergeable !== undefined) edge.mergeable = flags.mergeable;
 }
 
 /**
@@ -273,11 +279,14 @@ function pushWhileBack(frame: WhileFrame): void {
  */
 function pushWhileOut(frame: WhileFrame): void {
   const { out, headerWest, southHook, elbowX, headerOutLane } = frame;
+  // `withMerge(LIMITED)` (`FtileWhile.java:485` -- T1b wires `mergeable`
+  // from this comment); `snake2` below keeps the builder's own default
+  // FULL (`:504`), confirmed merge-case C (`connection-census.md` §3/§4).
   pushEdgeFlagged(
     out,
     [headerWest, { x: elbowX, y: headerWest.y }, { x: elbowX, y: southHook.y }],
     [headerOutLane, headerOutLane],
-    { emphasize: 'down', arrowhead: false },
+    { emphasize: 'down', arrowhead: false, mergeable: 'LIMITED' },
   );
   pushEdgeFlagged(out, [{ x: elbowX, y: southHook.y }, southHook], [headerOutLane, headerOutLane], {
     arrowhead: false,

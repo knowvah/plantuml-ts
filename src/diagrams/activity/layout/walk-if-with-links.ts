@@ -241,6 +241,25 @@ function hlineOutXsLinks(ctx: IfLinksCtx): { out1X: number; out2X: number } {
   };
 }
 
+/** The `hline` routing template itself -- split out of {@link
+ *  connectionHlineLinks} purely to keep that function's own NLOC under
+ *  the file's limit. */
+function hlinePayloadLinks(ctx: IfLinksCtx, out1X: number, out2X: number): { low: number; high: number } & {
+  candidates: Array<{ x: number; lane: string | undefined }>;
+  unfiltered: number[];
+} {
+  const { t, x, myLane } = ctx;
+  return {
+    low: x,
+    high: x + t.width,
+    candidates: [
+      { x: out1X, lane: laneOut(t.tile1, myLane) },
+      { x: out2X, lane: laneOut(t.tile2, myLane) },
+    ],
+    unfiltered: [],
+  };
+}
+
 /**
  * `ConnectionHline` (`hline` only, T1p-a, `withMerge(NONE)` -- T1b wires
  * `mergeable` from this comment -- no arrowhead) -- a plain closing bar
@@ -269,19 +288,11 @@ function connectionHlineLinks(ctx: IfLinksCtx): void {
     ],
     myLane,
     myLane,
-    {
-      hline: {
-        low: x,
-        high: x + t.width,
-        candidates: [
-          { x: out1X, lane: laneOut(t.tile1, myLane) },
-          { x: out2X, lane: laneOut(t.tile2, myLane) },
-        ],
-        unfiltered: [],
-      },
-    },
+    { hline: hlinePayloadLinks(ctx, out1X, out2X) },
   );
-  out.edges[out.edges.length - 1]!.arrowhead = false;
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.arrowhead = false;
+  edge.mergeable = 'NONE';
 }
 
 /** `ConnectionVerticalThenHorizontalDirect`, exactly one branch has a point
