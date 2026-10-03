@@ -15,6 +15,8 @@
 
 import type { ActivityIf, ActivityElseIf, ActivityNode } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
+import { Pragma } from '../../../core/skin/Pragma.js';
+import { PragmaKey } from '../../../core/skin/PragmaKey.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondInside2 } from '../tiles/gtile-diamond-inside2.js';
@@ -28,6 +30,20 @@ import { tileNodes } from './tile-layout.js';
 import { laneOut } from './swimlane-lanes.js';
 
 export type IfBuilder = 'down' | 'with-links' | 'long-horizontal' | 'long-vertical';
+
+/**
+ * `laneOrder` (`ast.swimlanes`) + `pragma` (`ast.pragma`, D12/T1p-b),
+ * bundled so threading both through `buildIfDown`/`shouldUseElse1` (each
+ * already at the file's 5-param cap with `dispatch`/`optionalStop`/`parts`/
+ * `swimlane`) does not push them over it. `buildIf`'s own PUBLIC signature
+ * keeps them as two separate positional params (matching `tile-layout.ts
+ * #tileIf`'s existing call convention); this type is purely an internal
+ * bundling device for this file's own private builder helpers.
+ */
+interface IfLayoutCtx {
+  readonly laneOrder: readonly string[];
+  readonly pragma: Pragma;
+}
 
 export interface IfBuilderResult {
   readonly builder: IfBuilder;
@@ -81,27 +97,30 @@ function createDownResult(
   return { builder: 'down', swapped: paramAIsElse };
 }
 
+/** `node.elseIfBranches.length > 0`'s own builder pick -- split out of
+ *  {@link ifBuilderOf} purely to keep that function's own CCN under the
+ *  file's limit (the pragma read adds one more branch to an already-at-cap
+ *  function). `pragma.isTrue(PragmaKey.USE_VERTICAL_IF)` is the EXACT
+ *  upstream call site.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorIf.java:86 */
+function chainBuilderOf(pragma: Pragma): IfBuilderResult {
+  return { builder: pragma.isTrue(PragmaKey.USE_VERTICAL_IF) ? 'long-vertical' : 'long-horizontal' };
+}
+
 /**
  * `FtileFactoryDelegatorIf#createIf` (`thens.size() > 1` -> long-horizontal
  * or, under `!pragma useVerticalIf true`, long-vertical; `:85-92`) composed
  * with `ConditionalBuilder#create`'s own four-condition dispatch
  * (`:149-161`). `branch1`/`branch2` there are `then`/`else`.
  *
- * `useVerticalIf` defaults to `false` so every existing caller (no pragma
- * support reaches this function yet -- `tile-layout.ts`'s own doc comment
- * on `tileIf` names the gap) keeps its prior dispatch byte-identically.
+ * `pragma` defaults to an empty `Pragma` (`isTrue` always `false` on an
+ * empty table) so a direct unit-test caller that only exercises unlaned,
+ * unpragma'd fixtures need not pass it -- same convention as `laneOrder`'s
+ * own `= []` default immediately below.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorIf.java:85-88
  */
-/** `node.elseIfBranches.length > 0`'s own builder pick -- split out of
- *  {@link ifBuilderOf} purely to keep that function's own CCN under the
- *  file's limit (the pragma flag adds one more branch to an already-at-cap
- *  function). */
-function chainBuilderOf(useVerticalIf: boolean): IfBuilderResult {
-  return { builder: useVerticalIf ? 'long-vertical' : 'long-horizontal' };
-}
-
-export function ifBuilderOf(node: ActivityIf, useVerticalIf = false): IfBuilderResult {
-  if (node.elseIfBranches.length > 0) return chainBuilderOf(useVerticalIf);
+export function ifBuilderOf(node: ActivityIf, pragma: Pragma = Pragma.createEmpty()): IfBuilderResult {
+  if (node.elseIfBranches.length > 0) return chainBuilderOf(pragma);
 
   const thenNodes = node.thenBranch;
   const elseNodes = node.elseBranch;
@@ -168,13 +187,8 @@ function countIfSwimlanes(node: ActivityIf): number {
   return acc.size;
 }
 
-function toBranchTile(
-  nodes: readonly ActivityNode[],
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): IfWithLinksBranch {
-  const tiles = tileNodes([...nodes], bounder, theme, laneOrder);
+function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): IfWithLinksBranch {
+  const tiles = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
@@ -182,13 +196,13 @@ function toBranchTile(
  * `createWithLinks` (`ConditionalBuilder.java:213-232`): a `withWestAndEast`
  * hexagon, both branches, and the merge rhombus when both have a point out.
  */
-function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
+function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const labels: { west?: string; east?: string } = {};
   if (node.thenLabel !== undefined) labels.west = node.thenLabel;
   if (node.elseLabel !== undefined) labels.east = node.elseLabel;
   const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
-  const branch1 = toBranchTile(node.thenBranch, bounder, theme, laneOrder);
-  const branch2 = toBranchTile(node.elseBranch, bounder, theme, laneOrder);
+  const branch1 = toBranchTile(node.thenBranch, bounder, theme, ctx);
+  const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
   const laneCount = countIfSwimlanes(node);
   return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, theme.conditionEndStyle);
 }
@@ -238,17 +252,16 @@ function buildLongHorizontalDiamonds(
  * branch (`then` + every `elseif`), each coupled with its own branch
  * content, plus the `else` branch placed to the right of the row.
  */
-function buildIfLongHorizontal(
-  node: ActivityIf,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): Tile {
+function buildIfLongHorizontal(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const branches = longHorizontalBranches(node);
   const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, laneOrder), bounder, theme),
+    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
   );
-  const tile2 = new GtileTopDown(tileNodes([...node.elseBranch], bounder, theme, laneOrder), bounder, theme);
+  const tile2 = new GtileTopDown(
+    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
+    bounder,
+    theme,
+  );
   const diamonds = buildLongHorizontalDiamonds(branches, node.elseLabel, bounder, theme);
   const inlabelSizes = branches.map(() => 0);
   return new GtileIfLongHorizontal(diamonds, tiles, tile2, inlabelSizes);
@@ -282,17 +295,16 @@ function buildLongVerticalDiamonds(
  * diamond fed by the `else` clause (`tile2`, below the column).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:131-204
  */
-function buildIfLongVertical(
-  node: ActivityIf,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): Tile {
+function buildIfLongVertical(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const branches = longHorizontalBranches(node);
   const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, laneOrder), bounder, theme),
+    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
   );
-  const tile2 = new GtileTopDown(tileNodes([...node.elseBranch], bounder, theme, laneOrder), bounder, theme);
+  const tile2 = new GtileTopDown(
+    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
+    bounder,
+    theme,
+  );
   const diamonds = buildLongVerticalDiamonds(branches, bounder, theme);
   return new GtileIfLongVertical(diamonds, tiles, tile2, node.elseLabel);
 }
@@ -404,15 +416,16 @@ function applyIfDownSwimlaneOut(result: GtileIfDown, optionalStop: Tile | null, 
   if (out !== undefined) result.swimlaneOut = out;
 }
 
-function buildIfDown(
-  node: ActivityIf,
-  bounder: StringBounder,
-  theme: Theme,
-  dispatch: IfBuilderResult,
-  laneOrder: readonly string[],
-): Tile {
-  const thenTile = new GtileTopDown(tileNodes([...node.thenBranch], bounder, theme, laneOrder), bounder, theme);
-  const elseTile = new GtileTopDown(tileNodes([...node.elseBranch], bounder, theme, laneOrder), bounder, theme);
+/** `new GtileTopDown(tileNodes(nodes, ...), bounder, theme)` -- split out
+ *  of {@link buildIfDown} only to keep that function's own NLOC under the
+ *  file's limit (the `ctx` bundling above added two call sites back). */
+function branchBodyTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
+  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme);
+}
+
+function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dispatch: IfBuilderResult, ctx: IfLayoutCtx): Tile {
+  const thenTile = branchBodyTile(node.thenBranch, bounder, theme, ctx);
+  const elseTile = branchBodyTile(node.elseBranch, bounder, theme, ctx);
   const parts = resolveIfDownParts(node, dispatch.swapped === true, thenTile, elseTile);
 
   const labels: { south?: string; east?: string } = {};
@@ -422,7 +435,7 @@ function buildIfDown(
 
   const optionalStop = dispatch.optionalStop === true ? parts.sideTile : null;
   const hasTwoBranches = thenTile.hasPointOut() && elseTile.hasPointOut();
-  const useElse1 = shouldUseElse1(theme, optionalStop, parts, node.swimlane, laneOrder);
+  const useElse1 = shouldUseElse1(theme, optionalStop, parts, node.swimlane, ctx.laneOrder);
   if (useElse1) diamond1.swapEastWest();
 
   const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, {
@@ -435,44 +448,25 @@ function buildIfDown(
 }
 
 /**
- * `theme.useVerticalIf` does not exist on the real `Theme` type
- * (`core/theme.ts`) yet -- adding it is a one-line, elsewhere-precedented
- * change (`conditionEndStyle`, T1p-a) but `core/theme.ts` is outside this
- * task's write-set. This structural type documents the exact shape that
- * future edit would add; read optionally via {@link readUseVerticalIf} so
- * `buildIf`'s own signature stays untouched and every existing caller (a
- * `Theme` with no such field) behaves byte-identically.
- */
-interface ThemeWithVerticalIfPragma {
-  readonly useVerticalIf?: boolean;
-}
-
-/**
- * `!pragma useVerticalIf true` (D12/T1p-b), `false` when absent. No
- * activity parser command recognises `!pragma` lines today (grepped --
- * `node-dispatch.ts`'s `LINE_HANDLERS` has no pragma entry, unlike class/
- * sequence/state/description's own command tables), and `node-dispatch.ts`/
- * `ast.ts`/`parser.ts` are outside this task's write-set, so no real parse
- * can set {@link ThemeWithVerticalIfPragma.useVerticalIf} yet -- reported
- * as a blocker, not silently worked around. Threading stops at this read,
- * fully wired and tested via direct calls with a hand-built `Theme`, so
- * landing parser-side recognition (setting this field, by whatever upstream
- * mechanism eventually threads it onto `Theme`) is the only remaining step.
- */
-function readUseVerticalIf(theme: Theme): boolean {
-  return (theme as Theme & ThemeWithVerticalIfPragma).useVerticalIf === true;
-}
-
-/**
  * `laneOrder` is `ast.swimlanes` (this diagram's real declaration order),
  * threaded from `layoutActivity` (mission `activity-if-tile-port` T4).
- * Defaulted to `[]` so direct unit-test callers that only exercise unlaned
- * fixtures need not pass it.
+ * `pragma` is `ast.pragma` (D12/T1p-b, `!pragma useVerticalIf true` ->
+ * `ifBuilderOf`'s own `pragma.isTrue(PragmaKey.USE_VERTICAL_IF)` read --
+ * `FtileFactoryDelegatorIf.java:86`'s exact call site). Both defaulted so
+ * a direct unit-test caller that only exercises unlaned, unpragma'd
+ * fixtures need not pass either.
  */
-export function buildIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[] = []): Tile {
-  const dispatch = ifBuilderOf(node, readUseVerticalIf(theme));
-  if (dispatch.builder === 'with-links') return buildIfWithLinks(node, bounder, theme, laneOrder);
-  if (dispatch.builder === 'down') return buildIfDown(node, bounder, theme, dispatch, laneOrder);
-  if (dispatch.builder === 'long-vertical') return buildIfLongVertical(node, bounder, theme, laneOrder);
-  return buildIfLongHorizontal(node, bounder, theme, laneOrder);
+export function buildIf(
+  node: ActivityIf,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[] = [],
+  pragma: Pragma = Pragma.createEmpty(),
+): Tile {
+  const dispatch = ifBuilderOf(node, pragma);
+  const ctx: IfLayoutCtx = { laneOrder, pragma };
+  if (dispatch.builder === 'with-links') return buildIfWithLinks(node, bounder, theme, ctx);
+  if (dispatch.builder === 'down') return buildIfDown(node, bounder, theme, dispatch, ctx);
+  if (dispatch.builder === 'long-vertical') return buildIfLongVertical(node, bounder, theme, ctx);
+  return buildIfLongHorizontal(node, bounder, theme, ctx);
 }

@@ -6,13 +6,10 @@ import type {
   ActivityIf,
   ActivityWhile,
   ActivityRepeat,
-  ActivityFork,
-  ActivitySplit,
-  ActivitySwitch,
-  ActivityGroup,
 } from '../ast.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import type { Theme } from '../../../core/theme.js';
+import { Pragma } from '../../../core/skin/Pragma.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileStart } from '../tiles/gtile-start.js';
 import { GtileStop } from '../tiles/gtile-stop.js';
@@ -20,22 +17,16 @@ import { GtileEnd } from '../tiles/gtile-end.js';
 import { GtileBreak } from '../tiles/gtile-break.js';
 import { GtileAction } from '../tiles/gtile-action.js';
 import { GtileNote } from '../tiles/gtile-note.js';
-import { GtileDiamond } from '../tiles/gtile-diamond.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat } from '../tiles/gtile-repeat.js';
 import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
-import { GtileFork } from '../tiles/gtile-fork.js';
-import { GtileMerge } from '../tiles/gtile-merge.js';
-import { GtileSplit } from '../tiles/gtile-split.js';
-import { GtileSwitch } from '../tiles/gtile-switch.js';
-import { GtileGroup } from '../tiles/gtile-group.js';
-import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
+import { tileFork, tileGroup, tileSplit, tileSwitch } from './tile-layout-structural.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -56,13 +47,16 @@ function makeBounder(measurer: StringMeasurer, theme: Theme): StringBounder {
  * (T4/T5) — every concrete `Gtile*` still satisfies both, since a mutable
  * class field structurally satisfies a `readonly` interface member.
  */
-function withSwimlane<T extends { swimlane?: string | undefined }>(tile: T, swimlane: string | undefined): T {
+export function withSwimlane<T extends { swimlane?: string | undefined }>(tile: T, swimlane: string | undefined): T {
   tile.swimlane = swimlane;
   return tile;
 }
 
 /** Mirrors {@link withSwimlane} for a tile's exit lane (T5, D1). */
-function withSwimlaneOut<T extends { swimlaneOut?: string | undefined }>(tile: T, swimlaneOut: string | undefined): T {
+export function withSwimlaneOut<T extends { swimlaneOut?: string | undefined }>(
+  tile: T,
+  swimlaneOut: string | undefined,
+): T {
   tile.swimlaneOut = swimlaneOut;
   return tile;
 }
@@ -121,6 +115,7 @@ export function tileNodes(
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[] = [],
+  pragma: Pragma = Pragma.createEmpty(),
 ): Tile[] {
   const tiles: Tile[] = [];
   for (const node of nodes) {
@@ -129,7 +124,7 @@ export function tileNodes(
       if (last !== undefined) withKilled(last);
       continue;
     }
-    const t = tileNode(node, bounder, theme, laneOrder);
+    const t = tileNode(node, bounder, theme, laneOrder, pragma);
     if (t !== null) tiles.push(t);
   }
   return tiles;
@@ -145,8 +140,8 @@ export function tileNodes(
  * `ConnectionElse1` vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
  * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
  */
-function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
-  return withSwimlane(buildIf(node, bounder, theme, laneOrder), node.swimlane);
+function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): Tile {
+  return withSwimlane(buildIf(node, bounder, theme, laneOrder, pragma), node.swimlane);
 }
 
 /**
@@ -181,13 +176,14 @@ function tileWhile(
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
+  pragma: Pragma,
 ): GtileWhile {
   const labels: { north?: string; west?: string } = {};
   if (node.yesLabel !== undefined) labels.north = node.yesLabel;
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
   const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   return withSwimlane(new GtileWhile(header, body, bounder, theme, backwardTile), node.swimlane);
@@ -223,8 +219,9 @@ function tileRepeatEntry(
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
+  pragma: Pragma,
 ): Tile {
-  if (node.entry !== undefined) return tileNode(node.entry, bounder, theme, laneOrder)!;
+  if (node.entry !== undefined) return tileNode(node.entry, bounder, theme, laneOrder, pragma)!;
   return withSwimlane(new GtileRepeatEntry(), node.swimlane);
 }
 
@@ -257,10 +254,11 @@ function tileRepeat(
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
+  pragma: Pragma,
 ): GtileRepeat {
-  const entry = tileRepeatEntry(node, bounder, theme, laneOrder);
+  const entry = tileRepeatEntry(node, bounder, theme, laneOrder, pragma);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const labels = repeatConditionLabels(node, backward, laneOrder);
@@ -278,86 +276,9 @@ function tileRepeat(
   );
 }
 
-/**
- * D12/T1p-c: `node.style === 'merge'` (`fork ... end merge`) builds a
- * `GtileMerge` instead -- same branch tiling, different join shape
- * (`gtile-merge.ts`'s own doc). `withSwimlane`/`withSwimlaneOut` reuse the
- * AST's captured fields for both styles (`walk-fork-branches.ts
- * #pushMergeDiamondNode`'s own doc covers the one divergence this elides).
- */
-function tileFork(node: ActivityFork, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): GtileFork {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
-  const built = node.style === 'merge' ? new GtileMerge(branches, bounder) : new GtileFork(branches, bounder);
-  return withSwimlaneOut(withSwimlane(built, node.swimlane), node.swimlaneOut);
-}
-
-function tileSplit(
-  node: ActivitySplit,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): GtileSplit {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
-  return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
-}
-
-/**
- * Builds a {@link GtileSwitch} from an `ActivitySwitch` node (mission
- * ubrr-T10 M2). DIVERGENCE, documented: upstream's real switch shape is
- * `GtileIfHexagon` (`activitydiagram3/gtile/GtileIfHexagon.java`) -- a
- * hexagon opener with 1/2-branch-only side labels and N-branch-dependent
- * connection routing, a materially different (and materially larger)
- * class than anything else in `tiles/`. This reuses the already-ported,
- * already-tested `GtileSwitch` (a plain diamond opener/closer, case
- * labels drawn as ordinary edge text) instead: same topology (opener ->
- * N cases -> merge), same landing engine (D3), different diamond/hexagon
- * shape and label placement. The merge diamond is unconditional, matching
- * `GtileIfHexagon`'s own `shape2` (always built and drawn, independent of
- * whether any case continues).
- */
-function tileSwitch(
-  node: ActivitySwitch,
-  bounder: StringBounder,
-  theme: Theme,
-  laneOrder: readonly string[],
-): GtileSwitch {
-  const diamond = new GtileDiamond(node.condition, bounder, theme);
-  const cases = node.cases.map((kase) => {
-    const tile = new GtileTopDown(tileNodes(kase.body, bounder, theme, laneOrder), bounder, theme);
-    return kase.label !== undefined ? { tile, label: kase.label } : { tile };
-  });
-  const mergeDiamond = new GtileDiamond('', bounder, theme);
-  return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
-}
-
-/**
- * Builds a {@link GtileGroup}/{@link GtilePartition} from an
- * `ActivityGroup` node (mission ubrr-T10 M6). `groupType === 'group'`
- * builds `GtileGroup`; the other four (`partition`/`package`/`rectangle`/
- * `card`) all build `GtilePartition` -- upstream draws a DIFFERENT
- * `USymbol` per type (`CommandPartition3#getUSymbol`), but this port has
- * only the two tile classes (`gtile-group.ts`/`gtile-partition.ts`,
- * identical geometry, `kind` differs), so `package`/`rectangle`/`card`
- * collapse onto `GtilePartition`'s shape -- a documented divergence, not
- * a silent one. The bracket-less-form warning banner (`CommandPartition3`
- * `hasBracket == false` -> `addWarning(...)`, `CommandCloseGroupLegacy3`
- * likewise) is NOT rendered -- `ActivityGroup.hasBracket` is carried on
- * the AST for a future task, unread here.
- */
-function tileGroup(node: ActivityGroup, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile {
-  const body = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder), bounder, theme);
-  const tile =
-    node.groupType === 'group'
-      ? new GtileGroup(node.title, body, bounder, theme)
-      : new GtilePartition(node.title, body, bounder, theme);
-  return withSwimlane(tile, node.swimlane);
-}
+// `tileFork`/`tileSplit`/`tileSwitch`/`tileGroup` moved to
+// `tile-layout-structural.ts` (D12/T1p-b) to keep this file under the
+// 500-line cap -- see that file's own doc comment.
 
 export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
   if (ast.nodes.length === 0) {
@@ -365,7 +286,12 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   }
 
   const bounder = makeBounder(measurer, theme);
-  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+  // D12/T1p-b: `ast.pragma` mirrors `TitledDiagram#getPragma()` -- the
+  // single per-diagram `Pragma` a real `parseActivity()` call always sets;
+  // defaulted here only for hand-built AST literal fixtures (`ast.ts`'s
+  // own doc comment on the field).
+  const pragma = ast.pragma ?? Pragma.createEmpty();
+  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes, pragma);
   const root = new GtileTopDown(tiles, bounder, theme);
   // D2 (`plans/activity-divergence-drive/decisions.md`): the root Ftile's
   // own local coordinates start at the true origin -- upstream never bakes
@@ -466,7 +392,7 @@ function tileSimpleLeaf(
  * as part of `tileNode`, so any function placed below it inflates the
  * complexity hook's ratchet for this name. Add new builders above.
  */
-function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[]): Tile | null {
+function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): Tile | null {
   if (isSimpleLeaf(node)) {
     return tileSimpleLeaf(node, bounder, theme);
   }
@@ -475,19 +401,19 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
   }
   switch (node.kind) {
     case 'if':
-      return tileIf(node, bounder, theme, laneOrder);
+      return tileIf(node, bounder, theme, laneOrder, pragma);
     case 'while':
-      return tileWhile(node, bounder, theme, laneOrder);
+      return tileWhile(node, bounder, theme, laneOrder, pragma);
     case 'repeat':
-      return tileRepeat(node, bounder, theme, laneOrder);
+      return tileRepeat(node, bounder, theme, laneOrder, pragma);
     case 'fork':
-      return tileFork(node, bounder, theme, laneOrder);
+      return tileFork(node, bounder, theme, laneOrder, pragma);
     case 'split':
-      return tileSplit(node, bounder, theme, laneOrder);
+      return tileSplit(node, bounder, theme, laneOrder, pragma);
     case 'switch':
-      return tileSwitch(node, bounder, theme, laneOrder);
+      return tileSwitch(node, bounder, theme, laneOrder, pragma);
     case 'group':
-      return tileGroup(node, bounder, theme, laneOrder);
+      return tileGroup(node, bounder, theme, laneOrder, pragma);
     default: {
       const _exhaustive: never = node;
       console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);
