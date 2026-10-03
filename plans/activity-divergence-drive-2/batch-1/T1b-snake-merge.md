@@ -26,6 +26,10 @@ interface input — every strategy assignment cites the Java line it records).
 4. Reproduce every T1a merge case byte-for-byte against the jar (unit/oracle).
 
 ## Write-set
+Amended at the b1p close (journal row 21): `src/diagrams/activity/**` and its
+tests (T1b runs alone; batch 1p added push sites in `walk-if-long-vertical.ts`,
+`walk-switch.ts`, `walk-repeat-weldings.ts`, `swimlane-hline.ts`,
+`walk-fork-branches.ts#walkMerge`, ...). Original list for reference:
 `src/diagrams/activity/activity-geometry.types.ts`,
 `src/diagrams/activity/layout/snake-merge.ts` (NEW),
 `src/diagrams/activity/layout/{tile-coordinates,walk-if-down,walk-if-with-links,
