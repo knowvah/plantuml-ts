@@ -57,16 +57,27 @@ export interface IfBuilderResult {
 }
 
 /**
- * `InstructionList#isOnlySingleStopOrSpot` mapped onto our AST (T1 Q0):
- * a lone `stop`/`end`, or `[action, kill|detach]` (Java mutates a killed
- * action in place, `all.size()==1`; our port models `kill`/`detach` as
- * their own node, so the Java-equivalent case is two of ours).
- * `InstructionSpot` has no AST analogue (zero corpus usage, documented gap).
+ * `InstructionList#isOnlySingleStopOrSpot` mapped onto our AST (T1 Q0,
+ * amended T3d/zaloze): a lone `stop`/`end`, OR a lone `spot` (`(X)` with
+ * no `detach`/`kill`), OR `[action|spot, kill|detach]` (Java mutates a
+ * killed action/spot IN PLACE, `all.size()==1`; our port models
+ * `kill`/`detach` as their own node, so the Java-equivalent case is two of
+ * ours). `InstructionSpot.isOnlySingleStopOrSpot` returns `true`
+ * UNCONDITIONALLY for a bare spot -- `killed` only matters for rendering
+ * (`hasPointOut`), never for this routing check, mirroring
+ * `InstructionSimple#isKilled()`'s own gate for a plain `action`.
+ * `ActivitySpot` (`ast.ts`, mission T2g) gave `(X)` its own AST node kind
+ * after this comment was first written; the kind was never added here,
+ * so a killed/bare spot else-branch (`zaloze-31-jibo311`) fell through to
+ * `with-links` instead of `down`.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:90-106
+ * @see net/sourceforge/plantuml/activitydiagram3/InstructionSpot.java
  */
 function isStopOrSpot(nodes: readonly ActivityNode[]): boolean {
-  if (nodes.length === 1 && (nodes[0]!.kind === 'stop' || nodes[0]!.kind === 'end')) return true;
-  if (nodes.length === 2 && nodes[0]!.kind === 'action') {
+  if (nodes.length === 1 && (nodes[0]!.kind === 'stop' || nodes[0]!.kind === 'end' || nodes[0]!.kind === 'spot')) {
+    return true;
+  }
+  if (nodes.length === 2 && (nodes[0]!.kind === 'action' || nodes[0]!.kind === 'spot')) {
     const second = nodes[1]!.kind;
     return second === 'kill' || second === 'detach';
   }

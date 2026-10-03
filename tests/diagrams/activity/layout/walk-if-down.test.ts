@@ -313,3 +313,33 @@ describe('assignCoordinatesFull — down: Else2 emits the hexagon elbow reservat
     expect(full.reservations[0]!.y).toBeCloseTo(end.y - 12, 5);
   });
 });
+
+describe('layoutActivity — down: optionalStop + lane switch (IFDS, lukoxa-16-cecu095)', () => {
+  // FtileIfDown.java:130-131: optionalStop replaces diamond2 with a bare
+  // `new FtileEmpty(skinParam)` carrying NO swimlane -- ConnectionOut
+  // must stay in the main flow's own lane, never jog back to the if's
+  // ambient lane the way a real cross-lane diamond2 would.
+  const laned: ActivityIf = {
+    kind: 'if',
+    condition: 'test',
+    thenBranch: [{ kind: 'stop' }],
+    elseBranch: [{ kind: 'action', label: 'foo2', swimlane: 'Fournisseur' }],
+    elseIfBranches: [],
+    swimlane: 'Web Service',
+  };
+  const tile = buildIf(laned, bounder, theme, ['Web Service', 'Fournisseur']);
+  const full = assignCoordinatesFull({
+    root: tile,
+    ast: emptyAst,
+    baseX: LAYOUT_MARGIN,
+    baseY: LAYOUT_MARGIN,
+    bounder,
+    theme,
+  });
+
+  it('ConnectionOut (edge 2) is tagged with the SAME lane on both ends', () => {
+    const outMeta = full.edgeMeta[2]!;
+    expect(outMeta.lane1).toBe('Fournisseur');
+    expect(outMeta.lane2).toBe('Fournisseur');
+  });
+});

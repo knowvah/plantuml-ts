@@ -12,6 +12,7 @@ import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
 import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
   CIRCLE_INK,
@@ -28,6 +29,8 @@ import {
   renderDiamond,
   renderHexagonPolygon,
   renderHexagonOwnLabel,
+  renderHexagonMultilineLabel,
+  diamondColors,
 } from './activity-renderer-if-shapes.js';
 import {
   renderSignalLabel,
@@ -178,16 +181,14 @@ export function actColors(theme: Theme): ActivityColors {
     nodeBorder: act?.border ?? theme.colors.border,
     // `activityBar { BackgroundColor #5 }` (plantuml.skin:387, D4).
     barFill: act?.barColor ?? ACTIVITY_BAR_FILL,
-    // `activityDiagram { circle { start, stop, end { LineColor #2;
-    // BackgroundColor #2 } } }` (plantuml.skin:379-380) -- the SAME token
-    // for stroke and fill. `#2` is upstream's one-digit hex shorthand,
-    // resolved through the ported `HColorSet` digit-length parser (D5),
-    // never written as a literal. A user's `skinparam ActivityStartColor`
-    // still wins: the built-in default is the LAST tier, not the first.
+    // `circle { start,stop,end { LineColor #2; BackgroundColor #2 } } }`
+    // (plantuml.skin:379-380) -- SAME token for stroke/fill, `#2` resolved
+    // through the ported `HColorSet` digit-length parser (D5). A user's
+    // `skinparam ActivityStartColor` still wins (last tier, not first).
     startFill: act?.startColor ?? CIRCLE_INK,
     endFill: act?.endColor ?? CIRCLE_INK,
-    diamondFill: act?.diamondBackground ?? theme.colors.nodeBackground,
-    diamondBorder: act?.diamondBorder ?? theme.colors.border,
+    diamondFill: diamondColors(act, theme).fill,
+    diamondBorder: diamondColors(act, theme).border,
   };
 }
 
@@ -255,15 +256,13 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
- *  under this file's per-function NLOC limit. Multi-line: `GtileIfHexagon
- *  .java:184`/`GtileHexagonInside.java:64` resolve `of(root, element,
- *  activityDiagram, activity, diamond)`, the diamond SName (`FontSize 11`,
- *  plantuml.skin:370). Single-line: jar-verified on `rerovo-62-nazo755`'s
- *  "test" hexagon (`cy=27`, `fontSize=11`): `y=30.056 === cy + 11 * 5/18`,
- *  the SAME N=1 reduction of `centeredFirstBaselineY` -- not the old
- *  `cy + condSize/3` (would give 30.667, 0.611px off). Exported (T3k) so
- *  `activity-renderer-if-shapes.ts`'s `renderHexagonOwnLabel` (this file
- *  was already at the 500-line cap) can draw the own label separately. */
+ *  under this file's per-function NLOC limit. Single-line: jar-verified on
+ *  `rerovo-62-nazo755`'s "test" hexagon (`cy=27`, `fontSize=11`):
+ *  `y=30.056 === cy + 11 * 5/18`, the N=1 reduction of
+ *  `centeredFirstBaselineY`. Multi-line: {@link renderHexagonMultilineLabel}
+ *  (`activity-renderer-if-shapes.ts`, also at this file's own 500-line cap,
+ *  IFNL/T3d doc). Exported (T3k) so that file's `renderHexagonOwnLabel` can
+ *  draw the own label separately. */
 export function renderHexagonLabel(
   label: string | undefined,
   cx: number,
@@ -274,7 +273,7 @@ export function renderHexagonLabel(
   const lines = (label ?? '').split('\n');
   const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
   return lines.length > 1
-    ? renderMultilineText(lines, cx, cy, theme, opts)
+    ? renderHexagonMultilineLabel(lines, cx, cy, theme, opts)
     : renderLabel(label ?? '', cx, centeredFirstBaselineY(cy, condSize, 1), theme, opts);
 }
 
@@ -282,12 +281,11 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
-  const dent = h / 2;
-  // `Hexagon.asPolygon(shadowing, width, height)` (`Hexagon.java:65-74`)
-  // calls `addPoint` SEVEN times, re-adding the first point `(hexagonHalf
-  // Size, 0)` as the closing point after `(0, height/2)`
-  // (`Hexagon.java:68,74`) -- `UPolygon` does not close itself on draw
-  // (T2f mechanism 1, same as {@link renderIfMerge}).
+  // I (T3d): the dent is the FIXED `hexagonHalfSize` (12), not `height/2`
+  // -- equal only when h=24 (default). `asPolygon(shadowing,w,h)`
+  // (`Hexagon.java:46,65-74`) re-adds `(dent,0)` as the closing point
+  // after `(0,h/2)` -- `UPolygon` does not close itself on draw.
+  const dent = HEXAGON_HALF_SIZE;
   const first = { x: x + dent, y: y };
   const shape = polygon(
     [
@@ -457,15 +455,15 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderSplitLine(node, theme);
     case 'if-split':
     case 'while-header':
-      // T3k: the shape ALONE -- the own label now draws through its own
-      // `'if-own-label'` node, pushed by every `'if-split'`/`'while-
-      // header'` producer immediately after this polygon (or after
-      // north/south when the walker has one, `FtileDiamondInside.java:
-      // 84-102`'s own draw order). `renderDiamond`'s unlabelled shape is
-      // unaffected -- it never had an own-label node to begin with.
-      return node.label !== undefined && node.label !== ''
-        ? renderHexagonPolygon(node, theme)
-        : renderDiamond(node, theme);
+      // T3k: the shape ALONE -- the own label draws via its own
+      // `'if-own-label'` node, pushed right after (`FtileDiamondInside
+      // .java:84-102`'s own draw order). D (T3d, `sofoje-37-tila554`):
+      // an EMPTY condition is STILL `FtileDiamondInside` under the
+      // default `ConditionStyle.INSIDE_HEXAGON` (`ConditionalBuilder
+      // .java:250-256`, `FtileWhile.java:131-132`) -- always the 7-point
+      // hexagon, never the 5-point `FtileDiamond` rhombus (`EMPTY_DIAMOND`
+      // only, a non-default skinparam neither builder wires yet).
+      return renderHexagonPolygon(node, theme);
     case 'repeat-cond':
       return renderHexagonPolygon(node, theme);
     case 'if-merge':

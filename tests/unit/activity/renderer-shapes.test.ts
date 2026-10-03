@@ -560,9 +560,17 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
     expect(actualX).toBeCloseTo(expectedX, 2);
   });
 
-  it('a labelled hexagon condition centres each line on its own width, no text-anchor', () => {
+  it('a labelled hexagon condition left-aligns every line to ONE shared block x, no text-anchor (IFNL, T3d)', () => {
+    // root's default HorizontalAlignment left (plantuml.skin:12, diamond {}
+    // never overrides it) positions every Sheet stripe at the label
+    // TextBlock's own local x=0; the whole block is centred ONCE
+    // (FtileDiamondInside.java:94-96), not each line on its own width --
+    // verified against vaxiki-78-nice114's jar SVG (all 3 lines share one x).
     const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
     expect(svg).not.toContain('text-anchor');
+    const xs = [...svg.matchAll(/<text x="([\d.]+)"/g)].map((m) => m[1]);
+    expect(xs).toHaveLength(2);
+    expect(xs[0]).toBe(xs[1]);
   });
 
   it('SDL chevron labels (single and multi-line) carry no text-anchor', () => {

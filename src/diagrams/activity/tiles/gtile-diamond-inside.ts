@@ -7,6 +7,11 @@ import { activityFontSize } from '../activity-style-defaults.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
+ *  `if (h < 10) h = 10`. Applied per LINE inside {@link measureLabel}, not
+ *  once to the summed total -- each creole line is its own `AtomText`.
+ * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
+const ATOM_TEXT_MIN_HEIGHT = 10;
 
 export type DiamondSide = 'north' | 'south' | 'west' | 'east';
 
@@ -79,7 +84,7 @@ function measureLabel(text: string | undefined, bounder: StringBounder, fontSize
   for (const line of t.split('\n')) {
     const dim = bounder.getDimension(line, fontSize);
     if (dim.width > width) width = dim.width;
-    height += dim.height;
+    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
   }
   return { text: t, width, height };
 }
@@ -131,7 +136,13 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
     this.east = measureLabel(labels.east, bounder, arrowSize);
 
     const diamondSize = activityFontSize(theme, 'diamond');
-    const dimLabel = bounder.getDimension(label, diamondSize);
+    // IFNL (T3d, `vaxiki-78-nice114`): a multi-line condition (unescaped
+    // real `\n`s, `if-dispatch.ts#unescapeLabelNewlines`) needs the SAME
+    // per-line fold as the north/south/east/west labels above -- a single
+    // `getDimension` call on the whole string reports one oversized line,
+    // not `label.calculateDimension`'s own per-`AtomText` sum
+    // (`AtomText.java` via `SheetBlock1`/`TextBlockLineCentered`).
+    const dimLabel = measureLabel(label, bounder, diamondSize);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;
