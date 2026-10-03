@@ -443,6 +443,48 @@ describe('T4 — text colour cascade (D3)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T2f — `AtomTable` grid lines for an all-table-rows action label
+// (`AtomTable.java:150-158`). Jar-verified against `niletu-83-lego826`/
+// `activity-creole-table` (`:|Creole Table Line1|\n|Line2|;`, box
+// x=16 y=16 width=114.875 height=48): 3 horizontal rules (row boundaries
+// at y=28/40/52) + 2 vertical rules (x=26/120.875) bounding the single
+// column.
+// ---------------------------------------------------------------------------
+
+describe('renderAction — AtomTable grid (T2f)', () => {
+  it('draws 3 horizontal + 2 vertical grid lines for a 2-row, 1-column table', () => {
+    const node = makeNode({
+      kind: 'action',
+      label: '|Creole Table Line1|\n|Line2|',
+      x: 16,
+      y: 16,
+      width: 114.875,
+      height: 48,
+    });
+    const svg = renderAction(node, theme);
+    expect(svg).toContain('x1="26" y1="28" x2="120.875" y2="28"');
+    expect(svg).toContain('x1="26" y1="40" x2="120.875" y2="40"');
+    expect(svg).toContain('x1="26" y1="52" x2="120.875" y2="52"');
+    expect(svg).toContain('x1="26" y1="28" x2="26" y2="52"');
+    expect(svg).toContain('x1="120.875" y1="28" x2="120.875" y2="52"');
+    expect((svg.match(/<line/g) ?? []).length).toBe(5);
+    expect(svg).toContain('>Creole Table Line1<');
+    expect(svg).toContain('>Line2<');
+    expect(svg).not.toContain('|');
+  });
+
+  it('draws no grid lines for a plain (non-table) multi-line label', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('<line');
+  });
+
+  it('draws no grid lines when only SOME physical lines are table rows', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('<line');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // amb-T5 — every activity text is positioned by `x` (D2), never
 // `text-anchor`. `FtileBox.java:224-233` (LEFT at `padding.left`, the only
 // reachable root tier today); `FtileDiamondInside.java:94-96` /

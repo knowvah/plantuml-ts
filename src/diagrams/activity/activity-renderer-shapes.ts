@@ -10,7 +10,7 @@ import type { Theme } from '../../core/theme.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
+import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
 import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import {
   ACTIVITY_BAR_FILL,
@@ -251,7 +251,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
       : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
-  return box + labelEl;
+  return box + labelEl + renderCreoleTableGrid(node, lines, actionSize, theme);
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
