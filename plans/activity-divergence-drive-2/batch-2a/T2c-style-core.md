@@ -15,11 +15,21 @@ molexa; `ArrowFontSize` inside `skinparam activity {}` — kafevi;
 class, state, sequence, component, usecase, mindmap, object before/after; a
 conformant loss = stop 4.
 
+## Added at the b1 close: ConditionStyle InsideDiamond (ex-T2a)
+`skinparam ConditionStyle InsideDiamond` selects `FtileDiamondSquare`
+(`svek/ConditionStyle.java:41-64`, `skin/SkinParam.java:997-1004`,
+`ConditionalBuilder.getShape1` `:251-277`; `Hexagon.asPolygonSquare` unclosed,
+own size formula, east label +5 y `FtileDiamondSquare.java:104`) — carapo,
+novata, perate. Follow T1p-a's `conditionEndStyle` wiring (core handler +
+theme field + `conditional-builder.ts`) as the precedent. Read
+`batch-2a/T2a-condition-style.md` for the rest of the context; its HLINE and
+fivama items are done.
+
 ## Task
 For each row: `--dump`/`--align`, read the Java (quote file:line), port at the origin, apply to every fixture the mechanism governs, pin with a test. Measure the full corpus before/after (probe + elements).
 
 ## Write-set
-`src/core/skinparam-*.ts`, `src/core/theme*.ts`, `src/core/svek/image/creole-text-lines.ts`, `src/diagrams/activity/{activity-style-defaults,activity-style-defaults-swimlane,activity-text-style,activity-renderer-text}.ts`.
+`src/core/skinparam-*.ts`, `src/core/theme*.ts`, `src/core/svek/image/creole-text-lines.ts`, `src/diagrams/activity/{activity-style-defaults,activity-style-defaults-swimlane,activity-text-style,activity-renderer-text}.ts`, plus (ex-T2a) `src/diagrams/activity/layout/{conditional-builder,walk-if-down}.ts`, `src/diagrams/activity/tiles/gtile-diamond*.ts` (+ a new square tile), `src/diagrams/activity/activity-renderer-if-shapes.ts`.
 
 ## Acceptance
 - Given each named row, then the diffs from this mechanism go to 0 (or the row is re-slotted with mechanism + owning file).

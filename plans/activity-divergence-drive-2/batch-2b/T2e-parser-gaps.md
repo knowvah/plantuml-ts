@@ -3,6 +3,9 @@
 Agent: typescript-pro, worktree `add2-T2e`. Depends on T1b (b1 close).
 
 ## Context
+At the b1 close 34 rows remain `error` (the 4 `end merge` rows were fixed by
+T1p-c); `oracle/goldens/svg-activity/diff-baseline.json` lists them. dulate-94-
+bupu593 refuses on `(additional text) elseif` (its pragma line is commented out).
 `decisions.md#D6`. All 38 refuse with the same generic message; the failing
 lines vary (lane switch `|laneTwo|`, `fork again`, `kill`, `note left: …`,
 `'=== … ===` comments, multi-line actions, `while (foo)`, `else`, `end`…; planning
@@ -14,7 +17,7 @@ lenient fallthrough. Report each row's state (renders / still refused + why).
 For each row: `--dump`/`--align`, read the Java (quote file:line), port at the origin, apply to every fixture the mechanism governs, pin with a test. Measure the full corpus before/after (probe + elements).
 
 ## Write-set
-`src/diagrams/activity/{parser,node-dispatch,dispatch-support,if-dispatch,group-dispatch,parallel-dispatch,switch-dispatch,list-backward-dispatch}.ts`, their tests.
+`src/diagrams/activity/{parser,node-dispatch,dispatch-support,dispatch-common-commands,if-dispatch,group-dispatch,parallel-dispatch,switch-dispatch,list-backward-dispatch}.ts`, `src/diagrams/activity/ast.ts` (new AST fields only), their tests. A construct that parses but needs new layout/render code outside this set: re-slot it with the mechanism.
 
 ## Acceptance
 - Given each named row, then the diffs from this mechanism go to 0 (or the row is re-slotted with mechanism + owning file).
