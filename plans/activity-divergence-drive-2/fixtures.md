@@ -14,7 +14,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 |---|---|---|---|---|---|---|
 | molexa-46-redi999 | 1 | exact {} | skinparam defaultTextAlignment center in action text; residual per journal row 40 |  |  |  |
 | pekuxe-00-bovi270 | 1 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
-| setecu-78-cuko533 | 1 | exact {} | preserveAspectRatio hardcoded in src/core/klimt/document-shell.ts:197 (stop 8) |  |  |  |
+| setecu-78-cuko533 | 1 | exact {} | preserveAspectRatio hardcoded in src/core/klimt/document-shell.ts:197 (stop 8) | T2d | document-shell.ts/dispatcher.ts now thread `preserveAspectRatio` (default `SkinParam.java:119`, cascade `TextBlockExporter.java:380-386`); no `Theme` field exists to carry `skinparam preserveaspectratio` (`SkinParam.java:1086-1088`) into it -- that's a new skinparam key handler + `Theme` field, T2d's write-set excludes `core/theme.ts`/skinparam handlers | open -> add3 (new `Theme.preserveAspectRatio` field + skinparam key handler in `src/core/skinparam-key-handlers-table-{a,b}.ts` + `renderActivity`/other producers reading it off `theme`; owner: whichever task owns `src/core/theme.ts`) |
 | begivo-34-sicu289 | 2 | exact {} |  |  |  |  |
 | biguku-39-voxu233 | 2 | exact {} | repeat entry diamond: Hexagon.asPolygon(shadowing) closed, stroke 0.5; residual per journal row 42 |  |  |  |
 | bixefi-77-moki051 | 2 | exact {} |  |  |  |  |
@@ -71,7 +71,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | fivama-51-cusa142 | 12 | exact {} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 | T1b | snake merge 12->0 | pinned (add2-b1) |
 | dakesa-98-mano758 | 13 | exact {} | gradient BackgroundColor (theme field typed string, not Paint); residual per journal row 41 |  |  |  |
 | fabule-54-pili300 | 22 | text-only {text: -2} | creole table / %n() / ____ in action text; residual per journal row 40 |  |  |  |
-| laxibe-66-teme800 | 26 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
+| laxibe-66-teme800 | 26 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 | T2d | `CommandCreoleUrl.ts`'s tooltip strip had no boundary (`UrlBuilder.java:76-80`): a `{...}` glued to trailing non-whitespace text (`{dd}sss`) is never a tooltip upstream, only a Link char swallow; added the `(?=\s\|$)` lookahead | pinned (conformant) |
 | volefo-41-tolo996 | 29 | exact {} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
 | maduja-30-xiri319 | 30 | extra line only {line: 2} |  |  |  |  |
 | samavi-13-fuku339 | 30 | extra line only {line: 2} |  |  |  |  |

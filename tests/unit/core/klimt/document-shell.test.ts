@@ -127,4 +127,23 @@ describe('assembleDocumentShell — root <g> text attributes', () => {
     expect(svg).toContain('background:x&quot;onload=&quot;alert(1);');
     expect(svg).not.toContain('&amp;quot;');
   });
+
+  /**
+   * add2 T2d (setecu-78-cuko533): `preserveAspectRatio` used to be
+   * hardcoded `"none"` unconditionally. `SkinParam.java:119`
+   * (`DEFAULT_PRESERVE_ASPECT_RATIO = "none"`) is still the value when the
+   * fragment carries none, but `ShellFragment.preserveAspectRatio` now
+   * overrides it when a producer sets it.
+   */
+  it('defaults preserveAspectRatio to "none" when the fragment carries none', () => {
+    expect(shell('<g>' + INNER + CLOSE)).toContain('preserveAspectRatio="none"');
+  });
+
+  it('honors an explicit ShellFragment.preserveAspectRatio override', () => {
+    const svg = assembleDocumentShell(
+      { body: '<g>' + INNER + CLOSE, width: 100, height: 50, preserveAspectRatio: 'xMinYMid slice' },
+      'CLASS',
+    );
+    expect(svg).toContain('preserveAspectRatio="xMinYMid slice"');
+  });
 });
