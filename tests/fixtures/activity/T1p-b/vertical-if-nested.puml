@@ -1,0 +1,16 @@
+@startuml
+!pragma useVerticalIf true
+start
+if (cond1) then (yes)
+  if (inner) then (yes)
+    :nested action a;
+  else (no)
+    :nested action b;
+  endif
+elseif (cond2) then (yes)
+  :action two;
+else (no)
+  :action three;
+endif
+stop
+@enduml

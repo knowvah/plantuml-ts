@@ -1,0 +1,14 @@
+@startuml
+!pragma useVerticalIf true
+start
+if (cond1) then (yes)
+  :action one;
+elseif (cond2) then (yes)
+  :action two;
+elseif (cond3) then (yes)
+  :action three;
+else (no)
+  :action four;
+endif
+stop
+@enduml
