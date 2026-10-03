@@ -28,6 +28,7 @@ import {
   RE_ARROW_LABEL,
   RE_ENDWHILE,
   RE_ESCAPED_NEWLINE,
+  RE_NOTE_END,
   RE_NOTE_MULTI,
   RE_NOTE_SINGLE,
   RE_REPEAT_HEAD,
@@ -48,7 +49,7 @@ import {
 } from './dispatch-support.js';
 import { tryIf } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward } from './list-backward-dispatch.js';
+import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
@@ -114,7 +115,20 @@ export interface MultilineActionBody {
  *  (optionally followed by `<<stereo>>`), or end-of-input. Exported: also
  *  `backward-dispatch.ts#tryBackward`'s multiline form (mission ubrr-T10
  *  M3) reuses this verbatim -- the identical content-then-`;`-then-
- *  stereogroup(s) closer shape `backward:`'s own multiline form has. */
+ *  stereogroup(s) closer shape `backward:`'s own multiline form has.
+ *
+ * A `{{`/`}}` span (upstream's `EmbeddedDiagram.EMBEDDED_START`/`_END`,
+ * a nested diagram rendered as an image inside the label) is tracked by
+ * `braceDepth` and treated as OPAQUE text while open (D6): `;` inside it
+ * belongs to the nested diagram's own grammar, not this action's closer
+ * -- `RE_ACTION_CLOSE` is tried only at depth 0. Before this,
+ * `mufixi-71-koma752`/`pufuzi-99-vone170` closed early on the embedded
+ * diagram's first inner `;`, leaving its `}}` unrecognized. Rendering
+ * the nested diagram as an image needs a new builder outside this
+ * task's write-set; its source lands as literal label text instead
+ * (documented fidelity gap, not a parse gap).
+ * @see net/sourceforge/plantuml/EmbeddedDiagram.java:73-74
+ */
 export function readMultilineActionBody(
   ctx: ParseContext,
   startIdx: number,
@@ -123,10 +137,12 @@ export function readMultilineActionBody(
   const { lines } = ctx;
   let cursor = startIdx;
   let multiStereo: string | undefined;
+  let braceDepth = 0;
   while (cursor < lines.length) {
     const raw = lines[cursor]!;
     const inner = raw.trim();
-    const closeMatch = RE_ACTION_CLOSE.exec(inner);
+    if (inner.startsWith('{{')) braceDepth++;
+    const closeMatch = braceDepth === 0 ? RE_ACTION_CLOSE.exec(inner) : null;
     if (closeMatch !== null) {
       const withoutSemi = closeMatch[1]!.trim();
       if (withoutSemi !== '') labelParts.push(withoutSemi);
@@ -135,6 +151,7 @@ export function readMultilineActionBody(
       cursor++;
       break;
     }
+    if (inner === '}}') braceDepth--;
     if (inner !== '') labelParts.push(raw);
     cursor++;
   }
@@ -303,33 +320,38 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** note right : text  (single-line) */
+/** `(floating )?note (left|right)? (#color)? : text` (single-line). Group
+ *  1 is the `floating` keyword (dropped -- see {@link RE_NOTE_SINGLE}'s
+ *  own doc), group 2 is direction, group 3 is text (color is
+ *  non-capturing). */
 function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
   if (noteSingleMatch === null) return null;
-  const direction = noteSingleMatch[1]?.toLowerCase();
+  const direction = noteSingleMatch[2]?.toLowerCase();
   const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
   const node: ActivityNote = {
     kind: 'note',
-    text: noteSingleMatch[2]!.trim(),
+    text: noteSingleMatch[3]!.trim(),
     position,
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
 }
 
-/** note left/right (multi-line, ends with "end note") */
+/** `(floating )?note (left|right)? (#color)?` (multi-line, ends with
+ *  {@link RE_NOTE_END}'s `end note`/`endnote`). Group 1 is `floating`
+ *  (dropped), group 2 is direction (color is non-capturing). */
 function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteMultiMatch = RE_NOTE_MULTI.exec(line);
   if (noteMultiMatch === null) return null;
   const { lines } = ctx;
-  const direction = noteMultiMatch[1]?.toLowerCase();
+  const direction = noteMultiMatch[2]?.toLowerCase();
   const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
   let cursor = idx + 1;
   const textLines: string[] = [];
   while (cursor < lines.length) {
     const inner = lines[cursor]!.trim();
-    if (inner.toLowerCase() === 'end note') {
+    if (RE_NOTE_END.test(inner)) {
       cursor++;
       break;
     }
@@ -364,6 +386,10 @@ function tryArrowLabel(ctx: ParseContext, idx: number, line: string): DispatchRe
 const LINE_HANDLERS: readonly LineHandler[] = [
   trySwimlane,
   trySimpleKeyword,
+  // `(X)` circled-spot connector: registered right after Start3/Stop3
+  // upstream (`ActivityDiagramFactory3.java:144`) -- `trySimpleKeyword`
+  // above covers start/stop/end/kill/detach/break together.
+  tryCircleSpot,
   tryAction,
   tryMultilineAction,
   // `partition`/`group` (mission ubrr-T10 M6) registered upstream BEFORE
@@ -393,6 +419,10 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   // (`ActivityDiagramFactory3.java:160`, right before `CommandLabel`/
   // `CommandGoto`).
   tryActivityList,
+  // `label NAME` / `goto NAME`: registered LAST upstream, after
+  // ActivityList (`ActivityDiagramFactory3.java:160-161`).
+  tryLabel,
+  tryGoto,
 ];
 
 /**
