@@ -1,8 +1,18 @@
 # T1b — snake-merge port (D1/D2)
 
 Branch `add2/T1b`, worktree `.claude/worktrees/add2-T1b`. Commits (in
-order): `7cd434907`, `a8dc4be29`, `2bc4dd671`, `e46868ea5`. Not merged,
-not pushed.
+order): `7cd434907`, `a8dc4be29`, `2bc4dd671`, `e46868ea5`, `21bb1c70f`,
+`2a8061b59`. Not merged, not pushed.
+
+## Delta (orchestrator review, journal row 22 — AXIS_EPSILON removed)
+Orchestrator review flagged `AXIS_EPSILON = 1e-6` as stop 13 (no
+upstream `file:line`, diverges from `Direction.fromVector`'s EXACT
+equality, `utils/Direction.java:110-128`). Diagnosed and fixed at the
+origin in `2a8061b59` — see "A real floating-point defect" below for
+the updated mechanism; the epsilon is gone, `directionOf` is back to
+exact `===` with an `@see`, and the throw (matching Java's
+`IllegalArgumentException`) is kept. Full re-measure at the bottom of
+this file.
 
 ## Commits
 - `7cd434907` feat(activity): scaffold snake-merge inputs (D1/D2) --
@@ -16,14 +26,20 @@ not pushed.
   (new), wired into `assign-coordinates-full.ts` between
   `placeSwimlanes` and `compressGeometry`; wires the 4 real NONE/LIMITED
   push sites; adds an `AXIS_EPSILON` tolerance for ulp-scale float
-  drift; updates 6 unit tests whose edge-count assertions the fusion
-  legitimately changed (with mechanism cited), plus one disappeared
+  drift (REMOVED in `2a8061b59`, see below); updates 6 unit tests whose
+  edge-count assertions the fusion legitimately changed (with mechanism
+  cited), plus one disappeared
   `ALLOWED_HARD_OVERLAPS` entry in the compress invariant test.
 - `2bc4dd671` test(activity): cover snake-merge's Snake/Worm/scope
   mechanics -- 3 new test files, 100% branch coverage on both new
   source files from these alone.
 - `e46868ea5` chore(activity): regenerate catalog for snake-merge
   modules.
+- `21bb1c70f` docs(agent-notes): first close-out report (superseded by
+  this delta).
+- `2a8061b59` fix(activity): resolve `pushTopDownSiblingEdge`'s local
+  round-trip before `baseX` -- removes `AXIS_EPSILON`, fixes the real
+  defect at its origin (see below).
 
 ## Java → ours mapping
 | Java | file:line | ours |
@@ -114,31 +130,46 @@ scope equality. Tested in isolation at two levels:
 ## Probe Σ / element census, before → after
 - Baseline (branch head, `695ab7e0e`): Σ 31381 / 245 rows; elements
   extra line+arrow 98 (ws not separately recorded in this file).
-- After the merge engine landed (commit `a8dc4be29`, all 4 strategy
-  sites wired): **Σ 25092**, 73 fallers, 6 risers, 244 rows (one row's
-  own count shifted by ±1 across a promote/row-count boundary unrelated
-  to this task -- not investigated, matches `a8dc4be29`'s own probe
-  output exactly as measured).
-- Element census (`activity-probe-elements.ts`): extra line+arrow
-  **99 → 59** (ws 11370), extra arrow only 14, extra line only 10,
-  missing line+arrow 1 (jupoxe, see below), text-only 17, mixed 12,
-  **exact 90 → 131**.
+- After the merge engine landed, pre-this-fix (commit `a8dc4be29`, all
+  4 strategy sites wired, `AXIS_EPSILON` tolerance in place): Σ 25092,
+  73 fallers, 6 risers.
+- **After the stop-13 fix (`2a8061b59`, this delta, exact equality, no
+  tolerance anywhere): Σ 25086** (-6 vs the epsilon version), 74
+  fallers, **5 risers** -- `jupoxe-15-sugo110` drops out of the riser
+  list entirely (1825 → 1822, now a faller) and `pixako-75-kumi821`
+  moves from "crashes, unscored" to a genuine faller (184 pinned → 118,
+  -66). No new rows moved; the 5 remaining risers are BYTE-IDENTICAL in
+  score to the pre-fix measurement (unaffected by this fix, confirmed
+  below).
+- Element census (`activity-probe-elements.ts`, re-run after the fix):
+  extra line+arrow **99 → 59** (unchanged from the pre-fix measurement
+  -- this fix only touched `pixako`/`jupoxe`'s own coordinates, not
+  element counts elsewhere), **exact 90 → 131**.
 
-## Every riser, with mechanism
-6 risers on `activity.diff-baseline.ratchet.test.ts`, all **explained**
-(D7), none re-pinned here (re-pinning is orchestrator-only per
-established mission convention, confirmed in `.agent-notes/
+## Every riser, with mechanism (re-measured after the stop-13 fix)
+**5** risers on `activity.diff-baseline.ratchet.test.ts` (was 6 before
+the stop-13 fix; `jupoxe-15-sugo110` no longer rises -- see below), all
+**explained** (D7), none re-pinned here (re-pinning is orchestrator-
+only per established mission convention, confirmed in `.agent-notes/
 T1p-d-repeat-weld.md`'s own citation of `repin-activity-baselines.ts`'s
 doc comment):
 
 | slug | baseline ws | new ws | Δ | mechanism |
 |---|---|---|---|---|
-| cujoni-21-somi079 | 124 | 131 | +7 | D7 reveal: element count now EXACTLY matches the jar (merge-case B closed); `compareSvg` switches LCS→positional, exposing a pre-existing, unrelated draw-order divergence (our `ellipse`/`path`/`text` emission order for the `note` construct vs the jar's) that the prior count mismatch hid. Confirmed: `childCount` diff is now absent entirely; every remaining weight-bearing diff is a KIND mismatch (`ellipse` vs `path`, etc.) at a matching index, not a coordinate error. |
-| kijazo-83-kipu485 | 125 | 222 | +97 | Same D7 reveal class. `childCount` diff absent; 14/40 diffs are kind-mismatches. |
-| nafaxo-62-boso912 | 146 | 167 | +21 | Same D7 reveal class. `childCount` diff absent; 7/58 diffs are kind-mismatches. |
-| nikivo-06-kaxa873 | 241 | 330 | +89 | Same D7 reveal class. `childCount` diff absent; 12/174 diffs are kind-mismatches. |
-| ruzica-16-deli877 | 463 | 697 | +234 | Same D7 reveal class (largest Δ; this fixture nests `while`/`if`/multi-swimlane, so more elements shift index). `childCount` diff absent; 36/217 diffs are kind-mismatches. |
-| jupoxe-15-sugo110 | 1825 | 1828 | +3 | **Different mechanism, verified by comparing against a pre-merge worktree at `7cd434907`** (temporary `git worktree add --detach`, removed after measuring): `childCount` was ALREADY massively diverged before this task (168 vs the jar's 293 -- an unrelated, pre-existing gap from this fixture's deeply-nested `repeat`/`elseif`/`detach` structure, nothing to do with merging). The merge engine correctly fuses a few of OUR OWN edges (168→163, matching the jar's own `Snake.merge` mechanism), which moves our count FURTHER from 293 and so RAISES `compare.ts`'s childCount-weight term (scales with gap magnitude -- project memory `weightedscore-antimonotone-under-growth.md`/`oracle-score-blind-to-magnitude.md`) even though the underlying change is correct. `diffCount` actually FELL (669→637); only the weighted score ticked up, by 3, on an already severely-diverged fixture. Not a merge defect. |
+| cujoni-21-somi079 | 124 | 131 | +7 | D7 reveal: element count now EXACTLY matches the jar (merge-case B closed); `compareSvg` switches LCS→positional, exposing a pre-existing, unrelated draw-order divergence (our `ellipse`/`path`/`text` emission order for the `note` construct vs the jar's) that the prior count mismatch hid. Confirmed: `childCount` diff is now absent entirely; every remaining weight-bearing diff is a KIND mismatch (`ellipse` vs `path`, etc.) at a matching index, not a coordinate error. Unaffected by the stop-13 fix (identical ws before/after). |
+| kijazo-83-kipu485 | 125 | 222 | +97 | Same D7 reveal class. `childCount` diff absent; 14/40 diffs are kind-mismatches. Unaffected by the stop-13 fix. |
+| nafaxo-62-boso912 | 146 | 167 | +21 | Same D7 reveal class. `childCount` diff absent; 7/58 diffs are kind-mismatches. Unaffected by the stop-13 fix. |
+| nikivo-06-kaxa873 | 241 | 330 | +89 | Same D7 reveal class. `childCount` diff absent; 12/174 diffs are kind-mismatches. Unaffected by the stop-13 fix. |
+| ruzica-16-deli877 | 463 | 697 | +234 | Same D7 reveal class (largest Δ; this fixture nests `while`/`if`/multi-swimlane, so more elements shift index). `childCount` diff absent; 36/217 diffs are kind-mismatches. Unaffected by the stop-13 fix. |
+
+**No longer a riser**: `jupoxe-15-sugo110` (1825 → 1822 after the
+stop-13 fix, a faller). Before the fix it rose to 1828 (+3) via a
+DIFFERENT mechanism (`compare.ts`'s childCount-weight term scaling with
+an already-massive, unrelated pre-existing gap -- `weightedscore-
+antimonotone-under-growth.md`); the `pushTopDownSiblingEdge` fix
+changed this fixture's own coordinates enough that it now falls
+instead. Not independently re-diagnosed past confirming it no longer
+rises -- the mechanism that explained the PRE-fix rise is moot now.
 
 ## Acceptance items — status
 - T1p-b vertical-if residual (childCount+2/height+20): **CLOSED**.
@@ -146,7 +177,7 @@ doc comment):
   fixtures; `activity-vertical-if-t1pb.test.ts` re-pinned with new
   `diffCount`/`weightedScore` and the mechanism (D7 reveal: `diffCount`
   fell, `weightedScore` rose from the SAME index-shift class as the
-  6 risers above -- cited inline in the test's own doc comment).
+  5 risers above -- cited inline in the test's own doc comment).
 - Journal row 14's six break-in-repeat rows: **DONE** (see table above;
   mudobi's residual is a separately-diagnosed, pre-existing, unrelated
   defect, not line/arrow).
@@ -174,37 +205,91 @@ sibling edge into `:E;` -- exactly the fusion `MergeStrategy.NONE`
 ratchet's own failure message (first diff `svg/@height`), fixed by
 wiring the NONE tag (the planned next step), re-verified green.
 
-## A real floating-point defect found and fixed
+## A real floating-point defect found and fixed AT ITS ORIGIN (not tolerated)
 `pixako-75-kumi821` (break-in-while fixture) crashed the ENTIRE render
-pipeline (not just a score regression) with `snake-merge: not a
-horizontal or vertical line (63.021875,269)->(63.021874999999994,304)`
--- two points this port's own upstream geometry computes through
-different arithmetic paths that should land on the same X, differing
-by 6e-15 (confirmed via direct instrumentation of the exact `a.points`/
-`b.points` passed into the merge, not guessed). Fixed with a 1e-6
-`AXIS_EPSILON` tolerance in `snake-merge-worm.ts#directionOf` --
-several orders of magnitude above float64 noise at this magnitude and
-below any real geometric distinction in this domain (`Snake.same()`'s
-own merge-trigger tolerance is `0.001`). Caught by
-`tests/diagrams/activity/layout/compress/invariant.test.ts`'s
-"no baseline fixture throws" test, which exercises all 268 baseline
-fixtures -- this is the kind of defect that only a full-corpus pass
-surfaces, not a hand-picked sample.
+pipeline with `snake-merge: not a horizontal or vertical line
+(63.021875,269)->(63.021874999999994,304)`. First pass (now superseded)
+papered over it with a 1e-6 `AXIS_EPSILON` in `directionOf` -- correctly
+flagged by orchestrator review as stop 13: no upstream `file:line`, and
+it diverges from `Direction.fromVector`'s EXACT equality
+(`utils/Direction.java:110-128`, throws `IllegalArgumentException` on a
+non-exact diagonal).
 
-## Quality bar
+**Mechanism**: `pushTopDownSiblingEdge` (`tile-coordinates.ts`, old
+version) computed `from.x = prev.x + prevChild.getCoord(SOUTH_HOOK).x`
+and `to.x = next.x + child.getCoord(NORTH_HOOK).x`, where `prev.x`/
+`next.x` were ALREADY-absolute (`childX = x + t.childOffsetsX[i]`,
+computed one step earlier in `walkTile`'s own loop). Each side therefore
+evaluated `(x + (left - N)) + N` for its OWN tile's hook value `N`
+(`left` = the composite's own `left`, `childOffsetsX[i] = left - N`) --
+mathematically `x + left` on both sides, but the absolute origin `x`
+was folded into the sum ONE STEP BEFORE the local `(left-N)+N`
+round-trip resolves, regrouping the same three terms and letting each
+side round independently to a value one ULP apart from the other.
+
+**Origin**: `tile-coordinates.ts` (old `pushTopDownSiblingEdge`, the
+`childX = x + t.childOffsetsX[i]!` line inside `walkTile`'s own
+`'gtile-top-down'` loop, plus the `from`/`to` construction immediately
+below it).
+
+**Causal chain**: two DIFFERENT tiles' own hook values (`N` for
+`prevChild`, a DIFFERENT `N2` for `child`) each go through their own
+copy of the `(x + (left-N)) + N` round-trip; IEEE-754 does not
+guarantee `fl(fl(a-b)+b) == a` for arbitrary `a`,`b`, and whether it
+holds depends on the specific bit pattern of `N`/`N2` -- so the two
+sides can land on different final `x` values even though both
+represent the same composite `left`.
+
+**How Java avoids it**: `FtileFactoryDelegatorAssembly#assembly`
+(`:71-74`) computes `p1 = geo.translate(translate1).getPointOut()`,
+`p2 = tile2.calculateDimension(...).translate(translate2).getPointIn()`,
+where `translate1`/`translate2` come from `FtileAssemblySimple
+#getTranslated1/2` (`:132-140`): `UTranslate.dx(left - tile.left)` --
+computed ENTIRELY in the composite's own LOCAL space. `FtileGeometry
+#translate`/`#getPointOut` (`FtileGeometry.java:149-156,77-82`) then
+resolves `tile.left + dx`, STILL local. The composite's own absolute
+placement is applied as a SEPARATE, OUTER `UTranslate` at draw time --
+never folded into this same sum. Java's grouping is `N + (left - N)`,
+local, THEN absolute; ours was `(absolute + (left-N)) + N`, absolute
+folded in mid-calculation.
+
+**Fix**: `TopDownSiblingLink` now carries `baseX` (the walk-time
+absolute origin) and each side's own LOCAL `prevOffsetX`/`nextOffsetX`
+separately; `pushTopDownSiblingEdge` computes `baseX + (offsetX +
+hook.x)` -- local round-trip first, absolute origin added exactly once,
+last -- matching Java's own grouping.
+
+**Ruled out** (with evidence, not assumption): a genuine geometric
+divergence in `childOffsetsX`/hook values themselves -- ruled out
+because `prevChild.getCoord(SOUTH_HOOK).x` and `prevChild.getCoord
+(NORTH_HOOK).x` were confirmed BIT-IDENTICAL via direct instrumentation
+on every fixture sampled (the SAME tile's own two hooks always agreed);
+the drift was isolated entirely to the SUMMATION ORDER across the two
+DIFFERENT tiles' own round-trips, confirmed by reproducing the crash
+with exact (non-tolerant) equality, then resolving it with ONLY a
+regrouping of the same three terms (no numeric value changed).
+
+**Verified**: all 268 baseline fixtures lay out without throwing
+(`compress/invariant.test.ts`, exact equality, no tolerance anywhere);
+golden ratchet 73/73; `pixako-75-kumi821` now renders at ws=118 (was
+184 pinned, a genuine -66 improvement, not merely "no longer crashes").
+Caught originally by `compress/invariant.test.ts`'s "no baseline
+fixture throws" test (all 268 fixtures) -- the kind of defect only a
+full-corpus pass surfaces.
+
+## Quality bar (re-verified after the stop-13 fix)
 - `tests/diagrams/activity`, `tests/unit/activity`,
   `activity.golden.ratchet` (73/73), `activity.harness-parity`,
   `compress/invariant.test.ts`: **1529/1529 passing** (foreground,
-  `npx vitest run`, not the full `npm test`).
+  `npx vitest run`, not the full `npm test`), re-run clean after
+  `2a8061b59`.
 - `npm run typecheck`: clean (both tsconfigs).
-- `npx eslint src tests`: clean.
-- `npm run build`: succeeds.
-- `npm run catalog`: regenerated and committed (2 new modules).
-- Full `npm test` (coverage) was NOT run to completion in this session
-  -- the orchestrator's own policy is to run it at batch close, and a
-  prior attempt here hit the harness's stream/foreground timeout and
-  was moved to background; its output was not relied on for any
-  decision in this report.
+- `npx eslint src tests` (scoped to touched files): clean.
+- Full `npm test`/`npm run build` were NOT re-run after this delta --
+  per the orchestrator's own instruction for this follow-up ("no full
+  npm test"); the prior report's `npm run build` success and `npm run
+  catalog` (no new exports in this delta, so no drift) both still
+  apply unchanged, since this fix touched no public API shape.
 
 ## Stale baselines left for the orchestrator (NOT fixed here)
 Per the established mission convention (`.agent-notes/
