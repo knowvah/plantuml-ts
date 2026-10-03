@@ -17,6 +17,7 @@ import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import { Pragma } from '../../core/skin/Pragma.js';
 import type { ActivityDiagramAST } from './ast.js';
 import { parseNodes } from './node-dispatch.js';
 import { isRefusal, type ParseContext } from './dispatch-support.js';
@@ -95,6 +96,12 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     currentSwimlane: undefined,
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(internalSprites, internalEmoji),
+    // D12/T1p-b: one `Pragma` instance per diagram, mirroring
+    // `TitledDiagram#getPragma()` (`skin/Pragma.java`) -- mutated in place
+    // by `dispatch-common-commands.ts#tryPragma` during `parseNodes`,
+    // carried onto the returned AST below (read at layout time by
+    // `conditional-builder.ts`, never re-derived).
+    pragma: Pragma.createEmpty(),
   };
 
   const result = parseNodes(ctx, 0, []);
@@ -105,5 +112,6 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     swimlanes: ctx.swimlanes,
     annotations: ctx.annotations,
     sprites: ctx.sprites,
+    pragma: ctx.pragma,
   };
 }

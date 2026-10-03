@@ -11,6 +11,7 @@ import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import type { Pragma } from '../../core/skin/Pragma.js';
 import type { ActivityNode } from './ast.js';
 
 // ---------------------------------------------------------------------------
@@ -226,6 +227,19 @@ export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(';\\s*(?:<<[^>]*>>)?\\s*(?
  *  false truncation even though it carries none of `$<>{}`). */
 export const RE_ESCAPED_NEWLINE = /\\n/g;
 
+/**
+ * `!pragma NAME [VALUE]` (D12/T1p-b, `dispatch-common-commands.ts#tryPragma`)
+ * -- mirrors `CommandPragma.getRegexConcat()` exactly: NAME is
+ * `[A-Za-z_][A-Za-z_0-9]*`, VALUE is `.*` and OPTIONAL (its own leading
+ * `\s+` is part of the optional group, so a bare `!pragma name` with no
+ * value matches with `VALUE` group `undefined`, same as upstream's
+ * `RegexOptional`). No `i` flag -- matches sequence's own `pragmaCommand`/
+ * class's own general `!pragma` rule, both case-sensitive on the literal
+ * `!pragma` keyword.
+ * @see net/sourceforge/plantuml/command/CommandPragma.java:60-70
+ */
+export const RE_PRAGMA = /^!pragma\s+([A-Za-z_][A-Za-z_0-9]*)(?:\s+(.*))?$/;
+
 // ---------------------------------------------------------------------------
 // Stop-keyword matching
 //
@@ -261,8 +275,15 @@ export interface ParseContext {
   /** `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4),
    *  mutated in place by `matchSpriteCommand` during `parseNodes`, tried
    *  immediately after `matchAnnotationCommand` in `tryAnnotation`/
-   *  `trySprite` (node-dispatch.ts). */
+   *  `trySprite` (dispatch-common-commands.ts). */
   sprites: SpriteRegistry;
+  /** `!pragma NAME [VALUE]` (D12/T1p-b), mutated in place by
+   *  `dispatch-common-commands.ts#tryPragma`'s own `.define()` call during
+   *  `parseNodes` -- mirrors `TitledDiagram#getPragma()`'s single
+   *  per-diagram `Pragma` instance (`skin/Pragma.java`). Read at layout
+   *  time via `ActivityDiagramAST.pragma` (`parser.ts` copies this
+   *  reference onto the returned AST), NOT re-derived. */
+  pragma: Pragma;
 }
 
 // ---------------------------------------------------------------------------

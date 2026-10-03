@@ -12,6 +12,7 @@ import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
 import type { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
+import type { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { GtileRepeat } from '../tiles/gtile-repeat.js';
 import type { GtileFork } from '../tiles/gtile-fork.js';
@@ -26,6 +27,7 @@ import { walkRepeat } from './walk-repeat.js';
 import { walkIfWithLinks } from './walk-if-with-links.js';
 import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
+import { walkIfLongVertical } from './walk-if-long-vertical.js';
 import { walkSwitch } from './walk-switch.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
@@ -146,9 +148,53 @@ function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
   pushEdge(out, new GConnectionVerticalDown().getPoints(from, to), laneOut(prevChild, myLane), laneIn(child, myLane));
 }
 
+/** Every if-builder's own tile kind -- checked BEFORE `walkTile`'s own
+ *  switch (same precedent as `tile-layout.ts#isSimpleLeaf`/
+ *  `isNullResultKind`, used there for the identical reason: a `Set.has`
+ *  guard costs ONE decision point for the whole group, where N more `case`
+ *  labels inside the switch would cost N -- keeping `walkTile`'s own
+ *  NLOC/CCN from growing every time a new if-builder lands, T1p-b's own
+ *  addition included). */
+const IF_VARIANT_KINDS: ReadonlySet<string> = new Set([
+  'gtile-if-with-links',
+  'gtile-if-down',
+  'gtile-if-long-horizontal',
+  'gtile-if-long-vertical',
+]);
+
+/**
+ * D1/D5/D12(T1p-b): every if-builder's own walker, each split into its own
+ * sibling module for the same reason `walkForkOrSplit`/`walkWhile` already
+ * are. Gated by {@link IF_VARIANT_KINDS} rather than inline `case` labels
+ * in `walkTile` itself (that function's own doc).
+ */
+function walkIfVariant(tile: Tile, x: number, y: number, myLane: string | undefined, out: Out): void {
+  switch (tile.kind) {
+    case 'gtile-if-with-links':
+      walkIfWithLinks(tile as unknown as GtileIfWithLinks, x, y, myLane, out);
+      return;
+    case 'gtile-if-down':
+      walkIfDown(tile as unknown as GtileIfDown, x, y, myLane, out);
+      return;
+    case 'gtile-if-long-horizontal':
+      // The legacy single-diamond tile and this switch's own single-diamond
+      // case are retired here (T5, the task that lands the last if-builder,
+      // D1).
+      walkIfLongHorizontal(tile as unknown as GtileIfLongHorizontal, x, y, myLane, out);
+      return;
+    default:
+      walkIfLongVertical(tile as unknown as GtileIfLongVertical, x, y, myLane, out);
+  }
+}
+
 export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out: Out): void {
   const { kindHint, lane } = hints;
   const myLane = laneAt(tile, lane);
+
+  if (IF_VARIANT_KINDS.has(tile.kind)) {
+    walkIfVariant(tile, x, y, myLane, out);
+    return;
+  }
 
   switch (tile.kind) {
     case 'gtile-start':
@@ -267,28 +313,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       }
       return;
     }
-
-    case 'gtile-if-with-links':
-      // D1/D5: `FtileIfWithLinks`'s own walker, split into
-      // `walk-if-with-links.ts` for the same reason `walkForkOrSplit`/
-      // `walkWhile` already are.
-      walkIfWithLinks(tile as unknown as GtileIfWithLinks, x, y, myLane, out);
-      return;
-
-    case 'gtile-if-down':
-      // D1/D5: `FtileIfDown`'s own walker, split into `walk-if-down.ts`
-      // for the same reason `walkIfWithLinks` already is.
-      walkIfDown(tile as unknown as GtileIfDown, x, y, myLane, out);
-      return;
-
-    case 'gtile-if-long-horizontal':
-      // D1/D5: `FtileIfLongHorizontal`'s own walker, split into
-      // `walk-if-long-horizontal.ts` for the same reason `walkIfDown`/
-      // `walkIfWithLinks` already are. The legacy single-diamond tile and
-      // this switch's own single-diamond case are retired here (T5, the
-      // task that lands the last if-builder, D1).
-      walkIfLongHorizontal(tile as unknown as GtileIfLongHorizontal, x, y, myLane, out);
-      return;
 
     case 'gtile-while':
       walkWhile(tile as unknown as GtileWhile, x, y, myLane, out);

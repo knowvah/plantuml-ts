@@ -13,9 +13,6 @@
  * small named functions sidesteps the tool bug instead of fighting it.
  */
 
-import { matchAnnotationCommand } from '../../core/annotations/index.js';
-import { matchSpriteCommand } from '../../core/sprite-commands.js';
-import { matchScaleCommand } from '../../core/scale-command.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
   ActivityAction,
@@ -54,6 +51,7 @@ import { tryFork, trySplit } from './parallel-dispatch.js';
 import { tryActivityList, tryBackward } from './list-backward-dispatch.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
+import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -359,44 +357,9 @@ function tryArrowLabel(ctx: ParseContext, idx: number, line: string): DispatchRe
   return { idx: idx + 1, node };
 }
 
-/**
- * title/caption/legend/header/footer/mainframe (mission G0b/T6,
- * decisions.md D3) -- tried last, right before the unknown-line fallback
- * (spec position: former parser.ts:607-610). Activity's own multiline note
- * body (`tryNoteMulti` above) already owns its lines via a dedicated inner
- * while-loop that never falls through to this point, so a `title`-shaped
- * line inside a note body is never stolen (same top-level-only guarantee
- * as sequence's note bodies).
- */
-function tryAnnotation(ctx: ParseContext, idx: number): DispatchResult | null {
-  const match = matchAnnotationCommand(ctx.lines, idx, ctx.annotations);
-  if (match === null) return null;
-  return { idx: idx + match.consumed };
-}
-
-/** `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4) --
- *  tried immediately after `tryAnnotation`, same last-before-fallback
- *  position, mirroring upstream's title-then-sprite registration order
- *  (CommonCommands.java:54-58). */
-function trySprite(ctx: ParseContext, idx: number): DispatchResult | null {
-  const match = matchSpriteCommand(ctx.lines, idx, ctx.sprites);
-  if (match === null) return null;
-  return { idx: idx + match.consumed };
-}
-
-/**
- * `scale ...` (6 forms, `CommonCommands#addCommonScaleCommands`, wired for
- * every `TitledDiagram` factory including `activitydiagram3`) -- mission
- * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. Recognised and consumed
- * only: the resolved factor is NOT applied to the rendered document (no
- * `ast.scale`/renderer wiring here, unlike `sequence`/`description`) --
- * activity-diagram scaling is a separate, unscoped follow-on; this just
- * stops the line from refusing.
- */
-function tryScale(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (matchScaleCommand(line) === undefined) return null;
-  return { idx: idx + 1 };
-}
+// `tryAnnotation`/`trySprite`/`tryScale`/`tryPragma` (D12/T1p-b) moved to
+// `dispatch-common-commands.ts` to keep this file under the 500-line cap
+// (it was already at the exact limit) -- see that file's own doc comment.
 
 const LINE_HANDLERS: readonly LineHandler[] = [
   trySwimlane,
@@ -418,6 +381,9 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryNoteMulti,
   tryArrowLabel,
   tryAnnotation,
+  // D12/T1p-b: `!pragma` registered BEFORE sprite within `addCommonCommands2`
+  // (`CommonCommands.java:62-89`).
+  tryPragma,
   trySprite,
   tryScale,
   tryAssumeTransparent,

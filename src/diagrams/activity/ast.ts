@@ -4,6 +4,7 @@
 
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import type { Pragma } from '../../core/skin/Pragma.js';
 
 // ---------------------------------------------------------------------------
 // Leaf node types
@@ -302,4 +303,14 @@ export interface ActivityDiagramAST {
    * `createSpriteRegistry()`.
    */
   sprites?: SpriteRegistry;
+  /**
+   * `!pragma NAME [VALUE]` (D12/T1p-b), populated by {@link tryPragma}
+   * (`dispatch-common-commands.ts`) during `parseNodes` -- mirrors
+   * `TitledDiagram#getPragma()`'s single per-diagram `Pragma` instance
+   * (`skin/Pragma.java`). Optional so hand-authored AST literal fixtures
+   * compile unchanged (read sites default to an empty `Pragma` when
+   * absent -- `conditional-builder.ts#buildIf`); a real `parseActivity()`
+   * call always sets it via `Pragma.createEmpty()`.
+   */
+  pragma?: Pragma;
 }
