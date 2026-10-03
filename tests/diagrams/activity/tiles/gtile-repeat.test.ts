@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { GtileRepeat } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
+import { GtileBreak } from '../../../../src/diagrams/activity/tiles/gtile-break.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
+import { TileComposite } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { GPoint, HookName } from '../../../../src/diagrams/activity/tiles/points.js';
@@ -241,5 +243,104 @@ describe('GtileRepeat — a real GtileDiamondInside condition keeps left === wid
     // gtile-diamond-inside.ts:92-99 -- NORTH_HOOK is unconditionally
     // `{ x: this.width / 2, y: 0 }`.
     expect(condition.getCoord(NORTH_HOOK).x).toBe(condition.width / 2);
+  });
+});
+
+/** A minimal `TileComposite` standing in for the body's own composite tree
+ *  (e.g. a sequence/if), so {@link countWeldingBreaks}'s recursive scan has
+ *  a REAL `children` array to walk -- `makeTile`'s own stub above is a
+ *  leaf (no `children`), which `countWeldingBreaks` correctly reports as 0
+ *  breaks, but can't model a `break` NESTED inside a sequence. */
+class StubComposite extends TileComposite {
+  readonly kind = 'stub-composite';
+  readonly width: number;
+  readonly height: number;
+  readonly children: readonly Tile[];
+  readonly left: number;
+  constructor(children: readonly Tile[], width = 40, height = 60, left = width / 2) {
+    super();
+    this.children = children;
+    this.width = width;
+    this.height = height;
+    this.left = left;
+  }
+  getCoord(): GPoint {
+    return { x: this.left, y: 0 };
+  }
+}
+
+// T1p-d D-new: `FtileFactoryDelegatorRepeat.repeat()`'s own weld-diamond
+// assembly (`:123-169`) -- a repeat whose body contains a `break` grows a
+// SEPARATE `weldDiamond` field and extends `height`/`width`/`left` to make
+// room for it; a repeat with no `break` is byte-identical to the pre-task
+// dimension formulas (every `describe` above this one already pins that).
+describe('GtileRepeat — weldDiamond (D-new, break-welding)', () => {
+  it('is undefined when the body has no break (every existing dimension test above is unaffected)', () => {
+    const entry = makeEntry();
+    const body = makeTile(40, 60, true, 10);
+    const condition = makeDiamond(50, 40);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(tile.weldDiamond).toBeUndefined();
+    expect(tile.left).toBe(25);
+    expect(tile.width).toBe(79);
+    expect(tile.height).toBe(220);
+  });
+
+  it('is undefined for a body with nested structure but zero breaks', () => {
+    const entry = makeEntry();
+    const leaf = makeTile(20, 20, true, 10);
+    const body = new StubComposite([leaf], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(tile.weldDiamond).toBeUndefined();
+  });
+
+  it('finds a break nested inside a composite body (recursive scan)', () => {
+    const entry = makeEntry();
+    const body = new StubComposite([makeTile(20, 20, true, 10), new GtileBreak()], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(tile.weldDiamond).toBeDefined();
+  });
+
+  it('grows height by the raw gap (35) plus the diamond (24) -- 59 total, D-new', () => {
+    const entry = makeEntry();
+    const body = new StubComposite([new GtileBreak()], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const noWeld = new GtileRepeat(entry, makeTile(40, 60, true, 10), condition, 'simple2', ctx);
+    const withWeld = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(withWeld.height).toBe(noWeld.height + 59);
+  });
+
+  it("the diamond's own placement sits centred on `left`, flush below the pre-weld height", () => {
+    const entry = makeEntry();
+    const body = new StubComposite([new GtileBreak()], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const noWeld = new GtileRepeat(entry, makeTile(40, 60, true, 10), condition, 'simple2', ctx);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(tile.weldDiamond).toEqual({ offsetX: tile.left - 12, offsetY: noWeld.height + 35 });
+  });
+
+  it('two breaks still produce exactly one weldDiamond (one diamond per repeat, not per break)', () => {
+    const entry = makeEntry();
+    const body = new StubComposite([new GtileBreak(), new GtileBreak()], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const tile = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    expect(tile.weldDiamond).toBeDefined();
+  });
+
+  it('shiftX adds to every X offset uniformly, never to a Y offset', () => {
+    const entry = makeEntry();
+    const body = new StubComposite([new GtileBreak()], 40, 60, 10);
+    const condition = makeDiamond(50, 40);
+    const noWeld = new GtileRepeat(entry, makeTile(40, 60, true, 10), condition, 'simple2', ctx);
+    const withWeld = new GtileRepeat(entry, body, condition, 'simple2', ctx);
+    const shiftX = withWeld.left - noWeld.left;
+    expect(shiftX).toBe(10);
+    expect(withWeld.entryOffsetX).toBe(noWeld.entryOffsetX + shiftX);
+    expect(withWeld.bodyOffsetX).toBe(noWeld.bodyOffsetX + shiftX);
+    expect(withWeld.conditionOffsetX).toBe(noWeld.conditionOffsetX + shiftX);
+    expect(withWeld.bodyOffsetY).toBe(noWeld.bodyOffsetY);
+    expect(withWeld.conditionOffsetY).toBe(noWeld.conditionOffsetY);
   });
 });
