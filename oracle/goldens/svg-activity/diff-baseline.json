@@ -167,10 +167,10 @@
       "type": "activity",
       "slug": "bizono-61-sasa740",
       "status": "baseline",
-      "weightedScore": 243,
-      "diffCount": 195,
+      "weightedScore": 209,
+      "diffCount": 168,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -410,10 +410,10 @@
       "type": "activity",
       "slug": "cixave-47-milo698",
       "status": "baseline",
-      "weightedScore": 97,
-      "diffCount": 63,
+      "weightedScore": 165,
+      "diffCount": 124,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -491,10 +491,10 @@
       "type": "activity",
       "slug": "dacuga-41-popo038",
       "status": "baseline",
-      "weightedScore": 140,
-      "diffCount": 92,
+      "weightedScore": 146,
+      "diffCount": 91,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -599,10 +599,10 @@
       "type": "activity",
       "slug": "dixiku-28-guzo497",
       "status": "baseline",
-      "weightedScore": 169,
-      "diffCount": 135,
+      "weightedScore": 141,
+      "diffCount": 114,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -626,10 +626,10 @@
       "type": "activity",
       "slug": "doziki-93-rosi997",
       "status": "baseline",
-      "weightedScore": 273,
-      "diffCount": 225,
+      "weightedScore": 244,
+      "diffCount": 189,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -1237,11 +1237,11 @@
     {
       "type": "activity",
       "slug": "jevofu-58-fazo194",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1310,10 +1310,10 @@
       "type": "activity",
       "slug": "jucidi-98-zato093",
       "status": "baseline",
-      "weightedScore": 169,
+      "weightedScore": 176,
       "diffCount": 128,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -1786,11 +1786,11 @@
     {
       "type": "activity",
       "slug": "mepeze-15-nuge493",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1832,10 +1832,10 @@
       "type": "activity",
       "slug": "mojezi-43-gamu360",
       "status": "baseline",
-      "diffCount": 109,
+      "diffCount": 106,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
-      "weightedScore": 122
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 106
     },
     {
       "type": "activity",
@@ -1859,10 +1859,10 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "status": "baseline",
-      "diffCount": 82,
+      "diffCount": 244,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
-      "weightedScore": 121
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 290
     },
     {
       "type": "activity",
@@ -1940,10 +1940,10 @@
       "type": "activity",
       "slug": "nerete-42-save418",
       "status": "baseline",
-      "diffCount": 218,
+      "diffCount": 216,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
-      "weightedScore": 356
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 354
     },
     {
       "type": "activity",
@@ -2264,10 +2264,10 @@
       "type": "activity",
       "slug": "pezubu-98-niba240",
       "status": "baseline",
-      "weightedScore": 101,
-      "diffCount": 67,
+      "weightedScore": 64,
+      "diffCount": 44,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -2300,10 +2300,10 @@
       "type": "activity",
       "slug": "pixako-75-kumi821",
       "status": "baseline",
-      "weightedScore": 197,
-      "diffCount": 114,
+      "weightedScore": 184,
+      "diffCount": 101,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -2597,10 +2597,10 @@
       "type": "activity",
       "slug": "ruzazu-94-meso880",
       "status": "baseline",
-      "diffCount": 153,
+      "diffCount": 151,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
-      "weightedScore": 173
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 164
     },
     {
       "type": "activity",
@@ -2632,11 +2632,11 @@
     {
       "type": "activity",
       "slug": "saxeku-17-gume203",
-      "status": "baseline",
-      "weightedScore": 58,
-      "diffCount": 31,
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2"
     },
     {
       "type": "activity",
@@ -2876,10 +2876,10 @@
       "type": "activity",
       "slug": "tmp1",
       "status": "baseline",
-      "diffCount": 153,
+      "diffCount": 151,
       "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
-      "weightedScore": 173
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 164
     },
     {
       "type": "activity",
@@ -3163,11 +3163,11 @@
     {
       "type": "activity",
       "slug": "xoreko-43-noto860",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3334,11 +3334,11 @@
     {
       "type": "activity",
       "slug": "zokuni-21-sapu966",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-02",
-      "measuredAgainstCommit": "31d8168e"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "weightedScore": 0
     },
     {
       "type": "activity",

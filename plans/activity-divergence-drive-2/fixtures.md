@@ -99,7 +99,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | bazuma-86-metu353 | 57 | exact {} | multiline branch label height + one <text> per line; residual per journal row 42 |  |  |  |
 | bozuro-33-celo170 | 58 | extra arrow only {polygon: 2} | repeat entry diamond: Hexagon.asPolygon(shadowing) closed, stroke 0.5; residual per journal row 42 |  |  |  |
 | racana-82-zece676 | 58 | exact {} |  |  |  |  |
-| saxeku-17-gume203 | 58 | extra line+arrow {polygon: 1, line: 1} | ConditionEndStyle hline (FtileIfDown.java:147-150); residual per journal row 42 |  |  |  |
+| saxeku-17-gume203 | 58 | extra line+arrow {polygon: 1, line: 1} | ConditionEndStyle hline (FtileIfDown.java:147-150); residual per journal row 42 | T1p-a | HLINE ConnectionHline FtileIfWithLinks.java:421-500 | pinned (add2-b1p) |
 | kenizo-43-siro273 | 60 | extra arrow only {polygon: 1} | backward: box + connectors unported (activity-loop-backward); residual per journal row 43/47 |  |  |  |
 | cifafo-49-jazi415 | 63 | exact {} | title/legend chrome offsets (shared core/annotations/chrome.ts, DiagramChromeFactory); residual per journal row 36/49/52 |  |  |  |
 | xizola-97-sizu458 | 63 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
@@ -132,9 +132,9 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | fikuki-99-kulu790 | 88 | text-only {text: 10} | embedded {{ }} diagram: oracle 42x42 slot (memory oracle-seam-embedded-42x42) |  |  |  |
 | gevaxi-80-tone223 | 89 | extra line+arrow {polygon: 1, line: 1} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 |  |  |  |
 | lukoxa-16-cecu095 | 92 | extra line+arrow {polygon: 1, line: 3} |  |  |  |  |
-| cixave-47-milo698 | 97 | missing line+arrow {polygon: -1, line: -4} |  |  |  |  |
+| cixave-47-milo698 | 97 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d | weld 97->165 (D7 reveal, journal 14); weld-join arrowheads -> T1b |  |
 | biredi-08-bama025 | 98 | extra arrow only {polygon: 1} |  |  |  |  |
-| pezubu-98-niba240 | 101 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
+| pezubu-98-niba240 | 101 | extra line+arrow {polygon: 1, line: 2} |  | T1p-a/T1p-g | HLINE 101->64; residual out1X/out2X width (gtile-if-with-links) + snake merge |  |
 | gelono-70-zuce760 | 102 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
 | sofoje-37-tila554 | 105 | extra line+arrow {polygon: 2, line: 1} |  |  |  |  |
 | liteza-62-nopo771 | 106 | extra arrow only {polygon: 2} |  |  |  |  |
@@ -151,9 +151,9 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | mifejo-31-sovi184 | 118 | extra line+arrow {polygon: 2, line: 2} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
 | gesogi-81-xoma900 | 120 | exact {} |  |  |  |  |
 | labala-74-juki864 | 120 | exact {} |  |  |  |  |
-| mudobi-07-biji996 | 121 | missing line+arrow {polygon: -2, line: -2, path: -1, text: -1} |  |  |  |  |
+| mudobi-07-biji996 | 121 | missing line+arrow {polygon: -2, line: -2, path: -1, text: -1} |  | T1p-d | weld 121->290 (D7 reveal, journal 14); weld-join arrowheads/lines -> T1b |  |
 | fetizo-39-jace641 | 122 | extra arrow only {polygon: 1} |  |  |  |  |
-| mojezi-43-gamu360 | 122 | extra line only {line: 2} |  |  |  |  |
+| mojezi-43-gamu360 | 122 | extra line only {line: 2} |  | T1p-e | switch cross-lane connectors 122->106 |  |
 | maketa-43-juja264 | 123 | extra line+arrow {polygon: 1, line: 5} |  |  |  |  |
 | cujoni-21-somi079 | 124 | extra arrow only {polygon: 1} |  |  |  |  |
 | decudi-92-bisu741 | 124 | extra line+arrow {polygon: 1, line: 5} |  |  |  |  |
@@ -167,7 +167,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | suluni-73-lotu140 | 135 | mixed {path: -1, text: -1} |  |  |  |  |
 | kavoro-11-jife299 | 137 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
 | bulasi-17-vafa634 | 138 | exact {} |  |  |  |  |
-| dacuga-41-popo038 | 140 | missing line+arrow {polygon: -1, line: -4} |  |  |  |  |
+| dacuga-41-popo038 | 140 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d | weld 140->146 (D7 reveal, journal 14); weld-join arrowheads -> T1b |  |
 | nomeco-93-minu967 | 141 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
 | rurebu-12-nebi203 | 141 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
 | jagove-43-nako107 | 142 | exact {} |  |  |  |  |
@@ -193,12 +193,12 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | giteso-65-mefo026 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
 | gudute-55-nulo344 | activity parser refused this source at line 14 (syntax): Syntax Error? |  |  |  |
 | jamana-83-gige126 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
-| jevofu-58-fazo194 | activity parser refused this source at line 8 (syntax): Syntax Error? |  |  |  |
+| jevofu-58-fazo194 | activity parser refused this source at line 8 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
 | jufefu-66-josa392 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
 | ketajo-72-rula535 | activity parser refused this source at line 7 (syntax): Syntax Error? |  |  |  |
 | kiceze-91-luke737 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
 | lapura-36-kavu144 | activity parser refused this source at line 11 (syntax): Syntax Error? |  |  |  |
-| mepeze-15-nuge493 | activity parser refused this source at line 6 (syntax): Syntax Error? |  |  |  |
+| mepeze-15-nuge493 | activity parser refused this source at line 6 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
 | mufixi-71-koma752 | activity parser refused this source at line 30 (syntax): Syntax Error? |  |  |  |
 | ninago-40-dalo726 | activity parser refused this source at line 10 (syntax): Syntax Error? |  |  |  |
 | nipuxu-11-tefa314 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
@@ -212,10 +212,24 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | vexula-75-noko098 | activity parser refused this source at line 2 (syntax): Syntax Error? |  |  |  |
 | vilecu-41-tete416 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
 | xolazi-74-vamu265 | activity parser refused this source at line 3 (syntax): Syntax Error? |  |  |  |
-| xoreko-43-noto860 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
+| xoreko-43-noto860 | activity parser refused this source at line 5 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
 | zafoxu-20-xofe568 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
 | zaloze-31-jibo311 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
 | zaxati-90-xacu660 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
 | zinelo-77-losu727 | activity parser refused this source at line 19 (syntax): Syntax Error? |  |  |  |
 | zizumo-48-taku661 | activity parser refused this source at line 4 (syntax): Syntax Error? |  |  |  |
-| zokuni-21-sapu966 | activity parser refused this source at line 5 (syntax): Syntax Error? |  |  |  |
+| zokuni-21-sapu966 | activity parser refused this source at line 5 (syntax): Syntax Error? | T1p-c | end merge: CommandForkEnd3.java:57-81 + ParallelBuilderMerge | pinned (add2-b1p) |
+
+
+## Rows above ws 150 at b0 that moved in b1p
+
+| slug | ws (b0) | element shape (b0) | add1 mechanism | task | mechanism | final |
+|---|---|---|---|---|---|---|
+| bizono-61-sasa740 | >150 |  |  | T1p-d | break weld 243->209; residual weld-join arrowheads -> T1b |  |
+| dixiku-28-guzo497 | >150 |  |  | T1p-d | GtileBreak 0x0 + weld 169->141; weld-join arrowheads -> T1b |  |
+| doziki-93-rosi997 | >150 |  |  | T1p-d | break weld 273->244; residual weld-join arrowheads -> T1b |  |
+| jucidi-98-zato093 | >150 |  |  | T1p-g | HLINE per-lane fan-out 169->176 (count reveal); coupleX vs SOUTH_HOOK out-x |  |
+| nerete-42-save418 | >150 |  |  | T1p-d | GtileBreak 0x0 356->354 |  |
+| pixako-75-kumi821 | >150 |  |  | T1p-d | GtileBreak 0x0 197->184 |  |
+| ruzazu-94-meso880 | >150 |  |  | T1p-e | switch cross-lane 173->164; BIG_DIAMOND in jar, SMALL here (case widths) |  |
+| tmp1 | >150 |  |  | T1p-e | duplicate of ruzazu-94-meso880 (pinned since 9524864ff); follow-on |  |

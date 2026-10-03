@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-02",
-  "measuredAgainstCommit": "65b07a57",
+  "measuredAgainstCommit": "bdf8b1e2",
   "fixtures": [
     {
       "type": "activity",
@@ -3881,10 +3881,33 @@
     {
       "type": "activity",
       "slug": "jevofu-58-fazo194",
-      "status": "error",
-      "reason": "activity parser refused this source at line 8 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -5568,10 +5591,33 @@
     {
       "type": "activity",
       "slug": "mepeze-15-nuge493",
-      "status": "error",
-      "reason": "activity parser refused this source at line 6 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -5767,8 +5813,8 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "status": "baseline",
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d",
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
       "ours": {
         "fill": {
           "#000": 13
@@ -5777,8 +5823,8 @@
           "(absent)": 13
         },
         "inset": {
-          "10": 7,
-          "10.001": 2
+          "10": 8,
+          "9.999": 1
         },
         "textCount": 13
       },
@@ -9649,10 +9695,33 @@
     {
       "type": "activity",
       "slug": "xoreko-43-noto860",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 2
+      }
     },
     {
       "type": "activity",
@@ -10084,10 +10153,33 @@
     {
       "type": "activity",
       "slug": "zokuni-21-sapu966",
-      "status": "error",
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?",
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "afd2d5f2"
+      "status": "baseline",
+      "measuredAt": "2026-10-02",
+      "measuredAgainstCommit": "bdf8b1e2",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 2
+      }
     },
     {
       "type": "activity",

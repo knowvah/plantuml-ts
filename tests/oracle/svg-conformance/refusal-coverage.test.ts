@@ -765,7 +765,11 @@ describe('refusal coverage — baseline shape', () => {
     // 6168 -> 6180 / 5900 -> 5912 / 268 at add1/close-b3 (2026-10-02): 12
     // more svg-activity clone rows (all render on both sides). Derivation:
     // 5912 + 268 = 6180.
-    expect(manifest.fixtures.length).toBe(6180);
+    // 6180 -> 6185 / 5912 -> 5921 / 268 -> 264 at add2/close-b1p (2026-10-02):
+    // 5 more svg-activity clone rows (saxeku + the 4 `end merge` rows; all
+    // render on both sides) and the 4 `end merge` dot-cache rows now render
+    // (CommandForkEnd3.java:57-81). Derivation: 5921 + 264 = 6185.
+    expect(manifest.fixtures.length).toBe(6185);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -785,7 +789,8 @@ describe('refusal coverage — baseline shape', () => {
     // CommandCreateJson.java:141-142); jarRendered is false (the jar's own
     // crash page), so it stays outside SLI 2. Re-pinned `weErrored: true`,
     // engine class, from a fresh measurement.
-    expect(pinnedErroring.length).toBe(268);
+    // 268 -> 264 at add2/close-b1p: the 4 `end merge` rows render.
+    expect(pinnedErroring.length).toBe(264);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -812,7 +817,9 @@ describe('refusal coverage — baseline shape', () => {
     // 5880 -> 5884 at add1/close-b1b (4 svg-activity clones).
     // 5884 -> 5900 at add1/close-b2 (16 svg-activity clones).
     // 5900 -> 5912 at add1/close-b3 (12 svg-activity clones).
-    expect(pinnedRendering.length).toBe(5912);
+    // 5912 -> 5921 at add2/close-b1p (5 svg-activity clones + 4 `end merge`
+    // dot-cache rows that now render).
+    expect(pinnedRendering.length).toBe(5921);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -902,7 +909,9 @@ describe('refusal coverage — baseline shape', () => {
     // 82 -> 39 at unknown-bucket-routing-repair/T10 (2026-09-20): 43 of the
     // queue render now that their activity3 constructs parse (see the
     // manifest derivation above).
-    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(39);
+    // 39 -> 35 at add2/close-b1p (2026-10-02): the 4 `end merge` rows render
+    // (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java).
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(35);
   });
 });
 
