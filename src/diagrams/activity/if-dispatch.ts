@@ -26,6 +26,15 @@ import { parseNodes } from './node-dispatch.js';
 // ---------------------------------------------------------------------------
 // if / elseif / else / endif
 // ---------------------------------------------------------------------------
+
+/** Stop-keyword PREFIX test for `elseif`, used only by
+ *  {@link consumeIfClauses}'s `parseNodes` stop-list -- not the full
+ *  {@link RE_ELSEIF} match (which also needs `then (label)`'s trailing
+ *  shape). Mirrors `RE_ELSEIF`'s own leading `(incoming)` group (see its
+ *  doc, `dispatch-support.ts`) so a decorated `elseif` stops a body scan
+ *  the same as a bare one. */
+const RE_ELSEIF_STOP = /^(?:\([^)]*\)\s*)?else\s*if\b/i;
+
 interface IfClauses {
   cursor: number;
   elseIfBranches: ActivityElseIf[];
@@ -132,7 +141,7 @@ interface ElseStep {
  */
 function consumeElseClause(ctx: ParseContext, cursor: number, label: string | undefined): ElseStep | ParseRefusal {
   const { lines } = ctx;
-  const elseResult = parseNodes(ctx, cursor + 1, ['endif']);
+  const elseResult = parseNodes(ctx, cursor + 1, [RE_ENDIF]);
   if (isRefusal(elseResult)) return elseResult;
   let next = elseResult.nextIdx;
   if (next < lines.length && RE_ENDIF.test(stripTrailingSemi(lines[next]!.trim()))) {
@@ -275,7 +284,18 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
   const openerSwimlane = swimlaneSpread(ctx);
 
   // then-branch stops at elseif, else, endif
-  const IF_INNER_STOPS: StopKeywords = ['elseif', 'else', 'endif'];
+  // `RE_ENDIF` (not the literal `'endif'`) so the then-branch body scan
+  // also stops at a zero-or-more-space `end if` closer (mission add2-T2e,
+  // D6: `zinelo-77-losu727`'s nested `end if` refused against the
+  // literal-string-only stop before this). `RE_ELSEIF_STOP` (not the
+  // literal `'elseif'`) so the scan also stops at a leading-`(incoming)`-
+  // decorated `elseif` (`dulate-94-bupu593`/`nolubo-93-rula384`): the
+  // literal-prefix stop never matched `(additional text) elseif (...)`,
+  // so the line fell through to the generic body dispatch instead of
+  // reaching {@link classifyClauseLine}'s own `RE_ELSEIF` match, and
+  // refused there (no body handler recognizes a bare `(label) elseif`
+  // line).
+  const IF_INNER_STOPS: StopKeywords = [RE_ELSEIF_STOP, 'else', RE_ENDIF];
   const thenResult = parseNodes(ctx, idx + 1, IF_INNER_STOPS);
   if (isRefusal(thenResult)) return thenResult;
   const thenBranch = thenResult.nodes;
