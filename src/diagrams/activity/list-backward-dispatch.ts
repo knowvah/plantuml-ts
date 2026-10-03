@@ -50,3 +50,45 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
   const node: ActivityBackward = { kind: 'backward', label: body.labelParts.join('\n'), ...swimlaneSpread(ctx) };
   return { idx: body.cursor, node };
 }
+
+// ---------------------------------------------------------------------------
+// `(X)` / `#color:(X)` circled-spot connector (mission add2-T2e, D6) and
+// `label NAME` / `goto NAME` (same mission). All three are consumed and
+// DROPPED -- no `ActivityNode` is returned -- same "parsed not drawn"
+// pattern `trySwimlane` (node-dispatch.ts) already uses for a line that
+// only mutates parse state. A real `ActivityNode` union member for any of
+// them would make `tile-layout.ts#tileNode`'s exhaustive switch (outside
+// this task's write-set) fail to compile; see this task's final report
+// for the re-slot (new node kind + layout/render builder, owner
+// `layout/tile-layout.ts` + `renderer.ts`).
+// @see net/sourceforge/plantuml/activitydiagram3/command/CommandCircleSpot3.java:56-62
+// @see net/sourceforge/plantuml/activitydiagram3/command/CommandLabel.java:56-61
+// @see net/sourceforge/plantuml/activitydiagram3/command/CommandGoto.java:56-61
+// @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:144,160-161
+//   -- registration order: CircleSpot3 right after Start3/Stop3; Label/
+//   Goto last, after ActivityList (this file's own `tryActivityList`).
+// ---------------------------------------------------------------------------
+
+/** `(X)` / `#color:(X)` -- a single-character "circled spot" connector. */
+const RE_CIRCLE_SPOT = /^(?:#\w+[-\\|/]?\w+:)?\(\S\)\s*;?\s*$/i;
+
+export function tryCircleSpot(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  if (!RE_CIRCLE_SPOT.test(line)) return null;
+  return { idx: idx + 1 };
+}
+
+/** `label NAME` -- declares the target of a later `goto NAME` jump. */
+const RE_LABEL = /^label\s+([\w.]+)\s*;?\s*$/i;
+
+export function tryLabel(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  if (!RE_LABEL.test(line)) return null;
+  return { idx: idx + 1 };
+}
+
+/** `goto NAME` -- jumps to the `label NAME` declared elsewhere. */
+const RE_GOTO = /^goto\s+([\w.]+)\s*;?\s*$/i;
+
+export function tryGoto(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  if (!RE_GOTO.test(line)) return null;
+  return { idx: idx + 1 };
+}
