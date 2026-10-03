@@ -22,15 +22,17 @@ describe('wormMerge — removeNullVector/removeRedondantDirection', () => {
     expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }]);
   });
 
-  it('removes a near-zero-length segment within AXIS_EPSILON (ulp-scale float drift)', () => {
-    // Mirrors the real defect found on pixako-75-kumi821: two points that
-    // SHOULD be exactly equal differ by a few ULPs.
-    const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0.0000001, y: 10 }, { x: 0, y: 20 }],
-      'FULL',
-    );
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }]);
+  it('throws on a near-but-not-exactly-zero-length segment (EXACT equality, matching Direction.fromVector)', () => {
+    // `Direction.fromVector` (`utils/Direction.java:110-130`) uses EXACT
+    // `==`, same as this port's `directionOf` -- a point pair that is
+    // merely CLOSE (not bit-identical) is a diagonal segment, not a null
+    // vector, and throws exactly as the Java would. The real upstream
+    // geometry defect this stress-tested (pixako-75-kumi821, a
+    // `pushTopDownSiblingEdge` summation-order mismatch) was fixed at
+    // its origin in `tile-coordinates.ts`, not tolerated here.
+    expect(() =>
+      wormMerge([{ x: 0, y: 0 }, { x: 0, y: 10 }], [{ x: 0.0000001, y: 10 }, { x: 0, y: 20 }], 'FULL'),
+    ).toThrow(/not a horizontal or vertical line/);
   });
 
   it('keeps a genuine corner (not collinear, not redundant)', () => {

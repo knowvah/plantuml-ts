@@ -21,33 +21,20 @@ export type MergeStrategy = 'FULL' | 'LIMITED' | 'NONE';
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 
 /**
- * Two coordinates this port's own upstream geometry computed through
- * different arithmetic paths (e.g. `x + a + b` vs `x + (a + b)`) that
- * SHOULD land on the same axis -- ulp-scale IEEE-754 drift, confirmed on
- * `pixako-75-kumi821` (`63.021875` vs `63.021874999999994`, a 6e-15
- * difference): several orders of magnitude below any real geometric
- * distinction in this domain (`Snake.same()`'s own merge-trigger
- * tolerance is `0.001`) and far above float64 noise at this magnitude
- * (~1e-13). Axis membership only -- never used to move a point.
- */
-const AXIS_EPSILON = 1e-6;
-
-/**
- * `Direction.fromVector` (`:110-130`): orthogonal segments only -- every
- * activity edge is axis-aligned, so the diagonal branch can never fire in
- * this port's geometry, same as upstream's own `IllegalArgumentException`
- * guard. `undefined` is this port's `null` (two coincident points --
- * `removeNullVector`'s own doc explains why that is reachable here even
- * though `Worm#addPoint`'s exact-duplicate skip runs on every OTHER push:
- * a merge join concatenates two ALREADY-built point lists with no such
- * guard at the seam).
+ * `Direction.fromVector` (`utils/Direction.java:110-130`): EXACT equality
+ * (`x1 == x2`, `y1 == y2`), throwing `IllegalArgumentException("Not a H or
+ * V line!")` otherwise (`:128`) -- every activity edge is axis-aligned, so
+ * the diagonal branch can never fire in this port's geometry either, given
+ * the SAME exact arithmetic the Java uses. `undefined` is this port's
+ * `null` (two coincident points -- `removeNullVector`'s own doc explains
+ * why that is reachable here even though `Worm#addPoint`'s exact-duplicate
+ * skip runs on every OTHER push: a merge join concatenates two ALREADY-
+ * built point lists with no such guard at the seam).
  */
 function directionOf(p1: GPoint, p2: GPoint): Direction | undefined {
-  const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-  if (Math.abs(dx) < AXIS_EPSILON && Math.abs(dy) < AXIS_EPSILON) return undefined;
-  if (Math.abs(dx) < AXIS_EPSILON) return dy > 0 ? 'DOWN' : 'UP';
-  if (Math.abs(dy) < AXIS_EPSILON) return dx > 0 ? 'RIGHT' : 'LEFT';
+  if (p1.x === p2.x && p1.y === p2.y) return undefined;
+  if (p1.x === p2.x) return p2.y > p1.y ? 'DOWN' : 'UP';
+  if (p1.y === p2.y) return p2.x > p1.x ? 'RIGHT' : 'LEFT';
   throw new Error(`snake-merge: not a horizontal or vertical line (${p1.x},${p1.y})->(${p2.x},${p2.y})`);
 }
 
