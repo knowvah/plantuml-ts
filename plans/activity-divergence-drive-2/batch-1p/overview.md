@@ -12,7 +12,7 @@ as `b1p` (prev = `b0`). Then T1b starts (batch 1).
 | [T1p-e](T1p-e-switch.md) | switch cross-swimlane connections | typescript-pro | `layout/tile-coordinates.ts`, `tiles/gtile-switch.ts`, `switch-dispatch.ts`, new files, `tests/fixtures/activity/T1p-e/**` (+ `layout/swimlane-loop-translate.ts`, row 7) | 1 | [x] |
 | [T1p-f](T1p-f-switch-big-diamond.md) | switch BIG_DIAMOND per-lane case draw | typescript-pro | `layout/{swimlane-placement,walk-switch}.ts`, `tiles/gtile-switch.ts`, new files, `tests/fixtures/activity/T1p-f/**` | 2 | [x] |
 | [T1p-g](T1p-g-hline-swimlane-minmax.md) | swimlane-aware getMinmax for HLINE connectors | typescript-pro | `layout/{walk-if-with-links,walk-if-long-horizontal}.ts`, T1p-f's per-lane seam, new files | 3 (after T1p-f) | [ ] |
-| [T1p-b](T1p-b-vertical-if.md) | FtileIfLongVertical (`!pragma useVerticalIf`) | typescript-pro | `if-dispatch.ts`, `layout/{conditional-builder,tile-layout,tile-coordinates}.ts`, `tiles/tile.ts`, new tile + walker, `tests/fixtures/activity/T1p-b/**` | 2 | [ ] |
+| [T1p-b](T1p-b-vertical-if.md) | FtileIfLongVertical (`!pragma useVerticalIf`) | typescript-pro | `if-dispatch.ts`, `layout/{conditional-builder,tile-layout,tile-coordinates}.ts`, `tiles/tile.ts`, new tile + walker, `tests/fixtures/activity/T1p-b/**` | 2 | [x] |
 
 All paths under `src/diagrams/activity/` unless stated; every task also owns
 its own new test files. A file a task needs that is not in its row: stop and

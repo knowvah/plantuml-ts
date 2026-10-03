@@ -35,6 +35,10 @@ walk-repeat-backward,walk-fork-branches,assign-coordinates-full,canvas-origin}.t
 `src/diagrams/activity/renderer.ts`, their tests, new tests.
 
 ## Acceptance
+- Given `tests/oracle/svg-conformance/activity-vertical-if-t1pb.test.ts`'s five
+  fixtures (pinned residual childCount +2, height +20: connectionIn + the
+  GtileTopDown sibling edge share the if's NORTH_HOOK), then the residual is
+  gone; update that test's pinned delta with the `Snake.java` quote.
 - Given journal row 14's six break-in-repeat rows (cixave, dacuga, mudobi,
   bizono, dixiku, doziki), then their extra weld-join arrowheads/lines are gone.
 - Given becaje-01-vaji284, bocaga-53-nale241, jecoxu-17-zama003, then the
