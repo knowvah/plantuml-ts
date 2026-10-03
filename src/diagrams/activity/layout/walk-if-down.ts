@@ -184,7 +184,16 @@ function connectionOut(ctx: IfDownCtx): void {
   if (!t.hasThenPointOut) return;
   const p1 = absolutePoint(t.mainTile.getCoord(SOUTH_HOOK), x + t.offsets.mainTileX, y + t.offsets.mainTileY);
   const p2 = diamond2Point(t, x, y, t.offsets.diamond2Left, t.offsets.diamond2PointInY);
-  pushEdge(out, [p1, p2], laneOut(t.mainTile, myLane), myLane);
+  const lane1 = laneOut(t.mainTile, myLane);
+  // IFDS (T3d, `lukoxa-16-cecu095`): `optionalStop !== null` means
+  // `diamond2` was replaced with a bare `new FtileEmpty(skinParam)`
+  // (`FtileIfDown.java:130-131`) carrying NO swimlane -- `ConnectionCross
+  // .java:58-60` skips the cross-lane draw and the edge stays inside the
+  // then-lane (`UGraphicInterceptorOneSwimlane.java:96-99`), never jogging
+  // back to the if's own ambient lane the way a real cross-lane diamond2
+  // would.
+  const lane2 = t.optionalStop !== null ? lane1 : myLane;
+  pushEdge(out, [p1, p2], lane1, lane2);
 }
 
 /** `ConnectionHorizontal` -- `diamond1` east point -> `optionalStop`'s own
