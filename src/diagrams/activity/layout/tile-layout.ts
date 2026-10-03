@@ -22,7 +22,8 @@ import { GtileLabel } from '../tiles/gtile-label.js';
 import { GtileGoto } from '../tiles/gtile-goto.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
-import { GtileRepeat } from '../tiles/gtile-repeat.js';
+import { GtileRepeat, RepeatConditionEmpty } from '../tiles/gtile-repeat.js';
+import type { RepeatConditionTile } from '../tiles/gtile-repeat.js';
 import { GtileRepeatEntry } from '../tiles/gtile-repeat-entry.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates } from './tile-coordinates.js';
@@ -189,7 +190,9 @@ function tileWhile(
   const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
-  return withSwimlane(new GtileWhile(header, body, bounder, theme, backwardTile), node.swimlane);
+  const specialOutTile = node.specialOut !== undefined ? tileSimpleLeaf(node.specialOut, bounder, theme) : undefined;
+  const ctx = { bounder, theme, backward: backwardTile, specialOut: specialOutTile };
+  return withSwimlane(new GtileWhile(header, body, ctx), node.swimlane);
 }
 
 /**
@@ -248,6 +251,24 @@ function selectRepeatBackConnection(node: ActivityRepeat, laneOrder: readonly st
 }
 
 /**
+ * `FtileRepeat.create`'s diamond2 slot (`:143-154`): a real condition
+ * hexagon, or {@link RepeatConditionEmpty} when this repeat has no test
+ * AND is the last instruction of its own parent list (`noOut &&
+ * Display.isNull(test)`, `:143-144`) -- `node.noOut` is set by
+ * `node-dispatch.ts#parseNodes` (D-new, family RNOOUT), `Display.isNull`
+ * is this port's empty-string `condition`.
+ */
+function tileRepeatCondition(
+  node: ActivityRepeat,
+  labels: { east?: string; west?: string; south?: string },
+  bounder: StringBounder,
+  theme: Theme,
+): RepeatConditionTile {
+  if (node.noOut === true && node.condition === '') return new RepeatConditionEmpty();
+  return new GtileDiamondInside(node.condition, labels, bounder, theme);
+}
+
+/**
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151
  *   -- `.withEast(yesTb).withSouth(outTb)`: the default (no `backward`,
  *   D1) branch puts the "is"/entry label east, the "not"/exit label south.
@@ -266,7 +287,7 @@ function tileRepeat(
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const labels = repeatConditionLabels(node, backward, laneOrder);
   const condition = withSwimlane(
-    new GtileDiamondInside(node.condition, labels, bounder, theme),
+    tileRepeatCondition(node, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
   );
   const backConnection = selectRepeatBackConnection(node, laneOrder);
@@ -323,12 +344,23 @@ const SIMPLE_LEAF_KINDS: ReadonlySet<string> = new Set<SimpleLeafKind>([
   'note',
 ]);
 
+/** Named alias for `isSimpleLeaf`'s type predicate and `tileSimpleLeaf`'s
+ *  own parameter -- same extraction `EarlyLeafNode` already has below,
+ *  for the same reason (a bare inline `Extract<...>` repeated at two call
+ *  sites is harder to scan, and this repo's own lizard reader has
+ *  previously desynced on an inline generic-plus-object-literal shape;
+ *  `.agent-notes/lizard-lt-in-object-literal.md`). */
+type SimpleLeafNode = Extract<
+  ActivityNode,
+  { kind: SimpleLeafKind }
+>;
+
 /** User-defined type guard (not a bare `Set.has`) so both `tileNode`
  *  branches narrow: the `if` arm to {@link SimpleLeafKind}, and -- just as
  *  important -- the switch below it to the COMPLEMENT, which is what lets
  *  that switch's `default: const _exhaustive: never = node` still
  *  type-check. */
-function isSimpleLeaf(node: ActivityNode): node is Extract<ActivityNode, { kind: SimpleLeafKind }> {
+function isSimpleLeaf(node: ActivityNode): node is SimpleLeafNode {
   return SIMPLE_LEAF_KINDS.has(node.kind);
 }
 
@@ -407,7 +439,7 @@ function tileEarlyLeaf(node: EarlyLeafNode): Tile | null {
  * new builders above" doc.
  */
 function tileSimpleLeaf(
-  node: Extract<ActivityNode, { kind: SimpleLeafKind }>,
+  node: SimpleLeafNode,
   bounder: StringBounder,
   theme: Theme,
 ): Tile {

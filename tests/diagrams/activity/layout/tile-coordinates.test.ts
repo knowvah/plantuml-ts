@@ -182,18 +182,19 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     // `GtileDiamondInside`, never a `GtileDiamond`.
     const header = new GtileDiamondInside('cond', {}, bounder, theme);
     const body = new GtileAction({ kind: 'action' as const, label: 'body' }, bounder, theme);
-    const whileTile = new GtileWhile(header, body, bounder, theme);
+    const whileTile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const c = new GtileAction({ kind: 'action' as const, label: 'c' }, bounder, theme);
     const root = new GtileTopDown([a, whileTile, c], bounder, theme);
     const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // node order is unaffected by D7 -- draws are node-then-its-own-edges
-    // per compound, walk order is unchanged: a, header(+its own label,
-    // T3k: a `'while-header'` polygon-only node plus a sibling
-    // `'if-own-label'` node, the header carries a real label 'cond' so it
-    // is no longer one combined node), body, c.
+    // per compound; WITHIN the while's own internals, WORD (mission
+    // add2-T3b, `FtileWhile.java:556-557`) draws `whileBlock` BEFORE
+    // `diamond1`: a, body, header(+its own label, T3k: a `'while-header'`
+    // polygon-only node plus a sibling `'if-own-label'` node, the header
+    // carries a real label 'cond' so it is no longer one combined node), c.
     expect(geo.nodes).toHaveLength(5);
-    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'cond', 'cond', 'body', 'c']);
+    expect(geo.nodes.map((n) => n.label)).toEqual(['a', 'body', 'cond', 'cond', 'c']);
     // altp-T4: In, Back, Out, Out2 (X's own internals) + a->X + X->c, SIX
     // pushes -- but T1b's `layout/snake-merge.ts` now fuses two pairs of
     // those end-to-start, down to 4 edges: `ConnectionOut`'s own two
@@ -207,7 +208,8 @@ describe('assignCoordinates — sibling link is drawn after both endpoints (D7/T
     const aBottom = geo.nodes[0]!.y + geo.nodes[0]!.height;
     const cTop = geo.nodes[4]!.y;
     // X's own origin y === the header's y (`GtileWhile.headerOffsetY === 0`).
-    const xTop = geo.nodes[1]!.y;
+    // WORD (mission add2-T3b) moved the header to index 2 (body now 1).
+    const xTop = geo.nodes[2]!.y;
     // Pre-compression upper bound (raw `whileTile.height`) -- compression
     // (T5, `compress-geometry.ts`) only ever REMOVES empty gaps, so a
     // compressed y can only be <= this raw estimate, never past it; used
@@ -298,7 +300,7 @@ describe('assignCoordinates — GtileTopDown aligns siblings on `left`, not cent
 describe('assignCoordinates — GtileWhile produces back-edge', () => {
   const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
   const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
   it('produces at least 2 nodes (diamond + action)', () => {
@@ -344,7 +346,7 @@ describe('assignCoordinates — GtileWhile produces back-edge', () => {
 describe('assignCoordinatesFull — GtileWhile emits a hexagon reservation', () => {
   const header = new GtileDiamondInside('loop?', {}, bounder, theme);
   const body = new GtileAction(actionNode, bounder, theme);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
   const full = assignCoordinatesFull({
     root: tile,
     ast: emptyAst,
@@ -388,7 +390,7 @@ describe('assignCoordinates — GtileWhile with an empty body draws ConnectionBa
   it('emits exactly 2 edges (BackEmpty, merged Out), no ConnectionIn', () => {
     const header = new GtileDiamondInside('loop?', {}, bounder, theme);
     const body = new GtileTopDown([], bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // T1b: `ConnectionOut`'s two snakes fuse (merge-case C) -- 2 edges.
@@ -405,7 +407,7 @@ describe('assignCoordinates — GtileWhile with an empty body draws ConnectionBa
   it('still reserves one 5x12 UEmpty beside the elbow (FtileWhile.java:459)', () => {
     const header = new GtileDiamondInside('loop?', {}, bounder, theme);
     const body = new GtileTopDown([], bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const full = assignCoordinatesFull({
       root: tile,
       ast: emptyAst,
@@ -430,7 +432,7 @@ describe('assignCoordinates — the while-header polygon is the hexagon-alone he
   it('uses the alone height, not the tile height that includes the north label', () => {
     const header = new GtileDiamondInside('loop?', { north: 'yes', west: 'no' }, bounder, theme);
     const body = new GtileTopDown([new GtileAction({ kind: 'action', label: 'a' }, bounder, theme)], bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     const headerNode = geo.nodes.find((n) => n.kind === 'while-header')!;
@@ -453,7 +455,7 @@ describe('assignCoordinates — GtileWhile with a body that has no point out (en
     // the only edges below are the while's own -- a wrapped sequence would
     // also add its own internal sibling edge, unrelated to this assertion.
     const body = new GtileStop();
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const full = assignCoordinatesFull({
       root: tile,
       ast: emptyAst,
@@ -481,7 +483,7 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
     const brk = new GtileBreak();
     const action2 = new GtileAction({ kind: 'action' as const, label: 'after', swimlane: 'default' }, bounder, theme);
     const body = new GtileTopDown([action1, brk, action2], bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
 
     // action1->brk (the body's OWN internal sibling edge, pushed while

@@ -161,7 +161,7 @@ describe('walkRepeat — backward set: node order and replaced back connection',
       { x: 175, y: 120 },
       { x: 175, y: 30 },
     ]);
-    expect(backward1.emphasize).toBe('up');
+    expect(backward1.emphasize).toBeUndefined();
   });
 
   it('ConnectionBackBackward1 exits on the LEFT when backward sits left of diamond2 centre', () => {

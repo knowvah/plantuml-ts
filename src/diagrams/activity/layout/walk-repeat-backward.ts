@@ -68,12 +68,14 @@ function backward2Points(frame: RepeatFrame, backNorth: GPoint): GPoint[] {
 }
 
 /**
- * Pushes `ConnectionBackBackward1` (diamond2 -> backward, `asToUp`,
- * `.emphasizeDirection(UP)`, `FtileRepeat.java:451`) then
- * `ConnectionBackBackward2` (backward -> diamond1/entry, `asToLeft`, no
- * emphasize -- `:500-501` never calls `emphasizeDirection`, unlike every
- * other repeat back-connector), matching `FtileRepeat.create`'s own
- * `conns.add` order (`:183,187`). `backPos` is `backward`'s own translated
+ * Pushes `ConnectionBackBackward1` (diamond2 -> backward, `asToUp`, NO
+ * emphasize -- `FtileRepeat.java:450-452` builds
+ * `Snake.create(skinParam(), arrowColor, asToUp()).withLabel(tbback,
+ * arrowHorizontalAlignment())` and never calls `emphasizeDirection`) then
+ * `ConnectionBackBackward2` (backward -> diamond1/entry, `asToLeft`, also
+ * no emphasize -- `:500-501` never calls `emphasizeDirection` either),
+ * matching `FtileRepeat.create`'s own `conns.add` order (`:183,187`).
+ * `backPos` is `backward`'s own translated
  * origin (`walk-repeat.ts`'s `backX`/`backY` = `t.backwardOffsetX/Y`
  * applied to this tile's own placement); `lanes` is backward's own
  * `laneIn`/`laneOut` (`swimlane-lanes.ts`), computed by the caller so this
@@ -96,8 +98,5 @@ export function pushRepeatBackwardConnections(
   };
 
   pushEdge(out, backward1Points(frame, backSouth), conditionOutLane, lanes.backIn);
-  const edge1 = out.edges[out.edges.length - 1]!;
-  edge1.emphasize = 'up';
-
   pushEdge(out, backward2Points(frame, backNorth), lanes.backOut, entryInLane);
 }

@@ -50,6 +50,7 @@ import {
 import { tryIf } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
 import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
+import { pushParsedNode } from './list-backward-dispatch.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
@@ -488,7 +489,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
 
     const result = dispatchLine(ctx, cursor, line, lc);
     if (isRefusal(result)) return result;
-    if (result.node !== undefined) nodes.push(result.node);
+    pushParsedNode(nodes, result.node); // WSPEC/RNOOUT, list-backward-dispatch.ts
     cursor = result.idx;
   }
 

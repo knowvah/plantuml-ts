@@ -177,6 +177,22 @@ export interface ActivityWhile {
   exitLabel?: string;
   body: ActivityNode[];
   swimlane?: string;
+  /**
+   * `ActivityDiagram3#manageSpecialStopEndAfterEndWhile` (`:177-192`): a
+   * bare `stop`/`end` immediately after this while's `endwhile`, when the
+   * body contains no `break` anywhere (recursively through every nested
+   * container -- `InstructionWhile.containsBreak()` -> `repeatList
+   * .containsBreak()`, `InstructionList.java:70-75`'s own recursion into
+   * every child instruction). Set by `node-dispatch.ts#parseNodes`, which
+   * consumes that stop/end as this field INSTEAD OF pushing it as an
+   * ordinary sibling (`InstructionWhile.setSpecial`, never `current()
+   * .add(ins)`, `ActivityDiagram3.java:162-165,171-174`). Drawn via
+   * `FtileWhile.java:513-552`'s `ConnectionOutSpecial`, which REPLACES the
+   * ordinary `ConnectionOut` entirely (`:163-166`) -- this while's own
+   * tile then reports `hasPointOut() === false` (`InstructionWhile.java:
+   * 128-129`'s `FtileKilled` wrap), same as a ordinary `stop`/`kill`.
+   */
+  specialOut?: ActivityStop | ActivityEnd;
 }
 
 export interface ActivityRepeat {
@@ -194,6 +210,17 @@ export interface ActivityRepeat {
   entry?: ActivityAction;
   body: ActivityNode[];
   condition: string;
+  /**
+   * `InstructionRepeat.isLastOfTheParent()` (`InstructionRepeat.java:
+   * 117-121,170`): `true` when this repeat is the LAST element of its own
+   * parent list -- set by `node-dispatch.ts#parseNodes` once that list
+   * finishes building (every such list, top-level or nested, is exactly
+   * one `parseNodes` call, mirroring one upstream `InstructionList`).
+   * Combined with an empty {@link condition} at tile-build time
+   * (`tile-layout.ts#tileRepeat`) to select {@link
+   * RepeatConditionEmpty} for diamond2 (`FtileRepeat.java:143-144`).
+   */
+  noOut?: boolean;
   /**
    * `is (…)` on `repeat while` -- the condition hexagon's east/north side
    * label, absent when not written or empty.

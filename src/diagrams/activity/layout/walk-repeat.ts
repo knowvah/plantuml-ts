@@ -25,8 +25,7 @@
  * `hexagon-reservations.ts` needs no new call site here.
  */
 
-import type { GtileRepeat, RepeatBackConnection } from '../tiles/gtile-repeat.js';
-import type { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { GtileRepeat, RepeatBackConnection, RepeatConditionTile } from '../tiles/gtile-repeat.js';
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
@@ -50,7 +49,7 @@ export interface RepeatFrame {
   readonly out: Out;
   readonly entry: Tile;
   readonly body: Tile;
-  readonly condition: GtileDiamondInside;
+  readonly condition: RepeatConditionTile;
   readonly entryX: number;
   readonly entryY: number;
   readonly bodyX: number;
@@ -111,7 +110,7 @@ interface RepeatOrigins {
   readonly condY: number;
   readonly entry: Tile;
   readonly body: Tile;
-  readonly condition: GtileDiamondInside;
+  readonly condition: RepeatConditionTile;
   readonly myLane: string | undefined;
   readonly out: Out;
   readonly bodyNodeStart: number;
@@ -163,17 +162,22 @@ function pushRepeatEntry(
  * resolves the condition's OWN `.swimlane` over the parent's inherited
  * `myLane`, same as `walkTile`'s own dispatch. The pushed node's `height`
  * is the hexagon-ALONE height, not `condition.height` (which would add a
- * north label's height, never set here, D1).
+ * north label's height, never set here, D1). D-new (RNOOUT): a
+ * {@link RepeatConditionEmpty} draws nothing at all (`FtileEmpty.drawU`
+ * is an empty body) -- the `kind` check below is this function's own
+ * narrowing guard, same discriminated-union idiom
+ * `walk-while-branch.ts#pushWhileHeader`'s own callers use elsewhere.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:150-151,210-219
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
  */
 function pushRepeatCondition(
-  condition: GtileDiamondInside,
+  condition: RepeatConditionTile,
   condX: number,
   condY: number,
   myLane: string | undefined,
   out: Out,
 ): void {
+  if (condition.kind === 'gtile-repeat-empty') return;
   const hexLane = laneAt(condition, myLane);
   const box = { x: condX, y: condY, width: condition.width, height: condition.getCoord(SOUTH_HOOK).y };
   pushNode(out, { id: out.nextId('repeat-cond'), kind: 'repeat-cond', ...box, label: condition.label }, hexLane);
@@ -231,7 +235,9 @@ function buildRepeatFrame(o: RepeatOrigins): RepeatFrame {
     tileX: x,
     tileY: y,
     tileWidth: t.width,
-    entryOffsetX: t.entryOffsetX, bodyOffsetX: t.bodyOffsetX, conditionOffsetX: t.conditionOffsetX,
+    entryOffsetX: t.entryOffsetX,
+    bodyOffsetX: t.bodyOffsetX,
+    conditionOffsetX: t.conditionOffsetX,
     backConnection: t.backConnection,
     entryOutLane: laneOut(entry, myLane),
     entryInLane: laneIn(entry, myLane),
