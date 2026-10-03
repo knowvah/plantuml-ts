@@ -1,0 +1,20 @@
+@startuml
+start
+
+if(a)
+    :b;
+elseif(c) then
+        :d;
+else(e)
+    if(f) then
+        :g;
+    elseif(h) then
+        :i;
+    else(j)
+        :k;
+    endif
+endif
+
+stop
+
+@enduml

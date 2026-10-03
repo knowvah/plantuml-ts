@@ -1,0 +1,9 @@
+@startuml
+if(somecheck) then
+    end
+else
+endif
+:moreSomething;
+:moreStuff;
+stop
+@enduml

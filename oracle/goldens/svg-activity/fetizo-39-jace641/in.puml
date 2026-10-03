@@ -1,0 +1,13 @@
+@startuml
+start
+if (condition A) then (yes)
+  :Text 1;
+elseif (condition B) then (yes)
+  :Text 2;
+else (not recognized)
+  :Text 3;
+  stop
+endif
+:do something;
+stop
+@enduml

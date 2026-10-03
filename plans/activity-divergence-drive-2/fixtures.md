@@ -68,7 +68,7 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | mafete-03-rapa918 | 8 | exact {} |  |  |  |  |
 | xekame-27-geba281 | 8 | exact {} |  |  |  |  |
 | foludi-80-gilo247 | 10 | exact {} | Worm emphasize arrowhead before its segment, terminal decoration last (Worm.java:134-171); residual per journal row 37 |  |  |  |
-| fivama-51-cusa142 | 12 | exact {} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 |  |  |  |
+| fivama-51-cusa142 | 12 | exact {} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 | T1b | snake merge 12->0 | pinned (add2-b1) |
 | dakesa-98-mano758 | 13 | exact {} | gradient BackgroundColor (theme field typed string, not Paint); residual per journal row 41 |  |  |  |
 | fabule-54-pili300 | 22 | text-only {text: -2} | creole table / %n() / ____ in action text; residual per journal row 40 |  |  |  |
 | laxibe-66-teme800 | 26 | exact {} | creole [[url{tip}label]] in action text; residual per journal row 40 |  |  |  |
@@ -92,73 +92,73 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | nesozi-09-zezu092 | 48 | text-only {text: -1} |  |  |  |  |
 | citire-32-mive114 | 49 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
 | nexitu-74-luga914 | 51 | exact {} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 |  |  |  |
-| fibafo-22-foze119 | 52 | extra line only {line: 2} |  |  |  |  |
-| novata-87-muti352 | 53 | extra line+arrow {polygon: 1, line: 1} | ConditionStyle InsideDiamond (unported style); residual per journal row 42 |  |  |  |
-| becaje-01-vaji284 | 54 | extra line+arrow {polygon: 1, line: 1} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 |  |  |  |
-| jecoxu-17-zama003 | 54 | extra line+arrow {polygon: 1, line: 1} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 |  |  |  |
+| fibafo-22-foze119 | 52 | extra line only {line: 2} |  | T1b | snake merge 52->0 | pinned (add2-b1) |
+| novata-87-muti352 | 53 | extra line+arrow {polygon: 1, line: 1} | ConditionStyle InsideDiamond (unported style); residual per journal row 42 | T1b | snake merge 53->22 |  |
+| becaje-01-vaji284 | 54 | extra line+arrow {polygon: 1, line: 1} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 | T1b | snake merge 54->0 | pinned (add2-b1) |
+| jecoxu-17-zama003 | 54 | extra line+arrow {polygon: 1, line: 1} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 | T1b | snake merge 54->0 | pinned (add2-b1) |
 | bazuma-86-metu353 | 57 | exact {} | multiline branch label height + one <text> per line; residual per journal row 42 |  |  |  |
-| bozuro-33-celo170 | 58 | extra arrow only {polygon: 2} | repeat entry diamond: Hexagon.asPolygon(shadowing) closed, stroke 0.5; residual per journal row 42 |  |  |  |
+| bozuro-33-celo170 | 58 | extra arrow only {polygon: 2} | repeat entry diamond: Hexagon.asPolygon(shadowing) closed, stroke 0.5; residual per journal row 42 | T1b | snake merge 58->31 |  |
 | racana-82-zece676 | 58 | exact {} |  |  |  |  |
 | saxeku-17-gume203 | 58 | extra line+arrow {polygon: 1, line: 1} | ConditionEndStyle hline (FtileIfDown.java:147-150); residual per journal row 42 | T1p-a | HLINE ConnectionHline FtileIfWithLinks.java:421-500 | pinned (add2-b1p) |
 | kenizo-43-siro273 | 60 | extra arrow only {polygon: 1} | backward: box + connectors unported (activity-loop-backward); residual per journal row 43/47 |  |  |  |
 | cifafo-49-jazi415 | 63 | exact {} | title/legend chrome offsets (shared core/annotations/chrome.ts, DiagramChromeFactory); residual per journal row 36/49/52 |  |  |  |
 | xizola-97-sizu458 | 63 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
-| geremo-94-tecu179 | 64 | extra line+arrow {polygon: 2, line: 1} |  |  |  |  |
-| navene-45-cozo466 | 64 | extra arrow only {polygon: 1} |  |  |  |  |
-| bocaga-53-nale241 | 66 | extra line+arrow {polygon: 2, line: 2} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 |  |  |  |
-| gacaja-15-keko600 | 66 | exact {} |  |  |  |  |
+| geremo-94-tecu179 | 64 | extra line+arrow {polygon: 2, line: 1} |  | T1b | snake merge 64->38 |  |
+| navene-45-cozo466 | 64 | extra arrow only {polygon: 1} |  | T1b | snake merge 64->20 |  |
+| bocaga-53-nale241 | 66 | extra line+arrow {polygon: 2, line: 2} | touching edges not fused (Snake.merge, Snake.java:303-327); residual per journal row 44 | T1b | snake merge 66->0 | pinned (add2-b1) |
+| gacaja-15-keko600 | 66 | exact {} |  | T1b | snake merge 66->6 |  |
 | luxido-91-covi016 | 66 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
 | xidamu-85-xoti640 | 66 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
 | bigide-91-bise382 | 67 | mixed {line: -2, text: 1} | title/legend chrome offsets (shared core/annotations/chrome.ts, DiagramChromeFactory); residual per journal row 36/49/52 |  |  |  |
 | reluvi-59-pifi444 | 67 | exact {} |  |  |  |  |
 | sadovu-51-fata536 | 67 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
 | gufuma-85-zoce945 | 68 | text-only {text: 5} | embedded {{ }} diagram: oracle 42x42 slot (memory oracle-seam-embedded-42x42) |  |  |  |
-| delide-30-teva601 | 69 | extra line+arrow {polygon: 2, line: 3} |  |  |  |  |
+| delide-30-teva601 | 69 | extra line+arrow {polygon: 2, line: 3} |  | T1b | snake merge 69->46 |  |
 | cemagu-66-vazo965 | 72 | exact {} |  |  |  |  |
-| felega-00-saxi785 | 72 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
-| saxuro-16-tezu631 | 73 | exact {} |  |  |  |  |
+| felega-00-saxi785 | 72 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 72->8 |  |
+| saxuro-16-tezu631 | 73 | exact {} |  | T1b | snake merge 73->61 |  |
 | carapo-31-bisi880 | 77 | exact {} | ConditionStyle InsideDiamond (unported style); residual per journal row 42 |  |  |  |
 | cubida-55-meku256 | 78 | extra line+arrow {polygon: 1, line: 1} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
-| dozaxu-98-xetu961 | 78 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
-| kafevi-44-tesu096 | 79 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
-| katopo-68-xajo866 | 79 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
+| dozaxu-98-xetu961 | 78 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 78->23 |  |
+| kafevi-44-tesu096 | 79 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 79->39 |  |
+| katopo-68-xajo866 | 79 | extra line+arrow {polygon: 1, line: 1} |  | T1b | snake merge 79->12 |  |
 | vimoxa-78-zucu656 | 80 | extra line+arrow {polygon: 1, line: 1, text: 1} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
-| vaxuta-95-cico162 | 81 | extra line+arrow {polygon: 1, line: 1} | if own-label vs branch-label order (unresolved: GtileHexagonInsideLabelled vs jar SVG) — instrument first; residual per journal row 42 |  |  |  |
+| vaxuta-95-cico162 | 81 | extra line+arrow {polygon: 1, line: 1} | if own-label vs branch-label order (unresolved: GtileHexagonInsideLabelled vs jar SVG) — instrument first; residual per journal row 42 | T1b | snake merge 81->0 | pinned (add2-b1) |
 | notuli-49-xugi698 | 82 | extra line only {rect: -1, line: 2, path: -2, text: -2} |  |  |  |  |
-| vupuse-73-nuso490 | 82 | extra arrow only {polygon: 2} |  |  |  |  |
+| vupuse-73-nuso490 | 82 | extra arrow only {polygon: 2} |  | T1b | snake merge 82->55 |  |
 | jevoce-05-mumi686 | 83 | extra line only {line: 2} |  |  |  |  |
 | cemipu-87-dinu624 | 84 | exact {} |  |  |  |  |
 | norire-15-taka956 | 85 | exact {} | note spike tip never computed (Opale getPolygonLeft/Right dead); residual per journal row 44 |  |  |  |
 | fikuki-99-kulu790 | 88 | text-only {text: 10} | embedded {{ }} diagram: oracle 42x42 slot (memory oracle-seam-embedded-42x42) |  |  |  |
-| gevaxi-80-tone223 | 89 | extra line+arrow {polygon: 1, line: 1} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 |  |  |  |
+| gevaxi-80-tone223 | 89 | extra line+arrow {polygon: 1, line: 1} | gtile-top-down sibling edge lacks hasPointOut() gate (InstructionList/FtileFactoryDelegatorAssembly hasPointOut); residual per journal row 44 | T1b | snake merge 89->34 |  |
 | lukoxa-16-cecu095 | 92 | extra line+arrow {polygon: 1, line: 3} |  |  |  |  |
-| cixave-47-milo698 | 97 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d | weld 97->165 (D7 reveal, journal 14); weld-join arrowheads -> T1b |  |
-| biredi-08-bama025 | 98 | extra arrow only {polygon: 1} |  |  |  |  |
+| cixave-47-milo698 | 97 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d+T1b | weld 97->165 (D7 reveal, journal 14); weld-join arrowheads -> T1b; snake merge 165->10 |  |
+| biredi-08-bama025 | 98 | extra arrow only {polygon: 1} |  | T1b | snake merge 98->3 |  |
 | pezubu-98-niba240 | 101 | extra line+arrow {polygon: 1, line: 2} |  | T1p-a/T1p-g | HLINE 101->64; residual out1X/out2X width (gtile-if-with-links) + snake merge |  |
-| gelono-70-zuce760 | 102 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
-| sofoje-37-tila554 | 105 | extra line+arrow {polygon: 2, line: 1} |  |  |  |  |
+| gelono-70-zuce760 | 102 | extra line+arrow {polygon: 2, line: 2} |  | T1b | snake merge 102->6 |  |
+| sofoje-37-tila554 | 105 | extra line+arrow {polygon: 2, line: 1} |  | T1b | snake merge 105->2 |  |
 | liteza-62-nopo771 | 106 | extra arrow only {polygon: 2} |  |  |  |  |
 | nikinu-06-sace939 | 107 | exact {} |  |  |  |  |
 | vokibe-29-vepe451 | 107 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
-| caciva-80-kene990 | 109 | extra line+arrow {polygon: 2, line: 2, path: -1, text: -1} | partition title not threaded onto the composite node; residual per journal row 44 |  |  |  |
+| caciva-80-kene990 | 109 | extra line+arrow {polygon: 2, line: 2, path: -1, text: -1} | partition title not threaded onto the composite node; residual per journal row 44 | T1b | snake merge 109->81 |  |
 | sifite-87-ziti434 | 109 | extra line+arrow {polygon: 1, line: 1, path: -1, text: -1} |  |  |  |  |
 | jipapo-14-kevu587 | 110 | extra line+arrow {polygon: 1, line: 1} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
-| sutura-08-zeme419 | 112 | extra line+arrow {polygon: 3, line: 3} |  |  |  |  |
+| sutura-08-zeme419 | 112 | extra line+arrow {polygon: 3, line: 3} |  | T1b | snake merge 112->0 | pinned (add2-b1) |
 | nijipa-25-pede639 | 113 | extra line+arrow {polygon: 1, line: 1} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
-| xovano-23-tazo278 | 114 | exact {} |  |  |  |  |
-| vaxiki-78-nice114 | 117 | extra line+arrow {polygon: 2, line: 2, text: -2} |  |  |  |  |
-| lifeve-53-zubi598 | 118 | extra line+arrow {polygon: 4, line: 3} |  |  |  |  |
+| xovano-23-tazo278 | 114 | exact {} |  | T1b | snake merge 114->102 |  |
+| vaxiki-78-nice114 | 117 | extra line+arrow {polygon: 2, line: 2, text: -2} |  | T1b | snake merge 117->77 |  |
+| lifeve-53-zubi598 | 118 | extra line+arrow {polygon: 4, line: 3} |  | T1b | snake merge 118->0 | pinned (add2-b1) |
 | mifejo-31-sovi184 | 118 | extra line+arrow {polygon: 2, line: 2} | note BackGroundColor #FEFFDD (plantuml.skin note SName); residual per journal row 41 |  |  |  |
 | gesogi-81-xoma900 | 120 | exact {} |  |  |  |  |
 | labala-74-juki864 | 120 | exact {} |  |  |  |  |
-| mudobi-07-biji996 | 121 | missing line+arrow {polygon: -2, line: -2, path: -1, text: -1} |  | T1p-d | weld 121->290 (D7 reveal, journal 14); weld-join arrowheads/lines -> T1b |  |
-| fetizo-39-jace641 | 122 | extra arrow only {polygon: 1} |  |  |  |  |
+| mudobi-07-biji996 | 121 | missing line+arrow {polygon: -2, line: -2, path: -1, text: -1} |  | T1p-d+T1b | weld 121->290 (D7 reveal, journal 14); weld-join arrowheads/lines -> T1b; snake merge 290->81 |  |
+| fetizo-39-jace641 | 122 | extra arrow only {polygon: 1} |  | T1b | snake merge 122->0 | pinned (add2-b1) |
 | mojezi-43-gamu360 | 122 | extra line only {line: 2} |  | T1p-e | switch cross-lane connectors 122->106 |  |
-| maketa-43-juja264 | 123 | extra line+arrow {polygon: 1, line: 5} |  |  |  |  |
-| cujoni-21-somi079 | 124 | extra arrow only {polygon: 1} |  |  |  |  |
-| decudi-92-bisu741 | 124 | extra line+arrow {polygon: 1, line: 5} |  |  |  |  |
+| maketa-43-juja264 | 123 | extra line+arrow {polygon: 1, line: 5} |  | T1b | snake merge 123->50 |  |
+| cujoni-21-somi079 | 124 | extra arrow only {polygon: 1} |  | T1b | snake merge 124->131 (D7 reveal: element counts now exact) |  |
+| decudi-92-bisu741 | 124 | extra line+arrow {polygon: 1, line: 5} |  | T1b | snake merge 124->51 |  |
 | copisa-69-xisi273 | 125 | text-only {text: -2} |  |  |  |  |
-| kijazo-83-kipu485 | 125 | extra line only {line: 2} |  |  |  |  |
+| kijazo-83-kipu485 | 125 | extra line only {line: 2} |  | T1b | snake merge 125->222 (D7 reveal: element counts now exact) |  |
 | loxija-71-joku558 | 126 | exact {} |  |  |  |  |
 | lidefe-01-vaki092 | 128 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
 | lafilo-69-tuti771 | 131 | text-only {text: -2} |  |  |  |  |
@@ -166,15 +166,15 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 | xabesu-51-dimi831 | 134 | text-only {text: -3} |  |  |  |  |
 | suluni-73-lotu140 | 135 | mixed {path: -1, text: -1} |  |  |  |  |
 | kavoro-11-jife299 | 137 | extra line+arrow {polygon: 2, line: 2} |  |  |  |  |
-| bulasi-17-vafa634 | 138 | exact {} |  |  |  |  |
-| dacuga-41-popo038 | 140 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d | weld 140->146 (D7 reveal, journal 14); weld-join arrowheads -> T1b |  |
-| nomeco-93-minu967 | 141 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
-| rurebu-12-nebi203 | 141 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
+| bulasi-17-vafa634 | 138 | exact {} |  | T1b | snake merge 138->78 |  |
+| dacuga-41-popo038 | 140 | missing line+arrow {polygon: -1, line: -4} |  | T1p-d+T1b | weld 140->146 (D7 reveal, journal 14); weld-join arrowheads -> T1b; snake merge 146->10 |  |
+| nomeco-93-minu967 | 141 | extra line+arrow {polygon: 1, line: 2} |  | T1b | snake merge 141->135 |  |
+| rurebu-12-nebi203 | 141 | extra line+arrow {polygon: 1, line: 2} |  | T1b | snake merge 141->135 |  |
 | jagove-43-nako107 | 142 | exact {} |  |  |  |  |
-| nafaxo-62-boso912 | 146 | extra arrow only {polygon: 1} |  |  |  |  |
-| pekefu-66-mepa144 | 146 | extra line+arrow {polygon: 2, line: 1, text: -1} |  |  |  |  |
-| cutabu-59-cilo276 | 148 | extra line+arrow {polygon: 1, line: 2} |  |  |  |  |
-| vivate-04-guso306 | 148 | extra line+arrow {polygon: 2, line: 1} |  |  |  |  |
+| nafaxo-62-boso912 | 146 | extra arrow only {polygon: 1} |  | T1b | snake merge 146->167 (D7 reveal: element counts now exact) |  |
+| pekefu-66-mepa144 | 146 | extra line+arrow {polygon: 2, line: 1, text: -1} |  | T1b | snake merge 146->42 |  |
+| cutabu-59-cilo276 | 148 | extra line+arrow {polygon: 1, line: 2} |  | T1b | snake merge 148->142 |  |
+| vivate-04-guso306 | 148 | extra line+arrow {polygon: 2, line: 1} |  | T1b | snake merge 148->4 |  |
 | gofebi-87-zeka817 | 149 | extra line+arrow {polygon: 1, line: 1} |  |  |  |  |
 
 ## Parse `error` rows (D6)
@@ -225,11 +225,47 @@ element shape from `measurements/b0-elements.json` (`ours − jar` per tag).
 
 | slug | ws (b0) | element shape (b0) | add1 mechanism | task | mechanism | final |
 |---|---|---|---|---|---|---|
-| bizono-61-sasa740 | >150 |  |  | T1p-d | break weld 243->209; residual weld-join arrowheads -> T1b |  |
-| dixiku-28-guzo497 | >150 |  |  | T1p-d | GtileBreak 0x0 + weld 169->141; weld-join arrowheads -> T1b |  |
-| doziki-93-rosi997 | >150 |  |  | T1p-d | break weld 273->244; residual weld-join arrowheads -> T1b |  |
-| jucidi-98-zato093 | >150 |  |  | T1p-g | HLINE per-lane fan-out 169->176 (count reveal); coupleX vs SOUTH_HOOK out-x |  |
-| nerete-42-save418 | >150 |  |  | T1p-d | GtileBreak 0x0 356->354 |  |
-| pixako-75-kumi821 | >150 |  |  | T1p-d | GtileBreak 0x0 197->184 |  |
+| bizono-61-sasa740 | >150 |  |  | T1p-d+T1b | break weld 243->209; residual weld-join arrowheads -> T1b; snake merge 209->14 |  |
+| dixiku-28-guzo497 | >150 |  |  | T1p-d+T1b | GtileBreak 0x0 + weld 169->141; weld-join arrowheads -> T1b; snake merge 141->10 |  |
+| doziki-93-rosi997 | >150 |  |  | T1p-d+T1b | break weld 273->244; residual weld-join arrowheads -> T1b; snake merge 244->14 |  |
+| jucidi-98-zato093 | >150 |  |  | T1p-g+T1b | HLINE per-lane fan-out 169->176 (count reveal); coupleX vs SOUTH_HOOK out-x; snake merge 176->83 |  |
+| nerete-42-save418 | >150 |  |  | T1p-d+T1b | GtileBreak 0x0 356->354; snake merge 354->177 |  |
+| pixako-75-kumi821 | >150 |  |  | T1p-d+T1b | GtileBreak 0x0 197->184; snake merge 184->118 |  |
 | ruzazu-94-meso880 | >150 |  |  | T1p-e | switch cross-lane 173->164; BIG_DIAMOND in jar, SMALL here (case widths) |  |
 | tmp1 | >150 |  |  | T1p-e | duplicate of ruzazu-94-meso880 (pinned since 9524864ff); follow-on |  |
+
+## Rows above ws 150 that moved in b1 (T1b snake merge)
+
+| slug | ws (b1p) | ws (b1) | task | mechanism | final |
+|---|---|---|---|---|---|
+| bareka-88-fusu160 | 253 | 115 | T1b | snake merge |  |
+| bazize-75-dedo568 | 192 | 5 | T1b | snake merge |  |
+| bepuku-07-vebe062 | 172 | 0 | T1b | snake merge | pinned (add2-b1) |
+| besaga-58-poli497 | 266 | 210 | T1b | snake merge |  |
+| boxoto-53-sifo232 | 449 | 14 | T1b | snake merge |  |
+| camavo-50-kaku123 | 180 | 126 | T1b | snake merge |  |
+| fatuzu-07-cevu894 | 272 | 220 | T1b | snake merge |  |
+| fovaja-48-leso567 | 268 | 144 | T1b | snake merge |  |
+| gitoke-38-beme495 | 306 | 1 | T1b | snake merge |  |
+| jafuli-91-sota277 | 157 | 0 | T1b | snake merge | pinned (add2-b1) |
+| jageti-56-kume076 | 188 | 182 | T1b | snake merge |  |
+| japeru-28-guku001 | 495 | 347 | T1b | snake merge |  |
+| judatu-15-xize591 | 370 | 353 | T1b | snake merge |  |
+| jupivo-67-gidi531 | 263 | 209 | T1b | snake merge |  |
+| jupoxe-15-sugo110 | 1825 | 1822 | T1b | snake merge |  |
+| kodaku-19-moni161 | 251 | 212 | T1b | snake merge |  |
+| leduvi-16-voli986 | 280 | 261 | T1b | snake merge |  |
+| levuma-67-cego489 | 197 | 101 | T1b | snake merge |  |
+| lopone-15-xiki477 | 274 | 216 | T1b | snake merge |  |
+| lufamo-62-xavo766 | 197 | 0 | T1b | snake merge | pinned (add2-b1) |
+| mabuke-20-muco282 | 343 | 299 | T1b | snake merge |  |
+| nikivo-06-kaxa873 | 241 | 330 | T1b | snake merge (D7 reveal) |  |
+| nojije-35-teta491 | 244 | 115 | T1b | snake merge |  |
+| rosepa-78-xivi448 | 352 | 291 | T1b | snake merge |  |
+| rucuga-83-tosu408 | 207 | 136 | T1b | snake merge |  |
+| rujuxa-07-neco067 | 158 | 18 | T1b | snake merge |  |
+| ruzica-16-deli877 | 463 | 697 | T1b | snake merge (D7 reveal) |  |
+| vamazo-19-tufu812 | 297 | 269 | T1b | snake merge |  |
+| vebala-15-tade547 | 289 | 8 | T1b | snake merge |  |
+| xefalo-73-sabi101 | 371 | 318 | T1b | snake merge |  |
+| zeporo-46-zicu301 | 314 | 135 | T1b | snake merge |  |

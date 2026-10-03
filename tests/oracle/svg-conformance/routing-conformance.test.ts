@@ -840,10 +840,13 @@ describe('routing conformance — jar-error classification', () => {
     // the 4 `end merge` dot-cache rows (jevofu, mepeze, xoreko, zokuni) now
     // render as ACTIVITY and are re-pinned `agree` (CommandForkEnd3.java:57-81),
     // plus 5 svg-activity clone rows. Derivation: 5175 + 905 + 105 = 6185.
-    expect(pinnedAgree.length).toBe(5175);
+    //
+    // 5175 -> 5187 / 6185 -> 6197 at add2/close-b1 (2026-10-03): 12 more
+    // svg-activity clone rows, same shape. Derivation: 5187 + 905 + 105 = 6197.
+    expect(pinnedAgree.length).toBe(5187);
     expect(pinnedMisroutes.length).toBe(905);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6185);
+    expect(manifest.fixtures.length).toBe(6197);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

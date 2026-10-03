@@ -1,0 +1,13 @@
+@startuml
+start
+if (?) then (1)
+    :Something;
+else (2)
+    if (?) then (x)
+        stop
+    else (y)
+        stop
+    endif
+endif
+stop
+@enduml

@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
-  "measuredAt": "2026-10-02",
-  "measuredAgainstCommit": "bdf8b1e2",
+  "measuredAt": "2026-10-03",
+  "measuredAgainstCommit": "d018a56f",
   "fixtures": [
     {
       "type": "activity",
@@ -1058,7 +1058,7 @@
           }
         ],
         "width": "189",
-        "height": "308"
+        "height": "300"
       },
       "jar": {
         "dividerXs": [
@@ -1718,7 +1718,7 @@
           }
         ],
         "width": "359",
-        "height": "311"
+        "height": "291"
       },
       "jar": {
         "dividerXs": [
@@ -1934,7 +1934,7 @@
         "bandRect": null,
         "lanes": [],
         "width": "162",
-        "height": "309"
+        "height": "303"
       },
       "jar": {
         "dividerXs": [],
@@ -2090,7 +2090,7 @@
           }
         ],
         "width": "584",
-        "height": "370"
+        "height": "379"
       },
       "jar": {
         "dividerXs": [
@@ -3158,7 +3158,7 @@
           }
         ],
         "width": "610",
-        "height": "1053"
+        "height": "1049"
       },
       "jar": {
         "dividerXs": [
@@ -3507,7 +3507,7 @@
           }
         ],
         "width": "295",
-        "height": "417"
+        "height": "382"
       },
       "jar": {
         "dividerXs": [
@@ -4907,7 +4907,7 @@
           }
         ],
         "width": "529",
-        "height": "604"
+        "height": "607"
       },
       "jar": {
         "dividerXs": [
@@ -6387,7 +6387,7 @@
           }
         ],
         "width": "410",
-        "height": "583"
+        "height": "559"
       },
       "jar": {
         "dividerXs": [
