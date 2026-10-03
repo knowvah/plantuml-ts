@@ -48,6 +48,9 @@ export interface SkinparamAccumulator {
   /** T1p-a: `skinparam ConditionEndStyle hline` -- see `theme.ts
    *  #conditionEndStyle`'s own doc comment. */
   conditionEndStyle: 'diamond' | 'hline' | undefined;
+  /** T2c (ex-T2a): `skinparam ConditionStyle InsideDiamond` -- see
+   *  `theme.ts#conditionStyle`'s own doc comment. */
+  conditionStyle: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond' | undefined;
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
@@ -249,6 +252,7 @@ const SCALAR_FIELD_NAMES = [
   'roundCorner',
   'componentStyle',
   'conditionEndStyle',
+  'conditionStyle',
   'actorStyle',
   'minimumWidth',
   'strictUml',

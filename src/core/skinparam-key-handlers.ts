@@ -41,6 +41,7 @@ import { isColorSpec, resolveColor } from './skinparam-key-normalize.js';
 import type { KeyHandler } from './skinparam-key-handlers-shared.js';
 import { KEY_HANDLERS_A } from './skinparam-key-handlers-table-a.js';
 import { KEY_HANDLERS_B } from './skinparam-key-handlers-table-b.js';
+import { KEY_HANDLERS_C } from './skinparam-key-handlers-table-c.js';
 
 // ---------------------------------------------------------------------------
 // Key → handler table
@@ -51,6 +52,7 @@ import { KEY_HANDLERS_B } from './skinparam-key-handlers-table-b.js';
 const KEY_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   ...KEY_HANDLERS_A,
   ...KEY_HANDLERS_B,
+  ...KEY_HANDLERS_C,
 ];
 
 const KEY_HANDLER_MAP: ReadonlyMap<string, KeyHandler> = new Map(

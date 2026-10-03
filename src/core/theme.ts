@@ -75,6 +75,8 @@ export interface Theme {
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
   /** T1p-a: `skinparam ConditionEndStyle hline` (`svek/ConditionEndStyle.java`; `SkinParam.java:1007-1013`, default `diamond` on an absent/unrecognized value). Consumed by `conditional-builder.ts`'s `buildIfDown`/`buildIfWithLinks` (`FtileFactoryDelegatorIf.java:75`, `ConditionalBuilder.java:149,537,546`). */
   conditionEndStyle?: 'diamond' | 'hline';
+  /** T2c: `skinparam ConditionStyle InsideDiamond` (`svek/ConditionStyle.java:41-64`, default `insideHexagon`); consumer: `activity-renderer-if-shapes.ts`. */
+  conditionStyle?: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
   /** `skinparam actorStyle awesome|hollow|stickman` (`SkinParam.java:1209-
    *  1218`'s `actorStyle()`: case-insensitive `getValue("actorstyle")`,
    *  `"awesome"` → `ActorStyle.AWESOME`, `"hollow"` → `ActorStyle.HOLLOW`,
@@ -396,6 +398,7 @@ export type ThemeOverride = {
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
   /** See {@link Theme.conditionEndStyle}'s own doc comment (T1p-a). */
   conditionEndStyle?: 'diamond' | 'hline';
+  /** See {@link Theme.conditionStyle}'s own doc comment (T2c). */ conditionStyle?: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;

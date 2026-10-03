@@ -58,6 +58,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['tabSize', (acc) => acc.tabSize],
   ['componentStyle', (acc) => acc.componentStyle],
   ['conditionEndStyle', (acc) => acc.conditionEndStyle], // T1p-a
+  ['conditionStyle', (acc) => acc.conditionStyle], // T2c
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],

@@ -31,6 +31,7 @@ const OPTIONAL_SCALAR_KEYS = [
   'fixCircleLabelOverlapping',
   'componentStyle',
   'conditionEndStyle', // T1p-a
+  'conditionStyle', // T2c
   'actorStyle',
   'minimumWidth',
   'strictUml',
