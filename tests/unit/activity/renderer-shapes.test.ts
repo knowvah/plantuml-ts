@@ -804,7 +804,14 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
   it('partition: unfilled rect, black stroke, LineThickness 1.5 -- not the generic node fill', () => {
     const node = makeNode({ kind: 'partition', x: 16, y: 45, width: 138.4, height: 122 });
     const svg = renderNode(node, theme);
-    expect(svg).toBe('<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>');
+    // Mission `activity-divergence-drive-2` T3g: `USymbolFrame#drawFrame`
+    // (`decoration/symbol/USymbolFrame.java:68-97`) also draws the title-tab
+    // underline `<path>` unconditionally, even with no title (`node.label`
+    // unset here) -- `getWTitle`'s own untitled fallback, `width/3`.
+    expect(svg).toBe(
+      '<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>' +
+        '<path d="M62.133,45 L62.133,50 L55.133,57 L16,57" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
   });
 
   it('group: same composite styling as partition (FromSkinparamToStyle.java:131-132, ONE SName for both)', () => {

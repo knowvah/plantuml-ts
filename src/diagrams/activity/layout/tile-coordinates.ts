@@ -462,7 +462,11 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
  */
 function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: string | undefined, out: Out): void {
   const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
-  pushNode(out, { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height }, myLane);
+  pushNode(
+    out,
+    { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height, label: tile.title },
+    myLane,
+  );
   if (tile.children.length === 0) return;
   // D1 (T1b): `FtileGroup` opens its own nested `UGraphicForSnake`
   // (`decisions.md#D1`) -- a pushed scope id so `snake-merge.ts` never
