@@ -17,7 +17,7 @@ the origin, apply to every row the census tags with it, pin with a test. Measure
 probe Σ + element census before/after each commit. Report rows that reach 0.
 
 ## Write-set
-`layout/{tile-layout,tile-layout-structural,tile-coordinates}.ts`, `tiles/{gtile-top-down,gtile-note,gtile-group,gtile-partition}.ts`, `layout/compress/**`, `activity-renderer-shapes.ts`, `activity-layout-constants.ts` (note margins), their tests.
+`layout/{tile-layout,tile-layout-structural,tile-layout-backward,tile-coordinates}.ts`, `tiles/{gtile-top-down,gtile-note,gtile-group,gtile-partition}.ts`, `layout/compress/**` EXCEPT `shapes-of.ts` (T3f), `activity-renderer-shapes.ts#renderComposite` ONLY (T3h owns the rest of that file; prefer a new `activity-renderer-composite.ts` called from one line), `activity-layout-constants.ts` (note margins), their tests.
 Anything else: stop and report (re-slot with mechanism + owner).
 
 ## Acceptance
