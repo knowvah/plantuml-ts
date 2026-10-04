@@ -17,6 +17,9 @@ describe('DARK_MODE_DEFAULTS', () => {
       text: '#FFF',
       classBackground: '#313139',
       spotClassBackground: '#2E5233',
+      // add2 T3h: `activityDiagram{circle{start,stop,end{...#d}}}` (:687-692).
+      // Unshortened (6-digit) -- `shortenColor` runs at SVG emission, not here.
+      activityCircleInk: '#DDDDDD',
     });
   });
 });

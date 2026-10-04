@@ -33,16 +33,22 @@ export interface DiamondInsideLabels {
  * with identically-shaped private members are NOT structurally
  * assignable to each other) makes a formal interface the only way to let
  * `GtileDiamondSquare` (T2c, `skinparam ConditionStyle InsideDiamond`)
- * stand in wherever `GtileDiamondInside` is accepted today. Consumers
- * (`gtile-if-down.ts`, `gtile-if-with-links.ts`) still type their
- * `diamond1` param as the concrete `GtileDiamondInside` class as of this
- * writing -- widening those two call sites to this interface is the
- * follow-on that actually wires `InsideDiamond` end to end (re-slotted:
- * both files are outside this task's write-set, one of them owned by a
- * concurrent task). `GtileDiamondInside implements` it below so the
- * surface is enforced at compile time the moment that widening lands.
+ * stand in wherever `GtileDiamondInside` is accepted today. add2 T3h
+ * widened `gtile-if-down.ts`'s and `gtile-if-with-links.ts`'s `diamond1`
+ * params (and `conditional-builder.ts`'s own construction) to this
+ * interface, wiring `InsideDiamond` end to end. `GtileDiamondInside
+ * implements` it below so the surface is enforced at compile time.
  */
 export interface DiamondConditionTile {
+  // add2 T3h: `kind`/`swimlane`/`swimlaneOut` added so this interface is
+  // ALSO a structural `Tile` (`tiles/tile.ts`) -- `walk-if-down.ts`/
+  // `walk-if-with-links.ts` (T3f's write-set, not touched) pass `diamond1`
+  // to several `Tile`-typed parameters; both concrete classes already
+  // carry these fields via `TileLeaf`, so this is a widening, not a new
+  // requirement on either implementer.
+  readonly kind: string;
+  readonly swimlane?: string;
+  readonly swimlaneOut?: string;
   readonly label: string;
   readonly width: number;
   readonly height: number;

@@ -1106,10 +1106,12 @@ describe('resolveColor', () => {
     expect(theme.colors.background).toBe('white');
   });
 
-  it('applies to activityBackgroundColor skinparam with gradient', () => {
+  it('add2 T3h (family PAINT): activityBackgroundColor keeps a gradient as a Gradient, not flattened (dakesa-98-mano758)', () => {
     const params = new Map([['activityBackgroundColor', '#AAAAAA-red']]);
     const { theme } = resolveSkinparam(params, defaultTheme);
-    expect(theme.colors.graph.activity?.background).toBe('red');
+    // `rect()`'s own `BoxStyle.fill?: Paint` draws the `<linearGradient>` --
+    // mirrors `arrowcolor`'s own Paint-preserving handler (cdd7-T1a D3).
+    expect(theme.colors.graph.activity?.background).toEqual({ color1: '#AAAAAA', color2: 'red', policy: '-' });
   });
 });
 

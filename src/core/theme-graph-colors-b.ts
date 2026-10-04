@@ -384,7 +384,7 @@ export interface ThemeGraphColorsB {
   // (USymbolUsecase.java with isBusiness=true).
   businessUsecaseFill: string;
   activity?: {
-    background?: string; // ActivityBackgroundColor — action box fill
+    background?: Paint; // ActivityBackgroundColor — action box fill (add2 T3h: Paint, gradients)
     border?: string; // ActivityBorderColor — action box stroke
     barColor?: string; // ActivityBarColor — fork/join bar fill
     diamondBackground?: string; // ActivityDiamondBackgroundColor

@@ -7,6 +7,7 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
@@ -22,13 +23,14 @@ import {
   activityLineThickness,
   activityRoundCorner,
 } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
+import { activityFontColor, activityFontFamily, linkStyleFields } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
 import {
   renderIfMerge,
   renderIfLabel,
   renderDiamond,
   renderHexagonPolygon,
+  renderDiamondSquarePolygon,
   renderHexagonOwnLabel,
   renderHexagonMultilineLabel,
   diamondColors,
@@ -47,19 +49,14 @@ import {
   measureMonoLineWidth,
 } from './activity-text-placement.js';
 
-// Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
-// importers of these four symbols working unchanged.
+// Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
+// in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
+// `activity-renderer-if-shapes.ts` respectively, each importing `actColors`/
+// `centeredFirstBaselineY` BACK from this file (safe circularity: function
+// definitions only, never called at module-load time) -- existing importers
+// of these names are unchanged.
 export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
-// Pure-move re-export (500-line split, T1c): the terminal-circle renderers
-// now live in `activity-renderer-terminals.ts`, which imports `actColors`
-// BACK from this file (same circular-but-safe shape as the signal-shapes
-// re-export above) -- existing importers of these four names are unchanged.
 export { renderStart, renderStop, renderEnd, renderSpot };
-// Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
-// `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
-// method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
-// BACK from this file (same circular-but-safe shape as the two re-exports
-// above) -- existing importers of this name are unchanged.
 export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
@@ -135,10 +132,12 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
   const lineWidth = measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
+  // add2 T3h: family K + F (pekuxe-00/gaxezi-48/nisexe-68/dozaxu-98).
   return drawActivityText(x, cy, label, {
-    fontFamily: theme.fontFamily,
+    fontFamily: activityFontFamily(theme, opts.sname),
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
+    ...linkStyleFields(theme),
   });
 }
 
@@ -152,11 +151,14 @@ export function renderMultilineText(
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   const y = centeredFirstBaselineY(cy, size, lines.length);
   const fill = activityFontColor(theme, opts.sname);
+  // add2 T3h, families K/F -- see renderLabel's own doc comment above.
+  const fontFamily = activityFontFamily(theme, opts.sname);
+  const link = linkStyleFields(theme);
   return lines
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+      return drawActivityText(x, y + size * i, ln, { fontFamily, fontSize: size, fill, ...link });
     })
     .join('');
 }
@@ -166,12 +168,12 @@ export function renderMultilineText(
 // ---------------------------------------------------------------------------
 
 export interface ActivityColors {
-  nodeFill: string;
+  nodeFill: Paint; // add2 T3h (family PAINT): gradients, not solid-only
   nodeBorder: string;
   barFill: string;
   startFill: string;
   endFill: string;
-  diamondFill: string;
+  diamondFill: Paint; // shares activityBackground's fallback tier
   diamondBorder: string;
 }
 
@@ -397,7 +399,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
   // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
   const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
-  const textStyle = { fontFamily: theme.fontFamily, fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const textStyle = { fontFamily: activityFontFamily(theme, 'note'), fontSize: noteSize, fill: activityFontColor(theme, 'note') };
   const labelEl =
     lines.length > 1
       ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)
@@ -453,15 +455,14 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'split-join-bar':
       return renderSplitLine(node, theme);
     case 'if-split':
+      // T3k: shape ALONE, own label via its own 'if-own-label' node.
+      // add2 T3h (CSTYLE): INSIDE_DIAMOND draws the square instead --
+      // while/repeat ('while-header' below) is T3f's, not gated here.
+      return theme.conditionStyle === 'insideDiamond'
+        ? renderDiamondSquarePolygon(node, theme)
+        : renderHexagonPolygon(node, theme);
     case 'while-header':
-      // T3k: the shape ALONE -- the own label draws via its own
-      // `'if-own-label'` node, pushed right after (`FtileDiamondInside
-      // .java:84-102`'s own draw order). D (T3d, `sofoje-37-tila554`):
-      // an EMPTY condition is STILL `FtileDiamondInside` under the
-      // default `ConditionStyle.INSIDE_HEXAGON` (`ConditionalBuilder
-      // .java:250-256`, `FtileWhile.java:131-132`) -- always the 7-point
-      // hexagon, never the 5-point `FtileDiamond` rhombus (`EMPTY_DIAMOND`
-      // only, a non-default skinparam neither builder wires yet).
+      // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
       return renderHexagonPolygon(node, theme);
     case 'repeat-cond':
       return renderHexagonPolygon(node, theme);

@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
-import { activityFontFamily } from '../../../src/diagrams/activity/activity-text-style.js';
+import { activityFontFamily, linkStyleFields } from '../../../src/diagrams/activity/activity-text-style.js';
 
 const theme = resolveTheme('default');
 
@@ -37,5 +37,34 @@ describe('activityFontFamily', () => {
     };
     expect(activityFontFamily(withBoth, 'activity')).toBe('Verdana');
     expect(activityFontFamily(withBoth, 'diamond')).toBe('Courier');
+  });
+
+  it('add2 T3h: diamond inherits the activity bucket when it has no own FontName (dozaxu-98-xetu961)', () => {
+    const activityOnly: Theme = {
+      ...theme,
+      colors: { ...theme.colors, elements: { ...theme.colors.elements, activity: { fontFamily: 'Verdana' } } },
+    };
+    expect(activityFontFamily(activityOnly, 'diamond')).toBe('Verdana');
+  });
+
+  it('add2 T3h: a non-diamond sname never falls through to the activity bucket', () => {
+    const activityOnly: Theme = {
+      ...theme,
+      colors: { ...theme.colors, elements: { ...theme.colors.elements, activity: { fontFamily: 'Verdana' } } },
+    };
+    expect(activityFontFamily(activityOnly, 'note')).toBe(theme.fontFamily);
+  });
+});
+
+describe('linkStyleFields (add2 T3h, family F)', () => {
+  it('omits both keys when the theme sets neither (exactOptionalPropertyTypes)', () => {
+    expect(linkStyleFields(theme)).toEqual({});
+  });
+
+  it('includes only the fields the theme actually sets', () => {
+    const withUnderline: Theme = { ...theme, hyperlinkUnderline: false };
+    expect(linkStyleFields(withUnderline)).toEqual({ hyperlinkUnderline: false });
+    const withTarget: Theme = { ...theme, svgLinkTarget: '_self' };
+    expect(linkStyleFields(withTarget)).toEqual({ svgLinkTarget: '_self' });
   });
 });

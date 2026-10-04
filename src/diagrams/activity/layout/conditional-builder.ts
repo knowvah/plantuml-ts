@@ -19,6 +19,8 @@ import { Pragma } from '../../../core/skin/Pragma.js';
 import { PragmaKey } from '../../../core/skin/PragmaKey.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondInsideLabels } from '../tiles/gtile-diamond-inside.js';
+import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
 import { GtileDiamondInside2 } from '../tiles/gtile-diamond-inside2.js';
 import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
@@ -203,6 +205,19 @@ function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, th
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
+/** add2 T3h (CSTYLE): `ConditionalBuilder.getShape1` (`:251-277`) --
+ * `INSIDE_DIAMOND` -> `FtileDiamondSquare`, else `FtileDiamondInside`.
+ * `EMPTY_DIAMOND` is a separate, still-unwired gate (T1p-a). */
+function createConditionDiamond(
+  label: string,
+  labels: DiamondInsideLabels,
+  bounder: StringBounder,
+  theme: Theme,
+): DiamondConditionTile {
+  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(label, labels, bounder, theme);
+  return new GtileDiamondInside(label, labels, bounder, theme);
+}
+
 /**
  * `createWithLinks` (`ConditionalBuilder.java:213-232`): a `withWestAndEast`
  * hexagon, both branches, and the merge rhombus when both have a point out.
@@ -211,6 +226,8 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   const labels: { west?: string; east?: string } = {};
   if (node.thenLabel !== undefined) labels.west = node.thenLabel;
   if (node.elseLabel !== undefined) labels.east = node.elseLabel;
+  // add2 T3h: NOT createConditionDiamond -- walk-if-with-links.ts (T3f's)
+  // still types diamond1 concretely; re-slotted below.
   const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
   const branch1 = toBranchTile(node.thenBranch, bounder, theme, ctx);
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
@@ -442,7 +459,7 @@ function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dis
   const labels: { south?: string; east?: string } = {};
   if (parts.mainLabel !== undefined) labels.south = parts.mainLabel;
   if (parts.sideLabel !== undefined) labels.east = parts.sideLabel;
-  const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  const diamond1 = createConditionDiamond(node.condition, labels, bounder, theme);
 
   const optionalStop = dispatch.optionalStop === true ? parts.sideTile : null;
   const hasTwoBranches = thenTile.hasPointOut() && elseTile.hasPointOut();
