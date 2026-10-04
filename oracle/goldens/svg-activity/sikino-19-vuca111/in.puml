@@ -1,0 +1,10 @@
+@startuml
+skinparam SwimlaneTitleFontColor red
+skinparam SwimlaneTitleFontSize 8
+skinparam SwimlaneBorderColor blue
+skinparam SwimlaneBorderThickness 5
+|lane1|
+:foo;
+|lane2|
+:bar; 
+@enduml

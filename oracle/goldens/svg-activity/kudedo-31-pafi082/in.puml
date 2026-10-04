@@ -1,0 +1,13 @@
+@startuml
+|Lane1|
+:Foo;
+|Lane1|
+:toto;
+|Lane2|
+repeat :Bar (wrong lane);
+|Lane1|
+:tmpa;
+|Lane1|
+:tmpb;
+repeat while (Success)
+@enduml

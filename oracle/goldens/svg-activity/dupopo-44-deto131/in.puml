@@ -1,0 +1,13 @@
+@startuml
+|swinlane1|
+:first;
+:second;
+|swinlane2|
+:swinlane2;
+|swinlane3|
+:swinlane3;
+|swinlane1|
+:back to swinline1;
+|swinlane2|
+:back to swinline2;
+@enduml

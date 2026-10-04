@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-03",
-  "measuredAgainstCommit": "66db7400",
+  "measuredAgainstCommit": "4f5d48d2",
   "fixtures": [
     {
       "type": "activity",
@@ -259,15 +259,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 7
+          "#000": 8
         },
         "anchor": {
-          "(absent)": 7
+          "(absent)": 8
         },
         "inset": {
           "10": 2
         },
-        "textCount": 7
+        "textCount": 8
       },
       "jar": {
         "fill": {
@@ -281,8 +281,8 @@
         },
         "textCount": 11
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -352,15 +352,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 13
+          "#000": 17
         },
         "anchor": {
-          "(absent)": 13
+          "(absent)": 17
         },
         "inset": {
           "10": 3
         },
-        "textCount": 13
+        "textCount": 17
       },
       "jar": {
         "fill": {
@@ -374,8 +374,8 @@
         },
         "textCount": 17
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -1468,15 +1468,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 7
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 7
         },
         "inset": {
           "10": 2
         },
-        "textCount": 5
+        "textCount": 7
       },
       "jar": {
         "fill": {
@@ -1490,8 +1490,8 @@
         },
         "textCount": 7
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -2466,15 +2466,16 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 9
+          "#000": 15
         },
         "anchor": {
-          "(absent)": 9
+          "(absent)": 15
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "9.999": 1
         },
-        "textCount": 9
+        "textCount": 15
       },
       "jar": {
         "fill": {
@@ -2488,8 +2489,8 @@
         },
         "textCount": 15
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -5171,15 +5172,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 7
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 7
         },
         "inset": {
           "10": 2
         },
-        "textCount": 5
+        "textCount": 7
       },
       "jar": {
         "fill": {
@@ -5193,8 +5194,8 @@
         },
         "textCount": 7
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -5297,16 +5298,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 17
+          "#000": 20
         },
         "anchor": {
-          "(absent)": 17
+          "(absent)": 20
         },
         "inset": {
-          "10": 5,
-          "9.998": 1
+          "10": 6
         },
-        "textCount": 17
+        "textCount": 20
       },
       "jar": {
         "fill": {
@@ -5320,8 +5320,8 @@
         },
         "textCount": 20
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -5588,15 +5588,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 19
+          "#000": 23
         },
         "anchor": {
-          "(absent)": 19
+          "(absent)": 23
         },
         "inset": {
           "10": 3
         },
-        "textCount": 19
+        "textCount": 23
       },
       "jar": {
         "fill": {
@@ -5610,8 +5610,8 @@
         },
         "textCount": 23
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -5776,15 +5776,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 10
+          "#000": 14
         },
         "anchor": {
-          "(absent)": 10
+          "(absent)": 14
         },
         "inset": {
           "10": 4
         },
-        "textCount": 10
+        "textCount": 14
       },
       "jar": {
         "fill": {
@@ -5798,8 +5798,8 @@
         },
         "textCount": 14
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -7365,15 +7365,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 6
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 6
         },
         "inset": {
           "10": 2
         },
-        "textCount": 5
+        "textCount": 6
       },
       "jar": {
         "fill": {
@@ -7387,8 +7387,8 @@
         },
         "textCount": 6
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -7518,15 +7518,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 7
+          "#000": 11
         },
         "anchor": {
-          "(absent)": 7
+          "(absent)": 11
         },
         "inset": {
           "10": 2
         },
-        "textCount": 7
+        "textCount": 11
       },
       "jar": {
         "fill": {
@@ -7540,8 +7540,8 @@
         },
         "textCount": 14
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -9583,7 +9583,8 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 3
+          "10": 2,
+          "9.999": 1
         },
         "textCount": 8
       },
@@ -9599,8 +9600,8 @@
         },
         "textCount": 8
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -9608,15 +9609,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 4
+          "#000": 6
         },
         "anchor": {
-          "(absent)": 4
+          "(absent)": 6
         },
         "inset": {
           "10": 2
         },
-        "textCount": 4
+        "textCount": 6
       },
       "jar": {
         "fill": {
@@ -9630,8 +9631,8 @@
         },
         "textCount": 6
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",
@@ -9708,18 +9709,18 @@
       "slug": "vexula-75-noko098",
       "status": "baseline",
       "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAgainstCommit": "4f5d48d2",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 13
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 13
         },
         "inset": {
           "10": 1
         },
-        "textCount": 8
+        "textCount": 13
       },
       "jar": {
         "fill": {
@@ -10083,15 +10084,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 6
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 6
         },
         "inset": {
           "10": 3
         },
-        "textCount": 5
+        "textCount": 6
       },
       "jar": {
         "fill": {
@@ -10105,8 +10106,8 @@
         },
         "textCount": 8
       },
-      "measuredAt": "2026-09-09",
-      "measuredAgainstCommit": "5859712e"
+      "measuredAt": "2026-10-03",
+      "measuredAgainstCommit": "4f5d48d2"
     },
     {
       "type": "activity",

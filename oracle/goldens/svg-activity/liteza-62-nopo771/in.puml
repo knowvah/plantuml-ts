@@ -1,0 +1,14 @@
+@startuml
+start
+repeat
+  :Do something1;
+  backward:single line statement works fine;
+repeat while (you want to)
+:Just a gap between the repeat loops;
+repeat
+  :Do something2;
+  backward: multiline
+  statement throws a syntax error;
+repeat while (you want to)
+end
+@enduml

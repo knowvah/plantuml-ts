@@ -1,0 +1,6 @@
+@startuml
+skinparam preserveAspectRatio xMinYMid slice
+start
+:foo1;
+stop
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+start
+:Hello;
+:Init;
+repeat
+:Other;
+:Other2;
+if (dummy) then (foo)
+	stop
+endif
+:Other3;
+repeatwhile (forever)
+@enduml

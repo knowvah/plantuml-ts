@@ -1,0 +1,17 @@
+@startuml
+start
+repeat
+:process data;
+if(processing fails?) then (yes)
+break
+else(no)
+endif
+:upload data;
+if(upload the data fails) then (yes)
+'arrow points to nothing
+break
+else (pass)
+endif
+repeat while (more data?)
+stop
+@enduml

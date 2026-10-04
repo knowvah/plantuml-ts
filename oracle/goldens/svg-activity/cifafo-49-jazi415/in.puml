@@ -1,0 +1,13 @@
+@startuml
+title Activity Diagram PlantUML New Syntax
+start
+split
+:a0;
+:b0;
+
+split again
+:a1;
+:b1;
+end split
+stop
+@enduml

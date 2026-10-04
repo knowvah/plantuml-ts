@@ -1,0 +1,30 @@
+@startuml
+|Bob|
+start
+:A;
+ 
+|Alice|
+:B;
+  fork
+  |Alice|  
+  :B_1;
+  |Bob|
+  :C_1;
+  end
+  
+  fork again
+  |Alice|  
+  :B_2;
+  :B_2_1;
+  |Bob|
+  :C_2;
+  end
+ 
+  fork again
+  |Alice|  
+  :B_3;
+  :B_3_1;
+  end
+  
+  end fork
+@enduml

@@ -1,0 +1,9 @@
+@startuml
+start
+:foo;
+if (bar\ntoto\ndffd ksjdf sdfljsdflmsd sdfskhj sf sdf sdfjk) then (Yes)
+:foobar;
+else (No)
+endif
+stop
+@enduml

@@ -848,10 +848,13 @@ describe('routing conformance — jar-error classification', () => {
     // the 34 remaining activity parser-gap dot-cache rows render as ACTIVITY
     // and are re-pinned `agree` (T2e/T2g), plus 13 svg-activity clone rows.
     // Derivation: 5234 + 871 + 105 = 6210.
-    expect(pinnedAgree.length).toBe(5234);
+    //
+    // 5234 -> 5343 / 6210 -> 6319 at add2/close-b3w1 (2026-10-03): 109 more
+    // svg-activity clone rows, same shape. Derivation: 5343 + 871 + 105 = 6319.
+    expect(pinnedAgree.length).toBe(5343);
     expect(pinnedMisroutes.length).toBe(871);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6210);
+    expect(manifest.fixtures.length).toBe(6319);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

@@ -1,0 +1,12 @@
+@startuml
+:Some random action;
+
+split
+        :Some random action0;
+split again
+        :Some random action111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111;
+        
+        :Some random action8;
+end split
+
+@enduml

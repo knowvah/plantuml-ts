@@ -1,0 +1,15 @@
+@startuml
+|col1|
+start
+repeat
+:Step1;
+
+|col2|
+repeat while
+:toto1;
+
+|col1|
+:Step 3;
+stop
+
+@enduml

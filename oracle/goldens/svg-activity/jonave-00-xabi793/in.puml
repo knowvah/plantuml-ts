@@ -1,0 +1,7 @@
+@startuml
+repeat
+:action 3;
+backward:action 4;
+repeat while (All checks pass?) is (no) not (yes)
+:next action;
+@enduml

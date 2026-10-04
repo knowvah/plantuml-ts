@@ -1,0 +1,18 @@
+@startuml
+|a|
+|b|
+start
+|b|
+:Lets begin;
+fork
+|a|
+:A Task;
+|b|
+:back to B;
+fork again
+:B task;
+end fork
+|b|
+:final task;
+stop
+@enduml

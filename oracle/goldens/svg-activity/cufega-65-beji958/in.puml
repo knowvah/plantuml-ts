@@ -1,0 +1,10 @@
+@startuml
+start
+:Hello;
+:Init;
+repeat
+:Other;
+:Other2;
+:Other3;
+repeatwhile (forever)
+@enduml

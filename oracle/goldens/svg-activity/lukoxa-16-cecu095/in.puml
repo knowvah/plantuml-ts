@@ -1,0 +1,11 @@
+@startuml
+|Web Service|
+start
+if (test) then
+      stop
+else
+      |Fournisseur|
+      :foo2;
+endif
+:goo;
+@enduml

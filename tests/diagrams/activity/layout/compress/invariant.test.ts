@@ -297,16 +297,19 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
   const ALLOWED_NEW_OVERLAPS = [
     // Cross-lane arrowheads, both `polygonSkipMode: 'x'` -- the Worm skips
     // the x-axis on such a polygon, so it never occupies x and a flip there
-    // is not a violation (`ftile/Worm.java:159-168`). Was `[7,9]` before T3.
-    'bixefi-77-moki051 [9,10] polygon×polygon',
+    // is not a violation (`ftile/Worm.java:159-168`). bixefi-77-moki051's
+    // `[9,10]` entry retired at add2/close-b3w1: no longer overlaps after
+    // T3c's fork X-compression fix (`ParallelBuilderFork.java:151-241`) and
+    // T3a's emphasize anchor; bixefi is a pinned golden since add2-b1.
     // Same class (`Worm.java:159-168`). Was `[9,11]` before T3.
     'bugaja-31-jaso630 [11,12] polygon×polygon',
     // The swimlane title's rect never occupies x
     // (`klimt/UGraphicCompressOnXorY.java:100-112`, the
     // `ignoreForCompressionOnX` band of `Swimlanes.java:358-367`).
-    // Unmoved: both shapes follow the whole edge run in `shapesOf`'s list.
-    'misiji-27-buje656 [14,18] empty×centeredText',
-    'misiji-27-buje656 [15,18] empty×centeredText',
+    // misiji-27-buje656's `[14,18]`/`[15,18]` entries retired at
+    // add2/close-b3w1: the pair no longer overlaps after T3a's lane-divider
+    // ink and title-band changes (`LaneDivider.java:97`, `Swimlanes.java:
+    // 357-367`); misiji is zero-diff and pinned at b3w1.
     // Same class (`Worm.java:159-168`). Were `[10,12]` and `[14,16]`
     // before T3.
     'racana-82-zece676 [14,15] polygon×polygon',
@@ -530,8 +533,8 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // (`walk-repeat.ts`'s own `'repeat-cond'` copy, same split mechanism).
     // Same pairs, same coordinates (polygon width `267.30625000000003`/
     // `131.1125`, text touching the polygon's right edge to within 5e-14).
-    'boxoto-53-sifo232 [32,35] polygon×text',
-    'boxoto-53-sifo232 [45,48] polygon×text',
+    // add2/close-b3w1: both boxoto entries retired -- the pairs no longer
+    // overlap after T3d's hexagon geometry (`Hexagon.java:46,65-74`).
     // `lopone-15-xiki477 [7,20]` -- see this constant's own doc comment
     // above ("RESOLVED by T1a"): no longer produced, so no longer listed.
     // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,
@@ -619,7 +622,9 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // other shape, not a geometry defect; the label's text/x is unchanged
     // by the height fix, only its height/y moved, which is what exposes
     // the pre-existing rounding artifact at this exact-touch boundary.
-    'jupoxe-15-sugo110 [39,139] text×polygon',
+    // add2/close-b3w1: retired -- the jupoxe pair no longer overlaps once
+    // T3d's per-line north-label sizing landed (`FtileDiamondInside2.java:
+    // 114-120`); the allowlist entry above is kept as history only.
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1368 modules · 5097 exported names.
+1370 modules · 5112 exported names.
 
 ## `src/`
 
@@ -151,8 +151,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `theme-graph-colors-c.ts` | `ThemeGraphColorsC` | theme-graph-colors-c.ts — third slice of `ThemeGraphColors`, split out because `theme-graph-colors-a.ts`/`-b.ts` are both at the project's 500-line cap (cdd2-T8) — mirrors the `-a`/`-b` split precedent exactly (combined back via intersectio |
 | `theme-graph-colors.ts` | `ElementColors`, `ThemeGraphColors` | theme-graph-colors.ts — the `Theme["colors"]["graph"]` sub-object, extracted from ./theme.ts (which re-declares it as `graph: ThemeGraphColors`) purely to keep theme.ts under the project 500-line file-size cap after the mission skin-file-lo |
 | `theme-merge.ts` | `deepMergeTheme` | `deepMergeTheme` and its helpers — split out of `theme.ts` (mechanical extraction to keep that file under the project's 500-line cap, same rationale as `theme-graph-colors.ts`/`theme-element-resolve.ts`; a pure move, no behavior change). |
+| `theme-root-fields.ts` | `ThemeRootFields` | Root-level `Theme` fields with no existing home — split out (rather than added inline) because `theme.ts` is already at the project's 500-line file-size cap (mirrors the `theme-colors-fields.ts`/`theme-sequence- fields.ts` precedent for the |
 | `theme-sequence-fields.ts` | `ThemeSequenceFields` | `Theme.sequence` field shape — split out of theme.ts (cdd-T30) to keep that file under the project's 500-line file-size cap. |
-| `theme.ts` | `ElementColors`, `ThemeGraphColors`, `ThemeColorFields`, `ThemeSequenceFields`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
+| `theme.ts` | `ElementColors`, `ThemeGraphColors`, `ThemeColorFields`, `ThemeSequenceFields`, `ThemeRootFields`, `Theme`, `defaultTheme`, `darkTheme`, `sketchyTheme`, `monochromeTheme`, `ThemeOverride`, `deepMergeTheme`, `resolveTheme`, `resolveElementPaint`, `resolveElementFontSize`, `resolveElementShadowing`, `resolveElementLineThickness`, `resolveElementMinimumWidth` | Theme system for plantuml-ts. |
 | `themes-builtin-a-m.ts` | `BUILTIN_THEMES_A_M` | Built-in PlantUML theme residue (amiga .. |
 | `themes-builtin-p-v.ts` | `BUILTIN_THEMES_P_V` | Built-in PlantUML theme residue (plain .. |
 | `themes-builtin.ts` | `BUILTIN_THEMES` | Built-in PlantUML theme residue: only the fields an executed `!theme` does not yet reach -- see scripts/compile-themes.py. |
@@ -1038,16 +1039,16 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
 | `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
-| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderHexagonOwnLabel` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderHexagonOwnLabel`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
-| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `renderEnd`, `renderSpot` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
+| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
 | `activity-renderer-text.ts` | `ActivityTextStyle`, `renderCreoleTableGrid`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
 | `activity-style-defaults-swimlane.ts` | `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The swimlane title/border style resolvers, split out of `activity-style-defaults.ts` (mission `activity-divergence-drive`, T2c) -- that module was 486 lines before the `fonebe-54-save009` arrow-thickness fix pushed it to 510, over this proj |
 | `activity-style-defaults.ts` | `ActivitySName`, `bucketKey`, `ACTIVITY_FONT_SIZE`, `DIAMOND_FONT_SIZE`, `ARROW_FONT_SIZE`, `SWIMLANE_FONT_SIZE`, `NOTE_FONT_SIZE`, `swimlaneFontSize`, `activityFontSize`, `ARROW_LINE_THICKNESS`, `COMPOSITE_LINE_THICKNESS`, `CIRCLE_LINE_THICKNESS`, `CIRCLE_END_LINE_THICKNESS`, `SWIMLANE_LINE_THICKNESS`, `NOTE_LINE_THICKNESS`, `ELEMENT_LINE_THICKNESS`, `activityLineThickness`, `swimlaneLineThickness`, `ACTIVITY_ROUND_CORNER`, `ROOT_ROUND_CORNER`, `activityRoundCorner`, `ACTIVITY_PADDING`, `ROOT_PADDING`, `activityPadding`, `activityBoxHeight`, `CIRCLE_INK`, `ACTIVITY_BAR_FILL`, `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground`, `resolveSolidBucketColor`, `activityArrowHeadColor` | The `activityDiagram { }` style-default table and its resolvers (mission `activity-style-defaults`, T2). |
 | `activity-text-placement.ts` | `measureLineWidth`, `measureMonoLineWidth`, `centeredLineX`, `ActivityTextOpts`, `activityTextLineX`, `isTableRowLine`, `tableRowCellsOf` | Per-line text-X placement for the activity renderer (mission `activity-min-box-width`, T5, D2). |
-| `activity-text-style.ts` | `activityMinimumWidth`, `ACTIVITY_FONT_COLOR`, `activityFontColor`, `activityHorizontalAlignment` | The unconsumed activity box-width, font-colour and horizontal-alignment resolvers (mission `activity-min-box-width`, T1, D1/D2/D3). |
+| `activity-text-style.ts` | `activityMinimumWidth`, `ACTIVITY_FONT_COLOR`, `activityFontColor`, `activityHorizontalAlignment`, `activityFontFamily` | The unconsumed activity box-width, font-colour and horizontal-alignment resolvers (mission `activity-min-box-width`, T1, D1/D2/D3). |
 | `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadPointsTriangle`, `arrowHeadPointsFor`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular`/`ArrowsTriangle` — the activity-diagram arrowhead decorations, selected on `skinparam style strictuml` (D4). |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityBackward`, `ActivitySpot`, `ActivityLabel`, `ActivityGoto`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivitySwitchCase`, `ActivitySwitch`, `ActivityGroup`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
@@ -1055,7 +1056,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
 | `if-dispatch.ts` | `stripTrailingSemi`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
-| `list-backward-dispatch.ts` | `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
+| `list-backward-dispatch.ts` | `nodeListContainsBreak`, `pushParsedNode`, `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
 | `node-dispatch.ts` | `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
@@ -1081,7 +1082,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
-| `canvas-origin.ts` | `ShapeFudge`, `isInkless`, `fudgeX`, `edgeInkX`, `FinalizeInput`, `FinalizedGeometry`, `finalizeGeometry` | Canvas origin (D2, mission `activity-divergence-drive` T1a): ports `Recentred` + the document margin + `LimitFinder` -- replaces the flat `LAYOUT_MARGIN` `assign-coordinates-full.ts#computeBounds` used to add on top of its own maxX/maxY. |
+| `canvas-origin-text-ink.ts` | `SPLIT_LINE_KINDS`, `extendForIfLabelText`, `extendForLaneDivider` | b3/T3a (`activity-divergence-drive-2` batch 3): three `canvas-origin.ts` ink-scan corrections (families A/P/Q) split into their own sibling module purely to keep `canvas-origin.ts` under the 500-line hook (mission convention, "a sibling mod |
+| `canvas-origin.ts` | `ShapeFudge`, `isInkless`, `fudgeX`, `MutableInkBounds`, `edgeInkX`, `FinalizeInput`, `FinalizedGeometry`, `finalizeGeometry` | Canvas origin (D2, mission `activity-divergence-drive` T1a): ports `Recentred` + the document margin + `LimitFinder` -- replaces the flat `LAYOUT_MARGIN` `assign-coordinates-full.ts#computeBounds` used to add on top of its own maxX/maxY. |
 | `conditional-builder.ts` | `IfBuilder`, `IfBuilderResult`, `ifBuilderOf`, `isMainLaneSmallerThanAllOthers`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `diamond-labels.ts` | `emitDiamondLabels`, `emitDiamondOwnLabel` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
 | `document-margin.ts` | `applyActivityDocumentMargin`, `applyActivityChrome` | document-margin.ts -- T3j (mission `activity-divergence-drive`, journal row 36): `TextBlockExporter#exportTo`'s outer document-margin wrap, composed AFTER chrome (title/legend/caption/header/footer) rather than baked into the body at layout |
@@ -1162,14 +1164,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-note.ts` | `GtileNote` |  |
 | `gtile-partition.ts` | `GtilePartition` |  |
 | `gtile-repeat-entry.ts` | `GtileRepeatEntry` |  |
-| `gtile-repeat.ts` | `RepeatBackConnection`, `GtileRepeatContext`, `GtileRepeat` |  |
+| `gtile-repeat.ts` | `RepeatConditionEmpty`, `RepeatConditionTile`, `RepeatBackConnection`, `GtileRepeatContext`, `GtileRepeat` |  |
 | `gtile-split.ts` | `GtileSplit` |  |
 | `gtile-spot.ts` | `GtileSpot` |  |
 | `gtile-start.ts` | `GtileStart` |  |
 | `gtile-stop.ts` | `GtileStop` |  |
 | `gtile-switch.ts` | `GtileSwitch` |  |
 | `gtile-top-down.ts` | `GtileTopDown` |  |
-| `gtile-while.ts` | `GtileWhile` |  |
+| `gtile-while.ts` | `GtileWhileContext`, `GtileWhile` |  |
 | `index.ts` | `GPoint`, `HookName`, `NORTH_HOOK`, `SOUTH_HOOK`, `EAST_HOOK`, `WEST_HOOK`, `NORTH_BORDER`, `SOUTH_BORDER`, `gpoint`, `StringBounder`, `Tile`, `TileLeaf`, `TileComposite` |  |
 | `points.ts` | `GPoint`, `NORTH_HOOK`, `SOUTH_HOOK`, `EAST_HOOK`, `WEST_HOOK`, `NORTH_BORDER`, `SOUTH_BORDER`, `HookName`, `gpoint` |  |
 | `tile.ts` | `StringBounder`, `Tile`, `TileLeaf`, `TileComposite` |  |

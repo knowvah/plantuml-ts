@@ -1,0 +1,12 @@
+@startuml
+start
+  repeat
+    if(T1) then
+      break
+    endif
+    
+
+    
+  repeat while (T3)
+stop
+@enduml

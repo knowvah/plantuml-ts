@@ -1,0 +1,20 @@
+@startuml
+|User|
+start
+split
+    |User|
+    :Prepare a source upload;
+    : Upload the package to the master with dput;
+    |Master|
+    : Receive the upload;
+    : Save the upload parameters;
+    :queue a build job;
+split again
+    |User|
+    : Create archive rebuild on the web interface;
+    |Master|
+    :Queue a build jobs for all packages in the archive;
+endsplit
+
+stop
+@enduml

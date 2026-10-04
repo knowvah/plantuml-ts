@@ -1,0 +1,10 @@
+@startuml
+|Author|
+Start
+repeat
+:foo;
+|Reviewer|
+:Review DocumentDocument Document Document Document Document Document Document Document Document Document Document;
+repeat while (Document agreed?)
+end
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+
+start
+repeat
+'  :Test something;
+    if (Something went wrong?) then (no)
+      :OK;
+	  ' comment brak and there is no more problem
+      break
+    endif
+repeat while (Something went wrong with long text?) is (yes)
+stop
+@enduml

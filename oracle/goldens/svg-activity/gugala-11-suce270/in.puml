@@ -1,0 +1,18 @@
+@startuml
+|a|
+|b|
+start
+|b|
+:Lets begin;
+|a|
+split
+:A Task;
+|b|
+:back to B;
+split again
+:B task;
+end split
+|b|
+:final task;
+stop
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+	start
+	if (very long condition is truncated?) then (yes)
+	 :BAD;
+	endif
+	stop
+@enduml

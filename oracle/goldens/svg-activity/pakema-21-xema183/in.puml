@@ -1,0 +1,7 @@
+@startuml
+|A|
+start
+:a;
+|BBBBBBBBBBBBBBBBBBBBBBBBB|
+:b;
+@enduml

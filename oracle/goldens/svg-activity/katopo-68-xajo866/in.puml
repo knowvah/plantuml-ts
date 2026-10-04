@@ -1,0 +1,9 @@
+@startuml
+|lane 1|
+start
+repeat
+repeat :some action;
+repeat while(test 1);
+repeat while(test 2);
+stop
+@enduml
