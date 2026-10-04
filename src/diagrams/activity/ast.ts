@@ -153,6 +153,15 @@ export interface ActivityGoto {
 export interface ActivityElseIf {
   condition: string;
   label?: string;
+  /**
+   * ELSEIFIN -- the leading `(incoming)` decoration on `elseif`, e.g.
+   * `(additional text) elseif (foo2) then (ok2)`. Drawn on the diamond's
+   * OWN west side (`FtileDiamondInside2.withWest`), never on the
+   * connecting arrow -- `dispatch-support.ts#RE_ELSEIF`'s own doc.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandElseIf2.java:70-76,147-151
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:178-186
+   */
+  incomingLabel?: string;
   body: ActivityNode[];
 }
 
