@@ -6,7 +6,7 @@ import type { GPoint } from '../tiles/points.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { GtileAction } from '../tiles/gtile-action.js';
-import type { GtileNote } from '../tiles/gtile-note.js';
+import type { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
@@ -282,6 +282,34 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         },
         myLane,
       );
+      return;
+    }
+
+    // `FtileWithNoteOpale#drawU` (`:195-221`): the note draws beside the
+    // wrapped tile (no flow edge), then the wrapped tile draws at its own
+    // translated offset. `pushTopDownSiblingEdge`'s `hasPointOut()`/
+    // `getCoord()` calls on a `gtile-note-opale` sibling resolve through
+    // THIS tile's own methods (`gtile-note.ts`), which pass through to the
+    // wrapped child -- no edge-code change needed there for this case.
+    case 'gtile-note-opale': {
+      const t = tile as unknown as GtileNoteOpale;
+      const note = t.note;
+      const noteNode: ActivityNodeGeo = {
+        id: out.nextId('note'),
+        kind: 'note',
+        x: x + t.noteOffsetX,
+        y: y + t.noteOffsetY,
+        width: note.width,
+        height: note.height,
+        label: note.text,
+        notePosition: note.side,
+      };
+      // `Opale#drawU`'s own `withLink == false` branch (`:109-110`) never
+      // sets a spike at all -- `t.withLink` mirrors that (`gtile-note.ts`'s
+      // own doc).
+      if (t.withLink) noteNode.spikeTip = { x: x + t.spikeOffsetX, y: y + t.spikeOffsetY };
+      pushNode(out, noteNode, myLane);
+      walkTile(t.children[0]!, x + t.tileOffsetX, y + t.tileOffsetY, { kindHint: null, lane: myLane }, out);
       return;
     }
 

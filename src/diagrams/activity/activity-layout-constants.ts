@@ -122,6 +122,11 @@ export const NOTE_SPIKE_DELTA = 4;
  *  an unsourced `NOTE_FOLD` (8) reused for the label baseline, which
  *  landed 5.889px low on `volefo-41-tolo996`'s single-line note. */
 export const NOTE_MARGIN_Y = 5;
+/** `FtileWithNoteOpale.java:85` -- `private final double suppSpace = 20;`,
+ *  the gap this composite's `getTranslate`/`getTranslateForOpale` (`:155-
+ *  167,177-193`) reserves between the note balloon and the tile it wraps.
+ *  Mission `activity-divergence-drive-2` T3g (family NOTE). */
+export const NOTE_OPALE_GAP = 20;
 /** The fork's black join bar's height. `GtileSplit` overrides with
  *  {@link THIN_SPLIT_HEIGHT} instead (`gtile-split.ts`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:64

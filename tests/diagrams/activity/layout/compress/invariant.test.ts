@@ -512,7 +512,15 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // its west `if-label`), which pushes the west label from index 1 to
     // 2. Same pair, same mechanism, confirmed byte-identical (hexagon.x
     // `163.21562499999993` vs label.x+width `163.21562499999995`).
-    'kitupi-32-jexo155 [0,2] polygon×text',
+    // RESOLVED by mission `activity-divergence-drive-2` T3g (family NOTE):
+    // `kitupi-32-jexo155`'s `else` branch's note now wraps `:no;`
+    // (`FtileWithNoteOpale`, `tile-layout-structural.ts#tileNote`) instead
+    // of sitting beside it as a flow sibling -- that branch's own width
+    // changed, which moved the downstream float arithmetic this ULP
+    // coincidence depended on; the pair no longer appears in `overlaps
+    // (after)` at all, so it is REMOVED from {@link ALLOWED_HARD_OVERLAPS}
+    // rather than carried forward (confirmed: `npx vitest run` on this file
+    // after the fix reports it in `received`, not `expected`).
     // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
     // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
     // dump: both hexagons' right edge exactly equals their own `ja`/east
