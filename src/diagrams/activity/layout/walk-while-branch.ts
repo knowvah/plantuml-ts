@@ -201,6 +201,11 @@ export interface WhileFrame {
   readonly backPos: GPoint;
   readonly backInLane: string | undefined;
   readonly backOutLane: string | undefined;
+  /** BACKLBL (add2 T3i): {@link GtileWhile.backIncoming}/{@link GtileWhile.backOutgoing},
+   *  carried here so `walk-while-backward.ts` never needs `t: GtileWhile`
+   *  as a separate parameter (same rationale as {@link backward} itself). */
+  readonly backIncoming: string | undefined;
+  readonly backOutgoing: string | undefined;
   /**
    * `FtileWhile`'s own `specialOut` field (`FtileWhile.java:84,120`,
    * mission add2-T3b, family WSPEC): the while's `ConnectionOutSpecial`
@@ -410,6 +415,7 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
     backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
     backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
+    backIncoming: t.backIncoming, backOutgoing: t.backOutgoing,
     ...buildWhileSpecialFields(t, x, y, myLane),
   };
 }

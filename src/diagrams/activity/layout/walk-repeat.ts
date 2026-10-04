@@ -360,6 +360,9 @@ function pushRepeatBackDispatch(
   pushRepeatBackwardConnections(frame, t.backward, backPos, {
     backIn: laneIn(t.backward, myLane),
     backOut: laneOut(t.backward, myLane),
+    // BACKLBL (add2 T3i): FtileRepeat.java:170-178,182-187 -- incoming1/incoming2.
+    backIncoming: t.backIncoming,
+    backOutgoing: t.backOutgoing,
   });
 }
 

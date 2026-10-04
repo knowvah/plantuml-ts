@@ -23,6 +23,7 @@ import {
   type ParseContext,
 } from './dispatch-support.js';
 import { readMultilineActionBody } from './node-dispatch.js';
+import { unescapeLabelNewlines } from './if-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // `containsBreak` (mission add2-T3b, family WSPEC) -- node-dispatch.ts's
@@ -139,20 +140,42 @@ export function tryActivityList(ctx: ParseContext, idx: number, line: string): D
 // which already stops at an RE_ACTION_CLOSE-shaped line -- the identical
 // content-then-`;`-then-stereogroup(s) shape `backward:`'s own closer has.
 // ---------------------------------------------------------------------------
+/** BACKLBL (add2 T3i): `{ [key]: text }` when the capture group matched a
+ *  non-empty value, else `{}` -- same "absent vs empty" fold every other
+ *  optional label capture in this module uses, pre-spread so callers
+ *  never re-invoke this (and re-trigger `exactOptionalPropertyTypes` on
+ *  a freshly-widened `string | undefined` call result). */
+function backArrowSpread<K extends string>(key: K, raw: string | undefined): { [P in K]?: string } {
+  if (raw === undefined) return {};
+  const trimmed = unescapeLabelNewlines(raw.trim());
+  return trimmed === '' ? {} : ({ [key]: trimmed } as { [P in K]?: string });
+}
+
 export function tryBackward(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const single = RE_BACKWARD.exec(line);
   if (single !== null) {
-    const label = single[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
-    const node: ActivityBackward = { kind: 'backward', label, ...swimlaneSpread(ctx) };
+    const label = single[2]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+    const node: ActivityBackward = {
+      kind: 'backward',
+      label,
+      ...swimlaneSpread(ctx),
+      ...backArrowSpread('incoming', single[1]),
+      ...backArrowSpread('outgoing', single[3]),
+    };
     return { idx: idx + 1, node };
   }
   const headMatch = RE_BACKWARD_HEAD.exec(line);
   if (headMatch === null || line.includes(';')) return null;
-  const firstPart = headMatch[1]!.trim();
+  const firstPart = headMatch[2]!.trim();
   const labelParts: string[] = [];
   if (firstPart !== '') labelParts.push(firstPart);
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
-  const node: ActivityBackward = { kind: 'backward', label: body.labelParts.join('\n'), ...swimlaneSpread(ctx) };
+  const node: ActivityBackward = {
+    kind: 'backward',
+    label: body.labelParts.join('\n'),
+    ...swimlaneSpread(ctx),
+    ...backArrowSpread('incoming', headMatch[1]),
+  };
   return { idx: body.cursor, node };
 }
 

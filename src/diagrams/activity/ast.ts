@@ -58,13 +58,15 @@ export interface ActivityArrowLabel {
 /**
  * `backward:LABEL;` inside a `repeat`/`repeatwhile` body -- names the
  * activity drawn on the loop's own RETURN edge, not a sequential body
- * step. Base form only (label + optional trailing stereogroup, both
- * ignored downstream): the incoming/outgoing arrow-color decoration and
- * the box-style/stereotype the label would carry on the return edge are
- * out of scope, matching `GtileRepeat`'s own class doc ("`backward:`
- * bodies are out of scope ... filed as `activity-loop-backward`").
- * `tileNode` (`layout/tile-layout.ts`) drops this node the same way it
- * drops `arrow-label` -- parsed, not yet drawn.
+ * step. `tile-layout-backward.ts#extractBackward` pulls it out of the
+ * body and builds it as its own tile (`GtileWhile`/`GtileRepeat`'s own
+ * `backward` field); the stereogroup/box-style the label would carry on
+ * that tile are out of scope, matching `GtileRepeat`'s own class doc
+ * ("`backward:` bodies are out of scope ... filed as `activity-loop-
+ * backward`"). BACKLBL (add2 T3i): {@link incoming}/{@link outgoing} ARE
+ * now parsed and drawn -- the arrow-COLOR half of each decoration
+ * (`INCOMING_COLOR`/`OUTCOMING_COLOR`) stays out of scope, same "parsed
+ * not drawn" bar every other base-form field here already sits at.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:73-170
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:135
  *   -- registration.
@@ -73,6 +75,26 @@ export interface ActivityBackward {
   kind: 'backward';
   label: string;
   swimlane?: string;
+  /**
+   * BACKLBL (add2 T3i): the leading `(incoming)` decoration, drawn on
+   * `ConnectionBackBackward1` (body-exit -> this backward box).
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:64-69
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:146,158-161,341-364
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:170-178,440-459
+   */
+  incoming?: string;
+  /**
+   * BACKLBL (add2 T3i): the trailing `(outgoing)` decoration, drawn on
+   * `ConnectionBackBackward2` (this backward box -> the condition/entry).
+   * Single-line `backward:label;(outgoing)` only -- the multiline closer
+   * reuses the generic `RE_ACTION_CLOSE` shape, which has no trailing-
+   * paren group (shared with plain multiline actions, out of this
+   * family's scope).
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:81-86
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:158-161,386-407
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:182-187,513-535
+   */
+  outgoing?: string;
 }
 
 /**

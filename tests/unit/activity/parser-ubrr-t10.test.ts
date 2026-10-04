@@ -106,6 +106,50 @@ describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
     expect(node.label).toBe('Log context2');
   });
 
+  // BACKLBL (add2 T3i): CommandBackward3.java:64-89, boxefe-81-situ725.
+  it('captures the leading (incoming) and trailing (outgoing) decorations', () => {
+    const ast = parse(['(incoming) backward :Warning; (dsc_5)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.label).toBe('Warning');
+    expect(node.incoming).toBe('incoming');
+    expect(node.outgoing).toBe('dsc_5');
+  });
+
+  it('leaves incoming/outgoing unset when neither decoration is present', () => {
+    const ast = parse(['backward:Log context;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBeUndefined();
+    expect(node.outgoing).toBeUndefined();
+  });
+
+  it('captures only incoming when outgoing is absent', () => {
+    const ast = parse(['(incoming) backward :Warning;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBe('incoming');
+    expect(node.outgoing).toBeUndefined();
+  });
+
+  it('captures only outgoing when incoming is absent', () => {
+    const ast = parse(['backward :Warning; (dsc_5)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBeUndefined();
+    expect(node.outgoing).toBe('dsc_5');
+  });
+
+  it('unescapes a literal \\n inside incoming/outgoing', () => {
+    const ast = parse(['(a\\nb) backward :Warning; (c\\nd)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBe('a\nb');
+    expect(node.outgoing).toBe('c\nd');
+  });
+
+  it('a multiline backward captures the leading (incoming) decoration', () => {
+    const ast = parse(['(incoming) backward:Log', 'context;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.label).toBe('Log\ncontext');
+    expect(node.incoming).toBe('incoming');
+  });
+
   it('an action line with two stereogroups still parses (xebuce action line)', () => {
     const ast = parse([':Generate diagrams1; <<save>> <<color>>']);
     const node = firstNode(ast) as ActivityAction;

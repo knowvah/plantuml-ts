@@ -78,24 +78,26 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  * doc for scope. The single-line form (this constant); the multiline
  * head/close pair lives in `node-dispatch.ts#tryBackward`, reusing
  * {@link RE_ACTION_CLOSE} for its closer (identical shape: content, `;`,
- * optional stereogroup(s), end). The leading `(incoming)`/trailing
- * `(outcoming)` arrow-decoration groups are matched (so a line that
- * carries either no longer refuses -- `boxefe-81-situ725`, T2e) but their
- * captured text is dropped, same "parsed not drawn" scope as the rest of
- * this node's incoming/outgoing decoration (`ActivityBackward`'s own doc,
- * `ast.ts`).
+ * optional stereogroup(s), end) -- which has no trailing-paren group, so
+ * the multiline closer never captures an `(outgoing)` label (BACKLBL,
+ * add2 T3i: documented gap, not attempted -- `RE_ACTION_CLOSE` is shared
+ * with plain multiline actions). Group 1 (leading `(incoming)`) and group
+ * 3 (trailing `(outgoing)`) are captured here, raw paren contents only --
+ * the arrow-COLOR half of each decoration (`INCOMING_COLOR`/
+ * `OUTCOMING_COLOR`) stays unparsed, matching the simplification level
+ * every other base-form field on this node already sits at.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:64-89
  *   -- the full `(INCOMING)? backward : LABEL ; <<stereo>>* (OUTCOMING)?`
  *   shape; both decoration groups are `RegexOptional`.
  */
 export const RE_BACKWARD =
-  /^(?:\([^)]*\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\([^)]*\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}
- *  fails to match. Leading `(incoming)` decoration accepted and dropped,
- *  same scope as {@link RE_BACKWARD}. */
-export const RE_BACKWARD_HEAD = /^(?:\([^)]*\)\s*)?backward\s*:(.*)$/i;
+ *  fails to match. Leading `(incoming)` captured (BACKLBL, add2 T3i),
+ *  same group shape as {@link RE_BACKWARD}'s own group 1. */
+export const RE_BACKWARD_HEAD = /^(?:\(([^)]*)\)\s*)?backward\s*:(.*)$/i;
 
 /**
  * `if (test) then (label)?`, now also accepting a trailing stereogroup

@@ -44,6 +44,24 @@ export function extractBackward(body: readonly ActivityNode[]): {
 }
 
 /**
+ * BACKLBL (add2 T3i): attaches `backward.incoming`/`.outgoing` onto a
+ * `GtileWhileContext`/`GtileRepeatContext`-shaped object, as `backIncoming`/
+ * `backOutgoing` -- generic over both contexts' shapes so this one
+ * function covers `tile-layout.ts#tileWhile`/`tileRepeat` alike. `ctx`'s
+ * own fields pass through unchanged; a `backward === undefined` leaves
+ * both new fields unset (`undefined`), same as every other optional
+ * context field.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:146,158-161
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:170-178,182-187
+ */
+export function withBackLabels<T extends object>(
+  ctx: T,
+  backward: ActivityBackward | undefined,
+): T & { backIncoming: string | undefined; backOutgoing: string | undefined } {
+  return { ...ctx, backIncoming: backward?.incoming, backOutgoing: backward?.outgoing };
+}
+
+/**
  * `FtileRepeat`'s own `backwardExitsOnLeft` (`FtileRepeat.java:210-219`):
  * `false` when either lane is unset (the common case -- every repeat row
  * without `|Lane|` syntax), else whether the backward activity's own lane

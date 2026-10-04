@@ -29,7 +29,7 @@ import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
-import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
+import { extractBackward, repeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
 import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
 
 // Re-export geometry types so renderer and index can import from one place.
@@ -195,7 +195,7 @@ function tileWhile(
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const specialOutTile = node.specialOut !== undefined ? tileSimpleLeaf(node.specialOut, bounder, theme) : undefined;
-  const ctx = { bounder, theme, backward: backwardTile, specialOut: specialOutTile };
+  const ctx = withBackLabels({ bounder, theme, backward: backwardTile, specialOut: specialOutTile }, backward);
   return withSwimlane(new GtileWhile(header, body, ctx), node.swimlane);
 }
 
@@ -297,7 +297,7 @@ function tileRepeat(
   const backConnection = selectRepeatBackConnection(node, laneOrder);
   return withSwimlaneOut(
     withSwimlane(
-      new GtileRepeat(entry, body, condition, backConnection, { bounder, theme, backward: backwardTile }),
+      new GtileRepeat(entry, body, condition, backConnection, withBackLabels({ bounder, theme, backward: backwardTile }, backward)),
       node.swimlane,
     ),
     node.swimlaneOut,

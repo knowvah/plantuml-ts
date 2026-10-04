@@ -268,6 +268,13 @@ export interface GtileRepeatContext {
    * until that seam is wired.
    */
   readonly backward?: Tile | undefined;
+  /** BACKLBL (add2 T3i): `backward:LABEL;`'s own leading `(incoming)`/
+   *  trailing `(outgoing)` decorations -- `FtileRepeat.java:170-178,182-
+   *  187` (`incoming1`/`incoming2`), carried through to `walk-repeat-
+   *  backward.ts` via `RepeatFrame`. Unread when {@link backward} is
+   *  unset. */
+  readonly backIncoming?: string | undefined;
+  readonly backOutgoing?: string | undefined;
 }
 
 /**
@@ -307,6 +314,10 @@ export class GtileRepeat extends TileComposite {
   readonly backConnection: RepeatBackConnection;
   /** {@link GtileRepeatContext.backward}, carried onto the instance. */
   readonly backward: Tile | undefined;
+  /** {@link GtileRepeatContext.backIncoming}/{@link GtileRepeatContext.backOutgoing},
+   *  carried onto the instance. */
+  readonly backIncoming: string | undefined;
+  readonly backOutgoing: string | undefined;
   /** `getTranslateBackward`'s `x`/`y` (`FtileRepeat.java:750-757`): `x =
    *  dimTotal.width - backward.width`, `y = (dimTotal.height -
    *  backward.height) / 2` -- flush to the tile's own right edge,
@@ -362,7 +373,7 @@ export class GtileRepeat extends TileComposite {
   ) {
     super();
     this.backConnection = backConnection;
-    this.backward = ctx.backward;
+    ({ backward: this.backward, backIncoming: this.backIncoming, backOutgoing: this.backOutgoing } = ctx);
     const dims = computeRawDims(entry, body, condition, ctx.backward);
     const weld = computeWeldLayout(dims.rawLeft, dims.rawWidth, dims.rawHeight, countWeldingBreaks(body));
     this.left = weld.left;

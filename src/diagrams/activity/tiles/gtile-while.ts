@@ -18,6 +18,12 @@ export interface GtileWhileContext {
   readonly bounder: StringBounder;
   readonly theme: Theme;
   readonly backward?: Tile | undefined;
+  /** BACKLBL (add2 T3i): `backward:LABEL;`'s own leading `(incoming)`/
+   *  trailing `(outgoing)` decorations -- `FtileWhile.java:146,158-161`
+   *  (`incoming1`/`incoming2`), carried through to `walk-while-backward.ts`
+   *  via `WhileFrame`. Unread when {@link backward} is unset. */
+  readonly backIncoming?: string | undefined;
+  readonly backOutgoing?: string | undefined;
   /**
    * `FtileWhile`'s own `specialOut` field (`FtileWhile.java:84,120,143-
    * 144,163-166`): a bare `stop`/`end` immediately after this while's
@@ -71,6 +77,10 @@ export class GtileWhile extends TileComposite {
    * (`:561-562`).
    */
   readonly backward: Tile | undefined;
+  /** {@link GtileWhileContext.backIncoming}/{@link GtileWhileContext.backOutgoing},
+   *  carried onto the instance. */
+  readonly backIncoming: string | undefined;
+  readonly backOutgoing: string | undefined;
   /** `getTranslateBackward`'s `x`/`y` (`FtileWhile.java:566-573`): `x =
    *  dimTotal.width - backward.width`, `y = (dimTotal.height -
    *  backward.height) / 2` -- flush to the tile's own right edge,
@@ -119,6 +129,8 @@ export class GtileWhile extends TileComposite {
   constructor(header: GtileDiamondInside, body: Tile, ctx: GtileWhileContext) {
     super();
     this.backward = ctx.backward;
+    this.backIncoming = ctx.backIncoming;
+    this.backOutgoing = ctx.backOutgoing;
     this.specialOut = ctx.specialOut;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
