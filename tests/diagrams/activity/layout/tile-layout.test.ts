@@ -520,6 +520,38 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(condition.swimlane).toBe('A');
   });
 
+  // CSTYLE (add2 T3i): `skinparam ConditionStyle InsideDiamond` ->
+  // FtileRepeat.java:159-161 -- novata-87-muti352, perate-09-gale335.
+  describe('repeat: INSIDE_DIAMOND condition style', () => {
+    const squareTheme: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+
+    it('builds a GtileDiamondSquare, not a GtileDiamondInside', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      const condition = repeatTile.children[2];
+      expect(condition.kind).toBe('gtile-diamond-square');
+      expect(condition.label).toBe('Start?');
+    });
+
+    it('always routes the yes/out labels east+south, never west (unlike the hexagon)', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      const condition = repeatTile.children[2] as unknown as { labelAt: (s: string) => unknown };
+      expect(condition.labelAt('east')).not.toBeNull();
+      expect(condition.labelAt('south')).not.toBeNull();
+      expect(condition.labelAt('west')).toBeNull();
+    });
+
+    it('the default theme (no conditionStyle) still builds the hexagon', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.children[2].kind).toBe('gtile-diamond-inside');
+    });
+  });
+
   // Mission `activity-loop-tile-port` T6 (D5): `FtileRepeat.java:186-199`'s
   // own back-connection selection, ported into `tile-layout.ts#tileRepeat`
   // (`selectRepeatBackConnection`) and stored on `GtileRepeat.backConnection`
