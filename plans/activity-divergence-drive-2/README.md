@@ -127,4 +127,23 @@ main is clean before every merge; merges, then runs the four gates.
 
 ## Status
 
-(filled by T-exit)
+Closed 2026-10-03 on `feat/activity-divergence-drive-2` (T-exit). Measurements:
+`measurements/final*` (= the b3 close, head unchanged since) vs `measurements/b0*`.
+
+| D10 clause | b0 | final | met |
+|---|---|---|---|
+| every `fixtures.md` row has a `final` | — | 157 `pinned (add2-*)`, 86 `open -> add3 (...)`, 0 empty | yes |
+| four gates green, collected = on-disk | 1018/1018 | 1042/1042, 0 failed; typecheck, lint, build green | yes |
+| golden ratchet + harness-parity green | — | green (224 goldens byte-equal; 58 parity cases) | yes |
+| 0 conformant losses in any engine (b0 -> final) | — | 0 (activity +158 conformant; unknown +2 gains; 26 other engines 0 movers) | yes |
+| 0 unexplained rises | — | every riser journaled with a diff-backed mechanism (rows 14, 19, 24, 35, 42) | yes |
+| >= 100 activity fixtures pinned | 67 | **224** (+157) | yes |
+| Σ weightedScore <= 20000 | 31366 (245 rows) | **16937** (126 baseline rows) | yes |
+| parse `error` rows | 38 | **0** (all promoted; 23 jar-error untouched) | — |
+| activity survey (conformant/structural/diverged) | 67/56/250 | **225/29/119** | — |
+
+Batches: 0, 1p (inserted after the stop-12 halt, user option 2), 1, 2a/2b,
+3 (waves 1-3 + interim pin round b3w1), 4. Halts: 1 (stop 12, journal row 5).
+D amendments: D3 (row 6), D12 added. Flags for review: journal rows 38
+(allowlisted float-touch overlap, later retired at row 43), 42 (jupoxe multi-line
+text height follow-on), 49 (layering allowlist for `resolveInlineLinks`).
