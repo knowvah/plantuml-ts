@@ -134,17 +134,22 @@ export const RE_IF_LEGACY = /^if\s*\((.*?)\)\s*then\s+when\s+(.*)$/i;
  * now also a trailing stereogroup (`CommandElseIf2.java` ends the same
  * way `CommandIf2` does -- see {@link RE_IF}'s own doc). `TEST`/`WHEN`
  * are lazy, same reason as {@link RE_IF}'s own doc. A leading
- * `(incoming)` group is also accepted and dropped (`dulate-94-bupu593`,
- * `nolubo-93-rula384`, T2e): it decorates the arrow from the PREVIOUS
- * branch into this elseif's diamond, which this port has no slot for
- * yet, same "parsed not drawn" scope `ActivityBackward`'s own incoming/
- * outgoing decoration already carries (`ast.ts`).
+ * `(incoming)` group is CAPTURED (group 1; `TEST`/`WHEN` shift to 2/3,
+ * ELSEIFIN, `dulate-94-bupu593`/`nolubo-93-rula384`): it decorates the
+ * arrow from the PREVIOUS branch into this elseif's diamond --
+ * `InstructionIf#elseIf`'s `inlabel` param (`ActivityDiagram3.java:316`)
+ * becomes `Branch#getInlabel()`, drawn on the diamond's OWN west side
+ * (`FtileIfLongHorizontal.java:178-186`: `diamond.withWest(tbInlabel)`,
+ * the SAME slot `walk-if-long-horizontal.ts#pushDiamondLabel(...,
+ * 'west', ...)` already draws for `FtileDiamondInside2`) -- never on
+ * the connecting arrow itself (`ConnectionHorizontal.drawU`,
+ * `:260-270`, draws no label at all).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandElseIf2.java:64-80
  *   -- the leading `(INCOMING)?` group (`RegexOptional` wrapping
  *   `"\\(" (.*?) "\\)"`), before `else`/`if`.
  */
 export const RE_ELSEIF =
-  /^(?:\([^)]*\)\s*)?else\s*if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?else\s*if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /** else (label?) */
 export const RE_ELSE = /^else\s*(?:\(([^)]*)\))?\s*$/i;

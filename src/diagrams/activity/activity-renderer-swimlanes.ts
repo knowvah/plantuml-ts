@@ -17,6 +17,7 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import { resolveInlineLinks } from '../description/parse-helpers.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
@@ -34,11 +35,21 @@ import {
  * `fill="none"` when no `SwimlaneTitleBackgroundColor` override resolves,
  * matching `renderEdgeLabel`'s own `stroke: 'none'` "paint nothing"
  * convention rather than a resolved `#00000000`.
+ *
+ * When a real override IS resolved, upstream's own paint call draws the
+ * SAME colour as both fill and stroke: `drawTitlesBackground`
+ * (`Swimlanes.java:358-366`) is `ug.apply(UTranslate.dx(5))
+ * .apply(color.bg()).apply(color).draw(back)` -- `.apply(color.bg())` sets
+ * the rect's background (fill), `.apply(color)` sets its foreground
+ * (stroke) to the IDENTICAL `HColor`, at the UGraphic default line
+ * thickness (1).
  */
 function renderSwimlaneBand(geo: ActivityGeometry, theme: Theme): string {
   if (geo.swimlaneBand === undefined) return '';
   const { x, y, width, height } = geo.swimlaneBand;
-  return rect(x, y, width, height, { fill: swimlaneHeaderBackground(theme), stroke: 'none' });
+  const color = swimlaneHeaderBackground(theme);
+  const paint = color === 'none' ? { fill: color, stroke: 'none' } : { fill: color, stroke: color, strokeWidth: 1 };
+  return rect(x, y, width, height, paint);
 }
 
 /** Every lane boundary X, INCLUDING both outer edges -- `n + 1` dividers
@@ -113,7 +124,10 @@ export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): strin
     const contentX = lane.contentX ?? lane.x;
     const contentWidth = lane.contentWidth ?? lane.width;
     const titleX = contentX + (contentWidth - (lane.titleWidth ?? 0)) / 2;
-    out += drawActivityText(titleX, baselineY, lane.name, { fontFamily: theme.fontFamily, fontSize, fill });
+    // SLURL: draw the RESOLVED text, same `[[url label]]` creole
+    // resolution `swimlane-placement.ts#measureLanes` measures by.
+    const title = resolveInlineLinks(lane.name);
+    out += drawActivityText(titleX, baselineY, title, { fontFamily: theme.fontFamily, fontSize, fill });
   }
   return out;
 }

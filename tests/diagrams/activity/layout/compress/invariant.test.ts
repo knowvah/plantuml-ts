@@ -301,8 +301,16 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `[9,10]` entry retired at add2/close-b3w1: no longer overlaps after
     // T3c's fork X-compression fix (`ParallelBuilderFork.java:151-241`) and
     // T3a's emphasize anchor; bixefi is a pinned golden since add2-b1.
-    // Same class (`Worm.java:159-168`). Was `[9,11]` before T3.
-    'bugaja-31-jaso630 [11,12] polygon×polygon',
+    // `bugaja-31-jaso630 [11,12]` (was `[9,11]` before T3) and
+    // `racana-82-zece676 [14,15]`/`[16,17]` (were `[10,12]`/`[14,16]`
+    // before T3) retired at T3f (b3w2): both are SPLIT cross-lane
+    // connectors, which `ParallelBuilderSplit.java:207-225,264-285` never
+    // calls `.ignoreForCompression()` on -- T3f's `EdgeShape` builder-kind
+    // discriminant (`'parallel-in-split'`/`'parallel-out-split'`,
+    // `walk-fork-branches.ts`) stops `shapes-of.ts#terminalArrowhead` from
+    // setting `polygonSkipMode: 'x'` on them, so the arrowhead polygon now
+    // occupies x and the pair no longer overlaps (confirmed: both fixtures
+    // are zero-diff pinned goldens since this fix).
     // The swimlane title's rect never occupies x
     // (`klimt/UGraphicCompressOnXorY.java:100-112`, the
     // `ignoreForCompressionOnX` band of `Swimlanes.java:358-367`).
@@ -310,10 +318,6 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // add2/close-b3w1: the pair no longer overlaps after T3a's lane-divider
     // ink and title-band changes (`LaneDivider.java:97`, `Swimlanes.java:
     // 357-367`); misiji is zero-diff and pinned at b3w1.
-    // Same class (`Worm.java:159-168`). Were `[10,12]` and `[14,16]`
-    // before T3.
-    'racana-82-zece676 [14,15] polygon×polygon',
-    'racana-82-zece676 [16,17] polygon×polygon',
     // Same class (`Worm.java:159-168`). Were `[47,49]`, `[47,51]`,
     // `[49,51]` before T3, `[50,51]`/`[50,52]`/`[51,52]` before T4 --
     // mission `activity-if-tile-port` T4 (2026-09-16): `tobajo-64-mipi810`

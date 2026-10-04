@@ -630,7 +630,11 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const tiles = tileNodes(ast.nodes, bounder, theme);
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
-    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');
+    // PARX (T3f, b3w2): a split's own in-drop carries 'parallel-in-split',
+    // not plain 'parallel-in' -- the builder-kind discriminant that lets
+    // `compress/shapes-of.ts` tell a split connector (never skips X)
+    // apart from a fork/merge one (always does on a cross-lane arrowhead).
+    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in-split');
     expect(inDrops).toHaveLength(2);
     expect(inDrops.map((m) => m.lane1)).toEqual(['A', 'A']);
   });
@@ -649,7 +653,9 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const tiles = tileNodes(ast.nodes, bounder, theme);
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
-    const outDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-out');
+    // PARX (T3f, b3w2): same 'parallel-out-split' discriminant as the
+    // in-drop test above.
+    const outDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-out-split');
     expect(outDrops).toHaveLength(2);
     expect(outDrops.map((m) => m.lane2)).toEqual(['Y', 'Y']);
     // The sources are each branch's own exit lane, unaffected by this fix.
@@ -664,5 +670,28 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     // `Cross` pass, `Swimlanes.java:178-216` at `:350-352`). Was
     // `['X', 'Y']` in walk order.
     expect(outDrops.map((m) => m.lane1)).toEqual(['Y', 'X']);
+  });
+
+  // PARX (T3f, b3w2): `GtileMerge` deliberately keeps `kind ===
+  // 'gtile-fork'` (`gtile-merge.ts`'s own doc), and `ParallelBuilderMerge
+  // .doStep1` shares Fork's own `ConnectionIn` byte-for-byte -- its
+  // in-drop must stay plain `'parallel-in'`, never `'parallel-in-split'`.
+  it("a merge's own in-drop keeps the plain (fork-like) shape tag, not '-split'", () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
+        },
+      ],
+      swimlanes: [],
+    };
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const root = new GtileTopDown(tiles, bounder, theme);
+    const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
+    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');
+    expect(inDrops).toHaveLength(2);
+    expect(result.edgeMeta.some((m) => m.shape === 'parallel-in-split')).toBe(false);
   });
 });

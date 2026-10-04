@@ -32,6 +32,19 @@ export interface ForkBranchContext {
    *  in-drop's start y is the TOP bar/line's own bottom edge, which is this
    *  many px below `y` (D4; `simuti`'s drops start at `56.5 = 55 + 1.5`). */
   readonly barHeight: number;
+  /**
+   * `t.kind === 'gtile-split'` (PARX, b3w1 close): tags each branch
+   * connector's {@link EdgeShape} with its builder kind so a cross-lane
+   * X-skip decision (`compress/shapes-of.ts#terminalArrowhead`) can tell
+   * a split connector (`ParallelBuilderSplit.java:207-225,264-285`'s
+   * `drawTranslate` overloads never call `.ignoreForCompression()`) apart
+   * from a fork/merge one (`ParallelBuilderFork.java:172,229` always
+   * does; `ParallelBuilderMerge` shares Fork's own `doStep1`/`doStep2`
+   * connector classes byte-for-byte, `gtile-merge.ts`'s own doc) --
+   * `GtileMerge` deliberately keeps `kind === 'gtile-fork'`, so this is
+   * `false` for merge too, matching Fork's behaviour.
+   */
+  readonly isSplit: boolean;
 }
 
 /**
@@ -92,7 +105,7 @@ function pushBranchIn(branch: Tile, bX: number, bY: number, ctx: ForkBranchConte
     ],
     ctx.myLane,
     laneIn(branch, ctx.myLane),
-    'parallel-in',
+    ctx.isSplit ? 'parallel-in-split' : 'parallel-in',
   );
 }
 
@@ -118,7 +131,7 @@ function pushBranchOut(branch: Tile, bX: number, bY: number, ctx: ForkBranchCont
     ],
     laneOut(branch, ctx.myLane),
     ctx.myLaneOut,
-    'parallel-out',
+    ctx.isSplit ? 'parallel-out-split' : 'parallel-out',
   );
 }
 
@@ -255,7 +268,8 @@ export function walkForkOrSplit(t: GtileFork, x: number, y: number, myLane: stri
   const myLaneOut = laneOut(t, myLane);
   pushTopBarOrLine(t, x, y, myLane, out);
   const joinBarY = y + t.height - t.barHeight;
-  walkForkBranches(t, { x, y, joinBarY, myLane, myLaneOut, barHeight: t.barHeight }, out);
+  const isSplit = t.kind === 'gtile-split';
+  walkForkBranches(t, { x, y, joinBarY, myLane, myLaneOut, barHeight: t.barHeight, isSplit }, out);
   pushJoinBarOrLine(t, x, joinBarY, myLane, myLaneOut, out);
 }
 
@@ -377,7 +391,15 @@ export function walkMerge(t: GtileFork, x: number, y: number, myLane: string | u
     top: y + t.height - MERGE_DIAMOND_SIZE,
     myLane,
   };
-  const inCtx: ForkBranchContext = { x, y, joinBarY: diamond.top, myLane, myLaneOut: myLane, barHeight: t.barHeight };
+  const inCtx: ForkBranchContext = {
+    x,
+    y,
+    joinBarY: diamond.top,
+    myLane,
+    myLaneOut: myLane,
+    barHeight: t.barHeight,
+    isSplit: false,
+  };
 
   for (const p of placed) walkTile(p.branch, p.bX, p.bY, { kindHint: null, lane: myLane }, out);
   for (const p of placed) pushBranchIn(p.branch, p.bX, p.bY, inCtx, out);

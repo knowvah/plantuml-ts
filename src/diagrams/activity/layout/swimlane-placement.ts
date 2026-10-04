@@ -11,21 +11,17 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ConnectionVerticalDown.java:87-100
  *   -- `drawTranslate`, the cross-lane edge shape ported below as
  *   {@link routeEdge}'s `'default'` case. `FtileIfDown.java:225-238,284-301`
- *   (`ConnectionIn`/`ConnectionOut#drawTranslate`) and
- *   `FtileWhile.java:200-214` use the byte-identical
- *   `(mp1a.y + mp2b.y) / 2` middle-Y shape, so one function covers the
- *   straight top-down case and every if/while/repeat/switch composite
- *   boundary.
+ *   and `FtileWhile.java:200-214` use the byte-identical `(mp1a.y +
+ *   mp2b.y) / 2` middle-Y shape, covering every if/while/repeat/switch
+ *   composite boundary.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:166-184
  *   -- `ConnectionIn#drawTranslate`: `middle = mp1a.getY() + 4`, ported
  *   below as {@link routeEdge}'s `'parallel-in'` case.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:220-241
  *   -- `ConnectionOut#drawTranslate`: `middle = mp2b.getY() - 14`, ported
  *   below as {@link routeEdge}'s `'parallel-out'` case.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225
- *   -- same `+ 4` shape for the split's in-connector.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:264-285
- *   -- same `- 14` shape for the split's out-connector.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225,264-285
+ *   -- same `+4`/`-14` shapes for the split's in/out connectors.
  */
 
 import type { StringBounder } from '../tiles/tile.js';
@@ -38,6 +34,7 @@ import type {
   SwimlaneGeo,
 } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
+import { resolveInlineLinks } from '../../description/parse-helpers.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -110,7 +107,9 @@ export interface EdgeMeta {
  * so a loop-tagged edge stays self-describing; {@link routeEdge} dispatches
  * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
  * the same as `'default'` via its `default:` branch. */
-export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
+export type EdgeShape =
+  | 'parallel-in' | 'parallel-out' | 'parallel-in-split' | 'parallel-out-split'
+  | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -256,19 +255,20 @@ function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
  * D6's three middle-Y shapes for a cross-lane 4-point jog. `'default'` is
  * `ConnectionVerticalDown#drawTranslate`'s average of both endpoints
  * (`ConnectionVerticalDown.java:87-100`); `'parallel-in'`/`'parallel-out'`
- * are the fork/split builders' bar-relative offsets (see the module doc
- * for the four `file:line` citations) -- `mp1`/`mp2` there are always the
- * bar-side / branch-side endpoint respectively (`pushBranchConnectors`,
- * `walk-fork-branches.ts`, emits bar-to-branch as `[bar, branch]` and
- * branch-to-join as `[branch, join]`, so `mp1.y`/`mp2.y` already select
- * the right endpoint without a shape-specific swap).
+ * (fork/merge) and their `-split` siblings (SAME elbow geometry, only the
+ * X-skip in `compress/shapes-of.ts` differs by builder kind) are the
+ * fork/split builders' bar-relative offsets (module doc citations) --
+ * `mp1`/`mp2` are always the bar-side/branch-side endpoint
+ * (`walk-fork-branches.ts` emits `[bar, branch]`/`[branch, join]`).
  */
 function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
   switch (shape) {
     case 'parallel-in':
+    case 'parallel-in-split':
     case 'if-vertical-in':
       return mp1.y + 4;
     case 'parallel-out':
+    case 'parallel-out-split':
       return mp2.y - 14;
     default:
       // 'default' + every loop kind -- the latter never reach here in
@@ -430,6 +430,8 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
  * each lane's content extent and title width, then resolves the lane
  * width floor once so both `computeLaneWidths` and the origin loop reuse
  * the SAME resolved value (upstream does too, `:399` then `:409,441`).
+ * SLURL: title width uses `resolveInlineLinks`, not raw `|[[url]]|`
+ * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
   const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
@@ -438,7 +440,8 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
-  for (const name of laneNames) titleWidths.set(name, bounder.getDimension(name, titleFontSize).width);
+  for (const name of laneNames)
+    titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
 
   // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
   // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,

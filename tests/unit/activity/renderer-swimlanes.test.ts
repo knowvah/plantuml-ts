@@ -121,6 +121,32 @@ describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
     const out = renderSwimlaneChrome(makeGeo(), customTheme);
     expect(out).toContain('fill="#EEE"');
   });
+
+  // M: Swimlanes.java:358-366 `drawTitlesBackground` -- `.apply(color.bg())
+  // .apply(color)` paints the SAME resolved colour as both fill and stroke
+  // (default UGraphic line thickness, 1) -- vidada-17-xuse810.
+  it('stroke equals the resolved fill (not none) when a real override is set', () => {
+    const customTheme = deepMergeTheme(defaultTheme, {
+      colors: {
+        ...defaultTheme.colors,
+        graph: {
+          ...defaultTheme.colors.graph,
+          activity: { swimlaneHeaderBackground: '#EEEEEE' },
+        },
+      },
+    });
+    const out = renderSwimlaneChrome(makeGeo(), customTheme);
+    expect(out).toContain('stroke="#EEE"');
+    expect(out).toContain('stroke-width="1"');
+  });
+
+  it('stroke stays none alongside the default transparent fill', () => {
+    const out = renderSwimlaneChrome(makeGeo(), theme);
+    const bandRect = /<rect[^>]*>/.exec(out)?.[0] ?? '';
+    expect(bandRect).toContain('fill="none"');
+    expect(bandRect).toContain('stroke="none"');
+    expect(bandRect).not.toContain('stroke-width');
+  });
 });
 
 describe('renderSwimlaneTitles', () => {
@@ -141,6 +167,17 @@ describe('renderSwimlaneTitles', () => {
     });
     const out = renderSwimlaneTitles(makeGeo(), customTheme);
     expect(out).toContain('font-size="30"');
+  });
+
+  // SLURL: `getTitle` (`Swimlanes.java:285-293`) draws the RESOLVED
+  // display text, not raw `[[url label]]` markup -- nesozi-09-zezu092.
+  it('draws the resolved label for a [[url label]] lane name, not raw markup', () => {
+    const geo = makeGeo({
+      swimlanes: [{ name: '[[www.plantuml.com First actor]]', x: 20, width: 100 }],
+    });
+    const out = renderSwimlaneTitles(geo, theme);
+    expect(out).toContain('>First actor<');
+    expect(out).not.toContain('[[');
   });
 
   it('draws in the resolved SwimlaneTitleFontColor', () => {

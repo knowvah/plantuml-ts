@@ -120,14 +120,18 @@ function consumeElseifClause(
   ifInnerStops: StopKeywords,
 ): ElseifStep | ParseRefusal {
   const elseifMatch = RE_ELSEIF.exec(clauseLine)!;
-  const eiLabel = unescapeLabel(elseifMatch[2]?.trim());
+  // ELSEIFIN: group 1 is the leading `(incoming)` decoration -- shifts
+  // condition/then-label to groups 2/3 (dispatch-support.ts's own doc).
+  const incomingLabel = unescapeLabel(elseifMatch[1]?.trim());
+  const eiLabel = unescapeLabel(elseifMatch[3]?.trim());
   const eiResult = parseNodes(ctx, cursor + 1, ifInnerStops);
   if (isRefusal(eiResult)) return eiResult;
   return {
     cursor: eiResult.nextIdx,
     branch: {
-      condition: unescapeLabelNewlines(elseifMatch[1]!.trim()),
+      condition: unescapeLabelNewlines(elseifMatch[2]!.trim()),
       ...(eiLabel !== undefined && eiLabel !== '' ? { label: eiLabel } : {}),
+      ...(incomingLabel !== undefined && incomingLabel !== '' ? { incomingLabel } : {}),
       body: eiResult.nodes,
     },
   };
