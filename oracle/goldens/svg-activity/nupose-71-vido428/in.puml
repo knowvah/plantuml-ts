@@ -1,0 +1,26 @@
+@startuml
+|S0|
+start
+|S1|
+|S2|
+|S2bsfdmlkjfdslkdsflkjsfdlksdlkfjis|
+:df S2bsfdmlkjfdslkdsflkjsfdlksdlkfjis S2bsfdmlkjfdslkdsflkjsfdlksdlkfjis;
+|S3|
+|S4|
+|S1|
+:decision;
+split
+if (foo)
+:foo1verylong;
+else
+:d;
+endif
+split again
+|S2|
+:foo2 foo2;
+split again
+|S3|
+:foo3 foo3;
+end split
+end
+@enduml

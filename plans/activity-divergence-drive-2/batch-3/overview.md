@@ -20,8 +20,8 @@ paths, report to `.agent-notes/<ID>.md`. Close per
 | [T3g](T3g-note-partition.md) | NOTE wrapper (Opale), PART partition tab | `layout/{tile-layout*,tile-coordinates}.ts`, `tiles/{gtile-top-down,gtile-note,gtile-group,gtile-partition}.ts`, `layout/compress/**`, `activity-renderer-shapes.ts` | 2 | [x] |
 | [T3h](T3h-style-wiring.md) | F/K/DARK consumers, PAINT, CSTYLE (if rows) | `activity-renderer-shapes.ts` (not renderComposite), `activity-renderer-if-shapes.ts`, `activity-style-defaults*.ts`, core theme/skinparam, `conditional-builder.ts`, if/diamond tiles | 2 | [x] |
 | b3w1 | interim pin round after wave 1 (journal row 43) | orchestrator | — | [x] |
-| [T3i](T3i-leftovers.md) | wave-3 leftovers (ELSEIFIN, BACKLBL, CSTYLE repeat/links, xabesu, N, O, levuma) | `src/diagrams/activity/**` | 3 | [ ] |
-| T3-close | b3, all-engine diff, re-pins, pin round 2 | per close-procedure | — | [ ] |
+| [T3i](T3i-leftovers.md) | wave-3 leftovers (ELSEIFIN, BACKLBL, CSTYLE repeat/links, xabesu, N, O, levuma) | `src/diagrams/activity/**` | 3 | [x] |
+| T3-close | b3, all-engine diff, re-pins, pin round 2 | per close-procedure | — | [x] |
 
 open -> add3 (not in batch 3): GLYPH `UCenteredCharacter` path outline
 (`DriverCenteredCharacterSvg.java:57-81`) lives in `src/core/klimt/**` (stop 8);

@@ -1,0 +1,33 @@
+@startuml
+
+|A|
+
+
+split
+    :something;
+split again
+    :Removing this line will stop the crash!!!;
+    
+    |B|
+    
+    :a;
+    repeat
+        
+        if(?) then (yes)
+            split
+                while (4 successful scans are not done?)
+                    :a;
+                    if(scanned successfully?) then (yes)
+                        :a;
+                    else
+                        :a;
+                    endif
+                endwhile
+            split again
+                :a;
+            end split
+        endif
+    repeat while(there is not enough fingers enrolled?)
+end split
+
+@enduml
