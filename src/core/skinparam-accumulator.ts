@@ -200,7 +200,13 @@ export interface SkinparamAccumulator {
   iconPublicBackgroundColor: string | undefined;
   guillemetStart: string | undefined;
   guillemetEnd: string | undefined;
-  activityBackground: string | undefined;
+  // add2 T3h (family PAINT): `Paint`, not `string` -- `skinparam activity{
+  // BackgroundColor red-green}` is a gradient (`HColorSet.java:109-116`),
+  // and `rect()`'s own `BoxStyle.fill?: Paint` already draws a
+  // `<linearGradient>` def for any gradient value (D9: one style path).
+  // Was flattened to a solid hex before the handler's `paint` param (4th
+  // arg, `arrowcolor`'s own precedent) was threaded through.
+  activityBackground: Paint | undefined;
   activityBorder: string | undefined;
   activityBarColor: string | undefined;
   activityDiamondBackground: string | undefined;

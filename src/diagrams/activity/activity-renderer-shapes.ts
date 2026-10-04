@@ -7,6 +7,7 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
@@ -165,12 +166,12 @@ export function renderMultilineText(
 // ---------------------------------------------------------------------------
 
 export interface ActivityColors {
-  nodeFill: string;
+  nodeFill: Paint; // add2 T3h (family PAINT): gradients, not solid-only
   nodeBorder: string;
   barFill: string;
   startFill: string;
   endFill: string;
-  diamondFill: string;
+  diamondFill: Paint; // shares activityBackground's fallback tier
   diamondBorder: string;
 }
 

@@ -16,6 +16,7 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
@@ -231,7 +232,7 @@ export function renderHexagonMultilineLabel(
 export function diamondColors(
   act: Theme['colors']['graph']['activity'],
   theme: Theme,
-): { fill: string; border: string } {
+): { fill: Paint; border: string } {
   return {
     fill: act?.diamondBackground ?? act?.background ?? theme.colors.nodeBackground,
     border: act?.diamondBorder ?? act?.border ?? theme.colors.border,

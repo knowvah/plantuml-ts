@@ -384,12 +384,8 @@ export const KEY_HANDLERS_B: ReadonlyArray<readonly [keys: readonly string[], ha
     },
   ],
   [['guillemet'], (acc, value) => applyGuillemet(acc, value)],
-  [
-    ['activitybackgroundcolor'],
-    (acc, _v, color) => {
-      acc.activityBackground = color;
-    },
-  ],
+  // add2 T3h (PAINT): Paint (4th arg), mirrors `arrowcolor` (table-a).
+  [['activitybackgroundcolor'], (acc, _v, _color, paint) => (acc.activityBackground = paint)],
   [
     ['activitybordercolor'],
     (acc, _v, color) => {
