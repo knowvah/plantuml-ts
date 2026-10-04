@@ -207,6 +207,40 @@ function pushTopBarOrLine(t: GtileFork, x: number, y: number, myLane: string | u
  *  last branch, so T7 leaves it reading `lastBranch` directly rather than
  *  `myLaneOut`; in practice the two agree, since nothing changes the
  *  current lane between the last branch's own close and `end split`. */
+/** N (add2 T3i): the fork's own join bar, with its `end fork {label}`
+ *  attached (`ParallelBuilderFork.java:114-115`'s `doStep2` -- the JOIN
+ *  bar only, never the opening one). Split out purely to keep {@link
+ *  pushJoinBarOrLine}'s own NLOC under the file's limit.
+ *
+ * The label is drawn, not a node -- compression (`compress-geometry.ts`)
+ * only ever sees `ActivityNodeGeo`/`Reservation` boxes, so without a
+ * reservation covering its own reach (`t.width - t.barWidth`, the SAME
+ * supplement `GtileFork`'s own constructor added to `width`), X
+ * compression collapses the "empty" space to its right back down,
+ * clipping the label off the canvas (`zafoxu-20-xofe568`: width 261 vs
+ * the jar's 284 before this reservation). Mirrors `hexagon-
+ * reservations.ts`'s own pattern -- a `UEmpty`-equivalent invisible box,
+ * never `ignoreX`/`ignoreY` (this is real occupied ink, not a background). */
+function pushForkJoinBar(t: GtileFork, x: number, joinBarY: number, myLaneOut: string | undefined, out: Out): void {
+  pushNode(
+    out,
+    {
+      id: out.nextId('join-bar'),
+      kind: 'join-bar',
+      x,
+      y: joinBarY,
+      width: t.barWidth,
+      height: t.barHeight,
+      ...(t.joinLabel !== undefined ? { label: t.joinLabel } : {}),
+    },
+    myLaneOut,
+  );
+  const labelSupp = t.width - t.barWidth;
+  if (labelSupp > 0) {
+    out.reservations.push({ x: x + t.barWidth, y: joinBarY, width: labelSupp, height: t.barHeight });
+  }
+}
+
 function pushJoinBarOrLine(
   t: GtileFork,
   x: number,
@@ -216,11 +250,7 @@ function pushJoinBarOrLine(
   out: Out,
 ): void {
   if (t.kind === 'gtile-fork') {
-    pushNode(
-      out,
-      { id: out.nextId('join-bar'), kind: 'join-bar', x, y: joinBarY, width: t.barWidth, height: t.barHeight },
-      myLaneOut,
-    );
+    pushForkJoinBar(t, x, joinBarY, myLaneOut, out);
     return;
   }
   if (!t.hasPointOut()) return;

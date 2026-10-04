@@ -774,6 +774,24 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
     expect(svg).toContain('stroke="#555"');
     expect(svg).not.toContain(`fill="${theme.colors.border}"`);
   });
+
+  // N (add2 T3i): `end fork {label}` -- FtileBlackBlock.java:84-92,
+  // 110-112, zafoxu-20-xofe568.
+  it('draws no label text when node.label is unset', () => {
+    const svg = renderBar(makeNode({ kind: 'fork-bar', x: 16, y: 55, width: 225.5, height: 6 }), theme);
+    expect(svg).not.toContain('<text');
+  });
+
+  it('draws the label to the right of the bar, vertically centred on its top edge', () => {
+    const svg = renderBar(
+      makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }),
+      theme,
+    );
+    expect(svg).toContain('x="246.5"');
+    expect(svg).toContain('y="136.056"');
+    expect(svg).toContain('font-size="11"');
+    expect(svg).toContain('>{or}<');
+  });
 });
 
 describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {

@@ -282,6 +282,16 @@ export interface ActivityFork {
    *   for `end merge` either (matching upstream's own silent drop).
    */
   style?: 'merge';
+  /**
+   * N (add2 T3i): `end fork {label}`'s own join-bar label, braces kept
+   * VERBATIM (upstream never strips them -- `zafoxu-20-xofe568`'s own
+   * jar SVG draws the literal text `{or}`). Never set when
+   * {@link style} is `'merge'` (see that field's own doc).
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkEnd3.java:72-74
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-196
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:114-115
+   */
+  label?: string;
 }
 
 export interface ActivitySplit {

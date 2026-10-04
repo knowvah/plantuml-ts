@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
+import type { Theme } from '../../../../src/core/theme.js';
+import { resolveTheme } from '../../../../src/core/theme.js';
 
 // Constants mirroring the implementation
 // `AbstractParallelFtilesBuilder.java:64` -- was an unsourced 8 (apc-T3).
@@ -176,6 +178,42 @@ describe('GtileFork — the third constructor argument overrides barHeight', () 
     expect(tile.branchTopYs[0]).toBe(1.5 + SPACE_AROUND_BLACK_BAR + 10);
     expect(tile.height).toBe(1.5 + SPACE_AROUND_BLACK_BAR * 2 + 80 + 1.5);
     // width/barWidth/branchOffsets are NOT barHeight-derived (D3, T4's job).
+    expect(tile.width).toBe(216);
+  });
+});
+
+// N (add2 T3i): `end fork {label}` -- FtileBlackBlock.java:84-92,110-112.
+describe('GtileFork — joinLabel widens width without recentring (zafoxu-20-xofe568)', () => {
+  const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
+  const measuringBounder: StringBounder = {
+    getDimension: (text: string, _size: number) => ({ width: text.length * 7, height: 11 }),
+  };
+  const b1 = stubTile(80, 60);
+  const b2 = stubTile(80, 80);
+
+  it('no label: width/left/joinLabel unchanged from the bare constructor', () => {
+    const tile = new GtileFork([b1, b2], measuringBounder);
+    expect(tile.width).toBe(216);
+    expect(tile.left).toBe(108);
+    expect(tile.joinLabel).toBeUndefined();
+  });
+
+  it('a label widens width by labelWidth + 5, leaving barWidth/left untouched', () => {
+    const tile = new GtileFork([b1, b2], measuringBounder, undefined, theme, '{or}');
+    expect(tile.barWidth).toBe(216);
+    expect(tile.left).toBe(108);
+    expect(tile.joinLabel).toBe('{or}');
+    expect(tile.width).toBe(216 + 4 * 7 + 5);
+  });
+
+  it('getCoord(NORTH_HOOK/SOUTH_HOOK) stays at `left`, not `width / 2`', () => {
+    const tile = new GtileFork([b1, b2], measuringBounder, undefined, theme, '{or}');
+    expect(tile.getCoord(NORTH_HOOK).x).toBe(108);
+    expect(tile.getCoord(SOUTH_HOOK).x).toBe(108);
+  });
+
+  it('no supplement when theme is omitted (label measurement needs both)', () => {
+    const tile = new GtileFork([b1, b2], measuringBounder, undefined, undefined, '{or}');
     expect(tile.width).toBe(216);
   });
 });

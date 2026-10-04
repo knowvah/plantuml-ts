@@ -336,6 +336,32 @@ describe('parses fork / fork again / end fork', () => {
     const node = firstNode(ast) as ActivityFork;
     expect(node.style).toBeUndefined();
   });
+
+  // N (add2 T3i): `end fork {label}` -- CommandForkEnd3.java:72-74,
+  // zafoxu-20-xofe568.
+  it('captures the {label} on "end fork {label}", braces kept verbatim', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end fork {or}']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.label).toBe('{or}');
+  });
+
+  it('plain "end fork" (no braces) leaves label unset', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end fork']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.label).toBeUndefined();
+  });
+
+  it('unescapes a literal \\n inside the label', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end fork {a\\nb}']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.label).toBe('{a\nb}');
+  });
+
+  it('preserves the label’s own casing despite the case-insensitive keyword match', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'END FORK {Or}']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.label).toBe('{Or}');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -356,6 +382,14 @@ describe('parses fork / fork again / end merge', () => {
     expect(node.branches).toHaveLength(2);
     expect((node.branches[0]?.[0] as ActivityAction).label).toBe('A');
     expect((node.branches[1]?.[0] as ActivityAction).label).toBe('B');
+  });
+
+  // N (add2 T3i): `end merge {label}` is parsed-and-dropped, matching
+  // upstream (`ActivityFork.style`'s own doc, ast.ts).
+  it('"end merge {label}" never captures a label', () => {
+    const ast = parse(['fork', '  :A;', 'fork again', '  :B;', 'end merge {or}']);
+    const node = firstNode(ast) as ActivityFork;
+    expect(node.label).toBeUndefined();
   });
 });
 

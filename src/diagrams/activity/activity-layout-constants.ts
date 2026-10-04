@@ -137,6 +137,10 @@ export const BAR_HEIGHT = 6;
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileThinSplit.java:61
  *   -- `private final double height = 1.5;`. */
 export const THIN_SPLIT_HEIGHT = 1.5;
+/** N (add2 T3i): `end fork {label}`'s own join-bar label margin.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:65
+ *   -- `private final double labelMargin = 5;`. */
+export const JOIN_LABEL_MARGIN = 5;
 /** Per-branch horizontal margin on EACH side of a fork/split branch
  *  (`computeNewFtile`'s `xMargin`, applied via `FtileUtils
  *  .addHorizontalMargin`). Replaces the fork's unsourced `BAR_OVERHANG`

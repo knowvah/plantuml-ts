@@ -111,7 +111,12 @@ export function tileFork(
     const tiles = tileNodes(b, bounder, theme, laneOrder, pragma);
     return new GtileTopDown(tiles, bounder, theme);
   });
-  const built = node.style === 'merge' ? new GtileMerge(branches, bounder) : new GtileFork(branches, bounder);
+  // N (add2 T3i): `node.label` is only ever set for `style !== 'merge'`
+  // (`ActivityFork.label`'s own doc, ast.ts) -- `GtileMerge` never reads it.
+  const built =
+    node.style === 'merge'
+      ? new GtileMerge(branches, bounder)
+      : new GtileFork(branches, bounder, undefined, theme, node.label);
   return withSwimlaneOut(withSwimlane(built, node.swimlane), node.swimlaneOut);
 }
 
