@@ -101,6 +101,7 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     swimlanes: [],
     swimlaneSet: new Set(),
     currentSwimlane: undefined,
+    swimlaneColors: new Map(),
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(internalSprites, internalEmoji),
     // D12/T1p-b: one `Pragma` instance per diagram, mirroring
@@ -117,6 +118,7 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
   return {
     nodes: result.nodes,
     swimlanes: ctx.swimlanes,
+    ...(ctx.swimlaneColors.size > 0 ? { swimlaneColors: Object.fromEntries(ctx.swimlaneColors) } : {}),
     annotations: ctx.annotations,
     sprites: ctx.sprites,
     pragma: ctx.pragma,

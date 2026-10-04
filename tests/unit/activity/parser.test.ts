@@ -380,6 +380,30 @@ describe('parses swimlane', () => {
     const ast = parse(['|Alice|', '  :Do work;', '|Bob|', '  :Review;']);
     expect(ast.swimlanes).toEqual(['Alice', 'Bob']);
   });
+
+  // O (add2 T3i): `|#color|name|` -- CommandSwimlane.java:60-68,
+  // Swimlanes.java:332-340 (cejupe-34-muti621, cakeca-72-kara622).
+  it('captures a lane’s own |#color|name| background, keyed by name', () => {
+    const ast = parse(['|#AntiqueWhite|Alice|', '  :Do work;', '|Bob|', '  :Review;']);
+    expect(ast.swimlaneColors).toEqual({ Alice: '#AntiqueWhite' });
+  });
+
+  it('a later color-less switch to the same lane keeps its earlier color', () => {
+    const ast = parse([
+      '|#AntiqueWhite|Alice|',
+      '  :Do work;',
+      '|Bob|',
+      '  :Review;',
+      '|Alice|',
+      '  :More work;',
+    ]);
+    expect(ast.swimlaneColors).toEqual({ Alice: '#AntiqueWhite' });
+  });
+
+  it('omits swimlaneColors entirely when no lane ever carries one', () => {
+    const ast = parse(['|Alice|', '  :Do work;', '|Bob|', '  :Review;']);
+    expect(ast.swimlaneColors).toBeUndefined();
+  });
 });
 
 // ---------------------------------------------------------------------------

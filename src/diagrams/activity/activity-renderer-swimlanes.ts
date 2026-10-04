@@ -52,6 +52,21 @@ function renderSwimlaneBand(geo: ActivityGeometry, theme: Theme): string {
   return rect(x, y, width, height, paint);
 }
 
+/**
+ * O (add2 T3i): the `|#color|name|` background rect, drawn BEFORE the
+ * lane's own node content (`Swimlanes.java:332-340`, inside the SAME
+ * per-lane loop {@link renderSwimlaneChrome} mirrors) -- `lane.x`/
+ * `lane.width` already match the jar's `xpos - divider1.getX2()` /
+ * `actualWidth + divider1.getX2() + divider2.getX1()` exactly (verified
+ * against `cejupe-34-muti621`'s oracle SVG, both divider lines land on
+ * this lane's own `x`/`x + width`), and `y1`/`y2` the SAME divider
+ * Y-range the lane's own divider line draws at just below.
+ */
+function renderSwimlaneBackground(lane: ActivityGeometry['swimlanes'][number], y1: number, y2: number): string {
+  if (lane.background === undefined) return '';
+  return rect(lane.x, y1, lane.width, y2 - y1, { fill: lane.background, stroke: lane.background, strokeWidth: 1 });
+}
+
 /** Every lane boundary X, INCLUDING both outer edges -- `n + 1` dividers
  *  for `n` lanes (`Swimlanes.java:318-350`'s own loop over
  *  `swimlanesSpecial()`, which has one more entry than `swimlanes()`). */
@@ -98,6 +113,7 @@ export function renderSwimlaneChrome(geo: ActivityGeometry, theme: Theme): strin
   let out = renderSwimlaneBand(geo, theme);
   for (const n of before) out += renderNode(n, theme);
   for (const lane of geo.swimlanes) {
+    out += renderSwimlaneBackground(lane, y1, y2);
     for (const n of byLane.get(lane.name) ?? []) out += renderNode(n, theme);
     out += line(lane.x, y1, lane.x, y2, { stroke, strokeWidth });
   }

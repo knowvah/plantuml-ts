@@ -134,6 +134,15 @@ export interface SwimlaneGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:373-375
    */
   contentX?: number;
+  /**
+   * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
+   * already span exactly the jar's background-rect bounds (verified
+   * against `cejupe-34-muti621`'s oracle SVG: both divider lines land
+   * on this lane's own `x` and `x + width`, byte-for-byte). `undefined`
+   * for a lane with no color segment (no rect drawn).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+   */
+  background?: string;
 }
 
 /**

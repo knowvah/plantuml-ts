@@ -61,7 +61,7 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  setCurrentSwimlane(ctx, m[1]!.trim());
+  setCurrentSwimlane(ctx, m[2]!.trim(), m[1]);
   return { idx: idx + 1 };
 }
 
