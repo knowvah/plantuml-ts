@@ -1,0 +1,15 @@
+@startuml
+
+|swimlane1|
+start
+split
+  :a;
+split again
+  :b;
+end split
+
+|swimlane1|
+:w;
+|swimlane2|
+:z;
+@enduml

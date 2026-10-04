@@ -68,6 +68,34 @@ export interface ActivityEdgeGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:306-307
    */
   midArrowAt?: { x: number; y: number; dir: 'up' | 'down' | 'left' | 'right' };
+  /**
+   * The Java `MergeStrategy` this edge's own `Snake` was built with
+   * (`activitydiagram3/ftile/MergeStrategy.java:38-46`: `FULL < LIMITED <
+   * NONE`), read ONLY by `layout/snake-merge.ts` (D1/D2) before any
+   * compression runs; absent means the builder's own default `FULL`
+   * (`Snake.create`'s static overloads, `Snake.java:138-153`, never call
+   * `.withMerge(...)`). Walkers set this only at the few sites a `.withMerge`
+   * call actually appears upstream -- every other push is correctly left
+   * `undefined` rather than redundantly writing `'FULL'`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:303-306
+   */
+  mergeable?: 'FULL' | 'LIMITED' | 'NONE';
+  /**
+   * b3/T3a (family C/EMMID): the PRE-compression midpoint of the first
+   * segment matching `emphasize`'s direction -- `Worm#drawLine`
+   * (`ftile/Worm.java:178-182`) computes the mid-arrow's anchor as
+   * `p1 + (p2-p1)/2` using the Worm's own (uncompressed) points, THEN
+   * draws through the compressing `UGraphic`, which maps that one anchor
+   * point through `ct()` on each axis exactly like any other point
+   * (`klimt/compress/UGraphicCompressOnXorY.java:117-126`'s `getTranslate`
+   * on the `draw(UShape)` non-`ULine`/non-`URectangle` branch) -- never by
+   * re-deriving a midpoint from the (already compressed) segment
+   * endpoints, which is a DIFFERENT point once X or Y compression removes
+   * unequal slack from each side. Populated once, pre-compression, by
+   * `compress-geometry.ts#withEmphasizeAnchor`; carried through both
+   * compress axes by `transformEdge`, same as {@link midArrowAt}.
+   */
+  emphasizeAt?: { x: number; y: number };
 }
 
 export interface SwimlaneGeo {
@@ -106,6 +134,15 @@ export interface SwimlaneGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:373-375
    */
   contentX?: number;
+  /**
+   * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
+   * already span exactly the jar's background-rect bounds (verified
+   * against `cejupe-34-muti621`'s oracle SVG: both divider lines land
+   * on this lane's own `x` and `x + width`, byte-for-byte). `undefined`
+   * for a lane with no color segment (no rect drawn).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+   */
+  background?: string;
 }
 
 /**
@@ -141,4 +178,23 @@ export interface ActivityGeometry {
   swimlanes: SwimlaneGeo[];
   swimlaneBand?: SwimlaneBandGeo;
   swimlaneDividerY?: SwimlaneDividerY;
+  /**
+   * b3/T3a (family E): the `Recentred`-only span, BEFORE the document
+   * margin -- `ink + RECENTRED_ENLARGE` (`activity-layout-constants.ts
+   * #RECENTRED_ENLARGE`'s own doc: `(M - m) + RECENTRED_ENLARGE`, the jar's
+   * `Recentred#getMinMax` size, which is exactly `RenderFragment
+   * .preChromeWidth`/`preChromeHeight`'s target value, T3j).
+   * `canvas-origin.ts#computeCanvasOrigin` computes this UN-floored, before
+   * `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL` derives
+   * {@link totalWidth}/{@link totalHeight} (the document-margin-included,
+   * floored, ceiled total). `renderer.ts#preChromeDims` reads it directly
+   * instead of reverse-subtracting a margin from the already-floored
+   * total, which loses the ink span's fractional part
+   * (`svek/DecorateEntityImage.java:144-150`'s `getTextX` centres chrome
+   * text against this un-floored span). Optional only for hand-built test
+   * fixtures that construct a bare `ActivityGeometry` literal without
+   * routing through `finalizeGeometry`.
+   */
+  rawWidth?: number;
+  rawHeight?: number;
 }

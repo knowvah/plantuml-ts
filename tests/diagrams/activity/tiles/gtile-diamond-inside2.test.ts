@@ -128,3 +128,20 @@ describe('GtileDiamondInside2 — hasPointOut', () => {
     expect(tile.hasPointOut()).toBe(true);
   });
 });
+
+// MLJOIN/IFNL residual (T3d, `pekefu-66-mepa144`): a real-\n-bearing
+// condition needs the SAME per-line width=MAX/height=SUM fold
+// `GtileDiamondInside`'s own `measureLabel` uses.
+describe('GtileDiamondInside2 — multiline condition label (pekefu-66-mepa144)', () => {
+  it('hexWidth is the widest line of the condition, not the whole string', () => {
+    // "no on"=5*7=35, "several lines"=13*7=91 -> max=91; +24 pad.
+    const tile = new GtileDiamondInside2('no on\nseveral lines', {}, bounder, theme);
+    expect(tile.hexWidth).toBe(115);
+  });
+
+  it('hexHeight sums every condition line, not one line', () => {
+    // 2 lines * 14 = 28 (above the 24 floor).
+    const tile = new GtileDiamondInside2('no on\nseveral lines', {}, bounder, theme);
+    expect(tile.hexHeight).toBe(28);
+  });
+});

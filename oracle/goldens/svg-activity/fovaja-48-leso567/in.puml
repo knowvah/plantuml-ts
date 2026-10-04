@@ -1,0 +1,13 @@
+@startuml
+start
+fork
+   while(condition?) is (true)
+      :task;
+   endwhile (false)
+fork again
+   while(condition?) is (true)
+      :task;
+   endwhile (false)
+end fork
+stop
+@enduml

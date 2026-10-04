@@ -11,14 +11,31 @@ import { isAssumeTransparent } from '../../core/assume-transparent.js';
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import type { Pragma } from '../../core/skin/Pragma.js';
 import type { ActivityNode } from './ast.js';
 
 // ---------------------------------------------------------------------------
 // Regex constants
 // ---------------------------------------------------------------------------
 
-/** Matches a swimlane header: |name| or |[#color]name| */
-export const RE_SWIMLANE = /^\|(?:\[#[^\]]*\])?([^|]+)\|\s*$/;
+/**
+ * Matches a swimlane header: `|name|` or `|#color|name|` (optionally
+ * followed by a trailing `|label|`, parsed but dropped -- this port has
+ * no separate swimlane display-label slot, same "parsed not drawn"
+ * scope as {@link RE_SWIMLANE}'s sibling constants below). Group 1 (add2
+ * T3i, family O): the `#color` segment, INCLUDING its leading `#`, same
+ * convention {@link RE_ACTION}'s own trailing `(#\w+)` group uses --
+ * `node.color` reaches `resolvePaint` with the `#` still attached.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwimlane.java:60-68
+ *   -- `"\\|"`, `ColorParser.exp6()` (`(?:(COLOR)\|)?`), `SWIMLANE
+ *   ([^|]+)`, `"\\|"`, `LABEL ([^|]+)?`. The previous `|[#color]name|`
+ *   bracket form matched no upstream `Command` at all -- `cakeca-72-
+ *   kara622`/`cejupe-34-muti621` (T2e) both use the real pipe-delimited
+ *   `|#LightBlue|REL|` shape.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+ *   -- `drawU`'s per-lane background rect, read via `swimlane.getColors()`.
+ */
+export const RE_SWIMLANE = /^\|(?:(#[^|]+)\|)?([^|]+)\|(?:[^|]+)?\s*$/;
 
 /**
  * Trailing stereogroup fragment: one or more consecutive `<<...>>` runs.
@@ -61,48 +78,85 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  * doc for scope. The single-line form (this constant); the multiline
  * head/close pair lives in `node-dispatch.ts#tryBackward`, reusing
  * {@link RE_ACTION_CLOSE} for its closer (identical shape: content, `;`,
- * optional stereogroup(s), end).
- * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:73-88
+ * optional stereogroup(s), end) -- which has no trailing-paren group, so
+ * the multiline closer never captures an `(outgoing)` label (BACKLBL,
+ * add2 T3i: documented gap, not attempted -- `RE_ACTION_CLOSE` is shared
+ * with plain multiline actions). Group 1 (leading `(incoming)`) and group
+ * 3 (trailing `(outgoing)`) are captured here, raw paren contents only --
+ * the arrow-COLOR half of each decoration (`INCOMING_COLOR`/
+ * `OUTCOMING_COLOR`) stays unparsed, matching the simplification level
+ * every other base-form field on this node already sits at.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:64-89
+ *   -- the full `(INCOMING)? backward : LABEL ; <<stereo>>* (OUTCOMING)?`
+ *   shape; both decoration groups are `RegexOptional`.
  */
-export const RE_BACKWARD = /^backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*$/i;
+export const RE_BACKWARD =
+  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}
- *  fails to match. */
-export const RE_BACKWARD_HEAD = /^backward\s*:(.*)$/i;
+ *  fails to match. Leading `(incoming)` captured (BACKLBL, add2 T3i),
+ *  same group shape as {@link RE_BACKWARD}'s own group 1. */
+export const RE_BACKWARD_HEAD = /^(?:\(([^)]*)\)\s*)?backward\s*:(.*)$/i;
 
 /**
  * `if (test) then (label)?`, now also accepting a trailing stereogroup
  * (mission ubrr-T10 M4a): `CommandIf2` ends in
  * `Stereogroup.optionalStereogroup()` before `end()`, which the pre-T10
- * regex had no arm for at all.
+ * regex had no arm for at all. `TEST`/`LABEL` use a LAZY `.*?` (mission
+ * add2-T2e, D6), not `[^)]*` -- a condition containing a method call like
+ * `isForward()` has a `)` BEFORE the one that actually closes the test,
+ * and `[^)]*` stops at the first one, leaving `) then` unconsumed and
+ * refusing the whole line (`pucinu-80-nopo009`, `zaxati-90-xacu660`,
+ * `fivone-96-nalo453`, `jamana-83-gige126`, `jufefu-66-josa392`,
+ * `vexula-75-noko098`). A lazy quantifier backtracks past inner `)`s the
+ * same way Java's own regex engine does -- this is not new leniency, it
+ * is matching upstream's actual quantifier.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandIf2.java:60-80
+ *   -- `new RegexLeaf(1, "TEST", "(.*?)")`.
  */
-export const RE_IF = /^if\s*\(([^)]*)\)\s*(?:then\s*(?:\(([^)]*)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+export const RE_IF = /^if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /**
  * `if (test) is|equals (value) then`, the leading `is`/`equals` synonym
  * for a bare-`then` clause used nowhere else -- `WHEN` fills the same
  * `thenLabel` slot `RE_IF`'s own `(label?)` group fills, since both
  * commands hand it to the identical `diagram.startIf(test, when, ...)`
- * call.
+ * call. Both groups lazy, same reason as {@link RE_IF}'s own doc.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandIf4.java:60-81
  */
 export const RE_IF4 =
-  /^if\s*\(([^)]*)\)\s*(?:is|equals?)\s*\(([^)]*)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+  /^if\s*\((.*?)\)\s*(?:is|equals?)\s*\((.*?)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /**
  * Legacy `if (test) then when LABEL` spelling -- no parens around the
- * label, mandatory `then` AND `when`.
+ * label, mandatory `then` AND `when`. Lazy `TEST`, same reason as
+ * {@link RE_IF}'s own doc.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandIfLegacy1.java:56-71
  */
-export const RE_IF_LEGACY = /^if\s*\(([^)]*)\)\s*then\s+when\s+(.*)$/i;
+export const RE_IF_LEGACY = /^if\s*\((.*?)\)\s*then\s+when\s+(.*)$/i;
 
-/** elseif (condition?) then (label?) — accepts `elseif` and `else if`,
- *  now also a trailing stereogroup (`CommandElseIf2.java` ends the same
- *  way `CommandIf2` does -- see {@link RE_IF}'s own doc). */
+/**
+ * elseif (condition?) then (label?) — accepts `elseif` and `else if`,
+ * now also a trailing stereogroup (`CommandElseIf2.java` ends the same
+ * way `CommandIf2` does -- see {@link RE_IF}'s own doc). `TEST`/`WHEN`
+ * are lazy, same reason as {@link RE_IF}'s own doc. A leading
+ * `(incoming)` group is CAPTURED (group 1; `TEST`/`WHEN` shift to 2/3,
+ * ELSEIFIN, `dulate-94-bupu593`/`nolubo-93-rula384`): it decorates the
+ * arrow from the PREVIOUS branch into this elseif's diamond --
+ * `InstructionIf#elseIf`'s `inlabel` param (`ActivityDiagram3.java:316`)
+ * becomes `Branch#getInlabel()`, drawn on the diamond's OWN west side
+ * (`FtileIfLongHorizontal.java:178-186`: `diamond.withWest(tbInlabel)`,
+ * the SAME slot `walk-if-long-horizontal.ts#pushDiamondLabel(...,
+ * 'west', ...)` already draws for `FtileDiamondInside2`) -- never on
+ * the connecting arrow itself (`ConnectionHorizontal.drawU`,
+ * `:260-270`, draws no label at all).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandElseIf2.java:64-80
+ *   -- the leading `(INCOMING)?` group (`RegexOptional` wrapping
+ *   `"\\(" (.*?) "\\)"`), before `else`/`if`.
+ */
 export const RE_ELSEIF =
-  /^else\s*if\s*\(([^)]*)\)\s*(?:then\s*(?:\(([^)]*)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?else\s*if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /** else (label?) */
 export const RE_ELSE = /^else\s*(?:\(([^)]*)\))?\s*$/i;
@@ -112,14 +166,18 @@ export const RE_ELSE = /^else\s*(?:\(([^)]*)\))?\s*$/i;
  */
 export const RE_ELSE_LEGACY = /^else\s+when\s+(.*)$/i;
 
-/** `endif`, now also a trailing stereogroup (`CommandEndif3` ends in
- *  `Stereogroup.optionalStereogroup()` too -- an exact-string `'endif'`
- *  check would otherwise silently swallow every line up to the NEXT
- *  bare `endif`, since {@link consumeIfClauses}'s `'unexpected'` fallback
- *  keeps scanning rather than refusing).
+/** `endif` or `end if` (zero-or-more space between the two words, mission
+ *  add2-T2e: `zinelo-77-losu727`'s nested nested `end if` closer refused
+ *  against an exact `endif`-only match), now also a trailing stereogroup
+ *  (`CommandEndif3` ends in `Stereogroup.optionalStereogroup()` too -- an
+ *  exact-string `'endif'` check would otherwise silently swallow every
+ *  line up to the NEXT bare `endif`, since {@link consumeIfClauses}'s
+ *  `'unexpected'` fallback keeps scanning rather than refusing).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandEndif3.java:56-67
+ *   -- `new RegexLeaf("end"), RegexLeaf.spaceZeroOrMore(), new
+ *   RegexLeaf("if")`.
  */
-export const RE_ENDIF = /^endif(?:\s*<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?$/i;
+export const RE_ENDIF = /^end\s*if(?:\s*<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?$/i;
 
 /**
  * `switch (test)`, optionally a trailing stereogroup. The leading
@@ -186,14 +244,46 @@ export const RE_REPEATWHILE =
   /^repeat\s*while(?:\s*\(([^)]*)\))?(?:\s*(?:is|equals?)\s*\(([^)]*)\))?(?:\s*not\s*\(([^)]*)\))?\s*;?\s*$/i;
 
 /**
- * Single-line note: "note (left|right)? : text"  — the direction is
- * optional. When omitted the note defaults to floating to the right of
- * the previous activity (matches upstream PlantUML behaviour).
+ * Single-line note: "(floating )?note (left|right)? (#color)? : text" —
+ * direction, the leading `floating` keyword, and the color are each
+ * optional. When direction is omitted the note defaults to floating to
+ * the right of the previous activity (matches upstream PlantUML
+ * behaviour). `floating`/color were missing entirely before (mission
+ * add2-T2e, D6): `giteso-65-mefo026`'s `floating note right: …` and
+ * `xolazi-74-vamu265`'s `note right #blue :sad note is sad` both refused
+ * against this. The COLOR group mirrors `ColorParser.COLOR_REGEXP`
+ * (`#\w+[-\|/]?\w+`, gradient-separator included) -- captured but
+ * dropped, same "parsed not drawn" scope as this file's other leading-
+ * color omissions (`RE_IF`'s own doc).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNote3.java:60-71
+ *   -- `TYPE (note|floating note)`, `POSITION (left|right)?`,
+ *   `color().getRegex()`, then the literal `:`.
+ * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46
  */
-export const RE_NOTE_SINGLE = /^note(?:\s+(left|right))?\s*:\s*(.+)$/i;
+export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*:\s*(.+)$/i;
 
-/** note (left|right)? (multi-line) — direction defaults to right when absent */
-export const RE_NOTE_MULTI = /^note(?:\s+(left|right))?\s*$/i;
+/**
+ * `(floating )?note (left|right)?` (multi-line, closed by {@link
+ * RE_NOTE_END}) — direction defaults to right when absent. `floating`/
+ * color, same doc as {@link RE_NOTE_SINGLE} above (`razuzu-32-faje125`'s
+ * bare `floating note right`, `tajuxe-32-sexo680`'s `note left #aabbcc`).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNoteLong3.java:131-141
+ */
+export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*$/i;
+
+/** `end note` / `endnote` -- single OPTIONAL space between the two words
+ *  (upstream's `%s` sentinel, same convention as {@link
+ *  RE_CLOSE_GROUP_LEGACY}'s `end\s?group`), not the zero-OR-MORE `\s*`
+ *  {@link RE_ENDIF}/{@link RE_ENDWHILE} use. Before this (mission
+ *  add2-T2e, D6) `tryNoteMulti`'s closer checked the literal string
+ *  `'end note'` only, so `razuzu-32-faje125`'s one-word `endnote` closer
+ *  never matched and the note body swallowed the rest of the diagram.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNoteLong3.java:48-49
+ *   -- `Pattern2.cmpile("^end[%s]?note$")`.
+ * @see net/sourceforge/plantuml/regex/Pattern2.java:57
+ *   -- `%s` expands to `[\s ]` (normal or non-breaking space).
+ */
+export const RE_NOTE_END = /^end[\s ]?note$/i;
 
 /**
  * Matches arrow-label lines:
@@ -226,6 +316,19 @@ export const RE_REPEAT_INLINE_TERMINATOR = new RegExp(';\\s*(?:<<[^>]*>>)?\\s*(?
  *  false truncation even though it carries none of `$<>{}`). */
 export const RE_ESCAPED_NEWLINE = /\\n/g;
 
+/**
+ * `!pragma NAME [VALUE]` (D12/T1p-b, `dispatch-common-commands.ts#tryPragma`)
+ * -- mirrors `CommandPragma.getRegexConcat()` exactly: NAME is
+ * `[A-Za-z_][A-Za-z_0-9]*`, VALUE is `.*` and OPTIONAL (its own leading
+ * `\s+` is part of the optional group, so a bare `!pragma name` with no
+ * value matches with `VALUE` group `undefined`, same as upstream's
+ * `RegexOptional`). No `i` flag -- matches sequence's own `pragmaCommand`/
+ * class's own general `!pragma` rule, both case-sensitive on the literal
+ * `!pragma` keyword.
+ * @see net/sourceforge/plantuml/command/CommandPragma.java:60-70
+ */
+export const RE_PRAGMA = /^!pragma\s+([A-Za-z_][A-Za-z_0-9]*)(?:\s+(.*))?$/;
+
 // ---------------------------------------------------------------------------
 // Stop-keyword matching
 //
@@ -233,12 +336,23 @@ export const RE_ESCAPED_NEWLINE = /\\n/g;
 // the trimmed lowercase line equals the keyword OR starts with the keyword
 // followed by a space. This handles `endwhile (label)`, `elseif (cond) then`,
 // `repeatwhile (cond)`, etc.
+//
+// A stop "keyword" may also be a fully-anchored `RegExp` (mission add2-T2e,
+// D6): the fork/split separator family (`end fork`/`endfork`, `fork
+// again`/`forkagain`, `end fork {label}`, …) needs the line-shape checks
+// {@link RE_FORK_END}/{@link RE_FORK_AGAIN}/{@link RE_SPLIT_END}/
+// {@link RE_SPLIT_AGAIN} already provide (zero-or-more internal space, an
+// optional trailing `{label}`/`;`), not a fixed-prefix string compare.
 // ---------------------------------------------------------------------------
 
-export type StopKeywords = readonly string[];
+export type StopKeywords = readonly (string | RegExp)[];
 
 export function matchesStopKeyword(lineLc: string, stops: StopKeywords): boolean {
   for (const kw of stops) {
+    if (typeof kw !== 'string') {
+      if (kw.test(lineLc)) return true;
+      continue;
+    }
     if (lineLc === kw || lineLc.startsWith(kw + ' ') || lineLc.startsWith(kw + '(')) {
       return true;
     }
@@ -255,26 +369,39 @@ export interface ParseContext {
   swimlanes: string[];
   swimlaneSet: Set<string>;
   currentSwimlane: string | undefined;
+  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name --
+   *  `Swimlanes.java:160-161` (`setSpecificColorTOBEREMOVED(BACK, color)`)
+   *  updates it on every occurrence that carries a color, never cleared
+   *  by a later color-less switch to the same lane. */
+  swimlaneColors: Map<string, string>;
   /** title/caption/legend/header/footer/mainframe chrome (mission G0b/T6),
    *  mutated in place by `matchAnnotationCommand` during `parseNodes`. */
   annotations: DiagramAnnotations;
   /** `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4),
    *  mutated in place by `matchSpriteCommand` during `parseNodes`, tried
    *  immediately after `matchAnnotationCommand` in `tryAnnotation`/
-   *  `trySprite` (node-dispatch.ts). */
+   *  `trySprite` (dispatch-common-commands.ts). */
   sprites: SpriteRegistry;
+  /** `!pragma NAME [VALUE]` (D12/T1p-b), mutated in place by
+   *  `dispatch-common-commands.ts#tryPragma`'s own `.define()` call during
+   *  `parseNodes` -- mirrors `TitledDiagram#getPragma()`'s single
+   *  per-diagram `Pragma` instance (`skin/Pragma.java`). Read at layout
+   *  time via `ActivityDiagramAST.pragma` (`parser.ts` copies this
+   *  reference onto the returned AST), NOT re-derived. */
+  pragma: Pragma;
 }
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-export function setCurrentSwimlane(ctx: ParseContext, name: string): void {
+export function setCurrentSwimlane(ctx: ParseContext, name: string, color?: string): void {
   ctx.currentSwimlane = name;
   if (!ctx.swimlaneSet.has(name)) {
     ctx.swimlaneSet.add(name);
     ctx.swimlanes.push(name);
   }
+  if (color !== undefined) ctx.swimlaneColors.set(name, color);
 }
 
 export function swimlaneSpread(ctx: ParseContext): { swimlane: string } | Record<string, never> {

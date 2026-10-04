@@ -1,0 +1,8 @@
+@startuml
+start
+:Other;
+if (dummy) then (foo)
+:Other2;
+endif
+:Other3;
+@enduml

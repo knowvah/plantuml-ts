@@ -1,0 +1,10 @@
+@startuml
+|Lampiris|
+:initiate switch();
+:VerifierRecevabiliteCHF();
+|Web Service|
+if (Recevable) then (non)
+:statut 022;
+stop
+endif
+@enduml

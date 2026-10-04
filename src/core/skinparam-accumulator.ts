@@ -45,6 +45,12 @@ export interface SkinparamAccumulator {
   tabSize: number | undefined;
   roundCorner: number | undefined;
   componentStyle: 'uml2' | 'uml1' | 'rectangle' | undefined;
+  /** T1p-a: `skinparam ConditionEndStyle hline` -- see `theme.ts
+   *  #conditionEndStyle`'s own doc comment. */
+  conditionEndStyle: 'diamond' | 'hline' | undefined;
+  /** T2c (ex-T2a): `skinparam ConditionStyle InsideDiamond` -- see
+   *  `theme.ts#conditionStyle`'s own doc comment. */
+  conditionStyle: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond' | undefined;
   actorStyle: ActorStyle | undefined;
   minimumWidth: number | undefined;
   strictUml: boolean | undefined;
@@ -77,6 +83,9 @@ export interface SkinparamAccumulator {
    *  `Red|Green` value is an `HColorGradient` (`HColorSet.java:109-116`),
    *  not a flattened string. */
   arrow: Paint | undefined;
+  /** T2c: `skinparam ArrowHeadColor` -- see `theme.ts
+   *  #ThemeColorFields.arrowHead`'s own doc comment. */
+  arrowHeadColor: Paint | undefined;
   /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` --
    *  `ColorParam.arrowLollipop`, read by `SvekEdge.java:266-268`. */
   arrowLollipopColor: string | undefined;
@@ -191,7 +200,13 @@ export interface SkinparamAccumulator {
   iconPublicBackgroundColor: string | undefined;
   guillemetStart: string | undefined;
   guillemetEnd: string | undefined;
-  activityBackground: string | undefined;
+  // add2 T3h (family PAINT): `Paint`, not `string` -- `skinparam activity{
+  // BackgroundColor red-green}` is a gradient (`HColorSet.java:109-116`),
+  // and `rect()`'s own `BoxStyle.fill?: Paint` already draws a
+  // `<linearGradient>` def for any gradient value (D9: one style path).
+  // Was flattened to a solid hex before the handler's `paint` param (4th
+  // arg, `arrowcolor`'s own precedent) was threaded through.
+  activityBackground: Paint | undefined;
   activityBorder: string | undefined;
   activityBarColor: string | undefined;
   activityDiamondBackground: string | undefined;
@@ -211,6 +226,12 @@ export interface SkinparamAccumulator {
   /** D4 amendment (T1): `SwimlaneTitleFontSize` -- see
    *  `theme-graph-colors-b.ts#swimlaneTitleFontSize`'s own doc comment. */
   swimlaneTitleFontSize: number | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.hyperlinkUnderline`. */
+  hyperlinkUnderline: boolean | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.svgLinkTarget`. */
+  svgLinkTarget: string | undefined;
+  /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.preserveAspectRatio`. */
+  preserveAspectRatio: string | undefined;
   /** Per-element (SName) color buckets — decision D4. */
   elements: Record<string, ElementColors>;
   unknown: string[];
@@ -242,6 +263,8 @@ const SCALAR_FIELD_NAMES = [
   'tabSize',
   'roundCorner',
   'componentStyle',
+  'conditionEndStyle',
+  'conditionStyle',
   'actorStyle',
   'minimumWidth',
   'strictUml',
@@ -258,6 +281,7 @@ const SCALAR_FIELD_NAMES = [
   'border',
   'text',
   'arrow',
+  'arrowHeadColor',
   'arrowLollipopColor',
   'noteBackground',
   'classBackground',
@@ -330,6 +354,9 @@ const SCALAR_FIELD_NAMES = [
   'swimlaneBorderThickness',
   'swimlaneTitleFontColor',
   'swimlaneTitleFontSize',
+  'hyperlinkUnderline',
+  'svgLinkTarget',
+  'preserveAspectRatio',
 ] as const satisfies ReadonlyArray<Exclude<keyof SkinparamAccumulator, 'elements' | 'unknown'>>;
 
 /** Fresh accumulator with all optional fields unset. */

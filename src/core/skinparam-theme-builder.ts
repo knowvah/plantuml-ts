@@ -57,6 +57,8 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['groupInheritance', (acc) => acc.groupInheritance],
   ['tabSize', (acc) => acc.tabSize],
   ['componentStyle', (acc) => acc.componentStyle],
+  ['conditionEndStyle', (acc) => acc.conditionEndStyle], // T1p-a
+  ['conditionStyle', (acc) => acc.conditionStyle], // T2c
   ['actorStyle', (acc) => acc.actorStyle],
   ['minimumWidth', (acc) => acc.minimumWidth],
   ['strictUml', (acc) => acc.strictUml],
@@ -68,6 +70,9 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['packageStyle', (acc) => acc.packageStyle],
   ['fixCircleLabelOverlapping', (acc) => acc.fixCircleLabelOverlapping],
   ['shadowing', (acc) => acc.shadowing],
+  ['hyperlinkUnderline', (acc) => acc.hyperlinkUnderline], // add2 T3e
+  ['svgLinkTarget', (acc) => acc.svgLinkTarget], // add2 T3e
+  ['preserveAspectRatio', (acc) => acc.preserveAspectRatio], // add2 T3e
 ];
 
 const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [
@@ -179,6 +184,7 @@ function hasColorsOverride(acc: SkinparamAccumulator): boolean {
     acc.border !== undefined ||
     acc.text !== undefined ||
     acc.arrow !== undefined ||
+    acc.arrowHeadColor !== undefined ||
     acc.arrowLollipopColor !== undefined ||
     acc.noteBackground !== undefined ||
     Object.keys(acc.elements).length > 0 ||
@@ -207,6 +213,7 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   if (acc.border !== undefined) colorsOverride.border = acc.border;
   if (acc.text !== undefined) colorsOverride.text = acc.text;
   if (acc.arrow !== undefined) colorsOverride.arrow = acc.arrow;
+  if (acc.arrowHeadColor !== undefined) colorsOverride.arrowHead = acc.arrowHeadColor;
   if (acc.arrowLollipopColor !== undefined) colorsOverride.arrowLollipopColor = acc.arrowLollipopColor;
   if (acc.noteBackground !== undefined) colorsOverride.noteBackground = acc.noteBackground;
   if (Object.keys(acc.elements).length > 0) colorsOverride.elements = acc.elements;
@@ -257,10 +264,47 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
 /** One `acc` scalar field seeded by {@link applyDarkModeDefaults}, paired
  *  with its dark-mode default value. Table-driven (mirrors {@link
  *  FieldTable}) purely to keep that function's own CCN under the cap --
- *  a `??=` chain of 6 independent fields is 6 branches on one function. */
+ *  a `??=` chain of independent fields is one branch per field on one
+ *  function.
+ *
+ * add2 T3h (family DARK): `activityBackground`/`activityStartColor`/
+ * `activityEndColor`/`arrowFontColor` added -- none has an OWN dark
+ * selector in `plantuml.skin`'s `@media` block (confirmed by reading it:
+ * `activityDiagram { }`'s dark block overrides only `partition`/`circle`/
+ * `activityBar`, `:683-694`), so each inherits root's own dark override,
+ * exactly like `classBackground`'s existing precedent two rows below
+ * already reasons through for class. `activityBackground` feeds BOTH
+ * `actColors().nodeFill` (the action box) AND, via its own `?? act
+ * ?.background` fallback tier, `diamondColors().fill` (`activity-
+ * renderer-if-shapes.ts`) -- ONE seed, not two, since the diamond bucket
+ * has no dark override of its own either and the existing light-mode
+ * cascade already shares the one field. `activityBorder` is deliberately
+ * NOT added here: `theme.colors.border`'s own existing dark seed (one row
+ * below) already reaches `actColors().nodeBorder`/`diamondColors().border`
+ * through THEIR existing `?? theme.colors.border` fallback tier --
+ * verified against `levuma-67-cego489`'s jar SVG, whose action-box/diamond
+ * `stroke` is already `#E7E7E7` with NO code change (only `@fill` diverged
+ * before this commit). `activityStartColor`/`activityEndColor` -> `circle,
+ * start/stop/end`'s OWN dark override (`:687-692`, `#d`, NOT root's `#2`) --
+ * `theme-dark.ts#DARK_MODE_DEFAULTS.activityCircleInk`. `arrowFontColor` ->
+ * root's dark `FontColor white` (`:565`) reaching the arrow signature the
+ * SAME way `core/arrow-label-font.ts#resolveArrowLabelFont` and `activity-
+ * text-style.ts#activityFontColor`'s existing `sname === 'arrow'` tier
+ * both already read this field for an EXPLICIT `skinparam arrowFontColor`
+ * -- this is that SAME field, seeded by dark mode instead of a user value. */
 const DARK_SCALAR_SEEDS: ReadonlyArray<
   readonly [
-    key: 'background' | 'border' | 'text' | 'classBackground' | 'classFontColor' | 'classAttributeFontColor',
+    key:
+      | 'background'
+      | 'border'
+      | 'text'
+      | 'classBackground'
+      | 'classFontColor'
+      | 'classAttributeFontColor'
+      | 'activityBackground'
+      | 'activityStartColor'
+      | 'activityEndColor'
+      | 'arrowFontColor',
     value: string,
   ]
 > = [
@@ -270,6 +314,10 @@ const DARK_SCALAR_SEEDS: ReadonlyArray<
   ['classBackground', DARK_MODE_DEFAULTS.classBackground],
   ['classFontColor', DARK_MODE_DEFAULTS.text],
   ['classAttributeFontColor', DARK_MODE_DEFAULTS.text],
+  ['activityBackground', DARK_MODE_DEFAULTS.classBackground],
+  ['activityStartColor', DARK_MODE_DEFAULTS.activityCircleInk],
+  ['activityEndColor', DARK_MODE_DEFAULTS.activityCircleInk],
+  ['arrowFontColor', DARK_MODE_DEFAULTS.text],
 ];
 
 /** The `elements['spotclass']` half of {@link applyDarkModeDefaults} --
@@ -280,12 +328,42 @@ function seedDarkSpotClass(acc: SkinparamAccumulator): void {
   }
 }
 
+/**
+ * add2 T3h (family DARK): the activity-EXCLUSIVE `elements['activity']`/
+ * `elements['diamond']` buckets' own FontColor -- `activity-text-style.ts
+ * #activityFontColor`'s bucket tier (checked FIRST, ahead of its hardcoded
+ * `ACTIVITY_FONT_COLOR` black default) already reads these for an
+ * EXPLICIT `<style> activityDiagram { activity { FontColor } } }`; dark
+ * mode seeds the SAME bucket instead, mirroring {@link seedDarkSpotClass}
+ * exactly. Both SNames are activity-exclusive (`activity-style-
+ * defaults.ts#ActivitySName`'s own doc comment), so this cannot move any
+ * other diagram's text colour -- UNLIKE `arrowFontColor` above, which
+ * reuses a SHARED field other engines also read (surveyed, not assumed).
+ */
+function seedDarkActivityFontColors(acc: SkinparamAccumulator): void {
+  if (acc.elements['activity'] === undefined) {
+    acc.elements['activity'] = { font: DARK_MODE_DEFAULTS.text };
+  }
+  if (acc.elements['diamond'] === undefined) {
+    acc.elements['diamond'] = { font: DARK_MODE_DEFAULTS.text };
+  }
+}
+
 function applyDarkModeDefaults(acc: SkinparamAccumulator): void {
   if (acc.mode !== 'dark') return;
   for (const [key, value] of DARK_SCALAR_SEEDS) {
     acc[key] ??= value;
   }
+  // add2 T3h (family DARK): `Paint`, not `string` -- kept out of
+  // DARK_SCALAR_SEEDS' string-only table. No dedicated dark `arrow {
+  // LineColor }` selector exists upstream (confirmed above), so every
+  // edge/arrowhead inherits root's dark `LineColor #e7e7e7` (`:567`) the
+  // SAME way `renderer.ts#renderEdge`'s existing `noGradient(theme.colors
+  // .arrow)` already reads this field for an explicit `skinparam
+  // ArrowColor`.
+  acc.arrow ??= DARK_MODE_DEFAULTS.border;
   seedDarkSpotClass(acc);
+  seedDarkActivityFontColors(acc);
 }
 
 /** Build a `Partial<Theme>` containing only the keys actually seen in `acc`. */

@@ -1,0 +1,20 @@
+@startuml
+skinparam SwimlaneTitleFontColor red
+skinparam SwimlaneTitleFontSize 18
+skinparam SwimlaneTitleBackgroundColor #EEE
+skinparam SwimlaneBorderColor blue
+skinparam SwimlaneBorderThickness 4
+
+|swinlane1|
+:first;
+:second;
+|swinlane2|
+:third;
+if (foo) then
+:something;
+endif
+|swinlane1|
+:back to swinline1;
+|swinlane2|
+:back to swinline2;
+@enduml

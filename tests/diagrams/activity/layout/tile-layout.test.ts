@@ -205,6 +205,92 @@ describe('layoutActivity — existing renderer tests still work', () => {
     expect(kinds).not.toContain('join-bar');
   });
 
+  // D12/T1p-c: `fork ... end merge` (`ForkStyle.MERGE`) draws a fork-bar
+  // (same `FtileBlackBlock` top, `ParallelBuilderMerge.doStep1` mirrors
+  // `ParallelBuilderFork.doStep1`) plus an `if-merge` diamond -- NEVER a
+  // join-bar (that's `ForkStyle.FORK`'s own shape).
+  it('fork with style "merge" produces fork-bar and if-merge nodes, no join-bar', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const kinds = geo.nodes.map((n) => n.kind);
+    expect(kinds).toContain('fork-bar');
+    expect(kinds).toContain('if-merge');
+    expect(kinds).not.toContain('join-bar');
+    const diamond = geo.nodes.find((n) => n.kind === 'if-merge');
+    expect(diamond).toMatchObject({ width: 24, height: 24 });
+  });
+
+  // D12/T1p-c: `ConnectionHorizontalThenVertical#arrivalOnDiamond`
+  // (`ParallelBuilderMerge.java:174-189`) -- 3 EQUAL-width branches (same
+  // label length, mirroring the corpus fixture `mepeze-15-nuge493`): the
+  // middle branch's own exit x coincides (within double-precision noise --
+  // `131.15` vs `131.14999999999998` on this measurer's own arithmetic
+  // path; `dedupeAdjacentPoints` intentionally applies NO tolerance,
+  // mirroring `Worm#addPoint`'s exact `==`, so whether this collapses to 2
+  // points or stays 3 is itself measurer-path-dependent, not asserted
+  // here) with the diamond's centre -- the NORTH-vertex case, landing at
+  // `(centerX, diamond.y)`; the outer two keep their 3-point horizontal-
+  // then-vertical shape, landing on the WEST/EAST vertex at the diamond's
+  // own vertical midline.
+  it('merge: middle of 3 equal branches drops straight in; outer two jog sideways', () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [
+            [{ kind: 'action', label: 'action 1' }],
+            [{ kind: 'action', label: 'action 2' }],
+            [{ kind: 'action', label: 'action 3' }],
+          ],
+        },
+      ],
+      swimlanes: [],
+    };
+    const geo = layoutActivity(ast, theme, measurer);
+    const diamond = geo.nodes.find((n) => n.kind === 'if-merge')!;
+    const centerX = diamond.x + diamond.width / 2;
+    const midlineY = diamond.y + diamond.height / 2;
+
+    const outEdges = geo.edges.filter(
+      (e) => e.points[e.points.length - 1]!.y === midlineY || e.points[e.points.length - 1]!.y === diamond.y,
+    );
+    expect(outEdges).toHaveLength(3);
+
+    // Distinguished by the LAST point's y (not point count -- see above).
+    const northEdges = outEdges.filter((e) => e.points[e.points.length - 1]!.y === diamond.y);
+    const sideEdges = outEdges.filter((e) => e.points[e.points.length - 1]!.y === midlineY);
+    expect(northEdges).toHaveLength(1);
+    expect(sideEdges).toHaveLength(2);
+
+    const middle = northEdges[0]!;
+    const middleFirst = middle.points[0]!;
+    const middleLast = middle.points[middle.points.length - 1]!;
+    expect(middleLast.x).toBeCloseTo(centerX, 9);
+    expect(middleLast.y).toBe(diamond.y);
+    for (const p of middle.points) expect(p.x).toBeCloseTo(middleFirst.x, 9);
+
+    for (const edge of sideEdges) {
+      expect(edge.points).toHaveLength(3);
+      const [p1, p2, p3] = edge.points as [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }];
+      expect(p2.x).toBe(p1.x);
+      expect(p2.y).toBe(p3.y);
+      expect(p3.y).toBe(midlineY);
+    }
+    // One lands on the west vertex, the other on the east vertex.
+    const landingXs = sideEdges.map((e) => e.points[2]!.x).sort((a, b) => a - b);
+    expect(landingXs).toEqual([diamond.x, diamond.x + diamond.width]);
+  });
+
   it('split with every branch detached (stop) produces split-bar but NO split-join-bar', () => {
     const ast: ActivityDiagramAST = {
       nodes: [
@@ -434,6 +520,38 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(condition.swimlane).toBe('A');
   });
 
+  // CSTYLE (add2 T3i): `skinparam ConditionStyle InsideDiamond` ->
+  // FtileRepeat.java:159-161 -- novata-87-muti352, perate-09-gale335.
+  describe('repeat: INSIDE_DIAMOND condition style', () => {
+    const squareTheme: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+
+    it('builds a GtileDiamondSquare, not a GtileDiamondInside', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      const condition = repeatTile.children[2];
+      expect(condition.kind).toBe('gtile-diamond-square');
+      expect(condition.label).toBe('Start?');
+    });
+
+    it('always routes the yes/out labels east+south, never west (unlike the hexagon)', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      const condition = repeatTile.children[2] as unknown as { labelAt: (s: string) => unknown };
+      expect(condition.labelAt('east')).not.toBeNull();
+      expect(condition.labelAt('south')).not.toBeNull();
+      expect(condition.labelAt('west')).toBeNull();
+    });
+
+    it('the default theme (no conditionStyle) still builds the hexagon', () => {
+      const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
+      const tiles = tileNodes(ast.nodes, bounder, theme);
+      const repeatTile = tiles[0] as unknown as GtileRepeat;
+      expect(repeatTile.children[2].kind).toBe('gtile-diamond-inside');
+    });
+  });
+
   // Mission `activity-loop-tile-port` T6 (D5): `FtileRepeat.java:186-199`'s
   // own back-connection selection, ported into `tile-layout.ts#tileRepeat`
   // (`selectRepeatBackConnection`) and stored on `GtileRepeat.backConnection`
@@ -544,7 +662,11 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const tiles = tileNodes(ast.nodes, bounder, theme);
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
-    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');
+    // PARX (T3f, b3w2): a split's own in-drop carries 'parallel-in-split',
+    // not plain 'parallel-in' -- the builder-kind discriminant that lets
+    // `compress/shapes-of.ts` tell a split connector (never skips X)
+    // apart from a fork/merge one (always does on a cross-lane arrowhead).
+    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in-split');
     expect(inDrops).toHaveLength(2);
     expect(inDrops.map((m) => m.lane1)).toEqual(['A', 'A']);
   });
@@ -563,7 +685,9 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const tiles = tileNodes(ast.nodes, bounder, theme);
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
-    const outDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-out');
+    // PARX (T3f, b3w2): same 'parallel-out-split' discriminant as the
+    // in-drop test above.
+    const outDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-out-split');
     expect(outDrops).toHaveLength(2);
     expect(outDrops.map((m) => m.lane2)).toEqual(['Y', 'Y']);
     // The sources are each branch's own exit lane, unaffected by this fix.
@@ -578,5 +702,28 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     // `Cross` pass, `Swimlanes.java:178-216` at `:350-352`). Was
     // `['X', 'Y']` in walk order.
     expect(outDrops.map((m) => m.lane1)).toEqual(['Y', 'X']);
+  });
+
+  // PARX (T3f, b3w2): `GtileMerge` deliberately keeps `kind ===
+  // 'gtile-fork'` (`gtile-merge.ts`'s own doc), and `ParallelBuilderMerge
+  // .doStep1` shares Fork's own `ConnectionIn` byte-for-byte -- its
+  // in-drop must stay plain `'parallel-in'`, never `'parallel-in-split'`.
+  it("a merge's own in-drop keeps the plain (fork-like) shape tag, not '-split'", () => {
+    const ast: ActivityDiagramAST = {
+      nodes: [
+        {
+          kind: 'fork',
+          style: 'merge',
+          branches: [[{ kind: 'action', label: 'branch A' }], [{ kind: 'action', label: 'branch B' }]],
+        },
+      ],
+      swimlanes: [],
+    };
+    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const root = new GtileTopDown(tiles, bounder, theme);
+    const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
+    const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');
+    expect(inDrops).toHaveLength(2);
+    expect(result.edgeMeta.some((m) => m.shape === 'parallel-in-split')).toBe(false);
   });
 });

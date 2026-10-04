@@ -30,6 +30,8 @@ const OPTIONAL_SCALAR_KEYS = [
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',
+  'conditionEndStyle', // T1p-a
+  'conditionStyle', // T2c
   'actorStyle',
   'minimumWidth',
   'strictUml',
@@ -59,6 +61,9 @@ const OPTIONAL_SCALAR_KEYS = [
   'diagramMargin',
   'handwritten',
   'styleOverrides',
+  'hyperlinkUnderline', // add2 T3e
+  'svgLinkTarget', // add2 T3e
+  'preserveAspectRatio', // add2 T3e
 ] as const;
 
 /** Copy the top-level optional scalars, preferring `partial` then `base`. */

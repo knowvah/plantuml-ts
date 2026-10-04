@@ -106,6 +106,50 @@ describe('M3 — CommandBackward3 (backward:LABEL;)', () => {
     expect(node.label).toBe('Log context2');
   });
 
+  // BACKLBL (add2 T3i): CommandBackward3.java:64-89, boxefe-81-situ725.
+  it('captures the leading (incoming) and trailing (outgoing) decorations', () => {
+    const ast = parse(['(incoming) backward :Warning; (dsc_5)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.label).toBe('Warning');
+    expect(node.incoming).toBe('incoming');
+    expect(node.outgoing).toBe('dsc_5');
+  });
+
+  it('leaves incoming/outgoing unset when neither decoration is present', () => {
+    const ast = parse(['backward:Log context;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBeUndefined();
+    expect(node.outgoing).toBeUndefined();
+  });
+
+  it('captures only incoming when outgoing is absent', () => {
+    const ast = parse(['(incoming) backward :Warning;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBe('incoming');
+    expect(node.outgoing).toBeUndefined();
+  });
+
+  it('captures only outgoing when incoming is absent', () => {
+    const ast = parse(['backward :Warning; (dsc_5)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBeUndefined();
+    expect(node.outgoing).toBe('dsc_5');
+  });
+
+  it('unescapes a literal \\n inside incoming/outgoing', () => {
+    const ast = parse(['(a\\nb) backward :Warning; (c\\nd)']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.incoming).toBe('a\nb');
+    expect(node.outgoing).toBe('c\nd');
+  });
+
+  it('a multiline backward captures the leading (incoming) decoration', () => {
+    const ast = parse(['(incoming) backward:Log', 'context;']);
+    const node = firstNode(ast) as ActivityBackward;
+    expect(node.label).toBe('Log\ncontext');
+    expect(node.incoming).toBe('incoming');
+  });
+
   it('an action line with two stereogroups still parses (xebuce action line)', () => {
     const ast = parse([':Generate diagrams1; <<save>> <<color>>']);
     const node = firstNode(ast) as ActivityAction;
@@ -343,19 +387,24 @@ describe('M4c — CommandIfLegacy1/CommandElseLegacy1 (barada-07-veca157)', () =
 // M5 — CommandWhileEnd3: `end while` / `while end` spellings
 // ---------------------------------------------------------------------------
 describe('M5 — CommandWhileEnd3 two-word spellings', () => {
+  // WSPEC (mission add2-T3b): a bare `stop` right after the closer, with
+  // no `break` in the body, redirects into the while's own `specialOut`
+  // (`ActivityDiagram3#manageSpecialStopEndAfterEndWhile`) instead of
+  // landing as an `ast.nodes[1]` sibling.
   it('"end while" closes the loop (rucuga-83-tosu408 shape)', () => {
     const ast = parse(['while(more?)', '  :finalize;', 'end while', 'stop']);
     const node = firstNode(ast) as ActivityWhile;
     expect(node.kind).toBe('while');
     expect(node.body).toHaveLength(1);
-    expect(ast.nodes[1]?.kind).toBe('stop');
+    expect(ast.nodes).toHaveLength(1);
+    expect(node.specialOut?.kind).toBe('stop');
   });
 
   it('"while end" (reversed order) also closes the loop', () => {
     const ast = parse(['while(more?)', '  :finalize;', 'while end', 'stop']);
     const node = firstNode(ast) as ActivityWhile;
     expect(node.kind).toBe('while');
-    expect(ast.nodes[1]?.kind).toBe('stop');
+    expect(node.specialOut?.kind).toBe('stop');
   });
 
   it('one-word "endwhile" still works (no regression)', () => {

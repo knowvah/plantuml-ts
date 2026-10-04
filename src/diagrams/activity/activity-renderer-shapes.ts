@@ -7,11 +7,14 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
+import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
+import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
 import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
   CIRCLE_INK,
@@ -20,14 +23,17 @@ import {
   activityLineThickness,
   activityRoundCorner,
 } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
+import { activityFontColor, activityFontFamily, linkStyleFields } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
 import {
   renderIfMerge,
   renderIfLabel,
   renderDiamond,
   renderHexagonPolygon,
+  renderDiamondSquarePolygon,
   renderHexagonOwnLabel,
+  renderHexagonMultilineLabel,
+  diamondColors,
 } from './activity-renderer-if-shapes.js';
 import {
   renderSignalLabel,
@@ -35,7 +41,7 @@ import {
   renderChevronRight,
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
-import { renderStart, renderStop, renderEnd } from './activity-renderer-terminals.js';
+import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
 import {
   type ActivityTextOpts,
   activityTextLineX,
@@ -43,19 +49,14 @@ import {
   measureMonoLineWidth,
 } from './activity-text-placement.js';
 
-// Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
-// importers of these four symbols working unchanged.
+// Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
+// in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
+// `activity-renderer-if-shapes.ts` respectively, each importing `actColors`/
+// `centeredFirstBaselineY` BACK from this file (safe circularity: function
+// definitions only, never called at module-load time) -- existing importers
+// of these names are unchanged.
 export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
-// Pure-move re-export (500-line split, T1c): the terminal-circle renderers
-// now live in `activity-renderer-terminals.ts`, which imports `actColors`
-// BACK from this file (same circular-but-safe shape as the signal-shapes
-// re-export above) -- existing importers of these four names are unchanged.
-export { renderStart, renderStop, renderEnd };
-// Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
-// `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
-// method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
-// BACK from this file (same circular-but-safe shape as the two re-exports
-// above) -- existing importers of this name are unchanged.
+export { renderStart, renderStop, renderEnd, renderSpot };
 export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
@@ -131,10 +132,12 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
   const lineWidth = measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
+  // add2 T3h: family K + F (pekuxe-00/gaxezi-48/nisexe-68/dozaxu-98).
   return drawActivityText(x, cy, label, {
-    fontFamily: theme.fontFamily,
+    fontFamily: activityFontFamily(theme, opts.sname),
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
+    ...linkStyleFields(theme),
   });
 }
 
@@ -148,11 +151,14 @@ export function renderMultilineText(
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   const y = centeredFirstBaselineY(cy, size, lines.length);
   const fill = activityFontColor(theme, opts.sname);
+  // add2 T3h, families K/F -- see renderLabel's own doc comment above.
+  const fontFamily = activityFontFamily(theme, opts.sname);
+  const link = linkStyleFields(theme);
   return lines
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+      return drawActivityText(x, y + size * i, ln, { fontFamily, fontSize: size, fill, ...link });
     })
     .join('');
 }
@@ -162,12 +168,12 @@ export function renderMultilineText(
 // ---------------------------------------------------------------------------
 
 export interface ActivityColors {
-  nodeFill: string;
+  nodeFill: Paint; // add2 T3h (family PAINT): gradients, not solid-only
   nodeBorder: string;
   barFill: string;
   startFill: string;
   endFill: string;
-  diamondFill: string;
+  diamondFill: Paint; // shares activityBackground's fallback tier
   diamondBorder: string;
 }
 
@@ -178,16 +184,14 @@ export function actColors(theme: Theme): ActivityColors {
     nodeBorder: act?.border ?? theme.colors.border,
     // `activityBar { BackgroundColor #5 }` (plantuml.skin:387, D4).
     barFill: act?.barColor ?? ACTIVITY_BAR_FILL,
-    // `activityDiagram { circle { start, stop, end { LineColor #2;
-    // BackgroundColor #2 } } }` (plantuml.skin:379-380) -- the SAME token
-    // for stroke and fill. `#2` is upstream's one-digit hex shorthand,
-    // resolved through the ported `HColorSet` digit-length parser (D5),
-    // never written as a literal. A user's `skinparam ActivityStartColor`
-    // still wins: the built-in default is the LAST tier, not the first.
+    // `circle { start,stop,end { LineColor #2; BackgroundColor #2 } } }`
+    // (plantuml.skin:379-380) -- SAME token for stroke/fill, `#2` resolved
+    // through the ported `HColorSet` digit-length parser (D5). A user's
+    // `skinparam ActivityStartColor` still wins (last tier, not first).
     startFill: act?.startColor ?? CIRCLE_INK,
     endFill: act?.endColor ?? CIRCLE_INK,
-    diamondFill: act?.diamondBackground ?? theme.colors.nodeBackground,
-    diamondBorder: act?.diamondBorder ?? theme.colors.border,
+    diamondFill: diamondColors(act, theme).fill,
+    diamondBorder: diamondColors(act, theme).border,
   };
 }
 
@@ -251,19 +255,17 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
       : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
-  return box + labelEl;
+  return box + labelEl + renderCreoleTableGrid(node, lines, actionSize, theme);
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
- *  under this file's per-function NLOC limit. Multi-line: `GtileIfHexagon
- *  .java:184`/`GtileHexagonInside.java:64` resolve `of(root, element,
- *  activityDiagram, activity, diamond)`, the diamond SName (`FontSize 11`,
- *  plantuml.skin:370). Single-line: jar-verified on `rerovo-62-nazo755`'s
- *  "test" hexagon (`cy=27`, `fontSize=11`): `y=30.056 === cy + 11 * 5/18`,
- *  the SAME N=1 reduction of `centeredFirstBaselineY` -- not the old
- *  `cy + condSize/3` (would give 30.667, 0.611px off). Exported (T3k) so
- *  `activity-renderer-if-shapes.ts`'s `renderHexagonOwnLabel` (this file
- *  was already at the 500-line cap) can draw the own label separately. */
+ *  under this file's per-function NLOC limit. Single-line: jar-verified on
+ *  `rerovo-62-nazo755`'s "test" hexagon (`cy=27`, `fontSize=11`):
+ *  `y=30.056 === cy + 11 * 5/18`, the N=1 reduction of
+ *  `centeredFirstBaselineY`. Multi-line: {@link renderHexagonMultilineLabel}
+ *  (`activity-renderer-if-shapes.ts`, also at this file's own 500-line cap,
+ *  IFNL/T3d doc). Exported (T3k) so that file's `renderHexagonOwnLabel` can
+ *  draw the own label separately. */
 export function renderHexagonLabel(
   label: string | undefined,
   cx: number,
@@ -274,7 +276,7 @@ export function renderHexagonLabel(
   const lines = (label ?? '').split('\n');
   const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
   return lines.length > 1
-    ? renderMultilineText(lines, cx, cy, theme, opts)
+    ? renderHexagonMultilineLabel(lines, cx, cy, theme, opts)
     : renderLabel(label ?? '', cx, centeredFirstBaselineY(cy, condSize, 1), theme, opts);
 }
 
@@ -282,12 +284,11 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
-  const dent = h / 2;
-  // `Hexagon.asPolygon(shadowing, width, height)` (`Hexagon.java:65-74`)
-  // calls `addPoint` SEVEN times, re-adding the first point `(hexagonHalf
-  // Size, 0)` as the closing point after `(0, height/2)`
-  // (`Hexagon.java:68,74`) -- `UPolygon` does not close itself on draw
-  // (T2f mechanism 1, same as {@link renderIfMerge}).
+  // I (T3d): the dent is the FIXED `hexagonHalfSize` (12), not `height/2`
+  // -- equal only when h=24 (default). `asPolygon(shadowing,w,h)`
+  // (`Hexagon.java:46,65-74`) re-adds `(dent,0)` as the closing point
+  // after `(0,h/2)` -- `UPolygon` does not close itself on draw.
+  const dent = HEXAGON_HALF_SIZE;
   const first = { x: x + dent, y: y };
   const shape = polygon(
     [
@@ -398,7 +399,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
   // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
   const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
-  const textStyle = { fontFamily: theme.fontFamily, fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const textStyle = { fontFamily: activityFontFamily(theme, 'note'), fontSize: noteSize, fill: activityFontColor(theme, 'note') };
   const labelEl =
     lines.length > 1
       ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)
@@ -419,13 +420,11 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
  *  yet (would need a `core/theme-graph-colors-b.ts` field, out of this
  *  task's write-set) -- the plain default is drawn unconditionally, which
  *  is also what every cohort row needs (none sets that skinparam).
- */
+ *  T3g (family PART): the title tab + text now draw too, ported in
+ *  `activity-renderer-composite.ts` (this file was at the line cap) --
+ *  this is a one-line delegate so existing callers are unchanged. */
 function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
-  return rect(node.x, node.y, node.width, node.height, {
-    fill: 'none',
-    stroke: '#000',
-    strokeWidth: activityLineThickness(theme, 'composite'),
-  });
+  return renderCompositeFrame(node, theme);
 }
 
 export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
@@ -456,17 +455,16 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'split-join-bar':
       return renderSplitLine(node, theme);
     case 'if-split':
-    case 'while-header':
-      // T3k: the shape ALONE -- the own label now draws through its own
-      // `'if-own-label'` node, pushed by every `'if-split'`/`'while-
-      // header'` producer immediately after this polygon (or after
-      // north/south when the walker has one, `FtileDiamondInside.java:
-      // 84-102`'s own draw order). `renderDiamond`'s unlabelled shape is
-      // unaffected -- it never had an own-label node to begin with.
-      return node.label !== undefined && node.label !== ''
-        ? renderHexagonPolygon(node, theme)
-        : renderDiamond(node, theme);
     case 'repeat-cond':
+      // T3k: shape ALONE, own label via its own 'if-own-label' node.
+      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead --
+      // while ('while-header' below) is still unwired (EMPTY_DIAMOND, no
+      // cohort fixture, T3i re-slot).
+      return theme.conditionStyle === 'insideDiamond'
+        ? renderDiamondSquarePolygon(node, theme)
+        : renderHexagonPolygon(node, theme);
+    case 'while-header':
+      // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
       return renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);
@@ -479,6 +477,11 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'group':
     case 'partition':
       return renderComposite(node, theme);
+    case 'spot':
+      return renderSpot(node, theme);
+    case 'label': // `FtileEmpty#drawU` is empty -- `ast.ts`'s own doc.
+    case 'goto':
+      return '';
     default: {
       // Unknown kind: render a plain rect as a fallback
       const c = actColors(theme);

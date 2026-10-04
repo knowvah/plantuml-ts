@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
-  "measuredAt": "2026-10-02",
-  "measuredAgainstCommit": "65b07a57",
+  "measuredAt": "2026-10-03",
+  "measuredAgainstCommit": "9104b8ee",
   "fixtures": [
     {
       "type": "activity",
@@ -44,7 +44,7 @@
           }
         ],
         "width": "183",
-        "height": "366"
+        "height": "367"
       },
       "jar": {
         "dividerXs": [
@@ -126,7 +126,7 @@
           }
         ],
         "width": "236",
-        "height": "276"
+        "height": "277"
       },
       "jar": {
         "dividerXs": [
@@ -208,7 +208,7 @@
           }
         ],
         "width": "267",
-        "height": "264"
+        "height": "265"
       },
       "jar": {
         "dividerXs": [
@@ -300,7 +300,7 @@
           }
         ],
         "width": "420",
-        "height": "144"
+        "height": "145"
       },
       "jar": {
         "dividerXs": [
@@ -361,7 +361,7 @@
           20,
           146.35,
           253.75,
-          443.575
+          457.663
         ],
         "titles": [
           {
@@ -376,14 +376,14 @@
           },
           {
             "fontSize": "18",
-            "x": "323.125",
+            "x": "330.169",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 422.575,
+          "width": 436.663,
           "height": 18,
           "fill": "none"
         },
@@ -398,11 +398,11 @@
           },
           {
             "x": 253.75,
-            "width": 189.82499999999993
+            "width": 203.91250000000002
           }
         ],
-        "width": "469",
-        "height": "224"
+        "width": "483",
+        "height": "225"
       },
       "jar": {
         "dividerXs": [
@@ -516,7 +516,7 @@
           }
         ],
         "width": "292",
-        "height": "322"
+        "height": "323"
       },
       "jar": {
         "dividerXs": [
@@ -560,20 +560,268 @@
     {
       "type": "activity",
       "slug": "caburo-70-buki284",
-      "status": "error",
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          520.475,
+          966.338
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "251.225",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "715.956",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 945.338,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 500.4750000000001
+          },
+          {
+            "x": 520.4750000000001,
+            "width": 445.8625
+          }
+        ],
+        "width": "992",
+        "height": "453"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          520.475,
+          966.338
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "251.225",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "715.956",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 945.338,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 500.475
+          },
+          {
+            "x": 520.475,
+            "width": 445.863
+          }
+        ],
+        "width": "992",
+        "height": "453"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
       "slug": "cakeca-72-kara622",
-      "status": "error",
-      "reason": "activity parser refused this source at line 2 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          729.6,
+          1117.88,
+          1481.55
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "305.669",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "906.188",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "1200.15",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 1460.55,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 709.6000000000001
+          },
+          {
+            "x": 729.6000000000001,
+            "width": 388.2750000000003
+          },
+          {
+            "x": 1117.8750000000005,
+            "width": 363.6750000000002
+          }
+        ],
+        "width": "1507",
+        "height": "1083"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          496.925,
+          918.738,
+          1317.41
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "189.331",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "690.281",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "1018.51",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 1296.41,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 476.925
+          },
+          {
+            "x": 496.925,
+            "width": 421.813
+          },
+          {
+            "x": 918.738,
+            "width": 398.672
+          }
+        ],
+        "width": "1343",
+        "height": "922"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",
       "slug": "cejupe-34-muti621",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          137.975,
+          236.175
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.887",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.975",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 215.175,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 117.975
+          },
+          {
+            "x": 137.975,
+            "width": 98.19999999999999
+          }
+        ],
+        "width": "262",
+        "height": "331"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          137.975,
+          236.175
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "34.887",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "142.975",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 215.175,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 117.975
+          },
+          {
+            "x": 137.975,
+            "width": 98.2
+          }
+        ],
+        "width": "262",
+        "height": "331"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -616,7 +864,7 @@
           }
         ],
         "width": "447",
-        "height": "455"
+        "height": "456"
       },
       "jar": {
         "dividerXs": [
@@ -660,8 +908,84 @@
     {
       "type": "activity",
       "slug": "ciloke-34-pumi198",
-      "status": "error",
-      "reason": "activity parser refused this source at line 15 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          68.137,
+          339.238
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "184.619",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 318.238,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 48.13749999999999
+          },
+          {
+            "x": 68.13749999999999,
+            "width": 271.1000000000001
+          }
+        ],
+        "width": "365",
+        "height": "227"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          68.137,
+          339.238
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "184.619",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 318.238,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 48.137
+          },
+          {
+            "x": 68.137,
+            "width": 271.101
+          }
+        ],
+        "width": "365",
+        "height": "227"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -703,7 +1027,7 @@
           }
         ],
         "width": "246",
-        "height": "252"
+        "height": "253"
       },
       "jar": {
         "dividerXs": [
@@ -754,7 +1078,7 @@
         "dividerXs": [
           20,
           167.456,
-          293.469
+          309.469
         ],
         "titles": [
           {
@@ -764,14 +1088,14 @@
           },
           {
             "fontSize": "18",
-            "x": "187.881",
+            "x": "195.881",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 52.5,
-          "width": 272.469,
+          "width": 288.469,
           "height": 18,
           "fill": "none"
         },
@@ -782,11 +1106,11 @@
           },
           {
             "x": 167.45625,
-            "width": 126.01250000000005
+            "width": 142.01250000000005
           }
         ],
-        "width": "319",
-        "height": "397"
+        "width": "335",
+        "height": "398"
       },
       "jar": {
         "dividerXs": [
@@ -867,7 +1191,7 @@
           }
         ],
         "width": "403",
-        "height": "332"
+        "height": "333"
       },
       "jar": {
         "dividerXs": [
@@ -960,7 +1284,7 @@
           }
         ],
         "width": "365",
-        "height": "352"
+        "height": "353"
       },
       "jar": {
         "dividerXs": [
@@ -1058,7 +1382,7 @@
           }
         ],
         "width": "189",
-        "height": "308"
+        "height": "301"
       },
       "jar": {
         "dividerXs": [
@@ -1140,7 +1464,7 @@
           }
         ],
         "width": "355",
-        "height": "467"
+        "height": "468"
       },
       "jar": {
         "dividerXs": [
@@ -1222,7 +1546,7 @@
           }
         ],
         "width": "500",
-        "height": "315"
+        "height": "316"
       },
       "jar": {
         "dividerXs": [
@@ -1266,8 +1590,84 @@
     {
       "type": "activity",
       "slug": "getene-72-dido571",
-      "status": "error",
-      "reason": "activity parser refused this source at line 4 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          171.675,
+          266.838
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "53.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.675",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 151.675
+          },
+          {
+            "x": 171.675,
+            "width": 95.16250000000002
+          }
+        ],
+        "width": "292",
+        "height": "325"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          171.675,
+          266.838
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "53.256",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "176.675",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 245.838,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 151.675
+          },
+          {
+            "x": 171.675,
+            "width": 95.163
+          }
+        ],
+        "width": "292",
+        "height": "325"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -1310,7 +1710,7 @@
           }
         ],
         "width": "183",
-        "height": "426"
+        "height": "427"
       },
       "jar": {
         "dividerXs": [
@@ -1392,7 +1792,7 @@
           }
         ],
         "width": "288",
-        "height": "385"
+        "height": "386"
       },
       "jar": {
         "dividerXs": [
@@ -1474,7 +1874,7 @@
           }
         ],
         "width": "393",
-        "height": "236"
+        "height": "237"
       },
       "jar": {
         "dividerXs": [
@@ -1527,8 +1927,8 @@
           255.175,
           362.575,
           745.6,
-          897.925,
-          929.975
+          919.925,
+          951.975
         ],
         "titles": [
           {
@@ -1553,19 +1953,19 @@
           },
           {
             "fontSize": "18",
-            "x": "810.738",
+            "x": "821.738",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "902.925",
+            "x": "924.925",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 908.975,
+          "width": 930.975,
           "height": 18,
           "fill": "none"
         },
@@ -1588,15 +1988,15 @@
           },
           {
             "x": 745.6,
-            "width": 152.32500000000005
+            "width": 174.32500000000016
           },
           {
-            "x": 897.9250000000001,
+            "x": 919.9250000000002,
             "width": 32.05000000000018
           }
         ],
-        "width": "955",
-        "height": "394"
+        "width": "977",
+        "height": "395"
       },
       "jar": {
         "dividerXs": [
@@ -1718,7 +2118,7 @@
           }
         ],
         "width": "359",
-        "height": "311"
+        "height": "292"
       },
       "jar": {
         "dividerXs": [
@@ -1768,7 +2168,7 @@
         "dividerXs": [
           20,
           322.175,
-          648.231
+          652.231
         ],
         "titles": [
           {
@@ -1778,14 +2178,14 @@
           },
           {
             "fontSize": "18",
-            "x": "479.184",
+            "x": "481.184",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 627.231,
+          "width": 631.231,
           "height": 18,
           "fill": "none"
         },
@@ -1796,10 +2196,10 @@
           },
           {
             "x": 322.17500000000007,
-            "width": 326.05625
+            "width": 330.05625
           }
         ],
-        "width": "674",
+        "width": "678",
         "height": "653"
       },
       "jar": {
@@ -1882,7 +2282,7 @@
           }
         ],
         "width": "851",
-        "height": "320"
+        "height": "321"
       },
       "jar": {
         "dividerXs": [
@@ -1934,7 +2334,7 @@
         "bandRect": null,
         "lanes": [],
         "width": "162",
-        "height": "309"
+        "height": "303"
       },
       "jar": {
         "dividerXs": [],
@@ -1954,7 +2354,7 @@
         "dividerXs": [
           20,
           103.238,
-          199.388
+          277.144
         ],
         "titles": [
           {
@@ -1964,14 +2364,14 @@
           },
           {
             "fontSize": "18",
-            "x": "116.775",
+            "x": "155.653",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 178.388,
+          "width": 256.144,
           "height": 18,
           "fill": "none"
         },
@@ -1982,11 +2382,11 @@
           },
           {
             "x": 103.2375,
-            "width": 96.14999999999999
+            "width": 173.90625
           }
         ],
-        "width": "225",
-        "height": "259"
+        "width": "303",
+        "height": "205"
       },
       "jar": {
         "dividerXs": [
@@ -2037,7 +2437,7 @@
         "bandRect": null,
         "lanes": [],
         "width": "274",
-        "height": "332"
+        "height": "312"
       },
       "jar": {
         "dividerXs": [],
@@ -2090,7 +2490,7 @@
           }
         ],
         "width": "584",
-        "height": "370"
+        "height": "380"
       },
       "jar": {
         "dividerXs": [
@@ -2282,7 +2682,7 @@
           }
         ],
         "width": "260",
-        "height": "248"
+        "height": "229"
       },
       "jar": {
         "dividerXs": [
@@ -2363,7 +2763,7 @@
           }
         ],
         "width": "279",
-        "height": "369"
+        "height": "350"
       },
       "jar": {
         "dividerXs": [
@@ -2446,7 +2846,7 @@
           }
         ],
         "width": "232",
-        "height": "506"
+        "height": "507"
       },
       "jar": {
         "dividerXs": [
@@ -2528,7 +2928,7 @@
           }
         ],
         "width": "313",
-        "height": "332"
+        "height": "333"
       },
       "jar": {
         "dividerXs": [
@@ -2578,7 +2978,7 @@
         "dividerXs": [
           20,
           143,
-          269.013
+          285.013
         ],
         "titles": [
           {
@@ -2588,14 +2988,14 @@
           },
           {
             "fontSize": "18",
-            "x": "163.425",
+            "x": "171.425",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 248.013,
+          "width": 264.013,
           "height": 18,
           "fill": "none"
         },
@@ -2606,11 +3006,11 @@
           },
           {
             "x": 143,
-            "width": 126.01250000000005
+            "width": 142.01250000000005
           }
         ],
-        "width": "295",
-        "height": "270"
+        "width": "311",
+        "height": "271"
       },
       "jar": {
         "dividerXs": [
@@ -2702,7 +3102,7 @@
           }
         ],
         "width": "384",
-        "height": "485"
+        "height": "466"
       },
       "jar": {
         "dividerXs": [
@@ -2804,7 +3204,7 @@
           }
         ],
         "width": "299",
-        "height": "366"
+        "height": "367"
       },
       "jar": {
         "dividerXs": [
@@ -2896,7 +3296,7 @@
           }
         ],
         "width": "272",
-        "height": "278"
+        "height": "279"
       },
       "jar": {
         "dividerXs": [
@@ -2977,7 +3377,7 @@
           }
         ],
         "width": "245",
-        "height": "316"
+        "height": "311"
       },
       "jar": {
         "dividerXs": [
@@ -3060,7 +3460,7 @@
           }
         ],
         "width": "267",
-        "height": "264"
+        "height": "265"
       },
       "jar": {
         "dividerXs": [
@@ -3158,7 +3558,7 @@
           }
         ],
         "width": "610",
-        "height": "1053"
+        "height": "1050"
       },
       "jar": {
         "dividerXs": [
@@ -3217,8 +3617,8 @@
       "ours": {
         "dividerXs": [
           20,
-          275.813,
-          379.638
+          104.925,
+          208.75
         ],
         "titles": [
           {
@@ -3228,29 +3628,29 @@
           },
           {
             "fontSize": "18",
-            "x": "280.813",
+            "x": "109.925",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 358.638,
+          "width": 187.75,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 20,
-            "width": 255.81250000000006
+            "width": 84.92500000000001
           },
           {
-            "x": 275.81250000000006,
+            "x": 104.92500000000001,
             "width": 103.82499999999999
           }
         ],
-        "width": "405",
-        "height": "226"
+        "width": "234",
+        "height": "227"
       },
       "jar": {
         "dividerXs": [
@@ -3337,7 +3737,7 @@
           }
         ],
         "width": "420",
-        "height": "440"
+        "height": "441"
       },
       "jar": {
         "dividerXs": [
@@ -3463,8 +3863,104 @@
     {
       "type": "activity",
       "slug": "ninago-40-dalo726",
-      "status": "error",
-      "reason": "activity parser refused this source at line 10 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          129.35,
+          208.7,
+          264.05
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "68.656",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "163.006",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "229.85",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 243.05,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109.34999999999998
+          },
+          {
+            "x": 129.34999999999997,
+            "width": 79.35000000000001
+          },
+          {
+            "x": 208.7,
+            "width": 55.349999999999966
+          }
+        ],
+        "width": "290",
+        "height": "185"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          129.35,
+          208.7,
+          264.05
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "68.656",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "163.006",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "229.85",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 243.05,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 109.35
+          },
+          {
+            "x": 129.35,
+            "width": 79.35
+          },
+          {
+            "x": 208.7,
+            "width": 55.35
+          }
+        ],
+        "width": "290",
+        "height": "185"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",
@@ -3507,7 +4003,7 @@
           }
         ],
         "width": "295",
-        "height": "417"
+        "height": "383"
       },
       "jar": {
         "dividerXs": [
@@ -3588,7 +4084,7 @@
           }
         ],
         "width": "242",
-        "height": "295"
+        "height": "286"
       },
       "jar": {
         "dividerXs": [
@@ -3671,7 +4167,7 @@
           }
         ],
         "width": "285",
-        "height": "397"
+        "height": "398"
       },
       "jar": {
         "dividerXs": [
@@ -3724,8 +4220,8 @@
           269.1,
           345.75,
           728.775,
-          844.425,
-          876.475
+          866.425,
+          898.475
         ],
         "titles": [
           {
@@ -3750,19 +4246,19 @@
           },
           {
             "fontSize": "18",
-            "x": "775.575",
+            "x": "786.575",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "849.425",
+            "x": "871.425",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 855.475,
+          "width": 877.475,
           "height": 18,
           "fill": "none"
         },
@@ -3785,15 +4281,15 @@
           },
           {
             "x": 728.775,
-            "width": 115.64999999999998
+            "width": 137.64999999999998
           },
           {
-            "x": 844.425,
+            "x": 866.425,
             "width": 32.05000000000018
           }
         ],
-        "width": "902",
-        "height": "380"
+        "width": "924",
+        "height": "381"
       },
       "jar": {
         "dividerXs": [
@@ -3915,7 +4411,7 @@
           }
         ],
         "width": "395",
-        "height": "184"
+        "height": "185"
       },
       "jar": {
         "dividerXs": [
@@ -3997,7 +4493,7 @@
           }
         ],
         "width": "206",
-        "height": "224"
+        "height": "225"
       },
       "jar": {
         "dividerXs": [
@@ -4089,7 +4585,7 @@
           }
         ],
         "width": "216",
-        "height": "356"
+        "height": "343"
       },
       "jar": {
         "dividerXs": [
@@ -4191,7 +4687,7 @@
           }
         ],
         "width": "1004",
-        "height": "236"
+        "height": "237"
       },
       "jar": {
         "dividerXs": [
@@ -4334,7 +4830,7 @@
           20,
           163.15,
           295.3,
-          436.45
+          494.45
         ],
         "titles": [
           {
@@ -4349,14 +4845,14 @@
           },
           {
             "fontSize": "18",
-            "x": "354.85",
+            "x": "383.85",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 415.45,
+          "width": 473.45,
           "height": 18,
           "fill": "none"
         },
@@ -4371,10 +4867,10 @@
           },
           {
             "x": 295.30000000000007,
-            "width": 141.14999999999986
+            "width": 199.14999999999986
           }
         ],
-        "width": "462",
+        "width": "520",
         "height": "130"
       },
       "jar": {
@@ -4467,7 +4963,7 @@
           }
         ],
         "width": "285",
-        "height": "440"
+        "height": "441"
       },
       "jar": {
         "dividerXs": [
@@ -4511,8 +5007,84 @@
     {
       "type": "activity",
       "slug": "razuzu-32-faje125",
-      "status": "error",
-      "reason": "activity parser refused this source at line 7 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          98.063,
+          547.081
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "288.484",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 526.081,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 78.0625
+          },
+          {
+            "x": 98.0625,
+            "width": 449.0187499999996
+          }
+        ],
+        "width": "573",
+        "height": "306"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          99.7,
+          288.556
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "25.819",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "160.041",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 267.556,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 79.7
+          },
+          {
+            "x": 99.7,
+            "width": 188.856
+          }
+        ],
+        "width": "314",
+        "height": "295"
+      },
+      "laneCount": 2
     },
     {
       "type": "activity",
@@ -4526,8 +5098,8 @@
           269.1,
           439.3,
           822.325,
-          937.975,
-          970.025
+          959.975,
+          992.025
         ],
         "titles": [
           {
@@ -4552,19 +5124,19 @@
           },
           {
             "fontSize": "18",
-            "x": "869.125",
+            "x": "880.125",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "942.975",
+            "x": "964.975",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 949.025,
+          "width": 971.025,
           "height": 18,
           "fill": "none"
         },
@@ -4587,15 +5159,15 @@
           },
           {
             "x": 822.3249999999999,
-            "width": 115.64999999999986
+            "width": 137.64999999999986
           },
           {
-            "x": 937.9749999999998,
+            "x": 959.9749999999998,
             "width": 32.05000000000018
           }
         ],
-        "width": "996",
-        "height": "380"
+        "width": "1018",
+        "height": "381"
       },
       "jar": {
         "dividerXs": [
@@ -4733,7 +5305,7 @@
           }
         ],
         "width": "471",
-        "height": "542"
+        "height": "558"
       },
       "jar": {
         "dividerXs": [
@@ -4824,7 +5396,7 @@
           }
         ],
         "width": "236",
-        "height": "368"
+        "height": "363"
       },
       "jar": {
         "dividerXs": [
@@ -4907,7 +5479,7 @@
           }
         ],
         "width": "529",
-        "height": "604"
+        "height": "608"
       },
       "jar": {
         "dividerXs": [
@@ -4988,7 +5560,7 @@
           }
         ],
         "width": "265",
-        "height": "332"
+        "height": "325"
       },
       "jar": {
         "dividerXs": [
@@ -5071,7 +5643,7 @@
           }
         ],
         "width": "269",
-        "height": "250"
+        "height": "251"
       },
       "jar": {
         "dividerXs": [
@@ -5126,7 +5698,7 @@
         "dividerXs": [
           20,
           64.7,
-          115.85
+          111.85
         ],
         "titles": [
           {
@@ -5136,14 +5708,14 @@
           },
           {
             "fontSize": "18",
-            "x": "79.25",
+            "x": "77.25",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 94.85,
+          "width": 90.85,
           "height": 18,
           "fill": "none"
         },
@@ -5154,11 +5726,11 @@
           },
           {
             "x": 64.7,
-            "width": 51.150000000000006
+            "width": 47.150000000000006
           }
         ],
-        "width": "141",
-        "height": "260"
+        "width": "137",
+        "height": "251"
       },
       "jar": {
         "dividerXs": [
@@ -5241,7 +5813,7 @@
           }
         ],
         "width": "139",
-        "height": "135"
+        "height": "136"
       },
       "jar": {
         "dividerXs": [
@@ -5323,7 +5895,7 @@
           }
         ],
         "width": "119",
-        "height": "95"
+        "height": "116"
       },
       "jar": {
         "dividerXs": [
@@ -5405,7 +5977,7 @@
           }
         ],
         "width": "516",
-        "height": "440"
+        "height": "441"
       },
       "jar": {
         "dividerXs": [
@@ -5455,8 +6027,8 @@
         "titles": [],
         "bandRect": null,
         "lanes": [],
-        "width": "154",
-        "height": "345"
+        "width": "150",
+        "height": "335"
       },
       "jar": {
         "dividerXs": [],
@@ -5509,7 +6081,7 @@
           }
         ],
         "width": "667",
-        "height": "184"
+        "height": "185"
       },
       "jar": {
         "dividerXs": [
@@ -5596,7 +6168,7 @@
           }
         ],
         "width": "236",
-        "height": "368"
+        "height": "363"
       },
       "jar": {
         "dividerXs": [
@@ -5689,7 +6261,7 @@
           }
         ],
         "width": "647",
-        "height": "682"
+        "height": "683"
       },
       "jar": {
         "dividerXs": [
@@ -5748,40 +6320,40 @@
       "ours": {
         "dividerXs": [
           20,
-          336.663,
-          709.025
+          414.012,
+          840.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "168.319",
+            "x": "206.994",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "512.831",
+            "x": "617.356",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 688.025,
+          "width": 819.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 20,
-            "width": 316.6625
+            "width": 394.01249999999993
           },
           {
-            "x": 336.6625,
-            "width": 372.36250000000007
+            "x": 414.01249999999993,
+            "width": 426.7125000000001
           }
         ],
-        "width": "735",
-        "height": "455"
+        "width": "866",
+        "height": "351"
       },
       "jar": {
         "dividerXs": [
@@ -5875,7 +6447,7 @@
           }
         ],
         "width": "285",
-        "height": "440"
+        "height": "441"
       },
       "jar": {
         "dividerXs": [
@@ -5923,40 +6495,40 @@
       "ours": {
         "dividerXs": [
           20,
-          360.662,
-          677.325
+          423.362,
+          807.725
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "180.319",
+            "x": "211.669",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "508.981",
+            "x": "605.531",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 656.325,
+          "width": 786.725,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 20,
-            "width": 340.66249999999997
+            "width": 403.36249999999995
           },
           {
-            "x": 360.66249999999997,
-            "width": 316.66249999999997
+            "x": 423.36249999999995,
+            "width": 384.36249999999995
           }
         ],
-        "width": "703",
-        "height": "325"
+        "width": "833",
+        "height": "249"
       },
       "jar": {
         "dividerXs": [
@@ -6140,7 +6712,7 @@
           }
         ],
         "width": "254",
-        "height": "338"
+        "height": "329"
       },
       "jar": {
         "dividerXs": [
@@ -6222,7 +6794,7 @@
           }
         ],
         "width": "381",
-        "height": "357"
+        "height": "338"
       },
       "jar": {
         "dividerXs": [
@@ -6305,7 +6877,7 @@
           }
         ],
         "width": "372",
-        "height": "508"
+        "height": "509"
       },
       "jar": {
         "dividerXs": [
@@ -6387,7 +6959,7 @@
           }
         ],
         "width": "410",
-        "height": "583"
+        "height": "560"
       },
       "jar": {
         "dividerXs": [
@@ -6431,8 +7003,104 @@
     {
       "type": "activity",
       "slug": "zinelo-77-losu727",
-      "status": "error",
-      "reason": "activity parser refused this source at line 19 (syntax): Syntax Error?"
+      "status": "baseline",
+      "ours": {
+        "dividerXs": [
+          20,
+          193.7,
+          334.4,
+          445.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "96.837",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.037",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "380.063",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 173.69999999999996
+          },
+          {
+            "x": 193.69999999999996,
+            "width": 140.70000000000002
+          },
+          {
+            "x": 334.4,
+            "width": 111.35000000000002
+          }
+        ],
+        "width": "471",
+        "height": "558"
+      },
+      "jar": {
+        "dividerXs": [
+          20,
+          193.7,
+          334.4,
+          445.75
+        ],
+        "titles": [
+          {
+            "fontSize": "18",
+            "x": "96.837",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "254.037",
+            "anchor": "(absent)"
+          },
+          {
+            "fontSize": "18",
+            "x": "380.063",
+            "anchor": "(absent)"
+          }
+        ],
+        "bandRect": {
+          "x": 20,
+          "y": 17.5,
+          "width": 424.75,
+          "height": 18,
+          "fill": "none"
+        },
+        "lanes": [
+          {
+            "x": 20,
+            "width": 173.7
+          },
+          {
+            "x": 193.7,
+            "width": 140.7
+          },
+          {
+            "x": 334.4,
+            "width": 111.35
+          }
+        ],
+        "width": "471",
+        "height": "558"
+      },
+      "laneCount": 3
     },
     {
       "type": "activity",
@@ -6442,8 +7110,8 @@
         "dividerXs": [
           20,
           80.063,
-          208.606,
-          309.15
+          204.606,
+          305.15
         ],
         "titles": [
           {
@@ -6453,19 +7121,19 @@
           },
           {
             "fontSize": "18",
-            "x": "119.303",
+            "x": "117.303",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "233.847",
+            "x": "229.847",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 288.15,
+          "width": 284.15,
           "height": 18,
           "fill": "none"
         },
@@ -6476,15 +7144,15 @@
           },
           {
             "x": 80.0625,
-            "width": 128.54375000000002
+            "width": 124.54374999999999
           },
           {
-            "x": 208.60625000000002,
-            "width": 100.54375000000002
+            "x": 204.60625,
+            "width": 100.54374999999999
           }
         ],
-        "width": "338",
-        "height": "437"
+        "width": "334",
+        "height": "428"
       },
       "jar": {
         "dividerXs": [

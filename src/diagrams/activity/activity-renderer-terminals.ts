@@ -1,16 +1,27 @@
 /**
- * Terminal-circle renderers: `start`/`stop`/`kill`/`end`. Split out of
+ * Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the
+ * `spot` connector (mission add2-T2g). Split out of
  * `activity-renderer-shapes.ts` (T1c, 500-line hook) -- re-exported from
  * there so existing import sites are unchanged (same "pure-move re-export"
  * pattern as `activity-renderer-signal-shapes.ts`, which this file mirrors
- * by importing {@link actColors} back from the main shapes module).
+ * by importing {@link actColors}/{@link centeredFirstBaselineY} back from
+ * the main shapes module).
  */
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, STOP_INNER_DELTA } from './activity-layout-constants.js';
-import { CIRCLE_END_LINE_THICKNESS, CIRCLE_INK, CIRCLE_LINE_THICKNESS } from './activity-style-defaults.js';
-import { actColors } from './activity-renderer-shapes.js';
+import {
+  CIRCLE_END_LINE_THICKNESS,
+  CIRCLE_INK,
+  CIRCLE_LINE_THICKNESS,
+  ELEMENT_LINE_THICKNESS,
+  activityFontSize,
+} from './activity-style-defaults.js';
+import { activityFontColor } from './activity-text-style.js';
+import { measureLineWidth } from './activity-text-placement.js';
+import { drawActivityText } from './activity-renderer-text.js';
+import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 
 export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
@@ -97,10 +108,16 @@ export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
  * against `fabexi-81-dife869`'s jar SVG byte-for-byte: the two points are
  * identical, only the x1/y1 vs x2/y2 assignment is transposed). This
  * compress wrapper lives under `core/klimt/**`, which T2f may not edit
- * (D7) -- the activity side normalises the one line it draws with a
- * negative `dy` instead of depending on a ported compress pass.
+ * (D7) -- the activity side normalises every line it draws with this
+ * SAME helper, rather than depending on a ported compress pass.
+ *
+ * b3/T3a (family B/ORD): exported so `renderer.ts#renderEdgeSegments` can
+ * apply the IDENTICAL swap to every edge segment line, not just this
+ * file's end-cross diagonals -- one normalisation, every `<line>` draw
+ * site, matching `UGraphicCompressOnXorY.java:142-146`'s own unconditional
+ * scope (it wraps the WHOLE diagram, every `ULine`, not a chosen few).
  */
-function orderedLine(x1: number, y1: number, x2: number, y2: number, style: LineStyle): string {
+export function orderedLine(x1: number, y1: number, x2: number, y2: number, style: LineStyle): string {
   return y1 > y2 ? line(x2, y2, x1, y1, style) : line(x1, y1, x2, y2, style);
 }
 
@@ -142,4 +159,62 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
       crossStyle,
     )
   );
+}
+
+/**
+ * `(X)` / `#color:(X)` -- the circled-character connector (mission
+ * add2-T2g). `FtileCircleSpot#drawU` (`:98-105,108-109`) fills AND
+ * strokes the circle in the merged style's BackgroundColor/LineColor,
+ * then draws the character centred via `UCenteredCharacter`. `circle,
+ * spot`'s merged `Style` carries NO skinparam convert of its own
+ * (confirmed by grep of `FromSkinparamToStyle.java`, unlike `circle,
+ * start/stop/end`, which have `activityStartColor`/`activityStopColor`/
+ * `activityEndColor`) -- so, unlike {@link renderStart}/{@link renderStop}/
+ * {@link renderEnd}, this draws the PLAIN root ink
+ * (`theme.colors.nodeBackground`/`theme.colors.border`), never through
+ * {@link actColors}'s themed `start`/`stop`/`end` buckets. `color`
+ * overrides ONLY the fill (`addSpot(spot, color)`,
+ * `ActivityDiagram3.java:131-137`).
+ *
+ * Stroke width is {@link ELEMENT_LINE_THICKNESS} (0.5), NOT
+ * `activityLineThickness(theme, 'circle')`'s own default
+ * (`CIRCLE_LINE_THICKNESS` = 1): that default exists for `start`/`stop`/
+ * `end`'s own
+ * MORE SPECIFIC `circle,start,stop,end{LineThickness 1}` rule
+ * (`plantuml.skin:379`), which `circle,spot` has no equivalent of, so its
+ * merged style falls through to the generic `element{LineThickness 0.5}`
+ * tier instead (`plantuml.skin:93`). Verified against the jar's own SVG
+ * (`vilecu-41-tete416`: `stroke:#181818;stroke-width:0.5`), not assumed.
+ *
+ * The character itself draws as a plain `<text>`, not upstream's
+ * `UCenteredCharacter` path-outline glyph -- `DriverCenteredCharacterSvg`
+ * is an EXISTING, project-wide, pre-this-task D3-prime stub
+ * (`core/klimt/drawing/svg/driver-svg-stubs.ts`: "centered-character
+ * drawing ... not yet ported"; the `UCenteredCharacter` shape class does
+ * not exist anywhere in this port). A `<text>` substitute preserves the
+ * information (which character is shown) that drawing nothing at all
+ * would lose (CLAUDE.md's "preserve information-carrying output").
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:84-109
+ * @see net/sourceforge/plantuml/style/FromSkinparamToStyle.java:137-139
+ */
+export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
+  const cx = node.x + node.width / 2;
+  const cy = node.y + node.height / 2;
+  const r = node.width / 2;
+  const fill = resolvePaint(node.color ?? theme.colors.nodeBackground).value;
+  const circle = ellipse(cx, cy, r, r, {
+    fill,
+    stroke: theme.colors.border,
+    'stroke-width': ELEMENT_LINE_THICKNESS,
+  });
+  const char = node.label ?? '';
+  if (char === '') return circle;
+  const size = activityFontSize(theme, 'circle');
+  const charWidth = measureLineWidth(theme, size, char);
+  const text = drawActivityText(cx - charWidth / 2, centeredFirstBaselineY(cy, size, 1), char, {
+    fill: activityFontColor(theme, 'circle'),
+    fontFamily: theme.fontFamily,
+    fontSize: size,
+  });
+  return circle + text;
 }

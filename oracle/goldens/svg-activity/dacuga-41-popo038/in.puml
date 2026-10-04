@@ -1,0 +1,10 @@
+@startuml
+repeat
+:test something;
+if (something get wrong) then (no) 
+break
+endif
+:error;
+repeat while
+:some more;
+@enduml

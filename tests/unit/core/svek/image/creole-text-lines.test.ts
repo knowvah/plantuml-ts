@@ -382,4 +382,24 @@ describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () =>
     expect(line.runs[0]!.size).toBe(font.size);
     expect(line.runs[0]!.dy).toBe(0);
   });
+
+  // T2c (activity-divergence-drive-2, zamagu-75-vape137): `CreoleAtomUrl`
+  // (`klimt/creole/atom/Atom.ts`) already carries BOTH `url` and
+  // `tooltip` -- `CommandCreoleUrl.ts#resolveUrlAndTooltip` parses a
+  // `{tooltip}` and defaults it to the url when absent, matching
+  // upstream's `resolveLabel`. `textAtomMeasured` previously copied only
+  // `atom.url.url` into the run, dropping `atom.url.tooltip` on the floor.
+  it('[[url{tooltip} label]] -- the run carries BOTH url and the resolved tooltip', () => {
+    const line = creoleTextLines('[[http://testLink1.com{dd} sss]]', font, measurer)[0]!;
+    const run = line.runs[0]!;
+    expect(run.url).toBe('http://testLink1.com');
+    expect(run.tooltip).toBe('dd');
+  });
+
+  it('[[url label]] with no {tooltip} -- the run\'s tooltip defaults to the url', () => {
+    const line = creoleTextLines('[[http://www.google.com]]', font, measurer)[0]!;
+    const run = line.runs[0]!;
+    expect(run.url).toBe('http://www.google.com');
+    expect(run.tooltip).toBe('http://www.google.com');
+  });
 });

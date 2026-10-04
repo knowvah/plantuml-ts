@@ -1,0 +1,17 @@
+@startuml
+split
+	  split
+	    :A;
+	    detach
+	  split again
+	    :B;
+	    detach
+	  end split
+split again
+ :C;
+ detach
+end split
+:toto1;
+ detach
+:toto2;
+@enduml

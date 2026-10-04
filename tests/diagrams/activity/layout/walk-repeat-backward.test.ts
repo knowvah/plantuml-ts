@@ -17,7 +17,7 @@ import type { Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
+  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}`, groupScope: []  };
 }
 
 function makeLeaf(kind: string, width: number, height: number, left = width / 2, hasPointOut = true): Tile {
@@ -55,6 +55,8 @@ interface RepeatTileOptions {
   backward?: Tile;
   backwardOffsetX?: number;
   backwardOffsetY?: number;
+  backIncoming?: string;
+  backOutgoing?: string;
 }
 
 function makeRepeatTile(o: RepeatTileOptions): GtileRepeat {
@@ -72,6 +74,8 @@ function makeRepeatTile(o: RepeatTileOptions): GtileRepeat {
     backward: o.backward,
     backwardOffsetX: o.backwardOffsetX ?? 0,
     backwardOffsetY: o.backwardOffsetY ?? 0,
+    backIncoming: o.backIncoming,
+    backOutgoing: o.backOutgoing,
   } as unknown as GtileRepeat;
 }
 
@@ -161,7 +165,7 @@ describe('walkRepeat — backward set: node order and replaced back connection',
       { x: 175, y: 120 },
       { x: 175, y: 30 },
     ]);
-    expect(backward1.emphasize).toBe('up');
+    expect(backward1.emphasize).toBeUndefined();
   });
 
   it('ConnectionBackBackward1 exits on the LEFT when backward sits left of diamond2 centre', () => {
@@ -252,5 +256,71 @@ describe('walkRepeat — backward set: node order and replaced back connection',
       { x: 22, y: 110 },
       { x: 40, y: 100 },
     ]);
+  });
+});
+
+// BACKLBL (add2 T3i): FtileRepeat.java:170-178,182-187 -- incoming1/incoming2.
+describe('walkRepeat — backward incoming/outgoing labels', () => {
+  function buildWithLabels() {
+    const entry = makeLeaf('stub-entry', 24, 24, 12);
+    const body = makeLeaf('stub-body', 40, 60, 12);
+    const condition = makeCondition(50, 40);
+    const backward = makeLeaf('gtile-action', 30, 20, 15);
+    const tile = makeRepeatTile({
+      entry,
+      body,
+      condition,
+      entryOffsetX: 30,
+      bodyOffsetX: 0,
+      bodyOffsetY: 50,
+      conditionOffsetX: 5,
+      conditionOffsetY: 100,
+      width: 200,
+      backward,
+      backwardOffsetX: 150,
+      backwardOffsetY: 10,
+      backIncoming: 'in',
+      backOutgoing: 'out',
+    });
+    const out = makeOut();
+    walkRepeat(tile, 10, 0, undefined, out);
+    return out;
+  }
+
+  it('attaches backIncoming to Backward1 (edge 1) and backOutgoing to Backward2 (edge 2)', () => {
+    const out = buildWithLabels();
+    expect(out.edges[1]!.label).toBe('in');
+    expect(out.edges[2]!.label).toBe('out');
+  });
+
+  it('never attaches onto ConnectionIn (edge 0) or ConnectionOut (edge 3)', () => {
+    const out = buildWithLabels();
+    expect(out.edges[0]!.label).toBeUndefined();
+    expect(out.edges[3]!.label).toBeUndefined();
+  });
+
+  it('leaves label undefined when backIncoming/backOutgoing are unset', () => {
+    const entry = makeLeaf('stub-entry', 24, 24, 12);
+    const body = makeLeaf('stub-body', 40, 60, 12);
+    const condition = makeCondition(50, 40);
+    const backward = makeLeaf('gtile-action', 30, 20, 15);
+    const tile = makeRepeatTile({
+      entry,
+      body,
+      condition,
+      entryOffsetX: 30,
+      bodyOffsetX: 0,
+      bodyOffsetY: 50,
+      conditionOffsetX: 5,
+      conditionOffsetY: 100,
+      width: 200,
+      backward,
+      backwardOffsetX: 150,
+      backwardOffsetY: 10,
+    });
+    const out = makeOut();
+    walkRepeat(tile, 10, 0, undefined, out);
+    expect(out.edges[1]!.label).toBeUndefined();
+    expect(out.edges[2]!.label).toBeUndefined();
   });
 });

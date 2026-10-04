@@ -138,39 +138,47 @@ describe('GtileEnd', () => {
   });
 });
 
+// T1p-d root-cause fix: `FtileBreak`'s own constructor
+// (`FtileBreak.java:44-46`) calls `super(skinParam, swimlane)`, resolving
+// to `FtileEmpty`'s two-arg ctor (`FtileEmpty.java:63-65`) --
+// `this(skinParam, 0, 0, swimlane)` -- width/height are `0`, not an
+// invented `20`. Confirmed independently via the parallel
+// `net.sourceforge.plantuml.activitydiagram3.gtile.GtileBreak` ->
+// `GtileEmpty(stringBounder, skinParam, swimlane)` -> `this(..., 0, 0,
+// swimlane)`, same result.
 describe('GtileBreak', () => {
   const tile = new GtileBreak();
 
-  it('has width = 20', () => {
-    expect(tile.width).toBe(20);
+  it('has width = 0 (FtileBreak.java:44-46 -> FtileEmpty.java:63-65)', () => {
+    expect(tile.width).toBe(0);
   });
 
-  it('has height = 20', () => {
-    expect(tile.height).toBe(20);
+  it('has height = 0 (FtileBreak.java:44-46 -> FtileEmpty.java:63-65)', () => {
+    expect(tile.height).toBe(0);
   });
 
-  it('NORTH_HOOK → { x: 10, y: 0 }', () => {
-    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 10, y: 0 });
+  it('NORTH_HOOK → { x: 0, y: 0 }', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 0, y: 0 });
   });
 
-  it('SOUTH_HOOK → { x: 10, y: 20 }', () => {
-    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 10, y: 20 });
+  it('SOUTH_HOOK → { x: 0, y: 0 }', () => {
+    expect(tile.getCoord(SOUTH_HOOK)).toEqual({ x: 0, y: 0 });
   });
 
-  it('EAST_HOOK → { x: 20, y: 10 }', () => {
-    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 20, y: 10 });
+  it('EAST_HOOK → { x: 0, y: 0 }', () => {
+    expect(tile.getCoord(EAST_HOOK)).toEqual({ x: 0, y: 0 });
   });
 
-  it('WEST_HOOK → { x: 0, y: 10 }', () => {
-    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 10 });
+  it('WEST_HOOK → { x: 0, y: 0 }', () => {
+    expect(tile.getCoord(WEST_HOOK)).toEqual({ x: 0, y: 0 });
   });
 
   it('NORTH_BORDER → same as NORTH_HOOK', () => {
-    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 10, y: 0 });
+    expect(tile.getCoord(NORTH_BORDER)).toEqual({ x: 0, y: 0 });
   });
 
   it('SOUTH_BORDER → same as SOUTH_HOOK', () => {
-    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 10, y: 20 });
+    expect(tile.getCoord(SOUTH_BORDER)).toEqual({ x: 0, y: 0 });
   });
 
   it('hasPointOut() === false (FtileBreak.java:63, withoutPointOut())', () => {

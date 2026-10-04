@@ -30,21 +30,23 @@ const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Ar
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
+  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}`, groupScope: []  };
 }
 
 describe('walkWhile — backward unset: identical to the pre-T3h shape', () => {
   it('pushes header then body, no third node; 4 edges (In, Simple, Out x2)', () => {
     const header = new GtileDiamondInside('cond', {}, bounder, theme);
     const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     const out = makeOut();
     walkWhile(tile, 0, 0, undefined, out);
 
-    // T3k: `header` carries a real own label ('cond'), so `pushWhileHeader`
+    // WORD (mission add2-T3b): `drawU` draws `whileBlock` BEFORE `diamond1`
+    // (`FtileWhile.java:556-557`) -- the body's own node lands first. T3k:
+    // `header` carries a real own label ('cond'), so `pushWhileHeader`
     // pushes a `'while-header'` polygon-only node plus a sibling
     // `'if-own-label'` text node, not a single combined node.
-    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action']);
+    expect(out.nodes.map((n) => n.kind)).toEqual(['action', 'while-header', 'if-own-label']);
     expect(out.edges).toHaveLength(4);
     expect(out.reservations).toHaveLength(1);
   });
@@ -55,7 +57,7 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     const header = new GtileDiamondInside('cond', {}, bounder, theme);
     const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
     const backward = new GtileAction({ kind: 'action', label: 'back' }, bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme, backward);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme, backward: backward });
     const out = makeOut();
     walkWhile(tile, 0, 0, undefined, out);
     return { header, body, backward, tile, out };
@@ -63,7 +65,7 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
 
   it('pushes the backward node LAST among nodes (FtileWhile.java:561-562)', () => {
     const { out } = build();
-    expect(out.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action', 'action']);
+    expect(out.nodes.map((n) => n.kind)).toEqual(['action', 'while-header', 'if-own-label', 'action']);
     expect(out.nodes[3]!.label).toBe('back');
   });
 
@@ -72,13 +74,13 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     expect(out.edges).toHaveLength(5);
   });
 
-  it('ConnectionBackBackward1 starts at the body’s own SOUTH_HOOK (the SAME point ConnectionBackSimple would use)', () => {
+  it('ConnectionBackBackward1 starts at the body’s own SOUTH_HOOK (the SAME point ConnectionBackSimple would use), no emphasize (FtileWhile.java:354)', () => {
     const { body, tile, out } = build();
     const bX = 0 + tile.bodyOffsetX;
     const bY = 0 + tile.bodyOffsetY;
     const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
     expect(out.edges[1]!.points[0]).toEqual(backFrom);
-    expect(out.edges[1]!.emphasize).toBe('up');
+    expect(out.edges[1]!.emphasize).toBeUndefined();
   });
 
   it('ConnectionBackBackward1 ends at backward’s own SOUTH_HOOK, elbowed at max(backFrom.y, bodyBottomY) + 12', () => {
@@ -98,6 +100,31 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     expect(out.reservations).toEqual([{ x: backFrom.x, y: y1bis, width: 5, height: 12 }]);
   });
 
+  // BACKLBL (add2 T3i): FtileWhile.java:146,158-161 -- incoming1/incoming2.
+  it('attaches backIncoming/backOutgoing onto Backward1/Backward2, undefined when unset', () => {
+    const { out } = build();
+    expect(out.edges[1]!.label).toBeUndefined();
+    expect(out.edges[2]!.label).toBeUndefined();
+  });
+
+  it('a set backIncoming/backOutgoing lands on Backward1/Backward2 only', () => {
+    const header = new GtileDiamondInside('cond', {}, bounder, theme);
+    const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
+    const backward = new GtileAction({ kind: 'action', label: 'back' }, bounder, theme);
+    const tile = new GtileWhile(header, body, {
+      bounder,
+      theme,
+      backward,
+      backIncoming: 'incoming',
+      backOutgoing: 'dsc_5',
+    });
+    const out = makeOut();
+    walkWhile(tile, 0, 0, undefined, out);
+    expect(out.edges[1]!.label).toBe('incoming');
+    expect(out.edges[2]!.label).toBe('dsc_5');
+    expect(out.edges[0]!.label).toBeUndefined();
+  });
+
   it('ConnectionBackBackward2 runs backward’s own NORTH_HOOK -> header’s own EAST_HOOK, no emphasize (FtileWhile.java:386-407)', () => {
     const { header, backward, tile, out } = build();
     const hX = 0 + tile.headerOffsetX;
@@ -115,7 +142,7 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
     Object.defineProperty(body, 'hasPointOut', { value: () => false });
     const backward = new GtileAction({ kind: 'action', label: 'back' }, bounder, theme);
-    const tile = new GtileWhile(header, body, bounder, theme, backward);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme, backward: backward });
     const out = makeOut();
     walkWhile(tile, 0, 0, undefined, out);
 

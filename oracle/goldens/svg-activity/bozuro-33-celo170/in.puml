@@ -1,0 +1,12 @@
+@startuml
+start
+repeat
+    :Do something;
+    if(Decide something) then (Yes with a very long comment which may cause an issue)
+        :Repeat something;
+    else (No)
+        :Finish something;
+        end
+    endif
+repeat while
+@enduml

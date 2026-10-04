@@ -1,0 +1,15 @@
+@startuml
+|swimlane 1|
+start
+
+repeat
+label dummylab
+|swimlane 2|
+  :read data;
+|swimlane 1|
+  :generate diagrams;
+repeat while (more data?)
+
+stop
+
+@enduml

@@ -102,6 +102,32 @@ describe('renderSwimlaneChrome', () => {
   });
 });
 
+// O (add2 T3i): `|#color|name|` background -- Swimlanes.java:332-340.
+describe('renderSwimlaneBackground (via renderSwimlaneChrome)', () => {
+  it('draws a lane background rect before that lane’s own nodes, spanning x/width exactly', () => {
+    const geo = makeGeo({
+      swimlanes: [
+        { name: 'A', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 },
+        { name: 'B', x: 120, width: 150, contentX: 126, contentWidth: 138, titleWidth: 25, background: '#AntiqueWhite' },
+      ],
+    });
+    const out = renderSwimlaneChrome(geo, theme);
+    expect(out).toContain('x="120" y="17.5" width="150" height="165" fill="#FAEBD7"');
+    expect(out).toContain('stroke="#FAEBD7"');
+    const bgIdx = out.indexOf('fill="#FAEBD7"');
+    const lineIdx = out.indexOf('x1="120"');
+    expect(bgIdx).toBeGreaterThanOrEqual(0);
+    expect(bgIdx).toBeLessThan(lineIdx);
+  });
+
+  it('draws no rect for a lane with no background', () => {
+    const out = renderSwimlaneChrome(makeGeo(), theme);
+    expect(out).not.toContain('#FAEBD7');
+    // Only the (transparent) title band rect, no lane background rects.
+    expect((out.match(/<rect/g) ?? []).length).toBe(1);
+  });
+});
+
 describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
   it('emits fill="none" by default (D3 — the transparent band is still drawn)', () => {
     const out = renderSwimlaneChrome(makeGeo(), theme);
@@ -120,6 +146,32 @@ describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
     });
     const out = renderSwimlaneChrome(makeGeo(), customTheme);
     expect(out).toContain('fill="#EEE"');
+  });
+
+  // M: Swimlanes.java:358-366 `drawTitlesBackground` -- `.apply(color.bg())
+  // .apply(color)` paints the SAME resolved colour as both fill and stroke
+  // (default UGraphic line thickness, 1) -- vidada-17-xuse810.
+  it('stroke equals the resolved fill (not none) when a real override is set', () => {
+    const customTheme = deepMergeTheme(defaultTheme, {
+      colors: {
+        ...defaultTheme.colors,
+        graph: {
+          ...defaultTheme.colors.graph,
+          activity: { swimlaneHeaderBackground: '#EEEEEE' },
+        },
+      },
+    });
+    const out = renderSwimlaneChrome(makeGeo(), customTheme);
+    expect(out).toContain('stroke="#EEE"');
+    expect(out).toContain('stroke-width="1"');
+  });
+
+  it('stroke stays none alongside the default transparent fill', () => {
+    const out = renderSwimlaneChrome(makeGeo(), theme);
+    const bandRect = /<rect[^>]*>/.exec(out)?.[0] ?? '';
+    expect(bandRect).toContain('fill="none"');
+    expect(bandRect).toContain('stroke="none"');
+    expect(bandRect).not.toContain('stroke-width');
   });
 });
 
@@ -141,6 +193,17 @@ describe('renderSwimlaneTitles', () => {
     });
     const out = renderSwimlaneTitles(makeGeo(), customTheme);
     expect(out).toContain('font-size="30"');
+  });
+
+  // SLURL: `getTitle` (`Swimlanes.java:285-293`) draws the RESOLVED
+  // display text, not raw `[[url label]]` markup -- nesozi-09-zezu092.
+  it('draws the resolved label for a [[url label]] lane name, not raw markup', () => {
+    const geo = makeGeo({
+      swimlanes: [{ name: '[[www.plantuml.com First actor]]', x: 20, width: 100 }],
+    });
+    const out = renderSwimlaneTitles(geo, theme);
+    expect(out).toContain('>First actor<');
+    expect(out).not.toContain('[[');
   });
 
   it('draws in the resolved SwimlaneTitleFontColor', () => {

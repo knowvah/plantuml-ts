@@ -20,12 +20,7 @@
  */
 
 import type { ActivityDiagramAST } from '../ast.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityGeometry,
-  ActivityNodeGeo,
-  SwimlaneBandGeo,
-} from '../activity-geometry.types.js';
+import type { ActivityGeometry, SwimlaneBandGeo } from '../activity-geometry.types.js';
 import type { Tile } from '../tiles/tile.js';
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
@@ -38,6 +33,7 @@ import { compressGeometry } from './compress/compress-geometry.js';
 import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
 import { finalizeGeometry } from './canvas-origin.js';
 import type { FinalizedGeometry } from './canvas-origin.js';
+import { mergeSnakes } from './snake-merge.js';
 
 /**
  * SWIMLANES COUNT TOWARD THE CANVAS TOO (32/268 fixtures once overflowed
@@ -146,6 +142,10 @@ function assembleFromFinal(
     geometry: {
       totalWidth: final.totalWidth,
       totalHeight: final.totalHeight,
+      // b3/T3a (family E): the un-floored span `renderer.ts#preChromeDims`
+      // reads directly -- see `ActivityGeometry.rawWidth`'s own doc.
+      rawWidth: final.rawWidth,
+      rawHeight: final.rawHeight,
       nodes: final.nodes,
       edges: final.edges,
       swimlanes: final.swimlanes,
@@ -232,18 +232,63 @@ function inLanePassOrder(
   };
 }
 
+/**
+ * D1 (T1b): `layout/snake-merge.ts`'s two-pass connector merge, run on
+ * raw pre-compression coordinates, in the jar's own lane-pass draw order
+ * (`edge-draw-order.ts#lanePassOrder` -- the SAME order `inLanePassOrder`
+ * re-derives post-compression below, so that later call is a stable
+ * no-op here, not a second reordering). Returns the same
+ * {@link PlacementResult} with `edges`/`edgeMeta` replaced.
+ */
+/**
+ * O (add2 T3i): attaches `|#color|name|`'s background onto each lane's own
+ * `SwimlaneGeo`, read back from `ast.swimlaneColors` (keyed by lane name,
+ * `dispatch-support.ts#setCurrentSwimlane`). `x`/`width` already match the
+ * jar's background-rect bounds exactly (verified against `cejupe-34-
+ * muti621`'s oracle SVG) -- no new geometry computed here, just the
+ * colour attached onto the SAME `SwimlaneGeo` the renderer already reads.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+ */
+function withLaneBackgrounds(placed: PlacementResult, colors: Record<string, string> | undefined): PlacementResult {
+  if (colors === undefined) return placed;
+  const swimlanes = placed.swimlanes.map((lane) => {
+    const background = colors[lane.name];
+    return background === undefined ? lane : { ...lane, background };
+  });
+  return { ...placed, swimlanes };
+}
+
+function mergeBeforeCompress(placed: PlacementResult, laneNames: readonly string[]): PlacementResult {
+  const order = lanePassOrder(placed.edgeMeta, laneNames);
+  const ordered = applyEdgeDrawOrder(placed.edges, placed.edgeMeta, order);
+  const merged = mergeSnakes(ordered.edges, ordered.edgeMeta);
+  return { ...placed, edges: merged.edges, edgeMeta: merged.edgeMeta };
+}
+
+/** Fresh, empty {@link Out} accumulator -- split out of {@link
+ *  assignCoordinatesFull} purely to keep that function's own NLOC under
+ *  the file's limit. */
+function buildOut(): Out {
+  let idCounter = 0;
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    nextId: (prefix: string) => `${prefix}-${++idCounter}`,
+    groupScope: [],
+  };
+}
+
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
-  const nodes: ActivityNodeGeo[] = [];
-  const edges: ActivityEdgeGeo[] = [];
-  const edgeMeta: EdgeMeta[] = [];
-  const reservations: Reservation[] = [];
-  let idCounter = 0;
-  const out: Out = { nodes, edges, edgeMeta, reservations, nextId: (prefix: string) => `${prefix}-${++idCounter}` };
+  const out = buildOut();
+  const { nodes, edges, edgeMeta, reservations } = out;
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
-  const placed = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);

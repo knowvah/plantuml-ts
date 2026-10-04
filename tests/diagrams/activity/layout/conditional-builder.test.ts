@@ -59,6 +59,26 @@ describe("ifBuilderOf — [action, kill] is Java's single killed instruction", (
   });
 });
 
+describe('ifBuilderOf — a bare or killed spot is stop-or-spot (zaloze, T3d)', () => {
+  // zaloze-31-jibo311: then=[action], else=[(A) spot, detach].
+  // InstructionSpot#isOnlySingleStopOrSpot is unconditionally true in the
+  // Java (InstructionList.java:98-99) -- killed or not.
+  it('[spot, detach] routes to down, not with-links', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }, { kind: 'detach' }]));
+    expect(result).toEqual({ builder: 'down', swapped: false, optionalStop: true });
+  });
+
+  it('[spot, kill] is the same command as detach', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }, { kind: 'kill' }]));
+    expect(result.builder).toBe('down');
+  });
+
+  it('a bare (unkilled) spot alone is also stop-or-spot', () => {
+    const result = ifBuilderOf(makeIf([action('next')], [{ kind: 'spot', name: 'A' }]));
+    expect(result).toEqual({ builder: 'down', swapped: false, optionalStop: true });
+  });
+});
+
 describe('ifBuilderOf — with-links', () => {
   it('both branches non-empty, neither a lone stop -> with-links', () => {
     expect(ifBuilderOf(makeIf([action('a')], [action('b')]))).toEqual({ builder: 'with-links' });
@@ -99,5 +119,30 @@ describe('buildIf — dispatch to the right tile class', () => {
     const tile = buildIf(node, bounder, theme) as GtileIfLongHorizontal;
     expect(tile.diamonds).toHaveLength(2);
     expect(tile.tiles).toHaveLength(2);
+  });
+
+  // ELSEIFIN (add2 T3i): CommandElseIf2.java:70-76's leading `(incoming)`
+  // group -- FtileIfLongHorizontal.java:178-186 `diamond.withWest`.
+  it('threads elseif.incomingLabel onto the branch diamond west side', () => {
+    const node = makeIf(
+      [action('a')],
+      [action('c')],
+      [{ condition: 'c2', incomingLabel: 'in', body: [action('b')] }],
+    );
+    const tile = buildIf(node, bounder, theme) as GtileIfLongHorizontal;
+    expect(tile.diamonds[0]!.labelAt('west')).toBeNull();
+    expect(tile.diamonds[1]!.labelAt('west')).toEqual({ x: -14, y: -2, width: 14, height: 14, label: 'in' });
+  });
+
+  it('a wider incomingLabel widens the whole if-tile (not just the hexagon)', () => {
+    const bare = makeIf([action('a')], [action('c')], [{ condition: 'c2', body: [action('b')] }]);
+    const withLabel = makeIf(
+      [action('a')],
+      [action('c')],
+      [{ condition: 'c2', incomingLabel: 'incoming', body: [action('b')] }],
+    );
+    const bareWidth = (buildIf(bare, bounder, theme) as GtileIfLongHorizontal).width;
+    const labeledWidth = (buildIf(withLabel, bounder, theme) as GtileIfLongHorizontal).width;
+    expect(labeledWidth).toBeGreaterThan(bareWidth);
   });
 });

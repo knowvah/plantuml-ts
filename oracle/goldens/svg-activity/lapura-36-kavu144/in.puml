@@ -1,0 +1,17 @@
+@startuml
+start
+
+fork
+:lib1::send_Hook();
+detach
+
+fork again
+:lib2::hook3;
+detach
+
+fork again
+endfork
+
+stop
+
+@enduml

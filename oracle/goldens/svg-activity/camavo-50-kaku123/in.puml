@@ -1,0 +1,14 @@
+@startuml
+start
+repeat
+ while (ok)
+   :init;
+   fork
+     :do something;
+   fork again
+     :do something else;
+   end fork
+ endwhile
+repeat while (not ready)
+stop
+@enduml

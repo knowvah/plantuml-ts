@@ -1,0 +1,7 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+:foo
+very very very very long text;
+end
+@enduml

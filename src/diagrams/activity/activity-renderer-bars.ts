@@ -16,7 +16,11 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { line, rect } from '../../core/svg.js';
-import { actColors } from './activity-renderer-shapes.js';
+import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { JOIN_LABEL_MARGIN } from './activity-layout-constants.js';
+import { activityFontSize } from './activity-style-defaults.js';
+import { activityFontColor } from './activity-text-style.js';
+import { drawActivityText } from './activity-renderer-text.js';
 
 /**
  * `URectangle.build(width, height).rounded(5)` -- the `5` is upstream's
@@ -56,13 +60,34 @@ const FORK_BAR_STROKE_WIDTH = 1;
  */
 export function renderBar(node: ActivityNodeGeo, theme: Theme): string {
   const fill = actColors(theme).barFill;
-  return rect(node.x, node.y, node.width, node.height, {
+  const bar = rect(node.x, node.y, node.width, node.height, {
     fill,
     stroke: fill,
     strokeWidth: FORK_BAR_STROKE_WIDTH,
     rx: FORK_BAR_CORNER_RADIUS,
     ry: FORK_BAR_CORNER_RADIUS,
   });
+  return bar + renderJoinBarLabel(node, theme);
+}
+
+/**
+ * N (add2 T3i): `end fork {label}` -- `FtileBlackBlock#drawU`'s own label
+ * draw, same `fcArrow` text config every OTHER in/out link label on this
+ * builder uses (`AbstractParallelFtilesBuilder#getTextBlock`). Drawn to
+ * the bar's own RIGHT (`x + width + labelMargin`), vertically centred on
+ * the bar's TOP edge, not its middle (`drawU`'s own `UTranslate(width +
+ * labelMargin, -dimLabel.getHeight() / 2)`, relative to the bar's local
+ * origin -- jar-verified against `zafoxu-20-xofe568`: bar top y=133,
+ * label baseline y=136.056 = `centeredFirstBaselineY(133, 11, 1)`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:84-92,110-112
+ */
+function renderJoinBarLabel(node: ActivityNodeGeo, theme: Theme): string {
+  if (node.label === undefined) return '';
+  const size = activityFontSize(theme, 'arrow');
+  const x = node.x + node.width + JOIN_LABEL_MARGIN;
+  const y = centeredFirstBaselineY(node.y, size, 1);
+  const fill = activityFontColor(theme, 'arrow');
+  return drawActivityText(x, y, node.label, { fill, fontFamily: theme.fontFamily, fontSize: size });
 }
 
 /**

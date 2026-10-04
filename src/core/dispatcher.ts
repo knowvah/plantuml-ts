@@ -93,6 +93,18 @@ export interface RenderFragment {
    */
   diagramType?: string;
   /**
+   * add2 T2d: the resolved root `preserveAspectRatio` attribute value --
+   * forwarded verbatim to `core/klimt/document-shell.ts#ShellFragment
+   * .preserveAspectRatio` (see that field's own doc comment for the jar
+   * cascade, `TextBlockExporter.java:380-386`). `undefined` takes the
+   * jar default (`core/klimt/document-shell.ts#DEFAULT_PRESERVE_ASPECT_RATIO`).
+   * No producer sets this yet -- the `skinparam preserveAspectRatio`
+   * value has no `Theme` field to read it from (T2d's write-set excludes
+   * `core/theme.ts` and the skinparam key handlers; see
+   * `plans/activity-divergence-drive-2/batch-2b/T2d-klimt-exception.md`).
+   */
+  preserveAspectRatio?: string;
+  /**
    * G2 N1: set by `core/annotations/chrome.ts#applyChrome` whenever it
    * added its OWN single bare `<g>` wrap around a decorated fragment's body
    * (i.e. `decorated === true` inside that function). A description-engine

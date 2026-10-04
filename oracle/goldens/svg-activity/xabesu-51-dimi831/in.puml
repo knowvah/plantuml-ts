@@ -1,0 +1,12 @@
+@startuml
+if(beginning of
+the day)
+:say hello!;
+endif
+:foo;
+repeat
+:Hello world!;
+repeatwhile(bool1 is True
+AND something
+AND bool2 is False)
+@enduml

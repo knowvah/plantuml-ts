@@ -44,11 +44,6 @@ export const NODE_MARGIN_X = 40;
  */
 export const SEQUENTIAL_ASSEMBLY_GAP = 35;
 export const START_STOP_RADIUS = 10;
-/** The connector-spot circle (`gtile-spot`). A DIFFERENT circle from
- *  {@link START_STOP_RADIUS} and from `abel/EntityPosition.RADIUS` — all
- *  three were once spelled `RADIUS` — and different again from json's
- *  own `SPOT_RADIUS = 3`, which is why this one is not called that. */
-export const CONNECTOR_SPOT_RADIUS = 8;
 
 /**
  * `stop`'s outer (bullseye) ellipse radius. `FtileCircleStop#drawU`
@@ -127,6 +122,11 @@ export const NOTE_SPIKE_DELTA = 4;
  *  an unsourced `NOTE_FOLD` (8) reused for the label baseline, which
  *  landed 5.889px low on `volefo-41-tolo996`'s single-line note. */
 export const NOTE_MARGIN_Y = 5;
+/** `FtileWithNoteOpale.java:85` -- `private final double suppSpace = 20;`,
+ *  the gap this composite's `getTranslate`/`getTranslateForOpale` (`:155-
+ *  167,177-193`) reserves between the note balloon and the tile it wraps.
+ *  Mission `activity-divergence-drive-2` T3g (family NOTE). */
+export const NOTE_OPALE_GAP = 20;
 /** The fork's black join bar's height. `GtileSplit` overrides with
  *  {@link THIN_SPLIT_HEIGHT} instead (`gtile-split.ts`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/AbstractParallelFtilesBuilder.java:64
@@ -137,6 +137,10 @@ export const BAR_HEIGHT = 6;
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileThinSplit.java:61
  *   -- `private final double height = 1.5;`. */
 export const THIN_SPLIT_HEIGHT = 1.5;
+/** N (add2 T3i): `end fork {label}`'s own join-bar label margin.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:65
+ *   -- `private final double labelMargin = 5;`. */
+export const JOIN_LABEL_MARGIN = 5;
 /** Per-branch horizontal margin on EACH side of a fork/split branch
  *  (`computeNewFtile`'s `xMargin`, applied via `FtileUtils
  *  .addHorizontalMargin`). Replaces the fork's unsourced `BAR_OVERHANG`

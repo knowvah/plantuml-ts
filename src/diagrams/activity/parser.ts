@@ -17,6 +17,7 @@ import { internalEmojiStoreFrom } from '../../core/internal-emoji-store.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
+import { Pragma } from '../../core/skin/Pragma.js';
 import type { ActivityDiagramAST } from './ast.js';
 import { parseNodes } from './node-dispatch.js';
 import { isRefusal, type ParseContext } from './dispatch-support.js';
@@ -33,8 +34,15 @@ import { isRefusal, type ParseContext } from './dispatch-support.js';
  * with subsequent lines until paren depth returns to zero.
  *
  * Lines that already balance or that are not control-flow openers are
- * returned unchanged. Newlines inside the joined text become spaces; this
- * matches upstream's behaviour where multi-line labels are flattened.
+ * returned unchanged. MLJOIN (T3d, `pekefu-66-mepa144`/`xabesu-51-dimi831`):
+ * upstream's own continuation join (`CommandDecoratorMultine.java:63`
+ * `toSingleLineWithHiddenNewLine`) keeps the line break as a HIDDEN
+ * sentinel, never a space -- a literal `\n` escape here (NOT a real
+ * newline: every opener regex's `(.*?)` capture groups lack the dotAll
+ * flag, so a real newline would truncate the match) survives those
+ * regexes unharmed and is later turned into a real line break by
+ * `if-dispatch.ts#unescapeLabelNewlines`, which every condition/label
+ * capture already routes through (IFNL, same task).
  */
 function joinUnbalancedLines(lines: readonly string[]): string[] {
   const RE_OPENER = /^\s*(?:if|elseif|while|else|repeatwhile|repeat\s+while|endwhile)\b/i;
@@ -51,7 +59,7 @@ function joinUnbalancedLines(lines: readonly string[]): string[] {
     let depth = countParenDepth(combined);
     let j = i + 1;
     while (depth > 0 && j < lines.length) {
-      combined += ' ' + lines[j]!.trim();
+      combined += '\\n' + lines[j]!.trim();
       depth = countParenDepth(combined);
       j++;
     }
@@ -93,8 +101,15 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     swimlanes: [],
     swimlaneSet: new Set(),
     currentSwimlane: undefined,
+    swimlaneColors: new Map(),
     annotations: createAnnotations(),
     sprites: createSpriteRegistry(internalSprites, internalEmoji),
+    // D12/T1p-b: one `Pragma` instance per diagram, mirroring
+    // `TitledDiagram#getPragma()` (`skin/Pragma.java`) -- mutated in place
+    // by `dispatch-common-commands.ts#tryPragma` during `parseNodes`,
+    // carried onto the returned AST below (read at layout time by
+    // `conditional-builder.ts`, never re-derived).
+    pragma: Pragma.createEmpty(),
   };
 
   const result = parseNodes(ctx, 0, []);
@@ -103,7 +118,9 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
   return {
     nodes: result.nodes,
     swimlanes: ctx.swimlanes,
+    ...(ctx.swimlaneColors.size > 0 ? { swimlaneColors: Object.fromEntries(ctx.swimlaneColors) } : {}),
     annotations: ctx.annotations,
     sprites: ctx.sprites,
+    pragma: ctx.pragma,
   };
 }

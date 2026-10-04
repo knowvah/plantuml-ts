@@ -1,0 +1,14 @@
+@startuml
+start
+:Initialisation;
+fork
+'=== starting ===
+:Parallel activity 1;
+'=== ending ===
+forkagain
+'=== starting ===
+:Parallel activity 2;
+'=== ending ===
+end fork
+stop
+@enduml

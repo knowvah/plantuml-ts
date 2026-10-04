@@ -40,6 +40,18 @@ export interface ThemeColorFields {
    *  `HColorGradient` upstream (`HColorSet.java:109-116`); consumers that
    *  draw flat call `paint.ts#noGradient`. */
   arrow: Paint;
+  /** T2c: `skinparam ArrowHeadColor` -- `FromSkinparamToStyle.java:153`
+   *  registers it as `PName.HeadColor` on `SName.arrow`. `Rainbow
+   *  .build(Style, HColorSet)` (`decoration/Rainbow.java:84-95`) reads
+   *  `style.value(PName.HeadColor)`; ABSENT means "track {@link arrow}",
+   *  never a fixed default (`colorHead = color` at `Rainbow.java:89`) --
+   *  so this field is left unset rather than defaulted, and every reader
+   *  falls back to {@link arrow} itself (`activity-style-defaults.ts
+   *  #activityArrowHeadColor`). Consumed by `Worm#drawInternalOneColor`
+   *  (`activitydiagram3/ftile/Worm.java:146-154`), which switches to this
+   *  color for the arrowhead decoration only, AFTER the line segments
+   *  already drew with {@link arrow}'s own color. */
+  arrowHead?: Paint;
   /** cdd7-T1a (D2): `skinparam ArrowLollipopColor` (`ColorParam
    *  .arrowLollipop`). Absent means `SvekEdge.java:266-268`'s fallback --
    *  the diagram background -- applied at draw time. */

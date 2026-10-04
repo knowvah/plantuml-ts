@@ -1,0 +1,14 @@
+@startuml
+while(Is a = b?) is (yes)
+  :Do something;
+  if(Is d = c?) then (yes)
+  :TestNode;
+  break
+  else (no1)
+  :toto1;
+  endif
+  :toto3;
+endwhile (no2)
+:Clean up;
+stop
+@enduml

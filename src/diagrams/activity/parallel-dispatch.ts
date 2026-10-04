@@ -21,31 +21,94 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { parseNodes } from './node-dispatch.js';
+import { unescapeLabelNewlines } from './if-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // fork / fork again / end fork
+//
+// Each separator keyword pair is `RegexLeaf.spaceZeroOrMore()` upstream
+// (zero-OR-MORE internal space, e.g. `endfork`/`end fork` both valid),
+// not the single-space-only literal this port used before (mission
+// add2-T2e, D6): `cigagu-31-rime196`, `ciloke-34-pumi198`,
+// `gudute-55-nulo344`, `ketajo-72-rula535`, `lapura-36-kavu144`,
+// `ninago-40-dalo726`, `rirefa-62-kucu593`, `ticeka-12-buli543`,
+// `zizumo-48-taku661` all refused on a zero-space separator. `end fork`/
+// `end merge` additionally take an optional `{label}` suffix
+// (`zafoxu-20-xofe568`, `end fork {or}`) -- captured for `end fork` (N,
+// add2 T3i), still parsed-and-dropped for `end merge` (`ActivityFork
+// .style`'s own doc, ast.ts: `ParallelBuilderMerge`'s constructor takes
+// no label upstream either).
+// `fork end` (word order reversed) stays out of scope, per this file's
+// pre-existing D12 note below.
 // ---------------------------------------------------------------------------
-const FORK_STOPS: StopKeywords = ['fork again', 'end fork'];
+/** @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkEnd3.java:57-81 */
+const RE_FORK_END = /^end\s*(fork|merge)\s*(\{[^}]*\})?\s*;?\s*$/i;
+/** @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkAgain3.java:56-62 */
+const RE_FORK_AGAIN = /^fork\s*again\s*;?\s*$/i;
+const FORK_STOPS: StopKeywords = [RE_FORK_AGAIN, RE_FORK_END];
 
 interface ForkBranches {
   cursor: number;
   branches: ActivityNode[][];
   swimlaneOut: string | undefined;
+  /** D12/T1p-c: set when the closer was `end merge` (`ForkStyle.MERGE`). */
+  style: 'merge' | undefined;
+  /** N (add2 T3i): `end fork {label}`'s own label, braces kept verbatim --
+   *  `undefined` for a plain `end fork`/`end merge` (never set for merge,
+   *  `ActivityFork.style`'s own doc). */
+  label: string | undefined;
 }
 
 /**
  * Collects every `fork`/`fork again`-delimited branch up to and including
- * `end fork`, re-reading `swimlaneOut` at each separator.
+ * `end fork`/`end merge`, re-reading `swimlaneOut` at each separator.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
  *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
- *   -- `setStyle` re-reads `swimlaneOut` at `end fork`.
+ *   -- `setStyle` re-reads `swimlaneOut` at `end fork`/`end merge` alike
+ *   (`ActivityDiagram3.endFork` calls `setStyle` the same way for either
+ *   `ForkStyle`, `ActivityDiagram3.java:236-244`).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandForkEnd3.java:57-81
+ *   -- the `STYLE` regex alternation: `end fork` | `fork end` | `end merge`.
+ *   `fork end` (the reversed synonym) is a separate, pre-existing gap --
+ *   out of scope here (D12 scopes this task to `end merge` only).
  */
+interface ForkSeparator {
+  readonly cursor: number;
+  readonly style: 'merge' | undefined;
+  readonly label: string | undefined;
+  readonly stop: boolean;
+}
+
+/**
+ * One separator line's worth of decision: `end fork`/`end merge` (stop,
+ * capture style + label) or `fork again` (continue, re-read the lane) --
+ * neither resets `cursor`'s caller-side swimlane re-read, done by the
+ * caller. N (add2 T3i): `sep`/`endMatch` are matched against the
+ * LOWERCASED line (case-insensitive `fork`/`merge`); group 2 is re-matched
+ * against the ORIGINAL `raw` line so the label's own casing survives.
+ * `label` stays `undefined` for `end merge` (`ActivityFork.style`'s own
+ * doc -- never drawn upstream) and for plain `fork again`.
+ */
+function forkSeparatorAt(raw: string, cursor: number): ForkSeparator | null {
+  const sep = raw.toLowerCase();
+  const endMatch = RE_FORK_END.exec(sep);
+  if (endMatch !== null) {
+    if (endMatch[1] === 'merge') return { cursor: cursor + 1, style: 'merge', label: undefined, stop: true };
+    const label = unescapeLabelNewlines(RE_FORK_END.exec(raw)?.[2] ?? '');
+    return { cursor: cursor + 1, style: undefined, label: label === '' ? undefined : label, stop: true };
+  }
+  if (RE_FORK_AGAIN.test(sep)) return { cursor: cursor + 1, style: undefined, label: undefined, stop: false };
+  return null;
+}
+
 function collectForkBranches(ctx: ParseContext, startIdx: number): ForkBranches | ParseRefusal {
   const { lines } = ctx;
   let cursor = startIdx;
   const branches: ActivityNode[][] = [];
   let swimlaneOut = ctx.currentSwimlane;
+  let style: 'merge' | undefined;
+  let label: string | undefined;
   let done = false;
   while (!done) {
     const branchResult = parseNodes(ctx, cursor, FORK_STOPS);
@@ -53,19 +116,18 @@ function collectForkBranches(ctx: ParseContext, startIdx: number): ForkBranches 
     branches.push(branchResult.nodes);
     cursor = branchResult.nextIdx;
     if (cursor >= lines.length) break;
-    const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end fork') {
-      swimlaneOut = ctx.currentSwimlane;
-      cursor++;
+    const sep = forkSeparatorAt(lines[cursor]!.trim(), cursor);
+    if (sep === null) {
       done = true;
-    } else if (sep === 'fork again') {
-      swimlaneOut = ctx.currentSwimlane;
-      cursor++;
-    } else {
-      done = true;
+      continue;
     }
+    swimlaneOut = ctx.currentSwimlane;
+    cursor = sep.cursor;
+    style = sep.style;
+    label = sep.label;
+    done = sep.stop;
   }
-  return { cursor, branches, swimlaneOut };
+  return { cursor, branches, swimlaneOut, style, label };
 }
 
 /**
@@ -92,14 +154,25 @@ export function tryFork(
     branches: result.branches,
     ...openerSwimlane,
     ...(result.swimlaneOut !== undefined ? { swimlaneOut: result.swimlaneOut } : {}),
+    ...(result.style !== undefined ? { style: result.style } : {}),
+    ...(result.label !== undefined ? { label: result.label } : {}),
   };
   return { idx: result.cursor, node };
 }
 
 // ---------------------------------------------------------------------------
 // split / split again / end split
+//
+// Same zero-or-more-space fix as the fork family above (mission
+// add2-T2e, D6: `caburo-70-buki284`'s `endsplit` refused). Unlike fork,
+// `end split`'s own upstream `RegexOr` includes the reversed `split end`
+// synonym too (`CommandSplitEnd3.java:56-70`), so it is ported here.
 // ---------------------------------------------------------------------------
-const SPLIT_STOPS: StopKeywords = ['split again', 'end split'];
+/** @see net/sourceforge/plantuml/activitydiagram3/command/CommandSplitEnd3.java:56-70 */
+const RE_SPLIT_END = /^(?:end\s*split|split\s*end)\s*;?\s*$/i;
+/** @see net/sourceforge/plantuml/activitydiagram3/command/CommandSplitAgain3.java:56-62 */
+const RE_SPLIT_AGAIN = /^split\s*again\s*;?\s*$/i;
+const SPLIT_STOPS: StopKeywords = [RE_SPLIT_AGAIN, RE_SPLIT_END];
 
 interface SplitBranches {
   cursor: number;
@@ -126,11 +199,11 @@ function collectSplitBranches(ctx: ParseContext, startIdx: number): SplitBranche
     cursor = branchResult.nextIdx;
     if (cursor >= lines.length) break;
     const sep = lines[cursor]!.trim().toLowerCase();
-    if (sep === 'end split') {
+    if (RE_SPLIT_END.test(sep)) {
       swimlaneOut = ctx.currentSwimlane;
       cursor++;
       done = true;
-    } else if (sep === 'split again') {
+    } else if (RE_SPLIT_AGAIN.test(sep)) {
       cursor++;
     } else {
       done = true;

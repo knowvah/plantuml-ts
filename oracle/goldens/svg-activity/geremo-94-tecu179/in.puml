@@ -1,0 +1,14 @@
+@startuml
+
+start
+:Activity 1;
+
+repeat :Activity 2;
+
+
+backward :Correction in second;
+
+
+repeat while (Something wrong?) is (yes) not (no);
+stop
+@enduml

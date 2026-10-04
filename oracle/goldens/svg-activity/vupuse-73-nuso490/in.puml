@@ -1,0 +1,7 @@
+@startuml
+start
+repeat
+  :Waiting for message;
+while (forever)
+stop
+@enduml

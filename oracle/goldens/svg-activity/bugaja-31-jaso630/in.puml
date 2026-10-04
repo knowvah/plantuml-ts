@@ -1,0 +1,14 @@
+@startuml
+|swim1|
+start
+split
+  :something;
+split again
+  |swim2|
+:something else;
+split again
+  |swim3|
+:really swimming now;
+end split
+:out;
+@enduml

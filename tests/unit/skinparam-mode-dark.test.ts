@@ -94,6 +94,40 @@ describe('resolveSkinparam — skinparam mode dark', () => {
     expect(theme.colors.background).toBe('#654321');
   });
 
+  it('sets the activity action-box/diamond fill (root inherits, no own dark selector)', () => {
+    const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
+    expect(theme.colors.graph.activity?.background).toBe('#313139');
+  });
+
+  it('sets the activity/diamond terminal-circle ink (own dark selector, #d not root)', () => {
+    const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
+    expect(theme.colors.graph.activity?.startColor).toBe('#DDDDDD');
+    expect(theme.colors.graph.activity?.endColor).toBe('#DDDDDD');
+  });
+
+  it('sets the generic arrow-label font color AND the arrow/edge line color', () => {
+    const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
+    expect(theme.colors.graph.arrowFontColor).toBe('#FFF');
+    expect(theme.colors.arrow).toBe('#E7E7E7');
+  });
+
+  it('seeds the activity-exclusive activity/diamond FontColor buckets', () => {
+    const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
+    expect(theme.colors.elements?.activity?.font).toBe('#FFF');
+    expect(theme.colors.elements?.diamond?.font).toBe('#FFF');
+  });
+
+  it('an explicit skinparam ActivityBackgroundColor wins over the dark default', () => {
+    const { theme } = resolveSkinparam(
+      new Map([
+        ['activitybackgroundcolor', '#123456'],
+        ['mode', 'dark'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.activity?.background).toBe('#123456');
+  });
+
   it('no `mode` key is a strict no-op: theme is byte-identical to an empty resolve', () => {
     const withoutMode = resolveSkinparam(new Map([['bordercolor', '#AAAAAA']]), defaultTheme).theme;
     expect(withoutMode.colors.background).toBe(defaultTheme.colors.background);

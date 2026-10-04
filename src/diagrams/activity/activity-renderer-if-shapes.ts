@@ -16,8 +16,10 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import { activityFontColor } from './activity-text-style.js';
 import {
   actColors,
@@ -27,7 +29,7 @@ import {
   textLines,
 } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
-import { centeredLineX, measureLineWidth } from './activity-text-placement.js';
+import { centeredLineX, measureLineWidth, type ActivityTextOpts } from './activity-text-placement.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -160,7 +162,9 @@ export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): strin
   const { x, y, width: w, height: h } = node;
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
-  const dent = h / 2;
+  // I (T3d): fixed dent `HEXAGON_HALF_SIZE` (12), not `height/2` -- same
+  // fix as `renderHexagon`'s own copy, `activity-renderer-shapes.ts`.
+  const dent = HEXAGON_HALF_SIZE;
   const first = { x: x + dent, y: y };
   return polygon(
     [
@@ -177,6 +181,30 @@ export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): strin
 }
 
 /**
+ * add2 T3h (family CSTYLE, `carapo-31-bisi880`): `Hexagon.asPolygonSquare`
+ * (`Hexagon.java:107-118`) -- the UNCLOSED 4-point rhombus `GtileDiamondSquare`
+ * sizes (`skinparam ConditionStyle InsideDiamond`), drawn by `FtileDiamondSquare
+ * #drawU` (`:84-86`) instead of `renderHexagonPolygon`'s 7-point hexagon.
+ * `renderNode`'s `'if-split'` case picks this when `theme.conditionStyle ===
+ * 'insideDiamond'` -- same fill/border/stroke cascade as the hexagon (one
+ * diamond-bucket colour path, D9), only the point list differs.
+ */
+export function renderDiamondSquarePolygon(node: ActivityNodeGeo, theme: Theme): string {
+  const { x, y, width: w, height: h } = node;
+  const c = actColors(theme);
+  const fill = node.color ?? c.diamondFill;
+  return polygon(
+    [
+      { x: x + w / 2, y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w / 2, y: y + h },
+      { x, y: y + h / 2 },
+    ],
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
+  );
+}
+
+/**
  * The hexagon's OWN label alone, centered in the node's own box -- the
  * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
  * callable on its own so a walker can push it as its own `'if-own-label'`
@@ -187,4 +215,50 @@ export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): stri
   const cy = node.y + node.height / 2;
   const condSize = activityFontSize(theme, 'diamond');
   return renderHexagonLabel(node.label, cx, cy, theme, condSize);
+}
+
+/**
+ * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d,
+ * `vaxiki-78-nice114`). Root's default `HorizontalAlignment left`
+ * (`plantuml.skin:12`; `activityDiagram { diamond {} }` never overrides
+ * it, `plantuml.skin:369-371`) positions every `Sheet` stripe at the
+ * label TextBlock's own local `x=0` -- the WHOLE block is centred ONCE
+ * (`FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
+ * dimLabel.width) / 2`), never each line on its own width. This is NOT
+ * `activity-renderer-shapes.ts#renderMultilineText`'s per-line `coef`
+ * centring -- that formula is verified correct for `FtileBox` action
+ * text specifically (`activity-text-placement.ts`'s own doc), a
+ * genuinely different Java draw path from the diamond's label TextBlock.
+ */
+export function renderHexagonMultilineLabel(
+  lines: string[],
+  cx: number,
+  cy: number,
+  theme: Theme,
+  opts: ActivityTextOpts,
+): string {
+  const condSize = opts.fontSize ?? activityFontSize(theme, 'diamond');
+  const maxWidth = Math.max(...lines.map((ln) => measureLineWidth(theme, condSize, ln)));
+  const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
+  return textLines(lines, cx - maxWidth / 2, centeredFirstBaselineY(cy, condSize, lines.length), condSize, style);
+}
+
+/**
+ * J (T3d, `kafevi-44-tesu096`): the diamond's own style signature
+ * `{root,element,activityDiagram,activity,diamond}` CONTAINS
+ * `SName.activity` (`StyleSignatureBasic.java:271-273`), so `activity {
+ * BackgroundColor/BorderColor }` cascades onto the diamond before the
+ * global default -- the same tier order `activityLineThickness`'s own
+ * `'arrow'` cascade already uses. Split out of `actColors`
+ * (`activity-renderer-shapes.ts`, at the 500-line cap) to keep that
+ * function's own CCN from rising.
+ */
+export function diamondColors(
+  act: Theme['colors']['graph']['activity'],
+  theme: Theme,
+): { fill: Paint; border: string } {
+  return {
+    fill: act?.diamondBackground ?? act?.background ?? theme.colors.nodeBackground,
+    border: act?.diamondBorder ?? act?.border ?? theme.colors.border,
+  };
 }

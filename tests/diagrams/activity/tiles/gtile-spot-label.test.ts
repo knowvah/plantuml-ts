@@ -1,82 +1,76 @@
 import { describe, expect, it } from 'vitest';
 import { GtileLabel } from '../../../../src/diagrams/activity/tiles/gtile-label.js';
 import { GtileSpot } from '../../../../src/diagrams/activity/tiles/gtile-spot.js';
-import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
-import type { Theme } from '../../../../src/core/theme.js';
-import { resolveTheme } from '../../../../src/core/theme.js';
+import { GtileGoto } from '../../../../src/diagrams/activity/tiles/gtile-goto.js';
 
-const bounder: StringBounder = {
-  getDimension: (text: string, _size: number) => ({
-    width: text.length * 7,
-    height: 14,
-  }),
-};
+// mission add2-T2g: `GtileSpot`/`GtileLabel` no longer take a
+// `bounder`/`theme` -- neither needs to MEASURE anything at tile-build
+// time (`FtileCircleSpot`'s SIZE is a Java-hardcoded 20x20, never
+// text-width-dependent; `FtileLabel`/`FtileGoto` are a zero-size
+// `FtileEmpty`, drawn and sized through NEITHER argument). The circled
+// character's own font size/colour is resolved at RENDER time instead
+// (`activity-renderer-terminals.ts#renderSpot`, covered by
+// `tests/unit/activity/renderer-shapes.test.ts`).
 
-// A REAL resolved theme, not a `{ fontSize, fontFamily } as unknown as
-// Theme` stub. The tiles now resolve per-element style through
-// `activityFontSize` (`activity-style-defaults.ts`), which reads
-// `theme.colors.elements` -- a partial cast had no `colors` at all and
-// threw. `fontSize` is kept at 13 so every assertion below that depends
-// on the ROOT font is unchanged.
-const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
-
-describe('GtileSpot — no name', () => {
-  const tile = new GtileSpot({ kind: 'spot', name: '' }, bounder, theme);
-
-  it('width === 16 (RADIUS * 2)', () => {
-    expect(tile.width).toBe(16);
+describe('GtileSpot', () => {
+  it('is a fixed 20x20 circle regardless of the character (FtileCircleSpot.java:60)', () => {
+    const short = new GtileSpot({ kind: 'spot', name: 'A' });
+    const long = new GtileSpot({ kind: 'spot', name: 'W' });
+    expect(short.width).toBe(20);
+    expect(short.height).toBe(20);
+    expect(long.width).toBe(20);
+    expect(long.height).toBe(20);
   });
 
-  it('height === 16 (RADIUS * 2)', () => {
-    expect(tile.height).toBe(16);
-  });
-});
-
-describe('GtileSpot — long name', () => {
-  // name has 10 chars; measured.width = 70; 70 + 8 = 78 > 16
-  const node = { kind: 'spot' as const, name: 'mySpotXYZ', color: '#FF0000' };
-  const tile = new GtileSpot(node, bounder, theme);
-
-  it('width > 16 when name is long', () => {
-    expect(tile.width).toBeGreaterThan(16);
-  });
-
-  it('tile.name matches input', () => {
-    expect(tile.name).toBe('mySpotXYZ');
-  });
-
-  it('tile.color matches input', () => {
+  it('tile.name/tile.color mirror the AST node', () => {
+    const tile = new GtileSpot({ kind: 'spot', name: 'A', color: '#FF0000' });
+    expect(tile.name).toBe('A');
     expect(tile.color).toBe('#FF0000');
   });
 
-  it('hasPointOut() === true (FtileCircleSpot.java:117, 5-arg ctor)', () => {
+  it('color is undefined when the node carries none', () => {
+    const tile = new GtileSpot({ kind: 'spot', name: 'A' });
+    expect(tile.color).toBeUndefined();
+  });
+
+  it('hasPointOut() === true (FtileCircleSpot.java:116-117, 5-arg ctor)', () => {
+    const tile = new GtileSpot({ kind: 'spot', name: 'A' });
     expect(tile.hasPointOut()).toBe(true);
   });
 });
 
 describe('GtileLabel', () => {
-  const node = { kind: 'label' as const, name: 'myLabel' };
-  const tile = new GtileLabel(node, bounder, theme);
-  // measured.width = 7 * 7 = 49; height = 14
-  const expectedWidth = 7 * 7 + 16; // 65
-
-  it('width >= measured.width + 16', () => {
-    expect(tile.width).toBeGreaterThanOrEqual(expectedWidth);
-  });
-
-  it('width === measured.width + 16', () => {
-    expect(tile.width).toBe(expectedWidth);
-  });
-
-  it('height === measured.height + 8', () => {
-    expect(tile.height).toBe(14 + 8);
+  it('is zero-size (FtileLabel extends FtileEmpty with no override)', () => {
+    const tile = new GtileLabel({ kind: 'label', name: 'myLabel' });
+    expect(tile.width).toBe(0);
+    expect(tile.height).toBe(0);
   });
 
   it('tile.name matches input', () => {
+    const tile = new GtileLabel({ kind: 'label', name: 'myLabel' });
     expect(tile.name).toBe('myLabel');
   });
 
-  it('hasPointOut() === true (FtileLabel.java:40, inherits FtileEmpty.java:91-92)', () => {
+  it('hasPointOut() === true (FtileEmpty.java:87-92, no outY sentinel)', () => {
+    const tile = new GtileLabel({ kind: 'label', name: 'myLabel' });
     expect(tile.hasPointOut()).toBe(true);
+  });
+});
+
+describe('GtileGoto', () => {
+  it('is zero-size, same as GtileLabel', () => {
+    const tile = new GtileGoto({ kind: 'goto', name: 'myLabel' });
+    expect(tile.width).toBe(0);
+    expect(tile.height).toBe(0);
+  });
+
+  it('tile.name matches input', () => {
+    const tile = new GtileGoto({ kind: 'goto', name: 'myLabel' });
+    expect(tile.name).toBe('myLabel');
+  });
+
+  it('hasPointOut() === false (FtileGoto.java:51-53, .withoutPointOut())', () => {
+    const tile = new GtileGoto({ kind: 'goto', name: 'myLabel' });
+    expect(tile.hasPointOut()).toBe(false);
   });
 });

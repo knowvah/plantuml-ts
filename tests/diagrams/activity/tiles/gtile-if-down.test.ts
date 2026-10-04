@@ -42,7 +42,7 @@ describe('GtileIfDown — merge rhombus case (no optionalStop, both branches hav
   // affects diamond1.height (north unset).
   const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
   const mainTile = stubTile(100, 50);
-  const tile = new GtileIfDown(diamond1, mainTile, null, true, false);
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: true, useElse1: false });
 
   // d1Geo{left:12,w:24,h:24}; thenPadded outer=120,contentDx=10; thenGeo{left:60,w:120,h:50};
   // d2{left:12,w:24,h:24} (hasTwoBranches, no optionalStop).
@@ -90,7 +90,7 @@ describe('GtileIfDown — main flow is asymmetric (nested if, left != width/2)',
   // geo=appendBottom(geoA,d2)={80,120,98}. height=98+36+12=146; width=132.
   const diamond1 = new GtileDiamondInside('', {}, bounder, theme);
   const mainTile = stubTileAsym(100, 50, 70);
-  const tile = new GtileIfDown(diamond1, mainTile, null, true, false);
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: true, useElse1: false });
 
   it('width === 132, height === 146, left === 80 (not 60, the symmetric value)', () => {
     expect(tile.width).toBe(132);
@@ -126,7 +126,7 @@ describe('GtileIfDown — optionalStop case (empty main flow, side box east of t
   const diamond1 = new GtileDiamondInside('dummy', { east: 'foo' }, bounder, theme);
   const mainTile = stubTile(0, 0); // an empty pass-through branch
   const optionalStop = stubTile(40, 30);
-  const tile = new GtileIfDown(diamond1, mainTile, optionalStop, false, false);
+  const tile = new GtileIfDown(diamond1, mainTile, optionalStop, { hasTwoBranches: false, useElse1: false });
 
   // d1Geo{left:29.5,w:59,h:24}; thenPadded(0): outer=50,contentDx=25; thenGeo{left:25,w:50,h:0};
   // d2 (optionalStop) = {left:0,w:0,h:0}.
@@ -153,7 +153,7 @@ describe('GtileIfDown — optionalStop case (empty main flow, side box east of t
   });
 
   it('withoutPointOut fires when the main flow itself lacks a point out', () => {
-    const noOut = new GtileIfDown(diamond1, stubTile(0, 0, false), optionalStop, false, false);
+    const noOut = new GtileIfDown(diamond1, stubTile(0, 0, false), optionalStop, { hasTwoBranches: false, useElse1: false });
     expect(noOut.hasPointOut()).toBe(false);
   });
 });
@@ -161,7 +161,7 @@ describe('GtileIfDown — optionalStop case (empty main flow, side box east of t
 describe('GtileIfDown — main flow ends without a point out, no optionalStop (ElseNoDiamond)', () => {
   const diamond1 = new GtileDiamondInside('', {}, bounder, theme);
   const mainTile = stubTile(80, 60, false);
-  const tile = new GtileIfDown(diamond1, mainTile, null, false, false);
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: false, useElse1: false });
 
   // d1Geo{left:12,w:24,h:24}; thenPadded(80): outer=100,contentDx=10; thenGeo{left:50,w:100,h:60};
   // d2 (no optionalStop, !hasTwoBranches) = {left:0,w:0,h:6}.
@@ -183,9 +183,55 @@ describe('GtileIfDown — main flow ends without a point out, no optionalStop (E
 
 describe('GtileIfDown — useElse1 is threaded through unchanged', () => {
   const diamond1 = new GtileDiamondInside('', {}, bounder, theme);
-  const tile = new GtileIfDown(diamond1, stubTile(40, 20), null, true, true);
+  const tile = new GtileIfDown(diamond1, stubTile(40, 20), null, { hasTwoBranches: true, useElse1: true });
 
   it('useElse1 is exposed for the walker to select Else1 over Else2', () => {
     expect(tile.useElse1).toBe(true);
+  });
+});
+
+describe('GtileIfDown — T1p-a conditionEndStyle hline (no optionalStop, hasTwoBranches)', () => {
+  // Same diamond1/mainTile as the merge-rhombus describe above, but
+  // `conditionEndStyle: 'hline'`: `getShape2`'s own early return
+  // (`ConditionalBuilder.java:287-288`) wins over `hasTwoBranches()`, so
+  // `diamond2` is the `FtileEmpty(0, hexagonHalfSize)` placeholder
+  // (left:0, width:0, height:12) regardless -- not the 24x24 rhombus.
+  const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
+  const mainTile = stubTile(100, 50);
+  const tile = new GtileIfDown(diamond1, mainTile, null, {
+    hasTwoBranches: true,
+    useElse1: false,
+    conditionEndStyle: 'hline',
+  });
+
+  // geoA=appendBottom(d1,then)={left:60,w:120,h:74}; d2{left:0,w:0,h:12}.
+  // geo=appendBottom(geoA,d2)={left:60,w:120,h:86}. height=86+36+14=136;
+  // width=120+12=132 (unaffected -- `hasOptionalStop` is false either way).
+  it('width === 132, height === 136 (the 12px hline placeholder, not the 24px rhombus)', () => {
+    expect(tile.width).toBe(132);
+    expect(tile.height).toBe(136);
+  });
+
+  it('diamond2Size === 0 and hasMergeNode is false, even though hasTwoBranches is true', () => {
+    expect(tile.offsets.diamond2Size).toBe(0);
+    expect(tile.hasMergeNode).toBe(false);
+  });
+
+  it('diamond2PointInY is half the placeholder height (6), not 0', () => {
+    expect(tile.offsets.diamond2PointInY).toBe(6);
+  });
+
+  it('conditionEndStyle is exposed for the walker to dispatch ElseHline/Hline', () => {
+    expect(tile.conditionEndStyle).toBe('hline');
+  });
+});
+
+describe('GtileIfDown — conditionEndStyle defaults to diamond when omitted', () => {
+  const diamond1 = new GtileDiamondInside('', {}, bounder, theme);
+  const tile = new GtileIfDown(diamond1, stubTile(40, 20), null, { hasTwoBranches: true, useElse1: false });
+
+  it('defaults conditionEndStyle and diamond2PointInY to the pre-T1p-a values', () => {
+    expect(tile.conditionEndStyle).toBe('diamond');
+    expect(tile.offsets.diamond2PointInY).toBe(0);
   });
 });

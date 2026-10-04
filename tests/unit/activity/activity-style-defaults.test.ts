@@ -193,6 +193,39 @@ describe('activityFontSize — default tier', () => {
   });
 });
 
+describe('activityFontSize — arrow reads graph.arrowFontSize (T2c, kafevi-44-tesu096)', () => {
+  it('`skinparam ArrowFontSize`/`activity{ArrowFontSize}` sizes only the arrow label', () => {
+    // `skinparam activity { ArrowFontSize 20 }` normalises to the flat
+    // `arrowfontsize` key the SAME way `activityArrowFontColor` does
+    // (`skinparam-key-normalize.ts` step 3), landing in
+    // `theme.colors.graph.arrowFontSize` (`skinparam-theme-builder.ts`'s
+    // `GRAPH_OVERRIDE_FIELDS`) -- the SAME field `arrow-label-font.ts
+    // #resolveArrowLabelFont` reads for every OTHER diagram's edge label.
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, arrowFontSize: 20 } },
+    };
+    expect(activityFontSize(theme, 'arrow')).toBe(20);
+    expect(activityFontSize(theme, 'activity')).toBe(12);
+  });
+
+  it('an activity{arrow{FontSize}} bucket override still wins (more specific)', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: {
+        ...DEFAULT.colors,
+        graph: { ...DEFAULT.colors.graph, arrowFontSize: 20 },
+        elements: { ...DEFAULT.colors.elements, arrow: { fontSize: 30 } },
+      },
+    };
+    expect(activityFontSize(theme, 'arrow')).toBe(30);
+  });
+
+  it('no graph.arrowFontSize set leaves the arrow default (11) unmoved', () => {
+    expect(activityFontSize(DEFAULT, 'arrow')).toBe(ARROW_FONT_SIZE);
+  });
+});
+
 describe('activityLineThickness — default tier', () => {
   it('an arrow is 1, not the 1.5 the port emitted for 2503 of 2702 lines', () => {
     expect(activityLineThickness(DEFAULT, 'arrow')).toBe(1);
@@ -538,22 +571,42 @@ describe('activityFontColor — arrow reads graph.arrowFontColor (T2c, suzuci-53
   });
 });
 
-describe('activityHorizontalAlignment (mission activity-min-box-width, T1, D2)', () => {
+describe('activityHorizontalAlignment (mission activity-min-box-width T1/D2; wired T2c, molexa-46-redi999)', () => {
   it('the default theme resolves the root `HorizontalAlignment left` (plantuml.skin:12)', () => {
     expect(activityHorizontalAlignment(DEFAULT)).toBe('left');
   });
 
   it('is unmoved by fields the alignment cascade does not read', () => {
-    // Neither cascade tier is reachable today (filed in the module's own
-    // doc comment): `ElementColors` carries no alignment role and
-    // `skinparam defaultTextAlignment` is unparsed anywhere in `src/core`.
-    // A bucket/minimumWidth change must not accidentally move alignment.
+    // `ElementColors.horizontalAlignment` is keyed by `root` (`skinparam
+    // defaultTextAlignment`'s own bucket, `FromSkinparamToStyle.java:155`)
+    // -- a DIFFERENT bucket's own fields (`activity`'s minimumWidth/font)
+    // or the root `minimumWidth` scalar must not accidentally move it.
     const theme: Theme = {
       ...DEFAULT,
       minimumWidth: 200,
       colors: { ...DEFAULT.colors, elements: { activity: { minimumWidth: 150, font: 'red' } } },
     };
     expect(activityHorizontalAlignment(theme)).toBe('left');
+  });
+
+  it('`skinparam defaultTextAlignment center` resolves via the root bucket (T2c)', () => {
+    // `defaulttextalignment` -> `acc.elements['root'].horizontalAlignment`
+    // (`skinparam-key-handlers-table-b.ts#setAlignment`) -- the SAME bucket
+    // `class/renderer-usymbol-entity-style.ts#rootHorizontalAlignment`
+    // already reads for a different diagram type.
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, root: { horizontalAlignment: 'CENTER' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('center');
+  });
+
+  it('`skinparam defaultTextAlignment right` resolves to right', () => {
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, root: { horizontalAlignment: 'RIGHT' } } },
+    };
+    expect(activityHorizontalAlignment(theme)).toBe('right');
   });
 
   it('never returns undefined — supplying the default is this module’s job', () => {

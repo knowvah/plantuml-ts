@@ -11,21 +11,17 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ConnectionVerticalDown.java:87-100
  *   -- `drawTranslate`, the cross-lane edge shape ported below as
  *   {@link routeEdge}'s `'default'` case. `FtileIfDown.java:225-238,284-301`
- *   (`ConnectionIn`/`ConnectionOut#drawTranslate`) and
- *   `FtileWhile.java:200-214` use the byte-identical
- *   `(mp1a.y + mp2b.y) / 2` middle-Y shape, so one function covers the
- *   straight top-down case and every if/while/repeat/switch composite
- *   boundary.
+ *   and `FtileWhile.java:200-214` use the byte-identical `(mp1a.y +
+ *   mp2b.y) / 2` middle-Y shape, covering every if/while/repeat/switch
+ *   composite boundary.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:166-184
  *   -- `ConnectionIn#drawTranslate`: `middle = mp1a.getY() + 4`, ported
  *   below as {@link routeEdge}'s `'parallel-in'` case.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:220-241
  *   -- `ConnectionOut#drawTranslate`: `middle = mp2b.getY() - 14`, ported
  *   below as {@link routeEdge}'s `'parallel-out'` case.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225
- *   -- same `+ 4` shape for the split's in-connector.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:264-285
- *   -- same `- 14` shape for the split's out-connector.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225,264-285
+ *   -- same `+4`/`-14` shapes for the split's in/out connectors.
  */
 
 import type { StringBounder } from '../tiles/tile.js';
@@ -38,6 +34,7 @@ import type {
   SwimlaneGeo,
 } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
+import { resolveInlineLinks } from '../../description/parse-helpers.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -49,7 +46,9 @@ import {
 } from './swimlane-context.js';
 import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
+import { routeHline, type HlinePayload } from './swimlane-hline.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
+import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
 // `activity-lane-capture` T2, this file's 500-line hook); re-exported here
@@ -73,6 +72,26 @@ export interface EdgeMeta {
    * the lanes differ, {@link routeEdge} delegates to `routeLoopTranslate`.
    * T1 never sets this from a walker -- scaffolding for T2/T3. */
   readonly loop?: LoopTranslate;
+  /** T1p-g: set only on `FtileIfWithLinks`/`FtileIfLongHorizontal`'s
+   * `ConnectionHline` (`walk-if-with-links.ts#connectionHlineLinks`,
+   * `walk-if-long-horizontal.ts#connectionHline`). When set, {@link
+   * routeEdge} delegates to `swimlane-hline.ts#routeHline` BEFORE the
+   * normal same/cross-lane dispatch -- this connector fans out to
+   * several lanes, never a single uniform shift. `lane1`/`lane2` stay
+   * the walker's own unlaned `myLane` tag, read only by `measureLanes`'
+   * `sameLaneEdges` (this module doc's own citation for why that keeps
+   * measurement byte-identical to pre-T1p-g). */
+  readonly hline?: HlinePayload;
+  /**
+   * T1b (D1): the `FtileGroup`/`partition` nesting active at `pushEdge`
+   * time (`undefined` = top level) -- a nested `UGraphicForSnake` flushes
+   * before its outer one, so two edges merge only when this matches.
+   * Read by `layout/snake-merge.ts`; propagated via `repeatEdgeMeta` for
+   * every routed edge except `routeHline`'s fan-out (always `NONE`
+   * strategy, so scope never matters there).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGroup.java
+   */
+  readonly scope?: string;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
@@ -88,7 +107,9 @@ export interface EdgeMeta {
  * so a loop-tagged edge stays self-describing; {@link routeEdge} dispatches
  * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
  * the same as `'default'` via its `default:` branch. */
-export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
+export type EdgeShape =
+  | 'parallel-in' | 'parallel-out' | 'parallel-in-split' | 'parallel-out-split'
+  | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -117,21 +138,6 @@ export interface PlacementResult {
 }
 
 /**
- * D2: the title band's height is the MAX, over lanes, of that lane's own
- * title `TextBlock`'s height (`Swimlanes#getTitlesHeight`, `:309-315`) --
- * never the raw `SwimlaneTitleFontSize` constant. Each title's own height
- * is floored at 10 by `AtomText#calculateDimensionSlow`
- * (`klimt/creole/legacy/AtomText.java:179-181`: `if (h < 10) h = 10;`),
- * which is why a small `SwimlaneTitleFontSize` does not shrink the band
- * proportionally. Confirmed against three pinned fixtures:
- * `SwimlaneTitleFontSize 8` -> band height 10 (`sikino-19-vuca111`, floored);
- * the default 18 -> 18 (`pakema-21-xema183`, already >= 10, unaffected);
- * `TitleFontSize 30` -> 30 (`cemipu-87-dinu624`, unaffected). Shared by
- * `tile-coordinates.ts` (vertical content reservation) and the swimlane
- * chrome renderer (band rect height) so both measure the exact same value
- * -- D2 forbids a second, independent implementation of this number.
- */
-/**
  * The ASCENT fraction a title's baseline sits at within the band, from
  * `StringBounder#getDescent` = `size / 4.5` (`klimt/font/StringBounder
  * .java:47`) -- the SAME ratio `activity-renderer-shapes.ts#ASCENT_FRACTION`
@@ -146,41 +152,13 @@ export interface PlacementResult {
  */
 export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 
-export function measureSwimlaneTitlesHeight(
-  laneNames: readonly string[],
-  bounder: StringBounder,
-  theme: Theme,
-): number {
-  const titleFontSize = swimlaneTitleFontSize(theme);
-  let max = 0;
-  for (const name of laneNames) {
-    max = Math.max(max, bounder.getDimension(name, titleFontSize).height);
-  }
-  return Math.max(max, 10);
-}
-
-export interface SwimlaneVertical {
-  readonly contentY: number;
-  readonly titlesHeight: number;
-}
-
-/**
- * `Swimlanes#drawU`'s own `swimlanes().size() > 1` guard (`:275`): a
- * single lane draws no chrome and reserves no vertical space; a real
- * multi-lane diagram pushes content down by `titlesHeight + 5`
- * (`getTitleHeightTranslate`, `:304-307`). Called once from
- * `assignCoordinates` before the pass-1 walk.
- */
-export function resolveSwimlaneVertical(
-  laneNames: readonly string[],
-  baseY: number,
-  bounder: StringBounder,
-  theme: Theme,
-): SwimlaneVertical {
-  if (laneNames.length <= 1) return { contentY: baseY, titlesHeight: 0 };
-  const titlesHeight = measureSwimlaneTitlesHeight(laneNames, bounder, theme);
-  return { contentY: baseY + titlesHeight + 5, titlesHeight };
-}
+// `measureSwimlaneTitlesHeight`/`SwimlaneVertical`/`resolveSwimlaneVertical`
+// moved to `swimlane-vertical.ts` (mission `activity-divergence-drive-2`
+// T1p-g, this file's own 500-line hook); re-exported below so existing
+// importers (`assign-coordinates-full.ts`, this file's own tests) are
+// untouched.
+export { measureSwimlaneTitlesHeight, resolveSwimlaneVertical } from './swimlane-vertical.js';
+export type { SwimlaneVertical } from './swimlane-vertical.js';
 
 export interface SwimlaneChrome {
   swimlaneBand: SwimlaneBandGeo;
@@ -247,6 +225,27 @@ function shiftNode(node: ActivityNodeGeo, deltas: ReadonlyMap<string, number>): 
   return { ...node, x: node.x + delta };
 }
 
+/**
+ * T1p-f: a BIG_DIAMOND switch's leaf case tile (`switch-swimlane-
+ * duplicate.ts`'s own tag) is drawn once per lane, not shifted into its
+ * OWN lane alone -- `Swimlanes#drawWhenSwimlanes` re-walks the whole
+ * tree once per lane (module doc), and the case tile's bypassed draw
+ * call (`FtileSwitchWithDiamonds.java:136-138`) is reached, ungated, on
+ * EVERY one of those passes. One copy per `laneNames` entry, each at
+ * that lane's own delta from the SAME pre-shift `x` {@link shiftNode}
+ * would have used.
+ */
+function placeNode(
+  node: ActivityNodeGeo,
+  laneNames: readonly string[],
+  deltas: ReadonlyMap<string, number>,
+): ActivityNodeGeo[] {
+  if (!isBigDiamondDuplicate(node)) return [shiftNode(node, deltas)];
+  return laneNames.map((lane) =>
+    withoutBigDiamondDuplicateTag({ ...node, x: node.x + (deltas.get(lane) ?? 0), swimlane: lane }),
+  );
+}
+
 function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
   if (delta === 0) return [...points];
   return points.map((p) => ({ x: p.x + delta, y: p.y }));
@@ -256,19 +255,20 @@ function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
  * D6's three middle-Y shapes for a cross-lane 4-point jog. `'default'` is
  * `ConnectionVerticalDown#drawTranslate`'s average of both endpoints
  * (`ConnectionVerticalDown.java:87-100`); `'parallel-in'`/`'parallel-out'`
- * are the fork/split builders' bar-relative offsets (see the module doc
- * for the four `file:line` citations) -- `mp1`/`mp2` there are always the
- * bar-side / branch-side endpoint respectively (`pushBranchConnectors`,
- * `walk-fork-branches.ts`, emits bar-to-branch as `[bar, branch]` and
- * branch-to-join as `[branch, join]`, so `mp1.y`/`mp2.y` already select
- * the right endpoint without a shape-specific swap).
+ * (fork/merge) and their `-split` siblings (SAME elbow geometry, only the
+ * X-skip in `compress/shapes-of.ts` differs by builder kind) are the
+ * fork/split builders' bar-relative offsets (module doc citations) --
+ * `mp1`/`mp2` are always the bar-side/branch-side endpoint
+ * (`walk-fork-branches.ts` emits `[bar, branch]`/`[branch, join]`).
  */
 function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
   switch (shape) {
     case 'parallel-in':
+    case 'parallel-in-split':
     case 'if-vertical-in':
       return mp1.y + 4;
     case 'parallel-out':
+    case 'parallel-out-split':
       return mp2.y - 14;
     default:
       // 'default' + every loop kind -- the latter never reach here in
@@ -278,10 +278,16 @@ function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
 }
 
 /** {@link routeEdge}'s return (D3): a non-loop path is one edge, no
- *  reservations; a dispatched translate shape may return more of either. */
+ *  reservations; a dispatched translate shape may return more of either.
+ *  `edgeMeta` (T1p-g): set only by the `hline` branch, one entry per
+ *  `edges` entry, each carrying ITS OWN lane -- `edge-draw-order.ts`
+ *  needs the per-edge lane, not the walker's original (now-stale)
+ *  `meta` tag every OTHER branch's caller still repeats via {@link
+ *  repeatEdgeMeta}. */
 interface RoutedEdge {
   readonly edges: ActivityEdgeGeo[];
   readonly reservations: Reservation[];
+  readonly edgeMeta?: EdgeMeta[];
 }
 
 /**
@@ -309,8 +315,21 @@ function isCrossLane(meta: EdgeMeta): boolean {
  * {@link LoopTranslate} (D1) delegates to `routeLoopTranslate`; any other
  * cross-lane edge draws the generic 4-point jog (module doc); only the
  * path's two endpoints matter, never the same-lane shape's interior elbow.
+ * `meta.hline` (T1p-g) dispatches FIRST, before either lane check: a
+ * `ConnectionHline` fans out to several lanes, each shifted by ITS OWN
+ * delta -- never the single uniform shift either branch below applies.
  */
-function routeEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, deltas: ReadonlyMap<string, number>): RoutedEdge {
+function routeEdge(
+  edge: ActivityEdgeGeo,
+  meta: EdgeMeta,
+  deltas: ReadonlyMap<string, number>,
+  laneNames: readonly string[],
+): RoutedEdge {
+  if (meta.hline !== undefined) {
+    const routed = routeHline(meta.hline, edge, laneNames, deltas);
+    return { edges: routed.edges, reservations: [], edgeMeta: routed.edgeMeta };
+  }
+
   const d1 = laneDelta(meta.lane1, deltas);
   const d2 = laneDelta(meta.lane2, deltas);
 
@@ -381,24 +400,48 @@ function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly Edg
 }
 
 /**
+ * T1p-f: `computeDrawingWidths`'s own draw-interception pass
+ * (`Swimlanes.java:379-395`) measures widths through
+ * `UGraphicInterceptorAllSwimlanes` (`vcompact/
+ * UGraphicInterceptorAllSwimlanes.java:88-99`), which has the SAME
+ * bypass as the draw pass itself: `FtileSwitchWithDiamonds#drawU`'s
+ * direct `tile.drawU(...)` call (`switch-swimlane-duplicate.ts`'s own
+ * doc) skips `withActiveSwimlanes`' narrowing, so a bypassed case tile's
+ * own shapes get dispatched to EVERY still-active lane's `LimitFinder`,
+ * not just its own tag's -- widening every lane's measured content to
+ * fit the duplicate, not only the lane it is structurally tagged to.
+ * One {@link LaneItem} per {@link laneNames} entry for a tagged node,
+ * mirroring {@link placeNode}'s own per-lane fan-out.
+ */
+function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneItem[] {
+  if (!isBigDiamondDuplicate(node)) {
+    return [
+      node.swimlane !== undefined
+        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width }
+        : { kind: node.kind, x: node.x, width: node.width },
+    ];
+  }
+  return laneNames.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));
+}
+
+/**
  * `computeDrawingWidths` (`Swimlanes.java:379-395`) plus the `min`
  * resolution step from `computeSizeInternal` (`:399-403`) -- measures
  * each lane's content extent and title width, then resolves the lane
  * width floor once so both `computeLaneWidths` and the origin loop reuse
  * the SAME resolved value (upstream does too, `:399` then `:409,441`).
+ * SLURL: title width uses `resolveInlineLinks`, not raw `|[[url]]|`
+ * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
   const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
-  const items: LaneItem[] = nodes.map((n) =>
-    n.swimlane !== undefined
-      ? { swimlane: n.swimlane, kind: n.kind, x: n.x, width: n.width }
-      : { kind: n.kind, x: n.x, width: n.width },
-  );
+  const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
-  for (const name of laneNames) titleWidths.set(name, bounder.getDimension(name, titleFontSize).width);
+  for (const name of laneNames)
+    titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
 
   // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
   // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,
@@ -445,12 +488,12 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
 
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
   // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
-  const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas));
+  const routed = edges.map((e, i) => routeEdge(e, edgeMeta[i]!, deltas, laneNames));
 
   return {
-    nodes: nodes.map((n) => shiftNode(n, deltas)),
+    nodes: nodes.flatMap((n) => placeNode(n, laneNames, deltas)),
     edges: routed.flatMap((r) => r.edges),
-    edgeMeta: routed.flatMap((r, i) => repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
+    edgeMeta: routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
     reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
   };

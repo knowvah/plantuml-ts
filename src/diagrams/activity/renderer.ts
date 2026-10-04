@@ -8,12 +8,13 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, line, polygon } from '../../core/svg.js';
+import { rect, polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { orderedLine } from './activity-renderer-terminals.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
-import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
@@ -161,12 +162,28 @@ function renderEdgeLabel(label: string, midX: number, midY: number, color: strin
  * Direction classification (including the diagonal/zero-length cases
  * upstream's `Worm` cannot produce) reuses {@link arrowDirection}'s ported
  * `Direction.fromVector` (`utils/Direction.java:110-128`).
+ *
+ * `colors.line`/`colors.head` are bundled into one param (rather than two
+ * strings) to stay under this file's 5-param complexity limit now that
+ * T2c's `ArrowHeadColor` split the line's `LineColor` from the decoration's
+ * own `HeadColor` (`Worm.java:126-127` vs `:153-154` -- two DIFFERENT
+ * `ug.apply` colors, never the same variable upstream either).
+ */
+/**
+ * b3/T3a (family C/EMMID): `emphasis.at` -- when present -- is the
+ * PRE-compression segment midpoint, already mapped through `ct()` on
+ * each axis by `compress-geometry.ts#withEmphasizeAnchor`/`transformEdge`
+ * (`ActivityEdgeGeo.emphasizeAt`'s own doc). Drawn via {@link DIR_VECTOR}
+ * rather than the segment's own (possibly-compressed) `dx, dy` -- the
+ * direction is already known (`emphasis.dir`), and `arrowTip`'s own
+ * `arrowDirection(dx, dy)` call only ever needs to recover that SAME
+ * `dir` back out of whatever vector it is given.
  */
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
-  edgeColor: string,
+  colors: { line: string; head: string },
   strokeWidth: number,
-  emphasize: ArrowDir | undefined,
+  emphasis: { dir: ArrowDir; at: { x: number; y: number } | undefined } | undefined,
   theme: Theme,
 ): string {
   let out = '';
@@ -176,12 +193,12 @@ function renderEdgeSegments(
     const p2 = pts[i + 1]!;
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
-    if (!emphasisDrawn && emphasize !== undefined && arrowDirection(dx, dy) === emphasize) {
-      const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      out += arrowTip(mid, { dx, dy }, edgeColor, theme);
+    if (!emphasisDrawn && emphasis !== undefined && arrowDirection(dx, dy) === emphasis.dir) {
+      const anchor = emphasis.at ?? { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.head, theme);
       emphasisDrawn = true;
     }
-    out += line(p1.x, p1.y, p2.x, p2.y, { stroke: edgeColor, strokeWidth });
+    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
   }
   return out;
 }
@@ -198,10 +215,12 @@ const DIR_VECTOR: Record<ArrowDir, { dx: number; dy: number }> = {
 
 /** D4: the extra arrowhead a translate shape places at its own point,
  *  split out of {@link renderEdge} to keep that function under the file's
- *  NLOC limit. */
-function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, edgeColor: string, theme: Theme): string {
+ *  NLOC limit. Draws in the decoration's own `HeadColor` (T2c), never the
+ *  line's `LineColor` -- there is no line segment at a mid-arrow point to
+ *  draw in the other color. */
+function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, headColor: string, theme: Theme): string {
   const { x, y, dir } = midArrowAt;
-  return arrowTip({ x, y }, DIR_VECTOR[dir], edgeColor, theme);
+  return arrowTip({ x, y }, DIR_VECTOR[dir], headColor, theme);
 }
 
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
@@ -210,6 +229,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 
   // cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer draws flat.
   const edgeColor = noGradient(theme.colors.arrow);
+  // T2c: `skinparam ArrowHeadColor` -- `Worm#drawInternalOneColor` applies
+  // THIS color to the decoration only (`ftile/Worm.java:153-154`), AFTER
+  // the line segments already drew with `edgeColor` (`:126-127`). Absent
+  // -> tracks `edgeColor` itself (`activityArrowHeadColor`'s own doc).
+  const headColor = noGradient(activityArrowHeadColor(theme));
   // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
   // `Worm#drawInternalOneColor` takes the LINE's stroke from
   // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`
@@ -224,7 +248,14 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // interleaved INTO this segment run, immediately before its matching
   // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
   // exact `Worm.java:138-143` loop body this ports.
-  const segments = renderEdgeSegments(pts, edgeColor, activityLineThickness(theme, 'arrow'), edge.emphasize, theme);
+  const emphasis = edge.emphasize === undefined ? undefined : { dir: edge.emphasize, at: edge.emphasizeAt };
+  const segments = renderEdgeSegments(
+    pts,
+    { line: edgeColor, head: headColor },
+    activityLineThickness(theme, 'arrow'),
+    emphasis,
+    theme,
+  );
 
   // Terminal arrowhead, drawn AFTER the full segment loop --
   // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
@@ -236,14 +267,14 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const prev = pts[pts.length - 2]!;
   const dx = last.x - prev.x;
   const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, edgeColor, theme);
+  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
 
   // D4: an explicit extra arrowhead at a translate shape's own point (see
   // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
   // decoration; this is a port-specific extension with no `Worm` draw-order
   // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
   // and is now interleaved above).
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, edgeColor, theme);
+  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, headColor, theme);
 
   // Optional edge label near midpoint
   let labelEl = '';
@@ -257,30 +288,23 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
 }
 
 /**
- * T3j (journal row 36): `geo.totalWidth`/`totalHeight` are the MARGINED
- * (document-margin-included) canvas dims `canvas-origin.ts#computeCanvasOrigin`
- * computes -- `Math.floor(ink + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL`,
- * where `CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_
- * MARGIN`. The RAW (pre-margin) dims chrome centres against are the
- * arithmetic inverse of the margin/ceil half of that recipe: subtract the
- * margin (both sides) and the ceil bump this function adds back.
- *
- * KNOWN LIMITATION (not silently dropped): this subtracts from the
- * ALREADY-FLOORED `totalWidth`/`totalHeight`, not from the ink span itself
- * -- exact only when that ink span already lands on the integer grid at
- * this stage. Getting the un-floored raw dims exactly (matching class's own
- * `computeClassRawInkDims`, independent of `computeClassDocumentDims`)
- * would mean threading a new field through `assign-coordinates-full.ts`
- * #assembleFromFinal`/`ActivityGeometry` -- outside this task's write-set;
- * re-slotted. Measured against the T3j acceptance corpus (cifafo, bigide):
- * the residual gap on every chrome-bearing fixture checked traces to a
- * SEPARATE, pre-existing defect (chrome title-text width measurement
- * precision, or body-ink width for an unrelated construct) -- not to this
- * subtraction -- but an un-exercised fractional-ink-span fixture could
- * still expose it. `RenderFragment.preChromeWidth`'s own doc comment names
- * the general mechanism this value feeds.
+ * T3j (journal row 36) / b3-T3a (family E): the RAW (pre-margin, pre-floor)
+ * dims chrome centres against -- `svek/DecorateEntityImage.java:144-150`'s
+ * `getTextX` aligns title/header/footer text against this exact un-floored
+ * span, not the floored `totalWidth`/`totalHeight`. `geo.rawWidth`/
+ * `rawHeight` (`canvas-origin.ts#computeCanvasOrigin`'s own `ink +
+ * RECENTRED_ENLARGE`, the SAME smaller pre-document-margin padding term
+ * `activity-layout-constants.ts#RECENTRED_ENLARGE`'s own doc cites) now
+ * carries that value exactly (`ActivityGeometry.rawWidth`'s own doc) --
+ * T3j's own margin-subtraction fallback (`totalWidth/Height - margin`,
+ * which loses the ink span's fractional part whenever it does not already
+ * land on the integer grid) is kept only for hand-built `ActivityGeometry`
+ * test fixtures that bypass `finalizeGeometry` and so never populate it.
  */
 function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+  if (geo.rawWidth !== undefined && geo.rawHeight !== undefined) {
+    return { width: geo.rawWidth, height: geo.rawHeight };
+  }
   const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
   return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
 }
@@ -341,5 +365,13 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     // the exact inverse this subtracts.
     preChromeWidth: raw.width,
     preChromeHeight: raw.height,
+    // add2 T3e (family G): `theme.preserveAspectRatio` (`core/theme-root-
+    // fields.ts`) forwarded verbatim -- `RenderFragment.preserveAspectRatio`
+    // reaches `document-shell.ts#assembleDocumentShell` unchanged (add2 T2d
+    // plumbing; this is the first producer to set it). Omitted entirely
+    // (not `undefined`, `exactOptionalPropertyTypes`) when no `skinparam
+    // preserveAspectRatio` was declared, which already takes
+    // `DEFAULT_PRESERVE_ASPECT_RATIO` ('none') at that consumer.
+    ...(theme.preserveAspectRatio !== undefined ? { preserveAspectRatio: theme.preserveAspectRatio } : {}),
   };
 }

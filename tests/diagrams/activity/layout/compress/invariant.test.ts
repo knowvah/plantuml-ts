@@ -297,20 +297,27 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
   const ALLOWED_NEW_OVERLAPS = [
     // Cross-lane arrowheads, both `polygonSkipMode: 'x'` -- the Worm skips
     // the x-axis on such a polygon, so it never occupies x and a flip there
-    // is not a violation (`ftile/Worm.java:159-168`). Was `[7,9]` before T3.
-    'bixefi-77-moki051 [9,10] polygon×polygon',
-    // Same class (`Worm.java:159-168`). Was `[9,11]` before T3.
-    'bugaja-31-jaso630 [11,12] polygon×polygon',
+    // is not a violation (`ftile/Worm.java:159-168`). bixefi-77-moki051's
+    // `[9,10]` entry retired at add2/close-b3w1: no longer overlaps after
+    // T3c's fork X-compression fix (`ParallelBuilderFork.java:151-241`) and
+    // T3a's emphasize anchor; bixefi is a pinned golden since add2-b1.
+    // `bugaja-31-jaso630 [11,12]` (was `[9,11]` before T3) and
+    // `racana-82-zece676 [14,15]`/`[16,17]` (were `[10,12]`/`[14,16]`
+    // before T3) retired at T3f (b3w2): both are SPLIT cross-lane
+    // connectors, which `ParallelBuilderSplit.java:207-225,264-285` never
+    // calls `.ignoreForCompression()` on -- T3f's `EdgeShape` builder-kind
+    // discriminant (`'parallel-in-split'`/`'parallel-out-split'`,
+    // `walk-fork-branches.ts`) stops `shapes-of.ts#terminalArrowhead` from
+    // setting `polygonSkipMode: 'x'` on them, so the arrowhead polygon now
+    // occupies x and the pair no longer overlaps (confirmed: both fixtures
+    // are zero-diff pinned goldens since this fix).
     // The swimlane title's rect never occupies x
     // (`klimt/UGraphicCompressOnXorY.java:100-112`, the
     // `ignoreForCompressionOnX` band of `Swimlanes.java:358-367`).
-    // Unmoved: both shapes follow the whole edge run in `shapesOf`'s list.
-    'misiji-27-buje656 [14,18] empty×centeredText',
-    'misiji-27-buje656 [15,18] empty×centeredText',
-    // Same class (`Worm.java:159-168`). Were `[10,12]` and `[14,16]`
-    // before T3.
-    'racana-82-zece676 [14,15] polygon×polygon',
-    'racana-82-zece676 [16,17] polygon×polygon',
+    // misiji-27-buje656's `[14,18]`/`[15,18]` entries retired at
+    // add2/close-b3w1: the pair no longer overlaps after T3a's lane-divider
+    // ink and title-band changes (`LaneDivider.java:97`, `Swimlanes.java:
+    // 357-367`); misiji is zero-diff and pinned at b3w1.
     // Same class (`Worm.java:159-168`). Were `[47,49]`, `[47,51]`,
     // `[49,51]` before T3, `[50,51]`/`[50,52]`/`[51,52]` before T4 --
     // mission `activity-if-tile-port` T4 (2026-09-16): `tobajo-64-mipi810`
@@ -509,7 +516,15 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // its west `if-label`), which pushes the west label from index 1 to
     // 2. Same pair, same mechanism, confirmed byte-identical (hexagon.x
     // `163.21562499999993` vs label.x+width `163.21562499999995`).
-    'kitupi-32-jexo155 [0,2] polygon×text',
+    // RESOLVED by mission `activity-divergence-drive-2` T3g (family NOTE):
+    // `kitupi-32-jexo155`'s `else` branch's note now wraps `:no;`
+    // (`FtileWithNoteOpale`, `tile-layout-structural.ts#tileNote`) instead
+    // of sitting beside it as a flow sibling -- that branch's own width
+    // changed, which moved the downstream float arithmetic this ULP
+    // coincidence depended on; the pair no longer appears in `overlaps
+    // (after)` at all, so it is REMOVED from {@link ALLOWED_HARD_OVERLAPS}
+    // rather than carried forward (confirmed: `npx vitest run` on this file
+    // after the fix reports it in `received`, not `expected`).
     // altp-T5: indices +1 each (were `[27,29]`/`[38,40]`), same mechanism
     // and same reason as `tobajo-64-mipi810` above -- confirmed by direct
     // dump: both hexagons' right edge exactly equals their own `ja`/east
@@ -530,8 +545,8 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // (`walk-repeat.ts`'s own `'repeat-cond'` copy, same split mechanism).
     // Same pairs, same coordinates (polygon width `267.30625000000003`/
     // `131.1125`, text touching the polygon's right edge to within 5e-14).
-    'boxoto-53-sifo232 [32,35] polygon×text',
-    'boxoto-53-sifo232 [45,48] polygon×text',
+    // add2/close-b3w1: both boxoto entries retired -- the pairs no longer
+    // overlap after T3d's hexagon geometry (`Hexagon.java:46,65-74`).
     // `lopone-15-xiki477 [7,20]` -- see this constant's own doc comment
     // above ("RESOLVED by T1a"): no longer produced, so no longer listed.
     // `nerete-42-save418 [22,25]` (mission `unknown-bucket-routing-repair`,
@@ -564,7 +579,15 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // doc). Same pair and same mechanism, unrelated to this task's own
     // draw-order fix -- still owned by the `activity-emphasize-arrow-
     // atomic-anchor` follow-on above.
-    'nerete-42-save418 [26,29] polygon×polygon',
+    // T1b: RESOLVED, no longer listed. `layout/snake-merge.ts` fuses
+    // `pushWhileOut`'s LIMITED `snake` into the touching `break`'s own
+    // terminal-arrowhead snake wherever their endpoints coincide
+    // (`Snake#merge`, `Snake.java:303-327`) -- one of this pair's own two
+    // polygons is now a single merged shape, so the collision this
+    // entry recorded can no longer occur (confirmed: `nerete-42-save418`
+    // falls 64 -> 20 on the probe; polygon count drops accordingly). The
+    // underlying atomic-anchor defect this entry names is unrelated and
+    // still open for whichever pair it next surfaces on.
     // `vamazo-19-tufu812 [1,18]`/`[5,13] polygon×polygon` (T1a, mission
     // `activity-divergence-drive`, D2): the SAME "touching becomes an
     // epsilon overlap after a second independent transform" class as
@@ -592,6 +615,28 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `[5,13]` the same one swimlane row down) -- neither pair appears in
     // `overlaps(after)` any more, so both are REMOVED here rather than
     // carried forward (same precedent as `lopone-15-xiki477` above).
+    // `jupoxe-15-sugo110 [39,139] text×polygon` (mission
+    // `activity-divergence-drive-2`, T3c, bazuma family): shape 39 is the
+    // `(timeout\nor logout)` multi-line `if-label` -- node 39 directly,
+    // confirmed by direct dump -- newly measured as ONE box spanning both
+    // lines (`shapes-of.ts#ifLabelShape`'s per-line-sum fix; the prior
+    // single-line `getDimension` call undercounted its height, same bug as
+    // `bazuma-86-metu353`). Shape 139 is an edge's terminal arrowhead
+    // landing exactly at this label's own left edge. Same
+    // "touching-becomes-an-epsilon-overlap-after-a-transform" class as
+    // `kitupi-32-jexo155`/`tobajo-64-mipi810` above, confirmed with a
+    // direct dump: `before`, `text.x(1040.928125) === arrowhead.x(
+    // 1032.928125) + width(8)` -- bit-identical, no overlap (`overlaps`'s
+    // strict `<` requires one bound strictly less). `after`:
+    // `text.x(994.9281249999999)` vs `arrowhead.x(986.928125) +
+    // width(8) === 994.928125` -- a ~1e-13 gap from the label's taller box
+    // being re-derived through the same compression transform as every
+    // other shape, not a geometry defect; the label's text/x is unchanged
+    // by the height fix, only its height/y moved, which is what exposes
+    // the pre-existing rounding artifact at this exact-touch boundary.
+    // add2/close-b3w1: retired -- the jupoxe pair no longer overlaps once
+    // T3d's per-line north-label sizing landed (`FtileDiamondInside2.java:
+    // 114-120`); the allowlist entry above is kept as history only.
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

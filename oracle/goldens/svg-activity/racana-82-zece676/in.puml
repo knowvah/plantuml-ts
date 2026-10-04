@@ -1,0 +1,21 @@
+@startuml
+|S1|
+split
+:K1_S1;
+split again
+|S2|
+:K1_S2;
+split again
+|S3|
+:K1_S3;
+split again
+|S1|
+:K2_S1;
+split again
+|S2|
+:K2_S2;
+split again
+|S3|
+:K2_S3;
+end split
+@enduml

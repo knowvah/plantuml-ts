@@ -1,0 +1,19 @@
+@startuml
+Title Test Flow
+start
+: Step 1;
+if (Step 1 right?) then (no)
+    : Error1;
+    stop
+elseif (Skip?) then (no)
+        : Step 2;
+        if (Still Valid?) then (no)
+            : Error2;
+            stop
+        else (yes)
+        endif
+else (yes)
+endif
+: next step;
+end
+@enduml

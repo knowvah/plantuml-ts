@@ -1,0 +1,12 @@
+@startuml
+!pragma useVerticalIf true
+start
+if (is it raining?) then (yes)
+  :bring an umbrella;
+elseif (is it sunny?) then (very much)
+  :wear sunglasses;
+else (overcast)
+  :just go outside;
+endif
+stop
+@enduml

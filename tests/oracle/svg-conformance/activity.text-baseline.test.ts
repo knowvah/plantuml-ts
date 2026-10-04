@@ -126,7 +126,7 @@ describe('svg-activity text census — corpus presence', () => {
     expect(pinned, 'the population is the committed corpus, never a slug list').toEqual(fromCache);
   });
 
-  it('the partition matches the sibling ratchet: 312 baseline / 38 error / 23 jar-error', () => {
+  it('the partition matches the sibling ratchet: 350 baseline / 0 error / 23 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -135,8 +135,15 @@ describe('svg-activity text census — corpus presence', () => {
     // error -> baseline by `repin-activity-baselines.ts`'s promotion pass.
     // add1 b3 (journal row 52): fukika-81-gite897 promoted error -> baseline
     // once `backward:LABEL;` stopped swallowing its `if`/`endif` (D8).
-    expect(baselineFixtures.length).toBe(312);
-    expect(errorFixtures.length).toBe(38);
+    // add2 close-b1p (2026-10-02): jevofu-58-fazo194, mepeze-15-nuge493,
+    // xoreko-43-noto860, zokuni-21-sapu966 promoted error -> baseline once
+    // `end merge` parses (CommandForkEnd3.java:57-81, ParallelBuilderMerge).
+    // add2 close-b2 (2026-10-03): the remaining 34 parser-gap rows render
+    // (T2e/T2g: CommandForkEnd3, SplitEnd3, Swimlane, If2, ElseIf2, Endif3,
+    // Backward3, Note3/NoteLong3, CircleSpot3, Label, Goto) and were
+    // promoted error -> baseline.
+    expect(baselineFixtures.length).toBe(350);
+    expect(errorFixtures.length).toBe(0);
     expect(jarErrorFixtures.length).toBe(23);
   });
 });

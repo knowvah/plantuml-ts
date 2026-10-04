@@ -1,0 +1,14 @@
+@startuml
+|swimlane1 aaaaaaaaaaaaaa|
+:first;
+:second;
+|swimlane2 aaaaaaaaaaaaaa|
+:third;
+if (foo) then
+:something;
+endif
+|swimlane1 aaaaaaaaaaaaaa|
+:back to swinline1;
+|swimlane2 aaaaaaaaaaaaaa|
+:back to swinline2;
+@enduml

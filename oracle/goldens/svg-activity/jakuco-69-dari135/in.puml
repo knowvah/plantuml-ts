@@ -1,0 +1,8 @@
+@startuml
+|AAAAAAAAAAAAAAAAAAAAAAAAA|
+start
+:a;
+:long;
+|B|
+:b;
+@enduml

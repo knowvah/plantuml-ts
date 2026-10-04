@@ -1,0 +1,17 @@
+@startuml
+start
+    if (Handshake) then (yes)
+        if (hello ?) then (yes)
+            :Fill struct
+            struct hello
+            {
+              std::uint8_t unix_time[4]
+              std::uint8_t random[28]
+            };
+        else if (finish ?) then (yes)
+            :Clear ?;
+        endif
+    else (no)
+    endif
+end
+@enduml

@@ -835,10 +835,29 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5154 -> 5166 / 6168 -> 6180 at add1/close-b3 (2026-10-02): 12 more
     // svg-activity clone rows, same shape. Derivation: 5166 + 909 + 105 = 6180.
-    expect(pinnedAgree.length).toBe(5166);
-    expect(pinnedMisroutes.length).toBe(909);
+    //
+    // 5166 -> 5175 / 909 -> 905 / 6180 -> 6185 at add2/close-b1p (2026-10-02):
+    // the 4 `end merge` dot-cache rows (jevofu, mepeze, xoreko, zokuni) now
+    // render as ACTIVITY and are re-pinned `agree` (CommandForkEnd3.java:57-81),
+    // plus 5 svg-activity clone rows. Derivation: 5175 + 905 + 105 = 6185.
+    //
+    // 5175 -> 5187 / 6185 -> 6197 at add2/close-b1 (2026-10-03): 12 more
+    // svg-activity clone rows, same shape. Derivation: 5187 + 905 + 105 = 6197.
+    //
+    // 5187 -> 5234 / 905 -> 871 / 6197 -> 6210 at add2/close-b2 (2026-10-03):
+    // the 34 remaining activity parser-gap dot-cache rows render as ACTIVITY
+    // and are re-pinned `agree` (T2e/T2g), plus 13 svg-activity clone rows.
+    // Derivation: 5234 + 871 + 105 = 6210.
+    //
+    // 5234 -> 5343 / 6210 -> 6319 at add2/close-b3w1 (2026-10-03): 109 more
+    // svg-activity clone rows, same shape. Derivation: 5343 + 871 + 105 = 6319.
+    //
+    // 5343 -> 5361 / 6319 -> 6337 at add2/close-b3 (2026-10-03): 18 more
+    // svg-activity clone rows, same shape. Derivation: 5361 + 871 + 105 = 6337.
+    expect(pinnedAgree.length).toBe(5361);
+    expect(pinnedMisroutes.length).toBe(871);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6180);
+    expect(manifest.fixtures.length).toBe(6337);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -892,7 +911,9 @@ describe('routing conformance — jar-error classification', () => {
     // 1051 -> 1050 at cdd5/close-b5: unknown/zolaza-45-sepi570 now agrees.
     // 1050 -> 1049 at cdd6/close-b1: unknown/xuloxo-85-vibu502 now agrees.
     // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
-    expect(censused.length).toBe(908);
+    // 908 -> 904 at add2/close-b1p: 4 `end merge` activity retirements.
+    // 904 -> 870 at add2/close-b2: 34 activity parser-gap retirements.
+    expect(censused.length).toBe(870);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

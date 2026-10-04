@@ -173,15 +173,27 @@ function connectionIn(ctx: IfDownCtx): void {
   pushEdge(out, [p1, p2], laneOut(t.diamond1, myLane), laneIn(t.mainTile, myLane));
 }
 
-/** `ConnectionOut` -- `mainTile.pointOut -> diamond2.pointIn`, skipped when
- *  the main flow itself has no point out (independent of `optionalStop`).
+/** `ConnectionOut` -- `mainTile.pointOut -> diamond2`'s own point, skipped
+ *  when the main flow itself has no point out (independent of
+ *  `optionalStop`). The target Y differs by `conditionEndStyle`
+ *  (`getP2` vs `getP2hline`, `:254-264,275-278`) -- see
+ *  {@link GtileIfDown.offsets}' own `diamond2PointInY` doc comment.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:241-302 */
 function connectionOut(ctx: IfDownCtx): void {
   const { t, x, y, myLane, out } = ctx;
   if (!t.hasThenPointOut) return;
   const p1 = absolutePoint(t.mainTile.getCoord(SOUTH_HOOK), x + t.offsets.mainTileX, y + t.offsets.mainTileY);
-  const p2 = diamond2Point(t, x, y, t.offsets.diamond2Left, 0);
-  pushEdge(out, [p1, p2], laneOut(t.mainTile, myLane), myLane);
+  const p2 = diamond2Point(t, x, y, t.offsets.diamond2Left, t.offsets.diamond2PointInY);
+  const lane1 = laneOut(t.mainTile, myLane);
+  // IFDS (T3d, `lukoxa-16-cecu095`): `optionalStop !== null` means
+  // `diamond2` was replaced with a bare `new FtileEmpty(skinParam)`
+  // (`FtileIfDown.java:130-131`) carrying NO swimlane -- `ConnectionCross
+  // .java:58-60` skips the cross-lane draw and the edge stays inside the
+  // then-lane (`UGraphicInterceptorOneSwimlane.java:96-99`), never jogging
+  // back to the if's own ambient lane the way a real cross-lane diamond2
+  // would.
+  const lane2 = t.optionalStop !== null ? lane1 : myLane;
+  pushEdge(out, [p1, p2], lane1, lane2);
 }
 
 /** `ConnectionHorizontal` -- `diamond1` east point -> `optionalStop`'s own
@@ -232,6 +244,47 @@ function connectionElse2(ctx: IfDownCtx): void {
   out.reservations.push(ifElseHexagonReservation(p2.x, p2.y));
 }
 
+/**
+ * `ConnectionElseHline` (extends `ConnectionElse2`, T1p-a, `FULL` strategy
+ * -- default, no `withMerge` call) -- draws only the APPROACH leg (diamond1
+ * EAST -> the bend directly above diamond2's own east-mid point);
+ * {@link connectionHline} draws the actual closing bar from that SAME bend
+ * point onward. Default arrowhead (`asToDown`); UNLIKE `Else1`/`Else2`, no
+ * `emphasizeDirection` (the override replaces `drawU` entirely and never
+ * calls it) -- do not add `pushEmphasizedEdge`'s `emphasize` here.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:409-445
+ */
+function connectionElseHline(ctx: IfDownCtx): void {
+  const { t, x, y, myLane, out } = ctx;
+  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
+  const p2y = diamond2Point(t, x, y, 0, t.offsets.diamond2PointInY).y;
+  const { right: wrapRight } = wrapEdges(ctx);
+  const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
+  pushEdge(out, [p1, { x: xmax, y: p1.y }, { x: xmax, y: p2y }], laneOut(t.diamond1, myLane), myLane);
+  out.reservations.push(ifElseHexagonReservation(xmax, p2y));
+}
+
+/**
+ * `ConnectionHline` (`withMerge(NONE)`, `:512` -- T1b wires `mergeable`
+ * from this comment) -- the closing bar from {@link connectionElseHline}'s
+ * own bend point LEFT into diamond2's own east-mid point, then DOWN into
+ * its south/out point. No arrowhead (`Snake.create(skinParam(), color)` --
+ * no third argument).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:461-522
+ */
+function connectionHline(ctx: IfDownCtx): void {
+  const { t, x, y, myLane, out } = ctx;
+  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
+  const { right: wrapRight } = wrapEdges(ctx);
+  const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
+  const p2 = diamond2Point(t, x, y, t.offsets.diamond2Size, t.offsets.diamond2PointInY);
+  const p3 = diamond2Point(t, x, y, t.offsets.diamond2Size, 2 * t.offsets.diamond2PointInY);
+  pushEdge(out, [{ x: xmax, y: p2.y }, p2, p3], myLane, myLane);
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.arrowhead = false;
+  edge.mergeable = 'NONE';
+}
+
 /** `ConnectionElseNoDiamond` -- `Else2`'s own shape, but ending at the
  *  whole tile's own point out (the main flow itself has no point out).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:447-458 */
@@ -246,8 +299,10 @@ function connectionElseNoDiamond(ctx: IfDownCtx): void {
   out.reservations.push(ifElseHexagonReservation(p2.x, p2.y));
 }
 
-/** The single `conns[1]` slot -- `ConnectionHorizontal` when `optionalStop`,
- *  else `ElseNoDiamond` when the main flow has no point out, else
+/** The single `conns[1]` slot (plus, under `hline`, the extra `conns[2]`
+ *  `ConnectionHline` slot pushed right alongside it) -- `ConnectionHorizontal`
+ *  when `optionalStop`, else `ElseNoDiamond` when the main flow has no point
+ *  out, else -- `'hline'`: `ElseHline` + `Hline`, unconditionally; `'diamond'`:
  *  `Else1`/`Else2` per `useElse1` (`FtileIfDown.java:137-153`). */
 function pushElseConnector(ctx: IfDownCtx): void {
   const { t } = ctx;
@@ -255,6 +310,9 @@ function pushElseConnector(ctx: IfDownCtx): void {
     connectionHorizontal(ctx);
   } else if (!t.hasThenPointOut) {
     connectionElseNoDiamond(ctx);
+  } else if (t.conditionEndStyle === 'hline') {
+    connectionElseHline(ctx);
+    connectionHline(ctx);
   } else if (t.useElse1) {
     connectionElse1(ctx);
   } else {

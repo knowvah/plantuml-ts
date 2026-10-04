@@ -34,6 +34,23 @@ export const DQUOTE = '\x22';
  *  `svg-graphics-core.ts`'s own doc comment). */
 export const VERSION_PLACEHOLDER = '$version$';
 
+/**
+ * The root `preserveAspectRatio` attribute's jar default, when nothing
+ * overrides it -- `SkinParam.java:119` (`DEFAULT_PRESERVE_ASPECT_RATIO =
+ * "none"`), read by `SkinParam#getPreserveAspectRatio` (`:1086-1088`,
+ * `getValue("preserveaspectratio", DEFAULT_PRESERVE_ASPECT_RATIO)`) and
+ * cascaded by `TextBlockExporter#getPreserveAspectRatio` (`:380-386`:
+ * `fileFormatOption` override first, else `skinParam`, else this constant
+ * directly). add2 T2d: this module now takes the resolved value as
+ * {@link ShellFragment.preserveAspectRatio} instead of hardcoding it --
+ * no producer yet supplies a non-default value (no `RenderFragment` field
+ * carries the resolved `skinparam preserveAspectRatio` -- that needs a new
+ * `Theme` field + skinparam key handler, outside this module's write-set;
+ * see `plans/activity-divergence-drive-2/batch-2b/T2d-klimt-exception.md`),
+ * so every caller still observes this literal until that lands.
+ */
+export const DEFAULT_PRESERVE_ASPECT_RATIO = 'none';
+
 /** `data-diagram-type` — the root attribute name every klimt-shaped
  *  document shell carries (verified against `DiagramType.java:45` and
  *  every cached jar fixture's root `<svg>`). */
@@ -54,6 +71,10 @@ export interface ShellFragment {
   readonly height: number;
   readonly background?: string;
   readonly extraDefs?: string;
+  /** See {@link DEFAULT_PRESERVE_ASPECT_RATIO}'s own doc comment -- the
+   *  root `preserveAspectRatio` attribute value. `undefined` takes the jar
+   *  default. */
+  readonly preserveAspectRatio?: string;
 }
 
 /**
@@ -122,9 +143,13 @@ function diagramTypeAttrOf(diagramType: string | undefined): string {
  * (`core/svg.ts`) every non-klimt-shaped engine uses.
  *
  * `xmlns:xlink`/`version="1.1"`/`zoomAndPan="magnify"`/
- * `preserveAspectRatio="none"`/`contentStyleType="text/css"` are ALL
- * diagram-type-wide constants, never per-fixture data — reproduced
- * directly rather than parsed back out of a klimt string. No
+ * `contentStyleType="text/css"` are diagram-type-wide constants, never
+ * per-fixture data — reproduced directly rather than parsed back out of a
+ * klimt string. `preserveAspectRatio` is the one exception (add2 T2d): it
+ * is per-fixture `skinparam`/pragma data upstream (see
+ * {@link DEFAULT_PRESERVE_ASPECT_RATIO}'s own doc comment), threaded
+ * through {@link ShellFragment.preserveAspectRatio} rather than hardcoded.
+ * No
  * `ALL_ARROW_TYPES` marker-def injection (every klimt-shaped engine draws
  * its own arrowheads as inline polygons/paths, never an SVG `<marker>`)
  * and no separate background `<rect>` (background is folded into the
@@ -196,7 +221,7 @@ export function assembleDocumentShell(fragment: ShellFragment, diagramType?: str
     DQUOTE +
     ' preserveAspectRatio=' +
     DQUOTE +
-    'none' +
+    (fragment.preserveAspectRatio ?? DEFAULT_PRESERVE_ASPECT_RATIO) +
     DQUOTE +
     ' contentStyleType=' +
     DQUOTE +

@@ -4,8 +4,23 @@ import { TileLeaf } from './tile.js';
 
 export class GtileBreak extends TileLeaf {
   readonly kind = 'gtile-break' as const;
-  readonly width = 20;
-  readonly height = 20;
+  /**
+   * `FtileBreak`'s own constructor (`FtileBreak.java:44-46`) calls
+   * `super(skinParam, swimlane)`, which resolves to `FtileEmpty`'s
+   * two-argument constructor (`FtileEmpty.java:63-65`): `this(skinParam,
+   * 0, 0, swimlane)` -- `width`/`height` are `0`, not an invented size.
+   * The previous `20`/`20` here was unsourced (no upstream citation) and
+   * inflated every tile containing a `break` by up to 20px before
+   * compression could partially absorb it (diagnosed T1p-d: the jar's
+   * `FtileIfDown` height for a then-only `if` ending in `break` is
+   * `total.geo.height + 36 + max(12, southLabelHeight)`, and
+   * `total.geo.height` sums `thenBlock.height`, which was wrongly
+   * reading this `20` instead of the jar's real `0`).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileBreak.java:44-46
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:55-65
+   */
+  readonly width = 0;
+  readonly height = 0;
 
   getCoord(hook: HookName): GPoint {
     switch (hook) {

@@ -51,6 +51,58 @@ describe('layoutActivity — down: plain/swap merge case, no optionalStop', () =
   });
 });
 
+describe('layoutActivity — down: conditionEndStyle hline (T1p-a)', () => {
+  // Same shape as the first describe block above, but `hline`: no
+  // `if-merge` node (`getShape2`'s own early return wins over
+  // `hasTwoBranches()`), and `conns[1]` becomes TWO connectors
+  // (`ElseHline` + `Hline`, `FtileIfDown.java:147-150`) instead of one.
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenLabel: 'yes',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const hlineTheme: Theme = { ...theme, conditionEndStyle: 'hline' };
+  const geo = layoutActivity(ast, hlineTheme, measurer);
+
+  it('no if-merge node under hline', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-merge')).toBe(false);
+  });
+
+  it('emits exactly 4 edges: In, ElseHline, Hline, Out (one more than diamond -- two connectors, no merge node)', () => {
+    expect(geo.edges.length).toBe(4);
+  });
+
+  it('ElseHline keeps its default arrowhead; Hline has none (withMerge(NONE), no arrow arg)', () => {
+    expect(geo.edges[1]!.arrowhead).not.toBe(false);
+    expect(geo.edges[2]!.arrowhead).toBe(false);
+  });
+
+  it('neither ElseHline nor Hline is emphasized (unlike Else1/Else2 under diamond)', () => {
+    expect(geo.edges[1]!.emphasize).toBeUndefined();
+    expect(geo.edges[2]!.emphasize).toBeUndefined();
+  });
+
+  it('ElseHline has 3 points (bend, short of diamond2); Hline has 3 points (bend -> mid -> bottom)', () => {
+    expect(geo.edges[1]!.points.length).toBe(3);
+    expect(geo.edges[2]!.points.length).toBe(3);
+  });
+
+  it('ElseHline and Hline share the same bend point', () => {
+    const elseHlinePoints = geo.edges[1]!.points;
+    const elseHlineLast = elseHlinePoints[elseHlinePoints.length - 1]!;
+    const hlineFirst = geo.edges[2]!.points[0]!;
+    expect(elseHlineLast).toEqual(hlineFirst);
+  });
+});
+
 describe('layoutActivity — down: optionalStop (stop east of the hexagon)', () => {
   const ast: ActivityDiagramAST = {
     nodes: [
@@ -79,8 +131,15 @@ describe('layoutActivity — down: optionalStop (stop east of the hexagon)', () 
     expect(stop.x).toBeGreaterThan(split.x + split.width);
   });
 
-  it('emits exactly 3 edges: In, Horizontal, Out', () => {
-    expect(geo.edges.length).toBe(3);
+  // T1b: `mainTile` here is a near-zero-height filler (the then-branch's
+  // whole content is the `stop` `optionalStop` diverts east), so
+  // `ConnectionIn`'s own target and `ConnectionOut`'s own source touch
+  // within `Snake.same()`'s `0.001` tolerance (`Snake.java:299-301`) --
+  // both FULL by default, they merge (`Snake.java:303-327`), and the
+  // straight-through point collapses too (`Worm#removeRedondantDirection`,
+  // `Worm.java:407-417`, both segments run DOWN): one 2-point edge.
+  it('emits exactly 2 edges: merged In+Out, Horizontal', () => {
+    expect(geo.edges.length).toBe(2);
   });
 });
 
@@ -252,5 +311,35 @@ describe('assignCoordinatesFull — down: Else2 emits the hexagon elbow reservat
     const end = elseEdge.points[elseEdge.points.length - 1]!;
     expect(full.reservations[0]!.x).toBeCloseTo(end.x, 5);
     expect(full.reservations[0]!.y).toBeCloseTo(end.y - 12, 5);
+  });
+});
+
+describe('layoutActivity — down: optionalStop + lane switch (IFDS, lukoxa-16-cecu095)', () => {
+  // FtileIfDown.java:130-131: optionalStop replaces diamond2 with a bare
+  // `new FtileEmpty(skinParam)` carrying NO swimlane -- ConnectionOut
+  // must stay in the main flow's own lane, never jog back to the if's
+  // ambient lane the way a real cross-lane diamond2 would.
+  const laned: ActivityIf = {
+    kind: 'if',
+    condition: 'test',
+    thenBranch: [{ kind: 'stop' }],
+    elseBranch: [{ kind: 'action', label: 'foo2', swimlane: 'Fournisseur' }],
+    elseIfBranches: [],
+    swimlane: 'Web Service',
+  };
+  const tile = buildIf(laned, bounder, theme, ['Web Service', 'Fournisseur']);
+  const full = assignCoordinatesFull({
+    root: tile,
+    ast: emptyAst,
+    baseX: LAYOUT_MARGIN,
+    baseY: LAYOUT_MARGIN,
+    bounder,
+    theme,
+  });
+
+  it('ConnectionOut (edge 2) is tagged with the SAME lane on both ends', () => {
+    const outMeta = full.edgeMeta[2]!;
+    expect(outMeta.lane1).toBe('Fournisseur');
+    expect(outMeta.lane2).toBe('Fournisseur');
   });
 });

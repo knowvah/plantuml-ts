@@ -1,0 +1,12 @@
+@startuml
+|swim1|
+fork
+  :something;
+fork again
+  |swim2|
+:something else;
+fork again
+  |swim3|
+:really swimming now;
+end fork
+@enduml

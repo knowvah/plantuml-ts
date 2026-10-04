@@ -163,12 +163,17 @@ describe('svg-activity swimlane census — population', () => {
     expect(pinned, 'the population is derived from the sources, never a slug list').toEqual(fromSources);
   });
 
-  it('the partition is 76 baseline / 8 error / 8 jar-error', () => {
+  it('the partition is 84 baseline / 0 error / 8 jar-error', () => {
     // 60 -> 76 / 24 -> 8 at unknown-bucket-routing-repair/T10 (2026-09-20):
     // 16 swimlane fixtures whose activity3 constructs now parse (see the
     // sibling ratchet's derivation), promoted error -> baseline.
-    expect(baselineFixtures.length).toBe(76);
-    expect(errorFixtures.length).toBe(8);
+    // add2 close-b2 (2026-10-03): the remaining 34 parser-gap rows render
+    // (T2e/T2g: CommandForkEnd3, SplitEnd3, Swimlane, If2, ElseIf2, Endif3,
+    // Backward3, Note3/NoteLong3, CircleSpot3, Label, Goto) and were
+    // promoted error -> baseline.
+    // Of them, 8 carry swimlanes: 76 -> 84 / 8 -> 0.
+    expect(baselineFixtures.length).toBe(84);
+    expect(errorFixtures.length).toBe(0);
     expect(jarErrorFixtures.length).toBe(8);
   });
 });

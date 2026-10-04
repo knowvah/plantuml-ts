@@ -13,9 +13,6 @@
  * small named functions sidesteps the tool bug instead of fighting it.
  */
 
-import { matchAnnotationCommand } from '../../core/annotations/index.js';
-import { matchSpriteCommand } from '../../core/sprite-commands.js';
-import { matchScaleCommand } from '../../core/scale-command.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type {
   ActivityAction,
@@ -31,6 +28,7 @@ import {
   RE_ARROW_LABEL,
   RE_ENDWHILE,
   RE_ESCAPED_NEWLINE,
+  RE_NOTE_END,
   RE_NOTE_MULTI,
   RE_NOTE_SINGLE,
   RE_REPEAT_HEAD,
@@ -49,11 +47,13 @@ import {
   type ParseOutcome,
   type StopKeywords,
 } from './dispatch-support.js';
-import { tryIf } from './if-dispatch.js';
+import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward } from './list-backward-dispatch.js';
+import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
+import { pushParsedNode } from './list-backward-dispatch.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
+import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -61,7 +61,7 @@ import { tryOpenGroup } from './group-dispatch.js';
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  setCurrentSwimlane(ctx, m[1]!.trim());
+  setCurrentSwimlane(ctx, m[2]!.trim(), m[1]);
   return { idx: idx + 1 };
 }
 
@@ -116,7 +116,20 @@ export interface MultilineActionBody {
  *  (optionally followed by `<<stereo>>`), or end-of-input. Exported: also
  *  `backward-dispatch.ts#tryBackward`'s multiline form (mission ubrr-T10
  *  M3) reuses this verbatim -- the identical content-then-`;`-then-
- *  stereogroup(s) closer shape `backward:`'s own multiline form has. */
+ *  stereogroup(s) closer shape `backward:`'s own multiline form has.
+ *
+ * A `{{`/`}}` span (upstream's `EmbeddedDiagram.EMBEDDED_START`/`_END`,
+ * a nested diagram rendered as an image inside the label) is tracked by
+ * `braceDepth` and treated as OPAQUE text while open (D6): `;` inside it
+ * belongs to the nested diagram's own grammar, not this action's closer
+ * -- `RE_ACTION_CLOSE` is tried only at depth 0. Before this,
+ * `mufixi-71-koma752`/`pufuzi-99-vone170` closed early on the embedded
+ * diagram's first inner `;`, leaving its `}}` unrecognized. Rendering
+ * the nested diagram as an image needs a new builder outside this
+ * task's write-set; its source lands as literal label text instead
+ * (documented fidelity gap, not a parse gap).
+ * @see net/sourceforge/plantuml/EmbeddedDiagram.java:73-74
+ */
 export function readMultilineActionBody(
   ctx: ParseContext,
   startIdx: number,
@@ -125,10 +138,12 @@ export function readMultilineActionBody(
   const { lines } = ctx;
   let cursor = startIdx;
   let multiStereo: string | undefined;
+  let braceDepth = 0;
   while (cursor < lines.length) {
     const raw = lines[cursor]!;
     const inner = raw.trim();
-    const closeMatch = RE_ACTION_CLOSE.exec(inner);
+    if (inner.startsWith('{{')) braceDepth++;
+    const closeMatch = braceDepth === 0 ? RE_ACTION_CLOSE.exec(inner) : null;
     if (closeMatch !== null) {
       const withoutSemi = closeMatch[1]!.trim();
       if (withoutSemi !== '') labelParts.push(withoutSemi);
@@ -137,6 +152,7 @@ export function readMultilineActionBody(
       cursor++;
       break;
     }
+    if (inner === '}}') braceDepth--;
     if (inner !== '') labelParts.push(raw);
     cursor++;
   }
@@ -256,15 +272,17 @@ interface RepeatClose {
  *   -- `repeatWhile(label, yes, out, …)`.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:193-200
  *   -- `setTest` stores `yesTb`/`outTb`, drawn on the condition hexagon
- *   (`ftile/vcompact/FtileRepeat.java:150-151`).
+ *   (`ftile/vcompact/FtileRepeat.java:150-151`). xabesu-51-dimi831 (T3i):
+ *   `CommandRepeatWhile3.java:144-147` routes TEST/WHEN/OUT through the
+ *   same `Display.getWithNewlines` escape as `if`/`elseif` (IFNL, T3d).
  */
 function parseRepeatClose(lines: readonly string[], cursor: number): RepeatClose {
   if (cursor >= lines.length) return { condition: '', yesLabel: undefined, outLabel: undefined, nextIdx: cursor };
   const endLine = lines[cursor]!.trim();
   const repeatMatch = RE_REPEATWHILE.exec(endLine);
-  const condition = repeatMatch?.[1]?.trim() ?? '';
-  const yesLabel = repeatMatch?.[2]?.trim();
-  const outLabel = repeatMatch?.[3]?.trim();
+  const condition = unescapeLabelNewlines(repeatMatch?.[1]?.trim() ?? '');
+  const yesLabel = unescapeLabel(repeatMatch?.[2]?.trim());
+  const outLabel = unescapeLabel(repeatMatch?.[3]?.trim());
   return { condition, yesLabel, outLabel, nextIdx: cursor + 1 };
 }
 
@@ -305,33 +323,38 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** note right : text  (single-line) */
+/** `(floating )?note (left|right)? (#color)? : text` (single-line). Group
+ *  1 is the `floating` keyword (dropped -- see {@link RE_NOTE_SINGLE}'s
+ *  own doc), group 2 is direction, group 3 is text (color is
+ *  non-capturing). */
 function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
   if (noteSingleMatch === null) return null;
-  const direction = noteSingleMatch[1]?.toLowerCase();
+  const direction = noteSingleMatch[2]?.toLowerCase();
   const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
   const node: ActivityNote = {
     kind: 'note',
-    text: noteSingleMatch[2]!.trim(),
+    text: noteSingleMatch[3]!.trim(),
     position,
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
 }
 
-/** note left/right (multi-line, ends with "end note") */
+/** `(floating )?note (left|right)? (#color)?` (multi-line, ends with
+ *  {@link RE_NOTE_END}'s `end note`/`endnote`). Group 1 is `floating`
+ *  (dropped), group 2 is direction (color is non-capturing). */
 function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteMultiMatch = RE_NOTE_MULTI.exec(line);
   if (noteMultiMatch === null) return null;
   const { lines } = ctx;
-  const direction = noteMultiMatch[1]?.toLowerCase();
+  const direction = noteMultiMatch[2]?.toLowerCase();
   const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
   let cursor = idx + 1;
   const textLines: string[] = [];
   while (cursor < lines.length) {
     const inner = lines[cursor]!.trim();
-    if (inner.toLowerCase() === 'end note') {
+    if (RE_NOTE_END.test(inner)) {
       cursor++;
       break;
     }
@@ -359,48 +382,17 @@ function tryArrowLabel(ctx: ParseContext, idx: number, line: string): DispatchRe
   return { idx: idx + 1, node };
 }
 
-/**
- * title/caption/legend/header/footer/mainframe (mission G0b/T6,
- * decisions.md D3) -- tried last, right before the unknown-line fallback
- * (spec position: former parser.ts:607-610). Activity's own multiline note
- * body (`tryNoteMulti` above) already owns its lines via a dedicated inner
- * while-loop that never falls through to this point, so a `title`-shaped
- * line inside a note body is never stolen (same top-level-only guarantee
- * as sequence's note bodies).
- */
-function tryAnnotation(ctx: ParseContext, idx: number): DispatchResult | null {
-  const match = matchAnnotationCommand(ctx.lines, idx, ctx.annotations);
-  if (match === null) return null;
-  return { idx: idx + match.consumed };
-}
-
-/** `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4) --
- *  tried immediately after `tryAnnotation`, same last-before-fallback
- *  position, mirroring upstream's title-then-sprite registration order
- *  (CommonCommands.java:54-58). */
-function trySprite(ctx: ParseContext, idx: number): DispatchResult | null {
-  const match = matchSpriteCommand(ctx.lines, idx, ctx.sprites);
-  if (match === null) return null;
-  return { idx: idx + match.consumed };
-}
-
-/**
- * `scale ...` (6 forms, `CommonCommands#addCommonScaleCommands`, wired for
- * every `TitledDiagram` factory including `activitydiagram3`) -- mission
- * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. Recognised and consumed
- * only: the resolved factor is NOT applied to the rendered document (no
- * `ast.scale`/renderer wiring here, unlike `sequence`/`description`) --
- * activity-diagram scaling is a separate, unscoped follow-on; this just
- * stops the line from refusing.
- */
-function tryScale(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (matchScaleCommand(line) === undefined) return null;
-  return { idx: idx + 1 };
-}
+// `tryAnnotation`/`trySprite`/`tryScale`/`tryPragma` (D12/T1p-b) moved to
+// `dispatch-common-commands.ts` to keep this file under the 500-line cap
+// (it was already at the exact limit) -- see that file's own doc comment.
 
 const LINE_HANDLERS: readonly LineHandler[] = [
   trySwimlane,
   trySimpleKeyword,
+  // `(X)` circled-spot connector: registered right after Start3/Stop3
+  // upstream (`ActivityDiagramFactory3.java:144`) -- `trySimpleKeyword`
+  // above covers start/stop/end/kill/detach/break together.
+  tryCircleSpot,
   tryAction,
   tryMultilineAction,
   // `partition`/`group` (mission ubrr-T10 M6) registered upstream BEFORE
@@ -418,6 +410,9 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryNoteMulti,
   tryArrowLabel,
   tryAnnotation,
+  // D12/T1p-b: `!pragma` registered BEFORE sprite within `addCommonCommands2`
+  // (`CommonCommands.java:62-89`).
+  tryPragma,
   trySprite,
   tryScale,
   tryAssumeTransparent,
@@ -427,6 +422,10 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   // (`ActivityDiagramFactory3.java:160`, right before `CommandLabel`/
   // `CommandGoto`).
   tryActivityList,
+  // `label NAME` / `goto NAME`: registered LAST upstream, after
+  // ActivityList (`ActivityDiagramFactory3.java:160-161`).
+  tryLabel,
+  tryGoto,
 ];
 
 /**
@@ -492,7 +491,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
 
     const result = dispatchLine(ctx, cursor, line, lc);
     if (isRefusal(result)) return result;
-    if (result.node !== undefined) nodes.push(result.node);
+    pushParsedNode(nodes, result.node); // WSPEC/RNOOUT, list-backward-dispatch.ts
     cursor = result.idx;
   }
 

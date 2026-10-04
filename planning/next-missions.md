@@ -35,6 +35,80 @@ post-D7 measurements.
 
 ---
 
+## `activity-divergence-drive-2` (add2) — DONE 2026-10-03 (T0a–T3i + T-exit/T-close-out, batches 0, 1p, 1, 2a/2b, 3, 4)
+
+Branch `feat/activity-divergence-drive-2` off main `8532ce8ba` (merge commit, not pushed).
+Brief, journal (50 rows) and ledger (243 rows, every `final` set):
+`plans/activity-divergence-drive-2/`. Halted once (stop 12: T1a's census found 17
+unported Java connections); the maintainer chose option 2, port the missing builders
+first, as an inserted batch 1p (D3 amendment, D12).
+
+**Counts.** Activity Σ weightedScore over un-pinned baseline rows **31366 → 16937**
+(245 → 126 rows); **224 fixtures byte-frozen** (67 → 224; D10 target 100); parse
+`error` rows **38 → 0**; survey **67/56/250 → 225/29/119**. 0 conformant losses in any
+engine (b0 → final); `unknown` +2 gains (cagoze, xucero). "extra line+arrow" rows 99 → 27.
+
+**Fixed (mechanism, Java).** Connector merge: `UGraphicForSnake` two-pass pending
+snakes, `Snake.merge`, `Worm.merge` per `MergeStrategy`, group scopes (T1b). Missing
+builders: `ConditionEndStyle` HLINE (+ swimlane-aware `getMinmax`), `FtileIfLongVertical`
++ activity `!pragma` (`CommandPragma`), `ParallelBuilderMerge` (`end merge`), repeat
+break welding (+ `FtileBreak` is 0x0), switch cross-lane connectors + BIG_DIAMOND
+per-lane redraw (`FtileSwitchWithDiamonds.java:136-138`). Exact `Direction.fromVector`
+kept exact: two arithmetic-grouping drifts fixed at their origin (`tile-coordinates`
+sibling edges, `walk-repeat`). 18 activity3 `Command*` regexes (all 38 refusals).
+Circle spot / label / goto tiles. Style core: ArrowHeadColor, defaultTextAlignment,
+arrowFontSize, ConditionStyle InsideDiamond (`FtileDiamondSquare`), preserveAspectRatio,
+hyperlinkUnderline/svgLinkTarget, activity FontName, dark-mode seeds, gradient activity
+background (Paint end-to-end). Creole url `{tooltip}` boundary (klimt, D8) and
+`AtomTable` grid lines. Batch 3: emphasize arrow at ct(pre-compress midpoint), every
+compressed line y1<=y2, lane-divider/split/if-label/chrome canvas ink, while body draw
+order, no emphasize on ConnectionBackBackward1, while specialOut, repeat noOut diamond,
+fork-only X-compression skip + split builder kind, if-condition newlines + continuation
+`\n`, hexagon slant, note Opale wrapper (`FtileWithNoteOpale`), partition title tab
+(`USymbolFrame`), elseif incoming label, `end fork {label}`, lane `|#color|`.
+
+### Open -> add3 (86 ledger rows; mechanisms in `fixtures.md`)
+
+- **Cross-lane connectors (XLANE):** if-with-links detour snakes
+  (`FtileIfWithLinks.java:149-286`), repeat back edges computed post-translate
+  (`FtileRepeat.java:432-535`, a new `LoopTranslate` variant).
+- **Snake text position:** `Snake.java:244-267` `getTextBlockPosition` (BOTTOM/CENTER/
+  zigzag) — the generic edge-label placement (boxefe backward labels).
+- **Notes:** width overscan (`Opale.java:56-59` margins), `FtileNoteAlone`,
+  `FtileWithNotes`, notes attached to if/while/repeat/switch/split, cross-lane notes.
+- **Partition ink-scan width** (`FtileGroup` getInnerMinMax).
+- **Multi-line TextBlock height** under deterministic text (jupoxe north label:
+  the jar reserves ~18-19 px for 2 lines, we 22; journal 42).
+- **ruzazu/tmp1:** BIG vs SMALL diamond flips on our case widths.
+- **reluvi:** `EMPTY_DIAMOND` repeat condition shape (`FtileRepeat.java:156-159`).
+- **levuma:** start/stop circle LineColor needs its own core field (dark seed).
+- **Document gradient background** (cigagu, gudute); **dakesa** gradient id hash.
+- **Embedded `{{ }}`** in actions (mufixi, pufuzi): nested-diagram renderer for
+  activity + action label as text/embed sequence.
+- **klimt (stop 8):** `UCenteredCharacter` glyph outline (spot letters), numbered-list
+  10 px floor (`AtomText.java:179-181`), creole bold in south labels (vimako),
+  `%n()` TIM builtin (fabule, core preprocessor).
+- Rows marked "residual needs re-census": their b2 family landed; re-measure first.
+
+### Follow-ons filed here
+
+- `resolveInlineLinks` belongs in a core url seam (upstream `url/UrlBuilder` is
+  shared); activity imports it from `description/` under a layering allowlist.
+- `tmp1` duplicates ruzazu-94-meso880 (pinned since aoh-T2) — retire it.
+- Agents: Serena tools write the MAIN checkout from a worktree (5 incidents); keep the
+  ban in every prompt and gate every merge on a clean main checkout.
+
+### Flags
+
+- Stop-12 halt (journal 5) → user option 2 → batch 1p, D3 amended + D12 (journal 6).
+- Rejected and reworked before merge: T1b's uncited `AXIS_EPSILON` (fixed at the origin,
+  journal 22-23), T1p-b's theme cast for `useVerticalIf` (real pragma path, journal 16).
+- Interim pin round b3w1 (journal 43) before wave 2; T3c's float-touch allowlist entry
+  was retired there.
+- Layering allowlist for activity → `description/parse-helpers.ts` (journal 49).
+
+---
+
 ## `activity-divergence-drive` (add1) — DONE 2026-10-02 (T0a–T3k + T-exit/T-close-out, batches 0–4)
 
 Branch `feat/activity-divergence-drive` off main `d4e29cc8c` (merge commit, not pushed).
@@ -64,6 +138,11 @@ Per-lane `LimitFinder` lane extents. Bar stroke+fill. Note Opale body/fold, note
 background `#FEFFDD`. `activityDiamond` font handlers. Partition composite frame.
 
 ### Open -> add2 (67 rows, by family; mechanisms in `fixtures.md`)
+
+> **add2 (2026-10-03):** Snake.merge, Opale note spike/wrapper, partition title,
+> ConditionStyle/ConditionEndStyle, the style-core items, both klimt items, bazuma,
+> gevaxi, fivama, table grid lines — DONE; cross-lane elbow disproved (it was a
+> canvas-height -1, fixed); vimako, `%n()`, embedded `{{ }}` carried to add3.
 
 - **Snake.merge** (touching edges fuse; needs a per-edge `MergeStrategy` through the
   if/while builders, `FtileIfDown.java:512`): becaje, bocaga, jecoxu; backward-connector
@@ -2267,7 +2346,8 @@ Ordered by how ready they are, not by size.
   diamond-`Ftile` consumer are located. Full evidence:
   `.agent-notes/aeg-T1-8-exceptions.md`.
 
-- **`activity-note-opale-attachment`** (NEW, unbriefed) — FILED 2026-09-19
+- **`activity-note-opale-attachment`** — DONE 2026-10-03 by add2 T3g (note wraps its
+  preceding tile, `FtileWithNoteOpale`); remainder in add2's Open -> add3. FILED 2026-09-19
   from a maintainer sample (`:Transfer Phase;` + `note right ... end note`
   + `:Termination Phase;`). The jar attaches a note to its instruction
   (`FtileFactoryDelegatorAddNote` -> `FtileWithNoteOpale`, 255 lines, and

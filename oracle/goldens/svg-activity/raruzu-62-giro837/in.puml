@@ -1,0 +1,14 @@
+@startuml
+|swinlane1|
+:first;
+:second;
+|swinlane2|
+:third;
+if (foo) then
+:something;
+endif
+|swinlane1|
+:back to swinline1;
+|swinlane2|
+:back to swinline2;
+@enduml

@@ -15,12 +15,14 @@ import { deepMergeTheme } from './theme-merge.js';
 import type { ThemeColorFields } from './theme-colors-fields.js';
 import type { Paint } from './paint.js';
 import type { ThemeSequenceFields } from './theme-sequence-fields.js';
+import type { ThemeRootFields } from './theme-root-fields.js';
 
 export type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 export type { ThemeColorFields } from './theme-colors-fields.js';
 export type { ThemeSequenceFields } from './theme-sequence-fields.js';
+export type { ThemeRootFields } from './theme-root-fields.js';
 
-export interface Theme {
+export interface Theme extends ThemeRootFields {
   fontFamily: string;
   fontSize: number;
   /** GraphvizImageBuilder.java:124-126 cascade font (`getStyleArrowCardinality`); default 13 = plantuml.skin:307 arrow FontSize, family = root's SansSerif (plantuml.skin:6, arrow sets no FontName). Optional so pre-existing hand-built `Theme` literals elsewhere stay valid; `defaultTheme`/`darkTheme` always set both. No consumer yet — T5/T6, decisions.md#D3. */
@@ -59,7 +61,6 @@ export interface Theme {
    * is why `!theme amiga` drew a 14px title where the jar draws 22px.
    */
   styleOverrides?: Record<string, Record<string, string>>;
-
   /** `skinparam linetype ortho|polyline` — svek routes edge labels through
    *  xlabel and emits splines=ortho under ortho (SvekEdge.java:434-441,
    *  DotStringFactory.java:160-168). Absent = default splines. */
@@ -73,6 +74,10 @@ export interface Theme {
    *  Default `uml2` draws the corner component icon; `uml1`/`rectangle` render
    *  components as plain boxes (changes node sizing). Absent = uml2. */
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** T1p-a: `skinparam ConditionEndStyle hline` (`svek/ConditionEndStyle.java`; `SkinParam.java:1007-1013`, default `diamond` on an absent/unrecognized value). Consumed by `conditional-builder.ts`'s `buildIfDown`/`buildIfWithLinks` (`FtileFactoryDelegatorIf.java:75`, `ConditionalBuilder.java:149,537,546`). */
+  conditionEndStyle?: 'diamond' | 'hline';
+  /** T2c: `skinparam ConditionStyle InsideDiamond` (`svek/ConditionStyle.java:41-64`, default `insideHexagon`); consumer: `activity-renderer-if-shapes.ts`. */
+  conditionStyle?: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
   /** `skinparam actorStyle awesome|hollow|stickman` (`SkinParam.java:1209-
    *  1218`'s `actorStyle()`: case-insensitive `getValue("actorstyle")`,
    *  `"awesome"` → `ActorStyle.AWESOME`, `"hollow"` → `ActorStyle.HOLLOW`,
@@ -245,7 +250,6 @@ export interface Theme {
    *  split — pure move, see that module's own doc comment). */
   sequence: ThemeSequenceFields;
 }
-
 export const defaultTheme: Theme = {
   fontFamily: 'sans-serif',
   fontSize: 14,
@@ -378,7 +382,7 @@ export const monochromeTheme: Theme = {
  * fields may each be partially specified. deepMergeTheme accepts this type and
  * fills missing fields from the base.
  */
-export type ThemeOverride = {
+export type ThemeOverride = Partial<ThemeRootFields> & {
   fontFamily?: string;
   fontSize?: number;
   cardinalityFontSize?: number;
@@ -392,6 +396,9 @@ export type ThemeOverride = {
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
+  /** See {@link Theme.conditionEndStyle}'s own doc comment (T1p-a). */
+  conditionEndStyle?: 'diamond' | 'hline';
+  /** See {@link Theme.conditionStyle}'s own doc comment (T2c). */ conditionStyle?: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;
@@ -425,6 +432,8 @@ export type ThemeOverride = {
     text?: string;
     /** cdd7-T1a (D3): see `ThemeColorFields.arrow`. */
     arrow?: Paint;
+    /** T2c: see `ThemeColorFields.arrowHead`'s own doc comment. */
+    arrowHead?: Paint;
     arrowLollipopColor?: string;
     note?: string;
     noteBackground?: string;
@@ -462,21 +471,10 @@ export { deepMergeTheme } from './theme-merge.js';
  * - undefined / omitted: returns defaultTheme.
  */
 export function resolveTheme(option?: ThemeOverride | string): Theme {
-  if (option === undefined || option === 'default') {
-    return defaultTheme;
-  }
-
-  if (option === 'dark') {
-    return darkTheme;
-  }
-
-  if (option === 'sketchy') {
-    return sketchyTheme;
-  }
-
-  if (option === 'monochrome') {
-    return monochromeTheme;
-  }
+  if (option === undefined || option === 'default') return defaultTheme;
+  if (option === 'dark') return darkTheme;
+  if (option === 'sketchy') return sketchyTheme;
+  if (option === 'monochrome') return monochromeTheme;
 
   if (typeof option === 'string') {
     const builtin = BUILTIN_THEMES[option];

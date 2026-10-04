@@ -62,7 +62,7 @@ function makeDiamond(width: number, height: number, left = width / 2) {
 describe('GtileWhile — geometry (header h=40, body h=80)', () => {
   const header = makeDiamond(60, 40);
   const body = makeTile(80, 80);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
 
   // geo = diamond1.appendBottom(whileBlock): geo.h = header.h + body.h
   // (`FtileGeometryMerger.java:47`); height = geo.h + 4*12 + labelHeight
@@ -127,7 +127,7 @@ describe('GtileWhile — geometry (header h=40, body h=80)', () => {
 describe('GtileWhile — width: body wider than header', () => {
   const header = makeDiamond(40, 40);
   const body = makeTile(100, 80);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
 
   // FtileWhile.java:586,591 -- `width = geo.w + dx + hexagonHalfSize`, `dx =
   // 2 * hexagonHalfSize`.
@@ -139,7 +139,7 @@ describe('GtileWhile — width: body wider than header', () => {
 describe('GtileWhile — width: header wider than body', () => {
   const header = makeDiamond(120, 40);
   const body = makeTile(60, 80);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
 
   it('width driven by header.width', () => {
     expect(tile.width).toBe(120 + 3 * HEXAGON_HALF_SIZE);
@@ -149,7 +149,7 @@ describe('GtileWhile — width: header wider than body', () => {
 describe('GtileWhile — hooks', () => {
   const header = makeDiamond(60, 40);
   const body = makeTile(80, 80);
-  const tile = new GtileWhile(header, body, bounder, theme);
+  const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
 
   it('NORTH_HOOK.y === 0', () => {
     expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
@@ -187,7 +187,7 @@ describe('GtileWhile — hasPointOut() is unconditionally true', () => {
   it('is true even when the body has no out point (ends in a stop)', () => {
     const header = makeDiamond(60, 40);
     const body = makeTile(80, 80, false);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     expect(tile.hasPointOut()).toBe(true);
   });
 });
@@ -200,7 +200,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('header left 30 (w 60), body left 10 (w 40): tile.left 54, width 96', () => {
     const header = makeDiamond(60, 40, 30);
     const body = makeTile(40, 80, true, 10);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     // geo.left = max(30, 10) = 30; tile.left = 30 + 24 = 54.
     expect(tile.left).toBe(54);
     expect(tile.headerOffsetX).toBe(24);
@@ -214,7 +214,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('body left 20 px right of its centre: width = geo.width + 3 * HEXAGON_HALF_SIZE', () => {
     const header = makeDiamond(60, 40); // left 30
     const body = makeTile(120, 80, true, 80); // centre 60, left 80
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     // geo.left = max(30, 80) = 80; tile.left = 80 + 24 = 104.
     expect(tile.left).toBe(104);
     expect(tile.headerOffsetX).toBe(74);
@@ -230,7 +230,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('body left LEFT of its centre widens the tile on the right', () => {
     const header = makeDiamond(60, 40); // left 30
     const body = makeTile(80, 80, true, 20); // left 20
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     // geo.left = max(30, 20) = 30; tile.left = 30 + 24 = 54.
     expect(tile.left).toBe(54);
     expect(tile.bodyOffsetX).toBe(34);
@@ -241,7 +241,7 @@ describe('GtileWhile — merger left/width with asymmetric children (D1)', () =>
   it('symmetric children: offsets land the composite at tile.left, not width / 2', () => {
     const header = makeDiamond(60, 40);
     const body = makeTile(80, 80);
-    const tile = new GtileWhile(header, body, bounder, theme);
+    const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     expect(tile.headerOffsetX).toBe(tile.left - 30);
     expect(tile.bodyOffsetX).toBe(tile.left - 40);
     expect(tile.getCoord(NORTH_HOOK).x).toBe(tile.left);

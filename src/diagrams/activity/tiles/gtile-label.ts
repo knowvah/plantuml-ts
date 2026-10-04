@@ -1,50 +1,42 @@
 import type { GPoint, HookName } from './points.js';
-import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
-import type { StringBounder } from './tile.js';
+import { NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, EAST_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
-import type { Theme } from '../../../core/theme.js';
+import type { ActivityLabel } from '../ast.js';
 
-// Local until ast.ts is extended
-interface ActivityLabel {
-  kind: 'label';
-  name: string;
-  swimlane?: string;
-}
-
+/**
+ * `label NAME` -- declares the target of a later `goto NAME` jump.
+ * `FtileLabel` extends `FtileEmpty` with NO override of `drawU` (empty)
+ * or `calculateDimensionFtile` (inherited `calculateDimensionEmpty()`):
+ * zero width, zero height, a normal (`true`) out point. A prior half-port
+ * here measured and drew a visible bordered box with the label's own
+ * text -- verified WRONG against the jar's own SVG, which contains no
+ * trace of the label text at all and is BYTE-IDENTICAL to the same
+ * diagram with the `label NAME;` line deleted (`ast.ts`'s own doc,
+ * `.agent-notes/T2g-spot-label-goto.md`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileLabel.java:40-49
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:47,83,87-92
+ */
 export class GtileLabel extends TileLeaf {
   readonly kind = 'gtile-label' as const;
   readonly name: string;
-  readonly width: number;
-  readonly height: number;
+  readonly width = 0;
+  readonly height = 0;
 
-  constructor(node: ActivityLabel, bounder: StringBounder, theme: Theme) {
+  constructor(node: ActivityLabel) {
     super();
     this.name = node.name;
-    // A `label`/`goto` target resolves `of(root, element, activityDiagram,
-    // goto)` (`ftile/Swimlanes.java:248,270`), and `plantuml.skin` carries
-    // NO `goto` block at any scope -- verified by grep, not assumed -- so
-    // the name inherits the root `FontSize 14` (:10) verbatim. The previous
-    // `- 2` was unsourced. Read straight from the theme rather than through
-    // `activityFontSize`: there is no `goto` SName in that resolver's union
-    // and no bucket for it, so routing it there would invent a scope
-    // upstream does not have.
-    const measured = bounder.getDimension(node.name, theme.fontSize);
-    this.width = measured.width + 16;
-    this.height = measured.height + 8;
   }
 
   getCoord(hook: HookName): GPoint {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.width / 2, y: 0 };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
-        return { x: this.width / 2, y: this.height };
+        return { x: 0, y: 0 };
       case EAST_HOOK:
-        return { x: this.width, y: this.height / 2 };
       case WEST_HOOK:
-        return { x: 0, y: this.height / 2 };
+        return { x: 0, y: 0 };
       /* c8 ignore next 3 */
       default: {
         const _exhaustive: never = hook;
@@ -54,13 +46,12 @@ export class GtileLabel extends TileLeaf {
   }
 
   /**
-   * Has an out point: `FtileLabel` does not override
-   * `calculateDimensionFtile`, so it inherits `FtileEmpty`'s.
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileLabel.java:40
-   *   -- `class FtileLabel extends FtileEmpty` with no override.
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:91-92
-   *   -- `calculateDimensionEmpty()`, five-argument `FtileGeometry` with
-   *   `outY = height`.
+   * `FtileEmpty#calculateDimensionEmpty` always has an out point (`outY =
+   * height`, never the `Double.MIN_NORMAL` sentinel) -- the default this
+   * class inherits from `TileLeaf` is already correct; stated explicitly
+   * (not just relying on the default) because {@link GtileGoto} sits
+   * right next to this file and overrides it to `false`.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileEmpty.java:87-92
    */
   hasPointOut(): boolean {
     return true;

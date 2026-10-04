@@ -70,6 +70,54 @@ describe('layoutActivity — long-horizontal: then/elseif/else chain', () => {
   });
 });
 
+describe('layoutActivity — long-horizontal: real swimlanes split the Hline per-lane (T1p-g)', () => {
+  // Same then/elseif/else chain as `chainAst`, but `a`/`b` stay in lane
+  // "A" (unchanged) while `d` switches to lane "B" -- `pezubu-98-niba240`'s
+  // own shape, mirrored for `FtileIfLongHorizontal`.
+  const lanedAst: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c1',
+        thenLabel: '1',
+        thenBranch: [{ kind: 'action', label: 'a', swimlane: 'A' }],
+        elseBranch: [{ kind: 'action', label: 'd', swimlane: 'B' }],
+        elseLabel: '3',
+        elseIfBranches: [{ condition: 'c2', label: '2', body: [{ kind: 'action', label: 'b', swimlane: 'A' }] }],
+        swimlane: 'A',
+      },
+    ],
+    swimlanes: ['A', 'B'],
+  };
+  const geo = layoutActivity(lanedAst, theme, measurer);
+
+  // `edge-draw-order.ts` re-groups the final edge run by lane pass, so the
+  // two Hline-derived edges are no longer the trailing two entries --
+  // identify them by their own shape instead: a flat (y1 === y2), 2-point,
+  // arrowless line (`ConnectionHline`'s own signature; no other connector
+  // in this chain is both flat and arrowless).
+  function isHlineEdge(e: (typeof geo.edges)[number]): boolean {
+    return e.points.length === 2 && e.arrowhead === false && e.points[0]!.y === e.points[1]!.y;
+  }
+
+  it('the Hline fans out to one edge per in-range lane -- 10 edges, not 9', () => {
+    expect(geo.edges.length).toBe(10);
+  });
+
+  it('exactly two Hline-derived edges exist, both at the SAME y', () => {
+    const hlines = geo.edges.filter(isHlineEdge);
+    expect(hlines).toHaveLength(2);
+    expect(hlines[0]!.points[0]!.y).toBe(hlines[1]!.points[0]!.y);
+  });
+
+  it('the two Hline segments cover DIFFERENT x-ranges (one per lane)', () => {
+    const [hlineA, hlineB] = geo.edges.filter(isHlineEdge);
+    const rangeA = [hlineA!.points[0]!.x, hlineA!.points[1]!.x].sort((p, q) => p - q);
+    const rangeB = [hlineB!.points[0]!.x, hlineB!.points[1]!.x].sort((p, q) => p - q);
+    expect(rangeA).not.toEqual(rangeB);
+  });
+});
+
 describe('layoutActivity — long-horizontal: every branch ends in stop', () => {
   const ast: ActivityDiagramAST = {
     nodes: [
@@ -86,13 +134,18 @@ describe('layoutActivity — long-horizontal: every branch ends in stop', () => 
   };
   const geo = layoutActivity(ast, theme, measurer);
 
-  it('no VerticalOut, no Hline: only VerticalIn x2, Horizontal, In, LastElseIn, LastElseOut', () => {
-    expect(geo.edges.length).toBe(6);
+  // T1b: `ConnectionLastElseIn`'s own exit point is exactly
+  // `ConnectionLastElseOut`'s own entry (both default FULL,
+  // `Snake.create`'s static overloads never call `.withMerge`) -- they
+  // fuse (`Snake#merge`, `Snake.java:303-327`): no VerticalOut, no
+  // Hline, VerticalIn x2, Horizontal, In, merged LastElseIn+LastElseOut.
+  it('no VerticalOut, no Hline: only VerticalIn x2, Horizontal, In, merged LastElseIn+LastElseOut', () => {
+    expect(geo.edges.length).toBe(5);
   });
 
-  it('LastElseOut (the last edge) carries the third point (W/2, H) since nbOut === 0', () => {
+  it('the merged LastElseIn+LastElseOut (last edge) carries 4 points (nbOut === 0)', () => {
     const lastElseOut = geo.edges[geo.edges.length - 1]!;
-    expect(lastElseOut.points.length).toBe(3);
+    expect(lastElseOut.points.length).toBe(4);
   });
 
   it('the empty else emits no node of its own (GtileTopDown with zero children) (T3k)', () => {

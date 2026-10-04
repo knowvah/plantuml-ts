@@ -1,0 +1,11 @@
+@startuml
+
+   if ( conf ) then (true)
+    note right
+       if statement
+    end note
+    :finalize;
+    break
+   endif
+
+@enduml

@@ -31,19 +31,25 @@ import type { WhileFrame } from './walk-while-branch.js';
  * port's `SOUTH_HOOK`) via the SAME `y1bis` elbow `ConnectionBackSimple`/
  * `ConnectionBackEmpty` already share (`hexagon-reservations.ts
  * #whileHexagonReservation`'s own doc) -- but the elbow's horizontal run
- * ends at `backSouth.x`, never at the tile's own right edge `xx`. Only
- * called when the body has a point out (`frame.body.hasPointOut()`,
- * {@link pushWhileBackwardConnections}'s own guard) -- mirrors
- * `ConnectionBackSimple`'s own `getP1() == null` early return, which skips
- * the connector AND its reservation together.
+ * ends at `backSouth.x`, never at the tile's own right edge `xx`. No
+ * emphasize -- `:354` builds `Snake.create(skinParam(), endInlinkColor,
+ * asToUp()).withLabel(back, BOTTOM)` and never calls `emphasizeDirection`,
+ * unlike `ConnectionBackSimple`/`ConnectionBackEmpty`'s own UP emphasize
+ * (`:261-262,435-436`). Only called when the body has a point out
+ * (`frame.body.hasPointOut()`, {@link pushWhileBackwardConnections}'s own
+ * guard) -- mirrors `ConnectionBackSimple`'s own `getP1() == null` early
+ * return, which skips the connector AND its reservation together.
+ * BACKLBL (add2 T3i): `back` ABOVE is `frame.backIncoming` -- the
+ * `(incoming)` decoration on `backward:`'s OWN leading paren, drawn
+ * `VerticalAlignment.BOTTOM` (upstream's own `withLabel` call, cited
+ * above).
  */
 function pushBackward1(frame: WhileFrame, backFrom: GPoint, backSouth: GPoint): void {
-  const { out, bodyBottomY, bodyOutLane, backInLane } = frame;
+  const { out, bodyBottomY, bodyOutLane, backInLane, backIncoming } = frame;
   const y1bis = Math.max(backFrom.y, bodyBottomY) + HEXAGON_HALF_SIZE;
   const points = [backFrom, { x: backFrom.x, y: y1bis }, { x: backSouth.x, y: y1bis }, backSouth];
   pushEdge(out, points, bodyOutLane, backInLane);
-  const edge = out.edges[out.edges.length - 1]!;
-  edge.emphasize = 'up';
+  if (backIncoming !== undefined) out.edges[out.edges.length - 1]!.label = backIncoming;
   out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
 }
 
@@ -57,10 +63,13 @@ function pushBackward1(frame: WhileFrame, backFrom: GPoint, backSouth: GPoint): 
  * connector) and always drawn, independent of the body's own point-out
  * state -- the Java source has no `hasPointOut` guard on this class at
  * all, unlike {@link pushBackward1}'s own `ConnectionBackBackward1`.
+ * BACKLBL (add2 T3i): `back` is `frame.backOutgoing` -- the trailing
+ * `(outgoing)` decoration, drawn with `arrowHorizontalAlignment()`.
  */
 function pushBackward2(frame: WhileFrame, backNorth: GPoint): void {
-  const { out, headerEast, headerInLane, backOutLane } = frame;
+  const { out, headerEast, headerInLane, backOutLane, backOutgoing } = frame;
   pushEdge(out, [backNorth, { x: backNorth.x, y: headerEast.y }, headerEast], backOutLane, headerInLane);
+  if (backOutgoing !== undefined) out.edges[out.edges.length - 1]!.label = backOutgoing;
 }
 
 /**

@@ -7,6 +7,11 @@ import { activityFontSize } from '../activity-style-defaults.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
+ *  `if (h < 10) h = 10`. Applied per LINE inside {@link measureLabel}, not
+ *  once to the summed total -- each creole line is its own `AtomText`.
+ * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
+const ATOM_TEXT_MIN_HEIGHT = 10;
 
 export type DiamondSide = 'north' | 'south' | 'west' | 'east';
 
@@ -15,6 +20,42 @@ export interface DiamondInsideLabels {
   south?: string;
   west?: string;
   east?: string;
+}
+
+/**
+ * The public contract `GtileIfDown`/`GtileIfWithLinks` need from an
+ * if-condition diamond tile, regardless of WHICH `ConditionStyle` built
+ * it. Upstream has no equivalent type -- `FtileDiamondInside` and
+ * `FtileDiamondSquare` are sibling subclasses of the abstract
+ * `FtileDiamondWIP` (`vertical/FtileDiamondWIP.java`), never one typed as
+ * the other -- but TypeScript's private-field nominal typing (`north`/
+ * `south`/`west`/`east` are `private` on both classes, so two classes
+ * with identically-shaped private members are NOT structurally
+ * assignable to each other) makes a formal interface the only way to let
+ * `GtileDiamondSquare` (T2c, `skinparam ConditionStyle InsideDiamond`)
+ * stand in wherever `GtileDiamondInside` is accepted today. add2 T3h
+ * widened `gtile-if-down.ts`'s and `gtile-if-with-links.ts`'s `diamond1`
+ * params (and `conditional-builder.ts`'s own construction) to this
+ * interface, wiring `InsideDiamond` end to end. `GtileDiamondInside
+ * implements` it below so the surface is enforced at compile time.
+ */
+export interface DiamondConditionTile {
+  // add2 T3h: `kind`/`swimlane`/`swimlaneOut` added so this interface is
+  // ALSO a structural `Tile` (`tiles/tile.ts`) -- `walk-if-down.ts`/
+  // `walk-if-with-links.ts` (T3f's write-set, not touched) pass `diamond1`
+  // to several `Tile`-typed parameters; both concrete classes already
+  // carry these fields via `TileLeaf`, so this is a widening, not a new
+  // requirement on either implementer.
+  readonly kind: string;
+  readonly swimlane?: string;
+  readonly swimlaneOut?: string;
+  readonly label: string;
+  readonly width: number;
+  readonly height: number;
+  getCoord(hook: HookName): GPoint;
+  labelAt(side: DiamondSide): { x: number; y: number; width: number; height: number; label: string } | null;
+  swapEastWest(): void;
+  hasPointOut(): boolean;
 }
 
 interface LabelDim {
@@ -49,7 +90,7 @@ function measureLabel(text: string | undefined, bounder: StringBounder, fontSize
   for (const line of t.split('\n')) {
     const dim = bounder.getDimension(line, fontSize);
     if (dim.width > width) width = dim.width;
-    height += dim.height;
+    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
   }
   return { text: t, width, height };
 }
@@ -80,7 +121,7 @@ function hexagonAlone(dimLabel: { width: number; height: number }): { width: num
  * at the hexagon's own top/bottom edge regardless of the north label.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-125
  */
-export class GtileDiamondInside extends TileLeaf {
+export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile {
   readonly kind = 'gtile-diamond-inside' as const;
   readonly label: string;
   readonly width: number;
@@ -101,7 +142,13 @@ export class GtileDiamondInside extends TileLeaf {
     this.east = measureLabel(labels.east, bounder, arrowSize);
 
     const diamondSize = activityFontSize(theme, 'diamond');
-    const dimLabel = bounder.getDimension(label, diamondSize);
+    // IFNL (T3d, `vaxiki-78-nice114`): a multi-line condition (unescaped
+    // real `\n`s, `if-dispatch.ts#unescapeLabelNewlines`) needs the SAME
+    // per-line fold as the north/south/east/west labels above -- a single
+    // `getDimension` call on the whole string reports one oversized line,
+    // not `label.calculateDimension`'s own per-`AtomText` sum
+    // (`AtomText.java` via `SheetBlock1`/`TextBlockLineCentered`).
+    const dimLabel = measureLabel(label, bounder, diamondSize);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;

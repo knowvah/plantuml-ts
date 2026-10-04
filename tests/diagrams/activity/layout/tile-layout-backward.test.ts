@@ -156,7 +156,8 @@ describe('tile-layout — while backward: unset (regression safety)', () => {
   const geo = layoutActivity(ast, theme, measurer);
 
   it('produces no extra action node beyond while-header/step (T3k: while-header + if-own-label)', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action']);
+    // WORD (mission add2-T3b): the body's own node lands BEFORE the header.
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['action', 'while-header', 'if-own-label']);
   });
 });
 
@@ -168,11 +169,14 @@ describe('tile-layout — while backward: set (FtileWhile.java:85,154-161,561-56
   const geo = layoutActivity(ast, theme, measurer);
 
   it('the backward node is pulled OUT of the body and pushed as its own action node, LAST', () => {
-    expect(geo.nodes.map((n) => n.kind)).toEqual(['while-header', 'if-own-label', 'action', 'action']);
+    // WORD (mission add2-T3b): the body's own node lands BEFORE the header.
+    expect(geo.nodes.map((n) => n.kind)).toEqual(['action', 'while-header', 'if-own-label', 'action']);
     expect(geo.nodes[3]!.label).toBe('go back');
   });
 
-  it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (5 edges: In, Backward1, Backward2, Out x2)', () => {
-    expect(geo.edges).toHaveLength(5);
+  // T1b: `ConnectionOut`'s two snakes fuse (merge-case C, `Snake.java:
+  // 303-327`) -- 4 edges now.
+  it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (4 edges: In, Backward1, Backward2, merged Out)', () => {
+    expect(geo.edges).toHaveLength(4);
   });
 });

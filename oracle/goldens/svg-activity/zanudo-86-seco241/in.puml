@@ -1,0 +1,6 @@
+@startuml
+skinparam ArrowColor orange
+skinparam ArrowHeadColor black
+:Qwerty;
+:Asdfgh;
+@enduml

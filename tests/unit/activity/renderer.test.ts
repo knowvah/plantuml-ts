@@ -753,6 +753,76 @@ describe('renderActivity — edge with emphasize', () => {
     // arrowheads.
     expect(tags).toEqual(['polygon', 'line', 'line', 'line', 'polygon']);
   });
+
+  // b3/T3a (family B/ORD): `UGraphicCompressOnXorY#drawLine`
+  // (`klimt/compress/UGraphicCompressOnXorY.java:142-146`) swaps a line's
+  // own endpoints whenever `y1 > y2`, unconditionally, for every line the
+  // activity engine draws -- not just the end-cross diagonal
+  // `activity-renderer-terminals.ts#orderedLine` already ported.
+  it('an upward segment (y1 > y2) is emitted with its endpoints swapped', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 10, y: 100 },
+            { x: 10, y: 20 },
+          ],
+          arrowhead: false,
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const line = content.match(/<line[^>]*\/>/)![0];
+    expect(line).toContain('y1="20"');
+    expect(line).toContain('y2="100"');
+  });
+
+  it('a downward segment (y1 <= y2) is emitted unchanged', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 10, y: 20 },
+            { x: 10, y: 100 },
+          ],
+          arrowhead: false,
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const line = content.match(/<line[^>]*\/>/)![0];
+    expect(line).toContain('y1="20"');
+    expect(line).toContain('y2="100"');
+  });
+
+  // b3/T3a (family C/EMMID): the emphasize arrow draws at `edge.emphasizeAt`
+  // (the PRE-compression segment midpoint, `compress-geometry.ts
+  // #withEmphasizeAnchor`'s own doc) when the geometry carries it, never a
+  // midpoint recomputed from `points` at render time.
+  it('places the emphasized arrow at emphasizeAt when present, not the segment midpoint', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+          emphasize: 'down',
+          emphasizeAt: { x: 0, y: 12 },
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    const content = contentAfterDefs(result);
+    const polygons = content.match(/<polygon[^>]*points="([^"]*)"/g) ?? [];
+    expect(polygons.length).toBe(2);
+    // `arrowHeadPoints('down')`'s own tip is its local (0,0), translated by
+    // `emphasizeAt` -- NOT the segment's own geometric midpoint (0, 15).
+    expect(polygons.some((p) => p.includes('0,12'))).toBe(true);
+    expect(polygons.some((p) => p.includes('0,15'))).toBe(false);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -1254,5 +1324,118 @@ describe('renderActivity — edge label colour (D3)', () => {
     });
     const content = contentAfterDefs(assembleSvg(renderActivity(geo, arrowBlue)));
     expect(content).toContain('fill="#00F"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2c: `skinparam ArrowHeadColor` -- `FromSkinparamToStyle.java:153`
+// (`PName.HeadColor` on `SName.arrow`), applied by `Worm
+// #drawInternalOneColor` to the decoration only, AFTER the line segments
+// drew in the LINE's own colour (`activitydiagram3/ftile/Worm.java:
+// 126-127,146-154`). Pins farexi-86-xanu521/zanudo-86-seco241/
+// fofele-65-lozo631/naroji-40-nuke022 (jar-verified exact match).
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge with ArrowHeadColor', () => {
+  function themeWithArrowHeadColor(color: string): typeof theme {
+    return { ...theme, colors: { ...theme.colors, arrowHead: color } };
+  }
+
+  it('absent: the arrowhead polygon draws in the LINE colour (theme.colors.arrow)', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const polygon = /<polygon[^>]*>/.exec(content)?.[0];
+    expect(polygon).toContain(`fill="${noGradient(theme.colors.arrow)}"`);
+    expect(polygon).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
+  });
+
+  it('set: the arrowhead polygon draws in ArrowHeadColor, the LINE stays theme.colors.arrow', () => {
+    const red = themeWithArrowHeadColor('#F00');
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, red)));
+    const line = /<line[^>]*>/.exec(content)?.[0];
+    const polygon = /<polygon[^>]*>/.exec(content)?.[0];
+    expect(line).toContain(`stroke="${noGradient(theme.colors.arrow)}"`);
+    expect(polygon).toContain('fill="#F00"');
+    expect(polygon).toContain('stroke="#F00"');
+  });
+
+  it('`ArrowHeadColor none` draws fill="none" stroke="none" with no stroke-width (SvgGraphics.java:630-637 rule 4)', () => {
+    const none = themeWithArrowHeadColor('none');
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, none)));
+    const polygon = /<polygon[^>]*>/.exec(content)?.[0];
+    expect(polygon).toContain('fill="none"');
+    expect(polygon).toContain('stroke="none"');
+    expect(polygon).not.toContain('stroke-width');
+  });
+
+  it('a midArrowAt decoration also draws in ArrowHeadColor, not the line colour', () => {
+    const red = themeWithArrowHeadColor('#F00');
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 0 },
+          ],
+          midArrowAt: { x: 50, y: 20, dir: 'up' },
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, red)));
+    const polygons = content.match(/<polygon[^>]*>/g) ?? [];
+    expect(polygons).toHaveLength(2);
+    expect(polygons.every((p) => p.includes('fill="#F00"'))).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// add2 T3e (family G): theme.preserveAspectRatio -> RenderFragment -> root
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — preserveAspectRatio (add2 T3e, family G)', () => {
+  it('forwards theme.preserveAspectRatio onto the RenderFragment', () => {
+    const withRatio: typeof theme = { ...theme, preserveAspectRatio: 'xMinYMid slice' };
+    const fragment = renderActivity(makeGeo(), withRatio);
+    expect(fragment.preserveAspectRatio).toBe('xMinYMid slice');
+  });
+
+  it('omits the field entirely when the theme carries none (exactOptionalPropertyTypes)', () => {
+    const fragment = renderActivity(makeGeo(), theme);
+    expect('preserveAspectRatio' in fragment).toBe(false);
+  });
+
+  it('reaches the assembled root <svg> preserveAspectRatio attribute', () => {
+    const withRatio: typeof theme = { ...theme, preserveAspectRatio: 'xMinYMid slice' };
+    const svg = assembleSvg(renderActivity(makeGeo(), withRatio));
+    expect(svg).toContain('preserveAspectRatio="xMinYMid slice"');
   });
 });

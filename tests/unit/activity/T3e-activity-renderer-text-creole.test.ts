@@ -41,6 +41,48 @@ describe('drawActivityText — `[[url]]`', () => {
     expect(svg).toContain('>foo1<');
     expect(svg).toContain('>end<');
   });
+
+  it('T2c: `[[url{tooltip} label]]` draws title/xlink:title as the TOOLTIP, not the url', () => {
+    // zamagu-75-vape137's own middle run, jar-verified:
+    // <a ... title="dd" xlink:title="dd"><text ...>sss</text></a> -- the
+    // creole command's `{dd}` tooltip, never `http://testLink1.com`.
+    const svg = drawActivityText(26, 87.333, '[[http://testLink1.com{dd} sss]]', STYLE);
+    expect(svg).toContain('title="dd"');
+    expect(svg).toContain('xlink:title="dd"');
+    expect(svg).not.toContain('title="http://testLink1.com"');
+    expect(svg).toContain('href="http://testLink1.com"');
+  });
+
+  it('`[[url label]]` with no `{tooltip}` still defaults the tooltip to the url', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('title="http://www.google.com"');
+    expect(svg).toContain('xlink:title="http://www.google.com"');
+  });
+});
+
+describe('drawActivityText — hyperlinkUnderline/svgLinkTarget (add2 T3e, family F)', () => {
+  it('a url run keeps the underline when hyperlinkUnderline is unset (upstream default true)', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('text-decoration="underline"');
+  });
+
+  it('hyperlinkUnderline: false strips the underline off a url run only', () => {
+    const svg = drawActivityText(26, 74.333, 'plain [[http://www.google.com]]', {
+      ...STYLE,
+      hyperlinkUnderline: false,
+    });
+    expect(svg).not.toContain('text-decoration="underline"');
+  });
+
+  it('svgLinkTarget forwards to the <a> wrapper\'s target attribute', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', { ...STYLE, svgLinkTarget: '_self' });
+    expect(svg).toContain('target="_self"');
+  });
+
+  it('svgLinkTarget unset falls through to linkWrap\'s own "_top" default', () => {
+    const svg = drawActivityText(26, 74.333, '[[http://www.google.com]]', STYLE);
+    expect(svg).toContain('target="_top"');
+  });
 });
 
 describe('drawActivityText — `|cell|` table row', () => {

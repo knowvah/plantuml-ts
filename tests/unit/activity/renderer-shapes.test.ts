@@ -22,6 +22,7 @@ import {
   renderNode,
   renderNote,
   renderParallelogram,
+  renderSpot,
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
@@ -206,6 +207,50 @@ describe('renderEnd', () => {
     const svg = renderEnd(makeNode({ kind: 'end', width: 20, height: 20 }), theme);
     expect(svg).toContain('stroke-width="2.5"');
     expect(svg).toContain('stroke-width="1.5"');
+  });
+});
+
+describe('renderSpot (mission add2-T2g)', () => {
+  // `FtileCircleSpot.java:60,84-109`: a fixed 20x20 circle, border/fill
+  // from the PLAIN root ink (no `circle,spot` skinparam convert exists --
+  // `activity-renderer-terminals.ts#renderSpot`'s own doc), stroke-width
+  // the ELEMENT tier (0.5), never `circle,start/stop/end`'s own 1.
+  it('emits a 20x20 ellipse at the plain root ink, stroke-width 0.5', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('rx="10"');
+    expect(svg).toContain('ry="10"');
+    expect(svg).toContain('cx="60"');
+    expect(svg).toContain('cy="60"');
+    expect(svg).toContain(`fill="${theme.colors.nodeBackground}"`);
+    expect(svg).toContain(`stroke="${theme.colors.border}"`);
+    expect(svg).toContain('stroke-width="0.5"');
+  });
+
+  it('an inline `color` overrides ONLY the fill, never the border', () => {
+    const node = makeNode({ kind: 'spot', width: 20, height: 20, label: 'B', color: '#00F' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('fill="#00F"');
+    expect(svg).toContain(`stroke="${theme.colors.border}"`);
+  });
+
+  it('draws the circled character as a <text>, centred, at the root font size 14', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
+    const svg = renderSpot(node, theme);
+    expect(svg).toContain('>A</text>');
+    expect(svg).toContain('font-size="14"');
+    // Centred: x = cx - charWidth/2, not the circle's own left edge.
+    const charWidth = measureLineWidth(theme, 14, 'A');
+    const expectedX = 60 - charWidth / 2;
+    const m = /<text x="([\d.]+)"/.exec(svg);
+    expect(m).not.toBeNull();
+    expect(Number(m![1])).toBeCloseTo(expectedX, 2);
+  });
+
+  it('draws no <text> at all when the character is empty', () => {
+    const node = makeNode({ kind: 'spot', width: 20, height: 20, label: '' });
+    const svg = renderSpot(node, theme);
+    expect(svg).not.toContain('<text');
   });
 });
 
@@ -443,6 +488,48 @@ describe('T4 — text colour cascade (D3)', () => {
 });
 
 // ---------------------------------------------------------------------------
+// T2f — `AtomTable` grid lines for an all-table-rows action label
+// (`AtomTable.java:150-158`). Jar-verified against `niletu-83-lego826`/
+// `activity-creole-table` (`:|Creole Table Line1|\n|Line2|;`, box
+// x=16 y=16 width=114.875 height=48): 3 horizontal rules (row boundaries
+// at y=28/40/52) + 2 vertical rules (x=26/120.875) bounding the single
+// column.
+// ---------------------------------------------------------------------------
+
+describe('renderAction — AtomTable grid (T2f)', () => {
+  it('draws 3 horizontal + 2 vertical grid lines for a 2-row, 1-column table', () => {
+    const node = makeNode({
+      kind: 'action',
+      label: '|Creole Table Line1|\n|Line2|',
+      x: 16,
+      y: 16,
+      width: 114.875,
+      height: 48,
+    });
+    const svg = renderAction(node, theme);
+    expect(svg).toContain('x1="26" y1="28" x2="120.875" y2="28"');
+    expect(svg).toContain('x1="26" y1="40" x2="120.875" y2="40"');
+    expect(svg).toContain('x1="26" y1="52" x2="120.875" y2="52"');
+    expect(svg).toContain('x1="26" y1="28" x2="26" y2="52"');
+    expect(svg).toContain('x1="120.875" y1="28" x2="120.875" y2="52"');
+    expect((svg.match(/<line/g) ?? []).length).toBe(5);
+    expect(svg).toContain('>Creole Table Line1<');
+    expect(svg).toContain('>Line2<');
+    expect(svg).not.toContain('|');
+  });
+
+  it('draws no grid lines for a plain (non-table) multi-line label', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('<line');
+  });
+
+  it('draws no grid lines when only SOME physical lines are table rows', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 120, height: 40 }), theme);
+    expect(svg).not.toContain('<line');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // amb-T5 — every activity text is positioned by `x` (D2), never
 // `text-anchor`. `FtileBox.java:224-233` (LEFT at `padding.left`, the only
 // reachable root tier today); `FtileDiamondInside.java:94-96` /
@@ -473,9 +560,17 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
     expect(actualX).toBeCloseTo(expectedX, 2);
   });
 
-  it('a labelled hexagon condition centres each line on its own width, no text-anchor', () => {
+  it('a labelled hexagon condition left-aligns every line to ONE shared block x, no text-anchor (IFNL, T3d)', () => {
+    // root's default HorizontalAlignment left (plantuml.skin:12, diamond {}
+    // never overrides it) positions every Sheet stripe at the label
+    // TextBlock's own local x=0; the whole block is centred ONCE
+    // (FtileDiamondInside.java:94-96), not each line on its own width --
+    // verified against vaxiki-78-nice114's jar SVG (all 3 lines share one x).
     const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes\nno', width: 60, height: 40 }), theme);
     expect(svg).not.toContain('text-anchor');
+    const xs = [...svg.matchAll(/<text x="([\d.]+)"/g)].map((m) => m[1]);
+    expect(xs).toHaveLength(2);
+    expect(xs[0]).toBe(xs[1]);
   });
 
   it('SDL chevron labels (single and multi-line) carry no text-anchor', () => {
@@ -679,6 +774,24 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
     expect(svg).toContain('stroke="#555"');
     expect(svg).not.toContain(`fill="${theme.colors.border}"`);
   });
+
+  // N (add2 T3i): `end fork {label}` -- FtileBlackBlock.java:84-92,
+  // 110-112, zafoxu-20-xofe568.
+  it('draws no label text when node.label is unset', () => {
+    const svg = renderBar(makeNode({ kind: 'fork-bar', x: 16, y: 55, width: 225.5, height: 6 }), theme);
+    expect(svg).not.toContain('<text');
+  });
+
+  it('draws the label to the right of the bar, vertically centred on its top edge', () => {
+    const svg = renderBar(
+      makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }),
+      theme,
+    );
+    expect(svg).toContain('x="246.5"');
+    expect(svg).toContain('y="136.056"');
+    expect(svg).toContain('font-size="11"');
+    expect(svg).toContain('>{or}<');
+  });
 });
 
 describe('renderSplitLine — split top/join line (FtileThinSplit)', () => {
@@ -709,7 +822,14 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
   it('partition: unfilled rect, black stroke, LineThickness 1.5 -- not the generic node fill', () => {
     const node = makeNode({ kind: 'partition', x: 16, y: 45, width: 138.4, height: 122 });
     const svg = renderNode(node, theme);
-    expect(svg).toBe('<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>');
+    // Mission `activity-divergence-drive-2` T3g: `USymbolFrame#drawFrame`
+    // (`decoration/symbol/USymbolFrame.java:68-97`) also draws the title-tab
+    // underline `<path>` unconditionally, even with no title (`node.label`
+    // unset here) -- `getWTitle`'s own untitled fallback, `width/3`.
+    expect(svg).toBe(
+      '<rect x="16" y="45" width="138.4" height="122" fill="none" stroke="#000" stroke-width="1.5"/>' +
+        '<path d="M62.133,45 L62.133,50 L55.133,57 L16,57" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
   });
 
   it('group: same composite styling as partition (FromSkinparamToStyle.java:131-132, ONE SName for both)', () => {
@@ -719,5 +839,33 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).toContain('stroke="#000"');
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).not.toContain(theme.colors.nodeBackground);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// add2 T3h (family CSTYLE): `renderNode`'s `'if-split'` case picks the
+// square polygon under `skinparam ConditionStyle InsideDiamond`, the
+// hexagon otherwise -- `'while-header'` is unaffected (T3f's family).
+// ---------------------------------------------------------------------------
+
+describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
+  it('draws the 7-point hexagon by default (no conditionStyle set)', () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('25,32.5,37,15');
+  });
+
+  it('draws the unclosed 4-point rhombus under ConditionStyle InsideDiamond (carapo-31-bisi880)', () => {
+    const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, insideDiamond);
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
+  });
+
+  it("'while-header' ignores conditionStyle (T3f's family, not gated here)", () => {
+    const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+    const node = makeNode({ kind: 'while-header', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, insideDiamond);
+    expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
   });
 });

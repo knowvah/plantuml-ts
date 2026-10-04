@@ -59,13 +59,48 @@ const URL_TAG_SOURCE = '\\[\\[([^\\[\\]]*(?:\\][^\\[\\]]+)*)\\]\\]';
 
 const HYPERLINK_COLOR = '#0000FF';
 
+/**
+ * add2 T2d (laxibe-66-teme800): a `{tooltip}` is only a tooltip when
+ * nothing but the label/end follows its closing brace -- upstream's
+ * `S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL` requires the Link to
+ * stop, THEN `(?:[%s]*\{([^{}]*)\})?` (optional tooltip), THEN
+ * `(?:[%s]([^%s\{\}\[\]][^\[\]]*))?` (optional label, which always starts
+ * with REQUIRED whitespace), THEN `END_PART` --
+ * `~/git/plantuml/.../url/UrlBuilder.java:76-80`:
+ * ```java
+ * private static final String S_LINK_WITH_OPTIONAL_TOOLTIP_WITH_OPTIONAL_LABEL = START_PART + //
+ *         "([^%s%g\\[\\]]+?)" + // Link
+ *         "(?:[%s]*\\{([^{}]*)\\})?" + // Optional tooltip
+ *         "(?:[%s]([^%s\\{\\}\\[\\]][^\\[\\]]*))?" + // Optional label
+ *         END_PART;
+ * ```
+ * So a `}` immediately glued to more non-whitespace text (`{dd}sss`) can
+ * never satisfy either the label branch (needs LEADING whitespace) or
+ * `END_PART` (needs `]]` right there) -- the lazy Link group is forced to
+ * keep growing PAST the brace pair instead, swallowing it as literal link
+ * text. Mirrored here as a lookahead: a `{...}` only counts as the tooltip
+ * when followed by whitespace or the end of `inner` (`$` -- `inner` is
+ * already everything between the `[[`/`]]` delimiters, so "end of inner"
+ * IS "immediately before `]]`"). `[^{}]*` matches the Java capture
+ * (`[^{}]*`) exactly.
+ */
+const TOOLTIP_RE = /\{([^{}]*)\}(?=\s|$)/;
+
+/** Finds the (at most one) upstream-recognized tooltip in `inner` and
+ *  returns `inner` with it excised -- shared by {@link resolveLabel} and
+ *  {@link resolveUrlAndTooltip} so both read the SAME boundary rule. */
+function extractTooltip(inner: string): { withoutTooltip: string; tooltip: string | undefined } {
+  const m = TOOLTIP_RE.exec(inner);
+  if (m === null) return { withoutTooltip: inner, tooltip: undefined };
+  return { withoutTooltip: inner.slice(0, m.index) + inner.slice(m.index + m[0].length), tooltip: m[1] };
+}
+
 /** Upstream: `Url`'s label-defaulting ctor -- strip an optional
  *  `{tooltip}`, the first whitespace-run is the url, everything after is
  *  the label; falls back to the url itself when nothing remains. */
 function resolveLabel(inner: string): string {
-  const withoutTooltip = inner
-    .replace(/\{[^}]*\}/g, '')
-    .replace(/\s+/g, ' ')
+  const withoutTooltip = extractTooltip(inner)
+    .withoutTooltip.replace(/\s+/g, ' ')
     .trim();
   const spaceIdx = withoutTooltip.indexOf(' ');
   return spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(spaceIdx + 1).trim();
@@ -77,14 +112,11 @@ function resolveLabel(inner: string): string {
  *  tooltip-defaulting ctor rule, same precedent `class-url.ts#buildUrl`
  *  already applies for the classifier-level grammar). */
 function resolveUrlAndTooltip(inner: string): { url: string; tooltip: string } {
-  const tooltipMatch = /\{([^}]*)\}/.exec(inner);
-  const withoutTooltip = inner
-    .replace(/\{[^}]*\}/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const { withoutTooltip: stripped, tooltip } = extractTooltip(inner);
+  const withoutTooltip = stripped.replace(/\s+/g, ' ').trim();
   const spaceIdx = withoutTooltip.indexOf(' ');
   const url = spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(0, spaceIdx);
-  return { url, tooltip: tooltipMatch?.[1] ?? url };
+  return { url, tooltip: tooltip ?? url };
 }
 
 /**

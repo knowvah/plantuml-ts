@@ -28,6 +28,7 @@ function makeOut(): Out {
     edgeMeta: [],
     reservations: [],
     nextId: (prefix: string) => `${prefix}${n++}`,
+    groupScope: [],
   };
 }
 
@@ -72,6 +73,9 @@ interface RepeatTileOptions {
   conditionOffsetY: number;
   width: number;
   backConnection: RepeatBackConnection;
+  /** `GtileRepeat.weldDiamond` (D-new, T1p-d) -- omitted (`undefined`) by
+   *  every pre-existing test below, matching a repeat with no `break`. */
+  weldDiamond?: { offsetX: number; offsetY: number };
 }
 
 /** A duck-typed `GtileRepeat` -- see the module doc for why a plain object
@@ -88,6 +92,7 @@ function makeRepeatTile(o: RepeatTileOptions): GtileRepeat {
     conditionOffsetY: o.conditionOffsetY,
     width: o.width,
     backConnection: o.backConnection,
+    weldDiamond: o.weldDiamond,
   } as unknown as GtileRepeat;
 }
 
@@ -475,5 +480,122 @@ describe('walkRepeat — draw order: body, entry, condition, then In, Back, Out 
     expect(out.edges[2]!.emphasize).toBeUndefined();
     expect(out.edges[2]!.points[0]).toEqual({ x: body.getCoord(SOUTH_HOOK).x, y: 50 + body.getCoord(SOUTH_HOOK).y });
     expect(out.edges[0]!.points[0]).toEqual({ x: entry.getCoord(SOUTH_HOOK).x, y: entry.getCoord(SOUTH_HOOK).y });
+  });
+});
+
+/** A duck-typed `GtileTopDown` body with N `gtile-break` children in a
+ *  vertical sequence, zero-width/offset so each break's own `x` stays at
+ *  `bodyX` -- enough to drive {@link walkRepeat}'s `bodyNodeStart`/`End`
+ *  capture and {@link pushRepeatWeldings}'s own scan without a real
+ *  `tile-layout.ts#tileRepeat` call. */
+function makeBreaksBody(count: number): Tile {
+  return {
+    kind: 'gtile-top-down' as const,
+    width: 20,
+    height: count * 20,
+    children: Array.from(
+      { length: count },
+      () => ({ kind: 'gtile-break', width: 20, height: 20, hasPointOut: () => false }) as Tile,
+    ),
+    childOffsets: Array.from({ length: count }, (_, i) => i * 20),
+    childOffsetsX: Array.from({ length: count }, () => 0),
+    getCoord: (hook: HookName): GPoint => (hook === SOUTH_HOOK ? { x: 10, y: count * 20 } : { x: 10, y: 0 }),
+    hasPointOut: () => false,
+  } as unknown as Tile;
+}
+
+// T1p-d D-new: `FtileFactoryDelegatorRepeat.repeat()`'s own break-weld
+// connections (`:132-165`) plus the diamond `assembly(...)` implies.
+describe('walkRepeat — break weldings (D-new, FtileFactoryDelegatorRepeat.java:123-169)', () => {
+  it('pushes nothing extra when weldDiamond is undefined (no break in this repeat)', () => {
+    const entry = makeLeaf('stub-entry', 24, 24, 12);
+    const body = makeLeaf('stub-body', 40, 60, 12);
+    const tile = makeRepeatTile({
+      entry,
+      body,
+      condition: filler.condition,
+      entryOffsetX: 0,
+      entryOffsetY: 0,
+      bodyOffsetX: 0,
+      bodyOffsetY: 50,
+      conditionOffsetX: filler.conditionOffsetX,
+      conditionOffsetY: filler.conditionOffsetY,
+      width: 100,
+      backConnection: 'simple2',
+    });
+    const out = makeOut();
+    walkRepeat(tile, 0, 0, undefined, out);
+    expect(out.nodes.some((n) => n.kind === 'repeat-start' && n.id.startsWith('repeat-start'))).toBe(false);
+  });
+
+  it('a single break: pushes the diamond node, the condition-exit edge, and a 4-point asToRight weld', () => {
+    const entry = makeLeaf('stub-entry', 24, 24, 12);
+    const body = makeBreaksBody(1);
+    const tile = makeRepeatTile({
+      entry,
+      body,
+      condition: filler.condition,
+      entryOffsetX: 0,
+      entryOffsetY: 0,
+      bodyOffsetX: 0,
+      bodyOffsetY: 50,
+      conditionOffsetX: 0,
+      conditionOffsetY: 120,
+      width: 100,
+      backConnection: 'simple2',
+      weldDiamond: { offsetX: -2, offsetY: 200 },
+    });
+    const out = makeOut();
+    walkRepeat(tile, 0, 0, undefined, out);
+
+    const diamond = out.nodes.find((n) => n.kind === 'repeat-start' && n.x === -2 && n.y === 200);
+    expect(diamond).toMatchObject({ x: -2, y: 200, width: 24, height: 24 });
+
+    // condition's own SOUTH_HOOK (0+25, 120+40=160) -> diamond's own NORTH_HOOK (-2+12, 200).
+    const condEdge = out.edges.find((e) => e.points[0]!.y === 160);
+    expect(condEdge!.points).toEqual([
+      { x: 25, y: 160 },
+      { x: 10, y: 200 },
+    ]);
+
+    // the break's own CENTER (x=0+10=10, y=bodyOffsetY+0=50) -> rail
+    // (tileX=0) -> diamond WEST_HOOK (-2, 212).
+    const weldEdge = out.edges.find((e) => e.points.length === 4 && e.points[3]!.x === -2);
+    expect(weldEdge!.points).toEqual([
+      { x: 10, y: 50 },
+      { x: 0, y: 50 },
+      { x: 0, y: 212 },
+      { x: -2, y: 212 },
+    ]);
+  });
+
+  it('two breaks: the first weld is the 4-point asToRight path, the second is a bare 2-point asToLeft stop', () => {
+    const entry = makeLeaf('stub-entry', 24, 24, 12);
+    const body = makeBreaksBody(2);
+    const tile = makeRepeatTile({
+      entry,
+      body,
+      condition: filler.condition,
+      entryOffsetX: 0,
+      entryOffsetY: 0,
+      bodyOffsetX: 0,
+      bodyOffsetY: 50,
+      conditionOffsetX: 0,
+      conditionOffsetY: 120,
+      width: 100,
+      backConnection: 'simple2',
+      weldDiamond: { offsetX: -2, offsetY: 200 },
+    });
+    const out = makeOut();
+    walkRepeat(tile, 0, 0, undefined, out);
+
+    const weldEdges = out.edges.filter((e) => e.points[0]!.y === 50 || e.points[0]!.y === 70);
+    expect(weldEdges).toHaveLength(2);
+    expect(weldEdges[0]!.points).toHaveLength(4); // first break (y=50): full rail+diamond path.
+    expect(weldEdges[1]!.points).toHaveLength(2); // second break (y=70): bare stop on the rail.
+    expect(weldEdges[1]!.points).toEqual([
+      { x: 10, y: 70 },
+      { x: 0, y: 70 },
+    ]);
   });
 });

@@ -26,6 +26,15 @@ import { parseNodes } from './node-dispatch.js';
 // ---------------------------------------------------------------------------
 // if / elseif / else / endif
 // ---------------------------------------------------------------------------
+
+/** Stop-keyword PREFIX test for `elseif`, used only by
+ *  {@link consumeIfClauses}'s `parseNodes` stop-list -- not the full
+ *  {@link RE_ELSEIF} match (which also needs `then (label)`'s trailing
+ *  shape). Mirrors `RE_ELSEIF`'s own leading `(incoming)` group (see its
+ *  doc, `dispatch-support.ts`) so a decorated `elseif` stops a body scan
+ *  the same as a bare one. */
+const RE_ELSEIF_STOP = /^(?:\([^)]*\)\s*)?else\s*if\b/i;
+
 interface IfClauses {
   cursor: number;
   elseIfBranches: ActivityElseIf[];
@@ -42,22 +51,30 @@ export function stripTrailingSemi(raw: string): string {
 }
 
 /**
- * `\n`/`\t`/`\\` escapes inside a branch label's raw text, mirroring
- * `Display#getWithNewlines`'s own backslash pass (`klimt/creole/Display
- * .java:287-313`): `\n` ends the current line (joined back with a REAL
- * newline here, since `renderIfLabel`'s `label.split('\n')` -- a literal
- * newline character -- is what turns one line into many), `\t` appends a
- * literal tab, `\\` appends a literal backslash, and any OTHER character
- * after a `\` is kept verbatim (both characters) -- upstream's own
- * trailing `else { current.append(c); current.append(c2); }`
- * (`:311-313`), not a silent drop (`getWithNewlines3`'s shorter sibling
- * DOES drop it, but that function is not the one any label here reaches).
+ * `\n`/`\t`/`\\` escapes inside a branch label's OR a condition's raw
+ * text, mirroring `Display#getWithNewlines`'s own backslash pass
+ * (`klimt/creole/Display.java:287-313`): `\n` ends the current line
+ * (joined back with a REAL newline here, since `renderIfLabel`'s
+ * `label.split('\n')` -- a literal newline character -- is what turns one
+ * line into many), `\t` appends a literal tab, `\\` appends a literal
+ * backslash, and any OTHER character after a `\` is kept verbatim (both
+ * characters) -- upstream's own trailing `else { current.append(c);
+ * current.append(c2); }` (`:311-313`), not a silent drop
+ * (`getWithNewlines3`'s shorter sibling DOES drop it, but that function is
+ * not the one any label/condition here reaches).
  * Before this (`bazuma-86-metu353`), an `else (...\n...)` label's literal
  * two-character `\`+`n` reached `renderIfLabel` unconverted, so its
  * `.split('\n')` (a real newline) never split it into multiple `<text>`
  * lines and `gtile-diamond-inside.ts`'s own `measureLabel` summed every
  * character's width (including the literal `\`/`n` glyphs) as ONE line,
  * reserving neither the right width nor the right height in layout.
+ * IFNL (T3d, `vaxiki-78-nice114`): the `if`/`elseif` CONDITION itself goes
+ * through the exact same `Display.getWithNewlines` call upstream
+ * (`CommandIf2.java:151`, `CommandIf4.java:120`, `CommandElseIf2.java:151`)
+ * but this module's own `matchIfHeader`/`consumeElseifClause` never applied
+ * {@link unescapeLabelNewlines} to the `condition` field, only to
+ * `thenLabel`/branch labels -- the literal `\`+`n` rendered verbatim in the
+ * hexagon's own text.
  * `\r`/`\l` (`:291-296`, upstream's own right/left natural-alignment
  * escapes) are a documented gap: no branch-label fixture in this task's
  * cohort uses either, and porting them means threading a new per-label
@@ -65,7 +82,7 @@ export function stripTrailingSemi(raw: string): string {
  * `renderIfLabel` -- a separate mechanism from "multiline branch label",
  * left for a fixture that actually needs it.
  */
-function unescapeLabelNewlines(text: string): string {
+export function unescapeLabelNewlines(text: string): string {
   let out = '';
   for (let i = 0; i < text.length; i++) {
     const c = text[i]!;
@@ -86,7 +103,7 @@ function unescapeLabelNewlines(text: string): string {
 /** {@link unescapeLabelNewlines} applied only when the captured group
  *  matched -- every call site below immediately follows an optional
  *  regex-group `.trim()`. */
-function unescapeLabel(text: string | undefined): string | undefined {
+export function unescapeLabel(text: string | undefined): string | undefined {
   return text === undefined ? text : unescapeLabelNewlines(text);
 }
 
@@ -103,14 +120,18 @@ function consumeElseifClause(
   ifInnerStops: StopKeywords,
 ): ElseifStep | ParseRefusal {
   const elseifMatch = RE_ELSEIF.exec(clauseLine)!;
-  const eiLabel = unescapeLabel(elseifMatch[2]?.trim());
+  // ELSEIFIN: group 1 is the leading `(incoming)` decoration -- shifts
+  // condition/then-label to groups 2/3 (dispatch-support.ts's own doc).
+  const incomingLabel = unescapeLabel(elseifMatch[1]?.trim());
+  const eiLabel = unescapeLabel(elseifMatch[3]?.trim());
   const eiResult = parseNodes(ctx, cursor + 1, ifInnerStops);
   if (isRefusal(eiResult)) return eiResult;
   return {
     cursor: eiResult.nextIdx,
     branch: {
-      condition: elseifMatch[1]!.trim(),
+      condition: unescapeLabelNewlines(elseifMatch[2]!.trim()),
       ...(eiLabel !== undefined && eiLabel !== '' ? { label: eiLabel } : {}),
+      ...(incomingLabel !== undefined && incomingLabel !== '' ? { incomingLabel } : {}),
       body: eiResult.nodes,
     },
   };
@@ -132,7 +153,7 @@ interface ElseStep {
  */
 function consumeElseClause(ctx: ParseContext, cursor: number, label: string | undefined): ElseStep | ParseRefusal {
   const { lines } = ctx;
-  const elseResult = parseNodes(ctx, cursor + 1, ['endif']);
+  const elseResult = parseNodes(ctx, cursor + 1, [RE_ENDIF]);
   if (isRefusal(elseResult)) return elseResult;
   let next = elseResult.nextIdx;
   if (next < lines.length && RE_ENDIF.test(stripTrailingSemi(lines[next]!.trim()))) {
@@ -250,11 +271,13 @@ interface IfHeader {
  */
 function matchIfHeader(line: string): IfHeader | null {
   const if4 = RE_IF4.exec(line);
-  if (if4 !== null) return { condition: if4[1]!.trim(), thenLabel: unescapeLabel(if4[2]?.trim()) };
+  if (if4 !== null) return { condition: unescapeLabelNewlines(if4[1]!.trim()), thenLabel: unescapeLabel(if4[2]?.trim()) };
   const if2 = RE_IF.exec(line);
-  if (if2 !== null) return { condition: if2[1]!.trim(), thenLabel: unescapeLabel(if2[2]?.trim()) };
+  if (if2 !== null) return { condition: unescapeLabelNewlines(if2[1]!.trim()), thenLabel: unescapeLabel(if2[2]?.trim()) };
   const legacy = RE_IF_LEGACY.exec(line);
-  if (legacy !== null) return { condition: legacy[1]!.trim(), thenLabel: unescapeLabel(legacy[2]!.trim()) };
+  if (legacy !== null) {
+    return { condition: unescapeLabelNewlines(legacy[1]!.trim()), thenLabel: unescapeLabel(legacy[2]!.trim()) };
+  }
   return null;
 }
 
@@ -275,7 +298,18 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
   const openerSwimlane = swimlaneSpread(ctx);
 
   // then-branch stops at elseif, else, endif
-  const IF_INNER_STOPS: StopKeywords = ['elseif', 'else', 'endif'];
+  // `RE_ENDIF` (not the literal `'endif'`) so the then-branch body scan
+  // also stops at a zero-or-more-space `end if` closer (mission add2-T2e,
+  // D6: `zinelo-77-losu727`'s nested `end if` refused against the
+  // literal-string-only stop before this). `RE_ELSEIF_STOP` (not the
+  // literal `'elseif'`) so the scan also stops at a leading-`(incoming)`-
+  // decorated `elseif` (`dulate-94-bupu593`/`nolubo-93-rula384`): the
+  // literal-prefix stop never matched `(additional text) elseif (...)`,
+  // so the line fell through to the generic body dispatch instead of
+  // reaching {@link classifyClauseLine}'s own `RE_ELSEIF` match, and
+  // refused there (no body handler recognizes a bare `(label) elseif`
+  // line).
+  const IF_INNER_STOPS: StopKeywords = [RE_ELSEIF_STOP, 'else', RE_ENDIF];
   const thenResult = parseNodes(ctx, idx + 1, IF_INNER_STOPS);
   if (isRefusal(thenResult)) return thenResult;
   const thenBranch = thenResult.nodes;

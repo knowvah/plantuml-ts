@@ -62,6 +62,50 @@ describe('layoutActivity — with-links: both branches non-empty, both continue'
   });
 });
 
+describe('layoutActivity — with-links: conditionEndStyle hline, both branches continue (T1p-a)', () => {
+  // Same shape as the first describe block above (saxeku-17-gume203's own
+  // unlaned shape), but `hline`: no `if-merge` node, and the "both have a
+  // point out" case takes `ConnectionVerticalOut` x2 + `ConnectionHline`
+  // (`FtileIfWithLinks.java:546-550`) instead of `ConnectionVerticalThen
+  // Horizontal` x2 into the merge rhombus.
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenLabel: 'yes',
+        elseLabel: 'no',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'b' }],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const hlineTheme: Theme = { ...theme, conditionEndStyle: 'hline' };
+  const geo = layoutActivity(ast, hlineTheme, measurer);
+
+  it('no if-merge node under hline', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-merge')).toBe(false);
+  });
+
+  it('emits exactly 5 connectors: in1, in2, ConnectionVerticalOut x2, ConnectionHline', () => {
+    expect(geo.edges.length).toBe(5);
+  });
+
+  it('ConnectionVerticalOut (edges 2,3) keep their default arrowhead; ConnectionHline (edge 4) has none', () => {
+    expect(geo.edges[2]!.arrowhead).toBeUndefined();
+    expect(geo.edges[3]!.arrowhead).toBeUndefined();
+    expect(geo.edges[4]!.arrowhead).toBe(false);
+  });
+
+  it('ConnectionHline is a flat horizontal bar at the tile"s own bottom', () => {
+    const hline = geo.edges[4]!;
+    expect(hline.points).toHaveLength(2);
+    expect(hline.points[0]!.y).toBe(hline.points[1]!.y);
+  });
+});
+
 describe('layoutActivity — with-links: then ends in stop (no merge, Direct out connector)', () => {
   const ast: ActivityDiagramAST = {
     nodes: [
@@ -128,11 +172,11 @@ describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and em
 
   const branch1: IfWithLinksBranch = { tile: stubTile(0, 0), isEmpty: true };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
-  const tile = new GtileIfWithLinks(diamond, branch1, branch2, 0);
+  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0);
 
   function makeOut(): Out {
     let n = 0;
-    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
+    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: []  };
   }
 
   it('in1 (to the empty branch) has no arrowhead', () => {
@@ -161,5 +205,62 @@ describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and em
     walkIfWithLinks(tile, 0, 0, undefined, out);
     const out2 = out.edges[3]!;
     expect(out2.emphasize).toBeUndefined();
+  });
+});
+
+describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing template (T1p-g)', () => {
+  const bounder: StringBounder = { getDimension: (t: string) => ({ width: t.length * 7, height: 14 }) };
+  const diamond = new GtileDiamondInside('c', {}, bounder, theme);
+
+  function stubTile(width: number, height: number, lane: string): Tile {
+    return {
+      kind: 'stub',
+      width,
+      height,
+      swimlaneOut: lane,
+      getCoord: (hook) =>
+        hook === NORTH_HOOK
+          ? { x: width / 2, y: 0 }
+          : hook === SOUTH_HOOK
+            ? { x: width / 2, y: height }
+            : { x: 0, y: 0 },
+      hasPointOut: () => true,
+    };
+  }
+
+  const branch1: IfWithLinksBranch = { tile: stubTile(40, 30, '2'), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 30, '3'), isEmpty: false };
+  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, 'hline');
+
+  function makeOut(): Out {
+    let n = 0;
+    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: []  };
+  }
+
+  it("the Hline edge's own meta carries both branches' out-x tagged with their own outcome lane", () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 0, 0, '2', out);
+    const hlineMeta = out.edgeMeta[out.edgeMeta.length - 1]!;
+    expect(hlineMeta.hline).toBeDefined();
+    const candidates = hlineMeta.hline!.candidates;
+    expect(candidates.map((c) => c.lane)).toEqual(['2', '3']);
+    expect(candidates.every((c) => Number.isFinite(c.x))).toBe(true);
+    expect(hlineMeta.hline!.unfiltered).toEqual([]);
+  });
+
+  it('`low`/`high` are the tile\'s own absolute left/right edge (x, x + width)', () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 5, 0, '2', out);
+    const hlineMeta = out.edgeMeta[out.edgeMeta.length - 1]!;
+    expect(hlineMeta.hline!.low).toBe(5);
+    expect(hlineMeta.hline!.high).toBe(5 + tile.width);
+  });
+
+  it('the pushed edge itself stays the UNLANED getMinmaxSimple extent (unchanged by the template)', () => {
+    const out = makeOut();
+    walkIfWithLinks(tile, 0, 0, '2', out);
+    const hline = out.edges[out.edges.length - 1]!;
+    expect(hline.points).toHaveLength(2);
+    expect(hline.arrowhead).toBe(false);
   });
 });

@@ -17,7 +17,7 @@
  *   east, in that order.
  */
 
-import type { DiamondSide, GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode } from './tile-coordinates.js';
@@ -30,7 +30,7 @@ import { pushNode } from './tile-coordinates.js';
  * `walk-if-down.ts`.
  */
 export function emitDiamondLabels(
-  diamond: GtileDiamondInside,
+  diamond: DiamondConditionTile,
   origin: GPoint,
   sides: readonly DiamondSide[],
   lane: string | undefined,
@@ -69,7 +69,7 @@ export function emitDiamondLabels(
  * pushed with (`renderHexagonOwnLabel` centers on that box).
  */
 export function emitDiamondOwnLabel(
-  diamond: GtileDiamondInside,
+  diamond: DiamondConditionTile,
   box: { x: number; y: number; width: number; height: number },
   lane: string | undefined,
   out: Out,

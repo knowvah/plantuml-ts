@@ -46,10 +46,13 @@ import { UText, FontStyle } from '../../core/klimt/shape/UText.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
-import { linkWrap } from '../../core/svg.js';
+import { linkWrap, line, type LineStyle } from '../../core/svg.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import type { CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
+import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
+import { activityFontColor } from './activity-text-style.js';
+import type { Theme } from '../../core/theme.js';
 
 /** `$version$` — the same placeholder literal `state/renderer-arrowhead.ts
  *  #drawArrowMarkup` and `class/renderer-group.ts#svgFromShapes` pass to a
@@ -78,6 +81,14 @@ export interface ActivityTextStyle {
   readonly fontFamily: string;
   readonly fontSize: number;
   readonly fill: string;
+  /** add2 T3e (family F): `theme.hyperlinkUnderline` (`core/theme-root-
+   *  fields.ts`), forwarded by the caller that resolved it. `undefined`
+   *  (no caller sets it yet) reads as `true` -- see {@link fontConfigForRun}. */
+  readonly hyperlinkUnderline?: boolean;
+  /** add2 T3e (family F): `theme.svgLinkTarget`, forwarded by the caller
+   *  that resolved it. `undefined` falls through to `core/svg.ts
+   *  #linkWrap`'s own `'_top'` parameter default. */
+  readonly svgLinkTarget?: string;
 }
 
 function toFontConfiguration(style: ActivityTextStyle): FontConfiguration {
@@ -115,17 +126,67 @@ function drawCreoleTableRow(x: number, y: number, content: string, style: Activi
   return out;
 }
 
+/**
+ * The merged table's own grid `<line>` rules `drawCreoleTableRow`'s own
+ * doc comment deferred to this call site (T2f, mission `activity-
+ * divergence-drive-2`) -- `AtomTable#drawU`'s `hline`/`vline` loops
+ * (`AtomTable.java:150-158`), collapsed to the single-column,
+ * uniform-row-height case this mission's two rows (`activity-creole-
+ * table`, `niletu-83-lego826`) exercise: `rowCount + 1` horizontal rules
+ * at `getStartingY(i) = i * lineHeight`, 2 vertical rules (one column) at
+ * `getStartingX({0, 1}) = {0, tableWidth}`. `lineColor` defaults to the
+ * font's own resolved color, not a fixed ink (`StripeTable.java:79-83`).
+ * The table block is centred in the box the SAME way `renderMultilineText`
+ * centres plain text (`TABLE_BLOCK_MARGIN_Y`'s own `AtomWithMargin(2,2)`
+ * wrap washes out of a symmetric centre, `gtile-action.ts`'s own doc).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomTable.java:150-158
+ */
+export function renderCreoleTableGrid(
+  box: { x: number; y: number; width: number; height: number },
+  lines: readonly string[],
+  lineHeight: number,
+  theme: Theme,
+): string {
+  if (lines.length === 0 || !lines.every(isTableRowLine)) return '';
+  const rowCount = lines.length;
+  const pad = activityPadding('activity');
+  const left = box.x + pad;
+  const width = box.width - 2 * pad;
+  const tableHeight = rowCount * lineHeight;
+  const top = box.y + box.height / 2 - tableHeight / 2;
+  const lineStyle: LineStyle = {
+    stroke: activityFontColor(theme, 'activity'),
+    strokeWidth: activityLineThickness(theme, 'activity'),
+  };
+  let out = '';
+  for (let i = 0; i <= rowCount; i += 1) {
+    const y = top + i * lineHeight;
+    out += line(left, y, left + width, y, lineStyle);
+  }
+  out += line(left, top, left, top + tableHeight, lineStyle);
+  out += line(left + width, top, left + width, top + tableHeight, lineStyle);
+  return out;
+}
+
 /** One `CreoleTextRun`'s `FontStyleFlags` -> the `FontStyle` set
  *  `DriverTextSvg` reads -- the SAME four flags `state/renderer-box.ts
  *  #runDecoration` maps to `text-decoration`, applied here as
  *  `FontConfiguration.styles` instead since activity draws through the
- *  klimt driver directly (D1), not `core/svg.ts#text`'s own attribute bag. */
+ *  klimt driver directly (D1), not `core/svg.ts#text`'s own attribute bag.
+ *
+ * add2 T3e (family F): a url run's `run.style.underline` is set
+ * unconditionally by `CommandCreoleUrl.ts` (klimt, outside this task's
+ * write-set) -- `SkinParam#useUnderlineForHyperlink()` (`skin/
+ * SkinParam.java:1056-1060`) only turns it OFF, so the suppression belongs
+ * here, gated on `run.url !== undefined` so a user's own explicit creole
+ * underline on NON-link text is never touched. */
 function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontConfiguration {
   const styles = new Set<FontStyle>();
   if (run.style.bold) styles.add(FontStyle.BOLD);
   if (run.style.italic) styles.add(FontStyle.ITALIC);
   if (run.style.underline) styles.add(FontStyle.UNDERLINE);
   if (run.style.strike) styles.add(FontStyle.STRIKE);
+  if (run.url !== undefined && style.hyperlinkUnderline === false) styles.delete(FontStyle.UNDERLINE);
   return { family: style.fontFamily, size: run.size, color: run.color ?? style.fill, styles };
 }
 
@@ -139,21 +200,26 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * SAME string-emitting `<a>` wrapper every other engine's url runs use,
  * jar-verified byte-exact per that function's own doc comment).
  *
- * Two narrowed pieces, both reported rather than fixed here:
- *  - `tooltip: run.url` (not the creole command's own resolved
- *    `{tooltip}`) is `creole-text-lines.ts#textAtomMeasured`'s own gap --
- *    that SHARED seam's `CreoleTextRun.url` carries only the href, never
- *    `CreoleAtomUrl.tooltip` (`core/svek/image/creole-text-lines.ts`,
- *    outside this task's write-set); `state/renderer-box.ts
- *    #renderStateRuns` draws the SAME narrowed value, so this is an
- *    inherited gap, not a new one (affects `zamagu-75-vape137`'s `title`).
- *  - `skinparam hyperlinkUnderline`/`svgLinkTarget` are NOT read: neither
- *    has a `Theme` field in this port yet (`activity-text-style.ts
- *    #activityHorizontalAlignment`'s own identical "FILED, not
- *    implemented" precedent) -- `linkWrap`'s `target` keeps its own
- *    `_top` default and every url run keeps `FontStyle.UNDERLINE`
- *    (`CommandCreoleUrl.ts`'s own unconditional `.add(FontStyle.UNDERLINE)`),
- *    affecting `gaxezi-48-zesa921`/`nisexe-68-vabu320`/`pekuxe-00-bovi270`.
+ * T2c: `tooltip: run.tooltip ?? run.url` now carries the creole command's
+ * own resolved `{tooltip}` -- `creole-text-lines.ts#textAtomMeasured` was
+ * dropping `atom.url.tooltip` on the floor (`CreoleAtomUrl` already
+ * carried both halves correctly; only the copy into `CreoleTextRun` was
+ * narrowed). Fixes `zamagu-75-vape137`'s `title`/`xlink:title`.
+ * `state/renderer-box.ts#renderStateRuns` (a different engine) still
+ * passes `run.url` as its own `tooltip` arg, so it is UNCHANGED by the
+ * new field's mere existence -- not this task's row to fix.
+ *
+ * add2 T3e (CORRECTED -- the prior version of this comment named `Theme`
+ * fields that did not yet exist): `hyperlinkUnderline`/`svgLinkTarget` now
+ * both read `theme`-derived values off {@link ActivityTextStyle}, applied
+ * by {@link fontConfigForRun} (underline) and below (`linkWrap`'s
+ * `target`). STILL NOT CLOSED, re-slotted: the one call site that would
+ * populate those two `ActivityTextStyle` fields for an ACTION node's label
+ * (`activity-renderer-shapes.ts#renderAction`) is outside this task's
+ * write-set, so both stay `undefined` (= upstream's own defaults, no
+ * behavior change) until that file forwards `theme.hyperlinkUnderline`/
+ * `theme.svgLinkTarget`. Affects `gaxezi-48-zesa921`/`nisexe-68-vabu320`/
+ * `pekuxe-00-bovi270`.
  */
 function drawCreoleUrlLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
@@ -167,7 +233,10 @@ function drawCreoleUrlLine(x: number, y: number, content: string, style: Activit
     // reaches a `[[url]]` line that also carries `<latex>`/`<math>`.
     if (run.text === '') continue;
     const drawn = drawRun(cx, y + run.dy, run.text, fontConfigForRun(run, style));
-    out += run.url !== undefined ? linkWrap(drawn, { url: run.url, tooltip: run.url }) : drawn;
+    out +=
+      run.url !== undefined
+        ? linkWrap(drawn, { url: run.url, tooltip: run.tooltip ?? run.url }, style.svgLinkTarget)
+        : drawn;
     cx += MEASURER.measure(run.text, { family: style.fontFamily, size: run.size }).width;
   }
   return out;

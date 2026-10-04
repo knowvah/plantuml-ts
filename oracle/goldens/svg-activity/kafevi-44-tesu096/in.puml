@@ -1,0 +1,20 @@
+@startuml
+skinparam activity {
+  BackgroundColor lightBlue
+  BorderColor darkBlue
+  DiamondFontColor red
+  DiamondFontSize 40
+  ArrowFontSize 20
+}
+
+start
+
+:step1;
+
+if (Why this text is black?) then (YES)
+stop
+else (no)
+:step2;
+endif
+stop
+@enduml

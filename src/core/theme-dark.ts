@@ -23,6 +23,8 @@
  * untouched by `ColorMapper.DARK_MODE`) — enforced by the `??=` gate at the
  * call site, not by this module.
  */
+import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
+
 export const DARK_MODE_DEFAULTS = {
   /**
    * `document { BackGroundColor #1B1B1B }` — plantuml.skin:572. The root SVG
@@ -67,4 +69,15 @@ export const DARK_MODE_DEFAULTS = {
    * hardcoded kind defaults.
    */
   spotClassBackground: '#2E5233',
+  /**
+   * add2 T3h (family DARK): `activityDiagram { circle { start, stop, end {
+   * LineColor #d; BackgroundColor #d } } }` — plantuml.skin:687-692. The
+   * activity engine's OWN dark override for its terminal circles (distinct
+   * from the light-mode `#2` the same block uses at `:290-295`/`:376-382`,
+   * `activity-style-defaults.ts#CIRCLE_INK`) — jar-verified against
+   * `levuma-67-cego489`'s own dark-mode SVG (`ellipse` fill/stroke `#DDD`).
+   * `resolveColorToSvgHex('#d')` is the SAME 1-digit-shorthand parser
+   * `CIRCLE_INK` already uses, not a hand-typed literal.
+   */
+  activityCircleInk: resolveColorToSvgHex('#d'),
 } as const;
