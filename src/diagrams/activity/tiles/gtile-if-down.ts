@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import type { GtileDiamondInside } from './gtile-diamond-inside.js';
+import type { DiamondConditionTile } from './gtile-diamond-inside.js';
 
 /** `ConditionalBuilder.java:171-172`: `new FtileMinWidthCentered(branch.getFtile(), 30)`. */
 const MIN_BRANCH_WIDTH = 30;
@@ -118,7 +118,7 @@ interface CoreGeometry {
  *  eastLabelWidth + stopWidth / 2)`. Shared by {@link computeGeometry}'s own
  *  width term and `computeStopOffsets`' own `stopX` -- both need the exact
  *  same value, never two independently-rounded copies. */
-function additionalWidthFor(diamond1: GtileDiamondInside, optionalStopWidth: number): number {
+function additionalWidthFor(diamond1: DiamondConditionTile, optionalStopWidth: number): number {
   const eastLabelWidth = diamond1.labelAt('east')?.width ?? 0;
   return Math.max(optionalStopWidth, eastLabelWidth + optionalStopWidth / 2);
 }
@@ -133,7 +133,7 @@ interface AlignedTotal {
 /** `d1.appendBottom(then).appendBottom(d2)`, split out of {@link
  *  computeGeometry} only to keep that function's own NLOC under the file's
  *  limit. @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:547-550 */
-function computeAlignedTotal(diamond1: GtileDiamondInside, main: Tile, flags: IfDownFlags): AlignedTotal {
+function computeAlignedTotal(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags): AlignedTotal {
   const d1Geo: AlignedGeo = { left: diamond1.width / 2, width: diamond1.width, height: diamond1.height };
   const thenPadded = paddedWidth(main);
   const thenGeo: AlignedGeo = { left: thenPadded.paddedLeft, width: thenPadded.outer, height: main.height };
@@ -155,7 +155,7 @@ function diamond2PointInY(flags: IfDownFlags, d2: AlignedGeo): number {
   return flags.conditionEndStyle === 'hline' ? d2.height / 2 : 0;
 }
 
-function computeGeometry(diamond1: GtileDiamondInside, main: Tile, flags: IfDownFlags, optionalStopWidth: number): CoreGeometry {
+function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags, optionalStopWidth: number): CoreGeometry {
   const total = computeAlignedTotal(diamond1, main, flags);
   const d2 = diamond2Geo(flags);
   const southLabelHeight = diamond1.labelAt('south')?.height ?? 0;
@@ -194,7 +194,7 @@ interface MainOffsets {
  *  own NLOC under the file's limit.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:624-637,659-665
  */
-function computeOffsets(diamond1: GtileDiamondInside, core: CoreGeometry): MainOffsets {
+function computeOffsets(diamond1: DiamondConditionTile, core: CoreGeometry): MainOffsets {
   const diamond1X = core.left - diamond1.width / 2;
   const wrapX = core.left - core.thenGeo.left;
   const mainTileY = core.d1Height + (core.height - core.d1Height - core.d2.height - core.thenGeo.height) / 2;
@@ -220,7 +220,7 @@ interface StopOffsets {
 /** `getTranslateOptionalStop` (`FtileIfDown.java:648-657`), split out of the
  *  constructor for the same reason as {@link computeOffsets}. Returns the
  *  zero placeholder when there is no optional-stop side box. */
-function computeStopOffsets(diamond1: GtileDiamondInside, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
+function computeStopOffsets(diamond1: DiamondConditionTile, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
   if (optionalStop === null) return { stopX: 0, stopY: 0 };
   const additionalWidth = additionalWidthFor(diamond1, optionalStop.width);
   return {
@@ -261,7 +261,7 @@ export class GtileIfDown extends TileComposite {
   readonly height: number;
   readonly children: readonly Tile[];
 
-  readonly diamond1: GtileDiamondInside;
+  readonly diamond1: DiamondConditionTile;
   readonly mainTile: Tile;
   readonly optionalStop: Tile | null;
   readonly useElse1: boolean;
@@ -294,7 +294,7 @@ export class GtileIfDown extends TileComposite {
    * @param options {@link GtileIfDownOptions} -- bundled (not 3 more
    *   positional params) to stay under the file's 5-parameter limit.
    */
-  constructor(diamond1: GtileDiamondInside, mainTile: Tile, optionalStop: Tile | null, options: GtileIfDownOptions) {
+  constructor(diamond1: DiamondConditionTile, mainTile: Tile, optionalStop: Tile | null, options: GtileIfDownOptions) {
     super();
     const conditionEndStyle = options.conditionEndStyle ?? 'diamond';
     this.diamond1 = diamond1;

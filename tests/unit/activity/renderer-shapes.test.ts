@@ -816,3 +816,31 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).not.toContain(theme.colors.nodeBackground);
   });
 });
+
+// ---------------------------------------------------------------------------
+// add2 T3h (family CSTYLE): `renderNode`'s `'if-split'` case picks the
+// square polygon under `skinparam ConditionStyle InsideDiamond`, the
+// hexagon otherwise -- `'while-header'` is unaffected (T3f's family).
+// ---------------------------------------------------------------------------
+
+describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
+  it('draws the 7-point hexagon by default (no conditionStyle set)', () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('25,32.5,37,15');
+  });
+
+  it('draws the unclosed 4-point rhombus under ConditionStyle InsideDiamond (carapo-31-bisi880)', () => {
+    const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, insideDiamond);
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
+  });
+
+  it("'while-header' ignores conditionStyle (T3f's family, not gated here)", () => {
+    const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+    const node = makeNode({ kind: 'while-header', x: 25, y: 15, width: 41.669, height: 35 });
+    const svg = renderNode(node, insideDiamond);
+    expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
+  });
+});

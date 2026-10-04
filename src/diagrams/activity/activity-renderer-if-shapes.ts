@@ -181,6 +181,30 @@ export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): strin
 }
 
 /**
+ * add2 T3h (family CSTYLE, `carapo-31-bisi880`): `Hexagon.asPolygonSquare`
+ * (`Hexagon.java:107-118`) -- the UNCLOSED 4-point rhombus `GtileDiamondSquare`
+ * sizes (`skinparam ConditionStyle InsideDiamond`), drawn by `FtileDiamondSquare
+ * #drawU` (`:84-86`) instead of `renderHexagonPolygon`'s 7-point hexagon.
+ * `renderNode`'s `'if-split'` case picks this when `theme.conditionStyle ===
+ * 'insideDiamond'` -- same fill/border/stroke cascade as the hexagon (one
+ * diamond-bucket colour path, D9), only the point list differs.
+ */
+export function renderDiamondSquarePolygon(node: ActivityNodeGeo, theme: Theme): string {
+  const { x, y, width: w, height: h } = node;
+  const c = actColors(theme);
+  const fill = node.color ?? c.diamondFill;
+  return polygon(
+    [
+      { x: x + w / 2, y },
+      { x: x + w, y: y + h / 2 },
+      { x: x + w / 2, y: y + h },
+      { x, y: y + h / 2 },
+    ],
+    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
+  );
+}
+
+/**
  * The hexagon's OWN label alone, centered in the node's own box -- the
  * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
  * callable on its own so a walker can push it as its own `'if-own-label'`

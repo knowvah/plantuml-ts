@@ -29,6 +29,7 @@ import {
   renderIfLabel,
   renderDiamond,
   renderHexagonPolygon,
+  renderDiamondSquarePolygon,
   renderHexagonOwnLabel,
   renderHexagonMultilineLabel,
   diamondColors,
@@ -47,19 +48,14 @@ import {
   measureMonoLineWidth,
 } from './activity-text-placement.js';
 
-// Pure-move re-export (500-line split, T2): keeps `activity-renderer-shapes.js`
-// importers of these four symbols working unchanged.
+// Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
+// in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
+// `activity-renderer-if-shapes.ts` respectively, each importing `actColors`/
+// `centeredFirstBaselineY` BACK from this file (safe circularity: function
+// definitions only, never called at module-load time) -- existing importers
+// of these names are unchanged.
 export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
-// Pure-move re-export (500-line split, T1c): the terminal-circle renderers
-// now live in `activity-renderer-terminals.ts`, which imports `actColors`
-// BACK from this file (same circular-but-safe shape as the signal-shapes
-// re-export above) -- existing importers of these four names are unchanged.
 export { renderStart, renderStop, renderEnd, renderSpot };
-// Pure-move re-export (500-line split, T3f): `renderDiamond` now lives in
-// `activity-renderer-if-shapes.ts` next to `renderIfMerge` (same Java
-// method, `FtileDiamond#drawU`), which imports `centeredFirstBaselineY`
-// BACK from this file (same circular-but-safe shape as the two re-exports
-// above) -- existing importers of this name are unchanged.
 export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
  *  .rounded()`'s halving, D4). `activityDiagram { activity { RoundCorner
@@ -460,15 +456,14 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'split-join-bar':
       return renderSplitLine(node, theme);
     case 'if-split':
+      // T3k: shape ALONE, own label via its own 'if-own-label' node.
+      // add2 T3h (CSTYLE): INSIDE_DIAMOND draws the square instead --
+      // while/repeat ('while-header' below) is T3f's, not gated here.
+      return theme.conditionStyle === 'insideDiamond'
+        ? renderDiamondSquarePolygon(node, theme)
+        : renderHexagonPolygon(node, theme);
     case 'while-header':
-      // T3k: the shape ALONE -- the own label draws via its own
-      // `'if-own-label'` node, pushed right after (`FtileDiamondInside
-      // .java:84-102`'s own draw order). D (T3d, `sofoje-37-tila554`):
-      // an EMPTY condition is STILL `FtileDiamondInside` under the
-      // default `ConditionStyle.INSIDE_HEXAGON` (`ConditionalBuilder
-      // .java:250-256`, `FtileWhile.java:131-132`) -- always the 7-point
-      // hexagon, never the 5-point `FtileDiamond` rhombus (`EMPTY_DIAMOND`
-      // only, a non-default skinparam neither builder wires yet).
+      // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
       return renderHexagonPolygon(node, theme);
     case 'repeat-cond':
       return renderHexagonPolygon(node, theme);
