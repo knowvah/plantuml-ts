@@ -103,7 +103,7 @@ main is clean before every merge; merges, then runs the four gates.
 | [1](batch-1/overview.md) | connector-merge port (D1–D3) | T1a → T1b | serial | [x] |
 | [2a](batch-2a/overview.md) · [2b](batch-2b/overview.md) | six families (ConditionStyle, Opale/compress, style core, klimt, parser, geometry) | T2a–T2f, T2-close | all ∥ | [x] |
 | [3](batch-3/overview.md) | drive round on the b2 cohort (ws ≤ 150) | written at b2 close | ∥ | [x] |
-| [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
+| [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [x] |
 
 ## Documents
 
