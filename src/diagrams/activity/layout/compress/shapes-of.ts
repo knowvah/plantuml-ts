@@ -305,15 +305,14 @@ function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape
   // `compressionMode` to `ON_X`. A same-lane fork/split connector (or
   // one with an unlaned endpoint) must NOT skip X -- PARX family,
   // gevaxi-80-tone223/ciloke-34-pumi198 (same-lane fork, ws -> 0/-14).
-  // KNOWN RESIDUAL (reported, not fixed here): `ParallelBuilderSplit
+  // PARX residual (T3c re-slot, closed b3w2): `ParallelBuilderSplit
   // .java:207-225,264-285`'s `drawTranslate` overloads NEVER call
   // `.ignoreForCompression()`, so a CROSS-lane split connector (e.g.
-  // bugaja-31-jaso630) should also never skip X -- distinguishing a
-  // fork's cross-lane connector from a split's needs a discriminant
-  // this adapter does not have (`EdgeMeta` carries no builder-kind
-  // tag; adding one touches `swimlane-placement.ts`/`tile-
-  // coordinates.ts`, outside this task's write-set). See the task
-  // report for the re-slot.
+  // bugaja-31-jaso630) must never skip X either -- `meta.shape` now
+  // carries the builder-kind discriminant (`'parallel-in-split'`/
+  // `'parallel-out-split'`, set by `walk-fork-branches.ts`'s
+  // `ForkBranchContext.isSplit`, `swimlane-placement.ts#EdgeShape`'s own
+  // doc), so the `-split` variants fall through to no-skip below.
   const crossLane = meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2;
   if ((meta.shape === 'parallel-in' || meta.shape === 'parallel-out') && crossLane) {
     shape.polygonSkipMode = 'x';

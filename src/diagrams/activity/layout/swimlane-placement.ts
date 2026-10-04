@@ -11,11 +11,9 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ConnectionVerticalDown.java:87-100
  *   -- `drawTranslate`, the cross-lane edge shape ported below as
  *   {@link routeEdge}'s `'default'` case. `FtileIfDown.java:225-238,284-301`
- *   (`ConnectionIn`/`ConnectionOut#drawTranslate`) and
- *   `FtileWhile.java:200-214` use the byte-identical
- *   `(mp1a.y + mp2b.y) / 2` middle-Y shape, so one function covers the
- *   straight top-down case and every if/while/repeat/switch composite
- *   boundary.
+ *   and `FtileWhile.java:200-214` use the byte-identical `(mp1a.y +
+ *   mp2b.y) / 2` middle-Y shape, covering every if/while/repeat/switch
+ *   composite boundary.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:166-184
  *   -- `ConnectionIn#drawTranslate`: `middle = mp1a.getY() + 4`, ported
  *   below as {@link routeEdge}'s `'parallel-in'` case.
@@ -109,7 +107,9 @@ export interface EdgeMeta {
  * so a loop-tagged edge stays self-describing; {@link routeEdge} dispatches
  * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
  * the same as `'default'` via its `default:` branch. */
-export type EdgeShape = 'parallel-in' | 'parallel-out' | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
+export type EdgeShape =
+  | 'parallel-in' | 'parallel-out' | 'parallel-in-split' | 'parallel-out-split'
+  | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -255,19 +255,20 @@ function shiftPoints(points: readonly GPoint[], delta: number): GPoint[] {
  * D6's three middle-Y shapes for a cross-lane 4-point jog. `'default'` is
  * `ConnectionVerticalDown#drawTranslate`'s average of both endpoints
  * (`ConnectionVerticalDown.java:87-100`); `'parallel-in'`/`'parallel-out'`
- * are the fork/split builders' bar-relative offsets (see the module doc
- * for the four `file:line` citations) -- `mp1`/`mp2` there are always the
- * bar-side / branch-side endpoint respectively (`pushBranchConnectors`,
- * `walk-fork-branches.ts`, emits bar-to-branch as `[bar, branch]` and
- * branch-to-join as `[branch, join]`, so `mp1.y`/`mp2.y` already select
- * the right endpoint without a shape-specific swap).
+ * (fork/merge) and their `-split` siblings (SAME elbow geometry, only the
+ * X-skip in `compress/shapes-of.ts` differs by builder kind) are the
+ * fork/split builders' bar-relative offsets (module doc citations) --
+ * `mp1`/`mp2` are always the bar-side/branch-side endpoint
+ * (`walk-fork-branches.ts` emits `[bar, branch]`/`[branch, join]`).
  */
 function crossLaneMiddleY(shape: EdgeShape, mp1: GPoint, mp2: GPoint): number {
   switch (shape) {
     case 'parallel-in':
+    case 'parallel-in-split':
     case 'if-vertical-in':
       return mp1.y + 4;
     case 'parallel-out':
+    case 'parallel-out-split':
       return mp2.y - 14;
     default:
       // 'default' + every loop kind -- the latter never reach here in
