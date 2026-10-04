@@ -121,6 +121,32 @@ describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
     const out = renderSwimlaneChrome(makeGeo(), customTheme);
     expect(out).toContain('fill="#EEE"');
   });
+
+  // M: Swimlanes.java:358-366 `drawTitlesBackground` -- `.apply(color.bg())
+  // .apply(color)` paints the SAME resolved colour as both fill and stroke
+  // (default UGraphic line thickness, 1) -- vidada-17-xuse810.
+  it('stroke equals the resolved fill (not none) when a real override is set', () => {
+    const customTheme = deepMergeTheme(defaultTheme, {
+      colors: {
+        ...defaultTheme.colors,
+        graph: {
+          ...defaultTheme.colors.graph,
+          activity: { swimlaneHeaderBackground: '#EEEEEE' },
+        },
+      },
+    });
+    const out = renderSwimlaneChrome(makeGeo(), customTheme);
+    expect(out).toContain('stroke="#EEE"');
+    expect(out).toContain('stroke-width="1"');
+  });
+
+  it('stroke stays none alongside the default transparent fill', () => {
+    const out = renderSwimlaneChrome(makeGeo(), theme);
+    const bandRect = /<rect[^>]*>/.exec(out)?.[0] ?? '';
+    expect(bandRect).toContain('fill="none"');
+    expect(bandRect).toContain('stroke="none"');
+    expect(bandRect).not.toContain('stroke-width');
+  });
 });
 
 describe('renderSwimlaneTitles', () => {

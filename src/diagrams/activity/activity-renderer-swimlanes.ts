@@ -34,11 +34,21 @@ import {
  * `fill="none"` when no `SwimlaneTitleBackgroundColor` override resolves,
  * matching `renderEdgeLabel`'s own `stroke: 'none'` "paint nothing"
  * convention rather than a resolved `#00000000`.
+ *
+ * When a real override IS resolved, upstream's own paint call draws the
+ * SAME colour as both fill and stroke: `drawTitlesBackground`
+ * (`Swimlanes.java:358-366`) is `ug.apply(UTranslate.dx(5))
+ * .apply(color.bg()).apply(color).draw(back)` -- `.apply(color.bg())` sets
+ * the rect's background (fill), `.apply(color)` sets its foreground
+ * (stroke) to the IDENTICAL `HColor`, at the UGraphic default line
+ * thickness (1).
  */
 function renderSwimlaneBand(geo: ActivityGeometry, theme: Theme): string {
   if (geo.swimlaneBand === undefined) return '';
   const { x, y, width, height } = geo.swimlaneBand;
-  return rect(x, y, width, height, { fill: swimlaneHeaderBackground(theme), stroke: 'none' });
+  const color = swimlaneHeaderBackground(theme);
+  const paint = color === 'none' ? { fill: color, stroke: 'none' } : { fill: color, stroke: color, strokeWidth: 1 };
+  return rect(x, y, width, height, paint);
 }
 
 /** Every lane boundary X, INCLUDING both outer edges -- `n + 1` dividers
