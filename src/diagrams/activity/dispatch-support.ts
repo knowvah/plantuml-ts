@@ -22,15 +22,20 @@ import type { ActivityNode } from './ast.js';
  * Matches a swimlane header: `|name|` or `|#color|name|` (optionally
  * followed by a trailing `|label|`, parsed but dropped -- this port has
  * no separate swimlane display-label slot, same "parsed not drawn"
- * scope as {@link RE_SWIMLANE}'s sibling constants below).
+ * scope as {@link RE_SWIMLANE}'s sibling constants below). Group 1 (add2
+ * T3i, family O): the `#color` segment, INCLUDING its leading `#`, same
+ * convention {@link RE_ACTION}'s own trailing `(#\w+)` group uses --
+ * `node.color` reaches `resolvePaint` with the `#` still attached.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwimlane.java:60-68
  *   -- `"\\|"`, `ColorParser.exp6()` (`(?:(COLOR)\|)?`), `SWIMLANE
  *   ([^|]+)`, `"\\|"`, `LABEL ([^|]+)?`. The previous `|[#color]name|`
  *   bracket form matched no upstream `Command` at all -- `cakeca-72-
  *   kara622`/`cejupe-34-muti621` (T2e) both use the real pipe-delimited
  *   `|#LightBlue|REL|` shape.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+ *   -- `drawU`'s per-lane background rect, read via `swimlane.getColors()`.
  */
-export const RE_SWIMLANE = /^\|(?:#[^|]+\|)?([^|]+)\|(?:[^|]+)?\s*$/;
+export const RE_SWIMLANE = /^\|(?:(#[^|]+)\|)?([^|]+)\|(?:[^|]+)?\s*$/;
 
 /**
  * Trailing stereogroup fragment: one or more consecutive `<<...>>` runs.
@@ -73,24 +78,26 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  * doc for scope. The single-line form (this constant); the multiline
  * head/close pair lives in `node-dispatch.ts#tryBackward`, reusing
  * {@link RE_ACTION_CLOSE} for its closer (identical shape: content, `;`,
- * optional stereogroup(s), end). The leading `(incoming)`/trailing
- * `(outcoming)` arrow-decoration groups are matched (so a line that
- * carries either no longer refuses -- `boxefe-81-situ725`, T2e) but their
- * captured text is dropped, same "parsed not drawn" scope as the rest of
- * this node's incoming/outgoing decoration (`ActivityBackward`'s own doc,
- * `ast.ts`).
+ * optional stereogroup(s), end) -- which has no trailing-paren group, so
+ * the multiline closer never captures an `(outgoing)` label (BACKLBL,
+ * add2 T3i: documented gap, not attempted -- `RE_ACTION_CLOSE` is shared
+ * with plain multiline actions). Group 1 (leading `(incoming)`) and group
+ * 3 (trailing `(outgoing)`) are captured here, raw paren contents only --
+ * the arrow-COLOR half of each decoration (`INCOMING_COLOR`/
+ * `OUTCOMING_COLOR`) stays unparsed, matching the simplification level
+ * every other base-form field on this node already sits at.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:64-89
  *   -- the full `(INCOMING)? backward : LABEL ; <<stereo>>* (OUTCOMING)?`
  *   shape; both decoration groups are `RegexOptional`.
  */
 export const RE_BACKWARD =
-  /^(?:\([^)]*\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\([^)]*\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}
- *  fails to match. Leading `(incoming)` decoration accepted and dropped,
- *  same scope as {@link RE_BACKWARD}. */
-export const RE_BACKWARD_HEAD = /^(?:\([^)]*\)\s*)?backward\s*:(.*)$/i;
+ *  fails to match. Leading `(incoming)` captured (BACKLBL, add2 T3i),
+ *  same group shape as {@link RE_BACKWARD}'s own group 1. */
+export const RE_BACKWARD_HEAD = /^(?:\(([^)]*)\)\s*)?backward\s*:(.*)$/i;
 
 /**
  * `if (test) then (label)?`, now also accepting a trailing stereogroup
@@ -362,6 +369,11 @@ export interface ParseContext {
   swimlanes: string[];
   swimlaneSet: Set<string>;
   currentSwimlane: string | undefined;
+  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name --
+   *  `Swimlanes.java:160-161` (`setSpecificColorTOBEREMOVED(BACK, color)`)
+   *  updates it on every occurrence that carries a color, never cleared
+   *  by a later color-less switch to the same lane. */
+  swimlaneColors: Map<string, string>;
   /** title/caption/legend/header/footer/mainframe chrome (mission G0b/T6),
    *  mutated in place by `matchAnnotationCommand` during `parseNodes`. */
   annotations: DiagramAnnotations;
@@ -383,12 +395,13 @@ export interface ParseContext {
 // Helpers
 // ---------------------------------------------------------------------------
 
-export function setCurrentSwimlane(ctx: ParseContext, name: string): void {
+export function setCurrentSwimlane(ctx: ParseContext, name: string, color?: string): void {
   ctx.currentSwimlane = name;
   if (!ctx.swimlaneSet.has(name)) {
     ctx.swimlaneSet.add(name);
     ctx.swimlanes.push(name);
   }
+  if (color !== undefined) ctx.swimlaneColors.set(name, color);
 }
 
 export function swimlaneSpread(ctx: ParseContext): { swimlane: string } | Record<string, never> {

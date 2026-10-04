@@ -3,6 +3,7 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamondInside } from './gtile-diamond-inside.js';
+import type { GtileDiamondSquare } from './gtile-diamond-square.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
@@ -63,11 +64,15 @@ export class RepeatConditionEmpty implements Tile {
 }
 
 /**
- * `FtileRepeat.create`'s diamond2 slot: the real condition hexagon, or
- * {@link RepeatConditionEmpty} for the no-test/last-of-parent case
- * (D-new, mission `add2-T3b`, family RNOOUT).
+ * `FtileRepeat.create`'s diamond2 slot: the real condition hexagon
+ * (`INSIDE_HEXAGON`, default), the INSIDE_DIAMOND square (CSTYLE, add2
+ * T3i: `FtileRepeat.java:159-161`), or {@link RepeatConditionEmpty} for
+ * the no-test/last-of-parent case (D-new, mission `add2-T3b`, family
+ * RNOOUT). EMPTY_DIAMOND (`FtileRepeat.java:156-159`) is not modeled --
+ * a bare diamond with its condition drawn OUTSIDE as an east label is a
+ * genuinely different shape/layout, re-slotted (T3i).
  */
-export type RepeatConditionTile = GtileDiamondInside | RepeatConditionEmpty;
+export type RepeatConditionTile = GtileDiamondInside | GtileDiamondSquare | RepeatConditionEmpty;
 
 /** {@link computeWeldLayout}'s return: the merged `left`/`width`/`height`
  *  every existing offset formula reads, the uniform horizontal `shiftX`
@@ -268,6 +273,13 @@ export interface GtileRepeatContext {
    * until that seam is wired.
    */
   readonly backward?: Tile | undefined;
+  /** BACKLBL (add2 T3i): `backward:LABEL;`'s own leading `(incoming)`/
+   *  trailing `(outgoing)` decorations -- `FtileRepeat.java:170-178,182-
+   *  187` (`incoming1`/`incoming2`), carried through to `walk-repeat-
+   *  backward.ts` via `RepeatFrame`. Unread when {@link backward} is
+   *  unset. */
+  readonly backIncoming?: string | undefined;
+  readonly backOutgoing?: string | undefined;
 }
 
 /**
@@ -307,6 +319,10 @@ export class GtileRepeat extends TileComposite {
   readonly backConnection: RepeatBackConnection;
   /** {@link GtileRepeatContext.backward}, carried onto the instance. */
   readonly backward: Tile | undefined;
+  /** {@link GtileRepeatContext.backIncoming}/{@link GtileRepeatContext.backOutgoing},
+   *  carried onto the instance. */
+  readonly backIncoming: string | undefined;
+  readonly backOutgoing: string | undefined;
   /** `getTranslateBackward`'s `x`/`y` (`FtileRepeat.java:750-757`): `x =
    *  dimTotal.width - backward.width`, `y = (dimTotal.height -
    *  backward.height) / 2` -- flush to the tile's own right edge,
@@ -362,7 +378,7 @@ export class GtileRepeat extends TileComposite {
   ) {
     super();
     this.backConnection = backConnection;
-    this.backward = ctx.backward;
+    ({ backward: this.backward, backIncoming: this.backIncoming, backOutgoing: this.backOutgoing } = ctx);
     const dims = computeRawDims(entry, body, condition, ctx.backward);
     const weld = computeWeldLayout(dims.rawLeft, dims.rawWidth, dims.rawHeight, countWeldingBreaks(body));
     this.left = weld.left;

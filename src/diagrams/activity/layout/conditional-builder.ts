@@ -13,7 +13,7 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorIf.java:85-92
  */
 
-import type { ActivityIf, ActivityElseIf, ActivityNode } from '../ast.js';
+import type { ActivityIf, ActivityNode } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import { PragmaKey } from '../../../core/skin/PragmaKey.js';
@@ -21,15 +21,13 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import type { DiamondConditionTile, DiamondInsideLabels } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
-import { GtileDiamondInside2 } from '../tiles/gtile-diamond-inside2.js';
 import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
-import { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
-import { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { tileNodes } from './tile-layout.js';
 import { laneOut } from './swimlane-lanes.js';
+import { buildIfLongHorizontal, buildIfLongVertical } from './conditional-builder-long.js';
 
 export type IfBuilder = 'down' | 'with-links' | 'long-horizontal' | 'long-vertical';
 
@@ -42,7 +40,7 @@ export type IfBuilder = 'down' | 'with-links' | 'long-horizontal' | 'long-vertic
  * #tileIf`'s existing call convention); this type is purely an internal
  * bundling device for this file's own private builder helpers.
  */
-interface IfLayoutCtx {
+export interface IfLayoutCtx {
   readonly laneOrder: readonly string[];
   readonly pragma: Pragma;
 }
@@ -235,107 +233,9 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, theme.conditionEndStyle);
 }
 
-interface LongHorizontalBranch {
-  readonly condition: string;
-  readonly label: string | undefined;
-  readonly body: readonly ActivityNode[];
-}
-
-/** `thens` = `then` plus every `elseif`, in source order (`FtileFactory
- *  DelegatorIf#createIf`'s own `thens` list). */
-function longHorizontalBranches(node: ActivityIf): LongHorizontalBranch[] {
-  const first: LongHorizontalBranch = { condition: node.condition, label: node.thenLabel, body: node.thenBranch };
-  const rest = node.elseIfBranches.map((e: ActivityElseIf): LongHorizontalBranch => ({
-    condition: e.condition,
-    label: e.label,
-    body: e.body,
-  }));
-  return [first, ...rest];
-}
-
-/**
- * Each branch's own hexagon (`.withNorth(tb1)`, the branch's own positive
- * label) plus, on the LAST branch only, the `else` clause's own positive
- * label (`.withEast(tb2)`). `inlabel` (`->label->`, `Branch#getInlabel()`)
- * has no AST analogue (documented gap, `gtile-if-long-horizontal.ts`'s own
- * doc) so every `inlabelSizes` entry this builder produces is `0`.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:167-197
- */
-function buildLongHorizontalDiamonds(
-  branches: readonly LongHorizontalBranch[],
-  elseLabel: string | undefined,
-  bounder: StringBounder,
-  theme: Theme,
-): GtileDiamondInside2[] {
-  return branches.map((b, i) => {
-    const labels: { north?: string; east?: string } = {};
-    if (b.label !== undefined) labels.north = b.label;
-    if (i === branches.length - 1 && elseLabel !== undefined) labels.east = elseLabel;
-    return new GtileDiamondInside2(b.condition, labels, bounder, theme);
-  });
-}
-
-/**
- * `FtileIfLongHorizontal.create` (`elseif` chains, D1): a hexagon per
- * branch (`then` + every `elseif`), each coupled with its own branch
- * content, plus the `else` branch placed to the right of the row.
- */
-function buildIfLongHorizontal(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
-  const branches = longHorizontalBranches(node);
-  const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
-  );
-  const tile2 = new GtileTopDown(
-    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
-    bounder,
-    theme,
-  );
-  const diamonds = buildLongHorizontalDiamonds(branches, node.elseLabel, bounder, theme);
-  const inlabelSizes = branches.map(() => 0);
-  return new GtileIfLongHorizontal(diamonds, tiles, tile2, inlabelSizes);
-}
-
-/**
- * Each branch's own `east` label (`diamond.withEast(tb1)`, the branch's own
- * positive label -- `thenLabel` for branch 0, each `elseif`'s own `label`
- * after) -- DIFFERENT slot from `buildLongHorizontalDiamonds`'s `north`
- * (`FtileDiamondInside2`'s `north`/`east` are independent label slots, this
- * builder's diamonds never set `north`). `inlabel` (`west`, `->label->`)
- * has no AST analogue, same documented gap as `buildLongHorizontalDiamonds`.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:142-160
- */
-function buildLongVerticalDiamonds(
-  branches: readonly LongHorizontalBranch[],
-  bounder: StringBounder,
-  theme: Theme,
-): GtileDiamondInside2[] {
-  return branches.map((b) => {
-    const labels: { east?: string } = {};
-    if (b.label !== undefined) labels.east = b.label;
-    return new GtileDiamondInside2(b.condition, labels, bounder, theme);
-  });
-}
-
-/**
- * `FtileIfLongVertical.create` (`!pragma useVerticalIf true` + `elseif`
- * chains, D12/T1p-b): a downward column of condition hexagons, each coupled
- * with its own branch body to the right, converging on a label-less merge
- * diamond fed by the `else` clause (`tile2`, below the column).
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:131-204
- */
-function buildIfLongVertical(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
-  const branches = longHorizontalBranches(node);
-  const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
-  );
-  const tile2 = new GtileTopDown(
-    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
-    bounder,
-    theme,
-  );
-  const diamonds = buildLongVerticalDiamonds(branches, bounder, theme);
-  return new GtileIfLongVertical(diamonds, tiles, tile2, node.elseLabel);
-}
+// `longHorizontalBranches`/`buildIfLongHorizontal`/`buildIfLongVertical`
+// moved to `conditional-builder-long.ts` (hook-enforced 500-line cap,
+// add2 T3i: ELSEIFIN wiring needed the room). Imported above.
 
 /**
  * `Swimlane#isSmallerThanAllOthers` (`Swimlane.java:130-137`): `false` when

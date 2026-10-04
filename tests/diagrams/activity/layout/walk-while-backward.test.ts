@@ -100,6 +100,31 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     expect(out.reservations).toEqual([{ x: backFrom.x, y: y1bis, width: 5, height: 12 }]);
   });
 
+  // BACKLBL (add2 T3i): FtileWhile.java:146,158-161 -- incoming1/incoming2.
+  it('attaches backIncoming/backOutgoing onto Backward1/Backward2, undefined when unset', () => {
+    const { out } = build();
+    expect(out.edges[1]!.label).toBeUndefined();
+    expect(out.edges[2]!.label).toBeUndefined();
+  });
+
+  it('a set backIncoming/backOutgoing lands on Backward1/Backward2 only', () => {
+    const header = new GtileDiamondInside('cond', {}, bounder, theme);
+    const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
+    const backward = new GtileAction({ kind: 'action', label: 'back' }, bounder, theme);
+    const tile = new GtileWhile(header, body, {
+      bounder,
+      theme,
+      backward,
+      backIncoming: 'incoming',
+      backOutgoing: 'dsc_5',
+    });
+    const out = makeOut();
+    walkWhile(tile, 0, 0, undefined, out);
+    expect(out.edges[1]!.label).toBe('incoming');
+    expect(out.edges[2]!.label).toBe('dsc_5');
+    expect(out.edges[0]!.label).toBeUndefined();
+  });
+
   it('ConnectionBackBackward2 runs backward’s own NORTH_HOOK -> header’s own EAST_HOOK, no emphasize (FtileWhile.java:386-407)', () => {
     const { header, backward, tile, out } = build();
     const hX = 0 + tile.headerOffsetX;

@@ -240,6 +240,24 @@ function inLanePassOrder(
  * no-op here, not a second reordering). Returns the same
  * {@link PlacementResult} with `edges`/`edgeMeta` replaced.
  */
+/**
+ * O (add2 T3i): attaches `|#color|name|`'s background onto each lane's own
+ * `SwimlaneGeo`, read back from `ast.swimlaneColors` (keyed by lane name,
+ * `dispatch-support.ts#setCurrentSwimlane`). `x`/`width` already match the
+ * jar's background-rect bounds exactly (verified against `cejupe-34-
+ * muti621`'s oracle SVG) -- no new geometry computed here, just the
+ * colour attached onto the SAME `SwimlaneGeo` the renderer already reads.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:332-340
+ */
+function withLaneBackgrounds(placed: PlacementResult, colors: Record<string, string> | undefined): PlacementResult {
+  if (colors === undefined) return placed;
+  const swimlanes = placed.swimlanes.map((lane) => {
+    const background = colors[lane.name];
+    return background === undefined ? lane : { ...lane, background };
+  });
+  return { ...placed, swimlanes };
+}
+
 function mergeBeforeCompress(placed: PlacementResult, laneNames: readonly string[]): PlacementResult {
   const order = lanePassOrder(placed.edgeMeta, laneNames);
   const ordered = applyEdgeDrawOrder(placed.edges, placed.edgeMeta, order);
@@ -270,7 +288,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
   const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
-  const placed = mergeBeforeCompress(placedRaw, ast.swimlanes);
+  const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);

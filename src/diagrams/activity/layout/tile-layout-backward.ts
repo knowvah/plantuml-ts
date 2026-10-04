@@ -44,6 +44,24 @@ export function extractBackward(body: readonly ActivityNode[]): {
 }
 
 /**
+ * BACKLBL (add2 T3i): attaches `backward.incoming`/`.outgoing` onto a
+ * `GtileWhileContext`/`GtileRepeatContext`-shaped object, as `backIncoming`/
+ * `backOutgoing` -- generic over both contexts' shapes so this one
+ * function covers `tile-layout.ts#tileWhile`/`tileRepeat` alike. `ctx`'s
+ * own fields pass through unchanged; a `backward === undefined` leaves
+ * both new fields unset (`undefined`), same as every other optional
+ * context field.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:146,158-161
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:170-178,182-187
+ */
+export function withBackLabels<T extends object>(
+  ctx: T,
+  backward: ActivityBackward | undefined,
+): T & { backIncoming: string | undefined; backOutgoing: string | undefined } {
+  return { ...ctx, backIncoming: backward?.incoming, backOutgoing: backward?.outgoing };
+}
+
+/**
  * `FtileRepeat`'s own `backwardExitsOnLeft` (`FtileRepeat.java:210-219`):
  * `false` when either lane is unset (the common case -- every repeat row
  * without `|Lane|` syntax), else whether the backward activity's own lane
@@ -64,13 +82,12 @@ export function backwardExitsOnLeft(
 }
 
 /**
- * `FtileRepeat.create`'s condition-diamond side-label choice
- * (`FtileRepeat.java:141-154`, INSIDE_HEXAGON branch only -- the only
- * style `tile-layout.ts#tileRepeat` models, per that function's own doc):
- * west+south when {@link backwardExitsOnLeft}, else east+south (the
- * pre-T3h default, unconditionally used when `backward` is unset --
- * `backwardExitsOnLeft` itself returns `false` for an unset backward,
- * `FtileRepeat.java:211-212`).
+ * `FtileRepeat.create`'s condition-diamond side-label choice, the
+ * INSIDE_HEXAGON branch (`FtileRepeat.java:141-154`): west+south when
+ * {@link backwardExitsOnLeft}, else east+south (the pre-T3h default,
+ * unconditionally used when `backward` is unset -- `backwardExitsOnLeft`
+ * itself returns `false` for an unset backward, `FtileRepeat.java:
+ * 211-212`).
  */
 export function repeatConditionLabels(
   node: ActivityRepeat,
@@ -85,4 +102,33 @@ export function repeatConditionLabels(
     else labels.east = node.yesLabel;
   }
   return labels;
+}
+
+/**
+ * CSTYLE (add2 T3i): the INSIDE_DIAMOND branch (`FtileRepeat.java:
+ * 159-161`, `new FtileDiamondSquare(...).withEast(yesTb).withSouth
+ * (outTb)`) -- ALWAYS east+south, UNLIKE {@link repeatConditionLabels}'s
+ * own west/east choice: the Java source has no `backwardExitsOnLeft`
+ * read in this branch at all (verified directly, not assumed).
+ */
+export function repeatConditionLabelsSquare(node: ActivityRepeat): { east?: string; south?: string } {
+  const labels: { east?: string; south?: string } = {};
+  if (node.outLabel !== undefined) labels.south = node.outLabel;
+  if (node.yesLabel !== undefined) labels.east = node.yesLabel;
+  return labels;
+}
+
+/** CSTYLE (add2 T3i): dispatches {@link repeatConditionLabelsSquare} or
+ *  {@link repeatConditionLabels} on `conditionStyle` -- split out of
+ *  `tile-layout.ts#tileRepeat` purely to keep that file under the 500-
+ *  line cap. */
+export function selectRepeatConditionLabels(
+  conditionStyle: string | undefined,
+  node: ActivityRepeat,
+  backward: ActivityBackward | undefined,
+  laneOrder: readonly string[],
+): { east?: string; west?: string; south?: string } {
+  return conditionStyle === 'insideDiamond'
+    ? repeatConditionLabelsSquare(node)
+    : repeatConditionLabels(node, backward, laneOrder);
 }

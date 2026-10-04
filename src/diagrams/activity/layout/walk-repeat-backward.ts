@@ -35,9 +35,10 @@ import type { RepeatFrame } from './walk-repeat.js';
  * backward activity's own x sits left of diamond2's own horizontal centre,
  * RIGHT otherwise -- straight across to `backSouth` (backward's own point
  * in, `getP2` reads `dim.getLeft(), dim.getOutY()` -- exactly this port's
- * `SOUTH_HOOK`, `GtileAction`'s own `getCoord` doc). No label (base-form-
- * only port, `ast.ts`'s own `ActivityBackward` doc -- `incoming1`'s
- * display is never parsed).
+ * `SOUTH_HOOK`, `GtileAction`'s own `getCoord` doc). BACKLBL (add2 T3i):
+ * the label (`tbback`/`incoming1`, attached by the caller) is unaffected
+ * by this side choice -- `withLabel` positions relative to the Snake's
+ * own geometry, not the diamond side.
  */
 function backward1Points(frame: RepeatFrame, backSouth: GPoint): GPoint[] {
   const { condition, condX, condY } = frame;
@@ -57,8 +58,8 @@ function backward1Points(frame: RepeatFrame, backSouth: GPoint): GPoint[] {
  * dim.getInY()` -- this port's `NORTH_HOOK`) left to a vertical run at
  * that same x, then to the entry's own RIGHT edge at mid-height --
  * UNCONDITIONALLY the right edge, never the left (unlike
- * {@link backward1Points}'s own side choice). No label, same reason as
- * {@link backward1Points}.
+ * {@link backward1Points}'s own side choice). BACKLBL (add2 T3i):
+ * carries `backArrowLabel`/`incoming2`, attached by the caller.
  */
 function backward2Points(frame: RepeatFrame, backNorth: GPoint): GPoint[] {
   const { entry, entryX, entryY } = frame;
@@ -79,13 +80,19 @@ function backward2Points(frame: RepeatFrame, backNorth: GPoint): GPoint[] {
  * origin (`walk-repeat.ts`'s `backX`/`backY` = `t.backwardOffsetX/Y`
  * applied to this tile's own placement); `lanes` is backward's own
  * `laneIn`/`laneOut` (`swimlane-lanes.ts`), computed by the caller so this
- * function stays within the file's 5-parameter limit.
+ * function stays within the file's 5-parameter limit -- `backIncoming`/
+ * `backOutgoing` (BACKLBL, add2 T3i) join the same bag for that reason.
  */
 export function pushRepeatBackwardConnections(
   frame: RepeatFrame,
   backward: Tile,
   backPos: GPoint,
-  lanes: { readonly backIn: string | undefined; readonly backOut: string | undefined },
+  lanes: {
+    readonly backIn: string | undefined;
+    readonly backOut: string | undefined;
+    readonly backIncoming: string | undefined;
+    readonly backOutgoing: string | undefined;
+  },
 ): void {
   const { out, conditionOutLane, entryInLane } = frame;
   const backSouth = {
@@ -98,5 +105,7 @@ export function pushRepeatBackwardConnections(
   };
 
   pushEdge(out, backward1Points(frame, backSouth), conditionOutLane, lanes.backIn);
+  if (lanes.backIncoming !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backIncoming;
   pushEdge(out, backward2Points(frame, backNorth), lanes.backOut, entryInLane);
+  if (lanes.backOutgoing !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backOutgoing;
 }

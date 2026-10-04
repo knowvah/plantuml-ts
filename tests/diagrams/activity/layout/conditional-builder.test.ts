@@ -120,4 +120,29 @@ describe('buildIf — dispatch to the right tile class', () => {
     expect(tile.diamonds).toHaveLength(2);
     expect(tile.tiles).toHaveLength(2);
   });
+
+  // ELSEIFIN (add2 T3i): CommandElseIf2.java:70-76's leading `(incoming)`
+  // group -- FtileIfLongHorizontal.java:178-186 `diamond.withWest`.
+  it('threads elseif.incomingLabel onto the branch diamond west side', () => {
+    const node = makeIf(
+      [action('a')],
+      [action('c')],
+      [{ condition: 'c2', incomingLabel: 'in', body: [action('b')] }],
+    );
+    const tile = buildIf(node, bounder, theme) as GtileIfLongHorizontal;
+    expect(tile.diamonds[0]!.labelAt('west')).toBeNull();
+    expect(tile.diamonds[1]!.labelAt('west')).toEqual({ x: -14, y: -2, width: 14, height: 14, label: 'in' });
+  });
+
+  it('a wider incomingLabel widens the whole if-tile (not just the hexagon)', () => {
+    const bare = makeIf([action('a')], [action('c')], [{ condition: 'c2', body: [action('b')] }]);
+    const withLabel = makeIf(
+      [action('a')],
+      [action('c')],
+      [{ condition: 'c2', incomingLabel: 'incoming', body: [action('b')] }],
+    );
+    const bareWidth = (buildIf(bare, bounder, theme) as GtileIfLongHorizontal).width;
+    const labeledWidth = (buildIf(withLabel, bounder, theme) as GtileIfLongHorizontal).width;
+    expect(labeledWidth).toBeGreaterThan(bareWidth);
+  });
 });

@@ -47,7 +47,7 @@ import {
   type ParseOutcome,
   type StopKeywords,
 } from './dispatch-support.js';
-import { tryIf } from './if-dispatch.js';
+import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
 import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
 import { pushParsedNode } from './list-backward-dispatch.js';
@@ -61,7 +61,7 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  setCurrentSwimlane(ctx, m[1]!.trim());
+  setCurrentSwimlane(ctx, m[2]!.trim(), m[1]);
   return { idx: idx + 1 };
 }
 
@@ -272,15 +272,17 @@ interface RepeatClose {
  *   -- `repeatWhile(label, yes, out, …)`.
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:193-200
  *   -- `setTest` stores `yesTb`/`outTb`, drawn on the condition hexagon
- *   (`ftile/vcompact/FtileRepeat.java:150-151`).
+ *   (`ftile/vcompact/FtileRepeat.java:150-151`). xabesu-51-dimi831 (T3i):
+ *   `CommandRepeatWhile3.java:144-147` routes TEST/WHEN/OUT through the
+ *   same `Display.getWithNewlines` escape as `if`/`elseif` (IFNL, T3d).
  */
 function parseRepeatClose(lines: readonly string[], cursor: number): RepeatClose {
   if (cursor >= lines.length) return { condition: '', yesLabel: undefined, outLabel: undefined, nextIdx: cursor };
   const endLine = lines[cursor]!.trim();
   const repeatMatch = RE_REPEATWHILE.exec(endLine);
-  const condition = repeatMatch?.[1]?.trim() ?? '';
-  const yesLabel = repeatMatch?.[2]?.trim();
-  const outLabel = repeatMatch?.[3]?.trim();
+  const condition = unescapeLabelNewlines(repeatMatch?.[1]?.trim() ?? '');
+  const yesLabel = unescapeLabel(repeatMatch?.[2]?.trim());
+  const outLabel = unescapeLabel(repeatMatch?.[3]?.trim());
   return { condition, yesLabel, outLabel, nextIdx: cursor + 1 };
 }
 

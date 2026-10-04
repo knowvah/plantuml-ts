@@ -455,16 +455,16 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'split-join-bar':
       return renderSplitLine(node, theme);
     case 'if-split':
+    case 'repeat-cond':
       // T3k: shape ALONE, own label via its own 'if-own-label' node.
-      // add2 T3h (CSTYLE): INSIDE_DIAMOND draws the square instead --
-      // while/repeat ('while-header' below) is T3f's, not gated here.
+      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead --
+      // while ('while-header' below) is still unwired (EMPTY_DIAMOND, no
+      // cohort fixture, T3i re-slot).
       return theme.conditionStyle === 'insideDiamond'
         ? renderDiamondSquarePolygon(node, theme)
         : renderHexagonPolygon(node, theme);
     case 'while-header':
       // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
-      return renderHexagonPolygon(node, theme);
-    case 'repeat-cond':
       return renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);

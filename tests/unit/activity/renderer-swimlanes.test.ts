@@ -102,6 +102,32 @@ describe('renderSwimlaneChrome', () => {
   });
 });
 
+// O (add2 T3i): `|#color|name|` background -- Swimlanes.java:332-340.
+describe('renderSwimlaneBackground (via renderSwimlaneChrome)', () => {
+  it('draws a lane background rect before that lane’s own nodes, spanning x/width exactly', () => {
+    const geo = makeGeo({
+      swimlanes: [
+        { name: 'A', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 },
+        { name: 'B', x: 120, width: 150, contentX: 126, contentWidth: 138, titleWidth: 25, background: '#AntiqueWhite' },
+      ],
+    });
+    const out = renderSwimlaneChrome(geo, theme);
+    expect(out).toContain('x="120" y="17.5" width="150" height="165" fill="#FAEBD7"');
+    expect(out).toContain('stroke="#FAEBD7"');
+    const bgIdx = out.indexOf('fill="#FAEBD7"');
+    const lineIdx = out.indexOf('x1="120"');
+    expect(bgIdx).toBeGreaterThanOrEqual(0);
+    expect(bgIdx).toBeLessThan(lineIdx);
+  });
+
+  it('draws no rect for a lane with no background', () => {
+    const out = renderSwimlaneChrome(makeGeo(), theme);
+    expect(out).not.toContain('#FAEBD7');
+    // Only the (transparent) title band rect, no lane background rects.
+    expect((out.match(/<rect/g) ?? []).length).toBe(1);
+  });
+});
+
 describe('renderSwimlaneBand (via renderSwimlaneChrome)', () => {
   it('emits fill="none" by default (D3 — the transparent band is still drawn)', () => {
     const out = renderSwimlaneChrome(makeGeo(), theme);

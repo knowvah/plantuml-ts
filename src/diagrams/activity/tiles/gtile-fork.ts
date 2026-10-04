@@ -2,7 +2,9 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import { BAR_HEIGHT, PARALLEL_X_MARGIN, SPACE_AROUND_BLACK_BAR } from '../activity-layout-constants.js';
+import { BAR_HEIGHT, JOIN_LABEL_MARGIN, PARALLEL_X_MARGIN, SPACE_AROUND_BLACK_BAR } from '../activity-layout-constants.js';
+import type { Theme } from '../../../core/theme.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 /**
  * Tallest in/out-link label height across every branch (`ymargin1`/
@@ -51,6 +53,25 @@ export class GtileFork extends TileComposite {
   readonly branchTopYs: readonly number[];
   readonly barWidth: number;
   /**
+   * The composite's own horizontal centre (`FtileGeometry.left`) -- ALWAYS
+   * `barWidth / 2`, independent of {@link joinLabel}'s own supplement to
+   * {@link width}. `FtileBlackBlock.calculateDimensionFtile`'s own `left`
+   * param is `width / 2` using its UN-supplemented `width` field, so the
+   * join bar's label never recentres the fork/split's in/out connection
+   * point (`FtileGeometryMerger`'s own `left = max(geo1.left, geo2.left)`
+   * resolves to the SAME value either side, verified by hand against
+   * `zafoxu-20-xofe568`'s own jar SVG: no connector shifts, only the
+   * canvas's own right edge grows).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:84-92
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:40-46
+   */
+  readonly left: number;
+  /** N (add2 T3i): `end fork {label}`'s own label, drawn beside the JOIN
+   *  bar only (`ParallelBuilderFork.java:114-115`'s `doStep2`, never
+   *  `doStep1`'s IN bar) -- read by `walk-fork-branches.ts` when it pushes
+   *  the `join-bar` node. */
+  readonly joinLabel: string | undefined;
+  /**
    * The top/bottom bar band's height -- `6` for fork
    * (`AbstractParallelFtilesBuilder.java:64`), `THIN_SPLIT_HEIGHT` (1.5,
    * `FtileThinSplit.java:61`) for `GtileSplit`, which passes it through
@@ -61,10 +82,26 @@ export class GtileFork extends TileComposite {
    */
   readonly barHeight: number;
 
-  constructor(branches: Tile[], _bounder: StringBounder, barHeight: number = BAR_HEIGHT) {
+  /** N (add2 T3i): the join label's own width supplement to {@link width}
+   *  (`0` without a label) -- split out purely to keep the constructor's
+   *  own NLOC under the file's limit. */
+  private static joinLabelSupp(bounder: StringBounder, theme: Theme | undefined, joinLabel: string | undefined): number {
+    if (joinLabel === undefined || theme === undefined) return 0;
+    const labelWidth = bounder.getDimension(joinLabel, activityFontSize(theme, 'arrow')).width;
+    return labelWidth > 0 ? labelWidth + JOIN_LABEL_MARGIN : 0;
+  }
+
+  constructor(
+    branches: Tile[],
+    bounder: StringBounder,
+    barHeight: number = BAR_HEIGHT,
+    theme?: Theme,
+    joinLabel?: string,
+  ) {
     super();
     this.children = branches;
     this.barHeight = barHeight;
+    this.joinLabel = joinLabel;
 
     // getSuppSpace1/getSuppSpace2 -- no per-branch link labels tracked yet.
     const ymargin1 = tallestLabelHeight([]);
@@ -77,8 +114,13 @@ export class GtileFork extends TileComposite {
       const supp = suppForIncomingArrow(0, 0, b.width);
       return PARALLEL_X_MARGIN + b.width + PARALLEL_X_MARGIN + supp;
     });
-    this.width = slots.reduce((s, slot) => s + slot, 0);
-    this.barWidth = this.width;
+    this.barWidth = slots.reduce((s, slot) => s + slot, 0);
+    this.left = this.barWidth / 2;
+    // N (add2 T3i): `FtileBlackBlock.calculateDimensionFtile`'s own
+    // `width + supp` -- the join bar's label widens the FORK's OWN
+    // bounding box (so a sibling to the right reserves room for it), but
+    // never the bar rect itself or `barWidth`/`left` above.
+    this.width = this.barWidth + GtileFork.joinLabelSupp(bounder, theme, joinLabel);
 
     const offsets: number[] = [];
     let x = 0;
@@ -113,10 +155,10 @@ export class GtileFork extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.width / 2, y: 0 };
+        return { x: this.left, y: 0 };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
-        return { x: this.width / 2, y: this.height };
+        return { x: this.left, y: this.height };
       case EAST_HOOK:
         return { x: this.width, y: this.height / 2 };
       case WEST_HOOK:

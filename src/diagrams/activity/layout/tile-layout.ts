@@ -21,6 +21,7 @@ import { GtileSpot } from '../tiles/gtile-spot.js';
 import { GtileLabel } from '../tiles/gtile-label.js';
 import { GtileGoto } from '../tiles/gtile-goto.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat, RepeatConditionEmpty } from '../tiles/gtile-repeat.js';
 import type { RepeatConditionTile } from '../tiles/gtile-repeat.js';
@@ -29,7 +30,7 @@ import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
-import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
+import { extractBackward, selectRepeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
 import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
 
 // Re-export geometry types so renderer and index can import from one place.
@@ -195,7 +196,7 @@ function tileWhile(
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const specialOutTile = node.specialOut !== undefined ? tileSimpleLeaf(node.specialOut, bounder, theme) : undefined;
-  const ctx = { bounder, theme, backward: backwardTile, specialOut: specialOutTile };
+  const ctx = withBackLabels({ bounder, theme, backward: backwardTile, specialOut: specialOutTile }, backward);
   return withSwimlane(new GtileWhile(header, body, ctx), node.swimlane);
 }
 
@@ -269,6 +270,8 @@ function tileRepeatCondition(
   theme: Theme,
 ): RepeatConditionTile {
   if (node.noOut === true && node.condition === '') return new RepeatConditionEmpty();
+  // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
+  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
   return new GtileDiamondInside(node.condition, labels, bounder, theme);
 }
 
@@ -289,7 +292,7 @@ function tileRepeat(
   const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
-  const labels = repeatConditionLabels(node, backward, laneOrder);
+  const labels = selectRepeatConditionLabels(theme.conditionStyle, node, backward, laneOrder);
   const condition = withSwimlane(
     tileRepeatCondition(node, labels, bounder, theme),
     outLane(node.swimlaneOut, node.swimlane),
@@ -297,7 +300,7 @@ function tileRepeat(
   const backConnection = selectRepeatBackConnection(node, laneOrder);
   return withSwimlaneOut(
     withSwimlane(
-      new GtileRepeat(entry, body, condition, backConnection, { bounder, theme, backward: backwardTile }),
+      new GtileRepeat(entry, body, condition, backConnection, withBackLabels({ bounder, theme, backward: backwardTile }, backward)),
       node.swimlane,
     ),
     node.swimlaneOut,
