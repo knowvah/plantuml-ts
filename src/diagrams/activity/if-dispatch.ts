@@ -82,7 +82,7 @@ export function stripTrailingSemi(raw: string): string {
  * `renderIfLabel` -- a separate mechanism from "multiline branch label",
  * left for a fixture that actually needs it.
  */
-function unescapeLabelNewlines(text: string): string {
+export function unescapeLabelNewlines(text: string): string {
   let out = '';
   for (let i = 0; i < text.length; i++) {
     const c = text[i]!;
@@ -103,7 +103,7 @@ function unescapeLabelNewlines(text: string): string {
 /** {@link unescapeLabelNewlines} applied only when the captured group
  *  matched -- every call site below immediately follows an optional
  *  regex-group `.trim()`. */
-function unescapeLabel(text: string | undefined): string | undefined {
+export function unescapeLabel(text: string | undefined): string | undefined {
   return text === undefined ? text : unescapeLabelNewlines(text);
 }
 

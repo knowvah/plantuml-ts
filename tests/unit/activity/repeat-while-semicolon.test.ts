@@ -30,3 +30,12 @@ describe('repeat while closer with a trailing semicolon', () => {
     expect([r.condition, r.yesLabel, r.outLabel]).toEqual(['W?', 'yes', 'no']);
   });
 });
+
+// xabesu-51-dimi831 (add2 T3i): CommandRepeatWhile3.java:144-147 routes
+// TEST/WHEN/OUT through Display.getWithNewlines, same as if/elseif (IFNL).
+describe('repeat while closer unescapes literal \\n (xabesu-51-dimi831)', () => {
+  it('splits the condition into two lines', () => {
+    const r = repeatOf('repeat while (a\\nb) is (y\\nes) not (n\\no)');
+    expect([r.condition, r.yesLabel, r.outLabel]).toEqual(['a\nb', 'y\nes', 'n\no']);
+  });
+});
