@@ -22,7 +22,7 @@ import {
   activityLineThickness,
   activityRoundCorner,
 } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
+import { activityFontColor, activityFontFamily, linkStyleFields } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
 import {
   renderIfMerge,
@@ -135,10 +135,12 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
   const lineWidth = measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
+  // add2 T3h: family K + F (pekuxe-00/gaxezi-48/nisexe-68/dozaxu-98).
   return drawActivityText(x, cy, label, {
-    fontFamily: theme.fontFamily,
+    fontFamily: activityFontFamily(theme, opts.sname),
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
+    ...linkStyleFields(theme),
   });
 }
 
@@ -152,11 +154,14 @@ export function renderMultilineText(
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   const y = centeredFirstBaselineY(cy, size, lines.length);
   const fill = activityFontColor(theme, opts.sname);
+  // add2 T3h, families K/F -- see renderLabel's own doc comment above.
+  const fontFamily = activityFontFamily(theme, opts.sname);
+  const link = linkStyleFields(theme);
   return lines
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + size * i, ln, { fontFamily: theme.fontFamily, fontSize: size, fill });
+      return drawActivityText(x, y + size * i, ln, { fontFamily, fontSize: size, fill, ...link });
     })
     .join('');
 }
@@ -397,7 +402,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
   // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
   const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
-  const textStyle = { fontFamily: theme.fontFamily, fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const textStyle = { fontFamily: activityFontFamily(theme, 'note'), fontSize: noteSize, fill: activityFontColor(theme, 'note') };
   const labelEl =
     lines.length > 1
       ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)

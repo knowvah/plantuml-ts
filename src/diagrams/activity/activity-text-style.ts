@@ -190,5 +190,29 @@ export function activityHorizontalAlignment(theme: Theme): 'left' | 'center' | '
  * :128,142,144`) are outside this task's write-set.
  */
 export function activityFontFamily(theme: Theme, sname: ActivitySName): string {
-  return theme.colors.elements?.[bucketKey(sname)]?.fontFamily ?? theme.fontFamily;
+  const own = theme.colors.elements?.[bucketKey(sname)]?.fontFamily;
+  if (own !== undefined) return own;
+  // add2 T3h: diamond's signature NESTS `SName.activity` (cited above), so
+  // an `activity{FontName}` rule legitimately matches it too, absent a
+  // diamond-specific override (just checked) -- jar-verified dozaxu-98-
+  // xetu961 (`skinparam activity{FontName Verdana}`, no DiamondFontName).
+  if (sname === 'diamond') {
+    const activityTier = theme.colors.elements?.[bucketKey('activity')]?.fontFamily;
+    if (activityTier !== undefined) return activityTier;
+  }
+  return theme.fontFamily;
+}
+
+/**
+ * add2 T3h (family F): `theme.hyperlinkUnderline`/`theme.svgLinkTarget` as
+ * an `ActivityTextStyle`-shaped spread fragment -- `exactOptionalPropertyTypes`
+ * forbids assigning an explicit `undefined` to an optional property, so a
+ * caller building a style literal must OMIT the key rather than set it to
+ * `undefined` (conditional spread, not a ternary-per-field).
+ */
+export function linkStyleFields(theme: Theme): { hyperlinkUnderline?: boolean; svgLinkTarget?: string } {
+  return {
+    ...(theme.hyperlinkUnderline !== undefined ? { hyperlinkUnderline: theme.hyperlinkUnderline } : {}),
+    ...(theme.svgLinkTarget !== undefined ? { svgLinkTarget: theme.svgLinkTarget } : {}),
+  };
 }
