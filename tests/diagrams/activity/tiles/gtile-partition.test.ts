@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { GtilePartition } from '../../../../src/diagrams/activity/tiles/gtile-partition.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
+import type { HookName } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { GPoint } from '../../../../src/diagrams/activity/tiles/points.js';
 
-const NODE_MARGIN_Y = 20;
-const H_PAD = 12;
+// `FtileMarged.java:92-96` (`BODY_MARGIN`, `gtile-group.ts`'s own doc).
+const BODY_MARGIN = 10;
+// `FtileGroup.java:74` -- `diffYY2 = 20`.
+const BOTTOM_PAD = 20;
 
 const bounder: StringBounder = {
   getDimension: (text: string, _size: number) => ({
@@ -24,15 +27,22 @@ const bounder: StringBounder = {
 // on the ROOT font is unchanged.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
+// Mission `activity-divergence-drive-2` T3g: hook-aware (unlike the prior
+// flat `{ x: 0, y: 0 }` for every hook -- see `gtile-group.test.ts`'s own
+// doc on this same change).
 function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
-    getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    getCoord: (hook: HookName): GPoint => ({ x: width / 2, y: hook === SOUTH_HOOK ? height : 0 }),
     hasPointOut: () => hasPointOut,
   };
 }
+
+/** `FtileGroup.java:140-143` -- `diffHeightTitle = max(25, dimTitle
+ *  .getHeight() + 20)`. The stub `bounder` always measures height 14. */
+const DIFF_HEIGHT_TITLE = Math.max(25, 14 + 20);
 
 describe('GtilePartition — kind', () => {
   const body = makeTile(100, 50);
@@ -47,16 +57,16 @@ describe('GtilePartition — same geometry as GtileGroup', () => {
   const body = makeTile(100, 50);
   const tile = new GtilePartition('Hi', body, bounder, theme);
 
-  it('width >= body.width + 2 * H_PAD', () => {
-    expect(tile.width).toBeGreaterThanOrEqual(100 + 2 * H_PAD);
+  it('width >= body.width + 2 * BODY_MARGIN', () => {
+    expect(tile.width).toBeGreaterThanOrEqual(100 + 2 * BODY_MARGIN);
   });
 
-  it('bodyOffsetY === titleHeight + NODE_MARGIN_Y', () => {
-    expect(tile.bodyOffsetY).toBe(tile.titleHeight + NODE_MARGIN_Y);
+  it('bodyOffsetY === diffHeightTitle', () => {
+    expect(tile.bodyOffsetY).toBe(DIFF_HEIGHT_TITLE);
   });
 
-  it('height === bodyOffsetY + body.height + H_PAD', () => {
-    expect(tile.height).toBe(tile.bodyOffsetY + body.height + H_PAD);
+  it('height === bodyOffsetY + body.height + BOTTOM_PAD', () => {
+    expect(tile.height).toBe(tile.bodyOffsetY + body.height + BOTTOM_PAD);
   });
 
   it('children contains only the body tile', () => {
@@ -71,8 +81,8 @@ describe('GtilePartition — long title drives width', () => {
   const tile = new GtilePartition(title, body, bounder, theme);
   const expectedTitleWidth = title.length * 7;
 
-  it('width === titleWidth + 2 * H_PAD when title is wider', () => {
-    expect(tile.width).toBe(expectedTitleWidth + 2 * H_PAD);
+  it('width === titleWidth + 20 when title is wider', () => {
+    expect(tile.width).toBe(expectedTitleWidth + 20);
   });
 });
 
@@ -80,12 +90,13 @@ describe('GtilePartition — hooks', () => {
   const body = makeTile(100, 60);
   const tile = new GtilePartition('Zone', body, bounder, theme);
 
-  it('NORTH_HOOK.y === 0', () => {
-    expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
+  it('NORTH_HOOK.y === bodyOffsetY (body.inY=0 + titleAndHeaderNoteHeight)', () => {
+    expect(tile.getCoord(NORTH_HOOK).y).toBe(tile.bodyOffsetY);
   });
 
-  it('SOUTH_HOOK.y === height', () => {
-    expect(tile.getCoord(SOUTH_HOOK).y).toBe(tile.height);
+  it('SOUTH_HOOK.y === body.height + bodyOffsetY (NOT the frame-bottom-padded total height)', () => {
+    expect(tile.getCoord(SOUTH_HOOK).y).toBe(body.height + tile.bodyOffsetY);
+    expect(tile.getCoord(SOUTH_HOOK).y).not.toBe(tile.height);
   });
 
   it('EAST_HOOK.x === width', () => {

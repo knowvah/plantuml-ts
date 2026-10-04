@@ -30,7 +30,7 @@ import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, repeatConditionLabels } from './tile-layout-backward.js';
-import { tileFork, tileGroup, tileSplit, tileSwitch } from './tile-layout-structural.js';
+import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -126,6 +126,10 @@ export function tileNodes(
     if (node.kind === 'kill' || node.kind === 'detach') {
       const last = tiles[tiles.length - 1];
       if (last !== undefined) withKilled(last);
+      continue;
+    }
+    if (node.kind === 'note') {
+      tileNote(tiles, node, bounder, theme);
       continue;
     }
     const t = tileNode(node, bounder, theme, laneOrder, pragma);
@@ -438,11 +442,7 @@ function tileEarlyLeaf(node: EarlyLeafNode): Tile | null {
  * 15th case there -- placed ABOVE `tileNode` per that function's own "add
  * new builders above" doc.
  */
-function tileSimpleLeaf(
-  node: SimpleLeafNode,
-  bounder: StringBounder,
-  theme: Theme,
-): Tile {
+export function tileSimpleLeaf(node: SimpleLeafNode, bounder: StringBounder, theme: Theme): Tile {
   switch (node.kind) {
     case 'start':
       return withSwimlane(new GtileStart(), node.swimlane);
@@ -460,11 +460,10 @@ function tileSimpleLeaf(
 }
 
 /**
- * Kept LAST in this file on purpose (mission `activity-loop-tile-port`,
- * T1): Lizard 1.23.0's TypeScript reader loses this function's closing
- * scope inside the `switch` (the same `identifier(` heuristic bug
- * `node-dispatch.ts`'s header describes) and reports everything after it
- * as part of `tileNode`, so any function placed below it inflates the
+ * Kept LAST in this file on purpose (mission `activity-loop-tile-port`, T1):
+ * Lizard 1.23.0's TypeScript reader loses this function's closing scope
+ * inside the `switch` (the `identifier(` heuristic bug `node-dispatch.ts`'s
+ * header describes), so any function placed below it inflates the
  * complexity hook's ratchet for this name. Add new builders above.
  */
 function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): Tile | null {

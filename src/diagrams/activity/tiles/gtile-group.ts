@@ -3,10 +3,18 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
-import { NODE_MARGIN_Y } from '../activity-layout-constants.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 
-const H_PAD = 12;
+/** `FtileUtils.addHorizontalMargin(inner, 10)` (`FtileGroup.java:97`): a
+ *  flat 10px margin added to BOTH sides of the body before any of this
+ *  class's own title/frame math runs (`FtileMarged.java:92-96`: width +=
+ *  20, body shifted +10 on x, height/inY/outY unchanged). Mission
+ *  `activity-divergence-drive-2` T3g (family PART): was a flat `H_PAD=12`
+ *  on both width AND the body offset, neither sourced. */
+const BODY_MARGIN = 10;
+/** `FtileGroup.java:74` -- `private final double diffYY2 = 20;`, the
+ *  frame's own bottom padding below the (margined) body. */
+const BOTTOM_PAD = 20;
 
 export class GtileGroup extends TileComposite {
   // Widened to `string` so subclasses (e.g. GtilePartition) can override
@@ -15,6 +23,10 @@ export class GtileGroup extends TileComposite {
   readonly width: number;
   readonly height: number;
   readonly children: readonly Tile[];
+  /** `node.title` verbatim -- `tile-coordinates.ts#walkTileGroup` threads
+   *  this onto the pushed node's `label` so the renderer's `USymbolFrame`
+   *  port (`activity-renderer-composite.ts`) can draw the title tab. */
+  readonly title: string;
   readonly titleHeight: number;
   readonly bodyOffsetX: number;
   readonly bodyOffsetY: number;
@@ -22,6 +34,7 @@ export class GtileGroup extends TileComposite {
   constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme) {
     super();
     this.children = [body];
+    this.title = title;
     // A group/partition frame resolves `of(root, element, activityDiagram,
     // <symbol>, composite)` (`ftile/vcompact/FtileGroup.java:89-92`), and
     // `activityDiagram { composite { ... } }` (plantuml.skin:364-368)
@@ -31,23 +44,48 @@ export class GtileGroup extends TileComposite {
     // the resolver rather than left as a bare `theme.fontSize` so a user's
     // `<style> activityDiagram { composite { FontSize N } }` reaches it.
     const titleMeasured = bounder.getDimension(title, activityFontSize(theme, 'composite'));
-    const TITLE_H = titleMeasured.height + 8;
-    this.titleHeight = TITLE_H;
-    this.width = Math.max(body.width + 2 * H_PAD, titleMeasured.width + 2 * H_PAD);
-    this.bodyOffsetX = H_PAD;
-    this.bodyOffsetY = TITLE_H + NODE_MARGIN_Y;
-    this.height = this.bodyOffsetY + body.height + H_PAD;
+    // `FtileGroup.java:140-143` -- `diffHeightTitle`: `max(25, dimTitle
+    // .getHeight() + 20)`. Was `titleMeasured.height + 8`, unsourced.
+    const diffHeightTitle = Math.max(25, titleMeasured.height + 20);
+    this.titleHeight = diffHeightTitle;
+    const margedBodyWidth = body.width + 2 * BODY_MARGIN;
+    // `:160-167` -- `suppWidth`: `max(orig.width, dimTitle.width + 20,
+    // dimHeaderNote.width + 20) - orig.width`. `headerNote` is always the
+    // empty `TextBlock` (`:110-113`, the `displayNote` branch is
+    // permanently commented out upstream), so its term is a flat `+20`;
+    // `orig.width` is `margedBodyWidth` (the body already widened by
+    // `FtileMarged`, `getInnerDimension`'s ink-scan correction unported --
+    // see this class's own `drawU` counterpart's doc).
+    const suppWidth = Math.max(margedBodyWidth, titleMeasured.width + 20, 20) - margedBodyWidth;
+    this.width = margedBodyWidth + suppWidth;
+    // `:145-148` -- `getTranslate`: `(suppWidth/2, diffHeightTitle +
+    // headerNoteHeight)`, drawn onto the already-`FtileMarged` body, whose
+    // OWN `+BODY_MARGIN` shift (`FtileMarged.java:108-110`) composes with
+    // this outer translate (`drawU`, `FtileGroup.java:225`).
+    this.bodyOffsetX = suppWidth / 2 + BODY_MARGIN;
+    this.bodyOffsetY = diffHeightTitle;
+    // `:194-195` -- `height = orig.height + diffHeightTitle + diffYY2 +
+    // headerNoteHeight`.
+    this.height = body.height + diffHeightTitle + BOTTOM_PAD;
   }
 
   getCoord(hook: HookName): GPoint {
-    const cx = this.width / 2;
+    const body = this.children[0]!;
+    // `:190-203` -- `calculateDimensionFtile`: `left = orig.getLeft() +
+    // suppWidth/2` (the `FtileMarged` body's own `+BODY_MARGIN` shift is
+    // already folded into `bodyOffsetX` above); `inY`/`outY` =
+    // `orig.getInY/OutY() + titleAndHeaderNoteHeight` (`bodyOffsetY`). Was
+    // a flat `this.width / 2` -- centred on the FRAME, not the body's own
+    // in/out column, which only coincide when the body happens to be
+    // centred under the title.
+    const left = body.getCoord(NORTH_HOOK).x + this.bodyOffsetX;
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: cx, y: 0 };
+        return { x: left, y: body.getCoord(NORTH_HOOK).y + this.bodyOffsetY };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
-        return { x: cx, y: this.height };
+        return { x: left, y: body.getCoord(SOUTH_HOOK).y + this.bodyOffsetY };
       case EAST_HOOK:
         return { x: this.width, y: this.height / 2 };
       case WEST_HOOK:

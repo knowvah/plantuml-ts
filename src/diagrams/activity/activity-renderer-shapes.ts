@@ -11,6 +11,7 @@ import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
+import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
 import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
@@ -417,13 +418,11 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
  *  yet (would need a `core/theme-graph-colors-b.ts` field, out of this
  *  task's write-set) -- the plain default is drawn unconditionally, which
  *  is also what every cohort row needs (none sets that skinparam).
- */
+ *  T3g (family PART): the title tab + text now draw too, ported in
+ *  `activity-renderer-composite.ts` (this file was at the line cap) --
+ *  this is a one-line delegate so existing callers are unchanged. */
 function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
-  return rect(node.x, node.y, node.width, node.height, {
-    fill: 'none',
-    stroke: '#000',
-    strokeWidth: activityLineThickness(theme, 'composite'),
-  });
+  return renderCompositeFrame(node, theme);
 }
 
 export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
