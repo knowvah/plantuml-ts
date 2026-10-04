@@ -169,6 +169,17 @@ describe('renderSwimlaneTitles', () => {
     expect(out).toContain('font-size="30"');
   });
 
+  // SLURL: `getTitle` (`Swimlanes.java:285-293`) draws the RESOLVED
+  // display text, not raw `[[url label]]` markup -- nesozi-09-zezu092.
+  it('draws the resolved label for a [[url label]] lane name, not raw markup', () => {
+    const geo = makeGeo({
+      swimlanes: [{ name: '[[www.plantuml.com First actor]]', x: 20, width: 100 }],
+    });
+    const out = renderSwimlaneTitles(geo, theme);
+    expect(out).toContain('>First actor<');
+    expect(out).not.toContain('[[');
+  });
+
   it('draws in the resolved SwimlaneTitleFontColor', () => {
     const customTheme = deepMergeTheme(defaultTheme, {
       colors: {

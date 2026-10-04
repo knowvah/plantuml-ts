@@ -22,10 +22,8 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:220-241
  *   -- `ConnectionOut#drawTranslate`: `middle = mp2b.getY() - 14`, ported
  *   below as {@link routeEdge}'s `'parallel-out'` case.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225
- *   -- same `+ 4` shape for the split's in-connector.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:264-285
- *   -- same `- 14` shape for the split's out-connector.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:207-225,264-285
+ *   -- same `+4`/`-14` shapes for the split's in/out connectors.
  */
 
 import type { StringBounder } from '../tiles/tile.js';
@@ -38,6 +36,7 @@ import type {
   SwimlaneGeo,
 } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
+import { resolveInlineLinks } from '../../description/parse-helpers.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -430,6 +429,8 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
  * each lane's content extent and title width, then resolves the lane
  * width floor once so both `computeLaneWidths` and the origin loop reuse
  * the SAME resolved value (upstream does too, `:399` then `:409,441`).
+ * SLURL: title width uses `resolveInlineLinks`, not raw `|[[url]]|`
+ * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
   const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
@@ -438,7 +439,8 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
-  for (const name of laneNames) titleWidths.set(name, bounder.getDimension(name, titleFontSize).width);
+  for (const name of laneNames)
+    titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
 
   // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
   // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,
