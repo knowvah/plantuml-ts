@@ -569,8 +569,11 @@ describe('renderActivity — repeat-start node', () => {
 // Test 12: edge with color renders a filled <rect> pill behind the label
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — edge with colored label pill', () => {
-  it('AC5: renders a <rect> with the specified fill color', () => {
+// The jar draws no background rect for a coloured edge label: it floods the
+// text's own box through an SVG filter (`SvgGraphics.java:732-735,772-786`,
+// getFilterBackColor), applied as `filter="url(#...)"` on the `<text>`.
+describe('renderActivity — edge with colored label (back-colour filter)', () => {
+  it('AC5: floods the label with the specified colour through a filter', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -584,9 +587,10 @@ describe('renderActivity — edge with colored label pill', () => {
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
-    // G1c: named colors resolve to their canonical jar hex.
-    expect(result).toContain('fill="#F00"');
-    expect(result).toContain('<rect');
+    // The jar's own flood: `<feFlood flood-color="#FF0000" .../>`.
+    expect(result).toContain('<feFlood flood-color="#FF0000" result="flood"/>');
+    expect(result).toMatch(/<text[^>]*filter="url\(#[^)]+\)"[^>]*>no3<\/text>/);
+    expect(result).not.toContain('<rect');
   });
 
   it('AC5: renders the label text "no3" on top of the pill', () => {
@@ -606,7 +610,7 @@ describe('renderActivity — edge with colored label pill', () => {
     expect(result).toContain('no3');
   });
 
-  it('AC5: the pill rect uses stroke="none"', () => {
+  it('AC5: composites the text over the flood, as the jar does', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -620,8 +624,7 @@ describe('renderActivity — edge with colored label pill', () => {
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
-    // The pill rect should have stroke="none"
-    expect(result).toContain('stroke="none"');
+    expect(result).toContain('<feComposite in="SourceGraphic" in2="flood" operator="over"/>');
   });
 });
 

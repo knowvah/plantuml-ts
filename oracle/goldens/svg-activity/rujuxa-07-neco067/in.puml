@@ -1,0 +1,29 @@
+@startuml
+|L1|
+start
+:a1;
+    if (c1) then (Yes)
+        :a2;
+        end
+    else (No)
+        repeat
+        |L2|
+        :a3;
+            if (c2) then (Yes)
+                :a4;
+                end
+            else (No)
+                |L3|
+                if (c3) then (Yes)
+                    :a5;
+                else (No)
+                    :a6;
+                endif
+                |L2|
+                :a7;
+            endif
+            |L1|
+        repeatwhile (r1)
+        kill
+    endif
+@enduml

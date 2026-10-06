@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
-  "measuredAt": "2026-10-03",
-  "measuredAgainstCommit": "9104b8ee",
+  "measuredAt": "2026-10-06",
+  "measuredAgainstCommit": "dcd2283c",
   "fixtures": [
     {
       "type": "activity",
@@ -820,8 +820,8 @@
       "type": "activity",
       "slug": "boxefe-81-situ725",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -834,7 +834,7 @@
           "12.5": 4
         },
         "textCount": 7,
-        "width": "252",
+        "width": "254",
         "height": "336"
       },
       "jar": {
@@ -1722,8 +1722,8 @@
       "type": "activity",
       "slug": "citire-32-mive114",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -1731,7 +1731,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 9,
+          "1": 7,
           "1.5": 3
         },
         "rx": {
@@ -2277,7 +2277,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 21,
+          "1": 20,
           "1.5": 6
         },
         "rx": {
@@ -2309,15 +2309,15 @@
         "width": "335",
         "height": "398"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
       "slug": "delide-30-teva601",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -2325,7 +2325,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 10,
           "1.5": 3
         },
         "rx": {
@@ -5039,7 +5039,7 @@
           "18": 6
         },
         "strokeWidth": {
-          "1": 33,
+          "1": 31,
           "1.5": 9,
           "2.5": 2
         },
@@ -5070,8 +5070,8 @@
         "width": "977",
         "height": "395"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -7005,15 +7005,15 @@
       "type": "activity",
       "slug": "luxido-91-covi016",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "12": 5,
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 11,
           "1.5": 3
         },
         "rx": {
@@ -7021,7 +7021,7 @@
           "12.5": 5
         },
         "textCount": 7,
-        "width": "279",
+        "width": "274",
         "height": "350"
       },
       "jar": {
@@ -7092,7 +7092,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 28,
+          "1": 26,
           "1.5": 3
         },
         "rx": {
@@ -7121,8 +7121,8 @@
         "width": "232",
         "height": "507"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -7178,7 +7178,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 16,
+          "1": 15,
           "1.5": 4
         },
         "rx": {
@@ -7209,8 +7209,8 @@
         "width": "311",
         "height": "271"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -9164,7 +9164,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 17,
+          "1": 16,
           "1.5": 4
         },
         "rx": {
@@ -9193,8 +9193,8 @@
         "width": "226",
         "height": "343"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -10339,7 +10339,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 34,
+          "1": 33,
           "2.5": 4,
           "1.5": 4
         },
@@ -10370,8 +10370,8 @@
         "width": "471",
         "height": "558"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -10514,7 +10514,7 @@
         },
         "textCount": 12,
         "width": "529",
-        "height": "608"
+        "height": "607"
       },
       "jar": {
         "fontSize": {
@@ -10534,15 +10534,15 @@
         "width": "528",
         "height": "607"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
       "slug": "sadovu-51-fata536",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -10550,7 +10550,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -10591,7 +10591,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 10,
           "2.5": 2,
           "1.5": 3
         },
@@ -10622,8 +10622,8 @@
         "width": "269",
         "height": "251"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -10980,8 +10980,8 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 6,
@@ -10994,7 +10994,7 @@
           "12.5": 6
         },
         "textCount": 12,
-        "width": "274",
+        "width": "281",
         "height": "575"
       },
       "jar": {
@@ -12573,15 +12573,15 @@
       "type": "activity",
       "slug": "xidamu-85-xoti640",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "12": 4,
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -12651,8 +12651,8 @@
       "type": "activity",
       "slug": "xizola-97-sizu458",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -12660,7 +12660,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -13246,8 +13246,8 @@
       "type": "activity",
       "slug": "zinelo-77-losu727",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 10,
@@ -13255,7 +13255,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 34,
+          "1": 33,
           "2.5": 4,
           "1.5": 4
         },
