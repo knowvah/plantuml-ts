@@ -48,7 +48,8 @@ import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js'
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { linkWrap, line, type LineStyle } from '../../core/svg.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
-import type { CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
+import type { CreoleTextRun, CreoleTextLine } from '../../core/svek/image/creole-text-lines.js';
+import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
 import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
@@ -179,7 +180,28 @@ export function renderCreoleTableGrid(
  * write-set) -- `SkinParam#useUnderlineForHyperlink()` (`skin/
  * SkinParam.java:1056-1060`) only turns it OFF, so the suppression belongs
  * here, gated on `run.url !== undefined` so a user's own explicit creole
- * underline on NON-link text is never touched. */
+ * underline on NON-link text is never touched.
+ *
+ * add3-T2b: `run.color` is `creole-text-lines.ts#textAtomMeasured`'s copy
+ * of the atom's own `FontConfiguration.color`, which starts life at
+ * `leaf-sizing-text.ts#baseFontConfiguration`'s `JAR_DEFAULT_TEXT_COLOR`
+ * (`'#000000'`) -- `FontSpec` (this seam's measurement-only font shape)
+ * carries no colour field for the base to inherit the CALLER's already-
+ * resolved `style.fill` from, so an ordinary NORMAL run (no creole
+ * `<color:x>` command) carries that fixed black, not "unset." Widening
+ * {@link drawActivityText} to route every line through this seam (D5)
+ * exposed the bug a bare `run.color ?? style.fill` would otherwise paper
+ * over: a `[[url]]`-only line, the sole pre-T2b caller, never coincided
+ * with a non-black `activityFontColor`/theme/dark-mode fill in this port's
+ * corpus, so the always-defined default silently won every time. Only a
+ * run whose colour differs from that SENTINEL carries a real creole
+ * override (`<color:x>`/`<back:x>`); anything else defers to the caller's
+ * OWN cascaded fill, matching upstream's `FontConfiguration` cascade
+ * (`FtileBox.java:178`'s `fc` argument, not a hardcoded jar default).
+ * Jar-verified against `labala-74-juki864` (`!theme amiga`), `levuma-67-
+ * cego489` (`skinparam mode dark`), `loxija-71-joku558`/`zepima-96-
+ * peco612` (`skinparam activityFontColor red`) -- all four regressed to
+ * black text under the bare fallback and are restored by this guard. */
 function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontConfiguration {
   const styles = new Set<FontStyle>();
   if (run.style.bold) styles.add(FontStyle.BOLD);
@@ -187,18 +209,52 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
   if (run.style.underline) styles.add(FontStyle.UNDERLINE);
   if (run.style.strike) styles.add(FontStyle.STRIKE);
   if (run.url !== undefined && style.hyperlinkUnderline === false) styles.delete(FontStyle.UNDERLINE);
-  return { family: style.fontFamily, size: run.size, color: run.color ?? style.fill, styles };
+  const hasExplicitColor = run.color !== undefined && run.color !== JAR_DEFAULT_TEXT_COLOR;
+  return { family: style.fontFamily, size: run.size, color: hasExplicitColor ? run.color : style.fill, styles };
 }
 
 /**
- * A `[[url]]`-bearing physical line: `CommandCreoleUrl`'s resolved
- * label/url/surrounding-text run sequence, built by the SAME creole lexer
- * (`buildLineAtoms`, via `creoleTextLines`) `CommandCreoleUrl.ts` registers
- * against. Each run draws at `y + run.dy` (0 for every NORMAL run --
- * `creole-sea-line.ts`'s own baseline-offset contract, decisions.md#D2) and
- * wraps in `<a href>` when it carries a url (`core/svg.ts#linkWrap`, the
- * SAME string-emitting `<a>` wrapper every other engine's url runs use,
- * jar-verified byte-exact per that function's own doc comment).
+ * One physical line, routed through the real creole lexer
+ * (`buildLineAtoms`, via `creoleTextLines`) -- `FtileBox.java:178-181`'s
+ * `skinParam.sheet(fc, align, CreoleMode.FULL).createSheet(label)` for an
+ * action's label, `ConditionalBuilder.java:280-282`'s `CreoleMode
+ * .SIMPLE_LINE` for a branch/condition label (both reach this ONE drawing
+ * primitive: neither caller passes its own `CreoleMode` through today, so
+ * the distinction is not yet observable in this port -- see this task's
+ * final report). add3-T2b (D5) widens this from the pre-existing `[[url]]`
+ * trigger (`CommandCreoleUrl`'s resolved label/url/surrounding-text run
+ * sequence, `CommandCreoleUrl.ts`) to EVERY non-table line, so `**bold**`/
+ * `__underline__`/a `=heading` cascade through the SAME classifier
+ * (`CreoleStripeSimpleParser.java:92-109,149-153`) instead of drawing as
+ * literal markup characters in a single unstyled run (`vimako-25-mega336`/
+ * `fatuzu-07-cevu894`/`bedezo-44-more709`/`pirofe-41-xama594`, census
+ * family CREOLE-INLINE). A `kind !== 'text'` line (a `HORIZONTAL_LINE`
+ * stripe, `creole-text-lines.ts`'s `'hr'` kind) still falls back to the
+ * single-run literal draw below -- UNCHANGED from the pre-T2b behavior,
+ * not yet a real rule (reported as a residual, not this commit's row).
+ *
+ * Each run draws at `y + run.dy` (0 for every NORMAL run on a line whose
+ * OTHER atoms -- if any -- share its own natural height, per `creole-sea-
+ * line.ts`'s own baseline-offset contract, decisions.md#D2). A lone run
+ * below `creole-sea-line.ts#ATOM_TEXT_MIN_HEIGHT` (`= 10`, the port's own
+ * `AtomText.java:179-181` floor) is the ONE case where `Sea` reports a
+ * REAL non-zero `dy` for an otherwise all-NORMAL single-run line -- jar-
+ * verified via `loxija-71-joku558`/`zepima-96-peco612` (both `skinparam
+ * activityFontSize 4`): routing their already-byte-exact plain "start"/
+ * "me" labels through this function moved their `<text>/@y` FURTHER from
+ * the jar, not closer, because `gtile-action.ts`'s own box-height sizing
+ * does not (yet) apply the matching floor (KLIMT-FLOOR, census-owned by a
+ * sibling task, not this one). {@link isPlainSingleRun} keeps that one
+ * case on its PRE-existing literal-draw path (byte-identical to before
+ * this task), so this generalization never regresses a row it does not
+ * own; every line that actually carries creole content (2+ runs, a style
+ * flag, a url, or a cascaded size) still draws through the real per-run
+ * path below.
+ *
+ * Each run draws at `y + run.dy` and wraps in `<a href>` when it carries a
+ * url (`core/svg.ts#linkWrap`, the SAME string-emitting `<a>` wrapper
+ * every other engine's url runs use, jar-verified byte-exact per that
+ * function's own doc comment).
  *
  * T2c: `tooltip: run.tooltip ?? run.url` now carries the creole command's
  * own resolved `{tooltip}` -- `creole-text-lines.ts#textAtomMeasured` was
@@ -221,11 +277,24 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * `theme.svgLinkTarget`. Affects `gaxezi-48-zesa921`/`nisexe-68-vabu320`/
  * `pekuxe-00-bovi270`.
  */
-function drawCreoleUrlLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
+/** See {@link drawCreoleLine}'s own doc comment (the `ATOM_TEXT_MIN_HEIGHT`
+ *  paragraph) for why this guard exists: `true` iff the line is exactly
+ *  one NORMAL, non-url, non-cascaded-size run -- the shape a line with NO
+ *  creole content (no style flag, no url, no heading/sup/sub) always has. */
+function isPlainSingleRun(line: CreoleTextLine, style: ActivityTextStyle): boolean {
+  if (line.runs.length !== 1) return false;
+  const run = line.runs[0]!;
+  const s = run.style;
+  return !s.bold && !s.italic && !s.underline && !s.strike && run.url === undefined && run.size === style.fontSize;
+}
+
+function drawCreoleLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
   const lines = creoleTextLines(content, font, MEASURER);
   const line = lines[0];
-  if (line === undefined || line.kind !== 'text') return drawRun(x, y, content, toFontConfiguration(style));
+  if (line === undefined || line.kind !== 'text' || isPlainSingleRun(line, style)) {
+    return drawRun(x, y, content, toFontConfiguration(style));
+  }
   let cx = x;
   let out = '';
   for (const run of line.runs) {
@@ -250,17 +319,21 @@ function drawCreoleUrlLine(x: number, y: number, content: string, style: Activit
  * expected -- callers need no translation-math change beyond dropping any
  * `dominantBaseline`/`textAnchor` they used to pass.
  *
- * T3e: a `|cell|`/`[[url]]`-bearing physical line routes through the real
- * creole seam ({@link drawCreoleTableRow}/{@link drawCreoleUrlLine})
- * instead of being drawn as one literal run -- every OTHER line (this
- * port's existing corpus, including every pinned golden) is drawn exactly
- * as before, since neither trigger (`[[`, a leading `|`) appears in a
- * plain activity label.
+ * T3e: a `|cell|` physical line routes through the dedicated table-cell
+ * seam ({@link drawCreoleTableRow}, `StripeTable`'s own stripped-cell
+ * content, checked first to match `creoleTextLines`' own table-row
+ * priority, `CreoleParser.java:91-100`). add3-T2b (D5): every OTHER line
+ * now routes through {@link drawCreoleLine} -- the SAME real creole lexer
+ * ({@link drawCreoleLine}'s own doc comment) -- not just a `[[url]]` line
+ * as before; a plain line with neither a url nor any `**`/`__`/`=`/`____`
+ * markup still measures and draws byte-identically, since `creoleTextLines`
+ * reduces to one unstyled run at the caller's own font for that case (no
+ * regression to this port's existing corpus, including every pinned
+ * golden).
  */
 export function drawActivityText(x: number, y: number, content: string, style: ActivityTextStyle): string {
   if (isTableRowLine(content)) return drawCreoleTableRow(x, y, content, style);
-  if (content.includes('[[')) return drawCreoleUrlLine(x, y, content, style);
-  return drawRun(x, y, content, toFontConfiguration(style));
+  return drawCreoleLine(x, y, content, style);
 }
 
 /**

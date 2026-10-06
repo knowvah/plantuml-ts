@@ -35,27 +35,32 @@ function measurerAdapterOf(bounder: StringBounder): StringMeasurer {
 
 /**
  * One physical line's content width -- the RESOLVED creole width, not the
- * literal (bracket/pipe-including) source text: `FtileBox
- * #calculateDimensionFtile` (`ftile/vertical/FtileBox.java:237-243`) sizes
- * the box from the `Display#create8`-built `TextBlock`, which for a
- * `[[url]]` line is `CommandCreoleUrl`'s resolved label/url/trailing-text
- * run sequence (`CommandCreoleUrl.ts`, consumed by `creoleTextLines` via
- * `buildLineAtoms`) and for a `|cell|` line is `StripeTable`'s own stripped
- * cell content (`activity-text-placement.ts#tableRowCellsOf`,
- * `StripeTable.java:137-159`) -- every other line (the overwhelming
- * majority of this port's corpus) keeps the pre-existing literal-text
- * measurement unchanged.
+ * literal (markup-including) source text: `FtileBox#calculateDimensionFtile`
+ * (`ftile/vertical/FtileBox.java:237-243`) sizes the box from the
+ * `Display#create8`-built `TextBlock`, i.e. `skinParam.sheet(fc, align,
+ * CreoleMode.FULL).createSheet(label)` (`FtileBox.java:178-181`) -- the SAME
+ * real lexer (`buildLineAtoms`, `klimt/creole/legacy/StripeSimple.ts`, via
+ * `creoleTextLines`) the Sheet's own `SheetBlock1` would measure every
+ * stripe through. add3-T2b (D5) widens this from the two pre-existing
+ * triggers (a `[[url]]` line, `StripeTable`'s own stripped `|cell|`
+ * content, `activity-text-placement.ts#tableRowCellsOf`,
+ * `StripeTable.java:137-159`) to EVERY line, so `**bold**`/`__underline__`/
+ * a `=heading`/a `____`/`====` horizontal-line stripe
+ * (`CreoleStripeSimpleParser.java:92-109,149-153`) all measure through the
+ * real classifier instead of as literal markup characters (`vimako-25-
+ * mega336`/`fatuzu-07-cevu894`/`bedezo-44-more709`/`pirofe-41-xama594`,
+ * census family CREOLE-INLINE). A `HORIZONTAL_LINE` stripe's own `width: 0`
+ * (`creole-text-lines.ts`'s `'hr'` kind) correctly never constrains the
+ * box -- matching upstream, where the rule spans whatever width the OTHER
+ * lines already settled on, not the reverse.
  */
 function creoleLineWidth(line: string, bounder: StringBounder, theme: Theme, fontSize: number): number {
-  if (line.includes('[[')) {
-    const font: FontSpec = { family: theme.fontFamily, size: fontSize };
-    const built = creoleTextLines(line, font, measurerAdapterOf(bounder));
-    return built[0]?.width ?? 0;
-  }
   if (isTableRowLine(line)) {
     return tableRowCellsOf(line).reduce((sum, cell) => sum + bounder.getDimension(cell, fontSize).width, 0);
   }
-  return bounder.getDimension(line, fontSize).width;
+  const font: FontSpec = { family: theme.fontFamily, size: fontSize };
+  const built = creoleTextLines(line, font, measurerAdapterOf(bounder));
+  return built[0]?.width ?? 0;
 }
 
 export class GtileAction extends TileLeaf {
