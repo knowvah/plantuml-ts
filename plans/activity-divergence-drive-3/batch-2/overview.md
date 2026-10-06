@@ -1,11 +1,14 @@
-# Batch 2 — notes, embedded {{ }}, klimt, small items (parallel)
+# Batch 2 — notes, creole/embed, small items (re-cut 2026-10-06, journal row 14)
 
-Four worktrees; write-sets disjoint. Close per close-procedure (`b2`), pin
-round 2, then write batch 3 from the census (re-measured at b2).
+Re-cut from the T0c/T0d census. Wave A runs during T1d (write-sets disjoint
+from T1d's); wave B after T1d merges. All merge at the b2 close. T2c dissolved:
+KLIMT-FLOOR -> T2b (same `gtile-action.ts` line-height site), PCTN -> T2a
+(`node-dispatch.ts`), GLYPH -> T2b report-only (accepted-divergence candidate;
+signing is stop 10).
 
-| ID | Description | Agent | Writes | Depends On | Done |
-|---|---|---|---|---|---|
-| [T2a](T2a-notes.md) | note families | typescript-pro | `tiles/gtile-note.ts`, `layout/tile-layout-structural.ts`, `layout/tile-layout.ts`, `activity-layout-constants.ts`, note branches of `layout/tile-coordinates.ts` | b1 | [ ] |
-| [T2b](T2b-embedded.md) | action text via core creole Sheet; `{{ }}` | typescript-pro | `activity-renderer-text.ts`, `tiles/gtile-action.ts`, text calls in `activity-renderer-shapes.ts`, `ast.ts` (new fields) | b1 | [ ] |
-| [T2c](T2c-klimt.md) | klimt items | typescript-pro | named files under `src/core/klimt/**` | b1 | [ ] |
-| [T2d](T2d-small.md) | ruzazu, reluvi, levuma, document gradient | typescript-pro | `tiles/gtile-switch.ts`, `layout/walk-switch.ts`, `tiles/gtile-repeat.ts`, `layout/walk-repeat.ts`, `activity-renderer-terminals.ts`, `src/core/{theme*,skinparam-*}.ts`, svg root background path | b1 | [ ] |
+| ID | Wave | Description | Agent | Writes | Depends On | Done |
+|---|---|---|---|---|---|---|
+| [T2b](T2b-embedded.md) | A | action/diamond text via core creole Sheet (CREOLE-INLINE, CREOLE-ACT, STRIPE, EMBED), KLIMT-FLOOR, GLYPH report | typescript-pro | `activity-renderer-text.ts`, `tiles/gtile-action.ts`, `tiles/gtile-diamond*.ts`, text calls in `activity-renderer-shapes.ts`, `ast.ts` (new fields), named `src/core/klimt/creole/**` files (survey-guarded) | b0 | [ ] |
+| [T2d-a](T2d-small.md) | A | HARNESS-SEED, DOCGRAD, DARK-CIRCLE (levuma) | typescript-pro | `tests/oracle/svg-conformance/render-fixture-activity.ts`, `activity-renderer-terminals.ts`, `src/core/{theme*,skinparam-*}.ts`, svg root background path in `src/core/` (survey-guarded) | b0 | [ ] |
+| T2a | B | notes: NOTEW/NOTE-SIZE, NOTELEFT (after NOTEW), NOTE-MULTI, NOTE-CREOLE, NOTE-SWIMLANE, IFNOTE, BACKNOTE, GROUPNOTE; PCTN | typescript-pro | `tiles/gtile-note.ts`, `layout/tile-layout*.ts`, `activity-layout-constants.ts`, note branches of `layout/tile-coordinates.ts`, `node-dispatch.ts`, `if-dispatch.ts`, `layout/conditional-builder*.ts` | T1d | [ ] |
+| T2d-b | B | ruzazu BIG_DIAMOND, CSTYLE-EMPTY / CONDSTYLE-EMPTY (reluvi, vamazo, tepivu, xefalo) | typescript-pro | `tiles/gtile-switch.ts`, `layout/walk-switch.ts`, `tiles/gtile-repeat.ts`, `tiles/gtile-while.ts`, `layout/walk-repeat.ts`, `layout/walk-while-branch.ts` | T1d; diamond file after T2b | [ ] |
