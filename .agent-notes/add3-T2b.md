@@ -1,5 +1,194 @@
 # add3-T2b — action text through the core creole sheet; embedded `{{ }}`
 
+## Pass 2 (orchestrator decision-journal row 15)
+
+Orchestrator rejected D5-amendment and `isPlainSingleRun`; ordered KLIMT-
+FLOOR ported for real, then per-line heading height, then STRIPE, then
+the Sheet-route spike, then EMBED, one commit per mechanism.
+
+### Commits (this pass)
+
+- `66d6416a1` feat(add3-T2b): port AtomText.java floor into action box
+  height — KLIMT-FLOOR for real; deletes `isPlainSingleRun`.
+- `aefc1de5c` feat(add3-T2b): per-line heading height, not a uniform
+  floor — KLIMT-ACT heading stripes.
+
+### Task 1 — KLIMT-FLOOR (landed)
+
+Java → ours:
+- `AtomText.java:179-181` (`if (h < 10) h = 10`) → `gtile-action.ts
+  #floorActionLineHeight`/`ACTION_TEXT_MIN_HEIGHT` (exported, CLAUDE.md's
+  "layout constant a renderer also needs is exported from the layout
+  module"), applied to `lineHeight` (the box sizer) and, via the new
+  `ActivityTextStyle#floorCoordinated` flag, to the renderer's per-line
+  Y-advance and `drawCreoleLine`'s per-run `dy`.
+- `AtomTextUtils.java:145-159`'s `createListNumber` (ordered-list header
+  atom) → `AtomTextUtils.ts#ListNumberAtom.calculateDimension` gained the
+  SAME floor (it never had it — a genuine, separate port gap, not
+  downstream of the bypass). Core file, survey-guarded (see below).
+
+Mechanism for the TWO regressions `isPlainSingleRun`'s removal exposed
+(both jar-verified, both fixed in the same commit, not a separate one —
+discovered during this commit's own verification, not a new task):
+1. `fontConfigForRun`'s `run.color ?? style.fill` always lost to
+   `creole-text-lines.ts#textAtomMeasured`'s copy of `leaf-sizing-text.ts
+   #baseFontConfiguration`'s always-defined `JAR_DEFAULT_TEXT_COLOR`
+   (`'#000000'`) — a plain run's `color` field is NEVER `undefined` in
+   this seam, so the caller's real `style.fill` never won once dy-removal
+   made every line go through the real per-run path. Fixed: treat the
+   sentinel as "no explicit creole colour." Regressed/fixed:
+   `labala-74-juki864` (`!theme amiga`), `levuma-67-cego489` (`skinparam
+   mode dark`), `loxija-71-joku558`/`zepima-96-peco612` (`skinparam
+   activityFontColor red`).
+2. A lone plain run under the floor (`activityFontSize 4` <
+   `ACTION_TEXT_MIN_HEIGHT`) gets a REAL non-zero `dy` from `creole-sea-
+   line.ts`'s `Sea` — faithful when the CALLER's own `y` was built on the
+   SAME floored line height (now true for `renderAction`'s `'activity'`-
+   sname paths), but WRONG for a caller that built `y` from the font's
+   OWN raw size (`renderIfLabel`'s arrow out-labels, a swimlane title —
+   neither owns `GtileAction`'s floor). Fixed via `floorCoordinated`
+   (opt-in per caller, default `false` = old behavior). Regressed/fixed:
+   `sikino-19-vuca111` (`SwimlaneTitleFontSize 8`), `dozaxu-98-xetu961`
+   (`ArrowFontSize 7`) — both were PINNED, byte-exact goldens; both are
+   confirmed green again (288/288 ratchet).
+
+Rows: `loxija-71-joku558` 121→9, `zepima-96-peco612` 171→9 (both exactly
+the "~9 each" the brief's census sandbox predicted), `letare-59-gore448`
+2→0.
+
+Engine survey (rule 11, `AtomTextUtils.ts` is `src/core/**`): 27 engines
+surveyed before and after (`/private/tmp/claude-501/add3-T2b/{before,
+after}/parity-*.json`, via `npx jiti scripts/svg-parity-survey.ts <e>
+--out ...` run individually from THIS worktree — never `survey-all.sh`,
+which hardcodes `cd` to the MAIN checkout, a hazard for a worktree
+agent). `engdiff.py`: `movers=0 conformant-losses=0` — `ListNumberAtom`
+is reached by no currently-surveyed non-activity fixture.
+
+### Task 2 — KLIMT-ACT per-line heading height (landed)
+
+Java → ours: `CreoleStripeSimpleParser.java:149-153`'s heading cascade
+(`StripeSimple.ts#fontConfigurationForHeading`: a `=heading` line grows
+bold + a per-order size delta, `+4`pt at order 0) → `gtile-action.ts
+#creoleLineHeight` (mirrors the existing `creoleLineWidth`'s real-
+classifier derivation, summed per physical line in place of the old
+`lineHeight * lineCount`) and the new `activity-renderer-line-heights
+.ts#actionLineHeights`/`centeredBaselines` (the renderer's own mirror,
+since it has no `StringBounder` — `activity-text-placement.ts`'s
+established "fresh `WidthTableMeasurer`" pattern, reused rather than
+threading `gtile-action.ts`'s bounder-shaped version through a render
+call). `centeredBaselines` generalizes `centeredFirstBaselineY` to
+heterogeneous per-line heights; proven algebraically identical to it
+when every height is equal, so every non-`'activity'` sname (diamond/
+hexagon, ALIGN-DIAMOND) keeps its EXACT prior closed-form bit-for-bit.
+
+Row: `jagove-43-nako107` 130→0 (jar-verified mechanism: each of its
+three `:=condN\n...\noperation...;` action boxes measured `rect/@height`
+4px short, 56 vs 60 — exactly one line's `+4`pt heading delta).
+`letuke-04-poza319`/`zejuso-92-kexo870` unchanged by this task (their
+own residuals are a table-grid path and a `legend` block respectively,
+neither a heading-height matter).
+
+No `src/core/**` file touched by this commit — no engine survey
+required.
+
+### Probe Σ by commit (125-row baseline)
+
+| after | Σ | risers |
+|---|---|---|
+| task 1 | 15732 | vimoxa-78-zucu656 (unchanged, documented NOTE-CREOLE reveal) |
+| task 2 | 15602 | vimoxa-78-zucu656 (unchanged) |
+
+Both commits: `activity.golden.ratchet.test.ts` + `.harness-parity
+.test.ts` 288/288 green, `tsc --noEmit` (both tsconfigs) clean, `eslint`
+on every changed file clean.
+
+### Task 3 — STRIPE (`____`/`====` HORIZONTAL_LINE) — BLOCKED, not landed
+
+**Mechanism, confirmed against the Java and the golden byte-for-byte**
+(diagnosis artifact, not a guess):
+
+- `CreoleStripeSimpleParser.ts#classifyStripeLine`/upstream's own
+  `CreoleStripeSimpleParser.java:92-109` (`SECTION_SEPARATOR_PATTERN`,
+  `^=+$`, length ≥ 4) classifies bare `====` as `HORIZONTAL_LINE` — but
+  bare `____` (underscores) matches NO upstream pattern there and is
+  `LITERAL` (plain text). Confirmed directly against `bigide-91-
+  bise382`'s own golden SVG: the `____` action box draws
+  `<text>____</text>` (literal), the `====` action box draws TWO real
+  `<line>` elements (`UHorizontalLine.java`'s `style==='=' ⇒
+  drawSimpleHline(y) + drawSimpleHline(y+2)`, the double-rule). My
+  mission brief's own framing ("the `____`/`====` HORIZONTAL_LINE
+  stripe") is half right: only `====` is a rule; `____` already renders
+  correctly as literal text under this pass's task-1/2 changes (verified
+  — `bigide`'s FIRST action box, the `____` one, is BYTE-EXACT already;
+  only the SECOND, `====`, box has open diffs).
+- Drawing `====` as a real double rule needs two things I have NOT yet
+  resolved:
+  1. A box-bounded `<line>` primitive (activity has no `UGraphic`/
+     `Stencil` to reuse `CreoleHorizontalLine.ts`'s "infinite" line
+     directly — straightforward: draw a literal `<line>` spanning the
+     box's own known padded content width).
+  2. **The real height a `====`/HORIZONTAL_LINE stripe contributes,
+     which I found CONFLICTING evidence for and did NOT resolve:**
+     - `creole-text-lines.ts:397-398` (the seam my task-1/2 `creoleLineHeight`
+       already calls) reports `CREOLE_HR_HEIGHT = 8`
+       (`leaf-sizing-text.ts:43`), whose OWN doc comment cites a DIFFERENT,
+       prior jar verification: `node [ foo1 ==== foo2 ]` = `14 + 8 + 14 +
+       30 margin = 66px`.
+     - `CreoleHorizontalLine.java:118-129`'s `calculateDimensionSlow`
+       (the REAL atom upstream's `CreoleParser`/`Sheet` pipeline
+       instantiates for a captured-empty separator — `this.line.length
+       === 0`, true for EVERY bare `----`/`====`/`....` since none of
+       them capture a label) returns a FLAT `new XDimension2D(10, 10)`
+       — height **10**, unconditional on style.
+     - `bigide-91-bise382`'s own golden algebra: box1 (3 literal lines,
+       12px each, `activityPadding('activity')` = 10 confirmed both
+       sides) = `36 + 20 = 56`, matching ours exactly. Box2 (2 literal
+       lines + 1 `====`) golden height = `54`; `54 - 24 - 20 = 10` — the
+       jar's OWN `====` stripe contributes **10**, matching `Creole
+       HorizontalLine.java` directly, NOT the `8` `creole-text-lines.ts`
+       currently reports.
+  - I did not reconcile these two sources within this pass's remaining
+    budget: either `CREOLE_HR_HEIGHT=8`'s prior verification used a
+    DIFFERENT upstream code path (not `CreoleHorizontalLine`, e.g. a
+    graphviz-node-label-specific stripe-height method I have not yet
+    located in `StripeSimple.java`/`Stripe.java`) and is correctly `8`
+    for ITS fixture while activity genuinely needs `10` from a different
+    atom — or one of the two readings is wrong. Changing the shared
+    `creole-text-lines.ts` constant to `10` without re-verifying the
+    OTHER fixture it was built against would risk a silent regression I
+    have no budget left to measure this pass; keeping `8` leaves bigide's
+    box height 2px short. **Per CLAUDE.md ("never fit a value") and
+    diagnosis.md, I am reporting this unresolved rather than picking
+    either number.** Next step: read `StripeSimple.java`'s own per-
+    stripe height accumulation (not yet done) to determine which real
+    class actually backs a MULTI-LINE `Display`'s HORIZONTAL_LINE
+    stripe — `CreoleHorizontalLine` (standalone atom, used when an
+    entire creole block IS one separator) may not be the same class
+    `SheetBlock1` asks for a stripe's height WITHIN a longer, mixed-
+    content Display; that distinction is the open question.
+  - Not committed: no code was written for task 3 (height uncertainty
+    blocks drawing it correctly either way) — `bigide-91-bise382`
+    remains at its pre-pass-2 score (67; the row's OTHER diffs are a
+    pre-existing, unrelated 0.5px global offset — see below).
+
+**Unrelated finding, not mine to fix**: `bigide-91-bise382` also carries
+a uniform ±0.5px horizontal offset across EVERY element (even the
+unrelated start/end circles and arrows) that is NOT part of the STRIPE
+mechanism and was present before any of this mission's edits (score 67
+unchanged since the very first `before.json` measurement). Not
+investigated further — flagging so the next STRIPE attempt does not
+mistake it for part of this mechanism.
+
+### Tasks 4/5 — not attempted
+
+Not reached: task 3 is the prerequisite for `bigide`'s own row and
+blocked the remaining budget. Per the brief's own instruction ("If 1-3
+land but 4/5 need more than this pass, commit 1-3 and report the exact
+blocker"), tasks 1-2 are committed and task 3's exact blocker is above;
+tasks 4 (Sheet-route spike) and 5 (EMBED) were not started this pass.
+
+## Pass 1 (original)
+
 ## Commits
 
 - `f3c251ff4` `feat(add3-T2b): route activity inline creole through the
