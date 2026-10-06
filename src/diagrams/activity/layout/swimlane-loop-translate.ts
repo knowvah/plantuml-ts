@@ -30,6 +30,8 @@ import {
   routeRepeatSimple1,
   routeRepeatSimple2,
   routeRepeatComplex1,
+  routeRepeatBackward1,
+  routeRepeatBackward2,
 } from './swimlane-loop-translate-repeat.js';
 import {
   routeSwitchHorizontalThenVertical,
@@ -145,12 +147,54 @@ export interface SwitchVerticalThenHorizontalCrossLoop {
   readonly diamond2: { readonly width: number; readonly height: number };
 }
 
+/**
+ * `FtileRepeat.ConnectionBackBackward1#drawTranslate` (`:432-438`, shared
+ * `drawSnake` at `:440-459`): `p1` is `getP1` (`:416-418`,
+ * `getTranslateDiamond2().getTranslated(0,0)` -- diamond2's own untranslated
+ * ORIGIN, this walker's own `condX`/`condY`); `p2` is `getP2` (`:420-423`,
+ * `dim.getLeft(), dim.getOutY()` -- backward's own untranslated SOUTH hook,
+ * this walker's own `backSouth`); `diamond2` carries `width`/`height` for
+ * the post-translate left/right side re-decision (`:447-449`) -- recomputed
+ * from the TRANSLATED `p1`/`p2`, never the untranslated ones T1c's own
+ * `walk-repeat-backward.ts#backward1Points` side-check used (this is the
+ * cross-lane analogue T1a's census flagged as missing). No `label` field:
+ * unlike `repeat-out`'s elbow+drop split, this shape is always exactly ONE
+ * edge, so `routeRepeatBackward1` rebuilds it as `{...edge, points}` --
+ * the base edge's own `label`/`labelAlign` (set by `applyBackwardLabel` at
+ * the SAME push site this loop record comes from) carries through the
+ * spread unchanged.
+ */
+export interface RepeatBackward1Loop {
+  readonly kind: 'repeat-backward1';
+  readonly p1: GPoint;
+  readonly p2: GPoint;
+  readonly diamond2: { readonly width: number; readonly height: number };
+}
+
+/**
+ * `FtileRepeat.ConnectionBackBackward2#drawTranslate` (`:482-511`): `p1` is
+ * `getP1` (`:473-476`, `dim.getLeft(), dim.getInY()` -- backward's own
+ * untranslated NORTH hook, this walker's own `backNorth`); `p2` is `getP2`
+ * (`:478-480`, diamond1's own untranslated ORIGIN, this walker's own
+ * `entryX`/`entryY`); `diamond1` carries `width` for the post-translate
+ * `x2 < x1` wraparound (`:495-497`) and `height` for the `y2` elbow
+ * (`:498`). No `label` field, same reason as {@link RepeatBackward1Loop}.
+ */
+export interface RepeatBackward2Loop {
+  readonly kind: 'repeat-backward2';
+  readonly p1: GPoint;
+  readonly p2: GPoint;
+  readonly diamond1: { readonly width: number; readonly height: number };
+}
+
 export type LoopTranslate =
   | WhileBackLoop
   | RepeatOutLoop
   | RepeatSimple1Loop
   | RepeatSimple2Loop
   | RepeatComplex1Loop
+  | RepeatBackward1Loop
+  | RepeatBackward2Loop
   | SwitchHorizontalThenVerticalCrossLoop
   | SwitchVerticalThenHorizontalCrossLoop;
 
@@ -186,6 +230,10 @@ export function routeLoopTranslate(
       return routeRepeatSimple2(loop, edge, dx1, dx2);
     case 'repeat-complex1':
       return routeRepeatComplex1(loop, edge, dx1, dx2);
+    case 'repeat-backward1':
+      return routeRepeatBackward1(loop, edge, dx1, dx2);
+    case 'repeat-backward2':
+      return routeRepeatBackward2(loop, edge, dx1, dx2);
     case 'switch-h-then-v-cross':
       return routeSwitchHorizontalThenVertical(loop, edge, dx1, dx2);
     case 'switch-v-then-h-cross':
