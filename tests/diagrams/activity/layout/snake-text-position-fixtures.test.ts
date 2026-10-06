@@ -45,6 +45,21 @@ function textPosition(svg: string, label: string): { x: number; y: number } {
   return { x: Number(m[1]), y: Number(m[2]) };
 }
 
+function attr(svg: string, name: string): string {
+  const m = svg.match(new RegExp(`${name}="([^"]*)"`));
+  if (m === null) throw new Error(`${name} not found`);
+  return m[1]!;
+}
+
+/** Count of `<text>` elements whose content is exactly `label` -- the
+ *  "exactly once, no duplicate draw" check every generic-mechanism
+ *  fixture below needs (`label-in-fork`'s own doc: upstream draws a
+ *  fork branch's entry label ONCE, on the first branch only). */
+function textOccurrences(svg: string, label: string): number {
+  const re = new RegExp(`<text[^>]*>${label}</text>`, 'g');
+  return (svg.match(re) ?? []).length;
+}
+
 describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', () => {
   const { ours, golden } = renderFixture('while-backward-bottom');
 
@@ -70,5 +85,109 @@ describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', ()
 
   it('Backward2 "dsc_5" y: pinned at the current (not jar-equal) value', () => {
     expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(96.806, 3);
+  });
+});
+
+/**
+ * T1b pass 2: the generic `-> label;` mechanism (`ActivityDiagram3.java:
+ * 105-106,437-465`), end to end -- every fixture below was rendered
+ * through `scripts/oracle-render.sh` and asserted against BOTH the
+ * real jar and our own port. Canvas `width`/`height` and the label's
+ * own `x` now match the jar EXACTLY in every case; `y` carries the
+ * same creole-ascent residual `while-backward-bottom` already
+ * documents above (not re-derived here -- same mechanism, same
+ * boundary).
+ */
+describe('generic -> label; -- default-arrow-label (start;:A;->hello;:B;stop;)', () => {
+  const { ours, golden } = renderFixture('default-arrow-label');
+
+  it('canvas width/height match the jar exactly', () => {
+    expect(attr(ours, 'width')).toBe(attr(golden, 'width'));
+    expect(attr(ours, 'height')).toBe(attr(golden, 'height'));
+  });
+
+  it('"hello" x matches the jar exactly', () => {
+    expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
+  });
+
+  it('"hello" y: pinned at the current (not jar-equal) value', () => {
+    expect(textPosition(ours, 'hello').y).toBeCloseTo(109.778, 3);
+  });
+});
+
+describe('generic -> label; -- colored-arrow-label (-><back:red> hello;)', () => {
+  const { ours, golden } = renderFixture('colored-arrow-label');
+
+  it('draws a feFlood/feComposite filter, never a RED background rect (SvgGraphics.java:772-786)', () => {
+    expect(ours).toContain('<feFlood flood-color="#FF0000"');
+    expect(ours).toContain('<feComposite in="SourceGraphic" in2="flood" operator="over"/>');
+    // The OLD pill mechanism (pre-T1b) drew a `<rect ... fill="red">` --
+    // every `<rect>` here must be the unrelated A/B action boxes
+    // (`fill="#F1F1F1"`), never the label's own colour.
+    expect(ours).not.toContain('fill="red"');
+    expect(golden).not.toContain('fill="red"');
+  });
+
+  it('"hello" carries filter="url(#...)" on the <text> itself, matching the jar\'s own shape', () => {
+    expect(ours).toMatch(/<text[^>]*filter="url\(#[^)]+\)"[^>]*>hello<\/text>/);
+    expect(golden).toMatch(/<text[^>]*filter="url\(#[^)]+\)"[^>]*>hello<\/text>/);
+  });
+
+  it('"hello" x matches the jar exactly; canvas size unchanged by the colour', () => {
+    expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
+    expect(attr(ours, 'width')).toBe(attr(golden, 'width'));
+    expect(attr(ours, 'height')).toBe(attr(golden, 'height'));
+  });
+});
+
+describe('generic -> label; -- label-before-repeat (FtileRepeat ConnectionIn, row 6)', () => {
+  const { ours, golden } = renderFixture('label-before-repeat');
+
+  it('canvas width/height match the jar exactly', () => {
+    expect(attr(ours, 'width')).toBe(attr(golden, 'width'));
+    expect(attr(ours, 'height')).toBe(attr(golden, 'height'));
+  });
+
+  it('"hello" x matches the jar exactly, drawn exactly once', () => {
+    expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
+    expect(textOccurrences(ours, 'hello')).toBe(1);
+    expect(textOccurrences(golden, 'hello')).toBe(1);
+  });
+});
+
+describe('generic -> label; -- label-after-endif (the merge-diamond\'s own out edge)', () => {
+  const { ours, golden } = renderFixture('label-after-endif');
+
+  it('canvas width/height match the jar exactly', () => {
+    expect(attr(ours, 'width')).toBe(attr(golden, 'width'));
+    expect(attr(ours, 'height')).toBe(attr(golden, 'height'));
+  });
+
+  it('"hello" x matches the jar exactly -- the SAME generic mechanism as a top-level label, no if-specific wiring needed', () => {
+    expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
+  });
+});
+
+/**
+ * T1b pass 2: `ParallelBuilderFork$ConnectionIn` (rows 19/20) -- a `->
+ * label;` right after `fork`, read off the FIRST branch's own entry
+ * edge only (`fork again`'s branch carries no label in this fixture).
+ */
+describe('generic -> label; -- label-in-fork (ParallelBuilderFork ConnectionIn, rows 19/20)', () => {
+  const { ours, golden } = renderFixture('label-in-fork');
+
+  it('"hello" drawn exactly once (first branch only), x matches the jar exactly', () => {
+    expect(textOccurrences(ours, 'hello')).toBe(1);
+    expect(textOccurrences(golden, 'hello')).toBe(1);
+    expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
+  });
+
+  // `ParallelBuilderFork`'s own bar-to-branch gap height reservation is a
+  // SEPARATE constant from `FtileFactoryDelegatorAssembly`'s generic
+  // 35px/label-height term (`tiles/gtile-top-down.ts#sequentialGap`) --
+  // NOT extended for a label this pass (`.agent-notes/add3-T1b.md`), so
+  // canvas size here is a KNOWN, documented residual, not jar-equal.
+  it('canvas size is a known residual (fork-specific gap, not re-derived this pass)', () => {
+    expect(attr(ours, 'width')).not.toBe(attr(golden, 'width'));
   });
 });
