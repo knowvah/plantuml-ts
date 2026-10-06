@@ -9,6 +9,7 @@ import { activityMinimumWidth } from '../activity-text-style.js';
 import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
 import type { StringMeasurer, FontSpec } from '../../../core/measurer.js';
 import { isTableRowLine, tableRowCellsOf } from '../activity-text-placement.js';
+import { buildActionTextBlock, klimtStringBounder } from '../activity-creole-sheet.js';
 
 /** `AtomText#calculateDimensionSlow`'s own floor (`AtomText.java:179-181`,
  *  `if (h < 10) h = 10`), applied to every creole text atom -- including
@@ -87,7 +88,7 @@ const TABLE_BLOCK_MARGIN_Y = 4;
  *  `size/4.5` is `StringBounder.java:47`'s own documented default, already
  *  cited by `activity-renderer-shapes.ts#ASCENT_FRACTION`; the seam only
  *  reads it for a `<back:gradient>` patch no row this task owns reaches. */
-function measurerAdapterOf(bounder: StringBounder): StringMeasurer {
+export function measurerAdapterOf(bounder: StringBounder): StringMeasurer {
   return {
     measure: (text, font) => bounder.getDimension(text, font.size),
     getDescent: (font) => font.size / 4.5,
@@ -149,6 +150,111 @@ function creoleLineHeight(line: string, bounder: StringBounder, theme: Theme, fo
   return built[0].kind === 'hr' ? ACTIVITY_HR_HEIGHT : built[0].height;
 }
 
+/**
+ * add3-T2b pass 3 (D5 Sheet spike): `FtileBox.java:178-181`'s own
+ * `SheetBlock1`, built for a label with no table row and no `<code>`
+ * block (both pre-existing, unchanged special cases -- the Sheet spike
+ * is scoped to plain creole text, matching `activity-creole-sheet.ts`'s
+ * own doc comment). `tb.calculateDimension` already includes `skinParam
+ * .getPadding()` (`activityPadding('activity')`, `SheetBlock1`'s own
+ * constructor arg) -- the caller must NOT add padding again. `null`
+ * when the label is empty (`Display.create([''])`'s own `isNull`
+ * short-circuit reports a zero-height sheet, not the `textHeight=0`
+ * this port's OWN formula already handles via `lines.length===0`'s
+ * `Math.max()` of an empty array -- deferred to the pre-existing path).
+ */
+function sheetDimension(
+  label: string,
+  bounder: StringBounder,
+  theme: Theme,
+  fontSize: number,
+): { width: number; height: number } | null {
+  if (label === '') return null;
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: theme.fontFamily, size: fontSize });
+  const dim = buildActionTextBlock(label, theme, fontSize, 'activity').calculateDimension(sheetBounder);
+  return { width: dim.getWidth(), height: dim.getHeight() };
+}
+
+/** `label.split('\n')`, `<code>` detection, and the table-row scan --
+ *  split out so {@link computeActionSize} stays under the per-function
+ *  complexity ceiling. */
+interface ActionLines {
+  readonly lines: readonly string[];
+  readonly isCodeBlock: boolean;
+  readonly hasTableRow: boolean;
+}
+
+function classifyActionLines(label: string): ActionLines {
+  // Strip <code>/<\/code> wrapper lines — they are not rendered as content.
+  const allLines = label.split('\n');
+  const isCodeBlock = /^<code>$/i.test(allLines[0]?.trim() ?? '');
+  const lines = allLines.filter((l) => !/^<\/?code>$/i.test(l.trim()));
+  return { lines, isCodeBlock, hasTableRow: lines.some((l) => isTableRowLine(l)) };
+}
+
+/** The per-line measurement context both {@link actionWidth} and
+ *  {@link actionHeight} need -- bundled to stay within this project's
+ *  5-param ceiling. */
+interface ActionSizeCtx {
+  readonly bounder: StringBounder;
+  readonly theme: Theme;
+  readonly fontSize: number;
+  readonly lineHeight: number;
+}
+
+/** `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
+ *  :237-243`) adds Padding to both axes and floors the WIDTH only via
+ *  `dimRaw.atLeast(minimumWidth, 0)`; `minimumWidth` resolves through
+ *  the shared `<style>`/`skinparam minClassWidth` cascade
+ *  (`activityMinimumWidth`, D1), whose own unset default is 0
+ *  (`style/ValueNull.java:61-63`). `sheetWidth` (D5 Sheet spike,
+ *  {@link sheetDimension}) already includes padding -- must NOT add it
+ *  twice. */
+function actionWidth(classified: ActionLines, sheetWidth: number | undefined, ctx: ActionSizeCtx): number {
+  if (sheetWidth !== undefined) return Math.max(sheetWidth, activityMinimumWidth(ctx.theme));
+  const { lines, isCodeBlock } = classified;
+  // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
+  // indented code lines because space glyphs are narrower than code chars.
+  const monoCharWidth = ctx.fontSize * 0.6;
+  const maxWidth = isCodeBlock
+    ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
+    : Math.max(...lines.map((l) => creoleLineWidth(l, ctx.bounder, ctx.theme, ctx.fontSize)));
+  return Math.max(maxWidth + 2 * activityPadding('activity'), activityMinimumWidth(ctx.theme));
+}
+
+/** No upstream minimum height (the port's old `ACTION_HEIGHT = 36` floor
+ *  stays deleted, D8). `sheetHeight` (D5 Sheet spike) already includes
+ *  padding and the real per-line/heading/HR cascade -- returned as-is. */
+function actionHeight(classified: ActionLines, sheetHeight: number | undefined, ctx: ActionSizeCtx): number {
+  if (sheetHeight !== undefined) return sheetHeight;
+  const { lines, isCodeBlock } = classified;
+  // `StripeTable.java:82`'s `AtomWithMargin(table, 2, 2)` -- see
+  // `TABLE_BLOCK_MARGIN_Y`'s own doc comment for the all-table-lines scope.
+  const isAllTableRows = !isCodeBlock && lines.length > 0 && lines.every((l) => isTableRowLine(l));
+  const textHeight =
+    isAllTableRows || isCodeBlock
+      ? ctx.lineHeight * lines.length + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0)
+      : lines.reduce((sum, l) => sum + creoleLineHeight(l, ctx.bounder, ctx.theme, ctx.fontSize, ctx.lineHeight), 0);
+  return activityBoxHeight(textHeight, 'activity');
+}
+
+/** `GtileAction`'s width/height. */
+function computeActionSize(label: string, bounder: StringBounder, theme: Theme): { width: number; height: number } {
+  const classified = classifyActionLines(label);
+  // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361).
+  const fontSize = activityFontSize(theme, 'activity');
+  // `calculateDimension`'s returned height is `size`, unconditionally --
+  // `klimt/drawing/font/StringBounderFromWidthTable.java:71`.
+  const lineHeight = floorActionLineHeight(bounder.getDimension('M', fontSize).height);
+  const ctx: ActionSizeCtx = { bounder, theme, fontSize, lineHeight };
+  const sheet =
+    classified.isCodeBlock || classified.hasTableRow ? null : sheetDimension(label, bounder, theme, fontSize);
+  return {
+    width: actionWidth(classified, sheet?.width, ctx),
+    height: actionHeight(classified, sheet?.height, ctx),
+  };
+}
+
 export class GtileAction extends TileLeaf {
   readonly kind = 'gtile-action' as const;
   readonly width: number;
@@ -160,54 +266,9 @@ export class GtileAction extends TileLeaf {
     super();
     this.label = node.label;
     this.color = node.color;
-    // Strip <code>/<\/code> wrapper lines — they are not rendered as content.
-    const allLines = node.label.split('\n');
-    const isCodeBlock = /^<code>$/i.test(allLines[0]?.trim() ?? '');
-    const lines = allLines.filter((l) => !/^<\/?code>$/i.test(l.trim()));
-    const lineCount = lines.length;
-    // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361).
-    // Every BoxStyle -- plain and SDL alike -- is an `FtileBox`, and every
-    // `FtileBox` resolves `SName.activity`
-    // (`ftile/vertical/FtileBox.java:97-99`, `:146`).
-    const fontSize = activityFontSize(theme, 'activity');
-    // The per-line baseline ADVANCE is EXACTLY 1x the font size, which is
-    // what the RENDERER has advanced at since `activity-element-granularity`
-    // T3 (`activity-renderer-shapes.ts`'s ASCENT_FRACTION block):
-    // `calculateDimension`'s returned height is `size`, unconditionally --
-    // `klimt/drawing/font/StringBounderFromWidthTable.java:71`. This sizer
-    // used `* 1.4` until `activity-style-defaults` D6, an unsourced constant
-    // that reserved 40% more height than the renderer then drew into.
-    const lineHeight = floorActionLineHeight(bounder.getDimension('M', fontSize).height);
-    // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
-    // indented code lines because space glyphs are narrower than code chars.
-    const monoCharWidth = fontSize * 0.6;
-    const maxWidth = isCodeBlock
-      ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
-      : Math.max(...lines.map((l) => creoleLineWidth(l, bounder, theme, fontSize)));
-    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
-    // :237-243`) adds the resolved `Padding` to BOTH axes and floors the
-    // WIDTH only -- `atLeast(minimumWidth, 0)`, a literal 0 for the height.
-    // So there is no upstream minimum height, and the port's own
-    // `ACTION_HEIGHT = 36` floor is deleted rather than lowered to the 32
-    // the jar emits (D8): 32 is what this derivation RETURNS for one line
-    // at FontSize 12 and Padding 10, which is corroboration, not a source.
-    const pad = activityPadding('activity');
-    // `FtileBox#calculateDimensionFtile` (`ftile/vertical/FtileBox.java
-    // :237-243`) adds Padding to both axes and floors the WIDTH only via
-    // `dimRaw.atLeast(minimumWidth, 0)`; `minimumWidth` resolves through
-    // the shared `<style>`/`skinparam minClassWidth` cascade
-    // (`activityMinimumWidth`, D1), whose own unset default is 0
-    // (`style/ValueNull.java:61-63`) -- so by default this box imposes no
-    // width floor at all, matching the jar.
-    this.width = Math.max(maxWidth + 2 * pad, activityMinimumWidth(theme));
-    // `StripeTable.java:82`'s `AtomWithMargin(table, 2, 2)` -- see
-    // `TABLE_BLOCK_MARGIN_Y`'s own doc comment for the all-table-lines scope.
-    const isAllTableRows = !isCodeBlock && lineCount > 0 && lines.every((l) => isTableRowLine(l));
-    const textHeight =
-      isAllTableRows || isCodeBlock
-        ? lineHeight * lineCount + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0)
-        : lines.reduce((sum, l) => sum + creoleLineHeight(l, bounder, theme, fontSize, lineHeight), 0);
-    this.height = activityBoxHeight(textHeight, 'activity');
+    const { width, height } = computeActionSize(node.label, bounder, theme);
+    this.width = width;
+    this.height = height;
   }
 
   getCoord(hook: HookName): GPoint {
