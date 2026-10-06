@@ -1,19 +1,14 @@
-# T2d — small items
+# T2d — small items (split into T2d-a wave A, T2d-b wave B at the b1 close)
 
-Agent: typescript-pro, worktree `add3-T2d`. Rules: [../common-rules.md](../common-rules.md).
+T2d-a: HARNESS-SEED, DOCGRAD, DARK-CIRCLE (see journal rows 14, 20).
+T2d-b: ruzazu-94-meso880 BIG_DIAMOND (`FtileSwitchWithDiamonds.java:73-90`, our
+case widths flip the w9 threshold; `.agent-notes/T1p-f-switch-big-diamond.md`),
+CSTYLE-EMPTY repeat/while (reluvi-59-pifi444, vamazo-19-tufu812:
+`FtileRepeat.java:156-159`, `FtileWhile.java:137-139`), CONDSTYLE-EMPTY
+(tepivu-88-reze603, xefalo-73-sabi101: `ConditionStyle.java:52-53`,
+`ConditionalBuilder.java:259-266`) — the if part needs `conditional-builder*.ts`
+(T2a's): report and leave it if so.
 
-## Task
-1. ruzazu-94-meso880: jar BIG_DIAMOND, ours SMALL — our case widths flip `FtileSwitchWithDiamonds.java:73-90`'s w9 threshold (`.agent-notes/T1p-f-switch-big-diamond.md`).
-2. reluvi-59-pifi444: EMPTY_DIAMOND repeat condition (`FtileRepeat.java:156-159`).
-3. levuma-67-cego489: start/stop circle LineColor as a new core field, dark-seeded, independent of activityStart/EndColor (reusing those would regress poraji; add2 `.agent-notes/T3i.md`).
-4. Document-level gradient background (cigagu, gudute; `theme.colors.background` as Paint).
-Core edits need the all-engine survey (sequential).
-
-## Write-set
-See [overview](overview.md) row T2d; anything else: stop and report.
-
-## Acceptance
-- Each row: named diffs gone or residual named; 0 conformant losses.
-- 0 unexplained risers; every pinned golden byte-equal; harness-parity green.
-
-Observability: N/A. Rollback: Reversible.
+## Write-set (T2d-b)
+`tiles/gtile-switch.ts`, `layout/walk-switch.ts`, `tiles/gtile-repeat.ts`,
+`tiles/gtile-while.ts`, `layout/walk-repeat.ts`, `layout/walk-while-branch.ts`, tests.
