@@ -45,6 +45,7 @@ import { renderStart, renderStop, renderEnd, renderSpot } from './activity-rende
 import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
 import { renderActionCodeBlock } from './activity-renderer-action-code.js';
 import { floorActionLineHeight } from './tiles/gtile-action.js';
+import { actionLineHeights, centeredBaselines } from './activity-renderer-line-heights.js';
 
 // Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
 // in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
@@ -139,11 +140,14 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
   });
 }
 
-/** KLIMT-FLOOR (`AtomText.java:179-181`): Y-advance floors via
- *  {@link floorActionLineHeight} for `'activity'` ONLY -- `GtileDiamond`'s
- *  OWN sizer does not carry this floor yet (ALIGN-DIAMOND, unassigned);
- *  flooring that advance without it would re-break the diamond box/text
- *  match. Drawn font `size` itself is never floored. */
+/** KLIMT-FLOOR/KLIMT-ACT (`AtomText.java:179-181`, `CreoleStripeSimpleParser
+ *  .java:149-153`): `'activity'` ONLY gets heterogeneous per-line
+ *  baselines ({@link actionLineHeights}/{@link centeredBaselines}) -- a
+ *  `=heading` line or a sub-floor custom font size grows/shrinks that
+ *  ONE line's own height. `GtileDiamond`'s OWN sizer carries neither
+ *  cascade yet (ALIGN-DIAMOND, unassigned), so every OTHER sname keeps
+ *  the EXACT pre-existing uniform closed form, unchanged bit-for-bit
+ *  (byte-exact pinned goldens depend on it). */
 export function renderMultilineText(
   lines: string[],
   cx: number,
@@ -153,8 +157,9 @@ export function renderMultilineText(
 ): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   const isAction = opts.sname === 'activity';
-  const lineHeight = isAction ? floorActionLineHeight(size) : size;
-  const y = centeredFirstBaselineY(cy, lineHeight, lines.length);
+  const baselines = isAction
+    ? centeredBaselines(cy, actionLineHeights(lines, theme, size))
+    : lines.map((_, i) => centeredFirstBaselineY(cy, size, lines.length) + size * i);
   const fill = activityFontColor(theme, opts.sname);
   // add2 T3h, families K/F -- see renderLabel's own doc comment above.
   const fontFamily = activityFontFamily(theme, opts.sname);
@@ -163,7 +168,7 @@ export function renderMultilineText(
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + lineHeight * i, ln, {
+      return drawActivityText(x, baselines[i]!, ln, {
         fontFamily,
         fontSize: size,
         fill,

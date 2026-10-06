@@ -88,6 +88,30 @@ function creoleLineWidth(line: string, bounder: StringBounder, theme: Theme, fon
   return built[0]?.width ?? 0;
 }
 
+/**
+ * One physical line's REAL height -- `CreoleStripeSimpleParser.java
+ * :149-153`'s heading cascade (`StripeSimple.ts#fontConfigurationForHeading`,
+ * a `=heading` line grows both bold AND size) and `AtomText.java:179-181`'s
+ * floor both flow through the SAME `creoleTextLines` call {@link
+ * creoleLineWidth} already makes, mirrored here for height -- add3-T2b
+ * pass 2 (KLIMT-ACT): `gtile-action.ts`'s own per-line height used to be
+ * ONE uniform {@link floorActionLineHeight} value for every line, so a
+ * `=condition1` heading line (bold + `+4`pt, `jagove-43-nako107`) measured
+ * 4px SHORT -- jar-verified: the box's own `rect/@height` is a flat `-4`
+ * (56 vs 60) for every one of its three `:=condN\n...\noperation...;`
+ * action boxes. `fallback` is the caller's own uniform floored height,
+ * covering the table-row/blank-physical-line cases this function does not
+ * itself classify (table rows keep their EXISTING uniform-height
+ * treatment, matching `StripeTable`'s own fixed row height, not a creole-
+ * cascaded one).
+ */
+function creoleLineHeight(line: string, bounder: StringBounder, theme: Theme, fontSize: number, fallback: number): number {
+  if (isTableRowLine(line)) return fallback;
+  const font: FontSpec = { family: theme.fontFamily, size: fontSize };
+  const built = creoleTextLines(line, font, measurerAdapterOf(bounder));
+  return built[0]?.height ?? fallback;
+}
+
 export class GtileAction extends TileLeaf {
   readonly kind = 'gtile-action' as const;
   readonly width: number;
@@ -142,7 +166,10 @@ export class GtileAction extends TileLeaf {
     // `StripeTable.java:82`'s `AtomWithMargin(table, 2, 2)` -- see
     // `TABLE_BLOCK_MARGIN_Y`'s own doc comment for the all-table-lines scope.
     const isAllTableRows = !isCodeBlock && lineCount > 0 && lines.every((l) => isTableRowLine(l));
-    const textHeight = lineHeight * lineCount + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0);
+    const textHeight =
+      isAllTableRows || isCodeBlock
+        ? lineHeight * lineCount + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0)
+        : lines.reduce((sum, l) => sum + creoleLineHeight(l, bounder, theme, fontSize, lineHeight), 0);
     this.height = activityBoxHeight(textHeight, 'activity');
   }
 
