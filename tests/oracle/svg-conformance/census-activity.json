@@ -1989,13 +1989,6 @@
       "bucket": "11-30"
     },
     {
-      "slug": "tmp1",
-      "status": "error",
-      "diffCount": null,
-      "bucket": null,
-      "reason": "activity parser refused this source at line 5 (syntax): Syntax Error?"
-    },
-    {
       "slug": "tobajo-64-mipi810",
       "status": "ok",
       "diffCount": 718,

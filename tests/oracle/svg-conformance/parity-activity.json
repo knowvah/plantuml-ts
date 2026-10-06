@@ -2244,15 +2244,6 @@
       "maxDeltaPath": "svg/@height"
     },
     {
-      "slug": "tmp1",
-      "type": "activity",
-      "dotEqual": true,
-      "verdict": "diverged",
-      "maxDelta": 191.556,
-      "firstDiff": "svg/g[1]/rect[1]/@fill",
-      "maxDeltaPath": "svg/g[1]/rect[1]/@y"
-    },
-    {
       "slug": "tobajo-64-mipi810",
       "type": "activity",
       "dotEqual": true,

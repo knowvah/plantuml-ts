@@ -854,10 +854,14 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5343 -> 5361 / 6319 -> 6337 at add2/close-b3 (2026-10-03): 18 more
     // svg-activity clone rows, same shape. Derivation: 5361 + 871 + 105 = 6337.
-    expect(pinnedAgree.length).toBe(5361);
+    //
+    // 5361 -> 5360 / 6337 -> 6336 at add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 5360 + 871 + 105 = 6336.
+    expect(pinnedAgree.length).toBe(5360);
     expect(pinnedMisroutes.length).toBe(871);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6337);
+    expect(manifest.fixtures.length).toBe(6336);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

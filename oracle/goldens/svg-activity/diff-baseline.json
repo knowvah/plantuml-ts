@@ -2874,15 +2874,6 @@
     },
     {
       "type": "activity",
-      "slug": "tmp1",
-      "status": "baseline",
-      "diffCount": 151,
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "bdf8b1e2",
-      "weightedScore": 164
-    },
-    {
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
       "weightedScore": 817,

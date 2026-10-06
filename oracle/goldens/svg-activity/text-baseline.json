@@ -9407,37 +9407,6 @@
     },
     {
       "type": "activity",
-      "slug": "tmp1",
-      "status": "baseline",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
-      "ours": {
-        "fill": {
-          "#000": 10
-        },
-        "anchor": {
-          "(absent)": 10
-        },
-        "inset": {
-          "10": 5
-        },
-        "textCount": 10
-      },
-      "jar": {
-        "fill": {
-          "#000": 11
-        },
-        "anchor": {
-          "(absent)": 11
-        },
-        "inset": {
-          "10": 6
-        },
-        "textCount": 11
-      }
-    },
-    {
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
       "ours": {

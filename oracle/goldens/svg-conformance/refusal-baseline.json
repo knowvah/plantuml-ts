@@ -38263,17 +38263,6 @@
     {
       "tree": "dot-cache",
       "type": "activity",
-      "slug": "tmp1",
-      "jarRendered": true,
-      "weErrored": false,
-      "engine": "activity",
-      "status": "ok",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1"
-    },
-    {
-      "tree": "dot-cache",
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "jarRendered": true,
       "weErrored": false,

@@ -11581,49 +11581,6 @@
     },
     {
       "type": "activity",
-      "slug": "tmp1",
-      "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
-      "ours": {
-        "fontSize": {
-          "11": 3,
-          "12": 5,
-          "18": 2
-        },
-        "strokeWidth": {
-          "1": 13,
-          "1.5": 3
-        },
-        "rx": {
-          "(absent)": 1,
-          "12.5": 5
-        },
-        "textCount": 10,
-        "width": "236",
-        "height": "363"
-      },
-      "jar": {
-        "fontSize": {
-          "11": 3,
-          "12": 6,
-          "18": 2
-        },
-        "strokeWidth": {
-          "1": 13,
-          "1.5": 3
-        },
-        "rx": {
-          "(absent)": 1,
-          "12.5": 6
-        },
-        "textCount": 11,
-        "width": "275",
-        "height": "348"
-      }
-    },
-    {
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
       "ours": {

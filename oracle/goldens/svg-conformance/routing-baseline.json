@@ -34819,16 +34819,6 @@
     {
       "tree": "dot-cache",
       "type": "activity",
-      "slug": "tmp1",
-      "jarType": "ACTIVITY",
-      "ourType": "ACTIVITY",
-      "status": "agree",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1"
-    },
-    {
-      "tree": "dot-cache",
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "jarType": "ACTIVITY",
       "ourType": "ACTIVITY",

@@ -285,7 +285,10 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
         `or partial checkout, not a cache that needs regenerating -- restore the tree rather ` +
         `than pruning diff-baseline.json to match it. Missing: ${missing.slice(0, 10).join(', ')}`,
     ).toEqual([]);
-    expect(manifest.fixtures.length).toBe(373);
+    // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 373 - 1 = 372.
+    expect(manifest.fixtures.length).toBe(372);
   });
 
   // add1-T0b: the three-status arithmetic (D8's README note) extends to a
@@ -294,7 +297,7 @@ describe('svg-activity weighted-score baseline ratchet — corpus presence', () 
   // than only checking `manifest.fixtures.length` above -- also catches an
   // unrecognized fifth status silently falling through every filter below
   // unexamined (at b0: 311 + 39 + 23 + 0 = 373; T0b pins no real row).
-  it('jar-error + error + baseline + pinned accounts for every one of the 373 fixtures', () => {
+  it('jar-error + error + baseline + pinned accounts for every one of the 372 fixtures', () => {
     expect(jarErrorFixtures.length + errorFixtures.length + baselineFixtures.length + pinnedFixtures.length).toBe(
       manifest.fixtures.length,
     );
