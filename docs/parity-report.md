@@ -12,7 +12,7 @@ One row per manifest bucket in `tests/visual/data/*.json` (28, alphabetical — 
 
 | type | engine | corpus | oracle | DOT equal | survey conformant / structural / diverged | census 0-diff | ratchet pins | diff-baseline (n · ΣweightedScore) | routing agree | refusal ok |
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- |
-| activity | activity | 771 | 373 | n/a (no DOT stage (non-svek)) | 225 / 29 / 119 | 0 | 224 | 126 · 16937 | 349/373 | 373/373 |
+| activity | activity | 771 | 372 | n/a (no DOT stage (non-svek)) | 225 / 29 / 118 | 0 | 224 | 125 · 16773 | 348/372 | 372/372 |
 | board | board | 4 | 4 | n/a (no DOT stage (non-svek)) | 0 / 0 / 4 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/4 | 4/4 |
 | c4 | description | 11 | 11 | n/a (no data-diagram-type classification) | 0 / 1 / 10 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 9/11 | 7/11 |
 | chart | chart | 29 | 29 | n/a (no DOT stage (non-svek)) | 0 / 0 / 29 | n/a (no census yet) | n/a (no ratchet yet) | n/a (no diff-baseline yet) | 0/29 | 29/29 |
