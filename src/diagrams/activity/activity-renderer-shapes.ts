@@ -42,12 +42,9 @@ import {
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
-import {
-  type ActivityTextOpts,
-  activityTextLineX,
-  measureLineWidth,
-  measureMonoLineWidth,
-} from './activity-text-placement.js';
+import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
+import { renderActionCodeBlock } from './activity-renderer-action-code.js';
+import { floorActionLineHeight } from './tiles/gtile-action.js';
 
 // Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
 // in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
@@ -138,9 +135,15 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
     ...linkStyleFields(theme),
+    floorCoordinated: opts.sname === 'activity',
   });
 }
 
+/** KLIMT-FLOOR (`AtomText.java:179-181`): Y-advance floors via
+ *  {@link floorActionLineHeight} for `'activity'` ONLY -- `GtileDiamond`'s
+ *  OWN sizer does not carry this floor yet (ALIGN-DIAMOND, unassigned);
+ *  flooring that advance without it would re-break the diamond box/text
+ *  match. Drawn font `size` itself is never floored. */
 export function renderMultilineText(
   lines: string[],
   cx: number,
@@ -149,7 +152,9 @@ export function renderMultilineText(
   opts: ActivityTextOpts,
 ): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
-  const y = centeredFirstBaselineY(cy, size, lines.length);
+  const isAction = opts.sname === 'activity';
+  const lineHeight = isAction ? floorActionLineHeight(size) : size;
+  const y = centeredFirstBaselineY(cy, lineHeight, lines.length);
   const fill = activityFontColor(theme, opts.sname);
   // add2 T3h, families K/F -- see renderLabel's own doc comment above.
   const fontFamily = activityFontFamily(theme, opts.sname);
@@ -158,7 +163,13 @@ export function renderMultilineText(
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + size * i, ln, { fontFamily, fontSize: size, fill, ...link });
+      return drawActivityText(x, y + lineHeight * i, ln, {
+        fontFamily,
+        fontSize: size,
+        fill,
+        ...link,
+        floorCoordinated: isAction,
+      });
     })
     .join('');
 }
@@ -202,8 +213,6 @@ export function actColors(theme: Theme): ActivityColors {
 // `activity-renderer-terminals.ts` (T1c, 500-line hook) -- re-exported
 // above.
 
-const CODE_BLOCK_RE = /^<code>([\s\S]*?)<\/code>$/i;
-
 export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361) --
   // the SAME value `tiles/gtile-action.ts` measured this box at, so the
@@ -222,28 +231,14 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
+  const floored = floorActionLineHeight(actionSize);
 
-  // <code>...</code> block: monospace, measured like `gtile-action.ts`'s
-  // own `monoCharWidth` sizing, not the proportional table `opts` reads.
-  const codeMatch = CODE_BLOCK_RE.exec(label.trim());
-  if (codeMatch !== null) {
-    const codeContent = codeMatch[1]!.replace(/^\n/, '').replace(/\n$/, '');
-    const codeLines = codeContent.split('\n');
-    const lineY = centeredFirstBaselineY(cy, actionSize, codeLines.length);
-    const codeFill = activityFontColor(theme, 'activity');
-    const labelText = codeLines
-      .map((ln, i) => {
-        const w = measureMonoLineWidth(actionSize, ln);
-        const x = activityTextLineX(theme, cx, w, opts);
-        return drawActivityText(x, lineY + actionSize * i, ln, {
-          fontFamily: 'monospace',
-          fontSize: actionSize,
-          fill: codeFill,
-        });
-      })
-      .join('');
-    return box + labelText;
-  }
+  // <code>...</code> block (`activity-renderer-action-code.ts`, split out
+  // for this file's 500-line cap): KLIMT-FLOOR applies to it too (every
+  // creole text atom, `AtomText.java:179-181`), hence `floored` not
+  // `actionSize` for the baseline Y.
+  const codeText = renderActionCodeBlock({ label, theme, cx, cy, floored, actionSize, opts });
+  if (codeText !== null) return box + codeText;
 
   const lines = label.split('\n');
   // D1/D9: the single-line baseline is the N=1 case of the SAME
@@ -254,7 +249,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const labelEl =
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
-      : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
+      : renderLabel(label, cx, centeredFirstBaselineY(cy, floored, 1), theme, opts);
   return box + labelEl + renderCreoleTableGrid(node, lines, actionSize, theme);
 }
 

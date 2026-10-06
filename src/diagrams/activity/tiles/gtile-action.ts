@@ -10,6 +10,31 @@ import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
 import type { StringMeasurer, FontSpec } from '../../../core/measurer.js';
 import { isTableRowLine, tableRowCellsOf } from '../activity-text-placement.js';
 
+/** `AtomText#calculateDimensionSlow`'s own floor (`AtomText.java:179-181`,
+ *  `if (h < 10) h = 10`), applied to every creole text atom -- including
+ *  the single-run, uniform-font-size case every action-box physical line
+ *  reduces to, since this port's `StringBounderFromWidthTable`-equivalent
+ *  (`WidthTableMeasurer`) returns `height === fontSize` unconditionally
+ *  (`klimt/drawing/font/StringBounderFromWidthTable.java:71`, this file's
+ *  own `lineHeight` comment below). add3-T2b pass 2 (D5/KLIMT-FLOOR):
+ *  `gtile-action.ts`'s own per-line height never carried this floor, so a
+ *  small custom `activityFontSize` (`loxija-71-joku558`/`zepima-96-
+ *  peco612`, both `skinparam activityFontSize 4`) sized the box 6px
+ *  shorter per line than every text atom inside it actually occupies --
+ *  jar-verified: the box `rect/@height` is a flat `+6` per line short
+ *  (24 vs 30 for a 1-line box, growing by `+6` per additional line) across
+ *  both fixtures. Exported so `activity-renderer-shapes.ts` applies the
+ *  IDENTICAL floor to the per-line Y-advance (CLAUDE.md's "a layout
+ *  constant a renderer also needs is exported from the layout module and
+ *  imported, never redeclared"), not just this sizer. */
+export const ACTION_TEXT_MIN_HEIGHT = 10;
+
+/** `AtomText.java:179-181`'s floor ({@link ACTION_TEXT_MIN_HEIGHT}),
+ *  applied to a raw per-line height. */
+export function floorActionLineHeight(rawHeight: number): number {
+  return Math.max(rawHeight, ACTION_TEXT_MIN_HEIGHT);
+}
+
 /** `StripeTable.java:82`: `new AtomWithMargin(table, 2, 2)` -- the merged
  *  creole table's own +2-top/+2-bottom margin, added ONCE per `FtileBox`
  *  whose entire label is a single `StripeTable` stripe (this task's two
@@ -91,7 +116,7 @@ export class GtileAction extends TileLeaf {
     // `klimt/drawing/font/StringBounderFromWidthTable.java:71`. This sizer
     // used `* 1.4` until `activity-style-defaults` D6, an unsourced constant
     // that reserved 40% more height than the renderer then drew into.
-    const lineHeight = bounder.getDimension('M', fontSize).height;
+    const lineHeight = floorActionLineHeight(bounder.getDimension('M', fontSize).height);
     // Monospace chars are ~0.6× fontSize wide; proportional bounder underestimates
     // indented code lines because space glyphs are narrower than code chars.
     const monoCharWidth = fontSize * 0.6;

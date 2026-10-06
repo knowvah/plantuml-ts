@@ -48,7 +48,7 @@ import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js'
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { linkWrap, line, type LineStyle } from '../../core/svg.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
-import type { CreoleTextRun, CreoleTextLine } from '../../core/svek/image/creole-text-lines.js';
+import type { CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
 import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
@@ -90,6 +90,23 @@ export interface ActivityTextStyle {
    *  that resolved it. `undefined` falls through to `core/svg.ts
    *  #linkWrap`'s own `'_top'` parameter default. */
   readonly svgLinkTarget?: string;
+  /** add3-T2b pass 2 (KLIMT-FLOOR): `true` ONLY from a caller whose OWN
+   *  `y` was built on `gtile-action.ts#floorActionLineHeight`'s SAME
+   *  floored line height (today: `renderAction`'s `'activity'`-sname
+   *  paths and their SDL-box siblings). `creole-sea-line.ts`'s `dy` is
+   *  the correction that turns `lineTop + lineHeight - unmutedSize/4.5`
+   *  (that module's own doc comment) into upstream's absolute placement
+   *  -- valid ONLY when the caller's `lineHeight` is the SAME value
+   *  `Sea` used to compute it (the FLOORED one). A caller that instead
+   *  built `y` from the font's own RAW, unfloored size (`renderIfLabel`'s
+   *  arrow out-labels, a swimlane title, a diamond/hexagon label -- none
+   *  of which this task's rows touch) never agreed to that contract, so
+   *  `dy` is simply wrong for it -- jar-verified regression on
+   *  `sikino-19-vuca111` (`SwimlaneTitleFontSize 8`) and `dozaxu-98-
+   *  xetu961` (`ArrowFontSize 7`) once `dy` was applied unconditionally.
+   *  `undefined`/`false` (every pre-existing caller) means "ignore `dy`",
+   *  matching this port's behavior before this flag existed. */
+  readonly floorCoordinated?: boolean;
 }
 
 function toFontConfiguration(style: ActivityTextStyle): FontConfiguration {
@@ -237,19 +254,13 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * OTHER atoms -- if any -- share its own natural height, per `creole-sea-
  * line.ts`'s own baseline-offset contract, decisions.md#D2). A lone run
  * below `creole-sea-line.ts#ATOM_TEXT_MIN_HEIGHT` (`= 10`, the port's own
- * `AtomText.java:179-181` floor) is the ONE case where `Sea` reports a
- * REAL non-zero `dy` for an otherwise all-NORMAL single-run line -- jar-
- * verified via `loxija-71-joku558`/`zepima-96-peco612` (both `skinparam
- * activityFontSize 4`): routing their already-byte-exact plain "start"/
- * "me" labels through this function moved their `<text>/@y` FURTHER from
- * the jar, not closer, because `gtile-action.ts`'s own box-height sizing
- * does not (yet) apply the matching floor (KLIMT-FLOOR, census-owned by a
- * sibling task, not this one). {@link isPlainSingleRun} keeps that one
- * case on its PRE-existing literal-draw path (byte-identical to before
- * this task), so this generalization never regresses a row it does not
- * own; every line that actually carries creole content (2+ runs, a style
- * flag, a url, or a cascaded size) still draws through the real per-run
- * path below.
+ * `AtomText.java:179-181` floor) gets a REAL non-zero `dy` from `Sea` --
+ * pass 1 of this task papered over this with an `isPlainSingleRun` bypass
+ * (reverted, decision-journal row 15) because `gtile-action.ts`'s own box
+ * height did not yet carry the SAME floor; pass 2 ports the floor into
+ * {@link floorActionLineHeight}/`gtile-action.ts`'s `lineHeight` instead,
+ * so the box and this function's `dy` agree again and no bypass is
+ * needed (`loxija-71-joku558`/`zepima-96-peco612`, KLIMT-FLOOR).
  *
  * Each run draws at `y + run.dy` and wraps in `<a href>` when it carries a
  * url (`core/svg.ts#linkWrap`, the SAME string-emitting `<a>` wrapper
@@ -277,31 +288,19 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * `theme.svgLinkTarget`. Affects `gaxezi-48-zesa921`/`nisexe-68-vabu320`/
  * `pekuxe-00-bovi270`.
  */
-/** See {@link drawCreoleLine}'s own doc comment (the `ATOM_TEXT_MIN_HEIGHT`
- *  paragraph) for why this guard exists: `true` iff the line is exactly
- *  one NORMAL, non-url, non-cascaded-size run -- the shape a line with NO
- *  creole content (no style flag, no url, no heading/sup/sub) always has. */
-function isPlainSingleRun(line: CreoleTextLine, style: ActivityTextStyle): boolean {
-  if (line.runs.length !== 1) return false;
-  const run = line.runs[0]!;
-  const s = run.style;
-  return !s.bold && !s.italic && !s.underline && !s.strike && run.url === undefined && run.size === style.fontSize;
-}
-
 function drawCreoleLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
   const lines = creoleTextLines(content, font, MEASURER);
   const line = lines[0];
-  if (line === undefined || line.kind !== 'text' || isPlainSingleRun(line, style)) {
-    return drawRun(x, y, content, toFontConfiguration(style));
-  }
+  if (line === undefined || line.kind !== 'text') return drawRun(x, y, content, toFontConfiguration(style));
   let cx = x;
   let out = '';
   for (const run of line.runs) {
     // `image` (latex/math) runs carry no text -- no row this task owns
     // reaches a `[[url]]` line that also carries `<latex>`/`<math>`.
     if (run.text === '') continue;
-    const drawn = drawRun(cx, y + run.dy, run.text, fontConfigForRun(run, style));
+    const dy = style.floorCoordinated === true ? run.dy : 0;
+    const drawn = drawRun(cx, y + dy, run.text, fontConfigForRun(run, style));
     out +=
       run.url !== undefined
         ? linkWrap(drawn, { url: run.url, tooltip: run.tooltip ?? run.url }, style.svgLinkTarget)
