@@ -23,6 +23,22 @@ import { measureLineWidth } from './activity-text-placement.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 
+/**
+ * `circle { start, stop, end { LineColor #2 } } }` (`plantuml.skin:379-380`
+ * light, `:687-692` `#d` dark) -- the three terminal circles' shared
+ * STROKE default. Independent of `activityStartColor`/`activityEndColor`
+ * (`Theme['colors']['graph']['activity']`'s `startColor`/`endColor`),
+ * which are `BackgroundColor`-only converts (`FromSkinparamToStyle.java:
+ * 137-138`) -- there is no upstream skinparam key mapping to `start`/
+ * `end`'s `LineColor` at all (confirmed by grep of that file: only `stop`
+ * has one, via `ActivityStopColor`, also unported), so this field is
+ * NEVER set by a key handler and reads only the dark-mode seed
+ * (`skinparam-theme-builder.ts#DARK_SCALAR_SEEDS`) or the light default.
+ */
+function circleInk(theme: Theme): string {
+  return theme.colors.graph.activity?.circleInk ?? CIRCLE_INK;
+}
+
 export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
@@ -37,12 +53,14 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   // `FromSkinparamToStyle.java:137`: `addConvert("activityStartColor",
   // PName.BackGroundColor, SName.circle, SName.start)` -- `ActivityStart
   // Color` maps ONLY to the FILL, never `LineColor`. The stroke is always
-  // the circle block's own default (`CIRCLE_INK`); it was wrongly reusing
-  // the resolved fill colour, which painted the border red along with the
-  // fill under `skinparam ActivityStartColor red` (T2f mechanism 7,
-  // `poraji-17-goke817`).
+  // the circle block's own (dark-seedable) {@link circleInk} default; it
+  // was wrongly reusing the resolved fill colour, which painted the
+  // border red along with the fill under `skinparam ActivityStartColor
+  // red` (T2f mechanism 7, `poraji-17-goke817`), and before T2d-a it
+  // stayed the light-only `CIRCLE_INK` constant even in dark mode
+  // (`levuma-67-cego489`: jar stroke `#DDD`, ours `#222`).
   const fill = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill, stroke: CIRCLE_INK, 'stroke-width': CIRCLE_LINE_THICKNESS });
+  return ellipse(cx, cy, r, r, { fill, stroke: circleInk(theme), 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
 
 /**
@@ -66,10 +84,7 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:55,87-94
  * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:55,72-103
  */
-// `theme` is unused now that `stop`'s ink is the plain circle-block
-// default (see the mechanism-7 comment below) -- kept for signature
-// parity with every other `render*(node, theme)` dispatch target.
-export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
+export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const outerR = node.height / 2;
@@ -80,11 +95,14 @@ export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
   // `SName.circle, SName.end`). Reusing `actColors(theme).endFill` here
   // made `stop` incorrectly inherit `ActivityEndColor` (T2f mechanism 7,
   // `poraji-17-goke817`: `ActivityEndColor red` left `stop` red). No
-  // `ActivityStopColor`-reading theme field exists yet (would need a
-  // `core/theme-graph-colors-b.ts` addition, out of this task's write-set
-  // -- reported, not added), so this reads the plain circle-block
-  // default unconditionally, same as the jar does absent that skinparam.
-  const ink = CIRCLE_INK;
+  // `ActivityStopColor`-reading theme field exists yet (would need its
+  // own dedicated field the same way {@link circleInk} is its own field,
+  // not this task's `circleInk` -- reported, not added), so this reads
+  // the plain circle-block default (dark-seeded via {@link circleInk}),
+  // same as the jar does absent that skinparam (T2d-a: was the light-only
+  // `CIRCLE_INK` constant; `levuma-67-cego489`'s jar SVG shows BOTH
+  // ellipses at `fill`/`stroke` `#DDD` in dark mode, ours stayed `#222`).
+  const ink = circleInk(theme);
   return (
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',

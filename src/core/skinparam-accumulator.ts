@@ -213,6 +213,22 @@ export interface SkinparamAccumulator {
   activityDiamondBorder: string | undefined;
   activityStartColor: string | undefined;
   activityEndColor: string | undefined;
+  /** T2d-a (row DARK-CIRCLE): `activityDiagram { circle { start, stop, end {
+   *  LineColor #2 } } }` (`plantuml.skin:379-380`) -- the terminal circles'
+   *  STROKE, independent of {@link activityStartColor}/
+   *  {@link activityEndColor} (which are `BackgroundColor`-only converts,
+   *  `FromSkinparamToStyle.java:137-138`). No upstream skinparam key maps
+   *  to this at all for `start`/`end` (confirmed by grep of
+   *  `FromSkinparamToStyle.java` -- only `stop` has one, via
+   *  `ActivityStopColor` -> `LineColor`, also unported) -- this field is
+   *  therefore NEVER set by a key handler, only seeded in dark mode
+   *  (`skinparam-theme-builder.ts#DARK_SCALAR_SEEDS`). Reusing
+   *  `activityStartColor`/`activityEndColor` here would be wrong in
+   *  general: `activity-renderer-terminals.ts#renderStart`'s own doc
+   *  comment documents the jar-verified regression (`poraji-17-goke817`,
+   *  `ActivityStartColor red` with no dark mode) where the stroke
+   *  incorrectly followed the fill to red. */
+  activityCircleInk: string | undefined;
   swimlaneBorder: string | undefined;
   /** D4 amendment (T1): `SwimlaneTitleBackgroundColor` -- see
    *  `theme-graph-colors-b.ts#swimlaneHeaderBackground`'s own doc comment. */
@@ -349,6 +365,7 @@ const SCALAR_FIELD_NAMES = [
   'activityDiamondBorder',
   'activityStartColor',
   'activityEndColor',
+  'activityCircleInk',
   'swimlaneBorder',
   'swimlaneHeaderBackground',
   'swimlaneBorderThickness',

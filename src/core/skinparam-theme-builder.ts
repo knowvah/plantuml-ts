@@ -83,6 +83,7 @@ const ACTIVITY_OVERRIDE_FIELDS: FieldTable = [
   ['diamondBorder', (acc) => acc.activityDiamondBorder],
   ['startColor', (acc) => acc.activityStartColor],
   ['endColor', (acc) => acc.activityEndColor],
+  ['circleInk', (acc) => acc.activityCircleInk],
   ['swimlaneBorder', (acc) => acc.swimlaneBorder],
   ['swimlaneHeaderBackground', (acc) => acc.swimlaneHeaderBackground],
   ['swimlaneBorderThickness', (acc) => acc.swimlaneBorderThickness],
@@ -291,7 +292,13 @@ function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
  * SAME way `core/arrow-label-font.ts#resolveArrowLabelFont` and `activity-
  * text-style.ts#activityFontColor`'s existing `sname === 'arrow'` tier
  * both already read this field for an EXPLICIT `skinparam arrowFontColor`
- * -- this is that SAME field, seeded by dark mode instead of a user value. */
+ * -- this is that SAME field, seeded by dark mode instead of a user value.
+ *
+ * T2d-a (row DARK-CIRCLE): `activityCircleInk` added -- the circle block's
+ * own `LineColor` (`plantuml.skin:379-380` light / `:687-692` dark), which
+ * has NO skinparam convert path at all for `start`/`end` (unlike
+ * `activityStartColor`/`activityEndColor`, which are `BackgroundColor`-only
+ * converts) -- so this is the ONLY tier that can ever set it. */
 const DARK_SCALAR_SEEDS: ReadonlyArray<
   readonly [
     key:
@@ -304,6 +311,7 @@ const DARK_SCALAR_SEEDS: ReadonlyArray<
       | 'activityBackground'
       | 'activityStartColor'
       | 'activityEndColor'
+      | 'activityCircleInk'
       | 'arrowFontColor',
     value: string,
   ]
@@ -317,6 +325,7 @@ const DARK_SCALAR_SEEDS: ReadonlyArray<
   ['activityBackground', DARK_MODE_DEFAULTS.classBackground],
   ['activityStartColor', DARK_MODE_DEFAULTS.activityCircleInk],
   ['activityEndColor', DARK_MODE_DEFAULTS.activityCircleInk],
+  ['activityCircleInk', DARK_MODE_DEFAULTS.activityCircleInk],
   ['arrowFontColor', DARK_MODE_DEFAULTS.text],
 ];
 
