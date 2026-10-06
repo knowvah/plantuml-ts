@@ -8,7 +8,7 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, polygon } from '../../core/svg.js';
+import { polygon, rect, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 import { orderedLine } from './activity-renderer-terminals.js';
@@ -16,6 +16,8 @@ import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
+import { measureLineWidth } from './activity-text-placement.js';
+import { getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
@@ -73,50 +75,116 @@ function arrowTip(
 }
 
 /**
- * Render the label for an edge, optionally with a colored background pill.
- *
- * When `color` is provided, a filled rect is rendered behind the label text.
- * Pill dimensions: width = approx label char count × (fontSize × 0.6) + 8px
- * padding; height = fontSize + 4px padding.
+ * The PRE-T1b estimate (unchanged byte-for-byte): a filled pill behind
+ * the label when `color` is set, plain text otherwise, both anchored at
+ * the geometric mid-POINT (`points[floor(points.length / 2)]`, by array
+ * index -- NOT `Snake`'s own `pt1`/`pt2`). Still used whenever
+ * `labelAlign` is `undefined` -- every site T1a's census found still
+ * unaudited (the generic `-> label;` drop, the switch-case family's
+ * `branch.getTextBlockPositive()`, which may not even BE `Snake
+ * #getTextBlockPosition`, etc.) keeps this exact rendering, unaffected
+ * by T1b. Applying the real port everywhere instead would change
+ * render/ink for those unaudited sites too -- confirmed:
+ * `sojono-24-tufe806`'s switch-case label moved the canvas `width` from
+ * 274 to 281 when this guard was first omitted, and NEITHER value is
+ * jar-equal (508), so the move was pure unaudited blast radius, not
+ * progress.
  */
-function renderEdgeLabel(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
-  // `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373). The
-  // activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
-  // the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
-  // / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
-  // through `of(root, element, activityDiagram, arrow)`.
+function renderEdgeLabelLegacy(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
   const size = activityFontSize(theme, 'arrow');
-  if (color !== undefined) {
-    const textWidth = label.length * (size * 0.6);
-    const pillW = textWidth + 8;
-    const pillH = size + 4;
-    const pillX = midX - pillW / 2;
-    const pillY = midY - pillH / 2;
-    const background = rect(pillX, pillY, pillW, pillH, {
-      fill: color,
-      stroke: 'none',
-    });
-    // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
-    // function's own padding, two lines up), so the centring offset that
-    // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
-    // algebra on the existing estimate, not a new guess. D1: no `dominant-
-    // baseline` either (the driver emits none) -- `centeredFirstBaselineY`
-    // is the same N=1 ascent-centred baseline `activity-renderer-shapes.ts`
-    // uses for every other box/hexagon/diamond single-line label.
-    const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
-      fill: activityFontColor(theme, 'arrow'),
-      fontFamily: theme.fontFamily,
-      fontSize: size,
-    });
-    return background + labelEl;
+  const fill = activityFontColor(theme, 'arrow');
+  if (color === undefined) {
+    return drawActivityText(midX + 4, midY - 4, label, { fill, fontFamily: theme.fontFamily, fontSize: size });
   }
-
-  // No color: plain text label offset slightly from the midpoint
-  return drawActivityText(midX + 4, midY - 4, label, {
-    fill: activityFontColor(theme, 'arrow'),
+  const textWidth = label.length * (size * 0.6);
+  const pillW = textWidth + 8;
+  const pillH = size + 4;
+  const pillX = midX - pillW / 2;
+  const pillY = midY - pillH / 2;
+  const background = rect(pillX, pillY, pillW, pillH, { fill: color, stroke: 'none' });
+  const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
+    fill,
     fontFamily: theme.fontFamily,
     fontSize: size,
   });
+  return background + labelEl;
+}
+
+/**
+ * The `labelAlign !== undefined` branch of {@link renderEdgeLabel} --
+ * positioned by {@link getTextBlockPosition} (T1b's port of `Snake
+ * #getTextBlockPosition`, `Snake.java:244-270`); split into its own
+ * function to keep `renderEdgeLabel` under this file's NLOC limit.
+ * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
+ * activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
+ * the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
+ * / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
+ * through `of(root, element, activityDiagram, arrow)`.
+ *
+ * `position` is the text block's TOP-LEFT corner, exactly as upstream's
+ * `UTranslate.point(position)` places it (`Snake.java:230`); no
+ * `text-anchor`, no extra offset beyond what that function already
+ * bakes into its own default branch (`+4`, `Snake.java:248`).
+ *
+ * A coloured label (`<back:color>`, T1a's `label-colored-pill` finding)
+ * draws through `core/svg.ts#text`'s own `textBackColor` -- the SAME
+ * `feFlood`/`feComposite` filter `getFilterBackColor` registers
+ * (`klimt/drawing/svg/SvgGraphics.java:732-735,772-786`), reused here
+ * rather than re-invented: upstream never draws a background RECT for
+ * this, only a filter clipped to the text's own bounding box (the SVG
+ * filter region default, `objectBoundingBox`). `drawActivityText`'s own
+ * klimt-driver path (`activity-renderer-text.ts`) has no `textBackColor`
+ * seam and is outside this task's write-set, so the coloured branch
+ * calls `core/svg.ts#text` directly instead -- the uncoloured branch is
+ * unchanged, still `drawActivityText`, to keep its existing
+ * `textLength` emission byte-identical.
+ */
+function renderEdgeLabelAligned(
+  label: string,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  labelAlign: SnakeTextAlign,
+  color: string | undefined,
+  theme: Theme,
+): string {
+  const size = activityFontSize(theme, 'arrow');
+  // `TextBlock.calculateDimension` -- single-line width/height, the SAME
+  // measurer-blind estimate `activity-text-placement.ts#measureLineWidth`
+  // already gives every other render-time label (that module's own doc);
+  // height is `WidthTableMeasurer#measure`'s own `font.size` convention
+  // (`core/measurer.ts:189`).
+  const width = measureLineWidth(theme, size, label);
+  const position = getTextBlockPosition(points, { width, height: size }, labelAlign);
+  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
+  const fill = activityFontColor(theme, 'arrow');
+  if (color !== undefined) {
+    return text(position.x, baselineY, label, {
+      fontFamily: theme.fontFamily,
+      fontSize: size,
+      fill,
+      textLength: width,
+      textBackColor: color,
+    });
+  }
+  return drawActivityText(position.x, baselineY, label, {
+    fill,
+    fontFamily: theme.fontFamily,
+    fontSize: size,
+  });
+}
+
+function renderEdgeLabel(
+  label: string,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  labelAlign: SnakeTextAlign | undefined,
+  color: string | undefined,
+  theme: Theme,
+): string {
+  if (labelAlign === undefined) {
+    const mid = Math.floor(points.length / 2);
+    const midPt = points[mid]!;
+    return renderEdgeLabelLegacy(label, midPt.x, midPt.y, color, theme);
+  }
+  return renderEdgeLabelAligned(label, points, labelAlign, color, theme);
 }
 
 /**
@@ -276,12 +344,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // and is now interleaved above).
   const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, headColor, theme);
 
-  // Optional edge label near midpoint
+  // Optional edge label, positioned by `Snake#getTextBlockPosition`
+  // (`renderEdgeLabel`'s own doc comment).
   let labelEl = '';
   if (edge.label !== undefined) {
-    const mid = Math.floor(pts.length / 2);
-    const midPt = pts[mid]!;
-    labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
+    labelEl = renderEdgeLabel(edge.label, pts, edge.labelAlign, edge.color, theme);
   }
 
   return segments + arrow + midArrowEl + labelEl;
