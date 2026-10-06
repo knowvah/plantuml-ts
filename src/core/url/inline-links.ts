@@ -1,13 +1,23 @@
 /**
  * Inline `[[url label]]` hyperlink-token resolution (`UrlBuilder`/
- * `CommandCreoleUrl`) -- split out of `parse-helpers-strings.ts` purely to
- * stay under the project's 500-line cap. Self-contained (its own regex,
- * no dependency on the rest of that file), so it moves as one cohesive
- * unit; `parse-helpers-strings.ts` re-exports `resolveInlineLinks` so
- * `from './parse-helpers-strings.js'` (and, transitively, `from
- * './parse-helpers.js'`) is unchanged for existing consumers
- * (`link-edge-attrs.ts`, `core/creole-atoms.ts`). Pure move, zero
- * behavior change.
+ * `CommandCreoleUrl`) -- originally split out of `parse-helpers-
+ * strings.ts` purely to stay under the project's 500-line cap, then
+ * moved here (add3 T0b, D9) to the shared url seam alongside
+ * `UrlBuilder.ts`/`Url.ts`: upstream resolves `[[url label]]` in ONE
+ * package, `net.sourceforge.plantuml.url`, consumed by both the
+ * description engine and the activity engine's swimlane titles --
+ * this file was the activity->description cross-engine edge that
+ * motivated the move. Self-contained (its own regex, no dependency on
+ * any sibling module), so it moves as one cohesive unit;
+ * `parse-helpers-strings.ts` re-exports `resolveInlineLinks` so `from
+ * './parse-helpers-strings.js'` (and, transitively, `from
+ * './parse-helpers.js'`) is unchanged for existing description
+ * consumers (`link-edge-attrs.ts`, `core/creole-atoms.ts`); activity
+ * consumers now import this file directly. Pure move, zero behavior
+ * change.
+ *
+ * @see net/sourceforge/plantuml/url/UrlBuilder.java
+ * @see net/sourceforge/plantuml/url/Url.java
  */
 
 /** UrlBuilder.getRegexp()'s optional tooltip group, `{...}` -- built from a
