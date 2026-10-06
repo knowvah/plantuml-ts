@@ -7,7 +7,7 @@
  * comments, same call sites (now imported).
  */
 
-import type { ActivityFork, ActivityGroup, ActivityNote, ActivitySplit, ActivitySwitch } from '../ast.js';
+import type { ActivityFork, ActivityGroup, ActivityNode, ActivityNote, ActivitySplit, ActivitySwitch } from '../ast.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { Pragma } from '../../../core/skin/Pragma.js';
@@ -23,6 +23,7 @@ import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
+import { withInLabel } from './tile-layout-inlabel.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator
@@ -101,6 +102,23 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
  * AST's captured fields for both styles (`walk-fork-branches.ts
  * #pushMergeDiamondNode`'s own doc covers the one divergence this elides).
  */
+/**
+ * T1b pass 2: a fork/split BRANCH's own `GtileTopDown` wrapper needs its
+ * first child's {@link Tile.inLabel} copied onto ITSELF, since
+ * `walk-fork-branches.ts#pushBranchIn` (`ParallelBuilderFork.java:
+ * 151-163`/`ParallelBuilderSplit.java:194-203`, T1a's census rows 19/20,
+ * 25/26) reads the WRAPPER, never its first child -- `tileNodes` only
+ * ever sets `inLabel` on the tile it was given directly
+ * (`tile-layout.ts`'s own doc), and a branch's own entry label (a `->
+ * label;` right after `fork`/`fork again`/`split`/`also`) is the FIRST
+ * node of `b`, not a sibling of the wrapper.
+ */
+function buildBranchTopDown(b: ActivityNode[], bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): GtileTopDown {
+  const tiles = tileNodes(b, bounder, theme, laneOrder, pragma);
+  const topDown = new GtileTopDown(tiles, bounder, theme);
+  return withInLabel(topDown, tiles[0]?.inLabel);
+}
+
 export function tileFork(
   node: ActivityFork,
   bounder: StringBounder,
@@ -108,10 +126,7 @@ export function tileFork(
   laneOrder: readonly string[],
   pragma: Pragma,
 ): GtileFork {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder, pragma);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
+  const branches = node.branches.map((b) => buildBranchTopDown(b, bounder, theme, laneOrder, pragma));
   // N (add2 T3i): `node.label` is only ever set for `style !== 'merge'`
   // (`ActivityFork.label`'s own doc, ast.ts) -- `GtileMerge` never reads it.
   const built =
@@ -128,10 +143,7 @@ export function tileSplit(
   laneOrder: readonly string[],
   pragma: Pragma,
 ): GtileSplit {
-  const branches = node.branches.map((b) => {
-    const tiles = tileNodes(b, bounder, theme, laneOrder, pragma);
-    return new GtileTopDown(tiles, bounder, theme);
-  });
+  const branches = node.branches.map((b) => buildBranchTopDown(b, bounder, theme, laneOrder, pragma));
   return withSwimlaneOut(withSwimlane(new GtileSplit(branches, bounder), node.swimlane), node.swimlaneOut);
 }
 

@@ -109,3 +109,53 @@ describe('generic -> label; -- a label with NO following node at all is dropped,
     expect(() => layout('@startuml\nstart\n:A;\n-> orphan;\n@enduml')).not.toThrow();
   });
 });
+
+// T1b pass 2: `ParallelBuilderFork$ConnectionIn`/`ParallelBuilderSplit
+// $ConnectionIn` (T1a's census rows 19/20, 25/26) -- a `-> label;` right
+// after `fork`/`fork again`/`split`/`also`, attached to the BRANCH's own
+// wrapping `GtileTopDown` (`tile-layout-structural.ts#buildBranchTopDown`),
+// read by `walk-fork-branches.ts#pushBranchIn`.
+describe('generic -> label; -- fork branch entry (ParallelBuilderFork.java:151-163)', () => {
+  const FORK_PUML = `@startuml
+start
+fork
+-> hello;
+:A;
+fork again
+:B;
+end fork
+stop
+@enduml`;
+
+  it('labels only the FIRST branch\'s own entry edge, exactly once (oracle-verified x=46.013)', () => {
+    const geo = layout(FORK_PUML);
+    const labelled = geo.edges.filter((e) => e.label === 'hello');
+    expect(labelled).toHaveLength(1);
+    expect(labelled[0]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+
+  it('the second branch (no label) carries no label at all', () => {
+    const geo = layout(FORK_PUML);
+    const bNode = geo.nodes.find((n) => n.label === 'B')!;
+    const intoB = geo.edges.find((e) => e.points.some((p) => p.y === bNode.y) && e.label === undefined);
+    expect(intoB).toBeDefined();
+  });
+});
+
+describe('generic -> label; -- split branch entry (ParallelBuilderSplit.java:194-203)', () => {
+  it('labels the first split branch\'s own entry edge', () => {
+    const geo = layout(`@startuml
+start
+split
+-> hello;
+:A;
+split again
+:B;
+end split
+stop
+@enduml`);
+    const labelled = geo.edges.filter((e) => e.label === 'hello');
+    expect(labelled).toHaveLength(1);
+    expect(labelled[0]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+});
