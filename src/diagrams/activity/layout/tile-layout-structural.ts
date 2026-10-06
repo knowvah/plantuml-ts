@@ -21,7 +21,8 @@ import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
-import { tileNodes, tileSimpleLeaf, withSwimlane, withSwimlaneOut } from './tile-layout.js';
+import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
+import { tileSimpleLeaf } from './tile-layout-leaves.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator

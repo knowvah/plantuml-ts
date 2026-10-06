@@ -13,10 +13,10 @@ export const NODE_MARGIN_X = 40;
  * runs (`Swimlanes.java:145`: `factory = new
  * FtileFactoryDelegatorAssembly(factory)`, applied once, for the whole
  * diagram). A second, labelled-arrow term (`height += textBlock
- * .calculateDimension(...).getHeight()`, `:59-62`) is 0 here because
- * `GtileTopDown`'s children carry no in-link-rendering label today (no
- * fixture in this mission's cohort needs one); add it at this constant's
- * call site, not as a second constant, when that lands.
+ * .calculateDimension(...).getHeight()`, `:59-62`) is added at THIS
+ * constant's own call site (`tiles/gtile-top-down.ts#sequentialGap`,
+ * T1b pass 2), not as a second constant here, whenever the NEXT child
+ * carries a pending `-> label;` ({@link Tile.inLabel}'s own doc).
  *
  * This raw gap is NEVER the rendered number by itself: `ActivityDiagram3
  * #getTextBlock` (`:209-210`) always runs `CompressionXorYBuilder.build
@@ -43,6 +43,22 @@ export const NODE_MARGIN_X = 40;
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:204-213
  */
 export const SEQUENTIAL_ASSEMBLY_GAP = 35;
+
+/**
+ * T1b pass 2: the activity-scoped `arrow` font size
+ * (`plantuml.skin:373`, `activityDiagram { arrow { FontSize 11 } }`),
+ * used ONLY at LAYOUT time (`tiles/gtile-top-down.ts#sequentialGap`,
+ * `layout/tile-layout-inlabel.ts#inLabelReservation`) to size an
+ * in-link label's own height/ink reservation -- `walkTile`'s own
+ * signature carries no `Theme`, unlike `renderer.ts#renderEdgeLabel`'s
+ * `activityFontSize(theme, 'arrow')` (the SAME default, resolved
+ * theme-aware at render time). A `skinparam ArrowFontSize` override
+ * would be reflected in the FINAL render but not in this layout-time
+ * reservation -- a residual, not fixed here (threading `Theme` through
+ * every `walkTile`/`pushTopDownSiblingEdge` call site is a much larger
+ * change than this constant).
+ */
+export const ARROW_LABEL_LAYOUT_FONT_SIZE = 11;
 export const START_STOP_RADIUS = 10;
 
 /**

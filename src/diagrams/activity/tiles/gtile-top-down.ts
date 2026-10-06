@@ -4,6 +4,21 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
+
+/**
+ * T1b pass 2: `FtileFactoryDelegatorAssembly#assembly`'s own height
+ * reservation (`FtileFactoryDelegatorAssembly.java:58-62`) -- `height
+ * += textBlock.calculateDimension(stringBounder).getHeight()` ONLY when
+ * `nextChild` carries a pending `-> label;` ({@link Tile.inLabel}'s own
+ * doc, `tiles/tile.ts`); `SEQUENTIAL_ASSEMBLY_GAP`'s base 35 always
+ * applies regardless (that constant's own doc).
+ */
+function sequentialGap(nextChild: Tile, bounder: StringBounder, theme: Theme): number {
+  if (nextChild.inLabel === undefined) return SEQUENTIAL_ASSEMBLY_GAP;
+  const fontSize = activityFontSize(theme, 'arrow');
+  return SEQUENTIAL_ASSEMBLY_GAP + bounder.getDimension(nextChild.inLabel.label, fontSize).height;
+}
 
 export class GtileTopDown extends TileComposite {
   readonly kind = 'gtile-top-down' as const;
@@ -36,7 +51,7 @@ export class GtileTopDown extends TileComposite {
    * this n-ary flattening represents. See that constant's own doc comment
    * for the full mechanism (raw 35, then a global compression pass).
    */
-  constructor(children: Tile[], _bounder: StringBounder, _theme: Theme) {
+  constructor(children: Tile[], bounder: StringBounder, theme: Theme) {
     super();
     this.children = children;
     if (children.length === 0) {
@@ -54,12 +69,14 @@ export class GtileTopDown extends TileComposite {
     this.childOffsetsX = lefts.map((l) => left - l);
     const offsets: number[] = [];
     let y = 0;
-    for (const child of children) {
+    for (let i = 0; i < children.length; i++) {
       offsets.push(y);
-      y += child.height + SEQUENTIAL_ASSEMBLY_GAP;
+      const next = children[i + 1];
+      const gap = next === undefined ? 0 : sequentialGap(next, bounder, theme);
+      y += children[i]!.height + gap;
     }
     this.childOffsets = offsets;
-    this.height = y - SEQUENTIAL_ASSEMBLY_GAP;
+    this.height = y;
   }
 
   getCoord(hook: HookName): GPoint {

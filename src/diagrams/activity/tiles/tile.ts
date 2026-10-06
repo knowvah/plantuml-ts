@@ -40,6 +40,22 @@ export interface Tile {
    *   -- the `swimlaneOut` field this mirrors.
    */
   readonly swimlaneOut?: string;
+  /**
+   * T1b pass 2 (`activity-divergence-drive-3`): the pending `-> label;`
+   * (`ActivityArrowLabel`, `ast.ts`) this tile's own incoming connection
+   * should carry, when one preceded it. Threaded from `tileNodes`
+   * (`layout/tile-layout.ts`, mirrors {@link swimlane}'s own threading
+   * site) onto the NEXT tile built, exactly as upstream attaches it to
+   * the next `Instruction` at construction time and never anywhere
+   * else.
+   * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:105-106,437-465
+   *   -- `setLabelNextArrow` -> `swimlanes.setNextLinkRenderer`; every
+   *   `add*`/`fork`/`start`/`stop`/... method reads `nextLinkRenderer()`
+   *   as the NEW instruction's own `LinkRendering`, then resets it to
+   *   `LinkRendering.none()`. `Instruction#getInLinkRendering()` is the
+   *   accessor every connector below reads from the tile it draws INTO.
+   */
+  readonly inLabel?: { label: string; color?: string };
   getCoord(hook: HookName): GPoint;
   /**
    * Whether this tile has an outgoing connection point that a later
@@ -65,6 +81,7 @@ export abstract class TileLeaf implements Tile {
   abstract getCoord(hook: HookName): GPoint;
   swimlane?: string;
   swimlaneOut?: string;
+  inLabel?: { label: string; color?: string };
 
   /**
    * Default `true` rather than `abstract`: every production `gtile-*.ts`
@@ -89,6 +106,7 @@ export abstract class TileComposite implements Tile {
   abstract readonly children: readonly Tile[];
   swimlane?: string;
   swimlaneOut?: string;
+  inLabel?: { label: string; color?: string };
 
   /**
    * Default `true` for the same reason as `TileLeaf.hasPointOut` above:
