@@ -49,6 +49,14 @@ const DIRECTION_LETTER: Record<'up' | 'down' | 'left' | 'right', string> = {
 };
 
 /**
+ * The alignment of a label whose push site carries none: the jar's
+ * `arrowHorizontalAlignment()` (`ftile/AbstractFtile.java:108-110`), i.e.
+ * `AlignmentParam.arrowMessageAlignment`, default LEFT
+ * (`skin/AlignmentParam.java:42`).
+ */
+export const DEFAULT_LABEL_ALIGN: SnakeTextAlign = { horizontal: 'LEFT' };
+
+/**
  * `Worm#getDirectionsCode` (`Worm.java:285-292`): one letter per segment
  * (`R`/`L`/`D`/`U`), reusing {@link arrowDirection}'s own total port of
  * `Direction.fromVector` (`arrows-regular.ts`'s own citation) rather than

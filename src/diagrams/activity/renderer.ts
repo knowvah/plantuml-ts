@@ -8,7 +8,7 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { polygon, rect, text } from '../../core/svg.js';
+import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 import { orderedLine } from './activity-renderer-terminals.js';
@@ -17,7 +17,7 @@ import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-
 import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { measureLineWidth } from './activity-text-placement.js';
-import { getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
+import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
@@ -75,44 +75,7 @@ function arrowTip(
 }
 
 /**
- * The PRE-T1b estimate (unchanged byte-for-byte): a filled pill behind
- * the label when `color` is set, plain text otherwise, both anchored at
- * the geometric mid-POINT (`points[floor(points.length / 2)]`, by array
- * index -- NOT `Snake`'s own `pt1`/`pt2`). Still used whenever
- * `labelAlign` is `undefined` -- every site T1a's census found still
- * unaudited (the generic `-> label;` drop, the switch-case family's
- * `branch.getTextBlockPositive()`, which may not even BE `Snake
- * #getTextBlockPosition`, etc.) keeps this exact rendering, unaffected
- * by T1b. Applying the real port everywhere instead would change
- * render/ink for those unaudited sites too -- confirmed:
- * `sojono-24-tufe806`'s switch-case label moved the canvas `width` from
- * 274 to 281 when this guard was first omitted, and NEITHER value is
- * jar-equal (508), so the move was pure unaudited blast radius, not
- * progress.
- */
-function renderEdgeLabelLegacy(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
-  const size = activityFontSize(theme, 'arrow');
-  const fill = activityFontColor(theme, 'arrow');
-  if (color === undefined) {
-    return drawActivityText(midX + 4, midY - 4, label, { fill, fontFamily: theme.fontFamily, fontSize: size });
-  }
-  const textWidth = label.length * (size * 0.6);
-  const pillW = textWidth + 8;
-  const pillH = size + 4;
-  const pillX = midX - pillW / 2;
-  const pillY = midY - pillH / 2;
-  const background = rect(pillX, pillY, pillW, pillH, { fill: color, stroke: 'none' });
-  const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
-    fill,
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-  });
-  return background + labelEl;
-}
-
-/**
- * The `labelAlign !== undefined` branch of {@link renderEdgeLabel} --
- * positioned by {@link getTextBlockPosition} (T1b's port of `Snake
+ * {@link renderEdgeLabel}'s draw, positioned by {@link getTextBlockPosition} (T1b's port of `Snake
  * #getTextBlockPosition`, `Snake.java:244-270`); split into its own
  * function to keep `renderEdgeLabel` under this file's NLOC limit.
  * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
@@ -179,12 +142,7 @@ function renderEdgeLabel(
   color: string | undefined,
   theme: Theme,
 ): string {
-  if (labelAlign === undefined) {
-    const mid = Math.floor(points.length / 2);
-    const midPt = points[mid]!;
-    return renderEdgeLabelLegacy(label, midPt.x, midPt.y, color, theme);
-  }
-  return renderEdgeLabelAligned(label, points, labelAlign, color, theme);
+  return renderEdgeLabelAligned(label, points, labelAlign ?? DEFAULT_LABEL_ALIGN, color, theme); // AbstractFtile.java:108-110
 }
 
 /**

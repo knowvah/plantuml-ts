@@ -14,7 +14,7 @@ import { activityFontSize } from '../activity-style-defaults.js';
 import { measureLineWidth } from '../activity-text-placement.js';
 import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
-import { getTextBlockPosition } from './snake-text-position.js';
+import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
 
 /**
@@ -97,17 +97,17 @@ export function extendForLaneDivider(
  * true in both axes, not just X.
  */
 export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdgeGeo, theme: Theme): void {
-  // `edge.labelAlign === undefined` means this edge's push site has not
-  // been updated to carry its real `Snake#withLabel` alignment (T1a's
-  // census) -- `renderer.ts#renderEdgeLabel`'s own doc comment cites the
-  // measured blast-radius regression (`sojono-24-tufe806`) this guard
-  // closes; the two guards must stay in lockstep (both gate on the SAME
-  // field) or the ink scan and the actual draw would size the canvas for
-  // a label position the renderer never produces.
-  if (edge.label === undefined || edge.labelAlign === undefined) return;
+  // No `labelAlign` = the jar's default `arrowHorizontalAlignment()`, LEFT
+  // (`AbstractFtile.java:108-110`, `AlignmentParam.java:42`); the renderer
+  // resolves the SAME default, so ink and draw agree.
+  if (edge.label === undefined) return;
   const fontSize = activityFontSize(theme, 'arrow');
   const width = measureLineWidth(theme, fontSize, edge.label);
-  const position = getTextBlockPosition(edge.points, { width, height: fontSize }, edge.labelAlign);
+  const position = getTextBlockPosition(
+    edge.points,
+    { width, height: fontSize },
+    edge.labelAlign ?? DEFAULT_LABEL_ALIGN,
+  );
   const baselineY = centeredFirstBaselineY(position.y + fontSize / 2, fontSize, 1);
   acc.minX = Math.min(acc.minX, position.x);
   acc.maxX = Math.max(acc.maxX, position.x + width);

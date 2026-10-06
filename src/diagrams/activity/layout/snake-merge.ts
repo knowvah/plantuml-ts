@@ -88,6 +88,8 @@ function joinOrdered(a: ActivityEdgeGeo, b: ActivityEdgeGeo, strategy: MergeStra
     points,
     mergeable: strategy,
     ...(a.label !== undefined ? { label: a.label } : {}),
+    // `mergeTexts` keeps each `Text` with its own alignment (`Snake.java:316-319`).
+    ...(a.labelAlign !== undefined ? { labelAlign: a.labelAlign } : {}),
     ...(a.color !== undefined ? { color: a.color } : {}),
     ...(emphasize !== undefined ? { emphasize } : {}),
     ...(midArrowAt !== undefined ? { midArrowAt } : {}),
