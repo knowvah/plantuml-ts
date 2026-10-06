@@ -37,6 +37,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import type { HlinePayload } from './swimlane-hline.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
+import { applyInLabel } from './tile-layout-inlabel.js';
 
 /**
  * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
@@ -183,6 +184,8 @@ function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
   const from = { x: baseX + (prevOffsetX + southHook.x), y: prevY + southHook.y };
   const to = { x: baseX + (nextOffsetX + northHook.x), y: nextY + northHook.y };
   pushEdge(out, new GConnectionVerticalDown().getPoints(from, to), laneOut(prevChild, myLane), laneIn(child, myLane));
+  // T1b pass 2: `ConnectionVerticalDown.java:79-80`'s own `withLabel(textBlock, arrowHorizontalAlignment())`.
+  applyInLabel(out, child, { horizontal: 'LEFT' });
 }
 
 /** Every if-builder's own tile kind -- checked BEFORE `walkTile`'s own

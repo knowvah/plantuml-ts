@@ -125,6 +125,26 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     expect(out.edges[0]!.label).toBeUndefined();
   });
 
+  // T1b (`activity-divergence-drive-3`): `Snake.create(...).withLabel(back,
+  // BOTTOM)` (`FtileWhile.java:354`/`:261-262`) for Backward1,
+  // `arrowHorizontalAlignment()` (`:389-390`) for Backward2.
+  it('Backward1 carries {vertical: BOTTOM}; Backward2 carries {horizontal: LEFT}', () => {
+    const header = new GtileDiamondInside('cond', {}, bounder, theme);
+    const body = new GtileAction({ kind: 'action', label: 'body' }, bounder, theme);
+    const backward = new GtileAction({ kind: 'action', label: 'back' }, bounder, theme);
+    const tile = new GtileWhile(header, body, {
+      bounder,
+      theme,
+      backward,
+      backIncoming: 'incoming',
+      backOutgoing: 'dsc_5',
+    });
+    const out = makeOut();
+    walkWhile(tile, 0, 0, undefined, out);
+    expect(out.edges[1]!.labelAlign).toEqual({ vertical: 'BOTTOM' });
+    expect(out.edges[2]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+
   it('ConnectionBackBackward2 runs backward’s own NORTH_HOOK -> header’s own EAST_HOOK, no emphasize (FtileWhile.java:386-407)', () => {
     const { header, backward, tile, out } = build();
     const hX = 0 + tile.headerOffsetX;

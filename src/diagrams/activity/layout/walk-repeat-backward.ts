@@ -26,8 +26,33 @@
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
+import type { Out } from './tile-coordinates.js';
 import { pushEdge } from './tile-coordinates.js';
 import type { RepeatFrame } from './walk-repeat.js';
+
+/**
+ * Both push sites below carry `Snake.create(...).withLabel(tbback,
+ * arrowHorizontalAlignment())` (T1a's census rows 9-15: every
+ * `FtileRepeat` back-connector variant upstream could pick -- `backConnection`
+ * simple1/`ConnectionBackComplex1`/`ConnectionBackSimple2`/
+ * `ConnectionBackBackward1`/`2` -- collapses to these two generic pushes
+ * in this port). `arrowHorizontalAlignment()` defaults to
+ * `HorizontalAlignment.LEFT` (`skin/AlignmentParam.java:42`); no seam in
+ * this port resolves the `skinparam arrowMessageAlignment` override (same
+ * reported gap as `walk-while-backward.ts`'s own citation) -- outside
+ * this task's write-set.
+ */
+const BACKWARD_LABEL_ALIGN = { horizontal: 'LEFT' } as const;
+
+/** Attaches `label`/{@link BACKWARD_LABEL_ALIGN} to the edge most
+ *  recently pushed onto `out`, when `label` is set -- split out of
+ *  {@link pushRepeatBackwardConnections} to keep that function under
+ *  this file's NLOC limit. */
+function applyBackwardLabel(out: Out, label: string | undefined): void {
+  if (label === undefined) return;
+  out.edges[out.edges.length - 1]!.label = label;
+  out.edges[out.edges.length - 1]!.labelAlign = BACKWARD_LABEL_ALIGN;
+}
 
 /**
  * `ConnectionBackBackward1#drawSnake` (`FtileRepeat.java:440-459`): from
@@ -105,7 +130,7 @@ export function pushRepeatBackwardConnections(
   };
 
   pushEdge(out, backward1Points(frame, backSouth), conditionOutLane, lanes.backIn);
-  if (lanes.backIncoming !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backIncoming;
+  applyBackwardLabel(out, lanes.backIncoming);
   pushEdge(out, backward2Points(frame, backNorth), lanes.backOut, entryInLane);
-  if (lanes.backOutgoing !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backOutgoing;
+  applyBackwardLabel(out, lanes.backOutgoing);
 }

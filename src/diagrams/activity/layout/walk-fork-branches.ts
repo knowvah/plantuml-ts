@@ -6,6 +6,7 @@ import type { Tile } from '../tiles/tile.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import { applyInLabel } from './tile-layout-inlabel.js';
 
 /**
  * The fixed values every branch in one fork/split shares -- bundled to
@@ -107,6 +108,11 @@ function pushBranchIn(branch: Tile, bX: number, bY: number, ctx: ForkBranchConte
     laneIn(branch, ctx.myLane),
     ctx.isSplit ? 'parallel-in-split' : 'parallel-in',
   );
+  // T1b pass 2: `ConnectionIn#drawU`'s own `withLabel(tbin,
+  // arrowHorizontalAlignment())` (`ParallelBuilderFork.java:156`/
+  // `ParallelBuilderSplit.java:199`) -- a `-> label;` right after
+  // `fork`/`fork again`/`split`/`also`.
+  applyInLabel(out, branch, { horizontal: 'LEFT' });
 }
 
 /**
