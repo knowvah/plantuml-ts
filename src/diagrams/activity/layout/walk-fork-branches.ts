@@ -6,7 +6,13 @@ import type { Tile } from '../tiles/tile.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
-import { applyInLabel } from './tile-layout-inlabel.js';
+import { applyInLabel, applyOutLabel } from './tile-layout-inlabel.js';
+
+/** `arrowHorizontalAlignment()`'s own resolved default -- shared by
+ *  `ParallelBuilderFork$ConnectionOut`/`ParallelBuilderSplit$ConnectionOut`
+ *  (T1d rows 21/22/27/28), exactly as `applyInLabel`'s own IN-side call
+ *  sites already use for the SAME classes' `ConnectionIn`. */
+const BRANCH_OUT_LABEL_ALIGN = { horizontal: 'LEFT' } as const;
 
 /**
  * The fixed values every branch in one fork/split shares -- bundled to
@@ -122,8 +128,12 @@ function pushBranchIn(branch: Tile, bX: number, bY: number, ctx: ForkBranchConte
  * branch, but only `if (dim.hasPointOut())` -- a branch ending in
  * `detach`/`kill` contributes none, and the rest keep source order
  * (`ParallelBuilderSplit.java:165-166`, `ParallelBuilderFork.java:125-126`).
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:155-167
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:120-127
+ * T1d rows 21/22/27/28: also carries the branch's own trailing `->
+ * label;` (`branch.outLabel`, `tile-layout-structural.ts
+ * #buildBranchTopDown`'s own doc) -- `ftile1.getOutLinkRendering()
+ * .getDisplay()` in BOTH Java classes, `arrowHorizontalAlignment()`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:155-167,197
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:120-127,197
  */
 function pushBranchOut(branch: Tile, bX: number, bY: number, ctx: ForkBranchContext, out: Out): void {
   if (!branch.hasPointOut()) return;
@@ -139,6 +149,7 @@ function pushBranchOut(branch: Tile, bX: number, bY: number, ctx: ForkBranchCont
     ctx.myLaneOut,
     ctx.isSplit ? 'parallel-out-split' : 'parallel-out',
   );
+  applyOutLabel(out, branch, BRANCH_OUT_LABEL_ALIGN);
 }
 
 /**

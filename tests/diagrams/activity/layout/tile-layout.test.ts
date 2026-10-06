@@ -350,7 +350,7 @@ describe('tileNodes — kill/detach mutate the preceding tile (T2b)', () => {
       ],
       bounder,
       theme,
-    );
+    ).tiles;
     expect(tiles.map((t) => t.kind)).toEqual(['gtile-action', 'gtile-action', 'gtile-action']);
   });
 
@@ -359,18 +359,18 @@ describe('tileNodes — kill/detach mutate the preceding tile (T2b)', () => {
       [{ kind: 'action', label: 'foo1' }, { kind: 'action', label: 'foo2' }, { kind: 'kill' }],
       bounder,
       theme,
-    );
+    ).tiles;
     expect(tiles[0]!.hasPointOut()).toBe(true);
     expect(tiles[1]!.hasPointOut()).toBe(false);
   });
 
   it('a kill with nothing preceding is a no-op (InstructionList.java:170-171)', () => {
-    const tiles = tileNodes([{ kind: 'kill' }], bounder, theme);
+    const tiles = tileNodes([{ kind: 'kill' }], bounder, theme).tiles;
     expect(tiles).toHaveLength(0);
   });
 
   it("detach shares kill's mechanism (CommandKill3.java:52-56, same regex)", () => {
-    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme);
+    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme).tiles;
     expect(tiles).toHaveLength(1);
     expect(tiles[0]!.hasPointOut()).toBe(false);
   });
@@ -380,7 +380,7 @@ describe('tileNodes — kill/detach mutate the preceding tile (T2b)', () => {
     // translate`) -- this just confirms the killed LEAF feeds it correctly,
     // the piece this fixes. Exercised for real by `simuti-16-lece058`
     // (split branches ending in `detach`).
-    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme);
+    const tiles = tileNodes([{ kind: 'action', label: 'a1' }, { kind: 'detach' }], bounder, theme).tiles;
     const branch = new GtileTopDown(tiles, bounder, theme);
     expect(branch.hasPointOut()).toBe(false);
   });
@@ -390,7 +390,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
   it('assigns each leaf tile the swimlane its node was parsed in', () => {
     const ast = parseAst('@startuml\n|A|\n:a;\n|B|\n:b;\n@enduml');
     expect(ast.nodes.map((n) => n.kind)).toEqual(['action', 'action']);
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     expect(tiles).toHaveLength(2);
     expect(tiles[0]!.swimlane).toBe('A');
     expect(tiles[1]!.swimlane).toBe('B');
@@ -398,7 +398,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
   it('leaves every tile swimlane undefined when the diagram has no lanes', () => {
     const ast = parseAst('@startuml\nstart\n:a;\nstop\n@enduml');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     expect(tiles).toHaveLength(3);
     for (const t of tiles) {
       expect(t.swimlane).toBeUndefined();
@@ -417,7 +417,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const ast = parseAst('@startuml\n|A|\nif (x) then (y)\n|B|\n:in-b;\n|A|\nendif\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('if');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     expect(tiles).toHaveLength(1);
 
     const ifTile = tiles[0] as unknown as GtileIfDown;
@@ -446,7 +446,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('repeat');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     expect(tiles).toHaveLength(1);
 
     const repeatTile = tiles[0] as unknown as GtileRepeat;
@@ -478,7 +478,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
   // Mission `activity-loop-tile-port` T5 (D2): the entry action is parsed
   // OFF the body (`ActivityRepeat.entry`) and now lands as `GtileRepeat`'s
   // OWN first child, never inside the body wrapper -- the T1 interim fold
-  // (`tileNodes([entry, ...body])`) is retired.
+  // (`tileNodes([entry, ...body]).tiles`) is retired.
   // @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:77-80
   //   -- `entry` replaces the entry diamond as `diamond1`, the first child.
   it("repeat: an inline entry action is the tile's own first child, never inside the body wrapper", () => {
@@ -488,7 +488,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     expect(repeatNode.entry?.label).toBe('R1');
     expect(repeatNode.body).toHaveLength(1);
 
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     const entryTile = repeatTile.children[0] as unknown as GtileAction;
     expect(entryTile.kind).toBe('gtile-action');
@@ -503,7 +503,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
   it('repeat: no inline entry action builds a GtileRepeatEntry as the first child', () => {
     const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     expect(repeatTile.children[0].kind).toBe('gtile-repeat-entry');
     const bodyWrapper = repeatTile.children[1] as unknown as GtileTopDown;
@@ -512,7 +512,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
   it('repeat: the condition diamond falls back to swimlane when the loop closes in the same lane', () => {
     const ast = parseAst('@startuml\n|A|\nrepeat\n:b;\nrepeat while (x)\n@enduml');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const repeatTile = tiles[0] as unknown as GtileRepeat;
     expect(repeatTile.swimlane).toBe('A');
     expect(repeatTile.swimlaneOut).toBe('A');
@@ -527,7 +527,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
     it('builds a GtileDiamondSquare, not a GtileDiamondInside', () => {
       const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
-      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       const condition = repeatTile.children[2];
       expect(condition.kind).toBe('gtile-diamond-square');
@@ -536,7 +536,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
     it('always routes the yes/out labels east+south, never west (unlike the hexagon)', () => {
       const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
-      const tiles = tileNodes(ast.nodes, bounder, squareTheme);
+      const tiles = tileNodes(ast.nodes, bounder, squareTheme).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       const condition = repeatTile.children[2] as unknown as { labelAt: (s: string) => unknown };
       expect(condition.labelAt('east')).not.toBeNull();
@@ -546,7 +546,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
     it('the default theme (no conditionStyle) still builds the hexagon', () => {
       const ast = parseAst('@startuml\nrepeat :SET INITIAL VALUES;\nrepeat while (Start?) is (N) not (Y)\n@enduml');
-      const tiles = tileNodes(ast.nodes, bounder, theme);
+      const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       expect(repeatTile.children[2].kind).toBe('gtile-diamond-inside');
     });
@@ -561,7 +561,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
   describe('repeat: backConnection selection (D5, FtileRepeat.java:186-199)', () => {
     it('no swimlanes at all -> simple2 (the no-lane default)', () => {
       const ast = parseAst('@startuml\nrepeat\n:a;\nrepeat while (x)\n@enduml');
-      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       expect(repeatTile.backConnection).toBe('simple2');
     });
@@ -572,7 +572,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
       // less than A's (0), so `isMainLaneSmallerThanAllOthers` returns true.
       const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
       expect(ast.swimlanes).toEqual(['A', 'B']);
-      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       expect(repeatTile.swimlane).toBe('A');
       expect(repeatTile.swimlaneOut).toBe('A');
@@ -584,7 +584,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
       // laneOrder index (0) is less than A's (1), so the predicate fails.
       const ast = parseAst('@startuml\n|B|\n:x;\n|A|\nrepeat\n|B|\n:b;\n|A|\nrepeat while (x)\n@enduml');
       expect(ast.swimlanes).toEqual(['B', 'A']);
-      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes).tiles;
       const repeatTile = tiles[1] as unknown as GtileRepeat;
       expect(repeatTile.swimlane).toBe('A');
       expect(repeatTile.swimlaneOut).toBe('A');
@@ -593,7 +593,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
 
     it('swimlane !== swimlaneOut -> complex1', () => {
       const ast = parseAst('@startuml\n|A|\nrepeat\n|B|\n:b;\nrepeat while (x)\n@enduml');
-      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes);
+      const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes).tiles;
       const repeatTile = tiles[0] as unknown as GtileRepeat;
       expect(repeatTile.swimlane).toBe('A');
       expect(repeatTile.swimlaneOut).toBe('B');
@@ -609,7 +609,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const ast = parseAst('@startuml\n|A|\nfork\n:a;\nfork again\n|B|\n:b;\nend fork\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('fork');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const forkTile = tiles[0] as unknown as GtileFork;
     expect(forkTile.kind).toBe('gtile-fork');
     expect(forkTile.swimlane).toBe('A');
@@ -635,7 +635,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
     const ast = parseAst('@startuml\n|A|\nsplit\n:a;\nsplit again\n|B|\n:b;\nend split\n@enduml');
     expect(ast.nodes).toHaveLength(1);
     expect(ast.nodes[0]!.kind).toBe('split');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const splitTile = tiles[0] as unknown as GtileSplit;
     expect(splitTile.kind).toBe('gtile-split');
     expect(splitTile.swimlane).toBe('A');
@@ -659,7 +659,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
   // closer, not 'A').
   it("each branch's in-drop bar-side lane is the split's OPENER, not its closer", () => {
     const ast = parseAst('@startuml\n|A|\nsplit\n|X|\n:a;\nsplit again\n|Y|\n:b;\nend split\n@enduml');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
     // PARX (T3f, b3w2): a split's own in-drop carries 'parallel-in-split',
@@ -682,7 +682,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
   // probe (`measurements/t7.json`), not reproduced here.
   it("every branch's out-drop lands in the split's own out lane", () => {
     const ast = parseAst('@startuml\n|A|\nsplit\n|X|\n:a;\nsplit again\n|Y|\n:b;\nend split\n@enduml');
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
     // PARX (T3f, b3w2): same 'parallel-out-split' discriminant as the
@@ -719,7 +719,7 @@ describe('tileNodes — swimlane threading (asr-T3)', () => {
       ],
       swimlanes: [],
     };
-    const tiles = tileNodes(ast.nodes, bounder, theme);
+    const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
     const root = new GtileTopDown(tiles, bounder, theme);
     const result = assignCoordinatesFull({ root, ast, baseX: 0, baseY: 0, bounder, theme });
     const inDrops = result.edgeMeta.filter((m) => m.shape === 'parallel-in');

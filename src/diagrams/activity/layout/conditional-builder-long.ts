@@ -18,6 +18,7 @@ import { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
 import { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { tileNodes } from './tile-layout.js';
+import { withOutLabel } from './tile-layout-inlabel.js';
 import type { IfLayoutCtx } from './conditional-builder.js';
 
 interface LongHorizontalBranch {
@@ -87,16 +88,38 @@ function buildLongHorizontalDiamonds(
  * `coupleGeometry`'s own `addHorizontalMargin` fold reserves so the west
  * label does not overlap the preceding branch's column.
  */
+/**
+ * T1d, rows 2/3: each `then`/`elseif` branch's own trailing `-> label;`
+ * (right before the NEXT `elseif`/`else`/`endif`) is `Branch#special`
+ * (`activitydiagram3/Branch.java:222-229`), set via `InstructionIf
+ * #switchToElse2`/`#elseIf`/`#endif` (`:166-198`) at that keyword's own
+ * dispatch -- the SAME pending-state machine {@link consumeArrowLabel}
+ * already threads through `tileNodes`, just read at the OPPOSITE end of
+ * a branch's node list. `GtileIfLongHorizontal#tiles[i]`/`tile2` are
+ * ordinary `Tile`s ({@link Tile.outLabel}'s own doc), so no change to
+ * that (out-of-write-set) class is needed -- {@link
+ * walkIfLongHorizontal}'s own `connectionVerticalOut`/
+ * `connectionLastElseOut` read it straight off the SAME object
+ * reference this builder sets it on.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:218-221,458-459
+ *   -- `ConnectionVerticalOut`, per-`then`/`elseif` branch.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:240-242,377-378
+ *   -- `ConnectionLastElseOut`, the `else` branch.
+ */
+function branchBodyWithOutLabel(
+  body: readonly ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  ctx: IfLayoutCtx,
+): Tile {
+  const { tiles, trailing } = tileNodes([...body], bounder, theme, ctx.laneOrder, ctx.pragma);
+  return withOutLabel(new GtileTopDown(tiles, bounder, theme), trailing);
+}
+
 export function buildIfLongHorizontal(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const branches = longHorizontalBranches(node);
-  const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
-  );
-  const tile2 = new GtileTopDown(
-    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
-    bounder,
-    theme,
-  );
+  const tiles = branches.map((b): Tile => branchBodyWithOutLabel(b.body, bounder, theme, ctx));
+  const tile2 = branchBodyWithOutLabel(node.elseBranch, bounder, theme, ctx);
   const diamonds = buildLongHorizontalDiamonds(branches, node.elseLabel, bounder, theme);
   const inlabelSizes = diamonds.map((d) => d.labelAt('west')?.width ?? 0);
   return new GtileIfLongHorizontal(diamonds, tiles, tile2, inlabelSizes);
@@ -133,15 +156,28 @@ function buildLongVerticalDiamonds(
  * chains, D12/T1p-b): a downward column of condition hexagons, each coupled
  * with its own branch body to the right, converging on a label-less merge
  * diamond fed by the `else` clause (`tile2`, below the column).
+ *
+ * T1d: a branch's own trailing `-> label;` is discarded here, NOT wired
+ * -- confirmed by grep (`getSpecial`/`getTextBlockSpecial` appear
+ * nowhere in this file) that `FtileIfLongVertical.create` never reads
+ * `Branch#special` at all. `InstructionIf#elseIf`/`#endif` still CAPTURE
+ * the pending label on every `Branch` regardless of which Ftile builder
+ * eventually consumes `thens` (`InstructionIf.java:166-198`), but this
+ * builder's own `conns` list (`:173-203`) never calls `getSpecial()` --
+ * upstream itself silently drops the label for `!pragma useVerticalIf
+ * true` chains. Mirrored faithfully (dead data, not a bug to fix) per
+ * this project's "preserve information-carrying output... including
+ * behaviour that looks like a bug" rule.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:131-204
  */
 export function buildIfLongVertical(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const branches = longHorizontalBranches(node);
   const tiles = branches.map(
-    (b): Tile => new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme),
+    (b): Tile =>
+      new GtileTopDown(tileNodes([...b.body], bounder, theme, ctx.laneOrder, ctx.pragma).tiles, bounder, theme),
   );
   const tile2 = new GtileTopDown(
-    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma),
+    tileNodes([...node.elseBranch], bounder, theme, ctx.laneOrder, ctx.pragma).tiles,
     bounder,
     theme,
   );
