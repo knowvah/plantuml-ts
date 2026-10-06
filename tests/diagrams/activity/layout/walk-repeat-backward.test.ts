@@ -293,6 +293,14 @@ describe('walkRepeat — backward incoming/outgoing labels', () => {
     expect(out.edges[2]!.label).toBe('out');
   });
 
+  // T1b (`activity-divergence-drive-3`): `arrowHorizontalAlignment()`
+  // (`FtileRepeat.java:451-452,500-501`, default LEFT) on both.
+  it('both carry {horizontal: LEFT}', () => {
+    const out = buildWithLabels();
+    expect(out.edges[1]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+    expect(out.edges[2]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+
   it('never attaches onto ConnectionIn (edge 0) or ConnectionOut (edge 3)', () => {
     const out = buildWithLabels();
     expect(out.edges[0]!.label).toBeUndefined();

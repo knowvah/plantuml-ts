@@ -25,6 +25,25 @@ import { pushEdge } from './tile-coordinates.js';
 import type { WhileFrame } from './walk-while-branch.js';
 
 /**
+ * `Snake.create(...).withLabel(back, BOTTOM)` (`FtileWhile.java:354` /
+ * `:261-262`'s own literal `VerticalAlignment.BOTTOM`, T1a's census row
+ * 16/17) -- {@link pushBackward1}'s own push site.
+ */
+const BACKWARD1_LABEL_ALIGN = { vertical: 'BOTTOM' } as const;
+
+/**
+ * `arrowHorizontalAlignment()` (`FtileWhile.java:389-390`, T1a's census
+ * row 18) -- `AbstractFtile.java:108-110` resolves this through
+ * `skinparam arrowMessageAlignment`, default `HorizontalAlignment.LEFT`
+ * (`skin/AlignmentParam.java:42`). No seam in this port resolves that
+ * skinparam (T1a's census: `ftile/AbstractFtile.ts` is a different,
+ * unbuilt `Ftile` graph); adding one is a new core/theme field, outside
+ * this task's write-set -- reported, not added. `{horizontal: 'LEFT'}`
+ * is upstream's own unconditional default, not a guess.
+ */
+const BACKWARD2_LABEL_ALIGN = { horizontal: 'LEFT' } as const;
+
+/**
  * `ConnectionBackBackward1#drawU` (`FtileWhile.java:341-364`): from the
  * body's own SOUTH_HOOK (`backFrom`, the SAME point `ConnectionBackSimple`
  * would use) down/across to `backSouth` (backward's own point in, this
@@ -49,7 +68,10 @@ function pushBackward1(frame: WhileFrame, backFrom: GPoint, backSouth: GPoint): 
   const y1bis = Math.max(backFrom.y, bodyBottomY) + HEXAGON_HALF_SIZE;
   const points = [backFrom, { x: backFrom.x, y: y1bis }, { x: backSouth.x, y: y1bis }, backSouth];
   pushEdge(out, points, bodyOutLane, backInLane);
-  if (backIncoming !== undefined) out.edges[out.edges.length - 1]!.label = backIncoming;
+  if (backIncoming !== undefined) {
+    out.edges[out.edges.length - 1]!.label = backIncoming;
+    out.edges[out.edges.length - 1]!.labelAlign = BACKWARD1_LABEL_ALIGN;
+  }
   out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
 }
 
@@ -69,7 +91,10 @@ function pushBackward1(frame: WhileFrame, backFrom: GPoint, backSouth: GPoint): 
 function pushBackward2(frame: WhileFrame, backNorth: GPoint): void {
   const { out, headerEast, headerInLane, backOutLane, backOutgoing } = frame;
   pushEdge(out, [backNorth, { x: backNorth.x, y: headerEast.y }, headerEast], backOutLane, headerInLane);
-  if (backOutgoing !== undefined) out.edges[out.edges.length - 1]!.label = backOutgoing;
+  if (backOutgoing !== undefined) {
+    out.edges[out.edges.length - 1]!.label = backOutgoing;
+    out.edges[out.edges.length - 1]!.labelAlign = BACKWARD2_LABEL_ALIGN;
+  }
 }
 
 /**

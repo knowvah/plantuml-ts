@@ -9,6 +9,8 @@
  * `layout.old.ts` engine and were deleted with it.
  */
 
+import type { SnakeTextAlign } from './layout/snake-text-position.js';
+
 // ---------------------------------------------------------------------------
 // Public geometry types
 // ---------------------------------------------------------------------------
@@ -39,6 +41,18 @@ export interface ActivityNodeGeo {
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
+  /**
+   * How {@link label} is positioned, mirroring `Snake#withLabel`'s two
+   * overloads (`ftile/Snake.java:124-136`) -- a pushed label carries
+   * EITHER `vertical` (the `VerticalAlignment` overload) OR `horizontal`
+   * (the `HorizontalAlignment` overload), never both. `undefined` when
+   * {@link label} is set but no push site has been updated to carry its
+   * real alignment yet (falls back to upstream's own default, `LEFT`,
+   * `skin/AlignmentParam.java:42`).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:244-270
+   *   (`getTextBlockPosition`, ported at `layout/snake-text-position.ts`)
+   */
+  labelAlign?: SnakeTextAlign;
   color?: string;
   /**
    * `false` = draw no end decoration. `Worm#drawInternalOneColor`'s
