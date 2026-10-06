@@ -82,7 +82,7 @@ import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
-import { assembleSvg } from '../../../src/index.js';
+import { assembleSvg, seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 
 interface ResolvedThemeAndStyles {
   readonly theme: Theme;
@@ -147,8 +147,23 @@ export function renderFixtureActivity(
   const geo = layoutActivity(ast, theme, measurer);
   const fragment = renderActivity(geo, theme);
 
+  // HARNESS-SEED (T2d-a row 1): mirrors `render-fixture-class.ts`'s own
+  // `seed` computation, which mirrors `index.ts#umlSourceOfBlock` +
+  // `prepareBlock`'s `seed: seedOfUmlSource(umlSource)` (`src/index.ts:
+  // 132-134,377`) exactly -- upstream `UmlSource#seed()` seeds every
+  // `<linearGradient>`/`<filter>` id in the assembled document
+  // (`SvgGraphics.java:160-162,393`). Without this the harness measured
+  // zero diagram-source seeding at all (`assembleSvg(fragment)` with no
+  // second argument), diverging from production for every fixture with
+  // more than one gradient/filter def.
+  const seed = seedOfUmlSource({
+    lines: first.source.lines,
+    rawSourceLines,
+    seedSourceLines: first.seedSource,
+  });
+
   const annotations = ast.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
+  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
   // add1 b3 (journal row 52): mirror `src/index.ts#applyAnnotationChrome`'s
@@ -156,8 +171,8 @@ export function renderFixtureActivity(
   // `TextBlockExporter.java:159-203`), so this harness must compose the same
   // way or it measures its own drift instead of the port.
   if (fragment.preChromeWidth !== undefined) {
-    return assembleSvg(applyActivityChrome(fragment, annotations, styles, measurer, ast.sprites));
+    return assembleSvg(applyActivityChrome(fragment, annotations, styles, measurer, ast.sprites), seed);
   }
   const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
-  return assembleSvg(chromed);
+  return assembleSvg(chromed, seed);
 }
