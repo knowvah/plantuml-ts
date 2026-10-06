@@ -1,0 +1,7 @@
+@startuml
+start
+:Foo;
+-><back:red> hello;
+:Bar;
+stop
+@enduml
