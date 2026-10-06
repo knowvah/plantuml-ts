@@ -221,3 +221,185 @@ green.
   both 288/288 green, both before AND after the gate fix.
 - 0 unexplained risers: `sojono-24-tufe806` WAS a riser before the
   gate fix (diagnosed, explained above); zero risers remain after it.
+
+---
+
+# PASS 2 (write-set extended: tiles/tile.ts, layout/tile-coordinates.ts,
+# any layout/walk-*.ts / layout/swimlane-*.ts push site, tiles/* assembly
+# height site)
+
+## Commits (branch add3/T1b, appended)
+
+5. `feat(add3-T1b): port the generic -> label; mechanism (row 1)` --
+   `tiles/tile.ts` (`Tile.inLabel`), `layout/tile-layout.ts`
+   (`tileNodes` pending-state loop), `layout/tile-layout-leaves.ts`
+   (new, `tileSimpleLeaf`/`tileEarlyLeaf` moved out to make room),
+   `layout/tile-layout-inlabel.ts` (new: `consumeArrowLabel`/
+   `withInLabel`/`applyInLabel`/`inLabelReservation`),
+   `layout/tile-coordinates.ts` (`pushTopDownSiblingEdge` wired),
+   `layout/tile-layout-structural.ts` (import fix),
+   `tiles/gtile-top-down.ts` (`sequentialGap`, the assembly height
+   reservation), `activity-layout-constants.ts`
+   (`ARROW_LABEL_LAYOUT_FONT_SIZE`), plus unit tests.
+6. `feat(add3-T1b): wire fork/split branch entry labels (rows 19,20,25,26)`
+   -- `layout/tile-layout-structural.ts` (`buildBranchTopDown`),
+   `layout/walk-fork-branches.ts` (`pushBranchIn` now calls
+   `applyInLabel`) -- this SAME function is also `walkMerge`'s own
+   `ConnectionIn`, so rows 23/24 landed for free (see below).
+7. `test(add3-T1b): authored fixtures for the generic -> label; mechanism`
+   -- 5 new `tests/fixtures/activity/add3-T1b/*` fixtures +
+   `snake-text-position-fixtures.test.ts` assertions.
+
+## Java -> ours (pass 2)
+
+- `ActivityDiagram3.java:105-106,437-465` (`setLabelNextArrow` ->
+  `nextLinkRenderer()`, consumed by the next instruction's own
+  `getInLinkRendering()`, then reset) -> `tile-layout.ts#tileNodes`'s
+  `pendingInLabel` loop var + `tile-layout-inlabel.ts#consumeArrowLabel`/
+  `withInLabel` (sets `Tile.inLabel` on whichever tile is built next).
+- `ConnectionVerticalDown.java:79-80` (`withLabel(textBlock,
+  arrowHorizontalAlignment())`) -> `tile-coordinates.ts
+  #pushTopDownSiblingEdge` -> `applyInLabel(out, child,
+  {horizontal:'LEFT'})`.
+- `FtileFactoryDelegatorAssembly.java:58-62` (`height = 35; if
+  (textBlock != null) height += textBlock.calculateDimension()
+  .getHeight();`) -> `tiles/gtile-top-down.ts#sequentialGap` (theme-aware,
+  since `GtileTopDown` already receives `Theme` at tile-BUILD time,
+  unlike the WALK-time reservation below).
+- `LimitFinder#drawText` (`LimitFinder.java:216-224`) -> `tile-layout-
+  inlabel.ts#inLabelReservation`, pushed to `out.reservations` at WALK
+  time (pre-compression) so `CompressionXorYBuilder` does not collapse
+  the height `sequentialGap` just reserved -- confirmed necessary by
+  measurement: WITHOUT this reservation, the gap compressed from
+  35+11=46 down to ~23.5 (verified against `start;:A;->hello;:B;stop;`
+  before vs after adding it).
+- `ParallelBuilderFork.java:151-163` / `ParallelBuilderSplit.java:
+  194-203` (`ConnectionIn`, `withLabel(tbin, arrowHorizontalAlignment())`,
+  reading the BRANCH's own `getInLinkRendering()`) -> `tile-layout-
+  structural.ts#buildBranchTopDown` copies `tiles[0]?.inLabel` onto the
+  branch's own `GtileTopDown` wrapper (the object `pushBranchIn` reads);
+  `walk-fork-branches.ts#pushBranchIn` now calls `applyInLabel`.
+- `ParallelBuilderMerge.java:71-119`'s own doc
+  ("`doStep1` is byte-for-byte `ParallelBuilderFork.doStep1`") ->
+  CONFIRMED by reading `walk-fork-branches.ts#walkMerge`: it ALREADY
+  calls the SAME `pushBranchIn`, so rows 23/24 (`ParallelBuilderMerge
+  $ConnectionIn`) landed with ZERO additional code -- fixed by commit 6
+  as a side effect, verified by reading, not assumed.
+- `FtileRepeat.java:170-172` (`tbin1`, `repeat.getInLinkRendering()
+  .getDisplay()`) -> CONFIRMED (by reading, then by oracle render) to
+  be the SAME `Instruction.getInLinkRendering()` accessor row 1 already
+  feeds -- row 6 needed ZERO additional wiring. Verified end to end
+  against a fresh oracle render (`label-before-repeat` fixture): EVERY
+  attribute matches the jar byte-for-byte except the one already-named
+  Y-baseline residual (109.778 ours vs 106.5 jar -- the SAME mechanism
+  as `default-arrow-label`'s own residual, not a new one).
+
+## Rows 2-8, 19-20, 23-29, 32, 34: full per-row disposition
+
+| Row(s) | Class | Status | Mechanism |
+|---|---|---|---|
+| 1 | `ConnectionVerticalDown` | DONE (pass 2, commit 5) | generic `inLabel` |
+| 6 | `FtileRepeat$ConnectionIn` (tbin) | DONE for free | SAME generic `inLabel` (`repeat.getInLinkRendering()` is the identical accessor); verified byte-exact end to end |
+| 19,20 | `ParallelBuilderFork$ConnectionIn` | DONE (commit 6) | generic `inLabel`, propagated onto the branch's `GtileTopDown` wrapper |
+| 23,24 | `ParallelBuilderMerge$ConnectionIn` | DONE for free (commit 6) | `walkMerge` already calls the same `pushBranchIn` fork/split share |
+| 25,26 | `ParallelBuilderSplit$ConnectionIn` | DONE (commit 6) | same as 19/20, `pushBranchIn` is shared verbatim |
+| 29 | `FtileIfWithLinks$ConnectionVerticalOut` | NOT APPLICABLE | read `FtileIfWithLinks.java:548-549`: the ONLY two construction sites pass `out2 = null` literally -- `Snake#withLabel`'s own `if (textBlock != null)` guard makes this upstream call permanently a no-op. Dead code in the jar itself; nothing to port. |
+| 34 | `FtileSwitchWithOneLink$ConnectionVerticalTop` | NOT APPLICABLE | reads `branch.getTextBlockPositive()` -- the branch's own CASE-condition display (`case (x)`'s text), a wholly different, ALREADY-ported mechanism (`walk-switch.ts#applyLastEdgeLabel`), not the arrow-label pending state. Same family as T1a's row-31 "confounded by switch-layout divergence" finding, not an arrow-label gap. |
+| 7,8 | `FtileRepeat$ConnectionOut` (tbout) | NOT APPLICABLE | read `FtileRepeat.java:170-185,361`: `tbout`'s source `repeat.getOutLinkRendering()`'s DISPLAY traces to `repeatWhile(Display label, Display yes, Display out, Display linkLabel, ...)` (`ActivityDiagram3.java:361`) -- a DEDICATED parameter of the `repeat while (x) is (yes) not (out)` command grammar, never `nextLinkRenderer()`. Not an arrow-label row at all; out of this task's mechanism. |
+| 2,3 | `FtileIfLongHorizontal$ConnectionOut`/`ConnectionLastElseOut` | NOT DONE, mechanism identified | `out2 = branch.getSpecial().getDisplay().create(...)` (`FtileIfLongHorizontal.java:218-220,240-242`); `Branch#special` is set via `InstructionIf.java:167,183,196`'s `setSpecial(nextLinkRenderer, ...)` -- the SAME pending `nextLinkRenderer()` state, but consumed at BRANCH-CLOSE time (elseif/else/endif), i.e. a `-> label;` at the END of a branch's own body, not its start. Our `tileNodes` currently DISCARDS any `pendingInLabel` left over when a node list ends (the branch simply runs out of siblings) -- it never surfaces to the branch-building caller. |
+| 4,5 | `FtileIfLongVertical$ConnectionVertical`/`ConnectionLastElse` | NOT DONE, same mechanism as 2,3 | same `Branch#special` |
+| 27,28 | `ParallelBuilderSplit$ConnectionOut` | NOT DONE, same mechanism | `tmp.getOutLinkRendering()` (`ParallelBuilderSplit.java:160-161`) -- a SPLIT branch's own trailing label (before `split again`/`end split`), same "branch exit" family as 2-5 |
+| 32 | `FtileSwitchWithManyLinks$ConnectionVerticalBottom` | NOT DONE, same mechanism | `branches.get(i).getTextBlockSpecial()` (`FtileSwitchWithManyLinks.java:462`) reads the SAME `Branch#special`/`getSpecial()` |
+
+### Why rows 2-5, 27, 28, 32 are not done this pass
+
+All seven share ONE blocking mechanism: a "branch EXIT label" (`Branch
+#special`, `Branch.java:222-228`), set at BRANCH-CLOSE time
+(`elseif`/`else`/`endif`/`split again`/`end split`/`end switch`) from
+whatever `nextLinkRenderer()` is still pending when that keyword is
+reached -- the SAME underlying pending-state machine as row 1, but
+captured at the OPPOSITE end of a node list (the trailing leftover,
+not the leading consumer).
+
+Our `tileNodes` (`tile-layout.ts`) currently has no way to report this
+leftover to its caller: it returns a bare `Tile[]`, and the pending
+value simply falls out of scope when the function returns with nodes
+still unconsumed. Making this land faithfully needs `tileNodes` to
+return `{ tiles: Tile[]; trailingLabel?: PendingInLabel }` (or
+equivalent) -- a BREAKING signature change with 13 existing call
+sites across `tile-layout.ts`, `tile-layout-structural.ts`,
+`conditional-builder.ts`, and `conditional-builder-long.ts` (counted
+by grep, this pass). Each of the ~4 compound kinds that would consume
+it (if-long-horizontal, if-long-vertical, split, switch) then needs
+its OWN correct attachment point verified against its own Java class
+before wiring -- a materially larger, separable unit of work than
+this pass's remaining budget, not an effort shortcut. Owner: a
+follow-on task with `tile-layout.ts` (the `tileNodes` signature) and
+the four compound-kind builder files in its write-set.
+
+## Retiring the labelAlign !== undefined gate
+
+Not retired as a separate step because nothing further was needed:
+EVERY site wired in this pass (row 1 and its for-free siblings 6,
+19-26) sets `labelAlign` unconditionally whenever `inLabel` is present
+(`applyInLabel`'s own body). The gate in `renderer.ts#renderEdgeLabel`/
+`canvas-origin-text-ink.ts#extendForEdgeLabelText` was ALREADY exactly
+scoped to "sites this pass's generic mechanism doesn't reach" (switch
+case labels, the still-undone branch-exit rows above) -- confirmed by
+measurement in pass 1 (the `sojono-24-tufe806` regression) and
+unchanged in pass 2 since no new site needed the fallback.
+
+## skinparam arrowMessageAlignment center|right
+
+Checked the read path as asked: there is still no seam (`ftile/
+AbstractFtile.ts` is the same unbuilt, different `Ftile` graph pass 1
+found). Beyond that, a NEW empirical finding this pass: rendered
+`skinparam arrowMessageAlignment center` against the jar
+(`label-align-center.puml` vs `default-arrow-label.puml`, scratch,
+not committed) and the two SVGs are IDENTICAL except embedded
+metadata -- `ConnectionVerticalDown`'s own `Snake` only ever carries 2
+points (`snake.addPoint(p1); snake.addPoint(p2);`,
+`ConnectionVerticalDown.java:81-82`), so its `getDirectionsCode()` is
+always length-1 and can NEVER match the zigzag `startsWith('DLD'/
+'DRD')` guard `getTextBlockPosition`'s own CENTER/RIGHT branches
+require. The skinparam is UNREACHABLE for this specific connector
+class regardless of whether the seam exists -- not a gap to close for
+row 1, confirmed by jar measurement, not assumed. (A genuinely zigzag
+connector -- e.g. a `drawTranslate` cross-swimlane 4-point snake --
+would be the right place to look if a future task needs to exercise
+those branches end to end; none of the rows wired this pass produce
+one.)
+
+## Probe Sigma / style-baseline (pass 2)
+
+Unchanged by every pass-2 commit: Sigma stayed 16770/125 rows, 1
+faller (`boxefe-81-situ725`, same as pass 1's end state), 0 risers,
+through all three commits. Full `tests/oracle/svg-conformance` run
+after every commit: only the ALREADY-FLAGGED `boxefe-81-situ725`
+style-baseline row stayed red (needs the SAME orchestrator re-pin pass
+1 already flagged); everything else green (6292/6294 passed, 1
+skipped, 1 expected-red, final count). No corpus-pinned fixture
+combines any wired row with a real `-> label;`/`fork`/`repeat`
+sequence carrying one, so every verification in this pass is via the
+5 new authored fixtures (oracle-rendered) plus unit/end-to-end tests,
+not corpus movement.
+
+## Acceptance (pass 2 additions)
+
+- Row 1 (`-> label;`) ported end to end: text reaches the renderer
+  (previously dropped entirely), X/canvas size match the jar exactly,
+  Y carries the same documented creole-ascent residual as pass 1.
+- Rows 6, 19, 20, 23, 24, 25, 26: confirmed wired (6 "for free" via the
+  SAME `pushBranchIn`/generic-assembly mechanisms), each verified
+  against a fresh oracle render.
+- Rows 29, 34: confirmed NOT APPLICABLE by reading the Java (dead code
+  / different mechanism respectively) -- not silently skipped, verified.
+- Rows 2-5, 7, 8, 27, 28, 32: confirmed NOT DONE with a named,
+  Java-cited mechanism each (two families: `repeatWhile`'s own
+  dedicated grammar for 7/8; `Branch#special`'s "branch exit label"
+  for the other five) -- owner and blast radius (13 call sites)
+  stated for the follow-on.
+- 0 unexplained movers: every canvas-size residual that remained
+  (fork's own bar-to-branch gap) is named with its mechanism
+  (`ParallelBuilderFork`'s own gap-height formula, a separate constant
+  from the generic assembly gap, not extended this pass).
