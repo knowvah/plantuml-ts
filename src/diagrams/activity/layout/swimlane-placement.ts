@@ -34,7 +34,7 @@ import type {
   SwimlaneGeo,
 } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
-import { resolveInlineLinks } from '../../description/parse-helpers.js';
+import { resolveInlineLinks } from '../../../core/url/inline-links.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,

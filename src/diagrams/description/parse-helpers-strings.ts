@@ -10,9 +10,11 @@
  * 1.23.0 miscounts braces when those chars appear inside /regex/ literals
  * inside function bodies.
  *
- * `resolveInlineLinks` was further split out to
- * `parse-helpers-inline-links.ts` (same 500-line reason), re-exported here
- * unchanged for existing consumers.
+ * `resolveInlineLinks` was further split out to `parse-helpers-
+ * inline-links.ts` (same 500-line reason), then moved to the shared
+ * `core/url/` seam (add3 T0b, D9) since upstream resolves `[[url
+ * label]]` in ONE package shared with the activity engine's swimlane
+ * titles. Re-exported here unchanged for existing consumers.
  */
 
 import { resolveTextEscapes } from '../../core/text-escapes.js';
@@ -20,7 +22,7 @@ import { Stereotype } from '../../core/stereo/Stereotype.js';
 import { GUILLEMET_NONE } from '../../core/stereo/StereotypeDecoration.js';
 import { parseSimpleColor } from '../../core/klimt/color/HColorSet.js';
 import type { StereotypeSpriteRef } from './ast.js';
-import { resolveInlineLinks } from './parse-helpers-inline-links.js';
+import { resolveInlineLinks } from '../../core/url/inline-links.js';
 export { resolveInlineLinks };
 
 // ---------------------------------------------------------------------------
