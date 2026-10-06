@@ -35,6 +35,42 @@ export function floorActionLineHeight(rawHeight: number): number {
   return Math.max(rawHeight, ACTION_TEXT_MIN_HEIGHT);
 }
 
+/**
+ * add3-T2b pass 3 (STRIPE): a bare `----`/`====`/`....` separator line
+ * (`CreoleStripeSimpleParser.ts#classifyStripeLine`'s `HORIZONTAL_LINE`,
+ * `CreoleStripeSimpleParser.java:92-109`) is drawn by `StripeSimple
+ * #analyzeAndAdd` (java:149-155) as `atoms.add(CreoleHorizontalLine
+ * .create(fontConfiguration, line, style.getStyle(), skinParam))` --
+ * `CreoleHorizontalLine` is the REAL atom this port's `StripeSimple.ts`
+ * ALSO instantiates for this classification (confirmed: it is the one
+ * class both engines import for it). Its own `calculateDimensionSlow`
+ * (`CreoleHorizontalLine.java:118-129`) returns a FLAT `new
+ * XDimension2D(10, 10)` for every bare separator -- `this.line.length
+ * === 0` is true for all three styles, since none of the bare patterns
+ * (`SECTION_SEPARATOR_PATTERN` etc.) ever capture a label. `10`,
+ * NOT `creole-text-lines.ts#CREOLE_HR_HEIGHT` (`= 8`,
+ * `leaf-sizing-text.ts:43`) -- that constant is independently oracle-
+ * verified too, but against a DIFFERENT class entirely: a `node x [ … ]`
+ * description-leaf BODY (`leaf-sizing-text.ts`'s own module doc comment:
+ * "the FULL Sheet/SheetBlock1 pipeline is too large to port... this seam
+ * builds on the pieces this port ALREADY has" -- i.e. it does NOT
+ * instantiate `CreoleHorizontalLine` at all). Re-verified this pass by
+ * rendering `node x [\nfoo1\n====\nfoo2\n]` through `scripts/oracle-
+ * render.sh`: the entity's own box spans `y=7` to `y=73` (height 66,
+ * EXACTLY the `14+8+14+30margin` the constant's own doc comment cites) --
+ * a real, independently-correct value for ITS class, not a typo. Two
+ * different upstream classes, two different real heights; this constant
+ * is `CreoleHorizontalLine`'s, re-derived locally rather than overloading
+ * the OTHER seam's (this port's own per-layer convention for a jar
+ * constant, matching `ACTION_TEXT_MIN_HEIGHT`'s own precedent above).
+ * `bigide-91-bise382`'s own golden confirms it algebraically: box2
+ * (`:first part\n====\nsecond part;`) height 54 = 12(text) + 12(text) +
+ * 10(HR) + 20(2x padding) -- box1 (`:first part\n____\nsecond part;`,
+ * `____` is LITERAL, not HR, confirmed by the SAME golden's `<text>
+ * ____</text>`) height 56 = 12+12+12+20, matching ours exactly already.
+ */
+export const ACTIVITY_HR_HEIGHT = 10;
+
 /** `StripeTable.java:82`: `new AtomWithMargin(table, 2, 2)` -- the merged
  *  creole table's own +2-top/+2-bottom margin, added ONCE per `FtileBox`
  *  whose entire label is a single `StripeTable` stripe (this task's two
@@ -109,7 +145,8 @@ function creoleLineHeight(line: string, bounder: StringBounder, theme: Theme, fo
   if (isTableRowLine(line)) return fallback;
   const font: FontSpec = { family: theme.fontFamily, size: fontSize };
   const built = creoleTextLines(line, font, measurerAdapterOf(bounder));
-  return built[0]?.height ?? fallback;
+  if (built[0] === undefined) return fallback;
+  return built[0].kind === 'hr' ? ACTIVITY_HR_HEIGHT : built[0].height;
 }
 
 export class GtileAction extends TileLeaf {

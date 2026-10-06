@@ -49,6 +49,7 @@ import { WidthTableMeasurer } from '../../core/measurer.js';
 import { linkWrap, line, type LineStyle } from '../../core/svg.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import type { CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
+import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
 import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
@@ -97,16 +98,38 @@ export interface ActivityTextStyle {
    *  the correction that turns `lineTop + lineHeight - unmutedSize/4.5`
    *  (that module's own doc comment) into upstream's absolute placement
    *  -- valid ONLY when the caller's `lineHeight` is the SAME value
-   *  `Sea` used to compute it (the FLOORED one). A caller that instead
-   *  built `y` from the font's own RAW, unfloored size (`renderIfLabel`'s
-   *  arrow out-labels, a swimlane title, a diamond/hexagon label -- none
-   *  of which this task's rows touch) never agreed to that contract, so
-   *  `dy` is simply wrong for it -- jar-verified regression on
-   *  `sikino-19-vuca111` (`SwimlaneTitleFontSize 8`) and `dozaxu-98-
-   *  xetu961` (`ArrowFontSize 7`) once `dy` was applied unconditionally.
-   *  `undefined`/`false` (every pre-existing caller) means "ignore `dy`",
-   *  matching this port's behavior before this flag existed. */
+   *  `Sea` used to compute it (the FLOORED one).
+   *
+   *  NOT an upstream distinction -- `ConditionalBuilder.java:280-282`'s
+   *  branch label (`getDisplayPositive().create0(..., CreoleMode
+   *  .SIMPLE_LINE, ...)`) and `Swimlanes.java:292`'s title
+   *  (`swimlane.getDisplay().create9(...)`) BOTH build a real creole
+   *  `TextBlock` through the SAME `Sheet`/`Sea` pipeline `FtileBox`
+   *  does, so upstream's OWN floor would apply to them too -- Java has
+   *  no asymmetry here. The asymmetry is this PORT's: `renderIfLabel`'s
+   *  arrow out-labels and the swimlane-title renderer still compute `y`
+   *  from the font's own RAW, unfloored size (neither has been migrated
+   *  to a `creoleTextLines`-derived height the way `GtileAction` now is)
+   *  -- applying `dy` to them unconditionally assumed a floor-
+   *  coordinated box neither one actually has yet, regressing two
+   *  PINNED goldens (`sikino-19-vuca111`, `SwimlaneTitleFontSize 8`;
+   *  `dozaxu-98-xetu961`, `ArrowFontSize 7`). `floorCoordinated` scopes
+   *  this task's fix to the ONE caller (`GtileAction`'s box) verified
+   *  this pass, rather than silently claiming the other two are already
+   *  correct. `undefined`/`false` (every caller not yet migrated) means
+   *  "ignore `dy`", matching this port's behavior before the flag
+   *  existed -- a real residual, not a closed divergence. */
   readonly floorCoordinated?: boolean;
+  /** add3-T2b pass 3 (STRIPE): the box's own left edge/full width/
+   *  border ink (`activity-renderer-line-heights.ts#actionRuleFields`),
+   *  set by an `'activity'`-sname caller only -- together let {@link
+   *  drawCreoleLine} draw a `HORIZONTAL_LINE` line's real rule(s)
+   *  spanning the WHOLE box (NOT the caller's own padded `x`) instead
+   *  of falling back to a literal draw. Any left `undefined` (every
+   *  caller that isn't an action/SDL box) keeps that fallback. */
+  readonly ruleLeft?: number;
+  readonly ruleWidth?: number;
+  readonly ruleStroke?: string;
 }
 
 function toFontConfiguration(style: ActivityTextStyle): FontConfiguration {
@@ -288,11 +311,40 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
  * `theme.svgLinkTarget`. Affects `gaxezi-48-zesa921`/`nisexe-68-vabu320`/
  * `pekuxe-00-bovi270`.
  */
+/**
+ * `UHorizontalLine.java:134-141`'s `drawHLine`/`getStroke`: a `=` rule
+ * draws TWICE (`y`, `y + 2`, java:135 -- `StripeSimple.ts#classifyStripeLine`'s
+ * own `style` char), a `.` rule is dashed (`new UStroke(1, 2, 1)`,
+ * java:139), `-`/anything else is one solid line -- EVERY branch shares
+ * thickness 1 (`UStroke.simple()`/`withThickness(DEFAULT_THICKNESS=1)`,
+ * none of the three changes it). `y` is already the rule's own MIDPOINT
+ * (`centeredBaselines`'s `isHr` branch, `top + height / 2` --
+ * `CreoleHorizontalLine.ts#drawU`'s `UTranslate.dy(dim.getHeight() / 2)`).
+ */
+function drawHorizontalRule(x: number, y: number, content: string, style: ActivityTextStyle): string {
+  const { ruleLeft, ruleWidth, ruleStroke } = style;
+  if (ruleLeft === undefined || ruleWidth === undefined || ruleStroke === undefined) {
+    return drawRun(x, y, content, toFontConfiguration(style));
+  }
+  const classified = classifyStripeLine(content);
+  const hrStyle = classified.type === 'HORIZONTAL_LINE' ? classified.style : '-';
+  const lineStyle: LineStyle = {
+    stroke: ruleStroke,
+    strokeWidth: 1,
+    ...(hrStyle === '.' ? { strokeDasharray: '1,2' } : {}),
+  };
+  let out = line(ruleLeft, y, ruleLeft + ruleWidth, y, lineStyle);
+  if (hrStyle === '=') out += line(ruleLeft, y + 2, ruleLeft + ruleWidth, y + 2, lineStyle);
+  return out;
+}
+
 function drawCreoleLine(x: number, y: number, content: string, style: ActivityTextStyle): string {
   const font = { family: style.fontFamily, size: style.fontSize };
   const lines = creoleTextLines(content, font, MEASURER);
   const line = lines[0];
-  if (line === undefined || line.kind !== 'text') return drawRun(x, y, content, toFontConfiguration(style));
+  if (line === undefined) return drawRun(x, y, content, toFontConfiguration(style));
+  if (line.kind === 'hr') return drawHorizontalRule(x, y, content, style);
+  if (line.kind !== 'text') return drawRun(x, y, content, toFontConfiguration(style));
   let cx = x;
   let out = '';
   for (const run of line.runs) {
