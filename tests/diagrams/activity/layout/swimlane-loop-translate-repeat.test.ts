@@ -10,6 +10,8 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  routeRepeatBackward1,
+  routeRepeatBackward2,
   routeRepeatComplex1,
   routeRepeatOut,
   routeRepeatSimple1,
@@ -17,6 +19,8 @@ import {
 } from '../../../../src/diagrams/activity/layout/swimlane-loop-translate-repeat.js';
 import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 import type {
+  RepeatBackward1Loop,
+  RepeatBackward2Loop,
   RepeatComplex1Loop,
   RepeatOutLoop,
   RepeatSimple1Loop,
@@ -277,6 +281,113 @@ describe('routeRepeatComplex1 — ConnectionBackComplex1#drawTranslate (FtileRep
       { x: 144.3375, y: 239 },
       { x: 144.3375, y: 87 },
       { x: 59.675, y: 87 },
+    ]);
+  });
+});
+
+describe('routeRepeatBackward1 — ConnectionBackBackward1#drawTranslate (FtileRepeat.java:432-459)', () => {
+  it('right side: translated backward x sits right of the translated diamond2 centre', () => {
+    const loop: RepeatBackward1Loop = {
+      kind: 'repeat-backward1',
+      p1: { x: 10, y: 100 }, // diamond2 origin, untranslated
+      p2: { x: 50, y: 140 }, // backward's own SOUTH hook, untranslated
+      diamond2: { width: 50, height: 40 },
+    };
+    const result = routeRepeatBackward1(loop, edge, 5, -5);
+
+    // p1 -> (15, 100); p2 -> (45, 140). centre = 15 + 25 = 40; 45 >= 40 -- right.
+    // x1 = 15 + 50 = 65; y1 = 100 + 20 = 120.
+    expect(result.edges).toHaveLength(1);
+    expect(result.edges[0]!.points).toEqual([
+      { x: 65, y: 120 },
+      { x: 45, y: 120 },
+      { x: 45, y: 140 },
+    ]);
+    expect(result.reservations).toEqual([]);
+  });
+
+  it('left side: translated backward x sits left of the translated diamond2 centre', () => {
+    const loop: RepeatBackward1Loop = {
+      kind: 'repeat-backward1',
+      p1: { x: 50, y: 100 },
+      p2: { x: 10, y: 140 },
+      diamond2: { width: 50, height: 40 },
+    };
+    const result = routeRepeatBackward1(loop, edge, 0, 0);
+
+    // centre = 50 + 25 = 75; 10 < 75 -- left. x1 = p1.x = 50; y1 = 120.
+    expect(result.edges[0]!.points).toEqual([
+      { x: 50, y: 120 },
+      { x: 10, y: 120 },
+      { x: 10, y: 140 },
+    ]);
+  });
+
+  it('carries the base edge’s own label/labelAlign through the rebuild', () => {
+    const labelled: ActivityEdgeGeo = { points: [], label: 'back', labelAlign: { horizontal: 'LEFT' } };
+    const loop: RepeatBackward1Loop = {
+      kind: 'repeat-backward1',
+      p1: { x: 0, y: 0 },
+      p2: { x: 0, y: 0 },
+      diamond2: { width: 0, height: 0 },
+    };
+    const result = routeRepeatBackward1(loop, labelled, 0, 0);
+    expect(result.edges[0]!.label).toBe('back');
+    expect(result.edges[0]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+});
+
+describe('routeRepeatBackward2 — ConnectionBackBackward2#drawTranslate (FtileRepeat.java:482-511)', () => {
+  it('no wraparound: translated entry x already sits at/right of backward x', () => {
+    const loop: RepeatBackward2Loop = {
+      kind: 'repeat-backward2',
+      p1: { x: 10, y: 50 }, // backward's own NORTH hook, untranslated
+      p2: { x: 30, y: 0 }, // diamond1 (entry) origin, untranslated
+      diamond1: { width: 24, height: 24 },
+    };
+    const result = routeRepeatBackward2(loop, edge, 0, 0);
+
+    // x1 = 10; y1 = 50. x2 = 30 (>= x1, no wraparound); y2 = 0 + 12 = 12.
+    expect(result.edges).toHaveLength(1);
+    expect(result.edges[0]!.points).toEqual([
+      { x: 10, y: 50 },
+      { x: 10, y: 12 },
+      { x: 30, y: 12 },
+    ]);
+    expect(result.reservations).toEqual([]);
+  });
+
+  it('wraparound: translated entry x sits left of backward x, adds diamond1.width', () => {
+    const loop: RepeatBackward2Loop = {
+      kind: 'repeat-backward2',
+      p1: { x: 50, y: 50 },
+      p2: { x: 10, y: 0 },
+      diamond1: { width: 24, height: 24 },
+    };
+    const result = routeRepeatBackward2(loop, edge, 0, 0);
+
+    // x1 = 50; x2 initial = 10 < 50 -- wraparound: x2 = 10 + 24 = 34. y2 = 12.
+    expect(result.edges[0]!.points).toEqual([
+      { x: 50, y: 50 },
+      { x: 50, y: 12 },
+      { x: 34, y: 12 },
+    ]);
+  });
+
+  it('applies dx1/dx2 to p1/p2 before the wraparound decision', () => {
+    const loop: RepeatBackward2Loop = {
+      kind: 'repeat-backward2',
+      p1: { x: 10, y: 50 },
+      p2: { x: 30, y: 0 },
+      diamond1: { width: 24, height: 24 },
+    };
+    const result = routeRepeatBackward2(loop, edge, 5, -5);
+
+    // p1 -> (15, 50); p2 -> (25, 0). x2 = 25 (>= 15, no wraparound); y2 = 12.
+    expect(result.edges[0]!.points).toEqual([
+      { x: 15, y: 50 },
+      { x: 15, y: 12 },
+      { x: 25, y: 12 },
     ]);
   });
 });
