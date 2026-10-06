@@ -166,6 +166,27 @@ function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode
 }
 
 /**
+ * T1b (`activity-divergence-drive-3`, D1 verification): an edge LABEL's
+ * position needs no anchor-carry field analogous to {@link
+ * ActivityEdgeGeo.emphasizeAt}/`midArrowAt` above. `Snake#getTextBlockPosition`
+ * (`ftile/Snake.java:244-270`) reads `worm.getPoint(i)`
+ * (`ftile/Worm.java:322-324`), which resolves every point through the
+ * compressing `UGraphic`'s own translate (`:326-329`, `resolve`/`tr`) --
+ * i.e. upstream computes the label position AT DRAW TIME, on the SAME
+ * already-compressed points `drawInternalOneColor` draws (both are
+ * called from `Snake#drawInternal`, `Snake.java:189-198`, in the same
+ * pass). This port's `layout/snake-text-position.ts#getTextBlockPosition`
+ * mirrors that by running at RENDER time (`renderer.ts#renderEdgeLabel`)
+ * over `edge.points` -- already carried through both `transformEdge`
+ * passes above by the time `renderer.ts` ever sees them. `emphasizeAt`/
+ * `midArrowAt` needed a carry only because their own (pre-this-mission)
+ * render-time computation ran a direction-match SEARCH that upstream
+ * runs pre-compression (`Worm#drawInternalOneColor`'s loop, `:134-143`)
+ * -- a label's position has no such pre-compression-only computation to
+ * preserve.
+ */
+
+/**
  * b3/T3a (family C/EMMID): populates {@link ActivityEdgeGeo.emphasizeAt}
  * from the edge's OWN pre-compression `points` -- run once, before the X
  * compression pass, so every subsequent `transformEdge` call (X then Y)
