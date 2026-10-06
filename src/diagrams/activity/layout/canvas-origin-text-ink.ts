@@ -8,10 +8,13 @@
  * `computeCanvasOrigin` are the only callers.
  */
 
-import type { ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { measureLineWidth } from '../activity-text-placement.js';
+import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
+import { getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
 
 /**
@@ -73,4 +76,41 @@ export function extendForLaneDivider(
   if (swimlanes.length <= 1) return;
   acc.minY = Math.min(acc.minY, baseY);
   acc.maxY = Math.max(acc.maxY, contentMaxY);
+}
+
+/**
+ * T1b (`activity-divergence-drive-3`): an edge label's own ink.
+ * `Snake#drawInternalLabel` (`ftile/Snake.java:226-232`) draws the label
+ * through the SAME `UGraphic` the line segments draw through, so
+ * `LimitFinder#drawText` (`klimt/drawing/LimitFinder.java:216-224`) --
+ * NOT the generic box treatment every `ActivityNodeGeo` kind above gets
+ * -- is what actually sizes it: `y -= dim.height - 1.5` then the four
+ * corners of `[x, x+dim.width] x [y, y+dim.height]`, where `(x, y)` is
+ * the draw call's own baseline position (upstream's `UText` draws at
+ * its local origin, which `TextBlock.drawU(ug.apply(UTranslate.point
+ * (position)))` places at exactly `position`, this port's own
+ * `getTextBlockPosition` result -- `renderer.ts#renderEdgeLabel`'s own
+ * `baselineY` is the SAME formula, so this function mirrors it rather
+ * than re-deriving a second one). `Snake#getMaxX` (`Snake.java:234-242`)
+ * confirms a label is part of the Ftile's own geometry (not drawn
+ * floating outside it) -- this is the WIDER mechanism that makes that
+ * true in both axes, not just X.
+ */
+export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdgeGeo, theme: Theme): void {
+  // `edge.labelAlign === undefined` means this edge's push site has not
+  // been updated to carry its real `Snake#withLabel` alignment (T1a's
+  // census) -- `renderer.ts#renderEdgeLabel`'s own doc comment cites the
+  // measured blast-radius regression (`sojono-24-tufe806`) this guard
+  // closes; the two guards must stay in lockstep (both gate on the SAME
+  // field) or the ink scan and the actual draw would size the canvas for
+  // a label position the renderer never produces.
+  if (edge.label === undefined || edge.labelAlign === undefined) return;
+  const fontSize = activityFontSize(theme, 'arrow');
+  const width = measureLineWidth(theme, fontSize, edge.label);
+  const position = getTextBlockPosition(edge.points, { width, height: fontSize }, edge.labelAlign);
+  const baselineY = centeredFirstBaselineY(position.y + fontSize / 2, fontSize, 1);
+  acc.minX = Math.min(acc.minX, position.x);
+  acc.maxX = Math.max(acc.maxX, position.x + width);
+  acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
+  acc.maxY = Math.max(acc.maxY, baselineY + 1.5);
 }
