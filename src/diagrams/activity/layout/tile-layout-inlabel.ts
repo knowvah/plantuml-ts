@@ -64,6 +64,25 @@ export function withInLabel<T extends { inLabel?: PendingInLabel | undefined }>(
 }
 
 /**
+ * T1d: the SAME "mutate in place, return for chaining" pattern as
+ * {@link withInLabel}, for {@link Tile.outLabel} -- a trailing `->
+ * label;` a branch/case body's own `tileNodes` call never consumed
+ * (`TileNodesResult.trailing`, `tile-layout.ts`). Threaded by each
+ * compound builder onto the branch/case tile IT owns, not by
+ * `tileNodes` itself (unlike {@link withInLabel}, which `tileNodes`
+ * applies generically to whichever tile comes next -- the trailing
+ * value instead needs the CALLER's own branch-tile reference, which
+ * only the compound builder has).
+ */
+export function withOutLabel<T extends { outLabel?: PendingInLabel | undefined }>(
+  tile: T,
+  outLabel: PendingInLabel | undefined,
+): T {
+  if (outLabel !== undefined) tile.outLabel = outLabel;
+  return tile;
+}
+
+/**
  * `LimitFinder#drawText`'s own ink box (`klimt/drawing/LimitFinder.java:
  * 216-224`), computed at WALK time (pre-compression) over the edge's own
  * RAW points -- mirrors `canvas-origin-text-ink.ts#extendForEdgeLabelText`'s
@@ -103,11 +122,29 @@ function inLabelReservation(
  * height reservations add for this label survives compression.
  */
 export function applyInLabel(out: Out, tile: { readonly inLabel?: PendingInLabel }, align: SnakeTextAlign): void {
-  const inLabel = tile.inLabel;
-  if (inLabel === undefined) return;
+  applyPendingLabelToLastEdge(out, tile.inLabel, align);
+}
+
+/**
+ * {@link applyInLabel}'s OUT-side mirror, for {@link Tile.outLabel} --
+ * attaches a branch/case's own trailing label (`Branch#special`/
+ * `InstructionList#outlinkRendering`, {@link withOutLabel}'s own
+ * citations) to the edge the caller just pushed for that tile's OWN
+ * outgoing connection (`ConnectionVerticalOut`/`ConnectionLastElseOut`/
+ * `ConnectionOut`/`ConnectionVerticalBottom`-equivalent push sites).
+ */
+export function applyOutLabel(out: Out, tile: { readonly outLabel?: PendingInLabel }, align: SnakeTextAlign): void {
+  applyPendingLabelToLastEdge(out, tile.outLabel, align);
+}
+
+/** The body {@link applyInLabel}/{@link applyOutLabel} share: both sides
+ *  read a DIFFERENT field off the SAME kind of pending value and attach
+ *  it to the most-recently-pushed edge identically. */
+function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefined, align: SnakeTextAlign): void {
+  if (pending === undefined) return;
   const edge = out.edges[out.edges.length - 1]!;
-  edge.label = inLabel.label;
+  edge.label = pending.label;
   edge.labelAlign = align;
-  if (inLabel.color !== undefined) edge.color = inLabel.color;
-  out.reservations.push(inLabelReservation(edge.points, inLabel, align));
+  if (pending.color !== undefined) edge.color = pending.color;
+  out.reservations.push(inLabelReservation(edge.points, pending, align));
 }

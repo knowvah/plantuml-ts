@@ -56,6 +56,23 @@ export interface Tile {
    *   accessor every connector below reads from the tile it draws INTO.
    */
   readonly inLabel?: { label: string; color?: string };
+  /**
+   * T1d (`activity-divergence-drive-3`): the leftover pending `->
+   * label;` this tile's BODY never consumed before its own node list
+   * ended -- i.e. a trailing arrow-label right before `elseif`/`else`/
+   * `endif`/`split again`/`end split`/`case`/`endswitch`. Threaded from
+   * `tileNodes`'s own return value ({@link TileNodesResult.trailing})
+   * onto the branch/case tile that owns that body, by each compound
+   * builder that reads it at its OWN Java attachment point (never a
+   * generic push site, unlike {@link inLabel} -- the attaching
+   * connector differs per compound kind).
+   * @see net/sourceforge/plantuml/activitydiagram3/Branch.java:222-229
+   *   -- `setSpecial`/`getSpecial()`, the if/switch mechanism.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:228-232
+   *   -- `outlinkRendering`/`setOutRendering`, the fork/split mechanism
+   *   (`InstructionFork.java:183-191`, `InstructionSplit.java:128-142`).
+   */
+  readonly outLabel?: { label: string; color?: string };
   getCoord(hook: HookName): GPoint;
   /**
    * Whether this tile has an outgoing connection point that a later
@@ -82,6 +99,7 @@ export abstract class TileLeaf implements Tile {
   swimlane?: string;
   swimlaneOut?: string;
   inLabel?: { label: string; color?: string };
+  outLabel?: { label: string; color?: string };
 
   /**
    * Default `true` rather than `abstract`: every production `gtile-*.ts`
@@ -107,6 +125,7 @@ export abstract class TileComposite implements Tile {
   swimlane?: string;
   swimlaneOut?: string;
   inLabel?: { label: string; color?: string };
+  outLabel?: { label: string; color?: string };
 
   /**
    * Default `true` for the same reason as `TileLeaf.hasPointOut` above:

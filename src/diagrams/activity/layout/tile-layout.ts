@@ -24,6 +24,7 @@ import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, selectRepeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
 import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
 import { consumeArrowLabel, withInLabel } from './tile-layout-inlabel.js';
+import type { PendingInLabel } from './tile-layout-inlabel.js';
 import { isEarlyLeafKind, isSimpleLeaf, tileEarlyLeaf, tileSimpleLeaf } from './tile-layout-leaves.js';
 
 // Re-export geometry types so renderer and index can import from one place.
@@ -108,13 +109,28 @@ function withKilled<T extends Tile>(tile: T): T {
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:169-174
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionSimple.java:123-127
  */
+/**
+ * T1d: {@link tileNodes}'s own return shape -- `tiles` is the SAME
+ * `Tile[]` every pre-T1d caller used positionally; `trailing` is the
+ * leftover `pendingInLabel` still unconsumed when the loop ran out of
+ * nodes (a `-> label;` that was the LAST thing in this body, with
+ * nothing after it to attach to) -- `Branch#special`/`InstructionList
+ * #outlinkRendering`'s own pending value, surfaced to the caller instead
+ * of silently falling out of scope (`tiles/tile.ts#Tile.outLabel`'s own
+ * doc names the two upstream fields this maps to per compound kind).
+ */
+export interface TileNodesResult {
+  readonly tiles: Tile[];
+  readonly trailing: PendingInLabel | undefined;
+}
+
 export function tileNodes(
   nodes: ActivityNode[],
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[] = [],
   pragma: Pragma = Pragma.createEmpty(),
-): Tile[] {
+): TileNodesResult {
   const tiles: Tile[] = [];
   // T1b pass 2: `nextLinkRenderer()`'s pending state
   // (`ActivityDiagram3.java:105-106`) -- set by an `arrow-label` node,
@@ -142,7 +158,7 @@ export function tileNodes(
       tiles.push(t);
     }
   }
-  return tiles;
+  return { tiles, trailing: pendingInLabel };
 }
 
 /**
@@ -198,7 +214,7 @@ function tileWhile(
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
   const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma).tiles;
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const specialOutTile = node.specialOut !== undefined ? tileSimpleLeaf(node.specialOut, bounder, theme) : undefined;
@@ -295,7 +311,7 @@ function tileRepeat(
 ): GtileRepeat {
   const entry = tileRepeatEntry(node, bounder, theme, laneOrder, pragma);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma).tiles;
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const labels = selectRepeatConditionLabels(theme.conditionStyle, node, backward, laneOrder);
@@ -328,7 +344,7 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   // defaulted here only for hand-built AST literal fixtures (`ast.ts`'s
   // own doc comment on the field).
   const pragma = ast.pragma ?? Pragma.createEmpty();
-  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes, pragma);
+  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes, pragma).tiles;
   const root = new GtileTopDown(tiles, bounder, theme);
   // D2 (`plans/activity-divergence-drive/decisions.md`): the root Ftile's
   // own local coordinates start at the true origin -- upstream never bakes
