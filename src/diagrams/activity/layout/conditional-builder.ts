@@ -198,8 +198,14 @@ function countIfSwimlanes(node: ActivityIf): number {
   return acc.size;
 }
 
+// A trailing `-> label;` on either branch is discarded here, not wired:
+// confirmed by grep (`getSpecial` appears nowhere in `cond/
+// FtileIfWithLinks.java`) that the `with-links` builder never reads
+// `Branch#special` -- `out2` is hardcoded `null` at both of its
+// construction sites (`FtileIfWithLinks.java:548-549`, already noted
+// NOT APPLICABLE by `.agent-notes/add3-T1b.md` row 29).
 function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): IfWithLinksBranch {
-  const tiles = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
+  const { tiles } = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
@@ -346,9 +352,12 @@ function applyIfDownSwimlaneOut(result: GtileIfDown, optionalStop: Tile | null, 
 
 /** `new GtileTopDown(tileNodes(nodes, ...), bounder, theme)` -- split out
  *  of {@link buildIfDown} only to keep that function's own NLOC under the
- *  file's limit (the `ctx` bundling above added two call sites back). */
+ *  file's limit (the `ctx` bundling above added two call sites back).
+ *  A trailing `-> label;` is discarded here too, same grep-confirmed
+ *  reason as {@link toBranchTile}: `FtileIfDown.java` never reads
+ *  `Branch#special` either. */
 function branchBodyTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
-  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme);
+  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma).tiles, bounder, theme);
 }
 
 function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dispatch: IfBuilderResult, ctx: IfLayoutCtx): Tile {

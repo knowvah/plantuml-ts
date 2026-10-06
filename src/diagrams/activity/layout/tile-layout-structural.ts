@@ -7,7 +7,15 @@
  * comments, same call sites (now imported).
  */
 
-import type { ActivityFork, ActivityGroup, ActivityNode, ActivityNote, ActivitySplit, ActivitySwitch } from '../ast.js';
+import type {
+  ActivityFork,
+  ActivityGroup,
+  ActivityNode,
+  ActivityNote,
+  ActivitySplit,
+  ActivitySwitch,
+  ActivitySwitchCase,
+} from '../ast.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { Pragma } from '../../../core/skin/Pragma.js';
@@ -23,7 +31,7 @@ import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
-import { withInLabel } from './tile-layout-inlabel.js';
+import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator
@@ -112,11 +120,27 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
  * (`tile-layout.ts`'s own doc), and a branch's own entry label (a `->
  * label;` right after `fork`/`fork again`/`split`/`also`) is the FIRST
  * node of `b`, not a sibling of the wrapper.
+ *
+ * T1d rows 21/22/27/28: the SAME wrapper's {@link Tile.outLabel} carries
+ * `tileNodes`'s own `trailing` -- a `-> label;` that was the LAST thing
+ * in this branch's body, right before `fork again`/`split again`/`end
+ * fork`/`end split`. `InstructionFork#manageOutRendering`/
+ * `InstructionSplit#splitAgain`/`#endSplit` both call `getLastList()
+ * .setOutRendering(nextLinkRenderer)` (`InstructionFork.java:183-191`,
+ * `InstructionSplit.java:128-142`) -- the SAME pending-state machine as
+ * row 1, captured at the branch's own CLOSE instead of its open.
+ * `walk-fork-branches.ts#pushBranchOut` (shared verbatim by fork AND
+ * split) reads it off this exact object.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderFork.java:124,197
+ *   -- `ConnectionOut`'s `label = ftile1.getOutLinkRendering().getDisplay()`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:160-161
+ *   -- same accessor, split's own `ConnectionOut`.
  */
 function buildBranchTopDown(b: ActivityNode[], bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): GtileTopDown {
-  const tiles = tileNodes(b, bounder, theme, laneOrder, pragma);
+  const { tiles, trailing } = tileNodes(b, bounder, theme, laneOrder, pragma);
   const topDown = new GtileTopDown(tiles, bounder, theme);
-  return withInLabel(topDown, tiles[0]?.inLabel);
+  withInLabel(topDown, tiles[0]?.inLabel);
+  return withOutLabel(topDown, trailing);
 }
 
 export function tileFork(
@@ -161,6 +185,31 @@ export function tileSplit(
  * `GtileIfHexagon`'s own `shape2` (always built and drawn, independent of
  * whether any case continues).
  */
+/**
+ * T1d row 32: a case's own trailing `-> label;` (right before the NEXT
+ * `case (...)`/`endswitch`) is `Branch#special`, set via
+ * `InstructionSwitch#switchCase`/`#endSwitch` (`InstructionSwitch.java:
+ * 166-183`) at that keyword's own dispatch -- the SAME mechanism as the
+ * if-builder's branch-exit label (`buildBranchTopDown`'s own doc above),
+ * read here from `tileNodes`'s own `trailing` instead of the CASE
+ * builder's fallthrough. `walk-switch.ts#pushCaseToMergeEdge` applies it
+ * to the case-to-merge edge with `VerticalAlignment.CENTER`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileSwitchWithManyLinks.java:454-462
+ *   -- `ConnectionVerticalBottom`/`ConnectionVerticalThenHorizontal`,
+ *   both reading `branches.get(i).getTextBlockSpecial()`.
+ */
+function tileSwitchCase(
+  kase: ActivitySwitchCase,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): { tile: GtileTopDown; label?: string } {
+  const { tiles, trailing } = tileNodes(kase.body, bounder, theme, laneOrder, pragma);
+  const tile = withOutLabel(new GtileTopDown(tiles, bounder, theme), trailing);
+  return kase.label !== undefined ? { tile, label: kase.label } : { tile };
+}
+
 export function tileSwitch(
   node: ActivitySwitch,
   bounder: StringBounder,
@@ -169,10 +218,7 @@ export function tileSwitch(
   pragma: Pragma,
 ): GtileSwitch {
   const diamond = new GtileDiamond(node.condition, bounder, theme);
-  const cases = node.cases.map((kase) => {
-    const tile = new GtileTopDown(tileNodes(kase.body, bounder, theme, laneOrder, pragma), bounder, theme);
-    return kase.label !== undefined ? { tile, label: kase.label } : { tile };
-  });
+  const cases = node.cases.map((kase) => tileSwitchCase(kase, bounder, theme, laneOrder, pragma));
   const mergeDiamond = new GtileDiamond('', bounder, theme);
   return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
 }
@@ -198,7 +244,7 @@ export function tileGroup(
   laneOrder: readonly string[],
   pragma: Pragma,
 ): Tile {
-  const body = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder, pragma), bounder, theme);
+  const body = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder, pragma).tiles, bounder, theme);
   const tile =
     node.groupType === 'group'
       ? new GtileGroup(node.title, body, bounder, theme)

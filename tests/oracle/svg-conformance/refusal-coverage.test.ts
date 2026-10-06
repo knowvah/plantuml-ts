@@ -783,7 +783,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6337 -> 6336 / 6107 -> 6106 / 230 at add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
     // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
     // Derivation: 6106 + 230 = 6336.
-    expect(manifest.fixtures.length).toBe(6336);
+    // 6336 -> 6349 / 6106 -> 6119 / 230 at add3/close-b1 (2026-10-06): 13
+    // svg-activity clone rows. Derivation: 6119 + 230 = 6349.
+    expect(manifest.fixtures.length).toBe(6349);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -839,7 +841,8 @@ describe('refusal coverage — baseline shape', () => {
     // 5980 -> 6089 at add2/close-b3w1 (109 svg-activity clones).
     // 6089 -> 6107 at add2/close-b3 (18 svg-activity clones).
     // 6107 -> 6106 at add3/T0a (`tmp1` retired, D9).
-    expect(pinnedRendering.length).toBe(6106);
+    // 6106 -> 6119 at add3/close-b1 (13 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6119);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

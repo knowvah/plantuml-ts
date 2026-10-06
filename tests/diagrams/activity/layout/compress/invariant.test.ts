@@ -139,7 +139,7 @@ function layoutBeforeAfter(markup: string, measurer: DeterministicMeasurer): Bef
   if (ast.nodes.length === 0) return null;
 
   const bounder = makeBounder(measurer, theme);
-  const tiles = tileNodes(ast.nodes, bounder, theme);
+  const tiles = tileNodes(ast.nodes, bounder, theme).tiles;
   const root = new GtileTopDown(tiles, bounder, theme);
   const before = assignCoordinatesFull({
     root,

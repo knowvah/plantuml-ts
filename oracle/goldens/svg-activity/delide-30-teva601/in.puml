@@ -1,0 +1,15 @@
+@startuml
+|1st Swimlane|
+|2nd Swimlane|
+start
+:Activity 1;
+|1st Swimlane|
+repeat :Activity 2;
+
+|2nd Swimlane|
+backward :Correction in second;
+
+|1st Swimlane|
+repeat while (Something wrong?) is (yes) not (no);
+stop
+@enduml

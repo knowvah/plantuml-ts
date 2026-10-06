@@ -83,7 +83,7 @@ paths; report to `.agent-notes/<ID>.md`. Parallel tasks run in worktrees from
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
 | [0](batch-0/overview.md) | branch, b0, tmp1 retire, url seam, cohort census | T0a, T0b, T0c, T0d | ∥ | [x] |
-| [1](batch-1/overview.md) | label/translate census, Snake labels, XLANE | T1a → T1b → T1c | serial | [ ] |
+| [1](batch-1/overview.md) | label/translate census, Snake labels, XLANE | T1a → T1b → T1c | serial | [x] |
 | [2](batch-2/overview.md) | notes, embedded `{{ }}`, klimt, small items | T2a–T2d | ∥ | [ ] |
 | [3](batch-3/overview.md) | drive round (written at b2 close) | — | waves | [ ] |
 | [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
