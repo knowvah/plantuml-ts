@@ -84,3 +84,59 @@ went from 354/514/354/396/354 to 0 diffs each. Their pins in
   - The `(E)` connector is text where the jar draws a glyph.
   - The floating-note spike.
 - **taredi SWIMLANE-GATE:** not mine (wave 2). See the riser section.
+
+## Follow-up: SWIMLANE-GATE on add4/T2a (orchestrator request; 3b560d2d6 kept)
+
+### Commit
+- `d5765de3d` fix(add4-T2a): gate vertical-if diamonds and connections by swimlane
+
+### Java -> ours
+| mechanism | Java | ours |
+|---|---|---|
+| composite `getSwimlanes()` = swimlaneIn + tiles + tile2 lanes, never the diamonds' lane | `FtileIfLongVertical.java:111-121` | `walk-if-long-vertical.ts` `compositeSwimlanes` (reuses `tile-coordinates-group.ts#collectTouchedLanes`) |
+| child Ftile drawn only in lanes its set shares with the active set | `UGraphicInterceptorAllSwimlanes.java:63-79`, `UGraphicInterceptorOneSwimlane.java:68-75` | `childDrawn` (diamonds, lastDiamond, their labels) |
+| Connection drawn in lane L iff tile1 out / tile2 in are null or L | `UGraphicInterceptorAllSwimlanes.java:129-143`, `UGraphicInterceptorOneSwimlane.java:93-104` | `connectionDrawn` / `pushGatedEdge`; ConnectionIn is `super(null, diamonds[0])` (`:211`) so lane1 = undefined. An undrawn Snake's label is never attached |
+| no Cross-pass fallback: these conns are not ConnectionTranslatable | `Swimlanes.java:178-200`, `ConnectionCross.java:49-64` | (no cross-lane edge emitted) |
+| `getSwimlaneIn()` = `tiles[0].getSwimlaneIn()`, `getSwimlaneOut()` = `getSwimlaneIn()` | `FtileIfLongVertical.java:123-129` | `swimlane-lanes.ts` `laneIn`/`laneOut`, kind `gtile-if-long-vertical` |
+
+- The gate is inactive when the diagram has no lanes, so non-swimlane output is unchanged.
+- `swimlane-placement.ts` and `swimlane-context.ts` were not needed. Lane widths follow from the nodes and edges no longer emitted, through the existing measure. I did not merge `feat/activity-divergence-drive-4` (T2c), because I touched neither file.
+
+### taredi-65-vero960
+| | before (3b560d2d6) | after the gate only | after the gate + laneIn |
+|---|---|---|---|
+| score | 335 | 10 | 0 |
+| element delta | polygon +10, line +19, text +5 | {} | {} |
+| lanes A/B/C/D/E width | 74.7 / 120.966 / 74.7 / 74.7 / 74.7 | | 74.7 / 62.088 / 74.7 / 74.7 / 74.7 (= jar) |
+| svg width x height | 465 x 423 | | 406 x 321 (= jar) |
+
+- The 10 left after the gate alone was the outer cross-lane connector landing at the lane-B pointIn x (204.709). The jar lands it at 148.522. Porting `getSwimlaneIn()` closed it.
+
+### Probe Σ
+4786 (3b560d2d6) -> 4451 (d5765de3d). No other row moved.
+
+### Risers
+None. taredi falls 335 -> 0. The diff-baseline ratchet is green again.
+
+### Census movers (d5765de3d, all to jar)
+| row | gate | field | before -> after | jar |
+|---|---|---|---|---|
+| taredi | style | width | 465 -> 406 | 406 |
+| taredi | style | height | 423 -> 321 | 321 |
+| taredi | style | textCount | 14 -> 9 | 9 |
+| taredi | style | fontSize 11 | 5 -> 0 | absent |
+| taredi | style | strokeWidth 1 | 26 -> 7 | 7 |
+| taredi | text | textCount | 14 -> 9 | 9 |
+| taredi | swimlane | dividerXs | -> [20, 94.7, 156.788, 231.488, 306.188, 380.888] | same |
+| taredi | swimlane | lanes, bandRect, titles | (to jar) | same |
+
+The bejeta and divinu movers from 3b560d2d6 are unchanged and equal the jar.
+
+### Tests and fixtures
+- New authored fixtures with jar goldens (`scripts/oracle-render.sh`) in `tests/fixtures/activity/add4-T2a/`:
+  - `vif-lane-gate` scored 342 before this commit and 0 after.
+  - `vif-lane-mixed` scored 84 before and 0 after.
+- Tests: `tests/diagrams/activity/layout/walk-if-long-vertical-lanes.test.ts`, plus `swimlane-lanes.test.ts` cases.
+- Gates:
+  - Green: golden ratchet, harness-parity, compress invariant, diff-baseline ratchet, `tests/diagrams/activity` (1274), typecheck, eslint.
+  - Red, as expected: the style, text and swimlane census pins for bejeta, divinu and taredi. Every mover equals the jar, so they need a re-pin.
