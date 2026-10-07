@@ -901,10 +901,13 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5537 -> 5544 / 6522 -> 6529 at add4/merge-T2a: 7
     // svg-activity clone rows (zero-diff pins). Derivation: 5544 + 875 + 110 = 6529.
-    expect(pinnedAgree.length).toBe(5544);
+    //
+    // 5544 -> 5566 / 6529 -> 6551 at add4/merge-T2d: 22
+    // svg-activity clone rows (zero-diff pins). Derivation: 5566 + 875 + 110 = 6551.
+    expect(pinnedAgree.length).toBe(5566);
     expect(pinnedMisroutes.length).toBe(875);
     expect(pinnedJarErrors.length).toBe(110);
-    expect(manifest.fixtures.length).toBe(6529);
+    expect(manifest.fixtures.length).toBe(6551);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

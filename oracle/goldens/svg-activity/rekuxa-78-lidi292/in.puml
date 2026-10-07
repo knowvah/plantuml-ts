@@ -1,0 +1,17 @@
+@startuml
+start
+title Number Analysis
+switch (source)
+
+case ( a )
+:case1;
+
+case ( b )
+:case2;
+end
+
+case ( c )
+:case3;
+
+endswitch
+@enduml

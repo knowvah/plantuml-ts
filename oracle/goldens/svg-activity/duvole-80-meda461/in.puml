@@ -1,0 +1,19 @@
+@startuml
+start
+switch (source)
+
+case ( a )
+:case1;
+
+case ( b )
+:case2;
+
+case ( c )
+:case3;
+detach
+'kill
+
+endswitch
+:...;
+
+@enduml

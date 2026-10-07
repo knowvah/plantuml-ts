@@ -1,0 +1,10 @@
+@startuml
+start
+switch (color)
+case (red)
+  :Text 1;
+case (blue)
+  :Text 2;
+endswitch
+stop
+@enduml
