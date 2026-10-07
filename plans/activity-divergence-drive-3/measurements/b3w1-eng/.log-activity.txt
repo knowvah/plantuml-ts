@@ -1,0 +1,16 @@
+surveying 372 activity fixtures (concurrency 6)
+  25/372
+  50/372
+  75/372
+  100/372
+  125/372
+  150/372
+  175/372
+  200/372
+  225/372
+  250/372
+  275/372
+  300/372
+  325/372
+  350/372
+wrote plans/activity-divergence-drive-3/measurements/b3w1-eng/parity-activity.json — {"conformant":284,"structural-match":30,"diverged":58,"errored":0,"timeout":0,"oracle-error":0}
