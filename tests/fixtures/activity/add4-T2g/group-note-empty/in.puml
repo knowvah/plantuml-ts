@@ -1,0 +1,7 @@
+@startuml
+start
+rectangle E {
+}
+note left: n after empty
+stop
+@enduml

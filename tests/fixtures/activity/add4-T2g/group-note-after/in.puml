@@ -1,0 +1,8 @@
+@startuml
+start
+partition P {
+:a;
+}
+note right: n after partition
+stop
+@enduml

@@ -155,9 +155,33 @@ export interface MutableInkBounds {
   maxY: number;
 }
 
+/**
+ * add4-T2g: the ink a `package`/`card` frame draws, which differs from the
+ * `USymbolFrame`/`USymbolRectangle` `URectangle` every other container
+ * draws (`FtileGroup.java:218-220` -> `type.asBig(...).drawU`):
+ *  - `package` (`USymbols.PACKAGE`, `USymbols.java:86`) is `USymbolFolder`'s
+ *    `UPolygon` when `roundCorner == 0` (`USymbolFolder.java:84-93`), which
+ *    `drawUPolygon` pads by `HACK_X_FOR_POLYGON` on X only, Y exact
+ *    (`LimitFinder.java:168-177`); the title `hline` lies inside it
+ *    (`USymbolFolder.java:123`).
+ *  - `card` (`USymbols.CARD`, `USymbols.java:69`) is `USymbolCard`'s
+ *    `URectangle` PLUS a full-width `ULine.hline(width)`
+ *    (`USymbolCard.java:61-67`); `drawULine` records `x + dx` exactly
+ *    (`LimitFinder.java:179-182`), one px past the rectangle's `x + width -
+ *    1` (`:184-188`), so the far X is exact and the near X stays the
+ *    rectangle's.
+ * `undefined` for every kind that keeps its {@link fudgeX}/{@link fudgeY}.
+ */
+function compositeFudge(node: ActivityNodeGeo): { x: ShapeFudge; y: ShapeFudge } | undefined {
+  if (node.usymbol === 'package') return { x: POLYGON_FUDGE_X, y: NO_FUDGE };
+  if (node.usymbol === 'card') return { x: { near: RECT_FUDGE.near, far: NO_FUDGE.far }, y: RECT_FUDGE };
+  return undefined;
+}
+
 function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   if (isInkless(node.kind)) return;
-  const fx = fudgeX(node.kind);
+  const composite = compositeFudge(node);
+  const fx = composite?.x ?? fudgeX(node.kind);
   acc.minX = Math.min(acc.minX, node.x - fx.near);
   acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
   if (node.kind === 'if-label') {
@@ -169,7 +193,7 @@ function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Them
     acc.maxY = Math.max(acc.maxY, node.y);
     return;
   }
-  const fy = fudgeY(node.kind);
+  const fy = composite?.y ?? fudgeY(node.kind);
   acc.minY = Math.min(acc.minY, node.y - fy.near);
   acc.maxY = Math.max(acc.maxY, node.y + node.height + fy.far);
 }

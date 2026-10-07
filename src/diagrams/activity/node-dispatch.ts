@@ -48,9 +48,9 @@ import {
   pushParsedNode,
 } from './list-backward-dispatch.js';
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
-import { tryOpenSwitch } from './switch-dispatch.js';
+import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
-import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
+import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
 
 // ---------------------------------------------------------------------------
@@ -231,12 +231,16 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
     if (endwhileMatch !== null) exitLabel = endwhileMatch[1]?.trim();
     cursor++;
   }
+  // `InstructionWhile#addNote` (`InstructionWhile.java:162-167`): a note
+  // while `repeatList` is still empty is the while's OWN note.
+  const { body, notes } = extractLeadingCaseNotes(bodyResult.nodes);
   const node: ActivityWhile = {
     kind: 'while',
     condition,
     ...(yesLabel !== undefined && yesLabel !== '' ? { yesLabel } : {}),
     ...(exitLabel !== undefined && exitLabel !== '' ? { exitLabel } : {}),
-    body: bodyResult.nodes,
+    body,
+    ...(notes.length > 0 ? { notes } : {}),
     ...openerSwimlane,
   };
   return { idx: cursor, node };
@@ -435,6 +439,16 @@ function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string):
   return refuse('syntax', idx, idx, 'Syntax Error?');
 }
 
+/** {@link pushParsedNode} plus the closed-group note redirect (add4-T2g,
+ *  `note-dispatch.ts#redirectNoteOntoGroup`); kept here because
+ *  `list-backward-dispatch.ts` is not this task's file and a cycle through
+ *  `note-dispatch.ts` is avoided. */
+function pushNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
+  if (node?.kind === 'note' && (redirectNoteOntoGroup(nodes, node, pushNode) || redirectNoteOntoWhile(nodes, node, pushNode)))
+    return;
+  pushParsedNode(nodes, node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+}
+
 /** Read nodes from `ctx.lines` from `idx` until a trimmed lowercase line
  *  matches one of `stops`, end-of-input, or a `ParseRefusal` surfaces from
  *  `dispatchLine` -- which this function propagates unchanged rather than
@@ -473,7 +487,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
 
     const result = dispatchLine(ctx, cursor, line, lc);
     if (isRefusal(result)) return result;
-    pushParsedNode(nodes, result.node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+    pushNode(nodes, result.node);
     cursor = result.idx;
   }
 

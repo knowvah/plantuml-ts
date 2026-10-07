@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1402 modules · 5284 exported names.
+1402 modules · 5287 exported names.
 
 ## `src/`
 
@@ -1070,7 +1070,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `ActivityPluginGeometry`, `hasActivityChrome`, `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `list-backward-dispatch.ts` | `nodeListContainsBreak`, `pushParsedNode`, `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
 | `node-dispatch.ts` | `swimlaneDisplaysOf`, `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
-| `note-dispatch.ts` | `tryNoteSingle`, `tryNoteMulti`, `redirectNoteOntoSwitch` | The two note line-shapes of `node-dispatch.ts`'s dispatch chain (`CommandNote3`/`CommandNoteLong3`), moved verbatim into a sibling module when add4-T1c's colour capture would have taken that file past the 500-line cap (mission convention: a |
+| `note-dispatch.ts` | `tryNoteSingle`, `tryNoteMulti`, `redirectNoteOntoSwitch`, `redirectNoteOntoGroup`, `redirectNoteOntoWhile` | The two note line-shapes of `node-dispatch.ts`'s dispatch chain (`CommandNote3`/`CommandNoteLong3`), moved verbatim into a sibling module when add4-T1c's colour capture would have taken that file past the 500-line cap (mission convention: a |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |
@@ -1131,7 +1131,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `tile-layout-backward.ts` | `extractBackward`, `withBackLabels`, `backwardExitsOnLeft`, `repeatConditionLabels`, `repeatConditionLabelsSquare`, `selectRepeatConditionLabels` | Pure AST-level helpers for `FtileRepeat`/`FtileWhile`'s optional `backward:LABEL;` activity, split out of `tile-layout.ts` only to keep that file under the project's 500-line cap (mission `activity- divergence-drive` T3h, push-forward -- th |
 | `tile-layout-inlabel.ts` | `PendingInLabel`, `consumeArrowLabel`, `withInLabel`, `withOutLabel`, `applyInLabel`, `applyOutLabel` | T1b pass 2 (`activity-divergence-drive-3`): the generic `-> label;` mechanism, split out of `tile-layout.ts` only to keep that file under the 500-line hook (mission convention, "a sibling module when a file would cross the hook" -- the same |
 | `tile-layout-leaves.ts` | `isSimpleLeaf`, `isEarlyLeafKind`, `tileEarlyLeaf`, `tileSimpleLeaf` | `tileNode`'s simple-leaf and early-leaf dispatch, split out of `tile-layout.ts` only to keep that file under the 500-line hook (mission convention, "a sibling module when a file would cross the hook" -- the same reasoning `tile-layout-backw |
-| `tile-layout-structural.ts` | `tileNote`, `tileFork`, `tileSplit`, `tileSwitch`, `tileGroup` | `tileFork`/`tileSplit`/`tileSwitch`/`tileGroup` -- split out of `tile-layout.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (threading a `pragma` parameter through every `tileX` builder, mirroring `laneOrder`'s ow |
+| `tile-layout-structural.ts` | `tileNote`, `tileFork`, `tileSplit`, `wrapWhileNotes`, `tileSwitch`, `tileGroup` | `tileFork`/`tileSplit`/`tileSwitch`/`tileGroup` -- split out of `tile-layout.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (threading a `pragma` parameter through every `tileX` builder, mirroring `laneOrder`'s ow |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `withSwimlane`, `withSwimlaneOut`, `TileNodesResult`, `tileNodes`, `layoutActivity` |  |
 | `walk-fork-branches.ts` | `ForkBranchContext`, `computeSplitExtent`, `isInsideForkBody`, `walkForkBranches`, `walkForkOrSplit`, `walkMerge` |  |
 | `walk-if-down.ts` | `walkIfDown` | The `'gtile-if-down'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch (mission `activity-if-tile-port` D5: one walker module per builder, one function per Java `Connection`). |

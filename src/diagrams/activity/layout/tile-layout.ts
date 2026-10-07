@@ -24,7 +24,7 @@ import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, selectRepeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
-import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
+import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote, wrapWhileNotes } from './tile-layout-structural.js';
 import { consumeArrowLabel, withInLabel } from './tile-layout-inlabel.js';
 import type { PendingInLabel } from './tile-layout-inlabel.js';
 import { isEarlyLeafKind, isSimpleLeaf, tileEarlyLeaf, tileSimpleLeaf } from './tile-layout-leaves.js';
@@ -421,7 +421,7 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
     case 'if':
       return tileIf(node, bounder, theme, laneOrder, pragma);
     case 'while':
-      return tileWhile(node, bounder, theme, laneOrder, pragma);
+      return wrapWhileNotes(tileWhile(node, bounder, theme, laneOrder, pragma), node.notes, bounder, theme);
     case 'repeat':
       return tileRepeat(node, bounder, theme, laneOrder, pragma);
     case 'fork':

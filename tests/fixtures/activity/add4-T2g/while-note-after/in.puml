@@ -1,0 +1,8 @@
+@startuml
+start
+while (true)
+  :Do Something;
+end while
+note right: n after endwhile
+stop
+@enduml

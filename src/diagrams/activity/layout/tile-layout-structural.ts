@@ -299,14 +299,35 @@ function tileSwitchCase(
  * `FLOATING_NOTE`, `:132-133`). The only TOP-aligned caller upstream.
  */
 function wrapSwitchNotes(tile: Tile, notes: readonly ActivityNote[], bounder: StringBounder, theme: Theme): Tile {
+  return wrapOwnNotes(tile, notes, bounder, theme, { alignment: 'top', link: true });
+}
+
+/** `FtileWithNoteOpale.create(tile, notes, withLink, alignment)`
+ *  (`FtileWithNoteOpale.java:113-122`), the wrap every `WithNote` container
+ *  applies to its own notes: 2+ notes collect into ONE `FtileWithNotes`, one
+ *  note is an Opale (spikeless when `withLink` is false or the note is a
+ *  `FLOATING_NOTE`, `:132-133`). */
+function wrapOwnNotes(
+  tile: Tile,
+  notes: readonly ActivityNote[],
+  bounder: StringBounder,
+  theme: Theme,
+  how: { readonly alignment?: 'top'; readonly link: boolean },
+): Tile {
   if (notes.length === 0) return tile;
   if (notes.length > 1) {
     const entries: WithNotesEntry[] = notes.map((n) => ({ text: n.text, position: n.position, color: n.color }));
-    return new GtileWithNotes(tile, entries, bounder, theme, 'top');
+    return new GtileWithNotes(tile, entries, bounder, theme, how.alignment);
   }
   const note = notes[0]!;
   const noteTile = tileSimpleLeaf(note, bounder, theme) as GtileNote;
-  return new GtileNoteOpale(tile, noteTile, note.floating !== true, 'top');
+  return new GtileNoteOpale(tile, noteTile, how.link && note.floating !== true, how.alignment);
+}
+
+/** `InstructionWhile#createFtile` (`InstructionWhile.java:126-127`): the
+ *  while's own notes wrap the whole loop, `withLink = false`, CENTER. */
+export function wrapWhileNotes(tile: Tile, notes: readonly ActivityNote[] | undefined, bounder: StringBounder, theme: Theme): Tile {
+  return wrapOwnNotes(tile, notes ?? [], bounder, theme, { link: false });
 }
 
 export function tileSwitch(
