@@ -260,23 +260,46 @@ describe('renderSpot (mission add2-T2g)', () => {
     expect(svg).toContain(`stroke="${theme.colors.border}"`);
   });
 
-  it('draws the circled character as a <text>, centred, at the root font size 14', () => {
+  // T3g: a captured letter (A/B/G) now draws the jar's own AWT glyph
+  // OUTLINE as a `<path>`, not a `<text>` substitute -- see
+  // `activity-spot-glyph-data.ts`'s doc comment for the scraped-fixture
+  // citation and `activity-spot-glyph.ts#spotGlyphPath` for the translate.
+  it('draws the circled character as a jar-scraped <path>, never <text>', () => {
     const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
     const svg = renderSpot(node, theme);
-    expect(svg).toContain('>A</text>');
-    expect(svg).toContain('font-size="14"');
-    // Centred: x = cx - charWidth/2, not the circle's own left edge.
-    const charWidth = measureLineWidth(theme, 14, 'A');
-    const expectedX = 60 - charWidth / 2;
-    const m = /<text x="([\d.]+)"/.exec(svg);
-    expect(m).not.toBeNull();
-    expect(Number(m![1])).toBeCloseTo(expectedX, 2);
+    expect(svg).not.toContain('<text');
+    expect(svg).toContain(
+      'd="M61.432,60.631 L59.709,56.27 L57.98,60.631 Z M62.95,64.5 L61.849,61.697 L57.563,61.697 ' +
+        'L56.449,64.5 L55.116,64.5 L59.128,54.383 L60.55,54.383 L64.501,64.5 Z"',
+    );
+    // `#000000` shortens to `#000` at emission (`shortenColor`) -- byte-
+    // identical to every scraped fixture's own glyph `fill` attribute.
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+    expect(svg).toContain('fill="#000"');
   });
 
-  it('draws no <text> at all when the character is empty', () => {
+  it('resolves the letter case-insensitively (lowercase parses to the same captured glyph)', () => {
+    const upper = renderSpot(makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' }), theme);
+    const lower = renderSpot(makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'a' }), theme);
+    expect(lower).toBe(upper);
+  });
+
+  // An UNCAPTURED letter falls back to upstream's own deterministic-text
+  // branch geometry (`DriverCenteredCharacterSvg.java:64-69`) rather than
+  // drawing nothing -- `activity-spot-glyph.ts`'s own doc comment.
+  it('falls back to upstream\'s deterministic <text> geometry for an uncaptured letter', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'Z' });
+    const svg = renderSpot(node, theme);
+    expect(svg).not.toContain('<path');
+    expect(svg).toContain('<text x="55" y="65" font-family="monospace" font-size="14"');
+    expect(svg).toContain('>Z</text>');
+  });
+
+  it('draws no glyph element at all when the character is empty', () => {
     const node = makeNode({ kind: 'spot', width: 20, height: 20, label: '' });
     const svg = renderSpot(node, theme);
     expect(svg).not.toContain('<text');
+    expect(svg).not.toContain('<path');
   });
 });
 

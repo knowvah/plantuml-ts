@@ -4,24 +4,21 @@
  * `activity-renderer-shapes.ts` (T1c, 500-line hook) -- re-exported from
  * there so existing import sites are unchanged (same "pure-move re-export"
  * pattern as `activity-renderer-signal-shapes.ts`, which this file mirrors
- * by importing {@link actColors}/{@link centeredFirstBaselineY} back from
- * the main shapes module).
+ * by importing {@link actColors} back from the main shapes module).
  */
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
+import { ellipse, line, path, resolvePaint, text, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, STOP_INNER_DELTA } from './activity-layout-constants.js';
 import {
   CIRCLE_END_LINE_THICKNESS,
   CIRCLE_INK,
   CIRCLE_LINE_THICKNESS,
   ELEMENT_LINE_THICKNESS,
-  activityFontSize,
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { measureLineWidth } from './activity-text-placement.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { spotGlyphPath } from './activity-spot-glyph.js';
+import { actColors } from './activity-renderer-shapes.js';
 
 /**
  * `circle { start, stop, end { LineColor #2 } } }` (`plantuml.skin:379-380`
@@ -204,15 +201,20 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
  * tier instead (`plantuml.skin:93`). Verified against the jar's own SVG
  * (`vilecu-41-tete416`: `stroke:#181818;stroke-width:0.5`), not assumed.
  *
- * The character itself draws as a plain `<text>`, not upstream's
- * `UCenteredCharacter` path-outline glyph -- `DriverCenteredCharacterSvg`
- * is an EXISTING, project-wide, pre-this-task D3-prime stub
- * (`core/klimt/drawing/svg/driver-svg-stubs.ts`: "centered-character
- * drawing ... not yet ported"; the `UCenteredCharacter` shape class does
- * not exist anywhere in this port). A `<text>` substitute preserves the
- * information (which character is shown) that drawing nothing at all
- * would lose (CLAUDE.md's "preserve information-carrying output").
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:84-109
+ * T3g: the character itself now draws as the platform AWT glyph OUTLINE
+ * `UCenteredCharacter` actually produces (`:110-111`), via
+ * {@link spotGlyphPath}'s captured-table lookup -- replacing the earlier
+ * plain-`<text>` substitute (`activity-spot-glyph-data.ts`'s own doc
+ * comment: `DriverCenteredCharacterSvg.java:56-81`'s `<text>` branch
+ * (`:64-69`) fires only for `FileFormat.SVG_DETERMINISTIC`, a format this
+ * port's oracle renders never select, so the jar always draws the `<path>`
+ * branch; `svg.setFillColor(fc.getColor())` at `:79`, independent of this
+ * circle's own `backColor`/`color` override). A letter with no captured
+ * outline still falls back to that `<text>` branch's own literal geometry
+ * (`x - 5, y + 5`, `monospace`, size 14) rather than drawing nothing --
+ * {@link spotGlyphPath}'s own doc comment names which letters that is
+ * (none, today: every corpus letter is captured).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:84-111
  * @see net/sourceforge/plantuml/style/FromSkinparamToStyle.java:137-139
  */
 export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
@@ -227,12 +229,11 @@ export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
   });
   const char = node.label ?? '';
   if (char === '') return circle;
-  const size = activityFontSize(theme, 'circle');
-  const charWidth = measureLineWidth(theme, size, char);
-  const text = drawActivityText(cx - charWidth / 2, centeredFirstBaselineY(cy, size, 1), char, {
-    fill: activityFontColor(theme, 'circle'),
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-  });
-  return circle + text;
+  const glyphFill = activityFontColor(theme, 'circle');
+  const d = spotGlyphPath(char, cx, cy);
+  const glyph =
+    d === undefined
+      ? text(cx - 5, cy + 5, char, { fill: glyphFill, fontFamily: 'monospace', fontSize: 14 })
+      : path(d, { fill: glyphFill });
+  return circle + glyph;
 }

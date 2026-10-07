@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import type { GtileDiamondInside } from './gtile-diamond-inside.js';
+import type { DiamondConditionTile } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 
@@ -63,6 +63,18 @@ export class GtileWhile extends TileComposite {
   readonly labelHeight = 0;
   /** `left - header.left`: the header's x inside the tile. */
   readonly headerOffsetX: number;
+  /**
+   * `geoDiamond1.getInY()` (`FtileGeometryMerger.java:46,49` --
+   * `appendBottom`'s `inY = geo1.getInY()`, unconditionally the FIRST
+   * geometry's own `inY`, never `0`): `0` for `GtileDiamondInside`/
+   * `GtileDiamondSquare` headers (both always `inY=0`, the invariant this
+   * field's own doc used to assume outright before `GtileDiamondEmpty`
+   * (add3 T3a, CONDSTYLE-EMPTY) joined the header union with a genuinely
+   * nonzero `inY` -- its own north-label reserve, `FtileDiamond.java:
+   * 109,111`). {@link getCoord}'s `NORTH_HOOK`/`NORTH_BORDER` reads this
+   * directly, generalizing the old hardcoded `y: 0`.
+   */
+  readonly headerInY: number;
   /** `left - body.left`: the body's x inside the tile. */
   readonly bodyOffsetX: number;
   /**
@@ -117,21 +129,27 @@ export class GtileWhile extends TileComposite {
    *   Special` term below cancels back out.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometry.java:48-82,190-192
    *   -- a tile's `left` IS its in/out x, i.e. `getCoord(NORTH_HOOK).x` here;
-   *   `appendBottom`'s `inY` is `geo1.getInY()`, and `FtileDiamondInside`'s
-   *   own `calculateDimensionAlone` (`vertical/FtileDiamondInside.java:106-
-   *   116`) always returns `inY = 0`, so the tile's `NORTH_HOOK.y` is 0.
+   *   `appendBottom`'s `inY` is `geo1.getInY()`, generalized here as
+   *   {@link headerInY} -- `FtileDiamondInside`'s own `calculateDimension
+   *   Alone` (`vertical/FtileDiamondInside.java:106-116`) always returns
+   *   `inY = 0` (so `NORTH_HOOK.y` was always 0 before add3 T3a), but
+   *   `FtileDiamond`'s own `calculateDimensionFtile` (`vertical/FtileDiamond
+   *   .java:109,111`) returns a real nonzero `inY` whenever its `north`
+   *   label is set, which `GtileDiamondEmpty` (the EMPTY_DIAMOND header)
+   *   now can be.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:644-656
    *   -- `getTranslateForSpecial`: `half = (d1.outY - d1.inY) / 2`; `y1 =
    *   max(3*half, 4*hexagonHalfSize)`; `xWhile = translateForWhile.dx -
    *   hexagonHalfSize`; `xDiamond = translateDiamond1.dx`; `x1 =
    *   min(xWhile, xDiamond) - xDeltaBecauseSpecial`.
    */
-  constructor(header: GtileDiamondInside, body: Tile, ctx: GtileWhileContext) {
+  constructor(header: DiamondConditionTile, body: Tile, ctx: GtileWhileContext) {
     super();
     this.backward = ctx.backward;
     this.backIncoming = ctx.backIncoming;
     this.backOutgoing = ctx.backOutgoing;
     this.specialOut = ctx.specialOut;
+    this.headerInY = header.getCoord(NORTH_HOOK).y;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
     const geoLeft = Math.max(headerLeft, bodyLeft);
@@ -153,7 +171,7 @@ export class GtileWhile extends TileComposite {
     this.backwardOffsetX = ctx.backward !== undefined ? this.width - ctx.backward.width : 0;
     this.backwardOffsetY = ctx.backward !== undefined ? (this.height - ctx.backward.height) / 2 : 0;
 
-    const half = header.getCoord(SOUTH_HOOK).y / 2;
+    const half = (header.getCoord(SOUTH_HOOK).y - this.headerInY) / 2;
     this.specialOffsetY = ctx.specialOut !== undefined ? Math.max(3 * half, 4 * HEXAGON_HALF_SIZE) : 0;
     const xWhile = this.bodyOffsetX - HEXAGON_HALF_SIZE;
     const xDiamond = this.headerOffsetX;
@@ -167,7 +185,7 @@ export class GtileWhile extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: cx, y: 0 };
+        return { x: cx, y: this.headerInY };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: cx, y: this.height };
