@@ -21,7 +21,7 @@ import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from '
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
-import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
+import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -406,12 +406,15 @@ function renderCrossLaneDecorations(geo: ActivityGeometry, theme: Theme): string
  * land on the integer grid) is kept only for hand-built `ActivityGeometry`
  * test fixtures that bypass `finalizeGeometry` and so never populate it.
  */
-function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+function preChromeDims(geo: ActivityGeometry, theme: Theme): { width: number; height: number } {
   if (geo.rawWidth !== undefined && geo.rawHeight !== undefined) {
     return { width: geo.rawWidth, height: geo.rawHeight };
   }
-  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
-  return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
+  const m = activityDocumentMargin(theme);
+  return {
+    width: geo.totalWidth - (m.left + m.right + SVG_CANVAS_CEIL),
+    height: geo.totalHeight - (m.top + m.bottom + SVG_CANVAS_CEIL),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -464,7 +467,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     children.push(renderSwimlaneTitles(geo, theme));
   }
 
-  const raw = preChromeDims(geo);
+  const raw = preChromeDims(geo, theme);
   return {
     body: children.join(''),
     width: geo.totalWidth,

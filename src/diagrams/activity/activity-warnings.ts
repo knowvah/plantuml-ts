@@ -41,7 +41,7 @@ import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { Warning } from '../../core/warning/Warning.js';
 import type { ActivityDiagramAST } from './ast.js';
-import { SVG_CANVAS_CEIL } from './activity-layout-constants.js';
+import { SVG_CANVAS_CEIL, type DocumentMargin } from './activity-layout-constants.js';
 
 /** The `new Warning(...)` texts `CommandSkinParam#executeArg` adds, keyed by
  *  the lower-cased skin parameter name (`equalsIgnoreCase`).
@@ -92,16 +92,17 @@ export function activityWarnings(ast: ActivityDiagramAST): readonly Warning[] {
   return result;
 }
 
-/** `Math.floor(raw + 2 * margin + SVG_CANVAS_CEIL)`: a canvas side for a raw
- *  span (`TextBlockExporter` margin + `SvgGraphics#ensureVisible`). */
-function canvasSide(raw: number, margin: number): number {
-  return Math.floor(raw + 2 * margin + SVG_CANVAS_CEIL);
+/** `Math.floor(raw + near + far + SVG_CANVAS_CEIL)`: a canvas side for a raw
+ *  span (`TextBlockExporter.java:199-202` + `SvgGraphics#ensureVisible`). */
+function canvasSide(raw: number, near: number, far: number): number {
+  return Math.floor(raw + (near + far + SVG_CANVAS_CEIL));
 }
 
 /**
  * `DiagramChromeFactory#addWarnings` over the activity fragment: the banner
  * at the raw block's origin (the document margin's `(margin, margin)` in
- * this fragment's margin-baked coordinates), drawn at the stacked block's
+ * this fragment's margin-baked coordinates, `TextBlockExporter.java:172`),
+ * drawn at the stacked block's
  * full width, the diagram body moved down by the banner height. The new
  * raw dims (`preChromeWidth`/`preChromeHeight`) are the stack's, so a
  * chrome pass composes title/legend/... around banner + body, as upstream's
@@ -112,11 +113,11 @@ export function withWarningBanner(
   fragment: RenderFragment,
   warnings: readonly Warning[],
   measurer: StringMeasurer,
-  margin: number,
+  margin: DocumentMargin,
 ): RenderFragment {
   if (warnings.length === 0) return fragment;
-  const rawW = fragment.preChromeWidth ?? fragment.width - 2 * margin - SVG_CANVAS_CEIL;
-  const rawH = fragment.preChromeHeight ?? fragment.height - 2 * margin - SVG_CANVAS_CEIL;
+  const rawW = fragment.preChromeWidth ?? fragment.width - (margin.left + margin.right + SVG_CANVAS_CEIL);
+  const rawH = fragment.preChromeHeight ?? fragment.height - (margin.top + margin.bottom + SVG_CANVAS_CEIL);
   const banner = new WarningBannerBlock(warnings, ColorMapper.IDENTITY);
   let bannerW = 0;
   let bannerH = 0;
@@ -125,7 +126,7 @@ export function withWarningBanner(
       const dim = banner.calculateDimension(ug.getStringBounder());
       bannerW = dim.getWidth();
       bannerH = dim.getHeight();
-      banner.drawU(ug.apply(new UTranslate(margin, margin)), Math.max(bannerW, rawW));
+      banner.drawU(ug.apply(new UTranslate(margin.left, margin.top)), Math.max(bannerW, rawW));
     },
   };
   const drawn = renderDrawableToFragment(drawable, { width: 0, height: 0, measurer, uid: BANNER_UID });
@@ -134,8 +135,9 @@ export function withWarningBanner(
   return {
     ...fragment,
     body: drawn.body + shiftFragmentBody(fragment.body, 0, bannerH),
-    width: fragment.width - canvasSide(rawW, margin) + canvasSide(stackW, margin),
-    height: fragment.height - canvasSide(rawH, margin) + canvasSide(stackH, margin),
+    width: fragment.width - canvasSide(rawW, margin.left, margin.right) + canvasSide(stackW, margin.left, margin.right),
+    height:
+      fragment.height - canvasSide(rawH, margin.top, margin.bottom) + canvasSide(stackH, margin.top, margin.bottom),
     preChromeWidth: stackW,
     preChromeHeight: stackH,
   };

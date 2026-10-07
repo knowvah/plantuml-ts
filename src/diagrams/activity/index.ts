@@ -15,7 +15,8 @@ import { parseActivity } from './parser.js';
 import { layoutActivity } from './layout/tile-layout.js';
 import { renderActivity } from './renderer.js';
 import { activityWarnings, withSkinParamWarnings, withWarningBanner } from './activity-warnings.js';
-import { ACTIVITY_DOCUMENT_MARGIN } from './activity-layout-constants.js';
+import { activityDocumentMargin, documentMarginTheme, type DocumentMargin } from './activity-layout-constants.js';
+import { isEmpty } from '../../core/annotations/index.js';
 
 /** The plugin's geometry: the laid-out diagram plus what the export step
  *  (`DiagramChromeFactory#addWarnings`, `activity-warnings.ts`) needs --
@@ -24,6 +25,14 @@ export interface ActivityPluginGeometry {
   readonly geo: ActivityGeometry;
   readonly warnings: readonly Warning[];
   readonly measurer: StringMeasurer;
+  /** The document margin the layout baked in (`activityDocumentMargin`). */
+  readonly margin: DocumentMargin;
+}
+
+/** `src/index.ts#applyAnnotationChrome`'s own guard: chrome composes only
+ *  around a diagram with a non-empty annotation set. */
+export function hasActivityChrome(ast: ActivityDiagramAST): boolean {
+  return ast.annotations !== undefined && !isEmpty(ast.annotations);
 }
 
 // ---------------------------------------------------------------------------
@@ -44,11 +53,15 @@ export const activityPlugin: SyncPlugin<ActivityDiagramAST, ActivityPluginGeomet
     return withSkinParamWarnings(ast, block.styleSource?.skinparam);
   },
 
+  // add4-T2e THEME-MARGIN: `documentMarginTheme`'s own doc (chrome keeps
+  // the default margin until `applyActivityChrome` takes the theme's).
   layoutSync(ast, theme, measurer) {
-    return { geo: layoutActivity(ast, theme, measurer), warnings: activityWarnings(ast), measurer };
+    const marginTheme = documentMarginTheme(theme, hasActivityChrome(ast));
+    const geo = layoutActivity(ast, marginTheme, measurer);
+    return { geo, warnings: activityWarnings(ast), measurer, margin: activityDocumentMargin(marginTheme) };
   },
 
-  render({ geo, warnings, measurer }, theme) {
-    return withWarningBanner(renderActivity(geo, theme), warnings, measurer, ACTIVITY_DOCUMENT_MARGIN);
+  render({ geo, warnings, measurer, margin }, theme) {
+    return withWarningBanner(renderActivity(geo, theme), warnings, measurer, margin);
   },
 };

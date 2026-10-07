@@ -14,7 +14,7 @@ import { renderSync } from '../../../src/index.js';
 const PADDING = 'Please use CSS style instead of skinparam padding';
 const HANDWRITTEN = "Please use '!option handwritten true' to enable handwritten ";
 const BRACKET = "You should use a bracket ({) when defining your container 'group' G";
-const MARGIN = 10;
+const MARGIN = { top: 10, right: 10, bottom: 10, left: 10 };
 /** Drawn text: monospace spaces become U+00A0, as in the jar's own SVG. */
 const PADDING_DRAWN = PADDING.replaceAll(' ', '\u00a0');
 
@@ -77,7 +77,7 @@ describe('withWarningBanner (DiagramChromeFactory.java:176-266)', () => {
     const bannerH = out.preChromeHeight! - 30;
     expect(bannerH).toBe(20);
     expect(out.body).toContain('cy="45"');
-    expect(out.height).toBe(Math.floor(30 + bannerH + 2 * MARGIN + 1));
+    expect(out.height).toBe(Math.floor(30 + bannerH + 20 + 1));
     // the banner (210.25 + 20) is wider than the 40px body: the stack takes
     // its width, and the rect spans it less 10 (java:234).
     expect(out.preChromeWidth).toBeCloseTo(230.25, 9);
