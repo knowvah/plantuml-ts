@@ -55,6 +55,9 @@
  *   - G: `vilecu-41-tete416` (`#green:(G)`, `cx=78.388, cy=245`) -- single
  *     occurrence, not independently cross-verified in this corpus.
  *
+ * add4 T1d: E added -- `xovigi-85-rufa987` (`(E)` x2, `cx=130`; `cy=901.111`
+ * and `cy=1022.722`), byte-identical after the `(10-cx, 10-cy)` translate.
+ *
  * NOT a shared table with `class-badge-glyph-data.ts`: class's own
  * default-size-17 `A` outline, normalized to a common centre and checked
  * point-for-point against this module's `A` entry, does not reduce to a
@@ -67,7 +70,7 @@
  * letter this table and the class table both define (only `A`, so far) is
  * therefore two independent entries, not one shared value.
  */
-export type ActivitySpotLetter = 'A' | 'B' | 'G';
+export type ActivitySpotLetter = 'A' | 'B' | 'E' | 'G';
 
 /** Reference spot centre every {@link SPOT_GLYPH_D} entry is captured at
  *  -- `FtileCircleSpot.java:110`'s own local `UTranslate(SIZE / 2, SIZE /
@@ -86,6 +89,9 @@ export const SPOT_GLYPH_D: Record<ActivitySpotLetter, string> = {
     'Q11.954,13.853 11.954,12.834 Q11.954,11.932 11.147,11.333 Q10.34,10.735 9.13,10.735 ' +
     'L8.727,10.735 Z M8.727,9.826 L9.185,9.826 Q10.333,9.826 10.966,9.334 Q11.598,8.842 11.598,7.946 ' +
     'Q11.598,6.456 9.288,6.456 L8.727,6.456 Z',
+  E:
+    'M6.806,15.5 L6.806,5.383 L12.459,5.383 L12.459,6.456 L8.241,6.456 L8.241,9.703 L11.775,9.703 ' +
+    'L11.775,10.763 L8.241,10.763 L8.241,14.427 L12.753,14.427 L12.753,15.5 Z',
   G:
     'M13.157,15.227 Q11.318,15.753 9.951,15.753 Q7.538,15.753 6.249,14.379 Q4.96,13.005 4.96,10.441 ' +
     'Q4.96,7.926 6.266,6.528 Q7.572,5.13 9.93,5.13 Q11.475,5.13 13.143,5.588 L13.143,6.914 ' +
