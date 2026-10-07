@@ -297,9 +297,13 @@ interface StopOffsets {
 function computeStopOffsets(diamond1: DiamondConditionTile, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
   if (optionalStop === null) return { stopX: 0, stopY: 0 };
   const additionalWidth = additionalWidthFor(diamond1, optionalStop.width);
+  // add4-T2d: `labelNorth = dimDiamond1.getInY()`; `y1 = labelNorth +
+  // (dimDiamond1.getHeight() - labelNorth - dimStop.getHeight()) / 2`
+  // (`FtileIfDown.java:651-653`) -- centred on the rhombus, not the box.
+  const labelNorth = diamond1.getCoord(NORTH_HOOK).y;
   return {
     stopX: core.left - diamond1.width / 2 + diamond1.width + additionalWidth,
-    stopY: (diamond1.height - optionalStop.height) / 2,
+    stopY: labelNorth + (diamond1.height - labelNorth - optionalStop.height) / 2,
   };
 }
 
@@ -407,7 +411,10 @@ export class GtileIfDown extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.left, y: this.diamond1Y };
+        // add4-T2d: `geoDiamond1.getInY() + opaleHeight`
+        // (`FtileIfDown.java:568-571`) -- diamond1's own inY is an
+        // EMPTY_DIAMOND's north-label height.
+        return { x: this.left, y: this.diamond1Y + this.diamond1.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };
