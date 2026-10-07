@@ -132,3 +132,70 @@ Element census vs a base-commit run (`activity-probe-elements.ts`): 0 movers at 
   - cakeca's LANE-INK gap is the partition SpecialText slot (T2b), not a lane mechanism.
 - **Impact**: route "fork bar width" symptoms in multi-lane forks to reservation tagging first.
 - **Confidence**: High (sandboxed 380 -> 2; merged scratch 123 -> 0).
+
+# Resume (orchestrator: write-set extended to walk-if-down.ts, the while-header case in activity-renderer-shapes.ts, tile-layout-inlabel.ts, walk-with-notes.ts)
+
+Base: ac4b683a8 (fast-forward merge of feat/activity-divergence-drive-4). Probe Σ 3465.
+
+## Commits
+1. `d6bf9b674` fix: move an if-down hexagon reservation with diamond1's lane (patch A)
+   - Java: `Connection(diamond1, diamond2)`, the UEmpty is drawn at `FtileIfDown.java:308,349,360,402,440`.
+   - Ours: `walk-if-down.ts`, 4 pushes, tagged with `laneOut(t.diamond1, myLane)`.
+2. `5b9294635` fix: pick the while-header diamond by condition style (patch B)
+   - Java: `FtileWhile.java:130-140`. Ours: the `while-header` case now calls `renderIfSplitShape`.
+   - EMPTY_DIAMOND with a test (`:137-139`) already matched the jar. `GtileDiamondEmpty.label` is always `''` and the test sits in the north slot. Authored fixture `while-empty-diamond-test` has 0 diffs, both before and after.
+3. `774ecdb25` fix: move a same-lane arrow-label reservation with its lane
+   - Java: `UGraphicInterceptorOneSwimlane.java:93-104`.
+   - Ours: `tile-layout-inlabel.ts#labelLane`.
+   - A cross-lane connection is drawn in the Cross pass (`Swimlanes.java:184-199`), so its label stays untagged.
+4. `456e812f9` fix: move a stacked note's margin reservation with its lane
+   - Java: `TextBlockMarged.java:79-86`, `Swimlanes.java:342-343`.
+   - Ours: `walk-with-notes.ts#pushStackedNote`.
+5. `72d388e0b` test: the unit test in `tests/unit/activity/renderer-shapes.test.ts` pinned the old hexagon. It is now pinned to the jar's rhombus. Commit 2 landed with this one unit test red.
+
+## Rows before -> after
+| row | before | after |
+|---|---|---|
+| tobajo-64-mipi810 | 380 | 2 |
+| nikivo-06-kaxa873 | 2 | 0 |
+
+Authored fixtures (all via `scripts/oracle-render.sh`):
+
+| fixture | without fix | with fix |
+|---|---|---|
+| `lane-res-if-down` | 173 | 0 |
+| `while-inside-diamond` | 1 | 0 |
+| `lane-res-inlabel` | 7 | 1 |
+| `lane-res-note-stack-fork` | 118 | 0 |
+| `lane-res-note-stack-wide` | 88 | 0 |
+
+The 1 left on `lane-res-inlabel` is the label's own y (+3.278). The same markup with no lanes, and with one lane, shows that same +3.278, so it is not a lane mechanism.
+
+## Probe Σ per commit
+| commit | Σ |
+|---|---|
+| base | 3465 |
+| c1 | 3087 |
+| c2 | 3085 |
+| c3 | 3085 |
+| c4 | 3085 |
+
+## Risers
+- 0 at every commit.
+- Element census vs the ac4b683a8 run: 0 movers at every commit.
+
+## Census movers (all == jar except kavoro's float noise)
+- c1, tobajo:
+  - swimlane: dividers `[20,242.475,474.694,603.013]`, titles 111.775 / 339.122 / 519.897, band 582.013, width 629;
+  - style: width 629.
+- c4, kavoro (swimlane `lanes`): lane-2 width moves by 5e-14, from 213.66249999999997 to 213.66250000000002 (jar 213.662).
+  - Cause: the shifted reservation changes the compression arithmetic order.
+  - SVG: unchanged, 0 diffs against the golden. Dividers, titles and width are unchanged and equal the jar.
+  - Strictly, this is 5e-14 further from the jar. A re-pin absorbs it.
+
+## Not done
+- tobajo residual 2: under `skinparam monochrome true` the note fill should be `#FAFAFA` (`ColorMapper.java:80-83`). Owner: note renderer.
+- Cross-lane arrow-label reservation: still untagged. The jar draws it with the translated `drawTranslate` points in the Cross pass. Ours would need the reservation computed from routed points.
+- Arrow label baseline +3.278 (`lane-res-inlabel`, reproduced with no lanes): not lane work, not chased.
+- Fork branch containing an arrow label: with no lanes the fork bar is 14.75 px narrower than the jar (222.85 vs 237.6). Isolated with a scratch fixture that was not committed. Not lane work, not chased.
+- Rule note: I ran `git stash` once by accident, from a stray command tail. I popped it immediately and `git stash list` is empty. No work was lost; the diff was re-verified before commit 3. A read-only `git stash list` was also run once earlier.
