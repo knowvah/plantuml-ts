@@ -79,6 +79,12 @@ import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseActivity } from '../../../src/diagrams/activity/parser.js';
 import { layoutActivity } from '../../../src/diagrams/activity/layout/tile-layout.js';
 import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
+import {
+  activityWarnings,
+  withSkinParamWarnings,
+  withWarningBanner,
+} from '../../../src/diagrams/activity/activity-warnings.js';
+import { ACTIVITY_DOCUMENT_MARGIN } from '../../../src/diagrams/activity/activity-layout-constants.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
@@ -154,10 +160,24 @@ export function renderFixtureActivity(
   const preprocessed = first.preprocessed;
   const rawSourceLines = first.rawSource.map((s) => s.getString());
   const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
-  const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const ast = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
+  // add4-T2e: `styleSource` mirrors `src/index.ts#umlSourceOfBlock`, and
+  // the skinparam-warning / warning-banner steps mirror
+  // `activity/index.ts#activityPlugin` (`activity-warnings.ts`).
+  const block = {
+    ...first.source,
+    rawStyles: preprocessed.styles,
+    stylePositions: preprocessed.stylePositions,
+    styleSource: preprocessed,
+  };
+  const parsed = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
+  const ast = withSkinParamWarnings(parsed, block.styleSource.skinparam);
   const geo = layoutActivity(ast, theme, measurer);
-  const fragment = renderActivity(geo, theme);
+  const fragment = withWarningBanner(
+    renderActivity(geo, theme),
+    activityWarnings(ast),
+    measurer,
+    ACTIVITY_DOCUMENT_MARGIN,
+  );
 
   // HARNESS-SEED (T2d-a row 1): mirrors `render-fixture-class.ts`'s own
   // `seed` computation, which mirrors `index.ts#umlSourceOfBlock` +

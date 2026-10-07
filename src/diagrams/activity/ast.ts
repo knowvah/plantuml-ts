@@ -455,9 +455,7 @@ export type ActivityNode =
   | ActivitySwitch
   | ActivityGroup;
 
-// ---------------------------------------------------------------------------
-// Root AST
-// ---------------------------------------------------------------------------
+// --- Root AST ---------------------------------------------------------------
 
 export interface ActivityDiagramAST {
   /** Top-level sequence of activity nodes (may contain nested structures). */
@@ -497,4 +495,6 @@ export interface ActivityDiagramAST {
    * call always sets it via `Pragma.createEmpty()`.
    */
   pragma?: Pragma;
+  /** `CommandSkinParam#executeArg` warnings (java:92-99), ahead of `pragma`'s: `activity-warnings.ts`. */
+  warnings?: ReturnType<Pragma['getWarnings']>;
 }
