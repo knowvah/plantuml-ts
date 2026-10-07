@@ -13,6 +13,7 @@
  * raw with its own `#`, the same shape `ActivityAction.color` does.
  */
 
+import { removeEmptyColumns } from './dispatch-multiline-body.js';
 import type { ActivityNode, ActivityNote } from './ast.js';
 import {
   RE_NOTE_END,
@@ -75,12 +76,16 @@ export function tryNoteMulti(ctx: ParseContext, idx: number, line: string): Disp
       cursor++;
       break;
     }
-    if (inner !== '') textLines.push(inner);
+    textLines.push(lines[cursor]!);
     cursor++;
   }
+  // `CommandNoteLong3#executeNow` (`CommandNoteLong3.java:118-122`):
+  // `subExtract(1, 1)` (the opener/closer, excluded above), then
+  // `removeEmptyColumns()` over the untrimmed body -- relative indentation
+  // and blank lines survive into the note's `Display`.
   const node: ActivityNote = {
     kind: 'note',
-    text: textLines.join('\n'),
+    text: removeEmptyColumns(textLines).join('\n'),
     position,
     ...noteColorSpread(noteMultiMatch[3]),
     ...noteFloatingSpread(noteMultiMatch[1]),

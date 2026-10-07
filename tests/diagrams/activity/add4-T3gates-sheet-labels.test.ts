@@ -46,6 +46,10 @@ describe('activity labels through the FtileBox Sheet (jar oracles)', () => {
     expect(diffPaths('titled-separators')).toEqual([]);
   });
 
+  it('multi-line action and note bodies lose only their shared indentation', () => {
+    expect(diffPaths('multiline-columns')).toEqual([]);
+  });
+
   it('hyperlinkColor/hyperlinkUnderline/svgLinkTarget reach action AND note links', () => {
     expect(diffPaths('hyperlink-skin')).toEqual([]);
   });
