@@ -20,18 +20,18 @@ import type { Reservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode, walkTile } from './tile-coordinates.js';
 import { collectTouchedLanes } from './tile-coordinates-group.js';
-import { markMeasureLanes } from './swimlane-context.js';
+import { markMeasureSpec } from './swimlane-context.js';
 
 /** add4-T2c: `FtileWithNoteOpale#getSwimlanes` -- the wrapped tile's own
  *  lanes plus `swimlaneNote` (`FtileWithNoteOpale.java:92-99`) -- is the
  *  set the measurement pass dispatches the Opale to (`swimlane-context.ts
- *  #markMeasureLanes`). Marked only when wider than the note's own lane. */
+ *  #MeasureSpec`). Marked only when wider than the note's own lane. */
 function markNoteMeasureLanes(noteNode: ActivityNodeGeo, t: GtileNoteOpale, myLane: string | undefined): void {
   const lanes = new Set<string>();
   collectTouchedLanes(t.children[0]!, lanes);
   if (lanes.size === 0 && myLane !== undefined) lanes.add(myLane);
   if (noteNode.swimlane !== undefined) lanes.add(noteNode.swimlane);
-  if (lanes.size > 1) markMeasureLanes(noteNode, [...lanes]);
+  if (lanes.size > 1) markMeasureSpec(noteNode, { lanes: [...lanes] });
 }
 
 /** `FtileWithNoteOpale#drawU` (`:195-221`): the note draws beside the
@@ -136,6 +136,9 @@ function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: nu
   // add4-T1c: `FtileWithNotes.java:109-111`'s own `eventuallyOverride`.
   if (entry.color !== undefined) node.color = entry.color;
   pushNode(origin.out, node, origin.lane);
+  // add4-T2c: the same margin box is lane content (`swimlane-context.ts
+  // #MeasureSpec`), not only canvas ink.
+  markMeasureSpec(node, { marginX: NOTE_STACK_MARGIN });
 }
 
 /** Every note in one side's stack, in top-to-bottom order

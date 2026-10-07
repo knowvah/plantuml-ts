@@ -1,0 +1,12 @@
+@startuml
+|A|
+:alpha;
+|B|
+:beta long action;
+note left: left of beta
+|A|
+note left
+wide left note in lane A
+end note
+:gamma;
+@enduml

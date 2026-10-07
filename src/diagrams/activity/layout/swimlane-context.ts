@@ -149,31 +149,59 @@ export function measureLaneExtents(
 }
 
 /**
- * add4-T2c: the lanes one drawn node is MEASURED into when that set is
- * wider than the node's own draw lane. `computeDrawingWidths` runs one
- * `UGraphicInterceptorAllSwimlanes` pass (`Swimlanes.java:379-395`); an
- * `Ftile`'s primitives go to every lane still active after narrowing to
- * `tile.getSwimlanes()` (`UGraphicInterceptorAllSwimlanes.java:88-101,
- * 160-168`). `FtileWithNoteOpale#getSwimlanes` is the wrapped tile's
- * lanes plus `swimlaneNote` (`FtileWithNoteOpale.java:92-99`) and its
- * `drawU` draws the Opale ungated outside a one-lane interceptor
- * (`:217`), so a note captured in another lane is measured into BOTH --
- * while the content pass draws it in `swimlaneNote` alone. Keyed by the
- * node object the walk pushes (`placeSwimlanes` receives those same
- * references); a `WeakMap`, never an own property, so no lane copy or
- * public geometry ever carries it.
+ * add4-T2c: how one drawn node is MEASURED when that differs from its own
+ * box in its own lane. `computeDrawingWidths` runs one
+ * `UGraphicInterceptorAllSwimlanes` pass (`Swimlanes.java:379-395`) whose
+ * per-lane `LimitFinder`s see every primitive a lane's content draws.
+ *
+ * - `lanes`: an `Ftile`'s primitives go to every lane still active after
+ *   narrowing to `tile.getSwimlanes()` (`UGraphicInterceptorAllSwimlanes
+ *   .java:88-101,160-168`). `FtileWithNoteOpale#getSwimlanes` is the
+ *   wrapped tile's lanes plus `swimlaneNote` (`FtileWithNoteOpale.java
+ *   :92-99`) and `drawU` draws the Opale ungated outside a one-lane
+ *   interceptor (`:217`), so a note captured in another lane is measured
+ *   into BOTH -- while the content pass draws it in `swimlaneNote` alone.
+ * - `marginX`: a stacked note is `TextBlockUtils.withMargin(opale, 10, 10)`
+ *   (`FtileWithNotes.java:134`), whose `drawU` draws `UEmpty.create(dim)`
+ *   over the margin-inclusive box (`TextBlockMarged.java:79-86`);
+ *   `LimitFinder#drawEmpty` adds both corners unfudged (`LimitFinder.java
+ *   :159-162`), so the lane spans the note plus `marginX` on each side.
+ *
+ * Keyed by the node object the walk pushes (`placeSwimlanes` receives
+ * those same references); a `WeakMap`, never an own property, so no lane
+ * copy or public geometry ever carries it. Read against the node's
+ * CURRENT `x`/`width`, never a snapshot.
  */
-const MEASURE_LANES = new WeakMap<object, readonly string[]>();
-
-/** Records `lanes` as `node`'s measurement lanes (see {@link MEASURE_LANES}). */
-export function markMeasureLanes(node: object, lanes: readonly string[]): void {
-  MEASURE_LANES.set(node, lanes);
+export interface MeasureSpec {
+  readonly lanes?: readonly string[];
+  readonly marginX?: number;
 }
 
-/** `node`'s measurement lanes, or `undefined` when it measures only into
- *  its own `swimlane`. */
-export function measureLanesOf(node: object): readonly string[] | undefined {
-  return MEASURE_LANES.get(node);
+const MEASURE_SPECS = new WeakMap<object, MeasureSpec>();
+
+/** Records `spec` as `node`'s measurement spec (see {@link MeasureSpec}). */
+export function markMeasureSpec(node: object, spec: MeasureSpec): void {
+  MEASURE_SPECS.set(node, spec);
+}
+
+/** `node`'s measurement spec, or `undefined` when it measures as its own
+ *  box in its own `swimlane`. */
+export function measureSpecOf(node: object): MeasureSpec | undefined {
+  return MEASURE_SPECS.get(node);
+}
+
+/** A {@link MeasureSpec}'d node's lane items: per lane, its own (fudged)
+ *  box plus, with `marginX`, the unfudged `UEmpty` margin box. */
+export function specLaneItems(
+  node: { readonly swimlane?: string; readonly kind: string; readonly x: number; readonly width: number },
+  spec: MeasureSpec,
+): LaneItem[] {
+  const lanes = spec.lanes ?? (node.swimlane !== undefined ? [node.swimlane] : []);
+  const m = spec.marginX;
+  return lanes.flatMap((lane) => {
+    const own: LaneItem = { swimlane: lane, kind: node.kind, x: node.x, width: node.width };
+    return m === undefined ? [own] : [own, { swimlane: lane, x: node.x - m, width: node.width + 2 * m }];
+  });
 }
 
 // ---------------------------------------------------------------------------

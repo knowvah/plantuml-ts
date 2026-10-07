@@ -33,7 +33,8 @@ import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
   measureLaneExtents,
-  measureLanesOf,
+  measureSpecOf,
+  specLaneItems,
   resolveSwimlaneMinWidth,
   type LaneItem,
   type LaneWidth,
@@ -364,10 +365,10 @@ interface MeasureLanesInput {
  * mirroring {@link placeNode}'s own per-lane fan-out.
  */
 function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneItem[] {
-  // add4-T2c: a cross-lane Opale note (`swimlane-context.ts#markMeasureLanes`).
-  const measureLanes = measureLanesOf(node);
-  if (measureLanes !== undefined)
-    return measureLanes.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));
+  // add4-T2c: a cross-lane Opale / a stacked note's margin box
+  // (`swimlane-context.ts#MeasureSpec`).
+  const spec = measureSpecOf(node);
+  if (spec !== undefined) return specLaneItems(node, spec);
   if (!isBigDiamondDuplicate(node)) {
     return [
       node.swimlane !== undefined
