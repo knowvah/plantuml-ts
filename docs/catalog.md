@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1395 modules · 5248 exported names.
+1396 modules · 5252 exported names.
 
 ## `src/`
 
