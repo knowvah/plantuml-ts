@@ -87,6 +87,13 @@ function pushWhileHeader(
   const box = { x: hX, y: hY + inY, width: header.width, height: header.getCoord(SOUTH_HOOK).y - inY };
   pushNode(out, { id: out.nextId('while-header'), kind: 'while-header', ...box, label: header.label }, hexLane);
   emitDiamondLabels(header, { x: hX, y: hY }, ['north'], hexLane, out);
+  // `south` (add3 T3a, CONDSTYLE-EMPTY): `FtileDiamond#drawU`'s own
+  // `north.drawU` THEN `south.drawU` (`:91,94`) -- only EMPTY_DIAMOND ever
+  // populates this slot for a while header (`.withSouth(yesTb)`,
+  // `FtileWhile.java:138`); always empty (no-op via `labelAt`'s own
+  // `dim.text === ''` guard) for `GtileDiamondInside`/`GtileDiamondSquare`,
+  // which never call `.withSouth()`.
+  emitDiamondLabels(header, { x: hX, y: hY }, ['south'], hexLane, out);
   emitDiamondOwnLabel(header, box, hexLane, out);
   emitDiamondLabels(header, { x: hX, y: hY }, ['west'], hexLane, out);
 }
