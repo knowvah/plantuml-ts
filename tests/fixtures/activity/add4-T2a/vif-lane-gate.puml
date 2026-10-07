@@ -1,0 +1,18 @@
+@startuml
+!pragma useVerticalIf on
+|Entry|
+start
+:prepare;
+|Decide|
+if (route?) then (left)
+  |West|
+  :go west;
+(retry) elseif (route2?) then (right)
+  |East|
+  :go east;
+else (none)
+  |Idle|
+  :wait;
+endif
+stop
+@enduml
