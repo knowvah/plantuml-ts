@@ -130,3 +130,36 @@ export function redirectNoteOntoSwitch(
   nodes[nodes.length - 1] = { ...last, cases };
   return true;
 }
+
+/**
+ * add4-T2g (COMPOSITE-NOTE): a note parsed while a CLOSED `group`/
+ * `partition`/`package`/`rectangle`/`card` is this list's last element.
+ * `InstructionList#addNote` forwards to `getLast().addNote(...)`
+ * (`InstructionList.java:190-196`); `InstructionGroup#addNote`
+ * (`InstructionGroup.java:125-131`) keeps it as its OWN `note` while its
+ * list is empty (a later one overwrites the earlier, `:127`), else
+ * forwards to `list.addNote`, i.e. to the group's last instruction. So the
+ * note lands INSIDE the frame, never after it. `push` is the enclosing
+ * list's own push (a group nested in a group, an `if`, a `switch` get
+ * their redirects); the note goes before any trailing `arrow-label` (a
+ * pending link rendering, not an instruction). Mutates `nodes` in place
+ * like every sibling redirect; `true` when it fired.
+ */
+export function redirectNoteOntoGroup(
+  nodes: ActivityNode[],
+  node: ActivityNote,
+  push: (list: ActivityNode[], n: ActivityNode) => void,
+): boolean {
+  const last = nodes[nodes.length - 1];
+  if (last === undefined || last.kind !== 'group') return false;
+  if (caseIsEmpty(last.body)) {
+    nodes[nodes.length - 1] = { ...last, note: node };
+    return true;
+  }
+  let split = last.body.length;
+  while (last.body[split - 1]!.kind === 'arrow-label') split--;
+  const head = last.body.slice(0, split);
+  push(head, node);
+  nodes[nodes.length - 1] = { ...last, body: [...head, ...last.body.slice(split)] };
+  return true;
+}

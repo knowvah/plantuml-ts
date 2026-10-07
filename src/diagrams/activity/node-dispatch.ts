@@ -50,7 +50,7 @@ import {
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
-import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
+import { redirectNoteOntoGroup, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
 
 // ---------------------------------------------------------------------------
@@ -435,6 +435,15 @@ function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string):
   return refuse('syntax', idx, idx, 'Syntax Error?');
 }
 
+/** {@link pushParsedNode} plus the closed-group note redirect (add4-T2g,
+ *  `note-dispatch.ts#redirectNoteOntoGroup`); kept here because
+ *  `list-backward-dispatch.ts` is not this task's file and a cycle through
+ *  `note-dispatch.ts` is avoided. */
+function pushNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
+  if (node?.kind === 'note' && redirectNoteOntoGroup(nodes, node, pushNode)) return;
+  pushParsedNode(nodes, node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+}
+
 /** Read nodes from `ctx.lines` from `idx` until a trimmed lowercase line
  *  matches one of `stops`, end-of-input, or a `ParseRefusal` surfaces from
  *  `dispatchLine` -- which this function propagates unchanged rather than
@@ -473,7 +482,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
 
     const result = dispatchLine(ctx, cursor, line, lc);
     if (isRefusal(result)) return result;
-    pushParsedNode(nodes, result.node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+    pushNode(nodes, result.node);
     cursor = result.idx;
   }
 
