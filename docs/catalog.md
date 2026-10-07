@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1393 modules · 5241 exported names.
+1393 modules · 5243 exported names.
 
 ## `src/`
 
@@ -1191,7 +1191,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-spot.ts` | `GtileSpot` |  |
 | `gtile-start.ts` | `GtileStart` |  |
 | `gtile-stop.ts` | `GtileStop` |  |
-| `gtile-switch-geometry.ts` | `SWITCH_X_SEPARATION`, `SWITCH_SUPP15`, `SWITCH_YDELTA1B`, `leftOf`, `rightOf`, `SwitchMode`, `computeSwitchMode`, `NudeDimensions`, `computeNudeDimensions`, `Ydelta1aParams`, `computeYdelta1a`, `CaseXOffsets`, `computeBigDiamondCaseX`, `computeSmallDiamondCaseX` |  |
+| `gtile-switch-geometry.ts` | `CaseDim`, `caseDimOf`, `SWITCH_X_SEPARATION`, `SWITCH_SUPP15`, `SWITCH_YDELTA1B`, `leftOf`, `rightOf`, `SwitchMode`, `computeSwitchMode`, `NudeDimensions`, `computeNudeDimensions`, `Ydelta1aParams`, `computeYdelta1a`, `CaseXOffsets`, `computeBigDiamondCaseX`, `computeSmallDiamondCaseX` |  |
 | `gtile-switch.ts` | `GtileSwitch` |  |
 | `gtile-top-down.ts` | `GtileTopDown` |  |
 | `gtile-while.ts` | `GtileWhileContext`, `GtileWhile` |  |

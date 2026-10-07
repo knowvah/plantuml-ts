@@ -353,7 +353,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // add3-T3d: `FtileWithNoteOpale.java:147-150` draws via the real creole
   // Sheet -- `renderNoteLabel`'s own doc (geometric fallback for a note
   // NOT sized by the matching `measureOpaleCreole`, e.g. NOTE-MULTI).
-  const sheetLabel = renderNoteLabel(label, theme, { x, y, width: w, height: h });
+  const sheetLabel = renderNoteLabel(label, theme, { x, y, width: w, height: h }, stroke);
   if (sheetLabel !== null) return body + sheetLabel;
 
   const lines = label.split('\n');

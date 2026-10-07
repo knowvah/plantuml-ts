@@ -43,6 +43,11 @@ import { LineBreakStrategy } from '../../core/klimt/LineBreakStrategy.js';
 import { ClockwiseTopRightBottomLeft } from '../../core/klimt/geom/ClockwiseTopRightBottomLeft.js';
 import { CreoleParser } from '../../core/klimt/creole/legacy/CreoleParser.js';
 import { SheetBlock1 } from '../../core/klimt/creole/SheetBlock1.js';
+import { SheetBlock2 } from '../../core/klimt/creole/SheetBlock2.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import type { UChange } from '../../core/klimt/UChange.js';
+import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { chromeAtomOps } from '../../core/annotations/blocks-creole.js';
 import { GUILLEMET_DEFAULT } from '../../core/text/Guillemet.js';
 import { Pragma } from '../../core/skin/Pragma.js';
@@ -107,7 +112,13 @@ function activitySkinSimple(fontConfiguration: FontConfiguration): ISkinSimple {
     copyAllFrom: () => undefined,
     getPragma: () => pragma,
     sheet: (fc, align, mode, stereo?: FontConfiguration) =>
-      new CreoleParser(fc, align, skin, { creoleMode: mode, stereotype: stereo ?? fc }, { atomOps, renderer: nestedRenderer() }),
+      new CreoleParser(
+        fc,
+        align,
+        skin,
+        { creoleMode: mode, stereotype: stereo ?? fc },
+        { atomOps, renderer: nestedRenderer() },
+      ),
   };
   return skin;
 }
@@ -146,7 +157,9 @@ export function buildActionTextBlock(label: string, theme: Theme, fontSize: numb
   // SAME type gap `DisplayCreole.ts#getCreole`/`CreoleHorizontalLine.ts
   // #getTitle` already cast through (both pre-existing, unrelated to
   // this task).
-  const sheet = skin.sheet(fc, align, CreoleMode.FULL).createSheet(Display.create(label.split('\n'))) as unknown as Sheet<CreoleAtom>;
+  const sheet = skin
+    .sheet(fc, align, CreoleMode.FULL)
+    .createSheet(Display.create(label.split('\n'))) as unknown as Sheet<CreoleAtom>;
   const atomOps = chromeAtomOps(undefined, fc);
   // add3-T3f (PADDING): Java feeds this ctor arg `skinParam.getPadding()`
   // (the BARE `skinparam padding N` key) and ADDS the element's own bucket
@@ -168,14 +181,21 @@ export function buildActionTextBlock(label: string, theme: Theme, fontSize: numb
  * renderer-text.ts#drawRun` already uses for a single `UText`, applied
  * here to a whole multi-stripe `TextBlock`.
  */
-export function drawActionTextBlock(tb: SheetBlock1, x: number, y: number, measurer: StringMeasurer, font: FontSpec): string {
+export function drawActionTextBlock(
+  tb: TextBlock,
+  x: number,
+  y: number,
+  measurer: StringMeasurer,
+  font: FontSpec,
+  changes: readonly UChange[] = [],
+): string {
   const driverBounder = {
     calculateDimension(fc: { readonly size: number }, text: string) {
       return { width: measurer.measure(text, { ...font, size: fc.size }).width };
     },
   };
   const ug = UGraphicSvg.build(0, basicSvgOption(), THROWAWAY_VERSION, driverBounder, measurer);
-  tb.drawU(ug.apply(new UTranslate(x, y)));
+  tb.drawU(changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(x, y))));
   return extractFlatContent(ug.getSvgString()).body;
 }
 
@@ -290,7 +310,9 @@ export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
   };
   const align = ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)];
   const skin = activitySkinSimple(fc);
-  const sheet = skin.sheet(fc, align, CreoleMode.FULL).createSheet(Display.create(text.split('\n'))) as unknown as Sheet<CreoleAtom>;
+  const sheet = skin
+    .sheet(fc, align, CreoleMode.FULL)
+    .createSheet(Display.create(text.split('\n'))) as unknown as Sheet<CreoleAtom>;
   const atomOps = chromeAtomOps(undefined, fc);
   return new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps);
 }
@@ -304,7 +326,10 @@ export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
  * NEVER disagree about a note's size, mirroring
  * {@link isActionSheetEligible}'s own doc comment for the action box.
  */
-export function noteTextBlockDimension(tb: SheetBlock1, sheetBounder: StringBounder): { width: number; height: number } {
+export function noteTextBlockDimension(
+  tb: SheetBlock1,
+  sheetBounder: StringBounder,
+): { width: number; height: number } {
   const dim = tb.calculateDimension(sheetBounder);
   return { width: dim.getWidth() + NOTE_MARGIN_X1 + NOTE_MARGIN_X2, height: dim.getHeight() + 2 * NOTE_MARGIN_Y };
 }
@@ -335,6 +360,7 @@ export function renderNoteLabel(
   text: string,
   theme: Theme,
   box: { readonly x: number; readonly y: number; readonly width: number; readonly height: number },
+  borderColor: string,
 ): string | null {
   const fontSize = activityFontSize(theme, 'note');
   const font = { family: activityFontFamily(theme, 'note'), size: fontSize };
@@ -342,5 +368,31 @@ export function renderNoteLabel(
   const sheetBounder = klimtStringBounder(DRAW_MEASURER, font);
   const sheetBox = noteTextBlockDimension(tb, sheetBounder);
   if (Math.abs(sheetBox.width - box.width) > 1e-6 || Math.abs(sheetBox.height - box.height) > 1e-6) return null;
-  return drawActionTextBlock(tb, box.x + NOTE_MARGIN_X1, box.y + NOTE_MARGIN_Y, DRAW_MEASURER, font);
+  // `Opale#drawU` (`Opale.java:107`): `ug...apply(borderColor)` before
+  // `textBlock.drawU` -- the colour a stencilled `----` separator line is
+  // stroked with (its fill, the `.bg()` half, paints nothing on a line).
+  return drawActionTextBlock(noteSheetBlock2(tb), box.x + NOTE_MARGIN_X1, box.y + NOTE_MARGIN_Y, DRAW_MEASURER, font, [
+    new Fore(borderColor),
+  ]);
+}
+
+/**
+ * `FtileWithNotes#getNoteTextBlock`'s `new SheetBlock2(sheet1, new
+ * Stencil() {...}, UStroke.simple())` (`FtileWithNotes.java:122-130`): the
+ * note Sheet is drawn through a stencil spanning `-6` to the sheet's own
+ * ending x `+ 15` (Opale's margins), so `SheetBlock2#drawU` wraps the
+ * UGraphic in `UGraphicStencil` and a creole `----` separator's
+ * `UHorizontalLine` becomes a `ULine` across the note
+ * (`UGraphicStencil.java:83`) instead of reaching the SVG driver, which
+ * has no `UHorizontalLine` driver (upstream neither).
+ */
+function noteSheetBlock2(sheet1: SheetBlock1): SheetBlock2 {
+  return new SheetBlock2(
+    sheet1,
+    {
+      getStartingX: () => -6, // FtileWithNotes.java:125 ("comes from Opale")
+      getEndingX: (stringBounder, y) => sheet1.getEndingX(stringBounder, y) + 15, // FtileWithNotes.java:129
+    },
+    UStroke.simple(),
+  );
 }

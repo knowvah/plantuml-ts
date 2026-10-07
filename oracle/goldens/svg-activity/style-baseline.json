@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "dd289f64",
+  "measuredAgainstCommit": "79c2bfb2",
   "fixtures": [
     {
       "type": "activity",
@@ -6558,7 +6558,7 @@
       "slug": "katime-87-vole867",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "79c2bfb2",
       "ours": {
         "fontSize": {
           "13": 1
@@ -6566,7 +6566,7 @@
         "strokeWidth": {},
         "rx": {},
         "textCount": 1,
-        "width": "124",
+        "width": "114",
         "height": "59"
       },
       "jar": {
@@ -8733,7 +8733,7 @@
         },
         "rx": {},
         "textCount": 4,
-        "width": "244",
+        "width": "224",
         "height": "189"
       },
       "jar": {
@@ -8749,7 +8749,7 @@
         "height": "189"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "79c2bfb2"
     },
     {
       "type": "activity",
@@ -14402,7 +14402,7 @@
       "slug": "vopidi-45-jitu863",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "79c2bfb2",
       "ours": {
         "fontSize": {
           "12": 1,
@@ -14415,7 +14415,7 @@
           "12.5": 1
         },
         "textCount": 3,
-        "width": "344",
+        "width": "334",
         "height": "151"
       },
       "jar": {
@@ -14907,7 +14907,7 @@
       "slug": "xirixi-47-laxe350",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "79c2bfb2",
       "ours": {
         "fontSize": {
           "12": 1,
@@ -14920,7 +14920,7 @@
           "12.5": 1
         },
         "textCount": 3,
-        "width": "344",
+        "width": "334",
         "height": "151"
       },
       "jar": {
