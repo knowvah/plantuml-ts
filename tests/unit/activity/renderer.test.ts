@@ -1442,3 +1442,36 @@ describe('renderActivity — preserveAspectRatio (add2 T3e, family G)', () => {
     expect(svg).toContain('preserveAspectRatio="xMinYMid slice"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// T2d-a pass 2 (row DOCGRAD): document-background Gradient forwarding
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — backgroundGradient forwarding (T2d-a pass 2)', () => {
+  const docGradient = { color1: '#AAAAAA', color2: 'white', policy: '-' } as const;
+
+  it('forwards theme.colors.backgroundGradient onto the RenderFragment', () => {
+    const withGradient: typeof theme = {
+      ...theme,
+      colors: { ...theme.colors, backgroundGradient: docGradient },
+    };
+    const fragment = renderActivity(makeGeo(), withGradient);
+    expect(fragment.backgroundGradient).toEqual(docGradient);
+  });
+
+  it('omits the field entirely when the theme carries none (exactOptionalPropertyTypes)', () => {
+    const fragment = renderActivity(makeGeo(), theme);
+    expect('backgroundGradient' in fragment).toBe(false);
+  });
+
+  it('reaches the assembled document as a minted linearGradient + full-canvas rect', () => {
+    const withGradient: typeof theme = {
+      ...theme,
+      colors: { ...theme.colors, backgroundGradient: docGradient },
+    };
+    const svg = assembleSvg(renderActivity(makeGeo(), withGradient));
+    expect(svg).toContain('<linearGradient');
+    expect(svg).toContain('fill="url(#');
+    expect(svg).not.toContain('background:');
+  });
+});

@@ -83,8 +83,12 @@ const BORDER_STYLE_HANDLERS: ReadonlyArray<readonly [keys: readonly string[], ha
 export const KEY_HANDLERS_A: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   [
     ['backgroundcolor'],
-    (acc, _v, color) => {
+    // T2d-a pass 2 (DOCGRAD): `paint` (4th arg) recovers a real `Gradient`
+    // (`HColorSet.java:78-119`) into its own field; `acc.background` stays
+    // the flattened end-colour every other reader already gets.
+    (acc, _v, color, paint) => {
       acc.background = color;
+      if (typeof paint !== 'string') acc.backgroundGradient = paint;
     },
   ],
   [

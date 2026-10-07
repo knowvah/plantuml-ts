@@ -105,6 +105,19 @@ describe('resolveSkinparam — skinparam mode dark', () => {
     expect(theme.colors.graph.activity?.endColor).toBe('#DDDDDD');
   });
 
+  // T2d-a (row DARK-CIRCLE): the circle block's own LineColor (STROKE),
+  // independent of startColor/endColor (BackgroundColor-only converts) --
+  // no skinparam key ever sets it, so dark mode is its ONLY source.
+  it('sets the activity terminal-circle STROKE ink (own dark selector, #d)', () => {
+    const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
+    expect(theme.colors.graph.activity?.circleInk).toBe('#DDDDDD');
+  });
+
+  it('leaves circleInk unset in light mode (falls back to CIRCLE_INK)', () => {
+    const { theme } = resolveSkinparam(new Map(), defaultTheme);
+    expect(theme.colors.graph.activity?.circleInk).toBeUndefined();
+  });
+
   it('sets the generic arrow-label font color AND the arrow/edge line color', () => {
     const { theme } = resolveSkinparam(new Map([['mode', 'dark']]), defaultTheme);
     expect(theme.colors.graph.arrowFontColor).toBe('#FFF');

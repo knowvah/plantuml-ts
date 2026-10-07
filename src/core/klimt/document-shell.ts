@@ -21,6 +21,7 @@
 import { collectDocumentDefs } from '../svg-defs.js';
 import { ROOT_GROUP_OPEN } from '../svg.js';
 import { escapeAttribute } from '../svg-format.js';
+import type { Gradient } from '../paint.js';
 
 /**
  * A literal double-quote, via unicode escape so this file contains zero raw
@@ -70,6 +71,14 @@ export interface ShellFragment {
   readonly width: number;
   readonly height: number;
   readonly background?: string;
+  /** T2d-a pass 2 (row DOCGRAD): present only for activity's gradient
+   *  document background -- when set, {@link assembleDocumentShell}
+   *  omits the root `style="background:...;"` property entirely, the
+   *  same way `SvgGraphics.java:178-183` leaves `backcolorString` null
+   *  for an `HColorGradient` backcolor. Never set by any other producer
+   *  today (confirmed by grep before this change), so this is a no-op
+   *  for every diagram type except activity. */
+  readonly backgroundGradient?: Gradient;
   readonly extraDefs?: string;
   /** See {@link DEFAULT_PRESERVE_ASPECT_RATIO}'s own doc comment -- the
    *  root `preserveAspectRatio` attribute value. `undefined` takes the jar
@@ -163,20 +172,33 @@ function diagramTypeAttrOf(diagramType: string | undefined): string {
  *   (`TextBlockExporter.java:292-294` only stamps it for a real diagram;
  *   verified against every cached error-page golden -- CDD T32).
  */
+/**
+ * Whether the root `style` attribute should carry a `background:` property
+ * at all. G2 N4: excludes the CANONICAL transparent hex `#00000000` --
+ * `svg-graphics-core.ts#finalizeRootAttributes`'s own exact rule
+ * (`this.backcolorString !== '#00000000'`); the two literal-string checks
+ * (`'transparent'`/`'none'`) are kept for any caller passing a raw,
+ * un-resolved value. T2d-a pass 2: a `backgroundGradient` ALSO forces
+ * no-style, regardless of `background`'s own value -- `SvgGraphics.java:
+ * 178-183` leaves `backcolorString` null unconditionally for an
+ * `HColorGradient` backcolor (no white/black/transparent check applies to
+ * it at all).
+ */
+function hasBackgroundStyle(fragment: ShellFragment, background: string): boolean {
+  return (
+    fragment.backgroundGradient === undefined &&
+    background !== 'transparent' &&
+    background !== 'none' &&
+    background !== '#00000000'
+  );
+}
+
 export function assembleDocumentShell(fragment: ShellFragment, diagramType?: string): string {
   const width = Math.trunc(fragment.width);
   const height = Math.trunc(fragment.height);
   const background = fragment.background ?? '#FFFFFF';
   const extraDefs = fragment.extraDefs ?? '';
-  // G2 N4: also excludes the CANONICAL transparent hex `#00000000` --
-  // `svg-graphics-core.ts#finalizeRootAttributes`'s own exact rule
-  // (`this.backcolorString !== '#00000000'`). Class's `renderClass` now
-  // passes an already-`resolveColorToSvgHex`-canonicalized value (G2 N4,
-  // "canonicalBackground"), so a literal `'transparent'`/`'none'` string
-  // never reaches here for class -- only the additive `#00000000` check
-  // catches it; the original two literal-string checks are kept for any
-  // caller that still passes a raw, un-resolved value.
-  const isSolid = background !== 'transparent' && background !== 'none' && background !== '#00000000';
+  const isSolid = hasBackgroundStyle(fragment, background);
   // `escapeAttribute` for the same reason `svg.ts#svgRoot`'s background rect
   // escapes its `fill`: an unparseable skinparam color arrives verbatim.
   const style = `width:${String(width)}px;height:${String(height)}px;${isSolid ? `background:${escapeAttribute(background)};` : ''}`;

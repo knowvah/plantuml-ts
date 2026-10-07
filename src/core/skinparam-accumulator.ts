@@ -10,12 +10,22 @@
  * per-field upstream provenance comments.
  */
 
-import type { Paint } from './paint.js';
+import type { Paint, Gradient } from './paint.js';
 import type { ElementColors } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
 export interface SkinparamAccumulator {
   fontFamily: string | undefined;
+  /** T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` is a
+   *  document-level GRADIENT (`HColorSet.java:109-116`). `background`
+   *  (below) keeps the flattened end-colour string every other consumer
+   *  reads; this carries the recovered `Gradient` to the ONE caller that
+   *  draws it (`assemble-svg.ts`'s activity background-rect finalizer) --
+   *  never widening `background` itself to `Paint` (see that field's own
+   *  doc comment for why). Set only when `skinparam-key-handlers-table-a
+   *  .ts`'s `backgroundcolor` handler's `paint` arg resolves to a real
+   *  `Gradient`, never for a plain colour. */
+  backgroundGradient: Gradient | undefined;
   /** cdd2-T8 (S-10): `skinparam defaultMonospacedFontName <name>` -- see
    *  `theme-graph-colors-c.ts#ThemeGraphColorsC.monospacedFontName`. */
   monospacedFontName: string | undefined;
@@ -213,6 +223,22 @@ export interface SkinparamAccumulator {
   activityDiamondBorder: string | undefined;
   activityStartColor: string | undefined;
   activityEndColor: string | undefined;
+  /** T2d-a (row DARK-CIRCLE): `activityDiagram { circle { start, stop, end {
+   *  LineColor #2 } } }` (`plantuml.skin:379-380`) -- the terminal circles'
+   *  STROKE, independent of {@link activityStartColor}/
+   *  {@link activityEndColor} (which are `BackgroundColor`-only converts,
+   *  `FromSkinparamToStyle.java:137-138`). No upstream skinparam key maps
+   *  to this at all for `start`/`end` (confirmed by grep of
+   *  `FromSkinparamToStyle.java` -- only `stop` has one, via
+   *  `ActivityStopColor` -> `LineColor`, also unported) -- this field is
+   *  therefore NEVER set by a key handler, only seeded in dark mode
+   *  (`skinparam-theme-builder.ts#DARK_SCALAR_SEEDS`). Reusing
+   *  `activityStartColor`/`activityEndColor` here would be wrong in
+   *  general: `activity-renderer-terminals.ts#renderStart`'s own doc
+   *  comment documents the jar-verified regression (`poraji-17-goke817`,
+   *  `ActivityStartColor red` with no dark mode) where the stroke
+   *  incorrectly followed the fill to red. */
+  activityCircleInk: string | undefined;
   swimlaneBorder: string | undefined;
   /** D4 amendment (T1): `SwimlaneTitleBackgroundColor` -- see
    *  `theme-graph-colors-b.ts#swimlaneHeaderBackground`'s own doc comment. */
@@ -278,6 +304,7 @@ const SCALAR_FIELD_NAMES = [
   'fixCircleLabelOverlapping',
   'shadowing',
   'background',
+  'backgroundGradient',
   'border',
   'text',
   'arrow',
@@ -349,6 +376,7 @@ const SCALAR_FIELD_NAMES = [
   'activityDiamondBorder',
   'activityStartColor',
   'activityEndColor',
+  'activityCircleInk',
   'swimlaneBorder',
   'swimlaneHeaderBackground',
   'swimlaneBorderThickness',

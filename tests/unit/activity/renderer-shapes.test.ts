@@ -88,6 +88,18 @@ describe('renderStart', () => {
     const svg = renderStart(makeNode({ kind: 'start' }), activityTheme);
     expect(svg).toContain('fill="#00F"');
   });
+
+  // T2d-a (row DARK-CIRCLE): the stroke follows `circleInk` (dark-seeded),
+  // never the fixed light-mode `CIRCLE_INK` constant -- jar-verified
+  // against `levuma-67-cego489`'s own dark-mode SVG (`stroke="#DDD"`).
+  it('strokes in `theme.colors.graph.activity.circleInk` when set, not the fixed light default', () => {
+    const activityTheme = deepMergeTheme(defaultTheme, {
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
+    });
+    const svg = renderStart(makeNode({ kind: 'start' }), activityTheme);
+    expect(svg).toContain('stroke="#DDD"');
+    expect(svg).not.toContain('stroke="#222"');
+  });
 });
 
 describe('renderStop', () => {
@@ -153,6 +165,20 @@ describe('renderStop', () => {
     expect(svg).not.toContain('#FF0');
     expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
     expect(svg).toContain('fill="#222"');
+  });
+
+  // T2d-a (row DARK-CIRCLE): both ellipses' fill+stroke follow `circleInk`
+  // (dark-seeded), never the fixed light-mode `CIRCLE_INK` constant --
+  // jar-verified against `levuma-67-cego489`'s own dark-mode SVG (both
+  // ellipses `fill`/`stroke` `#DDD`).
+  it('both ellipses follow `theme.colors.graph.activity.circleInk` when set', () => {
+    const activityTheme = deepMergeTheme(defaultTheme, {
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
+    });
+    const svg = renderStop(makeNode({ kind: 'stop', width: 22, height: 22 }), activityTheme);
+    expect((svg.match(/stroke="#DDD"/g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill="#DDD"');
+    expect(svg).not.toContain('#222');
   });
 });
 
