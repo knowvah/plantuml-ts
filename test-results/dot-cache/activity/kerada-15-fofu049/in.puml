@@ -1,0 +1,20 @@
+@startuml
+|#PeachPuff|A|
+|#Plum|B|
+|#DarkSeaGreen|C|
+|A|
+:start;
+|C|
+
+:some actions that will fork;
+split
+:forked A;
+|A|
+split again
+:forked B;
+
+|B|
+:B continuation;
+end split
+stop
+@enduml

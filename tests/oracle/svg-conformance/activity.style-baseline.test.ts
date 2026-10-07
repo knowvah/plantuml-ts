@@ -261,10 +261,12 @@ describe('svg-activity style census — corpus presence', () => {
     // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
     // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
     // Derivation: 373 - 1 = 372.
-    expect(manifest.fixtures.length).toBe(372);
+    // add4/T0b (2026-10-07): the 79 uncaptured tests/corpus/activity fixtures
+    // captured (D1; tmp1 stays retired). Derivation: 372 + 79 = 451.
+    expect(manifest.fixtures.length).toBe(451);
   });
 
-  it('the partition matches the sibling ratchet: 349 baseline / 0 error / 23 jar-error', () => {
+  it('the partition matches the sibling ratchet: 412 baseline / 7 error / 32 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -283,9 +285,15 @@ describe('svg-activity style census — corpus presence', () => {
     // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
     // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
     // Derivation: 350 - 1 = 349 baseline.
-    expect(baselineFixtures.length).toBe(349);
-    expect(errorFixtures.length).toBe(0);
-    expect(jarErrorFixtures.length).toBe(23);
+    // add4/T0b (2026-10-07): 79 new captures -- 63 render and were promoted
+    // error -> baseline by the promotion pass; 9 golden jar error pages
+    // (PSystemError.java:148-155); 7 our activity parser refuses (4 parser
+    // gaps: CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender; 3 misfiled non-activity sources the jar draws
+    // as SEQUENCE/CLASS). Derivation: 349 + 63 = 412 / 0 + 7 / 23 + 9 = 32.
+    expect(baselineFixtures.length).toBe(412);
+    expect(errorFixtures.length).toBe(7);
+    expect(jarErrorFixtures.length).toBe(32);
   });
 });
 

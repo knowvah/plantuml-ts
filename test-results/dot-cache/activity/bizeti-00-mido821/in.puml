@@ -1,0 +1,26 @@
+@startuml
+skinparam activityArrowColor green
+
+:start;
+partition foo {
+:exe1;
+if (test) then
+  :toto2;
+  fork
+    partition fork1 {
+      :some;
+    }
+  forkagain
+    :toto2;
+  endfork
+endif
+:other;
+}
+partition last {
+:stop ?;
+}
+partition last {
+stop
+}
+stop
+@enduml

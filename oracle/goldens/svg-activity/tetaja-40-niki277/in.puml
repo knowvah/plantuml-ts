@@ -1,0 +1,18 @@
+@startuml
+|#Lavender|RM ACOSS|
+start
+fork
+:KICKOFF RM ACOSS;
+
+fork again
+|#AliceBlue|CP ou delegataire|
+:KICKOFF CP;
+
+fork again
+|#Gainsboro|DEV CDS|
+:KICKOFF CDS;
+end fork
+
+
+Stop
+@enduml

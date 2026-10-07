@@ -1,0 +1,6 @@
+@startuml
+floating note left
+      a,b,c
+end note
+start
+@enduml

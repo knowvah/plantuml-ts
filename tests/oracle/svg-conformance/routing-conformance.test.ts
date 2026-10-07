@@ -870,10 +870,22 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5420 -> 5437 / 6396 -> 6413 at add3/close-b3 (2026-10-07): 17
     // svg-activity clone rows, same shape. Derivation: 5437 + 871 + 105 = 6413.
-    expect(pinnedAgree.length).toBe(5437);
-    expect(pinnedMisroutes.length).toBe(871);
-    expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6413);
+    //
+    // 5437 -> 5507 / 871 -> 875 / 105 -> 110 / 6413 -> 6492 at add4/T0b
+    // (2026-10-07): the 79 uncaptured tests/corpus/activity fixtures captured
+    // (tmp1, retired at add3/T0a, excluded). 66 agree ACTIVITY/ACTIVITY, 4
+    // agree NONE/NONE (jar ErrorUml past the head window), 4 known-misroute
+    // (activity parser gaps: page, link, hide footbox, hide stereotype --
+    // ledger unknown-ledger/add4-T0b-activity.json), 5 jar-error pages.
+    // Derivation: 5507 + 875 + 110 = 6492.
+    //
+    // 5507 -> 5518 / 6492 -> 6503 at add4/close-b0 (2026-10-07): 11
+    // svg-activity clone rows (new captures pinned zero-diff), same shape.
+    // Derivation: 5518 + 875 + 110 = 6503.
+    expect(pinnedAgree.length).toBe(5518);
+    expect(pinnedMisroutes.length).toBe(875);
+    expect(pinnedJarErrors.length).toBe(110);
+    expect(manifest.fixtures.length).toBe(6503);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -929,7 +941,9 @@ describe('routing conformance — jar-error classification', () => {
     // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
     // 908 -> 904 at add2/close-b1p: 4 `end merge` activity retirements.
     // 904 -> 870 at add2/close-b2: 34 activity parser-gap retirements.
-    expect(censused.length).toBe(870);
+    // 870 -> 874 at add4/T0b: 4 activity parser-gap misroutes (CommandPage,
+    // CommandLink3, CommandFootboxIgnored, CommandHideShowByGender).
+    expect(censused.length).toBe(874);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

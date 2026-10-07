@@ -791,8 +791,15 @@ describe('refusal coverage — baseline shape', () => {
     // svg-activity clone rows. Derivation: 6166 + 230 = 6396.
     // 6396 -> 6413 / 6166 -> 6183 / 230 at add3/close-b3 (2026-10-07): 17
     // svg-activity clone rows. Derivation: 6183 + 230 = 6413.
-    expect(manifest.fixtures.length).toBe(6413);
-    expect(pinnedJarErrors.length).toBe(105);
+    // 6413 -> 6492 / 6183 -> 6250 / 230 -> 242 at add4/T0b (2026-10-07): the
+    // 79 uncaptured tests/corpus/activity fixtures captured -- 66 render on
+    // both sides, 5 jar-error pages (we render tajiri-57-sepu092, error the
+    // other 4), 8 known-gap refusals (ledger
+    // unknown-ledger/add4-T0b-activity.json). Derivation: 6250 + 242 = 6492.
+    // 6492 -> 6503 / 6250 -> 6261 / 242 at add4/close-b0 (2026-10-07): 11
+    // svg-activity clone rows. Derivation: 6261 + 242 = 6503.
+    expect(manifest.fixtures.length).toBe(6503);
+    expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -813,7 +820,10 @@ describe('refusal coverage — baseline shape', () => {
     // engine class, from a fresh measurement.
     // 268 -> 264 at add2/close-b1p: the 4 `end merge` rows render.
     // 264 -> 230 at add2/close-b2: the 34 remaining activity parser-gap rows render.
-    expect(pinnedErroring.length).toBe(230);
+    // 230 -> 242 at add4/T0b: of the 79 new activity captures, 8 known-gap
+    // refusals + 4 of the 5 jar-error pages error here too (tajiri-57-sepu092's
+    // jar errors, we render -- refusal cohort jar-error).
+    expect(pinnedErroring.length).toBe(242);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -851,7 +861,10 @@ describe('refusal coverage — baseline shape', () => {
     // 6119 -> 6155 at add3/close-b2 (36 svg-activity clones).
     // 6155 -> 6166 at add3/close-b3w1 (11 svg-activity clones).
     // 6166 -> 6183 at add3/close-b3 (17 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6183);
+    // 6183 -> 6250 at add4/T0b (66 newly captured corpus fixtures render on
+    // both sides, plus jar-error page tajiri-57-sepu092, which we render).
+    // 6250 -> 6261 at add4/close-b0 (11 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6261);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -908,7 +921,10 @@ describe('refusal coverage — baseline shape', () => {
     // minute it reads jarRendered: false, so it is no defect to excuse.
     // 197 -> 196 at cdd5/close-b5: unknown/xuloxo-85-vibu502's Tim gap is
     // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
-    expect(gaps.length).toBe(196);
+    // 196 -> 204 at add4/T0b: 8 newly captured activity fixtures -- 4 parser
+    // gaps (each names its missing Command) and 4 jar ErrorUml pages past
+    // the head window (Welcome preamble, PSystemError.java:217-218).
+    expect(gaps.length).toBe(204);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

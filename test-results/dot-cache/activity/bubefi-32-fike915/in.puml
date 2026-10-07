@@ -1,0 +1,8 @@
+@startuml
+|swinlane1|This is the name of swinlane1
+:f1;
+|#red|swinlane3|
+:swinlane3;
+|swinlane1|
+:f2;
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+skinparam wrapWidth 267
+skinparam ActivityFontSize 10
+skinparam NoteFontSize 10
+
+start
+:Hello world;
+:Patients over 65 are elligible for pneumococcal vaccine! This is given as a single lifetime dose. Delay to allow optimal response.;
+     note left #white
+Patients over 65 are elligible for pneumococcal vaccine. This is given as a single lifetime dose. Delay to allow optimal response.
+      end note
+stop
+@enduml

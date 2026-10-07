@@ -1,0 +1,4 @@
+@startuml
+start
+[[http://www.google.com]]:foo1;
+@enduml

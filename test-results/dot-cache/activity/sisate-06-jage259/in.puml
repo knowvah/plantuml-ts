@@ -1,0 +1,21 @@
+@startuml
+!define S(x) | S x |
+' activate to suppress swimlanes
+'!define S(x) 
+
+
+S(1)
+S(2)
+
+S(1)
+start
+switch (condition)
+case (condition S1 ?)
+  :activity S1-1;
+  stop
+S(2)
+case (condition S2 ?)
+  :activity S2-1;
+  stop
+endswitch
+@enduml

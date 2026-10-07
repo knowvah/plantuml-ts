@@ -1,0 +1,20 @@
+@startuml
+start
+partition Conductor {
+ :Climbs on Platform;
+ fork
+	:Bows;
+}
+partition Audience {
+ fork again
+	:Applauds;
+partition Conductor {
+ end fork
+ :Waves Arms;
+}
+partition Orchestra {
+ :Introduction;
+ :Plays Music;
+}
+end
+@enduml

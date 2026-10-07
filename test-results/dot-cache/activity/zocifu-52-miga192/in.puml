@@ -1,0 +1,24 @@
+@startuml
+skinparam HyperlinkColor #White
+
+skinparam Default {
+  FontColor #004C5D
+}
+
+skinparam Activity {
+  FontColor #White
+  BackgroundColor #D3637D
+}
+
+skinparam Partition {
+  BackgroundColor #FDF6E3
+}
+
+start
+partition "[[https://google.com/ demo]]" {
+  :action1;
+  :[[https://google.com/ action2 with link]];
+}
+
+stop
+@enduml

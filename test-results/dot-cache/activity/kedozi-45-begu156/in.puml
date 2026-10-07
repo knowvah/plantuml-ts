@@ -1,0 +1,5 @@
+@startuml
+:any;
+switch (any2)
+        :Charged;
+@enduml
