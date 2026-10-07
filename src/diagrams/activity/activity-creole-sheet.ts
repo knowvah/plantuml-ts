@@ -173,8 +173,16 @@ export function drawActionTextBlock(tb: SheetBlock1, x: number, y: number, measu
 const DRAW_MEASURER = new WidthTableMeasurer();
 
 /**
- * The `renderAction` entry point: `null` when this label is not (yet)
- * this spike's verified scope:
+ * `true` when this label is in this spike's verified scope -- shared by
+ * {@link renderActionLabel} (drawing) AND `gtile-action.ts#sheetDimension`
+ * (sizing), so the two NEVER disagree about which labels use the Sheet
+ * (a label `sheetDimension` sized via the Sheet but `renderActionLabel`
+ * drew via the pre-existing per-line path, or vice-versa, would size and
+ * draw the SAME box two different ways -- jar-verified regression on
+ * `fikuki-99-kulu790`/`mufixi-71-koma752`, both `skinparam
+ * defaultTextAlignment center` with a `{{ }}` embed, caught once the
+ * nested-diagram renderer started actually rendering instead of silently
+ * falling back). Excluded, each a CONFIRMED blocker, not a guess:
  *  - a table row (`StripeTable`'s own dedicated draw, `activity-
  *    renderer-text.ts#renderCreoleTableGrid`, untouched);
  *  - a non-LEFT alignment (`FtileBox.java:224-233`'s CENTER/RIGHT
@@ -182,25 +190,39 @@ const DRAW_MEASURER = new WidthTableMeasurer();
  *    already ports for mindmap/wbs -- not yet wired here, so falling
  *    back is the honest choice over guessing the offset);
  *  - a bare `----`/`====`/`....` separator (`HORIZONTAL_LINE`,
- *    `CreoleStripeSimpleParser.ts#classifyStripeLine`): CONFIRMED
- *    BLOCKER, not a guess -- `StripeSimple.ts#analyzeAndAdd` adds a
- *    REAL `CreoleHorizontalLine` atom, whose `drawU` (`CreoleHorizontalLine
- *    .ts:115`) calls `ug.draw(UHorizontalLine)`; `UGraphicSvg.ts#register`
- *    (`u-graphic-svg.ts:164-178`) registers drivers for `URectangle`/
- *    `UEllipse`/`ULine`/`UPolygon`/`UPath`/`DotPath`/`UText`/`UImage`/
- *    `UComment`/`UEmpty` -- NOT `UHorizontalLine` -- so `ug.draw(...)`
- *    throws `"No driver registered for shape UHorizontalLine"`
- *    (`AbstractCommonUGraphic.ts:140`), jar-reproduced via `bigide-91-
- *    bise382`. A real fix needs a NEW SVG driver plus the `Stencil`
- *    context `UGraphicStencil`/`AbstractUGraphicHorizontalLine`
- *    resolve the rule's clip bounds from (neither exists in this
- *    port's `UGraphicSvg` yet) -- a `src/core/**` change, out of this
- *    pass's remaining scope; `bigide`'s own row is ALREADY correct via
- *    the pre-existing per-line path's `drawHorizontalRule`
- *    (`activity-renderer-text.ts`, this mission's own STRIPE commit),
- *    so falling back here costs nothing.
- * The caller's own `<code>` dispatch (`renderActionCodeBlock`) already
- * returns before reaching this function, so no code-block check here.
+ *    `CreoleStripeSimpleParser.ts#classifyStripeLine`): `StripeSimple.ts
+ *    #analyzeAndAdd` adds a REAL `CreoleHorizontalLine` atom, whose
+ *    `drawU` (`CreoleHorizontalLine.ts:115`) calls `ug.draw
+ *    (UHorizontalLine)`; `UGraphicSvg.ts#register` (`u-graphic-svg.ts
+ *    :164-178`) registers drivers for `URectangle`/`UEllipse`/`ULine`/
+ *    `UPolygon`/`UPath`/`DotPath`/`UText`/`UImage`/`UComment`/`UEmpty`
+ *    -- NOT `UHorizontalLine` -- so `ug.draw(...)` throws `"No driver
+ *    registered for shape UHorizontalLine"` (`AbstractCommonUGraphic.ts
+ *    :140`), jar-reproduced via `bigide-91-bise382`. A real fix needs a
+ *    NEW SVG driver plus the `Stencil` context `UGraphicStencil`/
+ *    `AbstractUGraphicHorizontalLine` resolve the rule's clip bounds
+ *    from (neither exists in this port's `UGraphicSvg` yet) -- a
+ *    `src/core/**` change, out of this pass's remaining scope; `bigide`'s
+ *    own row is ALREADY correct via the pre-existing per-line path's
+ *    `drawHorizontalRule` (this mission's own STRIPE commit);
+ *  - a `[[url]]` run: jar-verified regression on `nesozi-09-zezu092`
+ *    (`skinparam hyperlinkColor black`/`hyperlinkUnderline false`) --
+ *    {@link activitySkinSimple}'s minimal `ISkinSimple` does not (yet)
+ *    thread those two theme overrides into the real `CreoleParser`'s
+ *    resolved `FontConfiguration` for a url run.
+ */
+export function isActionSheetEligible(label: string, theme: Theme): boolean {
+  if (activityHorizontalAlignment(theme) !== 'left') return false;
+  return !label
+    .split('\n')
+    .some((l) => isTableRowLine(l) || classifyStripeLine(l).type === 'HORIZONTAL_LINE' || l.includes('[['));
+}
+
+/**
+ * The `renderAction` entry point: `null` when {@link isActionSheetEligible}
+ * says no (its own doc comment for every excluded case). The caller's
+ * own `<code>` dispatch (`renderActionCodeBlock`) already returns
+ * before reaching this function, so no code-block check here.
  */
 export function renderActionLabel(
   label: string,
@@ -208,15 +230,7 @@ export function renderActionLabel(
   fontSize: number,
   box: { readonly x: number; readonly y: number },
 ): string | null {
-  if (activityHorizontalAlignment(theme) !== 'left') return null;
-  const physicalLines = label.split('\n');
-  if (
-    physicalLines.some(
-      (l) => isTableRowLine(l) || classifyStripeLine(l).type === 'HORIZONTAL_LINE' || l.includes('[['),
-    )
-  ) {
-    return null;
-  }
+  if (!isActionSheetEligible(label, theme)) return null;
   const tb = buildActionTextBlock(label, theme, fontSize, 'activity');
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
   return drawActionTextBlock(tb, box.x, box.y, DRAW_MEASURER, font);

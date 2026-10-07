@@ -9,7 +9,7 @@ import { activityMinimumWidth } from '../activity-text-style.js';
 import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
 import type { StringMeasurer, FontSpec } from '../../../core/measurer.js';
 import { isTableRowLine, tableRowCellsOf } from '../activity-text-placement.js';
-import { buildActionTextBlock, klimtStringBounder } from '../activity-creole-sheet.js';
+import { buildActionTextBlock, klimtStringBounder, isActionSheetEligible } from '../activity-creole-sheet.js';
 
 /** `AtomText#calculateDimensionSlow`'s own floor (`AtomText.java:179-181`,
  *  `if (h < 10) h = 10`), applied to every creole text atom -- including
@@ -169,7 +169,7 @@ function sheetDimension(
   theme: Theme,
   fontSize: number,
 ): { width: number; height: number } | null {
-  if (label === '') return null;
+  if (label === '' || !isActionSheetEligible(label, theme)) return null;
   const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: theme.fontFamily, size: fontSize });
   const dim = buildActionTextBlock(label, theme, fontSize, 'activity').calculateDimension(sheetBounder);
   return { width: dim.getWidth(), height: dim.getHeight() };
