@@ -10,14 +10,10 @@ const Y_SEPARATION = 20;
 /** `FtileIfLongVertical.java:80`: `marginy1`. */
 const MARGIN_Y1 = 30;
 /**
- * `FtileIfLongVertical.create`'s own `double west = 10;` (`:141`), the
- * `FtileMargedWest(branch.getFtile(), west)` margin every branch body tile
- * gets (`:165`). Upstream only raises `west` above this floor when a branch
- * carries a non-empty `Branch#getInlabel()` (a `->label->` on the branch
- * line) -- no AST analogue in this port (documented gap shared with
- * `conditional-builder.ts#longHorizontalBranches`' own doc), so `west`
- * never moves off its initial value here. The 10px margin itself is NOT
- * gated on inlabel support -- it always applies.
+ * `FtileIfLongVertical.create`'s own `double west = 10;` (`:141`) -- the
+ * floor of the `FtileMargedWest(branch.getFtile(), west)` margin every
+ * branch body tile gets (`:165`). {@link westMargin} raises it to the widest
+ * `Branch#getInlabel()` (`:154-158`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMargedWest.java
  */
 const WEST_MARGIN = 10;
@@ -33,6 +29,22 @@ const LAST_ELSE_ARROW_HEIGHT = 40;
  *  identical precedent. */
 const MERGE_DIAMOND_SIZE = HEXAGON_HALF_SIZE * 2;
 
+/**
+ * A branch's own `Branch#getInlabel()` (`(No) elseif ...`): the text and its
+ * `tbInlabel.calculateDimension(...).getWidth()` (`FtileIfLongVertical.java:
+ * 154-157`), measured by the builder at the arrow font.
+ */
+export interface VerticalInlabel {
+  readonly label: string;
+  readonly width: number;
+}
+
+/** `west = max(west, tbInlabel.width)` over every branch, from the floor
+ *  {@link WEST_MARGIN} (`FtileIfLongVertical.java:141,154-158`). */
+function westMargin(inlabels: readonly (VerticalInlabel | undefined)[]): number {
+  return Math.max(WEST_MARGIN, ...inlabels.map((l) => l?.width ?? 0));
+}
+
 interface MinWidthPad {
   readonly outer: number;
   readonly contentDx: number;
@@ -42,7 +54,7 @@ interface MinWidthPad {
 /** `FtileMinWidthCentered(tile2, 30)` -- byte-identical to `gtile-if-long-
  *  horizontal.ts`'s own `minWidthCentered` (D5: no shared helper module
  *  between builder-specific tile files), used here ONLY for `tile2`
- *  (branch tiles get {@link WEST_MARGIN}'s unilateral margin instead, never
+ *  (branch tiles get the {@link westMargin} unilateral margin instead, never
  *  this centering).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMinWidthCentered.java */
 function minWidthCentered(tile: Tile, minWidth: number): MinWidthPad {
@@ -70,7 +82,7 @@ export interface VerticalBranchLayout {
   /** The branch body tile's own CONTENT origin -- i.e. the box origin
    *  (`allDiamondsWidth + (dimTotal.width - allDiamondsWidth - dim1.width)
    *  / 2`, `getTranslate1`, `:459-471`) already shifted by {@link
-   *  WEST_MARGIN} (`FtileMargedWest`'s own `dx` content shift). */
+   *  westMargin} (`FtileMargedWest`'s own `dx` content shift). */
   readonly tileX: number;
   readonly tileY: number;
   readonly hasPointOut: boolean;
@@ -122,15 +134,16 @@ function buildBranchLayouts(
   tiles: readonly Tile[],
   diamondsWidth: number,
   width: number,
+  west: number,
 ): VerticalBranchLayout[] {
   return diamonds.map((d, i) => {
     const tile = tiles[i]!;
-    const outer = tile.width + WEST_MARGIN;
+    const outer = tile.width + west;
     const boxX = diamondsWidth + (width - diamondsWidth - outer) / 2;
     return {
       diamondX: (diamondsWidth - d.width) / 2,
       diamondY: translateDy(i, diamonds, tiles),
-      tileX: boxX + WEST_MARGIN,
+      tileX: boxX + west,
       tileY: translateDy(i, diamonds, tiles) + d.height,
       hasPointOut: tile.hasPointOut(),
     };
@@ -140,9 +153,14 @@ function buildBranchLayouts(
 /** Orchestrates {@link computeWidthHeight}/{@link buildBranchLayouts} plus
  *  `tile2`'s own placement (`getTranslate2`, `:484-490`) and `lastDiamond`'s
  *  (`getTranslateLastDiamond`, `:452-457`). */
-function computeGeometry(diamonds: readonly GtileDiamondInside2[], tiles: readonly Tile[], tile2: Tile): FullGeo {
+function computeGeometry(
+  diamonds: readonly GtileDiamondInside2[],
+  tiles: readonly Tile[],
+  tile2: Tile,
+  west: number,
+): FullGeo {
   const diamondsWidth = allDiamondsWidth(diamonds);
-  const tilesOuterWidth = tiles.map((t) => t.width + WEST_MARGIN);
+  const tilesOuterWidth = tiles.map((t) => t.width + west);
   let branchColumnHeight = MARGIN_Y1;
   for (let i = 0; i < diamonds.length; i++) branchColumnHeight += diamonds[i]!.height + tiles[i]!.height;
   const tile2Pad = minWidthCentered(tile2, MIN_TILE2_WIDTH);
@@ -156,7 +174,7 @@ function computeGeometry(diamonds: readonly GtileDiamondInside2[], tiles: readon
     branchCount: diamonds.length,
   });
 
-  const branches = buildBranchLayouts(diamonds, tiles, diamondsWidth, width);
+  const branches = buildBranchLayouts(diamonds, tiles, diamondsWidth, width, west);
   const tile2Y = translateDy(diamonds.length, diamonds, tiles);
   const tile2X = (width - tile2Pad.outer) / 2 + tile2Pad.contentDx;
   const lastDiamondX = (width - MERGE_DIAMOND_SIZE) / 2;
@@ -175,11 +193,10 @@ function computeGeometry(diamonds: readonly GtileDiamondInside2[], tiles: readon
  * point out. Geometry only -- `layout/walk-if-long-vertical.ts` emits the
  * nodes and the `conns`-order connectors from these fields.
  *
- * `west`/inlabel (`FtileMargedWest`'s own margin) is a documented gap, same
- * convention as `gtile-if-long-horizontal.ts`'s own `inlabelSizes`: zero
- * corpus/authored fixtures in this port use `Branch#getInlabel()`, so the
- * margin stays at its upstream-default 10px floor ({@link WEST_MARGIN})
- * rather than ever growing.
+ * `inlabels[i]` is branch `i`'s own `Branch#getInlabel()`: every inlabel
+ * widens the shared `west` margin ({@link westMargin}) and branch `i+1`'s
+ * inlabel labels `ConnectionVertical(diamond_i, diamond_i+1)`
+ * (`FtileIfLongVertical.java:183-190`, drawn by `walk-if-long-vertical.ts`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java
  */
 export class GtileIfLongVertical extends TileComposite {
@@ -212,18 +229,27 @@ export class GtileIfLongVertical extends TileComposite {
    *  the tile, never the source `ActivityIf` node, matching `gtile-switch
    *  .ts#caseLabels`'s own precedent for an edge-carried label. */
   readonly elseLabel: string | undefined;
+  /** Per-branch `Branch#getInlabel()` -- see this class's own doc. */
+  readonly inlabels: readonly (VerticalInlabel | undefined)[];
   private readonly nbOut: number;
 
-  constructor(diamonds: GtileDiamondInside2[], tiles: Tile[], tile2: Tile, elseLabel: string | undefined) {
+  constructor(
+    diamonds: GtileDiamondInside2[],
+    tiles: Tile[],
+    tile2: Tile,
+    elseLabel: string | undefined,
+    inlabels: readonly (VerticalInlabel | undefined)[] = [],
+  ) {
     super();
     if (diamonds.length !== tiles.length) throw new Error('GtileIfLongVertical: diamonds/tiles length mismatch');
     this.diamonds = diamonds;
     this.tiles = tiles;
     this.tile2 = tile2;
     this.elseLabel = elseLabel;
+    this.inlabels = inlabels;
     this.hasTile2PointOut = tile2.hasPointOut();
 
-    const geo = computeGeometry(diamonds, tiles, tile2);
+    const geo = computeGeometry(diamonds, tiles, tile2, westMargin(inlabels));
     this.width = geo.width;
     this.height = geo.height;
     this.left = geo.width / 2;

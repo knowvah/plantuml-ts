@@ -131,3 +131,29 @@ describe('layoutActivity — long-vertical: a branch ending in stop skips its Th
     expect(geo.edges.length).toBe(7);
   });
 });
+
+describe('layoutActivity — long-vertical: an elseif inlabel labels ConnectionVertical', () => {
+  const ast = chainAst(verticalPragma());
+  const ifNode = ast.nodes[0] as Extract<ActivityDiagramAST['nodes'][number], { kind: 'if' }>;
+  const withInlabel: ActivityDiagramAST = {
+    ...ast,
+    nodes: [{ ...ifNode, elseIfBranches: [{ ...ifNode.elseIfBranches[0]!, incomingLabel: 'No' }] }],
+  };
+  const geo = layoutActivity(withInlabel, baseTheme, measurer);
+  const plain = layoutActivity(ast, baseTheme, measurer);
+
+  it('ConnectionVertical carries the inlabel, CENTER-aligned (FtileIfLongVertical.java:183-190,281-282)', () => {
+    expect(geo.edges[2]!.label).toBe('No');
+    expect(geo.edges[2]!.labelAlign).toEqual({ vertical: 'CENTER' });
+    expect(plain.edges[2]!.label).toBeUndefined();
+  });
+
+  it('the inlabel widens EVERY branch west margin by the same amount (FtileMargedWest, :141,157,165)', () => {
+    const gap = (g: typeof geo, body: string): number =>
+      g.nodes.find((n) => n.label === body)!.x - g.nodes.find((n) => n.label === 'c1')!.x;
+    const grewA = gap(geo, 'a') - gap(plain, 'a');
+    const grewB = gap(geo, 'b') - gap(plain, 'b');
+    expect(grewA).toBeGreaterThan(0);
+    expect(grewB).toBeCloseTo(grewA, 9);
+  });
+});

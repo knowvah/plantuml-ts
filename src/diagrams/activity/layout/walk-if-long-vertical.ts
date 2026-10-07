@@ -179,9 +179,8 @@ function connectionVerticalIn(ctx: LvCtx, i: number): void {
 /**
  * `ConnectionVertical` -- `MergeStrategy.FULL`. `diamond_i.SOUTH_HOOK ->
  * diamond_{i+1}.NORTH_HOOK`, a straight line (no elbow). `label` is the
- * NEXT branch's own inlabel (`Branch#getInlabel()`) -- always unset here,
- * same documented gap as `gtile-if-long-vertical.ts`'s own `WEST_MARGIN`
- * doc, so no label is ever attached.
+ * NEXT branch's own inlabel (`Branch#getInlabel()`, `:183-190`), drawn
+ * `withLabel(label, VerticalAlignment.CENTER)` (`:281-282`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:265-298
  *
  * T2h: `p1.x`/`p2.x` resolve each diamond's own LOCAL `diamondX` + hook
@@ -207,6 +206,11 @@ function connectionVertical(ctx: LvCtx, i: number): void {
     y: o2.y + d2.getCoord(NORTH_HOOK).y,
   };
   pushEdge(out, [p1, p2], laneOut(d1, myLane), laneIn(d2, myLane));
+  const inlabel = t.inlabels[i + 1];
+  if (inlabel === undefined) return;
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.label = inlabel.label;
+  edge.labelAlign = { vertical: 'CENTER' };
 }
 
 /**
@@ -299,7 +303,13 @@ function connectionThenOutConnect(ctx: LvCtx, i: number): void {
  * VerticalIn*, Vertical*, ThenOut, ThenOutConnect*, In, LastElse,
  * LastElseOut (`FtileIfLongVertical.java:173-201`).
  */
-export function walkIfLongVertical(t: GtileIfLongVertical, x: number, y: number, myLane: string | undefined, out: Out): void {
+export function walkIfLongVertical(
+  t: GtileIfLongVertical,
+  x: number,
+  y: number,
+  myLane: string | undefined,
+  out: Out,
+): void {
   const ctx: LvCtx = { t, x, y, myLane, out };
 
   for (let i = 0; i < t.tiles.length; i++) {
