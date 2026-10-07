@@ -72,11 +72,11 @@ describe('shapesOf — condition diamonds/hexagons', () => {
     expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 20, width: 40, height: 30 }]);
   });
 
-  it('if-split with no label is a diamond polygon (y centred on width/2, not the node height)', () => {
+  it('if-split with no label is a diamond polygon at the box bottom (FtileDiamond.java:87-89)', () => {
     const n = node('if-split', { x: 10, y: 20, width: 40, height: 30 });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
-    // size = width/2 = 20; cy = y + height/2 = 35; diamond y = cy - size = 15
-    expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 15, width: 40, height: 40 }]);
+    // size = width/2 = 20; cy = y + height - size = 30; diamond y = cy - size = 10
+    expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 10, width: 40, height: 40 }]);
   });
 
   it('repeat-cond is always a hexagon, even with no label', () => {
