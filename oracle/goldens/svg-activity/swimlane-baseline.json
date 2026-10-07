@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "55b70149",
+  "measuredAgainstCommit": "3b36df73",
   "fixtures": [
     {
       "type": "activity",
@@ -2600,7 +2600,7 @@
         "dividerXs": [
           20,
           103.238,
-          296.9
+          316.9
         ],
         "titles": [
           {
@@ -2610,14 +2610,14 @@
           },
           {
             "fontSize": "18",
-            "x": "165.531",
+            "x": "175.531",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 275.9,
+          "width": 295.9,
           "height": 18,
           "fill": "none"
         },
@@ -2628,10 +2628,10 @@
           },
           {
             "x": 103.2375,
-            "width": 193.66250000000002
+            "width": 213.66249999999997
           }
         ],
-        "width": "322",
+        "width": "342",
         "height": "151"
       },
       "jar": {
@@ -5747,40 +5747,40 @@
       "ours": {
         "dividerXs": [
           20,
-          98.063,
-          217.219
+          99.7,
+          288.556
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "25",
+            "x": "25.819",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "123.553",
+            "x": "160.041",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 196.219,
+          "width": 267.556,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 20,
-            "width": 78.0625
+            "width": 79.69999999999999
           },
           {
-            "x": 98.0625,
-            "width": 119.15625000000003
+            "x": 99.69999999999999,
+            "width": 188.8562500000001
           }
         ],
-        "width": "243",
-        "height": "357"
+        "width": "314",
+        "height": "295"
       },
       "jar": {
         "dividerXs": [

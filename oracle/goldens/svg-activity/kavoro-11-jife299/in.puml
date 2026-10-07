@@ -1,0 +1,14 @@
+@startuml
+|Slowlane|
+:walk;
+
+|Fastlane|
+:run;
+  note right
+    test right
+  end note
+
+  note left
+    test left
+  end note
+@enduml

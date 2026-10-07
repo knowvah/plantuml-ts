@@ -1,0 +1,19 @@
+@startuml
+|laneOne|
+:action1;
+|laneTwo|
+:action2;
+|laneOne|
+:action3;
+|laneTwo|
+floating note right
+I would like this
+note to appear
+in laneTwo
+even though
+there is no action
+there
+endnote
+|laneOne|
+:action3;
+@enduml
