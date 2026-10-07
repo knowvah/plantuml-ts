@@ -9,6 +9,7 @@ import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
 import { GtileBreak } from '../../../../src/diagrams/activity/tiles/gtile-break.js';
+import { GtileGroup } from '../../../../src/diagrams/activity/tiles/gtile-group.js';
 import { GtileStop } from '../../../../src/diagrams/activity/tiles/gtile-stop.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
@@ -625,6 +626,49 @@ describe('assignCoordinates — nodes are placed inside their own lane', () => {
   it('lane B starts exactly where lane A ends (adjacent, no gap or overlap)', () => {
     const geo = place('a', 'b');
     expect(geo.swimlanes[1]!.x).toBe(geo.swimlanes[0]!.x + geo.swimlanes[0]!.width);
+  });
+});
+
+describe('assignCoordinates — a group frame draws once per touched lane (T3h)', () => {
+  it('a group whose body touches two lanes produces two same-sized frame nodes', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+    b.swimlane = 'B';
+    const body = new GtileTopDown([a, b], bounder, theme);
+    const group = new GtileGroup('G', body, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(2);
+    expect(frames[0]!.width).toBe(frames[1]!.width);
+    expect(frames[0]!.height).toBe(frames[1]!.height);
+    expect(new Set(frames.map((f) => f.swimlane))).toEqual(new Set(['A', 'B']));
+  });
+
+  it('a group whose body stays in one lane still produces exactly one frame node', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const group = new GtileGroup('G', a, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A'] };
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(1);
+  });
+
+  it('a group in a diagram with no swimlanes renders one untagged frame (pre-T3h behavior)', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const group = new GtileGroup('G', a, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(1);
+    expect(frames[0]!.swimlane).toBeUndefined();
   });
 });
 

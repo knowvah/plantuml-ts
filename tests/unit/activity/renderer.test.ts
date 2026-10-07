@@ -300,6 +300,67 @@ describe('renderActivity — swimlanes', () => {
   });
 });
 
+/**
+ * T3h (row XLANE): `Swimlanes.java:350-352`'s Cross pass draws a
+ * cross-lane connection's own non-`Snake` decoration (`midArrowAt`)
+ * immediately, BEFORE `cross.flushUg()` drains every deferred `Snake` --
+ * i.e. before that same edge's own line. Verified against
+ * `kijazo-83-kipu485`'s jar element dump (`.agent-notes/add3-T3h.md`).
+ */
+describe('renderActivity — cross-lane decoration ordering (T3h)', () => {
+  it('draws a midArrowAt decoration BEFORE its own edge, in a swimlane diagram', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+        midArrowAt: { x: 50, y: 20, dir: 'up' },
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const polygons = result.match(/<polygon[^>]*points="[^"]*"[^>]*>/g) ?? [];
+    const midArrowPolygon = polygons.find((p) => p.includes('50,20'));
+    expect(midArrowPolygon).toBeDefined();
+    const midArrowIdx = result.indexOf(midArrowPolygon!);
+    const edgeLineIdx = result.indexOf('<line x1="60" y1="20"');
+    expect(edgeLineIdx).toBeGreaterThan(-1);
+    expect(midArrowIdx).toBeLessThan(edgeLineIdx);
+  });
+
+  it('renders exactly one midArrowAt polygon -- never duplicated by the split', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+        midArrowAt: { x: 50, y: 20, dir: 'up' },
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const polygons = result.match(/<polygon[^>]*points="[^"]*"[^>]*>/g) ?? [];
+    const matching = polygons.filter((p) => p.includes('50,20'));
+    expect(matching.length).toBe(1);
+  });
+
+  it('a diagram with no midArrowAt edges is unaffected by the new pass', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect((result.match(/<polygon/g) ?? []).length).toBe(1);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Test 6: diamond node (if-split) renders a polygon
 // ---------------------------------------------------------------------------

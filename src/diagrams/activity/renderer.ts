@@ -295,13 +295,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const dy = last.y - prev.y;
   const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
 
-  // D4: an explicit extra arrowhead at a translate shape's own point (see
-  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
-  // decoration; this is a port-specific extension with no `Worm` draw-order
-  // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
-  // and is now interleaved above).
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, headColor, theme);
-
+  // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate
+  // shape places at its own point) is NO LONGER drawn here -- see
+  // `renderCrossLaneDecorations`'s own doc for why it moved to a separate,
+  // earlier emission phase.
+  //
   // Optional edge label, positioned by `Snake#getTextBlockPosition`
   // (`renderEdgeLabel`'s own doc comment).
   let labelEl = '';
@@ -309,7 +307,63 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
     labelEl = renderEdgeLabel(edge.label, pts, edge.labelAlign, edge.color, theme);
   }
 
-  return segments + arrow + midArrowEl + labelEl;
+  return segments + arrow + labelEl;
+}
+
+/**
+ * T3h (row XLANE, `ruzica-16-deli877`/`nikivo-06-kaxa873`/`kijazo-83-
+ * kipu485`): the ONE non-`Snake` immediate decoration an activity render
+ * can emit outside its own edge's deferred line -- `ActivityEdgeGeo
+ * .midArrowAt`, set only by `swimlane-loop-translate-while.ts#routeWhileBack`
+ * for a while-loop back edge that crosses swimlanes.
+ *
+ * `Swimlanes.java:252` wraps the WHOLE document render in one
+ * `UGraphicForSnake`: `draw(UShape)` (`svek/UGraphicForSnake.java:137-144`)
+ * queues every `Snake` (`addPendingSnake`) and draws every OTHER shape
+ * immediately; `drawWhenSwimlanes` (`:318-356`) then runs the per-lane
+ * content pass for every lane (`:328-347`), THEN the single cross-lane
+ * `Cross` pass (`:350-351`), THEN `cross.flushUg()` (`:352`, draining every
+ * queued `Snake` -- same-lane AND cross-lane -- in queue order), THEN
+ * `drawTitles` (`:354`) last. `FtileWhile.ConnectionBackSimple
+ * #drawTranslate` (`:277-308`, reached ONLY via `ConnectionCross
+ * .java:63`, itself constructed ONLY inside `Swimlanes$Cross`, which exists
+ * ONLY when `swimlanes().size() > 1`) queues its own line
+ * (`ug.draw(snake)`, `:302`) and THEN draws the loop's up-arrow decoration
+ * immediately (`ug.apply(...).draw(skinParam().arrows().asToUp())`,
+ * `:307`) -- a plain `UPolygon` draw, never wrapped in a `Snake`, so it
+ * emits right there in the Cross pass, well before the final flush drains
+ * ITS OWN edge's line. No other `drawTranslate` override in the codebase
+ * (`FtileRepeat`, `FtileIfWithLinks`, `FtileSwitchWithManyLinks`, the
+ * `Parallel*` builders) draws a shape outside its `Snake.create(...)`
+ * call -- confirmed by reading each one; their own `UPolygon`s are only
+ * ever the `Snake`'s end-decoration argument, so they stay deferred with
+ * everything else. That makes this the ONLY port-side carrier
+ * (`ActivityEdgeGeo.midArrowAt`) of a decoration needing this split.
+ *
+ * Verified against `kijazo-83-kipu485`'s own element dump: jar's up-arrow
+ * polygon sits at index `[17]`, immediately after the per-lane content
+ * (`renderSwimlaneChrome`'s own output) and before the first deferred
+ * `<line>` of the edges batch; our pre-fix render placed the same polygon
+ * at `[38]`, inside its own edge's atomic `renderEdge` unit, bundled with
+ * (and after) that edge's own terminal arrow. This function reproduces the
+ * jar's placement: called once, between `renderSwimlaneChrome`'s per-lane
+ * content and the edges loop below -- the exact position the Cross pass's
+ * immediate draws occupy, before `cross.flushUg()`'s batch. A no-op
+ * (returns `''`) in a diagram with no cross-lane while-loop back edge,
+ * which is the only producer of `midArrowAt` (`routeWhileBack`'s own doc);
+ * harmless to call unconditionally, incl. the zero/one-lane case where
+ * `midArrowAt` structurally never appears (`routeWhileBack` is only
+ * reachable through swimlane-translate routing).
+ */
+function renderCrossLaneDecorations(geo: ActivityGeometry, theme: Theme): string {
+  const headColor = noGradient(activityArrowHeadColor(theme));
+  let out = '';
+  for (const edge of geo.edges) {
+    if (edge.midArrowAt !== undefined) {
+      out += renderMidArrow(edge.midArrowAt, headColor, theme);
+    }
+  }
+  return out;
 }
 
 /**
@@ -344,9 +398,11 @@ function preChromeDims(geo: ActivityGeometry): { width: number; height: number }
  * Draw order (D5 of `plans/activity-swimlane-rendering/decisions.md`):
  * with chrome (`swimlanes.length > 1`), the band/per-lane-nodes/dividers
  * come from `renderSwimlaneChrome` (`activity-renderer-swimlanes.ts`),
- * then every edge, then titles LAST. With zero or one lane there is no
- * chrome to draw (`Swimlanes.java:275`) and the output is the plain
- * node-then-edge order, byte-identical to a diagram with no swimlanes.
+ * then any cross-lane immediate decoration (T3h, `renderCrossLaneDecorations`
+ * -- the Cross pass, before the deferred-`Snake` flush), then every edge,
+ * then titles LAST. With zero or one lane there is no chrome to draw
+ * (`Swimlanes.java:275`) and the output is the plain node-then-edge order,
+ * byte-identical to a diagram with no swimlanes.
  */
 export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragment {
   const children: string[] = [];
@@ -367,6 +423,12 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
   } else {
     for (const node of geo.nodes) children.push(renderNode(node, theme));
   }
+
+  // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
+  // connection's own non-`Snake` decoration immediately, BEFORE
+  // `cross.flushUg()` drains every deferred `Snake` below -- see
+  // `renderCrossLaneDecorations`'s own doc.
+  children.push(renderCrossLaneDecorations(geo, theme));
 
   for (const edge of geo.edges) {
     children.push(renderEdge(edge, theme));
