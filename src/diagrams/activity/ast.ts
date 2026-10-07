@@ -308,8 +308,7 @@ export interface ActivityFork {
   branches: ActivityNode[][];
   swimlane?: string;
   /**
-   * The lane current at the most recent `fork again` or at `end fork`,
-   * when it differs from {@link swimlane}.
+   * The lane current at the most recent `fork again` or at `end fork`, when it differs from {@link swimlane}.
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
    *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
@@ -363,8 +362,9 @@ export interface ActivityNote {
   text: string;
   position: 'left' | 'right';
   swimlane?: string;
-  /** add4-T1c: `#color` (BACK), raw with its `#`; omitted when absent. @see CommandNote3.java:65-67,121 */
+  /** add4-T1c: `#color` (BACK, `#` kept) / `floating` (NoteType.FLOATING_NOTE); absent = omitted. @see CommandNote3.java:121-123 */
   color?: string;
+  floating?: true;
 }
 
 /**

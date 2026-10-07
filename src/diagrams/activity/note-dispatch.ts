@@ -31,6 +31,13 @@ function noteColorSpread(color: string | undefined): { color?: string } {
   return color === undefined ? {} : { color };
 }
 
+/** `NoteType.defaultType` (`sequencediagram/NoteType.java:43-48`): the `floating`
+ *  keyword (group 1) makes a `FLOATING_NOTE`, whose Opale is drawn with no
+ *  link (`FtileWithNoteOpale.java:132-133`, `withLink = false`). */
+function noteFloatingSpread(floating: string | undefined): { floating?: true } {
+  return floating === undefined ? {} : { floating: true };
+}
+
 /** `(floating )?note (left|right)? (#color)? : text` (single-line); group
  *  3 is the colour, group 4 the text. add3-T3d exception (NOTE-CREOLE):
  *  `CommandNote3.java:122`'s `Display.getWithNewlines` unescapes `\n` same
@@ -45,6 +52,7 @@ export function tryNoteSingle(ctx: ParseContext, idx: number, line: string): Dis
     text: unescapeLabelNewlines(noteSingleMatch[4]!.trim()),
     position,
     ...noteColorSpread(noteSingleMatch[3]),
+    ...noteFloatingSpread(noteSingleMatch[1]),
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
@@ -52,7 +60,7 @@ export function tryNoteSingle(ctx: ParseContext, idx: number, line: string): Dis
 
 /** `(floating )?note (left|right)? (#color)?` (multi-line, ends with
  *  {@link RE_NOTE_END}'s `end note`/`endnote`). Group 1 is `floating`
- *  (dropped), group 2 is direction, group 3 the colour. */
+ *  (`FLOATING_NOTE`), group 2 is direction, group 3 the colour. */
 export function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteMultiMatch = RE_NOTE_MULTI.exec(line);
   if (noteMultiMatch === null) return null;
@@ -75,6 +83,7 @@ export function tryNoteMulti(ctx: ParseContext, idx: number, line: string): Disp
     text: textLines.join('\n'),
     position,
     ...noteColorSpread(noteMultiMatch[3]),
+    ...noteFloatingSpread(noteMultiMatch[1]),
     ...swimlaneSpread(ctx),
   };
   return { idx: cursor, node };

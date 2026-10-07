@@ -159,7 +159,10 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
     tiles.push(noteTile);
     return;
   }
-  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, !WRAP_NO_LINK_KINDS.has(last.kind));
+  // add4-T1c: `FtileWithNoteOpale.java:132-133` -- a `FLOATING_NOTE` forces
+  // `withLink = false` whatever the wrapped tile's own kind allows.
+  const withLink = !WRAP_NO_LINK_KINDS.has(last.kind) && node.floating !== true;
+  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, withLink);
 }
 
 /**
