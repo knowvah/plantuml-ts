@@ -105,9 +105,14 @@ export class GtileNote extends TileLeaf {
    *  calls `eventuallyOverride`), so `tile-coordinates.ts`'s own
    *  `'gtile-note'` walker deliberately does not read it. */
   readonly color: string | undefined;
+  /** `FtileNoteAlone#withOutPoint` (`FtileNoteAlone.java:103,129-132`), set by
+   *  `FtileFactoryDelegatorAddNote.java:67-68` to `note.getType() ==
+   *  NoteType.NOTE` -- `false` for a `FLOATING_NOTE` alone (add4-T2c). */
+  readonly withOutPoint: boolean;
 
-  constructor(node: ActivityNote, bounder: StringBounder, theme: Theme) {
+  constructor(node: ActivityNote, bounder: StringBounder, theme: Theme, withOutPoint = true) {
     super();
+    this.withOutPoint = withOutPoint;
     this.text = node.text;
     this.side = node.position;
     this.color = node.color;
@@ -146,9 +151,11 @@ export class GtileNote extends TileLeaf {
   }
 
   /**
-   * Has an out point: `tile-layout.ts:79` always builds a `GtileNote` as
-   * an in-flow node (this port has no notion of a legend-only note), which
-   * corresponds to `NoteType.NOTE` below.
+   * {@link withOutPoint}: `true` (`NoteType.NOTE`) for every in-flow note;
+   * `false` only for a `FLOATING_NOTE` that is a list's FIRST element
+   * (`tile-layout-structural.ts#tileNote`, add4-T2c), so the following
+   * sibling gets no `ConnectionVerticalDown` (`FtileFactoryDelegator
+   * Assembly.java:68-70`).
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileNoteAlone.java:129-130
    *   -- `calculateDimensionFtile`'s `withOutPoint` branch, five-argument
    *   `FtileGeometry` with `outY = dimTotal.getHeight()`.
@@ -157,7 +164,7 @@ export class GtileNote extends TileLeaf {
    *   kind.
    */
   hasPointOut(): boolean {
-    return true;
+    return this.withOutPoint;
   }
 }
 

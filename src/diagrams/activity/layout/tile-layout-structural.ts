@@ -27,8 +27,7 @@ import { GtileSwitch } from '../tiles/gtile-switch.js';
 import { GtileGroup } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
-import type { GtileNote } from '../tiles/gtile-note.js';
-import { GtileNoteOpale } from '../tiles/gtile-note.js';
+import { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
 import { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
@@ -148,15 +147,30 @@ function isFirstWrapTarget(last: Tile): boolean {
   return WRAP_SAFE_KINDS.has(last.kind) || WRAP_NO_LINK_KINDS.has(last.kind);
 }
 
+/** `FtileFactoryDelegatorAddNote#addNote`'s `ftile == null` arm
+ *  (`FtileFactoryDelegatorAddNote.java:61-68`): a note on an EMPTY list
+ *  (`InstructionList#addNote` -> `WithNote#addNote`, `InstructionList
+ *  .java:189-195`; built first by `createFtile`'s `eventuallyAddNote(
+ *  factory, null, ...)`, `:146`) is a `FtileNoteAlone` whose out point
+ *  exists only for `NoteType.NOTE` -- a `FLOATING_NOTE` has none, so the
+ *  next sibling gets no connection (add4-T2c, cofubo/japeku). */
+function tileNoteAlone(node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
+  return withSwimlane(new GtileNote(node, bounder, theme, node.floating !== true), node.swimlane);
+}
+
 export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBounder, theme: Theme): void {
   const last = tiles[tiles.length - 1];
+  if (last === undefined) {
+    tiles.push(tileNoteAlone(node, bounder, theme));
+    return;
+  }
   const noteTile = tileSimpleLeaf(node, bounder, theme) as GtileNote;
   const sameLane = isSameLaneAsPrevious(node, last);
-  if (last !== undefined && sameLane && isMergeableNoteWrap(last)) {
+  if (sameLane && isMergeableNoteWrap(last)) {
     tiles[tiles.length - 1] = mergeIntoWithNotes(last, node, bounder, theme);
     return;
   }
-  if (last === undefined || !sameLane || !isFirstWrapTarget(last)) {
+  if (!sameLane || !isFirstWrapTarget(last)) {
     tiles.push(noteTile);
     return;
   }
