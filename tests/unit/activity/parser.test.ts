@@ -512,6 +512,26 @@ describe('parses note left multi-line', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Test 12b — `note : text` / `note` with NO direction keyword defaults to
+// LEFT (`NotePosition.java:43-48`'s own `defaultLeft(null) === LEFT`,
+// `activity-divergence-drive-3` T2a, family NOTELEFT) -- was 'right'.
+// ---------------------------------------------------------------------------
+
+describe('a note with no left/right keyword defaults to LEFT (NotePosition.java:43-48)', () => {
+  it('single-line `note : text` -- position is "left"', () => {
+    const ast = parse(['note : text here']);
+    const node = firstNode(ast) as ActivityNote;
+    expect(node.position).toBe('left');
+  });
+
+  it('multi-line `note` ... `end note` -- position is "left"', () => {
+    const ast = parse(['note', '  line 1', 'end note']);
+    const node = firstNode(ast) as ActivityNote;
+    expect(node.position).toBe('left');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 13 — parses end keyword
 // ---------------------------------------------------------------------------
 

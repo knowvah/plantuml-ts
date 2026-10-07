@@ -36,6 +36,7 @@ import {
   RE_REPEATWHILE,
   RE_SWIMLANE,
   RE_WHILE,
+  defaultLeftPosition,
   isRefusal,
   matchesStopKeyword,
   setCurrentSwimlane,
@@ -331,7 +332,7 @@ function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchRe
   const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
   if (noteSingleMatch === null) return null;
   const direction = noteSingleMatch[2]?.toLowerCase();
-  const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
+  const position = defaultLeftPosition(direction);
   const node: ActivityNote = {
     kind: 'note',
     text: noteSingleMatch[3]!.trim(),
@@ -349,7 +350,7 @@ function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchRes
   if (noteMultiMatch === null) return null;
   const { lines } = ctx;
   const direction = noteMultiMatch[2]?.toLowerCase();
-  const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
+  const position = defaultLeftPosition(direction);
   let cursor = idx + 1;
   const textLines: string[] = [];
   while (cursor < lines.length) {

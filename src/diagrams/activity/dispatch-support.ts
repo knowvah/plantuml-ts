@@ -264,12 +264,25 @@ export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:
 
 /**
  * `(floating )?note (left|right)?` (multi-line, closed by {@link
- * RE_NOTE_END}) — direction defaults to right when absent. `floating`/
- * color, same doc as {@link RE_NOTE_SINGLE} above (`razuzu-32-faje125`'s
- * bare `floating note right`, `tajuxe-32-sexo680`'s `note left #aabbcc`).
+ * RE_NOTE_END}) — direction defaults to LEFT when absent ({@link
+ * defaultLeftPosition}). `floating`/color, same doc as {@link
+ * RE_NOTE_SINGLE} above (`razuzu-32-faje125`'s bare `floating note
+ * right`, `tajuxe-32-sexo680`'s `note left #aabbcc`).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNoteLong3.java:131-141
  */
 export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*$/i;
+
+/** `NotePosition.java:43-48` -- `defaultLeft(s)`: `null` (no `left`/`right`
+ *  keyword in the source line, group 2 of {@link RE_NOTE_SINGLE}/{@link
+ *  RE_NOTE_MULTI} not participating) resolves to `LEFT`, never `RIGHT`.
+ *  `CommandNote3.java:123`/`CommandNoteLong3.java` both call it the same
+ *  way on the same regex group. `activity-divergence-drive-3` T2a (family
+ *  NOTELEFT): was an unsourced `direction === 'left' ? 'left' : 'right'`
+ *  in `node-dispatch.ts`'s `tryNoteSingle`/`tryNoteMulti`, which defaulted
+ *  the OTHER way. */
+export function defaultLeftPosition(direction: string | undefined): 'left' | 'right' {
+  return direction === 'right' ? 'right' : 'left';
+}
 
 /** `end note` / `endnote` -- single OPTIONAL space between the two words
  *  (upstream's `%s` sentinel, same convention as {@link
