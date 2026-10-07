@@ -1,0 +1,11 @@
+@startuml
+start
+switch (test?)
+case ( A )
+  :a;
+case ( B )
+  :b;
+endswitch
+note right: goes on b
+:after;
+@enduml

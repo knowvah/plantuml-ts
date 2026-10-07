@@ -76,9 +76,10 @@ import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
  * WHOLE if/else composite reserved the note's width beside it, which
  * upstream never does). `InstructionSplit#addNote` (`:96-98`) always
  * forwards into its last branch, never self-wraps, with no reachable
- * "closed" state at all. `while`/`repeat`/`switch`/`group` are UNVERIFIED
- * (no cohort row exercises a note directly after one) -- excluded from
- * the allow-list rather than guessed into it.
+ * "closed" state at all. A note after `endswitch` never reaches here
+ * (`note-dispatch.ts#redirectNoteOntoSwitch`, add4-T1f). `while`/`repeat`/
+ * `group` are UNVERIFIED (no cohort row exercises a note directly after
+ * one) -- excluded from the allow-list rather than guessed into it.
  */
 const WRAP_SAFE_KINDS: ReadonlySet<string> = new Set([
   'gtile-start',
@@ -278,13 +279,33 @@ function tileSwitchCase(
   return kase.label !== undefined ? { tile, label: kase.label } : { tile };
 }
 
+/**
+ * add4-T1f (SWITCH-NOTE): `InstructionSwitch#createFtile`'s
+ * `eventuallyAddNote(factory, result, getSwimlaneIn(), VerticalAlignment
+ * .TOP)` (`InstructionSwitch.java:125`) -> `FtileFactoryDelegatorAddNote
+ * #addNote` (`:56-71`) -> `FtileWithNoteOpale.create(ftile, notes, true,
+ * TOP)` (`FtileWithNoteOpale.java:113-122`): two or more notes collect
+ * into ONE `FtileWithNotes`, one note is a spiked Opale (no spike when
+ * `FLOATING_NOTE`, `:132-133`). The only TOP-aligned caller upstream.
+ */
+function wrapSwitchNotes(tile: Tile, notes: readonly ActivityNote[], bounder: StringBounder, theme: Theme): Tile {
+  if (notes.length === 0) return tile;
+  if (notes.length > 1) {
+    const entries: WithNotesEntry[] = notes.map((n) => ({ text: n.text, position: n.position, color: n.color }));
+    return new GtileWithNotes(tile, entries, bounder, theme, 'top');
+  }
+  const note = notes[0]!;
+  const noteTile = tileSimpleLeaf(note, bounder, theme) as GtileNote;
+  return new GtileNoteOpale(tile, noteTile, note.floating !== true, 'top');
+}
+
 export function tileSwitch(
   node: ActivitySwitch,
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
   pragma: Pragma,
-): GtileSwitch {
+): Tile {
   // `FtileFactoryDelegatorSwitch#getDiamond1`/`#getDiamond2` (`vcompact/
   // FtileFactoryDelegatorSwitch.java:129-161`): both are bare
   // `FtileDiamondInside` hexagons (no `.withNorth`/`.withWest`/`.withEast`
@@ -293,7 +314,8 @@ export function tileSwitch(
   const diamond = new GtileDiamondInside(node.condition, {}, bounder, theme);
   const cases = node.cases.map((kase) => tileSwitchCase(kase, bounder, theme, laneOrder, pragma));
   const mergeDiamond = new GtileDiamondInside('', {}, bounder, theme);
-  return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
+  const tile = withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
+  return wrapSwitchNotes(tile, node.notes ?? [], bounder, theme);
 }
 
 /**

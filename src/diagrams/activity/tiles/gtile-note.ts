@@ -161,6 +161,11 @@ export class GtileNote extends TileLeaf {
   }
 }
 
+/** `klimt/geom/VerticalAlignment`'s two values a note wrap is ever built
+ *  with: `CENTER` (every caller but one) and `TOP` (`InstructionSwitch
+ *  .java:125`, the switch's own notes). */
+export type NoteVerticalAlignment = 'center' | 'top';
+
 /**
  * `FtileWithNoteOpale` (`ftile/vcompact/FtileWithNoteOpale.java:78-255`):
  * wraps the PRECEDING tile with a note balloon beside it -- never an
@@ -204,7 +209,7 @@ export class GtileNoteOpale extends TileComposite {
   readonly spikeOffsetX: number;
   readonly spikeOffsetY: number;
 
-  constructor(tile: Tile, note: GtileNote, withLink = true) {
+  constructor(tile: Tile, note: GtileNote, withLink = true, verticalAlignment: NoteVerticalAlignment = 'center') {
     super();
     this.children = [tile];
     this.note = note;
@@ -217,14 +222,14 @@ export class GtileNoteOpale extends TileComposite {
     // `marge = notePosition === LEFT ? dimNote.w + suppSpace : 0`.
     this.tileOffsetY = (this.height - tile.height) / 2;
     this.tileOffsetX = note.side === 'left' ? note.width + NOTE_OPALE_GAP : 0;
-    // `getTranslateForOpale` (`:177-193`): `yForNote` is CENTER-aligned
-    // (`verticalAlignment.CENTER`, the default every simple-leaf predecessor
-    // passes -- `InstructionSimple.java:111`/`InstructionStop.java:76`/
-    // `InstructionStart.java:76`/`InstructionSpot.java:76`/
-    // `InstructionEnd.java:71`; `InstructionSwitch.java:125`'s TOP is not
-    // reached by any tile this composite wraps). `dx` mirrors `marge` on
-    // the opposite side: `0` when LEFT, else `dimTotal.w - dimNote.w`.
-    this.noteOffsetY = (this.height - note.height) / 2;
+    // `getTranslateForOpale` (`:177-193`): `yForNote = (dimTotal.h -
+    // dimNote.h) / 2` when CENTER (every simple-leaf predecessor --
+    // `InstructionSimple.java:111` et al), else `0` -- add4-T1f: the
+    // switch's own TOP (`InstructionSwitch.java:125`). `getTranslate`'s
+    // `yForFtile` above is centred whatever the alignment. `dx` mirrors
+    // `marge` on the opposite side: `0` when LEFT, else `dimTotal.w -
+    // dimNote.w`.
+    this.noteOffsetY = verticalAlignment === 'center' ? (this.height - note.height) / 2 : 0;
     this.noteOffsetX = note.side === 'left' ? 0 : this.width - note.width;
     // `pp2` resolved into this composite's local frame: the x-seam between
     // note and tile (= `tileOffsetX` when LEFT, `tileOffsetX + tile.width`
