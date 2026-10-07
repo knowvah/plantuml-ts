@@ -21,6 +21,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushNode, walkTile } from './tile-coordinates.js';
 import { collectTouchedLanes } from './tile-coordinates-group.js';
 import { markMeasureSpec } from './swimlane-context.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 
 /** add4-T2c: `FtileWithNoteOpale#getSwimlanes` -- the wrapped tile's own
  *  lanes plus `swimlaneNote` (`FtileWithNoteOpale.java:92-99`) -- is the
@@ -120,7 +121,9 @@ function marginBoxReservation(origin: StackOrigin, entry: StackedNote, stackWidt
  *  the stack's own outer origin; `entry.y` is this note's own offset
  *  WITHIN the stack (flush, no gap, `gtile-with-notes.ts#buildStack`). */
 function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: number): void {
-  origin.out.reservations.push(marginBoxReservation(origin, entry, stackWidth));
+  // The margin `UEmpty` is drawn in the stack's own lane pass
+  // (`TextBlockMarged.java:79-86`, `Swimlanes.java:342-343`).
+  pushLaneReservation(origin.out.reservations, marginBoxReservation(origin, entry, stackWidth), origin.lane);
   const noteX = origin.originX + origin.stackX + (stackWidth - entry.outerWidth) / 2 + NOTE_STACK_MARGIN;
   const noteY = origin.originY + entry.y + NOTE_STACK_MARGIN;
   const node: ActivityNodeGeo = {
