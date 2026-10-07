@@ -57,7 +57,7 @@ import { FontStyle, type FontConfiguration } from '../../shape/UText.js';
 // the jar's three runs `[` / linked url / `]` (`cedeti-10-bufu072`).
 const URL_TAG_SOURCE = '\\[\\[([^\\[\\]]*(?:\\][^\\[\\]]+)*)\\]\\]';
 
-const HYPERLINK_COLOR = '#0000FF';
+export const HYPERLINK_COLOR = '#0000FF';
 
 /**
  * add2 T2d (laxibe-66-teme800): a `{tooltip}` is only a tooltip when
@@ -99,9 +99,7 @@ function extractTooltip(inner: string): { withoutTooltip: string; tooltip: strin
  *  `{tooltip}`, the first whitespace-run is the url, everything after is
  *  the label; falls back to the url itself when nothing remains. */
 function resolveLabel(inner: string): string {
-  const withoutTooltip = extractTooltip(inner)
-    .withoutTooltip.replace(/\s+/g, ' ')
-    .trim();
+  const withoutTooltip = extractTooltip(inner).withoutTooltip.replace(/\s+/g, ' ').trim();
   const spaceIdx = withoutTooltip.indexOf(' ');
   return spaceIdx === -1 ? withoutTooltip : withoutTooltip.slice(spaceIdx + 1).trim();
 }
@@ -134,11 +132,11 @@ function resolveHyperlinkColor(saved: FontConfiguration): string {
 
 function applyHyperlinkStyleAndPush(label: string, url: string, tooltip: string, stripe: StripeBuilder): void {
   const saved: FontConfiguration = stripe.getActualFontConfiguration();
-  stripe.setActualFontConfiguration({
-    ...saved,
-    color: resolveHyperlinkColor(saved),
-    styles: new Set(saved.styles).add(FontStyle.UNDERLINE),
-  });
+  // `FontConfiguration#hyperlink()` (`FontConfiguration.java:335-340`):
+  // `add(FontStyle.UNDERLINE)` only when `hyperlinkUnderlineStroke != null`.
+  const styles = new Set(saved.styles);
+  if (saved.hyperlinkUnderlineStroke !== null) styles.add(FontStyle.UNDERLINE);
+  stripe.setActualFontConfiguration({ ...saved, color: resolveHyperlinkColor(saved), styles });
   stripe.analyzeAndAddInlineWithUrl(label, url, tooltip);
   stripe.setActualFontConfiguration(saved);
 }
