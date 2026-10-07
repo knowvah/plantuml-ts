@@ -1,0 +1,9 @@
+@startuml
+|lane one|   spaced out
+|two|wide label for a narrow lane
+start
+:x;
+|lane one|
+:y;
+stop
+@enduml

@@ -19,7 +19,7 @@ import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import { Pragma } from '../../core/skin/Pragma.js';
 import type { ActivityDiagramAST } from './ast.js';
-import { parseNodes } from './node-dispatch.js';
+import { parseNodes, swimlaneDisplaysOf } from './node-dispatch.js';
 import { isRefusal, type ParseContext } from './dispatch-support.js';
 
 // ---------------------------------------------------------------------------
@@ -119,8 +119,14 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     nodes: result.nodes,
     swimlanes: ctx.swimlanes,
     ...(ctx.swimlaneColors.size > 0 ? { swimlaneColors: Object.fromEntries(ctx.swimlaneColors) } : {}),
+    ...displaysSpread(swimlaneDisplaysOf(ctx)),
     annotations: ctx.annotations,
     sprites: ctx.sprites,
     pragma: ctx.pragma,
   };
+}
+
+/** `|name|LABEL` displays onto the AST, absent when no lane carries one. */
+function displaysSpread(displays: ReadonlyMap<string, string>): { swimlaneDisplays?: Record<string, string> } {
+  return displays.size > 0 ? { swimlaneDisplays: Object.fromEntries(displays) } : {};
 }

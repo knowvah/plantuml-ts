@@ -172,6 +172,12 @@ export interface SwimlaneGeo {
    */
   contentX?: number;
   /**
+   * `|name|LABEL`'s display label, which the title draws and measures
+   * instead of the name (`Swimlane#getDisplay`). Absent: the name.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164,285-293
+   */
+  display?: string;
+  /**
    * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
    * already span exactly the jar's background-rect bounds (verified
    * against `cejupe-34-muti621`'s oracle SVG: both divider lines land

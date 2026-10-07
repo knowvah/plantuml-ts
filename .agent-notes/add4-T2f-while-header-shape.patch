@@ -1,0 +1,28 @@
+diff --git a/src/diagrams/activity/activity-renderer-shapes.ts b/src/diagrams/activity/activity-renderer-shapes.ts
+index a85cd5a21..76c149771 100644
+--- a/src/diagrams/activity/activity-renderer-shapes.ts
++++ b/src/diagrams/activity/activity-renderer-shapes.ts
+@@ -448,18 +448,11 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
+       // function under the file's complexity cap).
+       return renderIfSplitShape(node, theme);
+     case 'while-header':
+-      // add3-T3d: same EMPTY_DIAMOND shape as 'if-split'/'repeat-cond'
+-      // above (`FtileWhile.create`'s own EMPTY_DIAMOND branch builds the
+-      // SAME `GtileDiamondEmpty`/`FtileDiamond` -- `.agent-notes/
+-      // add3-T3a.md`). Was unconditionally `renderHexagonPolygon` (a
+-      // stale "still the 7-point hexagon default" comment, disproved by
+-      // reading `FtileDiamond#drawU` directly -- see the case above).
+-      // `while` + INSIDE_DIAMOND is a separate, pre-existing gap (this
+-      // case never branched on it at all) -- not fixed here, flagged in
+-      // this task's report; no cohort fixture currently exercises it.
+-      return theme.conditionStyle === 'emptyDiamond' && node.label === ''
+-        ? renderDiamond(node, theme)
+-        : renderHexagonPolygon(node, theme);
++      // `FtileWhile.create` picks diamond1 by conditionStyle exactly as an
++      // if does: INSIDE_HEXAGON -> FtileDiamondInside, INSIDE_DIAMOND ->
++      // FtileDiamondSquare, EMPTY_DIAMOND -> FtileDiamond
++      // (`vcompact/FtileWhile.java:130-140`); same shape dispatch as above.
++      return renderIfSplitShape(node, theme);
+     case 'if-merge':
+       // add4-T2d: a switch's diamond2 is an `FtileDiamondInside` hexagon
+       // (`FtileFactoryDelegatorSwitch.java:159-160`), not `FtileDiamond`'s

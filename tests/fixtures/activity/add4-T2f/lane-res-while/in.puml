@@ -1,0 +1,14 @@
+@startuml
+|System|
+fork
+  repeat
+    :Update location to User;
+  repeat while (Approaching?) is (not yet)
+  :Notify;
+fork again
+  |Driver|
+  while (On the way?)
+    :Send current location;
+  endwhile
+end fork
+@enduml

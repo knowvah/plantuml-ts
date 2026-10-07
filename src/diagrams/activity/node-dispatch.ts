@@ -59,8 +59,34 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  setCurrentSwimlane(ctx, m[2]!.trim(), m[1]);
+  const name = m[2]!.trim();
+  setCurrentSwimlane(ctx, name, m[1]);
+  recordSwimlaneDisplay(ctx, name, line);
   return { idx: idx + 1 };
+}
+
+/** Per-parse `|name|LABEL` displays, keyed by the parse's own context. */
+const SWIMLANE_DISPLAYS = new WeakMap<ParseContext, Map<string, string>>();
+
+/**
+ * `LABEL ([^|]+)?` is everything after the closing `|` (it can hold no
+ * `|`), passed raw -- leading space included -- to `Display.getWithNewlines`
+ * and, when non-null, `setDisplay` on the lane; a later bare `|name|` leaves
+ * the display unchanged.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwimlane.java:65,97-98
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164
+ */
+function recordSwimlaneDisplay(ctx: ParseContext, name: string, line: string): void {
+  const label = line.trimEnd().slice(line.trimEnd().lastIndexOf('|') + 1);
+  if (label === '') return;
+  let displays = SWIMLANE_DISPLAYS.get(ctx);
+  if (displays === undefined) SWIMLANE_DISPLAYS.set(ctx, (displays = new Map<string, string>()));
+  displays.set(name, label);
+}
+
+/** The `|name|LABEL` displays recorded during this parse (empty if none). */
+export function swimlaneDisplaysOf(ctx: ParseContext): ReadonlyMap<string, string> {
+  return SWIMLANE_DISPLAYS.get(ctx) ?? new Map<string, string>();
 }
 
 // ---------------------------------------------------------------------------

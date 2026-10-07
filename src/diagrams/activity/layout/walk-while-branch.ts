@@ -33,6 +33,7 @@ import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js
 import type { Tile } from '../tiles/tile.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
@@ -267,7 +268,8 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
     emphasize: 'up',
     loop: buildWhileBackLoop(header, hX, hY, backFrom, { originX: xx - dimTotalWidth, dimTotalWidth }),
   });
-  out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
+  // Drawn in the body's out lane (`ConnectionBackSimple`, `FtileWhile.java:271,302`).
+  pushLaneReservation(out.reservations, whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY), bodyOutLane);
 }
 
 /**
@@ -287,7 +289,12 @@ function pushWhileBack(frame: WhileFrame): void {
     pushEdgeFlagged(out, backEdgePoints(headerSouth, headerEast, bodyBottomY, xx), [headerOutLane, headerOutLane], {
       emphasize: 'up',
     });
-    out.reservations.push(whileHexagonReservation(headerSouth.x, headerSouth.y, bodyBottomY));
+    // `ConnectionBackEmpty(diamond1, diamond1)`: the header's lane (`FtileWhile.java:414,459`).
+    pushLaneReservation(
+      out.reservations,
+      whileHexagonReservation(headerSouth.x, headerSouth.y, bodyBottomY),
+      headerOutLane,
+    );
     return;
   }
 
@@ -402,8 +409,10 @@ function buildWhileSpecialFields(
   x: number,
   y: number,
   myLane: string | undefined,
-): Pick<WhileFrame, 'specialOut' | 'specialPos' | 'specialInLane'> {
+): Pick<WhileFrame, 'specialOut' | 'specialPos' | 'specialInLane' | 'backIncoming' | 'backOutgoing'> {
   return {
+    backIncoming: t.backIncoming,
+    backOutgoing: t.backOutgoing,
     specialOut: t.specialOut,
     specialPos: { x: x + t.specialOffsetX, y: y + t.specialOffsetY },
     specialInLane: t.specialOut !== undefined ? laneIn(t.specialOut, myLane) : undefined,
@@ -438,7 +447,6 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
     backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
     backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
-    backIncoming: t.backIncoming, backOutgoing: t.backOutgoing,
     ...buildWhileSpecialFields(t, x, y, myLane),
   };
 }
