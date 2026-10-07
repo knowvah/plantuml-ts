@@ -377,6 +377,19 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // add1-T1c (b1b close): both lukoxa pairs are no longer produced -- the
     // stop tile shrank 28 -> 22 (`FtileCircleStop.java:55,93`), so the
     // `empty` ignoreX rects no longer project onto the title's y-span.
+    // add4-T1b: the pinned `empty×centeredText` class (a divider's
+    // `UEmpty`, `LaneDivider.java:91`, vs a lane title that never occupies
+    // x, `UGraphicCompressOnXorY.java:100-112`). cemipu's `swimlaneWidth
+    // same` floor now anchors each `UEmpty` at the lane's content left
+    // (`Swimlanes.java:331,345-346`) and nojije's lane A narrows to the
+    // jar's width once the elseif `ConnectionHline` is measured into every
+    // touched lane (`UGraphicInterceptorAllSwimlanes.java:88-101`) -- in
+    // both, the swimlane census (dividers, titles, band, lanes, width) now
+    // equals the jar's column exactly, so the title-over-divider overlap
+    // is the jar's own geometry.
+    'cemipu-87-dinu624 [21,24] empty×centeredText',
+    'nojije-35-teta491 [21,25] empty×centeredText',
+    'nojije-35-teta491 [22,25] empty×centeredText',
   ].sort();
 
   /**

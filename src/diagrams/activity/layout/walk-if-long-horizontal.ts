@@ -184,7 +184,9 @@ function connectionVerticalOut(ctx: LhCtx, i: number): void {
   const tileOrigin = { x: x + b.tileX, y: y + b.tileY };
   const p1 = absolutePoint(t.tiles[i]!.getCoord(SOUTH_HOOK), tileOrigin.x, tileOrigin.y);
   const p2 = { x: p1.x, y: y + t.height };
-  pushEdge(out, [p1, p2], laneOut(t.tiles[i]!, myLane), myLane);
+  // add4-T1b: `super(tile, null)` -- see {@link connectionLastElseOut}.
+  const lane = laneOut(t.tiles[i]!, myLane);
+  pushEdge(out, [p1, p2], lane, lane);
   applyOutLabel(out, t.tiles[i]!, BRANCH_EXIT_LABEL_ALIGN);
 }
 
@@ -242,7 +244,14 @@ function connectionLastElseOut(ctx: LhCtx): void {
   const p1 = absolutePoint(t.tile2.getCoord(SOUTH_HOOK), origin.x, origin.y);
   const points: GPoint[] = [p1, { x: p1.x, y: y + t.height }];
   if (t.nbOut === 0) points.push({ x: x + t.left, y: y + t.height });
-  pushEdge(out, points, laneOut(t.tile2, myLane), myLane);
+  // add4-T1b: `super(tile2, null)` (`:359`): a `null` tile2 is contained in
+  // every lane (`UGraphicInterceptorOneSwimlane`/`AllSwimlanes`' Connection
+  // branch, `vcompact/UGraphicInterceptorAllSwimlanes.java:88-101`) and
+  // `Swimlanes$Cross` skips it (`Swimlanes.java:189-193`), so it is a
+  // same-lane connection in tile2's OWN out lane -- never cross-lane-routed
+  // back to the diamonds' `myLane`.
+  const lane = laneOut(t.tile2, myLane);
+  pushEdge(out, points, lane, lane);
   applyOutLabel(out, t.tile2, BRANCH_EXIT_LABEL_ALIGN);
 }
 

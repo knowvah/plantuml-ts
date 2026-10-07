@@ -82,3 +82,25 @@ describe('elseif ConnectionHline lane ink — divider x vs the jar', () => {
     expect(dividerXs('laneink-e.puml', '[0-9.]+')).toEqual([20, 146.6, 346.391]);
   });
 });
+
+/**
+ * add4-T1b: `ConnectionLastElseOut`/`ConnectionVerticalOut` are
+ * `super(tile, null)` (`FtileIfLongHorizontal.java:359,444`): drawn in the
+ * tile's own out lane and skipped by `Swimlanes$Cross` (`:189-193`), so an
+ * `else` branch in another lane drops straight onto the merge bar instead
+ * of being cross-lane-routed back to the diamonds' lane. Jar lines from
+ * `scripts/oracle-render.sh` on `lastelse-out-xlane.puml` (the
+ * jucidi-98-zato093 markup).
+ */
+describe('cross-lane else branch exit', () => {
+  it('drops straight down from the else tile to the bar, like the jar', () => {
+    const svg = renderFixtureActivity(
+      readFileSync(join(DIR, 'lastelse-out-xlane.puml'), 'utf8'),
+      new DeterministicMeasurer(),
+    );
+    const at = (x: string): string[] => svg.match(new RegExp(`<line x1="${x}"[^>]*>`, 'g')) ?? [];
+    const ys = at('299.8').map((l) => /y1="([^"]*)" x2="([^"]*)" y2="([^"]*)"/.exec(l)!.slice(1));
+    expect(ys).toContainEqual(['211.5', '299.8', '231.5']);
+    expect(ys).not.toContainEqual(['211.5', '299.8', '216.5']);
+  });
+});
