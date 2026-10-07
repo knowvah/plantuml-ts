@@ -21,7 +21,7 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { parseNodes } from './node-dispatch.js';
-import { stripTrailingSemi } from './if-dispatch.js';
+import { stripTrailingSemi, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 
 /** `case`/`endswitch` are both simple word-prefix stops -- the same
@@ -85,7 +85,9 @@ function classifySwitchClauseLine(ctx: ParseContext, cursor: number): SwitchClau
 
   const caseMatch = RE_CASE.exec(clauseLine);
   if (caseMatch !== null) {
-    const label = caseMatch[1]!.trim();
+    // add4-T1f (SWITCH-NL): `CommandCase#executeArg` hands the label through
+    // `Display.getWithNewlines` (`CommandCase.java:87`), so `\n` is a line break.
+    const label = unescapeLabelNewlines(caseMatch[1]!.trim());
     const bodyResult = parseNodes(ctx, cursor + 1, SWITCH_INNER_STOPS);
     if (isRefusal(bodyResult)) return bodyResult;
     const { body, notes } = extractLeadingCaseNotes(bodyResult.nodes);

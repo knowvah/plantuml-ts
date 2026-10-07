@@ -102,15 +102,16 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // resolves the SAME default, so ink and draw agree.
   if (edge.label === undefined) return;
   const fontSize = activityFontSize(theme, 'arrow');
-  const width = measureLineWidth(theme, fontSize, edge.label);
-  const position = getTextBlockPosition(
-    edge.points,
-    { width, height: fontSize },
-    edge.labelAlign ?? DEFAULT_LABEL_ALIGN,
-  );
-  const baselineY = centeredFirstBaselineY(position.y + fontSize / 2, fontSize, 1);
+  // add4-T1f (SWITCH-NL): one `UText` per Sheet line, stacked `fontSize`
+  // apart (`SheetBlock1.java:146-148`); the envelope runs first ink-top to
+  // last ink-bottom, matching `renderer.ts#renderEdgeLabelAligned`.
+  const lines = edge.label.split('\n');
+  const width = Math.max(...lines.map((l) => measureLineWidth(theme, fontSize, l)));
+  const h = fontSize * lines.length;
+  const position = getTextBlockPosition(edge.points, { width, height: h }, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
+  const baselineY = centeredFirstBaselineY(position.y + h / 2, fontSize, lines.length);
   acc.minX = Math.min(acc.minX, position.x);
   acc.maxX = Math.max(acc.maxX, position.x + width);
   acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
-  acc.maxY = Math.max(acc.maxY, baselineY + 1.5);
+  acc.maxY = Math.max(acc.maxY, baselineY + fontSize * (lines.length - 1) + 1.5);
 }

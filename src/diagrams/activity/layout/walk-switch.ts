@@ -105,11 +105,33 @@ function hexagonCorners(tile: Tile, pos: GPoint): HexagonCorners {
  *  shape `walk-if-with-links.ts#pushDiamond1`/`#pushMerge` push, no
  *  west/east labels (the switch never sets them, `tile-layout-structural
  *  .ts#tileSwitch`'s own doc). */
-function pushSwitchDiamond(diamond: Tile, pos: GPoint, kind: 'if-split' | 'if-merge', myLane: string | undefined, out: Out): void {
+function pushSwitchDiamond(
+  diamond: Tile,
+  pos: GPoint,
+  kind: 'if-split' | 'if-merge',
+  myLane: string | undefined,
+  out: Out,
+): void {
   const label = kind === 'if-split' ? (diamond as unknown as { label: string }).label : '';
-  pushNode(out, { id: out.nextId(kind), kind, x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label }, myLane);
+  pushNode(
+    out,
+    { id: out.nextId(kind), kind, x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label },
+    myLane,
+  );
   if (kind === 'if-split' && label !== '') {
-    pushNode(out, { id: out.nextId('if-own-label'), kind: 'if-own-label', x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label }, myLane);
+    pushNode(
+      out,
+      {
+        id: out.nextId('if-own-label'),
+        kind: 'if-own-label',
+        x: pos.x,
+        y: pos.y,
+        width: diamond.width,
+        height: diamond.height,
+        label,
+      },
+      myLane,
+    );
   }
 }
 
@@ -268,7 +290,8 @@ function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrL
   const p1 = { x: cPos.x + southC.x, y: cPos.y + southC.y };
   const hex1 = hexagonCorners(step.diamond, step.dPos);
   const hex2 = hexagonInOut(step.mergeDiamond, step.mPos);
-  const points = asFirstOrLast ? verticalThenHorizontalPoints(p1, hex2) : verticalBottomPoints(p1, hex1, hex2);
+  const vThenH = asFirstOrLast ? verticalThenHorizontalPoints(p1, hex2) : undefined;
+  const points = vThenH?.points ?? verticalBottomPoints(p1, hex1, hex2);
   const vThenHLoop: LoopTranslate = {
     kind: 'switch-v-then-h-cross',
     p1,
@@ -278,7 +301,11 @@ function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrL
   const laneOutC = laneOut(c, step.myLane);
   const laneInMerge = laneIn(step.mergeDiamond, step.myLane);
   pushEdge(out, points, laneOutC, laneInMerge, { loop: vThenHLoop });
-  if (laneOutC === laneInMerge) applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
+  if (laneOutC !== laneInMerge) return;
+  // add4-T1f (R1): same-lane only -- the cross-lane class picks its own
+  // LEFT/RIGHT arrow from the translated points (`:363-381`).
+  if (vThenH !== undefined) out.edges[out.edges.length - 1]!.endDirection = vThenH.direction;
+  applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
 }
 
 /**
@@ -344,7 +371,13 @@ function walkOneCaseBody(step: SwitchCaseStep, args: OneCaseArgs, out: Out): voi
   walkSwitchCaseBody(step, { ...args, duplicatePerLane }, out);
 
   if (step.mergeDiamond === null || step.mPos === null || step.totalCases !== 1) return;
-  const mergeStep: MergeEdgeStep = { diamond: step.diamond, dPos: step.dPos, mergeDiamond: step.mergeDiamond, mPos: step.mPos, myLane: step.myLane };
+  const mergeStep: MergeEdgeStep = {
+    diamond: step.diamond,
+    dPos: step.dPos,
+    mergeDiamond: step.mergeDiamond,
+    mPos: step.mPos,
+    myLane: step.myLane,
+  };
   if (c.hasPointOut()) pushOneLinkMergeEdge(mergeStep, c, cPos, out);
 }
 
@@ -353,9 +386,16 @@ function walkOneCaseBody(step: SwitchCaseStep, args: OneCaseArgs, out: Out): voi
  *  ascending (`FtileSwitchWithManyLinks.java:432-444`) -- NOT the cases'
  *  own left-to-right array order. Extracted out of {@link walkSwitchCases}
  *  purely to keep that function's NLOC under the complexity hook's cap. */
-function pushCaseInEdges(step: SwitchCaseStep, cases: readonly Tile[], positions: readonly GPoint[], tile: GtileSwitch, out: Out): void {
+function pushCaseInEdges(
+  step: SwitchCaseStep,
+  cases: readonly Tile[],
+  positions: readonly GPoint[],
+  tile: GtileSwitch,
+  out: Out,
+): void {
   const n = cases.length;
-  const pushAt = (i: number): void => pushCaseInEdge(step, { i, c: cases[i]!, cPos: positions[i]!, label: tile.caseLabels[i] }, out);
+  const pushAt = (i: number): void =>
+    pushCaseInEdge(step, { i, c: cases[i]!, cPos: positions[i]!, label: tile.caseLabels[i] }, out);
   pushAt(0);
   if (n > 1) pushAt(n - 1);
   for (let i = 1; i < n - 1; i++) pushAt(i);
@@ -377,7 +417,13 @@ function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out
   }
   pushCaseInEdges(step, cases, positions, tile, out);
   if (step.totalCases > 1 && step.mergeDiamond !== null && step.mPos !== null) {
-    const mergeStep: MergeEdgeStep = { diamond: step.diamond, dPos: step.dPos, mergeDiamond: step.mergeDiamond, mPos: step.mPos, myLane: step.myLane };
+    const mergeStep: MergeEdgeStep = {
+      diamond: step.diamond,
+      dPos: step.dPos,
+      mergeDiamond: step.mergeDiamond,
+      mPos: step.mPos,
+      myLane: step.myLane,
+    };
     pushCaseToMergeEdges(mergeStep, cases, positions, out);
   }
 }
@@ -407,5 +453,6 @@ export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: stri
   // `FtileSwitchWithDiamonds#drawU` draws diamond2 only `if
   // (calculateDimension(stringBounder).hasPointOut())` (`:142-143`) -- a
   // switch whose every case ends in `stop`/`kill`/`detach` has no merge.
-  if (mergeDiamond !== null && mPos !== null && tile.hasPointOut()) pushSwitchDiamond(mergeDiamond, mPos, 'if-merge', myLane, out);
+  if (mergeDiamond !== null && mPos !== null && tile.hasPointOut())
+    pushSwitchDiamond(mergeDiamond, mPos, 'if-merge', myLane, out);
 }

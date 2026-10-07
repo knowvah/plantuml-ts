@@ -54,30 +54,27 @@ describe('switch case row = jar (single-line labels)', () => {
   });
 });
 
-// KNOWN GAP, outside this task's write-set: `case (a\nb)` keeps the
-// literal backslash-n -- `switch-dispatch.ts#classifySwitchClauseLine`
-// never applies `unescapeLabelNewlines`, where upstream's `CommandCase`
-// calls `Display.getWithNewlines` (`CommandCase.java:87`). The labels
-// then measure as ONE line. `it.fails` turns red once that lands, forcing
-// these to become plain assertions.
-describe('switch case row = jar (multi-line labels) -- parser gap', () => {
-  it.fails('mixed 1-/2-line labels: each case sits its own label height lower', () => {
+// add4-T1f (SWITCH-NL): `case (a\nb)` is a real line break --
+// `CommandCase.java:87` `Display.getWithNewlines` -- so each case sits its
+// own multi-line label height lower (`FtileDecorateInLabel`, `dy(yl)`).
+describe('switch case row = jar (multi-line labels)', () => {
+  it('mixed 1-/2-line labels: each case sits its own label height lower', () => {
     expectRowAndHeight('small-mixed', ['A', 'B', 'C', 'D']);
   });
 
-  it.fails('2-line labels', () => {
+  it('2-line labels', () => {
     expectRowAndHeight('small-2line', ['A', 'B', 'C', 'D']);
   });
 
-  it.fails('3-line labels', () => {
+  it('3-line labels', () => {
     expectRowAndHeight('small-3line', ['A', 'B', 'C', 'D']);
   });
 
-  it.fails('BIG_DIAMOND with a 3-line label', () => {
+  it('BIG_DIAMOND with a 3-line label', () => {
     expectRowAndHeight('big-mixed', ['A', 'B', 'D']);
   });
 
-  it.fails('OneLink with a 2-line label', () => {
+  it('OneLink with a 2-line label', () => {
     expectRowAndHeight('one-link', ['A', 'D']);
   });
 });

@@ -75,6 +75,17 @@ export interface ActivityEdgeGeo {
    */
   arrowhead?: false;
   /**
+   * add4-T1f (R1): the end decoration's direction, fixed by the push site
+   * that built the `Snake` (`Snake.create(skinParam, color, arrows()
+   * .asToDown())`, `ftile/Snake.java:144-148`) -- never read off the
+   * points. Set by `ConnectionVerticalThenHorizontal`
+   * (`cond/FtileSwitchWithManyLinks.java:159-170`), whose DOWN branch may
+   * end on a short horizontal (or empty) segment. Absent: the renderer and
+   * compressor fall back to the last segment with length
+   * (`compress/shapes-of-terminal.ts#terminalDecorationVector`).
+   */
+  endDirection?: 'up' | 'down' | 'left' | 'right';
+  /**
    * `Worm#drawInternalOneColor`'s `emphasizeDirection` parameter (set via
    * `Snake#emphasizeDirection`): an arrow is drawn at the midpoint of the
    * FIRST segment whose `Direction.fromVector(p1, p2)` equals this value,

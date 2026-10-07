@@ -21,7 +21,7 @@ import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
-import { terminalDecorationVector } from './shapes-of-terminal.js';
+import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -267,7 +267,7 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
 
 /**
  * The terminal arrowhead at an edge's last point, oriented by
- * {@link terminalDecorationVector} (the same vector `renderer.ts#renderEdge`
+ * {@link edgeDecorationVector} (the same vector `renderer.ts#renderEdge`
  * passes its terminal `arrowTip`). A zero-length last segment still gets
  * its arrowhead (`ftile/Worm.java:161-168` draws the end decoration with no
  * length test), so the compressor keeps its 10 px. `undefined` when
@@ -276,7 +276,7 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
   if (edge.arrowhead === false) return undefined;
-  const vector = terminalDecorationVector(edge.points);
+  const vector = edgeDecorationVector(edge);
   if (vector === undefined) return undefined;
   const last = edge.points[edge.points.length - 1]!;
   const ext = arrowHeadExtents(arrowDirection(vector.dx, vector.dy));
@@ -376,15 +376,27 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
  * measures the `UText` through the `StringBounder`,
  * `klimt/drawing/TextLimitFinder.java:82-90`); the position inputs mirror
  * the renderer's (`measureLineWidth`, `height = font size`).
+ * add4-T1f: a `\n` label is N `UText`s, each boxed by `SlotFinder#drawText`
+ * (`SlotFinder.java:127-135`), stacked one font size apart
+ * (`SheetBlock1.java:146-148`). Boxed as ONE envelope, {@link ifLabelShape}'s
+ * convention: "from the first line's own ink-top to the last line's own
+ * ink-bottom (max width across lines)"; the per-line slots touch, so the
+ * envelope is the same slot set.
  */
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
   if (edge.label === undefined) return undefined;
   const size = activityFontSize(theme, 'arrow');
-  const dim = bounder.getDimension(edge.label, size);
-  const placeDim = { width: measureLineWidth(theme, size, edge.label), height: size };
+  const lines = edge.label.split('\n');
+  const width = Math.max(...lines.map((l) => bounder.getDimension(l, size).width));
+  const placeDim = {
+    width: Math.max(...lines.map((l) => measureLineWidth(theme, size, l))),
+    height: size * lines.length,
+  };
   const position = getTextBlockPosition(edge.points, placeDim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
-  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
-  return { kind: 'text', x: position.x, y: baselineY, width: dim.width, height: dim.height };
+  const first = centeredFirstBaselineY(position.y + placeDim.height / 2, size, lines.length);
+  const last = first + size * (lines.length - 1);
+  const height = last - first + bounder.getDimension(lines[0]!, size).height;
+  return { kind: 'text', x: position.x, y: last, width, height };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
