@@ -65,58 +65,31 @@
  * `activity-renderer-shapes.ts` (confirmed by inspection), so there is no
  * consumer to wire it into here — same situation as sequence.
  */
+import { buildTheme } from '../../../src/core/build-theme.js';
 import { buildBlockUmls } from '../../../src/core/BlockUmlBuilder.js';
-import type { PreprocessOptions, PreprocessorResult } from '../../../src/core/preprocessor.js';
+import type { PreprocessOptions } from '../../../src/core/preprocessor.js';
 import type { ParseOptions } from '../../../src/core/dispatcher.js';
-import { resolveTheme } from '../../../src/core/theme.js';
-import { resolveSkinparam, parseStyleBlock } from '../../../src/core/skinparam.js';
-import { applyStyleMap } from '../../../src/core/style-map-theme.js';
-import { applySkinLayer } from '../../../src/core/skin-loader.js';
-import type { Theme } from '../../../src/core/theme.js';
-import type { StyleMap } from '../../../src/core/skinparam.js';
 import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseActivity } from '../../../src/diagrams/activity/parser.js';
 import { layoutActivity } from '../../../src/diagrams/activity/layout/tile-layout.js';
 import { renderActivity } from '../../../src/diagrams/activity/renderer.js';
+import {
+  activityWarnings,
+  withSkinParamWarnings,
+  withWarningBanner,
+} from '../../../src/diagrams/activity/activity-warnings.js';
+import {
+  activityDocumentMargin,
+  documentMarginTheme,
+} from '../../../src/diagrams/activity/activity-layout-constants.js';
+import { hasActivityChrome } from '../../../src/diagrams/activity/index.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { renderSync } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
-
-interface ResolvedThemeAndStyles {
-  readonly theme: Theme;
-  readonly styleMap: StyleMap;
-}
-
-function buildThemeForFixture(
-  preprocessed: PreprocessorResult,
-  rawSourceLines?: readonly string[],
-): ResolvedThemeAndStyles {
-  const base = resolveTheme(preprocessed.theme ?? 'default');
-  // mirrors render-fixture-state.ts#buildThemeForFixture's own Stage 1.5 --
-  // see that function's doc comment for the rationale (applied BEFORE the
-  // document's own skinparam so the document always wins; rawSourceLines
-  // threads bare `!define` flags into a preprocessor-grammar skin).
-  const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
-  const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
-
-  const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
-      const existing = acc.get(selector) ?? new Map<string, string>();
-      props.forEach((v, k) => existing.set(k, v));
-      acc.set(selector, existing);
-    });
-    return acc;
-  }, new Map());
-
-  const flatRoot = styleMap.get('') ?? new Map<string, string>();
-  const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  const theme = applyStyleMap(styleMap, withStyles);
-  return { theme, styleMap };
-}
 
 /** `renderFixtureActivity`'s own options bag: `PreprocessOptions` (forwarded
  *  to `buildBlockUmls`) UNION `ParseOptions` (`assetStore`, forwarded to
@@ -153,11 +126,30 @@ export function renderFixtureActivity(
 
   const preprocessed = first.preprocessed;
   const rawSourceLines = first.rawSource.map((s) => s.getString());
-  const { theme, styleMap } = buildThemeForFixture(preprocessed, rawSourceLines);
-  const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
-  const ast = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
-  const geo = layoutActivity(ast, theme, measurer);
-  const fragment = renderActivity(geo, theme);
+  // add4-T2e: production's own `buildTheme` (`src/index.ts:366`), not a
+  // local copy -- the copy skipped `withDocumentStyle`, so a theme's
+  // `root { Margin 5 }` (`TextBlockExporter.java:510-516`) never reached
+  // `theme.diagramMargin` here while it did in `renderSync`.
+  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  // add4-T2e: `styleSource` mirrors `src/index.ts#umlSourceOfBlock`, and
+  // the skinparam-warning / warning-banner steps mirror
+  // `activity/index.ts#activityPlugin` (`activity-warnings.ts`).
+  const block = {
+    ...first.source,
+    rawStyles: preprocessed.styles,
+    stylePositions: preprocessed.stylePositions,
+    styleSource: preprocessed,
+  };
+  const parsed = astOrThrow(parseActivity(block, { assetStore: options?.assetStore }), 'activity');
+  const ast = withSkinParamWarnings(parsed, block.styleSource.skinparam);
+  const marginTheme = documentMarginTheme(theme, hasActivityChrome(ast));
+  const geo = layoutActivity(ast, marginTheme, measurer);
+  const fragment = withWarningBanner(
+    renderActivity(geo, theme),
+    activityWarnings(ast),
+    measurer,
+    activityDocumentMargin(marginTheme),
+  );
 
   // HARNESS-SEED (T2d-a row 1): mirrors `render-fixture-class.ts`'s own
   // `seed` computation, which mirrors `index.ts#umlSourceOfBlock` +

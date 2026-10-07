@@ -2,6 +2,8 @@
  * Layout constants for the activity diagram layout engine.
  */
 
+import type { Theme } from '../../core/theme.js';
+
 export const NODE_MARGIN_Y = 20;
 export const NODE_MARGIN_X = 40;
 
@@ -220,28 +222,54 @@ export const RECENTRED_ENLARGE = 15;
  */
 export const ACTIVITY_DOCUMENT_MARGIN = 10;
 
-/**
- * The near-corner shift every node/edge/swimlane receives, regardless of
- * shape: `RECENTRED_PAD` (`Recentred#drawU`'s own fixed inner pad) PLUS
- * upstream's symmetric document margin (`ACTIVITY_DOCUMENT_MARGIN`),
- * composed in that order by `TextBlockExporter#exportTo`'s outer
- * `ug.apply(new UTranslate(margin.getLeft(), margin.getTop()))` -- `5 + 10 =
- * 15` on the near side. T3j: this is the MARGINED (post-chrome-wrap) shift
- * every fixture's body is drawn at by default (`finalizeGeometry`, unchanged
- * -- correct for every chrome-less fixture, since there the document margin
- * wraps the raw body directly, with nothing in between).
- */
-export const CANVAS_ORIGIN_SHIFT = RECENTRED_PAD + ACTIVITY_DOCUMENT_MARGIN;
+/** A `ClockwiseTopRightBottomLeft` document margin. */
+export interface DocumentMargin {
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+  readonly left: number;
+}
+
+/** `ClockwiseTopRightBottomLeft.same(ACTIVITY_DOCUMENT_MARGIN)`. */
+const DEFAULT_DOCUMENT_MARGIN: DocumentMargin = {
+  top: ACTIVITY_DOCUMENT_MARGIN,
+  right: ACTIVITY_DOCUMENT_MARGIN,
+  bottom: ACTIVITY_DOCUMENT_MARGIN,
+  left: ACTIVITY_DOCUMENT_MARGIN,
+};
 
 /**
- * The constant term in `totalDimension = (M - m) + CANVAS_PADDING_TOTAL`,
- * where `M`/`m` are the ink's own (fudged) max/min per axis
- * (`computeCanvasOrigin`): `RECENTRED_ENLARGE` grows the FAR corner by 15,
- * then `ACTIVITY_DOCUMENT_MARGIN` adds 10 on BOTH sides
- * (`TextBlockExporter#calculateFinalDimension`) -- `15 + 10 + 10 = 35`.
- * @see net/sourceforge/plantuml/core/TextBlockExporter.java:199-202
+ * `TextBlockExporter#calculateMargin`: the merged `{root, document}` style's
+ * `Margin` when it has one (`theme.diagramMargin`, `build-theme.ts
+ * #withDocumentStyle`), else `getDefaultMargins()` -- `same(10)`
+ * (add4-T2e THEME-MARGIN: `!theme amiga`'s `root { Margin 5 }`,
+ * `themes/puml-theme-amiga.puml:40`).
+ *
+ * The exporter translates the block by `(left, top)` and sizes the canvas
+ * `dim + left + right` x `dim + top + bottom`, so every node/edge/swimlane's
+ * near-corner shift is `RECENTRED_PAD + left` (resp. `top`) and the canvas
+ * span's constant term is `RECENTRED_ENLARGE + left + right` (resp. `top +
+ * bottom`) -- `5 + 10 = 15` and `15 + 10 + 10 = 35` by default.
+ * @see net/sourceforge/plantuml/core/TextBlockExporter.java:172-173,199-202,510-516
  */
-export const CANVAS_PADDING_TOTAL = RECENTRED_ENLARGE + 2 * ACTIVITY_DOCUMENT_MARGIN;
+export function activityDocumentMargin(theme: Theme): DocumentMargin {
+  return theme.diagramMargin ?? DEFAULT_DOCUMENT_MARGIN;
+}
+
+/**
+ * The theme the activity layout and its warning banner run with. A diagram
+ * with title/legend/caption/header/footer/mainframe chrome is margined by
+ * `layout/document-margin.ts#applyActivityChrome`, which `src/index.ts`
+ * calls with no theme and which therefore undoes and re-applies the fixed
+ * `ACTIVITY_DOCUMENT_MARGIN`; such a diagram keeps that default here too,
+ * so the inverse stays exact. Residual (add4-T2e): the jar applies the
+ * theme's margin there as well (`TextBlockExporter.java:510-516`).
+ */
+export function documentMarginTheme(theme: Theme, hasChrome: boolean): Theme {
+  if (!hasChrome || theme.diagramMargin === undefined) return theme;
+  const { diagramMargin: _ignored, ...rest } = theme;
+  return rest;
+}
 
 /**
  * `SvgGraphics#ensureVisible`'s own `(int)(x + 1)` cast: the FIRST point it

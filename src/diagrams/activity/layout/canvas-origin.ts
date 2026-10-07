@@ -7,7 +7,7 @@
  * would cross the hook"); `assign-coordinates-full.ts`'s `pass1Assemble`/
  * `compressAndAssemble` are the only callers of {@link finalizeGeometry}.
  * See `activity-layout-constants.ts` for the three numeric constants this
- * spends (`CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL`)
+ * spends (`RECENTRED_PAD`, `RECENTRED_ENLARGE`, `activityDocumentMargin`, `SVG_CANVAS_CEIL`)
  * and their own citations.
  *
  * Mechanism (journalled before any edit, per this task's own instructions):
@@ -52,10 +52,10 @@
  * Composing (1)+(2)'s translate+(3): a node's own near-corner coordinate
  * `p` ends up drawn at `p - m + 15` where `m` is the GLOBAL ink min (every
  * node/edge's own fudged near corner, reduced by `Math.min`) and `15 = 10
- * (margin) + 5 (Recentred's pad)` -- `CANVAS_ORIGIN_SHIFT`. The canvas's own
- * size is `(M - m) + 35` -- `35 = 15 (margin, both sides) + 15 (enlarge's
+ * (margin) + 5 (Recentred's pad)` by default (`activityDocumentMargin`). The canvas's own
+ * size is `(M - m) + 35` -- `35 = 20 (margin, both sides) + 15 (enlarge's
  * far pad only -- NOT doubled, `enlarge` never touches the near corner)` --
- * `CANVAS_PADDING_TOTAL`, THEN one further pixel from `SvgGraphics
+ * by default, THEN one further pixel from `SvgGraphics
  * #ensureVisible`'s own `(int)(x + 1)` cast (`klimt/drawing/svg/
  * SvgGraphics.java:129-136,142-143`), applied to `option.getMinDim()` (this
  * exact dimension) before any shape is drawn -- confirmed against
@@ -68,14 +68,15 @@ import type { Reservation } from './hexagon-reservations.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { bandReservationX, computeSwimlaneChrome, type SwimlaneChrome } from './swimlane-chrome.js';
 import {
-  CANVAS_ORIGIN_SHIFT,
-  CANVAS_PADDING_TOTAL,
   RECENTRED_ENLARGE,
+  RECENTRED_PAD,
   SVG_CANVAS_CEIL,
+  activityDocumentMargin,
 } from '../activity-layout-constants.js';
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
+import { shiftAll } from './canvas-origin-shift.js';
 import {
   SPLIT_LINE_KINDS,
   extendForEdgeLabelText,
@@ -381,54 +382,22 @@ function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   // b3/T3a (family E): the `Recentred`-only span `preChromeWidth`/
   // `preChromeHeight` must carry (`activity-layout-constants.ts
   // #RECENTRED_ENLARGE`'s own doc: `(M - m) + RECENTRED_ENLARGE`, BEFORE
-  // the document margin's further `+ 2 * ACTIVITY_DOCUMENT_MARGIN`) --
-  // a DIFFERENT (smaller) padding term than `totalWidth`/`totalHeight`'s
-  // own `CANVAS_PADDING_TOTAL` below; never the same variable.
+  // the document margin's further `left + right`) -- a DIFFERENT (smaller)
+  // padding term than `totalWidth`/`totalHeight`'s own below.
   const rawWidth = acc.maxX - acc.minX + RECENTRED_ENLARGE;
   const rawHeight = acc.maxY - acc.minY + RECENTRED_ENLARGE;
+  // add4-T2e THEME-MARGIN: the document margin is the theme's
+  // (`activityDocumentMargin`, `TextBlockExporter.java:510-516`); the
+  // integer pad terms are summed first, as the former constants were.
+  const m = activityDocumentMargin(theme);
   return {
-    shiftX: CANVAS_ORIGIN_SHIFT - acc.minX,
-    shiftY: CANVAS_ORIGIN_SHIFT - acc.minY,
-    totalWidth: Math.floor(acc.maxX - acc.minX + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
-    totalHeight: Math.floor(acc.maxY - acc.minY + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
+    shiftX: RECENTRED_PAD + m.left - acc.minX,
+    shiftY: RECENTRED_PAD + m.top - acc.minY,
+    totalWidth: Math.floor(acc.maxX - acc.minX + (RECENTRED_ENLARGE + m.left + m.right)) + SVG_CANVAS_CEIL,
+    totalHeight: Math.floor(acc.maxY - acc.minY + (RECENTRED_ENLARGE + m.top + m.bottom)) + SVG_CANVAS_CEIL,
     rawWidth,
     rawHeight,
   };
-}
-
-function shiftNodeGeo(node: ActivityNodeGeo, dx: number, dy: number): ActivityNodeGeo {
-  const next: ActivityNodeGeo = { ...node, x: node.x + dx, y: node.y + dy };
-  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + dx, y: node.spikeTip.y + dy };
-  return next;
-}
-
-function shiftEdgeGeo(edge: ActivityEdgeGeo, dx: number, dy: number): ActivityEdgeGeo {
-  const next: ActivityEdgeGeo = { ...edge, points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) };
-  if (edge.midArrowAt !== undefined) {
-    next.midArrowAt = { ...edge.midArrowAt, x: edge.midArrowAt.x + dx, y: edge.midArrowAt.y + dy };
-  }
-  // b3/T3a (family C/EMMID): `emphasizeAt` is the same kind of absolute
-  // anchor point as `midArrowAt` -- see `activity-geometry.types.ts`'s doc.
-  if (edge.emphasizeAt !== undefined) {
-    next.emphasizeAt = { x: edge.emphasizeAt.x + dx, y: edge.emphasizeAt.y + dy };
-  }
-  return next;
-}
-
-/** `contentMinX` is deliberately NOT shifted here, for the same reason
- *  `compress-geometry.ts#transformLane`'s own doc gives: it is measured
- *  lane-LOCAL, before the lane's own absolute translate is applied
- *  (`Swimlanes.java:416-431`) -- this canvas-origin shift is simply a
- *  further layer of the same kind of absolute translate `contentMinX`
- *  already excludes. */
-function shiftSwimlaneGeo(lane: SwimlaneGeo, dx: number): SwimlaneGeo {
-  const next: SwimlaneGeo = { ...lane, x: lane.x + dx };
-  if (lane.contentX !== undefined) next.contentX = lane.contentX + dx;
-  return next;
-}
-
-function shiftReservation(r: Reservation, dx: number, dy: number): Reservation {
-  return { ...r, x: r.x + dx, y: r.y + dy };
 }
 
 /** Bundles {@link computeCanvasOrigin} + the shift it implies into one
@@ -460,21 +429,6 @@ export interface FinalizedGeometry {
   chrome: Partial<SwimlaneChrome>;
 }
 
-/** {@link finalizeGeometry}'s own middle step, split out to keep that
- *  function's NLOC under the file's limit: shifts every node/edge/
- *  swimlane/reservation by the one `CanvasOrigin` translate. */
-function shiftAll(
-  input: Pick<FinalizeInput, 'nodes' | 'edges' | 'swimlanes' | 'reservations'>,
-  origin: CanvasOrigin,
-): Pick<FinalizedGeometry, 'nodes' | 'edges' | 'swimlanes' | 'reservations'> {
-  return {
-    nodes: input.nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY)),
-    edges: input.edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY)),
-    swimlanes: input.swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX)),
-    reservations: input.reservations.map((r) => shiftReservation(r, origin.shiftX, origin.shiftY)),
-  };
-}
-
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight, theme } = input;
   const origin = computeCanvasOrigin({
@@ -486,7 +440,7 @@ export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
     theme,
     contentMaxY: bounds.maxY,
   });
-  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin);
+  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin.shiftX, origin.shiftY);
   const [y1, y2] = [baseY + origin.shiftY, bounds.maxY + origin.shiftY];
   const chrome = computeSwimlaneChrome(shifted.swimlanes, y1, titlesHeight, y2, bandReservationX(shifted.reservations));
   return {
