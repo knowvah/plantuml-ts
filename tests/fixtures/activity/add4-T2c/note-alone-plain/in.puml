@@ -1,0 +1,7 @@
+@startuml
+note left
+  a,b,c
+end note
+start
+:foo;
+@enduml
