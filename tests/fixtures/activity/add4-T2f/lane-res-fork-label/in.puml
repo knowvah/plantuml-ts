@@ -1,0 +1,11 @@
+@startuml
+|A|
+:start here with a long one;
+|B|
+fork
+  :x;
+fork again
+  :y;
+end fork {joined label here}
+:z;
+@enduml

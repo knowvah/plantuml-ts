@@ -29,6 +29,7 @@ import type { Theme } from '../../../core/theme.js';
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import { swimlaneTitleText } from './swimlane-title.js';
+import { shiftLaneReservations } from './swimlane-reservation-lane.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -335,6 +336,9 @@ export interface PlacementInput {
   readonly theme: Theme;
   /** `|name|LABEL` displays keyed by lane name (`ast.swimlaneDisplays`). */
   readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
+  /** The walk's own reservations; lane-tagged ones take their lane's delta
+   *  (`swimlane-reservation-lane.ts`). */
+  readonly walkReservations?: readonly Reservation[];
 }
 
 /** {@link measureLanes}'s own inputs, bundled to keep that function under
@@ -409,6 +413,24 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
   return { widths: computeLaneWidths(extents, titleWidths, min), min };
 }
 
+/** Each lane's placement delta and geometry, carrying its `|name|LABEL`
+ *  display (`Swimlanes.java:163-164`). */
+function laneGeosOf(
+  laneNames: readonly string[],
+  origins: ReadonlyMap<string, { readonly delta: number; readonly geo: SwimlaneGeo }>,
+  laneDisplays: Readonly<Record<string, string>> | undefined,
+): { deltas: Map<string, number>; swimlanes: SwimlaneGeo[] } {
+  const deltas = new Map<string, number>();
+  const swimlanes: SwimlaneGeo[] = [];
+  for (const name of laneNames) {
+    const origin = origins.get(name)!;
+    deltas.set(name, origin.delta);
+    const display = laneDisplays?.[name];
+    swimlanes.push(display === undefined ? origin.geo : { ...origin.geo, display });
+  }
+  return { deltas, swimlanes };
+}
+
 /**
  * Orchestrates T4 + the origin loop + the shift, called once from
  * `assignCoordinates` after the pass-1 single-column walk. Returns
@@ -427,22 +449,17 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
  * `delta` no upstream diagram ever gets.
  */
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
-  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme, laneDisplays } = input;
+  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, laneDisplays } = input;
+  const walkReservations = input.walkReservations ?? [];
   if (laneNames.length <= 1) {
-    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
+    const reservations = [...walkReservations];
+    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations };
   }
 
-  const { widths, min } = measureLanes({ nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays });
+  const { widths, min } = measureLanes(input);
   const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
 
-  const deltas = new Map<string, number>();
-  const swimlanes: SwimlaneGeo[] = [];
-  for (const name of laneNames) {
-    const origin = origins.get(name)!;
-    deltas.set(name, origin.delta);
-    const display = laneDisplays?.[name];
-    swimlanes.push(display === undefined ? origin.geo : { ...origin.geo, display });
-  }
+  const { deltas, swimlanes } = laneGeosOf(laneNames, origins, laneDisplays);
 
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
   // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
@@ -453,6 +470,10 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
     edges: routed.flatMap((r) => r.edges),
     edgeMeta: routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
-    reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
+    reservations: [
+      ...shiftLaneReservations(walkReservations, deltas),
+      ...dividerGeo,
+      ...routed.flatMap((r) => r.reservations),
+    ],
   };
 }

@@ -288,7 +288,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
-  const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays };
+  const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays, walkReservations: reservations };
   const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, bounder, theme });
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
@@ -297,7 +297,7 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   // `xpos = 0` at `baseX`).
   const bandX = baseX + SWIMLANE_BAND_INSET_X;
   const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY, bandX);
-  const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
+  const allReservations = withBandReservation(placed.reservations, pass1Chrome.swimlaneBand);
 
   if (!compress) {
     const result = pass1Assemble({ placed, reservations: allReservations, bounds, baseY, titlesHeight, theme });
