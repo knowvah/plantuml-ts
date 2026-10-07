@@ -1,0 +1,11 @@
+@startuml
+start
+:act;
+note right #lightblue: coloured
+:two;
+note left #FF8800
+multi
+line
+end note
+stop
+@enduml

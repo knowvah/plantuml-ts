@@ -11,10 +11,21 @@ import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
+import {
+  drawActivityText,
+  drawActivityTextLines,
+  renderCreoleTableGrid,
+  type ActivityTextStyle,
+} from './activity-renderer-text.js';
 import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
 import { NOTE_MARGIN_Y } from './activity-layout-constants.js';
-import { noteFoldPath, noteBodyNormal, noteBodySpikeRight, noteBodySpikeLeft } from './activity-renderer-note-shapes.js';
+import {
+  noteFoldPath,
+  noteBodyNormal,
+  noteBodySpikeRight,
+  noteBodySpikeLeft,
+  noteFillOf,
+} from './activity-renderer-note-shapes.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
@@ -313,7 +324,7 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
 
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
-  const noteFill = theme.colors.noteBackground;
+  const noteFill = noteFillOf(node, theme); // add4-T1c: a note's own `#color`
   const stroke = theme.colors.border;
   // The ROOT `note { FontSize 13; LineThickness 0.5 }` block (plantuml.skin
   // :323,325): an activity note resolves `SName.note` under `activityDiagram`
@@ -356,7 +367,11 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
   // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
   const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
-  const textStyle = { fontFamily: activityFontFamily(theme, 'note'), fontSize: noteSize, fill: activityFontColor(theme, 'note') };
+  const textStyle = {
+    fontFamily: activityFontFamily(theme, 'note'),
+    fontSize: noteSize,
+    fill: activityFontColor(theme, 'note'),
+  };
   const labelEl =
     lines.length > 1
       ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)

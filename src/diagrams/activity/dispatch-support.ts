@@ -125,8 +125,7 @@ export const RE_IF = /^if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+
  * call. Both groups lazy, same reason as {@link RE_IF}'s own doc.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandIf4.java:60-81
  */
-export const RE_IF4 =
-  /^if\s*\((.*?)\)\s*(?:is|equals?)\s*\((.*?)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+export const RE_IF4 = /^if\s*\((.*?)\)\s*(?:is|equals?)\s*\((.*?)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /**
  * Legacy `if (test) then when LABEL` spelling -- no parens around the
@@ -258,15 +257,15 @@ export const RE_REPEATWHILE =
  * add2-T2e, D6): `giteso-65-mefo026`'s `floating note right: …` and
  * `xolazi-74-vamu265`'s `note right #blue :sad note is sad` both refused
  * against this. The COLOR group mirrors `ColorParser.COLOR_REGEXP`
- * (`#\w+[-\|/]?\w+`, gradient-separator included) -- captured but
- * dropped, same "parsed not drawn" scope as this file's other leading-
- * color omissions (`RE_IF`'s own doc).
+ * (`#\w+[-\|/]?\w+`, gradient-separator included); group 3 captures it
+ * (add4-T1c: `ActivityNote.color`, `CommandNote3.java:65-67`'s
+ * `simpleColor(ColorType.BACK)`), group 4 is the text.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNote3.java:60-71
  *   -- `TYPE (note|floating note)`, `POSITION (left|right)?`,
  *   `color().getRegex()`, then the literal `:`.
  * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46
  */
-export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*:\s*(.+)$/i;
+export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(#\w+[-\\|/]?\w+)?\s*:\s*(.+)$/i;
 
 /**
  * `(floating )?note (left|right)?` (multi-line, closed by {@link
@@ -276,7 +275,7 @@ export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:
  * right`, `tajuxe-32-sexo680`'s `note left #aabbcc`).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNoteLong3.java:131-141
  */
-export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*$/i;
+export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(#\w+[-\\|/]?\w+)?\s*$/i;
 
 /** `NotePosition.java:43-48` -- `defaultLeft(s)`: `null` (no `left`/`right`
  *  keyword in the source line, group 2 of {@link RE_NOTE_SINGLE}/{@link

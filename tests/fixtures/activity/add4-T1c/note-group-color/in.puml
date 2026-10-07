@@ -1,0 +1,8 @@
+@startuml
+start
+group grp
+note right #pink: gnote
+:act;
+end group
+stop
+@enduml

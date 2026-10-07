@@ -1,0 +1,12 @@
+@startuml
+start
+:act;
+floating note right: floats
+:two;
+floating note left
+multi
+end note
+:three;
+note right: linked
+stop
+@enduml

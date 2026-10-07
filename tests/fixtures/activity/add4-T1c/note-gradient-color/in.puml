@@ -1,0 +1,6 @@
+@startuml
+start
+:act;
+note right #red-blue: grad
+stop
+@enduml

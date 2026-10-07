@@ -31,7 +31,6 @@ import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
 import { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
-import { activityFontSize } from '../activity-style-defaults.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
@@ -100,9 +99,10 @@ const WRAP_NO_LINK_KINDS: ReadonlySet<string> = new Set(['gtile-fork', 'gtile-me
  *  (`StackedNote.text`/`NoteStack`'s own side segregation IS the
  *  position). */
 function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
-  if (last.kind === 'gtile-note-opale') return [{ text: last.note.text, position: last.note.side }];
-  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const })) ?? [];
-  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const })) ?? [];
+  if (last.kind === 'gtile-note-opale')
+    return [{ text: last.note.text, position: last.note.side, color: last.note.color }];
+  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const, color: n.color })) ?? [];
+  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const, color: n.color })) ?? [];
   return [...left, ...right];
 }
 
@@ -113,9 +113,17 @@ function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
  * spiked/stacked wrap the prior note(s) already built -- never nests.
  * `activity-divergence-drive-3` T2a, family NOTE-MULTI.
  */
-function mergeIntoWithNotes(last: GtileNoteOpale | GtileWithNotes, node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
-  const entries: WithNotesEntry[] = [...entriesOf(last), { text: node.text, position: node.position }];
-  return new GtileWithNotes(last.children[0]!, entries, bounder, activityFontSize(theme, 'note'));
+function mergeIntoWithNotes(
+  last: GtileNoteOpale | GtileWithNotes,
+  node: ActivityNote,
+  bounder: StringBounder,
+  theme: Theme,
+): Tile {
+  const entries: WithNotesEntry[] = [
+    ...entriesOf(last),
+    { text: node.text, position: node.position, color: node.color },
+  ];
+  return new GtileWithNotes(last.children[0]!, entries, bounder, theme);
 }
 
 /** `last` already carries one or more notes -- the NOTE-MULTI merge
@@ -151,7 +159,10 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
     tiles.push(noteTile);
     return;
   }
-  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, !WRAP_NO_LINK_KINDS.has(last.kind));
+  // add4-T1c: `FtileWithNoteOpale.java:132-133` -- a `FLOATING_NOTE` forces
+  // `withLink = false` whatever the wrapped tile's own kind allows.
+  const withLink = !WRAP_NO_LINK_KINDS.has(last.kind) && node.floating !== true;
+  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, withLink);
 }
 
 /**
@@ -187,7 +198,13 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:160-161
  *   -- same accessor, split's own `ConnectionOut`.
  */
-function buildBranchTopDown(b: ActivityNode[], bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): GtileTopDown {
+function buildBranchTopDown(
+  b: ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): GtileTopDown {
   const { tiles, trailing } = tileNodes(b, bounder, theme, laneOrder, pragma);
   const topDown = new GtileTopDown(tiles, bounder, theme);
   withInLabel(topDown, tiles[0]?.inLabel);
@@ -300,8 +317,8 @@ export function tileSwitch(
  *  divergence-drive-3` T2a, family GROUPNOTE. */
 function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: StringBounder, theme: Theme): Tile {
   if (note === undefined) return body;
-  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position }];
-  return new GtileWithNotes(body, entries, bounder, activityFontSize(theme, 'note'));
+  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position, color: note.color }];
+  return new GtileWithNotes(body, entries, bounder, theme);
 }
 
 export function tileGroup(
