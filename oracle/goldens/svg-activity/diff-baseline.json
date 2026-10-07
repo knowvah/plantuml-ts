@@ -2362,11 +2362,11 @@
     {
       "type": "activity",
       "slug": "nikivo-06-kaxa873",
-      "status": "baseline",
-      "diffCount": 2,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "50a347b2",
-      "weightedScore": 2
+      "measuredAgainstCommit": "c6f501d9",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3425,10 +3425,10 @@
       "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
-      "weightedScore": 380,
-      "diffCount": 380,
+      "weightedScore": 2,
+      "diffCount": 2,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "c6f501d9"
     },
     {
       "type": "activity",

@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "6c788ec6",
+  "measuredAgainstCommit": "c6f501d9",
   "fixtures": [
     {
       "type": "activity",
@@ -2628,7 +2628,7 @@
           },
           {
             "x": 103.2375,
-            "width": 213.66249999999997
+            "width": 213.66250000000002
           }
         ],
         "width": "342",
@@ -7014,49 +7014,49 @@
       "ours": {
         "dividerXs": [
           20,
-          281.003,
-          513.222,
-          641.541
+          242.475,
+          474.694,
+          603.013
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "131.039",
+            "x": "111.775",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "377.65",
+            "x": "339.122",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "558.425",
+            "x": "519.897",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 52.5,
-          "width": 620.541,
+          "width": 582.013,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
             "x": 20,
-            "width": 261.003125
+            "width": 222.47500000000002
           },
           {
-            "x": 281.003125,
+            "x": 242.47500000000002,
             "width": 232.21875
           },
           {
-            "x": 513.221875,
-            "width": 128.31875000000008
+            "x": 474.69375,
+            "width": 128.31875000000014
           }
         ],
-        "width": "667",
+        "width": "629",
         "height": "637"
       },
       "jar": {
