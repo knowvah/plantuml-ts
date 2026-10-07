@@ -184,33 +184,45 @@ function pushCaseInEdge(step: SwitchCaseStep, args: OneCaseArgs, out: Out): void
   applyLastEdgeLabel(out, label, caseInLabelAlign(i, totalCases));
 }
 
-/** `differentSwimlane(this, tile) == false`, approximated as "this case's
- *  own in-lane equals the switch's own lane" -- used only to decide
- *  whether a case counts toward {@link getFirstOutgoingArrow}/
- *  {@link getLastOutgoingArrow}'s window (`FtileSwitchWithManyLinks.java
- *  :406-410,489-507`). */
-function sameLane(c: Tile, myLane: string | undefined): boolean {
-  return laneIn(c, myLane) === myLane;
-}
+/**
+ * `differentSwimlane(this, tile)` (`FtileSwitchWithManyLinks.java:406-410`)
+ * gates {@link getFirstOutgoingArrow}/{@link getLastOutgoingArrow}'s window
+ * (`:489-507`) on `this.getSwimlaneOut() != tile.getSwimlaneIn()`. `this`
+ * here is the SWITCH itself: `FtileSwitchNude#getSwimlaneOut()` returns
+ * `getSwimlaneIn()` (`FtileSwitchNude.java:85-86`), which returns the
+ * switch's own single `in` field -- set once at construction
+ * (`FtileSwitchWithDiamonds.java:67-68`, `FtileSwitchNude.java:52-58`) and
+ * shared, unconditionally, by every branch. `tile.getSwimlaneIn()` for a
+ * DIRECT case of the switch is therefore ALWAYS that same `in` lane -- a
+ * branch's entry lane is a property of the switch dispatching into it, not
+ * of what the branch's own first statement later does (an internal
+ * `|lane|` directive changes the lane AFTER entry, never retroactively).
+ * `differentSwimlane(this, tile)` is thus structurally always false at
+ * THIS call site: no case is ever excluded from the window on lane
+ * grounds (contrast `FtileSwitchWithManyLinks.java:466-471`'s SEPARATE
+ * loop, `pushOneMergeEdge`'s own `switch-v-then-h-cross` tag below, which
+ * compares the REAL leaf-resolved exit lane and genuinely can differ).
+ * No port-side `sameLane` check belongs here at all -- `hasPointOut()` is
+ * the only live condition upstream ever applies.
+ */
 
 /** `FtileSwitchWithManyLinks#getFirstOutgoingArrow` (`:489-497`): the
- *  FIRST same-lane case (index `0..n-2`, the last index is NEVER
- *  checked here) with an out point; `tiles.size()` (the sentinel, "none
- *  found") otherwise. */
-function getFirstOutgoingArrow(caseTiles: readonly Tile[], myLane: string | undefined): number {
+ *  FIRST case (index `0..n-2`, the last index is NEVER checked here) with
+ *  an out point; `tiles.size()` (the sentinel, "none found") otherwise. */
+function getFirstOutgoingArrow(caseTiles: readonly Tile[]): number {
   const n = caseTiles.length;
   for (let i = 0; i < n - 1; i++) {
-    if (caseTiles[i]!.hasPointOut() && sameLane(caseTiles[i]!, myLane)) return i;
+    if (caseTiles[i]!.hasPointOut()) return i;
   }
   return n;
 }
 
 /** `FtileSwitchWithManyLinks#getLastOutgoingArrow` (`:499-507`): the LAST
- *  same-lane case (full `n-1..0` range) with an out point; `-1` ("none
- *  found") otherwise. */
-function getLastOutgoingArrow(caseTiles: readonly Tile[], myLane: string | undefined): number {
+ *  case (full `n-1..0` range) with an out point; `-1` ("none found")
+ *  otherwise. */
+function getLastOutgoingArrow(caseTiles: readonly Tile[]): number {
   for (let i = caseTiles.length - 1; i >= 0; i--) {
-    if (caseTiles[i]!.hasPointOut() && sameLane(caseTiles[i]!, myLane)) return i;
+    if (caseTiles[i]!.hasPointOut()) return i;
   }
   return -1;
 }
@@ -239,7 +251,15 @@ interface MergeEdgeStep {
  *  {@link pushCaseToMergeEdges} purely to keep that function's NLOC
  *  under the complexity hook's cap. T1d row 32: the case's own trailing
  *  `-> label;` (`c.outLabel`) is drawn CENTER-aligned, gated on >1 case
- *  (`FtileSwitchWithOneLink`'s own connector never calls `.withLabel()`). */
+ *  (`FtileSwitchWithOneLink`'s own connector never calls `.withLabel()`).
+ *  `add3` T3b-2: when the case's real exit lane differs from the merge
+ *  diamond's (the SAME comparison `routeEdge`'s own `isCrossLane` makes
+ *  downstream, duplicated here since the label decision must be made at
+ *  push time, before `swimlane-placement.ts` runs), the connector that
+ *  actually draws is `ConnectionVerticalThenHorizontalCrossSwimlane`
+ *  (`FtileSwitchWithManyLinks.java:352-356`), whose constructor takes no
+ *  label param at all -- unlike the same-lane classes' own `.withLabel()`
+ *  call (`:176-177,274-275`), it never attaches one. */
 function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrLast: boolean, out: Out): void {
   const southC = c.getCoord(SOUTH_HOOK);
   const p1 = { x: cPos.x + southC.x, y: cPos.y + southC.y };
@@ -252,14 +272,20 @@ function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrL
     p2: hex2.north,
     diamond2: { width: step.mergeDiamond.width, height: step.mergeDiamond.height },
   };
-  pushEdge(out, points, laneOut(c, step.myLane), laneIn(step.mergeDiamond, step.myLane), { loop: vThenHLoop });
-  applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
+  const laneOutC = laneOut(c, step.myLane);
+  const laneInMerge = laneIn(step.mergeDiamond, step.myLane);
+  pushEdge(out, points, laneOutC, laneInMerge, { loop: vThenHLoop });
+  if (laneOutC === laneInMerge) applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
 }
 
 /**
- * `FtileSwitchWithManyLinks#addOutgoingArrows` (`:447-473`), the
- * same-lane subset (cross-swimlane is the pre-existing `loop`-tagged
- * path, both connector classes' own `getP1`/`getP2`, unchanged). Two
+ * `FtileSwitchWithManyLinks#addOutgoingArrows`'s first loop (`:447-465`):
+ * the window is never lane-filtered ({@link getFirstOutgoingArrow}'s own
+ * doc), so `pushOneMergeEdge` runs for every case in range, same-lane or
+ * not -- `loop`-tagging inside it (unconditional, like {@link
+ * pushCaseInEdge}'s own `hThenVLoop`) is what makes a genuinely cross-lane
+ * push resolve to the right shape downstream (`routeEdge`'s own
+ * `isCrossLane` dispatch), never a second, separate code path here. Two
  * independent `if`s -- NOT `else if` -- for the first/last pushes: when
  * the only qualifying case is both (`firstOutgoingArrow ===
  * lastOutgoingArrow > 0`), upstream really does push the SAME connector
@@ -273,8 +299,8 @@ function pushCaseToMergeEdges(
   out: Out,
 ): void {
   const n = caseTiles.length;
-  const firstIdx = getFirstOutgoingArrow(caseTiles, step.myLane);
-  const lastIdx = getLastOutgoingArrow(caseTiles, step.myLane);
+  const firstIdx = getFirstOutgoingArrow(caseTiles);
+  const lastIdx = getLastOutgoingArrow(caseTiles);
   if (lastIdx === -1) return;
   const posOf = (i: number): GPoint => ({ x: caseX[i]!, y: caseY });
   if (firstIdx < n) pushOneMergeEdge(step, caseTiles[firstIdx]!, posOf(firstIdx), true, out);
