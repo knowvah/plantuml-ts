@@ -108,8 +108,12 @@ export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
  */
 export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
   const size = node.width / 2;
+  // add4-T2d (CONDSTYLE-EMPTY, `xefalo-73-sabi101`): `FtileDiamond#drawU`
+  // draws the rhombus at `UTranslate.dy(suppY1)` (`FtileDiamond.java:87-89`)
+  // -- the BOTTOM of a `(24, 24 + suppY1)` box (`:108-110`), below the north
+  // label, never centred on it. Identical to the centre for a square node.
+  const cy = node.y + node.height - size;
   const c = actColors(theme);
   const first = { x: cx, y: cy - size };
   const shape = polygon([first, { x: cx + size, y: cy }, { x: cx, y: cy + size }, { x: cx - size, y: cy }, first], {

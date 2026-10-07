@@ -360,6 +360,15 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     expect(svg).toContain('stroke-miterlimit="10"');
   });
 
+  it('add4-T2d: a north-labelled EMPTY_DIAMOND box draws the rhombus at its bottom, below suppY1', () => {
+    // `FtileDiamond#drawU` translates by `dy(suppY1)` before drawing the
+    // 24x24 `Hexagon.asPolygon` (`FtileDiamond.java:87-89`); the box is
+    // `(24, 24 + suppY1)` (`:108-110`). suppY1 = 11 here (one 11 pt line).
+    const svg = renderDiamond(makeNode({ kind: 'if-split', x: 156, y: 159, width: 24, height: 35 }), theme);
+    const points = /<polygon points="([^"]+)"/.exec(svg)?.[1];
+    expect(points).toBe('168,170,180,182,168,194,156,182,168,170');
+  });
+
   it('a note draws font-size 13 and stroke-width 0.5', () => {
     // The ROOT note block, plantuml.skin:323 and :325.
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
