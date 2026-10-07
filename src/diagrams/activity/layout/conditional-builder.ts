@@ -21,6 +21,7 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import type { DiamondConditionTile, DiamondInsideLabels } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
+import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
 import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
@@ -210,15 +211,34 @@ function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, th
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
-/** add2 T3h (CSTYLE): `ConditionalBuilder.getShape1` (`:251-277`) --
- * `INSIDE_DIAMOND` -> `FtileDiamondSquare`, else `FtileDiamondInside`.
- * `EMPTY_DIAMOND` is a separate, still-unwired gate (T1p-a). */
+/**
+ * `ConditionalBuilder.getShape1` (`:250-277`): `INSIDE_DIAMOND` ->
+ * `FtileDiamondSquare` (add2 T3h); `EMPTY_DIAMOND` -> `FtileDiamond`
+ * (add3 T3a, CONDSTYLE-EMPTY) -- `.withNorth(tbTest)` in BOTH of
+ * `getShape1`'s own `eastWest` branches (`:261,264`), so the condition
+ * text always routes to NORTH here too, same as `GtileDiamondInside`/
+ * `GtileDiamondSquare`'s own center `label` param slot -- `label` below IS
+ * `GtileDiamondEmpty`'s `testLabel` constructor argument, not read via
+ * `labels`. Else (default) `FtileDiamondInside`.
+ *
+ * Only wired for `buildIfDown`'s own caller (`:381` below) -- `buildIf
+ * WithLinks` (`:244`) still hardcodes `GtileDiamondInside` regardless of
+ * `conditionStyle`, a PRE-EXISTING gap (unrelated to this function) this
+ * task's write-set cannot close: `gtile-if-with-links.ts`/`walk-if-with-
+ * links.ts` both type `diamond1` as the concrete `GtileDiamondInside`
+ * class (verified directly, not the "add2 T3h widened" `DiamondCondition
+ * Tile` union that `gtile-diamond-inside.ts`'s own doc comment claims --
+ * that claim does not hold up against the current source and is not
+ * repeated here), and `walk-if-with-links.ts` is explicitly outside this
+ * task's write-set (`layout/walk-if-*.ts`).
+ */
 function createConditionDiamond(
   label: string,
   labels: DiamondInsideLabels,
   bounder: StringBounder,
   theme: Theme,
 ): DiamondConditionTile {
+  if (theme.conditionStyle === 'emptyDiamond') return new GtileDiamondEmpty(label, labels, bounder, theme);
   if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(label, labels, bounder, theme);
   return new GtileDiamondInside(label, labels, bounder, theme);
 }

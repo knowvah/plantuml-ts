@@ -12,7 +12,9 @@ import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
+import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat, RepeatConditionEmpty } from '../tiles/gtile-repeat.js';
 import type { RepeatConditionTile } from '../tiles/gtile-repeat.js';
@@ -211,11 +213,32 @@ function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, th
 }
 
 /**
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
- *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
- *   the "is not"/exit label sits west, UNAFFECTED by `backward` (the Java
- *   `create` builds `diamond1` before `backward` is ever read).
+ * `FtileWhile.create`'s own 3-way `conditionStyle` dispatch for the while
+ * header (`vcompact/FtileWhile.java:131-139`): `INSIDE_HEXAGON` (default)
+ * and `INSIDE_DIAMOND` both route `{north: yesLabel, west: exitLabel}`
+ * through `.withNorth(yesTb).withWest(outTb)`, differing only in shape
+ * class (`:132-136`). `EMPTY_DIAMOND` (CONDSTYLE-EMPTY, `add3-T3a`) is a
+ * genuinely different label layout, not just a different polygon: the
+ * condition text itself moves to NORTH (`.withNorth(testTb)`, always at
+ * the `styleDiamond`/`fcTest` font bucket -- `GtileDiamondEmpty`'s own
+ * `testLabel` param) and yes/exit demote to south/west (`:137-139`).
  */
+function buildWhileHeader(
+  node: ActivityWhile,
+  labels: { north?: string; west?: string },
+  bounder: StringBounder,
+  theme: Theme,
+): DiamondConditionTile {
+  if (theme.conditionStyle === 'emptyDiamond') {
+    const emptyLabels: { south?: string; west?: string } = {};
+    if (node.yesLabel !== undefined) emptyLabels.south = node.yesLabel;
+    if (node.exitLabel !== undefined) emptyLabels.west = node.exitLabel;
+    return new GtileDiamondEmpty(node.condition, emptyLabels, bounder, theme);
+  }
+  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
+  return new GtileDiamondInside(node.condition, labels, bounder, theme);
+}
+
 function tileWhile(
   node: ActivityWhile,
   bounder: StringBounder,
@@ -226,7 +249,7 @@ function tileWhile(
   const labels: { north?: string; west?: string } = {};
   if (node.yesLabel !== undefined) labels.north = node.yesLabel;
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
-  const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  const header = buildWhileHeader(node, labels, bounder, theme);
   const { rest, backward } = extractBackward(node.body);
   const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma).tiles;
   const body = new GtileTopDown(bodyTiles, bounder, theme);
@@ -306,6 +329,16 @@ function tileRepeatCondition(
   theme: Theme,
 ): RepeatConditionTile {
   if (node.noOut === true && node.condition === '') return new RepeatConditionEmpty();
+  // CONDSTYLE-EMPTY (add3 T3a): `FtileRepeat.java:156-159` --
+  // `.withEast(tbTest)` ONLY (no yes/out label at all, a preserved
+  // upstream quirk: `yesTb`/`outTb` are built at `:130-131` but never
+  // attached on this branch); `tbTest` itself is ARROW-bucket here
+  // (`fontConfiguration1 = fcArrow`, `:124-125`, the non-INSIDE_HEXAGON
+  // case), so it goes through `labels.east`, not `GtileDiamondEmpty`'s
+  // own diamond-bucket `testLabel` param (`''` here, matching `tileWhile`'s
+  // own EMPTY_DIAMOND call never leaving `testLabel` unset the way this
+  // one always does).
+  if (theme.conditionStyle === 'emptyDiamond') return new GtileDiamondEmpty('', { east: node.condition }, bounder, theme);
   // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
   if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
   return new GtileDiamondInside(node.condition, labels, bounder, theme);
