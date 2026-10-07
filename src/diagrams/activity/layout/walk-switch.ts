@@ -32,7 +32,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { markBigDiamondDuplicate } from './switch-swimlane-duplicate.js';
-import { applyOutLabel } from './tile-layout-inlabel.js';
+import { applyInLabel, applyOutLabel } from './tile-layout-inlabel.js';
 import type { SnakeTextAlign } from './snake-text-position.js';
 import {
   horizontalThenVerticalPoints,
@@ -45,12 +45,15 @@ import {
 import type { HexagonCorners } from './switch-connection-points.js';
 
 /** Labels the edge `pushEdge` just pushed, when non-empty, with its own
- *  alignment ({@link caseInLabelAlign}). */
+ *  alignment ({@link caseInLabelAlign}) -- through {@link applyInLabel},
+ *  the SAME attach-plus-reservation path every other connector's in-label
+ *  takes: the case label is `Branch#getTextBlockPositive()`, drawn by the
+ *  connector as a `UText` that `SlotFinder#drawText` (`klimt/compress/
+ *  SlotFinder.java`) counts as an occupant, so the compressor must see its
+ *  real placed box, not the generic mid-point estimate. */
 function applyLastEdgeLabel(out: Out, label: string | undefined, align: SnakeTextAlign): void {
   if (label === undefined || label === '') return;
-  const edge = out.edges[out.edges.length - 1]!;
-  edge.label = label;
-  edge.labelAlign = align;
+  applyInLabel(out, { inLabel: { label } }, align);
 }
 
 /**
@@ -294,15 +297,16 @@ function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrL
 function pushCaseToMergeEdges(
   step: MergeEdgeStep,
   caseTiles: readonly Tile[],
-  caseX: readonly number[],
-  caseY: number,
+  positions: readonly GPoint[],
   out: Out,
 ): void {
   const n = caseTiles.length;
   const firstIdx = getFirstOutgoingArrow(caseTiles);
   const lastIdx = getLastOutgoingArrow(caseTiles);
   if (lastIdx === -1) return;
-  const posOf = (i: number): GPoint => ({ x: caseX[i]!, y: caseY });
+  // Per-case body position: each case sits its OWN in-label height below
+  // the row (`FtileDecorateInLabel#drawU`, `gtile-switch.ts#decorateCase`).
+  const posOf = (i: number): GPoint => positions[i]!;
   if (firstIdx < n) pushOneMergeEdge(step, caseTiles[firstIdx]!, posOf(firstIdx), true, out);
   if (lastIdx > 0) pushOneMergeEdge(step, caseTiles[lastIdx]!, posOf(lastIdx), true, out);
   for (let i = firstIdx + 1; i < lastIdx; i++) {
@@ -374,8 +378,7 @@ function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out
   pushCaseInEdges(step, cases, positions, tile, out);
   if (step.totalCases > 1 && step.mergeDiamond !== null && step.mPos !== null) {
     const mergeStep: MergeEdgeStep = { diamond: step.diamond, dPos: step.dPos, mergeDiamond: step.mergeDiamond, mPos: step.mPos, myLane: step.myLane };
-    const caseX = positions.map((p) => p.x);
-    pushCaseToMergeEdges(mergeStep, cases, caseX, step.y + tile.caseOffsets[0]!.y, out);
+    pushCaseToMergeEdges(mergeStep, cases, positions, out);
   }
 }
 

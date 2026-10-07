@@ -1,0 +1,9 @@
+@startuml
+start
+switch (x)
+case (only)
+:A;
+endswitch
+:D;
+stop
+@enduml

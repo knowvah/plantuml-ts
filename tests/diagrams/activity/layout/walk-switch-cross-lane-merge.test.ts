@@ -25,7 +25,10 @@
  * function already carries the correct, previously-ported (T1p-e)
  * cross-lane geometry (`switch-v-then-h-cross`) once reached.
  *
- * mojezi-43-gamu360's own shape, reproduced minimally.
+ * mojezi-43-gamu360's own shape, reproduced minimally. Coordinates are
+ * the jar's own (`<line>`s of mojezi's oracle SVG), byte-equal since
+ * `add4` T1a ported `FtileDecorateInLabel` (case row sits each case
+ * label's own height lower).
  */
 import { describe, expect, it } from 'vitest';
 import { buildBlockUmls } from '../../../../src/core/BlockUmlBuilder.js';
@@ -70,24 +73,24 @@ describe('switch outgoing connector, last case crosses lane mid-branch', () => {
     // Case 0 (!S2, same lane throughout) gets this shape unconditionally;
     // case 1 (Aba1 -> |S1|) must get the analogous one, not be dropped.
     const sameLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 131.36249999999998 && e.points[0]!.y === 168.5,
+      (e) => e.points.length === 3 && e.points[0]!.x === 131.36249999999998 && e.points[0]!.y === 180.5,
     );
     expect(sameLaneCaseOut).toBeDefined();
 
     const crossLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 168.5,
+      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 180.5,
     );
     expect(crossLaneCaseOut).toBeDefined();
     expect(crossLaneCaseOut!.points).toEqual([
-      { x: 58.0125, y: 168.5 },
-      { x: 58.0125, y: 190.5 },
-      { x: 161.375, y: 190.5 },
+      { x: 58.0125, y: 180.5 },
+      { x: 58.0125, y: 202.5 },
+      { x: 161.375, y: 202.5 },
     ]);
   });
 
   it('carries no label on the cross-lane case-out connector (no `.withLabel()` call on `ConnectionVerticalThenHorizontalCrossSwimlane`)', () => {
     const crossLaneCaseOut = geo.edges.find(
-      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 168.5,
+      (e) => e.points.length === 3 && e.points[0]!.x === 58.0125 && e.points[0]!.y === 180.5,
     );
     expect(crossLaneCaseOut!.label).toBeUndefined();
   });

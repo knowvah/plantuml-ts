@@ -1,0 +1,15 @@
+@startuml
+start
+switch (x)
+case (one)
+:A;
+-> first exit label;
+case (two)
+:B;
+case (three)
+:C;
+-> last;
+endswitch
+:D;
+stop
+@enduml

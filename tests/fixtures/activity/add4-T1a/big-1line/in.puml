@@ -1,0 +1,11 @@
+@startuml
+start
+switch (a rather long switch test condition here)
+case (a)
+:A;
+case (b)
+:B;
+endswitch
+:D;
+stop
+@enduml
