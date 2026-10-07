@@ -29,8 +29,10 @@ import {
   textLines,
 } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
-import { centeredLineX, measureLineWidth, type ActivityTextOpts } from './activity-text-placement.js';
+import { centeredLineX, type ActivityTextOpts } from './activity-text-placement.js';
 import { floorActionLineHeight } from './tiles/gtile-action.js';
+import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -127,7 +129,7 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
   // dimLabel.width) / 2` in this node's own frame.
   const fontSize = activityFontSize(theme, 'diamond');
-  const lineWidth = measureLineWidth(theme, fontSize, node.label);
+  const lineWidth = diamondLineWidth(theme, fontSize, node.label);
   // D1: no `dominant-baseline` (the driver emits none, and no cached jar
   // SVG carries one) -- the real baseline is the same N=1 reduction of
   // `flooredFirstBaselineY` `renderHexagon`'s single-line branch uses.
@@ -252,6 +254,18 @@ export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): stri
   return renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }
 
+const CREOLE_MEASURER = new WidthTableMeasurer();
+
+/** add4-T2d (DIAMOND-CREOLE-WIDTH): a diamond label line's RESOLVED creole
+ *  width -- the condition text is a `CreoleMode.FULL` Sheet
+ *  (`ConditionalBuilder.java:241-244`), so `**x**` centres on the width of
+ *  its bold atom, not its markup. The SAME lexer and metric
+ *  `tiles/gtile-diamond-inside.ts#measureCondition` sizes the hexagon with
+ *  (`WidthTableMeasurer`, `activity-text-placement.ts#measureLineWidth`'s). */
+export function diamondLineWidth(theme: Theme, fontSize: number, line: string): number {
+  return creoleTextLines(line, { family: theme.fontFamily, size: fontSize }, CREOLE_MEASURER)[0]?.width ?? 0;
+}
+
 /**
  * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d,
  * `vaxiki-78-nice114`). Root's default `HorizontalAlignment left`
@@ -288,7 +302,7 @@ export function renderHexagonMultilineLabel(
   opts: ActivityTextOpts,
 ): string {
   const condSize = opts.fontSize ?? activityFontSize(theme, 'diamond');
-  const lineWidths = lines.map((ln) => measureLineWidth(theme, condSize, ln));
+  const lineWidths = lines.map((ln) => diamondLineWidth(theme, condSize, ln));
   const maxWidth = Math.max(...lineWidths);
   const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
   // add4-T2d: each stripe is a floored `AtomText` (`AtomText.java:179-181`).

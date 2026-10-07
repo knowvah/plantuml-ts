@@ -1,0 +1,12 @@
+@startuml
+start
+if (there is no "**[EOL]**") then (yes)
+  :a;
+endif
+if (**bold** first\nand __second__) then (yes)
+  :b;
+else (no)
+  :c;
+endif
+stop
+@enduml

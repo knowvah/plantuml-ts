@@ -4,6 +4,8 @@ import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { measurerAdapterOf } from './gtile-action.js';
 
 /** add3-T3f (PADDING, padding-only edit per this task's write-set): the
  *  bare `skinparam padding N` key (`theme-root-fields.ts#padding`), added
@@ -112,6 +114,27 @@ function measureLabel(text: string | undefined, bounder: StringBounder, fontSize
 }
 
 /**
+ * add4-T2d (DIAMOND-CREOLE-WIDTH, `mazoka-64-nixi123`): the condition text
+ * is a creole `Sheet`, not raw text -- `ConditionalBuilder#getShape1` builds
+ * `skinParam.sheet(styleDiamonFont, horizontalAlignment, CreoleMode.FULL)
+ * .createSheet(labelTest)` inside a `SheetBlock1`
+ * (`vcompact/cond/ConditionalBuilder.java:241-244`), so `**[EOL]**` is
+ * measured as its bold atom `[EOL]`, never with its four `*`. Each line's
+ * width goes through the SAME real lexer `gtile-action.ts#creoleLineWidth`
+ * uses (`creoleTextLines`); the per-line height fold is
+ * {@link measureLabel}'s.
+ */
+function measureCondition(text: string, bounder: StringBounder, fontSize: number, family: string): LabelDim {
+  const dim = measureLabel(text, bounder, fontSize);
+  if (dim.width === 0) return dim;
+  const measurer = measurerAdapterOf(bounder);
+  const widths = text
+    .split('\n')
+    .map((line) => creoleTextLines(line, { family, size: fontSize }, measurer)[0]?.width ?? 0);
+  return { ...dim, width: Math.max(...widths) };
+}
+
+/**
  * The hexagon-alone dimension. Special-cased to a literal 24x24 for an
  * empty condition label -- NOT `atLeast(24,24).delta(24,0)`, which would
  * wrongly add the 24 width pad even to a zero-width label.
@@ -164,7 +187,7 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
     // `getDimension` call on the whole string reports one oversized line,
     // not `label.calculateDimension`'s own per-`AtomText` sum
     // (`AtomText.java` via `SheetBlock1`/`TextBlockLineCentered`).
-    const dimLabel = withGlobalPadding(measureLabel(label, bounder, diamondSize), theme);
+    const dimLabel = withGlobalPadding(measureCondition(label, bounder, diamondSize, theme.fontFamily), theme);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;

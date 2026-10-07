@@ -44,6 +44,7 @@ import {
   renderHexagonPolygon,
   renderHexagonOwnLabel,
   renderHexagonMultilineLabel,
+  diamondLineWidth,
   renderIfSplitShape,
   diamondColors,
 } from './activity-renderer-if-shapes.js';
@@ -153,7 +154,9 @@ export function flooredFirstBaselineY(cy: number, fontSize: number, lineCount: n
 export function renderLabel(label: string, cx: number, cy: number, theme: Theme, opts: ActivityTextOpts): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
   if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
-  const lineWidth = measureLineWidth(theme, size, label);
+  // add4-T2d: a diamond label centres on its creole width (`diamondLineWidth`).
+  const lineWidth =
+    opts.sname === 'diamond' ? diamondLineWidth(theme, size, label) : measureLineWidth(theme, size, label);
   const x = activityTextLineX(theme, cx, lineWidth, opts);
   // add2 T3h: family K + F (pekuxe-00/gaxezi-48/nisexe-68/dozaxu-98).
   return drawActivityText(x, cy, label, {
