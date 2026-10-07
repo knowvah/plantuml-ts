@@ -99,11 +99,18 @@ function inLabelReservation(
   inLabel: PendingInLabel,
   align: SnakeTextAlign,
 ): Reservation {
-  const width = LABEL_MEASURER.measure(inLabel.label, { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE }).width;
-  const dim = { width, height: ARROW_LABEL_LAYOUT_FONT_SIZE };
+  // add4-T1f (SWITCH-NL): a `\n` label is an N-line Sheet, each stripe one
+  // font size high (`SheetBlock1.java:146-148`, `StringBounderFromWidthTable
+  // .java:69-71`); `SlotFinder#drawText` boxes each line's `UText`, and the
+  // adjacent boxes touch, so one N-line box is the same slot.
+  const lines = inLabel.label.split('\n');
+  const font = { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE };
+  const width = Math.max(...lines.map((l) => LABEL_MEASURER.measure(l, font).width));
+  const lineHeight = ARROW_LABEL_LAYOUT_FONT_SIZE;
+  const dim = { width, height: lineHeight * lines.length };
   const position = getTextBlockPosition(points, dim, align);
-  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, dim.height, 1);
-  const top = baselineY - (dim.height - 1.5);
+  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, lineHeight, lines.length);
+  const top = baselineY - (lineHeight - 1.5);
   return { x: position.x, y: top, width, height: dim.height };
 }
 

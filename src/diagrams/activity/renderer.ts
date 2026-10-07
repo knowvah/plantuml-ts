@@ -12,7 +12,7 @@ import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 import { orderedLine } from './activity-renderer-terminals.js';
-import { drawActivityText } from './activity-renderer-text.js';
+import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
@@ -116,10 +116,23 @@ function renderEdgeLabelAligned(
   // already gives every other render-time label (that module's own doc);
   // height is `WidthTableMeasurer#measure`'s own `font.size` convention
   // (`core/measurer.ts:189`).
-  const width = measureLineWidth(theme, size, label);
-  const position = getTextBlockPosition(points, { width, height: size }, labelAlign);
-  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
+  //
+  // add4-T1f (SWITCH-NL): a `\n` label is a multi-line Sheet
+  // (`Branch#getTextBlock` -> `Display#create0`, `Branch.java:247-257`,
+  // `HorizontalAlignment.LEFT`): `SheetBlock1#initMap` stacks each stripe
+  // `y += height` (`SheetBlock1.java:146-148`), one line = the bounder's
+  // height = the font size (`StringBounderFromWidthTable.java:69-71`, 11 px
+  // for the activity arrow font). Width = the widest line; one `<text>` per
+  // line, all at the block's own left x.
+  const lines = label.split('\n');
+  const width = Math.max(...lines.map((l) => measureLineWidth(theme, size, l)));
+  const position = getTextBlockPosition(points, { width, height: size * lines.length }, labelAlign);
+  const baselineY = centeredFirstBaselineY(position.y + (size * lines.length) / 2, size, lines.length);
   const fill = activityFontColor(theme, 'arrow');
+  if (lines.length > 1 && color === undefined) {
+    const style = { fill, fontFamily: theme.fontFamily, fontSize: size };
+    return drawActivityTextLines(lines, position.x, baselineY, size, style);
+  }
   if (color !== undefined) {
     return text(position.x, baselineY, label, {
       fontFamily: theme.fontFamily,
