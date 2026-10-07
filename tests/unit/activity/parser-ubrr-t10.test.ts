@@ -484,6 +484,20 @@ describe('M6 — CommandPartition3 (tuvigo-52-redo102 shape)', () => {
     expect(node.stereotype).toBeUndefined();
   });
 
+  // add4-T2b: CommandPartition3.java:154-157, CommandCloseGroupLegacy3.java:75.
+  it('bracket-less opener and legacy closer each add their warning, in order', () => {
+    const ast = parse(['Group "My G"', ':A;', 'end group']);
+    const messages = ast.pragma!.getWarnings().map((w) => w.getMessage().join('\n'));
+    expect(messages).toEqual([
+      "You should use a bracket ({) when defining your container 'Group' My G",
+      "You should use a bracket (}) instead of 'end group'",
+    ]);
+  });
+
+  it('a bracketed group closed by } adds no warning', () => {
+    expect(parse(['partition P {', ':A;', '}']).pragma!.getWarnings()).toEqual([]);
+  });
+
   it('bracket-less "rectangle <$sprite{...}>" form (bezogu-47-vevu307 shape)', () => {
     const ast = parse(['rectangle <$react{scale=1}>']);
     const node = firstNode(ast) as ActivityGroup;

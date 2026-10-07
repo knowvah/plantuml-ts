@@ -18,6 +18,7 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { parseNodes } from './node-dispatch.js';
+import { Warning } from '../../core/warning/Warning.js';
 import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
 
 /** `StringUtils#eventuallyRemoveStartingAndEndingDoubleQuote(String)`'s own
@@ -76,13 +77,22 @@ export function tryOpenGroup(ctx: ParseContext, idx: number, line: string): Disp
   const stereotype = m[5];
   const hasBracket = m[6]!.length > 0;
   const openerSwimlane = swimlaneSpread(ctx);
+  // `CommandPartition3.java:154-157`: TYPE as written, NAME unquoted (:143).
+  if (!hasBracket) {
+    ctx.pragma.addWarning(new Warning(`You should use a bracket ({) when defining your container '${m[1]!}' ${title}`));
+  }
 
   const bodyResult = parseNodes(ctx, idx + 1, GROUP_STOPS);
   if (isRefusal(bodyResult)) return bodyResult;
   let cursor = bodyResult.nextIdx;
   if (cursor < ctx.lines.length) {
     const closer = ctx.lines[cursor]!.trim();
-    if (RE_CLOSE_GROUP.test(closer) || RE_CLOSE_GROUP_LEGACY.test(closer)) cursor++;
+    if (RE_CLOSE_GROUP.test(closer)) cursor++;
+    else if (RE_CLOSE_GROUP_LEGACY.test(closer)) {
+      // `CommandCloseGroupLegacy3.java:75`: CMD is the whole anchored match (:57).
+      ctx.pragma.addWarning(new Warning(`You should use a bracket (}) instead of '${closer}'`));
+      cursor++;
+    }
   }
   const { body, note } = extractLeadingGroupNote(bodyResult.nodes);
 
