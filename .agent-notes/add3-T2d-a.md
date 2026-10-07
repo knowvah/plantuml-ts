@@ -1,12 +1,26 @@
 # T2d-a (add3) — final report
 
+## Pass 2 addendum (DOCGRAD, row 2) — see its own section below
+
+Orchestrator accepted pass 1 (`eabe9099b`, `fcaddc477`) and extended the
+write-set (`src/diagrams/activity/renderer.ts`'s fragment/background field,
+`skinparam-key-handlers-table-a.ts`'s `backgroundcolor` handler, the
+assemble-time background path) to unblock row 2. Merged
+`feat/activity-divergence-drive-3` into this branch first (no rebase,
+clean merge, no conflicts) to pick up batch 1's own `renderer.ts` changes,
+then implemented DOCGRAD as commit 3 (`6c1f1739f`). See "Row 2 — DOCGRAD
+... DONE (pass 2)" below for the full mechanism; the original "NOT
+ATTEMPTED" write-up is kept as pass 1's own record, superseded by pass 2.
+
 ## Commits (branch `add3/T2d-a`, worktree `.claude/worktrees/add3-T2d-a`)
 
 1. `eabe9099b` fix(add3-T2d-a): seed activity harness gradient/filter ids
 2. `fcaddc477` feat(add3-T2d-a): dark-seed the activity terminal-circle stroke
+3. `bda707819` merge(add3-T2d-a): feat/activity-divergence-drive-3 into branch
+4. `6c1f1739f` feat(add3-T2d-a): render activity gradient document backgrounds
 
-Both green individually (typecheck both tsconfigs, eslint on touched files,
-targeted vitest, the three oracle gates) before moving to the next commit.
+All four green individually (typecheck both tsconfigs, eslint on touched
+files, targeted vitest, the three oracle gates) before moving to the next.
 
 ## Row 1 — HARNESS-SEED (dakesa-98-mano758)
 
@@ -38,7 +52,7 @@ IDENTICAL set before and after this edit (confirmed via diff of the
 sorted failing-fixture list) — all pre-existing, not introduced here (see
 "Pre-existing red" below).
 
-## Row 2 — DOCGRAD (cigagu-31-rime196, gudute-55-nulo344) — NOT ATTEMPTED, mechanism filed
+## Row 2 — DOCGRAD (cigagu-31-rime196, gudute-55-nulo344) — pass 1 diagnosis (superseded by pass 2 below)
 
 **Mechanism** (read directly): both fixtures set
 `skinparam backgroundColor #AAAAAA-white` — upstream's document-level
@@ -104,6 +118,113 @@ this row — diagnosis only, per the write-set boundary (rule 7) and this
 project's own precedent for the identical situation
 (`.agent-notes/T2d-klimt-exception.md`, `.agent-notes/T3i.md`'s own
 "not attempted, re-slotted" treatment of `levuma`'s circle-ink gap).
+
+## Row 2 — DOCGRAD — DONE (pass 2)
+
+Orchestrator extended the write-set to cover exactly the gap named above
+(`src/diagrams/activity/renderer.ts`'s fragment/background field, the
+`backgroundcolor` handler, "the assemble-time background path") and
+explicitly ruled out widening `theme.colors.background` — confirming
+route 2 (dedicated field) from the pass-1 diagnosis, not route 1.
+
+**Fix, option 2 from the pass-1 diagnosis, implemented exactly as
+specified:**
+
+1. `skinparam-key-handlers-table-a.ts`'s `backgroundcolor` handler now
+   also reads its 4th arg (`paint`, `resolveColorPaint(value)`) and, when
+   it resolves to a real `Gradient` (not a plain string), stores it on a
+   NEW accumulator field `acc.backgroundGradient` — `acc.background`
+   (the flattened end-colour) is set exactly as before, byte-identical
+   for every non-gradient key.
+2. New `SkinparamAccumulator.backgroundGradient: Gradient | undefined`
+   (`skinparam-accumulator.ts`), threaded through `skinparam-theme-
+   builder.ts`'s `hasColorsOverride`/`buildColorsOverride` (split into a
+   new `applyBackgroundOverride` helper to stay under the CCN cap) into
+   a new ROOT-level `Theme['colors'].backgroundGradient?: Gradient`
+   (`theme-colors-fields.ts`, sibling to `background: string`, mirroring
+   the file's own existing `arrowHead?: Paint` precedent for "a dedicated
+   field beats widening a flat colour field").
+3. New `RenderFragment.backgroundGradient?: Gradient` (`dispatcher.ts`).
+   `src/diagrams/activity/renderer.ts`'s `renderActivity` now forwards
+   `theme.colors.backgroundGradient` onto the returned fragment via a
+   conditional spread (mirroring the file's own existing
+   `preserveAspectRatio` pattern, `exactOptionalPropertyTypes`-safe).
+4. New `ShellFragment.backgroundGradient?: Gradient`
+   (`klimt/document-shell.ts`). `assembleDocumentShell`'s `isSolid` check
+   (renamed `hasBackgroundStyle`, extracted to stay under the NLOC cap)
+   now ALSO returns `false` whenever `backgroundGradient` is set,
+   regardless of `background`'s own value — matching `SvgGraphics.java:
+   178-183` leaving `backcolorString` null UNCONDITIONALLY for a gradient
+   (no white/black/transparent check applies to that branch at all).
+   `backgroundGradient` is set by NO producer except activity's
+   `renderer.ts`, so this is a structural no-op for every other engine
+   (confirmed by the survey below, not just by the grep).
+5. `assemble-svg.ts`'s activity-finalize block (`ACTIVITY_DEFAULT_
+   BACKGROUND` through `finalizeActivityFragment`, ~77 lines) moved to a
+   NEW file `assemble-svg-activity.ts` (500-line hook: the file was
+   already at 549 lines pre-existing, over cap, before this change) —
+   a pure move for the pre-existing pieces, plus the new
+   `activityBackgroundRect` dispatcher: when `fragment.backgroundGradient`
+   is set, calls `paint.ts#paintToSvg` (already-built gradient-id-minting
+   + `<linearGradient>` def generator, same vector table as `SvgGraphics
+   .java:367-405`) and ALWAYS paints the rect (no `ACTIVITY_UNPAINTED_
+   BACKGROUNDS` check at all — `SvgGraphics.java:174-183`'s gradient
+   branch has no such guard, unlike its plain-colour sibling at `:184-192`).
+   The `<linearGradient>` def string rides inline in the returned body;
+   `svg-defs.ts#collectDocumentDefs` (already called from
+   `assembleDocumentShell`) lifts it into the shared `<defs>` the same way
+   it already does for every other inline gradient in this port —
+   verified, not assumed: the new module's own `spliceIntoActivityContent
+   Group` is a LOCAL copy of `assemble-svg.ts#spliceIntoContentGroup`
+   (same mechanism, now sourced from `document-shell.ts`'s own exported
+   `CONTENT_G_OPEN_RE` instead of a third copy of the regex) to avoid a
+   module cycle (`assemble-svg.ts` imports `finalizeActivityFragment` from
+   the new file; the new file would otherwise need to import back).
+
+**Jar-verified byte-for-byte** (direct render via `renderFixtureActivity`,
+not just the probe score) against `activity/cigagu-31-rime196`'s oracle
+SVG: root `style="width:213px;height:807px;"` (no `background:` property,
+exact match), `<defs>` carries `<linearGradient id="g1ulf3d7nd8qv0" ...>`
+— the SAME seeded id the jar mints (confirming row 1's HARNESS-SEED fix
+and this fix interoperate correctly) — and the content `<g>`'s first
+child is `<rect x="0" y="0" width="213" height="807" fill="url(#g1ulf3d7
+nd8qv0)" .../>`, identical to the jar's own first child. Only the
+attribute-order/style-vs-presentation-attribute spelling differs (already
+normalized-away by every existing oracle comparator in this mission).
+
+**Effect**: Σ 16354 → 16286 (−68, exactly 34+34 — both fixtures' full
+named weight), 0 risers, 0 fixtures besides `cigagu-31-rime196`/
+`gudute-55-nulo344` moved (`activity-probe.ts`). `activity.golden.ratchet`/
+`activity.harness-parity`: 100% green, unchanged. `activity.style-
+baseline`: 2 NEW failures, exactly `cigagu`/`gudute` — a histogram move
+the test's own assertion message describes as "neither automatically a
+regression nor automatically progress," asking for a re-pin from a fresh
+measurement. **Not re-pinned**: `oracle/goldens/**`/baseline JSONs are on
+this task's explicit do-not-edit list (rule 5); `scripts/repin-activity-
+baselines.ts` exists and would do it, but running it is outside this
+task's authority. Reported, not fixed — the owner of
+`oracle/goldens/svg-activity/style-baseline.json` should re-pin both rows
+from a fresh measurement; the exact moved field is `rx: {(absent): 0 ->
+1}` for both (one new `<rect>` with no `rx` attribute — the background
+rect this commit adds), confirmed harmless by direct inspection, not
+guessed.
+
+**New tests** (TDD-after-the-fact, mechanism found via Java + oracle
+reading first): `tests/unit/skinparam.test.ts` (2 new — gradient capture,
+non-gradient no-op), `tests/unit/core/assemble-svg.test.ts` (4 new — style
+omission, def+rect minting, no white/black/transparent skip for a
+gradient, plain-background regression guard), `tests/unit/activity/
+renderer.test.ts` (3 new — theme-to-fragment forwarding, omitted-when-
+absent, end-to-end through `assembleSvg`).
+
+**Cross-engine survey for this commit** (rule 11, since it touches
+`assemble-svg.ts`/`dispatcher.ts`/`document-shell.ts`/skinparam core
+files): ran all 28 engines sequentially, before (all touched files
+reverted to the merge commit `bda70781`, `assemble-svg-activity.ts`
+removed) and after. **27 of 28 engines byte-identical**
+(conformant/structural-match/diverged/errored/timeout/oracle-error, every
+count); only `activity` moved (conformant 239 → 241, diverged 103 → 101).
+**Zero conformant losses in any engine.**
 
 ## Row 3 — DARK-CIRCLE (levuma-67-cego489) — DONE
 
@@ -208,22 +329,30 @@ fixed (style-baseline pin re-generation is outside this task's scope).
 ## Quality gates
 
 `npx tsc --noEmit -p tsconfig.json` / `npx tsc --project tsconfig.node
-.json --noEmit`: clean after every commit. `npx eslint` on every touched
-file: clean. `npx vitest run tests/diagrams/activity tests/unit/activity
+.json --noEmit`: clean after every commit, both pass 1 and pass 2. `npx
+eslint` on every touched file: clean. `npx vitest run tests/diagrams/
+activity tests/unit/activity tests/unit/core tests/unit/skinparam.test.ts
 tests/unit/skinparam-mode-dark.test.ts tests/oracle/svg-conformance/
 activity.golden.ratchet.test.ts tests/oracle/svg-conformance/activity
-.harness-parity.test.ts`: 93 files / 1889 passed at final HEAD. 224+
-pinned goldens byte-equal throughout (golden ratchet green at every
-commit). No Serena MCP tool used (Read/Edit/Write/Bash only). No `git
-stash`. No raw `&` background jobs (used `run_in_background`/Bash's own
-auto-backgrounding only). No public API change — `src/index.ts`'s export
-list is unchanged (confirmed: no new/removed/renamed export names).
+.harness-parity.test.ts`: 420 files / 7564 passed (1 pre-existing skip) at
+final HEAD (`6c1f1739f`). 237 pinned goldens byte-equal throughout (golden
+ratchet green at every commit, both passes). No Serena MCP tool used
+(Read/Edit/Write/Bash only). No `git stash`. No raw `&` background jobs
+(used `run_in_background`/Bash's own auto-backgrounding only). No public
+API change — `src/index.ts`'s export list is unchanged (confirmed: no
+new/removed/renamed export names) across both passes.
 
 ## Not done, and why
 
-- **Row 2 (DOCGRAD)**: not attempted. Full mechanism above. Needs ONE
-  line at `src/diagrams/activity/renderer.ts:426` (outside this task's
-  write-set) plus a new dedicated `Paint`-typed theme field (in
-  write-set) and an activity-finalize change in `assemble-svg.ts` (in
-  write-set, "the svg root/document background path" named per the
-  brief's own instruction).
+- **Row 2 (DOCGRAD)**: DONE in pass 2 (commit `6c1f1739f`) once the
+  orchestrator extended the write-set to cover the exact gap pass 1
+  named (`renderer.ts`'s fragment field, the `backgroundcolor` handler,
+  the assemble-time background path). See "Row 2 — DOCGRAD — DONE
+  (pass 2)" above.
+- **`activity.style-baseline` re-pin for `cigagu-31-rime196`/
+  `gudute-55-nulo344`**: these two fixtures' style census moved (one new
+  `<rect>` with absent `rx`, the expected/correct effect of DOCGRAD) but
+  `oracle/goldens/svg-activity/style-baseline.json` was NOT re-pinned —
+  editing baseline JSONs is on this task's explicit do-not-edit list.
+  `scripts/repin-activity-baselines.ts` exists for this exact purpose;
+  running it is the owning mission's call, not this task's.
