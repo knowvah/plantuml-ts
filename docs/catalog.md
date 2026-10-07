@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1398 modules · 5267 exported names.
+1398 modules · 5268 exported names.
 
 ## `src/`
 
@@ -1044,7 +1044,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-action-code.ts` | `codeBlockLines`, `ActionCodeBlockArgs`, `renderActionCodeBlock` | `<code>...</code>` action-box bodies: monospace, measured like `tiles/ gtile-action.ts`'s own `monoCharWidth` sizing, not the proportional table `ActivityTextOpts` reads elsewhere. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite.ts` | `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
-| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondLineWidth`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
 | `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |

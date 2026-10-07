@@ -151,3 +151,88 @@ No style or swimlane census moved. The element census showed no delta at any ste
   no Java citation. The jar does colour it (fixtures in `tests/fixtures/activity/add4-T2d/`).
 - **Impact**: a test that blocks a fix needs a jar render before anyone trusts it.
 - **Confidence**: High
+
+---
+
+# add4-T2d resume: Not done 1 and 2
+
+I fast-forward merged `feat/activity-divergence-drive-4` (`b7bdaf260`) into this worktree.
+The probe now covers 52 unpinned rows; base Σ 4202. The write-set was extended to
+`tiles/gtile-if-with-links.ts`, `tiles/gtile-if-down.ts`, `tiles/gtile-diamond-inside.ts` and
+their tests. Same rules applied: no Serena, no stash, no `src/core` edits.
+
+## Commits
+1. `d65f09f66` fix(add4-T2d): enter an if at diamond1's own in y
+2. `7344982a3` fix(add4-T2d): centre an if's optional stop on the rhombus
+3. `f76a45277` fix(add4-T2d): size and centre diamond labels on their creole width
+   (this commit also carries the regenerated `docs/catalog.md`)
+
+## Java -> ours
+- **If in point.** The if's in point now includes diamond1's own inY.
+  - Java: `FtileIfWithDiamonds.java:179-191` (`dim1.appendBottom(dimNude)...incInY(yDeltaNote)`)
+    and `FtileIfDown.java:568-571` (`geoDiamond1.getInY() + opaleHeight`).
+  - Ours: `gtile-if-with-links.ts` and `gtile-if-down.ts` `NORTH_HOOK` now return
+    `diamond1Y + diamond1.getCoord(NORTH_HOOK).y`.
+  - Fixtures `empty-if-else` and `empty-if-down` are jar-exact.
+- **Optional stop.** The stop is now centred on the rhombus, not on the whole box.
+  - Java: `FtileIfDown.java:648-657` (`labelNorth + (h - labelNorth - stopH)/2`).
+  - Ours: `gtile-if-down.ts#computeStopOffsets`.
+  - Fixture `empty-if-stop`: the stop ellipse is jar-exact.
+- **Diamond label creole width.** The condition label is now measured as creole, not raw text.
+  - Java: `ConditionalBuilder.java:241-244` builds `skinParam.sheet(..., CreoleMode.FULL)
+    .createSheet(labelTest)` inside a `SheetBlock1`.
+  - Ours, sizing: `gtile-diamond-inside.ts#measureCondition` takes each line's width from
+    `creoleTextLines` (the same lexer as `gtile-action.ts#creoleLineWidth`).
+  - Ours, centring: `activity-renderer-if-shapes.ts#diamondLineWidth`. It is used by
+    `renderLabel` when `sname === 'diamond'`, by `renderHexagonMultilineLabel`, and by the
+    `renderDiamond` label.
+  - Fixture `diamond-creole-width` is jar-exact.
+
+## Rows (probe score)
+| row | before | after |
+|---|---|---|
+| xefalo | 289 | 227 (c1) -> 217 (c2) |
+| mazoka | 19 | 0 (c3) |
+| zivocu | 96 | 8 (c3) |
+| letuke | 138 | 94 (c3), not targeted |
+
+## Probe Σ per commit
+4202 -> 4140 -> 4130 -> 3979.
+
+## Risers
+None. The element census showed no delta at any commit.
+
+## Census movers
+None equals the pin's jar column exactly, but every one moves toward it.
+
+| row | census | pinned | now | jar |
+|---|---|---|---|---|
+| xefalo | style height | 967 | 930 (c1), 935 (c2) | 936 |
+| zivocu | style width | 449 | 433 | 433 (equal) |
+| letuke | style + swimlane width | 185 | 169 | 168 |
+
+## Not done
+1. **xefalo 217, the 1 px below an if with an optional stop.**
+   - Mechanism: `layout/compress/shapes-of-boxes.ts#diamondBox` still centres the
+     EMPTY_DIAMOND rhombus on its box. c5 (`renderDiamond`) moved the drawn rhombus to the
+     box bottom, following `FtileDiamond.java:87-89`, so the compress shape now disagrees
+     with the drawing.
+   - Scratch result, reverted: changing `const cy = node.y + node.height - size;` takes xefalo
+     217 -> 0 and makes `empty-if-stop` jar-exact, with 0 risers.
+   - Owner: T2b (`compress/shapes-of*`).
+2. **vimena 196 and the switch case label width.**
+   - Upstream `Branch#getTextBlock` uses `CreoleMode.SIMPLE_LINE` (`Branch.java:255-256`).
+   - SIMPLE_LINE keeps `**bold**` (vimena's jar draws "SomeOne" as a bold run) but drops the
+     creole `__underline__` command. Evidence: `CommandCreoleBuilder.java:85-86` adds it only
+     under FULL, and the jar renders `and __under__ line` literally.
+   - Scratch result, reverted: `creoleTextLines` (FULL) in `gtile-switch.ts#measureLabel`
+     takes vimena 196 -> 1. On a `__` case label, though, it is 25 px narrower than the jar.
+   - The faithful fix needs a `mode` option on `core/svek/image/creole-text-lines.ts#creoleTextLines`,
+     forwarded to `buildLineAtoms(raw, fc, mode)`, which already accepts it. That is a
+     `src/core` edit, so it needs the all-engine survey.
+   - Patch and fixture are parked in the session scratchpad: `switch-creole-full.patch` and
+     `fixture-keep/switch-case-creole-width`.
+3. **zivocu 8 and the vimena residual 1.**
+   - The `""GatewayID""` run inside the diamond label renders with font-family `""` where the
+     jar has `monospace`. This predates this session (`activity-renderer-text.ts`, not mine).
+   - zivocu's case labels sit 8.028 px low (text[11..17] y). I did not isolate this.

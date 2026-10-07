@@ -470,7 +470,10 @@ export class GtileIfWithLinks extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.left, y: this.diamond1Y };
+        // add4-T2d: `dim1.appendBottom(dimNude)` keeps diamond1's own inY
+        // (an EMPTY_DIAMOND's north-label height), then `.incInY(yDeltaNote)`
+        // (`FtileIfWithDiamonds.java:179-191`).
+        return { x: this.left, y: this.diamond1Y + this.diamond1.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };
