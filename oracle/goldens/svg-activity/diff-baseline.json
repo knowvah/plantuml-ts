@@ -1876,11 +1876,11 @@
     {
       "type": "activity",
       "slug": "lebile-91-veto202",
-      "status": "baseline",
-      "diffCount": 34,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1d2fb519",
-      "weightedScore": 60
+      "measuredAgainstCommit": "22f819df",
+      "weightedScore": 0
     },
     {
       "type": "activity",
