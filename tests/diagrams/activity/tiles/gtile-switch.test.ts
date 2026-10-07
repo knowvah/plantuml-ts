@@ -327,3 +327,25 @@ describe('GtileSwitch — FtileDecorateInLabel/OutLabel case decoration', () => 
     expect(tile.caseOffsets[1]!.x).toBe(80 + SWITCH_X_SEPARATION);
   });
 });
+
+// add4-T3b: `Branch#getTextBlock` builds the case label with
+// `display.create0(..., CreoleMode.SIMPLE_LINE, ...)` (`Branch.java:255-256`):
+// `**bold**` resolves (`CommandCreoleBuilder.java:76`) but `__underline__` is
+// registered only under FULL (`:85-86`), so it stays literal text.
+describe('GtileSwitch — case label measured as SIMPLE_LINE creole', () => {
+  const CHAR_W = 5;
+  const charBounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * CHAR_W, height: 11 }) };
+  const diamond = makeDiamond(60, 24);
+  // body 80 wide, left 40 -> right 40: the case widens by max(0, label - 40).
+  const secondCaseX = (label: string): number =>
+    new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label }, { tile: makeTile(80, 40) }], null, charBounder, theme)
+      .caseOffsets[1]!.x;
+
+  it('measures `**BBBBBB**` as its resolved text (30 px, fits; raw would be 50)', () => {
+    expect(secondCaseX('**BBBBBB**')).toBe(80 + SWITCH_X_SEPARATION);
+  });
+
+  it('measures `__uuuuu__` literally (underline is not a SIMPLE_LINE command)', () => {
+    expect(secondCaseX('__uuuuu__')).toBe(40 + 9 * CHAR_W + SWITCH_X_SEPARATION);
+  });
+});

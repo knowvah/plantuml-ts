@@ -68,6 +68,7 @@ import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import { FontStyle, getFont } from '../../klimt/shape/UText.js';
 import { ATOM_TEXT_MIN_HEIGHT, layoutLineThroughSea, measurerSeaLineOps } from './creole-sea-line.js';
 import { buildLineAtoms } from '../../klimt/creole/legacy/StripeSimple.js';
+import { CreoleMode } from '../../klimt/creole/CreoleMode.js';
 import {
   hasTabulation,
   tabStopWidth,
@@ -186,6 +187,10 @@ interface MeasureCtx {
   readonly measurer: StringMeasurer;
   readonly tabSizeNb: number;
   readonly sprites: SpriteDimsLookup | undefined;
+  /** add4-T3b: the `CreoleMode` the caller's `Display#create0` names --
+   *  `CommandCreoleBuilder.java:85-86` registers `__underline__` only under
+   *  `FULL`; `Branch.java:255-256` (switch case labels) asks `SIMPLE_LINE`. */
+  readonly mode: CreoleMode;
 }
 
 // ---------------------------------------------------------------------------
@@ -393,7 +398,7 @@ function buildPhysicalLine(raw: string, ctx: MeasureCtx, wrapWidth: number): rea
 
   // ADR-1 (creole-lexer-unification): the SAME lexer the description
   // renderer draws with — sizer<->renderer lock-step by construction (D1).
-  const built = buildLineAtoms(raw, baseFontConfiguration(ctx.font));
+  const built = buildLineAtoms(raw, baseFontConfiguration(ctx.font), ctx.mode);
   if (built.classification.type === 'HORIZONTAL_LINE') {
     return [{ runs: [], width: 0, height: CREOLE_HR_HEIGHT, kind: 'hr' }];
   }
@@ -428,7 +433,13 @@ export function creoleTextLines(
   display: string,
   font: FontSpec,
   measurer: StringMeasurer,
-  opts?: { readonly wrapWidth?: number; readonly tabSize?: number; readonly sprites?: SpriteDimsLookup },
+  opts?: {
+    readonly wrapWidth?: number;
+    readonly tabSize?: number;
+    readonly sprites?: SpriteDimsLookup;
+    /** Defaults to `CreoleMode.FULL` (`Display.create8`, every prior caller). */
+    readonly mode?: CreoleMode;
+  },
 ): readonly CreoleTextLine[] {
   if (display === '') return [];
 
@@ -437,6 +448,7 @@ export function creoleTextLines(
     measurer,
     tabSizeNb: opts?.tabSize ?? DEFAULT_TAB_SIZE,
     sprites: opts?.sprites,
+    mode: opts?.mode ?? CreoleMode.FULL,
   };
   const wrapWidth = opts?.wrapWidth ?? 0;
 

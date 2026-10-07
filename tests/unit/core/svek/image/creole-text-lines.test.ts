@@ -12,6 +12,7 @@ import { WidthTableMeasurer, FixedMeasurer } from '../../../../../src/core/measu
 import type { FontSpec, StringMeasurer } from '../../../../../src/core/measurer.js';
 import { parseSimpleColor, toSvgHex } from '../../../../../src/core/klimt/color/HColorSet.js';
 import { renderLatexAsImage } from '../../../../../src/core/latex.js';
+import { CreoleMode } from '../../../../../src/core/klimt/creole/CreoleMode.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../../../../src/core/decoration/symbol/usymbol-resolve.js';
 
 const font: FontSpec = { family: 'Helvetica', size: 14 };
@@ -401,5 +402,31 @@ describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () =>
     const run = line.runs[0]!;
     expect(run.url).toBe('http://www.google.com');
     expect(run.tooltip).toBe('http://www.google.com');
+  });
+});
+
+// add4-T3b: the `mode` option. `CommandCreoleBuilder.java:85-86` registers
+// the creole `__underline__` command ONLY under `CreoleMode.FULL`, while
+// `**bold**` (`:76`) is registered for every mode.
+describe('creoleTextLines mode option (CommandCreoleBuilder.java:85-86)', () => {
+  const measurer = new WidthTableMeasurer();
+
+  it('SIMPLE_LINE keeps `__under__` literal: one unstyled run whose width is the raw text', () => {
+    const line = creoleTextLines('a __u__ b', font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]!;
+    expect(line.runs.map((r) => r.text).join('')).toBe('a __u__ b');
+    expect(line.runs.some((r) => r.style.underline)).toBe(false);
+    expect(line.width).toBeCloseTo(measurer.measure('a __u__ b', font).width, 10);
+  });
+
+  it('SIMPLE_LINE still resolves `**bold**` (registered for every mode, :76)', () => {
+    const line = creoleTextLines('**B** c', font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]!;
+    expect(line.runs[0]!.text).toBe('B');
+    expect(line.runs[0]!.style.bold).toBe(true);
+  });
+
+  it('the default stays FULL: `__u__` becomes an underlined run', () => {
+    const line = creoleTextLines('a __u__ b', font, measurer)[0]!;
+    expect(line.runs.map((r) => r.text).join('')).toBe('a u b');
+    expect(line.runs.some((r) => r.text === 'u' && r.style.underline)).toBe(true);
   });
 });

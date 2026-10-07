@@ -4,6 +4,9 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+import { measurerAdapterOf } from './gtile-action.js';
 import type { CaseDim } from './gtile-switch-geometry.js';
 import {
   caseDimOf,
@@ -23,14 +26,23 @@ const ATOM_TEXT_MIN_HEIGHT = 10;
  *  `display.create0(...)` block -- `EMPTY_TEXT_BLOCK` (0x0) for a null
  *  display, else widest line by summed per-line heights, each line folded
  *  the same way `gtile-diamond-inside.ts#measureLabel` does.
+ *
+ *  add4-T3b: each line's width is its `CreoleMode.SIMPLE_LINE` creole width
+ *  (`Branch.java:255-256`) -- `**bold**` resolves to its text, while
+ *  `__underline__` stays literal (`CommandCreoleBuilder.java:85-86` registers
+ *  it only under FULL). The tile `StringBounder` is family-blind
+ *  (`getDimension(text, size)`), so the family is left empty.
  *  @see net/sourceforge/plantuml/activitydiagram3/Branch.java:248-266 */
 function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): { width: number; height: number } {
   if (text === undefined || text === '') return { width: 0, height: 0 };
+  const measurer = measurerAdapterOf(bounder);
+  const font = { family: '', size: fontSize };
   let width = 0;
   let height = 0;
   for (const line of text.split('\n')) {
     const dim = bounder.getDimension(line, fontSize);
-    if (dim.width > width) width = dim.width;
+    const lineWidth = creoleTextLines(line, font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]?.width ?? 0;
+    if (lineWidth > width) width = lineWidth;
     height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
   }
   return { width, height };
