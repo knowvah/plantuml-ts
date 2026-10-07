@@ -1,0 +1,11 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+:first line of the action
+----
+second;
+:a table
+|= head |= two |
+| cell | x |;
+stop
+@enduml

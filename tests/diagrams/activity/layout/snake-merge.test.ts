@@ -200,23 +200,16 @@ describe('mergeSnakes — second pass, removeEndDecorationIfTouches (no text gua
   });
 });
 
-describe('mergeSnakes — FtileGroup/partition scope isolation (D1)', () => {
-  it('never merges two otherwise-touching edges across different scopes', () => {
-    const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 0, y: 20 }])];
-    const result = mergeSnakes(edges, [meta('group-1'), meta('group-2')]);
-    expect(result.edges).toHaveLength(2);
-  });
-
-  it('still merges two touching edges within the SAME scope', () => {
-    const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 0, y: 20 }])];
-    const result = mergeSnakes(edges, [meta('group-1'), meta('group-1')]);
-    expect(result.edges).toHaveLength(1);
-  });
-
-  it('top-level (undefined scope) edges never merge into a group-scoped edge', () => {
+// add4-T3c: the "FtileGroup/partition scope isolation (D1)" block is retired.
+// `FtileGroup#drawU` (`FtileGroup.java:209-227`) is
+//   `type.asBig(...).drawU(ug); ...; ug.apply(getTranslate(stringBounder)).draw(inner);`
+// -- no `new UGraphicForSnake`; the only ones are `Swimlanes.java:252,274,386`
+// (per lane) and `FtileGroup.java:152` (inside `getInnerMinMax`, measurement).
+describe('mergeSnakes — a group boundary is no merge boundary', () => {
+  it('merges two touching edges whatever scope the walk tagged them with', () => {
     const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 0, y: 20 }])];
     const result = mergeSnakes(edges, [meta(), meta('group-1')]);
-    expect(result.edges).toHaveLength(2);
+    expect(result.edges).toHaveLength(1);
   });
 });
 

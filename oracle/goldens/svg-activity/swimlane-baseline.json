@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "c6f501d9",
+  "measuredAgainstCommit": "1916ce34",
   "fixtures": [
     {
       "type": "activity",
@@ -2977,8 +2977,8 @@
         "titles": [],
         "bandRect": null,
         "lanes": [],
-        "width": "169",
-        "height": "312"
+        "width": "168",
+        "height": "320"
       },
       "jar": {
         "dividerXs": [],
