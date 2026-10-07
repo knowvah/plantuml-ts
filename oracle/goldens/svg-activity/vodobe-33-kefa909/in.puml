@@ -1,0 +1,12 @@
+@startuml
+|p1|
+start
+partition testP {
+:on p1;
+|p2|
+:on p3;
+note right
+this is a long text note to have much bigger size on p3
+end note 
+}
+@enduml

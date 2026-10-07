@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1393 modules · 5243 exported names.
+1394 modules · 5244 exported names.
 
 ## `src/`
 
@@ -1114,6 +1114,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-loop-translate-switch.ts` | `routeSwitchHorizontalThenVertical`, `routeSwitchVerticalThenHorizontal` | `switch`'s two translatable cross-swimlane shapes (mission `activity-divergence-drive-2`, T1p-e), dispatched from `swimlane-loop-translate.ts#routeLoopTranslate`. |
 | `swimlane-loop-translate-while.ts` | `routeWhileBack` | `while`'s one translatable back-edge shape (mission `activity-loop-lane-translate`, T2). |
 | `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `SwitchHorizontalThenVerticalCrossLoop`, `SwitchVerticalThenHorizontalCrossLoop`, `RepeatBackward1Loop`, `RepeatBackward2Loop`, `IfLinksHThenVLoop`, `IfLinksVThenHLoop`, `IfLinksVThenHDirectLoop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
+| `swimlane-measure-edges.ts` | `sameLaneEdges` | The edges `computeDrawingWidths`' per-lane `LimitFinder`s see, split out of `swimlane-placement.ts` (its 500-line hook, add4-T1b). |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `TITLE_ASCENT_FRACTION`, `measureSwimlaneTitlesHeight`, `resolveSwimlaneVertical`, `SwimlaneVertical`, `SwimlaneChrome`, `computeSwimlaneChrome`, `repeatEdgeMeta`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
 | `swimlane-vertical.ts` | `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical` | The swimlane title band's vertical sizing -- split out of `swimlane-placement.ts` (this task's own 500-line hook) to make room for T1p-g's `ConnectionHline` routing. |
 | `switch-connection-points.ts` | `HexagonCorners`, `horizontalThenVerticalPoints`, `verticalTopPoints`, `oneLinkVerticalPoints`, `verticalThenHorizontalPoints`, `verticalBottomPoints`, `oneLinkBottomPoints` | Pure same-lane point-array math for the switch connectors, split out of `walk-switch.ts` purely to keep that file under the complexity hook's NLOC/CCN cap -- a direct port of `FtileSwitchWithManyLinks`'s/ `FtileSwitchWithOneLink`'s `Connect |

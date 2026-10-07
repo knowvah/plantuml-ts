@@ -387,9 +387,10 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // both, the swimlane census (dividers, titles, band, lanes, width) now
     // equals the jar's column exactly, so the title-over-divider overlap
     // is the jar's own geometry.
+    // add4/merge-T1b: nojije-35-teta491 reached zero diffs and was pinned
+    // (add4-T1b), leaving this test's baseline population; its two entries
+    // went with it.
     'cemipu-87-dinu624 [21,24] empty×centeredText',
-    'nojije-35-teta491 [21,25] empty×centeredText',
-    'nojije-35-teta491 [22,25] empty×centeredText',
   ].sort();
 
   /**
