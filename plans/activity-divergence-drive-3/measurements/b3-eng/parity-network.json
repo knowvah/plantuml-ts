@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-10-07T14:04:29.811Z",
+  "fixtures": [
+    {
+      "slug": "denevo-18-toza672",
+      "type": "network",
+      "dotEqual": true,
+      "verdict": "diverged",
+      "maxDelta": 288.70000000000005,
+      "firstDiff": "svg/g[1]/g[2]/text[1]",
+      "maxDeltaPath": "svg/g[1]/g[1]/rect[1]/@width"
+    },
+    {
+      "slug": "janezo-95-zale345",
+      "type": "network",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 149.73,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    },
+    {
+      "slug": "rozemi-46-vuli505",
+      "type": "network",
+      "dotEqual": false,
+      "verdict": "diverged",
+      "maxDelta": 149.73,
+      "firstDiff": "svg/@background",
+      "maxDeltaPath": "svg/g[1]/text[1]/@x"
+    }
+  ]
+}
