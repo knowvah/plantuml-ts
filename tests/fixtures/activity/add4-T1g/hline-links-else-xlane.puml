@@ -1,0 +1,18 @@
+@startuml
+' add4-T1g: pezubu-98-niba240 shape -- FtileIfWithLinks ConnectionHline
+' with the else branch in another lane.
+skinparam ConditionEndStyle hline
+| 1 |
+start
+:A;
+| 2 |
+if (test) then
+  :B;
+else
+  |3|
+  :D;
+endif
+| 2 |
+:E;
+stop
+@enduml
