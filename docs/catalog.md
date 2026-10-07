@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1400 modules · 5273 exported names.
+1402 modules · 5284 exported names.
 
 ## `src/`
 
@@ -1039,11 +1039,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `activity-creole-sheet.ts` | `klimtStringBounder`, `buildActionTextBlock`, `drawActionTextBlock`, `isActionSheetEligible`, `renderActionLabel`, `buildNoteTextBlock`, `noteTextBlockDimension`, `renderNoteLabel` | activity-creole-sheet — D5's Sheet spike: an action label's `Display` routed through the REAL `SheetBuilder -> SheetBlock1 -> stripes/atoms` pipeline (`FtileBox.java:178-181`: `skinParam.sheet(fc, align, CreoleMode.FULL).createSheet(label)` |
-| `activity-geometry.types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
+| `activity-geometry.types.ts` | `ActivityNodeGeo`, `CompositeUSymbol`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
 | `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `ARROW_LABEL_LAYOUT_FONT_SIZE`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_MARGIN_X1`, `NOTE_MARGIN_X2`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `DocumentMargin`, `activityDocumentMargin`, `documentMarginTheme`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
 | `activity-renderer-action-code.ts` | `codeBlockLines`, `ActionCodeBlockArgs`, `renderActionCodeBlock` | `<code>...</code>` action-box bodies: monospace, measured like `tiles/ gtile-action.ts`'s own `monoCharWidth` sizing, not the proportional table `ActivityTextOpts` reads elsewhere. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
-| `activity-renderer-composite.ts` | `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
+| `activity-renderer-composite-symbols.ts` | `CompositeInk`, `TitleDim`, `compositeSymbolTitleOrigin`, `drawCompositeSymbol` | The three non-frame container symbols `FtileGroup#drawU` can draw (`type.asBig(name, align, TextBlockUtils.empty(0, 0), ...)`, `ftile/vcompact/FtileGroup.java:216-219`): `package` -> `USymbolFolder`, `card` -> `USymbolCard`, `rectangle` -> |
+| `activity-renderer-composite.ts` | `compositeTitleWidth`, `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondLineWidth`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
 | `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
@@ -1153,6 +1154,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `compress-geometry.ts` | `CompressInput`, `CompressResult`, `compressGeometry` | `compressGeometry` -- `klimt/compress/CompressionXorYBuilder.java:52-69` and `UGraphicCompressOnXorY.java:86-135`, ported over `ActivityGeometry` instead of a live `UGraphic` redraw (D1). |
 | `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
 | `shapes-of-boxes.ts` | `hexagonBox`, `diamondBox`, `conditionBox`, `noteBox` | `shapes-of.ts`'s pure node-box geometry helpers -- split into their own sibling file (mission `activity-divergence-drive-3` T3i) purely to keep `shapes-of.ts` under the 500-line hook cap; no behavior change, a mechanical extraction of four |
+| `shapes-of-frame.ts` | `frameTabShape`, `frameTitleShape`, `frameShapes` | The `USymbolFrame#asBig` shapes a `group`/`partition` frame contributes to compression, beyond its own ignored rect (`shapes-of.ts#shapeForNode`): the title-tab underline and the title itself. |
 | `shapes-of-terminal.ts` | `edgeDecorationVector`, `terminalDecorationVector` | The direction of an edge's END decoration, shared by the renderer (`renderer.ts#renderEdge`'s terminal `arrowTip`) and the compressor's shape adapter (`shapes-of.ts#terminalArrowhead`) so both see the same arrowhead. |
 | `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
 | `slot-finder.ts` | `occupiesOn`, `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
@@ -1182,7 +1184,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
 | `gtile-goto.ts` | `GtileGoto` |  |
-| `gtile-group.ts` | `GtileGroup` |  |
+| `gtile-group.ts` | `frameTitleWidth`, `GtileGroupOptions`, `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
 | `gtile-if-long-vertical.ts` | `VerticalInlabel`, `VerticalBranchLayout`, `GtileIfLongVertical` |  |
