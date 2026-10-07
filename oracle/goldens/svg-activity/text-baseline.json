@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "2842c766",
+  "measuredAgainstCommit": "8e771a18",
   "fixtures": [
     {
       "type": "activity",
@@ -4101,19 +4101,19 @@
       "type": "activity",
       "slug": "giteso-65-mefo026",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 19
+          "#000": 20
         },
         "anchor": {
-          "(absent)": 19
+          "(absent)": 20
         },
         "inset": {
           "10": 6
         },
-        "textCount": 19
+        "textCount": 20
       },
       "jar": {
         "fill": {
@@ -9718,19 +9718,19 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "status": "baseline",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
           "10": 4
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -10325,19 +10325,19 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 12
+          "#000": 14
         },
         "anchor": {
-          "(absent)": 12
+          "(absent)": 14
         },
         "inset": {
           "10": 6
         },
-        "textCount": 12
+        "textCount": 14
       },
       "jar": {
         "fill": {

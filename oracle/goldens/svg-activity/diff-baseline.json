@@ -1238,10 +1238,10 @@
       "type": "activity",
       "slug": "giteso-65-mefo026",
       "status": "baseline",
-      "diffCount": 355,
+      "diffCount": 3,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "79c2bfb2",
-      "weightedScore": 461
+      "measuredAgainstCommit": "8e771a18",
+      "weightedScore": 3
     },
     {
       "type": "activity",
@@ -3011,10 +3011,10 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "status": "baseline",
-      "diffCount": 100,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 116
+      "measuredAgainstCommit": "8e771a18",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -3200,10 +3200,10 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "diffCount": 142,
+      "diffCount": 137,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 175
+      "measuredAgainstCommit": "8e771a18",
+      "weightedScore": 137
     },
     {
       "type": "activity",

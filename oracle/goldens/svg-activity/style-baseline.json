@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "50a347b2",
+  "measuredAgainstCommit": "8e771a18",
   "fixtures": [
     {
       "type": "activity",
@@ -5015,22 +5015,22 @@
       "slug": "giteso-65-mefo026",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fontSize": {
           "11": 6,
           "12": 6,
-          "13": 7
+          "13": 8
         },
         "strokeWidth": {
-          "1": 24
+          "1": 20
         },
         "rx": {
           "12.5": 6
         },
-        "textCount": 19,
-        "width": "500",
-        "height": "588"
+        "textCount": 20,
+        "width": "723",
+        "height": "543"
       },
       "jar": {
         "fontSize": {
@@ -11989,11 +11989,12 @@
       "slug": "rujixe-89-sumo552",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fontSize": {
           "11": 4,
-          "12": 4
+          "12": 4,
+          "13": 1
         },
         "strokeWidth": {
           "1": 17
@@ -12001,8 +12002,8 @@
         "rx": {
           "12.5": 4
         },
-        "textCount": 8,
-        "width": "247",
+        "textCount": 9,
+        "width": "367",
         "height": "301"
       },
       "jar": {
@@ -12755,11 +12756,12 @@
       "slug": "sojono-24-tufe806",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fontSize": {
           "11": 6,
-          "12": 6
+          "12": 6,
+          "13": 2
         },
         "strokeWidth": {
           "1": 20
@@ -12767,8 +12769,8 @@
         "rx": {
           "12.5": 6
         },
-        "textCount": 12,
-        "width": "318",
+        "textCount": 14,
+        "width": "512",
         "height": "527"
       },
       "jar": {
