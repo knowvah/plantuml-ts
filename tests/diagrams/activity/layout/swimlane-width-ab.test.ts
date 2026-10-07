@@ -26,9 +26,9 @@ import { renderFixtureActivity } from '../../../oracle/svg-conformance/render-fi
 const DIR = join(import.meta.dirname, '../../../fixtures/activity/add4-T1b');
 
 /** x1 of every full-height divider (the ones starting at the band top). */
-function dividerXs(name: string): number[] {
+function dividerXs(name: string, y2 = '258.5'): number[] {
   const svg = renderFixtureActivity(readFileSync(join(DIR, name), 'utf8'), new DeterministicMeasurer());
-  const lines = svg.match(/<line [^>]*y1="17.5"[^>]*y2="258.5"[^>]*>/g) ?? [];
+  const lines = svg.match(new RegExp(`<line [^>]*y1="17.5"[^>]*y2="${y2}"[^>]*>`, 'g')) ?? [];
   return lines.map((l) => Number(/x1="([^"]*)"/.exec(l)![1]));
 }
 
@@ -54,4 +54,31 @@ describe('swimlaneWidth A/B fixtures — divider x vs the jar', () => {
       expect(spacing(dividerXs(name))).toEqual(spacing(JAR_PADDED));
     },
   );
+});
+
+/**
+ * add4-T1b (LANE-INK): an `elseif` chain's `ConnectionHline`
+ * (`FtileIfLongHorizontal.java:476-547`, `super(null, null)`) is measured
+ * into EVERY lane the tile touches (`UGraphicInterceptorAllSwimlanes
+ * .java:88-101`), so a lane whose only content sits left of the merge bar
+ * still widens to the bar's `getMinmaxSimple` extent. Jar values from
+ * `scripts/oracle-render.sh` on the `laneink-*.puml` fixtures; `d` is the
+ * nojije-35-teta491 shape, `g`/`h` the zeporo-46-zicu301 shape.
+ */
+describe('elseif ConnectionHline lane ink — divider x vs the jar', () => {
+  it('laneink-d: elseif branch with a point out', () => {
+    expect(dividerXs('laneink-d.puml', '320.556')).toEqual([20, 94.3, 311.225]);
+  });
+
+  it('laneink-g: nested if (else) under an elseif', () => {
+    expect(dividerXs('laneink-g.puml', '452.056')).toEqual([20, 157.6, 395.841]);
+  });
+
+  it('laneink-h: nested if (no else) under an elseif', () => {
+    expect(dividerXs('laneink-h.puml', '452.056')).toEqual([20, 157.6, 394.722]);
+  });
+
+  it('laneink-e: no branch has a point out, so no bar and no widening', () => {
+    expect(dividerXs('laneink-e.puml', '[0-9.]+')).toEqual([20, 146.6, 346.391]);
+  });
 });

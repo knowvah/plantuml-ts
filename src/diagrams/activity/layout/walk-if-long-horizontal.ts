@@ -23,6 +23,7 @@ import { laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { HlineCandidate } from './swimlane-hline.js';
+import { collectTouchedLanes } from './tile-coordinates-group.js';
 import { applyOutLabel } from './tile-layout-inlabel.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default (`AbstractFtile
@@ -273,6 +274,19 @@ function hlineCandidates(ctx: LhCtx): HlineCandidate[] {
 }
 
 /**
+ * `FtileIfLongHorizontal#getSwimlanes()` (`:131-141`): `getSwimlaneIn()`
+ * (`couples.get(0).getSwimlaneIn()`, the diamonds' own `myLane`) plus every
+ * couple's and `tile2`'s own lanes -- `HlinePayload.measureLanes`.
+ */
+function hlineMeasureLanes(ctx: LhCtx): string[] {
+  const lanes = new Set<string>();
+  if (ctx.myLane !== undefined) lanes.add(ctx.myLane);
+  for (const tile of ctx.t.tiles) collectTouchedLanes(tile, lanes);
+  collectTouchedLanes(ctx.t.tile2, lanes);
+  return [...lanes];
+}
+
+/**
  * `ConnectionHline`, drawn only when `nbOut > 0` -- a plain, arrowless line
  * under the whole tile. The pushed edge is always the UNLANED
  * `getMinmaxSimple` extent (byte-identical to before T1p-g); the `hline`
@@ -301,7 +315,15 @@ function connectionHline(ctx: LhCtx): void {
     ],
     myLane,
     myLane,
-    { hline: { low: x, high: x + t.width, candidates: hlineCandidates(ctx), unfiltered: [leftOut] } },
+    {
+      hline: {
+        low: x,
+        high: x + t.width,
+        candidates: hlineCandidates(ctx),
+        unfiltered: [leftOut],
+        measureLanes: hlineMeasureLanes(ctx),
+      },
+    },
   );
   // `withMerge(NONE)` (`FtileIfLongHorizontal.java:507`) -- T1b wires
   // `mergeable`; see `swimlane-placement.ts#EdgeMeta.scope`'s own doc for

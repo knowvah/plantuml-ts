@@ -40,7 +40,6 @@ import {
   computeLaneWidths,
   measureLaneExtents,
   resolveSwimlaneMinWidth,
-  type LaneEdge,
   type LaneItem,
   type LaneWidth,
 } from './swimlane-context.js';
@@ -48,6 +47,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
 import { routeHline, type HlinePayload } from './swimlane-hline.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
+import { sameLaneEdges } from './swimlane-measure-edges.js';
 import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
@@ -384,20 +384,8 @@ interface MeasureLanesInput {
   readonly theme: Theme;
 }
 
-/** Every SAME-lane edge (T3i, {@link LaneEdge}'s own doc: a cross-lane
- *  edge draws through the separate `Cross` class and never enters a
- *  lane's own `getMinMax()`), zipped from `edges`/`edgeMeta` -- the two
- *  arrays `placeSwimlanes` already keeps index-aligned (`PlacementResult
- *  .edgeMeta`'s own doc). */
-function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly EdgeMeta[]): LaneEdge[] {
-  const out: LaneEdge[] = [];
-  for (let i = 0; i < edges.length; i++) {
-    const meta = edgeMeta[i]!;
-    if (meta.lane1 === undefined || meta.lane1 !== meta.lane2) continue;
-    out.push({ swimlane: meta.lane1, edge: edges[i]! });
-  }
-  return out;
-}
+// `sameLaneEdges` moved to `swimlane-measure-edges.ts` (add4-T1b, this
+// file's own 500-line hook).
 
 /**
  * T1p-f: `computeDrawingWidths`'s own draw-interception pass

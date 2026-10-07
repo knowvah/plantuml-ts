@@ -73,6 +73,19 @@ export interface HlinePayload {
   readonly high: number;
   readonly candidates: readonly HlineCandidate[];
   readonly unfiltered: readonly number[];
+  /**
+   * add4-T1b: the enclosing tile's own `getSwimlanes()`
+   * (`FtileIfLongHorizontal.java:131-141`). During `computeDrawingWidths`
+   * (`Swimlanes.java:378-394`) the measurer is `UGraphicInterceptorAllSwimlanes`,
+   * whose `Connection` branch (`vcompact/UGraphicInterceptorAllSwimlanes
+   * .java:88-101`) treats this connector's `null`/`null` tiles as
+   * contained in EVERY active lane -- the active set narrowed to this
+   * tile's own lanes when the tile itself was dispatched (`:63-69`). So the
+   * unlaned `getMinmaxSimple` edge widens every one of these lanes'
+   * `LimitFinder`, not just the walker's `myLane`
+   * (`swimlane-placement.ts#sameLaneEdges`). Absent = `myLane` only.
+   */
+  readonly measureLanes?: readonly string[];
 }
 
 /** @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:525-527

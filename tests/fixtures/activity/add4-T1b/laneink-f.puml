@@ -1,0 +1,20 @@
+@startuml
+|ERROR|
+|P1|
+start
+if (Skip?) then (no)
+  |P1|
+  :Step 2;
+  if (Still Valid?) then (no)
+    |ERROR|
+    :Error2;
+    stop
+  else (yes)
+  endif
+|P1|
+else (yes)
+endif
+|P1|
+:next step;
+end
+@enduml
