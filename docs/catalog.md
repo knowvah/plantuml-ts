@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1398 modules · 5268 exported names.
+1399 modules · 5270 exported names.
 
 ## `src/`
 
@@ -1068,7 +1068,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `if-dispatch.ts` | `stripTrailingSemi`, `unescapeLabelNewlines`, `unescapeLabel`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `ActivityPluginGeometry`, `hasActivityChrome`, `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `list-backward-dispatch.ts` | `nodeListContainsBreak`, `pushParsedNode`, `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
-| `node-dispatch.ts` | `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
+| `node-dispatch.ts` | `swimlaneDisplaysOf`, `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
 | `note-dispatch.ts` | `tryNoteSingle`, `tryNoteMulti`, `redirectNoteOntoSwitch` | The two note line-shapes of `node-dispatch.ts`'s dispatch chain (`CommandNote3`/`CommandNoteLong3`), moved verbatim into a sibling module when add4-T1c's colour capture would have taken that file past the 500-line cap (mission convention: a |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
@@ -1119,6 +1119,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `swimlane-loop-translate.ts` | `HEXAGON_HALF_SIZE`, `WhileBackLoop`, `RepeatOutLoop`, `RepeatSimple1Loop`, `RepeatSimple2Loop`, `RepeatComplex1Loop`, `SwitchHorizontalThenVerticalCrossLoop`, `SwitchVerticalThenHorizontalCrossLoop`, `RepeatBackward1Loop`, `RepeatBackward2Loop`, `IfLinksHThenVLoop`, `IfLinksVThenHLoop`, `IfLinksVThenHDirectLoop`, `LoopTranslate`, `LoopRouteResult`, `routeLoopTranslate` | D2 (`plans/activity-loop-lane-translate/decisions.md`): the tagged union of quantities each cross-lane loop connector shape needs from its own tile -- `getP1`/`getP2` UNTRANSLATED, plus the widths/heights `calculateDimension()` and the diam |
 | `swimlane-measure-edges.ts` | `sameLaneEdges` | The edges `computeDrawingWidths`' per-lane `LimitFinder`s see, split out of `swimlane-placement.ts` (its 500-line hook, add4-T1b). |
 | `swimlane-placement.ts` | `laneAt`, `laneIn`, `laneOut`, `EdgeMeta`, `EdgeShape`, `PlacementResult`, `TITLE_ASCENT_FRACTION`, `measureSwimlaneTitlesHeight`, `resolveSwimlaneVertical`, `SwimlaneVertical`, `computeSwimlaneChrome`, `SwimlaneChrome`, `repeatEdgeMeta`, `PlacementInput`, `placeSwimlanes` | Phase two of D1's two-phase split (`plans/activity-swimlane-rendering/decisions.md#d1`): given the per-lane content widths T4's `swimlane-context.ts` computes, assign each lane an absolute origin and shift every node/edge from `tile- coordi |
+| `swimlane-title.ts` | `swimlaneTitleText` | The text a swimlane title draws and is measured by: the lane's `\|name\|LABEL` display when it has one, else its name, each with `[[url label]]` creole links resolved (SLURL, `nesozi-09-zezu092`). |
 | `swimlane-vertical.ts` | `measureSwimlaneTitlesHeight`, `SwimlaneVertical`, `resolveSwimlaneVertical` | The swimlane title band's vertical sizing -- split out of `swimlane-placement.ts` (this task's own 500-line hook) to make room for T1p-g's `ConnectionHline` routing. |
 | `switch-connection-points.ts` | `HexagonCorners`, `horizontalThenVerticalPoints`, `verticalTopPoints`, `oneLinkVerticalPoints`, `verticalThenHorizontalPoints`, `verticalBottomPoints`, `oneLinkBottomPoints` | Pure same-lane point-array math for the switch connectors, split out of `walk-switch.ts` purely to keep that file under the complexity hook's NLOC/CCN cap -- a direct port of `FtileSwitchWithManyLinks`'s/ `FtileSwitchWithOneLink`'s `Connect |
 | `switch-cross-shapes.ts` | `DiamondHalfExtent`, `routeSwitchHorizontalThenVerticalCross`, `SwitchCrossDirection`, `SwitchVerticalThenHorizontalCrossResult`, `routeSwitchVerticalThenHorizontalCross` | Pure geometry for `FtileSwitchWithManyLinks`'s two cross-swimlane connectors (D12, mission `activity-divergence-drive-2` T1p-e). |
