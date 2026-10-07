@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1396 modules · 5257 exported names.
+1396 modules · 5258 exported names.
 
 ## `src/`
 
@@ -1181,7 +1181,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-group.ts` | `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
-| `gtile-if-long-vertical.ts` | `VerticalBranchLayout`, `GtileIfLongVertical` |  |
+| `gtile-if-long-vertical.ts` | `VerticalInlabel`, `VerticalBranchLayout`, `GtileIfLongVertical` |  |
 | `gtile-if-with-links-notes.ts` | `IfOwnNoteGeometry`, `computeIfOwnNoteGeometry` | `FtileIfWithDiamonds`'s own constructor (`:79-111`): processes AT MOST one LEFT and one RIGHT note from the if's own `notes` (any further note on an already-filled side is silently dropped -- `if (opaleLeft != EMPTY) continue;`/`:85-86,96-9 |
 | `gtile-if-with-links.ts` | `IfWithLinksBranch`, `IfLinksFlags`, `BranchGeo`, `NudeAndMerge`, `computeNudeAndMerge`, `IfWithLinksCreateOptions`, `GtileIfWithLinks` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
