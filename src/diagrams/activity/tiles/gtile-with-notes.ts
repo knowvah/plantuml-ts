@@ -3,6 +3,7 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import { TileComposite } from './tile.js';
 import type { StringBounder, Tile } from './tile.js';
 import { measureOpaleCreole } from './gtile-note.js';
+import type { NoteVerticalAlignment } from './gtile-note.js';
 import type { Theme } from '../../../core/theme.js';
 
 /** `TextBlockUtils.withMargin(opale, 10, 10)` -- a UNIFORM 10px margin on
@@ -88,21 +89,29 @@ interface WithNotesPlacement {
  *  own precedent: a dumb field-assignment constructor, all arithmetic in
  *  a pure function).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWithNotes.java:158-192,213-219 */
-function computeWithNotesPlacement(tile: Tile, left: NoteStack | null, right: NoteStack | null): WithNotesPlacement {
+function computeWithNotesPlacement(
+  tile: Tile,
+  left: NoteStack | null,
+  right: NoteStack | null,
+  verticalAlignment: NoteVerticalAlignment,
+): WithNotesPlacement {
   const leftWidth = left?.width ?? 0;
   const rightWidth = right?.width ?? 0;
   const leftHeight = left?.height ?? 0;
   const rightHeight = right?.height ?? 0;
   const width = tile.width + leftWidth + rightWidth;
   const height = Math.max(leftHeight, rightHeight, tile.height);
+  // add4-T1f: `getTranslate`/`getTranslateForLeft`/`getTranslateForRight`
+  // (`:158-192`) each take `yDelta = 0` when TOP, else the centring offset.
+  const centre = (h: number): number => (verticalAlignment === 'top' ? 0 : (height - h) / 2);
   return {
     width,
     height,
     tileOffsetX: leftWidth,
-    tileOffsetY: (height - tile.height) / 2,
-    leftOffsetY: (height - leftHeight) / 2,
+    tileOffsetY: centre(tile.height),
+    leftOffsetY: centre(leftHeight),
     rightOffsetX: width - rightWidth,
-    rightOffsetY: (height - rightHeight) / 2,
+    rightOffsetY: centre(rightHeight),
   };
 }
 
@@ -118,8 +127,8 @@ function computeWithNotesPlacement(tile: Tile, left: NoteStack | null, right: No
  * even for exactly one note). No gap between the tile and either stack
  * (`suppSpace` is declared, `FtileWithNoteOpale.java:81`-adjacent, but
  * dead code in THIS class -- never read by `calculateDimensionInternal`,
- * confirmed by inspection). Vertical alignment is always CENTER (every
- * known caller passes it; no cohort row exercises TOP).
+ * confirmed by inspection). Vertical alignment is CENTER for every caller
+ * but the switch's own notes (`InstructionSwitch.java:125`, TOP, add4-T1f).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWithNotes.java
  */
 export class GtileWithNotes extends TileComposite {
@@ -135,7 +144,13 @@ export class GtileWithNotes extends TileComposite {
   readonly rightOffsetX: number;
   readonly rightOffsetY: number;
 
-  constructor(tile: Tile, notes: readonly WithNotesEntry[], bounder: StringBounder, theme: Theme) {
+  constructor(
+    tile: Tile,
+    notes: readonly WithNotesEntry[],
+    bounder: StringBounder,
+    theme: Theme,
+    verticalAlignment: NoteVerticalAlignment = 'center',
+  ) {
     super();
     this.children = [tile];
     this.left = buildStack(
@@ -148,7 +163,7 @@ export class GtileWithNotes extends TileComposite {
       bounder,
       theme,
     );
-    const placement = computeWithNotesPlacement(tile, this.left, this.right);
+    const placement = computeWithNotesPlacement(tile, this.left, this.right, verticalAlignment);
     this.width = placement.width;
     this.height = placement.height;
     this.tileOffsetX = placement.tileOffsetX;

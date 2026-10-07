@@ -26,6 +26,7 @@ import {
 } from './dispatch-support.js';
 import { readMultilineActionBody } from './node-dispatch.js';
 import { unescapeLabelNewlines } from './if-dispatch.js';
+import { redirectNoteOntoSwitch } from './note-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // `containsBreak` (mission add2-T3b, family WSPEC) -- node-dispatch.ts's
@@ -193,7 +194,8 @@ function clearSpeculativeNoOut(nodes: ActivityNode[]): void {
  *  pushParsedNode} purely to keep that function's own CCN under the
  *  file's limit. `true` when one fired (the node is fully consumed). */
 function redirectOntoIf(nodes: ActivityNode[], node: ActivityNode): boolean {
-  if (node.kind === 'note') return redirectNoteOntoIf(nodes, node);
+  if (node.kind === 'note')
+    return redirectNoteOntoIf(nodes, node) || redirectNoteOntoSwitch(nodes, node, pushParsedNode);
   if (node.kind === 'kill' || node.kind === 'detach') return redirectKillOntoIf(nodes, node);
   return false;
 }

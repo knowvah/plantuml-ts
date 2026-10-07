@@ -378,21 +378,21 @@ export interface ActivitySwitchCase {
 }
 
 /**
- * `switch (test) ... case (v1) ... case (v2) ... endswitch` (mission
- * ubrr-T10 M2): structurally the N-way branch-and-merge
- * `CommandSwitch`/`CommandCase`/`CommandEndSwitch` build together, one
- * `startSwitch`/`switchCase`/`endSwitch` sequence per `switch`.
+ * `switch (test) ... case (v1) ... endswitch` (ubrr-T10 M2): one
+ * `startSwitch`/`switchCase`/`endSwitch` sequence. `notes` (add4-T1f): a
+ * note while `current == null || current.isEmpty()` is the switch's own
+ * (`InstructionSwitch.java:186-189`), drawn TOP-aligned (`:125`).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwitch.java:60-70
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCase.java:56-63
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandEndSwitch.java:58-63
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:129-131
- *   -- registration.
  */
 export interface ActivitySwitch {
   kind: 'switch';
   condition: string;
   cases: ActivitySwitchCase[];
   swimlane?: string;
+  notes?: ActivityNote[];
 }
 
 /**

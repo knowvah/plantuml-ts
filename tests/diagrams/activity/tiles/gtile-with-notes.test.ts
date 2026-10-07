@@ -141,3 +141,38 @@ describe('GtileWithNotes — stacked note is sized by the creole Sheet', () => {
     expect(box.width).toBeLessThan(5 * 7 + 21);
   });
 });
+
+// add4-T1f: `FtileWithNotes#getTranslate`/`#getTranslateForLeft`/
+// `#getTranslateForRight` (`FtileWithNotes.java:158-192`) take `yDelta = 0`
+// when TOP -- the switch's own notes (`InstructionSwitch.java:125`).
+describe('GtileWithNotes — TOP alignment', () => {
+  it('a tall tile: tile, left and right stacks all sit at y 0', () => {
+    const tile = stubTile(100, 200);
+    const t = new GtileWithNotes(
+      tile,
+      [
+        { text: 'n', position: 'left' },
+        { text: 'm', position: 'right' },
+      ],
+      bounder,
+      theme,
+      'top',
+    );
+    expect(t.height).toBe(200);
+    expect([t.tileOffsetY, t.leftOffsetY, t.rightOffsetY]).toEqual([0, 0, 0]);
+    expect(t.getCoord(NORTH_HOOK).y).toBe(0);
+  });
+
+  it('a short tile under a taller stack is NOT centred either', () => {
+    const tile = stubTile(100, 10);
+    const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, theme, 'top');
+    expect(t.height).toBe(44);
+    expect(t.tileOffsetY).toBe(0);
+    expect(t.getCoord(SOUTH_HOOK).y).toBe(10);
+  });
+
+  it('CENTER (default) centres the short side', () => {
+    const t = new GtileWithNotes(stubTile(100, 200), [{ text: 'n', position: 'left' }], bounder, theme);
+    expect(t.leftOffsetY).toBe((200 - 44) / 2);
+  });
+});

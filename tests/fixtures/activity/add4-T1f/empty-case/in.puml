@@ -1,0 +1,13 @@
+@startuml
+start
+switch (test?)
+case ( A )
+  note left: own by switch
+  :a;
+  note right: own by a
+case ( B )
+  note right: also switch
+  :b;
+endswitch
+stop
+@enduml

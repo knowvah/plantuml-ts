@@ -13,7 +13,7 @@
  * raw with its own `#`, the same shape `ActivityAction.color` does.
  */
 
-import type { ActivityNote } from './ast.js';
+import type { ActivityNode, ActivityNote } from './ast.js';
 import {
   RE_NOTE_END,
   RE_NOTE_MULTI,
@@ -87,4 +87,46 @@ export function tryNoteMulti(ctx: ParseContext, idx: number, line: string): Disp
     ...swimlaneSpread(ctx),
   };
   return { idx: cursor, node };
+}
+
+/** `Branch#isEmpty` -> `InstructionList#isEmpty` (`Branch.java:210-212`):
+ *  no instruction yet. `arrow-label` only sets the pending link rendering,
+ *  never an instruction (see `switch-dispatch.ts#extractLeadingCaseNotes`). */
+function caseIsEmpty(body: readonly ActivityNode[]): boolean {
+  return body.every((n) => n.kind === 'arrow-label');
+}
+
+/**
+ * add4-T1f (SWITCH-NOTE): a note parsed while a CLOSED `switch` is this
+ * list's last element. `InstructionList#addNote` forwards to `getLast()
+ * .addNote(...)` (`InstructionList.java:190-196`); `InstructionSwitch
+ * #addNote` (`InstructionSwitch.java:185-193`) keeps it as its OWN note
+ * while the last case (`current`) is empty, else forwards to that case
+ * (`Branch#addNote` -> its `InstructionList`, recursing to the case's last
+ * instruction). `push` is the enclosing list's own push
+ * (`list-backward-dispatch.ts#pushParsedNode`), passed in so the recursion
+ * gets every other redirect (onto an `if`, a nested `switch`) and so this
+ * module never imports its caller. The note goes before any trailing
+ * `arrow-label` (a pending rendering, not the case's last instruction).
+ * Mutates `nodes` in place like every sibling redirect; `true` when it fired.
+ */
+export function redirectNoteOntoSwitch(
+  nodes: ActivityNode[],
+  node: ActivityNote,
+  push: (list: ActivityNode[], n: ActivityNode) => void,
+): boolean {
+  const last = nodes[nodes.length - 1];
+  if (last === undefined || last.kind !== 'switch') return false;
+  const lastCase = last.cases[last.cases.length - 1];
+  if (lastCase === undefined || caseIsEmpty(lastCase.body)) {
+    nodes[nodes.length - 1] = { ...last, notes: [...(last.notes ?? []), node] };
+    return true;
+  }
+  let split = lastCase.body.length;
+  while (lastCase.body[split - 1]!.kind === 'arrow-label') split--;
+  const head = lastCase.body.slice(0, split);
+  push(head, node);
+  const cases = [...last.cases.slice(0, -1), { ...lastCase, body: [...head, ...lastCase.body.slice(split)] }];
+  nodes[nodes.length - 1] = { ...last, cases };
+  return true;
 }

@@ -1,0 +1,11 @@
+@startuml
+start
+switch (test?)
+floating note left: floating on switch
+case ( A )
+  :a;
+case ( B )
+  :b;
+endswitch
+stop
+@enduml
