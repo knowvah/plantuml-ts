@@ -139,11 +139,11 @@
     {
       "type": "activity",
       "slug": "bigide-91-bise382",
-      "status": "baseline",
-      "weightedScore": 35,
-      "diffCount": 35,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1d2fb519"
     },
     {
       "type": "activity",
@@ -391,11 +391,11 @@
     {
       "type": "activity",
       "slug": "cemipu-87-dinu624",
-      "status": "baseline",
-      "weightedScore": 6,
-      "diffCount": 6,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "50a347b2"
+      "measuredAgainstCommit": "1d2fb519"
     },
     {
       "type": "activity",
@@ -1877,10 +1877,10 @@
       "type": "activity",
       "slug": "lebile-91-veto202",
       "status": "baseline",
-      "diffCount": 38,
+      "diffCount": 34,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "3ec2d4cd",
-      "weightedScore": 64
+      "measuredAgainstCommit": "1d2fb519",
+      "weightedScore": 60
     },
     {
       "type": "activity",

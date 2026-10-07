@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "790fee5a",
+  "measuredAgainstCommit": "1d2fb519",
   "fixtures": [
     {
       "type": "activity",
@@ -1629,8 +1629,8 @@
           "30": 2
         },
         "strokeWidth": {
-          "0": 3,
-          "1": 16
+          "1": 16,
+          "(absent)": 3
         },
         "rx": {
           "(absent)": 1,
@@ -1659,7 +1659,7 @@
         "height": "456"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "50a347b2"
+      "measuredAgainstCommit": "1d2fb519"
     },
     {
       "type": "activity",
@@ -7528,7 +7528,7 @@
       "slug": "lebile-91-veto202",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "3ec2d4cd",
+      "measuredAgainstCommit": "1d2fb519",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -7544,7 +7544,7 @@
           "12.5": 1
         },
         "textCount": 8,
-        "width": "524",
+        "width": "530",
         "height": "272"
       },
       "jar": {
