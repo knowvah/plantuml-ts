@@ -26,6 +26,7 @@ import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
+import { markDecoratedSoleChild } from '../tiles/gtile-goto.js';
 import { measureIfOwnNote } from '../tiles/gtile-note.js';
 import { tileNodes } from './tile-layout.js';
 import { laneOut } from './swimlane-lanes.js';
@@ -213,6 +214,7 @@ function toBranchTile(
   ctx: IfLayoutCtx,
 ): IfWithLinksBranch {
   const { tiles } = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
+  markDecoratedSoleChild(tiles);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
@@ -396,7 +398,9 @@ function applyIfDownSwimlaneOut(result: GtileIfDown, optionalStop: Tile | null, 
  *  reason as {@link toBranchTile}: `FtileIfDown.java` never reads
  *  `Branch#special` either. */
 function branchBodyTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
-  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma).tiles, bounder, theme);
+  const { tiles } = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
+  markDecoratedSoleChild(tiles);
+  return new GtileTopDown(tiles, bounder, theme);
 }
 
 function buildIfDown(

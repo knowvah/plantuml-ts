@@ -10,8 +10,7 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode } from './activity-renderer-shapes.js';
-import { orderedLine } from './activity-renderer-terminals.js';
+import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
 import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
@@ -425,7 +424,9 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
   if (hasChrome) {
     children.push(renderSwimlaneChrome(geo, theme));
   } else {
-    for (const node of geo.nodes) children.push(renderNode(node, theme));
+    // add4-T3d: `TextBlockInterceptorUDrawable` (single lane only,
+    // `Swimlanes.java:251-258`) -- goto lines drawn as the nodes are.
+    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
   }
 
   // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane

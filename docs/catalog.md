@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1404 modules · 5295 exported names.
+1404 modules · 5297 exported names.
 
 ## `src/`
 
@@ -1052,7 +1052,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
-| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
+| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
 | `activity-renderer-text.ts` | `ActivityTextStyle`, `renderCreoleTableGrid`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
 | `activity-spot-glyph-data.ts` | `ActivitySpotLetter`, `SPOT_REFERENCE_CX`, `SPOT_REFERENCE_CY`, `SPOT_GLYPH_D`, `CAPTURED_SPOT_LETTERS` | Glyph outline `d` data for the `circle,spot` connector's single character (`(A)`, `#blue:(B)`, ...) -- captured verbatim from the jar's own SVG output, the SAME scraping method `class-badge-glyph-data.ts` documents (its own module doc comme |
 | `activity-spot-glyph.ts` | `spotGlyphPath`, `SPOT_TEXT_FALLBACK_NOTE` | Translates {@link SPOT_GLYPH_D}'s reference-position outline to an arbitrary spot centre -- the SAME per-token `(x, y, x, y, ...)` shift `class-badge.ts#badgeGlyphPath` uses for its own captured table (every command this letter set emits, ` |
@@ -1186,7 +1186,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-diamond.ts` | `GtileDiamond` |  |
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
-| `gtile-goto.ts` | `GtileGoto` |  |
+| `gtile-goto.ts` | `GtileGoto`, `markDecoratedSoleChild` |  |
 | `gtile-group.ts` | `frameTitleWidth`, `GtileGroupOptions`, `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |

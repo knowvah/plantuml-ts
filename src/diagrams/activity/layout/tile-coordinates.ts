@@ -324,7 +324,15 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     // per this task's write-set note (T2h owns this file).
     case 'gtile-spot': {
       const t = tile as unknown as GtileSpot;
-      const node: ActivityNodeGeo = { id: out.nextId('spot'), kind: 'spot', x, y, width: t.width, height: t.height, label: t.name };
+      const node: ActivityNodeGeo = {
+        id: out.nextId('spot'),
+        kind: 'spot',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
       if (t.color !== undefined) node.color = t.color;
       pushNode(out, node, myLane);
       return;
@@ -332,11 +340,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
 
     case 'gtile-label': {
       const t = tile as unknown as GtileLabel;
-      pushNode(
-        out,
-        { id: out.nextId('label'), kind: 'label', x, y, width: t.width, height: t.height, label: t.name },
-        myLane,
-      );
+      const node: ActivityNodeGeo = {
+        id: out.nextId('label'),
+        kind: 'label',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
+      if (!t.dispatched) node.dispatched = false;
+      pushNode(out, node, myLane);
       return;
     }
 
@@ -348,11 +362,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     // existing kind modeled "no out point").
     case 'gtile-goto': {
       const t = tile as unknown as GtileGoto;
-      pushNode(
-        out,
-        { id: out.nextId('goto'), kind: 'goto', x, y, width: t.width, height: t.height, label: t.name },
-        myLane,
-      );
+      const node: ActivityNodeGeo = {
+        id: out.nextId('goto'),
+        kind: 'goto',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
+      if (!t.dispatched) node.dispatched = false;
+      pushNode(out, node, myLane);
       return;
     }
 

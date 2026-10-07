@@ -41,6 +41,11 @@ export interface ActivityNodeGeo {
   diamondShape?: 'inside' | 'square' | 'empty';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
+  /** For `label`/`goto` nodes (add4-T3d): `false` when upstream draws the
+   *  tile through a decorator's direct `drawU`, bypassing
+   *  `UGraphicDispatchFtile` (see `tiles/gtile-goto.ts#markDecoratedSoleChild`).
+   *  Absent = dispatched. */
+  dispatched?: false;
   /**
    * The swimlane this node's source `ActivityNode` was parsed in, if any.
    * Mirrors `Tile.swimlane` (`tiles/tile.ts`); T5 populates this in
