@@ -7,6 +7,7 @@ import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { GtileAction } from '../tiles/gtile-action.js';
 import type { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
+import type { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
@@ -31,6 +32,7 @@ import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
 import { walkIfLongVertical } from './walk-if-long-vertical.js';
 import { walkSwitch } from './walk-switch.js';
+import { walkNoteOpale, walkWithNotes } from './walk-with-notes.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
@@ -288,33 +290,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
     }
 
-    // `FtileWithNoteOpale#drawU` (`:195-221`): the note draws beside the
-    // wrapped tile (no flow edge), then the wrapped tile draws at its own
-    // translated offset. `pushTopDownSiblingEdge`'s `hasPointOut()`/
-    // `getCoord()` calls on a `gtile-note-opale` sibling resolve through
-    // THIS tile's own methods (`gtile-note.ts`), which pass through to the
-    // wrapped child -- no edge-code change needed there for this case.
-    case 'gtile-note-opale': {
-      const t = tile as unknown as GtileNoteOpale;
-      const note = t.note;
-      const noteNode: ActivityNodeGeo = {
-        id: out.nextId('note'),
-        kind: 'note',
-        x: x + t.noteOffsetX,
-        y: y + t.noteOffsetY,
-        width: note.width,
-        height: note.height,
-        label: note.text,
-        notePosition: note.side,
-      };
-      // `Opale#drawU`'s own `withLink == false` branch (`:109-110`) never
-      // sets a spike at all -- `t.withLink` mirrors that (`gtile-note.ts`'s
-      // own doc).
-      if (t.withLink) noteNode.spikeTip = { x: x + t.spikeOffsetX, y: y + t.spikeOffsetY };
-      pushNode(out, noteNode, myLane);
-      walkTile(t.children[0]!, x + t.tileOffsetX, y + t.tileOffsetY, { kindHint: null, lane: myLane }, out);
+    // `FtileWithNoteOpale#drawU` (`:195-221`) -- see `walk-with-notes.ts`'s
+    // own `walkNoteOpale` doc.
+    case 'gtile-note-opale':
+      walkNoteOpale(tile as unknown as GtileNoteOpale, x, y, myLane, out);
       return;
-    }
+
+    // NOTE-MULTI/GROUPNOTE (`activity-divergence-drive-3` T2a):
+    // `FtileWithNotes` -- see `walk-with-notes.ts`'s own doc.
+    case 'gtile-with-notes':
+      walkWithNotes(tile as unknown as GtileWithNotes, x, y, myLane, out);
+      return;
 
     case 'gtile-diamond': {
       const t = tile as unknown as GtileDiamond;

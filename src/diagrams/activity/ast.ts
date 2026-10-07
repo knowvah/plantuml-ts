@@ -95,6 +95,19 @@ export interface ActivityBackward {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:182-187,513-535
    */
   outgoing?: string;
+  /**
+   * BACKNOTE (`activity-divergence-drive-3` T2a): `InstructionRepeat
+   * .addNote` (`:218-226`) routes a note to {@link notes} ONLY while
+   * `backward` is already set -- i.e. a note parsed IMMEDIATELY after
+   * this `backward:` line, before any other body node. A note BEFORE
+   * `backward:` belongs to the regular body flow instead (the
+   * pre-existing generic `tileNote` pairing, `tile-layout-structural.ts`)
+   * and never reaches this field. Drawn beside this backward activity
+   * via the same `GtileNoteOpale` wrap `tileNote` already builds for a
+   * simple leaf -- never a flow sibling.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:177-185,218-226
+   */
+  notes?: ActivityNote[];
 }
 
 /**
@@ -197,6 +210,21 @@ export interface ActivityIf {
   /** Intermediate elseif clauses in order; may be empty. */
   elseIfBranches: ActivityElseIf[];
   swimlane?: string;
+  /**
+   * Notes the IF ITSELF owns (never a branch's own flow content), in
+   * `WithNote#addNote`'s own insertion order: a LEADING note in the
+   * then/elseif/else branch (`InstructionIf.addNote`'s `current.isEmpty()`
+   * arm -- `if-dispatch.ts#tryIf`'s own extraction), then a note parsed
+   * immediately after this `if`'s `endif` while this if is still the
+   * enclosing list's `getLast()` (the `endifCalled` arm --
+   * `pushParsedNode`'s `kind==='note'`-onto-`kind==='if'` merge,
+   * `list-backward-dispatch.ts`). Drawn beside diamond1 by whichever
+   * builder `conditional-builder.ts#buildIf` picks -- never a flow
+   * sibling. Omitted (not `[]`) when the if owns no such note.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionIf.java:222-227
+   * @see net/sourceforge/plantuml/activitydiagram3/WithNote.java:56-59
+   */
+  notes?: ActivityNote[];
 }
 
 export interface ActivityWhile {
@@ -390,6 +418,15 @@ export interface ActivityGroup {
   hasBracket: boolean;
   body: ActivityNode[];
   swimlane?: string;
+  /**
+   * GROUPNOTE: `InstructionGroup.addNote` self-captures only while
+   * `list.isEmpty()` (a run of leading notes each overwrites the last --
+   * a single field, not a collection). `createFtile` wraps the body
+   * (before the frame) with it via `FtileWithNotes`, never
+   * `FtileWithNoteOpale`, even for this one note.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionGroup.java:104-105,125-131
+   */
+  note?: ActivityNote;
 }
 
 // ---------------------------------------------------------------------------

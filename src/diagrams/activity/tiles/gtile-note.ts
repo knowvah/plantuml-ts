@@ -4,8 +4,58 @@ import { TileComposite, TileLeaf } from './tile.js';
 import type { StringBounder, Tile } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { NOTE_FOLD, NOTE_H_PAD, NOTE_OPALE_GAP } from '../activity-layout-constants.js';
+import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y, NOTE_OPALE_GAP } from '../activity-layout-constants.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+
+export interface OpaleBox {
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * `Opale.java:89-96`: `getWidth`/`getHeight` size the note box from
+ * `textBlock.calculateDimension`, where `textBlock` is the multi-line
+ * creole sheet built over the note's own `Display`
+ * (`FtileWithNoteOpale.java:147-150`) -- ONE `TextBlock` line per `\n` in
+ * the source, never the whole string measured as a single run. Creole
+ * markup (`**bold**`, lists) inside a note line is NOT resolved here --
+ * that is the Sheet's `CreoleMode.FULL` parse, deferred to the
+ * separately-filed NOTE-CREOLE family. Shared by {@link GtileNote} (the
+ * flow-attached note leaf) and the if-composites' own LEFT/RIGHT Opale
+ * boxes (`FtileIfWithDiamonds.java:83-109`, `FtileIfDown.java:116-120`,
+ * `activity-divergence-drive-3` T2a, family IFNOTE) -- ALL THREE read the
+ * same `Opale` Java class, never a creole-aware variant.
+ */
+/** A note the enclosing `if` owns (`ActivityIf.notes`), pre-measured at
+ *  tile-building time -- `gtile-if-down.ts`/`gtile-if-with-links.ts` take
+ *  this (never raw `bounder`/`theme`) so neither file needs its own font
+ *  resolution, matching how both already take pre-built `Tile` children
+ *  rather than raw AST. */
+export interface IfOwnNote {
+  readonly text: string;
+  readonly position: 'left' | 'right';
+  readonly box: OpaleBox;
+}
+
+/** `FtileIfWithDiamonds`/`FtileIfDown`'s own `createOpale` (both read the
+ *  SAME note font, `Opale.java`'s `textBlock` built over `note.getDisplay()`
+ *  the identical way `FtileWithNoteOpale` does -- `FtileIfWithDiamonds
+ *  .java:113-130`, `FtileWithNoteOpale.java:146-150`). */
+export function measureIfOwnNote(note: ActivityNote, bounder: StringBounder, theme: Theme): IfOwnNote {
+  return { text: note.text, position: note.position, box: measureOpaleText(note.text, bounder, activityFontSize(theme, 'note')) };
+}
+
+export function measureOpaleText(text: string, bounder: StringBounder, fontSize: number): OpaleBox {
+  const lines = text.split('\n');
+  // `klimt/drawing/font/StringBounderFromWidthTable.java:71`'s
+  // `calculateDimension` height is `size`, unconditionally -- the same
+  // per-line advance `activity-renderer-shapes.ts#renderNote`'s
+  // `textLines(..., noteSize, ...)` call already draws with.
+  const lineHeight = bounder.getDimension('M', fontSize).height;
+  const textWidth = Math.max(...lines.map((line) => bounder.getDimension(line, fontSize).width));
+  const textHeight = lineHeight * lines.length;
+  return { width: textWidth + NOTE_MARGIN_X1 + NOTE_MARGIN_X2, height: textHeight + 2 * NOTE_MARGIN_Y };
+}
 
 export class GtileNote extends TileLeaf {
   readonly kind = 'gtile-note' as const;
@@ -25,9 +75,10 @@ export class GtileNote extends TileLeaf {
     // declares no `note` override, so the root value stands. Was
     // `theme.fontSize - 2` = 12, which moved the note the WRONG WAY: the
     // jar's note text is LARGER than its action text, not smaller.
-    const measured = bounder.getDimension(node.text, activityFontSize(theme, 'note'));
-    this.width = measured.width + 2 * NOTE_H_PAD + NOTE_FOLD;
-    this.height = measured.height + NOTE_FOLD + 16;
+    const fontSize = activityFontSize(theme, 'note');
+    const box = measureOpaleText(node.text, bounder, fontSize);
+    this.width = box.width;
+    this.height = box.height;
   }
 
   getCoord(hook: HookName): GPoint {

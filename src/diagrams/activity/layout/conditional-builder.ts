@@ -25,6 +25,7 @@ import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
+import { measureIfOwnNote } from '../tiles/gtile-note.js';
 import { tileNodes } from './tile-layout.js';
 import { laneOut } from './swimlane-lanes.js';
 import { buildIfLongHorizontal, buildIfLongVertical } from './conditional-builder-long.js';
@@ -375,10 +376,17 @@ function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dis
   const useElse1 = shouldUseElse1(theme, optionalStop, parts, node.swimlane, ctx.laneOrder);
   if (useElse1) diamond1.swapEastWest();
 
+  // `FtileIfDown.java:116-120`: EXACTLY one note (either side -- this
+  // builder ignores `NotePosition`), else none at all (2+ silently
+  // dropped). `activity-divergence-drive-3` T2a, family IFNOTE.
+  const ownNote = node.notes?.length === 1 ? node.notes[0] : undefined;
+  const opale = ownNote === undefined ? null : measureIfOwnNote(ownNote, bounder, theme);
+
   const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, {
     hasTwoBranches,
     useElse1,
     conditionEndStyle: theme.conditionEndStyle,
+    opale,
   });
   applyIfDownSwimlaneOut(result, optionalStop, parts.mainTile);
   return result;

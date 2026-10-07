@@ -3,6 +3,7 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { DiamondConditionTile } from './gtile-diamond-inside.js';
+import type { IfOwnNote } from './gtile-note.js';
 
 /** `ConditionalBuilder.java:171-172`: `new FtileMinWidthCentered(branch.getFtile(), 30)`. */
 const MIN_BRANCH_WIDTH = 30;
@@ -144,10 +145,13 @@ function computeAlignedTotal(diamond1: DiamondConditionTile, main: Tile, flags: 
 
 /**
  * The `36 + max(12, southLabelHeight)` vertical pad and the `12` (`+ stop
- * width + additionalWidth` when `optionalStop`) horizontal pad. `opale`
- * (notes on an `if`) is out of scope (D8) so every `opaleWidth`/
- * `opaleHeight` term in the Java is always `0` here, collapsing the
- * `supp > 0` branch permanently.
+ * width + additionalWidth` when `optionalStop`) horizontal pad, plus the
+ * single opale note's own `supp`/`opaleHeight` terms (`activity-
+ * divergence-drive-3` T2a, family IFNOTE -- CLOSES this file's own D8
+ * placeholder): `supp = max(0, opaleWidth - geo.left)` widens the LEFT
+ * side only when the note is wider than the composite's own natural left
+ * margin; `opaleHeight` pads height UNCONDITIONALLY (the note is always
+ * drawn, never centred against spare vertical room).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:555-564
  */
 /** See {@link CoreGeometry.diamond2PointInY}'s own doc comment. */
@@ -155,17 +159,73 @@ function diamond2PointInY(flags: IfDownFlags, d2: AlignedGeo): number {
   return flags.conditionEndStyle === 'hline' ? d2.height / 2 : 0;
 }
 
-function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags, optionalStopWidth: number): CoreGeometry {
-  const total = computeAlignedTotal(diamond1, main, flags);
-  const d2 = diamond2Geo(flags);
+interface OpaleLeftAdjust {
+  readonly supp: number;
+  readonly left: number;
+}
+
+/** The opale note's own `supp`/`left` adjustment, split out of {@link
+ *  computeGeometry} purely to keep that function's own NLOC/param-count
+ *  under the file's limit (IFNOTE's one `opale` param pushed it over).
+ *  `supp = max(0, opaleWidth - geo.left)`; `left = opaleWidth +
+ *  diamond1.width/2` only when `supp > 0`, else unchanged
+ *  (`FtileIfDown.java:558-571`). */
+function applyOpaleToLeft(diamond1: DiamondConditionTile, geoLeft: number, opaleWidth: number): OpaleLeftAdjust {
+  const supp = Math.max(0, opaleWidth - geoLeft);
+  return { supp, left: supp > 0 ? opaleWidth + diamond1.width / 2 : geoLeft };
+}
+
+interface HeightAndWidthBase {
+  readonly height: number;
+  readonly widthBase: number;
+}
+
+/** `height`/`widthBase` (pre-`supp`), split out of {@link computeGeometry}
+ *  for the same NLOC reason as {@link applyOpaleToLeft}. */
+function computeHeightAndWidthBase(
+  diamond1: DiamondConditionTile,
+  total: AlignedTotal,
+  flags: IfDownFlags,
+  optionalStopWidth: number,
+  opaleHeight: number,
+): HeightAndWidthBase {
   const southLabelHeight = diamond1.labelAt('south')?.height ?? 0;
-  const height = total.geo.height + 3 * HEXAGON_HALF_SIZE + Math.max(HEXAGON_HALF_SIZE, southLabelHeight);
-  const width = flags.hasOptionalStop
+  const height = total.geo.height + 3 * HEXAGON_HALF_SIZE + Math.max(HEXAGON_HALF_SIZE, southLabelHeight) + opaleHeight;
+  const widthBase = flags.hasOptionalStop
     ? total.geo.width + HEXAGON_HALF_SIZE + optionalStopWidth + additionalWidthFor(diamond1, optionalStopWidth)
     : total.geo.width + HEXAGON_HALF_SIZE;
+  return { height, widthBase };
+}
+
+interface ResolvedIfDownFlags {
+  readonly flags: IfDownFlags;
+  readonly hasMergeNode: boolean;
+}
+
+/** The constructor's own `flags`/`hasMergeNode` setup, split out purely to
+ *  keep that constructor's own CCN under the file's limit. */
+function resolveIfDownFlags(optionalStop: Tile | null, options: GtileIfDownOptions, conditionEndStyle: 'diamond' | 'hline'): ResolvedIfDownFlags {
+  const hasOptionalStop = optionalStop !== null;
   return {
-    left: total.geo.left,
-    width,
+    flags: { hasOptionalStop, hasTwoBranches: options.hasTwoBranches, conditionEndStyle },
+    hasMergeNode: !hasOptionalStop && options.hasTwoBranches && conditionEndStyle !== 'hline',
+  };
+}
+
+interface GeometryExtras {
+  readonly optionalStopWidth: number;
+  readonly opale: IfOwnNote | null;
+}
+
+function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags, extras: GeometryExtras): CoreGeometry {
+  const { optionalStopWidth, opale } = extras;
+  const total = computeAlignedTotal(diamond1, main, flags);
+  const d2 = diamond2Geo(flags);
+  const { supp, left } = applyOpaleToLeft(diamond1, total.geo.left, opale?.box.width ?? 0);
+  const { height, widthBase } = computeHeightAndWidthBase(diamond1, total, flags, optionalStopWidth, opale?.box.height ?? 0);
+  return {
+    left,
+    width: widthBase + supp,
     height,
     d1Height: total.d1Height,
     d2,
@@ -246,6 +306,13 @@ interface GtileIfDownOptions {
   readonly hasTwoBranches: boolean;
   readonly useElse1: boolean;
   readonly conditionEndStyle?: 'diamond' | 'hline' | undefined;
+  /** `FtileIfDown.java:116-120`: `notes.size() == 1 ? createOpale(first) :
+   *  EMPTY` -- exactly one note (either side; `FtileIfDown` ignores
+   *  `NotePosition` entirely), else none at all (2+ notes are silently
+   *  dropped, not stacked). Pre-measured by the caller
+   *  (`conditional-builder.ts#buildIfDown`, via `measureIfOwnNote`).
+   *  `activity-divergence-drive-3` T2a, family IFNOTE. */
+  readonly opale?: IfOwnNote | null;
 }
 
 /**
@@ -272,7 +339,9 @@ export class GtileIfDown extends TileComposite {
   readonly conditionEndStyle: 'diamond' | 'hline';
 
   readonly left: number;
-  readonly diamond1Y = 0;
+  /** `getTranslateDiamond1`'s own `y1 = opale.height` (`FtileIfDown.java:
+   *  640-645`) -- `0` when this if owns no note (the pre-IFNOTE value). */
+  readonly diamond1Y: number;
   /** {@link MainOffsets.wrapX}/`.wrapWidth` are the WRAPPED (padded)
    *  then-frame's own local x/width -- distinct from `.mainTileX`, which
    *  also folds in the content's own offset within that frame
@@ -280,6 +349,9 @@ export class GtileIfDown extends TileComposite {
    *  term). */
   readonly offsets: MainOffsets;
   readonly stop: StopOffsets;
+  /** `null` when this if owns no note, or owns more than one (silently
+   *  dropped, `GtileIfDownOptions.opale`'s own doc). */
+  readonly opale: IfOwnNote | null;
 
   /**
    * @param diamond1 the condition hexagon, `.withSouth(mainLabel)
@@ -303,17 +375,15 @@ export class GtileIfDown extends TileComposite {
     this.useElse1 = options.useElse1;
     this.conditionEndStyle = conditionEndStyle;
     this.hasThenPointOut = mainTile.hasPointOut();
-    this.hasMergeNode = optionalStop === null && options.hasTwoBranches && conditionEndStyle !== 'hline';
-
-    const flags: IfDownFlags = {
-      hasOptionalStop: optionalStop !== null,
-      hasTwoBranches: options.hasTwoBranches,
-      conditionEndStyle,
-    };
-    const core = computeGeometry(diamond1, mainTile, flags, optionalStop?.width ?? 0);
+    const { flags, hasMergeNode } = resolveIfDownFlags(optionalStop, options, conditionEndStyle);
+    this.hasMergeNode = hasMergeNode;
+    const opale = options.opale ?? null;
+    this.opale = opale;
+    const core = computeGeometry(diamond1, mainTile, flags, { optionalStopWidth: optionalStop?.width ?? 0, opale });
     this.left = core.left;
     this.width = core.width;
     this.height = core.height;
+    this.diamond1Y = opale?.box.height ?? 0;
     this.offsets = computeOffsets(diamond1, core);
     this.stop = computeStopOffsets(diamond1, optionalStop, core);
     this.children = optionalStop !== null ? [mainTile, diamond1, optionalStop] : [mainTile, diamond1];
@@ -323,7 +393,7 @@ export class GtileIfDown extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.left, y: 0 };
+        return { x: this.left, y: this.diamond1Y };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };

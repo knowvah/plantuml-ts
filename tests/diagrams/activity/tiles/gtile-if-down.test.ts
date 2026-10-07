@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
+import type { IfOwnNote } from '../../../../src/diagrams/activity/tiles/gtile-note.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -233,5 +234,82 @@ describe('GtileIfDown — conditionEndStyle defaults to diamond when omitted', (
   it('defaults conditionEndStyle and diamond2PointInY to the pre-T1p-a values', () => {
     expect(tile.conditionEndStyle).toBe('diamond');
     expect(tile.offsets.diamond2PointInY).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// IFNOTE (mission `activity-divergence-drive-3` T2a): `FtileIfDown.java:
+// 116-120,523-529` -- this file's own former D8 placeholder ("opale ... is
+// out of scope") is now wired. Same base scenario as the file's own first
+// describe block (diamond1 24x24, mainTile 100x50, no optionalStop,
+// hasTwoBranches=true -- pre-note: left=60, width=132, height=148) so the
+// delta each note width introduces is isolated and easy to hand-verify.
+// ---------------------------------------------------------------------------
+
+function note(text: string, position: 'left' | 'right'): IfOwnNote {
+  // Mirrors `measureIfOwnNote`/`measureOpaleText`'s own formula
+  // (`Opale.java:89-96`) against this file's stub bounder (7px/char width,
+  // 14px line height, both independent of fontSize): width = text.length*7
+  // + marginX1(6) + marginX2(15); height = 14 + 2*marginY(5).
+  return { text, position, box: { width: text.length * 7 + 21, height: 14 + 10 } };
+}
+
+describe('GtileIfDown — IFNOTE, note narrower than the natural left margin (supp === 0)', () => {
+  // note.width = 1*7+21 = 28, less than geo.left (60) -> supp = 0: only
+  // height grows (opaleHeight = 24), left/width are UNCHANGED from the
+  // no-note case above.
+  const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
+  const mainTile = stubTile(100, 50);
+  const opale = note('n', 'right');
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: true, useElse1: false, opale });
+
+  it('width/left unchanged (132/60), height grows by exactly opaleHeight (148 -> 172)', () => {
+    expect(tile.width).toBe(132);
+    expect(tile.left).toBe(60);
+    expect(tile.height).toBe(172);
+  });
+
+  it('diamond1Y === opale.box.height (24), pushing diamond1 down to reserve room above it', () => {
+    expect(tile.diamond1Y).toBe(24);
+  });
+
+  it('getCoord(NORTH_HOOK).y tracks diamond1Y, not a hardcoded 0', () => {
+    expect(tile.getCoord(NORTH_HOOK)).toEqual({ x: 60, y: 24 });
+  });
+
+  it('stores the note for the walker to draw', () => {
+    expect(tile.opale).toBe(opale);
+  });
+});
+
+describe('GtileIfDown — IFNOTE, note wider than the natural left margin (supp > 0)', () => {
+  // note.width = 20*7+21 = 161, wider than geo.left (60) -> supp = 161-60
+  // = 101: width widens by supp, left becomes opaleWidth + diamond1.width/2
+  // = 161 + 12 = 173 (FtileIfDown.java:567-571's own `supp > 0` branch).
+  const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
+  const mainTile = stubTile(100, 50);
+  const opale = note('a'.repeat(20), 'left');
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: true, useElse1: false, opale });
+
+  it('left === 173, width === 233 (132 + supp 101)', () => {
+    expect(tile.left).toBe(173);
+    expect(tile.width).toBe(233);
+  });
+
+  it('diamond1X shifts right to make room: offsets.diamond1X === left - diamond1.width/2', () => {
+    expect(tile.offsets.diamond1X).toBe(173 - 12);
+  });
+});
+
+describe('GtileIfDown — IFNOTE, no note is the pre-T2a geometry exactly (opale omitted)', () => {
+  const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
+  const mainTile = stubTile(100, 50);
+  const tile = new GtileIfDown(diamond1, mainTile, null, { hasTwoBranches: true, useElse1: false });
+
+  it('opale is null; diamond1Y is 0; width/height match the no-note case', () => {
+    expect(tile.opale).toBeNull();
+    expect(tile.diamond1Y).toBe(0);
+    expect(tile.width).toBe(132);
+    expect(tile.height).toBe(148);
   });
 });
