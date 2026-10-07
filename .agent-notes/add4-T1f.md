@@ -231,3 +231,23 @@ Probe Σ: 8468 -> 8147 -> 8130. 0 risers; no other row moved.
      `tiles/gtile-diamond-inside.ts#measureLabel`).
    - Case label y is +8.03: R2, label placement after compression (`renderer.ts`, D1 of add3).
 3. **lipiki 1:** the merge hexagon is 6-point in the jar, 4-point in ours (SWITCH-GEOM).
+
+### Follow-up `3e52146f9`: multi-line `edgeLabelShape` (residual 1 closed)
+- `compress/shapes-of.ts#edgeLabelShape` boxes all N lines as one envelope, using `ifLabelShape`'s
+  convention: "first line's own ink-top to the last line's own ink-bottom (max width across lines)".
+  - Upstream: `SlotFinder.java:127-135`, `SheetBlock1.java:146-148`.
+  - Test: `shapes-of.test.ts`.
+- Fixture ws (T1a), before -> after:
+
+  | fixture | before | after |
+  |---|---|---|
+  | small-mixed | 16 | 1 |
+  | small-2line | 90 | 7 |
+  | small-3line | 95 | 10 |
+
+  small-1line (1), big-mixed (5) and one-link (69) did not change.
+- Probe Σ 8130 -> 8130; no row moved. No new census movers.
+- Gates:
+  - ratchet and harness-parity: green
+  - compress `invariant.test.ts`: green
+  - `tests/diagrams/activity`: 1258 pass
