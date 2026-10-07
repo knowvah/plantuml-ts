@@ -83,6 +83,8 @@ import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, seedOfUmlSource } from '../../../src/core/assemble-svg.js';
+import { renderSync } from '../../../src/index.js';
+import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 
 interface ResolvedThemeAndStyles {
   readonly theme: Theme;
@@ -134,6 +136,16 @@ export function renderFixtureActivity(
   measurer: StringMeasurer,
   options?: FixtureActivityOptions,
 ): string {
+  // add3-T2b (D5 EMBED): mirrors `render-fixture-class.ts`'s own call --
+  // registers the real recursive nested-diagram renderer
+  // (`EmbeddedDiagram.ts`'s injected seam, `core/nested-diagram-registry
+  // .ts`) before rendering, matching `src/index.ts:383`'s production
+  // registration. Without it, a `{{ }}` action label's `EmbeddedDiagram
+  // .drawU` (reached once action text draws through the real creole
+  // Sheet, `activity-creole-sheet.ts#renderActionLabel`) falls back to
+  // its own "no renderer registered" error path -- the harness gap, not
+  // a defect in this port's own embed handling.
+  registerNestedDiagramRenderers((source) => renderSync(source, { measurer }));
   const blocks = buildBlockUmls(markup, options);
   const first = blocks[0];
   if (first === undefined) throw new Error('no diagram block found');
