@@ -380,17 +380,23 @@ interface OneCaseArgs {
   readonly label: string | undefined;
 }
 
-/** One case's own box/body walk + (single-case switch only) its
- *  case-to-merge edge -- extracted out of {@link walkSwitchCases}'s first
- *  pass purely to keep that function's NLOC under the complexity hook's
- *  cap. The many-case case-to-merge edges are pushed once for the whole
- *  row, by {@link pushCaseToMergeEdges}, not per case. */
+/** One case's own box/body walk -- extracted out of {@link walkSwitchCases}'s
+ *  first pass purely to keep that function's NLOC under the complexity
+ *  hook's cap. Case-to-merge edges are pushed after every in-edge, by
+ *  {@link pushMergeEdges}. */
 function walkOneCaseBody(step: SwitchCaseStep, args: OneCaseArgs, out: Out): void {
-  const { c, cPos } = args;
+  const { c } = args;
   const duplicatePerLane = step.isBigDiamond && !(unwrapSingleChildTopDown(c) instanceof TileComposite);
   walkSwitchCaseBody(step, { ...args, duplicatePerLane }, out);
+}
 
-  if (step.mergeDiamond === null || step.mPos === null || step.totalCases !== 1) return;
+/** The case-to-merge edges, pushed AFTER the diamond1-in edges. One case:
+ *  `FtileSwitchWithOneLink#addLinks` adds `ConnectionVerticalTop` (the
+ *  labelled in-link) and only then `ConnectionVerticalBottom`
+ *  (`FtileSwitchWithOneLink.java:134-143`). Many cases:
+ *  {@link pushCaseToMergeEdges}. */
+function pushMergeEdges(step: SwitchCaseStep, cases: readonly Tile[], positions: readonly GPoint[], out: Out): void {
+  if (step.mergeDiamond === null || step.mPos === null) return;
   const mergeStep: MergeEdgeStep = {
     diamond: step.diamond,
     dPos: step.dPos,
@@ -398,7 +404,12 @@ function walkOneCaseBody(step: SwitchCaseStep, args: OneCaseArgs, out: Out): voi
     mPos: step.mPos,
     myLane: step.myLane,
   };
-  if (c.hasPointOut()) pushOneLinkMergeEdge(mergeStep, c, cPos, out);
+  if (step.totalCases > 1) {
+    pushCaseToMergeEdges(mergeStep, cases, positions, out);
+    return;
+  }
+  const c = cases[0];
+  if (c !== undefined && c.hasPointOut()) pushOneLinkMergeEdge(mergeStep, c, positions[0]!, out);
 }
 
 /** The diamond1-in edges for every case, in `addIngoingArrows`'s own push
@@ -425,8 +436,8 @@ function pushCaseInEdges(
  *  function's NLOC under the complexity hook's cap. Three passes, each in
  *  upstream's own order (not necessarily the same order as each other):
  *  case boxes left-to-right, diamond1-in edges `first,last,interior`
- *  ({@link pushCaseInEdges}), case-to-merge edges `first,last,interior`
- *  ({@link pushCaseToMergeEdges}). */
+ *  ({@link pushCaseInEdges}), then the case-to-merge edges
+ *  ({@link pushMergeEdges}). */
 function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out: Out): void {
   const cases = tile.children.slice(1, 1 + tile.caseOffsets.length);
   const positions: GPoint[] = [];
@@ -436,16 +447,7 @@ function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out
     walkOneCaseBody(step, { i, c: cases[i]!, cPos, label: tile.caseLabels[i] }, out);
   }
   pushCaseInEdges(step, cases, positions, tile, out);
-  if (step.totalCases > 1 && step.mergeDiamond !== null && step.mPos !== null) {
-    const mergeStep: MergeEdgeStep = {
-      diamond: step.diamond,
-      dPos: step.dPos,
-      mergeDiamond: step.mergeDiamond,
-      mPos: step.mPos,
-      myLane: step.myLane,
-    };
-    pushCaseToMergeEdges(mergeStep, cases, positions, out);
-  }
+  pushMergeEdges(step, cases, positions, out);
 }
 
 export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: string | undefined, out: Out): void {

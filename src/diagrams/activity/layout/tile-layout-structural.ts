@@ -33,6 +33,7 @@ import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
+import { groupInnerInkMaxX } from './canvas-origin-group-ink.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator
@@ -372,10 +373,13 @@ function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: Stri
 
 /** `FtileGroup`'s `backColor` argument (`InstructionGroup.java`, from
  *  `CommandPartition3.java:145-147`). */
-function groupOptions(node: ActivityGroup): GtileGroupOptions {
+function groupOptions(node: ActivityGroup, body: Tile, theme: Theme): GtileGroupOptions {
   const t = node.groupType;
   const usymbol = t === 'package' || t === 'card' || t === 'rectangle' ? t : undefined;
+  // add4-T3c: `FtileGroup#getInnerMinMax` (`FtileGroup.java:150-158`).
+  const innerInkMaxX = groupInnerInkMaxX(body, theme);
   return {
+    ...(innerInkMaxX !== undefined ? { innerInkMaxX } : {}),
     ...(node.backColor !== undefined ? { backColor: node.backColor } : {}),
     ...(usymbol !== undefined ? { usymbol } : {}),
   };
@@ -392,7 +396,7 @@ export function tileGroup(
   const body = wrapGroupNote(rawBody, node.note, bounder, theme);
   const tile =
     node.groupType === 'group'
-      ? new GtileGroup(node.title, body, bounder, theme, groupOptions(node))
-      : new GtilePartition(node.title, body, bounder, theme, groupOptions(node));
+      ? new GtileGroup(node.title, body, bounder, theme, groupOptions(node, body, theme))
+      : new GtilePartition(node.title, body, bounder, theme, groupOptions(node, body, theme));
   return withSwimlane(tile, node.swimlane);
 }

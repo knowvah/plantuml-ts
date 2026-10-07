@@ -1,0 +1,6 @@
+@startuml
+title A title wider than the box
+:top
+----
+bottom;
+@enduml

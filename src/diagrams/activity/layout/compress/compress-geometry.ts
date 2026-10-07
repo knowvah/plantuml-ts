@@ -24,6 +24,7 @@ import { shapesOf } from './shapes-of.js';
 import { collectSlots } from './slot-finder.js';
 import { CompressionTransform, type PiecewiseAffineTransform } from './compression-transform.js';
 import { arrowDirection } from '../../arrows-regular.js';
+import { labelAnchors, transformAnchors, withLabelDeltas } from './edge-label-anchor.js';
 
 export interface CompressInput {
   nodes: ActivityNodeGeo[];
@@ -63,7 +64,15 @@ export interface CompressResult {
  * OCCUPIED for finding removable gaps, never whether a rect's own drawn
  * box gets resized once a gap through it is actually removed.
  */
-const RECT_WIDTH_KINDS = new Set(['action', 'fork-bar', 'join-bar', 'split-bar', 'split-join-bar', 'group', 'partition']);
+const RECT_WIDTH_KINDS = new Set([
+  'action',
+  'fork-bar',
+  'join-bar',
+  'split-bar',
+  'split-join-bar',
+  'group',
+  'partition',
+]);
 
 /**
  * On Y, only `action`/`fork-bar`/`join-bar` are true 2-D `URectangle`s and
@@ -176,6 +185,13 @@ function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode
 }
 
 /**
+ * SUPERSEDED by add4-T3a (`edge-label-anchor.ts`): the reading below is
+ * wrong. `Worm#getPoint` resolves a point through the Worm's own `tr` (its
+ * `move` translate, `ftile/Worm.java:65-79,326-330`), not through the
+ * compressing `UGraphic`, so the label position is computed on the RAW
+ * worm and only its `UText` draw point passes through `ct()`. Kept as the
+ * record of the earlier claim:
+ *
  * T1b (`activity-divergence-drive-3`, D1 verification): an edge LABEL's
  * position needs no anchor-carry field analogous to {@link
  * ActivityEdgeGeo.emphasizeAt}/`midArrowAt` above. `Snake#getTextBlockPosition`
@@ -270,6 +286,7 @@ function transformSwimlane(s: SwimlaneGeo, ct: PiecewiseAffineTransform): Swimla
 interface AxisResult {
   next: CompressInput;
   removed: number;
+  ct: PiecewiseAffineTransform;
 }
 
 /**
@@ -302,17 +319,26 @@ function compressAxis(input: CompressInput, mode: CompressionMode): AxisResult {
       ? { maxX: ct.transform(input.bounds.maxX), maxY: input.bounds.maxY }
       : { maxX: input.bounds.maxX, maxY: ct.transform(input.bounds.maxY) };
 
-  return { next: { ...input, nodes, edges, reservations, swimlanes, bounds }, removed };
+  return { next: { ...input, nodes, edges, reservations, swimlanes, bounds }, removed, ct };
 }
 
 /**
  * D1/D4: ON_X then ON_Y, the latter over the former's own output
- * (`ActivityDiagram3.java:209-210`). Never mutates `input`.
+ * (`ActivityDiagram3.java:209-210`). Never mutates `input`. Edge labels are
+ * anchored on the raw points and their anchor mapped through each pass's
+ * `ct` (`edge-label-anchor.ts`); the X-pass deltas are set before the Y
+ * pass so its slot finder sees the label at `(ctX(x), y)`, as the ON_Y
+ * builder's `SlotFinder` does (`CompressionXorYBuilder.java:62-68`).
  */
 export function compressGeometry(input: CompressInput): CompressResult {
   const withAnchors = { ...input, edges: withEmphasizeAnchor(input.edges) };
+  const rawLabels = labelAnchors(input.edges, input.theme);
   const x = compressAxis(withAnchors, 'x');
-  const y = compressAxis(x.next, 'y');
-  const { nodes, edges, swimlanes, reservations, bounds } = y.next;
+  const xLabels = transformAnchors(rawLabels, x.ct, 'x');
+  const xNext = { ...x.next, edges: withLabelDeltas(x.next.edges, xLabels, input.theme) };
+  const y = compressAxis(xNext, 'y');
+  const yLabels = transformAnchors(xLabels, y.ct, 'y');
+  const edges = withLabelDeltas(y.next.edges, yLabels, input.theme);
+  const { nodes, swimlanes, reservations, bounds } = y.next;
   return { nodes, edges, swimlanes, reservations: [...reservations], bounds, removed: { x: x.removed, y: y.removed } };
 }

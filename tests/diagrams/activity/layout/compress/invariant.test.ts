@@ -389,8 +389,7 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // is the jar's own geometry.
     // add4/merge-T1b: nojije-35-teta491 reached zero diffs and was pinned
     // (add4-T1b), leaving this test's baseline population; its two entries
-    // went with it.
-    'cemipu-87-dinu624 [21,24] empty×centeredText',
+    // went with it. add4/merge-T3c: cemipu-87-dinu624 likewise (add4-T3c).
   ].sort();
 
   /**

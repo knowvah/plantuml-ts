@@ -10,14 +10,13 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { renderNode } from './activity-renderer-shapes.js';
 import { orderedLine } from './activity-renderer-terminals.js';
 import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
-import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { measureLineWidth } from './activity-text-placement.js';
-import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
+import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
@@ -81,9 +80,9 @@ function arrowTip(
 }
 
 /**
- * {@link renderEdgeLabel}'s draw, positioned by {@link getTextBlockPosition} (T1b's port of `Snake
- * #getTextBlockPosition`, `Snake.java:244-270`); split into its own
- * function to keep `renderEdgeLabel` under this file's NLOC limit.
+ * An edge label, drawn where `compress/edge-label-anchor.ts#edgeLabelLayout`
+ * places it: `Snake#getTextBlockPosition` (`Snake.java:244-270`) on the raw
+ * worm, mapped through compression (add4-T3a).
  * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
  * activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
  * the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
@@ -108,38 +107,26 @@ function arrowTip(
  * unchanged, still `drawActivityText`, to keep its existing
  * `textLength` emission byte-identical.
  */
-function renderEdgeLabelAligned(
-  label: string,
-  points: ReadonlyArray<{ x: number; y: number }>,
-  labelAlign: SnakeTextAlign,
-  color: string | undefined,
-  theme: Theme,
-): string {
-  const size = activityFontSize(theme, 'arrow');
-  // `TextBlock.calculateDimension` -- single-line width/height, the SAME
-  // measurer-blind estimate `activity-text-placement.ts#measureLineWidth`
-  // already gives every other render-time label (that module's own doc);
-  // height is `WidthTableMeasurer#measure`'s own `font.size` convention
-  // (`core/measurer.ts:189`).
-  //
-  // add4-T1f (SWITCH-NL): a `\n` label is a multi-line Sheet
-  // (`Branch#getTextBlock` -> `Display#create0`, `Branch.java:247-257`,
-  // `HorizontalAlignment.LEFT`): `SheetBlock1#initMap` stacks each stripe
-  // `y += height` (`SheetBlock1.java:146-148`), one line = the bounder's
-  // height = the font size (`StringBounderFromWidthTable.java:69-71`, 11 px
-  // for the activity arrow font). Width = the widest line; one `<text>` per
-  // line, all at the block's own left x.
-  const lines = label.split('\n');
-  const width = Math.max(...lines.map((l) => measureLineWidth(theme, size, l)));
-  const position = getTextBlockPosition(points, { width, height: size * lines.length }, labelAlign);
-  const baselineY = centeredFirstBaselineY(position.y + (size * lines.length) / 2, size, lines.length);
+function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
+  // add4-T3a (R2): placement lives in `compress/edge-label-anchor.ts`
+  // (raw-worm position mapped through compression), shared with the slot
+  // finder. `TextBlock.calculateDimension`: width = the widest line
+  // (`activity-text-placement.ts#measureLineWidth`), one line = the font
+  // size (`StringBounderFromWidthTable.java:69-71`). add4-T1f (SWITCH-NL):
+  // a `\n` label is a LEFT Sheet (`Branch.java:247-257`), one `<text>` per
+  // stripe, all at the block's own left x (`SheetBlock1.java:146-148`).
+  const layout = edgeLabelLayout(edge, theme);
+  if (layout === undefined) return '';
+  const { lines, size, width, x, baselineY } = layout;
+  const label = lines.join('\n');
+  const color = edge.color;
   const fill = activityFontColor(theme, 'arrow');
   if (lines.length > 1 && color === undefined) {
     const style = { fill, fontFamily: theme.fontFamily, fontSize: size };
-    return drawActivityTextLines(lines, position.x, baselineY, size, style);
+    return drawActivityTextLines([...lines], x, baselineY, size, style);
   }
   if (color !== undefined) {
-    return text(position.x, baselineY, label, {
+    return text(x, baselineY, label, {
       fontFamily: theme.fontFamily,
       fontSize: size,
       fill,
@@ -147,21 +134,11 @@ function renderEdgeLabelAligned(
       textBackColor: color,
     });
   }
-  return drawActivityText(position.x, baselineY, label, {
+  return drawActivityText(x, baselineY, label, {
     fill,
     fontFamily: theme.fontFamily,
     fontSize: size,
   });
-}
-
-function renderEdgeLabel(
-  label: string,
-  points: ReadonlyArray<{ x: number; y: number }>,
-  labelAlign: SnakeTextAlign | undefined,
-  color: string | undefined,
-  theme: Theme,
-): string {
-  return renderEdgeLabelAligned(label, points, labelAlign ?? DEFAULT_LABEL_ALIGN, color, theme); // AbstractFtile.java:108-110
 }
 
 /**
@@ -328,10 +305,7 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   //
   // Optional edge label, positioned by `Snake#getTextBlockPosition`
   // (`renderEdgeLabel`'s own doc comment).
-  let labelEl = '';
-  if (edge.label !== undefined) {
-    labelEl = renderEdgeLabel(edge.label, pts, edge.labelAlign, edge.color, theme);
-  }
+  const labelEl = renderEdgeLabel(edge, theme);
 
   return segments + arrow + labelEl;
 }

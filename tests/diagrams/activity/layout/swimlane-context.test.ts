@@ -67,7 +67,7 @@ describe('measureLaneExtents', () => {
   });
 
   // T3i: a lane's own `getMinMax()` is measured through the SAME
-  // `LimitFinder` the whole-canvas scan uses (`canvas-origin.ts#fudgeX`'s
+  // `LimitFinder` the whole-canvas scan uses (`canvas-origin-fudge.ts#fudgeX`'s
   // own doc), so a boundary item's per-shape fudge shifts the lane's own
   // content extent -- `jakuco-69-dari135`'s lane content landed exactly
   // `RECT_FUDGE.near` (1) too far right before this was ported.
@@ -213,5 +213,21 @@ describe('no swimlanes / empty diagram', () => {
     const widths = computeLaneWidths(extents, new Map(), 0);
     expect(extents.size).toBe(0);
     expect(widths.size).toBe(0);
+  });
+});
+
+describe('measureLaneExtents -- node-aware fudge (add4-T3c)', () => {
+  it('a package is its polygon (+-10, LimitFinder.java:171-177), a card and a ruled action end on their ULine', () => {
+    const items = [
+      { swimlane: 'P', kind: 'partition', usymbol: 'package' as const, x: 100, width: 50 },
+      { swimlane: 'C', kind: 'partition', usymbol: 'card' as const, x: 100, width: 50 },
+      { swimlane: 'R', kind: 'action', label: 'a\n----\nb', x: 100, width: 50 },
+      { swimlane: 'Q', kind: 'partition', x: 100, width: 50 },
+    ];
+    const extents = measureLaneExtents(items, [], ['P', 'C', 'R', 'Q']);
+    expect(extents.get('P')).toEqual({ minX: 90, maxX: 160 });
+    expect(extents.get('C')).toEqual({ minX: 99, maxX: 150 });
+    expect(extents.get('R')).toEqual({ minX: 99, maxX: 150 });
+    expect(extents.get('Q')).toEqual({ minX: 99, maxX: 149 });
   });
 });
