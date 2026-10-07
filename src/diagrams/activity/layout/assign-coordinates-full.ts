@@ -28,6 +28,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { walkTile } from './tile-coordinates.js';
 import type { Out } from './tile-coordinates.js';
 import { placeSwimlanes, resolveSwimlaneVertical, computeSwimlaneChrome } from './swimlane-placement.js';
+import { SWIMLANE_BAND_INSET_X } from './swimlane-chrome.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 import { compressGeometry } from './compress/compress-geometry.js';
 import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
@@ -290,7 +291,11 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
-  const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
+  // `drawTitlesBackground`'s `UTranslate.dx(5)` from the block origin, which
+  // is `baseX` here (`Swimlanes.java:366`; `computeLaneOrigins` seeds its
+  // `xpos = 0` at `baseX`).
+  const bandX = baseX + SWIMLANE_BAND_INSET_X;
+  const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY, bandX);
   const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
 
   if (!compress) {

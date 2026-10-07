@@ -65,8 +65,8 @@
 
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { computeSwimlaneChrome, TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
-import type { SwimlaneChrome } from './swimlane-placement.js';
+import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
+import { bandReservationX, computeSwimlaneChrome, type SwimlaneChrome } from './swimlane-chrome.js';
 import {
   CANVAS_ORIGIN_SHIFT,
   CANVAS_PADDING_TOTAL,
@@ -76,7 +76,12 @@ import {
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
-import { SPLIT_LINE_KINDS, extendForEdgeLabelText, extendForIfLabelText, extendForLaneDivider } from './canvas-origin-text-ink.js';
+import {
+  SPLIT_LINE_KINDS,
+  extendForEdgeLabelText,
+  extendForIfLabelText,
+  extendForLaneDivider,
+} from './canvas-origin-text-ink.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
@@ -482,12 +487,8 @@ export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
     contentMaxY: bounds.maxY,
   });
   const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin);
-  const chrome = computeSwimlaneChrome(
-    shifted.swimlanes,
-    baseY + origin.shiftY,
-    titlesHeight,
-    bounds.maxY + origin.shiftY,
-  );
+  const [y1, y2] = [baseY + origin.shiftY, bounds.maxY + origin.shiftY];
+  const chrome = computeSwimlaneChrome(shifted.swimlanes, y1, titlesHeight, y2, bandReservationX(shifted.reservations));
   return {
     totalWidth: origin.totalWidth,
     totalHeight: origin.totalHeight,

@@ -26,13 +26,7 @@
 
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  SwimlaneBandGeo,
-  SwimlaneDividerY,
-  SwimlaneGeo,
-} from '../activity-geometry.types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import { resolveInlineLinks } from '../../../core/url/inline-links.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
@@ -108,8 +102,13 @@ export interface EdgeMeta {
  * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
  * the same as `'default'` via its `default:` branch. */
 export type EdgeShape =
-  | 'parallel-in' | 'parallel-out' | 'parallel-in-split' | 'parallel-out-split'
-  | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
+  | 'parallel-in'
+  | 'parallel-out'
+  | 'parallel-in-split'
+  | 'parallel-out-split'
+  | 'if-vertical-in'
+  | 'default'
+  | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -160,54 +159,11 @@ export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 export { measureSwimlaneTitlesHeight, resolveSwimlaneVertical } from './swimlane-vertical.js';
 export type { SwimlaneVertical } from './swimlane-vertical.js';
 
-export interface SwimlaneChrome {
-  swimlaneBand: SwimlaneBandGeo;
-  swimlaneDividerY: SwimlaneDividerY;
-}
-
-/**
- * Derives the band rect and the divider Y-range from the already-placed
- * lane geometry ({@link placeSwimlanes}'s own `swimlanes` output) plus the
- * block's own top (`baseY`) and content bottom (`contentBottomY` -- the
- * real content's own bottom edge, `bounds.maxY` shifted by the SAME
- * `canvas-origin.ts#computeCanvasOrigin` translate `baseY` itself already
- * carries; T1a (D2) replaced the flat `totalHeight - LAYOUT_MARGIN` this
- * used to be with that dynamic shift -- see `assign-coordinates-full.ts
- * #finalizeGeometry`, the one caller).
- *
- * Band x/width: `Swimlanes#drawTitlesBackground` (`:358-367`) draws at
- * `ug.apply(dx(5))` with `width = swimlanesSpecial().last().getTranslate()
- * .getDx() - 2*5 - 1`. The trailing special lane's translate is the LAST
- * divider's own x plus `halfMissingSpace(n+1, ...)`, which is always the
- * fixed outer-edge padding of 5 (`swimlane-context.ts#halfMissingSpace`,
- * the `i > lanes.length` branch) -- the SAME fixed 5 the FIRST divider's
- * own `halfMissingSpace(0, ...)` returns. Those two `+5`/`-5` terms
- * cancel, reducing the band to `x = lanes[0].x`, `width = Σ(lane.width) -
- * 1`. Verified against the pinned jar's `pakema-21-xema183`: dividers at
- * 20, 58.338, 369.275 -> Σwidth = 349.275; band x = 20 (== first divider),
- * band width = 348.275 (== Σ - 1) -- both exact matches.
- *
- * Divider Y-range: `LaneDivider#drawU` draws one full-height `ULine` per
- * boundary, `height = dimensionFull.getHeight() + titleHeightTranslate
- * .getDy()` (`Swimlanes.java:423-424`) -- from the block's own top to its
- * content bottom.
- */
-export function computeSwimlaneChrome(
-  swimlanes: readonly SwimlaneGeo[],
-  baseY: number,
-  titlesHeight: number,
-  contentBottomY: number,
-): Partial<SwimlaneChrome> {
-  // Same `size() > 1` guard as {@link resolveSwimlaneVertical}: a single
-  // lane draws no chrome, so there is nothing to derive.
-  if (swimlanes.length <= 1) return {};
-  const first = swimlanes[0]!;
-  const widthSum = swimlanes.reduce((acc, s) => acc + s.width, 0);
-  return {
-    swimlaneBand: { x: first.x, y: baseY, width: widthSum - 1, height: titlesHeight },
-    swimlaneDividerY: { y1: baseY, y2: contentBottomY },
-  };
-}
+// `SwimlaneChrome`/`computeSwimlaneChrome` moved to `swimlane-chrome.ts`
+// (add4-T1g, this file's own 500-line hook); re-exported so existing
+// importers are untouched.
+export { computeSwimlaneChrome } from './swimlane-chrome.js';
+export type { SwimlaneChrome } from './swimlane-chrome.js';
 
 // `LaneOrigin`/`computeLaneOrigins` and its supporting helpers moved to
 // `swimlane-lane-origins.ts` (this file's own 500-line hook, mission
@@ -457,7 +413,7 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
  * then skips `drawWhenSwimlanes` too, so a one-lane diagram draws through
  * the plain `full.drawU(ug)` branch with no swimlane translate applied at
  * all -- the SAME `<= 1` convention `resolveSwimlaneVertical`/
- * `computeSwimlaneChrome` (this file) already use. Before this fix, a
+ * `computeSwimlaneChrome` (`swimlane-chrome.ts`) already use. Before this fix, a
  * single named lane still ran the full origin loop, giving it a non-zero
  * `delta` no upstream diagram ever gets.
  */
