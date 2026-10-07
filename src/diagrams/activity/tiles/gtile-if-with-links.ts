@@ -32,18 +32,14 @@ export interface IfWithLinksBranch {
 interface PaddedWidth {
   /** The branch's own effective width after both wraps. */
   readonly outer: number;
-  /** How far the branch's own (unwrapped) content is offset from the
-   *  padded box's left edge. */
+  /** Offset of the unwrapped content from the padded box's left edge. */
   readonly contentDx: number;
-  /** The padded box's own `left` -- the branch's OWN `left`
-   *  (`getPoint2`/`FtileMarged`'s `orig.left + margin1`), NOT `outer / 2`:
-   *  a branch whose own content is off-centre (e.g. a nested `if`) shifts
-   *  through both wraps unchanged in kind, only translated.
+  /** The padded box's `left` -- the branch's OWN `left` translated
+   *  (`orig.left + margin1`), NOT `outer / 2` (off-centre nested ifs).
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMinWidthCentered.java:99-106
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileMarged.java:93-97 */
   readonly paddedLeft: number;
-  /** `outer - paddedLeft` -- the padded box's own `width - left`, the
-   *  Java's `(dimN.getWidth() - dimN.getLeft())` term. */
+  /** `outer - paddedLeft`: Java's `dimN.getWidth() - dimN.getLeft()`. */
   readonly paddedRight: number;
 }
 
@@ -76,12 +72,9 @@ function appendBottomGeo(a: AlignedGeo, b: AlignedGeo): AlignedGeo {
   return { left, width, height: a.height + b.height };
 }
 
-/** Flags {@link mergeGeo}/{@link computeNudeAndMerge}/{@link
- *  computeCoreGeometry} all need, bundled under the file's 5-param limit.
- *  `xDeltaNote`/`yDeltaNote`/`suppWidthNode` are `FtileIfNude.java:58-60`'s
- *  own IFNOTE fields, computed once by `gtile-if-with-links-notes.ts
- *  #computeIfOwnNoteGeometry`; exported so that module can build its own
- *  trial values of this shape. */
+/** Flags the geometry helpers share (5-param limit). The note deltas are
+ *  `FtileIfNude.java:58-60`'s IFNOTE fields (`gtile-if-with-links-notes.ts`
+ *  builds trial values of this shape). */
 export interface IfLinksFlags {
   readonly hasTwoBranches: boolean;
   /** `createWithLinks`'s own `getShape2(branch1, branch2, false)`
@@ -94,14 +87,25 @@ export interface IfLinksFlags {
   readonly yDeltaNote: number;
   /** How far the RIGHT note's own width overhangs the baseline right edge. */
   readonly suppWidthNode: number;
+  /** {@link ydeltaForLabels}. */
+  readonly ydeltaForLabels: number;
 }
 
-/**
- * `getShape2`'s `hasTwoBranches()` branch: a real 24x24 rhombus, or the
- * invisible placeholder -- EXCEPT `conditionEndStyle === 'hline'` (T1p-a),
- * which takes `getShape2`'s own early return (`:287-288`, BEFORE the
- * `hasTwoBranches()` check) regardless of `hasTwoBranches`: `FtileEmpty(0,
- * hexagonHalfSize)`, twice the plain placeholder's height.
+/** `FtileIfWithLinks#getYdeltaForLabels`: diamond2's west/east height when
+ *  it is an `FtileDiamond` (else `FtileEmpty`, 0). Its `tbout`s are
+ *  `Display.NULL` (non-null) -> an empty Sheet in a padded `SheetBlock1`,
+ *  `2 * padding` tall (`SheetBlock1.java:196-199`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:83-88
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:292-303
+ * @see net/sourceforge/plantuml/activitydiagram3/LinkRendering.java:49-53 */
+function ydeltaForLabels(hasTwoBranches: boolean, style: 'diamond' | 'hline', padding: number): number {
+  if (style === 'hline' || !hasTwoBranches) return 0;
+  return 2 * padding;
+}
+
+/** `getShape2`: a 24x24 rhombus when `hasTwoBranches()`, else the
+ *  placeholder -- except `hline` (T1p-a), whose early return (`:287-288`)
+ *  is always `FtileEmpty(0, hexagonHalfSize)`.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:285-311
  */
 function mergeGeo(flags: IfLinksFlags): AlignedGeo {
@@ -122,15 +126,16 @@ export interface NudeAndMerge {
   readonly merge: AlignedGeo;
 }
 
-/** `d1.appendBottom(nude).appendBottom(d2)`, split out of {@link
- *  computeCoreGeometry} for NLOC. Exported: `gtile-if-with-links-notes.ts
- *  #computeIfOwnNoteGeometry` also calls this with TRIAL
- *  `xDeltaNote`/`suppWidthNode` to read `diamond1`'s baseline x and the
- *  composite's baseline width, mirroring `getTranslateDiamond1().getDx()`'s
- *  own recompute-after-each-note semantics (`FtileIfWithDiamonds.java:
- *  88,100-102`, `clearCacheDimensionInternal()` at `:108`).
+/** `d1.appendBottom(nude).appendBottom(d2)`. Exported: `gtile-if-with-
+ *  links-notes.ts` calls it with TRIAL note deltas, mirroring the
+ *  recompute-after-each-note (`FtileIfWithDiamonds.java:88,100-102,108`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:183-186 */
-export function computeNudeAndMerge(diamond1: DiamondConditionTile, b1: BranchGeo, b2: BranchGeo, flags: IfLinksFlags): NudeAndMerge {
+export function computeNudeAndMerge(
+  diamond1: DiamondConditionTile,
+  b1: BranchGeo,
+  b2: BranchGeo,
+  flags: IfLinksFlags,
+): NudeAndMerge {
   const diamondLeft = diamond1.getCoord(SOUTH_HOOK).x;
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const diamondWidth = diamond1.width;
@@ -182,17 +187,16 @@ function computeCoreGeometry(
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const { geoTotal, merge } = computeNudeAndMerge(diamond1, b1, b2, flags);
 
-  // `getYdelta1a`/`getYdelta1b` (`FtileIfWithDiamonds.java:156-166`) --
-  // UNAFFECTED by `conditionEndStyle` (the shared base class has no such
-  // field; only `diamond2`'s own geometry, folded into `merge` above,
-  // differs for `hline`).
+  // `getYdelta1a/1b` (`FtileIfWithDiamonds.java:156-166`), independent of
+  // `conditionEndStyle` (only diamond2's geometry, in `merge`, differs).
   const ydelta1a = laneCount > 1 ? 20 : 10;
   const ydelta1b = laneCount > 1 ? 10 : flags.hasTwoBranches ? 6 : 0;
 
   return {
     totalLeft: geoTotal.left,
     totalWidth: geoTotal.width,
-    totalHeight: geoTotal.height + ydelta1a + ydelta1b,
+    // `+ getYdeltaForLabels` (`FtileIfWithDiamonds.java:187-190`).
+    totalHeight: geoTotal.height + ydelta1a + ydelta1b + flags.ydeltaForLabels,
     diamond1X0: geoTotal.left - diamondLeft,
     // `getTranslateDiamond1`'s own `y1=yDeltaNote` (`FtileIfWithDiamonds
     // .java:235`) -- room made at the composite's own top for the note.
@@ -237,13 +241,9 @@ function computeLabelMargins(diamond1: DiamondConditionTile, core: CoreGeometry)
   return { diff1, diff2, suppHeight };
 }
 
-/** Every field {@link GtileIfWithLinks}'s own constructor derives from
- *  `core`/`margins` -- split into a pure function (not inlined in the
- *  constructor) so T1p-a's new `conditionEndStyle` param did not push the
- *  constructor's own NLOC over the file's limit; applied via
- *  `Object.assign` (a plain object of `readonly`-named fields assigns onto
- *  the instance's own `readonly` properties without TS complaint, since
- *  `Object.assign`'s typing does not special-case `readonly`). */
+/** Every field {@link GtileIfWithLinks}'s constructor derives from
+ *  `core`/`margins`, computed by a pure function (NLOC) and applied via
+ *  `Object.assign`. */
 interface Placement {
   readonly width: number;
   readonly height: number;
@@ -266,7 +266,13 @@ interface Placement {
   readonly mergeY: number;
 }
 
-function computePlacement(b1: BranchGeo, b2: BranchGeo, core: CoreGeometry, margins: LabelMargins, flags: IfLinksFlags): Placement {
+function computePlacement(
+  b1: BranchGeo,
+  b2: BranchGeo,
+  core: CoreGeometry,
+  margins: LabelMargins,
+  flags: IfLinksFlags,
+): Placement {
   return {
     width: core.totalWidth + margins.diff1 + margins.diff2,
     height: core.totalHeight + margins.suppHeight,
@@ -298,12 +304,9 @@ interface GtileIfWithLinksFields extends Placement {
   readonly opaleRight: IfOwnNote | null;
 }
 
-/** {@link GtileIfWithLinks.create}'s own trailing options bag -- bundled
- *  under the file's 5-param limit, same convention `GtileIfDown`'s own
- *  `GtileIfDownOptions` uses for its `opale`. `notes` are PRE-MEASURED by
- *  the caller (`gtile-note.ts#measureIfOwnNote`), same as
- *  `conditionEndStyle`'s own convention -- this module stays free of
- *  `StringBounder`/`Theme`. */
+/** {@link GtileIfWithLinks.create}'s options bag (5-param limit). Every
+ *  value is pre-resolved by the caller (`notes` via `gtile-note.ts
+ *  #measureIfOwnNote`), so this module stays free of `StringBounder`/`Theme`. */
 export interface IfWithLinksCreateOptions {
   /** `skinparam ConditionEndStyle` -- default `'diamond'`
    *  (`SkinParam.java:1007-1013`). */
@@ -311,11 +314,11 @@ export interface IfWithLinksCreateOptions {
   /** `ActivityIf.notes` (T2a's capture), pre-measured.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:79-111 */
   readonly notes?: readonly IfOwnNote[];
+  /** `SkinParam#getPadding` (`SkinParam.java:1147-1150`); default 0. */
+  readonly padding?: number | undefined;
 }
 
-/** Both branches' own padded geometry plus their raw `hasPointOut` --
- *  split out of {@link GtileIfWithLinks.create} purely to keep that
- *  function's own NLOC under the file's limit. */
+/** Both branches' padded geometry plus raw `hasPointOut` (NLOC split). */
 interface BranchGeos {
   readonly b1: BranchGeo;
   readonly b2: BranchGeo;
@@ -337,39 +340,42 @@ interface ResolvedPlacement {
   readonly noteGeo: IfOwnNoteGeometry;
 }
 
-/** The note-geometry pre-pass (`computeIfOwnNoteGeometry`) composed with
- *  `computeCoreGeometry`/`computeLabelMargins`/`computePlacement` -- split
- *  out of {@link GtileIfWithLinks.create} purely to keep that function's
- *  own NLOC under the file's limit. */
+/** Note pre-pass (`computeIfOwnNoteGeometry`) then core geometry, label
+ *  margins and placement (NLOC split out of {@link GtileIfWithLinks.create}). */
 function resolvePlacement(
   diamond1: DiamondConditionTile,
   geos: BranchGeos,
   laneCount: number,
-  style: 'diamond' | 'hline',
-  notes: readonly IfOwnNote[],
+  options: IfWithLinksCreateOptions,
 ): ResolvedPlacement {
+  const style = options.conditionEndStyle ?? 'diamond';
+  const hasTwoBranches = geos.hasPointOut1 && geos.hasPointOut2;
   const baseFlags: IfLinksFlags = {
-    hasTwoBranches: geos.hasPointOut1 && geos.hasPointOut2,
+    hasTwoBranches,
     conditionEndStyle: style,
     xDeltaNote: 0,
     yDeltaNote: 0,
     suppWidthNode: 0,
+    ydeltaForLabels: ydeltaForLabels(hasTwoBranches, style, options.padding ?? 0),
   };
-  const noteGeo = computeIfOwnNoteGeometry(notes, diamond1, geos.b1, geos.b2, baseFlags);
-  const flags: IfLinksFlags = { ...baseFlags, xDeltaNote: noteGeo.xDeltaNote, yDeltaNote: noteGeo.yDeltaNote, suppWidthNode: noteGeo.suppWidthNode };
+  const noteGeo = computeIfOwnNoteGeometry(options.notes ?? [], diamond1, geos.b1, geos.b2, baseFlags);
+  const flags: IfLinksFlags = {
+    ...baseFlags,
+    xDeltaNote: noteGeo.xDeltaNote,
+    yDeltaNote: noteGeo.yDeltaNote,
+    suppWidthNode: noteGeo.suppWidthNode,
+  };
   const core = computeCoreGeometry(diamond1, geos.b1, geos.b2, flags, laneCount);
   const margins = computeLabelMargins(diamond1, core);
   return { placement: computePlacement(geos.b1, geos.b2, core, margins, flags), noteGeo };
 }
 
 /**
- * `FtileIfWithLinks`/`FtileIfWithDiamonds`: a hexagon condition, two
- * branches wrapped in `FtileMinWidthCentered(_, 30)` +
- * `addHorizontalMargin(_, 10)`, and a merge rhombus reached only when both
- * branches have a point out. Geometry only -- `layout/walk-if-with-links.ts`
- * emits the nodes and the four `addLinks` connectors from these fields.
- * Construct via {@link GtileIfWithLinks.create}, not `new` (T1p-a: the
- * constructor itself is a dumb field-assignment sink -- see its own doc).
+ * `FtileIfWithLinks`/`FtileIfWithDiamonds`: hexagon, two branches wrapped in
+ * `FtileMinWidthCentered(_, 30)` + `addHorizontalMargin(_, 10)`, and a merge
+ * rhombus when both branches have a point out. Geometry only --
+ * `layout/walk-if-with-links.ts` emits nodes and the four `addLinks`
+ * connectors. Construct via {@link GtileIfWithLinks.create}.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/ConditionalBuilder.java:213-232
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java
  */
@@ -405,13 +411,8 @@ export class GtileIfWithLinks extends TileComposite {
   readonly opaleLeft: IfOwnNote | null;
   readonly opaleRight: IfOwnNote | null;
 
-  /**
-   * All computation lives in {@link GtileIfWithLinks.create} (a static
-   * factory, T1p-a): this constructor does nothing but field assignment, so
-   * that a 5th constructor param (`conditionEndStyle`) forcing a multi-line
-   * signature never pushes an arithmetic-heavy function over the file's
-   * NLOC limit.
-   */
+  /** Field assignment only; all computation is in {@link
+   *  GtileIfWithLinks.create} (T1p-a, keeps NLOC under the limit). */
   private constructor(f: GtileIfWithLinksFields) {
     super();
     this.diamond1 = f.diamond1;
@@ -450,7 +451,7 @@ export class GtileIfWithLinks extends TileComposite {
   ): GtileIfWithLinks {
     const style = options?.conditionEndStyle ?? 'diamond';
     const geos = buildBranchGeos(branch1, branch2);
-    const { placement, noteGeo } = resolvePlacement(diamond1, geos, laneCount, style, options?.notes ?? []);
+    const { placement, noteGeo } = resolvePlacement(diamond1, geos, laneCount, options ?? {});
     return new GtileIfWithLinks({
       diamond1,
       tile1: branch1.tile,
@@ -489,10 +490,7 @@ export class GtileIfWithLinks extends TileComposite {
     }
   }
 
-  /**
-   * `FtileIfNude#calculateDimensionFtile` (unoverridden by
-   * `FtileIfWithDiamonds`): the OR of the two branches, never diamond2's
-   * own state.
+  /** `FtileIfNude#calculateDimensionFtile`: the OR of the two branches.
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfNude.java:132-138
    */
   hasPointOut(): boolean {
