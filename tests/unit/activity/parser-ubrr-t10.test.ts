@@ -449,6 +449,41 @@ describe('M6 — CommandPartition3 (tuvigo-52-redo102 shape)', () => {
     expect(node.body[0]?.kind).toBe('repeat');
   });
 
+  // add4-T2b (PART-COLOR): `CommandPartition3.java:71-87,143-147`.
+  it('BACK1: a colour before the name is the backColor, not title text (tetako)', () => {
+    const node = firstNode(parse(['partition #LightSkyBlue title1 {', ':foo2;', '}'])) as ActivityGroup;
+    expect(node.title).toBe('title1');
+    expect(node.backColor).toBe('#LightSkyBlue');
+    expect(node.hasBracket).toBe(true);
+  });
+
+  it('BACK2: a colour after the name is the backColor (kilavo)', () => {
+    const node = firstNode(parse(['partition title2 #LightSkyBlue {', ':foo3;', '}'])) as ActivityGroup;
+    expect(node.title).toBe('title2');
+    expect(node.backColor).toBe('#LightSkyBlue');
+  });
+
+  it('a quoted name followed by BACK2 drops the quotes (xovigi)', () => {
+    const node = firstNode(parse(['partition "Exception handler" #Salmon {', ':x;', '}'])) as ActivityGroup;
+    expect(node.title).toBe('Exception handler');
+    expect(node.backColor).toBe('#Salmon');
+  });
+
+  it('BACK1 wins over BACK2, and a stereotype is captured', () => {
+    const node = firstNode(parse(['card #red Name #blue <<S>> {', ':x;', '}'])) as ActivityGroup;
+    expect(node.groupType).toBe('card');
+    expect(node.title).toBe('Name');
+    expect(node.backColor).toBe('#red');
+    expect(node.stereotype).toBe('<<S>>');
+  });
+
+  it('no colour leaves backColor absent', () => {
+    const node = firstNode(parse(['package Action {', ':x;', '}'])) as ActivityGroup;
+    expect(node.title).toBe('Action');
+    expect(node.backColor).toBeUndefined();
+    expect(node.stereotype).toBeUndefined();
+  });
+
   it('bracket-less "rectangle <$sprite{...}>" form (bezogu-47-vevu307 shape)', () => {
     const ast = parse(['rectangle <$react{scale=1}>']);
     const node = firstNode(ast) as ActivityGroup;

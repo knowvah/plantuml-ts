@@ -69,7 +69,9 @@ export function compositeTitleWidth(theme: Theme, title: string): number {
  */
 export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const strokeWidth = activityLineThickness(theme, 'composite');
-  const body = rect(node.x, node.y, node.width, node.height, { fill: 'none', stroke: '#000', strokeWidth });
+  // `FtileGroup.java:101`: the command's `#color`, else the style's
+  // `BackGroundColor` (`none` by default).
+  const body = rect(node.x, node.y, node.width, node.height, { fill: node.color ?? 'none', stroke: '#000', strokeWidth });
 
   const fontSize = activityFontSize(theme, 'composite');
   const title = node.label ?? '';

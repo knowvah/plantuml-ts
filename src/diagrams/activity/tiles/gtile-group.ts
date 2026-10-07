@@ -34,6 +34,12 @@ export function frameTitleWidth(title: string, measurer: StringMeasurer, theme: 
   return Math.max(0, ...creoleTextLines(title, font, measurer).map((line) => line.width));
 }
 
+/** `FtileGroup`'s constructor inputs beyond the title/body
+ *  (`FtileGroup.java:94`: `backColor`). */
+export interface GtileGroupOptions {
+  readonly backColor?: string;
+}
+
 export class GtileGroup extends TileComposite {
   // Widened to `string` so subclasses (e.g. GtilePartition) can override
   // with a narrower literal while remaining assignable to this base type.
@@ -48,11 +54,16 @@ export class GtileGroup extends TileComposite {
   readonly titleHeight: number;
   readonly bodyOffsetX: number;
   readonly bodyOffsetY: number;
+  /** `FtileGroup#backColor` (`FtileGroup.java:101`): the command's own
+   *  `#color` (`CommandPartition3.java:145-147`), `#` kept; `undefined`
+   *  falls through to the style's `BackGroundColor` at draw time. */
+  readonly backColor: string | undefined;
 
-  constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme) {
+  constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme, opts: GtileGroupOptions = {}) {
     super();
     this.children = [body];
     this.title = title;
+    this.backColor = opts.backColor;
     // A group/partition frame resolves `of(root, element, activityDiagram,
     // <symbol>, composite)` (`ftile/vcompact/FtileGroup.java:89-92`), and
     // `activityDiagram { composite { ... } }` (plantuml.skin:364-368)

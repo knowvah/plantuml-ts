@@ -18,6 +18,11 @@ import {
   type StopKeywords,
 } from './dispatch-support.js';
 import { parseNodes } from './node-dispatch.js';
+import { eventuallyRemoveStartingAndEndingDoubleQuote } from '../../core/url/Url.js';
+
+/** `StringUtils#eventuallyRemoveStartingAndEndingDoubleQuote(String)`'s own
+ *  format argument (`StringUtils.java:90`). */
+const NAME_STRIP_FORMAT = '"([:';
 
 /**
  * Either closer ends whichever group is open, independent of which
@@ -63,8 +68,13 @@ export function tryOpenGroup(ctx: ParseContext, idx: number, line: string): Disp
   if (m === null) return null;
   const typeRaw = m[1]!.toLowerCase();
   if (!isGroupType(typeRaw)) return null; // unreachable: the regex's own alternation is exactly GROUP_TYPES
-  const title = (m[2] ?? m[3] ?? '').trim();
-  const hasBracket = m[4] !== undefined;
+  // `eventuallyRemoveStartingAndEndingDoubleQuote(arg.get("NAME", 0))`
+  // (`CommandPartition3.java:143`; `StringUtils.java:86-91`, format `"([:`).
+  const title = eventuallyRemoveStartingAndEndingDoubleQuote(m[3] ?? '', NAME_STRIP_FORMAT) ?? '';
+  // `b1 == null ? "BACK2" : "BACK1"` (`:145-147`).
+  const backColor = m[2] ?? m[4];
+  const stereotype = m[5];
+  const hasBracket = m[6]!.length > 0;
   const openerSwimlane = swimlaneSpread(ctx);
 
   const bodyResult = parseNodes(ctx, idx + 1, GROUP_STOPS);
@@ -81,6 +91,8 @@ export function tryOpenGroup(ctx: ParseContext, idx: number, line: string): Disp
     groupType: typeRaw,
     title,
     hasBracket,
+    ...(backColor !== undefined ? { backColor } : {}),
+    ...(stereotype !== undefined ? { stereotype } : {}),
     body,
     ...(note !== undefined ? { note } : {}),
     ...openerSwimlane,

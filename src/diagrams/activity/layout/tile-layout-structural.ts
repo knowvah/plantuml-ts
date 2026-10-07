@@ -24,7 +24,7 @@ import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileMerge } from '../tiles/gtile-merge.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileSwitch } from '../tiles/gtile-switch.js';
-import { GtileGroup } from '../tiles/gtile-group.js';
+import { GtileGroup, type GtileGroupOptions } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileNote } from '../tiles/gtile-note.js';
@@ -343,6 +343,12 @@ function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: Stri
   return new GtileWithNotes(body, entries, bounder, theme);
 }
 
+/** `FtileGroup`'s `backColor` argument (`InstructionGroup.java`, from
+ *  `CommandPartition3.java:145-147`). */
+function groupOptions(node: ActivityGroup): GtileGroupOptions {
+  return node.backColor !== undefined ? { backColor: node.backColor } : {};
+}
+
 export function tileGroup(
   node: ActivityGroup,
   bounder: StringBounder,
@@ -354,7 +360,7 @@ export function tileGroup(
   const body = wrapGroupNote(rawBody, node.note, bounder, theme);
   const tile =
     node.groupType === 'group'
-      ? new GtileGroup(node.title, body, bounder, theme)
-      : new GtilePartition(node.title, body, bounder, theme);
+      ? new GtileGroup(node.title, body, bounder, theme, groupOptions(node))
+      : new GtilePartition(node.title, body, bounder, theme, groupOptions(node));
   return withSwimlane(tile, node.swimlane);
 }

@@ -92,6 +92,12 @@ describe('GtileGroup — creole title width', () => {
     const tile = new GtileGroup('[[https://google.com/ a long visible label]]', makeTile(10, 50), bounder, theme);
     expect(tile.width).toBe('a long visible label'.length * 7 + 20);
   });
+
+  it('carries the backColor option (FtileGroup.java:94,101)', () => {
+    const tile = new GtileGroup('T', makeTile(10, 50), bounder, theme, { backColor: '#Salmon' });
+    expect(tile.backColor).toBe('#Salmon');
+    expect(new GtileGroup('T', makeTile(10, 50), bounder, theme).backColor).toBeUndefined();
+  });
 });
 
 describe('GtileGroup — bodyOffsetY', () => {

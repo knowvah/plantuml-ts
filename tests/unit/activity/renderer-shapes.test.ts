@@ -889,6 +889,11 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).not.toContain(theme.colors.nodeBackground);
   });
+
+  it('partition #color fills the frame (add4-T2b, FtileGroup.java:101)', () => {
+    const node = makeNode({ kind: 'partition', x: 0, y: 0, width: 50, height: 50, color: '#LightSkyBlue' });
+    expect(renderNode(node, theme)).toContain('<rect x="0" y="0" width="50" height="50" fill="#87CEFA"');
+  });
 });
 
 // ---------------------------------------------------------------------------
