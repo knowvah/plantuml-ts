@@ -1,0 +1,14 @@
+@startuml
+|System|
+fork
+  repeat
+    :Update location to User;
+  repeat while (Approaching drop-off location?) is (not yet)
+  :Notify to user "Driver is approaching";
+fork again
+  |Driver|
+  while (On the way?)
+    :Send current location;
+  endwhile
+end fork
+@enduml

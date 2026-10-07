@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "ad64c122",
+  "measuredAgainstCommit": "c4915f83",
   "fixtures": [
     {
       "type": "activity",
@@ -1059,7 +1059,7 @@
       "slug": "bubefi-32-fike915",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "c4915f83",
       "ours": {
         "fontSize": {
           "12": 3,
@@ -1074,7 +1074,7 @@
           "12.5": 3
         },
         "textCount": 5,
-        "width": "226",
+        "width": "358",
         "height": "197"
       },
       "jar": {
@@ -4829,7 +4829,7 @@
           "12.5": 3
         },
         "textCount": 8,
-        "width": "500",
+        "width": "485",
         "height": "316"
       },
       "jar": {
@@ -4851,8 +4851,8 @@
         "width": "485",
         "height": "316"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83"
     },
     {
       "type": "activity",
@@ -10951,7 +10951,7 @@
       "slug": "podobi-57-zoso040",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "c4915f83",
       "ours": {
         "fontSize": {
           "12": 3,
@@ -10966,7 +10966,7 @@
           "12.5": 3
         },
         "textCount": 5,
-        "width": "226",
+        "width": "358",
         "height": "197"
       },
       "jar": {
@@ -11183,7 +11183,7 @@
       "slug": "pubeza-23-jaza106",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "c4915f83",
       "ours": {
         "fontSize": {
           "12": 3,
@@ -11198,7 +11198,7 @@
           "12.5": 3
         },
         "textCount": 6,
-        "width": "235",
+        "width": "262",
         "height": "279"
       },
       "jar": {

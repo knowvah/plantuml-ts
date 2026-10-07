@@ -256,11 +256,11 @@
     {
       "type": "activity",
       "slug": "bubefi-32-fike915",
-      "status": "baseline",
-      "diffCount": 37,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 37
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -850,11 +850,11 @@
     {
       "type": "activity",
       "slug": "famiki-74-fedu284",
-      "status": "baseline",
-      "diffCount": 4,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 4
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1192,11 +1192,11 @@
     {
       "type": "activity",
       "slug": "gesogi-81-xoma900",
-      "status": "baseline",
-      "weightedScore": 76,
-      "diffCount": 76,
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "c4915f83"
     },
     {
       "type": "activity",
@@ -2749,11 +2749,11 @@
     {
       "type": "activity",
       "slug": "podobi-57-zoso040",
-      "status": "baseline",
-      "diffCount": 36,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 36
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2803,11 +2803,11 @@
     {
       "type": "activity",
       "slug": "pubeza-23-jaza106",
-      "status": "baseline",
-      "diffCount": 61,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 61
+      "measuredAgainstCommit": "c4915f83",
+      "weightedScore": 0
     },
     {
       "type": "activity",
