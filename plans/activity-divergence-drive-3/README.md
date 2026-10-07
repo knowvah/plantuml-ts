@@ -104,4 +104,19 @@ verify-agent-claims-si31, conformance-harness-mirrors-index-ts.
 
 ## Status
 
-(filled by T-exit)
+**COMPLETE (2026-10-07).** D7 clauses, b0 -> final (`measurements/final.json` = b3):
+
+| Clause | Bar | Result |
+|---|---|---|
+| Ledger | every `fixtures.md` row `final` set | 125/125: 77 `pinned (add3-bN)`, 48 `open -> add4 (<mechanism>)` |
+| Gates | four green, collected = on-disk | green at every close; final collected 1055 = on-disk 1055 |
+| Conformance | 0 conformant losses, any engine | 0 (b0 -> b3, 28 engines); non-activity movers: 9 `unknown`-engine gains |
+| Rises | 0 unexplained | 0; accepted rises each mechanised (journal rows 17, 28, 48); two regressions caught by census and fixed (T2a-2, T3b-2), one riser fixed (T3j) |
+| Pins | >= 280 | **301** (224 -> 301; tmp1 retired) |
+| Σ | <= 10000 | **4413** over 48 open rows (b0 16937 over 126) |
+
+Batches: b0 16773 (tmp1 retired) -> b1 16360 -> b2 9220 -> b3w1 6710 -> b3 4413.
+Decisions flagged for review: D5 reading kept literal over T2b's proposal (row 15);
+legacy label path retired by the orchestrator (row 16); GLYPH taken in scope on user
+direction via captured jar outlines (row 32). Rule breaches by agents (Serena x4,
+git stash x3) all disclosed and verified harmless before each merge.
