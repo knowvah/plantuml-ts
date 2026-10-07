@@ -1,0 +1,11 @@
+@startuml
+start
+:before
+-- titled --
+middle
+== double ==
+after
+----
+end;
+stop
+@enduml

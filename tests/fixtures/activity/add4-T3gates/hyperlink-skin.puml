@@ -1,0 +1,11 @@
+@startuml
+skinparam hyperlinkColor red
+skinparam hyperlinkUnderline false
+skinparam svgLinkTarget _blank
+start
+:go to [[http://example.com example]] now;
+note right
+see [[http://example.org docs]]
+end note
+stop
+@enduml

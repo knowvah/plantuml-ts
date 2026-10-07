@@ -28,6 +28,15 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       else if (v === 'inside' || v === 'insidehexagon') acc.conditionStyle = 'insideHexagon';
     },
   ],
+  // add4-T3gates: `addConvert("hyperlinkColor", PName.HyperLinkColor,
+  // SName.root)` (`FromSkinparamToStyle.java:135`) -- the root `HyperLinkColor`
+  // a `<style> root { HyperLinkColor }` block also writes (`style-map-element.ts`).
+  [
+    ['hyperlinkcolor'],
+    (acc, _v, color) => {
+      (acc.elements['root'] ??= {}).hyperlinkColor = color;
+    },
+  ],
   // add2 T3e (family F): `SkinParam#useUnderlineForHyperlink()`
   // (`skin/SkinParam.java:1056-1060`): underline stays ON unless the value
   // is the case-insensitive literal "false" -- `valueIs` lower-cases

@@ -250,15 +250,34 @@ export function activityFontFamily(theme: Theme, sname: ActivitySName): string {
 }
 
 /**
- * add2 T3h (family F): `theme.hyperlinkUnderline`/`theme.svgLinkTarget` as
+ * `style.value(PName.HyperLinkColor)` (`Style.java:265`) on an activity
+ * signature (`FtileBox.java:97-99`: root/element/activityDiagram/activity):
+ * the SName's own bucket (`<style> activity { HyperLinkColor }`; omitted
+ * `sname` = root only), else the root tier `skinparam hyperlinkColor` writes (`FromSkinparamToStyle.java
+ * :135`, `SName.root`). `undefined` = `plantuml.skin:7`'s root `HyperLinkColor
+ * blue`, applied by `CommandCreoleUrl.ts#resolveHyperlinkColor`.
+ */
+export function activityHyperlinkColor(theme: Theme, sname?: ActivitySName): string | undefined {
+  const own = sname === undefined ? undefined : theme.colors.elements?.[bucketKey(sname)]?.hyperlinkColor;
+  return own ?? theme.colors.elements?.['root']?.hyperlinkColor;
+}
+
+/**
+ * add2 T3h (family F): `theme.hyperlinkUnderline`/`theme.svgLinkTarget` (and,
+ * add4-T3gates, {@link activityHyperlinkColor}) as
  * an `ActivityTextStyle`-shaped spread fragment -- `exactOptionalPropertyTypes`
  * forbids assigning an explicit `undefined` to an optional property, so a
  * caller building a style literal must OMIT the key rather than set it to
  * `undefined` (conditional spread, not a ternary-per-field).
  */
-export function linkStyleFields(theme: Theme): { hyperlinkUnderline?: boolean; svgLinkTarget?: string } {
+export function linkStyleFields(
+  theme: Theme,
+  sname?: ActivitySName,
+): { hyperlinkUnderline?: boolean; svgLinkTarget?: string; hyperlinkColor?: string } {
+  const hyperlinkColor = activityHyperlinkColor(theme, sname);
   return {
     ...(theme.hyperlinkUnderline !== undefined ? { hyperlinkUnderline: theme.hyperlinkUnderline } : {}),
     ...(theme.svgLinkTarget !== undefined ? { svgLinkTarget: theme.svgLinkTarget } : {}),
+    ...(hyperlinkColor !== undefined ? { hyperlinkColor } : {}),
   };
 }
