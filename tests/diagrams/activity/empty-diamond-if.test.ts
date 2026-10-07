@@ -25,3 +25,17 @@ describe('EMPTY_DIAMOND if: the in-arrow ends at the rhombus, below the north la
     });
   }
 });
+
+// `getTranslateOptionalStop` centres the stop on the rhombus, below the
+// north label: `y1 = labelNorth + (h - labelNorth - stopH) / 2`
+// (`FtileIfDown.java:648-657`). The 1 px below it is the compress shape
+// (`compress/shapes-of-boxes.ts#diamondBox`, not this task's), so only the
+// stop and the rows above it are asserted here.
+describe('EMPTY_DIAMOND if with an optional stop', () => {
+  it('empty-if-stop: the stop ellipse sits at the rhombus centre y', () => {
+    const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, 'empty-if-stop');
+    const cys = (svg: string): string[] => [...svg.matchAll(/<ellipse [^>]*cy="([^"]*)"/g)].map((m) => m[1]!);
+    expect(cys(golden).slice(0, 3)).toEqual(['25', '120.944', '120.944']);
+    expect(cys(ours).slice(0, 3)).toEqual(cys(golden).slice(0, 3));
+  });
+});

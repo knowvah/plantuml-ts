@@ -297,9 +297,13 @@ interface StopOffsets {
 function computeStopOffsets(diamond1: DiamondConditionTile, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
   if (optionalStop === null) return { stopX: 0, stopY: 0 };
   const additionalWidth = additionalWidthFor(diamond1, optionalStop.width);
+  // add4-T2d: `labelNorth = dimDiamond1.getInY()`; `y1 = labelNorth +
+  // (dimDiamond1.getHeight() - labelNorth - dimStop.getHeight()) / 2`
+  // (`FtileIfDown.java:651-653`) -- centred on the rhombus, not the box.
+  const labelNorth = diamond1.getCoord(NORTH_HOOK).y;
   return {
     stopX: core.left - diamond1.width / 2 + diamond1.width + additionalWidth,
-    stopY: (diamond1.height - optionalStop.height) / 2,
+    stopY: labelNorth + (diamond1.height - labelNorth - optionalStop.height) / 2,
   };
 }
 
