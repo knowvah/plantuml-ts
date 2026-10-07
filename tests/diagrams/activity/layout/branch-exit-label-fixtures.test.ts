@@ -13,7 +13,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { renderActivityFixture, svgAttr, textOccurrences, textPosition } from '../../../helpers/activity-text-position.js';
+import {
+  renderActivityFixture,
+  svgAttr,
+  textOccurrences,
+  textPosition,
+} from '../../../helpers/activity-text-position.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_ROOT = join(HERE, '../../../fixtures/activity/add3-T1d');
@@ -44,18 +49,14 @@ describe('branch exit label -- if-long-horizontal (rows 2/3)', () => {
     expect(svgAttr(ours, 'width')).toBe(svgAttr(golden, 'width'));
   });
 
-  // Height carries a small residual, NOT this task's mechanism: verified
-  // (scratch, not committed) that a SINGLE exit label on this builder
-  // already over-measures height by 3px relative to the jar (300 ours vs
-  // 297 jar) -- `FtileIfLongHorizontal#calculateDimensionInternal`
-  // (`FtileIfLongHorizontal.java:690`) reserves `Math.max(100, maxOutY)`
-  // for the branch-to-merge drop UNCONDITIONALLY, a flat floor our port's
-  // ink-extension-only approach (`canvas-origin-text-ink.ts
-  // #extendForEdgeLabelText`) does not replicate -- that floor lives in
-  // `tiles/gtile-if-long-horizontal.ts`, outside this task's write-set.
-  // PINNED, not jar-equal.
-  it('canvas height is a known 3px residual (Math.max(100, maxOutY) floor, not re-derived this pass)', () => {
-    expect(svgAttr(ours, 'height')).not.toBe(svgAttr(golden, 'height'));
+  // add4-T1e: the earlier 3px "Math.max(100, maxOutY) floor" reading was
+  // wrong -- the extra height was `compress/shapes-of.ts#edgeLabelShape`'s
+  // stale mid-point box (`x + 4, y - 4`), which the jar never draws
+  // (`Snake#drawInternalLabel` places the text at `getTextBlockPosition`,
+  // `Snake.java:225-231,244-270`). With the box at the drawn position the
+  // height is jar-exact.
+  it('canvas height matches the jar exactly', () => {
+    expect(svgAttr(ours, 'height')).toBe(svgAttr(golden, 'height'));
   });
 });
 
@@ -114,14 +115,12 @@ describe('branch exit label + case alignment -- switch (rows 30-34)', () => {
     }
   });
 
-  // X positions are NOT asserted jar-equal here: T1a's own census (row 31)
-  // already found the switch builder's case-diamond PLACEMENT confounded
-  // against the jar, independent of any label mechanism -- the case
-  // bodies sit at different X than upstream regardless of whether they
-  // carry a label. This fixture's job is only to confirm the NEW
-  // mechanism (text present, correct alignment branch taken) without
-  // re-litigating that pre-existing, separately-tracked divergence.
-  it('canvas size differs from the jar (pre-existing switch case-diamond placement divergence, not this mechanism)', () => {
-    expect(svgAttr(ours, 'width')).not.toBe(svgAttr(golden, 'width'));
+  // add4-T1e: canvas width is now jar-exact. The difference this used to
+  // pin was the phantom mid-point label box in `compress/shapes-of.ts`
+  // (`edgeLabelShape`), not the case-diamond placement: the case labels are
+  // Snake texts (`FtileSwitchWithManyLinks.java:91-92,218-219`) and occupy
+  // only where they are drawn.
+  it('canvas width matches the jar exactly', () => {
+    expect(svgAttr(ours, 'width')).toBe(svgAttr(golden, 'width'));
   });
 });

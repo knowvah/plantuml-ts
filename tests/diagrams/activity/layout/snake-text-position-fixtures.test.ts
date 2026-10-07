@@ -71,26 +71,23 @@ describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', ()
     expect(textPosition(ours, 'dsc_5').x).toBe(textPosition(golden, 'dsc_5').x);
   });
 
-  // Y for both labels still carries a sub-2px residual, but NOT from this
-  // task's mechanism: every Y-axis value in this fixture (box `rect`/`text`
-  // y, independent of any label) is offset from the jar by the SAME
-  // ~0.944px step (e.g. the "read data" box: jar `rect y="99.944"` vs ours
-  // `rect y="99"`) -- a pre-existing, fixture-wide rounding divergence in
-  // the `while`/hexagon geometry this task's write-set does not touch.
-  // These two assertions PIN our own current output (a regression guard),
-  // not jar parity -- do not "fix" them by fitting a new constant here.
-  it('Backward1 "incoming" y: pinned at the current (not jar-equal) value', () => {
-    expect(textPosition(ours, 'incoming').y).toBeCloseTo(218.556, 3);
+  // add4-T1e: the fixture-wide ~0.944px Y offset was not rounding -- it was
+  // `compress/shapes-of.ts#edgeLabelShape`'s stale mid-point box, which
+  // held a Y slot the jar never draws into. With the box where
+  // `Snake#getTextBlockPosition` places the text (`Snake.java:244-270`),
+  // every box y and "incoming" are jar-exact.
+  it('Backward1 "incoming" y: matches the jar exactly', () => {
+    expect(textPosition(ours, 'incoming').y).toBe(textPosition(golden, 'incoming').y);
   });
 
-  // T3i: `gtile-while.ts#labelHeight` (previously hardcoded `0`) now
-  // measures `backIncoming`'s own text height into `GtileWhile.height`
-  // (`FtileWhile.java:585,597-601`), moving this label from a 6.444px
-  // jar divergence down to the SAME ~0.944-1px fixture-wide rounding
-  // residual every other y in this fixture carries (see the comment
-  // above) -- re-pinned to the new current value, not fitted.
+  // "dsc_5" keeps a 1.528px residual (jar 98.5). Ours computes the LEFT
+  // default position on the COMPRESSED points; the jar computes it on the
+  // raw points and the compressing `UGraphic` then moves the text as one
+  // translate (`UGraphicCompressOnXorY`). Owner: edge-label placement after
+  // compression (`renderer.ts#renderEdgeLabelAligned`). PINNED to our
+  // current output (a regression guard), not jar parity.
   it('Backward2 "dsc_5" y: pinned at the current (not jar-equal) value', () => {
-    expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(99.556, 3);
+    expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(100.028, 3);
   });
 });
 
@@ -161,7 +158,7 @@ describe('generic -> label; -- label-before-repeat (FtileRepeat ConnectionIn, ro
   });
 });
 
-describe('generic -> label; -- label-after-endif (the merge-diamond\'s own out edge)', () => {
+describe("generic -> label; -- label-after-endif (the merge-diamond's own out edge)", () => {
   const { ours, golden } = renderFixture('label-after-endif');
 
   it('canvas width/height match the jar exactly', () => {
