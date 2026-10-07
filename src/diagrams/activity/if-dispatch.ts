@@ -6,7 +6,7 @@
  */
 
 import type { ParseRefusal } from '../../core/parse-refusal.js';
-import type { ActivityElseIf, ActivityIf, ActivityNode } from './ast.js';
+import type { ActivityElseIf, ActivityIf, ActivityNode, ActivityNote } from './ast.js';
 import {
   RE_ELSE,
   RE_ELSE_LEGACY,
@@ -281,6 +281,54 @@ function matchIfHeader(line: string): IfHeader | null {
   return null;
 }
 
+interface LeadingNoteSplit {
+  readonly body: ActivityNode[];
+  readonly note?: ActivityNote;
+}
+
+/** `InstructionIf#addNote`'s `current.isEmpty()` arm
+ *  (`InstructionIf.java:222-227`): a note as the FIRST node of a
+ *  then/elseif/else branch belongs to the IF ITSELF, not the branch's own
+ *  flow content -- extracted here, before `tileNodes` ever sees the
+ *  branch body. The complementary TRAILING capture (`endifCalled`)
+ *  happens at `pushParsedNode` (`list-backward-dispatch.ts`), well after
+ *  {@link extractIfOwnNotes} returns. */
+function extractLeadingNote(body: ActivityNode[]): LeadingNoteSplit {
+  const first = body[0];
+  if (first === undefined || first.kind !== 'note') return { body };
+  return { body: body.slice(1), note: first };
+}
+
+interface IfNotesExtraction {
+  readonly thenBranch: ActivityNode[];
+  readonly elseIfBranches: ActivityElseIf[];
+  readonly elseBranch: ActivityNode[];
+  readonly notes: ActivityNote[];
+}
+
+/** `WithNote#addNote`'s own insertion order (`WithNote.java:56-59`):
+ *  then-branch's leading note first, each `elseif` branch's own in
+ *  clause order, else-branch's last -- the if's own `notes` array,
+ *  stripped out of each branch body. `activity-divergence-drive-3` T2a,
+ *  family IFNOTE. */
+function extractIfOwnNotes(
+  thenBranch: ActivityNode[],
+  elseIfBranches: ActivityElseIf[],
+  elseBranch: ActivityNode[],
+): IfNotesExtraction {
+  const notes: ActivityNote[] = [];
+  const then = extractLeadingNote(thenBranch);
+  if (then.note !== undefined) notes.push(then.note);
+  const elseIfs = elseIfBranches.map((branch) => {
+    const split = extractLeadingNote(branch.body);
+    if (split.note !== undefined) notes.push(split.note);
+    return split.note === undefined ? branch : { ...branch, body: split.body };
+  });
+  const elseSplit = extractLeadingNote(elseBranch);
+  if (elseSplit.note !== undefined) notes.push(elseSplit.note);
+  return { thenBranch: then.body, elseIfBranches: elseIfs, elseBranch: elseSplit.body, notes };
+}
+
 /**
  * Captures the `if`'s swimlane at its opener, not its closer.
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagram3.java:309
@@ -317,6 +365,7 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
   const clauses = consumeIfClauses(ctx, thenResult.nextIdx, IF_INNER_STOPS);
   if (isRefusal(clauses)) return clauses;
   const { cursor, elseIfBranches, elseBranch, elseLabel } = clauses;
+  const extracted = extractIfOwnNotes(thenBranch, elseIfBranches, elseBranch);
 
   // Always push exactly one if node per `if (...)` opener
   const ifNode: ActivityIf = {
@@ -324,10 +373,11 @@ export function tryIf(ctx: ParseContext, idx: number, line: string): DispatchRes
     condition,
     ...(thenLabel !== undefined && thenLabel !== '' ? { thenLabel } : {}),
     ...(elseLabel !== undefined && elseLabel !== '' ? { elseLabel } : {}),
-    thenBranch,
-    elseBranch,
-    elseIfBranches,
+    thenBranch: extracted.thenBranch,
+    elseBranch: extracted.elseBranch,
+    elseIfBranches: extracted.elseIfBranches,
     ...openerSwimlane,
+    ...(extracted.notes.length > 0 ? { notes: extracted.notes } : {}),
   };
   return { idx: cursor, node: ifNode };
 }

@@ -12,6 +12,7 @@ import type {
   ActivityLabel,
   ActivityGoto,
   ActivityNode,
+  ActivityNote,
 } from './ast.js';
 import {
   RE_ACTIVITY_LIST,
@@ -98,27 +99,57 @@ function redirectToWhileSpecialOut(
 }
 
 /**
+ * `InstructionList#addNote`'s `getLast().addNote(...)` arm
+ * (`InstructionList.java:190-195`) composed with `InstructionIf#addNote`'s
+ * own `endifCalled` arm (`InstructionIf.java:222-227`): a `note` parsed
+ * immediately after a CLOSED `if` (this list's own last element) is the
+ * if's OWN note, drawn beside diamond1 -- never a flow sibling. The
+ * complementary LEADING-branch capture (`current.isEmpty()`) happens
+ * inside `if-dispatch.ts#tryIf` itself, before the if node ever reaches
+ * this push site; this merge only ever APPENDS (preserving `WithNote`'s
+ * own insertion order -- branches process before `endif` in every case).
+ * `activity-divergence-drive-3` T2a, family IFNOTE. Internal to {@link
+ * pushParsedNode}, this module's only caller.
+ */
+function redirectNoteOntoIf(nodes: ActivityNode[], node: ActivityNote): boolean {
+  const last = nodes[nodes.length - 1];
+  if (last === undefined || last.kind !== 'if') return false;
+  nodes[nodes.length - 1] = { ...last, notes: [...(last.notes ?? []), node] };
+  return true;
+}
+
+/** RNOOUT's own "no longer last" correction, split out of {@link
+ *  pushParsedNode} purely to keep that function's own CCN under the
+ *  file's limit (IFNOTE added one more early-return branch). */
+function clearSpeculativeNoOut(nodes: ActivityNode[]): void {
+  const prev = nodes[nodes.length - 1];
+  if (prev !== undefined && prev.kind === 'repeat' && prev.noOut === true) {
+    nodes[nodes.length - 1] = { ...prev, noOut: false };
+  }
+}
+
+/**
  * `node-dispatch.ts#parseNodes`'s own push site (mission add2-T3b,
- * families WSPEC/RNOOUT) -- the ONE place a dispatched node joins `nodes`,
- * so both families' positional checks live here instead of growing
- * `parseNodes` itself (that file's own 500-line cap). Three things, in
- * order: (1) a `stop`/`end` right after a no-break `endwhile` redirects
- * via {@link redirectToWhileSpecialOut} instead of pushing (WSPEC); (2) a
- * `repeat` about to become non-last loses the speculative `noOut` this
- * function gave the PREVIOUS trailing repeat, since appending anything
- * after it means it is no longer `isLastOfTheParent()` (RNOOUT); (3) a
- * `repeat` node is pushed with `noOut: true` -- correct for as long as it
- * stays last, and corrected back to `false` by the next call if it does
- * not (mirrors `InstructionRepeat.isLastOfTheParent()`,
+ * families WSPEC/RNOOUT; IFNOTE added add3-T2a) -- the ONE place a
+ * dispatched node joins `nodes`, so each family's positional check lives
+ * here instead of growing `parseNodes` itself (that file's own 500-line
+ * cap). In order: (1) a `note` right after a closed `if` redirects via
+ * {@link redirectNoteOntoIf} instead of pushing (IFNOTE); (2) a `stop`/
+ * `end` right after a no-break `endwhile` redirects via {@link
+ * redirectToWhileSpecialOut} instead of pushing (WSPEC); (3) a `repeat`
+ * about to become non-last loses the speculative `noOut` this function
+ * gave the PREVIOUS trailing repeat, since appending anything after it
+ * means it is no longer `isLastOfTheParent()` (RNOOUT); (4) a `repeat`
+ * node is pushed with `noOut: true` -- correct for as long as it stays
+ * last, and corrected back to `false` by the next call if it does not
+ * (mirrors `InstructionRepeat.isLastOfTheParent()`,
  * `InstructionRepeat.java:117-121,170`, re-evaluated fresh every time the
  * parent list gains a new element, never computed once and cached).
  */
 export function pushParsedNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
   if (node === undefined) return;
-  const prev = nodes[nodes.length - 1];
-  if (prev !== undefined && prev.kind === 'repeat' && prev.noOut === true) {
-    nodes[nodes.length - 1] = { ...prev, noOut: false };
-  }
+  if (node.kind === 'note' && redirectNoteOntoIf(nodes, node)) return;
+  clearSpeculativeNoOut(nodes);
   if ((node.kind === 'stop' || node.kind === 'end') && redirectToWhileSpecialOut(nodes, node)) return;
   nodes.push(node.kind === 'repeat' ? { ...node, noOut: true } : node);
 }

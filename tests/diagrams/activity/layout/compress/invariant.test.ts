@@ -352,9 +352,15 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // own label is now its own `'if-own-label'` node ahead of this triple
     // in `shapesOf`'s flat list (7 new shapes measured directly). Same
     // coincident triple, same coordinates, only the index shifted.
+    // add3-T2a: index -1 (84->83) -- this fixture's own IFNOTE row (`note`
+    // owned by the fork branch's `if`, `FtileIfDown.java:116-120,523-529`)
+    // now draws its opale box FIRST in that if-down's own draw order
+    // (`walk-if-down.ts#pushIfOwnNote`, before `mainTile`/`diamond1`),
+    // inserting one new polygon (the fold triangle) ahead of this triple
+    // in `shapesOf`'s flat list. Same coincident triple, same coordinates.
+    'tobajo-64-mipi810 [83,84] polygon×polygon',
+    'tobajo-64-mipi810 [83,85] polygon×polygon',
     'tobajo-64-mipi810 [84,85] polygon×polygon',
-    'tobajo-64-mipi810 [84,86] polygon×polygon',
-    'tobajo-64-mipi810 [85,86] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -641,18 +647,17 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `activity-divergence-drive-3` T2a, family NOTE-SIZE): the SAME
     // "touching becomes an epsilon overlap after a second independent
     // transform" class as `kitupi-32-jexo155`/`tobajo-64-mipi810` above,
-    // newly surfaced here because `GtileNote`'s corrected width
-    // (`Opale.java:89-96`) shifted this row's note balloon, which shifted
-    // where its own fold triangle (`Opale#getCorner`, `:134-147`, shape 14)
-    // sits relative to the if-diamond beside it (shape 6). Confirmed with a
-    // direct dump: `before`, diamond `x(43.51875) + width(99.41875000000002)
-    // === 142.93750000000002` touches the fold's own `x(142.9375)` --
-    // within float noise, no overlap registered. `after`: diamond
-    // `x(43) + width(99.41875000000002) === 142.41875000000002` vs the
-    // fold's own `x(142.41875)` -- a ~2e-14 overlap from compression
-    // applying the SAME 0.51875 shift to both shapes through two
-    // independently-rounded paths, not a geometry defect.
-    'zakuke-30-sobi867 [6,14] polygon×polygon',
+    // surfaced by `GtileNote`'s corrected width shifting the fold
+    // triangle flush against the if-diamond beside it.
+    // RESOLVED by this same mission's own T2a IFNOTE commit: zakuke's note
+    // is itself this row's IFNOTE case ("note right before the first
+    // then-action of an if in a while", `FtileIfDown.java:116-120`) --
+    // once it moved from a floating sibling into the if-down's own opale
+    // slot, the diamond/fold pair's coordinates changed enough that they
+    // no longer touch at all (confirmed with a direct dump: `before` and
+    // `after` now report the IDENTICAL overlap set, `[[2,3],[2,4],[6,7],
+    // [9,16]]`, no `[6,14]` in either) -- removed rather than carried
+    // forward, same precedent as `lopone-15-xiki477` above.
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

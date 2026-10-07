@@ -532,6 +532,49 @@ describe('a note with no left/right keyword defaults to LEFT (NotePosition.java:
 });
 
 // ---------------------------------------------------------------------------
+// IFNOTE (mission `activity-divergence-drive-3` T2a): a note the IF ITSELF
+// owns (`InstructionIf.java:222-227`), never a branch sibling -- extracted
+// into `ActivityIf.notes`, stripped from the branch body it was parsed in.
+// ---------------------------------------------------------------------------
+
+describe('a note as the FIRST line of a then-branch belongs to the if, not the branch', () => {
+  it('is lifted into ActivityIf.notes, and the branch body no longer contains it', () => {
+    const ast = parse(['if (x) then (yes)', 'note right: n', ':a;', 'endif']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([{ kind: 'note', text: 'n', position: 'right' }]);
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }]);
+  });
+});
+
+describe('a note as the FIRST line of an else-branch belongs to the if', () => {
+  it('is lifted into ActivityIf.notes, appended after any then-branch note', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'else (no)', 'note left: e', ':b;', 'endif']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([{ kind: 'note', text: 'e', position: 'left' }]);
+    expect(node.elseBranch).toEqual([{ kind: 'action', label: 'b' }]);
+  });
+});
+
+describe('a note immediately after endif belongs to the CLOSED if, not a flow sibling', () => {
+  it('merges onto the if node; the top-level node list has ONE node, not two', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'note right: after']);
+    expect(ast.nodes).toHaveLength(1);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.kind).toBe('if');
+    expect(node.notes).toEqual([{ kind: 'note', text: 'after', position: 'right' }]);
+  });
+
+  it('appends after a leading-branch note, preserving insertion order', () => {
+    const ast = parse(['if (x) then (yes)', 'note left: lead', ':a;', 'endif', 'note right: trail']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([
+      { kind: 'note', text: 'lead', position: 'left' },
+      { kind: 'note', text: 'trail', position: 'right' },
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 13 — parses end keyword
 // ---------------------------------------------------------------------------
 

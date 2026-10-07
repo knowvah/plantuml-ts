@@ -197,6 +197,21 @@ export interface ActivityIf {
   /** Intermediate elseif clauses in order; may be empty. */
   elseIfBranches: ActivityElseIf[];
   swimlane?: string;
+  /**
+   * Notes the IF ITSELF owns (never a branch's own flow content), in
+   * `WithNote#addNote`'s own insertion order: a LEADING note in the
+   * then/elseif/else branch (`InstructionIf.addNote`'s `current.isEmpty()`
+   * arm -- `if-dispatch.ts#tryIf`'s own extraction), then a note parsed
+   * immediately after this `if`'s `endif` while this if is still the
+   * enclosing list's `getLast()` (the `endifCalled` arm --
+   * `pushParsedNode`'s `kind==='note'`-onto-`kind==='if'` merge,
+   * `list-backward-dispatch.ts`). Drawn beside diamond1 by whichever
+   * builder `conditional-builder.ts#buildIf` picks -- never a flow
+   * sibling. Omitted (not `[]`) when the if owns no such note.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionIf.java:222-227
+   * @see net/sourceforge/plantuml/activitydiagram3/WithNote.java:56-59
+   */
+  notes?: ActivityNote[];
 }
 
 export interface ActivityWhile {
