@@ -33,8 +33,9 @@
 import type { Theme } from '../../core/theme.js';
 import type { ActivitySName } from './activity-style-defaults.js';
 import { activityFontColor, activityFontFamily } from './activity-text-style.js';
-import { activityHorizontalAlignment } from './activity-text-style.js';
-import { activityPadding } from './activity-style-defaults.js';
+import { activityHorizontalAlignment, activityNoteHorizontalAlignment } from './activity-text-style.js';
+import { activityPadding, activityFontSize } from './activity-style-defaults.js';
+import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import { Display } from '../../core/klimt/creole/Display.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -234,4 +235,104 @@ export function renderActionLabel(
   const tb = buildActionTextBlock(label, theme, fontSize, 'activity');
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
   return drawActionTextBlock(tb, box.x, box.y, DRAW_MEASURER, font);
+}
+
+// ---------------------------------------------------------------------------
+// NOTE-CREOLE (add3-T3d): a note label's real creole `TextBlock`,
+// `FtileWithNoteOpale.java:147-150` / `FtileNoteAlone.java:114-117` minus
+// the `SheetBlock2` clip/border half (`Opale`, `activity-renderer-
+// shapes.ts#renderNote`, already draws the note's own fold/polygon body
+// separately -- the SAME split {@link buildActionTextBlock}'s own doc
+// comment makes for the action box).
+// ---------------------------------------------------------------------------
+
+/**
+ * `FtileWithNoteOpale.java:147-150`'s own Sheet build for a note's
+ * `Display` -- font/colour/size from {@link activityFontFamily}/
+ * {@link activityFontColor}/`activityFontSize(theme, 'note')` (sname
+ * `'note'`, not `'activity'`), alignment from
+ * {@link activityNoteHorizontalAlignment}.
+ *
+ * `SheetBlock1`'s own `padding` ctor arg stays at its default (`none()`,
+ * omitted below) -- unlike {@link buildActionTextBlock}'s
+ * `activityPadding('activity')`. Both Java sites pass `skinParam()
+ * .getPadding()` into their `SheetBlock1`, but that is `SkinParam
+ * #getPadding()` (`skin/SkinParam.java:1147-1150`, the GLOBAL top-level
+ * `skinparam padding` key, unset by every corpus fixture -> `none()`) --
+ * a DIFFERENT field from `style.getPadding()` (`PName.Padding`, the
+ * per-element `activity { Padding 10 }` cascade `activityPadding` models),
+ * which `FtileBox` ALSO adds a second time, externally, in its own
+ * `calculateDimensionFtile` (`:237-239`) -- the step
+ * {@link buildActionTextBlock}'s doc comment folds into one pass via
+ * `SheetBlock1`'s padding arg. `FtileWithNoteOpale`/`FtileNoteAlone` have
+ * no such second, per-element add at all; `Opale`'s own
+ * marginX1(6)/marginX2(15)/marginY(5) (`gtile-note.ts#measureOpaleCreole`,
+ * `activity-layout-constants.ts`) are the note box's ONLY additive terms
+ * -- confirmed against the ALREADY-PINNED NOTEW family's own formula
+ * (`norire-15-taka956` etc.: "text + marginX1 6 + marginX2 15 wide, text +
+ * 2*marginY 5 tall", no third padding term).
+ */
+export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
+  const fontSize = activityFontSize(theme, 'note');
+  const fc: FontConfiguration = {
+    family: activityFontFamily(theme, 'note'),
+    size: fontSize,
+    color: activityFontColor(theme, 'note'),
+    styles: new Set(),
+  };
+  const align = ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)];
+  const skin = activitySkinSimple(fc);
+  const sheet = skin.sheet(fc, align, CreoleMode.FULL).createSheet(Display.create(text.split('\n'))) as unknown as Sheet<CreoleAtom>;
+  const atomOps = chromeAtomOps(undefined, fc);
+  return new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps);
+}
+
+/**
+ * `Opale#getWidth`/`getHeight` (`svek/image/Opale.java:89-96`): the note
+ * box's own `textBlock.calculateDimension` plus Opale's fixed margins --
+ * shared by {@link measureOpaleCreole} (layout time, the caller's own
+ * real `StringBounder`) and {@link renderNoteLabel}'s own eligibility
+ * recheck (render time, a fixed deterministic measurer), so the two
+ * NEVER disagree about a note's size, mirroring
+ * {@link isActionSheetEligible}'s own doc comment for the action box.
+ */
+export function noteTextBlockDimension(tb: SheetBlock1, sheetBounder: StringBounder): { width: number; height: number } {
+  const dim = tb.calculateDimension(sheetBounder);
+  return { width: dim.getWidth() + NOTE_MARGIN_X1 + NOTE_MARGIN_X2, height: dim.getHeight() + 2 * NOTE_MARGIN_Y };
+}
+
+/** `Opale#drawU`'s own `textBlock.drawU(ug.apply(new UTranslate(marginX1,
+ *  marginY)))` (`Opale.java:126`) -- unconditional on alignment (CENTER/
+ *  RIGHT normalisation happens WITHIN the Sheet's own per-line `Sea`
+ *  layout, not as an outer box translate the way {@link
+ *  buildActionTextBlock}'s LEFT/CENTER/RIGHT split needs for `FtileBox`).
+ *
+ * Eligibility is GEOMETRIC, not syntactic (unlike {@link
+ * isActionSheetEligible}): `GtileWithNotes`'s own stacked multi-note
+ * sizing (`tiles/gtile-with-notes.ts#buildStack`, NOTE-MULTI family) is
+ * NOT yet routed through {@link buildNoteTextBlock} -- its own caller
+ * chain (`layout/tile-layout-structural.ts`, outside this task's
+ * write-set) threads it a bare `fontSize: number`, not a `Theme`, so it
+ * cannot build this Sheet without a `layout/**` edit this mission
+ * forbids. A note node whose OWN declared `box.width`/`box.height`
+ * disagrees with this function's freshly-recomputed creole dimension is
+ * exactly a note `renderNote`'s caller sized the OLD way -- `null` here
+ * falls back to the pre-existing raw per-line renderer rather than draw
+ * creole markup inside a box measured for plain text (the same class of
+ * sizing/drawing mismatch `isActionSheetEligible`'s own doc comment
+ * reports for `fikuki-99-kulu790`/`mufixi-71-koma752`, avoided here by
+ * construction instead of by a second syntactic gate).
+ */
+export function renderNoteLabel(
+  text: string,
+  theme: Theme,
+  box: { readonly x: number; readonly y: number; readonly width: number; readonly height: number },
+): string | null {
+  const fontSize = activityFontSize(theme, 'note');
+  const font = { family: activityFontFamily(theme, 'note'), size: fontSize };
+  const tb = buildNoteTextBlock(text, theme);
+  const sheetBounder = klimtStringBounder(DRAW_MEASURER, font);
+  const sheetBox = noteTextBlockDimension(tb, sheetBounder);
+  if (Math.abs(sheetBox.width - box.width) > 1e-6 || Math.abs(sheetBox.height - box.height) > 1e-6) return null;
+  return drawActionTextBlock(tb, box.x + NOTE_MARGIN_X1, box.y + NOTE_MARGIN_Y, DRAW_MEASURER, font);
 }

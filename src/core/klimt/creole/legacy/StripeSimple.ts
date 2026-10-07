@@ -63,6 +63,7 @@ import { MONOSPACED } from '../Parser.js';
 import { retrieveEmoji } from '../Emoji.js';
 import { emojiFactor } from '../atom/AtomEmoji.js';
 import { resolveColorToSvgHex } from '../../color/HColorSet.js';
+import { CharHidder } from '../../../utils/CharHidder.js';
 
 /** Font for an `<img>` cannot-decode/error fallback text run —
  *  `AtomImg.create` (`AtomImg.java:106-107`) hardcodes
@@ -355,6 +356,21 @@ export interface LineBuildAtoms {
  * and no caller font ever reached it regardless. Verified by the
  * two-different-element-fonts test in
  * `tests/unit/core/klimt/creole/legacy/StripeSimple.test.ts`.
+ *
+ * add3-T3d (NOTE-CREOLE): `CharHidder.hide` (`StripeSimple.java:150`,
+ * `analyzeAndAdd`) now runs on the classified `content` BEFORE the atom
+ * builder tokenizes it -- a `~X` tilde escape (X a markup-active char,
+ * `CharHidder.isToBeHidden`) must survive to {@link decodeAtomEscapes}'s
+ * own `CharHidder.unhide` (mirroring `AtomText.java:79`'s constructor
+ * order: unhide THEN `manageSpecialChars`/`resolveTextEscapes`), or the
+ * creole tokenizer below sees the markup character unescaped and
+ * interprets it (`vimoxa-78-zucu656`: `~""example1""` drew as a split
+ * `~` run + a monospace run instead of one literal `""example1""` run).
+ * Hiding happens AFTER classification, matching upstream: a stripe's
+ * `StripeStyleType` is already fixed by `CreoleStripeSimpleParser`'s own
+ * (separate, narrower) `CharHidder` use for the `#`-heading pattern only
+ * (`CreoleStripeSimpleParser.ts`'s own doc comment) before this function
+ * ever runs.
  */
 export function buildLineAtoms(
   line: string,
@@ -367,7 +383,7 @@ export function buildLineAtoms(
   // (every class member row) still classifies a leading `*`/`#` as NORMAL.
   const classification = classifyStripeLine(line, mode);
   if (classification.type === 'HORIZONTAL_LINE') return { classification, atoms: [], lineFont: font };
-  const content = classification.content;
+  const content = CharHidder.hide(classification.content);
   if (classification.type === 'LITERAL') {
     return { classification, atoms: decodeAtomEscapes(buildLiteralAtoms(content, font)), lineFont: font };
   }
@@ -399,7 +415,12 @@ export function buildLineAtoms(
  *
  * Only `text` atoms are decoded, matching upstream: an image/emoji/latex atom
  * carries a name or expression, never display text.
+ *
+ * add3-T3d: `CharHidder.unhide` (`AtomText.java:79`, BEFORE
+ * `manageSpecialChars`/`resolveTextEscapes` in upstream's own constructor
+ * order) restores a `~X` tilde escape {@link buildLineAtoms}'s own
+ * `CharHidder.hide` call protected from the creole tokenizer.
  */
 function decodeAtomEscapes(atoms: readonly CreoleAtom[]): CreoleAtom[] {
-  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(a.text) } : a));
+  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(CharHidder.unhide(a.text)) } : a));
 }

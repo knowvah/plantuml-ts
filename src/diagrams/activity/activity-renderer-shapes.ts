@@ -13,7 +13,8 @@ import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
 import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
-import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { noteFoldPath, noteBodyNormal, noteBodySpikeRight, noteBodySpikeLeft } from './activity-renderer-note-shapes.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
@@ -46,7 +47,7 @@ import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './ac
 import { renderActionCodeBlock } from './activity-renderer-action-code.js';
 import { floorActionLineHeight } from './tiles/gtile-action.js';
 import { actionLines, centeredBaselines, actionRuleFields } from './activity-renderer-line-heights.js';
-import { renderActionLabel } from './activity-creole-sheet.js';
+import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
 
 // Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
 // in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
@@ -310,59 +311,6 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }
 
-/** `Opale#getCorner` (`:134-147`, `roundCorner=0`): the fold triangle,
- *  identical for every body variant (`getPolygonNormal`/`Left`/`Right`) --
- *  `Opale#drawU` (`:126`) draws it unconditionally, as its own filled
- *  `<path>`, never as unfilled border lines. */
-function noteFoldPath(x: number, y: number, w: number): string {
-  const d = NOTE_CORNER_SIZE;
-  return `M${x + w - d},${y} L${x + w - d},${y + d} L${x + w},${y + d} L${x + w - d},${y}`;
-}
-
-/** `Opale#getPolygonNormal` (`:149-157`, no link, `roundCorner=0`): top-left
- *  -> bottom-left -> bottom-right -> right-edge-below-fold -> fold-top ->
- *  close. Was top-left -> fold-top -> right-edge-below-fold -> bottom-right
- *  -> bottom-left -> close, the opposite traversal (T2f mechanism 3). */
-function noteBodyNormal(x: number, y: number, w: number, h: number): string {
-  const d = NOTE_CORNER_SIZE;
-  return `M${x},${y} L${x},${y + h} L${x + w},${y + h} L${x + w},${y + d} L${x + w - d},${y} L${x},${y}`;
-}
-
-/** A degenerate `arcTo(point, roundCorner/2=0, 0, 0)` -- `Opale
- *  #getPolygonLeft`/`Right` ALWAYS emit an `A` command there, even at
- *  radius 0 (T2f mechanism 3, verified byte-exact against `cubida-55-
- *  meku256`'s jar SVG: `A0,0 0 0 0 <samepoint>` immediately follows the
- *  `L` that already reached that point). */
-function zeroArc(x: number, y: number): string {
-  return `A0,0 0 0 0 ${x},${y}`;
-}
-
-/** `Opale#getPolygonRight` (`:198-219`): spike on the RIGHT edge (the
- *  note sits LEFT of its target). `y1`'s floor is `cornersize` (`:208`)
- *  -- the spike may not rise into the fold's own corner. */
-function noteBodySpikeRight(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
-  const d = NOTE_CORNER_SIZE;
-  const y1 = Math.max(d, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
-  return (
-    `M${x},${y} L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
-    `L${x + w},${y + y1 + 2 * NOTE_SPIKE_DELTA} L${spike.x},${spike.y} L${x + w},${y + y1} ` +
-    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
-  );
-}
-
-/** `Opale#getPolygonLeft` (`:175-196`): spike on the LEFT edge (the note
- *  sits RIGHT of its target). `y1`'s floor is `0` (`:180`), not
- *  `cornersize` -- the fold is on the OPPOSITE (right) edge here. */
-function noteBodySpikeLeft(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
-  const d = NOTE_CORNER_SIZE;
-  const y1 = Math.max(0, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
-  return (
-    `M${x},${y} L${x},${y + y1} L${spike.x},${spike.y} L${x},${y + y1 + 2 * NOTE_SPIKE_DELTA} ` +
-    `L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
-    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
-  );
-}
-
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const noteFill = theme.colors.noteBackground;
@@ -390,6 +338,13 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const body = path(bodyD, paint) + path(noteFoldPath(x, y, w), paint);
 
   const label = node.label ?? '';
+
+  // add3-T3d: `FtileWithNoteOpale.java:147-150` draws via the real creole
+  // Sheet -- `renderNoteLabel`'s own doc (geometric fallback for a note
+  // NOT sized by the matching `measureOpaleCreole`, e.g. NOTE-MULTI).
+  const sheetLabel = renderNoteLabel(label, theme, { x, y, width: w, height: h });
+  if (sheetLabel !== null) return body + sheetLabel;
+
   const lines = label.split('\n');
   // `Opale.java:56` -- `marginX1 = 6`; `:127` --
   // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
@@ -459,15 +414,46 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'if-split':
     case 'repeat-cond':
       // T3k: shape ALONE, own label via its own 'if-own-label' node.
-      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead --
-      // while ('while-header' below) is still unwired (EMPTY_DIAMOND, no
-      // cohort fixture, T3i re-slot).
+      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead.
+      // add3-T3d: EMPTY_DIAMOND -- `FtileDiamond#drawU`
+      // (`vertical/FtileDiamond.java:85`) draws `Hexagon.asPolygon
+      // (shadowing)`, the NO-width/height overload (`Hexagon.java:46-62`):
+      // a FIXED 24x24 FOUR-point rhombus, not the six-point dented hexagon
+      // `Hexagon.asPolygon(shadowing, width, height)` overload
+      // `renderHexagonPolygon` ports -- geometrically identical to
+      // `renderDiamond`'s own point list once `renderDiamond`'s `size`
+      // reduces to the fixed `hexagonHalfSize` this shape always is.
+      // `node.label === ''` is this shape's own invariant, not a guess:
+      // `gtile-diamond-empty.ts`'s own doc says a `GtileDiamondEmpty`'s
+      // `label` is ALWAYS `''` (the condition text is a north/south/east/
+      // west slot, never this tile's own label) -- required IN ADDITION
+      // to the theme flag because `conditional-builder.ts#buildIfWithLinks`
+      // hardcodes `GtileDiamondInside` regardless of `conditionStyle`
+      // (`.agent-notes/add3-T3a.md`'s own "Not done" item 1, a separate,
+      // pre-existing gap outside this task's write-set, `layout/**`) --
+      // one of ITS 'if-split' nodes under `emptyDiamond` carries a
+      // NON-empty label (the real hexagon-sized condition text) and must
+      // keep drawing the hexagon its box was actually sized for.
+      // Jar-verified: without this label check, `xefalo-73-sabi101`
+      // (3 `with-links` ifs, `skinparam ConditionStyle diamond`)
+      // regressed 279->330 -- confirmed fixed back to 279 with it.
+      if (theme.conditionStyle === 'emptyDiamond' && node.label === '') return renderDiamond(node, theme);
       return theme.conditionStyle === 'insideDiamond'
         ? renderDiamondSquarePolygon(node, theme)
         : renderHexagonPolygon(node, theme);
     case 'while-header':
-      // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
-      return renderHexagonPolygon(node, theme);
+      // add3-T3d: same EMPTY_DIAMOND shape as 'if-split'/'repeat-cond'
+      // above (`FtileWhile.create`'s own EMPTY_DIAMOND branch builds the
+      // SAME `GtileDiamondEmpty`/`FtileDiamond` -- `.agent-notes/
+      // add3-T3a.md`). Was unconditionally `renderHexagonPolygon` (a
+      // stale "still the 7-point hexagon default" comment, disproved by
+      // reading `FtileDiamond#drawU` directly -- see the case above).
+      // `while` + INSIDE_DIAMOND is a separate, pre-existing gap (this
+      // case never branched on it at all) -- not fixed here, flagged in
+      // this task's report; no cohort fixture currently exercises it.
+      return theme.conditionStyle === 'emptyDiamond' && node.label === ''
+        ? renderDiamond(node, theme)
+        : renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);
     case 'if-label':

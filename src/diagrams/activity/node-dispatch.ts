@@ -324,10 +324,10 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** `(floating )?note (left|right)? (#color)? : text` (single-line). Group
- *  1 is the `floating` keyword (dropped -- see {@link RE_NOTE_SINGLE}'s
- *  own doc), group 2 is direction, group 3 is text (color is
- *  non-capturing). */
+/** `(floating )?note (left|right)? (#color)? : text` (single-line); group
+ *  3 is text. add3-T3d exception (NOTE-CREOLE): `CommandNote3.java:122`'s
+ *  `Display.getWithNewlines` unescapes `\n` same as
+ *  {@link unescapeLabelNewlines} already does for if/fork/repeat. */
 function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
   if (noteSingleMatch === null) return null;
@@ -335,7 +335,7 @@ function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchRe
   const position = defaultLeftPosition(direction);
   const node: ActivityNote = {
     kind: 'note',
-    text: noteSingleMatch[3]!.trim(),
+    text: unescapeLabelNewlines(noteSingleMatch[3]!.trim()),
     position,
     ...swimlaneSpread(ctx),
   };
