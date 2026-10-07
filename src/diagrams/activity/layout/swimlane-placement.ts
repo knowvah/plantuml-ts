@@ -443,11 +443,10 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
   for (const name of laneNames)
     titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
 
-  // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
-  // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,
-  // not the `"same"` sentinel (`SkinParam.java:1121-1129`).
+  // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
+  // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
   const contentWidths = [...extents.values()].map((e) => e.maxX - e.minX);
-  const min = resolveSwimlaneMinWidth(contentWidths, 0);
+  const min = resolveSwimlaneMinWidth(contentWidths, theme.swimlaneWidth ?? 0);
 
   return { widths: computeLaneWidths(extents, titleWidths, min), min };
 }

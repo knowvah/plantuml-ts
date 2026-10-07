@@ -154,10 +154,9 @@ export function measureLaneExtents(
 
 /**
  * `ISkinParam.SWIMLANE_WIDTH_SAME` -- the `skinparam swimlaneWidth same`
- * sentinel `SkinParam#swimlaneWidth()` returns for the string `"same"`.
- * Not yet wired to the parser (no `swimlanewidth` skinparam key exists in
- * `skinparam-key-handlers-table-*.ts`); modeled here so the arithmetic is
- * correct once that follow-on lands.
+ * sentinel `SkinParam#swimlaneWidth()` returns for the string `"same"`
+ * (parsed by `core/skinparam-key-handlers-table-c.ts`'s `swimlanewidth`
+ * handler into `Theme.swimlaneWidth`, add4-T1b).
  * @see net/sourceforge/plantuml/style/ISkinParam.java:71
  * @see net/sourceforge/plantuml/skin/SkinParam.java:1121-1129
  */

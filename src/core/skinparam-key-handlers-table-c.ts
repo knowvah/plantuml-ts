@@ -81,4 +81,28 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.padding = parseFiniteNumber(value);
     },
   ],
+  // add4-T1b: `SkinParam#swimlaneWidth()` (`skin/SkinParam.java:1121-1130`)
+  // -- `"same".equalsIgnoreCase` -> `SWIMLANE_WIDTH_SAME` (-1,
+  // `style/ISkinParam.java:71`), `isDigits` (`\d+`, `:130-136`) ->
+  // `Integer.parseInt`, else `0`. `getValue` reads the value already
+  // trimmed (`setParam`'s `StringUtils.trin`, `:229`).
+  [
+    ['swimlanewidth'],
+    (acc, value) => {
+      acc.swimlaneWidth = parseSwimlaneWidth(value.trim());
+    },
+  ],
 ];
+
+/** `ISkinParam.SWIMLANE_WIDTH_SAME` (`style/ISkinParam.java:71`). */
+const SWIMLANE_WIDTH_SAME = -1;
+
+/** `SkinParam.java:130`'s `DIGITS` pattern, matched whole (`matches()`). */
+const DIGITS = /^\d+$/;
+
+/** @see net/sourceforge/plantuml/skin/SkinParam.java:1121-1130 */
+function parseSwimlaneWidth(value: string): number {
+  if (value.toLowerCase() === 'same') return SWIMLANE_WIDTH_SAME;
+  if (DIGITS.test(value)) return Number.parseInt(value, 10);
+  return 0;
+}

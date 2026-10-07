@@ -60,4 +60,14 @@ export interface ThemeRootFields {
    * `undefined` must read as a no-op, not zero-with-effect.
    */
   padding?: number;
+  /**
+   * `skinparam swimlaneWidth <value>` — `SkinParam#swimlaneWidth()`
+   * (`skin/SkinParam.java:1121-1130`): the case-insensitive literal `same`
+   * -> `ISkinParam.SWIMLANE_WIDTH_SAME` (`-1`, `style/ISkinParam.java:71`);
+   * an all-digits value (`isDigits`, `SkinParam.java:130-136`, `\d+`) ->
+   * `Integer.parseInt`; anything else -> `0`. Absent = `0` (the same
+   * fallthrough). Read once by `Swimlanes#computeSizeInternal`
+   * (`activitydiagram3/ftile/Swimlanes.java:399`), its only reader.
+   */
+  swimlaneWidth?: number;
 }
