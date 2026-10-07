@@ -294,11 +294,20 @@ const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
  * skinparam and so loses the `OVERWRITE_EXISTING_VALUE` merge
  * (`style/StyleStorage.java:102-116`) once `ActivityBorderThickness` is
  * set -- `fonebe-54-save009`'s edge draws at stroke-width 10, not 1.
+ *
+ * add3-T3f: `sname === 'diamond'` carries the SAME tier, for the SAME
+ * reason -- `StyleSignatureBasic.activityDiamond()` (`:270-272`) is
+ * `{root, element, activityDiagram, activity, diamond}`, identical in
+ * shape to `activityArrow()`'s signature above; `ConditionalBuilder
+ * #getStyleSignatureDiamond` (`:101-106`) redeclares that tuple to
+ * resolve the diamond's own border stroke (`:244-246`). `xovano-23-
+ * tazo278`: `ActivityBorderThickness 0.1` must reach its `while`
+ * diamond's border too, not just its boxes and arrows.
  */
 export function activityLineThickness(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementLineThickness(theme, bucketKey(sname));
   if (bucket !== undefined) return bucket;
-  if (sname === 'arrow') {
+  if (sname === 'arrow' || sname === 'diamond') {
     const activityBucket = resolveElementLineThickness(theme, bucketKey('activity'));
     if (activityBucket !== undefined) return activityBucket;
   }
