@@ -288,7 +288,8 @@ export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoor
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
-  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays };
+  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, bounder, theme });
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
   // `drawTitlesBackground`'s `UTranslate.dx(5)` from the block origin, which

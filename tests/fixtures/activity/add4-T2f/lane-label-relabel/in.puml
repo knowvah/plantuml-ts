@@ -1,0 +1,11 @@
+@startuml
+|a|First label
+|#pink|b| second
+start
+:x;
+|a|Relabelled
+:y;
+|b|
+:z;
+stop
+@enduml

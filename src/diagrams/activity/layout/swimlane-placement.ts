@@ -28,7 +28,7 @@ import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
-import { resolveInlineLinks } from '../../../core/url/inline-links.js';
+import { swimlaneTitleText } from './swimlane-title.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -333,6 +333,8 @@ export interface PlacementInput {
   readonly baseY: number;
   readonly bounder: StringBounder;
   readonly theme: Theme;
+  /** `|name|LABEL` displays keyed by lane name (`ast.swimlaneDisplays`). */
+  readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
 }
 
 /** {@link measureLanes}'s own inputs, bundled to keep that function under
@@ -345,6 +347,7 @@ interface MeasureLanesInput {
   readonly laneNames: readonly string[];
   readonly bounder: StringBounder;
   readonly theme: Theme;
+  readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
 }
 
 // `sameLaneEdges` moved to `swimlane-measure-edges.ts` (add4-T1b, this
@@ -389,14 +392,14 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
  * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
-  const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
+  const { nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays } = input;
   const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
   for (const name of laneNames)
-    titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
+    titleWidths.set(name, bounder.getDimension(swimlaneTitleText(name, laneDisplays?.[name]), titleFontSize).width);
 
   // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
   // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
@@ -424,12 +427,12 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
  * `delta` no upstream diagram ever gets.
  */
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
-  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
+  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme, laneDisplays } = input;
   if (laneNames.length <= 1) {
     return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
   }
 
-  const { widths, min } = measureLanes({ nodes, edges, edgeMeta, laneNames, bounder, theme });
+  const { widths, min } = measureLanes({ nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays });
   const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
 
   const deltas = new Map<string, number>();
@@ -437,7 +440,8 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
   for (const name of laneNames) {
     const origin = origins.get(name)!;
     deltas.set(name, origin.delta);
-    swimlanes.push(origin.geo);
+    const display = laneDisplays?.[name];
+    swimlanes.push(display === undefined ? origin.geo : { ...origin.geo, display });
   }
 
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));

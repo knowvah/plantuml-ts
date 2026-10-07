@@ -462,11 +462,11 @@ export interface ActivityDiagramAST {
   nodes: ActivityNode[];
   /** Ordered list of swimlane names as they appear in the source. */
   swimlanes: string[];
-  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name --
-   *  undefined/absent for a lane with no color segment (transparent, no
-   *  rect drawn, `Swimlanes.java:332-340`'s own `back != null` guard).
-   *  Optional so hand-authored AST literal fixtures compile unchanged. */
+  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name; absent
+   *  = transparent (`Swimlanes.java:332-340`'s `back != null`). Optional. */
   swimlaneColors?: Record<string, string>;
+  /** `|name|LABEL`'s display, keyed by lane name (`Swimlanes.java:163-164`). */
+  swimlaneDisplays?: Record<string, string>;
   /**
    * title/caption/legend/header/footer/mainframe chrome (mission G0b).
    * Always populated by `parseActivity` (default `createAnnotations()`

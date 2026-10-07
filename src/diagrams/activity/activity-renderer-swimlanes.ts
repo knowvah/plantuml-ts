@@ -17,7 +17,7 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveInlineLinks } from '../../core/url/inline-links.js';
+import { swimlaneTitleText } from './layout/swimlane-title.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
@@ -142,7 +142,7 @@ export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): strin
     const titleX = contentX + (contentWidth - (lane.titleWidth ?? 0)) / 2;
     // SLURL: draw the RESOLVED text, same `[[url label]]` creole
     // resolution `swimlane-placement.ts#measureLanes` measures by.
-    const title = resolveInlineLinks(lane.name);
+    const title = swimlaneTitleText(lane.name, lane.display);
     out += drawActivityText(titleX, baselineY, title, { fontFamily: theme.fontFamily, fontSize, fill });
   }
   return out;
