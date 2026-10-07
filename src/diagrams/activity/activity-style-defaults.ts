@@ -187,9 +187,10 @@ export function swimlaneFontSize(theme: Theme): number {
 export function activityFontSize(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementFontSize(theme, bucketKey(sname), 'title');
   if (bucket !== undefined) return bucket;
-  if (sname === 'arrow' && theme.colors.graph.arrowFontSize !== undefined) {
-    return theme.colors.graph.arrowFontSize;
-  }
+  if (sname === 'arrow' && theme.colors.graph.arrowFontSize !== undefined) return theme.colors.graph.arrowFontSize;
+  // add4-T2b: `addConFont("Partition", SName.composite)` (FromSkinparamToStyle.java:133).
+  const partitionSize = sname === 'composite' ? theme.colors.graph.partitionFontSize : undefined;
+  if (partitionSize !== undefined) return partitionSize;
   if (theme.defaultFontSize !== undefined) return theme.defaultFontSize;
   return FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
 }

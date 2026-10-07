@@ -13,6 +13,7 @@ import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
@@ -54,6 +55,25 @@ export function compositeTitleWidth(theme: Theme, title: string): number {
   return frameTitleWidth(title, TITLE_MEASURER, theme);
 }
 
+/** The frame's `<symbol>/composite` style colours (`FtileGroup.java:99-102`):
+ *  `activityDiagram { composite { LineColor black; BackgroundColor transparent } }`
+ *  (`plantuml.skin:364-368`), the root `FontColor black`, each overridden by
+ *  the `Partition*` skinparams (`FromSkinparamToStyle.java:131-133`). */
+interface CompositeStyle {
+  readonly backColor: string;
+  readonly borderColor: string;
+  readonly fontColor: string;
+}
+
+function compositeStyle(theme: Theme): CompositeStyle {
+  const g = theme.colors.graph;
+  return {
+    backColor: g.partitionBackground ?? 'none',
+    borderColor: g.partitionBorder ?? '#000',
+    fontColor: g.partitionFontColor === undefined ? '#000' : resolveColorToSvgHex(g.partitionFontColor),
+  };
+}
+
 /**
  * `FtileGroup#drawU` (`:209-227`) + `USymbolFrame#asBig`'s `drawU`
  * (`:142-162`): the plain frame `rect` (unchanged from before this
@@ -69,9 +89,10 @@ export function compositeTitleWidth(theme: Theme, title: string): number {
  */
 export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const strokeWidth = activityLineThickness(theme, 'composite');
-  // `FtileGroup.java:101`: the command's `#color`, else the style's
-  // `BackGroundColor` (`none` by default).
-  const body = rect(node.x, node.y, node.width, node.height, { fill: node.color ?? 'none', stroke: '#000', strokeWidth });
+  const style = compositeStyle(theme);
+  // `FtileGroup.java:101`: the command's `#color`, else the style's `BackGroundColor`.
+  const fill = node.color ?? style.backColor;
+  const body = rect(node.x, node.y, node.width, node.height, { fill, stroke: style.borderColor, strokeWidth });
 
   const fontSize = activityFontSize(theme, 'composite');
   const title = node.label ?? '';
@@ -86,13 +107,17 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const textHeight = titleWidth === 0 ? 12 : fontSize + 3;
   const tab = path(compositeTabPath(node.x, node.y, textWidth, textHeight, cornerSize), {
     fill: 'none',
-    stroke: '#000',
+    stroke: style.borderColor,
     strokeWidth,
   });
 
   if (title === '') return body + tab;
   const titleX = node.x + 3;
   const titleY = node.y + 1 + fontSize * ASCENT_FRACTION;
-  const titleEl = drawActivityText(titleX, titleY, title, { fontFamily: theme.fontFamily, fontSize, fill: '#000' });
+  const titleEl = drawActivityText(titleX, titleY, title, {
+    fontFamily: theme.fontFamily,
+    fontSize,
+    fill: style.fontColor,
+  });
   return body + tab + titleEl;
 }

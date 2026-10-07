@@ -92,6 +92,35 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.swimlaneWidth = parseSwimlaneWidth(value.trim());
     },
   ],
+  // add4-T2b: `FromSkinparamToStyle.java:131-133` -- `PartitionBorderColor`
+  // -> `LineColor`, `PartitionBackgroundColor` -> `BackGroundColor`,
+  // `addConFont("Partition", ...)` -> `FontColor`/`FontSize`, all on
+  // `SName.composite`.
+  [
+    ['partitionbordercolor'],
+    (acc, _v, color) => {
+      acc.partitionBorder = color;
+    },
+  ],
+  [
+    ['partitionbackgroundcolor'],
+    (acc, _v, color) => {
+      acc.partitionBackground = color;
+    },
+  ],
+  [
+    ['partitionfontcolor'],
+    (acc, _v, color) => {
+      acc.partitionFontColor = color;
+    },
+  ],
+  [
+    ['partitionfontsize'],
+    (acc, value) => {
+      const v = parseFiniteNumber(value);
+      if (v !== undefined) acc.partitionFontSize = v;
+    },
+  ],
 ];
 
 /** `ISkinParam.SWIMLANE_WIDTH_SAME` (`style/ISkinParam.java:71`). */

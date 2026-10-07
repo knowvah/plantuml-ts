@@ -42,6 +42,17 @@ export interface ThemeGraphColorsC {
   genericCascadeBackground?: string;
   /** T11: the same signature's `LineColor` half. */
   genericCascadeBorder?: string;
+  /** add4-T2b: `addConvert("PartitionBorderColor", PName.LineColor,
+   *  SName.composite)` / `"PartitionBackgroundColor"` -> `BackGroundColor` /
+   *  `addConFont("Partition", SName.composite)`'s `FontColor` and `FontSize`
+   *  (`FromSkinparamToStyle.java:131-133`). Read by the activity frame
+   *  (`FtileGroup.java:99-102`, style `<symbol>/composite`, `:89-91`).
+   *  `PartitionBorderThickness` has no conversion upstream, so none here.
+   *  @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/FromSkinparamToStyle.java:131-133 */
+  partitionBorder?: string;
+  partitionBackground?: string;
+  partitionFontColor?: string;
+  partitionFontSize?: number;
   /** T11 (cdd3, Q-4 probe c, cdd2-T13): `skinparam classBackgroundColor`
    *  is converted into an `{element,class_}` style declaration upstream
    *  (`FromSkinparamToStyle.java`) BEFORE the generic tag's own merge
