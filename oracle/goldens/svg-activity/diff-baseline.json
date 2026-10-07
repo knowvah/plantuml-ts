@@ -2353,11 +2353,11 @@
     {
       "type": "activity",
       "slug": "nikinu-06-sace939",
-      "status": "baseline",
-      "weightedScore": 105,
-      "diffCount": 105,
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "55b70149"
     },
     {
       "type": "activity",
@@ -2668,11 +2668,11 @@
     {
       "type": "activity",
       "slug": "pezubu-98-niba240",
-      "status": "baseline",
-      "weightedScore": 55,
-      "diffCount": 42,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "dcd2283c"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "55b70149"
     },
     {
       "type": "activity",

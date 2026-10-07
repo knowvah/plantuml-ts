@@ -1,7 +1,7 @@
 {
   "$comment": "Swimlane census (divider x's, titles, band) of OUR laned activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): lanes transform like rectangles (D7), so divider x's moved on every laned fixture whose content compressed; 17-fixture fork/split subset 14 closer / 1 same / 2 farther (maketa, noxasi: the filed parser lane-capture defect).",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "50a347b2",
+  "measuredAgainstCommit": "55b70149",
   "fixtures": [
     {
       "type": "activity",
@@ -4153,40 +4153,40 @@
       "laneCount": 2,
       "ours": {
         "dividerXs": [
-          20,
-          280.45,
-          406.275
+          33,
+          293.45,
+          419.275
         ],
         "titles": [
           {
             "fontSize": "18",
-            "x": "102.144",
+            "x": "115.144",
             "anchor": "(absent)"
           },
           {
             "fontSize": "18",
-            "x": "298.281",
+            "x": "311.281",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
-          "x": 20,
+          "x": 16,
           "y": 17.5,
-          "width": 385.275,
+          "width": 402.275,
           "height": 18,
           "fill": "none"
         },
         "lanes": [
           {
-            "x": 20,
+            "x": 33,
             "width": 260.45000000000005
           },
           {
-            "x": 280.45000000000005,
+            "x": 293.45000000000005,
             "width": 125.82500000000005
           }
         ],
-        "width": "432",
+        "width": "445",
         "height": "441"
       },
       "jar": {
@@ -4994,7 +4994,7 @@
           20,
           59.013,
           152.025,
-          190.725
+          200.375
         ],
         "titles": [
           {
@@ -5009,14 +5009,14 @@
           },
           {
             "fontSize": "18",
-            "x": "166.369",
+            "x": "171.194",
             "anchor": "(absent)"
           }
         ],
         "bandRect": {
           "x": 20,
           "y": 17.5,
-          "width": 169.725,
+          "width": 179.375,
           "height": 18,
           "fill": "none"
         },
@@ -5031,10 +5031,10 @@
           },
           {
             "x": 152.025,
-            "width": 38.70000000000002
+            "width": 48.349999999999994
           }
         ],
-        "width": "216",
+        "width": "226",
         "height": "343"
       },
       "jar": {
