@@ -1,0 +1,94 @@
+diff --git a/src/diagrams/activity/layout/canvas-origin-text-ink.ts b/src/diagrams/activity/layout/canvas-origin-text-ink.ts
+index cc03cd1ef..f568d23df 100644
+--- a/src/diagrams/activity/layout/canvas-origin-text-ink.ts
++++ b/src/diagrams/activity/layout/canvas-origin-text-ink.ts
+@@ -102,15 +102,17 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
+   // resolves the SAME default, so ink and draw agree.
+   if (edge.label === undefined) return;
+   const fontSize = activityFontSize(theme, 'arrow');
+-  const width = measureLineWidth(theme, fontSize, edge.label);
++  const lines = edge.label.split('\n');
++  const width = Math.max(...lines.map((l) => measureLineWidth(theme, fontSize, l)));
++  const h = fontSize * lines.length;
+   const position = getTextBlockPosition(
+     edge.points,
+-    { width, height: fontSize },
++    { width, height: h },
+     edge.labelAlign ?? DEFAULT_LABEL_ALIGN,
+   );
+-  const baselineY = centeredFirstBaselineY(position.y + fontSize / 2, fontSize, 1);
++  const baselineY = centeredFirstBaselineY(position.y + h / 2, fontSize, lines.length);
+   acc.minX = Math.min(acc.minX, position.x);
+   acc.maxX = Math.max(acc.maxX, position.x + width);
+   acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
+-  acc.maxY = Math.max(acc.maxY, baselineY + 1.5);
++  acc.maxY = Math.max(acc.maxY, baselineY + fontSize * (lines.length - 1) + 1.5);
+ }
+diff --git a/src/diagrams/activity/layout/tile-layout-inlabel.ts b/src/diagrams/activity/layout/tile-layout-inlabel.ts
+index 4a5717ecb..fb97e7daa 100644
+--- a/src/diagrams/activity/layout/tile-layout-inlabel.ts
++++ b/src/diagrams/activity/layout/tile-layout-inlabel.ts
+@@ -99,11 +99,14 @@ function inLabelReservation(
+   inLabel: PendingInLabel,
+   align: SnakeTextAlign,
+ ): Reservation {
+-  const width = LABEL_MEASURER.measure(inLabel.label, { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE }).width;
+-  const dim = { width, height: ARROW_LABEL_LAYOUT_FONT_SIZE };
++  const lines = inLabel.label.split('\n');
++  const font = { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE };
++  const width = Math.max(...lines.map((l) => LABEL_MEASURER.measure(l, font).width));
++  const lineHeight = ARROW_LABEL_LAYOUT_FONT_SIZE;
++  const dim = { width, height: lineHeight * lines.length };
+   const position = getTextBlockPosition(points, dim, align);
+-  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, dim.height, 1);
+-  const top = baselineY - (dim.height - 1.5);
++  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, lineHeight, lines.length);
++  const top = baselineY - (lineHeight - 1.5);
+   return { x: position.x, y: top, width, height: dim.height };
+ }
+ 
+diff --git a/src/diagrams/activity/renderer.ts b/src/diagrams/activity/renderer.ts
+index aa95e9375..e34dd18f0 100644
+--- a/src/diagrams/activity/renderer.ts
++++ b/src/diagrams/activity/renderer.ts
+@@ -115,10 +115,13 @@ function renderEdgeLabelAligned(
+   // already gives every other render-time label (that module's own doc);
+   // height is `WidthTableMeasurer#measure`'s own `font.size` convention
+   // (`core/measurer.ts:189`).
+-  const width = measureLineWidth(theme, size, label);
+-  const position = getTextBlockPosition(points, { width, height: size }, labelAlign);
+-  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
++  const lines = label.split('\n');
++  const width = Math.max(...lines.map((l) => measureLineWidth(theme, size, l)));
++  const position = getTextBlockPosition(points, { width, height: size * lines.length }, labelAlign);
++  const baselineY = centeredFirstBaselineY(position.y + (size * lines.length) / 2, size, lines.length);
+   const fill = activityFontColor(theme, 'arrow');
++  if (lines.length > 1 && color === undefined)
++    return lines.map((l, i) => drawActivityText(position.x, baselineY + size * i, l, { fill, fontFamily: theme.fontFamily, fontSize: size })).join('');
+   if (color !== undefined) {
+     return text(position.x, baselineY, label, {
+       fontFamily: theme.fontFamily,
+diff --git a/src/diagrams/activity/switch-dispatch.ts b/src/diagrams/activity/switch-dispatch.ts
+index f4bb02988..889c0f7fb 100644
+--- a/src/diagrams/activity/switch-dispatch.ts
++++ b/src/diagrams/activity/switch-dispatch.ts
+@@ -21,7 +21,7 @@ import {
+   type StopKeywords,
+ } from './dispatch-support.js';
+ import { parseNodes } from './node-dispatch.js';
+-import { stripTrailingSemi } from './if-dispatch.js';
++import { stripTrailingSemi, unescapeLabelNewlines } from './if-dispatch.js';
+ import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
+ 
+ /** `case`/`endswitch` are both simple word-prefix stops -- the same
+@@ -85,7 +85,9 @@ function classifySwitchClauseLine(ctx: ParseContext, cursor: number): SwitchClau
+ 
+   const caseMatch = RE_CASE.exec(clauseLine);
+   if (caseMatch !== null) {
+-    const label = caseMatch[1]!.trim();
++    // add4-T1f (SWITCH-NL): `CommandCase#executeArg` hands the label through
++    // `Display.getWithNewlines` (`CommandCase.java:87`), so `\n` is a line break.
++    const label = unescapeLabelNewlines(caseMatch[1]!.trim());
+     const bodyResult = parseNodes(ctx, cursor + 1, SWITCH_INNER_STOPS);
+     if (isRefusal(bodyResult)) return bodyResult;
+     const { body, notes } = extractLeadingCaseNotes(bodyResult.nodes);
