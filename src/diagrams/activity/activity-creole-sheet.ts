@@ -32,7 +32,7 @@
  */
 import type { Theme } from '../../core/theme.js';
 import type { ActivitySName } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
+import { activityFontColor, activityFontFamily } from './activity-text-style.js';
 import { activityHorizontalAlignment } from './activity-text-style.js';
 import { activityPadding } from './activity-style-defaults.js';
 import { Display } from '../../core/klimt/creole/Display.js';
@@ -53,9 +53,21 @@ import type { ISkinSimple } from '../../core/style/ISkinSimple.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { StringBounder } from '../../core/klimt/font/StringBounder.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
+import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
+import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
+import { UTranslate } from '../../core/klimt/UTranslate.js';
+import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
+import { isTableRowLine } from './activity-text-placement.js';
+import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { Sheet } from '../../core/klimt/creole/Sheet.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+
+/** `$version$` -- the SAME placeholder literal `activity-renderer-text.ts
+ *  #THROWAWAY_VERSION` uses for the identical throwaway-`UGraphicSvg`
+ *  purpose. */
+const THROWAWAY_VERSION = '$version$';
 
 const ALIGNMENT_MAP: Record<'left' | 'center' | 'right', HorizontalAlignment> = {
   left: HorizontalAlignment.LEFT,
@@ -121,7 +133,7 @@ export function klimtStringBounder(measurer: StringMeasurer, font: FontSpec): St
  */
 export function buildActionTextBlock(label: string, theme: Theme, fontSize: number, sname: ActivitySName): SheetBlock1 {
   const fc: FontConfiguration = {
-    family: theme.fontFamily,
+    family: activityFontFamily(theme, sname),
     size: fontSize,
     color: activityFontColor(theme, sname),
     styles: new Set(),
@@ -136,4 +148,76 @@ export function buildActionTextBlock(label: string, theme: Theme, fontSize: numb
   const sheet = skin.sheet(fc, align, CreoleMode.FULL).createSheet(Display.create(label.split('\n'))) as unknown as Sheet<CreoleAtom>;
   const atomOps = chromeAtomOps(undefined, fc);
   return new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps, activityPadding('activity'));
+}
+
+/**
+ * Draws `tb` at the box's own top-left corner (`x`, `y`) -- `FtileBox
+ * #drawU`'s `this.tb.drawU(ug)` call for `HorizontalAlignment.LEFT`
+ * (`FtileBox.java:224-225`, no extra translate: `SheetBlock1`'s own
+ * padding constructor arg already accounts for the inset). The SAME
+ * throwaway-`UGraphicSvg` + `extractFlatContent` technique `activity-
+ * renderer-text.ts#drawRun` already uses for a single `UText`, applied
+ * here to a whole multi-stripe `TextBlock`.
+ */
+export function drawActionTextBlock(tb: SheetBlock1, x: number, y: number, measurer: StringMeasurer, font: FontSpec): string {
+  const driverBounder = {
+    calculateDimension(fc: { readonly size: number }, text: string) {
+      return { width: measurer.measure(text, { ...font, size: fc.size }).width };
+    },
+  };
+  const ug = UGraphicSvg.build(0, basicSvgOption(), THROWAWAY_VERSION, driverBounder, measurer);
+  tb.drawU(ug.apply(new UTranslate(x, y)));
+  return extractFlatContent(ug.getSvgString()).body;
+}
+
+const DRAW_MEASURER = new WidthTableMeasurer();
+
+/**
+ * The `renderAction` entry point: `null` when this label is not (yet)
+ * this spike's verified scope:
+ *  - a table row (`StripeTable`'s own dedicated draw, `activity-
+ *    renderer-text.ts#renderCreoleTableGrid`, untouched);
+ *  - a non-LEFT alignment (`FtileBox.java:224-233`'s CENTER/RIGHT
+ *    branches each need an extra X translate `FtileBoxOld.ts#drawU`
+ *    already ports for mindmap/wbs -- not yet wired here, so falling
+ *    back is the honest choice over guessing the offset);
+ *  - a bare `----`/`====`/`....` separator (`HORIZONTAL_LINE`,
+ *    `CreoleStripeSimpleParser.ts#classifyStripeLine`): CONFIRMED
+ *    BLOCKER, not a guess -- `StripeSimple.ts#analyzeAndAdd` adds a
+ *    REAL `CreoleHorizontalLine` atom, whose `drawU` (`CreoleHorizontalLine
+ *    .ts:115`) calls `ug.draw(UHorizontalLine)`; `UGraphicSvg.ts#register`
+ *    (`u-graphic-svg.ts:164-178`) registers drivers for `URectangle`/
+ *    `UEllipse`/`ULine`/`UPolygon`/`UPath`/`DotPath`/`UText`/`UImage`/
+ *    `UComment`/`UEmpty` -- NOT `UHorizontalLine` -- so `ug.draw(...)`
+ *    throws `"No driver registered for shape UHorizontalLine"`
+ *    (`AbstractCommonUGraphic.ts:140`), jar-reproduced via `bigide-91-
+ *    bise382`. A real fix needs a NEW SVG driver plus the `Stencil`
+ *    context `UGraphicStencil`/`AbstractUGraphicHorizontalLine`
+ *    resolve the rule's clip bounds from (neither exists in this
+ *    port's `UGraphicSvg` yet) -- a `src/core/**` change, out of this
+ *    pass's remaining scope; `bigide`'s own row is ALREADY correct via
+ *    the pre-existing per-line path's `drawHorizontalRule`
+ *    (`activity-renderer-text.ts`, this mission's own STRIPE commit),
+ *    so falling back here costs nothing.
+ * The caller's own `<code>` dispatch (`renderActionCodeBlock`) already
+ * returns before reaching this function, so no code-block check here.
+ */
+export function renderActionLabel(
+  label: string,
+  theme: Theme,
+  fontSize: number,
+  box: { readonly x: number; readonly y: number },
+): string | null {
+  if (activityHorizontalAlignment(theme) !== 'left') return null;
+  const physicalLines = label.split('\n');
+  if (
+    physicalLines.some(
+      (l) => isTableRowLine(l) || classifyStripeLine(l).type === 'HORIZONTAL_LINE' || l.includes('[['),
+    )
+  ) {
+    return null;
+  }
+  const tb = buildActionTextBlock(label, theme, fontSize, 'activity');
+  const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
+  return drawActionTextBlock(tb, box.x, box.y, DRAW_MEASURER, font);
 }

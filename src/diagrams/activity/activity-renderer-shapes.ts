@@ -46,6 +46,7 @@ import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './ac
 import { renderActionCodeBlock } from './activity-renderer-action-code.js';
 import { floorActionLineHeight } from './tiles/gtile-action.js';
 import { actionLines, centeredBaselines, actionRuleFields } from './activity-renderer-line-heights.js';
+import { renderActionLabel } from './activity-creole-sheet.js';
 
 // Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
 // in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
@@ -238,12 +239,13 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
   const floored = floorActionLineHeight(actionSize);
 
-  // <code>...</code> block (`activity-renderer-action-code.ts`, split out
-  // for this file's 500-line cap): KLIMT-FLOOR applies to it too (every
-  // creole text atom, `AtomText.java:179-181`), hence `floored` not
-  // `actionSize` for the baseline Y.
+  // <code>...</code> block: KLIMT-FLOOR applies too, hence `floored`.
   const codeText = renderActionCodeBlock({ label, theme, cx, cy, floored, actionSize, opts });
   if (codeText !== null) return box + codeText;
+
+  // D5 Sheet spike (`FtileBox.java:178-181`); `renderActionLabel` doc.
+  const sheetText = renderActionLabel(label, theme, actionSize, node);
+  if (sheetText !== null) return box + sheetText;
 
   const lines = label.split('\n');
   // D1/D9: the single-line baseline is the N=1 case of the SAME
