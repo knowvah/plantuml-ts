@@ -798,7 +798,9 @@ describe('refusal coverage — baseline shape', () => {
     // unknown-ledger/add4-T0b-activity.json). Derivation: 6250 + 242 = 6492.
     // 6492 -> 6503 / 6250 -> 6261 / 242 at add4/close-b0 (2026-10-07): 11
     // svg-activity clone rows. Derivation: 6261 + 242 = 6503.
-    expect(manifest.fixtures.length).toBe(6503);
+    // 6503 -> 6505 / 6261 -> 6263 at add4/merge-T1a: 2 svg-activity clone
+    // rows. Derivation: 6263 + 242 = 6505.
+    expect(manifest.fixtures.length).toBe(6505);
     expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -864,7 +866,8 @@ describe('refusal coverage — baseline shape', () => {
     // 6183 -> 6250 at add4/T0b (66 newly captured corpus fixtures render on
     // both sides, plus jar-error page tajiri-57-sepu092, which we render).
     // 6250 -> 6261 at add4/close-b0 (11 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6261);
+    // 6261 -> 6263 at add4/merge-T1a (2 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6263);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
