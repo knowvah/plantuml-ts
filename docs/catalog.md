@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1396 modules · 5253 exported names.
+1396 modules · 5257 exported names.
 
 ## `src/`
 
@@ -1106,7 +1106,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `snake-merge.ts` | `MergedEdges`, `mergeSnakes` | `UGraphicForSnake`'s two-pass connector-merge mechanism (D1, T1b), ported as a pure function over the lane-pass-ordered edge list `assign- coordinates-full.ts` builds AFTER `placeSwimlanes` but BEFORE `compressGeometry` runs: merging reads |
 | `snake-text-position.ts` | `SnakeTextAlign`, `DEFAULT_LABEL_ALIGN`, `directionsCode`, `getTextBlockPosition`, `snakeMaxX` | Pure port of `Snake#getTextBlockPosition` (`activitydiagram3/ftile/Snake.java:244-270`): where an edge label's TOP-LEFT corner is drawn, given the edge's own points and the label's measured dimension. |
 | `swimlane-chrome.ts` | `SwimlaneChrome`, `SWIMLANE_BAND_INSET_X`, `computeSwimlaneChrome`, `bandReservationX` | The swimlane title band and divider Y-range, derived from the placed lane geometry. |
-| `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneEdge`, `LaneExtent`, `measureLaneExtents`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
+| `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneEdge`, `LaneExtent`, `measureLaneExtents`, `MeasureSpec`, `markMeasureSpec`, `measureSpecOf`, `specLaneItems`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-hline.ts` | `HlineCandidate`, `HlinePayload`, `RoutedHlineMeta`, `RoutedHline`, `routeHline` | Swimlane-aware extent for the `ConnectionHline` closing bar both `FtileIfWithLinks`/`FtileIfLongHorizontal` draw for `ConditionEndStyle .HLINE`: under swimlanes, `Swimlanes#drawWhenSwimlanes` redraws the WHOLE tree once per lane (`Swimlanes |
 | `swimlane-lane-origins.ts` | `LaneOrigins`, `DividerReservation`, `computeLaneOrigins` | The per-lane origin loop, split out of `swimlane-placement.ts` (this file's own 500-line hook -- mission `activity-loop-lane-translate` T1, same pure-move precedent as `swimlane-lanes.ts`, whose own header notes why: existing importers stay |
 | `swimlane-lanes.ts` | `laneAt`, `laneIn`, `laneOut` | The `laneAt`/`laneIn`/`laneOut` lane-inheritance helpers, split out of `swimlane-placement.ts` (`plans/activity-lane-capture` T2) to keep that file under the 500-line hook. |
