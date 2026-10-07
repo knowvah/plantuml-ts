@@ -407,7 +407,10 @@ export class GtileIfDown extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.left, y: this.diamond1Y };
+        // add4-T2d: `geoDiamond1.getInY() + opaleHeight`
+        // (`FtileIfDown.java:568-571`) -- diamond1's own inY is an
+        // EMPTY_DIAMOND's north-label height.
+        return { x: this.left, y: this.diamond1Y + this.diamond1.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };
