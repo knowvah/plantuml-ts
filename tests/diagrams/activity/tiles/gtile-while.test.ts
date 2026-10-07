@@ -66,8 +66,8 @@ describe('GtileWhile — geometry (header h=40, body h=80)', () => {
 
   // geo = diamond1.appendBottom(whileBlock): geo.h = header.h + body.h
   // (`FtileGeometryMerger.java:47`); height = geo.h + 4*12 + labelHeight
-  // (`FtileWhile.java:585`, labelHeight 0 -- no `back1` capture, see
-  // `gtile-while.ts`'s `labelHeight` field doc).
+  // (`FtileWhile.java:585`, labelHeight 0 here -- this fixture passes no
+  // `backIncoming`, see `gtile-while.ts`'s `labelHeight` field doc).
   it('height === header.height + body.height + 4 * HEXAGON_HALF_SIZE + labelHeight', () => {
     expect(tile.height).toBe(40 + 80 + 4 * HEXAGON_HALF_SIZE + tile.labelHeight);
   });
@@ -76,7 +76,7 @@ describe('GtileWhile — geometry (header h=40, body h=80)', () => {
     expect(tile.height).toBe(168);
   });
 
-  it('labelHeight === 0 (no back1 captured today)', () => {
+  it('labelHeight === 0 (no backIncoming passed)', () => {
     expect(tile.labelHeight).toBe(0);
   });
 
@@ -189,6 +189,39 @@ describe('GtileWhile — hasPointOut() is unconditionally true', () => {
     const body = makeTile(80, 80, false);
     const tile = new GtileWhile(header, body, { bounder: bounder, theme: theme });
     expect(tile.hasPointOut()).toBe(true);
+  });
+});
+
+// T3i (row SNAKE-LBL, `boxefe-81-situ725`): `getSuppHeightForLabel`
+// (`FtileWhile.java:597-601`) returns `back1.calculateDimension
+// (stringBounder).getHeight()`, `back1` being `backIncoming`'s own
+// measured text -- NOT the hardcoded `0` a prior note claimed.
+describe('GtileWhile — labelHeight measures backIncoming (FtileWhile.java:585,597-601)', () => {
+  const measuringBounder: StringBounder = {
+    getDimension: (text: string, size: number) => ({ width: text.length * size, height: 13 }),
+  };
+
+  it('labelHeight === the measured height of a non-empty backIncoming', () => {
+    const header = makeDiamond(60, 40);
+    const body = makeTile(80, 80);
+    const tile = new GtileWhile(header, body, {
+      bounder: measuringBounder,
+      theme,
+      backIncoming: 'incoming',
+    });
+    expect(tile.labelHeight).toBe(13);
+    // Cancels in `bodyOffsetY` (same derivation as the zero-label case
+    // above), so `height` grows by `labelHeight` but the body's own
+    // internal y does not move.
+    expect(tile.height).toBe(40 + 80 + 4 * HEXAGON_HALF_SIZE + 13);
+    expect(tile.bodyOffsetY).toBe(40 + 2 * HEXAGON_HALF_SIZE);
+  });
+
+  it('labelHeight === 0 when backIncoming is an empty string', () => {
+    const header = makeDiamond(60, 40);
+    const body = makeTile(80, 80);
+    const tile = new GtileWhile(header, body, { bounder: measuringBounder, theme, backIncoming: '' });
+    expect(tile.labelHeight).toBe(0);
   });
 });
 

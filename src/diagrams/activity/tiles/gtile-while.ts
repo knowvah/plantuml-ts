@@ -5,14 +5,15 @@ import { TileComposite } from './tile.js';
 import type { DiamondConditionTile } from './gtile-diamond-inside.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 
 /**
  * `bounder`/`theme` are bundled into one trailing object solely to keep
  * the constructor's own parameter count at the hook's 5-parameter limit
  * once {@link specialOut} joined {@link backward} as a real parameter
- * (mission `add2-T3b`, family WSPEC) -- neither field is read (kept from
- * before this bundling, when they were named `_bounder`/`_theme`).
- * `tile-layout.ts#tileWhile` is this class's only call site.
+ * (mission `add2-T3b`, family WSPEC). `tile-layout.ts#tileWhile` is this
+ * class's only call site. T3i: both fields are read now, to measure
+ * {@link GtileWhile.labelHeight} (`back1`'s own text height).
  */
 export interface GtileWhileContext {
   readonly bounder: StringBounder;
@@ -52,15 +53,24 @@ export class GtileWhile extends TileComposite {
    */
   readonly left: number;
   /**
-   * `back1`'s height, added to `height` (`FtileWhile.java:585,597-601`).
-   * `back1` is the `-> text;` line immediately before `endwhile`
-   * (`ActivityDiagram3.java:403-407`, `InstructionWhile.java:208-213`).
-   * Our tile engine tiles every `arrow-label` node to `null`
-   * (`tile-layout.ts`'s `'arrow-label'` case) and no baseline `while`
-   * fixture has one before `endwhile`, so this is always 0 today -- the
-   * capture itself is a separate, filed gap, not this task's write-set.
+   * `back1`'s own height, added to `height`
+   * (`FtileWhile.java:585,597-601`: `getSuppHeightForLabel` returns
+   * `back1.calculateDimension(stringBounder).getHeight()`). `back1` is
+   * `incoming1.getDisplay().create(fontArrow, ...)` (`:147`) -- the SAME
+   * `(incoming)` decoration this port already carries as {@link
+   * GtileWhileContext.backIncoming} for `walk-while-backward.ts
+   * #pushBackward1`'s own label push. T3i (row SNAKE-LBL,
+   * `boxefe-81-situ725`): this field used to be hardcoded `0` (a prior
+   * note mislabelled `back1` as an unrelated, uncaptured `arrow-label`
+   * node) -- `back1` is always created when the non-empty-body branch
+   * runs, `backward` or not, but ONLY the `backward` path threads a
+   * string this port can measure; the general `incoming(...)` case
+   * (`InstructionWhile.java:207-212`, no `backward:` block at all)
+   * is a separate, uncaptured gap, left at its pre-existing `0`.
+   * `fontArrow` is `activityFontSize(theme, 'arrow')`, the SAME category
+   * `gtile-fork.ts`'s own join-label measurement already uses.
    */
-  readonly labelHeight = 0;
+  readonly labelHeight: number;
   /** `left - header.left`: the header's x inside the tile. */
   readonly headerOffsetX: number;
   /**
@@ -149,6 +159,10 @@ export class GtileWhile extends TileComposite {
     this.backIncoming = ctx.backIncoming;
     this.backOutgoing = ctx.backOutgoing;
     this.specialOut = ctx.specialOut;
+    this.labelHeight =
+      ctx.backIncoming !== undefined && ctx.backIncoming !== ''
+        ? ctx.bounder.getDimension(ctx.backIncoming, activityFontSize(ctx.theme, 'arrow')).height
+        : 0;
     this.headerInY = header.getCoord(NORTH_HOOK).y;
     const headerLeft = header.getCoord(NORTH_HOOK).x;
     const bodyLeft = body.getCoord(NORTH_HOOK).x;
