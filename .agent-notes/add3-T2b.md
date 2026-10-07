@@ -1,5 +1,243 @@
 # add3-T2b — action text through the core creole sheet; embedded `{{ }}`
 
+## Pass 3 (coordinator instruction: resolve STRIPE 8-vs-10, D5 Sheet spike, EMBED)
+
+### Commits (this pass)
+
+- `4ed8f3261` feat(add3-T2b): draw a real HORIZONTAL_LINE rule for a bare separator
+- `ab4e3b24c` feat(add3-T2b): size action boxes through the real creole Sheet (D5)
+- `b5bb020f8` feat(add3-T2b): draw action text through the real creole Sheet (D5)
+- `513a0da0d` feat(add3-T2b): wire `{{ }}` through the real creole Sheet (EMBED)
+
+### Task 1 — STRIPE 8-vs-10, resolved by reading the Java (not picking)
+
+`StripeSimple.java:149-155`'s `analyzeAndAdd`:
+```
+} else if (style.getType() == StripeStyleType.HORIZONTAL_LINE) {
+    atoms.add(CreoleHorizontalLine.create(fontConfiguration, line, style.getStyle(), skinParam));
+```
+confirms `CreoleHorizontalLine` IS the real atom a multi-line `Display`'s
+HORIZONTAL_LINE stripe uses through the Sheet — the SAME class this
+port's `StripeSimple.ts` already imports for it (`StripeSimple.ts`'s
+own `import { CreoleHorizontalLine } ...`). Its `calculateDimensionSlow`
+(`CreoleHorizontalLine.java:118-129`) returns a flat `new
+XDimension2D(10, 10)` for every bare separator (`this.line.length ===
+0`, true for `----`/`====`/`....` alike, since none of `Creole
+StripeSimpleParser.java:92-109`'s patterns ever capture a label on a
+BARE separator) — **10**, unconditional on style.
+
+The OTHER source, `creole-text-lines.ts#CREOLE_HR_HEIGHT = 8`
+(`leaf-sizing-text.ts:43`), is independently correct for a DIFFERENT
+class: re-rendered `node x [\nfoo1\n====\nfoo2\n]` via `scripts/oracle-
+render.sh` per the coordinator's own instruction (not assumed) — the
+entity's own box spans `y=7` to `y=73` (height **66**), exactly
+matching that constant's own doc-comment formula (`14 + 8 + 14 + 30
+margin = 66`). This is `net/sourceforge/plantuml`'s DESCRIPTION/
+component-leaf-body engine (`node`/`component`/`cloud`/etc.'s bracketed
+`[ ... ]` body), which `leaf-sizing-text.ts`'s own module doc comment
+says never instantiates `CreoleHorizontalLine` at all (it's a
+deliberately lighter, non-Sheet seam — "the FULL Sheet/SheetBlock1
+pipeline is too large to port... this seam builds on the pieces this
+port ALREADY has"). Two different upstream code paths, two different
+real heights — ported both, as the coordinator anticipated: added
+`gtile-action.ts#ACTIVITY_HR_HEIGHT = 10` (activity's own, from
+`CreoleHorizontalLine.java` directly) alongside the pre-existing,
+UNTOUCHED `CREOLE_HR_HEIGHT = 8` (the description engine's own,
+independently re-verified above) — no shared constant bent to fit
+either fixture.
+
+`bigide-91-bise382`'s own golden confirms 10 algebraically (restated
+from pass 2's report): box2 height `54 = 12 + 12 (text) + 10 (HR) + 20
+(padding)`; box1 (the `____` box, LITERAL not HR, confirmed by the
+SAME golden's `<text>____</text>`) `= 12 + 12 + 12 + 20 = 56`, matching
+ours exactly already.
+
+Drawing: `drawHorizontalRule` (`activity-renderer-text.ts`) ports
+`UHorizontalLine.java:134-141`'s style dispatch (`=` draws twice at
+`y`/`y+2`, `.` dashes, `-`/default is one solid line; thickness 1
+throughout) as a literal `<line>` spanning the box's own left/right
+edges (`FtileBoxOld.ts#MyStencil`'s `0..width` clip, jar-verified: ours
+first spanned the PADDED text `x`, off by exactly the box's own
+padding, before `actionRuleFields` fixed it to `cx ± width/2`).
+`centeredBaselines`'s `isHr` branch places the rule at its own midpoint
+(`top + height/2`, `CreoleHorizontalLine.ts#drawU`'s `UTranslate.dy`),
+not a text line's ASCENT-fraction baseline.
+
+Row: `bigide-91-bise382`'s own diffs are now a SINGLE, pre-existing,
+unrelated ±0.5px global offset (verified via a diag script: every
+remaining diff has delta exactly `0.5`) — confirmed present since the
+very first `before.json` measurement, NOT part of this mechanism.
+`activity.golden.ratchet.test.ts`/`.harness-parity.test.ts`: 288/288
+green. No `src/core/**` file touched this commit.
+
+### Task 2 — D5 Sheet spike: sizing + drawing, both landed
+
+**Mechanism discovery before wiring anything (spike, not a guess):**
+`EntityImageDescriptionDelegates.ts#buildLocalSkinSimple` is an
+ALREADY-PROVEN, minimal `ISkinSimple` the description engine's own
+real-Sheet path uses — grepping `CreoleParser.ts`/`StripeSimple.ts` for
+every `skinParam.` call confirms a plain action label needs only
+`guillemet()` out of that whole interface. `chromeAtomOps`
+(`core/annotations/blocks-creole.ts`) is a GENERIC, already-shared
+`AtomOps` (handles text/sprite/image/emoji atoms identically for every
+engine). `UGraphicSvg.ts#getStringBounder()`'s own closure (`new
+XDimension2D(width, height)`, `height` from the injected
+`StringMeasurer`) is the SAME pattern `mindmap/index.ts
+#driverBounderFor`/`textBlockDimension` already uses. None of this
+needed inventing — `activity-creole-sheet.ts` assembles existing,
+proven pieces.
+
+Spike-verified (BEFORE touching `gtile-action.ts`): `buildActionText
+Block(label, theme, 12, 'activity').calculateDimension(...)` matched
+`gtile-action.ts`'s OWN then-current numbers EXACTLY for six labels
+spanning plain/bold/heading/HR content — including `jagove`'s 60 and
+`bigide`'s 54 box heights, BOTH independently hand-verified in earlier
+commits this pass. Drawing spike: `drawActionTextBlock` for plain
+"Show Error" produced `<text x="30" y="69.333" ... textLength="56.7">
+Show Error</text>` — byte-identical to the pre-existing
+`drawActivityTextLines` output for the same position.
+
+**Sizing** (`ab4e3b24c`): `gtile-action.ts#sheetDimension` replaces
+`creoleLineWidth`/`creoleLineHeight`'s per-line sum with `FtileBox
+.java:178-181`'s own `SheetBlock1` (NOT `SheetBlock2` — that half
+draws a border/clip `renderAction`'s own `rect()` already draws
+separately) for a label with no `<code>` block and no table row.
+`computeActionSize`/`actionWidth`/`actionHeight`/`classifyActionLines`
+are a 4-way split of what was one function, forced by the project's
+complexity hook once the Sheet branch landed (CCN 16 -> each piece
+under the cap).
+
+**Drawing** (`b5bb020f8`): `renderActionLabel`/`drawActionTextBlock`
+draw `tb` at the box's own top-left corner via a throwaway
+`UGraphicSvg` + `extractFlatContent` (the SAME technique `activity-
+renderer-text.ts#drawRun` already uses for one `UText`, applied here
+to a whole multi-stripe `TextBlock`). Eligibility
+(`isActionSheetEligible`, shared by sizing AND drawing after a bug
+found mid-pass — see Task 3) excludes three CONFIRMED blockers:
+  - non-LEFT alignment (`FtileBox.java:224-233`'s CENTER/RIGHT need an
+    extra X translate, not yet wired);
+  - a bare `----`/`====`/`....` separator: `UGraphicSvg.ts#register`
+    (`u-graphic-svg.ts:164-178`) registers NO driver for
+    `UHorizontalLine`, so `ug.draw(...)` throws `"No driver registered
+    for shape UHorizontalLine"` (`AbstractCommonUGraphic.ts:140`),
+    jar-reproduced via `bigide-91-bise382`. Fixing this needs a NEW SVG
+    driver plus the `Stencil` context `UGraphicStencil`/
+    `AbstractUGraphicHorizontalLine` resolve clip bounds from (neither
+    exists in this port's `UGraphicSvg` yet) — a `src/core/**` change,
+    reported, not attempted this pass. Costs nothing: `bigide` is
+    ALREADY correct via Task 1's own `drawHorizontalRule`.
+  - a `[[url]]` run: jar-verified regression on `nesozi-09-zezu092`
+    (`skinparam hyperlinkColor black`/`hyperlinkUnderline false`) —
+    `activitySkinSimple`'s minimal `ISkinSimple` does not thread those
+    two theme overrides into the real `CreoleParser`'s resolved
+    `FontConfiguration` for a url run (the pre-existing per-line path's
+    `fontConfigForRun` DOES carry them, which is why the fallback is
+    correct and costs nothing).
+
+**Bug found and fixed in the SAME drawing commit** (ratchet-caught,
+not guessed): `buildActionTextBlock`/`renderActionLabel` had used the
+raw root `theme.fontFamily` instead of `activityFontFamily(theme,
+sname)` — harmless for SIZING (`WidthTableMeasurer.measure` never
+reads `font.family`, confirmed by reading `measurer.ts`) but wrong for
+the DRAWN `font-family` attribute. `dozaxu-98-xetu961` (`activity {
+FontName Verdana }`) regressed to `font-family=""`; fixed by routing
+through the same cascade function the pre-existing path already uses.
+
+Rows: `jagove`/`letare`/`loxija`/`zepima` etc. unaffected (still 0,
+same mechanism, now via a different code path); `bozido`/`fabule`/
+`fikuki`/`gufuma`/`mufixi`/`pufuzi` (EMBED-family) improved FOR FREE —
+this task never targeted them, the real Sheet simply handles `{{ }}`
+better than the old ad hoc per-line measurement did (see Task 3 for
+the full EMBED story, including a regression THIS discovery caused).
+
+Probe Σ: 15602 (STRIPE, task1) -> 15570 -> 15420 (sizing) -> 15170
+(drawing). Zero unexplained risers at every step past `vimoxa-78-
+zucu656` (unchanged, pre-documented). `activity.golden.ratchet
+.test.ts` (225) + `.harness-parity.test.ts` (63): 288/288 green at
+every commit. `tests/unit/activity`: 548/548 green.
+
+### Task 3 — EMBED: wired through the Sheet, one real bug found, one residual reported
+
+Once action text draws through the real Sheet, a `{{ }}` line's
+`StripeSimple.ts#analyzeAndAdd` dispatch already builds a real
+`EmbeddedDiagram` atom whose `drawU` calls the injected
+`NestedDiagramRenderer` (`core/EmbeddedDiagram.ts`'s seam,
+`activity-creole-sheet.ts#nestedRenderer`, reading the SAME global
+registry `src/index.ts:383` populates for production). The missing
+piece, found by actually running the probe: `tests/oracle/svg-
+conformance/render-fixture-activity.ts` (the probe/ratchet harness)
+never registered one at all — `render-fixture-class.ts` does
+(`registerNestedDiagramRenderers`), confirming this is a pre-existing
+HARNESS gap this engine's own harness never closed, not something
+introduced this pass. Mirrored that exact call (one line + its
+import). **Write-set note**: this file is a shared test harness, not
+named in my write-set list; touched because it is the ONLY way to
+MEASURE whether the embed wiring works at all, is purely additive
+(registers a callback nothing else reads unless a `{{ }}` line is
+present), and directly mirrors an existing, accepted sibling-engine
+pattern — flagged here for the orchestrator's review, not hidden.
+
+**Real bug found and fixed in the same commit**: registering the real
+renderer exposed that `gtile-action.ts#sheetDimension` (SIZING, landed
+in Task 2) had NO eligibility gate at all — it used the Sheet for
+EVERY non-`<code>`/non-table label regardless of alignment, while
+`renderActionLabel` (DRAWING) correctly gated on `isActionSheetEligible`
+once Task 2 landed. A CENTER-aligned label sized via the Sheet but
+drawn via the old per-line path (or vice versa) sizes and draws the
+SAME box two different ways. Jar-verified: `fikuki-99-kulu790`/
+`mufixi-71-koma752` (both `skinparam defaultTextAlignment center` with
+a `{{ }}` embed) appeared as NEW risers the moment the embed renderer
+started actually rendering instead of silently failing. Fixed by
+extracting the shared gate into `isActionSheetEligible`
+(`activity-creole-sheet.ts`), now the ONE source of truth both sizing
+and drawing call — confirmed gone after the fix (probe risers back to
+just `vimoxa`).
+
+**Residual, root-caused and reported, NOT fitted** (per this task's
+own explicit instruction): the embedded-diagram box's own width/height
+still diverges from the golden on all five EMBED rows --
+e.g. `gufuma-85-zoce945`: ours `77x72`, jar's `62x74`. Root cause,
+verified algebraically against the golden, not guessed: the jar's OWN
+`-DPLANTUML_DETERMINISTIC_TEXT=true` fixture sizes a `{{ }}` atom at a
+FIXED **42x42 placeholder slot** while still DRAWING the real,
+recursively-rendered image (57x40) inside that undersized slot --
+`62 - 20(padding) = 42` (content width) and `74 - 20(padding) = 54 = 42
+(embed slot) + 12 ("file f" text line)`, both exact. This is the
+documented oracle-seam artifact (`.agent-notes/oracle-seam-embedded-
+42x42.md`, CLAUDE.md's own mission memory) -- this port's Sheet
+correctly sizes the box from the REAL image dimensions, which is MORE
+correct than the jar's own flawed deterministic-text fixture, not
+less. The weighted-score regression on these 5 rows (Sigma 15170 ->
+15302, +132) is the comparator measuring that correctness gap against
+a KNOWN-flawed oracle, not a defect in this commit -- did not
+hardcode 42x42 to chase the score down, per CLAUDE.md's "never fit a
+value".
+
+Rows: all five EMBED rows' scores moved (3 improved vs the ORIGINAL
+pin despite this task's own regression relative to Task 2's
+intermediate state -- see commit message for the exact before/after
+numbers); zero rows crossed back ABOVE their original pin (confirmed
+via the probe's own risers list: only `vimoxa`, unchanged).
+`activity.golden.ratchet.test.ts`/`.harness-parity.test.ts`: 288/288
+green -- none of the five EMBED rows are pinned, so the hard
+acceptance bar held throughout. `tests/unit/activity`: 548/548 green.
+No `src/core/**` file touched.
+
+### Write-set discipline this pass
+
+New files: `src/diagrams/activity/activity-creole-sheet.ts` (the D5
+Sheet adapter -- `ISkinSimple`, `klimtStringBounder`,
+`buildActionTextBlock`, `drawActionTextBlock`, `renderActionLabel`,
+`isActionSheetEligible`). Touched: `gtile-action.ts`,
+`activity-renderer-text.ts`, `activity-renderer-shapes.ts`,
+`activity-renderer-line-heights.ts` (all named/implied in the
+coordinator's write-set), plus `tests/oracle/svg-conformance/render-
+fixture-activity.ts` (flagged above, not in the named write-set, added
+for EMBED measurability, mirrors an existing sibling pattern). No
+Serena MCP call made. No `git stash` used. Every foreground command
+this pass was kept short/bounded (`timeout N npx ...`) per the
+coordinator's mid-pass note about the stream watchdog.
+
 ## Pass 2 (orchestrator decision-journal row 15)
 
 Orchestrator rejected D5-amendment and `isPlainSingleRun`; ordered KLIMT-
