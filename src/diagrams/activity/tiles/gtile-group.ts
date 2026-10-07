@@ -4,6 +4,9 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import type { StringMeasurer } from '../../../core/measurer.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { measurerAdapterOf } from './gtile-action.js';
 
 /** `FtileUtils.addHorizontalMargin(inner, 10)` (`FtileGroup.java:97`): a
  *  flat 10px margin added to BOTH sides of the body before any of this
@@ -15,6 +18,21 @@ const BODY_MARGIN = 10;
 /** `FtileGroup.java:74` -- `private final double diffYY2 = 20;`, the
  *  frame's own bottom padding below the (margined) body. */
 const BOTTOM_PAD = 20;
+
+/**
+ * `dimTitle.getWidth()` of the frame title. The title is a creole
+ * `Display` (`FtileGroup.java:104-108`: `title.create(fc, LEFT,
+ * skinParam)`), so `[[url label]]` measures as `label` and `**x**` as `x`
+ * -- measured through the SAME `creoleTextLines` lexer the renderer draws
+ * it with, never as the raw markup. Shared by this tile's sizing
+ * (`suppWidth`, `:160-167`), the renderer's tab (`USymbolFrame.java:76-84`)
+ * and the compression adapter's title slot (`USymbolFrame.java:150-156`).
+ */
+export function frameTitleWidth(title: string, measurer: StringMeasurer, theme: Theme): number {
+  if (title === '') return 0;
+  const font = { family: theme.fontFamily, size: activityFontSize(theme, 'composite') };
+  return Math.max(0, ...creoleTextLines(title, font, measurer).map((line) => line.width));
+}
 
 export class GtileGroup extends TileComposite {
   // Widened to `string` so subclasses (e.g. GtilePartition) can override
@@ -56,7 +74,8 @@ export class GtileGroup extends TileComposite {
     // `orig.width` is `margedBodyWidth` (the body already widened by
     // `FtileMarged`, `getInnerDimension`'s ink-scan correction unported --
     // see this class's own `drawU` counterpart's doc).
-    const suppWidth = Math.max(margedBodyWidth, titleMeasured.width + 20, 20) - margedBodyWidth;
+    const titleWidth = frameTitleWidth(title, measurerAdapterOf(bounder), theme);
+    const suppWidth = Math.max(margedBodyWidth, titleWidth + 20, 20) - margedBodyWidth;
     this.width = margedBodyWidth + suppWidth;
     // `:145-148` -- `getTranslate`: `(suppWidth/2, diffHeightTitle +
     // headerNoteHeight)`, drawn onto the already-`FtileMarged` body, whose

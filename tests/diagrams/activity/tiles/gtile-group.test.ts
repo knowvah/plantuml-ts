@@ -85,6 +85,15 @@ describe('GtileGroup — long title drives width', () => {
   });
 });
 
+// add4-T2b (PART-TITLE-CREOLE): the title is a creole `Display`
+// (`FtileGroup.java:104-108`), so `[[url label]]` sizes as `label`.
+describe('GtileGroup — creole title width', () => {
+  it('a [[url label]] title is measured as its label', () => {
+    const tile = new GtileGroup('[[https://google.com/ a long visible label]]', makeTile(10, 50), bounder, theme);
+    expect(tile.width).toBe('a long visible label'.length * 7 + 20);
+  });
+});
+
 describe('GtileGroup — bodyOffsetY', () => {
   const body = makeTile(100, 50);
   const tile = new GtileGroup('Title', body, bounder, theme);

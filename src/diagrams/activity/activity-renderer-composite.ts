@@ -15,7 +15,8 @@ import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { measureLineWidth } from './activity-text-placement.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
+import { frameTitleWidth } from './tiles/gtile-group.js';
 // `ASCENT_FRACTION` is re-imported BACK from `activity-renderer-shapes.ts`
 // (circular-but-safe: only read inside a function body, after both
 // modules finish loading, the same established shape `renderDiamond`'s
@@ -26,7 +27,7 @@ import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
 /** `USymbolFrame#drawFrame` (`:68-97`): the title-tab underline, an OPEN
  *  (unfilled) 4-point path from the tab's top-right corner down past a
  *  `cornersize` dog-ear cut to the frame's own left edge. `fmt()` (not raw
- *  interpolation): `textWidth` is derived from `measureLineWidth`'s
+ *  interpolation): `textWidth` is derived from `compositeTitleWidth`'s
  *  table-lookup sum, which can land a ULP off a clean decimal
  *  (`19.425000000000004`) -- `svg.ts#attrs` cleans that for every OTHER
  *  numeric attribute in this file, but a `d` string's embedded numbers
@@ -40,6 +41,19 @@ function compositeTabPath(x: number, y: number, textWidth: number, textHeight: n
   return `M${x1},${fmt(y)} L${x1},${y2} L${x2},${y3} L${fmt(x)},${y3}`;
 }
 
+/** The renderer's own width table -- the SAME `WidthTableMeasurer` class
+ *  `activity-text-placement.ts#measureLineWidth` reads. */
+const TITLE_MEASURER = new WidthTableMeasurer();
+
+/**
+ * `dimTitle.getWidth()` of the frame title (`USymbolFrame.java:146,150`),
+ * shared by the renderer and the compression adapter
+ * (`layout/compress/shapes-of-frame.ts`) so both read one width.
+ */
+export function compositeTitleWidth(theme: Theme, title: string): number {
+  return frameTitleWidth(title, TITLE_MEASURER, theme);
+}
+
 /**
  * `FtileGroup#drawU` (`:209-227`) + `USymbolFrame#asBig`'s `drawU`
  * (`:142-162`): the plain frame `rect` (unchanged from before this
@@ -47,10 +61,11 @@ function compositeTabPath(x: number, y: number, textWidth: number, textHeight: n
  * fixed `(3, 1)` inset. `node.label` carries the title verbatim
  * (`tile-coordinates.ts#walkTileGroup`).
  * `USymbolFrame#getWTitle`/`getYpos` (`:76-104`)'s `dimTitle.getWidth() ==
- * 0` branch (an untitled frame) is ported; its `asBig`'s own `widthFull -
- * widthTitle < 25` `SpecialText` wrap (`:152-156`, an over-wide-title
- * fallback) is NOT -- no PART cohort row's title is wide enough to reach
- * it (every row's title is short relative to its own box).
+ * 0` branch (an untitled frame) is ported. `asBig`'s `widthFull -
+ * widthTitle < 25` branch (`:152-156`) draws the SAME text either way
+ * (`AbstractUGraphic.java:121-122` draws a `SpecialText` as its title); the
+ * branch only changes the compression footprint, which
+ * `layout/compress/shapes-of-frame.ts#frameTitleShape` ports.
  */
 export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const strokeWidth = activityLineThickness(theme, 'composite');
@@ -58,7 +73,7 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
 
   const fontSize = activityFontSize(theme, 'composite');
   const title = node.label ?? '';
-  const titleWidth = title === '' ? 0 : measureLineWidth(theme, fontSize, title);
+  const titleWidth = compositeTitleWidth(theme, title);
   // `getWTitle`/`getYpos`/`drawFrame`'s own `cornersize` local (`:76-
   // 84,99-104`): an EMPTY title falls back to a width/height-derived tab.
   // `WidthTableMeasurer#measure`'s height is always the raw font size
