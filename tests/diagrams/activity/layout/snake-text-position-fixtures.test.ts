@@ -80,14 +80,13 @@ describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', ()
     expect(textPosition(ours, 'incoming').y).toBe(textPosition(golden, 'incoming').y);
   });
 
-  // "dsc_5" keeps a 1.528px residual (jar 98.5). Ours computes the LEFT
-  // default position on the COMPRESSED points; the jar computes it on the
-  // raw points and the compressing `UGraphic` then moves the text as one
-  // translate (`UGraphicCompressOnXorY`). Owner: edge-label placement after
-  // compression (`renderer.ts#renderEdgeLabelAligned`). PINNED to our
-  // current output (a regression guard), not jar parity.
-  it('Backward2 "dsc_5" y: pinned at the current (not jar-equal) value', () => {
-    expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(100.028, 3);
+  // add4-T3a (R2): "dsc_5" is placed on the RAW worm (`Snake.java:244-270`;
+  // `Worm#getPoint` resolves only the Worm's own translate, `Worm.java
+  // :322-330`) and its draw point mapped through `ct()`
+  // (`UGraphicCompressOnXorY.java:87-128`) -- `compress/edge-label-anchor.ts`.
+  // Was pinned at 100.028 (placed on the compressed points).
+  it('Backward2 "dsc_5" y: matches the jar exactly', () => {
+    expect(textPosition(ours, 'dsc_5').y).toBe(textPosition(golden, 'dsc_5').y);
   });
 });
 
@@ -96,10 +95,9 @@ describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', ()
  * 105-106,437-465`), end to end -- every fixture below was rendered
  * through `scripts/oracle-render.sh` and asserted against BOTH the
  * real jar and our own port. Canvas `width`/`height` and the label's
- * own `x` now match the jar EXACTLY in every case; `y` carries the
- * same creole-ascent residual `while-backward-bottom` already
- * documents above (not re-derived here -- same mechanism, same
- * boundary).
+ * own `x` now match the jar EXACTLY in every case; since add4-T3a (R2,
+ * raw-worm placement mapped through compression) so does `y` for the
+ * uncoloured label.
  */
 describe('generic -> label; -- default-arrow-label (start;:A;->hello;:B;stop;)', () => {
   const { ours, golden } = renderFixture('default-arrow-label');
@@ -113,8 +111,10 @@ describe('generic -> label; -- default-arrow-label (start;:A;->hello;:B;stop;)',
     expect(textPosition(ours, 'hello').x).toBe(textPosition(golden, 'hello').x);
   });
 
-  it('"hello" y: pinned at the current (not jar-equal) value', () => {
-    expect(textPosition(ours, 'hello').y).toBeCloseTo(109.778, 3);
+  // add4-T3a (R2): was pinned at 109.778; the raw-worm placement mapped
+  // through compression (`edge-label-anchor.ts`) lands on the jar's 106.5.
+  it('"hello" y: matches the jar exactly', () => {
+    expect(textPosition(ours, 'hello').y).toBe(textPosition(golden, 'hello').y);
   });
 });
 

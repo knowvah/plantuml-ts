@@ -19,12 +19,10 @@ import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
-import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
-import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
-import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
+import { edgeLabelLayout } from './edge-label-anchor.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -355,21 +353,19 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
  * convention: "from the first line's own ink-top to the last line's own
  * ink-bottom (max width across lines)"; the per-line slots touch, so the
  * envelope is the same slot set.
+ * add4-T3a: the position is `edge-label-anchor.ts#edgeLabelLayout`, the
+ * renderer's own, so on the ON_Y pass the box sits at the label's
+ * X-compressed raw anchor, as the ON_Y `SlotFinder` sees it.
  */
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
-  if (edge.label === undefined) return undefined;
-  const size = activityFontSize(theme, 'arrow');
-  const lines = edge.label.split('\n');
+  const layout = edgeLabelLayout(edge, theme);
+  if (layout === undefined) return undefined;
+  const { lines, size } = layout;
   const width = Math.max(...lines.map((l) => bounder.getDimension(l, size).width));
-  const placeDim = {
-    width: Math.max(...lines.map((l) => measureLineWidth(theme, size, l))),
-    height: size * lines.length,
-  };
-  const position = getTextBlockPosition(edge.points, placeDim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
-  const first = centeredFirstBaselineY(position.y + placeDim.height / 2, size, lines.length);
+  const first = layout.baselineY;
   const last = first + size * (lines.length - 1);
   const height = last - first + bounder.getDimension(lines[0]!, size).height;
-  return { kind: 'text', x: position.x, y: last, width, height };
+  return { kind: 'text', x: layout.x, y: last, width, height };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its

@@ -53,11 +53,10 @@ describe('lane-tagged reservations', () => {
   });
 
   // A same-lane arrow label's reservation is drawn and measured in its lane.
-  // The one remaining diff is the label's own baseline (+3.278), which the
-  // same markup shows with no swimlanes at all: not a lane mechanism.
-  it('lane-res-inlabel matches the jar except the lane-independent label y', () => {
+  // add4-T3a (R2): the label baseline (+3.278 before) is placed on the raw
+  // worm and mapped through compression (`compress/edge-label-anchor.ts`).
+  it('lane-res-inlabel renders equal to the jar', () => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, 'lane-res-inlabel');
-    const paths = compareSvg(ours, golden, 'deterministic').diffs.map((d) => d.path);
-    expect(paths).toEqual(['svg/g[1]/text[5]/@y']);
+    expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
   });
 });

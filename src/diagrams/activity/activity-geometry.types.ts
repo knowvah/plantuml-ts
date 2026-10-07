@@ -141,6 +141,17 @@ export interface ActivityEdgeGeo {
    * compress axes by `transformEdge`, same as {@link midArrowAt}.
    */
   emphasizeAt?: { x: number; y: number };
+  /**
+   * add4-T3a (R2): how far compression moved this edge's label off the
+   * position `Snake#getTextBlockPosition` gives on `points`. Upstream places
+   * the label on the RAW worm (`ftile/Snake.java:244-270`, `Worm#getPoint`
+   * resolves only the Worm's own translate, `ftile/Worm.java:322-330`) and
+   * maps its `UText` draw point through `ct()` at draw time
+   * (`klimt/compress/UGraphicCompressOnXorY.java:87-128`). Set by
+   * `compress/edge-label-anchor.ts#withLabelDeltas`; a delta rather than a
+   * point so rigid translates of `points` carry it. Absent = zero.
+   */
+  labelDelta?: { x: number; y: number };
 }
 
 export interface SwimlaneGeo {
