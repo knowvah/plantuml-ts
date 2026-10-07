@@ -42,6 +42,27 @@ export interface GtileGroupOptions {
   /** `CommandPartition3#getUSymbol(type)` (`:89-106`) for the three
    *  non-frame keywords; it changes only `drawU`, never the geometry. */
   readonly usymbol?: CompositeUSymbol;
+  /** add4-T3c: the body's own `LimitFinder` ink `maxX`, body-local
+   *  (`layout/canvas-origin-group-ink.ts#groupInnerInkMaxX`); `undefined`
+   *  when the body draws nothing. */
+  readonly innerInkMaxX?: number;
+}
+
+/** `FtileGroup.java:183-184` -- `if (missingWidth > 0) return
+ *  orig.addDim(missingWidth + 5, 0)`: the `5` past the overrun. */
+const MISSING_WIDTH_PAD = 5;
+
+/**
+ * `getInnerDimensionSlow` (`FtileGroup.java:178-186`): `orig` is the
+ * `FtileMarged` body (`:97`), whose `drawU` draws the body `BODY_MARGIN`
+ * to the right (`FtileMarged.java:108-110`), so the replayed ink `maxX` is
+ * `BODY_MARGIN + innerInkMaxX`. `addDim` widens only `width`; `left` is
+ * kept (`FtileGeometry.java:174-176`).
+ */
+function innerDimensionWidth(margedBodyWidth: number, innerInkMaxX: number | undefined): number {
+  if (innerInkMaxX === undefined) return margedBodyWidth;
+  const missingWidth = BODY_MARGIN + innerInkMaxX - margedBodyWidth;
+  return missingWidth > 0 ? margedBodyWidth + missingWidth + MISSING_WIDTH_PAD : margedBodyWidth;
 }
 
 export class GtileGroup extends TileComposite {
@@ -83,7 +104,7 @@ export class GtileGroup extends TileComposite {
     // .getHeight() + 20)`. Was `titleMeasured.height + 8`, unsourced.
     const diffHeightTitle = Math.max(25, titleMeasured.height + 20);
     this.titleHeight = diffHeightTitle;
-    const margedBodyWidth = body.width + 2 * BODY_MARGIN;
+    const margedBodyWidth = innerDimensionWidth(body.width + 2 * BODY_MARGIN, opts.innerInkMaxX);
     // `:160-167` -- `suppWidth`: `max(orig.width, dimTitle.width + 20,
     // dimHeaderNote.width + 20) - orig.width`. `headerNote` is always the
     // empty `TextBlock` (`:110-113`, the `displayNote` branch is

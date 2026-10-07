@@ -371,6 +371,28 @@ interface CanvasOrigin {
   readonly rawHeight: number;
 }
 
+/** The draw calls one Ftile subtree makes, as the walk records them. */
+export interface InkSource {
+  readonly nodes: readonly ActivityNodeGeo[];
+  readonly edges: readonly ActivityEdgeGeo[];
+  readonly reservations: readonly Reservation[];
+}
+
+/**
+ * `LimitFinder`'s `MinMax` over every node, edge and `UEmpty`/`URectangle`
+ * reservation of `src` (`LimitFinder.java:133-188`), as unbounded (`+-Infinity`)
+ * corners when `src` draws nothing (`MinMaxMutable.getEmpty(false)`,
+ * `MinMaxMutable.java:45-50`). Shared by the root canvas scan and add4-T3c's
+ * `FtileGroup#getInnerMinMax` emulation (`canvas-origin-group-ink.ts`).
+ */
+export function inkBoundsOf(src: InkSource, theme: Theme): MutableInkBounds {
+  const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+  for (const n of src.nodes) extendForNode(acc, n, theme);
+  for (const e of src.edges) extendForEdge(acc, e, theme);
+  for (const r of src.reservations) extendForReservation(acc, r);
+  return acc;
+}
+
 /** {@link computeCanvasOrigin}'s own inputs, bundled to keep that function
  *  under the file's 5-parameter limit (T3i added `theme` as a 6th). */
 interface CanvasOriginInput {
@@ -390,11 +412,8 @@ interface CanvasOriginInput {
  *  near-corner shift and the final (ceiled) canvas size from it. */
 function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   const { nodes, edges, swimlanes, reservations, baseY, theme, contentMaxY } = input;
-  const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-  for (const n of nodes) extendForNode(acc, n, theme);
-  for (const e of edges) extendForEdge(acc, e, theme);
+  const acc = inkBoundsOf({ nodes, edges, reservations }, theme);
   for (const s of swimlanes) extendForSwimlane(acc, s);
-  for (const r of reservations) extendForReservation(acc, r);
   extendForSwimlaneTitles(acc, swimlanes, baseY, theme);
   extendForLaneDivider(acc, swimlanes, baseY, contentMaxY);
   if (!Number.isFinite(acc.minX)) {

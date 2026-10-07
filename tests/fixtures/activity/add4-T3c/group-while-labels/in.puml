@@ -1,0 +1,7 @@
+@startuml
+group G
+while (more?) is (yes)
+:step;
+endwhile (no)
+end group
+@enduml
