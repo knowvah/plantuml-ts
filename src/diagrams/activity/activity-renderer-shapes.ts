@@ -132,6 +132,18 @@ export function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
 }
 
+/** add4-T2d (KLIMT-FLOOR, `loxija-71-joku558`): a diamond label line is an
+ *  `AtomText` whose block height is floored at 10 (`AtomText.java:179-181`,
+ *  `if (h < 10) h = 10`) while its baseline stays at the RAW `rect.height -
+ *  descent` (`AtomText.java:213-215`), and `FtileDiamondInside#drawU` centres
+ *  the floored block (`ly = (dimTotal.height - dimLabel.height) / 2`,
+ *  `FtileDiamondInside.java:94-96`). So the first baseline is `cy -
+ *  N * max(size, 10) / 2 + size * ASCENT_FRACTION`; identical to
+ *  {@link centeredFirstBaselineY} for every `size >= 10`. */
+export function flooredFirstBaselineY(cy: number, fontSize: number, lineCount: number): number {
+  return cy - (floorActionLineHeight(fontSize) * lineCount) / 2 + fontSize * ASCENT_FRACTION;
+}
+
 /** `fontSize` defaults to the action box's size (`gtile-action.ts`); a
  *  DIFFERENT element passes its own. `opts` (`activity-text-placement.ts`)
  *  picks both the D3 colour bucket and the D2 `x` (LEFT/CENTER/RIGHT for
@@ -291,7 +303,7 @@ export function renderHexagonLabel(
   const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
   return lines.length > 1
     ? renderHexagonMultilineLabel(lines, cx, cy, theme, opts)
-    : renderLabel(label ?? '', cx, centeredFirstBaselineY(cy, condSize, 1), theme, opts);
+    : renderLabel(label ?? '', cx, flooredFirstBaselineY(cy, condSize, 1), theme, opts);
 }
 
 export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {

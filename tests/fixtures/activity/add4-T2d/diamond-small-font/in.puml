@@ -1,0 +1,17 @@
+@startuml
+skinparam activityDiagramFontSize 6
+skinparam activityDiamondFontSize 6
+start
+if (first line\nsecond) then (yes)
+  :a;
+else (no)
+  :b;
+endif
+repeat
+  :c;
+repeat while (one\ntwo\nthree)
+while (w?)
+  :d;
+endwhile
+stop
+@enduml
