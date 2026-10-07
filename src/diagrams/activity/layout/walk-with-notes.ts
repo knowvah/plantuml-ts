@@ -16,6 +16,7 @@ import type { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { NoteStack, StackedNote } from '../tiles/gtile-with-notes.js';
 import type { GtileNoteOpale } from '../tiles/gtile-note.js';
 import type { ActivityNodeGeo } from '../activity-geometry.types.js';
+import type { Reservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode, walkTile } from './tile-coordinates.js';
 
@@ -64,6 +65,32 @@ interface StackOrigin {
   readonly lane: string | undefined;
 }
 
+/**
+ * `TextBlockUtils.withMargin(opale, 10, 10)` (`FtileWithNotes.java:134`)
+ * returns a `TextBlockMarged` (`klimt/shape/TextBlockMarged.java:51-58`),
+ * whose `drawU` (`:74-81`) draws `ug.draw(UEmpty.create(dim))` -- the FULL
+ * outer (margin-inclusive) box -- BEFORE translating in and drawing the
+ * inner `opale`. `UEmpty` is not `UShapeIgnorableForCompression`
+ * (`SlotFinder#drawEmpty`, `SlotFinder.java:119-125`), so this margin box
+ * occupies its full extent on BOTH axes unconditionally, unlike
+ * `FtileMarged` (a pure translate, `FtileMarged.java:97-99`, no shape at
+ * all) -- the two "margin" wrappers this mission has ported are NOT the
+ * same primitive.
+ *
+ * T3j (row jogami-42-jaji869, GROUPNOTE riser): omitting this reservation
+ * left only the note's own INNER `noteBox()` polygon (`shapes-of.ts`)
+ * occupying compression space, undercounting the note's true footprint by
+ * exactly {@link NOTE_STACK_MARGIN} on its leading edge -- enough to turn
+ * an 8px (correctly unremovable, `smaller(5)`'s `size <= 2*margin` floor)
+ * gap between the frame's left edge and the note into an 18px (removable)
+ * one.
+ */
+function marginBoxReservation(origin: StackOrigin, entry: StackedNote, stackWidth: number): Reservation {
+  const x = origin.originX + origin.stackX + (stackWidth - entry.outerWidth) / 2;
+  const y = origin.originY + entry.y;
+  return { x, y, width: entry.outerWidth, height: entry.outerHeight };
+}
+
 /** One stacked note's own `kind: 'note'` push -- the SAME shape
  *  `tile-coordinates.ts`'s `'gtile-note-opale'` case pushes, minus
  *  `spikeTip` (`FtileWithNotes`'s own Opale is always `withLink=false`,
@@ -71,6 +98,7 @@ interface StackOrigin {
  *  the stack's own outer origin; `entry.y` is this note's own offset
  *  WITHIN the stack (flush, no gap, `gtile-with-notes.ts#buildStack`). */
 function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: number): void {
+  origin.out.reservations.push(marginBoxReservation(origin, entry, stackWidth));
   const noteX = origin.originX + origin.stackX + (stackWidth - entry.outerWidth) / 2 + NOTE_STACK_MARGIN;
   const noteY = origin.originY + entry.y + NOTE_STACK_MARGIN;
   const node: ActivityNodeGeo = {
