@@ -199,7 +199,7 @@ describe('GtileIfWithLinks — T1p-a conditionEndStyle hline, both branches have
   // `getYdelta1b`) still reads `hasTwoBranches` directly and is unaffected.
   const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
-  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, 'hline');
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, { conditionEndStyle: 'hline' });
 
   // geoTotal = appendBottom(geoA{left:110,w:200,h:74}, merge{left:0,w:0,h:12})
   //          = {left:110,w:200,h:86}. ydelta1a=10, ydelta1b=6 (hasTwoBranches
@@ -225,5 +225,132 @@ describe('GtileIfWithLinks — conditionEndStyle defaults to diamond when omitte
 
   it('defaults conditionEndStyle to diamond', () => {
     expect(tile.conditionEndStyle).toBe('diamond');
+  });
+});
+
+// Baseline (no notes) for this same branch1/branch2 pair: width=200, height=114,
+// left=110, diamond1X=98, diamond1Y=0, tile1X=10, tile2X=130, branchY=34 --
+// see the file's own first `describe` block for the full derivation.
+// `FtileIfWithDiamonds.java:79-111` (add3-T2a-2, IFNOTE for `with-links`).
+describe('GtileIfWithLinks — own LEFT note (add3-T2a-2 IFNOTE)', () => {
+  const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  // Baseline diamond1X0 = 98; a 150-wide note overhangs it by 52 ->
+  // xDeltaNote = 52. yDeltaNote = 30 (the note's own height).
+  const note = { text: 'left note', position: 'left' as const, box: { width: 150, height: 30 } };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, { notes: [note] });
+
+  it('widens by xDeltaNote(52) + suppWidthNode(0): 200 -> 252', () => {
+    expect(tile.width).toBe(252);
+  });
+
+  it('grows by yDeltaNote(30), baked into the nude section once: 114 -> 144', () => {
+    expect(tile.height).toBe(144);
+  });
+
+  it('diamond1X shifts right by xDeltaNote: 98 -> 150', () => {
+    expect(tile.diamond1X).toBe(150);
+  });
+
+  it('diamond1Y drops by yDeltaNote to make room for the note above it: 0 -> 30', () => {
+    expect(tile.diamond1Y).toBe(30);
+  });
+
+  it('tile1X shifts right by xDeltaNote: 10 -> 62', () => {
+    expect(tile.tile1X).toBe(62);
+  });
+
+  it('tile2X shifts right by xDeltaNote too -- the whole composite widened, branch2 stays anchored to the (new) right edge: 130 -> 182', () => {
+    expect(tile.tile2X).toBe(182);
+  });
+
+  it('branchY drops by yDeltaNote too, same as diamond1Y: 34 -> 64', () => {
+    expect(tile.branchY).toBe(64);
+  });
+
+  it('noteY sits at the composite\'s own top, 0 -- the room `diamond1Y`/`branchY` dropped into', () => {
+    expect(tile.noteY).toBe(0);
+  });
+
+  it('exposes the note on opaleLeft, opaleRight stays null', () => {
+    expect(tile.opaleLeft).toEqual(note);
+    expect(tile.opaleRight).toBeNull();
+  });
+});
+
+describe('GtileIfWithLinks — own RIGHT note (add3-T2a-2 IFNOTE)', () => {
+  const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  // pos1 = diamond1X0(98) + diamond1.width(24) + 90 = 212; pos2 = baseline
+  // totalWidth(200); suppWidthNode = 212 - 200 = 12. yDeltaNote = 20.
+  const note = { text: 'right note', position: 'right' as const, box: { width: 90, height: 20 } };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, { notes: [note] });
+
+  it('widens by suppWidthNode(12): 200 -> 212', () => {
+    expect(tile.width).toBe(212);
+  });
+
+  it('grows by yDeltaNote(20): 114 -> 134', () => {
+    expect(tile.height).toBe(134);
+  });
+
+  it('diamond1X is UNCHANGED by a right note (98)', () => {
+    expect(tile.diamond1X).toBe(98);
+  });
+
+  it('diamond1Y drops by yDeltaNote: 0 -> 20', () => {
+    expect(tile.diamond1Y).toBe(20);
+  });
+
+  it('tile2X is UNCHANGED -- suppWidthNode cancels out of its own formula (branch2 stays put; only the right edge grows)', () => {
+    expect(tile.tile2X).toBe(130);
+  });
+
+  it('exposes the note on opaleRight, opaleLeft stays null', () => {
+    expect(tile.opaleRight).toEqual(note);
+    expect(tile.opaleLeft).toBeNull();
+  });
+});
+
+describe('GtileIfWithLinks — a second same-side note is silently dropped (FtileIfWithDiamonds.java:85-86,96-97)', () => {
+  const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const first = { text: 'first', position: 'left' as const, box: { width: 150, height: 30 } };
+  const second = { text: 'second', position: 'left' as const, box: { width: 300, height: 99 } };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, { notes: [first, second] });
+
+  it('keeps only the FIRST left note (encounter order)', () => {
+    expect(tile.opaleLeft).toEqual(first);
+  });
+
+  it('the dropped second note never widens/heightens the composite (same geometry as the single-note case)', () => {
+    expect(tile.width).toBe(252);
+    expect(tile.height).toBe(144);
+  });
+});
+
+describe('GtileIfWithLinks — both LEFT and RIGHT notes together', () => {
+  const branch1: IfWithLinksBranch = { tile: stubTile(100, 50), isEmpty: false };
+  const branch2: IfWithLinksBranch = { tile: stubTile(60, 40), isEmpty: false };
+  const left = { text: 'left', position: 'left' as const, box: { width: 150, height: 30 } };
+  const right = { text: 'right', position: 'right' as const, box: { width: 90, height: 20 } };
+  const tile = GtileIfWithLinks.create(diamond(), branch1, branch2, 0, { notes: [left, right] });
+
+  it('yDeltaNote is the TALLER of the two notes (30, not 20)', () => {
+    expect(tile.diamond1Y).toBe(30);
+  });
+
+  it('carries both xDeltaNote (from LEFT) and suppWidthNode (from RIGHT, read with xDeltaNote already applied)', () => {
+    // pos1(right) now reads diamond1X AFTER the left note's own xDeltaNote
+    // (150) + diamond1.width(24) + 90 = 264; pos2 = geoTotal.width at that
+    // point (xDeltaNote=52, suppWidthNode=0) = 252 + 0 = 252 (same nude
+    // width as the LEFT-only case, since suppWidthNode is still 0 here).
+    // suppWidthNode = 264 - 252 = 12.
+    expect(tile.width).toBe(252 + 12);
+  });
+
+  it('exposes both notes', () => {
+    expect(tile.opaleLeft).toEqual(left);
+    expect(tile.opaleRight).toEqual(right);
   });
 });
