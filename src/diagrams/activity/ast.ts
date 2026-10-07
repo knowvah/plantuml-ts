@@ -349,13 +349,11 @@ export interface ActivitySplit {
   branches: ActivityNode[][];
   swimlane?: string;
   /**
-   * The lane current at `end split`, when it differs from {@link swimlane}.
-   * Unlike fork, split has no second capture point at `split again`
-   * (`InstructionSplit.java:128-134` opens each further list with the
-   * DEFAULT lane, never re-reading `swimlaneOut`).
+   * The lane current at `end split`, when it differs from {@link swimlane}. Unlike fork, split
+   * has no second capture point at `split again` (`InstructionSplit.java:128-134` opens each
+   * further list with the DEFAULT lane, never re-reading `swimlaneOut`).
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionSplit.java:136-141
-   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at
-   *   `end split`.
+   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at `end split`.
    */
   swimlaneOut?: string;
 }
@@ -365,6 +363,8 @@ export interface ActivityNote {
   text: string;
   position: 'left' | 'right';
   swimlane?: string;
+  /** add4-T1c: `#color` (BACK), raw with its `#`; omitted when absent. @see CommandNote3.java:65-67,121 */
+  color?: string;
 }
 
 /**

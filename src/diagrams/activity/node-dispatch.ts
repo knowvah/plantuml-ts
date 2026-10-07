@@ -14,29 +14,18 @@
  */
 
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
-import type {
-  ActivityAction,
-  ActivityArrowLabel,
-  ActivityNode,
-  ActivityNote,
-  ActivityRepeat,
-  ActivityWhile,
-} from './ast.js';
+import type { ActivityAction, ActivityArrowLabel, ActivityNode, ActivityRepeat, ActivityWhile } from './ast.js';
 import {
   RE_ACTION,
   RE_ACTION_CLOSE,
   RE_ARROW_LABEL,
   RE_ENDWHILE,
   RE_ESCAPED_NEWLINE,
-  RE_NOTE_END,
-  RE_NOTE_MULTI,
-  RE_NOTE_SINGLE,
   RE_REPEAT_HEAD,
   RE_REPEAT_INLINE_TERMINATOR,
   RE_REPEATWHILE,
   RE_SWIMLANE,
   RE_WHILE,
-  defaultLeftPosition,
   isRefusal,
   matchesStopKeyword,
   setCurrentSwimlane,
@@ -50,10 +39,18 @@ import {
 } from './dispatch-support.js';
 import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel, pushParsedNode } from './list-backward-dispatch.js';
+import {
+  tryActivityList,
+  tryBackward,
+  tryCircleSpot,
+  tryGoto,
+  tryLabel,
+  pushParsedNode,
+} from './list-backward-dispatch.js';
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
+import { tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
 
 // ---------------------------------------------------------------------------
@@ -322,48 +319,6 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
     ...(closerSwimlane !== undefined ? { swimlaneOut: closerSwimlane } : {}),
   };
   return { idx: close.nextIdx, node };
-}
-
-/** `(floating )?note (left|right)? (#color)? : text` (single-line); group
- *  3 is text. add3-T3d exception (NOTE-CREOLE): `CommandNote3.java:122`'s
- *  `Display.getWithNewlines` unescapes `\n` same as
- *  {@link unescapeLabelNewlines} already does for if/fork/repeat. */
-function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
-  if (noteSingleMatch === null) return null;
-  const direction = noteSingleMatch[2]?.toLowerCase();
-  const position = defaultLeftPosition(direction);
-  const node: ActivityNote = {
-    kind: 'note',
-    text: unescapeLabelNewlines(noteSingleMatch[3]!.trim()),
-    position,
-    ...swimlaneSpread(ctx),
-  };
-  return { idx: idx + 1, node };
-}
-
-/** `(floating )?note (left|right)? (#color)?` (multi-line, ends with
- *  {@link RE_NOTE_END}'s `end note`/`endnote`). Group 1 is `floating`
- *  (dropped), group 2 is direction (color is non-capturing). */
-function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  const noteMultiMatch = RE_NOTE_MULTI.exec(line);
-  if (noteMultiMatch === null) return null;
-  const { lines } = ctx;
-  const direction = noteMultiMatch[2]?.toLowerCase();
-  const position = defaultLeftPosition(direction);
-  let cursor = idx + 1;
-  const textLines: string[] = [];
-  while (cursor < lines.length) {
-    const inner = lines[cursor]!.trim();
-    if (RE_NOTE_END.test(inner)) {
-      cursor++;
-      break;
-    }
-    if (inner !== '') textLines.push(inner);
-    cursor++;
-  }
-  const node: ActivityNote = { kind: 'note', text: textLines.join('\n'), position, ...swimlaneSpread(ctx) };
-  return { idx: cursor, node };
 }
 
 /** Arrow label: -> label ;  or  -><back:color> label ; -- annotates the

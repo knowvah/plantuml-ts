@@ -98,11 +98,19 @@ export class GtileNote extends TileLeaf {
   readonly height: number;
   readonly text: string;
   readonly side: 'left' | 'right';
+  /** add4-T1c: the note's own `#color` (BACK), drawn as the Opale fill by
+   *  every wrap that overrides its style with `note.getColors()`
+   *  (`FtileWithNoteOpale.java:137-139`, `FtileWithNotes.java:109-111`) --
+   *  but NOT by a bare note leaf (`FtileNoteAlone.java:104-106` never
+   *  calls `eventuallyOverride`), so `tile-coordinates.ts`'s own
+   *  `'gtile-note'` walker deliberately does not read it. */
+  readonly color: string | undefined;
 
   constructor(node: ActivityNote, bounder: StringBounder, theme: Theme) {
     super();
     this.text = node.text;
     this.side = node.position;
+    this.color = node.color;
     // The ROOT `note { FontSize 13 }` block (plantuml.skin:323): an activity
     // note resolves `SName.note` under `activityDiagram`
     // (`ftile/vcompact/FtileWithNoteOpale.java:89`,

@@ -1,0 +1,8 @@
+@startuml
+start
+:act;
+note left #red: first
+note left: plain
+note right #aabbcc: third
+stop
+@enduml

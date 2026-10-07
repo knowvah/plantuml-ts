@@ -45,6 +45,9 @@ export function walkNoteOpale(t: GtileNoteOpale, x: number, y: number, myLane: s
   // sets a spike at all -- `t.withLink` mirrors that (`gtile-note.ts`'s
   // own doc).
   if (t.withLink) noteNode.spikeTip = { x: x + t.spikeOffsetX, y: y + t.spikeOffsetY };
+  // add4-T1c: `FtileWithNoteOpale.java:137-139` -- `eventuallyOverride(note
+  // .getColors())` makes the note's own `#color` the Opale's background.
+  if (note.color !== undefined) noteNode.color = note.color;
   pushNode(out, noteNode, myLane);
   walkTile(t.children[0]!, x + t.tileOffsetX, y + t.tileOffsetY, { kindHint: null, lane: myLane }, out);
 }
@@ -111,6 +114,8 @@ function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: nu
     label: entry.text,
     notePosition: origin.position,
   };
+  // add4-T1c: `FtileWithNotes.java:109-111`'s own `eventuallyOverride`.
+  if (entry.color !== undefined) node.color = entry.color;
   pushNode(origin.out, node, origin.lane);
 }
 

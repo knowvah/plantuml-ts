@@ -19,6 +19,9 @@ const NOTE_STACK_MARGIN = 10;
 export interface WithNotesEntry {
   readonly text: string;
   readonly position: 'left' | 'right';
+  /** add4-T1c: `note.getColors()`'s BACK -- `FtileWithNotes.java:106-111`
+   *  mutes the skin with it and overrides the Opale's `BackGroundColor`. */
+  readonly color?: string | undefined;
 }
 
 /** One note's geometry within its own side's vertical stack -- the OUTER
@@ -26,6 +29,7 @@ export interface WithNotesEntry {
  *  origin; the Opale box itself sits inset by {@link NOTE_STACK_MARGIN}. */
 export interface StackedNote {
   readonly text: string;
+  readonly color: string | undefined;
   readonly opaleWidth: number;
   readonly opaleHeight: number;
   readonly outerWidth: number;
@@ -59,7 +63,8 @@ function buildStack(notes: readonly WithNotesEntry[], bounder: StringBounder, th
     const opale = measureOpaleCreole(note.text, bounder, theme);
     const outerWidth = opale.width + 2 * NOTE_STACK_MARGIN;
     const outerHeight = opale.height + 2 * NOTE_STACK_MARGIN;
-    stacked.push({ text: note.text, opaleWidth: opale.width, opaleHeight: opale.height, outerWidth, outerHeight, y });
+    const { text, color } = note;
+    stacked.push({ text, color, opaleWidth: opale.width, opaleHeight: opale.height, outerWidth, outerHeight, y });
     width = Math.max(width, outerWidth);
     y += outerHeight;
   }
@@ -133,8 +138,16 @@ export class GtileWithNotes extends TileComposite {
   constructor(tile: Tile, notes: readonly WithNotesEntry[], bounder: StringBounder, theme: Theme) {
     super();
     this.children = [tile];
-    this.left = buildStack(notes.filter((n) => n.position === 'left'), bounder, theme);
-    this.right = buildStack(notes.filter((n) => n.position === 'right'), bounder, theme);
+    this.left = buildStack(
+      notes.filter((n) => n.position === 'left'),
+      bounder,
+      theme,
+    );
+    this.right = buildStack(
+      notes.filter((n) => n.position === 'right'),
+      bounder,
+      theme,
+    );
     const placement = computeWithNotesPlacement(tile, this.left, this.right);
     this.width = placement.width;
     this.height = placement.height;

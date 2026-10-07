@@ -99,9 +99,10 @@ const WRAP_NO_LINK_KINDS: ReadonlySet<string> = new Set(['gtile-fork', 'gtile-me
  *  (`StackedNote.text`/`NoteStack`'s own side segregation IS the
  *  position). */
 function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
-  if (last.kind === 'gtile-note-opale') return [{ text: last.note.text, position: last.note.side }];
-  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const })) ?? [];
-  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const })) ?? [];
+  if (last.kind === 'gtile-note-opale')
+    return [{ text: last.note.text, position: last.note.side, color: last.note.color }];
+  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const, color: n.color })) ?? [];
+  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const, color: n.color })) ?? [];
   return [...left, ...right];
 }
 
@@ -112,8 +113,16 @@ function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
  * spiked/stacked wrap the prior note(s) already built -- never nests.
  * `activity-divergence-drive-3` T2a, family NOTE-MULTI.
  */
-function mergeIntoWithNotes(last: GtileNoteOpale | GtileWithNotes, node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
-  const entries: WithNotesEntry[] = [...entriesOf(last), { text: node.text, position: node.position }];
+function mergeIntoWithNotes(
+  last: GtileNoteOpale | GtileWithNotes,
+  node: ActivityNote,
+  bounder: StringBounder,
+  theme: Theme,
+): Tile {
+  const entries: WithNotesEntry[] = [
+    ...entriesOf(last),
+    { text: node.text, position: node.position, color: node.color },
+  ];
   return new GtileWithNotes(last.children[0]!, entries, bounder, theme);
 }
 
@@ -186,7 +195,13 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:160-161
  *   -- same accessor, split's own `ConnectionOut`.
  */
-function buildBranchTopDown(b: ActivityNode[], bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): GtileTopDown {
+function buildBranchTopDown(
+  b: ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): GtileTopDown {
   const { tiles, trailing } = tileNodes(b, bounder, theme, laneOrder, pragma);
   const topDown = new GtileTopDown(tiles, bounder, theme);
   withInLabel(topDown, tiles[0]?.inLabel);
@@ -299,7 +314,7 @@ export function tileSwitch(
  *  divergence-drive-3` T2a, family GROUPNOTE. */
 function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: StringBounder, theme: Theme): Tile {
   if (note === undefined) return body;
-  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position }];
+  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position, color: note.color }];
   return new GtileWithNotes(body, entries, bounder, theme);
 }
 

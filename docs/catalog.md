@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1392 modules · 5238 exported names.
+1393 modules · 5241 exported names.
 
 ## `src/`
 
@@ -1046,7 +1046,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-composite.ts` | `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
-| `activity-renderer-note-shapes.ts` | `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
+| `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
@@ -1068,6 +1068,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `list-backward-dispatch.ts` | `nodeListContainsBreak`, `pushParsedNode`, `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
 | `node-dispatch.ts` | `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
+| `note-dispatch.ts` | `tryNoteSingle`, `tryNoteMulti` | The two note line-shapes of `node-dispatch.ts`'s dispatch chain (`CommandNote3`/`CommandNoteLong3`), moved verbatim into a sibling module when add4-T1c's colour capture would have taken that file past the 500-line cap (mission convention: a |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
 | `renderer.ts` | `renderActivity` | Activity diagram SVG renderer. |

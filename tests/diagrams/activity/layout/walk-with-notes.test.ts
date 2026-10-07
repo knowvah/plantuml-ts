@@ -101,3 +101,29 @@ describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry',
     expect(notes[1]!.x).toBe(out.reservations[1]!.x + 10);
   });
 });
+
+// add4-T1c: `FtileWithNotes.java:106-111` -- each stacked note's own
+// `#color` overrides its Opale's `BackGroundColor`; an uncoloured sibling
+// keeps the theme default (no `color` on its node).
+describe('walkWithNotes — per-note colour reaches each stacked note node', () => {
+  const tile = stubTile(40, 20);
+  const t = new GtileWithNotes(
+    tile,
+    [
+      { text: 'a', position: 'left', color: '#red' },
+      { text: 'b', position: 'left' },
+    ],
+    bounder,
+    theme,
+  );
+  const out = makeOut();
+  walkWithNotes(t, 0, 0, undefined, out);
+
+  it('first note carries "#red", second carries no colour', () => {
+    const notes = out.nodes.filter((node) => node.kind === 'note');
+    expect(notes.map((n) => n.label)).toEqual(['a', 'b']);
+    expect(notes[0]!.color).toBe('#red');
+    expect('color' in notes[1]!).toBe(false);
+    expect(t.left!.notes.map((n) => n.color)).toEqual(['#red', undefined]);
+  });
+});
