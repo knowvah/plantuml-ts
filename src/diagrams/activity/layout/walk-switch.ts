@@ -401,5 +401,8 @@ export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: stri
   };
   walkSwitchCases(tile, x, step, out);
 
-  if (mergeDiamond !== null && mPos !== null) pushSwitchDiamond(mergeDiamond, mPos, 'if-merge', myLane, out);
+  // `FtileSwitchWithDiamonds#drawU` draws diamond2 only `if
+  // (calculateDimension(stringBounder).hasPointOut())` (`:142-143`) -- a
+  // switch whose every case ends in `stop`/`kill`/`detach` has no merge.
+  if (mergeDiamond !== null && mPos !== null && tile.hasPointOut()) pushSwitchDiamond(mergeDiamond, mPos, 'if-merge', myLane, out);
 }
