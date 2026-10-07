@@ -5,6 +5,7 @@
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // Leaf node types
@@ -502,15 +503,13 @@ export interface ActivityDiagramAST {
    */
   sprites?: SpriteRegistry;
   /**
-   * `!pragma NAME [VALUE]` (D12/T1p-b), populated by {@link tryPragma}
-   * (`dispatch-common-commands.ts`) during `parseNodes` -- mirrors
-   * `TitledDiagram#getPragma()`'s single per-diagram `Pragma` instance
-   * (`skin/Pragma.java`). Optional so hand-authored AST literal fixtures
-   * compile unchanged (read sites default to an empty `Pragma` when
-   * absent -- `conditional-builder.ts#buildIf`); a real `parseActivity()`
-   * call always sets it via `Pragma.createEmpty()`.
-   */
+   * `!pragma NAME [VALUE]` (D12/T1p-b), populated by `tryPragma` during
+   * `parseNodes` -- `TitledDiagram#getPragma()`'s single `Pragma` instance
+   * (`skin/Pragma.java`). Optional for hand-authored AST literals (read
+   * sites default to an empty `Pragma`); `parseActivity()` always sets it. */
   pragma?: Pragma;
   /** `CommandSkinParam#executeArg` warnings (java:92-99), ahead of `pragma`'s: `activity-warnings.ts`. */
   warnings?: ReturnType<Pragma['getWarnings']>;
+  /** add4-T3b: `diagram.getScale()` (`TextBlockExporter.java:497`), unresolved; absent = none. */
+  scale?: ScaleSpec;
 }
