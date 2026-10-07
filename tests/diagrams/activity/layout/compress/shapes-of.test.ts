@@ -470,3 +470,29 @@ describe('shapesOf — swimlane titles (centeredText)', () => {
     expect(title.x).toBe(15);
   });
 });
+
+// add4-T1f: one `UText` per `\n` line (`SlotFinder.java:127-135`), boxed as
+// the if-label envelope -- `y` = last baseline, height = last - first
+// baseline + the first line's own height, width = the widest line.
+describe('shapesOf — multi-line edge label', () => {
+  const points = [
+    { x: 0, y: 0 },
+    { x: 0, y: 100 },
+  ];
+  const labelShape = (label: string) =>
+    shapesOf(baseInput({ edges: [{ points, label, labelAlign: { vertical: 'CENTER' } }], edgeMeta: [meta()] })).find(
+      (s) => s.kind === 'text',
+    )!;
+
+  it('spans N lines one font size apart, as wide as the widest line', () => {
+    const one = labelShape('ab');
+    const three = labelShape('ab\ncdef\ng');
+    expect(three.width).toBe(4 * 6);
+    expect(three.height).toBe(2 * 11 + 11);
+    expect(three.x).toBe(one.x);
+  });
+
+  it('a 1-line label keeps its single-line box (height = the bounder height)', () => {
+    expect(labelShape('ab')).toMatchObject({ width: 12, height: 11 });
+  });
+});
