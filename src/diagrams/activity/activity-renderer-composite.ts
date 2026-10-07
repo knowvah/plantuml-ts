@@ -11,6 +11,12 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { CompositeUSymbol } from './activity-geometry.types.js';
+import {
+  compositeSymbolTitleOrigin,
+  drawCompositeSymbol,
+  type CompositeInk,
+} from './activity-renderer-composite-symbols.js';
 import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
@@ -92,6 +98,8 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const style = compositeStyle(theme);
   // `FtileGroup.java:101`: the command's `#color`, else the style's `BackGroundColor`.
   const fill = node.color ?? style.backColor;
+  if (node.usymbol !== undefined)
+    return renderSymbolComposite(node, node.usymbol, theme, { fill, stroke: style.borderColor, strokeWidth });
   const body = rect(node.x, node.y, node.width, node.height, { fill, stroke: style.borderColor, strokeWidth });
 
   const fontSize = activityFontSize(theme, 'composite');
@@ -120,4 +128,28 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
     fill: style.fontColor,
   });
   return body + tab + titleEl;
+}
+
+/**
+ * `package`/`card`/`rectangle` (`activity-renderer-composite-symbols.ts`):
+ * the symbol's own frame, then its title as a plain text block at the
+ * symbol's own origin (`USymbolFolder.java:228`, `USymbolCard.java:133-134`,
+ * `USymbolRectangle.java:125-133`).
+ */
+function renderSymbolComposite(
+  node: ActivityNodeGeo,
+  usymbol: CompositeUSymbol,
+  theme: Theme,
+  ink: CompositeInk,
+): string {
+  const fontSize = activityFontSize(theme, 'composite');
+  const title = node.label ?? '';
+  const titleWidth = compositeTitleWidth(theme, title);
+  const dim = { width: titleWidth, height: title === '' ? 0 : fontSize };
+  const frame = drawCompositeSymbol(node, usymbol, dim, ink);
+  if (title === '') return frame;
+  const origin = compositeSymbolTitleOrigin(node, usymbol, titleWidth);
+  const fill = compositeStyle(theme).fontColor;
+  const y = origin.y + fontSize * ASCENT_FRACTION;
+  return frame + drawActivityText(origin.x, y, title, { fontFamily: theme.fontFamily, fontSize, fill });
 }

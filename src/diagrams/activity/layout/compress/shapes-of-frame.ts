@@ -14,6 +14,7 @@ import type { CompressShape } from './shapes-of.js';
 import { activityFontSize } from '../../activity-style-defaults.js';
 import { ASCENT_FRACTION } from '../../activity-renderer-shapes.js';
 import { compositeTitleWidth } from '../../activity-renderer-composite.js';
+import { compositeSymbolTitleOrigin } from '../../activity-renderer-composite-symbols.js';
 
 /** `USymbolFrame#asBig`'s "Temporary hack" threshold: `if (widthFull -
  *  widthTitle < 25)` (`USymbolFrame.java:153`). */
@@ -74,4 +75,40 @@ export function frameTitleShape(node: ActivityNodeGeo, bounder: StringBounder, t
     return { kind: 'text', x, y: y + fontSize * ASCENT_FRACTION, width: titleWidth, height: dim.height };
   }
   return { kind: 'empty', x: x + titleWidth, y, width: SPECIAL_TEXT_SLOT, height: SPECIAL_TEXT_SLOT };
+}
+
+/**
+ * Every compression shape of a `group`/`partition` node, in draw order.
+ *
+ * - `USymbolFrame` (`usymbol` absent): the rect, ignorable on both axes
+ *   (`USymbolFrame.java:70-71`), then {@link frameTabShape} and
+ *   {@link frameTitleShape}.
+ * - `package`/`card`/`rectangle`: the symbol's `UPolygon`/`URectangle`
+ *   carries no ignore flag (`USymbolFolder.java:93-102`,
+ *   `USymbolCard.java:60`, `USymbolRectangle.java:67-68`), so it occupies
+ *   its whole box; the title is a plain `UText` at the symbol's own origin
+ *   (`activity-renderer-composite-symbols.ts#compositeSymbolTitleOrigin`).
+ *   The `ULine`s draw no slot (`SlotFinder.java:84-109` has no `ULine` arm).
+ */
+export function frameShapes(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape[] {
+  const box = { x: node.x, y: node.y, width: node.width, height: node.height };
+  if (node.usymbol === undefined) {
+    const shapes: CompressShape[] = [
+      { kind: 'rect', ...box, ignoreX: true, ignoreY: true },
+      frameTabShape(node, theme),
+    ];
+    const title = frameTitleShape(node, bounder, theme);
+    return title === null ? shapes : [...shapes, title];
+  }
+  const shapes: CompressShape[] = [{ kind: node.usymbol === 'package' ? 'polygon' : 'rect', ...box }];
+  const title = node.label ?? '';
+  if (title === '') return shapes;
+  const fontSize = activityFontSize(theme, 'composite');
+  const titleWidth = compositeTitleWidth(theme, title);
+  const origin = compositeSymbolTitleOrigin(node, node.usymbol, titleWidth);
+  const height = bounder.getDimension(title, fontSize).height;
+  return [
+    ...shapes,
+    { kind: 'text', x: origin.x, y: origin.y + fontSize * ASCENT_FRACTION, width: titleWidth, height },
+  ];
 }

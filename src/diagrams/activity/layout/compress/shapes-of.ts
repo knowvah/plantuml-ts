@@ -22,7 +22,7 @@ import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-de
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
-import { frameTabShape, frameTitleShape } from './shapes-of-frame.js';
+import { frameShapes } from './shapes-of-frame.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -235,9 +235,6 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
   if (node.kind === 'if-own-label') return ifOwnLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
-  if (FRAME_KINDS.has(node.kind)) {
-    return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height, ignoreX: true, ignoreY: true };
-  }
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
 
@@ -463,13 +460,12 @@ function titleShapes(
 export function shapesOf(input: ShapesOfInput): CompressShape[] {
   const shapes: CompressShape[] = [];
   for (const node of input.nodes) {
+    if (FRAME_KINDS.has(node.kind)) {
+      shapes.push(...frameShapes(node, input.bounder, input.theme));
+      continue;
+    }
     const shape = shapeForNode(node, input.bounder, input.theme);
     if (shape !== null) shapes.push(shape);
-    if (FRAME_KINDS.has(node.kind)) {
-      shapes.push(frameTabShape(node, input.theme));
-      const title = frameTitleShape(node, input.bounder, input.theme);
-      if (title !== null) shapes.push(title);
-    }
   }
   for (let i = 0; i < input.edges.length; i++) {
     shapes.push(...shapesForEdge(input.edges[i]!, input.edgeMeta[i]!, input.bounder, input.theme));

@@ -48,7 +48,15 @@ export interface ActivityNodeGeo {
    * placed nodes by lane.
    */
   swimlane?: string;
+  /** add4-T2b: a `group`/`partition` frame drawn with a non-frame `USymbol`
+   *  (`CommandPartition3#getUSymbol`, `CommandPartition3.java:89-106`);
+   *  absent = `USymbolFrame` (`partition`/`group`). */
+  usymbol?: CompositeUSymbol;
 }
+
+/** The three container keywords that do NOT draw a `USymbolFrame`:
+ *  `USymbols.PACKAGE` (folder), `CARD`, `RECTANGLE` (`USymbols.java:69,86,91`). */
+export type CompositeUSymbol = 'package' | 'card' | 'rectangle';
 
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;

@@ -923,6 +923,60 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).toContain('fill="#FF0"');
   });
 
+  // add4-T2b (GROUP-USYMBOL): CommandPartition3.java:89-106; geometry from
+  // somome-34-nori033's jar SVG (frame 63.325 wide, title "Action" 38.938).
+  it('package draws the USymbolFolder tab polygon and its hline (USymbolFolder.java:85-124)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 133.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'package',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<polygon points="25,133.611,69.938,133.611,76.938,153.611,88.325,153.611,88.325,219.611,25,219.611,25,133.611" fill="none" stroke="#000" stroke-width="1.5"',
+    );
+    expect(svg).toContain('<line x1="25" y1="153.611" x2="76.938" y2="153.611" stroke="#000" stroke-width="1.5"/>');
+    expect(svg).toMatch(/<text x="29" y="146.5"[^>]*>Action<\/text>/);
+  });
+
+  it('card draws a rect, a full-width line at title height + 4, and a centred title (USymbolCard.java:59-66,120-135)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 229.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'card',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<rect x="25" y="229.611" width="63.325" height="86" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
+    expect(svg).toContain('<line x1="25" y1="247.611" x2="88.325" y2="247.611"');
+    expect(svg).toMatch(/<text x="37.194" y="242.5"[^>]*>Action<\/text>/);
+  });
+
+  it('rectangle draws a bare rect and a centred title, no tab (USymbolRectangle.java:65-71,104-134)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 325.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'rectangle',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).not.toContain('<path');
+    expect(svg).not.toContain('<line');
+    expect(svg).toMatch(/<text x="37.194" y="338.5"[^>]*>Action<\/text>/);
+  });
+
   it('partition #color fills the frame (add4-T2b, FtileGroup.java:101)', () => {
     const node = makeNode({ kind: 'partition', x: 0, y: 0, width: 50, height: 50, color: '#LightSkyBlue' });
     expect(renderNode(node, theme)).toContain('<rect x="0" y="0" width="50" height="50" fill="#87CEFA"');

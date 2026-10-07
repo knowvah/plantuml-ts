@@ -98,6 +98,13 @@ describe('GtileGroup — creole title width', () => {
     expect(tile.backColor).toBe('#Salmon');
     expect(new GtileGroup('T', makeTile(10, 50), bounder, theme).backColor).toBeUndefined();
   });
+
+  it('carries the usymbol option without changing the geometry (FtileGroup.java:190-203)', () => {
+    const plain = new GtileGroup('T', makeTile(10, 50), bounder, theme);
+    const card = new GtileGroup('T', makeTile(10, 50), bounder, theme, { usymbol: 'card' });
+    expect(card.usymbol).toBe('card');
+    expect([card.width, card.height]).toEqual([plain.width, plain.height]);
+  });
 });
 
 describe('GtileGroup — bodyOffsetY', () => {

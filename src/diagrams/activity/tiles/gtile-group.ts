@@ -5,6 +5,7 @@ import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
+import type { CompositeUSymbol } from '../activity-geometry.types.js';
 import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
 import { measurerAdapterOf } from './gtile-action.js';
 
@@ -38,6 +39,9 @@ export function frameTitleWidth(title: string, measurer: StringMeasurer, theme: 
  *  (`FtileGroup.java:94`: `backColor`). */
 export interface GtileGroupOptions {
   readonly backColor?: string;
+  /** `CommandPartition3#getUSymbol(type)` (`:89-106`) for the three
+   *  non-frame keywords; it changes only `drawU`, never the geometry. */
+  readonly usymbol?: CompositeUSymbol;
 }
 
 export class GtileGroup extends TileComposite {
@@ -58,12 +62,14 @@ export class GtileGroup extends TileComposite {
    *  `#color` (`CommandPartition3.java:145-147`), `#` kept; `undefined`
    *  falls through to the style's `BackGroundColor` at draw time. */
   readonly backColor: string | undefined;
+  readonly usymbol: CompositeUSymbol | undefined;
 
   constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme, opts: GtileGroupOptions = {}) {
     super();
     this.children = [body];
     this.title = title;
     this.backColor = opts.backColor;
+    this.usymbol = opts.usymbol;
     // A group/partition frame resolves `of(root, element, activityDiagram,
     // <symbol>, composite)` (`ftile/vcompact/FtileGroup.java:89-92`), and
     // `activityDiagram { composite { ... } }` (plantuml.skin:364-368)

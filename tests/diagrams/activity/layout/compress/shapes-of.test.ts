@@ -220,6 +220,35 @@ describe('shapesOf — frame title slot (SpecialText, add4-T2b)', () => {
   });
 });
 
+// add4-T2b (GROUP-USYMBOL): package/card/rectangle carry no compression
+// ignore flag and draw their title as a plain UText.
+describe('shapesOf — non-frame container symbols (add4-T2b)', () => {
+  const fontSize = activityFontSize(theme, 'composite');
+  const titleWidth = measureLineWidth(theme, fontSize, 'Action');
+  const box = { x: 25, y: 133.611, width: 63.325, height: 86, label: 'Action' };
+
+  it('package: a full polygon box plus the title text at (x + 4, y + 2)', () => {
+    const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, usymbol: 'package' })] }));
+    expect(shapes).toEqual([
+      { kind: 'polygon', x: 25, y: 133.611, width: 63.325, height: 86 },
+      { kind: 'text', x: 29, y: 135.611 + fontSize * (1 - 1 / 4.5), width: titleWidth, height: 11 },
+    ]);
+  });
+
+  it('card/rectangle: a full rect (no ignore flags) plus the centred title', () => {
+    for (const usymbol of ['card', 'rectangle'] as const) {
+      const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, usymbol })] }));
+      expect(shapes[0]).toEqual({ kind: 'rect', x: 25, y: 133.611, width: 63.325, height: 86 });
+      expect(shapes[1]!.x).toBe(25 + (63.325 - titleWidth) / 2);
+    }
+  });
+
+  it('an untitled symbol contributes only its box', () => {
+    const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, label: '', usymbol: 'rectangle' })] }));
+    expect(shapes).toHaveLength(1);
+  });
+});
+
 describe('shapesOf — plain box kinds', () => {
   it('action is a rect over the node box', () => {
     const shapes = shapesOf(baseInput({ nodes: [node('action')] }));
