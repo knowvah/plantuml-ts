@@ -2,7 +2,8 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileComposite } from './tile.js';
 import type { StringBounder, Tile } from './tile.js';
-import { measureOpaleText } from './gtile-note.js';
+import { measureOpaleCreole } from './gtile-note.js';
+import type { Theme } from '../../../core/theme.js';
 
 /** `TextBlockUtils.withMargin(opale, 10, 10)` -- a UNIFORM 10px margin on
  *  every side of each note's own Opale box, layered OUTSIDE Opale's own
@@ -44,13 +45,18 @@ export interface NoteStack {
  *  `XDimension2D#mergeTB` (`:94-98`), stacked top-to-bottom. `null` for
  *  an empty side (`FtileWithNotes.java:150-154`'s own `TextBlockUtils
  *  .empty(0, 0)`). */
-function buildStack(notes: readonly WithNotesEntry[], bounder: StringBounder, fontSize: number): NoteStack | null {
+function buildStack(notes: readonly WithNotesEntry[], bounder: StringBounder, theme: Theme): NoteStack | null {
   if (notes.length === 0) return null;
   let y = 0;
   let width = 0;
   const stacked: StackedNote[] = [];
   for (const note of notes) {
-    const opale = measureOpaleText(note.text, bounder, fontSize);
+    // add4-T1c: `FtileWithNotes.java:117-120` builds each Opale over the
+    // REAL creole `Sheet` (`skinParam().sheet(fc, ...).createSheet(note
+    // .getDisplay())`) -- the same `Opale` + `Sheet` `FtileWithNoteOpale`
+    // builds, so the same {@link measureOpaleCreole} sizer, never the raw
+    // `\n`-split string (which measured `**bold**`'s markers as glyphs).
+    const opale = measureOpaleCreole(note.text, bounder, theme);
     const outerWidth = opale.width + 2 * NOTE_STACK_MARGIN;
     const outerHeight = opale.height + 2 * NOTE_STACK_MARGIN;
     stacked.push({ text: note.text, opaleWidth: opale.width, opaleHeight: opale.height, outerWidth, outerHeight, y });
@@ -124,11 +130,11 @@ export class GtileWithNotes extends TileComposite {
   readonly rightOffsetX: number;
   readonly rightOffsetY: number;
 
-  constructor(tile: Tile, notes: readonly WithNotesEntry[], bounder: StringBounder, fontSize: number) {
+  constructor(tile: Tile, notes: readonly WithNotesEntry[], bounder: StringBounder, theme: Theme) {
     super();
     this.children = [tile];
-    this.left = buildStack(notes.filter((n) => n.position === 'left'), bounder, fontSize);
-    this.right = buildStack(notes.filter((n) => n.position === 'right'), bounder, fontSize);
+    this.left = buildStack(notes.filter((n) => n.position === 'left'), bounder, theme);
+    this.right = buildStack(notes.filter((n) => n.position === 'right'), bounder, theme);
     const placement = computeWithNotesPlacement(tile, this.left, this.right);
     this.width = placement.width;
     this.height = placement.height;

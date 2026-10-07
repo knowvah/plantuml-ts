@@ -31,7 +31,6 @@ import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
 import { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
-import { activityFontSize } from '../activity-style-defaults.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
@@ -115,7 +114,7 @@ function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
  */
 function mergeIntoWithNotes(last: GtileNoteOpale | GtileWithNotes, node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
   const entries: WithNotesEntry[] = [...entriesOf(last), { text: node.text, position: node.position }];
-  return new GtileWithNotes(last.children[0]!, entries, bounder, activityFontSize(theme, 'note'));
+  return new GtileWithNotes(last.children[0]!, entries, bounder, theme);
 }
 
 /** `last` already carries one or more notes -- the NOTE-MULTI merge
@@ -301,7 +300,7 @@ export function tileSwitch(
 function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: StringBounder, theme: Theme): Tile {
   if (note === undefined) return body;
   const entries: WithNotesEntry[] = [{ text: note.text, position: note.position }];
-  return new GtileWithNotes(body, entries, bounder, activityFontSize(theme, 'note'));
+  return new GtileWithNotes(body, entries, bounder, theme);
 }
 
 export function tileGroup(

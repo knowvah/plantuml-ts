@@ -4,15 +4,17 @@ import type { Out } from '../../../../src/diagrams/activity/layout/tile-coordina
 import { GtileWithNotes } from '../../../../src/diagrams/activity/tiles/gtile-with-notes.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
+import type { Theme } from '../../../../src/core/theme.js';
+import { resolveTheme } from '../../../../src/core/theme.js';
 
 // T3j (row jogami-42-jaji869, GROUPNOTE riser): `walkWithNotes` must emit a
 // compression reservation for each stacked note's OUTER (margin-inclusive)
 // box, mirroring `TextBlockMarged#drawU`'s own `ug.draw(UEmpty.create(dim))`
 // (`klimt/shape/TextBlockMarged.java:74-81`) -- see `walk-with-notes.ts
-// #marginBoxReservation`'s own doc for the full mechanism. Bounder/FONT_SIZE
+// #marginBoxReservation`'s own doc for the full mechanism. Bounder/theme
 // convention matches `gtile-with-notes.test.ts` (7px/char, 14px line height).
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 7, height: 14 }) };
-const FONT_SIZE = 13;
+const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
 function stubTile(width: number, height: number): Tile {
   return {
@@ -37,7 +39,7 @@ describe('walkWithNotes — one LEFT note: margin-box reservation + note positio
   // MARGIN) = 48 wide; 14 + 10 + 20 = 44 tall (same fixture as
   // `gtile-with-notes.test.ts`'s own "one note, LEFT only" describe block).
   const tile = stubTile(100, 50);
-  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, FONT_SIZE);
+  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, theme);
   const out = makeOut();
   walkWithNotes(t, 0, 0, undefined, out);
 
@@ -72,7 +74,7 @@ describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry',
       { text: 'c', position: 'right' },
     ],
     bounder,
-    FONT_SIZE,
+    theme,
   );
   const out = makeOut();
   walkWithNotes(t, 5, 0, undefined, out);
