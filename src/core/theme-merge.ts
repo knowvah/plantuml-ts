@@ -27,6 +27,7 @@ function mergeGraphColors(base: Theme, partial: ThemeOverride): Theme['colors'][
 /** Top-level optional scalar fields copied verbatim during a merge. */
 const OPTIONAL_SCALAR_KEYS = [
   'defaultFontSize',
+  'padding', // add3-T3f (PADDING)
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',

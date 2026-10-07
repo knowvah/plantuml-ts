@@ -148,7 +148,15 @@ export function buildActionTextBlock(label: string, theme: Theme, fontSize: numb
   // this task).
   const sheet = skin.sheet(fc, align, CreoleMode.FULL).createSheet(Display.create(label.split('\n'))) as unknown as Sheet<CreoleAtom>;
   const atomOps = chromeAtomOps(undefined, fc);
-  return new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps, activityPadding('activity'));
+  // add3-T3f (PADDING): Java feeds this ctor arg `skinParam.getPadding()`
+  // (the BARE `skinparam padding N` key) and ADDS the element's own bucket
+  // Padding separately at the outer FtileBox (`FtileBox.java:180` vs
+  // `:168`/`:237-243`) -- two independent additions that are both
+  // symmetric `ClockwiseTopRightBottomLeft.same(N)` values here, so their
+  // SUM reproduces the exact same total this one SheetBlock1 argument
+  // already stood in for (`theme-root-fields.ts#padding`'s own doc
+  // comment).
+  return new SheetBlock1(sheet, LineBreakStrategy.NONE, atomOps, activityPadding('activity') + (theme.padding ?? 0));
 }
 
 /**

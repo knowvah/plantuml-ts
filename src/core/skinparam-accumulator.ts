@@ -33,6 +33,9 @@ export interface SkinparamAccumulator {
   /** R2j: EXPLICIT `skinparam defaultFontSize` marker — see
    *  `theme.ts#defaultFontSize`'s own doc comment. */
   defaultFontSize: number | undefined;
+  /** add3-T3f (PADDING): bare `skinparam padding N` — see
+   *  `theme-root-fields.ts#padding`'s own doc comment. */
+  padding: number | undefined;
   linetype: 'ortho' | 'polyline' | undefined;
   nodeSep: number | undefined;
   rankSep: number | undefined;
@@ -275,6 +278,7 @@ const SCALAR_FIELD_NAMES = [
   'monospacedFontName',
   'fontSize',
   'defaultFontSize',
+  'padding',
   'linetype',
   'nodeSep',
   'rankSep',
