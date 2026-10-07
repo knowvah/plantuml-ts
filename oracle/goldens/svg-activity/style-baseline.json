@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "55b70149",
+  "measuredAgainstCommit": "134202b9",
   "fixtures": [
     {
       "type": "activity",
@@ -7806,7 +7806,7 @@
       "slug": "lipiki-79-fapu237",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "496e7386",
+      "measuredAgainstCommit": "134202b9",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -7821,7 +7821,7 @@
         },
         "textCount": 6,
         "width": "210",
-        "height": "162"
+        "height": "168"
       },
       "jar": {
         "fontSize": {
@@ -14162,10 +14162,10 @@
       "slug": "vimena-17-poju626",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "134202b9",
       "ours": {
         "fontSize": {
-          "11": 22,
+          "11": 24,
           "12": 16
         },
         "strokeWidth": {
@@ -14174,9 +14174,9 @@
         "rx": {
           "12.5": 10
         },
-        "textCount": 38,
-        "width": "834",
-        "height": "633"
+        "textCount": 40,
+        "width": "580",
+        "height": "677"
       },
       "jar": {
         "fontSize": {
@@ -15754,10 +15754,10 @@
       "slug": "zivocu-77-kopa900",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "134202b9",
       "ours": {
         "fontSize": {
-          "11": 8,
+          "11": 10,
           "12": 7
         },
         "strokeWidth": {
@@ -15766,9 +15766,9 @@
         "rx": {
           "12.5": 4
         },
-        "textCount": 15,
+        "textCount": 17,
         "width": "449",
-        "height": "322"
+        "height": "374"
       },
       "jar": {
         "fontSize": {

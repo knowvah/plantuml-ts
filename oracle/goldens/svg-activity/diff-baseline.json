@@ -1949,10 +1949,10 @@
       "type": "activity",
       "slug": "lipiki-79-fapu237",
       "status": "baseline",
-      "diffCount": 18,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "496e7386",
-      "weightedScore": 18
+      "measuredAgainstCommit": "134202b9",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -3578,10 +3578,10 @@
       "type": "activity",
       "slug": "vimena-17-poju626",
       "status": "baseline",
-      "diffCount": 400,
+      "diffCount": 184,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 415
+      "measuredAgainstCommit": "134202b9",
+      "weightedScore": 184
     },
     {
       "type": "activity",
@@ -3974,10 +3974,10 @@
       "type": "activity",
       "slug": "zivocu-77-kopa900",
       "status": "baseline",
-      "diffCount": 167,
+      "diffCount": 90,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 180
+      "measuredAgainstCommit": "134202b9",
+      "weightedScore": 90
     },
     {
       "type": "activity",
