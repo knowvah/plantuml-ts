@@ -158,8 +158,14 @@ export const RE_IF_LEGACY = /^if\s*\((.*?)\)\s*then\s+when\s+(.*)$/i;
 export const RE_ELSEIF =
   /^(?:\(([^)]*)\)\s*)?else\s*if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
-/** else (label?) */
-export const RE_ELSE = /^else\s*(?:\(([^)]*)\))?\s*$/i;
+/**
+ * else (label?) — `LABEL` is lazy, same reason as {@link RE_IF}'s own
+ * doc: a greedy/negated-class group cannot backtrack past a ')' inside
+ * the label itself (`else (Bar::bar())`), so it must be `(.*?)`, not
+ * `[^)]*`. Also accepts a trailing `;` (`RegexLeaf(";?")`).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandElse3.java:62-73
+ */
+export const RE_ELSE = /^else\s*(?:\((.*?)\))?\s*;?\s*$/i;
 
 /** Legacy `else when LABEL` spelling, the companion of {@link RE_IF_LEGACY}.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandElseLegacy1.java:56-68

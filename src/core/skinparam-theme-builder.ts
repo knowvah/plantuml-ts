@@ -45,6 +45,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['fontFamily', (acc) => acc.fontFamily],
   ['fontSize', (acc) => acc.fontSize],
   ['defaultFontSize', (acc) => acc.defaultFontSize],
+  ['padding', (acc) => acc.padding],
   ['linetype', (acc) => acc.linetype],
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],

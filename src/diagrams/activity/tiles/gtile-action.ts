@@ -219,7 +219,14 @@ function actionWidth(classified: ActionLines, sheetWidth: number | undefined, ct
   const maxWidth = isCodeBlock
     ? Math.max(0, ...lines.map((l) => l.length * monoCharWidth))
     : Math.max(...lines.map((l) => creoleLineWidth(l, ctx.bounder, ctx.theme, ctx.fontSize)));
-  return Math.max(maxWidth + 2 * activityPadding('activity'), activityMinimumWidth(ctx.theme));
+  // add3-T3f (PADDING): this is the `<code>`/table-row fallback that never
+  // reaches `sheetDimension` -- it still passes through the SAME real
+  // `FtileBox`/`SheetBlock1` upstream, so the bare `skinparam padding N`
+  // key (`theme-root-fields.ts#padding`) must land here too.
+  return Math.max(
+    maxWidth + 2 * activityPadding('activity') + 2 * (ctx.theme.padding ?? 0),
+    activityMinimumWidth(ctx.theme),
+  );
 }
 
 /** No upstream minimum height (the port's old `ACTION_HEIGHT = 36` floor
@@ -235,7 +242,8 @@ function actionHeight(classified: ActionLines, sheetHeight: number | undefined, 
     isAllTableRows || isCodeBlock
       ? ctx.lineHeight * lines.length + (isAllTableRows ? TABLE_BLOCK_MARGIN_Y : 0)
       : lines.reduce((sum, l) => sum + creoleLineHeight(l, ctx.bounder, ctx.theme, ctx.fontSize, ctx.lineHeight), 0);
-  return activityBoxHeight(textHeight, 'activity');
+  // add3-T3f (PADDING): same fallback-path note as `actionWidth` above.
+  return activityBoxHeight(textHeight, 'activity') + 2 * (ctx.theme.padding ?? 0);
 }
 
 /** `GtileAction`'s width/height. */
