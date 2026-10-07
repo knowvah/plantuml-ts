@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1402 modules · 5287 exported names.
+1404 modules · 5296 exported names.
 
 ## `src/`
 
@@ -1095,9 +1095,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `assign-coordinates-full.ts` | `AssignCoordinatesResult`, `AssignCoordinatesInput`, `assignCoordinatesFull` | `assignCoordinatesFull` -- `assignCoordinates`'s own result (`tile-coordinates.ts`) plus the compression side-channel mission `activity-klimt-compress` T3/T4/T5 need: the reservations the if/while walkers and `placeSwimlanes` emit, and the |
+| `canvas-origin-fudge.ts` | `FudgeSubject`, `ShapeFudge`, `RECT_FUDGE`, `POLYGON_FUDGE_X`, `NO_FUDGE`, `isInkless`, `fudgeX`, `fudgeY`, `nodeFudge` | The per-shape `LimitFinder` fudge table (`klimt/drawing/LimitFinder.java: 133-188`), split out of `canvas-origin.ts` (add4-T3c) to keep that file under the 500-line hook; see that module's doc for the mechanism. |
+| `canvas-origin-group-ink.ts` | `groupInnerInkMaxX` | add4-T3c: `FtileGroup#getInnerMinMax` (`ftile/vcompact/FtileGroup.java: 150-158`) -- the frame replays its inner tile's `drawU` through a `LimitFinder` (wrapped in a fresh `UGraphicForSnake`, so the inner snakes merge and lose touching end |
 | `canvas-origin-shift.ts` | `ShiftableGeometry`, `shiftAll` | The canvas-origin translate `canvas-origin.ts#finalizeGeometry` applies once it has the shift -- split out of `canvas-origin.ts` (add4-T2e) only to keep that file under the 500-line hook. |
 | `canvas-origin-text-ink.ts` | `SPLIT_LINE_KINDS`, `extendForIfLabelText`, `extendForLaneDivider`, `extendForEdgeLabelText` | b3/T3a (`activity-divergence-drive-2` batch 3): three `canvas-origin.ts` ink-scan corrections (families A/P/Q) split into their own sibling module purely to keep `canvas-origin.ts` under the 500-line hook (mission convention, "a sibling mod |
-| `canvas-origin.ts` | `ShapeFudge`, `isInkless`, `fudgeX`, `MutableInkBounds`, `edgeInkX`, `FinalizeInput`, `FinalizedGeometry`, `finalizeGeometry` | Canvas origin (D2, mission `activity-divergence-drive` T1a): ports `Recentred` + the document margin + `LimitFinder` -- replaces the flat `LAYOUT_MARGIN` `assign-coordinates-full.ts#computeBounds` used to add on top of its own maxX/maxY. |
+| `canvas-origin.ts` | `MutableInkBounds`, `edgeInkX`, `InkSource`, `inkBoundsOf`, `FinalizeInput`, `FinalizedGeometry`, `finalizeGeometry` | Canvas origin (D2, mission `activity-divergence-drive` T1a): ports `Recentred` + the document margin + `LimitFinder` -- replaces the flat `LAYOUT_MARGIN` `assign-coordinates-full.ts#computeBounds` used to add on top of its own maxX/maxY. |
 | `conditional-builder-long.ts` | `buildIfLongHorizontal`, `buildIfLongVertical` | The `elseif`-chain if-builders, split out of `conditional-builder.ts` (hook-enforced 500-line cap; add2 T3i needed the room for ELSEIFIN) -- `FtileIfLongHorizontal.create`'s per-branch hexagon row and `FtileIfLongVertical.create`'s downward |
 | `conditional-builder.ts` | `IfBuilder`, `IfLayoutCtx`, `IfBuilderResult`, `ifBuilderOf`, `isMainLaneSmallerThanAllOthers`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `diamond-labels.ts` | `emitDiamondLabels`, `emitDiamondOwnLabel` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
