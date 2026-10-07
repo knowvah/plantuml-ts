@@ -55,11 +55,19 @@ export { HEXAGON_HALF_SIZE };
  * `dimTotalWidth` is `calculateDimension(stringBounder).getWidth()`, and
  * `diamond` is `diamond1.calculateDimension(stringBounder)`'s own
  * `inY`/`outY`/`width` -- exactly the fields `:287-293` reads.
+ *
+ * add4-T1b: `originX` is the while tile's own pass-1 left edge. `xx`
+ * (`:298`) is computed in the tile's LOCAL frame -- `Swimlanes$Cross#draw`
+ * reaches `drawTranslate` through `tile.drawU(this)` (`Swimlanes.java:
+ * 186-189`), so the Cross `ug` already carries every parent's translate to
+ * the tile -- while `p1`/`p2` here are pass-1 absolute; `originX` puts
+ * `xx` in that same frame.
  */
 export interface WhileBackLoop {
   readonly kind: 'while-back';
   readonly p1: GPoint;
   readonly p2: GPoint;
+  readonly originX: number;
   readonly dimTotalWidth: number;
   readonly diamond: { readonly inY: number; readonly outY: number; readonly width: number };
 }

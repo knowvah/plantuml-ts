@@ -419,6 +419,7 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
 
   const whileBack: LoopTranslate = {
     kind: 'while-back',
+    originX: 0,
     p1: { x: 32, y: 32 },
     p2: { x: 32, y: 60 },
     dimTotalWidth: 100,
@@ -684,6 +685,7 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
   it('a loop-tagged edge (D3 stub, one edge out) yields edgeMeta.length === edges.length', () => {
     const whileBack: LoopTranslate = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 32, y: 32 },
       p2: { x: 32, y: 60 },
       dimTotalWidth: 100,

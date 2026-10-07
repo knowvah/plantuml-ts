@@ -17,6 +17,7 @@ describe('routeWhileBack', () => {
     // formula from the swimlane-translate term).
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 10, y: 40 },
       p2: { x: 0, y: 0 },
       dimTotalWidth: 100,
@@ -36,9 +37,26 @@ describe('routeWhileBack', () => {
     ]);
   });
 
+  it('adds the while tile origin to xx: the Cross ug is already at the tile (add4-T1b)', () => {
+    // Swimlanes$Cross reaches drawTranslate via tile.drawU(this)
+    // (Swimlanes.java:186-189), so :298's xx is tile-local; p1/p2 here are
+    // pass-1 absolute, so xx = originX + max(dx1, dx2) + dimTotalWidth.
+    const loop: WhileBackLoop = {
+      kind: 'while-back',
+      originX: 136,
+      p1: { x: 146, y: 40 },
+      p2: { x: 136, y: 0 },
+      dimTotalWidth: 100,
+      diamond: { inY: 0, outY: 10, width: 20 },
+    };
+    const xs = routeWhileBack(loop, baseEdge, 30, 7).edges[0]!.points.map((p) => p.x);
+    expect(xs).toEqual([176, 176, 266, 266, 163]);
+  });
+
   it('places midArrowAt at (xx, (y1+y2)/2) with dir "up", no emphasizeDirection (:306-307)', () => {
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 10, y: 40 },
       p2: { x: 0, y: 0 },
       dimTotalWidth: 100,
@@ -52,6 +70,7 @@ describe('routeWhileBack', () => {
   it('reserves a 5x12 UEmpty at (x1, y1bis) (:304, Hexagon.java:46)', () => {
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 10, y: 40 },
       p2: { x: 0, y: 0 },
       dimTotalWidth: 100,
@@ -64,6 +83,7 @@ describe('routeWhileBack', () => {
   it('takes xx from Math.max(translate1.dx, translate2.dx) (:297), not dx1 or dx2 alone', () => {
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 10, y: 40 },
       p2: { x: 0, y: 0 },
       dimTotalWidth: 100,
@@ -83,6 +103,7 @@ describe('routeWhileBack', () => {
   it('preserves edge fields other than emphasize (e.g. arrowhead) unchanged', () => {
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 0, y: 0 },
       p2: { x: 0, y: 0 },
       dimTotalWidth: 10,
@@ -121,6 +142,7 @@ describe('routeWhileBack', () => {
     // bottom-center: x = 309.156 + 156.125/2, y = 253.306 + 32.
     const loop: WhileBackLoop = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 387.2185, y: 285.306 },
       // p2 = diamond1's own origin: the header hexagon polygon's top-left,
       // (min x, min y) of "79.713,132.5,186.756,132.5,198.756,144.5,
