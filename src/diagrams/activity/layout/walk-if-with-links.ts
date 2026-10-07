@@ -264,7 +264,10 @@ function connectionVerticalOut(ctx: IfLinksCtx, useTile1: boolean): void {
   const origin = useTile1 ? { x: x + t.tile1X, y: y + t.branchY } : { x: x + t.tile2X, y: y + t.branchY };
   const tile = useTile1 ? t.tile1 : t.tile2;
   const p1 = absolutePoint(tile.getCoord(SOUTH_HOOK), origin.x, origin.y);
-  pushEdge(out, [p1, { x: p1.x, y: y + t.height }], laneOut(tile, myLane), myLane);
+  // add4-T1g: `super(tile, null)` (`:374-375`) -- `Swimlanes$Cross` skips a
+  // null tile (`Swimlanes.java:189-193`), so it draws in the tile's out lane.
+  const lane = laneOut(tile, myLane);
+  pushEdge(out, [p1, { x: p1.x, y: y + t.height }], lane, lane);
 }
 
 /** Both branches' own out-X, absolute, AND own outcome lane -- split out

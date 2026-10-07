@@ -27,3 +27,27 @@ describe('FtileIfWithLinks ConnectionHline lane ink — divider x vs the jar', (
     expect(dividerXs('hline-links-then-xlane.puml')).toEqual([20, 262.194, 348.569]);
   });
 });
+
+/**
+ * add4-T1g: `ConnectionVerticalOut` is `super(tile, null)`
+ * (`FtileIfWithLinks.java:374-375`), so `Swimlanes$Cross` skips it
+ * (`Swimlanes.java:189-193`) and it draws -- and is measured, arrowhead
+ * included -- in the branch tile's own out lane, straight down.
+ */
+describe('FtileIfWithLinks ConnectionVerticalOut stays in its tile lane', () => {
+  it('else branch in another lane: dividers equal the jar (pezubu shape)', () => {
+    expect(dividerXs('hline-links-else-xlane.puml')).toEqual([20, 59.013, 152.025, 200.375]);
+  });
+
+  it('else branch exit drops straight to the bar, no cross-lane elbow', () => {
+    const svg = renderFixtureActivity(
+      readFileSync(join(DIR, 'hline-links-else-xlane.puml'), 'utf8'),
+      new DeterministicMeasurer(),
+    );
+    const lines = (svg.match(/<line x1="181.375"[^>]*>/g) ?? []).map((l) =>
+      /y1="([^"]*)" x2="([^"]*)" y2="([^"]*)"/.exec(l)!.slice(1),
+    );
+    expect(lines).toContainEqual(['208.5', '181.375', '228.5']);
+    expect(lines).not.toContainEqual(['208.5', '181.375', '217.5']);
+  });
+});
