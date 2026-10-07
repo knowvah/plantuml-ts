@@ -206,7 +206,12 @@ function countIfSwimlanes(node: ActivityIf): number {
 // `Branch#special` -- `out2` is hardcoded `null` at both of its
 // construction sites (`FtileIfWithLinks.java:548-549`, already noted
 // NOT APPLICABLE by `.agent-notes/add3-T1b.md` row 29).
-function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): IfWithLinksBranch {
+function toBranchTile(
+  nodes: readonly ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  ctx: IfLayoutCtx,
+): IfWithLinksBranch {
   const { tiles } = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
@@ -266,7 +271,11 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
   const laneCount = countIfSwimlanes(node);
   const notes = (node.notes ?? []).map((n) => measureIfOwnNote(n, bounder, theme));
-  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, { conditionEndStyle: theme.conditionEndStyle, notes });
+  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, {
+    conditionEndStyle: theme.conditionEndStyle,
+    notes,
+    padding: theme.padding,
+  });
 }
 
 // `longHorizontalBranches`/`buildIfLongHorizontal`/`buildIfLongVertical`
@@ -390,7 +399,13 @@ function branchBodyTile(nodes: readonly ActivityNode[], bounder: StringBounder, 
   return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma).tiles, bounder, theme);
 }
 
-function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dispatch: IfBuilderResult, ctx: IfLayoutCtx): Tile {
+function buildIfDown(
+  node: ActivityIf,
+  bounder: StringBounder,
+  theme: Theme,
+  dispatch: IfBuilderResult,
+  ctx: IfLayoutCtx,
+): Tile {
   const thenTile = branchBodyTile(node.thenBranch, bounder, theme, ctx);
   const elseTile = branchBodyTile(node.elseBranch, bounder, theme, ctx);
   const parts = resolveIfDownParts(node, dispatch.swapped === true, thenTile, elseTile);

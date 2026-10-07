@@ -80,13 +80,10 @@ export interface EdgeMeta {
    * measurement byte-identical to pre-T1p-g). */
   readonly hline?: HlinePayload;
   /**
-   * T1b (D1): the `FtileGroup`/`partition` nesting active at `pushEdge`
-   * time (`undefined` = top level) -- a nested `UGraphicForSnake` flushes
-   * before its outer one, so two edges merge only when this matches.
-   * Read by `layout/snake-merge.ts`; propagated via `repeatEdgeMeta` for
-   * every routed edge except `routeHline`'s fan-out (always `NONE`
-   * strategy, so scope never matters there).
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGroup.java
+   * T1b (D1) scope tag. Unread since add4-T3c and never set: `FtileGroup
+   * #drawU` (`FtileGroup.java:209-227`) opens no `UGraphicForSnake`, so
+   * `snake-merge.ts` merges across group boundaries. The field and its
+   * `tile-coordinates.ts#pushEdge` producer are left for that file's owner.
    */
   readonly scope?: string;
 }
@@ -378,10 +375,16 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
   const spec = measureSpecOf(node);
   if (spec !== undefined) return specLaneItems(node, spec);
   if (!isBigDiamondDuplicate(node)) {
+    // add4-T3c: the lane's LimitFinder sees the same node-aware ink as the
+    // canvas scan (`canvas-origin-fudge.ts#nodeFudge`, `Swimlanes.java:379-395`).
+    const ink = {
+      ...(node.usymbol !== undefined ? { usymbol: node.usymbol } : {}),
+      ...(node.label !== undefined ? { label: node.label } : {}),
+    };
     return [
       node.swimlane !== undefined
-        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width }
-        : { kind: node.kind, x: node.x, width: node.width },
+        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width, ...ink }
+        : { kind: node.kind, x: node.x, width: node.width, ...ink },
     ];
   }
   return laneNames.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));

@@ -9,7 +9,9 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java
  */
 
-import { edgeInkX, fudgeX, isInkless } from './canvas-origin.js';
+import { edgeInkX } from './canvas-origin.js';
+import { isInkless, nodeFudge } from './canvas-origin-fudge.js';
+import type { CompositeUSymbol } from '../activity-geometry.types.js';
 import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
 
 export interface SwimlaneContext {
@@ -43,6 +45,12 @@ export interface LaneItem {
   readonly kind?: string;
   readonly x: number;
   readonly width: number;
+  /** add4-T3c: the node's own `usymbol`/`label`, so a lane measures the
+   *  SAME node-aware ink as the canvas scan (`canvas-origin-fudge.ts
+   *  #nodeFudge`: a package's polygon, a card's or a ruled action's
+   *  full-width `ULine`). */
+  readonly usymbol?: CompositeUSymbol;
+  readonly label?: string;
 }
 
 /**
@@ -79,14 +87,14 @@ function mergeExtent(acc: LaneExtent, next: LaneExtent): LaneExtent {
   return { minX: Math.min(acc.minX, next.minX), maxX: Math.max(acc.maxX, next.maxX) };
 }
 
-/** This lane's own items' extent, fudged per {@link fudgeX}. Split from
+/** This lane's own items' extent, fudged per `nodeFudge`. Split from
  *  {@link laneExtentOf} only to keep that function's own complexity under
  *  the file's limit (T3i added the sibling edge pass). */
 function itemsExtentOf(name: string, items: readonly LaneItem[]): LaneExtent {
   let acc = EMPTY_EXTENT;
   for (const item of items) {
     if (item.swimlane !== name || isInkless(item.kind ?? '')) continue;
-    const fudge = fudgeX(item.kind ?? '');
+    const fudge = nodeFudge({ ...item, kind: item.kind ?? '' }).x;
     acc = mergeExtent(acc, { minX: item.x - fudge.near, maxX: item.x + item.width + fudge.far });
   }
   return acc;
@@ -126,7 +134,7 @@ function laneExtentOf(name: string, items: readonly LaneItem[], edges: readonly 
  *   our engine already holds every node's coordinates), but a lane's own
  *   `getMinMax()` is populated by the SAME `LimitFinder` class the whole-
  *   canvas scan uses (`klimt/drawing/LimitFinder.java:170-211`), so its
- *   per-shape fudge (`canvas-origin.ts#fudgeX`) applies here too -- a raw
+ *   per-shape fudge (`canvas-origin-fudge.ts#nodeFudge`) applies here too -- a raw
  *   node box is 1-2px off every lane whose boundary item is a
  *   rect/ellipse/polygon kind (T3i, `jakuco-69-dari135`/`sikino-19-
  *   vuca111`/others: box content landed exactly `RECT_FUDGE.near` too far

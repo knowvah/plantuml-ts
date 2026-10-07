@@ -1,0 +1,10 @@
+@startuml
+|A|
+:a;
+|B|
+card P {
+:b;
+}
+|C|
+:c;
+@enduml

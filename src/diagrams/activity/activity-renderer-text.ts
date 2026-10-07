@@ -51,6 +51,7 @@ import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import type { CreoleTextRun } from '../../core/svek/image/creole-text-lines.js';
 import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
+import { HYPERLINK_COLOR } from '../../core/klimt/creole/command/CommandCreoleUrl.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
 import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
@@ -91,6 +92,10 @@ export interface ActivityTextStyle {
    *  that resolved it. `undefined` falls through to `core/svg.ts
    *  #linkWrap`'s own `'_top'` parameter default. */
   readonly svgLinkTarget?: string;
+  /** add4-T3gates: `activity-text-style.ts#activityHyperlinkColor`, forwarded
+   *  by the caller via `linkStyleFields`. `undefined` keeps the url run's own
+   *  colour (`CommandCreoleUrl.ts`'s `plantuml.skin:7` blue default). */
+  readonly hyperlinkColor?: string;
   /** add3-T2b pass 2 (KLIMT-FLOOR): `true` ONLY from a caller whose OWN
    *  `y` was built on `gtile-action.ts#floorActionLineHeight`'s SAME
    *  floored line height (today: `renderAction`'s `'activity'`-sname
@@ -249,8 +254,22 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
   if (run.style.underline) styles.add(FontStyle.UNDERLINE);
   if (run.style.strike) styles.add(FontStyle.STRIKE);
   if (run.url !== undefined && style.hyperlinkUnderline === false) styles.delete(FontStyle.UNDERLINE);
+  return { family: style.fontFamily, size: run.size, color: runColor(run, style), styles };
+}
+
+/** A run's ink: {@link fontConfigForRun}'s `JAR_DEFAULT_TEXT_COLOR` sentinel
+ *  rule, plus (add4-T3gates) the url-run analogue -- `creoleTextLines` builds
+ *  every url run from a base `FontConfiguration` with no `hyperlinkColor`, so
+ *  `FontConfiguration#hyperlink()` (`FontConfiguration.java:335-340`) always
+ *  lands on the `HYPERLINK_COLOR` default there; the caller's own resolved
+ *  `style.getFontConfiguration` hyperlink colour (`Style.java:265`) replaces
+ *  exactly that default, never an inner `<color:x>` override. */
+function runColor(run: CreoleTextRun, style: ActivityTextStyle): string | null {
+  if (run.url !== undefined && run.color === HYPERLINK_COLOR && style.hyperlinkColor !== undefined) {
+    return style.hyperlinkColor;
+  }
   const hasExplicitColor = run.color !== undefined && run.color !== JAR_DEFAULT_TEXT_COLOR;
-  return { family: style.fontFamily, size: run.size, color: hasExplicitColor ? run.color : style.fill, styles };
+  return hasExplicitColor ? (run.color ?? style.fill) : style.fill;
 }
 
 /**

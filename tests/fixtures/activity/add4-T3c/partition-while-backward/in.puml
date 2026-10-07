@@ -1,0 +1,8 @@
+@startuml
+partition P {
+while (t)
+:x;
+backward :b;
+endwhile
+}
+@enduml

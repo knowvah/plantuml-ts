@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "3ec2d4cd",
+  "measuredAgainstCommit": "1916ce34",
   "fixtures": [
     {
       "type": "activity",
@@ -1629,8 +1629,8 @@
           "30": 2
         },
         "strokeWidth": {
-          "0": 3,
-          "1": 16
+          "1": 16,
+          "(absent)": 3
         },
         "rx": {
           "(absent)": 1,
@@ -1659,7 +1659,7 @@
         "height": "456"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "50a347b2"
+      "measuredAgainstCommit": "1d2fb519"
     },
     {
       "type": "activity",
@@ -3798,7 +3798,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "12": 12
+          "12": 2
         },
         "strokeWidth": {
           "1": 2
@@ -3806,9 +3806,9 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 12,
+        "textCount": 2,
         "width": "230",
-        "height": "281"
+        "height": "273"
       },
       "jar": {
         "fontSize": {
@@ -3824,8 +3824,8 @@
         "width": "234",
         "height": "203"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -7528,7 +7528,7 @@
       "slug": "lebile-91-veto202",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "3ec2d4cd",
+      "measuredAgainstCommit": "1d2fb519",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -7544,7 +7544,7 @@
           "12.5": 1
         },
         "textCount": 8,
-        "width": "524",
+        "width": "530",
         "height": "272"
       },
       "jar": {
@@ -7657,17 +7657,18 @@
       "ours": {
         "fontSize": {
           "11": 4,
-          "12": 6
+          "12": 7
         },
         "strokeWidth": {
-          "1": 7
+          "1": 7,
+          "0.5": 4
         },
         "rx": {
           "12.5": 3
         },
-        "textCount": 10,
-        "width": "169",
-        "height": "312"
+        "textCount": 11,
+        "width": "168",
+        "height": "320"
       },
       "jar": {
         "fontSize": {
@@ -7686,7 +7687,7 @@
         "height": "320"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "ad64c122"
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -9007,11 +9008,11 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34",
       "ours": {
         "fontSize": {
-          "12": 31
+          "12": 2
         },
         "strokeWidth": {
           "1": 2
@@ -9019,9 +9020,9 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 31,
-        "width": "239",
-        "height": "509"
+        "textCount": 2,
+        "width": "334",
+        "height": "779"
       },
       "jar": {
         "fontSize": {
@@ -15730,7 +15731,7 @@
         },
         "textCount": 9,
         "width": "380",
-        "height": "466"
+        "height": "474"
       },
       "jar": {
         "fontSize": {
@@ -15750,7 +15751,7 @@
         "height": "474"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca"
+      "measuredAgainstCommit": "790fee5a"
     },
     {
       "type": "activity",

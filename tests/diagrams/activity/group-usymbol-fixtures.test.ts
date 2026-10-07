@@ -7,7 +7,7 @@
  * pads a `UPolygon` (the package folder) by `HACK_X_FOR_POLYGON = 10` on X
  * (`klimt/drawing/LimitFinder.java:169-177`) and reads a `ULine`'s end (the
  * card's full-width hline) exactly (`:179-182`) where a `URectangle` stops
- * 1 px short (`:184-188`); `layout/canvas-origin.ts#compositeFudge` ports it.
+ * 1 px short (`:184-188`); `layout/canvas-origin-fudge.ts#compositeFudge` ports it.
  */
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

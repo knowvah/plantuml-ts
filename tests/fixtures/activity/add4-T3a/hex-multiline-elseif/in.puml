@@ -1,0 +1,9 @@
+@startuml
+start
+if (some test) then (yes)
+    :acti1;
+elseif (no on
+several lines)
+    :acti2;
+endif
+@enduml
