@@ -26,9 +26,10 @@ import type { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
 import type { GtileDiamondInside2, DiamondInside2Side } from '../tiles/gtile-diamond-inside2.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
-import { laneIn, laneOut } from './swimlane-lanes.js';
+import { laneAt, laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import { collectTouchedLanes } from './tile-coordinates-group.js';
 
 interface LvCtx {
   readonly t: GtileIfLongVertical;
@@ -36,6 +37,61 @@ interface LvCtx {
   readonly y: number;
   readonly myLane: string | undefined;
   readonly out: Out;
+  /** {@link compositeSwimlanes}; `undefined` = no swimlanes, no gate. */
+  readonly gate: ReadonlySet<string> | undefined;
+}
+
+/**
+ * `FtileIfLongVertical#getSwimlanes()`: `getSwimlaneIn()` (= `tiles[0]
+ * .getSwimlaneIn()`) plus every branch tile's and `tile2`'s lanes -- the
+ * diamonds' and `lastDiamond`'s own lane is NOT included
+ * (`FtileIfLongVertical.java:111-125`). `undefined` when the diagram has no
+ * lanes at all (no interceptor pass, `Swimlanes.java:318-356`).
+ */
+function compositeSwimlanes(t: GtileIfLongVertical, myLane: string | undefined): ReadonlySet<string> | undefined {
+  const lanes = new Set<string>();
+  const inLane = laneIn(t.tiles[0]!, myLane);
+  if (inLane !== undefined) lanes.add(inLane);
+  for (const tile of t.tiles) collectTouchedLanes(tile, lanes);
+  collectTouchedLanes(t.tile2, lanes);
+  if (lanes.size === 0 && myLane === undefined) return undefined;
+  return lanes;
+}
+
+/**
+ * `UGraphicInterceptorAllSwimlanes`/`OneSwimlane#draw`'s `Ftile` branch: a
+ * child is drawn only in a lane its own `getSwimlanes()` shares with the
+ * active (composite) set (`UGraphicInterceptorAllSwimlanes.java:63-79`,
+ * `UGraphicInterceptorOneSwimlane.java:68-75`). A diamond's set is its one
+ * creation lane (`FtileDiamondInside2`/`FtileDiamond`, `swimlane` ctor arg).
+ */
+function childDrawn(ctx: LvCtx, lane: string | undefined): boolean {
+  return ctx.gate === undefined || lane === undefined || ctx.gate.has(lane);
+}
+
+/**
+ * The `Connection` branch: drawn in an active lane `L` iff `tile1` is null
+ * or its `getSwimlaneOut()` is null or `L`, and the same for `tile2`'s
+ * `getSwimlaneIn()` (`UGraphicInterceptorAllSwimlanes.java:129-143`,
+ * `UGraphicInterceptorOneSwimlane.java:93-104`). None of this builder's
+ * connections is a `ConnectionTranslatable`, so the `Cross` pass never
+ * draws a cross-lane one either (`Swimlanes.java:178-200`,
+ * `ConnectionCross.java:49-64`).
+ */
+function connectionDrawn(ctx: LvCtx, lane1: string | undefined, lane2: string | undefined): boolean {
+  if (ctx.gate === undefined) return true;
+  for (const lane of ctx.gate) {
+    if ((lane1 === undefined || lane1 === lane) && (lane2 === undefined || lane2 === lane)) return true;
+  }
+  return false;
+}
+
+/** {@link pushEdge} behind {@link connectionDrawn}; `false` = not drawn, so
+ *  the caller attaches no label (the Snake and its text go together). */
+function pushGatedEdge(ctx: LvCtx, points: GPoint[], lane1: string | undefined, lane2: string | undefined): boolean {
+  if (!connectionDrawn(ctx, lane1, lane2)) return false;
+  pushEdge(ctx.out, points, lane1, lane2);
+  return true;
 }
 
 function absolutePoint(local: GPoint, originX: number, originY: number): GPoint {
@@ -106,6 +162,7 @@ function pushDiamondOwnLabel(ctx: LvCtx, diamond: GtileDiamondInside2, origin: G
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside2.java:79-99 */
 function pushDiamondNode(ctx: LvCtx, i: number): void {
   const diamond = ctx.t.diamonds[i]!;
+  if (!childDrawn(ctx, laneAt(diamond, ctx.myLane))) return;
   const origin = diamondOrigin(ctx, i);
   pushNode(
     ctx.out,
@@ -132,6 +189,7 @@ function pushDiamondNode(ctx: LvCtx, i: number): void {
  *  `renderIfMerge`/`canvas-origin.ts`/`compress/shapes-of.ts` handling for
  *  that kind already applies correctly, unmodified). */
 function pushLastDiamondNode(ctx: LvCtx): void {
+  if (!childDrawn(ctx, ctx.myLane)) return;
   const origin = lastDiamondOrigin(ctx);
   pushNode(
     ctx.out,
@@ -158,6 +216,8 @@ function connectionIn(ctx: LvCtx): void {
   const d0Origin = diamondOrigin(ctx, 0);
   const p2 = absolutePoint(t.diamonds[0]!.getCoord(NORTH_HOOK), d0Origin.x, d0Origin.y);
   const mid = (p1.y + p2.y) / 2;
+  // `super(null, diamonds.get(0))` (`:211`): no tile1, so no lane1 gate.
+  if (!connectionDrawn(ctx, undefined, laneIn(t.diamonds[0]!, myLane))) return;
   pushEdge(out, [p1, { x: p1.x, y: mid }, { x: p2.x, y: mid }, p2], myLane, laneIn(t.diamonds[0]!, myLane));
 }
 
@@ -167,13 +227,13 @@ function connectionIn(ctx: LvCtx): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:230-263
  */
 function connectionVerticalIn(ctx: LvCtx, i: number): void {
-  const { t, myLane, out } = ctx;
+  const { t, myLane } = ctx;
   const diamond = t.diamonds[i]!;
   const dOrigin = diamondOrigin(ctx, i);
   const p1 = absolutePoint(diamond.getCoord(EAST_HOOK), dOrigin.x, dOrigin.y);
   const tOrigin = tileOrigin(ctx, i);
   const p2 = absolutePoint(t.tiles[i]!.getCoord(NORTH_HOOK), tOrigin.x, tOrigin.y);
-  pushEdge(out, [p1, { x: p2.x, y: p1.y }, p2], laneOut(diamond, myLane), laneIn(t.tiles[i]!, myLane));
+  pushGatedEdge(ctx, [p1, { x: p2.x, y: p1.y }, p2], laneOut(diamond, myLane), laneIn(t.tiles[i]!, myLane));
 }
 
 /**
@@ -205,7 +265,7 @@ function connectionVertical(ctx: LvCtx, i: number): void {
     x: x + (t.branches[i + 1]!.diamondX + d2.getCoord(NORTH_HOOK).x),
     y: o2.y + d2.getCoord(NORTH_HOOK).y,
   };
-  pushEdge(out, [p1, p2], laneOut(d1, myLane), laneIn(d2, myLane));
+  if (!pushGatedEdge(ctx, [p1, p2], laneOut(d1, myLane), laneIn(d2, myLane))) return;
   const inlabel = t.inlabels[i + 1];
   if (inlabel === undefined) return;
   const edge = out.edges[out.edges.length - 1]!;
@@ -227,12 +287,8 @@ function connectionLastElse(ctx: LvCtx): void {
   const p1 = absolutePoint(t.diamonds[last]!.getCoord(SOUTH_HOOK), dOrigin.x, dOrigin.y);
   const t2Origin = tile2Origin(ctx);
   const p2 = absolutePoint(t.tile2.getCoord(NORTH_HOOK), t2Origin.x, t2Origin.y);
-  pushEdge(
-    out,
-    [p1, { x: p1.x, y: p2.y - 15 }, { x: p2.x, y: p2.y - 15 }, p2],
-    laneOut(t.diamonds[last]!, myLane),
-    laneIn(t.tile2, myLane),
-  );
+  const points = [p1, { x: p1.x, y: p2.y - 15 }, { x: p2.x, y: p2.y - 15 }, p2];
+  if (!pushGatedEdge(ctx, points, laneOut(t.diamonds[last]!, myLane), laneIn(t.tile2, myLane))) return;
   if (t.elseLabel === undefined || t.elseLabel === '') return;
   // `Snake.create(...).withLabel(label, VerticalAlignment.CENTER)`
   // (`FtileIfLongVertical.java:319-320`).
@@ -247,13 +303,13 @@ function connectionLastElse(ctx: LvCtx): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:331-358
  */
 function connectionLastElseOut(ctx: LvCtx): void {
-  const { t, myLane, out } = ctx;
+  const { t, myLane } = ctx;
   if (!t.hasTile2PointOut) return;
   const t2Origin = tile2Origin(ctx);
   const p1 = absolutePoint(t.tile2.getCoord(SOUTH_HOOK), t2Origin.x, t2Origin.y);
   const ldOrigin = lastDiamondOrigin(ctx);
   const p2 = { x: ldOrigin.x + t.lastDiamondSize / 2, y: ldOrigin.y };
-  pushEdge(out, [p1, { x: p1.x, y: p2.y - 15 }, { x: p2.x, y: p2.y - 15 }, p2], laneOut(t.tile2, myLane), myLane);
+  pushGatedEdge(ctx, [p1, { x: p1.x, y: p2.y - 15 }, { x: p2.x, y: p2.y - 15 }, p2], laneOut(t.tile2, myLane), myLane);
 }
 
 /**
@@ -263,15 +319,15 @@ function connectionLastElseOut(ctx: LvCtx): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:360-392
  */
 function connectionThenOut(ctx: LvCtx): void {
-  const { t, x, myLane, out } = ctx;
+  const { t, x, myLane } = ctx;
   if (!t.branches[0]!.hasPointOut) return;
   const tOrigin = tileOrigin(ctx, 0);
   const p1 = absolutePoint(t.tiles[0]!.getCoord(SOUTH_HOOK), tOrigin.x, tOrigin.y);
   const ldOrigin = lastDiamondOrigin(ctx);
   const p2 = { x: ldOrigin.x + t.lastDiamondSize, y: ldOrigin.y + t.lastDiamondSize / 2 };
   const rightEdge = x + t.width;
-  pushEdge(
-    out,
+  pushGatedEdge(
+    ctx,
     [p1, { x: p1.x, y: p1.y + 15 }, { x: rightEdge, y: p1.y + 15 }, { x: rightEdge, y: p2.y }, p2],
     laneOut(t.tiles[0]!, myLane),
     myLane,
@@ -287,12 +343,12 @@ function connectionThenOut(ctx: LvCtx): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:394-421
  */
 function connectionThenOutConnect(ctx: LvCtx, i: number): void {
-  const { t, x, myLane, out } = ctx;
+  const { t, x, myLane } = ctx;
   if (!t.branches[i]!.hasPointOut) return;
   const tOrigin = tileOrigin(ctx, i);
   const p1 = absolutePoint(t.tiles[i]!.getCoord(SOUTH_HOOK), tOrigin.x, tOrigin.y);
   const p2 = { x: x + t.width, y: p1.y + 15 };
-  pushEdge(out, [p1, { x: p1.x, y: p2.y }, p2], laneOut(t.tiles[i]!, myLane), myLane);
+  pushGatedEdge(ctx, [p1, { x: p1.x, y: p2.y }, p2], laneOut(t.tiles[i]!, myLane), myLane);
 }
 
 /**
@@ -310,7 +366,7 @@ export function walkIfLongVertical(
   myLane: string | undefined,
   out: Out,
 ): void {
-  const ctx: LvCtx = { t, x, y, myLane, out };
+  const ctx: LvCtx = { t, x, y, myLane, out, gate: compositeSwimlanes(t, myLane) };
 
   for (let i = 0; i < t.tiles.length; i++) {
     const b = t.branches[i]!;

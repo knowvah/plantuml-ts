@@ -1,0 +1,15 @@
+@startuml
+!pragma useVerticalIf on
+|Main|
+start
+if (first?) then (yes)
+  :stay here;
+(again) elseif (second?) then (maybe)
+  |Side|
+  :move over;
+else (no)
+  |Main|
+  :fallback;
+endif
+stop
+@enduml
