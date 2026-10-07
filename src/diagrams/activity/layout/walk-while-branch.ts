@@ -27,7 +27,7 @@
  */
 
 import type { GtileWhile } from '../tiles/gtile-while.js';
-import type { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
@@ -64,21 +64,27 @@ import { pushWhileBackwardConnections } from './walk-while-backward.js';
  * `pushRepeatCondition`'s own fix and so a future `tileWhile` change that
  * DOES lane the header does not silently regress.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
+ *
+ * Generalized (add3 T3a, CONDSTYLE-EMPTY) to any {@link DiamondCondition
+ * Tile} header, not just the hexagon: the polygon's own box is the
+ * ALONE shape, i.e. `[header.getCoord(NORTH_HOOK).y, header.getCoord
+ * (SOUTH_HOOK).y)` -- for `GtileDiamondInside`/`GtileDiamondSquare`
+ * (`inY = 0` always) this reduces to the OLD `{y: hY, height: SOUTH_HOOK
+ * .y}` exactly; for `GtileDiamondEmpty` (`inY` = its own north-label
+ * reserve, possibly nonzero) the alone box is shifted DOWN by that
+ * reserve and is always exactly 24 tall, matching `FtileDiamond`'s own
+ * fixed-size rhombus (`gtile-diamond-empty.ts`'s own doc).
  */
 function pushWhileHeader(
-  header: GtileDiamondInside,
+  header: DiamondConditionTile,
   hX: number,
   hY: number,
   myLane: string | undefined,
   out: Out,
 ): void {
   const hexLane = laneAt(header, myLane);
-  // The polygon is the hexagon ALONE: `drawU` draws
-  // `Hexagon.asPolygon(dimTotal)` with `dimTotal = calculateDimensionAlone`
-  // (`FtileDiamondInside.java:87-89`), while `header.height` is
-  // `calculateDimensionFtile`'s, which adds the north label below it
-  // (`:119-124`). `SOUTH_HOOK.y` is that alone height.
-  const box = { x: hX, y: hY, width: header.width, height: header.getCoord(SOUTH_HOOK).y };
+  const inY = header.getCoord(NORTH_HOOK).y;
+  const box = { x: hX, y: hY + inY, width: header.width, height: header.getCoord(SOUTH_HOOK).y - inY };
   pushNode(out, { id: out.nextId('while-header'), kind: 'while-header', ...box, label: header.label }, hexLane);
   emitDiamondLabels(header, { x: hX, y: hY }, ['north'], hexLane, out);
   emitDiamondOwnLabel(header, box, hexLane, out);
@@ -131,16 +137,17 @@ function backEdgePoints(backFrom: GPoint, headerEast: GPoint, bodyBottomY: numbe
  * D2: `ConnectionBackSimple#drawTranslate`'s own untranslated `getP1` (this
  * `backFrom`) and `getP2` (diamond1's own origin, `(hX, hY)` --
  * `getTranslateDiamond1(...).getTranslated(new XPoint2D(0,0))`), plus the
- * header's own `diamond1.calculateDimension()` fields: `inY = 0`,
- * `outY = header.getCoord(SOUTH_HOOK).y` (the hexagon-ALONE height,
- * `FtileDiamondInside.java:106-116`'s `calculateDimensionAlone`, same value
+ * header's own `diamond1.calculateDimension()` fields: `inY =
+ * header.getCoord(NORTH_HOOK).y` (`0` for `GtileDiamondInside`/
+ * `GtileDiamondSquare`, `FtileDiamondInside.java:106-116`'s own
+ * `calculateDimensionAlone`; possibly nonzero for `GtileDiamondEmpty`,
+ * add3 T3a), `outY = header.getCoord(SOUTH_HOOK).y` (same value
  * `pushWhileHeader`'s own comment cites for that hook), `width =
- * header.width` (also hexagon-alone, per that same method). Split out of
- * {@link pushWhileBack} to keep that function's own NLOC under the file's
- * limit.
+ * header.width`. Split out of {@link pushWhileBack} to keep that
+ * function's own NLOC under the file's limit.
  */
 function buildWhileBackLoop(
-  header: GtileDiamondInside,
+  header: DiamondConditionTile,
   hX: number,
   hY: number,
   backFrom: GPoint,
@@ -151,21 +158,21 @@ function buildWhileBackLoop(
     p1: backFrom,
     p2: { x: hX, y: hY },
     dimTotalWidth,
-    diamond: { inY: 0, outY: header.getCoord(SOUTH_HOOK).y, width: header.width },
+    diamond: { inY: header.getCoord(NORTH_HOOK).y, outY: header.getCoord(SOUTH_HOOK).y, width: header.width },
   };
 }
 
 /** The absolute-frame values every `Connection*` below shares, computed
  *  once so `pushWhileBack`/`pushWhileOut` stay within the file's parameter
  *  limit. `headerEast`/`headerWest` are the header's own `EAST_HOOK`/
- *  `WEST_HOOK` translated -- both already sit at the hexagon's own
- *  mid-height (`gtile-diamond-inside.ts`'s `hexHeight / 2`), which is
- *  exactly `dimDiamond1.getInY() + (outY - inY) / 2` with `inY === 0`
- *  (`FtileDiamondInside.java:106-116`), so no separate `half` term is
- *  needed here. */
+ *  `WEST_HOOK` translated -- each already `getCoord`'s own `inY +
+ *  (outY - inY) / 2` (`FtileDiamondInside.java:106-116`'s `inY === 0`
+ *  case, generalized by `GtileDiamondEmpty.getCoord`, add3 T3a, to the
+ *  same expression with a possibly-nonzero `inY`), so no separate `half`
+ *  term is needed here either way. */
 export interface WhileFrame {
   readonly out: Out;
-  readonly header: GtileDiamondInside;
+  readonly header: DiamondConditionTile;
   readonly body: Tile;
   readonly hX: number;
   readonly hY: number;
@@ -365,7 +372,7 @@ interface WhileOrigins {
   readonly hY: number;
   readonly bX: number;
   readonly bY: number;
-  readonly header: GtileDiamondInside;
+  readonly header: DiamondConditionTile;
   readonly body: Tile;
   readonly myLane: string | undefined;
   readonly out: Out;
@@ -422,8 +429,10 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
 
 export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | undefined, out: Out): void {
   const rawChildren = t.children;
-  // D1: the header is always a `GtileDiamondInside` (`tile-layout.ts#tileWhile`).
-  const header = rawChildren[0] as unknown as GtileDiamondInside;
+  // D1 (widened add3 T3a, CONDSTYLE-EMPTY): the header is a
+  // `DiamondConditionTile` -- `GtileDiamondInside`/`GtileDiamondSquare`/
+  // `GtileDiamondEmpty`, dispatched by `tile-layout.ts#buildWhileHeader`.
+  const header = rawChildren[0] as unknown as DiamondConditionTile;
   const body = rawChildren[1]!;
   // Each child sits so its OWN `left` lands under the tile's merged `left`
   // (`FtileWhile.java:621-641`: `x = dimTotal.getLeft() - child.getLeft()`),
