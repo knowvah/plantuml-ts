@@ -76,6 +76,7 @@ import {
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
+import { shiftAll } from './canvas-origin-shift.js';
 import {
   SPLIT_LINE_KINDS,
   extendForEdgeLabelText,
@@ -396,41 +397,6 @@ function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   };
 }
 
-function shiftNodeGeo(node: ActivityNodeGeo, dx: number, dy: number): ActivityNodeGeo {
-  const next: ActivityNodeGeo = { ...node, x: node.x + dx, y: node.y + dy };
-  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + dx, y: node.spikeTip.y + dy };
-  return next;
-}
-
-function shiftEdgeGeo(edge: ActivityEdgeGeo, dx: number, dy: number): ActivityEdgeGeo {
-  const next: ActivityEdgeGeo = { ...edge, points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) };
-  if (edge.midArrowAt !== undefined) {
-    next.midArrowAt = { ...edge.midArrowAt, x: edge.midArrowAt.x + dx, y: edge.midArrowAt.y + dy };
-  }
-  // b3/T3a (family C/EMMID): `emphasizeAt` is the same kind of absolute
-  // anchor point as `midArrowAt` -- see `activity-geometry.types.ts`'s doc.
-  if (edge.emphasizeAt !== undefined) {
-    next.emphasizeAt = { x: edge.emphasizeAt.x + dx, y: edge.emphasizeAt.y + dy };
-  }
-  return next;
-}
-
-/** `contentMinX` is deliberately NOT shifted here, for the same reason
- *  `compress-geometry.ts#transformLane`'s own doc gives: it is measured
- *  lane-LOCAL, before the lane's own absolute translate is applied
- *  (`Swimlanes.java:416-431`) -- this canvas-origin shift is simply a
- *  further layer of the same kind of absolute translate `contentMinX`
- *  already excludes. */
-function shiftSwimlaneGeo(lane: SwimlaneGeo, dx: number): SwimlaneGeo {
-  const next: SwimlaneGeo = { ...lane, x: lane.x + dx };
-  if (lane.contentX !== undefined) next.contentX = lane.contentX + dx;
-  return next;
-}
-
-function shiftReservation(r: Reservation, dx: number, dy: number): Reservation {
-  return { ...r, x: r.x + dx, y: r.y + dy };
-}
-
 /** Bundles {@link computeCanvasOrigin} + the shift it implies into one
  *  finishing pass, shared by `assign-coordinates-full.ts`'s `pass1Assemble`
  *  and `compressAndAssemble` so the mechanism is written once. */
@@ -460,21 +426,6 @@ export interface FinalizedGeometry {
   chrome: Partial<SwimlaneChrome>;
 }
 
-/** {@link finalizeGeometry}'s own middle step, split out to keep that
- *  function's NLOC under the file's limit: shifts every node/edge/
- *  swimlane/reservation by the one `CanvasOrigin` translate. */
-function shiftAll(
-  input: Pick<FinalizeInput, 'nodes' | 'edges' | 'swimlanes' | 'reservations'>,
-  origin: CanvasOrigin,
-): Pick<FinalizedGeometry, 'nodes' | 'edges' | 'swimlanes' | 'reservations'> {
-  return {
-    nodes: input.nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY)),
-    edges: input.edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY)),
-    swimlanes: input.swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX)),
-    reservations: input.reservations.map((r) => shiftReservation(r, origin.shiftX, origin.shiftY)),
-  };
-}
-
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight, theme } = input;
   const origin = computeCanvasOrigin({
@@ -486,7 +437,7 @@ export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
     theme,
     contentMaxY: bounds.maxY,
   });
-  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin);
+  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin.shiftX, origin.shiftY);
   const [y1, y2] = [baseY + origin.shiftY, bounds.maxY + origin.shiftY];
   const chrome = computeSwimlaneChrome(shifted.swimlanes, y1, titlesHeight, y2, bandReservationX(shifted.reservations));
   return {
