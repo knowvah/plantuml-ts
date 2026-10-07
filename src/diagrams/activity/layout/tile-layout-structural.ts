@@ -19,7 +19,7 @@ import type {
 import type { StringBounder, Tile } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { Pragma } from '../../../core/skin/Pragma.js';
-import { GtileDiamond } from '../tiles/gtile-diamond.js';
+import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileMerge } from '../tiles/gtile-merge.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
@@ -268,9 +268,14 @@ export function tileSwitch(
   laneOrder: readonly string[],
   pragma: Pragma,
 ): GtileSwitch {
-  const diamond = new GtileDiamond(node.condition, bounder, theme);
+  // `FtileFactoryDelegatorSwitch#getDiamond1`/`#getDiamond2` (`vcompact/
+  // FtileFactoryDelegatorSwitch.java:129-161`): both are bare
+  // `FtileDiamondInside` hexagons (no `.withNorth`/`.withWest`/`.withEast`
+  // call anywhere in that file) -- diamond1 carries the switch's own
+  // condition label, diamond2 is always empty.
+  const diamond = new GtileDiamondInside(node.condition, {}, bounder, theme);
   const cases = node.cases.map((kase) => tileSwitchCase(kase, bounder, theme, laneOrder, pragma));
-  const mergeDiamond = new GtileDiamond('', bounder, theme);
+  const mergeDiamond = new GtileDiamondInside('', {}, bounder, theme);
   return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
 }
 
