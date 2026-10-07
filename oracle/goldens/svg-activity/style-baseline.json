@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "a30245de",
+  "measuredAgainstCommit": "76efedca",
   "fixtures": [
     {
       "type": "activity",
@@ -4323,9 +4323,10 @@
       "slug": "fukika-81-gite897",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9",
+      "measuredAgainstCommit": "76efedca",
       "ours": {
         "fontSize": {
+          "10": 1,
           "11": 4,
           "12": 5
         },
@@ -4333,11 +4334,12 @@
           "1": 15
         },
         "rx": {
+          "2.5": 1,
           "12.5": 5
         },
-        "textCount": 9,
+        "textCount": 10,
         "width": "334",
-        "height": "610"
+        "height": "630"
       },
       "jar": {
         "fontSize": {
@@ -7318,8 +7320,8 @@
           "2.5": 2
         },
         "textCount": 3,
-        "width": "193",
-        "height": "253"
+        "width": "183",
+        "height": "243"
       },
       "jar": {
         "fontSize": {
@@ -7337,8 +7339,8 @@
         "width": "183",
         "height": "243"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "76efedca"
     },
     {
       "type": "activity",
@@ -15711,6 +15713,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
+          "10": 1,
           "11": 2,
           "12": 6
         },
@@ -15718,11 +15721,12 @@
           "1": 19
         },
         "rx": {
+          "2.5": 1,
           "12.5": 6
         },
-        "textCount": 8,
+        "textCount": 9,
         "width": "380",
-        "height": "446"
+        "height": "466"
       },
       "jar": {
         "fontSize": {
@@ -15742,7 +15746,7 @@
         "height": "474"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "76efedca"
     },
     {
       "type": "activity",

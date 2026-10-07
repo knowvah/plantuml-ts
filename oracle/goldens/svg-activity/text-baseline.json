@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "541c5f2c",
+  "measuredAgainstCommit": "76efedca",
   "fixtures": [
     {
       "type": "activity",
@@ -3533,18 +3533,19 @@
       "slug": "fukika-81-gite897",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9",
+      "measuredAgainstCommit": "76efedca",
       "ours": {
         "fill": {
-          "#000": 9
+          "#000": 10
         },
         "anchor": {
-          "(absent)": 9
+          "(absent)": 10
         },
         "inset": {
+          "7": 1,
           "25": 5
         },
-        "textCount": 9
+        "textCount": 10
       },
       "jar": {
         "fill": {
@@ -12721,15 +12722,16 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
+          "7": 1,
           "20": 6
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -12745,7 +12747,7 @@
         "textCount": 9
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "76efedca"
     },
     {
       "type": "activity",
