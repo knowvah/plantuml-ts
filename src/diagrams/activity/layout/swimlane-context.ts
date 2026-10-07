@@ -148,6 +148,34 @@ export function measureLaneExtents(
   return extents;
 }
 
+/**
+ * add4-T2c: the lanes one drawn node is MEASURED into when that set is
+ * wider than the node's own draw lane. `computeDrawingWidths` runs one
+ * `UGraphicInterceptorAllSwimlanes` pass (`Swimlanes.java:379-395`); an
+ * `Ftile`'s primitives go to every lane still active after narrowing to
+ * `tile.getSwimlanes()` (`UGraphicInterceptorAllSwimlanes.java:88-101,
+ * 160-168`). `FtileWithNoteOpale#getSwimlanes` is the wrapped tile's
+ * lanes plus `swimlaneNote` (`FtileWithNoteOpale.java:92-99`) and its
+ * `drawU` draws the Opale ungated outside a one-lane interceptor
+ * (`:217`), so a note captured in another lane is measured into BOTH --
+ * while the content pass draws it in `swimlaneNote` alone. Keyed by the
+ * node object the walk pushes (`placeSwimlanes` receives those same
+ * references); a `WeakMap`, never an own property, so no lane copy or
+ * public geometry ever carries it.
+ */
+const MEASURE_LANES = new WeakMap<object, readonly string[]>();
+
+/** Records `lanes` as `node`'s measurement lanes (see {@link MEASURE_LANES}). */
+export function markMeasureLanes(node: object, lanes: readonly string[]): void {
+  MEASURE_LANES.set(node, lanes);
+}
+
+/** `node`'s measurement lanes, or `undefined` when it measures only into
+ *  its own `swimlane`. */
+export function measureLanesOf(node: object): readonly string[] | undefined {
+  return MEASURE_LANES.get(node);
+}
+
 // ---------------------------------------------------------------------------
 // Lane widths
 // ---------------------------------------------------------------------------

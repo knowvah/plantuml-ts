@@ -51,13 +51,16 @@ import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
  * the floating sibling model rather than nesting wraps incorrectly.
  * A note tagged with a DIFFERENT swimlane than the preceding tile (e.g.
  * `razuzu-32-faje125`: `floating note right` captured in `laneTwo`
- * immediately after an action in `laneOne`) also falls back: upstream
- * models this via `FtileWithNoteOpale`'s own `swimlaneNote` field
- * (`:86,92-99,217`), a per-swimlane-interceptor draw gate this port's flat
- * single-pass SVG canvas has no counterpart for -- wrapping it the same
- * way as a same-lane note would reserve flow-column width for a note that
- * upstream draws in a visually disjoint lane. Un-ported, re-slotted
- * (`activity-divergence-drive-2`, next-missions).
+ * immediately after an action in `laneOne`) wraps it the same way
+ * (add4-T2c): `InstructionList#addNote` forwards to `getLast().addNote`
+ * whatever the lane (`InstructionList.java:190-195`), carrying the
+ * note's own `swimlaneNote` (`ActivityDiagram3.java:480`). The Opale then
+ * draws only in that lane's pass (`FtileWithNoteOpale.java:217`, inside
+ * `Swimlanes.java:342`'s one-lane interceptor), which `walk-with-notes.ts
+ * #walkNoteOpale` mirrors by tagging the note node with the note tile's
+ * own lane. A merged `FtileWithNotes` ignores `swimlaneNote` entirely
+ * (`FtileWithNotes.java:87-97` delegate to the tile), so the merge arm
+ * has no lane guard either.
  *
  * `addNote`'s base (`WithNote.java:56-59`, unoverridden) is what every
  * kind in {@link WRAP_SAFE_KINDS} resolves to -- confirmed per-kind:
@@ -134,12 +137,6 @@ function isMergeableNoteWrap(tile: Tile): tile is GtileNoteOpale | GtileWithNote
   return tile.kind === 'gtile-note-opale' || tile.kind === 'gtile-with-notes';
 }
 
-/** `razuzu-32-faje125`'s own `sameLane` guard, split out of {@link
- *  tileNote} for the same CCN reason as {@link isMergeableNoteWrap}. */
-function isSameLaneAsPrevious(node: ActivityNote, last: Tile | undefined): boolean {
-  return last === undefined || node.swimlane === undefined || node.swimlane === last.swimlane;
-}
-
 /** Whether `last` is a WRAP_SAFE_KINDS/WRAP_NO_LINK_KINDS leaf this note
  *  may wrap for the FIRST time -- split out of {@link tileNote} for the
  *  same CCN reason as {@link isMergeableNoteWrap}. */
@@ -165,12 +162,11 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
     return;
   }
   const noteTile = tileSimpleLeaf(node, bounder, theme) as GtileNote;
-  const sameLane = isSameLaneAsPrevious(node, last);
-  if (sameLane && isMergeableNoteWrap(last)) {
+  if (isMergeableNoteWrap(last)) {
     tiles[tiles.length - 1] = mergeIntoWithNotes(last, node, bounder, theme);
     return;
   }
-  if (!sameLane || !isFirstWrapTarget(last)) {
+  if (!isFirstWrapTarget(last)) {
     tiles.push(noteTile);
     return;
   }
