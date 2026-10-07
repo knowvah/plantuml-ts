@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "76efedca",
+  "measuredAgainstCommit": "6c788ec6",
   "fixtures": [
     {
       "type": "activity",
@@ -6757,10 +6757,11 @@
       "slug": "mabove-82-dozu233",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "6c788ec6",
       "ours": {
         "fill": {
-          "#000": 2
+          "#FF0": 1,
+          "#000": 1
         },
         "anchor": {
           "(absent)": 2
@@ -10453,7 +10454,7 @@
       "slug": "somome-34-nori033",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "6c788ec6",
       "ours": {
         "fill": {
           "#000": 8
@@ -10462,7 +10463,8 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 4
+          "10": 4,
+          "12.194": 1
         },
         "textCount": 8
       },
@@ -11101,18 +11103,19 @@
       "slug": "tozecu-08-ride878",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "6c788ec6",
       "ours": {
         "fill": {
-          "#000": 18
+          "#000": 20
         },
         "anchor": {
-          "(absent)": 18
+          "(absent)": 20
         },
         "inset": {
-          "10": 7
+          "7": 1,
+          "10": 8
         },
-        "textCount": 18
+        "textCount": 20
       },
       "jar": {
         "fill": {

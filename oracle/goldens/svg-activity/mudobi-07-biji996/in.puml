@@ -1,0 +1,21 @@
+@startuml
+start
+:1;
+:2;
+repeat
+:3;
+:4;
+if (User confirms) then (Yes )
+:5;
+break
+else (User clicks on Cancel)
+:6;
+:7;
+endif
+partition abc {
+    :9;
+}
+repeat while (cond)
+    :8;
+stop
+@enduml

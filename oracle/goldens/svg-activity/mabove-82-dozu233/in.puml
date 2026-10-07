@@ -1,0 +1,14 @@
+@startuml
+skinparam partition {
+	BackgroundColor lightblue
+	BorderColor green
+	BorderThickness 4
+	FontSize 20
+	FontColor yellow
+}
+start
+partition Action {
+  :foo1;
+}
+stop
+@enduml

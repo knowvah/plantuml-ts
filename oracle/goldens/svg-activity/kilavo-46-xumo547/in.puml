@@ -1,0 +1,6 @@
+@startuml
+:foo1;
+partition title2 #LightSkyBlue {
+:foo3;
+}
+@enduml

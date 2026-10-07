@@ -68,8 +68,10 @@ export function frameTitleShape(node: ActivityNodeGeo, bounder: StringBounder, t
   const x = node.x + TITLE_INSET_X;
   const y = node.y + TITLE_INSET_Y;
   if (node.width - titleWidth < SPECIAL_TEXT_MIN_SPARE) {
-    // An empty `Display` draws no `UText`, so nothing reaches `drawText`.
-    if (title === '') return null;
+    // An empty `Display` -- or one whose atoms carry no text ink (a lone
+    // `<$sprite>`: the sprite atom draws an image, not a `UText`) -- draws
+    // no `UText`, so nothing reaches `drawText` (`SlotFinder.java:127-135`).
+    if (title === '' || titleWidth === 0) return null;
     const fontSize = activityFontSize(theme, 'composite');
     const dim = bounder.getDimension(title, fontSize);
     return { kind: 'text', x, y: y + fontSize * ASCENT_FRACTION, width: titleWidth, height: dim.height };
@@ -102,9 +104,10 @@ export function frameShapes(node: ActivityNodeGeo, bounder: StringBounder, theme
   }
   const shapes: CompressShape[] = [{ kind: node.usymbol === 'package' ? 'polygon' : 'rect', ...box }];
   const title = node.label ?? '';
-  if (title === '') return shapes;
-  const fontSize = activityFontSize(theme, 'composite');
   const titleWidth = compositeTitleWidth(theme, title);
+  // No `UText` ink, no `SlotFinder#drawText` slot (see frameTitleShape).
+  if (title === '' || titleWidth === 0) return shapes;
+  const fontSize = activityFontSize(theme, 'composite');
   const origin = compositeSymbolTitleOrigin(node, node.usymbol, titleWidth);
   const height = bounder.getDimension(title, fontSize).height;
   return [
