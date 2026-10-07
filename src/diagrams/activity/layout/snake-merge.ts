@@ -124,14 +124,11 @@ interface PendingEntry {
 /**
  * `addPendingSnake` (`UGraphicForSnake.java:146-156`): try every already-
  * pending entry IN ORDER, replace the first that accepts; else append.
- * Scoped to `FtileGroup`/`partition` boundaries (D1) -- a pending entry
- * outside the new edge's own scope is never even offered a merge, the
- * same way a nested `UGraphicForSnake`'s pending list is never visible
- * to its outer one.
+ * Unscoped: `FtileGroup#drawU` (`FtileGroup.java:209-227`) opens no
+ * `UGraphicForSnake` of its own (add4-T3c).
  */
 function addToPending(pending: PendingEntry[], entry: PendingEntry): void {
   for (let i = 0; i < pending.length; i++) {
-    if (pending[i]!.meta.scope !== entry.meta.scope) continue;
     const merged = mergeTwo(pending[i]!.edge, entry.edge);
     if (merged !== null) {
       pending[i] = { edge: merged, meta: pending[i]!.meta };
@@ -152,13 +149,13 @@ function touchesOther(entry: PendingEntry, other: PendingEntry): boolean {
 /**
  * `flushUg`'s own pass (`UGraphicForSnake.java:158-165`,
  * `removeEndDecorationIfTouches` at `:81-88`): for each pending entry,
- * drop its end decoration if ANY other entry in the SAME scope (including
+ * drop its end decoration if ANY other entry (including
  * itself -- harmless, `connection-census.md` §5) is untouchable-as-a-
  * target and still touches it.
  */
 function removeEndDecorationIfTouches(pending: readonly PendingEntry[]): PendingEntry[] {
   return pending.map((entry) => {
-    const touches = pending.some((other) => other.meta.scope === entry.meta.scope && touchesOther(entry, other));
+    const touches = pending.some((other) => touchesOther(entry, other));
     if (!touches) return entry;
     return { edge: { ...entry.edge, arrowhead: false as const }, meta: entry.meta };
   });
