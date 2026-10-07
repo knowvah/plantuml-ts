@@ -90,6 +90,7 @@ import type { ISkinSimple } from '../../../style/ISkinSimple.js';
 import { manageGuillemet } from '../../../text/Guillemet.js';
 import { buildStripeAtoms, fontConfigurationForHeading } from './StripeSimple.js';
 import { resolveTextEscapes } from '../../../text-escapes.js';
+import { CharHidder } from '../../../utils/CharHidder.js';
 import type { CreoleAtom } from '../atom/Atom.js';
 import { isTreeStart, isCodeStart, isLatexStart, MONOSPACED } from '../Parser.js';
 import type { AtomOps } from '../Sea.js';
@@ -136,9 +137,16 @@ function trim2(s: string): string {
  *  SAME "small utility, cite it" precedent as `trim2` above): T5a's
  *  per-`%newline()`-piece atom building (below) cannot reuse
  *  `buildLineAtoms`'s own internal call to it, since that function only
- *  ever builds one (unsplit) piece's atoms. */
+ *  ever builds one (unsplit) piece's atoms.
+ *
+ *  add3-T3d: `CharHidder.unhide` (`AtomText.java:79`, BEFORE
+ *  `manageSpecialChars` in upstream's own constructor order) restores a
+ *  `~X` tilde escape {@link buildTextStripes}'s own `CharHidder.hide` call
+ *  protected from the creole tokenizer -- the SAME pairing
+ *  `StripeSimple.ts#decodeAtomEscapes` carries for its own (non-Sheet)
+ *  caller. */
 function decodeTextAtoms(atoms: readonly CreoleAtom[]): readonly CreoleAtom[] {
-  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(a.text) } : a));
+  return atoms.map((a) => (a.kind === 'text' ? { ...a, text: resolveTextEscapes(CharHidder.unhide(a.text)) } : a));
 }
 
 /** `Iterator<DisplayLine>` -> `Iterator<string>` adapter —
@@ -467,7 +475,10 @@ export class CreoleParser implements SheetBuilder {
   }
 
   /** java:139-159's `analyzeAndAdd`/`modifyStripe` (HEADING/LIST/NORMAL),
-   *  called once per `%newline()`-split piece of the classified content. */
+   *  called once per `%newline()`-split piece of the classified content.
+   *  add3-T3d: `CharHidder.hide` (`StripeSimple.java:150`) runs on each
+   *  piece BEFORE the tokenizer sees it -- {@link decodeTextAtoms}'s own
+   *  doc comment for the matching `unhide`. */
   private buildTextStripes(
     classification: Exclude<StripeClassification, { type: 'HORIZONTAL_LINE' } | { type: 'LITERAL' }>,
     fontConfiguration: FontConfiguration,
@@ -480,7 +491,7 @@ export class CreoleParser implements SheetBuilder {
         : fontConfiguration;
     return splitOnNewlineSentinel(classification.content).map((piece) =>
       createSimpleStripe(
-        decodeTextAtoms(buildStripeAtoms(piece, lineFont)),
+        decodeTextAtoms(buildStripeAtoms(CharHidder.hide(piece), lineFont)),
         align,
         listHeader(classification, fontConfiguration, context),
       ),

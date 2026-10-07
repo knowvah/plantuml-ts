@@ -5,7 +5,10 @@ import type { StringBounder, Tile } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
 import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y, NOTE_OPALE_GAP } from '../activity-layout-constants.js';
+import { activityFontFamily } from '../activity-text-style.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { buildNoteTextBlock, klimtStringBounder, noteTextBlockDimension } from '../activity-creole-sheet.js';
+import { measurerAdapterOf } from './gtile-action.js';
 
 export interface OpaleBox {
   readonly width: number;
@@ -17,14 +20,24 @@ export interface OpaleBox {
  * `textBlock.calculateDimension`, where `textBlock` is the multi-line
  * creole sheet built over the note's own `Display`
  * (`FtileWithNoteOpale.java:147-150`) -- ONE `TextBlock` line per `\n` in
- * the source, never the whole string measured as a single run. Creole
- * markup (`**bold**`, lists) inside a note line is NOT resolved here --
- * that is the Sheet's `CreoleMode.FULL` parse, deferred to the
- * separately-filed NOTE-CREOLE family. Shared by {@link GtileNote} (the
- * flow-attached note leaf) and the if-composites' own LEFT/RIGHT Opale
- * boxes (`FtileIfWithDiamonds.java:83-109`, `FtileIfDown.java:116-120`,
- * `activity-divergence-drive-3` T2a, family IFNOTE) -- ALL THREE read the
- * same `Opale` Java class, never a creole-aware variant.
+ * the source, never the whole string measured as a single run.
+ *
+ * add3-T3d (NOTE-CREOLE): {@link GtileNote} (the flow-attached note leaf)
+ * now resolves creole markup (`**bold**`/`""mono""`/`~` escapes/lists) via
+ * {@link measureOpaleCreole}, the real `Sheet`. `measureIfOwnNote` (the
+ * if-composites' own LEFT/RIGHT Opale boxes, `FtileIfWithDiamonds.java
+ * :83-109`, `FtileIfDown.java:116-120`, family IFNOTE) deliberately still
+ * calls the OLD raw {@link measureOpaleText} -- IFNOTE's own rows are
+ * owned by a different, later task (`activity-divergence-drive-3` batch-3
+ * T3c), and the note TEXT's drawing for an if-own note is the SAME shared
+ * `renderNote` (`activity-renderer-shapes.ts`) {@link GtileNote} uses, so
+ * switching this sizer without first checking T3c's own in-flight work
+ * for a matching drawing-side change risks a sizing/drawing mismatch
+ * (the exact class of regression `isActionSheetEligible`'s own doc
+ * comment already reports for `fikuki-99-kulu790`/`mufixi-71-koma752`).
+ * `renderNoteLabel`'s own geometric eligibility check
+ * (`activity-creole-sheet.ts`) means an upgrade here is safe to land
+ * later without touching the renderer again.
  */
 /** A note the enclosing `if` owns (`ActivityIf.notes`), pre-measured at
  *  tile-building time -- `gtile-if-down.ts`/`gtile-if-with-links.ts` take
@@ -57,6 +70,28 @@ export function measureOpaleText(text: string, bounder: StringBounder, fontSize:
   return { width: textWidth + NOTE_MARGIN_X1 + NOTE_MARGIN_X2, height: textHeight + 2 * NOTE_MARGIN_Y };
 }
 
+/**
+ * {@link measureOpaleText}'s replacement for every caller that owns a
+ * `Theme` (add3-T3d, NOTE-CREOLE): `Opale.calculateDimension` over the
+ * REAL creole `Sheet` (`FtileWithNoteOpale.java:147-150`/`FtileNoteAlone
+ * .java:114-117`, `activity-creole-sheet.ts#buildNoteTextBlock`) instead
+ * of the raw `\n`-split string -- resolves `**bold**`/`""mono""`/`~`
+ * escapes/lists, not just literal lines.
+ *
+ * {@link measureOpaleText} itself is UNCHANGED and still used by `tiles/
+ * gtile-with-notes.ts` (NOTE-MULTI family): that file's own `GtileWithNotes`
+ * constructor is threaded a bare `fontSize: number` by its two callers in
+ * `layout/tile-layout-structural.ts`, which already HAVE a `Theme` in
+ * scope there but are outside this task's write-set (`layout/**`) --
+ * switching that chain to this function is a follow-on, not this commit.
+ */
+export function measureOpaleCreole(text: string, bounder: StringBounder, theme: Theme): OpaleBox {
+  const font = { family: activityFontFamily(theme, 'note'), size: activityFontSize(theme, 'note') };
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), font);
+  const tb = buildNoteTextBlock(text, theme);
+  return noteTextBlockDimension(tb, sheetBounder);
+}
+
 export class GtileNote extends TileLeaf {
   readonly kind = 'gtile-note' as const;
   readonly width: number;
@@ -75,8 +110,9 @@ export class GtileNote extends TileLeaf {
     // declares no `note` override, so the root value stands. Was
     // `theme.fontSize - 2` = 12, which moved the note the WRONG WAY: the
     // jar's note text is LARGER than its action text, not smaller.
-    const fontSize = activityFontSize(theme, 'note');
-    const box = measureOpaleText(node.text, bounder, fontSize);
+    // add3-T3d (NOTE-CREOLE): the real creole Sheet, not the raw `\n`-split
+    // string -- see {@link measureOpaleCreole}'s own doc comment.
+    const box = measureOpaleCreole(node.text, bounder, theme);
     this.width = box.width;
     this.height = box.height;
   }
