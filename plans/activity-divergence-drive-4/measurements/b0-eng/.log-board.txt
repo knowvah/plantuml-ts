@@ -1,0 +1,2 @@
+surveying 4 board fixtures (concurrency 6)
+wrote plans/activity-divergence-drive-4/measurements/b0-eng/parity-board.json — {"conformant":0,"structural-match":0,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}
