@@ -430,3 +430,20 @@ describe('creoleTextLines mode option (CommandCreoleBuilder.java:85-86)', () => 
     expect(line.runs.some((r) => r.text === 'u' && r.style.underline)).toBe(true);
   });
 });
+
+// add4-T3b: each atom carries its own `FontConfiguration` family -- a
+// `""mono""` run is `Parser.MONOSPACED` (`CommandCreoleMonospaced.java`,
+// `SkinParam.java:1068-1070`); `SvgGraphics.java:720-722` maps it to
+// `monospace` at draw time. The run must report it, not the caller's.
+describe('creoleTextLines run family', () => {
+  const measurer = new WidthTableMeasurer();
+
+  it('a ""mono"" run reports family "monospaced"; plain runs report the caller family', () => {
+    const line = creoleTextLines('a ""Gw"" b', font, measurer)[0]!;
+    expect(line.runs.map((r) => [r.text, r.family])).toEqual([
+      ['a ', 'Helvetica'],
+      ['Gw', 'monospaced'],
+      [' b', 'Helvetica'],
+    ]);
+  });
+});

@@ -124,6 +124,11 @@ export interface CreoleRunImage {
 
 export interface CreoleTextRun {
   readonly text: string;
+  /** add4-T3b: the atom's OWN `FontConfiguration` family -- `monospaced`
+   *  for a `""x""` run (`CommandCreoleMonospaced.java`, `SkinParam.java:
+   *  1068-1070`), mapped to `monospace` at draw time (`SvgGraphics.java:
+   *  720-722`). Set on every text run; absent on table-row/latex runs. */
+  readonly family?: string;
   readonly style: FontStyleFlags;
   readonly color?: string;
   readonly url?: string;
@@ -298,6 +303,7 @@ function textAtomMeasured(atom: Extract<CreoleAtom, { kind: 'text' }>, ctx: Meas
   const height = Math.max(ctx.measurer.measure(atom.text, runFont).height, ATOM_TEXT_MIN_HEIGHT);
   const run: UnplacedRun = {
     text: atom.text,
+    family: atom.font.family,
     style: styleFlagsFromSet(atom.font.styles),
     ...(atom.font.color !== null ? { color: atom.font.color } : {}),
     ...(atom.url !== undefined ? { url: atom.url.url, tooltip: atom.url.tooltip } : {}),
