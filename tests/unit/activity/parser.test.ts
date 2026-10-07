@@ -75,7 +75,7 @@ describe('parses :action; syntax', () => {
   // sentinel character directly (the preprocessor's own output shape),
   // the same way `fabule-54-pili300`'s fixture reaches this code path
   // after a real `%n()`-bearing source is preprocessed.
-  it('decodes a BLOCK_E1_NEWLINE sentinel (the preprocessor\'s own %n() expansion) to a real newline', () => {
+  it("decodes a BLOCK_E1_NEWLINE sentinel (the preprocessor's own %n() expansion) to a real newline", () => {
     const ast = parse([`:1 ${BLOCK_E1_NEWLINE} fprintf( hello${BLOCK_E1_NEWLINE} , %s);`]);
     const node = firstNode(ast) as ActivityAction;
     expect(node.label).toBe('1 \n fprintf( hello\n , %s)');
@@ -453,14 +453,7 @@ describe('parses swimlane', () => {
   });
 
   it('a later color-less switch to the same lane keeps its earlier color', () => {
-    const ast = parse([
-      '|#AntiqueWhite|Alice|',
-      '  :Do work;',
-      '|Bob|',
-      '  :Review;',
-      '|Alice|',
-      '  :More work;',
-    ]);
+    const ast = parse(['|#AntiqueWhite|Alice|', '  :Do work;', '|Bob|', '  :Review;', '|Alice|', '  :More work;']);
     expect(ast.swimlaneColors).toEqual({ Alice: '#AntiqueWhite' });
   });
 
@@ -601,6 +594,50 @@ describe('a note immediately after endif belongs to the CLOSED if, not a flow si
       { kind: 'note', text: 'lead', position: 'left' },
       { kind: 'note', text: 'trail', position: 'right' },
     ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// IF-KILL (mission `activity-divergence-drive-3` T3c): `detach`/`kill`
+// right after a closed `if` kills that if's `thenBranch`/`elseBranch` IN
+// PLACE (`InstructionIf.java:199-213`'s own `endifCalled` arm) -- never a
+// flow sibling. Our port models `kill`/`detach` as their own node, so
+// the Java "flip a `killed` flag" becomes "append the same node kind to
+// the branch", mirroring `isStopOrSpot`'s own in-branch `[action, kill|
+// detach]` convention (`conditional-builder.ts`).
+// ---------------------------------------------------------------------------
+
+describe('a detach/kill immediately after endif kills the CLOSED if, not a flow sibling', () => {
+  it('merges onto the if node; the top-level node list has ONE node, not two', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'detach']);
+    expect(ast.nodes).toHaveLength(1);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.kind).toBe('if');
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
+  });
+
+  it('kill behaves the same as detach', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'kill']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'kill' }]);
+  });
+
+  it('a non-empty elseBranch is ALSO killed (Java kills thens.get(0) AND elseBranch, same loop iteration)', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'else (no)', ':b;', 'endif', 'detach']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
+    expect(node.elseBranch).toEqual([{ kind: 'action', label: 'b' }, { kind: 'detach' }]);
+  });
+
+  it('an EMPTY elseBranch is left empty (Java only kills a branch whose getLast() is non-null)', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'detach']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.elseBranch).toEqual([]);
+  });
+
+  it('a detach NOT immediately after a closed if stays a flow sibling', () => {
+    const ast = parse([':a;', 'detach']);
+    expect(ast.nodes).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
   });
 });
 

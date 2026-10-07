@@ -11,6 +11,7 @@ import type {
   ActivitySpot,
   ActivityLabel,
   ActivityGoto,
+  ActivityIf,
   ActivityNode,
   ActivityNote,
 } from './ast.js';
@@ -118,6 +119,44 @@ function redirectNoteOntoIf(nodes: ActivityNode[], node: ActivityNote): boolean 
   return true;
 }
 
+/**
+ * `InstructionIf#kill`'s own `endifCalled` arm (`InstructionIf.java:
+ * 199-213`): a `kill`/`detach` parsed immediately after a CLOSED `if`
+ * (this list's own last element) kills that if's branches IN PLACE
+ * rather than becoming its own flow sibling -- `InstructionSimple#kill`
+ * (`InstructionSimple.java:124-126`) just flips a `killed` flag, but our
+ * port models `kill`/`detach` as their own node, so "kill the branch's
+ * last instruction" becomes "append this same node kind to the branch's
+ * own body" -- exactly the shape {@link isStopOrSpot}
+ * (`conditional-builder.ts`) already recognises for an IN-branch kill
+ * (`[action|spot, kill|detach]`, that function's own doc comment).
+ *
+ * Java's own `for (Branch branch : thens) { ...; return true; }` returns
+ * after the FIRST iteration unconditionally -- `thens.get(0)` is always
+ * the plain `thenBranch`; a later `elseif` branch (appended to `thens`
+ * by `addElseIf`) is NEVER reached by this loop, a genuine upstream
+ * quirk (preserved, not "fixed": CLAUDE.md's own information-carrying-
+ * behavior rule). `elseBranch`'s own kill is gated on `getLast() != null`
+ * (`:204`) -- skipped here when `elseBranch` is empty, matching
+ * `killLastOf`'s own no-op on an empty branch.
+ */
+function killLastOf(branch: readonly ActivityNode[], killer: ActivityNode): ActivityNode[] {
+  if (branch.length === 0) return [...branch];
+  return [...branch, killer];
+}
+
+function redirectKillOntoIf(nodes: ActivityNode[], node: Extract<ActivityNode, { kind: 'kill' | 'detach' }>): boolean {
+  const last = nodes[nodes.length - 1];
+  if (last === undefined || last.kind !== 'if') return false;
+  const updated: ActivityIf = {
+    ...last,
+    thenBranch: killLastOf(last.thenBranch, node),
+    elseBranch: killLastOf(last.elseBranch, node),
+  };
+  nodes[nodes.length - 1] = updated;
+  return true;
+}
+
 /** RNOOUT's own "no longer last" correction, split out of {@link
  *  pushParsedNode} purely to keep that function's own CCN under the
  *  file's limit (IFNOTE added one more early-return branch). */
@@ -136,19 +175,32 @@ function clearSpeculativeNoOut(nodes: ActivityNode[]): void {
  * cap). In order: (1) a `note` right after a closed `if` redirects via
  * {@link redirectNoteOntoIf} instead of pushing (IFNOTE); (2) a `stop`/
  * `end` right after a no-break `endwhile` redirects via {@link
- * redirectToWhileSpecialOut} instead of pushing (WSPEC); (3) a `repeat`
- * about to become non-last loses the speculative `noOut` this function
- * gave the PREVIOUS trailing repeat, since appending anything after it
- * means it is no longer `isLastOfTheParent()` (RNOOUT); (4) a `repeat`
- * node is pushed with `noOut: true` -- correct for as long as it stays
- * last, and corrected back to `false` by the next call if it does not
- * (mirrors `InstructionRepeat.isLastOfTheParent()`,
- * `InstructionRepeat.java:117-121,170`, re-evaluated fresh every time the
- * parent list gains a new element, never computed once and cached).
+ * redirectToWhileSpecialOut} instead of pushing (WSPEC); (3) a `kill`/
+ * `detach` right after a closed `if` redirects via {@link
+ * redirectKillOntoIf} instead of pushing (IF-KILL, `activity-divergence-
+ * drive-3` T3c); (4) a `repeat` about to become non-last loses the
+ * speculative `noOut` this function gave the PREVIOUS trailing repeat,
+ * since appending anything after it means it is no longer
+ * `isLastOfTheParent()` (RNOOUT); (5) a `repeat` node is pushed with
+ * `noOut: true` -- correct for as long as it stays last, and corrected
+ * back to `false` by the next call if it does not (mirrors
+ * `InstructionRepeat.isLastOfTheParent()`, `InstructionRepeat.java:
+ * 117-121,170`, re-evaluated fresh every time the parent list gains a
+ * new element, never computed once and cached).
  */
+/** Every "onto the preceding closed `if`" redirect (IFNOTE's note merge,
+ *  IF-KILL's kill/detach merge) tried in turn, split out of {@link
+ *  pushParsedNode} purely to keep that function's own CCN under the
+ *  file's limit. `true` when one fired (the node is fully consumed). */
+function redirectOntoIf(nodes: ActivityNode[], node: ActivityNode): boolean {
+  if (node.kind === 'note') return redirectNoteOntoIf(nodes, node);
+  if (node.kind === 'kill' || node.kind === 'detach') return redirectKillOntoIf(nodes, node);
+  return false;
+}
+
 export function pushParsedNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
   if (node === undefined) return;
-  if (node.kind === 'note' && redirectNoteOntoIf(nodes, node)) return;
+  if (redirectOntoIf(nodes, node)) return;
   clearSpeculativeNoOut(nodes);
   if ((node.kind === 'stop' || node.kind === 'end') && redirectToWhileSpecialOut(nodes, node)) return;
   nodes.push(node.kind === 'repeat' ? { ...node, noOut: true } : node);
