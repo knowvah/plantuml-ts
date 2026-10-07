@@ -59,12 +59,11 @@ describe('a ruled action inks its full width', () => {
  * `Swimlanes#computeDrawingWidths` (`Swimlanes.java:379-395`) measures each
  * lane through the same `LimitFinder`, so a package's polygon, a card's and
  * a ruled action's full-width `ULine` widen their lane. `measureLaneExtents`
- * reads `nodeFudge`, but `swimlane-placement.ts#laneItemsOf` (outside
- * add4-T3c's write-set) does not yet copy `usymbol`/`label` onto the
- * `LaneItem`: `it.fails` until that hunk lands, then flip to `it`.
+ * reads `nodeFudge`, and `swimlane-placement.ts#laneItemsOf` copies
+ * `usymbol`/`label` onto each `LaneItem`.
  */
 describe('a lane measures node-aware ink', () => {
-  it.fails.each([['lane-package'], ['lane-card'], ['lane-hrule']])('%s equals the jar', (name) => {
+  it.each([['lane-package'], ['lane-card'], ['lane-hrule']])('%s equals the jar', (name) => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
     expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
   });

@@ -375,10 +375,16 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
   const spec = measureSpecOf(node);
   if (spec !== undefined) return specLaneItems(node, spec);
   if (!isBigDiamondDuplicate(node)) {
+    // add4-T3c: the lane's LimitFinder sees the same node-aware ink as the
+    // canvas scan (`canvas-origin-fudge.ts#nodeFudge`, `Swimlanes.java:379-395`).
+    const ink = {
+      ...(node.usymbol !== undefined ? { usymbol: node.usymbol } : {}),
+      ...(node.label !== undefined ? { label: node.label } : {}),
+    };
     return [
       node.swimlane !== undefined
-        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width }
-        : { kind: node.kind, x: node.x, width: node.width },
+        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width, ...ink }
+        : { kind: node.kind, x: node.x, width: node.width, ...ink },
     ];
   }
   return laneNames.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));
