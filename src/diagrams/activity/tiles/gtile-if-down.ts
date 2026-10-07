@@ -252,12 +252,26 @@ interface MainOffsets {
 /** The main-flow content's own placement plus `diamond2`'s (real or
  *  invisible) placement -- split out of the constructor only to keep its
  *  own NLOC under the file's limit.
+ *
+ * `getTranslateForThen`'s own `y` (`:624-637`) leads with `opaleHeight`
+ * AND subtracts it again inside the centering remainder -- `opaleHeight`
+ * pads the AVAILABLE vertical room (`height` already includes it, added
+ * unconditionally by {@link computeHeightAndWidthBase}) and then is added
+ * back as a flat offset so the centred remainder is computed over the
+ * space BELOW the note, not over the whole (note + d1 + then + d2) span.
+ * `0` when this if owns no note (the pre-IFNOTE formula, unchanged) --
+ * add3-T3c (family IFNOTE): this file's own {@link GtileIfDown.diamond1Y}
+ * field already carries this term for `diamond1`'s own translate; this
+ * was the one `getTranslate*` site IFNOTE's original landing missed.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:624-637,659-665
  */
-function computeOffsets(diamond1: DiamondConditionTile, core: CoreGeometry): MainOffsets {
+function computeOffsets(diamond1: DiamondConditionTile, core: CoreGeometry, opaleHeight: number): MainOffsets {
   const diamond1X = core.left - diamond1.width / 2;
   const wrapX = core.left - core.thenGeo.left;
-  const mainTileY = core.d1Height + (core.height - core.d1Height - core.d2.height - core.thenGeo.height) / 2;
+  const mainTileY =
+    opaleHeight +
+    core.d1Height +
+    (core.height - opaleHeight - core.d1Height - core.d2.height - core.thenGeo.height) / 2;
   return {
     diamond1X,
     wrapX,
@@ -384,7 +398,7 @@ export class GtileIfDown extends TileComposite {
     this.width = core.width;
     this.height = core.height;
     this.diamond1Y = opale?.box.height ?? 0;
-    this.offsets = computeOffsets(diamond1, core);
+    this.offsets = computeOffsets(diamond1, core, this.diamond1Y);
     this.stop = computeStopOffsets(diamond1, optionalStop, core);
     this.children = optionalStop !== null ? [mainTile, diamond1, optionalStop] : [mainTile, diamond1];
   }

@@ -26,18 +26,18 @@ export interface OpaleBox {
  * now resolves creole markup (`**bold**`/`""mono""`/`~` escapes/lists) via
  * {@link measureOpaleCreole}, the real `Sheet`. `measureIfOwnNote` (the
  * if-composites' own LEFT/RIGHT Opale boxes, `FtileIfWithDiamonds.java
- * :83-109`, `FtileIfDown.java:116-120`, family IFNOTE) deliberately still
- * calls the OLD raw {@link measureOpaleText} -- IFNOTE's own rows are
- * owned by a different, later task (`activity-divergence-drive-3` batch-3
- * T3c), and the note TEXT's drawing for an if-own note is the SAME shared
- * `renderNote` (`activity-renderer-shapes.ts`) {@link GtileNote} uses, so
- * switching this sizer without first checking T3c's own in-flight work
- * for a matching drawing-side change risks a sizing/drawing mismatch
- * (the exact class of regression `isActionSheetEligible`'s own doc
- * comment already reports for `fikuki-99-kulu790`/`mufixi-71-koma752`).
- * `renderNoteLabel`'s own geometric eligibility check
- * (`activity-creole-sheet.ts`) means an upgrade here is safe to land
- * later without touching the renderer again.
+ * :83-109`, `FtileIfDown.java:116-120`, family IFNOTE) now does too
+ * (add3-T3c): `createOpale` (`FtileIfWithDiamonds.java:113-130`) builds
+ * the SAME real `Opale` over the real creole `Sheet` as `FtileWithNote
+ * Opale`'s own `createOpale` call -- there was never a second, simpler
+ * Java-side formula for the if-own note to justify the raw path. The
+ * drawing side (`activity-renderer-shapes.ts#renderNote` ->
+ * {@link renderNoteLabel}) already recomputes the SAME creole box at draw
+ * time and falls back to the old raw renderer only on a size mismatch
+ * (`activity-creole-sheet.ts`'s own doc comment); matching the sizer here
+ * makes every if-own note take that real-Sheet path with no renderer
+ * edit needed, closing the gap T3d's own doc comment (superseded by this
+ * one) left for this task.
  */
 /** A note the enclosing `if` owns (`ActivityIf.notes`), pre-measured at
  *  tile-building time -- `gtile-if-down.ts`/`gtile-if-with-links.ts` take
@@ -55,7 +55,7 @@ export interface IfOwnNote {
  *  the identical way `FtileWithNoteOpale` does -- `FtileIfWithDiamonds
  *  .java:113-130`, `FtileWithNoteOpale.java:146-150`). */
 export function measureIfOwnNote(note: ActivityNote, bounder: StringBounder, theme: Theme): IfOwnNote {
-  return { text: note.text, position: note.position, box: measureOpaleText(note.text, bounder, activityFontSize(theme, 'note')) };
+  return { text: note.text, position: note.position, box: measureOpaleCreole(note.text, bounder, theme) };
 }
 
 export function measureOpaleText(text: string, bounder: StringBounder, fontSize: number): OpaleBox {

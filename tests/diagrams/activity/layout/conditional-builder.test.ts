@@ -3,6 +3,8 @@ import { buildIf, ifBuilderOf } from '../../../../src/diagrams/activity/layout/c
 import type { ActivityIf, ActivityNode } from '../../../../src/diagrams/activity/ast.js';
 import { GtileIfDown } from '../../../../src/diagrams/activity/tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../../../../src/diagrams/activity/tiles/gtile-if-with-links.js';
+import { GtileDiamondEmpty } from '../../../../src/diagrams/activity/tiles/gtile-diamond-empty.js';
+import { GtileDiamondSquare } from '../../../../src/diagrams/activity/tiles/gtile-diamond-square.js';
 import { GtileIfLongHorizontal } from '../../../../src/diagrams/activity/tiles/gtile-if-long-horizontal.js';
 import type { StringBounder } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -144,5 +146,35 @@ describe('buildIf — dispatch to the right tile class', () => {
     const bareWidth = (buildIf(bare, bounder, theme) as GtileIfLongHorizontal).width;
     const labeledWidth = (buildIf(withLabel, bounder, theme) as GtileIfLongHorizontal).width;
     expect(labeledWidth).toBeGreaterThan(bareWidth);
+  });
+});
+
+// add3-T3c (CONDSTYLE-EMPTY): `buildIfWithLinks` now dispatches on
+// `theme.conditionStyle` like `buildIfDown` already did
+// (`ConditionalBuilder#getShape1`, `:259-266`), via the SAME
+// `createConditionDiamond` both builders share.
+describe('buildIf — with-links honours conditionStyle (add3-T3c)', () => {
+  it('conditionStyle emptyDiamond: diamond1 is GtileDiamondEmpty, not GtileDiamondInside', () => {
+    const emptyTheme: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+    const tile = buildIf(makeIf([action('a')], [action('b')]), bounder, emptyTheme) as GtileIfWithLinks;
+    expect(tile.diamond1).toBeInstanceOf(GtileDiamondEmpty);
+  });
+
+  it('conditionStyle insideDiamond: diamond1 is GtileDiamondSquare', () => {
+    const squareTheme: Theme = { ...theme, conditionStyle: 'insideDiamond' };
+    const tile = buildIf(makeIf([action('a')], [action('b')]), bounder, squareTheme) as GtileIfWithLinks;
+    expect(tile.diamond1).toBeInstanceOf(GtileDiamondSquare);
+  });
+
+  it('conditionStyle omitted: diamond1 stays GtileDiamondInside (no regression)', () => {
+    const tile = buildIf(makeIf([action('a')], [action('b')]), bounder, theme) as GtileIfWithLinks;
+    expect(tile.diamond1.kind).toBe('gtile-diamond-inside');
+  });
+
+  it('emptyDiamond: the north test label is a real, non-empty slot (routes the condition text there, not the always-"" tile label)', () => {
+    const emptyTheme: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+    const tile = buildIf(makeIf([action('a')], [action('b')]), bounder, emptyTheme) as GtileIfWithLinks;
+    expect(tile.diamond1.label).toBe('');
+    expect(tile.diamond1.labelAt('north')).toEqual({ x: 18, y: 0, width: 7, height: 14, label: 'c' });
   });
 });

@@ -221,16 +221,14 @@ function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, th
  * `GtileDiamondEmpty`'s `testLabel` constructor argument, not read via
  * `labels`. Else (default) `FtileDiamondInside`.
  *
- * Only wired for `buildIfDown`'s own caller (`:381` below) -- `buildIf
- * WithLinks` (`:244`) still hardcodes `GtileDiamondInside` regardless of
- * `conditionStyle`, a PRE-EXISTING gap (unrelated to this function) this
- * task's write-set cannot close: `gtile-if-with-links.ts`/`walk-if-with-
- * links.ts` both type `diamond1` as the concrete `GtileDiamondInside`
- * class (verified directly, not the "add2 T3h widened" `DiamondCondition
- * Tile` union that `gtile-diamond-inside.ts`'s own doc comment claims --
- * that claim does not hold up against the current source and is not
- * repeated here), and `walk-if-with-links.ts` is explicitly outside this
- * task's write-set (`layout/walk-if-*.ts`).
+ * Wired for both `buildIfDown` (`:381` below) and `buildIfWithLinks`
+ * (`:258` below, add3-T3c): `gtile-if-with-links.ts`/`gtile-if-with-links-
+ * notes.ts`/`walk-if-with-links.ts` (T3c's own write-set, `layout/walk-
+ * if-*.ts`) now type `diamond1` as this function's own return type,
+ * {@link DiamondConditionTile}, not the concrete `GtileDiamondInside`
+ * class the add2 T3h doc comment on that interface claimed but never
+ * delivered for this builder (verified false by reading the pre-T3c
+ * source directly, not repeated).
  */
 function createConditionDiamond(
   label: string,
@@ -259,9 +257,11 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   const labels: { west?: string; east?: string } = {};
   if (node.thenLabel !== undefined) labels.west = node.thenLabel;
   if (node.elseLabel !== undefined) labels.east = node.elseLabel;
-  // add2 T3h: NOT createConditionDiamond -- walk-if-with-links.ts (T3f's)
-  // still types diamond1 concretely; re-slotted below.
-  const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  // add3-T3c: now dispatches on `theme.conditionStyle` like `buildIfDown`
+  // already did (`ConditionalBuilder#getShape1`, `:259-266` for the
+  // `EMPTY_DIAMOND` arm this closes) -- see {@link createConditionDiamond}'s
+  // own doc comment for why this was previously hardcoded.
+  const diamond1 = createConditionDiamond(node.condition, labels, bounder, theme);
   const branch1 = toBranchTile(node.thenBranch, bounder, theme, ctx);
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
   const laneCount = countIfSwimlanes(node);

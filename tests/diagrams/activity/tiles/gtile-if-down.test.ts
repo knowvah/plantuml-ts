@@ -280,6 +280,20 @@ describe('GtileIfDown — IFNOTE, note narrower than the natural left margin (su
   it('stores the note for the walker to draw', () => {
     expect(tile.opale).toBe(opale);
   });
+
+  // add3-T3c: `getTranslateForThen` (`FtileIfDown.java:624-637`) leads
+  // with `opaleHeight` AND subtracts it again inside the centering
+  // remainder -- the original IFNOTE landing updated `diamond1Y` but left
+  // `mainTileY` at the pre-note formula (missing both `opaleHeight` terms),
+  // which shifted every then-branch action up by exactly `opaleHeight/2`
+  // (12 here) whenever an if-down owned a note. Caught on the jar-rendered
+  // corpus (`zakuke-30-sobi867`/`jisema-42-rapa121`/`nijipa-25-pede639`/
+  // `rucuga-83-tosu408`/`jipapo-14-kevu587`/`vexula-75-noko098`): mainTileY
+  // = opaleHeight(24) + d1Height(24) + (height(172) - opaleHeight(24) -
+  // d1Height(24) - d2Height(24) - thenHeight(50)) / 2 = 48 + 25 = 73.
+  it('offsets.mainTileY leads with opaleHeight, not just d1Height (73, not 61)', () => {
+    expect(tile.offsets.mainTileY).toBe(73);
+  });
 });
 
 describe('GtileIfDown — IFNOTE, note wider than the natural left margin (supp > 0)', () => {

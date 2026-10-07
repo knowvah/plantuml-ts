@@ -31,9 +31,9 @@ import {
   renderIfLabel,
   renderDiamond,
   renderHexagonPolygon,
-  renderDiamondSquarePolygon,
   renderHexagonOwnLabel,
   renderHexagonMultilineLabel,
+  renderIfSplitShape,
   diamondColors,
 } from './activity-renderer-if-shapes.js';
 import {
@@ -413,34 +413,10 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderSplitLine(node, theme);
     case 'if-split':
     case 'repeat-cond':
-      // T3k: shape ALONE, own label via its own 'if-own-label' node.
-      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead.
-      // add3-T3d: EMPTY_DIAMOND -- `FtileDiamond#drawU`
-      // (`vertical/FtileDiamond.java:85`) draws `Hexagon.asPolygon
-      // (shadowing)`, the NO-width/height overload (`Hexagon.java:46-62`):
-      // a FIXED 24x24 FOUR-point rhombus, not the six-point dented hexagon
-      // `Hexagon.asPolygon(shadowing, width, height)` overload
-      // `renderHexagonPolygon` ports -- geometrically identical to
-      // `renderDiamond`'s own point list once `renderDiamond`'s `size`
-      // reduces to the fixed `hexagonHalfSize` this shape always is.
-      // `node.label === ''` is this shape's own invariant, not a guess:
-      // `gtile-diamond-empty.ts`'s own doc says a `GtileDiamondEmpty`'s
-      // `label` is ALWAYS `''` (the condition text is a north/south/east/
-      // west slot, never this tile's own label) -- required IN ADDITION
-      // to the theme flag because `conditional-builder.ts#buildIfWithLinks`
-      // hardcodes `GtileDiamondInside` regardless of `conditionStyle`
-      // (`.agent-notes/add3-T3a.md`'s own "Not done" item 1, a separate,
-      // pre-existing gap outside this task's write-set, `layout/**`) --
-      // one of ITS 'if-split' nodes under `emptyDiamond` carries a
-      // NON-empty label (the real hexagon-sized condition text) and must
-      // keep drawing the hexagon its box was actually sized for.
-      // Jar-verified: without this label check, `xefalo-73-sabi101`
-      // (3 `with-links` ifs, `skinparam ConditionStyle diamond`)
-      // regressed 279->330 -- confirmed fixed back to 279 with it.
-      if (theme.conditionStyle === 'emptyDiamond' && node.label === '') return renderDiamond(node, theme);
-      return theme.conditionStyle === 'insideDiamond'
-        ? renderDiamondSquarePolygon(node, theme)
-        : renderHexagonPolygon(node, theme);
+      // T3k/add3-T3c: see `renderIfSplitShape`'s own doc comment
+      // (`activity-renderer-if-shapes.ts`, split out there to keep this
+      // function under the file's complexity cap).
+      return renderIfSplitShape(node, theme);
     case 'while-header':
       // add3-T3d: same EMPTY_DIAMOND shape as 'if-split'/'repeat-cond'
       // above (`FtileWhile.create`'s own EMPTY_DIAMOND branch builds the
