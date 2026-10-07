@@ -29,6 +29,9 @@ import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileNote } from '../tiles/gtile-note.js';
 import { GtileNoteOpale } from '../tiles/gtile-note.js';
+import { GtileWithNotes } from '../tiles/gtile-with-notes.js';
+import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
@@ -91,12 +94,60 @@ const WRAP_SAFE_KINDS: ReadonlySet<string> = new Set([
  *  applies to both tile kinds this builder produces. */
 const WRAP_NO_LINK_KINDS: ReadonlySet<string> = new Set(['gtile-fork', 'gtile-merge']);
 
+/** `WithNotesEntry` list of every note already stacked on a prior
+ *  `GtileWithNotes`/`GtileNoteOpale` wrap -- NOTE-MULTI's own merge
+ *  needs the PRIOR note(s)' text/side back out, never re-measured
+ *  (`StackedNote.text`/`NoteStack`'s own side segregation IS the
+ *  position). */
+function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
+  if (last.kind === 'gtile-note-opale') return [{ text: last.note.text, position: last.note.side }];
+  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const })) ?? [];
+  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const })) ?? [];
+  return [...left, ...right];
+}
+
+/**
+ * `FtileWithNoteOpale.create`'s own `notes.size() > 1` arm
+ * (`FtileWithNoteOpale.java:116-117`): a SECOND (or later) note on one
+ * instruction collects into ONE `FtileWithNotes`, REPLACING whatever
+ * spiked/stacked wrap the prior note(s) already built -- never nests.
+ * `activity-divergence-drive-3` T2a, family NOTE-MULTI.
+ */
+function mergeIntoWithNotes(last: GtileNoteOpale | GtileWithNotes, node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
+  const entries: WithNotesEntry[] = [...entriesOf(last), { text: node.text, position: node.position }];
+  return new GtileWithNotes(last.children[0]!, entries, bounder, activityFontSize(theme, 'note'));
+}
+
+/** `last` already carries one or more notes -- the NOTE-MULTI merge
+ *  target, not the WRAP_SAFE_KINDS leaf-wrap target. Split out of {@link
+ *  tileNote} purely to keep that function's own CCN under the file's
+ *  limit. */
+function isMergeableNoteWrap(tile: Tile): tile is GtileNoteOpale | GtileWithNotes {
+  return tile.kind === 'gtile-note-opale' || tile.kind === 'gtile-with-notes';
+}
+
+/** `razuzu-32-faje125`'s own `sameLane` guard, split out of {@link
+ *  tileNote} for the same CCN reason as {@link isMergeableNoteWrap}. */
+function isSameLaneAsPrevious(node: ActivityNote, last: Tile | undefined): boolean {
+  return last === undefined || node.swimlane === undefined || node.swimlane === last.swimlane;
+}
+
+/** Whether `last` is a WRAP_SAFE_KINDS/WRAP_NO_LINK_KINDS leaf this note
+ *  may wrap for the FIRST time -- split out of {@link tileNote} for the
+ *  same CCN reason as {@link isMergeableNoteWrap}. */
+function isFirstWrapTarget(last: Tile): boolean {
+  return WRAP_SAFE_KINDS.has(last.kind) || WRAP_NO_LINK_KINDS.has(last.kind);
+}
+
 export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBounder, theme: Theme): void {
   const last = tiles[tiles.length - 1];
   const noteTile = tileSimpleLeaf(node, bounder, theme) as GtileNote;
-  const sameLane = last === undefined || node.swimlane === undefined || node.swimlane === last.swimlane;
-  const wrapKind = last === undefined ? undefined : WRAP_SAFE_KINDS.has(last.kind) || WRAP_NO_LINK_KINDS.has(last.kind);
-  if (last === undefined || last.kind === 'gtile-note-opale' || !sameLane || wrapKind !== true) {
+  const sameLane = isSameLaneAsPrevious(node, last);
+  if (last !== undefined && sameLane && isMergeableNoteWrap(last)) {
+    tiles[tiles.length - 1] = mergeIntoWithNotes(last, node, bounder, theme);
+    return;
+  }
+  if (last === undefined || !sameLane || !isFirstWrapTarget(last)) {
     tiles.push(noteTile);
     return;
   }
@@ -237,6 +288,17 @@ export function tileSwitch(
  * likewise) is NOT rendered -- `ActivityGroup.hasBracket` is carried on
  * the AST for a future task, unread here.
  */
+/** `InstructionGroup#createFtile`'s own `if (note != null) tmp = new
+ *  FtileWithNotes(tmp, singleton(note), CENTER)` (`InstructionGroup
+ *  .java:104-105`): wraps the group's BODY, before the frame -- the
+ *  stacked/no-spike shape, even for this one note. `activity-
+ *  divergence-drive-3` T2a, family GROUPNOTE. */
+function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: StringBounder, theme: Theme): Tile {
+  if (note === undefined) return body;
+  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position }];
+  return new GtileWithNotes(body, entries, bounder, activityFontSize(theme, 'note'));
+}
+
 export function tileGroup(
   node: ActivityGroup,
   bounder: StringBounder,
@@ -244,7 +306,8 @@ export function tileGroup(
   laneOrder: readonly string[],
   pragma: Pragma,
 ): Tile {
-  const body = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder, pragma).tiles, bounder, theme);
+  const rawBody = new GtileTopDown(tileNodes(node.body, bounder, theme, laneOrder, pragma).tiles, bounder, theme);
+  const body = wrapGroupNote(rawBody, node.note, bounder, theme);
   const tile =
     node.groupType === 'group'
       ? new GtileGroup(node.title, body, bounder, theme)

@@ -418,6 +418,15 @@ export interface ActivityGroup {
   hasBracket: boolean;
   body: ActivityNode[];
   swimlane?: string;
+  /**
+   * GROUPNOTE: `InstructionGroup.addNote` self-captures only while
+   * `list.isEmpty()` (a run of leading notes each overwrites the last --
+   * a single field, not a collection). `createFtile` wraps the body
+   * (before the frame) with it via `FtileWithNotes`, never
+   * `FtileWithNoteOpale`, even for this one note.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionGroup.java:104-105,125-131
+   */
+  note?: ActivityNote;
 }
 
 // ---------------------------------------------------------------------------
