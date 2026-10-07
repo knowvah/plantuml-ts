@@ -1,0 +1,7 @@
+@startuml
+while (true)
+  note #lightblue: Can I be blue too?
+  :Do Something;
+  note #lightblue: I am blue
+end while
+@enduml

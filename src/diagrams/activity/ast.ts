@@ -252,6 +252,15 @@ export interface ActivityWhile {
    * 128-129`'s `FtileKilled` wrap), same as a ordinary `stop`/`kill`.
    */
   specialOut?: ActivityStop | ActivityEnd;
+  /**
+   * add4-T2g: the while's OWN notes (`WithNote#addNote`, appended): every
+   * note parsed while `repeatList` is still empty (a leading run in the
+   * body, or after `endwhile` of an empty body). `createFtile` wraps the
+   * whole while with them, `FtileWithNoteOpale.create(tmp, notes, false,
+   * CENTER)` (no link).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionWhile.java:126-127,162-167
+   */
+  notes?: ActivityNote[];
 }
 
 export interface ActivityRepeat {

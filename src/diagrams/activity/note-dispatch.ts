@@ -96,6 +96,13 @@ function caseIsEmpty(body: readonly ActivityNode[]): boolean {
   return body.every((n) => n.kind === 'arrow-label');
 }
 
+/** A node that is not an `Instruction` of the list it sits in: `-> label;`
+ *  only sets the pending link rendering, and `backward:` fills the while's
+ *  own `backward` field (`InstructionWhile.java:83`), never the list. */
+function isNotInstruction(n: ActivityNode): boolean {
+  return n.kind === 'arrow-label' || n.kind === 'backward';
+}
+
 /**
  * add4-T1f (SWITCH-NOTE): a note parsed while a CLOSED `switch` is this
  * list's last element. `InstructionList#addNote` forwards to `getLast()
@@ -158,6 +165,35 @@ export function redirectNoteOntoGroup(
   }
   let split = last.body.length;
   while (last.body[split - 1]!.kind === 'arrow-label') split--;
+  const head = last.body.slice(0, split);
+  push(head, node);
+  nodes[nodes.length - 1] = { ...last, body: [...head, ...last.body.slice(split)] };
+  return true;
+}
+
+/**
+ * add4-T2g (COMPOSITE-NOTE, while): a note parsed while a CLOSED `while` is
+ * this list's last element. `InstructionList#addNote` forwards to
+ * `getLast().addNote(...)` (`InstructionList.java:190-196`);
+ * `InstructionWhile#addNote` (`InstructionWhile.java:162-167`) keeps it as
+ * its OWN note (`WithNote#addNote`, appended) while `repeatList` is empty,
+ * else forwards to `repeatList.addNote`, i.e. to the body's last
+ * instruction. `push` is the enclosing list's push, as in
+ * {@link redirectNoteOntoGroup}. `true` when it fired.
+ */
+export function redirectNoteOntoWhile(
+  nodes: ActivityNode[],
+  node: ActivityNote,
+  push: (list: ActivityNode[], n: ActivityNode) => void,
+): boolean {
+  const last = nodes[nodes.length - 1];
+  if (last === undefined || last.kind !== 'while') return false;
+  if (last.body.every(isNotInstruction)) {
+    nodes[nodes.length - 1] = { ...last, notes: [...(last.notes ?? []), node] };
+    return true;
+  }
+  let split = last.body.length;
+  while (isNotInstruction(last.body[split - 1]!)) split--;
   const head = last.body.slice(0, split);
   push(head, node);
   nodes[nodes.length - 1] = { ...last, body: [...head, ...last.body.slice(split)] };

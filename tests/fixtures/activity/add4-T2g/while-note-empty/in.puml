@@ -1,0 +1,7 @@
+@startuml
+start
+while (true)
+end while
+note left: n on empty while
+stop
+@enduml

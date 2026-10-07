@@ -4,7 +4,9 @@
  * the group, which keeps it as its own note while its list is empty and
  * otherwise hands it to its last instruction (`InstructionGroup.java:
  * 125-131`). The note is therefore drawn INSIDE the frame, not stacked after
- * it. The goldens were rendered through `scripts/oracle-render.sh`.
+ * it. `InstructionWhile#addNote` (`InstructionWhile.java:162-167`) does the
+ * same, and a note parsed while its `repeatList` is empty is the while's own,
+ * wrapped around the whole loop with no link (`:126-127`). The goldens were rendered through `scripts/oracle-render.sh`.
  */
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,11 +22,14 @@ function countOf(svg: string, tag: string): number {
   return [...svg.matchAll(new RegExp(`<${tag}\\b`, 'g'))].length;
 }
 
-describe('note after a closed group', () => {
+describe('note forwarded by InstructionList#addNote', () => {
   it.each([
     ['group-note-after', 'a spiked note on the partition last action'],
     ['group-note-nested', 'a floating note reaches the innermost last action'],
     ['group-note-empty', 'an empty group keeps the note as its own'],
+    ['while-note-own', 'a leading body note wraps the whole while, spikeless'],
+    ['while-note-after', 'a note after endwhile reaches the body last action'],
+    ['while-note-empty', 'an empty while keeps the note as its own'],
   ])('%s: %s, equal to the jar', (name) => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
     expect(countOf(ours, 'line')).toBe(countOf(golden, 'line'));
