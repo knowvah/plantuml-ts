@@ -4,7 +4,7 @@ import { TileComposite, TileLeaf } from './tile.js';
 import type { StringBounder, Tile } from './tile.js';
 import type { ActivityNote } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { NOTE_FOLD, NOTE_H_PAD, NOTE_OPALE_GAP } from '../activity-layout-constants.js';
+import { NOTE_MARGIN_X1, NOTE_MARGIN_X2, NOTE_MARGIN_Y, NOTE_OPALE_GAP } from '../activity-layout-constants.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 
 export class GtileNote extends TileLeaf {
@@ -25,9 +25,29 @@ export class GtileNote extends TileLeaf {
     // declares no `note` override, so the root value stands. Was
     // `theme.fontSize - 2` = 12, which moved the note the WRONG WAY: the
     // jar's note text is LARGER than its action text, not smaller.
-    const measured = bounder.getDimension(node.text, activityFontSize(theme, 'note'));
-    this.width = measured.width + 2 * NOTE_H_PAD + NOTE_FOLD;
-    this.height = measured.height + NOTE_FOLD + 16;
+    const fontSize = activityFontSize(theme, 'note');
+    // `Opale.java:89-96`: `getWidth`/`getHeight` size the box from
+    // `textBlock.calculateDimension`, where `textBlock` is the multi-line
+    // creole sheet built over `note.getDisplay()`
+    // (`FtileWithNoteOpale.java:147-150`) -- ONE `TextBlock` line per `\n`
+    // in the source, never the whole string measured as a single run
+    // (`activity-divergence-drive-3` T2a, family NOTE-SIZE: the prior
+    // `bounder.getDimension(node.text, ...)` call fed the WHOLE `\n`-joined
+    // string through in one shot, so every embedded `\n` byte was measured
+    // as an un-mappable glyph instead of a line break). Creole markup
+    // (`**bold**`, lists) inside a note line is NOT resolved here -- that is
+    // `FtileWithNoteOpale.java:147-150`'s `CreoleMode.FULL` Sheet parse,
+    // deferred to the separately-filed NOTE-CREOLE family.
+    const lines = node.text.split('\n');
+    // `klimt/drawing/font/StringBounderFromWidthTable.java:71`'s
+    // `calculateDimension` height is `size`, unconditionally -- the same
+    // per-line advance `activity-renderer-shapes.ts#renderNote`'s
+    // `textLines(..., noteSize, ...)` call already draws with.
+    const lineHeight = bounder.getDimension('M', fontSize).height;
+    const textWidth = Math.max(...lines.map((line) => bounder.getDimension(line, fontSize).width));
+    const textHeight = lineHeight * lines.length;
+    this.width = textWidth + NOTE_MARGIN_X1 + NOTE_MARGIN_X2;
+    this.height = textHeight + 2 * NOTE_MARGIN_Y;
   }
 
   getCoord(hook: HookName): GPoint {

@@ -104,30 +104,28 @@ export const END_OUTER_RADIUS = 10;
  */
 export const END_CROSS_THICKNESS = 2.5;
 
-/** The note box's own horizontal padding. Split out of the former
- *  `ACTION_H_PAD` by `activity-style-defaults` T4, which replaced that
- *  constant's ACTION-box uses with the resolved `activityPadding`.
- *
- *  Deliberately NOT routed through that resolver: upstream's `note` block
- *  (`plantuml.skin:322-326`) declares no `Padding`, so the resolved value
- *  is 0, and an activity note's box geometry comes from `Opale`
- *  (`ftile/vcompact/FtileWithNoteOpale.java`) rather than from
- *  `FtileBox`'s padding arithmetic at all. 16 is this port's own unsourced
- *  number and stays exactly as it was; substituting the resolved 0 would
- *  collapse every note box on a guess. Owned by the filed
- *  `activity-note-width-overscan` mission, not by this one. */
-export const NOTE_H_PAD = 16;
-export const NOTE_FOLD = 8;
+/** `Opale.java:56` -- `public static final int marginX1 = 6;`, the note
+ *  box's own LEFT text inset (also the renderer's `labelX = x + 6`,
+ *  `activity-renderer-shapes.ts#renderNote`). `GtileNote`'s sizing used an
+ *  unsourced `NOTE_H_PAD=16` (doubled, +32) until `activity-divergence-
+ *  drive-3` T2a (family NOTE-SIZE) replaced it with Opale's own two
+ *  distinct margins below -- filed `activity-note-width-overscan` is
+ *  CLOSED by this change. */
+export const NOTE_MARGIN_X1 = 6;
+/** `Opale.java:57` -- `public static final int marginX2 = 15;`, the note
+ *  box's own RIGHT text inset (asymmetric: the fold corner at the
+ *  top-right, `NOTE_CORNER_SIZE`, needs more clearance than the left
+ *  edge). See {@link NOTE_MARGIN_X1}'s doc for the T2a replacement. */
+export const NOTE_MARGIN_X2 = 15;
 /** `Opale.java:53` -- `private static final int cornersize = 10;`, the
  *  note balloon's dog-ear fold triangle size, used by BOTH the no-link
  *  path (`getPolygonNormal`, `:149-171`) and every spiked direction
  *  (`getPolygonLeft/Right/Up/Down`, `:175-265`) for their shared
  *  `lineTo(width, cornersize)` / `lineTo(width - cornersize, 0)` pair and
- *  by `getCorner` (`:134-147`) for the fold triangle itself. A DIFFERENT
- *  number from {@link NOTE_FOLD} (which sizes the note TILE, `gtile-
- *  note.ts`, filed separately as `activity-note-width-overscan`) -- the
- *  renderer's fold geometry is correct against the jar regardless of
- *  whether the tile's own width/height are. */
+ *  by `getCorner` (`:134-147`) for the fold triangle itself. Purely a draw
+ *  geometry constant -- the TILE's own width/height ({@link
+ *  NOTE_MARGIN_X1}/{@link NOTE_MARGIN_X2}/{@link NOTE_MARGIN_Y}, `gtile-
+ *  note.ts`) are a separate concern. */
 export const NOTE_CORNER_SIZE = 10;
 /** `Opale.java:173` -- `private final double delta = 4;`, the spike's
  *  vertical half-span at the note edge it leaves from. */

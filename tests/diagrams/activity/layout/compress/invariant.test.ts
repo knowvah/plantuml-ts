@@ -637,6 +637,22 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // add2/close-b3w1: retired -- the jupoxe pair no longer overlaps once
     // T3d's per-line north-label sizing landed (`FtileDiamondInside2.java:
     // 114-120`); the allowlist entry above is kept as history only.
+    // `zakuke-30-sobi867 [6,14] polygon×polygon` (mission
+    // `activity-divergence-drive-3` T2a, family NOTE-SIZE): the SAME
+    // "touching becomes an epsilon overlap after a second independent
+    // transform" class as `kitupi-32-jexo155`/`tobajo-64-mipi810` above,
+    // newly surfaced here because `GtileNote`'s corrected width
+    // (`Opale.java:89-96`) shifted this row's note balloon, which shifted
+    // where its own fold triangle (`Opale#getCorner`, `:134-147`, shape 14)
+    // sits relative to the if-diamond beside it (shape 6). Confirmed with a
+    // direct dump: `before`, diamond `x(43.51875) + width(99.41875000000002)
+    // === 142.93750000000002` touches the fold's own `x(142.9375)` --
+    // within float noise, no overlap registered. `after`: diamond
+    // `x(43) + width(99.41875000000002) === 142.41875000000002` vs the
+    // fold's own `x(142.41875)` -- a ~2e-14 overlap from compression
+    // applying the SAME 0.51875 shift to both shapes through two
+    // independently-rounded paths, not a geometry defect.
+    'zakuke-30-sobi867 [6,14] polygon×polygon',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
