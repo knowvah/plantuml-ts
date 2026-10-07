@@ -62,6 +62,105 @@ describe('layoutActivity — with-links: both branches non-empty, both continue'
   });
 });
 
+// add3-T3c (CONDSTYLE-EMPTY): `skinparam ConditionStyle diamond` now
+// reaches the with-links builder too (`ConditionalBuilder#getShape1`'s
+// `EMPTY_DIAMOND` arm, `:259-266`), via `createConditionDiamond`.
+describe('layoutActivity — with-links: conditionStyle emptyDiamond (add3-T3c)', () => {
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenLabel: 'yes',
+        elseLabel: 'no',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'b' }],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const emptyTheme: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+  const geo = layoutActivity(ast, emptyTheme, measurer);
+
+  it("if-split carries diamondShape 'empty', not the pre-T3c undefined", () => {
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.diamondShape).toBe('empty');
+    expect(diamond1.label).toBe('');
+  });
+
+  it('the condition text draws as its own if-label(north), not if-own-label (the empty-diamond tile never has an own label)', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-own-label')).toBe(false);
+    const northLabel = geo.nodes.find((n) => n.kind === 'if-label' && n.label === 'c');
+    expect(northLabel).toBeDefined();
+  });
+
+  it('branch labels still draw (yes/no), unaffected by the shape change', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-label' && n.label === 'yes')).toBe(true);
+    expect(geo.nodes.some((n) => n.kind === 'if-label' && n.label === 'no')).toBe(true);
+  });
+});
+
+describe('layoutActivity — with-links: conditionStyle omitted keeps diamondShape "inside" (no regression, add3-T3c)', () => {
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'b' }],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const geo = layoutActivity(ast, theme, measurer);
+
+  it("if-split carries diamondShape 'inside'", () => {
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.diamondShape).toBe('inside');
+  });
+});
+
+describe('layoutActivity — with-links: own LEFT note (add3-T2a-2 IFNOTE)', () => {
+  // Mirrors javedu-70-vaxo310 (`if (test?) then :a; else :c; endif` + a note
+  // after `endif`) -- T2a's `ActivityIf.notes` capture (`InstructionIf.java:
+  // 222-227`) feeds this builder's own IFNOTE mechanism (add3-T2a-2,
+  // `FtileIfWithDiamonds.java:79-111,200-213`).
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'test?',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'c' }],
+        elseIfBranches: [],
+        notes: [{ kind: 'note', text: 'This note is on the if', position: 'left' }],
+      },
+    ],
+    swimlanes: [],
+  };
+  const geo = layoutActivity(ast, theme, measurer);
+
+  it('draws a note node, FIRST in drawU order (FtileIfWithDiamonds.java:203-213)', () => {
+    expect(geo.nodes[0]!.kind).toBe('note');
+    expect(geo.nodes[0]!.label).toBe('This note is on the if');
+    expect(geo.nodes[0]!.notePosition).toBe('left');
+  });
+
+  it('the note sits immediately LEFT of diamond1, flush (xOpale = diamond1X - noteWidth)', () => {
+    const note = geo.nodes[0]!;
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(note.x + note.width).toBe(diamond1.x);
+  });
+
+  it('the note sits at this composite\'s own top (noteY), diamond1 drops below it by yDeltaNote', () => {
+    const note = geo.nodes[0]!;
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.y).toBe(note.y + note.height);
+  });
+});
+
 describe('layoutActivity — with-links: conditionEndStyle hline, both branches continue (T1p-a)', () => {
   // Same shape as the first describe block above (saxeku-17-gume203's own
   // unlaned shape), but `hline`: no `if-merge` node, and the "both have a
@@ -230,7 +329,7 @@ describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing t
 
   const branch1: IfWithLinksBranch = { tile: stubTile(40, 30, '2'), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 30, '3'), isEmpty: false };
-  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, 'hline');
+  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, { conditionEndStyle: 'hline' });
 
   function makeOut(): Out {
     let n = 0;

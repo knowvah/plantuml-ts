@@ -9,6 +9,8 @@
  * `layout.old.ts` engine and were deleted with it.
  */
 
+import type { SnakeTextAlign } from './layout/snake-text-position.js';
+
 // ---------------------------------------------------------------------------
 // Public geometry types
 // ---------------------------------------------------------------------------
@@ -25,6 +27,18 @@ export interface ActivityNodeGeo {
   height: number;
   /** For note nodes: which side the note sits on relative to its action. */
   notePosition?: 'left' | 'right';
+  /**
+   * For `'if-split'` nodes only (add3-T3c): which concrete condition-
+   * diamond tile built this node, carried so `activity-renderer-
+   * shapes.ts#renderNode` can pick the true polygon shape instead of
+   * inferring it from `label === ''` (T3d's own heuristic, ambiguous once
+   * `buildIfWithLinks` could ALSO build a `GtileDiamondEmpty` with a
+   * non-empty north test label -- see that function's own doc comment).
+   * `undefined` for every OTHER producer of `'if-split'`/`'repeat-cond'`/
+   * `'while-header'` this task's write-set does not touch (`walk-while-
+   * branch.ts`/`walk-repeat*.ts`), which keep the pre-existing heuristic.
+   */
+  diamondShape?: 'inside' | 'square' | 'empty';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
   /**
@@ -39,6 +53,18 @@ export interface ActivityNodeGeo {
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
   label?: string;
+  /**
+   * How {@link label} is positioned, mirroring `Snake#withLabel`'s two
+   * overloads (`ftile/Snake.java:124-136`) -- a pushed label carries
+   * EITHER `vertical` (the `VerticalAlignment` overload) OR `horizontal`
+   * (the `HorizontalAlignment` overload), never both. `undefined` when
+   * {@link label} is set but no push site has been updated to carry its
+   * real alignment yet (falls back to upstream's own default, `LEFT`,
+   * `skin/AlignmentParam.java:42`).
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Snake.java:244-270
+   *   (`getTextBlockPosition`, ported at `layout/snake-text-position.ts`)
+   */
+  labelAlign?: SnakeTextAlign;
   color?: string;
   /**
    * `false` = draw no end decoration. `Worm#drawInternalOneColor`'s

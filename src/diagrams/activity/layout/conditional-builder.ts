@@ -21,10 +21,12 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
 import type { DiamondConditionTile, DiamondInsideLabels } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
+import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
 import { GtileIfDown } from '../tiles/gtile-if-down.js';
 import { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
 import type { IfWithLinksBranch } from '../tiles/gtile-if-with-links.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
+import { measureIfOwnNote } from '../tiles/gtile-note.js';
 import { tileNodes } from './tile-layout.js';
 import { laneOut } from './swimlane-lanes.js';
 import { buildIfLongHorizontal, buildIfLongVertical } from './conditional-builder-long.js';
@@ -198,20 +200,43 @@ function countIfSwimlanes(node: ActivityIf): number {
   return acc.size;
 }
 
+// A trailing `-> label;` on either branch is discarded here, not wired:
+// confirmed by grep (`getSpecial` appears nowhere in `cond/
+// FtileIfWithLinks.java`) that the `with-links` builder never reads
+// `Branch#special` -- `out2` is hardcoded `null` at both of its
+// construction sites (`FtileIfWithLinks.java:548-549`, already noted
+// NOT APPLICABLE by `.agent-notes/add3-T1b.md` row 29).
 function toBranchTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): IfWithLinksBranch {
-  const tiles = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
+  const { tiles } = tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma);
   return { tile: new GtileTopDown(tiles, bounder, theme), isEmpty: nodes.length === 0 };
 }
 
-/** add2 T3h (CSTYLE): `ConditionalBuilder.getShape1` (`:251-277`) --
- * `INSIDE_DIAMOND` -> `FtileDiamondSquare`, else `FtileDiamondInside`.
- * `EMPTY_DIAMOND` is a separate, still-unwired gate (T1p-a). */
+/**
+ * `ConditionalBuilder.getShape1` (`:250-277`): `INSIDE_DIAMOND` ->
+ * `FtileDiamondSquare` (add2 T3h); `EMPTY_DIAMOND` -> `FtileDiamond`
+ * (add3 T3a, CONDSTYLE-EMPTY) -- `.withNorth(tbTest)` in BOTH of
+ * `getShape1`'s own `eastWest` branches (`:261,264`), so the condition
+ * text always routes to NORTH here too, same as `GtileDiamondInside`/
+ * `GtileDiamondSquare`'s own center `label` param slot -- `label` below IS
+ * `GtileDiamondEmpty`'s `testLabel` constructor argument, not read via
+ * `labels`. Else (default) `FtileDiamondInside`.
+ *
+ * Wired for both `buildIfDown` (`:381` below) and `buildIfWithLinks`
+ * (`:258` below, add3-T3c): `gtile-if-with-links.ts`/`gtile-if-with-links-
+ * notes.ts`/`walk-if-with-links.ts` (T3c's own write-set, `layout/walk-
+ * if-*.ts`) now type `diamond1` as this function's own return type,
+ * {@link DiamondConditionTile}, not the concrete `GtileDiamondInside`
+ * class the add2 T3h doc comment on that interface claimed but never
+ * delivered for this builder (verified false by reading the pre-T3c
+ * source directly, not repeated).
+ */
 function createConditionDiamond(
   label: string,
   labels: DiamondInsideLabels,
   bounder: StringBounder,
   theme: Theme,
 ): DiamondConditionTile {
+  if (theme.conditionStyle === 'emptyDiamond') return new GtileDiamondEmpty(label, labels, bounder, theme);
   if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(label, labels, bounder, theme);
   return new GtileDiamondInside(label, labels, bounder, theme);
 }
@@ -219,18 +244,29 @@ function createConditionDiamond(
 /**
  * `createWithLinks` (`ConditionalBuilder.java:213-232`): a `withWestAndEast`
  * hexagon, both branches, and the merge rhombus when both have a point out.
+ * `node.notes` (T2a's `ActivityIf.notes` capture) is pre-measured here
+ * (never raw inside `gtile-if-with-links.ts`, same convention `buildIfDown`
+ * already uses for its own single opale) and threaded into `create`'s own
+ * note-geometry pre-pass (add3-T2a-2, the general `FtileIfWithDiamonds`
+ * IFNOTE mechanism -- `with-links` is the dispatch EVERY two-real-branch
+ * `if` with an own note actually reaches; `GtileIfDown` only owns the
+ * empty/stop-or-spot-branch case).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:79-111
  */
 function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const labels: { west?: string; east?: string } = {};
   if (node.thenLabel !== undefined) labels.west = node.thenLabel;
   if (node.elseLabel !== undefined) labels.east = node.elseLabel;
-  // add2 T3h: NOT createConditionDiamond -- walk-if-with-links.ts (T3f's)
-  // still types diamond1 concretely; re-slotted below.
-  const diamond1 = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  // add3-T3c: now dispatches on `theme.conditionStyle` like `buildIfDown`
+  // already did (`ConditionalBuilder#getShape1`, `:259-266` for the
+  // `EMPTY_DIAMOND` arm this closes) -- see {@link createConditionDiamond}'s
+  // own doc comment for why this was previously hardcoded.
+  const diamond1 = createConditionDiamond(node.condition, labels, bounder, theme);
   const branch1 = toBranchTile(node.thenBranch, bounder, theme, ctx);
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
   const laneCount = countIfSwimlanes(node);
-  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, theme.conditionEndStyle);
+  const notes = (node.notes ?? []).map((n) => measureIfOwnNote(n, bounder, theme));
+  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, { conditionEndStyle: theme.conditionEndStyle, notes });
 }
 
 // `longHorizontalBranches`/`buildIfLongHorizontal`/`buildIfLongVertical`
@@ -346,9 +382,12 @@ function applyIfDownSwimlaneOut(result: GtileIfDown, optionalStop: Tile | null, 
 
 /** `new GtileTopDown(tileNodes(nodes, ...), bounder, theme)` -- split out
  *  of {@link buildIfDown} only to keep that function's own NLOC under the
- *  file's limit (the `ctx` bundling above added two call sites back). */
+ *  file's limit (the `ctx` bundling above added two call sites back).
+ *  A trailing `-> label;` is discarded here too, same grep-confirmed
+ *  reason as {@link toBranchTile}: `FtileIfDown.java` never reads
+ *  `Branch#special` either. */
 function branchBodyTile(nodes: readonly ActivityNode[], bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
-  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma), bounder, theme);
+  return new GtileTopDown(tileNodes([...nodes], bounder, theme, ctx.laneOrder, ctx.pragma).tiles, bounder, theme);
 }
 
 function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dispatch: IfBuilderResult, ctx: IfLayoutCtx): Tile {
@@ -366,10 +405,17 @@ function buildIfDown(node: ActivityIf, bounder: StringBounder, theme: Theme, dis
   const useElse1 = shouldUseElse1(theme, optionalStop, parts, node.swimlane, ctx.laneOrder);
   if (useElse1) diamond1.swapEastWest();
 
+  // `FtileIfDown.java:116-120`: EXACTLY one note (either side -- this
+  // builder ignores `NotePosition`), else none at all (2+ silently
+  // dropped). `activity-divergence-drive-3` T2a, family IFNOTE.
+  const ownNote = node.notes?.length === 1 ? node.notes[0] : undefined;
+  const opale = ownNote === undefined ? null : measureIfOwnNote(ownNote, bounder, theme);
+
   const result = new GtileIfDown(diamond1, parts.mainTile, optionalStop, {
     hasTwoBranches,
     useElse1,
     conditionEndStyle: theme.conditionEndStyle,
+    opale,
   });
   applyIfDownSwimlaneOut(result, optionalStop, parts.mainTile);
   return result;

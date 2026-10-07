@@ -12,22 +12,53 @@
  * `walk-repeat.ts#pushRepeatBackDispatch` is the single call site that
  * enforces this either/or.
  *
- * `drawTranslate` (cross-lane routing, `ConnectionTranslatable`) is NOT
- * ported here -- both Java classes implement it (`FtileRepeat.java:
- * 406,463`), but wiring a new `LoopTranslate` variant for them is
- * `swimlane-loop-translate.ts`'s own seam (outside this task's write-set,
- * the same class of gap mission `activity-loop-lane-translate` already
- * closed for `Simple`/`Complex`). Every edge pushed here carries no `loop`
- * tag, so a backward activity in a different lane than its diamond/entry
- * renders in the SAME-LANE (`drawU`) shape regardless of lane -- a
- * documented residual, not a silent one.
+ * `drawTranslate` (cross-lane routing, `ConnectionTranslatable`) IS ported
+ * (mission `activity-divergence-drive-3` T1c): both Java classes
+ * (`FtileRepeat.java:432-459,482-511`) recompute their own side/wraparound
+ * decision from the POST-translate coordinates, never the untranslated
+ * ones {@link backward1Points}/{@link backward2Points} use for the
+ * same-lane `drawU` shape -- the `LoopTranslate` records built below
+ * (`'repeat-backward1'`/`'repeat-backward2'`, `swimlane-loop-translate.ts`)
+ * carry the diamonds' own width/height so `swimlane-loop-translate-repeat
+ * .ts#routeRepeatBackward1/2` can redo that decision once the walker's own
+ * lane pass supplies `dx1`/`dx2`. Every edge pushed here now carries a
+ * `loop` tag (D1/D2, mission `activity-loop-lane-translate`); the points
+ * pushed here stay the same-lane shape regardless (only a translate shape
+ * function ever reads the loop record, same convention as
+ * `walk-repeat-back-shapes.ts#pushRepeatBack`).
  */
 
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
+import type { Out } from './tile-coordinates.js';
 import { pushEdge } from './tile-coordinates.js';
 import type { RepeatFrame } from './walk-repeat.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
+
+/**
+ * Both push sites below carry `Snake.create(...).withLabel(tbback,
+ * arrowHorizontalAlignment())` (T1a's census rows 9-15: every
+ * `FtileRepeat` back-connector variant upstream could pick -- `backConnection`
+ * simple1/`ConnectionBackComplex1`/`ConnectionBackSimple2`/
+ * `ConnectionBackBackward1`/`2` -- collapses to these two generic pushes
+ * in this port). `arrowHorizontalAlignment()` defaults to
+ * `HorizontalAlignment.LEFT` (`skin/AlignmentParam.java:42`); no seam in
+ * this port resolves the `skinparam arrowMessageAlignment` override (same
+ * reported gap as `walk-while-backward.ts`'s own citation) -- outside
+ * this task's write-set.
+ */
+export const BACKWARD_LABEL_ALIGN = { horizontal: 'LEFT' } as const;
+
+/** Attaches `label`/{@link BACKWARD_LABEL_ALIGN} to the edge most
+ *  recently pushed onto `out`, when `label` is set -- split out of
+ *  {@link pushRepeatBackwardConnections} to keep that function under
+ *  this file's NLOC limit. */
+function applyBackwardLabel(out: Out, label: string | undefined): void {
+  if (label === undefined) return;
+  out.edges[out.edges.length - 1]!.label = label;
+  out.edges[out.edges.length - 1]!.labelAlign = BACKWARD_LABEL_ALIGN;
+}
 
 /**
  * `ConnectionBackBackward1#drawSnake` (`FtileRepeat.java:440-459`): from
@@ -69,6 +100,36 @@ function backward2Points(frame: RepeatFrame, backNorth: GPoint): GPoint[] {
 }
 
 /**
+ * The two {@link LoopTranslate} records {@link pushRepeatBackwardConnections}
+ * attaches to its own two edges -- split out purely to keep that function's
+ * own NLOC under the file's limit. `p1`/`p2` are each connection's own
+ * untranslated `getP1`/`getP2` (module doc), never the mid-height points
+ * {@link backward1Points}/{@link backward2Points} compute for the
+ * same-lane `drawU` shape.
+ */
+function buildBackwardLoops(
+  frame: RepeatFrame,
+  backSouth: GPoint,
+  backNorth: GPoint,
+): { loop1: LoopTranslate; loop2: LoopTranslate } {
+  const { condition, condX, condY, entry, entryX, entryY } = frame;
+  return {
+    loop1: {
+      kind: 'repeat-backward1',
+      p1: { x: condX, y: condY },
+      p2: backSouth,
+      diamond2: { width: condition.width, height: condition.height },
+    },
+    loop2: {
+      kind: 'repeat-backward2',
+      p1: backNorth,
+      p2: { x: entryX, y: entryY },
+      diamond1: { width: entry.width, height: entry.height },
+    },
+  };
+}
+
+/**
  * Pushes `ConnectionBackBackward1` (diamond2 -> backward, `asToUp`, NO
  * emphasize -- `FtileRepeat.java:450-452` builds
  * `Snake.create(skinParam(), arrowColor, asToUp()).withLabel(tbback,
@@ -103,9 +164,10 @@ export function pushRepeatBackwardConnections(
     x: backPos.x + backward.getCoord(NORTH_HOOK).x,
     y: backPos.y + backward.getCoord(NORTH_HOOK).y,
   };
+  const { loop1, loop2 } = buildBackwardLoops(frame, backSouth, backNorth);
 
-  pushEdge(out, backward1Points(frame, backSouth), conditionOutLane, lanes.backIn);
-  if (lanes.backIncoming !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backIncoming;
-  pushEdge(out, backward2Points(frame, backNorth), lanes.backOut, entryInLane);
-  if (lanes.backOutgoing !== undefined) out.edges[out.edges.length - 1]!.label = lanes.backOutgoing;
+  pushEdge(out, backward1Points(frame, backSouth), conditionOutLane, lanes.backIn, { loop: loop1 });
+  applyBackwardLabel(out, lanes.backIncoming);
+  pushEdge(out, backward2Points(frame, backNorth), lanes.backOut, entryInLane, { loop: loop2 });
+  applyBackwardLabel(out, lanes.backOutgoing);
 }

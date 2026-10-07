@@ -1,0 +1,14 @@
+@startuml
+start
+:Activity #1;
+
+if (foo?) then (yes)
+note right: note #3
+  :Activity #2;
+  :Activity #3;
+else (no)
+  :Activity #4;
+endif
+note right: note #5
+stop
+@enduml

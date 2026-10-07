@@ -1,0 +1,17 @@
+@startuml
+start
+if (test?) then
+if (test2?) then
+:b0;
+:b1;
+:b2;
+else
+:c2;
+endif
+note: This note is on the inner if
+else
+:c;
+endif
+note right: This note is on the if
+stop
+@enduml

@@ -1,0 +1,30 @@
+surveying 723 class fixtures (concurrency 6)
+  25/723
+  50/723
+  75/723
+  100/723
+  125/723
+  150/723
+  175/723
+  200/723
+  225/723
+  250/723
+  275/723
+  300/723
+  325/723
+  350/723
+  375/723
+  400/723
+  425/723
+  450/723
+  475/723
+  500/723
+  525/723
+  550/723
+  575/723
+  600/723
+  625/723
+  650/723
+  675/723
+  700/723
+wrote plans/activity-divergence-drive-3/measurements/b3w1-eng/parity-class.json — {"conformant":709,"structural-match":2,"diverged":12,"errored":0,"timeout":0,"oracle-error":0}

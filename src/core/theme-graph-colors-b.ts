@@ -391,6 +391,7 @@ export interface ThemeGraphColorsB {
     diamondBorder?: string; // ActivityDiamondBorderColor
     startColor?: string; // ActivityStartColor — filled start circle
     endColor?: string; // ActivityEndColor — end/terminate circle
+    circleInk?: string; // T2d-a: circle LineColor, dark-seeded only (see skinparam-accumulator.ts)
     // D4 amendment (T1, 2026-09-09): SwimlaneBorderColor ->
     // PName.LineColor -- lane divider stroke.
     // `FromSkinparamToStyle.java:161`.

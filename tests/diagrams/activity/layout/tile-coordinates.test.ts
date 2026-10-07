@@ -9,6 +9,7 @@ import { GtileWhile } from '../../../../src/diagrams/activity/tiles/gtile-while.
 import { GtileFork } from '../../../../src/diagrams/activity/tiles/gtile-fork.js';
 import { GtileSplit } from '../../../../src/diagrams/activity/tiles/gtile-split.js';
 import { GtileBreak } from '../../../../src/diagrams/activity/tiles/gtile-break.js';
+import { GtileGroup } from '../../../../src/diagrams/activity/tiles/gtile-group.js';
 import { GtileStop } from '../../../../src/diagrams/activity/tiles/gtile-stop.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
@@ -537,6 +538,50 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
   });
 });
 
+// T3i (row WELD, `jupivo-67-gidi531`): `InstructionFork.createFtile`
+// (`InstructionFork.java:122-130`) never calls or forwards a branch's
+// `getWeldingPoints()`, and the fork's own Ftile (`FtileForkInner`/
+// `FtileForkInnerOverlapped`, both `extends AbstractFtile` with no
+// override) falls back to `AbstractFtile.java:100-102`'s empty-list
+// default -- so a `break` inside a fork branch gets NO welding edge,
+// unlike the same-body-level break the previous `describe` block covers.
+describe('assignCoordinates — GtileWhile does NOT weld a break inside a fork branch', () => {
+  it('each break only gets its fork branch in-edge, no weld to the elbow', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    const brk1 = new GtileBreak();
+    const brk2 = new GtileBreak();
+    const body = new GtileFork([brk1, brk2], bounder);
+    const tile = new GtileWhile(header, body, { bounder, theme });
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const breakNodes = geo.nodes.filter((n) => n.kind === 'break');
+    expect(breakNodes).toHaveLength(2);
+
+    // A weld departs from the break's own point horizontally toward the
+    // while's exit column (`pushEdge(out, [{x: brk.x, y: brk.y}, {x:
+    // elbowX, y: brk.y}], ...)`). T1b's merge engine fuses that weld
+    // BACKWARD into the fork branch's own pending in-edge (same
+    // mechanism the non-fork weld test above documents), so a present
+    // weld would NOT show up as its own 2-point edge here -- it would
+    // extend the in-edge's point list past the break's own location.
+    // Checking every edge's LAST point (not just 2-point edges) catches
+    // both the fused and unfused shapes.
+    for (const brk of breakNodes) {
+      const touching = geo.edges.filter((e) => e.points.some((p) => p.x === brk.x && p.y === brk.y));
+      expect(touching.length).toBeGreaterThan(0);
+      for (const e of touching) {
+        expect(e.points.at(-1)).toEqual({ x: brk.x, y: brk.y });
+      }
+    }
+
+    // 2 fork branch-in edges (one per break, `hasPointOut()` is `false`
+    // so neither gets an out-edge) + the while's own header-entry, out,
+    // and back edges -- 5 total, 0 welds (verified against a live run of
+    // this exact fixture before writing this assertion).
+    expect(geo.edges).toHaveLength(5);
+  });
+});
+
 describe('assignCoordinatesFull — swimlane title band is an ignoreX/ignoreY reservation', () => {
   it('adds the band as a reservation matching computeSwimlaneChrome exactly', () => {
     const tile = new GtileAction(actionNode, bounder, theme);
@@ -625,6 +670,49 @@ describe('assignCoordinates — nodes are placed inside their own lane', () => {
   it('lane B starts exactly where lane A ends (adjacent, no gap or overlap)', () => {
     const geo = place('a', 'b');
     expect(geo.swimlanes[1]!.x).toBe(geo.swimlanes[0]!.x + geo.swimlanes[0]!.width);
+  });
+});
+
+describe('assignCoordinates — a group frame draws once per touched lane (T3h)', () => {
+  it('a group whose body touches two lanes produces two same-sized frame nodes', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const b = new GtileAction({ kind: 'action' as const, label: 'b' }, bounder, theme);
+    b.swimlane = 'B';
+    const body = new GtileTopDown([a, b], bounder, theme);
+    const group = new GtileGroup('G', body, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A', 'B'] };
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(2);
+    expect(frames[0]!.width).toBe(frames[1]!.width);
+    expect(frames[0]!.height).toBe(frames[1]!.height);
+    expect(new Set(frames.map((f) => f.swimlane))).toEqual(new Set(['A', 'B']));
+  });
+
+  it('a group whose body stays in one lane still produces exactly one frame node', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    a.swimlane = 'A';
+    const group = new GtileGroup('G', a, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const ast: ActivityDiagramAST = { nodes: [], swimlanes: ['A'] };
+    const geo = assignCoordinates(root, ast, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(1);
+  });
+
+  it('a group in a diagram with no swimlanes renders one untagged frame (pre-T3h behavior)', () => {
+    const a = new GtileAction({ kind: 'action' as const, label: 'a' }, bounder, theme);
+    const group = new GtileGroup('G', a, bounder, theme);
+    const root = new GtileTopDown([group], bounder, theme);
+    const geo = assignCoordinates(root, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const frames = geo.nodes.filter((n) => n.kind === 'group');
+    expect(frames).toHaveLength(1);
+    expect(frames[0]!.swimlane).toBeUndefined();
   });
 });
 

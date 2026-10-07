@@ -7,6 +7,7 @@
  */
 
 import type { KeyHandler } from './skinparam-key-handlers-shared.js';
+import { parseFiniteNumber } from './skinparam-key-handlers-shared.js';
 
 export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], handler: KeyHandler]> = [
   // T2c (ex-T2a): `SkinParam.getConditionStyle` (`skin/SkinParam.java:
@@ -68,6 +69,16 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
     ['activityfontname'],
     (acc, value) => {
       (acc.elements['activity'] ??= {}).fontFamily = value;
+    },
+  ],
+  // add3-T3f (PADDING): `SkinParam#getPadding()` (`skin/SkinParam.java
+  // :1147-1150`): `getAsDouble("padding")` -- `isIntOrDecimal` guard, a
+  // non-numeric value is left unset rather than poisoning the tier (same
+  // convention as `defaultfontsize` above).
+  [
+    ['padding'],
+    (acc, value) => {
+      acc.padding = parseFiniteNumber(value);
     },
   ],
 ];

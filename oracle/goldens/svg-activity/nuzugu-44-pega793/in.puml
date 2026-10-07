@@ -1,0 +1,14 @@
+@startuml
+start
+:foo1;
+note left
+my list is:
+* first item
+* second **item**
+** foo1
+# number 1
+# number **two**
+Foo1
+**Just** some bold information
+end note
+@enduml

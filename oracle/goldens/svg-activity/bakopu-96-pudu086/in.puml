@@ -1,0 +1,20 @@
+@startuml
+start
+
+:A\non\nseveral\nlines;
+note left
+note
+end note
+
+:b;
+note right
+this is a note which is longer
+and on
+several lines
+but without overscan
+it allow some tests
+end note
+
+:c;
+
+@enduml

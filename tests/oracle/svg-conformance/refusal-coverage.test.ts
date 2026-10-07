@@ -780,7 +780,18 @@ describe('refusal coverage — baseline shape', () => {
     // 6089 + 230 = 6319.
     // 6319 -> 6337 / 6089 -> 6107 / 230 at add2/close-b3 (2026-10-03): 18
     // more svg-activity clone rows. Derivation: 6107 + 230 = 6337.
-    expect(manifest.fixtures.length).toBe(6337);
+    // 6337 -> 6336 / 6107 -> 6106 / 230 at add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 6106 + 230 = 6336.
+    // 6336 -> 6349 / 6106 -> 6119 / 230 at add3/close-b1 (2026-10-06): 13
+    // svg-activity clone rows. Derivation: 6119 + 230 = 6349.
+    // 6349 -> 6385 / 6119 -> 6155 / 230 at add3/close-b2 (2026-10-06): 36
+    // svg-activity clone rows. Derivation: 6155 + 230 = 6385.
+    // 6385 -> 6396 / 6155 -> 6166 / 230 at add3/close-b3w1 (2026-10-07): 11
+    // svg-activity clone rows. Derivation: 6166 + 230 = 6396.
+    // 6396 -> 6413 / 6166 -> 6183 / 230 at add3/close-b3 (2026-10-07): 17
+    // svg-activity clone rows. Derivation: 6183 + 230 = 6413.
+    expect(manifest.fixtures.length).toBe(6413);
     expect(pinnedJarErrors.length).toBe(105);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -835,7 +846,12 @@ describe('refusal coverage — baseline shape', () => {
     // 5933 -> 5980 at add2/close-b2 (13 svg-activity clones + 34 rows that now render).
     // 5980 -> 6089 at add2/close-b3w1 (109 svg-activity clones).
     // 6089 -> 6107 at add2/close-b3 (18 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6107);
+    // 6107 -> 6106 at add3/T0a (`tmp1` retired, D9).
+    // 6106 -> 6119 at add3/close-b1 (13 svg-activity clones).
+    // 6119 -> 6155 at add3/close-b2 (36 svg-activity clones).
+    // 6155 -> 6166 at add3/close-b3w1 (11 svg-activity clones).
+    // 6166 -> 6183 at add3/close-b3 (17 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6183);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {

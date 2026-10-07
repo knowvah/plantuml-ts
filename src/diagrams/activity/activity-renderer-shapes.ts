@@ -13,7 +13,8 @@ import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
 import { drawActivityText, drawActivityTextLines, renderCreoleTableGrid, type ActivityTextStyle } from './activity-renderer-text.js';
 import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
-import { NOTE_CORNER_SIZE, NOTE_SPIKE_DELTA, NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { NOTE_MARGIN_Y } from './activity-layout-constants.js';
+import { noteFoldPath, noteBodyNormal, noteBodySpikeRight, noteBodySpikeLeft } from './activity-renderer-note-shapes.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
@@ -30,9 +31,9 @@ import {
   renderIfLabel,
   renderDiamond,
   renderHexagonPolygon,
-  renderDiamondSquarePolygon,
   renderHexagonOwnLabel,
   renderHexagonMultilineLabel,
+  renderIfSplitShape,
   diamondColors,
 } from './activity-renderer-if-shapes.js';
 import {
@@ -42,12 +43,11 @@ import {
   renderParallelogram,
 } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
-import {
-  type ActivityTextOpts,
-  activityTextLineX,
-  measureLineWidth,
-  measureMonoLineWidth,
-} from './activity-text-placement.js';
+import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
+import { renderActionCodeBlock } from './activity-renderer-action-code.js';
+import { floorActionLineHeight } from './tiles/gtile-action.js';
+import { actionLines, centeredBaselines, actionRuleFields } from './activity-renderer-line-heights.js';
+import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
 
 // Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
 // in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
@@ -138,9 +138,16 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
     ...linkStyleFields(theme),
+    floorCoordinated: opts.sname === 'activity',
   });
 }
 
+/** KLIMT-FLOOR/KLIMT-ACT/STRIPE: `'activity'` ONLY gets heterogeneous
+ *  per-line baselines ({@link actionLines}/{@link centeredBaselines}) --
+ *  a heading/floor/HR cascade each grow/shrink/reclassify ONE line
+ *  (`GtileDiamond`'s sizer has none yet, ALIGN-DIAMOND unassigned; every
+ *  other sname keeps its prior closed form). `ruleWidth` rides
+ *  `ActivityTextStyle` so a per-line HR draws its real rule(s). */
 export function renderMultilineText(
   lines: string[],
   cx: number,
@@ -149,16 +156,27 @@ export function renderMultilineText(
   opts: ActivityTextOpts,
 ): string {
   const size = opts.fontSize ?? activityFontSize(theme, 'activity');
-  const y = centeredFirstBaselineY(cy, size, lines.length);
+  const isAction = opts.sname === 'activity';
+  const baselines = isAction
+    ? centeredBaselines(cy, actionLines(lines, theme, size))
+    : lines.map((_, i) => centeredFirstBaselineY(cy, size, lines.length) + size * i);
   const fill = activityFontColor(theme, opts.sname);
   // add2 T3h, families K/F -- see renderLabel's own doc comment above.
   const fontFamily = activityFontFamily(theme, opts.sname);
   const link = linkStyleFields(theme);
+  const ruleFields = isAction ? actionRuleFields(cx, opts.width, actColors(theme).nodeBorder) : {};
   return lines
     .map((ln, i) => {
       const lineWidth = measureLineWidth(theme, size, ln);
       const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, y + size * i, ln, { fontFamily, fontSize: size, fill, ...link });
+      return drawActivityText(x, baselines[i]!, ln, {
+        fontFamily,
+        fontSize: size,
+        fill,
+        ...link,
+        floorCoordinated: isAction,
+        ...ruleFields,
+      });
     })
     .join('');
 }
@@ -202,8 +220,6 @@ export function actColors(theme: Theme): ActivityColors {
 // `activity-renderer-terminals.ts` (T1c, 500-line hook) -- re-exported
 // above.
 
-const CODE_BLOCK_RE = /^<code>([\s\S]*?)<\/code>$/i;
-
 export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361) --
   // the SAME value `tiles/gtile-action.ts` measured this box at, so the
@@ -222,28 +238,15 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
+  const floored = floorActionLineHeight(actionSize);
 
-  // <code>...</code> block: monospace, measured like `gtile-action.ts`'s
-  // own `monoCharWidth` sizing, not the proportional table `opts` reads.
-  const codeMatch = CODE_BLOCK_RE.exec(label.trim());
-  if (codeMatch !== null) {
-    const codeContent = codeMatch[1]!.replace(/^\n/, '').replace(/\n$/, '');
-    const codeLines = codeContent.split('\n');
-    const lineY = centeredFirstBaselineY(cy, actionSize, codeLines.length);
-    const codeFill = activityFontColor(theme, 'activity');
-    const labelText = codeLines
-      .map((ln, i) => {
-        const w = measureMonoLineWidth(actionSize, ln);
-        const x = activityTextLineX(theme, cx, w, opts);
-        return drawActivityText(x, lineY + actionSize * i, ln, {
-          fontFamily: 'monospace',
-          fontSize: actionSize,
-          fill: codeFill,
-        });
-      })
-      .join('');
-    return box + labelText;
-  }
+  // <code>...</code> block: KLIMT-FLOOR applies too, hence `floored`.
+  const codeText = renderActionCodeBlock({ label, theme, cx, cy, floored, actionSize, opts });
+  if (codeText !== null) return box + codeText;
+
+  // D5 Sheet spike (`FtileBox.java:178-181`); `renderActionLabel` doc.
+  const sheetText = renderActionLabel(label, theme, actionSize, node);
+  if (sheetText !== null) return box + sheetText;
 
   const lines = label.split('\n');
   // D1/D9: the single-line baseline is the N=1 case of the SAME
@@ -254,7 +257,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   const labelEl =
     lines.length > 1
       ? renderMultilineText(lines, cx, cy, theme, opts)
-      : renderLabel(label, cx, centeredFirstBaselineY(cy, actionSize, 1), theme, opts);
+      : renderLabel(label, cx, centeredFirstBaselineY(cy, floored, 1), theme, opts);
   return box + labelEl + renderCreoleTableGrid(node, lines, actionSize, theme);
 }
 
@@ -308,59 +311,6 @@ export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
   return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }
 
-/** `Opale#getCorner` (`:134-147`, `roundCorner=0`): the fold triangle,
- *  identical for every body variant (`getPolygonNormal`/`Left`/`Right`) --
- *  `Opale#drawU` (`:126`) draws it unconditionally, as its own filled
- *  `<path>`, never as unfilled border lines. */
-function noteFoldPath(x: number, y: number, w: number): string {
-  const d = NOTE_CORNER_SIZE;
-  return `M${x + w - d},${y} L${x + w - d},${y + d} L${x + w},${y + d} L${x + w - d},${y}`;
-}
-
-/** `Opale#getPolygonNormal` (`:149-157`, no link, `roundCorner=0`): top-left
- *  -> bottom-left -> bottom-right -> right-edge-below-fold -> fold-top ->
- *  close. Was top-left -> fold-top -> right-edge-below-fold -> bottom-right
- *  -> bottom-left -> close, the opposite traversal (T2f mechanism 3). */
-function noteBodyNormal(x: number, y: number, w: number, h: number): string {
-  const d = NOTE_CORNER_SIZE;
-  return `M${x},${y} L${x},${y + h} L${x + w},${y + h} L${x + w},${y + d} L${x + w - d},${y} L${x},${y}`;
-}
-
-/** A degenerate `arcTo(point, roundCorner/2=0, 0, 0)` -- `Opale
- *  #getPolygonLeft`/`Right` ALWAYS emit an `A` command there, even at
- *  radius 0 (T2f mechanism 3, verified byte-exact against `cubida-55-
- *  meku256`'s jar SVG: `A0,0 0 0 0 <samepoint>` immediately follows the
- *  `L` that already reached that point). */
-function zeroArc(x: number, y: number): string {
-  return `A0,0 0 0 0 ${x},${y}`;
-}
-
-/** `Opale#getPolygonRight` (`:198-219`): spike on the RIGHT edge (the
- *  note sits LEFT of its target). `y1`'s floor is `cornersize` (`:208`)
- *  -- the spike may not rise into the fold's own corner. */
-function noteBodySpikeRight(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
-  const d = NOTE_CORNER_SIZE;
-  const y1 = Math.max(d, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
-  return (
-    `M${x},${y} L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
-    `L${x + w},${y + y1 + 2 * NOTE_SPIKE_DELTA} L${spike.x},${spike.y} L${x + w},${y + y1} ` +
-    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
-  );
-}
-
-/** `Opale#getPolygonLeft` (`:175-196`): spike on the LEFT edge (the note
- *  sits RIGHT of its target). `y1`'s floor is `0` (`:180`), not
- *  `cornersize` -- the fold is on the OPPOSITE (right) edge here. */
-function noteBodySpikeLeft(x: number, y: number, w: number, h: number, spike: { x: number; y: number }): string {
-  const d = NOTE_CORNER_SIZE;
-  const y1 = Math.max(0, Math.min(spike.y - y - NOTE_SPIKE_DELTA, h - 2 * NOTE_SPIKE_DELTA));
-  return (
-    `M${x},${y} L${x},${y + y1} L${spike.x},${spike.y} L${x},${y + y1 + 2 * NOTE_SPIKE_DELTA} ` +
-    `L${x},${y + h} ${zeroArc(x, y + h)} L${x + w},${y + h} ${zeroArc(x + w, y + h)} ` +
-    `L${x + w},${y + d} L${x + w - d},${y} L${x},${y} ${zeroArc(x, y)}`
-  );
-}
-
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const noteFill = theme.colors.noteBackground;
@@ -388,6 +338,13 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const body = path(bodyD, paint) + path(noteFoldPath(x, y, w), paint);
 
   const label = node.label ?? '';
+
+  // add3-T3d: `FtileWithNoteOpale.java:147-150` draws via the real creole
+  // Sheet -- `renderNoteLabel`'s own doc (geometric fallback for a note
+  // NOT sized by the matching `measureOpaleCreole`, e.g. NOTE-MULTI).
+  const sheetLabel = renderNoteLabel(label, theme, { x, y, width: w, height: h });
+  if (sheetLabel !== null) return body + sheetLabel;
+
   const lines = label.split('\n');
   // `Opale.java:56` -- `marginX1 = 6`; `:127` --
   // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
@@ -456,16 +413,23 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
       return renderSplitLine(node, theme);
     case 'if-split':
     case 'repeat-cond':
-      // T3k: shape ALONE, own label via its own 'if-own-label' node.
-      // add2 T3h/T3i (CSTYLE): INSIDE_DIAMOND draws the square instead --
-      // while ('while-header' below) is still unwired (EMPTY_DIAMOND, no
-      // cohort fixture, T3i re-slot).
-      return theme.conditionStyle === 'insideDiamond'
-        ? renderDiamondSquarePolygon(node, theme)
-        : renderHexagonPolygon(node, theme);
+      // T3k/add3-T3c: see `renderIfSplitShape`'s own doc comment
+      // (`activity-renderer-if-shapes.ts`, split out there to keep this
+      // function under the file's complexity cap).
+      return renderIfSplitShape(node, theme);
     case 'while-header':
-      // D (T3d): an EMPTY condition is STILL the 7-point hexagon default.
-      return renderHexagonPolygon(node, theme);
+      // add3-T3d: same EMPTY_DIAMOND shape as 'if-split'/'repeat-cond'
+      // above (`FtileWhile.create`'s own EMPTY_DIAMOND branch builds the
+      // SAME `GtileDiamondEmpty`/`FtileDiamond` -- `.agent-notes/
+      // add3-T3a.md`). Was unconditionally `renderHexagonPolygon` (a
+      // stale "still the 7-point hexagon default" comment, disproved by
+      // reading `FtileDiamond#drawU` directly -- see the case above).
+      // `while` + INSIDE_DIAMOND is a separate, pre-existing gap (this
+      // case never branched on it at all) -- not fixed here, flagged in
+      // this task's report; no cohort fixture currently exercises it.
+      return theme.conditionStyle === 'emptyDiamond' && node.label === ''
+        ? renderDiamond(node, theme)
+        : renderHexagonPolygon(node, theme);
     case 'if-merge':
       return renderIfMerge(node, theme);
     case 'if-label':

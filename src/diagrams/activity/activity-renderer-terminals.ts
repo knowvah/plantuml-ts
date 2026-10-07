@@ -4,24 +4,37 @@
  * `activity-renderer-shapes.ts` (T1c, 500-line hook) -- re-exported from
  * there so existing import sites are unchanged (same "pure-move re-export"
  * pattern as `activity-renderer-signal-shapes.ts`, which this file mirrors
- * by importing {@link actColors}/{@link centeredFirstBaselineY} back from
- * the main shapes module).
+ * by importing {@link actColors} back from the main shapes module).
  */
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { ellipse, line, resolvePaint, type LineStyle } from '../../core/svg.js';
+import { ellipse, line, path, resolvePaint, text, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, STOP_INNER_DELTA } from './activity-layout-constants.js';
 import {
   CIRCLE_END_LINE_THICKNESS,
   CIRCLE_INK,
   CIRCLE_LINE_THICKNESS,
   ELEMENT_LINE_THICKNESS,
-  activityFontSize,
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
-import { measureLineWidth } from './activity-text-placement.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { spotGlyphPath } from './activity-spot-glyph.js';
+import { actColors } from './activity-renderer-shapes.js';
+
+/**
+ * `circle { start, stop, end { LineColor #2 } } }` (`plantuml.skin:379-380`
+ * light, `:687-692` `#d` dark) -- the three terminal circles' shared
+ * STROKE default. Independent of `activityStartColor`/`activityEndColor`
+ * (`Theme['colors']['graph']['activity']`'s `startColor`/`endColor`),
+ * which are `BackgroundColor`-only converts (`FromSkinparamToStyle.java:
+ * 137-138`) -- there is no upstream skinparam key mapping to `start`/
+ * `end`'s `LineColor` at all (confirmed by grep of that file: only `stop`
+ * has one, via `ActivityStopColor`, also unported), so this field is
+ * NEVER set by a key handler and reads only the dark-mode seed
+ * (`skinparam-theme-builder.ts#DARK_SCALAR_SEEDS`) or the light default.
+ */
+function circleInk(theme: Theme): string {
+  return theme.colors.graph.activity?.circleInk ?? CIRCLE_INK;
+}
 
 export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
@@ -37,12 +50,14 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   // `FromSkinparamToStyle.java:137`: `addConvert("activityStartColor",
   // PName.BackGroundColor, SName.circle, SName.start)` -- `ActivityStart
   // Color` maps ONLY to the FILL, never `LineColor`. The stroke is always
-  // the circle block's own default (`CIRCLE_INK`); it was wrongly reusing
-  // the resolved fill colour, which painted the border red along with the
-  // fill under `skinparam ActivityStartColor red` (T2f mechanism 7,
-  // `poraji-17-goke817`).
+  // the circle block's own (dark-seedable) {@link circleInk} default; it
+  // was wrongly reusing the resolved fill colour, which painted the
+  // border red along with the fill under `skinparam ActivityStartColor
+  // red` (T2f mechanism 7, `poraji-17-goke817`), and before T2d-a it
+  // stayed the light-only `CIRCLE_INK` constant even in dark mode
+  // (`levuma-67-cego489`: jar stroke `#DDD`, ours `#222`).
   const fill = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill, stroke: CIRCLE_INK, 'stroke-width': CIRCLE_LINE_THICKNESS });
+  return ellipse(cx, cy, r, r, { fill, stroke: circleInk(theme), 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
 
 /**
@@ -66,10 +81,7 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleStop.java:55,87-94
  * @see net/sourceforge/plantuml/svek/image/CircleEnd.java:55,72-103
  */
-// `theme` is unused now that `stop`'s ink is the plain circle-block
-// default (see the mechanism-7 comment below) -- kept for signature
-// parity with every other `render*(node, theme)` dispatch target.
-export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
+export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
   const cy = node.y + node.height / 2;
   const outerR = node.height / 2;
@@ -80,11 +92,14 @@ export function renderStop(node: ActivityNodeGeo, _theme: Theme): string {
   // `SName.circle, SName.end`). Reusing `actColors(theme).endFill` here
   // made `stop` incorrectly inherit `ActivityEndColor` (T2f mechanism 7,
   // `poraji-17-goke817`: `ActivityEndColor red` left `stop` red). No
-  // `ActivityStopColor`-reading theme field exists yet (would need a
-  // `core/theme-graph-colors-b.ts` addition, out of this task's write-set
-  // -- reported, not added), so this reads the plain circle-block
-  // default unconditionally, same as the jar does absent that skinparam.
-  const ink = CIRCLE_INK;
+  // `ActivityStopColor`-reading theme field exists yet (would need its
+  // own dedicated field the same way {@link circleInk} is its own field,
+  // not this task's `circleInk` -- reported, not added), so this reads
+  // the plain circle-block default (dark-seeded via {@link circleInk}),
+  // same as the jar does absent that skinparam (T2d-a: was the light-only
+  // `CIRCLE_INK` constant; `levuma-67-cego489`'s jar SVG shows BOTH
+  // ellipses at `fill`/`stroke` `#DDD` in dark mode, ours stayed `#222`).
+  const ink = circleInk(theme);
   return (
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',
@@ -186,15 +201,20 @@ export function renderEnd(node: ActivityNodeGeo, theme: Theme): string {
  * tier instead (`plantuml.skin:93`). Verified against the jar's own SVG
  * (`vilecu-41-tete416`: `stroke:#181818;stroke-width:0.5`), not assumed.
  *
- * The character itself draws as a plain `<text>`, not upstream's
- * `UCenteredCharacter` path-outline glyph -- `DriverCenteredCharacterSvg`
- * is an EXISTING, project-wide, pre-this-task D3-prime stub
- * (`core/klimt/drawing/svg/driver-svg-stubs.ts`: "centered-character
- * drawing ... not yet ported"; the `UCenteredCharacter` shape class does
- * not exist anywhere in this port). A `<text>` substitute preserves the
- * information (which character is shown) that drawing nothing at all
- * would lose (CLAUDE.md's "preserve information-carrying output").
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:84-109
+ * T3g: the character itself now draws as the platform AWT glyph OUTLINE
+ * `UCenteredCharacter` actually produces (`:110-111`), via
+ * {@link spotGlyphPath}'s captured-table lookup -- replacing the earlier
+ * plain-`<text>` substitute (`activity-spot-glyph-data.ts`'s own doc
+ * comment: `DriverCenteredCharacterSvg.java:56-81`'s `<text>` branch
+ * (`:64-69`) fires only for `FileFormat.SVG_DETERMINISTIC`, a format this
+ * port's oracle renders never select, so the jar always draws the `<path>`
+ * branch; `svg.setFillColor(fc.getColor())` at `:79`, independent of this
+ * circle's own `backColor`/`color` override). A letter with no captured
+ * outline still falls back to that `<text>` branch's own literal geometry
+ * (`x - 5, y + 5`, `monospace`, size 14) rather than drawing nothing --
+ * {@link spotGlyphPath}'s own doc comment names which letters that is
+ * (none, today: every corpus letter is captured).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileCircleSpot.java:84-111
  * @see net/sourceforge/plantuml/style/FromSkinparamToStyle.java:137-139
  */
 export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
@@ -209,12 +229,11 @@ export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
   });
   const char = node.label ?? '';
   if (char === '') return circle;
-  const size = activityFontSize(theme, 'circle');
-  const charWidth = measureLineWidth(theme, size, char);
-  const text = drawActivityText(cx - charWidth / 2, centeredFirstBaselineY(cy, size, 1), char, {
-    fill: activityFontColor(theme, 'circle'),
-    fontFamily: theme.fontFamily,
-    fontSize: size,
-  });
-  return circle + text;
+  const glyphFill = activityFontColor(theme, 'circle');
+  const d = spotGlyphPath(char, cx, cy);
+  const glyph =
+    d === undefined
+      ? text(cx - 5, cy + 5, char, { fill: glyphFill, fontFamily: 'monospace', fontSize: 14 })
+      : path(d, { fill: glyphFill });
+  return circle + glyph;
 }

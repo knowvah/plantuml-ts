@@ -1,0 +1,9 @@
+@startuml
+start
+:foo;
+if (some test) then
+note left:toto
+:ok;
+endif
+:end of traitement;
+@enduml

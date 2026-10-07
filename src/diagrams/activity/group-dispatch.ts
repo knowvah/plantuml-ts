@@ -6,7 +6,7 @@
  */
 
 import type { ParseRefusal } from '../../core/parse-refusal.js';
-import type { ActivityGroup } from './ast.js';
+import type { ActivityGroup, ActivityNode, ActivityNote } from './ast.js';
 import {
   RE_CLOSE_GROUP,
   RE_CLOSE_GROUP_LEGACY,
@@ -33,6 +33,26 @@ function isGroupType(s: string): s is ActivityGroup['groupType'] {
   return (GROUP_TYPES as readonly string[]).includes(s);
 }
 
+interface LeadingGroupNoteSplit {
+  readonly body: ActivityNode[];
+  readonly note?: ActivityNote;
+}
+
+/** `InstructionGroup#addNote`'s own `list.isEmpty()` self-capture
+ *  (`InstructionGroup.java:125-131`): a note is never actually ADDED to
+ *  the body list, so a RUN of leading notes each OVERWRITES the last --
+ *  a single field, not a collection. `activity-divergence-drive-3` T2a,
+ *  family GROUPNOTE. */
+function extractLeadingGroupNote(body: readonly ActivityNode[]): LeadingGroupNoteSplit {
+  let note: ActivityNote | undefined;
+  let i = 0;
+  while (i < body.length && body[i]!.kind === 'note') {
+    note = body[i] as ActivityNote;
+    i++;
+  }
+  return note === undefined ? { body: body.slice(i) } : { body: body.slice(i), note };
+}
+
 /**
  * Captures the group's swimlane at its opener, mirroring `tryIf`/
  * `tryWhile`/`tryRepeat`/`tryOpenSwitch`'s own convention (mission
@@ -54,13 +74,15 @@ export function tryOpenGroup(ctx: ParseContext, idx: number, line: string): Disp
     const closer = ctx.lines[cursor]!.trim();
     if (RE_CLOSE_GROUP.test(closer) || RE_CLOSE_GROUP_LEGACY.test(closer)) cursor++;
   }
+  const { body, note } = extractLeadingGroupNote(bodyResult.nodes);
 
   const node: ActivityGroup = {
     kind: 'group',
     groupType: typeRaw,
     title,
     hasBracket,
-    body: bodyResult.nodes,
+    body,
+    ...(note !== undefined ? { note } : {}),
     ...openerSwimlane,
   };
   return { idx: cursor, node };

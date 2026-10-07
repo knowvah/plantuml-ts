@@ -1,0 +1,22 @@
+@startuml
+start
+while (data?) is (yes)
+
+  :read data;
+
+fork
+  if(a)then(yes)
+   break
+  endif
+
+fork again
+  if(b)then(yes)
+   break
+  endif
+
+end fork
+
+endwhile (no)
+
+stop
+@enduml

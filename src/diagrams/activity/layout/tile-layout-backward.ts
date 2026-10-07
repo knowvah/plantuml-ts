@@ -9,7 +9,7 @@
  * needs that file's own private `tileSimpleLeaf`.
  */
 
-import type { ActivityBackward, ActivityNode, ActivityRepeat } from '../ast.js';
+import type { ActivityBackward, ActivityNode, ActivityNote, ActivityRepeat } from '../ast.js';
 
 /**
  * Pulls `backward:LABEL;` OUT of a repeat/while body, mirroring
@@ -27,20 +27,46 @@ import type { ActivityBackward, ActivityNode, ActivityRepeat } from '../ast.js';
  * `tile-layout.ts#tileNode`'s own `NULL_RESULT_KINDS` stays the fallback
  * for that case.
  */
+/** BACKNOTE's own trailing-note capture, split out of {@link
+ *  extractBackward} purely to keep that function's own CCN under the
+ *  file's limit. `InstructionRepeat.addNote`'s own `Display.isNull
+ *  (backward)` check (`:218-221`) is exactly "a note parsed before any
+ *  `backward:` line has been seen in this body" -- once `backward` is
+ *  set, EVERY following note is `backward`'s own (`:222-224`'s
+ *  unconditional `backwardNotes.add`, no re-check of what's between
+ *  them), not just an immediately-adjacent run; a non-note node ends it
+ *  only because the parser itself would have rejected a body node after
+ *  a `backward:` line already reaching `repeat while` (`CommandRepeat
+ *  While3`'s own stop keyword), so no such node exists to test against
+ *  in a real fixture. */
+function collectBackwardNotes(body: readonly ActivityNode[], fromIndex: number): ActivityNote[] {
+  const notes: ActivityNote[] = [];
+  for (let i = fromIndex; i < body.length; i++) {
+    const node = body[i]!;
+    if (node.kind === 'note') notes.push(node);
+  }
+  return notes;
+}
+
+/** Index of the LAST `backward`-kind node, or `-1` -- `Array#findLastIndex`
+ *  is ES2023, past this project's ES2022 lib target. */
+function lastBackwardIndex(body: readonly ActivityNode[]): number {
+  for (let i = body.length - 1; i >= 0; i--) {
+    if (body[i]!.kind === 'backward') return i;
+  }
+  return -1;
+}
+
 export function extractBackward(body: readonly ActivityNode[]): {
   rest: ActivityNode[];
   backward: ActivityBackward | undefined;
 } {
-  let backward: ActivityBackward | undefined;
-  const rest: ActivityNode[] = [];
-  for (const node of body) {
-    if (node.kind === 'backward') {
-      backward = node;
-      continue;
-    }
-    rest.push(node);
-  }
-  return { rest, backward };
+  const backwardIndex = lastBackwardIndex(body);
+  if (backwardIndex === -1) return { rest: [...body], backward: undefined };
+  const backward = body[backwardIndex] as ActivityBackward;
+  const notes = collectBackwardNotes(body, backwardIndex + 1);
+  const rest = body.filter((node, i) => node.kind !== 'backward' && !(i > backwardIndex && node.kind === 'note'));
+  return { rest, backward: notes.length > 0 ? { ...backward, notes } : backward };
 }
 
 /**

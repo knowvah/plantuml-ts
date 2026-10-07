@@ -5,61 +5,78 @@
  * tile-kind dispatch) from growing further, and to keep `tile-coordinates
  * .ts` itself under the file's 500-line cap -- the same reason
  * `walk-while-branch.ts`/`walk-repeat.ts`/`walk-fork-branches.ts` already
- * exist (mission `activity-divergence-drive-2`, T1p-e, batch 1p step 1:
- * "extract... first (no behaviour change, its own commit), then port").
+ * exist.
  *
- * T1p-e step 1 is a pure move: `walkSwitch`'s body, `applyLastEdgeLabel`,
- * and the `GConnectionSideThenVerticalThenSide`-based diamond<->case/
- * case<->merge-diamond shape are byte-identical to the code this replaces
- * in `tile-coordinates.ts`. The cross-swimlane port
- * (`FtileSwitchWithManyLinks.java:297-end`) is NOT yet wired into the live
- * render path here -- see this task's handback report for why.
+ * `activity-divergence-drive-3` T3b: diamond1/diamond2 are now real
+ * `FtileDiamondInside` hexagons (`tiles/gtile-diamond-inside.ts`, pushed
+ * directly as `'if-split'`/`'if-merge'` nodes -- the SAME convention
+ * `walk-if-with-links.ts#pushDiamond1`/`#pushMerge` use, since `GtileSwitch`
+ * no longer owns a `'gtile-diamond'`-kind child `walkTile` could dispatch
+ * on generically), and every connector is `FtileSwitchWithManyLinks`'s/
+ * `FtileSwitchWithOneLink`'s own `Connection*` shape (`switch-connection-
+ * points.ts`), not the generic `GConnectionSideThenVerticalThenSide`
+ * router. Cross-swimlane routing is untouched (`switch-swimlane-duplicate
+ * .ts`'s own doc, the pre-existing `loop`-tagged translate path).
  *
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileSwitchWithManyLinks.java
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileSwitchWithOneLink.java
  */
 
 import type { GtileSwitch } from '../tiles/gtile-switch.js';
-import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
+import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import type { GPoint } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
 import { TileComposite } from '../tiles/tile.js';
-import { GConnectionSideThenVerticalThenSide } from '../routing/gconnection-side-then-vertical-then-side.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
-import { pushEdge, walkTile } from './tile-coordinates.js';
+import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { markBigDiamondDuplicate } from './switch-swimlane-duplicate.js';
+import { applyOutLabel } from './tile-layout-inlabel.js';
+import type { SnakeTextAlign } from './snake-text-position.js';
+import {
+  horizontalThenVerticalPoints,
+  oneLinkBottomPoints,
+  oneLinkVerticalPoints,
+  verticalBottomPoints,
+  verticalThenHorizontalPoints,
+  verticalTopPoints,
+} from './switch-connection-points.js';
+import type { HexagonCorners } from './switch-connection-points.js';
 
-/** Labels the edge `pushEdge` just pushed, when non-empty. Extracted out
- *  of `walkTile`'s `'gtile-switch'` arm (mission ubrr-T10 M2, `case
- *  (LABEL)`'s own label -- see `GtileSwitch.caseLabels`'s own doc) purely
- *  to keep `walkTile`'s own NLOC/CCN off the complexity hook's ratchet. */
-function applyLastEdgeLabel(out: Out, label: string | undefined): void {
-  if (label !== undefined && label !== '') out.edges[out.edges.length - 1]!.label = label;
+/** Labels the edge `pushEdge` just pushed, when non-empty, with its own
+ *  alignment ({@link caseInLabelAlign}). */
+function applyLastEdgeLabel(out: Out, label: string | undefined, align: SnakeTextAlign): void {
+  if (label === undefined || label === '') return;
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.label = label;
+  edge.labelAlign = align;
 }
 
-interface SwitchCaseStep {
-  readonly diamond: Tile;
-  readonly dX: number;
-  readonly dY: number;
-  readonly mergeDiamond: Tile | null;
-  readonly centerX: number;
-  readonly mergeOffsetY: number | null;
-  readonly myLane: string | undefined;
-  readonly y: number;
+/**
+ * `ConnectionHorizontalThenVertical`/`ConnectionVerticalTop`'s own label
+ * alignment: `arrowHorizontalAlignment()` for the first/last case (also
+ * `FtileSwitchWithOneLink`'s single case, which is simultaneously first
+ * and last), `VerticalAlignment.CENTER` for every interior case.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileSwitchWithManyLinks.java:91-92,218-219
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileSwitchWithOneLink.java:82-83
+ */
+function caseInLabelAlign(i: number, total: number): SnakeTextAlign {
+  if (i === 0 || i === total - 1) return { horizontal: 'LEFT' };
+  return { vertical: 'CENTER' };
 }
+
+/** `VerticalAlignment.CENTER` -- the exit-label alignment every outgoing
+ *  case-to-merge connector uses (`FtileSwitchWithManyLinks.java:176-177,
+ *  274-275`); `FtileSwitchWithOneLink`'s own case-to-merge connector never
+ *  calls `.withLabel()` at all, so a single-case switch never draws one. */
+const CASE_OUT_LABEL_ALIGN: SnakeTextAlign = { vertical: 'CENTER' };
 
 /**
  * Unwraps our single-child `GtileTopDown` -- `tile-layout.ts`'s case-body
  * builder (`tileNodes`) ALWAYS wraps a case's body in one, even a single
- * statement, but upstream's own list-to-Ftile fold
- * (`FtileFactoryDelegatorAssembly#assembly`, `vcompact/
- * FtileFactoryDelegatorAssembly.java:57`) calls `assembly()` N-1 times
- * over an N-element list, so a SINGLE-statement body is never wrapped at
- * all in the jar -- `tiles.get(i)` there IS the bare leaf. Our wrapper is
- * a construction artifact with no Java counterpart; unwrap it so the
- * leaf/composite check below sees what the jar actually dispatches on.
+ * statement, but upstream's own list-to-Ftile fold never does for a
+ * single-statement body.
  */
 function unwrapSingleChildTopDown(tile: Tile): Tile {
   let current = tile;
@@ -69,133 +86,320 @@ function unwrapSingleChildTopDown(tile: Tile): Tile {
   return current;
 }
 
-interface SwitchCaseArgs {
-  readonly c: Tile;
-  readonly cX: number;
-  readonly caseOffsetY: number;
-  readonly label: string | undefined;
-  /** `tile.isBigDiamond && !(c instanceof TileComposite)` -- see
-   *  `switch-swimlane-duplicate.ts`'s own doc for why only a BIG_DIAMOND
-   *  switch's LEAF case tiles get the per-lane redraw tag. */
-  readonly duplicatePerLane: boolean;
+function hexagonCorners(tile: Tile, pos: GPoint): HexagonCorners {
+  const w = tile.getCoord(WEST_HOOK);
+  const e = tile.getCoord(EAST_HOOK);
+  const s = tile.getCoord(SOUTH_HOOK);
+  return {
+    west: { x: pos.x + w.x, y: pos.y + w.y },
+    east: { x: pos.x + e.x, y: pos.y + e.y },
+    south: { x: pos.x + s.x, y: pos.y + s.y },
+  };
 }
 
-/** Tags every node {@link walkSwitchCase}'s `walkTile` call just pushed
- *  (`out.nodes[nodeStart..]`) -- split out purely to keep that function's
- *  own NLOC under the complexity hook's cap. */
+/** `FtileFactoryDelegatorAddNote#addNote`-adjacent pushes for diamond1/
+ *  diamond2 -- the SAME `'if-split'`/`'if-merge'`/`'if-own-label'` node
+ *  shape `walk-if-with-links.ts#pushDiamond1`/`#pushMerge` push, no
+ *  west/east labels (the switch never sets them, `tile-layout-structural
+ *  .ts#tileSwitch`'s own doc). */
+function pushSwitchDiamond(diamond: Tile, pos: GPoint, kind: 'if-split' | 'if-merge', myLane: string | undefined, out: Out): void {
+  const label = kind === 'if-split' ? (diamond as unknown as { label: string }).label : '';
+  pushNode(out, { id: out.nextId(kind), kind, x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label }, myLane);
+  if (kind === 'if-split' && label !== '') {
+    pushNode(out, { id: out.nextId('if-own-label'), kind: 'if-own-label', x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label }, myLane);
+  }
+}
+
+interface SwitchCaseStep {
+  readonly diamond: Tile;
+  readonly dPos: GPoint;
+  readonly mergeDiamond: Tile | null;
+  readonly mPos: GPoint | null;
+  readonly myLane: string | undefined;
+  readonly y: number;
+  readonly totalCases: number;
+  readonly isBigDiamond: boolean;
+}
+
+/** Tags every node {@link walkSwitchCase}'s `walkTile` call just pushed. */
 function tagDuplicateNodes(out: Out, nodeStart: number): void {
   for (let i = nodeStart; i < out.nodes.length; i++) markBigDiamondDuplicate(out.nodes[i]!);
 }
 
-interface CaseToMergeArgs {
+/** The diamond1-to-case edge's same-lane points, dispatching on this
+ *  case's position (first/last -> `horizontalThenVerticalPoints`, middle
+ *  -> `verticalTopPoints`). */
+function diamondToCasePoints(step: SwitchCaseStep, i: number, cPos: GPoint, c: Tile): GPoint[] {
+  const { diamond, dPos, totalCases } = step;
+  const to = { x: cPos.x + c.getCoord(NORTH_HOOK).x, y: cPos.y + c.getCoord(NORTH_HOOK).y };
+  if (totalCases === 1) {
+    const south = diamond.getCoord(SOUTH_HOOK);
+    return oneLinkVerticalPoints({ x: dPos.x + south.x, y: dPos.y + south.y }, to);
+  }
+  const hex1 = hexagonCorners(diamond, dPos);
+  if (i === 0) return horizontalThenVerticalPoints(hex1.west, to, false, diamond.height);
+  if (i === totalCases - 1) return horizontalThenVerticalPoints(hex1.east, to, true, diamond.height);
+  return verticalTopPoints(hex1, to);
+}
+
+interface SwitchCaseArgs {
+  readonly i: number;
   readonly c: Tile;
   readonly cPos: GPoint;
-  readonly mergeDiamond: Tile;
-  readonly mPos: GPoint;
+  readonly label: string | undefined;
+  /** `tile.isBigDiamond && !(unwrap(c) instanceof TileComposite)` -- only a
+   *  BIG_DIAMOND switch's LEAF case tiles get the per-lane redraw tag
+   *  (`switch-swimlane-duplicate.ts`'s own doc). */
+  readonly duplicatePerLane: boolean;
 }
 
-/** The case-to-merge-diamond edge, tagged with `ConnectionVerticalThen
- *  HorizontalCrossSwimlane`'s loop shape (`FtileSwitchWithManyLinks.java
- *  :352-404`) -- extracted out of {@link walkSwitchCase} purely to keep
- *  that function under the complexity hook's NLOC cap. */
-function pushCaseToMergeEdge(args: CaseToMergeArgs, myLane: string | undefined, out: Out): void {
-  const { c, cPos, mergeDiamond, mPos } = args;
-  const mFrom = { x: cPos.x + c.getCoord(SOUTH_HOOK).x, y: cPos.y + c.getCoord(SOUTH_HOOK).y };
-  const mTo = { x: mPos.x + mergeDiamond.getCoord(NORTH_HOOK).x, y: mPos.y + mergeDiamond.getCoord(NORTH_HOOK).y };
-  // `getP1`/`getP2` (`:395-403`) are the origin tile's `getPointOut()` (=
-  // our SOUTH_HOOK, same `mFrom`) and `diamond2`'s own `getPointIn()` (=
-  // our NORTH_HOOK, same `mTo`).
-  const vThenHLoop: LoopTranslate = {
-    kind: 'switch-v-then-h-cross',
-    p1: mFrom,
-    p2: mTo,
-    diamond2: { width: mergeDiamond.width, height: mergeDiamond.height },
-  };
-  pushEdge(
-    out,
-    new GConnectionSideThenVerticalThenSide().getPoints(mFrom, mTo),
-    laneOut(c, myLane),
-    laneIn(mergeDiamond, myLane),
-    { loop: vThenHLoop },
-  );
-}
-
-/** One `case` tile's walk + its diamond-in edge + (when the switch has a
- *  merge diamond) its own case-to-merge edge. Extracted out of
- *  {@link walkSwitch}'s loop body purely to keep that function under the
- *  complexity hook's NLOC cap -- no behaviour change from the pre-split
- *  `tile-coordinates.ts` code (beyond the `loop` tags T1p-e adds). */
-function walkSwitchCase(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): void {
-  const { diamond, dX, dY, mergeDiamond, centerX, mergeOffsetY, myLane, y } = step;
-  const { c, cX, caseOffsetY, label, duplicatePerLane } = args;
-  const cY = y + caseOffsetY;
+/** One `case` tile's walk, split out of {@link walkSwitchCaseIn} purely to
+ *  keep that function under the complexity hook's NLOC cap. */
+function walkSwitchCaseBody(step: SwitchCaseStep, args: SwitchCaseArgs, out: Out): void {
   const nodeStart = out.nodes.length;
-  walkTile(c, cX, cY, { kindHint: null, lane: myLane }, out);
-  if (duplicatePerLane) tagDuplicateNodes(out, nodeStart);
+  walkTile(args.c, args.cPos.x, args.cPos.y, { kindHint: null, lane: step.myLane }, out);
+  if (args.duplicatePerLane) tagDuplicateNodes(out, nodeStart);
+}
 
-  const from = { x: dX + diamond.getCoord(SOUTH_HOOK).x, y: dY + diamond.getCoord(SOUTH_HOOK).y };
-  const to = { x: cX + c.getCoord(NORTH_HOOK).x, y: cY + c.getCoord(NORTH_HOOK).y };
-  // `ConnectionHorizontalThenVerticalCrossSwimlane` (`FtileSwitchWithManyLinks
-  // .java:297-350`): `getP1`/`getP2` (`:341-349`) are `diamond1`'s own
-  // `getPointOut()` (= our SOUTH_HOOK, same `from` the uniform shape above
-  // already uses) and the case tile's `getPointIn()` (= our NORTH_HOOK, same
-  // `to`) -- so this tag is attached to the SAME edge, not a second one;
-  // `routeEdge` (`swimlane-placement.ts`) only dispatches it when the two
-  // endpoints' lanes actually differ, same as every other `loop`-tagged edge.
+/** The diamond1-to-case edge, pushed + labelled -- body-only, NO node
+ *  walk (that's {@link walkSwitchCaseBody}, run in a SEPARATE, earlier
+ *  pass -- `addIngoingArrows`'s own push order, `first, last, then
+ *  interior ascending` (`FtileSwitchWithManyLinks.java:432-444`), differs
+ *  from the natural left-to-right order the case BOXES draw in, so the
+ *  two can't share one ascending loop). */
+function pushCaseInEdge(step: SwitchCaseStep, args: OneCaseArgs, out: Out): void {
+  const { diamond, myLane, totalCases } = step;
+  const { i, c, cPos, label } = args;
+
+  const points = diamondToCasePoints(step, i, cPos, c);
+  const to = points[points.length - 1]!;
+  const south = diamond.getCoord(SOUTH_HOOK);
   const hThenVLoop: LoopTranslate = {
     kind: 'switch-h-then-v-cross',
-    p1: from,
+    p1: { x: step.dPos.x + south.x, y: step.dPos.y + south.y },
     p2: to,
     diamond1: { width: diamond.width, height: diamond.height },
   };
-  const dcPts = new GConnectionSideThenVerticalThenSide().getPoints(from, to);
-  pushEdge(out, dcPts, laneOut(diamond, myLane), laneIn(c, myLane), { loop: hThenVLoop });
-  applyLastEdgeLabel(out, label);
+  pushEdge(out, points, laneOut(diamond, myLane), laneIn(c, myLane), { loop: hThenVLoop });
+  applyLastEdgeLabel(out, label, caseInLabelAlign(i, totalCases));
+}
 
-  if (mergeDiamond === null) return;
-  const mPos = { x: centerX - mergeDiamond.width / 2, y: y + mergeOffsetY! };
-  pushCaseToMergeEdge({ c, cPos: { x: cX, y: cY }, mergeDiamond, mPos }, myLane, out);
+/**
+ * `differentSwimlane(this, tile)` (`FtileSwitchWithManyLinks.java:406-410`)
+ * gates {@link getFirstOutgoingArrow}/{@link getLastOutgoingArrow}'s window
+ * (`:489-507`) on `this.getSwimlaneOut() != tile.getSwimlaneIn()`. `this`
+ * here is the SWITCH itself: `FtileSwitchNude#getSwimlaneOut()` returns
+ * `getSwimlaneIn()` (`FtileSwitchNude.java:85-86`), which returns the
+ * switch's own single `in` field -- set once at construction
+ * (`FtileSwitchWithDiamonds.java:67-68`, `FtileSwitchNude.java:52-58`) and
+ * shared, unconditionally, by every branch. `tile.getSwimlaneIn()` for a
+ * DIRECT case of the switch is therefore ALWAYS that same `in` lane -- a
+ * branch's entry lane is a property of the switch dispatching into it, not
+ * of what the branch's own first statement later does (an internal
+ * `|lane|` directive changes the lane AFTER entry, never retroactively).
+ * `differentSwimlane(this, tile)` is thus structurally always false at
+ * THIS call site: no case is ever excluded from the window on lane
+ * grounds (contrast `FtileSwitchWithManyLinks.java:466-471`'s SEPARATE
+ * loop, `pushOneMergeEdge`'s own `switch-v-then-h-cross` tag below, which
+ * compares the REAL leaf-resolved exit lane and genuinely can differ).
+ * No port-side `sameLane` check belongs here at all -- `hasPointOut()` is
+ * the only live condition upstream ever applies.
+ */
+
+/** `FtileSwitchWithManyLinks#getFirstOutgoingArrow` (`:489-497`): the
+ *  FIRST case (index `0..n-2`, the last index is NEVER checked here) with
+ *  an out point; `tiles.size()` (the sentinel, "none found") otherwise. */
+function getFirstOutgoingArrow(caseTiles: readonly Tile[]): number {
+  const n = caseTiles.length;
+  for (let i = 0; i < n - 1; i++) {
+    if (caseTiles[i]!.hasPointOut()) return i;
+  }
+  return n;
+}
+
+/** `FtileSwitchWithManyLinks#getLastOutgoingArrow` (`:499-507`): the LAST
+ *  case (full `n-1..0` range) with an out point; `-1` ("none found")
+ *  otherwise. */
+function getLastOutgoingArrow(caseTiles: readonly Tile[]): number {
+  for (let i = caseTiles.length - 1; i >= 0; i--) {
+    if (caseTiles[i]!.hasPointOut()) return i;
+  }
+  return -1;
+}
+
+function hexagonInOut(tile: Tile, pos: GPoint): { west: GPoint; east: GPoint; north: GPoint } {
+  const w = tile.getCoord(WEST_HOOK);
+  const e = tile.getCoord(EAST_HOOK);
+  const nIn = tile.getCoord(NORTH_HOOK);
+  return {
+    west: { x: pos.x + w.x, y: pos.y + w.y },
+    east: { x: pos.x + e.x, y: pos.y + e.y },
+    north: { x: pos.x + nIn.x, y: pos.y + nIn.y },
+  };
+}
+
+interface MergeEdgeStep {
+  readonly diamond: Tile;
+  readonly dPos: GPoint;
+  readonly mergeDiamond: Tile;
+  readonly mPos: GPoint;
+  readonly myLane: string | undefined;
+}
+
+/** One case-to-merge edge push (`ConnectionVerticalThenHorizontal` when
+ *  `asFirstOrLast`, else `ConnectionVerticalBottom`) -- extracted out of
+ *  {@link pushCaseToMergeEdges} purely to keep that function's NLOC
+ *  under the complexity hook's cap. T1d row 32: the case's own trailing
+ *  `-> label;` (`c.outLabel`) is drawn CENTER-aligned, gated on >1 case
+ *  (`FtileSwitchWithOneLink`'s own connector never calls `.withLabel()`).
+ *  `add3` T3b-2: when the case's real exit lane differs from the merge
+ *  diamond's (the SAME comparison `routeEdge`'s own `isCrossLane` makes
+ *  downstream, duplicated here since the label decision must be made at
+ *  push time, before `swimlane-placement.ts` runs), the connector that
+ *  actually draws is `ConnectionVerticalThenHorizontalCrossSwimlane`
+ *  (`FtileSwitchWithManyLinks.java:352-356`), whose constructor takes no
+ *  label param at all -- unlike the same-lane classes' own `.withLabel()`
+ *  call (`:176-177,274-275`), it never attaches one. */
+function pushOneMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, asFirstOrLast: boolean, out: Out): void {
+  const southC = c.getCoord(SOUTH_HOOK);
+  const p1 = { x: cPos.x + southC.x, y: cPos.y + southC.y };
+  const hex1 = hexagonCorners(step.diamond, step.dPos);
+  const hex2 = hexagonInOut(step.mergeDiamond, step.mPos);
+  const points = asFirstOrLast ? verticalThenHorizontalPoints(p1, hex2) : verticalBottomPoints(p1, hex1, hex2);
+  const vThenHLoop: LoopTranslate = {
+    kind: 'switch-v-then-h-cross',
+    p1,
+    p2: hex2.north,
+    diamond2: { width: step.mergeDiamond.width, height: step.mergeDiamond.height },
+  };
+  const laneOutC = laneOut(c, step.myLane);
+  const laneInMerge = laneIn(step.mergeDiamond, step.myLane);
+  pushEdge(out, points, laneOutC, laneInMerge, { loop: vThenHLoop });
+  if (laneOutC === laneInMerge) applyOutLabel(out, c, CASE_OUT_LABEL_ALIGN);
+}
+
+/**
+ * `FtileSwitchWithManyLinks#addOutgoingArrows`'s first loop (`:447-465`):
+ * the window is never lane-filtered ({@link getFirstOutgoingArrow}'s own
+ * doc), so `pushOneMergeEdge` runs for every case in range, same-lane or
+ * not -- `loop`-tagging inside it (unconditional, like {@link
+ * pushCaseInEdge}'s own `hThenVLoop`) is what makes a genuinely cross-lane
+ * push resolve to the right shape downstream (`routeEdge`'s own
+ * `isCrossLane` dispatch), never a second, separate code path here. Two
+ * independent `if`s -- NOT `else if` -- for the first/last pushes: when
+ * the only qualifying case is both (`firstOutgoingArrow ===
+ * lastOutgoingArrow > 0`), upstream really does push the SAME connector
+ * twice (verified against the literal `:454-458` source, not "fixed").
+ */
+function pushCaseToMergeEdges(
+  step: MergeEdgeStep,
+  caseTiles: readonly Tile[],
+  caseX: readonly number[],
+  caseY: number,
+  out: Out,
+): void {
+  const n = caseTiles.length;
+  const firstIdx = getFirstOutgoingArrow(caseTiles);
+  const lastIdx = getLastOutgoingArrow(caseTiles);
+  if (lastIdx === -1) return;
+  const posOf = (i: number): GPoint => ({ x: caseX[i]!, y: caseY });
+  if (firstIdx < n) pushOneMergeEdge(step, caseTiles[firstIdx]!, posOf(firstIdx), true, out);
+  if (lastIdx > 0) pushOneMergeEdge(step, caseTiles[lastIdx]!, posOf(lastIdx), true, out);
+  for (let i = firstIdx + 1; i < lastIdx; i++) {
+    if (caseTiles[i]!.hasPointOut()) pushOneMergeEdge(step, caseTiles[i]!, posOf(i), false, out);
+  }
+}
+
+/** `FtileSwitchWithOneLink$ConnectionVerticalBottom#drawU` (`:107-121`):
+ *  the single-case switch's only case-to-merge edge, no cross-swimlane
+ *  variant (that class exists only on `FtileSwitchWithManyLinks`) and no
+ *  `.withLabel()` call (so no `applyOutLabel`, unlike the many-case path). */
+function pushOneLinkMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, out: Out): void {
+  const southC = c.getCoord(SOUTH_HOOK);
+  const p1 = { x: cPos.x + southC.x, y: cPos.y + southC.y };
+  const northM = step.mergeDiamond.getCoord(NORTH_HOOK);
+  const p2 = { x: step.mPos.x + northM.x, y: step.mPos.y + northM.y };
+  pushEdge(out, oneLinkBottomPoints(p1, p2), laneOut(c, step.myLane), laneIn(step.mergeDiamond, step.myLane));
+}
+
+interface OneCaseArgs {
+  readonly i: number;
+  readonly c: Tile;
+  readonly cPos: GPoint;
+  readonly label: string | undefined;
+}
+
+/** One case's own box/body walk + (single-case switch only) its
+ *  case-to-merge edge -- extracted out of {@link walkSwitchCases}'s first
+ *  pass purely to keep that function's NLOC under the complexity hook's
+ *  cap. The many-case case-to-merge edges are pushed once for the whole
+ *  row, by {@link pushCaseToMergeEdges}, not per case. */
+function walkOneCaseBody(step: SwitchCaseStep, args: OneCaseArgs, out: Out): void {
+  const { c, cPos } = args;
+  const duplicatePerLane = step.isBigDiamond && !(unwrapSingleChildTopDown(c) instanceof TileComposite);
+  walkSwitchCaseBody(step, { ...args, duplicatePerLane }, out);
+
+  if (step.mergeDiamond === null || step.mPos === null || step.totalCases !== 1) return;
+  const mergeStep: MergeEdgeStep = { diamond: step.diamond, dPos: step.dPos, mergeDiamond: step.mergeDiamond, mPos: step.mPos, myLane: step.myLane };
+  if (c.hasPointOut()) pushOneLinkMergeEdge(mergeStep, c, cPos, out);
+}
+
+/** The diamond1-in edges for every case, in `addIngoingArrows`'s own push
+ *  order -- first case, then last case, then every interior case
+ *  ascending (`FtileSwitchWithManyLinks.java:432-444`) -- NOT the cases'
+ *  own left-to-right array order. Extracted out of {@link walkSwitchCases}
+ *  purely to keep that function's NLOC under the complexity hook's cap. */
+function pushCaseInEdges(step: SwitchCaseStep, cases: readonly Tile[], positions: readonly GPoint[], tile: GtileSwitch, out: Out): void {
+  const n = cases.length;
+  const pushAt = (i: number): void => pushCaseInEdge(step, { i, c: cases[i]!, cPos: positions[i]!, label: tile.caseLabels[i] }, out);
+  pushAt(0);
+  if (n > 1) pushAt(n - 1);
+  for (let i = 1; i < n - 1; i++) pushAt(i);
 }
 
 /** {@link walkSwitch}'s own case-tile loop, split out purely to keep that
- *  function's NLOC under the complexity hook's cap -- no behaviour
- *  change beyond the `duplicatePerLane` tag T1p-f adds. */
+ *  function's NLOC under the complexity hook's cap. Three passes, each in
+ *  upstream's own order (not necessarily the same order as each other):
+ *  case boxes left-to-right, diamond1-in edges `first,last,interior`
+ *  ({@link pushCaseInEdges}), case-to-merge edges `first,last,interior`
+ *  ({@link pushCaseToMergeEdges}). */
 function walkSwitchCases(tile: GtileSwitch, x: number, step: SwitchCaseStep, out: Out): void {
   const cases = tile.children.slice(1, 1 + tile.caseOffsets.length);
+  const positions: GPoint[] = [];
   for (let i = 0; i < cases.length; i++) {
-    const c = cases[i]!;
-    const cX = x + tile.caseOffsets[i]!;
-    const duplicatePerLane = tile.isBigDiamond && !(unwrapSingleChildTopDown(c) instanceof TileComposite);
-    walkSwitchCase(step, { c, cX, caseOffsetY: tile.caseOffsetY, label: tile.caseLabels[i], duplicatePerLane }, out);
+    const cPos = { x: x + tile.caseOffsets[i]!.x, y: step.y + tile.caseOffsets[i]!.y };
+    positions.push(cPos);
+    walkOneCaseBody(step, { i, c: cases[i]!, cPos, label: tile.caseLabels[i] }, out);
+  }
+  pushCaseInEdges(step, cases, positions, tile, out);
+  if (step.totalCases > 1 && step.mergeDiamond !== null && step.mPos !== null) {
+    const mergeStep: MergeEdgeStep = { diamond: step.diamond, dPos: step.dPos, mergeDiamond: step.mergeDiamond, mPos: step.mPos, myLane: step.myLane };
+    const caseX = positions.map((p) => p.x);
+    pushCaseToMergeEdges(mergeStep, cases, caseX, step.y + tile.caseOffsets[0]!.y, out);
   }
 }
 
 export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: string | undefined, out: Out): void {
-  const centerX = x + tile.width / 2;
-  const hasMerge = tile.mergeOffsetY !== null;
   const rawChildren = tile.children;
   const diamond = rawChildren[0]!;
+  const hasMerge = tile.mergeOffset !== null;
   const mergeDiamond = hasMerge ? rawChildren[rawChildren.length - 1]! : null;
 
-  const dX = centerX - diamond.width / 2;
-  const dY = y + tile.diamondOffsetY;
-  walkTile(diamond, dX, dY, { kindHint: 'if-split', lane: myLane }, out);
+  const dPos = { x: x + tile.diamondOffset.x, y: y + tile.diamondOffset.y };
+  pushSwitchDiamond(diamond, dPos, 'if-split', myLane, out);
 
+  const mPos = tile.mergeOffset !== null ? { x: x + tile.mergeOffset.x, y: y + tile.mergeOffset.y } : null;
   const step: SwitchCaseStep = {
     diamond,
-    dX,
-    dY,
+    dPos,
     mergeDiamond,
-    centerX,
-    mergeOffsetY: tile.mergeOffsetY,
+    mPos,
     myLane,
     y,
+    totalCases: tile.caseOffsets.length,
+    isBigDiamond: tile.isBigDiamond,
   };
   walkSwitchCases(tile, x, step, out);
 
-  if (mergeDiamond !== null) {
-    const mX = centerX - mergeDiamond.width / 2;
-    const mY = y + tile.mergeOffsetY!;
-    walkTile(mergeDiamond, mX, mY, { kindHint: 'if-merge', lane: myLane }, out);
-  }
+  if (mergeDiamond !== null && mPos !== null) pushSwitchDiamond(mergeDiamond, mPos, 'if-merge', myLane, out);
 }

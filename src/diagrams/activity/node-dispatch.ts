@@ -36,6 +36,7 @@ import {
   RE_REPEATWHILE,
   RE_SWIMLANE,
   RE_WHILE,
+  defaultLeftPosition,
   isRefusal,
   matchesStopKeyword,
   setCurrentSwimlane,
@@ -49,8 +50,8 @@ import {
 } from './dispatch-support.js';
 import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
-import { pushParsedNode } from './list-backward-dispatch.js';
+import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel, pushParsedNode } from './list-backward-dispatch.js';
+import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
@@ -93,7 +94,7 @@ function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: str
 function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
-  const label = actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+  const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereoRaw = actionMatch[2];
   const colorRaw = actionMatch[3];
   const node: ActivityAction = {
@@ -168,7 +169,7 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
   const node: ActivityAction = {
     kind: 'action',
-    label: body.labelParts.join('\n'),
+    label: decodeNewlineSentinels(body.labelParts.join('\n')),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
     ...swimlaneSpread(ctx),
   };
@@ -246,7 +247,7 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
-  const label = actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+  const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereoRaw = actionM[2];
   const colorRaw = actionM[3];
   return {
@@ -323,18 +324,18 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** `(floating )?note (left|right)? (#color)? : text` (single-line). Group
- *  1 is the `floating` keyword (dropped -- see {@link RE_NOTE_SINGLE}'s
- *  own doc), group 2 is direction, group 3 is text (color is
- *  non-capturing). */
+/** `(floating )?note (left|right)? (#color)? : text` (single-line); group
+ *  3 is text. add3-T3d exception (NOTE-CREOLE): `CommandNote3.java:122`'s
+ *  `Display.getWithNewlines` unescapes `\n` same as
+ *  {@link unescapeLabelNewlines} already does for if/fork/repeat. */
 function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
   if (noteSingleMatch === null) return null;
   const direction = noteSingleMatch[2]?.toLowerCase();
-  const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
+  const position = defaultLeftPosition(direction);
   const node: ActivityNote = {
     kind: 'note',
-    text: noteSingleMatch[3]!.trim(),
+    text: unescapeLabelNewlines(noteSingleMatch[3]!.trim()),
     position,
     ...swimlaneSpread(ctx),
   };
@@ -349,7 +350,7 @@ function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchRes
   if (noteMultiMatch === null) return null;
   const { lines } = ctx;
   const direction = noteMultiMatch[2]?.toLowerCase();
-  const position: 'left' | 'right' = direction === 'left' ? 'left' : 'right';
+  const position = defaultLeftPosition(direction);
   let cursor = idx + 1;
   const textLines: string[] = [];
   while (cursor < lines.length) {

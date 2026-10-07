@@ -110,28 +110,6 @@ export const ALLOWLIST: readonly AllowlistEntry[] = [
       're-spelling the stereotype grammar (cdd7 T2b, dezobu; journal row 29).',
   },
   {
-    from: 'src/diagrams/activity/activity-renderer-swimlanes.ts',
-    to: 'src/diagrams/description/parse-helpers.ts',
-    why:
-      'upstream resolves a [[url label]] token in ONE shared class, ' +
-      'net.sourceforge.plantuml.url.UrlBuilder (consumed by Swimlanes.java:285-293 ' +
-      'getTitle for activity lane titles and by the description engine). The port ' +
-      'keeps that resolver at description/parse-helpers-inline-links.ts#resolveInlineLinks; ' +
-      'activity reuses it rather than re-spelling the UrlBuilder grammar (add2 T3f, ' +
-      'SLURL). Debt: the helper belongs in src/core (a url/ seam), filed in next-missions.',
-  },
-  {
-    from: 'src/diagrams/activity/layout/swimlane-placement.ts',
-    to: 'src/diagrams/description/parse-helpers.ts',
-    why:
-      'upstream resolves a [[url label]] token in ONE shared class, ' +
-      'net.sourceforge.plantuml.url.UrlBuilder (consumed by Swimlanes.java:285-293 ' +
-      'getTitle for activity lane titles and by the description engine). The port ' +
-      'keeps that resolver at description/parse-helpers-inline-links.ts#resolveInlineLinks; ' +
-      'activity reuses it rather than re-spelling the UrlBuilder grammar (add2 T3f, ' +
-      'SLURL). Debt: the helper belongs in src/core (a url/ seam), filed in next-missions.',
-  },
-  {
     from: 'src/diagrams/mindmap/',
     to: 'src/diagrams/activity/ftile/',
     why:

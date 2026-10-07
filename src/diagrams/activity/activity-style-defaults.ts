@@ -167,6 +167,22 @@ export function swimlaneFontSize(theme: Theme): number {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style
  *  /FromSkinparamToStyle.java (`addConFont("arrow", SName.arrow)` registers
  *  `arrowFontSize` as `PName.FontSize` on `SName.arrow`)
+ *
+ * add3-T3f (STYLE-FONT): one more tier below the two above, above the
+ * hardcoded default -- `SkinParam#getFontSize` (`style/SkinParam.java
+ * :436-449`): per-param `"fontsize"` suffix (the two tiers above) first;
+ * else `getValue("defaultfontsize")` (`skinparam defaultFontSize N`,
+ * `FromSkinparamToStyle.java:91`'s `SName.element` registration -- every
+ * activity-family style signature chains through `SName.element`
+ * (`FtileBox.java:98`, `ConditionalBuilder.java:101-106`), so ONE bare
+ * `defaultFontSize` reaches activity/diamond/arrow alike); else
+ * `param[0].getDefaultSize(this)` (this module's own `FONT_SIZE_DEFAULTS`/
+ * {@link ARROW_FONT_SIZE} etc.). Ported field: `theme.defaultFontSize`
+ * (`theme.ts`'s own R2j doc comment already names this exact tier).
+ * `kepavi-26-sasu141`: `skinparam defaultFontSize 19` reaches the action
+ * ("yes"/"no"), diamond ("condition?") and arrow ("yes"/"no" branch
+ * label) text alike; its sibling `noteFontSize 5` is the FIRST (bucket)
+ * tier and still wins for the note.
  */
 export function activityFontSize(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementFontSize(theme, bucketKey(sname), 'title');
@@ -174,6 +190,7 @@ export function activityFontSize(theme: Theme, sname: ActivitySName): number {
   if (sname === 'arrow' && theme.colors.graph.arrowFontSize !== undefined) {
     return theme.colors.graph.arrowFontSize;
   }
+  if (theme.defaultFontSize !== undefined) return theme.defaultFontSize;
   return FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
 }
 
@@ -277,11 +294,20 @@ const LINE_THICKNESS_DEFAULTS: Readonly<Record<ActivitySName, number>> = {
  * skinparam and so loses the `OVERWRITE_EXISTING_VALUE` merge
  * (`style/StyleStorage.java:102-116`) once `ActivityBorderThickness` is
  * set -- `fonebe-54-save009`'s edge draws at stroke-width 10, not 1.
+ *
+ * add3-T3f: `sname === 'diamond'` carries the SAME tier, for the SAME
+ * reason -- `StyleSignatureBasic.activityDiamond()` (`:270-272`) is
+ * `{root, element, activityDiagram, activity, diamond}`, identical in
+ * shape to `activityArrow()`'s signature above; `ConditionalBuilder
+ * #getStyleSignatureDiamond` (`:101-106`) redeclares that tuple to
+ * resolve the diamond's own border stroke (`:244-246`). `xovano-23-
+ * tazo278`: `ActivityBorderThickness 0.1` must reach its `while`
+ * diamond's border too, not just its boxes and arrows.
  */
 export function activityLineThickness(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementLineThickness(theme, bucketKey(sname));
   if (bucket !== undefined) return bucket;
-  if (sname === 'arrow') {
+  if (sname === 'arrow' || sname === 'diamond') {
     const activityBucket = resolveElementLineThickness(theme, bucketKey('activity'));
     if (activityBucket !== undefined) return activityBucket;
   }

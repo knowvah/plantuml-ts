@@ -35,6 +35,22 @@ const INDENT_REFERENCE = '9. ';
 /** java:154 — the reference string whose width is the trailing gap. */
 const TRAILING_REFERENCE = '.';
 
+/** add3-T2b: `AtomText#calculateDimensionSlow`'s own floor (`AtomText.java
+ *  :179-181`, `if (h < 10) h = 10`) -- `ListNumberAtom` is a reduction of
+ *  that SAME method (this file's own module doc comment) but its
+ *  `calculateDimension` below had never carried the floor over, so a list
+ *  header under a small custom font size (`letare-59-gore448`'s `legend`
+ *  block numbering, `activity-divergence-drive-3` census family
+ *  KLIMT-FLOOR) reported a shorter box than the text atoms either side of
+ *  it, and `Sea#doAlign` (`SheetBlock1.java:130-152` -- the real line-
+ *  layout this header atom is placed on) centred the whole line on the
+ *  TALLER neighbour, pushing the header's own baseline up by the
+ *  difference. Re-derived locally (not imported from `svek/image/
+ *  creole-sea-line.ts#ATOM_TEXT_MIN_HEIGHT`, a DIFFERENT layer built on
+ *  top of `klimt/`, per this port's own per-layer re-derivation
+ *  convention for a jar-sourced constant). */
+const ATOM_HEIGHT_FLOOR = 10;
+
 /** `AtomText` reduced to exactly what a list number needs: one text run
  *  with a left and a right margin, drawn at the line's own baseline. */
 class ListNumberAtom implements Atom {
@@ -56,7 +72,7 @@ class ListNumberAtom implements Atom {
     const dim = stringBounder.calculateDimension(getFont(this.font), this.text);
     return new XDimension2D(
       this.marginLeft(stringBounder) + dim.getWidth() + this.marginRight(stringBounder),
-      dim.getHeight(),
+      Math.max(dim.getHeight(), ATOM_HEIGHT_FLOOR),
     );
   }
 

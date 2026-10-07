@@ -76,7 +76,7 @@ import {
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
-import { SPLIT_LINE_KINDS, extendForIfLabelText, extendForLaneDivider } from './canvas-origin-text-ink.js';
+import { SPLIT_LINE_KINDS, extendForEdgeLabelText, extendForIfLabelText, extendForLaneDivider } from './canvas-origin-text-ink.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
@@ -239,7 +239,7 @@ export function edgeInkX(edge: ActivityEdgeGeo): { minX: number; maxX: number } 
   return { minX, maxX };
 }
 
-function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
+function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo, theme: Theme): void {
   const { minX, maxX } = edgeInkX(edge);
   acc.minX = Math.min(acc.minX, minX);
   acc.maxX = Math.max(acc.maxX, maxX);
@@ -254,6 +254,7 @@ function extendForEdge(acc: MutableInkBounds, edge: ActivityEdgeGeo): void {
     acc.minY = Math.min(acc.minY, tip.y + ext.minY);
     acc.maxY = Math.max(acc.maxY, tip.y + ext.maxY);
   }
+  extendForEdgeLabelText(acc, edge, theme); // T1b: `Snake#drawInternalLabel`.
 }
 
 /**
@@ -361,7 +362,7 @@ function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   const { nodes, edges, swimlanes, reservations, baseY, theme, contentMaxY } = input;
   const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
   for (const n of nodes) extendForNode(acc, n, theme);
-  for (const e of edges) extendForEdge(acc, e);
+  for (const e of edges) extendForEdge(acc, e, theme);
   for (const s of swimlanes) extendForSwimlane(acc, s);
   for (const r of reservations) extendForReservation(acc, r);
   extendForSwimlaneTitles(acc, swimlanes, baseY, theme);

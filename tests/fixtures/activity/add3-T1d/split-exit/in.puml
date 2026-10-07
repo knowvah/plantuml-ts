@@ -1,0 +1,11 @@
+@startuml
+start
+split
+:A;
+-> splitExit;
+split again
+:B;
+end split
+:C;
+stop
+@enduml

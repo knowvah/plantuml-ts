@@ -1,0 +1,9 @@
+@startuml
+skinparam shadowing false
+start
+repeat
+:a;
+note right: this is a note
+repeat while (condition)
+stop
+@enduml

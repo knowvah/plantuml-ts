@@ -6,7 +6,7 @@
  * loop record's own untranslated `p1`/`p2` (each connection's own
  * `getP1`/`getP2`), then reproduce that method's arithmetic term for term.
  *
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:309-331,357-404,579-606,651-676
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:309-331,357-404,579-606,651-676,432-459,482-511
  */
 
 import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
@@ -14,6 +14,8 @@ import type { GPoint } from '../tiles/points.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
 import type {
   LoopRouteResult,
+  RepeatBackward1Loop,
+  RepeatBackward2Loop,
   RepeatComplex1Loop,
   RepeatOutLoop,
   RepeatSimple1Loop,
@@ -162,5 +164,47 @@ export function routeRepeatComplex1(
   const p1 = { x: loop.p1.x + dx1, y: loop.p1.y };
   const p2 = { x: loop.p2.x + dx2, y: loop.p2.y };
   const points = complex1TranslatePoints(p1, p2, loop);
+  return { edges: [{ ...edge, points }], reservations: [] };
+}
+
+/**
+ * `ConnectionBackBackward1#drawTranslate` (`:432-438`, shared `drawSnake`
+ * at `:440-459`): the left/right side decision (`diamondCenterX`, `x1`)
+ * reruns from the TRANSLATED `p1`/`p2`, never the untranslated ones --
+ * this is the one term that differs from `walk-repeat-backward.ts
+ * #backward1Points`'s own same-lane shape.
+ */
+export function routeRepeatBackward1(
+  loop: RepeatBackward1Loop,
+  edge: ActivityEdgeGeo,
+  dx1: number,
+  dx2: number,
+): LoopRouteResult {
+  const p1 = { x: loop.p1.x + dx1, y: loop.p1.y };
+  const p2 = { x: loop.p2.x + dx2, y: loop.p2.y };
+  const diamondCenterX = p1.x + loop.diamond2.width / 2;
+  const x1 = p2.x < diamondCenterX ? p1.x : p1.x + loop.diamond2.width;
+  const y1 = p1.y + loop.diamond2.height / 2;
+  const points: GPoint[] = [{ x: x1, y: y1 }, { x: p2.x, y: y1 }, p2];
+  return { edges: [{ ...edge, points }], reservations: [] };
+}
+
+/**
+ * `ConnectionBackBackward2#drawTranslate` (`:482-511`): the `x2 < x1`
+ * wraparound (`:495-497`) reruns from the TRANSLATED `p1`/`p2` -- the one
+ * term that differs from `walk-repeat-backward.ts#backward2Points`'s own
+ * same-lane shape (which always adds `entry.width`, unconditionally).
+ */
+export function routeRepeatBackward2(
+  loop: RepeatBackward2Loop,
+  edge: ActivityEdgeGeo,
+  dx1: number,
+  dx2: number,
+): LoopRouteResult {
+  const p1 = { x: loop.p1.x + dx1, y: loop.p1.y };
+  const p2 = { x: loop.p2.x + dx2, y: loop.p2.y };
+  const x2 = p2.x < p1.x ? p2.x + loop.diamond1.width : p2.x;
+  const y2 = p2.y + loop.diamond1.height / 2;
+  const points: GPoint[] = [p1, { x: p1.x, y: y2 }, { x: x2, y: y2 }];
   return { edges: [{ ...edge, points }], reservations: [] };
 }

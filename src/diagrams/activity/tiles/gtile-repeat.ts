@@ -4,6 +4,7 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { GtileDiamondInside } from './gtile-diamond-inside.js';
 import type { GtileDiamondSquare } from './gtile-diamond-square.js';
+import type { GtileDiamondEmpty } from './gtile-diamond-empty.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
@@ -66,13 +67,13 @@ export class RepeatConditionEmpty implements Tile {
 /**
  * `FtileRepeat.create`'s diamond2 slot: the real condition hexagon
  * (`INSIDE_HEXAGON`, default), the INSIDE_DIAMOND square (CSTYLE, add2
- * T3i: `FtileRepeat.java:159-161`), or {@link RepeatConditionEmpty} for
- * the no-test/last-of-parent case (D-new, mission `add2-T3b`, family
- * RNOOUT). EMPTY_DIAMOND (`FtileRepeat.java:156-159`) is not modeled --
- * a bare diamond with its condition drawn OUTSIDE as an east label is a
- * genuinely different shape/layout, re-slotted (T3i).
+ * T3i: `FtileRepeat.java:159-161`), the EMPTY_DIAMOND blank rhombus
+ * (CONDSTYLE-EMPTY, add3 T3a: `FtileRepeat.java:156-159` --
+ * `.withEast(tbTest)`, the condition drawn as an EAST label rather than
+ * centered), or {@link RepeatConditionEmpty} for the no-test/last-of-
+ * parent case (D-new, mission `add2-T3b`, family RNOOUT).
  */
-export type RepeatConditionTile = GtileDiamondInside | GtileDiamondSquare | RepeatConditionEmpty;
+export type RepeatConditionTile = GtileDiamondInside | GtileDiamondSquare | GtileDiamondEmpty | RepeatConditionEmpty;
 
 /** {@link computeWeldLayout}'s return: the merged `left`/`width`/`height`
  *  every existing offset formula reads, the uniform horizontal `shiftX`
@@ -201,10 +202,29 @@ function computeWeldLayout(rawLeft: number, rawWidth: number, rawHeight: number,
 }
 
 /**
+ * `tbTest.calculateDimension().getWidth()` (`FtileRepeat.java:706`): `0`
+ * for every `conditionStyle` except EMPTY_DIAMOND, where `tbTest` is the
+ * SAME `TextBlock` `condition` itself draws as its own `east` label
+ * (`:157-158`'s `.withEast(tbTest)` -- this class's only EMPTY_DIAMOND
+ * constructor call, `tile-layout.ts#tileRepeatCondition`, never sets any
+ * OTHER slot on that branch, so `east` and `tbTest` are always the same
+ * text here). `GtileDiamondEmpty.width` itself stays a fixed 24 regardless
+ * of this text's width (`gtile-diamond-empty.ts`'s own doc) -- this is the
+ * separate outer floor term the jar applies instead.
+ */
+function repeatTbTestWidth(condition: RepeatConditionTile): number {
+  if (condition.kind !== 'gtile-diamond-empty') return 0;
+  return condition.labelAt('east')?.width ?? 0;
+}
+
+/**
  * `FtileRepeat.java:767-786`'s own `getLeft`/`getRight`, then
  * `:701-717`'s `calculateDimensionInternal` -- split out of the
  * constructor to keep it under the file's NLOC cap (D-new); formulas
- * unchanged from before this task.
+ * unchanged from before this task except the {@link repeatTbTestWidth}
+ * floor term (add3 T3a, CONDSTYLE-EMPTY: `:706,709` -- `width = max(width,
+ * w + 2*hexagonHalfSize)`, applied BEFORE `backward`'s own `+=` term and
+ * the final `+2*hexagonHalfSize`, same order as below).
  */
 function computeRawDims(entry: Tile, body: Tile, condition: RepeatConditionTile, backward: Tile | undefined): RawDims {
   const bodyLeft = body.getCoord(NORTH_HOOK).x;
@@ -213,7 +233,8 @@ function computeRawDims(entry: Tile, body: Tile, condition: RepeatConditionTile,
   const rawLeft = Math.max(bodyLeft, entryHalf, conditionHalf);
   const right = Math.max(body.width - bodyLeft, entryHalf, conditionHalf);
   const contentWidth = rawLeft + right;
-  let innerWidth = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE);
+  const tbTestFloor = repeatTbTestWidth(condition) + 2 * HEXAGON_HALF_SIZE;
+  let innerWidth = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE, tbTestFloor);
   if (backward !== undefined) innerWidth += backward.width;
   const rawWidth = innerWidth + 2 * HEXAGON_HALF_SIZE;
   const rawHeight = entry.height + body.height + condition.height + 8 * HEXAGON_HALF_SIZE;

@@ -1,0 +1,12 @@
+surveying 273 state fixtures (concurrency 6)
+  25/273
+  50/273
+  75/273
+  100/273
+  125/273
+  150/273
+  175/273
+  200/273
+  225/273
+  250/273
+wrote plans/activity-divergence-drive-3/measurements/b0-eng/parity-state.json — {"conformant":73,"structural-match":12,"diverged":188,"errored":0,"timeout":0,"oracle-error":0}

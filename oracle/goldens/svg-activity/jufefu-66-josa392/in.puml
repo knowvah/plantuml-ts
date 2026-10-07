@@ -1,0 +1,16 @@
+@startuml
+
+title Example
+
+start
+:step 1;
+
+if (condition) then (Foo::foo())
+    :We are in Foo::foo();
+else (Bar::bar())
+    :We are in Bar::bar();
+endif
+
+stop
+
+@enduml

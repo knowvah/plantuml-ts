@@ -1,0 +1,10 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+if(long condition\nis\nlong) then
+  :Activity\nA;
+else
+  :Activity\nB;
+endif
+stop
+@enduml

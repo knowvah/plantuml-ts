@@ -11,17 +11,10 @@ import type { StringMeasurer } from '../../../core/measurer.js';
 import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
-import { GtileStart } from '../tiles/gtile-start.js';
-import { GtileStop } from '../tiles/gtile-stop.js';
-import { GtileEnd } from '../tiles/gtile-end.js';
-import { GtileBreak } from '../tiles/gtile-break.js';
-import { GtileAction } from '../tiles/gtile-action.js';
-import { GtileNote } from '../tiles/gtile-note.js';
-import { GtileSpot } from '../tiles/gtile-spot.js';
-import { GtileLabel } from '../tiles/gtile-label.js';
-import { GtileGoto } from '../tiles/gtile-goto.js';
 import { GtileDiamondInside } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import { GtileDiamondSquare } from '../tiles/gtile-diamond-square.js';
+import { GtileDiamondEmpty } from '../tiles/gtile-diamond-empty.js';
 import { GtileWhile } from '../tiles/gtile-while.js';
 import { GtileRepeat, RepeatConditionEmpty } from '../tiles/gtile-repeat.js';
 import type { RepeatConditionTile } from '../tiles/gtile-repeat.js';
@@ -32,6 +25,9 @@ import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.j
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, selectRepeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
 import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
+import { consumeArrowLabel, withInLabel } from './tile-layout-inlabel.js';
+import type { PendingInLabel } from './tile-layout-inlabel.js';
+import { isEarlyLeafKind, isSimpleLeaf, tileEarlyLeaf, tileSimpleLeaf } from './tile-layout-leaves.js';
 
 // Re-export geometry types so renderer and index can import from one place.
 export type { ActivityGeometry, ActivityNodeGeo, ActivityEdgeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
@@ -115,15 +111,39 @@ function withKilled<T extends Tile>(tile: T): T {
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:169-174
  * @see net/sourceforge/plantuml/activitydiagram3/InstructionSimple.java:123-127
  */
+/**
+ * T1d: {@link tileNodes}'s own return shape -- `tiles` is the SAME
+ * `Tile[]` every pre-T1d caller used positionally; `trailing` is the
+ * leftover `pendingInLabel` still unconsumed when the loop ran out of
+ * nodes (a `-> label;` that was the LAST thing in this body, with
+ * nothing after it to attach to) -- `Branch#special`/`InstructionList
+ * #outlinkRendering`'s own pending value, surfaced to the caller instead
+ * of silently falling out of scope (`tiles/tile.ts#Tile.outLabel`'s own
+ * doc names the two upstream fields this maps to per compound kind).
+ */
+export interface TileNodesResult {
+  readonly tiles: Tile[];
+  readonly trailing: PendingInLabel | undefined;
+}
+
 export function tileNodes(
   nodes: ActivityNode[],
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[] = [],
   pragma: Pragma = Pragma.createEmpty(),
-): Tile[] {
+): TileNodesResult {
   const tiles: Tile[] = [];
+  // T1b pass 2: `nextLinkRenderer()`'s pending state
+  // (`ActivityDiagram3.java:105-106`) -- set by an `arrow-label` node,
+  // consumed by (and reset at) the next tile-producing node, exactly as
+  // `withInLabel`'s own doc describes.
+  let pendingInLabel: ReturnType<typeof consumeArrowLabel> | undefined;
   for (const node of nodes) {
+    if (node.kind === 'arrow-label') {
+      pendingInLabel = consumeArrowLabel(node);
+      continue;
+    }
     if (node.kind === 'kill' || node.kind === 'detach') {
       const last = tiles[tiles.length - 1];
       if (last !== undefined) withKilled(last);
@@ -134,9 +154,13 @@ export function tileNodes(
       continue;
     }
     const t = tileNode(node, bounder, theme, laneOrder, pragma);
-    if (t !== null) tiles.push(t);
+    if (t !== null) {
+      withInLabel(t, pendingInLabel);
+      pendingInLabel = undefined;
+      tiles.push(t);
+    }
   }
-  return tiles;
+  return { tiles, trailing: pendingInLabel };
 }
 
 /**
@@ -171,15 +195,50 @@ function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, th
     node.swimlane !== undefined
       ? { kind: 'action', label: node.label, swimlane: node.swimlane }
       : { kind: 'action', label: node.label };
-  return tileSimpleLeaf(action, bounder, theme);
+  const tile = tileSimpleLeaf(action, bounder, theme);
+  if (node.notes === undefined || node.notes.length === 0) return tile;
+  // BACKNOTE (`activity-divergence-drive-3` T2a): `getFtileBackward`'s own
+  // `factory.addNote(result, swimlaneBackward, backwardNotes, CENTER)`
+  // (`InstructionRepeat.java:177-185`) is the SAME `FtileWithNoteOpale`
+  // wrap `tileNote` already builds for a simple leaf -- reused verbatim
+  // rather than re-implemented. Only the FIRST note wraps (`tileNote`'s
+  // own `tiles[0]` slot); any further note would float as a SEPARATE
+  // sibling `tileNote` cannot place (this slot takes exactly one `Tile`,
+  // unlike a flowing body list) -- unexercised by this family's own
+  // cohort (every row has exactly one), re-slotted to NOTE-MULTI if one
+  // ever does.
+  const tiles: Tile[] = [tile];
+  for (const note of node.notes) tileNote(tiles, note, bounder, theme);
+  return tiles[0]!;
 }
 
 /**
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:125-127
- *   -- `.withNorth(yesTb).withWest(outTb)`: the "is"/entry label sits north,
- *   the "is not"/exit label sits west, UNAFFECTED by `backward` (the Java
- *   `create` builds `diamond1` before `backward` is ever read).
+ * `FtileWhile.create`'s own 3-way `conditionStyle` dispatch for the while
+ * header (`vcompact/FtileWhile.java:131-139`): `INSIDE_HEXAGON` (default)
+ * and `INSIDE_DIAMOND` both route `{north: yesLabel, west: exitLabel}`
+ * through `.withNorth(yesTb).withWest(outTb)`, differing only in shape
+ * class (`:132-136`). `EMPTY_DIAMOND` (CONDSTYLE-EMPTY, `add3-T3a`) is a
+ * genuinely different label layout, not just a different polygon: the
+ * condition text itself moves to NORTH (`.withNorth(testTb)`, always at
+ * the `styleDiamond`/`fcTest` font bucket -- `GtileDiamondEmpty`'s own
+ * `testLabel` param) and yes/exit demote to south/west (`:137-139`).
  */
+function buildWhileHeader(
+  node: ActivityWhile,
+  labels: { north?: string; west?: string },
+  bounder: StringBounder,
+  theme: Theme,
+): DiamondConditionTile {
+  if (theme.conditionStyle === 'emptyDiamond') {
+    const emptyLabels: { south?: string; west?: string } = {};
+    if (node.yesLabel !== undefined) emptyLabels.south = node.yesLabel;
+    if (node.exitLabel !== undefined) emptyLabels.west = node.exitLabel;
+    return new GtileDiamondEmpty(node.condition, emptyLabels, bounder, theme);
+  }
+  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
+  return new GtileDiamondInside(node.condition, labels, bounder, theme);
+}
+
 function tileWhile(
   node: ActivityWhile,
   bounder: StringBounder,
@@ -190,9 +249,9 @@ function tileWhile(
   const labels: { north?: string; west?: string } = {};
   if (node.yesLabel !== undefined) labels.north = node.yesLabel;
   if (node.exitLabel !== undefined) labels.west = node.exitLabel;
-  const header = new GtileDiamondInside(node.condition, labels, bounder, theme);
+  const header = buildWhileHeader(node, labels, bounder, theme);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma).tiles;
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const specialOutTile = node.specialOut !== undefined ? tileSimpleLeaf(node.specialOut, bounder, theme) : undefined;
@@ -270,6 +329,16 @@ function tileRepeatCondition(
   theme: Theme,
 ): RepeatConditionTile {
   if (node.noOut === true && node.condition === '') return new RepeatConditionEmpty();
+  // CONDSTYLE-EMPTY (add3 T3a): `FtileRepeat.java:156-159` --
+  // `.withEast(tbTest)` ONLY (no yes/out label at all, a preserved
+  // upstream quirk: `yesTb`/`outTb` are built at `:130-131` but never
+  // attached on this branch); `tbTest` itself is ARROW-bucket here
+  // (`fontConfiguration1 = fcArrow`, `:124-125`, the non-INSIDE_HEXAGON
+  // case), so it goes through `labels.east`, not `GtileDiamondEmpty`'s
+  // own diamond-bucket `testLabel` param (`''` here, matching `tileWhile`'s
+  // own EMPTY_DIAMOND call never leaving `testLabel` unset the way this
+  // one always does).
+  if (theme.conditionStyle === 'emptyDiamond') return new GtileDiamondEmpty('', { east: node.condition }, bounder, theme);
   // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
   if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
   return new GtileDiamondInside(node.condition, labels, bounder, theme);
@@ -289,7 +358,7 @@ function tileRepeat(
 ): GtileRepeat {
   const entry = tileRepeatEntry(node, bounder, theme, laneOrder, pragma);
   const { rest, backward } = extractBackward(node.body);
-  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma);
+  const bodyTiles = tileNodes(rest, bounder, theme, laneOrder, pragma).tiles;
   const body = new GtileTopDown(bodyTiles, bounder, theme);
   const backwardTile = backward !== undefined ? tileBackwardActivity(backward, bounder, theme) : undefined;
   const labels = selectRepeatConditionLabels(theme.conditionStyle, node, backward, laneOrder);
@@ -322,7 +391,7 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   // defaulted here only for hand-built AST literal fixtures (`ast.ts`'s
   // own doc comment on the field).
   const pragma = ast.pragma ?? Pragma.createEmpty();
-  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes, pragma);
+  const tiles = tileNodes(ast.nodes, bounder, theme, ast.swimlanes, pragma).tiles;
   const root = new GtileTopDown(tiles, bounder, theme);
   // D2 (`plans/activity-divergence-drive/decisions.md`): the root Ftile's
   // own local coordinates start at the true origin -- upstream never bakes
@@ -332,134 +401,6 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   // geometry's own ink extent (`assign-coordinates-full.ts
   // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
   return assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
-}
-
-// `kill`/`detach` are NOT simple leaves (T2b): `tileNodes` intercepts and
-// consumes them before either of these ever sees one -- see `withKilled`
-// and its call site above. They stay out of this set so that invariant
-// is enforced at the type level too (a direct `tileNode` call on one
-// falls through to the `kill`/`detach` no-op case in its own switch,
-// below).
-type SimpleLeafKind = 'start' | 'stop' | 'end' | 'break' | 'action' | 'note';
-
-const SIMPLE_LEAF_KINDS: ReadonlySet<string> = new Set<SimpleLeafKind>([
-  'start',
-  'stop',
-  'end',
-  'break',
-  'action',
-  'note',
-]);
-
-/** Named alias for `isSimpleLeaf`'s type predicate and `tileSimpleLeaf`'s
- *  own parameter -- same extraction `EarlyLeafNode` already has below,
- *  for the same reason (a bare inline `Extract<...>` repeated at two call
- *  sites is harder to scan, and this repo's own lizard reader has
- *  previously desynced on an inline generic-plus-object-literal shape;
- *  `.agent-notes/lizard-lt-in-object-literal.md`). */
-type SimpleLeafNode = Extract<
-  ActivityNode,
-  { kind: SimpleLeafKind }
->;
-
-/** User-defined type guard (not a bare `Set.has`) so both `tileNode`
- *  branches narrow: the `if` arm to {@link SimpleLeafKind}, and -- just as
- *  important -- the switch below it to the COMPLEMENT, which is what lets
- *  that switch's `default: const _exhaustive: never = node` still
- *  type-check. */
-function isSimpleLeaf(node: ActivityNode): node is SimpleLeafNode {
-  return SIMPLE_LEAF_KINDS.has(node.kind);
-}
-
-/**
- * Kinds that always produce no tile of their own HERE: `arrow-label`
- * (mission ubrr-T10, no geometry of its own), `backward` (mission
- * `activity-divergence-drive` T3h: `tileRepeat`/`tileWhile`'s own
- * `extractBackward` pulls it OUT of a repeat/while body before `tileNodes`
- * ever sees it there -- this branch is the fallback for a `backward:`
- * found OUTSIDE that context, e.g. nested in an `if`/`fork` inside the
- * loop body or at top level, both of which the jar itself refuses to
- * parse, `ActivityDiagram3.java:390` `"Cannot find repeat"` -- an `error`
- * row, D8, not reached by any baseline fixture), and `kill`/`detach` (T2b
- * -- see {@link SimpleLeafKind}'s doc; `tileNodes` consumes these before
- * `tileNode` ever runs, so this branch is a direct-call safety net, not a
- * live path). Pulled out of `tileNode`'s own switch (mirroring
- * {@link isSimpleLeaf} immediately above) so adding `kill`/`detach` here
- * does not grow that switch's own branch count -- `tileNode`'s doc
- * explains why it must stay small.
- */
-/**
- * `arrow-label`/`backward` always produce no tile here (see this
- * constant's own surrounding doc); `kill`/`detach` reach this branch only
- * as a direct-call safety net (`tileNodes` intercepts the live path).
- * mission add2-T2g adds `spot`/`label`/`goto`: a visible 20x20 circle and
- * two zero-size pass-through tiles respectively -- see each type's own
- * `ast.ts` doc for the Java/empirical basis. None of the seven needs a
- * `bounder`/`theme` (unlike {@link tileSimpleLeaf}'s `action`/`note`), so
- * they stay out of that set, and all seven share ONE type-predicate
- * (rather than two) so `tileNode` keeps a SINGLE `if` here -- a second
- * `if` would push that function's own CCN over the complexity hook's cap
- * (`tileNode`'s own doc explains why its budget is tight).
- */
-const EARLY_LEAF_KINDS: ReadonlySet<string> = new Set([
-  'arrow-label',
-  'backward',
-  'kill',
-  'detach',
-  'spot',
-  'label',
-  'goto',
-]);
-
-type EarlyLeafNode = Extract<
-  ActivityNode,
-  { kind: 'arrow-label' | 'backward' | 'kill' | 'detach' | 'spot' | 'label' | 'goto' }
->;
-
-function isEarlyLeafKind(node: ActivityNode): node is EarlyLeafNode {
-  return EARLY_LEAF_KINDS.has(node.kind);
-}
-
-function tileEarlyLeaf(node: EarlyLeafNode): Tile | null {
-  switch (node.kind) {
-    case 'arrow-label':
-    case 'backward':
-    case 'kill':
-    case 'detach':
-      return null;
-    case 'spot':
-      return withSwimlane(new GtileSpot(node), node.swimlane);
-    case 'label':
-      return withSwimlane(new GtileLabel(node), node.swimlane);
-    case 'goto':
-      return withSwimlane(new GtileGoto(node), node.swimlane);
-  }
-}
-
-/**
- * Every leaf tile with no nested body and no `null` result: `start`/
- * `stop`/`end`/`break` (no bounder/theme needed) plus `action`/`note`
- * (need both). `kill`/`detach` are NOT here -- see {@link SimpleLeafKind}'s
- * own doc. Extracted from `tileNode` (mission ubrr-T10) to keep ITS OWN
- * switch under the complexity hook's cap once `backward` (M3) became a
- * 15th case there -- placed ABOVE `tileNode` per that function's own "add
- * new builders above" doc.
- */
-export function tileSimpleLeaf(node: SimpleLeafNode, bounder: StringBounder, theme: Theme): Tile {
-  switch (node.kind) {
-    case 'start':
-      return withSwimlane(new GtileStart(), node.swimlane);
-    case 'stop':
-      return withSwimlane(new GtileStop(), node.swimlane);
-    case 'end':
-      return withSwimlane(new GtileEnd(), node.swimlane);
-    case 'break':
-      return withSwimlane(new GtileBreak(), node.swimlane);
-    case 'action':
-      return withSwimlane(new GtileAction(node, bounder, theme), node.swimlane);
-    case 'note':
-      return withSwimlane(new GtileNote(node, bounder, theme), node.swimlane);
-  }
 }
 
 /**

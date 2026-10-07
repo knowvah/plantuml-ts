@@ -6,76 +6,90 @@ import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import type { GPoint, HookName } from '../../../../src/diagrams/activity/tiles/points.js';
 
-const NODE_MARGIN_Y = 20;
-const NODE_MARGIN_X = 40;
+// `FtileSwitchNude.xSeparation` / `FtileSwitchWithDiamonds.SUPP15` /
+// `#getYdelta1b` -- see `gtile-switch-geometry.ts`'s own citations.
+const SWITCH_X_SEPARATION = 20;
+const SWITCH_SUPP15 = 15;
+const SWITCH_YDELTA1B = 10;
+// `FtileSwitchNude#calculateDimensionInternalSlow`'s fixed `100` pad.
+const NUDE_HEIGHT_PAD = 100;
+// `FtileSwitchWithManyLinks#getYdelta1a`'s `max(10, ...) + 10` floor/tail,
+// with no case labels measured (every stub label is `undefined`).
+const YDELTA1A_NO_LABELS = 20;
 
 const bounder: StringBounder = {
   getDimension: (_text: string, _size: number) => ({ width: 0, height: 0 }),
 };
 
 // A REAL resolved theme, not a `{ fontSize, fontFamily } as unknown as
-// Theme` stub. The tiles now resolve per-element style through
+// Theme` stub -- the tiles resolve per-element style through
 // `activityFontSize` (`activity-style-defaults.ts`), which reads
-// `theme.colors.elements` -- a partial cast had no `colors` at all and
-// threw. `fontSize` is kept at 13 so every assertion below that depends
-// on the ROOT font is unchanged.
+// `theme.colors.elements`.
 const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
+// A symmetric leaf: `NORTH_HOOK`/`SOUTH_HOOK` sit at `width/2` (every
+// production leaf's own invariant, `gtile-switch-geometry.ts#leftOf`'s
+// own doc), `EAST_HOOK`/`WEST_HOOK` at mid-height.
 function makeTile(width: number, height: number, hasPointOut = true): Tile {
   return {
     kind: 'stub',
     width,
     height,
-    getCoord: (): GPoint => ({ x: 0, y: 0 }),
+    getCoord: (hook: HookName): GPoint => {
+      switch (hook) {
+        case EAST_HOOK:
+          return { x: width, y: height / 2 };
+        case WEST_HOOK:
+          return { x: 0, y: height / 2 };
+        case SOUTH_HOOK:
+          return { x: width / 2, y: height };
+        default:
+          return { x: width / 2, y: 0 };
+      }
+    },
     hasPointOut: () => hasPointOut,
   };
 }
 
-// GtileDiamond stub — only width/height matter for GtileSwitch geometry
+// `GtileDiamondInside` stub -- same symmetric-leaf shape as `makeTile`,
+// since only width/height/getCoord matter for `GtileSwitch` geometry.
 function makeDiamond(width: number, height: number) {
-  return {
-    kind: 'gtile-diamond' as const,
-    label: '',
-    width,
-    height,
-    getCoord: (_hook: HookName): GPoint => ({ x: 0, y: 0 }),
-    hasPointOut: () => true,
-  };
+  return { ...makeTile(width, height), kind: 'gtile-diamond-inside' as const, label: '' };
 }
 
-describe('GtileSwitch — 2 cases, no merge diamond', () => {
+describe('GtileSwitch — SMALL_DIAMOND, 2 cases, no merge diamond', () => {
+  // w13 = 60 - 40 - 40 = -20 <= w9(0) -> SMALL_DIAMOND.
   const diamond = makeDiamond(60, 40);
   const case0 = makeTile(80, 100);
   const case1 = makeTile(80, 60);
   const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], null, bounder, theme);
+  const nudeWidth = 80 + 80 + SWITCH_X_SEPARATION;
+  const nudeHeight = 100 + NUDE_HEIGHT_PAD;
+  const caseOffsetY = diamond.height + YDELTA1A_NO_LABELS;
 
-  it('width === case0.width + NODE_MARGIN_X + case1.width', () => {
-    expect(tile.width).toBe(80 + NODE_MARGIN_X + 80);
+  it('isBigDiamond is false', () => {
+    expect(tile.isBigDiamond).toBe(false);
   });
 
-  it('width === 200', () => {
-    expect(tile.width).toBe(200);
+  it('width === max(diamond.width, nudeWidth)', () => {
+    expect(tile.width).toBe(nudeWidth);
   });
 
-  it('caseOffsets[0] === 0', () => {
-    expect(tile.caseOffsets[0]).toBe(0);
+  it('caseOffsets are left-to-right, xSeparation apart, same Y', () => {
+    expect(tile.caseOffsets[0]).toEqual({ x: 0, y: caseOffsetY });
+    expect(tile.caseOffsets[1]).toEqual({ x: 80 + SWITCH_X_SEPARATION, y: caseOffsetY });
   });
 
-  it('caseOffsets[1] === 80 + NODE_MARGIN_X === 120', () => {
-    expect(tile.caseOffsets[1]).toBe(80 + NODE_MARGIN_X);
+  it('mergeOffset is null', () => {
+    expect(tile.mergeOffset).toBeNull();
   });
 
-  it('caseOffsetY === diamond.height + NODE_MARGIN_Y', () => {
-    expect(tile.caseOffsetY).toBe(40 + NODE_MARGIN_Y);
+  it('height === diamond.height + nudeHeight + Ydelta1a (no merge)', () => {
+    expect(tile.height).toBe(diamond.height + nudeHeight + YDELTA1A_NO_LABELS);
   });
 
-  it('mergeOffsetY is null', () => {
-    expect(tile.mergeOffsetY).toBeNull();
-  });
-
-  it('height === caseOffsetY + max(case heights)', () => {
-    const maxH = Math.max(case0.height, case1.height);
-    expect(tile.height).toBe(tile.caseOffsetY + maxH);
+  it('diamondOffset centers diamond1 within the total width', () => {
+    expect(tile.diamondOffset).toEqual({ x: (tile.width - diamond.width) / 2, y: 0 });
   });
 
   it('children has diamond and 2 case tiles', () => {
@@ -86,35 +100,58 @@ describe('GtileSwitch — 2 cases, no merge diamond', () => {
   });
 });
 
-describe('GtileSwitch — 2 cases with merge diamond', () => {
+describe('GtileSwitch — SMALL_DIAMOND, 2 cases with merge diamond', () => {
   const diamond = makeDiamond(60, 40);
   const case0 = makeTile(80, 100);
   const case1 = makeTile(80, 60);
   const merge = makeDiamond(60, 40);
   const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], merge, bounder, theme);
+  const nudeHeight = 100 + NUDE_HEIGHT_PAD;
 
-  it('mergeOffsetY is non-null', () => {
-    expect(tile.mergeOffsetY).not.toBeNull();
+  it('mergeOffset is non-null', () => {
+    expect(tile.mergeOffset).not.toBeNull();
   });
 
-  it('mergeOffsetY === caseOffsetY + maxCaseH + NODE_MARGIN_Y', () => {
-    const maxH = Math.max(case0.height, case1.height);
-    const baseH = tile.caseOffsetY + maxH;
-    expect(tile.mergeOffsetY).toBe(baseH + NODE_MARGIN_Y);
+  it('height === diamond.height + nudeHeight + merge.height + Ydelta1a + Ydelta1b', () => {
+    expect(tile.height).toBe(diamond.height + nudeHeight + merge.height + YDELTA1A_NO_LABELS + SWITCH_YDELTA1B);
   });
 
-  it('height > no-merge height', () => {
-    const noMergeHeight = tile.caseOffsetY + Math.max(case0.height, case1.height);
-    expect(tile.height).toBeGreaterThan(noMergeHeight);
-  });
-
-  it('height === mergeOffsetY + merge.height', () => {
-    expect(tile.height).toBe((tile.mergeOffsetY ?? 0) + merge.height);
+  it('mergeOffset sits flush at the bottom, centered on pivotLeft', () => {
+    expect(tile.mergeOffset).toEqual({ x: tile.width / 2 - merge.width / 2, y: tile.height - merge.height });
   });
 
   it('children includes merge diamond', () => {
     expect(tile.children).toHaveLength(4);
     expect(tile.children[3]).toBe(merge);
+  });
+});
+
+describe('GtileSwitch — BIG_DIAMOND, 2 cases', () => {
+  // w13 = 300 - 40 - 40 = 220 > w9(0) -> BIG_DIAMOND.
+  const diamond = makeDiamond(300, 40);
+  const case0 = makeTile(80, 100);
+  const case1 = makeTile(80, 60);
+  const tile = new GtileSwitch(diamond, [{ tile: case0 }, { tile: case1 }], null, bounder, theme);
+  const w13 = 300 - 40 - 40;
+
+  it('isBigDiamond is true', () => {
+    expect(tile.isBigDiamond).toBe(true);
+  });
+
+  it('width === tile0.width + SUPP15 + w13 + SUPP15 + tileLast.width', () => {
+    expect(tile.width).toBe(80 + SWITCH_SUPP15 + w13 + SWITCH_SUPP15 + 80);
+  });
+
+  it('caseOffsets[0] === 0 (first case flush at the left edge)', () => {
+    expect(tile.caseOffsets[0]!.x).toBe(0);
+  });
+
+  it('caseOffsets[last].x + caseLast.width === total width (flush right edge)', () => {
+    expect(tile.caseOffsets[1]!.x + case1.width).toBe(tile.width);
+  });
+
+  it('both cases share the same Y (the top hline)', () => {
+    expect(tile.caseOffsets[0]!.y).toBe(tile.caseOffsets[1]!.y);
   });
 });
 
@@ -141,10 +178,9 @@ describe('GtileSwitch — hooks', () => {
   });
 });
 
-// FtileSwitch.java:177-187 `calculateDimensionFtile`: iterates every case
-// tile and returns WITH an out point as soon as one `hasPointOut()`;
-// otherwise without -- the same any-case-has-one semantics as GtileIf's
-// branches.
+// `FtileSwitchNude#calculateDimensionFtile` (`:116-124`): iterates every
+// CASE tile and returns WITH an out point as soon as one `hasPointOut()`;
+// otherwise without.
 describe('GtileSwitch — hasPointOut() is true iff any case has one', () => {
   const diamond = makeDiamond(60, 40);
 
@@ -171,22 +207,10 @@ describe('GtileSwitch — hasPointOut() is true iff any case has one', () => {
   });
 });
 
-describe('GtileSwitch — diamond wider than cases', () => {
-  const diamond = makeDiamond(300, 40);
-  const case0 = makeTile(80, 60);
-  const tile = new GtileSwitch(diamond, [{ tile: case0 }], null, bounder, theme);
-
-  it('width driven by diamond.width when wider than cases', () => {
-    expect(tile.width).toBe(300);
-  });
-});
-
-// T1p-f: `isBigDiamond` ports `FtileSwitchWithDiamonds`'s constructor
-// (`vcompact/cond/FtileSwitchWithDiamonds.java:73-90`). `makeTile`'s stub
-// `getCoord` always returns `{x:0,y:0}`, so for every case tile here
-// `leftOf == 0` and `rightOf == width` -- the formula reduces to
-// `w13 = diamond.width - case0.width - 0` and (for > 2 cases) `w9 =
-// Σ(middle case widths)`.
+// `isBigDiamond` ports `FtileSwitchWithDiamonds`'s constructor
+// (`vcompact/cond/FtileSwitchWithDiamonds.java:73-90`). Every stub tile
+// here is a SYMMETRIC leaf (`makeTile`'s own doc), so `leftOf == rightOf
+// == width/2` throughout.
 describe('GtileSwitch — isBigDiamond (w13 > w9)', () => {
   it('is true for 2 cases when the diamond is wider than the first case (w9 is 0)', () => {
     const tile = new GtileSwitch(
@@ -218,7 +242,7 @@ describe('GtileSwitch — isBigDiamond (w13 > w9)', () => {
       bounder,
       theme,
     );
-    // w13 = 200 - 50 - 0 = 150; w9 = 30 (the one middle case).
+    // w13 = 200 - 25 - 25 = 150; w9 = 30 (the one middle case).
     expect(tile.isBigDiamond).toBe(true);
   });
 
@@ -230,12 +254,23 @@ describe('GtileSwitch — isBigDiamond (w13 > w9)', () => {
       bounder,
       theme,
     );
-    // w13 = 50 - 50 - 0 = 0; w9 = 30. 0 > 30 is false.
+    // w13 = 50 - 25 - 25 = 0; w9 = 30. 0 > 30 is false.
     expect(tile.isBigDiamond).toBe(false);
   });
 
   it('is false for an empty case list (defensive -- no upstream switch has zero cases)', () => {
     const tile = new GtileSwitch(makeDiamond(300, 40), [], null, bounder, theme);
     expect(tile.isBigDiamond).toBe(false);
+  });
+});
+
+// `FtileSwitchWithDiamonds#getYdelta1a` (`:100-102`, flat `20`) --
+// `FtileSwitchWithOneLink` never overrides it, unlike `WithManyLinks`.
+describe('GtileSwitch — single case (OneLink) Ydelta1a is flat 20', () => {
+  it('caseOffsetY === diamond.height + 20 regardless of mode', () => {
+    const diamond = makeDiamond(300, 40);
+    const case0 = makeTile(80, 60);
+    const tile = new GtileSwitch(diamond, [{ tile: case0 }], null, bounder, theme);
+    expect(tile.caseOffsets[0]!.y).toBe(diamond.height + 20);
   });
 });

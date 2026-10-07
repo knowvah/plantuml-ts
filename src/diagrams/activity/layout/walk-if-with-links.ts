@@ -17,12 +17,22 @@
  */
 
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
-import type { GtileDiamondInside, DiamondSide } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK, WEST_HOOK, EAST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import type { LoopTranslate } from './swimlane-loop-translate.js';
+
+/** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- see
+ *  `walk-if-down.ts#diamondShapeOf`'s own doc for why this is duplicated,
+ *  not imported. */
+function diamondShapeOf(diamond: DiamondConditionTile): 'inside' | 'square' | 'empty' {
+  if (diamond.kind === 'gtile-diamond-empty') return 'empty';
+  if (diamond.kind === 'gtile-diamond-square') return 'square';
+  return 'inside';
+}
 
 interface IfLinksCtx {
   readonly t: GtileIfWithLinks;
@@ -52,21 +62,25 @@ function absolutePoint(local: GPoint, originX: number, originY: number): GPoint 
 
 /** Pushes an edge, then overlays `arrowhead`/`emphasize` on the just-pushed
  *  edge -- `pushEdge` (`tile-coordinates.ts`) is a shared helper this module
- *  does not widen; every other caller keeps its own plain 4/5-arg call. */
+ *  does not widen; every other caller keeps its own plain 4/5-arg call.
+ *  `loop` (mission `activity-divergence-drive-3` T1c) attaches the
+ *  `LoopTranslate` record this edge's own cross-lane `drawTranslate`
+ *  shape needs -- same convention as `walk-repeat-back-shapes.ts
+ *  #pushRepeatBack`'s own `loop` passthrough. */
 function pushDecoratedEdge(
   out: Out,
   points: GPoint[],
   lanes: readonly [string | undefined, string | undefined],
-  decoration: { arrowhead?: false; emphasize?: Emphasize },
+  decoration: { arrowhead?: false; emphasize?: Emphasize; loop?: LoopTranslate },
 ): void {
-  pushEdge(out, points, lanes[0], lanes[1]);
+  pushEdge(out, points, lanes[0], lanes[1], decoration.loop !== undefined ? { loop: decoration.loop } : 'default');
   const edge = out.edges[out.edges.length - 1]!;
   if (decoration.arrowhead === false) edge.arrowhead = false;
   if (decoration.emphasize !== undefined) edge.emphasize = decoration.emphasize;
 }
 
 function pushDiamondLabel(
-  diamond: GtileDiamondInside,
+  diamond: DiamondConditionTile,
   side: DiamondSide,
   origin: GPoint,
   lane: string | undefined,
@@ -92,7 +106,7 @@ function pushDiamondLabel(
 /** `diamond1`'s own label, pushed as its own `'if-own-label'` node (T3k,
  *  companion fix -- see {@link pushDiamond1}'s own doc). No-ops on an empty
  *  label, same guard `walk-if-down.ts#pushDiamondOwnLabel` documents. */
-function pushDiamondOwnLabel(diamond: GtileDiamondInside, origin: GPoint, lane: string | undefined, out: Out): void {
+function pushDiamondOwnLabel(diamond: DiamondConditionTile, origin: GPoint, lane: string | undefined, out: Out): void {
   if (diamond.label === '') return;
   const node = {
     id: out.nextId('if-own-label'),
@@ -105,18 +119,22 @@ function pushDiamondOwnLabel(diamond: GtileDiamondInside, origin: GPoint, lane: 
   pushNode(out, node, lane);
 }
 
-/** `diamond1`'s polygon, then its own label, then its west/east children --
- *  `FtileDiamondInside#drawU`'s own order (hexagon, north/south -- never
- *  set for this builder, `conditional-builder.ts` only ever calls
- *  `.withWest`/`.withEast` on this diamond -- then the own label, then
- *  west, then east). T3k companion fix: `activity-renderer-shapes.ts`'s
- *  `renderNode` dispatcher now draws the `'if-split'` kind as the polygon
- *  ALONE (the own label moved to its own node) when labelled, for every
- *  `'if-split'` producer, including this one -- not listed in T3k's own
- *  write-set, but unclaimed by any other `batch-3` task and required so
- *  this walker's own label keeps drawing at all after that shared
- *  dispatcher change.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102 */
+/** `diamond1`'s polygon, then its own label, then its north/west/east
+ *  children -- `FtileDiamondInside#drawU`'s own order for `GtileDiamond
+ *  Inside` (`conditional-builder.ts` only ever calls `.withWest`/
+ *  `.withEast` on it, `north`/`south` always unset, both no-ops below);
+ *  `FtileDiamond#drawU`'s own order for `GtileDiamondEmpty` (add3-T3c,
+ *  `conditional-builder.ts#createConditionDiamond`'s `EMPTY_DIAMOND`
+ *  arm), whose condition text lives in `north` (see the `north` push's
+ *  own doc comment below). T3k companion fix: `activity-renderer-
+ *  shapes.ts`'s `renderNode` dispatcher now draws the `'if-split'` kind
+ *  as the polygon ALONE (the own label moved to its own node) when
+ *  labelled, for every `'if-split'` producer, including this one -- not
+ *  listed in T3k's own write-set, but unclaimed by any other `batch-3`
+ *  task and required so this walker's own label keeps drawing at all
+ *  after that shared dispatcher change.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamond.java:85-105 */
 function pushDiamond1(ctx: IfLinksCtx): void {
   const { t, x, y, myLane, out } = ctx;
   const dX = x + t.diamond1X;
@@ -131,11 +149,19 @@ function pushDiamond1(ctx: IfLinksCtx): void {
       width: t.diamond1.width,
       height: t.diamond1.height,
       label: t.diamond1.label,
+      diamondShape: diamondShapeOf(t.diamond1),
     },
     myLane,
   );
   const origin = { x: dX, y: dY };
   pushDiamondOwnLabel(t.diamond1, origin, myLane, out);
+  // add3-T3c: `GtileDiamondEmpty` (EMPTY_DIAMOND) routes the condition
+  // text to its own `north` SIDE slot, never its always-`''` `.label`
+  // (`gtile-diamond-empty.ts`'s own doc) -- `GtileDiamondInside` never
+  // sets `north` at all for this builder (`conditional-builder.ts` only
+  // calls `.withWest`/`.withEast` on it), so this is a no-op there, same
+  // as `walk-if-down.ts#pushDiamond1`'s own unconditional `'north'` push.
+  pushDiamondLabel(t.diamond1, 'north', origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'west', origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'east', origin, myLane, out);
 }
@@ -168,6 +194,15 @@ function mergePoint(t: GtileIfWithLinks, x: number, y: number, side: 'D' | 'B'):
   return side === 'D' ? { x: mX, y: mY } : { x: mX + t.mergeSize, y: mY };
 }
 
+/** The {@link IfLinksHThenVLoop}-shaped record for one `in1`/`in2` branch
+ *  -- split out of {@link pushInConnectors} purely to keep that function's
+ *  own NLOC under the file's limit. `diamondSide` is diamond1's own D/B
+ *  point (`getP1`), `branchSide` the branch's own point-in (`getP2`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:121-132,134-136 */
+function hThenVLoop(t: GtileIfWithLinks, diamondSide: GPoint, branchSide: GPoint): LoopTranslate {
+  return { kind: 'if-links-h-then-v', p1: diamondSide, p2: branchSide, diamond1: { height: t.diamond1.height } };
+}
+
 /** `in1`/`in2` -- `ConnectionHorizontalThenVertical`, from `diamond1`'s own
  *  D/B point to the branch's `pointIn`. No end decoration when the branch
  *  is empty (D6). @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithLinks.java:531-534 */
@@ -183,9 +218,11 @@ function pushInConnectors(ctx: IfLinksCtx): void {
   const diamondLane = laneOut(t.diamond1, myLane);
   pushDecoratedEdge(out, horizontalThenVertical(p1, in1To), [diamondLane, laneIn(t.tile1, myLane)], {
     ...(t.thenIsEmpty ? { arrowhead: false as const } : {}),
+    loop: hThenVLoop(t, p1, in1To),
   });
   pushDecoratedEdge(out, horizontalThenVertical(p2, in2To), [diamondLane, laneIn(t.tile2, myLane)], {
     ...(t.elseIsEmpty ? { arrowhead: false as const } : {}),
+    loop: hThenVLoop(t, p2, in2To),
   });
 }
 
@@ -206,9 +243,11 @@ function pushOutConnectorsBoth(ctx: IfLinksCtx): void {
   // `laneIn(diamond2, myLane)` call.
   pushDecoratedEdge(out, verticalThenHorizontal(out1From, mergeD), [laneOut(t.tile1, myLane), myLane], {
     ...(t.thenIsEmpty ? { emphasize: 'down' as const } : {}),
+    loop: { kind: 'if-links-v-then-h', p1: out1From, p2: mergeD },
   });
   pushDecoratedEdge(out, verticalThenHorizontal(out2From, mergeB), [laneOut(t.tile2, myLane), myLane], {
     ...(t.elseIsEmpty ? { emphasize: 'down' as const } : {}),
+    loop: { kind: 'if-links-v-then-h', p1: out2From, p2: mergeB },
   });
 }
 
@@ -309,6 +348,7 @@ function pushDirectConnector(ctx: IfLinksCtx, useTile1: boolean): void {
   pushDecoratedEdge(out, points, [laneOut(tile, myLane), myLane], {
     arrowhead: false,
     ...(isEmpty ? { emphasize: 'down' as const } : {}),
+    loop: { kind: 'if-links-v-then-h-direct', p1, p2 },
   });
 }
 
@@ -337,8 +377,42 @@ function pushOutConnectors(ctx: IfLinksCtx): void {
   }
 }
 
+/** `FtileIfWithDiamonds#drawU`'s own `opaleLeft`/`opaleRight` draws
+ *  (`:203-213`) -- FIRST in draw order, each at local `y=0` (`t.noteY` in
+ *  this port's own single-frame coordinates, see `GtileIfWithLinks
+ *  .noteY`'s own doc); `xOpale = diamond1X - opaleLeft.width` (LEFT) or
+ *  `diamond1X + diamond1.width` (RIGHT) -- never a spike, same no-spike
+ *  `createOpale(withLink=false)` path `walk-if-down.ts#pushIfOwnNote`
+ *  already documents (`FtileIfWithDiamonds.java:129`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:200-213 */
+function pushOwnNote(ctx: IfLinksCtx, note: typeof ctx.t.opaleLeft, onLeft: boolean): void {
+  if (note === null) return;
+  const { t, x, y, myLane, out } = ctx;
+  const noteX = onLeft ? x + t.diamond1X - note.box.width : x + t.diamond1X + t.diamond1.width;
+  pushNode(
+    out,
+    {
+      id: out.nextId('note'),
+      kind: 'note',
+      x: noteX,
+      y: y + t.noteY,
+      width: note.box.width,
+      height: note.box.height,
+      label: note.text,
+      notePosition: note.position,
+    },
+    myLane,
+  );
+}
+
+function pushOwnNotes(ctx: IfLinksCtx): void {
+  pushOwnNote(ctx, ctx.t.opaleLeft, true);
+  pushOwnNote(ctx, ctx.t.opaleRight, false);
+}
+
 export function walkIfWithLinks(t: GtileIfWithLinks, x: number, y: number, myLane: string | undefined, out: Out): void {
   const ctx: IfLinksCtx = { t, x, y, myLane, out };
+  pushOwnNotes(ctx);
   pushDiamond1(ctx);
   walkTile(t.tile1, x + t.tile1X, y + t.branchY, { kindHint: null, lane: myLane }, out);
   walkTile(t.tile2, x + t.tile2X, y + t.branchY, { kindHint: null, lane: myLane }, out);

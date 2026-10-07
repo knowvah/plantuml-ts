@@ -35,6 +35,61 @@ post-D7 measurements.
 
 ---
 
+## `activity-divergence-drive-3` (add3) — DONE 2026-10-07 (T0a–T3j + T-exit/T-close-out, batches 0–4)
+
+Branch `feat/activity-divergence-drive-3` off main `6eef9c769` (merge commit, not pushed).
+Brief: `plans/activity-divergence-drive-3/` (ledger `fixtures.md`, journal rows 1-50).
+
+**Counts (b0 -> final):** probe Σ 16937 over 126 rows -> **4413 over 48**; pinned
+**224 -> 301**; 0 conformant losses in any engine (28 engines; non-activity movers
+are 9 `unknown`-engine gains); 0 unexplained rises; gates green, 1055 test files.
+`tmp1` retired (duplicate of ruzazu-94-meso880).
+
+**Fixed mechanisms (Java):** `Snake#getTextBlockPosition` + per-site labelAlign,
+`-> label;` and branch-exit labels (`ActivityDiagram3.java:437-465`, `Branch.java:222-228`),
+label back-colour filter (`SvgGraphics.java:732-735`); cross-lane `LoopTranslate` kinds
+(FtileRepeat backward1/2, FtileIfWithLinks x3); action and note text through a real
+creole `SheetBlock1` (AtomText floor, heading heights, HORIZONTAL_LINE, embedded
+diagrams, CharHidder `~` escape); Opale note sizing, LEFT default, if-own notes on
+if-down and with-links, FtileWithNotes (+ its `TextBlockMarged` UEmpty margin box),
+backward notes, `%n()`; condition-style EMPTY_DIAMOND for while/repeat/if;
+FtileSwitchWithDiamonds/ManyLinks geometry + cross-lane case connector; snake
+deferral (`UGraphicForSnake`) for cross-lane decorations; group frame per touched
+lane; USymbolFrame compression ignore flags; fork welding; spot glyph outlines
+captured from the jar (class-badge precedent); gradient document background,
+dark circle ink, harness seed; else regex, defaultFontSize tier, padding.
+
+### Open -> add4 (48 ledger rows; mechanisms in `fixtures.md`)
+
+- **SWITCH (8 rows, largest sojono 276, rujixe 187):** +11 px from the case row —
+  literal `getYdelta1a` gives 21, jar 32; author a multi-line case-label fixture.
+- **EMBED (5):** the deterministic oracle's 42x42 `{{ }}` placeholder; never fit.
+- **NOTE-MULTI giteso 440 + 3:** TextBlockMarged ink in `canvas-origin.ts`;
+  missing `ActivityNote.color` in the parser.
+- **Lanes:** XLANE-HLINE jucidi/pezubu (10 px divider), SWIMW cemipu / LANE-MINWIDTH
+  nikinu (half-margin sum; `swimlaneWidth` is NOT a floor), NOTE-SWIMLANE razuzu,
+  XLANE ruzica 105 (while back-edge `xx`).
+- **tobajo 380:** fork/branch width with a differently-laned sibling (`gtile-fork.ts`).
+- **xefalo 289:** GtileDiamondEmpty label height drift. **PADDING** zivege/fukika:
+  activity warning-chrome banner unported. **THEME-MARGIN** labala:
+  `ACTIVITY_DOCUMENT_MARGIN` hardcoded in `canvas-origin.ts`.
+- UNKNOWN cakeca/zeporo/nojije/gesogi/pekefu; CREOLE-ACT zejuso/letuke; STRIPE bigide
+  (+0.5 x); SLURL nesozi; small residuals (KLIMT diamond FontColor fallback, EMPH
+  stroke in `renderer.ts`, NOTE-SIZE, NOTE-CREOLE).
+
+### Flags
+
+- D5 kept literal over T2b's proposal to skip the Sheet (journal row 15).
+- Legacy label path retired by the orchestrator after a runtime census (row 16).
+- GLYPH taken in scope on user direction; captured outlines cover A/B/G only.
+- Two regressions were caught by the style/text census (attributes moving AWAY from
+  the jar) while the probe score fell: T2a dropped if-own notes, T3b dropped a
+  cross-lane connector. Keep the away-from-jar census check in every close.
+- Agent rule breaches (Serena x4, `git stash` x3) were all disclosed; main verified
+  clean before each merge. Machine sleep stalled three agents once (resumed).
+
+---
+
 ## `activity-divergence-drive-2` (add2) — DONE 2026-10-03 (T0a–T3i + T-exit/T-close-out, batches 0, 1p, 1, 2a/2b, 3, 4)
 
 Branch `feat/activity-divergence-drive-2` off main `8532ce8ba` (merge commit, not pushed).

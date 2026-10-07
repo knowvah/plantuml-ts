@@ -1,0 +1,21 @@
+@startuml
+start
+split
+:bar1;
+note
+A bit of text describing what happens
+end note
+split again
+:bar2;
+end split
+:next;
+split
+:bar1;
+split again
+:bar2;
+note right
+A bit of text describing what happens
+end note
+end split
+stop
+@enduml

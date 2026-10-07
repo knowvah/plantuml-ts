@@ -54,8 +54,16 @@ export interface CompressResult {
  * but `ULine`'s own transform (`drawLine`, both endpoints through `ct`)
  * produces the IDENTICAL formula for a purely horizontal segment -- see
  * {@link RECT_HEIGHT_KINDS} for why the two families diverge on Y.
+ *
+ * T3i: `group`/`partition` joined this set -- `USymbolFrame#drawFrame`'s
+ * own frame box is ALSO a real `URectangle` (`USymbolFrame.java:70-71`),
+ * and `UGraphicCompressOnXorY.java:90`'s rect branch applies "ignore
+ * flags notwithstanding" (`isRectReservation`'s own doc cites the same
+ * line) -- `ignoreForCompressionOnX/Y` only changes what counts as
+ * OCCUPIED for finding removable gaps, never whether a rect's own drawn
+ * box gets resized once a gap through it is actually removed.
  */
-const RECT_WIDTH_KINDS = new Set(['action', 'fork-bar', 'join-bar', 'split-bar', 'split-join-bar']);
+const RECT_WIDTH_KINDS = new Set(['action', 'fork-bar', 'join-bar', 'split-bar', 'split-join-bar', 'group', 'partition']);
 
 /**
  * On Y, only `action`/`fork-bar`/`join-bar` are true 2-D `URectangle`s and
@@ -68,10 +76,12 @@ const RECT_WIDTH_KINDS = new Set(['action', 'fork-bar', 'join-bar', 'split-bar',
  * bookkeeping `height` field these two kinds carry (`t.barHeight`, unread
  * by the renderer) is therefore kept as-is, like any other translate-only
  * shape, rather than being run through a formula that would fabricate a
- * new value for a dimension nothing draws.
+ * new value for a dimension nothing draws. `group`/`partition` (T3i) join
+ * this set too, same `USymbolFrame` rect, same "ignore flags
+ * notwithstanding" rule as {@link RECT_WIDTH_KINDS}'s own doc.
  * @see net/sourceforge/plantuml/klimt/compress/UGraphicCompressOnXorY.java:122-127
  */
-const RECT_HEIGHT_KINDS = new Set(['action', 'fork-bar', 'join-bar']);
+const RECT_HEIGHT_KINDS = new Set(['action', 'fork-bar', 'join-bar', 'group', 'partition']);
 
 /**
  * A `Reservation` with either ignore flag set is modelled as a `'rect'`
@@ -164,6 +174,27 @@ function transformEdge(edge: ActivityEdgeGeo, ct: PiecewiseAffineTransform, mode
   }
   return next;
 }
+
+/**
+ * T1b (`activity-divergence-drive-3`, D1 verification): an edge LABEL's
+ * position needs no anchor-carry field analogous to {@link
+ * ActivityEdgeGeo.emphasizeAt}/`midArrowAt` above. `Snake#getTextBlockPosition`
+ * (`ftile/Snake.java:244-270`) reads `worm.getPoint(i)`
+ * (`ftile/Worm.java:322-324`), which resolves every point through the
+ * compressing `UGraphic`'s own translate (`:326-329`, `resolve`/`tr`) --
+ * i.e. upstream computes the label position AT DRAW TIME, on the SAME
+ * already-compressed points `drawInternalOneColor` draws (both are
+ * called from `Snake#drawInternal`, `Snake.java:189-198`, in the same
+ * pass). This port's `layout/snake-text-position.ts#getTextBlockPosition`
+ * mirrors that by running at RENDER time (`renderer.ts#renderEdgeLabel`)
+ * over `edge.points` -- already carried through both `transformEdge`
+ * passes above by the time `renderer.ts` ever sees them. `emphasizeAt`/
+ * `midArrowAt` needed a carry only because their own (pre-this-mission)
+ * render-time computation ran a direction-match SEARCH that upstream
+ * runs pre-compression (`Worm#drawInternalOneColor`'s loop, `:134-143`)
+ * -- a label's position has no such pre-compression-only computation to
+ * preserve.
+ */
 
 /**
  * b3/T3a (family C/EMMID): populates {@link ActivityEdgeGeo.emphasizeAt}

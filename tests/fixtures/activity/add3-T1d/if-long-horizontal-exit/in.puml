@@ -1,0 +1,14 @@
+@startuml
+start
+if (a) then (yes)
+:A;
+-> leftExit;
+elseif (b) then (yes)
+:B;
+else (no)
+:C;
+-> elseExit;
+endif
+:D;
+stop
+@enduml

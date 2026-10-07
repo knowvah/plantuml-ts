@@ -20,7 +20,7 @@ import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
-import { activityFontColor } from './activity-text-style.js';
+import { activityFontColor, activityHorizontalAlignment } from './activity-text-style.js';
 import {
   actColors,
   ASCENT_FRACTION,
@@ -205,6 +205,34 @@ export function renderDiamondSquarePolygon(node: ActivityNodeGeo, theme: Theme):
 }
 
 /**
+ * `'if-split'`/`'repeat-cond'`'s own shape dispatch, split out of
+ * `activity-renderer-shapes.ts#renderNode` purely to keep that function
+ * under the file's complexity cap (add3-T3c's own `node.diamondShape` arm
+ * pushed it over).
+ *
+ * add3-T3c: `'if-split'` now carries its own `node.diamondShape` (set by
+ * both of its producers, `walk-if-down.ts`/`walk-if-with-links.ts`, now
+ * that `buildIfWithLinks` dispatches on `conditionStyle` too, closing
+ * `.agent-notes/add3-T3a.md`'s "Not done" item 1) -- the real tile kind,
+ * not the `label === ''` inference add3-T3d used as a stand-in for it
+ * (ambiguous for exactly the case T3d's own comment described: a
+ * `with-links` `GtileDiamondEmpty` with a non-empty north test label,
+ * e.g. `xefalo-73-sabi101`'s 3 EMPTY_DIAMOND with-links ifs). `'repeat-
+ * cond'`'s own producer (`walk-repeat*.ts`) is outside this task's
+ * write-set and never sets this field, so it falls through to the
+ * pre-existing `conditionStyle`/`label` heuristic unchanged.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamond.java:85
+ */
+export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string {
+  if (node.diamondShape !== undefined) {
+    if (node.diamondShape === 'empty') return renderDiamond(node, theme);
+    return node.diamondShape === 'square' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
+  }
+  if (theme.conditionStyle === 'emptyDiamond' && node.label === '') return renderDiamond(node, theme);
+  return theme.conditionStyle === 'insideDiamond' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
+}
+
+/**
  * The hexagon's OWN label alone, centered in the node's own box -- the
  * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
  * callable on its own so a walker can push it as its own `'if-own-label'`
@@ -229,6 +257,21 @@ export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): stri
  * centring -- that formula is verified correct for `FtileBox` action
  * text specifically (`activity-text-placement.ts`'s own doc), a
  * genuinely different Java draw path from the diamond's label TextBlock.
+ *
+ * ALIGN-DIAMOND (add3-T3d, `mabuke-20-muco282`/`copisa-69-xisi273`,
+ * `skinparam defaultTextAlignment center`): `ConditionalBuilder#getShape1`
+ * (`vcompact/cond/ConditionalBuilder.java:240-243`) builds the condition
+ * label through the SAME real Sheet/`SheetBlock1` the module doc comment
+ * above already names, with `styleDiamond.getHorizontalAlignment()` as
+ * its alignment -- so a CENTER/RIGHT `defaultTextAlignment` reaches
+ * `SheetBlock1#initMap`'s own per-line `getCoef` post-pass
+ * (`klimt/creole/SheetBlock1.java:155-172`: `CENTER` -> `diff/2`,
+ * `RIGHT` -> `diff`, `LEFT`/`null` -> `0`, `diff = maxWidth - lineWidth`)
+ * EVEN THOUGH the block itself is still centred once at the outer level
+ * (both apply together: the LEFT case above is this formula's own
+ * `coef=0` reduction, unchanged). `activityHorizontalAlignment` is the
+ * SAME `root`-tier resolver `FtileBox` action text already reads for the
+ * identical `defaultTextAlignment` key.
  */
 export function renderHexagonMultilineLabel(
   lines: string[],
@@ -238,9 +281,19 @@ export function renderHexagonMultilineLabel(
   opts: ActivityTextOpts,
 ): string {
   const condSize = opts.fontSize ?? activityFontSize(theme, 'diamond');
-  const maxWidth = Math.max(...lines.map((ln) => measureLineWidth(theme, condSize, ln)));
+  const lineWidths = lines.map((ln) => measureLineWidth(theme, condSize, ln));
+  const maxWidth = Math.max(...lineWidths);
   const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
-  return textLines(lines, cx - maxWidth / 2, centeredFirstBaselineY(cy, condSize, lines.length), condSize, style);
+  const firstBaselineY = centeredFirstBaselineY(cy, condSize, lines.length);
+  const align = activityHorizontalAlignment(theme);
+  const blockX = cx - maxWidth / 2;
+  return lines
+    .map((ln, i) => {
+      const diff = maxWidth - lineWidths[i]!;
+      const offset = align === 'center' ? diff / 2 : align === 'right' ? diff : 0;
+      return drawActivityText(blockX + offset, firstBaselineY + condSize * i, ln, style);
+    })
+    .join('');
 }
 
 /**

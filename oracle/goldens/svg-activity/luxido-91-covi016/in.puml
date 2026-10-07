@@ -1,0 +1,12 @@
+@startuml
+|System|
+|Admin|
+repeat :Generate Again;
+:Step 1;
+|System|
+:Step 2;
+backward: Back;
+repeat while
+:Step 3;
+stop
+@enduml

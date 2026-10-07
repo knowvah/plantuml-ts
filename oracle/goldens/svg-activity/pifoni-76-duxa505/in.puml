@@ -1,0 +1,24 @@
+@startuml
+start
+note
+    note on start
+    **works fine**
+end note
+    if () then (end)
+    note
+        note on if
+        **(Possible to point to to diamond?)**
+    end note
+    end
+    note
+        note on end
+        **MISSING in Diagram!**
+    end note
+else (stop)
+    stop
+    note
+        note on stop
+        **works fine**
+    end note
+endif
+@enduml

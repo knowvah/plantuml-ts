@@ -1,0 +1,11 @@
+@startuml
+start
+if (cond) then (yes)
+:A;
+else (no)
+:B;
+endif
+-> hello;
+:C;
+stop
+@enduml

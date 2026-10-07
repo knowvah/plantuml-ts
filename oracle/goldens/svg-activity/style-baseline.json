@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
-  "measuredAt": "2026-10-03",
-  "measuredAgainstCommit": "9104b8ee",
+  "measuredAt": "2026-10-07",
+  "measuredAgainstCommit": "918cd7e9",
   "fixtures": [
     {
       "type": "activity",
@@ -54,8 +54,8 @@
           "12.5": 3
         },
         "textCount": 12,
-        "width": "677",
-        "height": "249"
+        "width": "327",
+        "height": "280"
       },
       "jar": {
         "fontSize": {
@@ -72,8 +72,8 @@
         "width": "327",
         "height": "280"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -316,7 +316,7 @@
       "ours": {
         "fontSize": {
           "11": 4,
-          "12": 4
+          "12": 7
         },
         "strokeWidth": {
           "1": 10
@@ -324,8 +324,8 @@
         "rx": {
           "12.5": 2
         },
-        "textCount": 8,
-        "width": "361",
+        "textCount": 11,
+        "width": "308",
         "height": "225"
       },
       "jar": {
@@ -343,8 +343,8 @@
         "width": "308",
         "height": "225"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -527,8 +527,8 @@
           "7.5": 1
         },
         "textCount": 7,
-        "width": "342",
-        "height": "227"
+        "width": "323",
+        "height": "222"
       },
       "jar": {
         "fontSize": {
@@ -548,8 +548,8 @@
         "width": "323",
         "height": "222"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -557,19 +557,19 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "12": 6,
+          "12": 5,
           "14": 1
         },
         "strokeWidth": {
-          "1": 3,
+          "1": 5,
           "2.5": 2
         },
         "rx": {
           "12.5": 2
         },
-        "textCount": 7,
+        "textCount": 6,
         "width": "176",
-        "height": "282"
+        "height": "280"
       },
       "jar": {
         "fontSize": {
@@ -587,8 +587,8 @@
         "width": "176",
         "height": "280"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -785,17 +785,17 @@
         "fontSize": {
           "11": 3,
           "12": 4,
-          "13": 5
+          "13": 4
         },
         "strokeWidth": {
-          "1": 14
+          "1": 12
         },
         "rx": {
           "12.5": 4
         },
-        "textCount": 12,
-        "width": "306",
-        "height": "453"
+        "textCount": 11,
+        "width": "278",
+        "height": "333"
       },
       "jar": {
         "fontSize": {
@@ -813,15 +813,15 @@
         "width": "278",
         "height": "333"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
       "slug": "boxefe-81-situ725",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -834,7 +834,7 @@
           "12.5": 4
         },
         "textCount": 7,
-        "width": "252",
+        "width": "254",
         "height": "336"
       },
       "jar": {
@@ -896,7 +896,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "12": 25
+          "12": 3
         },
         "strokeWidth": {
           "1": 4,
@@ -905,9 +905,9 @@
         "rx": {
           "12.5": 3
         },
-        "textCount": 25,
-        "width": "296",
-        "height": "515"
+        "textCount": 3,
+        "width": "237",
+        "height": "506"
       },
       "jar": {
         "fontSize": {
@@ -924,8 +924,8 @@
         "width": "343",
         "height": "419"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -1104,8 +1104,8 @@
           "12.5": 3
         },
         "textCount": 5,
-        "width": "516",
-        "height": "270"
+        "width": "478",
+        "height": "268"
       },
       "jar": {
         "fontSize": {
@@ -1123,8 +1123,8 @@
         "width": "478",
         "height": "268"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -1171,8 +1171,8 @@
       "type": "activity",
       "slug": "caciva-80-kene990",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 2,
@@ -1187,8 +1187,8 @@
           "12.5": 1
         },
         "textCount": 4,
-        "width": "184",
-        "height": "258"
+        "width": "174",
+        "height": "187"
       },
       "jar": {
         "fontSize": {
@@ -1249,25 +1249,25 @@
       "type": "activity",
       "slug": "cakeca-72-kara622",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "12": 21,
-          "14": 3,
+          "14": 5,
           "18": 3
         },
         "strokeWidth": {
-          "1": 32,
+          "1": 34,
           "1.5": 8
         },
         "rx": {
-          "(absent)": 6,
+          "(absent)": 8,
           "12.5": 13
         },
-        "textCount": 27,
-        "width": "1507",
-        "height": "1083"
+        "textCount": 29,
+        "width": "1322",
+        "height": "921"
       },
       "jar": {
         "fontSize": {
@@ -1639,8 +1639,8 @@
       "type": "activity",
       "slug": "cigagu-31-rime196",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -1650,6 +1650,7 @@
           "1": 29
         },
         "rx": {
+          "(absent)": 1,
           "12.5": 8,
           "2.5": 2
         },
@@ -1722,8 +1723,8 @@
       "type": "activity",
       "slug": "citire-32-mive114",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -1731,7 +1732,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 9,
+          "1": 7,
           "1.5": 3
         },
         "rx": {
@@ -1921,8 +1922,8 @@
           "12.5": 1
         },
         "textCount": 2,
-        "width": "186",
-        "height": "110"
+        "width": "167",
+        "height": "107"
       },
       "jar": {
         "fontSize": {
@@ -1939,8 +1940,8 @@
         "width": "167",
         "height": "107"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -2028,8 +2029,8 @@
         },
         "rx": {},
         "textCount": 4,
-        "width": "183",
-        "height": "222"
+        "width": "156",
+        "height": "210"
       },
       "jar": {
         "fontSize": {
@@ -2044,8 +2045,8 @@
         "width": "156",
         "height": "210"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -2277,7 +2278,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 21,
+          "1": 20,
           "1.5": 6
         },
         "rx": {
@@ -2309,15 +2310,15 @@
         "width": "335",
         "height": "398"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
       "slug": "delide-30-teva601",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -2325,7 +2326,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 10,
           "1.5": 3
         },
         "rx": {
@@ -2359,8 +2360,8 @@
       "type": "activity",
       "slug": "demibe-40-moda439",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 6,
@@ -2368,7 +2369,7 @@
           "14": 1
         },
         "strokeWidth": {
-          "1": 20,
+          "1": 17,
           "2.5": 2
         },
         "rx": {
@@ -2376,7 +2377,7 @@
         },
         "textCount": 12,
         "width": "356",
-        "height": "303"
+        "height": "272"
       },
       "jar": {
         "fontSize": {
@@ -2438,7 +2439,7 @@
       "ours": {
         "fontSize": {
           "12": 6,
-          "13": 6
+          "13": 10
         },
         "strokeWidth": {
           "1": 4
@@ -2446,9 +2447,9 @@
         "rx": {
           "12.5": 4
         },
-        "textCount": 12,
-        "width": "531",
-        "height": "295"
+        "textCount": 16,
+        "width": "283",
+        "height": "343"
       },
       "jar": {
         "fontSize": {
@@ -2465,8 +2466,8 @@
         "width": "283",
         "height": "343"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -2580,14 +2581,14 @@
           "13": 2
         },
         "strokeWidth": {
-          "1": 14
+          "1": 12
         },
         "rx": {
           "12.5": 4
         },
         "textCount": 9,
-        "width": "206",
-        "height": "431"
+        "width": "205",
+        "height": "330"
       },
       "jar": {
         "fontSize": {
@@ -2605,8 +2606,8 @@
         "width": "205",
         "height": "330"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -2910,15 +2911,15 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "12": 1
+          "12": 3
         },
         "strokeWidth": {},
         "rx": {
           "12.5": 1
         },
-        "textCount": 1,
-        "width": "163",
-        "height": "68"
+        "textCount": 3,
+        "width": "115",
+        "height": "92"
       },
       "jar": {
         "fontSize": {
@@ -2932,8 +2933,8 @@
         "width": "115",
         "height": "92"
       },
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -3030,7 +3031,7 @@
           "12.5": 3
         },
         "textCount": 15,
-        "width": "475",
+        "width": "456",
         "height": "368"
       },
       "jar": {
@@ -3049,8 +3050,8 @@
         "width": "456",
         "height": "368"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -3720,8 +3721,8 @@
       "type": "activity",
       "slug": "fukika-81-gite897",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -3734,8 +3735,8 @@
           "12.5": 5
         },
         "textCount": 9,
-        "width": "274",
-        "height": "456"
+        "width": "334",
+        "height": "610"
       },
       "jar": {
         "fontSize": {
@@ -3847,17 +3848,17 @@
         "fontSize": {
           "11": 3,
           "12": 4,
-          "13": 2
+          "13": 1
         },
         "strokeWidth": {
-          "1": 14
+          "1": 12
         },
         "rx": {
           "12.5": 4
         },
-        "textCount": 9,
-        "width": "206",
-        "height": "431"
+        "textCount": 8,
+        "width": "203",
+        "height": "330"
       },
       "jar": {
         "fontSize": {
@@ -3875,8 +3876,8 @@
         "width": "203",
         "height": "330"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -4262,8 +4263,8 @@
       "type": "activity",
       "slug": "giteso-65-mefo026",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 6,
@@ -4271,14 +4272,14 @@
           "13": 7
         },
         "strokeWidth": {
-          "1": 25
+          "1": 22
         },
         "rx": {
           "12.5": 6
         },
         "textCount": 19,
-        "width": "527",
-        "height": "704"
+        "width": "454",
+        "height": "560"
       },
       "jar": {
         "fontSize": {
@@ -4427,8 +4428,8 @@
           "12.5": 1
         },
         "textCount": 3,
-        "width": "241",
-        "height": "239"
+        "width": "222",
+        "height": "237"
       },
       "jar": {
         "fontSize": {
@@ -4446,15 +4447,15 @@
         "width": "222",
         "height": "237"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
       "slug": "gokagi-91-mise154",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -4462,14 +4463,14 @@
           "13": 3
         },
         "strokeWidth": {
-          "1": 10
+          "1": 9
         },
         "rx": {
           "12.5": 4
         },
         "textCount": 8,
-        "width": "363",
-        "height": "362"
+        "width": "400",
+        "height": "312"
       },
       "jar": {
         "fontSize": {
@@ -4595,8 +4596,8 @@
       "type": "activity",
       "slug": "gudute-55-nulo344",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -4607,6 +4608,7 @@
           "2.5": 2
         },
         "rx": {
+          "(absent)": 1,
           "12.5": 8,
           "2.5": 2
         },
@@ -4639,7 +4641,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "12": 6
+          "12": 1
         },
         "strokeWidth": {
           "1": 2
@@ -4647,9 +4649,9 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 6,
-        "width": "89",
-        "height": "209"
+        "textCount": 1,
+        "width": "113",
+        "height": "189"
       },
       "jar": {
         "fontSize": {
@@ -4665,8 +4667,8 @@
         "width": "98",
         "height": "191"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -4750,13 +4752,13 @@
       "type": "activity",
       "slug": "jageti-56-kume076",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 1,
           "12": 1,
-          "13": 1
+          "13": 5
         },
         "strokeWidth": {
           "1": 8
@@ -4764,9 +4766,9 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 3,
-        "width": "1127",
-        "height": "179"
+        "textCount": 7,
+        "width": "550",
+        "height": "217"
       },
       "jar": {
         "fontSize": {
@@ -4792,7 +4794,8 @@
       "ours": {
         "fontSize": {
           "11": 6,
-          "12": 9
+          "12": 6,
+          "16": 3
         },
         "strokeWidth": {
           "1": 17
@@ -4802,7 +4805,7 @@
         },
         "textCount": 15,
         "width": "244",
-        "height": "535"
+        "height": "547"
       },
       "jar": {
         "fontSize": {
@@ -4820,8 +4823,8 @@
         "width": "244",
         "height": "547"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -4905,8 +4908,8 @@
       "type": "activity",
       "slug": "japeru-28-guku001",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 10,
@@ -4921,8 +4924,8 @@
           "(absent)": 1
         },
         "textCount": 21,
-        "width": "225",
-        "height": "881"
+        "width": "207",
+        "height": "765"
       },
       "jar": {
         "fontSize": {
@@ -4953,14 +4956,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 11
+          "1": 10
         },
         "rx": {
           "12.5": 2
         },
         "textCount": 4,
-        "width": "174",
-        "height": "270"
+        "width": "227",
+        "height": "226"
       },
       "jar": {
         "fontSize": {
@@ -4978,8 +4981,8 @@
         "width": "227",
         "height": "226"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -5039,7 +5042,7 @@
           "18": 6
         },
         "strokeWidth": {
-          "1": 33,
+          "1": 31,
           "1.5": 9,
           "2.5": 2
         },
@@ -5070,8 +5073,8 @@
         "width": "977",
         "height": "395"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -5156,14 +5159,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 6
+          "1": 5
         },
         "rx": {
           "12.5": 1
         },
         "textCount": 4,
-        "width": "163",
-        "height": "224"
+        "width": "197",
+        "height": "185"
       },
       "jar": {
         "fontSize": {
@@ -5181,8 +5184,8 @@
         "width": "197",
         "height": "185"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "bdf8b1e2"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -5195,14 +5198,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 9
+          "1": 8
         },
         "rx": {
           "12.5": 3
         },
         "textCount": 5,
-        "width": "148",
-        "height": "371"
+        "width": "173",
+        "height": "312"
       },
       "jar": {
         "fontSize": {
@@ -5220,8 +5223,8 @@
         "width": "173",
         "height": "312"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -5262,8 +5265,8 @@
       "type": "activity",
       "slug": "jogami-42-jaji869",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "12": 3,
@@ -5271,15 +5274,15 @@
           "14": 1
         },
         "strokeWidth": {
-          "1": 5
+          "1": 4
         },
         "rx": {
           "12.5": 3,
           "(absent)": 1
         },
         "textCount": 7,
-        "width": "401",
-        "height": "384"
+        "width": "286",
+        "height": "304"
       },
       "jar": {
         "fontSize": {
@@ -5436,23 +5439,23 @@
       "type": "activity",
       "slug": "jufefu-66-josa392",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
-          "11": 2,
-          "12": 2,
+          "11": 3,
+          "12": 3,
           "14": 1
         },
         "strokeWidth": {
-          "1": 8
+          "1": 11
         },
         "rx": {
-          "12.5": 2
+          "12.5": 3
         },
-        "textCount": 5,
-        "width": "177",
-        "height": "328"
+        "textCount": 7,
+        "width": "287",
+        "height": "300"
       },
       "jar": {
         "fontSize": {
@@ -5489,7 +5492,7 @@
           "12": 1
         },
         "strokeWidth": {
-          "1": 25
+          "1": 23
         },
         "rx": {
           "12.5": 1,
@@ -5497,7 +5500,7 @@
         },
         "textCount": 8,
         "width": "265",
-        "height": "371"
+        "height": "367"
       },
       "jar": {
         "fontSize": {
@@ -5515,8 +5518,8 @@
         "width": "265",
         "height": "367"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "bdf8b1e2"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -5535,8 +5538,8 @@
           "12.5": 25
         },
         "textCount": 60,
-        "width": "2514",
-        "height": "1362"
+        "width": "1937",
+        "height": "1390"
       },
       "jar": {
         "fontSize": {
@@ -5554,8 +5557,8 @@
         "width": "1937",
         "height": "1390"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -5689,7 +5692,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 4,
+          "1": 3,
           "1.5": 3
         },
         "rx": {
@@ -5697,8 +5700,8 @@
           "12.5": 2
         },
         "textCount": 6,
-        "width": "303",
-        "height": "205"
+        "width": "322",
+        "height": "151"
       },
       "jar": {
         "fontSize": {
@@ -5718,8 +5721,8 @@
         "width": "342",
         "height": "151"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -5802,8 +5805,7 @@
       "ours": {
         "fontSize": {
           "5": 1,
-          "11": 3,
-          "12": 2
+          "19": 5
         },
         "strokeWidth": {
           "1": 9
@@ -5812,8 +5814,8 @@
           "12.5": 2
         },
         "textCount": 6,
-        "width": "271",
-        "height": "173"
+        "width": "298",
+        "height": "189"
       },
       "jar": {
         "fontSize": {
@@ -5830,8 +5832,8 @@
         "width": "298",
         "height": "189"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -6004,8 +6006,8 @@
           "12.5": 2
         },
         "textCount": 6,
-        "width": "784",
-        "height": "178"
+        "width": "765",
+        "height": "173"
       },
       "jar": {
         "fontSize": {
@@ -6023,8 +6025,8 @@
         "width": "765",
         "height": "173"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -6548,7 +6550,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
-          "11": 2,
+          "11": 4,
           "12": 6
         },
         "strokeWidth": {
@@ -6557,7 +6559,7 @@
         "rx": {
           "12.5": 3
         },
-        "textCount": 8,
+        "textCount": 10,
         "width": "185",
         "height": "312"
       },
@@ -6577,8 +6579,8 @@
         "width": "168",
         "height": "320"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -6637,8 +6639,8 @@
           "12.5": 1
         },
         "textCount": 5,
-        "width": "400",
-        "height": "215"
+        "width": "381",
+        "height": "199"
       },
       "jar": {
         "fontSize": {
@@ -6657,8 +6659,8 @@
         "width": "381",
         "height": "199"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -6863,7 +6865,7 @@
         },
         "textCount": 9,
         "width": "171",
-        "height": "357"
+        "height": "387"
       },
       "jar": {
         "fontSize": {
@@ -6881,8 +6883,8 @@
         "width": "171",
         "height": "387"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -7005,15 +7007,15 @@
       "type": "activity",
       "slug": "luxido-91-covi016",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "12": 5,
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 11,
           "1.5": 3
         },
         "rx": {
@@ -7021,7 +7023,7 @@
           "12.5": 5
         },
         "textCount": 7,
-        "width": "279",
+        "width": "274",
         "height": "350"
       },
       "jar": {
@@ -7092,7 +7094,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 28,
+          "1": 26,
           "1.5": 3
         },
         "rx": {
@@ -7121,8 +7123,8 @@
         "width": "232",
         "height": "507"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -7178,7 +7180,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 16,
+          "1": 15,
           "1.5": 4
         },
         "rx": {
@@ -7209,8 +7211,8 @@
         "width": "311",
         "height": "271"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -7381,12 +7383,12 @@
           "13": 4
         },
         "strokeWidth": {
-          "1": 2
+          "1": 1
         },
         "rx": {},
         "textCount": 4,
-        "width": "459",
-        "height": "171"
+        "width": "244",
+        "height": "189"
       },
       "jar": {
         "fontSize": {
@@ -7400,8 +7402,8 @@
         "width": "224",
         "height": "189"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -7458,8 +7460,8 @@
       "type": "activity",
       "slug": "mojezi-43-gamu360",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -7475,8 +7477,8 @@
           "12.5": 4
         },
         "textCount": 9,
-        "width": "245",
-        "height": "311"
+        "width": "238",
+        "height": "275"
       },
       "jar": {
         "fontSize": {
@@ -7583,8 +7585,8 @@
       "type": "activity",
       "slug": "mudobi-07-biji996",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -7600,7 +7602,7 @@
         },
         "textCount": 14,
         "width": "271",
-        "height": "730"
+        "height": "722"
       },
       "jar": {
         "fontSize": {
@@ -7982,14 +7984,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 6
+          "1": 5
         },
         "rx": {
           "12.5": 1
         },
         "textCount": 4,
-        "width": "163",
-        "height": "232"
+        "width": "197",
+        "height": "183"
       },
       "jar": {
         "fontSize": {
@@ -8007,8 +8009,8 @@
         "width": "197",
         "height": "183"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -8057,8 +8059,8 @@
       "type": "activity",
       "slug": "nikivo-06-kaxa873",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 2,
@@ -8074,8 +8076,8 @@
           "12.5": 6
         },
         "textCount": 10,
-        "width": "295",
-        "height": "525"
+        "width": "293",
+        "height": "547"
       },
       "jar": {
         "fontSize": {
@@ -8250,12 +8252,11 @@
       "type": "activity",
       "slug": "nipuxu-11-tefa314",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
-          "12": 2,
-          "14": 2
+          "12": 2
         },
         "strokeWidth": {
           "1": 3
@@ -8263,7 +8264,7 @@
         "rx": {
           "12.5": 2
         },
-        "textCount": 4,
+        "textCount": 2,
         "width": "79",
         "height": "229"
       },
@@ -8335,8 +8336,8 @@
           "12.5": 2
         },
         "textCount": 7,
-        "width": "470",
-        "height": "427"
+        "width": "451",
+        "height": "419"
       },
       "jar": {
         "fontSize": {
@@ -8355,8 +8356,8 @@
         "width": "451",
         "height": "419"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -8563,8 +8564,8 @@
           "12.5": 1
         },
         "textCount": 2,
-        "width": "183",
-        "height": "157"
+        "width": "164",
+        "height": "150"
       },
       "jar": {
         "fontSize": {
@@ -8581,32 +8582,32 @@
         "width": "164",
         "height": "150"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
       "slug": "notuli-49-xugi698",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "12": 2,
-          "14": 1,
+          "14": 2,
           "18": 2
         },
         "strokeWidth": {
-          "1": 7,
+          "1": 5,
           "1.5": 3
         },
         "rx": {
-          "(absent)": 2,
+          "(absent)": 3,
           "12.5": 2
         },
-        "textCount": 5,
+        "textCount": 6,
         "width": "242",
-        "height": "286"
+        "height": "263"
       },
       "jar": {
         "fontSize": {
@@ -8843,17 +8844,18 @@
       "ours": {
         "fontSize": {
           "12": 1,
-          "13": 8
+          "13": 13
         },
         "strokeWidth": {
           "1": 1
         },
         "rx": {
+          "(absent)": 1,
           "12.5": 1
         },
-        "textCount": 9,
-        "width": "706",
-        "height": "110"
+        "textCount": 14,
+        "width": "263",
+        "height": "180"
       },
       "jar": {
         "fontSize": {
@@ -8871,8 +8873,8 @@
         "width": "263",
         "height": "180"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -8962,8 +8964,8 @@
       "type": "activity",
       "slug": "pateca-54-lija084",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -8971,15 +8973,15 @@
           "14": 1
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "2.5": 2
         },
         "rx": {
           "12.5": 3
         },
         "textCount": 8,
-        "width": "213",
-        "height": "297"
+        "width": "217",
+        "height": "262"
       },
       "jar": {
         "fontSize": {
@@ -9164,7 +9166,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 17,
+          "1": 16,
           "1.5": 4
         },
         "rx": {
@@ -9193,8 +9195,8 @@
         "width": "226",
         "height": "343"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -9206,13 +9208,13 @@
           "13": 8
         },
         "strokeWidth": {
-          "1": 6,
+          "1": 5,
           "2.5": 2
         },
         "rx": {},
         "textCount": 10,
-        "width": "687",
-        "height": "212"
+        "width": "365",
+        "height": "188"
       },
       "jar": {
         "fontSize": {
@@ -9228,8 +9230,8 @@
         "width": "365",
         "height": "188"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -9238,7 +9240,7 @@
       "ours": {
         "fontSize": {
           "11": 7,
-          "12": 4
+          "12": 7
         },
         "strokeWidth": {
           "1": 10
@@ -9246,8 +9248,8 @@
         "rx": {
           "12.5": 2
         },
-        "textCount": 11,
-        "width": "361",
+        "textCount": 14,
+        "width": "308",
         "height": "236"
       },
       "jar": {
@@ -9265,8 +9267,8 @@
         "width": "308",
         "height": "236"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -9394,14 +9396,14 @@
           "13": 2
         },
         "strokeWidth": {
-          "1": 22
+          "1": 20
         },
         "rx": {
           "12.5": 5
         },
         "textCount": 9,
-        "width": "252",
-        "height": "495"
+        "width": "403",
+        "height": "417"
       },
       "jar": {
         "fontSize": {
@@ -9419,8 +9421,8 @@
         "width": "403",
         "height": "417"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -9439,8 +9441,8 @@
           "12.5": 5
         },
         "textCount": 7,
-        "width": "403",
-        "height": "338"
+        "width": "384",
+        "height": "333"
       },
       "jar": {
         "fontSize": {
@@ -9458,8 +9460,8 @@
         "width": "384",
         "height": "333"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -9576,11 +9578,11 @@
       "type": "activity",
       "slug": "pufuzi-99-vone170",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
-          "12": 6
+          "12": 1
         },
         "strokeWidth": {
           "1": 2
@@ -9588,9 +9590,9 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 6,
-        "width": "79",
-        "height": "209"
+        "textCount": 1,
+        "width": "125",
+        "height": "298"
       },
       "jar": {
         "fontSize": {
@@ -9818,8 +9820,8 @@
       "type": "activity",
       "slug": "razuzu-32-faje125",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "12": 4,
@@ -9835,8 +9837,8 @@
           "12.5": 4
         },
         "textCount": 12,
-        "width": "573",
-        "height": "306"
+        "width": "243",
+        "height": "357"
       },
       "jar": {
         "fontSize": {
@@ -9861,8 +9863,8 @@
       "type": "activity",
       "slug": "rekuxa-78-lidi292",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -9870,15 +9872,15 @@
           "14": 1
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "2.5": 2
         },
         "rx": {
           "12.5": 3
         },
         "textCount": 8,
-        "width": "213",
-        "height": "297"
+        "width": "217",
+        "height": "262"
       },
       "jar": {
         "fontSize": {
@@ -9915,8 +9917,8 @@
           "12.5": 2
         },
         "textCount": 4,
-        "width": "315",
-        "height": "218"
+        "width": "296",
+        "height": "213"
       },
       "jar": {
         "fontSize": {
@@ -9934,8 +9936,8 @@
         "width": "296",
         "height": "213"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -9953,7 +9955,7 @@
           "12.5": 3
         },
         "textCount": 4,
-        "width": "120",
+        "width": "105",
         "height": "306"
       },
       "jar": {
@@ -9971,8 +9973,8 @@
         "width": "105",
         "height": "306"
       },
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -10052,23 +10054,23 @@
       "type": "activity",
       "slug": "rirefa-62-kucu593",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 2,
           "12": 3
         },
         "strokeWidth": {
-          "1": 9
+          "1": 6
         },
         "rx": {
           "2.5": 2,
           "12.5": 3
         },
         "textCount": 5,
-        "width": "167",
-        "height": "264"
+        "width": "220",
+        "height": "181"
       },
       "jar": {
         "fontSize": {
@@ -10220,8 +10222,8 @@
       "type": "activity",
       "slug": "rucuga-83-tosu408",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -10229,14 +10231,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 11
+          "1": 10
         },
         "rx": {
           "12.5": 1
         },
         "textCount": 5,
-        "width": "207",
-        "height": "294"
+        "width": "240",
+        "height": "235"
       },
       "jar": {
         "fontSize": {
@@ -10294,8 +10296,8 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -10308,8 +10310,8 @@
           "12.5": 4
         },
         "textCount": 8,
-        "width": "245",
-        "height": "315"
+        "width": "243",
+        "height": "290"
       },
       "jar": {
         "fontSize": {
@@ -10339,7 +10341,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 34,
+          "1": 33,
           "2.5": 4,
           "1.5": 4
         },
@@ -10370,8 +10372,8 @@
         "width": "471",
         "height": "558"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -10455,12 +10457,12 @@
       "type": "activity",
       "slug": "ruzazu-94-meso880",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 3,
-          "12": 5,
+          "12": 6,
           "18": 2
         },
         "strokeWidth": {
@@ -10469,11 +10471,11 @@
         },
         "rx": {
           "(absent)": 1,
-          "12.5": 5
+          "12.5": 6
         },
-        "textCount": 10,
-        "width": "236",
-        "height": "363"
+        "textCount": 11,
+        "width": "275",
+        "height": "327"
       },
       "jar": {
         "fontSize": {
@@ -10514,7 +10516,7 @@
         },
         "textCount": 12,
         "width": "529",
-        "height": "608"
+        "height": "607"
       },
       "jar": {
         "fontSize": {
@@ -10534,15 +10536,15 @@
         "width": "528",
         "height": "607"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
       "slug": "sadovu-51-fata536",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -10550,7 +10552,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -10591,7 +10593,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 10,
           "2.5": 2,
           "1.5": 3
         },
@@ -10622,8 +10624,8 @@
         "width": "269",
         "height": "251"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c"
     },
     {
       "type": "activity",
@@ -10783,8 +10785,8 @@
       "type": "activity",
       "slug": "sifite-87-ziti434",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "12": 2,
@@ -10801,7 +10803,7 @@
         },
         "textCount": 5,
         "width": "137",
-        "height": "251"
+        "height": "226"
       },
       "jar": {
         "fontSize": {
@@ -10839,8 +10841,8 @@
           "12.5": 2
         },
         "textCount": 9,
-        "width": "421",
-        "height": "243"
+        "width": "263",
+        "height": "269"
       },
       "jar": {
         "fontSize": {
@@ -10858,8 +10860,8 @@
         "width": "263",
         "height": "269"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -10980,22 +10982,22 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 6,
           "12": 6
         },
         "strokeWidth": {
-          "1": 22
+          "1": 20
         },
         "rx": {
           "12.5": 6
         },
         "textCount": 12,
-        "width": "274",
-        "height": "575"
+        "width": "278",
+        "height": "503"
       },
       "jar": {
         "fontSize": {
@@ -11068,8 +11070,8 @@
           "12.5": 5
         },
         "textCount": 15,
-        "width": "734",
-        "height": "365"
+        "width": "384",
+        "height": "396"
       },
       "jar": {
         "fontSize": {
@@ -11087,8 +11089,8 @@
         "width": "384",
         "height": "396"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -11211,8 +11213,8 @@
       "type": "activity",
       "slug": "suluni-73-lotu140",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -11228,8 +11230,8 @@
           "12.5": 1
         },
         "textCount": 3,
-        "width": "150",
-        "height": "335"
+        "width": "144",
+        "height": "271"
       },
       "jar": {
         "fontSize": {
@@ -11363,19 +11365,17 @@
       "type": "activity",
       "slug": "tajuxe-32-sexo680",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "13": 2
         },
-        "strokeWidth": {
-          "1": 1
-        },
+        "strokeWidth": {},
         "rx": {},
         "textCount": 2,
-        "width": "234",
-        "height": "130"
+        "width": "168",
+        "height": "122"
       },
       "jar": {
         "fontSize": {
@@ -11513,8 +11513,8 @@
           "12.5": 3
         },
         "textCount": 6,
-        "width": "339",
-        "height": "247"
+        "width": "307",
+        "height": "252"
       },
       "jar": {
         "fontSize": {
@@ -11531,8 +11531,8 @@
         "width": "307",
         "height": "252"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "b4b553c7"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -11581,49 +11581,6 @@
     },
     {
       "type": "activity",
-      "slug": "tmp1",
-      "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
-      "ours": {
-        "fontSize": {
-          "11": 3,
-          "12": 5,
-          "18": 2
-        },
-        "strokeWidth": {
-          "1": 13,
-          "1.5": 3
-        },
-        "rx": {
-          "(absent)": 1,
-          "12.5": 5
-        },
-        "textCount": 10,
-        "width": "236",
-        "height": "363"
-      },
-      "jar": {
-        "fontSize": {
-          "11": 3,
-          "12": 6,
-          "18": 2
-        },
-        "strokeWidth": {
-          "1": 13,
-          "1.5": 3
-        },
-        "rx": {
-          "(absent)": 1,
-          "12.5": 6
-        },
-        "textCount": 11,
-        "width": "275",
-        "height": "348"
-      }
-    },
-    {
-      "type": "activity",
       "slug": "tobajo-64-mipi810",
       "status": "baseline",
       "ours": {
@@ -11635,7 +11592,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 64,
+          "1": 63,
           "1.5": 4
         },
         "rx": {
@@ -11644,8 +11601,8 @@
           "2.5": 2
         },
         "textCount": 29,
-        "width": "647",
-        "height": "683"
+        "width": "667",
+        "height": "637"
       },
       "jar": {
         "fontSize": {
@@ -11668,8 +11625,8 @@
         "width": "629",
         "height": "637"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -11763,8 +11720,8 @@
           "12.5": 4
         },
         "textCount": 10,
-        "width": "866",
-        "height": "351"
+        "width": "828",
+        "height": "341"
       },
       "jar": {
         "fontSize": {
@@ -11785,8 +11742,8 @@
         "width": "828",
         "height": "341"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -11814,8 +11771,8 @@
           "12.5": 3
         },
         "textCount": 8,
-        "width": "254",
-        "height": "414"
+        "width": "256",
+        "height": "402"
       },
       "jar": {
         "fontSize": {
@@ -11834,8 +11791,8 @@
         "width": "256",
         "height": "402"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -11960,8 +11917,8 @@
       "type": "activity",
       "slug": "vexula-75-noko098",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 11,
@@ -11969,14 +11926,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 15
+          "1": 14
         },
         "rx": {
           "12.5": 1
         },
         "textCount": 13,
         "width": "450",
-        "height": "410"
+        "height": "366"
       },
       "jar": {
         "fontSize": {
@@ -12042,12 +11999,11 @@
       "type": "activity",
       "slug": "vilecu-41-tete416",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
-          "12": 5,
-          "14": 2
+          "12": 5
         },
         "strokeWidth": {
           "1": 5
@@ -12055,7 +12011,7 @@
         "rx": {
           "12.5": 2
         },
-        "textCount": 7,
+        "textCount": 5,
         "width": "160",
         "height": "317"
       },
@@ -12127,8 +12083,8 @@
           "12.5": 1
         },
         "textCount": 4,
-        "width": "317",
-        "height": "110"
+        "width": "194",
+        "height": "116"
       },
       "jar": {
         "fontSize": {
@@ -12145,8 +12101,8 @@
         "width": "194",
         "height": "116"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842"
     },
     {
       "type": "activity",
@@ -12191,13 +12147,13 @@
       "type": "activity",
       "slug": "vodobe-33-kefa909",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "12": 2,
           "13": 1,
-          "14": 1,
+          "14": 2,
           "18": 2
         },
         "strokeWidth": {
@@ -12205,12 +12161,12 @@
           "1.5": 3
         },
         "rx": {
-          "(absent)": 2,
+          "(absent)": 3,
           "12.5": 2
         },
-        "textCount": 6,
-        "width": "833",
-        "height": "249"
+        "textCount": 7,
+        "width": "814",
+        "height": "221"
       },
       "jar": {
         "fontSize": {
@@ -12249,7 +12205,7 @@
           "12.5": 2
         },
         "textCount": 3,
-        "width": "310",
+        "width": "289",
         "height": "159"
       },
       "jar": {
@@ -12268,8 +12224,8 @@
         "width": "289",
         "height": "159"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -12287,8 +12243,8 @@
           "12.5": 1
         },
         "textCount": 2,
-        "width": "104",
-        "height": "124"
+        "width": "85",
+        "height": "110"
       },
       "jar": {
         "fontSize": {
@@ -12305,8 +12261,8 @@
         "width": "85",
         "height": "110"
       },
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -12362,8 +12318,8 @@
           "12.5": 3
         },
         "textCount": 13,
-        "width": "701",
-        "height": "340"
+        "width": "351",
+        "height": "369"
       },
       "jar": {
         "fontSize": {
@@ -12381,8 +12337,8 @@
         "width": "351",
         "height": "369"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -12518,7 +12474,7 @@
         },
         "textCount": 25,
         "width": "424",
-        "height": "906"
+        "height": "967"
       },
       "jar": {
         "fontSize": {
@@ -12535,8 +12491,8 @@
         "width": "424",
         "height": "936"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "d018a56f"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -12616,15 +12572,15 @@
       "type": "activity",
       "slug": "xidamu-85-xoti640",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "12": 4,
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -12694,8 +12650,8 @@
       "type": "activity",
       "slug": "xizola-97-sizu458",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 1,
@@ -12703,7 +12659,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 13,
           "1.5": 3
         },
         "rx": {
@@ -12737,8 +12693,8 @@
       "type": "activity",
       "slug": "xolazi-74-vamu265",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -12752,8 +12708,8 @@
           "12.5": 2
         },
         "textCount": 9,
-        "width": "511",
-        "height": "218"
+        "width": "443",
+        "height": "230"
       },
       "jar": {
         "fontSize": {
@@ -12905,8 +12861,8 @@
       "type": "activity",
       "slug": "zakuke-30-sobi867",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -12914,14 +12870,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 14
+          "1": 13
         },
         "rx": {
           "12.5": 1
         },
         "textCount": 5,
-        "width": "209",
-        "height": "298"
+        "width": "246",
+        "height": "239"
       },
       "jar": {
         "fontSize": {
@@ -12944,13 +12900,12 @@
       "type": "activity",
       "slug": "zaloze-31-jibo311",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8b812842",
       "ours": {
         "fontSize": {
           "11": 2,
-          "12": 1,
-          "14": 1
+          "12": 1
         },
         "strokeWidth": {
           "1": 4
@@ -12958,7 +12913,7 @@
         "rx": {
           "12.5": 1
         },
-        "textCount": 4,
+        "textCount": 3,
         "width": "135",
         "height": "197"
       },
@@ -13124,14 +13079,15 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
-          "11": 3,
-          "12": 12,
+          "11": 4,
+          "12": 17,
           "13": 1,
-          "14": 16
+          "14": 16,
+          "15": 1
         },
         "strokeWidth": {
           "1": 30
@@ -13140,9 +13096,9 @@
           "12.5": 9,
           "7.5": 1
         },
-        "textCount": 32,
-        "width": "842",
-        "height": "709"
+        "textCount": 39,
+        "width": "861",
+        "height": "704"
       },
       "jar": {
         "fontSize": {
@@ -13182,7 +13138,7 @@
         },
         "textCount": 11,
         "width": "286",
-        "height": "480"
+        "height": "516"
       },
       "jar": {
         "fontSize": {
@@ -13200,8 +13156,8 @@
         "width": "286",
         "height": "516"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400"
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251"
     },
     {
       "type": "activity",
@@ -13289,8 +13245,8 @@
       "type": "activity",
       "slug": "zinelo-77-losu727",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "4f5d48d2",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "dcd2283c",
       "ours": {
         "fontSize": {
           "11": 10,
@@ -13298,7 +13254,7 @@
           "18": 3
         },
         "strokeWidth": {
-          "1": 34,
+          "1": 33,
           "2.5": 4,
           "1.5": 4
         },
@@ -13346,8 +13302,8 @@
           "12.5": 6
         },
         "textCount": 8,
-        "width": "320",
-        "height": "352"
+        "width": "380",
+        "height": "446"
       },
       "jar": {
         "fontSize": {
@@ -13366,8 +13322,8 @@
         "width": "380",
         "height": "474"
       },
-      "measuredAt": "2026-09-30",
-      "measuredAgainstCommit": "2748fd1d"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",
@@ -13447,27 +13403,27 @@
       "type": "activity",
       "slug": "zokodi-10-dexu703",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fontSize": {
           "11": 1,
           "12": 2,
-          "14": 1,
+          "14": 2,
           "18": 3
         },
         "strokeWidth": {
-          "1": 14,
+          "1": 12,
           "1.5": 4,
           "2.5": 2
         },
         "rx": {
-          "(absent)": 2,
+          "(absent)": 3,
           "12.5": 2
         },
-        "textCount": 7,
-        "width": "334",
-        "height": "428"
+        "textCount": 8,
+        "width": "313",
+        "height": "357"
       },
       "jar": {
         "fontSize": {
@@ -13570,8 +13526,8 @@
       "type": "activity",
       "slug": "zuxute-46-daku634",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-06",
+      "measuredAgainstCommit": "0850c251",
       "ours": {
         "fontSize": {
           "11": 2,
@@ -13579,14 +13535,14 @@
           "13": 1
         },
         "strokeWidth": {
-          "1": 19
+          "1": 18
         },
         "rx": {
           "12.5": 3
         },
         "textCount": 6,
-        "width": "226",
-        "height": "362"
+        "width": "280",
+        "height": "303"
       },
       "jar": {
         "fontSize": {

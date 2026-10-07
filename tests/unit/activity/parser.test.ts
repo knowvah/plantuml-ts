@@ -23,6 +23,7 @@ import type {
   ActivityDetach,
 } from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
+import { BLOCK_E1_NEWLINE } from '../../../src/core/tim/builtin/jaws-constants.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -66,6 +67,35 @@ describe('parses :action; syntax', () => {
     const ast = parse([':A\\non\\nseveral\\nlines;']);
     const node = firstNode(ast) as ActivityAction;
     expect(node.label).toBe('A\non\nseveral\nlines');
+  });
+
+  // PCTN (mission `activity-divergence-drive-3` T2a): `%n()` is already
+  // expanded to the `BLOCK_E1_NEWLINE` sentinel by the TIM preprocessor
+  // before any diagram parser sees the line -- this test embeds the
+  // sentinel character directly (the preprocessor's own output shape),
+  // the same way `fabule-54-pili300`'s fixture reaches this code path
+  // after a real `%n()`-bearing source is preprocessed.
+  it("decodes a BLOCK_E1_NEWLINE sentinel (the preprocessor's own %n() expansion) to a real newline", () => {
+    const ast = parse([`:1 ${BLOCK_E1_NEWLINE} fprintf( hello${BLOCK_E1_NEWLINE} , %s);`]);
+    const node = firstNode(ast) as ActivityAction;
+    expect(node.label).toBe('1 \n fprintf( hello\n , %s)');
+  });
+});
+
+// PCTN, the two other `node-dispatch.ts` label sites `tryAction` shares
+// the sentinel decode with: a multi-line `:...` body, and `repeat`'s own
+// inline entry action.
+describe('PCTN decodes BLOCK_E1_NEWLINE in the multiline-action and repeat-entry label sites too', () => {
+  it('a multi-line action body decodes the sentinel on its own joined label', () => {
+    const ast = parse([':a', `b${BLOCK_E1_NEWLINE}c;`]);
+    const node = firstNode(ast) as ActivityAction;
+    expect(node.label).toBe('a\nb\nc');
+  });
+
+  it("repeat's inline entry action decodes the sentinel", () => {
+    const ast = parse([`repeat :R${BLOCK_E1_NEWLINE}1;`, ':a;', 'repeat while (c)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.entry?.label).toBe('R\n1');
   });
 });
 
@@ -423,14 +453,7 @@ describe('parses swimlane', () => {
   });
 
   it('a later color-less switch to the same lane keeps its earlier color', () => {
-    const ast = parse([
-      '|#AntiqueWhite|Alice|',
-      '  :Do work;',
-      '|Bob|',
-      '  :Review;',
-      '|Alice|',
-      '  :More work;',
-    ]);
+    const ast = parse(['|#AntiqueWhite|Alice|', '  :Do work;', '|Bob|', '  :Review;', '|Alice|', '  :More work;']);
     expect(ast.swimlaneColors).toEqual({ Alice: '#AntiqueWhite' });
   });
 
@@ -508,6 +531,113 @@ describe('parses note left multi-line', () => {
     const ast = parse(['note left', '  line 1', '  line 2', 'end note']);
     const node = firstNode(ast) as ActivityNote;
     expect(node.text).toContain('line 2');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 12b — `note : text` / `note` with NO direction keyword defaults to
+// LEFT (`NotePosition.java:43-48`'s own `defaultLeft(null) === LEFT`,
+// `activity-divergence-drive-3` T2a, family NOTELEFT) -- was 'right'.
+// ---------------------------------------------------------------------------
+
+describe('a note with no left/right keyword defaults to LEFT (NotePosition.java:43-48)', () => {
+  it('single-line `note : text` -- position is "left"', () => {
+    const ast = parse(['note : text here']);
+    const node = firstNode(ast) as ActivityNote;
+    expect(node.position).toBe('left');
+  });
+
+  it('multi-line `note` ... `end note` -- position is "left"', () => {
+    const ast = parse(['note', '  line 1', 'end note']);
+    const node = firstNode(ast) as ActivityNote;
+    expect(node.position).toBe('left');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// IFNOTE (mission `activity-divergence-drive-3` T2a): a note the IF ITSELF
+// owns (`InstructionIf.java:222-227`), never a branch sibling -- extracted
+// into `ActivityIf.notes`, stripped from the branch body it was parsed in.
+// ---------------------------------------------------------------------------
+
+describe('a note as the FIRST line of a then-branch belongs to the if, not the branch', () => {
+  it('is lifted into ActivityIf.notes, and the branch body no longer contains it', () => {
+    const ast = parse(['if (x) then (yes)', 'note right: n', ':a;', 'endif']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([{ kind: 'note', text: 'n', position: 'right' }]);
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }]);
+  });
+});
+
+describe('a note as the FIRST line of an else-branch belongs to the if', () => {
+  it('is lifted into ActivityIf.notes, appended after any then-branch note', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'else (no)', 'note left: e', ':b;', 'endif']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([{ kind: 'note', text: 'e', position: 'left' }]);
+    expect(node.elseBranch).toEqual([{ kind: 'action', label: 'b' }]);
+  });
+});
+
+describe('a note immediately after endif belongs to the CLOSED if, not a flow sibling', () => {
+  it('merges onto the if node; the top-level node list has ONE node, not two', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'note right: after']);
+    expect(ast.nodes).toHaveLength(1);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.kind).toBe('if');
+    expect(node.notes).toEqual([{ kind: 'note', text: 'after', position: 'right' }]);
+  });
+
+  it('appends after a leading-branch note, preserving insertion order', () => {
+    const ast = parse(['if (x) then (yes)', 'note left: lead', ':a;', 'endif', 'note right: trail']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.notes).toEqual([
+      { kind: 'note', text: 'lead', position: 'left' },
+      { kind: 'note', text: 'trail', position: 'right' },
+    ]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// IF-KILL (mission `activity-divergence-drive-3` T3c): `detach`/`kill`
+// right after a closed `if` kills that if's `thenBranch`/`elseBranch` IN
+// PLACE (`InstructionIf.java:199-213`'s own `endifCalled` arm) -- never a
+// flow sibling. Our port models `kill`/`detach` as their own node, so
+// the Java "flip a `killed` flag" becomes "append the same node kind to
+// the branch", mirroring `isStopOrSpot`'s own in-branch `[action, kill|
+// detach]` convention (`conditional-builder.ts`).
+// ---------------------------------------------------------------------------
+
+describe('a detach/kill immediately after endif kills the CLOSED if, not a flow sibling', () => {
+  it('merges onto the if node; the top-level node list has ONE node, not two', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'detach']);
+    expect(ast.nodes).toHaveLength(1);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.kind).toBe('if');
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
+  });
+
+  it('kill behaves the same as detach', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'kill']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'kill' }]);
+  });
+
+  it('a non-empty elseBranch is ALSO killed (Java kills thens.get(0) AND elseBranch, same loop iteration)', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'else (no)', ':b;', 'endif', 'detach']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.thenBranch).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
+    expect(node.elseBranch).toEqual([{ kind: 'action', label: 'b' }, { kind: 'detach' }]);
+  });
+
+  it('an EMPTY elseBranch is left empty (Java only kills a branch whose getLast() is non-null)', () => {
+    const ast = parse(['if (x) then (yes)', ':a;', 'endif', 'detach']);
+    const node = firstNode(ast) as ActivityIf;
+    expect(node.elseBranch).toEqual([]);
+  });
+
+  it('a detach NOT immediately after a closed if stays a flow sibling', () => {
+    const ast = parse([':a;', 'detach']);
+    expect(ast.nodes).toEqual([{ kind: 'action', label: 'a' }, { kind: 'detach' }]);
   });
 });
 

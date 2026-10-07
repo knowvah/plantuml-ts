@@ -227,11 +227,11 @@ describe('parseNodes trailing-`;` strip: bare keywords vs. colon-content command
     expect(firstNode(ast).kind).toBe('stop');
   });
 
-  it('a single-line note keeps its own trailing `;` as literal content (CommandNote3.java:75-80 has no semicolon in its grammar at all, jageti-56-kume076 shape)', () => {
+  it('a single-line note keeps its own trailing `;` as literal content, and unescapes its own `\\n` (CommandNote3.java:75-80 has no semicolon in its grammar at all; `Display.getWithNewlines` resolves `\\n`, add3-T3d; jageti-56-kume076 shape)', () => {
     const ast = parse([':Step;', 'note right: - first line\\n- second line;']);
     const note = ast.nodes[1] as ActivityNote;
     expect(note.kind).toBe('note');
-    expect(note.text).toBe('- first line\\n- second line;');
+    expect(note.text).toBe('- first line\n- second line;');
   });
 });
 

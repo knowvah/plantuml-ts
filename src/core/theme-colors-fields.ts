@@ -7,11 +7,18 @@
  * the same way, to theme-graph-colors.ts).
  */
 
-import type { Paint } from './paint.js';
+import type { Paint, Gradient } from './paint.js';
 import type { ElementColors, ThemeGraphColors } from './theme-graph-colors.js';
 
 export interface ThemeColorFields {
   background: string;
+  /** T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` is
+   *  a document-level `Gradient` (`HColorSet.java:109-116`). `background`
+   *  above stays its flattened end-colour -- see `skinparam-accumulator
+   *  .ts#backgroundGradient`'s doc comment for why this is a dedicated
+   *  field, not a widened `background: Paint`. Read only by `assemble-svg
+   *  .ts`'s activity background-rect finalizer. */
+  backgroundGradient?: Gradient;
   /** Default fill for action/node shapes (separate from canvas background). */
   nodeBackground: string;
   /**

@@ -19,6 +19,8 @@ import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
+import { measureLineWidth } from '../../activity-text-placement.js';
+import { conditionBox, noteBox } from './shapes-of-boxes.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -78,55 +80,6 @@ export interface ShapesOfInput {
   readonly theme: Theme;
 }
 
-/**
- * `FtileIfHexagon`/`GtileHexagonInside`'s drawn extents when a condition
- * label IS present (`activity-renderer-shapes.ts#renderHexagon`: a
- * `<polygon>` spanning the node's own box, `[x, x+w] x [y, y+h]`).
- */
-function hexagonBox(node: ActivityNodeGeo): { x: number; y: number; width: number; height: number } {
-  return { x: node.x, y: node.y, width: node.width, height: node.height };
-}
-
-/**
- * `renderDiamond`'s `diamond(cx, cy, size)` (`core/svg-shapes.ts`, `size =
- * node.width / 2`): x spans `[cx-size, cx+size] = [x, x+w]` exactly, but y
- * spans `[cy-size, cy+size]`, which only equals `[y, y+h]` when
- * `width === height` -- read literally here rather than assumed equal.
- */
-function diamondBox(node: ActivityNodeGeo): { x: number; y: number; width: number; height: number } {
-  const size = node.width / 2;
-  const cy = node.y + node.height / 2;
-  return { x: node.x, y: cy - size, width: node.width, height: size * 2 };
-}
-
-/**
- * `if-split`/`while-header` render a hexagon ONLY when labelled
- * (`activity-renderer-shapes.ts#renderNode`'s own `node.label !== undefined
- * && node.label !== '' ? renderHexagon(...) : renderDiamond(...)`);
- * `repeat-cond` always renders a hexagon.
- */
-function conditionBox(node: ActivityNodeGeo): { x: number; y: number; width: number; height: number } {
-  if (node.kind === 'repeat-cond') return hexagonBox(node);
-  return node.label !== undefined && node.label !== '' ? hexagonBox(node) : diamondBox(node);
-}
-
-/**
- * `renderNote`'s Opale balloon path: the box extended to include the
- * spike tip on whichever side the note sits (`activity-renderer-shapes.ts
- * #renderNote`'s `bodyPath` -- both the left- and right-spike cases route
- * through `spike.x`/`spike.y`, so the drawn extents are the box union the
- * spike point).
- */
-function noteBox(node: ActivityNodeGeo): { x: number; y: number; width: number; height: number } {
-  const spike = node.spikeTip;
-  if (spike === undefined) return { x: node.x, y: node.y, width: node.width, height: node.height };
-  const minX = Math.min(node.x, spike.x);
-  const maxX = Math.max(node.x + node.width, spike.x);
-  const minY = Math.min(node.y, spike.y);
-  const maxY = Math.max(node.y + node.height, spike.y);
-  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
-}
-
 /** `FtileBreak#drawU` draws nothing; upstream's `FtileThinSplit` draws a
  *  `ULine`, which never occupies (see {@link shapeForNode}'s doc). `if-merge`
  *  used to be listed here (`FtileEmpty#drawU`, the omitted-diamond2 path,
@@ -152,6 +105,12 @@ const BAR_KINDS = new Set(['fork-bar', 'join-bar']);
 
 /** Diamond/hexagon condition nodes -- see {@link conditionBox}. */
 const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
+
+/** T3i (row PARTCOMP): `partition`/`group` resolve to a bare
+ *  `USymbolFrame` (`USymbols.java:81,87`), whose own rect sets BOTH
+ *  `ignoreForCompressionOnX/Y()` (`USymbolFrame.java:70-71`) -- unlike
+ *  every other `'rect'`-kind node below (a plain `URectangle`). */
+const FRAME_KINDS = new Set(['group', 'partition']);
 
 /**
  * `if-label`'s text box (D3) -- `renderIfLabel`'s own baseline convention
@@ -250,14 +209,41 @@ function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: T
  *   -- the hexagon's own label, now its own node, see that function's doc).
  * - `note` -> `polygon`, {@link noteBox} (Opale is a `UPath`; `SlotFinder
  *   #drawPath` uses min/max, same as `drawPolygon`).
- * - everything else (start/stop/end/kill/spot/action/group/partition/
- *   label/default) -> `rect`, the node's own box. Occupancy-wise this is
+ * - `group`, `partition` -> `rect`, `ignoreX: true, ignoreY: true` (T3i,
+ *   {@link FRAME_KINDS}'s own doc).
+ * - everything else (start/stop/end/kill/spot/action/label/default) ->
+ *   `rect`, the node's own box, neither flag set. Occupancy-wise this is
  *   IDENTICAL to `ellipse`/`empty` for a symmetric shape --
  *   `SlotFinder#drawRectangle`/`drawEllipse`/`drawEmpty` all compute
  *   `[x, x+width]`/`[y, y+height]` byte-identically (`SlotFinder.java
  *   :138-161`) -- so which of the three a plain box kind is tagged does
  *   not change any slot.
  */
+/**
+ * `USymbolFrame#drawFrame`'s title-tab underline (`:76-84`, a `UPath`,
+ * `setIgnoreForCompressionOnX()` only -- never Y). `UPath#drawWhenCompressed`
+ * is a NO-OP (`klimt/UPath.java:233-234`, unlike `URectangle`'s 2px-edges
+ * reservation), so on X it must contribute NOTHING, not a shrunk box --
+ * modelled as `'polygon'` with `polygonSkipMode: 'x'` ({@link addShape}'s
+ * own `shape.polygonSkipMode !== mode` skip, the one existing CompressShape
+ * kind with that "contributes nothing on this axis" semantic). On Y
+ * (never skipped) it occupies its full `[y, y+textHeight]` box, exactly
+ * `SlotFinder#drawPath`'s own un-ignored branch. `textWidth`/`textHeight`
+ * mirror `activity-renderer-composite.ts#renderComposite`'s own formula
+ * verbatim (same `dimTitle.getWidth() == 0` branch, `USymbolFrame.java
+ * :76-84,99-104`) -- duplicated rather than imported, the same precedent
+ * {@link ifLabelShape} already sets for mirroring a renderer's geometry
+ * in this file.
+ */
+function frameTabShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
+  const fontSize = activityFontSize(theme, 'composite');
+  const title = node.label ?? '';
+  const titleWidth = title === '' ? 0 : measureLineWidth(theme, fontSize, title);
+  const textWidth = titleWidth === 0 ? node.width / 3 : titleWidth + 10;
+  const textHeight = titleWidth === 0 ? 12 : fontSize + 3;
+  return { kind: 'polygon', x: node.x, y: node.y, width: textWidth, height: textHeight, polygonSkipMode: 'x' };
+}
+
 function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape | null {
   if (NO_SHAPE_KINDS.has(node.kind)) return null;
   if (BAR_KINDS.has(node.kind)) {
@@ -270,6 +256,9 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
   if (node.kind === 'if-own-label') return ifOwnLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
+  if (FRAME_KINDS.has(node.kind)) {
+    return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height, ignoreX: true, ignoreY: true };
+  }
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
 
@@ -488,6 +477,7 @@ export function shapesOf(input: ShapesOfInput): CompressShape[] {
   for (const node of input.nodes) {
     const shape = shapeForNode(node, input.bounder, input.theme);
     if (shape !== null) shapes.push(shape);
+    if (FRAME_KINDS.has(node.kind)) shapes.push(frameTabShape(node, input.bounder, input.theme));
   }
   for (let i = 0; i < input.edges.length; i++) {
     shapes.push(...shapesForEdge(input.edges[i]!, input.edgeMeta[i]!, input.bounder, input.theme));

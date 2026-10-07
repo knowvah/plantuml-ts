@@ -1,0 +1,14 @@
+@startuml
+skinparam defaultFontSize 19
+skinparam noteFontSize 5
+if (condition?) then (yes)
+  :yes;
+else (no)
+  :no;
+  note right
+    any very very long text
+  end note
+endif
+
+stop
+@enduml

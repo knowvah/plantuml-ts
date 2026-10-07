@@ -15,6 +15,7 @@
  */
 
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
+import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
@@ -24,6 +25,17 @@ import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+
+/** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- keyed on
+ *  the concrete tile's `kind`, duplicated (not imported) in `walk-if-
+ *  with-links.ts` per this mission's own "one walker owns its own small
+ *  draw-site constant" precedent (`NOTE_STACK_MARGIN`'s duplication,
+ *  `layout/walk-with-notes.ts`). */
+function diamondShapeOf(diamond: DiamondConditionTile): 'inside' | 'square' | 'empty' {
+  if (diamond.kind === 'gtile-diamond-empty') return 'empty';
+  if (diamond.kind === 'gtile-diamond-square') return 'square';
+  return 'inside';
+}
 
 interface IfDownCtx {
   readonly t: GtileIfDown;
@@ -134,6 +146,7 @@ function pushDiamond1(ctx: IfDownCtx): void {
       width: t.diamond1.width,
       height: t.diamond1.height,
       label: t.diamond1.label,
+      diamondShape: diamondShapeOf(t.diamond1),
     },
     myLane,
   );
@@ -320,8 +333,36 @@ function pushElseConnector(ctx: IfDownCtx): void {
   }
 }
 
+/** `FtileIfDown#drawU`'s own `if (!isEmpty(opale)) opale.drawU(ug.apply
+ *  (UTranslate.dx(xOpale)))` (`:527-530`) -- FIRST in draw order, no `y`
+ *  translate at all (the note sits flush at this composite's own top,
+ *  `y=0` in its local frame; `diamond1Y` is what moves BELOW it). Never a
+ *  spike -- `createOpale`'s own `withLink=false` (`FtileIfWithDiamonds
+ *  .java:129`), same no-spike path `GtileNoteOpale.withLink` already
+ *  threads for the simple-leaf wrap (T3g). */
+function pushIfOwnNote(ctx: IfDownCtx): void {
+  const { t, x, y, myLane, out } = ctx;
+  if (t.opale === null) return;
+  const noteX = x + t.offsets.diamond1X - t.opale.box.width;
+  pushNode(
+    out,
+    {
+      id: out.nextId('note'),
+      kind: 'note',
+      x: noteX,
+      y,
+      width: t.opale.box.width,
+      height: t.opale.box.height,
+      label: t.opale.text,
+      notePosition: t.opale.position,
+    },
+    myLane,
+  );
+}
+
 export function walkIfDown(t: GtileIfDown, x: number, y: number, myLane: string | undefined, out: Out): void {
   const ctx: IfDownCtx = { t, x, y, myLane, out };
+  pushIfOwnNote(ctx);
   walkTile(t.mainTile, x + t.offsets.mainTileX, y + t.offsets.mainTileY, { kindHint: null, lane: myLane }, out);
   pushDiamond1(ctx);
   if (t.optionalStop !== null) {

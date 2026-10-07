@@ -1,0 +1,10 @@
+@startuml
+start
+fork
+-> hello;
+:A;
+fork again
+:B;
+end fork
+stop
+@enduml

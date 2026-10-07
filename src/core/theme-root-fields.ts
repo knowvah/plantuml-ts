@@ -44,4 +44,20 @@ export interface ThemeRootFields {
    * `activity/renderer.ts#renderActivity` is the first producer to set it.
    */
   preserveAspectRatio?: string;
+  /**
+   * `skinparam padding N` — `SkinParam#getPadding()` (`skin/SkinParam.java
+   * :1147-1150`): `getAsDouble("padding")`, a BARE root key, distinct from
+   * any per-element `<style>`/`skinparam <element>Padding` bucket value
+   * (`CommandSkinParam.java:96-99` additionally emits a "use CSS style
+   * instead" deprecation `Warning` when this key is set -- the Warning
+   * producer has no wiring in this port yet, reported separately, not
+   * blocking this field). Fed into EVERY activity `SheetBlock1` alongside
+   * (not instead of) that element's own bucket Padding (`FtileBox.java
+   * :180`, `ConditionalBuilder.java:244`, `FtileWithNoteOpale.java:149`,
+   * `FtileIfWithDiamonds.java:126`) -- two independent additions that
+   * happen to share one constructor argument upstream. Absent = `none()`
+   * (`SkinParam.java:1159`'s `isIntOrDecimal` guard), i.e. this field being
+   * `undefined` must read as a no-op, not zero-with-effect.
+   */
+  padding?: number;
 }

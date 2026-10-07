@@ -1,0 +1,7 @@
+surveying 126 timing fixtures (concurrency 6)
+  25/126
+  50/126
+  75/126
+  100/126
+  125/126
+wrote plans/activity-divergence-drive-3/measurements/b2-eng/parity-timing.json — {"conformant":0,"structural-match":0,"diverged":126,"errored":0,"timeout":0,"oracle-error":0}

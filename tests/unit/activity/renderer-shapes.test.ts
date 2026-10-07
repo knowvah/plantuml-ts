@@ -88,6 +88,18 @@ describe('renderStart', () => {
     const svg = renderStart(makeNode({ kind: 'start' }), activityTheme);
     expect(svg).toContain('fill="#00F"');
   });
+
+  // T2d-a (row DARK-CIRCLE): the stroke follows `circleInk` (dark-seeded),
+  // never the fixed light-mode `CIRCLE_INK` constant -- jar-verified
+  // against `levuma-67-cego489`'s own dark-mode SVG (`stroke="#DDD"`).
+  it('strokes in `theme.colors.graph.activity.circleInk` when set, not the fixed light default', () => {
+    const activityTheme = deepMergeTheme(defaultTheme, {
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
+    });
+    const svg = renderStart(makeNode({ kind: 'start' }), activityTheme);
+    expect(svg).toContain('stroke="#DDD"');
+    expect(svg).not.toContain('stroke="#222"');
+  });
 });
 
 describe('renderStop', () => {
@@ -153,6 +165,20 @@ describe('renderStop', () => {
     expect(svg).not.toContain('#FF0');
     expect((svg.match(/stroke="#222"/g) ?? []).length).toBe(2);
     expect(svg).toContain('fill="#222"');
+  });
+
+  // T2d-a (row DARK-CIRCLE): both ellipses' fill+stroke follow `circleInk`
+  // (dark-seeded), never the fixed light-mode `CIRCLE_INK` constant --
+  // jar-verified against `levuma-67-cego489`'s own dark-mode SVG (both
+  // ellipses `fill`/`stroke` `#DDD`).
+  it('both ellipses follow `theme.colors.graph.activity.circleInk` when set', () => {
+    const activityTheme = deepMergeTheme(defaultTheme, {
+      colors: { ...defaultTheme.colors, graph: { ...defaultTheme.colors.graph, activity: { circleInk: '#DDDDDD' } } },
+    });
+    const svg = renderStop(makeNode({ kind: 'stop', width: 22, height: 22 }), activityTheme);
+    expect((svg.match(/stroke="#DDD"/g) ?? []).length).toBe(2);
+    expect(svg).toContain('fill="#DDD"');
+    expect(svg).not.toContain('#222');
   });
 });
 
@@ -234,23 +260,46 @@ describe('renderSpot (mission add2-T2g)', () => {
     expect(svg).toContain(`stroke="${theme.colors.border}"`);
   });
 
-  it('draws the circled character as a <text>, centred, at the root font size 14', () => {
+  // T3g: a captured letter (A/B/G) now draws the jar's own AWT glyph
+  // OUTLINE as a `<path>`, not a `<text>` substitute -- see
+  // `activity-spot-glyph-data.ts`'s doc comment for the scraped-fixture
+  // citation and `activity-spot-glyph.ts#spotGlyphPath` for the translate.
+  it('draws the circled character as a jar-scraped <path>, never <text>', () => {
     const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' });
     const svg = renderSpot(node, theme);
-    expect(svg).toContain('>A</text>');
-    expect(svg).toContain('font-size="14"');
-    // Centred: x = cx - charWidth/2, not the circle's own left edge.
-    const charWidth = measureLineWidth(theme, 14, 'A');
-    const expectedX = 60 - charWidth / 2;
-    const m = /<text x="([\d.]+)"/.exec(svg);
-    expect(m).not.toBeNull();
-    expect(Number(m![1])).toBeCloseTo(expectedX, 2);
+    expect(svg).not.toContain('<text');
+    expect(svg).toContain(
+      'd="M61.432,60.631 L59.709,56.27 L57.98,60.631 Z M62.95,64.5 L61.849,61.697 L57.563,61.697 ' +
+        'L56.449,64.5 L55.116,64.5 L59.128,54.383 L60.55,54.383 L64.501,64.5 Z"',
+    );
+    // `#000000` shortens to `#000` at emission (`shortenColor`) -- byte-
+    // identical to every scraped fixture's own glyph `fill` attribute.
+    expect(ACTIVITY_FONT_COLOR).toBe('#000000');
+    expect(svg).toContain('fill="#000"');
   });
 
-  it('draws no <text> at all when the character is empty', () => {
+  it('resolves the letter case-insensitively (lowercase parses to the same captured glyph)', () => {
+    const upper = renderSpot(makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'A' }), theme);
+    const lower = renderSpot(makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'a' }), theme);
+    expect(lower).toBe(upper);
+  });
+
+  // An UNCAPTURED letter falls back to upstream's own deterministic-text
+  // branch geometry (`DriverCenteredCharacterSvg.java:64-69`) rather than
+  // drawing nothing -- `activity-spot-glyph.ts`'s own doc comment.
+  it('falls back to upstream\'s deterministic <text> geometry for an uncaptured letter', () => {
+    const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'Z' });
+    const svg = renderSpot(node, theme);
+    expect(svg).not.toContain('<path');
+    expect(svg).toContain('<text x="55" y="65" font-family="monospace" font-size="14"');
+    expect(svg).toContain('>Z</text>');
+  });
+
+  it('draws no glyph element at all when the character is empty', () => {
     const node = makeNode({ kind: 'spot', width: 20, height: 20, label: '' });
     const svg = renderSpot(node, theme);
     expect(svg).not.toContain('<text');
+    expect(svg).not.toContain('<path');
   });
 });
 
@@ -867,5 +916,43 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
     const node = makeNode({ kind: 'while-header', x: 25, y: 15, width: 41.669, height: 35 });
     const svg = renderNode(node, insideDiamond);
     expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
+  });
+});
+
+// add3-T3c: `node.diamondShape` (set by `walk-if-down.ts`/`walk-if-with-
+// links.ts`) now picks the shape directly -- `renderIfSplitShape`'s own
+// doc comment for why this replaces the `label === ''` inference below
+// it for the case that inference could not distinguish: an EMPTY_DIAMOND
+// `with-links` if, whose condition text is a real, non-empty `north`
+// label (never this node's own `label`, always `''` for that shape).
+describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
+  it("diamondShape 'empty' draws the fixed rhombus even with a non-empty label (the ambiguous case T3d's heuristic could not resolve)", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 24, height: 24, label: 'not empty', diamondShape: 'empty' });
+    const svg = renderNode(node, theme);
+    // renderDiamond's own fixed rhombus point list for a 24x24 box
+    // centred at (37, 27): size = 12.
+    expect(svg).toContain('<polygon points="37,15,49,27,37,39,25,27,37,15"');
+    // `label === 'not empty'` must NOT suppress the rhombus (it would
+    // under the pre-T3c `node.label === ''` heuristic).
+    expect(svg).toContain('<polygon');
+  });
+
+  it("diamondShape 'square' draws the square polygon regardless of theme.conditionStyle", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35, diamondShape: 'square' });
+    const svg = renderNode(node, theme); // no conditionStyle set at all
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
+  });
+
+  it("diamondShape 'inside' falls back to the hexagon when theme.conditionStyle is unset", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35, diamondShape: 'inside' });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('25,32.5,37,15');
+  });
+
+  it('diamondShape undefined (repeat-cond, walk-repeat*.ts not this task\'s write-set) keeps the pre-existing label === \'\' heuristic', () => {
+    const emptyDiamond: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+    const node = makeNode({ kind: 'repeat-cond', x: 25, y: 15, width: 24, height: 24, label: '' });
+    const svg = renderNode(node, emptyDiamond);
+    expect(svg).toContain('<polygon points="37,15,49,27,37,39,25,27,37,15"');
   });
 });

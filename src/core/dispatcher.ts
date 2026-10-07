@@ -24,6 +24,7 @@ import { upstreamTypeOf } from './block-extractor.js';
 import type { ParseRefusal } from './parse-refusal.js';
 import { mergeRefusals } from './parse-refusal.js';
 import { rect, text } from './svg.js';
+import type { Gradient } from './paint.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
@@ -71,6 +72,15 @@ export interface RenderFragment {
   height: number;
   /** svgRoot's `bgColor` argument. Omit to take svgRoot's own default. */
   background?: string;
+  /** T2d-a pass 2 (row DOCGRAD): the recovered `Gradient` half of a
+   *  `skinparam backgroundColor <c1>-<c2>` document background --
+   *  `theme.colors.backgroundGradient`'s own doc comment for why
+   *  `background` above stays a plain string. Set by activity's own
+   *  `renderer.ts` only; read by `assemble-svg.ts`'s activity finalizer
+   *  and `document-shell.ts#assembleDocumentShell` (to omit the root
+   *  `style="background:...;"` property the jar also omits for a
+   *  gradient, `SvgGraphics.java:178-183`). */
+  backgroundGradient?: Gradient;
   /** svgRoot's `extraDefs` argument. Omit to take svgRoot's own default. */
   extraDefs?: string;
   /**

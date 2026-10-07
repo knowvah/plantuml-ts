@@ -5,6 +5,22 @@ import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 
+/** add3-T3f (PADDING, padding-only edit per this task's write-set): the
+ *  bare `skinparam padding N` key (`theme-root-fields.ts#padding`), added
+ *  to BOTH axes of the condition label's own measured dimension before
+ *  {@link hexagonAlone} sizes the hexagon around it --
+ *  `ConditionalBuilder.java:244`'s `new SheetBlock1(sheet, diamondLineBreak,
+ *  skinParam.getPadding())` feeds this SAME global key into the hexagon's
+ *  inner `tbTest`, whose `calculateDimensionSlow` (`SheetBlock1.java:194-
+ *  197`, single-arg `.delta()`) adds it to width AND height alike --
+ *  `measureLabel` below is this port's stand-in for measuring that real
+ *  `tbTest`, so the term is added here rather than inside it. */
+function withGlobalPadding(dim: { width: number; height: number }, theme: Theme): { width: number; height: number } {
+  const pad = theme.padding ?? 0;
+  if (pad === 0) return dim;
+  return { width: dim.width + 2 * pad, height: dim.height + 2 * pad };
+}
+
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
 /** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
@@ -148,7 +164,7 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
     // `getDimension` call on the whole string reports one oversized line,
     // not `label.calculateDimension`'s own per-`AtomText` sum
     // (`AtomText.java` via `SheetBlock1`/`TextBlockLineCentered`).
-    const dimLabel = measureLabel(label, bounder, diamondSize);
+    const dimLabel = withGlobalPadding(measureLabel(label, bounder, diamondSize), theme);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;

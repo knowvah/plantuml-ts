@@ -1,0 +1,11 @@
+@startuml
+fork
+:a1;
+	if(test) then (true)
+		:a2;
+	endif
+	detach
+fork again
+:a3;
+endfork
+@enduml

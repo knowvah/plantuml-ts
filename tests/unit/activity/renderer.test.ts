@@ -300,6 +300,67 @@ describe('renderActivity — swimlanes', () => {
   });
 });
 
+/**
+ * T3h (row XLANE): `Swimlanes.java:350-352`'s Cross pass draws a
+ * cross-lane connection's own non-`Snake` decoration (`midArrowAt`)
+ * immediately, BEFORE `cross.flushUg()` drains every deferred `Snake` --
+ * i.e. before that same edge's own line. Verified against
+ * `kijazo-83-kipu485`'s jar element dump (`.agent-notes/add3-T3h.md`).
+ */
+describe('renderActivity — cross-lane decoration ordering (T3h)', () => {
+  it('draws a midArrowAt decoration BEFORE its own edge, in a swimlane diagram', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+        midArrowAt: { x: 50, y: 20, dir: 'up' },
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const polygons = result.match(/<polygon[^>]*points="[^"]*"[^>]*>/g) ?? [];
+    const midArrowPolygon = polygons.find((p) => p.includes('50,20'));
+    expect(midArrowPolygon).toBeDefined();
+    const midArrowIdx = result.indexOf(midArrowPolygon!);
+    const edgeLineIdx = result.indexOf('<line x1="60" y1="20"');
+    expect(edgeLineIdx).toBeGreaterThan(-1);
+    expect(midArrowIdx).toBeLessThan(edgeLineIdx);
+  });
+
+  it('renders exactly one midArrowAt polygon -- never duplicated by the split', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+        midArrowAt: { x: 50, y: 20, dir: 'up' },
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    const polygons = result.match(/<polygon[^>]*points="[^"]*"[^>]*>/g) ?? [];
+    const matching = polygons.filter((p) => p.includes('50,20'));
+    expect(matching.length).toBe(1);
+  });
+
+  it('a diagram with no midArrowAt edges is unaffected by the new pass', () => {
+    const geo = makeSwimlaneGeo();
+    geo.edges = [
+      {
+        points: [
+          { x: 60, y: 20 },
+          { x: 60, y: 50 },
+        ],
+      },
+    ];
+    const result = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    expect((result.match(/<polygon/g) ?? []).length).toBe(1);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Test 6: diamond node (if-split) renders a polygon
 // ---------------------------------------------------------------------------
@@ -569,8 +630,11 @@ describe('renderActivity — repeat-start node', () => {
 // Test 12: edge with color renders a filled <rect> pill behind the label
 // ---------------------------------------------------------------------------
 
-describe('renderActivity — edge with colored label pill', () => {
-  it('AC5: renders a <rect> with the specified fill color', () => {
+// The jar draws no background rect for a coloured edge label: it floods the
+// text's own box through an SVG filter (`SvgGraphics.java:732-735,772-786`,
+// getFilterBackColor), applied as `filter="url(#...)"` on the `<text>`.
+describe('renderActivity — edge with colored label (back-colour filter)', () => {
+  it('AC5: floods the label with the specified colour through a filter', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -584,9 +648,10 @@ describe('renderActivity — edge with colored label pill', () => {
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
-    // G1c: named colors resolve to their canonical jar hex.
-    expect(result).toContain('fill="#F00"');
-    expect(result).toContain('<rect');
+    // The jar's own flood: `<feFlood flood-color="#FF0000" .../>`.
+    expect(result).toContain('<feFlood flood-color="#FF0000" result="flood"/>');
+    expect(result).toMatch(/<text[^>]*filter="url\(#[^)]+\)"[^>]*>no3<\/text>/);
+    expect(result).not.toContain('<rect');
   });
 
   it('AC5: renders the label text "no3" on top of the pill', () => {
@@ -606,7 +671,7 @@ describe('renderActivity — edge with colored label pill', () => {
     expect(result).toContain('no3');
   });
 
-  it('AC5: the pill rect uses stroke="none"', () => {
+  it('AC5: composites the text over the flood, as the jar does', () => {
     const geo = makeGeo({
       edges: [
         {
@@ -620,8 +685,7 @@ describe('renderActivity — edge with colored label pill', () => {
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
-    // The pill rect should have stroke="none"
-    expect(result).toContain('stroke="none"');
+    expect(result).toContain('<feComposite in="SourceGraphic" in2="flood" operator="over"/>');
   });
 });
 
@@ -1437,5 +1501,38 @@ describe('renderActivity — preserveAspectRatio (add2 T3e, family G)', () => {
     const withRatio: typeof theme = { ...theme, preserveAspectRatio: 'xMinYMid slice' };
     const svg = assembleSvg(renderActivity(makeGeo(), withRatio));
     expect(svg).toContain('preserveAspectRatio="xMinYMid slice"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// T2d-a pass 2 (row DOCGRAD): document-background Gradient forwarding
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — backgroundGradient forwarding (T2d-a pass 2)', () => {
+  const docGradient = { color1: '#AAAAAA', color2: 'white', policy: '-' } as const;
+
+  it('forwards theme.colors.backgroundGradient onto the RenderFragment', () => {
+    const withGradient: typeof theme = {
+      ...theme,
+      colors: { ...theme.colors, backgroundGradient: docGradient },
+    };
+    const fragment = renderActivity(makeGeo(), withGradient);
+    expect(fragment.backgroundGradient).toEqual(docGradient);
+  });
+
+  it('omits the field entirely when the theme carries none (exactOptionalPropertyTypes)', () => {
+    const fragment = renderActivity(makeGeo(), theme);
+    expect('backgroundGradient' in fragment).toBe(false);
+  });
+
+  it('reaches the assembled document as a minted linearGradient + full-canvas rect', () => {
+    const withGradient: typeof theme = {
+      ...theme,
+      colors: { ...theme.colors, backgroundGradient: docGradient },
+    };
+    const svg = assembleSvg(renderActivity(makeGeo(), withGradient));
+    expect(svg).toContain('<linearGradient');
+    expect(svg).toContain('fill="url(#');
+    expect(svg).not.toContain('background:');
   });
 });

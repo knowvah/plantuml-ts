@@ -854,10 +854,26 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5343 -> 5361 / 6319 -> 6337 at add2/close-b3 (2026-10-03): 18 more
     // svg-activity clone rows, same shape. Derivation: 5361 + 871 + 105 = 6337.
-    expect(pinnedAgree.length).toBe(5361);
+    //
+    // 5361 -> 5360 / 6337 -> 6336 at add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 5360 + 871 + 105 = 6336.
+    //
+    // 5360 -> 5373 / 6336 -> 6349 at add3/close-b1 (2026-10-06): 13
+    // svg-activity clone rows, same shape. Derivation: 5373 + 871 + 105 = 6349.
+    //
+    // 5373 -> 5409 / 6349 -> 6385 at add3/close-b2 (2026-10-06): 36
+    // svg-activity clone rows, same shape. Derivation: 5409 + 871 + 105 = 6385.
+    //
+    // 5409 -> 5420 / 6385 -> 6396 at add3/close-b3w1 (2026-10-07): 11
+    // svg-activity clone rows, same shape. Derivation: 5420 + 871 + 105 = 6396.
+    //
+    // 5420 -> 5437 / 6396 -> 6413 at add3/close-b3 (2026-10-07): 17
+    // svg-activity clone rows, same shape. Derivation: 5437 + 871 + 105 = 6413.
+    expect(pinnedAgree.length).toBe(5437);
     expect(pinnedMisroutes.length).toBe(871);
     expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6337);
+    expect(manifest.fixtures.length).toBe(6413);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {

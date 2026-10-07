@@ -151,7 +151,13 @@ describe('GtileNote — a note measures at note FontSize 13', () => {
     const { bounder, sizes } = recordingBounder();
     const note: ActivityNote = { kind: 'note', text: 'n', position: 'right' };
     new GtileNote(note, bounder, THEME);
-    expect(sizes).toEqual([13]);
+    // `Opale.java:89-96`'s own `getWidth`/`getHeight` each call
+    // `textBlock.calculateDimension` once (`activity-divergence-drive-3`
+    // T2a, family NOTE-SIZE); this port's two calls (one `'M'` probe for
+    // the per-line advance, one for the line's own text) both still
+    // request the SAME note font size -- the call COUNT changed, not the
+    // size.
+    expect(new Set(sizes)).toEqual(new Set([13]));
     // The previous `theme.fontSize - 2` gave 12 -- smaller than the action
     // box's own 12 is equal to it, and both were the wrong direction: the
     // jar draws note text at 13 against an activity box's 12.

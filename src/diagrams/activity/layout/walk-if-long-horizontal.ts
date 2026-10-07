@@ -23,6 +23,13 @@ import { laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { HlineCandidate } from './swimlane-hline.js';
+import { applyOutLabel } from './tile-layout-inlabel.js';
+
+/** `arrowHorizontalAlignment()`'s own resolved default (`AbstractFtile
+ *  .java:108-110`, `AlignmentParam.java:42`) -- the alignment BOTH
+ *  `ConnectionVerticalOut` and `ConnectionLastElseOut` pass to
+ *  `withLabel` for a branch's own trailing `-> label;` (T1d rows 2/3). */
+const BRANCH_EXIT_LABEL_ALIGN = { horizontal: 'LEFT' } as const;
 
 interface LhCtx {
   readonly t: GtileIfLongHorizontal;
@@ -165,7 +172,9 @@ function connectionVerticalIn(ctx: LhCtx, i: number): void {
 }
 
 /** `ConnectionVerticalOut` -- `tile_i.pointOut -> (x, H)`, skipped when the
- *  branch has no point out.
+ *  branch has no point out. T1d row 3: carries the branch's own trailing
+ *  `-> label;` (`Branch#special`), set by {@link
+ *  conditional-builder-long.ts#branchBodyWithOutLabel} onto `t.tiles[i]`.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:438-474 */
 function connectionVerticalOut(ctx: LhCtx, i: number): void {
   const { t, x, y, myLane, out } = ctx;
@@ -175,6 +184,7 @@ function connectionVerticalOut(ctx: LhCtx, i: number): void {
   const p1 = absolutePoint(t.tiles[i]!.getCoord(SOUTH_HOOK), tileOrigin.x, tileOrigin.y);
   const p2 = { x: p1.x, y: y + t.height };
   pushEdge(out, [p1, p2], laneOut(t.tiles[i]!, myLane), myLane);
+  applyOutLabel(out, t.tiles[i]!, BRANCH_EXIT_LABEL_ALIGN);
 }
 
 /** A hexagon's own "right"/"left" mid point (`2*left`/`0`, `hexHeight/2`)
@@ -221,6 +231,8 @@ function connectionLastElseIn(ctx: LhCtx): void {
 
 /** `ConnectionLastElseOut` -- `tile2.pointOut -> (x, H)`; a third point
  *  `(W/2, H)` only when `nbOut === 0`; skipped when `tile2` has no point out.
+ *  T1d row 2: carries the `else` branch's own trailing `-> label;`
+ *  (`Branch#special`), set onto `t.tile2`.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:352-387 */
 function connectionLastElseOut(ctx: LhCtx): void {
   const { t, x, y, myLane, out } = ctx;
@@ -230,6 +242,7 @@ function connectionLastElseOut(ctx: LhCtx): void {
   const points: GPoint[] = [p1, { x: p1.x, y: y + t.height }];
   if (t.nbOut === 0) points.push({ x: x + t.left, y: y + t.height });
   pushEdge(out, points, laneOut(t.tile2, myLane), myLane);
+  applyOutLabel(out, t.tile2, BRANCH_EXIT_LABEL_ALIGN);
 }
 
 /** Every branch/`tile2` out-point's own absolute X, per `getMinmaxSimple`

@@ -1,0 +1,16 @@
+@startuml
+start
+switch (x)
+case (one)
+:A;
+-> firstExit;
+case (two)
+:B;
+-> midExit;
+case (three)
+:C;
+-> lastExit;
+endswitch
+:D;
+stop
+@enduml

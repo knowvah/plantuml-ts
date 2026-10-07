@@ -17,7 +17,7 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveInlineLinks } from '../description/parse-helpers.js';
+import { resolveInlineLinks } from '../../core/url/inline-links.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';

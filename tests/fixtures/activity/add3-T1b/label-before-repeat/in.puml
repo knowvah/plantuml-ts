@@ -1,0 +1,9 @@
+@startuml
+start
+:A;
+-> hello;
+repeat
+:B;
+repeat while (more?)
+stop
+@enduml

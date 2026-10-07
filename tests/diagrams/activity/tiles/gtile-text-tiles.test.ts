@@ -145,14 +145,26 @@ describe('GtileNote', () => {
     expect(tile.side).toBe('right');
   });
 
-  it('width includes NOTE_FOLD beyond measured width + 2*ACTION_H_PAD', () => {
-    // NOTE_FOLD = 8, ACTION_H_PAD = 16
-    // text = "A note" (6 chars) → measured width = 42
-    // expected minimum width = 42 + 2*16 + 8 = 82
+  it('width/height = text block + Opale.java:56-58 margins (marginX1=6, marginX2=15, 2*marginY=10)', () => {
+    // text = "A note" (6 chars) → measured width = 42 (stubBounder: 7px/char)
+    // expected width = 42 + 6 + 15 = 63; height = 14 (stub line height) + 10 = 24
     const node: ActivityNote = { kind: 'note', text: 'A note', position: 'right' };
     const tile = new GtileNote(node, stubBounder, stubTheme);
     const measuredWidth = 'A note'.length * 7; // 42
-    expect(tile.width).toBe(measuredWidth + 2 * 16 + 8);
+    expect(tile.width).toBe(measuredWidth + 6 + 15);
+    expect(tile.height).toBe(14 + 10);
+  });
+
+  it('a multi-line note sizes from EACH line, not the whole \\n-joined string (Opale.java:89-96, FtileWithNoteOpale.java:147-150)', () => {
+    // Was: the \n-joined string measured as ONE run, so every embedded
+    // \n byte cost width too, and the box never grew taller for extra
+    // lines (`activity-divergence-drive-3` T2a, family NOTE-SIZE).
+    const node: ActivityNote = { kind: 'note', text: 'short\nlonger line', position: 'right' };
+    const tile = new GtileNote(node, stubBounder, stubTheme);
+    const widestLineWidth = 'longer line'.length * 7; // 77, wider than "short" (35)
+    expect(tile.width).toBe(widestLineWidth + 6 + 15);
+    // Two lines at the stub's 14px line height, plus the 2*marginY=10 inset.
+    expect(tile.height).toBe(14 * 2 + 10);
   });
 
   it('hasPointOut() === true (in-flow note, FtileNoteAlone.java:129-130)', () => {

@@ -258,10 +258,13 @@ describe('svg-activity style census — corpus presence', () => {
       `test-results/dot-cache/activity/ is COMMITTED. Missing entries mean a broken or ` +
         `partial checkout, not a cache that needs regenerating. Missing: ${missing.slice(0, 10).join(', ')}`,
     ).toEqual([]);
-    expect(manifest.fixtures.length).toBe(373);
+    // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 373 - 1 = 372.
+    expect(manifest.fixtures.length).toBe(372);
   });
 
-  it('the partition matches the sibling ratchet: 350 baseline / 0 error / 23 jar-error', () => {
+  it('the partition matches the sibling ratchet: 349 baseline / 0 error / 23 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -277,7 +280,10 @@ describe('svg-activity style census — corpus presence', () => {
     // (T2e/T2g: CommandForkEnd3, SplitEnd3, Swimlane, If2, ElseIf2, Endif3,
     // Backward3, Note3/NoteLong3, CircleSpot3, Label, Goto) and were
     // promoted error -> baseline.
-    expect(baselineFixtures.length).toBe(350);
+    // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
+    // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
+    // Derivation: 350 - 1 = 349 baseline.
+    expect(baselineFixtures.length).toBe(349);
     expect(errorFixtures.length).toBe(0);
     expect(jarErrorFixtures.length).toBe(23);
   });

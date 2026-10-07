@@ -7,6 +7,7 @@ import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
 import type { GtileAction } from '../tiles/gtile-action.js';
 import type { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
+import type { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { GtileDiamond } from '../tiles/gtile-diamond.js';
 import type { GtileTopDown } from '../tiles/gtile-top-down.js';
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
@@ -31,12 +32,15 @@ import { walkIfDown } from './walk-if-down.js';
 import { walkIfLongHorizontal } from './walk-if-long-horizontal.js';
 import { walkIfLongVertical } from './walk-if-long-vertical.js';
 import { walkSwitch } from './walk-switch.js';
+import { walkNoteOpale, walkWithNotes } from './walk-with-notes.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
 import type { EdgeMeta, EdgeShape } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import type { HlinePayload } from './swimlane-hline.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
+import { applyInLabel } from './tile-layout-inlabel.js';
+import { walkTileGroup } from './tile-coordinates-group.js';
 
 /**
  * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
@@ -72,6 +76,13 @@ export interface Out {
    * `walkTile`'s `'gtile-group'`/`'gtile-partition'` case below.
    */
   groupScope: string[];
+  /**
+   * `[start, end)` ranges into `nodes` from a fork/split branch's body
+   * walk (set only by `walk-fork-branches.ts`) -- consulted by the
+   * while/repeat break-weld scans to mirror a real upstream gap; see
+   * that field's user-side doc for the cited mechanism.
+   */
+  forkBodyRanges?: Array<readonly [number, number]>;
 }
 
 export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
@@ -183,6 +194,8 @@ function pushTopDownSiblingEdge(out: Out, link: TopDownSiblingLink): void {
   const from = { x: baseX + (prevOffsetX + southHook.x), y: prevY + southHook.y };
   const to = { x: baseX + (nextOffsetX + northHook.x), y: nextY + northHook.y };
   pushEdge(out, new GConnectionVerticalDown().getPoints(from, to), laneOut(prevChild, myLane), laneIn(child, myLane));
+  // T1b pass 2: `ConnectionVerticalDown.java:79-80`'s own `withLabel(textBlock, arrowHorizontalAlignment())`.
+  applyInLabel(out, child, { horizontal: 'LEFT' });
 }
 
 /** Every if-builder's own tile kind -- checked BEFORE `walkTile`'s own
@@ -285,33 +298,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       return;
     }
 
-    // `FtileWithNoteOpale#drawU` (`:195-221`): the note draws beside the
-    // wrapped tile (no flow edge), then the wrapped tile draws at its own
-    // translated offset. `pushTopDownSiblingEdge`'s `hasPointOut()`/
-    // `getCoord()` calls on a `gtile-note-opale` sibling resolve through
-    // THIS tile's own methods (`gtile-note.ts`), which pass through to the
-    // wrapped child -- no edge-code change needed there for this case.
-    case 'gtile-note-opale': {
-      const t = tile as unknown as GtileNoteOpale;
-      const note = t.note;
-      const noteNode: ActivityNodeGeo = {
-        id: out.nextId('note'),
-        kind: 'note',
-        x: x + t.noteOffsetX,
-        y: y + t.noteOffsetY,
-        width: note.width,
-        height: note.height,
-        label: note.text,
-        notePosition: note.side,
-      };
-      // `Opale#drawU`'s own `withLink == false` branch (`:109-110`) never
-      // sets a spike at all -- `t.withLink` mirrors that (`gtile-note.ts`'s
-      // own doc).
-      if (t.withLink) noteNode.spikeTip = { x: x + t.spikeOffsetX, y: y + t.spikeOffsetY };
-      pushNode(out, noteNode, myLane);
-      walkTile(t.children[0]!, x + t.tileOffsetX, y + t.tileOffsetY, { kindHint: null, lane: myLane }, out);
+    // `FtileWithNoteOpale#drawU` (`:195-221`) -- see `walk-with-notes.ts`'s
+    // own `walkNoteOpale` doc.
+    case 'gtile-note-opale':
+      walkNoteOpale(tile as unknown as GtileNoteOpale, x, y, myLane, out);
       return;
-    }
+
+    // NOTE-MULTI/GROUPNOTE (`activity-divergence-drive-3` T2a):
+    // `FtileWithNotes` -- see `walk-with-notes.ts`'s own doc.
+    case 'gtile-with-notes':
+      walkWithNotes(tile as unknown as GtileWithNotes, x, y, myLane, out);
+      return;
 
     case 'gtile-diamond': {
       const t = tile as unknown as GtileDiamond;
@@ -452,28 +449,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       );
       return;
   }
-}
-
-/**
- * The `'gtile-group'`/`'gtile-partition'` case, split out of `walkTile`'s
- * own switch purely to keep that function's NLOC from growing (D1, T1b):
- * pushes a new `groupScope` id before walking the group's own body, so
- * `pushEdge` tags every edge inside with it, then pops it back off.
- */
-function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: string | undefined, out: Out): void {
-  const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
-  pushNode(
-    out,
-    { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height, label: tile.title },
-    myLane,
-  );
-  if (tile.children.length === 0) return;
-  // D1 (T1b): `FtileGroup` opens its own nested `UGraphicForSnake`
-  // (`decisions.md#D1`) -- a pushed scope id so `snake-merge.ts` never
-  // fuses an edge inside this group with one outside it.
-  out.groupScope.push(out.nextId('scope'));
-  walkTile(tile.children[0]!, x + tile.bodyOffsetX, y + tile.bodyOffsetY, { kindHint: null, lane: myLane }, out);
-  out.groupScope.pop();
 }
 
 /**

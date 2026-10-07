@@ -165,6 +165,42 @@ export function activityHorizontalAlignment(theme: Theme): 'left' | 'center' | '
   return 'left';
 }
 
+/**
+ * The resolved horizontal alignment for an activity NOTE's own creole
+ * text (add3-T3d, NOTE-CREOLE) -- its own `note` bucket if a `skinparam
+ * noteTextAlignment`/`<style> note { HorizontalAlignment }` rule set one
+ * (`skinparam-key-handlers-table-b.ts#setAlignment(acc, 'note', ...)`,
+ * `FromSkinparamToStyle.java:178`), else the SAME `root` tier
+ * {@link activityHorizontalAlignment} already reads.
+ *
+ * `FtileWithNoteOpale`'s own resolver, `skinParam().getHorizontalAlignment
+ * (AlignmentParam.noteTextAlignment, null, false, null)`
+ * (`FtileWithNoteOpale.java:139-140`), is `SkinParam#getHorizontalAlignment`
+ * (`skin/SkinParam.java:671-727`): an explicit `noteTextAlignment` value
+ * wins outright; absent one, `result == null` falls to
+ * `getDefaultTextAlignment(LEFT)` (`:720-721`), which itself reads
+ * `defaulttextalignment` (the SAME key `activityHorizontalAlignment`
+ * resolves) and only falls back to `LEFT` if THAT is also unset
+ * (`:731-738`) -- exactly the two-tier shape below.
+ *
+ * `FtileNoteAlone` (a note with no preceding tile to attach to) instead
+ * calls `skinParam.getDefaultTextAlignment(HorizontalAlignment.LEFT)`
+ * DIRECTLY (`FtileNoteAlone.java:106-107`), skipping the `noteTextAlignment`
+ * tier entirely -- a genuine, narrow upstream divergence between the two
+ * note `Ftile` shapes this port does not yet distinguish (no corpus
+ * fixture sets `noteTextAlignment` at all, confirmed by grep across every
+ * fixture's `in.puml` under `test-results/dot-cache/activity`), so both
+ * this port's note callers (`gtile-note.ts`'s flow note and if-own note)
+ * share this one resolver until a fixture actually needs the split.
+ */
+export function activityNoteHorizontalAlignment(theme: Theme): 'left' | 'center' | 'right' {
+  const noteAlignment = theme.colors.elements?.['note']?.horizontalAlignment;
+  if (noteAlignment === HorizontalAlignment.CENTER) return 'center';
+  if (noteAlignment === HorizontalAlignment.RIGHT) return 'right';
+  if (noteAlignment === HorizontalAlignment.LEFT) return 'left';
+  return activityHorizontalAlignment(theme);
+}
+
 // ---------------------------------------------------------------------------
 // Font family (add2 T3e, family K)
 // ---------------------------------------------------------------------------

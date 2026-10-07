@@ -8,7 +8,7 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { rect, polygon } from '../../core/svg.js';
+import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
 import { orderedLine } from './activity-renderer-terminals.js';
@@ -16,6 +16,8 @@ import { drawActivityText } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
+import { measureLineWidth } from './activity-text-placement.js';
+import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
@@ -73,50 +75,74 @@ function arrowTip(
 }
 
 /**
- * Render the label for an edge, optionally with a colored background pill.
+ * {@link renderEdgeLabel}'s draw, positioned by {@link getTextBlockPosition} (T1b's port of `Snake
+ * #getTextBlockPosition`, `Snake.java:244-270`); split into its own
+ * function to keep `renderEdgeLabel` under this file's NLOC limit.
+ * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
+ * activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
+ * the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
+ * / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
+ * through `of(root, element, activityDiagram, arrow)`.
  *
- * When `color` is provided, a filled rect is rendered behind the label text.
- * Pill dimensions: width = approx label char count × (fontSize × 0.6) + 8px
- * padding; height = fontSize + 4px padding.
+ * `position` is the text block's TOP-LEFT corner, exactly as upstream's
+ * `UTranslate.point(position)` places it (`Snake.java:230`); no
+ * `text-anchor`, no extra offset beyond what that function already
+ * bakes into its own default branch (`+4`, `Snake.java:248`).
+ *
+ * A coloured label (`<back:color>`, T1a's `label-colored-pill` finding)
+ * draws through `core/svg.ts#text`'s own `textBackColor` -- the SAME
+ * `feFlood`/`feComposite` filter `getFilterBackColor` registers
+ * (`klimt/drawing/svg/SvgGraphics.java:732-735,772-786`), reused here
+ * rather than re-invented: upstream never draws a background RECT for
+ * this, only a filter clipped to the text's own bounding box (the SVG
+ * filter region default, `objectBoundingBox`). `drawActivityText`'s own
+ * klimt-driver path (`activity-renderer-text.ts`) has no `textBackColor`
+ * seam and is outside this task's write-set, so the coloured branch
+ * calls `core/svg.ts#text` directly instead -- the uncoloured branch is
+ * unchanged, still `drawActivityText`, to keep its existing
+ * `textLength` emission byte-identical.
  */
-function renderEdgeLabel(label: string, midX: number, midY: number, color: string | undefined, theme: Theme): string {
-  // `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373). The
-  // activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
-  // the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
-  // / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
-  // through `of(root, element, activityDiagram, arrow)`.
+function renderEdgeLabelAligned(
+  label: string,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  labelAlign: SnakeTextAlign,
+  color: string | undefined,
+  theme: Theme,
+): string {
   const size = activityFontSize(theme, 'arrow');
+  // `TextBlock.calculateDimension` -- single-line width/height, the SAME
+  // measurer-blind estimate `activity-text-placement.ts#measureLineWidth`
+  // already gives every other render-time label (that module's own doc);
+  // height is `WidthTableMeasurer#measure`'s own `font.size` convention
+  // (`core/measurer.ts:189`).
+  const width = measureLineWidth(theme, size, label);
+  const position = getTextBlockPosition(points, { width, height: size }, labelAlign);
+  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
+  const fill = activityFontColor(theme, 'arrow');
   if (color !== undefined) {
-    const textWidth = label.length * (size * 0.6);
-    const pillW = textWidth + 8;
-    const pillH = size + 4;
-    const pillX = midX - pillW / 2;
-    const pillY = midY - pillH / 2;
-    const background = rect(pillX, pillY, pillW, pillH, {
-      fill: color,
-      stroke: 'none',
-    });
-    // D2: no `text-anchor`. `pillW - textWidth` is a CONSTANT 8 (this
-    // function's own padding, two lines up), so the centring offset that
-    // `text-anchor="middle"` used to give collapses to a constant `+ 4` --
-    // algebra on the existing estimate, not a new guess. D1: no `dominant-
-    // baseline` either (the driver emits none) -- `centeredFirstBaselineY`
-    // is the same N=1 ascent-centred baseline `activity-renderer-shapes.ts`
-    // uses for every other box/hexagon/diamond single-line label.
-    const labelEl = drawActivityText(pillX + 4, centeredFirstBaselineY(midY, size, 1), label, {
-      fill: activityFontColor(theme, 'arrow'),
+    return text(position.x, baselineY, label, {
       fontFamily: theme.fontFamily,
       fontSize: size,
+      fill,
+      textLength: width,
+      textBackColor: color,
     });
-    return background + labelEl;
   }
-
-  // No color: plain text label offset slightly from the midpoint
-  return drawActivityText(midX + 4, midY - 4, label, {
-    fill: activityFontColor(theme, 'arrow'),
+  return drawActivityText(position.x, baselineY, label, {
+    fill,
     fontFamily: theme.fontFamily,
     fontSize: size,
   });
+}
+
+function renderEdgeLabel(
+  label: string,
+  points: ReadonlyArray<{ x: number; y: number }>,
+  labelAlign: SnakeTextAlign | undefined,
+  color: string | undefined,
+  theme: Theme,
+): string {
+  return renderEdgeLabelAligned(label, points, labelAlign ?? DEFAULT_LABEL_ALIGN, color, theme); // AbstractFtile.java:108-110
 }
 
 /**
@@ -269,22 +295,75 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const dy = last.y - prev.y;
   const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
 
-  // D4: an explicit extra arrowhead at a translate shape's own point (see
-  // `ActivityEdgeGeo.midArrowAt`'s own doc) -- drawn after the terminal
-  // decoration; this is a port-specific extension with no `Worm` draw-order
-  // citation of its own (`emphasize`'s midpoint arrow, by contrast, has one
-  // and is now interleaved above).
-  const midArrowEl = edge.midArrowAt === undefined ? '' : renderMidArrow(edge.midArrowAt, headColor, theme);
-
-  // Optional edge label near midpoint
+  // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate
+  // shape places at its own point) is NO LONGER drawn here -- see
+  // `renderCrossLaneDecorations`'s own doc for why it moved to a separate,
+  // earlier emission phase.
+  //
+  // Optional edge label, positioned by `Snake#getTextBlockPosition`
+  // (`renderEdgeLabel`'s own doc comment).
   let labelEl = '';
   if (edge.label !== undefined) {
-    const mid = Math.floor(pts.length / 2);
-    const midPt = pts[mid]!;
-    labelEl = renderEdgeLabel(edge.label, midPt.x, midPt.y, edge.color, theme);
+    labelEl = renderEdgeLabel(edge.label, pts, edge.labelAlign, edge.color, theme);
   }
 
-  return segments + arrow + midArrowEl + labelEl;
+  return segments + arrow + labelEl;
+}
+
+/**
+ * T3h (row XLANE, `ruzica-16-deli877`/`nikivo-06-kaxa873`/`kijazo-83-
+ * kipu485`): the ONE non-`Snake` immediate decoration an activity render
+ * can emit outside its own edge's deferred line -- `ActivityEdgeGeo
+ * .midArrowAt`, set only by `swimlane-loop-translate-while.ts#routeWhileBack`
+ * for a while-loop back edge that crosses swimlanes.
+ *
+ * `Swimlanes.java:252` wraps the WHOLE document render in one
+ * `UGraphicForSnake`: `draw(UShape)` (`svek/UGraphicForSnake.java:137-144`)
+ * queues every `Snake` (`addPendingSnake`) and draws every OTHER shape
+ * immediately; `drawWhenSwimlanes` (`:318-356`) then runs the per-lane
+ * content pass for every lane (`:328-347`), THEN the single cross-lane
+ * `Cross` pass (`:350-351`), THEN `cross.flushUg()` (`:352`, draining every
+ * queued `Snake` -- same-lane AND cross-lane -- in queue order), THEN
+ * `drawTitles` (`:354`) last. `FtileWhile.ConnectionBackSimple
+ * #drawTranslate` (`:277-308`, reached ONLY via `ConnectionCross
+ * .java:63`, itself constructed ONLY inside `Swimlanes$Cross`, which exists
+ * ONLY when `swimlanes().size() > 1`) queues its own line
+ * (`ug.draw(snake)`, `:302`) and THEN draws the loop's up-arrow decoration
+ * immediately (`ug.apply(...).draw(skinParam().arrows().asToUp())`,
+ * `:307`) -- a plain `UPolygon` draw, never wrapped in a `Snake`, so it
+ * emits right there in the Cross pass, well before the final flush drains
+ * ITS OWN edge's line. No other `drawTranslate` override in the codebase
+ * (`FtileRepeat`, `FtileIfWithLinks`, `FtileSwitchWithManyLinks`, the
+ * `Parallel*` builders) draws a shape outside its `Snake.create(...)`
+ * call -- confirmed by reading each one; their own `UPolygon`s are only
+ * ever the `Snake`'s end-decoration argument, so they stay deferred with
+ * everything else. That makes this the ONLY port-side carrier
+ * (`ActivityEdgeGeo.midArrowAt`) of a decoration needing this split.
+ *
+ * Verified against `kijazo-83-kipu485`'s own element dump: jar's up-arrow
+ * polygon sits at index `[17]`, immediately after the per-lane content
+ * (`renderSwimlaneChrome`'s own output) and before the first deferred
+ * `<line>` of the edges batch; our pre-fix render placed the same polygon
+ * at `[38]`, inside its own edge's atomic `renderEdge` unit, bundled with
+ * (and after) that edge's own terminal arrow. This function reproduces the
+ * jar's placement: called once, between `renderSwimlaneChrome`'s per-lane
+ * content and the edges loop below -- the exact position the Cross pass's
+ * immediate draws occupy, before `cross.flushUg()`'s batch. A no-op
+ * (returns `''`) in a diagram with no cross-lane while-loop back edge,
+ * which is the only producer of `midArrowAt` (`routeWhileBack`'s own doc);
+ * harmless to call unconditionally, incl. the zero/one-lane case where
+ * `midArrowAt` structurally never appears (`routeWhileBack` is only
+ * reachable through swimlane-translate routing).
+ */
+function renderCrossLaneDecorations(geo: ActivityGeometry, theme: Theme): string {
+  const headColor = noGradient(activityArrowHeadColor(theme));
+  let out = '';
+  for (const edge of geo.edges) {
+    if (edge.midArrowAt !== undefined) {
+      out += renderMidArrow(edge.midArrowAt, headColor, theme);
+    }
+  }
+  return out;
 }
 
 /**
@@ -319,9 +398,11 @@ function preChromeDims(geo: ActivityGeometry): { width: number; height: number }
  * Draw order (D5 of `plans/activity-swimlane-rendering/decisions.md`):
  * with chrome (`swimlanes.length > 1`), the band/per-lane-nodes/dividers
  * come from `renderSwimlaneChrome` (`activity-renderer-swimlanes.ts`),
- * then every edge, then titles LAST. With zero or one lane there is no
- * chrome to draw (`Swimlanes.java:275`) and the output is the plain
- * node-then-edge order, byte-identical to a diagram with no swimlanes.
+ * then any cross-lane immediate decoration (T3h, `renderCrossLaneDecorations`
+ * -- the Cross pass, before the deferred-`Snake` flush), then every edge,
+ * then titles LAST. With zero or one lane there is no chrome to draw
+ * (`Swimlanes.java:275`) and the output is the plain node-then-edge order,
+ * byte-identical to a diagram with no swimlanes.
  */
 export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragment {
   const children: string[] = [];
@@ -343,6 +424,12 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     for (const node of geo.nodes) children.push(renderNode(node, theme));
   }
 
+  // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
+  // connection's own non-`Snake` decoration immediately, BEFORE
+  // `cross.flushUg()` drains every deferred `Snake` below -- see
+  // `renderCrossLaneDecorations`'s own doc.
+  children.push(renderCrossLaneDecorations(geo, theme));
+
   for (const edge of geo.edges) {
     children.push(renderEdge(edge, theme));
   }
@@ -357,6 +444,13 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
+    // T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` --
+    // see `theme.colors.backgroundGradient`'s own doc comment. Omitted
+    // entirely (not `undefined`, `exactOptionalPropertyTypes`) for the
+    // common case, mirroring `preserveAspectRatio` below.
+    ...(theme.colors.backgroundGradient !== undefined
+      ? { backgroundGradient: theme.colors.backgroundGradient }
+      : {}),
     diagramType: DIAGRAM_TYPE_ACTIVITY,
     // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
     // document-margin shift baked into `body` above, composes chrome around

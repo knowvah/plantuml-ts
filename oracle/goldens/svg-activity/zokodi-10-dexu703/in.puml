@@ -1,0 +1,13 @@
+@startuml
+|Lane1|
+start
+|Lane2|
+partition "Partition" {
+repeat
+:Activity;
+|Lane3|
+:Activity2;
+repeat while (Condition)
+}
+end
+@enduml

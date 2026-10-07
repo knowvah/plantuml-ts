@@ -1,0 +1,12 @@
+@startuml
+start
+fork
+    :Activity A;
+    note:note on activity A
+fork again
+    :Activity B;
+    note:note on activity B
+    :Activity C;
+end fork
+stop
+@enduml

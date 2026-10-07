@@ -1,0 +1,10 @@
+@startuml
+while(int i=0;i<100;i++)
+   if ( conf ) then (true)
+    note right
+       if statement
+    end note
+    :finalize;
+   endif
+end while
+@enduml
