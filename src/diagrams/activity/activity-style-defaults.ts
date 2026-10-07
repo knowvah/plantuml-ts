@@ -167,6 +167,22 @@ export function swimlaneFontSize(theme: Theme): number {
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style
  *  /FromSkinparamToStyle.java (`addConFont("arrow", SName.arrow)` registers
  *  `arrowFontSize` as `PName.FontSize` on `SName.arrow`)
+ *
+ * add3-T3f (STYLE-FONT): one more tier below the two above, above the
+ * hardcoded default -- `SkinParam#getFontSize` (`style/SkinParam.java
+ * :436-449`): per-param `"fontsize"` suffix (the two tiers above) first;
+ * else `getValue("defaultfontsize")` (`skinparam defaultFontSize N`,
+ * `FromSkinparamToStyle.java:91`'s `SName.element` registration -- every
+ * activity-family style signature chains through `SName.element`
+ * (`FtileBox.java:98`, `ConditionalBuilder.java:101-106`), so ONE bare
+ * `defaultFontSize` reaches activity/diamond/arrow alike); else
+ * `param[0].getDefaultSize(this)` (this module's own `FONT_SIZE_DEFAULTS`/
+ * {@link ARROW_FONT_SIZE} etc.). Ported field: `theme.defaultFontSize`
+ * (`theme.ts`'s own R2j doc comment already names this exact tier).
+ * `kepavi-26-sasu141`: `skinparam defaultFontSize 19` reaches the action
+ * ("yes"/"no"), diamond ("condition?") and arrow ("yes"/"no" branch
+ * label) text alike; its sibling `noteFontSize 5` is the FIRST (bucket)
+ * tier and still wins for the note.
  */
 export function activityFontSize(theme: Theme, sname: ActivitySName): number {
   const bucket = resolveElementFontSize(theme, bucketKey(sname), 'title');
@@ -174,6 +190,7 @@ export function activityFontSize(theme: Theme, sname: ActivitySName): number {
   if (sname === 'arrow' && theme.colors.graph.arrowFontSize !== undefined) {
     return theme.colors.graph.arrowFontSize;
   }
+  if (theme.defaultFontSize !== undefined) return theme.defaultFontSize;
   return FONT_SIZE_DEFAULTS[sname] ?? theme.fontSize;
 }
 
