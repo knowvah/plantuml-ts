@@ -11,7 +11,8 @@ import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swiml
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
-import { swimlaneTitleFontSize } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
+import { activityFontSize, swimlaneTitleFontSize } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
+import { measureLineWidth } from '../../../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 6, height: 11 }) };
@@ -121,6 +122,54 @@ describe('shapesOf — note with spike', () => {
     const n = node('note', { x: 100, y: 50, width: 60, height: 40 });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
     expect(shapes).toEqual([{ kind: 'polygon', x: 100, y: 50, width: 60, height: 40 }]);
+  });
+});
+
+// T3i (row PARTCOMP): `partition`/`group` are a `USymbolFrame`
+// (`USymbols.java:81,87`) -- its own rect sets BOTH
+// `ignoreForCompressionOnX/Y()` (`USymbolFrame.java:70-71`), unlike every
+// other box kind above (none of which carry either flag).
+describe('shapesOf — group/partition frame (USymbolFrame, T3i)', () => {
+  it('the frame rect is ignoreX AND ignoreY, unlike a plain box', () => {
+    const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[0]).toEqual({ kind: 'rect', x: 16, y: 45, width: 138.4, height: 122, ignoreX: true, ignoreY: true });
+  });
+
+  it('partition resolves the same way as group', () => {
+    const n = node('partition', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[0]).toMatchObject({ kind: 'rect', ignoreX: true, ignoreY: true });
+  });
+
+  it('an untitled frame also pushes its own title-tab polygon, skipped on X, width/3 x 12', () => {
+    const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes).toHaveLength(2);
+    expect(shapes[1]).toEqual({
+      kind: 'polygon',
+      x: 16,
+      y: 45,
+      width: 138.4 / 3,
+      height: 12,
+      polygonSkipMode: 'x',
+    });
+  });
+
+  it('a titled frame measures textWidth/textHeight from the title (USymbolFrame.java:76-84,99-104)', () => {
+    const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: 'P1' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    const fontSize = activityFontSize(theme, 'composite');
+    const expectedTextWidth = measureLineWidth(theme, fontSize, 'P1') + 10;
+    const expectedTextHeight = fontSize + 3;
+    expect(shapes[1]).toEqual({
+      kind: 'polygon',
+      x: 16,
+      y: 45,
+      width: expectedTextWidth,
+      height: expectedTextHeight,
+      polygonSkipMode: 'x',
+    });
   });
 });
 
