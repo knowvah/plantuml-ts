@@ -108,3 +108,17 @@ FRAME-TITLE-SLOT and HEX-LABEL-SLOT (pekefu) did not move.
     and +5.056 label-y notes.
 - **R3, renderSync path (real measurer).** pateca's x1 and ptA.x differ by an ulp there, so the last
   segment is non-zero and reads RIGHT. R1's field fixes it too.
+
+## Addendum: meguta riser closed (write-set extended by the orchestrator)
+- **Commit:** `86b6e578d` fix(activity): centre the vertical-if last-else label
+- **Change:** `walk-if-long-vertical.ts#connectionLastElse` now sets `labelAlign = { vertical: 'CENTER' }`.
+  - Upstream: `Snake.create(...).withLabel(label, VerticalAlignment.CENTER)` (`FtileIfLongVertical.java:319-320`).
+  - Test: `walk-if-long-vertical.test.ts`.
+  - Nothing else in the file was touched. Prettier had reflowed the `walkIfLongVertical` signature; I reverted that.
+- **Probe (93 rows; the probe set is 93, not 100):** Σ 9930 -> 9918. meguta 385 -> 373. No other row moved; element census unchanged.
+- **Census:** meguta height is 434 again, equal to the pin and the jar, so it no longer appears as a mover. The remaining style movers are the seven listed above. No text or swimlane movers.
+- **Gates:**
+  - ratchet + harness-parity: 393/393
+  - `tests/diagrams/activity`: 1185 pass, 7 expected fail (the 2 new `it.fails` are R1)
+  - typecheck and eslint: clean
+- **Still open:** meguta's `no3` y is 329.556 against the jar's 340.056. That is R2 (label placement after compression).
