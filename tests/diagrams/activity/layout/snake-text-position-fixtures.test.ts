@@ -83,8 +83,14 @@ describe('Snake label position -- while-backward-bottom (boxefe-81-situ725)', ()
     expect(textPosition(ours, 'incoming').y).toBeCloseTo(218.556, 3);
   });
 
+  // T3i: `gtile-while.ts#labelHeight` (previously hardcoded `0`) now
+  // measures `backIncoming`'s own text height into `GtileWhile.height`
+  // (`FtileWhile.java:585,597-601`), moving this label from a 6.444px
+  // jar divergence down to the SAME ~0.944-1px fixture-wide rounding
+  // residual every other y in this fixture carries (see the comment
+  // above) -- re-pinned to the new current value, not fitted.
   it('Backward2 "dsc_5" y: pinned at the current (not jar-equal) value', () => {
-    expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(96.806, 3);
+    expect(textPosition(ours, 'dsc_5').y).toBeCloseTo(99.556, 3);
   });
 });
 

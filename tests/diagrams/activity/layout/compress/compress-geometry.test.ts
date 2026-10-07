@@ -328,6 +328,46 @@ describe('compressGeometry — split-bar/split-join-bar geometry transform', () 
   });
 });
 
+// T3i (row PARTCOMP): `group`/`partition` joined `RECT_WIDTH_KINDS`/
+// `RECT_HEIGHT_KINDS` -- `USymbolFrame`'s own rect is ignore-flagged for
+// COMPRESSION OCCUPANCY (`shapesOf`), but `UGraphicCompressOnXorY.java:90`'s
+// rect-resize branch applies "ignore flags notwithstanding": the frame's
+// own drawn box must still shrink-wrap its (now-compressible) content on
+// BOTH axes, exactly like `fork-bar`/`action` above.
+describe('compressGeometry — group/partition frame shrink-wraps on both axes (T3i)', () => {
+  it('a 32-wide untitled frame over a 28-wide empty gap narrows its own width by 18', () => {
+    // `height: 14` keeps the title-tab's own Y occupancy (`[0,12]`, an
+    // untitled frame's `textHeight`) from leaving any Y gap of its own
+    // (`[12,14]` is only 2 wide, under `smaller(5)`'s 10-wide floor) --
+    // isolates this test to the X axis, same as the single-rect test above.
+    const frame = node('f', 'group', 0, 0, 2 + 28 + 2, 14);
+    const input = baseInput({ nodes: [frame], bounds: { maxX: 32, maxY: 14 } });
+    const result = compressGeometry(input);
+    const frameOut = result.nodes.find((n) => n.id === 'f')!;
+    expect(result.removed.x).toBe(18);
+    expect(round(frameOut.width)).toBe(14);
+    expect(round(frameOut.x)).toBe(0);
+  });
+
+  it('an untitled partition over a tall empty gap narrows its own height (its title-tab occupies the top 12px)', () => {
+    // A narrow frame (`width: 6`) and an empty title ('' -- untitled, so
+    // the tab's own textWidth is `width/3 = 2`, too small to create an X
+    // gap) isolates this test to the Y axis. `height = 32`: the frame's
+    // own `ignoreY` reservation is `[0,2]` + `[30,32]`, but the untitled
+    // tab's OWN (never-ignored-on-Y) `textHeight = 12` box extends that
+    // top reservation to `[0,12]` -- leaving ONE empty gap, `[12,30]` (18
+    // wide). `smaller(5)` keeps it (18 > 2*5) but shrinks it to `[17,25]`
+    // (8 wide) -- the amount actually removed.
+    const frame = node('f', 'partition', 0, 0, 6, 2 + 28 + 2);
+    const input = baseInput({ nodes: [frame], bounds: { maxX: 6, maxY: 32 } });
+    const result = compressGeometry(input);
+    const frameOut = result.nodes.find((n) => n.id === 'f')!;
+    expect(result.removed.y).toBe(8);
+    expect(round(frameOut.height)).toBe(24);
+    expect(round(frameOut.y)).toBe(0);
+  });
+});
+
 describe('compressGeometry — note spikeTip', () => {
   it('moves spikeTip.x through ct alongside the note box', () => {
     // The spike sits to the RIGHT of the note's own box (`notePosition:
