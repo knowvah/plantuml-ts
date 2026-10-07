@@ -1,0 +1,18 @@
+@startuml
+|ERROR|
+|P1|
+start
+if (Step 1 right?) then (no)
+  |ERROR|
+  :Error1;
+  stop
+elseif (Skip?) then (no)
+  |P1|
+  :Step 2;
+|P1|
+else (yes)
+endif
+|P1|
+:next step;
+end
+@enduml

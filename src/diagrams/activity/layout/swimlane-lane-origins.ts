@@ -46,8 +46,10 @@ interface LaneDividers {
  * (`MinMax.getEmpty(true)`), so `xx_n` reduces to `xpos + dividerWidth_n +
  * min / 2` and the divider itself to `xpos + x1_n + min / 2` (`min`
  * already resolved, never negative -- see `resolveSwimlaneMinWidth`, so
- * this is `Math.max(min, 0) / 2`). Split from {@link computeDividers} only
- * to keep that function's own NLOC under the file's limit.
+ * this is `Math.max(min, 0) / 2`). Its `UEmpty` sits at that SAME
+ * content-left minus the divider's width (add4-T1b, see {@link
+ * computeDividers}): `xpos + min / 2`. Split from {@link computeDividers}
+ * only to keep that function's own NLOC under the file's limit.
  */
 function trailingDivider(
   laneNames: readonly string[],
@@ -57,7 +59,7 @@ function trailingDivider(
 ): { dividerX: number; reservation: DividerReservation } {
   const x1n = halfMissingSpace(laneNames.length, inputs, min);
   const x2n = halfMissingSpace(laneNames.length + 1, inputs, min);
-  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos, width: x1n + x2n } };
+  return { dividerX: xpos + x1n + min / 2, reservation: { x: xpos + min / 2, width: x1n + x2n } };
 }
 
 /**
@@ -67,10 +69,18 @@ function trailingDivider(
  * variable, never independently meaningful, so returning them as a pair
  * rather than merging further is the natural seam. `dividerReservations`
  * is each boundary's `LaneDivider#drawU` `UEmpty(x1+x2, 1)`
- * (`LaneDivider.java:85-97`), at its own `xpos` -- BEFORE this divider's
- * own `x1` padding -- matching `Swimlanes.java:347-348`'s `ug.apply
- * (UTranslate.dx(xpos - dividerWith))` composed with `LaneDivider#drawU`'s
- * own local `UEmpty` at (0, 0).
+ * (`LaneDivider.java:85-97`), drawn by `drawWhenSwimlanes` at
+ * `ug.apply(UTranslate.dx(xpos - dividerWith))` (`Swimlanes.java:345-346`)
+ * where THAT `xpos` is `swimlane.getTranslate().getDx() + swimlane
+ * .getMinMax().getMinX()` (`:331`) -- the lane's CONTENT left (`left`
+ * below), not the origin loop's running `xpos`. The two coincide only
+ * when the lane is exactly content-wide; a `skinparam swimlaneWidth` floor
+ * (`:399-409`) centres the content and leaves the whole padding to the
+ * divider's RIGHT, where `CompressionXorYBuilder`'s `smaller(5)` gap
+ * (`klimt/compress/CompressionXorYBuilder.java:66`) collapses it -- jar
+ * A/B fixtures `tests/fixtures/activity/add4-T1b/swimw-*.puml` (100, 400,
+ * 9000 and `same` render byte-identical in the jar for exactly this
+ * reason).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/LaneDivider.java:85-97
  */
 function computeDividers(
@@ -92,7 +102,7 @@ function computeDividers(
     const left = xpos + dividerWidth + (w.width - w.contentWidth) / 2;
     contentLeft.push(left);
     dividerX.push(left - x2);
-    dividerReservations.push({ x: xpos, width: dividerWidth });
+    dividerReservations.push({ x: left - dividerWidth, width: dividerWidth });
     xpos += w.width + dividerWidth;
   }
   const trailing = trailingDivider(laneNames, inputs, min, xpos);

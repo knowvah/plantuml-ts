@@ -159,13 +159,14 @@ function buildWhileBackLoop(
   hX: number,
   hY: number,
   backFrom: GPoint,
-  dimTotalWidth: number,
+  dims: { readonly originX: number; readonly dimTotalWidth: number },
 ): LoopTranslate {
   return {
     kind: 'while-back',
     p1: backFrom,
     p2: { x: hX, y: hY },
-    dimTotalWidth,
+    originX: dims.originX,
+    dimTotalWidth: dims.dimTotalWidth,
     diamond: { inY: header.getCoord(NORTH_HOOK).y, outY: header.getCoord(SOUTH_HOOK).y, width: header.width },
   };
 }
@@ -264,7 +265,7 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
   const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
   pushEdgeFlagged(out, backEdgePoints(backFrom, headerEast, bodyBottomY, xx), [bodyOutLane, headerInLane], {
     emphasize: 'up',
-    loop: buildWhileBackLoop(header, hX, hY, backFrom, dimTotalWidth),
+    loop: buildWhileBackLoop(header, hX, hY, backFrom, { originX: xx - dimTotalWidth, dimTotalWidth }),
   });
   out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
 }

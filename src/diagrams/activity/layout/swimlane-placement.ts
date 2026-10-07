@@ -40,7 +40,6 @@ import {
   computeLaneWidths,
   measureLaneExtents,
   resolveSwimlaneMinWidth,
-  type LaneEdge,
   type LaneItem,
   type LaneWidth,
 } from './swimlane-context.js';
@@ -48,6 +47,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
 import { routeHline, type HlinePayload } from './swimlane-hline.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
+import { sameLaneEdges } from './swimlane-measure-edges.js';
 import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
@@ -222,7 +222,12 @@ function shiftNode(node: ActivityNodeGeo, deltas: ReadonlyMap<string, number>): 
   if (node.swimlane === undefined) return node;
   const delta = deltas.get(node.swimlane);
   if (delta === undefined || delta === 0) return node;
-  return { ...node, x: node.x + delta };
+  // add4-T1b: an Opale note's `spikeTip` is drawn by the SAME tile pass as
+  // the note itself (`FtileWithNoteOpale#drawU`, one lane translate), so it
+  // shifts with the note -- as `canvas-origin.ts#shiftNodeGeo` already does.
+  const next: ActivityNodeGeo = { ...node, x: node.x + delta };
+  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + delta, y: node.spikeTip.y };
+  return next;
 }
 
 /**
@@ -384,20 +389,8 @@ interface MeasureLanesInput {
   readonly theme: Theme;
 }
 
-/** Every SAME-lane edge (T3i, {@link LaneEdge}'s own doc: a cross-lane
- *  edge draws through the separate `Cross` class and never enters a
- *  lane's own `getMinMax()`), zipped from `edges`/`edgeMeta` -- the two
- *  arrays `placeSwimlanes` already keeps index-aligned (`PlacementResult
- *  .edgeMeta`'s own doc). */
-function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly EdgeMeta[]): LaneEdge[] {
-  const out: LaneEdge[] = [];
-  for (let i = 0; i < edges.length; i++) {
-    const meta = edgeMeta[i]!;
-    if (meta.lane1 === undefined || meta.lane1 !== meta.lane2) continue;
-    out.push({ swimlane: meta.lane1, edge: edges[i]! });
-  }
-  return out;
-}
+// `sameLaneEdges` moved to `swimlane-measure-edges.ts` (add4-T1b, this
+// file's own 500-line hook).
 
 /**
  * T1p-f: `computeDrawingWidths`'s own draw-interception pass
@@ -443,11 +436,10 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
   for (const name of laneNames)
     titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
 
-  // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
-  // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,
-  // not the `"same"` sentinel (`SkinParam.java:1121-1129`).
+  // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
+  // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
   const contentWidths = [...extents.values()].map((e) => e.maxX - e.minX);
-  const min = resolveSwimlaneMinWidth(contentWidths, 0);
+  const min = resolveSwimlaneMinWidth(contentWidths, theme.swimlaneWidth ?? 0);
 
   return { widths: computeLaneWidths(extents, titleWidths, min), min };
 }
