@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { terminalDecorationVector } from '../../../../../src/diagrams/activity/layout/compress/shapes-of-terminal.js';
+import {
+  edgeDecorationVector,
+  terminalDecorationVector,
+} from '../../../../../src/diagrams/activity/layout/compress/shapes-of-terminal.js';
 
 describe('terminalDecorationVector', () => {
   it('is the last segment when it has length', () => {
@@ -35,5 +38,31 @@ describe('terminalDecorationVector', () => {
 
   it('is undefined for fewer than two points', () => {
     expect(terminalDecorationVector([{ x: 1, y: 1 }])).toBeUndefined();
+  });
+});
+
+describe('edgeDecorationVector (add4-T1f R1)', () => {
+  const shortRight = [
+    { x: 0, y: 0 },
+    { x: 0, y: 50 },
+    { x: 3, y: 50 },
+  ];
+
+  it('an edge endDirection wins over the last segment (asToDown on a short horizontal tail)', () => {
+    expect(edgeDecorationVector({ points: shortRight, endDirection: 'down' })).toEqual({ dx: 0, dy: 1 });
+  });
+
+  it('each direction maps to its unit vector', () => {
+    expect(
+      ['up', 'left', 'right'].map((d) => edgeDecorationVector({ points: shortRight, endDirection: d as 'up' })),
+    ).toEqual([
+      { dx: 0, dy: -1 },
+      { dx: -1, dy: 0 },
+      { dx: 1, dy: 0 },
+    ]);
+  });
+
+  it('without endDirection it falls back to terminalDecorationVector', () => {
+    expect(edgeDecorationVector({ points: shortRight })).toEqual({ dx: 3, dy: 0 });
   });
 });

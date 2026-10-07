@@ -25,8 +25,29 @@
 
 type Point = { readonly x: number; readonly y: number };
 
+type EndDirection = 'up' | 'down' | 'left' | 'right';
+
+/** One unit step per {@link EndDirection} (SVG y grows downward). */
+const UNIT: Readonly<Record<EndDirection, { dx: number; dy: number }>> = {
+  up: { dx: 0, dy: -1 },
+  down: { dx: 0, dy: 1 },
+  left: { dx: -1, dy: 0 },
+  right: { dx: 1, dy: 0 },
+};
+
+/** add4-T1f (R1): the edge's own `endDirection` when its push site set one
+ *  (the creator's fixed decoration, `Snake.java:144-148`), else the
+ *  fallback below. */
+export function edgeDecorationVector(edge: {
+  readonly points: readonly Point[];
+  readonly endDirection?: EndDirection | undefined;
+}): { dx: number; dy: number } | undefined {
+  return edge.endDirection !== undefined ? UNIT[edge.endDirection] : terminalDecorationVector(edge.points);
+}
+
 /** The last segment with non-zero length, as a vector, or `undefined` when
- *  no segment has length (nothing to orient an arrowhead by). */
+ *  no segment has length (nothing to orient an arrowhead by). The fallback
+ *  for an edge whose push site sets no `endDirection`. */
 export function terminalDecorationVector(points: readonly Point[]): { dx: number; dy: number } | undefined {
   for (let i = points.length - 1; i > 0; i--) {
     const dx = points[i]!.x - points[i - 1]!.x;

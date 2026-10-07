@@ -4,15 +4,11 @@
  * :159-187`) picks `asToDown()` whenever the case's exit x lies within
  * diamond2's `[ptD.x, ptB.x]`, and the last segment `(x1, y2) -> ptA` may
  * then be a few px LONG and horizontal. `Worm#drawInternalOneColor` draws
- * that fixed polygon (`Worm.java:161-168`). Our edge carries no decoration
- * direction, so `terminalDecorationVector` reads RIGHT/LEFT off the short
- * horizontal segment: the arrowhead points the wrong way and its 8 px Y
- * box lets the compressor take 6 px the jar keeps.
- *
- * Owner: the push site, which already computes `direction`
- * (`switch-connection-points.ts#verticalThenHorizontalPoints`) and drops
- * it; it needs an `ActivityEdgeGeo` end-decoration field. These are
- * `it.fails` until then.
+ * that fixed polygon (`Worm.java:161-168`). add4-T1f (R1): the push site
+ * now carries that `direction` as `ActivityEdgeGeo.endDirection`
+ * (`switch-connection-points.ts#verticalThenHorizontalPoints`), read by
+ * `shapes-of-terminal.ts#edgeDecorationVector` in both the renderer and
+ * the compressor.
  *
  * `zero-length-down/in.svg` is the jar's render (`scripts/oracle-render.sh`).
  */
@@ -39,11 +35,11 @@ describe('switch V-then-H DOWN branch with a short last segment', () => {
     expect(svgAttr(ours, 'width')).toBe(svgAttr(golden, 'width'));
   });
 
-  it.fails('draws asToDown, not a horizontal arrowhead (end-decoration field missing)', () => {
+  it('draws asToDown, not a horizontal arrowhead (end-decoration field)', () => {
     expect(ours).toContain(JAR_DOWN_TIP);
   });
 
-  it.fails('canvas height matches the jar (301; ours 295)', () => {
+  it('canvas height matches the jar (301)', () => {
     expect(svgAttr(ours, 'height')).toBe(svgAttr(golden, 'height'));
   });
 });

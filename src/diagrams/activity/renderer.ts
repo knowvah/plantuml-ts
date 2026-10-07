@@ -20,7 +20,7 @@ import { measureLineWidth } from './activity-text-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
-import { terminalDecorationVector } from './layout/compress/shapes-of-terminal.js';
+import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
@@ -303,11 +303,11 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // 134-171`), never interleaved with it. Direction is second-to-last point
   // to last, skipping a zero-length last segment: upstream draws the end
   // decoration whatever that segment's length (`:161-168`, no length test;
-  // `terminalDecorationVector`'s own doc). `edge.arrowhead === false`
+  // `edgeDecorationVector`'s own doc). `edge.arrowhead === false`
   // mirrors a `null` end decoration (`if (endDecoration != null)` never
   // firing).
   const last = pts[pts.length - 1]!;
-  const vector = terminalDecorationVector(pts);
+  const vector = edgeDecorationVector(edge);
   const arrow = edge.arrowhead === false || vector === undefined ? '' : arrowTip(last, vector, headColor, theme);
 
   // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate

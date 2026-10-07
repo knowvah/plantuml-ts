@@ -21,7 +21,7 @@ import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
-import { terminalDecorationVector } from './shapes-of-terminal.js';
+import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -267,7 +267,7 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
 
 /**
  * The terminal arrowhead at an edge's last point, oriented by
- * {@link terminalDecorationVector} (the same vector `renderer.ts#renderEdge`
+ * {@link edgeDecorationVector} (the same vector `renderer.ts#renderEdge`
  * passes its terminal `arrowTip`). A zero-length last segment still gets
  * its arrowhead (`ftile/Worm.java:161-168` draws the end decoration with no
  * length test), so the compressor keeps its 10 px. `undefined` when
@@ -276,7 +276,7 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
   if (edge.arrowhead === false) return undefined;
-  const vector = terminalDecorationVector(edge.points);
+  const vector = edgeDecorationVector(edge);
   if (vector === undefined) return undefined;
   const last = edge.points[edge.points.length - 1]!;
   const ext = arrowHeadExtents(arrowDirection(vector.dx, vector.dy));

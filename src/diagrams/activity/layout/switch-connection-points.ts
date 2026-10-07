@@ -29,9 +29,20 @@ export interface HexagonCorners {
  * hexagon's own WEST (first) or EAST (last) corner. The `isLast() &&
  * p1.x > p2.x` detour only applies to the LAST case.
  */
-export function horizontalThenVerticalPoints(p1: GPoint, p2: GPoint, isLast: boolean, diamond1Height: number): GPoint[] {
+export function horizontalThenVerticalPoints(
+  p1: GPoint,
+  p2: GPoint,
+  isLast: boolean,
+  diamond1Height: number,
+): GPoint[] {
   if (isLast && p1.x > p2.x) {
-    return [p1, { x: p1.x + 12, y: p1.y }, { x: p1.x + 12, y: p1.y + diamond1Height }, { x: p2.x, y: p1.y + diamond1Height }, p2];
+    return [
+      p1,
+      { x: p1.x + 12, y: p1.y },
+      { x: p1.x + 12, y: p1.y + diamond1Height },
+      { x: p2.x, y: p1.y + diamond1Height },
+      p2,
+    ];
   }
   return [p1, { x: p2.x, y: p1.y }, p2];
 }
@@ -67,8 +78,14 @@ export function oneLinkVerticalPoints(p1: GPoint, p2: GPoint): GPoint[] {
  * `ConnectionVerticalThenHorizontal#drawU` (`FtileSwitchWithManyLinks
  * .java:142-188`): the first/last outgoing case's case-to-merge edge,
  * landing on diamond2's own WEST/EAST/NORTH point depending on direction.
+ * add4-T1f (R1): also returns that `direction` -- the arrow polygon is
+ * chosen with it (`asToRight`/`asToLeft`/`asToDown`, `:159-170`), so it is
+ * the edge's end decoration, whatever the last segment's own direction.
  */
-export function verticalThenHorizontalPoints(p1: GPoint, hex2: { west: GPoint; east: GPoint; north: GPoint }): GPoint[] {
+export function verticalThenHorizontalPoints(
+  p1: GPoint,
+  hex2: { west: GPoint; east: GPoint; north: GPoint },
+): { points: GPoint[]; direction: 'left' | 'right' | 'down' } {
   let p2: GPoint;
   let direction: 'LEFT' | 'RIGHT' | 'DOWN';
   if (p1.x < hex2.west.x) {
@@ -88,7 +105,7 @@ export function verticalThenHorizontalPoints(p1: GPoint, hex2: { west: GPoint; e
     points.push({ x: p1.x, y: p2.y });
   }
   points.push(p2);
-  return points;
+  return { points, direction: direction === 'LEFT' ? 'left' : direction === 'RIGHT' ? 'right' : 'down' };
 }
 
 /**
@@ -100,7 +117,11 @@ export function verticalThenHorizontalPoints(p1: GPoint, hex2: { west: GPoint; e
  * its x -- preserved verbatim (CLAUDE.md), same class of quirk as
  * {@link verticalTopPoints}'s open-space start.
  */
-export function verticalBottomPoints(p1: GPoint, hex1: HexagonCorners, hex2: { north: GPoint; west: GPoint }): GPoint[] {
+export function verticalBottomPoints(
+  p1: GPoint,
+  hex1: HexagonCorners,
+  hex2: { north: GPoint; west: GPoint },
+): GPoint[] {
   if (p1.x < hex1.west.x - MARGIN || p1.x > hex1.east.x + MARGIN) {
     return [p1, { x: p1.x, y: hex2.west.y }];
   }
