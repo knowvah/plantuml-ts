@@ -41,11 +41,23 @@ describe('lane-tagged reservations', () => {
     expect(laneReservationItems(list)).toEqual([{ swimlane: 'B', x: 10, width: 5 }]);
   });
 
-  it.each(['lane-res-while', 'lane-res-while-empty', 'lane-res-while-backward', 'lane-res-fork-label'])(
-    '%s renders equal to the jar',
-    (name) => {
-      const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
-      expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
-    },
-  );
+  it.each([
+    'lane-res-while',
+    'lane-res-while-empty',
+    'lane-res-while-backward',
+    'lane-res-fork-label',
+    'lane-res-if-down',
+  ])('%s renders equal to the jar', (name) => {
+    const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
+    expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
+  });
+
+  // A same-lane arrow label's reservation is drawn and measured in its lane.
+  // The one remaining diff is the label's own baseline (+3.278), which the
+  // same markup shows with no swimlanes at all: not a lane mechanism.
+  it('lane-res-inlabel matches the jar except the lane-independent label y', () => {
+    const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, 'lane-res-inlabel');
+    const paths = compareSvg(ours, golden, 'deterministic').diffs.map((d) => d.path);
+    expect(paths).toEqual(['svg/g[1]/text[5]/@y']);
+  });
 });

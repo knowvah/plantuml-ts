@@ -1,0 +1,22 @@
+@startuml
+|a|
+start
+fork
+:a1;
+fork again
+:a2;
+end fork
+|b|
+fork
+:b1;
+note left
+first note here
+end note
+note right
+second note text
+end note
+fork again
+:b2;
+end fork
+stop
+@enduml

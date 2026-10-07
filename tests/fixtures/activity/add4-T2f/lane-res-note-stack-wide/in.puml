@@ -1,0 +1,20 @@
+@startuml
+|a|
+start
+fork
+:a1 wide wide wide;
+fork again
+:a2;
+fork again
+:a3 wide wide wide;
+end fork
+|b|
+:b1;
+note left
+first note here
+end note
+note right
+second note text
+end note
+stop
+@enduml

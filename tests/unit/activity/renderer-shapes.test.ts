@@ -1003,11 +1003,13 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
     expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
   });
 
-  it("'while-header' ignores conditionStyle (T3f's family, not gated here)", () => {
+  // add4-T2f: `FtileWhile.create` builds `FtileDiamondSquare` under
+  // INSIDE_DIAMOND (`vcompact/FtileWhile.java:134-136`), as an if does.
+  it("'while-header' draws the 4-point rhombus under ConditionStyle InsideDiamond", () => {
     const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
     const node = makeNode({ kind: 'while-header', x: 25, y: 15, width: 41.669, height: 35 });
     const svg = renderNode(node, insideDiamond);
-    expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
   });
 });
 
