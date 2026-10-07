@@ -1,0 +1,21 @@
+@startuml
+|a|
+start
+:first action;
+fork
+:in lane a;
+fork again
+|b|
+:in lane b;
+if (check?) then (yes)
+:then;
+endif
+fork again
+|c|
+if (other?) then (yes)
+:then c;
+else (no)
+:else c;
+endif
+end fork
+@enduml

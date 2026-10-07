@@ -41,11 +41,14 @@ describe('lane-tagged reservations', () => {
     expect(laneReservationItems(list)).toEqual([{ swimlane: 'B', x: 10, width: 5 }]);
   });
 
-  it.each(['lane-res-while', 'lane-res-while-empty', 'lane-res-while-backward', 'lane-res-fork-label'])(
-    '%s renders equal to the jar',
-    (name) => {
-      const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
-      expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
-    },
-  );
+  it.each([
+    'lane-res-while',
+    'lane-res-while-empty',
+    'lane-res-while-backward',
+    'lane-res-fork-label',
+    'lane-res-if-down',
+  ])('%s renders equal to the jar', (name) => {
+    const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
+    expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
+  });
 });
