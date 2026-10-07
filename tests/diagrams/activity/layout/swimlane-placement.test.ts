@@ -97,13 +97,22 @@ describe('laneAt/laneIn/laneOut', () => {
     expect(laneOut(empty, 'ambient')).toBe('ambient');
   });
 
-  it("a composite's own swimlane wins over descending into children", () => {
+  // T3i (row PART-XLANE): `FtileAssemblySimple.getSwimlaneIn/Out()`
+  // (`FtileAssemblySimple.java:71-76`) is an UNCONDITIONAL one-line
+  // delegation to a child -- `tile1.getSwimlaneIn()`/`tile2
+  // .getSwimlaneOut()`, no own-field check at all (the class has no such
+  // field). `GtileTopDown` never gets a real `.swimlane` from `tile-
+  // layout.ts` either way, but a non-delegating kind (an ordinary leaf)
+  // still prioritises its OWN `.swimlane` correctly -- see the
+  // `laneOut prefers swimlaneOut...` case below, on a `FixedTile`, not a
+  // delegating composite.
+  it('a composite descends into children even when (synthetically) given its own swimlane', () => {
     const child = new FixedTile(10, 10);
     child.swimlane = 'child-lane';
     const wrapper = new GtileTopDown([child], {} as StringBounder, theme);
     wrapper.swimlane = 'wrapper-lane';
-    expect(laneIn(wrapper, undefined)).toBe('wrapper-lane');
-    expect(laneOut(wrapper, undefined)).toBe('wrapper-lane');
+    expect(laneIn(wrapper, undefined)).toBe('child-lane');
+    expect(laneOut(wrapper, undefined)).toBe('child-lane');
   });
 
   it('laneOut prefers swimlaneOut over swimlane when both are set', () => {
