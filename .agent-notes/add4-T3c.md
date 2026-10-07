@@ -71,3 +71,12 @@ None. No row rose after any commit, and no element count moved.
 - **Finding**: the emphasized `asToUp` arrowhead on the loop-back vertical at `x = width`, padded by HACK_X_FOR_POLYGON, gives a group frame orig + 9 before compression. The post-compression "+6" T2g measured is the compressor at work, not the ink.
 - **Impact**: when a jar measurement is read off a compressed SVG, check `smaller(5)` before deriving a constant.
 - **Confidence**: High
+
+## Resume (after merge 1d2fb519d; write-set extended)
+| sha | subject | Σ (20 rows, pinned 1174) |
+|---|---|---|
+| a0bd40192 | fix(activity): let snakes merge across a group frame | 1114 |
+| e243d6ac2 | fix(activity): measure a lane with node-aware ink | 1114 |
+- lebile-91-veto202 60 -> 0. 0 risers. Element census unchanged. Ratchet (392), parity, invariant, style/text/swimlane census, diff-baseline ratchet and tests/diagrams/activity + tests/unit/activity are all green. No census mover.
+- Retired: snake-merge-group-scope.test.ts and snake-merge.test.ts's scope-isolation block. The Java quote (FtileGroup.java:209-227 has no UGraphicForSnake) is in the replacement test comment.
+- Not done: `EdgeMeta.scope` (swimlane-placement.ts) and its producer `tile-coordinates.ts:164` plus `Out.groupScope` (:78) are now dead. tile-coordinates.ts is outside the write-set, so they are left for its owner.
