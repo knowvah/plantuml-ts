@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "3b36df73",
+  "measuredAgainstCommit": "a30245de",
   "fixtures": [
     {
       "type": "activity",
@@ -392,10 +392,10 @@
       "slug": "bejeta-45-sotu349",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 4,
+          "11": 5,
           "12": 4
         },
         "strokeWidth": {
@@ -404,8 +404,8 @@
         "rx": {
           "12.5": 4
         },
-        "textCount": 8,
-        "width": "209",
+        "textCount": 9,
+        "width": "213",
         "height": "397"
       },
       "jar": {
@@ -2944,10 +2944,10 @@
       "slug": "divinu-75-busu278",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 5,
+          "11": 6,
           "12": 3
         },
         "strokeWidth": {
@@ -2956,8 +2956,8 @@
         "rx": {
           "12.5": 3
         },
-        "textCount": 8,
-        "width": "143",
+        "textCount": 9,
+        "width": "189",
         "height": "304"
       },
       "jar": {
@@ -13285,24 +13285,23 @@
       "slug": "taredi-65-vero960",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 4,
           "12": 4,
           "18": 5
         },
         "strokeWidth": {
-          "1": 26,
+          "1": 7,
           "1.5": 6
         },
         "rx": {
           "(absent)": 1,
           "12.5": 4
         },
-        "textCount": 13,
-        "width": "463",
-        "height": "423"
+        "textCount": 9,
+        "width": "406",
+        "height": "321"
       },
       "jar": {
         "fontSize": {

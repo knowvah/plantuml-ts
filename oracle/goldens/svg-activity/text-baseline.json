@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "134202b9",
+  "measuredAgainstCommit": "a30245de",
   "fixtures": [
     {
       "type": "activity",
@@ -318,18 +318,18 @@
       "slug": "bejeta-45-sotu349",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
           "10": 4
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -2370,18 +2370,18 @@
       "slug": "divinu-75-busu278",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
           "10": 3
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -10765,18 +10765,18 @@
       "slug": "taredi-65-vero960",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fill": {
-          "#000": 13
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 13
+          "(absent)": 9
         },
         "inset": {
           "10": 4
         },
-        "textCount": 13
+        "textCount": 9
       },
       "jar": {
         "fill": {
