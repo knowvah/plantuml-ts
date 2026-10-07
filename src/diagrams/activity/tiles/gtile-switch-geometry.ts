@@ -2,6 +2,25 @@ import type { Tile } from './tile.js';
 import { NORTH_HOOK } from './points.js';
 
 /**
+ * The `FtileGeometry` subset the switch's own math reads off each case
+ * (`getWidth`/`getHeight`/`getLeft`). Each case is the DECORATED tile
+ * `FtileFactoryDelegatorSwitch#createWithLinks` builds
+ * (`FtileDecorateOutLabel(FtileDecorateInLabel(branch.getFtile(), ...))`,
+ * `FtileFactoryDelegatorSwitch.java:109-113`), not the bare branch body --
+ * see `gtile-switch.ts#decorateCase`.
+ */
+export interface CaseDim {
+  readonly width: number;
+  readonly height: number;
+  readonly left: number;
+}
+
+/** A bare tile's own {@link CaseDim} (no label decoration). */
+export function caseDimOf(tile: Tile): CaseDim {
+  return { width: tile.width, height: tile.height, left: leftOf(tile) };
+}
+
+/**
  * Pure layout math for {@link GtileSwitch}, split out of `gtile-switch.ts`
  * purely to keep that file's constructor under the complexity hook's NLOC
  * cap -- every formula here is a direct port of `FtileSwitchWithDiamonds`'s
@@ -32,8 +51,8 @@ export function leftOf(tile: Tile): number {
 }
 
 /** `FtileGeometry#getRight()` (`:166-168`): `width - left`. */
-export function rightOf(tile: Tile): number {
-  return tile.width - leftOf(tile);
+export function rightOf(tile: CaseDim): number {
+  return tile.width - tile.left;
 }
 
 export interface SwitchMode {
@@ -50,11 +69,11 @@ export interface SwitchMode {
  * and last (`:84-90` -- unreachable for <= 2 cases, so `w9` is 0 there
  * and `mode` reduces to `w13 > 0`).
  */
-export function computeSwitchMode(diamond1Width: number, caseTiles: readonly Tile[]): SwitchMode {
+export function computeSwitchMode(diamond1Width: number, caseTiles: readonly CaseDim[]): SwitchMode {
   if (caseTiles.length === 0) return { isBigDiamond: false, w13: 0, w9: 0 };
   const first = caseTiles[0]!;
   const last = caseTiles[caseTiles.length - 1]!;
-  const w13 = diamond1Width - rightOf(first) - leftOf(last);
+  const w13 = diamond1Width - rightOf(first) - last.left;
   let w9 = 0;
   for (let i = 1; i < caseTiles.length - 1; i++) w9 += caseTiles[i]!.width;
   return { isBigDiamond: w13 > w9, w13, w9 };
@@ -70,7 +89,7 @@ export interface NudeDimensions {
  * case `mergeLR`'d (sum width, max height), then `delta(xSeparation *
  * (n-1), 100)`.
  */
-export function computeNudeDimensions(caseTiles: readonly Tile[]): NudeDimensions {
+export function computeNudeDimensions(caseTiles: readonly CaseDim[]): NudeDimensions {
   let width = 0;
   let height = 0;
   for (const tile of caseTiles) {
@@ -117,7 +136,7 @@ export interface CaseXOffsets {
  * LAST case sits flush against the trailing `SUPP15` margin.
  */
 export function computeBigDiamondCaseX(
-  caseTiles: readonly Tile[],
+  caseTiles: readonly CaseDim[],
   mode: SwitchMode,
   diamond1Width: number,
 ): CaseXOffsets {
@@ -135,7 +154,7 @@ export function computeBigDiamondCaseX(
   // `getTranslateDiamond1`'s own `x1 = dimTotal.left - dim1.left` inverted
   // (`FtileSwitchWithDiamonds.java:174-180`): `dimTotal.left` (this
   // `pivotLeft`) is `tile0.getLeft() + SUPP15 + dim1.left`.
-  const pivotLeft = leftOf(caseTiles[0]!) + SWITCH_SUPP15 + diamond1Width / 2;
+  const pivotLeft = caseTiles[0]!.left + SWITCH_SUPP15 + diamond1Width / 2;
   return { xOffsets, totalWidth, pivotLeft };
 }
 
@@ -145,7 +164,7 @@ export function computeBigDiamondCaseX(
  * apart. Width/pivot come from the caller (`computeSmallDiamondExtent`),
  * which also folds in `diamond1`/`diamond2`'s own widths.
  */
-export function computeSmallDiamondCaseX(caseTiles: readonly Tile[]): number[] {
+export function computeSmallDiamondCaseX(caseTiles: readonly CaseDim[]): number[] {
   const xOffsets: number[] = [];
   let x = 0;
   for (const tile of caseTiles) {
