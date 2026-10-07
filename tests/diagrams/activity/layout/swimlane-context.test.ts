@@ -67,7 +67,7 @@ describe('measureLaneExtents', () => {
   });
 
   // T3i: a lane's own `getMinMax()` is measured through the SAME
-  // `LimitFinder` the whole-canvas scan uses (`canvas-origin.ts#fudgeX`'s
+  // `LimitFinder` the whole-canvas scan uses (`canvas-origin-fudge.ts#fudgeX`'s
   // own doc), so a boundary item's per-shape fudge shifts the lane's own
   // content extent -- `jakuco-69-dari135`'s lane content landed exactly
   // `RECT_FUDGE.near` (1) too far right before this was ported.
