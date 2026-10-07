@@ -171,3 +171,23 @@ None. No code is committed, so the style/text/swimlane census is unchanged.
 - **Finding**: `FtileDecorate.drawU` calls the child's `drawU` directly, so the dispatcher's `instanceof FtileLabel`/`FtileGoto` hooks never fire for a decorated sole child.
 - **Impact**: any dispatcher-driven behaviour (goto lines, label positions) depends on tile-tree wrapping, not only on node order.
 - **Confidence**: High (three jar renders)
+
+# Resume: zivege (write-set extended to gtile-if-with-links.ts, conditional-builder.ts, walk-if-down.ts, walk-if-with-links.ts)
+
+## Commits
+- `81405f542` fix(add4-T3d): add the merge diamond's padded label height to an if
+  - Java: `FtileIfWithLinks.java:83-88` (`getYdeltaForLabels`), `FtileIfWithDiamonds.java:187-190`, `ConditionalBuilder.java:292-303` (tbout = `Display.NULL` -> `create7`), `LinkRendering.java:49-53`, `FtileDiamond.java:118-122`, `SheetBlock1.java:196-199`, `MinMax.java:71-73` (empty sheet = 0x0 before padding).
+  - Ours: `tiles/gtile-if-with-links.ts#ydeltaForLabels` (2p when diamond2 is a real rhombus, else 0 for `hline`/one-branch `FtileEmpty`), folded into `computeCoreGeometry`'s `totalHeight`; `IfWithLinksCreateOptions.padding` fed from `theme.padding` in `layout/conditional-builder.ts#buildIfWithLinks`. Doc comments condensed to keep the file at 499 lines (prettier-formatted).
+  - Fixtures `tests/fixtures/activity/add4-T3d/if-links-merge-padding-{1,5,30,hline}` (oracle-render.sh), test `tests/diagrams/activity/if-links-merge-padding.test.ts`: 1/5/30 red at base, all green after; hline green both (guard).
+- No `shapes-of.ts`/`renderer.ts` hunk needed; `walk-if-*.ts` untouched (empty diamond1 side labels not required for zivege; jar sweep 1/5/10/30/none/0 all exact).
+
+## Rows / probe
+- zivege-92-rise076 49 -> 0. Probe Σ 1385 -> 1336, risers 0, fallers 1.
+
+## Census movers
+- style: zivege height 466 -> 474 (= pin `jar`). No text/swimlane movers. Ratchet, harness-parity, compress invariant green.
+
+## Not done
+- Empty diamond1 west/east labels (getLabelPositive of Display.NULL, also 2p x 2p) are still omitted by `conditional-builder.ts`; they only matter when 2p exceeds the diamond1 offset (diff1/diff2) or diamondOutY (suppHeight). No fixture exercises it.
+- `gtile-if-down.ts` diamond2 (`getShape2(useNorth=true)`) has the same padded tbout north/east labels; not in write-set. fukika residuals listed above remain with the padding patch.
+- Earlier patches still apply cleanly on 81405f542.
