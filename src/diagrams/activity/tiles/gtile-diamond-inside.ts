@@ -23,6 +23,18 @@ function withGlobalPadding(dim: { width: number; height: number }, theme: Theme)
   return { width: dim.width + 2 * pad, height: dim.height + 2 * pad };
 }
 
+/** add4-T3d: a SET side label is a creole Sheet too -- `getLabelPositive`
+ *  -> `create0(..., ftileFactory.skinParam(), ...)` (`ConditionalBuilder
+ *  .java:280-282`) -> `Display#getCreole`'s `new SheetBlock1(sheet, ...,
+ *  spriteContainer.getPadding())` (`klimt/creole/Display.java:692-700`),
+ *  so it grows by the same padding on both axes; `renderIfLabel` draws its
+ *  text at `(+padding, +padding)` (`SheetBlock1.java:209-210`). An unset
+ *  side stays `TextBlockUtils.empty(0, 0)` (`FtileDiamond.java:53-56`). */
+function padSide(d: LabelDim, theme: Theme): LabelDim {
+  if (d.text === '') return d;
+  return { ...d, ...withGlobalPadding(d, theme) };
+}
+
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
 /** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
@@ -175,10 +187,10 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
     super();
     this.label = label;
     const arrowSize = activityFontSize(theme, 'arrow');
-    this.north = measureLabel(labels.north, bounder, arrowSize);
-    this.south = measureLabel(labels.south, bounder, arrowSize);
-    this.west = measureLabel(labels.west, bounder, arrowSize);
-    this.east = measureLabel(labels.east, bounder, arrowSize);
+    this.north = padSide(measureLabel(labels.north, bounder, arrowSize), theme);
+    this.south = padSide(measureLabel(labels.south, bounder, arrowSize), theme);
+    this.west = padSide(measureLabel(labels.west, bounder, arrowSize), theme);
+    this.east = padSide(measureLabel(labels.east, bounder, arrowSize), theme);
 
     const diamondSize = activityFontSize(theme, 'diamond');
     // IFNL (T3d, `vaxiki-78-nice114`): a multi-line condition (unescaped

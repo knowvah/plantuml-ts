@@ -145,12 +145,15 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
   const fontSize = activityFontSize(theme, 'arrow');
   const label = node.label ?? '';
   const lines = label.split('\n');
-  const baselineY = node.y + fontSize * ASCENT_FRACTION;
+  // add4-T3d: the label's `SheetBlock1` translates by `(padding.left,
+  // padding.top)` before drawing (`SheetBlock1.java:209-210`).
+  const pad = theme.padding ?? 0;
+  const baselineY = node.y + pad + fontSize * ASCENT_FRACTION;
   const fill = activityFontColor(theme, 'arrow');
   if (lines.length > 1) {
-    return textLines(lines, node.x, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
+    return textLines(lines, node.x + pad, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
   }
-  return drawActivityText(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+  return drawActivityText(node.x + pad, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
 }
 
 /**

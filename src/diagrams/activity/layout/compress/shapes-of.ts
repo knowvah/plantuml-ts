@@ -116,6 +116,20 @@ const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
 const FRAME_KINDS = new Set(['group', 'partition']);
 
 /**
+ * Where an `if-label`'s first `UText` is drawn, relative to the node's own
+ * top-left: the label is a `SheetBlock1` (`Display.getCreole`,
+ * `klimt/creole/Display.java:692-700`) whose `drawU` translates by
+ * `(padding.left, padding.top)` (`SheetBlock1.java:209-210`) before the
+ * first line's baseline. `UGraphicCompressOnXorY` maps that draw point, not
+ * the padded box (`UGraphicCompressOnXorY.java:122-128`), so
+ * `compress-geometry.ts` moves the node by this anchor.
+ */
+export function ifLabelTextAnchor(theme: Theme): { dx: number; dy: number } {
+  const pad = theme.padding ?? 0;
+  return { dx: pad, dy: pad + activityFontSize(theme, 'arrow') * TITLE_BASELINE_ASCENT };
+}
+
+/**
  * `if-label`'s text box (D3) -- `renderIfLabel`'s own baseline convention
  * (`activity-renderer-if-shapes.ts`, Q5: `y0 + ARROW_FONT_SIZE *
  * ASCENT_FRACTION`, left-aligned starting at `node.x`,
@@ -149,7 +163,8 @@ const FRAME_KINDS = new Set(['group', 'partition']);
  */
 function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
   const fontSize = activityFontSize(theme, 'arrow');
-  const firstBaselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
+  const anchor = ifLabelTextAnchor(theme);
+  const firstBaselineY = node.y + anchor.dy;
   const lines = (node.label ?? '').split('\n');
   let width = 0;
   let firstHeight = 0;
@@ -159,7 +174,13 @@ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
     if (i === 0) firstHeight = dim.height;
   }
   const lastBaselineY = firstBaselineY + fontSize * (lines.length - 1);
-  return { kind: 'text', x: node.x, y: lastBaselineY, width, height: lastBaselineY - firstBaselineY + firstHeight };
+  return {
+    kind: 'text',
+    x: node.x + anchor.dx,
+    y: lastBaselineY,
+    width,
+    height: lastBaselineY - firstBaselineY + firstHeight,
+  };
 }
 
 /**
