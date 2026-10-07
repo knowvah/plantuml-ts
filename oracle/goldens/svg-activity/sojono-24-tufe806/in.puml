@@ -1,0 +1,28 @@
+@startuml
+start
+:Home Page;
+
+
+switch (action1)
+note left: on action1
+case ( click - linka )
+
+  :Page 1.1;
+
+case ( click - linkb )
+  :Page 1.2;
+  switch (action2)
+note left: on action2
+  case ( click - linkdsfsdf )
+    :first;
+    stop
+  case ( click - linkb )
+    :second;
+
+  endswitch
+endswitch
+
+:someending;
+
+stop
+@enduml

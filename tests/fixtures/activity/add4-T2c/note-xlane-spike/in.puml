@@ -1,0 +1,15 @@
+@startuml
+|A|
+:alpha;
+|B|
+:beta;
+|A|
+:gamma;
+|B|
+note right
+spiked note
+in B
+end note
+|A|
+:delta;
+@enduml

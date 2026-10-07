@@ -59,57 +59,54 @@ describe('layoutActivity — useVerticalIf unset: long-horizontal dispatch is un
 describe('layoutActivity — long-vertical: then/elseif/else chain', () => {
   const geo = layoutActivity(chainAst(verticalPragma()), baseTheme, measurer);
 
-  it('nodes read hexagon c1 (+ own c1, east 1), a, hexagon c2 (+ own c2, east 2), b, d, merge, in drawU order', () => {
+  it('nodes read a, b, hexagon c1 (+ own c1, east 1), hexagon c2 (+ own c2, east 2), d, merge, in drawU order (FtileIfLongVertical.java:492-502)', () => {
     expect(geo.nodes.map((n) => n.kind)).toEqual([
-      'if-split',
-      'if-own-label',
-      'if-label',
+      'action',
       'action',
       'if-split',
       'if-own-label',
       'if-label',
-      'action',
+      'if-split',
+      'if-own-label',
+      'if-label',
       'action',
       'if-merge',
     ]);
-    expect(geo.nodes[0]!.label).toBe('c1');
-    expect(geo.nodes[2]!.label).toBe('1');
-    expect(geo.nodes[3]!.label).toBe('a');
-    expect(geo.nodes[4]!.label).toBe('c2');
-    expect(geo.nodes[6]!.label).toBe('2');
-    expect(geo.nodes[7]!.label).toBe('b');
+    expect(geo.nodes[0]!.label).toBe('a');
+    expect(geo.nodes[1]!.label).toBe('b');
+    expect(geo.nodes[2]!.label).toBe('c1');
+    expect(geo.nodes[4]!.label).toBe('1');
+    expect(geo.nodes[5]!.label).toBe('c2');
+    expect(geo.nodes[7]!.label).toBe('2');
     expect(geo.nodes[8]!.label).toBe('d');
   });
 
-  it('emits 7 edges: In, VerticalIn a, VerticalIn b, Vertical(a->b), LastElse, LastElseOut, ThenOut a (b has no ThenOutConnect: only 2 branches, i=1 IS covered)', () => {
-    // ConnectionIn, ConnectionVerticalIn x2, ConnectionVertical x1,
-    // ConnectionLastElse, ConnectionLastElseOut, ConnectionThenOut (branch
-    // 0), ConnectionThenOutConnect (branch 1) = 8.
+  it('emits 8 edges: VerticalIn x2, Vertical, ThenOut, ThenOutConnect, In, LastElse, LastElseOut', () => {
     expect(geo.edges.length).toBe(8);
   });
 
+  // `create`'s `conns` order (FtileIfLongVertical.java:173-201):
+  // 0-1 VerticalIn, 2 Vertical, 3 ThenOut, 4 ThenOutConnect, 5 In,
+  // 6 LastElse, 7 LastElseOut.
   it('ConnectionLastElse carries the elseLabel "3"', () => {
-    // Walker push order: In, VerticalIn x2, Vertical, LastElse -- index 4.
-    const lastElse = geo.edges[4]!;
-    expect(lastElse.label).toBe('3');
+    expect(geo.edges[6]!.label).toBe('3');
   });
 
   it('ConnectionLastElse draws its label CENTER-aligned (FtileIfLongVertical.java:319-320)', () => {
-    expect(geo.edges[4]!.labelAlign).toEqual({ vertical: 'CENTER' });
+    expect(geo.edges[6]!.labelAlign).toEqual({ vertical: 'CENTER' });
   });
 
   it('ConnectionIn is a 4-point elbow (down, across, down)', () => {
-    expect(geo.edges[0]!.points.length).toBe(4);
+    expect(geo.edges[5]!.points.length).toBe(4);
   });
 
   it('ConnectionVertical (diamond0 -> diamond1) is a straight 2-point line', () => {
-    const vertical = geo.edges[3]!;
-    expect(vertical.points.length).toBe(2);
+    expect(geo.edges[2]!.points.length).toBe(2);
   });
 
-  it('ConnectionThenOut (branch 0, 5-point route via the right edge) and ConnectionThenOutConnect (branch 1, 3-point stub) are the last two edges', () => {
-    expect(geo.edges[6]!.points.length).toBe(5);
-    expect(geo.edges[7]!.points.length).toBe(3);
+  it('ConnectionThenOut (branch 0, 5-point route via the right edge) then ConnectionThenOutConnect (branch 1, 3-point stub)', () => {
+    expect(geo.edges[3]!.points.length).toBe(5);
+    expect(geo.edges[4]!.points.length).toBe(3);
   });
 });
 
@@ -132,5 +129,31 @@ describe('layoutActivity — long-vertical: a branch ending in stop skips its Th
 
   it('only 7 edges: In, VerticalIn x2, Vertical, LastElse, LastElseOut, ThenOutConnect (branch 1) -- branch 0"s ThenOut is skipped', () => {
     expect(geo.edges.length).toBe(7);
+  });
+});
+
+describe('layoutActivity — long-vertical: an elseif inlabel labels ConnectionVertical', () => {
+  const ast = chainAst(verticalPragma());
+  const ifNode = ast.nodes[0] as Extract<ActivityDiagramAST['nodes'][number], { kind: 'if' }>;
+  const withInlabel: ActivityDiagramAST = {
+    ...ast,
+    nodes: [{ ...ifNode, elseIfBranches: [{ ...ifNode.elseIfBranches[0]!, incomingLabel: 'No' }] }],
+  };
+  const geo = layoutActivity(withInlabel, baseTheme, measurer);
+  const plain = layoutActivity(ast, baseTheme, measurer);
+
+  it('ConnectionVertical carries the inlabel, CENTER-aligned (FtileIfLongVertical.java:183-190,281-282)', () => {
+    expect(geo.edges[2]!.label).toBe('No');
+    expect(geo.edges[2]!.labelAlign).toEqual({ vertical: 'CENTER' });
+    expect(plain.edges[2]!.label).toBeUndefined();
+  });
+
+  it('the inlabel widens EVERY branch west margin by the same amount (FtileMargedWest, :141,157,165)', () => {
+    const gap = (g: typeof geo, body: string): number =>
+      g.nodes.find((n) => n.label === body)!.x - g.nodes.find((n) => n.label === 'c1')!.x;
+    const grewA = gap(geo, 'a') - gap(plain, 'a');
+    const grewB = gap(geo, 'b') - gap(plain, 'b');
+    expect(grewA).toBeGreaterThan(0);
+    expect(grewB).toBeCloseTo(grewA, 9);
   });
 });

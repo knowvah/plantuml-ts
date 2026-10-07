@@ -1,0 +1,7 @@
+@startuml
+floating note
+      a,b,c
+end note
+:foo;
+
+@enduml

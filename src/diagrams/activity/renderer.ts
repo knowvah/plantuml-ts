@@ -21,7 +21,7 @@ import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from '
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
-import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
+import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -40,6 +40,10 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 // Label helpers
 // ---------------------------------------------------------------------------
 
+/** `UStroke.simple()` -- thickness 1.0 (`klimt/UStroke.java:75-77`), the
+ *  stroke every start/end decoration draws through (`Worm.java:159,166`). */
+const SIMPLE_STROKE_WIDTH = 1;
+
 /**
  * Draw the `ArrowsRegular`/`ArrowsTriangle` decoration (`arrows-regular.ts`,
  * D4) at `tip`, oriented by the segment direction `vector`. Bundled into
@@ -55,6 +59,7 @@ function arrowTip(
   vector: { dx: number; dy: number },
   color: string,
   theme: Theme,
+  strokeWidth = SIMPLE_STROKE_WIDTH,
 ): string {
   const { x, y } = tip;
   const { dx, dy } = vector;
@@ -71,7 +76,7 @@ function arrowTip(
     // the foreground and the background (`Worm.java:152-153`), so the
     // decoration is filled AND stroked in the same colour; this port drew a
     // fill alone.
-    { fill: color, stroke: color, strokeWidth: 1 },
+    { fill: color, stroke: color, strokeWidth },
   );
 }
 
@@ -235,7 +240,13 @@ function renderEdgeSegments(
     const dy = p2.y - p1.y;
     if (!emphasisDrawn && emphasis !== undefined && arrowDirection(dx, dy) === emphasis.dir) {
       const anchor = emphasis.at ?? { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.head, theme);
+      // EMPH-STROKE (add4-T2e): `drawLine(ug, line, emphasizeDirection)`
+      // (`Worm.java:139,177-181`) draws `arrows.asTo(direction)` through the
+      // SAME `ug` the segment lines use -- `arrowColor` fore + back
+      // (`:126-127`) and the worm's own stroke (`:128-131`). The
+      // `arrowHeadColor` / `UStroke.simple()` re-applies (`:152-166`) come
+      // AFTER the loop and reach the start/end decorations only.
+      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.line, theme, strokeWidth);
       emphasisDrawn = true;
     }
     out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
@@ -395,12 +406,15 @@ function renderCrossLaneDecorations(geo: ActivityGeometry, theme: Theme): string
  * land on the integer grid) is kept only for hand-built `ActivityGeometry`
  * test fixtures that bypass `finalizeGeometry` and so never populate it.
  */
-function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+function preChromeDims(geo: ActivityGeometry, theme: Theme): { width: number; height: number } {
   if (geo.rawWidth !== undefined && geo.rawHeight !== undefined) {
     return { width: geo.rawWidth, height: geo.rawHeight };
   }
-  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
-  return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
+  const m = activityDocumentMargin(theme);
+  return {
+    width: geo.totalWidth - (m.left + m.right + SVG_CANVAS_CEIL),
+    height: geo.totalHeight - (m.top + m.bottom + SVG_CANVAS_CEIL),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -453,7 +467,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     children.push(renderSwimlaneTitles(geo, theme));
   }
 
-  const raw = preChromeDims(geo);
+  const raw = preChromeDims(geo, theme);
   return {
     body: children.join(''),
     width: geo.totalWidth,

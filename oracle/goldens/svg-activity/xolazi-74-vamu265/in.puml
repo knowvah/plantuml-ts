@@ -1,0 +1,15 @@
+@startuml
+start
+if (Turn On The Game?) then (yes)
+  :Having Fun;
+  note left #red
+    this
+    is
+    note
+  end note
+else (no)
+  :Not Having Fun;
+  note right #blue :sad note is sad
+endif
+stop
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+skinparam ActivityBorderThickness 0.1
+|Customer|
+start
+:Sends request;
+|Team|
+:Reviews request; 
+while (Details sufficient?) is (No)
+:requests more detail;
+        |Customer|
+        :Provides more detail;
+        |Team|
+:re-reviews the request;
+endwhile (Yes)
+:Forwards request;
+end
+@enduml

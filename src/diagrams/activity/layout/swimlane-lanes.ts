@@ -29,6 +29,13 @@ interface ChildBearing {
  *  blanket recursion would be unfaithful for those kinds. */
 const DELEGATING_KINDS = new Set(['gtile-top-down', 'gtile-group', 'gtile-partition']);
 
+/** add4-T2a: `FtileIfLongVertical#getSwimlaneIn()` is `tiles.get(0)
+ *  .getSwimlaneIn()` and `getSwimlaneOut()` is `getSwimlaneIn()`
+ *  (`FtileIfLongVertical.java:123-129`) -- the first branch body's entry
+ *  lane, never the diamonds' own lane. `children[0]` is `tiles[0]`
+ *  (`getMyChildren()`, `:90-94`). */
+const IF_LONG_VERTICAL = 'gtile-if-long-vertical';
+
 /** A tile's OWN lane if `tile-layout.ts` set one (`Tile.swimlane`), else
  * the inherited ambient lane. */
 export function laneAt(tile: Tile, inherited: string | undefined): string | undefined {
@@ -51,6 +58,9 @@ export function laneAt(tile: Tile, inherited: string | undefined): string | unde
  * edge that must use its EXIT child's lane instead).
  */
 export function laneIn(tile: Tile, inherited: string | undefined): string | undefined {
+  if (tile.kind === IF_LONG_VERTICAL) {
+    return laneIn((tile as unknown as ChildBearing).children[0]!, tile.swimlane ?? inherited);
+  }
   if (DELEGATING_KINDS.has(tile.kind)) {
     const children = (tile as unknown as ChildBearing).children;
     // T3i fix-up: an EMPTY body (`partition P1 {}`, `sifite-87-ziti434`)
@@ -73,6 +83,7 @@ export function laneIn(tile: Tile, inherited: string | undefined): string | unde
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimable.java
  */
 export function laneOut(tile: Tile, inherited: string | undefined): string | undefined {
+  if (tile.kind === IF_LONG_VERTICAL) return laneIn(tile, inherited);
   if (tile.swimlaneOut !== undefined) return tile.swimlaneOut;
   if (DELEGATING_KINDS.has(tile.kind)) {
     const children = (tile as unknown as ChildBearing).children;

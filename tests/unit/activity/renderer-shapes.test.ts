@@ -360,6 +360,15 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     expect(svg).toContain('stroke-miterlimit="10"');
   });
 
+  it('add4-T2d: a north-labelled EMPTY_DIAMOND box draws the rhombus at its bottom, below suppY1', () => {
+    // `FtileDiamond#drawU` translates by `dy(suppY1)` before drawing the
+    // 24x24 `Hexagon.asPolygon` (`FtileDiamond.java:87-89`); the box is
+    // `(24, 24 + suppY1)` (`:108-110`). suppY1 = 11 here (one 11 pt line).
+    const svg = renderDiamond(makeNode({ kind: 'if-split', x: 156, y: 159, width: 24, height: 35 }), theme);
+    const points = /<polygon points="([^"]+)"/.exec(svg)?.[1];
+    expect(points).toBe('168,170,180,182,168,194,156,182,168,170');
+  });
+
   it('a note draws font-size 13 and stroke-width 0.5', () => {
     // The ROOT note block, plantuml.skin:323 and :325.
     const svg = renderNote(makeNode({ kind: 'note', label: 'n', width: 60, height: 40 }), theme);
@@ -462,13 +471,17 @@ describe('T4 — text colour cascade (D3)', () => {
     expect(svg).toContain('fill="#000"');
   });
 
-  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action, not a single-line diamond label', () => {
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action and the diamond label', () => {
     const activityRed = themeWithFontColor('activity', 'red');
     const actionSvg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), activityRed);
     expect(actionSvg).toContain('fill="#F00"');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
     const hexSvg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), activityRed);
-    expect(hexSvg).toContain('fill="#000"');
-    expect(hexSvg).not.toContain('fill="#F00"');
+    expect(hexSvg).toContain('fill="#F00"');
+    expect(hexSvg).not.toContain('fill="#000"');
   });
 
   it('a <latex> label still delegates to renderNodeLabel (permanent divergence)', () => {
@@ -502,13 +515,17 @@ describe('T4 — text colour cascade (D3)', () => {
     expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
   });
 
-  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action, not the diamond', () => {
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action and the diamond', () => {
     const activityRed = themeWithFontColor('activity', 'red');
     const actionSvg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), activityRed);
     expect(actionSvg).toContain('fill="#F00"');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
     const diamondSvg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), activityRed);
-    expect(diamondSvg).toContain('fill="#000"');
-    expect(diamondSvg).not.toContain('fill="#F00"');
+    expect(diamondSvg).toContain('fill="#F00"');
+    expect(diamondSvg).not.toContain('fill="#000"');
   });
 
   it('a labelled hexagon (diamond SName, gtile-diamond.ts sizing) resolves the diamond bucket', () => {

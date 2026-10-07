@@ -19,7 +19,7 @@ describe('laneAt', () => {
 });
 
 describe('laneIn/laneOut — plain leaf (no delegation)', () => {
-  it('laneIn/laneOut both read the leaf\'s own swimlane', () => {
+  it("laneIn/laneOut both read the leaf's own swimlane", () => {
     const leaf = stub('action', { swimlane: 'A' });
     expect(laneIn(leaf, 'B')).toBe('A');
     expect(laneOut(leaf, 'B')).toBe('A');
@@ -38,7 +38,7 @@ describe('laneIn/laneOut — plain leaf (no delegation)', () => {
 });
 
 describe('laneIn/laneOut — gtile-top-down delegates to first/last child', () => {
-  it('laneIn is the FIRST child\'s own lane, laneOut is the LAST', () => {
+  it("laneIn is the FIRST child's own lane, laneOut is the LAST", () => {
     const first = stub('action', { swimlane: 'A' });
     const last = stub('action', { swimlane: 'B' });
     const topDown = stub('gtile-top-down', { children: [first, last] });
@@ -65,7 +65,7 @@ describe('laneIn/laneOut — gtile-group/gtile-partition delegate to the body, i
     });
   }
 
-  it('an EMPTY body falls back to the group\'s own tag, not the caller\'s inherited', () => {
+  it("an EMPTY body falls back to the group's own tag, not the caller's inherited", () => {
     // `partition P1 {}` (`sifite-87-ziti434`) -- a real regression this
     // fix-up catches: delegating into an empty `gtile-top-down` with no
     // own swimlane must not surface the OUTER ambient lane instead.
@@ -80,5 +80,20 @@ describe('laneIn/laneOut — gtile-group/gtile-partition delegate to the body, i
     const group = stub('gtile-partition', { children: [emptyBody] });
     expect(laneIn(group, 'Ambient')).toBe('Ambient');
     expect(laneOut(group, 'Ambient')).toBe('Ambient');
+  });
+});
+
+describe('laneIn/laneOut — gtile-if-long-vertical (FtileIfLongVertical.java:123-129)', () => {
+  const vif = stub('gtile-if-long-vertical', {
+    swimlane: 'Decide',
+    children: [stub('action', { swimlane: 'West' }), stub('action', { swimlane: 'East' })],
+  });
+
+  it("laneIn is tiles[0].getSwimlaneIn(), not the diamonds' own lane", () => {
+    expect(laneIn(vif, 'Outer')).toBe('West');
+  });
+
+  it("laneOut is getSwimlaneIn(), never the last child's lane", () => {
+    expect(laneOut(vif, 'Outer')).toBe('West');
   });
 });

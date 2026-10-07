@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "134202b9",
+  "measuredAgainstCommit": "76efedca",
   "fixtures": [
     {
       "type": "activity",
@@ -392,10 +392,10 @@
       "slug": "bejeta-45-sotu349",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 4,
+          "11": 5,
           "12": 4
         },
         "strokeWidth": {
@@ -404,8 +404,8 @@
         "rx": {
           "12.5": 4
         },
-        "textCount": 8,
-        "width": "209",
+        "textCount": 9,
+        "width": "213",
         "height": "397"
       },
       "jar": {
@@ -2013,18 +2013,16 @@
       "slug": "cofubo-18-koju711",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "3b36df73",
       "ours": {
         "fontSize": {
           "13": 1
         },
-        "strokeWidth": {
-          "1": 1
-        },
+        "strokeWidth": {},
         "rx": {},
         "textCount": 1,
         "width": "85",
-        "height": "98"
+        "height": "88"
       },
       "jar": {
         "fontSize": {
@@ -2946,10 +2944,10 @@
       "slug": "divinu-75-busu278",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 5,
+          "11": 6,
           "12": 3
         },
         "strokeWidth": {
@@ -2958,8 +2956,8 @@
         "rx": {
           "12.5": 3
         },
-        "textCount": 8,
-        "width": "143",
+        "textCount": 9,
+        "width": "189",
         "height": "304"
       },
       "jar": {
@@ -4325,9 +4323,10 @@
       "slug": "fukika-81-gite897",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9",
+      "measuredAgainstCommit": "76efedca",
       "ours": {
         "fontSize": {
+          "10": 1,
           "11": 4,
           "12": 5
         },
@@ -4335,11 +4334,12 @@
           "1": 15
         },
         "rx": {
+          "2.5": 1,
           "12.5": 5
         },
-        "textCount": 9,
+        "textCount": 10,
         "width": "334",
-        "height": "610"
+        "height": "630"
       },
       "jar": {
         "fontSize": {
@@ -5695,21 +5695,19 @@
       "slug": "japeku-46-kulo799",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "3b36df73",
       "ours": {
         "fontSize": {
           "12": 1,
           "13": 1
         },
-        "strokeWidth": {
-          "1": 1
-        },
+        "strokeWidth": {},
         "rx": {
           "12.5": 1
         },
         "textCount": 2,
         "width": "85",
-        "height": "110"
+        "height": "100"
       },
       "jar": {
         "fontSize": {
@@ -6636,7 +6634,7 @@
           "12.5": 2
         },
         "textCount": 6,
-        "width": "322",
+        "width": "342",
         "height": "151"
       },
       "jar": {
@@ -6657,8 +6655,8 @@
         "width": "342",
         "height": "151"
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73"
     },
     {
       "type": "activity",
@@ -7322,8 +7320,8 @@
           "2.5": 2
         },
         "textCount": 3,
-        "width": "193",
-        "height": "253"
+        "width": "183",
+        "height": "243"
       },
       "jar": {
         "fontSize": {
@@ -7341,8 +7339,8 @@
         "width": "183",
         "height": "243"
       },
-      "measuredAt": "2026-10-01",
-      "measuredAgainstCommit": "8a8c1692"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "76efedca"
     },
     {
       "type": "activity",
@@ -11504,8 +11502,8 @@
       "type": "activity",
       "slug": "razuzu-32-faje125",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3b36df73",
       "ours": {
         "fontSize": {
           "12": 4,
@@ -11513,7 +11511,7 @@
           "18": 2
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 7,
           "1.5": 3
         },
         "rx": {
@@ -11521,8 +11519,8 @@
           "12.5": 4
         },
         "textCount": 12,
-        "width": "243",
-        "height": "357"
+        "width": "314",
+        "height": "295"
       },
       "jar": {
         "fontSize": {
@@ -13289,24 +13287,23 @@
       "slug": "taredi-65-vero960",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "a30245de",
       "ours": {
         "fontSize": {
-          "11": 4,
           "12": 4,
           "18": 5
         },
         "strokeWidth": {
-          "1": 26,
+          "1": 7,
           "1.5": 6
         },
         "rx": {
           "(absent)": 1,
           "12.5": 4
         },
-        "textCount": 13,
-        "width": "463",
-        "height": "423"
+        "textCount": 9,
+        "width": "406",
+        "height": "321"
       },
       "jar": {
         "fontSize": {
@@ -15716,6 +15713,7 @@
       "status": "baseline",
       "ours": {
         "fontSize": {
+          "10": 1,
           "11": 2,
           "12": 6
         },
@@ -15723,11 +15721,12 @@
           "1": 19
         },
         "rx": {
+          "2.5": 1,
           "12.5": 6
         },
-        "textCount": 8,
+        "textCount": 9,
         "width": "380",
-        "height": "446"
+        "height": "466"
       },
       "jar": {
         "fontSize": {
@@ -15747,7 +15746,7 @@
         "height": "474"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "76efedca"
     },
     {
       "type": "activity",

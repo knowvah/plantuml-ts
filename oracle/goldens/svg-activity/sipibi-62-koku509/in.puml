@@ -1,0 +1,17 @@
+@startuml
+switch (test?)
+case ( A )
+  :Text 1;
+kill
+case ( B ) 
+  :Text 2;
+kill
+case ( C )
+  :Text 3;
+kill
+case ( D )
+  :Text 4;
+'kill
+endswitch
+:out;
+@enduml

@@ -119,6 +119,16 @@ export const ACTIVITY_FONT_COLOR = resolveColorToSvgHex('black');
 export function activityFontColor(theme: Theme, sname: ActivitySName): string {
   const bucket = resolveSolidBucketColor(theme.colors.elements?.[bucketKey(sname)]?.font);
   if (bucket !== undefined) return bucket;
+  // add4-T2d (KLIMT-FLOOR, zepima-96-peco612): diamond's signature NESTS
+  // `SName.activity` (`StyleSignatureBasic.java:271-273`, `activityDiamond()`
+  // = root/element/activityDiagram/activity/diamond), so `skinparam
+  // activityFontColor` (`FromSkinparamToStyle.java:144`, `addConFont(
+  // "activity", SName.activity)`) reaches the diamond label absent a
+  // diamond-specific FontColor -- the same tier `activityFontFamily` has.
+  if (sname === 'diamond') {
+    const activityTier = resolveSolidBucketColor(theme.colors.elements?.[bucketKey('activity')]?.font);
+    if (activityTier !== undefined) return activityTier;
+  }
   if (sname === 'arrow' && theme.colors.graph.arrowFontColor !== undefined) {
     return theme.colors.graph.arrowFontColor;
   }
