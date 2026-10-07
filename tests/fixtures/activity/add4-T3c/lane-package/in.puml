@@ -1,0 +1,10 @@
+@startuml
+|A|
+:a;
+|B|
+package P {
+:b;
+}
+|C|
+:c;
+@enduml

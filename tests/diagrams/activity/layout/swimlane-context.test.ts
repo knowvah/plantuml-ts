@@ -215,3 +215,19 @@ describe('no swimlanes / empty diagram', () => {
     expect(widths.size).toBe(0);
   });
 });
+
+describe('measureLaneExtents -- node-aware fudge (add4-T3c)', () => {
+  it('a package is its polygon (+-10, LimitFinder.java:171-177), a card and a ruled action end on their ULine', () => {
+    const items = [
+      { swimlane: 'P', kind: 'partition', usymbol: 'package' as const, x: 100, width: 50 },
+      { swimlane: 'C', kind: 'partition', usymbol: 'card' as const, x: 100, width: 50 },
+      { swimlane: 'R', kind: 'action', label: 'a\n----\nb', x: 100, width: 50 },
+      { swimlane: 'Q', kind: 'partition', x: 100, width: 50 },
+    ];
+    const extents = measureLaneExtents(items, [], ['P', 'C', 'R', 'Q']);
+    expect(extents.get('P')).toEqual({ minX: 90, maxX: 160 });
+    expect(extents.get('C')).toEqual({ minX: 99, maxX: 150 });
+    expect(extents.get('R')).toEqual({ minX: 99, maxX: 150 });
+    expect(extents.get('Q')).toEqual({ minX: 99, maxX: 149 });
+  });
+});

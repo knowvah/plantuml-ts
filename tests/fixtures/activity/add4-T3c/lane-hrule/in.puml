@@ -1,0 +1,10 @@
+@startuml
+|A|
+:a;
+|B|
+:top
+----
+bottom;
+|C|
+:c;
+@enduml
