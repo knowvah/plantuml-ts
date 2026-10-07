@@ -1,0 +1,11 @@
+@startuml
+|Swimlane1|
+start
+partition Optional {
+    :Action1;
+    |Swimlane2|
+    :Action2;
+}
+
+stop
+@enduml

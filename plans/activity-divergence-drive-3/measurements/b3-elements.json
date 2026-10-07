@@ -1,11 +1,11 @@
 {
   "summary": {
     "rows": 65,
-    "ws": 4563,
+    "ws": 4413,
     "classes": {
       "extra line+arrow": {
         "count": 3,
-        "ws": 685
+        "ws": 679
       },
       "extra arrow only": {
         "count": 0,
@@ -29,7 +29,7 @@
       },
       "exact": {
         "count": 52,
-        "ws": 2528
+        "ws": 2384
       }
     }
   },
@@ -91,7 +91,7 @@
     },
     {
       "slug": "giteso-65-mefo026",
-      "ws": 446,
+      "ws": 440,
       "delta": {
         "polygon": 2,
         "line": 2,
@@ -126,7 +126,7 @@
     },
     {
       "slug": "jogami-42-jaji869",
-      "ws": 49,
+      "ws": 0,
       "delta": {}
     },
     {
@@ -182,7 +182,7 @@
     },
     {
       "slug": "mifejo-31-sovi184",
-      "ws": 70,
+      "ws": 25,
       "delta": {}
     },
     {
@@ -325,7 +325,7 @@
     },
     {
       "slug": "tajuxe-32-sexo680",
-      "ws": 54,
+      "ws": 4,
       "delta": {}
     },
     {

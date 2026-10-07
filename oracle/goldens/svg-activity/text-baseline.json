@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "8b812842",
+  "measuredAgainstCommit": "918cd7e9",
   "fixtures": [
     {
       "type": "activity",
@@ -3047,8 +3047,8 @@
       "type": "activity",
       "slug": "fukika-81-gite897",
       "status": "baseline",
-      "measuredAt": "2026-10-02",
-      "measuredAgainstCommit": "65b07a57",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fill": {
           "#000": 9
@@ -3057,7 +3057,7 @@
           "(absent)": 9
         },
         "inset": {
-          "10": 5
+          "25": 5
         },
         "textCount": 9
       },
@@ -4438,19 +4438,19 @@
       "type": "activity",
       "slug": "jufefu-66-josa392",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9",
       "ours": {
         "fill": {
-          "#000": 5
+          "#000": 7
         },
         "anchor": {
-          "(absent)": 5
+          "(absent)": 7
         },
         "inset": {
-          "10": 2
+          "10": 3
         },
-        "textCount": 5
+        "textCount": 7
       },
       "jar": {
         "fill": {
@@ -10772,7 +10772,7 @@
           "(absent)": 8
         },
         "inset": {
-          "10": 6
+          "20": 6
         },
         "textCount": 8
       },
@@ -10789,8 +10789,8 @@
         },
         "textCount": 9
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "918cd7e9"
     },
     {
       "type": "activity",

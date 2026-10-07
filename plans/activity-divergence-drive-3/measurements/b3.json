@@ -1,6 +1,6 @@
 {
-  "commit": "eefa3941",
-  "aggregate": 4563,
+  "commit": "918cd7e9",
+  "aggregate": 4413,
   "subsetSum": null,
   "fixtures": [
     {
@@ -65,9 +65,9 @@
     },
     {
       "slug": "giteso-65-mefo026",
-      "score": 446,
+      "score": 440,
       "pinned": 446,
-      "delta": 0
+      "delta": -6
     },
     {
       "slug": "gufuma-85-zoce945",
@@ -101,9 +101,9 @@
     },
     {
       "slug": "jogami-42-jaji869",
-      "score": 49,
+      "score": 0,
       "pinned": 10,
-      "delta": 39
+      "delta": -10
     },
     {
       "slug": "jucidi-98-zato093",
@@ -161,9 +161,9 @@
     },
     {
       "slug": "mifejo-31-sovi184",
-      "score": 70,
+      "score": 25,
       "pinned": 70,
-      "delta": 0
+      "delta": -45
     },
     {
       "slug": "mojezi-43-gamu360",
@@ -311,9 +311,9 @@
     },
     {
       "slug": "tajuxe-32-sexo680",
-      "score": 54,
+      "score": 4,
       "pinned": 54,
-      "delta": 0
+      "delta": -50
     },
     {
       "slug": "tobajo-64-mipi810",
@@ -395,27 +395,27 @@
     }
   ],
   "families": {
-    "svg/g[]/ellipse[]/@cx": 45,
-    "svg/g[]/rect[]/@x": 83,
-    "svg/g[]/text[]/@x": 190,
-    "svg/g[]/line[]/@x1": 330,
-    "svg/g[]/line[]/@x2": 337,
-    "svg/g[]/polygon[]/@points[]": 1698,
-    "svg/@height": 24,
-    "svg/@viewBox[]": 52,
+    "svg/g[]/ellipse[]/@cx": 41,
+    "svg/g[]/rect[]/@x": 80,
+    "svg/g[]/text[]/@x": 178,
+    "svg/g[]/line[]/@x1": 326,
+    "svg/g[]/line[]/@x2": 333,
+    "svg/g[]/polygon[]/@points[]": 1678,
+    "svg/@height": 22,
+    "svg/@viewBox[]": 48,
     "svg/g[]/rect[]/@y": 69,
-    "svg/g[]/text[]/@y": 143,
-    "svg/g[]/ellipse[]/@cy": 44,
-    "svg/g[]/line[]/@y1": 209,
-    "svg/g[]/line[]/@y2": 250,
-    "svg/@width": 28,
+    "svg/g[]/text[]/@y": 137,
+    "svg/g[]/ellipse[]/@cy": 40,
+    "svg/g[]/line[]/@y1": 204,
+    "svg/g[]/line[]/@y2": 247,
+    "svg/@width": 26,
     "svg/g[]/rect[]/@height": 9,
-    "svg/g[]/rect[]/@width": 28,
+    "svg/g[]/rect[]/@width": 27,
     "svg/g[]/image[]/@height": 1,
     "svg/g[]/image[]/@width": 1,
     "svg/g[]/image[]/@y": 1,
     "svg/g[][childCount]": 654,
-    "svg/g[]/path[]/@d[]": 256,
+    "svg/g[]/path[]/@d[]": 180,
     "svg/g[]/line[]/@stroke": 5,
     "svg/g[]/line[]/@stroke-width": 5,
     "svg/g[]/polygon[]/@points": 12,

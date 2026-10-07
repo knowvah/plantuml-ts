@@ -2,30 +2,30 @@
  "summary": {
   "rows": 65,
   "errors": 0,
-  "positionOnly": 17,
-  "uniformShift": 34,
+  "positionOnly": 18,
+  "uniformShift": 35,
   "familyFixtures": {
-   "svg/g[]/ellipse[]/@cx": 17,
-   "svg/g[]/rect[]/@x": 23,
-   "svg/g[]/text[]/@x": 27,
-   "svg/g[]/line[]/@x1": 31,
-   "svg/g[]/line[]/@x2": 31,
-   "svg/g[]/polygon[]/@points[]": 41,
-   "svg/@height": 24,
-   "svg/@viewBox[]": 37,
+   "svg/g[]/ellipse[]/@cx": 15,
+   "svg/g[]/rect[]/@x": 22,
+   "svg/g[]/text[]/@x": 24,
+   "svg/g[]/line[]/@x1": 30,
+   "svg/g[]/line[]/@x2": 30,
+   "svg/g[]/polygon[]/@points[]": 40,
+   "svg/@height": 22,
+   "svg/@viewBox[]": 35,
    "svg/g[]/rect[]/@y": 19,
-   "svg/g[]/text[]/@y": 23,
-   "svg/g[]/ellipse[]/@cy": 20,
-   "svg/g[]/line[]/@y1": 26,
-   "svg/g[]/line[]/@y2": 26,
-   "svg/@width": 28,
+   "svg/g[]/text[]/@y": 21,
+   "svg/g[]/ellipse[]/@cy": 18,
+   "svg/g[]/line[]/@y1": 25,
+   "svg/g[]/line[]/@y2": 25,
+   "svg/@width": 26,
    "svg/g[]/rect[]/@height": 8,
-   "svg/g[]/rect[]/@width": 21,
+   "svg/g[]/rect[]/@width": 20,
    "svg/g[]/image[]/@height": 1,
    "svg/g[]/image[]/@width": 1,
    "svg/g[]/image[]/@y": 1,
    "svg/g[][childCount]": 14,
-   "svg/g[]/path[]/@d[]": 11,
+   "svg/g[]/path[]/@d[]": 9,
    "svg/g[]/line[]/@stroke": 2,
    "svg/g[]/line[]/@stroke-width": 2,
    "svg/g[]/polygon[]/@points": 9,
@@ -319,8 +319,8 @@
   },
   {
    "slug": "giteso-65-mefo026",
-   "ws": 446,
-   "n": 354,
+   "ws": 440,
+   "n": 348,
    "families": {
     "svg/@height": 1,
     "svg/@viewBox[]": 2,
@@ -341,8 +341,8 @@
     "POLY": 2,
     "svg/g[]/line[]/@x1": 20,
     "svg/g[]/line[]/@x2": 20,
-    "svg/g[]/line[]/@y1": 20,
-    "svg/g[]/line[]/@y2": 20,
+    "svg/g[]/line[]/@y1": 16,
+    "svg/g[]/line[]/@y2": 18,
     "svg/g[][childCount]": 1
    },
    "nonPos": 215,
@@ -364,26 +364,25 @@
      195.194
     ],
     "y": [
-     15.555,
-     -38.555,
-     -34.5,
-     17.5,
-     8.5,
-     20.5,
-     31.5,
+     10.055,
+     -44.055,
+     -40,
+     12,
+     3,
+     15,
      26,
-     -11.5,
-     -139,
-     -148,
-     14.5,
-     17.25,
-     5.5,
-     11.5,
-     9.5,
+     20.5,
+     -17,
+     -144.5,
+     -153.5,
+     9,
+     11.75,
+     6,
+     4,
      330.5,
-     310.5,
-     -311,
-     -305.5
+     305,
+     -316.5,
+     -311
     ]
    }
   },
@@ -465,25 +464,12 @@
   },
   {
    "slug": "jogami-42-jaji869",
-   "ws": 49,
-   "n": 49,
-   "families": {
-    "svg/@viewBox[]": 1,
-    "svg/@width": 1,
-    "svg/g[]/ellipse[]/@cx": 3,
-    "svg/g[]/rect[]/@x": 3,
-    "svg/g[]/text[]/@x": 6,
-    "svg/g[]/rect[]/@width": 1,
-    "svg/g[]/path[]/@d[]": 10,
-    "svg/g[]/line[]/@x1": 4,
-    "svg/g[]/line[]/@x2": 4,
-    "svg/g[]/polygon[]/@points[]": 16
-   },
-   "nonPos": 27,
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
    "shifts": {
-    "x": [
-     8
-    ],
+    "x": [],
     "y": []
    }
   },
@@ -688,33 +674,23 @@
   },
   {
    "slug": "mifejo-31-sovi184",
-   "ws": 70,
-   "n": 70,
+   "ws": 25,
+   "n": 25,
    "families": {
-    "svg/@height": 1,
-    "svg/@viewBox[]": 2,
+    "svg/@viewBox[]": 1,
     "svg/@width": 1,
-    "svg/g[]/path[]/@d[]": 40,
-    "svg/g[]/text[]/@x": 4,
-    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/path[]/@d[]": 14,
     "svg/g[]/ellipse[]/@cx": 3,
-    "svg/g[]/ellipse[]/@cy": 3,
     "svg/g[]/line[]/@x1": 1,
     "svg/g[]/line[]/@x2": 1,
-    "svg/g[]/line[]/@y1": 1,
-    "svg/g[]/line[]/@y2": 1,
-    "svg/g[]/polygon[]/@points[]": 8
+    "svg/g[]/polygon[]/@points[]": 4
    },
-   "nonPos": 48,
+   "nonPos": 18,
    "shifts": {
     "x": [
-     10,
-     -10.15
+     -20.15
     ],
-    "y": [
-     10,
-     20
-    ]
+    "y": []
    }
   },
   {
@@ -1309,27 +1285,15 @@
   },
   {
    "slug": "tajuxe-32-sexo680",
-   "ws": 54,
-   "n": 54,
+   "ws": 4,
+   "n": 4,
    "families": {
-    "svg/@height": 1,
-    "svg/@viewBox[]": 2,
-    "svg/@width": 1,
-    "svg/g[]/path[]/@d[]": 40,
-    "svg/g[]/path[]/@fill": 4,
-    "svg/g[]/text[]/@x": 2,
-    "svg/g[]/text[]/@y": 2,
-    "svg/g[]/ellipse[]/@cx": 1,
-    "svg/g[]/ellipse[]/@cy": 1
+    "svg/g[]/path[]/@fill": 4
    },
-   "nonPos": 44,
+   "nonPos": 4,
    "shifts": {
-    "x": [
-     10
-    ],
-    "y": [
-     10
-    ]
+    "x": [],
+    "y": []
    }
   },
   {

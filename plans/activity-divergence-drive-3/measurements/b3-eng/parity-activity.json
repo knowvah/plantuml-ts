@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T13:59:50.003Z",
+  "generatedAt": "2026-10-07T14:45:45.550Z",
   "fixtures": [
     {
       "slug": "activity-creole-table",
@@ -899,9 +899,7 @@
       "slug": "jogami-42-jaji869",
       "type": "activity",
       "dotEqual": true,
-      "verdict": "structural-match",
-      "maxDelta": 8,
-      "maxDeltaPath": "svg/@viewBox[2]"
+      "verdict": "conformant"
     },
     {
       "slug": "jokaxi-40-toko207",
@@ -1278,8 +1276,8 @@
       "type": "activity",
       "dotEqual": true,
       "verdict": "structural-match",
-      "maxDelta": 20,
-      "maxDeltaPath": "svg/@height"
+      "maxDelta": 20.150000000000006,
+      "maxDeltaPath": "svg/g[1]/path[1]/@d[4]"
     },
     {
       "slug": "mijoso-20-sato362",
@@ -2032,9 +2030,8 @@
       "type": "activity",
       "dotEqual": true,
       "verdict": "diverged",
-      "maxDelta": 20,
-      "firstDiff": "svg/g[1]/path[1]/@fill",
-      "maxDeltaPath": "svg/@height"
+      "maxDelta": 0,
+      "firstDiff": "svg/g[1]/path[1]/@fill"
     },
     {
       "slug": "tamaxe-36-mono574",
