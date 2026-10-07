@@ -193,7 +193,21 @@ function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, th
     node.swimlane !== undefined
       ? { kind: 'action', label: node.label, swimlane: node.swimlane }
       : { kind: 'action', label: node.label };
-  return tileSimpleLeaf(action, bounder, theme);
+  const tile = tileSimpleLeaf(action, bounder, theme);
+  if (node.notes === undefined || node.notes.length === 0) return tile;
+  // BACKNOTE (`activity-divergence-drive-3` T2a): `getFtileBackward`'s own
+  // `factory.addNote(result, swimlaneBackward, backwardNotes, CENTER)`
+  // (`InstructionRepeat.java:177-185`) is the SAME `FtileWithNoteOpale`
+  // wrap `tileNote` already builds for a simple leaf -- reused verbatim
+  // rather than re-implemented. Only the FIRST note wraps (`tileNote`'s
+  // own `tiles[0]` slot); any further note would float as a SEPARATE
+  // sibling `tileNote` cannot place (this slot takes exactly one `Tile`,
+  // unlike a flowing body list) -- unexercised by this family's own
+  // cohort (every row has exactly one), re-slotted to NOTE-MULTI if one
+  // ever does.
+  const tiles: Tile[] = [tile];
+  for (const note of node.notes) tileNote(tiles, note, bounder, theme);
+  return tiles[0]!;
 }
 
 /**

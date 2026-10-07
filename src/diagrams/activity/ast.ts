@@ -95,6 +95,19 @@ export interface ActivityBackward {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:182-187,513-535
    */
   outgoing?: string;
+  /**
+   * BACKNOTE (`activity-divergence-drive-3` T2a): `InstructionRepeat
+   * .addNote` (`:218-226`) routes a note to {@link notes} ONLY while
+   * `backward` is already set -- i.e. a note parsed IMMEDIATELY after
+   * this `backward:` line, before any other body node. A note BEFORE
+   * `backward:` belongs to the regular body flow instead (the
+   * pre-existing generic `tileNote` pairing, `tile-layout-structural.ts`)
+   * and never reaches this field. Drawn beside this backward activity
+   * via the same `GtileNoteOpale` wrap `tileNote` already builds for a
+   * simple leaf -- never a flow sibling.
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:177-185,218-226
+   */
+  notes?: ActivityNote[];
 }
 
 /**

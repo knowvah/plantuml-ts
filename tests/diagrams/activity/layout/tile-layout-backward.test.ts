@@ -14,6 +14,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
+import { extractBackward } from '../../../../src/diagrams/activity/layout/tile-layout-backward.js';
 import { FormulaMeasurer } from '../../../../src/core/measurer.js';
 import type { ActivityDiagramAST, ActivityRepeat, ActivityWhile } from '../../../../src/diagrams/activity/ast.js';
 import type { Theme } from '../../../../src/core/theme.js';
@@ -178,5 +179,67 @@ describe('tile-layout — while backward: set (FtileWhile.java:85,154-161,561-56
   // 303-327`) -- 4 edges now.
   it('pushes ConnectionBackBackward1/2 in place of ConnectionBackSimple (4 edges: In, Backward1, Backward2, merged Out)', () => {
     expect(geo.edges).toHaveLength(4);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// BACKNOTE (mission `activity-divergence-drive-3` T2a):
+// `InstructionRepeat.java:177-185,218-226` -- a note parsed after
+// `backward:` is `backward`'s OWN note (`backwardNotes`), drawn beside it
+// via the same `FtileWithNoteOpale` wrap `tileNote` already builds for a
+// simple leaf -- never a flow sibling.
+// ---------------------------------------------------------------------------
+
+describe('extractBackward — BACKNOTE: a note after backward: becomes backward.notes', () => {
+  it('a note BEFORE backward: stays in rest (regular flow), backward.notes is unset', () => {
+    const body: ActivityRepeat['body'] = [
+      { kind: 'note', text: 'early', position: 'left' },
+      { kind: 'action', label: 'a' },
+      { kind: 'backward', label: 'go back' },
+    ];
+    const { rest, backward } = extractBackward(body);
+    expect(rest).toEqual([{ kind: 'note', text: 'early', position: 'left' }, { kind: 'action', label: 'a' }]);
+    expect(backward?.notes).toBeUndefined();
+  });
+
+  it('a note AFTER backward: is lifted into backward.notes and removed from rest', () => {
+    const body: ActivityRepeat['body'] = [
+      { kind: 'action', label: 'a' },
+      { kind: 'backward', label: 'go back' },
+      { kind: 'note', text: 'Note3', position: 'left' },
+    ];
+    const { rest, backward } = extractBackward(body);
+    expect(rest).toEqual([{ kind: 'action', label: 'a' }]);
+    expect(backward?.label).toBe('go back');
+    expect(backward?.notes).toEqual([{ kind: 'note', text: 'Note3', position: 'left' }]);
+  });
+});
+
+describe('tile-layout — repeat backward: with a trailing note renders a note node, not a floating sibling', () => {
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      { kind: 'start' },
+      {
+        kind: 'repeat',
+        body: [
+          { kind: 'action', label: 'read data' },
+          { kind: 'backward', label: 'go back' },
+          { kind: 'note', text: 'Warning note', position: 'left' },
+        ],
+        condition: 'done?',
+      },
+    ],
+    swimlanes: [],
+  };
+  const geo = layoutActivity(ast, theme, measurer);
+
+  it('renders exactly one note node, wrapped beside the backward action', () => {
+    const notes = geo.nodes.filter((n) => n.kind === 'note');
+    expect(notes).toHaveLength(1);
+    expect(notes[0]!.label).toBe('Warning note');
+  });
+
+  it('the backward action still renders as its own node', () => {
+    expect(geo.nodes.some((n) => n.kind === 'action' && n.label === 'go back')).toBe(true);
   });
 });
