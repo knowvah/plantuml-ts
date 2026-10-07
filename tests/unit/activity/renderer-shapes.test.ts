@@ -287,7 +287,7 @@ describe('renderSpot (mission add2-T2g)', () => {
   // An UNCAPTURED letter falls back to upstream's own deterministic-text
   // branch geometry (`DriverCenteredCharacterSvg.java:64-69`) rather than
   // drawing nothing -- `activity-spot-glyph.ts`'s own doc comment.
-  it('falls back to upstream\'s deterministic <text> geometry for an uncaptured letter', () => {
+  it("falls back to upstream's deterministic <text> geometry for an uncaptured letter", () => {
     const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'Z' });
     const svg = renderSpot(node, theme);
     expect(svg).not.toContain('<path');
@@ -849,10 +849,7 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
   });
 
   it('draws the label to the right of the bar, vertically centred on its top edge', () => {
-    const svg = renderBar(
-      makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }),
-      theme,
-    );
+    const svg = renderBar(makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }), theme);
     expect(svg).toContain('x="246.5"');
     expect(svg).toContain('y="136.056"');
     expect(svg).toContain('font-size="11"');
@@ -906,6 +903,84 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).not.toContain(theme.colors.nodeBackground);
   });
+
+  it('Partition* skinparams colour the frame, tab and title (add4-T2b, FtileGroup.java:99-102)', () => {
+    const styled: Theme = {
+      ...theme,
+      colors: {
+        ...theme.colors,
+        graph: {
+          ...theme.colors.graph,
+          partitionBorder: 'green',
+          partitionBackground: 'lightblue',
+          partitionFontColor: 'yellow',
+        },
+      },
+    };
+    const svg = renderNode(makeNode({ kind: 'partition', x: 0, y: 0, width: 80, height: 50, label: 'P' }), styled);
+    expect(svg).toContain('fill="#ADD8E6" stroke="#008000"');
+    expect(svg).toMatch(/<path d="[^"]*" fill="none" stroke="#008000" stroke-width="1.5"\/>/);
+    expect(svg).toContain('fill="#FF0"');
+  });
+
+  // add4-T2b (GROUP-USYMBOL): CommandPartition3.java:89-106; geometry from
+  // somome-34-nori033's jar SVG (frame 63.325 wide, title "Action" 38.938).
+  it('package draws the USymbolFolder tab polygon and its hline (USymbolFolder.java:85-124)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 133.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'package',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<polygon points="25,133.611,69.938,133.611,76.938,153.611,88.325,153.611,88.325,219.611,25,219.611,25,133.611" fill="none" stroke="#000" stroke-width="1.5"',
+    );
+    expect(svg).toContain('<line x1="25" y1="153.611" x2="76.938" y2="153.611" stroke="#000" stroke-width="1.5"/>');
+    expect(svg).toMatch(/<text x="29" y="146.5"[^>]*>Action<\/text>/);
+  });
+
+  it('card draws a rect, a full-width line at title height + 4, and a centred title (USymbolCard.java:59-66,120-135)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 229.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'card',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<rect x="25" y="229.611" width="63.325" height="86" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
+    expect(svg).toContain('<line x1="25" y1="247.611" x2="88.325" y2="247.611"');
+    expect(svg).toMatch(/<text x="37.194" y="242.5"[^>]*>Action<\/text>/);
+  });
+
+  it('rectangle draws a bare rect and a centred title, no tab (USymbolRectangle.java:65-71,104-134)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 325.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'rectangle',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).not.toContain('<path');
+    expect(svg).not.toContain('<line');
+    expect(svg).toMatch(/<text x="37.194" y="338.5"[^>]*>Action<\/text>/);
+  });
+
+  it('partition #color fills the frame (add4-T2b, FtileGroup.java:101)', () => {
+    const node = makeNode({ kind: 'partition', x: 0, y: 0, width: 50, height: 50, color: '#LightSkyBlue' });
+    expect(renderNode(node, theme)).toContain('<rect x="0" y="0" width="50" height="50" fill="#87CEFA"');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -944,7 +1019,15 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
 // label (never this node's own `label`, always `''` for that shape).
 describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
   it("diamondShape 'empty' draws the fixed rhombus even with a non-empty label (the ambiguous case T3d's heuristic could not resolve)", () => {
-    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 24, height: 24, label: 'not empty', diamondShape: 'empty' });
+    const node = makeNode({
+      kind: 'if-split',
+      x: 25,
+      y: 15,
+      width: 24,
+      height: 24,
+      label: 'not empty',
+      diamondShape: 'empty',
+    });
     const svg = renderNode(node, theme);
     // renderDiamond's own fixed rhombus point list for a 24x24 box
     // centred at (37, 27): size = 12.
@@ -966,7 +1049,7 @@ describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
     expect(svg).toContain('25,32.5,37,15');
   });
 
-  it('diamondShape undefined (repeat-cond, walk-repeat*.ts not this task\'s write-set) keeps the pre-existing label === \'\' heuristic', () => {
+  it("diamondShape undefined (repeat-cond, walk-repeat*.ts not this task's write-set) keeps the pre-existing label === '' heuristic", () => {
     const emptyDiamond: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
     const node = makeNode({ kind: 'repeat-cond', x: 25, y: 15, width: 24, height: 24, label: '' });
     const svg = renderNode(node, emptyDiamond);

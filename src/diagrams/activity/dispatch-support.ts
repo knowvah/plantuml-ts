@@ -205,18 +205,32 @@ export const RE_CASE = /^case\s*\(([^)]*)\)\s*$/i;
  */
 export const RE_ENDSWITCH = /^endswitch(?:\s*<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?$/i;
 
+/** `ColorParser.simpleColor(ColorType.BACK, id)`'s `COLORS_REGEXP`
+ *  (`PART2 | COLOR_REGEXP`), as one non-capturing alternation.
+ * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46,74-76 */
+const GROUP_COLORS =
+  String.raw`(?:#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)` +
+  String.raw`(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+|#\w+[-\\|/]?\w+)`;
+/** `%g` -- the double-quote class (`regex/Pattern2.java:59`: `"`, U+201C,
+ *  U+201D, `Jaws.BLOCK_E1_INVISIBLE_QUOTE` U+E121). */
+const GROUP_QUOTE = '["\u201c\u201d\ue121]';
+
 /**
- * `partition|package|rectangle|card|group NAME {`?, bracketed or not
- * (mission ubrr-T10 M6). Leading `BACK1` color and trailing `BACK2`/
- * `STEREO` are out of scope (no fixture in this mechanism's cohort
- * exercises them, same omission `RE_IF`'s own history already
- * established for a leading color). Group 2 is the quoted name (may
- * contain anything but a literal `"`); group 3 is the unquoted lazy
- * fallback (matches even `<$sprite{...}>`'s own embedded braces, since
- * `.` is unrestricted); group 4 is the literal `{` when present.
- * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:64-80
+ * `partition|package|rectangle|card|group [BACK1] NAME [BACK2] [<<STEREO>>] {`?
+ * -- `CommandPartition3#getRegexConcat` verbatim. Groups: 1 TYPE, 2 BACK1,
+ * 3 NAME (`[%g][^%g]+[%g]|.*?`, quotes still on -- the caller strips them
+ * with `eventuallyRemoveStartingAndEndingDoubleQuote`, `:143`), 4 BACK2,
+ * 5 STEREO (`StereotypePattern.optional`, `(<<.+?>>)`), 6 BRACKET (`\{?`,
+ * empty when absent).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:71-87
+ * @see net/sourceforge/plantuml/stereo/StereotypePattern.java:53-68
  */
-export const RE_GROUP_OPEN = /^(partition|package|rectangle|card|group)\s+(?:"([^"]+)"|(.*?))\s*(\{)?\s*$/i;
+export const RE_GROUP_OPEN = new RegExp(
+  String.raw`^(partition|package|rectangle|card|group)\s+(?:(${GROUP_COLORS})?\s+)?` +
+    String.raw`(${GROUP_QUOTE}[^"\u201c\u201d\ue121]+${GROUP_QUOTE}|.*?)(?:\s+(${GROUP_COLORS})?)?` +
+    String.raw`\s*(?:(<<.+?>>))?\s*(\{?)$`,
+  'i',
+);
 
 /** `}` -- the non-deprecated closer.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCloseGroup3.java:56-63

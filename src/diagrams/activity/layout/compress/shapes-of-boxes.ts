@@ -18,14 +18,16 @@ export function hexagonBox(node: ActivityNodeGeo): { x: number; y: number; width
 }
 
 /**
- * `renderDiamond`'s `diamond(cx, cy, size)` (`core/svg-shapes.ts`, `size =
- * node.width / 2`): x spans `[cx-size, cx+size] = [x, x+w]` exactly, but y
- * spans `[cy-size, cy+size]`, which only equals `[y, y+h]` when
- * `width === height` -- read literally here rather than assumed equal.
+ * `renderDiamond`'s rhombus (`size = node.width / 2`): x spans `[x, x+w]`.
+ * On y it sits at the box BOTTOM, not its centre: `FtileDiamond#drawU`
+ * translates by the north label's height before drawing the polygon --
+ * `final double suppY1 = north.calculateDimension(...).getHeight(); ug =
+ * ug.apply(UTranslate.dy(suppY1));` (`FtileDiamond.java:87-89`) -- so it
+ * spans `[y + h - 2*size, y + h]`, the same `cy` the renderer uses.
  */
 export function diamondBox(node: ActivityNodeGeo): { x: number; y: number; width: number; height: number } {
   const size = node.width / 2;
-  const cy = node.y + node.height / 2;
+  const cy = node.y + node.height - size;
   return { x: node.x, y: cy - size, width: node.width, height: size * 2 };
 }
 

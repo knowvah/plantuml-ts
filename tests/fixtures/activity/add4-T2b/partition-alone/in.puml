@@ -1,0 +1,7 @@
+@startuml
+start
+partition Action {
+  :foo4;
+}
+stop
+@enduml

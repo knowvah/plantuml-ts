@@ -416,6 +416,13 @@ export interface ActivityGroup {
   groupType: 'partition' | 'package' | 'rectangle' | 'card' | 'group';
   title: string;
   hasBracket: boolean;
+  /** `BACK1` (before the name) else `BACK2` (after it), `#` kept; absent =
+   *  the style's own `BackGroundColor`.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:145-147,163-165 */
+  backColor?: string;
+  /** `<<...>>` (`STEREO`), chevrons kept -- `Stereotype.build(stereo)`.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:151-152 */
+  stereotype?: string;
   body: ActivityNode[];
   swimlane?: string;
   /**

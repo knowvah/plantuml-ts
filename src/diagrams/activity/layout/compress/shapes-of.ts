@@ -22,6 +22,7 @@ import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-de
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
+import { frameShapes } from './shapes-of-frame.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -222,31 +223,6 @@ function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: T
  *   :138-161`) -- so which of the three a plain box kind is tagged does
  *   not change any slot.
  */
-/**
- * `USymbolFrame#drawFrame`'s title-tab underline (`:76-84`, a `UPath`,
- * `setIgnoreForCompressionOnX()` only -- never Y). `UPath#drawWhenCompressed`
- * is a NO-OP (`klimt/UPath.java:233-234`, unlike `URectangle`'s 2px-edges
- * reservation), so on X it must contribute NOTHING, not a shrunk box --
- * modelled as `'polygon'` with `polygonSkipMode: 'x'` ({@link addShape}'s
- * own `shape.polygonSkipMode !== mode` skip, the one existing CompressShape
- * kind with that "contributes nothing on this axis" semantic). On Y
- * (never skipped) it occupies its full `[y, y+textHeight]` box, exactly
- * `SlotFinder#drawPath`'s own un-ignored branch. `textWidth`/`textHeight`
- * mirror `activity-renderer-composite.ts#renderComposite`'s own formula
- * verbatim (same `dimTitle.getWidth() == 0` branch, `USymbolFrame.java
- * :76-84,99-104`) -- duplicated rather than imported, the same precedent
- * {@link ifLabelShape} already sets for mirroring a renderer's geometry
- * in this file.
- */
-function frameTabShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const fontSize = activityFontSize(theme, 'composite');
-  const title = node.label ?? '';
-  const titleWidth = title === '' ? 0 : measureLineWidth(theme, fontSize, title);
-  const textWidth = titleWidth === 0 ? node.width / 3 : titleWidth + 10;
-  const textHeight = titleWidth === 0 ? 12 : fontSize + 3;
-  return { kind: 'polygon', x: node.x, y: node.y, width: textWidth, height: textHeight, polygonSkipMode: 'x' };
-}
-
 function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape | null {
   if (NO_SHAPE_KINDS.has(node.kind)) return null;
   if (BAR_KINDS.has(node.kind)) {
@@ -259,9 +235,6 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
   if (node.kind === 'if-own-label') return ifOwnLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
-  if (FRAME_KINDS.has(node.kind)) {
-    return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height, ignoreX: true, ignoreY: true };
-  }
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
 
@@ -487,9 +460,12 @@ function titleShapes(
 export function shapesOf(input: ShapesOfInput): CompressShape[] {
   const shapes: CompressShape[] = [];
   for (const node of input.nodes) {
+    if (FRAME_KINDS.has(node.kind)) {
+      shapes.push(...frameShapes(node, input.bounder, input.theme));
+      continue;
+    }
     const shape = shapeForNode(node, input.bounder, input.theme);
     if (shape !== null) shapes.push(shape);
-    if (FRAME_KINDS.has(node.kind)) shapes.push(frameTabShape(node, input.bounder, input.theme));
   }
   for (let i = 0; i < input.edges.length; i++) {
     shapes.push(...shapesForEdge(input.edges[i]!, input.edgeMeta[i]!, input.bounder, input.theme));

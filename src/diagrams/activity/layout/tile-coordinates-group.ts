@@ -74,7 +74,17 @@ export function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: st
   for (const lane of lanes) {
     pushNode(
       out,
-      { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height, label: tile.title },
+      {
+        id: out.nextId(gKind),
+        kind: gKind,
+        x,
+        y,
+        width: tile.width,
+        height: tile.height,
+        label: tile.title,
+        ...(tile.backColor !== undefined ? { color: tile.backColor } : {}),
+        ...(tile.usymbol !== undefined ? { usymbol: tile.usymbol } : {}),
+      },
       lane,
     );
   }

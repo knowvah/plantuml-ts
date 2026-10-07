@@ -11,11 +11,19 @@
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { CompositeUSymbol } from './activity-geometry.types.js';
+import {
+  compositeSymbolTitleOrigin,
+  drawCompositeSymbol,
+  type CompositeInk,
+} from './activity-renderer-composite-symbols.js';
 import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
+import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { measureLineWidth } from './activity-text-placement.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
+import { frameTitleWidth } from './tiles/gtile-group.js';
 // `ASCENT_FRACTION` is re-imported BACK from `activity-renderer-shapes.ts`
 // (circular-but-safe: only read inside a function body, after both
 // modules finish loading, the same established shape `renderDiamond`'s
@@ -26,7 +34,7 @@ import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
 /** `USymbolFrame#drawFrame` (`:68-97`): the title-tab underline, an OPEN
  *  (unfilled) 4-point path from the tab's top-right corner down past a
  *  `cornersize` dog-ear cut to the frame's own left edge. `fmt()` (not raw
- *  interpolation): `textWidth` is derived from `measureLineWidth`'s
+ *  interpolation): `textWidth` is derived from `compositeTitleWidth`'s
  *  table-lookup sum, which can land a ULP off a clean decimal
  *  (`19.425000000000004`) -- `svg.ts#attrs` cleans that for every OTHER
  *  numeric attribute in this file, but a `d` string's embedded numbers
@@ -40,6 +48,38 @@ function compositeTabPath(x: number, y: number, textWidth: number, textHeight: n
   return `M${x1},${fmt(y)} L${x1},${y2} L${x2},${y3} L${fmt(x)},${y3}`;
 }
 
+/** The renderer's own width table -- the SAME `WidthTableMeasurer` class
+ *  `activity-text-placement.ts#measureLineWidth` reads. */
+const TITLE_MEASURER = new WidthTableMeasurer();
+
+/**
+ * `dimTitle.getWidth()` of the frame title (`USymbolFrame.java:146,150`),
+ * shared by the renderer and the compression adapter
+ * (`layout/compress/shapes-of-frame.ts`) so both read one width.
+ */
+export function compositeTitleWidth(theme: Theme, title: string): number {
+  return frameTitleWidth(title, TITLE_MEASURER, theme);
+}
+
+/** The frame's `<symbol>/composite` style colours (`FtileGroup.java:99-102`):
+ *  `activityDiagram { composite { LineColor black; BackgroundColor transparent } }`
+ *  (`plantuml.skin:364-368`), the root `FontColor black`, each overridden by
+ *  the `Partition*` skinparams (`FromSkinparamToStyle.java:131-133`). */
+interface CompositeStyle {
+  readonly backColor: string;
+  readonly borderColor: string;
+  readonly fontColor: string;
+}
+
+function compositeStyle(theme: Theme): CompositeStyle {
+  const g = theme.colors.graph;
+  return {
+    backColor: g.partitionBackground ?? 'none',
+    borderColor: g.partitionBorder ?? '#000',
+    fontColor: g.partitionFontColor === undefined ? '#000' : resolveColorToSvgHex(g.partitionFontColor),
+  };
+}
+
 /**
  * `FtileGroup#drawU` (`:209-227`) + `USymbolFrame#asBig`'s `drawU`
  * (`:142-162`): the plain frame `rect` (unchanged from before this
@@ -47,18 +87,24 @@ function compositeTabPath(x: number, y: number, textWidth: number, textHeight: n
  * fixed `(3, 1)` inset. `node.label` carries the title verbatim
  * (`tile-coordinates.ts#walkTileGroup`).
  * `USymbolFrame#getWTitle`/`getYpos` (`:76-104`)'s `dimTitle.getWidth() ==
- * 0` branch (an untitled frame) is ported; its `asBig`'s own `widthFull -
- * widthTitle < 25` `SpecialText` wrap (`:152-156`, an over-wide-title
- * fallback) is NOT -- no PART cohort row's title is wide enough to reach
- * it (every row's title is short relative to its own box).
+ * 0` branch (an untitled frame) is ported. `asBig`'s `widthFull -
+ * widthTitle < 25` branch (`:152-156`) draws the SAME text either way
+ * (`AbstractUGraphic.java:121-122` draws a `SpecialText` as its title); the
+ * branch only changes the compression footprint, which
+ * `layout/compress/shapes-of-frame.ts#frameTitleShape` ports.
  */
 export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const strokeWidth = activityLineThickness(theme, 'composite');
-  const body = rect(node.x, node.y, node.width, node.height, { fill: 'none', stroke: '#000', strokeWidth });
+  const style = compositeStyle(theme);
+  // `FtileGroup.java:101`: the command's `#color`, else the style's `BackGroundColor`.
+  const fill = node.color ?? style.backColor;
+  if (node.usymbol !== undefined)
+    return renderSymbolComposite(node, node.usymbol, theme, { fill, stroke: style.borderColor, strokeWidth });
+  const body = rect(node.x, node.y, node.width, node.height, { fill, stroke: style.borderColor, strokeWidth });
 
   const fontSize = activityFontSize(theme, 'composite');
   const title = node.label ?? '';
-  const titleWidth = title === '' ? 0 : measureLineWidth(theme, fontSize, title);
+  const titleWidth = compositeTitleWidth(theme, title);
   // `getWTitle`/`getYpos`/`drawFrame`'s own `cornersize` local (`:76-
   // 84,99-104`): an EMPTY title falls back to a width/height-derived tab.
   // `WidthTableMeasurer#measure`'s height is always the raw font size
@@ -69,13 +115,41 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   const textHeight = titleWidth === 0 ? 12 : fontSize + 3;
   const tab = path(compositeTabPath(node.x, node.y, textWidth, textHeight, cornerSize), {
     fill: 'none',
-    stroke: '#000',
+    stroke: style.borderColor,
     strokeWidth,
   });
 
   if (title === '') return body + tab;
   const titleX = node.x + 3;
   const titleY = node.y + 1 + fontSize * ASCENT_FRACTION;
-  const titleEl = drawActivityText(titleX, titleY, title, { fontFamily: theme.fontFamily, fontSize, fill: '#000' });
+  const titleEl = drawActivityText(titleX, titleY, title, {
+    fontFamily: theme.fontFamily,
+    fontSize,
+    fill: style.fontColor,
+  });
   return body + tab + titleEl;
+}
+
+/**
+ * `package`/`card`/`rectangle` (`activity-renderer-composite-symbols.ts`):
+ * the symbol's own frame, then its title as a plain text block at the
+ * symbol's own origin (`USymbolFolder.java:228`, `USymbolCard.java:133-134`,
+ * `USymbolRectangle.java:125-133`).
+ */
+function renderSymbolComposite(
+  node: ActivityNodeGeo,
+  usymbol: CompositeUSymbol,
+  theme: Theme,
+  ink: CompositeInk,
+): string {
+  const fontSize = activityFontSize(theme, 'composite');
+  const title = node.label ?? '';
+  const titleWidth = compositeTitleWidth(theme, title);
+  const dim = { width: titleWidth, height: title === '' ? 0 : fontSize };
+  const frame = drawCompositeSymbol(node, usymbol, dim, ink);
+  if (title === '') return frame;
+  const origin = compositeSymbolTitleOrigin(node, usymbol, titleWidth);
+  const fill = compositeStyle(theme).fontColor;
+  const y = origin.y + fontSize * ASCENT_FRACTION;
+  return frame + drawActivityText(origin.x, y, title, { fontFamily: theme.fontFamily, fontSize, fill });
 }

@@ -85,6 +85,28 @@ describe('GtileGroup — long title drives width', () => {
   });
 });
 
+// add4-T2b (PART-TITLE-CREOLE): the title is a creole `Display`
+// (`FtileGroup.java:104-108`), so `[[url label]]` sizes as `label`.
+describe('GtileGroup — creole title width', () => {
+  it('a [[url label]] title is measured as its label', () => {
+    const tile = new GtileGroup('[[https://google.com/ a long visible label]]', makeTile(10, 50), bounder, theme);
+    expect(tile.width).toBe('a long visible label'.length * 7 + 20);
+  });
+
+  it('carries the backColor option (FtileGroup.java:94,101)', () => {
+    const tile = new GtileGroup('T', makeTile(10, 50), bounder, theme, { backColor: '#Salmon' });
+    expect(tile.backColor).toBe('#Salmon');
+    expect(new GtileGroup('T', makeTile(10, 50), bounder, theme).backColor).toBeUndefined();
+  });
+
+  it('carries the usymbol option without changing the geometry (FtileGroup.java:190-203)', () => {
+    const plain = new GtileGroup('T', makeTile(10, 50), bounder, theme);
+    const card = new GtileGroup('T', makeTile(10, 50), bounder, theme, { usymbol: 'card' });
+    expect(card.usymbol).toBe('card');
+    expect([card.width, card.height]).toEqual([plain.width, plain.height]);
+  });
+});
+
 describe('GtileGroup — bodyOffsetY', () => {
   const body = makeTile(100, 50);
   const tile = new GtileGroup('Title', body, bounder, theme);

@@ -24,7 +24,7 @@ import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileMerge } from '../tiles/gtile-merge.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileSwitch } from '../tiles/gtile-switch.js';
-import { GtileGroup } from '../tiles/gtile-group.js';
+import { GtileGroup, type GtileGroupOptions } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
@@ -332,15 +332,11 @@ export function tileSwitch(
  * Builds a {@link GtileGroup}/{@link GtilePartition} from an
  * `ActivityGroup` node (mission ubrr-T10 M6). `groupType === 'group'`
  * builds `GtileGroup`; the other four (`partition`/`package`/`rectangle`/
- * `card`) all build `GtilePartition` -- upstream draws a DIFFERENT
- * `USymbol` per type (`CommandPartition3#getUSymbol`), but this port has
- * only the two tile classes (`gtile-group.ts`/`gtile-partition.ts`,
- * identical geometry, `kind` differs), so `package`/`rectangle`/`card`
- * collapse onto `GtilePartition`'s shape -- a documented divergence, not
- * a silent one. The bracket-less-form warning banner (`CommandPartition3`
- * `hasBracket == false` -> `addWarning(...)`, `CommandCloseGroupLegacy3`
- * likewise) is NOT rendered -- `ActivityGroup.hasBracket` is carried on
- * the AST for a future task, unread here.
+ * `card`) all build `GtilePartition` -- upstream's `FtileGroup` geometry
+ * is the same for every type; only `drawU`'s `USymbol` differs
+ * (`CommandPartition3#getUSymbol`), carried as the tile's `usymbol` option
+ * (add4-T2b) and drawn by `activity-renderer-composite.ts`. The bracket-less
+ * warnings are emitted at parse time (`group-dispatch.ts`, add4-T2b).
  */
 /** `InstructionGroup#createFtile`'s own `if (note != null) tmp = new
  *  FtileWithNotes(tmp, singleton(note), CENTER)` (`InstructionGroup
@@ -351,6 +347,17 @@ function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: Stri
   if (note === undefined) return body;
   const entries: WithNotesEntry[] = [{ text: note.text, position: note.position, color: note.color }];
   return new GtileWithNotes(body, entries, bounder, theme);
+}
+
+/** `FtileGroup`'s `backColor` argument (`InstructionGroup.java`, from
+ *  `CommandPartition3.java:145-147`). */
+function groupOptions(node: ActivityGroup): GtileGroupOptions {
+  const t = node.groupType;
+  const usymbol = t === 'package' || t === 'card' || t === 'rectangle' ? t : undefined;
+  return {
+    ...(node.backColor !== undefined ? { backColor: node.backColor } : {}),
+    ...(usymbol !== undefined ? { usymbol } : {}),
+  };
 }
 
 export function tileGroup(
@@ -364,7 +371,7 @@ export function tileGroup(
   const body = wrapGroupNote(rawBody, node.note, bounder, theme);
   const tile =
     node.groupType === 'group'
-      ? new GtileGroup(node.title, body, bounder, theme)
-      : new GtilePartition(node.title, body, bounder, theme);
+      ? new GtileGroup(node.title, body, bounder, theme, groupOptions(node))
+      : new GtilePartition(node.title, body, bounder, theme, groupOptions(node));
   return withSwimlane(tile, node.swimlane);
 }
