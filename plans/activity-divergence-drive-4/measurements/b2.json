@@ -1,0 +1,245 @@
+{
+  "commit": "bc66e4ee",
+  "aggregate": 1385,
+  "subsetSum": null,
+  "fixtures": [
+    {
+      "slug": "bigide-91-bise382",
+      "score": 35,
+      "pinned": 35,
+      "delta": 0
+    },
+    {
+      "slug": "boxefe-81-situ725",
+      "score": 1,
+      "pinned": 1,
+      "delta": 0
+    },
+    {
+      "slug": "bozido-07-geze049",
+      "score": 80,
+      "pinned": 80,
+      "delta": 0
+    },
+    {
+      "slug": "cemipu-87-dinu624",
+      "score": 6,
+      "pinned": 6,
+      "delta": 0
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "score": 87,
+      "pinned": 87,
+      "delta": 0
+    },
+    {
+      "slug": "fukika-81-gite897",
+      "score": 58,
+      "pinned": 58,
+      "delta": 0
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "score": 29,
+      "pinned": 29,
+      "delta": 0
+    },
+    {
+      "slug": "gunuki-27-nixu177",
+      "score": 14,
+      "pinned": 14,
+      "delta": 0
+    },
+    {
+      "slug": "jazedo-50-meka611",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "score": 31,
+      "pinned": 31,
+      "delta": 0
+    },
+    {
+      "slug": "labala-74-juki864",
+      "score": 5,
+      "pinned": 5,
+      "delta": 0
+    },
+    {
+      "slug": "lebile-91-veto202",
+      "score": 64,
+      "pinned": 64,
+      "delta": 0
+    },
+    {
+      "slug": "letuke-04-poza319",
+      "score": 94,
+      "pinned": 94,
+      "delta": 0
+    },
+    {
+      "slug": "lisade-37-vuri519",
+      "score": 66,
+      "pinned": 66,
+      "delta": 0
+    },
+    {
+      "slug": "meguta-71-pimi823",
+      "score": 1,
+      "pinned": 1,
+      "delta": 0
+    },
+    {
+      "slug": "momala-42-luvu884",
+      "score": 48,
+      "pinned": 48,
+      "delta": 0
+    },
+    {
+      "slug": "mufixi-71-koma752",
+      "score": 236,
+      "pinned": 236,
+      "delta": 0
+    },
+    {
+      "slug": "nesozi-09-zezu092",
+      "score": 20,
+      "pinned": 20,
+      "delta": 0
+    },
+    {
+      "slug": "nuvumi-83-tose343",
+      "score": 14,
+      "pinned": 14,
+      "delta": 0
+    },
+    {
+      "slug": "pekefu-66-mepa144",
+      "score": 8,
+      "pinned": 8,
+      "delta": 0
+    },
+    {
+      "slug": "pufuzi-99-vone170",
+      "score": 29,
+      "pinned": 29,
+      "delta": 0
+    },
+    {
+      "slug": "ruzazu-94-meso880",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    },
+    {
+      "slug": "sokomu-20-five757",
+      "score": 46,
+      "pinned": 46,
+      "delta": 0
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    },
+    {
+      "slug": "vimena-17-poju626",
+      "score": 196,
+      "pinned": 196,
+      "delta": 0
+    },
+    {
+      "slug": "xaxene-93-doka767",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    },
+    {
+      "slug": "xovigi-85-rufa987",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    },
+    {
+      "slug": "zejuso-92-kexo870",
+      "score": 148,
+      "pinned": 148,
+      "delta": 0
+    },
+    {
+      "slug": "zivege-92-rise076",
+      "score": 49,
+      "pinned": 49,
+      "delta": 0
+    },
+    {
+      "slug": "zivocu-77-kopa900",
+      "score": 8,
+      "pinned": 8,
+      "delta": 0
+    },
+    {
+      "slug": "zocifu-52-miga192",
+      "score": 2,
+      "pinned": 2,
+      "delta": 0
+    }
+  ],
+  "families": {
+    "svg/g[]/ellipse[]/@cx": 20,
+    "svg/g[]/rect[]/@x": 19,
+    "svg/g[]/text[]/@x": 61,
+    "svg/g[]/line[]/@x1": 75,
+    "svg/g[]/line[]/@x2": 76,
+    "svg/g[]/polygon[]/@points[]": 361,
+    "svg/g[]/text[]/@y": 26,
+    "svg/@height": 9,
+    "svg/@viewBox[]": 20,
+    "svg/@width": 11,
+    "svg/g[]/rect[]/@height": 7,
+    "svg/g[]/rect[]/@width": 9,
+    "svg/g[]/image[]/@height": 1,
+    "svg/g[]/image[]/@width": 1,
+    "svg/g[]/image[]/@y": 1,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/ellipse[]/@cy": 14,
+    "svg/g[]/line[]/@y1": 27,
+    "svg/g[]/line[]/@y2": 35,
+    "svg/g[][childCount]": 411,
+    "svg/g[]/line[]/@stroke": 3,
+    "svg/g[]/line[]/@stroke-width": 5,
+    "svg/g[]/ellipse[]/@fill": 2,
+    "svg/g[]/ellipse[]/@stroke": 3,
+    "svg/g[]/line[]": 41,
+    "svg/g[]/polygon[]": 42,
+    "svg/g[]/text[]/@font-weight": 1,
+    "svg/g[]/text[]/@textLength": 6,
+    "svg/g[]/text[]/text()[]": 3,
+    "svg/g[]/ellipse[]/@rx": 3,
+    "svg/g[]/ellipse[]/@ry": 3,
+    "svg/g[]/ellipse[]/@stroke-width": 3,
+    "svg/g[]/rect[]/@rx": 1,
+    "svg/g[]/rect[]/@ry": 1,
+    "svg/g[]/rect[]/@stroke-width": 1,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/a[]/text[]/@font-size": 1,
+    "svg/g[]/a[]/text[]/@textLength": 1,
+    "svg/g[]/a[]/text[]/@x": 1,
+    "svg/g[]/a[]/text[]/@y": 1,
+    "svg/g[]/polygon[]/@stroke-width": 2,
+    "svg/g[]/text[]": 27,
+    "svg/g[]/a[]/text[]/@fill": 3,
+    "svg/g[]/text[][childCount]": 1,
+    "svg/g[]/path[]/@fill": 2,
+    "svg/g[]/text[]/@font-family": 2,
+    "svg/g[]/g[]/rect[]/@x": 1,
+    "svg/g[]/g[]/text[]/@x": 16,
+    "svg/g[]/g[]/line[]/@x1": 9,
+    "svg/g[]/g[]/line[]/@x2": 9
+  }
+}
