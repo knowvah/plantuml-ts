@@ -1,0 +1,13 @@
+@startuml
+start
+switch (pick)
+case ( x )
+  :left;
+  stop
+case ( y )
+  :middle;
+case ( z )
+  :right;
+endswitch
+:after;
+@enduml

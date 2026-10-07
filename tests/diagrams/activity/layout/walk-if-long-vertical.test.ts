@@ -94,6 +94,10 @@ describe('layoutActivity — long-vertical: then/elseif/else chain', () => {
     expect(lastElse.label).toBe('3');
   });
 
+  it('ConnectionLastElse draws its label CENTER-aligned (FtileIfLongVertical.java:319-320)', () => {
+    expect(geo.edges[4]!.labelAlign).toEqual({ vertical: 'CENTER' });
+  });
+
   it('ConnectionIn is a 4-point elbow (down, across, down)', () => {
     expect(geo.edges[0]!.points.length).toBe(4);
   });

@@ -11,7 +11,10 @@ import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swiml
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
-import { activityFontSize, swimlaneTitleFontSize } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
+import {
+  activityFontSize,
+  swimlaneTitleFontSize,
+} from '../../../../../src/diagrams/activity/activity-style-defaults.js';
 import { measureLineWidth } from '../../../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
@@ -300,7 +303,13 @@ describe('shapesOf — edges', () => {
     expect(shapes).toHaveLength(0);
   });
 
-  it('an edge label is measured with the bounder and placed like renderEdgeLabel (no color)', () => {
+  // `Snake#getTextBlockPosition` (`Snake.java:244-270`), the SAME position
+  // `renderer.ts#renderEdgeLabelAligned` draws at; baseline is
+  // `centeredFirstBaselineY(top + size/2, size, 1)` = top + size * 7/9.
+  const ARROW = activityFontSize(theme, 'arrow');
+  const baselineOf = (top: number): number => top + (ARROW * 7) / 9;
+
+  it('an unaligned edge label takes the default LEFT branch: x = max(pt1.x, pt2.x) + 4', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
@@ -310,8 +319,43 @@ describe('shapesOf — edges', () => {
     };
     const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
     const textShape = shapes.find((s) => s.kind === 'text')!;
-    // mid = points[Math.floor(2/2)] = points[1] = (0, 20); no color -> (midX+4, midY-4)
-    expect(textShape).toEqual({ kind: 'text', x: 4, y: 16, width: 12, height: 11 });
+    // y top = (0 + 20) / 2 - ARROW / 2 (`Snake.java:250`)
+    expect(textShape).toEqual({ kind: 'text', x: 4, y: baselineOf(10 - ARROW / 2), width: 12, height: 11 });
+  });
+
+  it('a CENTER-aligned edge label sits at worm minX, centred on (first.y + last.y - 10) / 2', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 50, y: 0 },
+        { x: 50, y: 30 },
+        { x: 10, y: 30 },
+        { x: 10, y: 60 },
+      ],
+      label: 'no',
+      labelAlign: { vertical: 'CENTER' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    const textShape = shapes.find((s) => s.kind === 'text')!;
+    // `Snake.java:254-256`: x = minX = 10, y = (0 + 60 - 10) / 2 - h / 2
+    expect(textShape).toEqual({ kind: 'text', x: 10, y: baselineOf(25 - ARROW / 2), width: 12, height: 11 });
+  });
+
+  it('a labelled H-then-V switch case edge (LEFT) is not boxed at the midpoint + 4', () => {
+    // `ConnectionHorizontalThenVertical` (`FtileSwitchWithManyLinks.java:91-104`):
+    // D1 point -> (x2, y1) -> (x2, y2); code "LD" -> x = min(pt1.x, pt2.x),
+    // y centred between pt1.y and pt3.y (`Snake.java:265-267`).
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 100, y: 10 },
+        { x: 40, y: 10 },
+        { x: 40, y: 50 },
+      ],
+      label: 'a',
+      labelAlign: { horizontal: 'LEFT' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    const textShape = shapes.find((s) => s.kind === 'text')!;
+    expect(textShape).toEqual({ kind: 'text', x: 40, y: baselineOf(30 - ARROW / 2), width: 6, height: 11 });
   });
 });
 

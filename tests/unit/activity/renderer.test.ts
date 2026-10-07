@@ -915,6 +915,33 @@ describe('renderActivity — edge with arrowhead: false', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Test 15b (add4-T1e): a zero-length LAST segment still draws the end
+// decoration (`ftile/Worm.java:161-168` has no length test), oriented by the
+// segment before it -- the `ConnectionVerticalThenHorizontal` DOWN branch
+// (`FtileSwitchWithManyLinks.java:167-170`, `asToDown()`), pateca/duvole.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge ending on a zero-length segment', () => {
+  it('draws the asToDown arrowhead at the last point', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 143 },
+            { x: 100, y: 193 },
+            { x: 100, y: 193 },
+          ],
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    // asToDown: (-4,-10),(0,0),(4,-10),(0,-6), translated to (100, 193).
+    expect(content).toContain('<polygon points="96,183,100,193,104,183,100,187"');
+    expect((content.match(/<line/g) ?? []).length).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Test 16: `midArrowAt` draws exactly one extra arrowhead at its own point
 // (D4, mission `activity-loop-lane-translate` T1 --
 // `FtileWhile.ConnectionBackSimple#drawTranslate`'s `asToUp` at

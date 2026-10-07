@@ -20,6 +20,7 @@ import { measureLineWidth } from './activity-text-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { terminalDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
@@ -287,13 +288,14 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
   // sit below the `for` loop that draws every segment (`ftile/Worm.java:
   // 134-171`), never interleaved with it. Direction is second-to-last point
-  // to last. `edge.arrowhead === false` mirrors a `null` end decoration
-  // (`:161-168`'s `if (endDecoration != null)` never firing).
+  // to last, skipping a zero-length last segment: upstream draws the end
+  // decoration whatever that segment's length (`:161-168`, no length test;
+  // `terminalDecorationVector`'s own doc). `edge.arrowhead === false`
+  // mirrors a `null` end decoration (`if (endDecoration != null)` never
+  // firing).
   const last = pts[pts.length - 1]!;
-  const prev = pts[pts.length - 2]!;
-  const dx = last.x - prev.x;
-  const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
+  const vector = terminalDecorationVector(pts);
+  const arrow = edge.arrowhead === false || vector === undefined ? '' : arrowTip(last, vector, headColor, theme);
 
   // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate
   // shape places at its own point) is NO LONGER drawn here -- see
@@ -448,9 +450,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     // see `theme.colors.backgroundGradient`'s own doc comment. Omitted
     // entirely (not `undefined`, `exactOptionalPropertyTypes`) for the
     // common case, mirroring `preserveAspectRatio` below.
-    ...(theme.colors.backgroundGradient !== undefined
-      ? { backgroundGradient: theme.colors.backgroundGradient }
-      : {}),
+    ...(theme.colors.backgroundGradient !== undefined ? { backgroundGradient: theme.colors.backgroundGradient } : {}),
     diagramType: DIAGRAM_TYPE_ACTIVITY,
     // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
     // document-margin shift baked into `body` above, composes chrome around

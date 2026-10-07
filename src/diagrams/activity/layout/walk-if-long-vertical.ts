@@ -229,7 +229,12 @@ function connectionLastElse(ctx: LvCtx): void {
     laneOut(t.diamonds[last]!, myLane),
     laneIn(t.tile2, myLane),
   );
-  if (t.elseLabel !== undefined && t.elseLabel !== '') out.edges[out.edges.length - 1]!.label = t.elseLabel;
+  if (t.elseLabel === undefined || t.elseLabel === '') return;
+  // `Snake.create(...).withLabel(label, VerticalAlignment.CENTER)`
+  // (`FtileIfLongVertical.java:319-320`).
+  const edge = out.edges[out.edges.length - 1]!;
+  edge.label = t.elseLabel;
+  edge.labelAlign = { vertical: 'CENTER' };
 }
 
 /**

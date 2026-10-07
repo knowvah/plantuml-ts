@@ -21,6 +21,9 @@ import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
+import { terminalDecorationVector } from './shapes-of-terminal.js';
+import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
+import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -263,23 +266,20 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
 }
 
 /**
- * The terminal arrowhead at an edge's last point, direction from the
- * second-to-last point (`renderer.ts#renderEdge`'s own `arrowTip` call).
- * `undefined` when `edge.arrowhead === false` (D6 -- a `null` end decoration
- * never draws, `ftile/Worm.java:161-168`), the edge is too short, or the
- * last segment is zero-length -- `arrowTip`'s own `dx === 0 && dy === 0`
- * guard, D3.
+ * The terminal arrowhead at an edge's last point, oriented by
+ * {@link terminalDecorationVector} (the same vector `renderer.ts#renderEdge`
+ * passes its terminal `arrowTip`). A zero-length last segment still gets
+ * its arrowhead (`ftile/Worm.java:161-168` draws the end decoration with no
+ * length test), so the compressor keeps its 10 px. `undefined` when
+ * `edge.arrowhead === false` (D6 -- a `null` end decoration never draws) or
+ * no segment has length.
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
   if (edge.arrowhead === false) return undefined;
-  const pts = edge.points;
-  if (pts.length < 2) return undefined;
-  const last = pts[pts.length - 1]!;
-  const prev = pts[pts.length - 2]!;
-  const dx = last.x - prev.x;
-  const dy = last.y - prev.y;
-  if (dx === 0 && dy === 0) return undefined;
-  const ext = arrowHeadExtents(arrowDirection(dx, dy));
+  const vector = terminalDecorationVector(edge.points);
+  if (vector === undefined) return undefined;
+  const last = edge.points[edge.points.length - 1]!;
+  const ext = arrowHeadExtents(arrowDirection(vector.dx, vector.dy));
   const shape: CompressShape = {
     kind: 'polygon',
     x: last.x + ext.minX,
@@ -355,36 +355,36 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
 }
 
 /**
- * An edge label, measured WITH THE BOUNDER at `activityFontSize(theme,
- * 'arrow')` and placed exactly where `renderer.ts#renderEdgeLabel` places
- * it -- the renderer's own `label.length * 0.6 * size` width estimate is a
- * FILED approximation (mission README, "does not change"); this adapter
- * measures the true width instead, which is the whole point of porting
- * `TextLimitFinder` faithfully, and the difference is journaled, not
- * reconciled by changing the renderer.
+ * An edge label -- the `UText` `Snake#drawInternalLabel` draws
+ * (`ftile/Snake.java:225-231`: `text.textBlock.drawU(ug.apply(UTranslate
+ * .point(getTextBlockPosition(...))))`), which `SlotFinder#drawText`
+ * registers (`klimt/compress/SlotFinder.java:121-128`). Upstream has ONE
+ * draw site for every Snake label -- the switch case labels included:
+ * `FtileDecorateInLabel#drawU` draws nothing of its own, only the body
+ * `dy(yl)` lower (`vertical/FtileDecorateInLabel.java:71-74`); the text
+ * comes from the connection's `Snake.withLabel(branch
+ * .getTextBlockPositive(), ...)` (`cond/FtileSwitchWithManyLinks.java
+ * :91-92,218-219`). So the box sits exactly where `renderer.ts
+ * #renderEdgeLabelAligned` draws it: {@link getTextBlockPosition} over the
+ * edge's own points with its push site's `labelAlign` (default
+ * `arrowHorizontalAlignment()`, `AbstractFtile.java:108-110`), baseline via
+ * `centeredFirstBaselineY`. The prior mid-point `x + 4, y - 4` estimate
+ * mirrored a renderer convention retired by add3-T1b and sat up to 4 px
+ * past the real ink, blocking X compression the jar applies.
+ *
+ * The extents stay the bounder's own dimension (`TextLimitFinder#drawText`
+ * measures the `UText` through the `StringBounder`,
+ * `klimt/drawing/TextLimitFinder.java:82-90`); the position inputs mirror
+ * the renderer's (`measureLineWidth`, `height = font size`).
  */
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
   if (edge.label === undefined) return undefined;
-  const pts = edge.points;
-  const mid = Math.floor(pts.length / 2);
-  const midPt = pts[mid]!;
   const size = activityFontSize(theme, 'arrow');
   const dim = bounder.getDimension(edge.label, size);
-  let x: number;
-  let y: number;
-  if (edge.color !== undefined) {
-    // Pill case: `renderEdgeLabel`'s `text(pillX + 4, midY, ...)`.
-    const textWidth = edge.label.length * (size * 0.6);
-    const pillW = textWidth + 8;
-    const pillX = midPt.x - pillW / 2;
-    x = pillX + 4;
-    y = midPt.y;
-  } else {
-    // Plain case: `renderEdgeLabel`'s `text(midX + 4, midY - 4, ...)`.
-    x = midPt.x + 4;
-    y = midPt.y - 4;
-  }
-  return { kind: 'text', x, y, width: dim.width, height: dim.height };
+  const placeDim = { width: measureLineWidth(theme, size, edge.label), height: size };
+  const position = getTextBlockPosition(edge.points, placeDim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
+  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
+  return { kind: 'text', x: position.x, y: baselineY, width: dim.width, height: dim.height };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
