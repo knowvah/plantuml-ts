@@ -1,0 +1,14 @@
+@startuml
+<style>
+activityDiagram {
+  activity {
+    FontColor red
+  }
+}
+</style>
+start
+if (cond?) then (yes)
+  :go;
+endif
+stop
+@enduml
