@@ -222,7 +222,12 @@ function shiftNode(node: ActivityNodeGeo, deltas: ReadonlyMap<string, number>): 
   if (node.swimlane === undefined) return node;
   const delta = deltas.get(node.swimlane);
   if (delta === undefined || delta === 0) return node;
-  return { ...node, x: node.x + delta };
+  // add4-T1b: an Opale note's `spikeTip` is drawn by the SAME tile pass as
+  // the note itself (`FtileWithNoteOpale#drawU`, one lane translate), so it
+  // shifts with the note -- as `canvas-origin.ts#shiftNodeGeo` already does.
+  const next: ActivityNodeGeo = { ...node, x: node.x + delta };
+  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + delta, y: node.spikeTip.y };
+  return next;
 }
 
 /**
