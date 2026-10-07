@@ -85,6 +85,7 @@ export class GtileTopDown extends TileComposite {
       case NORTH_BORDER:
         return { x: this.left, y: this.children.length === 0 ? 0 : this.children[0]!.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
+        return { x: this.left, y: this.outY() };
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };
       case EAST_HOOK:
@@ -97,6 +98,26 @@ export class GtileTopDown extends TileComposite {
         throw new Error(`Unknown hook: ${String(_exhaustive)}`);
       }
     }
+  }
+
+  /**
+   * The sequence's out y: the LAST child's own out y plus that child's
+   * offset, not the sequence's bottom edge.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:49-50
+   *   -- `if (geo2.hasPointOut()) result = new FtileGeometry(width, height,
+   *   left, geo1.getInY(), geo2.getOutY() + geo1.getHeight())`: each
+   *   pairwise `appendBottom` keeps the lower tile's own outY shifted by
+   *   the upper tile's height, so an n-ary fold ends at the last child's
+   *   outY + its offset ({@link childOffsets}, which already carries the
+   *   `FtileFactoryDelegatorAssembly` gap).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:153-154
+   *   -- a one-instruction list is that instruction's own ftile, so its
+   *   out point is the child's, unchanged.
+   */
+  private outY(): number {
+    const n = this.children.length;
+    if (n === 0) return 0;
+    return this.childOffsets[n - 1]! + this.children[n - 1]!.getCoord(SOUTH_HOOK).y;
   }
 
   /**
