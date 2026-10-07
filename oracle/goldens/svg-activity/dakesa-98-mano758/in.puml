@@ -1,0 +1,6 @@
+@startuml
+skinparam activity {
+        BackgroundColor  red-green
+}
+:activity;
+@enduml

@@ -66,9 +66,13 @@ describe('attribute injection via skinparam colors', () => {
   // PR #59 review: `<latex>` labels wrap KaTeX in a foreignObject whose
   // `<div style="…font-family:${theme.fontFamily}…">` interpolated the font
   // name MID-VALUE -- past every `="`-anchored check. Now emitted via attrs().
+  // add3-T2b: activity ACTION text now draws through the creole Sheet
+  // (`FtileBox.java:178-181`), where `<latex>` is an AtomMath image with no
+  // font name, so the mixed-label seam is exercised through a diamond label,
+  // which still reaches `core/latex.ts#renderNodeLabel`.
   it('escapes the font name once inside the latex foreignObject style attribute', () => {
     const svg = expectSafe(
-      `@startuml\nskinparam defaultFontName x"onload="alert(1)\nstart\n:a <latex>x^2</latex> b;\nstop\n@enduml`,
+      `@startuml\nskinparam defaultFontName x"onload="alert(1)\nstart\nif (a <latex>x^2</latex> b) then\n:c;\nendif\nstop\n@enduml`,
     );
     expect(svg).toContain('font-family:x&quot;onload=&quot;alert(1);');
     expect(svg).not.toContain('onload="alert');

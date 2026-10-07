@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-10-07T01:28:46.513Z",
+  "fixtures": [
+    {
+      "slug": "pibite-04-xiba436",
+      "type": "ditaa",
+      "verdict": "oracle-error",
+      "dotEqual": false,
+      "errMsg": "cached in.svg not well-formed XML: 160B"
+    },
+    {
+      "slug": "xegota-93-tido298",
+      "type": "ditaa",
+      "verdict": "oracle-error",
+      "dotEqual": false,
+      "errMsg": "cached in.svg not well-formed XML: 1273B"
+    }
+  ]
+}

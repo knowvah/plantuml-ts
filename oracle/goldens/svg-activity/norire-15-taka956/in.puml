@@ -1,0 +1,6 @@
+@startuml
+start
+:to;
+stop
+note left: this is a note
+@enduml

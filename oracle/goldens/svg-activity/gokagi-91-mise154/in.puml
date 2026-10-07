@@ -1,0 +1,12 @@
+@startuml
+start
+repeat :Enter data;
+:Submit1;
+note left: Note1
+:Submit2;
+note right: Note2
+backward :Warning;
+note left: Note3
+repeat while (Valid?)
+stop
+@enduml

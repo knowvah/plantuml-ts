@@ -1,0 +1,17 @@
+@startuml
+
+if (condition?) then (yes)
+  :yes;
+else (no)
+  :no;
+  note right
+    any very very long text
+  end note
+endif
+stop
+
+legend
+this is the legend
+endlegend
+
+@enduml

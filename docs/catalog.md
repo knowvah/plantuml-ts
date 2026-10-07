@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1376 modules · 5156 exported names.
+1384 modules · 5191 exported names.
 
 ## `src/`
 
@@ -22,6 +22,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | Module | Exports | Purpose |
 |---|---|---|
 | `arrow-label-font.ts` | `ARROW_LABEL_DEFAULT_COLOR`, `ArrowLabelFont`, `resolveArrowLabelFont`, `resolveCardinalityFontColor`, `resolveCardinalityFont` | D3: the arrow-label font resolver -- `GraphvizImageBuilder.java:234-235` (`getDefaultStyleDefinitionArrow(stereotype).getMergedStyle(...) .getFontConfiguration(...)`), upstream's `labelFont` argument to `SvekEdge`'s constructor. |
+| `assemble-svg-activity.ts` | `finalizeActivityFragment` | Activity's per-diagram body finalization — split out of `assemble-svg.ts` (T2d-a pass 2, 500-line hook) to make room for the DOCGRAD gradient background branch. |
 | `assemble-svg.ts` | `assembleSvg`, `seedOfUmlSource` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |
 | `asset-store.ts` | `AssetPayload`, `AssetStore`, `combineAssetStores` | ADR-2's asset store seam (`plans/s1l-tail-fix/decisions.md`) — the synchronous, pre-fillable channel for vendored binary/text asset payloads (the jar-internal `/sprites/**` bundle, F4-a; Twemoji artwork, F4-b). |
 | `assume-transparent.ts` | `RE_ASSUME_TRANSPARENT`, `isAssumeTransparent` | `CommandAssumeTransparent`: `!assume transparent dark\|light`, a historical directive every command factory registers through `CommonCommands#addCommonCommands2` (`command/CommonCommands.java:65`). |
@@ -1037,11 +1038,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `activity-creole-sheet.ts` | `klimtStringBounder`, `buildActionTextBlock`, `drawActionTextBlock`, `isActionSheetEligible`, `renderActionLabel` | activity-creole-sheet — D5's Sheet spike: an action label's `Display` routed through the REAL `SheetBuilder -> SheetBlock1 -> stripes/atoms` pipeline (`FtileBox.java:178-181`: `skinParam.sheet(fc, align, CreoleMode.FULL).createSheet(label)` |
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
-| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `ARROW_LABEL_LAYOUT_FONT_SIZE`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_H_PAD`, `NOTE_FOLD`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
+| `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `ARROW_LABEL_LAYOUT_FONT_SIZE`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_MARGIN_X1`, `NOTE_MARGIN_X2`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
+| `activity-renderer-action-code.ts` | `codeBlockLines`, `ActionCodeBlockArgs`, `renderActionCodeBlock` | `<code>...</code>` action-box bodies: monospace, measured like `tiles/ gtile-action.ts`'s own `monoCharWidth` sizing, not the proportional table `ActivityTextOpts` reads elsewhere. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite.ts` | `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderHexagonOwnLabel`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
@@ -1054,7 +1058,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadPointsTriangle`, `arrowHeadPointsFor`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular`/`ArrowsTriangle` — the activity-diagram arrowhead decorations, selected on `skinparam style strictuml` (D4). |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityBackward`, `ActivitySpot`, `ActivityLabel`, `ActivityGoto`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivitySwitchCase`, `ActivitySwitch`, `ActivityGroup`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
-| `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_ACTIVITY_LIST`, `RE_BACKWARD`, `RE_BACKWARD_HEAD`, `RE_IF`, `RE_IF4`, `RE_IF_LEGACY`, `RE_ELSEIF`, `RE_ELSE`, `RE_ELSE_LEGACY`, `RE_ENDIF`, `RE_SWITCH`, `RE_CASE`, `RE_ENDSWITCH`, `RE_GROUP_OPEN`, `RE_CLOSE_GROUP`, `RE_CLOSE_GROUP_LEGACY`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `RE_NOTE_END`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `RE_PRAGMA`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler`, `tryAssumeTransparent` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
+| `dispatch-newline-sentinels.ts` | `decodeNewlineSentinels` | `%n()`/`%newline()` -> a real line break in an activity action label (mission `activity-divergence-drive-3` T2a, family PCTN). |
+| `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_ACTIVITY_LIST`, `RE_BACKWARD`, `RE_BACKWARD_HEAD`, `RE_IF`, `RE_IF4`, `RE_IF_LEGACY`, `RE_ELSEIF`, `RE_ELSE`, `RE_ELSE_LEGACY`, `RE_ENDIF`, `RE_SWITCH`, `RE_CASE`, `RE_ENDSWITCH`, `RE_GROUP_OPEN`, `RE_CLOSE_GROUP`, `RE_CLOSE_GROUP_LEGACY`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `defaultLeftPosition`, `RE_NOTE_END`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `RE_PRAGMA`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler`, `tryAssumeTransparent` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
 | `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
 | `if-dispatch.ts` | `stripTrailingSemi`, `unescapeLabelNewlines`, `unescapeLabel`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
@@ -1127,6 +1132,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `walk-switch.ts` | `walkSwitch` | The `'gtile-switch'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-backward.ts` | `pushWhileBackwardConnections` | `FtileWhile`'s `ConnectionBackBackward1`/`ConnectionBackBackward2` (`FtileWhile.java:85,154-161,313-408`), split out of `walk-while- branch.ts` only to keep that file under the project's 500-line cap (mission `activity-divergence-drive` T3h |
 | `walk-while-branch.ts` | `WhileFrame`, `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
+| `walk-with-notes.ts` | `walkNoteOpale`, `walkWithNotes` | The `'gtile-with-notes'` case's full node emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason the if-down/if-with-links/switch walkers already are (one walker module per builder) -- that file sits at the pro |
 
 ## `src/diagrams/activity/layout/compress/`
 
@@ -1152,7 +1158,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `gtile-action.ts` | `GtileAction` |  |
+| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `GtileDiamondInside` |  |
 | `gtile-diamond-inside2.ts` | `DiamondInside2Side`, `DiamondInside2Labels`, `GtileDiamondInside2` |  |
@@ -1165,10 +1171,11 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
 | `gtile-if-long-vertical.ts` | `VerticalBranchLayout`, `GtileIfLongVertical` |  |
-| `gtile-if-with-links.ts` | `IfWithLinksBranch`, `BranchGeo`, `GtileIfWithLinks` |  |
+| `gtile-if-with-links-notes.ts` | `IfOwnNoteGeometry`, `computeIfOwnNoteGeometry` | `FtileIfWithDiamonds`'s own constructor (`:79-111`): processes AT MOST one LEFT and one RIGHT note from the if's own `notes` (any further note on an already-filled side is silently dropped -- `if (opaleLeft != EMPTY) continue;`/`:85-86,96-9 |
+| `gtile-if-with-links.ts` | `IfWithLinksBranch`, `IfLinksFlags`, `BranchGeo`, `NudeAndMerge`, `computeNudeAndMerge`, `IfWithLinksCreateOptions`, `GtileIfWithLinks` |  |
 | `gtile-label.ts` | `GtileLabel` |  |
 | `gtile-merge.ts` | `MERGE_DIAMOND_SIZE`, `GtileMerge` |  |
-| `gtile-note.ts` | `GtileNote`, `GtileNoteOpale` |  |
+| `gtile-note.ts` | `OpaleBox`, `IfOwnNote`, `measureIfOwnNote`, `measureOpaleText`, `GtileNote`, `GtileNoteOpale` |  |
 | `gtile-partition.ts` | `GtilePartition` |  |
 | `gtile-repeat-entry.ts` | `GtileRepeatEntry` |  |
 | `gtile-repeat.ts` | `RepeatConditionEmpty`, `RepeatConditionTile`, `RepeatBackConnection`, `GtileRepeatContext`, `GtileRepeat` |  |
@@ -1179,6 +1186,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-switch.ts` | `GtileSwitch` |  |
 | `gtile-top-down.ts` | `GtileTopDown` |  |
 | `gtile-while.ts` | `GtileWhileContext`, `GtileWhile` |  |
+| `gtile-with-notes.ts` | `WithNotesEntry`, `StackedNote`, `NoteStack`, `GtileWithNotes` |  |
 | `index.ts` | `GPoint`, `HookName`, `NORTH_HOOK`, `SOUTH_HOOK`, `EAST_HOOK`, `WEST_HOOK`, `NORTH_BORDER`, `SOUTH_BORDER`, `gpoint`, `StringBounder`, `Tile`, `TileLeaf`, `TileComposite` |  |
 | `points.ts` | `GPoint`, `NORTH_HOOK`, `SOUTH_HOOK`, `EAST_HOOK`, `WEST_HOOK`, `NORTH_BORDER`, `SOUTH_BORDER`, `HookName`, `gpoint` |  |
 | `tile.ts` | `StringBounder`, `Tile`, `TileLeaf`, `TileComposite` |  |

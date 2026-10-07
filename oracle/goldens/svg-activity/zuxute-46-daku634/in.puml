@@ -1,0 +1,12 @@
+@startuml
+start
+while (true)
+if (test?) then
+:a;
+else
+:c;
+endif
+note right: This note is on the if
+:foo;
+end while
+@enduml

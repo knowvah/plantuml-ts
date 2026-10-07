@@ -1,0 +1,10 @@
+@startuml
+start
+if (test?) then
+:a;
+else
+:c;
+endif
+note: This note is on the if
+stop
+@enduml
