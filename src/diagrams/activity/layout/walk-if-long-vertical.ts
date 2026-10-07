@@ -291,22 +291,30 @@ function connectionThenOutConnect(ctx: LvCtx, i: number): void {
   pushEdge(out, [p1, { x: p1.x, y: p2.y }, p2], laneOut(t.tiles[i]!, myLane), myLane);
 }
 
+/**
+ * Node order mirrors `drawU`: every branch tile, then every diamond, then
+ * `tile2`, then `lastDiamond` (`FtileIfLongVertical.java:492-502`). Edge
+ * order mirrors `create`'s `conns` list, drawn after the tile by
+ * `FtileWithConnection#drawU` (`FtileWithConnection.java:69-74`):
+ * VerticalIn*, Vertical*, ThenOut, ThenOutConnect*, In, LastElse,
+ * LastElseOut (`FtileIfLongVertical.java:173-201`).
+ */
 export function walkIfLongVertical(t: GtileIfLongVertical, x: number, y: number, myLane: string | undefined, out: Out): void {
   const ctx: LvCtx = { t, x, y, myLane, out };
 
-  for (let i = 0; i < t.diamonds.length; i++) {
-    pushDiamondNode(ctx, i);
+  for (let i = 0; i < t.tiles.length; i++) {
     const b = t.branches[i]!;
     walkTile(t.tiles[i]!, x + b.tileX, y + b.tileY, { kindHint: null, lane: myLane }, out);
   }
+  for (let i = 0; i < t.diamonds.length; i++) pushDiamondNode(ctx, i);
   walkTile(t.tile2, x + t.tile2X, y + t.tile2Y, { kindHint: null, lane: myLane }, out);
   pushLastDiamondNode(ctx);
 
-  connectionIn(ctx);
   for (let i = 0; i < t.diamonds.length; i++) connectionVerticalIn(ctx, i);
   for (let i = 0; i < t.diamonds.length - 1; i++) connectionVertical(ctx, i);
-  connectionLastElse(ctx);
-  connectionLastElseOut(ctx);
   connectionThenOut(ctx);
   for (let i = 1; i < t.tiles.length; i++) connectionThenOutConnect(ctx, i);
+  connectionIn(ctx);
+  connectionLastElse(ctx);
+  connectionLastElseOut(ctx);
 }
