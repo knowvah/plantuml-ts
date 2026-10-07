@@ -3964,11 +3964,11 @@
     {
       "type": "activity",
       "slug": "zivege-92-rise076",
-      "status": "baseline",
-      "weightedScore": 49,
-      "diffCount": 49,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca"
+      "measuredAgainstCommit": "790fee5a"
     },
     {
       "type": "activity",
