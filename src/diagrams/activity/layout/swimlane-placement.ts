@@ -29,7 +29,7 @@ import type { Theme } from '../../../core/theme.js';
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
 import { swimlaneTitleText } from './swimlane-title.js';
-import { shiftLaneReservations } from './swimlane-reservation-lane.js';
+import { laneReservationItems, shiftLaneReservations } from './swimlane-reservation-lane.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
@@ -352,6 +352,7 @@ interface MeasureLanesInput {
   readonly bounder: StringBounder;
   readonly theme: Theme;
   readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
+  readonly walkReservations?: readonly Reservation[];
 }
 
 // `sameLaneEdges` moved to `swimlane-measure-edges.ts` (add4-T1b, this
@@ -398,6 +399,7 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
   const { nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays } = input;
   const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
+  items.push(...laneReservationItems(input.walkReservations ?? []));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);

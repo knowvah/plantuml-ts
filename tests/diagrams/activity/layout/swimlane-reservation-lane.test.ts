@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Reservation } from '../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import {
+  laneReservationItems,
   pushLaneReservation,
   shiftLaneReservations,
 } from '../../../../src/diagrams/activity/layout/swimlane-reservation-lane.js';
@@ -36,7 +37,11 @@ describe('lane-tagged reservations', () => {
     expect(shifted).toEqual([{ x: 110, y: 5, width: 5, height: 12 }, untagged]);
   });
 
-  it.each(['lane-res-while', 'lane-res-while-empty', 'lane-res-while-backward'])(
+  it('measures only a tagged reservation, unfudged, in its lane', () => {
+    expect(laneReservationItems(list)).toEqual([{ swimlane: 'B', x: 10, width: 5 }]);
+  });
+
+  it.each(['lane-res-while', 'lane-res-while-empty', 'lane-res-while-backward', 'lane-res-fork-label'])(
     '%s renders equal to the jar',
     (name) => {
       const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
