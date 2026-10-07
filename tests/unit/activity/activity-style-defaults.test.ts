@@ -482,10 +482,15 @@ describe('activityFontColor (mission activity-min-box-width, T1, D3)', () => {
     }
   });
 
-  it('`<style> activityDiagram { activity { FontColor red } }` colours only `activity`', () => {
+  it('`<style> activityDiagram { activity { FontColor red } }` colours `activity` and the nested `diamond`, not `note`', () => {
     const theme = themeWithBucket('activity', { font: 'red' });
     expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
-    expect(activityFontColor(theme, 'diamond')).toBe('#000000');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
+    expect(activityFontColor(theme, 'diamond')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'note')).toBe('#000000');
   });
 
   it('`activityBar` folds to the lowercased bucket key the allowlist spells', () => {
@@ -529,7 +534,12 @@ describe('activityFontColor — root style-override tier (T4b, D3 amended)', () 
       colors: { ...DEFAULT.colors, elements: { ...DEFAULT.colors.elements, activity: { font: 'red' } } },
     };
     expect(activityFontColor(theme, 'activity')).toBe('#FF0000');
-    expect(activityFontColor(theme, 'diamond')).toBe('#FFFFFF');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
+    expect(activityFontColor(theme, 'diamond')).toBe('#FF0000');
+    expect(activityFontColor(theme, 'note')).toBe('#FFFFFF');
   });
 
   it('an absent root fontcolor falls through to the skin black default', () => {

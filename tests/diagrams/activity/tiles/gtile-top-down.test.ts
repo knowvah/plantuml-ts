@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { GtileTopDown } from '../../../../src/diagrams/activity/tiles/gtile-top-down.js';
-import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
+import { NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 import type { Theme } from '../../../../src/core/theme.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
@@ -125,8 +125,33 @@ describe('GtileTopDown — hooks', () => {
     expect(tile.getCoord(NORTH_HOOK).y).toBe(0);
   });
 
-  it('SOUTH_HOOK.y === height', () => {
-    expect(tile.getCoord(SOUTH_HOOK).y).toBe(tile.height);
+  // `FtileGeometryMerger.java:49-50`: `geo2.getOutY() + geo1.getHeight()`
+  // -- the out y is the last child's own out y (the stub reports 0), not
+  // the sequence's bottom edge.
+  it("SOUTH_HOOK.y === the last child's own out y + its offset", () => {
+    expect(tile.getCoord(SOUTH_HOOK).y).toBe(0);
+  });
+
+  it('SOUTH_BORDER.y === height', () => {
+    expect(tile.getCoord(SOUTH_BORDER).y).toBe(tile.height);
+  });
+
+  it('a later child: its offset plus its own out y, not the bottom', () => {
+    const outAt = (y: number): Tile => ({
+      kind: 'stub',
+      width: 10,
+      height: 50,
+      getCoord: (hook) => (hook === SOUTH_HOOK ? { x: 0, y } : { x: 0, y: 0 }),
+      hasPointOut: () => true,
+    });
+    const seq = new GtileTopDown([outAt(50), outAt(30)], bounder, theme);
+    expect(seq.childOffsets[1]).toBe(85);
+    expect(seq.getCoord(SOUTH_HOOK).y).toBe(85 + 30);
+    expect(seq.height).toBe(135);
+  });
+
+  it('0 children: SOUTH_HOOK.y === 0', () => {
+    expect(new GtileTopDown([], bounder, theme).getCoord(SOUTH_HOOK).y).toBe(0);
   });
 });
 

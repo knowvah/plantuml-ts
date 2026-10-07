@@ -24,12 +24,13 @@ import { activityFontColor, activityHorizontalAlignment } from './activity-text-
 import {
   actColors,
   ASCENT_FRACTION,
-  centeredFirstBaselineY,
+  flooredFirstBaselineY,
   renderHexagonLabel,
   textLines,
 } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { centeredLineX, measureLineWidth, type ActivityTextOpts } from './activity-text-placement.js';
+import { floorActionLineHeight } from './tiles/gtile-action.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -107,8 +108,12 @@ export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
  */
 export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
   const size = node.width / 2;
+  // add4-T2d (CONDSTYLE-EMPTY, `xefalo-73-sabi101`): `FtileDiamond#drawU`
+  // draws the rhombus at `UTranslate.dy(suppY1)` (`FtileDiamond.java:87-89`)
+  // -- the BOTTOM of a `(24, 24 + suppY1)` box (`:108-110`), below the north
+  // label, never centred on it. Identical to the centre for a square node.
+  const cy = node.y + node.height - size;
   const c = actColors(theme);
   const first = { x: cx, y: cy - size };
   const shape = polygon([first, { x: cx + size, y: cy }, { x: cx, y: cy + size }, { x: cx - size, y: cy }, first], {
@@ -125,8 +130,8 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   const lineWidth = measureLineWidth(theme, fontSize, node.label);
   // D1: no `dominant-baseline` (the driver emits none, and no cached jar
   // SVG carries one) -- the real baseline is the same N=1 reduction of
-  // `centeredFirstBaselineY` `renderHexagon`'s single-line branch uses.
-  const label = drawActivityText(centeredLineX(cx, lineWidth), centeredFirstBaselineY(cy, fontSize, 1), node.label, {
+  // `flooredFirstBaselineY` `renderHexagon`'s single-line branch uses.
+  const label = drawActivityText(centeredLineX(cx, lineWidth), flooredFirstBaselineY(cy, fontSize, 1), node.label, {
     fontFamily: theme.fontFamily,
     fontSize,
     fill: activityFontColor(theme, 'diamond'),
@@ -229,7 +234,9 @@ export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string 
     return node.diamondShape === 'square' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
   }
   if (theme.conditionStyle === 'emptyDiamond' && node.label === '') return renderDiamond(node, theme);
-  return theme.conditionStyle === 'insideDiamond' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
+  return theme.conditionStyle === 'insideDiamond'
+    ? renderDiamondSquarePolygon(node, theme)
+    : renderHexagonPolygon(node, theme);
 }
 
 /**
@@ -284,14 +291,16 @@ export function renderHexagonMultilineLabel(
   const lineWidths = lines.map((ln) => measureLineWidth(theme, condSize, ln));
   const maxWidth = Math.max(...lineWidths);
   const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
-  const firstBaselineY = centeredFirstBaselineY(cy, condSize, lines.length);
+  // add4-T2d: each stripe is a floored `AtomText` (`AtomText.java:179-181`).
+  const firstBaselineY = flooredFirstBaselineY(cy, condSize, lines.length);
+  const advance = floorActionLineHeight(condSize);
   const align = activityHorizontalAlignment(theme);
   const blockX = cx - maxWidth / 2;
   return lines
     .map((ln, i) => {
       const diff = maxWidth - lineWidths[i]!;
       const offset = align === 'center' ? diff / 2 : align === 'right' ? diff : 0;
-      return drawActivityText(blockX + offset, firstBaselineY + condSize * i, ln, style);
+      return drawActivityText(blockX + offset, firstBaselineY + advance * i, ln, style);
     })
     .join('');
 }
