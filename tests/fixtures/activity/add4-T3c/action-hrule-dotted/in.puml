@@ -1,0 +1,6 @@
+@startuml
+:top
+....
+bottom;
+:other;
+@enduml

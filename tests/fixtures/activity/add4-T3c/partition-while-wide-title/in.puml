@@ -1,0 +1,7 @@
+@startuml
+partition "A very long partition title here" {
+while (t)
+:x;
+endwhile
+}
+@enduml

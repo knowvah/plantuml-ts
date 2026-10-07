@@ -28,12 +28,28 @@ import { extraLineStrokeWidth } from './klimt/drawing/svg/driver-text-svg-decora
 import type { ExtraLine } from './klimt/drawing/svg/driver-text-svg-decorations.js';
 
 /**
+ * `SvgGraphics#styleMe` (`klimt/drawing/svg/SvgGraphics.java:624-626`, used by
+ * `svgRectangle`/`svgLine`/`svgPolygon`/`svgPath`) writes NO stroke style when
+ * the formatted width is `"0"`, as `svg-graphics-core.ts#styleMe` does (add4-T3c).
+ */
+type StrokeAttrs = ReturnType<typeof strokeDecorationOf> & { stroke: string | undefined; styled: boolean };
+function strokeAttrsOf(
+  stroke: string | undefined,
+  style: { strokeWidth?: number; strokeDasharray?: string },
+): StrokeAttrs {
+  if (style.strokeWidth !== undefined && fmt(style.strokeWidth) === '0') {
+    return { stroke: undefined, strokeWidth: undefined, strokeDasharray: undefined, styled: false };
+  }
+  return { stroke, ...strokeDecorationOf(stroke, style.strokeWidth, style.strokeDasharray), styled: true };
+}
+
+/**
  * `<rect>` element.
  */
 export function rect(x: number, y: number, w: number, h: number, style: BoxStyle = {}): string {
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
-  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const sd = strokeAttrsOf(strokeR.value, style);
   const opacity = style.opacity === undefined ? undefined : formatOpacity(style.opacity, DEFAULT_SVG_DECIMALS);
   const fillOpacity =
     style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS);
@@ -46,7 +62,7 @@ export function rect(x: number, y: number, w: number, h: number, style: BoxStyle
     // Directly after `fill`, matching the jar's own emission order for a
     // transparent hit target: `<rect ... fill="#000" fill-opacity="0"/>`.
     ['fill-opacity', fillOpacity],
-    ['stroke', strokeR.value],
+    ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
     ...roundedCornerAttrs(style.rx, style.ry),
@@ -61,13 +77,13 @@ export function rect(x: number, y: number, w: number, h: number, style: BoxStyle
  */
 export function line(x1: number, y1: number, x2: number, y2: number, style: LineStyle = {}): string {
   const strokeR = resolvePaint(style.stroke);
-  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const sd = strokeAttrsOf(strokeR.value, style);
   const a = attrs([
     ['x1', x1],
     ['y1', y1],
     ['x2', x2],
     ['y2', y2],
-    ['stroke', strokeR.value],
+    ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
     ['marker-end', style.markerEnd],
@@ -218,7 +234,7 @@ export function image(x: number, y: number, width: number, height: number, href:
 export function path(d: string, style: LineStyle = {}): string {
   const strokeR = resolvePaint(style.stroke);
   const fillR = style.fill !== undefined ? resolvePaint(style.fill) : undefined;
-  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const sd = strokeAttrsOf(strokeR.value, style);
   const a = attrs([
     ['d', d],
     ['fill', fillR?.value ?? PAINT_NONE],
@@ -226,7 +242,7 @@ export function path(d: string, style: LineStyle = {}): string {
       'fill-opacity',
       style.fillOpacity === undefined ? undefined : formatOpacity(style.fillOpacity, DEFAULT_SVG_DECIMALS),
     ],
-    ['stroke', strokeR.value],
+    ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
     ['marker-end', style.markerEnd],
@@ -317,19 +333,19 @@ export function polygon(points: ReadonlyArray<{ x: number; y: number }>, style: 
   const pts = points.flatMap((p) => [fmt(p.x), fmt(p.y)]).join(',');
   const fillR = resolvePaint(style.fill);
   const strokeR = resolvePaint(style.stroke);
-  const sd = strokeDecorationOf(strokeR.value, style.strokeWidth, style.strokeDasharray);
+  const sd = strokeAttrsOf(strokeR.value, style);
   const a = attrs([
     ['points', pts],
     ['fill', fillR.value],
-    ['stroke', strokeR.value],
+    ['stroke', sd.stroke],
     ['stroke-width', sd.strokeWidth],
     ['stroke-dasharray', sd.strokeDasharray],
-    // Unconditional on a polygon, exactly as `SvgGraphics.java:658` writes it
-    // (`styleMe(elt, "stroke-linejoin:miter;stroke-miterlimit:10;")`), which
+    // On every styled polygon, as `SvgGraphics.java:658` writes it (`styleMe
+    // (elt, "stroke-linejoin:miter;stroke-miterlimit:10;")`), which
     // `core/klimt/.../svg-graphics-elements.ts:202` already mirrors for the
     // klimt path. 4018 of the 4037 polygons in the cached corpus carry it.
-    ['stroke-linejoin', 'miter'],
-    ['stroke-miterlimit', 10],
+    ['stroke-linejoin', sd.styled ? 'miter' : undefined],
+    ['stroke-miterlimit', sd.styled ? 10 : undefined],
   ] as const);
   return `${fillR.def}${strokeR.def}<polygon${a}/>`;
 }
