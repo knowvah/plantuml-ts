@@ -3830,10 +3830,10 @@
       "type": "activity",
       "slug": "xovigi-85-rufa987",
       "status": "baseline",
-      "diffCount": 146,
+      "diffCount": 156,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "79c2bfb2",
-      "weightedScore": 399
+      "measuredAgainstCommit": "2842c766",
+      "weightedScore": 391
     },
     {
       "type": "activity",
