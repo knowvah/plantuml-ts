@@ -802,8 +802,6 @@ describe('refusal coverage — baseline shape', () => {
     // rows. Derivation: 6263 + 242 = 6505.
     // 6505 -> 6510 / 6263 -> 6268 at add4/merge-T1c: 5 svg-activity clone
     // rows. Derivation: 6268 + 242 = 6510.
-    // 6510 -> 6510 / 6268 -> 6268 at add4/noop: 0 svg-activity clone
-    // rows. Derivation: 6268 + 242 = 6510.
     expect(manifest.fixtures.length).toBe(6510);
     expect(pinnedJarErrors.length).toBe(110);
     //
@@ -872,7 +870,6 @@ describe('refusal coverage — baseline shape', () => {
     // 6250 -> 6261 at add4/close-b0 (11 svg-activity clones).
     // 6261 -> 6263 at add4/merge-T1a (2 svg-activity clones).
     // 6263 -> 6268 at add4/merge-T1c (5 svg-activity clones).
-    // 6268 -> 6268 at add4/noop (0 svg-activity clones).
     expect(pinnedRendering.length).toBe(6268);
   });
 
