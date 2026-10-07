@@ -23,6 +23,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
 import { ARROW_LABEL_LAYOUT_FONT_SIZE } from '../activity-layout-constants.js';
 import { WidthTableMeasurer } from '../../../core/measurer.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 
 /** Measures an in-link label's width at layout time -- `family` is unused
  *  by `WidthTableMeasurer` (it reads only `size`, a universal sans-serif
@@ -153,5 +154,21 @@ function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefin
   edge.label = pending.label;
   edge.labelAlign = align;
   if (pending.color !== undefined) edge.color = pending.color;
-  out.reservations.push(inLabelReservation(edge.points, pending, align));
+  const r = inLabelReservation(edge.points, pending, align);
+  pushLaneReservation(out.reservations, r, labelLane(out.edgeMeta[out.edgeMeta.length - 1]!));
+}
+
+/**
+ * The lane whose pass draws a same-lane connection's Snake label: the gate
+ * passes in lane L when each end tile is null or in L
+ * (`UGraphicInterceptorOneSwimlane.java:93-104`). A cross-lane connection
+ * draws in the `Cross` pass through `drawTranslate`, with no single lane
+ * frame (`Swimlanes.java:184-199`), so it stays untagged.
+ */
+function labelLane(meta: {
+  readonly lane1: string | undefined;
+  readonly lane2: string | undefined;
+}): string | undefined {
+  if (meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2) return undefined;
+  return meta.lane1 ?? meta.lane2;
 }

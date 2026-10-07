@@ -1,0 +1,12 @@
+@startuml
+|a|
+start
+:a rather wide action in lane a;
+|b|
+:b1;
+-> a long arrow label in lane b;
+:b2;
+|a|
+:back in a;
+stop
+@enduml
