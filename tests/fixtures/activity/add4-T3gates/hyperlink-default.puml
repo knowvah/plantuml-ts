@@ -1,0 +1,5 @@
+@startuml
+start
+:[[http://example.com{tip} plain link]];
+stop
+@enduml

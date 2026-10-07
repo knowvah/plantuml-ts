@@ -589,9 +589,15 @@ describe('renderAction — AtomTable grid (T2f)', () => {
     expect(svg).not.toContain('<line');
   });
 
-  it('draws no grid lines when only SOME physical lines are table rows', () => {
-    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 120, height: 40 }), theme);
-    expect(svg).not.toContain('<line');
+  // add4-T3gates: the label is one Sheet (`FtileBox.java:178-181`), so the
+  // `|a|` line is a `StripeTable` stripe (`CreoleParser.java:99-100`) that
+  // draws its own grid above the plain stripe -- jar render of `:|a|\nplain;`
+  // (`scripts/oracle-render.sh`): 4 `<line>`s, `stroke-width:0.5`.
+  it('draws the table stripe grid when only SOME physical lines are table rows', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 45.425, height: 48 }), theme);
+    expect((svg.match(/<line/g) ?? []).length).toBe(4);
+    expect((svg.match(/<line[^>]*stroke-width:0\.5;/g) ?? []).length).toBe(4);
+    expect(svg).toContain('>plain<');
   });
 });
 

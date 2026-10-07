@@ -17,10 +17,10 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { swimlaneTitleText } from './layout/swimlane-title.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
+import { linkStyleFields } from './activity-text-style.js';
 import { TITLE_ASCENT_FRACTION } from './layout/swimlane-placement.js';
 import {
   swimlaneBorderColor,
@@ -130,20 +130,31 @@ export function renderSwimlaneChrome(geo: ActivityGeometry, theme: Theme): strin
  * no `FontStyle`). `contentX`/`contentWidth`/`titleWidth` are T5's own
  * `SwimlaneGeo` fields, already measured at layout time.
  */
+/** The lane's raw title creole -- its `|name|LABEL` display, else its name
+ *  (the same source `layout/swimlane-title.ts#swimlaneTitleText` resolves). */
+function laneTitleSource(lane: ActivityGeometry['swimlanes'][number]): string {
+  return lane.display ?? lane.name;
+}
+
 export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): string {
   if (geo.swimlaneBand === undefined) return '';
   const fontSize = swimlaneTitleFontSize(theme);
   const fill = swimlaneTitleFontColor(theme);
   const baselineY = geo.swimlaneBand.y + fontSize * TITLE_ASCENT_FRACTION;
+  const style = { fontFamily: theme.fontFamily, fontSize, fill, ...linkStyleFields(theme) };
   let out = '';
   for (const lane of geo.swimlanes) {
     const contentX = lane.contentX ?? lane.x;
     const contentWidth = lane.contentWidth ?? lane.width;
     const titleX = contentX + (contentWidth - (lane.titleWidth ?? 0)) / 2;
-    // SLURL: draw the RESOLVED text, same `[[url label]]` creole
-    // resolution `swimlane-placement.ts#measureLanes` measures by.
-    const title = swimlaneTitleText(lane.name, lane.display);
-    out += drawActivityText(titleX, baselineY, title, { fontFamily: theme.fontFamily, fontSize, fill });
+    // SLURL (add4-T3gates): `Swimlanes#getTitle` (`Swimlanes.java:285-293`)
+    // builds the title through `Display#create9` -- the creole Sheet, where a
+    // `[[url label]]` is a real `<a>`-wrapped run (`AtomTextUtils#createUrl`)
+    // in the swimlane's own `style.getFontConfiguration` hyperlink colour,
+    // and any text after `]]` (`nesozi-09-zezu092`'s trailing space) its own
+    // atom. `swimlane-placement.ts#measureLanes` measures the SAME resolved
+    // width (`swimlaneTitleText`), so drawing the raw display moves no `x`.
+    out += drawActivityText(titleX, baselineY, laneTitleSource(lane), style);
   }
   return out;
 }
