@@ -70,13 +70,6 @@ export interface Out {
   reservations: Reservation[];
   nextId: (prefix: string) => string;
   /**
-   * D1 (T1b): the `FtileGroup`/`partition` nesting stack `pushEdge` tags
-   * each new edge's `EdgeMeta.scope` with, joined (`[]` = top level) --
-   * see `swimlane-placement.ts`'s `EdgeMeta.scope` doc. Mutated only by
-   * `walkTile`'s `'gtile-group'`/`'gtile-partition'` case below.
-   */
-  groupScope: string[];
-  /**
    * `[start, end)` ranges into `nodes` from a fork/split branch's body
    * walk (set only by `walk-fork-branches.ts`) -- consulted by the
    * while/repeat break-weld scans to mirror a real upstream gap; see
@@ -161,7 +154,6 @@ export function pushEdge(
   const shape = typeof routing === 'string' ? routing : (routing.shape ?? 'default');
   const loop = typeof routing === 'string' ? undefined : routing.loop;
   const hline = typeof routing === 'string' ? undefined : routing.hline;
-  const scope = out.groupScope.length > 0 ? out.groupScope.join('>') : undefined;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
   out.edgeMeta.push({
     lane1,
@@ -169,7 +161,6 @@ export function pushEdge(
     shape,
     ...(loop !== undefined ? { loop } : {}),
     ...(hline !== undefined ? { hline } : {}),
-    ...(scope !== undefined ? { scope } : {}),
   });
 }
 

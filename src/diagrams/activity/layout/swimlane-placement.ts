@@ -79,13 +79,6 @@ export interface EdgeMeta {
    * `sameLaneEdges` (this module doc's own citation for why that keeps
    * measurement byte-identical to pre-T1p-g). */
   readonly hline?: HlinePayload;
-  /**
-   * T1b (D1) scope tag. Unread since add4-T3c and never set: `FtileGroup
-   * #drawU` (`FtileGroup.java:209-227`) opens no `UGraphicForSnake`, so
-   * `snake-merge.ts` merges across group boundaries. The field and its
-   * `tile-coordinates.ts#pushEdge` producer are left for that file's owner.
-   */
-  readonly scope?: string;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every

@@ -34,7 +34,6 @@ function freshOut(): Out {
     edgeMeta: [],
     reservations: [],
     nextId: (prefix: string) => `ink-${prefix}-${++idCounter}`,
-    groupScope: [],
   };
 }
 
