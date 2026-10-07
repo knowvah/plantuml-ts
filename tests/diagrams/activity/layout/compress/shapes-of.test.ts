@@ -148,7 +148,7 @@ describe('shapesOf — group/partition frame (USymbolFrame, T3i)', () => {
   it('an untitled frame also pushes its own title-tab polygon, skipped on X, width/3 x 12', () => {
     const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
-    expect(shapes).toHaveLength(2);
+    expect(shapes).toHaveLength(3);
     expect(shapes[1]).toEqual({
       kind: 'polygon',
       x: 16,
@@ -173,6 +173,50 @@ describe('shapesOf — group/partition frame (USymbolFrame, T3i)', () => {
       height: expectedTextHeight,
       polygonSkipMode: 'x',
     });
+  });
+});
+
+// add4-T2b (FRAME-TITLE-SLOT): `USymbolFrame#asBig` draws the title as a
+// plain `UText` when `widthFull - widthTitle < 25`, else as a `SpecialText`
+// whose compression footprint is a 1x1 `UEmpty` at the title's end
+// (`USymbolFrame.java:153-156`, `atmp/SpecialText.java:59-62`).
+describe('shapesOf — frame title slot (SpecialText, add4-T2b)', () => {
+  const fontSize = activityFontSize(theme, 'composite');
+
+  it('a wide frame reserves a 1x1 empty at (x + 3 + titleWidth, y + 1)', () => {
+    const n = node('partition', { x: 16, y: 45, width: 138.4, height: 122, label: 'P1' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    const titleWidth = measureLineWidth(theme, fontSize, 'P1');
+    expect(shapes[2]).toEqual({ kind: 'empty', x: 16 + 3 + titleWidth, y: 46, width: 1, height: 1 });
+  });
+
+  it('an untitled wide frame still reserves the 1x1 empty at x + 3', () => {
+    const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
+    expect(shapesOf(baseInput({ nodes: [n] }))[2]).toEqual({ kind: 'empty', x: 19, y: 46, width: 1, height: 1 });
+  });
+
+  it('a frame under 25 px wider than its title occupies the title text itself', () => {
+    const titleWidth = measureLineWidth(theme, fontSize, 'Wide title');
+    const n = node('partition', { x: 16, y: 45, width: titleWidth + 24, height: 122, label: 'Wide title' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[2]).toEqual({
+      kind: 'text',
+      x: 19,
+      y: 46 + fontSize * (1 - 1 / 4.5),
+      width: titleWidth,
+      height: 11,
+    });
+  });
+
+  it('a creole title measures its rendered text, not the markup', () => {
+    const n = node('partition', { x: 16, y: 45, width: 300, height: 122, label: '[[https://google.com/ demo]]' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[2]!.x).toBe(16 + 3 + measureLineWidth(theme, fontSize, 'demo'));
+  });
+
+  it('an untitled narrow frame draws no title shape', () => {
+    const n = node('group', { x: 16, y: 45, width: 20, height: 122, label: '' });
+    expect(shapesOf(baseInput({ nodes: [n] }))).toHaveLength(2);
   });
 });
 

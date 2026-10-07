@@ -22,7 +22,7 @@ import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-de
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
-import { frameTabShape } from './shapes-of-frame.js';
+import { frameTabShape, frameTitleShape } from './shapes-of-frame.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -467,6 +467,8 @@ export function shapesOf(input: ShapesOfInput): CompressShape[] {
     if (shape !== null) shapes.push(shape);
     if (FRAME_KINDS.has(node.kind)) {
       shapes.push(frameTabShape(node, input.theme));
+      const title = frameTitleShape(node, input.bounder, input.theme);
+      if (title !== null) shapes.push(title);
     }
   }
   for (let i = 0; i < input.edges.length; i++) {
