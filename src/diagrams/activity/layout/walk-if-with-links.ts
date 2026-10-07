@@ -356,8 +356,42 @@ function pushOutConnectors(ctx: IfLinksCtx): void {
   }
 }
 
+/** `FtileIfWithDiamonds#drawU`'s own `opaleLeft`/`opaleRight` draws
+ *  (`:203-213`) -- FIRST in draw order, each at local `y=0` (`t.noteY` in
+ *  this port's own single-frame coordinates, see `GtileIfWithLinks
+ *  .noteY`'s own doc); `xOpale = diamond1X - opaleLeft.width` (LEFT) or
+ *  `diamond1X + diamond1.width` (RIGHT) -- never a spike, same no-spike
+ *  `createOpale(withLink=false)` path `walk-if-down.ts#pushIfOwnNote`
+ *  already documents (`FtileIfWithDiamonds.java:129`).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:200-213 */
+function pushOwnNote(ctx: IfLinksCtx, note: typeof ctx.t.opaleLeft, onLeft: boolean): void {
+  if (note === null) return;
+  const { t, x, y, myLane, out } = ctx;
+  const noteX = onLeft ? x + t.diamond1X - note.box.width : x + t.diamond1X + t.diamond1.width;
+  pushNode(
+    out,
+    {
+      id: out.nextId('note'),
+      kind: 'note',
+      x: noteX,
+      y: y + t.noteY,
+      width: note.box.width,
+      height: note.box.height,
+      label: note.text,
+      notePosition: note.position,
+    },
+    myLane,
+  );
+}
+
+function pushOwnNotes(ctx: IfLinksCtx): void {
+  pushOwnNote(ctx, ctx.t.opaleLeft, true);
+  pushOwnNote(ctx, ctx.t.opaleRight, false);
+}
+
 export function walkIfWithLinks(t: GtileIfWithLinks, x: number, y: number, myLane: string | undefined, out: Out): void {
   const ctx: IfLinksCtx = { t, x, y, myLane, out };
+  pushOwnNotes(ctx);
   pushDiamond1(ctx);
   walkTile(t.tile1, x + t.tile1X, y + t.branchY, { kindHint: null, lane: myLane }, out);
   walkTile(t.tile2, x + t.tile2X, y + t.branchY, { kindHint: null, lane: myLane }, out);

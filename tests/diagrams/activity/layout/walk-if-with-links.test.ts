@@ -62,6 +62,45 @@ describe('layoutActivity — with-links: both branches non-empty, both continue'
   });
 });
 
+describe('layoutActivity — with-links: own LEFT note (add3-T2a-2 IFNOTE)', () => {
+  // Mirrors javedu-70-vaxo310 (`if (test?) then :a; else :c; endif` + a note
+  // after `endif`) -- T2a's `ActivityIf.notes` capture (`InstructionIf.java:
+  // 222-227`) feeds this builder's own IFNOTE mechanism (add3-T2a-2,
+  // `FtileIfWithDiamonds.java:79-111,200-213`).
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'test?',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'c' }],
+        elseIfBranches: [],
+        notes: [{ kind: 'note', text: 'This note is on the if', position: 'left' }],
+      },
+    ],
+    swimlanes: [],
+  };
+  const geo = layoutActivity(ast, theme, measurer);
+
+  it('draws a note node, FIRST in drawU order (FtileIfWithDiamonds.java:203-213)', () => {
+    expect(geo.nodes[0]!.kind).toBe('note');
+    expect(geo.nodes[0]!.label).toBe('This note is on the if');
+    expect(geo.nodes[0]!.notePosition).toBe('left');
+  });
+
+  it('the note sits immediately LEFT of diamond1, flush (xOpale = diamond1X - noteWidth)', () => {
+    const note = geo.nodes[0]!;
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(note.x + note.width).toBe(diamond1.x);
+  });
+
+  it('the note sits at this composite\'s own top (noteY), diamond1 drops below it by yDeltaNote', () => {
+    const note = geo.nodes[0]!;
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.y).toBe(note.y + note.height);
+  });
+});
+
 describe('layoutActivity — with-links: conditionEndStyle hline, both branches continue (T1p-a)', () => {
   // Same shape as the first describe block above (saxeku-17-gume203's own
   // unlaned shape), but `hline`: no `if-merge` node, and the "both have a
@@ -230,7 +269,7 @@ describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing t
 
   const branch1: IfWithLinksBranch = { tile: stubTile(40, 30, '2'), isEmpty: false };
   const branch2: IfWithLinksBranch = { tile: stubTile(60, 30, '3'), isEmpty: false };
-  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, 'hline');
+  const tile = GtileIfWithLinks.create(diamond, branch1, branch2, 0, { conditionEndStyle: 'hline' });
 
   function makeOut(): Out {
     let n = 0;

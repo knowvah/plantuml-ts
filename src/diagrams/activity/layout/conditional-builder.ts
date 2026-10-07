@@ -226,6 +226,14 @@ function createConditionDiamond(
 /**
  * `createWithLinks` (`ConditionalBuilder.java:213-232`): a `withWestAndEast`
  * hexagon, both branches, and the merge rhombus when both have a point out.
+ * `node.notes` (T2a's `ActivityIf.notes` capture) is pre-measured here
+ * (never raw inside `gtile-if-with-links.ts`, same convention `buildIfDown`
+ * already uses for its own single opale) and threaded into `create`'s own
+ * note-geometry pre-pass (add3-T2a-2, the general `FtileIfWithDiamonds`
+ * IFNOTE mechanism -- `with-links` is the dispatch EVERY two-real-branch
+ * `if` with an own note actually reaches; `GtileIfDown` only owns the
+ * empty/stop-or-spot-branch case).
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:79-111
  */
 function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme, ctx: IfLayoutCtx): Tile {
   const labels: { west?: string; east?: string } = {};
@@ -237,7 +245,8 @@ function buildIfWithLinks(node: ActivityIf, bounder: StringBounder, theme: Theme
   const branch1 = toBranchTile(node.thenBranch, bounder, theme, ctx);
   const branch2 = toBranchTile(node.elseBranch, bounder, theme, ctx);
   const laneCount = countIfSwimlanes(node);
-  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, theme.conditionEndStyle);
+  const notes = (node.notes ?? []).map((n) => measureIfOwnNote(n, bounder, theme));
+  return GtileIfWithLinks.create(diamond1, branch1, branch2, laneCount, { conditionEndStyle: theme.conditionEndStyle, notes });
 }
 
 // `longHorizontalBranches`/`buildIfLongHorizontal`/`buildIfLongVertical`
