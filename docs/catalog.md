@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1403 modules · 5293 exported names.
+1404 modules · 5294 exported names.
 
 ## `src/`
 
@@ -1156,6 +1156,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `edge-label-anchor.ts` | `EdgeLabelLayout`, `LabelAnchor`, `edgeLabelLayout`, `labelAnchors`, `transformAnchors`, `withLabelDeltas` | Edge-label placement through compression (add4-T3a, R2). |
 | `shapes-of-boxes.ts` | `hexagonBox`, `diamondBox`, `conditionBox`, `noteBox` | `shapes-of.ts`'s pure node-box geometry helpers -- split into their own sibling file (mission `activity-divergence-drive-3` T3i) purely to keep `shapes-of.ts` under the 500-line hook cap; no behavior change, a mechanical extraction of four |
 | `shapes-of-frame.ts` | `frameTabShape`, `frameTitleShape`, `frameShapes` | The `USymbolFrame#asBig` shapes a `group`/`partition` frame contributes to compression, beyond its own ignored rect (`shapes-of.ts#shapeForNode`): the title-tab underline and the title itself. |
+| `shapes-of-hexagon-label.ts` | `ifOwnLabelShapes` | `if-own-label`'s text slots (add4-T3a, HEX-LABEL-SLOT; split out of `shapes-of.ts`, which sits near its 500-line cap). |
 | `shapes-of-terminal.ts` | `edgeDecorationVector`, `terminalDecorationVector` | The direction of an edge's END decoration, shared by the renderer (`renderer.ts#renderEdge`'s terminal `arrowTip`) and the compressor's shape adapter (`shapes-of.ts#terminalArrowhead`) so both see the same arrowhead. |
 | `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
 | `slot-finder.ts` | `occupiesOn`, `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
