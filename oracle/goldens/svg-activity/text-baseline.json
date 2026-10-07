@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "3ec2d4cd",
+  "measuredAgainstCommit": "1916ce34",
   "fixtures": [
     {
       "type": "activity",
@@ -3088,15 +3088,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 12
+          "#000": 2
         },
         "anchor": {
-          "(absent)": 12
+          "(absent)": 2
         },
         "inset": {
           "70.338": 1
         },
-        "textCount": 12
+        "textCount": 2
       },
       "jar": {
         "fill": {
@@ -3110,8 +3110,8 @@
         },
         "textCount": 2
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -6260,15 +6260,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 10
+          "#000": 11
         },
         "anchor": {
-          "(absent)": 10
+          "(absent)": 11
         },
         "inset": {
           "10": 3
         },
-        "textCount": 10
+        "textCount": 11
       },
       "jar": {
         "fill": {
@@ -6282,8 +6282,8 @@
         },
         "textCount": 11
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -7322,19 +7322,19 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34",
       "ours": {
         "fill": {
-          "#000": 31
+          "#000": 2
         },
         "anchor": {
-          "(absent)": 31
+          "(absent)": 2
         },
         "inset": {
-          "75.025": 1
+          "122.338": 1
         },
-        "textCount": 31
+        "textCount": 2
       },
       "jar": {
         "fill": {
@@ -7596,8 +7596,7 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#00F": 1,
-          "#000": 3
+          "#000": 4
         },
         "anchor": {
           "(absent)": 4
@@ -7619,8 +7618,8 @@
         },
         "textCount": 5
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -11016,8 +11015,7 @@
           "(absent)": 29
         },
         "inset": {
-          "10": 10,
-          "9.999": 1
+          "10": 11
         },
         "textCount": 29
       },
@@ -11033,8 +11031,8 @@
         },
         "textCount": 29
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -12851,11 +12849,11 @@
       "slug": "zocifu-52-miga192",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "1916ce34",
       "ours": {
         "fill": {
-          "#00F": 2,
-          "#FFF": 1
+          "#00F": 1,
+          "#FFF": 2
         },
         "anchor": {
           "(absent)": 3
