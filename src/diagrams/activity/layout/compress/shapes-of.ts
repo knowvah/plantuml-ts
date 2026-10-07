@@ -21,6 +21,7 @@ import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 import { measureLineWidth } from '../../activity-text-placement.js';
 import { conditionBox, noteBox } from './shapes-of-boxes.js';
+import { terminalDecorationVector } from './shapes-of-terminal.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
 
@@ -265,23 +266,20 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
 }
 
 /**
- * The terminal arrowhead at an edge's last point, direction from the
- * second-to-last point (`renderer.ts#renderEdge`'s own `arrowTip` call).
- * `undefined` when `edge.arrowhead === false` (D6 -- a `null` end decoration
- * never draws, `ftile/Worm.java:161-168`), the edge is too short, or the
- * last segment is zero-length -- `arrowTip`'s own `dx === 0 && dy === 0`
- * guard, D3.
+ * The terminal arrowhead at an edge's last point, oriented by
+ * {@link terminalDecorationVector} (the same vector `renderer.ts#renderEdge`
+ * passes its terminal `arrowTip`). A zero-length last segment still gets
+ * its arrowhead (`ftile/Worm.java:161-168` draws the end decoration with no
+ * length test), so the compressor keeps its 10 px. `undefined` when
+ * `edge.arrowhead === false` (D6 -- a `null` end decoration never draws) or
+ * no segment has length.
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
   if (edge.arrowhead === false) return undefined;
-  const pts = edge.points;
-  if (pts.length < 2) return undefined;
-  const last = pts[pts.length - 1]!;
-  const prev = pts[pts.length - 2]!;
-  const dx = last.x - prev.x;
-  const dy = last.y - prev.y;
-  if (dx === 0 && dy === 0) return undefined;
-  const ext = arrowHeadExtents(arrowDirection(dx, dy));
+  const vector = terminalDecorationVector(edge.points);
+  if (vector === undefined) return undefined;
+  const last = edge.points[edge.points.length - 1]!;
+  const ext = arrowHeadExtents(arrowDirection(vector.dx, vector.dy));
   const shape: CompressShape = {
     kind: 'polygon',
     x: last.x + ext.minX,
