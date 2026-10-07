@@ -23,6 +23,7 @@ import type {
   ActivityDetach,
 } from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
+import { BLOCK_E1_NEWLINE } from '../../../src/core/tim/builtin/jaws-constants.js';
 
 // ---------------------------------------------------------------------------
 // Test helpers
@@ -66,6 +67,35 @@ describe('parses :action; syntax', () => {
     const ast = parse([':A\\non\\nseveral\\nlines;']);
     const node = firstNode(ast) as ActivityAction;
     expect(node.label).toBe('A\non\nseveral\nlines');
+  });
+
+  // PCTN (mission `activity-divergence-drive-3` T2a): `%n()` is already
+  // expanded to the `BLOCK_E1_NEWLINE` sentinel by the TIM preprocessor
+  // before any diagram parser sees the line -- this test embeds the
+  // sentinel character directly (the preprocessor's own output shape),
+  // the same way `fabule-54-pili300`'s fixture reaches this code path
+  // after a real `%n()`-bearing source is preprocessed.
+  it('decodes a BLOCK_E1_NEWLINE sentinel (the preprocessor\'s own %n() expansion) to a real newline', () => {
+    const ast = parse([`:1 ${BLOCK_E1_NEWLINE} fprintf( hello${BLOCK_E1_NEWLINE} , %s);`]);
+    const node = firstNode(ast) as ActivityAction;
+    expect(node.label).toBe('1 \n fprintf( hello\n , %s)');
+  });
+});
+
+// PCTN, the two other `node-dispatch.ts` label sites `tryAction` shares
+// the sentinel decode with: a multi-line `:...` body, and `repeat`'s own
+// inline entry action.
+describe('PCTN decodes BLOCK_E1_NEWLINE in the multiline-action and repeat-entry label sites too', () => {
+  it('a multi-line action body decodes the sentinel on its own joined label', () => {
+    const ast = parse([':a', `b${BLOCK_E1_NEWLINE}c;`]);
+    const node = firstNode(ast) as ActivityAction;
+    expect(node.label).toBe('a\nb\nc');
+  });
+
+  it("repeat's inline entry action decodes the sentinel", () => {
+    const ast = parse([`repeat :R${BLOCK_E1_NEWLINE}1;`, ':a;', 'repeat while (c)']);
+    const node = firstNode(ast) as ActivityRepeat;
+    expect(node.entry?.label).toBe('R\n1');
   });
 });
 

@@ -50,8 +50,8 @@ import {
 } from './dispatch-support.js';
 import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel } from './list-backward-dispatch.js';
-import { pushParsedNode } from './list-backward-dispatch.js';
+import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel, pushParsedNode } from './list-backward-dispatch.js';
+import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
 import { tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
@@ -94,7 +94,7 @@ function trySimpleKeyword(ctx: ParseContext, idx: number, _line: string, lc: str
 function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
-  const label = actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+  const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereoRaw = actionMatch[2];
   const colorRaw = actionMatch[3];
   const node: ActivityAction = {
@@ -169,7 +169,7 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
   const body = readMultilineActionBody(ctx, idx + 1, labelParts);
   const node: ActivityAction = {
     kind: 'action',
-    label: body.labelParts.join('\n'),
+    label: decodeNewlineSentinels(body.labelParts.join('\n')),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
     ...swimlaneSpread(ctx),
   };
@@ -247,7 +247,7 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const restLine = RE_REPEAT_INLINE_TERMINATOR.test(inlineRest) ? inlineRest : inlineRest + ';';
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
-  const label = actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n');
+  const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
   const stereoRaw = actionM[2];
   const colorRaw = actionM[3];
   return {
