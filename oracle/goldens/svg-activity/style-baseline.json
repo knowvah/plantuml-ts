@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "8e771a18",
+  "measuredAgainstCommit": "496e7386",
   "fixtures": [
     {
       "type": "activity",
@@ -908,8 +908,8 @@
       "type": "activity",
       "slug": "boxefe-81-situ725",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "dcd2283c",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -923,7 +923,7 @@
         },
         "textCount": 7,
         "width": "254",
-        "height": "336"
+        "height": "335"
       },
       "jar": {
         "fontSize": {
@@ -1701,7 +1701,7 @@
       "slug": "cezabi-50-cege262",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 8,
@@ -1714,7 +1714,7 @@
           "12.5": 7
         },
         "textCount": 15,
-        "width": "559",
+        "width": "536",
         "height": "249"
       },
       "jar": {
@@ -3316,7 +3316,7 @@
       "slug": "duvole-80-meda461",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -3330,7 +3330,7 @@
         },
         "textCount": 8,
         "width": "217",
-        "height": "249"
+        "height": "259"
       },
       "jar": {
         "fontSize": {
@@ -7806,7 +7806,7 @@
       "slug": "lipiki-79-fapu237",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -7820,7 +7820,7 @@
           "12.5": 2
         },
         "textCount": 6,
-        "width": "222",
+        "width": "210",
         "height": "162"
       },
       "jar": {
@@ -9053,7 +9053,7 @@
       "slug": "mukigo-10-dixi626",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 8,
@@ -9066,7 +9066,7 @@
           "12.5": 7
         },
         "textCount": 15,
-        "width": "505",
+        "width": "493",
         "height": "249"
       },
       "jar": {
@@ -10475,7 +10475,7 @@
       "slug": "pateca-54-lija084",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -10491,7 +10491,7 @@
         },
         "textCount": 8,
         "width": "217",
-        "height": "273"
+        "height": "283"
       },
       "jar": {
         "fontSize": {
@@ -12756,7 +12756,7 @@
       "slug": "sojono-24-tufe806",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "8e771a18",
+      "measuredAgainstCommit": "496e7386",
       "ours": {
         "fontSize": {
           "11": 6,
@@ -12770,7 +12770,7 @@
           "12.5": 6
         },
         "textCount": 14,
-        "width": "512",
+        "width": "508",
         "height": "527"
       },
       "jar": {

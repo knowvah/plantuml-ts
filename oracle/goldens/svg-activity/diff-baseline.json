@@ -221,10 +221,10 @@
       "type": "activity",
       "slug": "boxefe-81-situ725",
       "status": "baseline",
-      "diffCount": 55,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "dcd2283c",
-      "weightedScore": 55
+      "diffCount": 1,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -410,10 +410,10 @@
       "type": "activity",
       "slug": "cezabi-50-cege262",
       "status": "baseline",
-      "diffCount": 104,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 104
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -797,10 +797,10 @@
       "type": "activity",
       "slug": "duvole-80-meda461",
       "status": "baseline",
-      "diffCount": 22,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 28
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -1949,10 +1949,10 @@
       "type": "activity",
       "slug": "lipiki-79-fapu237",
       "status": "baseline",
-      "diffCount": 66,
+      "diffCount": 18,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 66
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 18
     },
     {
       "type": "activity",
@@ -2246,10 +2246,10 @@
       "type": "activity",
       "slug": "mukigo-10-dixi626",
       "status": "baseline",
-      "diffCount": 104,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 104
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -2615,10 +2615,10 @@
       "type": "activity",
       "slug": "pateca-54-lija084",
       "status": "baseline",
-      "diffCount": 14,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "dd289f64",
-      "weightedScore": 20
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 1
     },
     {
       "type": "activity",
@@ -3200,10 +3200,10 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "diffCount": 137,
+      "diffCount": 2,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "8e771a18",
-      "weightedScore": 137
+      "measuredAgainstCommit": "496e7386",
+      "weightedScore": 2
     },
     {
       "type": "activity",
