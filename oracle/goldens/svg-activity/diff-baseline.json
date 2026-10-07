@@ -2200,11 +2200,11 @@
     {
       "type": "activity",
       "slug": "momala-42-luvu884",
-      "status": "baseline",
-      "diffCount": 9,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "541c5f2c",
-      "weightedScore": 48
+      "measuredAgainstCommit": "dc72942f",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3226,11 +3226,11 @@
     {
       "type": "activity",
       "slug": "sokomu-20-five757",
-      "status": "baseline",
-      "diffCount": 9,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "541c5f2c",
-      "weightedScore": 46
+      "measuredAgainstCommit": "dc72942f",
+      "weightedScore": 0
     },
     {
       "type": "activity",
