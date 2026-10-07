@@ -205,6 +205,34 @@ export function renderDiamondSquarePolygon(node: ActivityNodeGeo, theme: Theme):
 }
 
 /**
+ * `'if-split'`/`'repeat-cond'`'s own shape dispatch, split out of
+ * `activity-renderer-shapes.ts#renderNode` purely to keep that function
+ * under the file's complexity cap (add3-T3c's own `node.diamondShape` arm
+ * pushed it over).
+ *
+ * add3-T3c: `'if-split'` now carries its own `node.diamondShape` (set by
+ * both of its producers, `walk-if-down.ts`/`walk-if-with-links.ts`, now
+ * that `buildIfWithLinks` dispatches on `conditionStyle` too, closing
+ * `.agent-notes/add3-T3a.md`'s "Not done" item 1) -- the real tile kind,
+ * not the `label === ''` inference add3-T3d used as a stand-in for it
+ * (ambiguous for exactly the case T3d's own comment described: a
+ * `with-links` `GtileDiamondEmpty` with a non-empty north test label,
+ * e.g. `xefalo-73-sabi101`'s 3 EMPTY_DIAMOND with-links ifs). `'repeat-
+ * cond'`'s own producer (`walk-repeat*.ts`) is outside this task's
+ * write-set and never sets this field, so it falls through to the
+ * pre-existing `conditionStyle`/`label` heuristic unchanged.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamond.java:85
+ */
+export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string {
+  if (node.diamondShape !== undefined) {
+    if (node.diamondShape === 'empty') return renderDiamond(node, theme);
+    return node.diamondShape === 'square' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
+  }
+  if (theme.conditionStyle === 'emptyDiamond' && node.label === '') return renderDiamond(node, theme);
+  return theme.conditionStyle === 'insideDiamond' ? renderDiamondSquarePolygon(node, theme) : renderHexagonPolygon(node, theme);
+}
+
+/**
  * The hexagon's OWN label alone, centered in the node's own box -- the
  * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
  * callable on its own so a walker can push it as its own `'if-own-label'`

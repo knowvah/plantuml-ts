@@ -62,6 +62,66 @@ describe('layoutActivity — with-links: both branches non-empty, both continue'
   });
 });
 
+// add3-T3c (CONDSTYLE-EMPTY): `skinparam ConditionStyle diamond` now
+// reaches the with-links builder too (`ConditionalBuilder#getShape1`'s
+// `EMPTY_DIAMOND` arm, `:259-266`), via `createConditionDiamond`.
+describe('layoutActivity — with-links: conditionStyle emptyDiamond (add3-T3c)', () => {
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenLabel: 'yes',
+        elseLabel: 'no',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'b' }],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const emptyTheme: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+  const geo = layoutActivity(ast, emptyTheme, measurer);
+
+  it("if-split carries diamondShape 'empty', not the pre-T3c undefined", () => {
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.diamondShape).toBe('empty');
+    expect(diamond1.label).toBe('');
+  });
+
+  it('the condition text draws as its own if-label(north), not if-own-label (the empty-diamond tile never has an own label)', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-own-label')).toBe(false);
+    const northLabel = geo.nodes.find((n) => n.kind === 'if-label' && n.label === 'c');
+    expect(northLabel).toBeDefined();
+  });
+
+  it('branch labels still draw (yes/no), unaffected by the shape change', () => {
+    expect(geo.nodes.some((n) => n.kind === 'if-label' && n.label === 'yes')).toBe(true);
+    expect(geo.nodes.some((n) => n.kind === 'if-label' && n.label === 'no')).toBe(true);
+  });
+});
+
+describe('layoutActivity — with-links: conditionStyle omitted keeps diamondShape "inside" (no regression, add3-T3c)', () => {
+  const ast: ActivityDiagramAST = {
+    nodes: [
+      {
+        kind: 'if',
+        condition: 'c',
+        thenBranch: [{ kind: 'action', label: 'a' }],
+        elseBranch: [{ kind: 'action', label: 'b' }],
+        elseIfBranches: [],
+      },
+    ],
+    swimlanes: [],
+  };
+  const geo = layoutActivity(ast, theme, measurer);
+
+  it("if-split carries diamondShape 'inside'", () => {
+    const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
+    expect(diamond1.diamondShape).toBe('inside');
+  });
+});
+
 describe('layoutActivity — with-links: own LEFT note (add3-T2a-2 IFNOTE)', () => {
   // Mirrors javedu-70-vaxo310 (`if (test?) then :a; else :c; endif` + a note
   // after `endif`) -- T2a's `ActivityIf.notes` capture (`InstructionIf.java:

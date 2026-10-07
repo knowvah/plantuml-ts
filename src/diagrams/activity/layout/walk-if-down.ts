@@ -15,6 +15,7 @@
  */
 
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
+import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
@@ -24,6 +25,17 @@ import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
+
+/** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- keyed on
+ *  the concrete tile's `kind`, duplicated (not imported) in `walk-if-
+ *  with-links.ts` per this mission's own "one walker owns its own small
+ *  draw-site constant" precedent (`NOTE_STACK_MARGIN`'s duplication,
+ *  `layout/walk-with-notes.ts`). */
+function diamondShapeOf(diamond: DiamondConditionTile): 'inside' | 'square' | 'empty' {
+  if (diamond.kind === 'gtile-diamond-empty') return 'empty';
+  if (diamond.kind === 'gtile-diamond-square') return 'square';
+  return 'inside';
+}
 
 interface IfDownCtx {
   readonly t: GtileIfDown;
@@ -134,6 +146,7 @@ function pushDiamond1(ctx: IfDownCtx): void {
       width: t.diamond1.width,
       height: t.diamond1.height,
       label: t.diamond1.label,
+      diamondShape: diamondShapeOf(t.diamond1),
     },
     myLane,
   );

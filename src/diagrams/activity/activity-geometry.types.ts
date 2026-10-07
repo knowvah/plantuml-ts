@@ -27,6 +27,18 @@ export interface ActivityNodeGeo {
   height: number;
   /** For note nodes: which side the note sits on relative to its action. */
   notePosition?: 'left' | 'right';
+  /**
+   * For `'if-split'` nodes only (add3-T3c): which concrete condition-
+   * diamond tile built this node, carried so `activity-renderer-
+   * shapes.ts#renderNode` can pick the true polygon shape instead of
+   * inferring it from `label === ''` (T3d's own heuristic, ambiguous once
+   * `buildIfWithLinks` could ALSO build a `GtileDiamondEmpty` with a
+   * non-empty north test label -- see that function's own doc comment).
+   * `undefined` for every OTHER producer of `'if-split'`/`'repeat-cond'`/
+   * `'while-header'` this task's write-set does not touch (`walk-while-
+   * branch.ts`/`walk-repeat*.ts`), which keep the pre-existing heuristic.
+   */
+  diamondShape?: 'inside' | 'square' | 'empty';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
   /**

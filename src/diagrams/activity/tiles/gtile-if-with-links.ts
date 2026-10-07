@@ -2,7 +2,7 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import type { GtileDiamondInside } from './gtile-diamond-inside.js';
+import type { DiamondConditionTile } from './gtile-diamond-inside.js';
 import type { IfOwnNote } from './gtile-note.js';
 import type { IfOwnNoteGeometry } from './gtile-if-with-links-notes.js';
 import { computeIfOwnNoteGeometry } from './gtile-if-with-links-notes.js';
@@ -130,7 +130,7 @@ export interface NudeAndMerge {
  *  own recompute-after-each-note semantics (`FtileIfWithDiamonds.java:
  *  88,100-102`, `clearCacheDimensionInternal()` at `:108`).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfWithDiamonds.java:183-186 */
-export function computeNudeAndMerge(diamond1: GtileDiamondInside, b1: BranchGeo, b2: BranchGeo, flags: IfLinksFlags): NudeAndMerge {
+export function computeNudeAndMerge(diamond1: DiamondConditionTile, b1: BranchGeo, b2: BranchGeo, flags: IfLinksFlags): NudeAndMerge {
   const diamondLeft = diamond1.getCoord(SOUTH_HOOK).x;
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const diamondWidth = diamond1.width;
@@ -172,7 +172,7 @@ interface CoreGeometry {
  * touched lanes, not the whole diagram's).
  */
 function computeCoreGeometry(
-  diamond1: GtileDiamondInside,
+  diamond1: DiamondConditionTile,
   b1: BranchGeo,
   b2: BranchGeo,
   flags: IfLinksFlags,
@@ -221,7 +221,7 @@ interface LabelMargins {
  * `computeMarginNeedForBranchLabe1/2` and
  * `computeVerticalMarginNeedForBranchs` (`FtileIfWithDiamonds.java:250-281`).
  */
-function computeLabelMargins(diamond1: GtileDiamondInside, core: CoreGeometry): LabelMargins {
+function computeLabelMargins(diamond1: DiamondConditionTile, core: CoreGeometry): LabelMargins {
   const diamondOutY = diamond1.getCoord(SOUTH_HOOK).y;
   const west = diamond1.labelAt('west');
   const east = diamond1.labelAt('east');
@@ -286,7 +286,7 @@ function computePlacement(b1: BranchGeo, b2: BranchGeo, core: CoreGeometry, marg
 /** Every value {@link GtileIfWithLinks}'s own (private) constructor needs,
  *  pre-computed by {@link GtileIfWithLinks.create}. */
 interface GtileIfWithLinksFields extends Placement {
-  readonly diamond1: GtileDiamondInside;
+  readonly diamond1: DiamondConditionTile;
   readonly tile1: Tile;
   readonly tile2: Tile;
   readonly thenIsEmpty: boolean;
@@ -342,7 +342,7 @@ interface ResolvedPlacement {
  *  out of {@link GtileIfWithLinks.create} purely to keep that function's
  *  own NLOC under the file's limit. */
 function resolvePlacement(
-  diamond1: GtileDiamondInside,
+  diamond1: DiamondConditionTile,
   geos: BranchGeos,
   laneCount: number,
   style: 'diamond' | 'hline',
@@ -379,7 +379,7 @@ export class GtileIfWithLinks extends TileComposite {
   readonly height: number;
   readonly children: readonly Tile[];
 
-  readonly diamond1: GtileDiamondInside;
+  readonly diamond1: DiamondConditionTile;
   readonly tile1: Tile;
   readonly tile2: Tile;
   readonly left: number;
@@ -442,7 +442,7 @@ export class GtileIfWithLinks extends TileComposite {
   /** @param options {@link IfWithLinksCreateOptions} -- bundled (not two
    *    more positional params) to stay under the file's 5-parameter limit. */
   static create(
-    diamond1: GtileDiamondInside,
+    diamond1: DiamondConditionTile,
     branch1: IfWithLinksBranch,
     branch2: IfWithLinksBranch,
     laneCount: number,

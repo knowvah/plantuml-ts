@@ -17,13 +17,22 @@
  */
 
 import type { GtileIfWithLinks } from '../tiles/gtile-if-with-links.js';
-import type { GtileDiamondInside, DiamondSide } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK, WEST_HOOK, EAST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
+
+/** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- see
+ *  `walk-if-down.ts#diamondShapeOf`'s own doc for why this is duplicated,
+ *  not imported. */
+function diamondShapeOf(diamond: DiamondConditionTile): 'inside' | 'square' | 'empty' {
+  if (diamond.kind === 'gtile-diamond-empty') return 'empty';
+  if (diamond.kind === 'gtile-diamond-square') return 'square';
+  return 'inside';
+}
 
 interface IfLinksCtx {
   readonly t: GtileIfWithLinks;
@@ -71,7 +80,7 @@ function pushDecoratedEdge(
 }
 
 function pushDiamondLabel(
-  diamond: GtileDiamondInside,
+  diamond: DiamondConditionTile,
   side: DiamondSide,
   origin: GPoint,
   lane: string | undefined,
@@ -97,7 +106,7 @@ function pushDiamondLabel(
 /** `diamond1`'s own label, pushed as its own `'if-own-label'` node (T3k,
  *  companion fix -- see {@link pushDiamond1}'s own doc). No-ops on an empty
  *  label, same guard `walk-if-down.ts#pushDiamondOwnLabel` documents. */
-function pushDiamondOwnLabel(diamond: GtileDiamondInside, origin: GPoint, lane: string | undefined, out: Out): void {
+function pushDiamondOwnLabel(diamond: DiamondConditionTile, origin: GPoint, lane: string | undefined, out: Out): void {
   if (diamond.label === '') return;
   const node = {
     id: out.nextId('if-own-label'),
@@ -110,18 +119,22 @@ function pushDiamondOwnLabel(diamond: GtileDiamondInside, origin: GPoint, lane: 
   pushNode(out, node, lane);
 }
 
-/** `diamond1`'s polygon, then its own label, then its west/east children --
- *  `FtileDiamondInside#drawU`'s own order (hexagon, north/south -- never
- *  set for this builder, `conditional-builder.ts` only ever calls
- *  `.withWest`/`.withEast` on this diamond -- then the own label, then
- *  west, then east). T3k companion fix: `activity-renderer-shapes.ts`'s
- *  `renderNode` dispatcher now draws the `'if-split'` kind as the polygon
- *  ALONE (the own label moved to its own node) when labelled, for every
- *  `'if-split'` producer, including this one -- not listed in T3k's own
- *  write-set, but unclaimed by any other `batch-3` task and required so
- *  this walker's own label keeps drawing at all after that shared
- *  dispatcher change.
- * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102 */
+/** `diamond1`'s polygon, then its own label, then its north/west/east
+ *  children -- `FtileDiamondInside#drawU`'s own order for `GtileDiamond
+ *  Inside` (`conditional-builder.ts` only ever calls `.withWest`/
+ *  `.withEast` on it, `north`/`south` always unset, both no-ops below);
+ *  `FtileDiamond#drawU`'s own order for `GtileDiamondEmpty` (add3-T3c,
+ *  `conditional-builder.ts#createConditionDiamond`'s `EMPTY_DIAMOND`
+ *  arm), whose condition text lives in `north` (see the `north` push's
+ *  own doc comment below). T3k companion fix: `activity-renderer-
+ *  shapes.ts`'s `renderNode` dispatcher now draws the `'if-split'` kind
+ *  as the polygon ALONE (the own label moved to its own node) when
+ *  labelled, for every `'if-split'` producer, including this one -- not
+ *  listed in T3k's own write-set, but unclaimed by any other `batch-3`
+ *  task and required so this walker's own label keeps drawing at all
+ *  after that shared dispatcher change.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamond.java:85-105 */
 function pushDiamond1(ctx: IfLinksCtx): void {
   const { t, x, y, myLane, out } = ctx;
   const dX = x + t.diamond1X;
@@ -136,11 +149,19 @@ function pushDiamond1(ctx: IfLinksCtx): void {
       width: t.diamond1.width,
       height: t.diamond1.height,
       label: t.diamond1.label,
+      diamondShape: diamondShapeOf(t.diamond1),
     },
     myLane,
   );
   const origin = { x: dX, y: dY };
   pushDiamondOwnLabel(t.diamond1, origin, myLane, out);
+  // add3-T3c: `GtileDiamondEmpty` (EMPTY_DIAMOND) routes the condition
+  // text to its own `north` SIDE slot, never its always-`''` `.label`
+  // (`gtile-diamond-empty.ts`'s own doc) -- `GtileDiamondInside` never
+  // sets `north` at all for this builder (`conditional-builder.ts` only
+  // calls `.withWest`/`.withEast` on it), so this is a no-op there, same
+  // as `walk-if-down.ts#pushDiamond1`'s own unconditional `'north'` push.
+  pushDiamondLabel(t.diamond1, 'north', origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'west', origin, myLane, out);
   pushDiamondLabel(t.diamond1, 'east', origin, myLane, out);
 }

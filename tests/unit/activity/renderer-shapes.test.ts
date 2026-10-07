@@ -918,3 +918,41 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
     expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
   });
 });
+
+// add3-T3c: `node.diamondShape` (set by `walk-if-down.ts`/`walk-if-with-
+// links.ts`) now picks the shape directly -- `renderIfSplitShape`'s own
+// doc comment for why this replaces the `label === ''` inference below
+// it for the case that inference could not distinguish: an EMPTY_DIAMOND
+// `with-links` if, whose condition text is a real, non-empty `north`
+// label (never this node's own `label`, always `''` for that shape).
+describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
+  it("diamondShape 'empty' draws the fixed rhombus even with a non-empty label (the ambiguous case T3d's heuristic could not resolve)", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 24, height: 24, label: 'not empty', diamondShape: 'empty' });
+    const svg = renderNode(node, theme);
+    // renderDiamond's own fixed rhombus point list for a 24x24 box
+    // centred at (37, 27): size = 12.
+    expect(svg).toContain('<polygon points="37,15,49,27,37,39,25,27,37,15"');
+    // `label === 'not empty'` must NOT suppress the rhombus (it would
+    // under the pre-T3c `node.label === ''` heuristic).
+    expect(svg).toContain('<polygon');
+  });
+
+  it("diamondShape 'square' draws the square polygon regardless of theme.conditionStyle", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35, diamondShape: 'square' });
+    const svg = renderNode(node, theme); // no conditionStyle set at all
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
+  });
+
+  it("diamondShape 'inside' falls back to the hexagon when theme.conditionStyle is unset", () => {
+    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 41.669, height: 35, diamondShape: 'inside' });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain('25,32.5,37,15');
+  });
+
+  it('diamondShape undefined (repeat-cond, walk-repeat*.ts not this task\'s write-set) keeps the pre-existing label === \'\' heuristic', () => {
+    const emptyDiamond: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
+    const node = makeNode({ kind: 'repeat-cond', x: 25, y: 15, width: 24, height: 24, label: '' });
+    const svg = renderNode(node, emptyDiamond);
+    expect(svg).toContain('<polygon points="37,15,49,27,37,39,25,27,37,15"');
+  });
+});

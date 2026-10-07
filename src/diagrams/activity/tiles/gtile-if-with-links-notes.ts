@@ -29,7 +29,7 @@
  */
 
 import { SOUTH_HOOK } from './points.js';
-import type { GtileDiamondInside } from './gtile-diamond-inside.js';
+import type { DiamondConditionTile } from './gtile-diamond-inside.js';
 import type { IfOwnNote } from './gtile-note.js';
 import type { BranchGeo, IfLinksFlags } from './gtile-if-with-links.js';
 import { computeNudeAndMerge } from './gtile-if-with-links.js';
@@ -46,7 +46,7 @@ export interface IfOwnNoteGeometry {
  *  both need, bundled so adding the per-note accumulator does not push
  *  either past the file's 5-parameter limit. */
 interface NoteGeomInputs {
-  readonly diamond1: GtileDiamondInside;
+  readonly diamond1: DiamondConditionTile;
   readonly b1: BranchGeo;
   readonly b2: BranchGeo;
   readonly baseFlags: IfLinksFlags;
@@ -89,7 +89,7 @@ function applyRightNote(acc: IfOwnNoteGeometry, note: IfOwnNote, inputs: NoteGeo
 
 export function computeIfOwnNoteGeometry(
   notes: readonly IfOwnNote[],
-  diamond1: GtileDiamondInside,
+  diamond1: DiamondConditionTile,
   b1: BranchGeo,
   b2: BranchGeo,
   baseFlags: IfLinksFlags,
