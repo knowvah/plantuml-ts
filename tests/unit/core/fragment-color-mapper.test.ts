@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyMonochromeHex, applyMonochromeToFragment } from '../../../src/diagrams/class/class-monochrome.js';
+import { applyMonochromeHex, applyMonochromeToFragment } from '../../../src/core/klimt/color/fragment-color-mapper.js';
 
 // G2 N61: `skinparam monochrome true|reverse` -- jar's `ColorMapper.MONOCHROME`/
 // `MONOCHROME_REVERSE` (`ColorUtils.java#getGrayScaleColor`/

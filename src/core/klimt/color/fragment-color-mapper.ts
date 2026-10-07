@@ -1,5 +1,9 @@
 /**
- * class-monochrome.ts -- `skinparam monochrome true|reverse` (G2 N61).
+ * fragment-color-mapper.ts -- `skinparam monochrome true|reverse` (G2 N61).
+ * Moved from `diagrams/class/class-monochrome.ts` (add4-T3d) so the activity
+ * engine applies the same whole-fragment mapper without a cross-engine
+ * import (`tests/architecture/layering.test.ts` rule 2). Class and activity
+ * both draw plain SVG strings, so both use this one post-process.
  *
  * Jar's `TitledDiagram.java#muteColorMapper` swaps in `ColorMapper.MONOCHROME`/
  * `MONOCHROME_REVERSE` (`klimt/color/ColorMapper.java:80-91`) for the ENTIRE
@@ -33,10 +37,10 @@
  * skinparam).
  */
 
-import { shortenColor } from '../../core/svg-format.js';
-import type { RgbTriple } from '../../core/klimt/color/ColorTrieNode.js';
-import { rgbToHsluv, hsluvToRgb } from '../../core/klimt/color/HUSLColorConverter.js';
-import { fromString as colorOrderFromString, getReverse } from '../../core/klimt/color/ColorOrder.js';
+import { shortenColor } from '../../svg-format.js';
+import type { RgbTriple } from './ColorTrieNode.js';
+import { rgbToHsluv, hsluvToRgb } from './HUSLColorConverter.js';
+import { fromString as colorOrderFromString, getReverse } from './ColorOrder.js';
 
 export type MonochromeMode = 'true' | 'reverse';
 
@@ -81,7 +85,7 @@ const FULLY_TRANSPARENT_ALPHA = '00';
 /** One mapped colour: `#RRGGBB`/`#RRGGBBAA`/`#RGB` in, the mapped hex out
  *  (anything else unchanged) -- the class stand-in for a `ColorMapper`
  *  (`klimt/color/ColorMapper.java`). */
-export type ClassColorMapper = (hex: string) => string;
+export type HexColorMapper = (hex: string) => string;
 
 /** Run `f` over the RGB channels of one hex colour, keeping its alpha. Any
  *  other shape (`"none"`, an unresolved token) passes through unchanged --
@@ -151,7 +155,7 @@ export function getReversed(color: RgbTriple): RgbTriple {
 export function colorMapperOf(theme: {
   readonly monochrome?: MonochromeMode | undefined;
   readonly reverseColor?: string | undefined;
-}): ClassColorMapper | undefined {
+}): HexColorMapper | undefined {
   const { monochrome, reverseColor } = theme;
   if (monochrome !== undefined) return (hex) => applyMonochromeHex(hex, monochrome);
   if (reverseColor === undefined) return undefined;
@@ -165,7 +169,7 @@ export function colorMapperOf(theme: {
  *  renderer ever emits, in both syntaxes it uses: the bare SVG attribute
  *  form (`fill="#RRGGBB"`) and the inline `style="..."` CSS-property form
  *  (`style="stroke:#RRGGBB;..."`, `stroke: #RRGGBB !important` in the
- *  `pathHoverColor` `<style>` block, `class-monochrome.test.ts`'s own
+ *  `pathHoverColor` `<style>` block, `fragment-color-mapper.test.ts`'s own
  *  "space after colon" case) -- captures the property-name-plus-delimiter
  *  prefix in group 1 (echoed back verbatim) so only the hex VALUE is
  *  rewritten. Scoped to these three property names specifically (not a bare
@@ -183,7 +187,7 @@ const COLOR_PROPERTY_RE =
  * mapper (neither `monochrome` nor a recognised `reversecolor`) is a strict
  * no-op -- zero risk to any fixture that doesn't opt in.
  */
-export function applyColorMapperToFragment(svg: string, mapper: ClassColorMapper | undefined): string {
+export function applyColorMapperToFragment(svg: string, mapper: HexColorMapper | undefined): string {
   if (mapper === undefined) return svg;
   // shortenColor is applied HERE and not in the mapper: this is an emission
   // site (rule 2's domain), whereas the mapper is also called on

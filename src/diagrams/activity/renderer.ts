@@ -19,6 +19,7 @@ import { activityFontColor } from './activity-text-style.js';
 import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 
@@ -443,7 +444,9 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
 
   const raw = preChromeDims(geo, theme);
   return {
-    body: children.join(''),
+    // add4-T3d: `TitledDiagram#muteColorMapper` maps EVERY drawn colour
+    // (`ColorMapper.java:80-91`), applied once to the assembled body.
+    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,

@@ -20,7 +20,7 @@ import { scaleClassTheme, type ScaledTheme } from './class-scale-geo.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { renderUSymbolIcon } from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { applyColorMapperToFragment, colorMapperOf } from './class-monochrome.js';
+import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { decorName } from './renderer-arrowhead.js';
 import {} from '../../core/svek/extremity/link-decor.js';
 import { buildClassUidPlan } from './renderer-uid.js';
@@ -197,10 +197,10 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // entity/link colors) -- transformed HERE so every downstream reader of
   // `canonicalBackground` (the returned `background` field, the
   // `documentBackgroundRect` derivation below) sees the already-mapped
-  // value, matching `class-monochrome.ts`'s own "single choke point"
+  // value, matching `fragment-color-mapper.ts`'s own "single choke point"
   // design (see that file's header doc comment).
   // cdd6 T3f: the mapper is `muteColorMapper`'s whole choice --
-  // `monochrome`, else `reversecolor` (`class-monochrome.ts#colorMapperOf`).
+  // `monochrome`, else `reversecolor` (`fragment-color-mapper.ts#colorMapperOf`).
   const colorMapper = colorMapperOf(theme);
   const resolvedBackground = resolveColorToSvgHex(theme.colors.background);
   const canonicalBackground = colorMapper !== undefined ? colorMapper(resolvedBackground) : resolvedBackground;
@@ -446,7 +446,7 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   if (mergedUsymbolDefs !== undefined) extraDefs += mergedUsymbolDefs;
 
   return {
-    // G2 N61: the single monochrome choke point -- see `class-monochrome.ts`'s
+    // G2 N61: the single monochrome choke point -- see `fragment-color-mapper.ts`'s
     // own header doc comment for why a post-processing pass over the WHOLE
     // assembled fragment (rather than threading `theme.monochrome` through
     // every individual color-resolution call site) is the correct, low-risk
