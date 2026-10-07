@@ -1877,10 +1877,10 @@
       "type": "activity",
       "slug": "lebile-91-veto202",
       "status": "baseline",
-      "diffCount": 196,
+      "diffCount": 38,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "79c2bfb2",
-      "weightedScore": 223
+      "measuredAgainstCommit": "3ec2d4cd",
+      "weightedScore": 64
     },
     {
       "type": "activity",
@@ -3235,11 +3235,11 @@
     {
       "type": "activity",
       "slug": "somome-34-nori033",
-      "status": "baseline",
-      "diffCount": 65,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "6c788ec6",
-      "weightedScore": 65
+      "measuredAgainstCommit": "3ec2d4cd",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3451,11 +3451,11 @@
     {
       "type": "activity",
       "slug": "tozecu-08-ride878",
-      "status": "baseline",
-      "diffCount": 343,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "6c788ec6",
-      "weightedScore": 504
+      "measuredAgainstCommit": "3ec2d4cd",
+      "weightedScore": 0
     },
     {
       "type": "activity",

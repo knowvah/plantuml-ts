@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "c6f501d9",
+  "measuredAgainstCommit": "3ec2d4cd",
   "fixtures": [
     {
       "type": "activity",
@@ -7528,7 +7528,7 @@
       "slug": "lebile-91-veto202",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "3ec2d4cd",
       "ours": {
         "fontSize": {
           "11": 3,
@@ -7537,15 +7537,15 @@
           "14": 1
         },
         "strokeWidth": {
-          "1": 14
+          "1": 13
         },
         "rx": {
           "(absent)": 1,
           "12.5": 1
         },
         "textCount": 8,
-        "width": "419",
-        "height": "326"
+        "width": "524",
+        "height": "272"
       },
       "jar": {
         "fontSize": {
@@ -12906,7 +12906,7 @@
       "slug": "somome-34-nori033",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "6c788ec6",
+      "measuredAgainstCommit": "3ec2d4cd",
       "ours": {
         "fontSize": {
           "12": 4,
@@ -12921,7 +12921,7 @@
           "12.5": 4
         },
         "textCount": 8,
-        "width": "99",
+        "width": "119",
         "height": "473"
       },
       "jar": {
@@ -13702,7 +13702,7 @@
       "slug": "tozecu-08-ride878",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "6c788ec6",
+      "measuredAgainstCommit": "3ec2d4cd",
       "ours": {
         "fontSize": {
           "10": 2,
@@ -13711,7 +13711,7 @@
           "14": 6
         },
         "strokeWidth": {
-          "1": 12,
+          "1": 7,
           "1.5": 3,
           "2.5": 2
         },
@@ -13722,7 +13722,7 @@
         },
         "textCount": 20,
         "width": "329",
-        "height": "923"
+        "height": "708"
       },
       "jar": {
         "fontSize": {
