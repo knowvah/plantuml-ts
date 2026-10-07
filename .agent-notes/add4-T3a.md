@@ -132,3 +132,30 @@
 - **Impact**: any port that recomputes a Snake-derived point after compression must carry a raw anchor instead,
   as `emphasizeAt`, `midArrowAt` and now `labelDelta` do.
 - **Confidence**: High (instrumented on 4 rows, exact match).
+
+## Resume: one-link switch order (momala/sokomu)
+- **Commit:** `aaddfa5d9` fix(activity): push a one-link switch's merge edge after its in-link
+- **Java -> ours:** `FtileSwitchWithOneLink#addLinks` adds VerticalTop and then VerticalBottom (`FtileSwitchWithOneLink.java:134-143`).
+  Ours: `walk-switch.ts#pushMergeEdges`, called after `pushCaseInEdges` in `walkSwitchCases`. The single-case push was removed from `walkOneCaseBody`. The many-case path is unchanged and still goes through `pushCaseToMergeEdges`.
+- **Rows:**
+  - momala: 48 -> 0
+  - sokomu: 46 -> 0
+  - T1a one-link: 16 -> 0
+  - T1a one-link-1line: 15 -> 0
+- **Probe:** Σ 1362 -> 1268. Risers: 0.
+- **Element census:** unchanged (delta {}).
+- **Survey:**
+  - momala and sokomu go from diverged to conformant.
+  - Conformant losses: 0.
+  - Totals: 389 / 8 / 54.
+- **Census movers:** none.
+- **Gates:** green.
+  - ratchet + parity, 387 pins
+  - compress invariant
+  - `tests/diagrams/activity`
+  - diff-baseline
+  - catalog
+  - typecheck
+  - eslint
+- **Test:** `tests/diagrams/activity/layout/walk-switch-one-link-order.test.ts`.
+- **Lizard:** flags `pushSwitchDiamond` at 49 NLOC. That warning is pre-existing (same at HEAD) and the function is untouched.
