@@ -11,11 +11,10 @@
  * (`klimt/compress/CompressionXorYBuilder.java:66`) collapses every such
  * gap to 10.
  *
- * Padded fixtures assert lane SPACING only: their absolute offset (jar 33
- * vs ours 20) is the title band's `UTranslate.dx(5)` anchor
- * (`Swimlanes.java:358-367`), which needs the block origin threaded into
- * `computeSwimlaneChrome`'s two callers -- outside this task's write-set,
- * see `.agent-notes/add4-T1b.md`.
+ * Padded fixtures' absolute offset (jar 33, not 20) is the title band's
+ * `UTranslate.dx(5)` anchor (`Swimlanes.java:358-367`), threaded into
+ * `computeSwimlaneChrome`'s two callers by add4-T1g
+ * (`swimlane-chrome.test.ts` covers the band itself).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -32,10 +31,6 @@ function dividerXs(name: string, y2 = '258.5'): number[] {
   return lines.map((l) => Number(/x1="([^"]*)"/.exec(l)![1]));
 }
 
-function spacing(xs: readonly number[]): number[] {
-  return xs.slice(1).map((x, i) => Number((x - xs[i]!).toFixed(3)));
-}
-
 const JAR_UNPADDED = [20, 58.338, 239.163, 277.163];
 const JAR_PADDED = [33, 80.675, 272.5, 319.5];
 
@@ -49,9 +44,9 @@ describe('swimlaneWidth A/B fixtures — divider x vs the jar', () => {
   });
 
   it.each(['swimw-100.puml', 'swimw-400.puml', 'swimw-9000.puml', 'swimw-same.puml', 'swimw-block-same.puml'])(
-    '%s: any floor compresses to the same lane spacing as the jar',
+    '%s: any floor compresses to the same dividers as the jar',
     (name) => {
-      expect(spacing(dividerXs(name))).toEqual(spacing(JAR_PADDED));
+      expect(dividerXs(name)).toEqual(JAR_PADDED);
     },
   );
 });

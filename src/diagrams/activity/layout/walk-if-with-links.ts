@@ -21,6 +21,7 @@ import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-i
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK, WEST_HOOK, EAST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-placement.js';
+import { collectTouchedLanes } from './tile-coordinates-group.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
@@ -263,7 +264,10 @@ function connectionVerticalOut(ctx: IfLinksCtx, useTile1: boolean): void {
   const origin = useTile1 ? { x: x + t.tile1X, y: y + t.branchY } : { x: x + t.tile2X, y: y + t.branchY };
   const tile = useTile1 ? t.tile1 : t.tile2;
   const p1 = absolutePoint(tile.getCoord(SOUTH_HOOK), origin.x, origin.y);
-  pushEdge(out, [p1, { x: p1.x, y: y + t.height }], laneOut(tile, myLane), myLane);
+  // add4-T1g: `super(tile, null)` (`:374-375`) -- `Swimlanes$Cross` skips a
+  // null tile (`Swimlanes.java:189-193`), so it draws in the tile's out lane.
+  const lane = laneOut(tile, myLane);
+  pushEdge(out, [p1, { x: p1.x, y: y + t.height }], lane, lane);
 }
 
 /** Both branches' own out-X, absolute, AND own outcome lane -- split out
@@ -283,9 +287,14 @@ function hlineOutXsLinks(ctx: IfLinksCtx): { out1X: number; out2X: number } {
 /** The `hline` routing template itself -- split out of {@link
  *  connectionHlineLinks} purely to keep that function's own NLOC under
  *  the file's limit. */
-function hlinePayloadLinks(ctx: IfLinksCtx, out1X: number, out2X: number): { low: number; high: number } & {
+function hlinePayloadLinks(
+  ctx: IfLinksCtx,
+  out1X: number,
+  out2X: number,
+): { low: number; high: number } & {
   candidates: Array<{ x: number; lane: string | undefined }>;
   unfiltered: number[];
+  measureLanes: string[];
 } {
   const { t, x, myLane } = ctx;
   return {
@@ -296,7 +305,28 @@ function hlinePayloadLinks(ctx: IfLinksCtx, out1X: number, out2X: number): { low
       { x: out2X, lane: laneOut(t.tile2, myLane) },
     ],
     unfiltered: [],
+    measureLanes: hlineMeasureLanesLinks(ctx),
   };
+}
+
+/**
+ * `ConnectionHline` is `super(null, null)` (`FtileIfWithLinks.java:425-426`),
+ * so `UGraphicInterceptorAllSwimlanes`' `Connection` branch
+ * (`vcompact/UGraphicInterceptorAllSwimlanes.java:129-143`) draws its
+ * `getMinmaxSimple` bar into every active lane -- narrowed (`:89-102,160-168`)
+ * to the enclosing tile's `getSwimlanes()`, which is `FtileIfNude
+ * #getSwimlanes()` (`FtileIfNude.java:79-87`): `in` (the diamond's own
+ * `myLane`) plus both branches' lanes. `FtileWithConnection` delegates
+ * `getSwimlanes()` to this tile (`vertical/FtileDecorate.java:94-95`).
+ * -> `HlinePayload.measureLanes`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/cond/FtileIfNude.java:79-87
+ */
+function hlineMeasureLanesLinks(ctx: IfLinksCtx): string[] {
+  const lanes = new Set<string>();
+  if (ctx.myLane !== undefined) lanes.add(ctx.myLane);
+  collectTouchedLanes(ctx.t.tile1, lanes);
+  collectTouchedLanes(ctx.t.tile2, lanes);
+  return [...lanes];
 }
 
 /**
