@@ -30,6 +30,7 @@ import { SOUTH_HOOK } from '../tiles/points.js';
 import { HEXAGON_HALF_SIZE } from './hexagon-reservations.js';
 import { pushEdge, pushNode } from './tile-coordinates.js';
 import type { RepeatFrame } from './walk-repeat.js';
+import { isInsideForkBody } from './walk-fork-branches.js';
 
 /** `FtileDiamond`'s own fixed box (`FtileDiamond.java:108-112`) -- the
  *  SAME constant `gtile-repeat.ts#WELD_DIAMOND_SIZE` computes, re-derived
@@ -74,6 +75,9 @@ function pushWeldDiamond(frame: RepeatFrame, dX: number, dY: number): void {
  * excluded from this scan either, since neither this port's `Tile`
  * interface nor its flat walk-time node list models that boundary; no
  * baseline fixture nests a loop with a `break` inside another loop).
+ * T3i: a `break` inside a fork/split branch IS excluded, via
+ * `isInsideForkBody` -- see that function's doc
+ * (`walk-fork-branches.ts`) for the cited mechanism.
  * `tr1` is the break node's own `NORTH_HOOK` (center-top, `GtileBreak
  * .getCoord(NORTH_HOOK)` = `{width/2, 0}`), NOT its raw top-left
  * `breakNode.x`/`.y` -- the jar's own `FtileBreak` is ~0-sized
@@ -92,7 +96,7 @@ function pushBreakWeldings(frame: RepeatFrame, diamondWest: GPoint): void {
   let first = true;
   for (let i = bodyNodeStart; i < bodyNodeEnd; i++) {
     const breakNode = out.nodes[i]!;
-    if (breakNode.kind !== 'break') continue;
+    if (breakNode.kind !== 'break' || isInsideForkBody(out, i)) continue;
     const tr1 = { x: breakNode.x + breakNode.width / 2, y: breakNode.y };
     const points: GPoint[] = first
       ? [tr1, { x: tileX, y: tr1.y }, { x: tileX, y: diamondWest.y }, diamondWest]

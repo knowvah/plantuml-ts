@@ -538,6 +538,50 @@ describe('assignCoordinates — GtileWhile welds a break, emitted LAST (D3/D7)',
   });
 });
 
+// T3i (row WELD, `jupivo-67-gidi531`): `InstructionFork.createFtile`
+// (`InstructionFork.java:122-130`) never calls or forwards a branch's
+// `getWeldingPoints()`, and the fork's own Ftile (`FtileForkInner`/
+// `FtileForkInnerOverlapped`, both `extends AbstractFtile` with no
+// override) falls back to `AbstractFtile.java:100-102`'s empty-list
+// default -- so a `break` inside a fork branch gets NO welding edge,
+// unlike the same-body-level break the previous `describe` block covers.
+describe('assignCoordinates — GtileWhile does NOT weld a break inside a fork branch', () => {
+  it('each break only gets its fork branch in-edge, no weld to the elbow', () => {
+    const header = new GtileDiamondInside('loop?', {}, bounder, theme);
+    const brk1 = new GtileBreak();
+    const brk2 = new GtileBreak();
+    const body = new GtileFork([brk1, brk2], bounder);
+    const tile = new GtileWhile(header, body, { bounder, theme });
+    const geo = assignCoordinates(tile, emptyAst, { x: LAYOUT_MARGIN, y: LAYOUT_MARGIN }, bounder, theme);
+
+    const breakNodes = geo.nodes.filter((n) => n.kind === 'break');
+    expect(breakNodes).toHaveLength(2);
+
+    // A weld departs from the break's own point horizontally toward the
+    // while's exit column (`pushEdge(out, [{x: brk.x, y: brk.y}, {x:
+    // elbowX, y: brk.y}], ...)`). T1b's merge engine fuses that weld
+    // BACKWARD into the fork branch's own pending in-edge (same
+    // mechanism the non-fork weld test above documents), so a present
+    // weld would NOT show up as its own 2-point edge here -- it would
+    // extend the in-edge's point list past the break's own location.
+    // Checking every edge's LAST point (not just 2-point edges) catches
+    // both the fused and unfused shapes.
+    for (const brk of breakNodes) {
+      const touching = geo.edges.filter((e) => e.points.some((p) => p.x === brk.x && p.y === brk.y));
+      expect(touching.length).toBeGreaterThan(0);
+      for (const e of touching) {
+        expect(e.points.at(-1)).toEqual({ x: brk.x, y: brk.y });
+      }
+    }
+
+    // 2 fork branch-in edges (one per break, `hasPointOut()` is `false`
+    // so neither gets an out-edge) + the while's own header-entry, out,
+    // and back edges -- 5 total, 0 welds (verified against a live run of
+    // this exact fixture before writing this assertion).
+    expect(geo.edges).toHaveLength(5);
+  });
+});
+
 describe('assignCoordinatesFull — swimlane title band is an ignoreX/ignoreY reservation', () => {
   it('adds the band as a reservation matching computeSwimlaneChrome exactly', () => {
     const tile = new GtileAction(actionNode, bounder, theme);

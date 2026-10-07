@@ -40,6 +40,7 @@ import type { LoopTranslate } from './swimlane-loop-translate.js';
 import type { HlinePayload } from './swimlane-hline.js';
 import { assignCoordinatesFull } from './assign-coordinates-full.js';
 import { applyInLabel } from './tile-layout-inlabel.js';
+import { walkTileGroup } from './tile-coordinates-group.js';
 
 /**
  * `kindHint` labels a diamond's role (`if-split`, `if-merge`,
@@ -75,6 +76,13 @@ export interface Out {
    * `walkTile`'s `'gtile-group'`/`'gtile-partition'` case below.
    */
   groupScope: string[];
+  /**
+   * `[start, end)` ranges into `nodes` from a fork/split branch's body
+   * walk (set only by `walk-fork-branches.ts`) -- consulted by the
+   * while/repeat break-weld scans to mirror a real upstream gap; see
+   * that field's user-side doc for the cited mechanism.
+   */
+  forkBodyRanges?: Array<readonly [number, number]>;
 }
 
 export function pushNode(out: Out, node: ActivityNodeGeo, lane: string | undefined): void {
@@ -441,78 +449,6 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
       );
       return;
   }
-}
-
-/**
- * T3h (row PART-XLANE, `vodobe-33-kefa909`/`notuli-49-xugi698`):
- * `FtileGroup.getSwimlanes()` (`:128-130`) delegates to `inner
- * .getSwimlanes()`, which for a sequential body resolves through
- * `FtileAssemblySimple.getSwimlanes()`'s union-of-children recursion
- * (`ftile/FtileAssemblySimple.java:148-153`) down to `FtileBox
- * .getSwimlanes()`'s own-field-only leaf case (`ftile/vertical/FtileBox
- * .java:110-115`: `swimlane == null ? emptySet() : singleton(swimlane)`).
- * No "inherited ambient lane" fallback anywhere in that chain -- every
- * real AST leaf already carries its OWN resolved `.swimlane`
- * (`tile-layout.ts`'s threading, `tile.ts`'s own doc), so a structural
- * tile with no AST node of its own (a diamond, a fork bar) contributes
- * nothing, exactly as the jar's generic `Ftile` would. Mirrored here as
- * a `children`-recursion generic over every `TileComposite` kind, not
- * `laneAt`/`laneIn`/`laneOut` (`swimlane-lanes.ts`) -- those port a
- * DIFFERENT upstream accessor pair (`Swimable.java`'s single-valued
- * `getSwimlaneIn()`/`getSwimlaneOut()`), never the full `Set<Swimlane>`.
- */
-function collectTouchedLanes(tile: Tile, out: Set<string>): void {
-  if (tile.swimlane !== undefined) out.add(tile.swimlane);
-  if ('children' in tile) {
-    for (const child of (tile as unknown as { children: readonly Tile[] }).children) {
-      collectTouchedLanes(child, out);
-    }
-  }
-}
-
-/**
- * The `'gtile-group'`/`'gtile-partition'` case, split out of `walkTile`'s
- * own switch purely to keep that function's NLOC from growing (D1, T1b):
- * pushes a new `groupScope` id before walking the group's own body, so
- * `pushEdge` tags every edge inside with it, then pops it back off.
- *
- * T3h: `FtileGroup.drawU` (`:209-227`) draws the SAME-sized frame
- * (`type.asBig(...)`, dims from the cached, lane-spanning `calculateDimension`)
- * every time it is invoked -- and `UGraphicInterceptorOneSwimlane.draw`
- * (`:66-75`) invokes `tile.drawU(this)` once per lane the group's
- * `getSwimlanes()` touches, since `drawWhenSwimlanes`'s own outer loop
- * (`Swimlanes.java:328-347`) runs that interceptor once per
- * `swimlanesSpecial()` entry. Net effect, verified against jar's own
- * `notuli-49-xugi698` SVG: two `<rect>` frames, BOTH `width="80.05"
- * height="130"`, one per touched lane, each at that lane's own x. One
- * `pushNode` per lane in {@link collectTouchedLanes}'s result (falling
- * back to `[myLane]`, a single push, when the body touches no lane of
- * its own -- the zero/one-lane case, byte-identical to the pre-T3h
- * single push). `bucketNodesByLane`'s own stable-order grouping
- * (`activity-renderer-swimlanes.ts`) means push order across DIFFERENT
- * lanes is immaterial; within a lane it still matters, which is why this
- * stays ahead of the content walk below, mirroring `drawU`'s own
- * frame-then-content order inside each lane's pass.
- */
-function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: string | undefined, out: Out): void {
-  const gKind = tile.kind === 'gtile-group' ? 'group' : 'partition';
-  const touched = new Set<string>();
-  if (tile.children.length > 0) collectTouchedLanes(tile.children[0]!, touched);
-  const lanes: ReadonlyArray<string | undefined> = touched.size > 0 ? [...touched] : [myLane];
-  for (const lane of lanes) {
-    pushNode(
-      out,
-      { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height, label: tile.title },
-      lane,
-    );
-  }
-  if (tile.children.length === 0) return;
-  // D1 (T1b): `FtileGroup` opens its own nested `UGraphicForSnake`
-  // (`decisions.md#D1`) -- a pushed scope id so `snake-merge.ts` never
-  // fuses an edge inside this group with one outside it.
-  out.groupScope.push(out.nextId('scope'));
-  walkTile(tile.children[0]!, x + tile.bodyOffsetX, y + tile.bodyOffsetY, { kindHint: null, lane: myLane }, out);
-  out.groupScope.pop();
 }
 
 /**

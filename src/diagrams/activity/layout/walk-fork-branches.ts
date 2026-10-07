@@ -176,6 +176,17 @@ function pushBranchOut(branch: Tile, bX: number, bY: number, ctx: ForkBranchCont
  * coordinates and counts are identical to the per-branch interleaving this
  * replaced -- only each edge's position in `out.edges` changes.
  */
+/** Whether `out.nodes[index]` was pushed while walking a fork/split (or
+ *  `fork...end merge`) branch's own body -- see `Out.forkBodyRanges`'s
+ *  doc for the upstream gap this guards the while/repeat weld scans
+ *  against. */
+export function isInsideForkBody(out: Out, index: number): boolean {
+  const ranges = out.forkBodyRanges;
+  if (ranges === undefined) return false;
+  for (const [s, e] of ranges) if (index >= s && index < e) return true;
+  return false;
+}
+
 export function walkForkBranches(t: GtileFork, ctx: ForkBranchContext, out: Out): void {
   const placed = t.children.map((branch, i) => ({
     branch,
@@ -183,7 +194,17 @@ export function walkForkBranches(t: GtileFork, ctx: ForkBranchContext, out: Out)
     bY: ctx.y + t.branchTopYs[i]!,
   }));
   // `inner` -- each branch's own internals, in branch order.
+  const rangeStart = out.nodes.length;
   for (const p of placed) walkTile(p.branch, p.bX, p.bY, { kindHint: null, lane: ctx.myLane }, out);
+  // T3i (row WELD, `jupivo-67-gidi531`): `InstructionFork.createFtile`
+  // (`InstructionFork.java:122-130`) never calls or forwards any
+  // branch's `getWeldingPoints()`, and the fork's own Ftile
+  // (`FtileForkInner`/`FtileForkInnerOverlapped`, both `extends
+  // AbstractFtile` with no override, `:54`/`:53`) falls back to
+  // `AbstractFtile.java:100-102`'s empty-list default -- so record this
+  // branch-body range for `pushWhileWeldings`/`pushBreakWeldings` to
+  // exclude any `break` inside it from their own weld scan.
+  (out.forkBodyRanges ??= []).push([rangeStart, out.nodes.length]);
   // `doStep1` -- every `ConnectionIn`, unconditional.
   for (const p of placed) pushBranchIn(p.branch, p.bX, p.bY, ctx, out);
   // `doStep2` -- every `ConnectionOut`, `hasPointOut()` branches only.
@@ -448,7 +469,12 @@ export function walkMerge(t: GtileFork, x: number, y: number, myLane: string | u
     isSplit: false,
   };
 
+  // T3i: same weld-shielding range as `walkForkBranches` (`fork...end
+  // merge` shares `InstructionFork.createFtile`, which never propagates
+  // a branch's `getWeldingPoints()` either).
+  const rangeStart = out.nodes.length;
   for (const p of placed) walkTile(p.branch, p.bX, p.bY, { kindHint: null, lane: myLane }, out);
+  (out.forkBodyRanges ??= []).push([rangeStart, out.nodes.length]);
   for (const p of placed) pushBranchIn(p.branch, p.bX, p.bY, inCtx, out);
   for (const p of placed) pushMergeOut(p.branch, p.bX, p.bY, diamond, out);
 

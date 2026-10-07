@@ -39,6 +39,7 @@ import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservatio
 import { emitDiamondLabels, emitDiamondOwnLabel } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushWhileBackwardConnections } from './walk-while-backward.js';
+import { isInsideForkBody } from './walk-fork-branches.js';
 
 /**
  * The hexagon node, then north, then the hexagon's OWN label, then west --
@@ -351,12 +352,19 @@ function pushWhileOutSpecial(frame: WhileFrame): void {
  * model that boundary and would re-weld such a break; no baseline fixture
  * nests a loop with a `break` inside another loop (`fixtures.md`), so this
  * is a documented gap, not a fixed case.
+ *
+ * T3i (row WELD, `jupivo-67-gidi531`): a `break` inside a `fork`/`fork
+ * again` branch is ALSO excluded -- `InstructionFork.createFtile`
+ * (`InstructionFork.java:122-130`) never calls or forwards a branch's
+ * `getWeldingPoints()`, so it never reaches `whileBlock.getWeldingPoints()`
+ * at all; `out.forkBodyRanges` (set by `walk-fork-branches.ts`) names
+ * exactly those node-index ranges.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileFactoryDelegatorWhile.java:101-116
  */
 function pushWhileWeldings(out: Out, bodyNodeStart: number, bodyNodeEnd: number, elbowX: number): void {
   for (let i = bodyNodeStart; i < bodyNodeEnd; i++) {
     const breakNode = out.nodes[i]!;
-    if (breakNode.kind !== 'break') continue;
+    if (breakNode.kind !== 'break' || isInsideForkBody(out, i)) continue;
     pushEdge(
       out,
       [
