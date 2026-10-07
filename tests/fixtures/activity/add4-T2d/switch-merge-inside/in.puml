@@ -1,0 +1,11 @@
+@startuml
+skinparam conditionStyle InsideDiamond
+start
+switch (test?)
+case ( A )
+  :Text 1;
+case ( B )
+  :Text 2;
+endswitch
+stop
+@enduml

@@ -100,6 +100,17 @@ function hexagonCorners(tile: Tile, pos: GPoint): HexagonCorners {
   };
 }
 
+/**
+ * Both switch diamonds are `FtileDiamondInside` hexagons, whatever the
+ * `ConditionStyle`: `getDiamond1` returns `new FtileDiamondInside(tbTest,
+ * ...)` and `getDiamond2` returns `new FtileDiamondInside(TextBlockUtils
+ * .empty(0, 0), ...)` (`FtileFactoryDelegatorSwitch.java:147,159-160`), whose
+ * `drawU` always draws `Hexagon.asPolygon(shadowing, width, height)`
+ * (`FtileDiamondInside.java:89-90`, `Hexagon.java:65-74`) -- the 7-point
+ * hexagon, even over a 0x0 label.
+ */
+const SWITCH_DIAMOND_SHAPE = 'inside' as const;
+
 /** `FtileFactoryDelegatorAddNote#addNote`-adjacent pushes for diamond1/
  *  diamond2 -- the SAME `'if-split'`/`'if-merge'`/`'if-own-label'` node
  *  shape `walk-if-with-links.ts#pushDiamond1`/`#pushMerge` push, no
@@ -115,7 +126,16 @@ function pushSwitchDiamond(
   const label = kind === 'if-split' ? (diamond as unknown as { label: string }).label : '';
   pushNode(
     out,
-    { id: out.nextId(kind), kind, x: pos.x, y: pos.y, width: diamond.width, height: diamond.height, label },
+    {
+      id: out.nextId(kind),
+      kind,
+      x: pos.x,
+      y: pos.y,
+      width: diamond.width,
+      height: diamond.height,
+      label,
+      diamondShape: SWITCH_DIAMOND_SHAPE,
+    },
     myLane,
   );
   if (kind === 'if-split' && label !== '') {

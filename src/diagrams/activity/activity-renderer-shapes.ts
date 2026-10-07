@@ -446,7 +446,10 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
         ? renderDiamond(node, theme)
         : renderHexagonPolygon(node, theme);
     case 'if-merge':
-      return renderIfMerge(node, theme);
+      // add4-T2d: a switch's diamond2 is an `FtileDiamondInside` hexagon
+      // (`FtileFactoryDelegatorSwitch.java:159-160`), not `FtileDiamond`'s
+      // rhombus -- `walk-switch.ts#SWITCH_DIAMOND_SHAPE`.
+      return node.diamondShape === 'inside' ? renderHexagonPolygon(node, theme) : renderIfMerge(node, theme);
     case 'if-label':
       return renderIfLabel(node, theme);
     case 'if-own-label':
