@@ -158,3 +158,76 @@ moved away from the jar.
   `WRAP_SAFE_KINDS`. `while`, `repeat` and `group` still have no redirect.
 - **Impact**: COMPOSITE-NOTE (lebile) needs the same parse-time treatment for `while` and `group`.
 - **Confidence**: High (switch); Medium (while/group, not measured here)
+
+## Resume (orchestrator, widened write-set): SWITCH-NL + T1e's R1
+
+Base: merged `feat/activity-divergence-drive-4` (T1a-T1e, T1g, my earlier T1f). Base Σ (93 rows) 8468.
+
+### Commits
+- `7fa1b914b` fix(add4-T1f): break switch case labels on \n and draw every line
+- `77db810ac` fix(add4-T1f): carry the switch v-then-h end decoration on the edge
+
+### SWITCH-NL: Java -> ours
+- (a) `CommandCase.java:87` `Display.getWithNewlines` -> `switch-dispatch.ts`, using `unescapeLabelNewlines`.
+- (b) `tile-layout-inlabel.ts#inLabelReservation` reserves N lines.
+- (c) `renderer.ts#renderEdgeLabelAligned` draws one `<text>` per line (`drawActivityTextLines`), all at
+  the block's left x.
+- (d) `canvas-origin-text-ink.ts#extendForEdgeLabelText` extends the box to the last line's ink.
+- Line spacing is 11 px:
+  - The label is a LEFT-aligned Sheet, `Branch#getTextBlock` -> `Display#create0`
+    (`Branch.java:247-257`).
+  - Stripes stack `y += height` (`SheetBlock1.java:146-148`).
+  - The deterministic bounder's height is the font size (`StringBounderFromWidthTable.java:69-71`); the
+    activity arrow font is 11.
+- T1a's five `it.fails` are now `it` (`gtile-switch-decorate-fixtures.test.ts`). New test:
+  `switch-case-newline.test.ts`.
+
+### R1: Java -> ours
+- `ConnectionVerticalThenHorizontal` picks `asToRight`/`asToLeft`/`asToDown` in the same branch as `p2`
+  (`FtileSwitchWithManyLinks.java:159-170`); `Snake.create` fixes it (`Snake.java:144-148`).
+- `switch-connection-points.ts#verticalThenHorizontalPoints` now returns `{ points, direction }`.
+- `walk-switch.ts#pushOneMergeEdge` sets `ActivityEdgeGeo.endDirection`, same-lane only. The cross-lane
+  class picks its own LEFT/RIGHT from the translated points (`:363-381`), and the swimlane rerouter
+  spreads `...edge`, so it must not inherit a DOWN.
+- `shapes-of-terminal.ts#edgeDecorationVector` uses `endDirection`, falling back to
+  `terminalDecorationVector`. Both `renderer.ts` and `compress/shapes-of.ts#terminalArrowhead` call it.
+- **Outside the write-set:** the `shapes-of.ts` import and call line, so the compressor sees the same
+  arrowhead.
+- T1e's two `it.fails` (`shapes-of-terminal-fixtures.test.ts`) are now `it`. New test:
+  `switch-connection-points.test.ts`.
+
+### Rows
+| row | before | after 7fa1b914b | after 77db810ac | element delta |
+|---|---|---|---|---|
+| vimena-17-poju626 | 415 | 184 | 184 | text-2 -> exact |
+| zivocu-77-kopa900 | 180 | 90 | 90 | text-2 -> exact |
+| lipiki-79-fapu237 | 18 | 18 | 1 | exact -> exact |
+
+Probe Σ: 8468 -> 8147 -> 8130. 0 risers; no other row moved.
+
+### Census movers (all equal the jar unless noted)
+- vimena style: fontSize11 22->24, textCount 38->40, height 633->677.
+- vimena width: 834->580. The jar is 546, so this moved toward the jar but is not equal. The residual is
+  `**bold**` measured raw (T1a).
+- vimena text: 38->40.
+- zivocu style: fontSize11 8->10, textCount 15->17, height 322->374. zivocu text: 15->17.
+- lipiki style: height 162->168.
+- Ratchet and harness-parity: green, pins byte-equal. Swimlane census: green.
+- `tests/diagrams/activity`: 1256 pass, 0 expected-fail.
+
+### Residuals (named)
+1. **`compress/shapes-of.ts#edgeLabelShape` is single-line (T1e's file, not in my write-set).**
+   - Mechanism: it measures `bounder.getDimension(wholeLabel)` (both lines as one run) and places a
+     1-line block. The X slot is therefore too wide, and the case row stays about 5 px wider.
+     `SlotFinder#drawText` boxes each line's `UText` (`klimt/compress/SlotFinder.java:127-135`).
+   - Scratch fix (reverted): the `ifLabelShape` envelope convention, `y = last baseline`,
+     `height = last - first + first line height`, `width = max line`.
+     - Fixture ws: small-2line 90 -> 7, small-3line 95 -> 10, small-mixed 16 -> 1.
+     - vimena and zivocu do not move.
+   - Fixture ws now: small-1line 1, small-mixed 16, small-2line 90, small-3line 95, big-mixed 5,
+     one-link 69. one-link's 69 is the pre-existing OneLink draw-order tag swaps.
+2. **zivocu 90.**
+   - diamond1 is 15.675 wider: the condition's creole is measured raw (DIAMOND-CREOLE-WIDTH,
+     `tiles/gtile-diamond-inside.ts#measureLabel`).
+   - Case label y is +8.03: R2, label placement after compression (`renderer.ts`, D1 of add3).
+3. **lipiki 1:** the merge hexagon is 6-point in the jar, 4-point in ours (SWITCH-GEOM).
