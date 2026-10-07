@@ -10,12 +10,22 @@
  * per-field upstream provenance comments.
  */
 
-import type { Paint } from './paint.js';
+import type { Paint, Gradient } from './paint.js';
 import type { ElementColors } from './theme.js';
 import type { ActorStyle } from './skin/ActorStyle.js';
 
 export interface SkinparamAccumulator {
   fontFamily: string | undefined;
+  /** T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` is a
+   *  document-level GRADIENT (`HColorSet.java:109-116`). `background`
+   *  (below) keeps the flattened end-colour string every other consumer
+   *  reads; this carries the recovered `Gradient` to the ONE caller that
+   *  draws it (`assemble-svg.ts`'s activity background-rect finalizer) --
+   *  never widening `background` itself to `Paint` (see that field's own
+   *  doc comment for why). Set only when `skinparam-key-handlers-table-a
+   *  .ts`'s `backgroundcolor` handler's `paint` arg resolves to a real
+   *  `Gradient`, never for a plain colour. */
+  backgroundGradient: Gradient | undefined;
   /** cdd2-T8 (S-10): `skinparam defaultMonospacedFontName <name>` -- see
    *  `theme-graph-colors-c.ts#ThemeGraphColorsC.monospacedFontName`. */
   monospacedFontName: string | undefined;
@@ -294,6 +304,7 @@ const SCALAR_FIELD_NAMES = [
   'fixCircleLabelOverlapping',
   'shadowing',
   'background',
+  'backgroundGradient',
   'border',
   'text',
   'arrow',

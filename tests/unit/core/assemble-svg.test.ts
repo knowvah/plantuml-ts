@@ -609,6 +609,76 @@ describe('gradient defs are hoisted and deduped', () => {
 });
 
 /**
+ * T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` on an
+ * ACTIVITY diagram -- `SvgGraphics.java:174-183`'s unconditional gradient
+ * branch (mints gradient #0, always paints the rect, no white/black/
+ * transparent check, no root `style="background:...;"` property).
+ */
+describe('assembleSvg — ACTIVITY gradient document background (DOCGRAD)', () => {
+  const docGradient = { color1: '#AAAAAA', color2: 'white', policy: '-' } as const;
+
+  it('omits the root style background property entirely', () => {
+    const svg = assembleSvg({
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'white',
+      backgroundGradient: docGradient,
+      diagramType: 'ACTIVITY',
+    });
+    const styleAttr = /style="([^"]*)"/.exec(svg)?.[1] ?? '';
+    expect(styleAttr).toBe('width:50px;height:30px;');
+    expect(styleAttr).not.toContain('background:');
+  });
+
+  it('mints exactly one linearGradient def and paints the full-canvas rect with it', () => {
+    const svg = assembleSvg({
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'white',
+      backgroundGradient: docGradient,
+      diagramType: 'ACTIVITY',
+    });
+    expect((svg.match(/<linearGradient/g) ?? []).length).toBe(1);
+    const id = /<linearGradient id="([^"]+)"/.exec(svg)?.[1];
+    expect(id).toBeDefined();
+    expect(svg).toContain(`<rect x="0" y="0" width="50" height="30" fill="url(#${String(id)})" stroke="none"/>`);
+  });
+
+  it('paints the rect even though the resolved stops are white (no white/black/transparent skip)', () => {
+    // Unlike the plain-colour branch (`ACTIVITY_UNPAINTED_BACKGROUNDS`),
+    // the jar's gradient branch has NO such guard at all -- verified by
+    // reading `SvgGraphics.java:174-183` directly: `createSvgGradient` and
+    // `paintBackcolor` run unconditionally whenever `backcolor instanceof
+    // HColorGradient`, regardless of what the two colours resolve to.
+    const allWhite = { color1: 'white', color2: 'white', policy: '-' } as const;
+    const svg = assembleSvg({
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: 'white',
+      backgroundGradient: allWhite,
+      diagramType: 'ACTIVITY',
+    });
+    expect(svg).toContain('fill="url(#');
+  });
+
+  it('a plain (non-gradient) ACTIVITY background is unaffected (regression guard)', () => {
+    const svg = assembleSvg({
+      body: INNER,
+      width: 50,
+      height: 30,
+      background: '#808080',
+      diagramType: 'ACTIVITY',
+    });
+    expect(svg).toContain('background:#808080;');
+    expect(svg).toContain('<rect x="0" y="0" width="50" height="30" fill="#808080" stroke="none"/>');
+    expect(svg).not.toContain('<linearGradient');
+  });
+});
+
+/**
  * cdd-B7FU-R4 — the optional `seed` parameter. `assembleSvg` is D2's single
  * central assembly point AND the only one that also sees the `completeSvg`
  * escape hatch, which is why the seeded-id rename lives here rather than in

@@ -40,6 +40,7 @@
  */
 import type { AssembledSvg, RenderFragment } from './dispatcher.js';
 import { svgRoot, group, rect } from './svg.js';
+import { finalizeActivityFragment } from './assemble-svg-activity.js';
 import { applySeededDefIds } from './svg-defs-seeded.js';
 import { seedOf } from './klimt/drawing/svg/svg-seed.js';
 import { assembleDocumentShell } from './klimt/document-shell.js';
@@ -365,81 +366,10 @@ function finalizeSequenceBody(fragment: RenderFragment): string {
 }
 
 // ---------------------------------------------------------------------------
-// activity finalize (activity-oracle-harness D6/D7)
+// activity finalize -- moved to `assemble-svg-activity.ts` (T2d-a pass 2,
+// 500-line hook cap, see that file's own header for why it needed its own
+// `spliceIntoContentGroup`-equivalent rather than importing this one back).
 // ---------------------------------------------------------------------------
-
-/** The default (unset) diagram background -- `theme.ts`'s own
- *  `colors.background: '#FFFFFF'`. Declared separately from the four sibling
- *  constants above for the same reason they are declared separately from each
- *  other: a per-engine correction to one must not silently move the rest. */
-const ACTIVITY_DEFAULT_BACKGROUND = '#FFFFFF';
-
-/**
- * The three resolved backgrounds for which the jar paints NO content-level
- * rect -- `SvgGraphics`'s constructor, `klimt/drawing/svg/SvgGraphics.java:
- * 186-192`, verbatim:
- *
- *   if (color.equals("#00000000") == false && color.equals("#000000") == false
- *           && color.equals("#FFFFFF") == false)
- *       this.paintBackcolor(color);
- *
- * `ActivityDiagram3 extends TitledDiagram` and declares no `backcolor`/
- * exporter member of its own, so activity inherits this shared
- * `TextBlockExporter#createUGraphicSVG` path unchanged -- there is no
- * activity-specific background mechanism. Same guard the sequence sibling
- * carries ({@link SEQUENCE_UNPAINTED_BACKGROUNDS}); unlike that one this set
- * holds ONLY resolved hex, because {@link finalizeActivityFragment}
- * canonicalizes before testing (activity's theme reaches here holding raw
- * spellings -- `grey`, `transparent`, lowercase `#f1f1f1`).
- */
-const ACTIVITY_UNPAINTED_BACKGROUNDS: ReadonlySet<string> = new Set([
-  ACTIVITY_DEFAULT_BACKGROUND,
-  '#000000',
-  '#00000000',
-]);
-
-/** The whole-canvas rect `SvgGraphics#paintBackcolor` appends to the root
- *  `<g>` (`:207-212`), resized to the final `maxX`/`maxY` (`:819-822`) --
- *  hence `fragment.width`/`height`, post-chrome. Jar-verified byte-for-byte
- *  against `activity/poraji-17-goke817` and `activity/labala-74-juki864`,
- *  whose goldens open their content `<g>` with exactly
- *  `<rect x="0" y="0" width="…" height="…" fill="…" style="stroke:none;"/>`. */
-function maybeActivityBackgroundRect(fragment: RenderFragment): string {
-  const background = fragment.background ?? ACTIVITY_DEFAULT_BACKGROUND;
-  if (ACTIVITY_UNPAINTED_BACKGROUNDS.has(background)) return '';
-  return rect(0, 0, Math.trunc(fragment.width), Math.trunc(fragment.height), {
-    fill: background,
-    stroke: 'none',
-    strokeWidth: 1,
-  });
-}
-
-/**
- * activity's per-diagram finalization. Canonicalizes `fragment.background`
- * itself as well as the body, for json's reason (N4's resolve-before-shell
- * convention): the jar's root `style` carries the value
- * `backcolor.toSvg(colorMapper)` returns (`SvgGraphics.java:805-806`), which
- * is always resolved hex -- `poraji-17-goke817`'s golden writes
- * `background:#808080;` where this port's theme still holds the literal
- * `grey`.
- *
- * Follows json's/sequence's shape rather than state's for the chrome-present
- * case: `paintBackcolor` runs in `SvgGraphics`'s CONSTRUCTOR, before any
- * diagram or chrome draw, so the rect is the content group's first child
- * whether or not `applyChrome` wrapped the body.
- */
-function finalizeActivityFragment(fragment: RenderFragment): RenderFragment {
-  const canonical =
-    fragment.background === undefined
-      ? fragment
-      : { ...fragment, background: resolveColorToSvgHex(fragment.background) };
-  const backgroundRect = maybeActivityBackgroundRect(canonical);
-  const body =
-    fragment.bodyWrapped === true
-      ? spliceIntoContentGroup(fragment.body, backgroundRect)
-      : group(backgroundRect + fragment.body);
-  return { ...canonical, body };
-}
 
 // ---------------------------------------------------------------------------
 // Dispatch

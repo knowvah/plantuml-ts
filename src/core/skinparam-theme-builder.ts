@@ -182,6 +182,7 @@ function hasGraphOverride(acc: SkinparamAccumulator): boolean {
 function hasColorsOverride(acc: SkinparamAccumulator): boolean {
   return (
     acc.background !== undefined ||
+    acc.backgroundGradient !== undefined ||
     acc.border !== undefined ||
     acc.text !== undefined ||
     acc.arrow !== undefined ||
@@ -208,9 +209,18 @@ function buildGraphOverride(acc: SkinparamAccumulator): Theme['colors']['graph']
   return graphOverride as unknown as Theme['colors']['graph'];
 }
 
+/** T2d-a pass 2: the `background`/`backgroundGradient` pair, split out of
+ *  {@link buildColorsOverride} purely to keep that function's own CCN
+ *  under the cap -- see `skinparam-accumulator.ts#backgroundGradient`'s
+ *  own doc comment for why these are two fields, not one `Paint`. */
+function applyBackgroundOverride(colorsOverride: Record<string, unknown>, acc: SkinparamAccumulator): void {
+  if (acc.background !== undefined) colorsOverride.background = acc.background;
+  if (acc.backgroundGradient !== undefined) colorsOverride.backgroundGradient = acc.backgroundGradient;
+}
+
 function buildColorsOverride(acc: SkinparamAccumulator): Theme['colors'] {
   const colorsOverride: Record<string, unknown> = {};
-  if (acc.background !== undefined) colorsOverride.background = acc.background;
+  applyBackgroundOverride(colorsOverride, acc);
   if (acc.border !== undefined) colorsOverride.border = acc.border;
   if (acc.text !== undefined) colorsOverride.text = acc.text;
   if (acc.arrow !== undefined) colorsOverride.arrow = acc.arrow;

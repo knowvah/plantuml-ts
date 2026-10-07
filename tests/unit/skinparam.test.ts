@@ -12,6 +12,21 @@ describe('resolveSkinparam — direct key matches', () => {
     expect(unknown).toEqual([]);
   });
 
+  // T2d-a pass 2 (row DOCGRAD): `#AAAAAA-white` is a document-level
+  // GRADIENT (`HColorSet.java:109-116`) -- `colors.background` keeps the
+  // flattened end colour every other consumer already reads; the real
+  // `Gradient` lands on the separate `colors.backgroundGradient` field.
+  it('maps a backgroundcolor gradient to BOTH colors.background (flattened) and colors.backgroundGradient', () => {
+    const { theme } = resolveSkinparam(new Map([['backgroundcolor', '#AAAAAA-white']]), defaultTheme);
+    expect(theme.colors.background).toBe('white');
+    expect(theme.colors.backgroundGradient).toEqual({ color1: '#AAAAAA', color2: 'white', policy: '-' });
+  });
+
+  it('leaves colors.backgroundGradient unset for a plain backgroundcolor', () => {
+    const { theme } = resolveSkinparam(new Map([['backgroundcolor', '#FF0000']]), defaultTheme);
+    expect(theme.colors.backgroundGradient).toBeUndefined();
+  });
+
   it('maps bordercolor to colors.border', () => {
     const { theme, unknown } = resolveSkinparam(new Map([['bordercolor', '#AABBCC']]), defaultTheme);
     expect(theme.colors.border).toBe('#AABBCC');

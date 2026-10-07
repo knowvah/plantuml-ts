@@ -382,6 +382,13 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
+    // T2d-a pass 2 (row DOCGRAD): `skinparam backgroundColor <c1>-<c2>` --
+    // see `theme.colors.backgroundGradient`'s own doc comment. Omitted
+    // entirely (not `undefined`, `exactOptionalPropertyTypes`) for the
+    // common case, mirroring `preserveAspectRatio` below.
+    ...(theme.colors.backgroundGradient !== undefined
+      ? { backgroundGradient: theme.colors.backgroundGradient }
+      : {}),
     diagramType: DIAGRAM_TYPE_ACTIVITY,
     // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
     // document-margin shift baked into `body` above, composes chrome around
