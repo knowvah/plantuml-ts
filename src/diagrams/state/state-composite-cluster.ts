@@ -375,7 +375,7 @@ export function resolveClusterComposite(
   // staying UNSET for this family (protection0/1 forced off,
   // `ClusterDotString.java:107-112`); (b) `addClusters`'s ee/i-wrapped
   // branch (`portRanksLabelOnEe`); (c) the FrontierCalculator correction
-  // pass (`borderPointMemberIds`/`frontierMinWidth` below).
+  // pass (`borderPointMemberIds` below).
   //
   // `ctx.theme.fontSize === 14` is DELIBERATELY NOT relaxed -- unverified at
   // non-default font sizes, left gated per diagnosis discipline. Ineligible
@@ -474,16 +474,9 @@ export function resolveClusterComposite(
             : CLUSTER_TITLE_BASELINE_MARGIN,
         }
       : {}),
-    // G7 T14b: `Cluster#manageEntryExitPoint`'s own inputs, threaded onto the
-    // GeoSpec so `state-composite-geo.ts#materializeCluster` can run
-    // `frontierCalculator`/`ensureMinWidth` (`state-composite-frontier.ts`)
-    // once this pass's real `DotLayoutResult` is available -- `Math.floor`
-    // matches G8/T1c's own jar-verified truncation rule (`SvekEdge
-    // .appendTable`'s `(int)` cast), the SAME rounding convention
-    // `titleTableWidth` above already uses at the `addClusters` seam.
-    ...(hasBorderPointChildren
-      ? { borderPointMemberIds, frontierMinWidth: Math.floor(headerWidth) + 10, rankdir: ctx.rankdir }
-      : {}),
+    // lgm-T1d: `solveAcc` lets `materializeCluster` replay this pass's
+    // `Cluster#manageEntryExitPoint` calls (`state-composite-drawn-rects.ts`).
+    ...(hasBorderPointChildren ? { borderPointMemberIds, solveAcc: acc } : {}),
     ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
   };
   // #lizard forgives -- faithful port of ClusterDotString's envelope assembly;

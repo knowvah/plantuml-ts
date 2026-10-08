@@ -1,0 +1,14 @@
+@startuml
+state "Outer composite with a deliberately very long title for width" as Outer {
+        state "oex" as oex <<exitpoint>>
+        state "Inner composite also with a long title for the min width" as Inner {
+                state "iex" as iex <<exitpoint>>
+                Inner: entry / i()
+        }
+}
+iex --> oex
+oex --> After
+Before --> Inner
+After --> Outer
+Outer --> Before
+@enduml

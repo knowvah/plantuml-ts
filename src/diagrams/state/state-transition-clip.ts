@@ -146,7 +146,7 @@ export interface SolveLine {
   readonly creationIndex?: number;
 }
 
-const toRectangleArea = (b: ClipRect): RectangleArea => ({
+export const toRectangleArea = (b: ClipRect): RectangleArea => ({
   minX: b.x,
   minY: b.y,
   maxX: b.x + b.width,
@@ -172,8 +172,10 @@ function groupIdOfEndpoint(endpointId: string): string | undefined {
  * (`parentId`). The zaent anchor is this port's stand-in for the cluster's
  * special point, not an `SvekNode` in `Cluster.nodes`, so it is excluded.
  */
-function projectionSpecsOf(acc: PassAccumulator, result: DotLayoutResult): Map<string, ProjectionClusterSpec> {
-  const nodeById = new Map(result.nodes.map((n) => [n.id, n] as const));
+export function projectionSpecsOf(
+  acc: PassAccumulator,
+  nodeById: ReadonlyMap<string, ClipRect>,
+): Map<string, ProjectionClusterSpec> {
   const clusterById = new Map(acc.clusters.map((c) => [c.id, c] as const));
   const specs = new Map<string, ProjectionClusterSpec>();
   for (const info of acc.borderPointClusters) {
@@ -199,9 +201,28 @@ function projectionSpecsOf(acc: PassAccumulator, result: DotLayoutResult): Map<s
   return specs;
 }
 
+/**
+ * `SvekEdge#projectionCluster` of a line as a `DotInputCluster.id`
+ * (`ClusterDotString.java:101-105`, last cluster in print order wins,
+ * `SvekEdge.java:1278-1281`); `undefined` when the line touches no
+ * border-point composite. Endpoint-symmetric, so the un-swapped / swapped
+ * endpoint order of a `reversed` edge is irrelevant.
+ */
+export function projectionClusterIdOf(
+  acc: PassAccumulator,
+): (line: { readonly from: string; readonly to: string }) => string | undefined {
+  const clusterIdByState = new Map(acc.borderPointClusters.map((c) => [c.stateId, c.clusterId] as const));
+  const projectionOrder = acc.borderPointClusters.map((c) => c.stateId);
+  return (line) => {
+    const touched = new Set([line.from, line.to].flatMap((e) => groupIdOfEndpoint(e) ?? []));
+    const projection = projectionClusterOf(touched, projectionOrder);
+    return projection === undefined ? undefined : clusterIdByState.get(projection);
+  };
+}
+
 /** Stable sort by `Bibliotekon#allLines()` position; a line with no recorded
  *  position keeps its place after every recorded one. */
-const inSolveOrder = (lines: readonly SolveLine[]): SolveLine[] =>
+export const inSolveOrder = <L extends { readonly creationIndex?: number }>(lines: readonly L[]): L[] =>
   [...lines].sort((a, b) => (a.creationIndex ?? Infinity) - (b.creationIndex ?? Infinity));
 
 /**
@@ -222,9 +243,9 @@ export function clipLinesInSolveOrder(
   lines: readonly SolveLine[],
 ): Map<string, Spline> {
   const graphviz = new Map([...clusterPosMapOf(result)].map(([id, b]) => [id, toRectangleArea(b)] as const));
-  const rects = new ClusterRectangles(graphviz, projectionSpecsOf(acc, result));
-  const clusterIdByState = new Map(acc.borderPointClusters.map((c) => [c.stateId, c.clusterId] as const));
-  const projectionOrder = acc.borderPointClusters.map((c) => c.stateId);
+  const nodeById = new Map(result.nodes.map((n) => [n.id, n] as const));
+  const rects = new ClusterRectangles(graphviz, projectionSpecsOf(acc, nodeById));
+  const projectionOf = projectionClusterIdOf(acc);
   const raw = clusterAnchorRectsOf(acc.clusters, result);
   const clusterIdByAnchor = anchorClusterIds(acc.clusters);
   const clipRectOf = (endpoint: string): ClipRect | undefined => {
@@ -234,9 +255,8 @@ export function clipLinesInSolveOrder(
   };
   const out = new Map<string, Spline>();
   for (const line of inSolveOrder(lines)) {
-    const touched = new Set([line.from, line.to].flatMap((e) => groupIdOfEndpoint(e) ?? []));
-    const projection = projectionClusterOf(touched, projectionOrder);
-    if (projection !== undefined) rects.manageEntryExitPoint(clusterIdByState.get(projection)!);
+    const projection = projectionOf(line);
+    if (projection !== undefined) rects.manageEntryExitPoint(projection);
     const clipped = clipSplineWith(line.points, clipRectOf(line.from), clipRectOf(line.to));
     out.set(line.key, clipped);
   }

@@ -1,0 +1,10 @@
+@startuml
+state "A composite title that is quite long indeed" as AA {
+        AA: entry / go()
+        state "ok_ex" as aa_ok_ex <<exitpoint>>
+}
+aa_ok_ex --> Idle
+state Idle {
+        Idle: entry / set_timeout(closest)
+}
+@enduml
