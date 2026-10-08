@@ -266,6 +266,8 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         label: t.label,
       };
       if (t.color !== undefined) node.color = t.color;
+      // `FtileBox`'s `boxStyle` (`FtileBox.java:222`), read by the renderer.
+      if (t.stereotype !== undefined) node.stereotype = t.stereotype;
       pushNode(out, node, myLane);
       return;
     }

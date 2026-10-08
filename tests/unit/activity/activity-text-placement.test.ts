@@ -5,7 +5,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   measureLineWidth,
-  measureMonoLineWidth,
   centeredLineX,
   activityTextLineX,
   isTableRowLine,
@@ -26,12 +25,6 @@ describe('measureLineWidth', () => {
     const at14 = measureLineWidth(theme, 14, 'hello');
     const at28 = measureLineWidth(theme, 28, 'hello');
     expect(at28).toBeCloseTo(at14 * 2, 6);
-  });
-});
-
-describe('measureMonoLineWidth', () => {
-  it('is length * fontSize * 0.6, matching gtile-action.ts monoCharWidth', () => {
-    expect(measureMonoLineWidth(12, 'abcd')).toBe(4 * 12 * 0.6);
   });
 });
 

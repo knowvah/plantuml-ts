@@ -1,0 +1,12 @@
+@startuml
+start
+repeat :entry; <<input>>
+  :body;
+backward :back; <<output>>
+repeat while (more?)
+while (w?)
+  :step;
+backward :again; <<procedure>>
+endwhile
+stop
+@enduml

@@ -435,6 +435,7 @@ function buildIfDown(
     useElse1,
     conditionEndStyle: theme.conditionEndStyle,
     opale,
+    padding: theme.padding,
   });
   applyIfDownSwimlaneOut(result, optionalStop, parts.mainTile);
   return result;

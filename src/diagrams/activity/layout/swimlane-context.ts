@@ -51,6 +51,10 @@ export interface LaneItem {
    *  full-width `ULine`). */
   readonly usymbol?: CompositeUSymbol;
   readonly label?: string;
+  /** add4-T3e: an action's stereotype (its `BoxStyle`) and height -- the
+   *  outline ink `canvas-origin-fudge.ts#nodeFudge` reads. */
+  readonly stereotype?: string;
+  readonly height?: number;
 }
 
 /**

@@ -1,0 +1,9 @@
+@startuml
+start
+repeat :entry; <<acceptEvent>>
+  :body;
+backward:multi
+line; <<save>>
+repeat while (more?)
+stop
+@enduml

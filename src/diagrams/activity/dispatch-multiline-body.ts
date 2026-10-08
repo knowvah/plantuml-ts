@@ -18,6 +18,7 @@
  * Middle lines -- blank ones included -- are kept verbatim.
  */
 import { RE_ACTION_CLOSE, type ParseContext } from './dispatch-support.js';
+import { stereogroupBackColor, stereogroupStereotype } from './dispatch-stereogroup.js';
 
 /** `{{`/`}}` -- `EmbeddedDiagram.EMBEDDED_START`/`_END` (`EmbeddedDiagram.java:73-74`). */
 const EMBEDDED_START = '{{';
@@ -45,6 +46,8 @@ export interface MultilineActionBody {
   cursor: number;
   labelParts: string[];
   multiStereo: string | undefined;
+  /** {@link stereogroupBackColor} of the closer's stereogroup. */
+  multiColor: string | undefined;
 }
 
 /** The block's closing line index (or `lines.length`): the first line,
@@ -62,12 +65,17 @@ function findCloseIndex(lines: readonly string[], startIdx: number): number {
 }
 
 /** Steps 3-4 of the module doc: the closer's own TEXT, or nothing. */
-function closingText(closer: string, previous: string | undefined): { text?: string; stereo?: string } {
+function closingText(closer: string, previous: string | undefined): { text?: string; stereo?: string; color?: string } {
   const m = RE_ACTION_CLOSE.exec(closer.trimEnd())!;
-  const stereo = m[2]?.trim().toLowerCase();
+  const stereo = stereogroupStereotype(m[2]);
+  const color = stereogroupBackColor(m[2]);
   const text = m[1]!;
   const dropped = text === '' && previous?.trim() === EMBEDDED_END;
-  return { ...(dropped ? {} : { text }), ...(stereo !== undefined ? { stereo } : {}) };
+  return {
+    ...(dropped ? {} : { text }),
+    ...(stereo !== undefined ? { stereo } : {}),
+    ...(color !== undefined ? { color } : {}),
+  };
 }
 
 /**
@@ -92,12 +100,14 @@ export function readMultilineActionBody(
   const middle = block.slice(1, closed ? -1 : undefined);
   labelParts.push(...middle);
   let multiStereo: string | undefined;
+  let multiColor: string | undefined;
   if (closed) {
     // `createFoo`'s `tmp.size() > 2` guard: the label already holds >= 2 lines.
     const previous = labelParts.length >= 2 ? labelParts[labelParts.length - 1] : undefined;
-    const { text, stereo } = closingText(block[block.length - 1]!, previous);
+    const { text, stereo, color } = closingText(block[block.length - 1]!, previous);
     if (text !== undefined) labelParts.push(text);
     multiStereo = stereo;
+    multiColor = color;
   }
-  return { cursor: end, labelParts, multiStereo };
+  return { cursor: end, labelParts, multiStereo, multiColor };
 }

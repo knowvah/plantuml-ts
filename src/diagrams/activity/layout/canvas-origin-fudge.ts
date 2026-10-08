@@ -10,8 +10,11 @@ import type { ActivityNodeGeo } from '../activity-geometry.types.js';
 
 /** What {@link nodeFudge} reads of a node: a placed `ActivityNodeGeo`, or
  *  a `swimlane-context.ts#LaneItem` built from one. */
-export type FudgeSubject = Pick<ActivityNodeGeo, 'kind'> & Partial<Pick<ActivityNodeGeo, 'usymbol' | 'label'>>;
+export type FudgeSubject = Pick<ActivityNodeGeo, 'kind'> &
+  Partial<Pick<ActivityNodeGeo, 'usymbol' | 'label' | 'stereotype' | 'width' | 'height'>>;
 import { classifyStripeLine } from '../../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
+import { boxStyleName, boxStyleOutlineX, boxStyleShield } from '../tiles/gtile-action.js';
+import { activityPadding } from '../activity-style-defaults.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
@@ -129,9 +132,35 @@ function hasHorizontalRule(node: FudgeSubject): boolean {
  * USymbol cases, an action's full-width rule, else the kind's own
  * {@link fudgeX}/{@link fudgeY}.
  */
+/** `BoxStyle#drawMe`'s outline ink per style (`BoxStyle.java:153-500`) over
+ *  the node box `[x, x + width]`, `W = width - shield`: a `UPolygon` gets
+ *  `HACK_X_FOR_POLYGON` on X (Y exact), a `UPath` is exact, a `URectangle`
+ *  is `drawRectangle`'s; `procedure`'s `vline`s reach the box's bottom
+ *  exactly. `timeEvent`'s hourglass is narrower than its LEFT-aligned
+ *  text, whose `drawText` ink starts at `padding` (`LimitFinder.java:
+ *  217-224`). */
+function boxStyleFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } | undefined {
+  if (node.kind !== 'action') return undefined;
+  const style = boxStyleName(node.stereotype);
+  if (style === undefined) return undefined;
+  if (style === 'continuous') return { x: NO_FUDGE, y: NO_FUDGE };
+  if (style === 'procedure') return { x: RECT_FUDGE, y: { near: RECT_FUDGE.near, far: 0 } };
+  if (style === 'task' || style === 'object') return { x: RECT_FUDGE, y: RECT_FUDGE };
+  const width = node.width ?? 0;
+  const outline = boxStyleOutlineX(style, width, node.height ?? 0);
+  const p = POLYGON_FUDGE_X.near;
+  // The LEFT-aligned text's exact ink, `[padding, width - shield - padding]`.
+  const pad = activityPadding('activity');
+  const near = Math.max(p - outline.minX, -pad);
+  const far = Math.max(outline.maxX - width + p, -(boxStyleShield(style) + pad));
+  return { x: { near, far }, y: NO_FUDGE };
+}
+
 export function nodeFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } {
   const composite = compositeFudge(node);
   if (composite !== undefined) return composite;
+  const boxStyle = boxStyleFudge(node);
+  if (boxStyle !== undefined) return boxStyle;
   if (hasHorizontalRule(node)) return { x: RECT_WITH_FULL_HLINE_X, y: RECT_FUDGE };
   return { x: fudgeX(node.kind), y: fudgeY(node.kind) };
 }
