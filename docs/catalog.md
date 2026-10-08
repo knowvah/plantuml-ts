@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1420 modules · 5351 exported names.
+1421 modules · 5352 exported names.
 
 ## `src/`
 
@@ -1593,6 +1593,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `buildHighlightMap`, `processStringDisplay`, `splitDisplayLines`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
+| `JsonObject.ts` | `JsonObject` | minimal-json's `JsonObject` -- the object value every json-family diagram draws. |
 | `layout.ts` | `JsonRowGeo`, `JsonNodeGeo`, `JsonEdgeGeo`, `JsonGeometry`, `layoutJson` | JSON diagram layout engine. |
 | `Mirror.ts` | `setMirrorBadValueHandler`, `Mirror` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/Mirror.java Upstream lays a json diagram out on a TRANSPOSED graph and rotates the answer back. |
 | `parser.ts` | `jsonSpriteRegistryFor`, `parseJson` | Parser for PlantUML JSON diagrams (@startjson / @endjson). |

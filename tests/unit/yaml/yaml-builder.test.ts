@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { YamlBuilder } from '../../../src/diagrams/yaml/yaml-builder.js';
-import { monomorphToJson } from '../../../src/diagrams/yaml/monomorph.js';
+import { monomorphToJson as monomorphToJsonObject } from '../../../src/diagrams/yaml/monomorph.js';
+import { plainOf } from '../../helpers/json-object.js';
+import type { Monomorph as MonomorphT } from '../../../src/diagrams/yaml/monomorph.js';
+
+/** `monomorphToJson` as a plain literal -- see `tests/helpers/json-object.ts`. */
+const monomorphToJson = (m: MonomorphT): unknown => plainOf(monomorphToJsonObject(m));
 
 describe('YamlBuilder', () => {
   // 1. Simple key-value

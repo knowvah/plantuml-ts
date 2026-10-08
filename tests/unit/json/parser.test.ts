@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseJson } from '../../../src/diagrams/json/parser.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 // ---------------------------------------------------------------------------
 // Helper
@@ -17,32 +18,32 @@ describe('parseJson', () => {
   describe('JSON body parsing', () => {
     it('parses a valid JSON object', () => {
       const ast = parse(['{"name": "Alice", "age": 30}']);
-      expect(ast.root).toEqual({ name: 'Alice', age: 30 });
+      expect(plainOf(ast.root)).toEqual({ name: 'Alice', age: 30 });
     });
 
     it('parses a valid JSON array', () => {
       const ast = parse(['[1, 2, 3]']);
-      expect(ast.root).toEqual([1, 2, 3]);
+      expect(plainOf(ast.root)).toEqual([1, 2, 3]);
     });
 
     it('parses a multi-line JSON object', () => {
       const ast = parse(['{', '  "key": "value"', '}']);
-      expect(ast.root).toEqual({ key: 'value' });
+      expect(plainOf(ast.root)).toEqual({ key: 'value' });
     });
 
     it('parses a JSON string scalar', () => {
       const ast = parse(['"hello"']);
-      expect(ast.root).toBe('hello');
+      expect(plainOf(ast.root)).toBe('hello');
     });
 
     it('parses a JSON number scalar', () => {
       const ast = parse(['42']);
-      expect(ast.root).toBe(42);
+      expect(plainOf(ast.root)).toBe(42);
     });
 
     it('parses a JSON null literal', () => {
       const ast = parse(['null']);
-      expect(ast.root).toBeNull();
+      expect(plainOf(ast.root)).toBeNull();
       expect(ast.parseError).toBe(false);
     });
 
@@ -57,13 +58,13 @@ describe('parseJson', () => {
     // tests/fixtures/unwind-U1/json-title-only.svg).
     it('sets root to null and parseError true for empty body', () => {
       const ast = parse([]);
-      expect(ast.root).toBeNull();
+      expect(plainOf(ast.root)).toBeNull();
       expect(ast.parseError).toBe(true);
     });
 
     it('sets root to null and parseError true for whitespace-only body', () => {
       const ast = parse(['   ', '  ']);
-      expect(ast.root).toBeNull();
+      expect(plainOf(ast.root)).toBeNull();
       expect(ast.parseError).toBe(true);
     });
 
@@ -76,19 +77,19 @@ describe('parseJson', () => {
         '}',
       ]);
       expect(ast.parseError).toBe(false);
-      expect(ast.root).toEqual({ firstName: 'John', lastName: 'Smith', isAlive: true });
+      expect(plainOf(ast.root)).toEqual({ firstName: 'John', lastName: 'Smith', isAlive: true });
     });
 
     it('parses JSON with block /* */ comments (JSONC)', () => {
       const ast = parse(['{', '  /* block comment */', '  "x": 1', '}']);
       expect(ast.parseError).toBe(false);
-      expect(ast.root).toEqual({ x: 1 });
+      expect(plainOf(ast.root)).toEqual({ x: 1 });
     });
 
     it('parses JSON with trailing comma (JSONC)', () => {
       const ast = parse(['{"a": 1, "b": 2,}']);
       expect(ast.parseError).toBe(false);
-      expect(ast.root).toEqual({ a: 1, b: 2 });
+      expect(plainOf(ast.root)).toEqual({ a: 1, b: 2 });
     });
   });
 
@@ -140,7 +141,7 @@ describe('parseJson', () => {
 
     it('parses highlight before JSON body without corrupting body', () => {
       const ast = parse(['#highlight "name"', '{"name": "Bob"}']);
-      expect(ast.root).toEqual({ name: 'Bob' });
+      expect(plainOf(ast.root)).toEqual({ name: 'Bob' });
       expect(ast.highlights).toEqual([{ path: ['name'], styleClass: '' }]);
     });
 
@@ -163,25 +164,25 @@ describe('parseJson', () => {
   describe('@startjson/@endjson wrapper stripping', () => {
     it('strips bare @startjson and @endjson lines', () => {
       const ast = parse(['@startjson', '{"a": 1}', '@endjson']);
-      expect(ast.root).toEqual({ a: 1 });
+      expect(plainOf(ast.root)).toEqual({ a: 1 });
       expect(ast.parseError).toBe(false);
     });
 
     it('strips @startjson with trailing whitespace', () => {
       const ast = parse(['@startjson  ', '{"b": 2}']);
-      expect(ast.root).toEqual({ b: 2 });
+      expect(plainOf(ast.root)).toEqual({ b: 2 });
       expect(ast.parseError).toBe(false);
     });
 
     it('strips @STARTJSON case-insensitively', () => {
       const ast = parse(['@STARTJSON', '{"c": 3}', '@ENDJSON']);
-      expect(ast.root).toEqual({ c: 3 });
+      expect(plainOf(ast.root)).toEqual({ c: 3 });
       expect(ast.parseError).toBe(false);
     });
 
     it('strips @startjson alongside #highlight directives', () => {
       const ast = parse(['@startjson', '#highlight "x"', '{"x": 1}', '@endjson']);
-      expect(ast.root).toEqual({ x: 1 });
+      expect(plainOf(ast.root)).toEqual({ x: 1 });
       expect(ast.highlights).toEqual([{ path: ['x'], styleClass: '' }]);
     });
   });
@@ -189,7 +190,7 @@ describe('parseJson', () => {
   describe('<style> block handling', () => {
     it('style block does not bleed into JSON body', () => {
       const ast = parse(['<style>', 'element { BackgroundColor: red; }', '</style>', '{"key": "val"}']);
-      expect(ast.root).toEqual({ key: 'val' });
+      expect(plainOf(ast.root)).toEqual({ key: 'val' });
       expect(ast.parseError).toBe(false);
     });
   });
@@ -197,7 +198,7 @@ describe('parseJson', () => {
   describe('acceptance criteria from spec', () => {
     it('given valid JSON object, root equals parsed object', () => {
       const ast = parse(['{ "x": 1, "y": 2 }']);
-      expect(ast.root).toEqual({ x: 1, y: 2 });
+      expect(plainOf(ast.root)).toEqual({ x: 1, y: 2 });
     });
 
     it('given #highlight "key", highlights contains directive with path [key]', () => {
@@ -218,7 +219,7 @@ describe('parseJson', () => {
 
     it('given bare JSON array [1,2,3], root is [1,2,3]', () => {
       const ast = parse(['[1,2,3]']);
-      expect(ast.root).toEqual([1, 2, 3]);
+      expect(plainOf(ast.root)).toEqual([1, 2, 3]);
     });
   });
 });

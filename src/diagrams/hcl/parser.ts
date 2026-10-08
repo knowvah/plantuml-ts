@@ -6,6 +6,7 @@ import type { ParseOptions } from '../../core/dispatcher.js';
 import { jsonSpriteRegistryFor } from '../json/parser.js';
 import { extractStyle, payloadOf, upstreamSourceLines } from '../json/StyleExtractor.js';
 import { headerOf } from '../json/json-diagram-factory.js';
+import { JsonObject } from '../json/JsonObject.js';
 
 // ---------------------------------------------------------------------------
 // Token types — port of net.sourceforge.plantuml.hcl.SymbolType
@@ -170,9 +171,7 @@ function getFunctionData(functionName: string, cursor: TokenCursor): unknown {
     if (value instanceof SentinelToken) {
       if (value.term.type === 'PARENTHESIS_CLOSE') {
         if (args.length === 0) return `${functionName}()`;
-        const result: Record<string, unknown> = {};
-        result[`${functionName}()`] = args;
-        return result;
+        return new JsonObject().add(`${functionName}()`, args);
       }
       // COMMA sentinel — continue
       continue;
@@ -181,8 +180,10 @@ function getFunctionData(functionName: string, cursor: TokenCursor): unknown {
   }
 }
 
-function getBracketData(cursor: TokenCursor): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
+/** `HclParser.java:123-148`: `JsonObject#add` per field -- a repeated name
+ *  is a second member (jar: `unwind2-S2b/hcl-dup-key`). */
+function getBracketData(cursor: TokenCursor): JsonObject {
+  const result = new JsonObject();
   while (true) {
     const current = next(cursor);
     if (current.type === 'CURLY_BRACKET_CLOSE') return result;
@@ -196,7 +197,7 @@ function getBracketData(cursor: TokenCursor): Record<string, unknown> {
       if (value instanceof SentinelToken) {
         throw new Error(`Unexpected sentinel as value for field ${fieldName}`);
       }
-      result[fieldName] = value;
+      result.add(fieldName, value);
     } else {
       throw new Error(`Unexpected token in bracket data: ${current.type}`);
     }
@@ -280,10 +281,9 @@ function parseTerms(terms: HclTerm[]): unknown {
     return map.values().next().value;
   }
 
-  const result: Record<string, unknown> = {};
-  for (const [k, v] of map) {
-    result[k] = v;
-  }
+  // `:70-74`: the LinkedHashMap's entries, `add`ed in order.
+  const result = new JsonObject();
+  for (const [k, v] of map) result.add(k, v);
   return result;
 }
 

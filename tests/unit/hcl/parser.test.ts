@@ -3,6 +3,7 @@ import { isDisplayPositionedNull } from '../../../src/core/annotations/index.js'
 import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
 import { extractBlocks } from '../../../src/core/block-extractor.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 // ---------------------------------------------------------------------------
 // Helper: build a UmlSource from an array of lines
@@ -24,7 +25,7 @@ describe('parseHcl — acceptance criteria', () => {
     const src = makeSource(['key = "value"', 'key2 = "value2"']);
     const ast = parseHcl(src);
     expect(ast.parseError).toBe(true);
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
     expect(ast.highlights).toEqual([]);
   });
 
@@ -35,20 +36,20 @@ describe('parseHcl — acceptance criteria', () => {
     const src = makeSource(['resource "aws_s3_bucket" "b" {', '  bucket = "test"', '}']);
     const ast = parseHcl(src);
     // Single-entry map → unwrapped → inner object
-    expect(ast.root).toEqual({ bucket: 'test' });
+    expect(plainOf(ast.root)).toEqual({ bucket: 'test' });
   });
 
   it('AC3: comment lines (starting with #) are stripped', () => {
     const src = makeSource(['# this is a comment', 'r {', 'key = "value"', '}']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({ key: 'value' });
+    expect(plainOf(ast.root)).toEqual({ key: 'value' });
   });
 
   it('AC4a: function with args is stored as { "fn()": [...args] }', () => {
     const src = makeSource(['resource "x" {', '  result = fn("a", "b")', '}']);
     const ast = parseHcl(src);
     // Single-entry map → unwrapped → the inner bracket object
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     // The result field holds a { "fn()": ["a", "b"] } object
     expect(inner['result']).toEqual({ 'fn()': ['a', 'b'] });
   });
@@ -56,7 +57,7 @@ describe('parseHcl — acceptance criteria', () => {
   it('AC4b: no-arg function is stored as string "fn()"', () => {
     const src = makeSource(['resource "x" {', '  result = noop()', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['result']).toBe('noop()');
   });
 
@@ -64,7 +65,7 @@ describe('parseHcl — acceptance criteria', () => {
     // The for-expression tokens are all STRING_SIMPLE (silently ignored)
     const src = makeSource(['resource "x" {', '  tags = [for k in list : k]', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['tags']).toEqual([]);
   });
 
@@ -77,7 +78,7 @@ describe('parseHcl — acceptance criteria', () => {
   it('AC7: <style> blocks are stripped before parsing', () => {
     const src = makeSource(['<style>', 'node { color: red }', '</style>', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({ key: 'val' });
+    expect(plainOf(ast.root)).toEqual({ key: 'val' });
   });
 
   it('AC8: a leading title is consumed but never set (HclDiagramFactory.java:86-92)', () => {
@@ -86,7 +87,7 @@ describe('parseHcl — acceptance criteria', () => {
     const src = makeSource(['title My Title', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
     expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(true);
-    expect(ast.root).toEqual({ key: 'val' });
+    expect(plainOf(ast.root)).toEqual({ key: 'val' });
   });
 });
 
@@ -100,26 +101,26 @@ describe('parseHcl — additional cases', () => {
   // cell (jar: unwind-U1/hcl-title-only).
   it('empty source → root is an empty object', () => {
     const ast = parseHcl(makeSource([]));
-    expect(ast.root).toEqual({});
+    expect(plainOf(ast.root)).toEqual({});
     expect(ast.parseError).toBe(false);
   });
 
   it('blank-only source → root is an empty object', () => {
     const ast = parseHcl(makeSource(['', '  ', '']));
-    expect(ast.root).toEqual({});
+    expect(plainOf(ast.root)).toEqual({});
   });
 
   it('single top-level block with one child → root is the child object directly (unwrapped)', () => {
     const src = makeSource(['module "vpc" {', '  cidr = "10.0.0.0/8"', '}']);
     const ast = parseHcl(src);
     // map has exactly 1 entry → value returned directly (not wrapped)
-    expect(ast.root).toEqual({ cidr: '10.0.0.0/8' });
+    expect(plainOf(ast.root)).toEqual({ cidr: '10.0.0.0/8' });
   });
 
   it('multiple top-level blocks → root is an object with block names as keys', () => {
     const src = makeSource(['module "a" { x = "1" }', 'module "b" { y = "2" }']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({
+    expect(plainOf(ast.root)).toEqual({
       'module "a"': { x: '1' },
       'module "b"': { y: '2' },
     });
@@ -128,35 +129,35 @@ describe('parseHcl — additional cases', () => {
   it('nested object value obj = { a = "1" }', () => {
     const src = makeSource(['resource "r" {', '  obj = { a = "1" }', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['obj']).toEqual({ a: '1' });
   });
 
   it('array of strings list = ["a", "b"]', () => {
     const src = makeSource(['resource "r" {', '  list = ["a", "b"]', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['list']).toEqual(['a', 'b']);
   });
 
   it('array of objects items = [{ name = "x" }]', () => {
     const src = makeSource(['resource "r" {', '  items = [{ name = "x" }]', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['items']).toEqual([{ name: 'x' }]);
   });
 
   it('variable reference var.bucket_name → stored as string', () => {
     const src = makeSource(['resource "r" {', '  path = var.bucket_name', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['path']).toBe('var.bucket_name');
   });
 
   it('string interpolation "${var.host}/path" → stored verbatim', () => {
     const src = makeSource(['resource "r" {', '  url = "${var.host}/path"', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['url']).toBe('${var.host}/path');
   });
 
@@ -164,7 +165,7 @@ describe('parseHcl — additional cases', () => {
     // cond ? "a" : "b" — PARENTHESIS_OPEN with empty pending → throw → null
     const src = makeSource(['resource "r" {', '  x = cond ? "a" : "b"', '}']);
     const ast = parseHcl(src);
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
     // HclDiagramFactory.java:79-83 + JsonDiagram.java:116-122: the jar draws
     // "Your data does not sound like HCL data" for this source (unwind-U1).
     expect(ast.parseError).toBe(true);
@@ -178,27 +179,27 @@ describe('parseHcl — additional cases', () => {
   it('@starthcl/@endhcl wrapper lines inside source.lines are stripped', () => {
     const src = makeSource(['@starthcl', 'r {', 'key = "val"', '}', '@endhcl']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({ key: 'val' });
+    expect(plainOf(ast.root)).toEqual({ key: 'val' });
   });
 
   it('key with colon separator (TWO_POINTS) instead of equals', () => {
     const src = makeSource(['resource "r" {', '  key : "value"', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['key']).toBe('value');
   });
 
   it('multiple key=value pairs inside one block produce a flat object', () => {
     const src = makeSource(['r {', 'a = "1"', 'b = "2"', 'c = "3"', '}']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({ a: '1', b: '2', c: '3' });
+    expect(plainOf(ast.root)).toEqual({ a: '1', b: '2', c: '3' });
   });
 
   // HclParser.java:235: `Character.isSpaceChar` -- a TAB is not a space, so
   // it stays in the field name (jar: unwind2-S2/hcl-tab-indent).
   it('a tab is part of the token, not a separator', () => {
     const ast = parseHcl(makeSource(['r {', '\ta = "1"', '}']));
-    expect(ast.root).toEqual({ '\ta': '1' });
+    expect(plainOf(ast.root)).toEqual({ '\ta': '1' });
   });
 
   // HclParser.java:188-216 flushes a pending string only when a symbol
@@ -206,20 +207,20 @@ describe('parseHcl — additional cases', () => {
   it('trailing text after the last symbol is dropped', () => {
     const ast = parseHcl(makeSource(['r {', '  a = "1"', '}', 'foo']));
     expect(ast.parseError).toBe(false);
-    expect(ast.root).toEqual({ a: '1' });
+    expect(plainOf(ast.root)).toEqual({ a: '1' });
   });
 
   it('skinparam directive before body is stripped', () => {
     const src = makeSource(['skinparam backgroundColor white', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({ key: 'val' });
+    expect(plainOf(ast.root)).toEqual({ key: 'val' });
   });
 
   it('blank lines within body are preserved (do not restart)', () => {
     // Body already started; blank lines between blocks should not affect parsing
     const src = makeSource(['module "a" { x = "1" }', '', 'module "b" { y = "2" }']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({
+    expect(plainOf(ast.root)).toEqual({
       'module "a"': { x: '1' },
       'module "b"': { y: '2' },
     });
@@ -229,7 +230,7 @@ describe('parseHcl — additional cases', () => {
     // Tests the COMMA sentinel branch inside getFunctionData
     const src = makeSource(['resource "r" {', '  result = format("hello %s", "world")', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['result']).toEqual({ 'format()': ['hello %s', 'world'] });
   });
 
@@ -238,13 +239,13 @@ describe('parseHcl — additional cases', () => {
     const src = makeSource(['"myblock" {', '  x = "1"', '}']);
     const ast = parseHcl(src);
     // Single entry → unwrapped
-    expect(ast.root).toEqual({ x: '1' });
+    expect(plainOf(ast.root)).toEqual({ x: '1' });
   });
 
   it('escaped quote in string value', () => {
     const src = makeSource(['resource "r" {', '  msg = "say \\"hello\\""', '}']);
     const ast = parseHcl(src);
-    const inner = ast.root as Record<string, unknown>;
+    const inner = plainOf(ast.root) as Record<string, unknown>;
     expect(inner['msg']).toBe('say "hello"');
   });
 
@@ -255,7 +256,7 @@ describe('parseHcl — additional cases', () => {
     // A block name followed by SQUARE_BRACKET_OPEN instead of "{".
     const src = makeSource(['blockname [']);
     const ast = parseHcl(src);
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
     // HclParser.java:88 throws; the jar draws the "does not sound like HCL
     // data" page (HclDiagramFactory.java:79-83, unwind-U1).
     expect(ast.parseError).toBe(true);
@@ -265,7 +266,7 @@ describe('parseHcl — additional cases', () => {
     // tokenize returns [] for a space-only body; parseMe's map is empty.
     const src = makeSource(['   ']);
     const ast = parseHcl(src);
-    expect(ast.root).toEqual({});
+    expect(plainOf(ast.root)).toEqual({});
   });
 
   it('unexpected token in bracket data field-name position → parse failure', () => {
@@ -276,7 +277,7 @@ describe('parseHcl — additional cases', () => {
     // CURLY_BRACKET_CLOSE, so it hits the else-throw.
     const src = makeSource(['resource "r" { ] }']);
     const ast = parseHcl(src);
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
   });
 
   it('unexpected token type in getValue throws → parse failure', () => {
@@ -291,7 +292,7 @@ describe('parseHcl — additional cases', () => {
     // Use TWO_POINTS as the value: key = : — TWO_POINTS hits the throw.
     const src2 = makeSource(['resource "r" {', '  key = :', '}']);
     const ast2 = parseHcl(src2);
-    expect(ast2.root).toBeNull();
+    expect(plainOf(ast2.root)).toBeNull();
     // Suppress unused src/ast
     void src;
     void ast;

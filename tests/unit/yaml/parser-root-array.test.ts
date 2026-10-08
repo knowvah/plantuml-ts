@@ -2,13 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { parseYaml } from '../../../src/diagrams/yaml/parser.js';
 import { renderSync } from '../../../src/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 function makeSource(lines: string[]): UmlSource {
   return { lines, type: 'yaml' };
 }
 
 function parse(lines: string[]) {
-  return parseYaml(makeSource(lines)).root;
+  return plainOf(parseYaml(makeSource(lines)).root);
 }
 
 describe('YAML parser — root-level arrays', () => {
