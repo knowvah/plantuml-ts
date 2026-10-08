@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1445 modules · 5472 exported names.
+1445 modules · 5474 exported names.
 
 ## `src/`
 
@@ -1532,7 +1532,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `element-embedded-block.ts` | `EmbeddedElementBlock`, `scanEmbeddedElementBlock` | `PSystemCommandFactory#addOneSingleLineManageEmbedded2` (`:288-307`) for `CommandCreateElementMultilines`' TYPE1 element body (`parser.ts`'s `continueElementBlock`): while an open element block is accumulating body lines, a line that OPENS |
 | `element-grammar-nosymbol.ts` | `RE_BARE_AS_DECORATED`, `BareAsDecorated`, `parseBareAsDecorated`, `RE_BARE_QUOTED_DECL`, `RE_BARE_DECORATED_DECL`, `RE_CODE_AS_QUOTED_DISPLAY`, `CodeAsQuotedDisplay`, `parseCodeAsQuotedDisplay` | `CommandCreateElementFull`'s declaration alternatives with the leading SYMBOL keyword OMITTED (`getRegexConcat:84`, `(?:(ALL_TYPES\|\(\))[%s]+)?` — the group is optional). |
 | `element-grammar.ts` | `BracketDeclaration`, `parseBracketDeclaration`, `removeMatching`, `removeMatchingLinks`, `effectiveRemovedIds`, `effectiveHiddenIds`, `visibleStereotypeLabels`, `nodeWithVisibleStereotype` | Element-declaration helpers split out of parser.ts to stay under 500 lines (CommandCreateElementFull.java, net.sourceforge.plantuml.descdiagram .command) — the bracket-shorthand declaration form and the id/tag-based `remove`/`hide`/`show` ( |
-| `frontier-cluster-bbox.ts` | `PortClusterInfo`, `ClusterSpacing`, `computePortClusterBbox` | frontier-cluster-bbox.ts — a port cluster's drawn box, `Cluster #manageEntryExitPoint` (`svek/Cluster.java:410-430`) over `core/svek/FrontierCalculator.ts`: final Collection<RectangleArea> insides = new ArrayList<>(); final List<XPoint2D> p |
+| `frontier-cluster-bbox.ts` | `PortClusterInfo`, `ClusterSpacing`, `computePortClusterBbox`, `registerPortCluster`, `DescriptionSolveRects` | frontier-cluster-bbox.ts — a port cluster's drawn box, `Cluster #manageEntryExitPoint` (`svek/Cluster.java:410-430`) over `core/svek/FrontierCalculator.ts`: final Collection<RectangleArea> insides = new ArrayList<>(); final List<XPoint2D> p |
 | `index.ts` | `descriptionPlugin` | Description diagram plugin — the consolidated engine for component, use-case, and deployment diagrams (upstream `DescriptionDiagramFactory`). |
 | `layout-classify.ts` | `countRawContainers`, `isEffectiveCluster`, `classifyAst` | Phase 1: AST classification (`classifyAst`/`classifyAsCluster`/ `isEffectiveCluster`/`countRawContainers`) -- split out of `layout.ts` purely to keep that file under this project's 500-line cap. |
 | `layout-dot-tree.ts` | `PortClusterCtx`, `computePortRanksByCluster`, `buildDotNodes`, `buildDotClusters`, `buildDotEdges`, `buildGeoTree` | Description-diagram layout, phases 2-3: `DotInputGraph` node/cluster/edge construction (svek's `ClusterDotString`/`SvekNode` analogs) and the bottom-up geo-tree assembly that maps solved DOT positions back onto `DescriptionNodeGeo`. |
