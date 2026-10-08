@@ -99,4 +99,11 @@ export interface ThemeGraphColorsC {
    *  `EntityImageClassHeader.java:93-101`'s `styleHeader`) -- the classifier
    *  NAME's links. */
   classCascadeHeaderHyperlinkColor?: string;
+  /** unwind2-S9: the grouping frames' merged-style `Shadowing`
+   *  (`Style#getShadowing`, `Style.java:109-115`), priority-ordered --
+   *  `group` over `{root,element,sequenceDiagram,group}` (`Grouping.java:62`)
+   *  and `reference` over `{root,element,sequenceDiagram,reference}`
+   *  (`Reference.java:67`). Set by `build-theme.ts`
+   *  (`sequence-frame-shadow.ts`); absent = 0, no shadow. */
+  sequenceFrameShadowing?: { readonly group: number; readonly reference: number };
 }

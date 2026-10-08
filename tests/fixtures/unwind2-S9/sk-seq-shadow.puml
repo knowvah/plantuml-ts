@@ -1,0 +1,8 @@
+@startuml
+skinparam sequenceGroupShadowing true
+participant A
+participant B
+group grp
+A -> B : hi
+end
+@enduml

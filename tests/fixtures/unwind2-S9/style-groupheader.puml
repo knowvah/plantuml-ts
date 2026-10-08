@@ -1,0 +1,12 @@
+@startuml
+<style>
+sequenceDiagram {
+  groupHeader { Shadowing 3 }
+}
+</style>
+participant A
+participant B
+group grp [cmt]
+A -> B : hi
+end
+@enduml

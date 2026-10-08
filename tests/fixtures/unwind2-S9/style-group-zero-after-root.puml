@@ -1,0 +1,11 @@
+@startuml
+skinparam shadowing true
+<style>
+sequenceDiagram { group { Shadowing 0 } }
+</style>
+participant A
+participant B
+group grp
+A -> B : hi
+end
+@enduml

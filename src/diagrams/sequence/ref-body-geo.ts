@@ -111,15 +111,20 @@ export function refBodyHeight(body: readonly string[], theme: Theme, measurer: S
 }
 
 /**
- * `getPreferredWidth` = max(text width, header width) + 2 * xMargin
- * (`ComponentRoseReference.java:155-159`), where `getTextWidth` is the widest
- * line plus the left and right padding
- * (`AbstractTextualComponent.java:106-108`). The shadow delta that term also
- * carries is 0 here: this port draws no shadow.
+ * `getPreferredWidth` = max(text width, header width) + 2 * xMargin +
+ * `symbolContextBody.getDeltaShadow()` (`ComponentRoseReference.java:155-159`),
+ * where `getTextWidth` is the widest line plus the left and right padding
+ * (`AbstractTextualComponent.java:106-108`). The delta is the `reference`
+ * style's merged `Shadowing` (`core/sequence-frame-shadow.ts`), which
+ * `renderer-frame-header.ts#renderBodyRect` takes back off the drawn rect
+ * (`:89`). Jar-verified: `tests/fixtures/unwind2-S9/style-reference.svg`
+ * against `noshadow-reference.svg` -- the canvas widens by 3, the rect does
+ * not.
  */
 export function refBodyWidth(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
   if (body.length === 0) return 0;
   const widest = Math.max(...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
   const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
-  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN;
+  const deltaShadow = theme.colors.graph.sequenceFrameShadowing?.reference ?? 0;
+  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + deltaShadow;
 }

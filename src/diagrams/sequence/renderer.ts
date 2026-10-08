@@ -50,6 +50,7 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
+import { sequenceShadowDefs } from './sequence-shadow.js';
 import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -465,6 +466,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    passes. Activations are absent here by design; see step 2.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
 
+  const shadowDefs = sequenceShadowDefs(scaledGeo.events, theme);
   return {
     body: children.join(''),
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
@@ -473,5 +475,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
     diagramType: DIAGRAM_TYPE_SEQUENCE,
+    // unwind2-S9: the frames' shadow filter, when one is drawn.
+    ...(shadowDefs === '' ? {} : { extraDefs: shadowDefs }),
   };
 }
