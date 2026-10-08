@@ -1,0 +1,8 @@
+@startuml
+skinparam defaultFontColor #FF0000
+skinparam ArrowColor #00AA00
+!theme amiga
+class A
+class B
+A --> B : uses
+@enduml

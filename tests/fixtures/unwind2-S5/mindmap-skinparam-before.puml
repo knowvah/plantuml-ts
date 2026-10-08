@@ -1,0 +1,8 @@
+@startmindmap
+skinparam defaultFontColor #FF0000
+skinparam ArrowColor #00AA00
+!theme amiga
+* root
+** a
+** b
+@endmindmap

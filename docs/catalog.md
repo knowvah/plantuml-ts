@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1419 modules · 5350 exported names.
+1420 modules · 5352 exported names.
 
 ## `src/`
 
@@ -124,6 +124,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-tag-cascade.ts` | `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade` | The `.tagname` stereotype sub-selector cascade (`StyleSignatureBasic #matchAllImpl` / `StyleStorage#computeMergedStyle`, G2 N36/N37) -- moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pur |
 | `style-map-theme.ts` | `applyStyleMap` | Selector → Theme field mapping (element-scoped <style> blocks). |
+| `style-root-shadowing.ts` | `dropRootShadowed`, `rootColoursOf` | A later `root` declaration of a colour beats every EARLIER declaration of that colour, however specific its selector (unwind2-S5). |
 | `style-skinparam-segments.ts` | `StyleSkinparamSegment`, `StyleSkinparamSource`, `styleSkinparamSegments` | The `skinparam` and `<style>` declarations of one block, back in the ONE order upstream applies them (cdd4-T7b). |
 | `svek-dot-emit-clusters.ts` | `inches`, `nodeLine`, `clusterBlock` | Node lines and cluster blocks for the Svek DOT emitter — split out of ./svek-dot-emit.ts for the 500-line file cap (G9/T1; pure move apart from the wrapper emission that motivated the split, see below). |
 | `svek-dot-emit-labels.ts` | `hex`, `round`, `trunc`, `labelTable`, `edgeLabelTable`, `shieldTable`, `portTable`, `rowPortTable` | Svek HTML-label table builders — the `label=<...>` values `svek-dot-emit.ts` writes into node, edge and cluster statements. |

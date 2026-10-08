@@ -1,0 +1,6 @@
+@startuml
+!theme reddress-darkblue
+class A
+class B
+A --> B : uses
+@enduml

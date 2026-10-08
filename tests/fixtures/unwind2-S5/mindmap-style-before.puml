@@ -1,0 +1,12 @@
+@startmindmap
+<style>
+root {
+  FontColor #FF0000
+  LineColor #00AA00
+}
+</style>
+!theme amiga
+* root
+** a
+** b
+@endmindmap
