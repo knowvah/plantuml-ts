@@ -10,9 +10,7 @@ import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
-import { rect, path, polygon } from '../../core/svg.js';
-import { renderNodeLabel } from '../../core/latex.js';
-import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
+import { rect, path } from '../../core/svg.js';
 import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
 import {
   noteFoldPath,
@@ -21,7 +19,6 @@ import {
   noteBodySpikeLeft,
   noteFillOf,
 } from './activity-renderer-note-shapes.js';
-import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import {
   ACTIVITY_BAR_FILL,
   CIRCLE_INK,
@@ -30,7 +27,6 @@ import {
   activityLineThickness,
   activityRoundCorner,
 } from './activity-style-defaults.js';
-import { activityFontColor, activityFontFamily, linkStyleFields } from './activity-text-style.js';
 import { renderBar, renderSplitLine } from './activity-renderer-bars.js';
 import {
   renderIfMerge,
@@ -38,14 +34,11 @@ import {
   renderDiamond,
   renderHexagonPolygon,
   renderHexagonOwnLabel,
-  renderHexagonMultilineLabel,
-  diamondLineWidth,
   renderIfSplitShape,
   diamondColors,
 } from './activity-renderer-if-shapes.js';
 import { renderBoxStyleAction } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
-import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
 import { boxStyleName, floorActionLineHeight } from './tiles/gtile-action.js';
 import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
 
@@ -91,23 +84,6 @@ function actionCornerRadius(theme: Theme): number {
  */
 export const ASCENT_FRACTION = 1 - 1 / 4.5;
 
-/**
- * One `<text>` element PER LINE, never `<tspan>` (D3). Upstream draws a
- * multi-line label as N separate `<text>` draws; `<tspan>` is reserved for
- * creole's own multi-STYLE-run serialisation within a single line
- * (`src/core/creole-svg.ts`, not this function's concern -- none of this
- * file's multi-line call sites carry creole markup, only `\n`-split text).
- */
-export function textLines(
-  lines: readonly string[],
-  x: number,
-  firstBaselineY: number,
-  lineHeight: number,
-  style: ActivityTextStyle,
-): string {
-  return drawActivityTextLines(lines, x, firstBaselineY, lineHeight, style);
-}
-
 /** First baseline Y so an N-line block is vertically centred around `cy`,
  *  using the cited advance/ascent above instead of the old `lh * 0.8`.
  *  `lineCount = 1` is this same formula's reduction to a SINGLE centred
@@ -130,28 +106,6 @@ export function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount
  *  {@link centeredFirstBaselineY} for every `size >= 10`. */
 export function flooredFirstBaselineY(cy: number, fontSize: number, lineCount: number): number {
   return cy - (floorActionLineHeight(fontSize) * lineCount) / 2 + fontSize * ASCENT_FRACTION;
-}
-
-/** `fontSize` defaults to the action box's size (`gtile-action.ts`); a
- *  DIFFERENT element passes its own. `opts` (`activity-text-placement.ts`)
- *  picks both the D3 colour bucket and the D2 `x` (LEFT/CENTER/RIGHT for
- *  `'activity'`, geometric centre for `'diamond'`). Only a `<latex>` label
- *  still delegates to `core/latex.ts#renderNodeLabel` -- a permanent LaTeX
- *  divergence (KaTeX, not JLaTeXMath), the sole exception here. */
-export function renderLabel(label: string, cx: number, cy: number, theme: Theme, opts: ActivityTextOpts): string {
-  const size = opts.fontSize ?? activityFontSize(theme, 'activity');
-  if (label.includes('<latex>')) return renderNodeLabel(label, cx, cy, theme, size);
-  // add4-T2d: a diamond label centres on its creole width (`diamondLineWidth`).
-  const lineWidth =
-    opts.sname === 'diamond' ? diamondLineWidth(theme, size, label) : measureLineWidth(theme, size, label);
-  const x = activityTextLineX(theme, cx, lineWidth, opts);
-  // add2 T3h: family K + F (pekuxe-00/gaxezi-48/nisexe-68/dozaxu-98).
-  return drawActivityText(x, cy, label, {
-    fontFamily: activityFontFamily(theme, opts.sname),
-    fontSize: size,
-    fill: activityFontColor(theme, opts.sname),
-    ...linkStyleFields(theme),
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -218,56 +172,6 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
 function renderActionBox(node: ActivityNodeGeo, theme: Theme): string {
   const style = boxStyleName(node.stereotype);
   return style === undefined ? renderAction(node, theme) : renderBoxStyleAction(node, theme, style);
-}
-
-/** The hexagon condition label, split out of {@link renderHexagon} to stay
- *  under this file's per-function NLOC limit. Single-line: jar-verified on
- *  `rerovo-62-nazo755`'s "test" hexagon (`cy=27`, `fontSize=11`):
- *  `y=30.056 === cy + 11 * 5/18`, the N=1 reduction of
- *  `centeredFirstBaselineY`. Multi-line: {@link renderHexagonMultilineLabel}
- *  (`activity-renderer-if-shapes.ts`, also at this file's own 500-line cap,
- *  IFNL/T3d doc). Exported (T3k) so that file's `renderHexagonOwnLabel` can
- *  draw the own label separately. */
-export function renderHexagonLabel(
-  label: string | undefined,
-  cx: number,
-  cy: number,
-  theme: Theme,
-  condSize: number,
-): string {
-  const lines = (label ?? '').split('\n');
-  const opts: ActivityTextOpts = { sname: 'diamond', fontSize: condSize };
-  return lines.length > 1
-    ? renderHexagonMultilineLabel(lines, cx, cy, theme, opts)
-    : renderLabel(label ?? '', cx, flooredFirstBaselineY(cy, condSize, 1), theme, opts);
-}
-
-export function renderHexagon(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.diamondFill;
-  // I (T3d): the dent is the FIXED `hexagonHalfSize` (12), not `height/2`
-  // -- equal only when h=24 (default). `asPolygon(shadowing,w,h)`
-  // (`Hexagon.java:46,65-74`) re-adds `(dent,0)` as the closing point
-  // after `(0,h/2)` -- `UPolygon` does not close itself on draw.
-  const dent = HEXAGON_HALF_SIZE;
-  const first = { x: x + dent, y: y };
-  const shape = polygon(
-    [
-      first,
-      { x: x + w - dent, y: y },
-      { x: x + w, y: y + h / 2 },
-      { x: x + w - dent, y: y + h },
-      { x: x + dent, y: y + h },
-      { x: x, y: y + h / 2 },
-      first,
-    ],
-    { fill, stroke: c.diamondBorder, strokeWidth: activityLineThickness(theme, 'diamond') },
-  );
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const condSize = activityFontSize(theme, 'diamond');
-  return shape + renderHexagonLabel(node.label, cx, cy, theme, condSize);
 }
 
 export function renderNote(node: ActivityNodeGeo, theme: Theme): string {

@@ -25,7 +25,6 @@ import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
 import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import type { ActivityTextOpts } from './activity-text-placement.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 
@@ -42,11 +41,11 @@ import { WidthTableMeasurer } from '../../core/measurer.js';
  * 80.725,107"` repeats the first pair). `svg-shapes.ts#polygon` only joins
  * the points it is given (no implicit closing), so the activity side
  * repeats the first point explicitly, same as the hexagon
- * ({@link renderHexagon}).
+ * ({@link renderHexagonPolygon}).
  * Same fill/stroke pair `renderDiamond` draws with, plus the explicit
  * `diamond` bucket's line thickness (`FtileDiamond.java:89`'s
  * `.apply(getStyle().getStroke())` -- the diamond style's own stroke,
- * `renderHexagon`'s `activityLineThickness(theme, 'diamond')` call resolves
+ * `renderHexagonPolygon`'s `activityLineThickness(theme, 'diamond')` resolves
  * the same style bucket) so a `diamond { LineThickness }` override is not
  * silently dropped on the rhombus.
  */
@@ -133,20 +132,16 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
  * The hexagon shape ALONE, no label -- `FtileDiamondInside#drawU` draws
  * the polygon, then north/south, then the own label, then west/east, as
  * FIVE separate draw calls, never one combined blob
- * (`vertical/FtileDiamondInside.java:84-102`). Split out of `activity-
- * renderer-shapes.ts#renderHexagon` (T3k, that file at the 500-line cap)
- * so a walker can push the polygon and the own label as two separate
- * nodes, landing the label between south and west in document order --
- * `renderHexagon` itself is unchanged (still shape+label in one call) and
- * stays the renderer that module's own tests exercise directly. Identical
- * polygon math to `renderHexagon`'s own (not re-derived).
+ * (`vertical/FtileDiamondInside.java:84-102`), so a walker pushes the
+ * polygon and the own label ({@link renderHexagonOwnLabel}) as two separate
+ * nodes, landing the label between south and west in document order (T3k).
  */
 export function renderHexagonPolygon(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const c = actColors(theme);
   const fill = node.color ?? c.diamondFill;
-  // I (T3d): fixed dent `HEXAGON_HALF_SIZE` (12), not `height/2` -- same
-  // fix as `renderHexagon`'s own copy, `activity-renderer-shapes.ts`.
+  // I (T3d): fixed dent `HEXAGON_HALF_SIZE` (12), not `height/2`; equal
+  // only when h=24 (`Hexagon.java:46,65-74`).
   const dent = HEXAGON_HALF_SIZE;
   const first = { x: x + dent, y: y };
   return polygon(
@@ -236,26 +231,6 @@ const CREOLE_MEASURER = new WidthTableMeasurer();
  *  (`WidthTableMeasurer`, `activity-text-placement.ts#measureLineWidth`'s). */
 export function diamondLineWidth(theme: Theme, fontSize: number, line: string): number {
   return creoleTextLines(line, { family: theme.fontFamily, size: fontSize }, CREOLE_MEASURER)[0]?.width ?? 0;
-}
-
-/**
- * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d): the SAME
- * condition Sheet {@link renderHexagonOwnLabel} draws
- * (`activity-text-sheet-diamond.ts#renderDiamondTestLabel`,
- * `ConditionalBuilder.java:240-247`), centred once on (`cx`, `cy`). The
- * Sheet's own `SheetBlock1#initMap` applies the per-stripe CENTER/RIGHT
- * `getCoef` shift (`SheetBlock1.java:155-172`) for a non-LEFT
- * `defaultTextAlignment` (ALIGN-DIAMOND, add3-T3d).
- */
-export function renderHexagonMultilineLabel(
-  lines: string[],
-  cx: number,
-  cy: number,
-  theme: Theme,
-  _opts: ActivityTextOpts,
-): string {
-  // A zero-size box at the centre: `lx = -dimLabel.width / 2`.
-  return renderDiamondTestLabel(lines.join('\n'), theme, { x: cx, y: cy, width: 0, height: 0 });
 }
 
 /**
