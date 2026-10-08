@@ -150,6 +150,14 @@ function buildMainframeTitleBlock(
   );
 }
 
+/** `UStroke#dashVisible,dashSpace` as the SVG `stroke-dasharray`; a zero
+ *  `dashVisible` is a solid stroke (`style-line-style.ts#lineStyleDash`). */
+function dashArrayOf(style: AnnotationBoxStyle): { dashArray?: string } {
+  const dash = style.lineStyle;
+  if (dash === undefined || dash.dashVisible === 0) return {};
+  return { dashArray: `${String(dash.dashVisible)},${String(dash.dashSpace)}` };
+}
+
 function bigFrameStyleOf(style: AnnotationBoxStyle): BigFrameStyle {
   return {
     fillColor: style.backgroundColor ?? style.documentBackground,
@@ -157,6 +165,7 @@ function bigFrameStyleOf(style: AnnotationBoxStyle): BigFrameStyle {
     lineThickness: style.lineThickness,
     roundCorner: style.roundCorner,
     padding: style.padding,
+    ...dashArrayOf(style),
   };
 }
 
