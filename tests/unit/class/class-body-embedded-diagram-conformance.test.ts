@@ -77,7 +77,8 @@ describe('gadufu-56-votu808 — end-to-end, real renderSync, isEnhancedBody alre
   it('the <image> payload is a real recursive render (ACTIVITY engine, the Cyrillic activity text), not the (42,42) fallback', () => {
     const [tag] = imageTags(group);
     const decoded = decodeHref(attr(tag!, 'xlink:href')!);
-    expect(decoded).toContain('data-diagram-type="ACTIVITY"');
+    // Root attributes are re-rooted away (`UImageSvg.java:73-76`).
+    expect(decoded).not.toContain('data-diagram-type');
     expect(decoded).toContain('Использовать');
     // NOT asserted equal to the jar's own 133x107: the residual (this
     // port's 121x96, `.agent-notes/cdd-T27.md`'s own arithmetic finding)
@@ -110,7 +111,10 @@ describe('moxobo/zikabo — the extraction+render mechanism, byte-exact, called 
     expect(rowsPart?.embeds?.[0]?.width).toBe(43);
     expect(rowsPart?.embeds?.[0]?.height).toBe(54);
     const decoded = decodeHref(rowsPart!.embeds![0]!.href!);
-    expect(decoded).toContain('data-diagram-type="DESCRIPTION"');
+    // `UImageSvg#getSvg` drops the nested root's attributes
+    // (`UImageSvg.java:73-76`); the description engine's leaf survives.
+    expect(decoded).toMatch(/^<svg height="54" width="43" /);
+    expect(decoded).toContain('<!--entity f-->');
     expect(decoded).toContain('>f<');
   });
 
@@ -148,7 +152,10 @@ describe('moxobo/zikabo — end-to-end, real renderSync, isEnhancedBody now true
     expect(attr(tags[0]!, 'width')).toBe('43');
     expect(attr(tags[0]!, 'height')).toBe('54');
     const decoded = decodeHref(attr(tags[0]!, 'xlink:href')!);
-    expect(decoded).toContain('data-diagram-type="DESCRIPTION"');
+    // `UImageSvg#getSvg` drops the nested root's attributes
+    // (`UImageSvg.java:73-76`); the description engine's leaf survives.
+    expect(decoded).toMatch(/^<svg height="54" width="43" /);
+    expect(decoded).toContain('<!--entity f-->');
     expect(decoded).toContain('>f<');
   });
 

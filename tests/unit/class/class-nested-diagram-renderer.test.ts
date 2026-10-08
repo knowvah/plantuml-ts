@@ -18,6 +18,7 @@
  * of CDD T27FU — see that file's own doc comment for what remains blocked
  * and why.
  */
+import { UImageSvg, svgImagePayload } from '../../../src/core/klimt/shape/UImageSvg.js';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import {
@@ -114,7 +115,9 @@ describe('createNestedDiagramRenderer — real renderSync integration', () => {
     // `<?plantuml ...?>` processing instruction.
     expect(decoded).not.toContain('<?plantuml');
     const standaloneStripped = renderSync(NESTED_SOURCE.join('\n')).replace(/<\?plantuml.+?\?>/g, '');
-    expect(decoded).toBe(standaloneStripped);
+    // `SvgGraphics#svgImage` re-roots the nested document before encoding
+    // it (`SvgGraphics.java:1015-1029`, `UImageSvg.java:65-93`).
+    expect(decoded).toBe(svgImagePayload(new UImageSvg(standaloneStripped, 1)));
 
     const expected = viewBoxDims(standaloneStripped);
     expect(imageMatches[0]).toContain(`width="${expected.width}"`);
