@@ -50,6 +50,10 @@ describe('activity labels through the FtileBox Sheet (jar oracles)', () => {
     expect(diffPaths('multiline-columns')).toEqual([]);
   });
 
+  it('partition and package titles take the hyperlink colour (Style.java:265)', () => {
+    expect(diffPaths('composite-title-url')).toEqual([]);
+  });
+
   it('hyperlinkColor/hyperlinkUnderline/svgLinkTarget reach action AND note links', () => {
     expect(diffPaths('hyperlink-skin')).toEqual([]);
   });
