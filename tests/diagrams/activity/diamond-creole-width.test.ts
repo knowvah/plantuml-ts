@@ -11,9 +11,6 @@ import { describe, expect, it } from 'vitest';
 
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 import { renderActivityFixture } from '../../helpers/activity-text-position.js';
-import { diamondLineWidth } from '../../../src/diagrams/activity/activity-renderer-if-shapes.js';
-import { measureLineWidth } from '../../../src/diagrams/activity/activity-text-placement.js';
-import { resolveTheme } from '../../../src/core/theme.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_ROOT = join(HERE, '../../fixtures/activity/add4-T2d');
@@ -22,11 +19,5 @@ describe('diamond label creole width', () => {
   it('diamond-creole-width renders jar-exact (single- and multi-line, bold + underline)', () => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, 'diamond-creole-width');
     expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
-  });
-
-  it('diamondLineWidth drops the markup, measureLineWidth keeps it', () => {
-    const theme = resolveTheme('default');
-    expect(diamondLineWidth(theme, 11, '**[EOL]**')).toBe(measureLineWidth(theme, 11, '[EOL]'));
-    expect(measureLineWidth(theme, 11, '**[EOL]**')).toBeGreaterThan(measureLineWidth(theme, 11, '[EOL]'));
   });
 });

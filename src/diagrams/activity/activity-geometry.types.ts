@@ -39,6 +39,14 @@ export interface ActivityNodeGeo {
    * branch.ts`/`walk-repeat*.ts`), which keep the pre-existing heuristic.
    */
   diamondShape?: 'inside' | 'square' | 'empty';
+  /**
+   * For `'if-label'` nodes only (add4-T3h): `'test'` when the label is an
+   * EMPTY_DIAMOND condition's own test text -- `FtileDiamond.withNorth(tbTest)`
+   * (`ConditionalBuilder.java:262-267`), the diamond-font `CreoleMode.FULL`
+   * condition Sheet (`:240-247`). Absent = a branch label, the arrow-font
+   * `SIMPLE_LINE` block (`:280-283`).
+   */
+  ifLabelRole?: 'test';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
   /** For `label`/`goto` nodes (add4-T3d): `false` when upstream draws the

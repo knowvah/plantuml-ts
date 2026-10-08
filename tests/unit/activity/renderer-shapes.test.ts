@@ -15,8 +15,6 @@ import {
   renderAction,
   renderDiamond,
   renderEnd,
-  renderHexagon,
-  renderLabel,
   renderNode,
   renderNote,
   renderSpot,
@@ -26,7 +24,10 @@ import {
 import { renderBar, renderSplitLine } from '../../../src/diagrams/activity/activity-renderer-bars.js';
 // add4-T3g: the live condition-label path (`FtileDiamondInside#drawU`); the
 // label-less `renderDiamond` rhombus is never handed a label by any producer.
-import { renderHexagonOwnLabel } from '../../../src/diagrams/activity/activity-renderer-if-shapes.js';
+import {
+  renderHexagonOwnLabel,
+  renderHexagonPolygon,
+} from '../../../src/diagrams/activity/activity-renderer-if-shapes.js';
 import { GtileAction } from '../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileDiamond } from '../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
@@ -42,6 +43,10 @@ const theme = resolveTheme('default');
 /** add4-T3e: the SDL/UML outlines are dispatched by `renderNode` from the
  *  node's stereotype (`BoxStyle.fromString`, `BoxStyle.java:126-133`); these
  *  wrap it for the older per-shape tests below. */
+// add4-T3h: a labelled hexagon is two nodes, `'if-split'` (the polygon) and
+// `'if-own-label'` (the condition Sheet), `FtileDiamondInside.java:84-96`.
+const renderHexagon = (n: ActivityNodeGeo, t: Theme): string =>
+  renderHexagonPolygon(n, t) + renderHexagonOwnLabel(n, t);
 const renderChevronLeft = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'input' }, t);
 const renderChevronRight = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'output' }, t);
 const renderParallelogram = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'save' }, t);
@@ -464,16 +469,12 @@ describe('T4 — text colour cascade (D3)', () => {
     expect(ACTIVITY_FONT_COLOR).toBe('#000000');
   });
 
-  // `renderLabel` (single-line path) resolves its own colour locally rather
-  // than delegating to `core/latex.ts#renderNodeLabel` (which hardcodes
-  // `theme.colors.text`) -- only a `<latex>` label still delegates there.
-
   it('a single-line action label draws the root black, not theme.colors.text', () => {
     const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
     expect(svg).toContain('fill="#000"');
   });
 
-  it('a single-line diamond-family label (renderLabel path) draws the root black', () => {
+  it('a single-line hexagon condition label draws the root black', () => {
     const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), theme);
     expect(svg).toContain('fill="#000"');
   });
@@ -489,11 +490,6 @@ describe('T4 — text colour cascade (D3)', () => {
     const hexSvg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), activityRed);
     expect(hexSvg).toContain('fill="#F00"');
     expect(hexSvg).not.toContain('fill="#000"');
-  });
-
-  it('a <latex> label still delegates to renderNodeLabel (permanent divergence)', () => {
-    const svg = renderLabel('<latex>x^2</latex>', 60, 60, theme, { sname: 'activity' });
-    expect(svg).not.toContain('fill="#000"');
   });
 
   it('a multi-line action label draws the resolved colour (#000, shortened), not theme.colors.text', () => {
@@ -669,10 +665,6 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
     expect(multi).not.toContain('text-anchor');
     expect(single).toContain('x="56"');
     expect((multi.match(/x="56"/g) ?? []).length).toBe(2);
-  });
-
-  it('renderLabel throws for an "activity" sname with no width (broken caller contract)', () => {
-    expect(() => renderLabel('go', 60, 60, theme, { sname: 'activity' } as never)).toThrow(/width is required/);
   });
 });
 

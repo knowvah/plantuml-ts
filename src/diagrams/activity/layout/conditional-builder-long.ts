@@ -17,7 +17,8 @@ import { GtileDiamondInside2 } from '../tiles/gtile-diamond-inside2.js';
 import { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
 import { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
 import type { VerticalInlabel } from '../tiles/gtile-if-long-vertical.js';
-import { activityFontSize } from '../activity-style-defaults.js';
+import { measureSide } from '../tiles/gtile-diamond-inside.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { tileNodes } from './tile-layout.js';
 import { withOutLabel } from './tile-layout-inlabel.js';
@@ -154,8 +155,8 @@ function buildLongVerticalDiamonds(
 /**
  * `tbInlabel = branch.getInlabel().create(fcArrow, LEFT, ...)` and its
  * `calculateDimension(...).getWidth()` (`FtileIfLongVertical.java:154-157`):
- * the widest line at the arrow font, `undefined` for a branch with no
- * inlabel (`Display.isNull`).
+ * the FULL creole block at the arrow font (add4-T3h), `undefined` for a
+ * branch with no inlabel (`Display.isNull`).
  */
 function measureVerticalInlabel(
   label: string | undefined,
@@ -163,9 +164,7 @@ function measureVerticalInlabel(
   theme: Theme,
 ): VerticalInlabel | undefined {
   if (label === undefined || label === '') return undefined;
-  const size = activityFontSize(theme, 'arrow');
-  const width = Math.max(...label.split('\n').map((line) => bounder.getDimension(line, size).width));
-  return { label, width };
+  return { label, width: measureSide(label, bounder, theme, CreoleMode.FULL).width };
 }
 
 /**

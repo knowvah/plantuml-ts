@@ -14,7 +14,12 @@ import { activityFontSize, activityLineThickness } from './activity-style-defaul
 import { activityHorizontalAlignment } from './activity-text-style.js';
 import { actColors } from './activity-renderer-shapes.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js';
-import { activitySheet, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import {
+  activityDisplayBlock,
+  activitySheet,
+  activityTextFontConfiguration,
+  drawActivityTextBlock,
+} from './activity-text-sheet.js';
 import { klimtStringBounder } from './activity-creole-sheet.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
@@ -29,6 +34,7 @@ import { WidthTableMeasurer } from '../../core/measurer.js';
 import type { Stencil } from '../../core/klimt/creole/Stencil.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { Paint } from '../../core/paint.js';
+import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 
 const ALIGNMENT_MAP: Record<'left' | 'center' | 'right', HorizontalAlignment> = {
   left: HorizontalAlignment.LEFT,
@@ -109,4 +115,42 @@ export function renderDiamondTestLabel(label: string, theme: Theme, box: Diamond
     new Back(box.fill ?? c.diamondFill),
   ];
   return drawActivityTextBlock(tb, { x: box.x + lx, y: box.y + ly }, theme, fc, changes);
+}
+
+/** The `'if-label'` fields {@link ifLabelBlock} reads. */
+export interface IfLabelNode {
+  readonly label?: string | undefined;
+  readonly ifLabelRole?: 'test' | undefined;
+}
+
+function ifLabelSName(node: IfLabelNode): 'diamond' | 'arrow' {
+  return node.ifLabelRole === 'test' ? 'diamond' : 'arrow';
+}
+
+/** The font size an `'if-label'` draws at: the diamond style's for a test
+ *  label (`styleDiamonFont`, `ConditionalBuilder.java:242`), the arrow
+ *  style's for a branch label (`fontArrow`, `:281`). */
+export function ifLabelFontSize(node: IfLabelNode, theme: Theme): number {
+  return activityFontSize(theme, ifLabelSName(node));
+}
+
+/** The `TextBlock` an `'if-label'` node draws and the font it draws at:
+ *  the condition test Sheet for `ifLabelRole: 'test'` (`FtileDiamond
+ *  .withNorth(tbTest)`, `ConditionalBuilder.java:262-267`), else
+ *  `getLabelPositive`'s `create0(fontArrow, LEFT, ..., CreoleMode.SIMPLE_LINE)`
+ *  (`ConditionalBuilder.java:280-283`). Layout sizes, boxes and anchors the
+ *  label with this same block. */
+export function ifLabelBlock(
+  node: IfLabelNode,
+  theme: Theme,
+): { readonly tb: TextBlock; readonly fc: FontConfiguration } {
+  const label = node.label ?? '';
+  const fc = activityTextFontConfiguration(theme, ifLabelFontSize(node, theme), ifLabelSName(node));
+  if (node.ifLabelRole === 'test') return { tb: diamondTestBlock(label, theme), fc };
+  const tb = activityDisplayBlock(label, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+  });
+  return { tb, fc };
 }

@@ -15,7 +15,7 @@
  */
 
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
-import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
@@ -72,6 +72,14 @@ function pushEmphasizedEdge(
   if (emphasize !== undefined) out.edges[out.edges.length - 1]!.emphasize = emphasize;
 }
 
+/** add4-T3h: an EMPTY_DIAMOND's north slot holds the condition's own
+ *  test Sheet, `FtileDiamond.withNorth(tbTest)` (`ConditionalBuilder.java:
+ *  262-267`) -- drawn at the diamond font, `CreoleMode.FULL`, not as an
+ *  arrow-font branch label. Every other slot is a branch label. */
+function testLabelRole(diamond: DiamondConditionTile, side: DiamondSide): { ifLabelRole?: 'test' } {
+  return side === 'north' && diamond.kind === 'gtile-diamond-empty' ? { ifLabelRole: 'test' } : {};
+}
+
 function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'east', origin: GPoint): void {
   const { t, myLane, out } = ctx;
   const l = t.diamond1.labelAt(side);
@@ -86,6 +94,7 @@ function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'ea
       width: l.width,
       height: l.height,
       label: l.label,
+      ...testLabelRole(t.diamond1, side),
     },
     myLane,
   );

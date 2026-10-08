@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { ifOwnLabelShapes } from '../../../../../src/diagrams/activity/layout/compress/shapes-of-hexagon-label.js';
-import { diamondLineWidth } from '../../../../../src/diagrams/activity/activity-renderer-if-shapes.js';
 import type { ActivityNodeGeo } from '../../../../../src/diagrams/activity/activity-geometry.types.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
@@ -28,7 +27,9 @@ describe('ifOwnLabelShapes (SlotFinder#drawText per UText, SlotFinder.java:127-1
 
   it('starts every LEFT line at the centred block left (FtileDiamondInside.java:94-96)', () => {
     const shapes = ifOwnLabelShapes(ownLabel('no on\nseveral lines'), bounder, theme);
-    const maxWidth = Math.max(diamondLineWidth(theme, 11, 'no on'), diamondLineWidth(theme, 11, 'several lines'));
+    // add4-T3h: the block is the drawn Sheet measured through the same
+    // bounder as the tile (6/char here), widest stripe `several lines`.
+    const maxWidth = 13 * 6;
     expect(shapes.map((s) => s.x)).toEqual([50 - maxWidth / 2, 50 - maxWidth / 2]);
   });
 

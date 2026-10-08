@@ -15,7 +15,6 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { renderFixtureActivity } from '../../oracle/svg-conformance/render-fixture-activity.js';
 import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
-import { drawActivityText } from '../../../src/diagrams/activity/activity-renderer-text.js';
 import { activityHyperlinkColor } from '../../../src/diagrams/activity/activity-text-style.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
@@ -64,24 +63,6 @@ describe('activity labels through the FtileBox Sheet (jar oracles)', () => {
 
   it('a `[[url label]]` lane title keeps its <a> in the root hyperlink colour', () => {
     expect(diffPaths('lane-title-url')).toEqual([]);
-  });
-});
-
-describe('drawActivityText url-run colour (Style.java:265)', () => {
-  const STYLE = { fontFamily: 'SansSerif', fontSize: 12, fill: '#000' };
-
-  it('replaces the default hyperlink blue with the caller-resolved colour', () => {
-    const svg = drawActivityText(10, 20, '[[http://x.com label]]', { ...STYLE, hyperlinkColor: '#008000' });
-    expect(svg).toContain('fill="#008000"');
-    expect(svg).not.toContain('fill="#00F"');
-  });
-
-  it('keeps an inner <color:x> override inside the link label', () => {
-    const svg = drawActivityText(10, 20, '[[http://x.com <color:red>label</color>]]', {
-      ...STYLE,
-      hyperlinkColor: '#008000',
-    });
-    expect(svg).toContain('fill="#F00"');
   });
 });
 

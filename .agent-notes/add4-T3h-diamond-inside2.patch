@@ -1,0 +1,75 @@
+diff --git a/src/diagrams/activity/tiles/gtile-diamond-inside2.ts b/src/diagrams/activity/tiles/gtile-diamond-inside2.ts
+index 22b7033fd..3064d3f8d 100644
+--- a/src/diagrams/activity/tiles/gtile-diamond-inside2.ts
++++ b/src/diagrams/activity/tiles/gtile-diamond-inside2.ts
+@@ -3,14 +3,11 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
+ import type { StringBounder } from './tile.js';
+ import { TileLeaf } from './tile.js';
+ import type { Theme } from '../../../core/theme.js';
+-import { activityFontSize } from '../activity-style-defaults.js';
++import { measureCondition, measureSide } from './gtile-diamond-inside.js';
++import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+ 
+ /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
+ const HEXAGON_HALF_SIZE = 12;
+-/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d).
+- * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
+-const ATOM_TEXT_MIN_HEIGHT = 10;
+-
+ export type DiamondInside2Side = 'north' | 'west' | 'east';
+ 
+ export interface DiamondInside2Labels {
+@@ -25,30 +22,6 @@ interface LabelDim {
+   readonly height: number;
+ }
+ 
+-/**
+- * Same convention as `GtileDiamondInside`'s own `measureLabel`: an unset
+- * label is a literal 0x0 box, never handed to the bounder. MLJOIN/IFNL
+- * residual (T3d, `pekefu-66-mepa144`): a real-`\n`-bearing condition (now
+- * unescaped by `if-dispatch.ts#unescapeLabelNewlines`, the same upstream
+- * `Display.getWithNewlines` path `FtileIfLongHorizontal.java:174`'s own
+- * `branch.getLabelTest().create0(...)` routes through) needs the SAME
+- * per-line width=MAX/height=SUM fold `gtile-diamond-inside.ts`'s own copy
+- * uses -- a single `getDimension` call on the whole string reports one
+- * oversized line.
+- */
+-function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): LabelDim {
+-  const t = text ?? '';
+-  if (t === '') return { text: t, width: 0, height: 0 };
+-  let width = 0;
+-  let height = 0;
+-  for (const line of t.split('\n')) {
+-    const dim = bounder.getDimension(line, fontSize);
+-    if (dim.width > width) width = dim.width;
+-    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
+-  }
+-  return { text: t, width, height };
+-}
+-
+ /** Byte-identical to `gtile-diamond-inside.ts`'s own `hexagonAlone` (D5: no
+  *  shared helper module between builder-specific tile files).
+  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside2.java:104-113
+@@ -115,13 +88,16 @@ export class GtileDiamondInside2 extends TileLeaf {
+   constructor(label: string, labels: DiamondInside2Labels, bounder: StringBounder, theme: Theme) {
+     super();
+     this.label = label;
+-    const arrowSize = activityFontSize(theme, 'arrow');
+-    this.north = measureLabel(labels.north, bounder, arrowSize);
+-    this.west = measureLabel(labels.west, bounder, arrowSize);
+-    this.east = measureLabel(labels.east, bounder, arrowSize);
++    // add4-T3h: every slot is a `Display#create(fcArrow, LEFT, skinParam)`
++    // FULL block (`FtileIfLongHorizontal.java:172-173,186`,
++    // `FtileIfLongVertical.java:142-143`, `FtileSwitch.java:110-111,123`);
++    // the condition is the `fcTest` FULL Sheet (`FtileIfLongHorizontal
++    // .java:175-177`), the extent `measureCondition` measures.
++    this.north = measureSide(labels.north, bounder, theme, CreoleMode.FULL);
++    this.west = measureSide(labels.west, bounder, theme, CreoleMode.FULL);
++    this.east = measureSide(labels.east, bounder, theme, CreoleMode.FULL);
+ 
+-    const diamondSize = activityFontSize(theme, 'diamond');
+-    const dimLabel = measureLabel(label, bounder, diamondSize);
++    const dimLabel = measureCondition(label, bounder, theme);
+     const hex = hexagonAlone(dimLabel);
+     this.hexWidth = hex.width;
+     this.hexHeight = hex.height;

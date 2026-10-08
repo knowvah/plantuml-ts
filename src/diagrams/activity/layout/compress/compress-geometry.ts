@@ -140,7 +140,7 @@ function transformIfLabel(
   mode: CompressionMode,
   theme: Theme,
 ): ActivityNodeGeo {
-  const { dx, dy } = ifLabelTextAnchor(theme);
+  const { dx, dy } = ifLabelTextAnchor(theme, node);
   if (mode === 'x') return { ...node, x: ct.transform(node.x + dx) - dx };
   return { ...node, y: ct.transform(node.y + dy) - dy };
 }
