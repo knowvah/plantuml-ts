@@ -24,6 +24,9 @@ import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
 import { ARROW_LABEL_LAYOUT_FONT_SIZE } from '../activity-layout-constants.js';
 import { WidthTableMeasurer } from '../../../core/measurer.js';
 import { pushLaneReservation } from './swimlane-reservation-lane.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+import type { FontSpec, StringMeasurer } from '../../../core/measurer.js';
 
 /** Measures an in-link label's width at layout time -- `family` is unused
  *  by `WidthTableMeasurer` (it reads only `size`, a universal sans-serif
@@ -84,6 +87,19 @@ export function withOutLabel<T extends { outLabel?: PendingInLabel | undefined }
 }
 
 /**
+ * One connector-label line's width as a `CreoleMode.SIMPLE_LINE` creole
+ * block -- every Snake label upstream is built that way
+ * (`FtileFactoryDelegator.java:111`, `Branch.java:255-256`,
+ * `ConditionalBuilder.java:282,295,299`, `FtileRepeat.java:171-200`,
+ * `AbstractParallelFtilesBuilder.java:195`): `**bold**` resolves,
+ * `__underline__` stays literal (`CommandCreoleBuilder.java:85-86`).
+ * Shared with `compress/shapes-of.ts#edgeLabelShape`.
+ */
+export function snakeLabelLineWidth(line: string, font: FontSpec, measurer: StringMeasurer): number {
+  return creoleTextLines(line, font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]?.width ?? 0;
+}
+
+/**
  * `LimitFinder#drawText`'s own ink box (`klimt/drawing/LimitFinder.java:
  * 216-224`), computed at WALK time (pre-compression) over the edge's own
  * RAW points -- mirrors `canvas-origin-text-ink.ts#extendForEdgeLabelText`'s
@@ -106,10 +122,18 @@ function inLabelReservation(
   // adjacent boxes touch, so one N-line box is the same slot.
   const lines = inLabel.label.split('\n');
   const font = { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE };
-  const width = Math.max(...lines.map((l) => LABEL_MEASURER.measure(l, font).width));
   const lineHeight = ARROW_LABEL_LAYOUT_FONT_SIZE;
+  // The placement keeps the raw width the renderer places with
+  // (`renderer.ts#renderEdgeLabelAligned`, `measureLineWidth`), so this box
+  // starts where the text is drawn.
+  const rawWidth = Math.max(...lines.map((l) => LABEL_MEASURER.measure(l, font).width));
+  const position = getTextBlockPosition(points, { width: rawWidth, height: lineHeight * lines.length }, align);
+  // add4-T3b SNAKE-LABEL-CREOLE: the occupied width is the connector label's
+  // SIMPLE_LINE creole width (`FtileFactoryDelegator.java:111`,
+  // `Branch.java:255-256`, `ConditionalBuilder.java:282`) -- what
+  // `SlotFinder#drawText` boxes once the markup has been resolved.
+  const width = Math.max(...lines.map((l) => snakeLabelLineWidth(l, font, LABEL_MEASURER)));
   const dim = { width, height: lineHeight * lines.length };
-  const position = getTextBlockPosition(points, dim, align);
   const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, lineHeight, lines.length);
   const top = baselineY - (lineHeight - 1.5);
   return { x: position.x, y: top, width, height: dim.height };
