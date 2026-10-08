@@ -96,19 +96,26 @@ function activitySkinSimple(fontConfiguration: FontConfiguration, theme: Theme):
   return skin;
 }
 
-/** `style.getFontConfiguration(colorSet)` (`Style.java:259-268`) for one
- *  activity SName: family, size, colour, `HyperLinkColor`, and
- *  `useUnderlineForHyperlink` (`SkinParam.java:1057-1060`). */
-export function activityTextFontConfiguration(theme: Theme, fontSize: number, sname: ActivitySName): FontConfiguration {
-  const hyperlinkColor = activityHyperlinkColor(theme, sname);
+/** `style.getFontConfiguration(colorSet)` (`Style.java:259-268`) from an
+ *  already-resolved family/size/colour: plus the style's `HyperLinkColor`
+ *  and `useUnderlineForHyperlink` (`SkinParam.java:1057-1060`). */
+export function styleFontConfiguration(
+  theme: Theme,
+  font: { readonly family: string; readonly size: number; readonly color: string },
+  hyperlinkColor: string | undefined,
+): FontConfiguration {
   return {
-    family: activityFontFamily(theme, sname),
-    size: fontSize,
-    color: activityFontColor(theme, sname),
+    ...font,
     styles: new Set(),
     ...(hyperlinkColor === undefined ? {} : { hyperlinkColor }),
     ...(theme.hyperlinkUnderline === false ? { hyperlinkUnderlineStroke: null } : {}),
   };
+}
+
+/** {@link styleFontConfiguration} for one activity SName. */
+export function activityTextFontConfiguration(theme: Theme, fontSize: number, sname: ActivitySName): FontConfiguration {
+  const font = { family: activityFontFamily(theme, sname), size: fontSize, color: activityFontColor(theme, sname) };
+  return styleFontConfiguration(theme, font, activityHyperlinkColor(theme, sname));
 }
 
 /** The `Display#create0` arguments every caller here supplies. */
