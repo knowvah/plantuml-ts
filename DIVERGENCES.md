@@ -441,11 +441,11 @@ seam replaced was worse:** `include-resolver.ts` used to **silently drop**
 the line, rendering diagrams *quietly wrong*.
 **Category:** limitation only for store-less callers (deliberate packaging).
 
-### Sprite and `img` rasters — PNG bytes and CC BY-ND artwork (library- and licence-forced)
+### Sprite and `img` rasters — CC BY-ND artwork passes through (licence-forced)
 
 **Mirrored (unwind-U4, 2026-10-08):** sprite rasters are resampled to the jar's `round(w*s)×round(h*s)` through a clean-room `AffineTransformOp` bilinear (`src/core/klimt/sprite/sprite-bilinear.ts`; 24/54248 channel values off by one on half-pixel downscale ties) and drawn at the raster's own size (`SvgGraphics.java:973-974`; `PortableImageAwt.java:113-127`); element geometry and note placement match the jar.
 
-**Remaining, forced:** (1) **PNG bytes** — the jar's IDAT is zlib 1.2.13 deflate at level 4 (`PNGImageWriter`); byte equality needs that deflate (a zlib port such as `pako`); ours are stored/fixed-Huffman. (2) **`img` data URIs pass through verbatim** — licence-forced for the AWS CC BY-ND artwork (`plans/si5b-stdlib/decisions.md` D3: any re-encode voids the grant); the jar's decode/resample/re-encode for other images is not done.
+**Remaining, forced:** **`img` data URIs pass through verbatim** — licence-forced for the AWS CC BY-ND artwork (`plans/si5b-stdlib/decisions.md` D3: any re-encode voids the grant); the jar's decode/resample/re-encode for other images is not done. (PNG bytes retired, unwind2-S6: `encodePng` is zlib level 4 via pako `legacyHash`, 32768-byte IDATs, byte-equal to the jar for equal pixels — `PNGImageWriter.java:182,364,1035`.)
 
 ### Emoji shorthand `<:name:>` — the platform glyph, not OpenMoji artwork (limitation, CDD B7FU-R1)
 
@@ -566,37 +566,9 @@ naming *this* renderer, not the Java one, is the point of the line.
 
 `!undef` only (`TLineType.java:53-56,87`), and it removes a variable only (`EaterUndef.java:48-54`); `!undefine` is a plain line, as the jar renders it.
 
-### `!theme` executes the theme; a residual summary fills four field families
+### ~~`!theme` executes the theme; a residual summary fills four field families~~ — RETIRED (unwind2-S5, 2026-10-08)
 
-**Upstream:** loads the theme file and executes its lines through the
-preprocessor at the directive's position (`TContext.java:726-755`); its
-skinparam and `<style>` lines reach the one style store in document order,
-so a later document line wins.
-
-**This port:** the same (cdd4-T7a/T7b). The theme's lines run in place, the
-skinparam / `<style>` collector reads the finished result list, and
-`build-theme.ts` applies skinparam and `<style>` runs in declaration order.
-What remains of the precompiled summary (`scripts/compile-themes.py` ->
-`themes-builtin*.ts`, applied below everything as the named base theme) is
-kept only where the executed declarations do not yet reach the consumer the
-jar's do:
-
-- `colors.text` from `<style> root { FontColor }` -- the sequence renderers
-  draw text with `colors.text` (`sequence/renderer.ts`,
-  `renderer-message.ts`, `renderer-participant-shapes.ts`); the style layer
-  has no `root` FontColor route to it.
-- `colors.arrow` / `colors.border` from `root { LineColor }` -- arrows and
-  borders default to these; no `root` LineColor route either.
-- `colors.graph.json` -- the json family reads only `jsonDiagram`-scoped
-  selectors (`style-map-json-diagram.ts`), not the `root` / bare `node`
-  cascade a theme writes.
-- MANUAL `fontFamily` / `colors.border` for eight reddress themes and a few
-  others whose values the script reads by hand; no corpus fixture measures
-  them.
-
-**Why:** each is a missing `root`-cascade route in the port's style layer,
-not a theme concern; routing `root` generally would move every document that
-writes a `<style> root { }` block. **Category:** limitation.
+Theme lines run in place (`TContext.java:726-755`) and root FontColor/LineColor rank by declaration counter (`Style.java:121-134`, `DarkString.java:50-66`; `build-theme.ts`, `style-root-shadowing.ts`); only the json residue (`colors.graph.json`) is left, owned by the json-family entry.
 
 ### File, environment, clock, and RNG builtins are inert by default
 
@@ -616,26 +588,9 @@ limitation.
 
 The flag is upstream's `true` (`JawsFlags.java:40`) and the sentinels decode as upstream (`Display.java:316-341`); unwind-U3 removed the port-only case-insensitive `%n()`/`%newline()` split in `flatten()` (TIM finds calls by an exact trie walk, `TrieImpl.java:91-111`). Open defects (not divergences): class member, description link label and state transition label skip `Display#getWithNewlines` (`it.fails` in `tests/unit/core/tim/unwind-u3-jar-fixtures.test.ts`).
 
-### `\t` in labels — a real tab, but no tab-stop indentation (limitation)
+### ~~`\t` in labels — a real tab, but no tab-stop indentation~~ — RETIRED (unwind2-S3, 2026-10-08)
 
-**Upstream:** `Display.getWithNewlines` expands the two-character `\t` escape
-to a real tab (`klimt/creole/Display.java:305`), and the text renderer then
-indents each line to `skinparam tabSize`-driven tab stops (jar `x` moves
-12 → 68 → 124 for one, two tabs in `lokija-02-dipe348`).
-
-**This port:** since SI27 T1 (2026-08-17) the ONE `Display.getWithNewlines`
-port (`core/klimt/creole/DisplayNewlines.ts#splitDisplayLines`) expands `\t`
-to a real tab exactly as upstream does — the glyph run and `textLength` are
-now byte-identical to the jar's — but the tab-stop x-indentation is not
-implemented, so every line still starts at the same x. Before SI27 the retired
-class/core copies left the literal backslash-t glyph pair in the text.
-
-**Why:** the escape scan and the tab-stop layout are two different upstream
-mechanisms; SI27 was a pure-move mission and ported the former only.
-**Category:** limitation, small. **Reach:** 4 state fixtures in the corpus
-(`duzazu-41-telu529`, `juvagu-33-dupa212`, `lokija-02-dipe348`,
-`vixobo-14-jole910`); `duzazu`/`vixobo` additionally hit the unported
-trailing-backslash line continuation of the state parser (pre-existing).
+Every `AtomText` run now tokenizes on `\t`/`BLOCK_E1_REAL_TABULATION` and draws each token at its tab stop, sized by the same walk (`AtomText.java:210-256`; one port, `core/klimt/creole/legacy/AtomText.ts#layoutTabbedText`), across activity, class (members, notes, headers, table cells, link labels), description, state and sequence; jar fixtures in `tests/fixtures/unwind2-S3/`. Open defects (not divergences): map cells, description link labels and state transition labels skip `Display#getWithNewlines`, so `\t` stays literal (`it.fails` in `tests/unit/core/klimt/creole/unwind2-s3-tab-stops.test.ts`).
 
 ### Security profile: an option, not an environment variable; no DNS check (limitation)
 
@@ -743,22 +698,9 @@ Mirrored: a leading `title` is consumed by StyleExtractor (`StyleExtractor.java:
 
 Mirrored: only `skinparam handwritten true` reaches a json/yaml/hcl theme (`StyleExtractor.java:88-97`, `src/diagrams/json/json-family-style-input.ts`); a `!theme`'s skinparams are dropped with it. `json/bitepo-72-vija933` and `json/sevaji-38-xita618` are now structurally clean.
 
-### Style selector support (limitation)
+### ~~Style selector support (limitation)~~ — RETIRED (unwind2-S2, 2026-10-08)
 
-**Upstream:** `HclDiagramFactory.java` has `styleExtractor.applyStyles()`
-commented out. `<style>` blocks inside `@starthcl` are stripped from the
-content but never applied — HCL diagrams always render with default styling.
-
-**This port:** Full `hcldiagram.*` style selector support is implemented,
-mirroring the `yamldiagram.*` block in `src/index.ts`. Users can write
-`<style> hclDiagram { node { BackgroundColor "#eee" } } </style>` inside
-an `@starthcl` block and it will be applied.
-
-**Reason:** The Java omission appears to be an incomplete implementation
-rather than a deliberate design choice. Style support is expected by users
-and consistent with how `@startyaml` and `@startjson` behave.
-
-**Affects:** all `@starthcl` diagrams using `<style>` blocks.
+Mirrored: `HclDiagramFactory.java:86-92` never calls `applyStyles`, so `<style>`, skin and `!theme` are stripped and ignored in `@starthcl` (`hclStyleInput`, `src/diagrams/json/json-family-style-input.ts`); json/yaml still apply them. `hclDiagram` is no `SName` (`Context.java:87-91` reads it as a stereotype), so the port's `hcldiagram.*` mapping is gone. Jar fixtures: `tests/fixtures/unwind2-S2/`.
 
 ---
 
@@ -848,25 +790,9 @@ justification did not hold, not to chase a gate it cannot reach.
 
 ## Packet diagrams
 
-### Spanning field — no spurious stub at row boundary (bug fix)
+### ~~Spanning field — no spurious stub at row boundary (bug fix)~~ — RETIRED (unwind2-S1, 2026-10-08)
 
-**Upstream:** when a spanning field (one that overflows across multiple
-rows) fills a row exactly to the boundary, plantuml.com inserts a spurious
-empty block at the end of that row. For example, with `colwidth=16` and
-`Header (8 bits)` followed by `Payload (32 bits)`, row 1 shows
-`Header | Payload (8 bits) | [empty stub]` instead of the correct
-`Header | Payload (8 bits)`.
-
-**This port:** no stub is inserted. A row that fills exactly to `colWidth`
-closes cleanly; the next row starts with the continuation block.
-
-**Reason:** the stub conveys no information and misrepresents the field
-layout. The correct split is `8 + 16 + 8 = 32 bits` across three rows with
-no remainder. The upstream behavior is a rendering bug, not an intentional
-design choice.
-
-**Affects:** `@startpacketdiag` diagrams where a spanning field begins
-mid-row and its first chunk fills the remaining columns exactly.
+The jar draws no stub; its spanning remainder block is `min(colWidth, carried width)` wide (`PacketDiagram.java:430,526`), mirrored in `src/diagrams/packetdiag/layout.ts`.
 
 ---
 
@@ -1257,18 +1183,9 @@ pipeline did before pagination existed. Note the axis: `renderAll` splits
 **Category:** limitation of the port's own API shape, filled rather than
 worked around.
 
-### The one pixel this costs
+### ~~The one pixel this costs~~ — RETIRED (unwind2-S4, 2026-10-08)
 
-`PlayingSpaceWithParticipants#drawU` clips the body to `pageHeight + 1` and
-places the footbox row at `pageHeight`, so on any page but the last the jar's
-lifelines end exactly one pixel BELOW the footbox top. This port spends one
-field, `SequenceGeometry.lifelineEndY`, on both quantities. It takes the
-footbox/image-height answer — which is what `calculateDimensionSlow` sizes the
-page from — so an inner page's lifelines stop 1px short of the jar's, under
-the footbox that covers them.
-
-**Category:** aesthetic, and unobservable at the element level: no node is
-added, removed or re-ordered by it.
+`footerShapeY` is the footbox top and `lifelineEndY` the clipped lifeline end, as in `PlayingSpaceWithParticipants.java:213-226`.
 
 ## Swimlane widths are measured from our own geometry, not by intercepting a draw
 
