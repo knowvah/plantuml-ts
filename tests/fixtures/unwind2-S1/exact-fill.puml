@@ -1,0 +1,7 @@
+@startpacketdiag
+packetdiag {
+  colwidth = 16
+  0-7: Header
+  8-23: Payload
+}
+@endpacketdiag
