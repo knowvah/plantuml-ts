@@ -13,7 +13,11 @@ import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
 import { floorActionLineHeight } from '../tiles/gtile-action.js';
-import { ifLabelFontSize } from '../activity-text-sheet-diamond.js';
+import { ifLabelBlock } from '../activity-text-sheet-diamond.js';
+import { klimtStringBounder } from '../activity-creole-sheet.js';
+import { WidthTableMeasurer } from '../../../core/measurer.js';
+
+const INK_MEASURER = new WidthTableMeasurer();
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -32,22 +36,30 @@ import type { MutableInkBounds } from './canvas-origin.js';
 export const SPLIT_LINE_KINDS = new Set(['split-bar', 'split-join-bar']);
 
 /**
- * Family Q: `klimt/drawing/LimitFinder.java:217-224`'s `drawText` -- the
+ * Family Q: `klimt/drawing/LimitFinder.java:216-224`'s `drawText` -- the
  * far (bottom) corner is ALWAYS `baseline + 1.5`, independent of the
  * font's own descent, and the near (top) corner is `baseline -
  * (fontSize - 1.5)` (the `StringBounder` height of one `UText`); never the
  * measured box's own `y`/`y + height` the generic box treatment uses for
- * every other kind. An `if-label` is a creole Sheet at its role's font
- * (`activity-text-sheet-diamond.ts#ifLabelFontSize`): `SheetBlock1` draws it
+ * every other kind. An `if-label` is a creole Sheet
+ * (`activity-text-sheet-diamond.ts#ifLabelBlock`): `SheetBlock1` draws it
  * inside its padding (`SheetBlock1.java:209-210`), one `UText` per stripe,
  * each stripe `max(fontSize, 10)` high (`AtomText.java:179-181`). The near
- * bound is the FIRST line's, the far bound the LAST line's (add4-T3h:
- * padding and the stripe floor, was `node.height / lineCount`).
+ * bound is the FIRST line's, the far bound the LAST line's; X spans the
+ * LEFT-aligned stripes, `[x + p, x + width - p]` (add4-T3h: the drawn
+ * block, not `node.width`, which an EMPTY_DIAMOND tile measures raw).
  */
 export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   const lineCount = (node.label ?? '').split('\n').length;
-  const fontSize = ifLabelFontSize(node, theme);
-  const firstBaselineY = node.y + (theme.padding ?? 0) + fontSize * TITLE_ASCENT_FRACTION;
+  const { tb, fc } = ifLabelBlock(node, theme);
+  const fontSize = fc.size;
+  const pad = theme.padding ?? 0;
+  const width = tb
+    .calculateDimension(klimtStringBounder(INK_MEASURER, { family: fc.family, size: fontSize }))
+    .getWidth();
+  acc.minX = Math.min(acc.minX, node.x + pad);
+  acc.maxX = Math.max(acc.maxX, node.x + width - pad);
+  const firstBaselineY = node.y + pad + fontSize * TITLE_ASCENT_FRACTION;
   const lastBaselineY = firstBaselineY + (lineCount - 1) * floorActionLineHeight(fontSize);
   acc.minY = Math.min(acc.minY, firstBaselineY - (fontSize - 1.5));
   acc.maxY = Math.max(acc.maxY, lastBaselineY + 1.5);

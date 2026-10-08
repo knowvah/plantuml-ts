@@ -85,7 +85,6 @@ import {
 } from './canvas-origin-text-ink.js';
 import { NO_FUDGE, POLYGON_FUDGE_X, RECT_FUDGE, isInkless, nodeFudge } from './canvas-origin-fudge.js';
 
-
 export interface MutableInkBounds {
   minX: number;
   minY: number;
@@ -93,16 +92,15 @@ export interface MutableInkBounds {
   maxY: number;
 }
 
-
 function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   if (isInkless(node.kind)) return;
-  const { x: fx, y: fy } = nodeFudge(node);
-  acc.minX = Math.min(acc.minX, node.x - fx.near);
-  acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
   if (node.kind === 'if-label') {
     extendForIfLabelText(acc, node, theme);
     return;
   }
+  const { x: fx, y: fy } = nodeFudge(node);
+  acc.minX = Math.min(acc.minX, node.x - fx.near);
+  acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
   if (SPLIT_LINE_KINDS.has(node.kind)) {
     acc.minY = Math.min(acc.minY, node.y);
     acc.maxY = Math.max(acc.maxY, node.y);

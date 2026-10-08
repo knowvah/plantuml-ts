@@ -42,4 +42,11 @@ describe('labels measured as drawn (jar oracles)', () => {
   it('vertical elseif inlabel: width of the FULL creole block', () => {
     expect(diffPaths('add4-T3h', 'vertical-inlabel')).toEqual([]);
   });
+
+  // ConditionalBuilder.java:262-267: an EMPTY_DIAMOND test is the diamond-
+  // font FULL condition Sheet (FtileDiamond.withNorth(tbTest)); its canvas
+  // ink is the drawn UTexts (LimitFinder.java:216-224), not the raw width.
+  it('EMPTY_DIAMOND if test: diamond font, creole runs, ink-sized canvas', () => {
+    expect(diffPaths('add4-T3h', 'empty-diamond-north-if')).toEqual([]);
+  });
 });
