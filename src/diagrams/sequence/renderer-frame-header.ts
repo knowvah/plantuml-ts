@@ -22,6 +22,7 @@ import {
   GROUP_LINE_THICKNESS,
   HEADER_LINE_COLOR,
   HEADER_LINE_THICKNESS,
+  REFERENCE_HEADER_LINE_THICKNESS,
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
   CORNER_SIZE,
@@ -180,10 +181,11 @@ function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
     CORNER_SIZE * k,
     ROUND_CORNER * k,
   );
+  const thickness = frame.frameType === 'ref' ? REFERENCE_HEADER_LINE_THICKNESS : HEADER_LINE_THICKNESS;
   return path(cornerD, {
     fill: HEADER_BACKGROUND_HEX,
     stroke: HEADER_LINE_COLOR,
-    strokeWidth: HEADER_LINE_THICKNESS * k,
+    strokeWidth: thickness * k,
   });
 }
 

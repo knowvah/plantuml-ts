@@ -25,6 +25,7 @@ import type {
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import { REF_X_MARGIN } from './ref-body-geo.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import {
   computeParticipantLayout,
@@ -251,6 +252,10 @@ function minEventX(event: EventGeo): number {
     case 'note':
       return event.x;
     case 'frame':
+      // A `ref` is a `ReferenceTile`, whose `getMinX` is `first`, the
+      // component origin `xMargin` left of its drawn box
+      // (`teoz/ReferenceTile.java:163-171`, `sequence-layout-ref.ts`).
+      if (event.frameType === 'ref') return event.x - REF_X_MARGIN;
       // A group reserves `EXTERNAL_MARGINX1` beyond its own frame:
       // `GroupingTile#getMinX:697-698` is
       // `min.addFixed(-EXTERNAL_MARGINX1 - notesWidth(LEFT))` with
@@ -387,7 +392,24 @@ function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: EventGe
     }
   }
 
-  return Math.max(totalWidth, dividerContentRight(eventGeos), delayContentRight(eventGeos, RIGHT_MARGIN));
+  return Math.max(
+    totalWidth,
+    dividerContentRight(eventGeos),
+    delayContentRight(eventGeos, RIGHT_MARGIN),
+    refContentRight(eventGeos) + RIGHT_MARGIN,
+  );
+}
+
+/** The rightmost `ReferenceTile#getMaxX` -- `last`, the component area's
+ *  right edge, `xMargin` beyond the drawn box (`teoz/ReferenceTile.java
+ *  :173-180`). A `ref` wider than its participants widens the document
+ *  (`tests/fixtures/unwind2-S9b/r-single.svg`). */
+function refContentRight(eventGeos: readonly EventGeo[]): number {
+  let right = Number.NEGATIVE_INFINITY;
+  for (const e of eventGeos) {
+    if (e.kind === 'frame' && e.frameType === 'ref') right = Math.max(right, e.x + e.width + REF_X_MARGIN);
+  }
+  return right;
 }
 
 /**

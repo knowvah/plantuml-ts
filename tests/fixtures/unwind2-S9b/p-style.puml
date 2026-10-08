@@ -1,0 +1,8 @@
+@startuml
+<style>
+sequenceDiagram { participant { Shadowing 5 } }
+</style>
+participant A
+actor B
+A -> B : hi
+@enduml

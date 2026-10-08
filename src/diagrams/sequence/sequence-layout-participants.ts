@@ -7,14 +7,21 @@
  * participants left-to-right by first-appearance order)
  */
 
-import type { Participant, ParticipantGeo, ParticipantType, SequenceDiagramAST, SequenceEvent } from './ast.js';
+import type {
+  FrameEvent,
+  Participant,
+  ParticipantGeo,
+  ParticipantType,
+  SequenceDiagramAST,
+  SequenceEvent,
+} from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
-import { displayLines } from './text-block-geo.js';
+import { displayLines, refBodyLines, refBodyWidth } from './text-block-geo.js';
 import {
   anyBadgeFor,
   BADGE_GAP,
@@ -108,6 +115,13 @@ interface SpanConstraint {
    * .java:418-426`), so the demand grows by half that head's width.
    */
   readonly createdIndex?: number;
+  /**
+   * A `ref`'s demand: `span` is required of `posD[to] - posB[from]`, the
+   * EDGES of the two boxes, not their centres --
+   * `last.ensureBiggerThan(first.addFixed(dim.getWidth()))`
+   * (`teoz/ReferenceTile.java:96-115`).
+   */
+  readonly edge?: true;
 }
 
 /**
@@ -182,11 +196,34 @@ function scanMessageLabels(
       // @see sequencediagram/graphic/MessageExoArrow.java
       continue;
     } else if (ev.kind === 'frame') {
-      for (const branch of ev.branches) {
-        scanMessageLabels(branch, sortedParticipants, scan, out);
-      }
+      scanFrame(ev, sortedParticipants, scan, out);
     }
   }
+}
+
+/** A frame's own demand (a `ref`'s, {@link refConstraint}) and its
+ *  branches' messages. */
+function scanFrame(ev: FrameEvent, sorted: Participant[], scan: ScanContext, out: SpanConstraint[]): void {
+  out.push(...refConstraint(ev, sorted, scan));
+  for (const branch of ev.branches) scanMessageLabels(branch, sorted, scan, out);
+}
+
+/**
+ * `ReferenceTile#init` (`teoz/ReferenceTile.java:96-115`): `first` is the
+ * leftmost referenced participant's `posB`, `last` the rightmost's `posD`,
+ * and `last.ensureBiggerThan(first.addFixed(dim.getWidth()))` pushes the
+ * rightmost box until the component's preferred width fits between them.
+ * A one-participant `ref` binds nothing: `last.addAtLeast(0)` (`:112-113`)
+ * is a fresh variable, so only the frame widens.
+ */
+function refConstraint(ev: FrameEvent, sorted: Participant[], scan: ScanContext): SpanConstraint[] {
+  if (ev.frameType !== 'ref' || ev.participants === undefined) return [];
+  const indices = ev.participants.map((id) => sorted.findIndex((p) => p.id === id)).filter((i) => i >= 0);
+  const from = Math.min(...indices);
+  const to = Math.max(...indices);
+  if (indices.length === 0 || from === to) return [];
+  const span = refBodyWidth(refBodyLines(ev.frameType, ev.label), scan.theme, scan.measurer);
+  return [{ from, to, span, edge: true }];
 }
 
 /**
@@ -216,7 +253,7 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
-    const symbolW = symbolPreferredWidth(p.type, lw, theme);
+    const symbolW = symbolPreferredWidth(p.type, lw, theme, participantShadowOf(p, theme));
     if (symbolW !== undefined) return symbolW;
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
     // `ComponentRoseParticipant`, differing only by `getDeltaCollection()`
@@ -228,9 +265,43 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `PName.MinimumWidth` is in no skin file and resolves to
     // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
     // corpus boxes to within 0.0005px (`findings/participant-width.md`).
-    const plain = lw + theme.sequence.participantPadding * 2;
+    const plain = lw + theme.sequence.participantPadding * 2 + reservedShadowOf(p.type, participantShadowOf(p, theme));
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
+}
+
+/**
+ * `Participant#getUsedStyles` (`Participant.java:86-96`): the kind's style
+ * signature `withTOBECHANGED(stereotype)`, whose `getShadowing()`
+ * `Style#getSymbolContext` turns into the component's delta shadow
+ * (`Style.java:109-115,277-281`, `ComponentRoseParticipant.java:83`).
+ */
+export function participantShadowOf(p: Participant, theme: Theme): number {
+  return theme.colors.graph.sequenceShadowing?.participant(p.type, p.stereotype) ?? 0;
+}
+
+/**
+ * The part of a head's delta shadow its PREFERRED dimensions reserve: all of
+ * it for the two kinds `ComponentRoseParticipant` draws, whose
+ * `getPreferredWidth`/`getPreferredHeight` add `deltaShadow`
+ * (`ComponentRoseParticipant.java:129-138`); none for the glyph kinds, whose
+ * components never read it (`ComponentRoseActor:84-92`,
+ * `ComponentRoseDatabase:95-105`, and their siblings).
+ */
+export function reservedShadowOf(type: ParticipantType, shadow: number): number {
+  return type === 'participant' || type === 'collections' ? shadow : 0;
+}
+
+/**
+ * The rectangle `ComponentRoseParticipant#drawInternalU` paints
+ * (`:100-104`): `getTextWidth` x `getTextHeight`, the preferred box less the
+ * reserved shadow. The label is laid out in it, never in the reserve -- the
+ * jar's text stays put when shadowing widens the column
+ * (`tests/fixtures/unwind2-S9b/p-plain.svg`).
+ */
+export function participantBoxOf(g: ParticipantGeo): ParticipantGeo {
+  const r = reservedShadowOf(g.type, g.shadow ?? 0);
+  return r === 0 ? g : { ...g, width: g.width - r, height: g.height - r, centerX: g.x + (g.width - r) / 2 };
 }
 
 /**
@@ -300,10 +371,24 @@ function positionParticipants(
     g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
-    g.labelRuns = buildLabelRuns(g, ctx);
+    g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx);
   }
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
+}
+
+/** `getPreferredHeight`: a glyph kind's own rule, else
+ *  `ComponentRoseParticipant`'s box plus `getDeltaCollection()` and the
+ *  reserved shadow (`ComponentRoseParticipant.java:129-132`). */
+function preferredHeightOf(
+  type: ParticipantType,
+  blockHeight: number,
+  boxHeight: number,
+  style: { readonly theme: Theme; readonly shadow: number },
+): number {
+  const box =
+    (type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight) + reservedShadowOf(type, style.shadow);
+  return symbolPreferredHeight(type, blockHeight, style.theme, style.shadow) ?? box;
 }
 
 /** Build the geometry for a single participant column at a given x offset. */
@@ -341,9 +426,8 @@ function buildParticipantGeo(
   // fitted `DB_HEIGHT = 80` floor).
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
   const boxHeight = blockHeight + 2 * theme.sequence.participantPadding;
-  const pHeight =
-    symbolPreferredHeight(p.type, blockHeight, theme) ??
-    (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight);
+  const shadow = participantShadowOf(p, theme);
+  const pHeight = preferredHeightOf(p.type, blockHeight, boxHeight, { theme, shadow });
   const centerX = currentX + width / 2;
 
   return {
@@ -364,6 +448,7 @@ function buildParticipantGeo(
     width,
     height: pHeight,
     centerX,
+    ...(shadow > 0 ? { shadow } : {}),
   };
 }
 
@@ -412,6 +497,11 @@ function solveParticipantXs(
     // `nextA >= prevE + 10`, the neighbour constraint.
     let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
     for (const c of incoming.get(i) ?? []) {
+      if (c.edge === true) {
+        // `posD[i] >= posB[c.from] + c.span`.
+        x = Math.max(x, xs[c.from]! + c.span - widths[i]!);
+        continue;
+      }
       // `centre[i] >= centre[c.from] + c.span`, expressed as a left edge.
       const createdHalf = c.createdIndex === undefined ? 0 : widths[c.createdIndex]! / 2;
       x = Math.max(x, centre(c.from) + c.span + createdHalf - widths[i]! / 2);

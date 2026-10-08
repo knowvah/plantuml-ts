@@ -21,6 +21,7 @@ import { DELAY_LINE_DASH, DELAY_LINE_GAP } from './sequence-delay.js';
 import { rect, line, escapeXmlText } from '../../core/svg.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
+import { activationShadowFilter } from './sequence-shadow.js';
 
 /** `ComponentRoseActiveLine#getPreferredWidth` (`:114-116`) returns 10; this
  *  is that width halved, because the bar is centred on the lifeline. */
@@ -198,6 +199,7 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
   const bar = rect(x, act.y, half * 2, act.height, {
     fill,
     stroke: theme.colors.border,
+    ...activationShadowFilter(theme),
   });
 
   return `${openTitledGroup('')}${bar}</g>`;
@@ -212,7 +214,7 @@ function renderOpenBar(act: ActivationGeo, x: number, fill: string, theme: Scale
   const width = ACTIVATION_HALF_WIDTH * theme.scaleK * 2;
   const style = { stroke: theme.colors.border, strokeWidth: theme.scaleK };
   const bottom = act.y + act.height;
-  const box = rect(x, act.y, width, act.height, { fill, stroke: fill });
+  const box = rect(x, act.y, width, act.height, { fill, stroke: fill, ...activationShadowFilter(theme) });
   const sides = line(x, act.y, x, bottom, style) + line(x + width, act.y, x + width, bottom, style);
   const up = act.open!.closeUp ? line(x, act.y, x + width, act.y, style) : '';
   const down = act.open!.closeDown ? line(x, bottom, x + width, bottom, style) : '';

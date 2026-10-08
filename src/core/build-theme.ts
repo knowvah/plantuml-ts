@@ -19,7 +19,7 @@ import { cleanForKeySlow } from './style/mindmap-style-builder.js';
 import { parseConditionalColor } from './klimt/color/HColorSet.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
 import { withActivityCircleStyle } from './activity-circle-style.js';
-import { withSequenceFrameShadowing } from './sequence-frame-shadow.js';
+import { withSequenceShadowing } from './sequence-shadowing.js';
 
 /**
  * Five-stage theme resolution:
@@ -80,9 +80,9 @@ export function buildTheme(preprocessed: PreprocessorResult, options?: RenderOpt
   const styleMap = mergedStyleMap([...skinSegments.map(rootColourRun), ...segments]);
   // add4-T3f: the activity circles' priority-ordered merged style -- see
   // `activity-circle-style.ts`; read only by the activity renderer.
-  // unwind2-S9: the sequence frames' merged-style Shadowing -- see
-  // `sequence-frame-shadow.ts`; read only by the sequence engine.
-  const withStyleMap = withSequenceFrameShadowing(
+  // unwind2-S9: the sequence elements' merged-style Shadowing -- see
+  // `sequence-shadowing.ts`; read only by the sequence engine.
+  const withStyleMap = withSequenceShadowing(
     withActivityCircleStyle(withDocumentStyle(withDeclarations, styleMap), preprocessed),
     preprocessed,
   );

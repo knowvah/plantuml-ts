@@ -205,6 +205,10 @@ export interface FrameEvent {
    *  .ts#handleFrameEvent` carries this array onto `FrameGeo
    *  .branchSeparators` for `renderer-frame-blotter.ts` to read (D10). */
   branchColors?: (string | undefined)[];
+  /** A `ref`'s own participants, as written (`Reference.java:104-106`,
+   *  `CommandReferenceOverSeveral.java:67-82`): `ReferenceTile#init` spans
+   *  their boxes (`teoz/ReferenceTile.java:96-115`). Absent for a group. */
+  participants?: string[];
 }
 
 export interface ActivationEvent {

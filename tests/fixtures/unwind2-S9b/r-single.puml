@@ -1,0 +1,7 @@
+@startuml
+participant VeryLongParticipantName
+participant B
+ref over VeryLongParticipantName : r
+ref over B : x
+B -> VeryLongParticipantName : z
+@enduml

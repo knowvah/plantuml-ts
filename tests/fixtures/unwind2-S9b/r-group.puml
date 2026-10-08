@@ -1,0 +1,7 @@
+@startuml
+participant A
+participant B
+group g
+ref over A, B : inner reference text here
+end
+@enduml

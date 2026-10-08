@@ -1,0 +1,12 @@
+@startuml
+<style>
+participant { .heavy { Shadowing 2 } }
+.lit { Shadowing 4 }
+</style>
+participant A <<heavy>>
+participant B
+actor C <<lit>>
+note over B <<lit>> : n
+A -> B : hi
+B -> C : x
+@enduml

@@ -1,0 +1,14 @@
+@startuml
+<style>
+note { Shadowing 0 }
+</style>
+participant A
+participant B
+A -> B : hi
+note left of A : n1
+note over B : n2
+note over A, B : n3
+hnote over A : h
+rnote over B : r
+A -> B : bye
+@enduml

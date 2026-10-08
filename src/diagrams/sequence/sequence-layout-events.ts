@@ -27,12 +27,20 @@ import type {
   TextRun,
 } from './ast.js';
 import type { FontSpec } from '../../core/measurer.js';
+import { noteShadowGeometry } from './sequence-layout-note-shadow.js';
 import { noteFontSpecOf } from './sequence-layout-shared.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
-import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
+import { displayLines } from './text-block-geo.js';
 import type { MessageLabelEnv } from './text-block-geo.js';
-import { offsetRun, sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import { handleRefEvent } from './sequence-layout-ref.js';
+import {
+  offsetRun,
+  sequenceAtomContext,
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+  type SequenceAtomContext,
+} from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { layoutDelay } from './sequence-delay.js';
 import type { MessageLevels } from './sequence-layout-participants.js';
@@ -212,15 +220,20 @@ function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProces
   const noteHeight = lines.length * lineHeight + NOTE_PADDING_Y * 2;
   // And the box is drawn `getPaddingY` BELOW the tile top -- `Rose.paddingY`
   // = 5, handed to the component at `Rose:115` and applied by
-  // `AbstractComponent#drawU:142-143` (`metano-36-gevu843`: y=52, tile 47).
-  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
+  // at y=52 against a tile top of 47.
+  const { shadow, reserve, drawnLess } = noteShadowGeometry(event, ctx.theme);
+  const noteGeo = buildNoteGeo(event, noteWidth + reserve, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  noteGeo.width -= drawnLess;
+  if (shadow > 0) noteGeo.shadow = shadow;
   const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
   noteGeo.textRuns = rows.map((r) => offsetRun(r, dx, dy));
   ctx.eventGeos.push(noteGeo);
   // `NoteTile#getPreferredHeight:167-171` is the component's height and
   // nothing else -- no spacing either side -- and that is `getTextHeight +
-  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`.
-  cursor.y += noteHeight + NOTE_PADDING_Y * 2;
+  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`
+  // plus the reserve (`sequence-layout-note-shadow.ts`).
+  cursor.y += noteHeight + NOTE_PADDING_Y * 2 + reserve;
 }
 
 /** `ComponentRoseNote`'s own vertical padding, `topRightBottomLeft(5, 15, 5,
@@ -307,26 +320,18 @@ const ELSE_TEOZ_DELTA_H = 4;
  *  frame reaches beyond the tiles it contains, on each side. */
 const FRAME_MARGIN_X = 16;
 
-/** Everything a frame's x/width/refBody needs that does NOT depend on
- *  where its branches leave the cursor: participant column bounds are
- *  fixed, and `refBodyLines` reads only `frameType`/`label`. Split out so
- *  `handleFrameEvent` can resolve these BEFORE the branch walk -- see the
- *  mutation-contract doc on `handleFrameEvent` (D2). */
-function computeFrameBody(
-  event: FrameEvent,
-  ctx: EventProcessingContext,
-): { x: number; width: number; refBody: readonly TextRun[]; body: readonly string[] } {
+/** A group frame's x and width -- participant column bounds only, so
+ *  `handleFrameEvent` resolves them BEFORE the branch walk (D2). A `ref` is
+ *  a different tile (`sequence-layout-ref.ts`). */
+function computeFrameBody(ctx: EventProcessingContext): { x: number; width: number } {
   const { minCx, maxCx } = participantCenterXBounds(ctx.participantMap);
-  const body = refBodyLines(event.frameType, event.label);
   // `GroupingTile.MARGINX = 16` (`:89`), applied as
   // `tile.getMinX().addFixed(-MARGINX)` and `m.addFixed(MARGINX)` (`:204,207`).
   // Jar-verified on `bovugo-63-lazo401`: its `opt` frame is `x="13.469"`
   // against a leftmost lifeline centre of 29.469 -- 16, not the 20 this port
   // used, which was uncited and made the frame overhang the participant row
   // far enough to shift the whole document's origin.
-  const x = minCx - FRAME_MARGIN_X;
-  const width = Math.max(maxCx - minCx + 2 * FRAME_MARGIN_X, refBodyWidth(body, ctx.theme, ctx.measurer));
-  return { x, width, refBody: refBodyRuns(body, x, width, ctx), body };
+  return { x: minCx - FRAME_MARGIN_X, width: maxCx - minCx + 2 * FRAME_MARGIN_X };
 }
 
 /** A creole BLOCK's width -- the max over its stripes that
@@ -346,54 +351,22 @@ function creoleLineWidth(runs: readonly TextRun[]): number {
 }
 
 /**
- * A `ref over` frame's body lines, as placed and measured runs (A4), one run
- * per creole atom (C5). The `y` moved here from `renderer.ts#renderRefBody`
- * because the renderer may no longer derive a baseline from a font size (D1),
- * and D5 keeps it there. Upstream draws the body
- * at `(textPos, getOldPaddingY() + textHeaderHeight)`
- * (`ComponentRoseReference.java:125-136`); this port substitutes
- * `+ theme.fontSize` (an SVG `<text>` y is a BASELINE, upstream's translate a
- * block top-left) and `frame.tabHeight` for `textHeaderHeight` (keying the
- * body to the DRAWN tab keeps the two from colliding). The `x` is
- * upstream's centring within the box (`AbstractTextualComponent.java:106-108`),
- * applied to the whole LINE and not to each run: the jar's two-line `ref` puts
- * both lines on one x (74.3, 76.962 in a box of x=70.3 w=76.775), and
- * `cikoca-19-feji527`'s url and `Foo2` sit adjacent at 16 + 121.275.
+ * What the tab's creole needs to draw a `<$sprite>` (unwind2-S9b): the
+ * sprites, and the colours `AtomSprite` tints a monochrome sprite between --
+ * the text's own `FontColor` (`groupHeader` sets none, so root's black,
+ * `plantuml.skin:9`) and the `Back` of the `ug` the text is drawn with.
+ * `ComponentRoseGroupingHeader#drawInternalU` fills the corner through a
+ * DERIVED `ug` (`:142`) and draws the text on one that never had a back
+ * applied (`:144,151`), so there is none -- jar-verified white on
+ * `tests/fixtures/unwind2-S7/s-group.svg`.
  */
-function refBodyRuns(
-  body: readonly string[],
-  x: number,
-  width: number,
-  ctx: EventProcessingContext,
-): readonly TextRun[] {
-  // `reference { FontSize 12 }` (`plantuml.skin:145-151`), NOT the ambient
-  // sequence font (`text-block-geo.ts#REFERENCE_FONT_SIZE`); the box this
-  // places into is sized from the same spec by `refBodyWidth`/`refBodyHeight`.
-  const font = sequenceCreoleFont(refBodyFontSpecOf(ctx.theme));
-  // The ref body's own inter-line advance, unchanged from the renderer it
-  // moved out of: NOT the measured line height, and substituting one for the
-  // other would move every multi-line `ref`.
-  const advance = ctx.theme.fontSize + 2;
-  return body.flatMap((line, i) => {
-    // Baselines are relative to the block top; `placeRefBody` drops them on.
-    const runs = sequenceCreoleRuns(line, font, { leftX: 0, baselineY: i * advance }, ctx.measurer);
-    const dx = x + (width - creoleLineWidth(runs)) / 2;
-    return runs.map((r) => ({ ...r, x: r.x + dx }));
-  });
+function tabAtomContext(ctx: EventProcessingContext): SequenceAtomContext | undefined {
+  return ctx.sprites === undefined ? undefined : { sprites: ctx.sprites, fontColor: GROUP_HEADER_SPRITE_TINT };
 }
 
-/** Drop `refBodyRuns`' relative baselines onto the frame's own top. Separate
- *  from it because `tabHeight` is resolved by `computeHeaderTab`, after the
- *  body's x is. */
-function placeRefBody(
-  runs: readonly TextRun[],
-  frameY: number,
-  tabHeight: number,
-  fontSize: number,
-): readonly TextRun[] {
-  const top = frameY + tabHeight + fontSize;
-  return runs.map((r) => ({ ...r, y: top + r.y }));
-}
+/** `plantuml.skin:9`, root `FontColor black`, in the form `AtomSprite`'s
+ *  tint takes. */
+const GROUP_HEADER_SPRITE_TINT = '#000000';
 
 /**
  * The header tab's title and its optional `[comment]`, as placed and measured
@@ -422,7 +395,13 @@ function buildTabRuns(
     const lh = ctx.measurer.measure('M', spec).height;
     const first = by + lh - ctx.measurer.getDescent(spec, 'M');
     return displayLines(text).flatMap((line, i) =>
-      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer),
+      sequenceCreoleRuns(
+        line,
+        sequenceCreoleFont(spec),
+        { leftX: bx, baselineY: first + i * lh },
+        ctx.measurer,
+        tabAtomContext(ctx),
+      ),
     );
   };
   const left = x + HEADER_PADDING.left;
@@ -444,16 +423,12 @@ function buildTabRuns(
  *  `branchLabels[0]` is "no comment", as `groupingCommand` defaults a
  *  conditionless frame's label to `''`.
  *
- *  A `ref` NEVER has a comment: `ReferenceTile#getComponent:117-124` builds
- *  `Display("ref") + reference.getStrings()` and `ComponentRoseReference`
- *  splits it at index 1 -- `subList(0, 1)` the header, `subList(1, ...)` the
- *  BODY (`ComponentRoseReference.java:67-78`), where `refBodyLines` already
- *  routes it. */
+ *  A `ref` never reaches here: it is its own tile (`sequence-layout-ref.ts`). */
 function computeHeaderTab(
   event: FrameEvent,
   ctx: EventProcessingContext,
 ): { tabText: string; tabComment?: string; tabTextWidth: number; tabWidth: number; tabHeight: number } {
-  const rawComment = event.frameType === 'ref' ? undefined : event.branchLabels[0];
+  const rawComment = event.branchLabels[0];
   const comment = rawComment === undefined || rawComment === '' ? undefined : rawComment;
   const { tabText, tabComment } = groupingHeaderDisplay(event.frameType, comment);
 
@@ -473,7 +448,7 @@ function computeHeaderTab(
   const titleFont = sequenceCreoleFont(fontSpec);
   const tabTextWidth = Math.max(
     ...titleLines.map((l) =>
-      creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer)),
+      creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer, tabAtomContext(ctx))),
     ),
   );
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
@@ -569,8 +544,10 @@ function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProc
   // frame's top. Those differ by `EXTERNAL_MARGINY`, and GroupingTile keeps
   // them apart deliberately: a parallel (`&`) sibling chains on the min, so
   // folding the margin into it would drift 4px per pair (`:145-152`).
+  // A `ref` is a `ReferenceTile`, not a `GroupingTile` (`sequence-layout-ref.ts`).
+  if (event.frameType === 'ref') return handleRefEvent(event, cursor, ctx);
   const frameStartY = cursor.y;
-  const { x, width, refBody, body } = computeFrameBody(event, ctx);
+  const { x, width } = computeFrameBody(ctx);
   const tab = computeHeaderTab(event, ctx);
   // `final double h = dim1.getHeight() + MARGINY_MAGIC / 2 + EXTERNAL_MARGINY;`
   // (`GroupingTile.java:156`) -- the body starts below the frame's top margin
@@ -591,11 +568,10 @@ function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProc
     ...(event.backColorElement !== undefined ? { backColorElement: event.backColorElement } : {}),
     ...(event.backColorGeneral !== undefined ? { backColorGeneral: event.backColorGeneral } : {}),
     branchSeparators: [], // placeholder -- populated by mutation in the loop below
-    refBody,
+    refBody: [],
     ...tab,
     tabRuns: buildTabRuns(tab, x, frameDrawnY, ctx),
   };
-  frameGeo.refBody = placeRefBody(refBody, frameDrawnY, tab.tabHeight, ctx.theme.fontSize);
   ctx.eventGeos.push(frameGeo);
 
   // Process each branch in sequence (alt frames have multiple branches).
@@ -626,9 +602,7 @@ function handleFrameEvent(event: FrameEvent, cursor: EventCursor, ctx: EventProc
   // `getTotalHeight = bodyHeight + dimIfEmpty.getHeight() + MARGINY_MAGIC / 2`
   // (`:342-345`), which `frameEndY - frameDrawnY` is exactly: the body offset
   // put `headerH + MARGINY_MAGIC / 2` between them and the walk added the body.
-  // The `max` is a `ref`'s floor, not a group's -- `ComponentRoseReference`'s
-  // header/body/footer split is deliberately out of C3's set (§1.9).
-  frameGeo.height = Math.max(frameEndY - frameDrawnY, refBodyHeight(body, ctx.theme, ctx.measurer));
+  frameGeo.height = frameEndY - frameDrawnY;
   // `getPreferredHeight = dim1 + bodyHeight + MARGINY_MAGIC + 2 *
   // EXTERNAL_MARGINY` (`:348-357`), which leaves exactly
   // `EXTERNAL_MARGINY + MARGINY_MAGIC / 2` of slack below the drawn border.

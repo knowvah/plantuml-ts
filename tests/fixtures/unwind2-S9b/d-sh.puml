@@ -1,0 +1,13 @@
+@startuml
+skinparam shadowing true
+participant A
+participant B
+A -> B : hi
+activate B
+== sep ==
+====
+B -> A : back
+deactivate B
+...
+A -> B : x
+@enduml
