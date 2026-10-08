@@ -54,3 +54,19 @@ describe('unwind2-S11: sprite atoms in text paths draw as the jar', () => {
     expect(diffs(dir, name)).toEqual([]);
   });
 });
+
+// A state transition label is still sized and drawn as one literal string
+// (`state-transition-label.ts`, `state-dot-graph.ts#computeEdgeLabelBox`):
+// the jar draws `t`, the sprite and `u` (`SvekEdge.java:298-299`). Flip to
+// CASES once that path resolves creole atoms.
+describe('unwind2-S11: open sprite-atom gaps', () => {
+  it('st-transition: the transition label still draws the literal markup', () => {
+    const svg = readFileSync(join(S11, 'st-transition.svg'), 'utf8');
+    const ours = renderSync(readFileSync(join(S11, 'st-transition.puml'), 'utf8'), {
+      measurer: new DeterministicMeasurer(),
+    });
+    expect(svg).toContain('<image');
+    expect(ours).not.toContain('<image');
+    expect(ours).toContain('t &lt;$foo> u');
+  });
+});
