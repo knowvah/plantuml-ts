@@ -1,29 +1,14 @@
 /**
- * The `'gtile-while'` case's full node/edge/reservation emission, split out
- * of `tile-coordinates.ts`'s `walkTile` switch only to keep that already-
- * oversized function (`#lizard forgives`, faithful port of the upstream
- * tile-kind dispatch) from growing further, and to keep `tile-coordinates
- * .ts` itself under the file's 500-line cap (mission `activity-klimt-
- * compress` README, "Push forward" -- "a sibling module when a file would
- * cross the 500-line hook", the same reason `walk-fork-branches.ts`
- * exists). The body below is the former case's own code, unchanged, per
- * CLAUDE.md "do not refactor while porting".
- *
- * `walkTile`/`pushEdge` are re-imported from `tile-coordinates.ts`, which
- * itself imports {@link walkWhile} from here for its `'gtile-while'` case
- * -- a circular import between the two modules, safe the same way
- * `tile-coordinates.ts`/`walk-fork-branches.ts` already are: both sides are
- * function DEFINITIONS, and neither calls into the other until
- * `assignCoordinates` actually walks the tile tree, well after both
- * modules finish loading.
+ * The `'gtile-while'` case's node/edge/reservation emission, split out of
+ * `tile-coordinates.ts`'s `walkTile` switch to keep that file under the
+ * 500-line cap (the `walk-fork-branches.ts` precedent). `walkTile`/`pushEdge`
+ * are re-imported from `tile-coordinates.ts`, a circular import that is safe
+ * because both sides are function definitions only called at walk time.
  *
  * altp-T4: draw ordering and point lists ported from `FtileWhile.java`'s
  * `ConnectionIn`/`ConnectionBackSimple`/`ConnectionBackEmpty`/
  * `ConnectionOut` and `FtileFactoryDelegatorWhile`'s break welding (D3, D6,
- * D7), replacing the home-grown straight-forward + `GConnectionVertical
- * DownThenBack` pair this module drew before. D8 retires `backEdgeRightX`
- * and `GConnectionVerticalDownThenBack` with this change -- `grep` shows no
- * reader of either outside this file and `layout.old.ts`.
+ * D7).
  */
 
 import type { ActivityNodeGeo } from '../activity-geometry.types.js';
@@ -43,53 +28,24 @@ import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushWhileBackwardConnections } from './walk-while-backward.js';
 import { isInsideForkBody } from './walk-fork-branches.js';
 
-/**
- * An EMPTY_DIAMOND header's north slot is the while's TEST, not a branch
- * label: `FtileDiamond.withNorth(testTb)` with `testTb = test.create(fcTest,
- * ...)` (`FtileWhile.java:124-126,137-139`), drawn at the diamond font and
- * colour -- `ifLabelRole: 'test'`, the role `walk-if-down.ts#testLabelRole`
- * gives the `if` test (`ConditionalBuilder.java:262-267`). The INSIDE
- * headers' north is the arrow-font `yesTb` (`:131-136`) and stays a branch
- * label.
- */
+/** EMPTY_DIAMOND: north is the TEST (`withNorth(testTb)`, an fcTest block,
+ *  `FtileWhile.java:124-126,137-139`) -> `ifLabelRole: 'test'`, as
+ *  `walk-if-down.ts#testLabelRole`. INSIDE headers' north is `yesTb` (`:131-136`). */
 function markEmptyDiamondTest(header: DiamondConditionTile, north: ActivityNodeGeo | undefined): void {
   if (north !== undefined && header.kind === 'gtile-diamond-empty') north.ifLabelRole = 'test';
 }
 
 /**
- * The hexagon node, then north, then the hexagon's OWN label, then west --
- * `FtileDiamondInside#drawU`'s own order (T3k): the polygon and the own
- * label are two SEPARATE draw calls upstream, never one combined blob, so
- * the own label lands AFTER north, not baked into the polygon push
- * (`renderNode`'s own `'while-header'` case draws the polygon only when
- * labelled; the own label draws through the `'if-own-label'` node below).
- * Still pushed under the ORIGINAL `'while-header'` kind (not a dedicated
- * one) so `canvas-origin.ts`'s polygon fudge and `shapes-of.ts`'s
- * condition-box treatment, both already keyed on that name, apply
- * unchanged; the SAME kind also covers the label-less case (`renderNode`'s
- * own ternary falls to `renderDiamond`). North is the "is"/entry label,
- * west is the "is not"/exit label; south/east are never set on this tile
- * (kept out, unlike `walk-repeat.ts`'s copy, which uses both). `laneAt`
- * resolves the header's OWN `.swimlane` over the parent's inherited
- * `myLane` -- the same resolution `walkTile`'s own dispatch
- * (`tile-coordinates.ts:117-118`) applies to every tile it walks; pushing
- * a node directly (never through `walkTile`, D1) means this helper must
- * apply it itself. `tileWhile` (`tile-layout.ts`) never calls
- * `withSwimlane` on the header today, so `header.swimlane` is always
- * `undefined` here and `hexLane === myLane` -- kept for parity with
- * `pushRepeatCondition`'s own fix and so a future `tileWhile` change that
- * DOES lane the header does not silently regress.
+ * The hexagon node, then north, south, the OWN label, then west --
+ * `FtileDiamondInside#drawU`'s order (T3k: polygon and own label are two
+ * draw calls, the own label an `'if-own-label'` node). Kind `'while-header'`
+ * also covers the label-less case. North is the "is" label, west the "is
+ * not" label. `laneAt` resolves the header's own `.swimlane` over `myLane`
+ * (`tile-coordinates.ts:117-118`), since this pushes without `walkTile`.
+ * The polygon box is the ALONE shape `[NORTH_HOOK.y, SOUTH_HOOK.y)`: `inY`
+ * is 0 for the INSIDE headers and `GtileDiamondEmpty`'s north reserve
+ * otherwise (add3 T3a, CONDSTYLE-EMPTY).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
- *
- * Generalized (add3 T3a, CONDSTYLE-EMPTY) to any {@link DiamondCondition
- * Tile} header, not just the hexagon: the polygon's own box is the
- * ALONE shape, i.e. `[header.getCoord(NORTH_HOOK).y, header.getCoord
- * (SOUTH_HOOK).y)` -- for `GtileDiamondInside`/`GtileDiamondSquare`
- * (`inY = 0` always) this reduces to the OLD `{y: hY, height: SOUTH_HOOK
- * .y}` exactly; for `GtileDiamondEmpty` (`inY` = its own north-label
- * reserve, possibly nonzero) the alone box is shifted DOWN by that
- * reserve and is always exactly 24 tall, matching `FtileDiamond`'s own
- * fixed-size rhombus (`gtile-diamond-empty.ts`'s own doc).
  */
 function pushWhileHeader(
   header: DiamondConditionTile,
@@ -206,11 +162,9 @@ export interface WhileFrame {
   readonly bY: number;
   readonly headerEast: GPoint;
   readonly headerWest: GPoint;
-  /** `ConnectionIn#getP1` / `ConnectionBackEmpty`'s start: diamond1's out. */
+  /** `ConnectionIn` p1 / p2, `ConnectionBackSimple` p1. */
   readonly headerSouth: GPoint;
-  /** `ConnectionIn#getP2`: the body's point in. */
   readonly bodyNorth: GPoint;
-  /** `ConnectionBackSimple#getP1`: the body's point out. */
   readonly bodySouth: GPoint;
   readonly southHook: GPoint;
   readonly bodyBottomY: number;
@@ -405,19 +359,10 @@ function pushWhileWeldings(out: Out, bodyNodeStart: number, bodyNodeEnd: number,
   }
 }
 
-/**
- * A child's hook in absolute coordinates, grouped as upstream groups it:
- * the child-LOCAL point first (`getTranslateDiamond1`/`getTranslateForWhile`
- * `.getTranslated(geo.getPointOut())`, `FtileWhile.java:179-186,228-232,
- * 621-641`), THEN the walk origin, which upstream adds last as the snake's
- * own `UTranslate` (`Worm.java:67-79` `move`, resolved per point). Folding
- * the origin into the offset first (`(x + offset) + hook`) left the in-edge
- * and back-edge ends one ULP apart on a resolved creole width (xovigi
- * under the FULL-block hexagon sizing: 168.97500000000002 vs 168.975), and
- * `Direction.fromVector`'s exact `==` (`Direction.java:110-130`), which
- * `snake-merge-worm.ts#directionOf` mirrors, then rejects the segment.
- * Same grouping fix as `tile-coordinates.ts#pushTopDownSiblingEdge`.
- */
+/** A child hook, child-LOCAL point first (`FtileWhile.java:179-186,228-232,
+ *  621-641`), walk origin last (the snake's `UTranslate`, `Worm.java:67-79`):
+ *  `(x + offset) + hook` left ends one ULP apart, which `Direction.fromVector`'s
+ *  exact `==` (`Direction.java:110-130`) rejects. Cf. `pushTopDownSiblingEdge`. */
 export function childHook(origin: GPoint, offset: GPoint, tile: Tile, hook: HookName): GPoint {
   const local = tile.getCoord(hook);
   return { x: origin.x + (offset.x + local.x), y: origin.y + (offset.y + local.y) };
@@ -457,14 +402,28 @@ function buildWhileSpecialFields(
   };
 }
 
+/** {@link WhileFrame}'s {@link childHook} points (split for the NLOC limit). */
+function buildWhileHookFields(
+  o: WhileOrigins,
+): Pick<WhileFrame, 'headerEast' | 'headerWest' | 'headerSouth' | 'bodyNorth' | 'bodySouth'> {
+  const { t, header, body } = o;
+  const origin = { x: o.x, y: o.y };
+  const headerOffset = { x: t.headerOffsetX, y: t.headerOffsetY };
+  const bodyOffset = { x: t.bodyOffsetX, y: t.bodyOffsetY };
+  return {
+    headerEast: childHook(origin, headerOffset, header, EAST_HOOK),
+    headerWest: childHook(origin, headerOffset, header, WEST_HOOK),
+    headerSouth: childHook(origin, headerOffset, header, SOUTH_HOOK),
+    bodyNorth: childHook(origin, bodyOffset, body, NORTH_HOOK),
+    bodySouth: childHook(origin, bodyOffset, body, SOUTH_HOOK),
+  };
+}
+
 /** Builds the {@link WhileFrame} every `Connection*` push reads from --
  *  split out of {@link walkWhile} only to keep that function's own NLOC
  *  under the file's limit. */
 function buildWhileFrame(o: WhileOrigins): WhileFrame {
   const { t, x, y, hX, hY, bX, bY, header, body, myLane, out } = o;
-  const origin = { x, y };
-  const headerOffset = { x: t.headerOffsetX, y: t.headerOffsetY };
-  const bodyOffset = { x: t.bodyOffsetX, y: t.bodyOffsetY };
   return {
     out,
     header,
@@ -473,11 +432,7 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     hY,
     bX,
     bY,
-    headerEast: childHook(origin, headerOffset, header, EAST_HOOK),
-    headerWest: childHook(origin, headerOffset, header, WEST_HOOK),
-    headerSouth: childHook(origin, headerOffset, header, SOUTH_HOOK),
-    bodyNorth: childHook(origin, bodyOffset, body, NORTH_HOOK),
-    bodySouth: childHook(origin, bodyOffset, body, SOUTH_HOOK),
+    ...buildWhileHookFields(o),
     southHook: { x: x + t.getCoord(SOUTH_HOOK).x, y: y + t.getCoord(SOUTH_HOOK).y },
     bodyBottomY: bY + body.height,
     xx: x + t.width,
