@@ -6,6 +6,7 @@
     "json/babico-87-soxo095",
     "json/bavize-88-jumu158",
     "json/bidire-98-kege137",
+    "json/bitepo-72-vija933",
     "json/bogiku-88-nano204",
     "json/cazuru-97-jala040",
     "json/cilemo-38-fafi313",
@@ -44,6 +45,7 @@
     "json/nuviro-48-sice969",
     "json/pijume-87-gufu868",
     "json/rutofu-66-kivu935",
+    "json/sevaji-38-xita618",
     "json/tacizo-43-dige090",
     "json/tivuru-65-vezu313",
     "json/vogeku-38-soxe333",
@@ -89,14 +91,6 @@
     "yaml/zomime-61-sase339"
   ],
   "divergent": {
-    "json/bitepo-72-vija933": {
-      "maxDiffs": 23,
-      "reason": "skinparam honored in the json family (DIVERGENCES.md, 'skinparam applies in the json family; upstream ignores it'). !theme aws-orange sets defaultFontName Verdana + defaultFontSize 12 via skinparam, which this port applies and the jar drops; every width/height/textLength diff here cascades from that font, and @background from the theme's skinparam BackgroundColor."
-    },
-    "json/sevaji-38-xita618": {
-      "maxDiffs": 1,
-      "reason": "skinparam honored in the json family (same entry). 'skinparam backgroundcolor transparent' suppresses the root background here; the jar ignores the directive and emits #FFFFFF."
-    },
     "json/timafu-94-bixe774": {
       "maxDiffs": 37,
       "reason": "ADR-2b engine delta amplified by `scale max 100*100`. dot-engine places the child node at x=133.237 where Smetana uses 133, so this port's calculateFinalDimension is 193.087 against the jar's 192.85; `scale max` divides by that dimension, so a 0.237px placement difference becomes a uniform 0.12% error in every emitted number. Node sizes are identical at scale 1. See ledger M7."
