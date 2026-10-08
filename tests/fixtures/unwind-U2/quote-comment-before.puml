@@ -1,0 +1,6 @@
+@startdot
+' a comment
+digraph G {
+  a -> b;
+}
+@enddot

@@ -1,114 +1,126 @@
 /**
- * `parseDot` — the PlantUML pre-step for `@startdot`, and nothing more.
+ * `parseDot` — upstream's `PSystemDotFactory` driven by
+ * `PSystemBasicFactory#createSystem`, and nothing more.
  *
- * This file used to assert a projected graph model (node shapes, ranks, edge
- * ids, HTML-label stripping, default-attribute inheritance). The passthrough
- * rewrite removed that projection: @knowvah/dot-engine now both parses and
- * renders the DOT, exactly as the graphviz executable does for upstream's
- * `directdot/PSystemDot`. Those assertions were re-testing the library and are
- * gone with the code they covered.
- *
- * What remains is this port's OWN contract: lift the PlantUML-only directives
- * out, and hand the rest through byte-for-byte.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/directdot/PSystemDotFactory.java:48-87
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/command/PSystemBasicFactory.java:41-68
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/UmlSource.java:79-106
  */
 import { describe, it, expect } from 'vitest';
 
 import { parseDot } from '../../../src/diagrams/dot/parser.js';
-import { isEmpty } from '../../../src/core/annotations/index.js';
+import type { UmlSource } from '../../../src/core/block-extractor.js';
 
-function wrap(inner: string): string {
-  return `@startdot\n${inner}\n@enddot`;
+function src(lines: string[], extra: Partial<UmlSource> = {}): UmlSource {
+  return { type: 'dot', lines, ...extra };
 }
 
-describe('parseDot — DOT body passthrough', () => {
-  it('carries the DOT body through unchanged', () => {
-    const ast = parseDot(wrap('digraph G {\n  a -> b;\n}'));
-    expect(ast.dotContent.trim()).toBe('digraph G {\n  a -> b;\n}');
+/** The header test, observed through `parseDot`: a first line it rejects is refused. */
+function isGraphvizDotHeader(line: string): boolean {
+  return !('refused' in parseDot(src([line, '}'])));
+}
+
+describe('isGraphvizDotHeader — PSystemDotFactory.java:48-56', () => {
+  it.each([
+    'digraph G {',
+    'graph {',
+    '  strict digraph x {  ',
+    'digraph "a \\" b" {',
+    'graph -1.5 {',
+    'digraph Ünïcode_1 {',
+  ])('accepts %j', (line) => {
+    expect(isGraphvizDotHeader(line)).toBe(true);
   });
 
-  it('strips the @startdot / @enddot markers', () => {
-    expect(parseDot(wrap('digraph { a }')).dotContent).not.toContain('@startdot');
-    expect(parseDot(wrap('digraph { a }')).dotContent).not.toContain('@enddot');
+  it.each(['digraph G { a -> b; }', 'Digraph G {', 'digraph G', 'digraph{', 'title My Graph', 'digraph 1x {'])(
+    'rejects %j',
+    (line) => {
+      expect(isGraphvizDotHeader(line)).toBe(false);
+    },
+  );
+});
+
+describe('parseDot — the DOT body', () => {
+  it('is the header and every later line, each with its newline, verbatim', () => {
+    const ast = parseDot(src(['digraph G {', '  a [label="http://x"]; // c', '/* b */', '}']));
+    expect(ast).toEqual({ dotContent: 'digraph G {\n  a [label="http://x"]; // c\n/* b */\n}\n' });
   });
 
-  it('parses a bare DOT body with no @startdot wrapper', () => {
-    expect(parseDot('digraph { a }').dotContent.trim()).toBe('digraph { a }');
+  it('keeps PlantUML directives after the header — graphviz reads them as DOT', () => {
+    const ast = parseDot(src(['digraph G {', 'title Hello', 'skinparam X Y', '}']));
+    expect(ast).toEqual({ dotContent: 'digraph G {\ntitle Hello\nskinparam X Y\n}\n' });
   });
 
-  it('leaves DOT syntax it does not understand alone — the engine is the parser', () => {
-    // Deliberately exotic: HTML labels, ports, records. None of it is this
-    // module's business any more; it must survive verbatim.
-    const body = 'digraph { n [shape=record, label="<f0> a|<f1> b"]; m [label=<<b>Bold</b>>]; n:f0 -> m; }';
-    expect(parseDot(wrap(body)).dotContent.trim()).toBe(body);
-  });
-
-  it("does not throw on malformed DOT — surfacing that is the engine's job at layout", () => {
-    expect(() => parseDot(wrap('digraph { a ->'))).not.toThrow();
+  it('stops at the first end directive (PSystemBasicFactory.java:54-58)', () => {
+    const ast = parseDot(src([], { seedSourceLines: ['@startdot', 'digraph G {', '}', '@enddot', 'ignored'] }));
+    expect(ast).toEqual({ dotContent: 'digraph G {\n}\n' });
   });
 });
 
-describe('parseDot — PlantUML directive lifting', () => {
-  it('collects skinparam lines out of the DOT body', () => {
-    const ast = parseDot(wrap('skinparam BackgroundColor #AABBCC\ndigraph { a }'));
-    expect(ast.skinparamLines).toEqual(['skinparam BackgroundColor #AABBCC']);
-    expect(ast.dotContent).not.toContain('skinparam');
+describe('parseDot — before the header', () => {
+  it('drops skinparam/skinparamlocked/!pragma/blank lines directly after @startdot', () => {
+    const lines = ['skinparam a b', '', 'skinparamlocked c d', '!pragma x', 'digraph G {', '}'];
+    expect(parseDot(src(lines))).toEqual({ dotContent: 'digraph G {\n}\n' });
   });
 
-  it('collects every skinparam line, not just the first', () => {
-    const ast = parseDot(wrap('skinparam One 1\nskinparam Two 2\ndigraph { a }'));
-    expect(ast.skinparamLines).toHaveLength(2);
+  it('skips whitespace-only lines before the first content line', () => {
+    expect(parseDot(src(['   ', 'digraph G {', '}']))).toEqual({ dotContent: 'digraph G {\n}\n' });
   });
 
-  it('skinparamLines is empty when the block has none', () => {
-    expect(parseDot(wrap('digraph { a }')).skinparamLines).toEqual([]);
+  it('refuses `title` with Syntax Error? on its line', () => {
+    expect(parseDot(src(['title My Graph', 'digraph G {', '}']))).toEqual({
+      refused: true,
+      kind: 'syntax',
+      line: 1,
+      consumed: 1,
+      message: 'Syntax Error?',
+      commandScore: 0,
+    });
   });
 
-  it('lifts a title into annotations, out of the DOT body', () => {
-    const ast = parseDot(wrap('title My Graph\ndigraph { a }'));
-    expect(ast.annotations.title.display).toEqual(['My Graph']);
-    expect(ast.dotContent).not.toContain('title');
+  it('noise is only noise directly after @startdot (isNoise is case-sensitive)', () => {
+    expect(parseDot(src(['   ', 'skinparam a b', 'digraph G {', '}']))).toMatchObject({ refused: true, line: 2 });
+    expect(parseDot(src(['Skinparam a b', 'digraph G {', '}']))).toMatchObject({ refused: true, line: 1 });
   });
 
-  it('leaves annotations empty when the block carries no chrome', () => {
-    expect(isEmpty(parseDot(wrap('digraph { a }')).annotations)).toBe(true);
-  });
-});
-
-describe('parseDot — comments', () => {
-  it('strips // line comments', () => {
-    const ast = parseDot(wrap('digraph { // a trailing note\n  a -> b;\n}'));
-    expect(ast.dotContent).not.toContain('a trailing note');
-    expect(ast.dotContent).toContain('a -> b;');
-  });
-
-  it('strips /* block */ comments, including multi-line ones', () => {
-    const ast = parseDot(wrap('digraph {\n/* one\n   two */\n  a -> b;\n}'));
-    expect(ast.dotContent).not.toContain('one');
-    expect(ast.dotContent).toContain('a -> b;');
-  });
-
-  it('does not invent DOT content from comment text', () => {
-    const ast = parseDot(wrap('digraph {\n// c -> d;\n  a -> b;\n}'));
-    expect(ast.dotContent).not.toContain('c -> d');
+  it('no header at all is Empty description, named on the @enddot line', () => {
+    expect(parseDot(src(['skinparam a b']))).toMatchObject({
+      refused: true,
+      line: 2,
+      message: 'Empty description',
+    });
   });
 });
 
-describe('parseDot — empty input', () => {
-  it('an empty @startdot block yields an empty AST without throwing', () => {
-    const ast = parseDot(wrap(''));
-    expect(ast.dotContent.trim()).toBe('');
-    expect(isEmpty(ast.annotations)).toBe(true);
+describe('parseDot — the refused line is a DOCUMENT line', () => {
+  it('reads the offender off linePositions when it survived directive stripping', () => {
+    const source = src(['title X', 'digraph G {', '}'], {
+      linePositions: [5, 6, 7],
+      seedSourceLines: ['@startdot', 'title X', 'digraph G {', '}', '@enddot'],
+    });
+    expect(parseDot(source)).toMatchObject({ refused: true, line: 5 });
   });
 
-  it('a completely empty string yields an empty AST without throwing', () => {
-    const ast = parseDot('');
-    expect(ast.dotContent).toBe('');
-    expect(ast.skinparamLines).toEqual([]);
+  it('places a hoisted <style> line by its distance from the next aligned line', () => {
+    const source = src(['digraph G {', '}'], {
+      linePositions: [4, 5],
+      seedSourceLines: ['@startdot', '<style>', 'node { }', '</style>', 'digraph G {', '}', '@enddot'],
+    });
+    expect(parseDot(source)).toMatchObject({ refused: true, line: 1 });
   });
 
-  it('a block holding only a title keeps the title and empties the body', () => {
-    const ast = parseDot(wrap('title Just Chrome'));
-    expect(ast.annotations.title.display).toEqual(['Just Chrome']);
-    expect(ast.dotContent.trim()).toBe('');
+  it('places an offender after every aligned line by its distance from the last one', () => {
+    const source = src(['x'], {
+      linePositions: [3],
+      seedSourceLines: ['@startdot', 'x', '@enddot'],
+    });
+    expect(parseDot(source)).toMatchObject({ refused: true, line: 3 });
+    const tail = src(['  '], { linePositions: [2], seedSourceLines: ['@startdot', '  ', 'skinparam a b', '@enddot'] });
+    expect(parseDot(tail)).toMatchObject({ refused: true, line: 3 });
+  });
+
+  it('falls back to the upstream index when nothing aligns', () => {
+    const source = src([], { linePositions: [], seedSourceLines: ['@startdot', '<style>', '@enddot'] });
+    expect(parseDot(source)).toMatchObject({ refused: true, line: 1 });
   });
 });

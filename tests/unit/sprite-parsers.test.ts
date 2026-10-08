@@ -165,12 +165,11 @@ describe('sprite registry population per engine', () => {
     expect(ast.root).toEqual({ a: '1' });
   });
 
-  it('dot: parseDot populates ast.sprites, DOT body survives untouched', () => {
-    const ast = parseDot(`${SPRITE_BLOCK}\ndigraph { a -> b }`);
-    expectIcon(ast.sprites);
-    // The passthrough rewrite removed the projected node/edge model; the body
-    // is now carried verbatim to the engine, so assert on it directly.
-    expect(ast.dotContent.trim()).toBe('digraph { a -> b }');
+  it('dot: a sprite block before the header is a syntax error, as upstream', () => {
+    // `PSystemDotFactory#executeLine` (java:71-77) accepts nothing before the
+    // graphviz header, so `sprite $x …` there is `Syntax Error?` on its line.
+    const source: UmlSource = { lines: [...L(SPRITE_BLOCK), 'digraph { a -> b }'], type: 'dot' };
+    expect(parseDot(source)).toMatchObject({ refused: true, line: 1, message: 'Syntax Error?' });
   });
 
   it('chart: parseChart populates ast.sprites, series data still parses', () => {

@@ -1,0 +1,6 @@
+@startdot
+digraph G {
+footer Hello World
+  a -> b;
+}
+@enddot
