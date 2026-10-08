@@ -7,6 +7,8 @@
  */
 
 import type { ActivityNodeGeo } from '../../activity-geometry.types.js';
+import { activityPadding } from '../../activity-style-defaults.js';
+import { boxStyleName, boxStyleOutlineX, boxStyleShield } from '../../tiles/gtile-action.js';
 
 /**
  * `FtileIfHexagon`/`GtileHexagonInside`'s drawn extents when a condition
@@ -57,4 +59,27 @@ export function noteBox(node: ActivityNodeGeo): { x: number; y: number; width: n
   const minY = Math.min(node.y, spike.y);
   const maxY = Math.max(node.y + node.height, spike.y);
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+/**
+ * add4-T3e: a `BoxStyle`d action draws its `drawMe` outline (`FtileBox.java
+ * :222`) instead of the rect, and `SlotFinder` occupies a `UPolygon`/`UPath`
+ * by its points' min/max (`SlotFinder.java:113-118,147-155`) plus each
+ * `UText` line (`:127-135`, LEFT-aligned at `padding`). On X that is the
+ * union of {@link boxStyleOutlineX} and the text's `[padding, width -
+ * shield - padding]`; on Y the outline spans the box (timeEvent's text
+ * keeps its top band occupied). `undefined` for PLAIN and the rect-drawn
+ * styles, whose ink is the node box.
+ */
+export function boxStyleBox(
+  node: ActivityNodeGeo,
+): { x: number; y: number; width: number; height: number } | undefined {
+  if (node.kind !== 'action') return undefined;
+  const style = boxStyleName(node.stereotype);
+  if (style === undefined) return undefined;
+  const outline = boxStyleOutlineX(style, node.width, node.height);
+  const pad = activityPadding('activity');
+  const minX = Math.min(outline.minX, pad);
+  const maxX = Math.max(outline.maxX, node.width - boxStyleShield(style) - pad);
+  return { x: node.x + minX, y: node.y, width: maxX - minX, height: node.height };
 }

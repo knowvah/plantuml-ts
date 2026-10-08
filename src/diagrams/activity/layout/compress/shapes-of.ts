@@ -19,7 +19,7 @@ import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
 import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
-import { conditionBox, noteBox } from './shapes-of-boxes.js';
+import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
 import { edgeLabelLayout } from './edge-label-anchor.js';
@@ -236,6 +236,8 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
   }
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
+  const styled = boxStyleBox(node); // add4-T3e
+  if (styled !== undefined) return { kind: 'polygon', ...styled };
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
 

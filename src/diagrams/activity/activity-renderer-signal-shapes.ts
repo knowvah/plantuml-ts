@@ -26,10 +26,8 @@ import { fmt } from '../../core/svg-format.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { actColors } from './activity-renderer-shapes.js';
 import { renderActionLabel } from './activity-creole-sheet.js';
-import { boxStyleShield } from './tiles/gtile-action.js';
+import { DELTA_INPUT_OUTPUT, boxStyleShield } from './tiles/gtile-action.js';
 
-/** `BoxStyle.java:110`. */
-const DELTA_INPUT_OUTPUT = 10;
 /** `BoxStyle.java:111`. */
 const DELTA_CONTINUOUS = 5;
 /** `BoxStyle.java:112`. */

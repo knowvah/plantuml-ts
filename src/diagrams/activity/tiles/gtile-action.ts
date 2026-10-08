@@ -115,6 +115,26 @@ export function boxStyleName(stereotype: string | undefined): string | undefined
   return Object.hasOwn(BOX_STYLE_SHIELDS, key) ? key : undefined;
 }
 
+/** `BoxStyle.DELTA_INPUT_OUTPUT` (`BoxStyle.java:110`) -- the outline
+ *  `activity-renderer-signal-shapes.ts` draws and {@link boxStyleOutlineX}
+ *  measures both read it. */
+export const DELTA_INPUT_OUTPUT = 10;
+
+/** X extent of a style's `drawMe` outline relative to the box's left edge,
+ *  over `w = width - shield` (`BoxStyle.java:179-498`): most span `[0,
+ *  width]`; objectSignal/acceptEvent reach `-DELTA` (`:387,467`) and
+ *  acceptEvent stops at `w` (`:468`); timeEvent's hourglass is `w/2 +-
+ *  height/3` (`:490-497`). The ink consumers (`canvas-origin-fudge.ts`,
+ *  `compress/shapes-of-box-style.ts`) add their own per-primitive rules. */
+export function boxStyleOutlineX(style: string, width: number, height: number): { minX: number; maxX: number } {
+  const w = width - boxStyleShield(style);
+  const d = DELTA_INPUT_OUTPUT;
+  if (style === 'objectsignal') return { minX: -d, maxX: w + d };
+  if (style === 'acceptevent') return { minX: -d, maxX: w };
+  if (style === 'timeevent') return { minX: w / 2 - height / 3, maxX: w / 2 + height / 3 };
+  return { minX: 0, maxX: width };
+}
+
 /** `BoxStyle#getShield` (`BoxStyle.java:122-124`); `PLAIN` is 0 (`:58`). */
 export function boxStyleShield(stereotype: string | undefined): number {
   const name = boxStyleName(stereotype);

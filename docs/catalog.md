@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1407 modules · 5308 exported names.
+1407 modules · 5311 exported names.
 
 ## `src/`
 
@@ -1158,7 +1158,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `compress-geometry.ts` | `CompressInput`, `CompressResult`, `compressGeometry` | `compressGeometry` -- `klimt/compress/CompressionXorYBuilder.java:52-69` and `UGraphicCompressOnXorY.java:86-135`, ported over `ActivityGeometry` instead of a live `UGraphic` redraw (D1). |
 | `compression-transform.ts` | `PiecewiseAffineTransform`, `CompressionTransform` | compression-transform.ts — `klimt/compress/PiecewiseAffineTransform.java`, `CompressionTransform.java` (mission `activity-klimt-compress` T2, `decisions.md` D6). |
 | `edge-label-anchor.ts` | `EdgeLabelLayout`, `LabelAnchor`, `edgeLabelLayout`, `labelAnchors`, `transformAnchors`, `withLabelDeltas` | Edge-label placement through compression (add4-T3a, R2). |
-| `shapes-of-boxes.ts` | `hexagonBox`, `diamondBox`, `conditionBox`, `noteBox` | `shapes-of.ts`'s pure node-box geometry helpers -- split into their own sibling file (mission `activity-divergence-drive-3` T3i) purely to keep `shapes-of.ts` under the 500-line hook cap; no behavior change, a mechanical extraction of four |
+| `shapes-of-boxes.ts` | `hexagonBox`, `diamondBox`, `conditionBox`, `noteBox`, `boxStyleBox` | `shapes-of.ts`'s pure node-box geometry helpers -- split into their own sibling file (mission `activity-divergence-drive-3` T3i) purely to keep `shapes-of.ts` under the 500-line hook cap; no behavior change, a mechanical extraction of four |
 | `shapes-of-frame.ts` | `frameTabShape`, `frameTitleShape`, `frameShapes` | The `USymbolFrame#asBig` shapes a `group`/`partition` frame contributes to compression, beyond its own ignored rect (`shapes-of.ts#shapeForNode`): the title-tab underline and the title itself. |
 | `shapes-of-hexagon-label.ts` | `ifOwnLabelShapes` | `if-own-label`'s text slots (add4-T3a, HEX-LABEL-SLOT; split out of `shapes-of.ts`, which sits near its 500-line cap). |
 | `shapes-of-terminal.ts` | `edgeDecorationVector`, `terminalDecorationVector` | The direction of an edge's END decoration, shared by the renderer (`renderer.ts#renderEdge`'s terminal `arrowTip`) and the compressor's shape adapter (`shapes-of.ts#terminalArrowhead`) so both see the same arrowhead. |
@@ -1180,7 +1180,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `boxStyleName`, `boxStyleShield`, `GtileAction` |  |
+| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `boxStyleName`, `DELTA_INPUT_OUTPUT`, `boxStyleOutlineX`, `boxStyleShield`, `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-empty.ts` | `GtileDiamondEmpty` |  |
 | `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `GtileDiamondInside` |  |

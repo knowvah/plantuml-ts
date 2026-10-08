@@ -13,7 +13,7 @@ import type { ActivityNodeGeo } from '../activity-geometry.types.js';
 export type FudgeSubject = Pick<ActivityNodeGeo, 'kind'> &
   Partial<Pick<ActivityNodeGeo, 'usymbol' | 'label' | 'stereotype' | 'width' | 'height'>>;
 import { classifyStripeLine } from '../../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
-import { boxStyleName, boxStyleShield } from '../tiles/gtile-action.js';
+import { boxStyleName, boxStyleOutlineX, boxStyleShield } from '../tiles/gtile-action.js';
 import { activityPadding } from '../activity-style-defaults.js';
 
 /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
@@ -143,32 +143,17 @@ function boxStyleFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } | u
   if (node.kind !== 'action') return undefined;
   const style = boxStyleName(node.stereotype);
   if (style === undefined) return undefined;
+  if (style === 'continuous') return { x: NO_FUDGE, y: NO_FUDGE };
+  if (style === 'procedure') return { x: RECT_FUDGE, y: { near: RECT_FUDGE.near, far: 0 } };
+  if (style === 'task' || style === 'object') return { x: RECT_FUDGE, y: RECT_FUDGE };
   const width = node.width ?? 0;
-  const shield = boxStyleShield(style);
-  const w = width - shield;
+  const outline = boxStyleOutlineX(style, width, node.height ?? 0);
   const p = POLYGON_FUDGE_X.near;
-  switch (style) {
-    case 'objectsignal':
-      return { x: { near: 2 * p, far: p }, y: NO_FUDGE };
-    case 'acceptevent':
-      return { x: { near: 2 * p, far: 0 }, y: NO_FUDGE };
-    case 'timeevent': {
-      const third = (node.height ?? 0) / 3;
-      const pad = activityPadding('activity');
-      const near = Math.max(-(w / 2 - third) + p, -pad);
-      const far = Math.max(-(width - w / 2 - third) + p, -(shield + pad));
-      return { x: { near, far }, y: NO_FUDGE };
-    }
-    case 'continuous':
-      return { x: NO_FUDGE, y: NO_FUDGE };
-    case 'procedure':
-      return { x: RECT_FUDGE, y: { near: RECT_FUDGE.near, far: 0 } };
-    case 'task':
-    case 'object':
-      return { x: RECT_FUDGE, y: RECT_FUDGE };
-    default:
-      return { x: POLYGON_FUDGE_X, y: NO_FUDGE };
-  }
+  // The LEFT-aligned text's exact ink, `[padding, width - shield - padding]`.
+  const pad = activityPadding('activity');
+  const near = Math.max(p - outline.minX, -pad);
+  const far = Math.max(outline.maxX - width + p, -(boxStyleShield(style) + pad));
+  return { x: { near, far }, y: NO_FUDGE };
 }
 
 export function nodeFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } {
