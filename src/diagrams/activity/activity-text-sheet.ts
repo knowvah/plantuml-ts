@@ -39,6 +39,8 @@ import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { ISkinSimple } from '../../core/style/ISkinSimple.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { UChange } from '../../core/klimt/UChange.js';
+import type { Sheet } from '../../core/klimt/creole/Sheet.js';
+import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
 import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
@@ -61,10 +63,12 @@ function nestedRenderer(): NestedDiagramRenderer {
 
 /** The `ISkinSimple` surface `CreoleParser`/`StripeSimple` read for a label:
  *  `SkinParam.java` defaults (no sprites, identity size hack, `MONOSPACED`,
- *  tabsize 8, dpi 96, `getPadding()` none -- `SkinParam.java:1147-1150`
- *  with no `skinparam padding`), the same members
- *  `activity-creole-sheet.ts#activitySkinSimple` builds. */
-function activitySkinSimple(fontConfiguration: FontConfiguration): ISkinSimple {
+ *  tabsize 8, dpi 96), the same members `activity-creole-sheet.ts
+ *  #activitySkinSimple` builds, plus `getPadding()`: `skinparam padding N`
+ *  (`SkinParam.java:1147-1150`, `theme.padding`), which `Display#getCreole`
+ *  hands its `SheetBlock1` (`Display.java:697-699`). */
+function activitySkinSimple(fontConfiguration: FontConfiguration, theme: Theme): ISkinSimple {
+  const padding = ClockwiseTopRightBottomLeft.same(theme.padding ?? 0);
   const atomOps = chromeAtomOps(undefined, fontConfiguration);
   const pragma = Pragma.createEmpty();
   const skin: ISkinSimple = {
@@ -74,7 +78,7 @@ function activitySkinSimple(fontConfiguration: FontConfiguration): ISkinSimple {
     transformStringForSizeHack: (s: string) => s,
     getValue: () => null,
     values: () => new Map<string, string>(),
-    getPadding: () => ClockwiseTopRightBottomLeft.none(),
+    getPadding: () => padding,
     getMonospacedFamily: () => MONOSPACED,
     getTabSize: () => 8,
     getDpi: () => 96,
@@ -121,15 +125,31 @@ export interface ActivityDisplayParams {
  * null)` (`Display.java:637-669`) for a label whose `\n`s are already line
  * breaks (`Display.getWithNewlines`, applied by the parser).
  */
-export function activityDisplayBlock(label: string, params: ActivityDisplayParams): TextBlock {
+export function activityDisplayBlock(label: string, theme: Theme, params: ActivityDisplayParams): TextBlock {
   const fc = params.fontConfiguration;
-  const ctx = { fontConfiguration: fc, spriteContainer: activitySkinSimple(fc), atomOps: chromeAtomOps(undefined, fc) };
+  const ctx = {
+    fontConfiguration: fc,
+    spriteContainer: activitySkinSimple(fc, theme),
+    atomOps: chromeAtomOps(undefined, fc),
+  };
   return Display.create(label.split('\n')).create0(
     ctx,
     params.horizontalAlignment,
     params.maxMessageSize ?? LineBreakStrategy.NONE,
     params.creoleMode,
   );
+}
+
+/** `skinParam.sheet(fc, align, mode).createSheet(display)` -- the Sheet a
+ *  caller wraps in its own `SheetBlock1` (`ConditionalBuilder.java:241-243`).
+ *  `SheetBuilder#createSheet` returns `Sheet<StripeAtom>`; `SheetBlock1`
+ *  wants `Sheet<CreoleAtom>` -- the type gap `DisplayCreole.ts#getCreole`
+ *  casts through. */
+export function activitySheet(label: string, theme: Theme, params: ActivityDisplayParams): Sheet<CreoleAtom> {
+  const fc = params.fontConfiguration;
+  return activitySkinSimple(fc, theme)
+    .sheet(fc, params.horizontalAlignment, params.creoleMode)
+    .createSheet(Display.create(label.split('\n'))) as unknown as Sheet<CreoleAtom>;
 }
 
 /** `$version$` -- the placeholder `activity-creole-sheet.ts` passes to its

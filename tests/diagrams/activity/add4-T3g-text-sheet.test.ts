@@ -32,4 +32,10 @@ describe('activity labels through Display#create0 (jar oracles)', () => {
   it('edge labels: bold, italic, url, <back:>, <color:> runs match the jar', () => {
     expect(diffPaths('edge-label-creole')).toEqual(['svg/@viewBox[2]', 'svg/@width']);
   });
+
+  // ConditionalBuilder.java:240-247 (FULL Sheet, diamond alignment,
+  // Hexagon.asStencil) centred by FtileDiamondInside.java:94-96.
+  it('hexagon test label: CENTER Sheet with creole colour matches the jar', () => {
+    expect(diffPaths('hexagon-labels-center')).toEqual([]);
+  });
 });

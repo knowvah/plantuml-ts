@@ -107,7 +107,7 @@ function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
   const { lines, size, x, baselineY } = layout;
   const label = lines.join('\n');
   const fc = activityTextFontConfiguration(theme, size, 'arrow');
-  const tb = activityDisplayBlock(edge.color === undefined ? label : `<back:${edge.color}>${label}`, {
+  const tb = activityDisplayBlock(edge.color === undefined ? label : `<back:${edge.color}>${label}`, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: CreoleMode.SIMPLE_LINE,

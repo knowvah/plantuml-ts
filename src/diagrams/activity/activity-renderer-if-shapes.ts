@@ -20,17 +20,16 @@ import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
-import { activityFontColor, activityHorizontalAlignment } from './activity-text-style.js';
+import { activityFontColor } from './activity-text-style.js';
 import {
   actColors,
   ASCENT_FRACTION,
   flooredFirstBaselineY,
-  renderHexagonLabel,
   textLines,
 } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
+import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
 import { centeredLineX, type ActivityTextOpts } from './activity-text-placement.js';
-import { floorActionLineHeight } from './tiles/gtile-action.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 
@@ -245,16 +244,12 @@ export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string 
 }
 
 /**
- * The hexagon's OWN label alone, centered in the node's own box -- the
- * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
- * callable on its own so a walker can push it as its own `'if-own-label'`
- * node (T3k, {@link renderHexagonPolygon}'s own doc).
+ * The hexagon's OWN label alone, as its own `'if-own-label'` node (T3k):
+ * `ConditionalBuilder#getShape1`'s condition Sheet, centred in the node's
+ * hexagon box by `FtileDiamondInside#drawU` (`FtileDiamondInside.java:85-96`).
  */
 export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const condSize = activityFontSize(theme, 'diamond');
-  return renderHexagonLabel(node.label, cx, cy, theme, condSize);
+  return renderDiamondTestLabel(node.label ?? '', theme, node);
 }
 
 const CREOLE_MEASURER = new WidthTableMeasurer();
@@ -270,56 +265,23 @@ export function diamondLineWidth(theme: Theme, fontSize: number, line: string): 
 }
 
 /**
- * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d,
- * `vaxiki-78-nice114`). Root's default `HorizontalAlignment left`
- * (`plantuml.skin:12`; `activityDiagram { diamond {} }` never overrides
- * it, `plantuml.skin:369-371`) positions every `Sheet` stripe at the
- * label TextBlock's own local `x=0` -- the WHOLE block is centred ONCE
- * (`FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
- * dimLabel.width) / 2`), never each line on its own width. This is NOT
- * `activity-renderer-shapes.ts#renderMultilineText`'s per-line `coef`
- * centring -- that formula is verified correct for `FtileBox` action
- * text specifically (`activity-text-placement.ts`'s own doc), a
- * genuinely different Java draw path from the diamond's label TextBlock.
- *
- * ALIGN-DIAMOND (add3-T3d, `mabuke-20-muco282`/`copisa-69-xisi273`,
- * `skinparam defaultTextAlignment center`): `ConditionalBuilder#getShape1`
- * (`vcompact/cond/ConditionalBuilder.java:240-243`) builds the condition
- * label through the SAME real Sheet/`SheetBlock1` the module doc comment
- * above already names, with `styleDiamond.getHorizontalAlignment()` as
- * its alignment -- so a CENTER/RIGHT `defaultTextAlignment` reaches
- * `SheetBlock1#initMap`'s own per-line `getCoef` post-pass
- * (`klimt/creole/SheetBlock1.java:155-172`: `CENTER` -> `diff/2`,
- * `RIGHT` -> `diff`, `LEFT`/`null` -> `0`, `diff = maxWidth - lineWidth`)
- * EVEN THOUGH the block itself is still centred once at the outer level
- * (both apply together: the LEFT case above is this formula's own
- * `coef=0` reduction, unchanged). `activityHorizontalAlignment` is the
- * SAME `root`-tier resolver `FtileBox` action text already reads for the
- * identical `defaultTextAlignment` key.
+ * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d): the SAME
+ * condition Sheet {@link renderHexagonOwnLabel} draws
+ * (`activity-text-sheet-diamond.ts#renderDiamondTestLabel`,
+ * `ConditionalBuilder.java:240-247`), centred once on (`cx`, `cy`). The
+ * Sheet's own `SheetBlock1#initMap` applies the per-stripe CENTER/RIGHT
+ * `getCoef` shift (`SheetBlock1.java:155-172`) for a non-LEFT
+ * `defaultTextAlignment` (ALIGN-DIAMOND, add3-T3d).
  */
 export function renderHexagonMultilineLabel(
   lines: string[],
   cx: number,
   cy: number,
   theme: Theme,
-  opts: ActivityTextOpts,
+  _opts: ActivityTextOpts,
 ): string {
-  const condSize = opts.fontSize ?? activityFontSize(theme, 'diamond');
-  const lineWidths = lines.map((ln) => diamondLineWidth(theme, condSize, ln));
-  const maxWidth = Math.max(...lineWidths);
-  const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
-  // add4-T2d: each stripe is a floored `AtomText` (`AtomText.java:179-181`).
-  const firstBaselineY = flooredFirstBaselineY(cy, condSize, lines.length);
-  const advance = floorActionLineHeight(condSize);
-  const align = activityHorizontalAlignment(theme);
-  const blockX = cx - maxWidth / 2;
-  return lines
-    .map((ln, i) => {
-      const diff = maxWidth - lineWidths[i]!;
-      const offset = align === 'center' ? diff / 2 : align === 'right' ? diff : 0;
-      return drawActivityText(blockX + offset, firstBaselineY + advance * i, ln, style);
-    })
-    .join('');
+  // A zero-size box at the centre: `lx = -dimLabel.width / 2`.
+  return renderDiamondTestLabel(lines.join('\n'), theme, { x: cx, y: cy, width: 0, height: 0 });
 }
 
 /**

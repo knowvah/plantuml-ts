@@ -1,0 +1,13 @@
+@startuml
+skinparam conditionStyle diamond
+start
+if (**is** it?) then (yes)
+  :A;
+else (no)
+  :B;
+endif
+repeat
+  :C;
+repeat while (more //data//?) is (yes) not (no)
+stop
+@enduml

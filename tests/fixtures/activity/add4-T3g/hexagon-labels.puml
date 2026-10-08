@@ -1,0 +1,11 @@
+@startuml
+start
+if (**bold** test\nsecond //line//) then (yes)
+  :A;
+elseif (one <color:blue>blue</color>) then (ok)
+  :B;
+else (no)
+  :C;
+endif
+stop
+@enduml

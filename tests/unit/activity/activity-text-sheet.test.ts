@@ -20,7 +20,7 @@ const ORIGIN = { x: 10, y: 20 };
 
 function draw(label: string, theme: Theme = THEME, mode: CreoleMode = CreoleMode.SIMPLE_LINE): string {
   const fc = activityTextFontConfiguration(theme, 11, 'arrow');
-  const tb = activityDisplayBlock(label, {
+  const tb = activityDisplayBlock(label, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: mode,
