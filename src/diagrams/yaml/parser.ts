@@ -1,5 +1,3 @@
-import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { HighlightDirective, JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseOptions } from '../../core/dispatcher.js';
@@ -9,8 +7,11 @@ import type { ParseOptions } from '../../core/dispatcher.js';
 import { jsonSpriteRegistryFor } from '../json/parser.js';
 import { parseYamlLines } from './yaml-parser.js';
 import { monomorphToJson } from './monomorph.js';
-import { matchScaleCommand } from '../../core/scale-command.js';
-import type { ScaleSpec } from '../../core/scale-command.js';
+import { extractStyle, payloadOf, upstreamSourceLines } from '../json/StyleExtractor.js';
+import { headerOf } from '../json/json-diagram-factory.js';
+
+/** `Highlighted.HIGHLIGHTED` (`yaml/Highlighted.java:49`). */
+const HIGHLIGHT_PREFIX = '#highlight ';
 
 /**
  * Parse a single `#highlight` directive line into a HighlightDirective.
@@ -25,7 +26,7 @@ import type { ScaleSpec } from '../../core/scale-command.js';
  */
 function parseYamlHighlightLine(line: string): HighlightDirective {
   // Strip "#highlight " prefix (11 chars)
-  let rest = line.slice('#highlight '.length).trim();
+  let rest = line.slice(HIGHLIGHT_PREFIX.length).trim();
 
   // Capture optional trailing <<stereotype>>
   const stereotypeMatch = /\s*<<([^<>]*)>>\s*$/.exec(rest);
@@ -45,113 +46,48 @@ function parseYamlHighlightLine(line: string): HighlightDirective {
   return { path, styleClass };
 }
 
-export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
-  const highlights: HighlightDirective[] = [];
-  const bodyLines: string[] = [];
-  let scale: ScaleSpec | undefined;
-  let inStyleBlock = false;
-  const annotations = createAnnotations();
-  // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
-  const sprites = jsonSpriteRegistryFor(options);
-  const lines = source.lines;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-    const t = line.trim();
-
-    // Strip @startyaml/@endyaml wrapper lines (block-extractor usually strips
-    // these but be defensive — the source.lines may or may not include them)
-    if (/^@startyaml\s*$/i.test(t) || /^@endyaml\s*$/i.test(t)) continue;
-
-    // <style> blocks stripped before YAML parsing
-    if (t === '<style>') {
-      inStyleBlock = true;
-      continue;
-    }
-    if (inStyleBlock) {
-      if (t === '</style>') inStyleBlock = false;
-      continue;
-    }
-
-    // #highlight lines — extract before YAML body
-    if (t.startsWith('#highlight ')) {
-      highlights.push(parseYamlHighlightLine(t));
-      continue;
-    }
-
-    // title/caption/legend/header/footer/mainframe (mission G0b/T8) — same
-    // before-body-only scope as the directive strip below. Title used to be
-    // excluded here and captured into a bespoke `title` field (T6); T8
-    // migrated it onto `annotations.title` like the other five (json's
-    // migration covers yaml since both share JsonDiagramAST/layoutJson).
-    if (bodyLines.length === 0) {
-      const annotationMatch = matchAnnotationCommand(lines, i, annotations);
-      if (annotationMatch !== null) {
-        i += annotationMatch.consumed - 1;
-        continue;
-      }
-      // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4):
-      // same before-body-only scope as the chrome matcher above, tried
-      // immediately after it.
-      const spriteMatch = matchSpriteCommand(lines, i, sprites);
-      if (spriteMatch !== null) {
-        i += spriteMatch.consumed - 1;
-        continue;
-      }
-    }
-
-    // Directive lines before YAML body (only skip if no body lines yet).
-    // `title ` no longer reaches here (consumed by the matcher above).
-    if (bodyLines.length === 0) {
-      if (/^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) {
-        // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
-        // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
-        // path because both factories construct a JsonDiagram.
-        scale = matchScaleCommand(t) ?? scale;
-        continue;
-      }
-    }
-
-    // Skip leading blank lines, but include blank lines within the body
-    if (t === '') {
-      if (bodyLines.length > 0) bodyLines.push(line);
-      continue;
-    }
-
-    bodyLines.push(line);
-  }
-
-  let root: unknown = null;
-  // A failed parse leaves upstream's value null (`YamlDiagramFactory.java:90-93`), which
-  // `JsonDiagram#drawU` draws as the "does not sound like YAML data" page
-  // (`JsonDiagram.java:116-122`) -- NOT the null-scalar node a successful
-  // parse of `null` would give. Hence the flag, as json's parser sets it.
-  let parseError = false;
-  const parseWarnings: string[] = [];
+/**
+ * `MonomorphToJson.convert(new YamlParser().parse(list))`. Any exception
+ * leaves the value null (`YamlDiagramFactory.java:90-93`), and so does a
+ * monomorph that is no scalar/list/map (`MonomorphToJson.java:44-52`, an
+ * empty payload): `JsonDiagram#drawU` draws both as the "does not sound like
+ * YAML data" page (`JsonDiagram.java:116-122`). A bare scalar document is
+ * one -- `YamlParser.java:53-54` throws on `NO_KEY_ONLY_TEXT` -- so unlike
+ * json a yaml diagram never reaches the scalar-root wrap
+ * (jar: `tests/fixtures/unwind-U1/yaml-root-*`).
+ */
+function parseYamlBody(list: string[], parseWarnings: string[]): { root: unknown; parseError: boolean } {
   try {
-    if (bodyLines.some((l) => l.trim() !== '')) {
-      const monomorph = parseYamlLines(bodyLines, parseWarnings);
-      root = monomorphToJson(monomorph);
-      // `MonomorphToJson.convert` returns null for an UNDETERMINATE monomorph
-      // (`MonomorphToJson.java:44-52`) -- the same null, the same page.
-      parseError = root === null;
-    }
+    const root = monomorphToJson(parseYamlLines(list, parseWarnings));
+    return { root, parseError: root === null };
   } catch {
-    parseError = true;
+    return { root: null, parseError: true };
   }
+}
 
-  // #lizard forgives -- pre-existing faithful port of the YAML diagram
-  // entry point (already over threshold before mission G0b/T6 added the
-  // annotation-matcher check; T8 removed the bespoke title field/branch but
-  // did not reduce the function below threshold).
+/**
+ * Parses a YAML diagram source, as `YamlDiagramFactory#createSystem` does: a
+ * {@link extractStyle} pass takes the directives (only `title`/`scale` reach
+ * the diagram -- see `StyleExtractor.ts`), then of the payload a
+ * `#highlight ` line is a highlight and every other line is YAML.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/yaml/YamlDiagramFactory.java:67-108
+ */
+export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
+  const extractor = extractStyle(upstreamSourceLines(source, 'yaml'));
+  const highlights: HighlightDirective[] = [];
+  const list: string[] = [];
+  for (const line of payloadOf(extractor)) {
+    if (line.startsWith(HIGHLIGHT_PREFIX)) highlights.push(parseYamlHighlightLine(line));
+    else list.push(line);
+  }
+  const parseWarnings: string[] = [];
   return {
-    root,
-    parseError,
+    ...parseYamlBody(list, parseWarnings),
     diagramLabel: 'YAML' as const,
     highlights,
-    annotations,
-    sprites,
-    ...(scale === undefined ? {} : { scale }),
+    ...headerOf(extractor, true),
+    // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
+    sprites: jsonSpriteRegistryFor(options),
     ...(parseWarnings.length === 0 ? {} : { parseWarnings }),
   };
 }

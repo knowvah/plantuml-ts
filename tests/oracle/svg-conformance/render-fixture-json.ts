@@ -92,7 +92,10 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
   const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
-  const block: UmlSource = { ...first.source, rawStyles: preprocessed.styles };
+  // unwind-U1: `seedSourceLines` is upstream's `UmlSource#iterator2()`, the
+  // list the json family's StyleExtractor port reads (`index.ts#
+  // umlSourceOfBlock` populates it in production).
+  const block: UmlSource = { ...first.source, rawStyles: preprocessed.styles, seedSourceLines: first.seedSource };
 
   const ast = parseForType(block, { assetStore: options?.assetStore });
   const geo = layoutJson(ast, theme, measurer);

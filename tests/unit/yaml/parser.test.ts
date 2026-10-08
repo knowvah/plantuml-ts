@@ -28,10 +28,12 @@ describe('parseYaml', () => {
     expect(ast.root).toEqual({ metadata: { name: 'foo', namespace: 'bar' } });
   });
 
-  it('returns root null for empty source', () => {
+  it('returns root null and parseError for empty source', () => {
+    // An empty payload converts to null (MonomorphToJson.java:44-52), drawn
+    // as the error page (JsonDiagram.java:116-122; jar: unwind-U1/yaml-title-only).
     const ast = parseYaml(makeSource([]));
     expect(ast.root).toBeNull();
-    expect(ast.parseError).toBe(false);
+    expect(ast.parseError).toBe(true);
   });
 
   it('returns root null for source with only blank lines', () => {

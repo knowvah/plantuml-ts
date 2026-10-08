@@ -143,26 +143,18 @@ describe('sprite registry population per engine', () => {
     expect(parsed.items.map((i) => i.label)).toEqual(['Source', 'Dest']);
   });
 
-  it('json: parseJson populates ast.sprites, JSON body still parses', () => {
-    const source: UmlSource = { lines: [...L(SPRITE_BLOCK), '{"a": 1}'], type: 'json' };
-    const ast = parseJson(source);
-    expectIcon(ast.sprites);
-    expect(ast.root).toEqual({ a: 1 });
-    expect(ast.parseError).toBe(false);
-  });
-
-  it('yaml: parseYaml populates ast.sprites, YAML body still parses', () => {
-    const source: UmlSource = { lines: [...L(SPRITE_BLOCK), 'a: 1'], type: 'yaml' };
-    const ast = parseYaml(source);
-    expectIcon(ast.sprites);
-    expect(ast.root).toEqual({ a: '1' });
-  });
-
-  it('hcl: parseHcl populates ast.sprites, HCL body still parses', () => {
-    const source: UmlSource = { lines: [...L(SPRITE_BLOCK), 'a = 1'], type: 'hcl' };
-    const ast = parseHcl(source);
-    expectIcon(ast.sprites);
-    expect(ast.root).toEqual({ a: '1' });
+  // The json family has no command table: `StyleExtractor.java:63-103` does
+  // not know `sprite`, so the definition is PAYLOAD and the body fails to
+  // parse -- the jar draws the "does not sound like X data" page
+  // (tests/fixtures/unwind-U1/{json,yaml,hcl}-sprite.svg).
+  it.each([
+    ['json', parseJson, '{"a": 1}'],
+    ['yaml', parseYaml, 'a: 1'],
+    ['hcl', parseHcl, 'resource "x" {\n a = 1\n}'],
+  ] as const)('%s: a sprite definition is payload, not a sprite (unwind-U1)', (type, parseFn, body) => {
+    const ast = parseFn({ lines: [...L(SPRITE_BLOCK), ...L(body)], type });
+    expect(ast.sprites?.byName.size).toBe(0);
+    expect(ast.parseError).toBe(true);
   });
 
   it('dot: parseDot populates ast.sprites, DOT body survives untouched', () => {
