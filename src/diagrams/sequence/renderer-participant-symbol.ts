@@ -77,7 +77,9 @@
 
 import type { Paint } from '../../core/paint.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveElementLineThickness, resolveElementShadowing } from '../../core/theme.js';
+import { resolveElementLineThickness } from '../../core/theme.js';
+import { sequenceShadowFilter } from './sequence-shadow.js';
+import { attrs } from '../../core/svg.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { MeasurerStringBounder } from '../../core/measurer-bounder.js';
 import type { ScaledTheme } from './scale-geo.js';
@@ -133,6 +135,9 @@ export interface ParticipantSymbolGeo {
   readonly height: number;
   readonly background?: Paint;
   readonly border?: Paint;
+  /** The participant's resolved delta shadow (`ParticipantGeo.shadow`), in
+   *  the same units as the box; 0 or absent draws none. */
+  readonly shadow?: number;
 }
 
 /** `head` flips the glyph/text order exactly as `ComponentRoseDatabase.java
@@ -222,7 +227,7 @@ function symbolContextFor(
     geo.background ?? null,
     geo.border ?? null,
     UStroke.withThickness(thickness),
-    resolveElementShadowing(theme, type),
+    geo.shadow ?? 0,
     roundCorner,
     0,
   );
@@ -322,12 +327,18 @@ function glyphOffset(
  * is a pure upstream constant for five of the six kinds and the collections
  * delta for the sixth, so no `Theme` lookup reaches it.
  */
-export function measureParticipantSymbol(type: GlyphParticipantType, theme: Theme): { width: number; height: number } {
+export function measureParticipantSymbol(
+  type: GlyphParticipantType,
+  theme: Theme,
+  shadow = 0,
+): { width: number; height: number } {
   if (type === 'actor') {
     // The ONE kind whose glyph dimension is theme-dependent:
     // `ActorStickMan` 27x60 (or 26x33 hollow, 55x61 awesome) per
-    // `skinparam actorStyle` (`ActorStyle.java:60-71`).
-    const probe = glyphFor('actor', ZERO_GEO, theme).calculateDimension(NO_BOUNDER);
+    // `skinparam actorStyle` (`ActorStyle.java:60-71`) -- and
+    // shadow-dependent: the stick man and the hollow actor add the delta to
+    // their height (`ActorStickMan.java:121`, `ActorHollow.java:110`).
+    const probe = glyphFor('actor', { ...ZERO_GEO, shadow }, theme).calculateDimension(NO_BOUNDER);
     return { width: probe.getWidth(), height: probe.getHeight() };
   }
   if (type === 'collections') return { width: COLLECTIONS_DELTA, height: COLLECTIONS_DELTA };
@@ -343,6 +354,10 @@ export function measureParticipantSymbol(type: GlyphParticipantType, theme: Them
   const dim = margin.addDimension(new XDimension2D(DATABASE_LABEL.width, DATABASE_LABEL.height));
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
+
+/** The glyph document's own shadow reference: `"f" + getSeed(seed)`
+ *  (`SvgGraphics.java:161`). */
+const GLYPH_SHADOW_REF = /filter="url\(#f[0-9a-z]+\)"/g;
 
 /**
  * Draws one participant glyph and returns its SVG fragment, positioned
@@ -377,15 +392,18 @@ export function renderParticipantSymbol(
     y: geo.y / k,
     width: geo.width / k,
     height: geo.height / k,
+    shadow: (geo.shadow ?? 0) / k,
   };
   const glyph = glyphFor(type, unscaled, opts.theme);
   const offset = glyphOffset(type, unscaled, glyph.calculateDimension(ug.getStringBounder()), opts.head);
   glyph.drawU(ug.apply(new UTranslate(unscaled.x, unscaled.y)).apply(offset));
 
-  const { body, extraDefs } = extractFlatContent(ug.getSvgString());
-  // A shadowed glyph (`skinparam shadowing`) emits a `<filter>` its shape
-  // references by id. The contract returns one string, and `<defs>` is a legal
-  // child anywhere the caller splices this in, so the defs ride along inline
-  // rather than being dropped and leaving a dangling `filter="url(#...)"`.
-  return extraDefs.length > 0 ? `<defs>${extraDefs}</defs>${body}` : body;
+  // A shadowed glyph's own one-glyph document minted its own shadow filter
+  // (`SvgGraphics#manageShadow`, `:1070-1090`). Upstream draws every head into
+  // ONE `SvgGraphics`, whose single filter every shadowed shape shares, so the
+  // glyph's def is dropped and its reference re-pointed at the page's
+  // (`sequence-shadow.ts`, emitted through the fragment's `extraDefs`).
+  const { body } = extractFlatContent(ug.getSvgString());
+  const filter = sequenceShadowFilter(unscaled.shadow ?? 0).filter;
+  return filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
 }

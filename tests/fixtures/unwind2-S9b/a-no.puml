@@ -1,0 +1,5 @@
+@startuml
+actor A
+actor B
+A -> B : hi
+@enduml

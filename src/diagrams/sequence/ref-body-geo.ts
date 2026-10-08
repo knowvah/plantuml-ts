@@ -125,6 +125,6 @@ export function refBodyWidth(body: readonly string[], theme: Theme, measurer: St
   if (body.length === 0) return 0;
   const widest = Math.max(...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
   const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
-  const deltaShadow = theme.colors.graph.sequenceFrameShadowing?.reference ?? 0;
+  const deltaShadow = theme.colors.graph.sequenceShadowing?.reference ?? 0;
   return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + deltaShadow;
 }

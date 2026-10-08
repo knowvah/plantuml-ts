@@ -24,6 +24,9 @@ export interface NoteGeo {
   text: string;
   color?: string;
   shape?: 'rect';
+  /** The note style's merged `getDeltaShadow()` (`Note#getUsedStyles`,
+   *  `core/sequence-shadowing.ts`), UNSCALED; absent when 0. */
+  shadow?: number;
   /** The body, one placed and measured run per line of {@link text} (A5).
    *  Measured at `note { FontSize 13 }`, not the ambient font. */
   textRuns: readonly TextRun[];

@@ -27,6 +27,7 @@ import type {
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import { noteShadowGeometry } from './sequence-layout-note-shadow.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 import { noteFontSpecOf } from './sequence-layout-shared.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
@@ -218,14 +219,18 @@ function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProces
   // = 5, handed to the component at `Rose:115` and applied by
   // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
   // at y=52 against a tile top of 47.
-  const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  const { shadow, reserve, drawnLess } = noteShadowGeometry(event, ctx.theme);
+  const noteGeo = buildNoteGeo(event, noteWidth + reserve, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
+  noteGeo.width -= drawnLess;
+  if (shadow > 0) noteGeo.shadow = shadow;
   const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
   noteGeo.textRuns = rows.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
   ctx.eventGeos.push(noteGeo);
   // `NoteTile#getPreferredHeight:167-171` is the component's height and
   // nothing else -- no spacing either side -- and that is `getTextHeight +
-  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`.
-  cursor.y += noteHeight + NOTE_PADDING_Y * 2;
+  // 2 * getPaddingY + deltaShadow` (`ComponentRoseNote:88-91`) = `blockH + 20`
+  // plus the reserve (`sequence-layout-note-shadow.ts`).
+  cursor.y += noteHeight + NOTE_PADDING_Y * 2 + reserve;
 }
 
 /** `ComponentRoseNote`'s own vertical padding, `topRightBottomLeft(5, 15, 5,

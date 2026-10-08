@@ -50,7 +50,7 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
-import { sequenceShadowDefs } from './sequence-shadow.js';
+import { sequenceShadowDefs, withNoteShadow } from './sequence-shadow.js';
 import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -96,10 +96,12 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
   // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
   // doc comment for the hexagon-vs-rectangle scope cut.
-  const noteShape =
+  const noteShape = withNoteShadow(
     note.shape === 'rect'
       ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
-      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth });
+      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth }),
+    note.shadow ?? 0,
+  );
   // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
   // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
   // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
@@ -466,7 +468,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    passes. Activations are absent here by design; see step 2.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
 
-  const shadowDefs = sequenceShadowDefs(scaledGeo.events, theme);
+  const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
   return {
     body: children.join(''),
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,

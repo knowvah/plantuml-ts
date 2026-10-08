@@ -33,6 +33,8 @@ import type { ParticipantBadge, ParticipantGeo, ParticipantType, TextRun } from 
 import { ellipse, image, rect, linkWrap } from '../../core/svg.js';
 import { sequenceText } from './sequence-text.js';
 import { participantBadgeGeo, participantLabelCy } from './sequence-layout-participant-sizing.js';
+import { participantBoxOf } from './sequence-layout-participants.js';
+import { sequenceShadowFilter } from './sequence-shadow.js';
 import {
   COLLECTIONS_DELTA,
   renderParticipantSymbol,
@@ -77,7 +79,15 @@ function renderSymbolShape(p: ParticipantGeo, blockTopY: number, head: boolean, 
   if (!hasParticipantGlyph(p.type)) return '';
   return renderParticipantSymbol(
     p.type,
-    { x: p.x, y: blockTopY, width: p.width, height: p.height, background: p.background, border: p.border },
+    {
+      x: p.x,
+      y: blockTopY,
+      width: p.width,
+      height: p.height,
+      background: p.background,
+      border: p.border,
+      shadow: p.shadow ?? 0,
+    },
     { head, display: p.display, theme },
   );
 }
@@ -198,6 +208,9 @@ function collectionsFrontBox(p: ParticipantGeo, blockTopY: number): string {
   return rect(p.x, blockTopY + COLLECTIONS_DELTA, p.width - COLLECTIONS_DELTA, p.height - COLLECTIONS_DELTA, {
     fill: p.background,
     stroke: p.border,
+    // `rect.setDeltaShadow(deltaShadow)` before BOTH draws
+    // (`ComponentRoseParticipant.java:104-109`).
+    ...sequenceShadowFilter(p.shadow ?? 0),
   });
 }
 
@@ -208,7 +221,10 @@ function collectionsFrontBox(p: ParticipantGeo, blockTopY: number): string {
  * (`Rose.java#createComponentParticipant`), which every glyph-bearing
  * `ComponentRose*` threads into `drawInternalU` to flip the glyph/text order.
  */
-function renderParticipantBlock(p: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
+function renderParticipantBlock(geo: ParticipantGeo, blockTopY: number, head: boolean, theme: ScaledTheme): string {
+  // The painted box, not the preferred one: a `participant`/`collections`
+  // head reserves its shadow outside the rectangle it draws.
+  const p = participantBoxOf({ ...geo, shadow: (geo.shadow ?? 0) * theme.scaleK });
   const label = renderNameBlock(p, participantLabelCy(p.type, p.height, blockTopY, head, theme), theme);
   if (hasParticipantGlyph(p.type)) {
     const glyph = renderSymbolShape(p, blockTopY, head, theme);
@@ -232,7 +248,12 @@ function renderParticipantBlock(p: ParticipantGeo, blockTopY: number, head: bool
   // `Participant#getUsedStyles` -- the kind's `<style>` bucket merged with
   // the participant's own inline colour, resolved in layout
   // (`sequence-layout-participants.ts#resolveParticipantBackground`).
-  const box = rect(p.x, blockTopY, p.width, p.height, { fill: p.background, stroke: p.border });
+  const box = rect(p.x, blockTopY, p.width, p.height, {
+    fill: p.background,
+    stroke: p.border,
+    // `rect.setDeltaShadow(deltaShadow)` (`ComponentRoseParticipant.java:104`).
+    ...sequenceShadowFilter(p.shadow ?? 0),
+  });
   return box + renderNameBlock(p, blockTopY + p.height / 2, theme);
 }
 

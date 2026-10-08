@@ -214,7 +214,7 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `TextBlockSprited#calculateDimension`: the badge widens the block by its
     // own width plus the 6px gap (`:57-67`).
     const lw = badge === undefined ? textW : textW + badge.width + BADGE_GAP;
-    const symbolW = symbolPreferredWidth(p.type, lw, theme);
+    const symbolW = symbolPreferredWidth(p.type, lw, theme, participantShadowOf(p, theme));
     if (symbolW !== undefined) return symbolW;
     // `PARTICIPANT_HEAD` / `COLLECTIONS_HEAD` both reach
     // `ComponentRoseParticipant`, differing only by `getDeltaCollection()`
@@ -226,9 +226,43 @@ function computeParticipantWidths(sortedParticipants: Participant[], ctx: Partic
     // `PName.MinimumWidth` is in no skin file and resolves to
     // `ValueNull#asDouble()` = 0 (`ValueNull.java:57-59`). Verified on 3570
     // corpus boxes to within 0.0005px (`findings/participant-width.md`).
-    const plain = lw + theme.sequence.participantPadding * 2;
+    const plain = lw + theme.sequence.participantPadding * 2 + reservedShadowOf(p.type, participantShadowOf(p, theme));
     return p.type === 'collections' ? plain + COLLECTIONS_DELTA : plain;
   });
+}
+
+/**
+ * `Participant#getUsedStyles` (`Participant.java:86-96`): the kind's style
+ * signature `withTOBECHANGED(stereotype)`, whose `getShadowing()`
+ * `Style#getSymbolContext` turns into the component's delta shadow
+ * (`Style.java:109-115,277-281`, `ComponentRoseParticipant.java:83`).
+ */
+export function participantShadowOf(p: Participant, theme: Theme): number {
+  return theme.colors.graph.sequenceShadowing?.participant(p.type, p.stereotype) ?? 0;
+}
+
+/**
+ * The part of a head's delta shadow its PREFERRED dimensions reserve: all of
+ * it for the two kinds `ComponentRoseParticipant` draws, whose
+ * `getPreferredWidth`/`getPreferredHeight` add `deltaShadow`
+ * (`ComponentRoseParticipant.java:129-138`); none for the glyph kinds, whose
+ * components never read it (`ComponentRoseActor:84-92`,
+ * `ComponentRoseDatabase:95-105`, and their siblings).
+ */
+export function reservedShadowOf(type: ParticipantType, shadow: number): number {
+  return type === 'participant' || type === 'collections' ? shadow : 0;
+}
+
+/**
+ * The rectangle `ComponentRoseParticipant#drawInternalU` paints
+ * (`:100-104`): `getTextWidth` x `getTextHeight`, the preferred box less the
+ * reserved shadow. The label is laid out in it, never in the reserve -- the
+ * jar's text stays put when shadowing widens the column
+ * (`tests/fixtures/unwind2-S9b/p-plain.svg`).
+ */
+export function participantBoxOf(g: ParticipantGeo): ParticipantGeo {
+  const r = reservedShadowOf(g.type, g.shadow ?? 0);
+  return r === 0 ? g : { ...g, width: g.width - r, height: g.height - r, centerX: g.x + (g.width - r) / 2 };
 }
 
 /**
@@ -298,7 +332,7 @@ function positionParticipants(
     g.y = TOP_MARGIN + maxParticipantHeight - areaOf(g);
     // AFTER the bottom-align, never before: the runs carry an absolute
     // baseline, and `g.y` is what it is measured from.
-    g.labelRuns = buildLabelRuns(g, ctx);
+    g.labelRuns = buildLabelRuns(participantBoxOf(g), ctx);
   }
 
   return { participantGeos, participantMap, participantIndex, maxParticipantHeight };
@@ -339,9 +373,10 @@ function buildParticipantGeo(
   // fitted `DB_HEIGHT = 80` floor).
   const blockHeight = Math.max(textHeight, badge?.height ?? 0);
   const boxHeight = blockHeight + 2 * theme.sequence.participantPadding;
+  const shadow = participantShadowOf(p, theme);
   const pHeight =
-    symbolPreferredHeight(p.type, blockHeight, theme) ??
-    (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight);
+    symbolPreferredHeight(p.type, blockHeight, theme, shadow) ??
+    (p.type === 'collections' ? boxHeight + COLLECTIONS_DELTA : boxHeight) + reservedShadowOf(p.type, shadow);
   const centerX = currentX + width / 2;
 
   return {
@@ -362,6 +397,7 @@ function buildParticipantGeo(
     width,
     height: pHeight,
     centerX,
+    ...(shadow > 0 ? { shadow } : {}),
   };
 }
 
