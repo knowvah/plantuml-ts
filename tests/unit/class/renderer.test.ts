@@ -1318,8 +1318,10 @@ describe('renderClass — edges', () => {
     },
   );
 
-  it('pins the default arrow-font colour to `#000000` (D3) -- NEVER ' + '`theme.colors.text` (`#181818`)', () => {
-    expect(defaultTheme.colors.text).not.toBe('#000000');
+  it('pins the default arrow-font colour to `#000000` (D3) -- NEVER ' + '`theme.colors.text`', () => {
+    // `theme.colors.text` is root FontColor black too (`plantuml.skin:9`), so
+    // a distinct value keeps this discriminating: the arrow never reads it.
+    const theme = { ...defaultTheme, colors: { ...defaultTheme.colors, text: '#123456' } };
     const geo = makeMinimalGeo({
       edges: [
         makeEdgeGeo({
@@ -1336,7 +1338,7 @@ describe('renderClass — edges', () => {
         }),
       ],
     });
-    const svg = assembleSvg(renderClass(geo, defaultTheme));
+    const svg = assembleSvg(renderClass(geo, theme));
     const expectedFill = shortenColor('#000000');
     expect(svg).toContain(`fill="${expectedFill}" textLength="26.325">uses</text>`);
     expect(svg).toContain(`fill="${expectedFill}" stroke="${expectedFill}"`);

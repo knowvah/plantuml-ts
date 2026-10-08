@@ -260,7 +260,7 @@ export const defaultTheme: Theme = {
     nodeBackground: '#F1F1F1',
     participantBackground: '#E2E2F0', // plantuml.skin:4 via :197-201
     border: '#181818',
-    text: '#181818',
+    text: '#000000', // root FontColor black, plantuml.skin:9; Style.java:259-263
     arrow: '#181818',
     note: '#FEFECE',
     noteBackground: '#FEFFDD', // T3d: plantuml.skin:3,324 root note{} (light mode; not :678-680's dark-media override)
@@ -391,14 +391,14 @@ export type ThemeOverride = Partial<ThemeRootFields> & {
   cardinalityFontStyle?: string;
   diagramMargin?: { top: number; right: number; bottom: number; left: number };
   /** See {@link Theme.styleOverrides}. */ styleOverrides?: Record<string, Record<string, string>>;
-  /** See `Theme.defaultFontSize`'s own doc comment (R2j). */
-  defaultFontSize?: number;
+  /** See `Theme.defaultFontSize`'s own doc comment (R2j). */ defaultFontSize?: number;
   linetype?: 'ortho' | 'polyline';
   fixCircleLabelOverlapping?: boolean;
   componentStyle?: 'uml2' | 'uml1' | 'rectangle';
   /** See {@link Theme.conditionEndStyle}'s own doc comment (T1p-a). */
   conditionEndStyle?: 'diamond' | 'hline';
-  /** See {@link Theme.conditionStyle}'s own doc comment (T2c). */ conditionStyle?: 'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
+  /** See {@link Theme.conditionStyle}'s own doc comment (T2c). */ conditionStyle?:
+    'insideHexagon' | 'emptyDiamond' | 'insideDiamond';
   actorStyle?: ActorStyle;
   minimumWidth?: number;
   strictUml?: boolean;

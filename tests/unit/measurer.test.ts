@@ -26,7 +26,7 @@ describe('defaultTheme', () => {
   });
 
   it('has correct text color', () => {
-    expect(defaultTheme.colors.text).toBe('#181818');
+    expect(defaultTheme.colors.text).toBe('#000000'); // plantuml.skin:9
   });
 
   it('has correct arrow color', () => {

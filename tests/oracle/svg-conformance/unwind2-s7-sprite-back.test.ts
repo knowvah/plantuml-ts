@@ -12,24 +12,10 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderSync } from '../../../src/index.js';
 import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
-import { spriteToPngDataUri, type SpriteLike } from '../../../src/core/klimt/sprite/sprite-raster.js';
 import { pngPayloads } from '../../helpers/png-decode.js';
 
 const S7 = 'tests/fixtures/unwind2-S7';
 const U4 = 'tests/fixtures/unwind-U4/sprite';
-const PARTICIPANT_BACK = '#E2E2F0'; // plantuml.skin:4
-/** `CommandCreoleSprite`'s font-relative factor at the 14pt head font. */
-const HEAD_FONT_FACTOR = 14 / 13;
-/** `theme.colors.text`, the sequence head font colour this port draws. */
-const PORT_SEQUENCE_TEXT = '#181818';
-
-/** Every fixture's `sprite $foo [10x12/16]` grid, as authored. */
-const SPRITE: SpriteLike = {
-  width: 10,
-  height: 12,
-  grayLevels: 16,
-  pixelAt: (x, y) => ((x + y) % 5 !== 0 ? (x * 3 + y * 5) % 16 : 0),
-};
 
 function hrefs(svg: string): string[] {
   return pngPayloads(svg).map((p) => Buffer.from(p).toString('base64'));
@@ -74,6 +60,13 @@ const EXACT: readonly (readonly [string, string])[] = [
   [S7, 'a-legend'],
   [S7, 'a-caption'],
   [S7, 'a-header'],
+  // A sequence head draws its label on the box `Back` for participant /
+  // collections / queue (`ComponentRoseParticipant.java:96-97,118`) and on
+  // no back for a stickman (`ComponentRoseActor.java:75,78`); the tint end is
+  // the head font, root `FontColor black` (`plantuml.skin:9`, unwind2-S10).
+  [U4, 's1-seq-participant'],
+  [S7, 's-participant-color'],
+  [S7, 's-actor'],
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -81,22 +74,6 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
     const expected = jar(dir, name);
     expect(expected.length).toBeGreaterThan(0);
     expect(ours(dir, name)).toEqual(expected);
-  });
-
-  // A sequence head draws its label on the box `Back` for participant /
-  // collections / queue (`ComponentRoseParticipant.java:96-97,118`) and on
-  // no back for a stickman (`ComponentRoseActor.java:75,78`). The back now
-  // matches; the remaining delta is the tint END: the jar's head font is
-  // black (`plantuml.skin:9`), this port's sequence text is `#181818`.
-  it.each([
-    ['s1-seq-participant', U4, PARTICIPANT_BACK],
-    ['s-participant-color', S7, '#FFC0CB'],
-    ['s-actor', S7, undefined],
-  ] as const)('%s: back colour matches; only the head font colour differs', (name, dir, back) => {
-    const tinted = (color: string | undefined) =>
-      spriteToPngDataUri(SPRITE, color, back, HEAD_FONT_FACTOR).dataUri.split(',')[1];
-    expect(jar(dir, name)).toEqual([tinted(undefined), tinted(undefined)]);
-    expect(ours(dir, name)).toEqual([tinted(PORT_SEQUENCE_TEXT), tinted(PORT_SEQUENCE_TEXT)]);
   });
 
   // The jar draws one sprite in each; the port draws none (no sprite atom

@@ -218,7 +218,7 @@ describe('participant labels through creole', () => {
     // The baseline is the jar's 27.889 since C3 landed the top margin; the
     // jar's own golden carries `<text x="17" y="27.889" ... >Bob</text>`.
     expect(render('jobadi-87-jegi648')).toContain(
-      '<text x="17" y="27.889" font-size="14" fill="#181818" textLength="24.938">Bob</text>',
+      '<text x="17" y="27.889" font-size="14" fill="#000" textLength="24.938">Bob</text>',
     );
   });
 });
