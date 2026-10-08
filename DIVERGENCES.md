@@ -543,24 +543,9 @@ tests (`tests/unit/preprocessor.test.ts`,
 component 251/259, usecase 81/87, class 680/680, object 78/80, state 260/261,
 with no fixture changing bucket.
 
-### The error diagram omits the raster decorations, and prints this port's own version
+### The error diagram's clock-selected banners are not drawn (no clock in `src/`)
 
-**Upstream:** the error diagram stacks the PlantUML logo into the Welcome
-block's top-right corner, and — depending on the *minute of the hour*
-(`System.currentTimeMillis() / 60000L % 60`) — a Patreon, Liberapay,
-dedication, or Arecibo banner, each a bundled raster image with a QR code.
-Its version banner reads `PlantUML version <x> / <commit>`.
-
-**This port:** none of the raster decorations are drawn, and the banner reads
-`plantuml-ts version <x> / <commit>`. The text of the error — the source
-listing, the `[From … (line N) ]` stack, the message — is byte-identical to the
-jar's, verified against the live oracle.
-
-**Why:** `src/` may not read a clock (rendering must be reproducible — no
-`Date.now()`), and this port vendors no raster assets. Upstream ships the same
-switch: `PSystemError.disableTimeBasedErrorDecorations()`. The version line
-naming *this* renderer, not the Java one, is the point of the line.
-**Category:** limitation (assets) / clarity (version identity).
+The logo and the Arecibo image are drawn as the jar draws them (`PSystemError.java:214-235`, `GraphicStrings#drawU`; `src/core/error/error-renderer.ts`; retired unwind2-S8, 2026-10-08). The version line stays this port's, by user ruling — see "Error pages print this port's version, and the source name is `string`". Remaining, forced: the Patreon/Liberapay/dedication banners are selected by the minute of the hour (`PSystemError.java:221-229`); `src/` reads no clock and the jar offers no deterministic switch for them (nothing calls `disableTimeBasedErrorDecorations()`, `:87-89`), so the port draws what the jar draws on the other 52 minutes — which every cached golden shows.
 
 ### ~~`!undefine` accepted as an alias for `!undef`~~ — RETIRED (unwind-U3, 2026-10-08)
 
@@ -796,37 +781,9 @@ The jar draws no stub; its spanning remainder block is `min(colWidth, carried wi
 
 ---
 
-## Bundled skins `sonyxperiadev` / `reddress` render instead of crashing
+## ~~Bundled skins `sonyxperiadev` / `reddress` render instead of crashing~~ — RETIRED (unwind2-S8, 2026-10-08)
 
-**Category:** limitation (upstream has a known gap — we fill it)
-
-**Upstream:** `skin sonyxperiadev` and `skin reddress` crash the PlantUML
-renderer with an unhandled exception (NullPointerException / StyleParsingException
-respectively) on every diagram type, producing an empty/degraded SVG. Reproduced
-in both the pinned oracle jar (1.2026.7beta3) and stable 1.2026.6. See
-`docs/upstream-plantuml-issues/01-bundled-skins-crash-renderer.md`.
-
-**This port:** loads both skins via the preprocessor+skinparam path
-(`skin-loader.ts`) and renders a real diagram, resolving the skins' skinparams
-as a base cascade layer. `sonyxperiadev` resolves fully (Arial font, shadowing
-off, entity/note colors). `reddress` bare resolves its font defaults; its
-`!ifdef`-gated colour variants do NOT yet work via `renderSync` — the document's
-own `!define`s aren't threaded into the isolated skin preprocess pass in
-production `index.ts`, and a separate pre-existing defect captures skinparam
-line values before TIM `!define` substitution runs (both tracked in
-`.agent-notes/skin-batch4-preproc.md`).
-
-**Reason:** upstream crashes, so there is no jar oracle to reproduce and no
-"correct" output to match — reproducing a crash is not a goal. Rendering the
-skin's declared skinparams is strictly more useful than a stack trace, and
-matches this port's charter (lower-friction PlantUML). Because upstream can't
-render these skins, the port's output here is verified against the skin files'
-own skinparam definitions (unit tests), not against a jar oracle — a deliberate,
-documented exception to the "author a jar oracle" rule, made because the jar
-itself is broken here.
-
-**Affects:** any diagram using `skin sonyxperiadev` (fully) or `skin reddress`
-(bare only). No upstream corpus fixture uses either.
+Upstream fixed the crash (11ed6720, #2797): `sonyxperiadev.skin` is the jar's style sheet verbatim (`src/core/skins-builtin-sonyxperiadev-*.ts`) and `skin reddress` is the jar's "Cannot find style" command error at the skin line (`TitledDiagram.java:159-182`, `src/core/skin-command.ts`).
 
 ---
 
