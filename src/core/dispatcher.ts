@@ -29,6 +29,7 @@ import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
 import type { ScaleSpec } from './scale-command.js';
+import type { PreprocessorResult } from './preprocessor.js';
 
 /**
  * The per-render inputs a plugin's `parse()` may need beyond the source
@@ -266,6 +267,14 @@ export interface SyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagina
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layoutSync(ast: AST, theme: Theme, measurer: StringMeasurer): Geo;
   render(geo: Geo, theme: Theme): AssembledSvg;
+  /**
+   * The style sources this engine's theme is built from, for an engine that
+   * does NOT execute every `skinparam`/`!theme` the preprocessor collected.
+   * Absent = all of them, which is every engine with a command table. The
+   * json family (`@startjson`/`@startyaml`/`@starthcl`) has none upstream and
+   * keeps only `skinparam handwritten` (`StyleExtractor.java:88-97`).
+   */
+  styleInput?(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult;
 }
 
 /**
@@ -278,6 +287,8 @@ export interface AsyncPlugin<AST = unknown, Geo = unknown> extends Partial<Pagin
   parse(source: UmlSource, options?: ParseOptions): AST | ParseRefusal;
   layout(ast: AST, theme: Theme, measurer: StringMeasurer): Promise<Geo>;
   render(geo: Geo, theme: Theme): AssembledSvg;
+  /** See {@link SyncPlugin.styleInput}. */
+  styleInput?(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult;
 }
 
 /**

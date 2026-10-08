@@ -92,3 +92,17 @@ export function resolveGlobalBackground(styleMap: StyleMap): string | undefined 
 export function resolveGlobalBorder(styleMap: StyleMap): string | undefined {
   return resolveRootElementProperty(styleMap, 'linecolor');
 }
+
+/**
+ * unwind-U1: the GLOBAL root/element universal-selector FontName -- same
+ * mechanism as {@link resolveGlobalBorder}, applied to FontName. Read by the
+ * json family (`style-map-json-diagram.ts`), whose node style signature
+ * carries `root`/`element` like every other (`TextBlockJson.java:269-288`),
+ * and which since unwind-U1 no longer takes `skinparam DefaultFontName`
+ * (`StyleExtractor.java:88-97`): a theme's `<style> root { FontName }`
+ * (`puml-theme-amiga.puml:36`) is how its font reaches a json node in the
+ * jar. Returns the RAW value, `undefined` when neither selector declares it.
+ */
+export function resolveGlobalFontName(styleMap: StyleMap): string | undefined {
+  return resolveRootElementProperty(styleMap, 'fontname');
+}
