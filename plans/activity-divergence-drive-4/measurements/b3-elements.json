@@ -1,0 +1,71 @@
+{
+  "summary": {
+    "rows": 6,
+    "ws": 217,
+    "classes": {
+      "extra line+arrow": {
+        "count": 1,
+        "ws": 31
+      },
+      "extra arrow only": {
+        "count": 0,
+        "ws": 0
+      },
+      "extra line only": {
+        "count": 0,
+        "ws": 0
+      },
+      "missing line+arrow": {
+        "count": 0,
+        "ws": 0
+      },
+      "text-only": {
+        "count": 0,
+        "ws": 0
+      },
+      "mixed": {
+        "count": 0,
+        "ws": 0
+      },
+      "exact": {
+        "count": 5,
+        "ws": 186
+      }
+    }
+  },
+  "rows": [
+    {
+      "slug": "bozido-07-geze049",
+      "ws": 80,
+      "delta": {}
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "ws": 14,
+      "delta": {}
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "ws": 29,
+      "delta": {}
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "ws": 31,
+      "delta": {
+        "polygon": 1,
+        "line": 3
+      }
+    },
+    {
+      "slug": "mufixi-71-koma752",
+      "ws": 34,
+      "delta": {}
+    },
+    {
+      "slug": "pufuzi-99-vone170",
+      "ws": 29,
+      "delta": {}
+    }
+  ]
+}

@@ -87,7 +87,7 @@ Orchestrator gates every merge on stop 17 and runs D6 after it.
 | [0](batch-0/overview.md) | branch, b0, capture the 80, census | T0a, T0b, T0c, T0d | T0c∥T0d after T0b | [x] |
 | [1](batch-1/overview.md) | switch Ydelta, lane widths, NOTE-MULTI, spot letters | T1a–T1d | ∥ | [x] |
 | [2](batch-2/overview.md) | census families (written at b1 close) | — | ∥ waves | [x] |
-| [3](batch-3/overview.md) | drive round + D9 gate-retirement sweep (written at b2 close) | — | ∥ waves | [ ] |
+| [3](batch-3/overview.md) | drive round + D9 gate-retirement sweep (written at b2 close) | — | ∥ waves | [x] |
 | [4](batch-4/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 
 ## Documents
