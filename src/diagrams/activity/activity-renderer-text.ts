@@ -209,7 +209,9 @@ function fontConfigForRun(run: CreoleTextRun, style: ActivityTextStyle): FontCon
   if (run.style.underline) styles.add(FontStyle.UNDERLINE);
   if (run.style.strike) styles.add(FontStyle.STRIKE);
   if (run.url !== undefined && style.hyperlinkUnderline === false) styles.delete(FontStyle.UNDERLINE);
-  return { family: style.fontFamily, size: run.size, color: runColor(run, style), styles };
+  // add4-T3g: the run's OWN family (`creole-text-lines.ts`, a `""mono""` run's
+  // `monospaced`, `SkinParam.java:1068-1070` -> `SvgGraphics.java:720-722`).
+  return { family: run.family ?? style.fontFamily, size: run.size, color: runColor(run, style), styles };
 }
 
 /** A run's ink: {@link fontConfigForRun}'s `JAR_DEFAULT_TEXT_COLOR` sentinel
