@@ -1,0 +1,15 @@
+@startuml
+|Main|
+start
+:something Received;
+if (a?) then (yes)
+  :first;
+elseif (b?) then (yes)
+  :second;
+else (no)
+  :fallback;
+endif
+|Other|
+:done;
+stop
+@enduml

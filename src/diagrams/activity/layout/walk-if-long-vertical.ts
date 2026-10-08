@@ -29,7 +29,7 @@ import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import { laneAt, laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
-import { collectTouchedLanes } from './tile-coordinates-group.js';
+import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 
 interface LvCtx {
   readonly t: GtileIfLongVertical;
@@ -49,13 +49,7 @@ interface LvCtx {
  * lanes at all (no interceptor pass, `Swimlanes.java:318-356`).
  */
 function compositeSwimlanes(t: GtileIfLongVertical, myLane: string | undefined): ReadonlySet<string> | undefined {
-  const lanes = new Set<string>();
-  const inLane = laneIn(t.tiles[0]!, myLane);
-  if (inLane !== undefined) lanes.add(inLane);
-  for (const tile of t.tiles) collectTouchedLanes(tile, lanes);
-  collectTouchedLanes(t.tile2, lanes);
-  if (lanes.size === 0 && myLane === undefined) return undefined;
-  return lanes;
+  return compositeLaneGate(laneIn(t.tiles[0]!, myLane), [...t.tiles, t.tile2], myLane);
 }
 
 /**
@@ -79,11 +73,7 @@ function childDrawn(ctx: LvCtx, lane: string | undefined): boolean {
  * `ConnectionCross.java:49-64`).
  */
 function connectionDrawn(ctx: LvCtx, lane1: string | undefined, lane2: string | undefined): boolean {
-  if (ctx.gate === undefined) return true;
-  for (const lane of ctx.gate) {
-    if ((lane1 === undefined || lane1 === lane) && (lane2 === undefined || lane2 === lane)) return true;
-  }
-  return false;
+  return nonTranslatableConnectionDrawn(ctx.gate, lane1, lane2);
 }
 
 /** {@link pushEdge} behind {@link connectionDrawn}; `false` = not drawn, so

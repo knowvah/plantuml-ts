@@ -100,8 +100,13 @@ describe('layoutActivity — long-horizontal: real swimlanes split the Hline per
     return e.points.length === 2 && e.arrowhead === false && e.points[0]!.y === e.points[1]!.y;
   }
 
-  it('the Hline fans out to one edge per in-range lane -- 10 edges, not 9', () => {
-    expect(geo.edges.length).toBe(10);
+  // 10 with the Hline fanned out per lane, minus `ConnectionLastElseIn`:
+  // `d` sits in lane B, the diamonds in A, and that connection is not
+  // `ConnectionTranslatable` (`FtileIfLongHorizontal.java:323`), so no
+  // swimlane pass draws it (`UGraphicInterceptorOneSwimlane.java:93-104`,
+  // `ConnectionCross.java:49-64`).
+  it('the Hline fans out to one edge per in-range lane; no cross-lane else-in -- 9 edges', () => {
+    expect(geo.edges.length).toBe(9);
   });
 
   it('exactly two Hline-derived edges exist, both at the SAME y', () => {
