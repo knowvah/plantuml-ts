@@ -96,7 +96,8 @@ interface IfDownFlags {
 function diamond2Geo(flags: IfDownFlags): AlignedGeo {
   if (flags.hasOptionalStop) return { left: 0, width: 0, height: 0 };
   if (flags.conditionEndStyle === 'hline') return { left: 0, width: 0, height: HEXAGON_HALF_SIZE };
-  if (flags.hasTwoBranches) return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE + diamond2North(flags) };
+  if (flags.hasTwoBranches)
+    return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE + diamond2North(flags) };
   return { left: 0, width: 0, height: MERGE_EMPTY_HEIGHT };
 }
 
@@ -226,7 +227,11 @@ interface ResolvedIfDownFlags {
 
 /** The constructor's own `flags`/`hasMergeNode` setup, split out purely to
  *  keep that constructor's own CCN under the file's limit. */
-function resolveIfDownFlags(optionalStop: Tile | null, options: GtileIfDownOptions, conditionEndStyle: 'diamond' | 'hline'): ResolvedIfDownFlags {
+function resolveIfDownFlags(
+  optionalStop: Tile | null,
+  options: GtileIfDownOptions,
+  conditionEndStyle: 'diamond' | 'hline',
+): ResolvedIfDownFlags {
   const hasOptionalStop = optionalStop !== null;
   const padding = options.padding ?? 0;
   return {
@@ -240,12 +245,23 @@ interface GeometryExtras {
   readonly opale: IfOwnNote | null;
 }
 
-function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags, extras: GeometryExtras): CoreGeometry {
+function computeGeometry(
+  diamond1: DiamondConditionTile,
+  main: Tile,
+  flags: IfDownFlags,
+  extras: GeometryExtras,
+): CoreGeometry {
   const { optionalStopWidth, opale } = extras;
   const total = computeAlignedTotal(diamond1, main, flags);
   const d2 = diamond2Geo(flags);
   const { supp, left } = applyOpaleToLeft(diamond1, total.geo.left, opale?.box.width ?? 0);
-  const { height, widthBase } = computeHeightAndWidthBase(diamond1, total, flags, optionalStopWidth, opale?.box.height ?? 0);
+  const { height, widthBase } = computeHeightAndWidthBase(
+    diamond1,
+    total,
+    flags,
+    optionalStopWidth,
+    opale?.box.height ?? 0,
+  );
   return {
     left,
     width: widthBase + supp,
@@ -323,7 +339,11 @@ interface StopOffsets {
 /** `getTranslateOptionalStop` (`FtileIfDown.java:648-657`), split out of the
  *  constructor for the same reason as {@link computeOffsets}. Returns the
  *  zero placeholder when there is no optional-stop side box. */
-function computeStopOffsets(diamond1: DiamondConditionTile, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
+function computeStopOffsets(
+  diamond1: DiamondConditionTile,
+  optionalStop: Tile | null,
+  core: CoreGeometry,
+): StopOffsets {
   if (optionalStop === null) return { stopX: 0, stopY: 0 };
   const additionalWidth = additionalWidthFor(diamond1, optionalStop.width);
   // add4-T2d: `labelNorth = dimDiamond1.getInY()`; `y1 = labelNorth +
