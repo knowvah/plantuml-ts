@@ -411,14 +411,12 @@ describe('%n() and %newline() built-in expansion', () => {
     expect(lines).toContain(':hello;');
   });
 
-  it('case-folded %N() is not a TIM function; flatten still splits it', () => {
-    // TIM function names are case-sensitive (upstream TimLoader): `%N()`
-    // survives the interpreter as literal text and is split into source
-    // lines by `flatten`'s `RE_NEWLINE_CALL_ANY_CASE` (pre-existing,
-    // port-specific accommodation -- unchanged by the R2b flag flip).
+  it('case-folded %N() is not a TIM function and stays literal text', () => {
+    // TIM call sites are found by `TrieImpl#getLonguestMatchStartingIn`, an
+    // exact-char walk (TrieImpl.java:91-111): `%N()` is plain text and the jar
+    // draws it literally (tests/fixtures/unwind-U3/newline-uppercase-literal.svg).
     const { lines } = preprocess('@startuml\n:a %N() b;\n@enduml');
-    expect(lines).toContain(':a');
-    expect(lines).toContain(' b;');
+    expect(lines).toEqual(['@startuml', ':a %N() b;', '@enduml']);
   });
 });
 
@@ -492,8 +490,8 @@ describe('trailing whitespace reaches the command layer (T6i)', () => {
     expect(lines).toContain(`:hello ${BLOCK_E1_NEWLINE} world; `);
   });
 
-  it('still right-trims the segments of the port-only case-folded %N() split', () => {
+  it('keeps the trailing space on a line carrying a literal case-folded %N()', () => {
     const { lines } = preprocess('@startuml\n:a %N() b; \n@enduml');
-    expect(lines).toEqual(['@startuml', ':a', ' b;', '@enduml']);
+    expect(lines).toEqual(['@startuml', ':a %N() b; ', '@enduml']);
   });
 });

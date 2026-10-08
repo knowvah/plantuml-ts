@@ -78,3 +78,43 @@ describe('unwind-U3 divergence 1: `!undef` only (TLineType.java:87)', () => {
     expectLikeJar('undef-variable', 'conformant');
   });
 });
+
+describe('unwind-U3 divergence 2: %newline()/%breakline() BLOCK_E1 sentinels', () => {
+  // `JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION = true` (JawsFlags.java:40):
+  // `Newline`/`NewlineShort` return `Jaws.BLOCK_E1_NEWLINE`, decoded into a
+  // display line break by `Display#getWithNewlines` (Display.java:316-341).
+  it.each([
+    ['newline-activity-action', 'conformant'],
+    ['newline-note', 'conformant'],
+    ['newline-sequence-message', 'texts'],
+  ] as const)('%s decodes the sentinel as the jar does', (name, how) => {
+    expectLikeJar(name, how);
+  });
+
+  // `%breakline()` returns `BLOCK_E1_BREAKLINE`, which `Jaws.mutateExpands1`
+  // splits into separate source lines (`BlockUml.java:153`, `Jaws.java:65-120`):
+  // the dangling `c` is a syntax error at line 2 in the jar.
+  it('%breakline() splits the source line before the diagram parser', () => {
+    expectLikeJar('breakline-sequence-message', 'syntaxErrorLine');
+  });
+
+  // KNOWN RESIDUAL (outside the TIM): these display consumers split label
+  // text with their own scanner instead of `Display#getWithNewlines`
+  // (`MethodsOrFieldsArea.java:255,264` for members), so the sentinel is drawn
+  // as an invisible character (or UText's `↵`) instead of a line break.
+  // `it.fails` turns red the day a consumer is fixed -- move it up then.
+  it.fails.each(['newline-class-member-only', 'newline-usecase', 'newline-state'])(
+    '%s: consumer does not decode BLOCK_E1_NEWLINE yet',
+    (name) => {
+      expectLikeJar(name, 'texts');
+    },
+  );
+
+  // TIM function names are case-sensitive: `FunctionsSet` finds call sites
+  // through `TrieImpl#getLonguestMatchStartingIn`, an exact-`char` walk
+  // (TrieImpl.java:91-111, `brothers.get(s.charAt(pos))`), so `%N()` /
+  // `%NEWLINE()` are plain text and the jar draws them literally.
+  it('`%N()` / `%NEWLINE()` are literal text, never a line break', () => {
+    expectLikeJar('newline-uppercase-literal', 'texts');
+  });
+});

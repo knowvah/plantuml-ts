@@ -1,0 +1,5 @@
+@startuml
+actor "Act%newline()Two" as A
+usecase "Use%newline()Case" as U
+A --> U : lab%newline()el
+@enduml

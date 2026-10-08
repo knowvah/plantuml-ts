@@ -1,0 +1,5 @@
+@startuml
+class A
+note right of A : one%newline()two
+note "x%newline()y" as N1
+@enduml
