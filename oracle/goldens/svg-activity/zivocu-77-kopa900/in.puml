@@ -1,0 +1,17 @@
+@startuml
+
+start
+switch (AlternativeAlternativeAlternative ""GatewayID"" defined for...)
+	case (**SomeOne**\n2)
+	:a;
+	case (**ANY**\n1\n2\n3)
+	:b;
+	case (else)
+		:Get Main ""GatewayID"";
+	endswitch
+:Get **Alternative**\n""GatewayID"";
+
+
+stop
+
+@enduml

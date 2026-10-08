@@ -3577,11 +3577,11 @@
     {
       "type": "activity",
       "slug": "vimena-17-poju626",
-      "status": "baseline",
-      "diffCount": 1,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "53d01279",
-      "weightedScore": 1
+      "measuredAgainstCommit": "2b080518",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3973,11 +3973,11 @@
     {
       "type": "activity",
       "slug": "zivocu-77-kopa900",
-      "status": "baseline",
-      "diffCount": 1,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "0a21936b",
-      "weightedScore": 1
+      "measuredAgainstCommit": "2b080518",
+      "weightedScore": 0
     },
     {
       "type": "activity",
