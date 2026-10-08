@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-> <back:yellow>yellow back;
+:b;
+stop
+@enduml

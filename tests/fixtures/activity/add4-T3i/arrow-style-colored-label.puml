@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-[#red]-> labelled;
+:b;
+stop
+@enduml
