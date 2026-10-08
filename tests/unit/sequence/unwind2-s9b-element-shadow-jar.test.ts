@@ -115,4 +115,13 @@ describe('unwind2-S9b element shadows (jar fixtures)', () => {
       expect(RE_DEFS.exec(ours)?.[0]).toBe(RE_DEFS.exec(jar)?.[0]);
     },
   );
+  it("keeps a glyph's gradient fill, lifted into the one <defs> (vasibu-26-lece790, !theme aws-orange)", () => {
+    // A glyph's own document mints its gradient (`SvgGraphics.java:363-405`);
+    // re-pointing its shadow must not drop it. The jar's whole page holds one.
+    const svg = oursOf('in', join(CORPUS, 'vasibu-26-lece790'));
+    const ids = [...svg.matchAll(/<linearGradient id="([^"]+)"/g)].map((m) => m[1]);
+    const refs = new Set([...svg.matchAll(/url\(#(g[0-9a-z]+)\)/g)].map((m) => m[1]));
+    expect(ids).toHaveLength(1);
+    expect([...refs]).toEqual(ids);
+  });
 });

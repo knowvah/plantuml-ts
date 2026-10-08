@@ -358,17 +358,31 @@ export function measureParticipantSymbol(
 /** The glyph document's own shadow reference: `"f" + getSeed(seed)`
  *  (`SvgGraphics.java:161`). */
 const GLYPH_SHADOW_REF = /filter="url\(#f[0-9a-z]+\)"/g;
+/** A klimt gradient writes its `id` last (`SvgGraphics.java:384-393`); the
+ *  page's def collector lifts the `<linearGradient id="g...` spelling only
+ *  (`svg-defs.ts#extractGradientDefs`), so the id is moved to the front. */
+const GLYPH_GRADIENT_OPEN = /<linearGradient((?: [a-z0-9]+="[^"]*")*?) id="(g[0-9a-z]+)"/g;
+/** ...and its def, `SvgGraphics.java:1074-1086`'s `<filter id="f...">`. */
+const GLYPH_SHADOW_DEF = /<filter id="f[0-9a-z]+"[^>]*>.*?<\/filter>/g;
 
 /**
- * A shadowed glyph's own one-glyph document minted its own shadow filter
- * (`SvgGraphics#manageShadow`, `:1070-1090`). Upstream draws every head into
- * ONE `SvgGraphics`, whose single filter every shadowed shape shares, so the
- * glyph's def is dropped and its reference re-pointed at the page's
- * (`sequence-shadow.ts`, emitted through the fragment's `extraDefs`).
+ * The glyph's one-glyph document, as inline content for the page.
+ *
+ * A shadowed glyph minted its own shadow filter (`SvgGraphics#manageShadow`,
+ * `:1070-1090`). Upstream draws every head into ONE `SvgGraphics`, whose
+ * single filter every shadowed shape shares, so that def is dropped and the
+ * reference re-pointed at the page's (`sequence-shadow.ts`, emitted through
+ * the fragment's `extraDefs`). Any other def -- a gradient fill's
+ * `<linearGradient>` -- rides along bare, where `svg-defs.ts
+ * #collectDocumentDefs` lifts it into `<defs>` and collapses duplicates, as
+ * upstream's one gradient map does (`SvgGraphics.java:363-405`).
  */
-function repointGlyphShadow(body: string, shadow: number): string {
+function glyphContent(svg: string, shadow: number): string {
+  const { body, extraDefs } = extractFlatContent(svg);
+  const defs = extraDefs.replace(GLYPH_SHADOW_DEF, '').replace(GLYPH_GRADIENT_OPEN, '<linearGradient id="$2"$1');
   const filter = sequenceShadowFilter(shadow).filter;
-  return filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
+  const drawn = filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
+  return defs + drawn;
 }
 
 /**
@@ -410,5 +424,5 @@ export function renderParticipantSymbol(
   const offset = glyphOffset(type, unscaled, glyph.calculateDimension(ug.getStringBounder()), opts.head);
   glyph.drawU(ug.apply(new UTranslate(unscaled.x, unscaled.y)).apply(offset));
 
-  return repointGlyphShadow(extractFlatContent(ug.getSvgString()).body, unscaled.shadow ?? 0);
+  return glyphContent(ug.getSvgString(), unscaled.shadow ?? 0);
 }
