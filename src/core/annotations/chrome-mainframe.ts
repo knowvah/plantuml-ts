@@ -19,6 +19,12 @@ import { buildChromeTextBlock } from './blocks-creole.js';
 import { mergeFragmentDefs } from '../klimt/document-shell.js';
 import { shiftFragmentBody } from './coord-shift.js';
 import { buildBigFrame, type BigFrameStyle } from '../klimt/shape/big-frame.js';
+import type { InkBox } from './body-ink.js';
+
+interface Dim {
+  readonly width: number;
+  readonly height: number;
+}
 
 /** cdd-T28: what every chrome text block needs beyond its own style — the
  *  injected `StringMeasurer` (unchanged) and the diagram's own
@@ -30,6 +36,38 @@ import { buildBigFrame, type BigFrameStyle } from '../klimt/shape/big-frame.js';
 export interface ChromeTextContext {
   readonly measurer: StringMeasurer;
   readonly sprites?: SpriteRegistry | undefined;
+}
+
+/**
+ * lgm-T1a: the block `decorateWithFrame` wraps, with the ink its `drawU`
+ * leaves in a `LimitFinder` when the producer's body can be scanned for it
+ * (`body-ink.ts`). `BigFrame#computeWidth`/`#computeHeight` and
+ * `decorateWithFrame#computeDelta` read ONLY that ink (`BigFrame.java:77-91`,
+ * `DiagramChromeFactory.java:331-335`), never `calculateDimension`; a block
+ * without `ink` is framed from its dimension as before (class, whose
+ * producer already hands over BigFrame's `ww`/`hh` -- see `big-frame.ts`).
+ */
+export interface FramedOriginal extends AnnotationBlock {
+  readonly ink?: InkBox;
+}
+
+/** `BigFrame#computeWidth`/`#computeHeight` (java:77-91): `ww` is `maxX` for
+ *  an ink starting at or after the origin and the ink width otherwise; `hh`
+ *  likewise over Y. */
+function frameExtent(original: FramedOriginal): Dim {
+  const ink = original.ink;
+  if (ink === undefined) return original;
+  return {
+    width: ink.minX >= 0 ? ink.maxX : ink.maxX - ink.minX,
+    height: ink.minY >= 0 ? ink.maxY : ink.maxY - ink.minY,
+  };
+}
+
+/** `decorateWithFrame#computeDelta` (java:332-337): the translate that moves
+ *  an ink reaching into negative coordinates back to the origin. */
+function inkDelta(original: FramedOriginal): { dx: number; dy: number } {
+  const ink = original.ink ?? { minX: 0, minY: 0 };
+  return { dx: Math.max(0, -ink.minX), dy: Math.max(0, -ink.minY) };
 }
 
 /** Every `matchLegend`/`matchLegendMultiline`/etc. command guards a
@@ -123,7 +161,7 @@ function bigFrameStyleOf(style: AnnotationBoxStyle): BigFrameStyle {
 }
 
 function buildFramedBlock(
-  original: AnnotationBlock,
+  original: FramedOriginal,
   mainFrame: DisplayPositioned,
   style: AnnotationBoxStyle,
   ctx: ChromeTextContext,
@@ -131,9 +169,10 @@ function buildFramedBlock(
   const titleBlock = buildMainframeTitleBlock(mainFrame, style, ctx);
   const layout = buildBigFrame(
     { width: titleBlock.width, height: titleBlock.height },
-    original,
+    frameExtent(original),
     bigFrameStyleOf(style),
   );
+  const delta = inkDelta(original);
 
   const parts = [
     layout.body,
@@ -142,7 +181,7 @@ function buildFramedBlock(
     // the `SpecialText`/direct-draw branch split there collapses to one
     // draw call in this port (no compression-mode `UGraphic`).
     shiftFragmentBody(titleBlock.body, 3, 1),
-    shiftFragmentBody(original.body, layout.originalX, layout.originalY),
+    shiftFragmentBody(original.body, layout.originalX + delta.dx, layout.originalY + delta.dy),
   ];
   const extraDefs = mergeFragmentDefs([original, titleBlock]);
   return {
@@ -154,7 +193,7 @@ function buildFramedBlock(
 }
 
 export function addMainframe(
-  original: AnnotationBlock,
+  original: FramedOriginal,
   mainFrame: DisplayPositioned,
   style: AnnotationBoxStyle,
   ctx: ChromeTextContext,
