@@ -38,4 +38,9 @@ describe('activity labels through Display#create0 (jar oracles)', () => {
   it('hexagon test label: CENTER Sheet with creole colour matches the jar', () => {
     expect(diffPaths('hexagon-labels-center')).toEqual([]);
   });
+
+  // FtileGroup.java:104-108: `title.create(fc, LEFT, skinParam)` (FULL).
+  it('partition and package titles: bold, italic, <color:> runs match the jar', () => {
+    expect(diffPaths('composite-titles')).toEqual([]);
+  });
 });
