@@ -63,12 +63,9 @@ describe('lgm-T1c: state chrome equals the jar', () => {
     expect(paths.filter((p) => /@(x|y|cx|cy|x1|x2|y1|y2|width|height|d\[|points)/.test(p))).toEqual([]);
   });
 
-  // `DotLayoutResult.originShift` of the top-level pass is not carried out of
-  // `state-composite-geo.ts#layoutComposite` yet (T1b's file): the frame is
-  // right, the body sits `originShift.y` too high. Flip to `[]` when it is.
-  it('state-frame-composite: open -- composite top pass has no originShift', () => {
-    const paths = pathsOf('state-frame-composite');
-    expect(paths).toContain('svg/@height');
-    expect(paths.every((p) => /@(height|y|y1|y2|cy|d\[|points)|viewBox\[3\]/.test(p))).toBe(true);
+  // `state-composite-geo.ts#layoutComposite` carries the top-level pass's
+  // `DotLayoutResult.originShift`, so the composite body sits in the raw frame.
+  it('state-frame-composite: frame and body equal the jar', () => {
+    expect(pathsOf('state-frame-composite')).toEqual([]);
   });
 });

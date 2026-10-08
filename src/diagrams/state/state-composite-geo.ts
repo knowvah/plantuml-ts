@@ -371,5 +371,13 @@ export function layoutComposite(ast: StateDiagramAST, theme: Theme, measurer: St
   // own doc comment.
   const states = materializeSpecs(specs, posMap, clusterPosMapOf(result), theme.shadowing ?? 0);
   const transitions = buildLevelTransitionGeos(acc, result);
-  return { totalWidth: result.width, totalHeight: result.height, states, transitions };
+  // lgm-T1c: a framed diagram draws the raw svek frame (DiagramChromeFactory.java:278-337
+  // never runs SvekResult.java:130-135's moveDelta), so layout.ts needs the top pass's shift.
+  return {
+    totalWidth: result.width,
+    totalHeight: result.height,
+    states,
+    transitions,
+    ...(result.originShift !== undefined ? { originShift: result.originShift } : {}),
+  };
 }
