@@ -10,3 +10,5 @@ check. Close per [close-procedure.md](../close-procedure.md) (`b1`, prev `b0b`).
 
 T1a must not edit `src/core/svek/**`; T1b must not edit `src/index.ts`,
 `src/core/annotations/**` or any harness file.
+
+| [T1c](T1c-svek-mainframe-raw.md) | state + description draw the framed SvekResult un-normalized (T1a remainder) | typescript-pro | see T1c file (disjoint from T1b) | T1a | [ ] |
