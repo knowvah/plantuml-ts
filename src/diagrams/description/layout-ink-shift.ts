@@ -77,16 +77,29 @@ import { runInkWalk, driverBounderFor } from './renderer-ink-extent.js';
 // `JAR_INK_MARGIN` comes from the single owner, `core/svek/SvekResult.ts`;
 // same value on both axes, and see this module's doc comment for the closed
 // per-axis derivation.
-import { JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
+import { INK_DELTA, JAR_INK_MARGIN } from '../../core/svek/SvekResult.js';
+import type { MinMax } from '../../core/klimt/geom/MinMax.js';
+import type { InkBox } from '../../core/annotations/body-ink.js';
 
 export interface InkShift {
   readonly dx: number;
   readonly dy: number;
 }
 
+/** What {@link placeBody} decided: where the raw body is drawn and the
+ *  block `DiagramChromeFactory.create` is handed. */
+export interface BodyPlacement extends InkShift {
+  /** `SvekResult#calculateDimension`'s return: ink + 15 (`SvekResult.java:135`). */
+  readonly block: { readonly width: number; readonly height: number };
+  /** The ink of the body as drawn -- a `mainframe` frames this, never `block`
+   *  (`BigFrame.java:77-91`, `DiagramChromeFactory.java:332-337`). */
+  readonly frameInk?: InkBox;
+}
+
 /**
- * Replaces the pre-G1b `computeGlobalShift` (`layout-geo-post.ts`): the
- * shift needed to move the RAW (graphviz-normalized, pre-shift) assembled
+ * The ink walk {@link placeBody} (formerly `computeInkShift`, itself the
+ * replacement of the pre-G1b `computeGlobalShift`, `layout-geo-post.ts`)
+ * derives the shift from: the shift needed to move the RAW (graphviz-normalized, pre-shift) assembled
  * geometry so its real drawn ink extent's top-left corner sits at
  * `(JAR_INK_MARGIN, JAR_INK_MARGIN)`, mirroring `SvekResult
  * #calculateDimension`'s `moveDelta` exactly (see this module's own doc
@@ -108,17 +121,17 @@ export interface InkShift {
  * doc comment): a hidden entity still contributes its full ink extent to
  * the shift, even though the real draw pass never paints it.
  */
-export function computeInkShift(
+function walkRawInk(
   rawNodes: readonly DescriptionNodeGeo[],
   rawEdges: readonly DescriptionEdgeGeo[],
   theme: Theme,
   measurer: StringMeasurer,
   sprites: SpriteRegistry | undefined,
-): InkShift {
+): MinMax {
   const plan = buildUidPlan({ nodes: [...rawNodes], edges: [...rawEdges] });
   const { containers, leaves } = collectByKind(rawNodes);
   const driverBounder = driverBounderFor(measurer);
-  const minMax = runInkWalk(
+  return runInkWalk(
     (ug) => {
       drawClusters(ug, containers, theme, plan, false);
       // T1e write-set expansion (journaled): see
@@ -129,8 +142,47 @@ export function computeInkShift(
     driverBounder,
     measurer,
   );
+}
+
+/** How the chrome will treat the body: `originShift` is set only under a
+ *  `mainframe` (`DotLayoutResult.originShift`). */
+export interface BodyFraming {
+  readonly mainframe: boolean;
+  readonly originShift?: { readonly x: number; readonly y: number };
+}
+
+/**
+ * lgm-T1c: {@link computeInkShift}'s `moveDelta` for the normal path; for a
+ * `mainframe`, its absence. `DiagramChromeFactory#decorateWithFrame` never
+ * calls the framed `SvekResult`'s `calculateDimension` (`UgDiagram.java:
+ * 124-128` -> `DiagramChromeFactory.java:129`; the wrapper's own
+ * `calculateDimension` asks only `frame`, `:317-321`), so `moveDelta(6 -
+ * minX, 6 - minY)` (`svek/SvekResult.java:130-135`) never runs and the body
+ * is drawn in the raw svek frame -- this port's layout frame plus
+ * `DotLayoutResult.originShift`. The chrome frames the ink of THAT body.
+ */
+export function placeBody(
+  rawNodes: readonly DescriptionNodeGeo[],
+  rawEdges: readonly DescriptionEdgeGeo[],
+  ctx: { readonly theme: Theme; readonly measurer: StringMeasurer; readonly sprites: SpriteRegistry | undefined },
+  framing: BodyFraming,
+): BodyPlacement {
+  const minMax = walkRawInk(rawNodes, rawEdges, ctx.theme, ctx.measurer, ctx.sprites);
+  const dim = minMax.getDimension().delta(INK_DELTA, INK_DELTA);
+  const block = { width: dim.getWidth(), height: dim.getHeight() };
+  if (!framing.mainframe) {
+    return { dx: JAR_INK_MARGIN - minMax.getMinX(), dy: JAR_INK_MARGIN - minMax.getMinY(), block };
+  }
+  const m = framing.originShift ?? { x: 0, y: 0 };
   return {
-    dx: JAR_INK_MARGIN - minMax.getMinX(),
-    dy: JAR_INK_MARGIN - minMax.getMinY(),
+    dx: m.x,
+    dy: m.y,
+    block,
+    frameInk: {
+      minX: minMax.getMinX() + m.x,
+      minY: minMax.getMinY() + m.y,
+      maxX: minMax.getMaxX() + m.x,
+      maxY: minMax.getMaxY() + m.y,
+    },
   };
 }

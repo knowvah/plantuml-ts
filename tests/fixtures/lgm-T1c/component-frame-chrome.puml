@@ -1,0 +1,10 @@
+@startuml
+mainframe Frame
+title The Title
+legend right
+  a legend
+end legend
+component A
+component B
+A --> B
+@enduml

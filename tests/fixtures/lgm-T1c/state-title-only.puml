@@ -1,0 +1,5 @@
+@startuml
+title The Title
+[*] --> A
+A --> B : go
+@enduml

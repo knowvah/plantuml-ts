@@ -1,0 +1,7 @@
+@startuml
+mainframe Frame
+[*] --> A
+A --> B : go
+note right of A : a note
+B --> [*]
+@enduml

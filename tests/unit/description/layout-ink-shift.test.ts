@@ -1,5 +1,5 @@
 /**
- * Unit tests for `computeInkShift` (G1b/J1, mechanism C) — the
+ * Unit tests for `placeBody` (G1b/J1, mechanism C) — the
  * `SvekResult#calculateDimension`/`moveDelta` ink-extent document margin
  * that replaced the flat `LAYOUT_MARGIN_LEADING` node-box margin
  * (`layout-ink-shift.ts`'s own doc comment has the full jar citation
@@ -12,7 +12,7 @@
  * affecting the ink-derived shift.
  */
 import { describe, it, expect } from 'vitest';
-import { computeInkShift } from '../../../src/diagrams/description/layout-ink-shift.js';
+import { placeBody } from '../../../src/diagrams/description/layout-ink-shift.js';
 import type { DescriptionNodeGeo } from '../../../src/diagrams/description/layout-helpers.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
@@ -35,7 +35,7 @@ function actorLeaf(id: string, x: number, y: number): DescriptionNodeGeo {
   return { id, symbol: 'actor', display: 'A', x, y, width: 27, height: 60, children: [] };
 }
 
-describe('computeInkShift — mechanism C ink-extent margin', () => {
+describe('placeBody — mechanism C ink-extent margin', () => {
   it(
     "anchors a single rect-shaped leaf at box (7,7): LimitFinder#drawRectangle's " +
       '-1 min-corner inset means box.x - 1 = 6 (the jar-forced ink constant), so ' +
@@ -43,7 +43,12 @@ describe('computeInkShift — mechanism C ink-extent margin', () => {
       'proving the fix is a no-op for the rect-topmost case (ledger.md I7).',
     () => {
       const node = rectLeaf('a', 0, 0);
-      const { dx, dy } = computeInkShift([node], [], defaultTheme, measurer, undefined);
+      const { dx, dy } = placeBody(
+        [node],
+        [],
+        { theme: defaultTheme, measurer, sprites: undefined },
+        { mainframe: false },
+      );
       expect(dx).toBeCloseTo(7, 6);
       expect(dy).toBeCloseTo(7, 6);
     },
@@ -57,7 +62,12 @@ describe('computeInkShift — mechanism C ink-extent margin', () => {
       'actor ellipse cy=14 -> box top 14-8-0.5=5.5; ratchet-pinned this iteration).',
     () => {
       const node = actorLeaf('emp', 0, 0);
-      const { dx, dy } = computeInkShift([node], [], defaultTheme, measurer, undefined);
+      const { dx, dy } = placeBody(
+        [node],
+        [],
+        { theme: defaultTheme, measurer, sprites: undefined },
+        { mainframe: false },
+      );
       expect(dx).toBeCloseTo(5.5, 6);
       expect(dy).toBeCloseTo(5.5, 6);
     },
@@ -75,7 +85,12 @@ describe('computeInkShift — mechanism C ink-extent margin', () => {
       // Global ink-min-y = 0.5 (actor) -> dy = 6-0.5 = 5.5.
       const rect = rectLeaf('r', 0, 10);
       const actor = actorLeaf('a', 20, 0);
-      const { dx, dy } = computeInkShift([rect, actor], [], defaultTheme, measurer, undefined);
+      const { dx, dy } = placeBody(
+        [rect, actor],
+        [],
+        { theme: defaultTheme, measurer, sprites: undefined },
+        { mainframe: false },
+      );
       expect(dx).toBeCloseTo(7, 6);
       expect(dy).toBeCloseTo(5.5, 6);
     },
@@ -87,7 +102,12 @@ describe('computeInkShift — mechanism C ink-extent margin', () => {
       'from an assumed (0,0) origin).',
     () => {
       const node = rectLeaf('a', 12, 34);
-      const { dx, dy } = computeInkShift([node], [], defaultTheme, measurer, undefined);
+      const { dx, dy } = placeBody(
+        [node],
+        [],
+        { theme: defaultTheme, measurer, sprites: undefined },
+        { mainframe: false },
+      );
       // ink-min-x = 12-1=11 -> dx = 6-11 = -5; ink-min-y = 34-1=33 -> dy = 6-33 = -27.
       expect(dx).toBeCloseTo(-5, 6);
       expect(dy).toBeCloseTo(-27, 6);

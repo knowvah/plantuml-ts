@@ -1,0 +1,8 @@
+@startuml
+mainframe Frame
+node Server
+database DB
+cloud Internet
+Internet --> Server
+Server --> DB
+@enduml

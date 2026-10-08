@@ -34,7 +34,8 @@ import {
   applyShieldEdgePorts,
 } from './layout-helpers.js';
 import { type EdgeMapping, buildEdgeGeos, computeTotalDimensions } from './layout-geo-post.js';
-import { computeInkShift } from './layout-ink-shift.js';
+import { placeBody, type BodyPlacement } from './layout-ink-shift.js';
+import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import type { PortClusterInfo, ClusterSpacing } from './frontier-cluster-bbox.js';
 import type { RectangleArea } from '../../core/svek/FrontierCalculator.js';
 import { computeGraphSpacing, type EdgeFontSpecs } from './link-edge-attrs.js';
@@ -265,7 +266,7 @@ function buildGeoAndEdges(
   theme: Theme,
   measurer: StringMeasurer,
   portClusterCtx: PortClusterCtx,
-): { nodes: DescriptionNodeGeo[]; edges: DescriptionEdgeGeo[] } {
+): { nodes: DescriptionNodeGeo[]; edges: DescriptionEdgeGeo[]; placement: BodyPlacement } {
   // G1 I-hideshow: `hidden` is draw-time-only (never a DOT/geo-tree
   // membership filter, contrast `removed` above) -- computed here, once,
   // from the SAME final `ast.nodes` this function already threads through
@@ -276,7 +277,7 @@ function buildGeoAndEdges(
   const rawNodes = buildGeoTree(ast.nodes, leafPosMap, collidingIds, removed, hidden, stereotypeRules, portClusterCtx);
   const geoIndex = buildNodeGeoIndex(rawNodes);
   // G1b/J1 (mechanism C): build edges ONCE at (dx=0,dy=0) -- the RAW,
-  // fully-resolved (spline-clipped, labeled) draw shape `computeInkShift`'s
+  // fully-resolved (spline-clipped, labeled) draw shape `placeBody`'s
   // ink walk needs (see that function's own doc comment for why translating
   // an already-clipped spline commutes with clipping a not-yet-shifted one).
   const rawMapping: EdgeMapping = {
@@ -288,7 +289,18 @@ function buildGeoAndEdges(
   };
   const drawLinks = withLinkNoteDrawn(ast.links);
   const rawEdges = buildEdgeGeos(drawLinks, result.edges, rawMapping, hidden);
-  const { dx, dy } = computeInkShift(rawNodes, rawEdges, theme, measurer, ast.sprites);
+  // lgm-T1c: `placeBody` is `SvekResult#calculateDimension`'s `moveDelta` -- or its absence
+  // under a `mainframe`, which draws the raw svek frame.
+  const placement = placeBody(
+    rawNodes,
+    rawEdges,
+    { theme, measurer, sprites: ast.sprites },
+    {
+      mainframe: ast.annotations !== undefined && !isDisplayPositionedNull(ast.annotations.mainFrame),
+      ...(result.originShift !== undefined ? { originShift: result.originShift } : {}),
+    },
+  );
+  const { dx, dy } = placement;
   const nodes = rawNodes.map((n) => shiftGeo(n, dx, dy));
   const edges =
     dx === 0 && dy === 0 ? rawEdges : buildEdgeGeos(drawLinks, result.edges, { ...rawMapping, dx, dy }, hidden);
@@ -296,7 +308,7 @@ function buildGeoAndEdges(
   // edge-geometry assembly context threaded from layoutDescription's own
   // single call site -- mission G5/C1 500-line split (pure move), not
   // introduced here.
-  return { nodes, edges };
+  return { nodes, edges, placement };
 }
 
 // ── Public API ──
@@ -432,16 +444,28 @@ export function layoutDescription(
     removed,
     theme.fixCircleLabelOverlapping === true,
   );
-  const { nodes, edges } = buildGeoAndEdges(ast, result, edgeDotBuild, collidingIds, removed, theme, measurer, {
-    infoByAstId: portClusterInfoByAstId,
-    spacing,
-  });
+  const { nodes, edges, placement } = buildGeoAndEdges(
+    ast,
+    result,
+    edgeDotBuild,
+    collidingIds,
+    removed,
+    theme,
+    measurer,
+    {
+      infoByAstId: portClusterInfoByAstId,
+      spacing,
+    },
+  );
   const { totalWidth, totalHeight } = computeTotalDimensions(nodes, edges);
   return {
     totalWidth,
     totalHeight,
     nodes,
     edges,
+    preChromeWidth: placement.block.width,
+    preChromeHeight: placement.block.height,
+    ...(placement.frameInk !== undefined ? { frameInk: placement.frameInk } : {}),
     ...(ast.seed !== undefined ? { seed: ast.seed } : {}),
     ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
     ...(ast.scale !== undefined ? { scale: ast.scale } : {}),
