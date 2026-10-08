@@ -28,7 +28,9 @@ describe('resolveArrowLabelFont (T2, D3)', () => {
       color: '#000000',
     });
     expect(ARROW_LABEL_DEFAULT_COLOR).toBe('#000000');
-    expect(defaultTheme.colors.text).not.toBe('#000000');
+    // Discriminating: a theme whose root text colour differs keeps the default.
+    const tinted = { ...defaultTheme, colors: { ...defaultTheme.colors, text: '#123456' } };
+    expect(resolveArrowLabelFont(tinted).color).toBe('#000000');
   });
 
   it('camuna shape: { size: 14, style: bold } maps to weight bold, no italic', () => {

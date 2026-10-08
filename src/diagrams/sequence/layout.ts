@@ -53,7 +53,13 @@ import {
   lifelineSegmentsByParticipant,
 } from './sequence-delay.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
-import { sequenceCreoleFont, sequenceCreoleRuns, sequenceLineWidth } from './sequence-creole.js';
+import {
+  sequenceAtomContext,
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+  sequenceLabelLineWidth,
+} from './sequence-creole.js';
+import type { MessageLabelEnv } from './text-block-geo.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -139,7 +145,7 @@ function assembleGeometry(
   const eventGeos = cutActivationsAtDelays(eventLayout.eventGeos);
   const headHeight = TOP_MARGIN + maxParticipantHeight;
   const delays = delaySpansOf(eventGeos);
-  const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
+  const totalWidth = computeTotalWidth(participantGeos, eventGeos, { theme, measurer, sprites: ast.sprites });
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
@@ -179,13 +185,13 @@ function runEventLayout(
   const eventGeos: EventGeo[] = [];
   const dividerGeos: DividerGeo[] = [];
   const newpageGeos: NewpageGeo[] = [];
-  const activationStart: ActivationStack = new Map();
   const ctx: EventProcessingContext = {
     theme,
     measurer,
+    sprites: ast.sprites,
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
-    activationStart,
+    activationStart: new Map(),
     eventGeos,
     dividerGeos,
     newpageGeos,
@@ -201,7 +207,7 @@ function runEventLayout(
     eventGeos,
     dividerGeos,
     newpageGeos,
-    openActivations: activationStart,
+    openActivations: ctx.activationStart,
     participantMap: participantLayout.participantMap,
     currentY,
   };
@@ -357,20 +363,12 @@ function isShowFootbox(ast: SequenceDiagramAST, theme: Theme): boolean {
   return footbox.toLowerCase() !== 'hide';
 }
 
-/**
- * Compute total diagram width: the rightmost participant edge, expanded if
- * any message label overflows it. Labels are rendered centered at midX with
- * text-anchor="middle", so the right edge of the label is midX + labelWidth/2.
- * A long label on a rightward message near the last participant can clip
- * without this check.
- */
-function computeTotalWidth(
-  participantGeos: ParticipantGeo[],
-  eventGeos: EventGeo[],
-  theme: Theme,
-  measurer: StringMeasurer,
-): number {
+/** Total diagram width: the rightmost participant edge, expanded if any
+ *  message label, centred at midX, overflows it (midX + labelWidth/2). */
+function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: EventGeo[], env: MessageLabelEnv): number {
+  const { theme, measurer } = env;
   const fontSpec = fontSpecOf(theme);
+  const atoms = sequenceAtomContext(env.sprites, theme.colors.text);
   // Safe: participantGeos is non-empty (guarded by the early return above)
   const lastParticipant = participantGeos[participantGeos.length - 1]!;
   let totalWidth = Math.max(
@@ -381,7 +379,7 @@ function computeTotalWidth(
   for (const geo of eventGeos) {
     if (geo.kind !== 'message') continue;
     const labelText = geo.sequenceNumber !== undefined ? `${geo.sequenceNumber}: ${geo.label}` : geo.label;
-    const labelWidth = sequenceLineWidth(labelText, fontSpec, measurer);
+    const labelWidth = sequenceLabelLineWidth(labelText, fontSpec, measurer, atoms);
     const midX = geo.arrowDirection === 'self' ? geo.fromX + 20 : (geo.fromX + geo.toX) / 2;
     const labelRightEdge = midX + labelWidth / 2 + RIGHT_MARGIN;
     if (labelRightEdge > totalWidth) {
@@ -488,11 +486,6 @@ function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number, ori
 }
 
 /**
- * Compute box background geometries (Step 4). Each box spans from
- * x = leftmost participant edge - 8 to rightmost + 8, y = 0,
- * height = totalHeight (covers the full diagram height).
- */
-/**
  * A `box` group's label as a placed, measured run (A5).
  *
  * The x and the baseline are exactly where `renderBoxBackground` put them
@@ -532,6 +525,8 @@ function boxLabelRuns(label: string, boxX: number, theme: Theme, measurer: Strin
 const BOX_LABEL_FONT_SIZE = 11;
 const BOX_LABEL_PADDING = 4;
 
+/** Box background geometries (Step 4): from the leftmost participant edge
+ *  - 8 to the rightmost + 8, y = 0, the full diagram height. */
 function computeBoxGeos(
   boxes: BoxGroup[],
   participantGeos: ParticipantGeo[],

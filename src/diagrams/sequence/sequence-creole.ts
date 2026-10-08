@@ -72,12 +72,13 @@
  * sequence geometry needs a new geo kind and a renderer branch.
  *
  * Raster `<img>`/`<$sprite>` LEFT that set for any caller passing a
- * {@link SequenceAtomContext} (cdd7 T1f; today the participant head): they
+ * {@link SequenceAtomContext} (cdd7 T1f: the participant head; unwind2-S10:
+ * message and note labels): they
  * resolve through the shared `makeAtomImageResolverFor` and ride
  * `TextRun.image` exactly as `'latex'` does. What stays literal is vector
  * ink — OpenIconic, SVG sprites, emoji — whose primitives `TextRun` has no
- * field for, and every `'inline'` atom on a context-less caller (message,
- * note, frame, divider labels).
+ * field for, and every `'inline'` atom on a context-less caller (frame,
+ * divider, delay, box labels).
  *
  * `<math>`/`<latex>` LEFT that set: a `'latex'` atom resolves to a measured,
  * drawable image through `core/latex.ts#renderLatexAsImage` — the one
@@ -215,6 +216,57 @@ export interface SequenceAtomContext {
   /** The `Back` the text is drawn on -- a monochrome sprite's gradient
    *  start (`SpriteMonochrome.java:216`, unwind2-S7). `undefined`: none. */
   readonly backColor?: Paint;
+}
+
+/**
+ * The {@link SequenceAtomContext} a component's label draws with: the
+ * diagram's sprites, the component font colour (`getFontConfiguration`,
+ * `AbstractComponent.java:129-130`) and the `Back` the component applied
+ * before `getTextBlock().drawU` -- the note fill (`ComponentRoseNote.java:
+ * 121,136`), none for an arrow label (`ComponentRoseArrow.java:179`, drawn on
+ * the ug it was handed). `undefined` with no registry.
+ */
+export function sequenceAtomContext(
+  sprites: SpriteRegistry | undefined,
+  fontColor: string,
+  backColor?: Paint,
+): SequenceAtomContext | undefined {
+  if (sprites === undefined) return undefined;
+  return { sprites, fontColor, ...(backColor === undefined ? {} : { backColor }) };
+}
+
+/**
+ * A label line's width as `getTextWidth` reads it: the creole block `create0`
+ * built (`AbstractTextualComponent.java:89-92,100-108`), so a `<$sprite>`
+ * reserves the sprite and not its source text. The LAST run's right edge --
+ * a non-text atom advances x without a run of its own.
+ */
+export function sequenceLabelLineWidth(
+  line: string,
+  spec: FontSpec,
+  measurer: StringMeasurer,
+  atomContext: SequenceAtomContext | undefined,
+): number {
+  const runs = sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: 0, baselineY: 0 }, measurer, atomContext);
+  const last = runs.at(-1);
+  return last === undefined ? 0 : last.x + last.textWidth;
+}
+
+/** A run moved by `(dx, dy)`: an image run's top (`SequenceRunImage.y`) is
+ *  absolute, so it moves with the baseline it was placed against. */
+export function offsetRun(run: TextRun, dx: number, dy: number): TextRun {
+  const moved = { ...run, x: run.x + dx, y: run.y + dy };
+  return run.image === undefined ? moved : { ...moved, image: { ...run.image, y: run.image.y + dy } };
+}
+
+/** The widest of a label's lines by {@link sequenceLabelLineWidth}; 0 for none. */
+export function sequenceLabelBlockWidth(
+  lines: readonly string[],
+  spec: FontSpec,
+  measurer: StringMeasurer,
+  atomContext: SequenceAtomContext | undefined,
+): number {
+  return Math.max(0, ...lines.map((l) => sequenceLabelLineWidth(l, spec, measurer, atomContext)));
 }
 
 /** A resolved raster `'inline'` atom -- an `<img>` or a monochrome/4096-colour

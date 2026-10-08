@@ -228,14 +228,10 @@ function makeSyncMessage(overrides?: Partial<MessageGeo>): MessageGeo {
   // Place the label the same way layout does, so these tests exercise the
   // real run placement rather than a hand-written stub that renders nothing.
   const number = base.sequenceLabel ?? (base.sequenceNumber === undefined ? undefined : String(base.sequenceNumber));
-  const block = messageLabelBlock(
-    base.label,
-    number,
-    (base.fromX + base.toX) / 2,
-    base.y - 5,
-    defaultTheme,
-    new FormulaMeasurer(),
-  );
+  const block = messageLabelBlock(base.label, number, (base.fromX + base.toX) / 2, base.y - 5, {
+    theme: defaultTheme,
+    measurer: new FormulaMeasurer(),
+  });
   return {
     ...base,
     labelLines: block.lines,

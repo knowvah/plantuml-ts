@@ -18,7 +18,12 @@ import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
-import { sequenceCreoleFont, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
+import {
+  sequenceAtomContext,
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+  type SequenceAtomContext,
+} from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
@@ -280,8 +285,7 @@ export function anyBadgeFor(
  * registry -- the pre-T1f whole-line literal, unchanged.
  */
 function labelAtomContext(ctx: ParticipantLayoutCtx, backColor: Paint | undefined): SequenceAtomContext | undefined {
-  if (ctx.sprites === undefined) return undefined;
-  return { sprites: ctx.sprites, fontColor: ctx.theme.colors.text, ...(backColor === undefined ? {} : { backColor }) };
+  return sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, backColor);
 }
 
 /**

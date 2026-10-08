@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1430 modules · 5409 exported names.
+1430 modules · 5414 exported names.
 
 ## `src/`
 
@@ -1691,7 +1691,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-color-grammar.ts` | `SEQUENCE_COLOR_ATOM`, `SEQUENCE_COLOR_COMPOUND`, `SEQUENCE_COLOR` | `ColorParser`'s two grammars (`COLOR_REGEXP`/`PART2`, combined as `COLORS_REGEXP`), shared by every sequence command that carries a `ColorParser.exp1()`/`simpleColor(...)` tail: the note-command family (`command-note-factory.ts`) AND the pa |
 | `sequence-command-registry.ts` | `SequenceCommand`, `SEQUENCE_COMMANDS` | THE sequence command list — one registration-ordered array, tried top-to-bottom with first match winning, mirroring `PSystemCommandFactory#getCandidate` (`:225-246`), which walks the single `cmds` list `SequenceDiagramFactory#initCommandsLi |
 | `sequence-creole-text-atom.ts` | `atomFontSpec`, `textAtomRuns`, `TextAtomRuns`, `sequenceLineWidth` | sequence-creole-text-atom.ts — one creole `'text'` atom as sequence `TextRun`s, and a raw line's width for sizing. |
-| `sequence-creole.ts` | `sequenceLineWidth`, `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
+| `sequence-creole.ts` | `sequenceLineWidth`, `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceAtomContext`, `sequenceLabelLineWidth`, `offsetRun`, `sequenceLabelBlockWidth`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
 | `sequence-delay.ts` | `DELAY_FONT_SIZE`, `DELAY_LINE_DASH`, `DELAY_LINE_GAP`, `layoutDelay`, `delaySpansOf`, `lifelineSegments`, `lifelineSegmentsByParticipant`, `delayContentRight`, `cutSegmentIfNeed`, `cutActivationsAtDelays` | The `...` / `...text...` DELAY: its tile, and the two cuts it makes in the drawing around it. |
 | `sequence-layout-create.ts` | `createEndpointX`, `createTileHeight`, `createdHeadOf`, `withCreateEnd`, `markCreated` | A `create` message: the message that took a pending `CREATE` life event (`MessageEvent.create`, `AbstractMessage#isCreate`). |
 | `sequence-layout-events.ts` | `ActivationStack`, `EventProcessingContext`, `EventCursor`, `processEvents`, `pushActivation`, `openActivation`, `activationLevel`, `flushOpenActivations`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
@@ -1707,7 +1707,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-participant-declaration.ts` | `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf` | The `participant`-family declaration grammar shared by `CommandParticipantA`/`A2`/`A3`/`A4` (`SequenceDiagramFactory.java:106`) -- split out of `sequence-parse-helpers.ts` purely to stay under the 500-line file cap (the same reason that fil |
 | `sequence-shadow.ts` | `sequenceShadowFilterDef`, `sequenceShadowFilter`, `frameShadowDelta`, `sequenceShadowDefs` | sequence-shadow.ts -- the drop-shadow `<filter>` a shadowed sequence frame references (unwind2-S9). |
 | `sequence-text.ts` | `SequenceRunImage`, `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
-| `text-block-geo.ts` | `displayLines`, `textBlockRuns`, `TextRun`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
+| `text-block-geo.ts` | `displayLines`, `textBlockRuns`, `TextRun`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `MessageLabelEnv`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 
 ## `src/diagrams/state/`
 

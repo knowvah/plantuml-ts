@@ -196,14 +196,7 @@ function buildMessageGeo(
   y: number,
   ctx: EventProcessingContext,
 ): MessageGeo {
-  const block = messageLabelBlock(
-    event.label,
-    numberTextOf(event),
-    labelLeftOf(event, endpoints),
-    y,
-    ctx.theme,
-    ctx.measurer,
-  );
+  const block = messageLabelBlock(event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx);
   return {
     labelLines: block.lines,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
