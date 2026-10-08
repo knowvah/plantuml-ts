@@ -73,3 +73,15 @@ describe('activityDisplayBlock + drawActivityTextBlock', () => {
     expect(draw('[[http://x.com link]]', theme)).toContain('fill="#008000"');
   });
 });
+
+describe('CreoleMode.SIMPLE_LINE (CommandCreoleBuilder.java:85-86)', () => {
+  it('keeps `__x__` literal in a SIMPLE_LINE sheet', () => {
+    expect(draw('a __u__ b')).toBe(
+      '<text x="10" y="28.556" fill="#000" font-size="11" textLength="42.831">a __u__ b</text>',
+    );
+  });
+
+  it('still underlines `__x__` in a FULL sheet', () => {
+    expect(draw('a __u__ b', THEME, CreoleMode.FULL)).toContain('text-decoration="underline">u</text>');
+  });
+});
