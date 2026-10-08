@@ -16,11 +16,14 @@
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import { line, rect } from '../../core/svg.js';
-import { actColors, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+import { actColors } from './activity-renderer-shapes.js';
 import { JOIN_LABEL_MARGIN } from './activity-layout-constants.js';
 import { activityFontSize } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
-import { drawActivityText } from './activity-renderer-text.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { klimtStringBounder } from './activity-creole-sheet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
 
 /**
  * `URectangle.build(width, height).rounded(5)` -- the `5` is upstream's
@@ -30,6 +33,8 @@ import { drawActivityText } from './activity-renderer-text.js';
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:101-102
  */
 const FORK_BAR_CORNER_RADIUS = 2.5;
+
+const LABEL_MEASURER = new WidthTableMeasurer();
 
 /**
  * `ug.apply(UStroke.withThickness(1.5)).draw(rect)` -- the split thin
@@ -83,11 +88,19 @@ export function renderBar(node: ActivityNodeGeo, theme: Theme): string {
  */
 function renderJoinBarLabel(node: ActivityNodeGeo, theme: Theme): string {
   if (node.label === undefined) return '';
-  const size = activityFontSize(theme, 'arrow');
-  const x = node.x + node.width + JOIN_LABEL_MARGIN;
-  const y = centeredFirstBaselineY(node.y, size, 1);
-  const fill = activityFontColor(theme, 'arrow');
-  return drawActivityText(x, y, node.label, { fill, fontFamily: theme.fontFamily, fontSize: size });
+  // `AbstractParallelFtilesBuilder#getTextBlock` (`:187-196`): `create7(fc,
+  // LEFT, skinParam, CreoleMode.SIMPLE_LINE)` at the arrow style's font.
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  const tb = activityDisplayBlock(node.label, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+  });
+  const dim = tb.calculateDimension(klimtStringBounder(LABEL_MEASURER, { family: fc.family, size: fc.size }));
+  // `FtileBlackBlock#drawU` (`:110-111`): `UTranslate(width + labelMargin,
+  // -dimLabel.getHeight() / 2)` from the bar's own origin.
+  const at = { x: node.x + (node.width + JOIN_LABEL_MARGIN), y: node.y + -dim.getHeight() / 2 };
+  return drawActivityTextBlock(tb, at, theme, fc);
 }
 
 /**

@@ -24,6 +24,9 @@ import {
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
 import { renderBar, renderSplitLine } from '../../../src/diagrams/activity/activity-renderer-bars.js';
+// add4-T3g: the live condition-label path (`FtileDiamondInside#drawU`); the
+// label-less `renderDiamond` rhombus is never handed a label by any producer.
+import { renderHexagonOwnLabel } from '../../../src/diagrams/activity/activity-renderer-if-shapes.js';
 import { GtileAction } from '../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileDiamond } from '../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
@@ -342,7 +345,7 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
   });
 
   it('a diamond label draws font-size 11, not the old `theme.fontSize - 2`', () => {
-    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    const svg = renderHexagonOwnLabel(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
     expect(svg).toContain('font-size="11"');
     expect(svg).not.toContain(`font-size="${theme.fontSize - 2}"`);
   });
@@ -397,7 +400,7 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     // something else"), so the agreement is pinned rather than assumed.
     const cases = [
       { label: 'hello', Tile: GtileAction, node: { kind: 'action' as const }, render: renderAction },
-      { label: 'yes', Tile: GtileDiamond, node: { kind: 'diamond' as const }, render: renderDiamond },
+      { label: 'yes', Tile: GtileDiamond, node: { kind: 'diamond' as const }, render: renderHexagonOwnLabel },
     ];
     for (const c of cases) {
       const { bounder, sizes } = recordingBounder();
@@ -505,7 +508,7 @@ describe('T4 — text colour cascade (D3)', () => {
   });
 
   it('a diamond label draws the root black (FtileDiamondInside label)', () => {
-    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    const svg = renderHexagonOwnLabel(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
     expect(svg).toContain('fill="#000"');
   });
 
@@ -527,7 +530,10 @@ describe('T4 — text colour cascade (D3)', () => {
     // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
     // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
     // style-activity-fontcolor ("cond?" is #F00).
-    const diamondSvg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), activityRed);
+    const diamondSvg = renderHexagonOwnLabel(
+      makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }),
+      activityRed,
+    );
     expect(diamondSvg).toContain('fill="#F00"');
     expect(diamondSvg).not.toContain('fill="#000"');
   });
@@ -627,7 +633,7 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 
   it('a diamond label centres on its OWN measured width (FtileDiamondInside.java:94-96)', () => {
     const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, width: 40, height: 40 });
-    const svg = renderDiamond(node, theme);
+    const svg = renderHexagonOwnLabel(node, theme);
     const cx = node.x + node.width / 2;
     const fontSize = 11; // plantuml.skin:370
     const expectedX = centeredLineX(cx, measureLineWidth(theme, fontSize, 'yes'));
@@ -777,7 +783,7 @@ describe('T1b — klimt text driver (D1)', () => {
 
   it('a diamond label carries no dominant-baseline, baseline from centeredFirstBaselineY', () => {
     const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, y: 40, width: 40, height: 40 });
-    const svg = renderDiamond(node, theme);
+    const svg = renderHexagonOwnLabel(node, theme);
     expect(svg).not.toContain('dominant-baseline');
     const cy = node.y + node.height / 2;
     const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);

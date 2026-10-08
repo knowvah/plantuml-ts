@@ -1,0 +1,10 @@
+@startuml
+start
+partition "**Bold** and //italic//" {
+  :A;
+}
+package "pkg <color:red>red</color>" {
+  :B;
+}
+stop
+@enduml

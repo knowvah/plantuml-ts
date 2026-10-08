@@ -20,17 +20,12 @@ import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
-import { activityFontColor, activityHorizontalAlignment } from './activity-text-style.js';
-import {
-  actColors,
-  ASCENT_FRACTION,
-  flooredFirstBaselineY,
-  renderHexagonLabel,
-  textLines,
-} from './activity-renderer-shapes.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { centeredLineX, type ActivityTextOpts } from './activity-text-placement.js';
-import { floorActionLineHeight } from './tiles/gtile-action.js';
+import { actColors } from './activity-renderer-shapes.js';
+import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
+import type { ActivityTextOpts } from './activity-text-placement.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 
@@ -71,20 +66,6 @@ export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
 }
 
 /**
- * A branch/condition label (D3) -- `getLabelPositive`'s `TextBlock` resolves
- * the ARROW style (`ConditionalBuilder.java:117,280-283`), drawn
- * unconditionally LEFT-aligned (`HorizontalAlignment.LEFT`,
- * `ConditionalBuilder.java:280`) starting at the node's own `x` -- NOT
- * routed through `activity-text-placement.ts#activityTextLineX`'s
- * width/theme-alignment dispatch (that module's `'activity'`/`'diamond'`
- * union has no LEFT-fixed case, and applying its `'activity'`-bucket
- * padding here would put the label at the wrong `x` on a diagram with a
- * non-default `HorizontalAlignment` skinparam). `node.x`/`node.y` are the
- * walker's own placed top-left (D3), already at the jar's `UTranslate`; the
- * baseline offset is Q5's convention (`.agent-notes/aitp-T1.md#q5`):
- * `y0 + ARROW_FONT_SIZE * ASCENT_FRACTION`.
- */
-/**
  * The repeat-entry rhombus (`repeat-start`) and the label-less `if-split`/
  * `while-header` diamond both resolve to `FtileDiamond#drawU`
  * (`vertical/FtileDiamond.java:89`): `ug.apply(borderColor)
@@ -123,37 +104,29 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
     stroke: c.diamondBorder,
     strokeWidth: activityLineThickness(theme, 'diamond'),
   });
-  if (node.label === undefined || node.label === '') return shape;
-  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
-  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
-  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
-  // dimLabel.width) / 2` in this node's own frame.
-  const fontSize = activityFontSize(theme, 'diamond');
-  const lineWidth = diamondLineWidth(theme, fontSize, node.label);
-  // D1: no `dominant-baseline` (the driver emits none, and no cached jar
-  // SVG carries one) -- the real baseline is the same N=1 reduction of
-  // `flooredFirstBaselineY` `renderHexagon`'s single-line branch uses.
-  const label = drawActivityText(centeredLineX(cx, lineWidth), flooredFirstBaselineY(cy, fontSize, 1), node.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fill: activityFontColor(theme, 'diamond'),
-  });
-  return shape + label;
+  // No producer hands this rhombus a label: `GtileDiamondEmpty#label` is
+  // the constant `''` (its test text is the `north` slot, an `'if-label'`
+  // node), and `repeat-start` carries none (`FtileDiamond` has no own label,
+  // `FtileDiamond.java:85-104`).
+  return shape;
 }
 
+/**
+ * A branch/condition label (D3): `ConditionalBuilder#getLabelPositive`'s
+ * `branch.getDisplayPositive().create0(fontArrow, HorizontalAlignment.LEFT,
+ * skinParam, labelLineBreak, CreoleMode.SIMPLE_LINE, null, null)`
+ * (`ConditionalBuilder.java:280-283`), drawn at the walker's placed top-left
+ * (`node.x`/`node.y`, the jar's `UTranslate`). `SheetBlock1` adds
+ * `skinparam padding` itself (`SheetBlock1.java:209-210`).
+ */
 export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
-  const fontSize = activityFontSize(theme, 'arrow');
-  const label = node.label ?? '';
-  const lines = label.split('\n');
-  // add4-T3d: the label's `SheetBlock1` translates by `(padding.left,
-  // padding.top)` before drawing (`SheetBlock1.java:209-210`).
-  const pad = theme.padding ?? 0;
-  const baselineY = node.y + pad + fontSize * ASCENT_FRACTION;
-  const fill = activityFontColor(theme, 'arrow');
-  if (lines.length > 1) {
-    return textLines(lines, node.x + pad, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
-  }
-  return drawActivityText(node.x + pad, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  const tb = activityDisplayBlock(node.label ?? '', theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+  });
+  return drawActivityTextBlock(tb, node, theme, fc);
 }
 
 /**
@@ -245,16 +218,12 @@ export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string 
 }
 
 /**
- * The hexagon's OWN label alone, centered in the node's own box -- the
- * SAME `cx`/`cy`/`condSize` geometry `renderHexagon` already used, just
- * callable on its own so a walker can push it as its own `'if-own-label'`
- * node (T3k, {@link renderHexagonPolygon}'s own doc).
+ * The hexagon's OWN label alone, as its own `'if-own-label'` node (T3k):
+ * `ConditionalBuilder#getShape1`'s condition Sheet, centred in the node's
+ * hexagon box by `FtileDiamondInside#drawU` (`FtileDiamondInside.java:85-96`).
  */
 export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): string {
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const condSize = activityFontSize(theme, 'diamond');
-  return renderHexagonLabel(node.label, cx, cy, theme, condSize);
+  return renderDiamondTestLabel(node.label ?? '', theme, node);
 }
 
 const CREOLE_MEASURER = new WidthTableMeasurer();
@@ -270,56 +239,23 @@ export function diamondLineWidth(theme: Theme, fontSize: number, line: string): 
 }
 
 /**
- * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d,
- * `vaxiki-78-nice114`). Root's default `HorizontalAlignment left`
- * (`plantuml.skin:12`; `activityDiagram { diamond {} }` never overrides
- * it, `plantuml.skin:369-371`) positions every `Sheet` stripe at the
- * label TextBlock's own local `x=0` -- the WHOLE block is centred ONCE
- * (`FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
- * dimLabel.width) / 2`), never each line on its own width. This is NOT
- * `activity-renderer-shapes.ts#renderMultilineText`'s per-line `coef`
- * centring -- that formula is verified correct for `FtileBox` action
- * text specifically (`activity-text-placement.ts`'s own doc), a
- * genuinely different Java draw path from the diamond's label TextBlock.
- *
- * ALIGN-DIAMOND (add3-T3d, `mabuke-20-muco282`/`copisa-69-xisi273`,
- * `skinparam defaultTextAlignment center`): `ConditionalBuilder#getShape1`
- * (`vcompact/cond/ConditionalBuilder.java:240-243`) builds the condition
- * label through the SAME real Sheet/`SheetBlock1` the module doc comment
- * above already names, with `styleDiamond.getHorizontalAlignment()` as
- * its alignment -- so a CENTER/RIGHT `defaultTextAlignment` reaches
- * `SheetBlock1#initMap`'s own per-line `getCoef` post-pass
- * (`klimt/creole/SheetBlock1.java:155-172`: `CENTER` -> `diff/2`,
- * `RIGHT` -> `diff`, `LEFT`/`null` -> `0`, `diff = maxWidth - lineWidth`)
- * EVEN THOUGH the block itself is still centred once at the outer level
- * (both apply together: the LEFT case above is this formula's own
- * `coef=0` reduction, unchanged). `activityHorizontalAlignment` is the
- * SAME `root`-tier resolver `FtileBox` action text already reads for the
- * identical `defaultTextAlignment` key.
+ * {@link renderHexagonLabel}'s multi-line branch (IFNL, T3d): the SAME
+ * condition Sheet {@link renderHexagonOwnLabel} draws
+ * (`activity-text-sheet-diamond.ts#renderDiamondTestLabel`,
+ * `ConditionalBuilder.java:240-247`), centred once on (`cx`, `cy`). The
+ * Sheet's own `SheetBlock1#initMap` applies the per-stripe CENTER/RIGHT
+ * `getCoef` shift (`SheetBlock1.java:155-172`) for a non-LEFT
+ * `defaultTextAlignment` (ALIGN-DIAMOND, add3-T3d).
  */
 export function renderHexagonMultilineLabel(
   lines: string[],
   cx: number,
   cy: number,
   theme: Theme,
-  opts: ActivityTextOpts,
+  _opts: ActivityTextOpts,
 ): string {
-  const condSize = opts.fontSize ?? activityFontSize(theme, 'diamond');
-  const lineWidths = lines.map((ln) => diamondLineWidth(theme, condSize, ln));
-  const maxWidth = Math.max(...lineWidths);
-  const style = { fontFamily: theme.fontFamily, fontSize: condSize, fill: activityFontColor(theme, opts.sname) };
-  // add4-T2d: each stripe is a floored `AtomText` (`AtomText.java:179-181`).
-  const firstBaselineY = flooredFirstBaselineY(cy, condSize, lines.length);
-  const advance = floorActionLineHeight(condSize);
-  const align = activityHorizontalAlignment(theme);
-  const blockX = cx - maxWidth / 2;
-  return lines
-    .map((ln, i) => {
-      const diff = maxWidth - lineWidths[i]!;
-      const offset = align === 'center' ? diff / 2 : align === 'right' ? diff : 0;
-      return drawActivityText(blockX + offset, firstBaselineY + advance * i, ln, style);
-    })
-    .join('');
+  // A zero-size box at the centre: `lx = -dimLabel.width / 2`.
+  return renderDiamondTestLabel(lines.join('\n'), theme, { x: cx, y: cy, width: 0, height: 0 });
 }
 
 /**

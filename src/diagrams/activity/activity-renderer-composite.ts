@@ -20,17 +20,12 @@ import {
 import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { linkStyleFields } from './activity-text-style.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { frameTitleWidth } from './tiles/gtile-group.js';
-// `ASCENT_FRACTION` is re-imported BACK from `activity-renderer-shapes.ts`
-// (circular-but-safe: only read inside a function body, after both
-// modules finish loading, the same established shape `renderDiamond`'s
-// own move into `activity-renderer-if-shapes.ts` already uses -- that
-// file's own doc comment on the re-export).
-import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
 
 /** `USymbolFrame#drawFrame` (`:68-97`): the title-tab underline, an OPEN
  *  (unfilled) 4-point path from the tab's top-right corner down past a
@@ -121,16 +116,8 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   });
 
   if (title === '') return body + tab;
-  const titleX = node.x + 3;
-  const titleY = node.y + 1 + fontSize * ASCENT_FRACTION;
-  // `style.getFontConfiguration` (`Style.java:259-268`): a `[[url]]` in the
-  // title takes the composite's resolved HyperLinkColor/underline/target.
-  const titleEl = drawActivityText(titleX, titleY, title, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fill: style.fontColor,
-    ...linkStyleFields(theme, 'composite'),
-  });
+  // `USymbolFrame.java:154`: `title.drawU(ug.apply(new UTranslate(3, 1)))`.
+  const titleEl = drawCompositeTitle(title, { x: node.x + 3, y: node.y + 1 }, theme);
   return body + tab + titleEl;
 }
 
@@ -153,15 +140,24 @@ function renderSymbolComposite(
   const frame = drawCompositeSymbol(node, usymbol, dim, ink);
   if (title === '') return frame;
   const origin = compositeSymbolTitleOrigin(node, usymbol, titleWidth);
-  const fill = compositeStyle(theme).fontColor;
-  const y = origin.y + fontSize * ASCENT_FRACTION;
-  return (
-    frame +
-    drawActivityText(origin.x, y, title, {
-      fontFamily: theme.fontFamily,
-      fontSize,
-      fill,
-      ...linkStyleFields(theme, 'composite'),
-    })
-  );
+  return frame + drawCompositeTitle(title, origin, theme);
+}
+
+/**
+ * `FtileGroup`'s `name` (`FtileGroup.java:104-108`): `title.create(fc,
+ * HorizontalAlignment.LEFT, skinParam)` -- a FULL creole Sheet at the
+ * composite style's `getFontConfiguration` (`Style.java:259-268`, incl.
+ * `HyperLinkColor`), drawn with its top-left at `at`.
+ */
+function drawCompositeTitle(title: string, at: { readonly x: number; readonly y: number }, theme: Theme): string {
+  const fc = {
+    ...activityTextFontConfiguration(theme, activityFontSize(theme, 'composite'), 'composite'),
+    color: compositeStyle(theme).fontColor,
+  };
+  const tb = activityDisplayBlock(title, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.FULL,
+  });
+  return drawActivityTextBlock(tb, at, theme, fc);
 }

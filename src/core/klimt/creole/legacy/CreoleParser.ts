@@ -491,7 +491,10 @@ export class CreoleParser implements SheetBuilder {
         : fontConfiguration;
     return splitOnNewlineSentinel(classification.content).map((piece) =>
       createSimpleStripe(
-        decodeTextAtoms(buildStripeAtoms(CharHidder.hide(piece), lineFont)),
+        // `new StripeSimple(..., modeSimpleLine)` picks FULL or OTHER commands
+        // (`StripeSimple.java:112-115`): SIMPLE_LINE keeps `__x__` literal
+        // (`CommandCreoleBuilder.java:85-86`).
+        decodeTextAtoms(buildStripeAtoms(CharHidder.hide(piece), lineFont, this.creoleMode)),
         align,
         listHeader(classification, fontConfiguration, context),
       ),
