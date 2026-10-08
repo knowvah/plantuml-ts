@@ -1,0 +1,4 @@
+@startjson
+mainframe My frame
+{ "a": 1 }
+@endjson

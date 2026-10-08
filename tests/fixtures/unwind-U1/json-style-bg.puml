@@ -1,0 +1,6 @@
+@startjson
+<style>
+document { BackGroundColor red }
+</style>
+{ "a": 1 }
+@endjson

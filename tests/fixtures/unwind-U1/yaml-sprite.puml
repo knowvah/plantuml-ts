@@ -1,0 +1,9 @@
+@startyaml
+sprite $foo [4x4/16] {
+FFFF
+F00F
+F00F
+FFFF
+}
+a: 1
+@endyaml

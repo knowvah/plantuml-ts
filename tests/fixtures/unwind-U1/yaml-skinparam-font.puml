@@ -1,0 +1,4 @@
+@startyaml
+skinparam defaultFontSize 20
+a: 1
+@endyaml

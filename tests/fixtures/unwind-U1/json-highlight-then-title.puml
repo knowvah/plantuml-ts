@@ -1,0 +1,5 @@
+@startjson
+#highlight "a"
+title My Title
+{ "a": 1 }
+@endjson
