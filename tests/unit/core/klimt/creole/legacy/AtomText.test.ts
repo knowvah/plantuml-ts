@@ -18,6 +18,7 @@ import {
   atomTextStartingAltitude,
   atomTextWidth,
   hasTabulation,
+  layoutTabbedText,
   tabStopWidth,
 } from '../../../../../../src/core/klimt/creole/legacy/AtomText.js';
 import { WidthTableMeasurer } from '../../../../../../src/core/measurer.js';
@@ -188,5 +189,56 @@ describe('atomTextStartingAltitude (AtomText.java:321-323)', () => {
 
   test('the altitude is independent of the run size (no scaling upstream)', () => {
     expect(atomTextStartingAltitude({ ...base, size: 40, fontPosition: 'EXPOSANT' })).toBe(-6);
+  });
+});
+
+describe('layoutTabbedText (AtomText.java:210-256, drawU + getWidth)', () => {
+  test('a tab-free run is one token at x 0, its own width', () => {
+    expect(layoutTabbedText('abc', FONT_SIZE, tenPerChar)).toEqual({
+      tokens: [{ text: 'abc', x: 0, width: 30 }],
+      width: 30,
+    });
+  });
+
+  test('an empty run draws nothing and is 0 wide', () => {
+    expect(layoutTabbedText('', FONT_SIZE, tenPerChar)).toEqual({ tokens: [], width: 0 });
+  });
+
+  test('each tab advances to the next stop and draws nothing', () => {
+    // tabString() at nb=8 measures 80 under tenPerChar, so the stop is 80.
+    expect(layoutTabbedText('ab\tc\t\td', FONT_SIZE, tenPerChar)).toEqual({
+      tokens: [
+        { text: 'ab', x: 0, width: 20 },
+        { text: 'c', x: 80, width: 10 },
+        { text: 'd', x: 240, width: 10 },
+      ],
+      width: 250,
+    });
+  });
+
+  test('a trailing tab still widens the run (getWidth is x after the walk)', () => {
+    expect(layoutTabbedText('a\t', FONT_SIZE, tenPerChar)).toEqual({
+      tokens: [{ text: 'a', x: 0, width: 10 }],
+      width: 80,
+    });
+  });
+
+  test('BLOCK_E1_REAL_TABULATION (%tab()) advances like a tab', () => {
+    const layout = layoutTabbedText(`a${BLOCK_E1_REAL_TABULATION}b`, FONT_SIZE, tenPerChar);
+    expect(layout.tokens).toEqual([
+      { text: 'a', x: 0, width: 10 },
+      { text: 'b', x: 80, width: 10 },
+    ]);
+  });
+
+  test('nb in 1..6 shortens tabString (AtomText.java:258-264)', () => {
+    expect(layoutTabbedText('a\tb', FONT_SIZE, tenPerChar, 4).tokens[1]).toEqual({ text: 'b', x: 40, width: 10 });
+  });
+
+  test('under the width table the stop is fontSize * 4 (52 at 13pt)', () => {
+    const measurer = new WidthTableMeasurer();
+    const font = { family: 'SansSerif', size: 13 };
+    const layout = layoutTabbedText('a\tb', 13, (s) => measurer.measure(s, font).width);
+    expect(layout.tokens.map((t) => t.x)).toEqual([0, 52]);
   });
 });

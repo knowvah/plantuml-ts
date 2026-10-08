@@ -1,0 +1,6 @@
+@startuml
+state S1 : a\tb
+state S1 : longer\tc
+state "x\ty" as S2
+S1 --> S2
+@enduml

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1419 modules · 5350 exported names.
+1420 modules · 5359 exported names.
 
 ## `src/`
 
@@ -474,7 +474,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `TabToken`, `tokenizeOnTabs`, `tabStringFor`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
+| `AtomText.ts` | `atomTextStartingAltitude`, `TAB_STOP_FONT_SIZE_FACTOR`, `TAB_STRING`, `BLOCK_E1_REAL_TABULATION`, `hasTabulation`, `tabStopWidth`, `advanceToTabStop`, `TabToken`, `tokenizeOnTabs`, `tabStringFor`, `TabTokenPlacement`, `TabbedTextLayout`, `layoutTabbedText`, `tabStopMeasurer`, `atomTextWidth` | AtomText — the TAB-STOP-aware width of one creole text run. |
 | `AtomTextUtils.ts` | `createListNumber` | AtomTextUtils — upstream's factory helpers around the legacy `AtomText`. |
 | `CommandCreoleBuilder.ts` | `CREOLE_COMMANDS`, `CREOLE_COMMANDS_OTHER` | CommandCreoleBuilder — builds the `starter prefix -> Command[]` map `StripeSimple#searchCommand` looks up against. |
 | `CreoleParser.ts` | `CreoleTextStyle`, `CreoleParserAdapters`, `CreoleParser` | CreoleParser — the ONLY upstream implementor of `SheetBuilder`: turns a `Display` into a `Sheet` of `Stripe`s, one physical display line at a time, dispatching each line to a table/tree/code/latex/plain-text classifier. |
@@ -1684,7 +1684,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-arrowhead.ts` | `ArrowHeadKind`, `ArrowPart`, `ArrowDecoration`, `ArrowDressing`, `ArrowConfiguration`, `ArrowSegment`, `ArrowCircle`, `HeadGeometry`, `ARROW_DELTA_X`, `ARROW_DELTA_Y`, `NICE_ARROW_INSET`, `DIAM_CIRCLE`, `THIN_CIRCLE`, `SPACE_CROSS_X`, `inclination1Of`, `inclination2Of`, `inclinationAngle1`, `inclinationAngle2`, `headGeometryNormalSide`, `headGeometryReverseSide`, `headGeometrySelf` | sequence-arrowhead.ts — the sequence engine's arrow SHAPE vocabulary. |
 | `sequence-color-grammar.ts` | `SEQUENCE_COLOR_ATOM`, `SEQUENCE_COLOR_COMPOUND`, `SEQUENCE_COLOR` | `ColorParser`'s two grammars (`COLOR_REGEXP`/`PART2`, combined as `COLORS_REGEXP`), shared by every sequence command that carries a `ColorParser.exp1()`/`simpleColor(...)` tail: the note-command family (`command-note-factory.ts`) AND the pa |
 | `sequence-command-registry.ts` | `SequenceCommand`, `SEQUENCE_COMMANDS` | THE sequence command list — one registration-ordered array, tried top-to-bottom with first match winning, mirroring `PSystemCommandFactory#getCandidate` (`:225-246`), which walks the single `cmds` list `SequenceDiagramFactory#initCommandsLi |
-| `sequence-creole.ts` | `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
+| `sequence-creole-text-atom.ts` | `atomFontSpec`, `textAtomRuns`, `TextAtomRuns`, `sequenceLineWidth` | sequence-creole-text-atom.ts — one creole `'text'` atom as sequence `TextRun`s, and a raw line's width for sizing. |
+| `sequence-creole.ts` | `sequenceLineWidth`, `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
 | `sequence-layout-events.ts` | `ActivationStack`, `EventProcessingContext`, `EventCursor`, `processEvents`, `pushActivation`, `openActivation`, `activationLevel`, `flushOpenActivations`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
 | `sequence-layout-exo.ts` | `handleMessageExoEvent`, `exoRightExtent`, `anchorExoBorders` | Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …). |
 | `sequence-layout-message.ts` | `handleMessageEvent`, `messageTileAdvance` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |

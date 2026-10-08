@@ -53,7 +53,9 @@ function resolveHeaderAtoms(
   sprites: SpriteRegistry | undefined,
   rawLine: string | undefined,
 ): HeaderLineBuild {
-  const resolved = resolveMemberAtoms(atoms, font, measurer, sprites);
+  // `true`: a header name line is `AtomText` runs (`display.create8`), so a
+  // tab advances to the next stop (`AtomText.java:210-256`) -- unwind2-S3.
+  const resolved = resolveMemberAtoms(atoms, font, measurer, sprites, true);
   // cdd-T25 (M8b) / CDD B7FU-R2 item (d): `true` iff the (sub)line must
   // render through the atom pipeline rather than the pre-T25 plain-text
   // fallback. For an UN-wrapped line (`rawLine` defined): the SAME "no

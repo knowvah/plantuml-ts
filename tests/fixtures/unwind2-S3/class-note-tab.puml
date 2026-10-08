@@ -1,0 +1,4 @@
+@startuml
+class Foo
+note right of Foo : a\tb\nlonger\tc
+@enduml

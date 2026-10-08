@@ -406,7 +406,7 @@ export function renderEdge(
     if (glyph !== undefined) labelParts.push(glyph);
   }
   const labelFontAttrs = arrowLabelTextAttrs(theme);
-  labelParts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor));
+  labelParts.push(...renderEdgeMainLabel(geo, labelFontAttrs, labelColor, measurer));
   // cdd-T7/cdd2-T19c (A2a/M5): `note on link`'s body, ordered against the
   // label per `SvekEdge.java:318-325`'s `mergeLR`/`mergeTB` operand order:
   // `Position.LEFT`/`TOP` draws the note FIRST (`mergeLR(noteOnly,
