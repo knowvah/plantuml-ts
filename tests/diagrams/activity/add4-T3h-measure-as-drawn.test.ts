@@ -30,4 +30,10 @@ describe('labels measured as drawn (jar oracles)', () => {
   it('EMPTY_DIAMOND repeat: tbTest width is the resolved creole width', () => {
     expect(diffPaths('add4-T3g', 'diamond-labels')).toEqual([]);
   });
+
+  // ConditionalBuilder.java:280-283: a side label is the SIMPLE_LINE
+  // arrow-font block, so `**yes**` is sized as its bold atom.
+  it('hexagon side labels: sized by the drawn SIMPLE_LINE block', () => {
+    expect(diffPaths('add4-T3g', 'branch-labels')).toEqual([]);
+  });
 });

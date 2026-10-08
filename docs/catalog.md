@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1408 modules · 5314 exported names.
+1408 modules · 5317 exported names.
 
 ## `src/`
 
@@ -1184,7 +1184,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `boxStyleName`, `DELTA_INPUT_OUTPUT`, `boxStyleOutlineX`, `boxStyleShield`, `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-empty.ts` | `GtileDiamondEmpty` |  |
-| `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `GtileDiamondInside` |  |
+| `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `LabelDim`, `measureSide`, `measureCondition`, `GtileDiamondInside` |  |
 | `gtile-diamond-inside2.ts` | `DiamondInside2Side`, `DiamondInside2Labels`, `GtileDiamondInside2` |  |
 | `gtile-diamond-square.ts` | `GtileDiamondSquare` |  |
 | `gtile-diamond.ts` | `GtileDiamond` |  |
