@@ -8,31 +8,32 @@
  * it: `BigFrame#computeWidth`/`#computeHeight` (`klimt/shape/BigFrame.java:
  * 77-91`) and `decorateWithFrame#computeDelta` (`core/DiagramChromeFactory
  * .java:331-335`) read the INK the diagram's `drawU` leaves in a
- * `LimitFinder` (`klimt/drawing/LimitFinder.java:108-215`). This port's
+ * `LimitFinder` (`klimt/drawing/LimitFinder.java:108-224`). This port's
  * `RenderFragment.body` is the string that same `drawU` serialized, so the
  * ink is recovered by re-applying `LimitFinder`'s per-shape rules to the
  * element each shape was serialized as -- one rule table for every engine,
  * instead of one hand-derived ink box per engine.
  *
  * Shape -> element -> rule (x/y are the shape's drawn origin):
- *  - `URectangle`  `<rect>`      (x-1, y-1) .. (x+w-1, y+h-1)  (:drawRectangle)
- *  - `ULine`       `<line>`      (x1, y1) .. (x2, y2)          (:drawULine)
- *  - `UEllipse`    `<ellipse>`   (x, y) .. (x+w-1, y+h-1)      (:drawEllipse)
+ *  - `URectangle`  `<rect>`      (x-1, y-1) .. (x+w-1, y+h-1)  (java:184-188)
+ *  - `ULine`       `<line>`      (x1, y1) .. (x2, y2)          (java:179-182)
+ *  - `UEllipse`    `<ellipse>`   (x, y) .. (x+w-1, y+h-1)      (java:211-215)
  *  - `UPolygon`    `<polygon>`   minX-10 .. maxX+10, minY .. maxY
- *                                (:drawUPolygon, `HACK_X_FOR_POLYGON`)
+ *                                (java:171-177, `HACK_X_FOR_POLYGON`)
  *  - `UPath`       `<path>`      every segment point; an arc only its end
- *                                point (`UPath#addPoint`)      (:drawUPath)
- *  - `UText`       `<text>`      (x, y-(h-1.5)) .. (x+w, y+1.5) (:drawText)
- *  - `UImage`      `<image>`     (x, y) .. (x+w-1, y+h-1)      (:drawImage)
+ *                                point (`UPath#addPoint`)      (java:164-167)
+ *  - `UText`       `<text>`      (x, y-(h-1.5)) .. (x+w, y+1.5) (java:217-224)
+ *  - `UImage`      `<image>`     (x, y) .. (x+w-1, y+h-1)      (java:199-202)
  *
  * NOT modelled (named, not silently dropped): `URectangle`/`UEllipse`
- * `deltaShadow` (`:drawRectangle`'s `+ shadow*2`) -- a shadowed shape
- * serializes as a `filter` reference that carries no offset; `UClip`
- * (`LimitFinder#apply` rejects it in this port too).
+ * `deltaShadow` (`+ shadow*2`) -- a shadowed shape serializes as a `filter`
+ * reference that carries no offset; `UEmpty` (java:159-162), which draws
+ * nothing and so leaves no element to scan (a producer that draws through
+ * klimt exports `RenderFragment.frameInk` instead -- mindmap); `UClip`.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/LimitFinder.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/BigFrame.java:77-91
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:331-335
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/DiagramChromeFactory.java:332-337
  */
 
 import type { FontSpec, StringMeasurer } from '../measurer.js';
@@ -45,11 +46,11 @@ export interface InkBox {
   readonly maxY: number;
 }
 
-/** `LimitFinder.HACK_X_FOR_POLYGON` (`LimitFinder.java:67`) -- the polygon's
+/** `LimitFinder.HACK_X_FOR_POLYGON` (`LimitFinder.java:169`) -- the polygon's
  *  X extent is widened by this on both sides. */
 const HACK_X_FOR_POLYGON = 10;
 
-/** `LimitFinder#drawText`'s `dim.getHeight() - 1.5` (`:211`). */
+/** `LimitFinder#drawText`'s `dim.getHeight() - 1.5` (`LimitFinder.java:220`). */
 const TEXT_BASELINE_LIFT = 1.5;
 
 const ELEMENT_RE = /<(rect|line|ellipse|polygon|path|text|image)\b([^>]*?)(\/?)>/g;
@@ -187,7 +188,7 @@ const SHAPE_INK: Readonly<Record<string, (ink: Ink, a: Attrs) => void>> = {
 /**
  * `LimitFinder#getMinMax` over `body`: the extent of everything the body
  * draws. An empty body is `MinMax.getEmpty(true)` -- all zero
- * (`LimitFinder.java:217-221`).
+ * (`LimitFinder.java:247-249`).
  */
 export function inkOfBody(body: string, measurer: StringMeasurer): InkBox {
   const ink: Ink = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };

@@ -225,7 +225,7 @@ export interface RenderFragment {
    * in the block's own coordinates -- for a producer that draws through the
    * ported klimt `UGraphic` and can therefore run that very pass, which is
    * the only way to see ink the serialized SVG does not carry (a
-   * `TextBlockMarged`'s `UEmpty` reservation, `TextBlockMarged.java:77-79`).
+   * `TextBlockMarged`'s `UEmpty` reservation, `TextBlockMarged.java:79-85`).
    * `core/annotations/chrome.ts#applyChrome` frames the mainframe from it;
    * without it the ink of a `diagramType` it knows is recovered from `body`
    * (`core/annotations/body-ink.ts`). Set by `diagrams/mindmap/index.ts`.

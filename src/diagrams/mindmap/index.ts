@@ -72,9 +72,9 @@ function textBlockDimension(diagram: MindMapDiagram, measurer: StringMeasurer): 
  */
 /** `TextBlockUtils.getMinMax(original, sb, false)` over the raw text block --
  *  the ink `DiagramChromeFactory.decorateWithFrame` frames it by
- *  (`DiagramChromeFactory.java:329-335`; `BigFrame.java:81,89`). It cannot be
+ *  (`DiagramChromeFactory.java:332-337`; `BigFrame.java:81,89`). It cannot be
  *  read back from the serialized body: every `TextBlockMarged` around an idea
- *  box draws a `UEmpty` of its margined size (`TextBlockMarged.java:77-79`),
+ *  box draws a `UEmpty` of its margined size (`TextBlockMarged.java:79-85`),
  *  which `LimitFinder` counts (`:drawEmpty`) and the SVG never shows. */
 function textBlockInk(diagram: MindMapDiagram, measurer: StringMeasurer): InkBox {
   const probe = UGraphicSvg.build(0, basicSvgOption(), VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);

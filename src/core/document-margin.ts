@@ -30,7 +30,7 @@
  *    true` (`cli/GlobalConfig.java:47`), so it is `same(5)` for every
  *    sequence diagram. The teoz block additionally translates its own body
  *    by `(5, 5)` and reports `dim + 10` (`teoz/SequenceDiagramFileMakerTeoz
- *    .java:136-165`) -- that part is INSIDE the block chrome receives.
+ *    .java:134-168`) -- that part is INSIDE the block chrome receives.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:159-203
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/UgDiagram.java:124-128

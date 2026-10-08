@@ -393,7 +393,7 @@ const ENSURE_VISIBLE_DELTA = 1;
 /**
  * lgm-T1a: the margin-less block `DiagramChromeFactory.create` receives --
  * `SequenceDiagramFileMakerTeoz#getTextBlock` reports `body + 10` and draws
- * at `translate(5, 5)` (`teoz/SequenceDiagramFileMakerTeoz.java:136-165`),
+ * at `translate(5, 5)` (`teoz/SequenceDiagramFileMakerTeoz.java:134-168`),
  * and `TextBlockExporter` adds `SequenceDiagram#getDefaultMargins()` on top
  * (`core/document-margin.ts`). `totalWidth`/`totalHeight` here are that sum,
  * so the block is `total - margin`; `core/annotations/chrome-export.ts`

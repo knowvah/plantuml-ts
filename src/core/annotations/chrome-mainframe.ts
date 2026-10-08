@@ -43,7 +43,7 @@ export interface ChromeTextContext {
  * leaves in a `LimitFinder` when the producer's body can be scanned for it
  * (`body-ink.ts`). `BigFrame#computeWidth`/`#computeHeight` and
  * `decorateWithFrame#computeDelta` read ONLY that ink (`BigFrame.java:77-91`,
- * `DiagramChromeFactory.java:331-335`), never `calculateDimension`; a block
+ * `DiagramChromeFactory.java:332-337`), never `calculateDimension`; a block
  * without `ink` is framed from its dimension as before (class, whose
  * producer already hands over BigFrame's `ww`/`hh` -- see `big-frame.ts`).
  */
