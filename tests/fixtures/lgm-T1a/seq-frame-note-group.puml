@@ -1,0 +1,9 @@
+@startuml
+mainframe Frame
+participant Alice
+participant Bob
+Alice -> Bob : hello
+group grp
+Bob --> Alice : ok
+end
+@enduml

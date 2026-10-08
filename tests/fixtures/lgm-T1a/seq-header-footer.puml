@@ -1,0 +1,5 @@
+@startuml
+header some header text
+footer some footer text
+Alice -> Bob : hello
+@enduml
