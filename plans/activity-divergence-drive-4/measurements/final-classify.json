@@ -1,0 +1,225 @@
+{
+ "summary": {
+  "rows": 7,
+  "errors": 0,
+  "positionOnly": 0,
+  "uniformShift": 4,
+  "familyFixtures": {
+   "svg/@height": 5,
+   "svg/@viewBox[]": 5,
+   "svg/@width": 5,
+   "svg/g[]/ellipse[]/@cx": 4,
+   "svg/g[]/rect[]/@x": 1,
+   "svg/g[]/text[]/@x": 2,
+   "svg/g[]/rect[]/@height": 5,
+   "svg/g[]/rect[]/@width": 4,
+   "svg/g[]/image[]/@height": 2,
+   "svg/g[]/image[]/@width": 2,
+   "svg/g[]/image[]/@y": 1,
+   "svg/g[]/rect[]/@y": 1,
+   "svg/g[]/text[]/@y": 1,
+   "svg/g[]/ellipse[]/@cy": 5,
+   "svg/g[]/line[]/@x1": 5,
+   "svg/g[]/line[]/@x2": 4,
+   "svg/g[]/line[]/@y1": 6,
+   "svg/g[]/line[]/@y2": 6,
+   "svg/g[]/polygon[]/@points[]": 5,
+   "svg/g[][childCount]": 2,
+   "svg/g[]/image[]/@x": 2,
+   "svg/g[]/rect[]/@fill": 1,
+   "svg/g[]/rect[]/@rx": 1,
+   "svg/g[]/rect[]/@ry": 1,
+   "svg/g[]/rect[]/@stroke": 1
+  }
+ },
+ "rows": [
+  {
+   "slug": "bozido-07-geze049",
+   "ws": 80,
+   "n": 63,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/image[]/@height": 1,
+    "svg/g[]/image[]/@width": 1,
+    "svg/g[]/image[]/@y": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@x1": 6,
+    "svg/g[]/line[]/@x2": 6,
+    "svg/g[]/line[]/@y1": 4,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 29,
+   "shifts": {
+    "x": [
+     -69.5
+    ],
+    "y": [
+     84,
+     -87
+    ]
+   }
+  },
+  {
+   "slug": "fikuki-99-kulu790",
+   "ws": 14,
+   "n": 14,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/image[]/@x": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 5,
+   "shifts": {
+    "x": [
+     49.5
+    ],
+    "y": [
+     -70
+    ]
+   }
+  },
+  {
+   "slug": "gufuma-85-zoce945",
+   "ws": 29,
+   "n": 29,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 14,
+   "shifts": {
+    "x": [
+     -7.5
+    ],
+    "y": [
+     2
+    ]
+   }
+  },
+  {
+   "slug": "jucidi-98-zato093",
+   "ws": 31,
+   "n": 4,
+   "families": {
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [
+     -103.4
+    ],
+    "y": [
+     69.5,
+     52
+    ]
+   }
+  },
+  {
+   "slug": "mufixi-71-koma752",
+   "ws": 34,
+   "n": 34,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/image[]/@height": 1,
+    "svg/g[]/image[]/@width": 1,
+    "svg/g[]/image[]/@x": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 16,
+   "shifts": {
+    "x": [
+     -52,
+     66
+    ],
+    "y": [
+     -576
+    ]
+   }
+  },
+  {
+   "slug": "pufuzi-99-vone170",
+   "ws": 29,
+   "n": 29,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 14,
+   "shifts": {
+    "x": [
+     -13.5
+    ],
+    "y": [
+     -107
+    ]
+   }
+  },
+  {
+   "slug": "tidoda-12-juxu745",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@rx": 1,
+    "svg/g[]/rect[]/@ry": 1,
+    "svg/g[]/rect[]/@stroke": 1
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  }
+ ]
+}

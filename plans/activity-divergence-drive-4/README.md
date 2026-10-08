@@ -108,4 +108,28 @@ oracle-seam-embedded-42x42, verify-agent-claims-si31.
 
 ## Status
 
-(filled by T-exit)
+**Executed and closed 2026-10-08** (T-exit). Batches 0-3 done; T-close-out merges to main.
+
+| D7 clause | b0 | final | met |
+|---|---|---|---|
+| activity fixtures pinned (>= 340) | 301 | **409** | yes |
+| Σ over add3's 48 rows (<= 2200) | 4413 | **217** | yes |
+| baseline rows / Σ (all) | 48 / 4413 (b0'; 100 / 12056 with the new captures) | 7 / 221 | — |
+| conformant losses, any engine, b0 -> final | — | **0** (111 movers, all improvements: 99 activity, 12 unknown) | yes |
+| unexplained rises | — | **0** (every riser journaled with a mechanism; D5 reveals rows 13, 29) | yes |
+| the 80 uncaptured fixtures | 0 captured | 79 captured + tmp1 retired; routed, pinned in routing/refusal, census family each | yes |
+| every ledger row `final` | — | 127 rows: 108 `pinned (<tag>)`, 19 `open -> add5 (<mechanism>)` | yes |
+| D9 staging gates | isActionSheetEligible + legacy text path | retired: isActionSheetEligible, every action/note/label fallback, `activity-renderer-text.ts` deleted | yes |
+| four gates, collected = on-disk | — | see journal row 64 | yes |
+
+**Open -> add5** (7 baseline rows, Σ 221): EMBED D4 seam (fikuki 14, mufixi 34,
+gufuma 29, pufuzi 29), bozido 80 (nested wbs/salt/gantt engines unported),
+**jucidi 31 (needs a user ruling: the jar omits ConnectionLastElseIn across
+lanes, journal row 20)**, tidoda 4 (group style not keyed on the USymbol).
+Plus 3 misfiled non-activity captures, 1 refusal-parity row (tajiri), 8
+jar-error captures.
+
+**Decisions flagged for review:** journal rows 4 (kept 3 misfiled captures per
+D1), 20 (jucidi connector kept), 41/54 (load-induced vitest timeouts; nereka
+one-off probably the same, not proven), 58 (rolled back an unpushed merge with
+`git reset --hard`), 61 (walk-if-down 1-ULP patch parked).

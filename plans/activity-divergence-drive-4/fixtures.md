@@ -121,15 +121,15 @@ task | mechanism | final. `final` ∈ `pinned (<tag>)` · `open -> add5 (<mechan
 | cebuci-75-zona564 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandLink3 (activitydiagram3/command/CommandLink3.java:59-63, ActivityDiagramFactory3.java:155); routes to class's refusal | pinned (add4-T3k) |
 | fugoko-04-lafo140 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandFootboxIgnored (command/CommandFootboxIgnored.java:53-56, ActivityDiagramFactory3.java:105); routes to class's refusal | pinned (add4-T3k) |
 | jetigu-21-zaje860 (new) | error | — | — | MISFILED | — | not an activity diagram (jar draws SEQUENCE) | open -> add5 (misfiled in tests/corpus/activity; activity parser correctly refuses) |
-| kedozi-45-begu156 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
-| nefume-98-leti603 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
+| kedozi-45-begu156 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
+| nefume-98-leti603 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
 | nuzise-60-temi305 (new) | error | — | — | MISFILED | — | not an activity diagram (jar draws SEQUENCE) | open -> add5 (misfiled in tests/corpus/activity; activity parser correctly refuses) |
-| pizuga-11-mabo948 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
+| pizuga-11-mabo948 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
 | romuru-66-samu329 (new) | error | — | — | MISFILED | — | not an activity diagram (jar draws CLASS) | open -> add5 (misfiled in tests/corpus/activity; activity parser correctly refuses) |
 | tajiri-57-sepu092 (new) | jar-error | — | — | JAR-ERROR | — | we render a source the jar rejects | open -> add5 (refusal parity: jar ErrorUml, we draw an ACTIVITY) |
-| ticoxo-71-jile893 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
+| ticoxo-71-jile893 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
 | tidoda-12-juxu745 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandHideShowByGender (`hide stereotype`, CommonCommands.java:106-109); routes to class's refusal | open -> add5 (ws 4: `rectangle` group ignores `skinparam rectangle` -- group style is not keyed on the USymbol, CommandPartition3.java:89-103,150,161-165) |
-| veducu-71-tika634 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
-| vipixe-71-rika369 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
-| xesoze-85-pugu865 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
-| zezaju-29-duni146 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
+| veducu-71-tika634 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
+| vipixe-71-rika369 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
+| xesoze-85-pugu865 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
+| zezaju-29-duni146 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | open -> add5 (jar-error: the deterministic jar draws an error page, PSystemError.java:148-155 -- no diagram to converge to) |
