@@ -5,6 +5,7 @@
  * file's header for why it is not a TIM concept.
  */
 
+import type { SkinDirective } from './preprocessor.js';
 import { EmbeddedDiagram, getEmbeddedType } from './EmbeddedDiagram.js';
 import type { StringLocated } from './tim/StringLocated.js';
 
@@ -130,10 +131,12 @@ export class StyleAndSkinparamCollector {
   readonly stylePositions: (number | undefined)[] = [];
   readonly skinparam = new Map<string, string>();
   /** mission skin-file-loading Batch 1: see `PreprocessorResult.skin`'s
-   *  own doc comment. Last `skin <name>` line in the document wins (no
-   *  corpus fixture repeats the directive; mirrors `skinparam`'s own
-   *  last-write-wins Map semantics for a repeated key). */
+   *  own doc comment. Last `skin <name>` line in the document wins: each
+   *  `CommandSkin` replaces the default skin (`TitledDiagram.java:180`). */
   skin: string | undefined;
+  /** unwind2-S8: every `skin <name>` line, in document order -- see
+   *  `PreprocessorResult.skinDirectives`. */
+  readonly skinDirectives: SkinDirective[] = [];
   /**
    * cdd4-T7b: the DECLARATION ORDER of the two streams, which the maps above
    * lose -- each key's last assignment and each `<style>` block's opening, on
@@ -200,7 +203,8 @@ export class StyleAndSkinparamCollector {
     }
     const skinMatch = RE_SKIN_LINE.exec(trimmed);
     if (skinMatch !== null) {
-      this.skin = skinMatch[1]!.trim().toLowerCase();
+      this.skin = skinMatch[1]!;
+      this.skinDirectives.push({ name: this.skin, position });
       return true;
     }
     return this.openSkinparam(trimmed);

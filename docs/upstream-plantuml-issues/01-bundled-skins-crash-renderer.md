@@ -1,6 +1,12 @@
 # Upstream PlantUML: bundled skins `sonyxperiadev` and `reddress` crash the renderer
 
-**Status:** filed upstream — https://github.com/plantuml/plantuml/issues/2797 (from plantuml-ts skin-file-loading Batch 4).
+**Status:** FIXED upstream in commit 11ed6720 (2026-07-26) and in the
+pinned oracle jar (1.2026.8beta1): `reddress.skin` was removed (`skin
+reddress` is now the command error "Cannot find style reddress") and
+`sonyxperiadev.skin` was converted to a complete `<style>` sheet. plantuml-ts
+mirrors both since unwind2-S8. Filed as
+https://github.com/plantuml/plantuml/issues/2797 (from plantuml-ts
+skin-file-loading Batch 4); the text below describes the pre-fix jars.
 **Not a dot-engine / this-port issue** — reproduced with unmodified upstream PlantUML.
 
 ## Summary
@@ -57,6 +63,5 @@ net.sourceforge.plantuml.style.parser.StyleParsingException: bad definition
 
 ## Note
 
-No test in the upstream PlantUML tree exercises either skin, which is likely
-why the regression went unnoticed. plantuml-ts renders these skins (resolving
-their skinparams) rather than crashing — see `DIVERGENCES.md`.
+No test in the upstream PlantUML tree exercised either skin, which is likely
+why the regression went unnoticed (the fix added `BundledSkinTest.java`).

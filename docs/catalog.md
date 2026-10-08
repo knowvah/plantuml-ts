@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1426 modules · 5394 exported names.
+1435 modules · 5415 exported names.
 
 ## `src/`
 
@@ -29,7 +29,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `assume-transparent.ts` | `RE_ASSUME_TRANSPARENT`, `isAssumeTransparent` | `CommandAssumeTransparent`: `!assume transparent dark\|light`, a historical directive every command factory registers through `CommonCommands#addCommonCommands2` (`command/CommonCommands.java:65`). |
 | `block-extractor.ts` | `DiagramType`, `UmlSource`, `finalizeBlock`, `upstreamTypeOf`, `extractBlocks` | Block extractor: types a block's PREPROCESSED content, from the @start<type> keyword suffix or -- for plain @startuml -- by probing the first 20 non-empty content lines. |
 | `BlockUmlBuilder.ts` | `RawBlock`, `BlockUmlOk`, `BlockUmlErr`, `BlockUml`, `buildBlockUmls`, `rawBlocksOf`, `buildBlockUml`, `isBlockEmpty` | `BlockUmlBuilder` -- the document -> blocks stage, and the reason it runs BEFORE the preprocessor. |
-| `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change beyond skin-reddress-variants Fix 2, documented below). |
+| `build-theme.ts` | `ResolvedThemeAndStyles`, `buildTheme` | Theme resolution -- extracted out of `src/index.ts` (this repo's `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior change). |
 | `cluster-title-table.ts` | `computeTitleTableHeight` | `ClusterHeader`'s title/stereotype/attribute-text-height formula — moved out of `../diagrams/state/state-composite-header.ts` (namespace-cluster-box mission T3: the class engine needs the same formula for its own cluster title table, and no |
 | `color-override.ts` | `resolveBareOrBackColor` | Shared `#color`/`#back:color;...` background-override extraction — split out of `renderer-classifier-box.ts` (G2 N34) so `renderer-note.ts` can reuse the SAME bare/`back:`-component grammar for a note's own `#color` override (`ClassNote.col |
 | `creole-atoms-image-resolver.ts` | `ResolvedDrawableAtom`, `SpritePrimitiveCollector`, `resolveSvgSpriteAtom`, `makeAtomImageResolverFor` | creole-atoms-image-resolver.ts — SI5b+E2r T7 (moved from `diagrams/ description/render-atoms.ts` by SI27 T2 — upstream's `AtomSprite`/ `SvgNanoParser` decomposition is ONE shared place both the description engine (`renderer-entity.ts`) and |
@@ -82,11 +82,12 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `paint.ts` | `Gradient`, `Paint`, `parseColor`, `isTransparentColor`, `hashString`, `paintToSvg`, `noGradient` | Paint — the color/gradient value model for the rendering layer. |
 | `parse-refusal.ts` | `ParseRefusalKind`, `ParseRefusal`, `refuse`, `refusalScore`, `mergeRefusals` | The refusal outcome a plugin returns instead of an AST, and the upstream tie-break for picking a winner when every candidate refuses. |
 | `preprocessor-collector.ts` | `StyleAndSkinparamCollector` | preprocessor-collector.ts -- the `<style>` / `skinparam` / `skin` line collector `preprocessor.ts#resultOf` runs over the interpreter's finished result list. |
-| `preprocessor.ts` | `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
+| `preprocessor.ts` | `SkinDirective`, `PreprocessorResult`, `DeclarationOrder`, `PreprocessOptions`, `preprocess`, `PreprocessorFailure`, `PreprocessOutcome`, `preprocessOrError`, `preprocessLinesOrError` | Preprocessor -- a thin wrapper over the TIM interpreter (`src/core/tim/`). |
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
-| `skin-loader.ts` | `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batches 1 (decisions D1/D2/D6) and 4 (preprocessor+skinparam skins). |
+| `skin-command.ts` | `skinCommandError`, `SkinCut`, `skinCutOf` | The `skin <name>` command's failure path — unwind2-S8. |
+| `skin-loader.ts` | `skinRunsOf`, `applySkinRun`, `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batch 1 (decisions D1/D2/D6); unwind2-S8. |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
 | `skinparam-key-handlers-shared.ts` | `arrowFontColorValue`, `KeyHandler`, `parseFiniteNumber`, `parseFiniteFloat`, `parseFiniteInt`, `parseNonZeroInt`, `parseFontStyleFlags`, `applyGuillemet` | Shared `KeyHandler` type + parse helpers for the skinparam key→handler table. |
@@ -96,13 +97,15 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `skinparam-key-handlers.ts` | `resolveColorPaint`, `applyNormalKey` | Table-driven dispatch for normalized (non stereotype-qualified) skinparam keys — the body of upstream SkinParam.java's key switch. |
 | `skinparam-key-normalize.ts` | `UNPARSEABLE_COLOR`, `isColorSpec`, `resolveColor`, `normaliseKey` | Skinparam key/value normalisation primitives. |
 | `skinparam-stereo-keys.ts` | `applyStereoOverride` | Stereotype-qualified skinparam key handling (`key.includes('<<')` branch). |
-| `skinparam-style-block.ts` | `parseStyleBlock` | `<style>` block parsing — parseStyleBlock and its internal helpers. |
+| `skinparam-style-block.ts` | `regularSchemeOf`, `parseStyleBlock` | `<style>` block parsing — parseStyleBlock and its internal helpers. |
 | `skinparam-theme-builder.ts` | `buildThemePartial` | Builds a `Partial<Theme>` from a populated {@link SkinparamAccumulator} — only the keys that were actually seen during key processing are set. |
 | `skinparam-types.ts` | `SkinparamResult`, `StyleMap` | Shared public types for the skinparam resolution pipeline. |
 | `skinparam.ts` | `SkinparamResult`, `StyleMap`, `resolveColor`, `ELEMENT_BUCKET_SNAMES`, `parseStyleBlock`, `resolveSkinparam` | Skinparam resolution pipeline for plantuml-ts. |
 | `skins-builtin-rose-1.ts` | `ROSE_SKIN_PART1` | `rose` built-in `<style>`-grammar skin, part 1 of 2 -- skin-file-loading mission Batch 4 split, purely to keep every module under this project's 500-line-per-file limit (`rose.skin` alone is ~550 lines verbatim, by far the largest of the fi |
 | `skins-builtin-rose-2.ts` | `ROSE_SKIN_PART2` | `rose` built-in `<style>`-grammar skin, part 2 of 2 -- see {@link ROSE_SKIN_PART1}'s doc comment for why this split exists and how the two halves recombine. |
-| `skins-builtin.ts` | `BUILTIN_SKINS` | Built-in PlantUML skin stylesheets (`skin <name>` directive) -- skin-file-loading mission, Batches 1 (D1/D2) and 4. |
+| `skins-builtin-sonyxperiadev-1.ts` | `SONYXPERIADEV_SKIN_PART1` | `sonyxperiadev` built-in `<style>`-grammar skin, part 1 of 2 -- the oracle jar's `skin/sonyxperiadev.skin` verbatim (`unzip -p oracle/dist/plantuml-oracle.jar skin/sonyxperiadev.skin` is byte-identical to `~/git/plantuml/src/main/resources/ |
+| `skins-builtin-sonyxperiadev-2.ts` | `SONYXPERIADEV_SKIN_PART2` | `sonyxperiadev` built-in `<style>`-grammar skin, part 2 of 2 -- the oracle jar's `skin/sonyxperiadev.skin` verbatim (`unzip -p oracle/dist/plantuml-oracle.jar skin/sonyxperiadev.skin` is byte-identical to `~/git/plantuml/src/main/resources/ |
+| `skins-builtin.ts` | `BUILTIN_SKINS` | Built-in PlantUML skin stylesheets (`skin <name>` directive) -- skin-file-loading mission, Batches 1 (D1/D2) and 4; unwind2-S8. |
 | `spline-clip.ts` | `ClipRect`, `subdivide`, `clipSplineStart`, `clipSplineEnd` | spline-clip.ts — faithful port of upstream's compound-edge boundary clipping (`DotPath#simulateCompound`, klimt/shape/DotPath.java), applied when an edge endpoint is a container/group. |
 | `sprite-commands.ts` | `addSprite`, `createSpriteRegistry`, `getSprite`, `getSpriteMonochrome`, `getSpriteSvg`, `getSpriteColor4096`, `spriteDimsLookupFor`, `surfaceSpriteWarnings`, `SpriteRegistry`, `isSpriteMultilineOpenLine`, `isSpriteMultilineCloseLine`, `isSvgSpriteOpenLine`, `isSvgSpriteCloseLine`, `matchSpriteCommand` | `matchSpriteCommand` — the shared sprite-DEFINITION matcher parsers call at their own command-dispatch position, mirroring `matchAnnotationCommand` (`core/annotations/commands.ts`) exactly: extraction inside each parser, never a textual pre |
 | `sprite-prefetch.ts` | `scanSpriteNames` | Scan a diagram source for the `<$name>` sprite references it contains. |
@@ -120,7 +123,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
 | `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder`, `resolveGlobalFontName` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
-| `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
+| `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-tag-cascade.ts` | `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade` | The `.tagname` stereotype sub-selector cascade (`StyleSignatureBasic #matchAllImpl` / `StyleStorage#computeMergedStyle`, G2 N36/N37) -- moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pur |
 | `style-map-theme.ts` | `applyStyleMap` | Selector → Theme field mapping (element-scoped <style> blocks). |
@@ -353,18 +356,24 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `arecibo-image.ts` | `ARECIBO_IMAGE` | The Arecibo message -- the raster `PSystemVersion.getArecibo()` draws (`PSystemVersion.java:112-114`, `src/main/resources/net/sourceforge/plantuml/version/arecibo.png`). |
+| `error-block.ts` | `Sink`, `ErrorBlock`, `mergeTB`, `mergeLR`, `drawImage`, `imageBlock`, `renderErrorBlock` | The `TextBlock` composition the error, Welcome and Unsupported pages are built from — unwind2-S8. |
 | `error-diagrams.ts` | `preprocessorErrorSvg`, `DiagramRefusal`, `errorSvg`, `welcomeSvg`, `emptySvg` | Error diagrams — upstream's `BlockUml#getDiagram`. |
-| `error-page-exact.ts` | `renderErrorPageOnly` | Exact `PSystemError` page geometry (C-17) — split out of `error-renderer.ts` (500-line complexity hook) so the fitted-ratio `Block`/`Line` model that file still needs for `blackOnWhite` (Welcome/Unsupported) doesn't grow past the cap alongs |
-| `error-renderer.ts` | `BLACK`, `RED`, `MY_GREEN`, `SANS`, `SIZE_12`, `SIZE_14`, `ERROR_PAGE_MARGIN`, `BAND_PAD_X`, `BAND_PAD_TOP`, `BAND_PAD_BOTTOM`, `HEADER_PAD_RIGHT`, `HEADER_PAD_BOTTOM`, `Run`, `drawRun`, `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported blocks) to SVG. |
+| `error-page-exact.ts` | `errorPageBlock` | Exact `PSystemError` page geometry (C-17) — split out of `error-renderer.ts` (500-line complexity hook). |
+| `error-renderer.ts` | `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | Draws a `PSystemError` (and the black-on-white Welcome / Unsupported pages) to SVG. |
+| `error-text.ts` | `BLACK`, `RED`, `MY_GREEN`, `SANS`, `SIZE_12`, `SIZE_14`, `ERROR_PAGE_MARGIN`, `BAND_PAD_X`, `BAND_PAD_TOP`, `BAND_PAD_BOTTOM`, `HEADER_PAD_RIGHT`, `HEADER_PAD_BOTTOM`, `Run`, `parseCreoleSubset`, `drawRun` | The text primitives the error, Welcome and Unsupported pages share: the `HColors` and `GraphicStrings` font constants, the margins of `PSystemError#getGraphicalFormatted`, the Creole subset the Welcome and Unsupported strings use, and the o |
 | `ErrorUml.ts` | `ErrorUmlType`, `AssumedDiagramType`, `ErrorUml` | One error, as the error diagram prints it: the message, the line it was raised on, a score (used to pick the "best" error when several diagram parsers each fail on the same source), and — when the parser had already committed to a diagram t |
+| `graphic-strings.ts` | `GraphicPosition`, `blackOnWhite` | `GraphicStrings.createBlackOnWhite` — the Welcome and Unsupported blocks, with the PlantUML logo in a corner (unwind2-S8). |
 | `index.ts` | `ErrorUml`, `ErrorUmlType`, `PSystemError`, `PSystemErrorEmpty`, `PSystemErrorPreprocessor`, `PSystemErrorV2`, `PSystemUnsupported`, `PSystemWelcome`, `buildV2`, `merge`, `umlSourceOf`, `renderPSystemError`, `renderPSystemUnsupported`, `renderPSystemWelcome` | The error diagram — upstream's `net/sourceforge/plantuml/error/` (plus the Welcome screen it stacks on top, from `eggs/PSystemWelcome`). |
+| `plantuml-logo.ts` | `PLANTUML_LOGO` | The PlantUML logo -- the raster `PSystemVersion.getPlantumlImage()` draws (`PSystemVersion.java:92-94`, `src/main/resources/net/sourceforge/plantuml/version/logo.png`). |
 | `PSystemError.ts` | `PSystemError` | The error diagram: PlantUML never throws on a malformed document, it RENDERS one. |
 | `PSystemErrorEmpty.ts` | `PSystemErrorEmpty` | The error diagram for a document that parsed but said nothing — the jar's `Empty description`. |
 | `PSystemErrorPreprocessor.ts` | `PSystemErrorPreprocessor` | The error diagram for a PREPROCESSOR (TIM) failure — an orphan `!endif`, a call to an unknown function, an include that cannot be resolved. |
 | `PSystemErrorUtils.ts` | `buildV2`, `merge` | Factory + merge helpers for the error diagram. |
 | `PSystemErrorV2.ts` | `PSystemErrorV2` | The general error diagram: a parser (or any later stage) failed on a line, and the failure is reported against the lines executed so far. |
 | `PSystemUnsupported.ts` | `PSystemUnsupported` | The "Diagram not supported by this release" screen: an `@start<something>` this build does not know. |
-| `PSystemWelcome.ts` | `PSystemWelcome` | The "Welcome to PlantUML!" block. |
+| `PSystemWelcome.ts` | `PSystemWelcome` |  |
+| `raster-image.ts` | `RasterImage` | A bundled raster the error pages draw: its pixel size (`PortableImage #getWidth`/`#getHeight`) and the data URI the jar's SVG embeds for it. |
 | `UmlSource.ts` | `umlSourceOf` | The diagram's own lines — `@start…` through `@end…` — sliced out of the raw input. |
 
 ## `src/core/gantt/`

@@ -1,0 +1,6 @@
+@startuml
+skin reddress
+start
+:hello;
+stop
+@enduml

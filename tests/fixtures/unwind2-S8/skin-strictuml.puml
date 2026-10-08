@@ -1,0 +1,4 @@
+@startuml
+skin strictuml
+A -> B
+@enduml

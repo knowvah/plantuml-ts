@@ -1,6 +1,7 @@
 import { buildBlockUml, buildBlockUmls, isBlockEmpty, rawBlocksOf } from './core/BlockUmlBuilder.js';
 import type { BlockUml, BlockUmlOk, RawBlock } from './core/BlockUmlBuilder.js';
 import { registry } from './core/dispatcher.js';
+import { skinCutOf } from './core/skin-command.js';
 import type { AssembledSvg, DiagramPlugin, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
@@ -354,21 +355,17 @@ interface PreparedBlock {
  * {@link renderBlockPages} before they diverge on sync-vs-async layout and
  * error wrapping: resolve its diagram plugin (the parse happens HERE: upstream
  * picks a factory by attempting the parse, and D0 forbids a second parse
- * path), build the theme from the plugin's `styleInput` (unwind-U1) and the
- * raw source lines (skin-reddress-variants Fix 2: `!define DARKBLUE` + `skin
- * reddress`), resolve its measurer, extract its AST (or throw the block's
+ * path; a failing `skin` line cuts it, unwind2-S8), build the theme from the
+ * plugin's `styleInput` (unwind-U1), resolve its measurer, extract its AST (or throw the block's
  * `DiagramRefusal`), and surface any sprite/parse warnings. Neither caller's
  * try/catch nor sync-vs-async `layout` call belongs here.
  */
 function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOptions | undefined): PreparedBlock {
-  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
+  const skinCut = skinCutOf(block.preprocessed, umlSource);
+  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore }, skinCut);
   const plugin = resolution.plugin;
   const preprocessed = plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed;
-  const { theme, styleMap } = buildTheme(
-    preprocessed,
-    options,
-    block.rawSource.map((s) => s.getString()),
-  );
+  const { theme, styleMap } = buildTheme(preprocessed, options);
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);
   surfaceSpriteWarnings(ast, options?.onWarning);
