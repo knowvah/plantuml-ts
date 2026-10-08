@@ -505,7 +505,7 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    * `vamazo-19-tufu812` below shows the identical class surfacing fresh,
    * from the same third transform, the other direction.
    */
-  const ALLOWED_HARD_OVERLAPS = [
+  const ALLOWED_HARD_OVERLAPS: string[] = [
     // `tobajo-64-mipi810 [16,17]` (mission `activity-loop-tile-port`, T2):
     // a repeat's condition hexagon and its OWN east label `ja`. The jar
     // draws the east label AT the hexagon's right edge, zero gap
