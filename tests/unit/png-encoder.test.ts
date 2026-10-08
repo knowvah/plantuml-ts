@@ -231,7 +231,7 @@ describe('spriteToPngDataUri', () => {
     expect(readPixel(scanlines, 2, 1, 0)).toEqual([0, 0, 0, 255]);
   });
 
-  it('scale multiplies the reported display dims but not the natural PNG raster size', () => {
+  it('scale resamples the PNG raster to round(natural * scale) (PortableImageAwt.java:117-118)', () => {
     const result = spriteToPngDataUri(sprite, '#000000', '#ffffff', 3);
     expect(result.naturalWidth).toBe(2);
     expect(result.naturalHeight).toBe(2);
@@ -240,8 +240,8 @@ describe('spriteToPngDataUri', () => {
 
     const b64 = result.dataUri.slice('data:image/png;base64,'.length);
     const { width, height } = parsePng(new Uint8Array(Buffer.from(b64, 'base64')));
-    expect(width).toBe(2); // raster stays natural-size; see sprite-raster.ts divergence note
-    expect(height).toBe(2);
+    expect(width).toBe(6); // PortableImageAwt#scale: (int) Math.round(2 * 3)
+    expect(height).toBe(6);
   });
 });
 

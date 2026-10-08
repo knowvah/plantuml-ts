@@ -1,0 +1,9 @@
+@startuml
+[*] --> S1
+state S1
+state Comp {
+  state Inner
+}
+S1 --> Comp
+Comp --> [*]
+@enduml

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1411 modules · 5329 exported names.
+1413 modules · 5334 exported names.
 
 ## `src/`
 
@@ -603,6 +603,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `UGroup.ts` | `UGroupType`, `getSvgKeyAttributeName`, `UGroup` | UGroupType — the SVG `<g>`/element attribute keys `UGroup` can carry (id, class, title, and various `data-*` bookkeeping keys svek/layout attach for traceability back to source). |
 | `UHorizontalLine.ts` | `UHorizontalLine` |  |
 | `UImage.ts` | `UImage` |  |
+| `UImageSvg.ts` | `UImageSvg`, `svgImagePayload` | Port of `UImageSvg` -- an SVG document drawn as an image, as `EmbeddedDiagram#drawU` builds it for a `{{ }}` sub-diagram (`EmbeddedDiagram.java:169-174`) -- plus the payload `SvgGraphics#svgImage (UImageSvg, x, y)` wraps it in before base64 |
 | `ULine.ts` | `ULine` |  |
 | `UPath.ts` | `USegmentType`, `USegment`, `UPath` |  |
 | `UPolygon.ts` | `UPolygon` |  |
@@ -619,6 +620,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `deflate-fixed.ts` | `deflateFixed` | DEFLATE with fixed Huffman codes (BTYPE=01) and LZ77 matching — RFC 1951. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `adler32`, `encodePng`, `toBase64`, `toBase64DataUri` | Minimal deterministic PNG writer, browser-safe, zero deps, synchronous. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
+| `sprite-bilinear.ts` | `scaledRasterSize`, `scaleBilinear` | The jar's sprite/img raster scale: `PortableImageAwt#scale` (`klimt/awt/PortableImageAwt.java:113-127`) builds a `round(w * scale) x round(h * scale)` `TYPE_INT_ARGB` destination and runs `java.awt.image.AffineTransformOp` with `TYPE_BILINE |
 | `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
 | `Sprite.ts` | `Sprite` | The shared marker every sprite kind implements: pixel dimensions. |
 | `SpriteColor4096.ts` | `SpriteColor4096` |  |
@@ -1385,7 +1387,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-member-ast.ts` | `Visibility`, `Member` | `Member`/`Visibility` types for class/interface/enum/object leaves. |
 | `class-member-atom-resolve.ts` | `ResolvedMemberAtom`, `resolveInlineAtom`, `resolveEmojiAtom`, `resolveOpenIconicAtom`, `resolveLatexAtom` | class-member-atom-resolve.ts — the non-text atom resolvers backing `class-member-creole.ts#resolveOneAtom` (inline img/sprite, OpenIconic vector, emoji, latex). |
 | `class-member-creole-render-text.ts` | `textRenderOverride`, `resolveTabbedTextRuns` | class-member-creole-render-text.ts — the DRAWN-text side of `DriverTextSvg.java:112-125`'s two RENDER-time-only branches, plus the TAB-STOP expansion `AtomText.java:210-256` applies to a member row's `'text'` atom before any of that. |
-| `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `atomTopDy`, `noteLineAtomDy` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
+| `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `atomTopDy`, `noteLineAtomDy`, `noteImageAtomTop` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
 | `class-member-creole.ts` | `MemberRenderAtom`, `MemberRowBuild`, `memberBaseFont`, `buildMemberAtoms`, `resolveMemberAtoms`, `resolveOneAtom`, `buildMemberRow`, `buildWrappedMemberRows`, `splitMemberDisplayLines`, `atomsToPlainText` | class-member-creole.ts — routes ONE classifier member row's display text through the shared creole atom engine (`core/klimt/creole/`, built for description by mission E2r) instead of drawing it as a single plain `<text>` element. |
 | `class-member-display.ts` | `splitMemberDisplayLines`, `atomsToPlainText` | class-member-display.ts — the physical-line splitter + plain-text projection for classifier member rows. |
 | `class-member-parser.ts` | `parseMemberLine` | Member (attribute/method) line parsing for PlantUML class diagrams. |

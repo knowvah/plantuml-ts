@@ -55,6 +55,7 @@
 import { UImage } from '../../core/klimt/shape/UImage.js';
 import { XDimension2D } from '../../core/klimt/geom/XDimension2D.js';
 import { toBase64 } from '../../core/klimt/sprite/png-encoder.js';
+import { UImageSvg, svgImagePayload } from '../../core/klimt/shape/UImageSvg.js';
 import type { NestedDiagramRenderer } from '../../core/EmbeddedDiagram.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { UGraphic } from '../../core/klimt/UGraphic.js';
@@ -98,20 +99,6 @@ export const MAX_NESTED_DIAGRAM_DEPTH = 24;
  */
 function stripPlantumlProcessingInstructions(svg: string): string {
   return svg.replace(/<\?plantuml.+?\?>/g, '');
-}
-
-/**
- * `viewBox="0 0 W H"` is present on every SVG this port's `renderSync`
- * emits (`core/svg.ts#svgRoot`) — read from there rather than the
- * `width`/`height` attributes, which carry a `px` suffix this port's own
- * output (unlike the jar's inner embedded payload) always includes.
- */
-function readSvgDimensions(svg: string): XDimension2D {
-  const match = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);
-  if (match === null) {
-    throw new Error('class-nested-diagram-renderer: rendered SVG has no viewBox="0 0 W H" to measure');
-  }
-  return new XDimension2D(Number(match[1]), Number(match[2]));
 }
 
 /**
@@ -208,9 +195,12 @@ export function createNestedDiagramRenderer(
     embedDepth++;
     try {
       const svg = stripPlantumlProcessingInstructions(renderFn(source.join('\n')));
-      const dim = readSvgDimensions(svg);
-      const href = `data:image/svg+xml;base64,${toBase64(new TextEncoder().encode(svg))}`;
-      return { width: dim.getWidth(), height: dim.getHeight(), href };
+      // `EmbeddedDiagram#drawU` draws `new UImageSvg(imageSvg, 1)`
+      // (java:169-174), sized from it (java:129-133); `SvgGraphics#svgImage`
+      // re-roots it before encoding (`SvgGraphics.java:1015-1029`).
+      const image = new UImageSvg(svg, 1);
+      const payload = toBase64(new TextEncoder().encode(svgImagePayload(image)));
+      return { width: image.getWidth(), height: image.getHeight(), href: `data:image/svg+xml;base64,${payload}` };
     } finally {
       embedDepth--;
     }
