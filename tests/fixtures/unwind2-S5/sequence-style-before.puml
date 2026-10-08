@@ -1,0 +1,11 @@
+@startuml
+<style>
+root {
+  FontColor #FF0000
+  LineColor #00AA00
+}
+</style>
+!theme amiga
+Alice -> Bob : hello
+Bob --> Alice : ok
+@enduml

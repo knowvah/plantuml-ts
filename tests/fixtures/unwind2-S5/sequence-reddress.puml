@@ -1,0 +1,5 @@
+@startuml
+!theme reddress-darkblue
+Alice -> Bob : hello
+Bob --> Alice : ok
+@enduml

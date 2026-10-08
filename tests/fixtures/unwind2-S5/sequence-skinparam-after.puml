@@ -1,0 +1,7 @@
+@startuml
+!theme amiga
+skinparam defaultFontColor #FF0000
+skinparam ArrowColor #00AA00
+Alice -> Bob : hello
+Bob --> Alice : ok
+@enduml

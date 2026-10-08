@@ -1,0 +1,7 @@
+@startuml
+skinparam defaultFontColor #FF0000
+skinparam ArrowColor #00AA00
+!theme amiga
+actor User
+User --> (Login)
+@enduml

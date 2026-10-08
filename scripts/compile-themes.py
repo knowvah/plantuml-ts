@@ -2,24 +2,23 @@
 """
 Compile the RESIDUE of PlantUML's built-in themes into src/core/themes-builtin.ts.
 
-cdd4-T7b: a `!theme` directive EXECUTES the theme source now (`TContext
+cdd4-T7b: a `!theme` directive EXECUTES the theme source (`TContext
 #executeTheme`, `TContext.java:726-755`), and its skinparam / `<style>` lines
 reach the styling pipeline at the directive's position like any document
-line. This summary is kept ONLY for the fields that executed state does not
-yet reach a consumer through, each for a stated mechanism (see
-`theme.ts#resolveTheme`):
+line. unwind2-S5: `root { FontColor }` / `root { LineColor }` now reach
+colors.text / colors.arrow / colors.border from the executed lines themselves,
+in declaration order (`build-theme.ts#rootCascadeSkinparams`), so this summary
+no longer carries them, nor the hand-read MANUAL fontFamily / border.
 
-  - `<style> root { FontColor }`   -> colors.text   (sequence text fill)
-  - `<style> root { LineColor }`   -> colors.border + colors.arrow
-  - MANUAL `lc` / `fn`             -> colors.border / fontFamily (hand-read
-    themes whose values the parse cannot resolve; unmeasured -- no corpus
-    fixture uses them)
+What is left is ONE field family the json engine reads only from here:
+
   - root colours, `LineThickness`, top-level `node { MaximumWidth }`
                                    -> colors.graph.json
 
-Everything else it once emitted -- colors.background, fontFamily,
-diagramMargin, styleOverrides and the aws-orange font sizes -- is carried by
-the executed theme and was retired.
+(the json family reads only `jsonDiagram`-scoped selectors,
+`style-map-json-diagram.ts`, not the `root` / bare `node` cascade a theme
+writes). MANUAL supplies the json colours for themes whose variables the
+parse cannot resolve.
 """
 
 import re
@@ -42,49 +41,49 @@ FILE_LINE_CAP = 500
 # ---------------------------------------------------------------------------
 MANUAL = {
     'cloudscape-design': {
-        'bg': 'transparent', 'fg': '#000716', 'lc': '#0972D3', 'fn': None,
+        'bg': 'transparent', 'fg': '#000716', 'lc': '#0972D3'
     },
     'reddress-darkblue': {
-        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b', 'fn': 'Verdana',
+        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b'
     },
     'reddress-darkgreen': {
-        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b', 'fn': 'Verdana',
+        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b'
     },
     'reddress-darkorange': {
-        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b', 'fn': 'Verdana',
+        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b'
     },
     'reddress-darkred': {
-        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b', 'fn': 'Verdana',
+        'bg': '#2e2e2e', 'fg': '#ffffff', 'lc': '#1b1b1b'
     },
     'reddress-lightblue': {
-        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888', 'fn': 'Verdana',
+        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888'
     },
     'reddress-lightgreen': {
-        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888', 'fn': 'Verdana',
+        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888'
     },
     'reddress-lightorange': {
-        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888', 'fn': 'Verdana',
+        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888'
     },
     'reddress-lightred': {
-        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888', 'fn': 'Verdana',
+        'bg': '#eeeeee', 'fg': '#222222', 'lc': '#888888'
     },
     'sunlust': {
-        'bg': '#fdf6e3', 'fg': '#657b83', 'lc': '#657b83', 'fn': None,
+        'bg': '#fdf6e3', 'fg': '#657b83', 'lc': '#657b83'
     },
     'carbon-gray': {
-        'bg': 'transparent', 'fg': '#f4f4f4', 'lc': '#4d4d4d', 'fn': None,
+        'bg': 'transparent', 'fg': '#f4f4f4', 'lc': '#4d4d4d'
     },
     'toy': {
-        'bg': '#DDDDDD', 'fg': '#333333', 'lc': '#333333', 'fn': None,
+        'bg': '#DDDDDD', 'fg': '#333333', 'lc': '#333333'
     },
     'vibrant': {
-        'bg': '#FFFFFF', 'fg': '#333333', 'lc': '#333333', 'fn': None,
+        'bg': '#FFFFFF', 'fg': '#333333', 'lc': '#333333'
     },
     'mars': {
-        'bg': '#F9F9F9', 'fg': '#191919', 'lc': '#191919', 'fn': None,
+        'bg': '#F9F9F9', 'fg': '#191919', 'lc': '#191919'
     },
     'black-knight': {
-        'bg': 'transparent', 'fg': '#fff200', 'lc': '#1c1c1c', 'fn': None,
+        'bg': 'transparent', 'fg': '#fff200', 'lc': '#1c1c1c'
     },
 }
 
@@ -280,23 +279,6 @@ def parse_theme(fname: str) -> dict[str, str | None]:
 # TypeScript emission
 # ---------------------------------------------------------------------------
 
-def _color_lines(fg: str | None, lc: str | None) -> list[str]:
-    """
-    The `colors: { … }` scalar fields still carried (text/border/arrow).
-
-    colors.background is not: the executed `skinparam BackgroundColor` /
-    `<style> root { BackgroundColor }` reach every consumer already.
-    """
-    out: list[str] = []
-    if fg:
-        out.append(f"      text: '{fg}',")
-    # border and arrow both come from LineColor
-    if lc:
-        out.append(f"      border: '{lc}',")
-        out.append(f"      arrow: '{lc}',")
-    return out
-
-
 def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
                       mw: str | None, lt: str | None = None,
                       root_bg: str | None = None) -> list[str]:
@@ -341,17 +323,15 @@ def _json_graph_lines(bg: str | None, fg: str | None, lc: str | None,
     return out
 
 
-def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str]) -> list[str]:
+def _emit_colors_block_lines(json_lines: list[str]) -> list[str]:
     """
-    Emit the `colors: { … }` block, or [] when there is nothing to say.
-
-    `colors` is emitted for a json-only property too -- a theme may declare
-    `node { MaximumWidth }` and no colors at all.
+    Emit the `colors: { graph: { json: { … } } }` block, or [] when there is
+    nothing to say -- a theme may declare `node { MaximumWidth }` and no
+    colors at all.
     """
-    if not (color_lines or json_lines):
+    if not json_lines:
         return []
     lines = ["    colors: {"]
-    lines.extend(color_lines)
     if json_lines:
         lines.append("      graph: {")
         lines.append("        json: {")
@@ -364,24 +344,15 @@ def _emit_colors_block_lines(color_lines: list[str], json_lines: list[str]) -> l
 
 def emit_theme_entry(name: str, props: dict) -> list[str]:
     """
-    Emit a TypeScript object entry for one theme.
-
-    `fontFamily` comes from a MANUAL `fn` only: every parsed `FontName` is the
-    executed theme's own `skinparam DefaultFontName` / `root { FontName }`,
-    which reach the renderers unaided.
+    Emit a TypeScript object entry for one theme: its json residue only.
     """
     fg = normalize_color(props.get('fg'))
     lc = normalize_color(props.get('lc'))
-    fn = MANUAL.get(name, {}).get('fn')
 
     lines = [f"  '{name}': {{"]
-    if fn:
-        lines.append(f"    fontFamily: '{fn}',")
-
-    color_lines = _color_lines(fg, lc)
     json_lines = _json_graph_lines(normalize_color(props.get('bg')), fg, lc, props.get('mw'),
                                    props.get('lt'), normalize_color(props.get('root_bg')))
-    lines.extend(_emit_colors_block_lines(color_lines, json_lines))
+    lines.extend(_emit_colors_block_lines(json_lines))
     lines.append("  },")
     return lines
 
@@ -412,7 +383,7 @@ def emit_data_module(var_name: str, sibling: str, names: list[str],
     out = [
         "/**",
         f" * Built-in PlantUML theme residue ({first} .. {last}): only the fields an",
-        " * executed `!theme` does not yet reach -- see scripts/compile-themes.py.",
+        " * executed `!theme` does not yet reach (json only) -- see scripts/compile-themes.py.",
         " * Auto-generated by scripts/compile-themes.py — do not edit by hand.",
         " * Re-run the script when upstream themes change.",
         " *",

@@ -8,12 +8,15 @@ import type { RenderOptions } from '../index.js';
 import type { PreprocessorResult } from './preprocessor.js';
 import { resolveTheme, deepMergeTheme } from './theme.js';
 import type { Theme } from './theme.js';
-import { resolveSkinparam, parseStyleBlock } from './skinparam.js';
+import { resolveSkinparam } from './skinparam.js';
 import type { StyleMap } from './skinparam.js';
 import { applyStyleMap } from './style-map-theme.js';
 import { applySkinLayer } from './skin-loader.js';
 import { computeClassTagCascadeGenerations } from './style-cascade-class.js';
 import { styleSkinparamSegments, type StyleSkinparamSegment } from './style-skinparam-segments.js';
+import { dropRootShadowed, rootColoursOf } from './style-root-shadowing.js';
+import { cleanForKeySlow } from './style/mindmap-style-builder.js';
+import { parseConditionalColor } from './klimt/color/HColorSet.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
 import { withActivityCircleStyle } from './activity-circle-style.js';
 
@@ -80,8 +83,10 @@ export function buildTheme(
 
   // Stages 2-3: skinparam directives and <style> blocks, in declaration order
   // (cdd4-T7b -- see `style-skinparam-segments.ts`).
-  const withDeclarations = styleSkinparamSegments(preprocessed).reduce(applySegment, withSkin);
-  const styleMap = mergedStyleMap(preprocessed.styles);
+  // unwind2-S5: minus what a later `root` colour shadows (`style-root-shadowing.ts`).
+  const segments = dropRootShadowed(styleSkinparamSegments(preprocessed)).flatMap(withRootStyleRun);
+  const withDeclarations = segments.reduce(applySegment, withSkin);
+  const styleMap = mergedStyleMap(segments);
   // add4-T3f: the activity circles' priority-ordered merged style -- see
   // `activity-circle-style.ts`; read only by the activity renderer.
   const withStyleMap = withActivityCircleStyle(withDocumentStyle(withDeclarations, styleMap), preprocessed);
@@ -115,10 +120,24 @@ export function buildTheme(
   return { theme, styleMap };
 }
 
-/** Every `<style>` block merged: last writer per selector+property. */
-function mergedStyleMap(styles: readonly string[]): StyleMap {
-  return styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
-    m.forEach((props, selector) => {
+/**
+ * A skinparam run, followed by the `root` style run its root colours ARE
+ * (unwind2-S5): `skinparam defaultFontColor` converts to exactly
+ * `root { FontColor }` (`FromSkinparamToStyle.java:157`), whose only effect
+ * upstream is that style, so it reaches every resolver a `<style> root`
+ * block reaches, at the skinparam's position.
+ */
+function withRootStyleRun(segment: StyleSkinparamSegment): StyleSkinparamSegment[] {
+  if (segment.kind === 'style') return [segment];
+  const root = rootColoursOf(segment.entries);
+  return root.size === 0 ? [segment] : [segment, { kind: 'style', styleMap: new Map([['root', root]]) }];
+}
+
+/** Every `<style>` run merged: last writer per selector+property. */
+function mergedStyleMap(segments: readonly StyleSkinparamSegment[]): StyleMap {
+  return segments.reduce<StyleMap>((acc, segment) => {
+    if (segment.kind === 'skinparam') return acc;
+    segment.styleMap.forEach((props, selector) => {
       const existing = acc.get(selector) ?? new Map<string, string>();
       props.forEach((v, k) => existing.set(k, v));
       acc.set(selector, existing);
@@ -134,9 +153,73 @@ function mergedStyleMap(styles: readonly string[]): StyleMap {
  * selectors through `applyStyleMap`.
  */
 function applySegment(theme: Theme, segment: StyleSkinparamSegment): Theme {
-  if (segment.kind === 'skinparam') return resolveSkinparam(segment.entries, theme).theme;
-  const flatRoot = segment.styleMap.get('') ?? new Map<string, string>();
+  if (segment.kind === 'skinparam')
+    return withoutSupersededArrowCascade(resolveSkinparam(segment.entries, theme).theme, segment.entries);
+  const flatRoot = new Map([
+    ...rootCascadeSkinparams(segment.styleMap.get('root')),
+    ...(segment.styleMap.get('') ?? new Map<string, string>()),
+  ]);
   return applyStyleMap(segment.styleMap, resolveSkinparam(flatRoot, theme).theme);
+}
+
+/**
+ * `skinparam ArrowColor` (and every `<type>ArrowColor`, which `cleanForKey`
+ * collapses to it, `SkinParam.java:277-283`) converts to `arrow { LineColor }`
+ * (`FromSkinparamToStyle.java:151`). Being later than whatever `<style>` run
+ * set the class arrow cascade (`root`/`classDiagram`/`arrow` LineColor,
+ * `style-cascade-class.ts`), its counter wins on the class edge's
+ * `{root, element, classDiagram, arrow}` signature (`Style.java:121-134`), so
+ * the cascade value it supersedes is dropped and `colors.arrow` -- which it
+ * just set -- is what the edge draws (unwind2-S5).
+ */
+function withoutSupersededArrowCascade(theme: Theme, entries: ReadonlyMap<string, string>): Theme {
+  const graph = theme.colors.graph;
+  if (graph.classCascadeArrowColor === undefined) return theme;
+  if (![...entries.keys()].some((key) => cleanForKeySlow(key).includes('arrowcolor'))) return theme;
+  const { classCascadeArrowColor: _superseded, ...rest } = graph;
+  return { ...theme, colors: { ...theme.colors, graph: rest } };
+}
+
+/**
+ * A `<style> root { FontColor; LineColor }`, AT ITS POSITION in the run order
+ * (unwind2-S5). Every style signature contains `root`, and upstream merges
+ * values by declaration counter, not by selector depth: `Style#mergeWith`
+ * (`style/Style.java:121-134`) keeps the higher-priority value
+ * (`DarkString#mergeWith`, `DarkString.java:50-66`), and every value's
+ * priority is `StyleBuilder#getNextInt` (`ValueImpl.java:51-55`,
+ * `StyleBuilder.java:119-122`) -- so a later `root` beats an earlier
+ * `skinparam ArrowColor`, and a later `ArrowColor` beats an earlier `root`.
+ *
+ * - `FontColor` IS `skinparam defaultFontColor`: that skinparam converts to
+ *   exactly `root { FontColor }` (`FromSkinparamToStyle.java:157`), so it
+ *   runs through the same handler.
+ * - `LineColor` has no skinparam twin; it reaches the two theme fields every
+ *   element and arrow inherits it through, `colors.border` (`borderColor`'s
+ *   handler) and `colors.arrow` (`arrowColor`'s handler).
+ *
+ * These two fields used to come from a precompiled summary of the theme
+ * applied below every document line, so the theme's value could neither beat
+ * an earlier document line nor be beaten by a later document `root` block.
+ *
+ * A conditional `#?light:dark` colour (`HColorScheme`) is not routed: upstream
+ * resolves it per drawn element against that element's own background
+ * (`HColorScheme#getAppropriateColor`), and these flat fields would carry the
+ * raw token into the SVG.
+ */
+function rootCascadeSkinparams(root: ReadonlyMap<string, string> | undefined): Map<string, string> {
+  const out = new Map<string, string>();
+  const plain = (key: string): string | undefined => {
+    const value = root?.get(key);
+    return value === undefined || parseConditionalColor(value) !== undefined ? undefined : value;
+  };
+  const fontColor = plain('fontcolor');
+  if (fontColor !== undefined) out.set('defaultfontcolor', fontColor);
+  const lineColor = plain('linecolor');
+  if (lineColor !== undefined) {
+    out.set('bordercolor', lineColor);
+    out.set('arrowcolor', lineColor);
+  }
+  return out;
 }
 
 /** A top-level `root` / `document` selector, or one nested under them. */

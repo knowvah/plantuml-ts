@@ -1,0 +1,10 @@
+@startuml
+<style>
+root {
+  FontColor #FF0000
+  LineColor #00AA00
+}
+</style>
+Alice -> Bob : hello
+Bob --> Alice : ok
+@enduml
