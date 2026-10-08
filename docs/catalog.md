@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1408 modules · 5320 exported names.
+1408 modules · 5318 exported names.
 
 ## `src/`
 
@@ -1046,9 +1046,9 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite-symbols.ts` | `CompositeInk`, `TitleDim`, `compositeSymbolTitleOrigin`, `drawCompositeSymbol` | The three non-frame container symbols `FtileGroup#drawU` can draw (`type.asBig(name, align, TextBlockUtils.empty(0, 0), ...)`, `ftile/vcompact/FtileGroup.java:216-219`): `package` -> `USymbolFolder`, `card` -> `USymbolCard`, `rectangle` -> |
 | `activity-renderer-composite.ts` | `compositeTitleWidth`, `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
-| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondLineWidth`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
+| `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
-| `activity-renderer-shapes.ts` | `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `ActivityColors`, `actColors`, `renderAction`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action -- plain or `BoxStyle`d, `activity-renderer-signal-shapes.ts` --, bar, diamond, hexagon, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-shapes.ts` | `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `centeredFirstBaselineY`, `ActivityColors`, `actColors`, `renderAction`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action -- plain or `BoxStyle`d, `activity-renderer-signal-shapes.ts` --, bar, diamond, hexagon, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderBoxStyleAction` | SDL/UML box styles (`:label; <<input>>` etc.): an `FtileBox` whose outline is `boxStyle.drawMe(ug, widthTotal, heightTotal, shadowing, roundCorner)` (`FtileBox.java:222`) instead of the PLAIN rounded rectangle, with the label drawn through |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |

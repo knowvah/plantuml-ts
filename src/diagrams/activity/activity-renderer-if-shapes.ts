@@ -23,8 +23,6 @@ import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon
 import { actColors } from './activity-renderer-shapes.js';
 import { ifLabelBlock, renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
 import { drawActivityTextBlock } from './activity-text-sheet.js';
-import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -215,18 +213,6 @@ export function renderIfSplitShape(node: ActivityNodeGeo, theme: Theme): string 
  */
 export function renderHexagonOwnLabel(node: ActivityNodeGeo, theme: Theme): string {
   return renderDiamondTestLabel(node.label ?? '', theme, node);
-}
-
-const CREOLE_MEASURER = new WidthTableMeasurer();
-
-/** add4-T2d (DIAMOND-CREOLE-WIDTH): a diamond label line's RESOLVED creole
- *  width -- the condition text is a `CreoleMode.FULL` Sheet
- *  (`ConditionalBuilder.java:241-244`), so `**x**` centres on the width of
- *  its bold atom, not its markup. The SAME lexer and metric
- *  `tiles/gtile-diamond-inside.ts#measureCondition` sizes the hexagon with
- *  (`WidthTableMeasurer`, `activity-text-placement.ts#measureLineWidth`'s). */
-export function diamondLineWidth(theme: Theme, fontSize: number, line: string): number {
-  return creoleTextLines(line, { family: theme.fontFamily, size: fontSize }, CREOLE_MEASURER)[0]?.width ?? 0;
 }
 
 /**

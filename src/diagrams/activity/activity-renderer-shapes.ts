@@ -39,7 +39,7 @@ import {
 } from './activity-renderer-if-shapes.js';
 import { renderBoxStyleAction } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
-import { boxStyleName, floorActionLineHeight } from './tiles/gtile-action.js';
+import { boxStyleName } from './tiles/gtile-action.js';
 import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
 
 // Pure-move re-exports (500-line splits T1c/T3f): these symbols now live in
@@ -94,18 +94,6 @@ export const ASCENT_FRACTION = 1 - 1 / 4.5;
  *  `renderer.ts`'s edge-label use, which centres on the same formula). */
 export function centeredFirstBaselineY(cy: number, lineHeight: number, lineCount: number): number {
   return cy - (lineHeight * lineCount) / 2 + lineHeight * ASCENT_FRACTION;
-}
-
-/** add4-T2d (KLIMT-FLOOR, `loxija-71-joku558`): a diamond label line is an
- *  `AtomText` whose block height is floored at 10 (`AtomText.java:179-181`,
- *  `if (h < 10) h = 10`) while its baseline stays at the RAW `rect.height -
- *  descent` (`AtomText.java:213-215`), and `FtileDiamondInside#drawU` centres
- *  the floored block (`ly = (dimTotal.height - dimLabel.height) / 2`,
- *  `FtileDiamondInside.java:94-96`). So the first baseline is `cy -
- *  N * max(size, 10) / 2 + size * ASCENT_FRACTION`; identical to
- *  {@link centeredFirstBaselineY} for every `size >= 10`. */
-export function flooredFirstBaselineY(cy: number, fontSize: number, lineCount: number): number {
-  return cy - (floorActionLineHeight(fontSize) * lineCount) / 2 + fontSize * ASCENT_FRACTION;
 }
 
 // ---------------------------------------------------------------------------
