@@ -1,0 +1,6 @@
+@starthcl
+skinparam handwritten true
+resource "x" {
+  a = 1
+}
+@endhcl

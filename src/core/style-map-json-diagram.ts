@@ -25,6 +25,7 @@
 import type { Theme } from './theme.js';
 import type { StyleMap } from './skinparam.js';
 import { resolveColor } from './skinparam.js';
+import { resolveGlobalFontName } from './style-map-global.js';
 
 type JsonGraphOverride = NonNullable<Theme['colors']['graph']['json']>;
 type StyleProps = ReadonlyMap<string, string>;
@@ -257,7 +258,11 @@ function computeDataDiagramFamilyOverride(
   prefix: string,
   elementOverride: Partial<JsonGraphOverride>,
 ): Partial<JsonGraphOverride> {
+  const rootFontName = resolveGlobalFontName(styleMap);
   return {
+    // unwind-U1: `root`/`element` FontName, overridden by any family-specific
+    // selector below -- see `style-map-global.ts#resolveGlobalFontName`.
+    ...(rootFontName === undefined ? {} : { nodeFontFamily: rootFontName }),
     ...elementOverride,
     ...computeDataDiagramNodeOverride(styleMap, prefix),
     ...computeDataDiagramArrowOverride(styleMap, prefix),

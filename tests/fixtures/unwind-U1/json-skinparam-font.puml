@@ -1,0 +1,5 @@
+@startjson
+skinparam defaultFontSize 20
+skinparam defaultFontName Verdana
+{ "a": 1 }
+@endjson

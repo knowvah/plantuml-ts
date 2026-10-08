@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1414 modules · 5335 exported names.
+1417 modules · 5343 exported names.
 
 ## `src/`
 
@@ -119,7 +119,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-cascade-visibility-icon.ts` | `applyVisibilityIconCascadeOverrides` | cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/ BackgroundColor } } }` -- split out of `style-cascade-class.ts` (500-line cap), a pure addition mirroring `style-cascade-class-font.ts`'s own split-for-size precedent. |
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
-| `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
+| `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder`, `resolveGlobalFontName` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
 | `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-tag-cascade.ts` | `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade` | The `.tagname` stereotype sub-selector cascade (`StyleSignatureBasic #matchAllImpl` / `StyleStorage#computeMergedStyle`, G2 N36/N37) -- moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pur |
@@ -1586,6 +1586,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `document-dimensions.ts` | `ENSURE_VISIBLE_BUMP`, `DocumentDimensions`, `documentDimensions` | The json document's own width/height. |
 | `Fission.ts` | `NeutronType`, `Neutron`, `getNeutrons`, `splitStripe` | Line wrapping, as upstream does it — by splitting a line into ATOMS and breaking between them, not by re-joining words into strings. |
 | `index.ts` | `jsonPlugin` | JSON diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
+| `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
+| `json-family-style-input.ts` | `jsonFamilyStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `buildHighlightMap`, `processStringDisplay`, `splitDisplayLines`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
@@ -1596,6 +1598,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-style.ts` | `HighlightClassStyle`, `BoxStyleJson`, `TextStyleJson`, `NodeStyleJson`, `JSON_SKIN_BLACK`, `SVG_CORNER_DIVISOR`, `resolveNodeStyle` | The resolved `jsonDiagram.node` style — the whole skinparam/style cascade for the json family, collapsed once per diagram into plain values the renderer only reads. |
 | `renderer.ts` | `renderJson` | JSON diagram SVG renderer. |
 | `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
+| `StyleExtractor.ts` | `StyleExtractor`, `extractStyle`, `payloadOf`, `upstreamSourceLines` | Port of upstream's `StyleExtractor` -- the json family's ONLY directive handling. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `TextBlockJson.ts` | `JsonRowGeo`, `CellAtom`, `MeasuredNode`, `buildRows`, `measureNode`, `recordLabelFor` | Node sizing for the json family — the port of upstream's `TextBlockJson`. |
 

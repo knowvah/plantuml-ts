@@ -1,0 +1,4 @@
+@startjson
+caption My caption
+{ "a": 1 }
+@endjson

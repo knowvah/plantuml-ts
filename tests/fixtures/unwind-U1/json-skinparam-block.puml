@@ -1,0 +1,7 @@
+@startjson
+skinparam {
+  BackgroundColor red
+  defaultFontSize 20
+}
+{ "a": 1 }
+@endjson

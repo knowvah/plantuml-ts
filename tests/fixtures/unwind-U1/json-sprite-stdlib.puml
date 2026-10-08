@@ -1,0 +1,4 @@
+@startjson
+sprite Netw jar:archimate/network
+{ "a": "<$Netw>" }
+@endjson

@@ -1,13 +1,11 @@
-import { createAnnotations, matchAnnotationCommand } from '../../core/annotations/index.js';
-import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import type { JsonDiagramAST } from '../json/ast.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseOptions } from '../../core/dispatcher.js';
 // D6 (cdd6-T1c): shared with json/yaml -- see `jsonSpriteRegistryFor`'s own
 // doc comment (json/yaml/hcl already share `layoutJson`/`renderJson`).
 import { jsonSpriteRegistryFor } from '../json/parser.js';
-import { matchScaleCommand } from '../../core/scale-command.js';
-import type { ScaleSpec } from '../../core/scale-command.js';
+import { extractStyle, payloadOf, upstreamSourceLines } from '../json/StyleExtractor.js';
+import { headerOf } from '../json/json-diagram-factory.js';
 
 // ---------------------------------------------------------------------------
 // Token types — port of net.sourceforge.plantuml.hcl.SymbolType
@@ -310,95 +308,43 @@ function parseTerms(terms: HclTerm[]): unknown {
 // Public API — port of the Java entry point
 // ---------------------------------------------------------------------------
 
-export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
-  const bodyLines: string[] = [];
-  let scale: ScaleSpec | undefined;
-  let inStyleBlock = false;
-  const annotations = createAnnotations();
-  // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
-  const sprites = jsonSpriteRegistryFor(options);
-  const lines = source.lines;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
-    const t = line.trim();
-
-    // Strip @starthcl/@endhcl wrapper lines
-    if (/^@starthcl\s*$/i.test(t) || /^@endhcl\s*$/i.test(t)) continue;
-
-    // Strip <style> blocks
-    if (t === '<style>') {
-      inStyleBlock = true;
-      continue;
-    }
-    if (inStyleBlock) {
-      if (t === '</style>') inStyleBlock = false;
-      continue;
-    }
-
-    // Strip comment lines (D2)
-    if (t.startsWith('#')) continue;
-
-    // title/caption/legend/header/footer/mainframe (mission G0b/T6) — only
-    // before body starts, same scope as the directive strips below. Unlike
-    // json/yaml, HCL never captured `title` into its own AST field (it was
-    // silently discarded pre-T6), so routing it through the shared matcher
-    // here is a straight migration, not a dual-mechanism conflict.
-    if (bodyLines.length === 0) {
-      const annotationMatch = matchAnnotationCommand(lines, i, annotations);
-      if (annotationMatch !== null) {
-        i += annotationMatch.consumed - 1;
-        continue;
-      }
-      // `sprite $name [WxH/N[z]] { ... }` definitions (mission SI5b/T4):
-      // same before-body-only scope as the chrome matcher above, tried
-      // immediately after it.
-      const spriteMatch = matchSpriteCommand(lines, i, sprites);
-      if (spriteMatch !== null) {
-        i += spriteMatch.consumed - 1;
-        continue;
-      }
-    }
-
-    // Strip other known directive lines before body
-    if (bodyLines.length === 0 && /^(?:skinparam|scale|skin|hide|!assume|!pragma)\s/i.test(t)) {
-      // …except `scale`: upstream captures it (StyleExtractor.java:82-83)
-      // and executes it (JsonDiagram.java:90-99). yaml and hcl share that
-      // path because both factories construct a JsonDiagram.
-      scale = matchScaleCommand(t) ?? scale;
-      continue;
-    }
-
-    // Skip leading blank lines, but include blank lines within the body
-    if (t === '') {
-      if (bodyLines.length > 0) bodyLines.push(line);
-      continue;
-    }
-
-    bodyLines.push(line);
-  }
-
-  let root: unknown = null;
+/**
+ * `new HclParser(list).parseMe()`. Any exception leaves the value null
+ * (`HclDiagramFactory.java:79-83`), which `JsonDiagram#drawU` draws as the
+ * "does not sound like HCL data" page (`JsonDiagram.java:116-122`) -- e.g. a
+ * directive after the payload, which `HclParser.java:88` rejects
+ * (jar: `tests/fixtures/unwind-U1/hcl-title-after`).
+ */
+function parseHclBody(lines: readonly string[]): { root: unknown; parseError: boolean } {
   try {
-    if (bodyLines.some((l) => l.trim() !== '')) {
-      const joined = bodyLines.join(' ');
-      const terms = tokenize(joined);
-      root = parseTerms(terms);
-    }
+    return { root: parseTerms(tokenize(lines.join(' '))), parseError: false };
   } catch {
-    // parse errors: root stays null
+    return { root: null, parseError: true };
   }
+}
 
-  // #lizard forgives -- pre-existing faithful port of the HCL entry point
-  // (already over threshold before mission G0b/T6 added the annotation-
-  // matcher check above).
+/**
+ * Parses an HCL diagram source, as `HclDiagramFactory#createSystem` does: a
+ * {@link extractStyle} pass takes the directives, then every payload line
+ * except a `#` comment (`HclSource.java:48-50`) is HCL.
+ *
+ * The extractor's `title` is consumed and DROPPED: the factory's `setTitle`
+ * block is commented out (`HclDiagramFactory.java:86-92`), so a leading
+ * `title` line renders nothing (jar: `hcl-title`). `caption`/`legend`/
+ * `header`/`footer` are payload, folded into the module name by
+ * `HclParser#getModuleOrSomething` (`HclParser.java:77-89`) and dropped with
+ * it when there is one top-level module (`:67-68`) (jar: `hcl-caption`, ...).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/hcl/HclDiagramFactory.java:61-94
+ */
+export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagramAST {
+  const extractor = extractStyle(upstreamSourceLines(source, 'hcl'));
+  const lines = payloadOf(extractor).filter((line) => !line.trim().startsWith('#'));
   return {
-    root,
-    parseError: false,
+    ...parseHclBody(lines),
     diagramLabel: 'HCL' as const,
     highlights: [],
-    annotations,
-    sprites,
-    ...(scale === undefined ? {} : { scale }),
+    ...headerOf(extractor, false),
+    // D6 (cdd6-T1c): mirrors `class/parser.ts:326-327`.
+    sprites: jsonSpriteRegistryFor(options),
   };
 }

@@ -1,0 +1,11 @@
+@starthcl
+sprite $foo [4x4/16] {
+FFFF
+F00F
+F00F
+FFFF
+}
+resource "x" {
+  a = 1
+}
+@endhcl

@@ -1,0 +1,4 @@
+@startjson
+skinparam backgroundcolor red
+{ "a": 1 }
+@endjson

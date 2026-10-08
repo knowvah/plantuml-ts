@@ -1,0 +1,4 @@
+@startyaml
+title My Title
+a: 1
+@endyaml

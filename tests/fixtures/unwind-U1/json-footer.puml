@@ -1,0 +1,4 @@
+@startjson
+footer My footer
+{ "a": 1 }
+@endjson

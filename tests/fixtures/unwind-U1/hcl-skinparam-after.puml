@@ -1,0 +1,6 @@
+@starthcl
+resource "x" {
+  a = 1
+}
+skinparam backgroundcolor red
+@endhcl
