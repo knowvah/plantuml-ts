@@ -32,4 +32,19 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
   it('elseif hexagon: creole in condition and branch labels', () => {
     expect(diffPaths('add4-T3h', 'elseif-creole')).toEqual([]);
   });
+
+  // ConditionalBuilder.java:240-247,262-267,280-283: an EMPTY_DIAMOND test
+  // is the condition Sheet (padding included), its sides SIMPLE_LINE blocks.
+  it('EMPTY_DIAMOND if: north Sheet and side blocks carry the padding', () => {
+    expect(diffPaths('add4-T3j', 'empty-diamond-padding')).toEqual([]);
+  });
+
+  // Residual: a heading stripe in the north test compresses 0.889 px too
+  // far (compress/shapes-of.ts#ifLabelShape derives stripe baselines from
+  // the base font; (15 - 11) / 4.5 is the heading's extra descent).
+  it('EMPTY_DIAMOND if: heading north keeps only the compress residual', () => {
+    const paths = diffPaths('add4-T3j', 'empty-diamond-blocks');
+    expect(paths.filter((p) => !/@(y|y1|y2|cy|points\[\d*[13579]\]|height|viewBox\[3\])$/.test(p))).toEqual([]);
+    expect(paths).toHaveLength(67);
+  });
 });
