@@ -50,6 +50,7 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
+import { SEQUENCE_DOCUMENT_MARGIN } from '../../core/document-margin.js';
 import { sequenceShadowDefs, withNoteShadow } from './sequence-shadow.js';
 import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
@@ -390,6 +391,23 @@ export function renderSequencePage(geo: SequenceGeometry, theme: Theme, pageInde
 const ENSURE_VISIBLE_DELTA = 1;
 
 /**
+ * lgm-T1a: the margin-less block `DiagramChromeFactory.create` receives --
+ * `SequenceDiagramFileMakerTeoz#getTextBlock` reports `body + 10` and draws
+ * at `translate(5, 5)` (`teoz/SequenceDiagramFileMakerTeoz.java:136-165`),
+ * and `TextBlockExporter` adds `SequenceDiagram#getDefaultMargins()` on top
+ * (`core/document-margin.ts`). `totalWidth`/`totalHeight` here are that sum,
+ * so the block is `total - margin`; `core/annotations/chrome-export.ts`
+ * composes chrome around it and puts the margin back. Left unset under a
+ * `scale` (the margin is scaled with the body there, so it cannot be
+ * subtracted as a constant) -- chrome then sees the final canvas as before.
+ */
+function preChromeDims(geo: SequenceGeometry, k: number): Pick<RenderFragment, 'preChromeWidth' | 'preChromeHeight'> {
+  if (k !== 1) return {};
+  const m = SEQUENCE_DOCUMENT_MARGIN;
+  return { preChromeWidth: geo.totalWidth - m.left - m.right, preChromeHeight: geo.totalHeight - m.top - m.bottom };
+}
+
+/**
  * Render a sequence diagram geometry into an SVG string — PAGE 1 of it.
  *
  * The jar writes `f.svg`, `f_001.svg`, … for a multi-page document; this
@@ -473,6 +491,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     body: children.join(''),
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
     height: scaledGeo.totalHeight + ENSURE_VISIBLE_DELTA,
+    ...preChromeDims(scaledGeo, k),
     background: theme.colors.background,
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.

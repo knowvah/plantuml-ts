@@ -31,13 +31,13 @@ import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseClass } from '../../../src/diagrams/class/parser.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
-import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
+import { isEmpty } from '../../../src/core/annotations/index.js';
+import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, renderSync } from '../../../src/index.js';
 import { registerNestedDiagramRenderers } from '../../../src/diagrams/class/class-nested-diagram-renderer.js';
 import { seedOf } from '../../../src/core/klimt/drawing/svg/svg-seed.js';
 import { seedOfUmlSource } from '../../../src/core/assemble-svg.js';
-import { applyClassDocumentMargin } from '../../../src/diagrams/class/layout-ink-extent.js';
 
 /**
  * `layoutFixtureClass`/`renderFixtureClass`'s own options bag: `PreprocessOptions`
@@ -158,16 +158,10 @@ export function renderFixtureClass(markup: string, measurer: StringMeasurer, opt
   // -- chrome text is creole now, so a `<$sprite>` in a title/legend has to
   // resolve against the diagram's own registry here too, or this harness
   // measures chrome differently from production.
-  const chromed = applyChrome(fragment, annotations, styles, measurer, geo.sprites);
-  // G2 N46: mirrors `index.ts#applyAnnotationChrome`'s class-specific
-  // margin re-application exactly -- see that function's own doc comment
-  // and `RenderFragment.preChromeWidth`'s doc comment for the jar-verified
-  // mechanism. `renderClass` always sets `preChromeWidth` (non-degenerate
-  // single-page path), so this always re-margins when annotations are
-  // present.
-  if (fragment.preChromeWidth === undefined) return assembleSvg(chromed, seed);
-  const margined = applyClassDocumentMargin({ width: chromed.width, height: chromed.height });
-  return assembleSvg({ ...chromed, width: margined.width, height: margined.height }, seed);
+  // lgm-T1a: the SAME `applyExportedChrome` production calls -- chrome around
+  // the producer's margin-less block (`renderClass` sets `preChromeWidth`
+  // on the non-degenerate single-page path), the document margin after.
+  return assembleSvg(applyExportedChrome(fragment, annotations, styles, measurer, geo.sprites), seed);
 }
 
 /**

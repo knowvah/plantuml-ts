@@ -60,7 +60,8 @@ import type { StringMeasurer } from '../../../src/core/measurer.js';
 import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import { layoutSequence } from '../../../src/diagrams/sequence/layout.js';
 import { renderSequence } from '../../../src/diagrams/sequence/renderer.js';
-import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
+import { isEmpty } from '../../../src/core/annotations/index.js';
+import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
@@ -108,6 +109,6 @@ export function renderFixtureSequence(
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
-  const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
+  const chromed = applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed);
 }
