@@ -1,0 +1,16 @@
+@startuml
+state "A composite title that is quite long indeed" as AA {
+        AA: entry / go()
+        state "ok_ex" as aa_ok_ex <<exitpoint>>
+}
+AA --> Closing: SubCompletion
+aa_ok_ex --> Idle
+state Idle {
+        Idle: entry / set_timeout(closest)
+}
+Idle --> AA: Rcv-AAR
+state Closing {
+        Closing: entry / reset()
+}
+Closing --> AA
+@enduml

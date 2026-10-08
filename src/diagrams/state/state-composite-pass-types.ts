@@ -28,10 +28,38 @@ import type { ConcurrentRegionPassResult } from './state-composite-concurrent.js
 import type { TransitionGeo, StateTextLine } from './state-geo-types.js';
 import type { NoteEdgeCandidate, ScopeNoteParts } from './state-note-layout.js';
 
+/**
+ * One composite cluster of a pass that has border-point (entry/exit/pin)
+ * members — the clusters `ClusterDotString#printInternal` makes the
+ * `projectionCluster` of every line touching them
+ * (`svek/ClusterDotString.java:101-105`, gated on
+ * `entityPositionsExceptNormal().size() > 0`). Recorded in the order
+ * `resolveClusterComposite` visits them, which is `printInternal`'s own
+ * parent-before-child print order.
+ */
+export interface BorderPointClusterInfo {
+  /** The composite's state id (what a `__zaent_<id>` endpoint addresses). */
+  stateId: string;
+  /** The pass's `DotInputCluster.id` for it. */
+  clusterId: string;
+  /** Direct border-point member node ids (`Cluster.nodes` that are not
+   *  `EntityPosition.NORMAL`). */
+  portNodeIds: readonly string[];
+  /** `Cluster.getTitleAndAttributeWidth()` (`Math.floor` of the measured
+   *  header width, `SvekEdge.appendTable`'s `(int)` cast) and
+   *  `getTitleAndAttributeHeight()`. */
+  titleAndAttributeWidth: number;
+  titleAndAttributeHeight: number;
+  rankdir: 'TB' | 'LR';
+}
+
 export interface PassAccumulator {
   nodes: DotInputNode[];
   edges: DotInputEdge[];
   clusters: DotInputCluster[];
+  /** The composites among `clusters` with border-point members, in print
+   *  order — see {@link BorderPointClusterInfo}. */
+  borderPointClusters: BorderPointClusterInfo[];
   /** (transition, edgeId) pairs for THIS pass — used post-layout to build
    *  TransitionGeo entries (label placement needs the routed points).
    *  `reversed` mirrors whether this edge's DOT `from`/`to` were swapped

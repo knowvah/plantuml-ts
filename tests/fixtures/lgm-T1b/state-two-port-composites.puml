@@ -1,0 +1,18 @@
+@startuml
+state AA {
+        AA: entry / set_timeout()
+        state "ok_ex" as aa_ok_ex <<exitpoint>>
+}
+state BB {
+        BB: entry / set_timeout()
+        state "ok_ex" as bb_ok_ex <<exitpoint>>
+}
+AA --> BB
+aa_ok_ex --> Idle
+state Idle {
+        Idle: entry / set_timeout(closest)
+}
+Idle --> BB
+BB --> AA
+bb_ok_ex --> Idle
+@enduml
