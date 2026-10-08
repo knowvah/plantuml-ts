@@ -184,6 +184,7 @@ function runEventLayout(
   const ctx: EventProcessingContext = {
     theme,
     measurer,
+    ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
     activationStart,

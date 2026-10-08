@@ -70,6 +70,9 @@ const EXACT: readonly (readonly [string, string])[] = [
   [S7, 'd-actor'], // the actor body fill, #F1F1F1
   [S7, 'd-note'], // EntityImageNote.java:283,288
   [S7, 's-badge'], // the participant box
+  // The group tab's text `ug` carries no back -- the corner fills through a
+  // derived `ug` (ComponentRoseGroupingHeader.java:142,144,151) -- so white.
+  [S7, 's-group'],
   [S7, 'a-title'],
   [S7, 'a-legend'],
   [S7, 'a-caption'],
@@ -101,7 +104,7 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-group', 's-message', 's-note', 'st-state'])(
+  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-message', 's-note', 'st-state'])(
     '%s: not yet drawn by the port',
     (name) => {
       expect(jar(S7, name).length).toBe(1);

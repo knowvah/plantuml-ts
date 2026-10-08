@@ -34,7 +34,8 @@ import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPrefe
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines } from './text-block-geo.js';
 import { handleRefEvent } from './sequence-layout-ref.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { layoutDelay } from './sequence-delay.js';
 import type { MessageLevels } from './sequence-layout-participants.js';
@@ -78,6 +79,9 @@ export type ActivationStack = Map<string, ActivationRecord[]>;
 export interface EventProcessingContext {
   theme: Theme;
   measurer: StringMeasurer;
+  /** The diagram's sprites, for `<$name>` atoms in component text
+   *  (`StripeSimple#addSprite`, `StripeSimple.java:228-235`). */
+  sprites?: SpriteRegistry;
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
   activationStart: ActivationStack;
@@ -349,6 +353,24 @@ function creoleLineWidth(runs: readonly TextRun[]): number {
 }
 
 /**
+ * What the tab's creole needs to draw a `<$sprite>` (unwind2-S9b): the
+ * sprites, and the colours `AtomSprite` tints a monochrome sprite between --
+ * the text's own `FontColor` (`groupHeader` sets none, so root's black,
+ * `plantuml.skin:9`) and the `Back` of the `ug` the text is drawn with.
+ * `ComponentRoseGroupingHeader#drawInternalU` fills the corner through a
+ * DERIVED `ug` (`:142`) and draws the text on one that never had a back
+ * applied (`:144,151`), so there is none -- jar-verified white on
+ * `tests/fixtures/unwind2-S7/s-group.svg`.
+ */
+function tabAtomContext(ctx: EventProcessingContext): SequenceAtomContext | undefined {
+  return ctx.sprites === undefined ? undefined : { sprites: ctx.sprites, fontColor: GROUP_HEADER_SPRITE_TINT };
+}
+
+/** `plantuml.skin:9`, root `FontColor black`, in the form `AtomSprite`'s
+ *  tint takes. */
+const GROUP_HEADER_SPRITE_TINT = '#000000';
+
+/**
  * The header tab's title and its optional `[comment]`, as placed and measured
  * runs (A4), one run per creole atom (C5). Two FONTS, not two runs -- the
  * title at `HEADER_FONT_SIZE` 13 bold, the comment at the group style's own
@@ -375,7 +397,13 @@ function buildTabRuns(
     const lh = ctx.measurer.measure('M', spec).height;
     const first = by + lh - ctx.measurer.getDescent(spec, 'M');
     return displayLines(text).flatMap((line, i) =>
-      sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: bx, baselineY: first + i * lh }, ctx.measurer),
+      sequenceCreoleRuns(
+        line,
+        sequenceCreoleFont(spec),
+        { leftX: bx, baselineY: first + i * lh },
+        ctx.measurer,
+        tabAtomContext(ctx),
+      ),
     );
   };
   const left = x + HEADER_PADDING.left;
@@ -422,7 +450,7 @@ function computeHeaderTab(
   const titleFont = sequenceCreoleFont(fontSpec);
   const tabTextWidth = Math.max(
     ...titleLines.map((l) =>
-      creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer)),
+      creoleLineWidth(sequenceCreoleRuns(l, titleFont, { leftX: 0, baselineY: 0 }, ctx.measurer, tabAtomContext(ctx))),
     ),
   );
   const tabWidth = HEADER_PADDING.left + tabTextWidth + HEADER_PADDING.right;
