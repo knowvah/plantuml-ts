@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1413 modules · 5334 exported names.
+1414 modules · 5335 exported names.
 
 ## `src/`
 
@@ -864,6 +864,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ReadFilterMergeLines.ts` | `endsWithBackslash`, `mergeEndingBackslashLines` | Trailing-`\` line continuation: a source line ending in a bare `\` merges with the NEXT physical line, before `@start`/`@end` block splitting or command dispatch sees the document. |
 | `ReadLineReader.ts` | `SOURCE_STRING_DESCRIPTION`, `readLines` | Raw text -> the `StringLocated` list the interpreter executes. |
 | `StartUtils.ts` | `isStartDirective`, `isEndDirective`, `isPauseDirective`, `isUnpauseDirective`, `isExit`, `possibleAppend` | The two directive probes `DiagramExtractor` needs: is this line a `@start...` / `@end...` (or the backslash spelling, `\startuml`)? |
+| `stdlib-folders.ts` | `JAR_STDLIB_FOLDERS` | The stdlib folder names the jar ships -- one `stdlib/<name>/info.spm` resource per folder, the file `Stdlib`'s constructor opens first (`Stdlib.java:84-95` -> `SpmChannel#getInternalInputStream`, `SpmChannel.java:69-72`). |
 | `stdlib-path.ts` | `StdlibPathParts`, `splitStdlibPath` | `Stdlib.java`'s stdlib-path key transform, in one place. |
 | `StdlibRegistry.ts` | `StdlibChunkLoadError`, `StdlibRegistry`, `stdlibRegistry` | Lazy, per-bundle registration for the `<bundle/thing>` stdlib seam. |
 | `StdlibRemote.ts` | `StdlibRemoteManifest`, `RemoteBundle`, `StdlibResourceFetchError`, `remoteStdlib` | Per-RESOURCE, fetch-backed stdlib bundle source (si11a T1). |

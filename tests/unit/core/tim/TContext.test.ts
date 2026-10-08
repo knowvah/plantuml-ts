@@ -162,15 +162,18 @@ describe('TContext — plantuml-ts divergences (each preserves pre-TIM behavior)
     expect(() => run(['!define BOLD(x) <b>x</b>', 'BOLD(a,b)'])).toThrow('Function not found BOLD');
   });
 
-  it('DIVERGENCE 4: !undef and its !undefine alias both drop the variable', () => {
+  // unwind-U3 RETIRED the former DIVERGENCES 4 and 5. Upstream's PATTERN_UNDEF
+  // is `simpleKeyword("!undef")` (TLineType.java:87), so `!undefine` is a PLAIN
+  // line; `EaterUndef` removes a variable only (EaterUndef.java:48-54).
+  it('unwind-U3: !undef drops the variable; !undefine is a plain line', () => {
     expect(preprocess('!define FOO bar\n!undef FOO\ntext FOO').lines).toEqual(['text FOO']);
-    expect(preprocess('!define FOO bar\n!undefine FOO\ntext FOO').lines).toEqual(['text FOO']);
+    expect(preprocess('!define FOO bar\n!undefine FOO\ntext FOO').lines).toEqual(['!undefine bar', 'text bar']);
   });
 
-  it('DIVERGENCE 5: !undefine also drops a like-named macro', () => {
-    const { context } = run(['!define BOLD(x) <b>x</b>', '!undefine BOLD', 'BOLD(hi)']);
-    expect(context.functionsSet.doesFunctionExist('BOLD')).toBe(false);
-    expect(output(context)).toEqual(['BOLD(hi)']);
+  it('unwind-U3: !undef leaves a like-named macro in place', () => {
+    const { context } = run(['!define BOLD(x) <b>x</b>', '!undef BOLD', 'BOLD(hi)']);
+    expect(context.functionsSet.doesFunctionExist('BOLD')).toBe(true);
+    expect(output(context)).toEqual(['<b>hi</b>']);
   });
 });
 

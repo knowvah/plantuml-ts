@@ -24,6 +24,10 @@
  *      position, as upstream's does (`TContext.java:737-743`).
  *   3. Ambient I/O and non-determinism reach the builtins only through the
  *      injected `TimEnvironment` seam.
+ *   4/5. RETIRED (unwind-U3): `!undefine` was accepted as an `!undef` alias
+ *      that also dropped a like-named macro. Upstream has `!undef` only
+ *      (`TLineType.java:87`) and it removes a variable only (`TContext.java:
+ *      497-500` -> `EaterUndef.java:48-54`).
  *
  * (SI6 RETIRED the former divergence 3 -- "a call to a known function name that
  * no overload's arity can cover passes through as literal text". It cited the
@@ -70,8 +74,6 @@ export type { TContextOptions } from './TContextOptions.js';
 /** @see ~/git/plantuml/.../tim/TContext.java#ONLY_WHITESPACE_NON_EMPTY */
 const ONLY_WHITESPACE_NON_EMPTY = /^\s+$/u;
 
-/** `!undef` or its plantuml-ts alias `!undefine` -- see `TLineType.ts#PATTERN_UNDEF`. */
-const RE_UNDEF_KEYWORD = /^!undef(ine)?/u;
 
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java */
 export class TContext implements TContextInterface {
@@ -297,21 +299,9 @@ export class TContext implements TContextInterface {
     this.applyFunctionsAndVariablesInternal(memory, s);
   }
 
-  /**
-   * PLANTUML-TS DIVERGENCE 4: `EaterUndef` (a faithful port) eats the literal
-   * token `!undef`; plantuml-ts also accepts `!undefine`, which its pre-TIM
-   * preprocessor recognized and `tests/unit/preprocessor.test.ts` pins (see
-   * `TLineType.ts#PATTERN_UNDEF`). Normalizing the alias here leaves the ported
-   * `EaterUndef` untouched.
-   */
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java:497-500 */
   private executeUndef(memory: TMemory, s: StringLocated): void {
-    const trimmed = s.getTrimmed().getString();
-    const name = trimmed.replace(RE_UNDEF_KEYWORD, '').trim();
-    const normalized = new StringLocated(`!undef ${name}`, s.getLocation(), 'UNDEF');
-    new EaterUndef(normalized).analyze(this, memory);
-    // PLANTUML-TS DIVERGENCE 5: also drop a like-named macro -- see
-    // `FunctionsSet#removeFunctionsByName` for why.
-    this.functionsSet.removeFunctionsByName(name);
+    new EaterUndef(s).analyze(this, memory);
   }
 
   /** The document's `!theme` name, if any -- `PreprocessorResult.theme`. */

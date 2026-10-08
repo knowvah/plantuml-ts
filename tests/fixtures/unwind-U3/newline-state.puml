@@ -1,0 +1,4 @@
+@startuml
+state S1 : desc%newline()more
+[*] --> S1 : go%newline()now
+@enduml

@@ -59,18 +59,12 @@ const PATTERN_COMMENT_LONG_START = new RegExp(`^${SPACE_CLASS}*/'`, 'u');
 const PATTERN_IFDEF = simpleKeyword('!ifdef');
 
 /**
- * plantuml-ts DIVERGENCE (deliberate, behavior-preserving): upstream is
- * `simpleKeyword("!undef")`, which does NOT match `!undefine` (the `\b` fails
- * between `f` and `i`; live-oracle-verified -- the jar renders
- * `!undefine FOO` as an error). plantuml-ts's pre-TIM `preprocessor.ts`
- * recognized `!undefine` and ONLY `!undefine` (`RE_UNDEFINE =
- * /^!undefine\s+(\w+)\s*$/`), and `tests/unit/preprocessor.test.ts` pins that
- * behavior. Accepting both spellings keeps the existing plantuml-ts contract
- * intact (no silent behavior change in this cutover) while adding upstream's
- * real `!undef`. `TContext#executeUndef` normalizes the alias before handing
- * the line to the (faithfully ported) `EaterUndef`.
+ * `simpleKeyword("!undef")`: the trailing `\b` fails between `f` and `i`, so
+ * `!undefine FOO` is NOT a directive -- it stays a PLAIN line (the jar renders
+ * it as a syntax error; tests/fixtures/unwind-U3/undefine-alias-error.svg).
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/text/TLineType.java:87
  */
-const PATTERN_UNDEF = new RegExp(`^${SPACE_CLASS}*!undef(ine)?\\b`, 'u');
+const PATTERN_UNDEF = simpleKeyword('!undef');
 
 const PATTERN_IFNDEF = simpleKeyword('!ifndef');
 

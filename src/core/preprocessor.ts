@@ -11,9 +11,8 @@
  *
  * What stays here (and NOT in `TContext`, because none of it is a TIM concept
  * upstream): the `<style>` block collector, the `skinparam` line/block
- * collector, and the `%n()` / BLOCK_E1 newline line-splitting. Upstream leaves
- * all three to layers this port does not have (the command layer and the
- * Jaws/Creole display layer). See `resultOf` below.
+ * collector, and `Jaws.mutateExpands1`'s `BLOCK_E1_BREAKLINE` split
+ * (`BlockUml.java:153`). See `resultOf` below.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java
  */
@@ -119,39 +118,19 @@ export interface PreprocessOptions {
 }
 
 /**
- * `%n()` / `%newline()` written in any case OTHER than all-lowercase. The
- * lowercase spellings are real TIM builtins (`NewlineShort` / `Newline`) and
- * are already expanded to {@link BLOCK_E1_NEWLINE} by the interpreter; the trie
- * that finds call sites is case-sensitive, exactly as upstream's is (the jar
- * renders `%N()` literally -- live-oracle-verified). plantuml-ts's pre-TIM
- * preprocessor matched them case-INSENSITIVELY, and
- * `tests/unit/preprocessor.test.ts` ("`%n()` is case-insensitive") pins that,
- * so the case-folded alias is preserved here as a deliberate divergence rather
- * than silently dropped in the cutover.
- */
-const RE_NEWLINE_CALL_ANY_CASE = /%n\(\)|%newline\(\)/gi;
-
-/**
  * Interpreter result lines -> `PreprocessorResult.lines`.
  *
- * Two decodings, and the difference between them is load-bearing:
- *
- *  - `Jaws.BLOCK_E1_NEWLINE` survives here only from
- *    `TContext#extractFromResultList` (`%retrieve_procedure`'s multi-line
- *    capture), where upstream uses it as an IN-LINE separator, NOT a line
- *    break. It is left in place: splitting on it would turn a captured class
- *    body inside a `note` into loose top-level source lines, and the jar does
- *    not (roputo-88-fuxo199 -- the jar emits one note node; splitting invents
- *    junk nodes, and even an embedded real newline breaks the block/line
- *    parsers downstream). FOLLOW-UP: decoding the sentinel into a label line
- *    break is the Jaws/Creole display layer's job, which this port does not
- *    have yet -- until then such a label renders on one line.
- *  - `%n()` / `%newline()` DO split the line into separate source lines. The
- *    lowercase spellings already produced a real newline in the interpreter
- *    (see `jaws-constants.ts#USE_BLOCK_E1_IN_NEWLINE_FUNCTION`) and were split
- *    by `TContext#applyFunctionsAndVariablesInternal`; only the case-folded
- *    alias (pinned by `tests/unit/preprocessor.test.ts`) reaches this far, and
- *    it is split here.
+ * `Jaws.BLOCK_E1_NEWLINE` (from `%n()` / `%newline()`, and from
+ * `TContext#extractFromResultList`'s `%retrieve_procedure` capture) is left IN
+ * the line: upstream splits only at `BLOCK_E1_BREAKLINE` (`mutateExpands1`
+ * below, `Jaws.java:65-120`) and decodes `BLOCK_E1_NEWLINE` later, in the
+ * display layer (`Display#getWithNewlines`, `Display.java:316-341` ->
+ * `DisplayNewlines.ts#parseWithNewlines`). Splitting it here turned a captured
+ * class body inside a `note` into loose top-level lines (roputo-88-fuxo199).
+ * `%N()` / `%NEWLINE()` (any case but lowercase) are not TIM calls at all --
+ * `TrieImpl#getLonguestMatchStartingIn` is an exact-char walk
+ * (`TrieImpl.java:91-111`) -- so they stay literal text, as the jar draws them
+ * (tests/fixtures/unwind-U3/newline-uppercase-literal.svg).
  *
  * Trailing whitespace is KEPT (T6i): upstream's preprocessor never trims a
  * line (`ReadLineReader.java:89-115` reads it verbatim, `TimLoader` hands the
@@ -160,9 +139,7 @@ const RE_NEWLINE_CALL_ANY_CASE = /%n\(\)|%newline\(\)/gi;
  * `super(false, …)` commands (`CommandMindMapOrgmode.java:55`,
  * `CommandMindMapPlus`, `CommandWBSItemNew/Old`, `CommandBoardPlus`, …) see
  * the trailing space: `* **1** ` draws bold `1` plus a ` ` atom
- * (kijaru-67-buco967). Only the segments of the port-only case-folded `%N()`
- * split above are right-trimmed, as before -- that split has no upstream
- * counterpart.
+ * (kijaru-67-buco967).
  *
  * Blank lines are KEPT (A2s): upstream emits
  * blank lines and the command layer decides per-construct — a blank in a
@@ -174,12 +151,8 @@ function flatten(resultList: readonly StringLocated[]): { lines: string[]; posit
   const lines: string[] = [];
   const positions: (number | undefined)[] = [];
   for (const located of resultList) {
-    const position = located.getLocation()?.getPosition();
-    const segments = located.getString().split(RE_NEWLINE_CALL_ANY_CASE);
-    for (const segment of segments) {
-      lines.push(segments.length === 1 ? segment : segment.trimEnd());
-      positions.push(position);
-    }
+    lines.push(located.getString());
+    positions.push(located.getLocation()?.getPosition());
   }
   return { lines, positions };
 }
