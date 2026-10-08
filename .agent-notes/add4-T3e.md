@@ -110,3 +110,24 @@ on `1a3d4fae6` and were verified together: Σ 489, 0 risers, gates green.
 - **Context**: `:<code>...</code>\n;` (the closer leaves an empty last line).
 - **Finding**: "IllegalArgumentException start=10.0 end=10.0" is the same crash add4-T3gates found for any blank label line. The fixture closes with text instead.
 - **Confidence**: High
+
+# Resume (after merge 56c7cead0; write-set extended)
+
+Base probe Σ 232. Commits:
+| sha | mechanism | Σ |
+|---|---|---|
+| 82d65620e | patch A: if-down merge diamond padding wiring | 228 |
+| 6d0871be4 | stereogroup parse: no `; #color`, `(.*?)` label, `;` on a multi-line opener, first non-PLAIN label, `<<#color>>` BACK colour | 228 |
+| 31c6fc78e | patch B: stereotype on the action geo, LimitFinder outline ink, lane items | 228 |
+| 60d566b6c | backward box style (`CommandBackward3.java:136-138`, `CommandBackwardLong3.java:112-115`) | 228 |
+| f339da553 | compress: box-styled action occupies its outline + text, `boxStyleOutlineX` shared | 228 |
+| 0866897fd | delete `activity-renderer-line-heights.ts`, `measureMonoLineWidth` | 228 |
+
+Fixtures: add4-T3e authored Σ 1207 -> 0 (stereogroup 96 -> 16 -> 0, lanes 98 -> 33 -> 0,
+new boxstyle-backward / -backward-multi exact); add4-T3d Σ 0. fukika 4 -> 0.
+Risers: 0 corpus, 0 authored. fakece-07-koga025 (jar-error, unscored) renders `:;` instead of refusing.
+Census: fukika ws 4 -> 0, element delta unchanged; no other mover. 400 goldens byte-equal.
+Outside the listed write-set, touched minimally: `dispatch-multiline-body.ts` (node-dispatch split),
+new `dispatch-stereogroup.ts`, `layout/tile-layout.ts` (backward action keeps the stereotype).
+Not done: `##`/`###`/`name:value;` stereogroup colours (`Stereogroup.java:150-190`); stale doc
+references in `activity-renderer-text.ts:126,295` (T3g).
