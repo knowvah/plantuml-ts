@@ -52,10 +52,11 @@ describe('activity document margin end to end', () => {
     expect(five).toEqual({ width: plain.width - 10, height: plain.height - 10, cx: plain.cx - 5, cy: plain.cy - 5 });
   });
 
-  it('with a title the default margin is kept (residual: applyActivityChrome)', () => {
+  // add4-T3b: `applyActivityChrome` re-applies the THEME margin around the
+  // chrome-composed block (`TextBlockExporter.java:172-173,199-202,510-516`).
+  it('with a title the theme margin still wraps the chromed document', () => {
     const plain = canvas(render(['title T', 'start']));
     const five = canvas(render([MARGIN_5_STYLE, 'title T', 'start']));
-    expect(five.width).toBe(plain.width);
-    expect(five.cy).toBe(plain.cy);
+    expect(five).toEqual({ width: plain.width - 10, height: plain.height - 10, cx: plain.cx - 5, cy: plain.cy - 5 });
   });
 });

@@ -1,0 +1,12 @@
+@startuml
+start
+switch (test?)
+case (**Bold** case\nand __under__ line)
+  :a;
+case (**B**)
+  :b;
+case (plain)
+  :c;
+endswitch
+stop
+@enduml

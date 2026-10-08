@@ -12,6 +12,7 @@ import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ActivityNode } from './ast.js';
 
 // ---------------------------------------------------------------------------
@@ -414,13 +415,12 @@ export interface ParseContext {
    *  immediately after `matchAnnotationCommand` in `tryAnnotation`/
    *  `trySprite` (dispatch-common-commands.ts). */
   sprites: SpriteRegistry;
-  /** `!pragma NAME [VALUE]` (D12/T1p-b), mutated in place by
-   *  `dispatch-common-commands.ts#tryPragma`'s own `.define()` call during
-   *  `parseNodes` -- mirrors `TitledDiagram#getPragma()`'s single
-   *  per-diagram `Pragma` instance (`skin/Pragma.java`). Read at layout
-   *  time via `ActivityDiagramAST.pragma` (`parser.ts` copies this
-   *  reference onto the returned AST), NOT re-derived. */
+  /** `!pragma NAME [VALUE]` (D12/T1p-b), `.define()`d in place by `tryPragma`
+   *  -- `TitledDiagram#getPragma()`'s single per-diagram `Pragma`
+   *  (`skin/Pragma.java`); `parser.ts` copies the reference onto the AST. */
   pragma: Pragma;
+  /** add4-T3b: the last `scale ...` (`AbstractDiagram.java:195-197`), set by `tryScale`. */
+  scale: ScaleSpec | undefined;
 }
 
 // ---------------------------------------------------------------------------
