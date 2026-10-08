@@ -24,6 +24,8 @@ import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
 import { edgeLabelLayout } from './edge-label-anchor.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
+import { snakeLabelLineWidth } from '../tile-layout-inlabel.js';
+import { measurerAdapterOf } from '../../tiles/gtile-action.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -362,7 +364,10 @@ function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Th
   const layout = edgeLabelLayout(edge, theme);
   if (layout === undefined) return undefined;
   const { lines, size } = layout;
-  const width = Math.max(...lines.map((l) => bounder.getDimension(l, size).width));
+  // add4-T3b SNAKE-LABEL-CREOLE: `TextLimitFinder#drawText` boxes the
+  // resolved SIMPLE_LINE block (`tile-layout-inlabel.ts#snakeLabelLineWidth`).
+  const measurer = measurerAdapterOf(bounder);
+  const width = Math.max(...lines.map((l) => snakeLabelLineWidth(l, { family: '', size }, measurer)));
   const first = layout.baselineY;
   const last = first + size * (lines.length - 1);
   const height = last - first + bounder.getDimension(lines[0]!, size).height;

@@ -26,14 +26,11 @@ describe('switch case label width = jar (SIMPLE_LINE creole)', () => {
     expectCasesAndWidth('switch-case-creole-width');
   });
 
-  // Known residual (add4-T3b report, SNAKE-LABEL-CREOLE): the tile now sizes
-  // the overhanging `**Bold** ...` label at its creole width, but the
-  // connector's Snake label is still boxed at its RAW width by
-  // `layout/tile-layout-inlabel.ts#inLabelReservation` and
-  // `layout/compress/shapes-of.ts#edgeLabelShape`, so X compression
-  // (`SlotFinder#drawText`) cannot remove the 10 px the jar removes. Flip to
-  // `it` once both sites measure through `creoleTextLines(..., SIMPLE_LINE)`.
-  it.fails('switch-case-simple-line: an overhanging bold label lets X compression close the gap', () => {
+  // add4-T3b SNAKE-LABEL-CREOLE: the connector's Snake label is boxed at its
+  // SIMPLE_LINE width by `layout/tile-layout-inlabel.ts#inLabelReservation`
+  // and `layout/compress/shapes-of.ts#edgeLabelShape`, so X compression
+  // (`SlotFinder#drawText`) closes the 10 px the jar closes.
+  it('switch-case-simple-line: an overhanging bold label lets X compression close the gap', () => {
     expectCasesAndWidth('switch-case-simple-line');
   });
 });

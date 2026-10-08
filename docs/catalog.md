@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5305 exported names.
+1406 modules · 5306 exported names.
 
 ## `src/`
 
@@ -1132,7 +1132,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `tile-coordinates-group.ts` | `collectTouchedLanes`, `walkTileGroup` | `tile-coordinates.ts`'s `'gtile-group'`/`'gtile-partition'` walk -- split into its own sibling file (mission `activity-divergence-drive-3` T3i) purely to keep `tile-coordinates.ts` under the 500-line hook cap; no behavior change, a mechanic |
 | `tile-coordinates.ts` | `WalkHints`, `Out`, `pushNode`, `PushEdgeRouting`, `pushEdge`, `walkTile`, `assignCoordinates` |  |
 | `tile-layout-backward.ts` | `extractBackward`, `withBackLabels`, `backwardExitsOnLeft`, `repeatConditionLabels`, `repeatConditionLabelsSquare`, `selectRepeatConditionLabels` | Pure AST-level helpers for `FtileRepeat`/`FtileWhile`'s optional `backward:LABEL;` activity, split out of `tile-layout.ts` only to keep that file under the project's 500-line cap (mission `activity- divergence-drive` T3h, push-forward -- th |
-| `tile-layout-inlabel.ts` | `PendingInLabel`, `consumeArrowLabel`, `withInLabel`, `withOutLabel`, `applyInLabel`, `applyOutLabel` | T1b pass 2 (`activity-divergence-drive-3`): the generic `-> label;` mechanism, split out of `tile-layout.ts` only to keep that file under the 500-line hook (mission convention, "a sibling module when a file would cross the hook" -- the same |
+| `tile-layout-inlabel.ts` | `PendingInLabel`, `consumeArrowLabel`, `withInLabel`, `withOutLabel`, `snakeLabelLineWidth`, `applyInLabel`, `applyOutLabel` | T1b pass 2 (`activity-divergence-drive-3`): the generic `-> label;` mechanism, split out of `tile-layout.ts` only to keep that file under the 500-line hook (mission convention, "a sibling module when a file would cross the hook" -- the same |
 | `tile-layout-leaves.ts` | `isSimpleLeaf`, `isEarlyLeafKind`, `tileEarlyLeaf`, `tileSimpleLeaf` | `tileNode`'s simple-leaf and early-leaf dispatch, split out of `tile-layout.ts` only to keep that file under the 500-line hook (mission convention, "a sibling module when a file would cross the hook" -- the same reasoning `tile-layout-backw |
 | `tile-layout-structural.ts` | `tileNote`, `tileFork`, `tileSplit`, `wrapWhileNotes`, `tileSwitch`, `tileGroup` | `tileFork`/`tileSplit`/`tileSwitch`/`tileGroup` -- split out of `tile-layout.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (threading a `pragma` parameter through every `tileX` builder, mirroring `laneOrder`'s ow |
 | `tile-layout.ts` | `ActivityGeometry`, `ActivityNodeGeo`, `ActivityEdgeGeo`, `SwimlaneGeo`, `withSwimlane`, `withSwimlaneOut`, `TileNodesResult`, `tileNodes`, `layoutActivity` |  |

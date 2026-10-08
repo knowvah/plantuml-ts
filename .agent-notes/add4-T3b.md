@@ -123,3 +123,28 @@ I used no Serena tools and no `git stash`. `feat/activity-divergence-drive-4` is
   a worktree, it measures main. I ran the per-engine loop in the worktree instead.
 - **Impact**: worktree agents must not use it as is.
 - **Confidence**: High
+
+---
+
+# add4-T3b resume: SNAKE-LABEL-CREOLE (Not done 2)
+- Merged feat/activity-divergence-drive-4 (`6229edef5`, 400 pinned).
+- Commit: `127a293c6` fix(add4-T3b): box connector labels at their SIMPLE_LINE creole width (+ docs/catalog.md).
+- Java -> ours:
+  - Java: every Snake label is SIMPLE_LINE (`FtileFactoryDelegator.java:111`, `Branch.java:255-256`,
+    `ConditionalBuilder.java:282,295,299`, `FtileRepeat.java:171-200`,
+    `AbstractParallelFtilesBuilder.java:195`).
+  - Ours: new `layout/tile-layout-inlabel.ts#snakeLabelLineWidth`. It is used by
+    `inLabelReservation` (occupied width) and `compress/shapes-of.ts#edgeLabelShape`.
+  - Placement still uses the raw width, as `renderer.ts` places the text with it.
+- Fixture `switch-case-simple-line`: 83 diffs -> 4. All geometry is exact: case x positions and
+  canvas width now equal the jar, and the test's `it.fails` is flipped to `it`.
+  - The 4 left are all on the renderer side, Not done 3: `activity-renderer-text.ts` draws
+    `x __under__ y __line__ z` in FULL mode, as 5 runs with underlining. The jar draws one literal
+    run. Owner: T3-gates / renderer.
+- Probe: Σ 232 over 12 rows, unchanged. No corpus row moved; 0 risers, 0 fallers.
+- Census movers: none.
+- Ratchet, harness-parity, compress invariant and style/text/swimlane gates: all green.
+- Activity survey: 400 conformant, which equals the 400 pinned.
+- Pre-existing, not mine: `npm run typecheck` fails at
+  `tests/diagrams/activity/layout/compress/invariant.test.ts:695` (string vs never on
+  `ALLOWED_HARD_OVERLAPS.includes`), arriving with the merged branch.

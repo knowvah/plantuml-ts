@@ -569,3 +569,28 @@ describe('shapesOf — multi-line edge label', () => {
     expect(labelShape('ab')).toMatchObject({ width: 12, height: 11 });
   });
 });
+
+// add4-T3b SNAKE-LABEL-CREOLE: a connector label is a SIMPLE_LINE creole
+// block (`Branch.java:255-256`, `FtileFactoryDelegator.java:111`,
+// `ConditionalBuilder.java:282`), so `SlotFinder#drawText` occupies its
+// RESOLVED width: `**bold**` loses its markup, `__u__` stays literal
+// (`CommandCreoleBuilder.java:85-86`).
+describe('shapesOf — edge label width is the SIMPLE_LINE creole width (add4-T3b)', () => {
+  const edgeWith = (label: string): ActivityEdgeGeo => ({
+    points: [
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ],
+    label,
+  });
+  const widthOf = (label: string): number =>
+    shapesOf(baseInput({ edges: [edgeWith(label)], edgeMeta: [meta()] })).find((s) => s.kind === 'text')!.width;
+
+  it('`**ok**` occupies the width of "ok" (bounder 6/char)', () => {
+    expect(widthOf('**ok**')).toBe(12);
+  });
+
+  it('`__ok__` occupies its literal width', () => {
+    expect(widthOf('__ok__')).toBe(36);
+  });
+});
