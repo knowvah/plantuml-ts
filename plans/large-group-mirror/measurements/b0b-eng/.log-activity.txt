@@ -1,0 +1,20 @@
+surveying 451 activity fixtures (concurrency 6)
+  25/451
+  50/451
+  75/451
+  100/451
+  125/451
+  150/451
+  175/451
+  200/451
+  225/451
+  250/451
+  275/451
+  300/451
+  325/451
+  350/451
+  375/451
+  400/451
+  425/451
+  450/451
+wrote plans/large-group-mirror/measurements/b0b-eng/parity-activity.json — {"conformant":410,"structural-match":6,"diverged":35,"errored":0,"timeout":0,"oracle-error":0}

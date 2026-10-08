@@ -101,7 +101,7 @@ gates every merge on stop 15 and runs the D5 element check after it.
 
 | Batch | Scope | Tasks | Parallel | Done |
 |---|---|---|---|---|
-| [0](batch-0/overview.md) | branch, b0 survey, A1 audit | T0a, T0b | T0b after T0a | [ ] |
+| [0](batch-0/overview.md) | branch, b0 survey, A1 audit | T0a, T0b (+T0c) | T0b after T0a | [x] |
 | [1](batch-1/overview.md) | A2 mainframe, A3 projection cluster | T1a, T1b | ∥ | [ ] |
 | [2](batch-2/overview.md) | exit + close-out + merge | T-exit, T-close-out | — | [ ] |
 

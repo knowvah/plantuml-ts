@@ -1,0 +1,2 @@
+surveying 6 packet fixtures (concurrency 6)
+wrote plans/large-group-mirror/measurements/b0b-eng/parity-packet.json — {"conformant":0,"structural-match":0,"diverged":6,"errored":0,"timeout":0,"oracle-error":0}
