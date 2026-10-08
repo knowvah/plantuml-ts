@@ -6,11 +6,10 @@
  * point, not the padded box (`UGraphicCompressOnXorY.java:122-128`).
  * Goldens via `scripts/oracle-render.sh`.
  *
- * The if-down fixture keeps one known residual: the else-line mid arrow
- * (`polygon[4]`) sits `p` higher than the jar. Upstream's if-down merge
- * diamond carries a padded empty north label (`getShape2(useNorth=true)`,
- * `ConditionalBuilder.java:292-303`) that lengthens the line before
- * compression; `tiles/gtile-if-down.ts` does not model it yet.
+ * add4-T3e: the if-down merge diamond's padded empty north label
+ * (`getShape2(useNorth=true)`, `ConditionalBuilder.java:292-303`) is now
+ * modelled by `tiles/gtile-if-down.ts#diamond2North`, closing the else-line
+ * mid-arrow residual.
  */
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,7 +20,6 @@ import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_ROOT = join(HERE, '../../fixtures/activity/add4-T3d');
-const IF_DOWN_MID_ARROW = 'svg/g[1]/polygon[4]/';
 
 describe('if side labels under skinparam padding', () => {
   it('if-with-links then/else labels match the jar', () => {
@@ -29,9 +27,8 @@ describe('if side labels under skinparam padding', () => {
     expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
   });
 
-  it('if-down labels match the jar; only the known mid-arrow residual remains', () => {
+  it('if-down labels and the else-line mid arrow match the jar', () => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, 'if-label-padding-down-yes');
-    const paths = compareSvg(ours, golden, 'deterministic').diffs.map((d) => d.path);
-    expect(paths.filter((p) => !p.startsWith(IF_DOWN_MID_ARROW))).toEqual([]);
+    expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
   });
 });
