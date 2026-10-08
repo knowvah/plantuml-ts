@@ -22,10 +22,9 @@ import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-de
 import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
-import { edgeLabelLayout } from './edge-label-anchor.js';
-import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
-import { snakeLabelLineWidth } from '../tile-layout-inlabel.js';
+import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
 import { measurerAdapterOf } from '../../tiles/gtile-action.js';
+import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -366,14 +365,15 @@ function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Th
   const layout = edgeLabelLayout(edge, theme);
   if (layout === undefined) return undefined;
   const { lines, size } = layout;
-  // add4-T3b SNAKE-LABEL-CREOLE: `TextLimitFinder#drawText` boxes the
-  // resolved SIMPLE_LINE block (`tile-layout-inlabel.ts#snakeLabelLineWidth`).
-  const measurer = measurerAdapterOf(bounder);
-  const width = Math.max(...lines.map((l) => snakeLabelLineWidth(l, { family: '', size }, measurer)));
-  const first = layout.baselineY;
+  // add4-T3b SNAKE-LABEL-CREOLE / add4-T3h: `TextLimitFinder#drawText` boxes
+  // each `UText` of the drawn SIMPLE_LINE block, inside `SheetBlock1`'s
+  // padding (`SheetBlock1.java:209-210`): `[x + p, x + width - p]`.
+  const pad = theme.padding ?? 0;
+  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder)).width - 2 * pad;
+  const first = layout.baselineY + pad;
   const last = first + size * (lines.length - 1);
   const height = last - first + bounder.getDimension(lines[0]!, size).height;
-  return { kind: 'text', x: layout.x, y: last, width, height };
+  return { kind: 'text', x: layout.x + pad, y: last, width, height };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its

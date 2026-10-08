@@ -11,8 +11,7 @@
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
-import { measureLineWidth } from '../activity-text-placement.js';
-import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
+import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -106,12 +105,16 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // apart (`SheetBlock1.java:146-148`); the envelope runs first ink-top to
   // last ink-bottom, matching `renderer.ts#renderEdgeLabelAligned`.
   const lines = edge.label.split('\n');
-  const width = Math.max(...lines.map((l) => measureLineWidth(theme, fontSize, l)));
-  const h = fontSize * lines.length;
-  const position = getTextBlockPosition(edge.points, { width, height: h }, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
-  const baselineY = centeredFirstBaselineY(position.y + h / 2, fontSize, lines.length);
-  acc.minX = Math.min(acc.minX, position.x);
-  acc.maxX = Math.max(acc.maxX, position.x + width);
+  // add4-T3h: the drawn block's own dimension (`edgeLabelBlockSize`,
+  // `Snake.java:247`); each `UText` sits inside `SheetBlock1`'s padding
+  // (`SheetBlock1.java:209-210`), so the LEFT block's ink spans
+  // `[x + p, x + width - p]`.
+  const pad = theme.padding ?? 0;
+  const dim = edgeLabelBlockSize(edge.label, theme);
+  const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
+  const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
+  acc.minX = Math.min(acc.minX, position.x + pad);
+  acc.maxX = Math.max(acc.maxX, position.x + dim.width - pad);
   acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
   acc.maxY = Math.max(acc.maxY, baselineY + fontSize * (lines.length - 1) + 1.5);
 }

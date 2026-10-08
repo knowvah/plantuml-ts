@@ -25,12 +25,11 @@ function diffPaths(name: string): string[] {
 
 describe('activity labels through Display#create0 (jar oracles)', () => {
   // FtileFactoryDelegator.java:103-112: `create7(fc, LEFT, skinParam,
-  // CreoleMode.SIMPLE_LINE)`. Every <text>/<a>/<filter> matches the jar;
-  // the canvas width is the layout's own raw-markup label width
-  // (`edge-label-anchor.ts#placeOnPoints` -> `measureLineWidth`), a
-  // residual outside the renderer.
+  // CreoleMode.SIMPLE_LINE)`. Every <text>/<a>/<filter> matches the jar,
+  // and the layout sizes the label with the same block (add4-T3h,
+  // `edge-label-anchor.ts#edgeLabelBlockSize`, `Snake.java:247`).
   it('edge labels: bold, italic, url, <back:>, <color:> runs match the jar', () => {
-    expect(diffPaths('edge-label-creole')).toEqual(['svg/@viewBox[2]', 'svg/@width']);
+    expect(diffPaths('edge-label-creole')).toEqual([]);
   });
 
   // ConditionalBuilder.java:240-247 (FULL Sheet, diamond alignment,
