@@ -129,3 +129,23 @@ Two other fixtures score above 0: T1p-e/switch-cross-swimlane (42) and T1p-f/swi
 - **Finding**: compression already sees the label (`edgeLabelShape`), but `laneReservationItems` feeds lane widths from lane-tagged reservations. Without it, `lane-res-inlabel` loses 101.6 px of lane width.
 - **Impact**: fix the reservation's font and width; do not delete it.
 - **Confidence**: High
+
+# Follow-up round (write-set widened to src/diagrams/activity/**)
+
+## Commits
+| sha | mechanism | probe Σ |
+|---|---|---|
+| `37b7e9b39` | `Out.theme`; in-label reservation = drawn create7 block at the arrow font (mirrors `canvas-origin-text-ink#extendForEdgeLabelText`); `ARROW_LABEL_LAYOUT_FONT_SIZE`, `snakeLabelLineWidth` deleted | 217 |
+| `a1b6dd1cd` | while/repeat condition tiles get `sideMode` FULL (`FtileWhile.java:123,127-128`, `FtileRepeat.java:130-131`); new `ifLabelRole: 'full'` draws the same block (while/repeat via `diamond-labels.ts`, elseif hexagon slots) | 217 |
+| `5fc5b6070` | `compress/shapes-of.ts#ifLabelShape` = LimitFinder text extent of the drawn block (per-UText font, `SlotFinder.java:127-135`) | 217 |
+| `892e08e8a` | hidden worm adds no terminal/emphasize slot (`Worm.java:123-124`); shared `layout/edge-link-style.ts` | 217 |
+| `6182f059e` | `ActivityArrowLabel.color` deleted (+ two parser assertions now on `style`) | 217 |
+| `5bad88bab` | compress invariant population = baseline + pinned (412 rows, was 6); 6 hard + 9 soft pairs re-pinned with dumped evidence | 217 |
+
+## Fixtures before -> after
+side-labels-small-font 19 -> 0; while-full-labels-diamond (authored) 107 -> 0; while-full-labels (authored) 198 -> 82 -> 0; empty-diamond-blocks 67 -> 0; arrow-style-hidden 12 -> 0. All 650 inputs hashed per commit: no corpus SVG moved; no riser.
+
+## Not done
+- Item 6 (`walk-if-down.ts` local-first hooks): same mechanism, patch at `.agent-notes/add4-T3j-walk-if-down-local-first.patch`, NOT committed. It removes the xovigi/58.65/119.009 noise, but moves (1) navene-45-cozo466's swimlane census by ULP (190.51875000000004 -> ...07; the equality pin is unrounded, jar column 190.519 equal either way) and (2) livigo-47-negi605 / nusajo-97-bemo713 header/footer `<text x>` 100.15 -> 100.14999999999999 (still conformant; the text x is emitted unrounded by the header/footer writer, a src/core formatting gap). Landing it needs an orchestrator census re-pin. One row keeps a 1-ULP connectionIn/Out (64.390625) -- intrinsic `(L - a) + a` vs `(L - b) + b`.
+- Rainbow arrows (`Snake#drawRainbow`), fcArrow tbTest quirks (`FtileIfLongVertical.java:144-146`, INSIDE_DIAMOND repeat), dashed emphasize-head dasharray, non-colour COLOR tokens (upstream throws): still open.
+- `while (...) is (a\nb)` labels: the parser leaves `\n` literal (jar converts) -- found while authoring; not fixed.

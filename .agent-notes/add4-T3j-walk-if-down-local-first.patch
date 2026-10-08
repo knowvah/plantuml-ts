@@ -1,0 +1,101 @@
+diff --git a/src/diagrams/activity/layout/walk-if-down.ts b/src/diagrams/activity/layout/walk-if-down.ts
+index a4717da5c..4dcb06b5d 100644
+--- a/src/diagrams/activity/layout/walk-if-down.ts
++++ b/src/diagrams/activity/layout/walk-if-down.ts
+@@ -46,8 +46,12 @@ interface IfDownCtx {
+   readonly out: Out;
+ }
+ 
+-function absolutePoint(local: GPoint, originX: number, originY: number): GPoint {
+-  return { x: originX + local.x, y: originY + local.y };
++/** A child hook, child-LOCAL point first (`FtileIfDown`'s `getTranslate*()
++ *  .getTranslated(geo.getPoint*())`, `FtileIfDown.java:196-239,624-637`),
++ *  walk origin last (the snake's `UTranslate`, `Worm.java:67-79`) -- the
++ *  grouping `walk-while-branch.ts#childHook` uses. */
++function absolutePoint(local: GPoint, origin: GPoint, offset: GPoint): GPoint {
++  return { x: origin.x + (offset.x + local.x), y: origin.y + (offset.y + local.y) };
+ }
+ 
+ /** `diamond2`'s own local point translated to this walk's absolute frame --
+@@ -191,8 +195,12 @@ function pushMergeNode(ctx: IfDownCtx): void {
+  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:196-239 */
+ function connectionIn(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(SOUTH_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
+-  const p2 = absolutePoint(t.mainTile.getCoord(NORTH_HOOK), x + t.offsets.mainTileX, y + t.offsets.mainTileY);
++  const p1 = absolutePoint(t.diamond1.getCoord(SOUTH_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
++  const p2 = absolutePoint(
++    t.mainTile.getCoord(NORTH_HOOK),
++    { x, y },
++    { x: t.offsets.mainTileX, y: t.offsets.mainTileY },
++  );
+   pushEdge(out, [p1, p2], laneOut(t.diamond1, myLane), laneIn(t.mainTile, myLane));
+ }
+ 
+@@ -205,7 +213,11 @@ function connectionIn(ctx: IfDownCtx): void {
+ function connectionOut(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+   if (!t.hasThenPointOut) return;
+-  const p1 = absolutePoint(t.mainTile.getCoord(SOUTH_HOOK), x + t.offsets.mainTileX, y + t.offsets.mainTileY);
++  const p1 = absolutePoint(
++    t.mainTile.getCoord(SOUTH_HOOK),
++    { x, y },
++    { x: t.offsets.mainTileX, y: t.offsets.mainTileY },
++  );
+   const p2 = diamond2Point(t, x, y, t.offsets.diamond2Left, t.offsets.diamond2PointInY);
+   const lane1 = laneOut(t.mainTile, myLane);
+   // IFDS (T3d, `lukoxa-16-cecu095`): `optionalStop !== null` means
+@@ -225,7 +237,7 @@ function connectionOut(ctx: IfDownCtx): void {
+ function connectionHorizontal(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+   const stop = t.optionalStop!;
+-  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const p2 = { x: x + t.stop.stopX, y: y + t.stop.stopY + stop.height / 2 };
+   pushEdge(out, [p1, p2], laneOut(t.diamond1, myLane), laneIn(stop, myLane));
+ }
+@@ -244,7 +256,7 @@ function wrapEdges(ctx: IfDownCtx): { left: number; right: number } {
+  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:304-354 */
+ function connectionElse1(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(WEST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(WEST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const p2 = diamond2Point(t, x, y, 0, t.offsets.diamond2Size / 2);
+   const { left: wrapLeft } = wrapEdges(ctx);
+   const xmin = Math.min(p1.x - HEXAGON_HALF_SIZE, wrapLeft);
+@@ -259,7 +271,7 @@ function connectionElse1(ctx: IfDownCtx): void {
+  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:356-407 */
+ function connectionElse2(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const p2 = diamond2Point(t, x, y, t.offsets.diamond2Size, t.offsets.diamond2Size / 2);
+   const { right: wrapRight } = wrapEdges(ctx);
+   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
+@@ -281,7 +293,7 @@ function connectionElse2(ctx: IfDownCtx): void {
+  */
+ function connectionElseHline(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const p2y = diamond2Point(t, x, y, 0, t.offsets.diamond2PointInY).y;
+   const { right: wrapRight } = wrapEdges(ctx);
+   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
+@@ -300,7 +312,7 @@ function connectionElseHline(ctx: IfDownCtx): void {
+  */
+ function connectionHline(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const { right: wrapRight } = wrapEdges(ctx);
+   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
+   const p2 = diamond2Point(t, x, y, t.offsets.diamond2Size, t.offsets.diamond2PointInY);
+@@ -316,7 +328,7 @@ function connectionHline(ctx: IfDownCtx): void {
+  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfDown.java:447-458 */
+ function connectionElseNoDiamond(ctx: IfDownCtx): void {
+   const { t, x, y, myLane, out } = ctx;
+-  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
++  const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), { x, y }, { x: t.offsets.diamond1X, y: t.diamond1Y });
+   const p2 = { x: x + t.left, y: y + t.height };
+   const { right: wrapRight } = wrapEdges(ctx);
+   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
