@@ -1,18 +1,23 @@
 /**
- * jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors
+ * jsonDiagram / yamlDiagram `<style>` block → `Theme.colors
  * .graph.json` field mapping, plus the `.tagname` style-class → `#highlight`
  * override table.
  *
- * These three diagram families render through the SAME "json" graph-color
+ * No `hclDiagram` family: `SName` has no such name (its entries include
+ * jsonDiagram and yamlDiagram, `SName.java:111,190`), so `Context.java:87-91` reads `hclDiagram` as
+ * a stereotype that no element carries, and `HclDiagramFactory.java:86-92`
+ * never applies styles anyway (unwind2-S2).
+ *
+ * These diagram families render through the SAME "json" graph-color
  * bucket (`Theme['colors']['graph']['json']`) and their `node` / `arrow` /
  * `node.separator` / `node.highlight` sub-selectors resolve via IDENTICAL
  * field-extraction logic, parametrized only by the selector prefix
- * ("jsondiagram" / "yamldiagram" / "hcldiagram") — verified byte-identical
+ * ("jsondiagram" / "yamldiagram") — verified byte-identical
  * modulo variable naming when this module was split out. json ALSO defines
  * a legacy bare `element` / `element.header` / `element.highlight` selector
- * trio that yaml/hcl do not (yaml/hcl instead use a single
+ * trio that yaml does not (yaml instead uses a single
  * `<prefix>.element` selector, which sets the NODE background) — this is the
- * only asymmetry between the three families; node/arrow/separator/highlight are
+ * only asymmetry between the families; node/arrow/separator/highlight are
  * fully shared via {@link computeDataDiagramFamilyOverride}.
  *
  * Relocated verbatim from `style-map-theme.ts` (not refactored — see
@@ -182,8 +187,8 @@ function computeDataDiagramHighlightOverride(styleMap: StyleMap, prefix: string)
 
 /**
  * json's own bare `element` / `element.header` / `element.highlight`
- * selector trio — see this module's head doc comment for why yaml/hcl
- * instead use a single `<prefix>.element` selector ({@link
+ * selector trio — see this module's head doc comment for why yaml
+ * instead uses a single `<prefix>.element` selector ({@link
  * computeDataDiagramElementOverride}).
  */
 function computeJsonElementOverride(styleMap: StyleMap): Partial<JsonGraphOverride> {
@@ -224,8 +229,8 @@ function computeJsonElementOverride(styleMap: StyleMap): Partial<JsonGraphOverri
 }
 
 /**
- * yaml's/hcl's shared `<prefix>.element { BackgroundColor }` selector — the
- * yaml/hcl sibling of {@link computeJsonElementOverride}'s 3-selector trio,
+ * yaml's `<prefix>.element { BackgroundColor }` selector — the
+ * yaml sibling of {@link computeJsonElementOverride}'s 3-selector trio,
  * and it targets the NODE background exactly as json's own `element` handler
  * does. `element` is an ancestor of `node` in the style signature, so a
  * background set there cascades to the node rect.
@@ -282,15 +287,6 @@ export function computeYamlFamilyOverride(styleMap: StyleMap): Partial<JsonGraph
     styleMap,
     'yamldiagram',
     computeDataDiagramElementOverride(styleMap, 'yamldiagram'),
-  );
-}
-
-/** `hclDiagram { element / node / arrow / … }`. */
-export function computeHclFamilyOverride(styleMap: StyleMap): Partial<JsonGraphOverride> {
-  return computeDataDiagramFamilyOverride(
-    styleMap,
-    'hcldiagram',
-    computeDataDiagramElementOverride(styleMap, 'hcldiagram'),
   );
 }
 

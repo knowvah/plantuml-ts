@@ -33,7 +33,6 @@ import { computeSimpleSelectorOverrides } from './style-map-simple-fields.js';
 import {
   computeJsonFamilyOverride,
   computeYamlFamilyOverride,
-  computeHclFamilyOverride,
   computeHighlightClassesOverride,
 } from './style-map-json-diagram.js';
 
@@ -43,10 +42,10 @@ type JsonGraphOverride = Partial<NonNullable<GraphColors['json']>>;
 /**
  * JSON diagram: element / element.header / element.highlight /
  * jsondiagram.node (from jsonDiagram { node { … } } style block), plus the
- * yamlDiagram/hclDiagram siblings sharing the same "json" graph bucket —
+ * yamlDiagram sibling sharing the same "json" graph bucket —
  * see `style-map-json-diagram.ts`'s own head doc comment. Each family is
  * merged in the SAME order the original if-chain processed them (json, then
- * yaml, then hcl) so a fixture combining more than one family resolves
+ * yaml) so a fixture combining more than one family resolves
  * identically to before. Returns `undefined` when no family (nor any
  * `.tagname` highlight class) contributed anything — matching the original
  * "only assign `graphOverride.json` when non-empty" gate.
@@ -55,7 +54,6 @@ function computeJsonGraphOverride(styleMap: StyleMap, jsonBase: JsonGraphOverrid
   const jsonOverride: JsonGraphOverride = {
     ...computeJsonFamilyOverride(styleMap),
     ...computeYamlFamilyOverride(styleMap),
-    ...computeHclFamilyOverride(styleMap),
   };
   const highlightClasses = computeHighlightClassesOverride(styleMap);
   if (highlightClasses !== undefined) jsonOverride.highlightClasses = highlightClasses;
@@ -66,7 +64,7 @@ function computeJsonGraphOverride(styleMap: StyleMap, jsonBase: JsonGraphOverrid
  * Every `Theme.colors.graph` override reachable from `styleMap` alone
  * (i.e. everything except the document/elements/shadowing/border extras
  * handled by {@link computeStyleMapExtras}): the simple single-selector
- * table, the json/yaml/hcl diagram family, the class-cascade ancestor
+ * table, the json/yaml diagram family, the class-cascade ancestor
  * overrides (G2 N36), and the bare root/element BackgroundColor cascade
  * (D3).
  */
