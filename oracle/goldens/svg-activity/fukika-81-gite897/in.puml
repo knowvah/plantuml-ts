@@ -1,0 +1,15 @@
+@startuml
+skinparam padding 15
+start
+repeat :foo as starting label;  
+  :read data;  
+  :generate diagrams;  
+backward:This is backward;  
+repeat while (more data?)  
+ 
+if (Is daytime?) then (no) 
+ : Go To Sleep;
+ else (yes)
+endif
+stop
+@enduml

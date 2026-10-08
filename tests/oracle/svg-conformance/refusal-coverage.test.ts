@@ -840,7 +840,9 @@ describe('refusal coverage — baseline shape', () => {
     // rows. Derivation: 6348 + 242 = 6590.
     // 6590 -> 6591 / 6348 -> 6349 at add4/merge-T3b: 1 svg-activity clone
     // rows. Derivation: 6349 + 242 = 6591.
-    expect(manifest.fixtures.length).toBe(6591);
+    // 6591 -> 6592 / 6350 -> 6351 at add4/merge-T3e-2: 1 svg-activity clone
+    // rows. Derivation: 6351 + 241 = 6592.
+    expect(manifest.fixtures.length).toBe(6592);
     expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -865,7 +867,8 @@ describe('refusal coverage — baseline shape', () => {
     // 230 -> 242 at add4/T0b: of the 79 new activity captures, 8 known-gap
     // refusals + 4 of the 5 jar-error pages error here too (tajiri-57-sepu092's
     // jar errors, we render -- refusal cohort jar-error).
-    expect(pinnedErroring.length).toBe(242);
+    // 242 -> 241 at add4/merge-T3e-2: fukika-81-gite897 renders (stale pin retired).
+    expect(pinnedErroring.length).toBe(241);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -927,7 +930,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6342 -> 6345 at add4/merge-T3d-3 (3 svg-activity clones).
     // 6345 -> 6348 at add4/merge-T3gates-2 (3 svg-activity clones).
     // 6348 -> 6349 at add4/merge-T3b (1 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6349);
+    // 6349 -> 6350 at add4/merge-T3e-2 (fukika-81-gite897 retired to rendering).
+    // 6350 -> 6351 at add4/merge-T3e-2 (1 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6351);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1023,7 +1028,10 @@ describe('refusal coverage — baseline shape', () => {
     // 39 -> 35 at add2/close-b1p (2026-10-02): the 4 `end merge` rows render
     // (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java).
     // 35 -> 1 at add2/close-b2: the 34 remaining parser-gap rows render (T2e/T2g).
-    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(1);
+    // 1 -> 0 at add4/merge-T3e-2 (2026-10-07): the last, dot-cache
+    // activity/fukika-81-gite897, has rendered since add1 b3 (journal row 52);
+    // its stale `weErrored: true` pin is retired from a fresh measurement.
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(0);
   });
 });
 

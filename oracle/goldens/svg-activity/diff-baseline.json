@@ -1066,11 +1066,11 @@
     {
       "type": "activity",
       "slug": "fukika-81-gite897",
-      "status": "baseline",
-      "diffCount": 4,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "fd2c3fa8",
-      "weightedScore": 4
+      "measuredAgainstCommit": "0996e889",
+      "weightedScore": 0
     },
     {
       "type": "activity",
