@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1411 modules · 5323 exported names.
+1411 modules · 5329 exported names.
 
 ## `src/`
 
@@ -1065,7 +1065,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadPointsTriangle`, `arrowHeadPointsFor`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular`/`ArrowsTriangle` — the activity-diagram arrowhead decorations, selected on `skinparam style strictuml` (D4). |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityBackward`, `ActivitySpot`, `ActivityLabel`, `ActivityGoto`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivitySwitchCase`, `ActivitySwitch`, `ActivityGroup`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-arrow-long.ts` | `singleLineArrowLabel`, `tryArrowLong` | dispatch-arrow-long -- `CommandArrowLong3`, the multi-line arrow label: `->` (or `-[#red]->`) followed by label text with NO closing `;` on that line opens a block that ends at the first later line ending in `;`. |
-| `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
+| `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma`, `RE_PAGE`, `RE_FOOTBOX_IGNORED`, `RE_HIDE_SHOW_BY_GENDER`, `RE_LINK3`, `tryIgnoredCommonCommand`, `tryLink3` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
 | `dispatch-multiline-body.ts` | `removeEmptyColumns`, `MultilineActionBody`, `readMultilineActionBody` | dispatch-multiline-body -- the BlocLines half of upstream's multi-line activity command (`CommandActivityLong3#executeNow`, `activitydiagram3/command/CommandActivityLong3.java:120-142`). |
 | `dispatch-newline-sentinels.ts` | `decodeNewlineSentinels` | `%n()`/`%newline()` -> a real line break in an activity action label (mission `activity-divergence-drive-3` T2a, family PCTN). |
 | `dispatch-stereogroup.ts` | `stereogroupStereotype`, `stereogroupBackColor` | dispatch-stereogroup -- the single `stereotype` an activity keeps from its trailing stereogroup (`<<a>> <<b>>`), split out of `dispatch-support.ts` (500-line cap). |
