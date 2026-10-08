@@ -1,0 +1,10 @@
+@startuml
+object o1 {
+  name = "x"
+}
+object o2
+map m {
+  k => v
+}
+o1 --> o2
+@enduml

@@ -1,0 +1,4 @@
+@startuml
+class A
+note right of A : a note
+@enduml

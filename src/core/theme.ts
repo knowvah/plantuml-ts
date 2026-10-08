@@ -270,9 +270,9 @@ export const defaultTheme: Theme = {
     divider: '#999999',
     error: '#CC0000',
     graph: {
-      // D2: upstream's authoritative Style-system default fill is #F1F1F1
-      // (resources/skin/plantuml.skin), superseding the legacy ColorParam
-      // yellow (#FEFECE). See DIVERGENCES.md and decisions.md#D2.
+      // plantuml.skin:2,17 root { BackGroundColor: var(--common-background) }
+      // = #F1F1F1 -- the jar draws this, never the legacy ColorParam
+      // yellow #FEFECE (HColors.java:95); jar-verified, unwind-U4.
       classBackground: '#F1F1F1',
       interfaceBackground: '#B4D7ED',
       enumBackground: '#F1F1F1',

@@ -1,0 +1,9 @@
+@startuml
+actor User
+usecase (Login)
+rectangle Sys {
+  usecase (Logout)
+}
+User --> (Login)
+User --> (Logout)
+@enduml
