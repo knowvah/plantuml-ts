@@ -18,13 +18,11 @@ import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
-import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+import { activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
 import { actColors } from './activity-renderer-shapes.js';
-import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
-import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
-import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
-import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
+import { ifLabelBlock, renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
+import { drawActivityTextBlock } from './activity-text-sheet.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 
@@ -114,17 +112,15 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
  * A branch/condition label (D3): `ConditionalBuilder#getLabelPositive`'s
  * `branch.getDisplayPositive().create0(fontArrow, HorizontalAlignment.LEFT,
  * skinParam, labelLineBreak, CreoleMode.SIMPLE_LINE, null, null)`
- * (`ConditionalBuilder.java:280-283`), drawn at the walker's placed top-left
- * (`node.x`/`node.y`, the jar's `UTranslate`). `SheetBlock1` adds
- * `skinparam padding` itself (`SheetBlock1.java:209-210`).
+ * (`ConditionalBuilder.java:280-283`), or an EMPTY_DIAMOND's own test text
+ * (`ifLabelRole: 'test'`, `FtileDiamond.withNorth(tbTest)`) -- the block
+ * `activity-text-sheet-diamond.ts#ifLabelBlock` picks -- drawn at the
+ * walker's placed top-left (`node.x`/`node.y`, the jar's `UTranslate`;
+ * `FtileDiamond.java:91` applies no colour or stroke to the north draw).
+ * `SheetBlock1` adds `skinparam padding` itself (`SheetBlock1.java:209-210`).
  */
 export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
-  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
-  const tb = activityDisplayBlock(node.label ?? '', theme, {
-    fontConfiguration: fc,
-    horizontalAlignment: HorizontalAlignment.LEFT,
-    creoleMode: CreoleMode.SIMPLE_LINE,
-  });
+  const { tb, fc } = ifLabelBlock(node, theme);
   return drawActivityTextBlock(tb, node, theme, fc);
 }
 

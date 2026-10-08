@@ -18,13 +18,14 @@ import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
-import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
+import { swimlaneTitleFontSize } from '../../activity-style-defaults.js';
 import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
 import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
 import { floorActionLineHeight, measurerAdapterOf } from '../../tiles/gtile-action.js';
-import { measureSide } from '../../tiles/gtile-diamond-inside.js';
+import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-text-sheet-diamond.js';
+import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
@@ -126,9 +127,9 @@ const FRAME_KINDS = new Set(['group', 'partition']);
  * the padded box (`UGraphicCompressOnXorY.java:122-128`), so
  * `compress-geometry.ts` moves the node by this anchor.
  */
-export function ifLabelTextAnchor(theme: Theme): { dx: number; dy: number } {
+export function ifLabelTextAnchor(theme: Theme, node: IfLabelNode): { dx: number; dy: number } {
   const pad = theme.padding ?? 0;
-  return { dx: pad, dy: pad + activityFontSize(theme, 'arrow') * TITLE_BASELINE_ASCENT };
+  return { dx: pad, dy: pad + ifLabelFontSize(node, theme) * TITLE_BASELINE_ASCENT };
 }
 
 /**
@@ -164,14 +165,16 @@ export function ifLabelTextAnchor(theme: Theme): { dx: number; dy: number } {
  * DRAWING/compression-bounds side.
  */
 function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const fontSize = activityFontSize(theme, 'arrow');
-  const anchor = ifLabelTextAnchor(theme);
+  const anchor = ifLabelTextAnchor(theme, node);
   const firstBaselineY = node.y + anchor.dy;
   const lines = (node.label ?? '').split('\n');
-  // add4-T3h: the drawn SIMPLE_LINE block's text width (its `SheetBlock1`
-  // padding excluded, `SheetBlock1.java:209-210`) and stripe advance
+  // add4-T3h: the drawn block's text width (its `SheetBlock1` padding
+  // excluded, `SheetBlock1.java:209-210`) and stripe advance
   // (`AtomText.java:179-181` floor), not the raw markup lines.
-  const width = measureSide(node.label, bounder, theme).width - 2 * anchor.dx;
+  const { tb, fc } = ifLabelBlock(node, theme);
+  const fontSize = fc.size;
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: fontSize });
+  const width = tb.calculateDimension(sheetBounder).getWidth() - 2 * anchor.dx;
   const firstHeight = bounder.getDimension(lines[0]!, fontSize).height;
   const lastBaselineY = firstBaselineY + floorActionLineHeight(fontSize) * (lines.length - 1);
   return {

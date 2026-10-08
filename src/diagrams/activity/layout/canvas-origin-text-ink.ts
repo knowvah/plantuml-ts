@@ -13,6 +13,7 @@ import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
 import { floorActionLineHeight } from '../tiles/gtile-action.js';
+import { ifLabelFontSize } from '../activity-text-sheet-diamond.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -36,8 +37,8 @@ export const SPLIT_LINE_KINDS = new Set(['split-bar', 'split-join-bar']);
  * font's own descent, and the near (top) corner is `baseline -
  * (fontSize - 1.5)` (the `StringBounder` height of one `UText`); never the
  * measured box's own `y`/`y + height` the generic box treatment uses for
- * every other kind. An `if-label` is a SIMPLE_LINE Sheet
- * (`activity-renderer-if-shapes.ts#renderIfLabel`): `SheetBlock1` draws it
+ * every other kind. An `if-label` is a creole Sheet at its role's font
+ * (`activity-text-sheet-diamond.ts#ifLabelFontSize`): `SheetBlock1` draws it
  * inside its padding (`SheetBlock1.java:209-210`), one `UText` per stripe,
  * each stripe `max(fontSize, 10)` high (`AtomText.java:179-181`). The near
  * bound is the FIRST line's, the far bound the LAST line's (add4-T3h:
@@ -45,7 +46,7 @@ export const SPLIT_LINE_KINDS = new Set(['split-bar', 'split-join-bar']);
  */
 export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   const lineCount = (node.label ?? '').split('\n').length;
-  const fontSize = activityFontSize(theme, 'arrow');
+  const fontSize = ifLabelFontSize(node, theme);
   const firstBaselineY = node.y + (theme.padding ?? 0) + fontSize * TITLE_ASCENT_FRACTION;
   const lastBaselineY = firstBaselineY + (lineCount - 1) * floorActionLineHeight(fontSize);
   acc.minY = Math.min(acc.minY, firstBaselineY - (fontSize - 1.5));
