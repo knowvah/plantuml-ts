@@ -24,6 +24,7 @@ import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
+import { spriteHrefOver } from '../klimt/sprite/sprite-tint.js';
 
 /** `'kind' in x` duck-typing of the plain-data `CreoleAtom` union vs a
  *  composite OOP `Atom` (`AtomTable`/`AtomTree`/`AtomMath`/…) —
@@ -126,7 +127,10 @@ function drawAtomImage(resolved: ResolvedAtomImageWithRaster, ug: UGraphic): voi
       resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
         ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
         : undefined;
-    ug.draw(UImage.build(resolved.width, resolved.height, resolved.href, raster));
+    // `SpriteMonochrome.java:216`: tinted over the drawing context's back.
+    ug.draw(
+      UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), raster),
+    );
     return;
   }
   for (const primitive of resolved.primitives) {

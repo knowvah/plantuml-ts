@@ -29,11 +29,8 @@ import {
   getSpriteSvg,
   type SpriteRegistry,
 } from '../../core/sprite-commands.js';
-import {
-  spriteToPngDataUri,
-  spriteMonochromeAsLike,
-  spriteColor4096ToPngDataUri,
-} from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteMonochromeAsLike, spriteColor4096ToPngDataUri } from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteTintHref, type SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
 import { resolveSvgSpriteAtom } from '../../core/creole-atoms-image-resolver.js';
 import { renderLatexAsImage } from '../../core/latex.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
@@ -115,15 +112,14 @@ function resolveSpriteAtom(
     // `AtomSprite#drawU` -> `asTextBlock(fontColor, forcedColor, ...)`:
     // the tint is `forcedColor == null ? fontColor : forcedColor` and the
     // gradient's start is the UGraphic's back colour, not the forced colour
-    // (`SpriteMonochrome.java:216-217`); no back colour reaches this layout-
-    // time resolver, so the rasterizer's white default stands in.
-    const png = spriteToPngDataUri(
-      spriteMonochromeAsLike(mono),
-      atom.forcedColor ?? baseFont.color ?? undefined,
-      undefined,
-      spriteScale(atom.scale, baseFont.size),
-    );
-    return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };
+    // (`SpriteMonochrome.java:216-217`) -- known only where the row is drawn,
+    // so the atom keeps its `tint` and `href` is the no-back rendition.
+    const tint: SpriteTint = {
+      sprite: spriteMonochromeAsLike(mono),
+      color: atom.forcedColor ?? baseFont.color ?? undefined,
+      scale: spriteScale(atom.scale, baseFont.size),
+    };
+    return { kind: 'image', href: spriteTintHref(tint, undefined), width: dims.width, height: dims.height, tint };
   }
   const color = getSpriteColor4096(sprites, atom.name);
   if (color === undefined) return undefined; // unknown name -- contributes nothing.

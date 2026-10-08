@@ -18,7 +18,16 @@ import { resolveMemberAtoms, memberBaseFont, resolveOneAtom, type MemberRowBuild
 import { atomsToPlainText } from './class-member-display.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { getSpriteMonochrome, getSpriteColor4096 } from '../../core/sprite-registry.js';
-import { spriteMonochromeAsLike, spriteToPngDataUri } from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteMonochromeAsLike } from '../../core/klimt/sprite/sprite-raster.js';
+import { spriteTintHref, type SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
+
+/** A resolved badge sprite: href, declared size, and a monochrome tint. */
+export interface BadgeSpriteImage {
+  readonly href: string;
+  readonly width: number;
+  readonly height: number;
+  readonly tint?: SpriteTint;
+}
 import { spriteColor4096ToPngDataUri } from '../../core/klimt/sprite/sprite-raster.js';
 import { BADGE_LEFT_MARGIN } from './class-badge.js';
 import { parseCircledCharDecoration, parseCircledSpriteDecoration } from './class-stereotype.js';
@@ -146,11 +155,12 @@ function resolveBadgeSpriteImage(
   name: string,
   color: string | undefined,
   scale: number,
-): { href: string; width: number; height: number } | undefined {
+): BadgeSpriteImage | undefined {
   const mono = getSpriteMonochrome(sprites, name);
   if (mono !== undefined) {
-    const png = spriteToPngDataUri(spriteMonochromeAsLike(mono), color, undefined, scale);
-    return { href: png.dataUri, width: png.width, height: png.height };
+    // unwind2-S7: drawn over the header's `Back` (`class-sprite-back.ts`).
+    const tint: SpriteTint = { sprite: spriteMonochromeAsLike(mono), color, scale };
+    return { href: spriteTintHref(tint, undefined), width: mono.width * scale, height: mono.height * scale, tint };
   }
   const color4096 = getSpriteColor4096(sprites, name);
   if (color4096 === undefined) return undefined;
@@ -176,7 +186,7 @@ function resolveBadgeSpriteImage(
 export function computeBadgeSpriteBox(
   classifier: Classifier,
   sprites: SpriteRegistry | undefined,
-): { width: number; height: number; image?: { href: string; width: number; height: number } } | undefined {
+): { width: number; height: number; image?: BadgeSpriteImage } | undefined {
   if (sprites === undefined) return undefined;
   const deco = parseCircledSpriteDecoration(classifier.stereotype);
   if (deco === undefined) return undefined;

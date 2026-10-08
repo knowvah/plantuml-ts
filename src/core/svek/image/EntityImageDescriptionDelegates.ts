@@ -70,6 +70,7 @@ import type { AtomOps } from '../../klimt/creole/Sea.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
 import type { Atom } from '../../klimt/creole/SheetBlock1.js';
 import { descEmbeddedRenderer } from './EntityImageDescriptionEmbed.js';
+import { spriteHrefOver } from '../../klimt/sprite/sprite-tint.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -296,7 +297,9 @@ export function descAtomOps(
           resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
             ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
             : undefined;
-        ug.draw(UImage.build(resolved.width, resolved.height, resolved.href, rasterDims));
+        ug.draw(
+          UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
+        );
       } else {
         // Each primitive re-applies its OWN translate+paint on top of the
         // atom's position `ug` already carries (`DrawablePrimitive`,

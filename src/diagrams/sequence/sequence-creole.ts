@@ -111,6 +111,7 @@ import { renderLatexAsImage } from '../../core/latex.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { AtomImageResolver } from '../../core/creole-atoms.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
+import type { Paint } from '../../core/paint.js';
 
 export { sequenceLineWidth } from './sequence-creole-text-atom.js';
 
@@ -211,6 +212,9 @@ function latexAtomRun(atom: Extract<CreoleAtom, { kind: 'latex' }>, origin: Creo
 export interface SequenceAtomContext {
   readonly sprites: SpriteRegistry;
   readonly fontColor: string;
+  /** The `Back` the text is drawn on -- a monochrome sprite's gradient
+   *  start (`SpriteMonochrome.java:216`, unwind2-S7). `undefined`: none. */
+  readonly backColor?: Paint;
 }
 
 /** A resolved raster `'inline'` atom -- an `<img>` or a monochrome/4096-colour
@@ -269,7 +273,8 @@ function drawableAtoms(
   lineFont: FontConfiguration,
   context: SequenceAtomContext | undefined,
 ): readonly DrawableAtom[] | undefined {
-  const resolverFor = context === undefined ? undefined : makeAtomImageResolverFor(context.sprites);
+  const resolverFor =
+    context === undefined ? undefined : makeAtomImageResolverFor(context.sprites, undefined, context.backColor);
   const out: DrawableAtom[] = [];
   for (const atom of atoms) {
     if (atom.kind === 'text' || atom.kind === 'latex') {

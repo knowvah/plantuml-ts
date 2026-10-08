@@ -8,6 +8,7 @@
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
 import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
 import type { DrawablePrimitive } from '../../core/creole-atoms.js';
+import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
 
 /**
  * One RESOLVED, render-ready run of a member row -- unlike `CreoleAtom`
@@ -80,7 +81,15 @@ export type MemberRenderAtom =
        *  `dy = 0` from `Sea` anyway — renderers read `atom.dy ?? 0`). */
       readonly dy?: number;
     }
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | {
+      readonly kind: 'image';
+      readonly href: string;
+      readonly width: number;
+      readonly height: number;
+      /** unwind2-S7: a monochrome sprite's deferred tint, drawn over the
+       *  emitting element's fill (`core/klimt/sprite/sprite-tint.ts`). */
+      readonly tint?: SpriteTint;
+    }
   /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` atom -- `SvgNanoParser`'s
    *  draw-time `UPath`/`UEllipse`/`UText` decomposition
    *  (`core/creole-atoms-image-resolver.ts#resolveSvgSpriteAtom`, the SAME

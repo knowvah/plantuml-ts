@@ -42,6 +42,7 @@ import {
   emojiLineHeightFactor,
   emojiRenderRun,
 } from '../../klimt/creole/atom/AtomEmoji.js';
+import { spriteHrefOver } from '../../klimt/sprite/sprite-tint.js';
 
 /**
  * SI15 T1 (ADR-1): widens `AtomImageResolver`'s `image` variant with the
@@ -380,7 +381,7 @@ function drawAtoms(
           ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
           : undefined;
       ug.apply(new UTranslate(x, origin.y)).draw(
-        UImage.build(resolved.width, resolved.height, resolved.href, rasterDims),
+        UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
       );
     } else {
       const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU

@@ -144,9 +144,14 @@ function packageFillValue(color: Paint): Paint {
  * port previously emitted the unsplit literal `fill="#yellow\gold"`).
  */
 export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
-  return packageFillValue(
-    parseColor(geo.color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT),
-  );
+  return namespaceColorFill(geo.color, theme);
+}
+
+/** {@link namespaceFill} from the namespace's own inline colour -- shared
+ *  with the cluster header, which tints a stereotype sprite over it
+ *  (unwind2-S7, `class-cluster-header.ts#buildStereoSprite`). */
+export function namespaceColorFill(color: string | undefined, theme: Theme): Paint {
+  return packageFillValue(parseColor(color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT));
 }
 
 // folderPathD / folderPolygonPoints / renderFolderPolygon / FolderTabPaint /

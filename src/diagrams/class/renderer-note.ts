@@ -61,6 +61,7 @@ import { NOTE_FONT_SIZE } from '../../core/klimt/font/FontParam.js';
  *  dashed host connector is NOT this stroke (a separate `Link`,
  *  `renderer-note-connector.ts#renderNoteConnectorPath`). */
 import { NOTE_STROKE_WIDTH, resolveNoteStroke } from './renderer-note-stroke.js';
+import { atomsOverBack } from './class-sprite-back.js';
 export { NOTE_STROKE_WIDTH };
 
 /** `EntityImageNote.java:275-289` `ug.draw(Opale.getCorner(...))`: the fold
@@ -270,7 +271,11 @@ function renderNoteLineContent(note: NoteGeo, ln: string, row: NoteLineRowCtx, t
   const marginX1 = NOTE_MARGIN_X1 * theme.scaleK;
   const startX = note.x + marginX1 + noteLineAlignDx(note, i, theme);
   if (note.lineAtoms !== undefined) {
-    return renderNoteLineAtoms(note.lineAtoms[i]!, startX, lineTop, lineHeight, theme, baselineOffset);
+    // unwind2-S7: the text draws on the note's `Back` (`EntityImageNote.java
+    // :283,288`, `Opale.java:107,127`), which a sprite atom tints from.
+    const back = resolveNoteBackground(note.color, theme, note.stereotype);
+    const atoms = atomsOverBack(note.lineAtoms[i]!, back);
+    return renderNoteLineAtoms(atoms, startX, lineTop, lineHeight, theme, baselineOffset);
   }
   return text(startX, lineTop + baselineOffset, ln, {
     fontFamily: theme.fontFamily,
