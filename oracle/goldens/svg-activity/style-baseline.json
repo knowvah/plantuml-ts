@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "fd2c3fa8",
+  "measuredAgainstCommit": "4ea823f1",
   "fixtures": [
     {
       "type": "activity",
@@ -7661,7 +7661,7 @@
         },
         "strokeWidth": {
           "1": 7,
-          "0.5": 4
+          "0.5": 5
         },
         "rx": {
           "12.5": 3
@@ -7687,7 +7687,7 @@
         "height": "320"
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "measuredAgainstCommit": "4ea823f1"
     },
     {
       "type": "activity",
@@ -9329,7 +9329,7 @@
       "ours": {
         "fontSize": {
           "12": 2,
-          "18": 2
+          "18": 3
         },
         "strokeWidth": {
           "1": 5,
@@ -9339,7 +9339,7 @@
           "(absent)": 1,
           "12.5": 2
         },
-        "textCount": 4,
+        "textCount": 5,
         "width": "234",
         "height": "227"
       },
@@ -9360,8 +9360,8 @@
         "width": "234",
         "height": "227"
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1"
     },
     {
       "type": "activity",
@@ -15497,8 +15497,8 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1",
       "ours": {
         "fontSize": {
           "11": 4,
@@ -15515,7 +15515,7 @@
           "7.5": 1
         },
         "textCount": 39,
-        "width": "861",
+        "width": "813",
         "height": "704"
       },
       "jar": {

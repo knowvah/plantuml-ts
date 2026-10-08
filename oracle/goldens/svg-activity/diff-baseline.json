@@ -1912,11 +1912,11 @@
     {
       "type": "activity",
       "slug": "letuke-04-poza319",
-      "status": "baseline",
-      "weightedScore": 13,
-      "diffCount": 7,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "measuredAgainstCommit": "4ea823f1"
     },
     {
       "type": "activity",
@@ -2326,11 +2326,11 @@
     {
       "type": "activity",
       "slug": "nesozi-09-zezu092",
-      "status": "baseline",
-      "weightedScore": 5,
-      "diffCount": 1,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34"
+      "measuredAgainstCommit": "4ea823f1"
     },
     {
       "type": "activity",
@@ -3911,10 +3911,10 @@
       "type": "activity",
       "slug": "zejuso-92-kexo870",
       "status": "baseline",
-      "diffCount": 148,
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
-      "weightedScore": 148
+      "diffCount": 2,
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1",
+      "weightedScore": 2
     },
     {
       "type": "activity",
@@ -4000,11 +4000,11 @@
     {
       "type": "activity",
       "slug": "zocifu-52-miga192",
-      "status": "baseline",
-      "diffCount": 1,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "1916ce34",
-      "weightedScore": 1
+      "measuredAgainstCommit": "4ea823f1",
+      "weightedScore": 0
     },
     {
       "type": "activity",
