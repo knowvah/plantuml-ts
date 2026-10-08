@@ -36,9 +36,19 @@ describe('preprocessor', () => {
     expect(result).toEqual(['note  over Alice']);
   });
 
-  it('!undefine removes a previous definition', () => {
-    const result = run(['!define FOO bar', '!undefine FOO', 'text FOO']);
+  it('!undef removes a previous definition', () => {
+    const result = run(['!define FOO bar', '!undef FOO', 'text FOO']);
     expect(result).toEqual(['text FOO']);
+  });
+
+  it('!undefine is NOT a directive: a plain line, substituted like any other', () => {
+    // Upstream's PATTERN_UNDEF is `simpleKeyword("!undef")` (TLineType.java:87),
+    // `^\s*!undef\b` (java:53-56): the `\b` fails between `f` and `i`, so the
+    // line is PLAIN, FOO is still defined, and the diagram parser sees
+    // `!undefine bar` (the jar renders a syntax error --
+    // tests/fixtures/unwind-U3/undefine-alias-error.svg).
+    const result = run(['!define FOO bar', '!undefine FOO', 'text FOO']);
+    expect(result).toEqual(['!undefine bar', 'text bar']);
   });
 
   it('!ifdef includes block when token is defined', () => {
@@ -254,9 +264,12 @@ describe('preprocessor', () => {
     expect(result).toEqual(['<b>one</b> and <b>two</b>']);
   });
 
-  it('!undefine removes a parametric macro', () => {
-    const result = run(['!define BOLD(x) <b>##x##</b>', '!undefine BOLD', 'BOLD(hello)']);
-    expect(result).toEqual(['BOLD(hello)']);
+  it('!undef does not remove a parametric macro', () => {
+    // `EaterUndef#analyze` only calls `memory.removeVariable(varname)`
+    // (EaterUndef.java:48-54); `FunctionsSet` has no removal path, so the
+    // macro survives (tests/fixtures/unwind-U3/undef-keeps-macro.svg).
+    const result = run(['!define BOLD(x) <b>##x##</b>', '!undef BOLD', 'BOLD(hello)']);
+    expect(result).toEqual(['<b>hello</b>']);
   });
 
   it('simple define still works after a parametric define is added (regression)', () => {

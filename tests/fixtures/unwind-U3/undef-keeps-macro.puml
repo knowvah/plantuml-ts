@@ -1,0 +1,5 @@
+@startuml
+!define WRAP(x) Box_x
+!undef WRAP
+class WRAP(One)
+@enduml
