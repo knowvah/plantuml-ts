@@ -76,11 +76,7 @@ function backward1Points(frame: RepeatFrame, backSouth: GPoint): GPoint[] {
   const diamondCenterX = condX + condition.width / 2;
   const x1 = backSouth.x < diamondCenterX ? condX : condX + condition.width;
   const y1 = condY + condition.height / 2;
-  return [
-    { x: x1, y: y1 },
-    { x: backSouth.x, y: y1 },
-    backSouth,
-  ];
+  return [{ x: x1, y: y1 }, { x: backSouth.x, y: y1 }, backSouth];
 }
 
 /**

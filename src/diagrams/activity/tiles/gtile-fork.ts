@@ -2,7 +2,12 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
-import { BAR_HEIGHT, JOIN_LABEL_MARGIN, PARALLEL_X_MARGIN, SPACE_AROUND_BLACK_BAR } from '../activity-layout-constants.js';
+import {
+  BAR_HEIGHT,
+  JOIN_LABEL_MARGIN,
+  PARALLEL_X_MARGIN,
+  SPACE_AROUND_BLACK_BAR,
+} from '../activity-layout-constants.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 
@@ -85,7 +90,11 @@ export class GtileFork extends TileComposite {
   /** N (add2 T3i): the join label's own width supplement to {@link width}
    *  (`0` without a label) -- split out purely to keep the constructor's
    *  own NLOC under the file's limit. */
-  private static joinLabelSupp(bounder: StringBounder, theme: Theme | undefined, joinLabel: string | undefined): number {
+  private static joinLabelSupp(
+    bounder: StringBounder,
+    theme: Theme | undefined,
+    joinLabel: string | undefined,
+  ): number {
     if (joinLabel === undefined || theme === undefined) return 0;
     const labelWidth = bounder.getDimension(joinLabel, activityFontSize(theme, 'arrow')).width;
     return labelWidth > 0 ? labelWidth + JOIN_LABEL_MARGIN : 0;

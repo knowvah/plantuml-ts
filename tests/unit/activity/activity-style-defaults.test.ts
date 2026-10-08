@@ -559,7 +559,10 @@ describe('activityFontColor — arrow reads graph.arrowFontColor (T2c, suzuci-53
     // SName.arrow)`) -- the SAME field `arrow-label-font.ts
     // #resolveArrowLabelFont` already reads for every OTHER diagram type's
     // edge label. This is activity's own reader of it.
-    const theme: Theme = { ...DEFAULT, colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, arrowFontColor: '#FF0000' } } };
+    const theme: Theme = {
+      ...DEFAULT,
+      colors: { ...DEFAULT.colors, graph: { ...DEFAULT.colors.graph, arrowFontColor: '#FF0000' } },
+    };
     expect(activityFontColor(theme, 'arrow')).toBe('#FF0000');
     expect(activityFontColor(theme, 'activity')).toBe(ACTIVITY_FONT_COLOR);
   });

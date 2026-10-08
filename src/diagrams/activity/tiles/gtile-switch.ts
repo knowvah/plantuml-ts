@@ -33,7 +33,11 @@ const ATOM_TEXT_MIN_HEIGHT = 10;
  *  it only under FULL). The tile `StringBounder` is family-blind
  *  (`getDimension(text, size)`), so the family is left empty.
  *  @see net/sourceforge/plantuml/activitydiagram3/Branch.java:248-266 */
-function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): { width: number; height: number } {
+function measureLabel(
+  text: string | undefined,
+  bounder: StringBounder,
+  fontSize: number,
+): { width: number; height: number } {
   if (text === undefined || text === '') return { width: 0, height: 0 };
   const measurer = measurerAdapterOf(bounder);
   const font = { family: '', size: fontSize };
@@ -126,9 +130,7 @@ function computeSwitchLayout(
   const extent = mode.isBigDiamond
     ? computeBigDiamondCaseX(decorated, mode, diamond1.width)
     : { xOffsets: computeSmallDiamondCaseX(decorated), totalWidth: 0, pivotLeft: 0 };
-  const width = mode.isBigDiamond
-    ? extent.totalWidth
-    : Math.max(diamond1.width, nude.width, mergeDiamond?.width ?? 0);
+  const width = mode.isBigDiamond ? extent.totalWidth : Math.max(diamond1.width, nude.width, mergeDiamond?.width ?? 0);
   const pivotLeft = mode.isBigDiamond ? extent.pivotLeft : width / 2;
 
   const caseOffsetY = diamond1.height + yDelta1a;

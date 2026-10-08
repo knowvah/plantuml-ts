@@ -316,8 +316,7 @@ export const RE_NOTE_END = /^end[\s ]?note$/i;
 
 /** Shared head of `CommandArrow3` / `CommandArrowLong3`: `RegexOr("->",
  *  COLOR=STYLE_COLORS_MULTIPLES)` + `spaceZeroOrMore`; group 1 = COLOR. */
-const ARROW_HEAD =
-  `(?:->|-\\[(${LINE_STYLE}(?:(?:;${LINE_STYLE})*)*)\\]->)[\\s\u00a0]*`;
+const ARROW_HEAD = `(?:->|-\\[(${LINE_STYLE}(?:(?:;${LINE_STYLE})*)*)\\]->)[\\s\u00a0]*`;
 
 /**
  * `CommandArrow3`'s regex: `->` OR a coloured/styled arrow

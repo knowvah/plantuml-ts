@@ -52,7 +52,7 @@ describe('NOTE-MULTI — two notes on one action merge into ONE note-count pair 
   });
 });
 
-describe('GROUPNOTE — a note as the partition/group\'s first line wraps the body, not a floating sibling', () => {
+describe("GROUPNOTE — a note as the partition/group's first line wraps the body, not a floating sibling", () => {
   const ast = parse(['partition P1 {', 'note left', 'group note text', 'end note', ':act2;', ':act3;', '}']);
 
   it('layoutActivity renders exactly one note node', () => {

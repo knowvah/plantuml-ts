@@ -21,25 +21,25 @@ import { renderFixtureActivity } from '../../oracle/svg-conformance/render-fixtu
 const measurer = new DeterministicMeasurer();
 
 describe('spotGlyphPath — captured letters', () => {
-  it('CAPTURED_SPOT_LETTERS is exactly A/B/E/G (this corpus\'s full census)', () => {
+  it("CAPTURED_SPOT_LETTERS is exactly A/B/E/G (this corpus's full census)", () => {
     expect([...CAPTURED_SPOT_LETTERS].sort()).toEqual(['A', 'B', 'E', 'G']);
   });
 
-  it('A translated to nipuxu-11-tefa314\'s first occurrence (cx=37.663, cy=117)', () => {
+  it("A translated to nipuxu-11-tefa314's first occurrence (cx=37.663, cy=117)", () => {
     expect(spotGlyphPath('A', 37.663, 117)).toBe(
       'M39.095,117.631 L37.372,113.27 L35.643,117.631 Z M40.613,121.5 L39.512,118.697 ' +
         'L35.226,118.697 L34.112,121.5 L32.779,121.5 L36.791,111.383 L38.213,111.383 L42.164,121.5 Z',
     );
   });
 
-  it('A translated to nipuxu-11-tefa314\'s second occurrence (cx=37.663, cy=147)', () => {
+  it("A translated to nipuxu-11-tefa314's second occurrence (cx=37.663, cy=147)", () => {
     expect(spotGlyphPath('A', 37.663, 147)).toBe(
       'M39.095,147.631 L37.372,143.27 L35.643,147.631 Z M40.613,151.5 L39.512,148.697 ' +
         'L35.226,148.697 L34.112,151.5 L32.779,151.5 L36.791,141.383 L38.213,141.383 L42.164,151.5 Z',
     );
   });
 
-  it('B translated to vilecu-41-tete416\'s occurrence (cx=78.388, cy=129)', () => {
+  it("B translated to vilecu-41-tete416's occurrence (cx=78.388, cy=129)", () => {
     expect(spotGlyphPath('B', 78.388, 129)).toBe(
       'M75.693,134.5 L75.693,124.383 L78.318,124.383 Q79.836,124.383 80.646,124.957 ' +
         'Q81.456,125.531 81.456,126.611 Q81.456,128.45 79.378,129.229 Q81.859,129.988 81.859,131.971 ' +
@@ -51,7 +51,7 @@ describe('spotGlyphPath — captured letters', () => {
     );
   });
 
-  it('G translated to vilecu-41-tete416\'s occurrence (cx=78.388, cy=245)', () => {
+  it("G translated to vilecu-41-tete416's occurrence (cx=78.388, cy=245)", () => {
     expect(spotGlyphPath('G', 78.388, 245)).toBe(
       'M81.545,250.227 Q79.706,250.753 78.339,250.753 Q75.926,250.753 74.637,249.379 ' +
         'Q73.348,248.005 73.348,245.441 Q73.348,242.926 74.654,241.528 Q75.96,240.13 78.318,240.13 ' +
@@ -92,20 +92,14 @@ describe('spotGlyphPath — captured letters', () => {
 
 describe('renderFixtureActivity — census fixtures reach the exact scraped glyph', () => {
   it('nipuxu-11-tefa314: two (A) spots both draw the captured A outline', () => {
-    const svg = renderFixtureActivity(
-      '@startuml\nstart\n:foo1;\n(A)\ndetach\n(A)\n:foo3;\n@enduml',
-      measurer,
-    );
+    const svg = renderFixtureActivity('@startuml\nstart\n:foo1;\n(A)\ndetach\n(A)\n:foo3;\n@enduml', measurer);
     const occurrences = svg.match(/<path d="M[\d.]+,[\d.]+ L[\d.]+,[\d.]+ L[\d.]+,[\d.]+ Z M[\d.]+/g) ?? [];
     expect(occurrences.length).toBe(2);
     expect(svg).not.toContain('>A</text>');
   });
 
   it('vilecu-41-tete416: #blue:(B) and #green:(G) each draw their captured outline, fill #000', () => {
-    const svg = renderFixtureActivity(
-      '@startuml\nstart\n:x;\n#blue:(B)\n:y;\n#green:(G)\nstop\n@enduml',
-      measurer,
-    );
+    const svg = renderFixtureActivity('@startuml\nstart\n:x;\n#blue:(B)\n:y;\n#green:(G)\nstop\n@enduml', measurer);
     expect(svg).not.toContain('>B</text>');
     expect(svg).not.toContain('>G</text>');
     // The glyph <path> fill stays #000 regardless of the circle's own

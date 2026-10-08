@@ -271,9 +271,11 @@ interface IfHeader {
  */
 function matchIfHeader(line: string): IfHeader | null {
   const if4 = RE_IF4.exec(line);
-  if (if4 !== null) return { condition: unescapeLabelNewlines(if4[1]!.trim()), thenLabel: unescapeLabel(if4[2]?.trim()) };
+  if (if4 !== null)
+    return { condition: unescapeLabelNewlines(if4[1]!.trim()), thenLabel: unescapeLabel(if4[2]?.trim()) };
   const if2 = RE_IF.exec(line);
-  if (if2 !== null) return { condition: unescapeLabelNewlines(if2[1]!.trim()), thenLabel: unescapeLabel(if2[2]?.trim()) };
+  if (if2 !== null)
+    return { condition: unescapeLabelNewlines(if2[1]!.trim()), thenLabel: unescapeLabel(if2[2]?.trim()) };
   const legacy = RE_IF_LEGACY.exec(line);
   if (legacy !== null) {
     return { condition: unescapeLabelNewlines(legacy[1]!.trim()), thenLabel: unescapeLabel(legacy[2]!.trim()) };

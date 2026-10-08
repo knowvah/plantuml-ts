@@ -201,7 +201,13 @@ export function routeHline(
     if (range === null) continue;
     const lane = laneNames[i]!;
     const delta = deltas.get(lane) ?? 0;
-    edges.push({ ...edge, points: [{ x: range.minX + delta, y }, { x: range.maxX + delta, y }] });
+    edges.push({
+      ...edge,
+      points: [
+        { x: range.minX + delta, y },
+        { x: range.maxX + delta, y },
+      ],
+    });
     edgeMeta.push({ lane1: lane, lane2: lane, shape: 'default' });
   }
   return { edges, edgeMeta };

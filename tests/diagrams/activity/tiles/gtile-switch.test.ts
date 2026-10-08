@@ -305,7 +305,13 @@ describe('GtileSwitch — FtileDecorateInLabel/OutLabel case decoration', () => 
   });
 
   it('adds the in-label height to the decorated case height (addTop) -> nude height', () => {
-    const tile = new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label: 'a' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    const tile = new GtileSwitch(
+      diamond,
+      [{ tile: makeTile(80, 40), label: 'a' }, { tile: makeTile(80, 40) }],
+      null,
+      labelBounder,
+      theme,
+    );
     expect(tile.height).toBe(diamond.height + 40 + LABEL_H + NUDE_HEIGHT_PAD + ydelta1a(LABEL_H));
   });
 
@@ -318,12 +324,24 @@ describe('GtileSwitch — FtileDecorateInLabel/OutLabel case decoration', () => 
 
   it('widens a case on the right when its label overhangs the body right (incRight)', () => {
     // body 20 wide, left 10 -> right 10; label 30 -> missing 20 -> width 40.
-    const tile = new GtileSwitch(diamond, [{ tile: makeTile(20, 40), label: 'wide' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    const tile = new GtileSwitch(
+      diamond,
+      [{ tile: makeTile(20, 40), label: 'wide' }, { tile: makeTile(80, 40) }],
+      null,
+      labelBounder,
+      theme,
+    );
     expect(tile.caseOffsets[1]!.x).toBe(40 + SWITCH_X_SEPARATION);
   });
 
   it('does not widen when the label fits inside the body right', () => {
-    const tile = new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label: 'fits' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    const tile = new GtileSwitch(
+      diamond,
+      [{ tile: makeTile(80, 40), label: 'fits' }, { tile: makeTile(80, 40) }],
+      null,
+      labelBounder,
+      theme,
+    );
     expect(tile.caseOffsets[1]!.x).toBe(80 + SWITCH_X_SEPARATION);
   });
 });

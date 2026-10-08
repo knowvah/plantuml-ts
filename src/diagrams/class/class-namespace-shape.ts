@@ -151,7 +151,9 @@ export function namespaceFill(geo: NamespaceGeo, theme: Theme): Paint {
  *  with the cluster header, which tints a stereotype sprite over it
  *  (unwind2-S7, `class-cluster-header.ts#buildStereoSprite`). */
 export function namespaceColorFill(color: string | undefined, theme: Theme): Paint {
-  return packageFillValue(parseColor(color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT));
+  return packageFillValue(
+    parseColor(color ?? theme.colors.graph.packageBackground ?? PACKAGE_CLUSTER_BACKGROUND_DEFAULT),
+  );
 }
 
 // folderPathD / folderPolygonPoints / renderFolderPolygon / FolderTabPaint /
