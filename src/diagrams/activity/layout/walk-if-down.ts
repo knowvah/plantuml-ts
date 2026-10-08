@@ -19,6 +19,7 @@ import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-i
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
+import { childTileDrawn, compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import { ifElseHexagonReservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
@@ -44,6 +45,10 @@ interface IfDownCtx {
   readonly y: number;
   readonly myLane: string | undefined;
   readonly out: Out;
+  /** `getSwimlanes()` = `thenBlock`'s lanes + `getSwimlaneIn()` (diamond1's)
+   *  -- NOT `optionalStop`'s (`FtileIfDown.java:91-99`), as a
+   *  {@link compositeLaneGate}. */
+  readonly gate: ReadonlySet<string> | undefined;
 }
 
 function absolutePoint(local: GPoint, originX: number, originY: number): GPoint {
@@ -227,7 +232,12 @@ function connectionHorizontal(ctx: IfDownCtx): void {
   const stop = t.optionalStop!;
   const p1 = absolutePoint(t.diamond1.getCoord(EAST_HOOK), x + t.offsets.diamond1X, y + t.diamond1Y);
   const p2 = { x: x + t.stop.stopX, y: y + t.stop.stopY + stop.height / 2 };
-  pushEdge(out, [p1, p2], laneOut(t.diamond1, myLane), laneIn(stop, myLane));
+  // `super(diamond1, optionalStop)` (`:166`), not `ConnectionTranslatable`:
+  // a stop in another lane gets no connector from any lane pass.
+  const lane1 = laneOut(t.diamond1, myLane);
+  const lane2 = laneIn(stop, myLane);
+  if (!nonTranslatableConnectionDrawn(ctx.gate, lane1, lane2)) return;
+  pushEdge(out, [p1, p2], lane1, lane2);
 }
 
 /** The wrapped then-frame's own absolute left/right edge, shared by
@@ -375,12 +385,17 @@ function pushIfOwnNote(ctx: IfDownCtx): void {
 }
 
 export function walkIfDown(t: GtileIfDown, x: number, y: number, myLane: string | undefined, out: Out): void {
-  const ctx: IfDownCtx = { t, x, y, myLane, out };
+  const gate = compositeLaneGate(laneIn(t.diamond1, myLane), [t.mainTile], myLane);
+  const ctx: IfDownCtx = { t, x, y, myLane, out, gate };
   pushIfOwnNote(ctx);
   walkTile(t.mainTile, x + t.offsets.mainTileX, y + t.offsets.mainTileY, { kindHint: null, lane: myLane }, out);
   pushDiamond1(ctx);
   if (t.optionalStop !== null) {
-    walkTile(t.optionalStop, x + t.stop.stopX, y + t.stop.stopY, { kindHint: null, lane: myLane }, out);
+    // `optionalStop` is outside `getSwimlanes()`: its own lane's pass never
+    // reaches this composite (`UGraphicInterceptorOneSwimlane.java:68-75`).
+    if (childTileDrawn(gate, t.optionalStop, myLane)) {
+      walkTile(t.optionalStop, x + t.stop.stopX, y + t.stop.stopY, { kindHint: null, lane: myLane }, out);
+    }
   } else {
     pushMergeNode(ctx);
   }

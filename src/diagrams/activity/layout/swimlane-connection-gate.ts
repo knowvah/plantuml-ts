@@ -57,3 +57,31 @@ export function nonTranslatableConnectionDrawn(
   }
   return false;
 }
+
+/**
+ * The interceptors' `Ftile` branch: a child whose own lane is `lane` is
+ * drawn only when the composite's {@link compositeLaneGate} contains it
+ * (`UGraphicInterceptorOneSwimlane.java:68-75`,
+ * `UGraphicInterceptorAllSwimlanes.java:63-79`). `undefined` gate or lane =
+ * drawn.
+ */
+export function childDrawnInLanes(gate: ReadonlySet<string> | undefined, lane: string | undefined): boolean {
+  return gate === undefined || lane === undefined || gate.has(lane);
+}
+
+/**
+ * {@link childDrawnInLanes} for a child that is itself a composite: its own
+ * `getSwimlanes()` is every lane it touches, falling back to its inherited
+ * lane when it touches none. Drawn when any of them is in `gate`.
+ */
+export function childTileDrawn(
+  gate: ReadonlySet<string> | undefined,
+  tile: Tile,
+  inherited: string | undefined,
+): boolean {
+  if (gate === undefined) return true;
+  const lanes = new Set<string>();
+  collectTouchedLanes(tile, lanes);
+  if (lanes.size === 0) return childDrawnInLanes(gate, tile.swimlane ?? inherited);
+  return [...lanes].some((lane) => gate.has(lane));
+}

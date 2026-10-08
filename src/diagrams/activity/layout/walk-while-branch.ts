@@ -26,6 +26,7 @@ import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservatio
 import { emitDiamondLabels, emitDiamondOwnLabel } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushWhileBackwardConnections } from './walk-while-backward.js';
+import { pushWhileOutSpecial, walkWhileSpecialOut, whileLaneGate } from './walk-while-special.js';
 import { isInsideForkBody } from './walk-fork-branches.js';
 
 /** EMPTY_DIAMOND: north is the TEST (`withNorth(testTb)`, an fcTest block,
@@ -307,25 +308,6 @@ function pushWhileOut(frame: WhileFrame): void {
 }
 
 /**
- * `ConnectionOutSpecial` (`FtileWhile.java:513-552`): REPLACES
- * `ConnectionOut` entirely when `specialOut` is set (`FtileWhile.create`,
- * `:163-166`). `p1 = translateDiamond1 + (0,0)`, `y1 = p1.y + inY + half`
- * with `inY = 0` and `half = hexHeight / 2` -- exactly this port's
- * `WEST_HOOK` (`frame.headerWest`, same mid-height point `pushWhileOut`
- * reads). `p2` is the special tile's own `NORTH_HOOK`, translated by
- * `frame.specialPos` (`getTranslateForSpecial`, `GtileWhile`'s own class
- * doc). Draw: `(x1,y1) -> (x2,y1) -> (x2,y2)`, `asToDown`, no emphasize,
- * default merge (FULL, `Snake.create(skinParam, color, arrow)`, `:533`).
- * Mission add2-T3b, family WSPEC.
- */
-function pushWhileOutSpecial(frame: WhileFrame): void {
-  const { out, headerWest, specialPos, specialOut, headerOutLane, specialInLane } = frame;
-  const special = specialOut!;
-  const p2 = { x: specialPos.x + special.getCoord(NORTH_HOOK).x, y: specialPos.y + special.getCoord(NORTH_HOOK).y };
-  pushEdge(out, [headerWest, { x: p2.x, y: headerWest.y }, p2], headerOutLane, specialInLane);
-}
-
-/**
  * One weld per `break` the body walk emitted, appended LAST (D3, D7).
  * `FtileWhile`'s own `getWeldingPoints()` is never overridden
  * (`AbstractFtile.java:100`'s empty-list default), so a `break` nested
@@ -485,14 +467,14 @@ export function walkWhile(t: GtileWhile, x: number, y: number, myLane: string | 
   // `InstructionWhile.java:121-122`) -- `walkTile`'s generic dispatch is
   // correct for both, same reason `walk-repeat.ts#pushRepeatBackwardNode`
   // cites.
-  if (t.specialOut !== undefined)
-    walkTile(t.specialOut, frame.specialPos.x, frame.specialPos.y, { kindHint: null, lane: myLane }, out);
+  const gate = whileLaneGate(frame, myLane);
+  walkWhileSpecialOut(frame, gate, myLane);
   if (t.backward !== undefined)
     walkTile(t.backward, frame.backPos.x, frame.backPos.y, { kindHint: null, lane: myLane }, out);
 
   // D7: In/Back(Simple|Empty|Backward), then Out(Special), then weldings.
   pushWhileBack(frame);
-  if (t.specialOut !== undefined) pushWhileOutSpecial(frame);
+  if (t.specialOut !== undefined) pushWhileOutSpecial(frame, gate);
   else pushWhileOut(frame);
   pushWhileWeldings(out, bodyNodeStart, bodyNodeEnd, frame.elbowX);
 }

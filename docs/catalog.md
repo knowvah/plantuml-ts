@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1412 modules · 5331 exported names.
+1413 modules · 5336 exported names.
 
 ## `src/`
 
@@ -1117,7 +1117,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `snake-merge.ts` | `MergedEdges`, `mergeSnakes` | `UGraphicForSnake`'s two-pass connector-merge mechanism (D1, T1b), ported as a pure function over the lane-pass-ordered edge list `assign- coordinates-full.ts` builds AFTER `placeSwimlanes` but BEFORE `compressGeometry` runs: merging reads |
 | `snake-text-position.ts` | `SnakeTextAlign`, `DEFAULT_LABEL_ALIGN`, `directionsCode`, `getTextBlockPosition`, `snakeMaxX` | Pure port of `Snake#getTextBlockPosition` (`activitydiagram3/ftile/Snake.java:244-270`): where an edge label's TOP-LEFT corner is drawn, given the edge's own points and the label's measured dimension. |
 | `swimlane-chrome.ts` | `SwimlaneChrome`, `SWIMLANE_BAND_INSET_X`, `computeSwimlaneChrome`, `bandReservationX` | The swimlane title band and divider Y-range, derived from the placed lane geometry. |
-| `swimlane-connection-gate.ts` | `compositeLaneGate`, `nonTranslatableConnectionDrawn` | The per-lane `Connection` gate every swimlane pass applies to a composite tile's NON-`ConnectionTranslatable` connections, shared by the if-walkers that port it (`walk-if-long-vertical.ts`, `walk-if-long-horizontal.ts`). |
+| `swimlane-connection-gate.ts` | `compositeLaneGate`, `nonTranslatableConnectionDrawn`, `childDrawnInLanes`, `childTileDrawn` | The per-lane `Connection` gate every swimlane pass applies to a composite tile's NON-`ConnectionTranslatable` connections, shared by the if-walkers that port it (`walk-if-long-vertical.ts`, `walk-if-long-horizontal.ts`). |
 | `swimlane-context.ts` | `SwimlaneContext`, `buildSwimlaneContexts`, `LaneItem`, `LaneEdge`, `LaneExtent`, `measureLaneExtents`, `MeasureSpec`, `markMeasureSpec`, `measureSpecOf`, `specLaneItems`, `SWIMLANE_WIDTH_SAME`, `SWIMLANE_HALF_MISSING_SPACE`, `LaneWidthInput`, `LaneWidth`, `resolveSwimlaneMinWidth`, `computeLaneWidths`, `halfMissingSpace` | Per-lane content-extent measurement and content-fitted swimlane sizing. |
 | `swimlane-hline.ts` | `HlineCandidate`, `HlinePayload`, `RoutedHlineMeta`, `RoutedHline`, `routeHline` | Swimlane-aware extent for the `ConnectionHline` closing bar both `FtileIfWithLinks`/`FtileIfLongHorizontal` draw for `ConditionEndStyle .HLINE`: under swimlanes, `Swimlanes#drawWhenSwimlanes` redraws the WHOLE tree once per lane (`Swimlanes |
 | `swimlane-lane-origins.ts` | `LaneOrigins`, `DividerReservation`, `computeLaneOrigins` | The per-lane origin loop, split out of `swimlane-placement.ts` (this file's own 500-line hook -- mission `activity-loop-lane-translate` T1, same pure-move precedent as `swimlane-lanes.ts`, whose own header notes why: existing importers stay |
@@ -1154,6 +1154,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `walk-switch.ts` | `walkSwitch` | The `'gtile-switch'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-backward.ts` | `pushWhileBackwardConnections` | `FtileWhile`'s `ConnectionBackBackward1`/`ConnectionBackBackward2` (`FtileWhile.java:85,154-161,313-408`), split out of `walk-while- branch.ts` only to keep that file under the project's 500-line cap (mission `activity-divergence-drive` T3h |
 | `walk-while-branch.ts` | `WhileFrame`, `childHook`, `walkWhile` | The `'gtile-while'` case's node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch to keep that file under the 500-line cap (the `walk-fork-branches.ts` precedent). |
+| `walk-while-special.ts` | `whileLaneGate`, `walkWhileSpecialOut`, `pushWhileOutSpecial` | `FtileWhile`'s `specialOut` child and its `ConnectionOutSpecial`, split out of `walk-while-branch.ts` (500-line cap) with the swimlane gate they need. |
 | `walk-with-notes.ts` | `walkNoteOpale`, `walkWithNotes` | The `'gtile-with-notes'` case's full node emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason the if-down/if-with-links/switch walkers already are (one walker module per builder) -- that file sits at the pro |
 
 ## `src/diagrams/activity/layout/compress/`

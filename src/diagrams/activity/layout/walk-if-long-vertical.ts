@@ -29,7 +29,7 @@ import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
 import { laneAt, laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
-import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
+import { childDrawnInLanes, compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 
 interface LvCtx {
   readonly t: GtileIfLongVertical;
@@ -60,7 +60,7 @@ function compositeSwimlanes(t: GtileIfLongVertical, myLane: string | undefined):
  * creation lane (`FtileDiamondInside2`/`FtileDiamond`, `swimlane` ctor arg).
  */
 function childDrawn(ctx: LvCtx, lane: string | undefined): boolean {
-  return ctx.gate === undefined || lane === undefined || ctx.gate.has(lane);
+  return childDrawnInLanes(ctx.gate, lane);
 }
 
 /**
