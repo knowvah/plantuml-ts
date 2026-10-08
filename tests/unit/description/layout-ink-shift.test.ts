@@ -114,3 +114,24 @@ describe('placeBody — mechanism C ink-extent margin', () => {
     },
   );
 });
+
+describe('placeBody — mainframe draws the raw svek frame (lgm-T1c)', () => {
+  const ctx = { theme: defaultTheme, measurer, sprites: undefined };
+
+  it('shifts by originShift only and frames the ink as drawn', () => {
+    const node = rectLeaf('A', 0, 0);
+    const normal = placeBody([node], [], ctx, { mainframe: false });
+    const framed = placeBody([node], [], ctx, { mainframe: true, originShift: { x: 3, y: 4 } });
+    expect({ dx: framed.dx, dy: framed.dy }).toEqual({ dx: 3, dy: 4 });
+    // rect ink-min is (x-1, y-1): the normal shift puts it at (6, 6).
+    expect(normal.dx).toBe(7);
+    expect(framed.frameInk).toMatchObject({ minX: 2, minY: 3 });
+    expect(framed.block).toEqual(normal.block);
+  });
+
+  it('defaults a missing originShift to zero and gives no frameInk unframed', () => {
+    const node = rectLeaf('A', 0, 0);
+    expect(placeBody([node], [], ctx, { mainframe: true })).toMatchObject({ dx: 0, dy: 0 });
+    expect(placeBody([node], [], ctx, { mainframe: false }).frameInk).toBeUndefined();
+  });
+});

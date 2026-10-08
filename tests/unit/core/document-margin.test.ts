@@ -42,8 +42,14 @@ describe('documentMarginOf', () => {
   it('is undefined without a declared block, or for a type the table does not know', () => {
     const { preChromeWidth: _w, preChromeHeight: _h, ...undeclared } = SEQUENCE_FRAGMENT;
     expect(documentMarginOf(undeclared)).toBeUndefined();
-    expect(documentMarginOf({ ...SEQUENCE_FRAGMENT, diagramType: 'STATE' })).toBeUndefined();
+    expect(documentMarginOf({ ...SEQUENCE_FRAGMENT, diagramType: 'SALT' })).toBeUndefined();
     expect(documentMarginOf({ ...SEQUENCE_FRAGMENT, diagramType: undefined as unknown as string })).toBeUndefined();
+  });
+});
+
+describe('documentMarginOf -- svek family (lgm-T1c)', () => {
+  it.each(['CLASS', 'STATE', 'DESCRIPTION'])('%s is a CucaDiagram (0, 5, 5, 0)', (diagramType) => {
+    expect(documentMarginOf({ ...SEQUENCE_FRAGMENT, diagramType })).toEqual({ top: 0, right: 5, bottom: 5, left: 0 });
   });
 });
 

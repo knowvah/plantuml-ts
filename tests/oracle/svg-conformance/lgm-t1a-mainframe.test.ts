@@ -99,17 +99,19 @@ describe('lgm-T1a: the conformance harnesses compose chrome as production does',
   });
 });
 
-// The svek family (state, description) draws the framed `SvekResult` in the
-// raw svek frame -- `decorateWithFrame` never calls its `calculateDimension`,
-// so `moveDelta(6 - minX, 6 - minY)` (`svek/SvekResult.java:130-135`) does not
-// run -- while these engines draw the normalized body. Class mirrors that in
-// its own layout (`class/layout-ink-extent.ts#mainframePlacement`); state and
-// description do not yet, so the frame rect is the wrong size. Flip these to
-// the EXACT list when they are ported: a test that starts failing here is the
-// good news.
-describe('lgm-T1a: open -- state and description mainframe (raw svek frame)', () => {
-  it.each(['state-frame', 'component-frame', 'usecase-frame'])('%s: the frame rect is still the wrong size', (name) => {
-    const frameWidth = diffsOf(name).filter((d) => d.path === 'svg/g[1]/rect[1]/@width');
-    expect(frameWidth).toHaveLength(1);
+// lgm-T1c: the svek family (state, description) draws the framed `SvekResult`
+// un-normalized, as the jar does (`DiagramChromeFactory.java:278-337` never
+// reaches `SvekResult#calculateDimension`, so `moveDelta`,
+// `svek/SvekResult.java:130-135`, does not run). Their frame rect, canvas and
+// body now equal the jar render; see lgm-t1c-svek-chrome.test.ts for the rest.
+describe('lgm-T1c: state and description mainframe (raw svek frame)', () => {
+  it.each(['component-frame', 'usecase-frame'])('%s equals the jar render', (name) => {
+    expect(diffsOf(name)).toEqual([]);
+  });
+
+  it('state-frame equals the jar render but for the transition label textLength', () => {
+    // `textLength` of the "go" label is empty in ours with or without chrome
+    // (a measurement-side residual of the state label, independent of chrome).
+    expect(diffsOf('state-frame').map((d) => d.path)).toEqual(['svg/g[1]/g[6]/text[1]/@textLength']);
   });
 });
