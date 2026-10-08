@@ -14,7 +14,7 @@ import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ActivityNode } from './ast.js';
-import { LINE_STYLE } from '../description/link-grammar-regex.js';
+import { LINE_STYLE } from '../../core/link-style-regex.js';
 
 // ---------------------------------------------------------------------------
 // Regex constants

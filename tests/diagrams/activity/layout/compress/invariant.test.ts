@@ -669,6 +669,8 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `after` now report the IDENTICAL overlap set, `[[2,3],[2,4],[6,7],
     // [9,16]]`, no `[6,14]` in either) -- removed rather than carried
     // forward, same precedent as `lopone-15-xiki477` above.
+    // add4/merge-T3h: xovigi-85-rufa987's two touching-becomes-epsilon
+    // label/hexagon pairs (T3h) left with its pin (add4-T3h).
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

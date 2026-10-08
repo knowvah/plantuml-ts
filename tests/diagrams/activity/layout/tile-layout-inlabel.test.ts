@@ -89,11 +89,15 @@ describe('generic -> label; -- no label: byte-identical to the pre-task shape', 
   });
 });
 
-describe('generic -> label; -- coloured (<back:color>)', () => {
-  it('carries both label and color onto the edge', () => {
+describe('generic -> label; -- <back:color> stays inside the creole label', () => {
+  // CommandArrow3.java:63-67 -- LABEL is `(.*);` handed whole to
+  // Display.getWithNewlines (:110); only the `-[...]->` bracket is the arrow
+  // COLOR (:99-103). The tag is creole, never lifted onto the edge.
+  it('keeps the tag in the label and sets no edge colour', () => {
     const geo = layout('@startuml\nstart\n:A;\n-><back:red> hello;\n:B;\nstop\n@enduml');
-    const labelled = geo.edges.find((e) => e.label === 'hello');
-    expect(labelled!.color).toBe('red');
+    const labelled = geo.edges.find((e) => e.label === '<back:red> hello');
+    expect(labelled).toBeDefined();
+    expect(labelled!.color).toBeUndefined();
   });
 });
 

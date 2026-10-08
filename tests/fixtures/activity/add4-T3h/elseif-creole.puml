@@ -1,0 +1,11 @@
+@startuml
+start
+if (**bold** test) then (**yes**)
+  :A;
+elseif (one //it//) then (ok)
+  :B;
+else (no)
+  :C;
+endif
+stop
+@enduml

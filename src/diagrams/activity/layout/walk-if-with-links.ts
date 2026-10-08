@@ -80,6 +80,14 @@ function pushDecoratedEdge(
   if (decoration.emphasize !== undefined) edge.emphasize = decoration.emphasize;
 }
 
+/** add4-T3h: an EMPTY_DIAMOND's north slot holds the condition's own
+ *  test Sheet, `FtileDiamond.withNorth(tbTest)` (`ConditionalBuilder.java:
+ *  262-267`) -- drawn at the diamond font, `CreoleMode.FULL`, not as an
+ *  arrow-font branch label. Every other slot is a branch label. */
+function testLabelRole(diamond: DiamondConditionTile, side: DiamondSide): { ifLabelRole?: 'test' } {
+  return side === 'north' && diamond.kind === 'gtile-diamond-empty' ? { ifLabelRole: 'test' } : {};
+}
+
 function pushDiamondLabel(
   diamond: DiamondConditionTile,
   side: DiamondSide,
@@ -99,6 +107,7 @@ function pushDiamondLabel(
       width: l.width,
       height: l.height,
       label: l.label,
+      ...testLabelRole(diamond, side),
     },
     lane,
   );

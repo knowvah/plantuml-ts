@@ -7,6 +7,7 @@
 import type {} from '../../core/descriptive-keywords.js';
 import type {} from './ast.js';
 import {} from './parse-helpers.js';
+import { STYLE_KEY1, STYLE_KEY2, LINE_STYLE, LINE_STYLE_MULTIPLES } from '../../core/link-style-regex.js';
 
 export const DECOR_ESCAPE_RE = /[.*+?^${}()|[\]\\]/g;
 
@@ -119,11 +120,8 @@ for (let i = 0; i < DECORS1_TOKENS.length; i++) {
   HEAD_TO_TAIL_TOKEN.set(head, tail);
 }
 
-// CommandLinkElement.KEY1/KEY2/LINE_STYLE/LINE_STYLE_MULTIPLES.
-export const STYLE_KEY1 = 'dotted|dashed|plain|bold|hidden|norank|single|node|thickness=\\d+';
-export const STYLE_KEY2 = ',dotted|,dashed|,plain|,bold|,hidden|,norank|,single|,node|,thickness=\\d+';
-export const LINE_STYLE = `(?:#\\w+|${STYLE_KEY1})(?:,#\\w+|${STYLE_KEY2})*`;
-export const LINE_STYLE_MULTIPLES = `${LINE_STYLE}(?:;${LINE_STYLE})*`;
+// CommandLinkElement.KEY1/KEY2/LINE_STYLE/LINE_STYLE_MULTIPLES live in core.
+export { STYLE_KEY1, STYLE_KEY2, LINE_STYLE, LINE_STYLE_MULTIPLES };
 
 /**
  * CommandLinkElement.getGroup(): endpoint alternatives, in upstream order —

@@ -46,12 +46,17 @@ import type { Theme } from '../../../../core/theme.js';
 import type { PiecewiseAffineTransform } from './compression-transform.js';
 import type { CompressionMode } from './slot.js';
 import { activityFontSize } from '../../activity-style-defaults.js';
-import { measureLineWidth } from '../../activity-text-placement.js';
-import { centeredFirstBaselineY } from '../../activity-renderer-shapes.js';
+import { ASCENT_FRACTION } from '../../activity-renderer-shapes.js';
+import { activityDisplayBlock, activityTextFontConfiguration } from '../../activity-text-sheet.js';
+import { klimtStringBounder } from '../../activity-creole-sheet.js';
+import { HorizontalAlignment } from '../../../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../../../core/klimt/creole/CreoleMode.js';
+import { WidthTableMeasurer, type StringMeasurer } from '../../../../core/measurer.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 
 /** A label's draw inputs: its lines, the arrow font size, the block width
- *  (widest line, `measureLineWidth`) and the first line's `UText` point. */
+ *  ({@link edgeLabelBlockSize}) and the block's anchor: its left `x` and
+ *  `top + size * ASCENT_FRACTION` (the renderer recovers the top from it). */
 export interface EdgeLabelLayout {
   readonly lines: readonly string[];
   readonly size: number;
@@ -66,21 +71,46 @@ export interface LabelAnchor {
   readonly y: number;
 }
 
+const BLOCK_MEASURER = new WidthTableMeasurer();
+
+/**
+ * `text.textBlock.calculateDimension(stringBounder)` (`Snake.java:247`) for
+ * the block the renderer draws: `FtileFactoryDelegator#getTextBlock`'s
+ * `create7(fc, LEFT, skinParam, CreoleMode.SIMPLE_LINE)`
+ * (`FtileFactoryDelegator.java:103-112`) -- creole resolved, every stripe's
+ * `AtomText` floor (`AtomText.java:179-181`) and `SheetBlock1`'s padding on
+ * both axes (`SheetBlock1.java:194-197`) included. A `<back:color>` the
+ * parser lifted into `edge.color` changes no extent. `measurer` is the
+ * caller's `StringBounder` (the compressor's injected one); the renderer's
+ * width table by default.
+ */
+export function edgeLabelBlockSize(
+  label: string,
+  theme: Theme,
+  measurer: StringMeasurer = BLOCK_MEASURER,
+): { width: number; height: number } {
+  const size = activityFontSize(theme, 'arrow');
+  const fc = activityTextFontConfiguration(theme, size, 'arrow');
+  const tb = activityDisplayBlock(label, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+  });
+  const dim = tb.calculateDimension(klimtStringBounder(measurer, { family: fc.family, size }));
+  return { width: dim.getWidth(), height: dim.getHeight() };
+}
+
 /**
  * The label placed on `points` alone: `Snake#getTextBlockPosition` for the
- * block's top-left (`Snake.java:244-270`), then the first baseline of a
- * LEFT Sheet of `lines.length` stripes, one font size each
- * (`Branch.java:247-257`, `SheetBlock1.java:146-148`,
- * `StringBounderFromWidthTable.java:69-71`).
+ * block's top-left (`Snake.java:244-270`) over the drawn block's own
+ * dimension ({@link edgeLabelBlockSize}).
  */
 function placeOnPoints(edge: ActivityEdgeGeo, label: string, theme: Theme): EdgeLabelLayout {
   const size = activityFontSize(theme, 'arrow');
   const lines = label.split('\n');
-  const width = Math.max(...lines.map((l) => measureLineWidth(theme, size, l)));
-  const height = size * lines.length;
-  const position = getTextBlockPosition(edge.points, { width, height }, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
-  const baselineY = centeredFirstBaselineY(position.y + height / 2, size, lines.length);
-  return { lines, size, width, x: position.x, baselineY };
+  const dim = edgeLabelBlockSize(label, theme);
+  const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
+  return { lines, size, width: dim.width, x: position.x, baselineY: position.y + size * ASCENT_FRACTION };
 }
 
 /**
