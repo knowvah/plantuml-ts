@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:timeEvent box
+second line; <<timeEvent>>
+:one line timeEvent; <<timeEvent>>
+:after;
+stop
+@enduml

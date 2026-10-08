@@ -1,5 +1,5 @@
 /**
- * T5's own invariant, over all 268 `status: "baseline"` fixtures of
+ * T5's own invariant, over every rendering (`baseline` and `pinned`) fixture of
  * `oracle/goldens/svg-activity/diff-baseline.json`: compression
  * (`compress-geometry.ts#compressGeometry`, wired at `assign-coordinates-
  * full.ts#assignCoordinatesFull`) must never THROW (stop 10) and must never
@@ -65,7 +65,7 @@ const CACHE_ROOT = join(HERE, '../../../../../test-results/dot-cache');
 interface BaselineFixture {
   readonly type: string;
   readonly slug: string;
-  readonly status: 'baseline' | 'error' | 'jar-error';
+  readonly status: 'baseline' | 'pinned' | 'error' | 'jar-error';
 }
 
 interface DiffBaselineManifest {
@@ -82,7 +82,11 @@ interface DiffBaselineManifest {
 const LAYOUT_MARGIN = 12;
 
 const manifest = JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) as DiffBaselineManifest;
-const baselineFixtures = manifest.fixtures.filter((f) => f.status === 'baseline');
+// add4-T3j: every RENDERING row -- `baseline` AND `pinned`. A row leaves
+// `baseline` when its golden is pinned, and a pinned row that throws in
+// layout is exactly what stop 10 must catch (xovigi did, unseen, under the
+// FULL-block hexagon sizing). `error`/`jar-error` rows have no render.
+const baselineFixtures = manifest.fixtures.filter((f) => f.status === 'baseline' || f.status === 'pinned');
 
 // Same theme-resolution prefix as `render-fixture-activity.ts` /
 // `swimlane-census.ts` -- each conformance surface keeps its own copy
@@ -181,7 +185,7 @@ function readMarkup(fixture: BaselineFixture): string {
 }
 
 describe('compress invariant -- no baseline fixture throws (stop 10)', () => {
-  it('lays out before and after on all 268 baseline fixtures without throwing', () => {
+  it('lays out before and after on every rendering fixture without throwing', () => {
     const measurer = new DeterministicMeasurer();
     const failures: string[] = [];
     for (const fixture of baselineFixtures) {
@@ -358,9 +362,6 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // (`walk-if-down.ts#pushIfOwnNote`, before `mainTile`/`diamond1`),
     // inserting one new polygon (the fold triangle) ahead of this triple
     // in `shapesOf`'s flat list. Same coincident triple, same coordinates.
-    'tobajo-64-mipi810 [83,84] polygon×polygon',
-    'tobajo-64-mipi810 [83,85] polygon×polygon',
-    'tobajo-64-mipi810 [84,85] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -377,6 +378,43 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // add1-T1c (b1b close): both lukoxa pairs are no longer produced -- the
     // stop tile shrank 28 -> 22 (`FtileCircleStop.java:55,93`), so the
     // `empty` ignoreX rects no longer project onto the title's y-span.
+    // add4-T1b: the pinned `empty×centeredText` class (a divider's
+    // `UEmpty`, `LaneDivider.java:91`, vs a lane title that never occupies
+    // x, `UGraphicCompressOnXorY.java:100-112`). cemipu's `swimlaneWidth
+    // same` floor now anchors each `UEmpty` at the lane's content left
+    // (`Swimlanes.java:331,345-346`) and nojije's lane A narrows to the
+    // jar's width once the elseif `ConnectionHline` is measured into every
+    // touched lane (`UGraphicInterceptorAllSwimlanes.java:88-101`) -- in
+    // both, the swimlane census (dividers, titles, band, lanes, width) now
+    // equals the jar's column exactly, so the title-over-divider overlap
+    // is the jar's own geometry.
+    // add4/merge-T1b: nojije-35-teta491 reached zero diffs and was pinned
+    // (add4-T1b), leaving this test's baseline population; its two entries
+    // went with it. add4/merge-T3c: cemipu-87-dinu624 likewise (add4-T3c);
+    // add4/merge-T3d-3: tobajo-64-mipi810's three polygon pairs (add4-T3d).
+    // add4-T3j: the population is every RENDERING row (`baseline` AND
+    // `pinned`), so pairs that "retired" or left with a pin are measured
+    // again; all nine are pinned byte-equal to the jar, and each is the
+    // non-hard class (`isHard` false), re-dumped (scratch `dumpov.ts`):
+    // - bixefi [9,10], tobajo [83,84]/[83,85]/[84,85]: cross-lane
+    //   arrowheads, `polygonSkipMode: 'x'` on both sides
+    //   (`Worm.java:159-168`), coincident after X compression
+    //   (bixefi 572 / 686.375 -> 245.75 both; tobajo 925.85 / 1050.375 /
+    //   1186.963 -> 483.694 all three). The add2/close-b3w1 "retired"
+    //   note on bixefi was population loss at its pin, not a fix.
+    // - cemipu [21,24], misiji [14,18]/[15,18], nojije [21,25]/[22,25]:
+    //   a divider `UEmpty` (`LaneDivider.java:91`) under a lane title that
+    //   never occupies x (`UGraphicCompressOnXorY.java:100-112`); same
+    //   misiji note as bixefi.
+    'bixefi-77-moki051 [9,10] polygon×polygon',
+    'cemipu-87-dinu624 [21,24] empty×centeredText',
+    'misiji-27-buje656 [14,18] empty×centeredText',
+    'misiji-27-buje656 [15,18] empty×centeredText',
+    'nojije-35-teta491 [21,25] empty×centeredText',
+    'nojije-35-teta491 [22,25] empty×centeredText',
+    'tobajo-64-mipi810 [83,84] polygon×polygon',
+    'tobajo-64-mipi810 [83,85] polygon×polygon',
+    'tobajo-64-mipi810 [84,85] polygon×polygon',
   ].sort();
 
   /**
@@ -494,7 +532,7 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
    * `vamazo-19-tufu812` below shows the identical class surfacing fresh,
    * from the same third transform, the other direction.
    */
-  const ALLOWED_HARD_OVERLAPS = [
+  const ALLOWED_HARD_OVERLAPS: string[] = [
     // `tobajo-64-mipi810 [16,17]` (mission `activity-loop-tile-port`, T2):
     // a repeat's condition hexagon and its OWN east label `ja`. The jar
     // draws the east label AT the hexagon's right edge, zero gap
@@ -516,7 +554,7 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // inserting one new shape ahead of this pair. Same pair, confirmed
     // byte-identical (`268.65625 + 73.3625 === 342.01875` vs
     // `342.01874999999995`).
-    'tobajo-64-mipi810 [19,21] polygon×text',
+    // add4/merge-T3d-3: tobajo-64-mipi810 [19,21] left with its pin (add4-T3d).
     // add1-T3k: `[0,2]` (was `[0,1]`) -- the own label is now its own
     // `'if-own-label'` node, landing at index 1 (between the hexagon and
     // its west `if-label`), which pushes the west label from index 1 to
@@ -658,6 +696,27 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `after` now report the IDENTICAL overlap set, `[[2,3],[2,4],[6,7],
     // [9,16]]`, no `[6,14]` in either) -- removed rather than carried
     // forward, same precedent as `lopone-15-xiki477` above.
+    // add4/merge-T3h: xovigi-85-rufa987's two touching-becomes-epsilon
+    // label/hexagon pairs (T3h) left with its pin (add4-T3h).
+    // add4-T3j: the population is now every RENDERING row (`baseline` AND
+    // `pinned`), so the pairs that left with their pins come back, each
+    // re-dumped (scratch `dumpov.ts`). All six: `before`, the hexagon's
+    // right edge EQUALS the label's x exactly (touching, no overlap);
+    // `after`, a 1e-14..1e-13 overlap from the two shapes' x re-derived
+    // through independent transforms -- the `tobajo` class above:
+    //   boxoto [32,35]: 562.278125 = 562.278125 -> 554.6781250000001 vs 554.678125
+    //   boxoto [45,48]: 642.8375000000001 = 642.8375000000001 -> 635.2375000000002 vs 635.2375000000001
+    //   kotiso [20,23]: 678.628125 = 678.628125 -> 574.6031250000001 vs 574.603125
+    //   tobajo [19,21]: 677.40625 = 677.40625 -> 330.83750000000003 vs 330.8375
+    //   xovigi [15,18], [28,31] (label WEST of the hexagon): text right
+    //     145.9875 = hexagon x 145.9875 -> 134.71250000000003 vs 134.7125
+    // All six rows are pinned byte-equal to the jar's golden.
+    'boxoto-53-sifo232 [32,35] polygon×text',
+    'boxoto-53-sifo232 [45,48] polygon×text',
+    'kotiso-16-vizi552 [20,23] polygon×text',
+    'tobajo-64-mipi810 [19,21] polygon×text',
+    'xovigi-85-rufa987 [15,18] polygon×text',
+    'xovigi-85-rufa987 [28,31] polygon×text',
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {

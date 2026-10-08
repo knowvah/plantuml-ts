@@ -17,11 +17,15 @@
 
 import type { ActivityGeometry, ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { resolveInlineLinks } from '../../core/url/inline-links.js';
 import { line, rect } from '../../core/svg.js';
 import { renderNode } from './activity-renderer-shapes.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { TITLE_ASCENT_FRACTION } from './layout/swimlane-placement.js';
+import { activityDisplayBlock, drawActivityTextBlock, styleFontConfiguration } from './activity-text-sheet.js';
+import { klimtStringBounder } from './activity-creole-sheet.js';
+import { activityHyperlinkColor } from './activity-text-style.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
+import { WidthTableMeasurer } from '../../core/measurer.js';
+
 import {
   swimlaneBorderColor,
   swimlaneBorderThickness,
@@ -29,6 +33,8 @@ import {
   swimlaneTitleFontColor,
   swimlaneTitleFontSize,
 } from './activity-style-defaults.js';
+
+const TITLE_MEASURER = new WidthTableMeasurer();
 
 /**
  * The transparent (or user-coloured) title-band rect (D3). Emits
@@ -130,20 +136,34 @@ export function renderSwimlaneChrome(geo: ActivityGeometry, theme: Theme): strin
  * no `FontStyle`). `contentX`/`contentWidth`/`titleWidth` are T5's own
  * `SwimlaneGeo` fields, already measured at layout time.
  */
+/** The lane's raw title creole -- its `|name|LABEL` display, else its name
+ *  (the same source `layout/swimlane-title.ts#swimlaneTitleText` resolves). */
+function laneTitleSource(lane: ActivityGeometry['swimlanes'][number]): string {
+  return lane.display ?? lane.name;
+}
+
 export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): string {
   if (geo.swimlaneBand === undefined) return '';
-  const fontSize = swimlaneTitleFontSize(theme);
-  const fill = swimlaneTitleFontColor(theme);
-  const baselineY = geo.swimlaneBand.y + fontSize * TITLE_ASCENT_FRACTION;
+  const font = { family: theme.fontFamily, size: swimlaneTitleFontSize(theme), color: swimlaneTitleFontColor(theme) };
+  const fc = styleFontConfiguration(theme, font, activityHyperlinkColor(theme));
+  const bounder = klimtStringBounder(TITLE_MEASURER, font);
   let out = '';
   for (const lane of geo.swimlanes) {
+    // `Swimlanes#getTitle` (`Swimlanes.java:285-293`): `create9(fc, LEFT,
+    // skinParam, wrap)` -- the display's default FULL creole Sheet, where a
+    // `[[url label]]` is a real `<a>`-wrapped run in the swimlane style's
+    // hyperlink colour (SLURL, add4-T3gates).
+    const tb = activityDisplayBlock(laneTitleSource(lane), theme, {
+      fontConfiguration: fc,
+      horizontalAlignment: HorizontalAlignment.LEFT,
+      creoleMode: CreoleMode.FULL,
+    });
+    // `UGraphicCompressOnXorY.java:100-112` (CenteredText): `pos =
+    // (realSpaceWidth - textWidth) / 2` past the lane's content left.
     const contentX = lane.contentX ?? lane.x;
     const contentWidth = lane.contentWidth ?? lane.width;
-    const titleX = contentX + (contentWidth - (lane.titleWidth ?? 0)) / 2;
-    // SLURL: draw the RESOLVED text, same `[[url label]]` creole
-    // resolution `swimlane-placement.ts#measureLanes` measures by.
-    const title = resolveInlineLinks(lane.name);
-    out += drawActivityText(titleX, baselineY, title, { fontFamily: theme.fontFamily, fontSize, fill });
+    const pos = (contentWidth - tb.calculateDimension(bounder).getWidth()) / 2;
+    out += drawActivityTextBlock(tb, { x: contentX + pos, y: geo.swimlaneBand.y }, theme, fc);
   }
   return out;
 }

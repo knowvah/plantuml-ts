@@ -1,0 +1,18 @@
+@startuml
+|LANE_A|
+|LANE_B|
+start
+:Step 1;
+if (test1) then
+    |LANE_A|
+    : Error1;
+    stop
+elseif (test2) then
+        |LANE_B|
+        : Step 2;
+        |LANE_B|
+endif
+|LANE_B|
+:next step;
+end
+@enduml

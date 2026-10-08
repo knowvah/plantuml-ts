@@ -128,6 +128,8 @@ const DEFAULT_LINK_TARGET = '_top';
 export class UGraphicSvg extends AbstractCommonUGraphic {
   private constructor(
     private readonly svg: SvgGraphics,
+    /** Upstream's `option` field (`UGraphicSvg.java:67`, copied at :77). */
+    private readonly option: SvgOption,
     private readonly stringBounder: DriverStringBounder,
     /** Dual-measurer conformance seam (this task, journaled write-set
      *  expansion — see `getStringBounder()`'s doc comment below for the
@@ -152,11 +154,11 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
     stringBounder: DriverStringBounder,
     measurer?: StringMeasurer,
   ): UGraphicSvg {
-    return new UGraphicSvg(new SvgGraphics(seed, option, version), stringBounder, measurer);
+    return new UGraphicSvg(new SvgGraphics(seed, option, version), option, stringBounder, measurer);
   }
 
   protected copyUGraphic(): UGraphicSvg {
-    const result = new UGraphicSvg(this.svg, this.stringBounder, this.measurer);
+    const result = new UGraphicSvg(this.svg, this.option, this.stringBounder, this.measurer);
     result.basicCopy(this);
     return result;
   }
@@ -235,13 +237,11 @@ export class UGraphicSvg extends AbstractCommonUGraphic {
    *
    * `target` is upstream's `option.getLinkTarget()` (`atmp/SvgOption.java
    * :224`), whose skin default is `_top` (`skin/SkinParam.java:1082`,
-   * `getValue("svglinktarget", "_top")`) — this port's `SvgOption` carries
-   * no `linkTarget` field, so the default is applied here; a `skinparam
-   * svgLinkTarget` override stays the named remainder `core/svg.ts
-   * #linkWrap` already records for the string-emitting path.
+   * `getValue("svglinktarget", "_top")`) — applied here when the caller's
+   * `SvgOption.linkTarget` is unset.
    */
   startUrl(url: { readonly url: string; readonly tooltip: string }): void {
-    this.svg.openLink(url.url, url.tooltip === '' ? null : url.tooltip, DEFAULT_LINK_TARGET);
+    this.svg.openLink(url.url, url.tooltip === '' ? null : url.tooltip, this.option.linkTarget ?? DEFAULT_LINK_TARGET);
   }
 
   /** Upstream: `closeUrl()` (java:164-167). */

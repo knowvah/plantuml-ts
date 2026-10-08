@@ -9,10 +9,7 @@
  * SvgGraphics.java exceeds this repo's 500-line file cap (D2′), so it is
  * split along its own method groups, chained by inheritance and
  * re-exported as a single `SvgGraphics` class from `svg-graphics.ts`.
- * Ended up four files, not the 2–3 estimated in the mission brief —
- * reported per D2′, since the document-lifecycle slice alone (this
- * file) needed a further split once the shadow/filter-def methods were
- * counted:
+ * Four files (D2′; the document-lifecycle slice needed a further split):
  *
  * 1. `svg-graphics-core.ts` (this file) — `SvgGraphicsCore`: fields,
  *    ctor/document setup, format/fill/style state, gradient-def
@@ -31,8 +28,8 @@
  *
  * `SvgOption` (upstream: `net.atmp.SvgOption`, a fluent builder over
  * `ConfigurationStore`/`ColorMapper`/`HColor`, none ported) is a plain
- * readonly shape with only the fields `SvgGraphics.java` reads —
- * `getFont()`/`getLinkTarget()` dropped (unread or dead upstream).
+ * readonly shape with the fields `SvgGraphics.java` reads, plus `linkTarget`
+ * (read by `UGraphicSvg.java:161`) — `getFont()` dropped (unread upstream).
  * `backcolor` is `Paint | undefined` (this port's Paint-for-HColor seam,
  * `src/core/paint.ts`), removing the need for `ColorMapper`.
  *
@@ -93,6 +90,8 @@ export interface SvgOption {
   readonly interactiveBaseFilename: string | null;
   /** Upstream: `SvgOption.getDecimal()` (ADR-2: threaded, default `DEFAULT_SVG_DECIMALS`). */
   readonly decimal: number;
+  /** Upstream: `SvgOption.getLinkTarget()` (`net/atmp/SvgOption.java:223`); unset = `_top`. */
+  readonly linkTarget?: string;
 }
 
 /** Upstream: `SvgOption.basic()` — a `SvgOption` with upstream's

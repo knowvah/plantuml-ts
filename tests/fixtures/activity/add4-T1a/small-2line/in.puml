@@ -1,0 +1,13 @@
+@startuml
+start
+switch (x)
+case (one\nline)
+:A;
+case (two\nline)
+:B;
+case (three\nline)
+:C;
+endswitch
+:D;
+stop
+@enduml

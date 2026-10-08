@@ -1,0 +1,2 @@
+surveying 5 dot fixtures (concurrency 6)
+wrote plans/activity-divergence-drive-4/measurements/b2-eng/parity-dot.json — {"conformant":5,"structural-match":0,"diverged":0,"errored":0,"timeout":0,"oracle-error":0}

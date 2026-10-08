@@ -1,0 +1,16 @@
+@startuml
+start
+partition Action {
+  :foo1;
+}
+package Action {
+  :foo2;
+}
+card Action {
+  :foo3;
+}
+rectangle Action {
+  :foo4;
+}
+stop
+@enduml

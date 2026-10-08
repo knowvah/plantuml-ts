@@ -1,0 +1,3 @@
+surveying 39 yaml fixtures (concurrency 6)
+  25/39
+wrote plans/activity-divergence-drive-4/measurements/b3-eng/parity-yaml.json — {"conformant":7,"structural-match":28,"diverged":4,"errored":0,"timeout":0,"oracle-error":0}

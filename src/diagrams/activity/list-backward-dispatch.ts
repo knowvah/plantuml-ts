@@ -24,8 +24,10 @@ import {
   type DispatchResult,
   type ParseContext,
 } from './dispatch-support.js';
+import { stereogroupStereotype } from './dispatch-stereogroup.js';
 import { readMultilineActionBody } from './node-dispatch.js';
 import { unescapeLabelNewlines } from './if-dispatch.js';
+import { redirectNoteOntoSwitch } from './note-dispatch.js';
 
 // ---------------------------------------------------------------------------
 // `containsBreak` (mission add2-T3b, family WSPEC) -- node-dispatch.ts's
@@ -193,7 +195,8 @@ function clearSpeculativeNoOut(nodes: ActivityNode[]): void {
  *  pushParsedNode} purely to keep that function's own CCN under the
  *  file's limit. `true` when one fired (the node is fully consumed). */
 function redirectOntoIf(nodes: ActivityNode[], node: ActivityNode): boolean {
-  if (node.kind === 'note') return redirectNoteOntoIf(nodes, node);
+  if (node.kind === 'note')
+    return redirectNoteOntoIf(nodes, node) || redirectNoteOntoSwitch(nodes, node, pushParsedNode);
   if (node.kind === 'kill' || node.kind === 'detach') return redirectKillOntoIf(nodes, node);
   return false;
 }
@@ -234,6 +237,10 @@ function backArrowSpread<K extends string>(key: K, raw: string | undefined): { [
   return trimmed === '' ? {} : ({ [key]: trimmed } as { [P in K]?: string });
 }
 
+function stereoSpread(stereotype: string | undefined): { stereotype?: string } {
+  return stereotype === undefined ? {} : { stereotype };
+}
+
 export function tryBackward(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const single = RE_BACKWARD.exec(line);
   if (single !== null) {
@@ -243,7 +250,9 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
       label,
       ...swimlaneSpread(ctx),
       ...backArrowSpread('incoming', single[1]),
-      ...backArrowSpread('outgoing', single[3]),
+      ...backArrowSpread('outgoing', single[4]),
+      // `CommandBackward3.java:136-138`: `stereogroup.getBoxStyle()`.
+      ...stereoSpread(stereogroupStereotype(single[3])),
     };
     return { idx: idx + 1, node };
   }
@@ -258,6 +267,8 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
     label: body.labelParts.join('\n'),
     ...swimlaneSpread(ctx),
     ...backArrowSpread('incoming', headMatch[1]),
+    // `CommandBackwardLong3.java:112-115`: the closer's stereogroup.
+    ...stereoSpread(body.multiStereo),
   };
   return { idx: body.cursor, node };
 }

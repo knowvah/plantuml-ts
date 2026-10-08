@@ -274,3 +274,78 @@ describe('GtileSwitch — single case (OneLink) Ydelta1a is flat 20', () => {
     expect(tile.caseOffsets[0]!.y).toBe(diamond.height + 20);
   });
 });
+
+// `FtileFactoryDelegatorSwitch#createWithLinks` (`:109-113`) wraps every
+// case as `FtileDecorateOutLabel(FtileDecorateInLabel(body, dimIn), dimOut)`.
+// A bounder whose every line is `LABEL_W` x `LABEL_H` makes each label's
+// own dimension exact: `n` lines -> `LABEL_W` x `n * LABEL_H`.
+describe('GtileSwitch — FtileDecorateInLabel/OutLabel case decoration', () => {
+  const LABEL_W = 30;
+  const LABEL_H = 11;
+  const labelBounder: StringBounder = { getDimension: () => ({ width: LABEL_W, height: LABEL_H }) };
+  const diamond = makeDiamond(60, 24);
+  // Ydelta1a with a tallest label of `h`: `max(10, h) + 10`
+  // (`FtileSwitchWithManyLinks.java:412-423`, SMALL_DIAMOND).
+  const ydelta1a = (h: number): number => Math.max(10, h) + 10;
+
+  it('places each case body its OWN in-label height below the row (drawU dy(yl))', () => {
+    const tile = new GtileSwitch(
+      diamond,
+      [
+        { tile: makeTile(80, 40), label: 'one' },
+        { tile: makeTile(80, 40), label: 'two\nlines' },
+      ],
+      null,
+      labelBounder,
+      theme,
+    );
+    const row = diamond.height + ydelta1a(2 * LABEL_H);
+    expect(tile.caseOffsets[0]!.y).toBe(row + LABEL_H);
+    expect(tile.caseOffsets[1]!.y).toBe(row + 2 * LABEL_H);
+  });
+
+  it('adds the in-label height to the decorated case height (addTop) -> nude height', () => {
+    const tile = new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label: 'a' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    expect(tile.height).toBe(diamond.height + 40 + LABEL_H + NUDE_HEIGHT_PAD + ydelta1a(LABEL_H));
+  });
+
+  it('adds the out-label height to the decorated case height (addBottom), not to its body offset', () => {
+    const body = { ...makeTile(80, 40), outLabel: { label: 'exit' } };
+    const tile = new GtileSwitch(diamond, [{ tile: body }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    expect(tile.caseOffsets[0]!.y).toBe(diamond.height + ydelta1a(0));
+    expect(tile.height).toBe(diamond.height + 40 + LABEL_H + NUDE_HEIGHT_PAD + ydelta1a(0));
+  });
+
+  it('widens a case on the right when its label overhangs the body right (incRight)', () => {
+    // body 20 wide, left 10 -> right 10; label 30 -> missing 20 -> width 40.
+    const tile = new GtileSwitch(diamond, [{ tile: makeTile(20, 40), label: 'wide' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    expect(tile.caseOffsets[1]!.x).toBe(40 + SWITCH_X_SEPARATION);
+  });
+
+  it('does not widen when the label fits inside the body right', () => {
+    const tile = new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label: 'fits' }, { tile: makeTile(80, 40) }], null, labelBounder, theme);
+    expect(tile.caseOffsets[1]!.x).toBe(80 + SWITCH_X_SEPARATION);
+  });
+});
+
+// add4-T3b: `Branch#getTextBlock` builds the case label with
+// `display.create0(..., CreoleMode.SIMPLE_LINE, ...)` (`Branch.java:255-256`):
+// `**bold**` resolves (`CommandCreoleBuilder.java:76`) but `__underline__` is
+// registered only under FULL (`:85-86`), so it stays literal text.
+describe('GtileSwitch — case label measured as SIMPLE_LINE creole', () => {
+  const CHAR_W = 5;
+  const charBounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * CHAR_W, height: 11 }) };
+  const diamond = makeDiamond(60, 24);
+  // body 80 wide, left 40 -> right 40: the case widens by max(0, label - 40).
+  const secondCaseX = (label: string): number =>
+    new GtileSwitch(diamond, [{ tile: makeTile(80, 40), label }, { tile: makeTile(80, 40) }], null, charBounder, theme)
+      .caseOffsets[1]!.x;
+
+  it('measures `**BBBBBB**` as its resolved text (30 px, fits; raw would be 50)', () => {
+    expect(secondCaseX('**BBBBBB**')).toBe(80 + SWITCH_X_SEPARATION);
+  });
+
+  it('measures `__uuuuu__` literally (underline is not a SIMPLE_LINE command)', () => {
+    expect(secondCaseX('__uuuuu__')).toBe(40 + 9 * CHAR_W + SWITCH_X_SEPARATION);
+  });
+});

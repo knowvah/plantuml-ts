@@ -1,0 +1,12 @@
+@startuml
+!pragma useVerticalIf on
+start
+if (a?) then (yes)
+  :A;
+(**in** label) elseif (b?) then (yes)
+  :B;
+else (no)
+  :C;
+endif
+stop
+@enduml

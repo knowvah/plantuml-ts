@@ -12,7 +12,9 @@ import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ActivityNode } from './ast.js';
+import { LINE_STYLE } from '../../core/link-style-regex.js';
 
 // ---------------------------------------------------------------------------
 // Regex constants
@@ -38,21 +40,16 @@ import type { ActivityNode } from './ast.js';
 export const RE_SWIMLANE = /^\|(?:(#[^|]+)\|)?([^|]+)\|(?:[^|]+)?\s*$/;
 
 /**
- * Trailing stereogroup fragment: one or more consecutive `<<...>>` runs.
- * Inlined (not shared via `new RegExp` string-building) into every
- * constant below that accepts one, mirroring `Stereogroup.optionalStereogroup`
- * (`stereo/Stereogroup.java:69-72`, `(<<[^<>]+>>(?:[%s]*<<[^<>]+>>)*)`),
- * widened from a single `<<...>>` capture (mission ubrr-T10 M4a/M3): only
- * the FIRST stereogroup's inner text is captured anywhere in this file
- * (existing convention, `stereotype` is a single field) -- the rest are
- * matched so the line itself does not fail to parse, never captured.
+ * `Stereogroup.optionalStereogroup()` (`stereo/Stereogroup.java:69-72`,
+ * `(<<[^<>]+>>(?:[%s]*<<[^<>]+>>)*)`): group 2 of both constants below is the
+ * WHOLE stereogroup, read by `dispatch-stereogroup.ts#stereogroupStereotype`.
+ * `CommandActivity3` (`CommandActivity3.java:68-77`) and the
+ * `CommandActivityLong3` END (`:60-67`) take no colour after it.
  */
+export const RE_ACTION = /^:(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/;
 
-/** Matches an action line: :label; or :label; <<stereo>> or :label; #color */
-export const RE_ACTION = /^:(.+?);\s*(?:<<([^>]*)>>(?:\s*<<[^>]*>>)*)?\s*(?:(#\w+))?\s*$/;
-
-/** Closing line of a multi-line action: content; optionally followed by <<stereo>> */
-export const RE_ACTION_CLOSE = /^(.*?);\s*(?:<<([^>]*)>>(?:\s*<<[^>]*>>)*)?\s*$/;
+/** Closing line of a multi-line action: `TEXT ; stereogroup?` (`CommandActivityLong3.java:60-67`). */
+export const RE_ACTION_CLOSE = /^(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/;
 
 /**
  * `* label` / `- label` list-item activity shorthand: a plain activity,
@@ -91,7 +88,7 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  *   shape; both decoration groups are `RegexOptional`.
  */
 export const RE_BACKWARD =
-  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}
@@ -125,8 +122,7 @@ export const RE_IF = /^if\s*\((.*?)\)\s*(?:then\s*(?:\((.*?)\))?)?\s*(?:<<[^<>]+
  * call. Both groups lazy, same reason as {@link RE_IF}'s own doc.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandIf4.java:60-81
  */
-export const RE_IF4 =
-  /^if\s*\((.*?)\)\s*(?:is|equals?)\s*\((.*?)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
+export const RE_IF4 = /^if\s*\((.*?)\)\s*(?:is|equals?)\s*\((.*?)\)\s*then\s*(?:<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/i;
 
 /**
  * Legacy `if (test) then when LABEL` spelling -- no parens around the
@@ -206,18 +202,32 @@ export const RE_CASE = /^case\s*\(([^)]*)\)\s*$/i;
  */
 export const RE_ENDSWITCH = /^endswitch(?:\s*<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?$/i;
 
+/** `ColorParser.simpleColor(ColorType.BACK, id)`'s `COLORS_REGEXP`
+ *  (`PART2 | COLOR_REGEXP`), as one non-capturing alternation.
+ * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46,74-76 */
+const GROUP_COLORS =
+  String.raw`(?:#(?:\w+[-\\|/]?\w+;)?(?:(?:text|back|header|line|line\.dashed|line\.dotted|line\.bold|shadowing)` +
+  String.raw`(?::\w+[-\\|/]?\w+)?(?:;|(?![\w;:.])))+|#\w+[-\\|/]?\w+)`;
+/** `%g` -- the double-quote class (`regex/Pattern2.java:59`: `"`, U+201C,
+ *  U+201D, `Jaws.BLOCK_E1_INVISIBLE_QUOTE` U+E121). */
+const GROUP_QUOTE = '["\u201c\u201d\ue121]';
+
 /**
- * `partition|package|rectangle|card|group NAME {`?, bracketed or not
- * (mission ubrr-T10 M6). Leading `BACK1` color and trailing `BACK2`/
- * `STEREO` are out of scope (no fixture in this mechanism's cohort
- * exercises them, same omission `RE_IF`'s own history already
- * established for a leading color). Group 2 is the quoted name (may
- * contain anything but a literal `"`); group 3 is the unquoted lazy
- * fallback (matches even `<$sprite{...}>`'s own embedded braces, since
- * `.` is unrestricted); group 4 is the literal `{` when present.
- * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:64-80
+ * `partition|package|rectangle|card|group [BACK1] NAME [BACK2] [<<STEREO>>] {`?
+ * -- `CommandPartition3#getRegexConcat` verbatim. Groups: 1 TYPE, 2 BACK1,
+ * 3 NAME (`[%g][^%g]+[%g]|.*?`, quotes still on -- the caller strips them
+ * with `eventuallyRemoveStartingAndEndingDoubleQuote`, `:143`), 4 BACK2,
+ * 5 STEREO (`StereotypePattern.optional`, `(<<.+?>>)`), 6 BRACKET (`\{?`,
+ * empty when absent).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:71-87
+ * @see net/sourceforge/plantuml/stereo/StereotypePattern.java:53-68
  */
-export const RE_GROUP_OPEN = /^(partition|package|rectangle|card|group)\s+(?:"([^"]+)"|(.*?))\s*(\{)?\s*$/i;
+export const RE_GROUP_OPEN = new RegExp(
+  String.raw`^(partition|package|rectangle|card|group)\s+(?:(${GROUP_COLORS})?\s+)?` +
+    String.raw`(${GROUP_QUOTE}[^"\u201c\u201d\ue121]+${GROUP_QUOTE}|.*?)(?:\s+(${GROUP_COLORS})?)?` +
+    String.raw`\s*(?:(<<.+?>>))?\s*(\{?)$`,
+  'i',
+);
 
 /** `}` -- the non-deprecated closer.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCloseGroup3.java:56-63
@@ -258,15 +268,15 @@ export const RE_REPEATWHILE =
  * add2-T2e, D6): `giteso-65-mefo026`'s `floating note right: …` and
  * `xolazi-74-vamu265`'s `note right #blue :sad note is sad` both refused
  * against this. The COLOR group mirrors `ColorParser.COLOR_REGEXP`
- * (`#\w+[-\|/]?\w+`, gradient-separator included) -- captured but
- * dropped, same "parsed not drawn" scope as this file's other leading-
- * color omissions (`RE_IF`'s own doc).
+ * (`#\w+[-\|/]?\w+`, gradient-separator included); group 3 captures it
+ * (add4-T1c: `ActivityNote.color`, `CommandNote3.java:65-67`'s
+ * `simpleColor(ColorType.BACK)`), group 4 is the text.
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNote3.java:60-71
  *   -- `TYPE (note|floating note)`, `POSITION (left|right)?`,
  *   `color().getRegex()`, then the literal `:`.
  * @see net/sourceforge/plantuml/klimt/color/ColorParser.java:43-46
  */
-export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*:\s*(.+)$/i;
+export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(#\w+[-\\|/]?\w+)?\s*:\s*(.+)$/i;
 
 /**
  * `(floating )?note (left|right)?` (multi-line, closed by {@link
@@ -276,7 +286,7 @@ export const RE_NOTE_SINGLE = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:
  * right`, `tajuxe-32-sexo680`'s `note left #aabbcc`).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandNoteLong3.java:131-141
  */
-export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(?:#\w+[-\\|/]?\w+)?\s*$/i;
+export const RE_NOTE_MULTI = /^(?:(floating)\s+)?note(?:\s+(left|right))?\s*(#\w+[-\\|/]?\w+)?\s*$/i;
 
 /** `NotePosition.java:43-48` -- `defaultLeft(s)`: `null` (no `left`/`right`
  *  keyword in the source line, group 2 of {@link RE_NOTE_SINGLE}/{@link
@@ -304,16 +314,42 @@ export function defaultLeftPosition(direction: string | undefined): 'left' | 'ri
  */
 export const RE_NOTE_END = /^end[\s ]?note$/i;
 
+/** Shared head of `CommandArrow3` / `CommandArrowLong3`: `RegexOr("->",
+ *  COLOR=STYLE_COLORS_MULTIPLES)` + `spaceZeroOrMore`; group 1 = COLOR. */
+const ARROW_HEAD =
+  `(?:->|-\\[(${LINE_STYLE}(?:(?:;${LINE_STYLE})*)*)\\]->)[\\s\u00a0]*`;
+
 /**
- * Matches arrow-label lines:
- *   -> label ;
- *   -><back:color> label ;
- *   -><color:color> label ;
+ * `CommandArrow3`'s regex: `->` OR a coloured/styled arrow
+ * (`CommandLinkElement.STYLE_COLORS_MULTIPLES`, i.e. `-[#red]->`,
+ * `-[bold]->`), optional spaces, then EITHER a label ending in `;`
+ * (`(.*);`) OR nothing. Everything between the spaces and the LAST `;` is
+ * the label, verbatim: `<back:x>` / `<color:x>` are creole commands inside
+ * it, never arrow attributes. Only the bracket part is arrow
+ * colour/style.
  *
- * Capture group 1: optional color value (e.g. "red", "#FF0000")
- * Capture group 2: label text
+ * Capture group 1: COLOR (the text inside `-[ ]->`, `undefined` for `->`)
+ * Capture group 2: LABEL (`undefined` when the line has no `;` label)
+ *
+ * Built via `new RegExp` -- same lizard brace-depth workaround and
+ * `<`/`>` hoisting convention as {@link RE_REPEAT_HEAD}.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrow3.java:61-71
+ *   -- `RegexOr("->", COLOR=STYLE_COLORS_MULTIPLES)`, `spaceZeroOrMore`,
+ *   `RegexOr(LABEL="(.*);", "")`.
+ * @see net/sourceforge/plantuml/descdiagram/command/CommandLinkElement.java:82-83
+ *   -- `"-\\[(" + LINE_STYLE_MULTIPLES + "*)\\]->"`.
  */
-export const RE_ARROW_LABEL = /^->(?:<(?:back|color):([^>]+)>)?\s*(.*?)\s*;?\s*$/i;
+export const RE_ARROW_LABEL = new RegExp(`^${ARROW_HEAD}(?:(.*);|)$`, 'i');
+
+/** `CommandArrowLong3`'s start pattern: the same head, then `LABEL=(.*)`
+ *  (first line of a multi-line arrow label; its end is {@link
+ *  RE_ARROW_LONG_END}).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrowLong3.java:66-74 */
+export const RE_ARROW_LONG = new RegExp(`^${ARROW_HEAD}(.*)$`, 'i');
+
+/** `CommandArrowLong3.END`: a line ending in `;` closes the label.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrowLong3.java:58 */
+export const RE_ARROW_LONG_END = new RegExp('^(.*);$');
 
 /** `repeat` head, optionally followed by an inline action on the same
  *  line (`repeat :foo;`). Built via `new RegExp` (not a `/.../ ` literal):
@@ -401,13 +437,12 @@ export interface ParseContext {
    *  immediately after `matchAnnotationCommand` in `tryAnnotation`/
    *  `trySprite` (dispatch-common-commands.ts). */
   sprites: SpriteRegistry;
-  /** `!pragma NAME [VALUE]` (D12/T1p-b), mutated in place by
-   *  `dispatch-common-commands.ts#tryPragma`'s own `.define()` call during
-   *  `parseNodes` -- mirrors `TitledDiagram#getPragma()`'s single
-   *  per-diagram `Pragma` instance (`skin/Pragma.java`). Read at layout
-   *  time via `ActivityDiagramAST.pragma` (`parser.ts` copies this
-   *  reference onto the returned AST), NOT re-derived. */
+  /** `!pragma NAME [VALUE]` (D12/T1p-b), `.define()`d in place by `tryPragma`
+   *  -- `TitledDiagram#getPragma()`'s single per-diagram `Pragma`
+   *  (`skin/Pragma.java`); `parser.ts` copies the reference onto the AST. */
   pragma: Pragma;
+  /** add4-T3b: the last `scale ...` (`AbstractDiagram.java:195-197`), set by `tryScale`. */
+  scale: ScaleSpec | undefined;
 }
 
 // ---------------------------------------------------------------------------

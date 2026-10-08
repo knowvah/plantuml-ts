@@ -870,10 +870,112 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5420 -> 5437 / 6396 -> 6413 at add3/close-b3 (2026-10-07): 17
     // svg-activity clone rows, same shape. Derivation: 5437 + 871 + 105 = 6413.
-    expect(pinnedAgree.length).toBe(5437);
-    expect(pinnedMisroutes.length).toBe(871);
-    expect(pinnedJarErrors.length).toBe(105);
-    expect(manifest.fixtures.length).toBe(6413);
+    //
+    // 5437 -> 5507 / 871 -> 875 / 105 -> 110 / 6413 -> 6492 at add4/T0b
+    // (2026-10-07): the 79 uncaptured tests/corpus/activity fixtures captured
+    // (tmp1, retired at add3/T0a, excluded). 66 agree ACTIVITY/ACTIVITY, 4
+    // agree NONE/NONE (jar ErrorUml past the head window), 4 known-misroute
+    // (activity parser gaps: page, link, hide footbox, hide stereotype --
+    // ledger unknown-ledger/add4-T0b-activity.json), 5 jar-error pages.
+    // Derivation: 5507 + 875 + 110 = 6492.
+    //
+    // 5507 -> 5518 / 6492 -> 6503 at add4/close-b0 (2026-10-07): 11
+    // svg-activity clone rows (new captures pinned zero-diff), same shape.
+    // Derivation: 5518 + 875 + 110 = 6503.
+    //
+    // 5518 -> 5520 / 6503 -> 6505 at add4/merge-T1a (2026-10-07): 2
+    // svg-activity clone rows (sisate, vatame pinned zero-diff).
+    // Derivation: 5520 + 875 + 110 = 6505.
+    //
+    // 5520 -> 5525 / 6505 -> 6510 at add4/merge-T1c: 5
+    // svg-activity clone rows (zero-diff pins). Derivation: 5525 + 875 + 110 = 6510.
+    //
+    // 5525 -> 5531 / 6510 -> 6516 at add4/merge-T1b: 6
+    // svg-activity clone rows (zero-diff pins). Derivation: 5531 + 875 + 110 = 6516.
+    //
+    // 5531 -> 5533 / 6516 -> 6518 at add4/merge-T1g: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5533 + 875 + 110 = 6518.
+    //
+    // 5533 -> 5537 / 6518 -> 6522 at add4/merge-T2c: 4
+    // svg-activity clone rows (zero-diff pins). Derivation: 5537 + 875 + 110 = 6522.
+    //
+    // 5537 -> 5544 / 6522 -> 6529 at add4/merge-T2a: 7
+    // svg-activity clone rows (zero-diff pins). Derivation: 5544 + 875 + 110 = 6529.
+    //
+    // 5544 -> 5566 / 6529 -> 6551 at add4/merge-T2d: 22
+    // svg-activity clone rows (zero-diff pins). Derivation: 5566 + 875 + 110 = 6551.
+    //
+    // 5566 -> 5567 / 6551 -> 6552 at add4/merge-T2e: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5567 + 875 + 110 = 6552.
+    //
+    // 5567 -> 5568 / 6552 -> 6553 at add4/merge-T2d-2: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5568 + 875 + 110 = 6553.
+    //
+    // 5568 -> 5573 / 6553 -> 6558 at add4/merge-T2f: 5
+    // svg-activity clone rows (zero-diff pins). Derivation: 5573 + 875 + 110 = 6558.
+    //
+    // 5573 -> 5584 / 6558 -> 6569 at add4/merge-T2b: 11
+    // svg-activity clone rows (zero-diff pins). Derivation: 5584 + 875 + 110 = 6569.
+    //
+    // 5584 -> 5585 / 6569 -> 6570 at add4/merge-T2f-2: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5585 + 875 + 110 = 6570.
+    //
+    // 5585 -> 5587 / 6570 -> 6572 at add4/merge-T2g: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5587 + 875 + 110 = 6572.
+    //
+    // 5587 -> 5593 / 6572 -> 6578 at add4/merge-T3a: 6
+    // svg-activity clone rows (zero-diff pins). Derivation: 5593 + 875 + 110 = 6578.
+    //
+    // 5593 -> 5594 / 6578 -> 6579 at add4/merge-T3d: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5594 + 875 + 110 = 6579.
+    //
+    // 5594 -> 5596 / 6579 -> 6581 at add4/merge-T3a-2: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5596 + 875 + 110 = 6581.
+    //
+    // 5596 -> 5598 / 6581 -> 6583 at add4/merge-T3c: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5598 + 875 + 110 = 6583.
+    //
+    // 5598 -> 5599 / 6583 -> 6584 at add4/merge-T3c-2: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5599 + 875 + 110 = 6584.
+    //
+    // 5599 -> 5602 / 6584 -> 6587 at add4/merge-T3d-3: 3
+    // svg-activity clone rows (zero-diff pins). Derivation: 5602 + 875 + 110 = 6587.
+    //
+    // 5602 -> 5605 / 6587 -> 6590 at add4/merge-T3gates-2: 3
+    // svg-activity clone rows (zero-diff pins). Derivation: 5605 + 875 + 110 = 6590.
+    //
+    // 5605 -> 5606 / 6590 -> 6591 at add4/merge-T3b: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5606 + 875 + 110 = 6591.
+    //
+    // 5606 -> 5607 / 875 -> 874 at add4/merge-T3e-2 (2026-10-07): `[FIXED]`
+    // retirement -- dot-cache activity/fukika-81-gite897, pinned known-misroute
+    // on 2026-09-02, has routed ACTIVITY since add1 b3; re-pinned agree from a
+    // fresh measurement. Derivation: 5607 + 874 + 110 = 6591.
+    //
+    // 5607 -> 5608 / 6591 -> 6592 at add4/merge-T3e-2: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5608 + 874 + 110 = 6592.
+    //
+    // 5608 -> 5609 / 6592 -> 6593 at add4/merge-T3f: 1
+    // svg-activity clone rows (zero-diff pins). Derivation: 5609 + 874 + 110 = 6593.
+    //
+    // 5609 -> 5611 / 6593 -> 6595 at add4/merge-T3g: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5611 + 874 + 110 = 6595.
+    //
+    // 5611 -> 5613 / 6595 -> 6597 at add4/merge-T3h: 2
+    // svg-activity clone rows (zero-diff pins). Derivation: 5613 + 874 + 110 = 6597.
+    //
+    // 5613 -> 5617 / 874 -> 870 at add4/merge-T3k (2026-10-08): `[FIXED]`
+    // retirements -- bopele/cebuci/fugoko/tidoda (the 4 add4-T0b activity
+    // parser gaps: CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender) now route ACTIVITY; re-pinned agree from a
+    // fresh measurement. Derivation: 5617 + 870 + 110 = 6597.
+    //
+    // 5617 -> 5620 / 6597 -> 6600 at add4/merge-T3k: 3
+    // svg-activity clone rows (zero-diff pins). Derivation: 5620 + 870 + 110 = 6600.
+    expect(pinnedAgree.length).toBe(5620);
+    expect(pinnedMisroutes.length).toBe(870);
+    expect(pinnedJarErrors.length).toBe(110);
+    expect(manifest.fixtures.length).toBe(6600);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -929,7 +1031,11 @@ describe('routing conformance — jar-error classification', () => {
     // 1049 -> 908 at the cdd6 <- main merge: 141 mindmap/c4 retirements.
     // 908 -> 904 at add2/close-b1p: 4 `end merge` activity retirements.
     // 904 -> 870 at add2/close-b2: 34 activity parser-gap retirements.
-    expect(censused.length).toBe(870);
+    // 870 -> 874 at add4/T0b: 4 activity parser-gap misroutes (CommandPage,
+    // CommandLink3, CommandFootboxIgnored, CommandHideShowByGender).
+    // 874 -> 873 at add4/merge-T3e-2: fukika's stale misroute retired.
+    // 873 -> 869 at add4/merge-T3k: the 4 add4-T0b activity parser gaps fixed.
+    expect(censused.length).toBe(869);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

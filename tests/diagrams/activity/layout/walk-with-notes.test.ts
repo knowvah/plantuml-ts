@@ -4,15 +4,17 @@ import type { Out } from '../../../../src/diagrams/activity/layout/tile-coordina
 import { GtileWithNotes } from '../../../../src/diagrams/activity/tiles/gtile-with-notes.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
+import type { Theme } from '../../../../src/core/theme.js';
+import { resolveTheme } from '../../../../src/core/theme.js';
 
 // T3j (row jogami-42-jaji869, GROUPNOTE riser): `walkWithNotes` must emit a
 // compression reservation for each stacked note's OUTER (margin-inclusive)
 // box, mirroring `TextBlockMarged#drawU`'s own `ug.draw(UEmpty.create(dim))`
 // (`klimt/shape/TextBlockMarged.java:74-81`) -- see `walk-with-notes.ts
-// #marginBoxReservation`'s own doc for the full mechanism. Bounder/FONT_SIZE
+// #marginBoxReservation`'s own doc for the full mechanism. Bounder/theme
 // convention matches `gtile-with-notes.test.ts` (7px/char, 14px line height).
 const bounder: StringBounder = { getDimension: (text: string) => ({ width: text.length * 7, height: 14 }) };
-const FONT_SIZE = 13;
+const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
 function stubTile(width: number, height: number): Tile {
   return {
@@ -29,7 +31,14 @@ function stubTile(width: number, height: number): Tile {
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: [] };
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    theme: resolveTheme('default'),
+    nextId: (p: string) => `${p}${n++}`,
+  };
 }
 
 describe('walkWithNotes — one LEFT note: margin-box reservation + note position', () => {
@@ -37,7 +46,7 @@ describe('walkWithNotes — one LEFT note: margin-box reservation + note positio
   // MARGIN) = 48 wide; 14 + 10 + 20 = 44 tall (same fixture as
   // `gtile-with-notes.test.ts`'s own "one note, LEFT only" describe block).
   const tile = stubTile(100, 50);
-  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, FONT_SIZE);
+  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, theme);
   const out = makeOut();
   walkWithNotes(t, 0, 0, undefined, out);
 
@@ -56,7 +65,6 @@ describe('walkWithNotes — one LEFT note: margin-box reservation + note positio
     expect(note.x).toBe(10);
     expect(note.y).toBe(t.leftOffsetY + 10);
   });
-
 });
 
 describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry', () => {
@@ -72,7 +80,7 @@ describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry',
       { text: 'c', position: 'right' },
     ],
     bounder,
-    FONT_SIZE,
+    theme,
   );
   const out = makeOut();
   walkWithNotes(t, 5, 0, undefined, out);
@@ -97,5 +105,31 @@ describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry',
     expect(notes.length).toBe(2);
     expect(notes[0]!.x).toBe(out.reservations[0]!.x + 10);
     expect(notes[1]!.x).toBe(out.reservations[1]!.x + 10);
+  });
+});
+
+// add4-T1c: `FtileWithNotes.java:106-111` -- each stacked note's own
+// `#color` overrides its Opale's `BackGroundColor`; an uncoloured sibling
+// keeps the theme default (no `color` on its node).
+describe('walkWithNotes — per-note colour reaches each stacked note node', () => {
+  const tile = stubTile(40, 20);
+  const t = new GtileWithNotes(
+    tile,
+    [
+      { text: 'a', position: 'left', color: '#red' },
+      { text: 'b', position: 'left' },
+    ],
+    bounder,
+    theme,
+  );
+  const out = makeOut();
+  walkWithNotes(t, 0, 0, undefined, out);
+
+  it('first note carries "#red", second carries no colour', () => {
+    const notes = out.nodes.filter((node) => node.kind === 'note');
+    expect(notes.map((n) => n.label)).toEqual(['a', 'b']);
+    expect(notes[0]!.color).toBe('#red');
+    expect('color' in notes[1]!).toBe(false);
+    expect(t.left!.notes.map((n) => n.color)).toEqual(['#red', undefined]);
   });
 });

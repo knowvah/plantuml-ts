@@ -1,0 +1,11 @@
+@startuml
+start
+:a;
+-[#blue,dashed]-> dashed;
+:b;
+-[dotted]->
+:c;
+-[#green,bold]->
+:d;
+stop
+@enduml

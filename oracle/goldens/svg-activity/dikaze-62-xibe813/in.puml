@@ -1,0 +1,13 @@
+@startuml
+start;
+if (Page.onSecutiryCheck()) then (true)
+    if (isForwarded?) then (no)
+        if (continue processing?) then (yes)
+           :goto bareB1;
+        endif
+    endif
+    :bareB1;
+endif
+:FIN;
+stop
+@enduml

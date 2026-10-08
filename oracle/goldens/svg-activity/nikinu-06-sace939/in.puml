@@ -1,0 +1,15 @@
+@startuml
+skinparam swimlaneWidth 400
+|swimlane1|
+:first with a very very long name to be displayed;
+:second;
+|swimlane2|
+:third;
+if (foo) then
+:something;
+endif
+|swimlane1|
+:back to swinline1;
+|swimlane2|
+:back to swinline2;
+@enduml

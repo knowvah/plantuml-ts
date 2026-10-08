@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
-import { activityFontFamily, linkStyleFields } from '../../../src/diagrams/activity/activity-text-style.js';
+import { activityFontColor, activityFontFamily, linkStyleFields } from '../../../src/diagrams/activity/activity-text-style.js';
 
 const theme = resolveTheme('default');
 
@@ -53,6 +53,30 @@ describe('activityFontFamily', () => {
       colors: { ...theme.colors, elements: { ...theme.colors.elements, activity: { fontFamily: 'Verdana' } } },
     };
     expect(activityFontFamily(activityOnly, 'note')).toBe(theme.fontFamily);
+  });
+});
+
+// add4-T2d (KLIMT-FLOOR, zepima-96-peco612): `activityDiamond()` nests
+// `SName.activity` (`StyleSignatureBasic.java:271-273`), so `skinparam
+// activityFontColor` reaches the diamond label too.
+describe('activityFontColor -- diamond inherits the activity bucket', () => {
+  const RED = '#FF0000';
+  const BLUE = '#0000FF';
+  const withElements = (elements: NonNullable<Theme['colors']['elements']>): Theme => ({
+    ...theme,
+    colors: { ...theme.colors, elements: { ...theme.colors.elements, ...elements } },
+  });
+
+  it('diamond falls through to the activity bucket when it has no own FontColor', () => {
+    expect(activityFontColor(withElements({ activity: { font: RED } }), 'diamond')).toBe(RED);
+  });
+
+  it("diamond's own bucket wins over the activity bucket", () => {
+    expect(activityFontColor(withElements({ activity: { font: RED }, diamond: { font: BLUE } }), 'diamond')).toBe(BLUE);
+  });
+
+  it('a non-diamond sname never falls through to the activity bucket', () => {
+    expect(activityFontColor(withElements({ activity: { font: RED } }), 'note')).toBe(activityFontColor(theme, 'note'));
   });
 });
 

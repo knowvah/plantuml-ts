@@ -335,17 +335,21 @@ describe('compressGeometry — split-bar/split-join-bar geometry transform', () 
 // own drawn box must still shrink-wrap its (now-compressible) content on
 // BOTH axes, exactly like `fork-bar`/`action` above.
 describe('compressGeometry — group/partition frame shrink-wraps on both axes (T3i)', () => {
-  it('a 32-wide untitled frame over a 28-wide empty gap narrows its own width by 18', () => {
+  it('a 32-wide untitled frame over a 28-wide empty gap narrows its own width by 16', () => {
     // `height: 14` keeps the title-tab's own Y occupancy (`[0,12]`, an
     // untitled frame's `textHeight`) from leaving any Y gap of its own
     // (`[12,14]` is only 2 wide, under `smaller(5)`'s 10-wide floor) --
     // isolates this test to the X axis, same as the single-rect test above.
+    // add4-T2b: `32 - 0 >= 25`, so the title is a `SpecialText` whose 1x1
+    // `UEmpty` sits at `x + 3` (`USymbolFrame.java:153-156`,
+    // `SpecialText.java:59-62`): occupied [0,2] [3,4] [30,32], gap [4,30]
+    // = 26 -> smaller(5) removes 16.
     const frame = node('f', 'group', 0, 0, 2 + 28 + 2, 14);
     const input = baseInput({ nodes: [frame], bounds: { maxX: 32, maxY: 14 } });
     const result = compressGeometry(input);
     const frameOut = result.nodes.find((n) => n.id === 'f')!;
-    expect(result.removed.x).toBe(18);
-    expect(round(frameOut.width)).toBe(14);
+    expect(result.removed.x).toBe(16);
+    expect(round(frameOut.width)).toBe(16);
     expect(round(frameOut.x)).toBe(0);
   });
 

@@ -21,6 +21,9 @@ import { parseActivity } from '../../../../src/diagrams/activity/parser.js';
 import { layoutActivity } from '../../../../src/diagrams/activity/layout/tile-layout.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import { astOrThrow } from '../../../helpers/parse-ast.js';
+import { applyInLabel } from '../../../../src/diagrams/activity/layout/tile-layout-inlabel.js';
+import type { Out } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
+import { ARROW_FONT_SIZE } from '../../../../src/diagrams/activity/activity-style-defaults.js';
 
 function layout(markup: string) {
   const first = buildBlockUmls(markup)[0];
@@ -86,15 +89,19 @@ describe('generic -> label; -- no label: byte-identical to the pre-task shape', 
   });
 });
 
-describe('generic -> label; -- coloured (<back:color>)', () => {
-  it('carries both label and color onto the edge', () => {
+describe('generic -> label; -- <back:color> stays inside the creole label', () => {
+  // CommandArrow3.java:63-67 -- LABEL is `(.*);` handed whole to
+  // Display.getWithNewlines (:110); only the `-[...]->` bracket is the arrow
+  // COLOR (:99-103). The tag is creole, never lifted onto the edge.
+  it('keeps the tag in the label and sets no edge colour', () => {
     const geo = layout('@startuml\nstart\n:A;\n-><back:red> hello;\n:B;\nstop\n@enduml');
-    const labelled = geo.edges.find((e) => e.label === 'hello');
-    expect(labelled!.color).toBe('red');
+    const labelled = geo.edges.find((e) => e.label === '<back:red> hello');
+    expect(labelled).toBeDefined();
+    expect(labelled!.color).toBeUndefined();
   });
 });
 
-describe('generic -> label; -- a label right before stop lands on stop\'s own incoming edge', () => {
+describe("generic -> label; -- a label right before stop lands on stop's own incoming edge", () => {
   // `stop(Colors)` (`ActivityDiagram3.java:155-163`) ALSO reads
   // `nextLinkRenderer()`, exactly like `addActivity`/`fork`/etc. -- not a
   // special case this mechanism needs to guard against.
@@ -127,7 +134,7 @@ end fork
 stop
 @enduml`;
 
-  it('labels only the FIRST branch\'s own entry edge, exactly once (oracle-verified x=46.013)', () => {
+  it("labels only the FIRST branch's own entry edge, exactly once (oracle-verified x=46.013)", () => {
     const geo = layout(FORK_PUML);
     const labelled = geo.edges.filter((e) => e.label === 'hello');
     expect(labelled).toHaveLength(1);
@@ -143,7 +150,7 @@ stop
 });
 
 describe('generic -> label; -- split branch entry (ParallelBuilderSplit.java:194-203)', () => {
-  it('labels the first split branch\'s own entry edge', () => {
+  it("labels the first split branch's own entry edge", () => {
     const geo = layout(`@startuml
 start
 split
@@ -157,5 +164,43 @@ stop
     const labelled = geo.edges.filter((e) => e.label === 'hello');
     expect(labelled).toHaveLength(1);
     expect(labelled[0]!.labelAlign).toEqual({ horizontal: 'LEFT' });
+  });
+});
+
+// add4-T3b SNAKE-LABEL-CREOLE: the walk-time reservation boxes the label's
+// SIMPLE_LINE creole width (`FtileFactoryDelegator.java:111`), not the raw
+// markup -- `**hello**` reserves exactly what `hello` reserves, while
+// `__hello__` keeps its underscores (`CommandCreoleBuilder.java:85-86`).
+describe('applyInLabel reservation width is the SIMPLE_LINE creole width', () => {
+  const reservedWidth = (label: string): number => {
+    const out = {
+      nodes: [],
+      edges: [
+        {
+          from: 'a',
+          to: 'b',
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 40 },
+          ],
+        },
+      ],
+      edgeMeta: [{ lane1: undefined, lane2: undefined, shape: 'default' }],
+      reservations: [],
+      theme: resolveTheme('default'),
+      nextId: (p: string) => p,
+    } as unknown as Out;
+    applyInLabel(out, { inLabel: { label } }, { horizontal: 'LEFT' });
+    return out.reservations[0]!.width;
+  };
+  const measurer = new DeterministicMeasurer();
+  const rawWidth = (text: string): number => measurer.measure(text, { family: '', size: ARROW_FONT_SIZE }).width;
+
+  it('`**hello**` reserves the width of `hello`', () => {
+    expect(reservedWidth('**hello**')).toBeCloseTo(rawWidth('hello'), 10);
+  });
+
+  it('`__hello__` keeps its literal width', () => {
+    expect(reservedWidth('__hello__')).toBeCloseTo(rawWidth('__hello__'), 10);
   });
 });

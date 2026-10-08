@@ -1,0 +1,18 @@
+@startuml
+|#AntiqueWhite|Actor A|
+|#AntiqueWhite|Actor C|
+|Actor A|
+:Some random action;
+
+split
+        |Actor A|
+        :Some random action0;
+split again
+        |Actor C|
+        :Some random action111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111;
+        
+        |Actor A|
+        :Some random action8;
+end split
+
+@enduml

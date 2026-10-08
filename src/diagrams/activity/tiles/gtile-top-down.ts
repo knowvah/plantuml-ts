@@ -4,7 +4,7 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
-import { activityFontSize } from '../activity-style-defaults.js';
+import { measureSide } from './gtile-diamond-inside.js';
 
 /**
  * T1b pass 2: `FtileFactoryDelegatorAssembly#assembly`'s own height
@@ -16,8 +16,10 @@ import { activityFontSize } from '../activity-style-defaults.js';
  */
 function sequentialGap(nextChild: Tile, bounder: StringBounder, theme: Theme): number {
   if (nextChild.inLabel === undefined) return SEQUENTIAL_ASSEMBLY_GAP;
-  const fontSize = activityFontSize(theme, 'arrow');
-  return SEQUENTIAL_ASSEMBLY_GAP + bounder.getDimension(nextChild.inLabel.label, fontSize).height;
+  // add4-T3j: `textBlock` is the create7 SIMPLE_LINE arrow block
+  // (`FtileFactoryDelegator.java:103-112`, read at `FtileFactoryDelegatorAssembly
+  // .java:59-62`), padding and stripe floor included.
+  return SEQUENTIAL_ASSEMBLY_GAP + measureSide(nextChild.inLabel.label, bounder, theme).height;
 }
 
 export class GtileTopDown extends TileComposite {
@@ -85,6 +87,7 @@ export class GtileTopDown extends TileComposite {
       case NORTH_BORDER:
         return { x: this.left, y: this.children.length === 0 ? 0 : this.children[0]!.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
+        return { x: this.left, y: this.outY() };
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };
       case EAST_HOOK:
@@ -97,6 +100,26 @@ export class GtileTopDown extends TileComposite {
         throw new Error(`Unknown hook: ${String(_exhaustive)}`);
       }
     }
+  }
+
+  /**
+   * The sequence's out y: the LAST child's own out y plus that child's
+   * offset, not the sequence's bottom edge.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGeometryMerger.java:49-50
+   *   -- `if (geo2.hasPointOut()) result = new FtileGeometry(width, height,
+   *   left, geo1.getInY(), geo2.getOutY() + geo1.getHeight())`: each
+   *   pairwise `appendBottom` keeps the lower tile's own outY shifted by
+   *   the upper tile's height, so an n-ary fold ends at the last child's
+   *   outY + its offset ({@link childOffsets}, which already carries the
+   *   `FtileFactoryDelegatorAssembly` gap).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionList.java:153-154
+   *   -- a one-instruction list is that instruction's own ftile, so its
+   *   out point is the child's, unchanged.
+   */
+  private outY(): number {
+    const n = this.children.length;
+    if (n === 0) return 0;
+    return this.childOffsets[n - 1]! + this.children[n - 1]!.getCoord(SOUTH_HOOK).y;
   }
 
   /**

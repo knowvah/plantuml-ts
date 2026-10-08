@@ -154,7 +154,7 @@ describe('layoutActivity — with-links: own LEFT note (add3-T2a-2 IFNOTE)', () 
     expect(note.x + note.width).toBe(diamond1.x);
   });
 
-  it('the note sits at this composite\'s own top (noteY), diamond1 drops below it by yDeltaNote', () => {
+  it("the note sits at this composite's own top (noteY), diamond1 drops below it by yDeltaNote", () => {
     const note = geo.nodes[0]!;
     const diamond1 = geo.nodes.find((n) => n.kind === 'if-split')!;
     expect(diamond1.y).toBe(note.y + note.height);
@@ -275,7 +275,14 @@ describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and em
 
   function makeOut(): Out {
     let n = 0;
-    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: []  };
+    return {
+      nodes: [],
+      edges: [],
+      edgeMeta: [],
+      reservations: [],
+      theme: resolveTheme('default'),
+      nextId: (p: string) => `${p}${n++}`,
+    };
   }
 
   it('in1 (to the empty branch) has no arrowhead', () => {
@@ -333,7 +340,14 @@ describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing t
 
   function makeOut(): Out {
     let n = 0;
-    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: []  };
+    return {
+      nodes: [],
+      edges: [],
+      edgeMeta: [],
+      reservations: [],
+      theme: resolveTheme('default'),
+      nextId: (p: string) => `${p}${n++}`,
+    };
   }
 
   it("the Hline edge's own meta carries both branches' out-x tagged with their own outcome lane", () => {
@@ -347,7 +361,7 @@ describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing t
     expect(hlineMeta.hline!.unfiltered).toEqual([]);
   });
 
-  it('`low`/`high` are the tile\'s own absolute left/right edge (x, x + width)', () => {
+  it("`low`/`high` are the tile's own absolute left/right edge (x, x + width)", () => {
     const out = makeOut();
     walkIfWithLinks(tile, 5, 0, '2', out);
     const hlineMeta = out.edgeMeta[out.edgeMeta.length - 1]!;

@@ -44,9 +44,8 @@ export function collectTouchedLanes(tile: Tile, out: Set<string>): void {
 
 /**
  * The `'gtile-group'`/`'gtile-partition'` case, split out of `walkTile`'s
- * own switch purely to keep that function's NLOC from growing (D1, T1b):
- * pushes a new `groupScope` id before walking the group's own body, so
- * `pushEdge` tags every edge inside with it, then pops it back off.
+ * own switch purely to keep that function's NLOC from growing. It opens
+ * no snake-merge scope (add4-T3c, see the walk call below).
  *
  * T3h: `FtileGroup.drawU` (`:209-227`) draws the SAME-sized frame
  * (`type.asBig(...)`, dims from the cached, lane-spanning `calculateDimension`)
@@ -74,15 +73,25 @@ export function walkTileGroup(tile: GtileGroup, x: number, y: number, myLane: st
   for (const lane of lanes) {
     pushNode(
       out,
-      { id: out.nextId(gKind), kind: gKind, x, y, width: tile.width, height: tile.height, label: tile.title },
+      {
+        id: out.nextId(gKind),
+        kind: gKind,
+        x,
+        y,
+        width: tile.width,
+        height: tile.height,
+        label: tile.title,
+        ...(tile.backColor !== undefined ? { color: tile.backColor } : {}),
+        ...(tile.usymbol !== undefined ? { usymbol: tile.usymbol } : {}),
+      },
       lane,
     );
   }
   if (tile.children.length === 0) return;
-  // D1 (T1b): `FtileGroup` opens its own nested `UGraphicForSnake`
-  // (`decisions.md#D1`) -- a pushed scope id so `snake-merge.ts` never
-  // fuses an edge inside this group with one outside it.
-  out.groupScope.push(out.nextId('scope'));
+  // add4-T3c: no snake scope. `FtileGroup#drawU` (`FtileGroup.java:209-227`)
+  // draws `inner` straight onto the caller's UGraphic -- `new
+  // UGraphicForSnake` exists only per lane (`Swimlanes.java:252,274,386`)
+  // and in the measurement-only `getInnerMinMax` (`FtileGroup.java:152`),
+  // so a snake inside a group merges with one outside it.
   walkTile(tile.children[0]!, x + tile.bodyOffsetX, y + tile.bodyOffsetY, { kindHint: null, lane: myLane }, out);
-  out.groupScope.pop();
 }

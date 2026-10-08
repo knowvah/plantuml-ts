@@ -15,10 +15,11 @@
  */
 
 import type { GtileIfDown } from '../tiles/gtile-if-down.js';
-import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
+import type { DiamondConditionTile, DiamondSide } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import { laneIn, laneOut } from './swimlane-lanes.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import { ifElseHexagonReservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
@@ -71,6 +72,14 @@ function pushEmphasizedEdge(
   if (emphasize !== undefined) out.edges[out.edges.length - 1]!.emphasize = emphasize;
 }
 
+/** add4-T3h: an EMPTY_DIAMOND's north slot holds the condition's own
+ *  test Sheet, `FtileDiamond.withNorth(tbTest)` (`ConditionalBuilder.java:
+ *  262-267`) -- drawn at the diamond font, `CreoleMode.FULL`, not as an
+ *  arrow-font branch label. Every other slot is a branch label. */
+function testLabelRole(diamond: DiamondConditionTile, side: DiamondSide): { ifLabelRole?: 'test' } {
+  return side === 'north' && diamond.kind === 'gtile-diamond-empty' ? { ifLabelRole: 'test' } : {};
+}
+
 function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'east', origin: GPoint): void {
   const { t, myLane, out } = ctx;
   const l = t.diamond1.labelAt(side);
@@ -85,6 +94,7 @@ function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'ea
       width: l.width,
       height: l.height,
       label: l.label,
+      ...testLabelRole(t.diamond1, side),
     },
     myLane,
   );
@@ -240,7 +250,8 @@ function connectionElse1(ctx: IfDownCtx): void {
   const xmin = Math.min(p1.x - HEXAGON_HALF_SIZE, wrapLeft);
   const points = [p1, { x: xmin, y: p1.y }, { x: xmin, y: p2.y }, p2];
   pushEmphasizedEdge(out, points, [laneOut(t.diamond1, myLane), myLane], 'down');
-  out.reservations.push(ifElseHexagonReservation(p2.x, p2.y));
+  // `Connection(diamond1, diamond2)`: drawn in diamond1's lane pass (`FtileIfDown.java:308,349,360,402,440`).
+  pushLaneReservation(out.reservations, ifElseHexagonReservation(p2.x, p2.y), laneOut(t.diamond1, myLane));
 }
 
 /** `ConnectionElse2` -- diamond1 EAST to diamond2's B (east) point, routed
@@ -254,7 +265,8 @@ function connectionElse2(ctx: IfDownCtx): void {
   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
   const points = [p1, { x: xmax, y: p1.y }, { x: xmax, y: p2.y }, p2];
   pushEmphasizedEdge(out, points, [laneOut(t.diamond1, myLane), myLane], 'down');
-  out.reservations.push(ifElseHexagonReservation(p2.x, p2.y));
+  // `Connection(diamond1, diamond2)`: drawn in diamond1's lane pass (`FtileIfDown.java:308,349,360,402,440`).
+  pushLaneReservation(out.reservations, ifElseHexagonReservation(p2.x, p2.y), laneOut(t.diamond1, myLane));
 }
 
 /**
@@ -274,7 +286,8 @@ function connectionElseHline(ctx: IfDownCtx): void {
   const { right: wrapRight } = wrapEdges(ctx);
   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
   pushEdge(out, [p1, { x: xmax, y: p1.y }, { x: xmax, y: p2y }], laneOut(t.diamond1, myLane), myLane);
-  out.reservations.push(ifElseHexagonReservation(xmax, p2y));
+  // `Connection(diamond1, diamond2)`: drawn in diamond1's lane pass (`FtileIfDown.java:308,349,360,402,440`).
+  pushLaneReservation(out.reservations, ifElseHexagonReservation(xmax, p2y), laneOut(t.diamond1, myLane));
 }
 
 /**
@@ -309,7 +322,8 @@ function connectionElseNoDiamond(ctx: IfDownCtx): void {
   const xmax = Math.max(p1.x + HEXAGON_HALF_SIZE, wrapRight);
   const points = [p1, { x: xmax, y: p1.y }, { x: xmax, y: p2.y }, p2];
   pushEmphasizedEdge(out, points, [laneOut(t.diamond1, myLane), myLane], 'down');
-  out.reservations.push(ifElseHexagonReservation(p2.x, p2.y));
+  // `Connection(diamond1, diamond2)`: drawn in diamond1's lane pass (`FtileIfDown.java:308,349,360,402,440`).
+  pushLaneReservation(out.reservations, ifElseHexagonReservation(p2.x, p2.y), laneOut(t.diamond1, myLane));
 }
 
 /** The single `conns[1]` slot (plus, under `hline`, the extra `conns[2]`

@@ -11,8 +11,13 @@
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
-import { measureLineWidth } from '../activity-text-placement.js';
-import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
+import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
+import { floorActionLineHeight } from '../tiles/gtile-action.js';
+import { ifLabelBlock } from '../activity-text-sheet-diamond.js';
+import { klimtStringBounder } from '../activity-creole-sheet.js';
+import { WidthTableMeasurer } from '../../../core/measurer.js';
+
+const INK_MEASURER = new WidthTableMeasurer();
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -31,26 +36,32 @@ import type { MutableInkBounds } from './canvas-origin.js';
 export const SPLIT_LINE_KINDS = new Set(['split-bar', 'split-join-bar']);
 
 /**
- * Family Q: `klimt/drawing/LimitFinder.java:217-224`'s `drawText` -- the
+ * Family Q: `klimt/drawing/LimitFinder.java:216-224`'s `drawText` -- the
  * far (bottom) corner is ALWAYS `baseline + 1.5`, independent of the
  * font's own descent, and the near (top) corner is `baseline -
- * (lineHeight - 1.5)`; never the measured box's own `y`/`y + height` the
- * generic box treatment uses for every other kind. An `if-label` draws
- * one `UText` per `\n`-split line (`renderIfLabel`'s own baseline,
- * `activity-renderer-if-shapes.ts:139`), each `fontSize` apart; the far
- * bound is the LAST line's baseline + 1.5, the near bound the FIRST
- * line's baseline minus one line's own height. `measureLabel`'s own
- * per-line SUM (`gtile-diamond-inside.ts:79-83`) means `node.height /
- * lineCount` recovers that one-line height exactly (every line shares the
- * same `fontSize`).
+ * (fontSize - 1.5)` (the `StringBounder` height of one `UText`); never the
+ * measured box's own `y`/`y + height` the generic box treatment uses for
+ * every other kind. An `if-label` is a creole Sheet
+ * (`activity-text-sheet-diamond.ts#ifLabelBlock`): `SheetBlock1` draws it
+ * inside its padding (`SheetBlock1.java:209-210`), one `UText` per stripe,
+ * each stripe `max(fontSize, 10)` high (`AtomText.java:179-181`). The near
+ * bound is the FIRST line's, the far bound the LAST line's; X spans the
+ * LEFT-aligned stripes, `[x + p, x + width - p]` (add4-T3h: the drawn
+ * block, not `node.width`, which an EMPTY_DIAMOND tile measures raw).
  */
 export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   const lineCount = (node.label ?? '').split('\n').length;
-  const fontSize = activityFontSize(theme, 'arrow');
-  const lineHeight = node.height / lineCount;
-  const firstBaselineY = node.y + fontSize * TITLE_ASCENT_FRACTION;
-  const lastBaselineY = firstBaselineY + (lineCount - 1) * fontSize;
-  acc.minY = Math.min(acc.minY, firstBaselineY - (lineHeight - 1.5));
+  const { tb, fc } = ifLabelBlock(node, theme);
+  const fontSize = fc.size;
+  const pad = theme.padding ?? 0;
+  const width = tb
+    .calculateDimension(klimtStringBounder(INK_MEASURER, { family: fc.family, size: fontSize }))
+    .getWidth();
+  acc.minX = Math.min(acc.minX, node.x + pad);
+  acc.maxX = Math.max(acc.maxX, node.x + width - pad);
+  const firstBaselineY = node.y + pad + fontSize * TITLE_ASCENT_FRACTION;
+  const lastBaselineY = firstBaselineY + (lineCount - 1) * floorActionLineHeight(fontSize);
+  acc.minY = Math.min(acc.minY, firstBaselineY - (fontSize - 1.5));
   acc.maxY = Math.max(acc.maxY, lastBaselineY + 1.5);
 }
 
@@ -102,15 +113,20 @@ export function extendForEdgeLabelText(acc: MutableInkBounds, edge: ActivityEdge
   // resolves the SAME default, so ink and draw agree.
   if (edge.label === undefined) return;
   const fontSize = activityFontSize(theme, 'arrow');
-  const width = measureLineWidth(theme, fontSize, edge.label);
-  const position = getTextBlockPosition(
-    edge.points,
-    { width, height: fontSize },
-    edge.labelAlign ?? DEFAULT_LABEL_ALIGN,
-  );
-  const baselineY = centeredFirstBaselineY(position.y + fontSize / 2, fontSize, 1);
-  acc.minX = Math.min(acc.minX, position.x);
-  acc.maxX = Math.max(acc.maxX, position.x + width);
+  // add4-T1f (SWITCH-NL): one `UText` per Sheet line, stacked `fontSize`
+  // apart (`SheetBlock1.java:146-148`); the envelope runs first ink-top to
+  // last ink-bottom, matching `renderer.ts#renderEdgeLabelAligned`.
+  const lines = edge.label.split('\n');
+  // add4-T3h: the drawn block's own dimension (`edgeLabelBlockSize`,
+  // `Snake.java:247`); each `UText` sits inside `SheetBlock1`'s padding
+  // (`SheetBlock1.java:209-210`), so the LEFT block's ink spans
+  // `[x + p, x + width - p]`.
+  const pad = theme.padding ?? 0;
+  const dim = edgeLabelBlockSize(edge.label, theme);
+  const position = getTextBlockPosition(edge.points, dim, edge.labelAlign ?? DEFAULT_LABEL_ALIGN);
+  const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
+  acc.minX = Math.min(acc.minX, position.x + pad);
+  acc.maxX = Math.max(acc.maxX, position.x + dim.width - pad);
   acc.minY = Math.min(acc.minY, baselineY - (fontSize - 1.5));
-  acc.maxY = Math.max(acc.maxY, baselineY + 1.5);
+  acc.maxY = Math.max(acc.maxY, baselineY + fontSize * (lines.length - 1) + 1.5);
 }

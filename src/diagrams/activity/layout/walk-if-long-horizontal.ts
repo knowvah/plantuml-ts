@@ -23,6 +23,7 @@ import { laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { HlineCandidate } from './swimlane-hline.js';
+import { collectTouchedLanes } from './tile-coordinates-group.js';
 import { applyOutLabel } from './tile-layout-inlabel.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default (`AbstractFtile
@@ -64,6 +65,8 @@ function pushDiamondLabel(ctx: LhCtx, diamond: GtileDiamondInside2, side: Diamon
       width: l.width,
       height: l.height,
       label: l.label,
+      // add4-T3j: drawn as the FULL `create(fcArrow)` block it is sized as.
+      ifLabelRole: 'full',
     },
     ctx.myLane,
   );
@@ -183,7 +186,9 @@ function connectionVerticalOut(ctx: LhCtx, i: number): void {
   const tileOrigin = { x: x + b.tileX, y: y + b.tileY };
   const p1 = absolutePoint(t.tiles[i]!.getCoord(SOUTH_HOOK), tileOrigin.x, tileOrigin.y);
   const p2 = { x: p1.x, y: y + t.height };
-  pushEdge(out, [p1, p2], laneOut(t.tiles[i]!, myLane), myLane);
+  // add4-T1b: `super(tile, null)` -- see {@link connectionLastElseOut}.
+  const lane = laneOut(t.tiles[i]!, myLane);
+  pushEdge(out, [p1, p2], lane, lane);
   applyOutLabel(out, t.tiles[i]!, BRANCH_EXIT_LABEL_ALIGN);
 }
 
@@ -241,7 +246,14 @@ function connectionLastElseOut(ctx: LhCtx): void {
   const p1 = absolutePoint(t.tile2.getCoord(SOUTH_HOOK), origin.x, origin.y);
   const points: GPoint[] = [p1, { x: p1.x, y: y + t.height }];
   if (t.nbOut === 0) points.push({ x: x + t.left, y: y + t.height });
-  pushEdge(out, points, laneOut(t.tile2, myLane), myLane);
+  // add4-T1b: `super(tile2, null)` (`:359`): a `null` tile2 is contained in
+  // every lane (`UGraphicInterceptorOneSwimlane`/`AllSwimlanes`' Connection
+  // branch, `vcompact/UGraphicInterceptorAllSwimlanes.java:88-101`) and
+  // `Swimlanes$Cross` skips it (`Swimlanes.java:189-193`), so it is a
+  // same-lane connection in tile2's OWN out lane -- never cross-lane-routed
+  // back to the diamonds' `myLane`.
+  const lane = laneOut(t.tile2, myLane);
+  pushEdge(out, points, lane, lane);
   applyOutLabel(out, t.tile2, BRANCH_EXIT_LABEL_ALIGN);
 }
 
@@ -273,6 +285,19 @@ function hlineCandidates(ctx: LhCtx): HlineCandidate[] {
 }
 
 /**
+ * `FtileIfLongHorizontal#getSwimlanes()` (`:131-141`): `getSwimlaneIn()`
+ * (`couples.get(0).getSwimlaneIn()`, the diamonds' own `myLane`) plus every
+ * couple's and `tile2`'s own lanes -- `HlinePayload.measureLanes`.
+ */
+function hlineMeasureLanes(ctx: LhCtx): string[] {
+  const lanes = new Set<string>();
+  if (ctx.myLane !== undefined) lanes.add(ctx.myLane);
+  for (const tile of ctx.t.tiles) collectTouchedLanes(tile, lanes);
+  collectTouchedLanes(ctx.t.tile2, lanes);
+  return [...lanes];
+}
+
+/**
  * `ConnectionHline`, drawn only when `nbOut > 0` -- a plain, arrowless line
  * under the whole tile. The pushed edge is always the UNLANED
  * `getMinmaxSimple` extent (byte-identical to before T1p-g); the `hline`
@@ -301,12 +326,19 @@ function connectionHline(ctx: LhCtx): void {
     ],
     myLane,
     myLane,
-    { hline: { low: x, high: x + t.width, candidates: hlineCandidates(ctx), unfiltered: [leftOut] } },
+    {
+      hline: {
+        low: x,
+        high: x + t.width,
+        candidates: hlineCandidates(ctx),
+        unfiltered: [leftOut],
+        measureLanes: hlineMeasureLanes(ctx),
+      },
+    },
   );
   // `withMerge(NONE)` (`FtileIfLongHorizontal.java:507`) -- T1b wires
-  // `mergeable`; see `swimlane-placement.ts#EdgeMeta.scope`'s own doc for
-  // why `routeHline`'s per-lane fan-out never loses this (`NONE` never
-  // reaches the merge pass's scope check at all).
+  // `mergeable`: `NONE` never reaches the merge pass, so `routeHline`'s
+  // per-lane fan-out cannot lose it.
   const edge = out.edges[out.edges.length - 1]!;
   edge.arrowhead = false;
   edge.mergeable = 'NONE';

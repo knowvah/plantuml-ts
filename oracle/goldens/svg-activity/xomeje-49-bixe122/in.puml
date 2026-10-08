@@ -1,0 +1,11 @@
+@startuml
+:start;
+partition foo {
+:exe1;
+if (test) then
+  :toto2;
+endif
+:other;
+}
+stop
+@enduml

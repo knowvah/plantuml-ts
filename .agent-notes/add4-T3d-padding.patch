@@ -1,0 +1,71 @@
+diff --git a/src/diagrams/activity/activity-renderer-if-shapes.ts b/src/diagrams/activity/activity-renderer-if-shapes.ts
+index aa63e6d95..783d61d27 100644
+--- a/src/diagrams/activity/activity-renderer-if-shapes.ts
++++ b/src/diagrams/activity/activity-renderer-if-shapes.ts
+@@ -145,12 +145,13 @@ export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
+   const fontSize = activityFontSize(theme, 'arrow');
+   const label = node.label ?? '';
+   const lines = label.split('\n');
+-  const baselineY = node.y + fontSize * ASCENT_FRACTION;
++  const pad = theme.padding ?? 0;
++  const baselineY = node.y + pad + fontSize * ASCENT_FRACTION;
+   const fill = activityFontColor(theme, 'arrow');
+   if (lines.length > 1) {
+-    return textLines(lines, node.x, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
++    return textLines(lines, node.x + pad, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
+   }
+-  return drawActivityText(node.x, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
++  return drawActivityText(node.x + pad, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+ }
+ 
+ /**
+diff --git a/src/diagrams/activity/layout/compress/shapes-of.ts b/src/diagrams/activity/layout/compress/shapes-of.ts
+index d2d635ca5..e693ea73b 100644
+--- a/src/diagrams/activity/layout/compress/shapes-of.ts
++++ b/src/diagrams/activity/layout/compress/shapes-of.ts
+@@ -150,7 +150,8 @@ const FRAME_KINDS = new Set(['group', 'partition']);
+  */
+ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
+   const fontSize = activityFontSize(theme, 'arrow');
+-  const firstBaselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
++  const pad = theme.padding ?? 0;
++  const firstBaselineY = node.y + pad + fontSize * TITLE_BASELINE_ASCENT;
+   const lines = (node.label ?? '').split('\n');
+   let width = 0;
+   let firstHeight = 0;
+@@ -160,7 +161,7 @@ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
+     if (i === 0) firstHeight = dim.height;
+   }
+   const lastBaselineY = firstBaselineY + fontSize * (lines.length - 1);
+-  return { kind: 'text', x: node.x, y: lastBaselineY, width, height: lastBaselineY - firstBaselineY + firstHeight };
++  return { kind: 'text', x: node.x + pad, y: lastBaselineY, width, height: lastBaselineY - firstBaselineY + firstHeight };
+ }
+ 
+ /**
+diff --git a/src/diagrams/activity/tiles/gtile-diamond-inside.ts b/src/diagrams/activity/tiles/gtile-diamond-inside.ts
+index 344af6a08..2875fa202 100644
+--- a/src/diagrams/activity/tiles/gtile-diamond-inside.ts
++++ b/src/diagrams/activity/tiles/gtile-diamond-inside.ts
+@@ -23,6 +23,7 @@ function withGlobalPadding(dim: { width: number; height: number }, theme: Theme)
+   return { width: dim.width + 2 * pad, height: dim.height + 2 * pad };
+ }
+ 
++function padSide(d: LabelDim, theme: Theme): LabelDim { if (d.text === '') return d; const w = withGlobalPadding(d, theme); return { ...d, ...w }; }
+ /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
+ const HEXAGON_HALF_SIZE = 12;
+ /** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
+@@ -175,10 +176,10 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
+     super();
+     this.label = label;
+     const arrowSize = activityFontSize(theme, 'arrow');
+-    this.north = measureLabel(labels.north, bounder, arrowSize);
+-    this.south = measureLabel(labels.south, bounder, arrowSize);
+-    this.west = measureLabel(labels.west, bounder, arrowSize);
+-    this.east = measureLabel(labels.east, bounder, arrowSize);
++    this.north = padSide(measureLabel(labels.north, bounder, arrowSize), theme);
++    this.south = padSide(measureLabel(labels.south, bounder, arrowSize), theme);
++    this.west = padSide(measureLabel(labels.west, bounder, arrowSize), theme);
++    this.east = padSide(measureLabel(labels.east, bounder, arrowSize), theme);
+ 
+     const diamondSize = activityFontSize(theme, 'diamond');
+     // IFNL (T3d, `vaxiki-78-nice114`): a multi-line condition (unescaped

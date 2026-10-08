@@ -1,0 +1,37 @@
+surveying 825 unknown fixtures (concurrency 6)
+  25/825
+  50/825
+  75/825
+  100/825
+  125/825
+  150/825
+  175/825
+  200/825
+  225/825
+  250/825
+  275/825
+  300/825
+  325/825
+  350/825
+  375/825
+  400/825
+  425/825
+  450/825
+  475/825
+  500/825
+  525/825
+  550/825
+  575/825
+  600/825
+  625/825
+  650/825
+  675/825
+  700/825
+  725/825
+  750/825
+  775/825
+  800/825
+  825/825
+[xmldom fatalError]	comment is not well-formed at position 1360 
+@#[line:1,col:1361]
+wrote plans/activity-divergence-drive-4/measurements/b1-eng/parity-unknown.json — {"conformant":348,"structural-match":57,"diverged":420,"errored":0,"timeout":0,"oracle-error":0}

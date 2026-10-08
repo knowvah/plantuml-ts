@@ -1,0 +1,15 @@
+@startuml
+start
+:Home Page;
+
+switch (action)
+note left: Note on Switch
+case ( case1 )
+  :Case1;
+case ( case2 )
+  :Case2;
+case ( case3 )
+  :Case3;
+endswitch
+stop
+@enduml

@@ -791,8 +791,67 @@ describe('refusal coverage — baseline shape', () => {
     // svg-activity clone rows. Derivation: 6166 + 230 = 6396.
     // 6396 -> 6413 / 6166 -> 6183 / 230 at add3/close-b3 (2026-10-07): 17
     // svg-activity clone rows. Derivation: 6183 + 230 = 6413.
-    expect(manifest.fixtures.length).toBe(6413);
-    expect(pinnedJarErrors.length).toBe(105);
+    // 6413 -> 6492 / 6183 -> 6250 / 230 -> 242 at add4/T0b (2026-10-07): the
+    // 79 uncaptured tests/corpus/activity fixtures captured -- 66 render on
+    // both sides, 5 jar-error pages (we render tajiri-57-sepu092, error the
+    // other 4), 8 known-gap refusals (ledger
+    // unknown-ledger/add4-T0b-activity.json). Derivation: 6250 + 242 = 6492.
+    // 6492 -> 6503 / 6250 -> 6261 / 242 at add4/close-b0 (2026-10-07): 11
+    // svg-activity clone rows. Derivation: 6261 + 242 = 6503.
+    // 6503 -> 6505 / 6261 -> 6263 at add4/merge-T1a: 2 svg-activity clone
+    // rows. Derivation: 6263 + 242 = 6505.
+    // 6505 -> 6510 / 6263 -> 6268 at add4/merge-T1c: 5 svg-activity clone
+    // rows. Derivation: 6268 + 242 = 6510.
+    // 6510 -> 6516 / 6268 -> 6274 at add4/merge-T1b: 6 svg-activity clone
+    // rows. Derivation: 6274 + 242 = 6516.
+    // 6516 -> 6518 / 6274 -> 6276 at add4/merge-T1g: 2 svg-activity clone
+    // rows. Derivation: 6276 + 242 = 6518.
+    // 6518 -> 6522 / 6276 -> 6280 at add4/merge-T2c: 4 svg-activity clone
+    // rows. Derivation: 6280 + 242 = 6522.
+    // 6522 -> 6529 / 6280 -> 6287 at add4/merge-T2a: 7 svg-activity clone
+    // rows. Derivation: 6287 + 242 = 6529.
+    // 6529 -> 6551 / 6287 -> 6309 at add4/merge-T2d: 22 svg-activity clone
+    // rows. Derivation: 6309 + 242 = 6551.
+    // 6551 -> 6552 / 6309 -> 6310 at add4/merge-T2e: 1 svg-activity clone
+    // rows. Derivation: 6310 + 242 = 6552.
+    // 6552 -> 6553 / 6310 -> 6311 at add4/merge-T2d-2: 1 svg-activity clone
+    // rows. Derivation: 6311 + 242 = 6553.
+    // 6553 -> 6558 / 6311 -> 6316 at add4/merge-T2f: 5 svg-activity clone
+    // rows. Derivation: 6316 + 242 = 6558.
+    // 6558 -> 6569 / 6316 -> 6327 at add4/merge-T2b: 11 svg-activity clone
+    // rows. Derivation: 6327 + 242 = 6569.
+    // 6569 -> 6570 / 6327 -> 6328 at add4/merge-T2f-2: 1 svg-activity clone
+    // rows. Derivation: 6328 + 242 = 6570.
+    // 6570 -> 6572 / 6328 -> 6330 at add4/merge-T2g: 2 svg-activity clone
+    // rows. Derivation: 6330 + 242 = 6572.
+    // 6572 -> 6578 / 6330 -> 6336 at add4/merge-T3a: 6 svg-activity clone
+    // rows. Derivation: 6336 + 242 = 6578.
+    // 6578 -> 6579 / 6336 -> 6337 at add4/merge-T3d: 1 svg-activity clone
+    // rows. Derivation: 6337 + 242 = 6579.
+    // 6579 -> 6581 / 6337 -> 6339 at add4/merge-T3a-2: 2 svg-activity clone
+    // rows. Derivation: 6339 + 242 = 6581.
+    // 6581 -> 6583 / 6339 -> 6341 at add4/merge-T3c: 2 svg-activity clone
+    // rows. Derivation: 6341 + 242 = 6583.
+    // 6583 -> 6584 / 6341 -> 6342 at add4/merge-T3c-2: 1 svg-activity clone
+    // rows. Derivation: 6342 + 242 = 6584.
+    // 6584 -> 6587 / 6342 -> 6345 at add4/merge-T3d-3: 3 svg-activity clone
+    // rows. Derivation: 6345 + 242 = 6587.
+    // 6587 -> 6590 / 6345 -> 6348 at add4/merge-T3gates-2: 3 svg-activity clone
+    // rows. Derivation: 6348 + 242 = 6590.
+    // 6590 -> 6591 / 6348 -> 6349 at add4/merge-T3b: 1 svg-activity clone
+    // rows. Derivation: 6349 + 242 = 6591.
+    // 6591 -> 6592 / 6350 -> 6351 at add4/merge-T3e-2: 1 svg-activity clone
+    // rows. Derivation: 6351 + 241 = 6592.
+    // 6592 -> 6593 / 6351 -> 6352 at add4/merge-T3f: 1 svg-activity clone
+    // rows. Derivation: 6352 + 241 = 6593.
+    // 6593 -> 6595 / 6352 -> 6354 at add4/merge-T3g: 2 svg-activity clone
+    // rows. Derivation: 6354 + 241 = 6595.
+    // 6595 -> 6597 / 6354 -> 6356 at add4/merge-T3h: 2 svg-activity clone
+    // rows. Derivation: 6356 + 241 = 6597.
+    // 6597 -> 6600 / 6360 -> 6363 at add4/merge-T3k: 3 svg-activity clone
+    // rows. Derivation: 6363 + 237 = 6600.
+    expect(manifest.fixtures.length).toBe(6600);
+    expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
     // (2026-09-20): `sequence/recani-60-licu962` renders now that the
@@ -813,7 +872,12 @@ describe('refusal coverage — baseline shape', () => {
     // engine class, from a fresh measurement.
     // 268 -> 264 at add2/close-b1p: the 4 `end merge` rows render.
     // 264 -> 230 at add2/close-b2: the 34 remaining activity parser-gap rows render.
-    expect(pinnedErroring.length).toBe(230);
+    // 230 -> 242 at add4/T0b: of the 79 new activity captures, 8 known-gap
+    // refusals + 4 of the 5 jar-error pages error here too (tajiri-57-sepu092's
+    // jar errors, we render -- refusal cohort jar-error).
+    // 242 -> 241 at add4/merge-T3e-2: fukika-81-gite897 renders (stale pin retired).
+    // 241 -> 237 at add4/merge-T3k: the 4 add4-T0b activity parser gaps render.
+    expect(pinnedErroring.length).toBe(237);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -851,7 +915,38 @@ describe('refusal coverage — baseline shape', () => {
     // 6119 -> 6155 at add3/close-b2 (36 svg-activity clones).
     // 6155 -> 6166 at add3/close-b3w1 (11 svg-activity clones).
     // 6166 -> 6183 at add3/close-b3 (17 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6183);
+    // 6183 -> 6250 at add4/T0b (66 newly captured corpus fixtures render on
+    // both sides, plus jar-error page tajiri-57-sepu092, which we render).
+    // 6250 -> 6261 at add4/close-b0 (11 svg-activity clones).
+    // 6261 -> 6263 at add4/merge-T1a (2 svg-activity clones).
+    // 6263 -> 6268 at add4/merge-T1c (5 svg-activity clones).
+    // 6268 -> 6274 at add4/merge-T1b (6 svg-activity clones).
+    // 6274 -> 6276 at add4/merge-T1g (2 svg-activity clones).
+    // 6276 -> 6280 at add4/merge-T2c (4 svg-activity clones).
+    // 6280 -> 6287 at add4/merge-T2a (7 svg-activity clones).
+    // 6287 -> 6309 at add4/merge-T2d (22 svg-activity clones).
+    // 6309 -> 6310 at add4/merge-T2e (1 svg-activity clones).
+    // 6310 -> 6311 at add4/merge-T2d-2 (1 svg-activity clones).
+    // 6311 -> 6316 at add4/merge-T2f (5 svg-activity clones).
+    // 6316 -> 6327 at add4/merge-T2b (11 svg-activity clones).
+    // 6327 -> 6328 at add4/merge-T2f-2 (1 svg-activity clones).
+    // 6328 -> 6330 at add4/merge-T2g (2 svg-activity clones).
+    // 6330 -> 6336 at add4/merge-T3a (6 svg-activity clones).
+    // 6336 -> 6337 at add4/merge-T3d (1 svg-activity clones).
+    // 6337 -> 6339 at add4/merge-T3a-2 (2 svg-activity clones).
+    // 6339 -> 6341 at add4/merge-T3c (2 svg-activity clones).
+    // 6341 -> 6342 at add4/merge-T3c-2 (1 svg-activity clones).
+    // 6342 -> 6345 at add4/merge-T3d-3 (3 svg-activity clones).
+    // 6345 -> 6348 at add4/merge-T3gates-2 (3 svg-activity clones).
+    // 6348 -> 6349 at add4/merge-T3b (1 svg-activity clones).
+    // 6349 -> 6350 at add4/merge-T3e-2 (fukika-81-gite897 retired to rendering).
+    // 6350 -> 6351 at add4/merge-T3e-2 (1 svg-activity clones).
+    // 6351 -> 6352 at add4/merge-T3f (1 svg-activity clones).
+    // 6352 -> 6354 at add4/merge-T3g (2 svg-activity clones).
+    // 6354 -> 6356 at add4/merge-T3h (2 svg-activity clones).
+    // 6356 -> 6360 at add4/merge-T3k (4 activity parser gaps fixed).
+    // 6360 -> 6363 at add4/merge-T3k (3 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6363);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -908,7 +1003,13 @@ describe('refusal coverage — baseline shape', () => {
     // minute it reads jarRendered: false, so it is no defect to excuse.
     // 197 -> 196 at cdd5/close-b5: unknown/xuloxo-85-vibu502's Tim gap is
     // fixed (cdd5-T5d); it renders, so there is no refusal left to excuse.
-    expect(gaps.length).toBe(196);
+    // 196 -> 204 at add4/T0b: 8 newly captured activity fixtures -- 4 parser
+    // gaps (each names its missing Command) and 4 jar ErrorUml pages past
+    // the head window (Welcome preamble, PSystemError.java:217-218).
+    // 204 -> 200 at add4/merge-T3k: the 4 add4-T0b activity parser-gap
+    // known-gaps are fixed (CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender ported) and re-pinned ok.
+    expect(gaps.length).toBe(200);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //
@@ -944,7 +1045,10 @@ describe('refusal coverage — baseline shape', () => {
     // 39 -> 35 at add2/close-b1p (2026-10-02): the 4 `end merge` rows render
     // (CommandForkEnd3.java:57-81, ParallelBuilderMerge.java).
     // 35 -> 1 at add2/close-b2: the 34 remaining parser-gap rows render (T2e/T2g).
-    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(1);
+    // 1 -> 0 at add4/merge-T3e-2 (2026-10-07): the last, dot-cache
+    // activity/fukika-81-gite897, has rendered since add1 b3 (journal row 52);
+    // its stale `weErrored: true` pin is retired from a fresh measurement.
+    expect(defects.filter((f) => f.type === 'activity')).toHaveLength(0);
   });
 });
 

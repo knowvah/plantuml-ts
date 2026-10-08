@@ -1,0 +1,7 @@
+@startuml
+partition P {
+repeat
+:x;
+repeat while (again?)
+}
+@enduml

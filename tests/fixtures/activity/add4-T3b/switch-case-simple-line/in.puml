@@ -1,0 +1,12 @@
+@startuml
+start
+switch (test?)
+case (**Bold** wide case label)
+  :a;
+case (x __under__ y __line__ z)
+  :b;
+case (plain)
+  :c;
+endswitch
+stop
+@enduml

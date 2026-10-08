@@ -98,11 +98,24 @@ export class GtileNote extends TileLeaf {
   readonly height: number;
   readonly text: string;
   readonly side: 'left' | 'right';
+  /** add4-T1c: the note's own `#color` (BACK), drawn as the Opale fill by
+   *  every wrap that overrides its style with `note.getColors()`
+   *  (`FtileWithNoteOpale.java:137-139`, `FtileWithNotes.java:109-111`) --
+   *  but NOT by a bare note leaf (`FtileNoteAlone.java:104-106` never
+   *  calls `eventuallyOverride`), so `tile-coordinates.ts`'s own
+   *  `'gtile-note'` walker deliberately does not read it. */
+  readonly color: string | undefined;
+  /** `FtileNoteAlone#withOutPoint` (`FtileNoteAlone.java:103,129-132`), set by
+   *  `FtileFactoryDelegatorAddNote.java:67-68` to `note.getType() ==
+   *  NoteType.NOTE` -- `false` for a `FLOATING_NOTE` alone (add4-T2c). */
+  readonly withOutPoint: boolean;
 
-  constructor(node: ActivityNote, bounder: StringBounder, theme: Theme) {
+  constructor(node: ActivityNote, bounder: StringBounder, theme: Theme, withOutPoint = true) {
     super();
+    this.withOutPoint = withOutPoint;
     this.text = node.text;
     this.side = node.position;
+    this.color = node.color;
     // The ROOT `note { FontSize 13 }` block (plantuml.skin:323): an activity
     // note resolves `SName.note` under `activityDiagram`
     // (`ftile/vcompact/FtileWithNoteOpale.java:89`,
@@ -138,9 +151,11 @@ export class GtileNote extends TileLeaf {
   }
 
   /**
-   * Has an out point: `tile-layout.ts:79` always builds a `GtileNote` as
-   * an in-flow node (this port has no notion of a legend-only note), which
-   * corresponds to `NoteType.NOTE` below.
+   * {@link withOutPoint}: `true` (`NoteType.NOTE`) for every in-flow note;
+   * `false` only for a `FLOATING_NOTE` that is a list's FIRST element
+   * (`tile-layout-structural.ts#tileNote`, add4-T2c), so the following
+   * sibling gets no `ConnectionVerticalDown` (`FtileFactoryDelegator
+   * Assembly.java:68-70`).
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileNoteAlone.java:129-130
    *   -- `calculateDimensionFtile`'s `withOutPoint` branch, five-argument
    *   `FtileGeometry` with `outY = dimTotal.getHeight()`.
@@ -149,9 +164,14 @@ export class GtileNote extends TileLeaf {
    *   kind.
    */
   hasPointOut(): boolean {
-    return true;
+    return this.withOutPoint;
   }
 }
+
+/** `klimt/geom/VerticalAlignment`'s two values a note wrap is ever built
+ *  with: `CENTER` (every caller but one) and `TOP` (`InstructionSwitch
+ *  .java:125`, the switch's own notes). */
+export type NoteVerticalAlignment = 'center' | 'top';
 
 /**
  * `FtileWithNoteOpale` (`ftile/vcompact/FtileWithNoteOpale.java:78-255`):
@@ -196,7 +216,7 @@ export class GtileNoteOpale extends TileComposite {
   readonly spikeOffsetX: number;
   readonly spikeOffsetY: number;
 
-  constructor(tile: Tile, note: GtileNote, withLink = true) {
+  constructor(tile: Tile, note: GtileNote, withLink = true, verticalAlignment: NoteVerticalAlignment = 'center') {
     super();
     this.children = [tile];
     this.note = note;
@@ -209,14 +229,14 @@ export class GtileNoteOpale extends TileComposite {
     // `marge = notePosition === LEFT ? dimNote.w + suppSpace : 0`.
     this.tileOffsetY = (this.height - tile.height) / 2;
     this.tileOffsetX = note.side === 'left' ? note.width + NOTE_OPALE_GAP : 0;
-    // `getTranslateForOpale` (`:177-193`): `yForNote` is CENTER-aligned
-    // (`verticalAlignment.CENTER`, the default every simple-leaf predecessor
-    // passes -- `InstructionSimple.java:111`/`InstructionStop.java:76`/
-    // `InstructionStart.java:76`/`InstructionSpot.java:76`/
-    // `InstructionEnd.java:71`; `InstructionSwitch.java:125`'s TOP is not
-    // reached by any tile this composite wraps). `dx` mirrors `marge` on
-    // the opposite side: `0` when LEFT, else `dimTotal.w - dimNote.w`.
-    this.noteOffsetY = (this.height - note.height) / 2;
+    // `getTranslateForOpale` (`:177-193`): `yForNote = (dimTotal.h -
+    // dimNote.h) / 2` when CENTER (every simple-leaf predecessor --
+    // `InstructionSimple.java:111` et al), else `0` -- add4-T1f: the
+    // switch's own TOP (`InstructionSwitch.java:125`). `getTranslate`'s
+    // `yForFtile` above is centred whatever the alignment. `dx` mirrors
+    // `marge` on the opposite side: `0` when LEFT, else `dimTotal.w -
+    // dimNote.w`.
+    this.noteOffsetY = verticalAlignment === 'center' ? (this.height - note.height) / 2 : 0;
     this.noteOffsetX = note.side === 'left' ? 0 : this.width - note.width;
     // `pp2` resolved into this composite's local frame: the x-seam between
     // note and tile (= `tileOffsetX` when LEFT, `tileOffsetX + tile.width`

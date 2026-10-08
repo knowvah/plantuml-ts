@@ -1,0 +1,10 @@
+@startuml
+switch (test?)
+case (cond A)
+  :Text A;
+case (cond B)
+  :text B;
+case (cond C)
+  end
+endswitch
+@enduml

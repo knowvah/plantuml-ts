@@ -126,7 +126,7 @@ describe('svg-activity text census — corpus presence', () => {
     expect(pinned, 'the population is the committed corpus, never a slug list').toEqual(fromCache);
   });
 
-  it('the partition matches the sibling ratchet: 349 baseline / 0 error / 23 jar-error', () => {
+  it('the partition matches the sibling ratchet: 416 baseline / 3 error / 32 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -145,9 +145,19 @@ describe('svg-activity text census — corpus presence', () => {
     // add3/T0a (2026-10-06): `tmp1` retired (D9), a byte-identical duplicate of
     // ruzazu-94-meso880 (pinned since 9524864ff); its dot-cache row is removed.
     // Derivation: 350 - 1 = 349 baseline.
-    expect(baselineFixtures.length).toBe(349);
-    expect(errorFixtures.length).toBe(0);
-    expect(jarErrorFixtures.length).toBe(23);
+    // add4/T0b (2026-10-07): 79 new captures -- 63 render and were promoted
+    // error -> baseline by the promotion pass; 9 golden jar error pages
+    // (PSystemError.java:148-155); 7 our activity parser refuses (4 parser
+    // gaps: CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender; 3 misfiled non-activity sources the jar draws
+    // as SEQUENCE/CLASS). Derivation: 349 + 63 = 412 / 0 + 7 / 23 + 9 = 32.
+    // add4/merge-T3k (2026-10-08): bopele/cebuci/fugoko/tidoda render once
+    // CommandPage, CommandLink3, CommandFootboxIgnored and
+    // CommandHideShowByGender are ported (ActivityDiagramFactory3.java:105,107,
+    // 155) -- promoted error -> baseline. Derivation: 412 + 4 = 416 / 7 - 4 = 3.
+    expect(baselineFixtures.length).toBe(416);
+    expect(errorFixtures.length).toBe(3);
+    expect(jarErrorFixtures.length).toBe(32);
   });
 });
 

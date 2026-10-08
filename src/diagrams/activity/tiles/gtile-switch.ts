@@ -4,7 +4,12 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+import { measurerAdapterOf } from './gtile-action.js';
+import type { CaseDim } from './gtile-switch-geometry.js';
 import {
+  caseDimOf,
   computeBigDiamondCaseX,
   computeNudeDimensions,
   computeSmallDiamondCaseX,
@@ -17,14 +22,60 @@ import {
  *  @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
 const ATOM_TEXT_MIN_HEIGHT = 10;
 
-/** `Branch#getTextBlockPositive`'s own height, per case label, folded
- *  per-line the same way `gtile-diamond-inside.ts#measureLabel` does --
- *  used only for {@link computeYdelta1a}'s `maxPositiveLabelHeight`. */
-function measureLabelHeight(text: string | undefined, bounder: StringBounder, fontSize: number): number {
-  if (text === undefined || text === '') return 0;
+/** `Branch#getTextBlock` (`Branch.java:248-258`): the arrow-font
+ *  `display.create0(...)` block -- `EMPTY_TEXT_BLOCK` (0x0) for a null
+ *  display, else widest line by summed per-line heights, each line folded
+ *  the same way `gtile-diamond-inside.ts#measureLabel` does.
+ *
+ *  add4-T3b: each line's width is its `CreoleMode.SIMPLE_LINE` creole width
+ *  (`Branch.java:255-256`) -- `**bold**` resolves to its text, while
+ *  `__underline__` stays literal (`CommandCreoleBuilder.java:85-86` registers
+ *  it only under FULL). The tile `StringBounder` is family-blind
+ *  (`getDimension(text, size)`), so the family is left empty.
+ *  @see net/sourceforge/plantuml/activitydiagram3/Branch.java:248-266 */
+function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): { width: number; height: number } {
+  if (text === undefined || text === '') return { width: 0, height: 0 };
+  const measurer = measurerAdapterOf(bounder);
+  const font = { family: '', size: fontSize };
+  let width = 0;
   let height = 0;
-  for (const line of text.split('\n')) height += Math.max(bounder.getDimension(line, fontSize).height, ATOM_TEXT_MIN_HEIGHT);
-  return height;
+  for (const line of text.split('\n')) {
+    const dim = bounder.getDimension(line, fontSize);
+    const lineWidth = creoleTextLines(line, font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]?.width ?? 0;
+    if (lineWidth > width) width = lineWidth;
+    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
+  }
+  return { width, height };
+}
+
+/** A case's {@link CaseDim} after both label decorations, plus `yl` --
+ *  the in-label height its body is drawn below. */
+interface DecoratedCase extends CaseDim {
+  readonly yl: number;
+}
+
+/**
+ * `FtileFactoryDelegatorSwitch#createWithLinks` (`:109-113`) wraps every
+ * branch as `FtileDecorateOutLabel(FtileDecorateInLabel(ftile,
+ * dimLabelIn), dimLabelOut)`, `dimLabelIn` = `getTextBlockPositive()`
+ * (the `case (LABEL)`), `dimLabelOut` = `getTextBlockSpecial()` (the
+ * trailing `-> label;`). `FtileDecorateInLabel#calculateDimension`:
+ * `addTop(yl)` then `incRight(xl - right)` when positive, and `drawU`
+ * translates the body by `dy(yl)`; `FtileDecorateOutLabel`: `addBottom(
+ * yl)` then the same `incRight`. `addTop` also shifts `inY`/`outY` by
+ * `yl` (`FtileGeometry.java:108-112`), which the walker gets for free by
+ * placing the BODY `yl` lower.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDecorateInLabel.java
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDecorateOutLabel.java
+ */
+function decorateCase(tile: Tile, label: string | undefined, bounder: StringBounder, fontSize: number): DecoratedCase {
+  const body = caseDimOf(tile);
+  const dimIn = measureLabel(label, bounder, fontSize);
+  const dimOut = measureLabel(tile.outLabel?.label, bounder, fontSize);
+  let width = body.width;
+  width += Math.max(0, dimIn.width - (width - body.left));
+  width += Math.max(0, dimOut.width - (width - body.left));
+  return { width, height: body.height + dimIn.height + dimOut.height, left: body.left, yl: dimIn.height };
 }
 
 interface SwitchLayout {
@@ -56,12 +107,13 @@ function computeSwitchLayout(
   bounder: StringBounder,
   theme: Theme,
 ): SwitchLayout {
-  const mode = computeSwitchMode(diamond1.width, caseTiles);
-  const nude = computeNudeDimensions(caseTiles);
   const arrowSize = activityFontSize(theme, 'arrow');
+  const decorated = caseTiles.map((tile, i) => decorateCase(tile, caseLabels[i], bounder, arrowSize));
+  const mode = computeSwitchMode(diamond1.width, decorated);
+  const nude = computeNudeDimensions(decorated);
   let maxPositiveLabelHeight = 0;
   for (const label of caseLabels) {
-    const h = measureLabelHeight(label, bounder, arrowSize);
+    const h = measureLabel(label, bounder, arrowSize).height;
     if (h > maxPositiveLabelHeight) maxPositiveLabelHeight = h;
   }
   const yDelta1a = computeYdelta1a({
@@ -72,15 +124,17 @@ function computeSwitchLayout(
   });
 
   const extent = mode.isBigDiamond
-    ? computeBigDiamondCaseX(caseTiles, mode, diamond1.width)
-    : { xOffsets: computeSmallDiamondCaseX(caseTiles), totalWidth: 0, pivotLeft: 0 };
+    ? computeBigDiamondCaseX(decorated, mode, diamond1.width)
+    : { xOffsets: computeSmallDiamondCaseX(decorated), totalWidth: 0, pivotLeft: 0 };
   const width = mode.isBigDiamond
     ? extent.totalWidth
     : Math.max(diamond1.width, nude.width, mergeDiamond?.width ?? 0);
   const pivotLeft = mode.isBigDiamond ? extent.pivotLeft : width / 2;
 
   const caseOffsetY = diamond1.height + yDelta1a;
-  const caseOffsets = extent.xOffsets.map((x) => ({ x, y: caseOffsetY }));
+  // `getTranslateMain`'s `dy1` (`FtileSwitchWithDiamonds.java:168-172`)
+  // plus each case's own `FtileDecorateInLabel#drawU` `dy(yl)`.
+  const caseOffsets = extent.xOffsets.map((x, i) => ({ x, y: caseOffsetY + decorated[i]!.yl }));
 
   const height =
     diamond1.height + nude.height + (mergeDiamond !== null ? mergeDiamond.height + SWITCH_YDELTA1B : 0) + yDelta1a;
@@ -103,8 +157,9 @@ export class GtileSwitch extends TileComposite {
   readonly width: number;
   readonly height: number;
   readonly children: readonly Tile[];
-  /** Per-case `{x, y}`, in this tile's own local frame -- `y` is the SAME
-   *  for every case (both modes), `x` differs per {@link isBigDiamond}. */
+  /** Per-case BODY `{x, y}`, in this tile's own local frame -- `y` is the
+   *  case row plus that case's own in-label height (`FtileDecorateInLabel`),
+   *  `x` differs per {@link isBigDiamond}. */
   readonly caseOffsets: readonly GPoint[];
   readonly diamondOffset: GPoint;
   readonly mergeOffset: GPoint | null;

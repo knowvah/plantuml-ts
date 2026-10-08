@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:input box
+second line; <<input>>
+:one line input; <<input>>
+:after;
+stop
+@enduml

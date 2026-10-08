@@ -11,7 +11,10 @@ import type { EdgeMeta } from '../../../../../src/diagrams/activity/layout/swiml
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
 import type { StringBounder } from '../../../../../src/diagrams/activity/tiles/tile.js';
 import { resolveTheme } from '../../../../../src/core/theme.js';
-import { activityFontSize, swimlaneTitleFontSize } from '../../../../../src/diagrams/activity/activity-style-defaults.js';
+import {
+  activityFontSize,
+  swimlaneTitleFontSize,
+} from '../../../../../src/diagrams/activity/activity-style-defaults.js';
 import { measureLineWidth } from '../../../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
@@ -69,11 +72,11 @@ describe('shapesOf — condition diamonds/hexagons', () => {
     expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 20, width: 40, height: 30 }]);
   });
 
-  it('if-split with no label is a diamond polygon (y centred on width/2, not the node height)', () => {
+  it('if-split with no label is a diamond polygon at the box bottom (FtileDiamond.java:87-89)', () => {
     const n = node('if-split', { x: 10, y: 20, width: 40, height: 30 });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
-    // size = width/2 = 20; cy = y + height/2 = 35; diamond y = cy - size = 15
-    expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 15, width: 40, height: 40 }]);
+    // size = width/2 = 20; cy = y + height - size = 30; diamond y = cy - size = 10
+    expect(shapes).toEqual([{ kind: 'polygon', x: 10, y: 10, width: 40, height: 40 }]);
   });
 
   it('repeat-cond is always a hexagon, even with no label', () => {
@@ -145,7 +148,7 @@ describe('shapesOf — group/partition frame (USymbolFrame, T3i)', () => {
   it('an untitled frame also pushes its own title-tab polygon, skipped on X, width/3 x 12', () => {
     const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
     const shapes = shapesOf(baseInput({ nodes: [n] }));
-    expect(shapes).toHaveLength(2);
+    expect(shapes).toHaveLength(3);
     expect(shapes[1]).toEqual({
       kind: 'polygon',
       x: 16,
@@ -170,6 +173,79 @@ describe('shapesOf — group/partition frame (USymbolFrame, T3i)', () => {
       height: expectedTextHeight,
       polygonSkipMode: 'x',
     });
+  });
+});
+
+// add4-T2b (FRAME-TITLE-SLOT): `USymbolFrame#asBig` draws the title as a
+// plain `UText` when `widthFull - widthTitle < 25`, else as a `SpecialText`
+// whose compression footprint is a 1x1 `UEmpty` at the title's end
+// (`USymbolFrame.java:153-156`, `atmp/SpecialText.java:59-62`).
+describe('shapesOf — frame title slot (SpecialText, add4-T2b)', () => {
+  const fontSize = activityFontSize(theme, 'composite');
+
+  it('a wide frame reserves a 1x1 empty at (x + 3 + titleWidth, y + 1)', () => {
+    const n = node('partition', { x: 16, y: 45, width: 138.4, height: 122, label: 'P1' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    const titleWidth = measureLineWidth(theme, fontSize, 'P1');
+    expect(shapes[2]).toEqual({ kind: 'empty', x: 16 + 3 + titleWidth, y: 46, width: 1, height: 1 });
+  });
+
+  it('an untitled wide frame still reserves the 1x1 empty at x + 3', () => {
+    const n = node('group', { x: 16, y: 45, width: 138.4, height: 122, label: '' });
+    expect(shapesOf(baseInput({ nodes: [n] }))[2]).toEqual({ kind: 'empty', x: 19, y: 46, width: 1, height: 1 });
+  });
+
+  it('a frame under 25 px wider than its title occupies the title text itself', () => {
+    const titleWidth = measureLineWidth(theme, fontSize, 'Wide title');
+    const n = node('partition', { x: 16, y: 45, width: titleWidth + 24, height: 122, label: 'Wide title' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[2]).toEqual({
+      kind: 'text',
+      x: 19,
+      y: 46 + fontSize * (1 - 1 / 4.5),
+      width: titleWidth,
+      height: 11,
+    });
+  });
+
+  it('a creole title measures its rendered text, not the markup', () => {
+    const n = node('partition', { x: 16, y: 45, width: 300, height: 122, label: '[[https://google.com/ demo]]' });
+    const shapes = shapesOf(baseInput({ nodes: [n] }));
+    expect(shapes[2]!.x).toBe(16 + 3 + measureLineWidth(theme, fontSize, 'demo'));
+  });
+
+  it('an untitled narrow frame draws no title shape', () => {
+    const n = node('group', { x: 16, y: 45, width: 20, height: 122, label: '' });
+    expect(shapesOf(baseInput({ nodes: [n] }))).toHaveLength(2);
+  });
+});
+
+// add4-T2b (GROUP-USYMBOL): package/card/rectangle carry no compression
+// ignore flag and draw their title as a plain UText.
+describe('shapesOf — non-frame container symbols (add4-T2b)', () => {
+  const fontSize = activityFontSize(theme, 'composite');
+  const titleWidth = measureLineWidth(theme, fontSize, 'Action');
+  const box = { x: 25, y: 133.611, width: 63.325, height: 86, label: 'Action' };
+
+  it('package: a full polygon box plus the title text at (x + 4, y + 2)', () => {
+    const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, usymbol: 'package' })] }));
+    expect(shapes).toEqual([
+      { kind: 'polygon', x: 25, y: 133.611, width: 63.325, height: 86 },
+      { kind: 'text', x: 29, y: 135.611 + fontSize * (1 - 1 / 4.5), width: titleWidth, height: 11 },
+    ]);
+  });
+
+  it('card/rectangle: a full rect (no ignore flags) plus the centred title', () => {
+    for (const usymbol of ['card', 'rectangle'] as const) {
+      const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, usymbol })] }));
+      expect(shapes[0]).toEqual({ kind: 'rect', x: 25, y: 133.611, width: 63.325, height: 86 });
+      expect(shapes[1]!.x).toBe(25 + (63.325 - titleWidth) / 2);
+    }
+  });
+
+  it('an untitled symbol contributes only its box', () => {
+    const shapes = shapesOf(baseInput({ nodes: [node('partition', { ...box, label: '', usymbol: 'rectangle' })] }));
+    expect(shapes).toHaveLength(1);
   });
 });
 
@@ -300,7 +376,13 @@ describe('shapesOf — edges', () => {
     expect(shapes).toHaveLength(0);
   });
 
-  it('an edge label is measured with the bounder and placed like renderEdgeLabel (no color)', () => {
+  // `Snake#getTextBlockPosition` (`Snake.java:244-270`), the SAME position
+  // `renderer.ts#renderEdgeLabelAligned` draws at; baseline is
+  // `centeredFirstBaselineY(top + size/2, size, 1)` = top + size * 7/9.
+  const ARROW = activityFontSize(theme, 'arrow');
+  const baselineOf = (top: number): number => top + (ARROW * 7) / 9;
+
+  it('an unaligned edge label takes the default LEFT branch: x = max(pt1.x, pt2.x) + 4', () => {
     const edge: ActivityEdgeGeo = {
       points: [
         { x: 0, y: 0 },
@@ -310,8 +392,43 @@ describe('shapesOf — edges', () => {
     };
     const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
     const textShape = shapes.find((s) => s.kind === 'text')!;
-    // mid = points[Math.floor(2/2)] = points[1] = (0, 20); no color -> (midX+4, midY-4)
-    expect(textShape).toEqual({ kind: 'text', x: 4, y: 16, width: 12, height: 11 });
+    // y top = (0 + 20) / 2 - ARROW / 2 (`Snake.java:250`)
+    expect(textShape).toEqual({ kind: 'text', x: 4, y: baselineOf(10 - ARROW / 2), width: 12, height: 11 });
+  });
+
+  it('a CENTER-aligned edge label sits at worm minX, centred on (first.y + last.y - 10) / 2', () => {
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 50, y: 0 },
+        { x: 50, y: 30 },
+        { x: 10, y: 30 },
+        { x: 10, y: 60 },
+      ],
+      label: 'no',
+      labelAlign: { vertical: 'CENTER' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    const textShape = shapes.find((s) => s.kind === 'text')!;
+    // `Snake.java:254-256`: x = minX = 10, y = (0 + 60 - 10) / 2 - h / 2
+    expect(textShape).toEqual({ kind: 'text', x: 10, y: baselineOf(25 - ARROW / 2), width: 12, height: 11 });
+  });
+
+  it('a labelled H-then-V switch case edge (LEFT) is not boxed at the midpoint + 4', () => {
+    // `ConnectionHorizontalThenVertical` (`FtileSwitchWithManyLinks.java:91-104`):
+    // D1 point -> (x2, y1) -> (x2, y2); code "LD" -> x = min(pt1.x, pt2.x),
+    // y centred between pt1.y and pt3.y (`Snake.java:265-267`).
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 100, y: 10 },
+        { x: 40, y: 10 },
+        { x: 40, y: 50 },
+      ],
+      label: 'a',
+      labelAlign: { horizontal: 'LEFT' },
+    };
+    const shapes = shapesOf(baseInput({ edges: [edge], edgeMeta: [meta()] }));
+    const textShape = shapes.find((s) => s.kind === 'text')!;
+    expect(textShape).toEqual({ kind: 'text', x: 40, y: baselineOf(30 - ARROW / 2), width: 6, height: 11 });
   });
 });
 
@@ -424,5 +541,56 @@ describe('shapesOf — swimlane titles (centeredText)', () => {
     const title = shapes.find((s) => s.kind === 'centeredText')!;
     // contentX ?? x = 5; contentWidth ?? width = 20; titleWidth ?? 0 = 0 -> 5 + (20-0)/2 = 15
     expect(title.x).toBe(15);
+  });
+});
+
+// add4-T1f: one `UText` per `\n` line (`SlotFinder.java:127-135`), boxed as
+// the if-label envelope -- `y` = last baseline, height = last - first
+// baseline + the first line's own height, width = the widest line.
+describe('shapesOf — multi-line edge label', () => {
+  const points = [
+    { x: 0, y: 0 },
+    { x: 0, y: 100 },
+  ];
+  const labelShape = (label: string) =>
+    shapesOf(baseInput({ edges: [{ points, label, labelAlign: { vertical: 'CENTER' } }], edgeMeta: [meta()] })).find(
+      (s) => s.kind === 'text',
+    )!;
+
+  it('spans N lines one font size apart, as wide as the widest line', () => {
+    const one = labelShape('ab');
+    const three = labelShape('ab\ncdef\ng');
+    expect(three.width).toBe(4 * 6);
+    expect(three.height).toBe(2 * 11 + 11);
+    expect(three.x).toBe(one.x);
+  });
+
+  it('a 1-line label keeps its single-line box (height = the bounder height)', () => {
+    expect(labelShape('ab')).toMatchObject({ width: 12, height: 11 });
+  });
+});
+
+// add4-T3b SNAKE-LABEL-CREOLE: a connector label is a SIMPLE_LINE creole
+// block (`Branch.java:255-256`, `FtileFactoryDelegator.java:111`,
+// `ConditionalBuilder.java:282`), so `SlotFinder#drawText` occupies its
+// RESOLVED width: `**bold**` loses its markup, `__u__` stays literal
+// (`CommandCreoleBuilder.java:85-86`).
+describe('shapesOf — edge label width is the SIMPLE_LINE creole width (add4-T3b)', () => {
+  const edgeWith = (label: string): ActivityEdgeGeo => ({
+    points: [
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ],
+    label,
+  });
+  const widthOf = (label: string): number =>
+    shapesOf(baseInput({ edges: [edgeWith(label)], edgeMeta: [meta()] })).find((s) => s.kind === 'text')!.width;
+
+  it('`**ok**` occupies the width of "ok" (bounder 6/char)', () => {
+    expect(widthOf('**ok**')).toBe(12);
+  });
+
+  it('`__ok__` occupies its literal width', () => {
+    expect(widthOf('__ok__')).toBe(36);
   });
 });

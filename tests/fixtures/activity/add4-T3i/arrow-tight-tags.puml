@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-><color:blue><back:yellow> mixed ;
+:b;
+stop
+@enduml

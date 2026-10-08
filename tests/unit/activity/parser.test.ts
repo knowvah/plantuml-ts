@@ -468,17 +468,49 @@ describe('parses swimlane', () => {
 // ---------------------------------------------------------------------------
 
 describe('parses action color', () => {
-  it('produces kind "action" with the correct label', () => {
-    const ast = parse([':Action; #lightblue']);
-    const node = firstNode(ast) as ActivityAction;
+  // add4-T3e: upstream colours an action only through its stereogroup
+  // (`Stereogroup#getInnerColors`, `Stereogroup.java:184-185`);
+  // `CommandActivity3.java:68-77` has no colour group after the `;`.
+  it('takes the BACK colour from a `<<#color>>` label', () => {
+    const node = firstNode(parse([':Action; <<#lightblue>>'])) as ActivityAction;
     expect(node.kind).toBe('action');
     expect(node.label).toBe('Action');
+    expect(node.color).toBe('#lightblue');
   });
 
-  it('captures the color with leading #', () => {
-    const ast = parse([':Action; #lightblue']);
-    const node = firstNode(ast) as ActivityAction;
-    expect(node.color).toBe('#lightblue');
+  it('the last `<<#color>>` wins (Colors#mergeWith)', () => {
+    const node = firstNode(parse([':A; <<#red>> <<#blue>>'])) as ActivityAction;
+    expect(node.color).toBe('#blue');
+  });
+
+  it('`:x; #pink` matches no single-line command: it opens a multi-line activity', () => {
+    const node = firstNode(parse([':x; <<save>> #pink', ':after;'])) as ActivityAction;
+    expect(node.label).toBe('x; <<save>> #pink\n:after');
+    expect(node.stereotype).toBeUndefined();
+    expect(node.color).toBeUndefined();
+  });
+});
+
+describe('stereogroup box style (Stereogroup.java:100-107)', () => {
+  it('keeps the first non-PLAIN label', () => {
+    const node = firstNode(parse([':two; <<foo>> <<procedure>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('procedure');
+  });
+
+  it('falls back to the first label when none is a box style', () => {
+    const node = firstNode(parse([':two; <<foo>> <<bar>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('foo');
+  });
+
+  it('applies to a multi-line closer too', () => {
+    const node = firstNode(parse([':a', 'b; <<x>> <<Input>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('input');
+  });
+
+  it('`:;` is an empty single-line activity (LABEL `(.*?)`, CommandActivity3.java:71)', () => {
+    const node = firstNode(parse([':;'])) as ActivityAction;
+    expect(node.kind).toBe('action');
+    expect(node.label).toBe('');
   });
 });
 
@@ -742,37 +774,42 @@ describe('parses break keyword', () => {
 // Test 18 — parses arrow-label lines (-> label ;)
 // ---------------------------------------------------------------------------
 
-describe('parses arrow-label with color tag -><back:red> no3 ;', () => {
-  it('produces a node with kind === "arrow-label"', () => {
-    const ast = parse(['-><back:red> no3 ;']);
-    expect(firstNode(ast).kind).toBe('arrow-label');
-  });
-
-  it('label is "no3"', () => {
-    const ast = parse(['-><back:red> no3 ;']);
-    const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.label).toBe('no3');
-  });
-
-  it('color is "red"', () => {
-    const ast = parse(['-><back:red> no3 ;']);
-    const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.color).toBe('red');
+describe('arrow label keeps <back:>/<color:> inside the creole label', () => {
+  // CommandArrow3.java:61-71 -- only the `-[...]->` bracket is arrow colour.
+  it.each([
+    ['-><back:red> no3 ;', '<back:red> no3 '],
+    ['-><color:blue> x ;', '<color:blue> x '],
+    ['-> <color:red>ink;', '<color:red>ink'],
+  ])('%s -> label %j, no lifted colour', (src, label) => {
+    const node = firstNode(parse([src])) as ActivityArrowLabel;
+    expect(node.kind).toBe('arrow-label');
+    expect(node.label).toBe(label);
+    expect(node.style).toBeUndefined();
   });
 });
 
-describe('parses arrow-label with color: tag -><color:blue> x ;', () => {
-  it('produces kind "arrow-label" with color "blue"', () => {
-    const ast = parse(['-><color:blue> x ;']);
-    const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.kind).toBe('arrow-label');
-    expect(node.color).toBe('blue');
+describe('arrow label bracket style and newline handling', () => {
+  it('-[#red]-> label; carries the bracket text as style', () => {
+    const node = firstNode(parse(['-[#red]-> lab;'])) as ActivityArrowLabel;
+    expect(node.style).toBe('#red');
+    expect(node.label).toBe('lab');
   });
 
-  it('label is "x"', () => {
-    const ast = parse(['-><color:blue> x ;']);
+  it('bare -[bold]-> has an empty label and a style', () => {
+    const node = firstNode(parse(['-[bold]->'])) as ActivityArrowLabel;
+    expect(node.style).toBe('bold');
+    expect(node.label).toBe('');
+  });
+
+  it('a literal \\n in the label becomes a line break', () => {
+    const node = firstNode(parse(['-> one\\ntwo;'])) as ActivityArrowLabel;
+    expect(node.label).toBe('one\ntwo');
+  });
+
+  it('a label without ; opens a multi-line label closed by the next ; line', () => {
+    const ast = parse(['-> first', '  second;', ':b;']);
     const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.label).toBe('x');
+    expect(node.label).toBe('first\nsecond');
   });
 });
 
@@ -782,16 +819,16 @@ describe('parses bare arrow-label line -> some label ;', () => {
     expect(firstNode(ast).kind).toBe('arrow-label');
   });
 
-  it('label is "some label"', () => {
+  it('label is "some label " (verbatim up to the last ;)', () => {
     const ast = parse(['-> some label ;']);
     const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.label).toBe('some label');
+    expect(node.label).toBe('some label ');
   });
 
-  it('color is undefined when no color tag is present', () => {
+  it('style is undefined for a plain -> arrow', () => {
     const ast = parse(['-> some label ;']);
     const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.color).toBeUndefined();
+    expect(node.style).toBeUndefined();
   });
 });
 
@@ -837,16 +874,18 @@ describe('action stereotype parsing', () => {
   });
 });
 
-describe('parses arrow-label line without trailing semicolon', () => {
-  it('still produces kind "arrow-label"', () => {
-    const ast = parse(['-> no semicolon']);
-    expect(firstNode(ast).kind).toBe('arrow-label');
+describe('arrow label line without trailing semicolon', () => {
+  // CommandArrow3's label alternative is `(.*);` (CommandArrow3.java:63-65):
+  // an unterminated `->` line is CommandArrowLong3's opener instead
+  // (CommandArrowLong3.java:66-74), closed by the next line ending in `;`.
+  it('spans to the next ;-terminated line (CommandArrowLong3)', () => {
+    const node = firstNode(parse(['-> no semicolon', 'still label;'])) as ActivityArrowLabel;
+    expect(node.kind).toBe('arrow-label');
+    expect(node.label).toBe('no semicolon\nstill label');
   });
 
-  it('label is "no semicolon"', () => {
-    const ast = parse(['-> no semicolon']);
-    const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.label).toBe('no semicolon');
+  it('is not an arrow-label when nothing ever closes it', () => {
+    expect(firstNode(parse(['-> no semicolon'])).kind).not.toBe('arrow-label');
   });
 });
 

@@ -419,6 +419,7 @@ describe('placeSwimlanes — loop-translate dispatch seam', () => {
 
   const whileBack: LoopTranslate = {
     kind: 'while-back',
+    originX: 0,
     p1: { x: 32, y: 32 },
     p2: { x: 32, y: 60 },
     dimTotalWidth: 100,
@@ -684,6 +685,7 @@ describe('placeSwimlanes — edgeMeta parallel to edges, one-edge cases end to e
   it('a loop-tagged edge (D3 stub, one edge out) yields edgeMeta.length === edges.length', () => {
     const whileBack: LoopTranslate = {
       kind: 'while-back',
+      originX: 0,
       p1: { x: 32, y: 32 },
       p2: { x: 32, y: 60 },
       dimTotalWidth: 100,
@@ -784,5 +786,28 @@ describe('computeSwimlaneChrome', () => {
   it('spans the divider Y-range from the block top to the content bottom', () => {
     const chrome = computeSwimlaneChrome(lanes, 17.5, 18, 164.5);
     expect(chrome.swimlaneDividerY).toEqual({ y1: 17.5, y2: 164.5 });
+  });
+});
+
+// add4-T1b (vodobe-33-kefa909): an Opale note's spike tip is drawn in the
+// same lane pass as the note (`FtileWithNoteOpale#drawU`), so the lane
+// translate moves it with the note.
+describe('placeSwimlanes — a note spikeTip shifts with its lane', () => {
+  it('adds the lane delta to spikeTip.x, leaving y alone', () => {
+    const a = node('a', 12, 40, 'A');
+    const note: ActivityNodeGeo = { ...node('n', 12, 60, 'B'), kind: 'note', spikeTip: { x: 5, y: 9 } };
+    const result = placeSwimlanes({
+      nodes: [a, note],
+      edges: [],
+      edgeMeta: [],
+      laneNames: ['A', 'B'],
+      baseX: 12,
+      baseY: 12,
+      bounder: { getDimension: () => ({ width: 0, height: 0 }) },
+      theme,
+    });
+    const placed = result.nodes.find((n) => n.id === 'n')!;
+    expect(placed.spikeTip).toEqual({ x: 5 + (placed.x - note.x), y: 9 });
+    expect(placed.x - note.x).toBeGreaterThan(0);
   });
 });

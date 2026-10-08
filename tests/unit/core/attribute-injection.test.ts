@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { DOMParser } from '@xmldom/xmldom';
 import { renderSync } from '../../../src/index.js';
 import { assembleDocumentShell } from '../../../src/core/klimt/document-shell.js';
+import { renderNodeLabel } from '../../../src/core/latex.js';
+import { defaultTheme } from '../../../src/core/theme.js';
 
 // An unparseable `skinparam backgroundColor` token is kept verbatim by
 // `resolveColorToSvgHex` (g1c decision K1) where upstream's `getColorOrWhite`
@@ -66,15 +68,20 @@ describe('attribute injection via skinparam colors', () => {
   // PR #59 review: `<latex>` labels wrap KaTeX in a foreignObject whose
   // `<div style="…font-family:${theme.fontFamily}…">` interpolated the font
   // name MID-VALUE -- past every `="`-anchored check. Now emitted via attrs().
-  // add3-T2b: activity ACTION text now draws through the creole Sheet
-  // (`FtileBox.java:178-181`), where `<latex>` is an AtomMath image with no
-  // font name, so the mixed-label seam is exercised through a diamond label,
-  // which still reaches `core/latex.ts#renderNodeLabel`.
+  // add4-T3g: every activity label (action, note, condition, branch) now
+  // draws through a creole Sheet, where `<latex>` is an AtomMath image with
+  // no font name, so `core/latex.ts#renderNodeLabel` is exercised directly.
   it('escapes the font name once inside the latex foreignObject style attribute', () => {
+    const theme = { ...defaultTheme, fontFamily: 'x"onload="alert(1)' };
+    const svg = renderNodeLabel('a <latex>x^2</latex> b', 50, 20, theme, 11);
+    expect(svg).toContain('font-family:x&quot;onload=&quot;alert(1);');
+    expect(svg).not.toContain('onload="alert');
+  });
+
+  it('keeps the payload font name inert in a latex condition label', () => {
     const svg = expectSafe(
       `@startuml\nskinparam defaultFontName x"onload="alert(1)\nstart\nif (a <latex>x^2</latex> b) then\n:c;\nendif\nstop\n@enduml`,
     );
-    expect(svg).toContain('font-family:x&quot;onload=&quot;alert(1);');
     expect(svg).not.toContain('onload="alert');
   });
 

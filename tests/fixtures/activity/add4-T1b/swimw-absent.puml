@@ -1,0 +1,10 @@
+@startuml
+|A|
+start
+:a;
+|B|
+:a much longer action label here;
+|C|
+:c;
+stop
+@enduml

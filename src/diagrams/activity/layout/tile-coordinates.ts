@@ -69,13 +69,9 @@ export interface Out {
    */
   reservations: Reservation[];
   nextId: (prefix: string) => string;
-  /**
-   * D1 (T1b): the `FtileGroup`/`partition` nesting stack `pushEdge` tags
-   * each new edge's `EdgeMeta.scope` with, joined (`[]` = top level) --
-   * see `swimlane-placement.ts`'s `EdgeMeta.scope` doc. Mutated only by
-   * `walkTile`'s `'gtile-group'`/`'gtile-partition'` case below.
-   */
-  groupScope: string[];
+  /** The diagram theme, for walk-time label blocks (add4-T3j:
+   *  `tile-layout-inlabel.ts#inLabelReservation` sizes the drawn block). */
+  readonly theme: Theme;
   /**
    * `[start, end)` ranges into `nodes` from a fork/split branch's body
    * walk (set only by `walk-fork-branches.ts`) -- consulted by the
@@ -161,7 +157,6 @@ export function pushEdge(
   const shape = typeof routing === 'string' ? routing : (routing.shape ?? 'default');
   const loop = typeof routing === 'string' ? undefined : routing.loop;
   const hline = typeof routing === 'string' ? undefined : routing.hline;
-  const scope = out.groupScope.length > 0 ? out.groupScope.join('>') : undefined;
   out.edges.push({ points: dedupeAdjacentPoints(points) });
   out.edgeMeta.push({
     lane1,
@@ -169,7 +164,6 @@ export function pushEdge(
     shape,
     ...(loop !== undefined ? { loop } : {}),
     ...(hline !== undefined ? { hline } : {}),
-    ...(scope !== undefined ? { scope } : {}),
   });
 }
 
@@ -275,6 +269,8 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
         label: t.label,
       };
       if (t.color !== undefined) node.color = t.color;
+      // `FtileBox`'s `boxStyle` (`FtileBox.java:222`), read by the renderer.
+      if (t.stereotype !== undefined) node.stereotype = t.stereotype;
       pushNode(out, node, myLane);
       return;
     }
@@ -324,7 +320,15 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     // per this task's write-set note (T2h owns this file).
     case 'gtile-spot': {
       const t = tile as unknown as GtileSpot;
-      const node: ActivityNodeGeo = { id: out.nextId('spot'), kind: 'spot', x, y, width: t.width, height: t.height, label: t.name };
+      const node: ActivityNodeGeo = {
+        id: out.nextId('spot'),
+        kind: 'spot',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
       if (t.color !== undefined) node.color = t.color;
       pushNode(out, node, myLane);
       return;
@@ -332,11 +336,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
 
     case 'gtile-label': {
       const t = tile as unknown as GtileLabel;
-      pushNode(
-        out,
-        { id: out.nextId('label'), kind: 'label', x, y, width: t.width, height: t.height, label: t.name },
-        myLane,
-      );
+      const node: ActivityNodeGeo = {
+        id: out.nextId('label'),
+        kind: 'label',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
+      if (!t.dispatched) node.dispatched = false;
+      pushNode(out, node, myLane);
       return;
     }
 
@@ -348,11 +358,17 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
     // existing kind modeled "no out point").
     case 'gtile-goto': {
       const t = tile as unknown as GtileGoto;
-      pushNode(
-        out,
-        { id: out.nextId('goto'), kind: 'goto', x, y, width: t.width, height: t.height, label: t.name },
-        myLane,
-      );
+      const node: ActivityNodeGeo = {
+        id: out.nextId('goto'),
+        kind: 'goto',
+        x,
+        y,
+        width: t.width,
+        height: t.height,
+        label: t.name,
+      };
+      if (!t.dispatched) node.dispatched = false;
+      pushNode(out, node, myLane);
       return;
     }
 

@@ -1,0 +1,19 @@
+@startuml
+skinparam ArrowHeadColor none
+
+start
+:Foo;
+partition "Backend" {
+fork
+  partition "Before" {
+    :action A;
+  }
+fork again
+  partition "After" {
+    :action B;
+  }
+end fork
+}
+
+stop
+@enduml

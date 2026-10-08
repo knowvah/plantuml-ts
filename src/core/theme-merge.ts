@@ -28,6 +28,7 @@ function mergeGraphColors(base: Theme, partial: ThemeOverride): Theme['colors'][
 const OPTIONAL_SCALAR_KEYS = [
   'defaultFontSize',
   'padding', // add3-T3f (PADDING)
+  'swimlaneWidth', // add4-T1b
   'linetype',
   'fixCircleLabelOverlapping',
   'componentStyle',

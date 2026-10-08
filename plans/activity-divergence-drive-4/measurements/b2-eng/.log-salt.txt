@@ -1,0 +1,4 @@
+surveying 51 salt fixtures (concurrency 6)
+  25/51
+  50/51
+wrote plans/activity-divergence-drive-4/measurements/b2-eng/parity-salt.json — {"conformant":0,"structural-match":0,"diverged":51,"errored":0,"timeout":0,"oracle-error":0}

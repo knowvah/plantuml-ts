@@ -1,0 +1,11 @@
+@startuml
+start
+rectangle Outer {
+:a;
+partition Inner {
+:b;
+}
+}
+floating note: n after outer
+stop
+@enduml

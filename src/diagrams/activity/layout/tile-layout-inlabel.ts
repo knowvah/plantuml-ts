@@ -19,32 +19,31 @@ import type { ActivityArrowLabel } from '../ast.js';
 import type { SnakeTextAlign } from './snake-text-position.js';
 import { getTextBlockPosition } from './snake-text-position.js';
 import type { Out } from './tile-coordinates.js';
+import type { Theme } from '../../../core/theme.js';
+import { activityFontSize } from '../activity-style-defaults.js';
+import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
+import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
-import { ARROW_LABEL_LAYOUT_FONT_SIZE } from '../activity-layout-constants.js';
-import { WidthTableMeasurer } from '../../../core/measurer.js';
-
-/** Measures an in-link label's width at layout time -- `family` is unused
- *  by `WidthTableMeasurer` (it reads only `size`, a universal sans-serif
- *  table), so the module-level instance below needs no `Theme`. */
-const LABEL_MEASURER = new WidthTableMeasurer();
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 
 /** One pending `-> label;`, carried from the `arrow-label` node that set
  *  it to whichever tile consumes it next ({@link Tile.inLabel}'s own
- *  doc, `tiles/tile.ts`). */
+ *  doc, `tiles/tile.ts`). `label` is `''` for a style-only arrow
+ *  (`-[#red]->`); `color` is `CommandArrow3`'s COLOR group verbatim, the
+ *  next arrow's `Rainbow` definition (`CommandArrow3.java:99-103`). */
 export type PendingInLabel = { label: string; color?: string };
 
 /**
- * `setLabelNextArrow(Display label)` (`ActivityDiagram3.java:456-465`):
- * builds the pending value from one `arrow-label` AST node. Returns
- * `undefined` for an empty label (`ActivityArrowLabel.label === ''`),
- * mirroring `Snake#withLabel(TextBlock, ...)`'s own `textBlock != null`
- * guard (`Snake.java:124-136`) -- an empty `Display` never becomes a
- * drawn `Text` upstream either.
+ * `CommandArrow3#executeArg` (`CommandArrow3.java:96-110`): the COLOR group
+ * sets the next arrow's rainbow (`setColorNextArrow`), a non-empty LABEL
+ * its label (`setLabelNextArrow`, `ActivityDiagram3.java:456-465`). Both
+ * absent ("plain arrow, with no effect", `:92`) -> `undefined`. An empty
+ * label never becomes a drawn `Text` (`Snake.java:124-136`); see
+ * {@link applyInLabel}.
  */
 export function consumeArrowLabel(node: ActivityArrowLabel): PendingInLabel | undefined {
-  if (node.label === '') return undefined;
-  return node.color === undefined ? { label: node.label } : { label: node.label, color: node.color };
+  if (node.style === undefined) return node.label === '' ? undefined : { label: node.label };
+  return { label: node.label, color: node.style };
 }
 
 /**
@@ -98,13 +97,22 @@ function inLabelReservation(
   points: readonly { x: number; y: number }[],
   inLabel: PendingInLabel,
   align: SnakeTextAlign,
+  theme: Theme,
 ): Reservation {
-  const width = LABEL_MEASURER.measure(inLabel.label, { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE }).width;
-  const dim = { width, height: ARROW_LABEL_LAYOUT_FONT_SIZE };
+  // add4-T3j: the drawn block (`edgeLabelBlockSize`, `Snake.java:247`) at
+  // the theme's arrow font places the label; each `UText` sits inside
+  // `SheetBlock1`'s padding (`SheetBlock1.java:209-210`), stacked one font
+  // size apart (`SheetBlock1.java:146-148`) -- the same box as
+  // `canvas-origin-text-ink.ts#extendForEdgeLabelText`.
+  const lines = inLabel.label.split('\n');
+  const fontSize = activityFontSize(theme, 'arrow');
+  const pad = theme.padding ?? 0;
+  const dim = edgeLabelBlockSize(inLabel.label, theme);
   const position = getTextBlockPosition(points, dim, align);
-  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, dim.height, 1);
-  const top = baselineY - (dim.height - 1.5);
-  return { x: position.x, y: top, width, height: dim.height };
+  const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
+  const top = baselineY - (fontSize - 1.5);
+  const bottom = baselineY + fontSize * (lines.length - 1) + 1.5;
+  return { x: position.x + pad, y: top, width: dim.width - 2 * pad, height: bottom - top };
 }
 
 /**
@@ -143,8 +151,25 @@ export function applyOutLabel(out: Out, tile: { readonly outLabel?: PendingInLab
 function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefined, align: SnakeTextAlign): void {
   if (pending === undefined) return;
   const edge = out.edges[out.edges.length - 1]!;
+  if (pending.color !== undefined) edge.color = pending.color;
+  if (pending.label === '') return;
   edge.label = pending.label;
   edge.labelAlign = align;
-  if (pending.color !== undefined) edge.color = pending.color;
-  out.reservations.push(inLabelReservation(edge.points, pending, align));
+  const r = inLabelReservation(edge.points, pending, align, out.theme);
+  pushLaneReservation(out.reservations, r, labelLane(out.edgeMeta[out.edgeMeta.length - 1]!));
+}
+
+/**
+ * The lane whose pass draws a same-lane connection's Snake label: the gate
+ * passes in lane L when each end tile is null or in L
+ * (`UGraphicInterceptorOneSwimlane.java:93-104`). A cross-lane connection
+ * draws in the `Cross` pass through `drawTranslate`, with no single lane
+ * frame (`Swimlanes.java:184-199`), so it stays untagged.
+ */
+function labelLane(meta: {
+  readonly lane1: string | undefined;
+  readonly lane2: string | undefined;
+}): string | undefined {
+  if (meta.lane1 !== undefined && meta.lane2 !== undefined && meta.lane1 !== meta.lane2) return undefined;
+  return meta.lane1 ?? meta.lane2;
 }

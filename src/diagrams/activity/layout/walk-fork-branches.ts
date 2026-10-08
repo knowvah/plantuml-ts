@@ -7,6 +7,7 @@ import { laneIn, laneOut } from './swimlane-placement.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { applyInLabel, applyOutLabel } from './tile-layout-inlabel.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default -- shared by
  *  `ParallelBuilderFork$ConnectionOut`/`ParallelBuilderSplit$ConnectionOut`
@@ -275,7 +276,8 @@ function pushForkJoinBar(t: GtileFork, x: number, joinBarY: number, myLaneOut: s
   );
   const labelSupp = t.width - t.barWidth;
   if (labelSupp > 0) {
-    out.reservations.push({ x: x + t.barWidth, y: joinBarY, width: labelSupp, height: t.barHeight });
+    const supp = { x: x + t.barWidth, y: joinBarY, width: labelSupp, height: t.barHeight };
+    pushLaneReservation(out.reservations, supp, myLaneOut);
   }
 }
 
@@ -443,11 +445,7 @@ function pushMergeDiamondNode(diamond: MergeDiamondGeo, out: Out): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderMerge.java:71-119
  */
 export function walkMerge(t: GtileFork, x: number, y: number, myLane: string | undefined, out: Out): void {
-  pushNode(
-    out,
-    { id: out.nextId('fork-bar'), kind: 'fork-bar', x, y, width: t.barWidth, height: t.barHeight },
-    myLane,
-  );
+  pushNode(out, { id: out.nextId('fork-bar'), kind: 'fork-bar', x, y, width: t.barWidth, height: t.barHeight }, myLane);
 
   const placed = t.children.map((branch, i) => ({
     branch,

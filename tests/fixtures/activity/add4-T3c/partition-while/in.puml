@@ -1,0 +1,7 @@
+@startuml
+partition P {
+while (true)
+:x;
+end while
+}
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+!pragma useVerticalIf on
+start
+:Activity1;
+if (Conditional) then (yes)
+ :Activity2;
+(No) elseif (Conditional)
+ :Activity3;
+else (No)
+ :Activity4;
+endif
+stop
+@enduml

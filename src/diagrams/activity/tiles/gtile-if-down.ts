@@ -66,6 +66,9 @@ interface IfDownFlags {
   /** `ConditionalBuilder#getShape2` (`:285-311`): `skinparam
    *  ConditionEndStyle hline` -- see this constant's own doc below. */
   readonly conditionEndStyle: 'diamond' | 'hline';
+  /** The bare `skinparam padding` (`SkinParam.java:1147-1150`) --
+   *  {@link diamond2North}. */
+  readonly padding: number;
 }
 
 /**
@@ -93,8 +96,26 @@ interface IfDownFlags {
 function diamond2Geo(flags: IfDownFlags): AlignedGeo {
   if (flags.hasOptionalStop) return { left: 0, width: 0, height: 0 };
   if (flags.conditionEndStyle === 'hline') return { left: 0, width: 0, height: HEXAGON_HALF_SIZE };
-  if (flags.hasTwoBranches) return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE };
+  if (flags.hasTwoBranches)
+    return { left: MERGE_SIZE / 2, width: MERGE_SIZE, height: MERGE_SIZE + diamond2North(flags) };
   return { left: 0, width: 0, height: MERGE_EMPTY_HEIGHT };
+}
+
+/**
+ * The merge rhombus's north label height -- its `inY` (`suppY1`,
+ * `FtileDiamond.java:108-112`). `createDown` builds diamond2 with
+ * `getShape2(..., useNorth=true)`, i.e. `withNorth(tbout1)`
+ * (`ConditionalBuilder.java:176,302`); `tbout1` is the then-branch's out
+ * `Display`, `Display.NULL` for a plain branch (`LinkRendering.none()`,
+ * `LinkRendering.java:49-53`) -- non-null, so `create7` still builds a
+ * `SheetBlock1` around an empty Sheet, `2 * padding` tall
+ * (`SheetBlock1.java:196-199`). `0` for every shape but the real rhombus
+ * (`optionalStop` swaps in `FtileEmpty`, `FtileIfDown.java:130-132`).
+ * The rhombus itself is drawn below it (`FtileDiamond.java:89-91`).
+ */
+function diamond2North(flags: IfDownFlags): number {
+  const isRhombus = !flags.hasOptionalStop && flags.conditionEndStyle !== 'hline' && flags.hasTwoBranches;
+  return isRhombus ? 2 * flags.padding : 0;
 }
 
 interface CoreGeometry {
@@ -113,6 +134,8 @@ interface CoreGeometry {
    *  placeholder), so this single field is correct for all three shapes
    *  without a separate flag. */
   readonly diamond2PointInY: number;
+  /** {@link diamond2North}. */
+  readonly d2North: number;
 }
 
 /** `getAdditionalWidth` (`FtileIfDown.java:580-585`): `max(stopWidth,
@@ -204,10 +227,15 @@ interface ResolvedIfDownFlags {
 
 /** The constructor's own `flags`/`hasMergeNode` setup, split out purely to
  *  keep that constructor's own CCN under the file's limit. */
-function resolveIfDownFlags(optionalStop: Tile | null, options: GtileIfDownOptions, conditionEndStyle: 'diamond' | 'hline'): ResolvedIfDownFlags {
+function resolveIfDownFlags(
+  optionalStop: Tile | null,
+  options: GtileIfDownOptions,
+  conditionEndStyle: 'diamond' | 'hline',
+): ResolvedIfDownFlags {
   const hasOptionalStop = optionalStop !== null;
+  const padding = options.padding ?? 0;
   return {
-    flags: { hasOptionalStop, hasTwoBranches: options.hasTwoBranches, conditionEndStyle },
+    flags: { hasOptionalStop, hasTwoBranches: options.hasTwoBranches, conditionEndStyle, padding },
     hasMergeNode: !hasOptionalStop && options.hasTwoBranches && conditionEndStyle !== 'hline',
   };
 }
@@ -217,12 +245,23 @@ interface GeometryExtras {
   readonly opale: IfOwnNote | null;
 }
 
-function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDownFlags, extras: GeometryExtras): CoreGeometry {
+function computeGeometry(
+  diamond1: DiamondConditionTile,
+  main: Tile,
+  flags: IfDownFlags,
+  extras: GeometryExtras,
+): CoreGeometry {
   const { optionalStopWidth, opale } = extras;
   const total = computeAlignedTotal(diamond1, main, flags);
   const d2 = diamond2Geo(flags);
   const { supp, left } = applyOpaleToLeft(diamond1, total.geo.left, opale?.box.width ?? 0);
-  const { height, widthBase } = computeHeightAndWidthBase(diamond1, total, flags, optionalStopWidth, opale?.box.height ?? 0);
+  const { height, widthBase } = computeHeightAndWidthBase(
+    diamond1,
+    total,
+    flags,
+    optionalStopWidth,
+    opale?.box.height ?? 0,
+  );
   return {
     left,
     width: widthBase + supp,
@@ -230,6 +269,7 @@ function computeGeometry(diamond1: DiamondConditionTile, main: Tile, flags: IfDo
     d1Height: total.d1Height,
     d2,
     diamond2PointInY: diamond2PointInY(flags, d2),
+    d2North: diamond2North(flags),
     thenPadded: total.thenPadded,
     thenGeo: total.thenGeo,
   };
@@ -279,7 +319,12 @@ function computeOffsets(diamond1: DiamondConditionTile, core: CoreGeometry, opal
     mainTileX: wrapX + core.thenPadded.contentDx,
     mainTileY,
     diamond2X: core.left - core.d2.left,
-    diamond2Y: core.height - core.d2.height,
+    // `getTranslateDiamond2`'s `y2 = height - dimDiamond2.height`
+    // (`FtileIfDown.java:659-663`) plus the rhombus's own `suppY1`
+    // (`FtileDiamond.java:89-91`): the node is the rhombus, and its point
+    // in (`inY = suppY1`) and mid (`inY + (outY - inY) / 2`, `:262`) are
+    // both relative to it.
+    diamond2Y: core.height - core.d2.height + core.d2North,
     diamond2Left: core.d2.left,
     diamond2Size: core.d2.width,
     diamond2PointInY: core.diamond2PointInY,
@@ -294,12 +339,20 @@ interface StopOffsets {
 /** `getTranslateOptionalStop` (`FtileIfDown.java:648-657`), split out of the
  *  constructor for the same reason as {@link computeOffsets}. Returns the
  *  zero placeholder when there is no optional-stop side box. */
-function computeStopOffsets(diamond1: DiamondConditionTile, optionalStop: Tile | null, core: CoreGeometry): StopOffsets {
+function computeStopOffsets(
+  diamond1: DiamondConditionTile,
+  optionalStop: Tile | null,
+  core: CoreGeometry,
+): StopOffsets {
   if (optionalStop === null) return { stopX: 0, stopY: 0 };
   const additionalWidth = additionalWidthFor(diamond1, optionalStop.width);
+  // add4-T2d: `labelNorth = dimDiamond1.getInY()`; `y1 = labelNorth +
+  // (dimDiamond1.getHeight() - labelNorth - dimStop.getHeight()) / 2`
+  // (`FtileIfDown.java:651-653`) -- centred on the rhombus, not the box.
+  const labelNorth = diamond1.getCoord(NORTH_HOOK).y;
   return {
     stopX: core.left - diamond1.width / 2 + diamond1.width + additionalWidth,
-    stopY: (diamond1.height - optionalStop.height) / 2,
+    stopY: labelNorth + (diamond1.height - labelNorth - optionalStop.height) / 2,
   };
 }
 
@@ -327,6 +380,8 @@ interface GtileIfDownOptions {
    *  (`conditional-builder.ts#buildIfDown`, via `measureIfOwnNote`).
    *  `activity-divergence-drive-3` T2a, family IFNOTE. */
   readonly opale?: IfOwnNote | null;
+  /** `theme.padding` (`skinparam padding`) -- {@link diamond2North}. */
+  readonly padding?: number | undefined;
 }
 
 /**
@@ -407,7 +462,10 @@ export class GtileIfDown extends TileComposite {
     switch (hook) {
       case NORTH_HOOK:
       case NORTH_BORDER:
-        return { x: this.left, y: this.diamond1Y };
+        // add4-T2d: `geoDiamond1.getInY() + opaleHeight`
+        // (`FtileIfDown.java:568-571`) -- diamond1's own inY is an
+        // EMPTY_DIAMOND's north-label height.
+        return { x: this.left, y: this.diamond1Y + this.diamond1.getCoord(NORTH_HOOK).y };
       case SOUTH_HOOK:
       case SOUTH_BORDER:
         return { x: this.left, y: this.height };

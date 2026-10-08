@@ -1,0 +1,11 @@
+@startuml
+:foo1;
+label lab1
+:foo2;
+if (some test) then
+  goto lab1
+else
+  :foo4;
+endif
+stop
+@enduml

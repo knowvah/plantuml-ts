@@ -1,0 +1,4 @@
+@startuml
+note #red: alone
+:act;
+@enduml

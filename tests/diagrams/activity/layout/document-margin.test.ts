@@ -12,9 +12,12 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+  activityDocumentContext,
   applyActivityDocumentMargin,
   applyActivityChrome,
+  applyActivityScale,
 } from '../../../../src/diagrams/activity/layout/document-margin.js';
+import type { Theme } from '../../../../src/core/theme.js';
 import type { AnnotationStyles } from '../../../../src/core/annotations/chrome.js';
 import {
   createAnnotations,
@@ -154,5 +157,85 @@ describe('applyActivityChrome', () => {
     expect(result.body).toBe(fragment.body);
     expect(result.width).toBe(fragment.width);
     expect(result.height).toBe(fragment.height);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// add4-T3b ACT-SCALE: `TextBlockExporter#computeScaleFactor` (java:204-208)
+// resolves the spec on `calculateFinalDimension()` (java:198-202) -- the RAW
+// (pre-`ensureVisible`) block dimension plus the document margin -- and the
+// fragment carries the resolved strategy as a `simple` spec.
+// ---------------------------------------------------------------------------
+
+describe('applyActivityScale / applyActivityChrome scale', () => {
+  const THEME = {} as unknown as Theme;
+  const input = (ast: unknown, theme: Theme = THEME) => ({ ast, theme, sprites: undefined });
+
+  it('resolves `scale N width` against raw width + left + right margin (not the floored canvas)', () => {
+    const fragment = makeActivityFragment(199.625, 108.5);
+    const result = applyActivityScale(fragment, input({ scale: { kind: 'width', target: 500 } }));
+    expect('completeSvg' in result).toBe(false);
+    const scaled = result as RenderFragment;
+    expect(scaled.scaleSpec).toEqual({ kind: 'simple', factor: 500 / 219.625 });
+    expect(scaled.body).toBe(fragment.body);
+    expect(scaled.width).toBe(fragment.width);
+  });
+
+  it('forwards dpi unresolved, so the core multiplies it after the clamp', () => {
+    const fragment = makeActivityFragment(100, 50);
+    const result = applyActivityScale(fragment, input({}, { dpi: 192 } as unknown as Theme)) as RenderFragment;
+    expect(result.scaleSpec).toBeUndefined();
+    expect(result.dpi).toBe(192);
+  });
+
+  it('leaves a fragment with no scale and the default dpi untouched (same object)', () => {
+    const fragment = makeActivityFragment(100, 50);
+    expect(applyActivityScale(fragment, input({}))).toBe(fragment);
+  });
+
+  it('leaves a non-activity fragment untouched', () => {
+    const fragment: RenderFragment = { body: BODY_MARKER, width: 10, height: 10, diagramType: 'CLASS' };
+    expect(applyActivityScale(fragment, input({ scale: { kind: 'simple', factor: 2 } }))).toBe(fragment);
+  });
+
+  it('with chrome, resolves against the CHROME-composed raw block plus the margin', () => {
+    const fragment = makeActivityFragment(20, 50);
+    const doc = input({ scale: { kind: 'width', target: 300 } });
+    const result = applyActivityChrome(fragment, withTitle('AAAAAAAAAAAAAA'), plainStyles(), MEASURER, doc);
+    // the title (141 wide) dominates the raw body (20): dim.width = 141 + 20.
+    expect(result.scaleSpec).toEqual({ kind: 'simple', factor: 300 / 161 });
+  });
+});
+
+describe('activityDocumentContext', () => {
+  it('reads ast.scale and the theme dpi and margin', () => {
+    const theme = { dpi: 120, diagramMargin: { top: 1, right: 2, bottom: 3, left: 4 } } as unknown as Theme;
+    const doc = activityDocumentContext({ scale: { kind: 'simple', factor: 2 } }, theme, undefined);
+    expect(doc).toEqual({
+      margin: { top: 1, right: 2, bottom: 3, left: 4 },
+      scaleSpec: { kind: 'simple', factor: 2 },
+      dpi: 120,
+    });
+  });
+
+  it('omits what the AST and theme do not set (default same(10) margin)', () => {
+    const doc = activityDocumentContext({}, {} as unknown as Theme, undefined);
+    expect(doc).toEqual({ margin: { top: 10, right: 10, bottom: 10, left: 10 } });
+  });
+});
+
+describe('applyActivityChrome theme margin (add4-T3b)', () => {
+  it('re-applies an asymmetric theme margin: shift by (left, top), pad by left+right / top+bottom', () => {
+    const fragment = makeActivityFragment(100, 50);
+    const theme = { diagramMargin: { top: 1, right: 2, bottom: 3, left: 4 } } as unknown as Theme;
+    const result = applyActivityChrome(fragment, withTitle('T'), plainStyles(), MEASURER, {
+      ast: {},
+      theme,
+      sprites: undefined,
+    });
+    // layout baked same(10) (documentMarginTheme) -> undone; then (4, 1).
+    expect(result.body).toContain(shiftedBodyMarker(-10 + 4, -10 + 1 + ONE_LINE_BLOCK_HEIGHT));
+    expect(result.width).toBe(Math.floor(100 + 4 + 2 + 1));
+    expect(result.height).toBe(Math.floor(50 + ONE_LINE_BLOCK_HEIGHT + 1 + 3 + 1));
   });
 });

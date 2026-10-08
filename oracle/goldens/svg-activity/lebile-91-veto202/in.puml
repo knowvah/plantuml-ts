@@ -1,0 +1,18 @@
+@startuml
+if (a) then (yes)
+  partition "Hi I make things clearer" {
+    note #lightblue
+      Am I blue too?
+    end note
+    while (true)
+      note #lightblue
+        Can I be blue too?
+      end note
+       :Do Something;
+       note #lightblue
+         I'm blue!
+       end note
+    end while
+  }
+endif
+@enduml

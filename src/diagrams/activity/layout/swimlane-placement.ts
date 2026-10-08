@@ -26,21 +26,17 @@
 
 import type { StringBounder } from '../tiles/tile.js';
 import type { Theme } from '../../../core/theme.js';
-import type {
-  ActivityEdgeGeo,
-  ActivityNodeGeo,
-  SwimlaneBandGeo,
-  SwimlaneDividerY,
-  SwimlaneGeo,
-} from '../activity-geometry.types.js';
+import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { GPoint } from '../tiles/points.js';
-import { resolveInlineLinks } from '../../../core/url/inline-links.js';
+import { swimlaneTitleText } from './swimlane-title.js';
+import { laneReservationItems, shiftLaneReservations } from './swimlane-reservation-lane.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import {
   computeLaneWidths,
   measureLaneExtents,
+  measureSpecOf,
+  specLaneItems,
   resolveSwimlaneMinWidth,
-  type LaneEdge,
   type LaneItem,
   type LaneWidth,
 } from './swimlane-context.js';
@@ -48,6 +44,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { routeLoopTranslate, type LoopTranslate } from './swimlane-loop-translate.js';
 import { routeHline, type HlinePayload } from './swimlane-hline.js';
 import { computeLaneOrigins } from './swimlane-lane-origins.js';
+import { sameLaneEdges } from './swimlane-measure-edges.js';
 import { isBigDiamondDuplicate, withoutBigDiamondDuplicateTag } from './switch-swimlane-duplicate.js';
 
 // `laneAt`/`laneIn`/`laneOut` moved to `swimlane-lanes.ts` (mission
@@ -82,16 +79,6 @@ export interface EdgeMeta {
    * `sameLaneEdges` (this module doc's own citation for why that keeps
    * measurement byte-identical to pre-T1p-g). */
   readonly hline?: HlinePayload;
-  /**
-   * T1b (D1): the `FtileGroup`/`partition` nesting active at `pushEdge`
-   * time (`undefined` = top level) -- a nested `UGraphicForSnake` flushes
-   * before its outer one, so two edges merge only when this matches.
-   * Read by `layout/snake-merge.ts`; propagated via `repeatEdgeMeta` for
-   * every routed edge except `routeHline`'s fan-out (always `NONE`
-   * strategy, so scope never matters there).
-   * @see net/sourceforge/plantuml/activitydiagram3/ftile/FtileGroup.java
-   */
-  readonly scope?: string;
 }
 
 /** D6: the two fork/split cross-lane elbow shapes, plus the fallback every
@@ -108,8 +95,13 @@ export interface EdgeMeta {
  * on `EdgeMeta.loop`, never `shape`, so `crossLaneMiddleY` treats all five
  * the same as `'default'` via its `default:` branch. */
 export type EdgeShape =
-  | 'parallel-in' | 'parallel-out' | 'parallel-in-split' | 'parallel-out-split'
-  | 'if-vertical-in' | 'default' | LoopTranslate['kind'];
+  | 'parallel-in'
+  | 'parallel-out'
+  | 'parallel-in-split'
+  | 'parallel-out-split'
+  | 'if-vertical-in'
+  | 'default'
+  | LoopTranslate['kind'];
 
 export interface PlacementResult {
   nodes: ActivityNodeGeo[];
@@ -160,54 +152,11 @@ export const TITLE_ASCENT_FRACTION = 1 - 1 / 4.5;
 export { measureSwimlaneTitlesHeight, resolveSwimlaneVertical } from './swimlane-vertical.js';
 export type { SwimlaneVertical } from './swimlane-vertical.js';
 
-export interface SwimlaneChrome {
-  swimlaneBand: SwimlaneBandGeo;
-  swimlaneDividerY: SwimlaneDividerY;
-}
-
-/**
- * Derives the band rect and the divider Y-range from the already-placed
- * lane geometry ({@link placeSwimlanes}'s own `swimlanes` output) plus the
- * block's own top (`baseY`) and content bottom (`contentBottomY` -- the
- * real content's own bottom edge, `bounds.maxY` shifted by the SAME
- * `canvas-origin.ts#computeCanvasOrigin` translate `baseY` itself already
- * carries; T1a (D2) replaced the flat `totalHeight - LAYOUT_MARGIN` this
- * used to be with that dynamic shift -- see `assign-coordinates-full.ts
- * #finalizeGeometry`, the one caller).
- *
- * Band x/width: `Swimlanes#drawTitlesBackground` (`:358-367`) draws at
- * `ug.apply(dx(5))` with `width = swimlanesSpecial().last().getTranslate()
- * .getDx() - 2*5 - 1`. The trailing special lane's translate is the LAST
- * divider's own x plus `halfMissingSpace(n+1, ...)`, which is always the
- * fixed outer-edge padding of 5 (`swimlane-context.ts#halfMissingSpace`,
- * the `i > lanes.length` branch) -- the SAME fixed 5 the FIRST divider's
- * own `halfMissingSpace(0, ...)` returns. Those two `+5`/`-5` terms
- * cancel, reducing the band to `x = lanes[0].x`, `width = Σ(lane.width) -
- * 1`. Verified against the pinned jar's `pakema-21-xema183`: dividers at
- * 20, 58.338, 369.275 -> Σwidth = 349.275; band x = 20 (== first divider),
- * band width = 348.275 (== Σ - 1) -- both exact matches.
- *
- * Divider Y-range: `LaneDivider#drawU` draws one full-height `ULine` per
- * boundary, `height = dimensionFull.getHeight() + titleHeightTranslate
- * .getDy()` (`Swimlanes.java:423-424`) -- from the block's own top to its
- * content bottom.
- */
-export function computeSwimlaneChrome(
-  swimlanes: readonly SwimlaneGeo[],
-  baseY: number,
-  titlesHeight: number,
-  contentBottomY: number,
-): Partial<SwimlaneChrome> {
-  // Same `size() > 1` guard as {@link resolveSwimlaneVertical}: a single
-  // lane draws no chrome, so there is nothing to derive.
-  if (swimlanes.length <= 1) return {};
-  const first = swimlanes[0]!;
-  const widthSum = swimlanes.reduce((acc, s) => acc + s.width, 0);
-  return {
-    swimlaneBand: { x: first.x, y: baseY, width: widthSum - 1, height: titlesHeight },
-    swimlaneDividerY: { y1: baseY, y2: contentBottomY },
-  };
-}
+// `SwimlaneChrome`/`computeSwimlaneChrome` moved to `swimlane-chrome.ts`
+// (add4-T1g, this file's own 500-line hook); re-exported so existing
+// importers are untouched.
+export { computeSwimlaneChrome } from './swimlane-chrome.js';
+export type { SwimlaneChrome } from './swimlane-chrome.js';
 
 // `LaneOrigin`/`computeLaneOrigins` and its supporting helpers moved to
 // `swimlane-lane-origins.ts` (this file's own 500-line hook, mission
@@ -222,7 +171,12 @@ function shiftNode(node: ActivityNodeGeo, deltas: ReadonlyMap<string, number>): 
   if (node.swimlane === undefined) return node;
   const delta = deltas.get(node.swimlane);
   if (delta === undefined || delta === 0) return node;
-  return { ...node, x: node.x + delta };
+  // add4-T1b: an Opale note's `spikeTip` is drawn by the SAME tile pass as
+  // the note itself (`FtileWithNoteOpale#drawU`, one lane translate), so it
+  // shifts with the note -- as `canvas-origin.ts#shiftNodeGeo` already does.
+  const next: ActivityNodeGeo = { ...node, x: node.x + delta };
+  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + delta, y: node.spikeTip.y };
+  return next;
 }
 
 /**
@@ -370,6 +324,11 @@ export interface PlacementInput {
   readonly baseY: number;
   readonly bounder: StringBounder;
   readonly theme: Theme;
+  /** `|name|LABEL` displays keyed by lane name (`ast.swimlaneDisplays`). */
+  readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
+  /** The walk's own reservations; lane-tagged ones take their lane's delta
+   *  (`swimlane-reservation-lane.ts`). */
+  readonly walkReservations?: readonly Reservation[];
 }
 
 /** {@link measureLanes}'s own inputs, bundled to keep that function under
@@ -382,22 +341,12 @@ interface MeasureLanesInput {
   readonly laneNames: readonly string[];
   readonly bounder: StringBounder;
   readonly theme: Theme;
+  readonly laneDisplays?: Readonly<Record<string, string>> | undefined;
+  readonly walkReservations?: readonly Reservation[];
 }
 
-/** Every SAME-lane edge (T3i, {@link LaneEdge}'s own doc: a cross-lane
- *  edge draws through the separate `Cross` class and never enters a
- *  lane's own `getMinMax()`), zipped from `edges`/`edgeMeta` -- the two
- *  arrays `placeSwimlanes` already keeps index-aligned (`PlacementResult
- *  .edgeMeta`'s own doc). */
-function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly EdgeMeta[]): LaneEdge[] {
-  const out: LaneEdge[] = [];
-  for (let i = 0; i < edges.length; i++) {
-    const meta = edgeMeta[i]!;
-    if (meta.lane1 === undefined || meta.lane1 !== meta.lane2) continue;
-    out.push({ swimlane: meta.lane1, edge: edges[i]! });
-  }
-  return out;
-}
+// `sameLaneEdges` moved to `swimlane-measure-edges.ts` (add4-T1b, this
+// file's own 500-line hook).
 
 /**
  * T1p-f: `computeDrawingWidths`'s own draw-interception pass
@@ -414,11 +363,23 @@ function sameLaneEdges(edges: readonly ActivityEdgeGeo[], edgeMeta: readonly Edg
  * mirroring {@link placeNode}'s own per-lane fan-out.
  */
 function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneItem[] {
+  // add4-T2c: a cross-lane Opale / a stacked note's margin box
+  // (`swimlane-context.ts#MeasureSpec`).
+  const spec = measureSpecOf(node);
+  if (spec !== undefined) return specLaneItems(node, spec);
   if (!isBigDiamondDuplicate(node)) {
+    // add4-T3c: the lane's LimitFinder sees the same node-aware ink as the
+    // canvas scan (`canvas-origin-fudge.ts#nodeFudge`, `Swimlanes.java:379-395`).
+    const ink = {
+      ...(node.usymbol !== undefined ? { usymbol: node.usymbol } : {}),
+      ...(node.label !== undefined ? { label: node.label } : {}),
+      // add4-T3e: an action's `BoxStyle` outline ink (`nodeFudge`).
+      ...(node.stereotype !== undefined ? { stereotype: node.stereotype, height: node.height } : {}),
+    };
     return [
       node.swimlane !== undefined
-        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width }
-        : { kind: node.kind, x: node.x, width: node.width },
+        ? { swimlane: node.swimlane, kind: node.kind, x: node.x, width: node.width, ...ink }
+        : { kind: node.kind, x: node.x, width: node.width, ...ink },
     ];
   }
   return laneNames.map((lane) => ({ swimlane: lane, kind: node.kind, x: node.x, width: node.width }));
@@ -434,22 +395,40 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
  * markup (`getTitle`, `Swimlanes.java:285-293`); `nesozi-09-zezu092`.
  */
 function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth>; min: number } {
-  const { nodes, edges, edgeMeta, laneNames, bounder, theme } = input;
+  const { nodes, edges, edgeMeta, laneNames, bounder, theme, laneDisplays } = input;
   const items: LaneItem[] = nodes.flatMap((n) => laneItemsOf(n, laneNames));
+  items.push(...laneReservationItems(input.walkReservations ?? []));
   const extents = measureLaneExtents(items, sameLaneEdges(edges, edgeMeta), laneNames);
 
   const titleFontSize = swimlaneTitleFontSize(theme);
   const titleWidths = new Map<string, number>();
   for (const name of laneNames)
-    titleWidths.set(name, bounder.getDimension(resolveInlineLinks(name), titleFontSize).width);
+    titleWidths.set(name, bounder.getDimension(swimlaneTitleText(name, laneDisplays?.[name]), titleFontSize).width);
 
-  // `skinparam swimlaneWidth` is unparsed (no `swimlanewidth` key in
-  // `skinparam-key-handlers-table-*.ts`); its default is the literal `0`,
-  // not the `"same"` sentinel (`SkinParam.java:1121-1129`).
+  // `skinparam swimlaneWidth` (`Swimlanes.java:399`); absent reads `0`,
+  // not the `"same"` sentinel (`SkinParam.java:1121-1130`).
   const contentWidths = [...extents.values()].map((e) => e.maxX - e.minX);
-  const min = resolveSwimlaneMinWidth(contentWidths, 0);
+  const min = resolveSwimlaneMinWidth(contentWidths, theme.swimlaneWidth ?? 0);
 
   return { widths: computeLaneWidths(extents, titleWidths, min), min };
+}
+
+/** Each lane's placement delta and geometry, carrying its `|name|LABEL`
+ *  display (`Swimlanes.java:163-164`). */
+function laneGeosOf(
+  laneNames: readonly string[],
+  origins: ReadonlyMap<string, { readonly delta: number; readonly geo: SwimlaneGeo }>,
+  laneDisplays: Readonly<Record<string, string>> | undefined,
+): { deltas: Map<string, number>; swimlanes: SwimlaneGeo[] } {
+  const deltas = new Map<string, number>();
+  const swimlanes: SwimlaneGeo[] = [];
+  for (const name of laneNames) {
+    const origin = origins.get(name)!;
+    deltas.set(name, origin.delta);
+    const display = laneDisplays?.[name];
+    swimlanes.push(display === undefined ? origin.geo : { ...origin.geo, display });
+  }
+  return { deltas, swimlanes };
 }
 
 /**
@@ -465,26 +444,22 @@ function measureLanes(input: MeasureLanesInput): { widths: Map<string, LaneWidth
  * then skips `drawWhenSwimlanes` too, so a one-lane diagram draws through
  * the plain `full.drawU(ug)` branch with no swimlane translate applied at
  * all -- the SAME `<= 1` convention `resolveSwimlaneVertical`/
- * `computeSwimlaneChrome` (this file) already use. Before this fix, a
+ * `computeSwimlaneChrome` (`swimlane-chrome.ts`) already use. Before this fix, a
  * single named lane still ran the full origin loop, giving it a non-zero
  * `delta` no upstream diagram ever gets.
  */
 export function placeSwimlanes(input: PlacementInput): PlacementResult {
-  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, bounder, theme } = input;
+  const { nodes, edges, edgeMeta, laneNames, baseX, baseY, laneDisplays } = input;
+  const walkReservations = input.walkReservations ?? [];
   if (laneNames.length <= 1) {
-    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations: [] };
+    const reservations = [...walkReservations];
+    return { nodes: [...nodes], edges: [...edges], edgeMeta: [...edgeMeta], swimlanes: [], reservations };
   }
 
-  const { widths, min } = measureLanes({ nodes, edges, edgeMeta, laneNames, bounder, theme });
+  const { widths, min } = measureLanes(input);
   const { origins, dividerReservations } = computeLaneOrigins(laneNames, widths, min, baseX);
 
-  const deltas = new Map<string, number>();
-  const swimlanes: SwimlaneGeo[] = [];
-  for (const name of laneNames) {
-    const origin = origins.get(name)!;
-    deltas.set(name, origin.delta);
-    swimlanes.push(origin.geo);
-  }
+  const { deltas, swimlanes } = laneGeosOf(laneNames, origins, laneDisplays);
 
   const dividerGeo: Reservation[] = dividerReservations.map((d) => ({ x: d.x, y: baseY, width: d.width, height: 1 }));
   // D3/D4: a routed edge may expand to >1 edge/reservation -- flat-map both.
@@ -495,6 +470,10 @@ export function placeSwimlanes(input: PlacementInput): PlacementResult {
     edges: routed.flatMap((r) => r.edges),
     edgeMeta: routed.flatMap((r, i) => r.edgeMeta ?? repeatEdgeMeta(edgeMeta[i]!, r.edges.length)),
     swimlanes,
-    reservations: [...dividerGeo, ...routed.flatMap((r) => r.reservations)],
+    reservations: [
+      ...shiftLaneReservations(walkReservations, deltas),
+      ...dividerGeo,
+      ...routed.flatMap((r) => r.reservations),
+    ],
   };
 }

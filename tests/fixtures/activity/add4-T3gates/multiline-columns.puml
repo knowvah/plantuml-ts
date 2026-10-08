@@ -1,0 +1,13 @@
+@startuml
+start
+  :first
+    deeper
+	indented
+  last;
+note right
+  top
+      deeper
+  bottom
+end note
+stop
+@enduml

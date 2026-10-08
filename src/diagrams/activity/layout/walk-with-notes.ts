@@ -19,6 +19,21 @@ import type { ActivityNodeGeo } from '../activity-geometry.types.js';
 import type { Reservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode, walkTile } from './tile-coordinates.js';
+import { collectTouchedLanes } from './tile-coordinates-group.js';
+import { markMeasureSpec } from './swimlane-context.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
+
+/** add4-T2c: `FtileWithNoteOpale#getSwimlanes` -- the wrapped tile's own
+ *  lanes plus `swimlaneNote` (`FtileWithNoteOpale.java:92-99`) -- is the
+ *  set the measurement pass dispatches the Opale to (`swimlane-context.ts
+ *  #MeasureSpec`). Marked only when wider than the note's own lane. */
+function markNoteMeasureLanes(noteNode: ActivityNodeGeo, t: GtileNoteOpale, myLane: string | undefined): void {
+  const lanes = new Set<string>();
+  collectTouchedLanes(t.children[0]!, lanes);
+  if (lanes.size === 0 && myLane !== undefined) lanes.add(myLane);
+  if (noteNode.swimlane !== undefined) lanes.add(noteNode.swimlane);
+  if (lanes.size > 1) markMeasureSpec(noteNode, { lanes: [...lanes] });
+}
 
 /** `FtileWithNoteOpale#drawU` (`:195-221`): the note draws beside the
  *  wrapped tile (no flow edge), then the wrapped tile draws at its own
@@ -45,7 +60,15 @@ export function walkNoteOpale(t: GtileNoteOpale, x: number, y: number, myLane: s
   // sets a spike at all -- `t.withLink` mirrors that (`gtile-note.ts`'s
   // own doc).
   if (t.withLink) noteNode.spikeTip = { x: x + t.spikeOffsetX, y: y + t.spikeOffsetY };
-  pushNode(out, noteNode, myLane);
+  // add4-T1c: `FtileWithNoteOpale.java:137-139` -- `eventuallyOverride(note
+  // .getColors())` makes the note's own `#color` the Opale's background.
+  if (note.color !== undefined) noteNode.color = note.color;
+  // add4-T2c: `FtileWithNoteOpale.java:217` draws the Opale only in its
+  // `swimlaneNote`'s pass (`Swimlanes.java:342`'s one-lane interceptor),
+  // at that lane's translate -- the note tile's own lane, not the wrapped
+  // tile's, when the note was captured in another `|lane|`.
+  pushNode(out, noteNode, note.swimlane ?? myLane);
+  markNoteMeasureLanes(noteNode, t, myLane);
   walkTile(t.children[0]!, x + t.tileOffsetX, y + t.tileOffsetY, { kindHint: null, lane: myLane }, out);
 }
 
@@ -98,7 +121,9 @@ function marginBoxReservation(origin: StackOrigin, entry: StackedNote, stackWidt
  *  the stack's own outer origin; `entry.y` is this note's own offset
  *  WITHIN the stack (flush, no gap, `gtile-with-notes.ts#buildStack`). */
 function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: number): void {
-  origin.out.reservations.push(marginBoxReservation(origin, entry, stackWidth));
+  // The margin `UEmpty` is drawn in the stack's own lane pass
+  // (`TextBlockMarged.java:79-86`, `Swimlanes.java:342-343`).
+  pushLaneReservation(origin.out.reservations, marginBoxReservation(origin, entry, stackWidth), origin.lane);
   const noteX = origin.originX + origin.stackX + (stackWidth - entry.outerWidth) / 2 + NOTE_STACK_MARGIN;
   const noteY = origin.originY + entry.y + NOTE_STACK_MARGIN;
   const node: ActivityNodeGeo = {
@@ -111,7 +136,12 @@ function pushStackedNote(origin: StackOrigin, entry: StackedNote, stackWidth: nu
     label: entry.text,
     notePosition: origin.position,
   };
+  // add4-T1c: `FtileWithNotes.java:109-111`'s own `eventuallyOverride`.
+  if (entry.color !== undefined) node.color = entry.color;
   pushNode(origin.out, node, origin.lane);
+  // add4-T2c: the same margin box is lane content (`swimlane-context.ts
+  // #MeasureSpec`), not only canvas ink.
+  markMeasureSpec(node, { marginX: NOTE_STACK_MARGIN });
 }
 
 /** Every note in one side's stack, in top-to-bottom order

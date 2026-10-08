@@ -1,0 +1,8 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+if (short\na much longer line\n<color:red>red</color>) then (yes)
+  :A;
+endif
+stop
+@enduml

@@ -28,6 +28,7 @@ import type { Reservation } from './hexagon-reservations.js';
 import { walkTile } from './tile-coordinates.js';
 import type { Out } from './tile-coordinates.js';
 import { placeSwimlanes, resolveSwimlaneVertical, computeSwimlaneChrome } from './swimlane-placement.js';
+import { SWIMLANE_BAND_INSET_X } from './swimlane-chrome.js';
 import type { EdgeMeta, PlacementResult } from './swimlane-placement.js';
 import { compressGeometry } from './compress/compress-geometry.js';
 import { applyEdgeDrawOrder, lanePassOrder } from './edge-draw-order.js';
@@ -268,30 +269,35 @@ function mergeBeforeCompress(placed: PlacementResult, laneNames: readonly string
 /** Fresh, empty {@link Out} accumulator -- split out of {@link
  *  assignCoordinatesFull} purely to keep that function's own NLOC under
  *  the file's limit. */
-function buildOut(): Out {
+function buildOut(theme: Theme): Out {
   let idCounter = 0;
   return {
     nodes: [],
     edges: [],
     edgeMeta: [],
     reservations: [],
+    theme,
     nextId: (prefix: string) => `${prefix}-${++idCounter}`,
-    groupScope: [],
   };
 }
 
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
-  const out = buildOut();
+  const out = buildOut(theme);
   const { nodes, edges, edgeMeta, reservations } = out;
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
 
-  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, laneNames: ast.swimlanes, baseX, baseY, bounder, theme });
+  const lanes = { laneNames: ast.swimlanes, laneDisplays: ast.swimlaneDisplays, walkReservations: reservations };
+  const placedRaw = placeSwimlanes({ nodes, edges, edgeMeta, ...lanes, baseX, baseY, bounder, theme });
   const placed = mergeBeforeCompress(withLaneBackgrounds(placedRaw, ast.swimlaneColors), ast.swimlanes);
   const bounds = computeBounds(root, baseX, contentY, placed);
-  const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY);
-  const allReservations = withBandReservation([...reservations, ...placed.reservations], pass1Chrome.swimlaneBand);
+  // `drawTitlesBackground`'s `UTranslate.dx(5)` from the block origin, which
+  // is `baseX` here (`Swimlanes.java:366`; `computeLaneOrigins` seeds its
+  // `xpos = 0` at `baseX`).
+  const bandX = baseX + SWIMLANE_BAND_INSET_X;
+  const pass1Chrome = computeSwimlaneChrome(placed.swimlanes, baseY, titlesHeight, bounds.maxY, bandX);
+  const allReservations = withBandReservation(placed.reservations, pass1Chrome.swimlaneBand);
 
   if (!compress) {
     const result = pass1Assemble({ placed, reservations: allReservations, bounds, baseY, titlesHeight, theme });

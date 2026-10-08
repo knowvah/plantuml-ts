@@ -1,0 +1,11 @@
+@startuml
+skinparam conditionStyle diamond
+skinparam padding 3
+start
+if (is **big**\nor small?) then (**yes**)
+  :a;
+else (no __u__)
+  :b;
+endif
+stop
+@enduml

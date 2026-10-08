@@ -1,0 +1,173 @@
+diff --git a/src/diagrams/activity/activity-renderer-terminals.ts b/src/diagrams/activity/activity-renderer-terminals.ts
+index 3de08dfdc..75c6636cf 100644
+--- a/src/diagrams/activity/activity-renderer-terminals.ts
++++ b/src/diagrams/activity/activity-renderer-terminals.ts
+@@ -18,7 +18,7 @@ import {
+ } from './activity-style-defaults.js';
+ import { activityFontColor } from './activity-text-style.js';
+ import { spotGlyphPath } from './activity-spot-glyph.js';
+-import { actColors } from './activity-renderer-shapes.js';
++import { actColors, renderNode } from './activity-renderer-shapes.js';
+ 
+ /**
+  * `circle { start, stop, end { LineColor #2 } } }` (`plantuml.skin:379-380`
+@@ -237,3 +237,51 @@ export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
+       : path(d, { fill: glyphFill });
+   return circle + glyph;
+ }
++
++/** The `UParam` default stroke a `UGraphic` carries before any `.apply(
++ *  UStroke)` -- `UStroke.simple()`, thickness 1. `drawGoto` applies colours
++ *  only, so its two lines keep it. Same value as `renderer.ts`'s private
++ *  `SIMPLE_STROKE_WIDTH` (not exported; outside this task's write-set).
++ * @see net/sourceforge/plantuml/klimt/UStroke.java:75-77 */
++const GOTO_STROKE_WIDTH = 1;
++
++/**
++ * `FtileGoto`'s jump line, drawn by the dispatcher rather than the tile
++ * (`FtileGoto` itself draws nothing): from the goto's point-in --
++ * `FtileEmpty`'s `(width / 2, 0)`, i.e. the zero-size node's own `(x, y)`
++ * -- `ULine.hline(dx)` then, translated by `dx`, `ULine.vline(dy)` to the
++ * recorded label translate. Coloured by `gotoColor`, the merged
++ * `activityDiagram.goto` LineColor (`Swimlanes.java:246-249`); `plantuml.skin`
++ * has no `goto` rule, so that is root `LineColor` -- `theme.colors.border`.
++ * No stroke is applied, so the default `UStroke` (thickness 1). A goto with
++ * no label drawn before it (`dest == null`) draws nothing (`:108-109`).
++ * Both lines go through {@link orderedLine}: a jump back up has `dy < 0`.
++ * @see net/sourceforge/plantuml/activitydiagram3/ftile/UGraphicDispatchFtile.java:101-119
++ */
++function renderGoto(node: ActivityNodeGeo, dest: { x: number; y: number } | undefined, theme: Theme): string {
++  if (dest === undefined) return '';
++  const style = { stroke: theme.colors.border, strokeWidth: GOTO_STROKE_WIDTH };
++  return orderedLine(node.x, node.y, dest.x, node.y, style) + orderedLine(dest.x, node.y, dest.x, dest.y, style);
++}
++
++/**
++ * `UGraphicDispatchFtile#draw` over a node sequence in draw order: every
++ * node renders as {@link renderNode}; a `label` node records its translate
++ * under its name (`positions.put`, so a later label of the same name wins)
++ * AFTER drawing, and a `goto` node appends {@link renderGoto} after its own
++ * (empty) draw. Upstream installs the dispatcher only on the single-lane
++ * path (`Swimlanes.java:251-258` -- `drawWhenSwimlanes` never wraps it), so
++ * this is for the plain node loop, not the swimlane chrome pass.
++ * @see net/sourceforge/plantuml/activitydiagram3/ftile/UGraphicDispatchFtile.java:70-85
++ * @see net/sourceforge/plantuml/activitydiagram3/ftile/TextBlockInterceptorUDrawable.java:61-64
++ */
++export function renderNodesDispatchingGotos(nodes: readonly ActivityNodeGeo[], theme: Theme): string[] {
++  const positions = new Map<string, { x: number; y: number }>();
++  return nodes.map((node) => {
++    const svg = renderNode(node, theme);
++    const name = node.label ?? '';
++    if (node.kind === 'label') positions.set(name, { x: node.x, y: node.y });
++    if (node.kind === 'goto') return svg + renderGoto(node, positions.get(name), theme);
++    return svg;
++  });
++}
+diff --git a/src/diagrams/activity/renderer.ts b/src/diagrams/activity/renderer.ts
+index 83bca6746..ab5efffee 100644
+--- a/src/diagrams/activity/renderer.ts
++++ b/src/diagrams/activity/renderer.ts
+@@ -10,8 +10,8 @@ import type { Theme } from '../../core/theme.js';
+ import type { RenderFragment } from '../../core/dispatcher.js';
+ import { polygon, text } from '../../core/svg.js';
+ import {} from '../../core/latex.js';
+-import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
+-import { orderedLine } from './activity-renderer-terminals.js';
++import { centeredFirstBaselineY } from './activity-renderer-shapes.js';
++import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
+ import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
+ import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
+ import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
+@@ -450,7 +450,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
+   if (hasChrome) {
+     children.push(renderSwimlaneChrome(geo, theme));
+   } else {
+-    for (const node of geo.nodes) children.push(renderNode(node, theme));
++    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
+   }
+ 
+   // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
+diff --git a/tests/unit/activity/renderer-goto.test.ts b/tests/unit/activity/renderer-goto.test.ts
+new file mode 100644
+index 000000000..71559cb9b
+--- /dev/null
++++ b/tests/unit/activity/renderer-goto.test.ts
+@@ -0,0 +1,78 @@
++/**
++ * add4-T3d (GOTO-LINES): `UGraphicDispatchFtile` records each `FtileLabel`'s
++ * translate as it is drawn and, on drawing an `FtileGoto`, draws
++ * `ULine.hline(dx)` then `ULine.vline(dy)` from the goto's point-in to the
++ * recorded label position (`UGraphicDispatchFtile.java:78-85,101-119`).
++ * Expected values come from the jar's own SVG for `gunuki-27-nixu177`
++ * (label at 37.663,53; goto at 37.663,172) and `nuvumi-83-tose343` (label at
++ * 81.938,53; goto at 37.663,206).
++ */
++import { describe, expect, it } from 'vitest';
++import { renderNodesDispatchingGotos } from '../../../src/diagrams/activity/activity-renderer-terminals.js';
++import type { ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
++import { deepMergeTheme, resolveTheme } from '../../../src/core/theme.js';
++
++const theme = resolveTheme('default');
++const LINE_STYLE = 'stroke="#181818" stroke-width="1"';
++
++function zeroNode(kind: 'label' | 'goto', name: string, x: number, y: number): ActivityNodeGeo {
++  return { id: `${kind}-${name}-${y}`, kind, label: name, x, y, width: 0, height: 0 };
++}
++
++describe('renderNodesDispatchingGotos', () => {
++  it('draws a zero hline then the vline up to a label drawn earlier (gunuki)', () => {
++    const out = renderNodesDispatchingGotos(
++      [zeroNode('label', 'lab1', 37.663, 53), zeroNode('goto', 'lab1', 37.663, 172)],
++      theme,
++    );
++    expect(out).toEqual([
++      '',
++      `<line x1="37.663" y1="172" x2="37.663" y2="172" ${LINE_STYLE}/>` +
++        `<line x1="37.663" y1="53" x2="37.663" y2="172" ${LINE_STYLE}/>`,
++    ]);
++  });
++
++  it('runs the hline across to the label column before climbing (nuvumi)', () => {
++    const out = renderNodesDispatchingGotos(
++      [zeroNode('label', 'lab1', 81.938, 53), zeroNode('goto', 'lab1', 37.663, 206)],
++      theme,
++    );
++    expect(out[1]).toBe(
++      `<line x1="37.663" y1="206" x2="81.938" y2="206" ${LINE_STYLE}/>` +
++        `<line x1="81.938" y1="53" x2="81.938" y2="206" ${LINE_STYLE}/>`,
++    );
++  });
++
++  it('draws nothing for a goto whose label has not been drawn yet (dest == null)', () => {
++    const out = renderNodesDispatchingGotos(
++      [zeroNode('goto', 'later', 10, 100), zeroNode('label', 'later', 10, 20)],
++      theme,
++    );
++    expect(out).toEqual(['', '']);
++  });
++
++  it('jumps to the most recently drawn label of that name (HashMap.put overwrite)', () => {
++    const out = renderNodesDispatchingGotos(
++      [zeroNode('label', 'x', 10, 20), zeroNode('label', 'x', 10, 40), zeroNode('goto', 'x', 10, 90)],
++      theme,
++    );
++    expect(out[2]).toBe(
++      `<line x1="10" y1="90" x2="10" y2="90" ${LINE_STYLE}/><line x1="10" y1="40" x2="10" y2="90" ${LINE_STYLE}/>`,
++    );
++  });
++
++  it('strokes in the root LineColor (goto style has no rule of its own)', () => {
++    const red = deepMergeTheme(theme, { colors: { ...theme.colors, border: '#FF0000' } });
++    const out = renderNodesDispatchingGotos([zeroNode('label', 'a', 5, 5), zeroNode('goto', 'a', 5, 50)], red);
++    expect(out[1]).toBe(
++      '<line x1="5" y1="50" x2="5" y2="50" stroke="#F00" stroke-width="1"/>' +
++        '<line x1="5" y1="5" x2="5" y2="50" stroke="#F00" stroke-width="1"/>',
++    );
++  });
++
++  it('renders every other node exactly as renderNode does', () => {
++    const start: ActivityNodeGeo = { id: 's', kind: 'start', x: 0, y: 0, width: 20, height: 20 };
++    const [svg] = renderNodesDispatchingGotos([start], theme);
++    expect(svg).toBe('<ellipse cx="10" cy="10" rx="10" ry="10" fill="#222" stroke="#222" stroke-width="1"/>');
++  });
++});

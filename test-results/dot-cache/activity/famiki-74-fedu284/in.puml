@@ -1,0 +1,14 @@
+@startuml
+|a|A
+|b|B
+
+|a|
+start
+if(Test) then(yes)
+  |b|
+  :Action;
+else (no)
+endif
+|a|
+stop
+@enduml

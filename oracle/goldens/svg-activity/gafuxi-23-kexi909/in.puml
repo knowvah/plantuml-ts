@@ -1,0 +1,13 @@
+@startuml
+skinparam ConditionEndStyle hline
+!pragma useVerticalIf on
+
+start
+repeat 
+	if (option1) then (yes)
+		stop
+	elseif (option2) then (yes)
+		:do something;
+	endif
+repeat while
+@enduml

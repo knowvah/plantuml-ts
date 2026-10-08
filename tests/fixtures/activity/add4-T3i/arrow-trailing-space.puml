@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-> some label ;
+:b;
+stop
+@enduml

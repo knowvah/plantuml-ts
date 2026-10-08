@@ -1,0 +1,16 @@
+@startuml
+swimlane P1
+swimlane P2
+swimlane P3
+
+if (multiprocessor?) then (yes)
+  fork in p1
+  :Treatment 1; in P1
+  fork again
+    :Treatment 2;
+  end fork
+else (monoproc)
+  :Treatment 1;
+  :Treatment 2;
+endif
+@enduml

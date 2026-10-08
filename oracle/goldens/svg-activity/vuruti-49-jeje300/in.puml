@@ -1,0 +1,17 @@
+@startuml
+start
+partition "Correct" {
+:a;
+note right
+Note is inside the partition
+end note
+}
+partition "Wrong" {
+ 
+note right
+Note is outside the partition
+end note
+}
+ 
+stop
+@enduml

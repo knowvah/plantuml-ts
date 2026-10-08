@@ -1,0 +1,12 @@
+@startuml
+:start1;
+partition "go up the stairs" {
+ :go up first step;
+ :go up second step;
+ if (tired) then(yes)
+   :stop a bit;
+ endif
+ :go up last steps;
+}
+:start2;
+@enduml

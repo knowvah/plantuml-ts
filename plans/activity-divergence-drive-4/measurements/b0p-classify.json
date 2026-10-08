@@ -1,0 +1,3478 @@
+{
+ "summary": {
+  "rows": 111,
+  "errors": 0,
+  "positionOnly": 15,
+  "uniformShift": 46,
+  "familyFixtures": {
+   "svg/@viewBox[]": 73,
+   "svg/@width": 51,
+   "svg/g[]/ellipse[]/@cx": 39,
+   "svg/g[]/rect[]/@x": 49,
+   "svg/g[]/text[]/@x": 59,
+   "svg/g[]/text[]/@font-size": 14,
+   "svg/g[]/text[]/@textLength": 23,
+   "svg/g[]/text[]/@y": 55,
+   "svg/g[]/text[]/text()[]": 21,
+   "svg/g[]/rect[]/@y": 50,
+   "svg/g[]/polygon[]/@points[]": 80,
+   "svg/g[]/line[]/@x1": 64,
+   "svg/g[]/line[]/@x2": 64,
+   "svg/g[]/line[]/@y1": 61,
+   "svg/g[]/line[]/@y2": 58,
+   "svg/g[][childCount]": 34,
+   "svg/@height": 48,
+   "svg/g[]/rect[]/@width": 35,
+   "svg/g[]/path[]/@d[]": 20,
+   "svg/g[]/ellipse[]/@cy": 42,
+   "svg/g[]/rect[]/@height": 15,
+   "svg/g[]/image[]/@height": 1,
+   "svg/g[]/image[]/@width": 1,
+   "svg/g[]/image[]/@y": 1,
+   "svg/g[]/line[]/@stroke": 4,
+   "svg/g[]/line[]/@stroke-width": 5,
+   "svg/g[]/polygon[]/@points": 23,
+   "POLY": 23,
+   "svg/g[]/rect[]/@fill": 7,
+   "svg/g[]/polygon[]": 8,
+   "svg/g[]/text[]": 8,
+   "svg/g[]/rect[]": 6,
+   "svg/g[]/ellipse[]": 5,
+   "svg/g[]/line[]": 8,
+   "svg/g[]/ellipse[]/@fill": 2,
+   "svg/g[]/ellipse[]/@rx": 2,
+   "svg/g[]/ellipse[]/@ry": 2,
+   "svg/g[]/path[]/@d": 5,
+   "svg/g[]/ellipse[]/@stroke": 1,
+   "svg/g[]/rect[]/@stroke-width": 3,
+   "svg/g[]/path[]/@fill": 4,
+   "svg/g[]/polygon[]/@fill": 1,
+   "svg/g[]/polygon[]/@stroke-width": 3,
+   "svg/g[]/text[]/@font-weight": 4,
+   "svg/g[]/ellipse[]/@stroke-width": 1,
+   "svg/g[]/rect[]/@rx": 2,
+   "svg/g[]/rect[]/@ry": 2,
+   "svg/g[]/a[]/text[]/@font-size": 1,
+   "svg/g[]/a[]/text[]/@textLength": 1,
+   "svg/g[]/a[]/text[]/@x": 2,
+   "svg/g[]/a[]/text[]/@y": 1,
+   "svg/g[]/text[]/@fill": 3,
+   "svg/g[]/rect[]/@stroke": 4,
+   "svg/g[]/path[]/@stroke": 3,
+   "svg/g[]/a[]/text[]/@fill": 2,
+   "svg/g[]/text[][childCount]": 1,
+   "svg/g[]/g[]/text[]/@x": 3,
+   "svg/g[]/text[]/@font-family": 3,
+   "svg/g[]/g[]/rect[]/@x": 1,
+   "svg/g[]/g[]/line[]/@x1": 1,
+   "svg/g[]/g[]/line[]/@x2": 1
+  }
+ },
+ "rows": [
+  {
+   "slug": "bejeta-45-sotu349",
+   "ws": 286,
+   "n": 176,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 6,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 3,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/text[]/text()[]": 4,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/polygon[]/@points[]": 76,
+    "svg/g[]/line[]/@x1": 18,
+    "svg/g[]/line[]/@x2": 19,
+    "svg/g[]/line[]/@y1": 17,
+    "svg/g[]/line[]/@y2": 17,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 86,
+   "shifts": {
+    "x": [
+     2.047,
+     24.093,
+     4.093,
+     67.138,
+     -87.138,
+     2.219,
+     86.012,
+     -81.919,
+     118.362,
+     81.012,
+     14.047,
+     48.662,
+     -114.269,
+     -74.872,
+     -9.953,
+     -42.522
+    ],
+    "y": [
+     33.777,
+     76,
+     -81.5,
+     -28.277,
+     27,
+     24,
+     -64,
+     -24,
+     32,
+     -5,
+     -29,
+     -66,
+     79,
+     64,
+     -52,
+     -42,
+     -57,
+     -71,
+     29,
+     66,
+     -79,
+     52,
+     42,
+     57
+    ]
+   }
+  },
+  {
+   "slug": "bigide-91-bise382",
+   "ws": 35,
+   "n": 35,
+   "families": {
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/line[]/@x1": 7,
+    "svg/g[]/line[]/@x2": 7,
+    "svg/g[]/polygon[]/@points[]": 12
+   },
+   "nonPos": 12,
+   "shifts": {
+    "x": [
+     -0.5
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "bizeti-00-mido821",
+   "ws": 158,
+   "n": 158,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@x": 10,
+    "svg/g[]/text[]/@x": 11,
+    "svg/g[]/rect[]/@width": 3,
+    "svg/g[]/path[]/@d[]": 16,
+    "svg/g[]/polygon[]/@points[]": 72,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/ellipse[]/@cx": 4,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/line[]/@x1": 15,
+    "svg/g[]/line[]/@x2": 15,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 91,
+   "shifts": {
+    "x": [
+     1.425
+    ],
+    "y": [
+     0.611,
+     -12
+    ]
+   }
+  },
+  {
+   "slug": "boxefe-81-situ725",
+   "ws": 55,
+   "n": 55,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 4,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y1": 7,
+    "svg/g[]/line[]/@y2": 10,
+    "svg/g[]/polygon[]/@points[]": 24
+   },
+   "nonPos": 24,
+   "shifts": {
+    "x": [],
+    "y": [
+     0.944,
+     0.945,
+     -0.111,
+     -0.112,
+     -1.056
+    ]
+   }
+  },
+  {
+   "slug": "bozido-07-geze049",
+   "ws": 80,
+   "n": 63,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/image[]/@height": 1,
+    "svg/g[]/image[]/@width": 1,
+    "svg/g[]/image[]/@y": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@x1": 6,
+    "svg/g[]/line[]/@x2": 6,
+    "svg/g[]/line[]/@y1": 4,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 29,
+   "shifts": {
+    "x": [
+     -69.5
+    ],
+    "y": [
+     84,
+     -87
+    ]
+   }
+  },
+  {
+   "slug": "bubefi-32-fike915",
+   "ws": 37,
+   "n": 37,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/line[]/@x1": 8,
+    "svg/g[]/line[]/@x2": 8,
+    "svg/g[]/polygon[]/@points[]": 8,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/text()[]": 1
+   },
+   "nonPos": 11,
+   "shifts": {
+    "x": [
+     66.037,
+     132.075,
+     66.038,
+     132.076
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "cakeca-72-kara622",
+   "ws": 123,
+   "n": 123,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 5,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/path[]/@d[]": 8,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y2": 5,
+    "svg/g[]/rect[]/@height": 2,
+    "svg/g[]/line[]/@x1": 20,
+    "svg/g[]/line[]/@x2": 20,
+    "svg/g[]/rect[]/@x": 7,
+    "svg/g[]/text[]/@x": 12,
+    "svg/g[]/polygon[]/@points[]": 36
+   },
+   "nonPos": 51,
+   "shifts": {
+    "x": [
+     9.538,
+     9.537,
+     20.54,
+     20.537,
+     20.538,
+     20.53,
+     4.768,
+     15.03
+    ],
+    "y": [
+     0.611
+    ]
+   }
+  },
+  {
+   "slug": "cemipu-87-dinu624",
+   "ws": 82,
+   "n": 82,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/line[]/@stroke": 3,
+    "svg/g[]/line[]/@stroke-width": 3,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/polygon[]/@points[]": 40,
+    "svg/g[]/line[]/@x1": 12,
+    "svg/g[]/line[]/@x2": 13
+   },
+   "nonPos": 47,
+   "shifts": {
+    "x": [
+     -2.425,
+     11,
+     -15.113,
+     -2.426,
+     -4.556
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "cezabi-50-cege262",
+   "ws": 224,
+   "n": 224,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 111,
+    "svg/g[]/text[]/@x": 9,
+    "svg/g[]/rect[]/@y": 7,
+    "svg/g[]/text[]/@y": 14,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 17,
+    "svg/g[]/line[]/@y2": 21,
+    "svg/g[]/line[]/@x2": 17,
+    "svg/g[]/line[]/@y1": 14
+   },
+   "nonPos": 111,
+   "shifts": {
+    "x": [
+     20.288,
+     20.287,
+     6.431,
+     -2.525,
+     -3.287,
+     -4.05
+    ],
+    "y": [
+     11,
+     5.5,
+     3.667
+    ]
+   }
+  },
+  {
+   "slug": "cofubo-18-koju711",
+   "ws": 17,
+   "n": 4,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [],
+    "y": [
+     -10
+    ]
+   }
+  },
+  {
+   "slug": "cokoja-48-luki109",
+   "ws": 2,
+   "n": 2,
+   "families": {
+    "svg/g[]/line[]/@y1": 2
+   },
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": [
+     -12
+    ]
+   }
+  },
+  {
+   "slug": "dabulu-96-feco908",
+   "ws": 1,
+   "n": 1,
+   "families": {
+    "svg/g[]/line[]/@y1": 1
+   },
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": [
+     -36
+    ]
+   }
+  },
+  {
+   "slug": "dajoge-59-cusa859",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "demibe-40-moda439",
+   "ws": 86,
+   "n": 86,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@y": 10,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@y1": 11,
+    "svg/g[]/line[]/@y2": 16,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@points[]": 40
+   },
+   "nonPos": 40,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     5.5,
+     3.667
+    ]
+   }
+  },
+  {
+   "slug": "dikaze-62-xibe813",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "dimuco-32-niro540",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "divinu-75-busu278",
+   "ws": 274,
+   "n": 164,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 4,
+    "svg/g[]/text[]/@x": 6,
+    "svg/g[]/text[]/@y": 5,
+    "svg/g[]/text[]/text()[]": 5,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/polygon[]/@points[]": 68,
+    "svg/g[]/line[]/@x1": 16,
+    "svg/g[]/line[]/@x2": 17,
+    "svg/g[]/line[]/@y1": 17,
+    "svg/g[]/line[]/@y2": 17,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 80,
+   "shifts": {
+    "x": [
+     27.415,
+     65.403,
+     45.403,
+     34.691,
+     -34.691,
+     -20,
+     27.416,
+     4.012,
+     94.391,
+     -48.988,
+     109.378,
+     89.39,
+     39.415,
+     74.403,
+     -63.975,
+     -16.572,
+     15.415,
+     -1.585
+    ],
+    "y": [
+     33.777,
+     76,
+     -81.5,
+     5.5,
+     -33.777,
+     27,
+     24,
+     -64,
+     -24,
+     32,
+     -5,
+     -29,
+     -66,
+     79,
+     64,
+     -52,
+     -42,
+     -57,
+     -71,
+     29,
+     66,
+     -79,
+     52,
+     42,
+     57
+    ]
+   }
+  },
+  {
+   "slug": "dulusu-13-roka577",
+   "ws": 42,
+   "n": 42,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/path[]/@d[]": 4,
+    "svg/g[]/text[]/@y": 2,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/line[]/@y2": 2,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[]/line[]/@y1": 1
+   },
+   "nonPos": 22,
+   "shifts": {
+    "x": [
+     12.65
+    ],
+    "y": [
+     0.611
+    ]
+   }
+  },
+  {
+   "slug": "duvole-80-meda461",
+   "ws": 58,
+   "n": 52,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 4,
+    "svg/g[]/text[]/@y": 7,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/line[]/@y2": 10,
+    "svg/g[]/polygon[]/@points[]": 20,
+    "svg/g[]/line[]/@y1": 7,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 21,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     21,
+     5.5,
+     3.667
+    ]
+   }
+  },
+  {
+   "slug": "famiki-74-fedu284",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/text[]/text()[]": 2
+   },
+   "nonPos": 2,
+   "shifts": {
+    "x": [
+     -1.013
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "fikuki-99-kulu790",
+   "ws": 87,
+   "n": 14,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1,
+    "svg/g[]/polygon[]/@points[]": 4,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 6,
+   "shifts": {
+    "x": [],
+    "y": [
+     -78
+    ]
+   }
+  },
+  {
+   "slug": "fitega-67-kupi183",
+   "ws": 132,
+   "n": 119,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 59,
+    "svg/g[]/text[]/@x": 3,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 9,
+    "svg/g[]/line[]/@y2": 11,
+    "svg/g[]/line[]/@x2": 9,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 60,
+   "shifts": {
+    "x": [
+     1.559,
+     0.559
+    ],
+    "y": [
+     11,
+     5.5,
+     10.667,
+     3.667,
+     16
+    ]
+   }
+  },
+  {
+   "slug": "fukika-81-gite897",
+   "ws": 150,
+   "n": 133,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cy": 3,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@y": 9,
+    "svg/g[]/polygon[]/@points[]": 71,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 3,
+    "svg/g[]/line[]/@y1": 15,
+    "svg/g[]/line[]/@y2": 15,
+    "svg/g[]/line[]/@x2": 3,
+    "svg/g[]/line[]/@x1": 3,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 72,
+   "shifts": {
+    "x": [
+     3.665,
+     15
+    ],
+    "y": [
+     20,
+     30.444,
+     30.445,
+     30.944,
+     5
+    ]
+   }
+  },
+  {
+   "slug": "fuleno-34-boni528",
+   "ws": 619,
+   "n": 155,
+   "families": {
+    "svg/g[]/polygon[]": 13,
+    "svg/g[]/text[]/@font-size": 3,
+    "svg/g[]/text[]/@textLength": 5,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/text[]/text()[]": 6,
+    "svg/g[]/text[]": 7,
+    "svg/g[]/rect[]": 3,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/ellipse[]": 2,
+    "svg/g[]/line[]/@x1": 17,
+    "svg/g[]/line[]/@x2": 14,
+    "svg/g[]/line[]/@y1": 18,
+    "svg/g[]/line[]/@y2": 18,
+    "svg/g[]/line[]": 9,
+    "svg/g[]/polygon[]/@points[]": 28
+   },
+   "nonPos": 76,
+   "shifts": {
+    "x": [
+     83.735,
+     20.31,
+     -63.735,
+     64.044,
+     -20,
+     7.712,
+     43.022,
+     73.022,
+     35.31,
+     35,
+     -73.022,
+     98.022,
+     68.022,
+     -43.022,
+     -98.022,
+     -42,
+     -68.022
+    ],
+    "y": [
+     28.277,
+     151.777,
+     194,
+     -112.5,
+     -81.5,
+     -33.777,
+     32,
+     27,
+     39,
+     76,
+     88,
+     118,
+     130,
+     -182,
+     -100,
+     -44,
+     -123,
+     -147,
+     140,
+     -81,
+     -66,
+     -37,
+     -42,
+     -71,
+     -86,
+     -116,
+     -79,
+     81,
+     52,
+     42,
+     57
+    ]
+   }
+  },
+  {
+   "slug": "gafuxi-23-kexi909",
+   "ws": 306,
+   "n": 62,
+   "families": {
+    "svg/g[]/polygon[]": 7,
+    "svg/g[]/text[]": 3,
+    "svg/g[]/ellipse[]": 2,
+    "svg/g[]/text[]/@textLength": 2,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/text[]/@y": 2,
+    "svg/g[]/text[]/text()[]": 2,
+    "svg/g[]/rect[]": 1,
+    "svg/g[]/text[]/@font-size": 1,
+    "svg/g[]/line[]/@x1": 6,
+    "svg/g[]/line[]/@x2": 5,
+    "svg/g[]/line[]/@y1": 8,
+    "svg/g[]/line[]/@y2": 8,
+    "svg/g[]/line[]": 5,
+    "svg/g[]/polygon[]/@points[]": 8
+   },
+   "nonPos": 31,
+   "shifts": {
+    "x": [
+     48.094,
+     -20,
+     -19.303,
+     35.047,
+     84.397,
+     54.35,
+     49.35,
+     -49.35,
+     -84.397,
+     -35.047,
+     -79.397
+    ],
+    "y": [
+     -71.5,
+     -33.777,
+     32,
+     27,
+     39,
+     66,
+     78,
+     44,
+     46,
+     -105,
+     -142,
+     -127,
+     5,
+     -9,
+     24
+    ]
+   }
+  },
+  {
+   "slug": "gelixa-02-sele970",
+   "ws": 621,
+   "n": 145,
+   "families": {
+    "svg/g[]/polygon[]": 11,
+    "svg/g[]/text[]/@font-size": 4,
+    "svg/g[]/text[]/@textLength": 6,
+    "svg/g[]/text[]/@x": 7,
+    "svg/g[]/text[]/@y": 7,
+    "svg/g[]/text[]/text()[]": 6,
+    "svg/g[]/text[]": 6,
+    "svg/g[]/rect[]": 4,
+    "svg/g[]/ellipse[]": 5,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/ellipse[]/@fill": 1,
+    "svg/g[]/ellipse[]/@rx": 1,
+    "svg/g[]/ellipse[]/@ry": 1,
+    "svg/g[]/polygon[]/@points[]": 34,
+    "svg/g[]/line[]/@x1": 10,
+    "svg/g[]/line[]/@x2": 7,
+    "svg/g[]/line[]/@y1": 13,
+    "svg/g[]/line[]/@y2": 13,
+    "svg/g[]/line[]": 8
+   },
+   "nonPos": 87,
+   "shifts": {
+    "x": [
+     83.735,
+     20.31,
+     0.309,
+     -0.31,
+     -83.735,
+     64.044,
+     -20,
+     7.712,
+     43.022,
+     73.022,
+     35.31,
+     35,
+     -73.022,
+     30,
+     -30,
+     -43.022,
+     -68.022
+    ],
+    "y": [
+     28.277,
+     118,
+     151.777,
+     -236,
+     -146.277,
+     -123.5,
+     -33.777,
+     32,
+     27,
+     39,
+     130,
+     -224,
+     -142,
+     236,
+     268,
+     189,
+     -393,
+     -430,
+     -415,
+     -47,
+     -37,
+     52,
+     42,
+     57
+    ]
+   }
+  },
+  {
+   "slug": "gesogi-81-xoma900",
+   "ws": 76,
+   "n": 76,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/polygon[]/@points[]": 35,
+    "svg/g[]/line[]/@x1": 15,
+    "svg/g[]/line[]/@x2": 16
+   },
+   "nonPos": 37,
+   "shifts": {
+    "x": [
+     -15,
+     -7.5
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "gexuko-22-dumi059",
+   "ws": 544,
+   "n": 138,
+   "families": {
+    "svg/g[]/polygon[]": 12,
+    "svg/g[]/text[]/@font-size": 3,
+    "svg/g[]/text[]/@textLength": 5,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/text[]/text()[]": 6,
+    "svg/g[]/text[]": 6,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/ellipse[]": 2,
+    "svg/g[]/rect[]": 2,
+    "svg/g[]/line[]/@x1": 12,
+    "svg/g[]/line[]/@x2": 10,
+    "svg/g[]/line[]/@y1": 16,
+    "svg/g[]/line[]/@y2": 16,
+    "svg/g[]/polygon[]/@points[]": 28,
+    "svg/g[]/line[]": 8
+   },
+   "nonPos": 72,
+   "shifts": {
+    "x": [
+     83.735,
+     20.31,
+     -63.735,
+     64.044,
+     -20,
+     7.712,
+     43.022,
+     73.022,
+     42,
+     35.31,
+     35,
+     -73.022,
+     98.022,
+     -30,
+     -43.022,
+     -68.022
+    ],
+    "y": [
+     72.277,
+     151.777,
+     194,
+     -112.5,
+     -81.5,
+     -33.777,
+     32,
+     27,
+     393,
+     378,
+     44,
+     -310,
+     118,
+     130,
+     76,
+     88,
+     -182,
+     -100,
+     162,
+     150,
+     71,
+     47,
+     10,
+     -319,
+     -329,
+     -89,
+     -67,
+     81,
+     52,
+     42,
+     57
+    ]
+   }
+  },
+  {
+   "slug": "giteso-65-mefo026",
+   "ws": 440,
+   "n": 348,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 5,
+    "svg/g[]/path[]/@d[]": 88,
+    "svg/g[]/text[]/@x": 18,
+    "svg/g[]/rect[]/@x": 6,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 2,
+    "svg/g[]/text[]/@y": 15,
+    "svg/g[]/text[]/text()[]": 2,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/polygon[]/@points[]": 118,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/path[]/@d": 2,
+    "svg/g[]/polygon[]/@points": 2,
+    "POLY": 2,
+    "svg/g[]/line[]/@x1": 20,
+    "svg/g[]/line[]/@x2": 20,
+    "svg/g[]/line[]/@y1": 16,
+    "svg/g[]/line[]/@y2": 18,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 215,
+   "shifts": {
+    "x": [
+     183.194,
+     -178.403,
+     280.553,
+     97.388,
+     97.387,
+     241.287,
+     106.475,
+     259,
+     269,
+     262.537,
+     241.288,
+     269.953,
+     281.953,
+     195.194
+    ],
+    "y": [
+     10.055,
+     -44.055,
+     -40,
+     12,
+     3,
+     15,
+     26,
+     20.5,
+     -17,
+     -144.5,
+     -153.5,
+     9,
+     11.75,
+     6,
+     4,
+     330.5,
+     305,
+     -316.5,
+     -311
+    ]
+   }
+  },
+  {
+   "slug": "gufuma-85-zoce945",
+   "ws": 29,
+   "n": 29,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 14,
+   "shifts": {
+    "x": [
+     -7.5
+    ],
+    "y": [
+     2
+    ]
+   }
+  },
+  {
+   "slug": "gunuki-27-nixu177",
+   "ws": 14,
+   "n": 1,
+   "families": {
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "jageti-56-kume076",
+   "ws": 1,
+   "n": 1,
+   "families": {
+    "svg/g[]/line[]/@y1": 1
+   },
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": [
+     -21.5
+    ]
+   }
+  },
+  {
+   "slug": "japeku-46-kulo799",
+   "ws": 18,
+   "n": 5,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [],
+    "y": [
+     -10
+    ]
+   }
+  },
+  {
+   "slug": "jazedo-50-meka611",
+   "ws": 41,
+   "n": 35,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 17,
+   "shifts": {
+    "x": [],
+    "y": [
+     20.556,
+     12
+    ]
+   }
+  },
+  {
+   "slug": "jucidi-98-zato093",
+   "ws": 81,
+   "n": 40,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/line[]/@x1": 7,
+    "svg/g[]/line[]/@x2": 8,
+    "svg/g[]/line[]/@y1": 3,
+    "svg/g[]/line[]/@y2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 14,
+   "shifts": {
+    "x": [
+     10,
+     -92,
+     -64.4,
+     -14,
+     89.4,
+     5
+    ],
+    "y": [
+     69.5,
+     49.5,
+     52,
+     15
+    ]
+   }
+  },
+  {
+   "slug": "jusama-23-bojo989",
+   "ws": 2,
+   "n": 2,
+   "families": {
+    "svg/g[]/line[]/@y1": 2
+   },
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": [
+     -12
+    ]
+   }
+  },
+  {
+   "slug": "katime-87-vole867",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/path[]/@d": 1,
+    "svg/g[]/ellipse[]/@cx": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [
+     -10
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "kavoro-11-jife299",
+   "ws": 37,
+   "n": 37,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/path[]/@d[]": 20,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 3,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 25,
+   "shifts": {
+    "x": [
+     10,
+     20
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "kerada-15-fofu049",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "kijazo-83-kipu485",
+   "ws": 8,
+   "n": 8,
+   "families": {
+    "svg/g[]/polygon[]/@points[]": 4,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/line[]/@x1": 2
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [
+     5.625
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "kilavo-46-xumo547",
+   "ws": 19,
+   "n": 19,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/path[]/@d[]": 3,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/text()[]": 1,
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/line[]/@x2": 1,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 11,
+   "shifts": {
+    "x": [
+     -2
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "kotiso-16-vizi552",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "labala-74-juki864",
+   "ws": 120,
+   "n": 120,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/ellipse[]/@cy": 3,
+    "svg/g[]/ellipse[]/@fill": 2,
+    "svg/g[]/ellipse[]/@stroke": 3,
+    "svg/g[]/rect[]/@stroke-width": 3,
+    "svg/g[]/rect[]/@x": 5,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@x": 3,
+    "svg/g[]/text[]/@y": 3,
+    "svg/g[]/line[]/@x1": 7,
+    "svg/g[]/line[]/@x2": 7,
+    "svg/g[]/line[]/@y1": 7,
+    "svg/g[]/line[]/@y2": 7,
+    "svg/g[]/polygon[]/@points[]": 56
+   },
+   "nonPos": 66,
+   "shifts": {
+    "x": [
+     -5
+    ],
+    "y": [
+     -5
+    ]
+   }
+  },
+  {
+   "slug": "lebile-91-veto202",
+   "ws": 227,
+   "n": 200,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/path[]/@d[]": 62,
+    "svg/g[]/path[]/@fill": 6,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/text[]/@x": 6,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/polygon[]/@points[]": 66,
+    "svg/g[]/polygon[]/@fill": 1,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@stroke-width": 1,
+    "svg/g[]/line[]/@x1": 13,
+    "svg/g[]/line[]/@x2": 13,
+    "svg/g[]/line[]/@y2": 11,
+    "svg/g[]/line[]/@y1": 7,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 139,
+   "shifts": {
+    "x": [
+     -100.062,
+     114.812,
+     114.813,
+     104.781,
+     90.813,
+     26.406,
+     50.406,
+     110.781,
+     187.188,
+     199.188,
+     126.813
+    ],
+    "y": [
+     -25,
+     -3.5,
+     -54,
+     4,
+     156.056,
+     134,
+     12,
+     66.056,
+     -266.056,
+     -22,
+     -42
+    ]
+   }
+  },
+  {
+   "slug": "letuke-04-poza319",
+   "ws": 138,
+   "n": 97,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 7,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@font-weight": 1,
+    "svg/g[]/text[]/@textLength": 3,
+    "svg/g[]/text[]/@y": 3,
+    "svg/g[]/text[]/text()[]": 3,
+    "svg/g[]/polygon[]/@points[]": 49,
+    "svg/g[]/line[]/@x1": 7,
+    "svg/g[]/line[]/@x2": 7,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 59,
+   "shifts": {
+    "x": [
+     -8.525,
+     4.788,
+     -17.05
+    ],
+    "y": [
+     -8,
+     6,
+     8
+    ]
+   }
+  },
+  {
+   "slug": "lipiki-79-fapu237",
+   "ws": 115,
+   "n": 102,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/polygon[]/@points[]": 43,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 5,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@x1": 10,
+    "svg/g[]/line[]/@x2": 10,
+    "svg/g[]/line[]/@y1": 8,
+    "svg/g[]/line[]/@y2": 11,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 44,
+   "shifts": {
+    "x": [
+     11.563,
+     -0.366,
+     -6.55,
+     11.562,
+     -12.366,
+     -0.438
+    ],
+    "y": [
+     11,
+     5.5,
+     3.667,
+     21,
+     -3,
+     9
+    ]
+   }
+  },
+  {
+   "slug": "lisade-37-vuri519",
+   "ws": 66,
+   "n": 66,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/ellipse[]/@cy": 3,
+    "svg/g[]/ellipse[]/@rx": 3,
+    "svg/g[]/ellipse[]/@ry": 3,
+    "svg/g[]/ellipse[]/@stroke-width": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@rx": 1,
+    "svg/g[]/rect[]/@ry": 1,
+    "svg/g[]/rect[]/@stroke-width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 2,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/text[]/@y": 2,
+    "svg/g[]/a[]/text[]/@font-size": 1,
+    "svg/g[]/a[]/text[]/@textLength": 1,
+    "svg/g[]/a[]/text[]/@x": 1,
+    "svg/g[]/a[]/text[]/@y": 1,
+    "svg/g[]/line[]/@stroke-width": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[]/line[]/@y2": 2,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[]/polygon[]/@stroke-width": 2
+   },
+   "nonPos": 40,
+   "shifts": {
+    "x": [
+     138.272,
+     20.426,
+     33.192,
+     62.969,
+     217.789
+    ],
+    "y": [
+     31.915,
+     70.213,
+     94.895,
+     150.64,
+     44.681,
+     111.065,
+     136.597
+    ]
+   }
+  },
+  {
+   "slug": "loxija-71-joku558",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/text[]/@fill": 2,
+    "svg/g[]/text[]/@y": 2
+   },
+   "nonPos": 2,
+   "shifts": {
+    "x": [],
+    "y": [
+     -2
+    ]
+   }
+  },
+  {
+   "slug": "lukuxe-26-gemu804",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "mabove-82-dozu233",
+   "ws": 53,
+   "n": 53,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@stroke": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/path[]/@d[]": 7,
+    "svg/g[]/path[]/@stroke": 1,
+    "svg/g[]/text[]/@fill": 1,
+    "svg/g[]/text[]/@font-size": 1,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/@y": 2,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/line[]/@y2": 2,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[]/line[]/@y1": 1
+   },
+   "nonPos": 31,
+   "shifts": {
+    "x": [
+     6.15
+    ],
+    "y": [
+     1.944,
+     6.611,
+     7.944,
+     7.945
+    ]
+   }
+  },
+  {
+   "slug": "mazoka-64-nixi123",
+   "ws": 259,
+   "n": 259,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@y": 7,
+    "svg/g[]/text[]/@y": 22,
+    "svg/g[]/ellipse[]/@cy": 14,
+    "svg/g[]/polygon[]/@points[]": 147,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/line[]/@y1": 27,
+    "svg/g[]/line[]/@y2": 30,
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/line[]/@x2": 1
+   },
+   "nonPos": 148,
+   "shifts": {
+    "x": [
+     8.525,
+     -8.525
+    ],
+    "y": [
+     11,
+     5.5
+    ]
+   }
+  },
+  {
+   "slug": "meguta-71-pimi823",
+   "ws": 373,
+   "n": 60,
+   "families": {
+    "svg/g[]/polygon[]": 8,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 3,
+    "svg/g[]/text[]/@x": 3,
+    "svg/g[]/text[]/@y": 3,
+    "svg/g[]/text[]/text()[]": 3,
+    "svg/g[]/text[]": 4,
+    "svg/g[]/rect[]": 2,
+    "svg/g[]/ellipse[]": 1,
+    "svg/g[]/line[]": 8,
+    "svg/g[]/line[]/@x1": 5,
+    "svg/g[]/line[]/@x2": 4,
+    "svg/g[]/line[]/@y1": 7,
+    "svg/g[]/line[]/@y2": 7
+   },
+   "nonPos": 31,
+   "shifts": {
+    "x": [
+     82.188,
+     62.188,
+     -49.662,
+     -12.556,
+     42.094,
+     91.744,
+     54.65,
+     49.65,
+     -49.65,
+     -42.094
+    ],
+    "y": [
+     28.277,
+     -121.5,
+     -33.777,
+     76,
+     27,
+     39,
+     116,
+     128,
+     44,
+     47,
+     -155,
+     -192,
+     -177,
+     5,
+     24
+    ]
+   }
+  },
+  {
+   "slug": "mifejo-31-sovi184",
+   "ws": 25,
+   "n": 25,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/path[]/@d[]": 14,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/line[]/@x2": 1,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 18,
+   "shifts": {
+    "x": [
+     -20.15
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "mojezi-43-gamu360",
+   "ws": 46,
+   "n": 46,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/text[]/@y": 5,
+    "svg/g[]/line[]/@y2": 10,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@points[]": 20,
+    "svg/g[]/line[]/@y1": 5
+   },
+   "nonPos": 20,
+   "shifts": {
+    "x": [],
+    "y": [
+     12,
+     6
+    ]
+   }
+  },
+  {
+   "slug": "momala-42-luvu884",
+   "ws": 61,
+   "n": 22,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[]/line[]/@y2": 2,
+    "svg/g[]/polygon[]/@points[]": 8,
+    "svg/g[]/line[]": 1,
+    "svg/g[]/polygon[]": 1,
+    "svg/g[]/text[]": 1
+   },
+   "nonPos": 11,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     -52,
+     -41
+    ]
+   }
+  },
+  {
+   "slug": "mudobi-07-biji996",
+   "ws": 64,
+   "n": 64,
+   "families": {
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/path[]/@d[]": 4,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/polygon[]/@points[]": 36,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y2": 9,
+    "svg/g[]/line[]/@y1": 6
+   },
+   "nonPos": 40,
+   "shifts": {
+    "x": [],
+    "y": [
+     0.611,
+     -11.389
+    ]
+   }
+  },
+  {
+   "slug": "mufixi-71-koma752",
+   "ws": 236,
+   "n": 32,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 15,
+   "shifts": {
+    "x": [
+     -4.688,
+     -4.687
+    ],
+    "y": [
+     -306
+    ]
+   }
+  },
+  {
+   "slug": "mukigo-10-dixi626",
+   "ws": 229,
+   "n": 216,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 111,
+    "svg/g[]/text[]/@x": 9,
+    "svg/g[]/rect[]/@y": 7,
+    "svg/g[]/text[]/@y": 14,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 15,
+    "svg/g[]/line[]/@y2": 19,
+    "svg/g[]/line[]/@x2": 15,
+    "svg/g[]/line[]/@y1": 13,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 112,
+   "shifts": {
+    "x": [
+     12.915,
+     -4,
+     1.915,
+     1.153,
+     0.39
+    ],
+    "y": [
+     11,
+     5.5,
+     10.667,
+     3.667,
+     16
+    ]
+   }
+  },
+  {
+   "slug": "nesozi-09-zezu092",
+   "ws": 20,
+   "n": 5,
+   "families": {
+    "svg/g[]/a[]/text[]/@fill": 1,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/text[][childCount]": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [
+     74.925
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "nikinu-06-sace939",
+   "ws": 105,
+   "n": 105,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 7,
+    "svg/g[]/text[]/@x": 9,
+    "svg/g[]/line[]/@x1": 19,
+    "svg/g[]/line[]/@x2": 19,
+    "svg/g[]/polygon[]/@points[]": 48
+   },
+   "nonPos": 49,
+   "shifts": {
+    "x": [
+     -4,
+     13,
+     24,
+     24.737,
+     23.999,
+     21.868
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "nikivo-06-kaxa873",
+   "ws": 13,
+   "n": 13,
+   "families": {
+    "svg/g[]/polygon[]/@points": 2,
+    "POLY": 2,
+    "svg/g[]/polygon[]/@points[]": 7,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/line[]/@x1": 2
+   },
+   "nonPos": 7,
+   "shifts": {
+    "x": [
+     21.269
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "nojije-35-teta491",
+   "ws": 113,
+   "n": 113,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@x": 8,
+    "svg/g[]/ellipse[]/@cx": 4,
+    "svg/g[]/polygon[]/@points[]": 54,
+    "svg/g[]/line[]/@x1": 20,
+    "svg/g[]/line[]/@x2": 20
+   },
+   "nonPos": 55,
+   "shifts": {
+    "x": [
+     -7.944,
+     -4.887,
+     -4.888,
+     -2.444
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "nosape-69-jato240",
+   "ws": 43,
+   "n": 43,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y2": 7,
+    "svg/g[]/polygon[]/@points[]": 20,
+    "svg/g[]/line[]/@y1": 5
+   },
+   "nonPos": 20,
+   "shifts": {
+    "x": [],
+    "y": [
+     12,
+     6
+    ]
+   }
+  },
+  {
+   "slug": "nuvumi-83-tose343",
+   "ws": 14,
+   "n": 1,
+   "families": {
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 1,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "pateca-54-lija084",
+   "ws": 61,
+   "n": 55,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/line[]/@y2": 12,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@points[]": 20,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 21,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     5.5,
+     3.667,
+     21
+    ]
+   }
+  },
+  {
+   "slug": "pekefu-66-mepa144",
+   "ws": 8,
+   "n": 8,
+   "families": {
+    "svg/g[]/line[]/@x2": 3,
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [
+     -0.237
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "pezubu-98-niba240",
+   "ws": 55,
+   "n": 42,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 2,
+    "svg/g[]/line[]/@x1": 5,
+    "svg/g[]/line[]/@x2": 6,
+    "svg/g[]/line[]/@y1": 4,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 18,
+   "shifts": {
+    "x": [
+     9,
+     9.65,
+     -10,
+     -40.35,
+     -35.35,
+     34.35,
+     4.825
+    ],
+    "y": [
+     64,
+     52,
+     20,
+     11,
+     -73,
+     -52
+    ]
+   }
+  },
+  {
+   "slug": "pipupe-81-ladi581",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "podobi-57-zoso040",
+   "ws": 36,
+   "n": 36,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 4,
+    "svg/g[]/line[]/@x1": 8,
+    "svg/g[]/line[]/@x2": 8,
+    "svg/g[]/polygon[]/@points[]": 8,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/text()[]": 1
+   },
+   "nonPos": 11,
+   "shifts": {
+    "x": [
+     66.037,
+     132.075,
+     66.038,
+     132.076
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "popome-26-zufo950",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/rect[]/@stroke": 2,
+    "svg/g[]/path[]/@stroke": 2
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "pubeza-23-jaza106",
+   "ws": 61,
+   "n": 61,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@x": 6,
+    "svg/g[]/line[]/@x1": 11,
+    "svg/g[]/line[]/@x2": 11,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[]/text[]/@textLength": 3,
+    "svg/g[]/text[]/text()[]": 3
+   },
+   "nonPos": 21,
+   "shifts": {
+    "x": [
+     13.475,
+     26.95,
+     -23.538,
+     12.438,
+     11.482
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "pufuzi-99-vone170",
+   "ws": 29,
+   "n": 29,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 12,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1
+   },
+   "nonPos": 14,
+   "shifts": {
+    "x": [
+     -13.5
+    ],
+    "y": [
+     -107
+    ]
+   }
+  },
+  {
+   "slug": "razuzu-32-faje125",
+   "ws": 158,
+   "n": 117,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@x": 12,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 8,
+    "svg/g[]/line[]/@y2": 10,
+    "svg/g[]/path[]/@d[]": 20,
+    "svg/g[]/line[]/@stroke": 2,
+    "svg/g[]/line[]/@stroke-width": 2,
+    "svg/g[]/line[]/@x1": 9,
+    "svg/g[]/line[]/@x2": 9,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 50,
+   "shifts": {
+    "x": [
+     -4.681,
+     -22.591,
+     71.337,
+     -57.941,
+     130.915,
+     228.525,
+     0.819,
+     36.488
+    ],
+    "y": [
+     18,
+     -62,
+     -107,
+     145,
+     -112,
+     65,
+     98,
+     -104,
+     -160,
+     -158.5,
+     -142
+    ]
+   }
+  },
+  {
+   "slug": "rekuxa-78-lidi292",
+   "ws": 58,
+   "n": 58,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/text[]/@y": 6,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/line[]/@y2": 12,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@points[]": 24
+   },
+   "nonPos": 24,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     5.5,
+     3.667
+    ]
+   }
+  },
+  {
+   "slug": "rujixe-89-sumo552",
+   "ws": 187,
+   "n": 157,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@font-size": 1,
+    "svg/g[]/text[]/@textLength": 1,
+    "svg/g[]/text[]/@x": 8,
+    "svg/g[]/text[]/@y": 7,
+    "svg/g[]/text[]/text()[]": 1,
+    "svg/g[]/polygon[]/@points[]": 71,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 15,
+    "svg/g[]/line[]/@x2": 15,
+    "svg/g[]/line[]/@y2": 11,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 75,
+   "shifts": {
+    "x": [
+     123.266,
+     -67.05,
+     120.275,
+     122.269,
+     124.263,
+     123.265,
+     124.262
+    ],
+    "y": [
+     47.778,
+     11,
+     5.5,
+     10.667,
+     3.667,
+     16
+    ]
+   }
+  },
+  {
+   "slug": "ruzazu-94-meso880",
+   "ws": 60,
+   "n": 60,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@y": 7,
+    "svg/g[]/line[]/@y2": 13,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[]/line[]/@y1": 8
+   },
+   "nonPos": 24,
+   "shifts": {
+    "x": [],
+    "y": [
+     20.556,
+     12
+    ]
+   }
+  },
+  {
+   "slug": "ruzica-16-deli877",
+   "ws": 105,
+   "n": 105,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/polygon[]/@points[]": 55,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/line[]/@x1": 20,
+    "svg/g[]/line[]/@x2": 20
+   },
+   "nonPos": 56,
+   "shifts": {
+    "x": [
+     -14.619,
+     -14.618,
+     135.966,
+     -1.64,
+     -7.31
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "sifite-87-ziti434",
+   "ws": 18,
+   "n": 18,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/path[]/@d[]": 4,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 8,
+   "shifts": {
+    "x": [],
+    "y": [
+     0.611
+    ]
+   }
+  },
+  {
+   "slug": "sipibi-62-koku509",
+   "ws": 51,
+   "n": 51,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@y": 9,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/line[]/@y2": 7,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[]/line[]/@y1": 3
+   },
+   "nonPos": 24,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     5.5
+    ]
+   }
+  },
+  {
+   "slug": "sisate-06-jage259",
+   "ws": 88,
+   "n": 82,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 35,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/line[]/@y2": 7,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/line[]/@x1": 7,
+    "svg/g[]/line[]/@x2": 6,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 37,
+   "shifts": {
+    "x": [
+     22.65,
+     11.325
+    ],
+    "y": [
+     12,
+     112,
+     6
+    ]
+   }
+  },
+  {
+   "slug": "sojono-24-tufe806",
+   "ws": 276,
+   "n": 243,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 5,
+    "svg/g[]/rect[]/@x": 6,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 2,
+    "svg/g[]/text[]/@x": 12,
+    "svg/g[]/text[]/@y": 11,
+    "svg/g[]/text[]/text()[]": 2,
+    "svg/g[]/polygon[]/@points[]": 117,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/polygon[]/@points": 2,
+    "POLY": 2,
+    "svg/g[]/line[]/@x1": 20,
+    "svg/g[]/line[]/@x2": 20,
+    "svg/g[]/line[]/@y1": 14,
+    "svg/g[]/line[]/@y2": 16,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 124,
+   "shifts": {
+    "x": [
+     167.425,
+     -76.544,
+     96.388,
+     228.691,
+     65.794,
+     199.206,
+     199.207,
+     230.032,
+     228.69,
+     96.387
+    ],
+    "y": [
+     47.778,
+     12,
+     59.778,
+     24,
+     18,
+     6
+    ]
+   }
+  },
+  {
+   "slug": "sokomu-20-five757",
+   "ws": 51,
+   "n": 14,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 1,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/line[]/@y1": 1,
+    "svg/g[]/line[]/@y2": 1,
+    "svg/g[]/polygon[]/@points[]": 4,
+    "svg/g[]/line[]": 1,
+    "svg/g[]/polygon[]": 1,
+    "svg/g[]/text[]": 1
+   },
+   "nonPos": 7,
+   "shifts": {
+    "x": [],
+    "y": [
+     11,
+     -52,
+     -41
+    ]
+   }
+  },
+  {
+   "slug": "somome-34-nori033",
+   "ws": 152,
+   "n": 109,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@x": 7,
+    "svg/g[]/rect[]/@y": 7,
+    "svg/g[]/path[]/@d[]": 8,
+    "svg/g[]/text[]/@x": 8,
+    "svg/g[]/text[]/@y": 8,
+    "svg/g[]/rect[]/@height": 2,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 5,
+    "svg/g[]/line[]/@x2": 5,
+    "svg/g[]/line[]/@y2": 5,
+    "svg/g[]/polygon[]/@points[]": 40,
+    "svg/g[]/line[]/@y1": 4,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 51,
+   "shifts": {
+    "x": [
+     9,
+     10,
+     18.194
+    ],
+    "y": [
+     0.611,
+     1.611,
+     8.611,
+     9.611,
+     16.611,
+     17.611,
+     24.611
+    ]
+   }
+  },
+  {
+   "slug": "tajuxe-32-sexo680",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/path[]/@fill": 4
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "taredi-65-vero960",
+   "ws": 328,
+   "n": 98,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/line[]/@y2": 13,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/rect[]/@y": 3,
+    "svg/g[]/text[]/@x": 7,
+    "svg/g[]/text[]/@y": 3,
+    "svg/g[]/line[]/@x1": 11,
+    "svg/g[]/line[]/@x2": 11,
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@stroke": 2,
+    "svg/g[]/line[]/@stroke-width": 2,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/polygon[]/@points[]": 24,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 30,
+   "shifts": {
+    "x": [
+     -56.831,
+     54.219,
+     128.919,
+     182.269,
+     -140.269,
+     -268.319,
+     -115.016,
+     -38.097,
+     -28.416
+    ],
+    "y": [
+     -102,
+     -14,
+     -48,
+     -58,
+     -171,
+     22,
+     -261,
+     -218,
+     -268,
+     -152,
+     -154.5,
+     -147,
+     -97
+    ]
+   }
+  },
+  {
+   "slug": "tetaja-40-niki277",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "tetako-26-xeja109",
+   "ws": 34,
+   "n": 34,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 3,
+    "svg/g[]/rect[]/@fill": 2,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/path[]/@d[]": 6,
+    "svg/g[]/text[]/@textLength": 2,
+    "svg/g[]/text[]/text()[]": 2,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 8
+   },
+   "nonPos": 22,
+   "shifts": {
+    "x": [
+     -2
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "tobajo-64-mipi810",
+   "ws": 380,
+   "n": 380,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/g[]/text[]/@x": 1,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/rect[]/@x": 10,
+    "svg/g[]/text[]/@x": 23,
+    "svg/g[]/path[]/@fill": 2,
+    "svg/g[]/polygon[]/@points[]": 224,
+    "svg/g[]/line[]/@x1": 57,
+    "svg/g[]/line[]/@x2": 58
+   },
+   "nonPos": 228,
+   "shifts": {
+    "x": [
+     -19.264,
+     -15.001,
+     -15,
+     -38.528,
+     -23.528
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "tozecu-08-ride878",
+   "ws": 562,
+   "n": 390,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@fill": 12,
+    "svg/g[]/rect[]/@height": 12,
+    "svg/g[]/rect[]/@rx": 12,
+    "svg/g[]/rect[]/@ry": 12,
+    "svg/g[]/rect[]/@stroke": 12,
+    "svg/g[]/rect[]/@stroke-width": 12,
+    "svg/g[]/rect[]/@width": 12,
+    "svg/g[]/rect[]/@x": 12,
+    "svg/g[]/rect[]/@y": 12,
+    "svg/g[]/text[]/@font-family": 1,
+    "svg/g[]/text[]/@font-size": 14,
+    "svg/g[]/text[]/@textLength": 14,
+    "svg/g[]/text[]/@x": 18,
+    "svg/g[]/text[]/@y": 18,
+    "svg/g[]/text[]/text()[]": 14,
+    "svg/g[]/path[]/@d[]": 100,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/ellipse[]/@cy": 1,
+    "svg/g[]/line[]/@stroke": 2,
+    "svg/g[]/line[]/@stroke-width": 2,
+    "svg/g[]/line[]/@x1": 9,
+    "svg/g[]/line[]/@x2": 9,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/line[]/@y2": 9,
+    "svg/g[]/polygon[]/@points[]": 56,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 286,
+   "shifts": {
+    "x": [
+     -49.416,
+     -52.416,
+     153.466,
+     160.466,
+     90.14,
+     147.478,
+     154.478,
+     -7.197,
+     -14.197,
+     23.291,
+     131.803,
+     138.803,
+     -18.816,
+     -25.816,
+     17.481,
+     -27.741,
+     16.019,
+     134.335,
+     141.335,
+     -29.703,
+     38.518,
+     12.038,
+     0.684,
+     70.075,
+     142.35,
+     121.803,
+     115.616,
+     127.99
+    ],
+    "y": [
+     -3,
+     6.667,
+     -2,
+     5.444,
+     6,
+     -0.444,
+     -14,
+     -6.556,
+     14,
+     6.556,
+     -11.5,
+     -49,
+     -41.556,
+     -29,
+     -36.444,
+     -54.5,
+     -92,
+     -84.556,
+     -78.444,
+     -97.5,
+     -135,
+     -127.556,
+     -107,
+     -113.444,
+     -132.5,
+     -170,
+     -162.556,
+     -142,
+     -148.444,
+     -167.778,
+     -143,
+     404.813,
+     373.187,
+     328.813,
+     309.187,
+     -310,
+     -278,
+     -269,
+     -257,
+     -233,
+     -224,
+     -204,
+     -172,
+     -163
+    ]
+   }
+  },
+  {
+   "slug": "tuneta-22-mega154",
+   "ws": 2,
+   "n": 2,
+   "families": {
+    "svg/g[]/path[]/@d[]": 2
+   },
+   "nonPos": 2,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "vatame-42-dege160",
+   "ws": 192,
+   "n": 179,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/polygon[]/@points[]": 96,
+    "svg/g[]/text[]/@x": 7,
+    "svg/g[]/rect[]/@y": 5,
+    "svg/g[]/text[]/@y": 9,
+    "svg/g[]/ellipse[]/@cy": 8,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/ellipse[]/@cx": 4,
+    "svg/g[]/line[]/@y1": 9,
+    "svg/g[]/line[]/@y2": 12,
+    "svg/g[]/line[]/@x1": 11,
+    "svg/g[]/line[]/@x2": 10,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 97,
+   "shifts": {
+    "x": [
+     2.172,
+     4.344,
+     4.343
+    ],
+    "y": [
+     11,
+     5.5
+    ]
+   }
+  },
+  {
+   "slug": "vimena-17-poju626",
+   "ws": 427,
+   "n": 412,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@x": 10,
+    "svg/g[]/text[]/@x": 38,
+    "svg/g[]/polygon[]/@points[]": 165,
+    "svg/g[]/text[]/@font-family": 1,
+    "svg/g[]/rect[]/@y": 9,
+    "svg/g[]/text[]/@y": 34,
+    "svg/g[]/polygon[]/@points": 2,
+    "POLY": 2,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 35,
+    "svg/g[]/line[]/@x2": 35,
+    "svg/g[]/line[]/@y2": 31,
+    "svg/g[]/text[]/@font-weight": 2,
+    "svg/g[]/text[]/@textLength": 6,
+    "svg/g[]/text[]/text()[]": 6,
+    "svg/g[]/line[]/@y1": 28,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 181,
+   "shifts": {
+    "x": [
+     72.778,
+     80.615,
+     24.341,
+     69.41,
+     72.241,
+     -50.969,
+     103.237,
+     196.525,
+     24.34,
+     73.84,
+     -25.16,
+     -106.765,
+     -106.766,
+     64.941,
+     69.409,
+     -45.61,
+     -50.968,
+     -1.468,
+     -100.468,
+     -155.744,
+     -155.743,
+     103.238,
+     -11.781
+    ],
+    "y": [
+     25.5,
+     14.5,
+     58.5,
+     47.5,
+     7.25,
+     18.25,
+     7,
+     36.5
+    ]
+   }
+  },
+  {
+   "slug": "vodobe-33-kefa909",
+   "ws": 42,
+   "n": 42,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/path[]/@d[]": 20,
+    "svg/g[]/text[]/@x": 5,
+    "svg/g[]/line[]/@x1": 3,
+    "svg/g[]/line[]/@x2": 4,
+    "svg/g[]/polygon[]/@points[]": 4
+   },
+   "nonPos": 26,
+   "shifts": {
+    "x": [
+     -305.662,
+     -305.663,
+     -152.832
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "vopidi-45-jitu863",
+   "ws": 20,
+   "n": 20,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/path[]/@d": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 8
+   },
+   "nonPos": 9,
+   "shifts": {
+    "x": [
+     -10
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "vuruti-49-jeje300",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "xaxene-93-doka767",
+   "ws": 41,
+   "n": 35,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/text[]/@y": 4,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/line[]/@y1": 2,
+    "svg/g[]/line[]/@y2": 4,
+    "svg/g[]/polygon[]/@points[]": 16,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 17,
+   "shifts": {
+    "x": [],
+    "y": [
+     20.556,
+     12
+    ]
+   }
+  },
+  {
+   "slug": "xefalo-73-sabi101",
+   "ws": 289,
+   "n": 289,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 8,
+    "svg/g[]/text[]/@y": 23,
+    "svg/g[]/polygon[]/@points[]": 167,
+    "svg/g[]/ellipse[]/@cy": 4,
+    "svg/g[]/line[]/@y1": 41,
+    "svg/g[]/line[]/@y2": 42,
+    "svg/g[]/line[]/@x1": 1,
+    "svg/g[]/line[]/@x2": 1
+   },
+   "nonPos": 167,
+   "shifts": {
+    "x": [
+     -23.237,
+     23.237
+    ],
+    "y": [
+     -9.056,
+     -9.055,
+     -18.111,
+     -27.167,
+     -21.667,
+     -21.666,
+     -18.112,
+     -30.723,
+     -30.722,
+     -26.667,
+     -10.667,
+     -16.167,
+     -7.111,
+     1.944,
+     -19.722
+    ]
+   }
+  },
+  {
+   "slug": "xirixi-47-laxe350",
+   "ws": 20,
+   "n": 20,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/path[]/@d": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/line[]/@x1": 2,
+    "svg/g[]/line[]/@x2": 2,
+    "svg/g[]/polygon[]/@points[]": 8
+   },
+   "nonPos": 9,
+   "shifts": {
+    "x": [
+     -10
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "xolazi-74-vamu265",
+   "ws": 5,
+   "n": 5,
+   "families": {
+    "svg/g[]/path[]/@fill": 4,
+    "svg/g[]/line[]/@y1": 1
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [],
+    "y": [
+     -8.5
+    ]
+   }
+  },
+  {
+   "slug": "xomeje-49-bixe122",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "xovano-23-tazo278",
+   "ws": 2,
+   "n": 2,
+   "families": {
+    "svg/g[]/polygon[]/@stroke-width": 2
+   },
+   "nonPos": 2,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "xovigi-85-rufa987",
+   "ws": 400,
+   "n": 147,
+   "families": {
+    "svg/g[]/path[]/@d": 1,
+    "svg/g[]/rect[]/@height": 1,
+    "svg/g[]/rect[]/@width": 2,
+    "svg/g[]/polygon[]": 7,
+    "svg/g[]/text[]/@font-size": 2,
+    "svg/g[]/text[]/@textLength": 4,
+    "svg/g[]/text[]/@x": 6,
+    "svg/g[]/text[]/@y": 5,
+    "svg/g[]/text[]/text()[]": 4,
+    "svg/g[]/text[]": 5,
+    "svg/g[]/rect[]": 2,
+    "svg/g[]/text[]/@font-weight": 2,
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@x": 1,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/path[]/@d[]": 8,
+    "svg/g[]/ellipse[]/@cy": 3,
+    "svg/g[]/line[]/@x1": 13,
+    "svg/g[]/line[]/@x2": 13,
+    "svg/g[]/line[]/@y1": 14,
+    "svg/g[]/line[]/@y2": 14,
+    "svg/g[]/line[]": 5,
+    "svg/g[]/polygon[]/@points[]": 32
+   },
+   "nonPos": 76,
+   "shifts": {
+    "x": [
+     61.975,
+     41.975,
+     -20,
+     17.05,
+     12.319,
+     1.975,
+     31.988,
+     57,
+     30.013,
+     77.012,
+     52,
+     -31.988,
+     -77.012,
+     -57,
+     -52,
+     -10
+    ],
+    "y": [
+     28.277,
+     -81.5,
+     -33.777,
+     0.611,
+     0.612,
+     0.61,
+     42.055,
+     27,
+     39,
+     76,
+     88,
+     -32,
+     -29,
+     47,
+     109,
+     -5,
+     9,
+     -27,
+     -86.055,
+     -86,
+     -185,
+     5,
+     -9
+    ]
+   }
+  },
+  {
+   "slug": "xucero-03-kixi746",
+   "ws": 0,
+   "n": 0,
+   "families": {},
+   "nonPos": 0,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "zejuso-92-kexo870",
+   "ws": 148,
+   "n": 148,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 1,
+    "svg/g[]/rect[]/@x": 4,
+    "svg/g[]/text[]/@x": 13,
+    "svg/g[]/polygon[]/@points[]": 61,
+    "svg/g[]/text[]/@y": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/line[]/@x1": 15,
+    "svg/g[]/line[]/@x2": 15,
+    "svg/g[]/g[]/rect[]/@x": 1,
+    "svg/g[]/g[]/text[]/@x": 16,
+    "svg/g[]/g[]/line[]/@x1": 9,
+    "svg/g[]/g[]/line[]/@x2": 9
+   },
+   "nonPos": 62,
+   "shifts": {
+    "x": [
+     -12,
+     -3.475,
+     0.763,
+     -20.525,
+     -24,
+     -48,
+     -23.999
+    ],
+    "y": [
+     -0.889
+    ]
+   }
+  },
+  {
+   "slug": "zepima-96-peco612",
+   "ws": 3,
+   "n": 3,
+   "families": {
+    "svg/g[]/text[]/@fill": 3
+   },
+   "nonPos": 3,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "zeporo-46-zicu301",
+   "ws": 129,
+   "n": 129,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/g[]/text[]/@x": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 2,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 13,
+    "svg/g[]/polygon[]/@points[]": 61,
+    "svg/g[]/line[]/@x1": 24,
+    "svg/g[]/line[]/@x2": 22
+   },
+   "nonPos": 62,
+   "shifts": {
+    "x": [
+     5.5,
+     11
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "zivege-92-rise076",
+   "ws": 140,
+   "n": 123,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/rect[]/@y": 6,
+    "svg/g[]/text[]/@y": 8,
+    "svg/g[]/polygon[]/@points[]": 68,
+    "svg/g[]/line[]/@y1": 19,
+    "svg/g[]/line[]/@y2": 19,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 69,
+   "shifts": {
+    "x": [],
+    "y": [
+     20,
+     28,
+     24
+    ]
+   }
+  },
+  {
+   "slug": "zivocu-77-kopa900",
+   "ws": 180,
+   "n": 167,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 2,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 67,
+    "svg/g[]/text[]/@font-family": 1,
+    "svg/g[]/rect[]/@y": 4,
+    "svg/g[]/text[]/@y": 12,
+    "svg/g[]/rect[]/@x": 3,
+    "svg/g[]/text[]/@x": 10,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@y2": 14,
+    "svg/g[]/text[]/@textLength": 3,
+    "svg/g[]/text[]/text()[]": 3,
+    "svg/g[]/line[]/@x1": 13,
+    "svg/g[]/line[]/@x2": 14,
+    "svg/g[]/line[]/@y1": 11,
+    "svg/g[]/text[]/@font-weight": 1,
+    "svg/g[][childCount]": 1
+   },
+   "nonPos": 76,
+   "shifts": {
+    "x": [
+     -7.837,
+     5.569,
+     -15.674,
+     -7.838,
+     -49.5,
+     -15.675,
+     -17.118
+    ],
+    "y": [
+     43.444,
+     43.445,
+     65.444,
+     65.445,
+     32.444,
+     32.445,
+     8.194,
+     19.194,
+     9.611,
+     30.194,
+     41.194
+    ]
+   }
+  },
+  {
+   "slug": "zocifu-52-miga192",
+   "ws": 34,
+   "n": 34,
+   "families": {
+    "svg/@viewBox[]": 1,
+    "svg/@width": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/rect[]/@fill": 1,
+    "svg/g[]/rect[]/@width": 1,
+    "svg/g[]/path[]/@d[]": 3,
+    "svg/g[]/a[]/text[]/@fill": 2,
+    "svg/g[]/rect[]/@x": 2,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/a[]/text[]/@x": 1,
+    "svg/g[]/line[]/@x1": 3,
+    "svg/g[]/line[]/@x2": 3,
+    "svg/g[]/polygon[]/@points[]": 12
+   },
+   "nonPos": 19,
+   "shifts": {
+    "x": [
+     -2
+    ],
+    "y": []
+   }
+  },
+  {
+   "slug": "zoxazu-64-vebi280",
+   "ws": 4,
+   "n": 4,
+   "families": {
+    "svg/g[]/rect[]/@stroke": 2,
+    "svg/g[]/path[]/@stroke": 2
+   },
+   "nonPos": 4,
+   "shifts": {
+    "x": [],
+    "y": []
+   }
+  },
+  {
+   "slug": "zucile-04-duga040",
+   "ws": 95,
+   "n": 95,
+   "families": {
+    "svg/@height": 1,
+    "svg/@viewBox[]": 1,
+    "svg/g[]/ellipse[]/@cx": 3,
+    "svg/g[]/polygon[]/@points[]": 43,
+    "svg/g[]/text[]/@x": 1,
+    "svg/g[]/path[]/@d[]": 16,
+    "svg/g[]/text[]/@y": 5,
+    "svg/g[]/rect[]/@y": 2,
+    "svg/g[]/polygon[]/@points": 1,
+    "POLY": 1,
+    "svg/g[]/ellipse[]/@cy": 2,
+    "svg/g[]/line[]/@x1": 4,
+    "svg/g[]/line[]/@y2": 7,
+    "svg/g[]/line[]/@y1": 5,
+    "svg/g[]/line[]/@x2": 4
+   },
+   "nonPos": 59,
+   "shifts": {
+    "x": [
+     14.8
+    ],
+    "y": [
+     12,
+     6
+    ]
+   }
+  }
+ ]
+}

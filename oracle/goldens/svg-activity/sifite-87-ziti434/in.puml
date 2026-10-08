@@ -1,0 +1,10 @@
+@startuml
+|S1|
+:A1;
+|S2|
+:A2;
+partition P1 {
+}
+
+stop
+@enduml

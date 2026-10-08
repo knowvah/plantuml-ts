@@ -9,7 +9,9 @@
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java
  */
 
-import { edgeInkX, fudgeX, isInkless } from './canvas-origin.js';
+import { edgeInkX } from './canvas-origin.js';
+import { isInkless, nodeFudge } from './canvas-origin-fudge.js';
+import type { CompositeUSymbol } from '../activity-geometry.types.js';
 import type { ActivityEdgeGeo } from '../activity-geometry.types.js';
 
 export interface SwimlaneContext {
@@ -43,6 +45,16 @@ export interface LaneItem {
   readonly kind?: string;
   readonly x: number;
   readonly width: number;
+  /** add4-T3c: the node's own `usymbol`/`label`, so a lane measures the
+   *  SAME node-aware ink as the canvas scan (`canvas-origin-fudge.ts
+   *  #nodeFudge`: a package's polygon, a card's or a ruled action's
+   *  full-width `ULine`). */
+  readonly usymbol?: CompositeUSymbol;
+  readonly label?: string;
+  /** add4-T3e: an action's stereotype (its `BoxStyle`) and height -- the
+   *  outline ink `canvas-origin-fudge.ts#nodeFudge` reads. */
+  readonly stereotype?: string;
+  readonly height?: number;
 }
 
 /**
@@ -79,14 +91,14 @@ function mergeExtent(acc: LaneExtent, next: LaneExtent): LaneExtent {
   return { minX: Math.min(acc.minX, next.minX), maxX: Math.max(acc.maxX, next.maxX) };
 }
 
-/** This lane's own items' extent, fudged per {@link fudgeX}. Split from
+/** This lane's own items' extent, fudged per `nodeFudge`. Split from
  *  {@link laneExtentOf} only to keep that function's own complexity under
  *  the file's limit (T3i added the sibling edge pass). */
 function itemsExtentOf(name: string, items: readonly LaneItem[]): LaneExtent {
   let acc = EMPTY_EXTENT;
   for (const item of items) {
     if (item.swimlane !== name || isInkless(item.kind ?? '')) continue;
-    const fudge = fudgeX(item.kind ?? '');
+    const fudge = nodeFudge({ ...item, kind: item.kind ?? '' }).x;
     acc = mergeExtent(acc, { minX: item.x - fudge.near, maxX: item.x + item.width + fudge.far });
   }
   return acc;
@@ -126,7 +138,7 @@ function laneExtentOf(name: string, items: readonly LaneItem[], edges: readonly 
  *   our engine already holds every node's coordinates), but a lane's own
  *   `getMinMax()` is populated by the SAME `LimitFinder` class the whole-
  *   canvas scan uses (`klimt/drawing/LimitFinder.java:170-211`), so its
- *   per-shape fudge (`canvas-origin.ts#fudgeX`) applies here too -- a raw
+ *   per-shape fudge (`canvas-origin-fudge.ts#nodeFudge`) applies here too -- a raw
  *   node box is 1-2px off every lane whose boundary item is a
  *   rect/ellipse/polygon kind (T3i, `jakuco-69-dari135`/`sikino-19-
  *   vuca111`/others: box content landed exactly `RECT_FUDGE.near` too far
@@ -148,16 +160,71 @@ export function measureLaneExtents(
   return extents;
 }
 
+/**
+ * add4-T2c: how one drawn node is MEASURED when that differs from its own
+ * box in its own lane. `computeDrawingWidths` runs one
+ * `UGraphicInterceptorAllSwimlanes` pass (`Swimlanes.java:379-395`) whose
+ * per-lane `LimitFinder`s see every primitive a lane's content draws.
+ *
+ * - `lanes`: an `Ftile`'s primitives go to every lane still active after
+ *   narrowing to `tile.getSwimlanes()` (`UGraphicInterceptorAllSwimlanes
+ *   .java:88-101,160-168`). `FtileWithNoteOpale#getSwimlanes` is the
+ *   wrapped tile's lanes plus `swimlaneNote` (`FtileWithNoteOpale.java
+ *   :92-99`) and `drawU` draws the Opale ungated outside a one-lane
+ *   interceptor (`:217`), so a note captured in another lane is measured
+ *   into BOTH -- while the content pass draws it in `swimlaneNote` alone.
+ * - `marginX`: a stacked note is `TextBlockUtils.withMargin(opale, 10, 10)`
+ *   (`FtileWithNotes.java:134`), whose `drawU` draws `UEmpty.create(dim)`
+ *   over the margin-inclusive box (`TextBlockMarged.java:79-86`);
+ *   `LimitFinder#drawEmpty` adds both corners unfudged (`LimitFinder.java
+ *   :159-162`), so the lane spans the note plus `marginX` on each side.
+ *
+ * Keyed by the node object the walk pushes (`placeSwimlanes` receives
+ * those same references); a `WeakMap`, never an own property, so no lane
+ * copy or public geometry ever carries it. Read against the node's
+ * CURRENT `x`/`width`, never a snapshot.
+ */
+export interface MeasureSpec {
+  readonly lanes?: readonly string[];
+  readonly marginX?: number;
+}
+
+const MEASURE_SPECS = new WeakMap<object, MeasureSpec>();
+
+/** Records `spec` as `node`'s measurement spec (see {@link MeasureSpec}). */
+export function markMeasureSpec(node: object, spec: MeasureSpec): void {
+  MEASURE_SPECS.set(node, spec);
+}
+
+/** `node`'s measurement spec, or `undefined` when it measures as its own
+ *  box in its own `swimlane`. */
+export function measureSpecOf(node: object): MeasureSpec | undefined {
+  return MEASURE_SPECS.get(node);
+}
+
+/** A {@link MeasureSpec}'d node's lane items: per lane, its own (fudged)
+ *  box plus, with `marginX`, the unfudged `UEmpty` margin box. */
+export function specLaneItems(
+  node: { readonly swimlane?: string; readonly kind: string; readonly x: number; readonly width: number },
+  spec: MeasureSpec,
+): LaneItem[] {
+  const lanes = spec.lanes ?? (node.swimlane !== undefined ? [node.swimlane] : []);
+  const m = spec.marginX;
+  return lanes.flatMap((lane) => {
+    const own: LaneItem = { swimlane: lane, kind: node.kind, x: node.x, width: node.width };
+    return m === undefined ? [own] : [own, { swimlane: lane, x: node.x - m, width: node.width + 2 * m }];
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Lane widths
 // ---------------------------------------------------------------------------
 
 /**
  * `ISkinParam.SWIMLANE_WIDTH_SAME` -- the `skinparam swimlaneWidth same`
- * sentinel `SkinParam#swimlaneWidth()` returns for the string `"same"`.
- * Not yet wired to the parser (no `swimlanewidth` skinparam key exists in
- * `skinparam-key-handlers-table-*.ts`); modeled here so the arithmetic is
- * correct once that follow-on lands.
+ * sentinel `SkinParam#swimlaneWidth()` returns for the string `"same"`
+ * (parsed by `core/skinparam-key-handlers-table-c.ts`'s `swimlanewidth`
+ * handler into `Theme.swimlaneWidth`, add4-T1b).
  * @see net/sourceforge/plantuml/style/ISkinParam.java:71
  * @see net/sourceforge/plantuml/skin/SkinParam.java:1121-1129
  */

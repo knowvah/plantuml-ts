@@ -19,8 +19,8 @@ function makeOut(): Out {
     edges: [],
     edgeMeta: [],
     reservations: [],
+    theme: resolveTheme('default'),
     nextId: (prefix: string) => `${prefix}-${++n}`,
-    groupScope: [],
   };
 }
 

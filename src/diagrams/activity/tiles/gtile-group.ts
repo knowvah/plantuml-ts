@@ -4,6 +4,10 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
+import type { StringMeasurer } from '../../../core/measurer.js';
+import type { CompositeUSymbol } from '../activity-geometry.types.js';
+import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
+import { measurerAdapterOf } from './gtile-action.js';
 
 /** `FtileUtils.addHorizontalMargin(inner, 10)` (`FtileGroup.java:97`): a
  *  flat 10px margin added to BOTH sides of the body before any of this
@@ -15,6 +19,51 @@ const BODY_MARGIN = 10;
 /** `FtileGroup.java:74` -- `private final double diffYY2 = 20;`, the
  *  frame's own bottom padding below the (margined) body. */
 const BOTTOM_PAD = 20;
+
+/**
+ * `dimTitle.getWidth()` of the frame title. The title is a creole
+ * `Display` (`FtileGroup.java:104-108`: `title.create(fc, LEFT,
+ * skinParam)`), so `[[url label]]` measures as `label` and `**x**` as `x`
+ * -- measured through the SAME `creoleTextLines` lexer the renderer draws
+ * it with, never as the raw markup. Shared by this tile's sizing
+ * (`suppWidth`, `:160-167`), the renderer's tab (`USymbolFrame.java:76-84`)
+ * and the compression adapter's title slot (`USymbolFrame.java:150-156`).
+ */
+export function frameTitleWidth(title: string, measurer: StringMeasurer, theme: Theme): number {
+  if (title === '') return 0;
+  const font = { family: theme.fontFamily, size: activityFontSize(theme, 'composite') };
+  return Math.max(0, ...creoleTextLines(title, font, measurer).map((line) => line.width));
+}
+
+/** `FtileGroup`'s constructor inputs beyond the title/body
+ *  (`FtileGroup.java:94`: `backColor`). */
+export interface GtileGroupOptions {
+  readonly backColor?: string;
+  /** `CommandPartition3#getUSymbol(type)` (`:89-106`) for the three
+   *  non-frame keywords; it changes only `drawU`, never the geometry. */
+  readonly usymbol?: CompositeUSymbol;
+  /** add4-T3c: the body's own `LimitFinder` ink `maxX`, body-local
+   *  (`layout/canvas-origin-group-ink.ts#groupInnerInkMaxX`); `undefined`
+   *  when the body draws nothing. */
+  readonly innerInkMaxX?: number;
+}
+
+/** `FtileGroup.java:183-184` -- `if (missingWidth > 0) return
+ *  orig.addDim(missingWidth + 5, 0)`: the `5` past the overrun. */
+const MISSING_WIDTH_PAD = 5;
+
+/**
+ * `getInnerDimensionSlow` (`FtileGroup.java:178-186`): `orig` is the
+ * `FtileMarged` body (`:97`), whose `drawU` draws the body `BODY_MARGIN`
+ * to the right (`FtileMarged.java:108-110`), so the replayed ink `maxX` is
+ * `BODY_MARGIN + innerInkMaxX`. `addDim` widens only `width`; `left` is
+ * kept (`FtileGeometry.java:174-176`).
+ */
+function innerDimensionWidth(margedBodyWidth: number, innerInkMaxX: number | undefined): number {
+  if (innerInkMaxX === undefined) return margedBodyWidth;
+  const missingWidth = BODY_MARGIN + innerInkMaxX - margedBodyWidth;
+  return missingWidth > 0 ? margedBodyWidth + missingWidth + MISSING_WIDTH_PAD : margedBodyWidth;
+}
 
 export class GtileGroup extends TileComposite {
   // Widened to `string` so subclasses (e.g. GtilePartition) can override
@@ -30,11 +79,18 @@ export class GtileGroup extends TileComposite {
   readonly titleHeight: number;
   readonly bodyOffsetX: number;
   readonly bodyOffsetY: number;
+  /** `FtileGroup#backColor` (`FtileGroup.java:101`): the command's own
+   *  `#color` (`CommandPartition3.java:145-147`), `#` kept; `undefined`
+   *  falls through to the style's `BackGroundColor` at draw time. */
+  readonly backColor: string | undefined;
+  readonly usymbol: CompositeUSymbol | undefined;
 
-  constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme) {
+  constructor(title: string, body: Tile, bounder: StringBounder, theme: Theme, opts: GtileGroupOptions = {}) {
     super();
     this.children = [body];
     this.title = title;
+    this.backColor = opts.backColor;
+    this.usymbol = opts.usymbol;
     // A group/partition frame resolves `of(root, element, activityDiagram,
     // <symbol>, composite)` (`ftile/vcompact/FtileGroup.java:89-92`), and
     // `activityDiagram { composite { ... } }` (plantuml.skin:364-368)
@@ -48,7 +104,7 @@ export class GtileGroup extends TileComposite {
     // .getHeight() + 20)`. Was `titleMeasured.height + 8`, unsourced.
     const diffHeightTitle = Math.max(25, titleMeasured.height + 20);
     this.titleHeight = diffHeightTitle;
-    const margedBodyWidth = body.width + 2 * BODY_MARGIN;
+    const margedBodyWidth = innerDimensionWidth(body.width + 2 * BODY_MARGIN, opts.innerInkMaxX);
     // `:160-167` -- `suppWidth`: `max(orig.width, dimTitle.width + 20,
     // dimHeaderNote.width + 20) - orig.width`. `headerNote` is always the
     // empty `TextBlock` (`:110-113`, the `displayNote` branch is
@@ -56,7 +112,8 @@ export class GtileGroup extends TileComposite {
     // `orig.width` is `margedBodyWidth` (the body already widened by
     // `FtileMarged`, `getInnerDimension`'s ink-scan correction unported --
     // see this class's own `drawU` counterpart's doc).
-    const suppWidth = Math.max(margedBodyWidth, titleMeasured.width + 20, 20) - margedBodyWidth;
+    const titleWidth = frameTitleWidth(title, measurerAdapterOf(bounder), theme);
+    const suppWidth = Math.max(margedBodyWidth, titleWidth + 20, 20) - margedBodyWidth;
     this.width = margedBodyWidth + suppWidth;
     // `:145-148` -- `getTranslate`: `(suppWidth/2, diffHeightTitle +
     // headerNoteHeight)`, drawn onto the already-`FtileMarged` body, whose

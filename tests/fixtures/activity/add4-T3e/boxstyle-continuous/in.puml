@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:continuous box
+second line; <<continuous>>
+:one line continuous; <<continuous>>
+:after;
+stop
+@enduml

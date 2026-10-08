@@ -1,0 +1,18 @@
+@startuml
+' add4-T1g: FtileIfWithLinks ConnectionHline with the then branch in
+' another lane, the else branch in the diamond's own lane.
+skinparam ConditionEndStyle hline
+|A|
+start
+:first action;
+if (a fairly long test condition) then (yes)
+  |B|
+  :then side;
+else (no)
+  |A|
+  :else side with a long label;
+endif
+|A|
+:after;
+stop
+@enduml

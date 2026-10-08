@@ -1,0 +1,13 @@
+@startuml
+start
+switch (x)
+case (a much wider case label)
+:A;
+case (two)
+:B;
+case (another wide label here)
+:C;
+endswitch
+:D;
+stop
+@enduml

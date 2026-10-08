@@ -1,0 +1,10 @@
+@startuml
+|Lane with a very very long title indeed|
+start
+:a;
+|B|
+:b;
+|Another quite long lane title|
+:c;
+stop
+@enduml

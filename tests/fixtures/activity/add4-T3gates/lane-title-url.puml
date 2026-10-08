@@ -1,0 +1,9 @@
+@startuml
+skinparam hyperlinkColor green
+|[[www.plantuml.com First actor]]|
+start
+:Action1;
+|Other|
+:Action2;
+stop
+@enduml

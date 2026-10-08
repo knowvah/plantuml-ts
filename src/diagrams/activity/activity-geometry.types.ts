@@ -39,8 +39,24 @@ export interface ActivityNodeGeo {
    * branch.ts`/`walk-repeat*.ts`), which keep the pre-existing heuristic.
    */
   diamondShape?: 'inside' | 'square' | 'empty';
+  /**
+   * For `'if-label'` nodes only (add4-T3h): `'test'` when the label is an
+   * EMPTY_DIAMOND condition's own test text -- `FtileDiamond.withNorth(tbTest)`
+   * (`ConditionalBuilder.java:262-267`), the diamond-font `CreoleMode.FULL`
+   * condition Sheet (`:240-247`). Absent = a branch label, the arrow-font
+   * `SIMPLE_LINE` block (`:280-283`). `'full'` (add4-T3j) = an arrow-font
+   * `Display#create` FULL block: a while's / repeat's yes/out labels
+   * (`FtileWhile.java:123,127-128`, `FtileRepeat.java:127-131`) and an
+   * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
+   */
+  ifLabelRole?: 'test' | 'full';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
+  /** For `label`/`goto` nodes (add4-T3d): `false` when upstream draws the
+   *  tile through a decorator's direct `drawU`, bypassing
+   *  `UGraphicDispatchFtile` (see `tiles/gtile-goto.ts#markDecoratedSoleChild`).
+   *  Absent = dispatched. */
+  dispatched?: false;
   /**
    * The swimlane this node's source `ActivityNode` was parsed in, if any.
    * Mirrors `Tile.swimlane` (`tiles/tile.ts`); T5 populates this in
@@ -48,7 +64,15 @@ export interface ActivityNodeGeo {
    * placed nodes by lane.
    */
   swimlane?: string;
+  /** add4-T2b: a `group`/`partition` frame drawn with a non-frame `USymbol`
+   *  (`CommandPartition3#getUSymbol`, `CommandPartition3.java:89-106`);
+   *  absent = `USymbolFrame` (`partition`/`group`). */
+  usymbol?: CompositeUSymbol;
 }
+
+/** The three container keywords that do NOT draw a `USymbolFrame`:
+ *  `USymbols.PACKAGE` (folder), `CARD`, `RECTANGLE` (`USymbols.java:69,86,91`). */
+export type CompositeUSymbol = 'package' | 'card' | 'rectangle';
 
 export interface ActivityEdgeGeo {
   points: Array<{ x: number; y: number }>;
@@ -74,6 +98,17 @@ export interface ActivityEdgeGeo {
    * (`FtileIfWithLinks.java:288-367`) or `ConnectionHline`.
    */
   arrowhead?: false;
+  /**
+   * add4-T1f (R1): the end decoration's direction, fixed by the push site
+   * that built the `Snake` (`Snake.create(skinParam, color, arrows()
+   * .asToDown())`, `ftile/Snake.java:144-148`) -- never read off the
+   * points. Set by `ConnectionVerticalThenHorizontal`
+   * (`cond/FtileSwitchWithManyLinks.java:159-170`), whose DOWN branch may
+   * end on a short horizontal (or empty) segment. Absent: the renderer and
+   * compressor fall back to the last segment with length
+   * (`compress/shapes-of-terminal.ts#terminalDecorationVector`).
+   */
+  endDirection?: 'up' | 'down' | 'left' | 'right';
   /**
    * `Worm#drawInternalOneColor`'s `emphasizeDirection` parameter (set via
    * `Snake#emphasizeDirection`): an arrow is drawn at the midpoint of the
@@ -122,6 +157,17 @@ export interface ActivityEdgeGeo {
    * compress axes by `transformEdge`, same as {@link midArrowAt}.
    */
   emphasizeAt?: { x: number; y: number };
+  /**
+   * add4-T3a (R2): how far compression moved this edge's label off the
+   * position `Snake#getTextBlockPosition` gives on `points`. Upstream places
+   * the label on the RAW worm (`ftile/Snake.java:244-270`, `Worm#getPoint`
+   * resolves only the Worm's own translate, `ftile/Worm.java:322-330`) and
+   * maps its `UText` draw point through `ct()` at draw time
+   * (`klimt/compress/UGraphicCompressOnXorY.java:87-128`). Set by
+   * `compress/edge-label-anchor.ts#withLabelDeltas`; a delta rather than a
+   * point so rigid translates of `points` carry it. Absent = zero.
+   */
+  labelDelta?: { x: number; y: number };
 }
 
 export interface SwimlaneGeo {
@@ -160,6 +206,12 @@ export interface SwimlaneGeo {
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:373-375
    */
   contentX?: number;
+  /**
+   * `|name|LABEL`'s display label, which the title draws and measures
+   * instead of the name (`Swimlane#getDisplay`). Absent: the name.
+   * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164,285-293
+   */
+  display?: string;
   /**
    * O (add2 T3i): `|#color|name|`'s own background -- `x`/`width` above
    * already span exactly the jar's background-rect bounds (verified

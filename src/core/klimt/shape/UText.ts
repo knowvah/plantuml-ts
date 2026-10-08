@@ -1,4 +1,5 @@
 import type { UShape } from '../UShape.js';
+import type { UStroke } from '../UStroke.js';
 import { FontPosition, fontPositionSpace, muteFontSize } from '../font/FontPosition.js';
 
 /**
@@ -119,6 +120,13 @@ export interface FontConfiguration {
    *  caller falls back to upstream's own `blue` default
    *  (`plantuml.skin:7,565`, `SkinParam.java:305-311`). decisions.md#D3. */
   readonly hyperlinkColor?: string;
+  /** Upstream's `hyperlinkUnderlineStroke` field (`FontConfiguration.java:146`),
+   *  set from `skinParam.useUnderlineForHyperlink()` (`SkinParam.java:1057-1060`:
+   *  `UStroke.simple()` unless `skinparam hyperlinkUnderline false`, then
+   *  `null`). `FontConfiguration#hyperlink()` (java:335-340) adds `UNDERLINE`
+   *  only when it is non-null. `undefined` is the unset-skinparam default
+   *  (`UStroke.simple()`); only `null` suppresses the underline. */
+  readonly hyperlinkUnderlineStroke?: UStroke | null;
 }
 
 /**

@@ -7,7 +7,7 @@
  * would cross the hook"); `assign-coordinates-full.ts`'s `pass1Assemble`/
  * `compressAndAssemble` are the only callers of {@link finalizeGeometry}.
  * See `activity-layout-constants.ts` for the three numeric constants this
- * spends (`CANVAS_ORIGIN_SHIFT`, `CANVAS_PADDING_TOTAL`, `SVG_CANVAS_CEIL`)
+ * spends (`RECENTRED_PAD`, `RECENTRED_ENLARGE`, `activityDocumentMargin`, `SVG_CANVAS_CEIL`)
  * and their own citations.
  *
  * Mechanism (journalled before any edit, per this task's own instructions):
@@ -52,10 +52,10 @@
  * Composing (1)+(2)'s translate+(3): a node's own near-corner coordinate
  * `p` ends up drawn at `p - m + 15` where `m` is the GLOBAL ink min (every
  * node/edge's own fudged near corner, reduced by `Math.min`) and `15 = 10
- * (margin) + 5 (Recentred's pad)` -- `CANVAS_ORIGIN_SHIFT`. The canvas's own
- * size is `(M - m) + 35` -- `35 = 15 (margin, both sides) + 15 (enlarge's
+ * (margin) + 5 (Recentred's pad)` by default (`activityDocumentMargin`). The canvas's own
+ * size is `(M - m) + 35` -- `35 = 20 (margin, both sides) + 15 (enlarge's
  * far pad only -- NOT doubled, `enlarge` never touches the near corner)` --
- * `CANVAS_PADDING_TOTAL`, THEN one further pixel from `SvgGraphics
+ * by default, THEN one further pixel from `SvgGraphics
  * #ensureVisible`'s own `(int)(x + 1)` cast (`klimt/drawing/svg/
  * SvgGraphics.java:129-136,142-143`), applied to `option.getMinDim()` (this
  * exact dimension) before any shape is drawn -- confirmed against
@@ -65,82 +65,25 @@
 
 import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-geometry.types.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { computeSwimlaneChrome, TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
-import type { SwimlaneChrome } from './swimlane-placement.js';
+import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
+import { bandReservationX, computeSwimlaneChrome, type SwimlaneChrome } from './swimlane-chrome.js';
 import {
-  CANVAS_ORIGIN_SHIFT,
-  CANVAS_PADDING_TOTAL,
   RECENTRED_ENLARGE,
+  RECENTRED_PAD,
   SVG_CANVAS_CEIL,
+  activityDocumentMargin,
 } from '../activity-layout-constants.js';
 import { arrowDirection, arrowHeadExtents, type ArrowDir } from '../arrows-regular.js';
 import { swimlaneTitleFontSize } from '../activity-style-defaults.js';
 import type { Theme } from '../../../core/theme.js';
-import { SPLIT_LINE_KINDS, extendForEdgeLabelText, extendForIfLabelText, extendForLaneDivider } from './canvas-origin-text-ink.js';
-
-/** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
- *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
- *  (T3i, `swimlane-context.ts#measureLaneExtents`): `Swimlanes
- *  .computeDrawingWidths` (`Swimlanes.java:379-395`) measures each lane's
- *  own content extent through this SAME `LimitFinder` class -- a lane's
- *  `getMinMax()` is not the raw node box, it is the SAME fudged ink this
- *  module already computes for the whole-canvas scan. One fudge table, two
- *  consumers, never re-derived. */
-export interface ShapeFudge {
-  readonly near: number;
-  readonly far: number;
-}
-
-/** `drawRectangle` (`LimitFinder.java:185-189`). `style.getShadowing()`
- *  defaults to 0 (`root { Shadowing: 0.0; }`, `plantuml.skin:18`, no
- *  `action`/`group`/`partition`/bar-specific override), so the far corner's
- *  `+2*deltaShadow` term is omitted here. */
-const RECT_FUDGE: ShapeFudge = { near: 1, far: -1 };
-/** `drawEllipse` (`:206-210`): exact near corner, `drawRectangle`'s far. */
-const ELLIPSE_FUDGE: ShapeFudge = { near: 0, far: -1 };
-/** `drawUPolygon` (`:170-176`), X axis only -- `HACK_X_FOR_POLYGON = 10`. */
-const POLYGON_FUDGE_X: ShapeFudge = { near: 10, far: 10 };
-/** `drawULine`/`drawUPath`/`drawDotPath` (exact), and every kind this task
- *  has not yet verified against the oracle (`note`'s own `Opale` IS
- *  confirmed exact -- a `UPath`, `Opale.java:108` -- but shares this same
- *  zero fudge, so it is not called out as its own constant). */
-const NO_FUDGE: ShapeFudge = { near: 0, far: 0 };
-
-/** `FtileCircleStart`/`Stop`/`EndCross` + the connector spot -- all circles.
- * @see net/sourceforge/plantuml/svek/image/CircleStart.java:73-74 */
-const ELLIPSE_KINDS = new Set(['start', 'stop', 'end', 'spot']);
-/** `action` is `FtileBox` (a real `URectangle`); `group`/`partition`'s own
- *  outer box is too (confirmed: the oracle's `t-partition` probe places its
- *  rect at the SAME fudged offset as a bare action box); `fork-bar`/
- *  `join-bar` are `FtileBlackBlock`'s solid `URectangle`
- *  (`compress-geometry.ts#RECT_WIDTH_KINDS` already treats them as such for
- *  the unrelated compression transform). */
-const RECT_KINDS = new Set(['action', 'group', 'partition', 'fork-bar', 'join-bar']);
-/** Every diamond/hexagon condition node -- `Hexagon.asPolygon`/`FtileDiamond`
- *  both draw a `UPolygon` (`Hexagon.java:48-66`). X only (`POLYGON_FUDGE_X`'s
- *  own doc). */
-const POLYGON_X_KINDS = new Set(['diamond', 'if-split', 'if-merge', 'while-header', 'repeat-cond', 'repeat-start']);
-
-/** `break` draws no glyph at all (`activity-renderer-shapes.ts`'s own
- *  `case 'break'` returns `''`) -- excluded from the ink scan entirely,
- *  rather than assigned a fudge, so an all-break diagram never collapses
- *  the min/max reduction onto a phantom shape. */
-export function isInkless(kind: string): boolean {
-  return kind === 'break';
-}
-
-export function fudgeX(kind: string): ShapeFudge {
-  if (ELLIPSE_KINDS.has(kind)) return ELLIPSE_FUDGE;
-  if (RECT_KINDS.has(kind)) return RECT_FUDGE;
-  if (POLYGON_X_KINDS.has(kind)) return POLYGON_FUDGE_X;
-  return NO_FUDGE;
-}
-
-function fudgeY(kind: string): ShapeFudge {
-  if (ELLIPSE_KINDS.has(kind)) return ELLIPSE_FUDGE;
-  if (RECT_KINDS.has(kind)) return RECT_FUDGE;
-  return NO_FUDGE; // polygon fudge is X-only; every other kind is exact.
-}
+import { shiftAll } from './canvas-origin-shift.js';
+import {
+  SPLIT_LINE_KINDS,
+  extendForEdgeLabelText,
+  extendForIfLabelText,
+  extendForLaneDivider,
+} from './canvas-origin-text-ink.js';
+import { NO_FUDGE, POLYGON_FUDGE_X, RECT_FUDGE, isInkless, nodeFudge } from './canvas-origin-fudge.js';
 
 export interface MutableInkBounds {
   minX: number;
@@ -151,19 +94,18 @@ export interface MutableInkBounds {
 
 function extendForNode(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   if (isInkless(node.kind)) return;
-  const fx = fudgeX(node.kind);
-  acc.minX = Math.min(acc.minX, node.x - fx.near);
-  acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
   if (node.kind === 'if-label') {
     extendForIfLabelText(acc, node, theme);
     return;
   }
+  const { x: fx, y: fy } = nodeFudge(node);
+  acc.minX = Math.min(acc.minX, node.x - fx.near);
+  acc.maxX = Math.max(acc.maxX, node.x + node.width + fx.far);
   if (SPLIT_LINE_KINDS.has(node.kind)) {
     acc.minY = Math.min(acc.minY, node.y);
     acc.maxY = Math.max(acc.maxY, node.y);
     return;
   }
-  const fy = fudgeY(node.kind);
   acc.minY = Math.min(acc.minY, node.y - fy.near);
   acc.maxY = Math.max(acc.maxY, node.y + node.height + fy.far);
 }
@@ -341,6 +283,28 @@ interface CanvasOrigin {
   readonly rawHeight: number;
 }
 
+/** The draw calls one Ftile subtree makes, as the walk records them. */
+export interface InkSource {
+  readonly nodes: readonly ActivityNodeGeo[];
+  readonly edges: readonly ActivityEdgeGeo[];
+  readonly reservations: readonly Reservation[];
+}
+
+/**
+ * `LimitFinder`'s `MinMax` over every node, edge and `UEmpty`/`URectangle`
+ * reservation of `src` (`LimitFinder.java:133-188`), as unbounded (`+-Infinity`)
+ * corners when `src` draws nothing (`MinMaxMutable.getEmpty(false)`,
+ * `MinMaxMutable.java:45-50`). Shared by the root canvas scan and add4-T3c's
+ * `FtileGroup#getInnerMinMax` emulation (`canvas-origin-group-ink.ts`).
+ */
+export function inkBoundsOf(src: InkSource, theme: Theme): MutableInkBounds {
+  const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+  for (const n of src.nodes) extendForNode(acc, n, theme);
+  for (const e of src.edges) extendForEdge(acc, e, theme);
+  for (const r of src.reservations) extendForReservation(acc, r);
+  return acc;
+}
+
 /** {@link computeCanvasOrigin}'s own inputs, bundled to keep that function
  *  under the file's 5-parameter limit (T3i added `theme` as a 6th). */
 interface CanvasOriginInput {
@@ -360,11 +324,8 @@ interface CanvasOriginInput {
  *  near-corner shift and the final (ceiled) canvas size from it. */
 function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   const { nodes, edges, swimlanes, reservations, baseY, theme, contentMaxY } = input;
-  const acc: MutableInkBounds = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
-  for (const n of nodes) extendForNode(acc, n, theme);
-  for (const e of edges) extendForEdge(acc, e, theme);
+  const acc = inkBoundsOf({ nodes, edges, reservations }, theme);
   for (const s of swimlanes) extendForSwimlane(acc, s);
-  for (const r of reservations) extendForReservation(acc, r);
   extendForSwimlaneTitles(acc, swimlanes, baseY, theme);
   extendForLaneDivider(acc, swimlanes, baseY, contentMaxY);
   if (!Number.isFinite(acc.minX)) {
@@ -376,54 +337,22 @@ function computeCanvasOrigin(input: CanvasOriginInput): CanvasOrigin {
   // b3/T3a (family E): the `Recentred`-only span `preChromeWidth`/
   // `preChromeHeight` must carry (`activity-layout-constants.ts
   // #RECENTRED_ENLARGE`'s own doc: `(M - m) + RECENTRED_ENLARGE`, BEFORE
-  // the document margin's further `+ 2 * ACTIVITY_DOCUMENT_MARGIN`) --
-  // a DIFFERENT (smaller) padding term than `totalWidth`/`totalHeight`'s
-  // own `CANVAS_PADDING_TOTAL` below; never the same variable.
+  // the document margin's further `left + right`) -- a DIFFERENT (smaller)
+  // padding term than `totalWidth`/`totalHeight`'s own below.
   const rawWidth = acc.maxX - acc.minX + RECENTRED_ENLARGE;
   const rawHeight = acc.maxY - acc.minY + RECENTRED_ENLARGE;
+  // add4-T2e THEME-MARGIN: the document margin is the theme's
+  // (`activityDocumentMargin`, `TextBlockExporter.java:510-516`); the
+  // integer pad terms are summed first, as the former constants were.
+  const m = activityDocumentMargin(theme);
   return {
-    shiftX: CANVAS_ORIGIN_SHIFT - acc.minX,
-    shiftY: CANVAS_ORIGIN_SHIFT - acc.minY,
-    totalWidth: Math.floor(acc.maxX - acc.minX + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
-    totalHeight: Math.floor(acc.maxY - acc.minY + CANVAS_PADDING_TOTAL) + SVG_CANVAS_CEIL,
+    shiftX: RECENTRED_PAD + m.left - acc.minX,
+    shiftY: RECENTRED_PAD + m.top - acc.minY,
+    totalWidth: Math.floor(acc.maxX - acc.minX + (RECENTRED_ENLARGE + m.left + m.right)) + SVG_CANVAS_CEIL,
+    totalHeight: Math.floor(acc.maxY - acc.minY + (RECENTRED_ENLARGE + m.top + m.bottom)) + SVG_CANVAS_CEIL,
     rawWidth,
     rawHeight,
   };
-}
-
-function shiftNodeGeo(node: ActivityNodeGeo, dx: number, dy: number): ActivityNodeGeo {
-  const next: ActivityNodeGeo = { ...node, x: node.x + dx, y: node.y + dy };
-  if (node.spikeTip !== undefined) next.spikeTip = { x: node.spikeTip.x + dx, y: node.spikeTip.y + dy };
-  return next;
-}
-
-function shiftEdgeGeo(edge: ActivityEdgeGeo, dx: number, dy: number): ActivityEdgeGeo {
-  const next: ActivityEdgeGeo = { ...edge, points: edge.points.map((p) => ({ x: p.x + dx, y: p.y + dy })) };
-  if (edge.midArrowAt !== undefined) {
-    next.midArrowAt = { ...edge.midArrowAt, x: edge.midArrowAt.x + dx, y: edge.midArrowAt.y + dy };
-  }
-  // b3/T3a (family C/EMMID): `emphasizeAt` is the same kind of absolute
-  // anchor point as `midArrowAt` -- see `activity-geometry.types.ts`'s doc.
-  if (edge.emphasizeAt !== undefined) {
-    next.emphasizeAt = { x: edge.emphasizeAt.x + dx, y: edge.emphasizeAt.y + dy };
-  }
-  return next;
-}
-
-/** `contentMinX` is deliberately NOT shifted here, for the same reason
- *  `compress-geometry.ts#transformLane`'s own doc gives: it is measured
- *  lane-LOCAL, before the lane's own absolute translate is applied
- *  (`Swimlanes.java:416-431`) -- this canvas-origin shift is simply a
- *  further layer of the same kind of absolute translate `contentMinX`
- *  already excludes. */
-function shiftSwimlaneGeo(lane: SwimlaneGeo, dx: number): SwimlaneGeo {
-  const next: SwimlaneGeo = { ...lane, x: lane.x + dx };
-  if (lane.contentX !== undefined) next.contentX = lane.contentX + dx;
-  return next;
-}
-
-function shiftReservation(r: Reservation, dx: number, dy: number): Reservation {
-  return { ...r, x: r.x + dx, y: r.y + dy };
 }
 
 /** Bundles {@link computeCanvasOrigin} + the shift it implies into one
@@ -455,21 +384,6 @@ export interface FinalizedGeometry {
   chrome: Partial<SwimlaneChrome>;
 }
 
-/** {@link finalizeGeometry}'s own middle step, split out to keep that
- *  function's NLOC under the file's limit: shifts every node/edge/
- *  swimlane/reservation by the one `CanvasOrigin` translate. */
-function shiftAll(
-  input: Pick<FinalizeInput, 'nodes' | 'edges' | 'swimlanes' | 'reservations'>,
-  origin: CanvasOrigin,
-): Pick<FinalizedGeometry, 'nodes' | 'edges' | 'swimlanes' | 'reservations'> {
-  return {
-    nodes: input.nodes.map((n) => shiftNodeGeo(n, origin.shiftX, origin.shiftY)),
-    edges: input.edges.map((e) => shiftEdgeGeo(e, origin.shiftX, origin.shiftY)),
-    swimlanes: input.swimlanes.map((s) => shiftSwimlaneGeo(s, origin.shiftX)),
-    reservations: input.reservations.map((r) => shiftReservation(r, origin.shiftX, origin.shiftY)),
-  };
-}
-
 export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
   const { nodes, edges, swimlanes, reservations, bounds, baseY, titlesHeight, theme } = input;
   const origin = computeCanvasOrigin({
@@ -481,13 +395,9 @@ export function finalizeGeometry(input: FinalizeInput): FinalizedGeometry {
     theme,
     contentMaxY: bounds.maxY,
   });
-  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin);
-  const chrome = computeSwimlaneChrome(
-    shifted.swimlanes,
-    baseY + origin.shiftY,
-    titlesHeight,
-    bounds.maxY + origin.shiftY,
-  );
+  const shifted = shiftAll({ nodes, edges, swimlanes, reservations }, origin.shiftX, origin.shiftY);
+  const [y1, y2] = [baseY + origin.shiftY, bounds.maxY + origin.shiftY];
+  const chrome = computeSwimlaneChrome(shifted.swimlanes, y1, titlesHeight, y2, bandReservationX(shifted.reservations));
   return {
     totalWidth: origin.totalWidth,
     totalHeight: origin.totalHeight,

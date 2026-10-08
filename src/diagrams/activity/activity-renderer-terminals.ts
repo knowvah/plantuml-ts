@@ -8,6 +8,7 @@
  */
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
+import type { Paint } from '../../core/paint.js';
 import { ellipse, line, path, resolvePaint, text, type LineStyle } from '../../core/svg.js';
 import { END_CROSS_THICKNESS, STOP_INNER_DELTA } from './activity-layout-constants.js';
 import {
@@ -18,7 +19,7 @@ import {
 } from './activity-style-defaults.js';
 import { activityFontColor } from './activity-text-style.js';
 import { spotGlyphPath } from './activity-spot-glyph.js';
-import { actColors } from './activity-renderer-shapes.js';
+import { actColors, renderNode } from './activity-renderer-shapes.js';
 
 /**
  * `circle { start, stop, end { LineColor #2 } } }` (`plantuml.skin:379-380`
@@ -34,6 +35,27 @@ import { actColors } from './activity-renderer-shapes.js';
  */
 function circleInk(theme: Theme): string {
   return theme.colors.graph.activity?.circleInk ?? CIRCLE_INK;
+}
+
+/**
+ * add4-T3f: a circle's merged-style colours (`core/activity-circle-style
+ * .ts`) -- priority-ordered, so a later `<style> root` (a theme's) or a
+ * `skin` beats plantuml.skin's circle rule exactly as upstream merges
+ * (`StyleStorage.java:101-115`, `DarkString.java:54-57,73-78`). Each half
+ * falls back to the pre-existing default only when absent (a hand-built
+ * `Theme`, or an unparsable `<style>` block).
+ */
+function circleColors(
+  theme: Theme,
+  leaf: 'start' | 'stop',
+  back: Paint,
+  line: string,
+): { back: string | undefined; line: string | undefined } {
+  const merged = theme.colors.graph.activity?.circleStyle?.[leaf];
+  return {
+    back: resolvePaint(merged?.back ?? back).value,
+    line: resolvePaint(merged?.line ?? line).value,
+  };
 }
 
 export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
@@ -56,8 +78,10 @@ export function renderStart(node: ActivityNodeGeo, theme: Theme): string {
   // red` (T2f mechanism 7, `poraji-17-goke817`), and before T2d-a it
   // stayed the light-only `CIRCLE_INK` constant even in dark mode
   // (`levuma-67-cego489`: jar stroke `#DDD`, ours `#222`).
-  const fill = resolvePaint(actColors(theme).startFill).value;
-  return ellipse(cx, cy, r, r, { fill, stroke: circleInk(theme), 'stroke-width': CIRCLE_LINE_THICKNESS });
+  // add4-T3f: `CircleStart#drawU` -- `lineColor` stroke, `backColor` fill
+  // (`svek/image/CircleStart.java:72-82`), both off the merged style.
+  const { back, line } = circleColors(theme, 'start', actColors(theme).startFill, circleInk(theme));
+  return ellipse(cx, cy, r, r, { fill: back, stroke: line, 'stroke-width': CIRCLE_LINE_THICKNESS });
 }
 
 /**
@@ -99,13 +123,19 @@ export function renderStop(node: ActivityNodeGeo, theme: Theme): string {
   // same as the jar does absent that skinparam (T2d-a: was the light-only
   // `CIRCLE_INK` constant; `levuma-67-cego489`'s jar SVG shows BOTH
   // ellipses at `fill`/`stroke` `#DDD` in dark mode, ours stayed `#222`).
+  // add4-T3f: `CircleEnd#drawU` -- outer ring `lineColor`, inner disc
+  // `backColor` fill + `lineColor` stroke (`CircleEnd.java:74-102`; equal
+  // colours take `HColors.middle`, which is that same colour). Both off the
+  // merged style, which carries `ActivityStopColor` too (`LineColor`,
+  // `FromSkinparamToStyle.java:139`).
   const ink = circleInk(theme);
+  const { back, line } = circleColors(theme, 'stop', ink, ink);
   return (
     ellipse(cx, cy, outerR, outerR, {
       fill: 'none',
-      stroke: ink,
+      stroke: line,
       'stroke-width': CIRCLE_LINE_THICKNESS,
-    }) + ellipse(cx, cy, innerR, innerR, { fill: ink, stroke: ink, 'stroke-width': CIRCLE_LINE_THICKNESS })
+    }) + ellipse(cx, cy, innerR, innerR, { fill: back, stroke: line, 'stroke-width': CIRCLE_LINE_THICKNESS })
   );
 }
 
@@ -236,4 +266,56 @@ export function renderSpot(node: ActivityNodeGeo, theme: Theme): string {
       ? text(cx - 5, cy + 5, char, { fill: glyphFill, fontFamily: 'monospace', fontSize: 14 })
       : path(d, { fill: glyphFill });
   return circle + glyph;
+}
+
+/** The `UParam` default stroke a `UGraphic` carries before any `.apply(
+ *  UStroke)` -- `UStroke.simple()`, thickness 1. `drawGoto` applies colours
+ *  only, so its two lines keep it. Same value as `renderer.ts`'s private
+ *  `SIMPLE_STROKE_WIDTH` (not exported; outside this task's write-set).
+ * @see net/sourceforge/plantuml/klimt/UStroke.java:75-77 */
+const GOTO_STROKE_WIDTH = 1;
+
+/**
+ * `FtileGoto`'s jump line, drawn by the dispatcher rather than the tile
+ * (`FtileGoto` itself draws nothing): from the goto's point-in --
+ * `FtileEmpty`'s `(width / 2, 0)`, i.e. the zero-size node's own `(x, y)`
+ * -- `ULine.hline(dx)` then, translated by `dx`, `ULine.vline(dy)` to the
+ * recorded label translate. Coloured by `gotoColor`, the merged
+ * `activityDiagram.goto` LineColor (`Swimlanes.java:246-249`); `plantuml.skin`
+ * has no `goto` rule, so that is root `LineColor` -- `theme.colors.border`.
+ * No stroke is applied, so the default `UStroke` (thickness 1). A goto with
+ * no label drawn before it (`dest == null`) draws nothing (`:108-109`).
+ * Both lines go through {@link orderedLine}: a jump back up has `dy < 0`.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/UGraphicDispatchFtile.java:101-119
+ */
+function renderGoto(node: ActivityNodeGeo, dest: { x: number; y: number } | undefined, theme: Theme): string {
+  if (dest === undefined) return '';
+  const style = { stroke: theme.colors.border, strokeWidth: GOTO_STROKE_WIDTH };
+  return orderedLine(node.x, node.y, dest.x, node.y, style) + orderedLine(dest.x, node.y, dest.x, dest.y, style);
+}
+
+/**
+ * `UGraphicDispatchFtile#draw` over a node sequence in draw order: every
+ * node renders as {@link renderNode}; a `label` node records its translate
+ * under its name (`positions.put`, so a later label of the same name wins)
+ * AFTER drawing, and a `goto` node appends {@link renderGoto} after its own
+ * (empty) draw. A node flagged `dispatched: false` was drawn by its
+ * parent's direct `drawU` call, which never reaches the dispatcher's
+ * `instanceof` hooks (`vertical/FtileDecorate.java:79-80`), so it is
+ * neither recorded nor drawn. Upstream installs the dispatcher only on the single-lane
+ * path (`Swimlanes.java:251-258` -- `drawWhenSwimlanes` never wraps it), so
+ * this is for the plain node loop, not the swimlane chrome pass.
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/UGraphicDispatchFtile.java:70-85
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/TextBlockInterceptorUDrawable.java:61-64
+ */
+export function renderNodesDispatchingGotos(nodes: readonly ActivityNodeGeo[], theme: Theme): string[] {
+  const positions = new Map<string, { x: number; y: number }>();
+  return nodes.map((node) => {
+    const svg = renderNode(node, theme);
+    const name = node.label ?? '';
+    if (node.dispatched === false) return svg;
+    if (node.kind === 'label') positions.set(name, { x: node.x, y: node.y });
+    if (node.kind === 'goto') return svg + renderGoto(node, positions.get(name), theme);
+    return svg;
+  });
 }

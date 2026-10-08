@@ -1,0 +1,12 @@
+@startuml
+skinparam ArrowFontSize 8
+start
+if (test?) then (**yes**\nsecond)
+  :A;
+else (no\n//way//\nthird)
+  :B;
+endif
+-> **one** two;
+:C;
+stop
+@enduml

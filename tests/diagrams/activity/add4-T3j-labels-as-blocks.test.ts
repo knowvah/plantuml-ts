@@ -1,0 +1,81 @@
+/**
+ * add4-T3j: the remaining label slots sized as the blocks upstream builds
+ * (T3h's "Not done" 1-6). Fixtures carry their jar oracle as `<name>.svg`
+ * (`scripts/oracle-render.sh`, deterministic text).
+ */
+import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.js';
+import { renderFixtureActivity } from '../../oracle/svg-conformance/render-fixture-activity.js';
+import { fixtureIncludeStore } from '../../helpers/fixture-include-store.js';
+import { compareSvg } from '../../oracle/svg-conformance/compare.js';
+
+const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/activity');
+
+function diffPaths(dir: string, name: string): string[] {
+  const markup = readFileSync(join(FIXTURES, dir, `${name}.puml`), 'utf8');
+  const golden = readFileSync(join(FIXTURES, dir, `${name}.svg`), 'utf8');
+  const ours = renderFixtureActivity(markup, new DeterministicMeasurer(), { includeStore: fixtureIncludeStore() });
+  return compareSvg(ours, golden, 'deterministic').diffs.map((d) => d.path);
+}
+
+describe('labels sized as the drawn blocks (jar oracles)', () => {
+  // FtileIfLongHorizontal.java:172-177,186: elseif side slots are FULL
+  // `create(fcArrow)` blocks, the condition a `create0(fcTest, FULL)` Sheet.
+  it('elseif hexagon: condition Sheet and FULL side blocks', () => {
+    expect(diffPaths('add4-T3g', 'hexagon-labels')).toEqual([]);
+  });
+
+  it('elseif hexagon: creole in condition and branch labels', () => {
+    expect(diffPaths('add4-T3h', 'elseif-creole')).toEqual([]);
+  });
+
+  // ConditionalBuilder.java:240-247,262-267,280-283: an EMPTY_DIAMOND test
+  // is the condition Sheet (padding included), its sides SIMPLE_LINE blocks.
+  it('EMPTY_DIAMOND if: north Sheet and side blocks carry the padding', () => {
+    expect(diffPaths('add4-T3j', 'empty-diamond-padding')).toEqual([]);
+  });
+
+  // SlotFinder.java:127-135 boxes each drawn UText at its own font: a
+  // heading stripe in the north test keeps its taller slot.
+  it('EMPTY_DIAMOND if: heading north test compresses as drawn', () => {
+    expect(diffPaths('add4-T3j', 'empty-diamond-blocks')).toEqual([]);
+  });
+
+  it('while/repeat FULL side labels with a heading compress as drawn', () => {
+    expect(diffPaths('add4-T3j', 'while-full-labels')).toEqual([]);
+  });
+
+  // FtileFactoryDelegatorAssembly.java:58-62: the sequential gap adds the
+  // create7 SIMPLE_LINE block's height (padding and stripe floor included).
+  it('sequential gap: the in-label block height, padding included', () => {
+    expect(diffPaths('add4-T3h', 'side-labels-padding')).toEqual([]);
+  });
+
+  // FtileWhile.java:124-126,137-139: an EMPTY_DIAMOND while's north is the
+  // test (`withNorth(testTb)`), drawn at the diamond font and colour.
+  it('EMPTY_DIAMOND while: the north test is the condition, not a branch label', () => {
+    expect(diffPaths('add4-T3h', 'empty-diamond-north')).toEqual([]);
+  });
+
+  // FtileDiamondSquare.java:86,115 read the condition Sheet's dimension;
+  // its sides are ConditionalBuilder's SIMPLE_LINE blocks (:280-283).
+  it('INSIDE_DIAMOND if: condition Sheet and side blocks carry the padding', () => {
+    expect(diffPaths('add4-T3j', 'inside-diamond-blocks')).toEqual([]);
+  });
+
+  // The walk-time in-label box is the drawn block at the theme's arrow font
+  // (canvas-origin-text-ink.ts#extendForEdgeLabelText's box), not a fixed 11pt.
+  it('in-label at a small arrow font: reservation sized as the drawn block', () => {
+    expect(diffPaths('add4-T3h', 'side-labels-small-font')).toEqual([]);
+  });
+
+  // FtileWhile.java:123,127-128 and FtileRepeat.java:127-131: while/repeat
+  // side labels are FULL `create(fcArrow)` blocks (`__u__` underlines).
+  it('while/repeat side labels are FULL blocks (EMPTY_DIAMOND)', () => {
+    expect(diffPaths('add4-T3j', 'while-full-labels-diamond')).toEqual([]);
+  });
+});

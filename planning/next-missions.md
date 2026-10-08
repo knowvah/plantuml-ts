@@ -35,6 +35,74 @@ post-D7 measurements.
 
 ---
 
+## `activity-divergence-drive-4` (add4) — DONE 2026-10-08 (T0a–T3k + T-exit/T-close-out, batches 0–4)
+
+Branch `feat/activity-divergence-drive-4` off main `1651cf200` (merge commit, not pushed).
+Brief: `plans/activity-divergence-drive-4/` (ledger `fixtures.md`, journal rows 1-64).
+
+**Counts (b0 -> final):** add3's 48 rows Σ **4413 -> 217**; all baseline rows
+100 Σ 12056 (b0′, with the new captures) -> **7 Σ 221**; pinned **301 -> 409**;
+0 conformant losses in any of 28 engines (111 movers, all improvements: 99
+activity, 12 `unknown`); 0 unexplained rises. The 80 uncaptured corpus fixtures:
+79 captured (`tmp1` stays retired) and pinned in routing/refusal. D9 done:
+`isActionSheetEligible`, every action/note/label fallback and the whole
+`activity-renderer-text.ts` are deleted.
+
+**Fixed mechanisms (Java):** switch case `FtileDecorateIn/OutLabel` wrapping +
+hasPointOut merge diamond + switch notes + SIMPLE_LINE case labels + `\n` +
+FtileDiamondInside hexagons + one-link edge order; `swimlaneWidth` (floor IS
+applied, compression hides it), divider/band anchoring, merge-bar and
+reservation lane tagging, `|name|LABEL` displays, SWIMLANE-GATE for vertical
+ifs; vertical-if draw order + elseif inlabel; notes: creole sizing, `#color`,
+floating, cross-lane, inside groups/whiles, top-aligned switch notes, the
+stencil for `----`; partition BACK/STEREO/USymbols/title slot/warnings; core:
+warning banner, theme document margin (+ with chrome), activity `scale`,
+hyperlink skin, SIMPLE_LINE creole mode, run font family, zero-width stroke,
+start/stop circle style priority, monochrome mapper, link-style grammar;
+FtileBox Sheet + MyStencil for every action, `<code>` StripeCode, BoxStyle
+outlines (box styles had NEVER reached the renderer), edge labels on the raw
+worm then compressed, labels measured as drawn, group inner ink, LimitFinder
+canvas/lane ink, goto lines, CommandArrow3/ArrowLong3 grammar + arrow style,
+removeEmptyColumns, CommandPage/Link3/FootboxIgnored/HideShowByGender.
+
+### Open -> add5 (7 baseline rows Σ 221 + 12 non-scored rows; mechanisms in `fixtures.md`)
+
+- **EMBED (fikuki 14, mufixi 34, gufuma 29, pufuzi 29):** D4 oracle seam — the
+  deterministic jar sizes `{{ }}` as 42x42 but draws the real image. Never fit.
+- **bozido 80:** `{{ }}` nests wbs/salt/gantt; engines unported.
+- **jucidi 31 — needs a user ruling:** the jar never draws `ConnectionLastElseIn`
+  across lanes (`ConnectionCross.java:49-64`); ours keeps the connector
+  (information-carrying). Mirror, or record in `DIVERGENCES.md`?
+- **tidoda 4:** `rectangle` group style not keyed on the USymbol
+  (`CommandPartition3.java:89-103,150,161-165`).
+- Non-scored: 3 misfiled non-activity captures (jetigu/nuzise SEQUENCE, romuru
+  CLASS); tajiri (jar errors, we draw — refusal parity); 8 jar-error pages.
+- Smaller follow-ons: rainbow arrows (`Snake#drawRainbow`), fcArrow test-label
+  quirks (`FtileIfLongVertical.java:144-146`, INSIDE_DIAMOND repeat), dashed
+  emphasize arrowhead, `<style> root` colouring actions/arrows, Stereogroup
+  `##`/`name:value`, while label `\n`, unrounded root width under `scale`
+  (core `document-shell.ts`, mindmap too), walk-if-down 1-ULP hook patch
+  (parked, `.agent-notes/add4-T3j-walk-if-down-local-first.patch`).
+
+### Flags
+
+- The deterministic jar crashes ("IllegalArgumentException start=end") on any
+  blank line inside an action/note label, and on some italic/mono branch labels
+  under padding — oracle cannot check those.
+- Vitest per-test timeouts fire at load avg > ~50 (4 agents surveying); run gate
+  sets at `--maxWorkers=4` while agents work. One sequence (nereka) failure was
+  probably this, not proven (journal rows 41, 54).
+- Orchestrator slips caught: a commit not gated on its test result (row 41), a
+  merge gate without typecheck (row 50), a merged branch whose agent ran only
+  `tests/unit` (rolled back unpushed, row 58). Gate every merge on the full
+  conformance+activity+architecture set AND typecheck.
+- Census claims disproved by agents: switch label height 22 (row 9), tobajo fork
+  bar width (row 32), T2g's group "+1" (row 43), fukika "note x" (row 40).
+- Two orchestrator merge regressions fixed at origin: note `----` without the
+  stencil (row 14), zero-ink frame-title slot (row 35).
+
+---
+
 ## `activity-divergence-drive-3` (add3) — DONE 2026-10-07 (T0a–T3j + T-exit/T-close-out, batches 0–4)
 
 Branch `feat/activity-divergence-drive-3` off main `6eef9c769` (merge commit, not pushed).

@@ -20,6 +20,7 @@
 
 import type { GPoint } from '../tiles/points.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../tiles/points.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
 import { pushEdge } from './tile-coordinates.js';
 import type { WhileFrame } from './walk-while-branch.js';
@@ -72,7 +73,8 @@ function pushBackward1(frame: WhileFrame, backFrom: GPoint, backSouth: GPoint): 
     out.edges[out.edges.length - 1]!.label = backIncoming;
     out.edges[out.edges.length - 1]!.labelAlign = BACKWARD1_LABEL_ALIGN;
   }
-  out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
+  // `ConnectionBackBackward1(whileBlock, backward)`: the body's out lane (`FtileWhile.java:318,363`).
+  pushLaneReservation(out.reservations, whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY), bodyOutLane);
 }
 
 /**

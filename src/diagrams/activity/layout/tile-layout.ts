@@ -7,6 +7,7 @@ import type {
   ActivityWhile,
   ActivityRepeat,
 } from '../ast.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
@@ -24,7 +25,7 @@ import { assignCoordinates } from './tile-coordinates.js';
 import { buildIf, isMainLaneSmallerThanAllOthers } from './conditional-builder.js';
 import type { RepeatBackConnection } from '../tiles/gtile-repeat.js';
 import { extractBackward, selectRepeatConditionLabels, withBackLabels } from './tile-layout-backward.js';
-import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote } from './tile-layout-structural.js';
+import { tileFork, tileGroup, tileSplit, tileSwitch, tileNote, wrapWhileNotes } from './tile-layout-structural.js';
 import { consumeArrowLabel, withInLabel } from './tile-layout-inlabel.js';
 import type { PendingInLabel } from './tile-layout-inlabel.js';
 import { isEarlyLeafKind, isSimpleLeaf, tileEarlyLeaf, tileSimpleLeaf } from './tile-layout-leaves.js';
@@ -173,7 +174,13 @@ export function tileNodes(
  * `ConnectionElse1` vs `Else2` selection (`Swimlane#isSmallerThanAllOthers`,
  * `Swimlane.java:130-137`) -- see `conditional-builder.ts`'s own doc.
  */
-function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): Tile {
+function tileIf(
+  node: ActivityIf,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): Tile {
   return withSwimlane(buildIf(node, bounder, theme, laneOrder, pragma), node.swimlane);
 }
 
@@ -183,18 +190,18 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrde
  * `InstructionRepeat.java:182`/`InstructionWhile.java:121-122` both
  * resolve `backward` via `factory.activity(backward, swimlane, boxStyle,
  * ...)`, the identical `FtileFactory#activity` call site every ordinary
- * action resolves to. `ActivityBackward` carries no `color`/`stereotype`
- * (base-form-only port, `ast.ts`'s own doc), so the synthetic
- * `ActivityAction` below never sets either. Kept here (not in
- * `tile-layout-backward.ts` with {@link extractBackward}/
+ * action resolves to, `boxStyle` included (`CommandBackward3.java:138`).
+ * Kept here (not in `tile-layout-backward.ts` with {@link extractBackward}/
  * {@link backwardExitsOnLeft}) since it needs `tileSimpleLeaf`, private to
  * this file.
  */
 function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, theme: Theme): Tile {
-  const action: ActivityAction =
-    node.swimlane !== undefined
-      ? { kind: 'action', label: node.label, swimlane: node.swimlane }
-      : { kind: 'action', label: node.label };
+  const action: ActivityAction = {
+    kind: 'action',
+    label: node.label,
+    ...(node.swimlane !== undefined ? { swimlane: node.swimlane } : {}),
+    ...(node.stereotype !== undefined ? { stereotype: node.stereotype } : {}),
+  };
   const tile = tileSimpleLeaf(action, bounder, theme);
   if (node.notes === undefined || node.notes.length === 0) return tile;
   // BACKNOTE (`activity-divergence-drive-3` T2a): `getFtileBackward`'s own
@@ -233,10 +240,11 @@ function buildWhileHeader(
     const emptyLabels: { south?: string; west?: string } = {};
     if (node.yesLabel !== undefined) emptyLabels.south = node.yesLabel;
     if (node.exitLabel !== undefined) emptyLabels.west = node.exitLabel;
-    return new GtileDiamondEmpty(node.condition, emptyLabels, bounder, theme);
+    return new GtileDiamondEmpty(node.condition, emptyLabels, bounder, theme, CreoleMode.FULL);
   }
-  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
-  return new GtileDiamondInside(node.condition, labels, bounder, theme);
+  if (theme.conditionStyle === 'insideDiamond')
+    return new GtileDiamondSquare(node.condition, labels, bounder, theme, CreoleMode.FULL);
+  return new GtileDiamondInside(node.condition, labels, bounder, theme, CreoleMode.FULL);
 }
 
 function tileWhile(
@@ -338,10 +346,12 @@ function tileRepeatCondition(
   // own diamond-bucket `testLabel` param (`''` here, matching `tileWhile`'s
   // own EMPTY_DIAMOND call never leaving `testLabel` unset the way this
   // one always does).
-  if (theme.conditionStyle === 'emptyDiamond') return new GtileDiamondEmpty('', { east: node.condition }, bounder, theme);
+  if (theme.conditionStyle === 'emptyDiamond')
+    return new GtileDiamondEmpty('', { east: node.condition }, bounder, theme, CreoleMode.FULL);
   // CSTYLE (add2 T3i): FtileRepeat.java:159-161.
-  if (theme.conditionStyle === 'insideDiamond') return new GtileDiamondSquare(node.condition, labels, bounder, theme);
-  return new GtileDiamondInside(node.condition, labels, bounder, theme);
+  if (theme.conditionStyle === 'insideDiamond')
+    return new GtileDiamondSquare(node.condition, labels, bounder, theme, CreoleMode.FULL);
+  return new GtileDiamondInside(node.condition, labels, bounder, theme, CreoleMode.FULL);
 }
 
 /**
@@ -367,13 +377,9 @@ function tileRepeat(
     outLane(node.swimlaneOut, node.swimlane),
   );
   const backConnection = selectRepeatBackConnection(node, laneOrder);
-  return withSwimlaneOut(
-    withSwimlane(
-      new GtileRepeat(entry, body, condition, backConnection, withBackLabels({ bounder, theme, backward: backwardTile }, backward)),
-      node.swimlane,
-    ),
-    node.swimlaneOut,
-  );
+  const backLabels = withBackLabels({ bounder, theme, backward: backwardTile }, backward);
+  const repeat = new GtileRepeat(entry, body, condition, backConnection, backLabels);
+  return withSwimlaneOut(withSwimlane(repeat, node.swimlane), node.swimlaneOut);
 }
 
 // `tileFork`/`tileSplit`/`tileSwitch`/`tileGroup` moved to
@@ -403,6 +409,12 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   return assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
 }
 
+/** `tileNode`'s exhaustive default: an unknown kind draws nothing. */
+function unknownNodeKind(node: never): null {
+  console.warn(`tile-layout: unknown node kind '${String((node as ActivityNode).kind)}'`);
+  return null;
+}
+
 /**
  * Kept LAST in this file on purpose (mission `activity-loop-tile-port`, T1):
  * Lizard 1.23.0's TypeScript reader loses this function's closing scope
@@ -410,18 +422,20 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
  * header describes), so any function placed below it inflates the
  * complexity hook's ratchet for this name. Add new builders above.
  */
-function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): Tile | null {
-  if (isSimpleLeaf(node)) {
-    return tileSimpleLeaf(node, bounder, theme);
-  }
-  if (isEarlyLeafKind(node)) {
-    return tileEarlyLeaf(node);
-  }
+function tileNode(
+  node: ActivityNode,
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): Tile | null {
+  if (isSimpleLeaf(node)) return tileSimpleLeaf(node, bounder, theme);
+  if (isEarlyLeafKind(node)) return tileEarlyLeaf(node);
   switch (node.kind) {
     case 'if':
       return tileIf(node, bounder, theme, laneOrder, pragma);
     case 'while':
-      return tileWhile(node, bounder, theme, laneOrder, pragma);
+      return wrapWhileNotes(tileWhile(node, bounder, theme, laneOrder, pragma), node.notes, bounder, theme);
     case 'repeat':
       return tileRepeat(node, bounder, theme, laneOrder, pragma);
     case 'fork':
@@ -432,10 +446,7 @@ function tileNode(node: ActivityNode, bounder: StringBounder, theme: Theme, lane
       return tileSwitch(node, bounder, theme, laneOrder, pragma);
     case 'group':
       return tileGroup(node, bounder, theme, laneOrder, pragma);
-    default: {
-      const _exhaustive: never = node;
-      console.warn(`tile-layout: unknown node kind '${String((_exhaustive as ActivityNode).kind)}'`);
-      return null;
-    }
+    default:
+      return unknownNodeKind(node);
   }
 }

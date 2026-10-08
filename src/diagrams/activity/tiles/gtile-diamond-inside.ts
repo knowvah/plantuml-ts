@@ -4,31 +4,17 @@ import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
-
-/** add3-T3f (PADDING, padding-only edit per this task's write-set): the
- *  bare `skinparam padding N` key (`theme-root-fields.ts#padding`), added
- *  to BOTH axes of the condition label's own measured dimension before
- *  {@link hexagonAlone} sizes the hexagon around it --
- *  `ConditionalBuilder.java:244`'s `new SheetBlock1(sheet, diamondLineBreak,
- *  skinParam.getPadding())` feeds this SAME global key into the hexagon's
- *  inner `tbTest`, whose `calculateDimensionSlow` (`SheetBlock1.java:194-
- *  197`, single-arg `.delta()`) adds it to width AND height alike --
- *  `measureLabel` below is this port's stand-in for measuring that real
- *  `tbTest`, so the term is added here rather than inside it. */
-function withGlobalPadding(dim: { width: number; height: number }, theme: Theme): { width: number; height: number } {
-  const pad = theme.padding ?? 0;
-  if (pad === 0) return dim;
-  return { width: dim.width + 2 * pad, height: dim.height + 2 * pad };
-}
+import { measurerAdapterOf } from './gtile-action.js';
+import { klimtStringBounder } from '../activity-creole-sheet.js';
+import { activityDisplayBlock, activityTextFontConfiguration } from '../activity-text-sheet.js';
+import { diamondTestBlock } from '../activity-text-sheet-diamond.js';
+import { HorizontalAlignment } from '../../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
+import type { TextBlock } from '../../../core/klimt/shape/TextBlock.js';
+import type { FontConfiguration } from '../../../core/klimt/shape/UText.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
-/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d):
- *  `if (h < 10) h = 10`. Applied per LINE inside {@link measureLabel}, not
- *  once to the summed total -- each creole line is its own `AtomText`.
- * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
-const ATOM_TEXT_MIN_HEIGHT = 10;
-
 export type DiamondSide = 'north' | 'south' | 'west' | 'east';
 
 export interface DiamondInsideLabels {
@@ -74,41 +60,69 @@ export interface DiamondConditionTile {
   hasPointOut(): boolean;
 }
 
-interface LabelDim {
+export interface LabelDim {
   readonly text: string;
   readonly width: number;
   readonly height: number;
 }
 
+/** `TextBlock#calculateDimension` through the tile's own `StringBounder`
+ *  (`klimtStringBounder` over `measurerAdapterOf`, the seam
+ *  `gtile-action.ts#computeActionSize` sizes the action Sheet with). */
+function blockDimension(
+  tb: TextBlock,
+  bounder: StringBounder,
+  fc: FontConfiguration,
+): { width: number; height: number } {
+  const dim = tb.calculateDimension(
+    klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: fc.size }),
+  );
+  return { width: dim.getWidth(), height: dim.getHeight() };
+}
+
 /**
- * `TextBlockUtils.empty(0, 0)` for an unset label -- measured as a literal
- * 0x0 box, never handed to the bounder (an empty-string query on a real
- * bounder can still report a nonzero line height). A multi-line label
- * (real `\n`s, already unescaped by `if-dispatch.ts#unescapeLabelNewlines`
- * before this constructor ever sees them -- D5, `bazuma-86-metu353`) is
- * measured ONE LINE AT A TIME and folded to width=MAX, height=SUM, instead
- * of a single `getDimension` call on the whole string (which summed every
- * character's width on ONE reported line, including the two now-unescaped
- * `\`/`n` glyphs, and never reserved room for the extra lines below).
- * `renderIfLabel`'s own `textLines` draw pass already advances by exactly
- * `fontSize` per line (`ASCENT_FRACTION`, `activity-renderer-shapes.ts`);
- * summing each line's OWN reported height (every line here is `fontSize`
- * per `measure`'s own `height: font.size`, `core/measurer.ts:190`)
- * reproduces that same N*fontSize total without a second hard-coded
- * constant. Jar-verified on `bazuma-86-metu353`'s 6-line else label: its
- * `<text>` elements sit 11.0 apart (== `fontSize`), one `y` step per line.
+ * A side label (`north`/`south`/`west`/`east`): `getLabelPositive`'s
+ * `create0(fontArrow, LEFT, skinParam, labelLineBreak, CreoleMode.SIMPLE_LINE)`
+ * (`ConditionalBuilder.java:280-283`), the block `renderIfLabel` draws --
+ * creole resolved, each stripe's `AtomText` floor (`AtomText.java:179-181`)
+ * and `SheetBlock1`'s padding on both axes (`SheetBlock1.java:194-197`)
+ * included. An unset side stays a literal 0x0 box, never handed to the
+ * bounder. `creoleMode` FULL is `Display#create(fcArrow, LEFT, skinParam)`
+ * (`Display.java:614-617`), the side labels `FtileIfLongHorizontal`/
+ * `FtileIfLongVertical` build (`FtileIfLongHorizontal.java:172-173,186`,
+ * `FtileIfLongVertical.java:155-156`).
  */
-function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): LabelDim {
+export function measureSide(
+  text: string | undefined,
+  bounder: StringBounder,
+  theme: Theme,
+  creoleMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+): LabelDim {
   const t = text ?? '';
   if (t === '') return { text: t, width: 0, height: 0 };
-  let width = 0;
-  let height = 0;
-  for (const line of t.split('\n')) {
-    const dim = bounder.getDimension(line, fontSize);
-    if (dim.width > width) width = dim.width;
-    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
-  }
-  return { text: t, width, height };
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  const tb = activityDisplayBlock(t, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode,
+  });
+  return { text: t, ...blockDimension(tb, bounder, fc) };
+}
+
+/**
+ * The condition's own `tbTest` (`ConditionalBuilder.java:240-247`): the
+ * diamond-font `CreoleMode.FULL` Sheet in a `SheetBlock1` carrying
+ * `skinParam.getPadding()` -- `activity-text-sheet-diamond.ts
+ * #diamondTestBlock`, the block `renderHexagonOwnLabel` draws. An empty
+ * condition stays 0x0 (`hexagonAlone`'s special case). The same extent as
+ * the `create0(fcTest, defaultTextAlignment, FULL)` block an `elseif`
+ * hexagon carries (`FtileIfLongHorizontal.java:175-177`): a stencil never
+ * changes a `SheetBlock2` dimension.
+ */
+export function measureCondition(text: string, bounder: StringBounder, theme: Theme): LabelDim {
+  if (text === '') return { text, width: 0, height: 0 };
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
+  return { text, ...blockDimension(diamondTestBlock(text, theme), bounder, fc) };
 }
 
 /**
@@ -148,23 +162,26 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
   private west: LabelDim;
   private east: LabelDim;
 
-  constructor(label: string, labels: DiamondInsideLabels, bounder: StringBounder, theme: Theme) {
+  /** @param sideMode `SIMPLE_LINE` for an `if` (`ConditionalBuilder.java:280-283`),
+   *  `FULL` for a while / repeat (`FtileWhile.java:123,127-128`, `FtileRepeat.java:130-131`). */
+  constructor(
+    label: string,
+    labels: DiamondInsideLabels,
+    bounder: StringBounder,
+    theme: Theme,
+    sideMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+  ) {
     super();
     this.label = label;
-    const arrowSize = activityFontSize(theme, 'arrow');
-    this.north = measureLabel(labels.north, bounder, arrowSize);
-    this.south = measureLabel(labels.south, bounder, arrowSize);
-    this.west = measureLabel(labels.west, bounder, arrowSize);
-    this.east = measureLabel(labels.east, bounder, arrowSize);
+    this.north = measureSide(labels.north, bounder, theme, sideMode);
+    this.south = measureSide(labels.south, bounder, theme, sideMode);
+    this.west = measureSide(labels.west, bounder, theme, sideMode);
+    this.east = measureSide(labels.east, bounder, theme, sideMode);
 
-    const diamondSize = activityFontSize(theme, 'diamond');
-    // IFNL (T3d, `vaxiki-78-nice114`): a multi-line condition (unescaped
-    // real `\n`s, `if-dispatch.ts#unescapeLabelNewlines`) needs the SAME
-    // per-line fold as the north/south/east/west labels above -- a single
-    // `getDimension` call on the whole string reports one oversized line,
-    // not `label.calculateDimension`'s own per-`AtomText` sum
-    // (`AtomText.java` via `SheetBlock1`/`TextBlockLineCentered`).
-    const dimLabel = withGlobalPadding(measureLabel(label, bounder, diamondSize), theme);
+    // `FtileDiamondInside#calculateDimensionAlone` reads `label
+    // .calculateDimension` (`FtileDiamondInside.java:106-116`) -- the Sheet,
+    // one stripe per real `\n` (IFNL, T3d, `vaxiki-78-nice114`).
+    const dimLabel = measureCondition(label, bounder, theme);
     const hex = hexagonAlone(dimLabel);
     this.width = hex.width;
     this.hexHeight = hex.height;

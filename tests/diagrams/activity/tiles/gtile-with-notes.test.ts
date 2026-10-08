@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { GtileWithNotes } from '../../../../src/diagrams/activity/tiles/gtile-with-notes.js';
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../../src/diagrams/activity/tiles/points.js';
 import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
+import { measureOpaleCreole } from '../../../../src/diagrams/activity/tiles/gtile-note.js';
+import type { Theme } from '../../../../src/core/theme.js';
+import { resolveTheme } from '../../../../src/core/theme.js';
 
 // `FtileWithNotes` (`ftile/vcompact/FtileWithNotes.java:73-226`): stub
 // bounder mirrors `gtile-text-tiles.test.ts`'s own convention (7px/char
@@ -9,7 +12,7 @@ import type { StringBounder, Tile } from '../../../../src/diagrams/activity/tile
 const bounder: StringBounder = {
   getDimension: (text: string) => ({ width: text.length * 7, height: 14 }),
 };
-const FONT_SIZE = 13;
+const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Arial' };
 
 function stubTile(width: number, height: number): Tile {
   return {
@@ -30,7 +33,7 @@ function stubTile(width: number, height: number): Tile {
 
 describe('GtileWithNotes — one note, LEFT only', () => {
   const tile = stubTile(100, 50);
-  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, FONT_SIZE);
+  const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, theme);
 
   it('width = tile.width + leftStack.width (48), no gap', () => {
     expect(t.left?.width).toBe(48);
@@ -53,7 +56,7 @@ describe('GtileWithNotes — one note, LEFT only', () => {
 describe('GtileWithNotes — one note, RIGHT only, note TALLER than the tile', () => {
   const tile = stubTile(100, 20);
   // 2-line note: outer height = 2*14 + 10 + 20 = 58, taller than tile (20).
-  const t = new GtileWithNotes(tile, [{ text: 'a\nb', position: 'right' }], bounder, FONT_SIZE);
+  const t = new GtileWithNotes(tile, [{ text: 'a\nb', position: 'right' }], bounder, theme);
 
   it('height is dominated by the note stack, not the tile', () => {
     expect(t.right?.height).toBe(58);
@@ -75,7 +78,7 @@ describe('GtileWithNotes — two notes, BOTH LEFT, stack flush (no gap, FtileWit
       { text: 'nn', position: 'left' },
     ],
     bounder,
-    FONT_SIZE,
+    theme,
   );
 
   it('left stack width = max across both notes; height = sum (flush, no gap)', () => {
@@ -99,7 +102,7 @@ describe('GtileWithNotes — notes on BOTH sides', () => {
       { text: 'right', position: 'right' },
     ],
     bounder,
-    FONT_SIZE,
+    theme,
   );
 
   it('width = tile + left + right', () => {
@@ -118,5 +121,58 @@ describe('GtileWithNotes — notes on BOTH sides', () => {
     const south = t.getCoord(SOUTH_HOOK);
     expect(north.x).toBe(tile.getCoord(NORTH_HOOK).x + t.tileOffsetX);
     expect(south.x).toBe(north.x);
+  });
+});
+
+// `FtileWithNotes.java:117-120`: each stacked note's Opale wraps the REAL
+// creole `Sheet` (`skinParam().sheet(...).createSheet(note.getDisplay())`),
+// not the raw string -- `**b**` measures as the one glyph `b`, never as
+// the five raw characters (mifejo-31-sovi184's 20.15 px over-width).
+describe('GtileWithNotes — stacked note is sized by the creole Sheet', () => {
+  const tile = stubTile(40, 20);
+  const t = new GtileWithNotes(tile, [{ text: '**b**', position: 'left' }], bounder, theme);
+
+  it('opaleWidth/opaleHeight = measureOpaleCreole, outer = opale + 2*10', () => {
+    const box = measureOpaleCreole('**b**', bounder, theme);
+    const note = t.left!.notes[0]!;
+    expect(note.opaleWidth).toBe(box.width);
+    expect(note.opaleHeight).toBe(box.height);
+    expect(note.outerWidth).toBe(box.width + 20);
+    expect(box.width).toBeLessThan(5 * 7 + 21);
+  });
+});
+
+// add4-T1f: `FtileWithNotes#getTranslate`/`#getTranslateForLeft`/
+// `#getTranslateForRight` (`FtileWithNotes.java:158-192`) take `yDelta = 0`
+// when TOP -- the switch's own notes (`InstructionSwitch.java:125`).
+describe('GtileWithNotes — TOP alignment', () => {
+  it('a tall tile: tile, left and right stacks all sit at y 0', () => {
+    const tile = stubTile(100, 200);
+    const t = new GtileWithNotes(
+      tile,
+      [
+        { text: 'n', position: 'left' },
+        { text: 'm', position: 'right' },
+      ],
+      bounder,
+      theme,
+      'top',
+    );
+    expect(t.height).toBe(200);
+    expect([t.tileOffsetY, t.leftOffsetY, t.rightOffsetY]).toEqual([0, 0, 0]);
+    expect(t.getCoord(NORTH_HOOK).y).toBe(0);
+  });
+
+  it('a short tile under a taller stack is NOT centred either', () => {
+    const tile = stubTile(100, 10);
+    const t = new GtileWithNotes(tile, [{ text: 'n', position: 'left' }], bounder, theme, 'top');
+    expect(t.height).toBe(44);
+    expect(t.tileOffsetY).toBe(0);
+    expect(t.getCoord(SOUTH_HOOK).y).toBe(10);
+  });
+
+  it('CENTER (default) centres the short side', () => {
+    const t = new GtileWithNotes(stubTile(100, 200), [{ text: 'n', position: 'left' }], bounder, theme);
+    expect(t.leftOffsetY).toBe((200 - 44) / 2);
   });
 });

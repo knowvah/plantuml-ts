@@ -1,0 +1,8 @@
+@startuml
+	start
+	if (toto) is (10) then
+	 :BAD;
+	else (20)
+	endif
+	stop
+@enduml

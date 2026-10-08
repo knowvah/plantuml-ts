@@ -1,0 +1,12 @@
+@startuml
+|System|
+fork
+  :a very long action in the system lane;
+  :second;
+fork again
+  |Driver|
+  while (On the way?)
+  endwhile
+  :after;
+end fork
+@enduml

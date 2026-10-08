@@ -1,0 +1,21 @@
+@startuml
+skinparam conditionStyle diamond
+<style>
+activityDiagram {
+  diamond {
+    FontColor red
+    FontSize 14
+  }
+}
+</style>
+start
+if (**is** it //ok//?) then (yes)
+  :A;
+else (no)
+  :B;
+endif
+if (down?) then (yes)
+  :C;
+endif
+stop
+@enduml

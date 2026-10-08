@@ -14,29 +14,17 @@
  */
 
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
-import type {
-  ActivityAction,
-  ActivityArrowLabel,
-  ActivityNode,
-  ActivityNote,
-  ActivityRepeat,
-  ActivityWhile,
-} from './ast.js';
+import type { ActivityAction, ActivityArrowLabel, ActivityNode, ActivityRepeat, ActivityWhile } from './ast.js';
 import {
   RE_ACTION,
-  RE_ACTION_CLOSE,
   RE_ARROW_LABEL,
   RE_ENDWHILE,
   RE_ESCAPED_NEWLINE,
-  RE_NOTE_END,
-  RE_NOTE_MULTI,
-  RE_NOTE_SINGLE,
   RE_REPEAT_HEAD,
   RE_REPEAT_INLINE_TERMINATOR,
   RE_REPEATWHILE,
   RE_SWIMLANE,
   RE_WHILE,
-  defaultLeftPosition,
   isRefusal,
   matchesStopKeyword,
   setCurrentSwimlane,
@@ -50,11 +38,29 @@ import {
 } from './dispatch-support.js';
 import { tryIf, unescapeLabel, unescapeLabelNewlines } from './if-dispatch.js';
 import { tryFork, trySplit } from './parallel-dispatch.js';
-import { tryActivityList, tryBackward, tryCircleSpot, tryGoto, tryLabel, pushParsedNode } from './list-backward-dispatch.js';
+import {
+  tryActivityList,
+  tryBackward,
+  tryCircleSpot,
+  tryGoto,
+  tryLabel,
+  pushParsedNode,
+} from './list-backward-dispatch.js';
+import { singleLineArrowLabel, tryArrowLong } from './dispatch-arrow-long.js';
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
-import { tryOpenSwitch } from './switch-dispatch.js';
+import { readMultilineActionBody } from './dispatch-multiline-body.js';
+import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
-import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
+import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
+import {
+  tryAnnotation,
+  tryIgnoredCommonCommand,
+  tryLink3,
+  tryPragma,
+  trySprite,
+  tryScale,
+} from './dispatch-common-commands.js';
+import { stereogroupBackColor, stereogroupStereotype } from './dispatch-stereogroup.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -62,8 +68,37 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  setCurrentSwimlane(ctx, m[2]!.trim(), m[1]);
+  // `CommandSwimlane.java:63` `([^|]+)`, untrimmed: `Swimlanes#getOrCreate`
+  // (`Swimlanes.java:168-176`) matches it by exact `equals`, and
+  // `Swimlane.java:60` displays it verbatim.
+  const name = m[2]!;
+  setCurrentSwimlane(ctx, name, m[1]);
+  recordSwimlaneDisplay(ctx, name, line);
   return { idx: idx + 1 };
+}
+
+/** Per-parse `|name|LABEL` displays, keyed by the parse's own context. */
+const SWIMLANE_DISPLAYS = new WeakMap<ParseContext, Map<string, string>>();
+
+/**
+ * `LABEL ([^|]+)?` is everything after the closing `|` (it can hold no
+ * `|`), passed raw -- leading space included -- to `Display.getWithNewlines`
+ * and, when non-null, `setDisplay` on the lane; a later bare `|name|` leaves
+ * the display unchanged.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwimlane.java:65,97-98
+ * @see net/sourceforge/plantuml/activitydiagram3/ftile/Swimlanes.java:163-164
+ */
+function recordSwimlaneDisplay(ctx: ParseContext, name: string, line: string): void {
+  const label = line.trimEnd().slice(line.trimEnd().lastIndexOf('|') + 1);
+  if (label === '') return;
+  let displays = SWIMLANE_DISPLAYS.get(ctx);
+  if (displays === undefined) SWIMLANE_DISPLAYS.set(ctx, (displays = new Map<string, string>()));
+  displays.set(name, label);
+}
+
+/** The `|name|LABEL` displays recorded during this parse (empty if none). */
+export function swimlaneDisplaysOf(ctx: ParseContext): ReadonlyMap<string, string> {
+  return SWIMLANE_DISPLAYS.get(ctx) ?? new Map<string, string>();
 }
 
 // ---------------------------------------------------------------------------
@@ -95,74 +130,27 @@ function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
   const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
-  const stereoRaw = actionMatch[2];
-  const colorRaw = actionMatch[3];
+  const stereotype = stereogroupStereotype(actionMatch[2]);
+  const color = stereogroupBackColor(actionMatch[2]);
   const node: ActivityAction = {
     kind: 'action',
     label,
-    ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
-    ...(colorRaw !== undefined ? { color: colorRaw } : {}),
+    ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(color !== undefined ? { color } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
 }
 
-export interface MultilineActionBody {
-  cursor: number;
-  labelParts: string[];
-  multiStereo: string | undefined;
-}
+export { readMultilineActionBody, type MultilineActionBody } from './dispatch-multiline-body.js';
 
-/** Consumes body lines of a multiline action until its closing `;`
- *  (optionally followed by `<<stereo>>`), or end-of-input. Exported: also
- *  `backward-dispatch.ts#tryBackward`'s multiline form (mission ubrr-T10
- *  M3) reuses this verbatim -- the identical content-then-`;`-then-
- *  stereogroup(s) closer shape `backward:`'s own multiline form has.
- *
- * A `{{`/`}}` span (upstream's `EmbeddedDiagram.EMBEDDED_START`/`_END`,
- * a nested diagram rendered as an image inside the label) is tracked by
- * `braceDepth` and treated as OPAQUE text while open (D6): `;` inside it
- * belongs to the nested diagram's own grammar, not this action's closer
- * -- `RE_ACTION_CLOSE` is tried only at depth 0. Before this,
- * `mufixi-71-koma752`/`pufuzi-99-vone170` closed early on the embedded
- * diagram's first inner `;`, leaving its `}}` unrecognized. Rendering
- * the nested diagram as an image needs a new builder outside this
- * task's write-set; its source lands as literal label text instead
- * (documented fidelity gap, not a parse gap).
- * @see net/sourceforge/plantuml/EmbeddedDiagram.java:73-74
- */
-export function readMultilineActionBody(
-  ctx: ParseContext,
-  startIdx: number,
-  labelParts: string[],
-): MultilineActionBody {
-  const { lines } = ctx;
-  let cursor = startIdx;
-  let multiStereo: string | undefined;
-  let braceDepth = 0;
-  while (cursor < lines.length) {
-    const raw = lines[cursor]!;
-    const inner = raw.trim();
-    if (inner.startsWith('{{')) braceDepth++;
-    const closeMatch = braceDepth === 0 ? RE_ACTION_CLOSE.exec(inner) : null;
-    if (closeMatch !== null) {
-      const withoutSemi = closeMatch[1]!.trim();
-      if (withoutSemi !== '') labelParts.push(withoutSemi);
-      const sc = closeMatch[2];
-      if (sc !== undefined) multiStereo = sc.trim().toLowerCase();
-      cursor++;
-      break;
-    }
-    if (inner === '}}') braceDepth--;
-    if (inner !== '') labelParts.push(raw);
-    cursor++;
-  }
-  return { cursor, labelParts, multiStereo };
-}
-
-/** Multiline action: starts with `:` but no closing `;` on the same line. */
+/** Multiline action: any `:` line {@link tryAction} did not take.
+ *  `CommandMultilines2#isValid` (`command/CommandMultilines2.java:98-107`)
+ *  never tests the FIRST line against the END pattern, so a `;` on it --
+ *  `:x; <<save>> #pink`, which matches no single-line command -- does not
+ *  close the block (`CommandActivityLong3.java:79-82`). */
 function tryMultilineAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!line.startsWith(':') || line.includes(';')) return null;
+  if (!line.startsWith(':')) return null;
   const firstPart = line.slice(1).trim();
   const labelParts: string[] = [];
   if (firstPart !== '') labelParts.push(firstPart);
@@ -171,6 +159,7 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
     kind: 'action',
     label: decodeNewlineSentinels(body.labelParts.join('\n')),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
+    ...(body.multiColor !== undefined ? { color: body.multiColor } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: body.cursor, node };
@@ -208,12 +197,16 @@ function tryWhile(ctx: ParseContext, idx: number, line: string): DispatchResult 
     if (endwhileMatch !== null) exitLabel = endwhileMatch[1]?.trim();
     cursor++;
   }
+  // `InstructionWhile#addNote` (`InstructionWhile.java:162-167`): a note
+  // while `repeatList` is still empty is the while's OWN note.
+  const { body, notes } = extractLeadingCaseNotes(bodyResult.nodes);
   const node: ActivityWhile = {
     kind: 'while',
     condition,
     ...(yesLabel !== undefined && yesLabel !== '' ? { yesLabel } : {}),
     ...(exitLabel !== undefined && exitLabel !== '' ? { exitLabel } : {}),
-    body: bodyResult.nodes,
+    body,
+    ...(notes.length > 0 ? { notes } : {}),
     ...openerSwimlane,
   };
   return { idx: cursor, node };
@@ -248,13 +241,13 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
   const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
-  const stereoRaw = actionM[2];
-  const colorRaw = actionM[3];
+  const stereotype = stereogroupStereotype(actionM[2]);
+  const color = stereogroupBackColor(actionM[2]);
   return {
     kind: 'action',
     label,
-    ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
-    ...(colorRaw !== undefined ? { color: colorRaw } : {}),
+    ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(color !== undefined ? { color } : {}),
     ...swimlaneSpread(ctx),
   };
 }
@@ -324,60 +317,20 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** `(floating )?note (left|right)? (#color)? : text` (single-line); group
- *  3 is text. add3-T3d exception (NOTE-CREOLE): `CommandNote3.java:122`'s
- *  `Display.getWithNewlines` unescapes `\n` same as
- *  {@link unescapeLabelNewlines} already does for if/fork/repeat. */
-function tryNoteSingle(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  const noteSingleMatch = RE_NOTE_SINGLE.exec(line);
-  if (noteSingleMatch === null) return null;
-  const direction = noteSingleMatch[2]?.toLowerCase();
-  const position = defaultLeftPosition(direction);
-  const node: ActivityNote = {
-    kind: 'note',
-    text: unescapeLabelNewlines(noteSingleMatch[3]!.trim()),
-    position,
-    ...swimlaneSpread(ctx),
-  };
-  return { idx: idx + 1, node };
-}
-
-/** `(floating )?note (left|right)? (#color)?` (multi-line, ends with
- *  {@link RE_NOTE_END}'s `end note`/`endnote`). Group 1 is `floating`
- *  (dropped), group 2 is direction (color is non-capturing). */
-function tryNoteMulti(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  const noteMultiMatch = RE_NOTE_MULTI.exec(line);
-  if (noteMultiMatch === null) return null;
-  const { lines } = ctx;
-  const direction = noteMultiMatch[2]?.toLowerCase();
-  const position = defaultLeftPosition(direction);
-  let cursor = idx + 1;
-  const textLines: string[] = [];
-  while (cursor < lines.length) {
-    const inner = lines[cursor]!.trim();
-    if (RE_NOTE_END.test(inner)) {
-      cursor++;
-      break;
-    }
-    if (inner !== '') textLines.push(inner);
-    cursor++;
-  }
-  const node: ActivityNote = { kind: 'note', text: textLines.join('\n'), position, ...swimlaneSpread(ctx) };
-  return { idx: cursor, node };
-}
-
-/** Arrow label: -> label ;  or  -><back:color> label ; -- annotates the
- *  next drawn edge with a text label and optional color pill. */
+/** `CommandArrow3` (`CommandArrow3.java:61-71`): `-> label;`,
+ *  `-[#red]-> label;`, bare `-[#red]->`. The label is `Display.
+ *  getWithNewlines(pragma, label)` (`:110`): `\\n` becomes a line break
+ *  here, once; `<back:>`/`<color:>` stay in the label for creole. */
 function tryArrowLabel(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!line.startsWith('->')) return null;
+  if (!line.startsWith('-')) return null;
   const arrowMatch = RE_ARROW_LABEL.exec(line);
   if (arrowMatch === null) return null;
-  const color = arrowMatch[1]?.trim() || undefined;
-  const label = arrowMatch[2]?.trim() ?? '';
+  const style = arrowMatch[1];
+  const label = singleLineArrowLabel(ctx, arrowMatch[2] ?? '');
   const node: ActivityArrowLabel = {
     kind: 'arrow-label',
     label,
-    ...(color !== undefined ? { color } : {}),
+    ...(style !== undefined ? { style } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
@@ -410,12 +363,15 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryNoteSingle,
   tryNoteMulti,
   tryArrowLabel,
+  tryArrowLong,
   tryAnnotation,
   // D12/T1p-b: `!pragma` registered BEFORE sprite within `addCommonCommands2`
   // (`CommonCommands.java:62-89`).
   tryPragma,
   trySprite,
   tryScale,
+  tryIgnoredCommonCommand,
+  tryLink3,
   tryAssumeTransparent,
   // Tried LAST, immediately before the unknown-line fallback: `[-*]` is a
   // broad prefix (mission ubrr-T10 M1) and upstream itself registers
@@ -454,6 +410,19 @@ function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string):
   return refuse('syntax', idx, idx, 'Syntax Error?');
 }
 
+/** {@link pushParsedNode} plus the closed-group note redirect (add4-T2g,
+ *  `note-dispatch.ts#redirectNoteOntoGroup`); kept here because
+ *  `list-backward-dispatch.ts` is not this task's file and a cycle through
+ *  `note-dispatch.ts` is avoided. */
+function pushNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
+  if (
+    node?.kind === 'note' &&
+    (redirectNoteOntoGroup(nodes, node, pushNode) || redirectNoteOntoWhile(nodes, node, pushNode))
+  )
+    return;
+  pushParsedNode(nodes, node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+}
+
 /** Read nodes from `ctx.lines` from `idx` until a trimmed lowercase line
  *  matches one of `stops`, end-of-input, or a `ParseRefusal` surfaces from
  *  `dispatchLine` -- which this function propagates unchanged rather than
@@ -481,7 +450,8 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
     // single-line `backward:LABEL;`, falling to its multiline reader,
     // swallowing following lines). A colon ANYWHERE means some command
     // owns that `;` -- bare keywords never contain one.
-    if (!line.startsWith(':') && !line.includes(':') && line.endsWith(';')) {
+    // `CommandArrow3`'s `(.*);` owns its own `;` (`CommandArrow3.java:61-65`).
+    if (!line.startsWith(':') && !line.includes(':') && line.endsWith(';') && !RE_ARROW_LABEL.test(line)) {
       line = line.slice(0, -1).trimEnd();
     }
 
@@ -492,7 +462,7 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
 
     const result = dispatchLine(ctx, cursor, line, lc);
     if (isRefusal(result)) return result;
-    pushParsedNode(nodes, result.node); // WSPEC/RNOOUT, list-backward-dispatch.ts
+    pushNode(nodes, result.node);
     cursor = result.idx;
   }
 

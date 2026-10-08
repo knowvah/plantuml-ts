@@ -28,6 +28,15 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       else if (v === 'inside' || v === 'insidehexagon') acc.conditionStyle = 'insideHexagon';
     },
   ],
+  // add4-T3gates: `addConvert("hyperlinkColor", PName.HyperLinkColor,
+  // SName.root)` (`FromSkinparamToStyle.java:135`) -- the root `HyperLinkColor`
+  // a `<style> root { HyperLinkColor }` block also writes (`style-map-element.ts`).
+  [
+    ['hyperlinkcolor'],
+    (acc, _v, color) => {
+      (acc.elements['root'] ??= {}).hyperlinkColor = color;
+    },
+  ],
   // add2 T3e (family F): `SkinParam#useUnderlineForHyperlink()`
   // (`skin/SkinParam.java:1056-1060`): underline stays ON unless the value
   // is the case-insensitive literal "false" -- `valueIs` lower-cases
@@ -81,4 +90,57 @@ export const KEY_HANDLERS_C: ReadonlyArray<readonly [keys: readonly string[], ha
       acc.padding = parseFiniteNumber(value);
     },
   ],
+  // add4-T1b: `SkinParam#swimlaneWidth()` (`skin/SkinParam.java:1121-1130`)
+  // -- `"same".equalsIgnoreCase` -> `SWIMLANE_WIDTH_SAME` (-1,
+  // `style/ISkinParam.java:71`), `isDigits` (`\d+`, `:130-136`) ->
+  // `Integer.parseInt`, else `0`. `getValue` reads the value already
+  // trimmed (`setParam`'s `StringUtils.trin`, `:229`).
+  [
+    ['swimlanewidth'],
+    (acc, value) => {
+      acc.swimlaneWidth = parseSwimlaneWidth(value.trim());
+    },
+  ],
+  // add4-T2b: `FromSkinparamToStyle.java:131-133` -- `PartitionBorderColor`
+  // -> `LineColor`, `PartitionBackgroundColor` -> `BackGroundColor`,
+  // `addConFont("Partition", ...)` -> `FontColor`/`FontSize`, all on
+  // `SName.composite`.
+  [
+    ['partitionbordercolor'],
+    (acc, _v, color) => {
+      acc.partitionBorder = color;
+    },
+  ],
+  [
+    ['partitionbackgroundcolor'],
+    (acc, _v, color) => {
+      acc.partitionBackground = color;
+    },
+  ],
+  [
+    ['partitionfontcolor'],
+    (acc, _v, color) => {
+      acc.partitionFontColor = color;
+    },
+  ],
+  [
+    ['partitionfontsize'],
+    (acc, value) => {
+      const v = parseFiniteNumber(value);
+      if (v !== undefined) acc.partitionFontSize = v;
+    },
+  ],
 ];
+
+/** `ISkinParam.SWIMLANE_WIDTH_SAME` (`style/ISkinParam.java:71`). */
+const SWIMLANE_WIDTH_SAME = -1;
+
+/** `SkinParam.java:130`'s `DIGITS` pattern, matched whole (`matches()`). */
+const DIGITS = /^\d+$/;
+
+/** @see net/sourceforge/plantuml/skin/SkinParam.java:1121-1130 */
+function parseSwimlaneWidth(value: string): number {
+  if (value.toLowerCase() === 'same') return SWIMLANE_WIDTH_SAME;
+  if (DIGITS.test(value)) return Number.parseInt(value, 10);
+  return 0;
+}

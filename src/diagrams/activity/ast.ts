@@ -5,6 +5,7 @@
 import type { DiagramAnnotations } from '../../core/annotations/index.js';
 import type { SpriteRegistry } from '../../core/sprite-commands.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
+import type { ScaleSpec } from '../../core/scale-command.js';
 
 // ---------------------------------------------------------------------------
 // Leaf node types
@@ -50,8 +51,12 @@ export interface ActivityBreak {
 
 export interface ActivityArrowLabel {
   kind: 'arrow-label';
+  /** The creole label, `\\n` already converted (`CommandArrow3.java:110`). */
   label: string;
-  color?: string;
+  /** `-[#red]->`'s bracket text (`CommandArrow3` COLOR group, the rainbow
+   *  and line style of the NEXT arrow, `CommandArrow3.java:99-103`), carried
+   *  to `ActivityEdgeGeo.color` by `layout/tile-layout-inlabel.ts`. */
+  style?: string;
   swimlane?: string;
 }
 
@@ -86,10 +91,8 @@ export interface ActivityBackward {
   /**
    * BACKLBL (add2 T3i): the trailing `(outgoing)` decoration, drawn on
    * `ConnectionBackBackward2` (this backward box -> the condition/entry).
-   * Single-line `backward:label;(outgoing)` only -- the multiline closer
-   * reuses the generic `RE_ACTION_CLOSE` shape, which has no trailing-
-   * paren group (shared with plain multiline actions, out of this
-   * family's scope).
+   * Single-line `backward:label;(outgoing)` only: the multiline closer
+   * reuses `RE_ACTION_CLOSE`, which has no trailing-paren group.
    * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:81-86
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:158-161,386-407
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:182-187,513-535
@@ -108,6 +111,8 @@ export interface ActivityBackward {
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:177-185,218-226
    */
   notes?: ActivityNote[];
+  /** Box style (`CommandBackward3.java:136-138`), as `ActivityAction.stereotype`. */
+  stereotype?: string;
 }
 
 /**
@@ -252,6 +257,15 @@ export interface ActivityWhile {
    * 128-129`'s `FtileKilled` wrap), same as a ordinary `stop`/`kill`.
    */
   specialOut?: ActivityStop | ActivityEnd;
+  /**
+   * add4-T2g: the while's OWN notes (`WithNote#addNote`, appended): every
+   * note parsed while `repeatList` is still empty (a leading run in the
+   * body, or after `endwhile` of an empty body). `createFtile` wraps the
+   * whole while with them, `FtileWithNoteOpale.create(tmp, notes, false,
+   * CENTER)` (no link).
+   * @see net/sourceforge/plantuml/activitydiagram3/InstructionWhile.java:126-127,162-167
+   */
+  notes?: ActivityNote[];
 }
 
 export interface ActivityRepeat {
@@ -308,8 +322,7 @@ export interface ActivityFork {
   branches: ActivityNode[][];
   swimlane?: string;
   /**
-   * The lane current at the most recent `fork again` or at `end fork`,
-   * when it differs from {@link swimlane}.
+   * The lane current at the most recent `fork again` or at `end fork`, when it differs from {@link swimlane}.
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:138-141
    *   -- `forkAgain` re-reads `swimlaneOut` at each `fork again`.
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionFork.java:193-197
@@ -349,13 +362,11 @@ export interface ActivitySplit {
   branches: ActivityNode[][];
   swimlane?: string;
   /**
-   * The lane current at `end split`, when it differs from {@link swimlane}.
-   * Unlike fork, split has no second capture point at `split again`
-   * (`InstructionSplit.java:128-134` opens each further list with the
-   * DEFAULT lane, never re-reading `swimlaneOut`).
+   * The lane current at `end split`, when it differs from {@link swimlane}. Unlike fork, split
+   * has no second capture point at `split again` (`InstructionSplit.java:128-134` opens each
+   * further list with the DEFAULT lane, never re-reading `swimlaneOut`).
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionSplit.java:136-141
-   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at
-   *   `end split`.
+   *   -- `endSplit` reads `swimlanes.getCurrentSwimlane()` once, at `end split`.
    */
   swimlaneOut?: string;
 }
@@ -365,6 +376,9 @@ export interface ActivityNote {
   text: string;
   position: 'left' | 'right';
   swimlane?: string;
+  /** add4-T1c: `#color` (BACK, `#` kept) / `floating` (NoteType.FLOATING_NOTE); absent = omitted. @see CommandNote3.java:121-123 */
+  color?: string;
+  floating?: true;
 }
 
 /**
@@ -378,21 +392,21 @@ export interface ActivitySwitchCase {
 }
 
 /**
- * `switch (test) ... case (v1) ... case (v2) ... endswitch` (mission
- * ubrr-T10 M2): structurally the N-way branch-and-merge
- * `CommandSwitch`/`CommandCase`/`CommandEndSwitch` build together, one
- * `startSwitch`/`switchCase`/`endSwitch` sequence per `switch`.
+ * `switch (test) ... case (v1) ... endswitch` (ubrr-T10 M2): one
+ * `startSwitch`/`switchCase`/`endSwitch` sequence. `notes` (add4-T1f): a
+ * note while `current == null || current.isEmpty()` is the switch's own
+ * (`InstructionSwitch.java:186-189`), drawn TOP-aligned (`:125`).
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandSwitch.java:60-70
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandCase.java:56-63
  * @see net/sourceforge/plantuml/activitydiagram3/command/CommandEndSwitch.java:58-63
  * @see net/sourceforge/plantuml/activitydiagram3/ActivityDiagramFactory3.java:129-131
- *   -- registration.
  */
 export interface ActivitySwitch {
   kind: 'switch';
   condition: string;
   cases: ActivitySwitchCase[];
   swimlane?: string;
+  notes?: ActivityNote[];
 }
 
 /**
@@ -416,6 +430,13 @@ export interface ActivityGroup {
   groupType: 'partition' | 'package' | 'rectangle' | 'card' | 'group';
   title: string;
   hasBracket: boolean;
+  /** `BACK1` (before the name) else `BACK2` (after it), `#` kept; absent =
+   *  the style's own `BackGroundColor`.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:145-147,163-165 */
+  backColor?: string;
+  /** `<<...>>` (`STEREO`), chevrons kept -- `Stereotype.build(stereo)`.
+   * @see net/sourceforge/plantuml/activitydiagram3/command/CommandPartition3.java:151-152 */
+  stereotype?: string;
   body: ActivityNode[];
   swimlane?: string;
   /**
@@ -455,20 +476,18 @@ export type ActivityNode =
   | ActivitySwitch
   | ActivityGroup;
 
-// ---------------------------------------------------------------------------
-// Root AST
-// ---------------------------------------------------------------------------
+// --- Root AST ---------------------------------------------------------------
 
 export interface ActivityDiagramAST {
   /** Top-level sequence of activity nodes (may contain nested structures). */
   nodes: ActivityNode[];
   /** Ordered list of swimlane names as they appear in the source. */
   swimlanes: string[];
-  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name --
-   *  undefined/absent for a lane with no color segment (transparent, no
-   *  rect drawn, `Swimlanes.java:332-340`'s own `back != null` guard).
-   *  Optional so hand-authored AST literal fixtures compile unchanged. */
+  /** O (add2 T3i): `|#color|name|`'s background, keyed by lane name; absent
+   *  = transparent (`Swimlanes.java:332-340`'s `back != null`). Optional. */
   swimlaneColors?: Record<string, string>;
+  /** `|name|LABEL`'s display, keyed by lane name (`Swimlanes.java:163-164`). */
+  swimlaneDisplays?: Record<string, string>;
   /**
    * title/caption/legend/header/footer/mainframe chrome (mission G0b).
    * Always populated by `parseActivity` (default `createAnnotations()`
@@ -488,13 +507,13 @@ export interface ActivityDiagramAST {
    */
   sprites?: SpriteRegistry;
   /**
-   * `!pragma NAME [VALUE]` (D12/T1p-b), populated by {@link tryPragma}
-   * (`dispatch-common-commands.ts`) during `parseNodes` -- mirrors
-   * `TitledDiagram#getPragma()`'s single per-diagram `Pragma` instance
-   * (`skin/Pragma.java`). Optional so hand-authored AST literal fixtures
-   * compile unchanged (read sites default to an empty `Pragma` when
-   * absent -- `conditional-builder.ts#buildIf`); a real `parseActivity()`
-   * call always sets it via `Pragma.createEmpty()`.
-   */
+   * `!pragma NAME [VALUE]` (D12/T1p-b), populated by `tryPragma` during
+   * `parseNodes` -- `TitledDiagram#getPragma()`'s single `Pragma` instance
+   * (`skin/Pragma.java`). Optional for hand-authored AST literals (read
+   * sites default to an empty `Pragma`); `parseActivity()` always sets it. */
   pragma?: Pragma;
+  /** `CommandSkinParam#executeArg` warnings (java:92-99), ahead of `pragma`'s: `activity-warnings.ts`. */
+  warnings?: ReturnType<Pragma['getWarnings']>;
+  /** add4-T3b: `diagram.getScale()` (`TextBlockExporter.java:497`), unresolved; absent = none. */
+  scale?: ScaleSpec;
 }

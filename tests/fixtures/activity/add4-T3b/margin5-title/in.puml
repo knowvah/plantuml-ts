@@ -1,0 +1,11 @@
+@startuml
+<style>
+root {
+  Margin 5
+}
+</style>
+title Margin five
+start
+:hello;
+stop
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+:centered title
+<code>
+ab
+longer code line
+</code>
+x;
+stop
+@enduml

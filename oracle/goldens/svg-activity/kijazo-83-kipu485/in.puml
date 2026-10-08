@@ -1,0 +1,12 @@
+@startuml
+|Citoyen|
+Start
+:Envoi du formulaire ;
+while (le formulaire est valide ?) is (non)
+|ebee-vdq-form|
+:Re-affichage du formulaire avec messages d'erreur ;
+:Remplissage du formulaire ;
+Endwhile (oui)
+|ebee-vdq-form|
+:Demande de generation du PDF/A avec le compte VDQ_WORK ;
+@enduml

@@ -21,8 +21,8 @@ import { renderFixtureActivity } from '../../oracle/svg-conformance/render-fixtu
 const measurer = new DeterministicMeasurer();
 
 describe('spotGlyphPath — captured letters', () => {
-  it('CAPTURED_SPOT_LETTERS is exactly A/B/G (this corpus\'s full census)', () => {
-    expect([...CAPTURED_SPOT_LETTERS].sort()).toEqual(['A', 'B', 'G']);
+  it('CAPTURED_SPOT_LETTERS is exactly A/B/E/G (this corpus\'s full census)', () => {
+    expect([...CAPTURED_SPOT_LETTERS].sort()).toEqual(['A', 'B', 'E', 'G']);
   });
 
   it('A translated to nipuxu-11-tefa314\'s first occurrence (cx=37.663, cy=117)', () => {
@@ -61,6 +61,19 @@ describe('spotGlyphPath — captured letters', () => {
     );
   });
 
+  it('E round-trips to both xovigi-85-rufa987 occurrences (raw d)', () => {
+    expect(spotGlyphPath('E', 130, 901.111)).toBe(
+      'M126.806,906.611 L126.806,896.494 L132.459,896.494 L132.459,897.567 L128.241,897.567 ' +
+        'L128.241,900.814 L131.775,900.814 L131.775,901.874 L128.241,901.874 L128.241,905.538 ' +
+        'L132.753,905.538 L132.753,906.611 Z',
+    );
+    expect(spotGlyphPath('E', 130, 1022.722)).toBe(
+      'M126.806,1028.222 L126.806,1018.105 L132.459,1018.105 L132.459,1019.178 L128.241,1019.178 ' +
+        'L128.241,1022.425 L131.775,1022.425 L131.775,1023.485 L128.241,1023.485 L128.241,1027.149 ' +
+        'L132.753,1027.149 L132.753,1028.222 Z',
+    );
+  });
+
   it('resolves lowercase the same as uppercase', () => {
     expect(spotGlyphPath('a', 10, 10)).toBe(spotGlyphPath('A', 10, 10));
     expect(spotGlyphPath('b', 10, 10)).toBe(spotGlyphPath('B', 10, 10));
@@ -73,7 +86,7 @@ describe('spotGlyphPath — captured letters', () => {
   });
 
   it('every captured table entry is keyed to itself (no stray letters)', () => {
-    expect(Object.keys(SPOT_GLYPH_D).sort()).toEqual(['A', 'B', 'G']);
+    expect(Object.keys(SPOT_GLYPH_D).sort()).toEqual(['A', 'B', 'E', 'G']);
   });
 });
 

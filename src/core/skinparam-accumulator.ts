@@ -36,6 +36,9 @@ export interface SkinparamAccumulator {
   /** add3-T3f (PADDING): bare `skinparam padding N` — see
    *  `theme-root-fields.ts#padding`'s own doc comment. */
   padding: number | undefined;
+  /** add4-T1b: `skinparam swimlaneWidth` — see
+   *  `theme-root-fields.ts#swimlaneWidth`'s own doc comment. */
+  swimlaneWidth: number | undefined;
   linetype: 'ortho' | 'polyline' | undefined;
   nodeSep: number | undefined;
   rankSep: number | undefined;
@@ -255,6 +258,12 @@ export interface SkinparamAccumulator {
   /** D4 amendment (T1): `SwimlaneTitleFontSize` -- see
    *  `theme-graph-colors-b.ts#swimlaneTitleFontSize`'s own doc comment. */
   swimlaneTitleFontSize: number | undefined;
+  /** add4-T2b: `Partition{Border,Background}Color` and `PartitionFont{Color,
+   *  Size}` -- see `theme-graph-colors-c.ts#ThemeGraphColorsC.partitionBorder`. */
+  partitionBorder: string | undefined;
+  partitionBackground: string | undefined;
+  partitionFontColor: string | undefined;
+  partitionFontSize: number | undefined;
   /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.hyperlinkUnderline`. */
   hyperlinkUnderline: boolean | undefined;
   /** add2 T3e: see `theme-root-fields.ts#ThemeRootFields.svgLinkTarget`. */
@@ -279,6 +288,7 @@ const SCALAR_FIELD_NAMES = [
   'fontSize',
   'defaultFontSize',
   'padding',
+  'swimlaneWidth',
   'linetype',
   'nodeSep',
   'rankSep',
@@ -332,6 +342,10 @@ const SCALAR_FIELD_NAMES = [
   'classFontColorByStereo',
   'classFontColor',
   'classFontColorAutomatic',
+  'partitionBorder',
+  'partitionBackground',
+  'partitionFontColor',
+  'partitionFontSize',
   'classAttributeFontColor',
   'classAttributeFontSizeByStereo',
   'classFontSizeByStereo',

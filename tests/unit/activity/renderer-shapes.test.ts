@@ -13,20 +13,21 @@ import { noGradient } from '../../../src/core/paint.js';
 import { describe, it, expect } from 'vitest';
 import {
   renderAction,
-  renderChevronLeft,
-  renderChevronRight,
   renderDiamond,
   renderEnd,
-  renderHexagon,
-  renderLabel,
   renderNode,
   renderNote,
-  renderParallelogram,
   renderSpot,
   renderStart,
   renderStop,
 } from '../../../src/diagrams/activity/activity-renderer-shapes.js';
 import { renderBar, renderSplitLine } from '../../../src/diagrams/activity/activity-renderer-bars.js';
+// add4-T3g: the live condition-label path (`FtileDiamondInside#drawU`); the
+// label-less `renderDiamond` rhombus is never handed a label by any producer.
+import {
+  renderHexagonOwnLabel,
+  renderHexagonPolygon,
+} from '../../../src/diagrams/activity/activity-renderer-if-shapes.js';
 import { GtileAction } from '../../../src/diagrams/activity/tiles/gtile-action.js';
 import { GtileDiamond } from '../../../src/diagrams/activity/tiles/gtile-diamond.js';
 import { GtileNote } from '../../../src/diagrams/activity/tiles/gtile-note.js';
@@ -35,9 +36,20 @@ import type { ActivityNodeGeo } from '../../../src/diagrams/activity/activity-ge
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
-import { measureLineWidth, centeredLineX } from '../../../src/diagrams/activity/activity-text-placement.js';
+import { measureLineWidth } from '../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = resolveTheme('default');
+
+/** add4-T3e: the SDL/UML outlines are dispatched by `renderNode` from the
+ *  node's stereotype (`BoxStyle.fromString`, `BoxStyle.java:126-133`); these
+ *  wrap it for the older per-shape tests below. */
+// add4-T3h: a labelled hexagon is two nodes, `'if-split'` (the polygon) and
+// `'if-own-label'` (the condition Sheet), `FtileDiamondInside.java:84-96`.
+const renderHexagon = (n: ActivityNodeGeo, t: Theme): string =>
+  renderHexagonPolygon(n, t) + renderHexagonOwnLabel(n, t);
+const renderChevronLeft = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'input' }, t);
+const renderChevronRight = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'output' }, t);
+const renderParallelogram = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'save' }, t);
 
 function makeNode(overrides: Partial<ActivityNodeGeo> & Pick<ActivityNodeGeo, 'kind'>): ActivityNodeGeo {
   return { id: 'node1', x: 50, y: 50, width: 20, height: 20, ...overrides };
@@ -287,7 +299,7 @@ describe('renderSpot (mission add2-T2g)', () => {
   // An UNCAPTURED letter falls back to upstream's own deterministic-text
   // branch geometry (`DriverCenteredCharacterSvg.java:64-69`) rather than
   // drawing nothing -- `activity-spot-glyph.ts`'s own doc comment.
-  it('falls back to upstream\'s deterministic <text> geometry for an uncaptured letter', () => {
+  it("falls back to upstream's deterministic <text> geometry for an uncaptured letter", () => {
     const node = makeNode({ kind: 'spot', x: 50, y: 50, width: 20, height: 20, label: 'Z' });
     const svg = renderSpot(node, theme);
     expect(svg).not.toContain('<path');
@@ -338,7 +350,7 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
   });
 
   it('a diamond label draws font-size 11, not the old `theme.fontSize - 2`', () => {
-    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    const svg = renderHexagonOwnLabel(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
     expect(svg).toContain('font-size="11"');
     expect(svg).not.toContain(`font-size="${theme.fontSize - 2}"`);
   });
@@ -358,6 +370,15 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     expect(svg).toContain('stroke-width="0.5"');
     expect(svg).toContain('stroke-linejoin="miter"');
     expect(svg).toContain('stroke-miterlimit="10"');
+  });
+
+  it('add4-T2d: a north-labelled EMPTY_DIAMOND box draws the rhombus at its bottom, below suppY1', () => {
+    // `FtileDiamond#drawU` translates by `dy(suppY1)` before drawing the
+    // 24x24 `Hexagon.asPolygon` (`FtileDiamond.java:87-89`); the box is
+    // `(24, 24 + suppY1)` (`:108-110`). suppY1 = 11 here (one 11 pt line).
+    const svg = renderDiamond(makeNode({ kind: 'if-split', x: 156, y: 159, width: 24, height: 35 }), theme);
+    const points = /<polygon points="([^"]+)"/.exec(svg)?.[1];
+    expect(points).toBe('168,170,180,182,168,194,156,182,168,170');
   });
 
   it('a note draws font-size 13 and stroke-width 0.5', () => {
@@ -384,7 +405,7 @@ describe('T5 — resolved font, corner radius and circle ink', () => {
     // something else"), so the agreement is pinned rather than assumed.
     const cases = [
       { label: 'hello', Tile: GtileAction, node: { kind: 'action' as const }, render: renderAction },
-      { label: 'yes', Tile: GtileDiamond, node: { kind: 'diamond' as const }, render: renderDiamond },
+      { label: 'yes', Tile: GtileDiamond, node: { kind: 'diamond' as const }, render: renderHexagonOwnLabel },
     ];
     for (const c of cases) {
       const { bounder, sizes } = recordingBounder();
@@ -448,32 +469,27 @@ describe('T4 — text colour cascade (D3)', () => {
     expect(ACTIVITY_FONT_COLOR).toBe('#000000');
   });
 
-  // `renderLabel` (single-line path) resolves its own colour locally rather
-  // than delegating to `core/latex.ts#renderNodeLabel` (which hardcodes
-  // `theme.colors.text`) -- only a `<latex>` label still delegates there.
-
   it('a single-line action label draws the root black, not theme.colors.text', () => {
     const svg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), theme);
     expect(svg).toContain('fill="#000"');
   });
 
-  it('a single-line diamond-family label (renderLabel path) draws the root black', () => {
+  it('a single-line hexagon condition label draws the root black', () => {
     const svg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), theme);
     expect(svg).toContain('fill="#000"');
   });
 
-  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action, not a single-line diamond label', () => {
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a single-line action and the diamond label', () => {
     const activityRed = themeWithFontColor('activity', 'red');
     const actionSvg = renderAction(makeNode({ kind: 'action', label: 'go', width: 120, height: 32 }), activityRed);
     expect(actionSvg).toContain('fill="#F00"');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
     const hexSvg = renderHexagon(makeNode({ kind: 'diamond', label: 'yes', width: 60, height: 40 }), activityRed);
-    expect(hexSvg).toContain('fill="#000"');
-    expect(hexSvg).not.toContain('fill="#F00"');
-  });
-
-  it('a <latex> label still delegates to renderNodeLabel (permanent divergence)', () => {
-    const svg = renderLabel('<latex>x^2</latex>', 60, 60, theme, { sname: 'activity' });
-    expect(svg).not.toContain('fill="#000"');
+    expect(hexSvg).toContain('fill="#F00"');
+    expect(hexSvg).not.toContain('fill="#000"');
   });
 
   it('a multi-line action label draws the resolved colour (#000, shortened), not theme.colors.text', () => {
@@ -488,7 +504,7 @@ describe('T4 — text colour cascade (D3)', () => {
   });
 
   it('a diamond label draws the root black (FtileDiamondInside label)', () => {
-    const svg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
+    const svg = renderHexagonOwnLabel(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), theme);
     expect(svg).toContain('fill="#000"');
   });
 
@@ -502,13 +518,20 @@ describe('T4 — text colour cascade (D3)', () => {
     expect((svg.match(/fill="#000"/g) ?? []).length).toBe(2);
   });
 
-  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action, not the diamond', () => {
+  it('`<style> activityDiagram { activity { FontColor red } }` colours a multi-line action and the diamond', () => {
     const activityRed = themeWithFontColor('activity', 'red');
     const actionSvg = renderAction(makeNode({ kind: 'action', label: 'l1\nl2', width: 120, height: 40 }), activityRed);
     expect(actionSvg).toContain('fill="#F00"');
-    const diamondSvg = renderDiamond(makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }), activityRed);
-    expect(diamondSvg).toContain('fill="#000"');
-    expect(diamondSvg).not.toContain('fill="#F00"');
+    // add4-T2d: `activityDiamond()` nests `SName.activity`
+    // (`StyleSignatureBasic.java:271-273`), so the activity rule reaches the
+    // diamond label -- jar-verified, tests/fixtures/activity/add4-T2d/
+    // style-activity-fontcolor ("cond?" is #F00).
+    const diamondSvg = renderHexagonOwnLabel(
+      makeNode({ kind: 'diamond', label: 'yes', width: 40, height: 40 }),
+      activityRed,
+    );
+    expect(diamondSvg).toContain('fill="#F00"');
+    expect(diamondSvg).not.toContain('fill="#000"');
   });
 
   it('a labelled hexagon (diamond SName, gtile-diamond.ts sizing) resolves the diamond bucket', () => {
@@ -572,9 +595,15 @@ describe('renderAction — AtomTable grid (T2f)', () => {
     expect(svg).not.toContain('<line');
   });
 
-  it('draws no grid lines when only SOME physical lines are table rows', () => {
-    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 120, height: 40 }), theme);
-    expect(svg).not.toContain('<line');
+  // add4-T3gates: the label is one Sheet (`FtileBox.java:178-181`), so the
+  // `|a|` line is a `StripeTable` stripe (`CreoleParser.java:99-100`) that
+  // draws its own grid above the plain stripe -- jar render of `:|a|\nplain;`
+  // (`scripts/oracle-render.sh`): 4 `<line>`s, `stroke-width:0.5`.
+  it('draws the table stripe grid when only SOME physical lines are table rows', () => {
+    const svg = renderAction(makeNode({ kind: 'action', label: '|a|\nplain', width: 45.425, height: 48 }), theme);
+    expect((svg.match(/<line/g) ?? []).length).toBe(4);
+    expect((svg.match(/<line[^>]*stroke-width:0\.5;/g) ?? []).length).toBe(4);
+    expect(svg).toContain('>plain<');
   });
 });
 
@@ -600,10 +629,10 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
 
   it('a diamond label centres on its OWN measured width (FtileDiamondInside.java:94-96)', () => {
     const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, width: 40, height: 40 });
-    const svg = renderDiamond(node, theme);
+    const svg = renderHexagonOwnLabel(node, theme);
     const cx = node.x + node.width / 2;
     const fontSize = 11; // plantuml.skin:370
-    const expectedX = centeredLineX(cx, measureLineWidth(theme, fontSize, 'yes'));
+    const expectedX = cx - measureLineWidth(theme, fontSize, 'yes') / 2;
     const actualX = Number(/<text x="([\d.]+)"/.exec(svg)?.[1]);
     expect(svg).not.toContain('text-anchor');
     expect(actualX).toBeCloseTo(expectedX, 2);
@@ -636,10 +665,6 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
     expect(multi).not.toContain('text-anchor');
     expect(single).toContain('x="56"');
     expect((multi.match(/x="56"/g) ?? []).length).toBe(2);
-  });
-
-  it('renderLabel throws for an "activity" sname with no width (broken caller contract)', () => {
-    expect(() => renderLabel('go', 60, 60, theme, { sname: 'activity' } as never)).toThrow(/width is required/);
   });
 });
 
@@ -750,7 +775,7 @@ describe('T1b — klimt text driver (D1)', () => {
 
   it('a diamond label carries no dominant-baseline, baseline from centeredFirstBaselineY', () => {
     const node = makeNode({ kind: 'diamond', label: 'yes', x: 40, y: 40, width: 40, height: 40 });
-    const svg = renderDiamond(node, theme);
+    const svg = renderHexagonOwnLabel(node, theme);
     expect(svg).not.toContain('dominant-baseline');
     const cy = node.y + node.height / 2;
     const y = Number(/<text[^>]*\sy="([\d.]+)"/.exec(svg)?.[1]);
@@ -832,10 +857,7 @@ describe('renderBar — fork/join bar (FtileBlackBlock)', () => {
   });
 
   it('draws the label to the right of the bar, vertically centred on its top edge', () => {
-    const svg = renderBar(
-      makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }),
-      theme,
-    );
+    const svg = renderBar(makeNode({ kind: 'join-bar', x: 16, y: 133, width: 225.5, height: 6, label: '{or}' }), theme);
     expect(svg).toContain('x="246.5"');
     expect(svg).toContain('y="136.056"');
     expect(svg).toContain('font-size="11"');
@@ -889,6 +911,84 @@ describe('renderNode -- group/partition frame (composite SName)', () => {
     expect(svg).toContain('stroke-width="1.5"');
     expect(svg).not.toContain(theme.colors.nodeBackground);
   });
+
+  it('Partition* skinparams colour the frame, tab and title (add4-T2b, FtileGroup.java:99-102)', () => {
+    const styled: Theme = {
+      ...theme,
+      colors: {
+        ...theme.colors,
+        graph: {
+          ...theme.colors.graph,
+          partitionBorder: 'green',
+          partitionBackground: 'lightblue',
+          partitionFontColor: 'yellow',
+        },
+      },
+    };
+    const svg = renderNode(makeNode({ kind: 'partition', x: 0, y: 0, width: 80, height: 50, label: 'P' }), styled);
+    expect(svg).toContain('fill="#ADD8E6" stroke="#008000"');
+    expect(svg).toMatch(/<path d="[^"]*" fill="none" stroke="#008000" stroke-width="1.5"\/>/);
+    expect(svg).toContain('fill="#FF0"');
+  });
+
+  // add4-T2b (GROUP-USYMBOL): CommandPartition3.java:89-106; geometry from
+  // somome-34-nori033's jar SVG (frame 63.325 wide, title "Action" 38.938).
+  it('package draws the USymbolFolder tab polygon and its hline (USymbolFolder.java:85-124)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 133.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'package',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<polygon points="25,133.611,69.938,133.611,76.938,153.611,88.325,153.611,88.325,219.611,25,219.611,25,133.611" fill="none" stroke="#000" stroke-width="1.5"',
+    );
+    expect(svg).toContain('<line x1="25" y1="153.611" x2="76.938" y2="153.611" stroke="#000" stroke-width="1.5"/>');
+    expect(svg).toMatch(/<text x="29" y="146.5"[^>]*>Action<\/text>/);
+  });
+
+  it('card draws a rect, a full-width line at title height + 4, and a centred title (USymbolCard.java:59-66,120-135)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 229.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'card',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).toContain(
+      '<rect x="25" y="229.611" width="63.325" height="86" fill="none" stroke="#000" stroke-width="1.5"/>',
+    );
+    expect(svg).toContain('<line x1="25" y1="247.611" x2="88.325" y2="247.611"');
+    expect(svg).toMatch(/<text x="37.194" y="242.5"[^>]*>Action<\/text>/);
+  });
+
+  it('rectangle draws a bare rect and a centred title, no tab (USymbolRectangle.java:65-71,104-134)', () => {
+    const node = makeNode({
+      kind: 'partition',
+      x: 25,
+      y: 325.611,
+      width: 63.325,
+      height: 86,
+      label: 'Action',
+      usymbol: 'rectangle',
+    });
+    const svg = renderNode(node, theme);
+    expect(svg).not.toContain('<path');
+    expect(svg).not.toContain('<line');
+    expect(svg).toMatch(/<text x="37.194" y="338.5"[^>]*>Action<\/text>/);
+  });
+
+  it('partition #color fills the frame (add4-T2b, FtileGroup.java:101)', () => {
+    const node = makeNode({ kind: 'partition', x: 0, y: 0, width: 50, height: 50, color: '#LightSkyBlue' });
+    expect(renderNode(node, theme)).toContain('<rect x="0" y="0" width="50" height="50" fill="#87CEFA"');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -911,11 +1011,13 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
     expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
   });
 
-  it("'while-header' ignores conditionStyle (T3f's family, not gated here)", () => {
+  // add4-T2f: `FtileWhile.create` builds `FtileDiamondSquare` under
+  // INSIDE_DIAMOND (`vcompact/FtileWhile.java:134-136`), as an if does.
+  it("'while-header' draws the 4-point rhombus under ConditionStyle InsideDiamond", () => {
     const insideDiamond: Theme = { ...theme, conditionStyle: 'insideDiamond' };
     const node = makeNode({ kind: 'while-header', x: 25, y: 15, width: 41.669, height: 35 });
     const svg = renderNode(node, insideDiamond);
-    expect(svg).toContain('25,32.5,37,15'); // still the hexagon's dent point
+    expect(svg).toContain('<polygon points="45.835,15,66.669,32.5,45.835,50,25,32.5"');
   });
 });
 
@@ -927,7 +1029,15 @@ describe("renderNode -- 'if-split' ConditionStyle dispatch (add2 T3h)", () => {
 // label (never this node's own `label`, always `''` for that shape).
 describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
   it("diamondShape 'empty' draws the fixed rhombus even with a non-empty label (the ambiguous case T3d's heuristic could not resolve)", () => {
-    const node = makeNode({ kind: 'if-split', x: 25, y: 15, width: 24, height: 24, label: 'not empty', diamondShape: 'empty' });
+    const node = makeNode({
+      kind: 'if-split',
+      x: 25,
+      y: 15,
+      width: 24,
+      height: 24,
+      label: 'not empty',
+      diamondShape: 'empty',
+    });
     const svg = renderNode(node, theme);
     // renderDiamond's own fixed rhombus point list for a 24x24 box
     // centred at (37, 27): size = 12.
@@ -949,7 +1059,7 @@ describe("renderNode -- 'if-split' diamondShape dispatch (add3-T3c)", () => {
     expect(svg).toContain('25,32.5,37,15');
   });
 
-  it('diamondShape undefined (repeat-cond, walk-repeat*.ts not this task\'s write-set) keeps the pre-existing label === \'\' heuristic', () => {
+  it("diamondShape undefined (repeat-cond, walk-repeat*.ts not this task's write-set) keeps the pre-existing label === '' heuristic", () => {
     const emptyDiamond: Theme = { ...theme, conditionStyle: 'emptyDiamond' };
     const node = makeNode({ kind: 'repeat-cond', x: 25, y: 15, width: 24, height: 24, label: '' });
     const svg = renderNode(node, emptyDiamond);

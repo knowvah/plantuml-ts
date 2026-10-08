@@ -24,17 +24,16 @@ import { GtileFork } from '../tiles/gtile-fork.js';
 import { GtileMerge } from '../tiles/gtile-merge.js';
 import { GtileSplit } from '../tiles/gtile-split.js';
 import { GtileSwitch } from '../tiles/gtile-switch.js';
-import { GtileGroup } from '../tiles/gtile-group.js';
+import { GtileGroup, type GtileGroupOptions } from '../tiles/gtile-group.js';
 import { GtilePartition } from '../tiles/gtile-partition.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
-import type { GtileNote } from '../tiles/gtile-note.js';
-import { GtileNoteOpale } from '../tiles/gtile-note.js';
+import { GtileNote, GtileNoteOpale } from '../tiles/gtile-note.js';
 import { GtileWithNotes } from '../tiles/gtile-with-notes.js';
 import type { WithNotesEntry } from '../tiles/gtile-with-notes.js';
-import { activityFontSize } from '../activity-style-defaults.js';
 import { tileNodes, withSwimlane, withSwimlaneOut } from './tile-layout.js';
 import { tileSimpleLeaf } from './tile-layout-leaves.js';
 import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
+import { groupInnerInkMaxX } from './canvas-origin-group-ink.js';
 
 /**
  * `FtileFactoryDelegatorAddNote#addNote` (`vcompact/FtileFactoryDelegator
@@ -53,13 +52,16 @@ import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
  * the floating sibling model rather than nesting wraps incorrectly.
  * A note tagged with a DIFFERENT swimlane than the preceding tile (e.g.
  * `razuzu-32-faje125`: `floating note right` captured in `laneTwo`
- * immediately after an action in `laneOne`) also falls back: upstream
- * models this via `FtileWithNoteOpale`'s own `swimlaneNote` field
- * (`:86,92-99,217`), a per-swimlane-interceptor draw gate this port's flat
- * single-pass SVG canvas has no counterpart for -- wrapping it the same
- * way as a same-lane note would reserve flow-column width for a note that
- * upstream draws in a visually disjoint lane. Un-ported, re-slotted
- * (`activity-divergence-drive-2`, next-missions).
+ * immediately after an action in `laneOne`) wraps it the same way
+ * (add4-T2c): `InstructionList#addNote` forwards to `getLast().addNote`
+ * whatever the lane (`InstructionList.java:190-195`), carrying the
+ * note's own `swimlaneNote` (`ActivityDiagram3.java:480`). The Opale then
+ * draws only in that lane's pass (`FtileWithNoteOpale.java:217`, inside
+ * `Swimlanes.java:342`'s one-lane interceptor), which `walk-with-notes.ts
+ * #walkNoteOpale` mirrors by tagging the note node with the note tile's
+ * own lane. A merged `FtileWithNotes` ignores `swimlaneNote` entirely
+ * (`FtileWithNotes.java:87-97` delegate to the tile), so the merge arm
+ * has no lane guard either.
  *
  * `addNote`'s base (`WithNote.java:56-59`, unoverridden) is what every
  * kind in {@link WRAP_SAFE_KINDS} resolves to -- confirmed per-kind:
@@ -77,9 +79,10 @@ import { withInLabel, withOutLabel } from './tile-layout-inlabel.js';
  * WHOLE if/else composite reserved the note's width beside it, which
  * upstream never does). `InstructionSplit#addNote` (`:96-98`) always
  * forwards into its last branch, never self-wraps, with no reachable
- * "closed" state at all. `while`/`repeat`/`switch`/`group` are UNVERIFIED
- * (no cohort row exercises a note directly after one) -- excluded from
- * the allow-list rather than guessed into it.
+ * "closed" state at all. A note after `endswitch` never reaches here
+ * (`note-dispatch.ts#redirectNoteOntoSwitch`, add4-T1f). `while`/`repeat`/
+ * `group` are UNVERIFIED (no cohort row exercises a note directly after
+ * one) -- excluded from the allow-list rather than guessed into it.
  */
 const WRAP_SAFE_KINDS: ReadonlySet<string> = new Set([
   'gtile-start',
@@ -100,9 +103,10 @@ const WRAP_NO_LINK_KINDS: ReadonlySet<string> = new Set(['gtile-fork', 'gtile-me
  *  (`StackedNote.text`/`NoteStack`'s own side segregation IS the
  *  position). */
 function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
-  if (last.kind === 'gtile-note-opale') return [{ text: last.note.text, position: last.note.side }];
-  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const })) ?? [];
-  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const })) ?? [];
+  if (last.kind === 'gtile-note-opale')
+    return [{ text: last.note.text, position: last.note.side, color: last.note.color }];
+  const left = last.left?.notes.map((n) => ({ text: n.text, position: 'left' as const, color: n.color })) ?? [];
+  const right = last.right?.notes.map((n) => ({ text: n.text, position: 'right' as const, color: n.color })) ?? [];
   return [...left, ...right];
 }
 
@@ -113,9 +117,17 @@ function entriesOf(last: GtileNoteOpale | GtileWithNotes): WithNotesEntry[] {
  * spiked/stacked wrap the prior note(s) already built -- never nests.
  * `activity-divergence-drive-3` T2a, family NOTE-MULTI.
  */
-function mergeIntoWithNotes(last: GtileNoteOpale | GtileWithNotes, node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
-  const entries: WithNotesEntry[] = [...entriesOf(last), { text: node.text, position: node.position }];
-  return new GtileWithNotes(last.children[0]!, entries, bounder, activityFontSize(theme, 'note'));
+function mergeIntoWithNotes(
+  last: GtileNoteOpale | GtileWithNotes,
+  node: ActivityNote,
+  bounder: StringBounder,
+  theme: Theme,
+): Tile {
+  const entries: WithNotesEntry[] = [
+    ...entriesOf(last),
+    { text: node.text, position: node.position, color: node.color },
+  ];
+  return new GtileWithNotes(last.children[0]!, entries, bounder, theme);
 }
 
 /** `last` already carries one or more notes -- the NOTE-MULTI merge
@@ -126,12 +138,6 @@ function isMergeableNoteWrap(tile: Tile): tile is GtileNoteOpale | GtileWithNote
   return tile.kind === 'gtile-note-opale' || tile.kind === 'gtile-with-notes';
 }
 
-/** `razuzu-32-faje125`'s own `sameLane` guard, split out of {@link
- *  tileNote} for the same CCN reason as {@link isMergeableNoteWrap}. */
-function isSameLaneAsPrevious(node: ActivityNote, last: Tile | undefined): boolean {
-  return last === undefined || node.swimlane === undefined || node.swimlane === last.swimlane;
-}
-
 /** Whether `last` is a WRAP_SAFE_KINDS/WRAP_NO_LINK_KINDS leaf this note
  *  may wrap for the FIRST time -- split out of {@link tileNote} for the
  *  same CCN reason as {@link isMergeableNoteWrap}. */
@@ -139,19 +145,36 @@ function isFirstWrapTarget(last: Tile): boolean {
   return WRAP_SAFE_KINDS.has(last.kind) || WRAP_NO_LINK_KINDS.has(last.kind);
 }
 
+/** `FtileFactoryDelegatorAddNote#addNote`'s `ftile == null` arm
+ *  (`FtileFactoryDelegatorAddNote.java:61-68`): a note on an EMPTY list
+ *  (`InstructionList#addNote` -> `WithNote#addNote`, `InstructionList
+ *  .java:189-195`; built first by `createFtile`'s `eventuallyAddNote(
+ *  factory, null, ...)`, `:146`) is a `FtileNoteAlone` whose out point
+ *  exists only for `NoteType.NOTE` -- a `FLOATING_NOTE` has none, so the
+ *  next sibling gets no connection (add4-T2c, cofubo/japeku). */
+function tileNoteAlone(node: ActivityNote, bounder: StringBounder, theme: Theme): Tile {
+  return withSwimlane(new GtileNote(node, bounder, theme, node.floating !== true), node.swimlane);
+}
+
 export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBounder, theme: Theme): void {
   const last = tiles[tiles.length - 1];
+  if (last === undefined) {
+    tiles.push(tileNoteAlone(node, bounder, theme));
+    return;
+  }
   const noteTile = tileSimpleLeaf(node, bounder, theme) as GtileNote;
-  const sameLane = isSameLaneAsPrevious(node, last);
-  if (last !== undefined && sameLane && isMergeableNoteWrap(last)) {
+  if (isMergeableNoteWrap(last)) {
     tiles[tiles.length - 1] = mergeIntoWithNotes(last, node, bounder, theme);
     return;
   }
-  if (last === undefined || !sameLane || !isFirstWrapTarget(last)) {
+  if (!isFirstWrapTarget(last)) {
     tiles.push(noteTile);
     return;
   }
-  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, !WRAP_NO_LINK_KINDS.has(last.kind));
+  // add4-T1c: `FtileWithNoteOpale.java:132-133` -- a `FLOATING_NOTE` forces
+  // `withLink = false` whatever the wrapped tile's own kind allows.
+  const withLink = !WRAP_NO_LINK_KINDS.has(last.kind) && node.floating !== true;
+  tiles[tiles.length - 1] = new GtileNoteOpale(last, noteTile, withLink);
 }
 
 /**
@@ -187,7 +210,13 @@ export function tileNote(tiles: Tile[], node: ActivityNote, bounder: StringBound
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/ParallelBuilderSplit.java:160-161
  *   -- same accessor, split's own `ConnectionOut`.
  */
-function buildBranchTopDown(b: ActivityNode[], bounder: StringBounder, theme: Theme, laneOrder: readonly string[], pragma: Pragma): GtileTopDown {
+function buildBranchTopDown(
+  b: ActivityNode[],
+  bounder: StringBounder,
+  theme: Theme,
+  laneOrder: readonly string[],
+  pragma: Pragma,
+): GtileTopDown {
   const { tiles, trailing } = tileNodes(b, bounder, theme, laneOrder, pragma);
   const topDown = new GtileTopDown(tiles, bounder, theme);
   withInLabel(topDown, tiles[0]?.inLabel);
@@ -261,13 +290,54 @@ function tileSwitchCase(
   return kase.label !== undefined ? { tile, label: kase.label } : { tile };
 }
 
+/**
+ * add4-T1f (SWITCH-NOTE): `InstructionSwitch#createFtile`'s
+ * `eventuallyAddNote(factory, result, getSwimlaneIn(), VerticalAlignment
+ * .TOP)` (`InstructionSwitch.java:125`) -> `FtileFactoryDelegatorAddNote
+ * #addNote` (`:56-71`) -> `FtileWithNoteOpale.create(ftile, notes, true,
+ * TOP)` (`FtileWithNoteOpale.java:113-122`): two or more notes collect
+ * into ONE `FtileWithNotes`, one note is a spiked Opale (no spike when
+ * `FLOATING_NOTE`, `:132-133`). The only TOP-aligned caller upstream.
+ */
+function wrapSwitchNotes(tile: Tile, notes: readonly ActivityNote[], bounder: StringBounder, theme: Theme): Tile {
+  return wrapOwnNotes(tile, notes, bounder, theme, { alignment: 'top', link: true });
+}
+
+/** `FtileWithNoteOpale.create(tile, notes, withLink, alignment)`
+ *  (`FtileWithNoteOpale.java:113-122`), the wrap every `WithNote` container
+ *  applies to its own notes: 2+ notes collect into ONE `FtileWithNotes`, one
+ *  note is an Opale (spikeless when `withLink` is false or the note is a
+ *  `FLOATING_NOTE`, `:132-133`). */
+function wrapOwnNotes(
+  tile: Tile,
+  notes: readonly ActivityNote[],
+  bounder: StringBounder,
+  theme: Theme,
+  how: { readonly alignment?: 'top'; readonly link: boolean },
+): Tile {
+  if (notes.length === 0) return tile;
+  if (notes.length > 1) {
+    const entries: WithNotesEntry[] = notes.map((n) => ({ text: n.text, position: n.position, color: n.color }));
+    return new GtileWithNotes(tile, entries, bounder, theme, how.alignment);
+  }
+  const note = notes[0]!;
+  const noteTile = tileSimpleLeaf(note, bounder, theme) as GtileNote;
+  return new GtileNoteOpale(tile, noteTile, how.link && note.floating !== true, how.alignment);
+}
+
+/** `InstructionWhile#createFtile` (`InstructionWhile.java:126-127`): the
+ *  while's own notes wrap the whole loop, `withLink = false`, CENTER. */
+export function wrapWhileNotes(tile: Tile, notes: readonly ActivityNote[] | undefined, bounder: StringBounder, theme: Theme): Tile {
+  return wrapOwnNotes(tile, notes ?? [], bounder, theme, { link: false });
+}
+
 export function tileSwitch(
   node: ActivitySwitch,
   bounder: StringBounder,
   theme: Theme,
   laneOrder: readonly string[],
   pragma: Pragma,
-): GtileSwitch {
+): Tile {
   // `FtileFactoryDelegatorSwitch#getDiamond1`/`#getDiamond2` (`vcompact/
   // FtileFactoryDelegatorSwitch.java:129-161`): both are bare
   // `FtileDiamondInside` hexagons (no `.withNorth`/`.withWest`/`.withEast`
@@ -276,22 +346,19 @@ export function tileSwitch(
   const diamond = new GtileDiamondInside(node.condition, {}, bounder, theme);
   const cases = node.cases.map((kase) => tileSwitchCase(kase, bounder, theme, laneOrder, pragma));
   const mergeDiamond = new GtileDiamondInside('', {}, bounder, theme);
-  return withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
+  const tile = withSwimlane(new GtileSwitch(diamond, cases, mergeDiamond, bounder, theme), node.swimlane);
+  return wrapSwitchNotes(tile, node.notes ?? [], bounder, theme);
 }
 
 /**
  * Builds a {@link GtileGroup}/{@link GtilePartition} from an
  * `ActivityGroup` node (mission ubrr-T10 M6). `groupType === 'group'`
  * builds `GtileGroup`; the other four (`partition`/`package`/`rectangle`/
- * `card`) all build `GtilePartition` -- upstream draws a DIFFERENT
- * `USymbol` per type (`CommandPartition3#getUSymbol`), but this port has
- * only the two tile classes (`gtile-group.ts`/`gtile-partition.ts`,
- * identical geometry, `kind` differs), so `package`/`rectangle`/`card`
- * collapse onto `GtilePartition`'s shape -- a documented divergence, not
- * a silent one. The bracket-less-form warning banner (`CommandPartition3`
- * `hasBracket == false` -> `addWarning(...)`, `CommandCloseGroupLegacy3`
- * likewise) is NOT rendered -- `ActivityGroup.hasBracket` is carried on
- * the AST for a future task, unread here.
+ * `card`) all build `GtilePartition` -- upstream's `FtileGroup` geometry
+ * is the same for every type; only `drawU`'s `USymbol` differs
+ * (`CommandPartition3#getUSymbol`), carried as the tile's `usymbol` option
+ * (add4-T2b) and drawn by `activity-renderer-composite.ts`. The bracket-less
+ * warnings are emitted at parse time (`group-dispatch.ts`, add4-T2b).
  */
 /** `InstructionGroup#createFtile`'s own `if (note != null) tmp = new
  *  FtileWithNotes(tmp, singleton(note), CENTER)` (`InstructionGroup
@@ -300,8 +367,22 @@ export function tileSwitch(
  *  divergence-drive-3` T2a, family GROUPNOTE. */
 function wrapGroupNote(body: Tile, note: ActivityNote | undefined, bounder: StringBounder, theme: Theme): Tile {
   if (note === undefined) return body;
-  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position }];
-  return new GtileWithNotes(body, entries, bounder, activityFontSize(theme, 'note'));
+  const entries: WithNotesEntry[] = [{ text: note.text, position: note.position, color: note.color }];
+  return new GtileWithNotes(body, entries, bounder, theme);
+}
+
+/** `FtileGroup`'s `backColor` argument (`InstructionGroup.java`, from
+ *  `CommandPartition3.java:145-147`). */
+function groupOptions(node: ActivityGroup, body: Tile, theme: Theme): GtileGroupOptions {
+  const t = node.groupType;
+  const usymbol = t === 'package' || t === 'card' || t === 'rectangle' ? t : undefined;
+  // add4-T3c: `FtileGroup#getInnerMinMax` (`FtileGroup.java:150-158`).
+  const innerInkMaxX = groupInnerInkMaxX(body, theme);
+  return {
+    ...(innerInkMaxX !== undefined ? { innerInkMaxX } : {}),
+    ...(node.backColor !== undefined ? { backColor: node.backColor } : {}),
+    ...(usymbol !== undefined ? { usymbol } : {}),
+  };
 }
 
 export function tileGroup(
@@ -315,7 +396,7 @@ export function tileGroup(
   const body = wrapGroupNote(rawBody, node.note, bounder, theme);
   const tile =
     node.groupType === 'group'
-      ? new GtileGroup(node.title, body, bounder, theme)
-      : new GtilePartition(node.title, body, bounder, theme);
+      ? new GtileGroup(node.title, body, bounder, theme, groupOptions(node, body, theme))
+      : new GtilePartition(node.title, body, bounder, theme, groupOptions(node, body, theme));
   return withSwimlane(tile, node.swimlane);
 }

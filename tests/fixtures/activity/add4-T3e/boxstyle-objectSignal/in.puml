@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:objectSignal box
+second line; <<objectSignal>>
+:one line objectSignal; <<objectSignal>>
+:after;
+stop
+@enduml

@@ -1,7 +1,7 @@
 {
   "$comment": "Text census (fill, anchor, inset) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): insets move where a label's box shifted with the compressed geometry; no fill/anchor change is expected.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "918cd7e9",
+  "measuredAgainstCommit": "53d01279",
   "fixtures": [
     {
       "type": "activity",
@@ -315,6 +315,37 @@
     },
     {
       "type": "activity",
+      "slug": "bejeta-45-sotu349",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      }
+    },
+    {
+      "type": "activity",
       "slug": "bepuku-07-vebe062",
       "status": "baseline",
       "ours": {
@@ -565,6 +596,37 @@
     },
     {
       "type": "activity",
+      "slug": "bizeti-00-mido821",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 12
+      },
+      "jar": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 12
+      }
+    },
+    {
+      "type": "activity",
       "slug": "bizono-61-sasa740",
       "status": "baseline",
       "ours": {
@@ -651,6 +713,37 @@
       },
       "measuredAt": "2026-10-06",
       "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "bopele-45-bufo031",
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -775,6 +868,37 @@
       },
       "measuredAt": "2026-10-02",
       "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "bubefi-32-fike915",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -1119,6 +1243,37 @@
     },
     {
       "type": "activity",
+      "slug": "cebuci-75-zona564",
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "cejupe-34-muti621",
       "status": "baseline",
       "measuredAt": "2026-10-03",
@@ -1240,6 +1395,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "cezabi-50-cege262",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 15
+      },
+      "jar": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 15
+      }
     },
     {
       "type": "activity",
@@ -1460,6 +1646,64 @@
     },
     {
       "type": "activity",
+      "slug": "cofubo-18-koju711",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {},
+        "textCount": 1
+      },
+      "jar": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {},
+        "textCount": 1
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "cokoja-48-luki109",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
       "slug": "copisa-69-xisi273",
       "status": "baseline",
       "ours": {
@@ -1673,6 +1917,37 @@
     },
     {
       "type": "activity",
+      "slug": "dabulu-96-feco908",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 23
+        },
+        "anchor": {
+          "(absent)": 23
+        },
+        "inset": {
+          "10": 14
+        },
+        "textCount": 23
+      },
+      "jar": {
+        "fill": {
+          "#000": 23
+        },
+        "anchor": {
+          "(absent)": 23
+        },
+        "inset": {
+          "10": 14
+        },
+        "textCount": 23
+      }
+    },
+    {
+      "type": "activity",
       "slug": "dacuga-41-popo038",
       "status": "baseline",
       "ours": {
@@ -1701,6 +1976,37 @@
       },
       "measuredAt": "2026-10-02",
       "measuredAgainstCommit": "65b07a57"
+    },
+    {
+      "type": "activity",
+      "slug": "dajoge-59-cusa859",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 6
+        },
+        "textCount": 9
+      }
     },
     {
       "type": "activity",
@@ -1983,6 +2289,68 @@
     },
     {
       "type": "activity",
+      "slug": "dikaze-62-xibe813",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 9
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "dimuco-32-niro540",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
       "slug": "dirame-64-cica627",
       "status": "baseline",
       "ours": {
@@ -2042,6 +2410,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "divinu-75-busu278",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 9
+      }
     },
     {
       "type": "activity",
@@ -2231,6 +2630,37 @@
     },
     {
       "type": "activity",
+      "slug": "dulusu-13-roka577",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      }
+    },
+    {
+      "type": "activity",
       "slug": "dunejo-33-divo189",
       "status": "baseline",
       "ours": {
@@ -2290,6 +2720,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "duvole-80-meda461",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -2422,6 +2883,37 @@
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 3 (syntax): Syntax Error?",
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "afd2d5f2"
+    },
+    {
+      "type": "activity",
+      "slug": "famiki-74-fedu284",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -2642,15 +3134,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 12
+          "#000": 2
         },
         "anchor": {
-          "(absent)": 12
+          "(absent)": 2
         },
         "inset": {
           "70.338": 1
         },
-        "textCount": 12
+        "textCount": 2
       },
       "jar": {
         "fill": {
@@ -2664,8 +3156,8 @@
         },
         "textCount": 2
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -2736,6 +3228,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "fitega-67-kupi183",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 7
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 7
+      }
     },
     {
       "type": "activity",
@@ -3045,21 +3568,53 @@
     },
     {
       "type": "activity",
+      "slug": "fugoko-04-lafo140",
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 1
+      },
+      "jar": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 1
+      }
+    },
+    {
+      "type": "activity",
       "slug": "fukika-81-gite897",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9",
+      "measuredAgainstCommit": "76efedca",
       "ours": {
         "fill": {
-          "#000": 9
+          "#000": 10
         },
         "anchor": {
-          "(absent)": 9
+          "(absent)": 10
         },
         "inset": {
+          "7": 1,
           "25": 5
         },
-        "textCount": 9
+        "textCount": 10
       },
       "jar": {
         "fill": {
@@ -3073,6 +3628,37 @@
           "25": 5
         },
         "textCount": 10
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "fuleno-34-boni528",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 14
+      },
+      "jar": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 14
       }
     },
     {
@@ -3113,6 +3699,37 @@
       },
       "measuredAt": "2026-10-06",
       "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "gafuxi-23-kexi909",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -3270,6 +3887,37 @@
       },
       "measuredAt": "2026-10-06",
       "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "gelixa-02-sele970",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 14
+      },
+      "jar": {
+        "fill": {
+          "#000": 14
+        },
+        "anchor": {
+          "(absent)": 14
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 14
+      }
     },
     {
       "type": "activity",
@@ -3459,6 +4107,37 @@
     },
     {
       "type": "activity",
+      "slug": "gexuko-22-dumi059",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 13
+        },
+        "anchor": {
+          "(absent)": 13
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 13
+      },
+      "jar": {
+        "fill": {
+          "#000": 13
+        },
+        "anchor": {
+          "(absent)": 13
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 13
+      }
+    },
+    {
+      "type": "activity",
       "slug": "gimegi-77-xidu727",
       "status": "baseline",
       "ours": {
@@ -3492,19 +4171,19 @@
       "type": "activity",
       "slug": "giteso-65-mefo026",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 19
+          "#000": 20
         },
         "anchor": {
-          "(absent)": 19
+          "(absent)": 20
         },
         "inset": {
           "10": 6
         },
-        "textCount": 19
+        "textCount": 20
       },
       "jar": {
         "fill": {
@@ -3862,6 +4541,37 @@
     },
     {
       "type": "activity",
+      "slug": "gunuki-27-nixu177",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 4
+      }
+    },
+    {
+      "type": "activity",
       "slug": "jafuli-91-sota277",
       "status": "baseline",
       "ours": {
@@ -4017,6 +4727,37 @@
     },
     {
       "type": "activity",
+      "slug": "japeku-46-kulo799",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      }
+    },
+    {
+      "type": "activity",
       "slug": "japeru-28-guku001",
       "status": "baseline",
       "measuredAt": "2026-10-03",
@@ -4087,6 +4828,37 @@
     },
     {
       "type": "activity",
+      "slug": "jazedo-50-meka611",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
       "slug": "jecoxu-17-zama003",
       "status": "baseline",
       "ours": {
@@ -4115,6 +4887,14 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "jetigu-21-zaje860",
+      "status": "error",
+      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -4537,6 +5317,37 @@
     },
     {
       "type": "activity",
+      "slug": "jusama-23-bojo989",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 7
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 7
+      }
+    },
+    {
+      "type": "activity",
       "slug": "kafevi-44-tesu096",
       "status": "baseline",
       "ours": {
@@ -4601,6 +5412,33 @@
     },
     {
       "type": "activity",
+      "slug": "katime-87-vole867",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {},
+        "textCount": 1
+      },
+      "jar": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {},
+        "textCount": 1
+      }
+    },
+    {
+      "type": "activity",
       "slug": "katopo-68-xajo866",
       "status": "baseline",
       "ours": {
@@ -4660,6 +5498,14 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "kedozi-45-begu156",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Cannot read properties of undefined (reading 'x')",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -4753,6 +5599,37 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "kerada-15-fofu049",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -4880,6 +5757,37 @@
     },
     {
       "type": "activity",
+      "slug": "kilavo-46-xumo547",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "kitupi-32-jexo155",
       "status": "baseline",
       "ours": {
@@ -4997,6 +5905,37 @@
       },
       "measuredAt": "2026-10-06",
       "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "kotiso-16-vizi552",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 24
+        },
+        "anchor": {
+          "(absent)": 24
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 24
+      },
+      "jar": {
+        "fill": {
+          "#000": 24
+        },
+        "anchor": {
+          "(absent)": 24
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 24
+      }
     },
     {
       "type": "activity",
@@ -5281,6 +6220,37 @@
     },
     {
       "type": "activity",
+      "slug": "lebile-91-veto202",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 8
+      }
+    },
+    {
+      "type": "activity",
       "slug": "leduvi-16-voli986",
       "status": "baseline",
       "ours": {
@@ -5359,15 +6329,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 10
+          "#000": 11
         },
         "anchor": {
-          "(absent)": 10
+          "(absent)": 11
         },
         "inset": {
           "10": 3
         },
-        "textCount": 10
+        "textCount": 11
       },
       "jar": {
         "fill": {
@@ -5381,8 +6351,8 @@
         },
         "textCount": 11
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -5472,6 +6442,70 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "lipiki-79-fapu237",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "lisade-37-vuri519",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "53d01279",
+      "ours": {
+        "fill": {
+          "#000": 2,
+          "#00F": 1
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "22.766": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 2,
+          "#00F": 1
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "22.766": 1
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -5605,8 +6639,8 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#F00": 5,
-          "#000": 4
+          "#F00": 7,
+          "#000": 2
         },
         "anchor": {
           "(absent)": 9
@@ -5629,8 +6663,8 @@
         },
         "textCount": 9
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c"
     },
     {
       "type": "activity",
@@ -5727,6 +6761,37 @@
     },
     {
       "type": "activity",
+      "slug": "lukuxe-26-gemu804",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 27
+      },
+      "jar": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 27
+      }
+    },
+    {
+      "type": "activity",
       "slug": "luxido-91-covi016",
       "status": "baseline",
       "measuredAt": "2026-10-02",
@@ -5754,6 +6819,39 @@
           "10": 5
         },
         "textCount": 7
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "mabove-82-dozu233",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "ours": {
+        "fill": {
+          "#FF0": 1,
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#FF0": 1,
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 2
       }
     },
     {
@@ -5913,6 +7011,37 @@
     },
     {
       "type": "activity",
+      "slug": "mazoka-64-nixi123",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 24
+        },
+        "anchor": {
+          "(absent)": 24
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 24
+      },
+      "jar": {
+        "fill": {
+          "#000": 24
+        },
+        "anchor": {
+          "(absent)": 24
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 24
+      }
+    },
+    {
+      "type": "activity",
       "slug": "megara-21-rumi574",
       "status": "baseline",
       "ours": {
@@ -5941,6 +7070,37 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "meguta-71-pimi823",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 11
+      },
+      "jar": {
+        "fill": {
+          "#000": 11
+        },
+        "anchor": {
+          "(absent)": 11
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 11
+      }
     },
     {
       "type": "activity",
@@ -6134,6 +7294,37 @@
     },
     {
       "type": "activity",
+      "slug": "momala-42-luvu884",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "movexa-27-rexe388",
       "status": "baseline",
       "ours": {
@@ -6200,19 +7391,19 @@
       "type": "activity",
       "slug": "mufixi-71-koma752",
       "status": "baseline",
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "66db7400",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34",
       "ours": {
         "fill": {
-          "#000": 31
+          "#000": 2
         },
         "anchor": {
-          "(absent)": 31
+          "(absent)": 2
         },
         "inset": {
-          "75.025": 1
+          "122.338": 1
         },
-        "textCount": 31
+        "textCount": 2
       },
       "jar": {
         "fill": {
@@ -6234,6 +7425,37 @@
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "afd2d5f2"
+    },
+    {
+      "type": "activity",
+      "slug": "mukigo-10-dixi626",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 15
+      },
+      "jar": {
+        "fill": {
+          "#000": 15
+        },
+        "anchor": {
+          "(absent)": 15
+        },
+        "inset": {
+          "10": 7
+        },
+        "textCount": 15
+      }
     },
     {
       "type": "activity",
@@ -6400,6 +7622,14 @@
     },
     {
       "type": "activity",
+      "slug": "nefume-98-leti603",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Parsing syntax error about nota;number",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
       "slug": "nerete-42-save418",
       "status": "baseline",
       "measuredAt": "2026-09-20",
@@ -6435,16 +7665,15 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#00F": 1,
-          "#000": 3
+          "#000": 5
         },
         "anchor": {
-          "(absent)": 4
+          "(absent)": 5
         },
         "inset": {
           "10": 1
         },
-        "textCount": 4
+        "textCount": 5
       },
       "jar": {
         "fill": {
@@ -6458,8 +7687,8 @@
         },
         "textCount": 5
       },
-      "measuredAt": "2026-10-03",
-      "measuredAgainstCommit": "9104b8ee"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1"
     },
     {
       "type": "activity",
@@ -6988,6 +8217,37 @@
     },
     {
       "type": "activity",
+      "slug": "nosape-69-jato240",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      }
+    },
+    {
+      "type": "activity",
       "slug": "notuli-49-xugi698",
       "status": "baseline",
       "measuredAt": "2026-10-07",
@@ -7177,6 +8437,45 @@
       },
       "measuredAt": "2026-09-30",
       "measuredAgainstCommit": "2748fd1d"
+    },
+    {
+      "type": "activity",
+      "slug": "nuvumi-83-tose343",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 5
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "nuzise-60-temi305",
+      "status": "error",
+      "reason": "not an activity diagram: the jar renders data-diagram-type=SEQUENCE (teoz group/self-message; also captured under dot-cache/unknown) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 3 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -7498,6 +8797,37 @@
     },
     {
       "type": "activity",
+      "slug": "pipupe-81-ladi581",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 27
+      },
+      "jar": {
+        "fill": {
+          "#000": 27
+        },
+        "anchor": {
+          "(absent)": 27
+        },
+        "inset": {
+          "10": 16
+        },
+        "textCount": 27
+      }
+    },
+    {
+      "type": "activity",
       "slug": "pirofe-41-xama594",
       "status": "baseline",
       "ours": {
@@ -7599,6 +8929,14 @@
     },
     {
       "type": "activity",
+      "slug": "pizuga-11-mabo948",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 1 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
       "slug": "podelo-13-jaja314",
       "status": "baseline",
       "ours": {
@@ -7627,6 +8965,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "podobi-57-zoso040",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -7692,6 +9061,37 @@
     },
     {
       "type": "activity",
+      "slug": "popome-26-zufo950",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
       "slug": "poraji-17-goke817",
       "status": "baseline",
       "ours": {
@@ -7739,6 +9139,37 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "pubeza-23-jaza106",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
     },
     {
       "type": "activity",
@@ -8215,6 +9646,14 @@
     },
     {
       "type": "activity",
+      "slug": "romuru-66-samu329",
+      "status": "error",
+      "reason": "not an activity diagram: the jar renders data-diagram-type=CLASS (component + note with an embedded {{ }} activity) (TextBlockExporter.java:292-294) and routing agrees; misfiled in tests/corpus/activity, so the activity parser refuses it (activity parser refused this source at line 0 (syntax): Syntax Error?)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
       "slug": "roroko-26-coje324",
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
@@ -8349,19 +9788,19 @@
       "type": "activity",
       "slug": "rujixe-89-sumo552",
       "status": "baseline",
-      "measuredAt": "2026-09-20",
-      "measuredAgainstCommit": "a11418a1",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
           "10": 4
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -8861,6 +10300,68 @@
     },
     {
       "type": "activity",
+      "slug": "sipibi-62-koku509",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 10
+      },
+      "jar": {
+        "fill": {
+          "#000": 10
+        },
+        "anchor": {
+          "(absent)": 10
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 10
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "sisate-06-jage259",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      },
+      "jar": {
+        "fill": {
+          "#000": 7
+        },
+        "anchor": {
+          "(absent)": 7
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 7
+      }
+    },
+    {
+      "type": "activity",
       "slug": "sofoje-37-tila554",
       "status": "baseline",
       "ours": {
@@ -8894,19 +10395,19 @@
       "type": "activity",
       "slug": "sojono-24-tufe806",
       "status": "baseline",
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "8e771a18",
       "ours": {
         "fill": {
-          "#000": 12
+          "#000": 14
         },
         "anchor": {
-          "(absent)": 12
+          "(absent)": 14
         },
         "inset": {
           "10": 6
         },
-        "textCount": 12
+        "textCount": 14
       },
       "jar": {
         "fill": {
@@ -8984,6 +10485,70 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "sokomu-20-five757",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 4
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "somome-34-nori033",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "6c788ec6",
+      "ours": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4,
+          "12.194": 1
+        },
+        "textCount": 8
+      },
+      "jar": {
+        "fill": {
+          "#000": 8
+        },
+        "anchor": {
+          "(absent)": 8
+        },
+        "inset": {
+          "10": 4,
+          "12.194": 1
+        },
+        "textCount": 8
+      }
     },
     {
       "type": "activity",
@@ -9202,6 +10767,14 @@
     },
     {
       "type": "activity",
+      "slug": "tajiri-57-sepu092",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render SUCCEEDED (we accept a source the jar rejects; open -> add4)",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
       "slug": "tajuxe-32-sexo680",
       "status": "baseline",
       "measuredAt": "2026-10-03",
@@ -9257,6 +10830,37 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "taredi-65-vero960",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "a30245de",
+      "ours": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      },
+      "jar": {
+        "fill": {
+          "#000": 9
+        },
+        "anchor": {
+          "(absent)": 9
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 9
+      }
     },
     {
       "type": "activity",
@@ -9353,6 +10957,68 @@
     },
     {
       "type": "activity",
+      "slug": "tetaja-40-niki277",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "tetako-26-xeja109",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 5
+      }
+    },
+    {
+      "type": "activity",
       "slug": "ticeka-12-buli543",
       "status": "baseline",
       "measuredAt": "2026-10-03",
@@ -9384,6 +11050,47 @@
     },
     {
       "type": "activity",
+      "slug": "ticoxo-71-jile893",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Illegal call here. Is there a return directive in your function?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
+      "slug": "tidoda-12-juxu745",
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1,
+          "14.644": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1,
+          "14.644": 1
+        },
+        "textCount": 2
+      }
+    },
+    {
+      "type": "activity",
       "slug": "tirizu-79-niza262",
       "status": "jar-error",
       "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108)",
@@ -9402,8 +11109,7 @@
           "(absent)": 29
         },
         "inset": {
-          "10": 10,
-          "9.999": 1
+          "10": 11
         },
         "textCount": 29
       },
@@ -9419,8 +11125,8 @@
         },
         "textCount": 29
       },
-      "measuredAt": "2026-10-06",
-      "measuredAgainstCommit": "0850c251"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "1916ce34"
     },
     {
       "type": "activity",
@@ -9483,6 +11189,41 @@
       },
       "measuredAt": "2026-09-09",
       "measuredAgainstCommit": "5859712e"
+    },
+    {
+      "type": "activity",
+      "slug": "tozecu-08-ride878",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "3ec2d4cd",
+      "ours": {
+        "fill": {
+          "#000": 20
+        },
+        "anchor": {
+          "(absent)": 20
+        },
+        "inset": {
+          "7": 1,
+          "10": 7,
+          "78.221": 1
+        },
+        "textCount": 20
+      },
+      "jar": {
+        "fill": {
+          "#000": 20
+        },
+        "anchor": {
+          "(absent)": 20
+        },
+        "inset": {
+          "7": 1,
+          "10": 7,
+          "78.221": 1
+        },
+        "textCount": 20
+      }
     },
     {
       "type": "activity",
@@ -9553,6 +11294,37 @@
       },
       "measuredAt": "2026-10-06",
       "measuredAgainstCommit": "0850c251"
+    },
+    {
+      "type": "activity",
+      "slug": "vatame-42-dege160",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 12
+      },
+      "jar": {
+        "fill": {
+          "#000": 12
+        },
+        "anchor": {
+          "(absent)": 12
+        },
+        "inset": {
+          "10": 5
+        },
+        "textCount": 12
+      }
     },
     {
       "type": "activity",
@@ -9646,6 +11418,14 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "veducu-71-tika634",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 5 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -9783,6 +11563,37 @@
     },
     {
       "type": "activity",
+      "slug": "vimena-17-poju626",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "134202b9",
+      "ours": {
+        "fill": {
+          "#000": 40
+        },
+        "anchor": {
+          "(absent)": 40
+        },
+        "inset": {
+          "10": 10
+        },
+        "textCount": 40
+      },
+      "jar": {
+        "fill": {
+          "#000": 40
+        },
+        "anchor": {
+          "(absent)": 40
+        },
+        "inset": {
+          "10": 10
+        },
+        "textCount": 40
+      }
+    },
+    {
+      "type": "activity",
       "slug": "vimoxa-78-zucu656",
       "status": "baseline",
       "ours": {
@@ -9811,6 +11622,14 @@
       },
       "measuredAt": "2026-10-07",
       "measuredAgainstCommit": "8b812842"
+    },
+    {
+      "type": "activity",
+      "slug": "vipixe-71-rika369",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: Infinite loop?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -9938,6 +11757,37 @@
     },
     {
       "type": "activity",
+      "slug": "vopidi-45-jitu863",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "vozane-63-kepe177",
       "status": "baseline",
       "ours": {
@@ -10031,6 +11881,37 @@
     },
     {
       "type": "activity",
+      "slug": "vuruti-49-jeje300",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 5
+      }
+    },
+    {
+      "type": "activity",
       "slug": "xabesu-51-dimi831",
       "status": "baseline",
       "ours": {
@@ -10090,6 +11971,37 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "xaxene-93-doka767",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      },
+      "jar": {
+        "fill": {
+          "#000": 5
+        },
+        "anchor": {
+          "(absent)": 5
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 5
+      }
     },
     {
       "type": "activity",
@@ -10188,6 +12100,14 @@
     },
     {
       "type": "activity",
+      "slug": "xesoze-85-pugu865",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: A procedure cannot have !return directive. Declare it as a function instead ?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
+    },
+    {
+      "type": "activity",
       "slug": "xidamu-85-xoti640",
       "status": "baseline",
       "measuredAt": "2026-10-02",
@@ -10250,6 +12170,37 @@
     },
     {
       "type": "activity",
+      "slug": "xirixi-47-laxe350",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "xizola-97-sizu458",
       "status": "baseline",
       "measuredAt": "2026-10-02",
@@ -10308,6 +12259,37 @@
           "10": 2
         },
         "textCount": 9
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "xomeje-49-bixe122",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
       }
     },
     {
@@ -10379,6 +12361,68 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "77d50172"
+    },
+    {
+      "type": "activity",
+      "slug": "xovigi-85-rufa987",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "2842c766",
+      "ours": {
+        "fill": {
+          "#000": 25
+        },
+        "anchor": {
+          "(absent)": 25
+        },
+        "inset": {
+          "10": 8
+        },
+        "textCount": 25
+      },
+      "jar": {
+        "fill": {
+          "#000": 25
+        },
+        "anchor": {
+          "(absent)": 25
+        },
+        "inset": {
+          "10": 8
+        },
+        "textCount": 25
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "xucero-03-kixi746",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 4
+      },
+      "jar": {
+        "fill": {
+          "#000": 4
+        },
+        "anchor": {
+          "(absent)": 4
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 4
+      }
     },
     {
       "type": "activity",
@@ -10640,8 +12684,8 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#F00": 6,
-          "#000": 5
+          "#F00": 9,
+          "#000": 2
         },
         "anchor": {
           "(absent)": 11
@@ -10664,8 +12708,8 @@
         },
         "textCount": 11
       },
-      "measuredAt": "2026-09-16",
-      "measuredAgainstCommit": "543f0fcf"
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "541c5f2c"
     },
     {
       "type": "activity",
@@ -10697,6 +12741,14 @@
       },
       "measuredAt": "2026-09-16",
       "measuredAgainstCommit": "543f0fcf"
+    },
+    {
+      "type": "activity",
+      "slug": "zezaju-29-duni146",
+      "status": "jar-error",
+      "reason": "golden is a jar error page (PSystemError.java:148-155 / ReportLog.java:103-108); our own render also errored: activity parser refused this source at line 0 (syntax): Syntax Error?",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c"
     },
     {
       "type": "activity",
@@ -10766,15 +12818,16 @@
       "status": "baseline",
       "ours": {
         "fill": {
-          "#000": 8
+          "#000": 9
         },
         "anchor": {
-          "(absent)": 8
+          "(absent)": 9
         },
         "inset": {
+          "7": 1,
           "20": 6
         },
-        "textCount": 8
+        "textCount": 9
       },
       "jar": {
         "fill": {
@@ -10790,7 +12843,38 @@
         "textCount": 9
       },
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "918cd7e9"
+      "measuredAgainstCommit": "76efedca"
+    },
+    {
+      "type": "activity",
+      "slug": "zivocu-77-kopa900",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "134202b9",
+      "ours": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 17
+      },
+      "jar": {
+        "fill": {
+          "#000": 17
+        },
+        "anchor": {
+          "(absent)": 17
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 17
+      }
     },
     {
       "type": "activity",
@@ -10856,6 +12940,37 @@
     },
     {
       "type": "activity",
+      "slug": "zocifu-52-miga192",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "4ea823f1",
+      "ours": {
+        "fill": {
+          "#FFF": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#FFF": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 3
+      }
+    },
+    {
+      "type": "activity",
       "slug": "zokodi-10-dexu703",
       "status": "baseline",
       "measuredAt": "2026-10-07",
@@ -10914,6 +13029,68 @@
           "10": 2
         },
         "textCount": 2
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "zoxazu-64-vebi280",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 4
+        },
+        "textCount": 6
+      }
+    },
+    {
+      "type": "activity",
+      "slug": "zucile-04-duga040",
+      "status": "baseline",
+      "measuredAt": "2026-10-07",
+      "measuredAgainstCommit": "87727a9c",
+      "ours": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
+      },
+      "jar": {
+        "fill": {
+          "#000": 6
+        },
+        "anchor": {
+          "(absent)": 6
+        },
+        "inset": {
+          "10": 2
+        },
+        "textCount": 6
       }
     },
     {

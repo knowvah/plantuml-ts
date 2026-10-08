@@ -1,0 +1,6 @@
+@startuml
+!theme amiga
+start
+:Hello;
+stop
+@enduml

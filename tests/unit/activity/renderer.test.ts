@@ -642,8 +642,7 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'no3',
-          color: 'red',
+          label: '<back:red>no3',
         },
       ],
     });
@@ -662,8 +661,7 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'no3',
-          color: 'red',
+          label: '<back:red>no3',
         },
       ],
     });
@@ -679,13 +677,33 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'pill',
-          color: '#00FF00',
+          label: '<back:#00FF00>pill',
         },
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
     expect(result).toContain('<feComposite in="SourceGraphic" in2="flood" operator="over"/>');
+  });
+
+  // add4-T3j: `edge.color` is the next arrow's COLOR group
+  // (`CommandArrow3.java:99-103`), the line and head colour -- not a label flood.
+  it('strokes the line and fills the head with the COLOR group colour', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 50 },
+            { x: 100, y: 150 },
+          ],
+          label: 'no3',
+          color: '#red',
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    expect(result).toContain('<line x1="100" y1="50" x2="100" y2="150" stroke="#F00" stroke-width="1"/>');
+    expect(result).toMatch(/<polygon[^>]*fill="#F00"/);
+    expect(result).not.toContain('feFlood');
   });
 });
 
@@ -818,6 +836,39 @@ describe('renderActivity — edge with emphasize', () => {
     expect(tags).toEqual(['polygon', 'line', 'line', 'line', 'polygon']);
   });
 
+  // add4-T2e EMPH-STROKE: `drawLine(ug, line, emphasizeDirection)`
+  // (`Worm.java:139,177-181`) draws the mid-segment arrowhead through the
+  // LINE's own `ug` -- `arrowColor` (`:126-127`) and the worm's stroke
+  // (`:128-131`); only the end decoration takes `arrowHeadColor` and
+  // `UStroke.simple()` (`:152-166`).
+  it('draws the emphasis arrowhead in the line colour and stroke', () => {
+    const lineColor = '#123456';
+    const headColor = '#654321';
+    const styled = {
+      ...theme,
+      colors: { ...theme.colors, arrow: lineColor, arrowHead: headColor },
+      styleOverrides: { root: { linethickness: '0.1' } },
+    };
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 0, y: 30 },
+          ],
+          emphasize: 'down',
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, styled)));
+    const polygons = content.match(/<polygon[^>]*\/>/g) ?? [];
+    expect(polygons.length).toBe(2);
+    expect(polygons[0]).toContain(`fill="${lineColor}"`);
+    expect(polygons[0]).toContain('stroke-width="0.1"');
+    expect(polygons[1]).toContain(`fill="${headColor}"`);
+    expect(polygons[1]).toContain('stroke-width="1"');
+  });
+
   // b3/T3a (family B/ORD): `UGraphicCompressOnXorY#drawLine`
   // (`klimt/compress/UGraphicCompressOnXorY.java:142-146`) swaps a line's
   // own endpoints whenever `y1 > y2`, unconditionally, for every line the
@@ -911,6 +962,33 @@ describe('renderActivity — edge with arrowhead: false', () => {
     const content = contentAfterDefs(result);
     expect(content).toContain('<line');
     expect(content).not.toContain('<polygon');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Test 15b (add4-T1e): a zero-length LAST segment still draws the end
+// decoration (`ftile/Worm.java:161-168` has no length test), oriented by the
+// segment before it -- the `ConnectionVerticalThenHorizontal` DOWN branch
+// (`FtileSwitchWithManyLinks.java:167-170`, `asToDown()`), pateca/duvole.
+// ---------------------------------------------------------------------------
+
+describe('renderActivity — edge ending on a zero-length segment', () => {
+  it('draws the asToDown arrowhead at the last point', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 143 },
+            { x: 100, y: 193 },
+            { x: 100, y: 193 },
+          ],
+        },
+      ],
+    });
+    const content = contentAfterDefs(assembleSvg(renderActivity(geo, theme)));
+    // asToDown: (-4,-10),(0,0),(4,-10),(0,-6), translated to (100, 193).
+    expect(content).toContain('<polygon points="96,183,100,193,104,183,100,187"');
+    expect((content.match(/<line/g) ?? []).length).toBe(2);
   });
 });
 

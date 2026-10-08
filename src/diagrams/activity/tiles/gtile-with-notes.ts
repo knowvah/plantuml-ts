@@ -2,7 +2,9 @@ import type { GPoint, HookName } from './points.js';
 import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOOK } from './points.js';
 import { TileComposite } from './tile.js';
 import type { StringBounder, Tile } from './tile.js';
-import { measureOpaleText } from './gtile-note.js';
+import { measureOpaleCreole } from './gtile-note.js';
+import type { NoteVerticalAlignment } from './gtile-note.js';
+import type { Theme } from '../../../core/theme.js';
 
 /** `TextBlockUtils.withMargin(opale, 10, 10)` -- a UNIFORM 10px margin on
  *  every side of each note's own Opale box, layered OUTSIDE Opale's own
@@ -18,6 +20,9 @@ const NOTE_STACK_MARGIN = 10;
 export interface WithNotesEntry {
   readonly text: string;
   readonly position: 'left' | 'right';
+  /** add4-T1c: `note.getColors()`'s BACK -- `FtileWithNotes.java:106-111`
+   *  mutes the skin with it and overrides the Opale's `BackGroundColor`. */
+  readonly color?: string | undefined;
 }
 
 /** One note's geometry within its own side's vertical stack -- the OUTER
@@ -25,6 +30,7 @@ export interface WithNotesEntry {
  *  origin; the Opale box itself sits inset by {@link NOTE_STACK_MARGIN}. */
 export interface StackedNote {
   readonly text: string;
+  readonly color: string | undefined;
   readonly opaleWidth: number;
   readonly opaleHeight: number;
   readonly outerWidth: number;
@@ -44,16 +50,22 @@ export interface NoteStack {
  *  `XDimension2D#mergeTB` (`:94-98`), stacked top-to-bottom. `null` for
  *  an empty side (`FtileWithNotes.java:150-154`'s own `TextBlockUtils
  *  .empty(0, 0)`). */
-function buildStack(notes: readonly WithNotesEntry[], bounder: StringBounder, fontSize: number): NoteStack | null {
+function buildStack(notes: readonly WithNotesEntry[], bounder: StringBounder, theme: Theme): NoteStack | null {
   if (notes.length === 0) return null;
   let y = 0;
   let width = 0;
   const stacked: StackedNote[] = [];
   for (const note of notes) {
-    const opale = measureOpaleText(note.text, bounder, fontSize);
+    // add4-T1c: `FtileWithNotes.java:117-120` builds each Opale over the
+    // REAL creole `Sheet` (`skinParam().sheet(fc, ...).createSheet(note
+    // .getDisplay())`) -- the same `Opale` + `Sheet` `FtileWithNoteOpale`
+    // builds, so the same {@link measureOpaleCreole} sizer, never the raw
+    // `\n`-split string (which measured `**bold**`'s markers as glyphs).
+    const opale = measureOpaleCreole(note.text, bounder, theme);
     const outerWidth = opale.width + 2 * NOTE_STACK_MARGIN;
     const outerHeight = opale.height + 2 * NOTE_STACK_MARGIN;
-    stacked.push({ text: note.text, opaleWidth: opale.width, opaleHeight: opale.height, outerWidth, outerHeight, y });
+    const { text, color } = note;
+    stacked.push({ text, color, opaleWidth: opale.width, opaleHeight: opale.height, outerWidth, outerHeight, y });
     width = Math.max(width, outerWidth);
     y += outerHeight;
   }
@@ -77,21 +89,29 @@ interface WithNotesPlacement {
  *  own precedent: a dumb field-assignment constructor, all arithmetic in
  *  a pure function).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWithNotes.java:158-192,213-219 */
-function computeWithNotesPlacement(tile: Tile, left: NoteStack | null, right: NoteStack | null): WithNotesPlacement {
+function computeWithNotesPlacement(
+  tile: Tile,
+  left: NoteStack | null,
+  right: NoteStack | null,
+  verticalAlignment: NoteVerticalAlignment,
+): WithNotesPlacement {
   const leftWidth = left?.width ?? 0;
   const rightWidth = right?.width ?? 0;
   const leftHeight = left?.height ?? 0;
   const rightHeight = right?.height ?? 0;
   const width = tile.width + leftWidth + rightWidth;
   const height = Math.max(leftHeight, rightHeight, tile.height);
+  // add4-T1f: `getTranslate`/`getTranslateForLeft`/`getTranslateForRight`
+  // (`:158-192`) each take `yDelta = 0` when TOP, else the centring offset.
+  const centre = (h: number): number => (verticalAlignment === 'top' ? 0 : (height - h) / 2);
   return {
     width,
     height,
     tileOffsetX: leftWidth,
-    tileOffsetY: (height - tile.height) / 2,
-    leftOffsetY: (height - leftHeight) / 2,
+    tileOffsetY: centre(tile.height),
+    leftOffsetY: centre(leftHeight),
     rightOffsetX: width - rightWidth,
-    rightOffsetY: (height - rightHeight) / 2,
+    rightOffsetY: centre(rightHeight),
   };
 }
 
@@ -107,8 +127,8 @@ function computeWithNotesPlacement(tile: Tile, left: NoteStack | null, right: No
  * even for exactly one note). No gap between the tile and either stack
  * (`suppSpace` is declared, `FtileWithNoteOpale.java:81`-adjacent, but
  * dead code in THIS class -- never read by `calculateDimensionInternal`,
- * confirmed by inspection). Vertical alignment is always CENTER (every
- * known caller passes it; no cohort row exercises TOP).
+ * confirmed by inspection). Vertical alignment is CENTER for every caller
+ * but the switch's own notes (`InstructionSwitch.java:125`, TOP, add4-T1f).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWithNotes.java
  */
 export class GtileWithNotes extends TileComposite {
@@ -124,12 +144,26 @@ export class GtileWithNotes extends TileComposite {
   readonly rightOffsetX: number;
   readonly rightOffsetY: number;
 
-  constructor(tile: Tile, notes: readonly WithNotesEntry[], bounder: StringBounder, fontSize: number) {
+  constructor(
+    tile: Tile,
+    notes: readonly WithNotesEntry[],
+    bounder: StringBounder,
+    theme: Theme,
+    verticalAlignment: NoteVerticalAlignment = 'center',
+  ) {
     super();
     this.children = [tile];
-    this.left = buildStack(notes.filter((n) => n.position === 'left'), bounder, fontSize);
-    this.right = buildStack(notes.filter((n) => n.position === 'right'), bounder, fontSize);
-    const placement = computeWithNotesPlacement(tile, this.left, this.right);
+    this.left = buildStack(
+      notes.filter((n) => n.position === 'left'),
+      bounder,
+      theme,
+    );
+    this.right = buildStack(
+      notes.filter((n) => n.position === 'right'),
+      bounder,
+      theme,
+    );
+    const placement = computeWithNotesPlacement(tile, this.left, this.right, verticalAlignment);
     this.width = placement.width;
     this.height = placement.height;
     this.tileOffsetX = placement.tileOffsetX;

@@ -1,0 +1,18 @@
+diff --git a/src/diagrams/activity/renderer.ts b/src/diagrams/activity/renderer.ts
+index 83bca6746..1e72c0e47 100644
+--- a/src/diagrams/activity/renderer.ts
++++ b/src/diagrams/activity/renderer.ts
+@@ -1,3 +1,4 @@
++import { applyColorMapperToFragment, colorMapperOf } from '../class/class-monochrome.js';
+ /**
+  * Activity diagram SVG renderer.
+  *
+@@ -469,7 +470,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
+ 
+   const raw = preChromeDims(geo, theme);
+   return {
+-    body: children.join(''),
++    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
+     width: geo.totalWidth,
+     height: geo.totalHeight,
+     background: theme.colors.background,

@@ -12,6 +12,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { resolveTheme } from '../../../../src/core/theme.js';
 import { walkRepeat } from '../../../../src/diagrams/activity/layout/walk-repeat.js';
 import type { GtileRepeat, RepeatBackConnection } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import type { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
@@ -27,8 +28,8 @@ function makeOut(): Out {
     edges: [],
     edgeMeta: [],
     reservations: [],
+    theme: resolveTheme('default'),
     nextId: (prefix: string) => `${prefix}${n++}`,
-    groupScope: [],
   };
 }
 

@@ -136,3 +136,38 @@ describe('GtileIfLongVertical — mismatched diamonds/tiles length throws', () =
     expect(() => new GtileIfLongVertical([d0], [], tile2, undefined)).toThrow();
   });
 });
+
+describe('GtileIfLongVertical — an elseif inlabel widens every branch west margin', () => {
+  // `west = max(10, tbInlabel.width)` then `FtileMargedWest(tile, west)` on
+  // EVERY branch (FtileIfLongVertical.java:141,154-158,164-165).
+  const d0 = new GtileDiamondInside2('', {}, bounder, theme);
+  const d1 = new GtileDiamondInside2('', {}, bounder, theme);
+  const tile = new GtileIfLongVertical([d0, d1], [stubTile(40, 20), stubTile(40, 20)], stubTile(40, 20), undefined, [
+    undefined,
+    { label: 'No', width: 14 },
+  ]);
+
+  // diamondsWidth=24; tilesOuterWidth=[54,54]; widthBase=78.
+  it('width === 78; tileX = 24 + (78-24-54)/2 + 14 = 38 for both branches', () => {
+    expect(tile.width).toBe(78);
+    expect(tile.branches[0]!.tileX).toBe(38);
+    expect(tile.branches[1]!.tileX).toBe(38);
+  });
+
+  it('keeps the inlabels per branch for ConnectionVertical (:183-190)', () => {
+    expect(tile.inlabels[1]).toEqual({ label: 'No', width: 14 });
+    expect(tile.inlabels[0]).toBeUndefined();
+  });
+
+  it('an inlabel narrower than 10 leaves the west floor at 10 (:141)', () => {
+    const narrow = new GtileIfLongVertical(
+      [d0, d1],
+      [stubTile(40, 20), stubTile(40, 20)],
+      stubTile(40, 20),
+      undefined,
+      [undefined, { label: 'n', width: 7 }],
+    );
+    expect(narrow.width).toBe(74);
+    expect(narrow.branches[1]!.tileX).toBe(34);
+  });
+});

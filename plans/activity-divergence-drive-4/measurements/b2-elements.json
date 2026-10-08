@@ -1,0 +1,209 @@
+{
+  "summary": {
+    "rows": 31,
+    "ws": 1385,
+    "classes": {
+      "extra line+arrow": {
+        "count": 1,
+        "ws": 31
+      },
+      "extra arrow only": {
+        "count": 0,
+        "ws": 0
+      },
+      "extra line only": {
+        "count": 0,
+        "ws": 0
+      },
+      "missing line+arrow": {
+        "count": 0,
+        "ws": 0
+      },
+      "text-only": {
+        "count": 3,
+        "ws": 343
+      },
+      "mixed": {
+        "count": 3,
+        "ws": 122
+      },
+      "exact": {
+        "count": 24,
+        "ws": 889
+      }
+    }
+  },
+  "rows": [
+    {
+      "slug": "bigide-91-bise382",
+      "ws": 35,
+      "delta": {}
+    },
+    {
+      "slug": "boxefe-81-situ725",
+      "ws": 1,
+      "delta": {}
+    },
+    {
+      "slug": "bozido-07-geze049",
+      "ws": 80,
+      "delta": {}
+    },
+    {
+      "slug": "cemipu-87-dinu624",
+      "ws": 6,
+      "delta": {}
+    },
+    {
+      "slug": "fikuki-99-kulu790",
+      "ws": 87,
+      "delta": {
+        "text": 10
+      }
+    },
+    {
+      "slug": "fukika-81-gite897",
+      "ws": 58,
+      "delta": {}
+    },
+    {
+      "slug": "gufuma-85-zoce945",
+      "ws": 29,
+      "delta": {}
+    },
+    {
+      "slug": "gunuki-27-nixu177",
+      "ws": 14,
+      "delta": {
+        "line": -2
+      }
+    },
+    {
+      "slug": "jazedo-50-meka611",
+      "ws": 2,
+      "delta": {}
+    },
+    {
+      "slug": "jucidi-98-zato093",
+      "ws": 31,
+      "delta": {
+        "polygon": 1,
+        "line": 3
+      }
+    },
+    {
+      "slug": "labala-74-juki864",
+      "ws": 5,
+      "delta": {}
+    },
+    {
+      "slug": "lebile-91-veto202",
+      "ws": 64,
+      "delta": {}
+    },
+    {
+      "slug": "letuke-04-poza319",
+      "ws": 94,
+      "delta": {
+        "line": -5,
+        "text": -1
+      }
+    },
+    {
+      "slug": "lisade-37-vuri519",
+      "ws": 66,
+      "delta": {}
+    },
+    {
+      "slug": "meguta-71-pimi823",
+      "ws": 1,
+      "delta": {}
+    },
+    {
+      "slug": "momala-42-luvu884",
+      "ws": 48,
+      "delta": {}
+    },
+    {
+      "slug": "mufixi-71-koma752",
+      "ws": 236,
+      "delta": {
+        "text": 29
+      }
+    },
+    {
+      "slug": "nesozi-09-zezu092",
+      "ws": 20,
+      "delta": {
+        "text": -1
+      }
+    },
+    {
+      "slug": "nuvumi-83-tose343",
+      "ws": 14,
+      "delta": {
+        "line": -2
+      }
+    },
+    {
+      "slug": "pekefu-66-mepa144",
+      "ws": 8,
+      "delta": {}
+    },
+    {
+      "slug": "pufuzi-99-vone170",
+      "ws": 29,
+      "delta": {}
+    },
+    {
+      "slug": "ruzazu-94-meso880",
+      "ws": 2,
+      "delta": {}
+    },
+    {
+      "slug": "sokomu-20-five757",
+      "ws": 46,
+      "delta": {}
+    },
+    {
+      "slug": "tobajo-64-mipi810",
+      "ws": 2,
+      "delta": {}
+    },
+    {
+      "slug": "vimena-17-poju626",
+      "ws": 196,
+      "delta": {}
+    },
+    {
+      "slug": "xaxene-93-doka767",
+      "ws": 2,
+      "delta": {}
+    },
+    {
+      "slug": "xovigi-85-rufa987",
+      "ws": 2,
+      "delta": {}
+    },
+    {
+      "slug": "zejuso-92-kexo870",
+      "ws": 148,
+      "delta": {}
+    },
+    {
+      "slug": "zivege-92-rise076",
+      "ws": 49,
+      "delta": {}
+    },
+    {
+      "slug": "zivocu-77-kopa900",
+      "ws": 8,
+      "delta": {}
+    },
+    {
+      "slug": "zocifu-52-miga192",
+      "ws": 2,
+      "delta": {}
+    }
+  ]
+}

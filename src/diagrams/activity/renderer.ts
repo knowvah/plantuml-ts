@@ -8,19 +8,24 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { polygon, text } from '../../core/svg.js';
+import { polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode, centeredFirstBaselineY } from './activity-renderer-shapes.js';
-import { orderedLine } from './activity-renderer-terminals.js';
-import { drawActivityText } from './activity-renderer-text.js';
+import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
-import { activityArrowHeadColor, activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
-import { measureLineWidth } from './activity-text-placement.js';
-import { DEFAULT_LABEL_ALIGN, getTextBlockPosition, type SnakeTextAlign } from './layout/snake-text-position.js';
+import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
+import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
-import { ACTIVITY_DOCUMENT_MARGIN, SVG_CANVAS_CEIL } from './activity-layout-constants.js';
+import { LinkStyle } from '../../core/decoration/LinkStyle.js';
+import { edgeColorTokens, edgeLinkStyle } from './layout/edge-link-style.js';
+import { parseColor, toSvgHex } from '../../core/klimt/color/HColorSet.js';
+import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
+import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
+import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -39,6 +44,13 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 // Label helpers
 // ---------------------------------------------------------------------------
 
+/** `UStroke.simple()` -- thickness 1.0 (`klimt/UStroke.java:75-77`), the
+ *  stroke every start/end decoration draws through (`Worm.java:159,166`). */
+const SIMPLE_STROKE_WIDTH = 1;
+
+/** `Snake#drawInternal`'s single-colour stroke value (`Snake.java:193`). */
+const SNAKE_STROKE_VALUE = 1.5;
+
 /**
  * Draw the `ArrowsRegular`/`ArrowsTriangle` decoration (`arrows-regular.ts`,
  * D4) at `tip`, oriented by the segment direction `vector`. Bundled into
@@ -54,6 +66,7 @@ function arrowTip(
   vector: { dx: number; dy: number },
   color: string,
   theme: Theme,
+  strokeWidth = SIMPLE_STROKE_WIDTH,
 ): string {
   const { x, y } = tip;
   const { dx, dy } = vector;
@@ -70,79 +83,41 @@ function arrowTip(
     // the foreground and the background (`Worm.java:152-153`), so the
     // decoration is filled AND stroked in the same colour; this port drew a
     // fill alone.
-    { fill: color, stroke: color, strokeWidth: 1 },
+    { fill: color, stroke: color, strokeWidth },
   );
 }
 
 /**
- * {@link renderEdgeLabel}'s draw, positioned by {@link getTextBlockPosition} (T1b's port of `Snake
- * #getTextBlockPosition`, `Snake.java:244-270`); split into its own
- * function to keep `renderEdgeLabel` under this file's NLOC limit.
- * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
- * activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
- * the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
- * / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
- * through `of(root, element, activityDiagram, arrow)`.
+ * An edge label, drawn where `compress/edge-label-anchor.ts#edgeLabelLayout`
+ * places it: `Snake#getTextBlockPosition` (`Snake.java:244-270`) on the raw
+ * worm, mapped through compression (add4-T3a), then
+ * `text.textBlock.drawU(ug.apply(UTranslate.point(position)))`
+ * (`Snake.java:225-231`). The block is `FtileFactoryDelegator#getTextBlock`'s
+ * `display.create7(fc, HorizontalAlignment.LEFT, skinParam,
+ * CreoleMode.SIMPLE_LINE)` (`FtileFactoryDelegator.java:103-112`; the
+ * branch labels' `Branch#getTextBlock`, `Branch.java:250-258`, is the same
+ * LEFT `SIMPLE_LINE` block), with the `activityDiagram { arrow }` font
+ * (`style.getFontConfiguration`, plantuml.skin:373).
  *
- * `position` is the text block's TOP-LEFT corner, exactly as upstream's
- * `UTranslate.point(position)` places it (`Snake.java:230`); no
- * `text-anchor`, no extra offset beyond what that function already
- * bakes into its own default branch (`+4`, `Snake.java:248`).
- *
- * A coloured label (`<back:color>`, T1a's `label-colored-pill` finding)
- * draws through `core/svg.ts#text`'s own `textBackColor` -- the SAME
- * `feFlood`/`feComposite` filter `getFilterBackColor` registers
- * (`klimt/drawing/svg/SvgGraphics.java:732-735,772-786`), reused here
- * rather than re-invented: upstream never draws a background RECT for
- * this, only a filter clipped to the text's own bounding box (the SVG
- * filter region default, `objectBoundingBox`). `drawActivityText`'s own
- * klimt-driver path (`activity-renderer-text.ts`) has no `textBackColor`
- * seam and is outside this task's write-set, so the coloured branch
- * calls `core/svg.ts#text` directly instead -- the uncoloured branch is
- * unchanged, still `drawActivityText`, to keep its existing
- * `textLength` emission byte-identical.
+ * `position` is the block's top-left; the layout carries the first
+ * baseline, `position.y + size * ASCENT_FRACTION`
+ * (`activity-renderer-shapes.ts#centeredFirstBaselineY`), so the top is
+ * recovered from it. A `<back:color>` stays in the creole label
+ * (`CommandArrow3.java:61-71`), whose `AtomText` back colour becomes the
+ * `<text filter>` flood (`SvgGraphics.java:732-735`).
  */
-function renderEdgeLabelAligned(
-  label: string,
-  points: ReadonlyArray<{ x: number; y: number }>,
-  labelAlign: SnakeTextAlign,
-  color: string | undefined,
-  theme: Theme,
-): string {
-  const size = activityFontSize(theme, 'arrow');
-  // `TextBlock.calculateDimension` -- single-line width/height, the SAME
-  // measurer-blind estimate `activity-text-placement.ts#measureLineWidth`
-  // already gives every other render-time label (that module's own doc);
-  // height is `WidthTableMeasurer#measure`'s own `font.size` convention
-  // (`core/measurer.ts:189`).
-  const width = measureLineWidth(theme, size, label);
-  const position = getTextBlockPosition(points, { width, height: size }, labelAlign);
-  const baselineY = centeredFirstBaselineY(position.y + size / 2, size, 1);
-  const fill = activityFontColor(theme, 'arrow');
-  if (color !== undefined) {
-    return text(position.x, baselineY, label, {
-      fontFamily: theme.fontFamily,
-      fontSize: size,
-      fill,
-      textLength: width,
-      textBackColor: color,
-    });
-  }
-  return drawActivityText(position.x, baselineY, label, {
-    fill,
-    fontFamily: theme.fontFamily,
-    fontSize: size,
+function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
+  const layout = edgeLabelLayout(edge, theme);
+  if (layout === undefined) return '';
+  const { lines, size, x, baselineY } = layout;
+  const label = lines.join('\n');
+  const fc = activityTextFontConfiguration(theme, size, 'arrow');
+  const tb = activityDisplayBlock(label, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
   });
-}
-
-function renderEdgeLabel(
-  label: string,
-  points: ReadonlyArray<{ x: number; y: number }>,
-  labelAlign: SnakeTextAlign | undefined,
-  color: string | undefined,
-  theme: Theme,
-): string {
-  return renderEdgeLabelAligned(label, points, labelAlign ?? DEFAULT_LABEL_ALIGN, color, theme); // AbstractFtile.java:108-110
+  return drawActivityTextBlock(tb, { x, y: baselineY - size * ASCENT_FRACTION }, theme, fc);
 }
 
 /**
@@ -208,7 +183,7 @@ function renderEdgeLabel(
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
   colors: { line: string; head: string },
-  strokeWidth: number,
+  stroke: LineStroke,
   emphasis: { dir: ArrowDir; at: { x: number; y: number } | undefined } | undefined,
   theme: Theme,
 ): string {
@@ -221,10 +196,17 @@ function renderEdgeSegments(
     const dy = p2.y - p1.y;
     if (!emphasisDrawn && emphasis !== undefined && arrowDirection(dx, dy) === emphasis.dir) {
       const anchor = emphasis.at ?? { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.head, theme);
+      // EMPH-STROKE (add4-T2e): `drawLine(ug, line, emphasizeDirection)`
+      // (`Worm.java:139,177-181`) draws `arrows.asTo(direction)` through the
+      // SAME `ug` the segment lines use -- `arrowColor` fore + back
+      // (`:126-127`) and the worm's own stroke (`:128-131`). The
+      // `arrowHeadColor` / `UStroke.simple()` re-applies (`:152-166`) come
+      // AFTER the loop and reach the start/end decorations only.
+      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.line, theme, stroke.width);
       emphasisDrawn = true;
     }
-    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
+    const dash = stroke.dash === undefined ? {} : { strokeDasharray: stroke.dash };
+    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth: stroke.width, ...dash });
   }
   return out;
 }
@@ -249,63 +231,99 @@ function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, hea
   return arrowTip({ x, y }, DIR_VECTOR[dir], headColor, theme);
 }
 
+type LineStroke = { readonly width: number; readonly dash?: string };
+
+/** One worm's colours and stroke (`Worm#drawInternalOneColor`). */
+interface EdgeLook {
+  readonly line: string;
+  readonly head: string;
+  readonly stroke: LineStroke;
+  readonly invisible: boolean;
+}
+
+/**
+ * The default look. cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer
+ * draws flat. T2c: `skinparam ArrowHeadColor` reaches the decoration only
+ * (`ftile/Worm.java:146-154`; absent -> `activityArrowHeadColor` tracks the
+ * line colour). The line stroke is `style.getStroke()` (`:128-129`, the
+ * `linkStyle.isNormal()` branch, `plantuml.skin:374`); the `withThickness
+ * (1.5)` at `:157,165` is overridden by `UStroke.simple()` (`:162,170`).
+ */
+function defaultEdgeLook(theme: Theme): EdgeLook {
+  return {
+    line: noGradient(theme.colors.arrow),
+    head: noGradient(activityArrowHeadColor(theme)),
+    stroke: { width: activityLineThickness(theme, 'arrow') },
+    invisible: false,
+  };
+}
+
+/**
+ * `HtmlColorAndStyle.build` over `CommandArrow3`'s COLOR group
+ * (`edge.color`, `-[#red,bold]->`; `HtmlColorAndStyle.java:86-106`): each
+ * comma token is either a `LinkStyle` keyword (`LinkStyle.fromString1`) or
+ * a colour replacing the style's `LineColor`. The head colour is `null`
+ * there, so it is the arrow colour (`:66`), not `ArrowHeadColor`. A
+ * non-normal style strokes at `goThickness(1.5).getStroke3()`
+ * (`Worm.java:130-131`, `Snake.java:193`; `LinkStyle.java:98-109`). Only
+ * the first `;` colour is drawn: `Snake#drawRainbow` (`Snake.java:200-224`)
+ * is not ported.
+ */
+function edgeLook(edge: ActivityEdgeGeo, theme: Theme): EdgeLook {
+  const base = defaultEdgeLook(theme);
+  if (edge.color === undefined) return base;
+  const style = edgeLinkStyle(edge);
+  let line = base.line;
+  for (const token of edgeColorTokens(edge)) {
+    if (LinkStyle.fromString1(token).isNormal()) line = colorTokenHex(token) ?? line;
+  }
+  return { line, head: line, stroke: linkStroke(style, base.stroke), invisible: style.isInvisible() };
+}
+
+/** `HColorSet#getColor` as SVG hex; `undefined` for a non-colour (upstream throws). */
+function colorTokenHex(token: string): string | undefined {
+  const parsed = parseColor(token);
+  return parsed === undefined ? undefined : toSvgHex(parsed);
+}
+
+/** `Worm.java:128-131`: the style's own stroke when normal, else
+ *  `goThickness(1.5).getStroke3()` (`Snake.java:193` passes 1.5). */
+function linkStroke(style: LinkStyle, normal: LineStroke): LineStroke {
+  if (style.isNormal()) return normal;
+  const s = style.goThickness(SNAKE_STROKE_VALUE).getStroke3();
+  const dash = s.getDashVisible() === 0 ? undefined : `${s.getDashVisible()},${s.getDashSpace()}`;
+  return dash === undefined ? { width: s.getThickness() } : { width: s.getThickness(), dash };
+}
+
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
+  const look = edgeLook(edge, theme);
+  if (look.invisible) return renderEdgeLabel(edge, theme);
 
-  // cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer draws flat.
-  const edgeColor = noGradient(theme.colors.arrow);
-  // T2c: `skinparam ArrowHeadColor` -- `Worm#drawInternalOneColor` applies
-  // THIS color to the decoration only (`ftile/Worm.java:153-154`), AFTER
-  // the line segments already drew with `edgeColor` (`:126-127`). Absent
-  // -> tracks `edgeColor` itself (`activityArrowHeadColor`'s own doc).
-  const headColor = noGradient(activityArrowHeadColor(theme));
-  // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
-  // `Worm#drawInternalOneColor` takes the LINE's stroke from
-  // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`
-  // branch). The `UStroke.withThickness(1.5)` calls at `:154` and `:161`
-  // are inside `if (startDecoration != null)` / `if (endDecoration !=
-  // null)` -- and each of those then draws through
-  // `.apply(UStroke.simple())` (`:159`, `:166`), which is thickness 1.0
-  // (`klimt/UStroke.java:75-77`), so the 1.5 never reaches any output at
-  // all. This port had generalised it to every segment of every edge.
-  //
   // The `emphasize` arrowhead (`Snake#emphasizeDirection`, D6) is
   // interleaved INTO this segment run, immediately before its matching
   // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
   // exact `Worm.java:138-143` loop body this ports.
   const emphasis = edge.emphasize === undefined ? undefined : { dir: edge.emphasize, at: edge.emphasizeAt };
-  const segments = renderEdgeSegments(
-    pts,
-    { line: edgeColor, head: headColor },
-    activityLineThickness(theme, 'arrow'),
-    emphasis,
-    theme,
-  );
+  const segments = renderEdgeSegments(pts, look, look.stroke, emphasis, theme);
 
   // Terminal arrowhead, drawn AFTER the full segment loop --
   // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
   // sit below the `for` loop that draws every segment (`ftile/Worm.java:
   // 134-171`), never interleaved with it. Direction is second-to-last point
-  // to last. `edge.arrowhead === false` mirrors a `null` end decoration
-  // (`:161-168`'s `if (endDecoration != null)` never firing).
+  // to last, skipping a zero-length last segment: upstream draws the end
+  // decoration whatever that segment's length (`:161-168`, no length test;
+  // `edgeDecorationVector`'s own doc). `edge.arrowhead === false`
+  // mirrors a `null` end decoration (`if (endDecoration != null)` never
+  // firing).
   const last = pts[pts.length - 1]!;
-  const prev = pts[pts.length - 2]!;
-  const dx = last.x - prev.x;
-  const dy = last.y - prev.y;
-  const arrow = edge.arrowhead === false ? '' : arrowTip(last, { dx, dy }, headColor, theme);
+  const vector = edgeDecorationVector(edge);
+  const arrow = edge.arrowhead === false || vector === undefined ? '' : arrowTip(last, vector, look.head, theme);
 
-  // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate
-  // shape places at its own point) is NO LONGER drawn here -- see
-  // `renderCrossLaneDecorations`'s own doc for why it moved to a separate,
-  // earlier emission phase.
-  //
-  // Optional edge label, positioned by `Snake#getTextBlockPosition`
-  // (`renderEdgeLabel`'s own doc comment).
-  let labelEl = '';
-  if (edge.label !== undefined) {
-    labelEl = renderEdgeLabel(edge.label, pts, edge.labelAlign, edge.color, theme);
-  }
+  // D4/T3h: `edge.midArrowAt` is drawn by `renderCrossLaneDecorations`.
+  // The label is positioned by `Snake#getTextBlockPosition`.
+  const labelEl = renderEdgeLabel(edge, theme);
 
   return segments + arrow + labelEl;
 }
@@ -380,12 +398,15 @@ function renderCrossLaneDecorations(geo: ActivityGeometry, theme: Theme): string
  * land on the integer grid) is kept only for hand-built `ActivityGeometry`
  * test fixtures that bypass `finalizeGeometry` and so never populate it.
  */
-function preChromeDims(geo: ActivityGeometry): { width: number; height: number } {
+function preChromeDims(geo: ActivityGeometry, theme: Theme): { width: number; height: number } {
   if (geo.rawWidth !== undefined && geo.rawHeight !== undefined) {
     return { width: geo.rawWidth, height: geo.rawHeight };
   }
-  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL;
-  return { width: geo.totalWidth - margin, height: geo.totalHeight - margin };
+  const m = activityDocumentMargin(theme);
+  return {
+    width: geo.totalWidth - (m.left + m.right + SVG_CANVAS_CEIL),
+    height: geo.totalHeight - (m.top + m.bottom + SVG_CANVAS_CEIL),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -421,7 +442,9 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
   if (hasChrome) {
     children.push(renderSwimlaneChrome(geo, theme));
   } else {
-    for (const node of geo.nodes) children.push(renderNode(node, theme));
+    // add4-T3d: `TextBlockInterceptorUDrawable` (single lane only,
+    // `Swimlanes.java:251-258`) -- goto lines drawn as the nodes are.
+    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
   }
 
   // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
@@ -438,9 +461,11 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     children.push(renderSwimlaneTitles(geo, theme));
   }
 
-  const raw = preChromeDims(geo);
+  const raw = preChromeDims(geo, theme);
   return {
-    body: children.join(''),
+    // add4-T3d: `TitledDiagram#muteColorMapper` maps EVERY drawn colour
+    // (`ColorMapper.java:80-91`), applied once to the assembled body.
+    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,
@@ -448,9 +473,7 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
     // see `theme.colors.backgroundGradient`'s own doc comment. Omitted
     // entirely (not `undefined`, `exactOptionalPropertyTypes`) for the
     // common case, mirroring `preserveAspectRatio` below.
-    ...(theme.colors.backgroundGradient !== undefined
-      ? { backgroundGradient: theme.colors.backgroundGradient }
-      : {}),
+    ...(theme.colors.backgroundGradient !== undefined ? { backgroundGradient: theme.colors.backgroundGradient } : {}),
     diagramType: DIAGRAM_TYPE_ACTIVITY,
     // T3j: `index.ts#applyAnnotationChrome`'s activity branch undoes the
     // document-margin shift baked into `body` above, composes chrome around

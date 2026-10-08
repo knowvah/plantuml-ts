@@ -46,6 +46,7 @@ const ROOT_SCALAR_FIELDS: FieldTable = [
   ['fontSize', (acc) => acc.fontSize],
   ['defaultFontSize', (acc) => acc.defaultFontSize],
   ['padding', (acc) => acc.padding],
+  ['swimlaneWidth', (acc) => acc.swimlaneWidth], // add4-T1b
   ['linetype', (acc) => acc.linetype],
   ['nodeSep', (acc) => acc.nodeSep],
   ['rankSep', (acc) => acc.rankSep],
@@ -96,6 +97,11 @@ const GRAPH_OVERRIDE_FIELDS: FieldTable = [
   // cdd2-T8 (S-10): see `theme-graph-colors-c.ts#ThemeGraphColorsC
   // .monospacedFontName`.
   ['monospacedFontName', (acc) => acc.monospacedFontName],
+  // add4-T2b: see `theme-graph-colors-c.ts#ThemeGraphColorsC.partitionBorder`.
+  ['partitionBorder', (acc) => acc.partitionBorder],
+  ['partitionBackground', (acc) => acc.partitionBackground],
+  ['partitionFontColor', (acc) => acc.partitionFontColor],
+  ['partitionFontSize', (acc) => acc.partitionFontSize],
   // cdd2-T8 (S-13): see `theme-graph-colors-c.ts#ThemeGraphColorsC
   // .classFontColorAutomatic`.
   ['classFontColorAutomatic', (acc) => acc.classFontColorAutomatic],

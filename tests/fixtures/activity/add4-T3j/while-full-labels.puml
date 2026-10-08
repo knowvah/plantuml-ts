@@ -1,0 +1,10 @@
+@startuml
+start
+while (more?) is (= big yes)
+  :work;
+endwhile (__done__)
+repeat
+  :again;
+repeat while (retry?) is (= sure) not (__no__)
+stop
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+skinparam conditionStyle diamond
+start
+while (more data?) is (yes)
+:read;
+endwhile (no)
+stop
+@enduml

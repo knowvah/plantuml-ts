@@ -41,7 +41,7 @@ export function routeWhileBack(loop: WhileBackLoop, edge: ActivityEdgeGeo, dx1: 
   const y2 = p2y + loop.diamond.inY + half;
 
   const y1bis = y1 + HEXAGON_HALF_SIZE;
-  const xx = Math.max(dx1, dx2) + loop.dimTotalWidth;
+  const xx = loop.originX + Math.max(dx1, dx2) + loop.dimTotalWidth;
 
   const points: GPoint[] = [
     { x: x1, y: y1 },

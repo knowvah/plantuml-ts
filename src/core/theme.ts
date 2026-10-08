@@ -98,16 +98,16 @@ export interface Theme extends ThemeRootFields {
    *  #muteColorMapper` swaps in `ColorMapper.MONOCHROME`/`MONOCHROME_REVERSE`
    *  for the diagram's ENTIRE draw pass (`klimt/color/ColorMapper.java:
    *  80-91`), applied LAST regardless of a color's own source. Consumed as
-   *  a post-process over the assembled SVG fragment (`class-monochrome.ts
-   *  #applyMonochromeToFragment`) -- class only; `SkinParam.isDark(...)`'s
+   *  a post-process over the assembled SVG fragment (`fragment-color-mapper.ts
+   *  #applyMonochromeToFragment`) -- class and activity bodies; `SkinParam.isDark(...)`'s
    *  own DARK_MODE branch (ahead of `monochrome`) is unmodeled. */
   monochrome?: 'true' | 'reverse';
   /** cdd6 T3f: the RAW `skinparam reversecolor` value, read by the same
    *  `muteColorMapper` AFTER `monochrome` (`TitledDiagram.java:301-312`):
    *  `dark` (any case) -> `ColorMapper.LIGTHNESS_INVERSE` (`ColorUtils
    *  #getReversed`, an HSLuv lightness flip), a `ColorOrder` name ->
-   *  `ColorMapper.reverse(order)`, anything else -> no mapping. Class only,
-   *  applied by the same post-process (`class-monochrome.ts#colorMapperOf`).
+   *  `ColorMapper.reverse(order)`, anything else -> no mapping. Class and activity,
+   *  applied by the same post-process (`fragment-color-mapper.ts#colorMapperOf`).
    *  Read by `skinparam-key-handlers-table-b.ts`'s `reversecolor` row. */
   reverseColor?: string;
   /** G2 N18: `skinparam style strictuml` -- a global sharp-corner toggle,

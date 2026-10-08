@@ -1,0 +1,24 @@
+@startuml
+if (Q1) then
+  switch (Q2)
+  case ( 503 )
+    :A;
+    stop
+  case ( 500 ) 
+    :B;
+    stop
+  endswitch
+else
+  switch (Q3)
+  case (Timeout)
+    :C;
+    if (Q4) then
+      :D;
+      stop
+    else
+      :E;
+     stop
+    endif
+  endswitch
+endif
+@enduml

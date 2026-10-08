@@ -597,6 +597,25 @@ describe('resolveSkinparam — activity skinparam keys', () => {
     expect(unknown).toEqual([]);
   });
 
+  // add4-T2b: FromSkinparamToStyle.java:131-133 (SName.composite).
+  it('maps the Partition* keys to colors.graph.partition*, and leaves BorderThickness unknown', () => {
+    const { theme, unknown } = resolveSkinparam(
+      new Map([
+        ['PartitionBorderColor', 'green'],
+        ['PartitionBackgroundColor', 'lightblue'],
+        ['PartitionFontColor', 'yellow'],
+        ['PartitionFontSize', '20'],
+        ['PartitionBorderThickness', '4'],
+      ]),
+      defaultTheme,
+    );
+    expect(theme.colors.graph.partitionBorder).toBe('green');
+    expect(theme.colors.graph.partitionBackground).toBe('lightblue');
+    expect(theme.colors.graph.partitionFontColor).toBe('yellow');
+    expect(theme.colors.graph.partitionFontSize).toBe(20);
+    expect(unknown).toEqual(['partitionborderthickness']);
+  });
+
   it('maps SwimlaneTitleFontSize to colors.graph.activity.swimlaneTitleFontSize', () => {
     const { theme, unknown } = resolveSkinparam(new Map([['SwimlaneTitleFontSize', '30']]), defaultTheme);
     expect(theme.colors.graph.activity?.swimlaneTitleFontSize).toBe(30);

@@ -14,7 +14,7 @@ import {
   applyColorMapperToFragment,
   colorMapperOf,
   getReversed,
-} from '../../../src/diagrams/class/class-monochrome.js';
+} from '../../../src/core/klimt/color/fragment-color-mapper.js';
 import { renderClass } from '../../../src/diagrams/class/renderer.js';
 import { layoutClass } from '../../../src/diagrams/class/layout.js';
 import { defaultTheme } from '../../../src/core/theme.js';

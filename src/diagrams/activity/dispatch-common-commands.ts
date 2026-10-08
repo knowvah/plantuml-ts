@@ -15,7 +15,8 @@
 import { matchAnnotationCommand } from '../../core/annotations/index.js';
 import { matchSpriteCommand } from '../../core/sprite-commands.js';
 import { matchScaleCommand } from '../../core/scale-command.js';
-import { RE_PRAGMA, type DispatchResult, type ParseContext } from './dispatch-support.js';
+import type { ActivityArrowLabel } from './ast.js';
+import { RE_PRAGMA, swimlaneSpread, type DispatchResult, type ParseContext } from './dispatch-support.js';
 
 /**
  * title/caption/legend/header/footer/mainframe (mission G0b/T6,
@@ -45,14 +46,17 @@ export function trySprite(ctx: ParseContext, idx: number): DispatchResult | null
 /**
  * `scale ...` (6 forms, `CommonCommands#addCommonScaleCommands`, wired for
  * every `TitledDiagram` factory including `activitydiagram3`) -- mission
- * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. Recognised and consumed
- * only: the resolved factor is NOT applied to the rendered document (no
- * `ast.scale`/renderer wiring here, unlike `sequence`/`description`) --
- * activity-diagram scaling is a separate, unscoped follow-on; this just
- * stops the line from refusing.
+ * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. add4-T3b (ACT-SCALE):
+ * each form calls `diagram.setScale(...)` (`CommandScale.java:104`,
+ * `CommandScaleWidthOrHeight.java:82-84`, ...), which REPLACES the previous
+ * one (`AbstractDiagram.java:195-197`), so the spec lands on `ctx.scale`
+ * unresolved; `layout/document-margin.ts` resolves it at export time
+ * against the final dimension (`TextBlockExporter.java:160-166`).
  */
-export function tryScale(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (matchScaleCommand(line) === undefined) return null;
+export function tryScale(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const spec = matchScaleCommand(line);
+  if (spec === undefined) return null;
+  ctx.scale = spec;
   return { idx: idx + 1 };
 }
 
@@ -80,4 +84,59 @@ export function tryPragma(ctx: ParseContext, idx: number, line: string): Dispatc
   const name = match[1]!.toLowerCase();
   if (name !== 'svgsize') ctx.pragma.define(name, match[2] ?? null);
   return { idx: idx + 1 };
+}
+
+/**
+ * `page NxM` (`CommandPage.java:55-62`): `setSplitPagesHorizontal/Vertical`
+ * (`:92-93`) are read only by `PSystemUtils.splitPng` (`:178`) -- the PNG
+ * multi-file splitter -- so a single SVG is unaffected: accepted, no state.
+ * Non-positive counts are an upstream `error("Argument must be positive")`
+ * (`:88-89`), kept as a refusal here by not matching them.
+ */
+export const RE_PAGE = /^page\s+(\d+)\s*x*\s*(\d+)$/i;
+
+/** `[hide|show] footbox` (`CommandFootboxIgnored.java:55-56`): ok(), no effect. */
+export const RE_FOOTBOX_IGNORED = /^(?:(?:hide|show)\s*)?footbox$/i;
+
+/**
+ * `hide|show [GENDER] [empty] PORTION` (`CommandHideShowByGender.java:59-69`);
+ * `executeArg` dispatches on class/description/sequence diagrams and "Just
+ * ignored" otherwise (`:154-159`, the activity case).
+ */
+export const RE_HIDE_SHOW_BY_GENDER = new RegExp(
+  '^(?:hide|show)\\s+' +
+    '(?:(?:class|object|interface|enum|annotation|dataclass|record|abstract|[\\p{L}\\p{N}_.]+|"[^"]+"|<<.*>>)\\s+)*?' +
+    '(?:empty\\s+)?' +
+    '(?:members?|attributes?|fields?|methods?|circles?|circled?|stereotypes?)$',
+  'iu',
+);
+
+/** `link #color[;]` (`CommandLink3.java:59-63`). */
+export const RE_LINK3 = /^link\s+(#\w+);?$/i;
+
+/**
+ * Accepted-and-ignored common commands: `page` (`CommonCommands.java:73`),
+ * `footbox` (`ActivityDiagramFactory3.java:105`), hide/show by gender
+ * (`CommonCommands.java:106-109`). Each upstream `executeArg` leaves the
+ * activity diagram untouched, so the line is consumed without a node.
+ */
+export function tryIgnoredCommonCommand(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const positivePage = (m: RegExpExecArray | null): boolean => m !== null && Number(m[1]) > 0 && Number(m[2]) > 0;
+  const ignored =
+    positivePage(RE_PAGE.exec(line)) || RE_FOOTBOX_IGNORED.test(line) || RE_HIDE_SHOW_BY_GENDER.test(line);
+  return ignored ? { idx: idx + 1 } : null;
+}
+
+/**
+ * `link #color` (`CommandLink3.java:76-83`): `setColorNextArrow(Rainbow.
+ * fromColor(color, null))` -- the same `setNextLink(LinkRendering.create(
+ * rainbow))` as `-[#color]->` with no label (`ActivityDiagram3.java:470-475`,
+ * `CommandArrow3.java:99-103`), so it lowers to the identical style-only
+ * arrow-label node.
+ */
+export function tryLink3(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const match = RE_LINK3.exec(line);
+  if (match === null) return null;
+  const node: ActivityArrowLabel = { kind: 'arrow-label', label: '', style: match[1]!, ...swimlaneSpread(ctx) };
+  return { idx: idx + 1, node };
 }

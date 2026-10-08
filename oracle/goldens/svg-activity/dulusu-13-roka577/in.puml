@@ -1,0 +1,11 @@
+@startuml
+ 
+skinparam PartitionBackgroundColor #00ff00
+skinparam PackageBackgroundColor #ff0000
+ 
+start
+Partition MyPartition {
+    :Foo;
+}
+stop
+@enduml

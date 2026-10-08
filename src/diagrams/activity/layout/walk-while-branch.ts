@@ -1,38 +1,25 @@
 /**
- * The `'gtile-while'` case's full node/edge/reservation emission, split out
- * of `tile-coordinates.ts`'s `walkTile` switch only to keep that already-
- * oversized function (`#lizard forgives`, faithful port of the upstream
- * tile-kind dispatch) from growing further, and to keep `tile-coordinates
- * .ts` itself under the file's 500-line cap (mission `activity-klimt-
- * compress` README, "Push forward" -- "a sibling module when a file would
- * cross the 500-line hook", the same reason `walk-fork-branches.ts`
- * exists). The body below is the former case's own code, unchanged, per
- * CLAUDE.md "do not refactor while porting".
- *
- * `walkTile`/`pushEdge` are re-imported from `tile-coordinates.ts`, which
- * itself imports {@link walkWhile} from here for its `'gtile-while'` case
- * -- a circular import between the two modules, safe the same way
- * `tile-coordinates.ts`/`walk-fork-branches.ts` already are: both sides are
- * function DEFINITIONS, and neither calls into the other until
- * `assignCoordinates` actually walks the tile tree, well after both
- * modules finish loading.
+ * The `'gtile-while'` case's node/edge/reservation emission, split out of
+ * `tile-coordinates.ts`'s `walkTile` switch to keep that file under the
+ * 500-line cap (the `walk-fork-branches.ts` precedent). `walkTile`/`pushEdge`
+ * are re-imported from `tile-coordinates.ts`, a circular import that is safe
+ * because both sides are function definitions only called at walk time.
  *
  * altp-T4: draw ordering and point lists ported from `FtileWhile.java`'s
  * `ConnectionIn`/`ConnectionBackSimple`/`ConnectionBackEmpty`/
  * `ConnectionOut` and `FtileFactoryDelegatorWhile`'s break welding (D3, D6,
- * D7), replacing the home-grown straight-forward + `GConnectionVertical
- * DownThenBack` pair this module drew before. D8 retires `backEdgeRightX`
- * and `GConnectionVerticalDownThenBack` with this change -- `grep` shows no
- * reader of either outside this file and `layout.old.ts`.
+ * D7).
  */
 
+import type { ActivityNodeGeo } from '../activity-geometry.types.js';
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
-import type { GPoint } from '../tiles/points.js';
+import type { GPoint, HookName } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
 import { laneAt, laneIn, laneOut } from './swimlane-placement.js';
+import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { HEXAGON_HALF_SIZE, whileHexagonReservation } from './hexagon-reservations.js';
@@ -41,40 +28,24 @@ import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushWhileBackwardConnections } from './walk-while-backward.js';
 import { isInsideForkBody } from './walk-fork-branches.js';
 
+/** EMPTY_DIAMOND: north is the TEST (`withNorth(testTb)`, an fcTest block,
+ *  `FtileWhile.java:124-126,137-139`) -> `ifLabelRole: 'test'`, as
+ *  `walk-if-down.ts#testLabelRole`. INSIDE headers' north is `yesTb` (`:131-136`). */
+function markEmptyDiamondTest(header: DiamondConditionTile, north: ActivityNodeGeo | undefined): void {
+  if (north !== undefined && header.kind === 'gtile-diamond-empty') north.ifLabelRole = 'test';
+}
+
 /**
- * The hexagon node, then north, then the hexagon's OWN label, then west --
- * `FtileDiamondInside#drawU`'s own order (T3k): the polygon and the own
- * label are two SEPARATE draw calls upstream, never one combined blob, so
- * the own label lands AFTER north, not baked into the polygon push
- * (`renderNode`'s own `'while-header'` case draws the polygon only when
- * labelled; the own label draws through the `'if-own-label'` node below).
- * Still pushed under the ORIGINAL `'while-header'` kind (not a dedicated
- * one) so `canvas-origin.ts`'s polygon fudge and `shapes-of.ts`'s
- * condition-box treatment, both already keyed on that name, apply
- * unchanged; the SAME kind also covers the label-less case (`renderNode`'s
- * own ternary falls to `renderDiamond`). North is the "is"/entry label,
- * west is the "is not"/exit label; south/east are never set on this tile
- * (kept out, unlike `walk-repeat.ts`'s copy, which uses both). `laneAt`
- * resolves the header's OWN `.swimlane` over the parent's inherited
- * `myLane` -- the same resolution `walkTile`'s own dispatch
- * (`tile-coordinates.ts:117-118`) applies to every tile it walks; pushing
- * a node directly (never through `walkTile`, D1) means this helper must
- * apply it itself. `tileWhile` (`tile-layout.ts`) never calls
- * `withSwimlane` on the header today, so `header.swimlane` is always
- * `undefined` here and `hexLane === myLane` -- kept for parity with
- * `pushRepeatCondition`'s own fix and so a future `tileWhile` change that
- * DOES lane the header does not silently regress.
+ * The hexagon node, then north, south, the OWN label, then west --
+ * `FtileDiamondInside#drawU`'s order (T3k: polygon and own label are two
+ * draw calls, the own label an `'if-own-label'` node). Kind `'while-header'`
+ * also covers the label-less case. North is the "is" label, west the "is
+ * not" label. `laneAt` resolves the header's own `.swimlane` over `myLane`
+ * (`tile-coordinates.ts:117-118`), since this pushes without `walkTile`.
+ * The polygon box is the ALONE shape `[NORTH_HOOK.y, SOUTH_HOOK.y)`: `inY`
+ * is 0 for the INSIDE headers and `GtileDiamondEmpty`'s north reserve
+ * otherwise (add3 T3a, CONDSTYLE-EMPTY).
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileDiamondInside.java:84-102
- *
- * Generalized (add3 T3a, CONDSTYLE-EMPTY) to any {@link DiamondCondition
- * Tile} header, not just the hexagon: the polygon's own box is the
- * ALONE shape, i.e. `[header.getCoord(NORTH_HOOK).y, header.getCoord
- * (SOUTH_HOOK).y)` -- for `GtileDiamondInside`/`GtileDiamondSquare`
- * (`inY = 0` always) this reduces to the OLD `{y: hY, height: SOUTH_HOOK
- * .y}` exactly; for `GtileDiamondEmpty` (`inY` = its own north-label
- * reserve, possibly nonzero) the alone box is shifted DOWN by that
- * reserve and is always exactly 24 tall, matching `FtileDiamond`'s own
- * fixed-size rhombus (`gtile-diamond-empty.ts`'s own doc).
  */
 function pushWhileHeader(
   header: DiamondConditionTile,
@@ -87,7 +58,9 @@ function pushWhileHeader(
   const inY = header.getCoord(NORTH_HOOK).y;
   const box = { x: hX, y: hY + inY, width: header.width, height: header.getCoord(SOUTH_HOOK).y - inY };
   pushNode(out, { id: out.nextId('while-header'), kind: 'while-header', ...box, label: header.label }, hexLane);
+  const northAt = out.nodes.length;
   emitDiamondLabels(header, { x: hX, y: hY }, ['north'], hexLane, out);
+  markEmptyDiamondTest(header, out.nodes[northAt]);
   // `south` (add3 T3a, CONDSTYLE-EMPTY): `FtileDiamond#drawU`'s own
   // `north.drawU` THEN `south.drawU` (`:91,94`) -- only EMPTY_DIAMOND ever
   // populates this slot for a while header (`.withSouth(yesTb)`,
@@ -159,13 +132,14 @@ function buildWhileBackLoop(
   hX: number,
   hY: number,
   backFrom: GPoint,
-  dimTotalWidth: number,
+  dims: { readonly originX: number; readonly dimTotalWidth: number },
 ): LoopTranslate {
   return {
     kind: 'while-back',
     p1: backFrom,
     p2: { x: hX, y: hY },
-    dimTotalWidth,
+    originX: dims.originX,
+    dimTotalWidth: dims.dimTotalWidth,
     diamond: { inY: header.getCoord(NORTH_HOOK).y, outY: header.getCoord(SOUTH_HOOK).y, width: header.width },
   };
 }
@@ -188,6 +162,10 @@ export interface WhileFrame {
   readonly bY: number;
   readonly headerEast: GPoint;
   readonly headerWest: GPoint;
+  /** `ConnectionIn` p1 / p2, `ConnectionBackSimple` p1. */
+  readonly headerSouth: GPoint;
+  readonly bodyNorth: GPoint;
+  readonly bodySouth: GPoint;
   readonly southHook: GPoint;
   readonly bodyBottomY: number;
   readonly xx: number;
@@ -249,11 +227,10 @@ export interface WhileFrame {
  * under the file's limit.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
-function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
-  const { out, header, body, hX, hY, bX, bY, headerEast, bodyBottomY, xx, dimTotalWidth } = frame;
+function pushWhileBackNonEmpty(frame: WhileFrame): void {
+  const { out, header, body, hX, hY, headerEast, headerSouth, bodyBottomY, xx, dimTotalWidth } = frame;
   const { headerOutLane, headerInLane, bodyInLane, bodyOutLane } = frame;
-  const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
-  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
+  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, frame.bodyNorth), headerOutLane, bodyInLane);
 
   if (frame.backward !== undefined) {
     pushWhileBackwardConnections(frame);
@@ -261,12 +238,13 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
   }
   if (!body.hasPointOut()) return;
 
-  const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
+  const backFrom = frame.bodySouth;
   pushEdgeFlagged(out, backEdgePoints(backFrom, headerEast, bodyBottomY, xx), [bodyOutLane, headerInLane], {
     emphasize: 'up',
-    loop: buildWhileBackLoop(header, hX, hY, backFrom, dimTotalWidth),
+    loop: buildWhileBackLoop(header, hX, hY, backFrom, { originX: xx - dimTotalWidth, dimTotalWidth }),
   });
-  out.reservations.push(whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY));
+  // Drawn in the body's out lane (`ConnectionBackSimple`, `FtileWhile.java:271,302`).
+  pushLaneReservation(out.reservations, whileHexagonReservation(backFrom.x, backFrom.y, bodyBottomY), bodyOutLane);
 }
 
 /**
@@ -279,18 +257,22 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
 function pushWhileBack(frame: WhileFrame): void {
-  const { out, header, body, hX, hY, headerEast, bodyBottomY, xx, headerOutLane } = frame;
-  const headerSouth = { x: hX + header.getCoord(SOUTH_HOOK).x, y: hY + header.getCoord(SOUTH_HOOK).y };
+  const { out, body, headerEast, headerSouth, bodyBottomY, xx, headerOutLane } = frame;
 
   if (body.width === 0 || body.height === 0) {
     pushEdgeFlagged(out, backEdgePoints(headerSouth, headerEast, bodyBottomY, xx), [headerOutLane, headerOutLane], {
       emphasize: 'up',
     });
-    out.reservations.push(whileHexagonReservation(headerSouth.x, headerSouth.y, bodyBottomY));
+    // `ConnectionBackEmpty(diamond1, diamond1)`: the header's lane (`FtileWhile.java:414,459`).
+    pushLaneReservation(
+      out.reservations,
+      whileHexagonReservation(headerSouth.x, headerSouth.y, bodyBottomY),
+      headerOutLane,
+    );
     return;
   }
 
-  pushWhileBackNonEmpty(frame, headerSouth);
+  pushWhileBackNonEmpty(frame);
 }
 
 /**
@@ -377,6 +359,15 @@ function pushWhileWeldings(out: Out, bodyNodeStart: number, bodyNodeEnd: number,
   }
 }
 
+/** A child hook, child-LOCAL point first (`FtileWhile.java:179-186,228-232,
+ *  621-641`), walk origin last (the snake's `UTranslate`, `Worm.java:67-79`):
+ *  `(x + offset) + hook` left ends one ULP apart, which `Direction.fromVector`'s
+ *  exact `==` (`Direction.java:110-130`) rejects. Cf. `pushTopDownSiblingEdge`. */
+export function childHook(origin: GPoint, offset: GPoint, tile: Tile, hook: HookName): GPoint {
+  const local = tile.getCoord(hook);
+  return { x: origin.x + (offset.x + local.x), y: origin.y + (offset.y + local.y) };
+}
+
 /** Everything {@link buildWhileFrame} needs, bundled to keep it (and
  *  {@link walkWhile}, which builds this) under the file's parameter limit. */
 interface WhileOrigins {
@@ -401,11 +392,30 @@ function buildWhileSpecialFields(
   x: number,
   y: number,
   myLane: string | undefined,
-): Pick<WhileFrame, 'specialOut' | 'specialPos' | 'specialInLane'> {
+): Pick<WhileFrame, 'specialOut' | 'specialPos' | 'specialInLane' | 'backIncoming' | 'backOutgoing'> {
   return {
+    backIncoming: t.backIncoming,
+    backOutgoing: t.backOutgoing,
     specialOut: t.specialOut,
     specialPos: { x: x + t.specialOffsetX, y: y + t.specialOffsetY },
     specialInLane: t.specialOut !== undefined ? laneIn(t.specialOut, myLane) : undefined,
+  };
+}
+
+/** {@link WhileFrame}'s {@link childHook} points (split for the NLOC limit). */
+function buildWhileHookFields(
+  o: WhileOrigins,
+): Pick<WhileFrame, 'headerEast' | 'headerWest' | 'headerSouth' | 'bodyNorth' | 'bodySouth'> {
+  const { t, header, body } = o;
+  const origin = { x: o.x, y: o.y };
+  const headerOffset = { x: t.headerOffsetX, y: t.headerOffsetY };
+  const bodyOffset = { x: t.bodyOffsetX, y: t.bodyOffsetY };
+  return {
+    headerEast: childHook(origin, headerOffset, header, EAST_HOOK),
+    headerWest: childHook(origin, headerOffset, header, WEST_HOOK),
+    headerSouth: childHook(origin, headerOffset, header, SOUTH_HOOK),
+    bodyNorth: childHook(origin, bodyOffset, body, NORTH_HOOK),
+    bodySouth: childHook(origin, bodyOffset, body, SOUTH_HOOK),
   };
 }
 
@@ -422,8 +432,7 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     hY,
     bX,
     bY,
-    headerEast: { x: hX + header.getCoord(EAST_HOOK).x, y: hY + header.getCoord(EAST_HOOK).y },
-    headerWest: { x: hX + header.getCoord(WEST_HOOK).x, y: hY + header.getCoord(WEST_HOOK).y },
+    ...buildWhileHookFields(o),
     southHook: { x: x + t.getCoord(SOUTH_HOOK).x, y: y + t.getCoord(SOUTH_HOOK).y },
     bodyBottomY: bY + body.height,
     xx: x + t.width,
@@ -437,7 +446,6 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     backPos: { x: x + t.backwardOffsetX, y: y + t.backwardOffsetY },
     backInLane: t.backward !== undefined ? laneIn(t.backward, myLane) : undefined,
     backOutLane: t.backward !== undefined ? laneOut(t.backward, myLane) : undefined,
-    backIncoming: t.backIncoming, backOutgoing: t.backOutgoing,
     ...buildWhileSpecialFields(t, x, y, myLane),
   };
 }

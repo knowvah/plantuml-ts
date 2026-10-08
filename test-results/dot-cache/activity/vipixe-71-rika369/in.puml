@@ -1,0 +1,12 @@
+@startuml
+!procedure $foo($arg)
+:avant;
+!while $arg!=0
+:foo $arg;
+!endwhile
+:apres;
+!endprocedure
+
+:a;
+$foo(3)
+@enduml

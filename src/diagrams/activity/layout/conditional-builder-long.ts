@@ -16,6 +16,9 @@ import type { StringBounder, Tile } from '../tiles/tile.js';
 import { GtileDiamondInside2 } from '../tiles/gtile-diamond-inside2.js';
 import { GtileIfLongHorizontal } from '../tiles/gtile-if-long-horizontal.js';
 import { GtileIfLongVertical } from '../tiles/gtile-if-long-vertical.js';
+import type { VerticalInlabel } from '../tiles/gtile-if-long-vertical.js';
+import { measureSide } from '../tiles/gtile-diamond-inside.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 import { GtileTopDown } from '../tiles/gtile-top-down.js';
 import { tileNodes } from './tile-layout.js';
 import { withOutLabel } from './tile-layout-inlabel.js';
@@ -134,9 +137,7 @@ export function buildIfLongHorizontal(node: ActivityIf, bounder: StringBounder, 
  * the diamond at all: `FtileIfLongVertical.java:154-157,185-189` passes it
  * to `ConnectionVertical`, the connecting ARROW between consecutive
  * diamonds -- a different mechanism from the horizontal builder's
- * `.withWest`, out of ELSEIFIN's cited scope
- * (`FtileIfLongHorizontal.java:178-186` only); left as the same
- * documented gap it always was.
+ * `.withWest`; see {@link measureVerticalInlabel}.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongVertical.java:142-160
  */
 function buildLongVerticalDiamonds(
@@ -149,6 +150,21 @@ function buildLongVerticalDiamonds(
     if (b.label !== undefined) labels.east = b.label;
     return new GtileDiamondInside2(b.condition, labels, bounder, theme);
   });
+}
+
+/**
+ * `tbInlabel = branch.getInlabel().create(fcArrow, LEFT, ...)` and its
+ * `calculateDimension(...).getWidth()` (`FtileIfLongVertical.java:154-157`):
+ * the FULL creole block at the arrow font (add4-T3h), `undefined` for a
+ * branch with no inlabel (`Display.isNull`).
+ */
+function measureVerticalInlabel(
+  label: string | undefined,
+  bounder: StringBounder,
+  theme: Theme,
+): VerticalInlabel | undefined {
+  if (label === undefined || label === '') return undefined;
+  return { label, width: measureSide(label, bounder, theme, CreoleMode.FULL).width };
 }
 
 /**
@@ -182,5 +198,6 @@ export function buildIfLongVertical(node: ActivityIf, bounder: StringBounder, th
     theme,
   );
   const diamonds = buildLongVerticalDiamonds(branches, bounder, theme);
-  return new GtileIfLongVertical(diamonds, tiles, tile2, node.elseLabel);
+  const inlabels = branches.map((b) => measureVerticalInlabel(b.incomingLabel, bounder, theme));
+  return new GtileIfLongVertical(diamonds, tiles, tile2, node.elseLabel, inlabels);
 }

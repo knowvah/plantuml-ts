@@ -18,9 +18,18 @@ import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
 import { arrowDirection, arrowHeadExtents } from '../../arrows-regular.js';
-import { activityFontSize, swimlaneTitleFontSize } from '../../activity-style-defaults.js';
-import { measureLineWidth } from '../../activity-text-placement.js';
-import { conditionBox, noteBox } from './shapes-of-boxes.js';
+import { swimlaneTitleFontSize } from '../../activity-style-defaults.js';
+import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
+import { edgeDecorationVector } from './shapes-of-terminal.js';
+import { frameShapes } from './shapes-of-frame.js';
+import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
+import { measurerAdapterOf } from '../../tiles/gtile-action.js';
+import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-text-sheet-diamond.js';
+import { klimtStringBounder } from '../../activity-creole-sheet.js';
+import { TextBlockUtils } from '../../../../core/klimt/shape/TextBlockUtils.js';
+import { TEXT_LIMIT_SHIFT } from './slot-finder.js';
+import { edgeLinkStyle } from '../edge-link-style.js';
+import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
 
@@ -113,6 +122,20 @@ const CONDITION_KINDS = new Set(['if-split', 'while-header', 'repeat-cond']);
 const FRAME_KINDS = new Set(['group', 'partition']);
 
 /**
+ * Where an `if-label`'s first `UText` is drawn, relative to the node's own
+ * top-left: the label is a `SheetBlock1` (`Display.getCreole`,
+ * `klimt/creole/Display.java:692-700`) whose `drawU` translates by
+ * `(padding.left, padding.top)` (`SheetBlock1.java:209-210`) before the
+ * first line's baseline. `UGraphicCompressOnXorY` maps that draw point, not
+ * the padded box (`UGraphicCompressOnXorY.java:122-128`), so
+ * `compress-geometry.ts` moves the node by this anchor.
+ */
+export function ifLabelTextAnchor(theme: Theme, node: IfLabelNode): { dx: number; dy: number } {
+  const pad = theme.padding ?? 0;
+  return { dx: pad, dy: pad + ifLabelFontSize(node, theme) * TITLE_BASELINE_ASCENT };
+}
+
+/**
  * `if-label`'s text box (D3) -- `renderIfLabel`'s own baseline convention
  * (`activity-renderer-if-shapes.ts`, Q5: `y0 + ARROW_FONT_SIZE *
  * ASCENT_FRACTION`, left-aligned starting at `node.x`,
@@ -145,40 +168,22 @@ const FRAME_KINDS = new Set(['group', 'partition']);
  * DRAWING/compression-bounds side.
  */
 function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const fontSize = activityFontSize(theme, 'arrow');
-  const firstBaselineY = node.y + fontSize * TITLE_BASELINE_ASCENT;
-  const lines = (node.label ?? '').split('\n');
-  let width = 0;
-  let firstHeight = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const dim = bounder.getDimension(lines[i]!, fontSize);
-    if (dim.width > width) width = dim.width;
-    if (i === 0) firstHeight = dim.height;
-  }
-  const lastBaselineY = firstBaselineY + fontSize * (lines.length - 1);
-  return { kind: 'text', x: node.x, y: lastBaselineY, width, height: lastBaselineY - firstBaselineY + firstHeight };
-}
-
-/**
- * `if-own-label`'s text box (T3k, companion fix -- see `shapeForNode`'s own
- * doc) -- `renderHexagonOwnLabel`'s own `cx`/`cy`/`condSize` geometry
- * (`activity-renderer-if-shapes.ts`), CENTERED horizontally (unlike {@link
- * ifLabelShape}'s left-aligned `node.x`), single-line reduction of
- * `centeredFirstBaselineY` for the baseline (the SAME `ASCENT_FRACTION`
- * {@link ifLabelShape} already uses, under this file's own name). Before
- * T3k split the own label into its own node, this text was baked into the
- * SAME node as the polygon and so had no separate `CompressShape` at all
- * (`conditionBox`'s hexagon box already bounds it); this restores that
- * coverage so compression's own overlap invariant (`invariant.test.ts`,
- * stop 11) still sees it.
- */
-function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const condSize = activityFontSize(theme, 'diamond');
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const dim = bounder.getDimension(node.label ?? '', condSize);
-  const baselineY = cy - condSize / 2 + condSize * TITLE_BASELINE_ASCENT;
-  return { kind: 'text', x: cx - dim.width / 2, y: baselineY, width: dim.width, height: dim.height };
+  // add4-T3j: `SlotFinder#drawText` (`SlotFinder.java:127-135`) boxes each
+  // drawn `UText` at its OWN font (a heading stripe is 15pt), so the
+  // envelope is the drawn block's text extent -- `LimitFinder#drawText`'s
+  // same `[baseline - h + 1.5, baseline + 1.5]` box (`LimitFinder.java:
+  // 216-224`), read off the block drawn at the node's origin.
+  const { tb, fc } = ifLabelBlock(node, theme);
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: fc.size });
+  const mm = TextBlockUtils.getMinMax(tb, sheetBounder, false);
+  const height = mm.getMaxY() - mm.getMinY();
+  return {
+    kind: 'text',
+    x: node.x + mm.getMinX(),
+    y: node.y + mm.getMaxY() - TEXT_LIMIT_SHIFT,
+    width: mm.getMaxX() - mm.getMinX(),
+    height,
+  };
 }
 
 /**
@@ -205,8 +210,10 @@ function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: T
  *   draws `Hexagon.asPolygon(shadowing)`'s 4-point rhombus, whose bounding
  *   box is exactly `[x, x+24] x [y, y+24]`, `Hexagon.java:49-56`).
  * - `if-label` -> `text`, {@link ifLabelShape} (D3).
- * - `if-own-label` -> `text`, {@link ifOwnLabelShape} (T3k, companion fix
- *   -- the hexagon's own label, now its own node, see that function's doc).
+ * - `if-own-label` -> one `text` per label line,
+ *   `shapes-of-hexagon-label.ts#ifOwnLabelShapes` (routed by
+ *   {@link shapesOf}, add4-T3a; T3k split the hexagon's own label into its
+ *   own node so compression's overlap invariant still sees it).
  * - `note` -> `polygon`, {@link noteBox} (Opale is a `UPath`; `SlotFinder
  *   #drawPath` uses min/max, same as `drawPolygon`).
  * - `group`, `partition` -> `rect`, `ignoreX: true, ignoreY: true` (T3i,
@@ -219,31 +226,6 @@ function ifOwnLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: T
  *   :138-161`) -- so which of the three a plain box kind is tagged does
  *   not change any slot.
  */
-/**
- * `USymbolFrame#drawFrame`'s title-tab underline (`:76-84`, a `UPath`,
- * `setIgnoreForCompressionOnX()` only -- never Y). `UPath#drawWhenCompressed`
- * is a NO-OP (`klimt/UPath.java:233-234`, unlike `URectangle`'s 2px-edges
- * reservation), so on X it must contribute NOTHING, not a shrunk box --
- * modelled as `'polygon'` with `polygonSkipMode: 'x'` ({@link addShape}'s
- * own `shape.polygonSkipMode !== mode` skip, the one existing CompressShape
- * kind with that "contributes nothing on this axis" semantic). On Y
- * (never skipped) it occupies its full `[y, y+textHeight]` box, exactly
- * `SlotFinder#drawPath`'s own un-ignored branch. `textWidth`/`textHeight`
- * mirror `activity-renderer-composite.ts#renderComposite`'s own formula
- * verbatim (same `dimTitle.getWidth() == 0` branch, `USymbolFrame.java
- * :76-84,99-104`) -- duplicated rather than imported, the same precedent
- * {@link ifLabelShape} already sets for mirroring a renderer's geometry
- * in this file.
- */
-function frameTabShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const fontSize = activityFontSize(theme, 'composite');
-  const title = node.label ?? '';
-  const titleWidth = title === '' ? 0 : measureLineWidth(theme, fontSize, title);
-  const textWidth = titleWidth === 0 ? node.width / 3 : titleWidth + 10;
-  const textHeight = titleWidth === 0 ? 12 : fontSize + 3;
-  return { kind: 'polygon', x: node.x, y: node.y, width: textWidth, height: textHeight, polygonSkipMode: 'x' };
-}
-
 function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape | null {
   if (NO_SHAPE_KINDS.has(node.kind)) return null;
   if (BAR_KINDS.has(node.kind)) {
@@ -254,32 +236,27 @@ function shapeForNode(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
     return { kind: 'polygon', x: node.x, y: node.y, width: node.width, height: node.height };
   }
   if (node.kind === 'if-label') return ifLabelShape(node, bounder, theme);
-  if (node.kind === 'if-own-label') return ifOwnLabelShape(node, bounder, theme);
   if (node.kind === 'note') return { kind: 'polygon', ...noteBox(node) };
-  if (FRAME_KINDS.has(node.kind)) {
-    return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height, ignoreX: true, ignoreY: true };
-  }
+  const styled = boxStyleBox(node); // add4-T3e
+  if (styled !== undefined) return { kind: 'polygon', ...styled };
   return { kind: 'rect', x: node.x, y: node.y, width: node.width, height: node.height };
 }
 
 /**
- * The terminal arrowhead at an edge's last point, direction from the
- * second-to-last point (`renderer.ts#renderEdge`'s own `arrowTip` call).
- * `undefined` when `edge.arrowhead === false` (D6 -- a `null` end decoration
- * never draws, `ftile/Worm.java:161-168`), the edge is too short, or the
- * last segment is zero-length -- `arrowTip`'s own `dx === 0 && dy === 0`
- * guard, D3.
+ * The terminal arrowhead at an edge's last point, oriented by
+ * {@link edgeDecorationVector} (the same vector `renderer.ts#renderEdge`
+ * passes its terminal `arrowTip`). A zero-length last segment still gets
+ * its arrowhead (`ftile/Worm.java:161-168` draws the end decoration with no
+ * length test), so the compressor keeps its 10 px. `undefined` when
+ * `edge.arrowhead === false` (D6 -- a `null` end decoration never draws) or
+ * no segment has length.
  */
 function terminalArrowhead(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape | undefined {
   if (edge.arrowhead === false) return undefined;
-  const pts = edge.points;
-  if (pts.length < 2) return undefined;
-  const last = pts[pts.length - 1]!;
-  const prev = pts[pts.length - 2]!;
-  const dx = last.x - prev.x;
-  const dy = last.y - prev.y;
-  if (dx === 0 && dy === 0) return undefined;
-  const ext = arrowHeadExtents(arrowDirection(dx, dy));
+  const vector = edgeDecorationVector(edge);
+  if (vector === undefined) return undefined;
+  const last = edge.points[edge.points.length - 1]!;
+  const ext = arrowHeadExtents(arrowDirection(vector.dx, vector.dy));
   const shape: CompressShape = {
     kind: 'polygon',
     x: last.x + ext.minX,
@@ -355,46 +332,69 @@ function midArrowShape(edge: ActivityEdgeGeo): CompressShape | undefined {
 }
 
 /**
- * An edge label, measured WITH THE BOUNDER at `activityFontSize(theme,
- * 'arrow')` and placed exactly where `renderer.ts#renderEdgeLabel` places
- * it -- the renderer's own `label.length * 0.6 * size` width estimate is a
- * FILED approximation (mission README, "does not change"); this adapter
- * measures the true width instead, which is the whole point of porting
- * `TextLimitFinder` faithfully, and the difference is journaled, not
- * reconciled by changing the renderer.
+ * An edge label -- the `UText` `Snake#drawInternalLabel` draws
+ * (`ftile/Snake.java:225-231`: `text.textBlock.drawU(ug.apply(UTranslate
+ * .point(getTextBlockPosition(...))))`), which `SlotFinder#drawText`
+ * registers (`klimt/compress/SlotFinder.java:121-128`). Upstream has ONE
+ * draw site for every Snake label -- the switch case labels included:
+ * `FtileDecorateInLabel#drawU` draws nothing of its own, only the body
+ * `dy(yl)` lower (`vertical/FtileDecorateInLabel.java:71-74`); the text
+ * comes from the connection's `Snake.withLabel(branch
+ * .getTextBlockPositive(), ...)` (`cond/FtileSwitchWithManyLinks.java
+ * :91-92,218-219`). So the box sits exactly where `renderer.ts
+ * #renderEdgeLabelAligned` draws it: {@link getTextBlockPosition} over the
+ * edge's own points with its push site's `labelAlign` (default
+ * `arrowHorizontalAlignment()`, `AbstractFtile.java:108-110`), baseline via
+ * `centeredFirstBaselineY`. The prior mid-point `x + 4, y - 4` estimate
+ * mirrored a renderer convention retired by add3-T1b and sat up to 4 px
+ * past the real ink, blocking X compression the jar applies.
+ *
+ * The extents stay the bounder's own dimension (`TextLimitFinder#drawText`
+ * measures the `UText` through the `StringBounder`,
+ * `klimt/drawing/TextLimitFinder.java:82-90`); the position inputs mirror
+ * the renderer's (`measureLineWidth`, `height = font size`).
+ * add4-T1f: a `\n` label is N `UText`s, each boxed by `SlotFinder#drawText`
+ * (`SlotFinder.java:127-135`), stacked one font size apart
+ * (`SheetBlock1.java:146-148`). Boxed as ONE envelope, {@link ifLabelShape}'s
+ * convention: "from the first line's own ink-top to the last line's own
+ * ink-bottom (max width across lines)"; the per-line slots touch, so the
+ * envelope is the same slot set.
+ * add4-T3a: the position is `edge-label-anchor.ts#edgeLabelLayout`, the
+ * renderer's own, so on the ON_Y pass the box sits at the label's
+ * X-compressed raw anchor, as the ON_Y `SlotFinder` sees it.
  */
 function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Theme): CompressShape | undefined {
-  if (edge.label === undefined) return undefined;
-  const pts = edge.points;
-  const mid = Math.floor(pts.length / 2);
-  const midPt = pts[mid]!;
-  const size = activityFontSize(theme, 'arrow');
-  const dim = bounder.getDimension(edge.label, size);
-  let x: number;
-  let y: number;
-  if (edge.color !== undefined) {
-    // Pill case: `renderEdgeLabel`'s `text(pillX + 4, midY, ...)`.
-    const textWidth = edge.label.length * (size * 0.6);
-    const pillW = textWidth + 8;
-    const pillX = midPt.x - pillW / 2;
-    x = pillX + 4;
-    y = midPt.y;
-  } else {
-    // Plain case: `renderEdgeLabel`'s `text(midX + 4, midY - 4, ...)`.
-    x = midPt.x + 4;
-    y = midPt.y - 4;
-  }
-  return { kind: 'text', x, y, width: dim.width, height: dim.height };
+  const layout = edgeLabelLayout(edge, theme);
+  if (layout === undefined) return undefined;
+  const { lines, size } = layout;
+  // add4-T3b SNAKE-LABEL-CREOLE / add4-T3h: `TextLimitFinder#drawText` boxes
+  // each `UText` of the drawn SIMPLE_LINE block, inside `SheetBlock1`'s
+  // padding (`SheetBlock1.java:209-210`): `[x + p, x + width - p]`.
+  const pad = theme.padding ?? 0;
+  const width = edgeLabelBlockSize(lines.join('\n'), theme, measurerAdapterOf(bounder)).width - 2 * pad;
+  const first = layout.baselineY + pad;
+  const last = first + size * (lines.length - 1);
+  const height = last - first + bounder.getDimension(lines[0]!, size).height;
+  return { kind: 'text', x: layout.x + pad, y: last, width, height };
 }
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
  *  segments (`ULine`, never occupies, D1). */
+/** The worm's own end and emphasize decorations (`Worm.java:138-171`). */
+function wormDecorations(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape[] {
+  const out: CompressShape[] = [];
+  const terminal = terminalArrowhead(edge, meta);
+  if (terminal !== undefined) out.push(terminal);
+  const emphasized = emphasizeArrowhead(edge);
+  if (emphasized !== undefined) out.push(emphasized);
+  return out;
+}
+
 function shapesForEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, bounder: StringBounder, theme: Theme): CompressShape[] {
   const shapes: CompressShape[] = [];
-  const terminal = terminalArrowhead(edge, meta);
-  if (terminal !== undefined) shapes.push(terminal);
-  const emphasized = emphasizeArrowhead(edge);
-  if (emphasized !== undefined) shapes.push(emphasized);
+  // add4-T3j: a hidden worm returns before drawing its line or either
+  // decoration (`Worm.java:123-124`); its label still draws (`Snake.java:195`).
+  if (!edgeLinkStyle(edge).isInvisible()) shapes.push(...wormDecorations(edge, meta));
   const midArrow = midArrowShape(edge);
   if (midArrow !== undefined) shapes.push(midArrow);
   const label = edgeLabelShape(edge, bounder, theme);
@@ -475,9 +475,16 @@ function titleShapes(
 export function shapesOf(input: ShapesOfInput): CompressShape[] {
   const shapes: CompressShape[] = [];
   for (const node of input.nodes) {
+    if (FRAME_KINDS.has(node.kind)) {
+      shapes.push(...frameShapes(node, input.bounder, input.theme));
+      continue;
+    }
+    if (node.kind === 'if-own-label') {
+      shapes.push(...ifOwnLabelShapes(node, input.bounder, input.theme));
+      continue;
+    }
     const shape = shapeForNode(node, input.bounder, input.theme);
     if (shape !== null) shapes.push(shape);
-    if (FRAME_KINDS.has(node.kind)) shapes.push(frameTabShape(node, input.bounder, input.theme));
   }
   for (let i = 0; i < input.edges.length; i++) {
     shapes.push(...shapesForEdge(input.edges[i]!, input.edgeMeta[i]!, input.bounder, input.theme));

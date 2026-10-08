@@ -119,6 +119,16 @@ export const ACTIVITY_FONT_COLOR = resolveColorToSvgHex('black');
 export function activityFontColor(theme: Theme, sname: ActivitySName): string {
   const bucket = resolveSolidBucketColor(theme.colors.elements?.[bucketKey(sname)]?.font);
   if (bucket !== undefined) return bucket;
+  // add4-T2d (KLIMT-FLOOR, zepima-96-peco612): diamond's signature NESTS
+  // `SName.activity` (`StyleSignatureBasic.java:271-273`, `activityDiamond()`
+  // = root/element/activityDiagram/activity/diamond), so `skinparam
+  // activityFontColor` (`FromSkinparamToStyle.java:144`, `addConFont(
+  // "activity", SName.activity)`) reaches the diamond label absent a
+  // diamond-specific FontColor -- the same tier `activityFontFamily` has.
+  if (sname === 'diamond') {
+    const activityTier = resolveSolidBucketColor(theme.colors.elements?.[bucketKey('activity')]?.font);
+    if (activityTier !== undefined) return activityTier;
+  }
   if (sname === 'arrow' && theme.colors.graph.arrowFontColor !== undefined) {
     return theme.colors.graph.arrowFontColor;
   }
@@ -240,15 +250,34 @@ export function activityFontFamily(theme: Theme, sname: ActivitySName): string {
 }
 
 /**
- * add2 T3h (family F): `theme.hyperlinkUnderline`/`theme.svgLinkTarget` as
+ * `style.value(PName.HyperLinkColor)` (`Style.java:265`) on an activity
+ * signature (`FtileBox.java:97-99`: root/element/activityDiagram/activity):
+ * the SName's own bucket (`<style> activity { HyperLinkColor }`; omitted
+ * `sname` = root only), else the root tier `skinparam hyperlinkColor` writes (`FromSkinparamToStyle.java
+ * :135`, `SName.root`). `undefined` = `plantuml.skin:7`'s root `HyperLinkColor
+ * blue`, applied by `CommandCreoleUrl.ts#resolveHyperlinkColor`.
+ */
+export function activityHyperlinkColor(theme: Theme, sname?: ActivitySName): string | undefined {
+  const own = sname === undefined ? undefined : theme.colors.elements?.[bucketKey(sname)]?.hyperlinkColor;
+  return own ?? theme.colors.elements?.['root']?.hyperlinkColor;
+}
+
+/**
+ * add2 T3h (family F): `theme.hyperlinkUnderline`/`theme.svgLinkTarget` (and,
+ * add4-T3gates, {@link activityHyperlinkColor}) as
  * an `ActivityTextStyle`-shaped spread fragment -- `exactOptionalPropertyTypes`
  * forbids assigning an explicit `undefined` to an optional property, so a
  * caller building a style literal must OMIT the key rather than set it to
  * `undefined` (conditional spread, not a ternary-per-field).
  */
-export function linkStyleFields(theme: Theme): { hyperlinkUnderline?: boolean; svgLinkTarget?: string } {
+export function linkStyleFields(
+  theme: Theme,
+  sname?: ActivitySName,
+): { hyperlinkUnderline?: boolean; svgLinkTarget?: string; hyperlinkColor?: string } {
+  const hyperlinkColor = activityHyperlinkColor(theme, sname);
   return {
     ...(theme.hyperlinkUnderline !== undefined ? { hyperlinkUnderline: theme.hyperlinkUnderline } : {}),
     ...(theme.svgLinkTarget !== undefined ? { svgLinkTarget: theme.svgLinkTarget } : {}),
+    ...(hyperlinkColor !== undefined ? { hyperlinkColor } : {}),
   };
 }

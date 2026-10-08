@@ -1,0 +1,13 @@
+@startuml
+start
+switch (whatever)
+  case (first case)
+    :foo case;
+    note right
+      switch this will not be rendered
+    end note
+  case (other case)
+    :bar;
+endswitch
+stop
+@enduml
