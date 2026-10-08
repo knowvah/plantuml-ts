@@ -1345,7 +1345,7 @@ engine. WBS is first (it shares `IdeaShape`, `FtileBoxOld.createWbs` and
 
 ### Error pages print this port's version, and the source name is `string`
 
-**Category:** limitation. `fogari-75-febu345` / `femiba-70-duvi238` render the
+**Category:** kept by user ruling (2026-10-08): the error page names this port and its version so a user is never told they ran PlantUML; the source name is platform-forced (`renderSync` receives markup, not a file). `fogari-75-febu345` / `femiba-70-duvi238` render the
 jar's `PSystemError` page kind, colours and layout, but the first line reads
 `plantuml-ts version 0.1.0 / unknown [Unknown compile time]` where the jar
 prints its own version, and `[From string (line N) ]` where the jar, invoked
