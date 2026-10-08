@@ -87,7 +87,7 @@ export const RE_ACTIVITY_LIST = /^[-*]\s?(.*?)\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?
  *   shape; both decoration groups are `RegexOptional`.
  */
 export const RE_BACKWARD =
-  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(?:<<[^>]*>>(?:\s*<<[^>]*>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
+  /^(?:\(([^)]*)\)\s*)?backward\s*:\s*(.+?)\s*;\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*(?:\(([^)]*)\))?\s*$/i;
 
 /** `backward:` with no closing `;` on the same line -- the multiline
  *  opener `node-dispatch.ts#tryBackward` checks after {@link RE_BACKWARD}

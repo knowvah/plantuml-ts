@@ -37,6 +37,8 @@ describe('action box styles match the jar', () => {
     'boxstyle-hr',
     'boxstyle-variants',
     'boxstyle-stereogroup',
+    'boxstyle-backward',
+    'boxstyle-backward-multi',
   ])('%s', (name) => {
     const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
     expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);

@@ -183,18 +183,18 @@ function tileIf(node: ActivityIf, bounder: StringBounder, theme: Theme, laneOrde
  * `InstructionRepeat.java:182`/`InstructionWhile.java:121-122` both
  * resolve `backward` via `factory.activity(backward, swimlane, boxStyle,
  * ...)`, the identical `FtileFactory#activity` call site every ordinary
- * action resolves to. `ActivityBackward` carries no `color`/`stereotype`
- * (base-form-only port, `ast.ts`'s own doc), so the synthetic
- * `ActivityAction` below never sets either. Kept here (not in
- * `tile-layout-backward.ts` with {@link extractBackward}/
+ * action resolves to, `boxStyle` included (`CommandBackward3.java:138`).
+ * Kept here (not in `tile-layout-backward.ts` with {@link extractBackward}/
  * {@link backwardExitsOnLeft}) since it needs `tileSimpleLeaf`, private to
  * this file.
  */
 function tileBackwardActivity(node: ActivityBackward, bounder: StringBounder, theme: Theme): Tile {
-  const action: ActivityAction =
-    node.swimlane !== undefined
-      ? { kind: 'action', label: node.label, swimlane: node.swimlane }
-      : { kind: 'action', label: node.label };
+  const action: ActivityAction = {
+    kind: 'action',
+    label: node.label,
+    ...(node.swimlane !== undefined ? { swimlane: node.swimlane } : {}),
+    ...(node.stereotype !== undefined ? { stereotype: node.stereotype } : {}),
+  };
   const tile = tileSimpleLeaf(action, bounder, theme);
   if (node.notes === undefined || node.notes.length === 0) return tile;
   // BACKNOTE (`activity-divergence-drive-3` T2a): `getFtileBackward`'s own

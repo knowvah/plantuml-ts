@@ -87,10 +87,8 @@ export interface ActivityBackward {
   /**
    * BACKLBL (add2 T3i): the trailing `(outgoing)` decoration, drawn on
    * `ConnectionBackBackward2` (this backward box -> the condition/entry).
-   * Single-line `backward:label;(outgoing)` only -- the multiline closer
-   * reuses the generic `RE_ACTION_CLOSE` shape, which has no trailing-
-   * paren group (shared with plain multiline actions, out of this
-   * family's scope).
+   * Single-line `backward:label;(outgoing)` only: the multiline closer
+   * reuses `RE_ACTION_CLOSE`, which has no trailing-paren group.
    * @see net/sourceforge/plantuml/activitydiagram3/command/CommandBackward3.java:81-86
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:158-161,386-407
    * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileRepeat.java:182-187,513-535
@@ -109,6 +107,8 @@ export interface ActivityBackward {
    * @see net/sourceforge/plantuml/activitydiagram3/InstructionRepeat.java:177-185,218-226
    */
   notes?: ActivityNote[];
+  /** Box style (`CommandBackward3.java:136-138`), as `ActivityAction.stereotype`. */
+  stereotype?: string;
 }
 
 /**

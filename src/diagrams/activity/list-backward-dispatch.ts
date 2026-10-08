@@ -24,6 +24,7 @@ import {
   type DispatchResult,
   type ParseContext,
 } from './dispatch-support.js';
+import { stereogroupStereotype } from './dispatch-stereogroup.js';
 import { readMultilineActionBody } from './node-dispatch.js';
 import { unescapeLabelNewlines } from './if-dispatch.js';
 import { redirectNoteOntoSwitch } from './note-dispatch.js';
@@ -236,6 +237,10 @@ function backArrowSpread<K extends string>(key: K, raw: string | undefined): { [
   return trimmed === '' ? {} : ({ [key]: trimmed } as { [P in K]?: string });
 }
 
+function stereoSpread(stereotype: string | undefined): { stereotype?: string } {
+  return stereotype === undefined ? {} : { stereotype };
+}
+
 export function tryBackward(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const single = RE_BACKWARD.exec(line);
   if (single !== null) {
@@ -245,7 +250,9 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
       label,
       ...swimlaneSpread(ctx),
       ...backArrowSpread('incoming', single[1]),
-      ...backArrowSpread('outgoing', single[3]),
+      ...backArrowSpread('outgoing', single[4]),
+      // `CommandBackward3.java:136-138`: `stereogroup.getBoxStyle()`.
+      ...stereoSpread(stereogroupStereotype(single[3])),
     };
     return { idx: idx + 1, node };
   }
@@ -260,6 +267,8 @@ export function tryBackward(ctx: ParseContext, idx: number, line: string): Dispa
     label: body.labelParts.join('\n'),
     ...swimlaneSpread(ctx),
     ...backArrowSpread('incoming', headMatch[1]),
+    // `CommandBackwardLong3.java:112-115`: the closer's stereogroup.
+    ...stereoSpread(body.multiStereo),
   };
   return { idx: body.cursor, node };
 }
