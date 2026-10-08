@@ -1,0 +1,15 @@
+@startuml
+<style>
+root {
+  BackgroundColor #FFCC00
+  LineColor #0000FF
+}
+circle {
+  BackgroundColor #FF0000
+  LineColor #00FF00
+}
+</style>
+start
+:Hello;
+stop
+@enduml

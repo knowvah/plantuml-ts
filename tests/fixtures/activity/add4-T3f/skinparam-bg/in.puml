@@ -1,0 +1,7 @@
+@startuml
+skinparam BackgroundColor #FFCC00
+skinparam ActivityBorderColor #0000FF
+start
+:Hello;
+stop
+@enduml

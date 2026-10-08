@@ -15,6 +15,7 @@ import { applySkinLayer } from './skin-loader.js';
 import { computeClassTagCascadeGenerations } from './style-cascade-class.js';
 import { styleSkinparamSegments, type StyleSkinparamSegment } from './style-skinparam-segments.js';
 import { parseClockwise } from './annotations/annotation-clockwise.js';
+import { withActivityCircleStyle } from './activity-circle-style.js';
 
 /**
  * Five-stage theme resolution:
@@ -81,7 +82,9 @@ export function buildTheme(
   // (cdd4-T7b -- see `style-skinparam-segments.ts`).
   const withDeclarations = styleSkinparamSegments(preprocessed).reduce(applySegment, withSkin);
   const styleMap = mergedStyleMap(preprocessed.styles);
-  const withStyleMap = withDocumentStyle(withDeclarations, styleMap);
+  // add4-T3f: the activity circles' priority-ordered merged style -- see
+  // `activity-circle-style.ts`; read only by the activity renderer.
+  const withStyleMap = withActivityCircleStyle(withDocumentStyle(withDeclarations, styleMap), preprocessed);
 
   // G2 N39: position-scoped classifier `.tagname` cascade generations --
   // see `preprocessed.stylePositions`'s doc comment for the mechanism.
