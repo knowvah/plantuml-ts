@@ -112,10 +112,15 @@ function resolveSpriteAtom(
   const dims = measureInlineAtom(atom, spriteDims, baseFont.size);
   const mono = getSpriteMonochrome(sprites, atom.name);
   if (mono !== undefined) {
+    // `AtomSprite#drawU` -> `asTextBlock(fontColor, forcedColor, ...)`:
+    // the tint is `forcedColor == null ? fontColor : forcedColor` and the
+    // gradient's start is the UGraphic's back colour, not the forced colour
+    // (`SpriteMonochrome.java:216-217`); no back colour reaches this layout-
+    // time resolver, so the rasterizer's white default stands in.
     const png = spriteToPngDataUri(
       spriteMonochromeAsLike(mono),
-      baseFont.color ?? undefined,
-      atom.forcedColor,
+      atom.forcedColor ?? baseFont.color ?? undefined,
+      undefined,
       spriteScale(atom.scale, baseFont.size),
     );
     return { kind: 'image', href: png.dataUri, width: dims.width, height: dims.height };

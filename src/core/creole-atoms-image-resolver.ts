@@ -346,10 +346,12 @@ function resolveSpriteAtom(
   // `fc.getSize2D() / 13.0` factor -- the SAME call the sizer makes, so drawn
   // and measured sprite geometry cannot drift (S1L-f).
   const dims = measureInlineAtom(atom, spriteDims, font.size);
+  // Tint = `forcedColor ?? fontColor`; the back colour is the UGraphic's,
+  // unknown here, so white stands in (`SpriteMonochrome.java:181-182,216-217`).
   const png = spriteToPngDataUri(
     spriteMonochromeAsLike(sprite),
-    font.color ?? undefined,
-    atom.forcedColor,
+    atom.forcedColor ?? font.color ?? undefined,
+    undefined,
     // G10: same url-label bypass as `resolveSvgSpriteAtom` above — the
     // rasterized PNG's scale must track `measureInlineAtom`'s declared box.
     spriteAtomScale(atom, font.size),

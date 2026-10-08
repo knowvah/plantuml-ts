@@ -230,3 +230,17 @@ export function noteLineAtomDy(atoms: readonly MemberRenderAtom[], lineHeight: n
     return baseline - reference;
   });
 }
+
+/**
+ * unwind-U4, note engine: an `'image'` atom's top, as an offset from its
+ * line's top. `Sea#doAlign` (`klimt/creole/Sea.java:72-80`) moves every atom
+ * to `-height + getStartingAltitude()`, `AtomSprite`/`AtomImg` both return
+ * altitude 0 (`AtomSprite.java:69-71`, `AtomImg.java:242-244`), and
+ * `translateMinYto` (`SheetBlock1.java:142`) then lifts the line so its
+ * tallest span starts at the top -- so the image's BOTTOM sits at the line's
+ * shared `maxSpan`, not at the line top.
+ */
+export function noteImageAtomTop(atoms: readonly MemberRenderAtom[], imageHeight: number): number {
+  const { maxSpan } = seaLineHeightAndSpan(atoms.map(noteAtomSeaEntry));
+  return maxSpan - imageHeight;
+}

@@ -32,7 +32,7 @@ import {
 } from './note-opale.js';
 import { getFont } from '../../core/klimt/shape/UText.js';
 import type { MemberRenderAtom } from './class-member-creole.js';
-import { noteLineAtomDy } from './class-member-creole-sea.js';
+import { noteImageAtomTop, noteLineAtomDy } from './class-member-creole-sea.js';
 import { renderOpenIconicAtom } from './renderer-openiconic.js';
 import { renderMemberRowDrawable } from './class-member-sprite-render.js';
 // cdd-T10 wiring fix: a row's own creole `----` divider / table draws AT
@@ -217,10 +217,11 @@ function renderNoteLineAtoms(
       x += atom.width;
       continue;
     }
-    // 'image': jar's `AtomImg`/`AtomSprite` sit at the line's TOP (altitude
-    // 0), not the text baseline -- same placement rule `renderRowAtoms`
-    // applies for a classifier member row's inline atom.
-    out += image(x, legacyY - baselineOffset, atom.width, atom.height, atom.href);
+    // 'image': `Sea` bottom-aligns the atom on the line's shared span
+    // (`noteImageAtomTop`); the drawn box is the raster's own rounded size
+    // (`SvgGraphics.java:973-974`), x-advance keeps the declared width.
+    const top = lineTop + noteImageAtomTop(atoms, atom.height);
+    out += image(x, top, Math.round(atom.width), Math.round(atom.height), atom.href);
     x += atom.width;
   }
   // #lizard forgives -- pre-existing per-atom-kind switch, unrelated to
