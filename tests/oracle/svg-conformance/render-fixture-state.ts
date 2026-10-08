@@ -31,7 +31,8 @@ import { astOrThrow } from '../../helpers/parse-ast.js';
 import { parseState } from '../../../src/diagrams/state/parser.js';
 import { layoutState } from '../../../src/diagrams/state/layout.js';
 import { renderState } from '../../../src/diagrams/state/renderer.js';
-import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
+import { isEmpty } from '../../../src/core/annotations/index.js';
+import { applyExportedChrome } from '../../../src/core/annotations/chrome-export.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
 
@@ -69,6 +70,8 @@ export function renderFixtureState(markup: string, measurer: StringMeasurer, opt
   if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment);
 
   const styles = resolveAnnotationStyles(theme, preprocessed, styleMap);
-  const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
+  // lgm-T1c: the SAME `applyExportedChrome` `src/index.ts` calls -- state now
+  // declares its margin-less block, so chrome composes before the margin.
+  const chromed = applyExportedChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed);
 }
