@@ -1822,11 +1822,11 @@
     {
       "type": "activity",
       "slug": "labala-74-juki864",
-      "status": "baseline",
-      "weightedScore": 5,
-      "diffCount": 5,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca"
+      "measuredAgainstCommit": "12b567d9"
     },
     {
       "type": "activity",
