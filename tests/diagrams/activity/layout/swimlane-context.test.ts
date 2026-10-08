@@ -97,7 +97,12 @@ describe('measureLaneExtents', () => {
   // box's own far corner (51.675).
   it("widens a lane's extent by a same-lane edge's arrowhead ink", () => {
     const items: LaneItem[] = [{ swimlane: 'A', kind: 'action', x: 26, width: 26.675 }]; // ink 25..51.675
-    const edge: ActivityEdgeGeo = { points: [{ x: 39.338, y: 60.5 }, { x: 39.338, y: 80.5 }] };
+    const edge: ActivityEdgeGeo = {
+      points: [
+        { x: 39.338, y: 60.5 },
+        { x: 39.338, y: 80.5 },
+      ],
+    };
     const edges: LaneEdge[] = [{ swimlane: 'A', edge }];
     const extents = measureLaneExtents(items, edges, ['A']);
     expect(extents.get('A')!.maxX).toBeCloseTo(53.338, 5);

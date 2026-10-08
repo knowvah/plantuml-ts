@@ -134,7 +134,11 @@ describe('routeIfLinksVThenH — ConnectionVerticalThenHorizontal#drawTranslate 
 
 describe('routeIfLinksVThenHDirect — ConnectionVerticalThenHorizontalDirect#drawTranslate (FtileIfWithLinks.java:327-354)', () => {
   it('drops hexagonHalfSize at the elbow, then returns to the untranslated bottom Y', () => {
-    const loop: IfLinksVThenHDirectLoop = { kind: 'if-links-v-then-h-direct', p1: { x: 0, y: 50 }, p2: { x: 20, y: 100 } };
+    const loop: IfLinksVThenHDirectLoop = {
+      kind: 'if-links-v-then-h-direct',
+      p1: { x: 0, y: 50 },
+      p2: { x: 20, y: 100 },
+    };
     const result = routeIfLinksVThenHDirect(loop, { ...edge, arrowhead: false, emphasize: 'down' }, 5, -5);
 
     // mp1a = (5, 50). mp2b = (20 - 5, 100 - 12) = (15, 88).

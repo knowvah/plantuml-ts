@@ -1,0 +1,16 @@
+@startuml
+state AA {
+        AA: entry / set_timeout()
+        state "ok_ex" as aa_ok_ex <<exitpoint>>
+}
+AA --> Closing: SubCompletion
+aa_ok_ex --> Idle
+state Idle {
+        Idle: entry / set_timeout(closest)
+}
+Idle --> AA: Rcv-AAR
+state Closing {
+        Closing: entry / reset_next_try_timeout()
+}
+Closing --> AA
+@enduml

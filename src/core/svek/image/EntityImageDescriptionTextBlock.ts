@@ -381,7 +381,12 @@ function drawAtoms(
           ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
           : undefined;
       ug.apply(new UTranslate(x, origin.y)).draw(
-        UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
+        UImage.build(
+          resolved.width,
+          resolved.height,
+          spriteHrefOver(resolved, ug.getParam().getBackcolor()),
+          rasterDims,
+        ),
       );
     } else {
       const translated = ug.apply(new UTranslate(x, origin.y)); // @see SvgNanoParser.java#drawU

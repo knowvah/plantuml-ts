@@ -12,3 +12,4 @@ T1a must not edit `src/core/svek/**`; T1b must not edit `src/index.ts`,
 `src/core/annotations/**` or any harness file.
 
 | [T1c](T1c-svek-mainframe-raw.md) | state + description draw the framed SvekResult un-normalized (T1a remainder) | typescript-pro | see T1c file (disjoint from T1b) | T1a | [ ] |
+| [T1d](T1d-drawn-cluster-rect.md) | draw the border-point composite at the rect after L+2 mutations (T1b remainder) | typescript-pro | see T1d file (disjoint from T1c) | T1b | [ ] |

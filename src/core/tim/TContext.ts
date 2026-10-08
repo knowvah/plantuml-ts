@@ -74,7 +74,6 @@ export type { TContextOptions } from './TContextOptions.js';
 /** @see ~/git/plantuml/.../tim/TContext.java#ONLY_WHITESPACE_NON_EMPTY */
 const ONLY_WHITESPACE_NON_EMPTY = /^\s+$/u;
 
-
 /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/tim/TContext.java */
 export class TContext implements TContextInterface {
   private readonly resultList: StringLocated[] = [];

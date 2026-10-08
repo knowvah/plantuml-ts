@@ -9,6 +9,8 @@
  */
 
 import type { State } from './ast.js';
+import type { DotInputCluster } from '../../core/graph-layout.js';
+import type { PassAccumulator } from './state-composite-pass-types.js';
 import { isBorderPoint } from './state-entity-position.js';
 
 /** All descendant ids of `state` (children recursively + concurrent-region
@@ -220,4 +222,31 @@ export function isAutarkic(state: State, allTransitions: readonly FlatLink[]): b
  *  `thereALinkFromOrToGroup2`, drives the zaent anchor. */
 export function isGroupTouched(id: string, allTransitions: readonly FlatLink[]): boolean {
   return allTransitions.some((t) => t.from === id || t.to === id);
+}
+
+/**
+ * Registers `cluster` (just pushed onto `acc.clusters`) as one of the pass's
+ * `ClusterDotString` clusters with non-normal members — the ones that become
+ * the `projectionCluster` of every line touching them
+ * (`svek/ClusterDotString.java:101-105`). Called in cluster-creation order,
+ * which is `printInternal`'s parent-before-child print order.
+ * `labelWidth`/`labelHeight` are the measured header
+ * (`state-composite-cluster.ts`'s `headerWidth`/`headerHeight`);
+ * `Cluster.getTitleAndAttributeWidth()` is the `(int)` of the width.
+ */
+export function recordBorderPointCluster(
+  acc: PassAccumulator,
+  rankdir: 'TB' | 'LR',
+  stateId: string,
+  cluster: DotInputCluster,
+  portNodeIds: readonly string[],
+): void {
+  acc.borderPointClusters.push({
+    stateId,
+    clusterId: cluster.id,
+    portNodeIds,
+    titleAndAttributeWidth: Math.floor(cluster.labelWidth ?? 0),
+    titleAndAttributeHeight: cluster.labelHeight ?? 0,
+    rankdir,
+  });
 }

@@ -19,14 +19,35 @@ function meta(scope?: string): EdgeMeta {
 
 describe('mergeSnakes — FULL+FULL natural-direction merge', () => {
   it('fuses two touching FULL edges into one, in pending-slot order', () => {
-    const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 0, y: 20 }])];
+    const edges = [
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
+    ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
-    expect(result.edges[0]!.points).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }]);
+    expect(result.edges[0]!.points).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ]);
   });
 
   it('a non-touching pair never merges', () => {
-    const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 50, y: 50 }, { x: 50, y: 60 }])];
+    const edges = [
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge([
+        { x: 50, y: 50 },
+        { x: 50, y: 60 },
+      ]),
+    ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
   });
@@ -35,8 +56,17 @@ describe('mergeSnakes — FULL+FULL natural-direction merge', () => {
 describe('mergeSnakes — MergeStrategy.NONE never merges, even when touching', () => {
   it('a NONE edge stays separate (D2: LIMITED/NONE sites never fuse past the Java rule)', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { mergeable: 'NONE' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { mergeable: 'NONE' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -44,8 +74,17 @@ describe('mergeSnakes — MergeStrategy.NONE never merges, even when touching', 
 
   it('max(FULL, NONE) is NONE regardless of which side carries it', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { mergeable: 'NONE' }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }]),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { mergeable: 'NONE' },
+      ),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -55,8 +94,17 @@ describe('mergeSnakes — MergeStrategy.NONE never merges, even when touching', 
 describe('mergeSnakes — MergeStrategy.LIMITED merges but the merged strategy stays LIMITED', () => {
   it('a FULL+LIMITED merge resolves to LIMITED on the merged result', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { mergeable: 'LIMITED' }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }]),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { mergeable: 'LIMITED' },
+      ),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
@@ -67,8 +115,17 @@ describe('mergeSnakes — MergeStrategy.LIMITED merges but the merged strategy s
 describe('mergeSnakes — text guard (Snake.merge checks only the LATER/tail side)', () => {
   it('a text-bearing LATER-pushed edge blocks the merge (natural direction)', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { label: 'busy' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { label: 'busy' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -76,8 +133,17 @@ describe('mergeSnakes — text guard (Snake.merge checks only the LATER/tail sid
 
   it('a text-bearing EARLIER-pushed edge does NOT block the merge (natural direction)', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { label: 'busy' }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }]),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { label: 'busy' },
+      ),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
@@ -86,8 +152,17 @@ describe('mergeSnakes — text guard (Snake.merge checks only the LATER/tail sid
 
   it('an empty-string label counts as no text (TextBlockUtils.isEmpty)', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { label: '' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { label: '' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
@@ -101,16 +176,37 @@ describe('mergeSnakes — reverse-direction join (Snake.merge:323-324 recursion)
   // swaps roles: the OUTPUT runs new-then-pending, and the text guard
   // now checks the PENDING side (the new "other" in that nested call).
   it('runs new-edge-then-pending in the output, in reverse-direction mode', () => {
-    const edges = [edge([{ x: 10, y: 10 }, { x: 20, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 10, y: 10 }])];
+    const edges = [
+      edge([
+        { x: 10, y: 10 },
+        { x: 20, y: 10 },
+      ]),
+      edge([
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+      ]),
+    ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
-    expect(result.edges[0]!.points).toEqual([{ x: 0, y: 10 }, { x: 20, y: 10 }]);
+    expect(result.edges[0]!.points).toEqual([
+      { x: 0, y: 10 },
+      { x: 20, y: 10 },
+    ]);
   });
 
   it('text on the PENDING side blocks a reverse-direction merge', () => {
     const edges = [
-      edge([{ x: 10, y: 10 }, { x: 20, y: 10 }], { label: 'pending-text' }),
-      edge([{ x: 0, y: 10 }, { x: 10, y: 10 }]),
+      edge(
+        [
+          { x: 10, y: 10 },
+          { x: 20, y: 10 },
+        ],
+        { label: 'pending-text' },
+      ),
+      edge([
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -118,8 +214,17 @@ describe('mergeSnakes — reverse-direction join (Snake.merge:323-324 recursion)
 
   it('text on the NEW side does NOT block a reverse-direction merge', () => {
     const edges = [
-      edge([{ x: 10, y: 10 }, { x: 20, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 10, y: 10 }], { label: 'new-text' }),
+      edge([
+        { x: 10, y: 10 },
+        { x: 20, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 10, y: 10 },
+        ],
+        { label: 'new-text' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(1);
@@ -130,8 +235,17 @@ describe('mergeSnakes — reverse-direction join (Snake.merge:323-324 recursion)
 describe('mergeSnakes — merged decoration/emphasize (Snake.java:313,320)', () => {
   it('oneOf prefers the TAIL end decoration, falling back to the head', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { arrowhead: false }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }]),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { arrowhead: false },
+      ),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     // tail's own decoration is non-null (arrowhead !== false) -> wins.
@@ -140,8 +254,20 @@ describe('mergeSnakes — merged decoration/emphasize (Snake.java:313,320)', () 
 
   it('falls back to the head decoration when the tail has none', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { arrowhead: false }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { arrowhead: false }),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { arrowhead: false },
+      ),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { arrowhead: false },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges[0]!.arrowhead).toBe(false);
@@ -149,8 +275,20 @@ describe('mergeSnakes — merged decoration/emphasize (Snake.java:313,320)', () 
 
   it("emphasize prefers the head's own value, falling back to the tail", () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { emphasize: 'down' }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { emphasize: 'up' }),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { emphasize: 'down' },
+      ),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { emphasize: 'up' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges[0]!.emphasize).toBe('down');
@@ -158,8 +296,20 @@ describe('mergeSnakes — merged decoration/emphasize (Snake.java:313,320)', () 
 
   it('color is always the head/earlier side own color', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }], { color: '#111111' }),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { color: '#222222' }),
+      edge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        { color: '#111111' },
+      ),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { color: '#222222' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges[0]!.color).toBe('#111111');
@@ -171,8 +321,17 @@ describe('mergeSnakes — second pass, removeEndDecorationIfTouches (no text gua
     // The text guard blocks the MERGE pass, but the second pass has no
     // such guard and still fires (`UGraphicForSnake.java:81-100`).
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { label: 'busy' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { label: 'busy' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -181,8 +340,17 @@ describe('mergeSnakes — second pass, removeEndDecorationIfTouches (no text gua
 
   it('a NONE-strategy target is cannotBeTouched -- decoration survives', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }], { mergeable: 'NONE' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        { mergeable: 'NONE' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -191,8 +359,17 @@ describe('mergeSnakes — second pass, removeEndDecorationIfTouches (no text gua
 
   it('a pure-horizontal target is cannotBeTouched -- decoration survives', () => {
     const edges = [
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 20, y: 10 }], { label: 'busy' }),
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge(
+        [
+          { x: 0, y: 10 },
+          { x: 20, y: 10 },
+        ],
+        { label: 'busy' },
+      ),
     ];
     const result = mergeSnakes(edges, [meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -207,7 +384,16 @@ describe('mergeSnakes — second pass, removeEndDecorationIfTouches (no text gua
 // (per lane) and `FtileGroup.java:152` (inside `getInnerMinMax`, measurement).
 describe('mergeSnakes — a group boundary is no merge boundary', () => {
   it('merges two touching edges whatever scope the walk tagged them with', () => {
-    const edges = [edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]), edge([{ x: 0, y: 10 }, { x: 0, y: 20 }])];
+    const edges = [
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
+    ];
     const result = mergeSnakes(edges, [meta(), meta('group-1')]);
     expect(result.edges).toHaveLength(1);
   });
@@ -216,9 +402,18 @@ describe('mergeSnakes — a group boundary is no merge boundary', () => {
 describe('mergeSnakes — a new edge merges into the FIRST accepting pending slot, in place', () => {
   it('three edges collapse to one surviving pending slot at its original position', () => {
     const edges = [
-      edge([{ x: 100, y: 100 }, { x: 100, y: 110 }]), // unrelated pending, stays separate
-      edge([{ x: 0, y: 0 }, { x: 0, y: 10 }]),
-      edge([{ x: 0, y: 10 }, { x: 0, y: 20 }]),
+      edge([
+        { x: 100, y: 100 },
+        { x: 100, y: 110 },
+      ]), // unrelated pending, stays separate
+      edge([
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ]),
+      edge([
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ]),
     ];
     const result = mergeSnakes(edges, [meta(), meta(), meta()]);
     expect(result.edges).toHaveLength(2);
@@ -226,7 +421,13 @@ describe('mergeSnakes — a new edge merges into the FIRST accepting pending slo
     // before the unrelated edge's irrelevant -- order here is by FIRST
     // APPEARANCE among survivors, matching `UGraphicForSnake`'s own
     // `snakes` list, which never reorders on a replace-in-place).
-    expect(result.edges[0]!.points).toEqual([{ x: 100, y: 100 }, { x: 100, y: 110 }]);
-    expect(result.edges[1]!.points).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }]);
+    expect(result.edges[0]!.points).toEqual([
+      { x: 100, y: 100 },
+      { x: 100, y: 110 },
+    ]);
+    expect(result.edges[1]!.points).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ]);
   });
 });

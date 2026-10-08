@@ -6,7 +6,11 @@
 import { describe, it, expect } from 'vitest';
 import { resolveTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
-import { activityFontColor, activityFontFamily, linkStyleFields } from '../../../src/diagrams/activity/activity-text-style.js';
+import {
+  activityFontColor,
+  activityFontFamily,
+  linkStyleFields,
+} from '../../../src/diagrams/activity/activity-text-style.js';
 
 const theme = resolveTheme('default');
 

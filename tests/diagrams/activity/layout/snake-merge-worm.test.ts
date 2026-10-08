@@ -15,11 +15,20 @@ import { wormMerge } from '../../../../src/diagrams/activity/layout/snake-merge-
 describe('wormMerge — removeNullVector/removeRedondantDirection', () => {
   it('collapses two collinear DOWN segments into one straight line', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: 0, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ],
       'FULL',
     );
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ]);
   });
 
   it('throws on a near-but-not-exactly-zero-length segment (EXACT equality, matching Direction.fromVector)', () => {
@@ -31,25 +40,53 @@ describe('wormMerge — removeNullVector/removeRedondantDirection', () => {
     // `pushTopDownSiblingEdge` summation-order mismatch) was fixed at
     // its origin in `tile-coordinates.ts`, not tolerated here.
     expect(() =>
-      wormMerge([{ x: 0, y: 0 }, { x: 0, y: 10 }], [{ x: 0.0000001, y: 10 }, { x: 0, y: 20 }], 'FULL'),
+      wormMerge(
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: 10 },
+        ],
+        [
+          { x: 0.0000001, y: 10 },
+          { x: 0, y: 20 },
+        ],
+        'FULL',
+      ),
     ).toThrow(/not a horizontal or vertical line/);
   });
 
   it('keeps a genuine corner (not collinear, not redundant)', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: 10, y: 10 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+      ],
       'FULL',
     );
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 10 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 10 },
+      { x: 10, y: 10 },
+    ]);
   });
 });
 
 describe('wormMerge — removePattern6 (forward-and-backward)', () => {
   it('collapses a there-and-back bounce (RIGHT then LEFT) to the original endpoint', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 10, y: 0 }],
-      [{ x: 10, y: 0 }, { x: 15, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+      ],
+      [
+        { x: 10, y: 0 },
+        { x: 15, y: 0 },
+        { x: 10, y: 0 },
+        { x: 10, y: 20 },
+      ],
       'FULL',
     );
     // The RIGHT(10->15)/LEFT(15->10) bounce collapses away entirely,
@@ -57,7 +94,11 @@ describe('wormMerge — removePattern6 (forward-and-backward)', () => {
     // -- which `removeRedondantDirection` then further folds (both
     // (0,0)->(10,0) and the surviving (10,0)->(10,20) are NOT the same
     // direction, so only the bounce itself collapses).
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 10, y: 0 },
+      { x: 10, y: 20 },
+    ]);
   });
 });
 
@@ -67,8 +108,17 @@ describe('wormMerge — removePattern1 (DOWN,LEFT,DOWN,RIGHT corner)', () => {
     // 6 points, one more than the 4-point pattern itself reads -- a
     // 5-point list never even reaches the `i=0` check.
     const result = wormMerge(
-      [{ x: 10, y: 0 }, { x: 10, y: 10 }],
-      [{ x: 10, y: 10 }, { x: 0, y: 10 }, { x: 0, y: 20 }, { x: 10, y: 20 }, { x: 10, y: 30 }],
+      [
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+      ],
+      [
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+        { x: 10, y: 20 },
+        { x: 10, y: 30 },
+      ],
       'FULL',
     );
     // Pattern at i=0: DOWN(10,0->10,10), LEFT(10,10->0,10), DOWN(0,10->0,20),
@@ -76,7 +126,10 @@ describe('wormMerge — removePattern1 (DOWN,LEFT,DOWN,RIGHT corner)', () => {
     // corner at (x=points[1].x, y=points[3].y) = (10, 20), landing exactly
     // on the surviving (10,20)->(10,30) point -- `removeNullVector` then
     // `removeRedondantDirection` fold the rest to a straight line.
-    expect(result).toEqual([{ x: 10, y: 0 }, { x: 10, y: 30 }]);
+    expect(result).toEqual([
+      { x: 10, y: 0 },
+      { x: 10, y: 30 },
+    ]);
   });
 });
 
@@ -87,43 +140,89 @@ describe('wormMerge — removePattern2 (RIGHT,DOWN,RIGHT,UP corner)', () => {
     // (`removeRedondantDirection`) collapses the list before this one's
     // own loop gets its turn.
     const result = wormMerge(
-      [{ x: 0, y: 20 }, { x: 10, y: 20 }],
-      [{ x: 10, y: 20 }, { x: 10, y: 30 }, { x: 20, y: 30 }, { x: 20, y: 10 }, { x: 30, y: 10 }],
+      [
+        { x: 0, y: 20 },
+        { x: 10, y: 20 },
+      ],
+      [
+        { x: 10, y: 20 },
+        { x: 10, y: 30 },
+        { x: 20, y: 30 },
+        { x: 20, y: 10 },
+        { x: 30, y: 10 },
+      ],
       'FULL',
     );
     // Pattern at i=0: RIGHT, DOWN, RIGHT, UP -- replaces points[1..3] with
     // (x=points[3].x, y=points[1].y) = (20, 20).
-    expect(result).toEqual([{ x: 0, y: 20 }, { x: 20, y: 20 }, { x: 20, y: 10 }, { x: 30, y: 10 }]);
+    expect(result).toEqual([
+      { x: 0, y: 20 },
+      { x: 20, y: 20 },
+      { x: 20, y: 10 },
+      { x: 30, y: 10 },
+    ]);
   });
 });
 
 describe('wormMerge — removePattern3 (DOWN,RIGHT,DOWN,RIGHT corner)', () => {
   it('collapses a double-right staircase into one corner', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: 10, y: 10 }, { x: 10, y: 20 }, { x: 20, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+        { x: 10, y: 20 },
+        { x: 20, y: 20 },
+      ],
       'FULL',
     );
     // Pattern at i=0: DOWN, RIGHT, DOWN, RIGHT -- replaces points[1..3]
     // with (x=points[1].x, y=points[3].y) = (0, 20).
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }, { x: 20, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+      { x: 20, y: 20 },
+    ]);
   });
 });
 
 describe('wormMerge — removePattern4 (DOWN,LEFT,DOWN,RIGHT at the LAST 5 points, gated)', () => {
   it('collapses when the gate (p4.x > p1.x) holds', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: -10, y: 10 }, { x: -10, y: 20 }, { x: 5, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: -10, y: 10 },
+        { x: -10, y: 20 },
+        { x: 5, y: 20 },
+      ],
       'FULL',
     );
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }, { x: 5, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+      { x: 5, y: 20 },
+    ]);
   });
 
   it('does NOT fire when the gate fails (p4.x <= p1.x)', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: -10, y: 10 }, { x: -10, y: 20 }, { x: 0, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: -10, y: 10 },
+        { x: -10, y: 20 },
+        { x: 0, y: 20 },
+      ],
       'FULL',
     );
     expect(result).toEqual([
@@ -139,17 +238,37 @@ describe('wormMerge — removePattern4 (DOWN,LEFT,DOWN,RIGHT at the LAST 5 point
 describe('wormMerge — removePattern5 (DOWN,RIGHT,DOWN,LEFT at the LAST 5 points, gated)', () => {
   it('collapses when the gate (p4.x + 4 < p1.x) holds', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: 10, y: 10 }, { x: 10, y: 20 }, { x: -10, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+        { x: 10, y: 20 },
+        { x: -10, y: 20 },
+      ],
       'FULL',
     );
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 20 }, { x: -10, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+      { x: -10, y: 20 },
+    ]);
   });
 
   it('does NOT fire when the gate fails (p4.x + 4 >= p1.x)', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 0, y: 10 }],
-      [{ x: 0, y: 10 }, { x: 10, y: 10 }, { x: 10, y: 20 }, { x: 0, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 0, y: 10 },
+      ],
+      [
+        { x: 0, y: 10 },
+        { x: 10, y: 10 },
+        { x: 10, y: 20 },
+        { x: 0, y: 20 },
+      ],
       'FULL',
     );
     expect(result).toEqual([
@@ -165,20 +284,40 @@ describe('wormMerge — removePattern5 (DOWN,RIGHT,DOWN,LEFT at the LAST 5 point
 describe('wormMerge — removePattern7 (RIGHT,DOWN,LEFT,DOWN at the FIRST position)', () => {
   it('collapses a leading notch into a 2-point corner, gated on p3.x > p0.x', () => {
     const result = wormMerge(
-      [{ x: 0, y: 0 }, { x: 10, y: 0 }],
-      [{ x: 10, y: 0 }, { x: 10, y: 10 }, { x: 5, y: 10 }, { x: 5, y: 20 }],
+      [
+        { x: 0, y: 0 },
+        { x: 10, y: 0 },
+      ],
+      [
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 5, y: 10 },
+        { x: 5, y: 20 },
+      ],
       'FULL',
     );
     // Pattern at i=0: RIGHT, DOWN, LEFT, DOWN with p3.x(5) > p0.x(0) --
     // `removePattern7` replaces points[1..2] with (x=p3.x, y=p0.y) =
     // (5, 0), a 2-point replace (not 3, unlike every other pattern here).
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 20 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 5, y: 0 },
+      { x: 5, y: 20 },
+    ]);
   });
 
   it('does NOT fire when p3.x <= p0.x (the gate)', () => {
     const result = wormMerge(
-      [{ x: 10, y: 0 }, { x: 20, y: 0 }],
-      [{ x: 20, y: 0 }, { x: 20, y: 10 }, { x: 5, y: 10 }, { x: 5, y: 20 }],
+      [
+        { x: 10, y: 0 },
+        { x: 20, y: 0 },
+      ],
+      [
+        { x: 20, y: 0 },
+        { x: 20, y: 10 },
+        { x: 5, y: 10 },
+        { x: 5, y: 20 },
+      ],
       'FULL',
     );
     // p3.x(5) <= p0.x(10) -- `removePattern7` must not fire; the points
@@ -194,7 +333,10 @@ describe('wormMerge — removePattern7 (RIGHT,DOWN,LEFT,DOWN at the FIRST positi
 });
 
 describe('wormMerge — removePattern8 (FULL only, LIMITED preserves the corner)', () => {
-  const headPts = [{ x: 0, y: 0 }, { x: 10, y: 0 }];
+  const headPts = [
+    { x: 0, y: 0 },
+    { x: 10, y: 0 },
+  ];
   const tailPts = [
     { x: 10, y: 0 },
     { x: 0, y: 0 },
@@ -209,15 +351,27 @@ describe('wormMerge — removePattern8 (FULL only, LIMITED preserves the corner)
     // simple corner, nothing left for `removePattern8` to do on THIS
     // shape once pattern6 runs first in upstream's own order. Confirms
     // pattern6 (checked before 8) wins when both could apply.
-    expect(result).toEqual([{ x: 0, y: 0 }, { x: 0, y: 10 }, { x: 10, y: 10 }]);
+    expect(result).toEqual([
+      { x: 0, y: 0 },
+      { x: 0, y: 10 },
+      { x: 10, y: 10 },
+    ]);
   });
 
   it('decisions.md D2: LIMITED skips removePattern8 specifically', () => {
     // A shape where ONLY removePattern8 (not 6) could collapse it:
     // LEFT, DOWN, LEFT, DOWN with no reversing bounce.
     const result = wormMerge(
-      [{ x: 20, y: 0 }, { x: 10, y: 0 }],
-      [{ x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }, { x: 0, y: 20 }],
+      [
+        { x: 20, y: 0 },
+        { x: 10, y: 0 },
+      ],
+      [
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ],
       'LIMITED',
     );
     expect(result).toEqual([
@@ -231,20 +385,30 @@ describe('wormMerge — removePattern8 (FULL only, LIMITED preserves the corner)
 
   it('the SAME shape collapses under FULL (removePattern8 runs)', () => {
     const result = wormMerge(
-      [{ x: 20, y: 0 }, { x: 10, y: 0 }],
-      [{ x: 10, y: 0 }, { x: 10, y: 10 }, { x: 0, y: 10 }, { x: 0, y: 20 }],
+      [
+        { x: 20, y: 0 },
+        { x: 10, y: 0 },
+      ],
+      [
+        { x: 10, y: 0 },
+        { x: 10, y: 10 },
+        { x: 0, y: 10 },
+        { x: 0, y: 20 },
+      ],
       'FULL',
     );
     // LEFT, DOWN, LEFT, DOWN -- replaces points[1..3] with
     // (x=points[3].x, y=points[1].y) = (0, 0).
-    expect(result).toEqual([{ x: 20, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 20 }]);
+    expect(result).toEqual([
+      { x: 20, y: 0 },
+      { x: 0, y: 0 },
+      { x: 0, y: 20 },
+    ]);
   });
 });
 
 describe('wormMerge — diagonal segment throws (axis-aligned geometry only)', () => {
   it('throws when a segment is neither horizontal nor vertical', () => {
-    expect(() => wormMerge([{ x: 0, y: 0 }], [{ x: 10, y: 10 }], 'FULL')).toThrow(
-      /not a horizontal or vertical line/,
-    );
+    expect(() => wormMerge([{ x: 0, y: 0 }], [{ x: 10, y: 10 }], 'FULL')).toThrow(/not a horizontal or vertical line/);
   });
 });

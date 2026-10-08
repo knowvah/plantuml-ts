@@ -40,6 +40,9 @@ export function classifierRowBack(geo: ClassifierGeo, theme: Theme, isHeader: bo
 }
 
 /** Re-tints every monochrome sprite atom over `back`; other atoms pass. */
-export function atomsOverBack(atoms: readonly MemberRenderAtom[], back: Paint | undefined): readonly MemberRenderAtom[] {
+export function atomsOverBack(
+  atoms: readonly MemberRenderAtom[],
+  back: Paint | undefined,
+): readonly MemberRenderAtom[] {
   return atoms.map((a) => (a.kind === 'image' && a.tint !== undefined ? { ...a, href: spriteHrefOver(a, back) } : a));
 }

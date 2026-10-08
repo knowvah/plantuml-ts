@@ -7,7 +7,12 @@ import { sameLaneEdges } from '../../../../src/diagrams/activity/layout/swimlane
 import type { EdgeMeta } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
 import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 
-const EDGE = { points: [{ x: 0, y: 0 }, { x: 10, y: 0 }] } as unknown as ActivityEdgeGeo;
+const EDGE = {
+  points: [
+    { x: 0, y: 0 },
+    { x: 10, y: 0 },
+  ],
+} as unknown as ActivityEdgeGeo;
 const HLINE = { low: 0, high: 10, candidates: [], unfiltered: [0] };
 
 function meta(lane1: string | undefined, lane2: string | undefined, extra: Partial<EdgeMeta> = {}): EdgeMeta {

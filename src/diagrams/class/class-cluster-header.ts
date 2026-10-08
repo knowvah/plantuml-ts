@@ -122,7 +122,11 @@ export function visibleNamespaceStereotypeLabels(
  * `getHeight() * scale` (`SpriteMonochrome.java:221-225`). `undefined` when
  * the name does not resolve (upstream's `null`, so the labels run).
  */
-function buildStereoSprite(ns: Namespace, sprites: SpriteRegistry | undefined, theme: Theme): ClusterHeaderStereo | undefined {
+function buildStereoSprite(
+  ns: Namespace,
+  sprites: SpriteRegistry | undefined,
+  theme: Theme,
+): ClusterHeaderStereo | undefined {
   if (ns.stereotype === undefined || sprites === undefined) return undefined;
   const deco = StereotypeDecoration.buildSimple(`<<${ns.stereotype}>>`);
   if (deco.spriteName === undefined) return undefined;

@@ -14,7 +14,11 @@ import { describe, expect, it } from 'vitest';
 
 import type { ActivityNodeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 import { placeSwimlanes } from '../../../../src/diagrams/activity/layout/swimlane-placement.js';
-import { markMeasureSpec, measureSpecOf, specLaneItems } from '../../../../src/diagrams/activity/layout/swimlane-context.js';
+import {
+  markMeasureSpec,
+  measureSpecOf,
+  specLaneItems,
+} from '../../../../src/diagrams/activity/layout/swimlane-context.js';
 import { resolveTheme } from '../../../../src/core/theme.js';
 import { renderActivityFixture } from '../../../helpers/activity-text-position.js';
 import { compareSvg } from '../../../oracle/svg-conformance/compare.js';

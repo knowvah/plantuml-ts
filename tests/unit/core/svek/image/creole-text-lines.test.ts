@@ -397,7 +397,7 @@ describe('creoleTextLines — FontPosition runs through Sea (SI30 D1/D2)', () =>
     expect(run.tooltip).toBe('dd');
   });
 
-  it('[[url label]] with no {tooltip} -- the run\'s tooltip defaults to the url', () => {
+  it("[[url label]] with no {tooltip} -- the run's tooltip defaults to the url", () => {
     const line = creoleTextLines('[[http://www.google.com]]', font, measurer)[0]!;
     const run = line.runs[0]!;
     expect(run.url).toBe('http://www.google.com');

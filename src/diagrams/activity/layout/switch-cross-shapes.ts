@@ -48,11 +48,7 @@ export function routeSwitchHorizontalThenVerticalCross(
 ): GPoint[] {
   const towardMp2b = mp1a.x > mp2b.x ? -diamond1.halfWidth : diamond1.halfWidth;
   const y = mp1a.y - diamond1.halfHeight;
-  return [
-    { x: mp1a.x + towardMp2b, y },
-    { x: mp2b.x, y },
-    mp2b,
-  ];
+  return [{ x: mp1a.x + towardMp2b, y }, { x: mp2b.x, y }, mp2b];
 }
 
 /** `'left'` when `mp1a` sits to the RIGHT of `mp2b` (the approach enters

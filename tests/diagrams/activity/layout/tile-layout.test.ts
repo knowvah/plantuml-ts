@@ -281,7 +281,11 @@ describe('layoutActivity — existing renderer tests still work', () => {
 
     for (const edge of sideEdges) {
       expect(edge.points).toHaveLength(3);
-      const [p1, p2, p3] = edge.points as [{ x: number; y: number }, { x: number; y: number }, { x: number; y: number }];
+      const [p1, p2, p3] = edge.points as [
+        { x: number; y: number },
+        { x: number; y: number },
+        { x: number; y: number },
+      ];
       expect(p2.x).toBe(p1.x);
       expect(p2.y).toBe(p3.y);
       expect(p3.y).toBe(midlineY);

@@ -84,7 +84,7 @@ describe('GtileMerge — geometry with 2 branches (w=80 each, h=60 and h=80)', (
     expect(tile.kind).toBe('gtile-fork');
   });
 
-  it('is an instanceof GtileMerge (the walker\'s own dispatch check)', () => {
+  it("is an instanceof GtileMerge (the walker's own dispatch check)", () => {
     expect(tile instanceof GtileMerge).toBe(true);
   });
 });
