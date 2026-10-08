@@ -26,7 +26,11 @@ import type {
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { computeParticipantLayout, type ParticipantLayoutResult } from './sequence-layout-participants.js';
+import {
+  computeParticipantLayout,
+  type MessageLevels,
+  type ParticipantLayoutResult,
+} from './sequence-layout-participants.js';
 import {
   flushOpenActivations,
   processEvents,
@@ -42,6 +46,12 @@ import {
 } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
+import {
+  cutActivationsAtDelays,
+  delayContentRight,
+  delaySpansOf,
+  lifelineSegmentsByParticipant,
+} from './sequence-delay.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
 import { sequenceCreoleFont, sequenceCreoleRuns, sequenceLineWidth } from './sequence-creole.js';
 
@@ -54,7 +64,13 @@ export function layoutSequence(ast: SequenceDiagramAST, theme: Theme, measurer: 
     return emptyGeometry();
   }
 
-  const first = layoutFrom(ast, theme, measurer, LEFT_MARGIN);
+  // The participant row needs each message's live LEVELS (`CommunicationTile
+  // #addConstraints:404-416`), which only the event walk computes: walk once
+  // to record them, then lay out again with them (`MessageLevels`).
+  const levels: MessageLevels = new Map();
+  const measured = layoutFrom(ast, theme, measurer, LEFT_MARGIN, { record: levels });
+  const anyLive = [...levels.values()].some((l) => l.level1 > 0 || l.level2 > 0);
+  const first = anyLive ? layoutFrom(ast, theme, measurer, LEFT_MARGIN, { use: levels }) : measured;
   // Upstream does not lay out from a fixed left edge: it solves an origin and
   // then draws the body shifted by `dx(-min1)`, where `min1` is
   // `body.getMinX()` (`SequenceDiagramFileMakerTeoz.java:82,135-136`). Whatever
@@ -68,7 +84,7 @@ export function layoutSequence(ast: SequenceDiagramAST, theme: Theme, measurer: 
   // negative coordinates -- content off the left of the canvas.
   const overhang = LEFT_MARGIN - minContentX(first);
   if (overhang <= 0) return first;
-  return layoutFrom(ast, theme, measurer, LEFT_MARGIN + overhang);
+  return layoutFrom(ast, theme, measurer, LEFT_MARGIN + overhang, anyLive ? { use: levels } : {});
 }
 
 /** One layout pass with the participant row starting at `originX`. */
@@ -77,9 +93,10 @@ function layoutFrom(
   theme: Theme,
   measurer: StringMeasurer,
   originX: number,
+  levels: { record?: MessageLevels; use?: MessageLevels },
 ): SequenceGeometry {
-  const participantLayout = computeParticipantLayout(ast, theme, measurer, originX);
-  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout);
+  const participantLayout = computeParticipantLayout(ast, theme, measurer, originX, levels.use);
+  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout, levels.record);
   return assembleGeometry(ast, participantLayout, eventLayout, theme, measurer, originX);
 }
 
@@ -110,7 +127,7 @@ function assembleGeometry(
   originX: number,
 ): SequenceGeometry {
   const { participantGeos, maxParticipantHeight } = participantLayout;
-  const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
+  const { dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } = computeVerticalTotals(
@@ -118,7 +135,10 @@ function assembleGeometry(
     currentY,
     showFootbox,
   );
-  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos);
+  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
+  const eventGeos = cutActivationsAtDelays(eventLayout.eventGeos);
+  const headHeight = TOP_MARGIN + maxParticipantHeight;
+  const delays = delaySpansOf(eventGeos);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
@@ -135,8 +155,9 @@ function assembleGeometry(
     // `findings/vertical-terms.md` §0's landmark table. Every consumer
     // (`renderer-lifeline.ts:95`, `sequence-page.ts:320`) already reads it as
     // an absolute coordinate.
-    headHeight: TOP_MARGIN + maxParticipantHeight,
+    headHeight,
     lifelineEndY,
+    ...lifelineSegmentsByParticipant(participantGeos, headHeight, lifelineEndY, delays),
     footerShapeY,
     showFootbox,
     boxes: boxGeos,
@@ -153,6 +174,7 @@ function runEventLayout(
   theme: Theme,
   measurer: StringMeasurer,
   participantLayout: ParticipantLayoutResult,
+  messageLevels?: MessageLevels,
 ): EventLayoutResult {
   const eventGeos: EventGeo[] = [];
   const dividerGeos: DividerGeo[] = [];
@@ -167,6 +189,7 @@ function runEventLayout(
     eventGeos,
     dividerGeos,
     newpageGeos,
+    ...(messageLevels !== undefined ? { messageLevels } : {}),
   };
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
   // head row, and NOT one `messageSpacing`: teoz has no such term at all
@@ -234,6 +257,9 @@ function minEventX(event: EventGeo): number {
     case 'divider':
     case 'newpage':
       return event.bandX;
+    case 'delay':
+      // `DelayTile#getMinX` (`:121-124`): `middle - preferredWidth / 2`.
+      return event.middleX - event.textWidth / 2;
     default:
       return Number.POSITIVE_INFINITY;
   }
@@ -296,9 +322,9 @@ interface VerticalTotals {
  * between the lifeline end and an actor/database foot; upstream's tail
  * component puts the label above its own stickman INSIDE its own height
  * (`LivingSpaces#drawHeads:135-141`) and reserves nothing extra, which is why
- * `footerShapeY` is now just `lifelineEndY`. `renderFooterBox` already draws
- * from `lifelineEndY` and derives each kind's glyph offset itself, so the
- * field survives only for `sequence-page.ts`/`scale-geo.ts`.
+ * `footerShapeY` (the foot row's top) equals `lifelineEndY` here. The two
+ * separate only per page, in `sequence-page.ts`, where upstream's clip lets
+ * the lifelines run one pixel past the foot row's top.
  */
 function computeVerticalTotals(maxParticipantHeight: number, currentY: number, showFootbox: boolean): VerticalTotals {
   const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
@@ -363,7 +389,7 @@ function computeTotalWidth(
     }
   }
 
-  return Math.max(totalWidth, dividerContentRight(eventGeos));
+  return Math.max(totalWidth, dividerContentRight(eventGeos), delayContentRight(eventGeos, RIGHT_MARGIN));
 }
 
 /**

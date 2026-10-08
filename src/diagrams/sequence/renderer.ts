@@ -18,7 +18,17 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type { BoxGeo, SequenceGeometry, EventGeo, ActivationGeo, NoteGeo, FrameGeo, NewpageGeo } from './ast.js';
+import type {
+  BoxGeo,
+  SequenceGeometry,
+  EventGeo,
+  ActivationGeo,
+  NoteGeo,
+  FrameGeo,
+  NewpageGeo,
+  DelayGeo,
+} from './ast.js';
+import { DELAY_FONT_SIZE } from './sequence-delay.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
@@ -266,24 +276,36 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
   if (event.kind === 'frame') {
     return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
   }
-  if (isBackground) return '';
+  return isBackground ? '' : renderForeground(event, theme);
+}
+
+/** The foreground pass for every kind but `frame` (handled above). */
+function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme): string {
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
     case 'activation':
-      // Drawn in the lifeline pass (step 2), not here -- see the comment
-      // there and `LivingSpace#drawLineAndLiveboxes`.
+    // Drawn in the lifeline pass (step 2), not here -- see the comment
+    // there and `LivingSpace#drawLineAndLiveboxes`.
+    // falls through
+    case 'space':
+      // Space geos add no visible elements
       return '';
     case 'note':
       return renderNote(event, theme);
     case 'divider':
       return renderDivider(event, theme);
-    case 'space':
-      // Space geos add no visible elements
-      return '';
     case 'newpage':
       return renderNewpage(event, theme);
+    case 'delay':
+      return renderDelayText(event, theme);
   }
+}
+
+/** `ComponentRoseDelayText#drawInternalU` (`:62-70`): only the text block --
+ *  the dotted line is the lifeline's own `DELAY_LINE` piece. */
+function renderDelayText(delay: DelayGeo, theme: ScaledTheme): string {
+  return delay.labelRuns.map((run) => creoleRunText(run, theme, DELAY_FONT_SIZE * theme.scaleK)).join('');
 }
 
 /** One event-walk pass -- see {@link renderEvent}; mirrors the one
@@ -410,15 +432,17 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     renderLifelinePass(
       scaledGeo.participants,
       scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      scaledGeo.headHeight,
-      scaledGeo.lifelineEndY,
+      (p) =>
+        scaledGeo.lifelineSegments?.[p.id] ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
       scaledTheme,
     ),
   );
 
   // 3. Participant header boxes
+  // A created participant has no head here (`drawHeadOrTail:194-196`); its
+  // create message draws it instead.
   for (const p of scaledGeo.participants) {
-    children.push(renderParticipantBox(p, scaledTheme));
+    if (p.createY === undefined) children.push(renderParticipantBox(p, scaledTheme));
   }
 
   // 4. Footer boxes, unless suppressed -- BEFORE the foreground tiles.
@@ -432,7 +456,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
-      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledTheme));
+      children.push(renderFooterBox(p, scaledGeo.footerShapeY, scaledTheme));
     }
   }
 

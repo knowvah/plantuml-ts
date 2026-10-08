@@ -14,9 +14,14 @@
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { MessageExoType } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
+import type { ParticipantGeo } from './geo-participant.js';
 
 export interface MessageGeo {
   kind: 'message';
+  /** A create message's head (`CommunicationTile#drawU:347-371`): the
+   *  participant, at the x the tile draws it, and the block top it is drawn
+   *  from -- see `sequence-layout-create.ts`. */
+  createdHead?: { participant: ParticipantGeo; y: number };
   fromX: number;
   toX: number;
   y: number;
@@ -98,4 +103,11 @@ export interface ActivationGeo {
    */
   level: number;
   color?: string;
+  /**
+   * Set only on a bar a delay cut into pieces (`LiveBoxesDrawer#doDrawing`,
+   * `teoz/LiveBoxesDrawer.java:105-121`): which ends of THIS piece are closed.
+   * `ACTIVATION_BOX_CLOSE_OPEN` is `{ closeUp: true, closeDown: false }`, and
+   * so on. Absent is `CLOSE_CLOSE`, the plain rectangle.
+   */
+  open?: { closeUp: boolean; closeDown: boolean };
 }

@@ -1,0 +1,7 @@
+@startuml
+Alice -> Bob : one
+...line one\nline two...
+Bob -> Carol : make
+...
+Carol -> Alice : back
+@enduml

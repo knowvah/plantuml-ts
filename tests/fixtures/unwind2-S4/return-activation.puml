@@ -1,0 +1,8 @@
+@startuml
+Bob -> Alice ++ : hello
+Alice -> Ken ++ : work
+Ken -> Ken : self
+return Hi
+return Done
+Ken -> Bob : after
+@enduml

@@ -106,7 +106,7 @@ export function symbolPreferredHeight(type: ParticipantType, blockHeight: number
 // .md` names disagreement between them as this project's recurring defect
 // class. They were the renderer's private helpers until A3 gave layout the job
 // of placing the runs; the footer still needs them at render time, because a
-// foot block's own top is `lifelineEndY`, which is not known when the head is
+// foot block's own top is `footerShapeY`, which is not known when the head is
 // built.
 
 /** `getDeltaCollection()` -- how far the FRONT rectangle of a `collections`

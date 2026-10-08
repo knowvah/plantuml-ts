@@ -19,7 +19,8 @@
  */
 
 import type { ActivationEvent } from './ast.js';
-import { emit, ensureParticipant, type Command } from './sequence-parse-helpers.js';
+import { emit, ensureParticipant, type Command, type ParseState } from './sequence-parse-helpers.js';
+import { activate, getActivatingMessage, type LifeEventType } from './sequence-life-state.js';
 
 /** `CommandActivate`'s shared WHO group -- `([%pLN_.@]+|[%g][^%g]+[%g])`
  *  (`CommandActivate.java:65`): a bare token or a quoted, space-carrying
@@ -48,6 +49,7 @@ export const activateCommand: Command = {
     const participantId = stripQuotes(match[1]!);
     const color = match[2];
     ensureParticipant(state, participantId);
+    if (refusedLifeEvent(state, participantId, 'ACTIVATE')) return;
     const ev: ActivationEvent = {
       kind: 'activate',
       participantId,
@@ -66,6 +68,7 @@ export const deactivateCommand: Command = {
   execute(state, match) {
     const participantId = stripQuotes(match[1]!);
     ensureParticipant(state, participantId);
+    if (refusedLifeEvent(state, participantId, 'DEACTIVATE')) return;
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
@@ -84,6 +87,7 @@ export const destroyCommand: Command = {
   execute(state, match) {
     const participantId = stripQuotes(match[1]!);
     ensureParticipant(state, participantId);
+    if (refusedLifeEvent(state, participantId, 'DESTROY')) return;
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
@@ -94,25 +98,20 @@ export const destroyCommand: Command = {
 };
 
 // 8. bare deactivate -- `CommandDeactivateShort` (`SequenceDiagramFactory
-//    .java:104`). Upstream deactivates `getActivatingMessage()
-//    .getParticipant2()`, the target of the latest message that still has
-//    an open ACTIVATE life event on the `activationState` stack
-//    (`SequenceDiagram.java:347-393`). This port has no `activationState`
-//    / `getActivatingMessage()` (see `command-arrow.ts`'s `returnCommand`
-//    note, which flags the same gap), so the best approximation available
-//    within this task's write-set is `state.lastMessageTo` -- the target of
-//    the MOST RECENT message, which `returnCommand` already treats as the
-//    stand-in for "the message currently open for activation". A source
-//    with no preceding message has nothing to deactivate (upstream returns
-//    `CommandExecutionResult.error("Nothing to deactivate.")`; this
-//    dispatch table's `execute` returns void, so the no-op is the closest
-//    equivalent) and is left as-is rather than emitting a bogus event.
-// @see sequencediagram/command/CommandDeactivateShort.java:57-61,73-83
+//    .java:104`): deactivates `getActivatingMessage().getParticipant2()`,
+//    the target of the latest message still holding an ACTIVATE on the
+//    `activationState` stack, and is an error when there is none.
+// @see sequencediagram/command/CommandDeactivateShort.java:73-86
 export const deactivateShortCommand: Command = {
   pattern: /^deactivate\s*$/i,
   execute(state) {
-    const participantId = state.lastMessageTo;
-    if (participantId === null) return;
+    const message = getActivatingMessage(state.life);
+    if (message === undefined) {
+      state.executionError = 'Nothing to deactivate.';
+      return;
+    }
+    const participantId = message.kind === 'message' ? message.to : message.participant;
+    if (refusedLifeEvent(state, participantId, 'DEACTIVATE')) return;
     const ev: ActivationEvent = {
       kind: 'deactivate',
       participantId,
@@ -120,3 +119,15 @@ export const deactivateShortCommand: Command = {
     emit(state, ev);
   },
 };
+
+/**
+ * `diagram.activate(p, type, ...)` as `CommandActivate#executeArg` calls it
+ * (`CommandActivate.java:115-119`): an error string becomes
+ * `CommandExecutionResult.error`, i.e. a refused line.
+ */
+function refusedLifeEvent(state: ParseState, participantId: string, type: LifeEventType): boolean {
+  const error = activate(state.life, participantId, type);
+  if (error === undefined) return false;
+  state.executionError = error;
+  return true;
+}

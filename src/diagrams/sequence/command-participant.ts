@@ -13,6 +13,7 @@
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:106-110
  */
 
+import { activate } from './sequence-life-state.js';
 import type { ParticipantType } from './ast.js';
 import {
   ensureParticipant,
@@ -32,9 +33,10 @@ import {
  * registered command instead. See `dispatchCommand`'s own doc comment for
  * why this refusal shape must NOT become `state.executionError`.
  */
-function declareParticipant(state: ParseState, type: ParticipantType, rest: string): void {
+function declareParticipant(state: ParseState, type: ParticipantType, rest: string): string {
   const { id, display, color, stereotype, url } = parseParticipantDeclaration(rest);
   ensureParticipant(state, id, type, { display, color, stereotype, url });
+  return id;
 }
 
 // 4. Participant declarations with optional quoted name, alias, and color.
@@ -53,20 +55,18 @@ export const participantCommand: Command = {
 
 /** `create [participant|actor|...] X` — `CommandParticipant`'s CREATE
  *  branch: declares the participant (defaulting to type `participant`) and
- *  triggers a CREATE life event on it (`LifeEventType.CREATE`,
- *  `CommandParticipant.java:194-199`). This port's layout always renders a
- *  participant's header box at the top row regardless of first use, so the
- *  CREATE life event's deferred-appearance visual (the box appearing only
- *  at the create line, `LifeEventType.CREATE`'s handling in
- *  `ComponentRoseParticipant`) is not reproduced — a documented
- *  simplification: `create` behaves as sugar for a plain participant
- *  declaration here, same scope cut as `autoactivate`'s write-only flag.
+ *  files a CREATE life event on it (`CommandParticipant.java:194-199`), which
+ *  `SequenceDiagram#activate` holds as `pendingCreate` until the next message
+ *  takes it (`:374-377`, `:207-214`) -- see `sequence-life-state.ts`. The
+ *  error `activate` can return (after a delay) refuses the line.
  *  @see sequencediagram/command/CommandParticipant.java:80-86,142-201 */
 export const createCommand: Command = {
   pattern: /^create\s+(?:(participant|actor|boundary|control|entity|queue|database|collections)\s+)?(.+)$/i,
   execute(state, match) {
     const type = (match[1]?.toLowerCase() ?? 'participant') as ParticipantType;
-    declareParticipant(state, type, match[2]!.trim());
+    const id = declareParticipant(state, type, match[2]!.trim());
+    const error = activate(state.life, id, 'CREATE');
+    if (error !== undefined) state.executionError = error;
   },
 };
 

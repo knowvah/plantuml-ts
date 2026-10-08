@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : one
+...
+activate Bob
+Bob -> Alice : two
+@enduml

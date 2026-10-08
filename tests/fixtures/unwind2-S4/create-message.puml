@@ -1,0 +1,12 @@
+@startuml
+A -> B : 1
+create C
+A -> C : make
+...
+C -> B : back
+create actor D
+C -> D : make actor
+B -> E ** : arrow create
+create F
+F <- A : leftward
+@enduml

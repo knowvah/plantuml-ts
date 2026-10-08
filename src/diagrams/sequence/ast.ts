@@ -96,6 +96,9 @@ export interface AbstractMessageEvent {
   parallel?: boolean;
   /** `{name}` (`CommandArrow.java:417`). Stored, not drawn. */
   anchor?: string;
+  /** `AbstractMessage#isCreate` (`:169-171`): this message took the pending
+   *  `CREATE` life event (`SequenceDiagram.java:207-214`). */
+  create?: true;
 }
 
 export interface MessageEvent extends AbstractMessageEvent {

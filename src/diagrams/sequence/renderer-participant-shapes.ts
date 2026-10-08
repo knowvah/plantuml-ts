@@ -236,6 +236,12 @@ function renderParticipantBlock(p: ParticipantGeo, blockTopY: number, head: bool
   return box + renderNameBlock(p, blockTopY + p.height / 2, theme);
 }
 
+/** The head a create message draws at its tile top
+ *  (`LivingSpace#drawHead(ug, context, TOP, LEFT|RIGHT)`). */
+export function renderCreatedHead(head: { participant: ParticipantGeo; y: number }, theme: ScaledTheme): string {
+  return withParticipantUrl(head.participant, renderParticipantBlock(head.participant, head.y, true, theme));
+}
+
 /** The header row. */
 export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
   return withParticipantUrl(p, renderParticipantBlock(p, p.y, true, theme));
@@ -269,9 +275,9 @@ function withParticipantUrl(p: ParticipantGeo, drawn: string): string {
   return p.url === undefined ? drawn : linkWrap(drawn, p.url);
 }
 
-/** The footer row (`isShowFootbox`), drawn from `lifelineEndY` down. Every
- *  kind derives its own glyph offset from the block, so the layout's
- *  pre-computed `footerShapeY` is no longer threaded here. */
-export function renderFooterBox(p: ParticipantGeo, lifelineEndY: number, theme: ScaledTheme): string {
-  return withParticipantUrl(p, renderParticipantBlock(p, lifelineEndY, false, theme));
+/** The footer row (`isShowFootbox`), drawn from `footerShapeY` down --
+ *  `dy(pageHeight + headHeight)`, `PlayingSpaceWithParticipants.java:225-226`.
+ *  Every kind derives its own glyph offset from the block. */
+export function renderFooterBox(p: ParticipantGeo, footerShapeY: number, theme: ScaledTheme): string {
+  return withParticipantUrl(p, renderParticipantBlock(p, footerShapeY, false, theme));
 }

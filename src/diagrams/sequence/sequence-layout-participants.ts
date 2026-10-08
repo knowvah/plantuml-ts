@@ -10,7 +10,7 @@
 import type { Participant, ParticipantGeo, ParticipantType, SequenceDiagramAST, SequenceEvent } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
-import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, TOP_MARGIN } from './sequence-layout-shared.js';
+import { ARROW_PADDING_X, arrowFontSpecOf, fontSpecOf, LIVE_DELTA_SIZE, TOP_MARGIN } from './sequence-layout-shared.js';
 import { COLLECTIONS_DELTA } from './renderer-participant-symbol.js';
 import { symbolPreferredHeight, symbolPreferredWidth } from './sequence-layout-participant-sizing.js';
 import { ARROW_DELTA_X } from './sequence-arrowhead.js';
@@ -59,10 +59,11 @@ export function computeParticipantLayout(
   theme: Theme,
   measurer: StringMeasurer,
   originX: number = LEFT_MARGIN,
+  levels?: MessageLevels,
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, theme, measurer, constraints);
+  scanMessageLabels(ast.events, sortedParticipants, { theme, measurer, levels }, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
@@ -100,6 +101,39 @@ interface SpanConstraint {
   readonly to: number;
   /** Required `centre[to] - centre[from]`. */
   readonly span: number;
+  /**
+   * A create message's created participant (its index): `getPoint2` is that
+   * head's near EDGE, `posB`/`posD`, not its centre (`CommunicationTile
+   * .java:418-426`), so the demand grows by half that head's width.
+   */
+  readonly createdIndex?: number;
+}
+
+/**
+ * Each message's two live levels, `livingSpace1/2.getLevelAt(this,
+ * IGNORE_FUTURE_DEACTIVATE)`, as the event walk measured them. The row is
+ * solved before the walk, so these come from a previous pass -- the "third
+ * layout pass" `plans/sequence-coordinate-convergence/findings/
+ * label-widening.md` names for upstream's deferred `Real` arithmetic.
+ */
+export type MessageLevels = Map<SequenceEvent, { level1: number; level2: number }>;
+
+interface ScanContext {
+  readonly theme: Theme;
+  readonly measurer: StringMeasurer;
+  readonly levels: MessageLevels | undefined;
+}
+
+/**
+ * The `LIVE_DELTA_SIZE` terms of `CommunicationTile#addConstraints:404-416`,
+ * moved onto the centre-to-centre span: left-to-right only `point2` moves,
+ * by `-5` when PART2 is live; right-to-left `point1` moves by `-5` when PART1
+ * is live and `point2` by `+5 * level2`.
+ */
+function liveDelta(levels: { level1: number; level2: number } | undefined, reverse: boolean): number {
+  if (levels === undefined) return 0;
+  if (!reverse) return levels.level2 > 0 ? LIVE_DELTA_SIZE : 0;
+  return (levels.level1 > 0 ? LIVE_DELTA_SIZE : 0) + LIVE_DELTA_SIZE * levels.level2;
 }
 
 /**
@@ -108,15 +142,15 @@ interface SpanConstraint {
  * Constraints are stored `from < to` regardless of the arrow's direction: the
  * reverse branch of `addConstraints` (`:402-409`) swaps which endpoint is
  * bounded, but demands the same distance. The `LIVE_DELTA_SIZE` adjustments in
- * both branches are NOT modelled here — see `findings/label-widening.md`.
+ * both branches are {@link liveDelta}'s, from the previous pass's levels.
  */
 function scanMessageLabels(
   events: readonly SequenceEvent[],
   sortedParticipants: Participant[],
-  theme: Theme,
-  measurer: StringMeasurer,
+  scan: ScanContext,
   out: SpanConstraint[],
 ): void {
+  const { theme, measurer } = scan;
   const arrowSpec = arrowFontSpecOf(theme);
   for (const ev of events) {
     if (ev.kind === 'message' && ev.from !== ev.to) {
@@ -133,7 +167,8 @@ function scanMessageLabels(
           // `getTextWidth + getArrowDeltaX`, and `getTextWidth` is the block
           // plus both paddings. The same formula `sequence-layout-exo.ts`
           // already uses for an exo message's demand.
-          span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X,
+          span: labelWidth + 2 * ARROW_PADDING_X + ARROW_DELTA_X + liveDelta(scan.levels?.get(ev), fi > ti),
+          ...(ev.create === true ? { createdIndex: ti } : {}),
         });
       }
     } else if (ev.kind === 'messageExo') {
@@ -146,7 +181,7 @@ function scanMessageLabels(
       continue;
     } else if (ev.kind === 'frame') {
       for (const branch of ev.branches) {
-        scanMessageLabels(branch, sortedParticipants, theme, measurer, out);
+        scanMessageLabels(branch, sortedParticipants, scan, out);
       }
     }
   }
@@ -376,7 +411,8 @@ function solveParticipantXs(
     let x = i === 0 ? originX : xs[i - 1]! + widths[i - 1]! + theme.sequence.participantGap;
     for (const c of incoming.get(i) ?? []) {
       // `centre[i] >= centre[c.from] + c.span`, expressed as a left edge.
-      x = Math.max(x, centre(c.from) + c.span - widths[i]! / 2);
+      const createdHalf = c.createdIndex === undefined ? 0 : widths[c.createdIndex]! / 2;
+      x = Math.max(x, centre(c.from) + c.span + createdHalf - widths[i]! / 2);
     }
     xs.push(x);
   }

@@ -22,6 +22,7 @@ import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { ActivationEvent, SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
 import { activateCommand, deactivateShortCommand } from '../../../src/diagrams/sequence/command-lifeline.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
   const result = parseSequence(lines);
@@ -49,6 +50,7 @@ function freshState(): ParseState {
     currentBox: null,
     boxCounter: 0,
     executionError: undefined,
+    life: newLifeState(),
   };
 }
 
@@ -114,30 +116,22 @@ describe('bare `deactivate` (CommandDeactivateShort)', () => {
     expect(match).not.toBeNull();
   });
 
-  it('deactivates the target of the most recent message', () => {
-    const state = freshState();
-    state.lastMessageTo = 'Bob';
-    const match = deactivateShortCommand.pattern.exec('deactivate');
-    deactivateShortCommand.execute(state, match as RegExpExecArray);
-    expect(state.ast.events).toHaveLength(1);
-    expect(state.ast.events[0]).toMatchObject({ kind: 'deactivate', participantId: 'Bob' });
+  // `getActivatingMessage().getParticipant2()` (`CommandDeactivateShort
+  // .java:76-80`): the target of the latest message still ACTIVATING.
+  it('deactivates the target of the latest activating message', () => {
+    const ast = parse(['A -> B ++ : go', 'B -> C ++ : on', 'deactivate', 'deactivate']);
+    const deactivated = activationEvents(ast)
+      .filter((e) => e.kind === 'deactivate')
+      .map((e) => e.participantId);
+    expect(deactivated).toEqual(['C', 'B']);
   });
 
-  it('re-targets after the last-message cursor changes', () => {
-    const state = freshState();
-    state.lastMessageTo = 'Bob';
-    const match = deactivateShortCommand.pattern.exec('deactivate');
-    deactivateShortCommand.execute(state, match as RegExpExecArray);
-    state.lastMessageTo = 'Carol';
-    deactivateShortCommand.execute(state, match as RegExpExecArray);
-    expect(state.ast.events.map((e) => (e as ActivationEvent).participantId)).toEqual(['Bob', 'Carol']);
-  });
-
-  it('is a no-op with no preceding message (nothing to deactivate)', () => {
+  it('is an error with nothing activating (`Nothing to deactivate.`)', () => {
     const state = freshState();
     const match = deactivateShortCommand.pattern.exec('deactivate');
     expect(match).not.toBeNull();
     deactivateShortCommand.execute(state, match as RegExpExecArray);
     expect(state.ast.events).toHaveLength(0);
+    expect(state.executionError).toBe('Nothing to deactivate.');
   });
 });

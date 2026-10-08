@@ -55,6 +55,8 @@
 
 import type {
   ActivationGeo,
+  DelayGeo,
+  LifelineSegment,
   NewpageEvent,
   SequenceDiagramAST,
   SequenceEvent,
@@ -159,6 +161,8 @@ function clipMessage(m: MessageGeo, band: PageBand): MessageGeo | undefined {
     ...rest,
     y: shift(band, m.y),
     labelLines: m.labelLines.filter((r) => inBand(band, r.y)).map((r) => ({ ...r, y: shift(band, r.y) })),
+    // The created head goes with its arrow; its block top moves with the page.
+    ...(m.createdHead !== undefined ? { createdHead: { ...m.createdHead, y: shift(band, m.createdHead.y) } } : {}),
     ...(keepNumber ? { labelNumber: { ...labelNumber, y: shift(band, labelNumber.y) } } : {}),
   };
 }
@@ -181,11 +185,19 @@ function clipNote(n: NoteGeo, band: PageBand): NoteGeo | undefined {
   return { ...n, y: shift(band, n.y) };
 }
 
-/** CLAMP — an activation bar is a `URectangle` and nothing else. */
+/** CLAMP — a closed activation bar is a `URectangle` and nothing else. A
+ *  piece a delay left OPEN (`ActivationGeo.open`) also draws its closed ends
+ *  as horizontal `ULine`s, which `getClippedLine` drops once their y leaves
+ *  the band; its rect and sides clamp with the rest. */
 function clipActivation(a: ActivationGeo, band: PageBand): ActivationGeo | undefined {
   const span = clampSpan(band, a.y, a.height);
   if (span === undefined) return undefined;
-  return { ...a, y: span.y, height: span.height };
+  if (a.open === undefined) return { ...a, y: span.y, height: span.height };
+  const open = {
+    closeUp: a.open.closeUp && inBand(band, a.y),
+    closeDown: a.open.closeDown && inBand(band, a.y + a.height),
+  };
+  return { ...a, y: span.y, height: span.height, open };
 }
 
 /**
@@ -252,6 +264,40 @@ function shiftSpace(s: SpaceGeo, band: PageBand): SpaceGeo {
   return { ...s, y: shift(band, s.y) };
 }
 
+/** A delay's only ink upstream is its text (`ComponentRoseDelayText`), so
+ *  each run answers for itself by its anchor (`DriverTextSvg:88-90`). */
+function clipDelay(d: DelayGeo, band: PageBand): DelayGeo {
+  const labelRuns = d.labelRuns.filter((r) => inBand(band, r.y)).map((r) => ({ ...r, y: shift(band, r.y) }));
+  return { ...d, y: shift(band, d.y), labelRuns };
+}
+
+/**
+ * `UClip#getClippedLine` (`klimt/UClip.java:131-157`) on one vertical
+ * lifeline piece: both ends are clamped, and a piece with BOTH ends outside
+ * that clamps to a point is dropped (`newy1 != newy2`, `:137-140`). A dropped
+ * `DELAY_LINE` leaves nothing; a dropped `PARTICIPANT_LINE` leaves its empty
+ * titled group (`clippedOut`).
+ */
+function clipSegment(seg: LifelineSegment, band: PageBand): LifelineSegment | undefined {
+  const clamp = (y: number): number => Math.min(Math.max(y, band.top), band.bottom);
+  const y1 = shift(band, clamp(seg.y1));
+  const y2 = shift(band, clamp(seg.y2));
+  const gone = !inBand(band, seg.y1) && !inBand(band, seg.y2) && y1 === y2;
+  if (!gone) return { ...seg, y1, y2 };
+  return seg.delay ? undefined : { ...seg, y1, y2, clippedOut: true };
+}
+
+function clipSegments(segments: readonly LifelineSegment[], band: PageBand): LifelineSegment[] {
+  return segments.map((s) => clipSegment(s, band)).filter((s): s is LifelineSegment => s !== undefined);
+}
+
+function clipLifelines(
+  lifelines: Readonly<Record<string, readonly LifelineSegment[]>>,
+  band: PageBand,
+): Record<string, LifelineSegment[]> {
+  return Object.fromEntries(Object.entries(lifelines).map(([id, segs]) => [id, clipSegments(segs, band)]));
+}
+
 function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
   switch (event.kind) {
     case 'message':
@@ -268,6 +314,8 @@ function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
       return shiftSpace(event, band);
     case 'newpage':
       return clipNewpage(event, band);
+    case 'delay':
+      return clipDelay(event, band);
   }
 }
 
@@ -316,20 +364,23 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
 
   // `pageHeight + headHeight` -- where `drawU` puts the footbox row
   // (`:225-226`) and where `calculateDimensionSlow` ends the image
-  // (`:80-86`). This port spends ONE field where upstream has two: its
-  // `lifelineEndY` is both the lifeline's bottom and the footbox's top,
-  // which the clip separates by exactly the band's `+ 1` on any page but the
-  // last. The footbox/image answer is taken, so an inner page's lifelines
-  // stop 1px short of the jar's -- under the footbox that covers them.
-  const lifelineEndY = shift(band, ymax);
-  const delta = lifelineEndY - geo.lifelineEndY;
+  // (`:80-86`).
+  const footerShapeY = shift(band, ymax);
+  const delta = footerShapeY - geo.footerShapeY;
   const totalHeight = geo.totalHeight + delta;
+  // The lifelines are a SEPARATE quantity: `drawLifeLines(ugBody, fullHeight,
+  // ...)` (`:221`) draws them over the whole diagram and the clip trims them
+  // (`:213-216`; `UClip#getClippedLine` clamps a vertical line). On any page
+  // but the last that leaves them at the band's bottom, `ymax + 1` -- one
+  // pixel below the footbox top. On the last page the line ends first.
+  const lifelineEndY = shift(band, Math.min(geo.lifelineEndY, band.bottom));
 
   return {
     ...geo,
     events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
-    footerShapeY: geo.footerShapeY + delta,
+    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: clipLifelines(geo.lifelineSegments, band) } : {}),
+    footerShapeY,
     totalHeight,
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()
     // + ...` (`SequenceDiagramFileMakerTeoz.java:138-140`), i.e. the PAGE's

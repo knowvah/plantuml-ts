@@ -23,6 +23,7 @@ import type {
   SequenceEvent,
   SpaceEvent,
 } from '../../../src/diagrams/sequence/ast.js';
+import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
 
 function freshState(): ParseState {
   return {
@@ -38,6 +39,7 @@ function freshState(): ParseState {
     currentBox: null,
     boxCounter: 0,
     executionError: undefined,
+    life: newLifeState(),
   };
 }
 

@@ -78,6 +78,8 @@ import type {
   DividerGeo,
   SpaceGeo,
   NewpageGeo,
+  DelayGeo,
+  LifelineSegment,
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
@@ -141,6 +143,7 @@ function scaleParticipant(p: ParticipantGeo, k: number): ParticipantGeo {
     // unscaled left edge and baseline.
     labelRuns: p.labelRuns.map((r) => scaleRun(r, k)),
     ...(p.badge !== undefined ? { badge: { ...p.badge, width: p.badge.width * k, height: p.badge.height * k } } : {}),
+    ...(p.createY !== undefined ? { createY: p.createY * k } : {}),
   };
 }
 
@@ -170,6 +173,9 @@ function scaleMessage(m: MessageGeo, k: number): MessageGeo {
     ...(m.selfReturnX !== undefined ? { selfReturnX: m.selfReturnX * k } : {}),
     labelLines: m.labelLines.map((r) => scaleRun(r, k)),
     ...(m.labelNumber !== undefined ? { labelNumber: scaleRun(m.labelNumber, k) } : {}),
+    ...(m.createdHead !== undefined
+      ? { createdHead: { participant: scaleParticipant(m.createdHead.participant, k), y: m.createdHead.y * k } }
+      : {}),
   };
 }
 
@@ -267,7 +273,29 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleSpace(event, k);
     case 'newpage':
       return scaleNewpage(event, k);
+    case 'delay':
+      return scaleDelay(event, k);
   }
+}
+
+function scaleLifelines(
+  lifelines: Readonly<Record<string, readonly LifelineSegment[]>>,
+  k: number,
+): Record<string, LifelineSegment[]> {
+  const scaled = (segs: readonly LifelineSegment[]): LifelineSegment[] =>
+    segs.map((s) => ({ ...s, y1: s.y1 * k, y2: s.y2 * k }));
+  return Object.fromEntries(Object.entries(lifelines).map(([id, segs]) => [id, scaled(segs)]));
+}
+
+function scaleDelay(d: DelayGeo, k: number): DelayGeo {
+  return {
+    ...d,
+    y: d.y * k,
+    height: d.height * k,
+    middleX: d.middleX * k,
+    textWidth: d.textWidth * k,
+    labelRuns: d.labelRuns.map((r) => scaleRun(r, k)),
+  };
 }
 
 /**
@@ -286,6 +314,7 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
     headHeight: geo.headHeight * k,
     lifelineEndY: geo.lifelineEndY * k,
     footerShapeY: geo.footerShapeY * k,
+    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: scaleLifelines(geo.lifelineSegments, k) } : {}),
     participants: geo.participants.map((p) => scaleParticipant(p, k)),
     events: geo.events.map((e) => scaleEvent(e, k)),
     boxes: geo.boxes.map((b) => scaleBox(b, k)),

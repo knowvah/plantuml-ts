@@ -34,6 +34,8 @@ import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
+import { layoutDelay } from './sequence-delay.js';
+import type { MessageLevels } from './sequence-layout-participants.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
   groupingHeaderDisplay,
@@ -96,6 +98,10 @@ export interface EventProcessingContext {
    * which are the same answer.
    */
   lastMessageParticipants?: readonly string[] | undefined;
+  /** Where the walk records each message's two live levels for the
+   *  participant row's next pass -- see `sequence-layout-participants.ts
+   *  #MessageLevels`. */
+  messageLevels?: MessageLevels;
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */
@@ -725,32 +731,16 @@ function handleDividerEvent(event: DividerEvent, cursor: EventCursor, ctx: Event
 }
 
 /**
- * A delay reserves its component's own height and nothing else
- * (`DelayTile#getPreferredHeight:114-118`), and there are two components. A
- * bare `...` is a `ComponentRoseDelayLine`, a constant **20** (`:68-71`) that
- * this port's `messageSpacing` matched by luck; a `...text...` is a
- * `ComponentRoseDelayText`, `getTextHeight + 20` (`:72-75`) over padding
- * `topRightBottomLeft(4, 0, 4, 0)` (`:54`), i.e. `blockH + 28` at
- * `delay { FontSize 11 }` (`plantuml.skin:290-295`). The text is still not
- * DRAWN — a pre-existing element gap — but its space is now reserved.
+ * `DelayTile` (`teoz/DelayTile.java`): the tile reserves its `DELAY_TEXT`
+ * component's height -- a bare `...` included, whose `Display.empty()` makes
+ * it `0 + 4 + 4 + 20` -- and is laid out, drawn and allowed to cut the
+ * lifelines and activation bars by `sequence-delay.ts`.
  */
 function handleDelayEvent(event: DelayEvent, cursor: EventCursor, ctx: EventProcessingContext): void {
-  if (event.text === undefined) {
-    cursor.y += DELAY_LINE_HEIGHT;
-    return;
-  }
-  const spec: FontSpec = { family: ctx.theme.fontFamily, size: DELAY_FONT_SIZE };
-  const blockH = displayLines(event.text).length * ctx.measurer.measure('M', spec).height;
-  cursor.y += blockH + 2 * DELAY_PADDING_Y + DELAY_LINE_HEIGHT;
+  const geo = layoutDelay(event, cursor.y, [...ctx.participantMap.values()], ctx.theme, ctx.measurer);
+  ctx.eventGeos.push(geo);
+  cursor.y += geo.height;
 }
-
-/** `ComponentRoseDelayLine#getPreferredHeight:68-71`, and the constant term of
- *  `ComponentRoseDelayText#getPreferredHeight:72-75`. */
-const DELAY_LINE_HEIGHT = 20;
-/** `ComponentRoseDelayText:54` — `topRightBottomLeft(4, 0, 4, 0)`. */
-const DELAY_PADDING_Y = 4;
-/** `delay { FontSize 11 }` (`plantuml.skin:290-295`). */
-const DELAY_FONT_SIZE = 11;
 
 /**
  * `NewpageTile` (`teoz/NewpageTile.java:63-67`): a tile whose `YGauge` starts

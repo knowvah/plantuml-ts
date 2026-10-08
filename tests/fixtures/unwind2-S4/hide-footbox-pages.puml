@@ -1,0 +1,6 @@
+@startuml
+hide footbox
+Alice -> Bob : one
+newpage
+Alice -> Bob : two
+@enduml

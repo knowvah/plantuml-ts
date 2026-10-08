@@ -15,7 +15,9 @@
  * @see net/sourceforge/plantuml/skin/rose/ComponentRoseActiveLine.java
  */
 
-import type { ParticipantGeo, ActivationGeo } from './ast.js';
+import type { ParticipantGeo, ActivationGeo, LifelineSegment } from './ast.js';
+import { fmt } from '../../core/svg-format.js';
+import { DELAY_LINE_DASH, DELAY_LINE_GAP } from './sequence-delay.js';
 import { rect, line, escapeXmlText } from '../../core/svg.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
@@ -116,6 +118,38 @@ export function renderLifeline(
   return `${openTitledGroup(toTooltipText(p.display))}${hover}${vline}</g>`;
 }
 
+/** `ComponentRoseDelayLine#drawInternalU` (`:59-65`): one vertical line at
+ *  `(int) (width / 2)` = 0 of a 1-wide component, so on the lifeline itself,
+ *  dashed `delay { LineStyle 1-4 }`. It opens no `<g>`. */
+function renderDelayLine(p: ParticipantGeo, seg: LifelineSegment, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  return line(p.centerX, seg.y1, p.centerX, seg.y2, {
+    stroke: theme.colors.lifeline,
+    strokeDasharray: `${fmt(DELAY_LINE_DASH * k)},${fmt(DELAY_LINE_GAP * k)}`,
+  });
+}
+
+/**
+ * One participant's lifeline, piece by piece -- `MutingLine#drawLine`
+ * (`teoz/MutingLine.java:73-92`); see `sequence-delay.ts#lifelineSegments`.
+ * A `PARTICIPANT_LINE` piece a page clipped away entirely still opens its
+ * titled group (`ComponentRoseLine` starts it before the driver drops the
+ * shapes), so it is emitted empty.
+ */
+export function renderLifelineSegments(
+  p: ParticipantGeo,
+  segments: readonly LifelineSegment[],
+  theme: ScaledTheme,
+): string {
+  return segments
+    .map((seg) => {
+      if (seg.delay) return renderDelayLine(p, seg, theme);
+      if (seg.clippedOut === true) return `${openTitledGroup(toTooltipText(p.display))}</g>`;
+      return renderLifeline(p, seg.y1, seg.y2, theme);
+    })
+    .join('');
+}
+
 /**
  * Upstream: `ComponentRoseActiveLine#drawInternalU` (`:71-105`).
  *
@@ -160,12 +194,29 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
   // cx=57.075: its golden runs x=52.075, 57.075, 62.075, 67.075.
   const x = act.lifelineX - half + (act.level - 1) * half;
   const fill = act.color ?? theme.colors.activation;
+  if (act.open !== undefined) return `${openTitledGroup('')}${renderOpenBar(act, x, fill, theme)}</g>`;
   const bar = rect(x, act.y, half * 2, act.height, {
     fill,
     stroke: theme.colors.border,
   });
 
   return `${openTitledGroup('')}${bar}</g>`;
+}
+
+/**
+ * The `closeUp && closeDown` false branch of `ComponentRoseActiveLine
+ * #drawInternalU` (`:88-101`): the rect is filled AND stroked with the back
+ * colour, then the two sides are drawn, then whichever ends are closed.
+ */
+function renderOpenBar(act: ActivationGeo, x: number, fill: string, theme: ScaledTheme): string {
+  const width = ACTIVATION_HALF_WIDTH * theme.scaleK * 2;
+  const style = { stroke: theme.colors.border, strokeWidth: theme.scaleK };
+  const bottom = act.y + act.height;
+  const box = rect(x, act.y, width, act.height, { fill, stroke: fill });
+  const sides = line(x, act.y, x, bottom, style) + line(x + width, act.y, x + width, bottom, style);
+  const up = act.open!.closeUp ? line(x, act.y, x + width, act.y, style) : '';
+  const down = act.open!.closeDown ? line(x, bottom, x + width, bottom, style) : '';
+  return box + sides + up + down;
 }
 
 /**
@@ -193,8 +244,7 @@ export function renderActivation(act: ActivationGeo, theme: ScaledTheme): string
 export function renderLifelinePass(
   participants: readonly ParticipantGeo[],
   activations: readonly ActivationGeo[],
-  headHeight: number,
-  lifelineEndY: number,
+  lifelineOf: (p: ParticipantGeo) => readonly LifelineSegment[],
   theme: ScaledTheme,
 ): string {
   return participants
@@ -203,7 +253,7 @@ export function renderLifelinePass(
         .filter((a) => a.participantId === p.id)
         .map((a) => renderActivation(a, theme))
         .join('');
-      return renderLifeline(p, headHeight, lifelineEndY, theme) + boxes;
+      return renderLifelineSegments(p, lifelineOf(p), theme) + boxes;
     })
     .join('');
 }
