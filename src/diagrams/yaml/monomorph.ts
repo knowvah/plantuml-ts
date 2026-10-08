@@ -7,6 +7,8 @@
  *   net.sourceforge.plantuml.yaml.parser.MonomorphToJson
  */
 
+import { JsonObject } from '../json/JsonObject.js';
+
 // ---------------------------------------------------------------------------
 // MonomorphType
 // ---------------------------------------------------------------------------
@@ -175,19 +177,20 @@ function convertToArray(input: Monomorph): unknown[] {
   return result;
 }
 
-function convertToObject(input: Monomorph): Record<string, unknown> {
-  const obj: Record<string, unknown> = {};
+/** `MonomorphToJson.java:69-86`: `add` per `LinkedHashMap` key, in order. */
+function convertToObject(input: Monomorph): JsonObject {
+  const obj = new JsonObject();
   for (const key of input.keys()) {
     const element = input.getMapValue(key);
     switch (element.type) {
       case 'SCALAR':
-        obj[key] = element.getValue();
+        obj.add(key, element.getValue());
         break;
       case 'MAP':
-        obj[key] = convertToObject(element);
+        obj.add(key, convertToObject(element));
         break;
       case 'LIST':
-        obj[key] = convertToArray(element);
+        obj.add(key, convertToArray(element));
         break;
       case 'UNDETERMINATE':
         throw new Error('MAP value is UNDETERMINATE');

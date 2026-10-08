@@ -5,6 +5,7 @@
  */
 
 import type { HighlightDirective } from './ast.js';
+import type { JsonObject } from './JsonObject.js';
 import type {} from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 
@@ -48,7 +49,7 @@ export function getDisplayValue(v: unknown): DisplayValue {
 // Tree walking
 // ---------------------------------------------------------------------------
 
-export type JsonContainer = Record<string, unknown> | unknown[];
+export type JsonContainer = JsonObject | unknown[];
 
 export interface FlatNode {
   id: string;
@@ -62,7 +63,7 @@ export function containerEntries(v: JsonContainer): Array<[string, unknown]> {
   if (Array.isArray(v)) {
     return v.map((item, i) => [String(i), item]);
   }
-  return Object.entries(v);
+  return v.members();
 }
 
 /**

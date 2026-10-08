@@ -1,0 +1,11 @@
+@starthcl
+m {
+  a = "1"
+}
+o {
+  c = "3"
+}
+m {
+  b = "2"
+}
+@endhcl

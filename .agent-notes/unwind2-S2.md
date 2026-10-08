@@ -11,7 +11,7 @@
   hand-written tokenizer "port".
 - **Confidence**: High (tests/fixtures/unwind2-S2/hcl-tab-indent, hcl-trailing-token)
 
-## Observation: json-family key column is not tab-aware (open)
+## Observation: json-family key column is not tab-aware (FIXED unwind2-S2b f42b3053d)
 - **Context**: hcl-tab-indent after the tokenizer fix.
 - **Finding**: key text lands at the jar's x=71 (keyAtoms walk tabs) but
   `TextBlockJson.ts#cellMetrics` measures `keyWidth` with the raw bounder;
@@ -21,7 +21,7 @@
   allowance in tests/unit/hcl/unwind2-s2-jar.test.ts.
 - **Confidence**: High
 
-## Observation: duplicate object keys collapse in the whole json family (open)
+## Observation: duplicate object keys collapse in the whole json family (FIXED unwind2-S2b 80f41be3c)
 - **Context**: probing HclParser `JsonObject.add` semantics.
 - **Finding**: `r { a = "1"  a = "2" }` -> jar draws two rows `a|1`, `a|2`
   (minimal-json `JsonObject.add` appends without dedup). Our AST root is a
@@ -39,3 +39,12 @@
   affect output -- no `<style>` reaches an hcl theme.
 - **Impact**: dead-code candidate for a src/core owner (grep first).
 - **Confidence**: Medium (not traced through every caller of the override)
+
+## Observation: json-family values are JsonObject, not plain objects (unwind2-S2b)
+- **Context**: porting minimal-json's ordered, duplicate-keeping JsonObject.
+- **Finding**: `JsonDiagramAST.root` objects are now `src/diagrams/json/JsonObject.ts`
+  instances. Tests compare through `tests/helpers/json-object.ts`
+  (`plainOf` collapses duplicates, `jsonObjectOf` builds inputs). yaml's own
+  dedup is upstream's LinkedHashMap, not JsonObject's.
+- **Impact**: any new consumer must iterate `members()`, never `Object.entries`.
+- **Confidence**: High

@@ -3,6 +3,7 @@ import { layoutJson } from '../../../src/diagrams/json/layout.js';
 import type { JsonDiagramAST, HighlightDirective } from '../../../src/diagrams/json/ast.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import { FixedMeasurer } from '../../../src/core/measurer.js';
+import { jsonObjectOf } from '../../helpers/json-object.js';
 import type { FontSpec, StringMeasurer } from '../../../src/core/measurer.js';
 import { setLayoutInputObserver } from '../../../src/core/graph-layout.js';
 import type { DotInputGraph } from '../../../src/core/graph-layout.js';
@@ -20,7 +21,7 @@ const measurer = new FixedMeasurer(8, 14);
 function makeAst(root: unknown, highlights: ReadonlyArray<readonly string[]> = [], parseError = false): JsonDiagramAST {
   // Convert plain string[][] to HighlightDirective[] with styleClass: ''
   const directives: HighlightDirective[] = highlights.map((path) => ({ path, styleClass: '' }));
-  return { root, parseError, highlights: directives };
+  return { root: jsonObjectOf(root), parseError, highlights: directives };
 }
 
 // ---------------------------------------------------------------------------
@@ -537,7 +538,7 @@ describe('layoutJson', () => {
 
   it('highlight directive with styleClass "h1" produces row.highlight === "h1"', () => {
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple', size: 'Large' },
+      root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
@@ -548,7 +549,7 @@ describe('layoutJson', () => {
 
   it('highlight directive with no styleClass produces row.highlight === ""', () => {
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple' },
+      root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: '' }],
     };

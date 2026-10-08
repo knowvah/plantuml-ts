@@ -16,6 +16,8 @@
  *  - `HclParser.java:77-89`: a top-level term sequence must end in `{`; an
  *    `=` throws, the factory swallows it (`HclDiagramFactory.java:81-83`)
  *    and the null data is the error page (`hcl-top-assign-*`).
+ *  - `hcl-tab-indent`'s key column is tab-aware since unwind2-S2b
+ *    (`TextBlockJson.ts#cellMetrics`).
  *  - `HclSource.java:48-53` appends each line's characters with NO separator
  *    (`hcl-join-*`).
  */
@@ -28,30 +30,6 @@ import { DeterministicMeasurer } from '../../../src/core/measurer-deterministic.
 import { compareSvg } from '../../oracle/svg-conformance/compare.js';
 
 const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind2-S2');
-
-/**
- * Fixtures whose residual is a DIFFERENT, still-open json-family defect,
- * outside unwind2-S2's write-set. `hcl-tab-indent`: the tokenizer now keeps
- * the tab in the key (`HclParser.java:235`) and the key text lands at the
- * jar's x=71, but `TextBlockJson.ts#cellMetrics` measures `keyWidth` with
- * the raw bounder, not tab-aware (`AtomText#getWidth`, as the value column
- * already is), so the key column is 56px narrower than the jar's.
- */
-const OTHER_DEFECT: Readonly<Record<string, readonly string[]>> = {
-  'hcl-tab-indent': [
-    'svg/@viewBox[2]',
-    'svg/@width',
-    'svg/g[1]/rect[1]/@width',
-    'svg/g[1]/text[2]/@x',
-    'svg/g[1]/line[1]/@x1',
-    'svg/g[1]/line[1]/@x2',
-    'svg/g[1]/line[2]/@x2',
-    'svg/g[1]/text[4]/@x',
-    'svg/g[1]/line[3]/@x1',
-    'svg/g[1]/line[3]/@x2',
-    'svg/g[1]/rect[2]/@width',
-  ],
-};
 
 /**
  * Multi-node fixtures: the json family lays out through `SmetanaForJson`
@@ -82,6 +60,6 @@ describe('unwind2-S2 — hcl style, top-level assignment, line joining', () => {
       expect(paths.filter((p) => !SMETANA_POSITIONAL.test(p))).toEqual([]);
       return;
     }
-    expect(paths).toEqual(OTHER_DEFECT[name] ?? []);
+    expect(paths).toEqual([]);
   });
 });

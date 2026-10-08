@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest';
 import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 function makeSource(lines: string[]): UmlSource {
   return { lines, type: 'hcl' };
@@ -24,7 +25,7 @@ describe('parseHcl — directive lines (unwind-U1)', () => {
   it('a leading `title X` is consumed and never set', () => {
     const ast = parseHcl(makeSource(['title My HCL', ...BLOCK]));
     expect(isEmpty(ast.annotations!)).toBe(true);
-    expect(ast.root).toEqual({ key: 'value' });
+    expect(plainOf(ast.root)).toEqual({ key: 'value' });
   });
 
   it('`caption X` is payload: it joins the module name, dropped with one module', () => {
@@ -32,8 +33,8 @@ describe('parseHcl — directive lines (unwind-U1)', () => {
     expect(isEmpty(two.annotations!)).toBe(true);
     // HclSource.java:48-53 joins lines with no separator, so `c` runs into
     // `resource` (jar: unwind2-S2/hcl-join-caption).
-    expect(Object.keys(two.root as object)).toEqual(['caption cresource "x"', 'other']);
-    expect(parseHcl(makeSource(['caption c', ...BLOCK])).root).toEqual({ key: 'value' });
+    expect(Object.keys(plainOf(two.root) as object)).toEqual(['caption cresource "x"', 'other']);
+    expect(plainOf(parseHcl(makeSource(['caption c', ...BLOCK])).root)).toEqual({ key: 'value' });
   });
 
   it('a title AFTER the payload is payload, and fails to parse (HclParser.java:88)', () => {

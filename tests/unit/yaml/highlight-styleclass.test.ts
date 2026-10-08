@@ -8,6 +8,7 @@ import { defaultTheme, deepMergeTheme } from '../../../src/core/theme.js';
 import { FormulaMeasurer } from '../../../src/core/measurer.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
 import type { JsonDiagramAST } from '../../../src/diagrams/json/ast.js';
+import { jsonObjectOf } from '../../helpers/json-object.js';
 
 function makeYamlSource(lines: string[]): UmlSource {
   return { lines, type: 'yaml' };
@@ -77,7 +78,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
       colors: { graph: { json: { highlightClasses: { h1: { background: '#0F0' } } } } },
     });
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple', size: 'Large' },
+      root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
@@ -88,7 +89,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
 
   it('row.highlight is "" when directive has no styleClass', () => {
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple' },
+      root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: '' }],
     };
@@ -99,7 +100,7 @@ describe('layoutJson — propagates styleClass to row.highlight', () => {
 
   it('non-highlighted rows have highlight=false', () => {
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple', size: 'Large' },
+      root: jsonObjectOf({ fruit: 'Apple', size: 'Large' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
@@ -119,7 +120,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
       colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF' } } } } },
     });
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple' },
+      root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
@@ -133,7 +134,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
   it('falls back to default highlight color when class not defined in highlightClasses', () => {
     // h1 class present in directive but not in theme.highlightClasses
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple' },
+      root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };
@@ -148,7 +149,7 @@ describe('renderJson — uses highlightClasses background for named class', () =
       colors: { graph: { json: { highlightClasses: { h1: { background: '#ABCDEF', fontColor: '#F00' } } } } },
     });
     const ast: JsonDiagramAST = {
-      root: { fruit: 'Apple' },
+      root: jsonObjectOf({ fruit: 'Apple' }),
       parseError: false,
       highlights: [{ path: ['fruit'], styleClass: 'h1' }],
     };

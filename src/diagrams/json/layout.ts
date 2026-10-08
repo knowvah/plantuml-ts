@@ -12,7 +12,9 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from '../../core/graph-layout.js';
-import { measureNode, recordLabelFor } from './TextBlockJson.js';
+import { measureNode } from './TextBlockJson.js';
+import { recordLabelFor } from './record-label.js';
+import type { JsonObject } from './JsonObject.js';
 import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
@@ -151,7 +153,7 @@ import { documentDimensions, ENSURE_VISIBLE_BUMP } from './document-dimensions.j
  */
 function normalizeRoot(root: unknown): JsonContainer {
   if (typeof root !== 'object' || root === null) return [root] as JsonContainer;
-  const isEmpty = Array.isArray(root) ? root.length === 0 : Object.keys(root).length === 0;
+  const isEmpty = Array.isArray(root) ? root.length === 0 : (root as JsonObject).size === 0;
   return (isEmpty ? [''] : root) as JsonContainer;
 }
 
