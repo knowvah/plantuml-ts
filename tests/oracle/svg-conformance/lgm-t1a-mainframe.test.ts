@@ -85,9 +85,12 @@ describe('lgm-T1a: the conformance harnesses compose chrome as production does',
   const MEASURER = new DeterministicMeasurer();
   const source = (name: string): string => readFileSync(join(DIR, `${name}.puml`), 'utf8');
 
-  it.each(['seq-frame-all', 'seq-frame-style', 'seq-title-only'])('%s: renderFixtureSequence === renderSync', (name) => {
-    expect(renderFixtureSequence(source(name), MEASURER)).toBe(renderSync(source(name), { measurer: MEASURER }));
-  });
+  it.each(['seq-frame-all', 'seq-frame-style', 'seq-title-only'])(
+    '%s: renderFixtureSequence === renderSync',
+    (name) => {
+      expect(renderFixtureSequence(source(name), MEASURER)).toBe(renderSync(source(name), { measurer: MEASURER }));
+    },
+  );
 
   it('class-frame: renderFixtureClass === renderSync', () => {
     expect(renderFixtureClass(source('class-frame'), MEASURER)).toBe(
