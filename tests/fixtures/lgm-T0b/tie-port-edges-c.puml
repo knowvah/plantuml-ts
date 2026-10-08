@@ -1,0 +1,10 @@
+@startuml
+class HashMap<K,V>
+HashMap [b2] ..> [h] V1
+HashMap [e5] --> [e] V2
+HashMap [a1] --> [g] V3
+HashMap [c3] ..> [h] V4
+MoreComplex [x: String] --> Y
+MoreComplex [y: int] ..> Y
+MoreComplex [x: String] --> X
+@enduml
