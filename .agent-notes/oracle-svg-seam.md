@@ -1,0 +1,7 @@
+## Observation: deterministic-text seam reported matchesProperty("SVG") = false
+- **Context**: user-ordered fix (2026-10-08) of the 42x42 `{{ }}` slot; fork commit 37c07dce45a on `dot-output` (seam #3), patch `oracle/patches/0003-oracle-svg-property.patch`.
+- **Finding**: `EmbeddedDiagram.java:129` is the ONLY StringBounder caller of `matchesProperty("SVG")`, so the fix cannot move any other measurement. Staged jar (`/private/tmp/claude-501/oracle-svg-seam/plantuml-oracle.jar`): 39 non-`{{` control fixtures byte-identical; 38 cached fixtures contain `{{`, 34 of them reproduce the cache exactly with the OLD jar and change with the new one (seam isolated).
+- **Finding**: 4 fixtures render non-deterministically on the pinned jar itself — the nested embedded image's width changes run to run (kovaxi-11-reti348: 934/873/963 px): usecase/kovaxi-11-reti348, usecase/zidebi-71-nocu387, activity/runima-82-jigi009, activity/pixisi-38-kixa563. Their caches can never be reproduced. Mechanism not yet isolated.
+- **Finding**: batching many .puml into one JVM is ~100x faster (38 in 1.8 s) but NOT safe for `{{ }}` fixtures — zidebi rendered 875 px batched vs 895 solo; JVM static state leaks between diagrams. Batch only fixtures without `{{`.
+- **Finding**: a copy of `scripts/oracle-render.sh` outside the repo silently loses Batik (REPO derives from the script's own dir). Override REPO, not just JAR.
+- **Confidence**: High (controls, old-jar reproduction, repeated solo renders).
