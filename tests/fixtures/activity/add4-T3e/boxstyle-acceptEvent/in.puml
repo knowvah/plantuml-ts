@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:acceptEvent box
+second line; <<acceptEvent>>
+:one line acceptEvent; <<acceptEvent>>
+:after;
+stop
+@enduml

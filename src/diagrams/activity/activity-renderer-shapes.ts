@@ -1,6 +1,7 @@
 /**
  * Activity node-shape rendering: per-shape SVG emitters (start/stop/end,
- * action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the
+ * action -- plain or `BoxStyle`d, `activity-renderer-signal-shapes.ts` --,
+ * bar, diamond, hexagon, note) plus the
  * renderNode dispatcher and shared label/color helpers. Split out of
  * `renderer.ts` (line cap); text `x` math lives in `activity-text-placement`.
  */
@@ -42,25 +43,18 @@ import {
   renderIfSplitShape,
   diamondColors,
 } from './activity-renderer-if-shapes.js';
-import {
-  renderSignalLabel,
-  renderChevronLeft,
-  renderChevronRight,
-  renderParallelogram,
-} from './activity-renderer-signal-shapes.js';
+import { renderBoxStyleAction } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
 import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
-import { floorActionLineHeight } from './tiles/gtile-action.js';
-import { actionLines, centeredBaselines, actionRuleFields } from './activity-renderer-line-heights.js';
+import { boxStyleName, floorActionLineHeight } from './tiles/gtile-action.js';
 import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
 
-// Pure-move re-exports (500-line splits T2/T1c/T3f): these symbols now live
-// in `activity-renderer-signal-shapes.ts`/`activity-renderer-terminals.ts`/
-// `activity-renderer-if-shapes.ts` respectively, each importing `actColors`/
+// Pure-move re-exports (500-line splits T1c/T3f): these symbols now live in
+// `activity-renderer-terminals.ts`/`activity-renderer-if-shapes.ts`
+// respectively, each importing `actColors`/
 // `centeredFirstBaselineY` BACK from this file (safe circularity: function
 // definitions only, never called at module-load time) -- existing importers
 // of these names are unchanged.
-export { renderSignalLabel, renderChevronLeft, renderChevronRight, renderParallelogram };
 export { renderStart, renderStop, renderEnd, renderSpot };
 export { renderDiamond };
 /** `rx`/`ry` are each HALF the resolved `RoundCorner` (`URectangle#build()
@@ -157,47 +151,7 @@ export function renderLabel(label: string, cx: number, cy: number, theme: Theme,
     fontSize: size,
     fill: activityFontColor(theme, opts.sname),
     ...linkStyleFields(theme),
-    floorCoordinated: opts.sname === 'activity',
   });
-}
-
-/** KLIMT-FLOOR/KLIMT-ACT/STRIPE: `'activity'` ONLY gets heterogeneous
- *  per-line baselines ({@link actionLines}/{@link centeredBaselines}) --
- *  a heading/floor/HR cascade each grow/shrink/reclassify ONE line
- *  (`GtileDiamond`'s sizer has none yet, ALIGN-DIAMOND unassigned; every
- *  other sname keeps its prior closed form). `ruleWidth` rides
- *  `ActivityTextStyle` so a per-line HR draws its real rule(s). */
-export function renderMultilineText(
-  lines: string[],
-  cx: number,
-  cy: number,
-  theme: Theme,
-  opts: ActivityTextOpts,
-): string {
-  const size = opts.fontSize ?? activityFontSize(theme, 'activity');
-  const isAction = opts.sname === 'activity';
-  const baselines = isAction
-    ? centeredBaselines(cy, actionLines(lines, theme, size))
-    : lines.map((_, i) => centeredFirstBaselineY(cy, size, lines.length) + size * i);
-  const fill = activityFontColor(theme, opts.sname);
-  // add2 T3h, families K/F -- see renderLabel's own doc comment above.
-  const fontFamily = activityFontFamily(theme, opts.sname);
-  const link = linkStyleFields(theme);
-  const ruleFields = isAction ? actionRuleFields(cx, opts.width, actColors(theme).nodeBorder) : {};
-  return lines
-    .map((ln, i) => {
-      const lineWidth = measureLineWidth(theme, size, ln);
-      const x = activityTextLineX(theme, cx, lineWidth, opts);
-      return drawActivityText(x, baselines[i]!, ln, {
-        fontFamily,
-        fontSize: size,
-        fill,
-        ...link,
-        floorCoordinated: isAction,
-        ...ruleFields,
-      });
-    })
-    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -255,6 +209,15 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   });
   // D5 Sheet spike (`FtileBox.java:178-181`); `renderActionLabel` doc.
   return box + renderActionLabel(node.label ?? '', theme, actionSize, node);
+}
+
+/** `FtileBox#drawU`'s `boxStyle.drawMe` (`FtileBox.java:222`): PLAIN is the
+ *  rounded rectangle ({@link renderAction}); every other `BoxStyle`
+ *  (`Stereogroup#getBoxStyle`, `BoxStyle.java:126-133`) draws its own
+ *  outline (`activity-renderer-signal-shapes.ts`). */
+function renderActionBox(node: ActivityNodeGeo, theme: Theme): string {
+  const style = boxStyleName(node.stereotype);
+  return style === undefined ? renderAction(node, theme) : renderBoxStyleAction(node, theme, style);
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
@@ -364,10 +327,7 @@ export function renderNode(node: ActivityNodeGeo, theme: Theme): string {
     case 'end':
       return renderEnd(node, theme);
     case 'action':
-      if (node.stereotype === 'input') return renderChevronLeft(node, theme);
-      if (node.stereotype === 'output') return renderChevronRight(node, theme);
-      if (node.stereotype === 'save') return renderParallelogram(node, theme);
-      return renderAction(node, theme);
+      return renderActionBox(node, theme);
     case 'break':
       // `break` is a flow-control marker — it has no visible glyph in
       // upstream PlantUML. The layout still places a zero-area anchor for

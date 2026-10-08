@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5307 exported names.
+1406 modules · 5301 exported names.
 
 ## `src/`
 
@@ -1048,8 +1048,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondLineWidth`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
 | `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
-| `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
-| `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
+| `activity-renderer-shapes.ts` | `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action -- plain or `BoxStyle`d, `activity-renderer-signal-shapes.ts` --, bar, diamond, hexagon, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-signal-shapes.ts` | `renderBoxStyleAction` | SDL/UML box styles (`:label; <<input>>` etc.): an `FtileBox` whose outline is `boxStyle.drawMe(ug, widthTotal, heightTotal, shadowing, roundCorner)` (`FtileBox.java:222`) instead of the PLAIN rounded rectangle, with the label drawn through |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
 | `activity-renderer-text.ts` | `ActivityTextStyle`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
@@ -1179,7 +1179,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `GtileAction` |  |
+| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `boxStyleName`, `boxStyleShield`, `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-empty.ts` | `GtileDiamondEmpty` |  |
 | `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `GtileDiamondInside` |  |

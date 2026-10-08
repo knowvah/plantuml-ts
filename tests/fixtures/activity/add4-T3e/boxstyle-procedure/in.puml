@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:procedure box
+second line; <<procedure>>
+:one line procedure; <<procedure>>
+:after;
+stop
+@enduml

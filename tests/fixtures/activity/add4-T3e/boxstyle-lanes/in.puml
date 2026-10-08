@@ -1,0 +1,10 @@
+@startuml
+|A|
+start
+:in lane A; <<input>>
+|B|
+:accept in B; <<acceptEvent>>
+:time; <<timeEvent>>
+|A|
+stop
+@enduml
