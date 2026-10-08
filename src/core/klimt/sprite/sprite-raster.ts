@@ -195,8 +195,8 @@ const DEFAULT_SCALE = 1;
  * (`net/atmp/PixelImage.java:69-78`) resamples once, through
  * `PortableImageAwt#scale` (`TYPE_BILINEAR`, `SpriteMonochrome.java:207`).
  * {@link scaleBilinear} reproduces that resample (its doc records the
- * measured residual), so the PNG's IHDR size is the jar's; the DEFLATE
- * stream is not (`png-encoder.ts`).
+ * measured residual), so the PNG's IHDR size is the jar's, and so are its
+ * bytes for equal pixels (`png-encoder.ts`, unwind2-S6).
  */
 export function spriteToPngDataUri(
   sprite: SpriteLike,
