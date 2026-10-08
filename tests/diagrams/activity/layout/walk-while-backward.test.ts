@@ -30,7 +30,7 @@ const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Ar
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}`, groupScope: []  };
+  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
 }
 
 describe('walkWhile — backward unset: identical to the pre-T3h shape', () => {
@@ -91,9 +91,17 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     const bodyBottomY = bY + body.height;
     const y1bis = Math.max(backFrom.y, bodyBottomY) + 12;
     const backPos = { x: 0 + tile.backwardOffsetX, y: 0 + tile.backwardOffsetY };
-    const backSouth = { x: backPos.x + backward.getCoord(SOUTH_HOOK).x, y: backPos.y + backward.getCoord(SOUTH_HOOK).y };
+    const backSouth = {
+      x: backPos.x + backward.getCoord(SOUTH_HOOK).x,
+      y: backPos.y + backward.getCoord(SOUTH_HOOK).y,
+    };
 
-    expect(out.edges[1]!.points).toEqual([backFrom, { x: backFrom.x, y: y1bis }, { x: backSouth.x, y: y1bis }, backSouth]);
+    expect(out.edges[1]!.points).toEqual([
+      backFrom,
+      { x: backFrom.x, y: y1bis },
+      { x: backSouth.x, y: y1bis },
+      backSouth,
+    ]);
     // The SAME reservation `ConnectionBackSimple`/`ConnectionBackEmpty` draw,
     // at the SAME (backFrom.x, y1bis) elbow (`hexagon-reservations.ts
     // #whileHexagonReservation`'s own doc).
@@ -151,7 +159,10 @@ describe('walkWhile — backward set (FtileWhile.java:154-161,313-408,561-562)',
     const hY = 0 + tile.headerOffsetY;
     const headerEast = { x: hX + header.getCoord(EAST_HOOK).x, y: hY + header.getCoord(EAST_HOOK).y };
     const backPos = { x: 0 + tile.backwardOffsetX, y: 0 + tile.backwardOffsetY };
-    const backNorth = { x: backPos.x + backward.getCoord(NORTH_HOOK).x, y: backPos.y + backward.getCoord(NORTH_HOOK).y };
+    const backNorth = {
+      x: backPos.x + backward.getCoord(NORTH_HOOK).x,
+      y: backPos.y + backward.getCoord(NORTH_HOOK).y,
+    };
 
     expect(out.edges[2]!.points).toEqual([backNorth, { x: backNorth.x, y: headerEast.y }, headerEast]);
     expect(out.edges[2]!.emphasize).toBeUndefined();

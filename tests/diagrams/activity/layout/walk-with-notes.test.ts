@@ -31,7 +31,7 @@ function stubTile(width: number, height: number): Tile {
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}`, groupScope: [] };
+  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
 }
 
 describe('walkWithNotes — one LEFT note: margin-box reservation + note position', () => {
@@ -58,7 +58,6 @@ describe('walkWithNotes — one LEFT note: margin-box reservation + note positio
     expect(note.x).toBe(10);
     expect(note.y).toBe(t.leftOffsetY + 10);
   });
-
 });
 
 describe('walkWithNotes — two stacked RIGHT notes: one reservation per entry', () => {

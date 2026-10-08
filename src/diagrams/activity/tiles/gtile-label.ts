@@ -21,6 +21,11 @@ export class GtileLabel extends TileLeaf {
   readonly name: string;
   readonly width = 0;
   readonly height = 0;
+  /** `false` when the parent draws this tile through a direct `drawU`
+   *  (`UGraphicDispatchFtile` never sees it); set once by
+   *  {@link markDecoratedSoleChild} right after construction, read by
+   *  `layout/tile-coordinates.ts`. */
+  dispatched = true;
 
   constructor(node: ActivityLabel) {
     super();

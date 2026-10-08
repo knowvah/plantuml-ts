@@ -16,7 +16,7 @@ import type {} from '../../core/dispatcher.js';
 import { path, linkWrap } from '../../core/svg.js';
 import {} from '../../core/usymbol-shapes.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
-import {} from './class-monochrome.js';
+import {} from '../../core/klimt/color/fragment-color-mapper.js';
 import { buildEdgeArrowheads, decorName, applyDecorTrim, buildMiddleDecorMarkup } from './renderer-arrowhead.js';
 import type { ContactRect } from './renderer-arrowhead-contact.js';
 import { looksLikeRevertedForSvg, looksLikeNoDecorAtAllSvg } from '../../core/svek/extremity/link-decor.js';

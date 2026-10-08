@@ -11,14 +11,8 @@ import type { Paint } from '../../core/paint.js';
 import type {} from '../../core/dispatcher.js';
 import { rect, path, polygon } from '../../core/svg.js';
 import { renderNodeLabel } from '../../core/latex.js';
-import {
-  drawActivityText,
-  drawActivityTextLines,
-  renderCreoleTableGrid,
-  type ActivityTextStyle,
-} from './activity-renderer-text.js';
+import { drawActivityText, drawActivityTextLines, type ActivityTextStyle } from './activity-renderer-text.js';
 import { renderComposite as renderCompositeFrame } from './activity-renderer-composite.js';
-import { NOTE_MARGIN_Y } from './activity-layout-constants.js';
 import {
   noteFoldPath,
   noteBodyNormal,
@@ -271,20 +265,7 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
   if (codeText !== null) return box + codeText;
 
   // D5 Sheet spike (`FtileBox.java:178-181`); `renderActionLabel` doc.
-  const sheetText = renderActionLabel(label, theme, actionSize, node);
-  if (sheetText !== null) return box + sheetText;
-
-  const lines = label.split('\n');
-  // D1/D9: the single-line baseline is the N=1 case of the SAME
-  // `centeredFirstBaselineY` the multi-line branch already uses, not the
-  // old `cy + actionSize / 3` hand-rounding (`rarodo-65-fudu505`: box
-  // `rect.y + 19.333` reduces to `cy + actionSize * 5/18` here, not
-  // `cy + actionSize/3` -- a 0.667px error at `actionSize=12`).
-  const labelEl =
-    lines.length > 1
-      ? renderMultilineText(lines, cx, cy, theme, opts)
-      : renderLabel(label, cx, centeredFirstBaselineY(cy, floored, 1), theme, opts);
-  return box + labelEl + renderCreoleTableGrid(node, lines, actionSize, theme);
+  return box + renderActionLabel(label, theme, actionSize, node);
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay
@@ -341,11 +322,6 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const { x, y, width: w, height: h } = node;
   const noteFill = noteFillOf(node, theme); // add4-T1c: a note's own `#color`
   const stroke = theme.colors.border;
-  // The ROOT `note { FontSize 13; LineThickness 0.5 }` block (plantuml.skin
-  // :323,325): an activity note resolves `SName.note` under `activityDiagram`
-  // (`FtileWithNoteOpale.java:89`, `FtileNoteAlone.java:77`), which declares
-  // no `note` override, so root stands -- the size `gtile-note.ts` measured.
-  const noteSize = activityFontSize(theme, 'note');
   const spike = node.spikeTip;
   const paint = { fill: noteFill, stroke, strokeWidth: NOTE_LINE_THICKNESS };
   // `node.notePosition === 'left'` means the NOTE sits left of its target,
@@ -366,32 +342,8 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
   const label = node.label ?? '';
 
   // add3-T3d: `FtileWithNoteOpale.java:147-150` draws via the real creole
-  // Sheet -- `renderNoteLabel`'s own doc (geometric fallback for a note
-  // NOT sized by the matching `measureOpaleCreole`, e.g. NOTE-MULTI).
-  const sheetLabel = renderNoteLabel(label, theme, { x, y, width: w, height: h }, stroke);
-  if (sheetLabel !== null) return body + sheetLabel;
-
-  const lines = label.split('\n');
-  // `Opale.java:56` -- `marginX1 = 6`; `:127` --
-  // `textBlock.drawU(ug.apply(new UTranslate(marginX1, marginY)))`. Was an
-  // unsourced `x + 4`.
-  const labelX = x + 6;
-  // `Opale.java:58`'s `marginY = 5` is the text BLOCK's own top inset; the
-  // first line's baseline is that same ascent-based reduction every other
-  // single/multi-line label in this file uses (`ASCENT_FRACTION`, D1/D9) --
-  // not the old unsourced `NOTE_FOLD` reuse, which put the baseline 5.889px
-  // low on a single-line note (T2f mechanism 3, `volefo-41-tolo996`).
-  const firstBaselineY = y + NOTE_MARGIN_Y + noteSize * ASCENT_FRACTION;
-  const textStyle = {
-    fontFamily: activityFontFamily(theme, 'note'),
-    fontSize: noteSize,
-    fill: activityFontColor(theme, 'note'),
-  };
-  const labelEl =
-    lines.length > 1
-      ? textLines(lines, labelX, firstBaselineY, noteSize, textStyle)
-      : drawActivityText(labelX, firstBaselineY, label, textStyle);
-  return body + labelEl;
+  // Sheet -- `renderNoteLabel`'s own doc.
+  return body + renderNoteLabel(label, theme, { x, y, width: w, height: h }, stroke);
 }
 
 /** The root `composite { LineColor black; BackgroundColor transparent;

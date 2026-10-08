@@ -277,7 +277,6 @@ function buildOut(): Out {
     edgeMeta: [],
     reservations: [],
     nextId: (prefix: string) => `${prefix}-${++idCounter}`,
-    groupScope: [],
   };
 }
 

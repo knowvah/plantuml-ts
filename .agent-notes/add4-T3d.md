@@ -191,3 +191,76 @@ None. No code is committed, so the style/text/swimlane census is unchanged.
 - Empty diamond1 west/east labels (getLabelPositive of Display.NULL, also 2p x 2p) are still omitted by `conditional-builder.ts`; they only matter when 2p exceeds the diamond1 offset (diff1/diff2) or diamondOutY (suppHeight). No fixture exercises it.
 - `gtile-if-down.ts` diamond2 (`getShape2(useNorth=true)`) has the same padded tbout north/east labels; not in write-set. fukika residuals listed above remain with the padding patch.
 - Earlier patches still apply cleanly on 81405f542.
+
+# Round 3 (after merging feat/activity-divergence-drive-4 16f95ff19, then 991271c6f)
+
+Base probe Σ 1219 (22 rows): fukika 58, gunuki 14, nuvumi 14, tobajo 2, labala 5.
+
+## Commits
+| sha | subject | probe Σ after |
+|---|---|---|
+| f08703b78 | fix: pad an if's side labels and compress them by their text | 1165 |
+| 54484e854 | fix: map activity colours through monochrome | 1163 |
+| df404f211 | fix: draw goto jump lines, skipping decorated sole children | 1135 |
+| 991271c6f | merge feat/activity-divergence-drive-4 (catalog conflict -> regenerated) | 658 (others' work) |
+| 66134b4d4 | refactor: drop the dead group snake scope | 658 (no-op) |
+| 897736a23 | refactor: delete the dead action and note label fallbacks | 658 (no-op) |
+
+## PADDING (fukika 58 -> 4)
+- Side labels: `gtile-diamond-inside.ts#padSide`, only on sides the builder sets (`ConditionalBuilder.java:280-282`, `Display.java:692-700`, `SheetBlock1.java:196-210`). The text is drawn at (+p, +p) (`renderIfLabel`).
+- Instrumented residual 6: the south/east label text y (+4.056/+5.5) came from compression mapping the if-label NODE TOP. Upstream maps the UText draw point (`UGraphicCompressOnXorY.java:122-128`). Fix:
+  - `shapes-of.ts#ifLabelTextAnchor`, `(p, p + fontSize*ascent)`;
+  - `compress-geometry.ts#transformIfLabel` moves the node by that anchor on both axes.
+  - Result: 6 -> 4.
+- Residual 4: the if-down else-line mid arrow (polygon[11]) is p too high. Jar sweep: off by exactly 1 at p = 1, 5 at p = 5, 15 at p = 15.
+  - Mechanism: the if-down merge diamond is `getShape2(useNorth=true)` = `FtileDiamond.withNorth(tbout1)`, with tbout1 = `Display.NULL` -> a padded empty Sheet 2p tall (`ConditionalBuilder.java:292-303`).
+  - `FtileDiamond#calculateDimensionFtile` adds the north height and sets inY = 2p (`FtileDiamond.java:108-112`). That lengthens the else line by 2p before compression, so its midpoint moves by p.
+  - Ours: `tiles/gtile-if-down.ts#diamond2Geo` is a flat 24 x 24. Owner `gtile-if-down.ts` (not in any of my write-sets).
+  - The authored fixture `if-label-padding-down-yes` shows the same residual, and its test tolerates only that path.
+
+## monochrome (tobajo 2 -> 0)
+- `layering.test.ts` rule 2 forbids an activity -> class import. `class-monochrome.ts` moved to `src/core/klimt/color/fragment-color-mapper.ts` (`ClassColorMapper` -> `HexColorMapper`); class imports were re-pointed, tests moved to `tests/unit/core/`.
+- `renderer.ts` maps the body (`ColorMapper.java:80-83`). The background is not mapped (not needed by any row; class maps its own).
+- Rule 11: 28-engine survey before (scratch engA) and after (engB). engdiff: 1 mover (activity tobajo diverged -> conformant), 0 conformant losses.
+
+## GOTO-LINES (gunuki 14 -> 0, nuvumi 14 -> 0, kiceze byte-equal)
+- `renderNodesDispatchingGotos` (`UGraphicDispatchFtile.java:70-85,101-119`) is used by `renderer.ts`'s single-lane loop.
+- `dispatched: false` (`ActivityNodeGeo`, `GtileGoto`/`GtileLabel.dispatched`) is set by `gtile-goto.ts#markDecoratedSoleChild` in `conditional-builder.ts` (both branch builders) and carried by `tile-coordinates.ts`.
+- Fixtures `goto-seq` (lines), `goto-alone` (none), `goto-lblalone` (none), all from oracle renders. Without the flag, alone and lblalone are red.
+
+### Direct-drawU audit (upstream containers that bypass the dispatcher for the child they wrap)
+- `FtileDecorate.drawU` -> `ftile.drawU(ug)` (`vertical/FtileDecorate.java:79-80`) and every subclass that does not override it with `ug.draw`:
+  - `FtileMinWidthCentered`: if branches, `ConditionalBuilder.java:138-139,171-172`; switch branches, `FtileFactoryDelegatorSwitch.java:86,95`.
+  - `FtileMargedWest`, `FtileWithUrl` (`:55`), `FtileWithConnection` (`:70`).
+  - `FtileDecorateIn`/`Out`/`InLabel`/`OutLabel`/`PointOut`: `decorateIn` wraps any instruction with an in-link label or colour (`InstructionList.java:150-151`); switch labels at `FtileFactoryDelegatorSwitch.java:112`.
+  - `FtileDecorateWelding`, `FtileWithSwimlanes`.
+- `FtileSwitchWithDiamonds.drawU` BIG_DIAMOND mode: `tile.drawU(...)` (`:138`).
+- `FtileWithNotes.drawU`: draws only its notes directly (`:196-197`), not the tile.
+- Dispatched via `ug.draw`: `FtileAssemblySimple` (`:110-111`), `FtileMarged` (`:113`), `FtileMargedRight`, `FtileMargedVertically`, `FtileForkInner` (`:95`), `FtileWhile` (`:556`), `FtileGroup` (`:225`); `getInnerMinMax` is measurement only.
+- Ported now: if branches (with-links + down). NOT ported, no fixture:
+  - switch branches;
+  - elseif (`conditional-builder-long.ts`);
+  - a goto/label carrying an in-link label (`decorateIn`);
+  - `FtileWithUrl`.
+
+## Dead code
+- `EdgeMeta.scope` / `Out.groupScope` removed: producer, field, two initialisers, test initialisers, swimlane-placement doc. Byte-equal.
+- `renderAction`/`renderNote` geometric fallbacks and `activity-renderer-text.ts#renderCreoleTableGrid` deleted.
+  - Both `renderActionLabel`/`renderNoteLabel` return `string`, never null.
+  - Instrumented over all 451 dot-cache fixtures: 0 fires (426 rendered; 25 pre-existing throws: 17 parser refusals, 2 `IllegalArgumentException start=end`, 1 snake-merge non-axis line, 1 undefined `x`, and others).
+  - No test referenced the grid helper.
+
+## Census movers (all = pin `jar`)
+- style:
+  - fukika width 334 -> 337, height 630 -> 640;
+  - gunuki strokeWidth{1: 3 -> 5};
+  - nuvumi strokeWidth{1: 10 -> 12};
+  - tobajo: none.
+- text/swimlane: none.
+- Ratchet byte-equal and harness-parity/invariant green at every commit.
+
+## Not done
+- labala: unchanged (core style priority, see above).
+- fukika residual 4: `gtile-if-down.ts` diamond2 north padded label.
+- Goto dispatch for switch/elseif/decorateIn/url wrappers (audit above).
+- I ran a read-only `git stash list` once (accidental command tail); no stash was created.

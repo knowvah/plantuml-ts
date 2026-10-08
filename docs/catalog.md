@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5305 exported names.
+1406 modules · 5307 exported names.
 
 ## `src/`
 
@@ -400,6 +400,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ColorOrder.ts` | `ColorOrder`, `getColor`, `getReverse`, `fromString` | ColorOrder -- a channel permutation, used by `ColorMapper.reverse(order)` (`ColorMapper.java:93-100`) for `skinparam reversecolor <order>` (`TitledDiagram.java:308-312`). |
 | `ColorTrieNode.ts` | `RgbTriple`, `getColor`, `NAMES` | ColorTrieNode — the named-color -> RGB table upstream registers into a letter-indexed trie. |
 | `ColorUtils.ts` | `getGrayScale`, `getGrayScaleColor`, `getGrayScaleColorReverse` |  |
+| `fragment-color-mapper.ts` | `MonochromeMode`, `HexColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | fragment-color-mapper.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `HColorGradient.ts` | `GradientPolicy`, `HColorGradient` |  |
 | `HColors.ts` | `HColors` |  |
 | `HColorSet.ts` | `ResolvedColor`, `parseSimpleColor`, `parseColor`, `toSvgHex`, `resolveColorToSvgHex`, `ConditionalColorSpec`, `parseConditionalColor`, `resolveConditionalColor`, `HColorSet` | HColorSet — resolves a single color token (a `#RRGGBB`/`#RGB`/`#RRGGBBAA` hex form, or a named color from {@link ColorTrieNode}) to a canonical SVG-ready hex string, mirroring `HColorSet#parseSimpleColor` and `XColor#toSvg`. |
@@ -1051,8 +1052,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
-| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
-| `activity-renderer-text.ts` | `ActivityTextStyle`, `renderCreoleTableGrid`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
+| `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
+| `activity-renderer-text.ts` | `ActivityTextStyle`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
 | `activity-spot-glyph-data.ts` | `ActivitySpotLetter`, `SPOT_REFERENCE_CX`, `SPOT_REFERENCE_CY`, `SPOT_GLYPH_D`, `CAPTURED_SPOT_LETTERS` | Glyph outline `d` data for the `circle,spot` connector's single character (`(A)`, `#blue:(B)`, ...) -- captured verbatim from the jar's own SVG output, the SAME scraping method `class-badge-glyph-data.ts` documents (its own module doc comme |
 | `activity-spot-glyph.ts` | `spotGlyphPath`, `SPOT_TEXT_FALLBACK_NOTE` | Translates {@link SPOT_GLYPH_D}'s reference-position outline to an arbitrary spot centre -- the SAME per-token `(x, y, x, y, ...)` shift `class-badge.ts#badgeGlyphPath` uses for its own captured table (every command this letter set emits, ` |
 | `activity-style-defaults-swimlane.ts` | `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The swimlane title/border style resolvers, split out of `activity-style-defaults.ts` (mission `activity-divergence-drive`, T2c) -- that module was 486 lines before the `fonebe-54-save009` arrow-thickness fix pushed it to 510, over this proj |
@@ -1160,7 +1161,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `shapes-of-frame.ts` | `frameTabShape`, `frameTitleShape`, `frameShapes` | The `USymbolFrame#asBig` shapes a `group`/`partition` frame contributes to compression, beyond its own ignored rect (`shapes-of.ts#shapeForNode`): the title-tab underline and the title itself. |
 | `shapes-of-hexagon-label.ts` | `ifOwnLabelShapes` | `if-own-label`'s text slots (add4-T3a, HEX-LABEL-SLOT; split out of `shapes-of.ts`, which sits near its 500-line cap). |
 | `shapes-of-terminal.ts` | `edgeDecorationVector`, `terminalDecorationVector` | The direction of an edge's END decoration, shared by the renderer (`renderer.ts#renderEdge`'s terminal `arrowTip`) and the compressor's shape adapter (`shapes-of.ts#terminalArrowhead`) so both see the same arrowhead. |
-| `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
+| `shapes-of.ts` | `Reservation`, `CompressShape`, `ShapesOfInput`, `ifLabelTextAnchor`, `shapesOf` | `shapesOf` -- D2's shape adapter. |
 | `slot-finder.ts` | `occupiesOn`, `collectSlots`, `overlaps` | `collectSlots` -- `klimt/compress/SlotFinder.java:70-140`'s `draw` dispatch, ported line for line over the flat `CompressShape[]` `shapesOf` (`shapes-of.ts`) produces (D2). |
 | `slot.ts` | `CompressionMode`, `compareSlotByStart`, `Slot`, `SlotSet` | slot.ts — `klimt/compress/Slot.java`, `SlotSet.java`, `CompressionMode.java` (mission `activity-klimt-compress` T2, `decisions.md` D2/D5). |
 
@@ -1187,7 +1188,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `gtile-diamond.ts` | `GtileDiamond` |  |
 | `gtile-end.ts` | `GtileEnd` |  |
 | `gtile-fork.ts` | `GtileFork` |  |
-| `gtile-goto.ts` | `GtileGoto` |  |
+| `gtile-goto.ts` | `GtileGoto`, `markDecoratedSoleChild` |  |
 | `gtile-group.ts` | `frameTitleWidth`, `GtileGroupOptions`, `GtileGroup` |  |
 | `gtile-if-down.ts` | `GtileIfDown` |  |
 | `gtile-if-long-horizontal.ts` | `BranchLayout`, `GtileIfLongHorizontal` |  |
@@ -1386,7 +1387,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-member-render-atom.ts` | `MemberRenderAtom`, `MemberRowBuild` | class-member-render-atom.ts — `MemberRenderAtom`/`MemberRowBuild`, the render-ready shapes `class-member-creole.ts#resolveMemberAtoms` produces. |
 | `class-member-rows.ts` | `ROW_TEXT_LEFT_MARGIN`, `rowIconZoneWidth`, `sectionHeight`, `isMethodMember`, `SectionRowContext`, `buildSectionRows`, `sectionWidth`, `FlatMemberRows`, `buildWrappedSectionRowBuilds`, `annotateWrappedMembers` | Member-row/compartment sizing helpers for the generic class/interface/ enum/annotation classifier box (`class-layout-helpers.ts# measureGenericClassifier`). |
 | `class-member-sprite-render.ts` | `renderMemberRowDrawable` | class-member-sprite-render.ts — draws a member row's `'drawable'` atom (C-4, cdd3-T23): the `DrawablePrimitive[]` decomposition `class-member-atom-resolve.ts#resolveSpriteAtom` already resolved at LAYOUT time, placed at the row's own RENDER |
-| `class-monochrome.ts` | `MonochromeMode`, `ClassColorMapper`, `applyMonochromeHex`, `getReversed`, `colorMapperOf`, `applyColorMapperToFragment`, `applyMonochromeToFragment` | class-monochrome.ts -- `skinparam monochrome true\|reverse` (G2 N61). |
 | `class-multiline-element.ts` | `continueMultilineElement`, `tryOpenMultilineElement` | Mechanism A (unknown-bucket-routing-repair, T7): `CommandCreateElementMultilines` ported into the class engine — a multi-line descriptive-leaf declaration, UNGATED by `allowmixing` (unlike the single-line `CommandCreateElementFull2` this po |
 | `class-namespace-decorations.ts` | `setNamespaceUrl`, `setNamespaceColor` | `Namespace.url` / `Namespace.color` setters, split out of `class-container.ts` to keep that file under the project's 500-line cap (T11) -- re-exported there so `import { setNamespaceUrl } from './class-container.js'` call sites are unaffect |
 | `class-namespace-folder-outline.ts` | `FolderTabGeo`, `folderPathD`, `folderPolygonPoints`, `renderFolderPolygon`, `FolderTabPaint`, `renderFolderTabShape` | class-namespace-folder-outline.ts — the folder-tab OUTLINE shape builders (`USymbolFolder#drawFolder`'s two branches: the default rounded-arc `UPath`, and the `skinparam style strictuml` sharp-corner `UPolygon`). |

@@ -1,0 +1,8 @@
+@startuml
+skinparam padding 8
+start
+if (ready?) then (yes)
+  :go;
+endif
+stop
+@enduml

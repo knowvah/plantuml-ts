@@ -53,9 +53,6 @@ import { classifyStripeLine } from '../../core/klimt/creole/legacy/CreoleStripeS
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import { HYPERLINK_COLOR } from '../../core/klimt/creole/command/CommandCreoleUrl.js';
 import { isTableRowLine, tableRowCellsOf } from './activity-text-placement.js';
-import { activityPadding, activityLineThickness } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
-import type { Theme } from '../../core/theme.js';
 
 /** `$version$` — the same placeholder literal `state/renderer-arrowhead.ts
  *  #drawArrowMarkup` and `class/renderer-group.ts#svgFromShapes` pass to a
@@ -169,48 +166,6 @@ function drawCreoleTableRow(x: number, y: number, content: string, style: Activi
     out += drawRun(cx, y, cell, font);
     cx += MEASURER.measure(cell, { family: style.fontFamily, size: style.fontSize }).width;
   }
-  return out;
-}
-
-/**
- * The merged table's own grid `<line>` rules `drawCreoleTableRow`'s own
- * doc comment deferred to this call site (T2f, mission `activity-
- * divergence-drive-2`) -- `AtomTable#drawU`'s `hline`/`vline` loops
- * (`AtomTable.java:150-158`), collapsed to the single-column,
- * uniform-row-height case this mission's two rows (`activity-creole-
- * table`, `niletu-83-lego826`) exercise: `rowCount + 1` horizontal rules
- * at `getStartingY(i) = i * lineHeight`, 2 vertical rules (one column) at
- * `getStartingX({0, 1}) = {0, tableWidth}`. `lineColor` defaults to the
- * font's own resolved color, not a fixed ink (`StripeTable.java:79-83`).
- * The table block is centred in the box the SAME way `renderMultilineText`
- * centres plain text (`TABLE_BLOCK_MARGIN_Y`'s own `AtomWithMargin(2,2)`
- * wrap washes out of a symmetric centre, `gtile-action.ts`'s own doc).
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/creole/atom/AtomTable.java:150-158
- */
-export function renderCreoleTableGrid(
-  box: { x: number; y: number; width: number; height: number },
-  lines: readonly string[],
-  lineHeight: number,
-  theme: Theme,
-): string {
-  if (lines.length === 0 || !lines.every(isTableRowLine)) return '';
-  const rowCount = lines.length;
-  const pad = activityPadding('activity');
-  const left = box.x + pad;
-  const width = box.width - 2 * pad;
-  const tableHeight = rowCount * lineHeight;
-  const top = box.y + box.height / 2 - tableHeight / 2;
-  const lineStyle: LineStyle = {
-    stroke: activityFontColor(theme, 'activity'),
-    strokeWidth: activityLineThickness(theme, 'activity'),
-  };
-  let out = '';
-  for (let i = 0; i <= rowCount; i += 1) {
-    const y = top + i * lineHeight;
-    out += line(left, y, left + width, y, lineStyle);
-  }
-  out += line(left, top, left, top + tableHeight, lineStyle);
-  out += line(left + width, top, left + width, top + tableHeight, lineStyle);
   return out;
 }
 

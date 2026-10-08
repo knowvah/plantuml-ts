@@ -20,7 +20,7 @@ import type { Reservation } from '../hexagon-reservations.js';
 import type { StringBounder } from '../../tiles/tile.js';
 import type { Theme } from '../../../../core/theme.js';
 import type { CompressionMode } from './slot.js';
-import { shapesOf } from './shapes-of.js';
+import { ifLabelTextAnchor, shapesOf } from './shapes-of.js';
 import { collectSlots } from './slot-finder.js';
 import { CompressionTransform, type PiecewiseAffineTransform } from './compression-transform.js';
 import { arrowDirection } from '../../arrows-regular.js';
@@ -132,6 +132,19 @@ function findSwimlaneBand(reservations: readonly Reservation[]): SwimlaneBandGeo
 
 /** @see UGraphicCompressOnXorY.java:90-96 (rect); the fallthrough
  *  translate-and-keep-size branch (`:107-108`) for every other node kind. */
+/** An `if-label` moves with its first `UText`'s draw point
+ *  ({@link ifLabelTextAnchor}), which sits inside the padded box. */
+function transformIfLabel(
+  node: ActivityNodeGeo,
+  ct: PiecewiseAffineTransform,
+  mode: CompressionMode,
+  theme: Theme,
+): ActivityNodeGeo {
+  const { dx, dy } = ifLabelTextAnchor(theme);
+  if (mode === 'x') return { ...node, x: ct.transform(node.x + dx) - dx };
+  return { ...node, y: ct.transform(node.y + dy) - dy };
+}
+
 function transformNode(node: ActivityNodeGeo, ct: PiecewiseAffineTransform, mode: CompressionMode): ActivityNodeGeo {
   const next: ActivityNodeGeo = { ...node };
   const spikeTip = node.spikeTip === undefined ? undefined : { ...node.spikeTip };
@@ -310,7 +323,9 @@ function compressAxis(input: CompressInput, mode: CompressionMode): AxisResult {
   const ct = new CompressionTransform(slotSet);
   const removed = slotSet.slots().reduce((acc, s) => acc + s.size(), 0);
 
-  const nodes = input.nodes.map((n) => transformNode(n, ct, mode));
+  const nodes = input.nodes.map((n) =>
+    n.kind === 'if-label' ? transformIfLabel(n, ct, mode, input.theme) : transformNode(n, ct, mode),
+  );
   const edges = input.edges.map((e) => transformEdge(e, ct, mode));
   const reservations = input.reservations.map((r) => transformReservation(r, ct, mode));
   const swimlanes = mode === 'x' ? input.swimlanes.map((s) => transformSwimlane(s, ct)) : input.swimlanes;

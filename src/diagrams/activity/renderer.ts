@@ -10,8 +10,7 @@ import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 import { polygon, text } from '../../core/svg.js';
 import {} from '../../core/latex.js';
-import { renderNode } from './activity-renderer-shapes.js';
-import { orderedLine } from './activity-renderer-terminals.js';
+import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
 import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
@@ -19,6 +18,7 @@ import { activityFontColor } from './activity-text-style.js';
 import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
 
@@ -424,7 +424,9 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
   if (hasChrome) {
     children.push(renderSwimlaneChrome(geo, theme));
   } else {
-    for (const node of geo.nodes) children.push(renderNode(node, theme));
+    // add4-T3d: `TextBlockInterceptorUDrawable` (single lane only,
+    // `Swimlanes.java:251-258`) -- goto lines drawn as the nodes are.
+    children.push(...renderNodesDispatchingGotos(geo.nodes, theme));
   }
 
   // T3h: `Swimlanes.java:350-352`'s Cross pass draws a cross-lane
@@ -443,7 +445,9 @@ export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragm
 
   const raw = preChromeDims(geo, theme);
   return {
-    body: children.join(''),
+    // add4-T3d: `TitledDiagram#muteColorMapper` maps EVERY drawn colour
+    // (`ColorMapper.java:80-91`), applied once to the assembled body.
+    body: applyColorMapperToFragment(children.join(''), colorMapperOf(theme)),
     width: geo.totalWidth,
     height: geo.totalHeight,
     background: theme.colors.background,

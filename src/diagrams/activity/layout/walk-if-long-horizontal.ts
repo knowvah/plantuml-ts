@@ -335,9 +335,8 @@ function connectionHline(ctx: LhCtx): void {
     },
   );
   // `withMerge(NONE)` (`FtileIfLongHorizontal.java:507`) -- T1b wires
-  // `mergeable`; see `swimlane-placement.ts#EdgeMeta.scope`'s own doc for
-  // why `routeHline`'s per-lane fan-out never loses this (`NONE` never
-  // reaches the merge pass's scope check at all).
+  // `mergeable`: `NONE` never reaches the merge pass, so `routeHline`'s
+  // per-lane fan-out cannot lose it.
   const edge = out.edges[out.edges.length - 1]!;
   edge.arrowhead = false;
   edge.mergeable = 'NONE';

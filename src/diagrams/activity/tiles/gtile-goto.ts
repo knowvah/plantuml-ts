@@ -2,6 +2,8 @@ import type { GPoint, HookName } from './points.js';
 import { NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, EAST_HOOK, WEST_HOOK } from './points.js';
 import { TileLeaf } from './tile.js';
 import type { ActivityGoto } from '../ast.js';
+import type { Tile } from './tile.js';
+import { GtileLabel } from './gtile-label.js';
 
 /**
  * `goto NAME` -- jumps to the `label NAME` declared elsewhere. `FtileGoto`
@@ -24,6 +26,11 @@ export class GtileGoto extends TileLeaf {
   readonly name: string;
   readonly width = 0;
   readonly height = 0;
+  /** `false` when the parent draws this tile through a direct `drawU`
+   *  (`UGraphicDispatchFtile` never sees it); set once by
+   *  {@link markDecoratedSoleChild} right after construction, read by
+   *  `layout/tile-coordinates.ts`. */
+  dispatched = true;
 
   constructor(node: ActivityGoto) {
     super();
@@ -52,4 +59,21 @@ export class GtileGoto extends TileLeaf {
   hasPointOut(): boolean {
     return false;
   }
+}
+
+/**
+ * `InstructionList#createFtile` returns a sole instruction's own ftile with
+ * no assembly around it (`InstructionList.java:146-157`); an if branch then
+ * wraps it in `FtileMinWidthCentered` (`ConditionalBuilder.java:138-139,
+ * 171-172`), an `FtileDecorate` whose `drawU` calls `ftile.drawU(ug)`
+ * directly (`vertical/FtileDecorate.java:79-80`). A `goto`/`label` that is
+ * a branch's ONLY tile therefore never reaches `UGraphicDispatchFtile#draw`
+ * (`UGraphicDispatchFtile.java:70-85`): not recorded, no goto line. Inside
+ * a longer list, `FtileAssemblySimple#drawU` uses `ug.draw(tile)`
+ * (`FtileAssemblySimple.java:108-111`), so siblings stay dispatched.
+ */
+export function markDecoratedSoleChild(tiles: readonly Tile[]): void {
+  if (tiles.length !== 1) return;
+  const only = tiles[0];
+  if (only instanceof GtileGoto || only instanceof GtileLabel) only.dispatched = false;
 }
