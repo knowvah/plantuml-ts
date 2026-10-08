@@ -37,7 +37,7 @@ import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
 import type { MessageGeo, ActivationGeo } from './geo-message.js';
 import type { FrameGeo } from './geo-frame.js';
-import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo } from './geo-annotation.js';
+import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo, DelayGeo, LifelineSegment } from './geo-annotation.js';
 
 export type { TextRun };
 export type * from './geo-participant.js';
@@ -45,7 +45,7 @@ export type * from './geo-message.js';
 export type * from './geo-frame.js';
 export type * from './geo-annotation.js';
 
-export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo;
+export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo | DelayGeo;
 
 export interface SequenceGeometry {
   totalWidth: number;
@@ -77,6 +77,12 @@ export interface SequenceGeometry {
    * footbox row's top -- see `footerShapeY`.
    */
   lifelineEndY: number;
+  /**
+   * The lifeline cut at every delay (`MutingLine#drawLine`), present only
+   * when the diagram has a delay. Absent means one `PARTICIPANT_LINE` from
+   * `headHeight` to `lifelineEndY`.
+   */
+  lifelineSegments?: readonly LifelineSegment[];
   /**
    * The top of the footbox row: `UTranslate.dy(pageHeight + headHeight)`
    * (`PlayingSpaceWithParticipants.java:225-226`). Equal to `lifelineEndY`

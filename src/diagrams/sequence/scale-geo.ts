@@ -78,6 +78,7 @@ import type {
   DividerGeo,
   SpaceGeo,
   NewpageGeo,
+  DelayGeo,
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
@@ -267,7 +268,20 @@ function scaleEvent(event: EventGeo, k: number): EventGeo {
       return scaleSpace(event, k);
     case 'newpage':
       return scaleNewpage(event, k);
+    case 'delay':
+      return scaleDelay(event, k);
   }
+}
+
+function scaleDelay(d: DelayGeo, k: number): DelayGeo {
+  return {
+    ...d,
+    y: d.y * k,
+    height: d.height * k,
+    middleX: d.middleX * k,
+    textWidth: d.textWidth * k,
+    labelRuns: d.labelRuns.map((r) => scaleRun(r, k)),
+  };
 }
 
 /**
@@ -286,6 +300,9 @@ export function scaleSequenceGeometry(geo: SequenceGeometry, k: number): Sequenc
     headHeight: geo.headHeight * k,
     lifelineEndY: geo.lifelineEndY * k,
     footerShapeY: geo.footerShapeY * k,
+    ...(geo.lifelineSegments !== undefined
+      ? { lifelineSegments: geo.lifelineSegments.map((s) => ({ ...s, y1: s.y1 * k, y2: s.y2 * k })) }
+      : {}),
     participants: geo.participants.map((p) => scaleParticipant(p, k)),
     events: geo.events.map((e) => scaleEvent(e, k)),
     boxes: geo.boxes.map((b) => scaleBox(b, k)),

@@ -1,0 +1,12 @@
+@startuml
+Alice -> Bob : start
+activate Bob
+Bob -> Carol : work
+activate Carol
+...
+Carol --> Bob : done
+deactivate Carol
+...later...
+Bob --> Alice : end
+deactivate Bob
+@enduml

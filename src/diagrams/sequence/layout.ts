@@ -42,6 +42,7 @@ import {
 } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
+import { cutActivationsAtDelays, delaySpansOf, lifelineSegments } from './sequence-delay.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 
@@ -110,7 +111,7 @@ function assembleGeometry(
   originX: number,
 ): SequenceGeometry {
   const { participantGeos, maxParticipantHeight } = participantLayout;
-  const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
+  const { dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } = computeVerticalTotals(
@@ -118,7 +119,10 @@ function assembleGeometry(
     currentY,
     showFootbox,
   );
-  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos);
+  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
+  const eventGeos = cutActivationsAtDelays(eventLayout.eventGeos);
+  const headHeight = TOP_MARGIN + maxParticipantHeight;
+  const delays = delaySpansOf(eventGeos);
   const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
@@ -135,8 +139,9 @@ function assembleGeometry(
     // `findings/vertical-terms.md` §0's landmark table. Every consumer
     // (`renderer-lifeline.ts:95`, `sequence-page.ts:320`) already reads it as
     // an absolute coordinate.
-    headHeight: TOP_MARGIN + maxParticipantHeight,
+    headHeight,
     lifelineEndY,
+    ...(delays.length > 0 ? { lifelineSegments: lifelineSegments(headHeight, lifelineEndY, delays) } : {}),
     footerShapeY,
     showFootbox,
     boxes: boxGeos,
@@ -234,6 +239,9 @@ function minEventX(event: EventGeo): number {
     case 'divider':
     case 'newpage':
       return event.bandX;
+    case 'delay':
+      // `DelayTile#getMinX` (`:121-124`): `middle - preferredWidth / 2`.
+      return event.middleX - event.textWidth / 2;
     default:
       return Number.POSITIVE_INFINITY;
   }
@@ -363,7 +371,17 @@ function computeTotalWidth(
     }
   }
 
-  return Math.max(totalWidth, dividerContentRight(eventGeos));
+  return Math.max(totalWidth, dividerContentRight(eventGeos), delayContentRight(eventGeos));
+}
+
+/** `DelayTile#getMaxX` (`:126-129`), `middle + preferredWidth / 2`, maxed
+ *  into the right border like every tile's (`PlayingSpace.java:75-96`). */
+function delayContentRight(eventGeos: EventGeo[]): number {
+  let right = 0;
+  for (const geo of eventGeos) {
+    if (geo.kind === 'delay') right = Math.max(right, geo.middleX + geo.textWidth / 2 + RIGHT_MARGIN);
+  }
+  return right;
 }
 
 /**

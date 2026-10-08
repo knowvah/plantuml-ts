@@ -98,4 +98,11 @@ export interface ActivationGeo {
    */
   level: number;
   color?: string;
+  /**
+   * Set only on a bar a delay cut into pieces (`LiveBoxesDrawer#doDrawing`,
+   * `teoz/LiveBoxesDrawer.java:105-121`): which ends of THIS piece are closed.
+   * `ACTIVATION_BOX_CLOSE_OPEN` is `{ closeUp: true, closeDown: false }`, and
+   * so on. Absent is `CLOSE_CLOSE`, the plain rectangle.
+   */
+  open?: { closeUp: boolean; closeDown: boolean };
 }

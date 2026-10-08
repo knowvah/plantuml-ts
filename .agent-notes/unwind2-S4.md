@@ -26,3 +26,20 @@
 - **Impact**: Porting delay ink (MutingLine split + DelayTile text) is the
   follow-on that removes that rise; not a page-geometry defect.
 - **Confidence**: High
+
+## Observation: delay ink ported (follow-on to the entry above)
+- **Context**: Orchestrator asked to port MutingLine/DelayTile so giloko stops rising.
+- **Finding**: `DelayTile` ALWAYS builds `DELAY_TEXT` (DelayTile.java:84-88), so a
+  bare `...` is 28 tall (empty block + 4+4 padding + 20), not 20 as the port
+  had; `......` is also 28 because `AbstractTextualComponent:86-87` turns one
+  empty line into `TextBlockEmpty`. Delays are registered in the background
+  pass, before `drawLifeLines`, so every lifeline is cut. Activation bars are
+  cut by `Segment#cutSegmentIfNeed` and drawn open (back-colour rect + sides).
+  A page clip drops a `DELAY_LINE` but leaves an EMPTY `<g><title>` for a
+  clipped-out `PARTICIPANT_LINE`. Code: `src/diagrams/sequence/sequence-delay.ts`.
+- **Impact**: weightedScore 0 rises / 67 falls across 1127 fixtures. Two
+  pre-existing gaps now show through the cut: `create` lifelines start at the
+  head row (upstream starts them at the create y, `LivingSpace#
+  drawLineAndLiveboxes` aliveChanges), and `return` not closing an
+  activation in kukeja-88-zida141 -- both add pieces the jar does not draw.
+- **Confidence**: High

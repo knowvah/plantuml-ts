@@ -15,7 +15,7 @@ import {
   renderActivation,
   renderLifelinePass,
 } from '../../../src/diagrams/sequence/renderer-lifeline.js';
-import type { ParticipantGeo, ActivationGeo } from '../../../src/diagrams/sequence/ast.js';
+import type { ParticipantGeo, ActivationGeo, LifelineSegment } from '../../../src/diagrams/sequence/ast.js';
 import type { ScaledTheme } from '../../../src/diagrams/sequence/scale-geo.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 
@@ -28,6 +28,8 @@ const theme: ScaledTheme = { ...defaultTheme, scaleK: 1 };
  * at 39 and every lifeline starts there — one pixel below the box.
  */
 const HEAD_HEIGHT = 39;
+/** The un-delayed lifeline: one `PARTICIPANT_LINE` from the head row to 178. */
+const WHOLE_LIFELINE: LifelineSegment = { y1: HEAD_HEIGHT, y2: 178, delay: false };
 
 function participant(over: Partial<ParticipantGeo> = {}): ParticipantGeo {
   const base: ParticipantGeo = {
@@ -204,8 +206,7 @@ describe('renderLifelinePass', () => {
     const svg = renderLifelinePass(
       [p('A', 22), p('B', 122)],
       [act('B', 122, 50), act('A', 22, 60)],
-      HEAD_HEIGHT,
-      178,
+      [WHOLE_LIFELINE],
       theme,
     );
 
@@ -214,7 +215,7 @@ describe('renderLifelinePass', () => {
   });
 
   it('keeps multiple boxes on one participant in source order', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], HEAD_HEIGHT, 178, theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], [WHOLE_LIFELINE], theme);
 
     expect([...svg.matchAll(/<rect [^>]*?y="(\d+)"/g)].map((m) => m[1])).toEqual([
       '39', // the hover target, which spans the whole lifeline
@@ -224,7 +225,7 @@ describe('renderLifelinePass', () => {
   });
 
   it('emits a bare lifeline for a participant with no activations', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], HEAD_HEIGHT, 178, theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], [WHOLE_LIFELINE], theme);
 
     expect([...svg.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual(['A']);
   });

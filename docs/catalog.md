@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1419 modules · 5350 exported names.
+1420 modules · 5361 exported names.
 
 ## `src/`
 
@@ -1657,7 +1657,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
 | `divider-style.ts` | `DIVIDER_LINE_COLOR`, `DIVIDER_LINE_THICKNESS`, `DIVIDER_BACKGROUND`, `DIVIDER_FONT_SIZE`, `DIVIDER_FONT_BOLD`, `DIVIDER_PADDING`, `DIVIDER_HEIGHT_ALLOWANCE`, `DIVIDER_WIDTH_ALLOWANCE`, `DIVIDER_LABEL_DELTA_X`, `DIVIDER_BAND_HEIGHT`, `dividerFontSpecOf`, `dividerPreferredHeight`, `dividerPreferredWidth` | Style constants for the sequence-diagram divider (`== label ==`, and the empty `====` form). |
 | `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
-| `geo-annotation.ts` | `NoteGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `BoxGeo` | The geometry `renderer.ts` draws ITSELF — notes, dividers, the `newpage` separator, explicit vertical space, and the `box` group background. |
+| `geo-annotation.ts` | `NoteGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `BoxGeo`, `DelayGeo`, `LifelineSegment` | The geometry `renderer.ts` draws ITSELF — notes, dividers, the `newpage` separator, explicit vertical space, and the `box` group background. |
 | `geo-frame.ts` | `FrameGeo` | FRAME geometry — `alt`/`opt`/`loop`/`group`/`ref` boxes, their header tab and their `else` branch bands. |
 | `geo-message.ts` | `MessageGeo`, `ActivationGeo` | MESSAGE geometry — an arrow, its label runs, and the activation bars a message opens and closes. |
 | `geo-participant.ts` | `ParticipantBadge`, `ParticipantGeo` | PARTICIPANT geometry — the head/foot boxes and their stereotype badges. |
@@ -1672,7 +1672,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-divider.ts` | `renderDivider` | `== label ==` / `====` divider rendering — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `renderer-frame-blotter.ts` | `renderFrameBlotter` | The grouping-frame BACKGROUND pass -- the coloured band(s) a `loop`/`alt`/ `opt`/`par`/`break`/`critical`/`group`/`ref` frame paints behind its body, split at each `else` branch boundary so each branch can carry its own fill. |
 | `renderer-frame-header.ts` | `frameHeaderCornerPath`, `renderGroupingHeaderBackground`, `renderGroupingHeaderForeground` | A grouping frame's type tab -- background pass (the plain outline) and foreground pass (the clipped-corner tab + its text). |
-| `renderer-lifeline.ts` | `renderLifeline`, `renderActivation`, `renderLifelinePass` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
+| `renderer-lifeline.ts` | `renderLifeline`, `renderLifelineSegments`, `renderActivation`, `renderLifelinePass` | The two "line" components a sequence participant owns: its lifeline and its activation (livebox) bars. |
 | `renderer-message.ts` | `renderMessage` | Sequence diagram message-drawing path. |
 | `renderer-participant-shapes.ts` | `renderParticipantBox`, `renderFooterBox` | renderer-participant-shapes.ts — one participant's head or footer BLOCK: its glyph, its label, and the dispatch between them. |
 | `renderer-participant-symbol.ts` | `SymbolParticipantType`, `GlyphParticipantType`, `ParticipantSymbolGeo`, `ParticipantSymbolOpts`, `COLLECTIONS_DELTA`, `measureParticipantSymbol`, `renderParticipantSymbol` | renderer-participant-symbol.ts — the sequence engine's participant GLYPH seam: a sequence-local mirror of upstream's `ComponentRose*` family (`skin/rose/Rose.java#createComponentParticipant`, `:137-190`) that drives the SHARED, already-port |
@@ -1685,6 +1685,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-color-grammar.ts` | `SEQUENCE_COLOR_ATOM`, `SEQUENCE_COLOR_COMPOUND`, `SEQUENCE_COLOR` | `ColorParser`'s two grammars (`COLOR_REGEXP`/`PART2`, combined as `COLORS_REGEXP`), shared by every sequence command that carries a `ColorParser.exp1()`/`simpleColor(...)` tail: the note-command family (`command-note-factory.ts`) AND the pa |
 | `sequence-command-registry.ts` | `SequenceCommand`, `SEQUENCE_COMMANDS` | THE sequence command list — one registration-ordered array, tried top-to-bottom with first match winning, mirroring `PSystemCommandFactory#getCandidate` (`:225-246`), which walks the single `cmds` list `SequenceDiagramFactory#initCommandsLi |
 | `sequence-creole.ts` | `CreoleOrigin`, `sequenceCreoleFont`, `SequenceAtomContext`, `sequenceCreoleRuns` | sequence-creole.ts — routes ONE sequence display line through the shared creole atom engine (`core/klimt/creole/`) instead of drawing it as a single plain `<text>`, producing the placed, measured `TextRun[]` the sequence geometry already ca |
+| `sequence-delay.ts` | `DELAY_FONT_SIZE`, `DELAY_LINE_DASH`, `DELAY_LINE_GAP`, `layoutDelay`, `delaySpansOf`, `lifelineSegments`, `cutSegmentIfNeed`, `cutActivationsAtDelays` | The `...` / `...text...` DELAY: its tile, and the two cuts it makes in the drawing around it. |
 | `sequence-layout-events.ts` | `ActivationStack`, `EventProcessingContext`, `EventCursor`, `processEvents`, `pushActivation`, `openActivation`, `activationLevel`, `flushOpenActivations`, `emitActivation` | Sequence diagram layout — event geometry (Step 2 of layoutSequence). |
 | `sequence-layout-exo.ts` | `handleMessageExoEvent`, `exoRightExtent`, `anchorExoBorders` | Sequence diagram layout — EXO message geometry (`[-> Bob`, `Bob ->]`, …). |
 | `sequence-layout-message.ts` | `handleMessageEvent`, `messageTileAdvance` | Sequence diagram layout — message-arrow geometry, split out of sequence-layout-events.ts to keep both files under the size cap. |

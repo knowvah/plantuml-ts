@@ -18,7 +18,17 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type { BoxGeo, SequenceGeometry, EventGeo, ActivationGeo, NoteGeo, FrameGeo, NewpageGeo } from './ast.js';
+import type {
+  BoxGeo,
+  SequenceGeometry,
+  EventGeo,
+  ActivationGeo,
+  NoteGeo,
+  FrameGeo,
+  NewpageGeo,
+  DelayGeo,
+} from './ast.js';
+import { DELAY_FONT_SIZE } from './sequence-delay.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
@@ -283,7 +293,15 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
       return '';
     case 'newpage':
       return renderNewpage(event, theme);
+    case 'delay':
+      return renderDelayText(event, theme);
   }
+}
+
+/** `ComponentRoseDelayText#drawInternalU` (`:62-70`): only the text block --
+ *  the dotted line is the lifeline's own `DELAY_LINE` piece. */
+function renderDelayText(delay: DelayGeo, theme: ScaledTheme): string {
+  return delay.labelRuns.map((run) => creoleRunText(run, theme, DELAY_FONT_SIZE * theme.scaleK)).join('');
 }
 
 /** One event-walk pass -- see {@link renderEvent}; mirrors the one
@@ -410,8 +428,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     renderLifelinePass(
       scaledGeo.participants,
       scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      scaledGeo.headHeight,
-      scaledGeo.lifelineEndY,
+      scaledGeo.lifelineSegments ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
       scaledTheme,
     ),
   );

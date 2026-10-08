@@ -1,0 +1,7 @@
+@startuml
+Alice -> Bob : one
+...5 minutes later...
+Bob -> Carol : two
+... a much longer delay label that is wider than the lifelines ...
+Carol -> Alice : three
+@enduml
