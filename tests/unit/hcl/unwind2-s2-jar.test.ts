@@ -53,6 +53,16 @@ const OTHER_DEFECT: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
+/**
+ * Multi-node fixtures: the json family lays out through `SmetanaForJson`
+ * upstream and `@knowvah/dot-engine` here (CLAUDE.md, "One layout engine",
+ * ruling 2026-08-09), so node placement and edge paths carry a settled
+ * geometry delta. Only positional attributes may differ; text, structure
+ * and sizes must match.
+ */
+const SMETANA_GEOMETRY: ReadonlySet<string> = new Set(['hcl-join-caption']);
+const SMETANA_POSITIONAL = /^svg\/@width$|\/@(x|cx|x1|x2|viewBox\[2\]|d\[\d+\])$/u;
+
 const CASES = readdirSync(DIR)
   .filter((f) => f.endsWith('.puml'))
   .map((f) => f.slice(0, -'.puml'.length))
@@ -60,7 +70,7 @@ const CASES = readdirSync(DIR)
 
 describe('unwind2-S2 — hcl style, top-level assignment, line joining', () => {
   it('has the fixture set', () => {
-    expect(CASES.length).toBe(10);
+    expect(CASES.length).toBe(14);
   });
 
   it.each(CASES)('%s', (name) => {
@@ -68,6 +78,10 @@ describe('unwind2-S2 — hcl style, top-level assignment, line joining', () => {
     const jar = readFileSync(join(DIR, `${name}.svg`), 'utf8');
     const ours = renderSync(source, { measurer: new DeterministicMeasurer() });
     const paths = compareSvg(ours, jar, 'deterministic').diffs.map((d) => d.path);
+    if (SMETANA_GEOMETRY.has(name)) {
+      expect(paths.filter((p) => !SMETANA_POSITIONAL.test(p))).toEqual([]);
+      return;
+    }
     expect(paths).toEqual(OTHER_DEFECT[name] ?? []);
   });
 });

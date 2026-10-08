@@ -300,7 +300,10 @@ function parseTerms(terms: HclTerm[]): unknown {
  */
 function parseHclBody(lines: readonly string[]): { root: unknown; parseError: boolean } {
   try {
-    return { root: parseTerms(tokenize(lines.join(' '))), parseError: false };
+    // `HclSource#add` (`HclSource.java:48-53`) appends each line's characters
+    // with NO separator, so an unquoted value runs into the next line's first
+    // token (jar: `tests/fixtures/unwind2-S2/hcl-join-*`).
+    return { root: parseTerms(tokenize(lines.join(''))), parseError: false };
   } catch {
     return { root: null, parseError: true };
   }

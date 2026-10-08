@@ -30,7 +30,9 @@ describe('parseHcl — directive lines (unwind-U1)', () => {
   it('`caption X` is payload: it joins the module name, dropped with one module', () => {
     const two = parseHcl(makeSource(['caption c', ...BLOCK, 'other {', 'a = "1"', '}']));
     expect(isEmpty(two.annotations!)).toBe(true);
-    expect(Object.keys(two.root as object)).toEqual(['caption c resource "x"', 'other']);
+    // HclSource.java:48-53 joins lines with no separator, so `c` runs into
+    // `resource` (jar: unwind2-S2/hcl-join-caption).
+    expect(Object.keys(two.root as object)).toEqual(['caption cresource "x"', 'other']);
     expect(parseHcl(makeSource(['caption c', ...BLOCK])).root).toEqual({ key: 'value' });
   });
 
