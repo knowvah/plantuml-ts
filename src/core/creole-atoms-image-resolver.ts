@@ -48,24 +48,20 @@
  * `fontStereo` — see `EntityImageDescription.ts`'s
  * `atomImageResolverFor(font)` call sites, one per textblock, each with
  * its own font). `atom.forcedColor` overrides it, matching upstream's
- * `forcedColor == null ? fontColor : forcedColor`. `backColor` is left
- * unset (defaults to white, `sprite-raster.ts`'s own default) — upstream's
- * `backColor` comes from the active `UGraphic`'s current `Back` paint
- * (`ug.getParam().getBackcolor()`), which this port's `TextBlock` seam
- * does not thread through; documented simplification, not a geometry bug
- * (T7's jar-verification scope pins RELATIONS, not tint bytes — see the
- * mission brief).
+ * `forcedColor == null ? fontColor : forcedColor`. The gradient's start is
+ * the drawing context's back colour (`ug.getParam().getBackcolor()`,
+ * `SpriteMonochrome.java:216`): a monochrome result carries its
+ * {@link SpriteTint} so a `UGraphic` draw site re-tints over its own `Back`
+ * (`sprite-tint.ts#spriteHrefOver`), and a layout-time caller that knows the
+ * fill passes it to {@link makeAtomImageResolverFor} (unwind2-S7).
  */
 import type { FontConfiguration } from './klimt/shape/UText.js';
 import type { AtomImageResolver, InlineAtomToken, SpriteDimsLookup } from './creole-atoms.js';
 import { measureInlineAtom, spriteAtomScale } from './creole-atoms-measure.js';
 import type { SpriteRegistry } from './sprite-commands.js';
 import { getSpriteMonochrome, getSpriteSvg, getSpriteColor4096, spriteDimsLookupFor } from './sprite-commands.js';
-import {
-  spriteToPngDataUri,
-  spriteMonochromeAsLike,
-  spriteColor4096ToPngDataUri,
-} from './klimt/sprite/sprite-raster.js';
+import { spriteMonochromeAsLike, spriteColor4096ToPngDataUri } from './klimt/sprite/sprite-raster.js';
+import { spriteTintHref, type SpriteTint } from './klimt/sprite/sprite-tint.js';
 import { SvgNanoParser } from './klimt/sprite/SvgNanoParser.js';
 import type { DrawablePrimitive } from './creole-atoms.js';
 import type { UGraphic } from './klimt/UGraphic.js';
@@ -99,6 +95,8 @@ type ResolvedAtomImage =
        *  (`.agent-notes/si15-ink-offset.md`). */
       readonly rasterWidth?: number;
       readonly rasterHeight?: number;
+      /** unwind2-S7: present for a monochrome sprite (`sprite-tint.ts`). */
+      readonly tint?: SpriteTint;
     }
   | ResolvedDrawableAtom
   | undefined;
@@ -346,16 +344,16 @@ function resolveSpriteAtom(
   // `fc.getSize2D() / 13.0` factor -- the SAME call the sizer makes, so drawn
   // and measured sprite geometry cannot drift (S1L-f).
   const dims = measureInlineAtom(atom, spriteDims, font.size);
-  // Tint = `forcedColor ?? fontColor`; the back colour is the UGraphic's,
-  // unknown here, so white stands in (`SpriteMonochrome.java:181-182,216-217`).
-  const png = spriteToPngDataUri(
-    spriteMonochromeAsLike(sprite),
-    atom.forcedColor ?? font.color ?? undefined,
-    undefined,
-    // G10: same url-label bypass as `resolveSvgSpriteAtom` above — the
-    // rasterized PNG's scale must track `measureInlineAtom`'s declared box.
-    spriteAtomScale(atom, font.size),
-  );
+  // Tint = `forcedColor ?? fontColor` (`SpriteMonochrome.java:216-217`).
+  // G10: same url-label bypass as `resolveSvgSpriteAtom` above — the
+  // rasterized PNG's scale must track `measureInlineAtom`'s declared box.
+  // The back colour is the draw site's: `href` is the no-back (white,
+  // `:181-182`) rendition until `tint` is drawn over one.
+  const tint: SpriteTint = {
+    sprite: spriteMonochromeAsLike(sprite),
+    color: atom.forcedColor ?? font.color ?? undefined,
+    scale: spriteAtomScale(atom, font.size),
+  };
   // SI15 T6: raster = `Math.round(declared)`, not the registry's native
   // grid dims (`sprite.width`/`sprite.height`, T1's formula). Upstream
   // resamples its emitted PNG to `round(grid × scale)` via an AWT bilinear
@@ -367,12 +365,20 @@ function resolveSpriteAtom(
   // `.agent-notes/si15-ink-offset.md`.
   return {
     kind: 'image',
-    href: png.dataUri,
+    href: spriteTintHref(tint, undefined),
     width: dims.width,
     height: dims.height,
     rasterWidth: Math.round(dims.width),
     rasterHeight: Math.round(dims.height),
+    tint,
   };
+}
+
+/** A resolved monochrome sprite drawn over `backColor` -- for a caller that
+ *  knows the fill at layout time (unwind2-S7); everything else unchanged. */
+function overBack(resolved: ResolvedAtomImage, backColor: Paint | undefined): ResolvedAtomImage {
+  if (backColor === undefined || resolved?.kind !== 'image' || resolved.tint === undefined) return resolved;
+  return { ...resolved, href: spriteTintHref(resolved.tint, backColor) };
 }
 
 /**
@@ -391,6 +397,9 @@ export function makeAtomImageResolverFor(
   // .create`'s own doc comment. `undefined` (every caller today) preserves
   // the pre-D3 `UStroke.simple()` seed exactly.
   ambientStroke?: UStroke,
+  // unwind2-S7: the fill the text is drawn on, when the caller emits the
+  // href itself rather than through a `UGraphic` (`sprite-tint.ts`).
+  backColor?: Paint,
 ): (font: FontConfiguration) => AtomImageResolver {
   const spriteDims = registry !== undefined ? spriteDimsLookupFor(registry) : undefined;
   return (font: FontConfiguration): AtomImageResolver => {
@@ -402,7 +411,7 @@ export function makeAtomImageResolverFor(
       // than guessing an unverified description-side render path.
       if (atom.kind === 'openiconic') return undefined;
       if (registry === undefined || spriteDims === undefined) return undefined;
-      return resolveSpriteAtom(atom, registry, spriteDims, font, ambientStroke);
+      return overBack(resolveSpriteAtom(atom, registry, spriteDims, font, ambientStroke), backColor);
     };
   };
 }

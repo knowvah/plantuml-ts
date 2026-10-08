@@ -28,6 +28,7 @@ import {} from './renderer-body-enhanced.js';
 import {} from './class-shadow.js';
 import { classifierCascadeFontColor } from './renderer-classifier-row-font-color.js';
 import { parseDeclarationColors } from './class-declaration-extractors.js';
+import { atomsOverBack, classifierRowBack } from './class-sprite-back.js';
 
 /**
  * Every classifier row (header AND member) shares ONE plain-baseline
@@ -214,7 +215,9 @@ export function renderRowText(
   const resolvedInlineTextColor = inlineTextColor !== undefined ? resolveColorToSvgHex(inlineTextColor) : undefined;
   const fontColor = resolvedInlineTextColor ?? classifierCascadeFontColor(geo, theme, isHeader, isStereoLabelRow);
   if (row.atoms !== undefined) {
-    return renderRowAtoms(row.atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
+    // unwind2-S7: a sprite atom tints over the row's back (`class-sprite-back.ts`).
+    const atoms = atomsOverBack(row.atoms, classifierRowBack(geo, theme, isHeader));
+    return renderRowAtoms(atoms, geo.x + row.indent, geo.y + row.y, theme, fontColor);
   }
   return text(geo.x + row.indent, geo.y + row.y, row.text, {
     // G2 N23: `row.fontFamily`/`row.fontSize` (set only on the header row

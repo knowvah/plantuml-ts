@@ -60,6 +60,7 @@ import {
   resolveStereoFont,
 } from './class-layout-fonts.js';
 import { measureUsecaseOrActor, measureLollipop, measureAssociationDiamond } from './class-layout-leaf-shapes.js';
+import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
 // Re-exported for existing external consumers (class-directives.ts, layout.ts,
 // note-layout.ts) -- G2/N14 moved the implementations to class-member-rows.ts
 // to keep this file under the 500-line cap; the public import path is unchanged.
@@ -192,7 +193,7 @@ export interface MeasuredClassifier {
    *  Present only alongside a resolved sprite decoration; wins over
    *  `badgeChar`/the default kind badge at draw time
    *  (`renderer-classifier-box.ts#buildHeaderPrimitive`). */
-  badgeSpriteImage?: { href: string; width: number; height: number };
+  badgeSpriteImage?: { href: string; width: number; height: number; readonly tint?: SpriteTint };
   /** G2 N32: `class Foo<T>`'s generic type-parameter tag box -- see
    *  `class-stereotype.ts#buildGenericTagGeo`'s doc comment. Omitted for
    *  every classifier with no `typeParams` (zero behavior change). */

@@ -411,7 +411,10 @@ function drawNoteFallback(
   // (upstream: every `UHorizontalLine#drawMe` call REQUIRES one --
   // `klimt/drawing/LimitFinder.java` has no `UHorizontalLine` branch
   // either, jar-verified by inspection).
-  const stencilled = UGraphicStencil.create(ug, new XDimension2D(node.width, node.height));
+  // The text draws on the note's `Back` (`EntityImageNote.java:283,288`,
+  // `Opale.java:107,127`) -- a sprite atom tints from it (unwind2-S7).
+  const onFill = ug.apply(new Back(theme.colors.noteBackground));
+  const stencilled = UGraphicStencil.create(onFill, new XDimension2D(node.width, node.height));
   block.drawU(stencilled.apply(new UTranslate(NOTE_MARGIN_X, NOTE_MARGIN_Y)));
 }
 
