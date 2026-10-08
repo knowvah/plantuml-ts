@@ -1,0 +1,8 @@
+@startuml
+start
+:a;
+-[#blue]-> line one
+  line two;
+:b;
+stop
+@enduml
