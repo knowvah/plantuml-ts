@@ -39,13 +39,14 @@ import {
   TITLE_LOCAL_LEFT_OFFSET as TITLE_X_OFFSET,
   packageTitleFontFamily,
   packageTitleFontSize,
+  namespaceTitleWidth,
+  namespaceTitleHeight,
 } from './class-namespace-title-runs.js';
 import {
   MARGIN_TITLE_X1,
   MARGIN_TITLE_X2,
   MARGIN_TITLE_X3,
   PACKAGE_ROUND_CORNER,
-  titleFont,
   getWTitle,
   getHTitle,
   getTitleBaselineOffset,
@@ -199,7 +200,14 @@ export function measureEmptyPackageLeafDim(
   stereotypeLabels: readonly string[] = [],
   legend?: DisplayPositioned,
 ): EmptyPackageLeafDim {
-  const dim = measurer.measure(label, titleFont(theme));
+  // unwind2-S11: `desc = entity.getDisplay().create(titleFontConfiguration,
+  // ...)` (`EntityImageEmptyPackage.java` constructor) is a creole block --
+  // a `<$sprite>` is its own atom, not literal glyphs -- so it is the title
+  // block's width/height, not one raw-string measure.
+  const dim = {
+    width: namespaceTitleWidth(measurer, theme, label),
+    height: namespaceTitleHeight(measurer, theme, label),
+  };
   const stereo = leafStereoBlock(measurer, theme, stereotypeLabels, legend);
   const sh = stereo?.height ?? 0;
   const width = Math.max(dim.width, stereo?.width ?? 0) + EMPTY_PACKAGE_MARGIN * 2;
@@ -314,7 +322,10 @@ function drawTitle(
   const titleTextLength =
     geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK : undefined;
   return renderNamespaceTitleAuto(
-    { label: geo.label, theme, measurer, blockTopY: at.blockTopY },
+    // unwind2-S11: `ClusterDecoration#drawU(ug, back, ...)` draws the title
+    // over the leaf's back (`EntityImageEmptyPackage#drawU`) -- a sprite's
+    // tint start.
+    { label: geo.label, theme, measurer, blockTopY: at.blockTopY, back: emptyPackagePaint(theme, draw.tags).fill },
     {
       x: at.x,
       y: at.baselineY,

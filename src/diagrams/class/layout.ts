@@ -474,7 +474,10 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
+export function layoutClass(ast: ClassDiagramAST, skinTheme: Theme, measurer: StringMeasurer): ClassGeometry {
+  // unwind2-S11: a cluster title reads the diagram's own `sprite` map
+  // through its skin param (`StripeSimple.java:229`), `Theme#sprites` here.
+  const theme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
   const geo =
     ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
   // cdd-T30/cdd3-T34 (C-10): `theme.dpi` default 96 (`Theme.dpi`'s doc

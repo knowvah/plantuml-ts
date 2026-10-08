@@ -4,6 +4,8 @@
  * `renderer-edge.ts` (cdd3-T33, 500-line hook cap) — a pure move,
  * re-exported from that file so no consumer's import path changed.
  */
+import { spriteTintHref } from '../../core/klimt/sprite/sprite-tint.js';
+import type { EdgeLabelRun } from './class-edge-label-sprite-runs.js';
 import { text, attrs, image } from '../../core/svg.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
@@ -212,6 +214,7 @@ export function renderEdgeSingleLabel(
 ): string[] {
   const font: LabelFontAttrs =
     label.fontSize !== undefined ? { ...labelFontAttrs, fontSize: label.fontSize } : labelFontAttrs;
+  if (label.runs !== undefined) return renderSpriteLabelRuns(label, label.runs, font, labelColor);
   return labelTextRuns(label, font, measurer).map((run) =>
     text(run.x, label.y, run.text, {
       fill: labelColor,
@@ -222,4 +225,39 @@ export function renderEdgeSingleLabel(
       textLength: run.width,
     }),
   );
+}
+
+/** A sprite's tint end is `forcedColor ?? fontColor` (`SpriteMonochrome
+ *  .java:216-217`) -- the label's own colour unless the markup forced one. */
+function runHref(run: Extract<EdgeLabelRun, { kind: 'image' }>, labelColor: string): string {
+  return run.tint === undefined
+    ? run.href
+    : spriteTintHref({ ...run.tint, color: run.tint.color ?? labelColor }, undefined);
+}
+
+/** unwind2-S11: a text+`<$sprite>` label (`class-edge-label-sprite-runs.ts`)
+ *  -- each text atom its own `<text>` on the shared baseline, each sprite
+ *  its `<image>` at `dy` from it, drawn at the raster's rounded size as a
+ *  class row image is (`renderer-classifier-rows.ts`). No `Back` is applied
+ *  before an edge label, so a monochrome sprite tints over white
+ *  (`SpriteMonochrome.java:181-182`). */
+function renderSpriteLabelRuns(
+  label: { readonly x: number; readonly y: number },
+  runs: readonly EdgeLabelRun[],
+  font: LabelFontAttrs,
+  labelColor: string,
+): string[] {
+  const parts: string[] = [];
+  let x = label.x;
+  for (const run of runs) {
+    if (run.kind === 'image') {
+      parts.push(image(x, label.y + run.dy, Math.round(run.width), Math.round(run.height), runHref(run, labelColor)));
+    } else if (run.text.trim() !== '') {
+      parts.push(
+        text(x, label.y, run.text, { fill: labelColor, ...font, lengthAdjust: 'spacing', textLength: run.width }),
+      );
+    }
+    x += run.width;
+  }
+  return parts;
 }

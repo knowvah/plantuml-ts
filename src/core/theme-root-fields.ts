@@ -1,3 +1,5 @@
+import type { SpriteRegistry } from './sprite-registry.js';
+
 /**
  * Root-level `Theme` fields with no existing home — split out (rather than
  * added inline) because `theme.ts` is already at the project's 500-line
@@ -70,4 +72,15 @@ export interface ThemeRootFields {
    * (`activitydiagram3/ftile/Swimlanes.java:399`), its only reader.
    */
   swimlaneWidth?: number;
+  /**
+   * `SkinParam#sprites` (`skin/SkinParam.java:799-817`): the per-diagram
+   * `sprite` map every creole `<$name>` resolves through
+   * (`StripeSimple.java:229`, `skinParam.getSprite(src)`). Upstream the
+   * `ISkinParam` a text block is built with carries it; here the engine that
+   * parsed the `sprite` commands copies its `ast.sprites` onto the theme it
+   * lays out and renders with (unwind2-S11). Absent = no `sprite` commands,
+   * upstream's empty map (the internal-sprite fallback still applies via
+   * `sprite-registry.ts#getSprite` when present).
+   */
+  sprites?: SpriteRegistry;
 }

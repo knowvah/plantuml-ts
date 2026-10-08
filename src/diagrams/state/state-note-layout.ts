@@ -37,6 +37,8 @@
  * @see ~/git/plantuml/.../command/note/CommandFactoryNote.java (freestanding)
  */
 
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
 import type { NotePosition, StateNote } from './ast.js';
 import type { Theme } from '../../core/theme.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
@@ -118,7 +120,7 @@ const NOTE_FONT_STYLES: ReadonlySet<FontStyle> = new Set();
  * (un-padded) content box, `EntityImageNote.java:176-181`'s own split.
  */
 export function measureNote(text: string, theme: Theme, measurer: StringMeasurer): NoteMeasurement {
-  const pure = measureNotePureText(text, theme.fontFamily, measurer);
+  const pure = measureNotePureText(text, theme.fontFamily, measurer, theme.sprites);
   return {
     lines: buildRenderLines(text, theme, measurer),
     width: pure.width + NOTE_MARGIN_X1 + NOTE_MARGIN_X2,
@@ -144,9 +146,17 @@ export function measureNote(text: string, theme: Theme, measurer: StringMeasurer
  * BOTH `state-dot-graph.ts` and `state-composite-edge-label.ts` at once. A
  * no-op today regardless: `EntityImageNoteLink.ts`'s own doc comment records
  * that no `note ... on link` fixture in the corpus carries creole markup. */
-export function measureNotePureText(text: string, fontFamily: string, measurer: StringMeasurer): PureNoteTextDim {
+export function measureNotePureText(
+  text: string,
+  fontFamily: string,
+  measurer: StringMeasurer,
+  sprites?: SpriteRegistry,
+): PureNoteTextDim {
   const font: FontConfiguration = { family: fontFamily, size: NOTE_FONT_SIZE, color: null, styles: NOTE_FONT_STYLES };
-  const dim = buildNoteBody(text, font).calculateDimension(new MeasurerStringBounder(measurer));
+  // unwind2-S11: `skinParam.getSprite` sizes a `<$sprite>` atom
+  // (`StripeSimple.java:229`).
+  const opts = sprites === undefined ? undefined : { atomImageResolverFor: makeAtomImageResolverFor(sprites) };
+  const dim = buildNoteBody(text, font, opts).calculateDimension(new MeasurerStringBounder(measurer));
   return { width: dim.getWidth(), height: dim.getHeight() };
 }
 
@@ -178,7 +188,8 @@ const NOTE_TAB_SIZE_NB = 8;
  */
 function buildRenderLines(text: string, theme: Theme, measurer: StringMeasurer): readonly StateStyledTextLine[] {
   const font: FontSpec = { family: theme.fontFamily, size: NOTE_FONT_SIZE };
-  return creoleTextLines(text, font, measurer).map((ln) =>
+  const opts = theme.sprites === undefined ? undefined : { spriteRegistry: theme.sprites };
+  return creoleTextLines(text, font, measurer, opts).map((ln) =>
     ln.kind === 'table-row'
       ? tableRowRenderLine(ln, font, measurer)
       : toStyledLine(ln, font, measurer, NOTE_TAB_SIZE_NB),

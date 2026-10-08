@@ -67,6 +67,9 @@ import { WidthTableMeasurer } from '../../core/measurer.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { Sheet } from '../../core/klimt/creole/Sheet.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import { getSprite, type SpriteRegistry } from '../../core/sprite-registry.js';
+import { Back } from '../../core/klimt/Back.js';
+import type { Paint } from '../../core/paint.js';
 
 /** `$version$` -- the placeholder version for the throwaway `UGraphicSvg`
  *  each draw below renders into. */
@@ -91,12 +94,14 @@ function nestedRenderer(): NestedDiagramRenderer {
   );
 }
 
-/** See module doc comment. */
-function activitySkinSimple(fontConfiguration: FontConfiguration): ISkinSimple {
-  const atomOps = chromeAtomOps(undefined, fontConfiguration);
+/** See module doc comment. `getSprite` is `SkinParam#getSprite`
+ *  (`SkinParam.java:811-817`) over the diagram's own map (`Theme#sprites`),
+ *  which `StripeSimple#addSprite` reads (`StripeSimple.java:229`). */
+function activitySkinSimple(fontConfiguration: FontConfiguration, sprites: SpriteRegistry | undefined): ISkinSimple {
+  const atomOps = chromeAtomOps(sprites, fontConfiguration);
   const pragma = Pragma.createEmpty();
   const skin: ISkinSimple = {
-    getSprite: () => null,
+    getSprite: (name: string) => (sprites === undefined ? null : (getSprite(sprites, name) ?? null)),
     guillemet: () => GUILLEMET_DEFAULT,
     getFromMd5: () => null,
     transformStringForSizeHack: (s: string) => s,
@@ -156,8 +161,13 @@ function activityFontConfiguration(theme: Theme, fontSize: number, sname: Activi
  *  #createSheet` returns `Sheet<StripeAtom>`; `SheetBlock1` wants
  *  `Sheet<CreoleAtom>` -- the SAME type gap `DisplayCreole.ts#getCreole` casts
  *  through. */
-function createSheet(text: string, fc: FontConfiguration, align: HorizontalAlignment): Sheet<CreoleAtom> {
-  return activitySkinSimple(fc)
+function createSheet(
+  text: string,
+  fc: FontConfiguration,
+  align: HorizontalAlignment,
+  sprites: SpriteRegistry | undefined,
+): Sheet<CreoleAtom> {
+  return activitySkinSimple(fc, sprites)
     .sheet(fc, align, CreoleMode.FULL)
     .createSheet(Display.create(text.split('\n'))) as unknown as Sheet<CreoleAtom>;
 }
@@ -185,8 +195,8 @@ export function buildActionTextBlock(
   shield = 0,
 ): SheetBlock2 {
   const fc = activityFontConfiguration(theme, fontSize, sname);
-  const sheet = createSheet(label, fc, ALIGNMENT_MAP[activityHorizontalAlignment(theme)]);
-  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(undefined, fc), theme.padding ?? 0);
+  const sheet = createSheet(label, fc, ALIGNMENT_MAP[activityHorizontalAlignment(theme)], theme.sprites);
+  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
   const padding = activityPadding(sname);
   return new SheetBlock2(
     sheet1,
@@ -269,7 +279,13 @@ export function renderActionLabel(
   label: string,
   theme: Theme,
   fontSize: number,
-  box: { readonly x: number; readonly y: number; readonly width: number; readonly shield?: number },
+  box: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly shield?: number;
+    readonly color?: string;
+  },
 ): string {
   const tb = buildActionTextBlock(label, theme, fontSize, 'activity', box.shield ?? 0);
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
@@ -279,8 +295,11 @@ export function renderActionLabel(
   // `ug.apply(style.getStroke())`, before `tb.drawU` -- the ink a stencilled
   // `----` `ULine` is stroked with and the stroke a creole table's grid
   // (`AtomTable#drawU`) inherits.
+  // unwind2-S11: `ug.apply(backColor.bg())` (`:215-218`) -- the back a
+  // creole `<$sprite>` tints over (`SpriteMonochrome.java:216`).
   const changes = [
     new Fore(actColors(theme).nodeBorder),
+    new Back(box.color ?? actColors(theme).nodeFill),
     UStroke.withThickness(activityLineThickness(theme, 'activity')),
   ];
   return drawActionTextBlock(tb, box.x + t.getDx(), box.y + t.getDy(), { theme, font, changes });
@@ -323,8 +342,8 @@ export function renderActionLabel(
  */
 export function buildNoteTextBlock(text: string, theme: Theme): SheetBlock1 {
   const fc = activityFontConfiguration(theme, activityFontSize(theme, 'note'), 'note');
-  const sheet = createSheet(text, fc, ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)]);
-  return new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(undefined, fc));
+  const sheet = createSheet(text, fc, ALIGNMENT_MAP[activityNoteHorizontalAlignment(theme)], theme.sprites);
+  return new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc));
 }
 
 /**
@@ -351,17 +370,18 @@ export function renderNoteLabel(
   text: string,
   theme: Theme,
   box: { readonly x: number; readonly y: number; readonly width: number; readonly height: number },
-  borderColor: string,
+  ink: { readonly border: string; readonly fill: Paint },
 ): string {
   const font = { family: activityFontFamily(theme, 'note'), size: activityFontSize(theme, 'note') };
   const tb = buildNoteTextBlock(text, theme);
-  // `Opale#drawU` (`Opale.java:107`): `ug...apply(borderColor)` before
-  // `textBlock.drawU` -- the colour a stencilled `----` separator line is
-  // stroked with (its fill, the `.bg()` half, paints nothing on a line).
+  // `Opale#drawU` (`Opale.java:107`): `ug.apply(noteBackgroundColor.bg())
+  // .apply(borderColor)` before `textBlock.drawU` -- the colour a stencilled
+  // `----` separator line is stroked with, and the back a `<$sprite>` tints
+  // over (`SpriteMonochrome.java:216`, unwind2-S11).
   return drawActionTextBlock(noteSheetBlock2(tb), box.x + NOTE_MARGIN_X1, box.y + NOTE_MARGIN_Y, {
     theme,
     font,
-    changes: [new Fore(borderColor)],
+    changes: [new Back(ink.fill), new Fore(ink.border)],
   });
 }
 

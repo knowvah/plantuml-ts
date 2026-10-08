@@ -386,7 +386,10 @@ function tileRepeat(
 // `tile-layout-structural.ts` (D12/T1p-b) to keep this file under the
 // 500-line cap -- see that file's own doc comment.
 
-export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: StringMeasurer) {
+export function layoutActivity(ast: ActivityDiagramAST, skinTheme: Theme, measurer: StringMeasurer) {
+  // unwind2-S11: every text block reads the diagram's own `sprite` map
+  // through its skin param (`StripeSimple.java:229`), `Theme#sprites` here.
+  const theme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
   if (ast.nodes.length === 0) {
     return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
   }
@@ -406,7 +409,8 @@ export function layoutActivity(ast: ActivityDiagramAST, theme: Theme, measurer: 
   // origin/size is derived AFTER layout, dynamically, from the placed
   // geometry's own ink extent (`assign-coordinates-full.ts
   // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
-  return assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
+  const geo = assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
+  return ast.sprites === undefined ? geo : { ...geo, sprites: ast.sprites };
 }
 
 /** `tileNode`'s exhaustive default: an unknown kind draws nothing. */

@@ -16,6 +16,7 @@ import { pngPayloads } from '../../helpers/png-decode.js';
 
 const S7 = 'tests/fixtures/unwind2-S7';
 const U4 = 'tests/fixtures/unwind-U4/sprite';
+const S11 = 'tests/fixtures/unwind2-S11';
 
 function hrefs(svg: string): string[] {
   return pngPayloads(svg).map((p) => Buffer.from(p).toString('base64'));
@@ -72,6 +73,33 @@ const EXACT: readonly (readonly [string, string])[] = [
   // body on the note fill (`ComponentRoseNote.java:121,136`) -- #FEFFDD.
   [S7, 's-message'],
   [S7, 's-note'],
+  // unwind2-S11: the activity text blocks now resolve `<$sprite>` through
+  // the diagram's own map (`StripeSimple.java:229`).
+  [S7, 'ac-activity'], // FtileBox.java:215-218 -- the box fill
+  [S11, 'ac-color'], // skinparam ActivityBackgroundColor pink, 13pt (scale 1)
+  [S11, 'ac-multiline'],
+  [S11, 'ac-note'], // Opale.java:107 -- #FEFFDD
+  [S11, 'ac-arrow'], // an arrow label: no back (white)
+  [S11, 'ac-if'], // FtileDiamondInside.java:85 -- test label + south slot
+  // unwind2-S11: state text through `creole-text-lines.ts`'s sprite runs.
+  [S7, 'st-state'], // EntityImageStateCommon.java:131-140 -- the state fill
+  [S11, 'st-color'], // inline #pink
+  [S11, 'st-desc'], // the fields block, same `ug`
+  [S11, 'st-empty'],
+  [S11, 'st-hide-empty'], // EntityImageStateEmptyDescription#drawU applyColor
+  [S11, 'st-composite'], // the composite title
+  [S11, 'st-note'], // Opale.java:107 -- #FEFFDD
+  // unwind2-S11: cluster titles resolve `<$sprite>` through `Theme#sprites`.
+  [S7, 'c-package-title'], // USymbolFolder.java:224,228-229 -- no fill: white
+  [S11, 'c-package-color'], // #pink cluster fill
+  [S11, 'c-package-rect'], // USymbolRectangle#asBig
+  [S11, 'c-package-stereo-title'],
+  [S11, 'c-package-empty'], // EntityImageEmptyPackage, the leaf fill
+  // unwind2-S11: a text+sprite relationship label, no back (white).
+  [S7, 'c-edge'],
+  [S11, 'c-edge-color'], // skinparam ArrowFontColor red -- the tint end
+  [S11, 'c-edge-first'],
+  [S11, 'c-edge-two'],
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -83,11 +111,8 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-group', 'st-state'])(
-    '%s: not yet drawn by the port',
-    (name) => {
-      expect(jar(S7, name).length).toBe(1);
-      expect(ours(S7, name)).toEqual([]);
-    },
-  );
+  it.each(['s-group'])('%s: not yet drawn by the port', (name) => {
+    expect(jar(S7, name).length).toBe(1);
+    expect(ours(S7, name)).toEqual([]);
+  });
 });

@@ -4,6 +4,7 @@
  * shares. Split out of `class-edge-geo.ts` (500-line hook cap, cdd-T6) --
  * a pure move; `class-edge-geo.ts` re-exports `EdgeGeoTextContext`.
  */
+import { resolveSpriteLabelRuns, spriteRunsLabelAnchor } from './class-edge-label-sprite-runs.js';
 import type { Relationship } from './ast.js';
 import type { DotLayoutResult } from '../../core/graph-layout.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
@@ -307,6 +308,13 @@ function attachPlainLabel(
   if (sprite !== undefined) {
     const pos = spriteLabelAnchor(sprite, center, labelMarginOf(rel));
     edgeGeo.labelImage = { href: sprite.href, width: sprite.width, height: sprite.height, ...pos };
+    return;
+  }
+  // unwind2-S11: text beside a `<$sprite>` -- the SAME runs the DOT box
+  // was sized from (`class-edge-label-measure.ts`).
+  const mixed = resolveSpriteLabelRuns(resolvedLabel, labelFont, measurer, text.noteCtx?.sprites);
+  if (mixed !== undefined) {
+    edgeGeo.label = spriteRunsLabelAnchor(mixed, center);
     return;
   }
   // rimeca-17-gice904: an inline `<u>...</u>` creole tag draws as
