@@ -51,6 +51,14 @@ import type { DiagramAnnotations } from '../../../core/annotations/model.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import type { SpriteRegistry } from '../../../core/sprite-commands.js';
 
+/** `TitledDiagram#getDefaultMargins()`, `same(10)` (`TitledDiagram.java:275`). */
+const SAME_10: DocumentMargin = {
+  top: ACTIVITY_DOCUMENT_MARGIN,
+  right: ACTIVITY_DOCUMENT_MARGIN,
+  bottom: ACTIVITY_DOCUMENT_MARGIN,
+  left: ACTIVITY_DOCUMENT_MARGIN,
+};
+
 /**
  * `TextBlockExporter#exportTo`'s outer document-margin wrap, applied to an
  * ALREADY chrome-composed fragment (`core/annotations/chrome.ts#applyChrome`'s
@@ -60,12 +68,15 @@ import type { SpriteRegistry } from '../../../core/sprite-commands.js';
  * near corner moves too: the composed body must be SHIFTED by
  * `(ACTIVITY_DOCUMENT_MARGIN, ACTIVITY_DOCUMENT_MARGIN)`, not merely padded.
  */
-export function applyActivityDocumentMargin(fragment: RenderFragment): RenderFragment {
+export function applyActivityDocumentMargin(
+  fragment: RenderFragment,
+  margin: DocumentMargin = SAME_10,
+): RenderFragment {
   return {
     ...fragment,
-    body: shiftFragmentBody(fragment.body, ACTIVITY_DOCUMENT_MARGIN, ACTIVITY_DOCUMENT_MARGIN),
-    width: Math.floor(fragment.width + 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL),
-    height: Math.floor(fragment.height + 2 * ACTIVITY_DOCUMENT_MARGIN + SVG_CANVAS_CEIL),
+    body: shiftFragmentBody(fragment.body, margin.left, margin.top),
+    width: Math.floor(fragment.width + margin.left + margin.right + SVG_CANVAS_CEIL),
+    height: Math.floor(fragment.height + margin.top + margin.bottom + SVG_CANVAS_CEIL),
   };
 }
 
@@ -102,15 +113,7 @@ export function activityDocumentContext(
   };
 }
 
-/** `TitledDiagram#getDefaultMargins()`, `same(10)` (`TitledDiagram.java:275`). */
-const DEFAULT_DOCUMENT_CONTEXT: ActivityDocumentContext = {
-  margin: {
-    top: ACTIVITY_DOCUMENT_MARGIN,
-    right: ACTIVITY_DOCUMENT_MARGIN,
-    bottom: ACTIVITY_DOCUMENT_MARGIN,
-    left: ACTIVITY_DOCUMENT_MARGIN,
-  },
-};
+const DEFAULT_DOCUMENT_CONTEXT: ActivityDocumentContext = { margin: SAME_10 };
 
 /** `SkinParam#getDpi()`'s default (`skin/SkinParam.java:649-656`). */
 const DEFAULT_DPI = 96;
@@ -190,11 +193,16 @@ export function applyActivityChrome(
     height: fragment.preChromeHeight ?? fragment.height,
   };
   const chromedRaw = applyChrome(raw, annotations, styles, measurer, doc.sprites);
-  const margin = 2 * ACTIVITY_DOCUMENT_MARGIN;
+  // add4-T3b THEME-MARGIN: the layout baked `same(10)` under chrome
+  // (`documentMarginTheme`), undone above; the export margin is the
+  // theme's (`TextBlockExporter.Builder#calculateMargin`, java:510-516),
+  // translated by (left, top) and summed into the dimension (`:172-173,
+  // 199-202`).
+  const m = doc.margin;
   return withActivityScale(
-    applyActivityDocumentMargin(chromedRaw),
-    chromedRaw.width + margin,
-    chromedRaw.height + margin,
+    applyActivityDocumentMargin(chromedRaw, m),
+    chromedRaw.width + m.left + m.right,
+    chromedRaw.height + m.top + m.bottom,
     doc,
   );
 }

@@ -223,3 +223,19 @@ describe('activityDocumentContext', () => {
     expect(doc).toEqual({ margin: { top: 10, right: 10, bottom: 10, left: 10 } });
   });
 });
+
+describe('applyActivityChrome theme margin (add4-T3b)', () => {
+  it('re-applies an asymmetric theme margin: shift by (left, top), pad by left+right / top+bottom', () => {
+    const fragment = makeActivityFragment(100, 50);
+    const theme = { diagramMargin: { top: 1, right: 2, bottom: 3, left: 4 } } as unknown as Theme;
+    const result = applyActivityChrome(fragment, withTitle('T'), plainStyles(), MEASURER, {
+      ast: {},
+      theme,
+      sprites: undefined,
+    });
+    // layout baked same(10) (documentMarginTheme) -> undone; then (4, 1).
+    expect(result.body).toContain(shiftedBodyMarker(-10 + 4, -10 + 1 + ONE_LINE_BLOCK_HEIGHT));
+    expect(result.width).toBe(Math.floor(100 + 4 + 2 + 1));
+    expect(result.height).toBe(Math.floor(50 + ONE_LINE_BLOCK_HEIGHT + 1 + 3 + 1));
+  });
+});

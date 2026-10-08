@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5305 exported names.
+1406 modules · 5309 exported names.
 
 ## `src/`
 
@@ -1103,7 +1103,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `conditional-builder-long.ts` | `buildIfLongHorizontal`, `buildIfLongVertical` | The `elseif`-chain if-builders, split out of `conditional-builder.ts` (hook-enforced 500-line cap; add2 T3i needed the room for ELSEIFIN) -- `FtileIfLongHorizontal.create`'s per-branch hexagon row and `FtileIfLongVertical.create`'s downward |
 | `conditional-builder.ts` | `IfBuilder`, `IfLayoutCtx`, `IfBuilderResult`, `ifBuilderOf`, `isMainLaneSmallerThanAllOthers`, `buildIf` | `ConditionalBuilder#create`'s dispatch (`ifBuilderOf`, T1's Q0 note) and all three builders (`buildIf`). |
 | `diamond-labels.ts` | `emitDiamondLabels`, `emitDiamondOwnLabel` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
-| `document-margin.ts` | `applyActivityDocumentMargin`, `applyActivityChrome` | document-margin.ts -- T3j (mission `activity-divergence-drive`, journal row 36): `TextBlockExporter#exportTo`'s outer document-margin wrap, composed AFTER chrome (title/legend/caption/header/footer) rather than baked into the body at layout |
+| `document-margin.ts` | `applyActivityDocumentMargin`, `ActivityDocumentContext`, `activityDocumentContext`, `ActivityExportInput`, `applyActivityScale`, `applyActivityChrome` | document-margin.ts -- T3j (mission `activity-divergence-drive`, journal row 36): `TextBlockExporter#exportTo`'s outer document-margin wrap, composed AFTER chrome (title/legend/caption/header/footer) rather than baked into the body at layout |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
