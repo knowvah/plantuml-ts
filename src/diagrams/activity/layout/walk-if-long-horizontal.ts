@@ -23,7 +23,7 @@ import { laneIn, laneOut } from './swimlane-lanes.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { HlineCandidate } from './swimlane-hline.js';
-import { collectTouchedLanes } from './tile-coordinates-group.js';
+import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 import { applyOutLabel } from './tile-layout-inlabel.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default (`AbstractFtile
@@ -38,6 +38,24 @@ interface LhCtx {
   readonly y: number;
   readonly myLane: string | undefined;
   readonly out: Out;
+  /** `getSwimlanes()` (`:131-141`) as a {@link compositeLaneGate};
+   *  `undefined` = no swimlanes, no gate. */
+  readonly gate: ReadonlySet<string> | undefined;
+}
+
+/** {@link pushEdge} for a NON-`ConnectionTranslatable` connection, behind
+ *  {@link nonTranslatableConnectionDrawn}: one whose tiles sit in two
+ *  different lanes is drawn by no swimlane pass
+ *  (`UGraphicInterceptorOneSwimlane.java:93-104`, `ConnectionCross.java
+ *  :49-64`). */
+function pushNonTranslatableEdge(
+  ctx: LhCtx,
+  points: GPoint[],
+  lane1: string | undefined,
+  lane2: string | undefined,
+): void {
+  if (!nonTranslatableConnectionDrawn(ctx.gate, lane1, lane2)) return;
+  pushEdge(ctx.out, points, lane1, lane2);
 }
 
 function absolutePoint(local: GPoint, originX: number, originY: number): GPoint {
@@ -207,31 +225,36 @@ function hexMidPoint(ctx: LhCtx, i: number, side: 'right' | 'left'): GPoint {
 /** `ConnectionHorizontal` -- adjacent diamonds' hex right-mid -> left-mid.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:260-294 */
 function connectionHorizontal(ctx: LhCtx, i: number): void {
-  const { t, myLane, out } = ctx;
+  const { t, myLane } = ctx;
   const p1 = hexMidPoint(ctx, i, 'right');
   const p2 = hexMidPoint(ctx, i + 1, 'left');
-  pushEdge(out, [p1, p2], laneOut(t.diamonds[i]!, myLane), laneIn(t.diamonds[i + 1]!, myLane));
+  pushNonTranslatableEdge(ctx, [p1, p2], laneOut(t.diamonds[i]!, myLane), laneIn(t.diamonds[i + 1]!, myLane));
 }
 
 /** `ConnectionIn` -- the tile's own `pointIn` elbowed down into diamond 0.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:300-321 */
 function connectionIn(ctx: LhCtx): void {
-  const { t, x, y, myLane, out } = ctx;
+  const { t, x, y, myLane } = ctx;
   const p1 = { x: x + t.left, y };
   const d0Origin = diamondOrigin(ctx, 0);
   const p2 = { x: d0Origin.x + t.diamonds[0]!.left, y: d0Origin.y };
-  pushEdge(out, [p1, { x: p2.x, y: p1.y }, p2], myLane, laneIn(t.diamonds[0]!, myLane));
+  // `super(null, diamonds.get(0))` (`:305`): no tile1, so no lane1 gate.
+  if (!nonTranslatableConnectionDrawn(ctx.gate, undefined, laneIn(t.diamonds[0]!, myLane))) return;
+  pushEdge(ctx.out, [p1, { x: p2.x, y: p1.y }, p2], myLane, laneIn(t.diamonds[0]!, myLane));
 }
 
 /** `ConnectionLastElseIn` -- last diamond's hex right-mid -> `tile2.pointIn`.
+ *  `super(lastDiamond, tile2)` (`:328`) and NOT `ConnectionTranslatable`:
+ *  with `tile2` in another lane the jar draws no else-entry connector.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileIfLongHorizontal.java:323-350 */
 function connectionLastElseIn(ctx: LhCtx): void {
-  const { t, myLane, out } = ctx;
+  const { t, myLane } = ctx;
   const last = t.diamonds.length - 1;
   const p1 = hexMidPoint(ctx, last, 'right');
   const origin = tile2Origin(ctx);
   const p2 = absolutePoint(t.tile2.getCoord(NORTH_HOOK), origin.x, origin.y);
-  pushEdge(out, [p1, { x: p2.x, y: p1.y }, p2], laneOut(t.diamonds[last]!, myLane), laneIn(t.tile2, myLane));
+  const lane1 = laneOut(t.diamonds[last]!, myLane);
+  pushNonTranslatableEdge(ctx, [p1, { x: p2.x, y: p1.y }, p2], lane1, laneIn(t.tile2, myLane));
 }
 
 /** `ConnectionLastElseOut` -- `tile2.pointOut -> (x, H)`; a third point
@@ -290,11 +313,7 @@ function hlineCandidates(ctx: LhCtx): HlineCandidate[] {
  * couple's and `tile2`'s own lanes -- `HlinePayload.measureLanes`.
  */
 function hlineMeasureLanes(ctx: LhCtx): string[] {
-  const lanes = new Set<string>();
-  if (ctx.myLane !== undefined) lanes.add(ctx.myLane);
-  for (const tile of ctx.t.tiles) collectTouchedLanes(tile, lanes);
-  collectTouchedLanes(ctx.t.tile2, lanes);
-  return [...lanes];
+  return [...(ctx.gate ?? [])];
 }
 
 /**
@@ -351,7 +370,8 @@ export function walkIfLongHorizontal(
   myLane: string | undefined,
   out: Out,
 ): void {
-  const ctx: LhCtx = { t, x, y, myLane, out };
+  const gate = compositeLaneGate(myLane, [...t.tiles, t.tile2], myLane);
+  const ctx: LhCtx = { t, x, y, myLane, out, gate };
   for (let i = 0; i < t.diamonds.length; i++) walkCouple(ctx, i);
   walkTile(t.tile2, x + t.tile2X + t.tile2ContentDx, y + t.tile2Y, { kindHint: null, lane: myLane }, out);
 

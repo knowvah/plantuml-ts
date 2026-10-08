@@ -1,0 +1,14 @@
+@startuml
+|A|
+start
+:something Received;
+if (x?) then (yes)
+  :work;
+else (no)
+  |B|
+  stop
+endif
+|A|
+:done;
+stop
+@enduml

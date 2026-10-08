@@ -1543,11 +1543,11 @@
     {
       "type": "activity",
       "slug": "jucidi-98-zato093",
-      "status": "baseline",
-      "weightedScore": 31,
-      "diffCount": 4,
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "50a347b2"
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2098d674"
     },
     {
       "type": "activity",

@@ -32,6 +32,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { markBigDiamondDuplicate } from './switch-swimlane-duplicate.js';
+import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 import { applyInLabel, applyOutLabel } from './tile-layout-inlabel.js';
 import type { SnakeTextAlign } from './snake-text-position.js';
 import {
@@ -164,6 +165,8 @@ interface SwitchCaseStep {
   readonly y: number;
   readonly totalCases: number;
   readonly isBigDiamond: boolean;
+  /** `FtileSwitchNude#getSwimlanes()` (`FtileSwitchNude.java:70-79`). */
+  readonly gate: ReadonlySet<string> | undefined;
 }
 
 /** Tags every node {@link walkSwitchCase}'s `walkTile` call just pushed. */
@@ -216,6 +219,10 @@ function pushCaseInEdge(step: SwitchCaseStep, args: OneCaseArgs, out: Out): void
   const { diamond, myLane, totalCases } = step;
   const { i, c, cPos, label } = args;
 
+  // `FtileSwitchWithOneLink`'s connections (`:64-121`) are untranslatable and
+  // have no cross-swimlane variant: across lanes, no in-link and no label.
+  const lanes = [laneOut(diamond, myLane), laneIn(c, myLane)] as const;
+  if (totalCases === 1 && !nonTranslatableConnectionDrawn(step.gate, ...lanes)) return;
   const points = diamondToCasePoints(step, i, cPos, c);
   const to = points[points.length - 1]!;
   const south = diamond.getCoord(SOUTH_HOOK);
@@ -289,6 +296,7 @@ interface MergeEdgeStep {
   readonly mergeDiamond: Tile;
   readonly mPos: GPoint;
   readonly myLane: string | undefined;
+  readonly gate: ReadonlySet<string> | undefined;
 }
 
 /** One case-to-merge edge push (`ConnectionVerticalThenHorizontal` when
@@ -370,7 +378,10 @@ function pushOneLinkMergeEdge(step: MergeEdgeStep, c: Tile, cPos: GPoint, out: O
   const p1 = { x: cPos.x + southC.x, y: cPos.y + southC.y };
   const northM = step.mergeDiamond.getCoord(NORTH_HOOK);
   const p2 = { x: step.mPos.x + northM.x, y: step.mPos.y + northM.y };
-  pushEdge(out, oneLinkBottomPoints(p1, p2), laneOut(c, step.myLane), laneIn(step.mergeDiamond, step.myLane));
+  const lane1 = laneOut(c, step.myLane);
+  const lane2 = laneIn(step.mergeDiamond, step.myLane);
+  if (!nonTranslatableConnectionDrawn(step.gate, lane1, lane2)) return; // as `pushCaseInEdge`
+  pushEdge(out, oneLinkBottomPoints(p1, p2), lane1, lane2);
 }
 
 interface OneCaseArgs {
@@ -403,6 +414,7 @@ function pushMergeEdges(step: SwitchCaseStep, cases: readonly Tile[], positions:
     mergeDiamond: step.mergeDiamond,
     mPos: step.mPos,
     myLane: step.myLane,
+    gate: step.gate,
   };
   if (step.totalCases > 1) {
     pushCaseToMergeEdges(mergeStep, cases, positions, out);
@@ -469,6 +481,7 @@ export function walkSwitch(tile: GtileSwitch, x: number, y: number, myLane: stri
     y,
     totalCases: tile.caseOffsets.length,
     isBigDiamond: tile.isBigDiamond,
+    gate: compositeLaneGate(myLane, tile.children.slice(1, 1 + tile.caseOffsets.length), myLane),
   };
   walkSwitchCases(tile, x, step, out);
 

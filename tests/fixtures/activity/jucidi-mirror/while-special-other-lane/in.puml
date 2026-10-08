@@ -1,0 +1,10 @@
+@startuml
+|A|
+start
+:something Received;
+while (more?) is (yes)
+  :work;
+endwhile (no)
+|B|
+stop
+@enduml

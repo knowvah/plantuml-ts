@@ -1,0 +1,14 @@
+@startuml
+|A|
+start
+:something Received;
+fork
+  :left;
+fork again
+  |B|
+  :right;
+end merge
+|A|
+:done;
+stop
+@enduml

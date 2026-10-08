@@ -1,0 +1,13 @@
+@startuml
+|A|
+start
+:something Received;
+switch (kind?)
+case (one)
+  |B|
+  :only;
+endswitch
+|A|
+:done;
+stop
+@enduml

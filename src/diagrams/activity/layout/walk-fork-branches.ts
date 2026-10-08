@@ -8,6 +8,7 @@ import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
 import { applyInLabel, applyOutLabel } from './tile-layout-inlabel.js';
 import { pushLaneReservation } from './swimlane-reservation-lane.js';
+import { compositeLaneGate, nonTranslatableConnectionDrawn } from './swimlane-connection-gate.js';
 
 /** `arrowHorizontalAlignment()`'s own resolved default -- shared by
  *  `ParallelBuilderFork$ConnectionOut`/`ParallelBuilderSplit$ConnectionOut`
@@ -355,6 +356,9 @@ interface MergeDiamondGeo {
   readonly centerX: number;
   readonly top: number;
   readonly myLane: string | undefined;
+  /** The composite's lanes ({@link compositeLaneGate}): every branch's
+   *  plus the diamond's (`FtileAssemblySimple(result, out)`). */
+  readonly gate: ReadonlySet<string> | undefined;
 }
 
 /**
@@ -394,6 +398,10 @@ function mergeArrival(startX: number, diamond: MergeDiamondGeo): GPoint {
  * upstream -- tagging both ends with the same lane means `routeEdge`
  * (`swimlane-placement.ts`) never treats this edge as lane-crossing,
  * matching that absence rather than inventing support upstream never had.
+ * `super(tile, diamond)` (`:129`): a branch whose out lane is not the
+ * diamond's is drawn by no lane pass (`UGraphicInterceptorOneSwimlane
+ * .java:93-104`) and, untranslatable, by no cross pass either
+ * (`ConnectionCross.java:49-64`).
  */
 function pushMergeOut(branch: Tile, bX: number, bY: number, diamond: MergeDiamondGeo, out: Out): void {
   if (!branch.hasPointOut()) return;
@@ -402,6 +410,7 @@ function pushMergeOut(branch: Tile, bX: number, bY: number, diamond: MergeDiamon
   const y1 = bY + south.y;
   const target = mergeArrival(x1, diamond);
   const lane = laneOut(branch, diamond.myLane);
+  if (!nonTranslatableConnectionDrawn(diamond.gate, lane, diamond.myLane)) return;
   pushEdge(out, [{ x: x1, y: y1 }, { x: x1, y: target.y }, target], lane, lane);
 }
 
@@ -409,15 +418,10 @@ function pushMergeOut(branch: Tile, bX: number, bY: number, diamond: MergeDiamon
  *  both are the SAME upstream class, a label-less `FtileDiamond`
  *  (`vertical/FtileDiamond.java`), so the existing `renderIfMerge`/
  *  `canvas-origin.ts`/`compress/shapes-of.ts` handling for that kind
- *  already applies correctly, unmodified. `myLane` (not a distinct
- *  `swimlaneOutForStep2()` descent): D12's merge builder reads
- *  `list99.get(0).getSwimlaneIn()`/the base class's own
- *  `swimlaneOutForStep2()` default internally rather than the
- *  `InstructionFork`-captured fields `GtileFork`'s `withSwimlane`/
- *  `withSwimlaneOut` set (`tile-layout.ts#tileFork`) -- the two coincide
- *  whenever nothing changes lane between the fork opener/closer and the
- *  first/last branch's own edge, true of every row in this task's cohort;
- *  not re-derived from the branches here for that reason. */
+ *  already applies correctly, unmodified. Its lane is
+ *  `swimlaneOutForStep2()` = the LAST branch's `getSwimlaneOut()`
+ *  (`ParallelBuilderMerge.java:101`, `AbstractParallelFtilesBuilder.java
+ *  :208-210`), not the fork's own `myLane`. */
 function pushMergeDiamondNode(diamond: MergeDiamondGeo, out: Out): void {
   pushNode(
     out,
@@ -452,10 +456,13 @@ export function walkMerge(t: GtileFork, x: number, y: number, myLane: string | u
     bX: x + t.branchOffsets[i]!,
     bY: y + t.branchTopYs[i]!,
   }));
+  const last = t.children[t.children.length - 1];
+  const diamondLane = last !== undefined ? laneOut(last, myLane) : myLane;
   const diamond: MergeDiamondGeo = {
     centerX: x + t.getCoord(NORTH_HOOK).x,
     top: y + t.height - MERGE_DIAMOND_SIZE,
-    myLane,
+    myLane: diamondLane,
+    gate: compositeLaneGate(diamondLane, t.children, myLane),
   };
   const inCtx: ForkBranchContext = {
     x,
