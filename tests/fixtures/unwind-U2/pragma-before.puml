@@ -1,0 +1,6 @@
+@startdot
+!pragma layout smetana
+digraph G {
+  a -> b;
+}
+@enddot

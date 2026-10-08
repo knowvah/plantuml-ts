@@ -1,0 +1,6 @@
+@startdot
+digraph G {
+caption Hello World
+  a -> b;
+}
+@enddot

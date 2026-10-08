@@ -8,8 +8,8 @@
  *
  * That is not an assumption. Measured against the pinned oracle jar: a block
  * with `skinparam BackgroundColor #AABBCC` above its `digraph` produces output
- * BYTE-IDENTICAL to the same block without it. The old assertions were
- * asserting a divergence; these assert the faithful behaviour.
+ * BYTE-IDENTICAL to the same block without it (`UmlSource#removeInitialNoise`
+ * drops it, UmlSource.java:79-106; a `<style>` there is a syntax error).
  */
 import { describe, it, expect } from 'vitest';
 
@@ -23,8 +23,8 @@ import { parseAst } from '../../helpers/parse-ast.js';
 const measurer = new FormulaMeasurer();
 const theme = defaultTheme;
 
-function makeSource(lines: string[], rawStyles: string[] = []): UmlSource {
-  return { type: 'dot', lines, rawStyles };
+function makeSource(lines: string[]): UmlSource {
+  return { type: 'dot', lines };
 }
 
 function renderFull(source: UmlSource): string {
@@ -33,49 +33,27 @@ function renderFull(source: UmlSource): string {
   return assembleSvg(dotPlugin.render(geo, theme));
 }
 
-const GRAPH = ['@startdot', 'digraph G {', '  a -> b;', '}', '@enddot'];
-
-describe('parseAst(dotPlugin, )', () => {
-  it('passes rawStyles from UmlSource into the AST', () => {
-    const ast = parseAst(dotPlugin, makeSource(GRAPH, ['node { BackgroundColor: red }']));
-    expect(ast.rawStyles).toHaveLength(1);
-    expect(ast.rawStyles[0]).toContain('BackgroundColor');
-  });
-
-  it('rawStyles defaults to [] when UmlSource provides none', () => {
-    const ast = parseAst(dotPlugin, { type: 'dot', lines: GRAPH });
-    expect(ast.rawStyles).toEqual([]);
-  });
-});
+const GRAPH = ['digraph G {', '  a -> b;', '}'];
+const DOC = ['@startdot', ...GRAPH, '@enddot'];
 
 describe('dotPlugin — skin directives are inert, as upstream', () => {
   const baseline = renderFull(makeSource(GRAPH));
 
   it('a skinparam line changes nothing about the output', () => {
-    const withSkin = renderFull(makeSource(['@startdot', 'skinparam BackgroundColor #AABBCC', ...GRAPH.slice(1)]));
+    const withSkin = renderFull(makeSource(['skinparam BackgroundColor #AABBCC', ...GRAPH]));
     expect(withSkin).toBe(baseline);
   });
 
   it('several skinparam lines still change nothing', () => {
     const withSkin = renderFull(
       makeSource([
-        '@startdot',
         'skinparam BackgroundColor #AABBCC',
         'skinparam FontColor #FF0000',
         'skinparam FontSize 22',
-        ...GRAPH.slice(1),
+        ...GRAPH,
       ]),
     );
     expect(withSkin).toBe(baseline);
-  });
-
-  it('a <style> block changes nothing', () => {
-    const withStyle = renderFull(makeSource(GRAPH, ['node { BackgroundColor: red }', 'edge { LineColor: blue }']));
-    expect(withStyle).toBe(baseline);
-  });
-
-  it('an empty rawStyles array changes nothing', () => {
-    expect(renderFull(makeSource(GRAPH, []))).toBe(baseline);
   });
 });
 
@@ -86,20 +64,16 @@ describe('dotPlugin — output shape', () => {
     expect(svg).toMatch(/width="\d+pt"/);
   });
 
-  it('renders chrome when the block carries a title (deliberate divergence)', () => {
-    // Through the real entry point, not `renderFull`: chrome is composed by
-    // `applyAnnotationChrome` inside src/index.ts's render path, which
-    // `assembleSvg` alone does not reach.
-    const svg = renderSync(['@startdot', 'title My Graph', ...GRAPH.slice(1)].join('\n'));
-    expect(svg).toContain('My Graph');
-    expect(svg).toContain('id="graph0"');
+  it("a title before the header is the jar's syntax-error page, not chrome", () => {
+    // PSystemDotFactory.java:71-77 + PSystemBasicFactory.java:61-64.
+    const svg = renderSync(['@startdot', 'title My Graph', ...GRAPH, '@enddot'].join('\n'));
+    expect(svg).toContain('Syntax Error? (Assumed diagram type: dot)');
+    expect(svg).not.toContain('id="graph0"');
   });
 
   it("emits graphviz's document verbatim through the real entry point when there is no chrome", () => {
-    const svg = renderSync(GRAPH.join('\n'));
+    const svg = renderSync(DOC.join('\n'));
     expect(svg.startsWith('<?xml')).toBe(true);
     expect(svg).not.toContain('<marker');
   });
 });
-
-describe('dotPlugin.accepts()', () => {});

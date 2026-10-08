@@ -1551,7 +1551,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `DotDiagramAST`, `DotGeometry` |  |
+| `ast.ts` | `DotDiagramAST`, `DotGeometry` | `@startdot` is a PASSTHROUGH, not a diagram model. |
 | `index.ts` | `dotPlugin` |  |
 | `layout.ts` | `layoutDot` |  |
 | `parser.ts` | `parseDot` |  |

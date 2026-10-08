@@ -1,0 +1,6 @@
+@startdot
+title My Graph
+digraph G {
+  a -> b;
+}
+@enddot
