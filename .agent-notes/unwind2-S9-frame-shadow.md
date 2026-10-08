@@ -8,13 +8,12 @@
   `<filter>` in the content group and an empty `<defs/>`.
 - **Confidence**: High
 
-## Observation: sequence participants under shadowing are unported
-- **Context**: jar renders under `skinparam shadowing true` / `skin rose` /
-  `!theme materia` (tests/fixtures/unwind2-S9/).
-- **Finding**: the jar shadows every plain participant head and foot box and
-  grows the head row by the delta (frames start 3px lower at Shadowing 3);
-  this port draws neither. Only the glyph kinds routed through
-  `renderer-participant-symbol.ts` read `resolveElementShadowing`.
-- **Impact**: any shadowed sequence diagram diverges in participant ink and
-  every y below the head row.
+## Observation: compareSvg cannot see a dangling def reference
+- **Context**: unwind2-S9b, re-pointing participant glyph shadows.
+- **Finding**: dropping a glyph's gradient `<linearGradient>` left
+  `fill="url(#g...)"` dangling, and the sequence weightedScore did not move
+  (vasibu-26-lece790 scored the same with and without the def). Only a
+  per-tag element-count comparison against the jar showed it.
+- **Impact**: when a change touches defs, count `<linearGradient>`/`<filter>`
+  and check every `url(#...)` resolves; the ratchet will not.
 - **Confidence**: High
