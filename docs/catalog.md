@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1408 modules · 5318 exported names.
+1408 modules · 5319 exported names.
 
 ## `src/`
 
@@ -1149,7 +1149,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `walk-repeat.ts` | `RepeatFrame`, `pushEdgeFlagged`, `walkRepeat` | The `'gtile-repeat'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-switch.ts` | `walkSwitch` | The `'gtile-switch'` case's full node/edge emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from growing fu |
 | `walk-while-backward.ts` | `pushWhileBackwardConnections` | `FtileWhile`'s `ConnectionBackBackward1`/`ConnectionBackBackward2` (`FtileWhile.java:85,154-161,313-408`), split out of `walk-while- branch.ts` only to keep that file under the project's 500-line cap (mission `activity-divergence-drive` T3h |
-| `walk-while-branch.ts` | `WhileFrame`, `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
+| `walk-while-branch.ts` | `WhileFrame`, `childHook`, `walkWhile` | The `'gtile-while'` case's full node/edge/reservation emission, split out of `tile-coordinates.ts`'s `walkTile` switch only to keep that already- oversized function (`#lizard forgives`, faithful port of the upstream tile-kind dispatch) from |
 | `walk-with-notes.ts` | `walkNoteOpale`, `walkWithNotes` | The `'gtile-with-notes'` case's full node emission, split out of `tile-coordinates.ts`'s `walkTile` switch for the same reason the if-down/if-with-links/switch walkers already are (one walker module per builder) -- that file sits at the pro |
 
 ## `src/diagrams/activity/layout/compress/`

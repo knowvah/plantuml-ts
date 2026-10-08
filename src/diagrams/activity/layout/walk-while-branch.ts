@@ -28,7 +28,7 @@
 
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
-import type { GPoint } from '../tiles/points.js';
+import type { GPoint, HookName } from '../tiles/points.js';
 import { EAST_HOOK, NORTH_HOOK, SOUTH_HOOK, WEST_HOOK } from '../tiles/points.js';
 import type { Tile } from '../tiles/tile.js';
 import { GConnectionVerticalDown } from '../routing/gconnection-vertical-down.js';
@@ -190,6 +190,12 @@ export interface WhileFrame {
   readonly bY: number;
   readonly headerEast: GPoint;
   readonly headerWest: GPoint;
+  /** `ConnectionIn#getP1` / `ConnectionBackEmpty`'s start: diamond1's out. */
+  readonly headerSouth: GPoint;
+  /** `ConnectionIn#getP2`: the body's point in. */
+  readonly bodyNorth: GPoint;
+  /** `ConnectionBackSimple#getP1`: the body's point out. */
+  readonly bodySouth: GPoint;
   readonly southHook: GPoint;
   readonly bodyBottomY: number;
   readonly xx: number;
@@ -251,11 +257,10 @@ export interface WhileFrame {
  * under the file's limit.
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
-function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
-  const { out, header, body, hX, hY, bX, bY, headerEast, bodyBottomY, xx, dimTotalWidth } = frame;
+function pushWhileBackNonEmpty(frame: WhileFrame): void {
+  const { out, header, body, hX, hY, headerEast, headerSouth, bodyBottomY, xx, dimTotalWidth } = frame;
   const { headerOutLane, headerInLane, bodyInLane, bodyOutLane } = frame;
-  const inTo = { x: bX + body.getCoord(NORTH_HOOK).x, y: bY + body.getCoord(NORTH_HOOK).y };
-  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, inTo), headerOutLane, bodyInLane);
+  pushEdge(out, new GConnectionVerticalDown().getPoints(headerSouth, frame.bodyNorth), headerOutLane, bodyInLane);
 
   if (frame.backward !== undefined) {
     pushWhileBackwardConnections(frame);
@@ -263,7 +268,7 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
   }
   if (!body.hasPointOut()) return;
 
-  const backFrom = { x: bX + body.getCoord(SOUTH_HOOK).x, y: bY + body.getCoord(SOUTH_HOOK).y };
+  const backFrom = frame.bodySouth;
   pushEdgeFlagged(out, backEdgePoints(backFrom, headerEast, bodyBottomY, xx), [bodyOutLane, headerInLane], {
     emphasize: 'up',
     loop: buildWhileBackLoop(header, hX, hY, backFrom, { originX: xx - dimTotalWidth, dimTotalWidth }),
@@ -282,8 +287,7 @@ function pushWhileBackNonEmpty(frame: WhileFrame, headerSouth: GPoint): void {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileWhile.java:148-168
  */
 function pushWhileBack(frame: WhileFrame): void {
-  const { out, header, body, hX, hY, headerEast, bodyBottomY, xx, headerOutLane } = frame;
-  const headerSouth = { x: hX + header.getCoord(SOUTH_HOOK).x, y: hY + header.getCoord(SOUTH_HOOK).y };
+  const { out, body, headerEast, headerSouth, bodyBottomY, xx, headerOutLane } = frame;
 
   if (body.width === 0 || body.height === 0) {
     pushEdgeFlagged(out, backEdgePoints(headerSouth, headerEast, bodyBottomY, xx), [headerOutLane, headerOutLane], {
@@ -298,7 +302,7 @@ function pushWhileBack(frame: WhileFrame): void {
     return;
   }
 
-  pushWhileBackNonEmpty(frame, headerSouth);
+  pushWhileBackNonEmpty(frame);
 }
 
 /**
@@ -385,6 +389,24 @@ function pushWhileWeldings(out: Out, bodyNodeStart: number, bodyNodeEnd: number,
   }
 }
 
+/**
+ * A child's hook in absolute coordinates, grouped as upstream groups it:
+ * the child-LOCAL point first (`getTranslateDiamond1`/`getTranslateForWhile`
+ * `.getTranslated(geo.getPointOut())`, `FtileWhile.java:179-186,228-232,
+ * 621-641`), THEN the walk origin, which upstream adds last as the snake's
+ * own `UTranslate` (`Worm.java:67-79` `move`, resolved per point). Folding
+ * the origin into the offset first (`(x + offset) + hook`) left the in-edge
+ * and back-edge ends one ULP apart on a resolved creole width (xovigi
+ * under the FULL-block hexagon sizing: 168.97500000000002 vs 168.975), and
+ * `Direction.fromVector`'s exact `==` (`Direction.java:110-130`), which
+ * `snake-merge-worm.ts#directionOf` mirrors, then rejects the segment.
+ * Same grouping fix as `tile-coordinates.ts#pushTopDownSiblingEdge`.
+ */
+export function childHook(origin: GPoint, offset: GPoint, tile: Tile, hook: HookName): GPoint {
+  const local = tile.getCoord(hook);
+  return { x: origin.x + (offset.x + local.x), y: origin.y + (offset.y + local.y) };
+}
+
 /** Everything {@link buildWhileFrame} needs, bundled to keep it (and
  *  {@link walkWhile}, which builds this) under the file's parameter limit. */
 interface WhileOrigins {
@@ -424,6 +446,9 @@ function buildWhileSpecialFields(
  *  under the file's limit. */
 function buildWhileFrame(o: WhileOrigins): WhileFrame {
   const { t, x, y, hX, hY, bX, bY, header, body, myLane, out } = o;
+  const origin = { x, y };
+  const headerOffset = { x: t.headerOffsetX, y: t.headerOffsetY };
+  const bodyOffset = { x: t.bodyOffsetX, y: t.bodyOffsetY };
   return {
     out,
     header,
@@ -432,8 +457,11 @@ function buildWhileFrame(o: WhileOrigins): WhileFrame {
     hY,
     bX,
     bY,
-    headerEast: { x: hX + header.getCoord(EAST_HOOK).x, y: hY + header.getCoord(EAST_HOOK).y },
-    headerWest: { x: hX + header.getCoord(WEST_HOOK).x, y: hY + header.getCoord(WEST_HOOK).y },
+    headerEast: childHook(origin, headerOffset, header, EAST_HOOK),
+    headerWest: childHook(origin, headerOffset, header, WEST_HOOK),
+    headerSouth: childHook(origin, headerOffset, header, SOUTH_HOOK),
+    bodyNorth: childHook(origin, bodyOffset, body, NORTH_HOOK),
+    bodySouth: childHook(origin, bodyOffset, body, SOUTH_HOOK),
     southHook: { x: x + t.getCoord(SOUTH_HOOK).x, y: y + t.getCoord(SOUTH_HOOK).y },
     bodyBottomY: bY + body.height,
     xx: x + t.width,
