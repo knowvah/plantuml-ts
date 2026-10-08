@@ -117,12 +117,30 @@ export function welcomeSvg(options?: RenderOptions): string {
  * @see ~/git/plantuml/.../command/PSystemAbstractFactory.java#buildEmptyError
  */
 export function emptySvg(block: BlockUmlOk, options?: RenderOptions): string {
+  if (isWelcomeSource(block)) {
+    const welcome = new PSystemWelcome('BACKGROUND_CORNER_BOTTOM_RIGHT');
+    return renderPSystemWelcome(welcome, errorMeasurer(options));
+  }
   const startLine = block.rawSource[0]!;
   const assumed: DiagramType = block.suffix === 'uml' ? UML_EMPTY_ASSUMED_TYPE : block.source.type;
   const error = new ErrorUml('SYNTAX_ERROR', EMPTY_DESCRIPTION, 0, startLine, assumed);
   const system = new PSystemErrorEmpty(block.rawSource, [startLine], error);
   return renderPSystemError(system, errorMeasurer(options));
 }
+
+/**
+ * `PSystemWelcomeFactory`: the first factory `@startuml` tries
+ * (`PSystemBuilder.java:133`, typed `SEQUENCE`, `PSystemWelcomeFactory.java:58-61`) answers a source of
+ * exactly two lines -- `@startuml` and its `@enduml` -- with the Welcome page,
+ * logo bottom-right, before any factory can raise *Empty description*.
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/eggs/PSystemWelcomeFactory.java:49-56
+ */
+function isWelcomeSource(block: BlockUmlOk): boolean {
+  return block.suffix === 'uml' && block.seedSource.length === WELCOME_SOURCE_LINES;
+}
+
+/** `source.getTotalLineCount() == 2`. @see PSystemWelcomeFactory.java:52 */
+const WELCOME_SOURCE_LINES = 2;
 
 /** @see ~/git/plantuml/.../command/PSystemAbstractFactory.java#EMPTY_DESCRIPTION */
 const EMPTY_DESCRIPTION = 'Empty description';

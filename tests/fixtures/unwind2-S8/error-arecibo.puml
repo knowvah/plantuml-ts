@@ -1,0 +1,7 @@
+@startuml
+foo arecibo
+A -> B
+B -> C
+C -> D
+D -> E
+@enduml
