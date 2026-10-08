@@ -21,6 +21,7 @@ import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
 import { LinkStyle } from '../../core/decoration/LinkStyle.js';
+import { edgeColorTokens, edgeLinkStyle } from './layout/edge-link-style.js';
 import { parseColor, toSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
@@ -271,12 +272,10 @@ function defaultEdgeLook(theme: Theme): EdgeLook {
 function edgeLook(edge: ActivityEdgeGeo, theme: Theme): EdgeLook {
   const base = defaultEdgeLook(theme);
   if (edge.color === undefined) return base;
+  const style = edgeLinkStyle(edge);
   let line = base.line;
-  let style = LinkStyle.NORMAL();
-  for (const token of edge.color.split(';')[0]!.split(',')) {
-    const tmp = LinkStyle.fromString1(token);
-    if (!tmp.isNormal()) style = tmp;
-    else line = colorTokenHex(token) ?? line;
+  for (const token of edgeColorTokens(edge)) {
+    if (LinkStyle.fromString1(token).isNormal()) line = colorTokenHex(token) ?? line;
   }
   return { line, head: line, stroke: linkStroke(style, base.stroke), invisible: style.isInvisible() };
 }

@@ -28,6 +28,7 @@ import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { TextBlockUtils } from '../../../../core/klimt/shape/TextBlockUtils.js';
 import { TEXT_LIMIT_SHIFT } from './slot-finder.js';
+import { edgeLinkStyle } from '../edge-link-style.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
@@ -379,12 +380,21 @@ function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Th
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
  *  segments (`ULine`, never occupies, D1). */
+/** The worm's own end and emphasize decorations (`Worm.java:138-171`). */
+function wormDecorations(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape[] {
+  const out: CompressShape[] = [];
+  const terminal = terminalArrowhead(edge, meta);
+  if (terminal !== undefined) out.push(terminal);
+  const emphasized = emphasizeArrowhead(edge);
+  if (emphasized !== undefined) out.push(emphasized);
+  return out;
+}
+
 function shapesForEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, bounder: StringBounder, theme: Theme): CompressShape[] {
   const shapes: CompressShape[] = [];
-  const terminal = terminalArrowhead(edge, meta);
-  if (terminal !== undefined) shapes.push(terminal);
-  const emphasized = emphasizeArrowhead(edge);
-  if (emphasized !== undefined) shapes.push(emphasized);
+  // add4-T3j: a hidden worm returns before drawing its line or either
+  // decoration (`Worm.java:123-124`); its label still draws (`Snake.java:195`).
+  if (!edgeLinkStyle(edge).isInvisible()) shapes.push(...wormDecorations(edge, meta));
   const midArrow = midArrowShape(edge);
   if (midArrow !== undefined) shapes.push(midArrow);
   const label = edgeLabelShape(edge, bounder, theme);

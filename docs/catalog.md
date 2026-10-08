@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1410 modules · 5321 exported names.
+1411 modules · 5323 exported names.
 
 ## `src/`
 
@@ -1110,6 +1110,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `diamond-labels.ts` | `emitDiamondLabels`, `emitDiamondOwnLabel` | `emitDiamondLabels` — the shared `if-label` node emission every `GtileDiamondInside` caller needs: one node per side in `sides` whose `labelAt(side)` is non-null, translated into the walk's absolute frame. |
 | `document-margin.ts` | `applyActivityDocumentMargin`, `ActivityDocumentContext`, `activityDocumentContext`, `ActivityExportInput`, `applyActivityScale`, `applyActivityChrome` | document-margin.ts -- T3j (mission `activity-divergence-drive`, journal row 36): `TextBlockExporter#exportTo`'s outer document-margin wrap, composed AFTER chrome (title/legend/caption/header/footer) rather than baked into the body at layout |
 | `edge-draw-order.ts` | `passOf`, `lanePassOrder`, `applyEdgeDrawOrder` | Rule (b) of mission `activity-edge-draw-order`: the order in which an activity diagram's edges are DRAWN, when the diagram declares swimlanes. |
+| `edge-link-style.ts` | `edgeColorTokens`, `edgeLinkStyle` | The `LinkStyle` of an edge's `CommandArrow3` COLOR group (`edge.color`, e.g. |
 | `edge-point-dedupe.ts` | `dedupeAdjacentPoints` |  |
 | `hexagon-reservations.ts` | `HEXAGON_HALF_SIZE`, `HEXAGON_RESERVATION_WIDTH`, `Reservation`, `whileHexagonReservation`, `ifElseHexagonReservation` | `UEmpty(5, Hexagon.hexagonHalfSize)` compression reservations — small placeholders upstream draws beside a hexagon/diamond's loop-back elbow so `SlotFinder` never lets the compressor collapse the space an adjacent decoration needs. |
 | `snake-merge-worm.ts` | `MergeStrategy`, `wormMerge` | `Worm#merge`'s corner-collapse fixed point (D1, T1b) -- the direction- pattern passes `Snake#merge` (`snake-merge.ts`) runs over a freshly concatenated point list, and nothing else: this module owns no notion of decorations, text, or strate |

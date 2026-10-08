@@ -52,12 +52,9 @@ describe('next-arrow style (jar oracles)', () => {
     expect(diffPaths(dir, name)).toEqual([]);
   });
 
-  // Worm.java:123-124 returns before drawing a hidden worm; its label still
-  // draws (Snake.java:195). Residual: compress/shapes-of.ts still counts the
-  // hidden arrowhead, so the gap below compresses 8.444 px less than the jar.
-  it('hidden arrow: no line or head, label kept; only the compress residual', () => {
-    const paths = diffPaths('add4-T3j', 'arrow-style-hidden');
-    expect(paths.filter((p) => !/@(y|y1|y2|cy|points\[\d*[13579]\]|height|viewBox\[3\])$/.test(p))).toEqual([]);
-    expect(paths).toHaveLength(12);
+  // Worm.java:123-124 returns before drawing a hidden worm (no line, no
+  // head, so no slot); its label still draws (Snake.java:195).
+  it('hidden arrow: no line or head, label kept', () => {
+    expect(diffPaths('add4-T3j', 'arrow-style-hidden')).toEqual([]);
   });
 });
