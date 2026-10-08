@@ -39,13 +39,14 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
     expect(diffPaths('add4-T3j', 'empty-diamond-padding')).toEqual([]);
   });
 
-  // Residual: a heading stripe in the north test compresses 0.889 px too
-  // far (compress/shapes-of.ts#ifLabelShape derives stripe baselines from
-  // the base font; (15 - 11) / 4.5 is the heading's extra descent).
-  it('EMPTY_DIAMOND if: heading north keeps only the compress residual', () => {
-    const paths = diffPaths('add4-T3j', 'empty-diamond-blocks');
-    expect(paths.filter((p) => !/@(y|y1|y2|cy|points\[\d*[13579]\]|height|viewBox\[3\])$/.test(p))).toEqual([]);
-    expect(paths).toHaveLength(67);
+  // SlotFinder.java:127-135 boxes each drawn UText at its own font: a
+  // heading stripe in the north test keeps its taller slot.
+  it('EMPTY_DIAMOND if: heading north test compresses as drawn', () => {
+    expect(diffPaths('add4-T3j', 'empty-diamond-blocks')).toEqual([]);
+  });
+
+  it('while/repeat FULL side labels with a heading compress as drawn', () => {
+    expect(diffPaths('add4-T3j', 'while-full-labels')).toEqual([]);
   });
 
   // FtileFactoryDelegatorAssembly.java:58-62: the sequential gap adds the
