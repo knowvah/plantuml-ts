@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5306 exported names.
+1407 modules · 5308 exported names.
 
 ## `src/`
 
@@ -1065,6 +1065,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
 | `dispatch-multiline-body.ts` | `removeEmptyColumns`, `MultilineActionBody`, `readMultilineActionBody` | dispatch-multiline-body -- the BlocLines half of upstream's multi-line activity command (`CommandActivityLong3#executeNow`, `activitydiagram3/command/CommandActivityLong3.java:120-142`). |
 | `dispatch-newline-sentinels.ts` | `decodeNewlineSentinels` | `%n()`/`%newline()` -> a real line break in an activity action label (mission `activity-divergence-drive-3` T2a, family PCTN). |
+| `dispatch-stereogroup.ts` | `stereogroupStereotype`, `stereogroupBackColor` | dispatch-stereogroup -- the single `stereotype` an activity keeps from its trailing stereogroup (`<<a>> <<b>>`), split out of `dispatch-support.ts` (500-line cap). |
 | `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_ACTIVITY_LIST`, `RE_BACKWARD`, `RE_BACKWARD_HEAD`, `RE_IF`, `RE_IF4`, `RE_IF_LEGACY`, `RE_ELSEIF`, `RE_ELSE`, `RE_ELSE_LEGACY`, `RE_ENDIF`, `RE_SWITCH`, `RE_CASE`, `RE_ENDSWITCH`, `RE_GROUP_OPEN`, `RE_CLOSE_GROUP`, `RE_CLOSE_GROUP_LEGACY`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `defaultLeftPosition`, `RE_NOTE_END`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `RE_PRAGMA`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler`, `tryAssumeTransparent` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
 | `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
 | `if-dispatch.ts` | `stripTrailingSemi`, `unescapeLabelNewlines`, `unescapeLabel`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |

@@ -468,17 +468,49 @@ describe('parses swimlane', () => {
 // ---------------------------------------------------------------------------
 
 describe('parses action color', () => {
-  it('produces kind "action" with the correct label', () => {
-    const ast = parse([':Action; #lightblue']);
-    const node = firstNode(ast) as ActivityAction;
+  // add4-T3e: upstream colours an action only through its stereogroup
+  // (`Stereogroup#getInnerColors`, `Stereogroup.java:184-185`);
+  // `CommandActivity3.java:68-77` has no colour group after the `;`.
+  it('takes the BACK colour from a `<<#color>>` label', () => {
+    const node = firstNode(parse([':Action; <<#lightblue>>'])) as ActivityAction;
     expect(node.kind).toBe('action');
     expect(node.label).toBe('Action');
+    expect(node.color).toBe('#lightblue');
   });
 
-  it('captures the color with leading #', () => {
-    const ast = parse([':Action; #lightblue']);
-    const node = firstNode(ast) as ActivityAction;
-    expect(node.color).toBe('#lightblue');
+  it('the last `<<#color>>` wins (Colors#mergeWith)', () => {
+    const node = firstNode(parse([':A; <<#red>> <<#blue>>'])) as ActivityAction;
+    expect(node.color).toBe('#blue');
+  });
+
+  it('`:x; #pink` matches no single-line command: it opens a multi-line activity', () => {
+    const node = firstNode(parse([':x; <<save>> #pink', ':after;'])) as ActivityAction;
+    expect(node.label).toBe('x; <<save>> #pink\n:after');
+    expect(node.stereotype).toBeUndefined();
+    expect(node.color).toBeUndefined();
+  });
+});
+
+describe('stereogroup box style (Stereogroup.java:100-107)', () => {
+  it('keeps the first non-PLAIN label', () => {
+    const node = firstNode(parse([':two; <<foo>> <<procedure>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('procedure');
+  });
+
+  it('falls back to the first label when none is a box style', () => {
+    const node = firstNode(parse([':two; <<foo>> <<bar>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('foo');
+  });
+
+  it('applies to a multi-line closer too', () => {
+    const node = firstNode(parse([':a', 'b; <<x>> <<Input>>'])) as ActivityAction;
+    expect(node.stereotype).toBe('input');
+  });
+
+  it('`:;` is an empty single-line activity (LABEL `(.*?)`, CommandActivity3.java:71)', () => {
+    const node = firstNode(parse([':;'])) as ActivityAction;
+    expect(node.kind).toBe('action');
+    expect(node.label).toBe('');
   });
 });
 

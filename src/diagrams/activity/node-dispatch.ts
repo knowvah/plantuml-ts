@@ -52,6 +52,7 @@ import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
 import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
+import { stereogroupBackColor, stereogroupStereotype } from './dispatch-stereogroup.js';
 
 // ---------------------------------------------------------------------------
 // Swimlane header: |name| or |[#color]name|
@@ -121,13 +122,13 @@ function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult
   const actionMatch = RE_ACTION.exec(line);
   if (actionMatch === null) return null;
   const label = decodeNewlineSentinels(actionMatch[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
-  const stereoRaw = actionMatch[2];
-  const colorRaw = actionMatch[3];
+  const stereotype = stereogroupStereotype(actionMatch[2]);
+  const color = stereogroupBackColor(actionMatch[2]);
   const node: ActivityAction = {
     kind: 'action',
     label,
-    ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
-    ...(colorRaw !== undefined ? { color: colorRaw } : {}),
+    ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(color !== undefined ? { color } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
@@ -135,9 +136,13 @@ function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult
 
 export { readMultilineActionBody, type MultilineActionBody } from './dispatch-multiline-body.js';
 
-/** Multiline action: starts with `:` but no closing `;` on the same line. */
+/** Multiline action: any `:` line {@link tryAction} did not take.
+ *  `CommandMultilines2#isValid` (`command/CommandMultilines2.java:98-107`)
+ *  never tests the FIRST line against the END pattern, so a `;` on it --
+ *  `:x; <<save>> #pink`, which matches no single-line command -- does not
+ *  close the block (`CommandActivityLong3.java:79-82`). */
 function tryMultilineAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!line.startsWith(':') || line.includes(';')) return null;
+  if (!line.startsWith(':')) return null;
   const firstPart = line.slice(1).trim();
   const labelParts: string[] = [];
   if (firstPart !== '') labelParts.push(firstPart);
@@ -146,6 +151,7 @@ function tryMultilineAction(ctx: ParseContext, idx: number, line: string): Dispa
     kind: 'action',
     label: decodeNewlineSentinels(body.labelParts.join('\n')),
     ...(body.multiStereo !== undefined ? { stereotype: body.multiStereo } : {}),
+    ...(body.multiColor !== undefined ? { color: body.multiColor } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: body.cursor, node };
@@ -227,13 +233,13 @@ function parseRepeatEntry(ctx: ParseContext, inlineRest: string | undefined): Ac
   const actionM = RE_ACTION.exec(restLine);
   if (actionM === null) return undefined;
   const label = decodeNewlineSentinels(actionM[1]!.trim().replace(RE_ESCAPED_NEWLINE, '\n'));
-  const stereoRaw = actionM[2];
-  const colorRaw = actionM[3];
+  const stereotype = stereogroupStereotype(actionM[2]);
+  const color = stereogroupBackColor(actionM[2]);
   return {
     kind: 'action',
     label,
-    ...(stereoRaw !== undefined ? { stereotype: stereoRaw.trim().toLowerCase() } : {}),
-    ...(colorRaw !== undefined ? { color: colorRaw } : {}),
+    ...(stereotype !== undefined ? { stereotype } : {}),
+    ...(color !== undefined ? { color } : {}),
     ...swimlaneSpread(ctx),
   };
 }

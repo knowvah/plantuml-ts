@@ -39,21 +39,16 @@ import type { ActivityNode } from './ast.js';
 export const RE_SWIMLANE = /^\|(?:(#[^|]+)\|)?([^|]+)\|(?:[^|]+)?\s*$/;
 
 /**
- * Trailing stereogroup fragment: one or more consecutive `<<...>>` runs.
- * Inlined (not shared via `new RegExp` string-building) into every
- * constant below that accepts one, mirroring `Stereogroup.optionalStereogroup`
- * (`stereo/Stereogroup.java:69-72`, `(<<[^<>]+>>(?:[%s]*<<[^<>]+>>)*)`),
- * widened from a single `<<...>>` capture (mission ubrr-T10 M4a/M3): only
- * the FIRST stereogroup's inner text is captured anywhere in this file
- * (existing convention, `stereotype` is a single field) -- the rest are
- * matched so the line itself does not fail to parse, never captured.
+ * `Stereogroup.optionalStereogroup()` (`stereo/Stereogroup.java:69-72`,
+ * `(<<[^<>]+>>(?:[%s]*<<[^<>]+>>)*)`): group 2 of both constants below is the
+ * WHOLE stereogroup, read by `dispatch-stereogroup.ts#stereogroupStereotype`.
+ * `CommandActivity3` (`CommandActivity3.java:68-77`) and the
+ * `CommandActivityLong3` END (`:60-67`) take no colour after it.
  */
+export const RE_ACTION = /^:(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/;
 
-/** Matches an action line: :label; or :label; <<stereo>> or :label; #color */
-export const RE_ACTION = /^:(.+?);\s*(?:<<([^>]*)>>(?:\s*<<[^>]*>>)*)?\s*(?:(#\w+))?\s*$/;
-
-/** Closing line of a multi-line action: content; optionally followed by <<stereo>> */
-export const RE_ACTION_CLOSE = /^(.*?);\s*(?:<<([^>]*)>>(?:\s*<<[^>]*>>)*)?\s*$/;
+/** Closing line of a multi-line action: `TEXT ; stereogroup?` (`CommandActivityLong3.java:60-67`). */
+export const RE_ACTION_CLOSE = /^(.*?);\s*(<<[^<>]+>>(?:\s*<<[^<>]+>>)*)?\s*$/;
 
 /**
  * `* label` / `- label` list-item activity shorthand: a plain activity,
