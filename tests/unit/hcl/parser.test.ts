@@ -17,12 +17,15 @@ function makeSource(lines: string[]): UmlSource {
 // ---------------------------------------------------------------------------
 
 describe('parseHcl — acceptance criteria', () => {
-  it('AC1: flat key=value pairs produce a flat object', () => {
+  // HclParser.java:77-89: a top-level entry must be names then `{`; an `=`
+  // throws at :88 and the jar draws the "does not sound like HCL data" page
+  // (unwind2-S2, jar: tests/fixtures/unwind2-S2/hcl-top-assign-*).
+  it('AC1: top-level key=value pairs are a parse failure, as in the jar', () => {
     const src = makeSource(['key = "value"', 'key2 = "value2"']);
     const ast = parseHcl(src);
-    expect(ast.parseError).toBe(false);
+    expect(ast.parseError).toBe(true);
+    expect(ast.root).toBeNull();
     expect(ast.highlights).toEqual([]);
-    expect(ast.root).toEqual({ key: 'value', key2: 'value2' });
   });
 
   it('AC2: block with quoted name parts — quoted strings included in name with space separator', () => {
@@ -36,7 +39,7 @@ describe('parseHcl — acceptance criteria', () => {
   });
 
   it('AC3: comment lines (starting with #) are stripped', () => {
-    const src = makeSource(['# this is a comment', 'key = "value"']);
+    const src = makeSource(['# this is a comment', 'r {', 'key = "value"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'value' });
   });
@@ -72,7 +75,7 @@ describe('parseHcl — acceptance criteria', () => {
   });
 
   it('AC7: <style> blocks are stripped before parsing', () => {
-    const src = makeSource(['<style>', 'node { color: red }', '</style>', 'key = "val"']);
+    const src = makeSource(['<style>', 'node { color: red }', '</style>', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'val' });
   });
@@ -80,7 +83,7 @@ describe('parseHcl — acceptance criteria', () => {
   it('AC8: a leading title is consumed but never set (HclDiagramFactory.java:86-92)', () => {
     // StyleExtractor.java:84-85 takes the line; the hcl factory's setTitle
     // block is commented out, so no chrome (jar: unwind-U1/hcl-title).
-    const src = makeSource(['title My Title', 'key = "val"']);
+    const src = makeSource(['title My Title', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
     expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(true);
     expect(ast.root).toEqual({ key: 'val' });
@@ -168,12 +171,12 @@ describe('parseHcl — additional cases', () => {
   });
 
   it('highlights is always empty []', () => {
-    const ast = parseHcl(makeSource(['key = "val"']));
+    const ast = parseHcl(makeSource(['r {', 'key = "val"', '}']));
     expect(ast.highlights).toEqual([]);
   });
 
   it('@starthcl/@endhcl wrapper lines inside source.lines are stripped', () => {
-    const src = makeSource(['@starthcl', 'key = "val"', '@endhcl']);
+    const src = makeSource(['@starthcl', 'r {', 'key = "val"', '}', '@endhcl']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'val' });
   });
@@ -185,14 +188,29 @@ describe('parseHcl — additional cases', () => {
     expect(inner['key']).toBe('value');
   });
 
-  it('multiple flat key=value pairs produce a flat object', () => {
-    const src = makeSource(['a = "1"', 'b = "2"', 'c = "3"']);
+  it('multiple key=value pairs inside one block produce a flat object', () => {
+    const src = makeSource(['r {', 'a = "1"', 'b = "2"', 'c = "3"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ a: '1', b: '2', c: '3' });
   });
 
+  // HclParser.java:235: `Character.isSpaceChar` -- a TAB is not a space, so
+  // it stays in the field name (jar: unwind2-S2/hcl-tab-indent).
+  it('a tab is part of the token, not a separator', () => {
+    const ast = parseHcl(makeSource(['r {', '\ta = "1"', '}']));
+    expect(ast.root).toEqual({ '\ta': '1' });
+  });
+
+  // HclParser.java:188-216 flushes a pending string only when a symbol
+  // follows it, so trailing text is dropped (jar: unwind2-S2/hcl-trailing-token).
+  it('trailing text after the last symbol is dropped', () => {
+    const ast = parseHcl(makeSource(['r {', '  a = "1"', '}', 'foo']));
+    expect(ast.parseError).toBe(false);
+    expect(ast.root).toEqual({ a: '1' });
+  });
+
   it('skinparam directive before body is stripped', () => {
-    const src = makeSource(['skinparam backgroundColor white', 'key = "val"']);
+    const src = makeSource(['skinparam backgroundColor white', 'r {', 'key = "val"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({ key: 'val' });
   });
@@ -234,9 +252,7 @@ describe('parseHcl — additional cases', () => {
     // An EQUALS or bracket at the outermost module-name-reading position
     // (before we see a CURLY_BRACKET_OPEN) triggers the error branch in
     // getModuleOrSomething. This exercises line 241-242.
-    // We use a plain "[" at the top level (not flat-assignment) to trigger it.
-    // To avoid isFlatAssignment routing: start with a token that looks like a
-    // block name but then has a SQUARE_BRACKET_OPEN instead of "{".
+    // A block name followed by SQUARE_BRACKET_OPEN instead of "{".
     const src = makeSource(['blockname [']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
@@ -245,10 +261,8 @@ describe('parseHcl — additional cases', () => {
     expect(ast.parseError).toBe(true);
   });
 
-  it('isFlatAssignment returns false for empty token stream → empty object', () => {
-    // Exercises the fallthrough path in isFlatAssignment (no tokens at all).
-    // An empty body is already tested above; this variant uses only whitespace
-    // to ensure the joined string is empty and tokenize returns [].
+  it('whitespace-only body → empty object', () => {
+    // tokenize returns [] for a space-only body; parseMe's map is empty.
     const src = makeSource(['   ']);
     const ast = parseHcl(src);
     expect(ast.root).toEqual({});

@@ -7,10 +7,13 @@ describe('hclPlugin', () => {
     expect(hclPlugin.type).toBe('hcl');
   });
 
-  it('renders a flat key-value HCL block to SVG', () => {
+  // HclParser.java:88 throws on a top-level `=`; the jar draws the error page
+  // (unwind2-S2, jar: tests/fixtures/unwind2-S2/hcl-top-assign-*).
+  it('renders a top-level key-value line as the HCL error page', () => {
     const svg = renderSync('@starthcl\nregion = "us-east-1"\n@endhcl');
-    expect(svg).toMatch(/^<svg/);
-    expect(svg).toContain('us-east-1');
+    // `\s`: the emitted spaces are NBSP (`core/svg-shapes.ts#text`).
+    expect(svg).toMatch(/>Your\sdata\sdoes\snot\ssound\slike\sHCL\sdata</u);
+    expect(svg).not.toContain('us-east-1');
   });
 
   it('renders a nested resource block to SVG', () => {
@@ -24,7 +27,7 @@ describe('hclPlugin', () => {
   });
 
   it('drops a leading title, as the jar does (HclDiagramFactory.java:86-92)', () => {
-    const svg = renderSync('@starthcl\ntitle My Title\nkey = "value"\n@endhcl');
+    const svg = renderSync('@starthcl\ntitle My Title\nr {\nkey = "value"\n}\n@endhcl');
     expect(svg).not.toContain('My Title');
     expect(svg).toContain('value');
   });
