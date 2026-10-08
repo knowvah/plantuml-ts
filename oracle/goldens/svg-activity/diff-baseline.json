@@ -1957,11 +1957,11 @@
     {
       "type": "activity",
       "slug": "lisade-37-vuri519",
-      "status": "baseline",
-      "diffCount": 66,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 66
+      "measuredAgainstCommit": "53d01279",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3578,10 +3578,10 @@
       "type": "activity",
       "slug": "vimena-17-poju626",
       "status": "baseline",
-      "diffCount": 196,
+      "diffCount": 1,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "541c5f2c",
-      "weightedScore": 196
+      "measuredAgainstCommit": "53d01279",
+      "weightedScore": 1
     },
     {
       "type": "activity",

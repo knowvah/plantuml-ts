@@ -1,0 +1,6 @@
+@startuml
+scale 500 width
+start
+:foo1 [[http://www.google.com]] end;
+stop
+@enduml

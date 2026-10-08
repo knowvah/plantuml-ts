@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "4ea823f1",
+  "measuredAgainstCommit": "53d01279",
   "fixtures": [
     {
       "type": "activity",
@@ -7844,20 +7844,20 @@
       "slug": "lisade-37-vuri519",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "53d01279",
       "ours": {
         "fontSize": {
-          "12": 3
+          "27.319": 3
         },
         "strokeWidth": {
-          "1": 2
+          "2.277": 2
         },
         "rx": {
-          "12.5": 1
+          "28.458": 1
         },
         "textCount": 3,
-        "width": "220",
-        "height": "149"
+        "width": "500",
+        "height": "339"
       },
       "jar": {
         "fontSize": {
@@ -14164,7 +14164,7 @@
       "slug": "vimena-17-poju626",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "134202b9",
+      "measuredAgainstCommit": "53d01279",
       "ours": {
         "fontSize": {
           "11": 24,
@@ -14177,7 +14177,7 @@
           "12.5": 10
         },
         "textCount": 40,
-        "width": "580",
+        "width": "546",
         "height": "677"
       },
       "jar": {
