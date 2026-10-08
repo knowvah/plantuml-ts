@@ -39,38 +39,56 @@ const SHADOW_OFFSET = 4;
 /** The shadow `<filter>` def at document scale `k`.
  *  @see SvgGraphics.java:1070-1090 */
 export function sequenceShadowFilterDef(k = 1): string {
+  const blur = attrs([
+    ['result', 'blurOut'],
+    ['stdDeviation', fmt(SHADOW_BLUR * k)],
+  ]);
+  const offset = attrs([
+    ['result', 'blurOut3'],
+    ['in', 'blurOut2'],
+    ['dx', fmt(SHADOW_OFFSET * k)],
+    ['dy', fmt(SHADOW_OFFSET * k)],
+  ]);
   return (
-    `<filter${attrs([
-      ['id', SEQUENCE_SHADOW_FILTER_ID],
-      ['x', -1],
-      ['y', -1],
-      ['width', '300%'],
-      ['height', '300%'],
-    ])}>` +
-    `<feGaussianBlur${attrs([
-      ['result', 'blurOut'],
-      ['stdDeviation', fmt(SHADOW_BLUR * k)],
-    ])}/>` +
-    `<feColorMatrix${attrs([
-      ['type', 'matrix'],
-      ['in', 'blurOut'],
-      ['result', 'blurOut2'],
-      ['values', SHADOW_COLOR_MATRIX_VALUES],
-    ])}/>` +
-    `<feOffset${attrs([
-      ['result', 'blurOut3'],
-      ['in', 'blurOut2'],
-      ['dx', fmt(SHADOW_OFFSET * k)],
-      ['dy', fmt(SHADOW_OFFSET * k)],
-    ])}/>` +
-    `<feBlend${attrs([
-      ['in', 'SourceGraphic'],
-      ['in2', 'blurOut3'],
-      ['mode', 'normal'],
-    ])}/>` +
-    `</filter>`
+    '<filter' +
+    FILTER_HEAD +
+    '><feGaussianBlur' +
+    blur +
+    '/>' +
+    COLOR_MATRIX +
+    '<feOffset' +
+    offset +
+    '/>' +
+    BLEND +
+    '</filter>'
   );
 }
+
+/** The filter's fixed parts (`SvgGraphics.java:1074-1085`). */
+const FILTER_HEAD = attrs([
+  ['id', SEQUENCE_SHADOW_FILTER_ID],
+  ['x', -1],
+  ['y', -1],
+  ['width', '300%'],
+  ['height', '300%'],
+]);
+const COLOR_MATRIX =
+  '<feColorMatrix' +
+  attrs([
+    ['type', 'matrix'],
+    ['in', 'blurOut'],
+    ['result', 'blurOut2'],
+    ['values', SHADOW_COLOR_MATRIX_VALUES],
+  ]) +
+  '/>';
+const BLEND =
+  '<feBlend' +
+  attrs([
+    ['in', 'SourceGraphic'],
+    ['in2', 'blurOut3'],
+    ['mode', 'normal'],
+  ]) +
+  '/>';
 
 /**
  * `addFilterShadowId` (`SvgGraphics.java:889-893`): a shape with

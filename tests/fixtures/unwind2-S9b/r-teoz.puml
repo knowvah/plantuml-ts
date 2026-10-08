@@ -1,0 +1,7 @@
+@startuml
+!pragma teoz true
+participant A
+participant B
+A -> B : hi
+ref over A, B : a reference that is wider than both
+@enduml

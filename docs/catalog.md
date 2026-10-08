@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1431 modules · 5418 exported names.
+1432 modules · 5425 exported names.
 
 ## `src/`
 
@@ -1662,7 +1662,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `command-return.ts` | `returnCommand` | `CommandReturn` (`SequenceDiagramFactory.java:129`) -- split out of `command-arrow.ts` to keep that file under its size cap; see that file's header for why it is filed beside the arrow rules. |
 | `command-sprite.ts` | `matchSpriteBase64Command` | `CommandSpriteBase64` — `sprite $name data:image/png;base64,<payload>`, the inline-image sprite definition. |
 | `divider-style.ts` | `DIVIDER_LINE_COLOR`, `DIVIDER_LINE_THICKNESS`, `DIVIDER_BACKGROUND`, `DIVIDER_FONT_SIZE`, `DIVIDER_FONT_BOLD`, `DIVIDER_PADDING`, `DIVIDER_HEIGHT_ALLOWANCE`, `DIVIDER_WIDTH_ALLOWANCE`, `DIVIDER_LABEL_DELTA_X`, `DIVIDER_BAND_HEIGHT`, `dividerFontSpecOf`, `dividerPreferredHeight`, `dividerPreferredWidth` | Style constants for the sequence-diagram divider (`== label ==`, and the empty `====` form). |
-| `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
+| `frame-style.ts` | `GROUP_BACKGROUND`, `GROUP_LINE_COLOR`, `GROUP_LINE_THICKNESS`, `GROUP_FONT_SIZE`, `GROUP_FONT_BOLD`, `HEADER_LINE_THICKNESS`, `HEADER_BACKGROUND`, `HEADER_LINE_COLOR`, `REFERENCE_HEADER_LINE_THICKNESS`, `HEADER_FONT_SIZE`, `HEADER_FONT_BOLD`, `HEADER_PADDING`, `CORNER_SIZE`, `groupingHeaderDisplay` | Style constants for the sequence-diagram frame/grouping background pass (`loop`, `alt`, `opt`, `par`, `break`, `critical`, `group`, `ref`). |
 | `geo-annotation.ts` | `NoteGeo`, `DividerGeo`, `SpaceGeo`, `NewpageGeo`, `BoxGeo`, `DelayGeo`, `LifelineSegment` | The geometry `renderer.ts` draws ITSELF — notes, dividers, the `newpage` separator, explicit vertical space, and the `box` group background. |
 | `geo-frame.ts` | `FrameGeo` | FRAME geometry — `alt`/`opt`/`loop`/`group`/`ref` boxes, their header tab and their `else` branch bands. |
 | `geo-message.ts` | `MessageGeo`, `ActivationGeo` | MESSAGE geometry — an arrow, its label runs, and the activation bars a message opens and closes. |
@@ -1672,7 +1672,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout.ts` | `layoutSequence` | Sequence diagram layout engine. |
 | `newpage-style.ts` | `NEWPAGE_MARGIN_Y`, `NEWPAGE_LINE_HEIGHT`, `NEWPAGE_TILE_HEIGHT`, `NEWPAGE_LINE_COLOR`, `NEWPAGE_LINE_THICKNESS`, `NEWPAGE_DASH_UNIT` | Style and size constants for the sequence-diagram page separator (`newpage`). |
 | `parser.ts` | `parseSequence` | Parser for PlantUML sequence diagrams. |
-| `ref-body-geo.ts` | `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth` | ref-body-geo.ts — the `ref over` frame's own geometry (`ComponentRoseReference`), split verbatim out of `text-block-geo.ts` when that file reached the project's 500-line cap. |
+| `ref-body-geo.ts` | `REF_PADDING`, `REF_HEIGHT_FOOTER`, `REF_X_MARGIN`, `REF_HEADER_EXTRA_WIDTH`, `REF_HEADER_TEXT`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth` | ref-body-geo.ts — the `ref over` frame's own geometry (`ComponentRoseReference`), split verbatim out of `text-block-geo.ts` when that file reached the project's 500-line cap. |
 | `renderer-arrowhead-glyph.ts` | `paintOf`, `niceArrowOf`, `ARROW_THICKNESS`, `renderArrowHead` | Arrow-head GLYPH drawing: the paint, the polygon, the async lines and the decoration circle that one arrow END draws. |
 | `renderer-arrowhead.ts` | `reverseArrowConfiguration`, `renderFlatMessageArrow`, `renderSelfMessageHead` | renderer-arrowhead.ts — the sequence engine's arrow EMISSION layer. |
 | `renderer-divider.ts` | `renderDivider` | `== label ==` / `====` divider rendering — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
@@ -1701,6 +1701,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-layout-participant-label.ts` | `ParticipantLayoutCtx`, `visibleStereotypeLines`, `labelRows`, `resolveParticipantBackground`, `resolveParticipantBorder`, `BADGE_GAP`, `anyBadgeFor`, `buildLabelRuns` | sequence-layout-participant-label.ts — a participant head's LABEL: its stereotype rows, its creole runs (sprites included, cdd7 T1f), its badge and the paints its box is filled and stroked with. |
 | `sequence-layout-participant-sizing.ts` | `symbolPreferredWidth`, `symbolPreferredHeight`, `participantLabelCy`, `participantBadgeGeo` | sequence-layout-participant-sizing.ts — one function per participant family's own `getPreferredWidth` / `getPreferredHeight`, split out of `sequence-layout-participants.ts` when the citations pushed that file past the repo's 500-line cap (t |
 | `sequence-layout-participants.ts` | `LEFT_MARGIN`, `ParticipantLayoutResult`, `computeParticipantLayout`, `MessageLevels`, `participantShadowOf`, `reservedShadowOf`, `participantBoxOf`, `headSlackOf` | Sequence diagram layout — participant column geometry (Step 1 of layoutSequence). |
+| `sequence-layout-ref.ts` | `handleRefEvent` | A `ref over` frame's geometry: `ReferenceTile` drawing `ComponentRoseReference` (unwind2-S9b). |
 | `sequence-layout-shared.ts` | `fontSpecOf`, `ARROW_FONT_SIZE`, `arrowFontSpecOf`, `NOTE_FONT_SIZE`, `noteFontSpecOf`, `LIVE_DELTA_SIZE`, `ARROW_PADDING_X`, `TOP_MARGIN`, `PLAYING_SPACE_STARTING_Y`, `PLAYING_SPACE_TAIL_Y`, `BOTTOM_MARGIN` | Small shared leaf utilities for sequence diagram layout. |
 | `sequence-life-state.ts` | `AbstractMessageEvent`, `LifeEventType`, `LastEventWithDeactivate`, `LifeState`, `AFTER_DELAY_ERROR`, `newLifeState`, `addMessage`, `activate`, `getActivatingMessage`, `manageActivations`, `autoActivate`, `exoLifeEvents` | The life-event bookkeeping `SequenceDiagram` keeps while it parses: the pending `create`, the last delay, the event a bare life event binds to, and the stack of activating messages `return` and a bare `deactivate` read. |
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |

@@ -1,0 +1,9 @@
+@startuml
+participant A
+participant B
+participant C
+A -> B : hi
+ref over A, C : a reference spanning three participants wide
+ref over C, A : back
+B -> C : x
+@enduml

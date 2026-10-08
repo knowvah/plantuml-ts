@@ -360,6 +360,18 @@ export function measureParticipantSymbol(
 const GLYPH_SHADOW_REF = /filter="url\(#f[0-9a-z]+\)"/g;
 
 /**
+ * A shadowed glyph's own one-glyph document minted its own shadow filter
+ * (`SvgGraphics#manageShadow`, `:1070-1090`). Upstream draws every head into
+ * ONE `SvgGraphics`, whose single filter every shadowed shape shares, so the
+ * glyph's def is dropped and its reference re-pointed at the page's
+ * (`sequence-shadow.ts`, emitted through the fragment's `extraDefs`).
+ */
+function repointGlyphShadow(body: string, shadow: number): string {
+  const filter = sequenceShadowFilter(shadow).filter;
+  return filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
+}
+
+/**
  * Draws one participant glyph and returns its SVG fragment, positioned
  * absolutely at `geo`.
  *
@@ -398,12 +410,5 @@ export function renderParticipantSymbol(
   const offset = glyphOffset(type, unscaled, glyph.calculateDimension(ug.getStringBounder()), opts.head);
   glyph.drawU(ug.apply(new UTranslate(unscaled.x, unscaled.y)).apply(offset));
 
-  // A shadowed glyph's own one-glyph document minted its own shadow filter
-  // (`SvgGraphics#manageShadow`, `:1070-1090`). Upstream draws every head into
-  // ONE `SvgGraphics`, whose single filter every shadowed shape shares, so the
-  // glyph's def is dropped and its reference re-pointed at the page's
-  // (`sequence-shadow.ts`, emitted through the fragment's `extraDefs`).
-  const { body } = extractFlatContent(ug.getSvgString());
-  const filter = sequenceShadowFilter(unscaled.shadow ?? 0).filter;
-  return filter === undefined ? body : body.replace(GLYPH_SHADOW_REF, attrs([['filter', filter]]).trimStart());
+  return repointGlyphShadow(extractFlatContent(ug.getSvgString()).body, unscaled.shadow ?? 0);
 }

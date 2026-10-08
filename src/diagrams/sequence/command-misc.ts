@@ -218,9 +218,10 @@ function ensureRefParticipants(state: ParseState, raw: string): string[] {
 export const refOverCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?\s*:\s*(.*)$/i,
   execute(state, match) {
-    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
+    const participants = ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, participants);
     const label = match[3]!.trim();
-    emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label] });
+    emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label], participants });
   },
 };
 
@@ -244,7 +245,8 @@ export const refOverCommand: Command = {
 export const refOverMultilineCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?(?:\s*#\w+)?\s*$/i,
   execute(state, match) {
-    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
-    state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''] };
+    const participants = ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, participants);
+    state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''], participants };
   },
 };
