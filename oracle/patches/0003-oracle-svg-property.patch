@@ -1,0 +1,42 @@
+From 37c07dce45a4b4935559c3d3d02352be5da79dba Mon Sep 17 00:00:00 2001
+From: Scott Seely <scott@seely.io>
+Date: Thu, 8 Oct 2026 17:51:51 -0500
+Subject: [PATCH] fix(oracle): width-table bounder answers matchesProperty(SVG)
+ like stock
+
+Under PLANTUML_DETERMINISTIC_TEXT the seam swapped StringBounderSvg for
+StringBounderFromWidthTable, which inherits matchesProperty = false. The
+only StringBounder caller of matchesProperty("SVG") is
+EmbeddedDiagram#calculateDimensionSlow, which then took the PNG arm,
+threw, and reserved 42x42 for every embedded {{ }} diagram. Metrics are
+unchanged; the jar stays byte-identical to stock when the property is unset.
+---
+ .../java/net/sourceforge/plantuml/FileFormat.java    | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/src/main/java/net/sourceforge/plantuml/FileFormat.java b/src/main/java/net/sourceforge/plantuml/FileFormat.java
+index 0be38eba51f..dddf0d280d8 100644
+--- a/src/main/java/net/sourceforge/plantuml/FileFormat.java
++++ b/src/main/java/net/sourceforge/plantuml/FileFormat.java
+@@ -184,7 +184,17 @@ public enum FileFormat {
+ 		// planning/adr/ADR-001-text-measurement.md in plantuml-ts.
+ 		if (System.getProperty("PLANTUML_DETERMINISTIC_TEXT") != null
+ 				&& (this == SVG || this == SVG_DETERMINISTIC))
+-			return new StringBounderFromWidthTable(FileFormat.SVG_DETERMINISTIC);
++			// The width table replaces only the METRICS. The bounder must still
++			// answer matchesProperty("SVG") as StringBounderSvg does
++			// (StringBounderSvg.java:67-69), or EmbeddedDiagram#calculateDimensionSlow
++			// takes the PNG arm, throws, and reserves 42x42 for every {{ }} diagram
++			// (EmbeddedDiagram.java:129-152) where the stock jar sizes the real SVG.
++			return new StringBounderFromWidthTable(FileFormat.SVG_DETERMINISTIC) {
++				@Override
++				public boolean matchesProperty(String propertyName) {
++					return "SVG".equalsIgnoreCase(propertyName);
++				}
++			};
+ 
+ 
+ 		// ::comment when JAVA8
+-- 
+2.54.0 (Apple Git-157)
+
