@@ -20,7 +20,7 @@ import { splitStateDisplayLines } from './state-sizing.js';
 import { measureLines, measureClusterTitle, titleAndAttributeWidth } from './state-composite-header.js';
 import { computeTitleTableHeight } from '../../core/cluster-title-table.js';
 import { zaentId } from './state-composite-classify.js';
-import { isGroupTouched } from './state-composite-detect.js';
+import { isGroupTouched, recordBorderPointCluster } from './state-composite-detect.js';
 import { getEntityPosition, isInputPosition, isOutputPosition } from './state-entity-position.js';
 import { concurrentRegionScopeId } from './state-parse-state.js';
 import {
@@ -427,6 +427,7 @@ export function resolveClusterComposite(
     ...(parentClusterId !== undefined ? { parentId: parentClusterId } : {}),
   };
   acc.clusters.push(cluster);
+  if (hasBorderPointChildren) recordBorderPointCluster(acc, ctx.rankdir, s.id, cluster, borderPointMemberIds);
 
   const childSpecs = directMembers.map((c) => resolveMember(c, acc, ctx, clusterId));
   for (const c of directMembers) {
@@ -485,9 +486,8 @@ export function resolveClusterComposite(
       : {}),
     ...(s.creationIndex !== undefined ? { creationIndex: s.creationIndex } : {}),
   };
-  // #lizard forgives -- faithful port of ClusterDotString's envelope
-  // assembly; each block below is one independently-conditional layer
-  // (§2 of mechanisms.md), not decision complexity to simplify.
+  // #lizard forgives -- faithful port of ClusterDotString's envelope assembly;
+  // each block is one independently-conditional layer (mechanisms.md §2).
 }
 
 /** Group a non-autonom composite's DIRECT border-point (entry/exit/pin)

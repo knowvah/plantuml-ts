@@ -1,0 +1,12 @@
+@startuml
+component "Alpha" as A {
+  portout pout1
+  component inner
+}
+component B
+component C
+B --> A
+A --> C
+C --> A
+pout1 --> C
+@enduml
