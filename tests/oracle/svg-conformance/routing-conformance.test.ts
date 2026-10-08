@@ -963,10 +963,19 @@ describe('routing conformance — jar-error classification', () => {
     //
     // 5611 -> 5613 / 6595 -> 6597 at add4/merge-T3h: 2
     // svg-activity clone rows (zero-diff pins). Derivation: 5613 + 874 + 110 = 6597.
-    expect(pinnedAgree.length).toBe(5613);
-    expect(pinnedMisroutes.length).toBe(874);
+    //
+    // 5613 -> 5617 / 874 -> 870 at add4/merge-T3k (2026-10-08): `[FIXED]`
+    // retirements -- bopele/cebuci/fugoko/tidoda (the 4 add4-T0b activity
+    // parser gaps: CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender) now route ACTIVITY; re-pinned agree from a
+    // fresh measurement. Derivation: 5617 + 870 + 110 = 6597.
+    //
+    // 5617 -> 5620 / 6597 -> 6600 at add4/merge-T3k: 3
+    // svg-activity clone rows (zero-diff pins). Derivation: 5620 + 870 + 110 = 6600.
+    expect(pinnedAgree.length).toBe(5620);
+    expect(pinnedMisroutes.length).toBe(870);
     expect(pinnedJarErrors.length).toBe(110);
-    expect(manifest.fixtures.length).toBe(6597);
+    expect(manifest.fixtures.length).toBe(6600);
   });
 
   it('every jar-error entry carries jarErrored: true, and no other entry does', () => {
@@ -1025,7 +1034,8 @@ describe('routing conformance — jar-error classification', () => {
     // 870 -> 874 at add4/T0b: 4 activity parser-gap misroutes (CommandPage,
     // CommandLink3, CommandFootboxIgnored, CommandHideShowByGender).
     // 874 -> 873 at add4/merge-T3e-2: fukika's stale misroute retired.
-    expect(censused.length).toBe(873);
+    // 873 -> 869 at add4/merge-T3k: the 4 add4-T0b activity parser gaps fixed.
+    expect(censused.length).toBe(869);
     for (const m of censused) {
       expect(m.reason ?? '', `${keyOf(m)} must cite its upstream origin`).toMatch(/\w+\.java:\d+/);
     }

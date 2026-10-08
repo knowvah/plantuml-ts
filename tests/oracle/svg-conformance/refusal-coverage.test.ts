@@ -848,7 +848,9 @@ describe('refusal coverage — baseline shape', () => {
     // rows. Derivation: 6354 + 241 = 6595.
     // 6595 -> 6597 / 6354 -> 6356 at add4/merge-T3h: 2 svg-activity clone
     // rows. Derivation: 6356 + 241 = 6597.
-    expect(manifest.fixtures.length).toBe(6597);
+    // 6597 -> 6600 / 6360 -> 6363 at add4/merge-T3k: 3 svg-activity clone
+    // rows. Derivation: 6363 + 237 = 6600.
+    expect(manifest.fixtures.length).toBe(6600);
     expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -874,7 +876,8 @@ describe('refusal coverage — baseline shape', () => {
     // refusals + 4 of the 5 jar-error pages error here too (tajiri-57-sepu092's
     // jar errors, we render -- refusal cohort jar-error).
     // 242 -> 241 at add4/merge-T3e-2: fukika-81-gite897 renders (stale pin retired).
-    expect(pinnedErroring.length).toBe(241);
+    // 241 -> 237 at add4/merge-T3k: the 4 add4-T0b activity parser gaps render.
+    expect(pinnedErroring.length).toBe(237);
     // 5285 -> 5292 at class-divergence-drive-2/close-b1 (7 svg-class clones).
     // 5292 -> 5315 at class-divergence-drive-2/close-b2 (23 svg-class clones).
     // 5315 -> 5322 at class-divergence-drive-2/close-b3 (7 svg-class clones).
@@ -941,7 +944,9 @@ describe('refusal coverage — baseline shape', () => {
     // 6351 -> 6352 at add4/merge-T3f (1 svg-activity clones).
     // 6352 -> 6354 at add4/merge-T3g (2 svg-activity clones).
     // 6354 -> 6356 at add4/merge-T3h (2 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6356);
+    // 6356 -> 6360 at add4/merge-T3k (4 activity parser gaps fixed).
+    // 6360 -> 6363 at add4/merge-T3k (3 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6363);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
@@ -1001,7 +1006,10 @@ describe('refusal coverage — baseline shape', () => {
     // 196 -> 204 at add4/T0b: 8 newly captured activity fixtures -- 4 parser
     // gaps (each names its missing Command) and 4 jar ErrorUml pages past
     // the head window (Welcome preamble, PSystemError.java:217-218).
-    expect(gaps.length).toBe(204);
+    // 204 -> 200 at add4/merge-T3k: the 4 add4-T0b activity parser-gap
+    // known-gaps are fixed (CommandPage, CommandLink3, CommandFootboxIgnored,
+    // CommandHideShowByGender ported) and re-pinned ok.
+    expect(gaps.length).toBe(200);
     for (const g of gaps) {
       // The bar is a specific upstream ORIGIN, cited as `File.java:line`.
       //

@@ -211,11 +211,11 @@
     {
       "type": "activity",
       "slug": "bopele-45-bufo031",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -364,11 +364,11 @@
     {
       "type": "activity",
       "slug": "cebuci-75-zona564",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 1 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -1057,11 +1057,11 @@
     {
       "type": "activity",
       "slug": "fugoko-04-lafo140",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3406,11 +3406,11 @@
     {
       "type": "activity",
       "slug": "tidoda-12-juxu745",
-      "status": "error",
-      "diffCount": null,
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "diffCount": 4,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "weightedScore": 4
     },
     {
       "type": "activity",

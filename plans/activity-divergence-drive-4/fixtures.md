@@ -117,9 +117,9 @@ task | mechanism | final. `final` ∈ `pinned (<tag>)` · `open -> add5 (<mechan
 | tozecu-08-ride878 (new) | 562 | line+2, path+4, polygon+4, text-2 | svg/g[]/path[]/@d[] 100; svg/g[]/polygon[]/@points[] 56 | WARN-BANNER | — | unported warning banner (`DiagramChromeFactory.java:103,128,176-266`) for `group` without bracket (`CommandPartition3.java:157`) + `end group` (`CommandCloseGroupLegacy3.java:75`): +40 px y on everything. Then GROUP-USYM | pinned (add4-T2g) |
 | fuleno-34-boni528 (new) | 619 | exact | svg/g[]/polygon[]/@points[] 28; svg/g[]/line[]/@y1 18 | VIF-ORDER | — | same as gelixa (`FtileIfLongVertical.java:492-502,172-203,319-320`) | pinned (add4-T2a) |
 | gelixa-02-sele970 (new) | 621 | exact | svg/g[]/polygon[]/@points[] 34; svg/g[]/line[]/@y1 13 | VIF-ORDER | — | drawU paints all branch tiles, then all diamonds, then tile2, lastDiamond (`FtileIfLongVertical.java:492-502`); conns order VerticalIn*, Vertical*, ThenOut, ThenOutConnect*, In, LastElse, LastElseOut (`:172-203`); ours i | pinned (add4-T2a) |
-| bopele-45-bufo031 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandPage (command/CommandPage.java:55-62, CommonCommands.java:73); routes to class's refusal | ? |
-| cebuci-75-zona564 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandLink3 (activitydiagram3/command/CommandLink3.java:59-63, ActivityDiagramFactory3.java:155); routes to class's refusal | ? |
-| fugoko-04-lafo140 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandFootboxIgnored (command/CommandFootboxIgnored.java:53-56, ActivityDiagramFactory3.java:105); routes to class's refusal | ? |
+| bopele-45-bufo031 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandPage (command/CommandPage.java:55-62, CommonCommands.java:73); routes to class's refusal | pinned (add4-T3k) |
+| cebuci-75-zona564 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandLink3 (activitydiagram3/command/CommandLink3.java:59-63, ActivityDiagramFactory3.java:155); routes to class's refusal | pinned (add4-T3k) |
+| fugoko-04-lafo140 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandFootboxIgnored (command/CommandFootboxIgnored.java:53-56, ActivityDiagramFactory3.java:105); routes to class's refusal | pinned (add4-T3k) |
 | jetigu-21-zaje860 (new) | error | — | — | MISFILED | — | not an activity diagram (jar draws SEQUENCE) | open -> add5 (misfiled in tests/corpus/activity; activity parser correctly refuses) |
 | kedozi-45-begu156 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
 | nefume-98-leti603 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
@@ -128,7 +128,7 @@ task | mechanism | final. `final` ∈ `pinned (<tag>)` · `open -> add5 (<mechan
 | romuru-66-samu329 (new) | error | — | — | MISFILED | — | not an activity diagram (jar draws CLASS) | open -> add5 (misfiled in tests/corpus/activity; activity parser correctly refuses) |
 | tajiri-57-sepu092 (new) | jar-error | — | — | JAR-ERROR | — | we render a source the jar rejects | open -> add5 (refusal parity: jar ErrorUml, we draw an ACTIVITY) |
 | ticoxo-71-jile893 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
-| tidoda-12-juxu745 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandHideShowByGender (`hide stereotype`, CommonCommands.java:106-109); routes to class's refusal | ? |
+| tidoda-12-juxu745 (new) | error | — | — | ROUTE-GAP | b2 | activity parser lacks CommandHideShowByGender (`hide stereotype`, CommonCommands.java:106-109); routes to class's refusal | open -> add5 (ws 4: `rectangle` group ignores `skinparam rectangle` -- group style is not keyed on the USymbol, CommandPartition3.java:89-103,150,161-165) |
 | veducu-71-tika634 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
 | vipixe-71-rika369 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |
 | xesoze-85-pugu865 (new) | jar-error | — | — | JAR-ERROR | — | jar error page; we also refuse | jar-error (no golden diagram) |

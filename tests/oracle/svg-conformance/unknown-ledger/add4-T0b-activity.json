@@ -4,23 +4,23 @@
     {
       "slug": "bopele-45-bufo031",
       "cohort": "add4-activity-parser-gap",
-      "disposition": "known-misroute",
+      "disposition": "fixed",
       "task": "add4-T0b",
-      "reason": "ActivityDiagramFactory3 accepts this source: 'page 2x2' matches CommandPage (command/CommandPage.java:55-62), registered via CommonCommands.addCommonCommands2 (CommonCommands.java:73) from addCommonCommands1 (ActivityDiagramFactory3.java:107). This port's activity command set has no equivalent (verified add4-T0b: a minimal 'page 2x2' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md)."
+      "reason": "ActivityDiagramFactory3 accepts this source: 'page 2x2' matches CommandPage (command/CommandPage.java:55-62), registered via CommonCommands.addCommonCommands2 (CommonCommands.java:73) from addCommonCommands1 (ActivityDiagramFactory3.java:107). This port's activity command set has no equivalent (verified add4-T0b: a minimal 'page 2x2' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md). FIXED at add4-T3k (dispatch-common-commands.ts tryIgnoredCommonCommand/tryLink3)."
     },
     {
       "slug": "cebuci-75-zona564",
       "cohort": "add4-activity-parser-gap",
-      "disposition": "known-misroute",
+      "disposition": "fixed",
       "task": "add4-T0b",
-      "reason": "ActivityDiagramFactory3 accepts this source: 'link #red' matches CommandLink3 (activitydiagram3/command/CommandLink3.java:59-63), registered at ActivityDiagramFactory3.java:155. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'link #red' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md)."
+      "reason": "ActivityDiagramFactory3 accepts this source: 'link #red' matches CommandLink3 (activitydiagram3/command/CommandLink3.java:59-63), registered at ActivityDiagramFactory3.java:155. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'link #red' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md). FIXED at add4-T3k (dispatch-common-commands.ts tryIgnoredCommonCommand/tryLink3)."
     },
     {
       "slug": "fugoko-04-lafo140",
       "cohort": "add4-activity-parser-gap",
-      "disposition": "known-misroute",
+      "disposition": "fixed",
       "task": "add4-T0b",
-      "reason": "ActivityDiagramFactory3 accepts this source: 'hide footbox' matches CommandFootboxIgnored (command/CommandFootboxIgnored.java:53-56), registered at ActivityDiagramFactory3.java:105. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'hide footbox' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md)."
+      "reason": "ActivityDiagramFactory3 accepts this source: 'hide footbox' matches CommandFootboxIgnored (command/CommandFootboxIgnored.java:53-56), registered at ActivityDiagramFactory3.java:105. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'hide footbox' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md). FIXED at add4-T3k (dispatch-common-commands.ts tryIgnoredCommonCommand/tryLink3)."
     },
     {
       "slug": "nefume-98-leti603",
@@ -46,9 +46,9 @@
     {
       "slug": "tidoda-12-juxu745",
       "cohort": "add4-activity-parser-gap",
-      "disposition": "known-misroute",
+      "disposition": "fixed",
       "task": "add4-T0b",
-      "reason": "ActivityDiagramFactory3 accepts this source: 'hide stereotype' matches CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java), registered via CommonCommands.addCommonHides (CommonCommands.java:106-109) from addCommonCommands1 (ActivityDiagramFactory3.java:107); 'rectangle outerAction {' (CommandPartition3.java:73) already parses here. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'hide stereotype' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md)."
+      "reason": "ActivityDiagramFactory3 accepts this source: 'hide stereotype' matches CommandHideShowByGender (classdiagram/command/CommandHideShowByGender.java), registered via CommonCommands.addCommonHides (CommonCommands.java:106-109) from addCommonCommands1 (ActivityDiagramFactory3.java:107); 'rectangle outerAction {' (CommandPartition3.java:73) already parses here. This port's activity command set has no equivalent (verified add4-T0b: a minimal 'hide stereotype' source refuses as activity and falls through to class's refusal), so the dispatcher draws class's error sentinel where the jar draws an ACTIVITY diagram. Parser gap, open -> add4 routing family (add4 fixtures.md). FIXED at add4-T3k (dispatch-common-commands.ts tryIgnoredCommonCommand/tryLink3)."
     },
     {
       "slug": "xesoze-85-pugu865",

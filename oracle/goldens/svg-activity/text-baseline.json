@@ -717,10 +717,33 @@
     {
       "type": "activity",
       "slug": "bopele-45-bufo031",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -1221,10 +1244,33 @@
     {
       "type": "activity",
       "slug": "cebuci-75-zona564",
-      "status": "error",
-      "reason": "activity parser refused this source at line 1 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      },
+      "jar": {
+        "fill": {
+          "#000": 3
+        },
+        "anchor": {
+          "(absent)": 3
+        },
+        "inset": {
+          "10": 3
+        },
+        "textCount": 3
+      }
     },
     {
       "type": "activity",
@@ -3523,10 +3569,33 @@
     {
       "type": "activity",
       "slug": "fugoko-04-lafo140",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 1
+      },
+      "jar": {
+        "fill": {
+          "#000": 1
+        },
+        "anchor": {
+          "(absent)": 1
+        },
+        "inset": {
+          "10": 1
+        },
+        "textCount": 1
+      }
     },
     {
       "type": "activity",
@@ -10990,10 +11059,35 @@
     {
       "type": "activity",
       "slug": "tidoda-12-juxu745",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1,
+          "14.644": 1
+        },
+        "textCount": 2
+      },
+      "jar": {
+        "fill": {
+          "#000": 2
+        },
+        "anchor": {
+          "(absent)": 2
+        },
+        "inset": {
+          "10": 1,
+          "14.644": 1
+        },
+        "textCount": 2
+      }
     },
     {
       "type": "activity",

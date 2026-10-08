@@ -899,10 +899,39 @@
     {
       "type": "activity",
       "slug": "bopele-45-bufo031",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fontSize": {
+          "12": 3
+        },
+        "strokeWidth": {
+          "1": 4,
+          "2.5": 2
+        },
+        "rx": {
+          "12.5": 3
+        },
+        "textCount": 3,
+        "width": "79",
+        "height": "251"
+      },
+      "jar": {
+        "fontSize": {
+          "12": 3
+        },
+        "strokeWidth": {
+          "1": 4,
+          "2.5": 2
+        },
+        "rx": {
+          "12.5": 3
+        },
+        "textCount": 3,
+        "width": "79",
+        "height": "251"
+      }
     },
     {
       "type": "activity",
@@ -1533,10 +1562,37 @@
     {
       "type": "activity",
       "slug": "cebuci-75-zona564",
-      "status": "error",
-      "reason": "activity parser refused this source at line 1 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fontSize": {
+          "12": 3
+        },
+        "strokeWidth": {
+          "1": 2
+        },
+        "rx": {
+          "12.5": 3
+        },
+        "textCount": 3,
+        "width": "79",
+        "height": "172"
+      },
+      "jar": {
+        "fontSize": {
+          "12": 3
+        },
+        "strokeWidth": {
+          "1": 2
+        },
+        "rx": {
+          "12.5": 3
+        },
+        "textCount": 3,
+        "width": "79",
+        "height": "172"
+      }
     },
     {
       "type": "activity",
@@ -4313,10 +4369,37 @@
     {
       "type": "activity",
       "slug": "fugoko-04-lafo140",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fontSize": {
+          "12": 1
+        },
+        "strokeWidth": {
+          "1": 1
+        },
+        "rx": {
+          "12.5": 1
+        },
+        "textCount": 1,
+        "width": "75",
+        "height": "107"
+      },
+      "jar": {
+        "fontSize": {
+          "12": 1
+        },
+        "strokeWidth": {
+          "1": 1
+        },
+        "rx": {
+          "12.5": 1
+        },
+        "textCount": 1,
+        "width": "75",
+        "height": "107"
+      }
     },
     {
       "type": "activity",
@@ -13564,10 +13647,36 @@
     {
       "type": "activity",
       "slug": "tidoda-12-juxu745",
-      "status": "error",
-      "reason": "activity parser refused this source at line 0 (syntax): Syntax Error?",
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c"
+      "status": "baseline",
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "2686a257",
+      "ours": {
+        "fontSize": {
+          "12": 1,
+          "14": 1
+        },
+        "strokeWidth": {},
+        "rx": {
+          "(absent)": 1,
+          "12.5": 1
+        },
+        "textCount": 2,
+        "width": "136",
+        "height": "122"
+      },
+      "jar": {
+        "fontSize": {
+          "12": 1,
+          "14": 1
+        },
+        "strokeWidth": {},
+        "rx": {
+          "12.5": 2
+        },
+        "textCount": 2,
+        "width": "136",
+        "height": "122"
+      }
     },
     {
       "type": "activity",

@@ -1,0 +1,6 @@
+@startuml
+:foo1;
+link #red
+:foo2;
+:foo3;
+@enduml

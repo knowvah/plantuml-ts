@@ -266,7 +266,7 @@ describe('svg-activity style census — corpus presence', () => {
     expect(manifest.fixtures.length).toBe(451);
   });
 
-  it('the partition matches the sibling ratchet: 412 baseline / 7 error / 32 jar-error', () => {
+  it('the partition matches the sibling ratchet: 416 baseline / 3 error / 32 jar-error', () => {
     // 268 -> 311 / 82 -> 39 at unknown-bucket-routing-repair/T10
     // (2026-09-20): 43 recorded parser-gap errors now render -- the activity
     // seam gained CommandActivityList, CommandSwitch/Case/EndSwitch,
@@ -291,8 +291,12 @@ describe('svg-activity style census — corpus presence', () => {
     // gaps: CommandPage, CommandLink3, CommandFootboxIgnored,
     // CommandHideShowByGender; 3 misfiled non-activity sources the jar draws
     // as SEQUENCE/CLASS). Derivation: 349 + 63 = 412 / 0 + 7 / 23 + 9 = 32.
-    expect(baselineFixtures.length).toBe(412);
-    expect(errorFixtures.length).toBe(7);
+    // add4/merge-T3k (2026-10-08): bopele/cebuci/fugoko/tidoda render once
+    // CommandPage, CommandLink3, CommandFootboxIgnored and
+    // CommandHideShowByGender are ported (ActivityDiagramFactory3.java:105,107,
+    // 155) -- promoted error -> baseline. Derivation: 412 + 4 = 416 / 7 - 4 = 3.
+    expect(baselineFixtures.length).toBe(416);
+    expect(errorFixtures.length).toBe(3);
     expect(jarErrorFixtures.length).toBe(32);
   });
 });
