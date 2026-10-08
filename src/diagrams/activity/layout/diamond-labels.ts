@@ -49,6 +49,10 @@ export function emitDiamondLabels(
         width: l.width,
         height: l.height,
         label: l.label,
+        // add4-T3j: only the while/repeat walkers call this; their slots are
+        // `create(fcArrow)` FULL blocks (`FtileWhile.java:123,127-128`,
+        // `FtileRepeat.java:127-131`).
+        ifLabelRole: 'full',
       },
       lane,
     );

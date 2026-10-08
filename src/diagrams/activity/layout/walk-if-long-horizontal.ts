@@ -65,6 +65,8 @@ function pushDiamondLabel(ctx: LhCtx, diamond: GtileDiamondInside2, side: Diamon
       width: l.width,
       height: l.height,
       label: l.label,
+      // add4-T3j: drawn as the FULL `create(fcArrow)` block it is sized as.
+      ifLabelRole: 'full',
     },
     ctx.myLane,
   );

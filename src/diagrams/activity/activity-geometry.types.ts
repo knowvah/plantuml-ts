@@ -44,9 +44,12 @@ export interface ActivityNodeGeo {
    * EMPTY_DIAMOND condition's own test text -- `FtileDiamond.withNorth(tbTest)`
    * (`ConditionalBuilder.java:262-267`), the diamond-font `CreoleMode.FULL`
    * condition Sheet (`:240-247`). Absent = a branch label, the arrow-font
-   * `SIMPLE_LINE` block (`:280-283`).
+   * `SIMPLE_LINE` block (`:280-283`). `'full'` (add4-T3j) = an arrow-font
+   * `Display#create` FULL block: a while's / repeat's yes/out labels
+   * (`FtileWhile.java:123,127-128`, `FtileRepeat.java:127-131`) and an
+   * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
    */
-  ifLabelRole?: 'test';
+  ifLabelRole?: 'test' | 'full';
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
   /** For `label`/`goto` nodes (add4-T3d): `false` when upstream draws the

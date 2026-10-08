@@ -71,4 +71,10 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
   it('in-label at a small arrow font: reservation sized as the drawn block', () => {
     expect(diffPaths('add4-T3h', 'side-labels-small-font')).toEqual([]);
   });
+
+  // FtileWhile.java:123,127-128 and FtileRepeat.java:127-131: while/repeat
+  // side labels are FULL `create(fcArrow)` blocks (`__u__` underlines).
+  it('while/repeat side labels are FULL blocks (EMPTY_DIAMOND)', () => {
+    expect(diffPaths('add4-T3j', 'while-full-labels-diamond')).toEqual([]);
+  });
 });
