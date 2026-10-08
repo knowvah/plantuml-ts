@@ -1,0 +1,7 @@
+@startuml
+class HashMap<K,V>
+HashMap [e5] --> [g] V1
+HashMap [b2] ..> [f] V2
+HashMap [a1] --> [g] V3
+MoreComplex [z: boolean] ..> X
+@enduml
