@@ -1,57 +1,59 @@
 /**
- * Minimal deterministic PNG writer, browser-safe, zero deps, synchronous.
+ * Deterministic PNG writer, browser-safe, synchronous: the byte stream the
+ * jar's `javax.imageio` PNG writer produces for a sprite raster.
  *
- * Not a port of any single upstream Java class -- upstream relies on the
- * JDK's `javax.imageio` PNG writer (via `SImageIO`/`PortableImageAwt`),
- * which is not portable to TypeScript/browser. This is new code built to
- * the PNG (RFC 2083) and zlib/DEFLATE (RFC 1950/1951) specs directly,
- * scoped exactly to what sprite/img rendering needs per D7
- * (plans/si5b-stdlib/decisions.md): 8-bit RGBA, one PNG per sprite/img
- * atom, deterministic byte output (no compression heuristics, no OS/time
- * metadata) so the same pixels always produce the same bytes.
+ * The jar writes every raster through `SvgGraphics#toBase64` ->
+ * `SImageIO.write(image, "png", baos)` (`SvgGraphics.java:1055-1059`,
+ * `SImageIO.java:75-77`) -> `ImageIO.write` with NO write param, so the
+ * JDK's `com.sun.imageio.plugins.png.PNGImageWriter` emits, in order
+ * (`PNGImageWriter.java:1262-1292`): the signature, IHDR, the IDAT run,
+ * IEND -- no ancillary chunks for a metadata-less `BufferedImage`.
  *
- * Compression strategy: DEFLATE with fixed Huffman codes and LZ77
- * (`deflate-fixed.ts`), which is deterministic by construction -- no
- * frequency pass, no code-length table in the stream.
+ * - Filter: `RowFilter#filterRow` returns 0 for every non-palette row
+ *   (`RowFilter.java:93-98`), so each scanline is `0x00` + the raw RGBA row.
+ * - Compression: `new Deflater(deflaterLevel)` (`PNGImageWriter.java:182`)
+ *   with `deflaterLevel = DEFAULT_COMPRESSION_LEVEL = 4`
+ *   (`PNGImageWriter.java:364,1213`). `Deflater(int)` is
+ *   `this(level, false)` -> `init(level, DEFAULT_STRATEGY, nowrap=false)`
+ *   (`Deflater.java:203,211-213`), and the native side calls
+ *   `deflateInit2(strm, level, Z_DEFLATED, MAX_WBITS, DEF_MEM_LEVEL=8,
+ *   strategy)` (OpenJDK `libzip/Deflater.c:39,52-54`): a zlib-wrapped stream,
+ *   windowBits 15, memLevel 8, strategy 0. The JDK bundles zlib 1.2.13.
+ * - Chunking: `new IDATOutputStream(stream, 32768, deflaterLevel)`
+ *   (`PNGImageWriter.java:1035`) cuts the deflate output into IDAT chunks of
+ *   exactly 32768 bytes, the last one short (`IDATOutputStream#deflate`,
+ *   `PNGImageWriter.java:246-264`; `finish`, :272-283). The input is fed
+ *   row by row with `Z_NO_FLUSH`, which leaves the stream identical to a
+ *   one-shot deflate of the whole scanline buffer.
  *
- * This file previously emitted STORED blocks only, reasoning that "PlantUML
- * sprites are tiny (~64x64), so the size cost of skipping LZ77/Huffman
- * coding is negligible". Measured against the jar on `birocu-87-xubi808`
- * that cost was 21x -- 16516 bytes to its 777, for pixel data of identical
- * shape (both 8-bit RGBA, both filter 0, both 16448 bytes raw). Sprite rows
- * are long runs of identical RGBA pixels, so the assumption was backwards:
- * this is the input LZ77 helps most, not least. Stored blocks remain only
- * for the empty-input edge case.
+ * Deflate is `pako` (MIT AND Zlib). `legacyHash: true` is load-bearing:
+ * pako 3 defaults to Chromium zlib's multiplicative 4-byte insert hash,
+ * which finds different LZ77 matches; `legacyHash` restores stock zlib's
+ * rolling `UPDATE_HASH` (`((h << hash_shift) ^ c) & hash_mask`, zlib
+ * `deflate.c`). With it the output equals the jar's IDAT byte for byte on
+ * every fixture in `tests/fixtures/unwind-U4/` and `tests/fixtures/unwind2-S6/`.
  *
  * @see https://www.rfc-editor.org/rfc/rfc2083 (PNG)
- * @see https://www.rfc-editor.org/rfc/rfc1950 (ZLIB)
- * @see https://www.rfc-editor.org/rfc/rfc1951 (DEFLATE) section 3.2.4 (stored blocks)
  */
 
-import { deflateFixed } from './deflate-fixed.js';
+import { deflate } from 'pako';
 
-/** 8-byte PNG file signature (RFC 2083 section 3.1). */
+/** 8-byte PNG file signature (`PNGImageWriter#write_magic`, RFC 2083 section 3.1). */
 const PNG_SIGNATURE: readonly number[] = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
-/** zlib CMF byte: CM=8 (deflate), CINFO=7 (32K window) -- RFC 1950 section 2.2. */
-const ZLIB_CMF_BYTE = 0x78;
-/**
- * zlib FLG byte: FLEVEL=0 (fastest/no compression hint), FDICT=0, and
- * FCHECK chosen so `(CMF*256 + FLG) % 31 === 0` as RFC 1950 section 2.2
- * requires. For CMF=0x78, FLG=0x01 satisfies the check.
- */
-const ZLIB_FLG_BYTE = 0x01;
-
-/** Max length of a single DEFLATE stored block (LEN is a 16-bit field). */
-const STORED_BLOCK_MAX_LEN = 0xffff;
-/** DEFLATE stored-block header byte when this is the final block (BFINAL=1, BTYPE=00). */
-const STORED_BLOCK_HEADER_FINAL = 0x01;
-/** DEFLATE stored-block header byte for a non-final block (BFINAL=0, BTYPE=00). */
-const STORED_BLOCK_HEADER_MORE = 0x00;
+/** `PNGImageWriter.DEFAULT_COMPRESSION_LEVEL` (`PNGImageWriter.java:364`). */
+const DEFLATER_LEVEL = 4;
+/** `MAX_WBITS` passed by OpenJDK `libzip/Deflater.c:53` when `nowrap` is false. */
+const ZLIB_WINDOW_BITS = 15;
+/** `DEF_MEM_LEVEL` (OpenJDK `libzip/Deflater.c:39`). */
+const ZLIB_MEM_LEVEL = 8;
+/** `Deflater.DEFAULT_STRATEGY` (`Deflater.java:152`) = zlib `Z_DEFAULT_STRATEGY`. */
+const ZLIB_DEFAULT_STRATEGY = 0;
+/** IDAT chunk length (`PNGImageWriter.java:1035`). */
+const IDAT_CHUNK_LENGTH = 32768;
 
 const CRC32_POLYNOMIAL = 0xedb88320;
 const CRC32_SEED = 0xffffffff;
-const ADLER32_MODULO = 65521;
 
 const PNG_BIT_DEPTH_8 = 8;
 /** PNG color type 6 = truecolor with alpha (RGBA). */
@@ -59,7 +61,7 @@ const PNG_COLOR_TYPE_RGBA = 6;
 const PNG_COMPRESSION_METHOD_DEFLATE = 0;
 const PNG_FILTER_METHOD_ADAPTIVE = 0;
 const PNG_INTERLACE_METHOD_NONE = 0;
-/** Per-scanline filter type 0 (None) -- every scanline is written unfiltered. */
+/** Per-scanline filter type 0 (None) -- `RowFilter.java:93-98`. */
 const SCANLINE_FILTER_NONE = 0;
 
 /** Bytes per pixel for 8-bit RGBA. */
@@ -94,17 +96,6 @@ export function crc32(data: Uint8Array): number {
   return (crc ^ CRC32_SEED) >>> 0;
 }
 
-/** Adler-32 checksum (RFC 1950 section 8), matching zlib's trailing IDAT checksum. */
-export function adler32(data: Uint8Array): number {
-  let a = 1;
-  let b = 0;
-  for (let i = 0; i < data.length; i++) {
-    a = (a + data[i]!) % ADLER32_MODULO;
-    b = (b + a) % ADLER32_MODULO;
-  }
-  return ((b << 16) | a) >>> 0;
-}
-
 function writeUint32BE(value: number): Uint8Array {
   return new Uint8Array([(value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff]);
 }
@@ -130,54 +121,34 @@ function pngChunk(type: string, data: Uint8Array): Uint8Array {
 }
 
 /**
- * Wraps `raw` in DEFLATE stored (uncompressed) blocks (RFC 1951 section
- * 3.2.4): each block is a 1-byte header (BFINAL/BTYPE, byte-aligned since
- * every block here starts on a byte boundary) followed by 2-byte LEN,
- * 2-byte NLEN (one's-complement of LEN), then LEN raw bytes. Blocks are
- * split every 64KB-1 bytes (0xFFFF, the max a 16-bit LEN field can hold).
+ * The zlib stream `new Deflater(4)` produces for `raw` (see the file header
+ * for the parameter provenance).
  */
-function deflateStoredBlocks(raw: Uint8Array): Uint8Array {
-  if (raw.length === 0) {
-    const nlen = ~0 & 0xffff;
-    return new Uint8Array([STORED_BLOCK_HEADER_FINAL, 0x00, 0x00, nlen & 0xff, (nlen >>> 8) & 0xff]);
-  }
-
-  const blocks: Uint8Array[] = [];
-  let offset = 0;
-  while (offset < raw.length) {
-    const len = Math.min(STORED_BLOCK_MAX_LEN, raw.length - offset);
-    const isFinal = offset + len >= raw.length;
-    const nlen = ~len & 0xffff;
-    const block = new Uint8Array(5 + len);
-    block[0] = isFinal ? STORED_BLOCK_HEADER_FINAL : STORED_BLOCK_HEADER_MORE;
-    block[1] = len & 0xff;
-    block[2] = (len >>> 8) & 0xff;
-    block[3] = nlen & 0xff;
-    block[4] = (nlen >>> 8) & 0xff;
-    block.set(raw.subarray(offset, offset + len), 5);
-    blocks.push(block);
-    offset += len;
-  }
-  return concatBytes(blocks);
+function deflateLikeJdk(raw: Uint8Array): Uint8Array {
+  return deflate(raw, {
+    level: DEFLATER_LEVEL,
+    windowBits: ZLIB_WINDOW_BITS,
+    memLevel: ZLIB_MEM_LEVEL,
+    strategy: ZLIB_DEFAULT_STRATEGY,
+    legacyHash: true,
+  });
 }
 
 /**
- * Wraps `raw` in a full zlib stream: 2-byte header, the DEFLATE payload,
- * 4-byte Adler-32 trailer.
- *
- * The payload is a fixed-Huffman LZ77 block (`deflate-fixed.ts`). Empty
- * input still takes the stored path -- a zero-length stored block is the
- * shortest legal encoding of nothing, and it keeps that edge case free of
- * the matcher entirely.
+ * Cuts `zlibStream` into IDAT chunks of `IDAT_CHUNK_LENGTH` bytes, the last
+ * one short -- `IDATOutputStream#deflate` starts a new chunk only when the
+ * current one is full AND more output remains (`PNGImageWriter.java:250-254`),
+ * so a stream that is an exact multiple never gets a trailing empty IDAT.
  */
-function zlibWrap(raw: Uint8Array): Uint8Array {
-  const header = new Uint8Array([ZLIB_CMF_BYTE, ZLIB_FLG_BYTE]);
-  const compressed = raw.length === 0 ? deflateStoredBlocks(raw) : deflateFixed(raw);
-  const checksum = writeUint32BE(adler32(raw));
-  return concatBytes([header, compressed, checksum]);
+function idatChunks(zlibStream: Uint8Array): Uint8Array[] {
+  const chunks: Uint8Array[] = [];
+  for (let offset = 0; offset < zlibStream.length; offset += IDAT_CHUNK_LENGTH) {
+    chunks.push(pngChunk('IDAT', zlibStream.subarray(offset, offset + IDAT_CHUNK_LENGTH)));
+  }
+  return chunks;
 }
 
-/** Prepends filter-type-0 (None) to every scanline, per RFC 2083 section 6.2. */
+/** Prepends filter-type-0 (None) to every scanline (`RowFilter.java:93-98`). */
 function buildScanlines(rgba: Uint8Array, width: number, height: number): Uint8Array {
   const rowStride = width * RGBA_BYTES_PER_PIXEL;
   const rowBytes = 1 + rowStride;
@@ -190,6 +161,7 @@ function buildScanlines(rgba: Uint8Array, width: number, height: number): Uint8A
   return out;
 }
 
+/** IHDR payload (`PNGImageWriter#write_IHDR`, `PNGImageWriter.java:468-492`). */
 function buildIhdrData(width: number, height: number): Uint8Array {
   return concatBytes([
     writeUint32BE(width),
@@ -206,9 +178,8 @@ function buildIhdrData(width: number, height: number): Uint8Array {
 
 /**
  * Encodes `rgba` (row-major, 4 bytes/pixel, `width * height * 4` bytes
- * total) into a complete 8-bit RGBA PNG file: signature, IHDR, one IDAT
- * (stored-block zlib stream), IEND. Deterministic -- identical input
- * always produces identical output bytes.
+ * total) into the 8-bit RGBA PNG the jar's `PNGImageWriter` writes for the
+ * same pixels: signature, IHDR, IDAT run, IEND. Deterministic.
  */
 export function encodePng(rgba: Uint8Array, width: number, height: number): Uint8Array {
   const expectedLength = width * height * RGBA_BYTES_PER_PIXEL;
@@ -219,12 +190,11 @@ export function encodePng(rgba: Uint8Array, width: number, height: number): Uint
     throw new Error(`encodePng: rgba.length ${rgba.length} does not match ${width}x${height}x4 (${expectedLength})`);
   }
 
-  const scanlines = buildScanlines(rgba, width, height);
   const signature = new Uint8Array(PNG_SIGNATURE);
   const ihdr = pngChunk('IHDR', buildIhdrData(width, height));
-  const idat = pngChunk('IDAT', zlibWrap(scanlines));
+  const idats = idatChunks(deflateLikeJdk(buildScanlines(rgba, width, height)));
   const iend = pngChunk('IEND', new Uint8Array(0));
-  return concatBytes([signature, ihdr, idat, iend]);
+  return concatBytes([signature, ihdr, ...idats, iend]);
 }
 
 /** Standard (RFC 4648) base64 encoding -- NOT PlantUML's 6-bit sprite alphabet. */
