@@ -59,7 +59,10 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  const name = m[2]!.trim();
+  // `CommandSwimlane.java:63` `([^|]+)`, untrimmed: `Swimlanes#getOrCreate`
+  // (`Swimlanes.java:168-176`) matches it by exact `equals`, and
+  // `Swimlane.java:60` displays it verbatim.
+  const name = m[2]!;
   setCurrentSwimlane(ctx, name, m[1]);
   recordSwimlaneDisplay(ctx, name, line);
   return { idx: idx + 1 };
