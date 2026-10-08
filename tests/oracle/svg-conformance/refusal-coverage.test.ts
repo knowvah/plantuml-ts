@@ -850,7 +850,9 @@ describe('refusal coverage — baseline shape', () => {
     // rows. Derivation: 6356 + 241 = 6597.
     // 6597 -> 6600 / 6360 -> 6363 at add4/merge-T3k: 3 svg-activity clone
     // rows. Derivation: 6363 + 237 = 6600.
-    expect(manifest.fixtures.length).toBe(6600);
+    // 6600 -> 6601 / 6363 -> 6364 at add4/fix-jucidi: 1 svg-activity clone
+    // rows. Derivation: 6364 + 237 = 6601.
+    expect(manifest.fixtures.length).toBe(6601);
     expect(pinnedJarErrors.length).toBe(110);
     //
     // 242 -> 241 / 4242 -> 4243 at unknown-bucket-routing-repair/T11
@@ -946,7 +948,8 @@ describe('refusal coverage — baseline shape', () => {
     // 6354 -> 6356 at add4/merge-T3h (2 svg-activity clones).
     // 6356 -> 6360 at add4/merge-T3k (4 activity parser gaps fixed).
     // 6360 -> 6363 at add4/merge-T3k (3 svg-activity clones).
-    expect(pinnedRendering.length).toBe(6363);
+    // 6363 -> 6364 at add4/fix-jucidi (1 svg-activity clones).
+    expect(pinnedRendering.length).toBe(6364);
   });
 
   it('every known-gap pin names the unported Command that explains it', () => {
