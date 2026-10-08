@@ -22,7 +22,7 @@ features:
   - title: Pure SVG renderer
     details: No DOM, no canvas, no async rendering path. renderSync() takes PlantUML source and returns an SVG string, synchronously, in the browser or Node.
   - title: Preprocessor with documented scope
-    details: "!define/!undefine, conditionals (!ifdef/!ifndef/!else/!endif), and !theme are supported. External !include is opt-in via a caller-supplied fetcher — see the divergences page for exact scope."
+    details: "!define/!undef, conditionals (!ifdef/!ifndef/!else/!endif), and !theme are supported. External !include is opt-in via a caller-supplied fetcher — see the divergences page for exact scope."
 ---
 
 ## Layout: one engine, always
