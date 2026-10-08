@@ -4673,12 +4673,11 @@
     {
       "type": "sequence",
       "slug": "loteba-26-konu854",
-      "status": "error",
-      "weightedScore": null,
-      "diffCount": null,
-      "measuredAt": "2026-08-26",
-      "measuredAgainstCommit": "c3a24c9d",
-      "reason": "refuses to parse -- source line 22: `& return Hello44`. Unported: CommandReturn's PARALLEL group `(&[%s]*)?` (CommandReturn.java:68; SequenceDiagramFactory.java:129). The `/ note` VMERGE form its previous pin named now parses (line 10 is accepted). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
+      "status": "baseline",
+      "weightedScore": 261,
+      "diffCount": 261,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "5b653036c"
     },
     {
       "type": "sequence",
@@ -5449,10 +5448,10 @@
       "type": "sequence",
       "slug": "mukebo-35-xoju095",
       "status": "baseline",
-      "weightedScore": 601,
+      "weightedScore": 607,
       "diffCount": 503,
-      "measuredAt": "2026-09-19",
-      "measuredAgainstCommit": "1452ec2d"
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "5b653036c"
     },
     {
       "type": "sequence",
