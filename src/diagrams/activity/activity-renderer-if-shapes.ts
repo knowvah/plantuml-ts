@@ -23,12 +23,13 @@ import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon
 import { activityFontColor } from './activity-text-style.js';
 import {
   actColors,
-  ASCENT_FRACTION,
   flooredFirstBaselineY,
-  textLines,
 } from './activity-renderer-shapes.js';
 import { drawActivityText } from './activity-renderer-text.js';
 import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { centeredLineX, type ActivityTextOpts } from './activity-text-placement.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
@@ -69,20 +70,6 @@ export function renderIfMerge(node: ActivityNodeGeo, theme: Theme): string {
   );
 }
 
-/**
- * A branch/condition label (D3) -- `getLabelPositive`'s `TextBlock` resolves
- * the ARROW style (`ConditionalBuilder.java:117,280-283`), drawn
- * unconditionally LEFT-aligned (`HorizontalAlignment.LEFT`,
- * `ConditionalBuilder.java:280`) starting at the node's own `x` -- NOT
- * routed through `activity-text-placement.ts#activityTextLineX`'s
- * width/theme-alignment dispatch (that module's `'activity'`/`'diamond'`
- * union has no LEFT-fixed case, and applying its `'activity'`-bucket
- * padding here would put the label at the wrong `x` on a diagram with a
- * non-default `HorizontalAlignment` skinparam). `node.x`/`node.y` are the
- * walker's own placed top-left (D3), already at the jar's `UTranslate`; the
- * baseline offset is Q5's convention (`.agent-notes/aitp-T1.md#q5`):
- * `y0 + ARROW_FONT_SIZE * ASCENT_FRACTION`.
- */
 /**
  * The repeat-entry rhombus (`repeat-start`) and the label-less `if-split`/
  * `while-header` diamond both resolve to `FtileDiamond#drawU`
@@ -140,19 +127,22 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
   return shape + label;
 }
 
+/**
+ * A branch/condition label (D3): `ConditionalBuilder#getLabelPositive`'s
+ * `branch.getDisplayPositive().create0(fontArrow, HorizontalAlignment.LEFT,
+ * skinParam, labelLineBreak, CreoleMode.SIMPLE_LINE, null, null)`
+ * (`ConditionalBuilder.java:280-283`), drawn at the walker's placed top-left
+ * (`node.x`/`node.y`, the jar's `UTranslate`). `SheetBlock1` adds
+ * `skinparam padding` itself (`SheetBlock1.java:209-210`).
+ */
 export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
-  const fontSize = activityFontSize(theme, 'arrow');
-  const label = node.label ?? '';
-  const lines = label.split('\n');
-  // add4-T3d: the label's `SheetBlock1` translates by `(padding.left,
-  // padding.top)` before drawing (`SheetBlock1.java:209-210`).
-  const pad = theme.padding ?? 0;
-  const baselineY = node.y + pad + fontSize * ASCENT_FRACTION;
-  const fill = activityFontColor(theme, 'arrow');
-  if (lines.length > 1) {
-    return textLines(lines, node.x + pad, baselineY, fontSize, { fontFamily: theme.fontFamily, fontSize, fill });
-  }
-  return drawActivityText(node.x + pad, baselineY, label, { fontFamily: theme.fontFamily, fontSize, fill });
+  const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'arrow'), 'arrow');
+  const tb = activityDisplayBlock(node.label ?? '', theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
+  });
+  return drawActivityTextBlock(tb, node, theme, fc);
 }
 
 /**
