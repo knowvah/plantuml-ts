@@ -26,6 +26,7 @@
  * reader of either outside this file and `layout.old.ts`.
  */
 
+import type { ActivityNodeGeo } from '../activity-geometry.types.js';
 import type { GtileWhile } from '../tiles/gtile-while.js';
 import type { DiamondConditionTile } from '../tiles/gtile-diamond-inside.js';
 import type { GPoint, HookName } from '../tiles/points.js';
@@ -41,6 +42,19 @@ import { emitDiamondLabels, emitDiamondOwnLabel } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 import { pushWhileBackwardConnections } from './walk-while-backward.js';
 import { isInsideForkBody } from './walk-fork-branches.js';
+
+/**
+ * An EMPTY_DIAMOND header's north slot is the while's TEST, not a branch
+ * label: `FtileDiamond.withNorth(testTb)` with `testTb = test.create(fcTest,
+ * ...)` (`FtileWhile.java:124-126,137-139`), drawn at the diamond font and
+ * colour -- `ifLabelRole: 'test'`, the role `walk-if-down.ts#testLabelRole`
+ * gives the `if` test (`ConditionalBuilder.java:262-267`). The INSIDE
+ * headers' north is the arrow-font `yesTb` (`:131-136`) and stays a branch
+ * label.
+ */
+function markEmptyDiamondTest(header: DiamondConditionTile, north: ActivityNodeGeo | undefined): void {
+  if (north !== undefined && header.kind === 'gtile-diamond-empty') north.ifLabelRole = 'test';
+}
 
 /**
  * The hexagon node, then north, then the hexagon's OWN label, then west --
@@ -88,7 +102,9 @@ function pushWhileHeader(
   const inY = header.getCoord(NORTH_HOOK).y;
   const box = { x: hX, y: hY + inY, width: header.width, height: header.getCoord(SOUTH_HOOK).y - inY };
   pushNode(out, { id: out.nextId('while-header'), kind: 'while-header', ...box, label: header.label }, hexLane);
+  const northAt = out.nodes.length;
   emitDiamondLabels(header, { x: hX, y: hY }, ['north'], hexLane, out);
+  markEmptyDiamondTest(header, out.nodes[northAt]);
   // `south` (add3 T3a, CONDSTYLE-EMPTY): `FtileDiamond#drawU`'s own
   // `north.drawU` THEN `south.drawU` (`:91,94`) -- only EMPTY_DIAMOND ever
   // populates this slot for a while header (`.withSouth(yesTb)`,

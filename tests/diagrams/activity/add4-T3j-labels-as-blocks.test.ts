@@ -53,4 +53,10 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
   it('sequential gap: the in-label block height, padding included', () => {
     expect(diffPaths('add4-T3h', 'side-labels-padding')).toEqual([]);
   });
+
+  // FtileWhile.java:124-126,137-139: an EMPTY_DIAMOND while's north is the
+  // test (`withNorth(testTb)`), drawn at the diamond font and colour.
+  it('EMPTY_DIAMOND while: the north test is the condition, not a branch label', () => {
+    expect(diffPaths('add4-T3h', 'empty-diamond-north')).toEqual([]);
+  });
 });
