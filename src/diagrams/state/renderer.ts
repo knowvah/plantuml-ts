@@ -285,7 +285,9 @@ function renderClusterSiblingMarkup(
 /**
  * Render a state diagram geometry into an SVG string.
  */
-export function renderState(geo: StateGeometry, theme: Theme): RenderFragment {
+export function renderState(geo: StateGeometry, skinTheme: Theme): RenderFragment {
+  // unwind2-S11: the layout's `sprite` map (`layoutState`).
+  const theme = geo.sprites === undefined ? skinTheme : { ...skinTheme, sprites: geo.sprites };
   const uidPlan = buildStateUidPlan(geo);
   const concurrentGlobalIds = geo.concurrentGlobalIds ?? new Map<string, number>();
 

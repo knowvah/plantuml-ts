@@ -70,6 +70,7 @@
  * never calls into this module yet — every target fixture this iteration is
  * FLAT, `layout.ts#hasAnyComposite` false for all three).
  */
+import type { Paint } from '../../core/paint.js';
 import { lineTo, moveTo } from '../../core/svg-path-builder.js';
 import type { StateDiagramAST, StateNote } from './ast.js';
 import type { StateNodeGeo, StateTextLine } from './state-geo-types.js';
@@ -208,16 +209,19 @@ export function buildFlatNoteGeos(ast: StateDiagramAST, ctx: FlatNoteGeoCtx): St
  *  #toStyledLine`), so a `<sup>`/`<sub>`/`**bold**`/`<color:…>` run inside a
  *  note body now draws at its own size/baseline/decoration instead of one
  *  flat `<text>` of the markup-stripped-and-joined line (pre-T5 shape). */
-function renderNoteTextLines(node: StateNodeGeo, theme: Theme): string {
+function renderNoteTextLines(node: StateNodeGeo, theme: Theme, back: Paint): string {
   const lines = styledLines(node.noteLines ?? [], NOTE_FONT_SIZE);
   const parts: string[] = [];
   let lineTop = node.y + NOTE_MARGIN_Y;
   for (const ln of lines) {
     const height = ln.height === 0 ? NOTE_FONT_SIZE : ln.height;
     parts.push(
+      // unwind2-S11: `Opale#drawU` applies the note fill before the text
+      // (`Opale.java:107`), a sprite's tint back.
       renderStateRuns(ln.runs, node.x + NOTE_MARGIN_X1, lineTop, height, {
         fontFamily: theme.fontFamily,
         fill: '#000000',
+        back,
       }),
     );
     lineTop += height;
@@ -245,7 +249,7 @@ export function renderStateNoteFreestanding(node: StateNodeGeo, theme: Theme): s
   return (
     path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
     path(corner, { fill, stroke: theme.colors.border, strokeWidth: NOTE_CORNER_DEFAULT_STROKE_WIDTH }) +
-    renderNoteTextLines(node, theme)
+    renderNoteTextLines(node, theme, fill)
   );
 }
 
@@ -270,7 +274,7 @@ export function renderStateNoteOpale(node: StateNodeGeo, theme: Theme): string {
   return (
     path(outline, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
     path(corner, { fill, stroke: theme.colors.border, strokeWidth: NOTE_STROKE_WIDTH }) +
-    renderNoteTextLines(node, theme)
+    renderNoteTextLines(node, theme, fill)
   );
 }
 
@@ -369,6 +373,7 @@ function renderNoteOnLinkTextLines(px: number, py: number, lines: readonly State
       renderStateRuns(ln.runs, px + NOTE_MARGIN_X1, lineTop, height, {
         fontFamily: theme.fontFamily,
         fill: '#000000',
+        back: NOTE_FILL,
       }),
     );
     lineTop += height;

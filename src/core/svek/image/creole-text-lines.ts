@@ -61,7 +61,10 @@
  * inclusive literal text the un-registered markup used to measure as.
  */
 import type { FontSpec, StringMeasurer } from '../../measurer.js';
-import type { SpriteDimsLookup } from '../../creole-atoms.js';
+import type { InlineAtomToken, SpriteDimsLookup } from '../../creole-atoms.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../sprite-registry.js';
+import type { SpriteTint } from '../../klimt/sprite/sprite-tint.js';
+import { creoleRunSpriteImage } from './creole-run-sprite.js';
 import { measureInlineAtom } from '../../creole-atoms-measure.js';
 import { emojiSquareDim } from '../../klimt/creole/atom/AtomEmoji.js';
 import type { CreoleAtom } from '../../klimt/creole/atom/Atom.js';
@@ -120,6 +123,13 @@ export interface CreoleRunImage {
   readonly width: number;
   readonly height: number;
   readonly top: number;
+  /** unwind2-S11: a monochrome `<$sprite>`'s deferred tint
+   *  (`creole-run-sprite.ts#creoleRunImageHref` completes it at draw). */
+  readonly tint?: SpriteTint;
+  /** unwind2-S11: a sprite's raster box, drawn as the `<image>` size while
+   *  `width`/`height` advance the line (`creole-run-sprite.ts`). */
+  readonly rasterWidth?: number;
+  readonly rasterHeight?: number;
 }
 
 export interface CreoleTextRun {
@@ -192,6 +202,9 @@ interface MeasureCtx {
   readonly measurer: StringMeasurer;
   readonly tabSizeNb: number;
   readonly sprites: SpriteDimsLookup | undefined;
+  /** unwind2-S11: the diagram's `sprite` map, when the caller draws a
+   *  `<$sprite>` atom's image (`creole-run-sprite.ts`). */
+  readonly registry: SpriteRegistry | undefined;
   /** add4-T3b: the `CreoleMode` the caller's `Display#create0` names --
    *  `CommandCreoleBuilder.java:85-86` registers `__underline__` only under
    *  `FULL`; `Branch.java:255-256` (switch case labels) asks `SIMPLE_LINE`. */
@@ -338,8 +351,24 @@ function latexAtomMeasured(atom: Extract<CreoleAtom, { kind: 'latex' }>, ctx: Me
   };
 }
 
+/** unwind2-S11: a `<$sprite>` atom's image run, when the caller threads the
+ *  registry and the name resolves to a raster sprite -- `AtomSprite#drawU`
+ *  (`creole-run-sprite.ts`'s doc). Its box is {@link measureInlineAtom}'s,
+ *  the same dims the no-image path reserves; `top` is placed by `Sea`. */
+function inlineSpriteMeasured(atom: InlineAtomToken, ctx: MeasureCtx): AtomMeasured | undefined {
+  if (atom.kind !== 'sprite' || ctx.registry === undefined) return undefined;
+  const img = creoleRunSpriteImage(atom, ctx.registry, ctx.font.size);
+  if (img === undefined) return undefined;
+  return {
+    run: { text: '', style: NO_STYLE, size: ctx.font.size, image: { ...img, top: 0 } },
+    width: img.width,
+    height: img.height,
+  };
+}
+
 /** One `CreoleAtom`'s run (`null` for a non-text, non-latex atom — the
- *  `CreoleTextRun` shape carries no sprite/emoji variant) plus its
+ *  `CreoleTextRun` shape carries no emoji variant, and a sprite one only
+ *  via {@link inlineSpriteMeasured}) plus its
  *  width/height contribution. `'inline'` (img/sprite): D9's
  *  `measureInlineAtom` (`creole-atoms-measure.ts`). `'emoji'`:
  *  `AtomEmoji#calculateDimensionSlow`/box height (`AtomEmoji.java:57-64`).
@@ -348,6 +377,8 @@ function atomMeasured(atom: CreoleAtom, ctx: MeasureCtx): AtomMeasured {
   if (atom.kind === 'text') return textAtomMeasured(atom, ctx);
   if (atom.kind === 'latex') return latexAtomMeasured(atom, ctx);
   if (atom.kind === 'inline') {
+    const sprite = inlineSpriteMeasured(atom.atom, ctx);
+    if (sprite !== undefined) return sprite;
     const dims = measureInlineAtom(atom.atom, ctx.sprites, ctx.font.size);
     return { run: null, width: dims.width, height: dims.height };
   }
@@ -443,6 +474,8 @@ export function creoleTextLines(
     readonly wrapWidth?: number;
     readonly tabSize?: number;
     readonly sprites?: SpriteDimsLookup;
+    /** unwind2-S11: draw `<$sprite>` atoms as image runs. */
+    readonly spriteRegistry?: SpriteRegistry;
     /** Defaults to `CreoleMode.FULL` (`Display.create8`, every prior caller). */
     readonly mode?: CreoleMode;
   },
@@ -453,7 +486,9 @@ export function creoleTextLines(
     font,
     measurer,
     tabSizeNb: opts?.tabSize ?? DEFAULT_TAB_SIZE,
-    sprites: opts?.sprites,
+    sprites:
+      opts?.sprites ?? (opts?.spriteRegistry !== undefined ? spriteDimsLookupFor(opts.spriteRegistry) : undefined),
+    registry: opts?.spriteRegistry,
     mode: opts?.mode ?? CreoleMode.FULL,
   };
   const wrapWidth = opts?.wrapWidth ?? 0;

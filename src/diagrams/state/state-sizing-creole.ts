@@ -59,6 +59,7 @@ import {
 } from '../../core/klimt/creole/legacy/AtomText.js';
 import { JAR_DEFAULT_TEXT_COLOR } from '../../core/decoration/symbol/usymbol-resolve.js';
 import type { Theme } from '../../core/theme.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { StateTextLine } from './state-geo-types.js';
 
 /** `SkinParam#getTabSize` default (`SkinParam.java:1073`,
@@ -168,6 +169,9 @@ export interface StateCreoleBlock {
 export interface StateCreoleOpts {
   readonly wrapWidth?: number;
   readonly tabSize?: number;
+  /** unwind2-S11: `SkinParam#getSprite`'s map (`Theme#sprites`), so a
+   *  `<$sprite>` atom is drawn (`creole-run-sprite.ts`). */
+  readonly spriteRegistry?: SpriteRegistry;
 }
 
 /**
@@ -185,6 +189,7 @@ export function stateCreoleOpts(theme: Theme, wrap: boolean): StateCreoleOpts {
   return {
     ...(wrap && theme.wrapWidth !== undefined ? { wrapWidth: theme.wrapWidth } : {}),
     tabSize: theme.tabSize ?? DEFAULT_TAB_SIZE,
+    ...(theme.sprites !== undefined ? { spriteRegistry: theme.sprites } : {}),
   };
 }
 

@@ -6,6 +6,7 @@
  */
 
 import type { StateKind } from './ast.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 /** One measured text line (`state-sizing.ts#measureTextLines`/
  *  `measureBodyTextLines`) — `width` is the line's own measured advance
@@ -410,4 +411,8 @@ export interface StateGeometry {
    * literal predating this mission).
    */
   concurrentGlobalIds?: ReadonlyMap<string, number>;
+  /** unwind2-S11: `ast.sprites`, carried to the draw so a label's creole
+   *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
+   *  799-817`). */
+  sprites?: SpriteRegistry;
 }

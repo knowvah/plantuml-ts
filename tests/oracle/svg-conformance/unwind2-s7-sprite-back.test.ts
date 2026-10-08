@@ -83,6 +83,14 @@ const EXACT: readonly (readonly [string, string])[] = [
   [S11, 'ac-note'], // Opale.java:107 -- #FEFFDD
   [S11, 'ac-arrow'], // an arrow label: no back (white)
   [S11, 'ac-if'], // FtileDiamondInside.java:85 -- test label + south slot
+  // unwind2-S11: state text through `creole-text-lines.ts`'s sprite runs.
+  [S7, 'st-state'], // EntityImageStateCommon.java:131-140 -- the state fill
+  [S11, 'st-color'], // inline #pink
+  [S11, 'st-desc'], // the fields block, same `ug`
+  [S11, 'st-empty'],
+  [S11, 'st-hide-empty'], // EntityImageStateEmptyDescription#drawU applyColor
+  [S11, 'st-composite'], // the composite title
+  [S11, 'st-note'], // Opale.java:107 -- #FEFFDD
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -110,11 +118,8 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['c-edge', 'c-package-title', 's-group', 's-message', 's-note', 'st-state'])(
-    '%s: not yet drawn by the port',
-    (name) => {
-      expect(jar(S7, name).length).toBe(1);
-      expect(ours(S7, name)).toEqual([]);
-    },
-  );
+  it.each(['c-edge', 'c-package-title', 's-group', 's-message', 's-note'])('%s: not yet drawn by the port', (name) => {
+    expect(jar(S7, name).length).toBe(1);
+    expect(ours(S7, name)).toEqual([]);
+  });
 });
