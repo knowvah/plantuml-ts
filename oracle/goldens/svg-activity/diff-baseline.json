@@ -3829,11 +3829,11 @@
     {
       "type": "activity",
       "slug": "xovigi-85-rufa987",
-      "status": "baseline",
-      "diffCount": 2,
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "6c788ec6",
-      "weightedScore": 2
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "e1afb6d6",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3910,11 +3910,11 @@
     {
       "type": "activity",
       "slug": "zejuso-92-kexo870",
-      "status": "baseline",
-      "diffCount": 2,
-      "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "4ea823f1",
-      "weightedScore": 2
+      "status": "pinned",
+      "diffCount": 0,
+      "measuredAt": "2026-10-08",
+      "measuredAgainstCommit": "e1afb6d6",
+      "weightedScore": 0
     },
     {
       "type": "activity",

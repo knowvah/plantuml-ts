@@ -669,18 +669,8 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // `after` now report the IDENTICAL overlap set, `[[2,3],[2,4],[6,7],
     // [9,16]]`, no `[6,14]` in either) -- removed rather than carried
     // forward, same precedent as `lopone-15-xiki477` above.
-    // `xovigi-85-rufa987 [15,18]`/`[28,31] polygon×text` (add4-T3h): the
-    // SAME "touching becomes an epsilon overlap after a second transform"
-    // class as `tobajo-64-mipi810` above. Shape 15/28 is an `elseif`
-    // hexagon, 18/31 its west `**yes**` label, drawn at `-dimWest.width`
-    // (`FtileDiamondInside.java:100`). `ifLabelShape` now boxes the drawn
-    // block's resolved width (18.35625) instead of the raw `**yes**`, so the
-    // label touches the hexagon. Direct dump: `before`, `134.8125 +
-    // 18.35625 === 153.16875 === polygon.x`, no overlap; `after`, `123.5375
-    // + 18.35625 === 141.89375` vs `polygon.x` `141.89374999999998`, a
-    // ~3e-14 overlap. Not a geometry defect: xovigi is jar-exact.
-    'xovigi-85-rufa987 [15,18] polygon×text',
-    'xovigi-85-rufa987 [28,31] polygon×text',
+    // add4/merge-T3h: xovigi-85-rufa987's two touching-becomes-epsilon
+    // label/hexagon pairs (T3h) left with its pin (add4-T3h).
   ].sort();
 
   it('never introduces a HARD shape-pair overlap (both shapes occupying both axes) that was not already present before compression', () => {
