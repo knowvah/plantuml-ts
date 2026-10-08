@@ -988,30 +988,9 @@ does not record `reverseDefine` on a self message at all — `arrowConfiguration
 drops it — so the case cannot even be detected in layout yet. Every self loop
 here draws rightward.
 
-## Grouping-frame background shadow is not ported
+## ~~Grouping-frame background shadow is not ported~~ — RETIRED (unwind2-S9, 2026-10-08)
 
-`sequence-frame-background-pass` T1/D4, 2026-08-28.
-
-`ComponentRoseGroupingHeader.java:131` calls `rect.setDeltaShadow(symbolContext
-.getDeltaShadow())` inside `drawBackgroundInternalU` (`:126-133`), before
-filling the frame's background rect with the resolved fill colour. This
-port's background half (`src/diagrams/sequence/renderer-frame-header.ts`)
-omits the call.
-
-**Why left out:** every `Shadowing` default in `plantuml.skin` is 0, so
-`getDeltaShadow()` evaluates to 0 on every corpus fixture today and the
-omission has zero corpus reach — no fixture sets `skinparam shadowing true`
-or `Shadowing 1` on a `sequenceDiagram.group`/`groupHeader` element, and this
-port's own SName style cascade has no bucket for those two elements at all
-(see `sequence-group-style-cascade`, `planning/next-missions.md`), so there
-is currently no grammar path that would even reach the branch. Recorded as a
-gap rather than ported speculatively.
-
-**Affects:** any `group`/`loop`/`alt`/`opt`/`par`/`break`/`critical` frame
-under a skin/style that turns shadowing on. No corpus fixture currently
-does.
-
-**Category:** limitation.
+group/ref frames read the faithful StyleBuilder's `group`/`reference` Shadowing and draw `ComponentRoseGroupingHeader.java:131` / `ComponentRoseReference.java:89-96`'s shadow; jar fixtures in `tests/fixtures/unwind2-S9/`.
 
 ## Background-pass rollout: three fixtures read as a rise the ratchet cannot mechanically clear
 
