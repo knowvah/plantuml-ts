@@ -1,0 +1,4 @@
+@startuml
+!include <c4>
+Alice -> Bob : hi
+@enduml

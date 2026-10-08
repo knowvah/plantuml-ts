@@ -1,0 +1,4 @@
+@startuml
+!include <tupadr3/nosuchfile>
+Alice -> Bob : hi
+@enduml

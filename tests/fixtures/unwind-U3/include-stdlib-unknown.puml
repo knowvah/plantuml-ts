@@ -1,0 +1,4 @@
+@startuml
+!include <nosuchbundle/thing>
+Alice -> Bob : hi
+@enduml

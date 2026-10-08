@@ -147,23 +147,45 @@ describe('withStdlib() wiring -- IncludeExecutor consults the store before throw
     expect(lines).toEqual(['<b>hi</b>']);
   });
 
-  it('a bundle absent from the supplied store still throws StdlibNotBundledError', () => {
+  // A bundle the jar ships but the host did not supply: the jar would render
+  // it; the asset-free core cannot (packaging), so the typed remedy stays.
+  it('a jar bundle absent from the supplied store still throws StdlibNotBundledError', () => {
     const err = (() => {
       try {
-        run(['!include <other/thing>'], new MapIncludeStore(), stdlibStore(fake));
+        run(['!include <office/thing>'], new MapIncludeStore(), stdlibStore(fake));
         return undefined;
       } catch (e) {
         return e as StdlibNotBundledError;
       }
     })();
     expect(err).toBeInstanceOf(StdlibNotBundledError);
-    expect(err?.bundle).toBe('other');
+    expect(err?.bundle).toBe('office');
+  });
+
+  // unwind-U3: a bundle the JAR does not ship. `PathSystem#getInputFile` calls
+  // `Stdlib.retrieve(libname)` (PathSystem.java:196-201, from TContext.java:815),
+  // which throws an UncheckedIOException for the missing `info.spm`
+  // (Stdlib.java:166-176); `TContext#executeOneLineSafe` turns it into "Fatal
+  // parsing error" (TContext.java:374-384) --
+  // tests/fixtures/unwind-U3/include-stdlib-unknown.svg.
+  it('a bundle the jar does not ship is a "Fatal parsing error"', () => {
+    expect(() => run(['!include <other/thing>'], new MapIncludeStore(), stdlibStore(fake))).toThrow(
+      'Fatal parsing error',
+    );
+    expect(() => run(['!include <other/thing>'], new MapIncludeStore())).toThrow('Fatal parsing error');
+  });
+
+  // No `/`: `PathSystem#getInputFile`'s `full.substring(0, full.indexOf('/'))`
+  // (PathSystem.java:198) throws, and that too is a "Fatal parsing error"
+  // (tests/fixtures/unwind-U3/include-stdlib-no-slash.svg).
+  it('a bracketed path with no slash is a "Fatal parsing error"', () => {
+    expect(() => run(['!include <c4>'], new MapIncludeStore())).toThrow('Fatal parsing error');
   });
 
   it('no store at all: message is byte-for-byte the pinned StdlibNotBundledError text', () => {
     const err = (() => {
       try {
-        run(['!include <fake/thing>'], new MapIncludeStore());
+        run(['!include <tupadr3/thing>'], new MapIncludeStore());
         return undefined;
       } catch (e) {
         return e as StdlibNotBundledError;
@@ -176,14 +198,14 @@ describe('withStdlib() wiring -- IncludeExecutor consults the store before throw
     expect(err).toBeInstanceOf(StdlibNotBundledError);
     expect(err?.registrySupplied).toBe(false);
     expect(err?.message).toBe(
-      "Cannot resolve !include <fake/thing>: no stdlib bundle named 'fake' is available.\n" +
+      "Cannot resolve !include <tupadr3/thing>: no stdlib bundle named 'tupadr3' is available.\n" +
         'plantuml-ts vendors no PlantUML stdlib, so a host must supply the bundle. Either:\n' +
         '  - render(): pass options.stdlibRegistry --\n' +
-        "      stdlibRegistry({ 'fake': () => import('@knowvah/plantuml-stdlib/fake') })\n" +
+        "      stdlibRegistry({ 'tupadr3': () => import('@knowvah/plantuml-stdlib/tupadr3') })\n" +
         '  - renderSync(): it cannot await, so warm the store up first --\n' +
         '      const includeStore = await prepareIncludeStore(source, { stdlibRegistry });\n' +
-        "  - or pass options.includeStore with an entry keyed '<fake/thing>' (or " +
-        "'fake/thing') whose value is the content of that stdlib file.",
+        "  - or pass options.includeStore with an entry keyed '<tupadr3/thing>' (or " +
+        "'tupadr3/thing') whose value is the content of that stdlib file.",
     );
   });
 

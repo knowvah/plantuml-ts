@@ -35,6 +35,7 @@ import type { StringLocated } from './StringLocated.js';
 import type { TContext } from './TContext.js';
 import type { TMemory } from './TMemory.js';
 import { Sub } from './iterator/Sub.js';
+import { JAR_STDLIB_FOLDERS } from './stdlib-folders.js';
 
 /** `http://` / `https://` include target -- upstream's `SURL` branch. */
 const RE_URL = /^https?:\/\//u;
@@ -76,7 +77,7 @@ export class IncludeExecutor {
       if (strategy === PreprocessorIncludeStrategy.DEFAULT) return;
     }
 
-    const lines = readLines(this.load(what, '!include'), what, s.getLocation());
+    const lines = readLines(this.load(what, '!include', s), what, s.getLocation());
     this.filesUsedCurrent.add(what);
 
     // A file that is itself a whole `@startuml ... @enduml` document contributes
@@ -100,7 +101,9 @@ export class IncludeExecutor {
       // `TContext.java:659-661`: an `!includesub`d file's reader is wrapped in
       // `ReadFilterMergeLines` directly -- unlike `executeInclude` /
       // `executeIncludeDef` below, which are NOT (upstream never wraps those).
-      const lines = mergeEndingBackslashLines(readLines(this.load(filename, '!includesub'), filename, s.getLocation()));
+      const lines = mergeEndingBackslashLines(
+        readLines(this.load(filename, '!includesub', s), filename, s.getLocation()),
+      );
       sub = Sub.fromLines(lines, blocname, context, memory);
     }
     sub ??= this.subs.get(what);
@@ -122,7 +125,7 @@ export class IncludeExecutor {
     const include = new EaterIncludeDef(s.getTrimmed());
     include.analyze(context, memory);
     const definitionName = include.getLocation();
-    const body = readLines(this.load(definitionName, '!includedef'), definitionName, s.getLocation());
+    const body = readLines(this.load(definitionName, '!includedef', s), definitionName, s.getLocation());
     context.executeLines(memory, body, undefined, false);
   }
 
@@ -153,10 +156,13 @@ export class IncludeExecutor {
    * `StdlibNotBundledError`.
    *
    * @throws IncludeNotFoundError  the store cannot serve `what`.
-   * @throws StdlibNotBundledError `what` is the `<bundle/thing>` stdlib form and
-   *                               no host bundle/store resolves it.
+   * @throws EaterException        an `!include <bundle/thing>` miss the jar
+   *                               itself reports -- see {@link throwJarStdlibMiss}.
+   * @throws StdlibNotBundledError `what` is the `<bundle/thing>` stdlib form, the
+   *                               jar ships that bundle, and no host bundle/store
+   *                               resolves it.
    */
-  private load(what: string, directive: string): string {
+  private load(what: string, directive: string, s: StringLocated): string {
     const direct = this.store.get(what);
     if (direct !== undefined) return direct;
 
@@ -171,11 +177,38 @@ export class IncludeExecutor {
       const bundled = this.store.getPumlResource?.(stdlib);
       if (bundled !== undefined) return bundled;
 
+      if (directive === '!include') throwJarStdlibMiss(stdlib, s);
       throw new StdlibNotBundledError(what, stdlib);
     }
 
     throw new IncludeNotFoundError(what, directive);
   }
+}
+
+/**
+ * The `!include <...>` misses whose jar output does not depend on which assets
+ * a host supplied, mirrored exactly. Before any reader exists,
+ * `TContext#executeInclude` calls `PathSystem#getInputFile(what)`
+ * (`TContext.java:815`), which lowercases the path, cuts the folder name at the
+ * first `/` and calls `Stdlib.retrieve(libname)` (`PathSystem.java:196-201`).
+ * Both failures escape as unchecked exceptions -- `substring(0, -1)` when there
+ * is no `/`, and `Stdlib.retrieve`'s `UncheckedIOException` for a folder the
+ * jar does not ship (`Stdlib.java:166-176`) -- and `executeOneLineSafe` turns
+ * either into `Fatal parsing error` (`TContext.java:374-384`). Jar fixtures:
+ * tests/fixtures/unwind-U3/include-stdlib-{unknown,no-slash}.svg.
+ *
+ * Only reached once the store has missed: a host's exact-key entry or bundle
+ * wins first (the port's include seam), where the jar would fail regardless.
+ * Returns -- and the caller throws `StdlibNotBundledError` -- for a folder the
+ * jar DOES ship: the jar then either renders the include or reports `cannot
+ * include <what>` (`TContext.java:885`) for a file the folder lacks, and an
+ * asset-free core that was not handed the bundle cannot tell those apart.
+ */
+function throwJarStdlibMiss(stdlib: string, s: StringLocated): void {
+  const full = stdlib.toLowerCase();
+  const slash = full.indexOf('/');
+  if (slash === -1 || !JAR_STDLIB_FOLDERS.has(full.substring(0, slash)))
+    throw new EaterException('Fatal parsing error', s);
 }
 
 /**

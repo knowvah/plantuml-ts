@@ -118,3 +118,31 @@ describe('unwind-U3 divergence 2: %newline()/%breakline() BLOCK_E1 sentinels', (
     expectLikeJar('newline-uppercase-literal', 'texts');
   });
 });
+
+describe('unwind-U3 divergence 3: `!include <bundle/thing>` misses', () => {
+  // An unknown bundle: `PathSystem#getInputFile` calls `Stdlib.retrieve`
+  // before any reader exists (PathSystem.java:196-201, TContext.java:815); the
+  // missing `info.spm` escapes as an UncheckedIOException (Stdlib.java:166-176)
+  // and `executeOneLineSafe` raises `EaterException("Fatal parsing error", s)`
+  // (TContext.java:374-384). No `/` fails the same way, one line earlier
+  // (`substring(0, -1)`, PathSystem.java:198).
+  it('an unknown bundle is the jar\'s "Fatal parsing error" page', () => {
+    expectLikeJar('include-stdlib-unknown', 'errorMessage');
+  });
+
+  it('a bracketed path with no slash is the same "Fatal parsing error" page', () => {
+    expectLikeJar('include-stdlib-no-slash', 'errorMessage');
+  });
+
+  // KNOWN RESIDUAL: a folder the jar ships, file missing. The jar says
+  // `cannot include <what>` (TContext.java:885); the port cannot tell "bundle
+  // supplied, file missing" from "bundle not supplied" through the public
+  // `StdlibStore` (getPumlResource only), so it keeps `StdlibNotBundledError`.
+  it.fails('a missing file in a jar folder is "cannot include <what>"', () => {
+    expectLikeJar('include-stdlib-missing-file', 'errorMessage');
+  });
+
+  it('a bundled stdlib include renders the diagram', () => {
+    expectLikeJar('include-stdlib-bundled', 'texts');
+  });
+});
