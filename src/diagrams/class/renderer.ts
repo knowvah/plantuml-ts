@@ -191,7 +191,10 @@ export function renderClass(geo: ClassGeometry, rawTheme: Theme): RenderFragment
   // function so every existing read below (colors, `monochrome`,
   // `shadowing`, every internal call) picks up the scaled value with no
   // further changes.
-  const theme = scaleClassTheme(rawTheme, geo.scaleK ?? 1);
+  // unwind2-S11: the layout's `sprite` map rides `Theme#sprites`, as
+  // `layoutClass` laid it out (a cluster title's `<$sprite>`).
+  const skinTheme = geo.sprites === undefined ? rawTheme : { ...rawTheme, sprites: geo.sprites };
+  const theme = scaleClassTheme(skinTheme, geo.scaleK ?? 1);
   // G2 N61: `skinparam monochrome true|reverse` applies to the document
   // background too (jar's `ColorMapper` is universal, not scoped to
   // entity/link colors) -- transformed HERE so every downstream reader of

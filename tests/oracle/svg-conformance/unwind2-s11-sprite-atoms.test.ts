@@ -38,6 +38,11 @@ const CASES: readonly (readonly [string, string])[] = [
   [S11, 'st-hide-empty'],
   [S11, 'st-composite'],
   [S11, 'st-note'],
+  [S7, 'c-package-title'],
+  [S11, 'c-package-color'],
+  [S11, 'c-package-rect'],
+  [S11, 'c-package-stereo-title'],
+  [S11, 'c-package-empty'],
 ];
 
 describe('unwind2-S11: sprite atoms in text paths draw as the jar', () => {

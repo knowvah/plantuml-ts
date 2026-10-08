@@ -198,7 +198,9 @@ export function renderNamespaceFolder(geo: NamespaceGeo, theme: ScaledTheme, mea
     geo.label.length > 0 ? geo.wtitle - (MARGIN_TITLE_X1 + MARGIN_TITLE_X2) * theme.scaleK - vis.dx : undefined;
   const titleX = geo.x + TITLE_X_OFFSET * theme.scaleK + vis.dx;
   const label = renderNamespaceTitleAuto(
-    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    // unwind2-S11: `symbolContext.apply(ug)` precedes the title draw
+    // (`USymbolFolder.java:224,228-229`) -- a sprite's tint back.
+    { label: geo.label, theme, measurer, blockTopY: geo.y + TITLE_LOCAL_TOP_OFFSET * theme.scaleK, back: fill },
     {
       x: titleX,
       y: geo.y + geo.baselineOffset,
@@ -270,7 +272,13 @@ export function renderNamespaceRect(geo: NamespaceGeo, theme: ScaledTheme, measu
   // rawTextWidth) / 2`), matching `mucuxi-36-beku683`'s own citation above
   // for a markup-free, single-line label.
   const label = renderNamespaceTitleAuto(
-    { label: geo.label, theme, measurer, blockTopY: geo.y + stereo.height + TITLE_LOCAL_TOP_OFFSET * theme.scaleK },
+    {
+      label: geo.label,
+      theme,
+      measurer,
+      blockTopY: geo.y + stereo.height + TITLE_LOCAL_TOP_OFFSET * theme.scaleK,
+      back: fill, // `USymbolRectangle#asBig`, the same `symbolContext.apply(ug)`
+    },
     {
       x: geo.x + posTitle + vis.dx,
       y: geo.y + stereo.height + geo.baselineOffset,

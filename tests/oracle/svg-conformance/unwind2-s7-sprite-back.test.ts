@@ -91,6 +91,12 @@ const EXACT: readonly (readonly [string, string])[] = [
   [S11, 'st-hide-empty'], // EntityImageStateEmptyDescription#drawU applyColor
   [S11, 'st-composite'], // the composite title
   [S11, 'st-note'], // Opale.java:107 -- #FEFFDD
+  // unwind2-S11: cluster titles resolve `<$sprite>` through `Theme#sprites`.
+  [S7, 'c-package-title'], // USymbolFolder.java:224,228-229 -- no fill: white
+  [S11, 'c-package-color'], // #pink cluster fill
+  [S11, 'c-package-rect'], // USymbolRectangle#asBig
+  [S11, 'c-package-stereo-title'],
+  [S11, 'c-package-empty'], // EntityImageEmptyPackage, the leaf fill
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -118,7 +124,7 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['c-edge', 'c-package-title', 's-group', 's-message', 's-note'])('%s: not yet drawn by the port', (name) => {
+  it.each(['c-edge', 's-group', 's-message', 's-note'])('%s: not yet drawn by the port', (name) => {
     expect(jar(S7, name).length).toBe(1);
     expect(ours(S7, name)).toEqual([]);
   });
