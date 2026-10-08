@@ -1,0 +1,12 @@
+@startuml
+skin rose
+<style>
+root {
+  BackgroundColor #FFCC00
+  LineColor #0000FF
+}
+</style>
+start
+:Hello;
+stop
+@enduml

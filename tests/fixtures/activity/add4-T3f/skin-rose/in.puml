@@ -1,0 +1,6 @@
+@startuml
+skin rose
+start
+:Hello;
+stop
+@enduml

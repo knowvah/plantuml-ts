@@ -1,0 +1,7 @@
+@startuml
+skinparam ActivityStartColor #FF0000
+skinparam ActivityStopColor #00FF00
+start
+:Hello;
+stop
+@enduml

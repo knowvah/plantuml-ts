@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1407 modules · 5310 exported names.
+1408 modules · 5315 exported names.
 
 ## `src/`
 
@@ -21,6 +21,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
+| `activity-circle-style.ts` | `ActivityCircleColors`, `ActivityCircleStyle`, `ActivityCircleStyleSource`, `resolveActivityCircleStyle`, `withActivityCircleStyle` | The activity start/stop circles' merged-style colours (mission add4, T3f, `labala-74-juki864`). |
 | `arrow-label-font.ts` | `ARROW_LABEL_DEFAULT_COLOR`, `ArrowLabelFont`, `resolveArrowLabelFont`, `resolveCardinalityFontColor`, `resolveCardinalityFont` | D3: the arrow-label font resolver -- `GraphvizImageBuilder.java:234-235` (`getDefaultStyleDefinitionArrow(stereotype).getMergedStyle(...) .getFontConfiguration(...)`), upstream's `labelFont` argument to `SvekEdge`'s constructor. |
 | `assemble-svg-activity.ts` | `finalizeActivityFragment` | Activity's per-diagram body finalization — split out of `assemble-svg.ts` (T2d-a pass 2, 500-line hook) to make room for the DOCGRAD gradient background branch. |
 | `assemble-svg.ts` | `assembleSvg`, `seedOfUmlSource` | The single central document-assembly choke point — extracted from `src/index.ts` (mission A5 / T4), which sits at the repo's 500-line hook cap. |

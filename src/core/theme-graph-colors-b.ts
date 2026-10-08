@@ -6,6 +6,7 @@
  */
 
 import type { Paint } from './paint.js';
+import type { ActivityCircleStyle } from './activity-circle-style.js';
 
 export interface ThemeGraphColorsB {
   /** G2 N66: `EntityImageNote`'s OWN `Style#wrapWidth` cascade -- a
@@ -392,6 +393,9 @@ export interface ThemeGraphColorsB {
     startColor?: string; // ActivityStartColor — filled start circle
     endColor?: string; // ActivityEndColor — end/terminate circle
     circleInk?: string; // T2d-a: circle LineColor, dark-seeded only (see skinparam-accumulator.ts)
+    // add4-T3f: the start/stop circles' MERGED-style colours, priority-
+    // ordered (`activity-circle-style.ts`); set by `build-theme.ts`.
+    circleStyle?: ActivityCircleStyle;
     // D4 amendment (T1, 2026-09-09): SwimlaneBorderColor ->
     // PName.LineColor -- lane divider stroke.
     // `FromSkinparamToStyle.java:161`.
