@@ -43,7 +43,7 @@ import {
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import { sequenceCreoleFont, sequenceCreoleRuns, sequenceLineWidth } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -355,7 +355,7 @@ function computeTotalWidth(
   for (const geo of eventGeos) {
     if (geo.kind !== 'message') continue;
     const labelText = geo.sequenceNumber !== undefined ? `${geo.sequenceNumber}: ${geo.label}` : geo.label;
-    const labelWidth = measurer.measure(labelText, fontSpec).width;
+    const labelWidth = sequenceLineWidth(labelText, fontSpec, measurer);
     const midX = geo.arrowDirection === 'self' ? geo.fromX + 20 : (geo.fromX + geo.toX) / 2;
     const labelRightEdge = midX + labelWidth / 2 + RIGHT_MARGIN;
     if (labelRightEdge > totalWidth) {

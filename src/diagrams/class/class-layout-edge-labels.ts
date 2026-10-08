@@ -20,6 +20,9 @@ import { isBareMagicArrowLabel } from './class-magic-arrow.js';
 // to `class-edge-label-measure.ts` (500-line hook cap) -- a pure move, see
 // that file's own doc comment for the split rationale/precedent.
 import { computeMeasuredLabelAttrs } from './class-edge-label-measure.js';
+// unwind2-S3: every link-label line is one `AtomText` run, so its width is
+// the tab-stop walk (`AtomText.java:239-256`), never a raw measure.
+import { tabStopMeasurer } from '../../core/klimt/creole/legacy/AtomText.js';
 // T10: the note operand's REAL dimension -- `EntityImageNoteLink` builds a
 // `ComponentRoseNote`, a DIFFERENT upstream component from the one
 // `measureNote` models -- see `class-note-link-box.ts`'s own doc comment for
@@ -439,8 +442,12 @@ export function edgeLabelAttrs(
     // upstream's `dimNote.delta(2 * labelShield)` at `:441` runs on `dimNote`
     // regardless of which ternary arm (`hasNoteLabelText()` vs
     // `CONSTRAINT_SPOT`) produced it.
-    ...withLabelShield(withLabelMargin(computeRelLabelAttrs(rel, font, measurer, noteCtx), rel, noteCtx), rel, noteCtx),
-    ...computeMultiplicityAttrs(rel, cardinalityFont, measurer),
+    ...withLabelShield(
+      withLabelMargin(computeRelLabelAttrs(rel, font, tabStopMeasurer(measurer), noteCtx), rel, noteCtx),
+      rel,
+      noteCtx,
+    ),
+    ...computeMultiplicityAttrs(rel, cardinalityFont, tabStopMeasurer(measurer)),
   });
 }
 

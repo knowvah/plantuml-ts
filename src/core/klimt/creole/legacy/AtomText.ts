@@ -66,6 +66,7 @@
  */
 
 import { getSpace, type FontConfiguration } from '../../shape/UText.js';
+import type { FontSpec, StringMeasurer } from '../../../measurer.js';
 
 /** Upstream `AtomText#getStartingAltitude(StringBounder)` (java:321-323) —
  *  a straight `return fontConfiguration.getSpace()`, i.e. the run's
@@ -166,6 +167,86 @@ export function tokenizeOnTabs(text: string): TabToken[] {
 export function tabStringFor(nb: number): string {
   return nb >= 1 && nb < 7 ? TAB_STRING.slice(0, nb) : TAB_STRING;
 }
+
+/** One `<text>` `AtomText#drawU` emits for a run: a non-tab token, its `x`
+ *  offset from the RUN's own start, and its own measured width. */
+export interface TabTokenPlacement {
+  readonly text: string;
+  readonly x: number;
+  readonly width: number;
+}
+
+/** {@link layoutTabbedText}'s result: the drawn tokens and the run's width
+ *  (`#getWidth`, java:239-256 — the `x` after the LAST token, so a trailing
+ *  tab still widens the run). */
+export interface TabbedTextLayout {
+  readonly tokens: readonly TabTokenPlacement[];
+  readonly width: number;
+}
+
+/**
+ * Upstream `AtomText#drawU`'s tokenizer walk (java:210-231) and `#getWidth`
+ * (java:239-256) in one pass: `x` starts at 0 INSIDE the run, a tab (or
+ * `BLOCK_E1_REAL_TABULATION`) advances to the next stop and draws nothing,
+ * every other token draws at `x` and advances by its measured width. A
+ * tab-free run is one token at `x = 0` (an empty run is none) — the same
+ * single `<text>` every caller drew before. `TileText#drawU`/`#getWidth`
+ * (`klimt/shape/TileText.java:94-140`) is the identical walk.
+ *
+ * `nb` is `FontConfiguration#getTabSize()` ({@link tabStringFor}); `fontSize`
+ * and `measure` must be bound to the run's MUTED font (module doc comment).
+ */
+export function layoutTabbedText(
+  text: string,
+  fontSize: number,
+  measure: (s: string) => number,
+  nb: number = DEFAULT_TAB_SIZE_NB,
+): TabbedTextLayout {
+  if (!hasTabulation(text)) {
+    const width = measure(text);
+    return { tokens: text.length === 0 ? [] : [{ text, x: 0, width }], width };
+  }
+  const tabStop = tabStopWidth(measure(tabStringFor(nb)), fontSize);
+  const tokens: TabTokenPlacement[] = [];
+  let x = 0;
+  for (const token of tokenizeOnTabs(text)) {
+    if (token.isTab) {
+      x = advanceToTabStop(x, tabStop);
+      continue;
+    }
+    const width = measure(token.text);
+    tokens.push({ text: token.text, x, width });
+    x += width;
+  }
+  return { tokens, width: x };
+}
+
+/**
+ * `measurer` with every width taken through `AtomText#getWidth`
+ * (java:239-256) — for a seam whose strings are each ONE plain-text run (a
+ * stripped link-label line), where a raw `measure` would size a tab at the
+ * width table's 0. Heights and descents are the wrapped measurer's own: the
+ * tab walk only moves `x` (`AtomText.java:176-184` takes `h` off the whole
+ * text). A tab-free string measures byte-identically.
+ */
+export function tabStopMeasurer(measurer: StringMeasurer): StringMeasurer {
+  return {
+    measure(text: string, font: FontSpec): { width: number; height: number } {
+      const dim = measurer.measure(text, font);
+      if (!hasTabulation(text)) return dim;
+      return { width: atomTextWidth(text, font.size, (s) => measurer.measure(s, font).width), height: dim.height };
+    },
+    getDescent(font: FontSpec, text: string): number {
+      return measurer.getDescent(font, text);
+    },
+  };
+}
+
+/** `SkinParam#getTabSize()`'s default (`skin/SkinParam.java:1096-1097`,
+ *  `getAsInt("tabsize", 8)`), also the `8` the 4-argument
+ *  `FontConfiguration.create` hardcodes (`klimt/font/FontConfiguration.java:
+ *  229-232`). */
+const DEFAULT_TAB_SIZE_NB = 8;
 
 /**
  * Width of one creole text run, expanding tabulations to tab stops —

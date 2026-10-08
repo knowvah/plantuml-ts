@@ -1,0 +1,9 @@
+@startuml
+class Foo {
+  a\tb
+  +field\t: int
+  x\t\ty
+  longername\tz
+  ab\tcd\tef
+}
+@enduml

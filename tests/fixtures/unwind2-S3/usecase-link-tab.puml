@@ -1,0 +1,5 @@
+@startuml
+rectangle A
+rectangle B
+A --> B : x\ty
+@enduml

@@ -56,6 +56,7 @@ import {
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
 import type { ClassGeometry, ClassLeafGeo } from './class-geo-types.js';
+import { tabStopMeasurer } from '../../core/klimt/creole/legacy/AtomText.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
 export {
@@ -340,7 +341,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
     inNodeMapOrder(result, dotGraph), // cdd3-T16: `Bibliotekon#allNodes`
     swappedEdges,
     {
-      measurer,
+      // unwind2-S3: link-label lines are `AtomText` runs -- tab-stop widths.
+      measurer: tabStopMeasurer(measurer),
       labelFont: resolveArrowLabelFont(theme),
       fontFamily: theme.fontFamily,
       // cdd-T6 (A2a/M2): the SAME `skinparam classAttributeIconSize`

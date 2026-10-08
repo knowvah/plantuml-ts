@@ -1,0 +1,8 @@
+@startuml
+Alice -> Bob : hi
+note left of Alice : a\tb
+note right of Bob
+  first\tsecond
+  x\t\ty
+end note
+@enduml

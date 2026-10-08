@@ -1,0 +1,3 @@
+@startuml
+S1 --> S2 : x\ty
+@enduml

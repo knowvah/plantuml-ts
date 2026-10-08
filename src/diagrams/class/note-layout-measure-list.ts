@@ -29,7 +29,9 @@ export function buildPlainRows(rawLine: string, ctx: NoteLineBuildContext): Note
   const builds =
     maxWidth > 0
       ? buildWrappedMemberRows(ln, {}, fontSpec, measurer, maxWidth, sprites)
-      : [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites)];
+      : // A note line is `AtomText` runs like a member row (`Opale` draws a
+        // `create8` sheet), so a tab advances to the next stop -- unwind2-S3.
+        [resolveMemberAtoms(buildMemberAtoms(ln, font), font, measurer, sprites, true)];
   return builds.map((build) => ({
     text: builds.length === 1 ? ln : atomsToPlainText(build.atoms),
     width: build.width,

@@ -302,6 +302,9 @@ function buildCellLines(
       cellFont,
       ctx.measurer,
       ctx.sprites,
+      // A cell line is `AtomText` runs too: tabs advance to the next stop
+      // (`AtomText.java:210-256`) -- unwind2-S3.
+      true,
     );
     built.push({ y: h, atoms: build.atoms, width: build.width, align });
     w = Math.max(w, build.width);

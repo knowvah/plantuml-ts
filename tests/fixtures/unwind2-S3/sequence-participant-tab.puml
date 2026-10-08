@@ -1,0 +1,5 @@
+@startuml
+participant "a\tb" as A
+participant "longer\tc" as B
+A -> B : m
+@enduml

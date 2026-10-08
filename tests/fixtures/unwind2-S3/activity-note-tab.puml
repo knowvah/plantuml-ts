@@ -1,0 +1,9 @@
+@startuml
+start
+:act;
+note right
+  a\tb
+  longer\tc
+end note
+stop
+@enduml

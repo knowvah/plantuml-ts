@@ -1,0 +1,7 @@
+@startuml
+start
+:a\tb;
+:longer text\tx\ty;
+:line one\nab\tcd;
+stop
+@enduml

@@ -1,0 +1,5 @@
+@startuml
+Alice -> Bob : a\tb\tc
+Bob -> Alice : longer text\tx
+Alice -> Bob : one\ntwo\tthree
+@enduml

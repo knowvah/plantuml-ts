@@ -46,6 +46,7 @@ import { messageTileAdvance } from './sequence-layout-message.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
+import { sequenceLineWidth } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -135,7 +136,8 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): n
   const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
   const lines = event.label === '' ? [] : event.label.split('\n');
-  const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => ctx.measurer.measure(l, fontSpec).width));
+  const labelWidth =
+    lines.length === 0 ? 0 : Math.max(...lines.map((l) => sequenceLineWidth(l, fontSpec, ctx.measurer)));
   return numberWidth + gap + labelWidth;
 }
 

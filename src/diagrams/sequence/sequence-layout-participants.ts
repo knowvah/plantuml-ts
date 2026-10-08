@@ -25,6 +25,7 @@ import {
   visibleStereotypeLines,
   type ParticipantLayoutCtx,
 } from './sequence-layout-participant-label.js';
+import { sequenceLineWidth } from './sequence-creole.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -123,7 +124,8 @@ function scanMessageLabels(
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
         const lines = ev.label === '' ? [] : displayLines(ev.label);
-        const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => measurer.measure(l, arrowSpec).width));
+        const labelWidth =
+          lines.length === 0 ? 0 : Math.max(...lines.map((l) => sequenceLineWidth(l, arrowSpec, measurer)));
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),

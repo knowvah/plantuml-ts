@@ -1,0 +1,6 @@
+@startuml
+class "a\tb" as A
+note as N
+| c\td | e |
+end note
+@enduml
