@@ -26,13 +26,13 @@ import type {
   SpaceGeo,
   TextRun,
 } from './ast.js';
-import type { Theme } from '../../core/theme.js';
-import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
+import type { FontSpec } from '../../core/measurer.js';
 import { noteFontSpecOf } from './sequence-layout-shared.js';
 import { DIVIDER_PADDING, DIVIDER_LABEL_DELTA_X, dividerFontSpecOf, dividerPreferredHeight } from './divider-style.js';
 import { NEWPAGE_TILE_HEIGHT } from './newpage-style.js';
 import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpecOf } from './text-block-geo.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import type { MessageLabelEnv } from './text-block-geo.js';
+import { offsetRun, sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { layoutDelay } from './sequence-delay.js';
 import type { MessageLevels } from './sequence-layout-participants.js';
@@ -73,9 +73,7 @@ export type ActivationStack = Map<string, ActivationRecord[]>;
  * nested frame branches recurse through the same participant geometry and
  * pending-activation records.
  */
-export interface EventProcessingContext {
-  theme: Theme;
-  measurer: StringMeasurer;
+export interface EventProcessingContext extends MessageLabelEnv {
   participantMap: Map<string, ParticipantGeo>;
   participantIndex: Map<string, number>;
   activationStart: ActivationStack;
@@ -207,20 +205,17 @@ function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProces
   // `textBlock.calculateDimension` plus the padding (`AbstractTextualComponent
   // .java:100-108`) over the block `create0` built (`:89-92`), so `<b>bold</b>`
   // reserves the width of `bold` (jar: `moxope-92-roco972`).
-  const rows = noteBodyRuns(lines, fontSpec, ctx);
+  const rows = noteBodyRuns(lines, fontSpec, ctx, event.color ?? ctx.theme.colors.noteBackground);
   const noteWidth = blockWidthOf(rows) + notePadding * 2;
   // The DRAWN box is `getTextHeight` tall -- the block plus `padding.top` and
-  // `padding.bottom`, both 5 (`ComponentRoseNote:67-70,104-118`). This port
-  // used the x padding (10) on both axes, making every note box 10 too tall.
+  // `padding.bottom`, both 5 (`ComponentRoseNote:67-70,104-118`).
   const noteHeight = lines.length * lineHeight + NOTE_PADDING_Y * 2;
-
   // And the box is drawn `getPaddingY` BELOW the tile top -- `Rose.paddingY`
   // = 5, handed to the component at `Rose:115` and applied by
-  // `AbstractComponent#drawU:142-143`. On `metano-36-gevu843` the jar's box is
-  // at y=52 against a tile top of 47.
+  // `AbstractComponent#drawU:142-143` (`metano-36-gevu843`: y=52, tile 47).
   const noteGeo = buildNoteGeo(event, noteWidth, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
   const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
-  noteGeo.textRuns = rows.map((r) => ({ ...r, x: r.x + dx, y: r.y + dy }));
+  noteGeo.textRuns = rows.map((r) => offsetRun(r, dx, dy));
   ctx.eventGeos.push(noteGeo);
   // `NoteTile#getPreferredHeight:167-171` is the component's height and
   // nothing else -- no spacing either side -- and that is `getTextHeight +
@@ -884,19 +879,18 @@ function buildNoteGeo(
  *
  * `ComponentRoseNoteBox#drawInternalU` draws the block at
  * `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` (`:105`) — LEFT-aligned
- * inside the box, not centred, which is what this port had been doing with a
- * `text-anchor="middle"`. `diffX` is the slack when the drawn area is wider
- * than the component's preferred width; this port sizes the box to the text, so
- * it is 0 and the block sits at the padding. Relative rather than absolute
- * because the box's own x derives FROM this block's width
- * (`handleNoteEvent`): the caller adds the origin and padding once it has them.
- * Each entry is one line — a note's `\n` split already happened upstream. */
-function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext): readonly TextRun[] {
+ * inside the box. `diffX` is the slack when the drawn area is wider than the
+ * component's preferred width; this port sizes the box to the text, so it is 0.
+ * Relative because the box's own x derives FROM this block's width
+ * (`handleNoteEvent`). `back` is the note fill the component applies before
+ * drawing the text (`ComponentRoseNote.java:121,136`), a sprite's tint start. */
+function noteBodyRuns(lines: readonly string[], spec: FontSpec, ctx: EventProcessingContext, back: string) {
   const font = sequenceCreoleFont(spec);
   const lineHeight = ctx.measurer.measure('M', spec).height;
   const ascent = lineHeight - ctx.measurer.getDescent(spec, 'M');
+  const atoms = sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, back);
   return lines.flatMap((l, i) =>
-    sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer),
+    sequenceCreoleRuns(l, font, { leftX: 0, baselineY: ascent + i * lineHeight }, ctx.measurer, atoms),
   );
 }
 

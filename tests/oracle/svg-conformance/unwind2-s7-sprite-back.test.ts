@@ -67,6 +67,11 @@ const EXACT: readonly (readonly [string, string])[] = [
   [U4, 's1-seq-participant'],
   [S7, 's-participant-color'],
   [S7, 's-actor'],
+  // unwind2-S10: an arrow label is drawn on no `Back` (white,
+  // `ComponentRoseArrow.java:179`, `SpriteMonochrome.java:181-182`); a note
+  // body on the note fill (`ComponentRoseNote.java:121,136`) -- #FEFFDD.
+  [S7, 's-message'],
+  [S7, 's-note'],
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -78,7 +83,7 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-group', 's-message', 's-note', 'st-state'])(
+  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-group', 'st-state'])(
     '%s: not yet drawn by the port',
     (name) => {
       expect(jar(S7, name).length).toBe(1);

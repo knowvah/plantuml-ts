@@ -25,7 +25,8 @@ import {
   visibleStereotypeLines,
   type ParticipantLayoutCtx,
 } from './sequence-layout-participant-label.js';
-import { sequenceLineWidth } from './sequence-creole.js';
+import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 /**
  * The playing space's left border — where the participant row starts, and
@@ -63,7 +64,7 @@ export function computeParticipantLayout(
 ): ParticipantLayoutResult {
   const sortedParticipants = [...ast.participants].sort((a, b) => a.order - b.order);
   const constraints: SpanConstraint[] = [];
-  scanMessageLabels(ast.events, sortedParticipants, { theme, measurer, levels }, constraints);
+  scanMessageLabels(ast.events, sortedParticipants, { theme, measurer, levels, sprites: ast.sprites }, constraints);
 
   const ctx: ParticipantLayoutCtx = { theme, measurer, sprites: ast.sprites };
   const participantWidths = computeParticipantWidths(sortedParticipants, ctx);
@@ -122,6 +123,7 @@ interface ScanContext {
   readonly theme: Theme;
   readonly measurer: StringMeasurer;
   readonly levels: MessageLevels | undefined;
+  readonly sprites: SpriteRegistry | undefined;
 }
 
 /**
@@ -152,14 +154,14 @@ function scanMessageLabels(
 ): void {
   const { theme, measurer } = scan;
   const arrowSpec = arrowFontSpecOf(theme);
+  const atoms = sequenceAtomContext(scan.sprites, theme.colors.text);
   for (const ev of events) {
     if (ev.kind === 'message' && ev.from !== ev.to) {
       const fi = sortedParticipants.findIndex((p) => p.id === ev.from);
       const ti = sortedParticipants.findIndex((p) => p.id === ev.to);
       if (fi >= 0 && ti >= 0 && fi !== ti) {
         const lines = ev.label === '' ? [] : displayLines(ev.label);
-        const labelWidth =
-          lines.length === 0 ? 0 : Math.max(...lines.map((l) => sequenceLineWidth(l, arrowSpec, measurer)));
+        const labelWidth = sequenceLabelBlockWidth(lines, arrowSpec, measurer, atoms);
         out.push({
           from: Math.min(fi, ti),
           to: Math.max(fi, ti),
