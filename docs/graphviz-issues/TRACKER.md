@@ -540,3 +540,12 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         order-sensitivity E3.md recorded as a MEDIUM-confidence lead does
         not hold today -- measurement recorded here, no issue filed. -->
 - [ ] 27-parser-accepts-node-brace-block.md  <!-- FILED 2026-10-08 (unwind-U2): `node { shape=box }` parses in dot-engine 1.6.1, graphviz rejects; also peggy vs yacc error text on invalid DOT. -->
+- [ ] 28-flat-nonadjacent-edge-ignores-splines-polyline-line.md  <!-- FILED 2026-10-08 (lgm-T0c): flat edge across a non-neighbour ignores splines=polyline/line (routesplines used); deroxu-29-gude369. -->
+- [ ] 29-ortho-self-loop-edge-lost.md  <!-- FILED 2026-10-08 (lgm-T0c): `splines=ortho; a->a` loses the loop ("lost a a edge"), real draws it; xagonu-36-sudi116. -->
+- [ ] 30-flat-adjacent-edge-pair-with-port-endpoint-offset.md  <!-- FILED 2026-10-08 (lgm-T0c): adjacent flat edge pair with one port: port-less edge endpoints off ~0.2px; sokevu-87-toce485, repoge-41-demu604. -->
+- [~] 31-routing-failure-lost-edge-exit-status.md  <!-- FILED 2026-10-08 (lgm-T0c): zuduxu-90-kosi876 / rubebe-45-sura795 "rejected" by dot only via exit 1 (Pshortestpath failed, edges lost identically); same SVG, not the issue-27 class. -->
+- [ ] 32-adjacent-flat-parallel-labelled-edges-mirrored-detour.md  <!-- FILED 2026-10-08 (lgm-T0c): makeSimpleFlatLabels detour edge is the x-mirror of real; zosuje-43-zebi775, bamami-10-lava790, bobixe-18-riza923, pugodi-27-kone040, rufopi-30-roro642. Same family as 23. -->
+- [ ] 33-parallel-labelled-edges-second-edge-bend-position.md  <!-- FILED 2026-10-08 (lgm-T0c): parallel labelled non-flat edges, second edge's Bezier join at other label-box end; xenusu-76-sabi405. -->
+- [ ] 34-html-table-border-emitted-before-cells.md  <!-- FILED 2026-10-08 (lgm-T0c): 16.1.0 draws table border before cells, dot-engine after (matches 15.0 source); order-only; seen in rubebe-45-sura795. -->
+- [ ] 35-narrow-edge-label-parallel-edges-layout-offset.md  <!-- FILED 2026-10-08 (lgm-T0c): narrow-label parallel edges put nodes at fractional x in real, integer in dot-engine (0.226px); no fixture isolates it. -->
+  <!-- 23 ALSO SEEN 2026-10-08 (lgm-T0c): nugecu-04-tona107 minimises to this mechanism; related 32, 33. -->

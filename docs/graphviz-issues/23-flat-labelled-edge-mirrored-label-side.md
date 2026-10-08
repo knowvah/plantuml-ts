@@ -71,3 +71,11 @@ into `routesplines`'s own box-to-box search.
 geometrically valid path around the label, and any compensation here would
 be fitting a tie-break the engine should resolve the same way real graphviz
 does.
+
+**Also seen in (lgm-T0c, 2026-10-08):** `class/nugecu-04-tona107` minimises to
+this mechanism (flat labelled edge + a second flat edge into the same node;
+mirror sums verified). The same mirrored-detour symptom occurs in the
+adjacent-pair function (issue 32: zosuje, bamami/bobixe/pugodi/rufopi) and
+possibly the multi-edge corridor (issue 33: xenusu). Shared hypothesis: tie in
+`lib/pathplan/route.c#reallyroutespline`'s strict-`>` split-vertex choice on
+polylines symmetric about the label box (unconfirmed).
