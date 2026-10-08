@@ -296,9 +296,9 @@ interface VerticalTotals {
  * between the lifeline end and an actor/database foot; upstream's tail
  * component puts the label above its own stickman INSIDE its own height
  * (`LivingSpaces#drawHeads:135-141`) and reserves nothing extra, which is why
- * `footerShapeY` is now just `lifelineEndY`. `renderFooterBox` already draws
- * from `lifelineEndY` and derives each kind's glyph offset itself, so the
- * field survives only for `sequence-page.ts`/`scale-geo.ts`.
+ * `footerShapeY` (the foot row's top) equals `lifelineEndY` here. The two
+ * separate only per page, in `sequence-page.ts`, where upstream's clip lets
+ * the lifelines run one pixel past the foot row's top.
  */
 function computeVerticalTotals(maxParticipantHeight: number, currentY: number, showFootbox: boolean): VerticalTotals {
   const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;

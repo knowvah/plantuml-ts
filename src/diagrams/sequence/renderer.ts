@@ -432,7 +432,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
-      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledTheme));
+      children.push(renderFooterBox(p, scaledGeo.footerShapeY, scaledTheme));
     }
   }
 

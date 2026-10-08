@@ -68,9 +68,21 @@ export interface SequenceGeometry {
    * layout about where the body begins.
    */
   headHeight: number;
+  /**
+   * Where every lifeline (and its hover rect) stops. Upstream draws the
+   * lifelines over the WHOLE diagram (`livingSpaces.drawLifeLines(ugBody,
+   * fullHeight, context)`, `PlayingSpaceWithParticipants.java:221`) and lets
+   * the page's `UClip` trim them (`:213-216`), so on a `newpage` page this is
+   * the clip's bottom edge, `pageHeight + 1` below the page top, and NOT the
+   * footbox row's top -- see `footerShapeY`.
+   */
   lifelineEndY: number;
-  /** Y where non-rectangular footer shapes (actor, database) start.
-   *  Equals lifelineEndY + label-zone height so the label appears above the shape. */
+  /**
+   * The top of the footbox row: `UTranslate.dy(pageHeight + headHeight)`
+   * (`PlayingSpaceWithParticipants.java:225-226`). Equal to `lifelineEndY`
+   * except on a `newpage` page that is not the last, where the clip's `+ 1`
+   * leaves the lifelines one pixel BELOW it.
+   */
   footerShapeY: number;
   /** Background rectangles for box groups (rendered at z=0, behind lifelines). */
   boxes: BoxGeo[];

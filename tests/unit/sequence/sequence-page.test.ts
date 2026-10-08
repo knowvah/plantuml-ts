@@ -178,13 +178,18 @@ describe('page list', () => {
 
 describe('band and totals', () => {
   /** Page 0 of a two-page document: band `[headHeight, tile.y + 21 + 1]`,
-   *  no translation, and the lifelines stop at `pageHeight + headHeight`. */
+   *  no translation. The footbox row sits at `pageHeight + headHeight`
+   *  (`PlayingSpaceWithParticipants.java:225-226`); the lifelines, drawn
+   *  over `fullHeight` and clipped (`:213-221`), run to the band's bottom,
+   *  one pixel lower -- the jar's `two-pages.svg` has footbox `y="95"`,
+   *  lifeline `y2="96"`. */
   it('page 0 keeps the head row in place and ends the body at ymax', () => {
     const g = geo([message(100), newpage(200), message(300)]);
     const page = paginateSequence(g, 0);
     expect(only<MessageGeo>(page, 'message').map((m) => m.y)).toEqual([100]);
     // ymax = 200 + 21 = 221, dy = 0
-    expect(page.lifelineEndY).toBe(221);
+    expect(page.footerShapeY).toBe(221);
+    expect(page.lifelineEndY).toBe(222);
     expect(page.totalHeight).toBe(560 - (LIFELINE_END - 221));
   });
 
@@ -195,6 +200,8 @@ describe('band and totals', () => {
     const page = paginateSequence(g, 1);
     // dy = 30 - 200 = -170
     expect(only<MessageGeo>(page, 'message').map((m) => m.y)).toEqual([130]);
+    // Last page: the line ends before the clip's `+ 1` does, so the two
+    // quantities coincide again.
     expect(page.lifelineEndY).toBe(LIFELINE_END - 170);
     expect(page.totalHeight).toBe(560 - 170);
     expect(page.footerShapeY).toBe(LIFELINE_END - 170);

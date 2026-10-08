@@ -316,20 +316,22 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
 
   // `pageHeight + headHeight` -- where `drawU` puts the footbox row
   // (`:225-226`) and where `calculateDimensionSlow` ends the image
-  // (`:80-86`). This port spends ONE field where upstream has two: its
-  // `lifelineEndY` is both the lifeline's bottom and the footbox's top,
-  // which the clip separates by exactly the band's `+ 1` on any page but the
-  // last. The footbox/image answer is taken, so an inner page's lifelines
-  // stop 1px short of the jar's -- under the footbox that covers them.
-  const lifelineEndY = shift(band, ymax);
-  const delta = lifelineEndY - geo.lifelineEndY;
+  // (`:80-86`).
+  const footerShapeY = shift(band, ymax);
+  const delta = footerShapeY - geo.footerShapeY;
   const totalHeight = geo.totalHeight + delta;
+  // The lifelines are a SEPARATE quantity: `drawLifeLines(ugBody, fullHeight,
+  // ...)` (`:221`) draws them over the whole diagram and the clip trims them
+  // (`:213-216`; `UClip#getClippedLine` clamps a vertical line). On any page
+  // but the last that leaves them at the band's bottom, `ymax + 1` -- one
+  // pixel below the footbox top. On the last page the line ends first.
+  const lifelineEndY = shift(band, Math.min(geo.lifelineEndY, band.bottom));
 
   return {
     ...geo,
     events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
-    footerShapeY: geo.footerShapeY + delta,
+    footerShapeY,
     totalHeight,
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()
     // + ...` (`SequenceDiagramFileMakerTeoz.java:138-140`), i.e. the PAGE's
