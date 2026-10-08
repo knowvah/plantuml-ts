@@ -29,3 +29,9 @@
 - **Finding**: jar title text at x=20,y=30.889 (doc margin 10 + skin `title { Padding 5; Margin 5 }`, plantuml.skin:30-38); ours x=10,y=20.889 and the document 21px narrower. Identical diffs on the pre-U1 parsers, so not caused by U1. Lives in core/annotations chrome composition with the json fragment.
 - **Impact**: follow-on for whoever owns src/core/annotations; pinned by count in tests/unit/json/unwind-u1-jar.test.ts.
 - **Confidence**: High (measured before and after)
+
+## Observation: parallel agents share ONE session scratchpad -- survey dirs collide
+- **Context**: before/after all-engine surveys written to `<scratchpad>/before` and `<scratchpad>/after`.
+- **Finding**: sibling unwind agents (U3 etc.) run under the same session scratchpad path and used the same `before`/`after` dir names; their surveys overwrote several of this agent's `parity-*.json` (mtimes out of this agent's run order) and this agent's json/yaml after-run wrote into theirs. Re-ran into `U1-base`/`U1-after`.
+- **Impact**: prefix every scratchpad path with the task id. Also never run git commit/amend while a survey script has `git checkout <base> -- src` applied: the checkout stages base files, and an amend commits them.
+- **Confidence**: High
