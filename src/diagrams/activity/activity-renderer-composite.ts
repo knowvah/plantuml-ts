@@ -21,6 +21,7 @@ import { rect, path } from '../../core/svg.js';
 import { fmt } from '../../core/svg-format.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { drawActivityText } from './activity-renderer-text.js';
+import { linkStyleFields } from './activity-text-style.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { frameTitleWidth } from './tiles/gtile-group.js';
@@ -122,10 +123,13 @@ export function renderComposite(node: ActivityNodeGeo, theme: Theme): string {
   if (title === '') return body + tab;
   const titleX = node.x + 3;
   const titleY = node.y + 1 + fontSize * ASCENT_FRACTION;
+  // `style.getFontConfiguration` (`Style.java:259-268`): a `[[url]]` in the
+  // title takes the composite's resolved HyperLinkColor/underline/target.
   const titleEl = drawActivityText(titleX, titleY, title, {
     fontFamily: theme.fontFamily,
     fontSize,
     fill: style.fontColor,
+    ...linkStyleFields(theme, 'composite'),
   });
   return body + tab + titleEl;
 }
@@ -151,5 +155,13 @@ function renderSymbolComposite(
   const origin = compositeSymbolTitleOrigin(node, usymbol, titleWidth);
   const fill = compositeStyle(theme).fontColor;
   const y = origin.y + fontSize * ASCENT_FRACTION;
-  return frame + drawActivityText(origin.x, y, title, { fontFamily: theme.fontFamily, fontSize, fill });
+  return (
+    frame +
+    drawActivityText(origin.x, y, title, {
+      fontFamily: theme.fontFamily,
+      fontSize,
+      fill,
+      ...linkStyleFields(theme, 'composite'),
+    })
+  );
 }

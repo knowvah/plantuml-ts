@@ -91,3 +91,36 @@ All 28 engines were surveyed before (identical to `measurements/b2-eng`) and aft
 - Composite title hyperlink: file outside the write-set.
 - zivocu family: T3b's creole-text-lines.
 - No `wrapWidth` (`style.wrapWidth()`, MaximumWidth) on the action Sheet: `LineBreakStrategy.NONE` as before. No row in scope exercises it.
+
+## Resume (after T3-gates merge 1916ce346; merged feat at 78608da61, Σ 742)
+
+Commits: `b26384548` removeEmptyColumns (action + note), `4165abe20` lane
+name untrimmed, `5dd4aef6a` composite title hyperlink style.
+
+Rows: zejuso 148->2, letuke 13->0, nesozi 5->0, zocifu 1->0.
+Probe Σ: 742 -> 583 -> 578 -> 577. 0 risers at every commit; 451-fixture
+render diff per commit moved only the named rows (+ jar-error pixisi
+565->560, runima 560->557 on commit 1).
+
+Crude-patch +5 risers (bozido/gufuma/pufuzi/fikuki/mufixi): all end `}}`
+then `;`; the crude patch kept the empty closing TEXT that
+`Display.createFoo` (Display.java:190-193) drops after `}}`. The faithful
+port applies that rule -> 0 risers.
+
+Other removeEmptyColumns callers: CommandNoteLong3 (ported, note-dispatch.ts;
+0 corpus movers, authored fixture multiline-columns 37->0),
+CommandBackwardLong3 (shares readMultilineActionBody, covered),
+CommandArrowLong3 (multi-line `->` label command is NOT ported at all --
+a new command in dispatch, T3b's dispatch-support.ts; not done).
+
+Census movers, all = jar: letuke strokeWidth[0.5] 4->5, zejuso width ->813,
+nesozi fontSize[18] ->3, textCount ->5, fill#000 ->5, titles ->jar;
+zocifu fill #00F ->0, #FFF ->3.
+
+Finding: the deterministic-text jar crashes ("IllegalArgumentException
+start=X end=X") on ANY blank line inside an action/note label (bisected:
+`:first\n\nlast;`, a note with a blank line, `:\n  x\n;`). Same crash as the
+4 jar-error rows. We keep blank lines (upstream BlocLines does); cannot be
+oracle-verified.
+
+Not done: CommandArrowLong3 port (see above).

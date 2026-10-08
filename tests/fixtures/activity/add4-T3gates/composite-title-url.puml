@@ -1,0 +1,11 @@
+@startuml
+skinparam hyperlinkColor green
+start
+partition "[[http://a.com part]]" {
+  :a;
+}
+package "[[http://b.com pkg]]" {
+  :b;
+}
+stop
+@enduml

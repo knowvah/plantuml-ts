@@ -17,7 +17,6 @@ import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 import type { ActivityAction, ActivityArrowLabel, ActivityNode, ActivityRepeat, ActivityWhile } from './ast.js';
 import {
   RE_ACTION,
-  RE_ACTION_CLOSE,
   RE_ARROW_LABEL,
   RE_ENDWHILE,
   RE_ESCAPED_NEWLINE,
@@ -48,6 +47,7 @@ import {
   pushParsedNode,
 } from './list-backward-dispatch.js';
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
+import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
@@ -59,7 +59,10 @@ import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common
 function trySwimlane(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
   const m = RE_SWIMLANE.exec(line);
   if (m === null) return null;
-  const name = m[2]!.trim();
+  // `CommandSwimlane.java:63` `([^|]+)`, untrimmed: `Swimlanes#getOrCreate`
+  // (`Swimlanes.java:168-176`) matches it by exact `equals`, and
+  // `Swimlane.java:60` displays it verbatim.
+  const name = m[2]!;
   setCurrentSwimlane(ctx, name, m[1]);
   recordSwimlaneDisplay(ctx, name, line);
   return { idx: idx + 1 };
@@ -130,58 +133,7 @@ function tryAction(ctx: ParseContext, idx: number, line: string): DispatchResult
   return { idx: idx + 1, node };
 }
 
-export interface MultilineActionBody {
-  cursor: number;
-  labelParts: string[];
-  multiStereo: string | undefined;
-}
-
-/** Consumes body lines of a multiline action until its closing `;`
- *  (optionally followed by `<<stereo>>`), or end-of-input. Exported: also
- *  `backward-dispatch.ts#tryBackward`'s multiline form (mission ubrr-T10
- *  M3) reuses this verbatim -- the identical content-then-`;`-then-
- *  stereogroup(s) closer shape `backward:`'s own multiline form has.
- *
- * A `{{`/`}}` span (upstream's `EmbeddedDiagram.EMBEDDED_START`/`_END`,
- * a nested diagram rendered as an image inside the label) is tracked by
- * `braceDepth` and treated as OPAQUE text while open (D6): `;` inside it
- * belongs to the nested diagram's own grammar, not this action's closer
- * -- `RE_ACTION_CLOSE` is tried only at depth 0. Before this,
- * `mufixi-71-koma752`/`pufuzi-99-vone170` closed early on the embedded
- * diagram's first inner `;`, leaving its `}}` unrecognized. Rendering
- * the nested diagram as an image needs a new builder outside this
- * task's write-set; its source lands as literal label text instead
- * (documented fidelity gap, not a parse gap).
- * @see net/sourceforge/plantuml/EmbeddedDiagram.java:73-74
- */
-export function readMultilineActionBody(
-  ctx: ParseContext,
-  startIdx: number,
-  labelParts: string[],
-): MultilineActionBody {
-  const { lines } = ctx;
-  let cursor = startIdx;
-  let multiStereo: string | undefined;
-  let braceDepth = 0;
-  while (cursor < lines.length) {
-    const raw = lines[cursor]!;
-    const inner = raw.trim();
-    if (inner.startsWith('{{')) braceDepth++;
-    const closeMatch = braceDepth === 0 ? RE_ACTION_CLOSE.exec(inner) : null;
-    if (closeMatch !== null) {
-      const withoutSemi = closeMatch[1]!.trim();
-      if (withoutSemi !== '') labelParts.push(withoutSemi);
-      const sc = closeMatch[2];
-      if (sc !== undefined) multiStereo = sc.trim().toLowerCase();
-      cursor++;
-      break;
-    }
-    if (inner === '}}') braceDepth--;
-    if (inner !== '') labelParts.push(raw);
-    cursor++;
-  }
-  return { cursor, labelParts, multiStereo };
-}
+export { readMultilineActionBody, type MultilineActionBody } from './dispatch-multiline-body.js';
 
 /** Multiline action: starts with `:` but no closing `;` on the same line. */
 function tryMultilineAction(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
@@ -444,7 +396,10 @@ function dispatchLine(ctx: ParseContext, idx: number, line: string, lc: string):
  *  `list-backward-dispatch.ts` is not this task's file and a cycle through
  *  `note-dispatch.ts` is avoided. */
 function pushNode(nodes: ActivityNode[], node: ActivityNode | undefined): void {
-  if (node?.kind === 'note' && (redirectNoteOntoGroup(nodes, node, pushNode) || redirectNoteOntoWhile(nodes, node, pushNode)))
+  if (
+    node?.kind === 'note' &&
+    (redirectNoteOntoGroup(nodes, node, pushNode) || redirectNoteOntoWhile(nodes, node, pushNode))
+  )
     return;
   pushParsedNode(nodes, node); // WSPEC/RNOOUT, list-backward-dispatch.ts
 }

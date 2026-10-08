@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5307 exported names.
+1407 modules · 5310 exported names.
 
 ## `src/`
 
@@ -1064,13 +1064,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `arrows-regular.ts` | `ArrowDir`, `arrowHeadPoints`, `arrowHeadPointsTriangle`, `arrowHeadPointsFor`, `arrowHeadExtents`, `arrowDirection` | `ArrowsRegular`/`ArrowsTriangle` — the activity-diagram arrowhead decorations, selected on `skinparam style strictuml` (D4). |
 | `ast.ts` | `ActivityAction`, `ActivityStart`, `ActivityStop`, `ActivityEnd`, `ActivityKill`, `ActivityDetach`, `ActivityBreak`, `ActivityArrowLabel`, `ActivityBackward`, `ActivitySpot`, `ActivityLabel`, `ActivityGoto`, `ActivityElseIf`, `ActivityIf`, `ActivityWhile`, `ActivityRepeat`, `ActivityFork`, `ActivitySplit`, `ActivityNote`, `ActivitySwitchCase`, `ActivitySwitch`, `ActivityGroup`, `ActivityNode`, `ActivityDiagramAST` | AST type definitions for PlantUML activity diagrams (new syntax). |
 | `dispatch-common-commands.ts` | `tryAnnotation`, `trySprite`, `tryScale`, `tryPragma` | The "tried last, right before the unknown-line fallback" common-command handlers (title/sprite/scale/pragma) -- split out of `node-dispatch.ts` (D12/T1p-b) purely to keep that file under the project's 500-line cap (it was already at the exa |
+| `dispatch-multiline-body.ts` | `removeEmptyColumns`, `MultilineActionBody`, `readMultilineActionBody` | dispatch-multiline-body -- the BlocLines half of upstream's multi-line activity command (`CommandActivityLong3#executeNow`, `activitydiagram3/command/CommandActivityLong3.java:120-142`). |
 | `dispatch-newline-sentinels.ts` | `decodeNewlineSentinels` | `%n()`/`%newline()` -> a real line break in an activity action label (mission `activity-divergence-drive-3` T2a, family PCTN). |
 | `dispatch-support.ts` | `RE_SWIMLANE`, `RE_ACTION`, `RE_ACTION_CLOSE`, `RE_ACTIVITY_LIST`, `RE_BACKWARD`, `RE_BACKWARD_HEAD`, `RE_IF`, `RE_IF4`, `RE_IF_LEGACY`, `RE_ELSEIF`, `RE_ELSE`, `RE_ELSE_LEGACY`, `RE_ENDIF`, `RE_SWITCH`, `RE_CASE`, `RE_ENDSWITCH`, `RE_GROUP_OPEN`, `RE_CLOSE_GROUP`, `RE_CLOSE_GROUP_LEGACY`, `RE_WHILE`, `RE_ENDWHILE`, `RE_REPEATWHILE`, `RE_NOTE_SINGLE`, `RE_NOTE_MULTI`, `defaultLeftPosition`, `RE_NOTE_END`, `RE_ARROW_LABEL`, `RE_REPEAT_HEAD`, `RE_REPEAT_INLINE_TERMINATOR`, `RE_ESCAPED_NEWLINE`, `RE_PRAGMA`, `StopKeywords`, `matchesStopKeyword`, `ParseContext`, `setCurrentSwimlane`, `swimlaneSpread`, `ParseResult`, `ParseOutcome`, `isRefusal`, `DispatchResult`, `LineHandler`, `tryAssumeTransparent` | Shared regex constants, stop-keyword matching, and the mutable parse context/result shapes for the activity diagram recursive-descent parser. |
 | `group-dispatch.ts` | `tryOpenGroup` | `partition\|package\|rectangle\|card\|group NAME { ... |
 | `if-dispatch.ts` | `stripTrailingSemi`, `unescapeLabelNewlines`, `unescapeLabel`, `tryIf` | `if / elseif / else / endif` dispatch for the activity diagram parser. |
 | `index.ts` | `ActivityPluginGeometry`, `hasActivityChrome`, `activityPlugin` | Activity diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `list-backward-dispatch.ts` | `nodeListContainsBreak`, `pushParsedNode`, `tryActivityList`, `tryBackward`, `tryCircleSpot`, `tryLabel`, `tryGoto` | `* label` / `- label` list-item activities (M1) and `backward:LABEL;` (M3) dispatch. |
-| `node-dispatch.ts` | `swimlaneDisplaysOf`, `MultilineActionBody`, `readMultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
+| `node-dispatch.ts` | `swimlaneDisplaysOf`, `readMultilineActionBody`, `MultilineActionBody`, `parseNodes` | Core recursive-descent line dispatch (mission G0b/T6: split out of parser.ts to stay under the 500-line file cap; behavior change limited to the annotation-matcher wiring in `tryAnnotation` below). |
 | `note-dispatch.ts` | `tryNoteSingle`, `tryNoteMulti`, `redirectNoteOntoSwitch`, `redirectNoteOntoGroup`, `redirectNoteOntoWhile` | The two note line-shapes of `node-dispatch.ts`'s dispatch chain (`CommandNote3`/`CommandNoteLong3`), moved verbatim into a sibling module when add4-T1c's colour capture would have taken that file past the 500-line cap (mission convention: a |
 | `parallel-dispatch.ts` | `tryFork`, `trySplit` | `fork` / `fork again` / `end fork` and `split` / `split again` / `end split` dispatch for the activity diagram parser. |
 | `parser.ts` | `parseActivity` | Parser for PlantUML activity diagrams (new syntax). |
