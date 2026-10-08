@@ -20,6 +20,8 @@ import { activityArrowHeadColor, activityLineThickness } from './activity-style-
 import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
+import { LinkStyle } from '../../core/decoration/LinkStyle.js';
+import { parseColor, toSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
@@ -44,6 +46,9 @@ const DIAGRAM_TYPE_ACTIVITY = 'ACTIVITY';
 /** `UStroke.simple()` -- thickness 1.0 (`klimt/UStroke.java:75-77`), the
  *  stroke every start/end decoration draws through (`Worm.java:159,166`). */
 const SIMPLE_STROKE_WIDTH = 1;
+
+/** `Snake#drawInternal`'s single-colour stroke value (`Snake.java:193`). */
+const SNAKE_STROKE_VALUE = 1.5;
 
 /**
  * Draw the `ArrowsRegular`/`ArrowsTriangle` decoration (`arrows-regular.ts`,
@@ -96,10 +101,9 @@ function arrowTip(
  * `position` is the block's top-left; the layout carries the first
  * baseline, `position.y + size * ASCENT_FRACTION`
  * (`activity-renderer-shapes.ts#centeredFirstBaselineY`), so the top is
- * recovered from it. A `<back:color>` label (CommandArrow3.java:63-67 keeps
- * the colour in the creole label; this port's parser lifts it into
- * `edge.color`) is restored as the creole command, whose `AtomText` back
- * colour becomes the `<text filter>` flood (`SvgGraphics.java:732-735`).
+ * recovered from it. A `<back:color>` stays in the creole label
+ * (`CommandArrow3.java:61-71`), whose `AtomText` back colour becomes the
+ * `<text filter>` flood (`SvgGraphics.java:732-735`).
  */
 function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
   const layout = edgeLabelLayout(edge, theme);
@@ -107,7 +111,7 @@ function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
   const { lines, size, x, baselineY } = layout;
   const label = lines.join('\n');
   const fc = activityTextFontConfiguration(theme, size, 'arrow');
-  const tb = activityDisplayBlock(edge.color === undefined ? label : `<back:${edge.color}>${label}`, theme, {
+  const tb = activityDisplayBlock(label, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: CreoleMode.SIMPLE_LINE,
@@ -178,7 +182,7 @@ function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
 function renderEdgeSegments(
   pts: ReadonlyArray<{ x: number; y: number }>,
   colors: { line: string; head: string },
-  strokeWidth: number,
+  stroke: LineStroke,
   emphasis: { dir: ArrowDir; at: { x: number; y: number } | undefined } | undefined,
   theme: Theme,
 ): string {
@@ -197,10 +201,11 @@ function renderEdgeSegments(
       // (`:126-127`) and the worm's own stroke (`:128-131`). The
       // `arrowHeadColor` / `UStroke.simple()` re-applies (`:152-166`) come
       // AFTER the loop and reach the start/end decorations only.
-      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.line, theme, strokeWidth);
+      out += arrowTip(anchor, DIR_VECTOR[emphasis.dir], colors.line, theme, stroke.width);
       emphasisDrawn = true;
     }
-    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth });
+    const dash = stroke.dash === undefined ? {} : { strokeDasharray: stroke.dash };
+    out += orderedLine(p1.x, p1.y, p2.x, p2.y, { stroke: colors.line, strokeWidth: stroke.width, ...dash });
   }
   return out;
 }
@@ -225,39 +230,84 @@ function renderMidArrow(midArrowAt: { x: number; y: number; dir: ArrowDir }, hea
   return arrowTip({ x, y }, DIR_VECTOR[dir], headColor, theme);
 }
 
+type LineStroke = { readonly width: number; readonly dash?: string };
+
+/** One worm's colours and stroke (`Worm#drawInternalOneColor`). */
+interface EdgeLook {
+  readonly line: string;
+  readonly head: string;
+  readonly stroke: LineStroke;
+  readonly invisible: boolean;
+}
+
+/**
+ * The default look. cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer
+ * draws flat. T2c: `skinparam ArrowHeadColor` reaches the decoration only
+ * (`ftile/Worm.java:146-154`; absent -> `activityArrowHeadColor` tracks the
+ * line colour). The line stroke is `style.getStroke()` (`:128-129`, the
+ * `linkStyle.isNormal()` branch, `plantuml.skin:374`); the `withThickness
+ * (1.5)` at `:157,165` is overridden by `UStroke.simple()` (`:162,170`).
+ */
+function defaultEdgeLook(theme: Theme): EdgeLook {
+  return {
+    line: noGradient(theme.colors.arrow),
+    head: noGradient(activityArrowHeadColor(theme)),
+    stroke: { width: activityLineThickness(theme, 'arrow') },
+    invisible: false,
+  };
+}
+
+/**
+ * `HtmlColorAndStyle.build` over `CommandArrow3`'s COLOR group
+ * (`edge.color`, `-[#red,bold]->`; `HtmlColorAndStyle.java:86-106`): each
+ * comma token is either a `LinkStyle` keyword (`LinkStyle.fromString1`) or
+ * a colour replacing the style's `LineColor`. The head colour is `null`
+ * there, so it is the arrow colour (`:66`), not `ArrowHeadColor`. A
+ * non-normal style strokes at `goThickness(1.5).getStroke3()`
+ * (`Worm.java:130-131`, `Snake.java:193`; `LinkStyle.java:98-109`). Only
+ * the first `;` colour is drawn: `Snake#drawRainbow` (`Snake.java:200-224`)
+ * is not ported.
+ */
+function edgeLook(edge: ActivityEdgeGeo, theme: Theme): EdgeLook {
+  const base = defaultEdgeLook(theme);
+  if (edge.color === undefined) return base;
+  let line = base.line;
+  let style = LinkStyle.NORMAL();
+  for (const token of edge.color.split(';')[0]!.split(',')) {
+    const tmp = LinkStyle.fromString1(token);
+    if (!tmp.isNormal()) style = tmp;
+    else line = colorTokenHex(token) ?? line;
+  }
+  return { line, head: line, stroke: linkStroke(style, base.stroke), invisible: style.isInvisible() };
+}
+
+/** `HColorSet#getColor` as SVG hex; `undefined` for a non-colour (upstream throws). */
+function colorTokenHex(token: string): string | undefined {
+  const parsed = parseColor(token);
+  return parsed === undefined ? undefined : toSvgHex(parsed);
+}
+
+/** `Worm.java:128-131`: the style's own stroke when normal, else
+ *  `goThickness(1.5).getStroke3()` (`Snake.java:193` passes 1.5). */
+function linkStroke(style: LinkStyle, normal: LineStroke): LineStroke {
+  if (style.isNormal()) return normal;
+  const s = style.goThickness(SNAKE_STROKE_VALUE).getStroke3();
+  const dash = s.getDashVisible() === 0 ? undefined : `${s.getDashVisible()},${s.getDashSpace()}`;
+  return dash === undefined ? { width: s.getThickness() } : { width: s.getThickness(), dash };
+}
+
 function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   const pts = edge.points;
   if (pts.length < 2) return '';
+  const look = edgeLook(edge, theme);
+  if (look.invisible) return renderEdgeLabel(edge, theme);
 
-  // cdd7-T1a (D3): `colors.arrow` is a Paint; this renderer draws flat.
-  const edgeColor = noGradient(theme.colors.arrow);
-  // T2c: `skinparam ArrowHeadColor` -- `Worm#drawInternalOneColor` applies
-  // THIS color to the decoration only (`ftile/Worm.java:153-154`), AFTER
-  // the line segments already drew with `edgeColor` (`:126-127`). Absent
-  // -> tracks `edgeColor` itself (`activityArrowHeadColor`'s own doc).
-  const headColor = noGradient(activityArrowHeadColor(theme));
-  // `activityDiagram { arrow { LineThickness 1 } }` (plantuml.skin:374).
-  // `Worm#drawInternalOneColor` takes the LINE's stroke from
-  // `style.getStroke()` (`ftile/Worm.java:129`, the `linkStyle.isNormal()`
-  // branch). The `UStroke.withThickness(1.5)` calls at `:154` and `:161`
-  // are inside `if (startDecoration != null)` / `if (endDecoration !=
-  // null)` -- and each of those then draws through
-  // `.apply(UStroke.simple())` (`:159`, `:166`), which is thickness 1.0
-  // (`klimt/UStroke.java:75-77`), so the 1.5 never reaches any output at
-  // all. This port had generalised it to every segment of every edge.
-  //
   // The `emphasize` arrowhead (`Snake#emphasizeDirection`, D6) is
   // interleaved INTO this segment run, immediately before its matching
   // segment's own line -- `renderEdgeSegments`' own doc comment quotes the
   // exact `Worm.java:138-143` loop body this ports.
   const emphasis = edge.emphasize === undefined ? undefined : { dir: edge.emphasize, at: edge.emphasizeAt };
-  const segments = renderEdgeSegments(
-    pts,
-    { line: edgeColor, head: headColor },
-    activityLineThickness(theme, 'arrow'),
-    emphasis,
-    theme,
-  );
+  const segments = renderEdgeSegments(pts, look, look.stroke, emphasis, theme);
 
   // Terminal arrowhead, drawn AFTER the full segment loop --
   // `Worm#drawInternalOneColor`'s `startDecoration`/`endDecoration` draws
@@ -270,15 +320,10 @@ function renderEdge(edge: ActivityEdgeGeo, theme: Theme): string {
   // firing).
   const last = pts[pts.length - 1]!;
   const vector = edgeDecorationVector(edge);
-  const arrow = edge.arrowhead === false || vector === undefined ? '' : arrowTip(last, vector, headColor, theme);
+  const arrow = edge.arrowhead === false || vector === undefined ? '' : arrowTip(last, vector, look.head, theme);
 
-  // D4/T3h: `edge.midArrowAt` (an explicit extra arrowhead a translate
-  // shape places at its own point) is NO LONGER drawn here -- see
-  // `renderCrossLaneDecorations`'s own doc for why it moved to a separate,
-  // earlier emission phase.
-  //
-  // Optional edge label, positioned by `Snake#getTextBlockPosition`
-  // (`renderEdgeLabel`'s own doc comment).
+  // D4/T3h: `edge.midArrowAt` is drawn by `renderCrossLaneDecorations`.
+  // The label is positioned by `Snake#getTextBlockPosition`.
   const labelEl = renderEdgeLabel(edge, theme);
 
   return segments + arrow + labelEl;

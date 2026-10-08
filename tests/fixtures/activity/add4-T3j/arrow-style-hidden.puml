@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-[hidden]-> invisible;
+:b;
+stop
+@enduml

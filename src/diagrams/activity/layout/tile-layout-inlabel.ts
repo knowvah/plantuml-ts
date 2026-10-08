@@ -35,20 +35,22 @@ const LABEL_MEASURER = new WidthTableMeasurer();
 
 /** One pending `-> label;`, carried from the `arrow-label` node that set
  *  it to whichever tile consumes it next ({@link Tile.inLabel}'s own
- *  doc, `tiles/tile.ts`). */
+ *  doc, `tiles/tile.ts`). `label` is `''` for a style-only arrow
+ *  (`-[#red]->`); `color` is `CommandArrow3`'s COLOR group verbatim, the
+ *  next arrow's `Rainbow` definition (`CommandArrow3.java:99-103`). */
 export type PendingInLabel = { label: string; color?: string };
 
 /**
- * `setLabelNextArrow(Display label)` (`ActivityDiagram3.java:456-465`):
- * builds the pending value from one `arrow-label` AST node. Returns
- * `undefined` for an empty label (`ActivityArrowLabel.label === ''`),
- * mirroring `Snake#withLabel(TextBlock, ...)`'s own `textBlock != null`
- * guard (`Snake.java:124-136`) -- an empty `Display` never becomes a
- * drawn `Text` upstream either.
+ * `CommandArrow3#executeArg` (`CommandArrow3.java:96-110`): the COLOR group
+ * sets the next arrow's rainbow (`setColorNextArrow`), a non-empty LABEL
+ * its label (`setLabelNextArrow`, `ActivityDiagram3.java:456-465`). Both
+ * absent ("plain arrow, with no effect", `:92`) -> `undefined`. An empty
+ * label never becomes a drawn `Text` (`Snake.java:124-136`); see
+ * {@link applyInLabel}.
  */
 export function consumeArrowLabel(node: ActivityArrowLabel): PendingInLabel | undefined {
-  if (node.label === '') return undefined;
-  return node.color === undefined ? { label: node.label } : { label: node.label, color: node.color };
+  if (node.style === undefined) return node.label === '' ? undefined : { label: node.label };
+  return { label: node.label, color: node.style };
 }
 
 /**
@@ -175,9 +177,10 @@ export function applyOutLabel(out: Out, tile: { readonly outLabel?: PendingInLab
 function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefined, align: SnakeTextAlign): void {
   if (pending === undefined) return;
   const edge = out.edges[out.edges.length - 1]!;
+  if (pending.color !== undefined) edge.color = pending.color;
+  if (pending.label === '') return;
   edge.label = pending.label;
   edge.labelAlign = align;
-  if (pending.color !== undefined) edge.color = pending.color;
   const r = inLabelReservation(edge.points, pending, align);
   pushLaneReservation(out.reservations, r, labelLane(out.edgeMeta[out.edgeMeta.length - 1]!));
 }
