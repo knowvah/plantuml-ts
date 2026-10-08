@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1406 modules · 5308 exported names.
+1406 modules · 5307 exported names.
 
 ## `src/`
 
@@ -1053,7 +1053,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
-| `activity-renderer-text.ts` | `ActivityTextStyle`, `renderCreoleTableGrid`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
+| `activity-renderer-text.ts` | `ActivityTextStyle`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
 | `activity-spot-glyph-data.ts` | `ActivitySpotLetter`, `SPOT_REFERENCE_CX`, `SPOT_REFERENCE_CY`, `SPOT_GLYPH_D`, `CAPTURED_SPOT_LETTERS` | Glyph outline `d` data for the `circle,spot` connector's single character (`(A)`, `#blue:(B)`, ...) -- captured verbatim from the jar's own SVG output, the SAME scraping method `class-badge-glyph-data.ts` documents (its own module doc comme |
 | `activity-spot-glyph.ts` | `spotGlyphPath`, `SPOT_TEXT_FALLBACK_NOTE` | Translates {@link SPOT_GLYPH_D}'s reference-position outline to an arbitrary spot centre -- the SAME per-token `(x, y, x, y, ...)` shift `class-badge.ts#badgeGlyphPath` uses for its own captured table (every command this letter set emits, ` |
 | `activity-style-defaults-swimlane.ts` | `SWIMLANE_BORDER_COLOR`, `SWIMLANE_TITLE_FONT_COLOR`, `swimlaneBorderColor`, `swimlaneTitleFontColor`, `swimlaneBorderThickness`, `swimlaneTitleFontSize`, `swimlaneHeaderBackground` | The swimlane title/border style resolvers, split out of `activity-style-defaults.ts` (mission `activity-divergence-drive`, T2c) -- that module was 486 lines before the `fonebe-54-save009` arrow-thickness fix pushed it to 510, over this proj |
