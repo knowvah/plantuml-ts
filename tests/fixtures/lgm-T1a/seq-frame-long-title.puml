@@ -1,0 +1,4 @@
+@startuml
+mainframe A much longer mainframe label than the diagram body is wide
+Alice -> Bob : hi
+@enduml

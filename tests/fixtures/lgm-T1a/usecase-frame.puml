@@ -1,0 +1,6 @@
+@startuml
+mainframe Frame
+actor User
+usecase (Login)
+User --> (Login)
+@enduml

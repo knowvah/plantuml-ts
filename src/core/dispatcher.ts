@@ -29,6 +29,7 @@ import type { Gradient } from './paint.js';
 import type { Theme } from './theme.js';
 import type { StringMeasurer } from './measurer.js';
 import type { AssetStore } from './asset-store.js';
+import type { InkBox } from './annotations/body-ink.js';
 import type { ScaleSpec } from './scale-command.js';
 import type { PreprocessorResult } from './preprocessor.js';
 
@@ -218,6 +219,18 @@ export interface RenderFragment {
    * body's numbers are rounded once, after the scale. Returns the flat body.
    */
   drawBodyAt?: (scale: number, dx: number, dy: number) => string;
+  /**
+   * lgm-T1a: the `LimitFinder` ink (`TextBlockUtils.getMinMax(block, sb,
+   * false)`) of the block `DiagramChromeFactory.decorateWithFrame` frames,
+   * in the block's own coordinates -- for a producer that draws through the
+   * ported klimt `UGraphic` and can therefore run that very pass, which is
+   * the only way to see ink the serialized SVG does not carry (a
+   * `TextBlockMarged`'s `UEmpty` reservation, `TextBlockMarged.java:79-85`).
+   * `core/annotations/chrome.ts#applyChrome` frames the mainframe from it;
+   * without it the ink of a `diagramType` it knows is recovered from `body`
+   * (`core/annotations/body-ink.ts`). Set by `diagrams/mindmap/index.ts`.
+   */
+  frameInk?: InkBox;
 }
 
 /**

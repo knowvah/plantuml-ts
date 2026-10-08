@@ -15,7 +15,7 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/mindmap/MindMapDiagramFactory.java
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/TextBlockExporter.java:153-203
  */
-import { isEmpty } from '../../core/annotations/index.js';
+import { isDisplayPositionedNull, isEmpty } from '../../core/annotations/index.js';
 import { addWarnings } from '../../core/annotations/WarningBannerBlock.js';
 import type { RenderFragment, SyncPlugin } from '../../core/dispatcher.js';
 import { extractFlatContent, extractViewBoxDims, VERSION_PLACEHOLDER } from '../../core/klimt/document-shell.js';
@@ -31,6 +31,8 @@ import { UTranslate } from '../../core/klimt/UTranslate.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { resolveScaleFactor } from '../../core/scale-command.js';
 import { BODY_ANCHOR } from '../../core/TextBlockExporter.js';
+import { TextBlockUtils } from '../../core/klimt/shape/TextBlockUtils.js';
+import type { InkBox } from '../../core/annotations/body-ink.js';
 import { createMindMapDiagram } from './MindMapDiagramFactory.js';
 import type { MindMapDiagram } from './MindMapDiagram.js';
 
@@ -68,6 +70,18 @@ function textBlockDimension(diagram: MindMapDiagram, measurer: StringMeasurer): 
  * identity.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/TitledDiagram.java:291-311
  */
+/** `TextBlockUtils.getMinMax(original, sb, false)` over the raw text block --
+ *  the ink `DiagramChromeFactory.decorateWithFrame` frames it by
+ *  (`DiagramChromeFactory.java:332-337`; `BigFrame.java:81,89`). It cannot be
+ *  read back from the serialized body: every `TextBlockMarged` around an idea
+ *  box draws a `UEmpty` of its margined size (`TextBlockMarged.java:79-85`),
+ *  which `LimitFinder` counts (`:drawEmpty`) and the SVG never shows. */
+function textBlockInk(diagram: MindMapDiagram, measurer: StringMeasurer): InkBox {
+  const probe = UGraphicSvg.build(0, basicSvgOption(), VERSION_PLACEHOLDER, driverBounderFor(measurer), measurer);
+  const minMax = TextBlockUtils.getMinMax(exportedTextBlock(diagram), probe.getStringBounder(), false);
+  return { minX: minMax.getMinX(), minY: minMax.getMinY(), maxX: minMax.getMaxX(), maxY: minMax.getMaxY() };
+}
+
 function muteColorMapper(diagram: MindMapDiagram): ColorMapper {
   const skinParam = diagram.getSkinParam();
   if (skinParam.getValue('mode')?.toLowerCase() === 'dark') return ColorMapper.DARK_MODE;
@@ -194,6 +208,7 @@ function rawTextBlock(diagram: MindMapDiagram, measurer: StringMeasurer): Render
     height: dim.getHeight(),
     dpi: diagram.getSkinParam().getDpi(),
     drawBodyAt,
+    ...(isDisplayPositionedNull(diagram.annotations.mainFrame) ? {} : { frameInk: textBlockInk(diagram, measurer) }),
   };
   return diagram.scale === undefined ? anchored : { ...anchored, scaleSpec: diagram.scale };
 }

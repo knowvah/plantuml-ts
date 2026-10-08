@@ -5,6 +5,7 @@
  */
 
 import type { HorizontalAlignment } from '../klimt/geom/HorizontalAlignment.js';
+import type { LineStyleDash } from '../style-line-style.js';
 
 export interface BoxSides {
   top: number;
@@ -30,6 +31,11 @@ export interface AnnotationBoxStyle {
    *  -- see `style.ts`'s module doc comment for the full title/legend-only
    *  `Box*` key list this mirrors. */
   lineThickness: number;
+  /** lgm-T1a: `PName.LineStyle` (`Style#getStroke`, `Style.java:299-320`) --
+   *  the dash half of the element's stroke, set only by a `<style>` block
+   *  (`gunecu-53-jebu067`: `mainframe { LineStyle 2 }`). `undefined` is
+   *  solid; only the mainframe's `BigFrame` draw reads it today. */
+  lineStyle?: LineStyleDash;
   /** G2 N51: the document canvas's own resolved background hex
    *  (`resolveColorToSvgHex(theme.colors.background)`, computed ONCE in
    *  `resolveAnnotationStyles` and copied verbatim onto every element) --

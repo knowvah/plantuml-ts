@@ -5,10 +5,10 @@ import { skinCutOf } from './core/skin-command.js';
 import type { AssembledSvg, DiagramPlugin, Resolution } from './core/dispatcher.js';
 import { buildTheme } from './core/build-theme.js';
 import { applyChrome, isEmpty as isAnnotationsEmpty } from './core/annotations/index.js';
+import { applyExportedChrome } from './core/annotations/chrome-export.js';
 import type { DiagramAnnotations } from './core/annotations/index.js';
 import { resolveAnnotationStyles } from './core/annotations/style.js';
 import { unwrapKlimtSvg } from './diagrams/description/renderer.js';
-import { applyClassDocumentMargin } from './diagrams/class/layout-ink-extent.js';
 import { applyActivityChrome, applyActivityScale } from './diagrams/activity/layout/document-margin.js';
 import { sequencePlugin } from './diagrams/sequence/index.js';
 import { classPlugin } from './diagrams/class/index.js';
@@ -234,22 +234,11 @@ function applyAnnotationChrome(
     if (fragment.diagramType === 'ACTIVITY' && fragment.preChromeWidth !== undefined) {
       return applyActivityChrome(fragment, annotations, styles, measurer, { ast, theme, sprites });
     }
-    const chromed = applyChrome(fragment, annotations, styles, measurer, sprites);
-    // G2 N46: class fragments center chrome text against the PRE-margin
-    // ink dims (`fragment.preChromeWidth`/`preChromeHeight`, threaded
-    // through `applyChrome` -- see that function's own doc comment) --
-    // `chromed.width`/`height` come out raw-based too, so the document
-    // margin/`SvgGraphics#ensureVisible` quirk this port's no-chrome path
-    // already applies at layout time (`layout-ink-extent.ts
-    // #computeClassDocumentDims`) must be re-applied HERE, once, to the
-    // fully chrome-composed result -- matching jar's own
-    // `TextBlockExporter#calculateFinalDimension` running AFTER
-    // `DiagramChromeFactory.create`, not before it. A no-op (`??` never
-    // triggers) for every other engine (`preChromeWidth` stays
-    // `undefined`).
-    if (fragment.preChromeWidth === undefined) return chromed;
-    const margined = applyClassDocumentMargin({ width: chromed.width, height: chromed.height });
-    return { ...chromed, width: margined.width, height: margined.height };
+    // lgm-T1a: `UgDiagram#getExporter`'s order -- chrome around the producer's
+    // margin-less block, the document margin (and `ensureVisible`) after --
+    // is `applyExportedChrome`'s, for class (G2 N46) and sequence alike. A
+    // fragment that declares no such block is chromed as handed over.
+    return applyExportedChrome(fragment, annotations, styles, measurer, sprites);
   }
 
   if (pluginType !== 'description') return fragment;

@@ -1,0 +1,6 @@
+@startuml
+mainframe Frame
+component A
+component B
+A --> B
+@enduml
