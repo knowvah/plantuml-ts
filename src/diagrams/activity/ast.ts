@@ -53,15 +53,10 @@ export interface ActivityArrowLabel {
   kind: 'arrow-label';
   /** The creole label, `\\n` already converted (`CommandArrow3.java:110`). */
   label: string;
-  /** `-[#red]->`'s bracket text (`CommandArrow3` COLOR group, rainbow/line
-   *  style of the NEXT arrow, `CommandArrow3.java:99-103`). Parsed, not yet
-   *  drawn: needs the layout + renderer edge-colour hunk (see add4-T3i). */
+  /** `-[#red]->`'s bracket text (`CommandArrow3` COLOR group, the rainbow
+   *  and line style of the NEXT arrow, `CommandArrow3.java:99-103`), carried
+   *  to `ActivityEdgeGeo.color` by `layout/tile-layout-inlabel.ts`. */
   style?: string;
-  /** Retired: the parser no longer lifts `<back:>`/`<color:>` out of the
-   *  label (`CommandArrow3.java:61-71` keeps them in it). Never produced;
-   *  `layout/tile-layout-inlabel.ts` + `renderer.ts#renderEdgeLabel` still
-   *  read it and are T3h's to delete. */
-  color?: string;
   swimlane?: string;
 }
 

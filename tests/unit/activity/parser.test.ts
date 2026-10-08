@@ -784,7 +784,7 @@ describe('arrow label keeps <back:>/<color:> inside the creole label', () => {
     const node = firstNode(parse([src])) as ActivityArrowLabel;
     expect(node.kind).toBe('arrow-label');
     expect(node.label).toBe(label);
-    expect(node.color).toBeUndefined();
+    expect(node.style).toBeUndefined();
   });
 });
 
@@ -825,10 +825,10 @@ describe('parses bare arrow-label line -> some label ;', () => {
     expect(node.label).toBe('some label ');
   });
 
-  it('color is undefined when no color tag is present', () => {
+  it('style is undefined for a plain -> arrow', () => {
     const ast = parse(['-> some label ;']);
     const node = firstNode(ast) as ActivityArrowLabel;
-    expect(node.color).toBeUndefined();
+    expect(node.style).toBeUndefined();
   });
 });
 
