@@ -1,0 +1,9 @@
+@starthcl
+caption c
+resource "x" {
+key = "value"
+}
+other {
+a = "1"
+}
+@endhcl

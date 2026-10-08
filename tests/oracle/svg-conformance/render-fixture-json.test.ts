@@ -60,7 +60,9 @@ describe('renderFixtureJson — parse dispatch (AC4)', () => {
 
     const j = shellOf(render('@startjson\n{"a": 1}\n@endjson'));
     const y = shellOf(render('@startyaml\na: 1\n@endyaml'));
-    const h = shellOf(render('@starthcl\na = 1\n@endhcl'));
+    // A top-level `a = 1` is the hcl error page (HclParser.java:88), so the
+    // hcl probe wraps it in a block (unwind2-S2).
+    const h = shellOf(render('@starthcl\nr {\na = 1\n}\n@endhcl'));
     expect(y).toBe(j);
     expect(h).toBe(j);
   });
@@ -68,7 +70,7 @@ describe('renderFixtureJson — parse dispatch (AC4)', () => {
   it("each type is tagged with the jar's own data-diagram-type", () => {
     expect(render('@startjson\n{"a": 1}\n@endjson')).toContain('data-diagram-type="JSON"');
     expect(render('@startyaml\na: 1\n@endyaml')).toContain('data-diagram-type="YAML"');
-    expect(render('@starthcl\na = 1\n@endhcl')).toContain('data-diagram-type="HCL"');
+    expect(render('@starthcl\nr {\na = 1\n}\n@endhcl')).toContain('data-diagram-type="HCL"');
   });
 
   it('throws a named error when the markup holds no diagram block', () => {

@@ -13,7 +13,7 @@ import type { JsonDiagramAST } from '../json/ast.js';
 import type { JsonGeometry } from '../json/layout.js';
 import { parseHcl } from './parser.js';
 import { layoutJson } from '../json/layout.js';
-import { jsonFamilyStyleInput } from '../json/json-family-style-input.js';
+import { hclStyleInput } from '../json/json-family-style-input.js';
 import { renderJson } from '../json/renderer.js';
 
 // ---------------------------------------------------------------------------
@@ -34,8 +34,10 @@ export const hclPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   },
 
   // unwind-U1: `skinparam` is not executed in this family upstream
-  // (`StyleExtractor.java:88-97`) -- see `json-family-style-input.ts`.
-  styleInput: jsonFamilyStyleInput,
+  // (`StyleExtractor.java:88-97`); unwind2-S2: nor, for hcl alone, `<style>`
+  // / `skin` / `!theme` (`HclDiagramFactory.java:86-92`) -- see
+  // `json-family-style-input.ts#hclStyleInput`.
+  styleInput: hclStyleInput,
 
   layoutSync(ast, theme, measurer) {
     return layoutJson(ast, theme, measurer);

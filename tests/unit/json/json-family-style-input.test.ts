@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { preprocess } from '../../../src/core/preprocessor.js';
-import { jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
+import { hclStyleInput, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
 import { jsonPlugin } from '../../../src/diagrams/json/index.js';
 import { yamlPlugin } from '../../../src/diagrams/yaml/index.js';
 import { hclPlugin } from '../../../src/diagrams/hcl/index.js';
@@ -44,9 +44,45 @@ describe('jsonFamilyStyleInput', () => {
     expect(out.theme).toBe(pre.theme);
   });
 
-  it('is the styleInput of all three json-family plugins', () => {
+  it('is the styleInput of json and yaml; hcl has its own', () => {
     expect(jsonPlugin).toHaveProperty('styleInput', jsonFamilyStyleInput);
     expect(yamlPlugin).toHaveProperty('styleInput', jsonFamilyStyleInput);
-    expect(hclPlugin).toHaveProperty('styleInput', jsonFamilyStyleInput);
+    expect(hclPlugin).toHaveProperty('styleInput', hclStyleInput);
+  });
+});
+
+describe('hclStyleInput', () => {
+  function hclInputOf(lines: readonly string[]) {
+    const source = ['@starthcl', ...lines, '@endhcl'];
+    const pre = preprocess(source.join('\n'));
+    const block: UmlSource = { lines: [...pre.lines], type: 'hcl', seedSourceLines: source };
+    return { pre, out: hclStyleInput(pre, block) };
+  }
+
+  // `HclDiagramFactory.java:86-92`: `applyStyles` is commented out.
+  it('drops <style>, skin and the theme, keeping handwritten', () => {
+    const { pre, out } = hclInputOf([
+      'skinparam handwritten true',
+      'skin rose',
+      '<style>',
+      'document { BackGroundColor red }',
+      '</style>',
+      'r {',
+      '}',
+    ]);
+    expect(pre.styles.length).toBe(1);
+    expect(pre.skin).toBe('rose');
+    expect(out.styles).toEqual([]);
+    expect(out.stylePositions).toEqual([]);
+    expect(out.skin).toBeUndefined();
+    expect(out.theme).toBeNull();
+    expect(out.declarationOrder?.styles).toEqual([]);
+    expect([...out.skinparam]).toEqual([['handwritten', 'true']]);
+  });
+
+  it('drops a !theme name', () => {
+    const { pre, out } = hclInputOf(['!theme amiga', 'r {', '}']);
+    expect(pre.theme).toBe('amiga');
+    expect(out.theme).toBeNull();
   });
 });

@@ -1,0 +1,6 @@
+@starthcl
+resource "r" {
+a = ab
+cd
+}
+@endhcl

@@ -34,8 +34,15 @@ interface HclTerm {
 // Tokenizer — port of HclParser.parse() / HclParser.getType()
 // ---------------------------------------------------------------------------
 
+/**
+ * `Character.isSpaceChar` (`HclParser.java:235`): Unicode categories Zs, Zl
+ * and Zp only -- a TAB is NOT a space, so `\ta` is a one-token field name
+ * (jar: `tests/fixtures/unwind2-S2/hcl-tab-indent`).
+ */
+const JAVA_SPACE_CHAR = /^[\p{Zs}\p{Zl}\p{Zp}]$/u;
+
 function getSpecialType(c: string): SymbolType | 'SPACE' | null {
-  if (c === ' ' || c === '\t' || c === '\n' || c === '\r') return 'SPACE';
+  if (JAVA_SPACE_CHAR.test(c)) return 'SPACE';
   if (c === '{') return 'CURLY_BRACKET_OPEN';
   if (c === '}') return 'CURLY_BRACKET_CLOSE';
   if (c === '[') return 'SQUARE_BRACKET_OPEN';
@@ -110,10 +117,9 @@ function tokenize(chars: string): HclTerm[] {
     i++;
   }
 
-  // Flush any remaining pending string
-  if (pendingString.length > 0) {
-    terms.push({ type: 'STRING_SIMPLE', data: pendingString });
-  }
+  // No final flush: `HclParser.java:188-216` emits a pending string only
+  // when a symbol follows it, so trailing text after the last symbol is
+  // dropped (jar: `tests/fixtures/unwind2-S2/hcl-trailing-token`).
 
   // #lizard forgives -- pre-existing faithful port of HclParser.parse()'s
   // tokenizer loop (already over threshold before mission G0b/T6).
@@ -253,35 +259,12 @@ function getModuleOrSomething(cursor: TokenCursor): Map<string, unknown> {
 }
 
 /**
- * Detect whether the token stream represents flat top-level key=value
- * assignments (i.e., the first name token is immediately followed by
- * EQUALS or TWO_POINTS rather than CURLY_BRACKET_OPEN).
- *
- * This is an extension beyond the Java parser which requires all top-level
- * entries to be named blocks. Flat assignments are treated as an implicit
- * bracket block.
+ * `HclParser#parseMe` (`HclParser.java:61-75`): every top-level entry is a
+ * module -- names then `{` (`:77-89`). A top-level `a = 1` reaches `:88` and
+ * throws, which is the error page (jar: `tests/fixtures/unwind2-S2/
+ * hcl-top-assign-*`).
  */
-function isFlatAssignment(terms: HclTerm[]): boolean {
-  // Walk through string tokens; as soon as we see EQUALS or TWO_POINTS
-  // before a CURLY_BRACKET_OPEN, it's a flat assignment stream.
-  for (let i = 0; i < terms.length; i++) {
-    const t = terms[i]!;
-    if (t.type === 'EQUALS' || t.type === 'TWO_POINTS') return true;
-    if (t.type === 'CURLY_BRACKET_OPEN') return false;
-  }
-  return false;
-}
-
 function parseTerms(terms: HclTerm[]): unknown {
-  // Flat key=value (no wrapping block) — treat as implicit bracket block
-  if (isFlatAssignment(terms)) {
-    // Synthesize a CURLY_BRACKET_CLOSE sentinel at the end so getBracketData
-    // terminates correctly, then parse as a bracket block.
-    const syntheticTerms: HclTerm[] = [...terms, { type: 'CURLY_BRACKET_CLOSE' }];
-    const cursor: TokenCursor = { terms: syntheticTerms, idx: 0 };
-    return getBracketData(cursor);
-  }
-
   const cursor: TokenCursor = { terms, idx: 0 };
   const map = new Map<string, unknown>();
 
@@ -317,7 +300,10 @@ function parseTerms(terms: HclTerm[]): unknown {
  */
 function parseHclBody(lines: readonly string[]): { root: unknown; parseError: boolean } {
   try {
-    return { root: parseTerms(tokenize(lines.join(' '))), parseError: false };
+    // `HclSource#add` (`HclSource.java:48-53`) appends each line's characters
+    // with NO separator, so an unquoted value runs into the next line's first
+    // token (jar: `tests/fixtures/unwind2-S2/hcl-join-*`).
+    return { root: parseTerms(tokenize(lines.join(''))), parseError: false };
   } catch {
     return { root: null, parseError: true };
   }

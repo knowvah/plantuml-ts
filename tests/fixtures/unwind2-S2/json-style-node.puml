@@ -1,0 +1,11 @@
+@startjson
+<style>
+jsonDiagram {
+  node {
+    BackGroundColor #eeeeee
+    LineColor red
+  }
+}
+</style>
+{ "ami": "ami-123" }
+@endjson
