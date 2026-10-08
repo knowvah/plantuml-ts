@@ -8,6 +8,12 @@ import type { GtileDiamondEmpty } from './gtile-diamond-empty.js';
 import type { Theme } from '../../../core/theme.js';
 import { HEXAGON_HALF_SIZE } from '../layout/hexagon-reservations.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
+import { activityFontSize } from '../activity-style-defaults.js';
+import { activityDisplayBlock, activityTextFontConfiguration } from '../activity-text-sheet.js';
+import { klimtStringBounder } from '../activity-creole-sheet.js';
+import { measurerAdapterOf } from './gtile-action.js';
+import { HorizontalAlignment } from '../../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 
 /**
  * `FtileDiamond`'s own fixed box (`FtileDiamond.java:108-112`,
@@ -211,10 +217,26 @@ function computeWeldLayout(rawLeft: number, rawWidth: number, rawHeight: number,
  * text here). `GtileDiamondEmpty.width` itself stays a fixed 24 regardless
  * of this text's width (`gtile-diamond-empty.ts`'s own doc) -- this is the
  * separate outer floor term the jar applies instead.
+ *
+ * add4-T3h: measured as the block upstream builds, `test.create(
+ * fontConfiguration1, defaultTextAlignment, spriteContainer)`
+ * (`FtileRepeat.java:124-128`) -- `create7(..., CreoleMode.FULL)`
+ * (`Display.java:614-617`) at `fcArrow` (every style but INSIDE_HEXAGON),
+ * so `//data//` is its italic atom, not its markup. The alignment never
+ * changes a `SheetBlock1` width (the widest stripe), so LEFT stands in.
  */
-function repeatTbTestWidth(condition: RepeatConditionTile): number {
+function repeatTbTestWidth(condition: RepeatConditionTile, bounder: StringBounder, theme: Theme): number {
   if (condition.kind !== 'gtile-diamond-empty') return 0;
-  return condition.labelAt('east')?.width ?? 0;
+  const test = condition.labelAt('east')?.label;
+  if (test === undefined) return 0;
+  const size = activityFontSize(theme, 'arrow');
+  const fc = activityTextFontConfiguration(theme, size, 'arrow');
+  const tb = activityDisplayBlock(test, theme, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.FULL,
+  });
+  return tb.calculateDimension(klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size })).getWidth();
 }
 
 /**
@@ -226,14 +248,20 @@ function repeatTbTestWidth(condition: RepeatConditionTile): number {
  * w + 2*hexagonHalfSize)`, applied BEFORE `backward`'s own `+=` term and
  * the final `+2*hexagonHalfSize`, same order as below).
  */
-function computeRawDims(entry: Tile, body: Tile, condition: RepeatConditionTile, backward: Tile | undefined): RawDims {
+function computeRawDims(
+  entry: Tile,
+  body: Tile,
+  condition: RepeatConditionTile,
+  backward: Tile | undefined,
+  tbTestWidth: number,
+): RawDims {
   const bodyLeft = body.getCoord(NORTH_HOOK).x;
   const entryHalf = entry.width / 2;
   const conditionHalf = condition.width / 2;
   const rawLeft = Math.max(bodyLeft, entryHalf, conditionHalf);
   const right = Math.max(body.width - bodyLeft, entryHalf, conditionHalf);
   const contentWidth = rawLeft + right;
-  const tbTestFloor = repeatTbTestWidth(condition) + 2 * HEXAGON_HALF_SIZE;
+  const tbTestFloor = tbTestWidth + 2 * HEXAGON_HALF_SIZE;
   let innerWidth = Math.max(contentWidth, 2 * HEXAGON_HALF_SIZE, tbTestFloor);
   if (backward !== undefined) innerWidth += backward.width;
   const rawWidth = innerWidth + 2 * HEXAGON_HALF_SIZE;
@@ -270,9 +298,8 @@ export type RepeatBackConnection = 'simple1' | 'simple2' | 'complex1';
 /**
  * `bounder`/`theme` are bundled into one trailing object solely to keep
  * the constructor's own parameter count at the hook's 5-parameter limit
- * once {@link RepeatBackConnection} is added as a real parameter -- neither
- * field is read (kept from before this bundling, when they were named
- * `_bounder`/`_theme`); `tile-layout.ts#tileRepeat` is this class's only
+ * once {@link RepeatBackConnection} is added as a real parameter; both are
+ * read by {@link repeatTbTestWidth} (add4-T3h). `tile-layout.ts#tileRepeat` is this class's only
  * call site, so the bundling is invisible to every other tileXxx builder's
  * own `(bounder, theme)` calling convention. `backward` joined the bundle
  * for the same reason (mission `activity-divergence-drive` T3h) rather
@@ -400,7 +427,8 @@ export class GtileRepeat extends TileComposite {
     super();
     this.backConnection = backConnection;
     ({ backward: this.backward, backIncoming: this.backIncoming, backOutgoing: this.backOutgoing } = ctx);
-    const dims = computeRawDims(entry, body, condition, ctx.backward);
+    const tbTestWidth = repeatTbTestWidth(condition, ctx.bounder, ctx.theme);
+    const dims = computeRawDims(entry, body, condition, ctx.backward, tbTestWidth);
     const weld = computeWeldLayout(dims.rawLeft, dims.rawWidth, dims.rawHeight, countWeldingBreaks(body));
     this.left = weld.left;
     this.width = weld.width;
