@@ -122,14 +122,22 @@ export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagra
   }
 
   let root: unknown = null;
+  // A failed parse leaves upstream's value null (`YamlDiagramFactory.java:90-93`), which
+  // `JsonDiagram#drawU` draws as the "does not sound like YAML data" page
+  // (`JsonDiagram.java:116-122`) -- NOT the null-scalar node a successful
+  // parse of `null` would give. Hence the flag, as json's parser sets it.
+  let parseError = false;
   const parseWarnings: string[] = [];
   try {
     if (bodyLines.some((l) => l.trim() !== '')) {
       const monomorph = parseYamlLines(bodyLines, parseWarnings);
       root = monomorphToJson(monomorph);
+      // `MonomorphToJson.convert` returns null for an UNDETERMINATE monomorph
+      // (`MonomorphToJson.java:44-52`) -- the same null, the same page.
+      parseError = root === null;
     }
   } catch {
-    // parse errors: root stays null
+    parseError = true;
   }
 
   // #lizard forgives -- pre-existing faithful port of the YAML diagram
@@ -138,7 +146,7 @@ export function parseYaml(source: UmlSource, options?: ParseOptions): JsonDiagra
   // did not reduce the function below threshold).
   return {
     root,
-    parseError: false,
+    parseError,
     diagramLabel: 'YAML' as const,
     highlights,
     annotations,

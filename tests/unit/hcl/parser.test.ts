@@ -156,7 +156,9 @@ describe('parseHcl — additional cases', () => {
     const src = makeSource(['resource "r" {', '  x = cond ? "a" : "b"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
-    expect(ast.parseError).toBe(false);
+    // HclDiagramFactory.java:79-83 + JsonDiagram.java:116-122: the jar draws
+    // "Your data does not sound like HCL data" for this source (unwind-U1).
+    expect(ast.parseError).toBe(true);
   });
 
   it('highlights is always empty []', () => {
@@ -232,7 +234,9 @@ describe('parseHcl — additional cases', () => {
     const src = makeSource(['blockname [']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
-    expect(ast.parseError).toBe(false);
+    // HclParser.java:88 throws; the jar draws the "does not sound like HCL
+    // data" page (HclDiagramFactory.java:79-83, unwind-U1).
+    expect(ast.parseError).toBe(true);
   });
 
   it('isFlatAssignment returns false for empty token stream → root null', () => {

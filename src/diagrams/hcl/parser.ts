@@ -379,6 +379,11 @@ export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagram
   }
 
   let root: unknown = null;
+  // A failed parse leaves upstream's value null (`HclDiagramFactory.java:79-83`), which
+  // `JsonDiagram#drawU` draws as the "does not sound like HCL data" page
+  // (`JsonDiagram.java:116-122`) -- NOT the null-scalar node a successful
+  // parse of `null` would give. Hence the flag, as json's parser sets it.
+  let parseError = false;
   try {
     if (bodyLines.some((l) => l.trim() !== '')) {
       const joined = bodyLines.join(' ');
@@ -386,7 +391,7 @@ export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagram
       root = parseTerms(terms);
     }
   } catch {
-    // parse errors: root stays null
+    parseError = true;
   }
 
   // #lizard forgives -- pre-existing faithful port of the HCL entry point
@@ -394,7 +399,7 @@ export function parseHcl(source: UmlSource, options?: ParseOptions): JsonDiagram
   // matcher check above).
   return {
     root,
-    parseError: false,
+    parseError,
     diagramLabel: 'HCL' as const,
     highlights: [],
     annotations,

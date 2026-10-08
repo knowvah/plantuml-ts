@@ -62,3 +62,16 @@ describe('YAML parser — directives', () => {
     expect(ast.root).toEqual({ foo: 'bar' });
   });
 });
+
+describe('YAML parser — a failed parse is the error page (unwind-U1)', () => {
+  // YamlParser.java:53-54 throws on a bare scalar (NO_KEY_ONLY_TEXT);
+  // YamlDiagramFactory.java:90-93 leaves the value null and JsonDiagram.java:
+  // 116-122 draws "Your data does not sound like YAML data" -- jar:
+  // tests/fixtures/unwind-U1/yaml-root-*.svg. Unlike json, a yaml scalar root
+  // never reaches JsonDiagram's scalar-in-array wrap.
+  it.each(['42', 'hello', 'true', 'null'])('scalar root %s sets parseError', (scalar) => {
+    const ast = parse([scalar]);
+    expect(ast.parseError).toBe(true);
+    expect(ast.root).toBeNull();
+  });
+});
