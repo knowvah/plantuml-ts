@@ -39,11 +39,18 @@ a fast numeric loop feels like evidence. **Stop and open the Java** before you
   them. **Build deep before wide**: one diagram type end-to-end at a time.
 - **Test layer interactions, not features.** Prefer upstream fixtures to
   synthesized ones; theirs are combinatorial because real bugs were.
-- **Preserve information-carrying output** — structure, disambiguating labels,
-  source order, meaningful colors — including behavior that looks like a bug.
-  **Incidental rendering may improve, deliberately**, documented in
-  `DIVERGENCES.md`/a comment/the commit message. Never fix an apparent
-  upstream bug inline. Test: would a long-time user be surprised?
+- **Mirror the jar's output exactly** — every element it draws, and nothing
+  it doesn't — including behavior that looks like a bug or loses information
+  (a missing connector, a clipped label). Never "improve" on the jar, never
+  fix an upstream bug inline. An element the jar omits is a defect in ours:
+  remove it with the Java quote. "Never drop a note/label/connector" rules
+  protect what the JAR draws; they never license keeping our extras.
+- **A divergence exists only where a library forces it**: dot-engine instead
+  of Smetana (below), KaTeX instead of JLaTeXMath, the oracle seam for
+  `{{ }}` and platform glyph outlines. Each is named in `DIVERGENCES.md` with
+  the library that forces it. Taste, readability, "information" or effort
+  never justify one — and the agent never decides one alone: no library
+  forcing it ⇒ mirror.
 
 ## The long tail is the deliverable (YAGNI does not apply)
 
@@ -59,7 +66,7 @@ edge cases — not for build tooling, harness, CI.
 - The bar is pleasing aesthetic alignment, not "produces a correct diagram."
 - **"Hard" and "out of scope" are triggers to VERIFY, not skip.** Check a
   scope claim against the code before repeating it — yours or a subagent's.
-  A divergence is a considered product choice, never an effort excuse.
+  A divergence is library-forced or it is a bug — never an effort excuse.
   Crossing a module boundary is the work. Only "genuinely large AND separable"
   earns a deferral, proven by measurement, as a tracked mission.
 
