@@ -12,6 +12,7 @@ import type { ActivityEdgeGeo, ActivityNodeGeo, SwimlaneGeo } from '../activity-
 import type { Theme } from '../../../core/theme.js';
 import { activityFontSize } from '../activity-style-defaults.js';
 import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
+import { floorActionLineHeight } from '../tiles/gtile-action.js';
 import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from './snake-text-position.js';
 import type { MutableInkBounds } from './canvas-origin.js';
@@ -33,23 +34,21 @@ export const SPLIT_LINE_KINDS = new Set(['split-bar', 'split-join-bar']);
  * Family Q: `klimt/drawing/LimitFinder.java:217-224`'s `drawText` -- the
  * far (bottom) corner is ALWAYS `baseline + 1.5`, independent of the
  * font's own descent, and the near (top) corner is `baseline -
- * (lineHeight - 1.5)`; never the measured box's own `y`/`y + height` the
- * generic box treatment uses for every other kind. An `if-label` draws
- * one `UText` per `\n`-split line (`renderIfLabel`'s own baseline,
- * `activity-renderer-if-shapes.ts:139`), each `fontSize` apart; the far
- * bound is the LAST line's baseline + 1.5, the near bound the FIRST
- * line's baseline minus one line's own height. `measureLabel`'s own
- * per-line SUM (`gtile-diamond-inside.ts:79-83`) means `node.height /
- * lineCount` recovers that one-line height exactly (every line shares the
- * same `fontSize`).
+ * (fontSize - 1.5)` (the `StringBounder` height of one `UText`); never the
+ * measured box's own `y`/`y + height` the generic box treatment uses for
+ * every other kind. An `if-label` is a SIMPLE_LINE Sheet
+ * (`activity-renderer-if-shapes.ts#renderIfLabel`): `SheetBlock1` draws it
+ * inside its padding (`SheetBlock1.java:209-210`), one `UText` per stripe,
+ * each stripe `max(fontSize, 10)` high (`AtomText.java:179-181`). The near
+ * bound is the FIRST line's, the far bound the LAST line's (add4-T3h:
+ * padding and the stripe floor, was `node.height / lineCount`).
  */
 export function extendForIfLabelText(acc: MutableInkBounds, node: ActivityNodeGeo, theme: Theme): void {
   const lineCount = (node.label ?? '').split('\n').length;
   const fontSize = activityFontSize(theme, 'arrow');
-  const lineHeight = node.height / lineCount;
-  const firstBaselineY = node.y + fontSize * TITLE_ASCENT_FRACTION;
-  const lastBaselineY = firstBaselineY + (lineCount - 1) * fontSize;
-  acc.minY = Math.min(acc.minY, firstBaselineY - (lineHeight - 1.5));
+  const firstBaselineY = node.y + (theme.padding ?? 0) + fontSize * TITLE_ASCENT_FRACTION;
+  const lastBaselineY = firstBaselineY + (lineCount - 1) * floorActionLineHeight(fontSize);
+  acc.minY = Math.min(acc.minY, firstBaselineY - (fontSize - 1.5));
   acc.maxY = Math.max(acc.maxY, lastBaselineY + 1.5);
 }
 

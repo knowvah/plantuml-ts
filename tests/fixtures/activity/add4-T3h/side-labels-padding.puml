@@ -1,0 +1,12 @@
+@startuml
+skinparam padding 4
+start
+if (**bold** cond) then (**yes**)
+  :A;
+else (no ""way"")
+  :B;
+endif
+-> link [[http://example.com go]];
+:C;
+stop
+@enduml

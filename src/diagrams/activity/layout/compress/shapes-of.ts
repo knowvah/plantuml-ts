@@ -23,7 +23,8 @@ import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
 import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
-import { measurerAdapterOf } from '../../tiles/gtile-action.js';
+import { floorActionLineHeight, measurerAdapterOf } from '../../tiles/gtile-action.js';
+import { measureSide } from '../../tiles/gtile-diamond-inside.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
@@ -167,14 +168,12 @@ function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Them
   const anchor = ifLabelTextAnchor(theme);
   const firstBaselineY = node.y + anchor.dy;
   const lines = (node.label ?? '').split('\n');
-  let width = 0;
-  let firstHeight = 0;
-  for (let i = 0; i < lines.length; i++) {
-    const dim = bounder.getDimension(lines[i]!, fontSize);
-    if (dim.width > width) width = dim.width;
-    if (i === 0) firstHeight = dim.height;
-  }
-  const lastBaselineY = firstBaselineY + fontSize * (lines.length - 1);
+  // add4-T3h: the drawn SIMPLE_LINE block's text width (its `SheetBlock1`
+  // padding excluded, `SheetBlock1.java:209-210`) and stripe advance
+  // (`AtomText.java:179-181` floor), not the raw markup lines.
+  const width = measureSide(node.label, bounder, theme).width - 2 * anchor.dx;
+  const firstHeight = bounder.getDimension(lines[0]!, fontSize).height;
+  const lastBaselineY = firstBaselineY + floorActionLineHeight(fontSize) * (lines.length - 1);
   return {
     kind: 'text',
     x: node.x + anchor.dx,

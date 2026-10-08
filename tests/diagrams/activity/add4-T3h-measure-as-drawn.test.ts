@@ -36,4 +36,10 @@ describe('labels measured as drawn (jar oracles)', () => {
   it('hexagon side labels: sized by the drawn SIMPLE_LINE block', () => {
     expect(diffPaths('add4-T3g', 'branch-labels')).toEqual([]);
   });
+
+  // FtileIfLongVertical.java:154-157: the inlabel's west margin is the FULL
+  // arrow block's width.
+  it('vertical elseif inlabel: width of the FULL creole block', () => {
+    expect(diffPaths('add4-T3h', 'vertical-inlabel')).toEqual([]);
+  });
 });
