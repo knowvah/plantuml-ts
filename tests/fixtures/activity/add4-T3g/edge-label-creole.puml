@@ -1,0 +1,12 @@
+@startuml
+start
+:A;
+-> **bold** and //italic//;
+:B;
+-> link [[http://example.com link]];
+:C;
+-><back:yellow> on yellow;
+:D;
+-> <color:red>red</color> text;
+stop
+@enduml

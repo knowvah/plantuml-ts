@@ -8,13 +8,15 @@
 import type { ActivityGeometry, ActivityEdgeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
-import { polygon, text } from '../../core/svg.js';
+import { polygon } from '../../core/svg.js';
 import {} from '../../core/latex.js';
 import { orderedLine, renderNodesDispatchingGotos } from './activity-renderer-terminals.js';
-import { drawActivityText, drawActivityTextLines } from './activity-renderer-text.js';
+import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
+import { ASCENT_FRACTION } from './activity-renderer-shapes.js';
+import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
+import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { renderSwimlaneChrome, renderSwimlaneTitles } from './activity-renderer-swimlanes.js';
 import { activityArrowHeadColor, activityLineThickness } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
 import { edgeLabelLayout } from './layout/compress/edge-label-anchor.js';
 import { arrowDirection, arrowHeadPointsFor, type ArrowDir } from './arrows-regular.js';
 import { noGradient } from '../../core/paint.js';
@@ -82,63 +84,35 @@ function arrowTip(
 /**
  * An edge label, drawn where `compress/edge-label-anchor.ts#edgeLabelLayout`
  * places it: `Snake#getTextBlockPosition` (`Snake.java:244-270`) on the raw
- * worm, mapped through compression (add4-T3a).
- * `activityDiagram { arrow { FontSize 11 } }` (plantuml.skin:373): the
- * activity-scoped block BEATS the root `arrow { FontSize 13 }` (:317) --
- * the more-specific StyleSignature wins, and `HtmlColorAndStyle.java:83`
- * / `ftile/FtileFactoryDelegator.java:84` both resolve an activity edge
- * through `of(root, element, activityDiagram, arrow)`.
+ * worm, mapped through compression (add4-T3a), then
+ * `text.textBlock.drawU(ug.apply(UTranslate.point(position)))`
+ * (`Snake.java:225-231`). The block is `FtileFactoryDelegator#getTextBlock`'s
+ * `display.create7(fc, HorizontalAlignment.LEFT, skinParam,
+ * CreoleMode.SIMPLE_LINE)` (`FtileFactoryDelegator.java:103-112`; the
+ * branch labels' `Branch#getTextBlock`, `Branch.java:250-258`, is the same
+ * LEFT `SIMPLE_LINE` block), with the `activityDiagram { arrow }` font
+ * (`style.getFontConfiguration`, plantuml.skin:373).
  *
- * `position` is the text block's TOP-LEFT corner, exactly as upstream's
- * `UTranslate.point(position)` places it (`Snake.java:230`); no
- * `text-anchor`, no extra offset beyond what that function already
- * bakes into its own default branch (`+4`, `Snake.java:248`).
- *
- * A coloured label (`<back:color>`, T1a's `label-colored-pill` finding)
- * draws through `core/svg.ts#text`'s own `textBackColor` -- the SAME
- * `feFlood`/`feComposite` filter `getFilterBackColor` registers
- * (`klimt/drawing/svg/SvgGraphics.java:732-735,772-786`), reused here
- * rather than re-invented: upstream never draws a background RECT for
- * this, only a filter clipped to the text's own bounding box (the SVG
- * filter region default, `objectBoundingBox`). `drawActivityText`'s own
- * klimt-driver path (`activity-renderer-text.ts`) has no `textBackColor`
- * seam and is outside this task's write-set, so the coloured branch
- * calls `core/svg.ts#text` directly instead -- the uncoloured branch is
- * unchanged, still `drawActivityText`, to keep its existing
- * `textLength` emission byte-identical.
+ * `position` is the block's top-left; the layout carries the first
+ * baseline, `position.y + size * ASCENT_FRACTION`
+ * (`activity-renderer-shapes.ts#centeredFirstBaselineY`), so the top is
+ * recovered from it. A `<back:color>` label (CommandArrow3.java:63-67 keeps
+ * the colour in the creole label; this port's parser lifts it into
+ * `edge.color`) is restored as the creole command, whose `AtomText` back
+ * colour becomes the `<text filter>` flood (`SvgGraphics.java:732-735`).
  */
 function renderEdgeLabel(edge: ActivityEdgeGeo, theme: Theme): string {
-  // add4-T3a (R2): placement lives in `compress/edge-label-anchor.ts`
-  // (raw-worm position mapped through compression), shared with the slot
-  // finder. `TextBlock.calculateDimension`: width = the widest line
-  // (`activity-text-placement.ts#measureLineWidth`), one line = the font
-  // size (`StringBounderFromWidthTable.java:69-71`). add4-T1f (SWITCH-NL):
-  // a `\n` label is a LEFT Sheet (`Branch.java:247-257`), one `<text>` per
-  // stripe, all at the block's own left x (`SheetBlock1.java:146-148`).
   const layout = edgeLabelLayout(edge, theme);
   if (layout === undefined) return '';
-  const { lines, size, width, x, baselineY } = layout;
+  const { lines, size, x, baselineY } = layout;
   const label = lines.join('\n');
-  const color = edge.color;
-  const fill = activityFontColor(theme, 'arrow');
-  if (lines.length > 1 && color === undefined) {
-    const style = { fill, fontFamily: theme.fontFamily, fontSize: size };
-    return drawActivityTextLines([...lines], x, baselineY, size, style);
-  }
-  if (color !== undefined) {
-    return text(x, baselineY, label, {
-      fontFamily: theme.fontFamily,
-      fontSize: size,
-      fill,
-      textLength: width,
-      textBackColor: color,
-    });
-  }
-  return drawActivityText(x, baselineY, label, {
-    fill,
-    fontFamily: theme.fontFamily,
-    fontSize: size,
+  const fc = activityTextFontConfiguration(theme, size, 'arrow');
+  const tb = activityDisplayBlock(edge.color === undefined ? label : `<back:${edge.color}>${label}`, {
+    fontConfiguration: fc,
+    horizontalAlignment: HorizontalAlignment.LEFT,
+    creoleMode: CreoleMode.SIMPLE_LINE,
   });
+  return drawActivityTextBlock(tb, { x, y: baselineY - size * ASCENT_FRACTION }, theme, fc);
 }
 
 /**
