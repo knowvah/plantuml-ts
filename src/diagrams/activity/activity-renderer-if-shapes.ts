@@ -20,17 +20,12 @@ import type { Paint } from '../../core/paint.js';
 import { polygon } from '../../core/svg.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
 import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon.java:46
-import { activityFontColor } from './activity-text-style.js';
-import {
-  actColors,
-  flooredFirstBaselineY,
-} from './activity-renderer-shapes.js';
-import { drawActivityText } from './activity-renderer-text.js';
+import { actColors } from './activity-renderer-shapes.js';
 import { renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
 import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBlock } from './activity-text-sheet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { centeredLineX, type ActivityTextOpts } from './activity-text-placement.js';
+import type { ActivityTextOpts } from './activity-text-placement.js';
 import { creoleTextLines } from '../../core/svek/image/creole-text-lines.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 
@@ -109,22 +104,11 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
     stroke: c.diamondBorder,
     strokeWidth: activityLineThickness(theme, 'diamond'),
   });
-  if (node.label === undefined || node.label === '') return shape;
-  // `activityDiagram { diamond { FontSize 11 } }` (plantuml.skin:370), the
-  // same value `tiles/gtile-diamond.ts` measured it at. `x` is
-  // `FtileDiamondInside.java:94-96`'s `lx = (dimTotal.width -
-  // dimLabel.width) / 2` in this node's own frame.
-  const fontSize = activityFontSize(theme, 'diamond');
-  const lineWidth = diamondLineWidth(theme, fontSize, node.label);
-  // D1: no `dominant-baseline` (the driver emits none, and no cached jar
-  // SVG carries one) -- the real baseline is the same N=1 reduction of
-  // `flooredFirstBaselineY` `renderHexagon`'s single-line branch uses.
-  const label = drawActivityText(centeredLineX(cx, lineWidth), flooredFirstBaselineY(cy, fontSize, 1), node.label, {
-    fontFamily: theme.fontFamily,
-    fontSize,
-    fill: activityFontColor(theme, 'diamond'),
-  });
-  return shape + label;
+  // No producer hands this rhombus a label: `GtileDiamondEmpty#label` is
+  // the constant `''` (its test text is the `north` slot, an `'if-label'`
+  // node), and `repeat-start` carries none (`FtileDiamond` has no own label,
+  // `FtileDiamond.java:85-104`).
+  return shape;
 }
 
 /**
