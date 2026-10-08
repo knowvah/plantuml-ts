@@ -1,0 +1,8 @@
+@startpacketdiag
+packetdiag {
+  colwidth = 16
+  0-3: A
+  4-35: Wide
+  36-47: Z
+}
+@endpacketdiag

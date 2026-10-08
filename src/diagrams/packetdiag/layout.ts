@@ -101,8 +101,15 @@ function buildGrid(
       }
 
       if (remain > 0) {
+        // The jar sizes this block with `toPacketBlock(remainRowWidth, true,
+        // false, ...)` (`PacketDiagram.java:430`), i.e. `Math.min(newWidth,
+        // width)` (`PacketDiagram.java:526`) where `width` is the carried
+        // item's width (`overflow`, here) and `newWidth` the reset
+        // `colWidth` -- NOT `remain`. Only the row accounting uses `remain`
+        // (`PacketDiagram.java:431`), so the block can be wider than the
+        // space left (a jar bug, mirrored).
         currRow.push({
-          width: remain,
+          width: Math.min(colWidth, overflow),
           height: item.height,
           label: item.label,
           leftOpen: true,
@@ -198,7 +205,17 @@ export function layoutPacket(ast: PacketDiagramAST): PacketGeometry {
     totalBlocksHeight += blockRenderedHeight(maxHeightUnits, bitHeight);
   }
 
-  const totalWidth = MARGIN_LEFT + (colWidth + 1) * bitWidth + MARGIN_RIGHT;
+  // `totalWidth = Math.max(indicatorTotalWidth, gridMaxWidth)`
+  // (`PacketDiagram.java:143-178`): a row whose blocks overshoot `colWidth`
+  // (see the remainder block in `buildGrid`) widens the canvas.
+  let gridMaxBits = 0;
+  for (const row of grid) {
+    gridMaxBits = Math.max(
+      gridMaxBits,
+      row.reduce((s, b) => s + b.width, 0),
+    );
+  }
+  const totalWidth = MARGIN_LEFT + Math.max(colWidth + 1, gridMaxBits) * bitWidth + MARGIN_RIGHT;
   const totalHeight = INDICATOR_HEIGHT + totalBlocksHeight + MARGIN_BOTTOM;
 
   return {
