@@ -19,6 +19,7 @@ import { scanLineForAtoms } from '../../core/creole-atoms.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
 import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import type { FontStyle } from '../../core/klimt/shape/UText.js';
+import { resolveSpriteLabelRuns } from './class-edge-label-sprite-runs.js';
 
 /**
  * `SvekEdge.java:298-299`'s `create0(..., CreoleMode.SIMPLE_LINE, ...)`
@@ -200,6 +201,10 @@ function computeSingleLinePlainLabelAttrs(
   if (sprite !== undefined) {
     return { label, labelWidth: sprite.width + vis.iconWidth, labelHeight: Math.max(sprite.height, vis.iconHeight) };
   }
+  // unwind2-S11: text beside a `<$sprite>` is one creole line
+  // (`class-edge-label-sprite-runs.ts`), the sprite its own atom.
+  const mixed = vis.iconWidth === 0 ? resolveSpriteLabelRuns(vis.text, font, measurer, sprites) : undefined;
+  if (mixed !== undefined) return { label, labelWidth: mixed.width, labelHeight: mixed.height };
   // M4 cause C: `<<x>>` -> `«x»` BEFORE measuring (`core/edge-label-box.ts
   // #applyGuillemet`, `Guillemet.java:78-88`) -- runs AFTER the visibility
   // strip, mirroring `Display.manageGuillemet`'s per-line order
