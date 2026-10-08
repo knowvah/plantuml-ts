@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1449 modules · 5486 exported names.
+1449 modules · 5489 exported names.
 
 ## `src/`
 
@@ -1543,7 +1543,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `layout-helpers-shape-endpoint.ts` | `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts` | Link endpoint resolution + DOT node shape resolution for the description diagram layout engine. |
 | `layout-helpers-types.ts` | `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE` | Pure type/const declarations for the description diagram layout engine. |
 | `layout-helpers.ts` | `DescriptionNodeGeo`, `Bbox`, `EdgeContainerEndpoints`, `ResolvedEndpoint`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `CONTAINER_PADDING`, `CONTAINER_TOP_PAD`, `EMPTY_CONTAINER_WIDTH`, `EMPTY_CONTAINER_HEIGHT`, `LAYOUT_MARGIN`, `LAYOUT_MARGIN_LEADING`, `GROUP_ANCHOR_SIZE`, `groupAnchorNodeId`, `resolveEndpoint`, `containerEndpointsInfo`, `symbolBaseShape`, `isInterfaceShielded`, `shapeForNode`, `isPortLabelWide`, `portTablePad`, `applyShieldEdgePorts`, `measureLeafNode`, `measureLeafShield`, `ACTOR_WIDTH`, `ACTOR_HEIGHT`, `USECASE_HEIGHT`, `PORT_SIZE`, `measureTitleLabel`, `isContainer`, `isClusterNode`, `computeContainerBbox`, `shiftGeo`, `insideBbox`, `buildNodeGeoIndex`, `degenerateSingleLeaf` | Pure, stateless helpers for the description diagram layout engine. |
-| `layout-ink-shift.ts` | `InkShift`, `computeInkShift` | layout-ink-shift.ts — G1b/J1 (mechanism C): `SvekResult #calculateDimension`'s `moveDelta` shift (svek/SvekResult.java:125-136), replacing this port's former flat node-box document margin (`layout-geo-post.ts`'s pre-G1b `computeGlobalShift` |
+| `layout-ink-shift.ts` | `InkShift`, `BodyPlacement`, `BodyFraming`, `placeBody` | layout-ink-shift.ts — G1b/J1 (mechanism C): `SvekResult #calculateDimension`'s `moveDelta` shift (svek/SvekResult.java:125-136), replacing this port's former flat node-box document margin (`layout-geo-post.ts`'s pre-G1b `computeGlobalShift` |
 | `layout-types.ts` | `ContainerDesc`, `ClassifyCtx`, `EdgeDotBuildResult` | The layout engine's shared context/result TYPES, split out of `layout.ts` (this project's established "500-line splits" workaround — mechanical move only, no behavior and no upstream divergence). |
 | `layout.ts` | `isEffectiveCluster`, `DescriptionNodeGeo`, `DescriptionEdgeGeo`, `DescriptionGeometry`, `ClassifyCtx`, `ContainerDesc`, `EdgeDotBuildResult`, `layoutDescription`, `USymbol` | Unified layout engine for PlantUML descriptive diagrams (component / use-case / deployment). |
 | `link-edge-attrs.ts` | `EdgeFontSpecs`, `computeGraphSpacing`, `buildLinkEdgeAttributes` | Link-derived DOT edge attributes + graph spacing for the description engine. |
@@ -1732,7 +1732,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 |---|---|---|
 | `ast.ts` | `JsonNode`, `StateKind`, `HistoryPseudostate`, `Separator`, `State`, `TransitionDirection`, `Transition`, `NotePosition`, `StateNote`, `RemoveRestoreDirective`, `StateDiagramAST` | AST type definitions for PlantUML state diagrams. |
 | `index.ts` | `statePlugin` | State diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
-| `layout-ink-extent.ts` | `StateDocumentDims`, `computeStateDocumentDims`, `StateInkShift`, `computeStateInkShift`, `SvekResultGeometry`, `computeSvekResultGeometry` | layout-ink-extent.ts — mission G4 S1, mechanism 4 ("document-margin / ink-extent computation gap"): the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/ TextBlockExporter.java:200-202,751-753), |
+| `layout-ink-extent.ts` | `computeStateInkBox`, `StateDocumentDims`, `computeStateDocumentDims`, `StateInkShift`, `computeStateInkShift`, `SvekResultGeometry`, `computeSvekResultGeometry` | layout-ink-extent.ts — mission G4 S1, mechanism 4 ("document-margin / ink-extent computation gap"): the `SvekResult`/`TextBlockExporter` document-dimension recipe (svek/SvekResult.java:126-133, core/ TextBlockExporter.java:200-202,751-753), |
 | `layout-ink-transition.ts` | `InkBox`, `newInkBox`, `addPoint`, `addTransitionInk` | layout-ink-transition.ts — the state engine's TRANSITION ink path, plus the `InkBox` accumulator primitives it and `layout-ink-extent.ts`'s per-shape node adders share. |
 | `layout.ts` | `StateNodeGeo`, `TransitionGeo`, `StateGeometry`, `layoutState` | State diagram layout engine. |
 | `parser.ts` | `parseState` | Parser for PlantUML state diagrams. |

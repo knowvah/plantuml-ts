@@ -321,6 +321,10 @@ export function renderState(geo: StateGeometry, skinTheme: Theme): RenderFragmen
     height: geo.totalHeight,
     background: resolveColorToSvgHex(theme.colors.background),
     diagramType: DIAGRAM_TYPE_STATE,
+    ...(geo.preChromeWidth !== undefined && geo.preChromeHeight !== undefined
+      ? { preChromeWidth: geo.preChromeWidth, preChromeHeight: geo.preChromeHeight }
+      : {}),
+    ...(geo.frameInk !== undefined ? { frameInk: geo.frameInk } : {}),
     ...(extraDefs !== undefined ? { extraDefs } : {}),
   };
 }

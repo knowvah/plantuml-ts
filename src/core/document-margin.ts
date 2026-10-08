@@ -73,6 +73,8 @@ const CUCA_DOCUMENT_MARGIN: DocumentMargin = {
  *  `preChromeWidth`/`preChromeHeight` belong here. */
 const DOCUMENT_MARGIN_BY_DIAGRAM_TYPE: Readonly<Record<string, DocumentMargin>> = {
   CLASS: CUCA_DOCUMENT_MARGIN,
+  STATE: CUCA_DOCUMENT_MARGIN,
+  DESCRIPTION: CUCA_DOCUMENT_MARGIN,
   SEQUENCE: SEQUENCE_DOCUMENT_MARGIN,
 };
 

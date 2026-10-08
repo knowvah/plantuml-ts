@@ -1,0 +1,10 @@
+@startuml
+mainframe Frame
+left to right direction
+actor User
+usecase (Login)
+usecase (Logout)
+note right of User : n
+User --> (Login)
+User --> (Logout)
+@enduml

@@ -359,6 +359,16 @@ function buildInkBox(
   return box;
 }
 
+/**
+ * lgm-T1c: the `LimitFinder` ink {@link computeStateDocumentDims} and
+ * {@link computeStateInkShift} measure, un-reduced -- what a mainframe frames
+ * (`BigFrame.java:77-91`, `DiagramChromeFactory.java:332-337`). Same
+ * `labelInk: false` fold as the two document-level functions.
+ */
+export function computeStateInkBox(states: readonly StateNodeGeo[], transitions: readonly TransitionGeo[]): InkBox {
+  return buildInkBox(states, transitions, false, 'always');
+}
+
 export interface StateDocumentDims {
   readonly width: number;
   readonly height: number;

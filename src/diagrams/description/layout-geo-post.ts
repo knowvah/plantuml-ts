@@ -6,7 +6,7 @@
  * keep each module within the complexity budget.
  *
  * G1b/J1 write-set expansion (journaled, mechanism C): Phase 4 (the global
- * coordinate shift) moved to `layout-ink-shift.ts#computeInkShift` — it now
+ * coordinate shift) moved to `layout-ink-shift.ts#placeBody` — it now
  * needs the theme-aware draw primitives (`renderer-draw-sequence.ts`) to
  * mirror `SvekResult#calculateDimension`'s real ink-extent walk, which this
  * module deliberately stays free of (pure geometry only — see

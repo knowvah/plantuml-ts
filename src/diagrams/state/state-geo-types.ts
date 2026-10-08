@@ -7,6 +7,7 @@
 
 import type { StateKind } from './ast.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { InkBox } from '../../core/annotations/body-ink.js';
 
 /** One measured text line (`state-sizing.ts#measureTextLines`/
  *  `measureBodyTextLines`) — `width` is the line's own measured advance
@@ -415,4 +416,26 @@ export interface StateGeometry {
    *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
    *  799-817`). */
   sprites?: SpriteRegistry;
+  /**
+   * lgm-T1c: the margin-less block `DiagramChromeFactory.create` is handed
+   * (`SvekResult#calculateDimension`, `svek/SvekResult.java:130-135`: ink +
+   * 15) -- `RenderFragment.preChromeWidth`/`preChromeHeight`. Absent for an
+   * empty diagram.
+   */
+  preChromeWidth?: number;
+  preChromeHeight?: number;
+  /**
+   * lgm-T1c: under a `mainframe` only. The `LimitFinder` ink of the
+   * UN-normalized svek body (`decorateWithFrame` never reaches
+   * `SvekResult#calculateDimension`, so `moveDelta` never runs,
+   * `DiagramChromeFactory.java:278-337`), in the drawn frame
+   * (`RenderFragment.frameInk`).
+   */
+  frameInk?: InkBox;
+  /**
+   * The node/edge min `graph-layout.ts#shiftToOrigin` subtracted
+   * (`DotLayoutResult.originShift`): layout frame + this = the jar's svek
+   * frame, the frame a framed body is drawn in. Set by the flat pipeline.
+   */
+  originShift?: { readonly x: number; readonly y: number };
 }

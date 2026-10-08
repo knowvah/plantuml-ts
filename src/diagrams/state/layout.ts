@@ -36,7 +36,10 @@ import type { ClipRect } from '../../core/spline-clip.js';
 import type { StateNodeGeo, TransitionGeo, StateGeometry, StateRegionGeo } from './state-geo-types.js';
 
 export type { StateNodeGeo, TransitionGeo, StateGeometry } from './state-geo-types.js';
-import { computeStateDocumentDims, computeStateInkShift } from './layout-ink-extent.js';
+import { computeStateDocumentDims, computeStateInkBox, computeStateInkShift } from './layout-ink-extent.js';
+import { svekDimension } from '../../core/svek/SvekResult.js';
+import { applyCucaDocumentMargin } from '../../core/TextBlockExporter.js';
+import { isDisplayPositionedNull } from '../../core/annotations/index.js';
 import { buildStateGeoTextFields } from './state-sizing.js';
 import { buildFlatNoteGeos, type FlatNoteGeoCtx } from './renderer-note.js';
 
@@ -230,6 +233,7 @@ function layoutFlat(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer
     totalHeight: result.height,
     states: buildFlatStateGeos(ast, { posMap, edgePosMap, theme, measurer }),
     transitions: buildFlatTransitionGeos(ast, result, theme, measurer, clusterAnchorRectsOf(dotGraph.clusters, result)),
+    ...(result.originShift !== undefined ? { originShift: result.originShift } : {}),
   };
 }
 
@@ -310,12 +314,46 @@ function shiftStateTransition(t: TransitionGeo, dx: number, dy: number): Transit
   };
 }
 
-function applyStateDocumentMargin(geo: StateGeometry): StateGeometry {
+/**
+ * lgm-T1c: `DiagramChromeFactory#decorateWithFrame` over an UN-normalized
+ * `SvekResult`. Under a `mainframe` nothing calls `SvekResult
+ * #calculateDimension` (`UgDiagram.java:124-128` -> `DiagramChromeFactory
+ * .java:129`; the wrapper's own `calculateDimension` asks only `frame`,
+ * `:317-321`), so its `moveDelta(6 - minX, 6 - minY)` (`svek/SvekResult
+ * .java:130-135`) never runs: the body is drawn in the raw svek frame (this
+ * port's layout frame + `DotLayoutResult.originShift`). The chrome then
+ * frames the `LimitFinder` ink of that body (`BigFrame.java:77-91`) and moves
+ * it by `computeDelta` (`:332-337`), both from {@link StateGeometry
+ * .frameInk}. Class mirrors this in `class/layout-ink-extent.ts
+ * #mainframePlacement`.
+ */
+function applyMainframePlacement(geo: StateGeometry): StateGeometry {
+  const m = geo.originShift ?? { x: 0, y: 0 };
+  const states = geo.states.map((n) => shiftStateNode(n, m.x, m.y));
+  const transitions = geo.transitions.map((t) => shiftStateTransition(t, m.x, m.y));
+  const ink = computeStateInkBox(states, transitions);
+  const block = svekDimension(ink);
+  const canvas = applyCucaDocumentMargin(block);
+  return {
+    totalWidth: canvas.width,
+    totalHeight: canvas.height,
+    preChromeWidth: block.width,
+    preChromeHeight: block.height,
+    frameInk: ink,
+    states,
+    transitions,
+  };
+}
+
+function applyStateDocumentMargin(geo: StateGeometry, framed: boolean): StateGeometry {
+  if (framed) return applyMainframePlacement(geo);
   const dims = computeStateDocumentDims(geo.states, geo.transitions);
   const shift = computeStateInkShift(geo.states, geo.transitions);
+  const block = svekDimension(computeStateInkBox(geo.states, geo.transitions));
   return {
     totalWidth: dims.width,
     totalHeight: dims.height,
+    ...(dims.width === 0 && dims.height === 0 ? {} : { preChromeWidth: block.width, preChromeHeight: block.height }),
     states: geo.states.map((n) => shiftStateNode(n, shift.dx, shift.dy)),
     transitions: geo.transitions.map((t) => shiftStateTransition(t, shift.dx, shift.dy)),
   };
@@ -344,7 +382,10 @@ export function layoutState(ast: StateDiagramAST, skinTheme: Theme, measurer: St
   // is a single end-of-pipeline merge rather than plumbing through every
   // intermediate flat/composite/margin-shift helper.
   return {
-    ...applyStateDocumentMargin(raw),
+    ...applyStateDocumentMargin(
+      raw,
+      ast.annotations !== undefined && !isDisplayPositionedNull(ast.annotations.mainFrame),
+    ),
     concurrentGlobalIds: effAst.concurrentGlobalIds ?? new Map(),
     ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
   };

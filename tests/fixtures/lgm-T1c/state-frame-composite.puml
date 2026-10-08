@@ -1,0 +1,9 @@
+@startuml
+mainframe Frame
+state Outer {
+  [*] --> Inner1
+  Inner1 --> Inner2
+}
+[*] --> Outer
+Outer --> [*]
+@enduml
