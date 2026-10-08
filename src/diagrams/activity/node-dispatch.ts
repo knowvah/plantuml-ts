@@ -46,6 +46,7 @@ import {
   tryLabel,
   pushParsedNode,
 } from './list-backward-dispatch.js';
+import { singleLineArrowLabel, tryArrowLong } from './dispatch-arrow-long.js';
 import { decodeNewlineSentinels } from './dispatch-newline-sentinels.js';
 import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
@@ -309,18 +310,20 @@ function tryRepeat(ctx: ParseContext, idx: number, line: string, lc: string): Di
   return { idx: close.nextIdx, node };
 }
 
-/** Arrow label: -> label ;  or  -><back:color> label ; -- annotates the
- *  next drawn edge with a text label and optional color pill. */
+/** `CommandArrow3` (`CommandArrow3.java:61-71`): `-> label;`,
+ *  `-[#red]-> label;`, bare `-[#red]->`. The label is `Display.
+ *  getWithNewlines(pragma, label)` (`:110`): `\\n` becomes a line break
+ *  here, once; `<back:>`/`<color:>` stay in the label for creole. */
 function tryArrowLabel(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (!line.startsWith('->')) return null;
+  if (!line.startsWith('-')) return null;
   const arrowMatch = RE_ARROW_LABEL.exec(line);
   if (arrowMatch === null) return null;
-  const color = arrowMatch[1]?.trim() || undefined;
-  const label = arrowMatch[2]?.trim() ?? '';
+  const style = arrowMatch[1];
+  const label = singleLineArrowLabel(ctx, arrowMatch[2] ?? '');
   const node: ActivityArrowLabel = {
     kind: 'arrow-label',
     label,
-    ...(color !== undefined ? { color } : {}),
+    ...(style !== undefined ? { style } : {}),
     ...swimlaneSpread(ctx),
   };
   return { idx: idx + 1, node };
@@ -353,6 +356,7 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryNoteSingle,
   tryNoteMulti,
   tryArrowLabel,
+  tryArrowLong,
   tryAnnotation,
   // D12/T1p-b: `!pragma` registered BEFORE sprite within `addCommonCommands2`
   // (`CommonCommands.java:62-89`).
@@ -437,7 +441,8 @@ export function parseNodes(ctx: ParseContext, idx: number, stops: StopKeywords):
     // single-line `backward:LABEL;`, falling to its multiline reader,
     // swallowing following lines). A colon ANYWHERE means some command
     // owns that `;` -- bare keywords never contain one.
-    if (!line.startsWith(':') && !line.includes(':') && line.endsWith(';')) {
+    // `CommandArrow3`'s `(.*);` owns its own `;` (`CommandArrow3.java:61-65`).
+    if (!line.startsWith(':') && !line.includes(':') && line.endsWith(';') && !RE_ARROW_LABEL.test(line)) {
       line = line.slice(0, -1).trimEnd();
     }
 

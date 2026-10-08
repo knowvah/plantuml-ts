@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-> <color:red>red ink;
+:b;
+stop
+@enduml

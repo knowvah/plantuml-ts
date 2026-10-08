@@ -14,6 +14,7 @@ import type { ParseRefusal } from '../../core/parse-refusal.js';
 import type { Pragma } from '../../core/skin/Pragma.js';
 import type { ScaleSpec } from '../../core/scale-command.js';
 import type { ActivityNode } from './ast.js';
+import { LINE_STYLE } from '../description/link-grammar-regex.js';
 
 // ---------------------------------------------------------------------------
 // Regex constants
@@ -313,16 +314,42 @@ export function defaultLeftPosition(direction: string | undefined): 'left' | 'ri
  */
 export const RE_NOTE_END = /^end[\s ]?note$/i;
 
+/** Shared head of `CommandArrow3` / `CommandArrowLong3`: `RegexOr("->",
+ *  COLOR=STYLE_COLORS_MULTIPLES)` + `spaceZeroOrMore`; group 1 = COLOR. */
+const ARROW_HEAD =
+  `(?:->|-\\[(${LINE_STYLE}(?:(?:;${LINE_STYLE})*)*)\\]->)[\\s\u00a0]*`;
+
 /**
- * Matches arrow-label lines:
- *   -> label ;
- *   -><back:color> label ;
- *   -><color:color> label ;
+ * `CommandArrow3`'s regex: `->` OR a coloured/styled arrow
+ * (`CommandLinkElement.STYLE_COLORS_MULTIPLES`, i.e. `-[#red]->`,
+ * `-[bold]->`), optional spaces, then EITHER a label ending in `;`
+ * (`(.*);`) OR nothing. Everything between the spaces and the LAST `;` is
+ * the label, verbatim: `<back:x>` / `<color:x>` are creole commands inside
+ * it, never arrow attributes. Only the bracket part is arrow
+ * colour/style.
  *
- * Capture group 1: optional color value (e.g. "red", "#FF0000")
- * Capture group 2: label text
+ * Capture group 1: COLOR (the text inside `-[ ]->`, `undefined` for `->`)
+ * Capture group 2: LABEL (`undefined` when the line has no `;` label)
+ *
+ * Built via `new RegExp` -- same lizard brace-depth workaround and
+ * `<`/`>` hoisting convention as {@link RE_REPEAT_HEAD}.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrow3.java:61-71
+ *   -- `RegexOr("->", COLOR=STYLE_COLORS_MULTIPLES)`, `spaceZeroOrMore`,
+ *   `RegexOr(LABEL="(.*);", "")`.
+ * @see net/sourceforge/plantuml/descdiagram/command/CommandLinkElement.java:82-83
+ *   -- `"-\\[(" + LINE_STYLE_MULTIPLES + "*)\\]->"`.
  */
-export const RE_ARROW_LABEL = /^->(?:<(?:back|color):([^>]+)>)?\s*(.*?)\s*;?\s*$/i;
+export const RE_ARROW_LABEL = new RegExp(`^${ARROW_HEAD}(?:(.*);|)$`, 'i');
+
+/** `CommandArrowLong3`'s start pattern: the same head, then `LABEL=(.*)`
+ *  (first line of a multi-line arrow label; its end is {@link
+ *  RE_ARROW_LONG_END}).
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrowLong3.java:66-74 */
+export const RE_ARROW_LONG = new RegExp(`^${ARROW_HEAD}(.*)$`, 'i');
+
+/** `CommandArrowLong3.END`: a line ending in `;` closes the label.
+ * @see net/sourceforge/plantuml/activitydiagram3/command/CommandArrowLong3.java:58 */
+export const RE_ARROW_LONG_END = new RegExp('^(.*);$');
 
 /** `repeat` head, optionally followed by an inline action on the same
  *  line (`repeat :foo;`). Built via `new RegExp` (not a `/.../ ` literal):

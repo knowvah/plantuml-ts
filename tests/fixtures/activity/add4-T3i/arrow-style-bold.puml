@@ -1,0 +1,7 @@
+@startuml
+start
+:a;
+-[bold]-> bold line;
+:b;
+stop
+@enduml
