@@ -1,0 +1,10 @@
+@startuml
+start
+:<code>
+int main() {
+  return 0
+}
+</code>
+end of box;
+stop
+@enduml

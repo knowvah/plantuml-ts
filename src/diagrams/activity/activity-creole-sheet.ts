@@ -254,9 +254,9 @@ const DRAW_MEASURER = new WidthTableMeasurer();
  * The `renderAction` entry point: `FtileBox#drawU`'s `tb.drawU(...)`
  * (`FtileBox.java:224-233`) for EVERY action label. `box.width` is the box's
  * own `calculateDimension` width (`dimTotal`), the SAME
- * {@link actionBoxDimension} `gtile-action.ts` sized it with. The caller's
- * own `<code>` dispatch (`renderActionCodeBlock`) returns before reaching
- * this function.
+ * {@link actionBoxDimension} `gtile-action.ts` sized it with. A `<code>`
+ * block is one more stripe of the same Sheet (`StripeCode`,
+ * `CreoleParser.java:103-104`), not a separate path.
  */
 export function renderActionLabel(
   label: string,

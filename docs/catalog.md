@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1407 modules · 5310 exported names.
+1406 modules · 5307 exported names.
 
 ## `src/`
 
@@ -1042,7 +1042,6 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-creole-sheet.ts` | `klimtStringBounder`, `buildActionTextBlock`, `actionBoxDimension`, `drawActionTextBlock`, `renderActionLabel`, `buildNoteTextBlock`, `noteTextBlockDimension`, `renderNoteLabel` | activity-creole-sheet -- every action and note label drawn through the REAL `SheetBuilder -> SheetBlock1 -> SheetBlock2 -> stripes/atoms` pipeline upstream builds them with: `FtileBox.java:178-181` for the action box (`new SheetBlock2(new S |
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `CompositeUSymbol`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
 | `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `ARROW_LABEL_LAYOUT_FONT_SIZE`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_MARGIN_X1`, `NOTE_MARGIN_X2`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `DocumentMargin`, `activityDocumentMargin`, `documentMarginTheme`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
-| `activity-renderer-action-code.ts` | `codeBlockLines`, `ActionCodeBlockArgs`, `renderActionCodeBlock` | `<code>...</code>` action-box bodies: monospace, measured like `tiles/ gtile-action.ts`'s own `monoCharWidth` sizing, not the proportional table `ActivityTextOpts` reads elsewhere. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite-symbols.ts` | `CompositeInk`, `TitleDim`, `compositeSymbolTitleOrigin`, `drawCompositeSymbol` | The three non-frame container symbols `FtileGroup#drawU` can draw (`type.asBig(name, align, TextBlockUtils.empty(0, 0), ...)`, `ftile/vcompact/FtileGroup.java:216-219`): `package` -> `USymbolFolder`, `card` -> `USymbolCard`, `rectangle` -> |
 | `activity-renderer-composite.ts` | `compositeTitleWidth`, `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |

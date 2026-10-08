@@ -50,7 +50,6 @@ import {
 } from './activity-renderer-signal-shapes.js';
 import { renderStart, renderStop, renderEnd, renderSpot } from './activity-renderer-terminals.js';
 import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
-import { renderActionCodeBlock } from './activity-renderer-action-code.js';
 import { floorActionLineHeight } from './tiles/gtile-action.js';
 import { actionLines, centeredBaselines, actionRuleFields } from './activity-renderer-line-heights.js';
 import { renderActionLabel, renderNoteLabel } from './activity-creole-sheet.js';
@@ -254,18 +253,8 @@ export function renderAction(node: ActivityNodeGeo, theme: Theme): string {
     rx: actionCornerRadius(theme),
     ry: actionCornerRadius(theme),
   });
-  const label = node.label ?? '';
-  const cx = node.x + node.width / 2;
-  const cy = node.y + node.height / 2;
-  const opts: ActivityTextOpts = { sname: 'activity', fontSize: actionSize, width: node.width };
-  const floored = floorActionLineHeight(actionSize);
-
-  // <code>...</code> block: KLIMT-FLOOR applies too, hence `floored`.
-  const codeText = renderActionCodeBlock({ label, theme, cx, cy, floored, actionSize, opts });
-  if (codeText !== null) return box + codeText;
-
   // D5 Sheet spike (`FtileBox.java:178-181`); `renderActionLabel` doc.
-  return box + renderActionLabel(label, theme, actionSize, node);
+  return box + renderActionLabel(node.label ?? '', theme, actionSize, node);
 }
 
 /** The hexagon condition label, split out of {@link renderHexagon} to stay

@@ -4,8 +4,7 @@ import { TileLeaf } from './tile.js';
 import type { StringBounder } from './tile.js';
 import type { ActivityAction } from '../ast.js';
 import type { Theme } from '../../../core/theme.js';
-import { activityBoxHeight, activityFontSize, activityPadding } from '../activity-style-defaults.js';
-import { activityMinimumWidth } from '../activity-text-style.js';
+import { activityFontSize } from '../activity-style-defaults.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
 import { actionBoxDimension, buildActionTextBlock, klimtStringBounder } from '../activity-creole-sheet.js';
 
@@ -85,50 +84,14 @@ export function measurerAdapterOf(bounder: StringBounder): StringMeasurer {
 }
 
 /**
- * `<code>` block sizing -- the ONE label this sizer does not route through
- * the Sheet, because its draw side does not either: `activity-renderer-
- * shapes.ts#renderAction` dispatches `renderActionCodeBlock` (a per-line
- * monospace renderer, `activity-renderer-action-code.ts`) BEFORE
- * `renderActionLabel`, so sizing it via `StripeCode` here would size and draw
- * the same box two different ways. Upstream has no such split (`StripeCode`
- * is a Sheet stripe, `CreoleParser.java`); retiring it is a draw-side change
- * in those two files.
- */
-function codeBlockSize(
-  lines: readonly string[],
-  bounder: StringBounder,
-  theme: Theme,
-): { width: number; height: number } {
-  const fontSize = activityFontSize(theme, 'activity');
-  // `calculateDimension`'s returned height is `size`, unconditionally --
-  // `klimt/drawing/font/StringBounderFromWidthTable.java:71`.
-  const lineHeight = floorActionLineHeight(bounder.getDimension('M', fontSize).height);
-  // Monospace chars are ~0.6x fontSize wide (the draw side's own advance).
-  const maxWidth = Math.max(0, ...lines.map((l) => l.length * fontSize * 0.6));
-  const barePadding = 2 * (theme.padding ?? 0);
-  return {
-    width: Math.max(maxWidth + 2 * activityPadding('activity') + barePadding, activityMinimumWidth(theme)),
-    height: activityBoxHeight(lineHeight * lines.length, 'activity') + barePadding,
-  };
-}
-
-/**
  * `GtileAction`'s width/height: `FtileBox#calculateDimensionFtile`
  * (`FtileBox.java:236-243`) over the box's own Sheet text block
  * (`activity-creole-sheet.ts#buildActionTextBlock`, `FtileBox.java:178-181`)
- * -- every label, creole tables, separators, `[[url]]`s and `{{ }}` embeds
+ * -- every label, creole tables, separators, `[[url]]`s, `{{ }}` embeds and
+ * `<code>` blocks (a `StripeCode` stripe, `CreoleParser.java:103-104`)
  * included, measured through the caller's own `StringBounder`.
  */
 function computeActionSize(label: string, bounder: StringBounder, theme: Theme): { width: number; height: number } {
-  const allLines = label.split('\n');
-  // Strip <code>/<\/code> wrapper lines -- they are not rendered as content.
-  if (/^<code>$/i.test(allLines[0]?.trim() ?? '')) {
-    return codeBlockSize(
-      allLines.filter((l) => !/^<\/?code>$/i.test(l.trim())),
-      bounder,
-      theme,
-    );
-  }
   // `activityDiagram { activity { FontSize 12 } }` (plantuml.skin:361).
   const fontSize = activityFontSize(theme, 'activity');
   const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: theme.fontFamily, size: fontSize });

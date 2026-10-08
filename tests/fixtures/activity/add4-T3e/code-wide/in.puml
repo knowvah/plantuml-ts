@@ -1,0 +1,9 @@
+@startuml
+start
+:short
+<code>
+a very long code line here
+</code>
+end;
+stop
+@enduml
