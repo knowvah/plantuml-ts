@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1419 modules · 5350 exported names.
+1419 modules · 5351 exported names.
 
 ## `src/`
 
@@ -1589,7 +1589,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `Fission.ts` | `NeutronType`, `Neutron`, `getNeutrons`, `splitStripe` | Line wrapping, as upstream does it — by splitting a line into ATOMS and breaking between them, not by re-joining words into strings. |
 | `index.ts` | `jsonPlugin` | JSON diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
 | `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
-| `json-family-style-input.ts` | `jsonFamilyStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
+| `json-family-style-input.ts` | `jsonFamilyStyleInput`, `hclStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `buildHighlightMap`, `processStringDisplay`, `splitDisplayLines`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
