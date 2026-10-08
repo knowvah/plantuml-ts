@@ -26,13 +26,14 @@ import { walkTile, type Out } from './tile-coordinates.js';
 import { mergeSnakes } from './snake-merge.js';
 import { inkBoundsOf } from './canvas-origin.js';
 
-function freshOut(): Out {
+function freshOut(theme: Theme): Out {
   let idCounter = 0;
   return {
     nodes: [],
     edges: [],
     edgeMeta: [],
     reservations: [],
+    theme,
     nextId: (prefix: string) => `ink-${prefix}-${++idCounter}`,
   };
 }
@@ -45,7 +46,7 @@ function freshOut(): Out {
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vcompact/FtileGroup.java:150-158
  */
 export function groupInnerInkMaxX(body: Tile, theme: Theme): number | undefined {
-  const out = freshOut();
+  const out = freshOut(theme);
   walkTile(body, 0, 0, { kindHint: null, lane: undefined }, out);
   const merged = mergeSnakes(out.edges, out.edgeMeta);
   const ink = inkBoundsOf({ nodes: out.nodes, edges: merged.edges, reservations: out.reservations }, theme);

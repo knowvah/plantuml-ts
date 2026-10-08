@@ -19,19 +19,12 @@ import type { ActivityArrowLabel } from '../ast.js';
 import type { SnakeTextAlign } from './snake-text-position.js';
 import { getTextBlockPosition } from './snake-text-position.js';
 import type { Out } from './tile-coordinates.js';
+import type { Theme } from '../../../core/theme.js';
+import { activityFontSize } from '../activity-style-defaults.js';
+import { edgeLabelBlockSize } from './compress/edge-label-anchor.js';
+import { TITLE_ASCENT_FRACTION } from './swimlane-placement.js';
 import type { Reservation } from './hexagon-reservations.js';
-import { centeredFirstBaselineY } from '../activity-renderer-shapes.js';
-import { ARROW_LABEL_LAYOUT_FONT_SIZE } from '../activity-layout-constants.js';
-import { WidthTableMeasurer } from '../../../core/measurer.js';
 import { pushLaneReservation } from './swimlane-reservation-lane.js';
-import { creoleTextLines } from '../../../core/svek/image/creole-text-lines.js';
-import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
-import type { FontSpec, StringMeasurer } from '../../../core/measurer.js';
-
-/** Measures an in-link label's width at layout time -- `family` is unused
- *  by `WidthTableMeasurer` (it reads only `size`, a universal sans-serif
- *  table), so the module-level instance below needs no `Theme`. */
-const LABEL_MEASURER = new WidthTableMeasurer();
 
 /** One pending `-> label;`, carried from the `arrow-label` node that set
  *  it to whichever tile consumes it next ({@link Tile.inLabel}'s own
@@ -89,19 +82,6 @@ export function withOutLabel<T extends { outLabel?: PendingInLabel | undefined }
 }
 
 /**
- * One connector-label line's width as a `CreoleMode.SIMPLE_LINE` creole
- * block -- every Snake label upstream is built that way
- * (`FtileFactoryDelegator.java:111`, `Branch.java:255-256`,
- * `ConditionalBuilder.java:282,295,299`, `FtileRepeat.java:171-200`,
- * `AbstractParallelFtilesBuilder.java:195`): `**bold**` resolves,
- * `__underline__` stays literal (`CommandCreoleBuilder.java:85-86`).
- * Shared with `compress/shapes-of.ts#edgeLabelShape`.
- */
-export function snakeLabelLineWidth(line: string, font: FontSpec, measurer: StringMeasurer): number {
-  return creoleTextLines(line, font, measurer, { mode: CreoleMode.SIMPLE_LINE })[0]?.width ?? 0;
-}
-
-/**
  * `LimitFinder#drawText`'s own ink box (`klimt/drawing/LimitFinder.java:
  * 216-224`), computed at WALK time (pre-compression) over the edge's own
  * RAW points -- mirrors `canvas-origin-text-ink.ts#extendForEdgeLabelText`'s
@@ -117,28 +97,22 @@ function inLabelReservation(
   points: readonly { x: number; y: number }[],
   inLabel: PendingInLabel,
   align: SnakeTextAlign,
+  theme: Theme,
 ): Reservation {
-  // add4-T1f (SWITCH-NL): a `\n` label is an N-line Sheet, each stripe one
-  // font size high (`SheetBlock1.java:146-148`, `StringBounderFromWidthTable
-  // .java:69-71`); `SlotFinder#drawText` boxes each line's `UText`, and the
-  // adjacent boxes touch, so one N-line box is the same slot.
+  // add4-T3j: the drawn block (`edgeLabelBlockSize`, `Snake.java:247`) at
+  // the theme's arrow font places the label; each `UText` sits inside
+  // `SheetBlock1`'s padding (`SheetBlock1.java:209-210`), stacked one font
+  // size apart (`SheetBlock1.java:146-148`) -- the same box as
+  // `canvas-origin-text-ink.ts#extendForEdgeLabelText`.
   const lines = inLabel.label.split('\n');
-  const font = { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE };
-  const lineHeight = ARROW_LABEL_LAYOUT_FONT_SIZE;
-  // The placement keeps the raw width the renderer places with
-  // (`renderer.ts#renderEdgeLabelAligned`, `measureLineWidth`), so this box
-  // starts where the text is drawn.
-  const rawWidth = Math.max(...lines.map((l) => LABEL_MEASURER.measure(l, font).width));
-  const position = getTextBlockPosition(points, { width: rawWidth, height: lineHeight * lines.length }, align);
-  // add4-T3b SNAKE-LABEL-CREOLE: the occupied width is the connector label's
-  // SIMPLE_LINE creole width (`FtileFactoryDelegator.java:111`,
-  // `Branch.java:255-256`, `ConditionalBuilder.java:282`) -- what
-  // `SlotFinder#drawText` boxes once the markup has been resolved.
-  const width = Math.max(...lines.map((l) => snakeLabelLineWidth(l, font, LABEL_MEASURER)));
-  const dim = { width, height: lineHeight * lines.length };
-  const baselineY = centeredFirstBaselineY(position.y + dim.height / 2, lineHeight, lines.length);
-  const top = baselineY - (lineHeight - 1.5);
-  return { x: position.x, y: top, width, height: dim.height };
+  const fontSize = activityFontSize(theme, 'arrow');
+  const pad = theme.padding ?? 0;
+  const dim = edgeLabelBlockSize(inLabel.label, theme);
+  const position = getTextBlockPosition(points, dim, align);
+  const baselineY = position.y + pad + fontSize * TITLE_ASCENT_FRACTION;
+  const top = baselineY - (fontSize - 1.5);
+  const bottom = baselineY + fontSize * (lines.length - 1) + 1.5;
+  return { x: position.x + pad, y: top, width: dim.width - 2 * pad, height: bottom - top };
 }
 
 /**
@@ -181,7 +155,7 @@ function applyPendingLabelToLastEdge(out: Out, pending: PendingInLabel | undefin
   if (pending.label === '') return;
   edge.label = pending.label;
   edge.labelAlign = align;
-  const r = inLabelReservation(edge.points, pending, align);
+  const r = inLabelReservation(edge.points, pending, align, out.theme);
   pushLaneReservation(out.reservations, r, labelLane(out.edgeMeta[out.edgeMeta.length - 1]!));
 }
 

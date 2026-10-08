@@ -65,4 +65,10 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
   it('INSIDE_DIAMOND if: condition Sheet and side blocks carry the padding', () => {
     expect(diffPaths('add4-T3j', 'inside-diamond-blocks')).toEqual([]);
   });
+
+  // The walk-time in-label box is the drawn block at the theme's arrow font
+  // (canvas-origin-text-ink.ts#extendForEdgeLabelText's box), not a fixed 11pt.
+  it('in-label at a small arrow font: reservation sized as the drawn block', () => {
+    expect(diffPaths('add4-T3h', 'side-labels-small-font')).toEqual([]);
+  });
 });

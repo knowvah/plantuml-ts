@@ -23,7 +23,7 @@ import { resolveTheme } from '../../../../src/core/theme.js';
 import { astOrThrow } from '../../../helpers/parse-ast.js';
 import { applyInLabel } from '../../../../src/diagrams/activity/layout/tile-layout-inlabel.js';
 import type { Out } from '../../../../src/diagrams/activity/layout/tile-coordinates.js';
-import { ARROW_LABEL_LAYOUT_FONT_SIZE } from '../../../../src/diagrams/activity/activity-layout-constants.js';
+import { ARROW_FONT_SIZE } from '../../../../src/diagrams/activity/activity-style-defaults.js';
 
 function layout(markup: string) {
   const first = buildBlockUmls(markup)[0];
@@ -187,14 +187,14 @@ describe('applyInLabel reservation width is the SIMPLE_LINE creole width', () =>
       ],
       edgeMeta: [{ lane1: undefined, lane2: undefined, shape: 'default' }],
       reservations: [],
+      theme: resolveTheme('default'),
       nextId: (p: string) => p,
     } as unknown as Out;
     applyInLabel(out, { inLabel: { label } }, { horizontal: 'LEFT' });
     return out.reservations[0]!.width;
   };
   const measurer = new DeterministicMeasurer();
-  const rawWidth = (text: string): number =>
-    measurer.measure(text, { family: '', size: ARROW_LABEL_LAYOUT_FONT_SIZE }).width;
+  const rawWidth = (text: string): number => measurer.measure(text, { family: '', size: ARROW_FONT_SIZE }).width;
 
   it('`**hello**` reserves the width of `hello`', () => {
     expect(reservedWidth('**hello**')).toBeCloseTo(rawWidth('hello'), 10);

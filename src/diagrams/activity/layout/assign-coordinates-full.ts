@@ -269,20 +269,21 @@ function mergeBeforeCompress(placed: PlacementResult, laneNames: readonly string
 /** Fresh, empty {@link Out} accumulator -- split out of {@link
  *  assignCoordinatesFull} purely to keep that function's own NLOC under
  *  the file's limit. */
-function buildOut(): Out {
+function buildOut(theme: Theme): Out {
   let idCounter = 0;
   return {
     nodes: [],
     edges: [],
     edgeMeta: [],
     reservations: [],
+    theme,
     nextId: (prefix: string) => `${prefix}-${++idCounter}`,
   };
 }
 
 export function assignCoordinatesFull(input: AssignCoordinatesInput): AssignCoordinatesResult {
   const { root, ast, baseX, baseY, bounder, theme, compress = true } = input;
-  const out = buildOut();
+  const out = buildOut(theme);
   const { nodes, edges, edgeMeta, reservations } = out;
   const { contentY, titlesHeight } = resolveSwimlaneVertical(ast.swimlanes, baseY, bounder, theme);
   walkTile(root, baseX, contentY, { kindHint: null, lane: undefined }, out);
