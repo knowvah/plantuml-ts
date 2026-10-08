@@ -326,25 +326,24 @@ describe('chrome creole — {{ }} embedded diagrams (CDD B7FU-R2)', () => {
       /xlink:href="data:image\/svg\+xml;base64,([^"]+)"/.exec(image!)![1]!,
       'base64',
     ).toString('utf-8');
-    expect(decoded).toContain('data-diagram-type="DESCRIPTION"');
+    // unwind-U4: the payload is `UImageSvg#getSvg` -- the nested root is
+    // replaced by a bare `<svg height width>` (UImageSvg.java:73-76), so the
+    // nested document's `data-diagram-type` does not survive, as in the jar.
+    expect(decoded).toMatch(/^<svg height="\d+" width="\d+" /);
+    expect(decoded).not.toContain('data-diagram-type');
     expect(decoded).toContain('>f<');
   });
 
-  it('a legend embedding an unsupported diagram type (no salt engine) degrades to the (42,42) fallback, not a crash', () => {
-    // Mirrors bixogo-47-xulu385/roxosu-00-pini153's own shape: a user-macro
-    // `SALT(...)` expands to `{{salt ... }}`; this port has no salt engine
-    // (`EmbeddedDiagram.ts`'s own catch degrades to (42,42) -- see that
-    // file's `calculateDimensionSlow`/`drawU` doc comments), so the render
-    // call itself throws "unknown diagram type" and is caught upstream --
-    // the legend still renders (no crash), with a fixed-size placeholder
-    // rect only, no `<image>`.
+  it('a legend embedding an unsupported diagram type (no salt engine) draws the dispatcher placeholder, as the jar does', () => {
+    // bixogo-47-xulu385/roxosu-00-pini153's shape: `{{salt ... }}` with no salt
+    // engine. The nested render is the dispatcher's 300x60 "unknown diagram
+    // type" SVG, which has no viewBox; upstream's UImageSvg falls back to the
+    // root width/height (UImageSvg.java:139-144) and draws it, so the legend
+    // holds a 300x60 <image> (unwind-U4; was a 42x42 empty slot).
     const src = '@startuml\nclass foo\nlegend\n{{salt\n{+\n<b>x\n}\n}}\nendlegend\n@enduml';
     const svg = renderSync(src, { measurer: new DeterministicMeasurer() });
     const legend = chromeGroup(svg, 'legend');
-    expect(legend).not.toContain('<image');
-    // The legend's own rect is the (42,42) fallback plus its fixed 5px
-    // padding on each side (bixogo-47-xulu385/roxosu-00-pini153's own
-    // shape, `test-results/dot-cache/class/bixogo-47-xulu385/in.puml`).
-    expect(/<rect[^>]*width="52"[^>]*height="52"/.test(legend)).toBe(true);
+    expect(legend).toContain('<image width="300" height="60"');
+    expect(/<rect[^>]*width="310"[^>]*height="70"/.test(legend)).toBe(true);
   });
 });
