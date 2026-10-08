@@ -59,4 +59,10 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
   it('EMPTY_DIAMOND while: the north test is the condition, not a branch label', () => {
     expect(diffPaths('add4-T3h', 'empty-diamond-north')).toEqual([]);
   });
+
+  // FtileDiamondSquare.java:86,115 read the condition Sheet's dimension;
+  // its sides are ConditionalBuilder's SIMPLE_LINE blocks (:280-283).
+  it('INSIDE_DIAMOND if: condition Sheet and side blocks carry the padding', () => {
+    expect(diffPaths('add4-T3j', 'inside-diamond-blocks')).toEqual([]);
+  });
 });
