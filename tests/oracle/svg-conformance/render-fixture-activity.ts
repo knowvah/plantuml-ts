@@ -85,7 +85,7 @@ import {
 } from '../../../src/diagrams/activity/activity-layout-constants.js';
 import { hasActivityChrome } from '../../../src/diagrams/activity/index.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
-import { applyActivityChrome } from '../../../src/diagrams/activity/layout/document-margin.js';
+import { applyActivityChrome, applyActivityScale } from '../../../src/diagrams/activity/layout/document-margin.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg, seedOfUmlSource } from '../../../src/core/assemble-svg.js';
 import { renderSync } from '../../../src/index.js';
@@ -167,7 +167,10 @@ export function renderFixtureActivity(
   });
 
   const annotations = ast.annotations;
-  if (annotations === undefined || isEmpty(annotations)) return assembleSvg(fragment, seed);
+  // add4-T3b: mirrors `src/index.ts#applyAnnotationChrome`'s scale step.
+  if (annotations === undefined || isEmpty(annotations)) {
+    return assembleSvg(applyActivityScale(fragment, { ast, theme }), seed);
+  }
 
   const styles = resolveAnnotationStyles(theme, preprocessed.skinparam, styleMap);
   // add1 b3 (journal row 52): mirror `src/index.ts#applyAnnotationChrome`'s
@@ -175,7 +178,8 @@ export function renderFixtureActivity(
   // `TextBlockExporter.java:159-203`), so this harness must compose the same
   // way or it measures its own drift instead of the port.
   if (fragment.preChromeWidth !== undefined) {
-    return assembleSvg(applyActivityChrome(fragment, annotations, styles, measurer, ast.sprites), seed);
+    const input = { ast, theme, sprites: ast.sprites };
+    return assembleSvg(applyActivityChrome(fragment, annotations, styles, measurer, input), seed);
   }
   const chromed = applyChrome(fragment, annotations, styles, measurer, ast.sprites);
   return assembleSvg(chromed, seed);

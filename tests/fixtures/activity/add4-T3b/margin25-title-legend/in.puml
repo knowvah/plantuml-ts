@@ -1,0 +1,15 @@
+@startuml
+<style>
+document {
+  Margin 25
+}
+</style>
+title A rather long title for the box
+start
+:a;
+:b;
+stop
+legend
+the legend
+endlegend
+@enduml

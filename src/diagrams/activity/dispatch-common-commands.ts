@@ -45,14 +45,17 @@ export function trySprite(ctx: ParseContext, idx: number): DispatchResult | null
 /**
  * `scale ...` (6 forms, `CommonCommands#addCommonScaleCommands`, wired for
  * every `TitledDiagram` factory including `activitydiagram3`) -- mission
- * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. Recognised and consumed
- * only: the resolved factor is NOT applied to the rendered document (no
- * `ast.scale`/renderer wiring here, unlike `sequence`/`description`) --
- * activity-diagram scaling is a separate, unscoped follow-on; this just
- * stops the line from refusing.
+ * ubrr-T10 M2's `zovemu-18-keki646` prerequisite. add4-T3b (ACT-SCALE):
+ * each form calls `diagram.setScale(...)` (`CommandScale.java:104`,
+ * `CommandScaleWidthOrHeight.java:82-84`, ...), which REPLACES the previous
+ * one (`AbstractDiagram.java:195-197`), so the spec lands on `ctx.scale`
+ * unresolved; `layout/document-margin.ts` resolves it at export time
+ * against the final dimension (`TextBlockExporter.java:160-166`).
  */
-export function tryScale(_ctx: ParseContext, idx: number, line: string): DispatchResult | null {
-  if (matchScaleCommand(line) === undefined) return null;
+export function tryScale(ctx: ParseContext, idx: number, line: string): DispatchResult | null {
+  const spec = matchScaleCommand(line);
+  if (spec === undefined) return null;
+  ctx.scale = spec;
   return { idx: idx + 1 };
 }
 

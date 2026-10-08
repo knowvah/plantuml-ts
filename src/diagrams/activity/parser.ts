@@ -110,6 +110,7 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     // carried onto the returned AST below (read at layout time by
     // `conditional-builder.ts`, never re-derived).
     pragma: Pragma.createEmpty(),
+    scale: undefined,
   };
 
   const result = parseNodes(ctx, 0, []);
@@ -123,6 +124,8 @@ export function parseActivity(block: UmlSource, options?: ParseOptions): Activit
     annotations: ctx.annotations,
     sprites: ctx.sprites,
     pragma: ctx.pragma,
+    // add4-T3b: `TextBlockExporter.Builder#styled` reads `diagram.getScale()`.
+    ...(ctx.scale !== undefined ? { scale: ctx.scale } : {}),
   };
 }
 

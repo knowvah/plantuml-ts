@@ -9,10 +9,14 @@
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/SvgGraphics.java
  */
 import type { RenderFragment } from './dispatcher.js';
-import { group, rect } from './svg.js';
+import { attrs, group, rect } from './svg.js';
 import { paintToSvg } from './paint.js';
 import { resolveColorToSvgHex } from './klimt/color/HColorSet.js';
 import { CONTENT_G_OPEN_RE } from './klimt/document-shell.js';
+import { scaleFragmentBody } from './TextBlockExporter.js';
+import { resolveScaleFactor } from './scale-command.js';
+import { mapOutsideInlineDefs } from './svg-defs.js';
+import { DEFAULT_SVG_DECIMALS, formatDecimal } from './svg-format.js';
 
 /** The default (unset) diagram background -- `theme.ts`'s own
  *  `colors.background: '#FFFFFF'`. Declared separately from the sibling
@@ -111,6 +115,36 @@ function spliceIntoActivityContentGroup(body: string, markup: string): string {
 }
 
 /**
+ * add4-T3b (ACT-SCALE): the activity attributes `scaleFragmentBody`'s
+ * mindmap vocabulary (`TextBlockExporter.ts#SCALABLE_ATTR_RE`) does not
+ * name. Every one is a `SvgGraphics#format`-ed length (`SvgGraphics.java:
+ * 468-475`): ellipse centres, line endpoints, and the dash pattern
+ * (`setStrokeWidth`, `:557-562`). `stroke-width="..."` is NOT listed: the
+ * mindmap regex's `\bwidth` alternative already matches it after the `-`
+ * (pinned by `assemble-svg-activity-scale.test.ts`), so listing it here
+ * would scale it twice.
+ */
+const ACTIVITY_EXTRA_SCALABLE_ATTR_RE = /(?<![\w-])(cx|cy|x1|y1|x2|y2|stroke-dasharray)="([^"]*)"/g;
+const NUMBER_RE = /-?\d+(?:\.\d+)?/g;
+
+function scaleNumbers(value: string, factor: number): string {
+  return value.replace(NUMBER_RE, (token) => formatDecimal(Number(token) * factor, DEFAULT_SVG_DECIMALS));
+}
+
+/** The whole composed activity body at `factor` -- upstream draws it through
+ *  ONE scaled `UGraphic` (`TextBlockExporter.java:165-177`). `factor === 1`
+ *  is byte-identical. Inline defs are stepped over, as `scaleFragmentBody`
+ *  does (gradient `x1`/`y1` are objectBoundingBox fractions). */
+function scaleActivityBody(body: string, factor: number): string {
+  if (factor === 1) return body;
+  return mapOutsideInlineDefs(scaleFragmentBody(body, factor), (segment) =>
+    segment.replace(ACTIVITY_EXTRA_SCALABLE_ATTR_RE, (_m, name: string, value: string) =>
+      attrs([[name, scaleNumbers(value, factor)]]).trimStart(),
+    ),
+  );
+}
+
+/**
  * activity's per-diagram finalization. Canonicalizes `fragment.background`
  * itself as well as the body, for json's reason (N4's resolve-before-shell
  * convention): the jar's root `style` carries the value
@@ -136,5 +170,20 @@ export function finalizeActivityFragment(fragment: RenderFragment): RenderFragme
     fragment.bodyWrapped === true
       ? spliceIntoActivityContentGroup(fragment.body, backgroundRect)
       : group(backgroundRect + fragment.body);
-  return { ...canonical, body };
+  // add4-T3b (ACT-SCALE): `computeScaleFactor` (`TextBlockExporter.java:
+  // 204-208`). The activity layer already resolved the spec's strategy
+  // against `calculateFinalDimension()` (`layout/document-margin.ts
+  // #withActivityScale`) -- the post-chrome, post-margin raw dimension only
+  // it can rebuild -- and hands it here as a `simple` spec, so `width`/
+  // `height` below are unread for it. The canvas (`maxX`/`maxY`, already
+  // the `ensureVisible` integers) and the background rect scale with the
+  // body (`SvgGraphics.java:801-822`).
+  const factor = resolveScaleFactor(fragment.scaleSpec, fragment.width, fragment.height, fragment.dpi);
+  if (factor === 1) return { ...canonical, body };
+  return {
+    ...canonical,
+    body: scaleActivityBody(body, factor),
+    width: fragment.width * factor,
+    height: fragment.height * factor,
+  };
 }
