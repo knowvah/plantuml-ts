@@ -1,8 +1,6 @@
 /**
- * Annotation-command wiring for the JSON diagram parser (mission G0b/T6, T8).
- * `title` now routes through the shared annotation matcher along with
- * caption/legend/header/footer/mainframe (T8 migrated it off the bespoke
- * `ast.title` field onto `ast.annotations.title`).
+ * Directive lines in `@startjson`, as upstream handles them (unwind-U1):
+ * the json family has no command table, only `StyleExtractor`.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -13,29 +11,37 @@ function parse(lines: string[]) {
   return parseJson({ lines, type: 'json' as const });
 }
 
-describe('parseJson — annotation commands (mission G0b/T6, T8)', () => {
-  it('single-line `title X` populates annotations.title (T8), not the JSON body', () => {
+describe('parseJson — directive lines (unwind-U1)', () => {
+  // StyleExtractor.java:84-85 + JsonDiagramFactory.java:105-108: only a
+  // leading `title ` line is chrome, and its text is taken raw.
+  it('single-line `title X` populates annotations.title, not the JSON body', () => {
     const ast = parse(['title My JSON', '{"a": 1}']);
     expect(ast.annotations?.title.display).toEqual(['My JSON']);
     expect(ast.root).toEqual({ a: 1 });
   });
 
-  it('multi-line `title ... end title` populates annotations.title (bonus over the old bespoke single-line-only regex)', () => {
-    const ast = parse(['title', 'Line One', 'Line Two', 'end title', '{"a": 1}']);
-    expect(ast.annotations?.title.display).toEqual(['Line One', 'Line Two']);
-    expect(ast.root).toEqual({ a: 1 });
+  it('keeps quotes in the title text (jar: unwind-U1/json-title-quoted)', () => {
+    expect(parse(['title "Q"', '{"a": 1}']).annotations?.title.display).toEqual(['"Q"']);
   });
 
-  it('single-line caption populates annotations.caption, not the JSON body', () => {
-    const ast = parse(['caption a caption', '{"a": 1}']);
-    expect(ast.annotations?.caption.display).toEqual(['a caption']);
-    expect(ast.root).toEqual({ a: 1 });
+  // Everything else is payload, so the JSON fails to parse and the jar draws
+  // "Your data does not sound like JSON data" (jar: unwind-U1/json-caption,
+  // json-legend, json-header, json-footer, json-mainframe, json-title-after).
+  it.each([
+    ['multi-line title', ['title', 'Line One', 'end title']],
+    ['caption', ['caption a caption']],
+    ['legend', ['legend', 'a legend line', 'end legend']],
+    ['header', ['header h']],
+    ['footer', ['footer f']],
+    ['mainframe', ['mainframe m']],
+  ])('%s is payload: parse error, no chrome', (_name, lines) => {
+    const ast = parse([...lines, '{"a": 1}']);
+    expect(ast.parseError).toBe(true);
+    expect(isEmpty(ast.annotations!)).toBe(true);
   });
 
-  it('multi-line `legend ... end legend` populates annotations.legend, not the JSON body', () => {
-    const ast = parse(['legend', 'a legend line', 'end legend', '{"a": 1}']);
-    expect(ast.annotations?.legend.display).toEqual(['a legend line']);
-    expect(ast.root).toEqual({ a: 1 });
+  it('a title after the payload is payload', () => {
+    expect(parse(['{"a": 1}', 'title Late']).parseError).toBe(true);
   });
 
   it('annotation-free fixture parses identically (no chrome, empty annotations)', () => {

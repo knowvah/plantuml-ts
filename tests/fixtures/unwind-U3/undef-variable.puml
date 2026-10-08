@@ -1,0 +1,5 @@
+@startuml
+!define FOO Alice
+!undef FOO
+class FOO
+@enduml

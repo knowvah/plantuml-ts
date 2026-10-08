@@ -1,0 +1,4 @@
+@startyaml
+caption My caption
+a: 1
+@endyaml

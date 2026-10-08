@@ -3,10 +3,10 @@
   "totals": {
     "missing-element": 260,
     "extra-element": 111,
-    "geometry": 72197,
+    "geometry": 72205,
     "text-metrics": 2249,
     "format-units": 1,
-    "other": 25022
+    "other": 25038
   },
   "fixtures": [
     {
@@ -5899,6 +5899,18 @@
         "text-metrics": 0,
         "format-units": 0,
         "other": 15
+      }
+    },
+    {
+      "slug": "licole-34-vejo527",
+      "diffCount": 26,
+      "buckets": {
+        "missing-element": 0,
+        "extra-element": 0,
+        "geometry": 8,
+        "text-metrics": 0,
+        "format-units": 0,
+        "other": 18
       }
     },
     {
@@ -12683,14 +12695,14 @@
     },
     {
       "slug": "xurenu-86-nezu467",
-      "diffCount": 48,
+      "diffCount": 46,
       "buckets": {
         "missing-element": 0,
         "extra-element": 0,
         "geometry": 35,
         "text-metrics": 0,
         "format-units": 0,
-        "other": 13
+        "other": 11
       }
     },
     {
@@ -13550,10 +13562,6 @@
     {
       "slug": "ladiro-50-gume805",
       "reason": "refuses to parse -- source line 5: `  Note`, the BODY of the multi-line opener `note left of Alice [[http://www.google.fr]]` on line 4. Unported: the UrlBuilder.OPTIONAL tail of factorySequenceNoteCommand.createMultiLine (FactorySequenceNoteCommand.java:76-90, the OPTIONAL at :89; SequenceDiagramFactory.java:134). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
-    },
-    {
-      "slug": "licole-34-vejo527",
-      "reason": "refuses to parse -- preprocessed line 4: ` + XXX`. NOT an unported command and NOT an unported `%newline()` (Newline.ts:31 ports it). Measured mechanism: `%newline()` written INSIDE a TIM double-quoted literal (`!$mixed0 = \"XXX + %newline() + XXX\"`) yields a real U+000A, where the same call outside a literal (`\"XXX\" + %newline() + \"XXX\"`) correctly yields the U+E100 sentinel. applyFunctionsAndVariablesInternal then splits the substituted message on \\n (TContext.ts:362, mirroring tim/TContext.java:512-517 whose gate Pragma.legacyReplaceBackslashNByNewline() is hardcoded true, skin/Pragma.java:95-97), so the label becomes two source lines and the continuation matches no Command. Upstream never splits because Newline#executeReturnFunction returns the sentinel in BOTH positions (tim/builtin/Newline.java:63-67 under JawsFlags.java:40). Under parse-attempt dispatch an unmatched line is a refusal, not a silently dropped statement: this port declines the whole source the way PSystemCommandFactory.executeFewLines does (PSystemCommandFactory.java:169-175)."
     },
     {
       "slug": "loteba-26-konu854",

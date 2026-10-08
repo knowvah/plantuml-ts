@@ -1,0 +1,7 @@
+@startdot
+digraph G {
+  a [label="http://x"]; // trailing
+  /* block */
+  a -> b;
+}
+@enddot

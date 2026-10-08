@@ -1,0 +1,13 @@
+@startuml
+class Foo {
+  +bar : int
+  +baz()
+}
+interface Iface
+enum Color {
+  RED
+}
+abstract class Abs
+annotation Ann
+Foo --> Iface
+@enduml

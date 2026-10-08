@@ -39,7 +39,10 @@ describe.each([
     const ast = parseFn(block(type, lines), { assetStore });
     expect(ast.sprites?.internal).toBeDefined();
     expect(ast.sprites?.internal?.get('archimate/network')).toBeDefined();
-    expect(ast.sprites?.byName.has('Netw')).toBe(true);
+    // unwind-U1: the json family has no command table, so the `sprite` line
+    // itself is payload (StyleExtractor.java:63-103; jar:
+    // tests/fixtures/unwind-U1/json-sprite-stdlib) -- nothing is defined.
+    expect(ast.sprites?.byName.has('Netw')).toBe(false);
   });
 
   it(`${type}Plugin.parse forwards options.assetStore (D6 plugin wiring)`, () => {

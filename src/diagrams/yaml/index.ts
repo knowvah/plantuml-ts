@@ -19,6 +19,7 @@ import type { JsonDiagramAST } from '../json/ast.js';
 import type { JsonGeometry } from '../json/layout.js';
 import { parseYaml } from './parser.js';
 import { layoutJson } from '../json/layout.js';
+import { jsonFamilyStyleInput } from '../json/json-family-style-input.js';
 import { renderJson } from '../json/renderer.js';
 
 // ---------------------------------------------------------------------------
@@ -40,6 +41,10 @@ export const yamlPlugin: SyncPlugin<JsonDiagramAST, JsonGeometry> = {
   parse(source, options) {
     return parseYaml(source, options);
   },
+
+  // unwind-U1: `skinparam` is not executed in this family upstream
+  // (`StyleExtractor.java:88-97`) -- see `json-family-style-input.ts`.
+  styleInput: jsonFamilyStyleInput,
 
   layoutSync(ast, theme, measurer) {
     return layoutJson(ast, theme, measurer);

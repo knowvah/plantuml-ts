@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob : hello%newline()world
+Bob -> Alice : a%n()b
+@enduml

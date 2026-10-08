@@ -539,3 +539,4 @@ either diagnosed as correct-by-oracle, or reclassified as our work.
         mismatches (sanity check, matching E3.md's own number exactly). The
         order-sensitivity E3.md recorded as a MEDIUM-confidence lead does
         not hold today -- measurement recorded here, no issue filed. -->
+- [ ] 27-parser-accepts-node-brace-block.md  <!-- FILED 2026-10-08 (unwind-U2): `node { shape=box }` parses in dot-engine 1.6.1, graphviz rejects; also peggy vs yacc error text on invalid DOT. -->

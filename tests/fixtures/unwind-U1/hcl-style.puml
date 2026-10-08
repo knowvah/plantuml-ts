@@ -1,0 +1,8 @@
+@starthcl
+<style>
+document { BackGroundColor red }
+</style>
+resource "aws_instance" "web" {
+  ami = "ami-123"
+}
+@endhcl

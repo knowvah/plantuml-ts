@@ -42,8 +42,8 @@
  * A fixture whose residual diffs are a DELIBERATE divergence is listed under
  * `divergent` with a diff ceiling instead of being required clean — see
  * {@link DivergentEntry} for why a ceiling and not an attribute allowlist.
- * Today that is the json family honoring `skinparam`, which upstream's
- * `JsonDiagramFactory` has no command table to parse at all.
+ * (The json family honoring `skinparam` was one until unwind-U1 mirrored
+ * upstream's `StyleExtractor`, which keeps only `handwritten`.)
  *
  * Shrink-only, like every other ratchet here: a fixture listed in the manifest
  * must stay clean, and one that becomes clean should be added.

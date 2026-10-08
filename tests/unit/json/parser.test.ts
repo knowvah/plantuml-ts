@@ -52,16 +52,19 @@ describe('parseJson', () => {
       expect(ast.highlights).toHaveLength(0);
     });
 
-    it('sets root to null and parseError false for empty body', () => {
+    // `Json.parse("")` throws ParseException, which JsonDiagramFactory.java:
+    // 94-96 turns into the "does not sound like JSON data" page (jar:
+    // tests/fixtures/unwind-U1/json-title-only.svg).
+    it('sets root to null and parseError true for empty body', () => {
       const ast = parse([]);
       expect(ast.root).toBeNull();
-      expect(ast.parseError).toBe(false);
+      expect(ast.parseError).toBe(true);
     });
 
-    it('sets root to null and parseError false for whitespace-only body', () => {
+    it('sets root to null and parseError true for whitespace-only body', () => {
       const ast = parse(['   ', '  ']);
       expect(ast.root).toBeNull();
-      expect(ast.parseError).toBe(false);
+      expect(ast.parseError).toBe(true);
     });
 
     it('parses JSON with inline // comments (JSONC)', () => {

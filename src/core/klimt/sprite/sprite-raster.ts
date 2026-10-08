@@ -46,6 +46,7 @@
  */
 import { parseColorString, type RgbColor } from '../../tim/builtin/color-utils.js';
 import { encodePng, toBase64DataUri, RGBA_BYTES_PER_PIXEL } from './png-encoder.js';
+import { scaleBilinear } from './sprite-bilinear.js';
 import type { SpriteMonochrome } from './SpriteMonochrome.js';
 import type { SpriteColor4096 } from './SpriteColor4096.js';
 
@@ -170,13 +171,15 @@ export function spriteToRgba(sprite: SpriteLike, fontColor?: string, backColor?:
 
 export interface SpritePngResult {
   readonly dataUri: string;
-  /** Natural PNG pixel dimensions (matches the encoded IHDR); unaffected by `scale`. */
+  /** The sprite's own grid size, before `scale`. The encoded PNG is
+   *  `scaledRasterSize(natural, scale)` (`sprite-bilinear.ts`). */
   readonly naturalWidth: number;
   readonly naturalHeight: number;
   /**
-   * Display dimensions for the SVG `<image>` element: `natural{Width,Height} * scale`.
-   * See file-header-adjacent divergence note on `spriteToPngDataUri` for why
-   * the raster itself is NOT resampled to this size.
+   * Declared (layout) size, `natural * scale` unrounded -- upstream's
+   * `calculateDimension` (`SpriteMonochrome.java:224`, `AtomImg.java:239`).
+   * The drawn `<image>` carries the raster's own rounded size instead
+   * (`SvgGraphics.java:973-974`, `image.getWidth()`).
    */
   readonly width: number;
   readonly height: number;
@@ -187,32 +190,13 @@ const DEFAULT_SCALE = 1;
 /**
  * Tints and rasterizes `sprite` to a `data:image/png;base64,...` URI.
  *
- * Scale handling -- DISCLOSED DIVERGENCE (journal for DIVERGENCES.md):
- * `UImage#scale` (klimt/shape/UImage.java:79-81) delegates to
- * `MutableImage#withScale`, which for the sprite/img path
- * (`PixelImage#withScale`, net/atmp/PixelImage.java:64-67) MULTIPLIES the
- * cumulative scale and only resamples lazily in `getImage()`
- * (PixelImage.java:69-78) via `PortableImage#scale(scale, interpolationType)`
- * -- for sprites/img atoms `interpolationType` is
- * `AffineTransformType.TYPE_BILINEAR` (SpriteMonochrome.java:207,
- * AtomImg.java:250). The actual resampler
- * (`PortableImageAwt#scale`, klimt/awt/PortableImageAwt.java:113-127) is
- * `java.awt.image.AffineTransformOp` with `TYPE_BILINEAR` -- a JDK Java2D
- * algorithm with no portable spec, infeasible to reproduce byte-exact here
- * and out of scope for a minimal, no-canvas, deterministic encoder
- * (D7, plans/si5b-stdlib/decisions.md). So: contrary to the initial
- * hypothesis that upstream defers scaling entirely to an SVG-level
- * transform, upstream DOES resample the raw PNG bitmap -- just via an
- * unportable AWT filter. This function instead emits the NATURAL-size PNG
- * (no resampling) and returns `width`/`height` (`natural * scale`,
- * unrounded) for the caller to place on the SVG `<image width height>`
- * attributes, letting the browser's own image scaling stand in for AWT's
- * bilinear resample -- functionally equivalent to a deferred-to-SVG-transform
- * approach, chosen as the pragmatic substitute once byte-exact AWT
- * resampling was ruled infeasible. Geometry (the scaled box size) matches
- * upstream's `calculateDimension`/`calculateDimensionSlow`
- * (`width * scale`, `height * scale` -- SpriteMonochrome.java:224,
- * AtomImg.java:239) exactly; only the pixel-resampling algorithm differs.
+ * Scale: `UImage#scale` (`klimt/shape/UImage.java:79-81`) multiplies the
+ * `PixelImage`'s cumulative scale, and `PixelImage#getImage`
+ * (`net/atmp/PixelImage.java:69-78`) resamples once, through
+ * `PortableImageAwt#scale` (`TYPE_BILINEAR`, `SpriteMonochrome.java:207`).
+ * {@link scaleBilinear} reproduces that resample (its doc records the
+ * measured residual), so the PNG's IHDR size is the jar's; the DEFLATE
+ * stream is not (`png-encoder.ts`).
  */
 export function spriteToPngDataUri(
   sprite: SpriteLike,
@@ -220,8 +204,10 @@ export function spriteToPngDataUri(
   backColor?: string,
   scale: number = DEFAULT_SCALE,
 ): SpritePngResult {
-  const { rgba, width, height } = spriteToRgba(sprite, fontColor, backColor);
-  const png = encodePng(rgba, width, height);
+  const natural = spriteToRgba(sprite, fontColor, backColor);
+  const { width, height } = natural;
+  const raster = scaleBilinear(natural, scale);
+  const png = encodePng(raster.rgba, raster.width, raster.height);
   return {
     dataUri: toBase64DataUri(png),
     naturalWidth: width,
@@ -265,14 +251,14 @@ export function spriteColor4096ToRgba(sprite: SpriteColor4096): RgbaBitmap {
 /**
  * cdd-T26 residual round: encodes a {@link SpriteColor4096} to a
  * `data:image/png;base64,...` URI — the `/color`-sprite sibling of
- * {@link spriteToPngDataUri}, same scale-geometry contract (natural PNG,
- * `width`/`height` pre-scaled for the caller's `<image>` attributes; see
- * that function's own doc comment for the full disclosed-divergence
- * citation on why the raster itself is not resampled).
+ * {@link spriteToPngDataUri}, same scale contract (the raster is resampled
+ * by {@link scaleBilinear}; `width`/`height` are the declared size).
  */
 export function spriteColor4096ToPngDataUri(sprite: SpriteColor4096, scale: number = DEFAULT_SCALE): SpritePngResult {
-  const { rgba, width, height } = spriteColor4096ToRgba(sprite);
-  const png = encodePng(rgba, width, height);
+  const natural = spriteColor4096ToRgba(sprite);
+  const { width, height } = natural;
+  const raster = scaleBilinear(natural, scale);
+  const png = encodePng(raster.rgba, raster.width, raster.height);
   return {
     dataUri: toBase64DataUri(png),
     naturalWidth: width,

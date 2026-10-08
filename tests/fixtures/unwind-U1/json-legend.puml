@@ -1,0 +1,4 @@
+@startjson
+legend My legend
+{ "a": 1 }
+@endjson

@@ -1,0 +1,10 @@
+@startuml
+class A {
+  {{
+    class X
+    X --> Y
+  }}
+  --
+  y : int
+}
+@enduml

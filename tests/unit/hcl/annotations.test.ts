@@ -1,9 +1,12 @@
 /**
- * Annotation-command wiring for the HCL diagram parser (mission G0b/T6).
- * Unlike json/yaml, HCL never captured `title` into its own AST field
- * (it was silently discarded pre-T6) — routing it through the shared
- * annotation matcher here is a straight migration, not a dual-mechanism
- * conflict, so `title` participates here (unlike json/yaml/dot/chart).
+ * Directive lines in `@starthcl`, as upstream handles them (unwind-U1).
+ *
+ * HCL has no command table: `StyleExtractor.java:63-103` consumes a leading
+ * `title ` line and `HclDiagramFactory.java:86-92` never sets it (the block is
+ * commented out), so no chrome is drawn. `caption`/`legend`/`header`/`footer`
+ * are not directives at all -- they are HCL payload, folded into the module
+ * name by `HclParser#getModuleOrSomething` (`HclParser.java:77-89`).
+ * Jar renders: `tests/fixtures/unwind-U1/hcl-{title,caption,legend,...}.svg`.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -15,22 +18,24 @@ function makeSource(lines: string[]): UmlSource {
   return { lines, type: 'hcl' };
 }
 
-describe('parseHcl — annotation commands (mission G0b/T6)', () => {
-  it('single-line `title X` populates annotations.title (previously silently discarded)', () => {
-    const ast = parseHcl(makeSource(['title My HCL', 'key = "value"']));
-    expect(ast.annotations?.title.display).toEqual(['My HCL']);
-    expect(ast.root).toEqual({ key: 'value' });
-  });
+const BLOCK = ['resource "x" {', '  key = "value"', '}'];
 
-  it('multi-line `legend ... end legend` populates annotations.legend, not body content', () => {
-    const ast = parseHcl(makeSource(['legend', 'a legend line', 'end legend', 'key = "value"']));
-    expect(ast.annotations?.legend.display).toEqual(['a legend line']);
-    expect(ast.root).toEqual({ key: 'value' });
-  });
-
-  it('annotation-free fixture parses identically (no chrome, empty annotations)', () => {
-    const ast = parseHcl(makeSource(['key = "value"']));
+describe('parseHcl — directive lines (unwind-U1)', () => {
+  it('a leading `title X` is consumed and never set', () => {
+    const ast = parseHcl(makeSource(['title My HCL', ...BLOCK]));
     expect(isEmpty(ast.annotations!)).toBe(true);
     expect(ast.root).toEqual({ key: 'value' });
+  });
+
+  it('`caption X` is payload: it joins the module name, dropped with one module', () => {
+    const two = parseHcl(makeSource(['caption c', ...BLOCK, 'other {', 'a = "1"', '}']));
+    expect(isEmpty(two.annotations!)).toBe(true);
+    expect(Object.keys(two.root as object)).toEqual(['caption c resource "x"', 'other']);
+    expect(parseHcl(makeSource(['caption c', ...BLOCK])).root).toEqual({ key: 'value' });
+  });
+
+  it('a title AFTER the payload is payload, and fails to parse (HclParser.java:88)', () => {
+    const ast = parseHcl(makeSource([...BLOCK, 'title Late']));
+    expect(ast.parseError).toBe(true);
   });
 });

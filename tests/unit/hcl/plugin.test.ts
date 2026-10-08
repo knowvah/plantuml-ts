@@ -23,9 +23,10 @@ describe('hclPlugin', () => {
     expect(typeof svg).toBe('string');
   });
 
-  it('renders title text via annotation chrome (DIVERGENCES.md: upstream crashes on hcl title)', () => {
+  it('drops a leading title, as the jar does (HclDiagramFactory.java:86-92)', () => {
     const svg = renderSync('@starthcl\ntitle My Title\nkey = "value"\n@endhcl');
-    expect(svg).toContain('My Title');
+    expect(svg).not.toContain('My Title');
+    expect(svg).toContain('value');
   });
 
   it('handles ternary expression without throwing', () => {

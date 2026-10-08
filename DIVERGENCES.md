@@ -219,29 +219,9 @@ earlier history of this entry (the missing `LimitFinder` primitive, mission
 G0's port of it, the description-engine style-resolution blocker) is in git
 history under this heading.
 
-### Default element skin — grey (`#F1F1F1`), not legacy yellow (`#FEFECE`)
+### ~~Default element skin — grey (`#F1F1F1`), not legacy yellow (`#FEFECE`)~~ — RETIRED (unwind-U4, 2026-10-08)
 
-**Upstream:** PlantUML carries two default fills for class/object/descriptive
-elements — the legacy `ColorParam` default (`#FEFECE` pale yellow) and the
-newer Style-system default (`#F1F1F1` grey, `resources/skin/plantuml.skin`).
-Which one renders depends on the code path/version; the current reference jar
-(`plantuml-1.2026.7beta3`) renders the Style-system grey.
-
-**This port:** adopts `#F1F1F1` fill / `#181818` border / black font as the
-default element skin (`classBackground`, `enumBackground`, and every
-per-element default via `resolveElementPaint` → `nodeBackground`). Note
-elements keep their distinct pale-yellow default; only the general element
-skin changed.
-
-**Category:** aesthetic (alignment with the authoritative modern default).
-
-**Rationale:** matches what current upstream actually renders, so a
-default-colored diagram looks like the reference jar rather than the legacy
-yellow. Deliberate, maintainer-approved — see `decisions.md#D2`
-(planning/mission-render-fidelity). Reversible by reverting the two default
-values in `src/core/theme.ts`.
-
----
+Not a divergence: the pinned jar draws `#F1F1F1`/`#181818` elements and a `#FEFFDD` note (`plantuml.skin:2-3,16-17,324`); pinned by `tests/oracle/svg-conformance/unwind-u4-skin.test.ts`.
 
 ### LaTeX rendering engine — KaTeX, not JLaTeXMath (permanent)
 
@@ -450,31 +430,22 @@ anyway, a variable-built include path (`!include $path`) was inexpressible, and
 verbatim and shipped as opt-in packages (`@knowvah/plantuml-stdlib`, `-aws`,
 `-tupadr3`, `-all`); a caller registers bundles via `stdlibStore(...)` /
 `withStdlib(...)` on `options.includeStore` and the form resolves with
-upstream Stdlib.java key semantics. With NO store supplied, the core package
-still throws `StdlibNotBundledError` naming the bundle — the core stays
-asset-free by design (bundle size + license hygiene). **What the original
+upstream Stdlib.java key semantics. A folder the jar does not ship (or a slashless `<x>`)
+now renders the jar's "Fatal parsing error" page (unwind-U3, 303682bf4;
+`PathSystem.java:196-201`, `Stdlib.java:166-176`, `TContext.java:374-384`). For a folder
+the jar DOES ship that no store supplies, the core still throws
+`StdlibNotBundledError` — packaging-forced (the core is asset-free; stdlib
+ships as opt-in packages); `render()` surfaces it via `prepareIncludeStore`'s
+public typed error. **What the original
 seam replaced was worse:** `include-resolver.ts` used to **silently drop**
 the line, rendering diagrams *quietly wrong*.
 **Category:** limitation only for store-less callers (deliberate packaging).
 
-### Sprite and `img` rasters — pass-through and browser scaling (deliberate)
+### Sprite and `img` rasters — PNG bytes and CC BY-ND artwork (library- and licence-forced)
 
-**Upstream:** decodes every `data:image/png;base64` payload and RE-ENCODES a
-fresh PNG (ImageIO) into its SVG output, and scales sprites/images by AWT
-bilinear resampling (`AffineTransformOp`) before encoding.
+**Mirrored (unwind-U4, 2026-10-08):** sprite rasters are resampled to the jar's `round(w*s)×round(h*s)` through a clean-room `AffineTransformOp` bilinear (`src/core/klimt/sprite/sprite-bilinear.ts`; 24/54248 channel values off by one on half-pixel downscale ties) and drawn at the raster's own size (`SvgGraphics.java:973-974`; `PortableImageAwt.java:113-127`); element geometry and note placement match the jar.
 
-**This port:** `img` data URIs pass through **byte-verbatim** into the SVG
-`image` href (required by the AWS CC BY-ND verbatim constraint, and cheaper);
-sprites are rasterized once at natural size through a deterministic
-stored-block PNG encoder, and ALL scaling is carried by the `image` element
-width/height (the browser resamples). Geometry (element kind, x/y/w/h,
-scale math) matches the jar; href BYTES deliberately differ.
-
-**Reason:** ImageIO's encoder and AWT's bilinear filter are unportable and
-non-deterministic across JDKs; verbatim pass-through is also the
-licensing-safe path for ND-licensed artwork.
-
-**Affects:** any diagram rendering stdlib icons or creole `img`/sprite atoms.
+**Remaining, forced:** (1) **PNG bytes** — the jar's IDAT is zlib 1.2.13 deflate at level 4 (`PNGImageWriter`); byte equality needs that deflate (a zlib port such as `pako`); ours are stored/fixed-Huffman. (2) **`img` data URIs pass through verbatim** — licence-forced for the AWS CC BY-ND artwork (`plans/si5b-stdlib/decisions.md` D3: any re-encode voids the grant); the jar's decode/resample/re-encode for other images is not done.
 
 ### Emoji shorthand `<:name:>` — the platform glyph, not OpenMoji artwork (limitation, CDD B7FU-R1)
 
@@ -514,64 +485,9 @@ surrounding layout numbers already match.
 ported") and `.agent-notes/cdd-T25.md`, which traced the same finding from the
 `<:name:>` shorthand side.
 
-### Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster (deliberate, CDD T27)
+### ~~Embedded `{{ }}` sub-diagrams — SVG source, not a re-encoded raster~~ — RETIRED (unwind-U4, 2026-10-08)
 
-**Upstream:** `EmbeddedDiagram#getImageSvg`/`getImageSvgSlow`
-(`EmbeddedDiagram.java:129-133,169-174,197-213`) renders the nested diagram,
-strips its `<?plantuml ...?>` processing instructions, and embeds the
-resulting bytes as a `data:image/svg+xml;base64` (or PNG, off the raster
-branch) `<image>` inside the parent diagram.
-
-**This port:** `src/diagrams/class/class-nested-diagram-renderer.ts`
-(`createNestedDiagramRenderer`, CDD T27) renders the nested source through
-this port's OWN `renderSync` recursively, strips the same `<?plantuml ...?>`
-PIs (java:199), and embeds the resulting SVG SOURCE, base64-encoded
-verbatim, as a `data:image/svg+xml;base64` `<image>` sized from the nested
-render's own `viewBox`. Geometry (one `<image>` element, `x`/`y`/`width`/
-`height`) is the target; the payload BYTES deliberately differ — this port
-never re-encodes through ImageIO/AWT (no raster pipeline at all, this
-project's architecture note). The jar's CURRENT oracle cache for this
-corpus holds REAL nested renders, not the `calculateDimensionSlow` catch
-fallback (`(42, 42)`, java:150-152) -- an earlier note
-(`.agent-notes/r2b-embedded-42x42.md`) documented the fallback against an
-OLDER cache and is corrected by `.agent-notes/cdd-T27.md`, which decodes
-the current cache's `<image>` payloads directly.
-
-**Reason:** same as the sprite/img entry above — no portable, deterministic
-raster re-encode path exists in a browser-safe library; embedding the real
-rendered SVG source is cheaper and strictly more informative than a raster.
-
-**Status (CDD T27FU, updated):** wired into production for the class
-engine's own ENHANCED-body pipeline (`class-body-enhanced-embeds.ts`
-ports `MethodsOrFieldsArea.java:109-123,141-152,429-440`'s embed
-separation/stacking directly into `class-body-enhanced-layout.ts
-#buildRowsBlockRows`; `src/index.ts#prepareBlock` registers the renderer,
-closing over the ambient call's own `options`/measurer, on every
-`renderSync` call). Observable today for any classifier body that ALREADY
-takes the enhanced-body path (a `--`/`==`/`..`/`__` separator or `|_` tree
-line present anywhere in the body) and also contains a `{{ }}` block —
-`gadufu-56-votu808` is such a fixture (0 structural diffs; the image's own
-width/height carry a small residual, `.agent-notes/cdd-T27.md`'s own
-mechanism finding — belongs to the embedded ACTIVITY engine's text
-measurement, not this seam). A body whose ONLY enhancing trigger would be
-the `{{ }}` block itself (no separator/tree line otherwise present, e.g.
-`moxobo-16-tipo829`/`zikabo-17-gugi332`) is still NOT reached: `class-body-
-enhanced.ts#isEnhancedBody` lacks upstream's third disjunct
-(`EmbeddedDiagram.getEmbeddedType(s) != null`, `BodierLikeClassOrObject
-.java:96`) and is excluded from this task's write-set (a concurrent task
-edits it) — see `.agent-notes/cdd-T27.md` for the one-line fix needed and
-why even fixing it would not unblock genuine multi-level recursion (a
-SEPARATE, more severe parser gap: `handlePendingBodyLine` has no
-embedded-block awareness at parse time at all, so a NESTED class
-declaration's own closing `}` inside a `{{ }}` region prematurely closes
-the outer body regardless of `isEnhancedBody`). `core/cucadiagram/
-MethodsOrFieldsArea.ts`'s OWN consumer remains unreached (dead code for
-class-body rendering, ADR-5 — a DIFFERENT, pre-existing fact this task's
-diagnosis re-confirmed, not something T27FU changed).
-
-**Affects:** any class-body `{{ }}` embed whose enclosing body already
-takes the enhanced path; the bare-embed-only case and T28's chrome/legend
-consumer remain as described above.
+The payload is now `UImageSvg#getSvg` plus the `SvgGraphics#svgImage` wrapper (`UImageSvg.java:65-146`; `SvgGraphics.java:1015-1029`; `src/core/klimt/shape/UImageSvg.ts`), byte-identical in structure to the jar's; the nested bytes are this port's own render of the nested diagram and differ only where that engine differs at top level. (The deterministic oracle's 42x42 slot and its `<text>` spot letter in nested class diagrams are instrument artefacts, see below.)
 
 ### `!includedef` reads the store; `!import` registers a lookup prefix
 
@@ -646,23 +562,9 @@ switch: `PSystemError.disableTimeBasedErrorDecorations()`. The version line
 naming *this* renderer, not the Java one, is the point of the line.
 **Category:** limitation (assets) / clarity (version identity).
 
-### `!undefine` accepted as an alias for `!undef` (superset)
+### ~~`!undefine` accepted as an alias for `!undef`~~ — RETIRED (unwind-U3, 2026-10-08)
 
-**Upstream:** only `!undef` exists; the jar errors on `!undefine`.
-
-**This port:** accepts **both**, and `!undefine` additionally drops a like-named
-*macro* (which upstream's `FunctionsSet` cannot do).
-
-**Why:** pre-existing plantuml-ts behavior, pinned by
-`tests/unit/preprocessor.test.ts`. A strict superset — no upstream-valid diagram
-changes meaning. **Category:** limitation (upstream gap we fill).
-
-**SI6 note:** the removal is now COMPLETE. It used to leave the macro's name in
-`FunctionsSet`'s `functions3` trie, relying on the (now retired) "function not
-found" passthrough to make a later call site fall back to literal text. With
-that passthrough gone, a call to an undefined macro would have raised `Function
-not found` — an error for a function the document explicitly removed — so the
-trie is now rebuilt from the surviving functions.
+`!undef` only (`TLineType.java:53-56,87`), and it removes a variable only (`EaterUndef.java:48-54`); `!undefine` is a plain line, as the jar renders it.
 
 ### `!theme` executes the theme; a residual summary fills four field families
 
@@ -710,24 +612,9 @@ browser (no `fs`, no `process.env`) and render reproducibly (no `Date.now()`, no
 `Math.random()`). A host can supply a real implementation. **Category:**
 limitation.
 
-### `%newline()` / `%breakline()` emit a real newline, not the BLOCK_E1 sentinel
+### ~~`%newline()` / `%breakline()` emit a real newline~~ — RETIRED (unwind-U3, 2026-10-08)
 
-**Upstream:** carries both branches, gated on
-`JawsFlags.USE_BLOCK_E1_IN_NEWLINE_FUNCTION`.
-
-**This port:** takes upstream's **legacy branch** (flag `false`), yielding a real
-newline.
-
-**Why:** this port has no Jaws/Creole decoder, so the BLOCK_E1 sentinel would
-reach the SVG as an invisible private-use character instead of a line break. The
-legacy branch is what made `%n()` split lines pre-TIM. **Category:** limitation.
-
-**Known residual:** `%retrieve_procedure`'s captured body is joined with
-upstream's `BLOCK_E1_NEWLINE` *in-line* separator (faithful — and required: line
-*splitting* regressed `roputo-88-fuxo199` to zero layout graphs by turning a
-captured class body inside a `note` into loose top-level lines). Without a Jaws
-decoder that separator renders as an invisible character rather than a label
-line break.
+The flag is upstream's `true` (`JawsFlags.java:40`) and the sentinels decode as upstream (`Display.java:316-341`); unwind-U3 removed the port-only case-insensitive `%n()`/`%newline()` split in `flatten()` (TIM finds calls by an exact trie walk, `TrieImpl.java:91-111`). Open defects (not divergences): class member, description link label and state transition label skip `Display#getWithNewlines` (`it.fails` in `tests/unit/core/tim/unwind-u3-jar-fixtures.test.ts`).
 
 ### `\t` in labels — a real tab, but no tab-stop indentation (limitation)
 
@@ -817,7 +704,7 @@ longer a divergence; entry removed.
 
 ## DOT diagrams
 
-### ~~@startdot — title and skinparam support~~ — HALF RETIRED (D14, 2026-08-08)
+### ~~@startdot — title and skinparam support~~ — RETIRED (D14 2026-08-08; unwind-U2 2026-10-08)
 
 This entry claimed the port "parses and applies" **both** `title` and
 `skinparam` inside `@startdot`, and that upstream "ignores" both. Two
@@ -827,9 +714,8 @@ corrections, each jar-verified rather than reasoned about:
   of an `@startdot` block yields *"Syntax Error? (Assumed diagram type: dot)"*,
   because `PSystemDotFactory#executeLine` skips every line until one matches
   its graphviz-header pattern and never starts the diagram. The title half of
-  this divergence is real but was mis-described; it is stated correctly under
-  **DOT-passthrough diagrams → `title` inside `@startdot` renders; upstream
-  errors** below, which is now the single record for it.
+  this divergence was retired by unwind-U2 (2026-10-08): the port now
+  produces the jar's error page (see **DOT-passthrough diagrams** below).
 - **The `skinparam` half is RETIRED — it was never a defensible divergence.**
   Upstream genuinely does ignore `skinparam` here (the line precedes the
   header, so the factory drops it), and *ignoring it is the faithful
@@ -849,98 +735,13 @@ justifies.
 
 ## HCL diagrams
 
-### `title` inside `@starthcl` renders; upstream crashes (deliberate)
+### ~~`title` inside `@starthcl` renders; upstream crashes~~ — RETIRED (unwind-U1, 2026-10-08)
 
-**Upstream:** a `title My Title` line inside `@starthcl` reaches the HCL
-content parser and throws `IllegalStateException: EQUALS`
-(`HclParser.java:88`, `getModuleOrSomething`) — HCL never registers the
-title commands and the raw line is treated as HCL data. Jar-verified
-2026-07-13 (`-tsvg -pipe` stack trace).
+Mirrored: a leading `title` is consumed by StyleExtractor (`StyleExtractor.java:84-85`) and never set (`HclDiagramFactory.java:86-92`), so nothing draws; caption/legend/header/footer are HCL payload; a title after the payload is the "does not sound like HCL data" page (`HclParser.java:88`). Jar fixtures: `tests/fixtures/unwind-U1/hcl-*`.
 
-**This port:** `title` (and caption/legend/header/footer) in `@starthcl`
-route through the shared annotation chrome (G0b) and render, consistent
-with `@startjson` / `@startyaml` (whose titles the jar does render).
-Before G0b this port silently stripped the line — also divergent.
+### ~~`skinparam` applies in the json family; upstream ignores it~~ — RETIRED (unwind-U1, 2026-10-08)
 
-**Reason:** the upstream crash is an unhandled-exception bug, not a
-behavior to reproduce. Aligning HCL with its json/yaml siblings is the
-lowest-surprise choice.
-
-**Affects:** `@starthcl` blocks carrying annotation directives.
-
----
-
-### `skinparam` applies in the json family; upstream ignores it (deliberate)
-
-Covers `@startjson`, `@startyaml` and `@starthcl` — all three build a
-`JsonDiagram` and share the mechanism below.
-
-**Upstream:** the json family has **no command table**.
-`JsonDiagramFactory.java:70-101` walks the source itself, and its directive
-handling is a single `if`/`else if` chain in `StyleExtractor.java:76-97`:
-
-| directive | upstream does |
-| --- | --- |
-| `<style>` … `</style>` | collected, applied via `applyStyles` |
-| `scale …` | collected, executed (`JsonDiagram.java:90-99`) |
-| `title …` | collected, set as the diagram title |
-| `skin …` | collected as `newSkin` |
-| `!assume`, `!pragma`, `hide` | matched and **explicitly ignored** |
-| `skinparam …` | matched, and **only `handwritten true` is honored** — every other key is read and discarded, and a `skinparam X { … }` block is consumed to its closing brace and dropped |
-| anything else | falls through to the JSON/YAML/HCL payload |
-
-So `skinparam` is not unparsed here; it is parsed and deliberately narrowed
-to one key. Nothing else reaches the style system, and
-`TitledDiagram#calculateBackColor` (`TitledDiagram.java:280-289`) resolves
-against the style cascade alone — landing on `plantuml.skin:21-22`
-`document { BackGroundColor white }`.
-
-Jar-verified 2026-08-09 against `plantuml-oracle.jar` (1.2026.7beta11).
-`skinparam backgroundcolor transparent` and `skinparam backgroundcolor red`
-inside `@startjson` both emit `background:#FFFFFF`, while the same directive
-in `@startuml` is honored. `<style> document { BackGroundColor red }` in
-`@startjson` DOES apply (`#FF0000`) — so it is `skinparam` specifically that
-is inert, not styling in general.
-
-This bites `!theme` hardest, because a theme file is mostly skinparams.
-`!theme amiga` changes a json background (`#0B58A8`) only because amiga
-declares it inside a `<style>` block (`puml-theme-amiga.puml:32-34`) as well
-as via `skinparam` (:82). `!theme aws-orange` declares its background only as
-`skinparam BackgroundColor` (`puml-theme-aws-orange.puml:44`), so upstream
-drops it — along with that theme's `defaultFontName Verdana` and
-`defaultFontSize 12`, leaving json text at sans-serif/14.
-
-**This port:** `skinparam` resolves for the json family exactly as it does
-everywhere else, through the shared theme pipeline. A json diagram under
-`!theme aws-orange` renders in Verdana 12 on the theme's background; one
-carrying `skinparam backgroundcolor transparent` gets a transparent
-background.
-
-**Reason:** maintainer decision, 2026-08-09. A `skinparam` line is a
-customization the diagram's author deliberately wrote, and the upstream
-narrowing to `handwritten` reads as an unfinished hand-rolled parser rather
-than a decision that json should be unstylable — the same reading that
-authorized HCL `<style>` support below. Honoring it is this port reducing
-friction, and it costs nothing structural: node sizing, colors and text all
-still resolve through the normal cascade.
-
-Note that upstream honoring `skinparam handwritten true` here is precisely
-what makes mission H1's handwritten renderer reachable in this family — so
-the one key upstream kept is already implemented, and this divergence only
-widens the set.
-
-**Cost, stated rather than hidden:** a themed json diagram differs from the
-jar in font and therefore in every derived width. Two corpus fixtures can
-never be structurally clean because of this, and both are pinned with a diff
-ceiling in `oracle/goldens/json-family-structural.json` under `divergent`
-(`json/bitepo-72-vija933`, 23; `json/sevaji-38-xita618`, 1) so the divergence
-is bounded and cannot quietly grow.
-
-**Affects:** `@startjson` / `@startyaml` / `@starthcl` blocks carrying
-`skinparam` directly, and any `!theme` whose styling is expressed as
-skinparams.
-
----
+Mirrored: only `skinparam handwritten true` reaches a json/yaml/hcl theme (`StyleExtractor.java:88-97`, `src/diagrams/json/json-family-style-input.ts`); a `!theme`'s skinparams are dropped with it. `json/bitepo-72-vija933` and `json/sevaji-38-xita618` are now structurally clean.
 
 ### Style selector support (limitation)
 
@@ -963,36 +764,11 @@ and consistent with how `@startyaml` and `@startjson` behave.
 
 ## DOT-passthrough diagrams
 
-### `title` inside `@startdot` renders; upstream errors (limitation, inverted)
+### ~~`title` inside `@startdot` renders; upstream errors~~ — RETIRED (unwind-U2, 2026-10-08)
 
-**Upstream:** `@startdot` is `PSystemDot extends DirectOsDiagram` — it shells
-out to the real `dot` binary and streams its SVG through, bypassing
-`DiagramChromeFactory` entirely. `PSystemDotFactory.executeLine` requires the
-first content line to match the bare graphviz header, so a `title …` line
-before it is a **syntax error** (jar-reproduced twice, 2026-07-13).
+`parseDot` ports PSystemDotFactory/PSystemBasicFactory/`UmlSource#removeInitialNoise`: a directive before the graphviz header is the jar's `Syntax Error?` page, after it every line is DOT (`PSystemDotFactory.java:48-81`; `PSystemBasicFactory.java:50-64`; `UmlSource.java:79-106`). Jar fixtures: `tests/fixtures/unwind-U2/`.
 
-**This port:** `title` (and the other annotation directives) inside
-`@startdot` render via the shared chrome. This was a pre-existing port-only
-feature (the old bespoke `TITLE_HEIGHT` band); G0b consolidated it through
-`src/core/annotations/` rather than removing it.
-
-**Reason:** removing a shipped feature to reproduce an upstream error has no
-user value; the consolidation keeps exactly one title mechanism.
-
-**Affects:** `@startdot` blocks carrying annotation directives (no upstream
-oracle exists for them — the jar errors).
-
-**Retained through D14 (2026-08-08), deliberately.** The passthrough rewrite
-made `@startdot` emit graphviz's bytes verbatim, which is what took the type to
-5/5 SVG-conformant. Chrome is the one thing that cannot survive verbatim
-emission, so `src/diagrams/dot/renderer.ts` carries a second path: with chrome
-present it returns a `RenderFragment` wrapping graphviz's inner markup, and the
-shared `applyChrome` composes around it. That second path costs **zero**
-conformance — every input reaching it is one the jar rejects outright, so there
-is no oracle to miss — and the conformance path stays byte-exact. Confirmed by
-the `svg-dot` ratchet: 5/5 zero-diff with the divergence in place.
-
----
+**Library-forced remainder (dot-engine):** dot-engine accepts `node { … }`, which graphviz rejects (`docs/graphviz-issues/27-parser-accepts-node-brace-block.md`), and on a parse failure it throws a peggy error where the jar emits graphviz's stderr text (`ProcessRunner.java:69`); node widths differ by up to 1 pt.
 
 ## JSON diagrams
 
@@ -1034,23 +810,9 @@ upstream").
 
 ---
 
-### Primitive root — empty key cell (clarity)
+### ~~Primitive root — empty key cell~~ — RETIRED (unwind-U1, 2026-10-08)
 
-**Upstream:** a scalar root value (number, string, boolean, null) is
-rendered differently from object/array roots; the key column behavior is
-not well-defined.
-
-**This port:** scalar roots are wrapped in a synthetic single-row node
-with an empty key (`""`) and the scalar as the value. The two-column
-layout is preserved and the key cell is simply blank.
-
-**Reason:** keeping a uniform two-column layout avoids special-casing
-both the layout engine and the renderer for a rare edge case. The empty
-key cell is visually harmless and maintains consistency with object nodes.
-
-**Affects:** `@startjson` diagrams whose root value is a primitive scalar.
-
----
+Mirrored: a json scalar root is a one-cell array (`JsonDiagram.java:80-82`, `layout.ts#normalizeRoot`); a yaml scalar root is the "does not sound like YAML data" page (`YamlParser.java:53-54`).
 
 ### Value text — per-type colors (RETIRED 2026-08-09)
 

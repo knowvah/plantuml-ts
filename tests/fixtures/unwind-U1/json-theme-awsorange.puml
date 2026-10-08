@@ -1,0 +1,4 @@
+@startjson
+!theme aws-orange
+{ "a": 1 }
+@endjson

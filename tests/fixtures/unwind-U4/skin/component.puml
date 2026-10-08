@@ -1,0 +1,12 @@
+@startuml
+component Comp
+interface I1
+node N1
+database DB
+package P {
+  component Inner
+}
+Comp --> I1
+Comp --> DB
+N1 --> Inner
+@enduml

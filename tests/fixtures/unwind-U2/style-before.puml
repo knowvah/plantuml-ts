@@ -1,0 +1,8 @@
+@startdot
+<style>
+node { LineColor red }
+</style>
+digraph G {
+  a -> b;
+}
+@enddot

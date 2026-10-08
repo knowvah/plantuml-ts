@@ -103,7 +103,7 @@ maintained here.
 
 ### Preprocessor scope
 
-The preprocessor supports `!define`/`!undefine`, conditionals
+The preprocessor supports `!define`/`!undef`, conditionals
 (`!ifdef`/`!ifndef`/`!else`/`!endif`), and `!theme`; the
 `!procedure`/`!function` macro family is in scope and being ported.
 

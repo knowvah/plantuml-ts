@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1413 modules · 5336 exported names.
+1419 modules · 5350 exported names.
 
 ## `src/`
 
@@ -119,7 +119,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-cascade-visibility-icon.ts` | `applyVisibilityIconCascadeOverrides` | cdd2-T8 (S-7): `<style> visibilityIcon { <kind> { LineColor/ BackgroundColor } } }` -- split out of `style-cascade-class.ts` (500-line cap), a pure addition mirroring `style-cascade-class-font.ts`'s own split-for-size precedent. |
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
-| `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
+| `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder`, `resolveGlobalFontName` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
 | `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-tag-cascade.ts` | `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade` | The `.tagname` stereotype sub-selector cascade (`StyleSignatureBasic #matchAllImpl` / `StyleStorage#computeMergedStyle`, G2 N36/N37) -- moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pur |
@@ -603,6 +603,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `UGroup.ts` | `UGroupType`, `getSvgKeyAttributeName`, `UGroup` | UGroupType — the SVG `<g>`/element attribute keys `UGroup` can carry (id, class, title, and various `data-*` bookkeeping keys svek/layout attach for traceability back to source). |
 | `UHorizontalLine.ts` | `UHorizontalLine` |  |
 | `UImage.ts` | `UImage` |  |
+| `UImageSvg.ts` | `UImageSvg`, `svgImagePayload` | Port of `UImageSvg` -- an SVG document drawn as an image, as `EmbeddedDiagram#drawU` builds it for a `{{ }}` sub-diagram (`EmbeddedDiagram.java:169-174`) -- plus the payload `SvgGraphics#svgImage (UImageSvg, x, y)` wraps it in before base64 |
 | `ULine.ts` | `ULine` |  |
 | `UPath.ts` | `USegmentType`, `USegment`, `UPath` |  |
 | `UPolygon.ts` | `UPolygon` |  |
@@ -619,6 +620,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `deflate-fixed.ts` | `deflateFixed` | DEFLATE with fixed Huffman codes (BTYPE=01) and LZ77 matching — RFC 1951. |
 | `png-encoder.ts` | `RGBA_BYTES_PER_PIXEL`, `crc32`, `adler32`, `encodePng`, `toBase64`, `toBase64DataUri` | Minimal deterministic PNG writer, browser-safe, zero deps, synchronous. |
 | `png-ihdr.ts` | `PngIhdr`, `parsePngIhdrFromDataUri` | PNG IHDR chunk reader for `data:image/png;base64,...` data URIs. |
+| `sprite-bilinear.ts` | `scaledRasterSize`, `scaleBilinear` | The jar's sprite/img raster scale: `PortableImageAwt#scale` (`klimt/awt/PortableImageAwt.java:113-127`) builds a `round(w * scale) x round(h * scale)` `TYPE_INT_ARGB` destination and runs `java.awt.image.AffineTransformOp` with `TYPE_BILINE |
 | `sprite-raster.ts` | `SpriteLike`, `spriteMonochromeAsLike`, `RgbaBitmap`, `spriteToRgba`, `SpritePngResult`, `spriteToPngDataUri`, `spriteColor4096ToRgba`, `spriteColor4096ToPngDataUri` | Monochrome-sprite tint + PNG rasterization (T5 of SI5b/decisions.md D7). |
 | `Sprite.ts` | `Sprite` | The shared marker every sprite kind implements: pixel dimensions. |
 | `SpriteColor4096.ts` | `SpriteColor4096` |  |
@@ -862,6 +864,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `ReadFilterMergeLines.ts` | `endsWithBackslash`, `mergeEndingBackslashLines` | Trailing-`\` line continuation: a source line ending in a bare `\` merges with the NEXT physical line, before `@start`/`@end` block splitting or command dispatch sees the document. |
 | `ReadLineReader.ts` | `SOURCE_STRING_DESCRIPTION`, `readLines` | Raw text -> the `StringLocated` list the interpreter executes. |
 | `StartUtils.ts` | `isStartDirective`, `isEndDirective`, `isPauseDirective`, `isUnpauseDirective`, `isExit`, `possibleAppend` | The two directive probes `DiagramExtractor` needs: is this line a `@start...` / `@end...` (or the backslash spelling, `\startuml`)? |
+| `stdlib-folders.ts` | `JAR_STDLIB_FOLDERS` | The stdlib folder names the jar ships -- one `stdlib/<name>/info.spm` resource per folder, the file `Stdlib`'s constructor opens first (`Stdlib.java:84-95` -> `SpmChannel#getInternalInputStream`, `SpmChannel.java:69-72`). |
 | `stdlib-path.ts` | `StdlibPathParts`, `splitStdlibPath` | `Stdlib.java`'s stdlib-path key transform, in one place. |
 | `StdlibRegistry.ts` | `StdlibChunkLoadError`, `StdlibRegistry`, `stdlibRegistry` | Lazy, per-bundle registration for the `<bundle/thing>` stdlib seam. |
 | `StdlibRemote.ts` | `StdlibRemoteManifest`, `RemoteBundle`, `StdlibResourceFetchError`, `remoteStdlib` | Per-RESOURCE, fetch-backed stdlib bundle source (si11a T1). |
@@ -1387,7 +1390,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `class-member-ast.ts` | `Visibility`, `Member` | `Member`/`Visibility` types for class/interface/enum/object leaves. |
 | `class-member-atom-resolve.ts` | `ResolvedMemberAtom`, `resolveInlineAtom`, `resolveEmojiAtom`, `resolveOpenIconicAtom`, `resolveLatexAtom` | class-member-atom-resolve.ts — the non-text atom resolvers backing `class-member-creole.ts#resolveOneAtom` (inline img/sprite, OpenIconic vector, emoji, latex). |
 | `class-member-creole-render-text.ts` | `textRenderOverride`, `resolveTabbedTextRuns` | class-member-creole-render-text.ts — the DRAWN-text side of `DriverTextSvg.java:112-125`'s two RENDER-time-only branches, plus the TAB-STOP expansion `AtomText.java:210-256` applies to a member row's `'text'` atom before any of that. |
-| `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `atomTopDy`, `noteLineAtomDy` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
+| `class-member-creole-sea.ts` | `atomFontSpec`, `mutedAtomFontSpec`, `seaLineHeightAndSpan`, `textAtomDy`, `atomTopDy`, `noteLineAtomDy`, `noteImageAtomTop` | class-member-creole-sea.ts — the `Sea`-placement math `class-member- creole.ts#resolveMemberAtoms` consumes (SI30 `decisions.md#D2/#D3`), split out purely to keep that file under the project's 500-line cap (same precedent as `class-member-d |
 | `class-member-creole.ts` | `MemberRenderAtom`, `MemberRowBuild`, `memberBaseFont`, `buildMemberAtoms`, `resolveMemberAtoms`, `resolveOneAtom`, `buildMemberRow`, `buildWrappedMemberRows`, `splitMemberDisplayLines`, `atomsToPlainText` | class-member-creole.ts — routes ONE classifier member row's display text through the shared creole atom engine (`core/klimt/creole/`, built for description by mission E2r) instead of drawing it as a single plain `<text>` element. |
 | `class-member-display.ts` | `splitMemberDisplayLines`, `atomsToPlainText` | class-member-display.ts — the physical-line splitter + plain-text projection for classifier member rows. |
 | `class-member-parser.ts` | `parseMemberLine` | Member (attribute/method) line parsing for PlantUML class diagrams. |
@@ -1553,7 +1556,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `ast.ts` | `DotDiagramAST`, `DotGeometry` |  |
+| `ast.ts` | `DotDiagramAST`, `DotGeometry` | `@startdot` is a PASSTHROUGH, not a diagram model. |
 | `index.ts` | `dotPlugin` |  |
 | `layout.ts` | `layoutDot` |  |
 | `parser.ts` | `parseDot` |  |
@@ -1585,6 +1588,8 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `document-dimensions.ts` | `ENSURE_VISIBLE_BUMP`, `DocumentDimensions`, `documentDimensions` | The json document's own width/height. |
 | `Fission.ts` | `NeutronType`, `Neutron`, `getNeutrons`, `splitStripe` | Line wrapping, as upstream does it — by splitting a line into ATOMS and breaking between them, not by re-joining words into strings. |
 | `index.ts` | `jsonPlugin` | JSON diagram plugin — wires together parser, layout, and renderer for use with the DiagramRegistry dispatcher. |
+| `json-diagram-factory.ts` | `JsonFamilyHeader`, `headerOf` | What the three json-family factories (`JsonDiagramFactory`, `YamlDiagramFactory`, `HclDiagramFactory`) and the `JsonDiagram` constructor take from a {@link StyleExtractor} besides the payload: the title and the `scale` line. |
+| `json-family-style-input.ts` | `jsonFamilyStyleInput` | The style sources a json-family diagram's theme is built from -- the `SyncPlugin.styleInput` of `@startjson` / `@startyaml` / `@starthcl`. |
 | `json-layout-prep.ts` | `ValueType`, `DisplayValue`, `getDisplayValue`, `JsonContainer`, `FlatNode`, `containerEntries`, `walkTree`, `EMPTY_MAP`, `buildHighlightMap`, `processStringDisplay`, `splitDisplayLines`, `wordWrapLine`, `BuildRowsOptions` | JSON diagram pre-layout: value display formatting, container tree flattening, highlight-map construction, and string wrapping. |
 | `json-renderer-highlight.ts` | `highlightClassOf`, `highlightFontFlags`, `highlightOverrides`, `highlightRect`, `scaleDasharray`, `keyIsBold`, `replacesFontStyle` | `#highlight`-class + row-separator dash-scaling helpers for the JSON renderer — split out of renderer.ts (cdd-T30, 500-line file-size cap) to make room for the widened `resolveScaleFactor` dpi-term call site. |
 | `JsonCurve.ts` | `CurvePoint`, `VERY_FIRST_LINE`, `supp`, `veryFirstPoint`, `buildArrowHeadPath`, `buildArrowHeadSegments`, `buildCurveSegments`, `buildCurvePath`, `segmentsToPathData` | @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/jsondiagram/JsonCurve.java The path a json edge draws, built from the layout engine's OWN spline rather than re-derived. |
@@ -1595,6 +1600,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `renderer-style.ts` | `HighlightClassStyle`, `BoxStyleJson`, `TextStyleJson`, `NodeStyleJson`, `JSON_SKIN_BLACK`, `SVG_CORNER_DIVISOR`, `resolveNodeStyle` | The resolved `jsonDiagram.node` style — the whole skinparam/style cascade for the json family, collapsed once per diagram into plain values the renderer only reads. |
 | `renderer.ts` | `renderJson` | JSON diagram SVG renderer. |
 | `scale-geo.ts` | `scaleJsonGeometry`, `scaleNodeStyle` | The `scale …` directive for the json family, applied at the layout→render boundary. |
+| `StyleExtractor.ts` | `StyleExtractor`, `extractStyle`, `payloadOf`, `upstreamSourceLines` | Port of upstream's `StyleExtractor` -- the json family's ONLY directive handling. |
 | `tab-stops.ts` | `tabString`, `tabStopWidth`, `TabToken`, `splitOnTabs`, `hasTab`, `tabAwareWidth`, `TabRun`, `walkTabs` | `\t` inside a drawn cell — tab-stop expansion, ported from `AtomText` (`klimt/creole/legacy/AtomText.java`). |
 | `TextBlockJson.ts` | `JsonRowGeo`, `CellAtom`, `MeasuredNode`, `buildRows`, `measureNode`, `recordLabelFor` | Node sizing for the json family — the port of upstream's `TextBlockJson`. |
 

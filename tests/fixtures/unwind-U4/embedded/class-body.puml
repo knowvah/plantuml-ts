@@ -1,0 +1,9 @@
+@startuml
+class A {
+  {{
+    Alice -> Bob : hi
+  }}
+  --
+  x : int
+}
+@enduml

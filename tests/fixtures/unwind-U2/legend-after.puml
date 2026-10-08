@@ -1,0 +1,8 @@
+@startdot
+digraph G {
+legend
+a legend line
+end legend
+  a -> b;
+}
+@enddot

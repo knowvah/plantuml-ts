@@ -36,9 +36,19 @@ describe('preprocessor', () => {
     expect(result).toEqual(['note  over Alice']);
   });
 
-  it('!undefine removes a previous definition', () => {
-    const result = run(['!define FOO bar', '!undefine FOO', 'text FOO']);
+  it('!undef removes a previous definition', () => {
+    const result = run(['!define FOO bar', '!undef FOO', 'text FOO']);
     expect(result).toEqual(['text FOO']);
+  });
+
+  it('!undefine is NOT a directive: a plain line, substituted like any other', () => {
+    // Upstream's PATTERN_UNDEF is `simpleKeyword("!undef")` (TLineType.java:87),
+    // `^\s*!undef\b` (java:53-56): the `\b` fails between `f` and `i`, so the
+    // line is PLAIN, FOO is still defined, and the diagram parser sees
+    // `!undefine bar` (the jar renders a syntax error --
+    // tests/fixtures/unwind-U3/undefine-alias-error.svg).
+    const result = run(['!define FOO bar', '!undefine FOO', 'text FOO']);
+    expect(result).toEqual(['!undefine bar', 'text bar']);
   });
 
   it('!ifdef includes block when token is defined', () => {
@@ -254,9 +264,12 @@ describe('preprocessor', () => {
     expect(result).toEqual(['<b>one</b> and <b>two</b>']);
   });
 
-  it('!undefine removes a parametric macro', () => {
-    const result = run(['!define BOLD(x) <b>##x##</b>', '!undefine BOLD', 'BOLD(hello)']);
-    expect(result).toEqual(['BOLD(hello)']);
+  it('!undef does not remove a parametric macro', () => {
+    // `EaterUndef#analyze` only calls `memory.removeVariable(varname)`
+    // (EaterUndef.java:48-54); `FunctionsSet` has no removal path, so the
+    // macro survives (tests/fixtures/unwind-U3/undef-keeps-macro.svg).
+    const result = run(['!define BOLD(x) <b>##x##</b>', '!undef BOLD', 'BOLD(hello)']);
+    expect(result).toEqual(['<b>hello</b>']);
   });
 
   it('simple define still works after a parametric define is added (regression)', () => {
@@ -398,14 +411,12 @@ describe('%n() and %newline() built-in expansion', () => {
     expect(lines).toContain(':hello;');
   });
 
-  it('case-folded %N() is not a TIM function; flatten still splits it', () => {
-    // TIM function names are case-sensitive (upstream TimLoader): `%N()`
-    // survives the interpreter as literal text and is split into source
-    // lines by `flatten`'s `RE_NEWLINE_CALL_ANY_CASE` (pre-existing,
-    // port-specific accommodation -- unchanged by the R2b flag flip).
+  it('case-folded %N() is not a TIM function and stays literal text', () => {
+    // TIM call sites are found by `TrieImpl#getLonguestMatchStartingIn`, an
+    // exact-char walk (TrieImpl.java:91-111): `%N()` is plain text and the jar
+    // draws it literally (tests/fixtures/unwind-U3/newline-uppercase-literal.svg).
     const { lines } = preprocess('@startuml\n:a %N() b;\n@enduml');
-    expect(lines).toContain(':a');
-    expect(lines).toContain(' b;');
+    expect(lines).toEqual(['@startuml', ':a %N() b;', '@enduml']);
   });
 });
 
@@ -479,8 +490,8 @@ describe('trailing whitespace reaches the command layer (T6i)', () => {
     expect(lines).toContain(`:hello ${BLOCK_E1_NEWLINE} world; `);
   });
 
-  it('still right-trims the segments of the port-only case-folded %N() split', () => {
+  it('keeps the trailing space on a line carrying a literal case-folded %N()', () => {
     const { lines } = preprocess('@startuml\n:a %N() b; \n@enduml');
-    expect(lines).toEqual(['@startuml', ':a', ' b;', '@enduml']);
+    expect(lines).toEqual(['@startuml', ':a %N() b; ', '@enduml']);
   });
 });

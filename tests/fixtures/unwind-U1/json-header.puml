@@ -1,0 +1,4 @@
+@startjson
+header My header
+{ "a": 1 }
+@endjson

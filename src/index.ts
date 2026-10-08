@@ -352,24 +352,23 @@ interface PreparedBlock {
 /**
  * The prepare sequence shared by {@link renderPagesSync} and
  * {@link renderBlockPages} before they diverge on sync-vs-async layout and
- * error wrapping: build the block's theme (skin-reddress-variants Fix 2
- * threads the block's own raw source lines so a `!define DARKBLUE` + `skin
- * reddress` combination fires reddress's `!ifdef DARKBLUE` gate in
- * production), resolve its diagram plugin (the parse happens HERE, inside
- * resolution: upstream picks a factory by attempting the parse, and D0
- * forbids a second parse path), resolve its measurer, extract its AST (or
- * throw the block's `DiagramRefusal`), and surface any sprite/parse
- * warnings. Neither caller's own try/catch nor sync-vs-async `layout` call
- * belongs here — those stay distinct per caller.
+ * error wrapping: resolve its diagram plugin (the parse happens HERE: upstream
+ * picks a factory by attempting the parse, and D0 forbids a second parse
+ * path), build the theme from the plugin's `styleInput` (unwind-U1) and the
+ * raw source lines (skin-reddress-variants Fix 2: `!define DARKBLUE` + `skin
+ * reddress`), resolve its measurer, extract its AST (or throw the block's
+ * `DiagramRefusal`), and surface any sprite/parse warnings. Neither caller's
+ * try/catch nor sync-vs-async `layout` call belongs here.
  */
 function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOptions | undefined): PreparedBlock {
+  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
+  const plugin = resolution.plugin;
+  const preprocessed = plugin.styleInput?.(block.preprocessed, umlSource) ?? block.preprocessed;
   const { theme, styleMap } = buildTheme(
-    block.preprocessed,
+    preprocessed,
     options,
     block.rawSource.map((s) => s.getString()),
   );
-  const resolution = registry.resolve(umlSource, { assetStore: options?.assetStore });
-  const plugin = resolution.plugin;
   const measurer = resolveMeasurer(plugin.type, options);
   const ast = astOf(resolution, options);
   surfaceSpriteWarnings(ast, options?.onWarning);
@@ -382,7 +381,7 @@ function prepareBlock(block: BlockUmlOk, umlSource: UmlSource, options: RenderOp
   // comment for why this cannot be a plain import instead.
   registerNestedDiagramRenderers((source) => renderSync(source, options));
   return {
-    ctx: { plugin, theme, styleMap, preprocessed: block.preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
+    ctx: { plugin, theme, styleMap, preprocessed, measurer, seed: seedOfUmlSource(umlSource) },
     ast,
   };
 }

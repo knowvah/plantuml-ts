@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { isDisplayPositionedNull } from '../../../src/core/annotations/index.js';
 import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
 import { extractBlocks } from '../../../src/core/block-extractor.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
@@ -76,10 +77,12 @@ describe('parseHcl — acceptance criteria', () => {
     expect(ast.root).toEqual({ key: 'val' });
   });
 
-  it('AC8: title directive routes to annotations, not the HCL body', () => {
+  it('AC8: a leading title is consumed but never set (HclDiagramFactory.java:86-92)', () => {
+    // StyleExtractor.java:84-85 takes the line; the hcl factory's setTitle
+    // block is commented out, so no chrome (jar: unwind-U1/hcl-title).
     const src = makeSource(['title My Title', 'key = "val"']);
     const ast = parseHcl(src);
-    expect(ast.annotations?.title.display).toEqual(['My Title']);
+    expect(isDisplayPositionedNull(ast.annotations!.title)).toBe(true);
     expect(ast.root).toEqual({ key: 'val' });
   });
 });
@@ -89,15 +92,18 @@ describe('parseHcl — acceptance criteria', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseHcl — additional cases', () => {
-  it('empty source → root is null', () => {
+  // An empty payload parses: HclParser#parseMe returns an empty JsonObject
+  // (HclParser.java:61-75), which JsonDiagram.java:83-86 draws as one empty
+  // cell (jar: unwind-U1/hcl-title-only).
+  it('empty source → root is an empty object', () => {
     const ast = parseHcl(makeSource([]));
-    expect(ast.root).toBeNull();
+    expect(ast.root).toEqual({});
     expect(ast.parseError).toBe(false);
   });
 
-  it('blank-only source → root is null', () => {
+  it('blank-only source → root is an empty object', () => {
     const ast = parseHcl(makeSource(['', '  ', '']));
-    expect(ast.root).toBeNull();
+    expect(ast.root).toEqual({});
   });
 
   it('single top-level block with one child → root is the child object directly (unwrapped)', () => {
@@ -156,7 +162,9 @@ describe('parseHcl — additional cases', () => {
     const src = makeSource(['resource "r" {', '  x = cond ? "a" : "b"', '}']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
-    expect(ast.parseError).toBe(false);
+    // HclDiagramFactory.java:79-83 + JsonDiagram.java:116-122: the jar draws
+    // "Your data does not sound like HCL data" for this source (unwind-U1).
+    expect(ast.parseError).toBe(true);
   });
 
   it('highlights is always empty []', () => {
@@ -232,16 +240,18 @@ describe('parseHcl — additional cases', () => {
     const src = makeSource(['blockname [']);
     const ast = parseHcl(src);
     expect(ast.root).toBeNull();
-    expect(ast.parseError).toBe(false);
+    // HclParser.java:88 throws; the jar draws the "does not sound like HCL
+    // data" page (HclDiagramFactory.java:79-83, unwind-U1).
+    expect(ast.parseError).toBe(true);
   });
 
-  it('isFlatAssignment returns false for empty token stream → root null', () => {
+  it('isFlatAssignment returns false for empty token stream → empty object', () => {
     // Exercises the fallthrough path in isFlatAssignment (no tokens at all).
     // An empty body is already tested above; this variant uses only whitespace
     // to ensure the joined string is empty and tokenize returns [].
     const src = makeSource(['   ']);
     const ast = parseHcl(src);
-    expect(ast.root).toBeNull();
+    expect(ast.root).toEqual({});
   });
 
   it('unexpected token in bracket data field-name position → parse failure', () => {
