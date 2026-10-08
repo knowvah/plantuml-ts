@@ -358,9 +358,6 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // (`walk-if-down.ts#pushIfOwnNote`, before `mainTile`/`diamond1`),
     // inserting one new polygon (the fold triangle) ahead of this triple
     // in `shapesOf`'s flat list. Same coincident triple, same coordinates.
-    'tobajo-64-mipi810 [83,84] polygon×polygon',
-    'tobajo-64-mipi810 [83,85] polygon×polygon',
-    'tobajo-64-mipi810 [84,85] polygon×polygon',
     // Same class as `misiji-27-buje656` above (`UGraphicCompressOnXorY.
     // java:100-112`): the swimlane title's rect never occupies x. Mission
     // `activity-if-tile-port` T6b: `lukoxa-16-cecu095` is a single-branch
@@ -389,7 +386,8 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // is the jar's own geometry.
     // add4/merge-T1b: nojije-35-teta491 reached zero diffs and was pinned
     // (add4-T1b), leaving this test's baseline population; its two entries
-    // went with it. add4/merge-T3c: cemipu-87-dinu624 likewise (add4-T3c).
+    // went with it. add4/merge-T3c: cemipu-87-dinu624 likewise (add4-T3c);
+    // add4/merge-T3d-3: tobajo-64-mipi810's three polygon pairs (add4-T3d).
   ].sort();
 
   /**
@@ -529,7 +527,7 @@ describe('compress invariant -- no new shape overlap (stop 11)', () => {
     // inserting one new shape ahead of this pair. Same pair, confirmed
     // byte-identical (`268.65625 + 73.3625 === 342.01875` vs
     // `342.01874999999995`).
-    'tobajo-64-mipi810 [19,21] polygon×text',
+    // add4/merge-T3d-3: tobajo-64-mipi810 [19,21] left with its pin (add4-T3d).
     // add1-T3k: `[0,2]` (was `[0,1]`) -- the own label is now its own
     // `'if-own-label'` node, landing at index 1 (between the hexagon and
     // its west `if-label`), which pushes the west label from index 1 to

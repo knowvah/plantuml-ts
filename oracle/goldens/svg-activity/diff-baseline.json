@@ -1067,10 +1067,10 @@
       "type": "activity",
       "slug": "fukika-81-gite897",
       "status": "baseline",
-      "diffCount": 58,
+      "diffCount": 4,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca",
-      "weightedScore": 58
+      "measuredAgainstCommit": "fd2c3fa8",
+      "weightedScore": 4
     },
     {
       "type": "activity",
@@ -1345,11 +1345,11 @@
     {
       "type": "activity",
       "slug": "gunuki-27-nixu177",
-      "status": "baseline",
-      "diffCount": 1,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 14
+      "measuredAgainstCommit": "fd2c3fa8",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -2569,11 +2569,11 @@
     {
       "type": "activity",
       "slug": "nuvumi-83-tose343",
-      "status": "baseline",
-      "diffCount": 1,
+      "status": "pinned",
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
-      "weightedScore": 14
+      "measuredAgainstCommit": "fd2c3fa8",
+      "weightedScore": 0
     },
     {
       "type": "activity",
@@ -3424,11 +3424,11 @@
     {
       "type": "activity",
       "slug": "tobajo-64-mipi810",
-      "status": "baseline",
-      "weightedScore": 2,
-      "diffCount": 2,
+      "status": "pinned",
+      "weightedScore": 0,
+      "diffCount": 0,
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "c6f501d9"
+      "measuredAgainstCommit": "fd2c3fa8"
     },
     {
       "type": "activity",

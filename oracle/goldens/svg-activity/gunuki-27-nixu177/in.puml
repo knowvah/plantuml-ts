@@ -1,0 +1,8 @@
+@startuml
+:foo1;
+label lab1
+:foo2;
+:foo3;
+goto lab1
+:foo4;
+@enduml

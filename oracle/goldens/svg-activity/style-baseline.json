@@ -1,7 +1,7 @@
 {
   "$comment": "Style census (font sizes, stroke widths, rx, text count, canvas) of OUR activity SVGs vs the jar's. RE-PINNED by activity-klimt-compress T6 (2026-09-10): canvas width/height move with the removed compression slots on 85 (x) / 160 (y) fixtures; no font/stroke/rx/textCount change is expected from this mission.",
   "measuredAt": "2026-10-07",
-  "measuredAgainstCommit": "1916ce34",
+  "measuredAgainstCommit": "fd2c3fa8",
   "fixtures": [
     {
       "type": "activity",
@@ -4323,7 +4323,7 @@
       "slug": "fukika-81-gite897",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "76efedca",
+      "measuredAgainstCommit": "fd2c3fa8",
       "ours": {
         "fontSize": {
           "10": 1,
@@ -4338,8 +4338,8 @@
           "12.5": 5
         },
         "textCount": 10,
-        "width": "334",
-        "height": "630"
+        "width": "337",
+        "height": "640"
       },
       "jar": {
         "fontSize": {
@@ -5467,13 +5467,13 @@
       "slug": "gunuki-27-nixu177",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "fd2c3fa8",
       "ours": {
         "fontSize": {
           "12": 4
         },
         "strokeWidth": {
-          "1": 3
+          "1": 5
         },
         "rx": {
           "12.5": 4
@@ -10306,14 +10306,14 @@
       "slug": "nuvumi-83-tose343",
       "status": "baseline",
       "measuredAt": "2026-10-07",
-      "measuredAgainstCommit": "87727a9c",
+      "measuredAgainstCommit": "fd2c3fa8",
       "ours": {
         "fontSize": {
           "11": 1,
           "12": 4
         },
         "strokeWidth": {
-          "1": 10
+          "1": 12
         },
         "rx": {
           "12.5": 4
