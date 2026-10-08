@@ -44,7 +44,7 @@ function addBoxSlot(slots: SlotSet, mode: CompressionMode, shape: CompressShape)
 
 /** `TextLimitFinder#drawText`'s `y -= dim.getHeight() - 1.5`
  *  (`klimt/drawing/TextLimitFinder.java:85`): the baseline-to-box shift. */
-const TEXT_LIMIT_SHIFT = 1.5;
+export const TEXT_LIMIT_SHIFT = 1.5;
 /** `TextLimitFinder#drawText` (`klimt/drawing/TextLimitFinder.java:82-90`):
  *  `y -= dim.height - 1.5`, then the box is `[x, x+w] x [y', y'+h]` --
  *  i.e. `[y - h + 1.5, y + 1.5]` in the ORIGINAL `y`. */

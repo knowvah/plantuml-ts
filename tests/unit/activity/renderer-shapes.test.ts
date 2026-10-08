@@ -36,7 +36,7 @@ import type { ActivityNodeGeo } from '../../../src/diagrams/activity/activity-ge
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
-import { measureLineWidth, centeredLineX } from '../../../src/diagrams/activity/activity-text-placement.js';
+import { measureLineWidth } from '../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = resolveTheme('default');
 
@@ -632,7 +632,7 @@ describe('amb-T5 — text positioned by x, not text-anchor (D2)', () => {
     const svg = renderHexagonOwnLabel(node, theme);
     const cx = node.x + node.width / 2;
     const fontSize = 11; // plantuml.skin:370
-    const expectedX = centeredLineX(cx, measureLineWidth(theme, fontSize, 'yes'));
+    const expectedX = cx - measureLineWidth(theme, fontSize, 'yes') / 2;
     const actualX = Number(/<text x="([\d.]+)"/.exec(svg)?.[1]);
     expect(svg).not.toContain('text-anchor');
     expect(actualX).toBeCloseTo(expectedX, 2);

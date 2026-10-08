@@ -46,21 +46,6 @@ export const NODE_MARGIN_X = 40;
  */
 export const SEQUENTIAL_ASSEMBLY_GAP = 35;
 
-/**
- * T1b pass 2: the activity-scoped `arrow` font size
- * (`plantuml.skin:373`, `activityDiagram { arrow { FontSize 11 } }`),
- * used ONLY at LAYOUT time (`tiles/gtile-top-down.ts#sequentialGap`,
- * `layout/tile-layout-inlabel.ts#inLabelReservation`) to size an
- * in-link label's own height/ink reservation -- `walkTile`'s own
- * signature carries no `Theme`, unlike `renderer.ts#renderEdgeLabel`'s
- * `activityFontSize(theme, 'arrow')` (the SAME default, resolved
- * theme-aware at render time). A `skinparam ArrowFontSize` override
- * would be reflected in the FINAL render but not in this layout-time
- * reservation -- a residual, not fixed here (threading `Theme` through
- * every `walkTile`/`pushTopDownSiblingEdge` call site is a much larger
- * change than this constant).
- */
-export const ARROW_LABEL_LAYOUT_FONT_SIZE = 11;
 export const START_STOP_RADIUS = 10;
 
 /**

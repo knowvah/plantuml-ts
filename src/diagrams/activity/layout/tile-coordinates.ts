@@ -69,6 +69,9 @@ export interface Out {
    */
   reservations: Reservation[];
   nextId: (prefix: string) => string;
+  /** The diagram theme, for walk-time label blocks (add4-T3j:
+   *  `tile-layout-inlabel.ts#inLabelReservation` sizes the drawn block). */
+  readonly theme: Theme;
   /**
    * `[start, end)` ranges into `nodes` from a fork/split branch's body
    * walk (set only by `walk-fork-branches.ts`) -- consulted by the

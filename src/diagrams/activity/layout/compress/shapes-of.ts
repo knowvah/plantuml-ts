@@ -23,9 +23,12 @@ import { boxStyleBox, conditionBox, noteBox } from './shapes-of-boxes.js';
 import { edgeDecorationVector } from './shapes-of-terminal.js';
 import { frameShapes } from './shapes-of-frame.js';
 import { edgeLabelBlockSize, edgeLabelLayout } from './edge-label-anchor.js';
-import { floorActionLineHeight, measurerAdapterOf } from '../../tiles/gtile-action.js';
+import { measurerAdapterOf } from '../../tiles/gtile-action.js';
 import { ifLabelBlock, ifLabelFontSize, type IfLabelNode } from '../../activity-text-sheet-diamond.js';
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
+import { TextBlockUtils } from '../../../../core/klimt/shape/TextBlockUtils.js';
+import { TEXT_LIMIT_SHIFT } from './slot-finder.js';
+import { edgeLinkStyle } from '../edge-link-style.js';
 import { ifOwnLabelShapes } from './shapes-of-hexagon-label.js';
 
 export type { Reservation } from '../hexagon-reservations.js';
@@ -165,24 +168,21 @@ export function ifLabelTextAnchor(theme: Theme, node: IfLabelNode): { dx: number
  * DRAWING/compression-bounds side.
  */
 function ifLabelShape(node: ActivityNodeGeo, bounder: StringBounder, theme: Theme): CompressShape {
-  const anchor = ifLabelTextAnchor(theme, node);
-  const firstBaselineY = node.y + anchor.dy;
-  const lines = (node.label ?? '').split('\n');
-  // add4-T3h: the drawn block's text width (its `SheetBlock1` padding
-  // excluded, `SheetBlock1.java:209-210`) and stripe advance
-  // (`AtomText.java:179-181` floor), not the raw markup lines.
+  // add4-T3j: `SlotFinder#drawText` (`SlotFinder.java:127-135`) boxes each
+  // drawn `UText` at its OWN font (a heading stripe is 15pt), so the
+  // envelope is the drawn block's text extent -- `LimitFinder#drawText`'s
+  // same `[baseline - h + 1.5, baseline + 1.5]` box (`LimitFinder.java:
+  // 216-224`), read off the block drawn at the node's origin.
   const { tb, fc } = ifLabelBlock(node, theme);
-  const fontSize = fc.size;
-  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: fontSize });
-  const width = tb.calculateDimension(sheetBounder).getWidth() - 2 * anchor.dx;
-  const firstHeight = bounder.getDimension(lines[0]!, fontSize).height;
-  const lastBaselineY = firstBaselineY + floorActionLineHeight(fontSize) * (lines.length - 1);
+  const sheetBounder = klimtStringBounder(measurerAdapterOf(bounder), { family: fc.family, size: fc.size });
+  const mm = TextBlockUtils.getMinMax(tb, sheetBounder, false);
+  const height = mm.getMaxY() - mm.getMinY();
   return {
     kind: 'text',
-    x: node.x + anchor.dx,
-    y: lastBaselineY,
-    width,
-    height: lastBaselineY - firstBaselineY + firstHeight,
+    x: node.x + mm.getMinX(),
+    y: node.y + mm.getMaxY() - TEXT_LIMIT_SHIFT,
+    width: mm.getMaxX() - mm.getMinX(),
+    height,
   };
 }
 
@@ -380,12 +380,21 @@ function edgeLabelShape(edge: ActivityEdgeGeo, bounder: StringBounder, theme: Th
 
 /** Every `CompressShape` one `ActivityEdgeGeo` contributes -- never its
  *  segments (`ULine`, never occupies, D1). */
+/** The worm's own end and emphasize decorations (`Worm.java:138-171`). */
+function wormDecorations(edge: ActivityEdgeGeo, meta: EdgeMeta): CompressShape[] {
+  const out: CompressShape[] = [];
+  const terminal = terminalArrowhead(edge, meta);
+  if (terminal !== undefined) out.push(terminal);
+  const emphasized = emphasizeArrowhead(edge);
+  if (emphasized !== undefined) out.push(emphasized);
+  return out;
+}
+
 function shapesForEdge(edge: ActivityEdgeGeo, meta: EdgeMeta, bounder: StringBounder, theme: Theme): CompressShape[] {
   const shapes: CompressShape[] = [];
-  const terminal = terminalArrowhead(edge, meta);
-  if (terminal !== undefined) shapes.push(terminal);
-  const emphasized = emphasizeArrowhead(edge);
-  if (emphasized !== undefined) shapes.push(emphasized);
+  // add4-T3j: a hidden worm returns before drawing its line or either
+  // decoration (`Worm.java:123-124`); its label still draws (`Snake.java:195`).
+  if (!edgeLinkStyle(edge).isInvisible()) shapes.push(...wormDecorations(edge, meta));
   const midArrow = midArrowShape(edge);
   if (midArrow !== undefined) shapes.push(midArrow);
   const label = edgeLabelShape(edge, bounder, theme);

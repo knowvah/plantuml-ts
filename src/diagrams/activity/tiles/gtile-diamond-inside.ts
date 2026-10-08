@@ -162,13 +162,21 @@ export class GtileDiamondInside extends TileLeaf implements DiamondConditionTile
   private west: LabelDim;
   private east: LabelDim;
 
-  constructor(label: string, labels: DiamondInsideLabels, bounder: StringBounder, theme: Theme) {
+  /** @param sideMode `SIMPLE_LINE` for an `if` (`ConditionalBuilder.java:280-283`),
+   *  `FULL` for a while / repeat (`FtileWhile.java:123,127-128`, `FtileRepeat.java:130-131`). */
+  constructor(
+    label: string,
+    labels: DiamondInsideLabels,
+    bounder: StringBounder,
+    theme: Theme,
+    sideMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+  ) {
     super();
     this.label = label;
-    this.north = measureSide(labels.north, bounder, theme);
-    this.south = measureSide(labels.south, bounder, theme);
-    this.west = measureSide(labels.west, bounder, theme);
-    this.east = measureSide(labels.east, bounder, theme);
+    this.north = measureSide(labels.north, bounder, theme, sideMode);
+    this.south = measureSide(labels.south, bounder, theme, sideMode);
+    this.west = measureSide(labels.west, bounder, theme, sideMode);
+    this.east = measureSide(labels.east, bounder, theme, sideMode);
 
     // `FtileDiamondInside#calculateDimensionAlone` reads `label
     // .calculateDimension` (`FtileDiamondInside.java:106-116`) -- the Sheet,

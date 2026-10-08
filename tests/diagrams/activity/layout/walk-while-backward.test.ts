@@ -30,7 +30,14 @@ const theme: Theme = { ...resolveTheme('default'), fontSize: 13, fontFamily: 'Ar
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    theme: resolveTheme('default'),
+    nextId: (prefix: string) => `${prefix}${n++}`,
+  };
 }
 
 describe('walkWhile — backward unset: identical to the pre-T3h shape', () => {

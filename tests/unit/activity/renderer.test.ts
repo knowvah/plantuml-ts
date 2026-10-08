@@ -642,8 +642,7 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'no3',
-          color: 'red',
+          label: '<back:red>no3',
         },
       ],
     });
@@ -662,8 +661,7 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'no3',
-          color: 'red',
+          label: '<back:red>no3',
         },
       ],
     });
@@ -679,13 +677,33 @@ describe('renderActivity — edge with colored label (back-colour filter)', () =
             { x: 100, y: 50 },
             { x: 100, y: 150 },
           ],
-          label: 'pill',
-          color: '#00FF00',
+          label: '<back:#00FF00>pill',
         },
       ],
     });
     const result = assembleSvg(renderActivity(geo, theme));
     expect(result).toContain('<feComposite in="SourceGraphic" in2="flood" operator="over"/>');
+  });
+
+  // add4-T3j: `edge.color` is the next arrow's COLOR group
+  // (`CommandArrow3.java:99-103`), the line and head colour -- not a label flood.
+  it('strokes the line and fills the head with the COLOR group colour', () => {
+    const geo = makeGeo({
+      edges: [
+        {
+          points: [
+            { x: 100, y: 50 },
+            { x: 100, y: 150 },
+          ],
+          label: 'no3',
+          color: '#red',
+        },
+      ],
+    });
+    const result = assembleSvg(renderActivity(geo, theme));
+    expect(result).toContain('<line x1="100" y1="50" x2="100" y2="150" stroke="#F00" stroke-width="1"/>');
+    expect(result).toMatch(/<polygon[^>]*fill="#F00"/);
+    expect(result).not.toContain('feFlood');
   });
 });
 

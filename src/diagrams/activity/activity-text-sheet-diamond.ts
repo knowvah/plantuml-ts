@@ -120,7 +120,7 @@ export function renderDiamondTestLabel(label: string, theme: Theme, box: Diamond
 /** The `'if-label'` fields {@link ifLabelBlock} reads. */
 export interface IfLabelNode {
   readonly label?: string | undefined;
-  readonly ifLabelRole?: 'test' | undefined;
+  readonly ifLabelRole?: 'test' | 'full' | undefined;
 }
 
 function ifLabelSName(node: IfLabelNode): 'diamond' | 'arrow' {
@@ -150,7 +150,7 @@ export function ifLabelBlock(
   const tb = activityDisplayBlock(label, theme, {
     fontConfiguration: fc,
     horizontalAlignment: HorizontalAlignment.LEFT,
-    creoleMode: CreoleMode.SIMPLE_LINE,
+    creoleMode: node.ifLabelRole === 'full' ? CreoleMode.FULL : CreoleMode.SIMPLE_LINE,
   });
   return { tb, fc };
 }

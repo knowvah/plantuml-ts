@@ -31,7 +31,14 @@ function stubTile(width: number, height: number): Tile {
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    theme: resolveTheme('default'),
+    nextId: (p: string) => `${p}${n++}`,
+  };
 }
 
 describe('walkWithNotes — one LEFT note: margin-box reservation + note position', () => {

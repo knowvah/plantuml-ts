@@ -3,35 +3,16 @@ import { EAST_HOOK, NORTH_BORDER, NORTH_HOOK, SOUTH_BORDER, SOUTH_HOOK, WEST_HOO
 import type { StringBounder } from './tile.js';
 import { TileLeaf } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
-import { activityFontSize } from '../activity-style-defaults.js';
 import type { DiamondConditionTile, DiamondInsideLabels, DiamondSide } from './gtile-diamond-inside.js';
+import { measureCondition, measureSide } from './gtile-diamond-inside.js';
+import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
-/** `AtomText#calculateDimensionSlow`'s own per-line height floor (L, T3d),
- *  same constant as every other diamond file's own copy.
- * @see net/sourceforge/plantuml/klimt/creole/legacy/AtomText.java:179-181 */
-const ATOM_TEXT_MIN_HEIGHT = 10;
-
 interface LabelDim {
   readonly text: string;
   readonly width: number;
   readonly height: number;
-}
-
-/** Same multi-line fold as every other diamond file's own copy (D5: no
- *  shared helper module between builder-specific tile files). */
-function measureLabel(text: string | undefined, bounder: StringBounder, fontSize: number): LabelDim {
-  const t = text ?? '';
-  if (t === '') return { text: t, width: 0, height: 0 };
-  let width = 0;
-  let height = 0;
-  for (const line of t.split('\n')) {
-    const dim = bounder.getDimension(line, fontSize);
-    if (dim.width > width) width = dim.width;
-    height += Math.max(dim.height, ATOM_TEXT_MIN_HEIGHT);
-  }
-  return { text: t, width, height };
 }
 
 /**
@@ -84,15 +65,29 @@ export class GtileDiamondEmpty extends TileLeaf implements DiamondConditionTile 
   private west: LabelDim;
   private east: LabelDim;
 
-  constructor(testLabel: string, labels: DiamondInsideLabels, bounder: StringBounder, theme: Theme) {
+  /**
+   * @param sideMode the side slots' creole mode: `SIMPLE_LINE` for an `if`
+   *   (`ConditionalBuilder.java:280-283` `getLabelPositive`), `FULL` for a
+   *   while's `create(fontArrow)` yes/out blocks (`FtileWhile.java:123,127-128`)
+   *   and a repeat's tbTest (`FtileRepeat.java:127-129`).
+   */
+  constructor(
+    testLabel: string,
+    labels: DiamondInsideLabels,
+    bounder: StringBounder,
+    theme: Theme,
+    sideMode: CreoleMode = CreoleMode.SIMPLE_LINE,
+  ) {
     super();
-    const arrowSize = activityFontSize(theme, 'arrow');
-    this.south = measureLabel(labels.south, bounder, arrowSize);
-    this.west = measureLabel(labels.west, bounder, arrowSize);
-    this.east = measureLabel(labels.east, bounder, arrowSize);
-    // `styleDiamond`/`fcTest`/`fcDiamond` bucket -- this class's own doc.
-    const diamondSize = activityFontSize(theme, 'diamond');
-    this.north = measureLabel(testLabel, bounder, diamondSize);
+    // add4-T3j: each slot is the block drawn there -- branch labels the
+    // arrow-font block in `sideMode`, the test the condition Sheet
+    // (`ConditionalBuilder.java:240-247`, `FtileDiamond.withNorth(tbTest)`;
+    // the while's `test.create(fcTest)`, `FtileWhile.java:124-126`, has the
+    // same extent).
+    this.south = measureSide(labels.south, bounder, theme, sideMode);
+    this.west = measureSide(labels.west, bounder, theme, sideMode);
+    this.east = measureSide(labels.east, bounder, theme, sideMode);
+    this.north = measureCondition(testLabel, bounder, theme);
     this.inY = this.north.height;
     // `FtileDiamond.java:109-111`: `dim = (24, 24 + suppY1)`.
     this.height = HEXAGON_HALF_SIZE * 2 + this.inY;

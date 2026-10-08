@@ -68,9 +68,8 @@ import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { Sheet } from '../../core/klimt/creole/Sheet.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
 
-/** `$version$` -- the SAME placeholder literal `activity-renderer-text.ts
- *  #THROWAWAY_VERSION` uses for the identical throwaway-`UGraphicSvg`
- *  purpose. */
+/** `$version$` -- the placeholder version for the throwaway `UGraphicSvg`
+ *  each draw below renders into. */
 const THROWAWAY_VERSION = '$version$';
 
 const ALIGNMENT_MAP: Record<'left' | 'center' | 'right', HorizontalAlignment> = {
@@ -239,8 +238,7 @@ interface DrawContext {
 
 /**
  * Draws `tb` at (`x`, `y`) on a throwaway `UGraphicSvg` + `extractFlatContent`
- * -- the SAME technique `activity-renderer-text.ts#drawRun` uses for one
- * `UText`, applied to a whole multi-stripe `TextBlock`. `SvgOption.linkTarget`
+ * -- one throwaway document per whole multi-stripe `TextBlock`. `SvgOption.linkTarget`
  * carries `skinparam svgLinkTarget` (`SkinParam.java:1082`) into every
  * `[[url]]` run's `<a target>` (`UGraphicSvg.java:161`).
  */

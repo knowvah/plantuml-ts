@@ -7,6 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { resolveTheme } from '../../../../src/core/theme.js';
 import { walkRepeat } from '../../../../src/diagrams/activity/layout/walk-repeat.js';
 import type { GtileRepeat, RepeatBackConnection } from '../../../../src/diagrams/activity/tiles/gtile-repeat.js';
 import type { GtileDiamondInside } from '../../../../src/diagrams/activity/tiles/gtile-diamond-inside.js';
@@ -17,7 +18,14 @@ import type { Tile } from '../../../../src/diagrams/activity/tiles/tile.js';
 
 function makeOut(): Out {
   let n = 0;
-  return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (prefix: string) => `${prefix}${n++}` };
+  return {
+    nodes: [],
+    edges: [],
+    edgeMeta: [],
+    reservations: [],
+    theme: resolveTheme('default'),
+    nextId: (prefix: string) => `${prefix}${n++}`,
+  };
 }
 
 function makeLeaf(kind: string, width: number, height: number, left = width / 2, hasPointOut = true): Tile {

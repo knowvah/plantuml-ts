@@ -275,7 +275,14 @@ describe('walkIfWithLinks — an isEmpty() branch suppresses its in-arrow and em
 
   function makeOut(): Out {
     let n = 0;
-    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
+    return {
+      nodes: [],
+      edges: [],
+      edgeMeta: [],
+      reservations: [],
+      theme: resolveTheme('default'),
+      nextId: (p: string) => `${p}${n++}`,
+    };
   }
 
   it('in1 (to the empty branch) has no arrowhead', () => {
@@ -333,7 +340,14 @@ describe('walkIfWithLinks — ConnectionHline carries a swimlane-aware routing t
 
   function makeOut(): Out {
     let n = 0;
-    return { nodes: [], edges: [], edgeMeta: [], reservations: [], nextId: (p: string) => `${p}${n++}` };
+    return {
+      nodes: [],
+      edges: [],
+      edgeMeta: [],
+      reservations: [],
+      theme: resolveTheme('default'),
+      nextId: (p: string) => `${p}${n++}`,
+    };
   }
 
   it("the Hline edge's own meta carries both branches' out-x tagged with their own outcome lane", () => {
