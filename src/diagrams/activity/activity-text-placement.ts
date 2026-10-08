@@ -74,14 +74,6 @@ export function measureLineWidth(theme: Theme, fontSize: number, line: string): 
   return MEASURER.measure(line, { family: theme.fontFamily, size: fontSize }).width;
 }
 
-/** `<code>` blocks measure monospace, matching `tiles/gtile-action.ts`'s own
- *  `monoCharWidth = fontSize * 0.6` sizing -- the box's width floor was
- *  computed with this SAME formula, so the render-time `x` must agree with
- *  it, not the proportional table {@link measureLineWidth} reads. */
-export function measureMonoLineWidth(fontSize: number, line: string): number {
-  return line.length * fontSize * 0.6;
-}
-
 /** `FtileDiamondInside.java:94-96` / `GtileHexagonInside.java:117` --
  *  geometric centring, no alignment branch. */
 export function centeredLineX(cx: number, lineWidth: number): number {
