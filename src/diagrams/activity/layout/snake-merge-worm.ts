@@ -102,7 +102,12 @@ function collapseCorner(points: GPoint[], i: number, corner: GPoint): void {
 /** `removePattern1` (`:419-434`): `DOWN,LEFT,DOWN,RIGHT` or its mirror. */
 function removePattern1(points: GPoint[]): boolean {
   for (let i = 0; i < points.length - 5; i++) {
-    if (isPattern(points, i, [['DOWN', 'LEFT', 'DOWN', 'RIGHT'], ['DOWN', 'RIGHT', 'DOWN', 'LEFT']])) {
+    if (
+      isPattern(points, i, [
+        ['DOWN', 'LEFT', 'DOWN', 'RIGHT'],
+        ['DOWN', 'RIGHT', 'DOWN', 'LEFT'],
+      ])
+    ) {
       collapseCorner(points, i, { x: points[i + 1]!.x, y: points[i + 3]!.y });
       return true;
     }
@@ -113,7 +118,12 @@ function removePattern1(points: GPoint[]): boolean {
 /** `removePattern2` (`:452-466`): `RIGHT,DOWN,RIGHT,UP` or its mirror. */
 function removePattern2(points: GPoint[]): boolean {
   for (let i = 0; i < points.length - 5; i++) {
-    if (isPattern(points, i, [['RIGHT', 'DOWN', 'RIGHT', 'UP'], ['LEFT', 'DOWN', 'LEFT', 'UP']])) {
+    if (
+      isPattern(points, i, [
+        ['RIGHT', 'DOWN', 'RIGHT', 'UP'],
+        ['LEFT', 'DOWN', 'LEFT', 'UP'],
+      ])
+    ) {
       collapseCorner(points, i, { x: points[i + 3]!.x, y: points[i + 1]!.y });
       return true;
     }
@@ -124,7 +134,12 @@ function removePattern2(points: GPoint[]): boolean {
 /** `removePattern3` (`:468-483`): `DOWN,RIGHT,DOWN,RIGHT` or its mirror. */
 function removePattern3(points: GPoint[]): boolean {
   for (let i = 0; i < points.length - 4; i++) {
-    if (isPattern(points, i, [['DOWN', 'RIGHT', 'DOWN', 'RIGHT'], ['DOWN', 'LEFT', 'DOWN', 'LEFT']])) {
+    if (
+      isPattern(points, i, [
+        ['DOWN', 'RIGHT', 'DOWN', 'RIGHT'],
+        ['DOWN', 'LEFT', 'DOWN', 'LEFT'],
+      ])
+    ) {
       collapseCorner(points, i, { x: points[i + 1]!.x, y: points[i + 3]!.y });
       return true;
     }
@@ -184,7 +199,12 @@ function removePattern7(points: GPoint[]): boolean {
  *  corner LIMITED preserves"). */
 function removePattern8(points: GPoint[]): boolean {
   for (let i = 0; i < points.length - 4; i++) {
-    if (isPattern(points, i, [['LEFT', 'DOWN', 'LEFT', 'DOWN'], ['RIGHT', 'DOWN', 'RIGHT', 'DOWN']])) {
+    if (
+      isPattern(points, i, [
+        ['LEFT', 'DOWN', 'LEFT', 'DOWN'],
+        ['RIGHT', 'DOWN', 'RIGHT', 'DOWN'],
+      ])
+    ) {
       collapseCorner(points, i, { x: points[i + 3]!.x, y: points[i + 1]!.y });
       return true;
     }

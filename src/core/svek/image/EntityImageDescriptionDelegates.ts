@@ -298,7 +298,12 @@ export function descAtomOps(
             ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
             : undefined;
         ug.draw(
-          UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), rasterDims),
+          UImage.build(
+            resolved.width,
+            resolved.height,
+            spriteHrefOver(resolved, ug.getParam().getBackcolor()),
+            rasterDims,
+          ),
         );
       } else {
         // Each primitive re-applies its OWN translate+paint on top of the

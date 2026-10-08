@@ -32,10 +32,7 @@ function repeatBody(backwardLabels: string[]): ActivityRepeat['body'] {
 
 describe('tile-layout — repeat backward: unset (regression safety)', () => {
   const ast: ActivityDiagramAST = {
-    nodes: [
-      { kind: 'start' },
-      { kind: 'repeat', body: [{ kind: 'action', label: 'read data' }], condition: 'done?' },
-    ],
+    nodes: [{ kind: 'start' }, { kind: 'repeat', body: [{ kind: 'action', label: 'read data' }], condition: 'done?' }],
     swimlanes: [],
   };
   const geo = layoutActivity(ast, theme, measurer);
@@ -47,10 +44,7 @@ describe('tile-layout — repeat backward: unset (regression safety)', () => {
 
 describe('tile-layout — repeat backward: set (FtileRepeat.java:84,181-187,685-692)', () => {
   const ast: ActivityDiagramAST = {
-    nodes: [
-      { kind: 'start' },
-      { kind: 'repeat', body: repeatBody(['go back']), condition: 'done?' },
-    ],
+    nodes: [{ kind: 'start' }, { kind: 'repeat', body: repeatBody(['go back']), condition: 'done?' }],
     swimlanes: [],
   };
   const geo = layoutActivity(ast, theme, measurer);
@@ -198,7 +192,10 @@ describe('extractBackward — BACKNOTE: a note after backward: becomes backward.
       { kind: 'backward', label: 'go back' },
     ];
     const { rest, backward } = extractBackward(body);
-    expect(rest).toEqual([{ kind: 'note', text: 'early', position: 'left' }, { kind: 'action', label: 'a' }]);
+    expect(rest).toEqual([
+      { kind: 'note', text: 'early', position: 'left' },
+      { kind: 'action', label: 'a' },
+    ]);
     expect(backward?.notes).toBeUndefined();
   });
 

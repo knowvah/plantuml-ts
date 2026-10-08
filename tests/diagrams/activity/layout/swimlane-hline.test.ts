@@ -4,7 +4,13 @@ import type { HlinePayload } from '../../../../src/diagrams/activity/layout/swim
 import type { ActivityEdgeGeo } from '../../../../src/diagrams/activity/activity-geometry.types.js';
 
 function makeEdge(minX: number, maxX: number, y = 50): ActivityEdgeGeo {
-  return { points: [{ x: minX, y }, { x: maxX, y }], arrowhead: false };
+  return {
+    points: [
+      { x: minX, y },
+      { x: maxX, y },
+    ],
+    arrowhead: false,
+  };
 }
 
 describe('swimlane-hline#routeHline', () => {
@@ -108,7 +114,7 @@ describe('swimlane-hline#routeHline', () => {
     expect(routed.edgeMeta[0]).toEqual({ lane1: 'B', lane2: 'B', shape: 'default' });
   });
 
-  it('every output edge preserves the original edge\'s own fields (e.g. arrowhead: false)', () => {
+  it("every output edge preserves the original edge's own fields (e.g. arrowhead: false)", () => {
     const payload: HlinePayload = { low: 0, high: 10, candidates: [{ x: 5, lane: 'A' }], unfiltered: [] };
     const routed = routeHline(payload, makeEdge(0, 10), ['A'], new Map());
     expect(routed.edges[0]!.arrowhead).toBe(false);

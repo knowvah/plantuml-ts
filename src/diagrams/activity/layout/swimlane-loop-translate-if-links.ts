@@ -99,12 +99,7 @@ function vThenHDelta(x1: number, x2: number): number {
  * (`:254-268`): a `MergeStrategy.LIMITED` unarrowed elbow to `mp2bc`, then a
  * SEPARATE `MergeStrategy.LIMITED` arrowed snake from `mp2bc` to `mp2b`.
  */
-function vThenHSameDirection(
-  edge: ActivityEdgeGeo,
-  mp1a: GPoint,
-  mp2b: GPoint,
-  delta: number,
-): LoopRouteResult {
+function vThenHSameDirection(edge: ActivityEdgeGeo, mp1a: GPoint, mp2b: GPoint, delta: number): LoopRouteResult {
   const middle = (mp1a.y + mp2b.y) / 2;
   const mp2bc = { x: mp2b.x + delta, y: mp2b.y };
   const base = withoutEmphasize(edge);
@@ -127,12 +122,7 @@ function vThenHSameDirection(
  * branch (`:269-282`): the same two-snake split as {@link
  * vThenHSameDirection}, but `mp2bb` also drops `1.5 * hexagonHalfSize` in Y.
  */
-function vThenHFlippedDirection(
-  edge: ActivityEdgeGeo,
-  mp1a: GPoint,
-  mp2b: GPoint,
-  delta: number,
-): LoopRouteResult {
+function vThenHFlippedDirection(edge: ActivityEdgeGeo, mp1a: GPoint, mp2b: GPoint, delta: number): LoopRouteResult {
   const mp2bb = { x: mp2b.x + delta, y: mp2b.y - 1.5 * HEXAGON_HALF_SIZE };
   const base = withoutEmphasize(edge);
   const main: ActivityEdgeGeo = {

@@ -34,6 +34,15 @@ describe('switch-swimlane-duplicate', () => {
     const node = makeNode();
     markBigDiamondDuplicate(node);
     const copy = withoutBigDiamondDuplicateTag({ ...node, x: 99, swimlane: 'Lane2' });
-    expect(copy).toEqual({ id: 'n-1', kind: 'action', x: 99, y: 20, width: 30, height: 40, label: 'A', swimlane: 'Lane2' });
+    expect(copy).toEqual({
+      id: 'n-1',
+      kind: 'action',
+      x: 99,
+      y: 20,
+      width: 30,
+      height: 40,
+      label: 'A',
+      swimlane: 'Lane2',
+    });
   });
 });

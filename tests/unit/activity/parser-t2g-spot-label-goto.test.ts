@@ -7,7 +7,12 @@
 import { describe, it, expect } from 'vitest';
 import { activityPlugin } from '../../../src/diagrams/activity/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
-import type { ActivityDiagramAST, ActivityGoto, ActivityLabel, ActivitySpot } from '../../../src/diagrams/activity/ast.js';
+import type {
+  ActivityDiagramAST,
+  ActivityGoto,
+  ActivityLabel,
+  ActivitySpot,
+} from '../../../src/diagrams/activity/ast.js';
 import { parseAst } from '../../helpers/parse-ast.js';
 
 function parse(lines: readonly string[]): ActivityDiagramAST {

@@ -48,8 +48,11 @@ describe('FtileGroup#getInnerDimensionSlow', () => {
 
 describe('groupInnerInkMaxX', () => {
   it('a while body inks its emphasized back arrowhead at width + 14', () => {
-    const tiles = tileNodes([{ kind: 'while', condition: 't', body: [{ kind: 'action', label: 'x' }] }], bounder, theme)
-      .tiles;
+    const tiles = tileNodes(
+      [{ kind: 'while', condition: 't', body: [{ kind: 'action', label: 'x' }] }],
+      bounder,
+      theme,
+    ).tiles;
     const body = new GtileTopDown(tiles, bounder, theme);
     expect(groupInnerInkMaxX(body, theme)).toBe(body.width + WHILE_INK_OVERRUN);
   });

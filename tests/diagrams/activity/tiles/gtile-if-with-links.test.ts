@@ -268,7 +268,7 @@ describe('GtileIfWithLinks — own LEFT note (add3-T2a-2 IFNOTE)', () => {
     expect(tile.branchY).toBe(64);
   });
 
-  it('noteY sits at the composite\'s own top, 0 -- the room `diamond1Y`/`branchY` dropped into', () => {
+  it("noteY sits at the composite's own top, 0 -- the room `diamond1Y`/`branchY` dropped into", () => {
     expect(tile.noteY).toBe(0);
   });
 

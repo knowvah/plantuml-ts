@@ -177,7 +177,7 @@ describe('arrowHeadPointsTriangle', () => {
     ]);
   });
 
-  it('every direction is a 3-point polygon, never ArrowsRegular\'s 4-point shape', () => {
+  it("every direction is a 3-point polygon, never ArrowsRegular's 4-point shape", () => {
     for (const dir of ['up', 'down', 'left', 'right'] as const) {
       expect(arrowHeadPointsTriangle(dir)).toHaveLength(3);
       expect(arrowHeadPoints(dir)).toHaveLength(4);

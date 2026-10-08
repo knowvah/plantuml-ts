@@ -13,7 +13,12 @@
  * @see net/sourceforge/plantuml/klimt/drawing/svg/DriverCenteredCharacterSvg.java:56-81
  */
 import { DEFAULT_SVG_DECIMALS, formatDecimal } from '../../core/svg-format.js';
-import { CAPTURED_SPOT_LETTERS, SPOT_GLYPH_D, SPOT_REFERENCE_CX, SPOT_REFERENCE_CY } from './activity-spot-glyph-data.js';
+import {
+  CAPTURED_SPOT_LETTERS,
+  SPOT_GLYPH_D,
+  SPOT_REFERENCE_CX,
+  SPOT_REFERENCE_CY,
+} from './activity-spot-glyph-data.js';
 
 /** Numeric-token regex (lizard-safe: built from a string, matches
  *  `class-badge.ts#NUMBER_RE`'s own convention for `<`/`>`-adjacent regex

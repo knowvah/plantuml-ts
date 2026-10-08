@@ -154,7 +154,10 @@ describe('GtileIfDown — optionalStop case (empty main flow, side box east of t
   });
 
   it('withoutPointOut fires when the main flow itself lacks a point out', () => {
-    const noOut = new GtileIfDown(diamond1, stubTile(0, 0, false), optionalStop, { hasTwoBranches: false, useElse1: false });
+    const noOut = new GtileIfDown(diamond1, stubTile(0, 0, false), optionalStop, {
+      hasTwoBranches: false,
+      useElse1: false,
+    });
     expect(noOut.hasPointOut()).toBe(false);
   });
 });

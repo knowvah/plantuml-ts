@@ -108,7 +108,15 @@ describe('renderSwimlaneBackground (via renderSwimlaneChrome)', () => {
     const geo = makeGeo({
       swimlanes: [
         { name: 'A', x: 20, width: 100, contentX: 26, contentWidth: 88, titleWidth: 30 },
-        { name: 'B', x: 120, width: 150, contentX: 126, contentWidth: 138, titleWidth: 25, background: '#AntiqueWhite' },
+        {
+          name: 'B',
+          x: 120,
+          width: 150,
+          contentX: 126,
+          contentWidth: 138,
+          titleWidth: 25,
+          background: '#AntiqueWhite',
+        },
       ],
     });
     const out = renderSwimlaneChrome(geo, theme);

@@ -327,7 +327,12 @@ function wrapOwnNotes(
 
 /** `InstructionWhile#createFtile` (`InstructionWhile.java:126-127`): the
  *  while's own notes wrap the whole loop, `withLink = false`, CENTER. */
-export function wrapWhileNotes(tile: Tile, notes: readonly ActivityNote[] | undefined, bounder: StringBounder, theme: Theme): Tile {
+export function wrapWhileNotes(
+  tile: Tile,
+  notes: readonly ActivityNote[] | undefined,
+  bounder: StringBounder,
+  theme: Theme,
+): Tile {
   return wrapOwnNotes(tile, notes ?? [], bounder, theme, { link: false });
 }
 

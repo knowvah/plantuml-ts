@@ -31,9 +31,7 @@ function draw(label: string, theme: Theme = THEME, mode: CreoleMode = CreoleMode
 describe('activityDisplayBlock + drawActivityTextBlock', () => {
   it('draws a plain label as one <text> on the block baseline', () => {
     // AtomText baseline: block top + size - descent (size 11, descent 11/4.5).
-    expect(draw('hello')).toBe(
-      '<text x="10" y="28.556" fill="#000" font-size="11" textLength="23.306">hello</text>',
-    );
+    expect(draw('hello')).toBe('<text x="10" y="28.556" fill="#000" font-size="11" textLength="23.306">hello</text>');
   });
 
   it('splits a `**bold**` run into its own <text> at the accumulated x', () => {

@@ -62,7 +62,12 @@ interface NoteGeomInputs {
 function applyLeftNote(acc: IfOwnNoteGeometry, note: IfOwnNote, inputs: NoteGeomInputs): IfOwnNoteGeometry {
   if (acc.opaleLeft !== null) return acc;
   const diamondLeft = inputs.diamond1.getCoord(SOUTH_HOOK).x;
-  const trial: IfLinksFlags = { ...inputs.baseFlags, xDeltaNote: acc.xDeltaNote, yDeltaNote: 0, suppWidthNode: acc.suppWidthNode };
+  const trial: IfLinksFlags = {
+    ...inputs.baseFlags,
+    xDeltaNote: acc.xDeltaNote,
+    yDeltaNote: 0,
+    suppWidthNode: acc.suppWidthNode,
+  };
   const diamond1X = computeNudeAndMerge(inputs.diamond1, inputs.b1, inputs.b2, trial).geoTotal.left - diamondLeft;
   const xDeltaNote = note.box.width > diamond1X ? note.box.width - diamond1X : acc.xDeltaNote;
   return { ...acc, opaleLeft: note, xDeltaNote, yDeltaNote: Math.max(acc.yDeltaNote, note.box.height) };
@@ -79,7 +84,12 @@ function applyLeftNote(acc: IfOwnNoteGeometry, note: IfOwnNote, inputs: NoteGeom
 function applyRightNote(acc: IfOwnNoteGeometry, note: IfOwnNote, inputs: NoteGeomInputs): IfOwnNoteGeometry {
   if (acc.opaleRight !== null) return acc;
   const diamondLeft = inputs.diamond1.getCoord(SOUTH_HOOK).x;
-  const trial: IfLinksFlags = { ...inputs.baseFlags, xDeltaNote: acc.xDeltaNote, yDeltaNote: 0, suppWidthNode: acc.suppWidthNode };
+  const trial: IfLinksFlags = {
+    ...inputs.baseFlags,
+    xDeltaNote: acc.xDeltaNote,
+    yDeltaNote: 0,
+    suppWidthNode: acc.suppWidthNode,
+  };
   const { geoTotal } = computeNudeAndMerge(inputs.diamond1, inputs.b1, inputs.b2, trial);
   const diamond1X = geoTotal.left - diamondLeft;
   const pos1 = diamond1X + inputs.diamond1.width + note.box.width;

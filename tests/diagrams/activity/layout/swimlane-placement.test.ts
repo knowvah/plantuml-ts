@@ -165,7 +165,14 @@ describe('placeSwimlanes — no lanes is a byte-identical passthrough', () => {
 describe('placeSwimlanes — a single named lane is also a byte-identical passthrough', () => {
   it('returns the same node content unshifted, empty swimlanes', () => {
     const nodes = [node('n1', 12, 40, 'Swimlane 1')];
-    const edges = [{ points: [{ x: 12, y: 0 }, { x: 12, y: 30 }] }];
+    const edges = [
+      {
+        points: [
+          { x: 12, y: 0 },
+          { x: 12, y: 30 },
+        ],
+      },
+    ];
     const result = placeSwimlanes({
       nodes,
       edges,
