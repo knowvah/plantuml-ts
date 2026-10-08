@@ -4,7 +4,7 @@ import type { StringBounder, Tile } from './tile.js';
 import { TileComposite } from './tile.js';
 import type { Theme } from '../../../core/theme.js';
 import { SEQUENTIAL_ASSEMBLY_GAP } from '../activity-layout-constants.js';
-import { activityFontSize } from '../activity-style-defaults.js';
+import { measureSide } from './gtile-diamond-inside.js';
 
 /**
  * T1b pass 2: `FtileFactoryDelegatorAssembly#assembly`'s own height
@@ -16,8 +16,10 @@ import { activityFontSize } from '../activity-style-defaults.js';
  */
 function sequentialGap(nextChild: Tile, bounder: StringBounder, theme: Theme): number {
   if (nextChild.inLabel === undefined) return SEQUENTIAL_ASSEMBLY_GAP;
-  const fontSize = activityFontSize(theme, 'arrow');
-  return SEQUENTIAL_ASSEMBLY_GAP + bounder.getDimension(nextChild.inLabel.label, fontSize).height;
+  // add4-T3j: `textBlock` is the create7 SIMPLE_LINE arrow block
+  // (`FtileFactoryDelegator.java:103-112`, read at `FtileFactoryDelegatorAssembly
+  // .java:59-62`), padding and stripe floor included.
+  return SEQUENTIAL_ASSEMBLY_GAP + measureSide(nextChild.inLabel.label, bounder, theme).height;
 }
 
 export class GtileTopDown extends TileComposite {

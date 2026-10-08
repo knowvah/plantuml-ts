@@ -47,4 +47,10 @@ describe('labels sized as the drawn blocks (jar oracles)', () => {
     expect(paths.filter((p) => !/@(y|y1|y2|cy|points\[\d*[13579]\]|height|viewBox\[3\])$/.test(p))).toEqual([]);
     expect(paths).toHaveLength(67);
   });
+
+  // FtileFactoryDelegatorAssembly.java:58-62: the sequential gap adds the
+  // create7 SIMPLE_LINE block's height (padding and stripe floor included).
+  it('sequential gap: the in-label block height, padding included', () => {
+    expect(diffPaths('add4-T3h', 'side-labels-padding')).toEqual([]);
+  });
 });
