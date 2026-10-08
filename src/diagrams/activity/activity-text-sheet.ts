@@ -48,6 +48,7 @@ import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
 import { WidthTableMeasurer } from '../../core/measurer.js';
 import { backColorFilterDef } from '../../core/svg-defs.js';
+import { getSprite } from '../../core/sprite-registry.js';
 
 /** `{{ }}` inside a label -- the global registry (`src/index.ts`), absent
  *  only when nothing registered one (a unit test). */
@@ -62,17 +63,19 @@ function nestedRenderer(): NestedDiagramRenderer {
 }
 
 /** The `ISkinSimple` surface `CreoleParser`/`StripeSimple` read for a label:
- *  `SkinParam.java` defaults (no sprites, identity size hack, `MONOSPACED`,
+ *  `SkinParam.java` defaults (the diagram's sprites, identity size hack, `MONOSPACED`,
  *  tabsize 8, dpi 96), the same members `activity-creole-sheet.ts
  *  #activitySkinSimple` builds, plus `getPadding()`: `skinparam padding N`
  *  (`SkinParam.java:1147-1150`, `theme.padding`), which `Display#getCreole`
  *  hands its `SheetBlock1` (`Display.java:697-699`). */
 function activitySkinSimple(fontConfiguration: FontConfiguration, theme: Theme): ISkinSimple {
   const padding = ClockwiseTopRightBottomLeft.same(theme.padding ?? 0);
-  const atomOps = chromeAtomOps(undefined, fontConfiguration);
+  const atomOps = chromeAtomOps(theme.sprites, fontConfiguration);
   const pragma = Pragma.createEmpty();
+  const sprites = theme.sprites;
   const skin: ISkinSimple = {
-    getSprite: () => null,
+    // unwind2-S11: `SkinParam#getSprite` (`SkinParam.java:811-817`).
+    getSprite: (name: string) => (sprites === undefined ? null : (getSprite(sprites, name) ?? null)),
     guillemet: () => GUILLEMET_DEFAULT,
     getFromMd5: () => null,
     transformStringForSizeHack: (s: string) => s,
@@ -137,7 +140,7 @@ export function activityDisplayBlock(label: string, theme: Theme, params: Activi
   const ctx = {
     fontConfiguration: fc,
     spriteContainer: activitySkinSimple(fc, theme),
-    atomOps: chromeAtomOps(undefined, fc),
+    atomOps: chromeAtomOps(theme.sprites, fc),
   };
   return Display.create(label.split('\n')).create0(
     ctx,

@@ -187,7 +187,7 @@ export function renderNote(node: ActivityNodeGeo, theme: Theme): string {
 
   // add3-T3d: `FtileWithNoteOpale.java:147-150` draws via the real creole
   // Sheet -- `renderNoteLabel`'s own doc.
-  return body + renderNoteLabel(label, theme, { x, y, width: w, height: h }, stroke);
+  return body + renderNoteLabel(label, theme, { x, y, width: w, height: h }, { border: stroke, fill: noteFill });
 }
 
 /** The root `composite { LineColor black; BackgroundColor transparent;

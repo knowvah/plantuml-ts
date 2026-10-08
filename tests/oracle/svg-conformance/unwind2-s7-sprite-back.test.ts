@@ -17,6 +17,7 @@ import { pngPayloads } from '../../helpers/png-decode.js';
 
 const S7 = 'tests/fixtures/unwind2-S7';
 const U4 = 'tests/fixtures/unwind-U4/sprite';
+const S11 = 'tests/fixtures/unwind2-S11';
 const PARTICIPANT_BACK = '#E2E2F0'; // plantuml.skin:4
 /** `CommandCreoleSprite`'s font-relative factor at the 14pt head font. */
 const HEAD_FONT_FACTOR = 14 / 13;
@@ -74,6 +75,14 @@ const EXACT: readonly (readonly [string, string])[] = [
   [S7, 'a-legend'],
   [S7, 'a-caption'],
   [S7, 'a-header'],
+  // unwind2-S11: the activity text blocks now resolve `<$sprite>` through
+  // the diagram's own map (`StripeSimple.java:229`).
+  [S7, 'ac-activity'], // FtileBox.java:215-218 -- the box fill
+  [S11, 'ac-color'], // skinparam ActivityBackgroundColor pink, 13pt (scale 1)
+  [S11, 'ac-multiline'],
+  [S11, 'ac-note'], // Opale.java:107 -- #FEFFDD
+  [S11, 'ac-arrow'], // an arrow label: no back (white)
+  [S11, 'ac-if'], // FtileDiamondInside.java:85 -- test label + south slot
 ];
 
 describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
@@ -101,7 +110,7 @@ describe('unwind2-S7: sprite tint starts from the drawing back colour', () => {
 
   // The jar draws one sprite in each; the port draws none (no sprite atom
   // reaches these text paths). Flip to EXACT once each is ported.
-  it.each(['ac-activity', 'c-edge', 'c-package-title', 's-group', 's-message', 's-note', 'st-state'])(
+  it.each(['c-edge', 'c-package-title', 's-group', 's-message', 's-note', 'st-state'])(
     '%s: not yet drawn by the port',
     (name) => {
       expect(jar(S7, name).length).toBe(1);
