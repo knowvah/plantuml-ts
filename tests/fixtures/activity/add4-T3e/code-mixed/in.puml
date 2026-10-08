@@ -1,0 +1,10 @@
+@startuml
+start
+:before text
+<code>
+x = foo(1)
+    indented line
+</code>
+after text;
+stop
+@enduml

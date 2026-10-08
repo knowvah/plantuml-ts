@@ -1,0 +1,159 @@
+diff --git a/src/diagrams/activity/layout/canvas-origin-fudge.ts b/src/diagrams/activity/layout/canvas-origin-fudge.ts
+index 246d4a21a..f8cd89734 100644
+--- a/src/diagrams/activity/layout/canvas-origin-fudge.ts
++++ b/src/diagrams/activity/layout/canvas-origin-fudge.ts
+@@ -10,8 +10,11 @@ import type { ActivityNodeGeo } from '../activity-geometry.types.js';
+ 
+ /** What {@link nodeFudge} reads of a node: a placed `ActivityNodeGeo`, or
+  *  a `swimlane-context.ts#LaneItem` built from one. */
+-export type FudgeSubject = Pick<ActivityNodeGeo, 'kind'> & Partial<Pick<ActivityNodeGeo, 'usymbol' | 'label'>>;
++export type FudgeSubject = Pick<ActivityNodeGeo, 'kind'> &
++  Partial<Pick<ActivityNodeGeo, 'usymbol' | 'label' | 'stereotype' | 'width' | 'height'>>;
+ import { classifyStripeLine } from '../../../core/klimt/creole/legacy/CreoleStripeSimpleParser.js';
++import { boxStyleName, boxStyleShield } from '../tiles/gtile-action.js';
++import { activityPadding } from '../activity-style-defaults.js';
+ 
+ /** A shape kind's own `{ near, far }` LimitFinder fudge (module doc above):
+  *  `recordedMin = real.min - near`, `recordedMax = real.max + far`. Exported
+@@ -129,9 +132,50 @@ function hasHorizontalRule(node: FudgeSubject): boolean {
+  * USymbol cases, an action's full-width rule, else the kind's own
+  * {@link fudgeX}/{@link fudgeY}.
+  */
++/** `BoxStyle#drawMe`'s outline ink per style (`BoxStyle.java:153-500`) over
++ *  the node box `[x, x + width]`, `W = width - shield`: a `UPolygon` gets
++ *  `HACK_X_FOR_POLYGON` on X (Y exact), a `UPath` is exact, a `URectangle`
++ *  is `drawRectangle`'s; `procedure`'s `vline`s reach the box's bottom
++ *  exactly. `timeEvent`'s hourglass is narrower than its LEFT-aligned
++ *  text, whose `drawText` ink starts at `padding` (`LimitFinder.java:
++ *  217-224`). */
++function boxStyleFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } | undefined {
++  if (node.kind !== 'action') return undefined;
++  const style = boxStyleName(node.stereotype);
++  if (style === undefined) return undefined;
++  const width = node.width ?? 0;
++  const shield = boxStyleShield(style);
++  const w = width - shield;
++  const p = POLYGON_FUDGE_X.near;
++  switch (style) {
++    case 'objectsignal':
++      return { x: { near: 2 * p, far: p }, y: NO_FUDGE };
++    case 'acceptevent':
++      return { x: { near: 2 * p, far: 0 }, y: NO_FUDGE };
++    case 'timeevent': {
++      const third = (node.height ?? 0) / 3;
++      const pad = activityPadding('activity');
++      const near = Math.max(-(w / 2 - third) + p, -pad);
++      const far = Math.max(-(width - w / 2 - third) + p, -(shield + pad));
++      return { x: { near, far }, y: NO_FUDGE };
++    }
++    case 'continuous':
++      return { x: NO_FUDGE, y: NO_FUDGE };
++    case 'procedure':
++      return { x: RECT_FUDGE, y: { near: RECT_FUDGE.near, far: 0 } };
++    case 'task':
++    case 'object':
++      return { x: RECT_FUDGE, y: RECT_FUDGE };
++    default:
++      return { x: POLYGON_FUDGE_X, y: NO_FUDGE };
++  }
++}
++
+ export function nodeFudge(node: FudgeSubject): { x: ShapeFudge; y: ShapeFudge } {
+   const composite = compositeFudge(node);
+   if (composite !== undefined) return composite;
++  const boxStyle = boxStyleFudge(node);
++  if (boxStyle !== undefined) return boxStyle;
+   if (hasHorizontalRule(node)) return { x: RECT_WITH_FULL_HLINE_X, y: RECT_FUDGE };
+   return { x: fudgeX(node.kind), y: fudgeY(node.kind) };
+ }
+diff --git a/src/diagrams/activity/layout/swimlane-context.ts b/src/diagrams/activity/layout/swimlane-context.ts
+index 534e1ba0e..46df2f378 100644
+--- a/src/diagrams/activity/layout/swimlane-context.ts
++++ b/src/diagrams/activity/layout/swimlane-context.ts
+@@ -51,6 +51,10 @@ export interface LaneItem {
+    *  full-width `ULine`). */
+   readonly usymbol?: CompositeUSymbol;
+   readonly label?: string;
++  /** add4-T3e: an action's stereotype (its `BoxStyle`) and height -- the
++   *  outline ink `canvas-origin-fudge.ts#nodeFudge` reads. */
++  readonly stereotype?: string;
++  readonly height?: number;
+ }
+ 
+ /**
+diff --git a/src/diagrams/activity/layout/swimlane-placement.ts b/src/diagrams/activity/layout/swimlane-placement.ts
+index 1a6abc9b7..a7f4dfa18 100644
+--- a/src/diagrams/activity/layout/swimlane-placement.ts
++++ b/src/diagrams/activity/layout/swimlane-placement.ts
+@@ -373,6 +373,8 @@ function laneItemsOf(node: ActivityNodeGeo, laneNames: readonly string[]): LaneI
+     const ink = {
+       ...(node.usymbol !== undefined ? { usymbol: node.usymbol } : {}),
+       ...(node.label !== undefined ? { label: node.label } : {}),
++      // add4-T3e: an action's `BoxStyle` outline ink (`nodeFudge`).
++      ...(node.stereotype !== undefined ? { stereotype: node.stereotype, height: node.height } : {}),
+     };
+     return [
+       node.swimlane !== undefined
+diff --git a/src/diagrams/activity/layout/tile-coordinates.ts b/src/diagrams/activity/layout/tile-coordinates.ts
+index 3f38977a1..2305cd039 100644
+--- a/src/diagrams/activity/layout/tile-coordinates.ts
++++ b/src/diagrams/activity/layout/tile-coordinates.ts
+@@ -266,6 +266,8 @@ export function walkTile(tile: Tile, x: number, y: number, hints: WalkHints, out
+         label: t.label,
+       };
+       if (t.color !== undefined) node.color = t.color;
++      // `FtileBox`'s `boxStyle` (`FtileBox.java:222`), read by the renderer.
++      if (t.stereotype !== undefined) node.stereotype = t.stereotype;
+       pushNode(out, node, myLane);
+       return;
+     }
+diff --git a/tests/diagrams/activity/action-box-style.test.ts b/tests/diagrams/activity/action-box-style.test.ts
+new file mode 100644
+index 000000000..07cf7aaf4
+--- /dev/null
++++ b/tests/diagrams/activity/action-box-style.test.ts
+@@ -0,0 +1,44 @@
++/**
++ * add4-T3e: every SDL/UML `BoxStyle` (`BoxStyle.java:61-97`) against the jar
++ * -- multi- and single-line labels, LEFT/CENTER alignment, `----`/`====`
++ * rules through the shielded stencil, mixed-case and hyphenated stereotypes.
++ * Goldens via `scripts/oracle-render.sh`. `boxstyle-lanes` (X compression
++ * sees only the node rect, not the `-D` outline points) and
++ * `boxstyle-stereogroup` (parser: first stereotype only, `#color` after a
++ * stereotype) are tracked residuals, not asserted here.
++ */
++import { dirname, join } from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { describe, expect, it } from 'vitest';
++
++import { renderActivityFixture } from '../../helpers/activity-text-position.js';
++import { compareSvg } from '../../oracle/svg-conformance/compare.js';
++
++const HERE = dirname(fileURLToPath(import.meta.url));
++const FIXTURE_ROOT = join(HERE, '../../fixtures/activity/add4-T3e');
++
++const STYLES = [
++  'input',
++  'output',
++  'procedure',
++  'load',
++  'save',
++  'continuous',
++  'task',
++  'object',
++  'objectSignal',
++  'trigger',
++  'sendSignal',
++  'acceptEvent',
++  'timeEvent',
++];
++
++describe('action box styles match the jar', () => {
++  it.each([...STYLES.map((s) => `boxstyle-${s}`), 'boxstyle-center', 'boxstyle-hr', 'boxstyle-variants'])(
++    '%s',
++    (name) => {
++      const { ours, golden } = renderActivityFixture(FIXTURE_ROOT, name);
++      expect(compareSvg(ours, golden, 'deterministic').diffs).toEqual([]);
++    },
++  );
++});

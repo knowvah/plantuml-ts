@@ -1,0 +1,10 @@
+@startuml
+skinparam padding 5
+start
+:pad
+<code>
+k = 1
+</code>
+z;
+stop
+@enduml

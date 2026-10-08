@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:sendSignal box
+second line; <<sendSignal>>
+:one line sendSignal; <<sendSignal>>
+:after;
+stop
+@enduml

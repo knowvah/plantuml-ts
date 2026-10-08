@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:trigger box
+second line; <<trigger>>
+:one line trigger; <<trigger>>
+:after;
+stop
+@enduml

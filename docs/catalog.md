@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1407 modules · 5314 exported names.
+1406 modules · 5305 exported names.
 
 ## `src/`
 
@@ -1042,15 +1042,14 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `activity-creole-sheet.ts` | `klimtStringBounder`, `buildActionTextBlock`, `actionBoxDimension`, `drawActionTextBlock`, `renderActionLabel`, `buildNoteTextBlock`, `noteTextBlockDimension`, `renderNoteLabel` | activity-creole-sheet -- every action and note label drawn through the REAL `SheetBuilder -> SheetBlock1 -> SheetBlock2 -> stripes/atoms` pipeline upstream builds them with: `FtileBox.java:178-181` for the action box (`new SheetBlock2(new S |
 | `activity-geometry.types.ts` | `ActivityNodeGeo`, `CompositeUSymbol`, `ActivityEdgeGeo`, `SwimlaneGeo`, `SwimlaneBandGeo`, `SwimlaneDividerY`, `ActivityGeometry` | Shared geometry types for the activity diagram layout engine. |
 | `activity-layout-constants.ts` | `NODE_MARGIN_Y`, `NODE_MARGIN_X`, `SEQUENTIAL_ASSEMBLY_GAP`, `ARROW_LABEL_LAYOUT_FONT_SIZE`, `START_STOP_RADIUS`, `STOP_OUTER_RADIUS`, `STOP_INNER_DELTA`, `END_OUTER_RADIUS`, `END_CROSS_THICKNESS`, `NOTE_MARGIN_X1`, `NOTE_MARGIN_X2`, `NOTE_CORNER_SIZE`, `NOTE_SPIKE_DELTA`, `NOTE_MARGIN_Y`, `NOTE_OPALE_GAP`, `BAR_HEIGHT`, `THIN_SPLIT_HEIGHT`, `JOIN_LABEL_MARGIN`, `PARALLEL_X_MARGIN`, `SPACE_AROUND_BLACK_BAR`, `DIAMOND_MIN`, `DIAMOND_LABEL_PAD`, `RECENTRED_PAD`, `RECENTRED_ENLARGE`, `ACTIVITY_DOCUMENT_MARGIN`, `DocumentMargin`, `activityDocumentMargin`, `documentMarginTheme`, `SVG_CANVAS_CEIL` | Layout constants for the activity diagram layout engine. |
-| `activity-renderer-action-code.ts` | `codeBlockLines`, `ActionCodeBlockArgs`, `renderActionCodeBlock` | `<code>...</code>` action-box bodies: monospace, measured like `tiles/ gtile-action.ts`'s own `monoCharWidth` sizing, not the proportional table `ActivityTextOpts` reads elsewhere. |
 | `activity-renderer-bars.ts` | `renderBar`, `renderSplitLine` | Fork/split bar rendering, split out of `activity-renderer-shapes.ts` to keep that file (already over the 500-line cap before this mission) from growing further (mission `activity-parallel-connectors`, T3, README "Push forward" -- "equivalen |
 | `activity-renderer-composite-symbols.ts` | `CompositeInk`, `TitleDim`, `compositeSymbolTitleOrigin`, `drawCompositeSymbol` | The three non-frame container symbols `FtileGroup#drawU` can draw (`type.asBig(name, align, TextBlockUtils.empty(0, 0), ...)`, `ftile/vcompact/FtileGroup.java:216-219`): `package` -> `USymbolFolder`, `card` -> `USymbolCard`, `rectangle` -> |
 | `activity-renderer-composite.ts` | `compositeTitleWidth`, `renderComposite` | `group`/`partition` frame rendering (`USymbolFrame#asBig`, `decoration/symbol/USymbolFrame.java:136-170`, called by `FtileGroup#drawU`, `ftile/vcompact/FtileGroup.java:209-227` -- `USymbols.PARTITION`/`USymbols.GROUP` are both a bare `USymb |
 | `activity-renderer-if-shapes.ts` | `renderIfMerge`, `renderDiamond`, `renderIfLabel`, `renderHexagonPolygon`, `renderDiamondSquarePolygon`, `renderIfSplitShape`, `renderHexagonOwnLabel`, `diamondLineWidth`, `renderHexagonMultilineLabel`, `diamondColors` | `if-merge` and `if-label` node renderers (mission `activity-if-tile-port`, D2/D3). |
 | `activity-renderer-line-heights.ts` | `ActionLine`, `actionLines`, `actionRuleFields`, `centeredBaselines` | activity-renderer-line-heights — the RENDER-time mirror of `tiles/ gtile-action.ts#creoleLineHeight`: heterogeneous per-physical-line heights for an `'activity'`-sname (`FtileBox`) text block. |
 | `activity-renderer-note-shapes.ts` | `noteFillOf`, `noteFoldPath`, `noteBodyNormal`, `zeroArc`, `noteBodySpikeRight`, `noteBodySpikeLeft` | Note-body polygon primitives -- split out of `activity-renderer- shapes.ts` (500-line cap, add3-T3d) purely mechanically: no behavior change, every function moved verbatim. |
-| `activity-renderer-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram`, `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `renderMultilineText`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action, bar, diamond, chevrons, hexagon, parallelogram, note) plus the renderNode dispatcher and shared label/color helpers. |
-| `activity-renderer-signal-shapes.ts` | `renderSignalLabel`, `renderChevronLeft`, `renderChevronRight`, `renderParallelogram` | SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action stereotypes): chevrons and the parallelogram, plus their shared label helper. |
+| `activity-renderer-shapes.ts` | `renderStart`, `renderStop`, `renderEnd`, `renderSpot`, `renderDiamond`, `ASCENT_FRACTION`, `textLines`, `centeredFirstBaselineY`, `flooredFirstBaselineY`, `renderLabel`, `ActivityColors`, `actColors`, `renderAction`, `renderHexagonLabel`, `renderHexagon`, `renderNote`, `renderNode` | Activity node-shape rendering: per-shape SVG emitters (start/stop/end, action -- plain or `BoxStyle`d, `activity-renderer-signal-shapes.ts` --, bar, diamond, hexagon, note) plus the renderNode dispatcher and shared label/color helpers. |
+| `activity-renderer-signal-shapes.ts` | `renderBoxStyleAction` | SDL/UML box styles (`:label; <<input>>` etc.): an `FtileBox` whose outline is `boxStyle.drawMe(ug, widthTotal, heightTotal, shadowing, roundCorner)` (`FtileBox.java:222`) instead of the PLAIN rounded rectangle, with the label drawn through |
 | `activity-renderer-swimlanes.ts` | `renderSwimlaneChrome`, `renderSwimlaneTitles` | Swimlane chrome: dividers, the transparent title band, and the floating per-lane titles. |
 | `activity-renderer-terminals.ts` | `renderStart`, `renderStop`, `orderedLine`, `renderEnd`, `renderSpot`, `renderNodesDispatchingGotos` | Terminal-circle renderers: `start`/`stop`/`kill`/`end`, plus the `spot` connector (mission add2-T2g). |
 | `activity-renderer-text.ts` | `ActivityTextStyle`, `drawActivityText`, `drawActivityTextLines` | activity-renderer-text.ts — every activity `<text>` goes through the klimt `DriverTextSvg` (decisions.md#D1), not a hand-built attribute list. |
@@ -1180,7 +1179,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 
 | Module | Exports | Purpose |
 |---|---|---|
-| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `GtileAction` |  |
+| `gtile-action.ts` | `ACTION_TEXT_MIN_HEIGHT`, `floorActionLineHeight`, `ACTIVITY_HR_HEIGHT`, `measurerAdapterOf`, `boxStyleName`, `boxStyleShield`, `GtileAction` |  |
 | `gtile-break.ts` | `GtileBreak` |  |
 | `gtile-diamond-empty.ts` | `GtileDiamondEmpty` |  |
 | `gtile-diamond-inside.ts` | `DiamondSide`, `DiamondInsideLabels`, `DiamondConditionTile`, `GtileDiamondInside` |  |

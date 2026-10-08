@@ -327,3 +327,49 @@ describe('GtileIfDown — IFNOTE, no note is the pre-T2a geometry exactly (opale
     expect(tile.height).toBe(148);
   });
 });
+
+describe('GtileIfDown — skinparam padding pads the merge rhombus north label (add4-T3e)', () => {
+  // `withNorth(tbout1)` with `tbout1` = `Display.NULL` -> an empty padded
+  // Sheet 2p tall (`ConditionalBuilder.java:292-303`, `SheetBlock1.java:196-199`);
+  // `FtileDiamond#calculateDimensionFtile` adds it to height and inY
+  // (`FtileDiamond.java:108-112`). Same geometry as the first describe, p = 5.
+  const diamond1 = new GtileDiamondInside('', { south: 'yes', east: 'no' }, bounder, theme);
+  const tile = new GtileIfDown(diamond1, stubTile(100, 50), null, {
+    hasTwoBranches: true,
+    useElse1: false,
+    padding: 5,
+  });
+
+  it('height grows by 2p (148 -> 158); the rhombus node sits 2p below its tile top', () => {
+    expect(tile.height).toBe(158);
+    expect(tile.offsets.diamond2Y).toBe(134);
+    expect(tile.offsets.diamond2Size).toBe(24);
+    expect(tile.offsets.diamond2Y + tile.offsets.diamond2Size).toBe(tile.height);
+  });
+
+  it('the main flow keeps its place above the taller merge (mainTileY 49)', () => {
+    // (158 - 24 - (24 + 10) - 50) / 2 + 24 = 49
+    expect(tile.offsets.mainTileY).toBe(49);
+  });
+
+  it('an optionalStop or hline diamond2 carries no north label', () => {
+    const stop = new GtileIfDown(diamond1, stubTile(100, 50), stubTile(20, 20), {
+      hasTwoBranches: true,
+      useElse1: false,
+      padding: 5,
+    });
+    const hline = new GtileIfDown(diamond1, stubTile(100, 50), null, {
+      hasTwoBranches: true,
+      useElse1: false,
+      conditionEndStyle: 'hline',
+      padding: 5,
+    });
+    const unpaddedStop = new GtileIfDown(diamond1, stubTile(100, 50), stubTile(20, 20), {
+      hasTwoBranches: true,
+      useElse1: false,
+    });
+    expect(stop.height).toBe(unpaddedStop.height);
+    expect(stop.offsets.diamond2Y).toBe(unpaddedStop.offsets.diamond2Y);
+    expect(hline.height).toBe(136);
+  });
+});

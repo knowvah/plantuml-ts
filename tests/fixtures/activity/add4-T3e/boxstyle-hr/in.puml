@@ -1,0 +1,10 @@
+@startuml
+start
+:first part
+----
+second part; <<output>>
+:a
+====
+b; <<objectSignal>>
+stop
+@enduml

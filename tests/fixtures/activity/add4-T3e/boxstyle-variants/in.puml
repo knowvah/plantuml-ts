@@ -1,0 +1,7 @@
+@startuml
+start
+:mixed case; <<Input>>
+:hyphen; <<send-signal>>
+:after;
+stop
+@enduml

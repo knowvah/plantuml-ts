@@ -1,0 +1,10 @@
+@startuml
+skinparam defaultTextAlignment center
+start
+:centered input
+wide second line; <<input>>
+:out; <<output>>
+:ev
+longer; <<acceptEvent>>
+stop
+@enduml

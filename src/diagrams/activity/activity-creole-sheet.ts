@@ -174,8 +174,17 @@ function createSheet(text: string, fc: FontConfiguration, align: HorizontalAlign
  * box's own width `- padding.getRight()`, so a creole `----` separator is a
  * `ULine` across the whole box (`UGraphicStencil.java:83`), not a
  * `UHorizontalLine` the SVG driver has no driver for (upstream neither).
+ * `shield` is the box's `BoxStyle#getShield` (`BoxStyle.java:122-124`):
+ * `MyStencil` reads `FtileBox#calculateDimension`, which includes it
+ * (`FtileBox.java:241`).
  */
-export function buildActionTextBlock(label: string, theme: Theme, fontSize: number, sname: ActivitySName): SheetBlock2 {
+export function buildActionTextBlock(
+  label: string,
+  theme: Theme,
+  fontSize: number,
+  sname: ActivitySName,
+  shield = 0,
+): SheetBlock2 {
   const fc = activityFontConfiguration(theme, fontSize, sname);
   const sheet = createSheet(label, fc, ALIGNMENT_MAP[activityHorizontalAlignment(theme)]);
   const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(undefined, fc), theme.padding ?? 0);
@@ -184,7 +193,7 @@ export function buildActionTextBlock(label: string, theme: Theme, fontSize: numb
     sheet1,
     {
       getStartingX: () => -padding, // FtileBox.java:126-128
-      getEndingX: (stringBounder) => actionBoxDimension(sheet1, stringBounder, theme, sname).width - padding, // :130-133
+      getEndingX: (stringBounder) => actionBoxDimension(sheet1, stringBounder, theme, sname).width + shield - padding, // :130-133
     },
     UStroke.withThickness(1),
   );
@@ -254,17 +263,17 @@ const DRAW_MEASURER = new WidthTableMeasurer();
  * The `renderAction` entry point: `FtileBox#drawU`'s `tb.drawU(...)`
  * (`FtileBox.java:224-233`) for EVERY action label. `box.width` is the box's
  * own `calculateDimension` width (`dimTotal`), the SAME
- * {@link actionBoxDimension} `gtile-action.ts` sized it with. The caller's
- * own `<code>` dispatch (`renderActionCodeBlock`) returns before reaching
- * this function.
+ * {@link actionBoxDimension} `gtile-action.ts` sized it with. A `<code>`
+ * block is one more stripe of the same Sheet (`StripeCode`,
+ * `CreoleParser.java:103-104`), not a separate path.
  */
 export function renderActionLabel(
   label: string,
   theme: Theme,
   fontSize: number,
-  box: { readonly x: number; readonly y: number; readonly width: number },
+  box: { readonly x: number; readonly y: number; readonly width: number; readonly shield?: number },
 ): string {
-  const tb = buildActionTextBlock(label, theme, fontSize, 'activity');
+  const tb = buildActionTextBlock(label, theme, fontSize, 'activity', box.shield ?? 0);
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
   const tbWidth = tb.calculateDimension(klimtStringBounder(DRAW_MEASURER, font)).getWidth();
   const t = actionTextTranslate(theme, box.width, tbWidth, activityPadding('activity'));

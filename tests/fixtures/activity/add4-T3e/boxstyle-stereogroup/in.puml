@@ -1,0 +1,7 @@
+@startuml
+start
+:two stereotypes; <<foo>> <<procedure>>
+:colour after stereo; <<save>> #pink
+:after;
+stop
+@enduml

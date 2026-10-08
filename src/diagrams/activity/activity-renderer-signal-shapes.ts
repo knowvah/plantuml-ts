@@ -1,141 +1,214 @@
 /**
- * SDL signal shapes (`<<input>>`/`<<output>>`/`<<save>>` action
- * stereotypes): chevrons and the parallelogram, plus their shared label
- * helper. Split out of `activity-renderer-shapes.ts` (mission
- * `activity-if-tile-port`, T2) to keep that file under the 500-line
- * complexity-hook cap after adding the `if-merge`/`if-label` renderers --
- * a pure-move extraction plus re-export, pre-authorised by the mission's
- * stop condition 1 / README "Push forward" list (same pattern already used
- * by `activity-renderer-bars.ts` for the fork/join bar and split line).
+ * SDL/UML box styles (`:label; <<input>>` etc.): an `FtileBox` whose outline
+ * is `boxStyle.drawMe(ug, widthTotal, heightTotal, shadowing, roundCorner)`
+ * (`FtileBox.java:222`) instead of the PLAIN rounded rectangle, with the
+ * label drawn through the SAME Sheet as a plain box (`FtileBox.java:178-181,
+ * 224-233`, `activity-creole-sheet.ts#renderActionLabel`).
  *
- * `actColors`/`renderMultilineText`/`renderLabel` are imported back FROM
- * `activity-renderer-shapes.ts`, which in turn imports {@link
- * renderChevronLeft}/{@link renderChevronRight}/{@link renderParallelogram}
- * from here for its `renderNode` dispatcher and re-exports all four (plus
- * {@link renderSignalLabel}) so existing importers of
- * `activity-renderer-shapes.js` are unaffected -- a circular import between
- * the two modules, safe the same way `activity-renderer-bars.ts` already
- * documents: both sides are function DEFINITIONS, and neither calls into
- * the other until a render actually runs, well after both modules finish
- * loading.
+ * Every `drawMe` first narrows the width by the style's shield (`width -=
+ * getShield()`, e.g. `BoxStyle.java:179-181`), so each outline below is
+ * built over `node.width - shield` -- the shield itself is the room the
+ * input/output point juts into. `BoxStyle.java:110-112` constants:
+ * `DELTA_INPUT_OUTPUT = 10`, `DELTA_CONTINUOUS = 5`, `PADDING = 5`. The
+ * outlines would live in `ftile/BoxStyle.ts`, whose SDL/UML half is not yet
+ * ported; the shield table is `tiles/gtile-action.ts#boxStyleShield`.
+ *
+ * `actColors` is imported back FROM `activity-renderer-shapes.ts`, which
+ * imports {@link renderBoxStyleAction} for its `renderNode` dispatcher -- a
+ * safe circular import (function definitions only, called at render time).
  */
 
 import type { ActivityNodeGeo } from './layout/tile-layout.js';
 import type { Theme } from '../../core/theme.js';
-import { polygon } from '../../core/svg.js';
+import type { Paint } from '../../core/paint.js';
+import { line, path, polygon, rect } from '../../core/svg.js';
+import { fmt } from '../../core/svg-format.js';
 import { activityFontSize, activityLineThickness } from './activity-style-defaults.js';
-import { activityFontColor } from './activity-text-style.js';
-import { type ActivityTextOpts, activityTextLineX, measureLineWidth } from './activity-text-placement.js';
-import { actColors, centeredFirstBaselineY, renderMultilineText, renderLabel } from './activity-renderer-shapes.js';
-import { drawActivityText } from './activity-renderer-text.js';
-import { floorActionLineHeight } from './tiles/gtile-action.js';
+import { actColors } from './activity-renderer-shapes.js';
+import { renderActionLabel } from './activity-creole-sheet.js';
+import { boxStyleShield } from './tiles/gtile-action.js';
 
-export function renderSignalLabel(label: string, x: number, width: number, cy: number, theme: Theme): string {
-  // A signal/chevron is an `FtileBox` with an SDL `BoxStyle`, so it resolves
-  // `SName.activity` like the plain box (`FtileBox.java:97-99`, `:146`) --
-  // the same SName `tiles/gtile-action.ts` sizes it at, and the same
-  // LEFT/CENTER/RIGHT branch (`FtileBox.java:224-233`) the action box uses.
-  const size = activityFontSize(theme, 'activity');
-  const cx = x + width / 2;
-  const opts: ActivityTextOpts = { sname: 'activity', fontSize: size, width };
-  const lines = label.split('\n');
-  if (lines.length === 1) {
-    const lineWidth = measureLineWidth(theme, size, label);
-    const lx = activityTextLineX(theme, cx, lineWidth, opts);
-    // D1: no `dominant-baseline` (the driver emits none) -- the chevron is
-    // sized by the SAME `tiles/gtile-action.ts` FtileBox model the plain
-    // action box uses (this function's own doc comment, `FtileBox.java
-    // :97-99,146`), so its single-line baseline reduces to the identical
-    // N=1 `centeredFirstBaselineY` already jar-verified for that box.
-    return drawActivityText(lx, centeredFirstBaselineY(cy, floorActionLineHeight(size), 1), label, {
-      fill: activityFontColor(theme, 'activity'),
-      fontFamily: theme.fontFamily,
-      fontSize: size,
-      floorCoordinated: true,
-    });
-  }
-  return renderMultilineText(lines, cx, cy, theme, opts);
+/** `BoxStyle.java:110`. */
+const DELTA_INPUT_OUTPUT = 10;
+/** `BoxStyle.java:111`. */
+const DELTA_CONTINUOUS = 5;
+/** `BoxStyle.java:112`. */
+const PADDING = 5;
+
+/** The narrowed outline box (`width -= getShield()`) and its ink. */
+interface Outline {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly paint: { readonly fill: Paint; readonly stroke: string; readonly strokeWidth: number };
 }
 
-export function renderChevronLeft(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // <<input>> = UML receive signal: flat left side (right-angle corners at
-  // top-left and bottom-left). Right side: two lines from top-right and
-  // bottom-right corners go inward/left at 60° to horizontal, meeting at
-  // the midpoint of the right edge → concave right notch pointing left.
-  // dent = (h/2) / tan(60°) = h / (2√3)
-  const dent = h / (2 * Math.sqrt(3));
-  const shape = polygon(
-    [
-      { x: x, y: y },
-      { x: x + w, y: y },
-      { x: x + w - dent, y: y + h / 2 },
-      { x: x + w, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
+type Pt = readonly [number, number];
+
+function poly(o: Outline, pts: readonly Pt[]): string {
+  return polygon(
+    pts.map(([px, py]) => ({ x: o.x + px, y: o.y + py })),
+    o.paint,
   );
-  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
 }
 
-export function renderChevronRight(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // 60° to horizontal: dent = (h/2) / tan(60°) = h / (2√3)
-  const dent = h / (2 * Math.sqrt(3));
-  // <<output>> = right-pointing arrow: body rectangle indented on right,
-  // vertex pointing right at the midpoint of the right edge.
-  const shape = polygon(
-    [
-      { x: x, y: y },
-      { x: x + w - dent, y: y },
-      { x: x + w, y: y + h / 2 },
-      { x: x + w - dent, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
-  );
-  return shape + renderSignalLabel(node.label ?? '', x, w, y + h / 2, theme);
+/** `BoxStyleInput#getShapeInput` (`BoxStyle.java:190-198`), also
+ *  `BoxStyleTrigger` (`:415-423`). */
+function inputShape(o: Outline): string {
+  const { w, h } = o;
+  const d = DELTA_INPUT_OUTPUT;
+  return poly(o, [
+    [0, 0],
+    [w + d, 0],
+    [w, h / 2],
+    [w + d, h],
+    [0, h],
+  ]);
 }
 
-export function renderParallelogram(node: ActivityNodeGeo, theme: Theme): string {
-  const { x, y, width: w, height: h } = node;
-  const c = actColors(theme);
-  const fill = node.color ?? c.nodeFill;
-  // Right-leaning parallelogram: interior angles 75° (acute) / 105° (obtuse).
-  // tan(75°) = h/d  →  d = h / (2 + √3) = h · (2 − √3)
-  const d = h * (2 - Math.sqrt(3));
-  const shape = polygon(
-    [
-      { x: x + d, y: y },
-      { x: x + w, y: y },
-      { x: x + w - d, y: y + h },
-      { x: x, y: y + h },
-    ],
-    { fill, stroke: c.nodeBorder, strokeWidth: activityLineThickness(theme, 'activity') },
+/** `BoxStyleOutput#getShapeOutput` (`BoxStyle.java:220-228`), also
+ *  `BoxStyleSendSignal` (`:441-449`). */
+function outputShape(o: Outline): string {
+  const { w, h } = o;
+  return poly(o, [
+    [0, 0],
+    [w, 0],
+    [w + DELTA_INPUT_OUTPUT, h / 2],
+    [w, h],
+    [0, h],
+  ]);
+}
+
+/** `BoxStyleProcedure#drawMe` (`BoxStyle.java:239-247`): a square rectangle
+ *  plus two `ULine.vline(height)` at `PADDING` and `width - PADDING`. */
+function procedureShape(o: Outline): string {
+  const { x, y, w, h, paint } = o;
+  const ink = { stroke: paint.stroke, strokeWidth: paint.strokeWidth };
+  return (
+    rect(x, y, w, h, paint) +
+    line(x + PADDING, y, x + PADDING, y + h, ink) +
+    line(x + w - PADDING, y, x + w - PADDING, y + h, ink)
   );
-  const cx = x + w / 2;
-  const cy = y + h / 2;
-  const boxSize = activityFontSize(theme, 'activity');
-  const lines = (node.label ?? '').split('\n');
-  const labelEl =
-    lines.length > 1
-      ? // `BoxStyle.SDL_SAVE` (`BoxStyle.java:73`) is still an `FtileBox`, so
-        // it resolves `SName.activity` like the plain box (`FtileBox.java
-        // :97-99`) -- the same SName `tiles/gtile-action.ts` measured it at.
-        renderMultilineText(lines, cx, cy, theme, { sname: 'activity', fontSize: boxSize, width: w })
-      : // Same `cy + boxSize/3` box-centre approximation T1b already replaced
-        // on the action/diamond/hexagon single-line paths (0.667px off at
-        // size 12) -- `BoxStyle.SDL_SAVE` is still an `FtileBox` (this
-        // function's own comment above), so the identical N=1
-        // `centeredFirstBaselineY` reduction applies here too.
-        renderLabel(node.label ?? '', cx, centeredFirstBaselineY(cy, floorActionLineHeight(boxSize), 1), theme, {
-          sname: 'activity',
-          fontSize: boxSize,
-          width: w,
-        });
-  return shape + labelEl;
+}
+
+/** `BoxStyleLoad#getShape` (`BoxStyle.java:264-271`). */
+function loadShape(o: Outline): string {
+  const { w, h } = o;
+  const d = DELTA_INPUT_OUTPUT;
+  return poly(o, [
+    [0, 0],
+    [w - d, 0],
+    [w, h],
+    [d, h],
+  ]);
+}
+
+/** `BoxStyleSave#getShape` (`BoxStyle.java:288-295`). */
+function saveShape(o: Outline): string {
+  const { w, h } = o;
+  const d = DELTA_INPUT_OUTPUT;
+  return poly(o, [
+    [d, 0],
+    [w, 0],
+    [w - d, h],
+    [0, h],
+  ]);
+}
+
+/** `BoxStyleContinuous#getShape` (`BoxStyle.java:312-330`): one `UPath`, two
+ *  open `MOVETO`/`LINETO` chevrons, drawn with the box's back colour. */
+function continuousShape(o: Outline): string {
+  const { x, y, w, h, paint } = o;
+  const c = DELTA_CONTINUOUS;
+  const p = (px: number, py: number): string => `${fmt(x + px)},${fmt(y + py)}`;
+  const d = `M${p(c, 0)} L${p(0, h / 2)} L${p(c, h)} M${p(w - c, 0)} L${p(w, h / 2)} L${p(w - c, h)}`;
+  return path(d, paint);
+}
+
+/** `BoxStyleTask`/`BoxStyleObject#getShape` (`BoxStyle.java:347-349,
+ *  366-368`): `URectangle.build(width, height)`, never rounded. */
+function squareShape(o: Outline): string {
+  return rect(o.x, o.y, o.w, o.h, o.paint);
+}
+
+/** `BoxStyleObjectSignal#getShape` (`BoxStyle.java:385-394`). */
+function objectSignalShape(o: Outline): string {
+  const { w, h } = o;
+  const d = DELTA_INPUT_OUTPUT;
+  return poly(o, [
+    [-d, 0],
+    [w, 0],
+    [w + d, h / 2],
+    [w, h],
+    [-d, h],
+    [0, h / 2],
+  ]);
+}
+
+/** `BoxStyleAcceptEvent#getShape` (`BoxStyle.java:466-474`). */
+function acceptEventShape(o: Outline): string {
+  const { w, h } = o;
+  const d = DELTA_INPUT_OUTPUT;
+  return poly(o, [
+    [-d, 0],
+    [w, 0],
+    [w, h],
+    [-d, h],
+    [0, h / 2],
+  ]);
+}
+
+/** `BoxStyleTimeEvent#getShape` (`BoxStyle.java:489-498`): the hourglass. */
+function timeEventShape(o: Outline): string {
+  const half = o.w / 2;
+  const third = o.h / 3;
+  return poly(o, [
+    [half - third, third],
+    [half + third, third],
+    [half - third, o.h],
+    [half + third, o.h],
+  ]);
+}
+
+/** Every non-PLAIN `BoxStyle` (`BoxStyle.java:61-97`) -> its `drawMe`
+ *  outline; keys are `tiles/gtile-action.ts#boxStyleName`'s. */
+const BOX_STYLE_OUTLINES: Readonly<Record<string, (o: Outline) => string>> = {
+  input: inputShape,
+  output: outputShape,
+  procedure: procedureShape,
+  load: loadShape,
+  save: saveShape,
+  continuous: continuousShape,
+  task: squareShape,
+  object: squareShape,
+  objectsignal: objectSignalShape,
+  trigger: inputShape,
+  sendsignal: outputShape,
+  acceptevent: acceptEventShape,
+  timeevent: timeEventShape,
+};
+
+/**
+ * `FtileBox#drawU` for a non-PLAIN box style (`FtileBox.java:195-233`): the
+ * outline in `borderColor`/`backColor.bg()`/`style.getStroke()` (`:208-222`),
+ * then the Sheet text block at the alignment translate, over the FULL
+ * `dimTotal` width (shield included, `:224-233`).
+ */
+export function renderBoxStyleAction(node: ActivityNodeGeo, theme: Theme, style: string): string {
+  const c = actColors(theme);
+  const shield = boxStyleShield(style);
+  const outline: Outline = {
+    x: node.x,
+    y: node.y,
+    w: node.width - shield,
+    h: node.height,
+    paint: {
+      fill: node.color ?? c.nodeFill,
+      stroke: c.nodeBorder,
+      strokeWidth: activityLineThickness(theme, 'activity'),
+    },
+  };
+  const label = renderActionLabel(node.label ?? '', theme, activityFontSize(theme, 'activity'), { ...node, shield });
+  return BOX_STYLE_OUTLINES[style]!(outline) + label;
 }

@@ -13,15 +13,12 @@ import { noGradient } from '../../../src/core/paint.js';
 import { describe, it, expect } from 'vitest';
 import {
   renderAction,
-  renderChevronLeft,
-  renderChevronRight,
   renderDiamond,
   renderEnd,
   renderHexagon,
   renderLabel,
   renderNode,
   renderNote,
-  renderParallelogram,
   renderSpot,
   renderStart,
   renderStop,
@@ -38,6 +35,13 @@ import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-tex
 import { measureLineWidth, centeredLineX } from '../../../src/diagrams/activity/activity-text-placement.js';
 
 const theme = resolveTheme('default');
+
+/** add4-T3e: the SDL/UML outlines are dispatched by `renderNode` from the
+ *  node's stereotype (`BoxStyle.fromString`, `BoxStyle.java:126-133`); these
+ *  wrap it for the older per-shape tests below. */
+const renderChevronLeft = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'input' }, t);
+const renderChevronRight = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'output' }, t);
+const renderParallelogram = (n: ActivityNodeGeo, t: Theme): string => renderNode({ ...n, stereotype: 'save' }, t);
 
 function makeNode(overrides: Partial<ActivityNodeGeo> & Pick<ActivityNodeGeo, 'kind'>): ActivityNodeGeo {
   return { id: 'node1', x: 50, y: 50, width: 20, height: 20, ...overrides };

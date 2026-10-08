@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:object box
+second line; <<object>>
+:one line object; <<object>>
+:after;
+stop
+@enduml

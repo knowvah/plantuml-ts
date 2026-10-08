@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:load box
+second line; <<load>>
+:one line load; <<load>>
+:after;
+stop
+@enduml

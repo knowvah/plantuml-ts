@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:task box
+second line; <<task>>
+:one line task; <<task>>
+:after;
+stop
+@enduml

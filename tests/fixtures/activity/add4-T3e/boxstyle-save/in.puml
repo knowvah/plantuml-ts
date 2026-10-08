@@ -1,0 +1,9 @@
+@startuml
+start
+:hello world;
+:save box
+second line; <<save>>
+:one line save; <<save>>
+:after;
+stop
+@enduml
