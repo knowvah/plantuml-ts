@@ -130,7 +130,7 @@ export function renderFixtureActivity(
   // local copy -- the copy skipped `withDocumentStyle`, so a theme's
   // `root { Margin 5 }` (`TextBlockExporter.java:510-516`) never reached
   // `theme.diagramMargin` here while it did in `renderSync`.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
   // add4-T2e: `styleSource` mirrors `src/index.ts#umlSourceOfBlock`, and
   // the skinparam-warning / warning-banner steps mirror
   // `activity/index.ts#activityPlugin` (`activity-warnings.ts`).

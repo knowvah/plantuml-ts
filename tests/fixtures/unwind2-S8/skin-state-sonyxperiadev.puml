@@ -1,0 +1,5 @@
+@startuml
+skin sonyxperiadev
+[*] --> S1
+S1 --> [*]
+@enduml

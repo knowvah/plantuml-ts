@@ -1,8 +1,6 @@
 /**
  * Exact `PSystemError` page geometry (C-17) — split out of
- * `error-renderer.ts` (500-line complexity hook) so the fitted-ratio
- * `Block`/`Line` model that file still needs for `blackOnWhite`
- * (Welcome/Unsupported) doesn't grow past the cap alongside this.
+ * `error-renderer.ts` (500-line complexity hook).
  *
  * `PSystemError#getGraphicalFormatted` builds five `TextBlockRaw`/
  * `TextBlockMarged` paragraphs and stacks them with `TextBlockUtils.mergeTB`
@@ -25,22 +23,16 @@
  * Every OTHER merge step's `b1`/`b2` carries no backcolor
  * (`TextBlockVertical.java`'s `if (back != null …)` guard), so draws no rect.
  *
- * `renderErrorPageOnly` is what every `PSystemError` fixture with
- * `getTotalLineCountLessThan5() === false` renders through. The rare
- * Welcome-stacked-on-error path (source < 5 lines) still uses
- * `error-renderer.ts`'s OLDER fitted-ratio `errorBlockLegacy` — no cached
- * fixture in this mission's assigned set exercises that combination, so it
- * is left untouched rather than risking an unverified blast radius into
- * `blackOnWhite`/Welcome geometry (a different, undiagnosed subsystem).
+ * {@link errorPageBlock} is the page as one block; `error-renderer.ts` stacks
+ * the Welcome block over it (source < 5 lines) and the Arecibo image beside
+ * it, unwind2-S8.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java#getGraphicalFormatted
  */
 
 import type { FontSpec, StringMeasurer } from '../measurer.js';
-import { group, rect } from '../svg.js';
+import { rect } from '../svg.js';
 import { emittedTextForm } from '../svg-text-font.js';
-import { assembleDocumentShell } from '../klimt/document-shell.js';
-import type { ShellFragment } from '../klimt/document-shell.js';
 import type { PSystemError } from './PSystemError.js';
 import {
   BLACK,
@@ -56,8 +48,9 @@ import {
   HEADER_PAD_RIGHT,
   HEADER_PAD_BOTTOM,
   drawRun,
-} from './error-renderer.js';
-import type { Run } from './error-renderer.js';
+} from './error-text.js';
+import type { Run } from './error-text.js';
+import type { ErrorBlock } from './error-block.js';
 
 /** One paragraph of the error page: `N` lines sharing a font/fill, optionally
  *  wrapped in a `TextBlockUtils#withMargin` box (and, for the `[From … ]`
@@ -179,28 +172,12 @@ function errorPageHeight(segments: readonly ErrorSegment[]): number {
   return 2 * ERROR_PAGE_MARGIN + segments.reduce((h, s) => h + segmentMarginedHeight(s), 0);
 }
 
-/**
- * `SvgGraphics#ensureVisible`'s canvas-growth rule: `maxX = (int)(x + 1)`
- * (`SvgGraphics.java:129-136`), seeded at construction with `minDim` — the
- * page's OWN declared dimension (`SvgGraphics.java:143`,
- * `ensureVisible(minDim.getWidth(), minDim.getHeight())`). That seed always
- * dominates every subsequent text run's own `ensureVisible(x+textLength, y)`
- * call for both luzive and sadamo (the declared width IS the widest line, by
- * construction), so the final `<svg>` `width`/`height`/`viewBox`
- * (`SvgGraphics.java:801-813`, read straight off `maxX`/`maxY`) reduce to
- * this one truncation of the declared size — jar-verified against both
- * fixtures' cached goldens (389×218, 602×190).
- */
-function ensureVisibleCanvasSize(declared: number): number {
-  return Math.trunc(declared + 1);
-}
-
 /** One paragraph's own lines, as `Run`s — baseline = this line's box top plus
  *  the font size (this file's own doc comment: `SingleLine#maxDeltaY`'s
  *  single-run case). */
-function drawSegmentLines(seg: ErrorSegment, boxTop: number, measurer: StringMeasurer): string[] {
+function drawSegmentLines(seg: ErrorSegment, left: number, boxTop: number, measurer: StringMeasurer): string[] {
   const svg: string[] = [];
-  const x = ERROR_PAGE_MARGIN + seg.marginLeft;
+  const x = left + ERROR_PAGE_MARGIN + seg.marginLeft;
   let lineTop = boxTop + seg.marginTop;
   for (const line of seg.lines) {
     const baseline = lineTop + seg.font.size;
@@ -221,56 +198,59 @@ function drawSegmentLines(seg: ErrorSegment, boxTop: number, measurer: StringMea
 /** One paragraph's own green band rect (when it has one) plus its lines,
  *  starting at `boxTop`. `bandRectWidth` is precomputed once by the caller
  *  (`max(bandWidth, bodyAllButLastWidth)` — this file's own doc comment). */
-function drawSegment(seg: ErrorSegment, boxTop: number, measurer: StringMeasurer, bandRectWidth: number): string[] {
+function drawSegment(seg: ErrorSegment, origin: Origin, measurer: StringMeasurer, bandRectWidth: number): string[] {
   const svg: string[] = [];
+  const boxTop = origin.y;
   if (seg.band !== undefined) {
     svg.push(
-      rect(ERROR_PAGE_MARGIN, boxTop, bandRectWidth, segmentMarginedHeight(seg), {
+      rect(origin.x + ERROR_PAGE_MARGIN, boxTop, bandRectWidth, segmentMarginedHeight(seg), {
         fill: seg.band,
         stroke: seg.band,
         strokeWidth: 1,
       }),
     );
   }
-  svg.push(...drawSegmentLines(seg, boxTop, measurer));
+  svg.push(...drawSegmentLines(seg, origin.x, boxTop, measurer));
   return svg;
 }
 
+/** Where a page's top-left corner lands. */
+interface Origin {
+  readonly x: number;
+  readonly y: number;
+}
+
 /**
- * Draw all five paragraphs top to bottom, starting at `y = ERROR_PAGE_MARGIN`
- * (the page's own `withMargin(result, 5, 5)` top/left — there is no outer
- * block to translate into, since this function is only ever the page's sole
- * content).
+ * Draw all five paragraphs top to bottom, starting at the page's own
+ * `withMargin(result, 5, 5)` top/left inside `origin`.
  * @see ~/git/plantuml/.../error/PSystemError.java#getGraphicalFormatted
  */
-function drawErrorSegments(segments: readonly ErrorSegment[], measurer: StringMeasurer): string[] {
+function drawErrorSegments(segments: readonly ErrorSegment[], origin: Origin, measurer: StringMeasurer): string[] {
   const svg: string[] = [];
   const bandSeg = segments[1]!;
   const bodyAllButLast = segments[2]!;
   const bandRectWidth = Math.max(segmentMarginedWidth(bandSeg, measurer), segmentRawWidth(bodyAllButLast, measurer));
 
-  let y = ERROR_PAGE_MARGIN;
+  let y = origin.y + ERROR_PAGE_MARGIN;
   for (const seg of segments) {
-    svg.push(...drawSegment(seg, y, measurer, bandRectWidth));
+    svg.push(...drawSegment(seg, { x: origin.x, y }, measurer, bandRectWidth));
     y += segmentMarginedHeight(seg);
   }
   return svg;
 }
 
 /**
- * The faithful `PSystemError` page (no Welcome block stacked on top): exact
- * geometry per this file's own doc comment, folded straight into the shared
- * klimt document shell — a single block, so its OWN background becomes the
- * canvas background with no separate rect (see `error-renderer.ts`'s own
- * header comment).
+ * The faithful `PSystemError` page as one block: its declared size (the
+ * `withMargin(result, 5, 5)` box, un-truncated) and black background
+ * (`addBackcolor(result, HColors.BLACK)`, `PSystemError.java:145`), drawn at
+ * any origin -- alone, under the Welcome block, or beside the Arecibo image.
  */
-export function renderErrorPageOnly(system: PSystemError, measurer: StringMeasurer): string {
+export function errorPageBlock(system: PSystemError, measurer: StringMeasurer): ErrorBlock {
   const segments = buildErrorSegments(system);
-  const fragment: ShellFragment = {
-    body: group(drawErrorSegments(segments, measurer).join('')),
-    width: ensureVisibleCanvasSize(errorPageWidth(segments, measurer)),
-    height: ensureVisibleCanvasSize(errorPageHeight(segments)),
+  return {
+    width: errorPageWidth(segments, measurer),
+    height: errorPageHeight(segments),
     background: BLACK,
+    draw: (sink, x, y) => sink.svg.push(...drawErrorSegments(segments, { x, y }, measurer)),
   };
-  return assembleDocumentShell(fragment, undefined);
 }

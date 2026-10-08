@@ -6,6 +6,7 @@
  */
 
 import type { StyleMap } from './skinparam-types.js';
+import { CssVariables } from './style/parser/CssVariables.js';
 
 /**
  * Normalize raw style block content so that braces appear on their own lines.
@@ -156,7 +157,7 @@ const DECLARATION_RE = /^\s*([\w-]+)(?:\s*:\s*|\s+)(.+)$/;
  * skipped. `stack` holds, per nesting depth, the list of comma-separated
  * selector alternatives (usually one) — see {@link computeSelectorPaths}.
  */
-function processStyleLine(line: string, stack: string[][], result: StyleMap): void {
+function processStyleLine(line: string, stack: string[][], result: StyleMap, variables: CssVariables): void {
   const openMatch = SELECTOR_OPEN_RE.exec(line);
   if (openMatch !== null) {
     const alternatives = openMatch[1]!
@@ -181,9 +182,15 @@ function processStyleLine(line: string, stack: string[][], result: StyleMap): vo
   // collapse to one path (== the legacy `stack.join('.')`); a comma frame
   // multiplies the paths, mirroring upstream's per-comma-token Style
   // expansion. An empty stack yields the single root path `''`.
+  // A `--name` key declares a css variable and no property; any other value
+  // goes through `var(--name)` lookup (`StyleParser.java:123,126`).
+  if (m[1]!.startsWith('--')) {
+    variables.learn(m[1]!, normalizeDeclarationValue(m[2]!));
+    return;
+  }
   const selectorPaths = computeSelectorPaths(stack);
   const key = m[1]!.toLowerCase();
-  const value = normalizeDeclarationValue(m[2]!);
+  const value = variables.value(normalizeDeclarationValue(m[2]!));
   writeDeclaration(result, selectorPaths, key, value);
 }
 
@@ -210,24 +217,38 @@ function processStyleLine(line: string, stack: string[][], result: StyleMap): vo
  *
  * Returns a StyleMap that maps selector paths to their declaration maps.
  */
+/**
+ * The REGULAR-scheme part of a style text: everything before its first
+ * `@media` token. Upstream's parser switches to `StyleScheme.DARK` there for
+ * the rest of the text and never back (`StyleParser.java:150-152`), and a
+ * DARK value is only ever read in dark mode -- this port renders light only.
+ */
+const RE_AROBASE_MEDIA = /@media\b/u;
+
+export function regularSchemeOf(raw: string): string {
+  const at = raw.search(RE_AROBASE_MEDIA);
+  return at < 0 ? raw : raw.slice(0, at);
+}
+
 export function parseStyleBlock(raw: string): StyleMap {
   const result: StyleMap = new Map();
   if (raw.length === 0) return result;
 
   // Normalize to ensure braces appear on their own lines (token boundary
   // normalization matching upstream's character-level tokenizer).
-  const normalized = normalizeStyleInput(raw);
+  const normalized = normalizeStyleInput(regularSchemeOf(raw));
 
   // Each frame is the list of comma-separated selector alternatives at that
   // nesting depth (usually one). A declaration writes to the cross-product of
   // every frame's alternatives -- for all-single-token frames this is exactly
   // the old `stack.join('.')`, so non-comma input is byte-identical.
   const stack: string[][] = [];
+  const variables = new CssVariables();
 
   for (const rawLine of normalized.split('\n')) {
     // Strip trailing \r so that CRLF line endings are handled cleanly.
     const line = rawLine.endsWith('\r') ? rawLine.slice(0, -1) : rawLine;
-    processStyleLine(line, stack, result);
+    processStyleLine(line, stack, result, variables);
   }
 
   // mission G6 T4: bare `<style> stateDiagram { BackgroundColor/LineColor/

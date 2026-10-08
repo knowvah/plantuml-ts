@@ -108,9 +108,9 @@ export function hasSwimlaneLine(markup: string): boolean {
 // geometry stage (see the file doc comment for why it is not imported).
 // ---------------------------------------------------------------------------
 
-function buildThemeForFixture(preprocessed: PreprocessorResult, rawSourceLines: readonly string[]): Theme {
+function buildThemeForFixture(preprocessed: PreprocessorResult): Theme {
   const base = resolveTheme(preprocessed.theme ?? 'default');
-  const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
+  const withSkin = applySkinLayer(preprocessed, base);
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
   const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
     m.forEach((props, selector) => {
@@ -141,10 +141,7 @@ export function layoutFixtureActivity(
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
   const preprocessed = first.preprocessed;
-  const theme = buildThemeForFixture(
-    preprocessed,
-    first.rawSource.map((s) => s.getString()),
-  );
+  const theme = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
   const ast = astOrThrow(parseActivity(block), ACTIVITY_TYPE);
   const geo = layoutActivity(ast, theme, measurer);

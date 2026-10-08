@@ -101,10 +101,9 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
   // `<style>`/`skin`/`!theme` too, unwind2-S2).
   const styleInput = block.type === 'hcl' ? hclStyleInput : jsonFamilyStyleInput;
   const preprocessed = styleInput(first.preprocessed, block);
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
 
   const ast = parseForType(block, { assetStore: options?.assetStore });
   const geo = layoutJson(ast, theme, measurer);

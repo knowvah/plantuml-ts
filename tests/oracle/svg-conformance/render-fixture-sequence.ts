@@ -88,10 +88,9 @@ export function renderFixtureSequence(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
   const parsed = parseSequence(first.source.lines, { assetStore: options?.assetStore });
   // T4: `parseSequence` now returns `SequenceDiagramAST | ParseRefusal`
   // (D1). This harness bypasses `src/index.ts`'s production narrowing (it

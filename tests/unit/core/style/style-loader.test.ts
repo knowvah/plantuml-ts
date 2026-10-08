@@ -69,12 +69,15 @@ describe('StyleLoader.getInputStreamForStyle', () => {
   it('resolves `/skin/<filename>` to the embedded jar text', () => {
     expect(getInputStreamForStyle('plantuml.skin')).toBe(PLANTUML_SKIN);
     expect(getInputStreamForStyle('strictuml.skin')).toBe(STRICTUML_SKIN);
-    // debug/rose: skins-builtin.ts text, byte-identical to the jar's skin/<name>.skin
+    // skins-builtin.ts text, byte-identical to the jar's skin/<name>.skin (unwind2-S8)
     expect(getInputStreamForStyle('debug.skin')).toBe(BUILTIN_SKINS['debug']);
     expect(getInputStreamForStyle('rose.skin')).toBe(BUILTIN_SKINS['rose']);
-    // reddress is no jar resource; the port's sonyxperiadev text differs from the jar's
+    expect(getInputStreamForStyle('sonyxperiadev.skin')).toBe(BUILTIN_SKINS['sonyxperiadev']);
+    // reddress.skin is no jar resource (removed upstream, commit 11ed6720);
+    // the lookup is case-sensitive, as `getResourceAsStream` is in a jar.
     expect(getInputStreamForStyle('reddress.skin')).toBeUndefined();
-    expect(getInputStreamForStyle('sonyxperiadev.skin')).toBeUndefined();
+    expect(getInputStreamForStyle('Rose.skin')).toBeUndefined();
+    expect(getInputStreamForStyle('constructor.skin')).toBeUndefined();
     expect(getInputStreamForStyle('rose')).toBeUndefined();
   });
 });

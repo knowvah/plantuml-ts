@@ -57,10 +57,9 @@ export function renderFixtureState(markup: string, measurer: StringMeasurer, opt
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles };
   const ast = astOrThrow(parseState(block, { assetStore: options?.assetStore }), 'state');
   const geo = layoutState(ast, theme, measurer);

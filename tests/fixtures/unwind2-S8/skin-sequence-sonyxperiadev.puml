@@ -1,0 +1,4 @@
+@startuml
+skin sonyxperiadev
+Alice -> Bob : hello
+@enduml

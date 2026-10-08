@@ -30,22 +30,36 @@ import { StyleAndSkinparamCollector } from './preprocessor-collector.js';
 import { BLOCK_E1_BREAKLINE } from './tim/builtin/jaws-constants.js';
 import { mutateExpandsBreakline } from './uml-source-lines.js';
 
+/** One `skin <name>` line: its argument and document position. */
+export interface SkinDirective {
+  readonly name: string;
+  readonly position: number | undefined;
+}
+
 export interface PreprocessorResult {
   readonly lines: readonly string[];
   readonly theme: string | null;
   /**
-   * mission skin-file-loading Batch 1: the `skin <name>` directive's
-   * captured argument (`skin rose` -> `"rose"`), lowercased. Upstream
+   * mission skin-file-loading Batch 1: the LAST `skin <name>` directive's
+   * captured argument (`skin rose` -> `"rose"`), as written -- upstream
+   * looks `<name>.skin` up case-sensitively (`TitledDiagram.java:161`). Upstream
    * grammar: `CommandSkin`/`SkinLoader` (`net/sourceforge/plantuml/
    * sequencediagram/command/CommandSkin.java`) -- `^skin\\s+([\\w.]+)$`,
    * a bare directive line like `skinparam`/`theme`, NOT a TIM `!` command.
    * `undefined` when the document has no `skin` line. `skin-loader.ts`
-   * resolves the name against the embedded `<style>`-grammar registry
-   * (`skins-builtin.ts`); an unrecognized or preprocessor-grammar name
-   * (`reddress`/`sonyxperiadev`, D1) is a no-op there, not here -- this
+   * resolves the name against the embedded registry (`skins-builtin.ts`);
+   * a name the jar cannot load is refused first (`skin-command.ts`) -- this
    * field only captures what the directive line SAID, unvalidated.
    */
   readonly skin?: string | undefined;
+  /**
+   * unwind2-S8: every `skin <name>` line in document order, with its
+   * 0-indexed document position (the frame of {@link linePositions}).
+   * `CommandSkin` executes each one where it stands, and the first whose
+   * `TitledDiagram#loadSkin` fails is that line's command error
+   * (`CommandSkin.java:75-81`). Absent on a hand-built result.
+   */
+  readonly skinDirectives?: readonly SkinDirective[];
   readonly styles: readonly string[];
   readonly skinparam: ReadonlyMap<string, string>;
   /**
@@ -300,6 +314,7 @@ function resultOf(context: TContext): PreprocessorResult {
     dataLines: context.getResultList().map((line) => line.getString()),
     theme: context.getThemeName() ?? null,
     skin: collector.skin,
+    skinDirectives: collector.skinDirectives,
     styles: collector.styles,
     stylePositions: collector.stylePositions,
     skinparam: collector.skinparam,

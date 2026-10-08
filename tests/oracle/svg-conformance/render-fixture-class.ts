@@ -93,12 +93,11 @@ export function layoutFixtureClass(
   if (!first.ok) throw first.failure.cause;
 
   const preprocessed = first.preprocessed;
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
   // cdd4-T7b/cdd4-T13: the shipped `buildTheme`, not a copy of it -- a copy
   // measured a path no shipped code takes once theme styling (declaration-
   // order skinparam/`<style>` interleaving, root/document routing) moved
   // into it.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
   // cdd4-T4 (bidusa-22-jutu505): mirrors `classPlugin.parse(block, options)`
   // (`src/diagrams/class/index.ts:47-51`) -- `parseClass` was called with NO

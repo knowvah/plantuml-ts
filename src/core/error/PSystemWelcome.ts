@@ -1,3 +1,5 @@
+import type { GraphicPosition } from './graphic-strings.js';
+
 /**
  * The "Welcome to PlantUML!" block. Upstream renders it as its own diagram for
  * an empty document, AND stacks it on top of the error diagram whenever the
@@ -9,9 +11,12 @@
  * The strings carry upstream's creole: `<b>` (bold), `""…""` (monospace), and
  * `<u>…</u>` (underline). `error-renderer.ts` draws all three.
  *
- * Upstream also draws the PlantUML logo (`PSystemVersion.getPlantumlImage()`)
- * in the block's top-right corner. This port vendors no raster assets, so the
- * logo is omitted — the text is identical.
+ * A placed Welcome block also draws the PlantUML logo
+ * (`PSystemVersion.getPlantumlImage()`) in that corner: top-right on an error
+ * page (`PSystemError.java:255-258`), bottom-right as a diagram of its own
+ * (`PSystemWelcomeFactory.java:52-53`), where four more blank lines make room
+ * for it (`PSystemWelcome.java:73-78`). Unplaced, it is text only
+ * (`PSystemWelcome.java:83-86`).
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/eggs/PSystemWelcome.java
  */
@@ -19,7 +24,7 @@
 export class PSystemWelcome {
   private readonly strings: string[] = [];
 
-  constructor() {
+  constructor(private readonly position?: GraphicPosition) {
     this.strings.push('<b>Welcome to PlantUML!');
     this.strings.push(' ');
     this.strings.push('You can start with a simple UML Diagram like:');
@@ -34,6 +39,12 @@ export class PSystemWelcome {
     this.strings.push(' ');
     this.strings.push('(Details by typing ""license"" keyword)');
     this.strings.push(' ');
+    if (position === 'BACKGROUND_CORNER_BOTTOM_RIGHT') for (let i = 0; i < 4; i++) this.strings.push(' ');
+  }
+
+  /** Where the logo goes; `undefined` draws none. */
+  getPosition(): GraphicPosition | undefined {
+    return this.position;
   }
 
   /** The lines a black-on-white `GraphicStrings` block draws. */

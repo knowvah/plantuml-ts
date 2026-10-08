@@ -1,7 +1,7 @@
 /**
  * Theme resolution -- extracted out of `src/index.ts` (this repo's
  * `check-complexity.py` 500-line file cap; a MECHANICAL move, no behavior
- * change beyond skin-reddress-variants Fix 2, documented below).
+ * change).
  */
 
 import type { RenderOptions } from '../index.js';
@@ -11,7 +11,7 @@ import type { Theme } from './theme.js';
 import { resolveSkinparam } from './skinparam.js';
 import type { StyleMap } from './skinparam.js';
 import { applyStyleMap } from './style-map-theme.js';
-import { applySkinLayer } from './skin-loader.js';
+import { applySkinRun, skinRunsOf } from './skin-loader.js';
 import { computeClassTagCascadeGenerations } from './style-cascade-class.js';
 import { styleSkinparamSegments, type StyleSkinparamSegment } from './style-skinparam-segments.js';
 import { dropRootShadowed, rootColoursOf } from './style-root-shadowing.js';
@@ -53,41 +53,31 @@ export interface ResolvedThemeAndStyles {
   readonly styleMap: StyleMap;
 }
 
-/**
- * `documentRawSourceLines` (skin-reddress-variants Fix 2): the block's own
- * raw source lines (`BlockUmlOk.rawSource`, mapped to plain strings),
- * threaded into Stage 1.5's `applySkinLayer` call. Without this, a document
- * combining `!define DARKBLUE` with `skin reddress` never fires reddress's
- * `!ifdef DARKBLUE` gate in production `renderSync`/`render` -- previously
- * provable only via the test harness (`render-fixture-state.ts`), a gap
- * flagged in `plans/skin-file-loading/decision-journal.md` (B4, 2026-07-25).
- * Optional: omitted callers (there are none left in this file, but the test
- * harness constructs its own equivalent directly) see identical behavior to
- * before -- `applySkinLayer`'s 3rd param was already optional.
- */
-export function buildTheme(
-  preprocessed: PreprocessorResult,
-  options?: RenderOptions,
-  documentRawSourceLines?: readonly string[],
-): ResolvedThemeAndStyles {
+export function buildTheme(preprocessed: PreprocessorResult, options?: RenderOptions): ResolvedThemeAndStyles {
   // Stage 1: named base theme
   const themeName = typeof options?.theme === 'string' ? options.theme : (preprocessed.theme ?? 'default');
   const base = resolveTheme(themeName);
 
-  // Stage 1.5: apply a `skin <name>` directive's own base layer (D6,
-  // skin-file-loading mission Batch 1) -- BELOW the document's own
-  // skinparam/`<style>` application below, so a diagram combining
-  // `skin rose` with an explicit `skinparam` still lets the document's
-  // own skinparam win. No-op when `preprocessed.skin` is absent or names
-  // an unrecognized/preprocessor-grammar skin (D1).
-  const withSkin = applySkinLayer(preprocessed, base, documentRawSourceLines);
-
+  // Stage 1.5: a `skin <name>` directive's sheet (D6, skin-file-loading
+  // mission Batch 1) -- its runs come FIRST in the declaration order, so the
+  // document's own skinparam/`<style>` lines below beat it, and a later root
+  // colour of either shadows an earlier element value (unwind2-S8).
   // Stages 2-3: skinparam directives and <style> blocks, in declaration order
   // (cdd4-T7b -- see `style-skinparam-segments.ts`).
   // unwind2-S5: minus what a later `root` colour shadows (`style-root-shadowing.ts`).
-  const segments = dropRootShadowed(styleSkinparamSegments(preprocessed)).flatMap(withRootStyleRun);
+  const skinRuns = skinRunsOf(preprocessed);
+  const ordered = dropRootShadowed([
+    ...skinRuns.map((styleMap): StyleSkinparamSegment => ({ kind: 'style', styleMap })),
+    ...styleSkinparamSegments(preprocessed),
+  ]);
+  const skinSegments = ordered.slice(0, skinRuns.length);
+  const withSkin = skinSegments.reduce(applySkinSegment, base);
+  const segments = ordered.slice(skinRuns.length).flatMap(withRootStyleRun);
   const withDeclarations = segments.reduce(applySegment, withSkin);
-  const styleMap = mergedStyleMap(segments);
+  // The skin's root colours reach every style reader at the skin's position,
+  // as a skinparam run's do (`withRootStyleRun`); its other values are the
+  // flat theme's own defaults, which those readers already start from.
+  const styleMap = mergedStyleMap([...skinSegments.map(rootColourRun), ...segments]);
   // add4-T3f: the activity circles' priority-ordered merged style -- see
   // `activity-circle-style.ts`; read only by the activity renderer.
   // unwind2-S9: the sequence frames' merged-style Shadowing -- see
@@ -120,7 +110,7 @@ export function buildTheme(
       ? deepMergeTheme(withGenerations, options.theme)
       : withGenerations;
   // #lizard forgives -- mechanical extraction of index.ts's own pre-existing
-  // `buildTheme` (unchanged five-stage structure, +1 param for Fix 2); was
+  // `buildTheme` (unchanged five-stage structure); was
   // never flagged in index.ts because that file's 500-line gate short-
   // circuited the per-function check first.
   return { theme, styleMap };
@@ -150,6 +140,23 @@ function mergedStyleMap(segments: readonly StyleSkinparamSegment[]): StyleMap {
     });
     return acc;
   }, new Map());
+}
+
+/** Only the `root` colours of a `<style>` run (`ROOT_COLOURS` keys). */
+function rootColourRun(segment: StyleSkinparamSegment): StyleSkinparamSegment {
+  if (segment.kind !== 'style') return segment;
+  const root = segment.styleMap.get('root') ?? new Map<string, string>();
+  const colours = new Map([...root].filter(([key]) => ROOT_COLOUR_KEYS.has(key)));
+  return { kind: 'style', styleMap: new Map([['root', colours]]) };
+}
+
+/** The `root` colours `style-root-shadowing.ts` ranks by declaration order. */
+const ROOT_COLOUR_KEYS: ReadonlySet<string> = new Set(['fontcolor', 'linecolor']);
+
+/** A skin run onto the theme (`skin-loader.ts#applySkinRun`). */
+function applySkinSegment(theme: Theme, segment: StyleSkinparamSegment): Theme {
+  if (segment.kind !== 'style') return theme;
+  return applySkinRun(theme, segment.styleMap, rootCascadeSkinparams(segment.styleMap.get('root')));
 }
 
 /**

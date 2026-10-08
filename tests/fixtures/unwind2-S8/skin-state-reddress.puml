@@ -1,0 +1,5 @@
+@startuml
+skin reddress
+[*] --> S1
+S1 --> [*]
+@enduml
