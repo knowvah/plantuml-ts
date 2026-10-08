@@ -152,6 +152,33 @@ export function lifelineSegments(start: number, end: number, delays: readonly Sp
   return out;
 }
 
+/**
+ * Every participant's pieces: `LivingSpace#drawLineAndLiveboxes`
+ * (`teoz/LivingSpace.java:150-167`) draws the line from `aliveSince` -- the
+ * create y, else 0 (this port's `headHeight`). The field is absent when no
+ * participant needs more than the one plain line.
+ */
+export function lifelineSegmentsByParticipant(
+  participants: readonly ParticipantGeo[],
+  headHeight: number,
+  end: number,
+  delays: readonly Span[],
+): { lifelineSegments?: Record<string, LifelineSegment[]> } {
+  if (delays.length === 0 && participants.every((p) => p.createY === undefined)) return {};
+  const pieces = participants.map((p) => [p.id, lifelineSegments(p.createY ?? headHeight, end, delays)] as const);
+  return { lifelineSegments: Object.fromEntries(pieces) };
+}
+
+/** `DelayTile#getMaxX` (`:126-129`), `middle + preferredWidth / 2`, maxed
+ *  into the right border like every tile's (`PlayingSpace.java:75-96`). */
+export function delayContentRight(eventGeos: readonly EventGeo[], rightMargin: number): number {
+  let right = 0;
+  for (const geo of eventGeos) {
+    if (geo.kind === 'delay') right = Math.max(right, geo.middleX + geo.textWidth / 2 + rightMargin);
+  }
+  return right;
+}
+
 /** `Segment#cutSegmentIfNeed` (`sequencediagram/graphic/Segment.java:99-127`),
  *  including its `0.001` tolerance and its early return past `pos2`. */
 export function cutSegmentIfNeed(full: Span, delays: readonly Span[]): Span[] {

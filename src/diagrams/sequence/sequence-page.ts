@@ -161,6 +161,8 @@ function clipMessage(m: MessageGeo, band: PageBand): MessageGeo | undefined {
     ...rest,
     y: shift(band, m.y),
     labelLines: m.labelLines.filter((r) => inBand(band, r.y)).map((r) => ({ ...r, y: shift(band, r.y) })),
+    // The created head goes with its arrow; its block top moves with the page.
+    ...(m.createdHead !== undefined ? { createdHead: { ...m.createdHead, y: shift(band, m.createdHead.y) } } : {}),
     ...(keepNumber ? { labelNumber: { ...labelNumber, y: shift(band, labelNumber.y) } } : {}),
   };
 }
@@ -289,6 +291,13 @@ function clipSegments(segments: readonly LifelineSegment[], band: PageBand): Lif
   return segments.map((s) => clipSegment(s, band)).filter((s): s is LifelineSegment => s !== undefined);
 }
 
+function clipLifelines(
+  lifelines: Readonly<Record<string, readonly LifelineSegment[]>>,
+  band: PageBand,
+): Record<string, LifelineSegment[]> {
+  return Object.fromEntries(Object.entries(lifelines).map(([id, segs]) => [id, clipSegments(segs, band)]));
+}
+
 function clipEvent(event: EventGeo, band: PageBand): EventGeo | undefined {
   switch (event.kind) {
     case 'message':
@@ -370,7 +379,7 @@ export function paginateSequence(geo: SequenceGeometry, pageIndex: number): Sequ
     ...geo,
     events: geo.events.map((e) => clipEvent(e, band)).filter((e): e is EventGeo => e !== undefined),
     lifelineEndY,
-    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: clipSegments(geo.lifelineSegments, band) } : {}),
+    ...(geo.lifelineSegments !== undefined ? { lifelineSegments: clipLifelines(geo.lifelineSegments, band) } : {}),
     footerShapeY,
     totalHeight,
     // `dolls.drawEnglobers` is handed `body.calculateDimension().getHeight()

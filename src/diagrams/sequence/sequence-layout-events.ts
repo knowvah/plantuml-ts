@@ -35,6 +35,7 @@ import { displayLines, refBodyLines, refBodyHeight, refBodyWidth, refBodyFontSpe
 import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
 import { handleMessageEvent } from './sequence-layout-message.js';
 import { layoutDelay } from './sequence-delay.js';
+import type { MessageLevels } from './sequence-layout-participants.js';
 import { handleMessageExoEvent } from './sequence-layout-exo.js';
 import {
   groupingHeaderDisplay,
@@ -97,6 +98,10 @@ export interface EventProcessingContext {
    * which are the same answer.
    */
   lastMessageParticipants?: readonly string[] | undefined;
+  /** Where the walk records each message's two live levels for the
+   *  participant row's next pass -- see `sequence-layout-participants.ts
+   *  #MessageLevels`. */
+  messageLevels?: MessageLevels;
 }
 
 /** Running Y cursor plus the y of the most recent message arrow. */

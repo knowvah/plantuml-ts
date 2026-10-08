@@ -7,6 +7,7 @@
  * scaling rationale this module inherits (`ScaledTheme.scaleK`).
  */
 
+import { renderCreatedHead } from './renderer-participant-shapes.js';
 import type { MessageGeo, TextRun } from './ast.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaledDashPattern } from './scale-geo.js';
@@ -197,6 +198,14 @@ function renderMessageLabel(msg: MessageGeo, theme: ScaledTheme): string {
  * behavior until that bucket is ported.
  */
 export function renderMessage(msg: MessageGeo, theme: ScaledTheme): string {
+  // A create message draws the created head FIRST, then the arrow
+  // (`CommunicationTile#drawU:351-371`) -- and draws it even when the arrow
+  // is hidden, since only the arrow component checks `isHidden()`.
+  const head = msg.createdHead === undefined ? '' : renderCreatedHead(msg.createdHead, theme);
+  return head + renderMessageArrowAndLabel(msg, theme);
+}
+
+function renderMessageArrowAndLabel(msg: MessageGeo, theme: ScaledTheme): string {
   const configuration = msg.arrow;
   // `-[hidden]->` draws NOTHING: `ComponentRoseArrow#drawInternalU:85-87` and
   // `ComponentRoseSelfArrow#drawInternalU:71-73` both return on

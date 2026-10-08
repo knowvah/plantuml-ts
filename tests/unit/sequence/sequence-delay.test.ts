@@ -182,7 +182,7 @@ function paged(events: EventGeo[]): SequenceGeometry {
     footerShapeY: 500,
     showFootbox: true,
     boxes: [],
-    lifelineSegments: lifelineSegments(30, 500, delaySpansOf(events)),
+    lifelineSegments: { A: lifelineSegments(30, 500, delaySpansOf(events)) },
   };
 }
 
@@ -192,7 +192,7 @@ describe('a page clips the pieces (UClip#getClippedLine)', () => {
     // Each PARTICIPANT_LINE below the band still opens its group (giloko's
     // trailing `<g><title>A</title></g>`); the DELAY_LINE leaves nothing.
     const emptied = { y1: 222, y2: 222, delay: false, clippedOut: true };
-    expect(page.lifelineSegments).toEqual([
+    expect(page.lifelineSegments?.['A']).toEqual([
       { y1: 30, y2: 221, delay: false },
       { y1: 221, y2: 222, delay: true },
       emptied,
@@ -221,6 +221,6 @@ describe('scale', () => {
     const scaled = scaleSequenceGeometry(paged([{ ...delay(100), textWidth: 10, middleX: 50 }]), 2);
     const d = scaled.events.find((e): e is DelayGeo => e.kind === 'delay');
     expect([d?.y, d?.height, d?.middleX, d?.textWidth]).toEqual([200, 56, 100, 20]);
-    expect(scaled.lifelineSegments?.[1]).toEqual({ y1: 200, y2: 256, delay: true });
+    expect(scaled.lifelineSegments?.['A']?.[1]).toEqual({ y1: 200, y2: 256, delay: true });
   });
 });

@@ -78,11 +78,13 @@ export interface SequenceGeometry {
    */
   lifelineEndY: number;
   /**
-   * The lifeline cut at every delay (`MutingLine#drawLine`), present only
-   * when the diagram has a delay. Absent means one `PARTICIPANT_LINE` from
-   * `headHeight` to `lifelineEndY`.
+   * Each participant's lifeline, by id, cut at every delay
+   * (`MutingLine#drawLine`) and started at its `createY` when it was created
+   * (`LivingSpace#drawLineAndLiveboxes`). Present only when the diagram has
+   * a delay or a create; absent means one `PARTICIPANT_LINE` from
+   * `headHeight` to `lifelineEndY` for everyone.
    */
-  lifelineSegments?: readonly LifelineSegment[];
+  lifelineSegments?: Readonly<Record<string, readonly LifelineSegment[]>>;
   /**
    * The top of the footbox row: `UTranslate.dy(pageHeight + headHeight)`
    * (`PlayingSpaceWithParticipants.java:225-226`). Equal to `lifelineEndY`

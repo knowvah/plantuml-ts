@@ -89,6 +89,9 @@ export const dividerCommand: Command = {
       // shared gap. Engine-wide, filed with the other sequence text gaps.
       text: match[1]!.replace(/\\n/g, '\n'),
     };
+    // `SequenceDiagram#divider` (`:270-276`): a divider closes off the
+    // message before it for a bare life event that follows.
+    state.life.lastEventWithDeactivate = 'notMessage';
     emit(state, ev);
   },
 };
@@ -120,6 +123,7 @@ export const delayWithTextCommand: Command = {
   pattern: /^(?:\.{3}|…)(.*)(?:\.{3}|…)$/,
   execute(state, match) {
     const ev: DelayEvent = { kind: 'delay', text: match[1]! };
+    state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
 };
@@ -136,6 +140,7 @@ export const bareDelayCommand: Command = {
   pattern: /^(?:\.{3}|…)$/,
   execute(state) {
     const ev: DelayEvent = { kind: 'delay' };
+    state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
 };

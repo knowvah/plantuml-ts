@@ -206,7 +206,7 @@ describe('renderLifelinePass', () => {
     const svg = renderLifelinePass(
       [p('A', 22), p('B', 122)],
       [act('B', 122, 50), act('A', 22, 60)],
-      [WHOLE_LIFELINE],
+      () => [WHOLE_LIFELINE],
       theme,
     );
 
@@ -215,7 +215,7 @@ describe('renderLifelinePass', () => {
   });
 
   it('keeps multiple boxes on one participant in source order', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], [WHOLE_LIFELINE], theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('A', 22, 60), act('A', 22, 10)], () => [WHOLE_LIFELINE], theme);
 
     expect([...svg.matchAll(/<rect [^>]*?y="(\d+)"/g)].map((m) => m[1])).toEqual([
       '39', // the hover target, which spans the whole lifeline
@@ -225,7 +225,7 @@ describe('renderLifelinePass', () => {
   });
 
   it('emits a bare lifeline for a participant with no activations', () => {
-    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], [WHOLE_LIFELINE], theme);
+    const svg = renderLifelinePass([p('A', 22)], [act('B', 122, 50)], () => [WHOLE_LIFELINE], theme);
 
     expect([...svg.matchAll(/<title>(.*?)<\/title>/g)].map((m) => m[1])).toEqual(['A']);
   });

@@ -23,6 +23,7 @@ import type {
 import type { ArrowConfiguration, ArrowHeadKind } from './sequence-arrowhead.js';
 import type { Command as CoreCommand } from '../../core/command/Command.js';
 import type { ParticipantUrl } from './sequence-participant-declaration.js';
+import type { LifeState } from './sequence-life-state.js';
 import { createAnnotations } from '../../core/annotations/index.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { InternalSpriteStore } from '../../core/internal-sprite-store.js';
@@ -45,16 +46,13 @@ export interface ParseState {
    *  same shape as `pendingNote`, kept separate because a `ref`'s body text
    *  becomes a `FrameEvent.label`, not a `NoteEvent.text`. */
   pendingRef: FrameEvent | null;
-  /** Track the most recent message sender for `return` command. */
+  /** The latest arrow's endpoints -- read by `endCommand`'s note anchor. */
   lastMessageFrom: string | null;
   lastMessageTo: string | null;
-  /**
-   * T11 (ubrr batch 2): LEFT/RIGHT of the most recent `EventWithNote`
-   * (`SequenceDiagram#getLastEventWithNote`, `SequenceDiagram.java:154-
-   * 158`) -- set by `executeArrow`, `refOverCommand`/`refOverMultilineCommand`
-   * and `endCommand`/`elseCommand`; read by `noteOnArrowCommand`, which
-   * documents the full three-class mechanism. `null` = none yet.
-   */
+  /** T11 (ubrr batch 2): LEFT/RIGHT of the latest `EventWithNote` (`SequenceDiagram
+   *  #getLastEventWithNote`, `:154-158`) -- set by `executeArrow`, `refOver*Command`
+   *  and `endCommand`/`elseCommand`; read by `noteOnArrowCommand`, which
+   *  documents the full three-class mechanism. `null` = none yet. */
   lastEventWithNoteLeft: string | null;
   lastEventWithNoteRight: string | null;
   /** The currently open box group (between `box` and `end box`). */
@@ -72,6 +70,8 @@ export interface ParseState {
    * (the default) means the command that just ran succeeded.
    */
   executionError: string | undefined;
+  /** `SequenceDiagram`'s life-event bookkeeping -- `sequence-life-state.ts`. */
+  life: LifeState;
 }
 
 // ---------------------------------------------------------------------------

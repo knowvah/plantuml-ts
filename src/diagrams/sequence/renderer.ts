@@ -276,21 +276,25 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
   if (event.kind === 'frame') {
     return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
   }
-  if (isBackground) return '';
+  return isBackground ? '' : renderForeground(event, theme);
+}
+
+/** The foreground pass for every kind but `frame` (handled above). */
+function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme): string {
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
     case 'activation':
-      // Drawn in the lifeline pass (step 2), not here -- see the comment
-      // there and `LivingSpace#drawLineAndLiveboxes`.
+    // Drawn in the lifeline pass (step 2), not here -- see the comment
+    // there and `LivingSpace#drawLineAndLiveboxes`.
+    // falls through
+    case 'space':
+      // Space geos add no visible elements
       return '';
     case 'note':
       return renderNote(event, theme);
     case 'divider':
       return renderDivider(event, theme);
-    case 'space':
-      // Space geos add no visible elements
-      return '';
     case 'newpage':
       return renderNewpage(event, theme);
     case 'delay':
@@ -428,14 +432,17 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     renderLifelinePass(
       scaledGeo.participants,
       scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      scaledGeo.lifelineSegments ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
+      (p) =>
+        scaledGeo.lifelineSegments?.[p.id] ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
       scaledTheme,
     ),
   );
 
   // 3. Participant header boxes
+  // A created participant has no head here (`drawHeadOrTail:194-196`); its
+  // create message draws it instead.
   for (const p of scaledGeo.participants) {
-    children.push(renderParticipantBox(p, scaledTheme));
+    if (p.createY === undefined) children.push(renderParticipantBox(p, scaledTheme));
   }
 
   // 4. Footer boxes, unless suppressed -- BEFORE the foreground tiles.

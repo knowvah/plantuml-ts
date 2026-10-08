@@ -244,7 +244,7 @@ function renderOpenBar(act: ActivationGeo, x: number, fill: string, theme: Scale
 export function renderLifelinePass(
   participants: readonly ParticipantGeo[],
   activations: readonly ActivationGeo[],
-  segments: readonly LifelineSegment[],
+  lifelineOf: (p: ParticipantGeo) => readonly LifelineSegment[],
   theme: ScaledTheme,
 ): string {
   return participants
@@ -253,7 +253,7 @@ export function renderLifelinePass(
         .filter((a) => a.participantId === p.id)
         .map((a) => renderActivation(a, theme))
         .join('');
-      return renderLifelineSegments(p, segments, theme) + boxes;
+      return renderLifelineSegments(p, lifelineOf(p), theme) + boxes;
     })
     .join('');
 }

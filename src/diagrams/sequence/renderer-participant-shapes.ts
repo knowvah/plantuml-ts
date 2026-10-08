@@ -236,6 +236,12 @@ function renderParticipantBlock(p: ParticipantGeo, blockTopY: number, head: bool
   return box + renderNameBlock(p, blockTopY + p.height / 2, theme);
 }
 
+/** The head a create message draws at its tile top
+ *  (`LivingSpace#drawHead(ug, context, TOP, LEFT|RIGHT)`). */
+export function renderCreatedHead(head: { participant: ParticipantGeo; y: number }, theme: ScaledTheme): string {
+  return withParticipantUrl(head.participant, renderParticipantBlock(head.participant, head.y, true, theme));
+}
+
 /** The header row. */
 export function renderParticipantBox(p: ParticipantGeo, theme: ScaledTheme): string {
   return withParticipantUrl(p, renderParticipantBlock(p, p.y, true, theme));

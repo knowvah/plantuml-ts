@@ -1,0 +1,4 @@
+@startuml
+Alice -> Bob : one
+deactivate
+@enduml

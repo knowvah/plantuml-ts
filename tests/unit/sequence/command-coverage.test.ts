@@ -75,20 +75,28 @@ describe('scale', () => {
 // create — CommandParticipant.java:80-86,142-201
 // ---------------------------------------------------------------------------
 
+// The message after `create X` must be sent TO X by someone else
+// (`Message#compatibleForCreate`, `Message.java:78-80`); a self message is an
+// error -- see `unwind2-s4-life-events-jar.test.ts`.
 describe('create', () => {
   it('declares a plain-type participant', () => {
-    const ast = parse(['create Dog', 'Dog -> Dog : bark']);
+    const ast = parse(['create Dog', 'Cat -> Dog : bark']);
     expect(ast.participants[0]).toMatchObject({ id: 'Dog', type: 'participant' });
   });
 
   it('declares a typed participant', () => {
-    const ast = parse(['create actor Bob', 'Bob -> Bob : hi']);
+    const ast = parse(['create actor Bob', 'Al -> Bob : hi']);
     expect(ast.participants[0]).toMatchObject({ id: 'Bob', type: 'actor' });
   });
 
   it('supports "create X as Y"', () => {
-    const ast = parse(['create ThisIsTheLongNameOfAnInstance as T', 'T -> T : hi']);
+    const ast = parse(['create ThisIsTheLongNameOfAnInstance as T', 'A -> T : hi']);
     expect(ast.participants[0]).toMatchObject({ id: 'T', display: 'ThisIsTheLongNameOfAnInstance' });
+  });
+
+  it('marks the next message to X as the create message', () => {
+    const ast = parse(['create Dog', 'Cat -> Dog : bark']);
+    expect(ast.events[0]).toMatchObject({ kind: 'message', to: 'Dog', create: true });
   });
 });
 

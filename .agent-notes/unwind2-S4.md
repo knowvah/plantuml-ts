@@ -43,3 +43,28 @@
   drawLineAndLiveboxes` aliveChanges), and `return` not closing an
   activation in kukeja-88-zida141 -- both add pieces the jar does not draw.
 - **Confidence**: High
+
+## Observation: create / return / after-delay refusal ported (follow-on)
+- **Context**: Orchestrator asked to remove the extra elements the delay cut
+  exposed on cepase/kilepu/xikuro (`create`) and kukeja (`return`).
+- **Finding**: `create X` was parse-only sugar. Upstream holds it as
+  `pendingCreate` until the next message, which must be TO X from someone
+  else (`SequenceDiagram.java:207-211`, else an error page). That message's
+  tile draws X's head at its top, ends the arrow at the head's edge
+  (`CommunicationTile#getPoint2`, posB/posD), is at least head-tall, and X's
+  lifeline starts there. `return` reads an `activationState` stack of
+  ACTIVATING messages (`SequenceDiagram.java:352-413`) and deactivates;
+  bare `deactivate` reads the same stack. Any life event right after `...`
+  is refused ("You cannot Activate/Deactivate just after a ...").
+  Life bookkeeping lives in `src/diagrams/sequence/sequence-life-state.ts`.
+- **Finding**: `LOOP -> X` was parsed as a `loop` group: this port's command
+  table lists grouping before the arrows, upstream registers CommandArrow
+  (:111) before CommandGrouping (:126). groupingCommand now declines a line
+  the arrow regexes match.
+- **Finding**: participant spacing now carries the `LIVE_DELTA_SIZE` terms of
+  `addConstraints` via a recorded-levels pass (`MessageLevels`); without it a
+  correct `return` pop raised secida/xuxugi by 5.
+- **Impact**: the jar's error-page routing for an execution refusal is not
+  matched (ours names description/class on a tie, the jar names sequence) --
+  a core dispatcher tie-break, outside the sequence write-set.
+- **Confidence**: High

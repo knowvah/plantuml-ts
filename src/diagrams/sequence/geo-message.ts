@@ -14,9 +14,14 @@
 import type { ArrowConfiguration } from './sequence-arrowhead.js';
 import type { MessageExoType } from './ast.js';
 import type { TextRun } from './text-block-geo.js';
+import type { ParticipantGeo } from './geo-participant.js';
 
 export interface MessageGeo {
   kind: 'message';
+  /** A create message's head (`CommunicationTile#drawU:347-371`): the
+   *  participant, at the x the tile draws it, and the block top it is drawn
+   *  from -- see `sequence-layout-create.ts`. */
+  createdHead?: { participant: ParticipantGeo; y: number };
   fromX: number;
   toX: number;
   y: number;
