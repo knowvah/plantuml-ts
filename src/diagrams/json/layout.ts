@@ -12,7 +12,8 @@ import type { Theme } from '../../core/theme.js';
 import type { StringMeasurer } from '../../core/measurer.js';
 import { layoutGraph as dotLayout } from '../../core/graph-layout.js';
 import type { DotInputEdge, DotInputGraph, DotInputNode, DotLayoutResult } from '../../core/graph-layout.js';
-import { measureNode, recordLabelFor } from './TextBlockJson.js';
+import { measureNode } from './TextBlockJson.js';
+import { recordLabelFor } from './record-label.js';
 import type { JsonRowGeo, MeasuredNode } from './TextBlockJson.js';
 
 // A5/T6b: node sizing moved to `TextBlockJson.ts` (upstream's own class
