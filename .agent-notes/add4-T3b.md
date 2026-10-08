@@ -136,7 +136,11 @@ I used no Serena tools and no `git stash`. `feat/activity-divergence-drive-4` is
   - Ours: new `layout/tile-layout-inlabel.ts#snakeLabelLineWidth`. It is used by
     `inLabelReservation` (occupied width) and `compress/shapes-of.ts#edgeLabelShape`.
   - Placement still uses the raw width, as `renderer.ts` places the text with it.
-- Fixture `switch-case-simple-line`: 13 diffs -> 0. Its `it.fails` is flipped to `it`.
+- Fixture `switch-case-simple-line`: 83 diffs -> 4. All geometry is exact: case x positions and
+  canvas width now equal the jar, and the test's `it.fails` is flipped to `it`.
+  - The 4 left are all on the renderer side, Not done 3: `activity-renderer-text.ts` draws
+    `x __under__ y __line__ z` in FULL mode, as 5 runs with underlining. The jar draws one literal
+    run. Owner: T3-gates / renderer.
 - Probe: Σ 232 over 12 rows, unchanged. No corpus row moved; 0 risers, 0 fallers.
 - Census movers: none.
 - Ratchet, harness-parity, compress invariant and style/text/swimlane gates: all green.
