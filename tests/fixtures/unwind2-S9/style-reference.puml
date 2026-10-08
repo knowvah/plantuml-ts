@@ -1,0 +1,12 @@
+@startuml
+<style>
+sequenceDiagram {
+  reference { Shadowing 3 }
+}
+</style>
+participant A
+participant B
+A -> B : hi
+ref over A, B : init
+ref over A : a much longer reference body text
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+<style>
+sequenceDiagram {
+  group { Shadowing 3 }
+}
+</style>
+participant A
+participant B
+group grp [cmt]
+A -> B : hi
+end
+alt ok
+A -> B : y
+else bad
+B -> A : z
+end
+@enduml

@@ -9,7 +9,7 @@ module for X already exist?* — one row per module, its exported surface
 named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 `ast-grep`, which are better at it than any document.
 
-1426 modules · 5394 exported names.
+1428 modules · 5401 exported names.
 
 ## `src/`
 
@@ -86,6 +86,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `render-options.ts` | `RenderOptions`, `getDefaultMeasurer`, `resolveMeasurer` | `RenderOptions` and measurer resolution — extracted from `src/index.ts` (mission A5 / T4). |
 | `rose-note-dim.ts` | `RoseNoteDim`, `roseNoteDim` | The note operand `computeMergedLabelBox` (`core/edge-label-box.ts`) merges into an edge label: `EntityImageNoteLink`'s own dimension. |
 | `scale-command.ts` | `ScaleSpec`, `matchScaleCommand`, `resolveScaleFactor` | scale-command.ts — shared `scale ...` directive parsing + factor resolution (mission G1 I-scale). |
+| `sequence-frame-shadow.ts` | `SequenceFrameShadowSource`, `SequenceFrameShadowing`, `resolveSequenceFrameShadowing`, `withSequenceFrameShadowing` | The sequence grouping frames' merged-style `Shadowing` (unwind2-S9). |
 | `skin-loader.ts` | `applySkinLayer` | `skin <name>` directive resolution — skin-file-loading mission, Batches 1 (decisions D1/D2/D6) and 4 (preprocessor+skinparam skins). |
 | `skinparam-accumulator.ts` | `SkinparamAccumulator`, `createSkinparamAccumulator` | Mutable accumulator threaded through the resolveSkinparam key-processing loop (skinparam-key-handlers.ts, skinparam-stereo-keys.ts) and consumed by the theme-partial builder (skinparam-theme-builder.ts). |
 | `skinparam-element-buckets.ts` | `ELEMENT_BUCKET_SNAMES`, `ElementColorRole`, `matchElementColorKey`, `matchStereotypeSpotColorKey`, `matchElementFontSizeKey`, `matchElementShadowingKey`, `parseShadowingValue`, `matchElementLineThicknessKey` | Per-element (SName) style-bucket matching for the skinparam pipeline. |
@@ -120,7 +121,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `style-line-style.ts` | `LineStyleDash`, `lineStyleDash`, `BorderStyleConversion`, `convertBorderStyleValue` | `PName.LineStyle` -- the dash half of a style's stroke, and the skinparam front-end that writes it (`skinparam <sname>BorderStyle`). |
 | `style-map-element.ts` | `collectElementStyleBuckets`, `resolveDocumentBackground`, `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade`, `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder` | Element-scoped `<style>` block routing — decision D4. |
 | `style-map-global.ts` | `resolveGlobalShadowing`, `resolveGlobalBackground`, `resolveGlobalBorder`, `resolveGlobalFontName` | Bare `root`/`element` universal-selector resolvers (the diagram-wide Shadowing / BackgroundColor / LineColor defaults), moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pure file-cap move; |
-| `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHclFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram / hclDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
+| `style-map-json-diagram.ts` | `computeJsonFamilyOverride`, `computeYamlFamilyOverride`, `computeHighlightClassesOverride` | jsonDiagram / yamlDiagram `<style>` block → `Theme.colors .graph.json` field mapping, plus the `.tagname` style-class → `#highlight` override table. |
 | `style-map-simple-fields.ts` | `computeSimpleSelectorOverrides` | Single-selector → single-or-few `Theme.colors.graph` field mappings (actor / usecase / class / interface / enum / statediagram / activitybar / package). |
 | `style-map-tag-cascade.ts` | `cleanStereotypeToken`, `collectStyleTagNames`, `resolveStyleCascade`, `computeShowStereotypeByTag`, `computeNoteStyleTagCascade` | The `.tagname` stereotype sub-selector cascade (`StyleSignatureBasic #matchAllImpl` / `StyleStorage#computeMergedStyle`, G2 N36/N37) -- moved verbatim out of `style-map-element.ts` to keep that module under the 500-line cap (cdd6 T1a, a pur |
 | `style-map-theme.ts` | `applyStyleMap` | Selector → Theme field mapping (element-scoped <style> blocks). |
@@ -1702,6 +1703,7 @@ named. For *where is symbol Y defined*, use Serena's `find_symbol` or
 | `sequence-page.ts` | `newpageTilesOf`, `sequencePageCount`, `paginateSequence`, `sequencePageAst` | `newpage` PAGINATION: one `SequenceGeometry` in, one page's `SequenceGeometry` out. |
 | `sequence-parse-helpers.ts` | `ParseState`, `Command`, `SequenceCommandRefusal`, `makeDefaultAST`, `currentEvents`, `ensureParticipant`, `emit`, `setLastEventWithNoteSpan`, `applyAutonumber`, `formatAutonumber`, `ArrowSpec`, `arrowConfigurationOf`, `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf`, `urlOf`, `autoActivationFlags`, `activationFlags`, `DottedStart`, `parseDottedStart`, `linkedParticipantIds`, `applyHideStereotype`, `applyHideUnlinked` | Mutable parse state and shared helpers for the sequence diagram parser. |
 | `sequence-participant-declaration.ts` | `ParticipantDeclaration`, `ParticipantUrl`, `parseParticipantDeclaration`, `participantUrlOf` | The `participant`-family declaration grammar shared by `CommandParticipantA`/`A2`/`A3`/`A4` (`SequenceDiagramFactory.java:106`) -- split out of `sequence-parse-helpers.ts` purely to stay under the 500-line file cap (the same reason that fil |
+| `sequence-shadow.ts` | `sequenceShadowFilterDef`, `sequenceShadowFilter`, `frameShadowDelta`, `sequenceShadowDefs` | sequence-shadow.ts -- the drop-shadow `<filter>` a shadowed sequence frame references (unwind2-S9). |
 | `sequence-text.ts` | `SequenceRunImage`, `SequenceTextSpec`, `sequenceText` | sequence-text.ts — the ONE `<text>` emitter the sequence engine routes through (mission `sequence-text-and-y-convergence`, D3). |
 | `text-block-geo.ts` | `displayLines`, `textBlockRuns`, `TextRun`, `REFERENCE_FONT_SIZE`, `refBodyFontSpecOf`, `refHeaderFontSpecOf`, `refBodyLines`, `refBodyHeight`, `refBodyWidth`, `ARROW_LABEL_PADDING_X1`, `ARROW_LABEL_HEAD_CLEARANCE`, `MessageLabelBlock`, `messageLabelBlock`, `messageLabelRows` | text-block-geo.ts — how a sequence-diagram `Display` becomes POSITIONED text runs. |
 
