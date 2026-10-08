@@ -1,0 +1,6 @@
+@startuml
+skinparam shadowing true
+actor A
+actor B
+A -> B : hi
+@enduml

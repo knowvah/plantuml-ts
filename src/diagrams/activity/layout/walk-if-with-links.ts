@@ -24,6 +24,7 @@ import { laneIn, laneOut } from './swimlane-placement.js';
 import { collectTouchedLanes } from './tile-coordinates-group.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import { diamondBackOf } from './diamond-labels.js';
 import type { LoopTranslate } from './swimlane-loop-translate.js';
 
 /** `ActivityNodeGeo.diamondShape`'s own producer (add3-T3c) -- see
@@ -108,6 +109,7 @@ function pushDiamondLabel(
       height: l.height,
       label: l.label,
       ...testLabelRole(diamond, side),
+      ...diamondBackOf(diamond),
     },
     lane,
   );

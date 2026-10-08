@@ -241,9 +241,12 @@ describe('one tile, one height', () => {
     expect(addedBy([{ kind: 'space', pixels: 37 }])).toBe(37);
   });
 
-  it('a bare `...` reserves 20 and a `...text...` reserves `blockH + 28`', () => {
-    // `ComponentRoseDelayLine:68-71` and `ComponentRoseDelayText:54,72-75`.
-    expect(addedBy([{ kind: 'delay' }])).toBe(20);
+  it('a bare `...` reserves 28 and a `...text...` reserves `blockH + 28`', () => {
+    // `DelayTile#getPreferredHeight:114-118` always builds `DELAY_TEXT`
+    // (`:84-88`), so both are `ComponentRoseDelayText:54,72-75`; the bare form's
+    // `Display.empty()` contributes a zero-height block. Jar: `delay-bare.svg`
+    // (tests/fixtures/unwind2-S4) has its dotted span 74 -> 102.
+    expect(addedBy([{ kind: 'delay' }])).toBe(28);
     expect(addedBy([{ kind: 'delay', text: 'wait' }])).toBe(LINE + 28);
   });
 

@@ -1,0 +1,24 @@
+@startuml
+<style>
+group { Shadowing 2 }
+</style>
+participant A
+participant B
+loop 3 times
+A -> B : x
+end
+opt o
+A -> B : w
+end
+par p
+A -> B : v
+else q
+B -> A : r
+end
+break b
+A -> B : u
+end
+critical c
+A -> B : t
+end
+@enduml

@@ -447,9 +447,13 @@ describe('skin <name> directive -- skin-file-loading mission Batch 1', () => {
     expect(result.skin).toBe('rose');
   });
 
-  it('is case-insensitive and normalizes the captured name to lowercase', () => {
+  it('matches the keyword case-insensitively and keeps the name as written', () => {
+    // unwind2-S8: the jar looks `<name>.skin` up case-sensitively
+    // (`TitledDiagram.java:161`): `SKIN rose` loads rose (jar-verified),
+    // `skin Rose` is "Cannot find style Rose" (skin-command.ts).
     const result = preprocess('@startuml\nSKIN Rose\nstate a\n@enduml');
-    expect(result.skin).toBe('rose');
+    expect(result.skin).toBe('Rose');
+    expect(result.skinDirectives).toEqual([{ name: 'Rose', position: 1 }]);
   });
 
   it('removes the skin line from the emitted lines (consumed, not content)', () => {

@@ -72,12 +72,13 @@
  * sequence geometry needs a new geo kind and a renderer branch.
  *
  * Raster `<img>`/`<$sprite>` LEFT that set for any caller passing a
- * {@link SequenceAtomContext} (cdd7 T1f; today the participant head): they
+ * {@link SequenceAtomContext} (cdd7 T1f: the participant head; unwind2-S10:
+ * message and note labels): they
  * resolve through the shared `makeAtomImageResolverFor` and ride
  * `TextRun.image` exactly as `'latex'` does. What stays literal is vector
  * ink — OpenIconic, SVG sprites, emoji — whose primitives `TextRun` has no
- * field for, and every `'inline'` atom on a context-less caller (message,
- * note, frame, divider labels).
+ * field for, and every `'inline'` atom on a context-less caller (frame,
+ * divider, delay, box labels).
  *
  * `<math>`/`<latex>` LEFT that set: a `'latex'` atom resolves to a measured,
  * drawable image through `core/latex.ts#renderLatexAsImage` — the one
@@ -100,9 +101,10 @@
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { FontConfiguration } from '../../core/klimt/shape/UText.js';
-import { FontStyle, getFont } from '../../core/klimt/shape/UText.js';
+import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
+import { atomFontSpec, textAtomRuns } from './sequence-creole-text-atom.js';
 import { CharHidder } from '../../core/utils/CharHidder.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
 import type { TextRun } from './text-block-geo.js';
@@ -110,6 +112,9 @@ import { renderLatexAsImage } from '../../core/latex.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { AtomImageResolver } from '../../core/creole-atoms.js';
 import { makeAtomImageResolverFor } from '../../core/creole-atoms-image-resolver.js';
+import type { Paint } from '../../core/paint.js';
+
+export { sequenceLineWidth } from './sequence-creole-text-atom.js';
 
 /** Where a line's first run starts: `DriverTextSvg`'s own `x` (a LEFT edge)
  *  and `y` (a BASELINE), the same two quantities a `TextRun` carries. Every
@@ -138,91 +143,6 @@ export function sequenceCreoleFont(fontSpec: FontSpec, color: string | null = nu
   if (fontSpec.weight === 'bold') styles.add(FontStyle.BOLD);
   if (fontSpec.style === 'italic') styles.add(FontStyle.ITALIC);
   return { family: fontSpec.family, size: fontSpec.size, color, styles };
-}
-
-/**
- * The `FontSpec` one atom is MEASURED at — its own family and its EFFECTIVE
- * (muted) size.
- *
- * `getFont` applies `FontPosition.mute` at READ time, upstream's own
- * `FontConfiguration#getFont()` behaviour (`FontConfiguration.java:98-104`),
- * so a `<sup>`/`<sub>` run measures 3 smaller while the stored configuration
- * keeps the size a nested `<size:N>` set. Identical to the stored size for
- * every NORMAL run, which is all of them until `<sup>`/`<sub>` appears.
- */
-function atomFontSpec(font: FontConfiguration): FontSpec {
-  return {
-    family: font.family,
-    size: getFont(font).size,
-    ...(font.styles.has(FontStyle.BOLD) ? { weight: 'bold' as const } : {}),
-    ...(font.styles.has(FontStyle.ITALIC) ? { style: 'italic' as const } : {}),
-  };
-}
-
-/**
- * The whole `text-decoration` attribute for one run's style flags — a port of
- * `DriverTextSvg`'s own `StringBuilder decorations` cascade, in its order:
- *
- * ```java
- * if (fontConfiguration.containsStyle(FontStyle.UNDERLINE) ...) decorations.append("underline ");
- * if (fontConfiguration.containsStyle(FontStyle.STRIKE))        decorations.append("line-through ");
- * if (fontConfiguration.containsStyle(FontStyle.WAVE))          decorations.append("wavy underline ");
- * final String textDecoration = decorations.length() > 0 ? decorations.toString().trim() : null;
- * ```
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/drawing/svg/DriverTextSvg.java:139-160
- *
- * The `getUnderlineStroke().getThickness() > 0` guard and the
- * `getExtendedColor()` branches (which draw separate `<line>`s instead of a
- * decoration) have no counterpart on this port's minimal `FontConfiguration`
- * — `UText.ts`'s own doc comment records that deferral.
- */
-function creoleDecoration(styles: ReadonlySet<FontStyle>): string | undefined {
-  const parts: string[] = [];
-  if (styles.has(FontStyle.UNDERLINE)) parts.push('underline');
-  if (styles.has(FontStyle.STRIKE)) parts.push('line-through');
-  if (styles.has(FontStyle.WAVE)) parts.push('wavy underline');
-  return parts.length > 0 ? parts.join(' ') : undefined;
-}
-
-/**
- * One `'text'` atom as a placed, measured `TextRun`.
- *
- * The three metrics are the MEASURER's answer at this atom's OWN font (D5) —
- * `DriverTextSvg` resolves the same quantities from its `StringBounder`
- * before emitting (`DriverTextSvg.java:125-126,179`). `textAscent` is
- * measured rather than derived from the font size for the reason
- * `TextRun.textAscent` records: the `size - size/4.5` shorthand disagrees
- * with `FixedMeasurer`.
- */
-function textAtomRun(
-  atom: Extract<CreoleAtom, { kind: 'text' }>,
-  x: number,
-  baselineY: number,
-  measurer: StringMeasurer,
-): TextRun {
-  const spec = atomFontSpec(atom.font);
-  // `AtomText.java:79` unhides in the CONSTRUCTOR — i.e. per atom, after the
-  // command scan has already resolved against the hidden text, and BEFORE the
-  // atom is measured or drawn. So the tile-escaped character is restored here
-  // and every metric below is taken from the restored string.
-  const shown = CharHidder.unhide(atom.text);
-  const dim = measurer.measure(shown, spec);
-  const decoration = creoleDecoration(atom.font.styles);
-  return {
-    text: shown,
-    x,
-    y: baselineY,
-    textWidth: dim.width,
-    textAscent: dim.height - measurer.getDescent(spec, shown),
-    textLineHeight: dim.height,
-    fontFamily: spec.family,
-    fontSize: spec.size,
-    ...(atom.font.styles.has(FontStyle.BOLD) ? { bold: true } : {}),
-    ...(atom.font.styles.has(FontStyle.ITALIC) ? { italic: true } : {}),
-    ...(atom.font.color !== null ? { color: atom.font.color } : {}),
-    ...(decoration !== undefined ? { decoration } : {}),
-    ...(atom.url !== undefined ? { url: atom.url } : {}),
-  };
 }
 
 /**
@@ -293,6 +213,60 @@ function latexAtomRun(atom: Extract<CreoleAtom, { kind: 'latex' }>, origin: Creo
 export interface SequenceAtomContext {
   readonly sprites: SpriteRegistry;
   readonly fontColor: string;
+  /** The `Back` the text is drawn on -- a monochrome sprite's gradient
+   *  start (`SpriteMonochrome.java:216`, unwind2-S7). `undefined`: none. */
+  readonly backColor?: Paint;
+}
+
+/**
+ * The {@link SequenceAtomContext} a component's label draws with: the
+ * diagram's sprites, the component font colour (`getFontConfiguration`,
+ * `AbstractComponent.java:129-130`) and the `Back` the component applied
+ * before `getTextBlock().drawU` -- the note fill (`ComponentRoseNote.java:
+ * 121,136`), none for an arrow label (`ComponentRoseArrow.java:179`, drawn on
+ * the ug it was handed). `undefined` with no registry.
+ */
+export function sequenceAtomContext(
+  sprites: SpriteRegistry | undefined,
+  fontColor: string,
+  backColor?: Paint,
+): SequenceAtomContext | undefined {
+  if (sprites === undefined) return undefined;
+  return { sprites, fontColor, ...(backColor === undefined ? {} : { backColor }) };
+}
+
+/**
+ * A label line's width as `getTextWidth` reads it: the creole block `create0`
+ * built (`AbstractTextualComponent.java:89-92,100-108`), so a `<$sprite>`
+ * reserves the sprite and not its source text. The LAST run's right edge --
+ * a non-text atom advances x without a run of its own.
+ */
+export function sequenceLabelLineWidth(
+  line: string,
+  spec: FontSpec,
+  measurer: StringMeasurer,
+  atomContext: SequenceAtomContext | undefined,
+): number {
+  const runs = sequenceCreoleRuns(line, sequenceCreoleFont(spec), { leftX: 0, baselineY: 0 }, measurer, atomContext);
+  const last = runs.at(-1);
+  return last === undefined ? 0 : last.x + last.textWidth;
+}
+
+/** A run moved by `(dx, dy)`: an image run's top (`SequenceRunImage.y`) is
+ *  absolute, so it moves with the baseline it was placed against. */
+export function offsetRun(run: TextRun, dx: number, dy: number): TextRun {
+  const moved = { ...run, x: run.x + dx, y: run.y + dy };
+  return run.image === undefined ? moved : { ...moved, image: { ...run.image, y: run.image.y + dy } };
+}
+
+/** The widest of a label's lines by {@link sequenceLabelLineWidth}; 0 for none. */
+export function sequenceLabelBlockWidth(
+  lines: readonly string[],
+  spec: FontSpec,
+  measurer: StringMeasurer,
+  atomContext: SequenceAtomContext | undefined,
+): number {
+  return Math.max(0, ...lines.map((l) => sequenceLabelLineWidth(l, spec, measurer, atomContext)));
 }
 
 /** A resolved raster `'inline'` atom -- an `<img>` or a monochrome/4096-colour
@@ -351,7 +325,8 @@ function drawableAtoms(
   lineFont: FontConfiguration,
   context: SequenceAtomContext | undefined,
 ): readonly DrawableAtom[] | undefined {
-  const resolverFor = context === undefined ? undefined : makeAtomImageResolverFor(context.sprites);
+  const resolverFor =
+    context === undefined ? undefined : makeAtomImageResolverFor(context.sprites, undefined, context.backColor);
   const out: DrawableAtom[] = [];
   for (const atom of atoms) {
     if (atom.kind === 'text' || atom.kind === 'latex') {
@@ -465,7 +440,7 @@ export function sequenceCreoleRuns(
   const drawable = drawableAtoms(atoms, built.lineFont, atomContext);
   if (drawable === undefined) {
     const literal = { kind: 'text' as const, text: manageGuillemet(line), font: built.lineFont };
-    return [textAtomRun(literal, origin.leftX, origin.baselineY, measurer)];
+    return textAtomRuns(literal, origin.leftX, origin.baselineY, measurer).runs;
   }
   return placeDrawableAtoms(drawable, origin, measurer, measurer.getDescent(atomFontSpec(built.lineFont), 'M'));
 }
@@ -488,10 +463,16 @@ function placeDrawableAtoms(
   let x = origin.leftX;
   for (const atom of atoms) {
     const at = { leftX: x, baselineY: origin.baselineY };
-    let run: TextRun;
-    if (atom.kind === 'latex') run = latexAtomRun(atom, at, lineDescent);
-    else if (atom.kind === 'raster') run = imageAtomRun(atom, rasterDrawnSize(atom), at, lineDescent);
-    else run = textAtomRun(atom, x, origin.baselineY, measurer);
+    if (atom.kind === 'text') {
+      const placed = textAtomRuns(atom, x, origin.baselineY, measurer);
+      runs.push(...placed.runs);
+      x += placed.width;
+      continue;
+    }
+    const run =
+      atom.kind === 'latex'
+        ? latexAtomRun(atom, at, lineDescent)
+        : imageAtomRun(atom, rasterDrawnSize(atom), at, lineDescent);
     runs.push(run);
     x += run.textWidth;
   }

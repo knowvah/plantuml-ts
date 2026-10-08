@@ -24,6 +24,7 @@ import { pushLaneReservation } from './swimlane-reservation-lane.js';
 import { ifElseHexagonReservation } from './hexagon-reservations.js';
 import type { Out } from './tile-coordinates.js';
 import { pushEdge, pushNode, walkTile } from './tile-coordinates.js';
+import { diamondBackOf } from './diamond-labels.js';
 
 /** `Hexagon.hexagonHalfSize`. @see net/sourceforge/plantuml/activitydiagram3/ftile/Hexagon.java:46 */
 const HEXAGON_HALF_SIZE = 12;
@@ -100,6 +101,7 @@ function pushDiamondLabel(ctx: IfDownCtx, side: 'north' | 'south' | 'west' | 'ea
       height: l.height,
       label: l.label,
       ...testLabelRole(t.diamond1, side),
+      ...diamondBackOf(t.diamond1),
     },
     myLane,
   );

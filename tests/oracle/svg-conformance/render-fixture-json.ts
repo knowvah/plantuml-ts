@@ -36,7 +36,7 @@ import { parseYaml } from '../../../src/diagrams/yaml/parser.js';
 import { parseHcl } from '../../../src/diagrams/hcl/parser.js';
 import { layoutJson } from '../../../src/diagrams/json/layout.js';
 import { renderJson } from '../../../src/diagrams/json/renderer.js';
-import { jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
+import { hclStyleInput, jsonFamilyStyleInput } from '../../../src/diagrams/json/json-family-style-input.js';
 import { applyChrome, isEmpty } from '../../../src/core/annotations/index.js';
 import { resolveAnnotationStyles } from '../../../src/core/annotations/style.js';
 import { assembleSvg } from '../../../src/index.js';
@@ -97,12 +97,13 @@ export function renderFixtureJson(markup: string, measurer: StringMeasurer, opti
     seedSourceLines: first.seedSource,
   };
   // unwind-U1: the plugins' `styleInput`, applied where `index.ts#
-  // prepareBlock` applies it -- before the theme is built.
-  const preprocessed = jsonFamilyStyleInput(first.preprocessed, block);
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
+  // prepareBlock` applies it -- before the theme is built (hcl's drops
+  // `<style>`/`skin`/`!theme` too, unwind2-S2).
+  const styleInput = block.type === 'hcl' ? hclStyleInput : jsonFamilyStyleInput;
+  const preprocessed = styleInput(first.preprocessed, block);
   // cdd4-T7b: the shipped `buildTheme`, not a copy of it -- a copy measured a
   // path no shipped code takes once theme styling moved into it.
-  const { theme, styleMap } = buildTheme(preprocessed, undefined, rawSourceLines);
+  const { theme, styleMap } = buildTheme(preprocessed);
 
   const ast = parseForType(block, { assetStore: options?.assetStore });
   const geo = layoutJson(ast, theme, measurer);

@@ -1,0 +1,6 @@
+@startuml
+skin sonyxperiadev
+start
+:hello;
+stop
+@enduml

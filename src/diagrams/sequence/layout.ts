@@ -25,8 +25,13 @@ import type {
   TextRun,
 } from './ast.js';
 import type { Theme } from '../../core/theme.js';
+import { REF_X_MARGIN } from './ref-body-geo.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
-import { computeParticipantLayout, type ParticipantLayoutResult } from './sequence-layout-participants.js';
+import {
+  computeParticipantLayout,
+  type MessageLevels,
+  type ParticipantLayoutResult,
+} from './sequence-layout-participants.js';
 import {
   flushOpenActivations,
   processEvents,
@@ -42,8 +47,20 @@ import {
 } from './sequence-layout-shared.js';
 import { DIVIDER_WIDTH_ALLOWANCE, DIVIDER_LABEL_DELTA_X } from './divider-style.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
+import {
+  cutActivationsAtDelays,
+  delayContentRight,
+  delaySpansOf,
+  lifelineSegmentsByParticipant,
+} from './sequence-delay.js';
 import { anchorExoBorders, exoRightExtent } from './sequence-layout-exo.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import {
+  sequenceAtomContext,
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+  sequenceLabelLineWidth,
+} from './sequence-creole.js';
+import type { MessageLabelEnv } from './text-block-geo.js';
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -54,7 +71,13 @@ export function layoutSequence(ast: SequenceDiagramAST, theme: Theme, measurer: 
     return emptyGeometry();
   }
 
-  const first = layoutFrom(ast, theme, measurer, LEFT_MARGIN);
+  // The participant row needs each message's live LEVELS (`CommunicationTile
+  // #addConstraints:404-416`), which only the event walk computes: walk once
+  // to record them, then lay out again with them (`MessageLevels`).
+  const levels: MessageLevels = new Map();
+  const measured = layoutFrom(ast, theme, measurer, LEFT_MARGIN, { record: levels });
+  const anyLive = [...levels.values()].some((l) => l.level1 > 0 || l.level2 > 0);
+  const first = anyLive ? layoutFrom(ast, theme, measurer, LEFT_MARGIN, { use: levels }) : measured;
   // Upstream does not lay out from a fixed left edge: it solves an origin and
   // then draws the body shifted by `dx(-min1)`, where `min1` is
   // `body.getMinX()` (`SequenceDiagramFileMakerTeoz.java:82,135-136`). Whatever
@@ -68,7 +91,7 @@ export function layoutSequence(ast: SequenceDiagramAST, theme: Theme, measurer: 
   // negative coordinates -- content off the left of the canvas.
   const overhang = LEFT_MARGIN - minContentX(first);
   if (overhang <= 0) return first;
-  return layoutFrom(ast, theme, measurer, LEFT_MARGIN + overhang);
+  return layoutFrom(ast, theme, measurer, LEFT_MARGIN + overhang, anyLive ? { use: levels } : {});
 }
 
 /** One layout pass with the participant row starting at `originX`. */
@@ -77,9 +100,10 @@ function layoutFrom(
   theme: Theme,
   measurer: StringMeasurer,
   originX: number,
+  levels: { record?: MessageLevels; use?: MessageLevels },
 ): SequenceGeometry {
-  const participantLayout = computeParticipantLayout(ast, theme, measurer, originX);
-  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout);
+  const participantLayout = computeParticipantLayout(ast, theme, measurer, originX, levels.use);
+  const eventLayout = runEventLayout(ast, theme, measurer, participantLayout, levels.record);
   return assembleGeometry(ast, participantLayout, eventLayout, theme, measurer, originX);
 }
 
@@ -110,7 +134,7 @@ function assembleGeometry(
   originX: number,
 ): SequenceGeometry {
   const { participantGeos, maxParticipantHeight } = participantLayout;
-  const { eventGeos, dividerGeos, newpageGeos, currentY } = eventLayout;
+  const { dividerGeos, newpageGeos, currentY } = eventLayout;
 
   const showFootbox = isShowFootbox(ast, theme);
   const { lifelineEndY, footerShapeY, totalHeight } = computeVerticalTotals(
@@ -118,8 +142,11 @@ function assembleGeometry(
     currentY,
     showFootbox,
   );
-  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventGeos);
-  const totalWidth = computeTotalWidth(participantGeos, eventGeos, theme, measurer);
+  flushOpenActivations(eventLayout.openActivations, lifelineEndY, eventLayout.participantMap, eventLayout.eventGeos);
+  const eventGeos = cutActivationsAtDelays(eventLayout.eventGeos);
+  const headHeight = TOP_MARGIN + maxParticipantHeight;
+  const delays = delaySpansOf(eventGeos);
+  const totalWidth = computeTotalWidth(participantGeos, eventGeos, { theme, measurer, sprites: ast.sprites });
   backfillDividerWidth(dividerGeos, totalWidth, originX);
   backfillNewpageWidth(newpageGeos, totalWidth, originX);
   anchorExoBorders(messageGeosOf(eventGeos), totalWidth - RIGHT_MARGIN);
@@ -135,8 +162,9 @@ function assembleGeometry(
     // `findings/vertical-terms.md` §0's landmark table. Every consumer
     // (`renderer-lifeline.ts:95`, `sequence-page.ts:320`) already reads it as
     // an absolute coordinate.
-    headHeight: TOP_MARGIN + maxParticipantHeight,
+    headHeight,
     lifelineEndY,
+    ...lifelineSegmentsByParticipant(participantGeos, headHeight, lifelineEndY, delays),
     footerShapeY,
     showFootbox,
     boxes: boxGeos,
@@ -153,20 +181,22 @@ function runEventLayout(
   theme: Theme,
   measurer: StringMeasurer,
   participantLayout: ParticipantLayoutResult,
+  messageLevels?: MessageLevels,
 ): EventLayoutResult {
   const eventGeos: EventGeo[] = [];
   const dividerGeos: DividerGeo[] = [];
   const newpageGeos: NewpageGeo[] = [];
-  const activationStart: ActivationStack = new Map();
   const ctx: EventProcessingContext = {
     theme,
     measurer,
+    sprites: ast.sprites,
     participantMap: participantLayout.participantMap,
     participantIndex: participantLayout.participantIndex,
-    activationStart,
+    activationStart: new Map(),
     eventGeos,
     dividerGeos,
     newpageGeos,
+    ...(messageLevels !== undefined ? { messageLevels } : {}),
   };
   // `PlayingSpace:55,89` — the body's first tile sits `startingY` below the
   // head row, and NOT one `messageSpacing`: teoz has no such term at all
@@ -178,7 +208,7 @@ function runEventLayout(
     eventGeos,
     dividerGeos,
     newpageGeos,
-    openActivations: activationStart,
+    openActivations: ctx.activationStart,
     participantMap: participantLayout.participantMap,
     currentY,
   };
@@ -222,6 +252,10 @@ function minEventX(event: EventGeo): number {
     case 'note':
       return event.x;
     case 'frame':
+      // A `ref` is a `ReferenceTile`, whose `getMinX` is `first`, the
+      // component origin `xMargin` left of its drawn box
+      // (`teoz/ReferenceTile.java:163-171`, `sequence-layout-ref.ts`).
+      if (event.frameType === 'ref') return event.x - REF_X_MARGIN;
       // A group reserves `EXTERNAL_MARGINX1` beyond its own frame:
       // `GroupingTile#getMinX:697-698` is
       // `min.addFixed(-EXTERNAL_MARGINX1 - notesWidth(LEFT))` with
@@ -234,6 +268,9 @@ function minEventX(event: EventGeo): number {
     case 'divider':
     case 'newpage':
       return event.bandX;
+    case 'delay':
+      // `DelayTile#getMinX` (`:121-124`): `middle - preferredWidth / 2`.
+      return event.middleX - event.textWidth / 2;
     default:
       return Number.POSITIVE_INFINITY;
   }
@@ -296,9 +333,9 @@ interface VerticalTotals {
  * between the lifeline end and an actor/database foot; upstream's tail
  * component puts the label above its own stickman INSIDE its own height
  * (`LivingSpaces#drawHeads:135-141`) and reserves nothing extra, which is why
- * `footerShapeY` is now just `lifelineEndY`. `renderFooterBox` already draws
- * from `lifelineEndY` and derives each kind's glyph offset itself, so the
- * field survives only for `sequence-page.ts`/`scale-geo.ts`.
+ * `footerShapeY` (the foot row's top) equals `lifelineEndY` here. The two
+ * separate only per page, in `sequence-page.ts`, where upstream's clip lets
+ * the lifelines run one pixel past the foot row's top.
  */
 function computeVerticalTotals(maxParticipantHeight: number, currentY: number, showFootbox: boolean): VerticalTotals {
   const lifelineEndY = currentY + PLAYING_SPACE_TAIL_Y;
@@ -331,20 +368,12 @@ function isShowFootbox(ast: SequenceDiagramAST, theme: Theme): boolean {
   return footbox.toLowerCase() !== 'hide';
 }
 
-/**
- * Compute total diagram width: the rightmost participant edge, expanded if
- * any message label overflows it. Labels are rendered centered at midX with
- * text-anchor="middle", so the right edge of the label is midX + labelWidth/2.
- * A long label on a rightward message near the last participant can clip
- * without this check.
- */
-function computeTotalWidth(
-  participantGeos: ParticipantGeo[],
-  eventGeos: EventGeo[],
-  theme: Theme,
-  measurer: StringMeasurer,
-): number {
+/** Total diagram width: the rightmost participant edge, expanded if any
+ *  message label, centred at midX, overflows it (midX + labelWidth/2). */
+function computeTotalWidth(participantGeos: ParticipantGeo[], eventGeos: EventGeo[], env: MessageLabelEnv): number {
+  const { theme, measurer } = env;
   const fontSpec = fontSpecOf(theme);
+  const atoms = sequenceAtomContext(env.sprites, theme.colors.text);
   // Safe: participantGeos is non-empty (guarded by the early return above)
   const lastParticipant = participantGeos[participantGeos.length - 1]!;
   let totalWidth = Math.max(
@@ -355,7 +384,7 @@ function computeTotalWidth(
   for (const geo of eventGeos) {
     if (geo.kind !== 'message') continue;
     const labelText = geo.sequenceNumber !== undefined ? `${geo.sequenceNumber}: ${geo.label}` : geo.label;
-    const labelWidth = measurer.measure(labelText, fontSpec).width;
+    const labelWidth = sequenceLabelLineWidth(labelText, fontSpec, measurer, atoms);
     const midX = geo.arrowDirection === 'self' ? geo.fromX + 20 : (geo.fromX + geo.toX) / 2;
     const labelRightEdge = midX + labelWidth / 2 + RIGHT_MARGIN;
     if (labelRightEdge > totalWidth) {
@@ -363,7 +392,24 @@ function computeTotalWidth(
     }
   }
 
-  return Math.max(totalWidth, dividerContentRight(eventGeos));
+  return Math.max(
+    totalWidth,
+    dividerContentRight(eventGeos),
+    delayContentRight(eventGeos, RIGHT_MARGIN),
+    refContentRight(eventGeos) + RIGHT_MARGIN,
+  );
+}
+
+/** The rightmost `ReferenceTile#getMaxX` -- `last`, the component area's
+ *  right edge, `xMargin` beyond the drawn box (`teoz/ReferenceTile.java
+ *  :173-180`). A `ref` wider than its participants widens the document
+ *  (`tests/fixtures/unwind2-S9b/r-single.svg`). */
+function refContentRight(eventGeos: readonly EventGeo[]): number {
+  let right = Number.NEGATIVE_INFINITY;
+  for (const e of eventGeos) {
+    if (e.kind === 'frame' && e.frameType === 'ref') right = Math.max(right, e.x + e.width + REF_X_MARGIN);
+  }
+  return right;
 }
 
 /**
@@ -462,11 +508,6 @@ function backfillNewpageWidth(newpageGeos: NewpageGeo[], totalWidth: number, ori
 }
 
 /**
- * Compute box background geometries (Step 4). Each box spans from
- * x = leftmost participant edge - 8 to rightmost + 8, y = 0,
- * height = totalHeight (covers the full diagram height).
- */
-/**
  * A `box` group's label as a placed, measured run (A5).
  *
  * The x and the baseline are exactly where `renderBoxBackground` put them
@@ -506,6 +547,8 @@ function boxLabelRuns(label: string, boxX: number, theme: Theme, measurer: Strin
 const BOX_LABEL_FONT_SIZE = 11;
 const BOX_LABEL_PADDING = 4;
 
+/** Box background geometries (Step 4): from the leftmost participant edge
+ *  - 8 to the rightmost + 8, y = 0, the full diagram height. */
 function computeBoxGeos(
   boxes: BoxGroup[],
   participantGeos: ParticipantGeo[],

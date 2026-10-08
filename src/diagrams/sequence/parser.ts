@@ -29,6 +29,7 @@ import {
   type ParseState,
 } from './sequence-parse-helpers.js';
 import { SEQUENCE_COMMANDS } from './sequence-command-registry.js';
+import { newLifeState } from './sequence-life-state.js';
 import { refuse, type ParseRefusal } from '../../core/parse-refusal.js';
 
 // ---------------------------------------------------------------------------
@@ -396,6 +397,7 @@ export function parseSequence(lines: readonly string[], options?: ParseOptions):
     currentBox: null,
     boxCounter: 0,
     executionError: undefined,
+    life: newLifeState(),
   };
 
   const refusal = runDispatchLoop(state, lines);

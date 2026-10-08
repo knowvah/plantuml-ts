@@ -78,7 +78,7 @@ export function diamondTestBlock(label: string, theme: Theme): SheetBlock2 {
     horizontalAlignment: ALIGNMENT_MAP[activityHorizontalAlignment(theme)],
     creoleMode: CreoleMode.FULL,
   });
-  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(undefined, fc), theme.padding ?? 0);
+  const sheet1 = new SheetBlock1(sheet, LineBreakStrategy.NONE, chromeAtomOps(theme.sprites, fc), theme.padding ?? 0);
   return new SheetBlock2(
     sheet1,
     hexagonAsStencil(sheet1),

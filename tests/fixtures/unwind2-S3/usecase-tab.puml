@@ -1,0 +1,8 @@
+@startuml
+rectangle "a\tb" as R
+component "longer\tx\ty" as C
+usecase "u\tv" as U
+actor "act\tor" as A
+R --> C
+A --> U
+@enduml

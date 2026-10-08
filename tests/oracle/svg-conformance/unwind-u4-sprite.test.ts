@@ -8,9 +8,9 @@
  * - Raster size: the PNG is resampled to that size (`PixelImage.java:69-78`).
  * - Pixels: given the drawing context's back colour and the tint
  *   (`SpriteMonochrome.java:181-207,216-217`), the port's tint + bilinear
- *   reproduce the jar's decoded pixels exactly. The PNG BYTES differ: the
- *   jar's IDAT is zlib 1.2.13 at level 4 (`PNGImageWriter`'s
- *   `DEFAULT_COMPRESSION_LEVEL`), this port's a fixed-Huffman stream.
+ *   reproduce the jar's decoded pixels exactly. Given equal pixels the PNG
+ *   BYTES are equal too (zlib level 4, `PNGImageWriter.java:364`; pinned in
+ *   tests/unit/core/klimt/sprite/png-encoder-jar.test.ts).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -81,13 +81,18 @@ describe('unwind-U4 sprite rasters vs the jar', () => {
     ['s1-class-member', CLASS_FONT_FACTOR, CLASS_BACK, undefined],
     ['ctx-class-member', 0.7 * CLASS_FONT_FACTOR, CLASS_BACK, undefined],
     ['s1-seq-participant', CLASS_FONT_FACTOR, PARTICIPANT_BACK, undefined],
-  ] as const)('%s: tint over the context back colour + bilinear = the jar pixels', (name, scale, back, tint) => {
-    const jar = decodePng(pngPayloads(read(name, 'svg'))[0]!);
-    const href = spriteToPngDataUri(SPRITE, tint, back, scale).dataUri;
-    const port = decodePng(new Uint8Array(Buffer.from(href.split(',')[1]!, 'base64')));
-    expect([port.width, port.height, port.colorType]).toEqual([jar.width, jar.height, jar.colorType]);
-    expect(Buffer.from(port.pixels).equals(Buffer.from(jar.pixels))).toBe(true);
-  });
+  ] as const)(
+    '%s: tint over the context back colour + bilinear = the jar pixels and PNG bytes',
+    (name, scale, back, tint) => {
+      const jar = decodePng(pngPayloads(read(name, 'svg'))[0]!);
+      const href = spriteToPngDataUri(SPRITE, tint, back, scale).dataUri;
+      const port = decodePng(new Uint8Array(Buffer.from(href.split(',')[1]!, 'base64')));
+      expect([port.width, port.height, port.colorType]).toEqual([jar.width, jar.height, jar.colorType]);
+      expect(Buffer.from(port.pixels).equals(Buffer.from(jar.pixels))).toBe(true);
+      // unwind2-S6: and the PNG bytes themselves (PNGImageWriter.java:182,364,1035).
+      expect(href.split(',')[1]).toBe(Buffer.from(pngPayloads(read(name, 'svg'))[0]!).toString('base64'));
+    },
+  );
 
   it('the jar PNG carries only IHDR/IDAT/IEND with a level-4 zlib header (0x78 0x5E)', () => {
     const png = pngPayloads(read('scale1', 'svg'))[0]!;

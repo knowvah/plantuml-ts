@@ -5,7 +5,8 @@
  * and returns a JsonDiagramAST.
  */
 
-import { parse as parseJsonc, type ParseError } from 'jsonc-parser';
+import { parseTree, type Node as JsoncNode, type ParseError } from 'jsonc-parser';
+import { JsonObject } from './JsonObject.js';
 import { createSpriteRegistry } from '../../core/sprite-commands.js';
 import type { UmlSource } from '../../core/block-extractor.js';
 import type { ParseOptions } from '../../core/dispatcher.js';
@@ -80,8 +81,29 @@ export function jsonSpriteRegistryFor(options?: ParseOptions): ReturnType<typeof
 function parseJsonBody(text: string): { root: unknown; parseError: boolean } {
   if (text.trim() === '') return { root: null, parseError: true };
   const errors: ParseError[] = [];
-  const root: unknown = parseJsonc(text, errors, { allowTrailingComma: true });
-  return errors.length > 0 ? { root: null, parseError: true } : { root, parseError: false };
+  const tree = parseTree(text, errors, { allowTrailingComma: true });
+  return errors.length > 0 || tree === undefined
+    ? { root: null, parseError: true }
+    : { root: valueOf(tree), parseError: false };
+}
+
+/**
+ * A parsed node as upstream's `Json.DefaultHandler` builds it: an object
+ * `add`s every member in source order, a repeated name included
+ * (`Json.java:377-378`, `JsonObject.java:337-348`; jar:
+ * `unwind2-S2b/json-dup-key`, `json-int-keys`). Walks `parseTree` because
+ * `parse` returns a plain object, which cannot hold either.
+ */
+function valueOf(node: JsoncNode): unknown {
+  const children = node.children ?? [];
+  if (node.type === 'array') return children.map(valueOf);
+  if (node.type !== 'object') return node.value;
+  const result = new JsonObject();
+  for (const property of children) {
+    const [key, value] = property.children ?? [];
+    if (key !== undefined && value !== undefined) result.add(String(key.value), valueOf(value));
+  }
+  return result;
 }
 
 /**

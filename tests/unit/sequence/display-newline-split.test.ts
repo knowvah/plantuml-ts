@@ -107,13 +107,19 @@ describe('message labels split on the escape', () => {
   });
 
   it('emits one run per escaped line, each with its own width', () => {
-    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
+    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, {
+      theme: defaultTheme,
+      measurer: measurer(),
+    });
     expect(block.lines.map((r) => r.text)).toEqual(['one', 'two']);
     expect(block.lines[0]!.textWidth).not.toBe(block.lines[1]!.textWidth);
   });
 
   it('puts consecutive baselines one textLineHeight apart', () => {
-    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
+    const block = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, {
+      theme: defaultTheme,
+      measurer: measurer(),
+    });
     const [first, second] = block.lines;
     expect(second!.y - first!.y).toBeCloseTo(first!.textLineHeight, 10);
   });
@@ -122,8 +128,11 @@ describe('message labels split on the escape', () => {
     // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
     // (`ComponentRoseArrow.java:141-148`): the block's BOTTOM is pinned to
     // the arrow, so the last baseline is the same however many rows there are.
-    const one = messageLabelBlock('one', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
-    const two = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
+    const one = messageLabelBlock('one', undefined, LEFT_X, ARROW_Y, { theme: defaultTheme, measurer: measurer() });
+    const two = messageLabelBlock(`one${ESC}two`, undefined, LEFT_X, ARROW_Y, {
+      theme: defaultTheme,
+      measurer: measurer(),
+    });
     expect(two.lines.at(-1)!.y).toBeCloseTo(one.lines.at(-1)!.y, 10);
   });
 });
@@ -187,7 +196,7 @@ describe('SAFETY — a display with no escape is untouched', () => {
   });
 
   it('leaves a single-line message label at exactly one run', () => {
-    const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, defaultTheme, measurer());
+    const block = messageLabelBlock('hello', undefined, LEFT_X, ARROW_Y, { theme: defaultTheme, measurer: measurer() });
     expect(block.lines).toHaveLength(1);
     expect(block.lines[0]!.text).toBe('hello');
     expect(messageLabelRows('hello', undefined)).toBe(1);

@@ -16,6 +16,7 @@ export type { ClassifierRowGeo } from './class-geo-row-types.js';
 export { isNoteGeo, isClassifierGeo, classifierLeaves, noteLeaves, type ClassLeafGeo } from './class-leaf-geo.js';
 
 import type { JsonBodyItem } from './class-geo-json-types.js';
+import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
 // cdd-T6: re-exported so `class-geo-types.ts` stays the one import site for
 // class geometry types (see `class-geo-edge-extras.ts`'s own doc comment).
 export type {
@@ -122,7 +123,7 @@ export interface ClassifierGeo {
    *  .badgeSpriteImage` (`class-layout-helpers.ts`'s doc comment) — feeds
    *  `renderer-classifier-box.ts#buildHeaderPrimitive`'s sprite-badge draw
    *  (wins over `badgeChar`/the default kind badge). */
-  badgeSpriteImage?: { href: string; width: number; height: number };
+  badgeSpriteImage?: { href: string; width: number; height: number; readonly tint?: SpriteTint };
   /** G2 N31: copied unchanged from `Classifier.color` (`ast.ts`'s doc
    *  comment) -- feeds `renderer-classifier-box.ts#classifierFill`'s
    *  inline `class Foo #color { ... }` background override. */

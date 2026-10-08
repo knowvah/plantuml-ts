@@ -1,0 +1,4 @@
+@startuml
+Alice ->] : one
+return x
+@enduml

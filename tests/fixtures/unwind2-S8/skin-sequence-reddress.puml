@@ -1,0 +1,4 @@
+@startuml
+skin reddress
+Alice -> Bob : hello
+@enduml

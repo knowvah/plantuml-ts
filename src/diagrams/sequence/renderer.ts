@@ -18,7 +18,17 @@
  * `SvgGraphics.java:1035-1051`, is for embedded sprites only).
  */
 
-import type { BoxGeo, SequenceGeometry, EventGeo, ActivationGeo, NoteGeo, FrameGeo, NewpageGeo } from './ast.js';
+import type {
+  BoxGeo,
+  SequenceGeometry,
+  EventGeo,
+  ActivationGeo,
+  NoteGeo,
+  FrameGeo,
+  NewpageGeo,
+  DelayGeo,
+} from './ast.js';
+import { DELAY_FONT_SIZE } from './sequence-delay.js';
 import type { Theme } from '../../core/theme.js';
 import type { RenderFragment } from '../../core/dispatcher.js';
 // No `text` import: D3 -- every `<text>` this file emits goes through
@@ -40,6 +50,7 @@ import { renderDivider } from './renderer-divider.js';
 import type { ScaledTheme } from './scale-geo.js';
 import { scaleSequenceGeometry, scaleSequenceTheme, scaledDashPattern } from './scale-geo.js';
 import { paginateSequence } from './sequence-page.js';
+import { sequenceShadowDefs, withNoteShadow } from './sequence-shadow.js';
 import { NEWPAGE_DASH_UNIT, NEWPAGE_LINE_COLOR, NEWPAGE_LINE_THICKNESS, NEWPAGE_MARGIN_Y } from './newpage-style.js';
 
 /**
@@ -85,10 +96,12 @@ function renderNote(note: NoteGeo, theme: ScaledTheme): string {
   // T13: `rnote`/`hnote` (`NoteEvent.shape`) draw as a plain rectangle,
   // never the folded-corner `note` shape -- see `ast.ts`'s `NoteEvent.shape`
   // doc comment for the hexagon-vs-rectangle scope cut.
-  const noteShape =
+  const noteShape = withNoteShadow(
     note.shape === 'rect'
       ? rect(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth })
-      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth });
+      : noteBox(x, y, w, h, { fill, stroke: theme.colors.border, strokeWidth }),
+    note.shadow ?? 0,
+  );
   // A5: placed and measured in layout (D1). The block is LEFT-aligned at the
   // box's padding -- `ComponentRoseNoteBox#drawInternalU:105` translates it by
   // `(getOldPaddingX1() + diffX / 2, getOldPaddingY())` -- where this used to
@@ -266,24 +279,36 @@ function renderEvent(event: EventGeo, theme: ScaledTheme, isBackground: boolean)
   if (event.kind === 'frame') {
     return isBackground ? renderFrameBackground(event, theme) : renderFrame(event, theme);
   }
-  if (isBackground) return '';
+  return isBackground ? '' : renderForeground(event, theme);
+}
+
+/** The foreground pass for every kind but `frame` (handled above). */
+function renderForeground(event: Exclude<EventGeo, FrameGeo>, theme: ScaledTheme): string {
   switch (event.kind) {
     case 'message':
       return renderMessage(event, theme);
     case 'activation':
-      // Drawn in the lifeline pass (step 2), not here -- see the comment
-      // there and `LivingSpace#drawLineAndLiveboxes`.
+    // Drawn in the lifeline pass (step 2), not here -- see the comment
+    // there and `LivingSpace#drawLineAndLiveboxes`.
+    // falls through
+    case 'space':
+      // Space geos add no visible elements
       return '';
     case 'note':
       return renderNote(event, theme);
     case 'divider':
       return renderDivider(event, theme);
-    case 'space':
-      // Space geos add no visible elements
-      return '';
     case 'newpage':
       return renderNewpage(event, theme);
+    case 'delay':
+      return renderDelayText(event, theme);
   }
+}
+
+/** `ComponentRoseDelayText#drawInternalU` (`:62-70`): only the text block --
+ *  the dotted line is the lifeline's own `DELAY_LINE` piece. */
+function renderDelayText(delay: DelayGeo, theme: ScaledTheme): string {
+  return delay.labelRuns.map((run) => creoleRunText(run, theme, DELAY_FONT_SIZE * theme.scaleK)).join('');
 }
 
 /** One event-walk pass -- see {@link renderEvent}; mirrors the one
@@ -410,15 +435,17 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     renderLifelinePass(
       scaledGeo.participants,
       scaledGeo.events.filter((e): e is ActivationGeo => e.kind === 'activation'),
-      scaledGeo.headHeight,
-      scaledGeo.lifelineEndY,
+      (p) =>
+        scaledGeo.lifelineSegments?.[p.id] ?? [{ y1: scaledGeo.headHeight, y2: scaledGeo.lifelineEndY, delay: false }],
       scaledTheme,
     ),
   );
 
   // 3. Participant header boxes
+  // A created participant has no head here (`drawHeadOrTail:194-196`); its
+  // create message draws it instead.
   for (const p of scaledGeo.participants) {
-    children.push(renderParticipantBox(p, scaledTheme));
+    if (p.createY === undefined) children.push(renderParticipantBox(p, scaledTheme));
   }
 
   // 4. Footer boxes, unless suppressed -- BEFORE the foreground tiles.
@@ -432,7 +459,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    (not) reserved -- see `layout.ts#isShowFootbox`.
   if (scaledGeo.showFootbox) {
     for (const p of scaledGeo.participants) {
-      children.push(renderFooterBox(p, scaledGeo.lifelineEndY, scaledTheme));
+      children.push(renderFooterBox(p, scaledGeo.footerShapeY, scaledTheme));
     }
   }
 
@@ -441,6 +468,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
   //    passes. Activations are absent here by design; see step 2.
   children.push(...renderEventPass(scaledGeo.events, scaledTheme, false));
 
+  const shadowDefs = sequenceShadowDefs(scaledGeo, scaledTheme);
   return {
     body: children.join(''),
     width: scaledGeo.totalWidth + ENSURE_VISIBLE_DELTA,
@@ -449,5 +477,7 @@ function renderPaginated(geo: SequenceGeometry, theme: Theme): RenderFragment {
     // T2's `finalizeSequenceBody` (`core/assemble-svg.ts`) owns the content
     // `<g>` wrap and the background rect, so the body is handed over bare.
     diagramType: DIAGRAM_TYPE_SEQUENCE,
+    // unwind2-S9: the frames' shadow filter, when one is drawn.
+    ...(shadowDefs === '' ? {} : { extraDefs: shadowDefs }),
   };
 }

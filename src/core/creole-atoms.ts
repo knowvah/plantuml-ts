@@ -43,6 +43,7 @@ import type { UShape } from './klimt/UShape.js';
 import type { UTranslate } from './klimt/UTranslate.js';
 import type { UStroke } from './klimt/UStroke.js';
 import type { Paint } from './paint.js';
+import type { SpriteTint } from './klimt/sprite/sprite-tint.js';
 
 // ---------------------------------------------------------------------------
 // Token model
@@ -190,6 +191,9 @@ export type AtomImageResolver = (atom: InlineAtomToken) =>
       readonly href: string;
       readonly width: number;
       readonly height: number;
+      /** unwind2-S7: a monochrome sprite's deferred tint -- the draw site
+       *  re-rasterises over its own back colour (`sprite-tint.ts`). */
+      readonly tint?: SpriteTint;
     }
   | {
       readonly kind: 'drawable';

@@ -392,7 +392,6 @@ const DOCUMENT_BACKGROUND_SELECTOR_PRECEDENCE: readonly string[] = [
   'document',
   'jsondiagram.document',
   'yamldiagram.document',
-  'hcldiagram.document',
   ...DIAGRAM_TYPE_SELECTOR_NAMES,
   ...DIAGRAM_TYPE_SELECTOR_NAMES.map((name) => `${name}.document`),
 ];

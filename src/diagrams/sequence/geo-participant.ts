@@ -38,6 +38,23 @@ export interface ParticipantGeo {
   width: number;
   height: number;
   centerX: number;
+  /**
+   * The kind's merged-style `getDeltaShadow()` (`Participant#getUsedStyles`,
+   * `core/sequence-shadowing.ts`), UNSCALED; absent when 0. Every kind draws
+   * it as a filter; only `participant` and `collections` also reserve it --
+   * `ComponentRoseParticipant#getPreferredWidth/Height` add it (`:129-138`),
+   * so for those two `width`/`height` are the PREFERRED box and the drawn
+   * rectangle is `shadow` smaller (`sequence-layout-participants.ts
+   * #participantBoxOf`).
+   */
+  shadow?: number;
+  /**
+   * The top of the tile of the message that CREATED this participant --
+   * `LivingSpace#goCreate(y)` (`teoz/LivingSpace.java:256-259`). Its lifeline
+   * starts here and it has no head in the top row (`:154-166`, `:194-196`).
+   * Absent for a participant alive from the start.
+   */
+  createY?: number;
   /** Displayed form of {@link Participant.stereotype}: one guillemet-wrapped
    *  entry per `<<...>>` chunk, badge specs already stripped
    *  (`core/stereotype-decoration.ts`). Absent when there is none, when every

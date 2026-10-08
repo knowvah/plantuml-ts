@@ -5,6 +5,7 @@
  * the shared "scale resolved geometry as pure data" rationale this module
  * inherits unchanged.
  */
+import type { EdgeLabelRun } from './class-edge-label-sprite-runs.js';
 import type {
   EdgeGeo,
   QuantifierLineGeo,
@@ -95,6 +96,13 @@ function scaleSametail(s: SametailGeo, k: number): SametailGeo {
   return { parentId: s.parentId, contact: { x: s.contact.x * k, y: s.contact.y * k } };
 }
 
+/** unwind2-S11: a text+sprite label's runs -- every length scales. */
+function scaleLabelRuns(runs: readonly EdgeLabelRun[], k: number): EdgeLabelRun[] {
+  return runs.map((r) =>
+    r.kind === 'text' ? { ...r, width: r.width * k } : { ...r, width: r.width * k, height: r.height * k, dy: r.dy * k },
+  );
+}
+
 /** Label/quantifier/role/visibility-icon fields, scaled -- split out of
  *  {@link scaleEdgeGeo} so neither half of that assembly exceeds this
  *  project's per-function CCN cap. */
@@ -108,6 +116,7 @@ function scaleEdgeGeoLabels(edge: EdgeGeo, k: number): Partial<EdgeGeo> {
             y: edge.label.y * k,
             width: edge.label.width * k,
             ...(edge.label.fontSize !== undefined ? { fontSize: edge.label.fontSize * k } : {}),
+            ...(edge.label.runs !== undefined ? { runs: scaleLabelRuns(edge.label.runs, k) } : {}),
           },
         }
       : {}),

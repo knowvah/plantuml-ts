@@ -18,7 +18,12 @@ import { resolveBareOrBackColor } from '../../core/color-override.js';
 import { resolveColorToSvgHex } from '../../core/klimt/color/HColorSet.js';
 import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import { fontSpecOf } from './sequence-layout-shared.js';
-import { sequenceCreoleFont, sequenceCreoleRuns, type SequenceAtomContext } from './sequence-creole.js';
+import {
+  sequenceAtomContext,
+  sequenceCreoleFont,
+  sequenceCreoleRuns,
+  type SequenceAtomContext,
+} from './sequence-creole.js';
 import {
   parseCircledCharDecoration,
   parseCircledSpriteDecoration,
@@ -122,9 +127,14 @@ interface LabelRow {
  *  stereotype labels, then the display's own lines -- and the box's width, its
  *  height and its placed runs all come from this ONE list: a disagreement
  *  between any two is text overhanging its own box. */
-export function labelRows(rows: readonly string[], spec: FontSpec, ctx: ParticipantLayoutCtx): readonly LabelRow[] {
+export function labelRows(
+  rows: readonly string[],
+  spec: FontSpec,
+  ctx: ParticipantLayoutCtx,
+  backColor?: Paint,
+): readonly LabelRow[] {
   const font = sequenceCreoleFont(spec);
-  const atomContext = labelAtomContext(ctx);
+  const atomContext = labelAtomContext(ctx, backColor);
   return rows.map((row) => {
     const runs = sequenceCreoleRuns(row, font, { leftX: 0, baselineY: 0 }, ctx.measurer, atomContext);
     const last = runs.at(-1);
@@ -274,9 +284,22 @@ export function anyBadgeFor(
  * a monochrome sprite with (`StripeSimple.java:228-235`). `undefined` with no
  * registry -- the pre-T1f whole-line literal, unchanged.
  */
-function labelAtomContext(ctx: ParticipantLayoutCtx): SequenceAtomContext | undefined {
-  if (ctx.sprites === undefined) return undefined;
-  return { sprites: ctx.sprites, fontColor: ctx.theme.colors.text };
+function labelAtomContext(ctx: ParticipantLayoutCtx, backColor: Paint | undefined): SequenceAtomContext | undefined {
+  return sequenceAtomContext(ctx.sprites, ctx.theme.colors.text, backColor);
+}
+
+/**
+ * The `Back` a head's label is drawn on (unwind2-S7). `participant` and
+ * `collections` are `ComponentRoseParticipant`, which applies the box fill
+ * before `textBlock.drawU` (`ComponentRoseParticipant.java:96-97,118`;
+ * `Rose.java:136-150`); `queue` draws its label inside `USymbolQueue#asSmall`
+ * after `symbolContext.apply(ug)` (`USymbolQueue.java:141,147`). The
+ * stickman kinds (`ComponentRoseActor.java:75,78`, `Boundary`, `Control`,
+ * `Entity`, `Database`) draw the label on the head's own `ug`, which carries
+ * no back -- jar-verified white (`tests/fixtures/unwind2-S7/s-actor`).
+ */
+function labelBackColor(p: ParticipantGeo): Paint | undefined {
+  return p.type === 'participant' || p.type === 'collections' || p.type === 'queue' ? p.background : undefined;
 }
 
 /**
@@ -312,7 +335,7 @@ function translateRun(run: TextRun, dx: number, baselineY: number): TextRun {
 export function buildLabelRuns(p: ParticipantGeo, ctx: ParticipantLayoutCtx): readonly TextRun[] {
   const { theme } = ctx;
   const spec = fontSpecOf(theme);
-  const rows = labelRows([...(p.stereotypeLines ?? []), ...displayLines(p.display)], spec, ctx);
+  const rows = labelRows([...(p.stereotypeLines ?? []), ...displayLines(p.display)], spec, ctx, labelBackColor(p));
   const cx = participantBadgeGeo(p.badge, p.x, p.width, theme)?.nameCx ?? p.centerX;
   // The block is centred on `cy`, and the rows stack from its top downward.
   const cy = participantLabelCy(p.type, p.height, p.y, true, theme);

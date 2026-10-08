@@ -92,9 +92,9 @@ const baselineFixtures = manifest.fixtures.filter((f) => f.status === 'baseline'
 // `swimlane-census.ts` -- each conformance surface keeps its own copy
 // rather than importing another surface's private helper (precedent: both
 // of those files already duplicate this, neither exports it).
-function buildThemeForFixture(preprocessed: PreprocessorResult, rawSourceLines: readonly string[]): Theme {
+function buildThemeForFixture(preprocessed: PreprocessorResult): Theme {
   const base = resolveTheme(preprocessed.theme ?? 'default');
-  const withSkin = applySkinLayer(preprocessed, base, rawSourceLines);
+  const withSkin = applySkinLayer(preprocessed, base);
   const withSkinparam = resolveSkinparam(preprocessed.skinparam, withSkin).theme;
   const styleMap = preprocessed.styles.map(parseStyleBlock).reduce<StyleMap>((acc, m) => {
     m.forEach((props, selector) => {
@@ -136,8 +136,7 @@ function layoutBeforeAfter(markup: string, measurer: DeterministicMeasurer): Bef
   if (first === undefined) throw new Error('no diagram block found');
   if (!first.ok) throw first.failure.cause;
   const preprocessed = first.preprocessed;
-  const rawSourceLines = first.rawSource.map((s) => s.getString());
-  const theme = buildThemeForFixture(preprocessed, rawSourceLines);
+  const theme = buildThemeForFixture(preprocessed);
   const block = { ...first.source, rawStyles: preprocessed.styles, stylePositions: preprocessed.stylePositions };
   const ast = astOrThrow(parseActivity(block), 'activity');
   if (ast.nodes.length === 0) return null;

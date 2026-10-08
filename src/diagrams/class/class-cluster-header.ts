@@ -80,6 +80,8 @@ import {
   DEFAULT_GROUP_FONT_COLOR,
 } from './class-package-style.js';
 import { packageTitleFontFamily, packageTitleFontSize } from './class-namespace-title-runs.js';
+import { spriteBackColor } from '../../core/klimt/sprite/sprite-tint.js';
+import { namespaceColorFill } from './class-namespace-shape.js';
 
 /** One composed header stereo block, top-left at (0, 0). */
 export interface ClusterHeaderStereo {
@@ -120,7 +122,7 @@ export function visibleNamespaceStereotypeLabels(
  * `getHeight() * scale` (`SpriteMonochrome.java:221-225`). `undefined` when
  * the name does not resolve (upstream's `null`, so the labels run).
  */
-function buildStereoSprite(ns: Namespace, sprites: SpriteRegistry | undefined): ClusterHeaderStereo | undefined {
+function buildStereoSprite(ns: Namespace, sprites: SpriteRegistry | undefined, theme: Theme): ClusterHeaderStereo | undefined {
   if (ns.stereotype === undefined || sprites === undefined) return undefined;
   const deco = StereotypeDecoration.buildSimple(`<<${ns.stereotype}>>`);
   if (deco.spriteName === undefined) return undefined;
@@ -128,7 +130,15 @@ function buildStereoSprite(ns: Namespace, sprites: SpriteRegistry | undefined): 
   const color4096 = mono === undefined ? getSpriteColor4096(sprites, deco.spriteName) : undefined;
   const png =
     mono !== undefined
-      ? spriteToPngDataUri(spriteMonochromeAsLike(mono), undefined, undefined, deco.spriteScale)
+      ? spriteToPngDataUri(
+          spriteMonochromeAsLike(mono),
+          undefined,
+          // unwind2-S7: `USymbolFolder#asBig` draws the header after
+          // `symbolContext.apply(ug)` (`USymbolFolder.java:224,228-229`), so
+          // the sprite tints over the cluster fill (`SpriteMonochrome.java:216`).
+          spriteBackColor(namespaceColorFill(ns.color, theme)),
+          deco.spriteScale,
+        )
       : color4096 !== undefined
         ? spriteColor4096ToPngDataUri(color4096, deco.spriteScale)
         : undefined;
@@ -185,7 +195,7 @@ function stereoFontColor(ns: Namespace, theme: Theme): string {
  */
 function buildStereoText(ns: Namespace, ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer) {
   // `ClusterHeader.java:199-201`: the sprite is tried before the labels.
-  const sprite = buildStereoSprite(ns, ast.sprites);
+  const sprite = buildStereoSprite(ns, ast.sprites, theme);
   if (sprite !== undefined) return sprite;
   const labels = visibleNamespaceStereotypeLabels(ns, ast.hideStereotypeDirectives ?? []);
   if (labels.length === 0) return undefined;

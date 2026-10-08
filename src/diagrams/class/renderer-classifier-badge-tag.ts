@@ -22,6 +22,8 @@ import {
   resolveBadgeRadius,
   BADGE_LEFT_MARGIN,
 } from './class-badge.js';
+import { spriteHrefOver, type SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
+import { classifierRowBack } from './class-sprite-back.js';
 
 /**
  * The kind badge in the header: a filled `<ellipse>` (radius {@link
@@ -178,7 +180,7 @@ export function renderBadge(geo: ClassifierGeo, theme: ScaledTheme): string {
  */
 export function renderBadgeSpriteImage(
   geo: ClassifierGeo,
-  sprite: { href: string; width: number; height: number },
+  sprite: { href: string; width: number; height: number; readonly tint?: SpriteTint },
   theme: ScaledTheme,
 ): string {
   const headerH = geo.dividerYs[0] ?? geo.height;
@@ -187,7 +189,10 @@ export function renderBadgeSpriteImage(
   const badgeIndent = geo.rows[nameRowIndex]?.badgeIndent ?? BADGE_LEFT_MARGIN * theme.scaleK + badgeRadius;
   const spriteX = geo.x + badgeIndent - badgeRadius;
   const spriteY = geo.y + (headerH - sprite.height) / 2;
-  return image(spriteX, spriteY, sprite.width, sprite.height, sprite.href);
+  // unwind2-S7: `EntityImageClassHeader` draws the sprite on `ugHeader`
+  // (`EntityImageClass.java:238`), so it tints over the header's back.
+  const href = spriteHrefOver(sprite, classifierRowBack(geo, theme, true));
+  return image(spriteX, spriteY, sprite.width, sprite.height, href);
 }
 
 /**

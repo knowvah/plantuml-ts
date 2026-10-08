@@ -23,6 +23,7 @@ import type { DiagramType, UmlSource } from './block-extractor.js';
 import { upstreamTypeOf } from './block-extractor.js';
 import type { ParseRefusal } from './parse-refusal.js';
 import { mergeRefusals } from './parse-refusal.js';
+import type { SkinCut } from './skin-command.js';
 import { rect, text } from './svg.js';
 import type { Gradient } from './paint.js';
 import type { Theme } from './theme.js';
@@ -384,18 +385,51 @@ export class DiagramRegistry {
    * (`PSystemBuilder.java:259-260`). A source with no candidate set at all
    * (a hand-built fixture, see `UmlSource.types`) states no constraint, so
    * every plugin is a candidate.
+   *
+   * `cut` (unwind2-S8): a hoisted command line that fails for every engine
+   * reaching it (`skin-command.ts`). Each candidate then parses only the
+   * lines before it; one that accepts them is refused AT the cut, one that
+   * refuses earlier keeps its own refusal, and the merge picks the page as
+   * upstream's `PSystemErrorUtils#merge` does.
    */
-  resolve(source: UmlSource, options?: ParseOptions): Resolution {
+  resolve(source: UmlSource, options?: ParseOptions, cut?: SkinCut): Resolution {
     const attempts: Attempt[] = [];
+    const parsed = cut === undefined ? source : truncated(source, cut.index);
     for (const plugin of this.plugins) {
       if (source.types !== undefined && !source.types.has(upstreamTypeOf(plugin.type))) continue;
-      const parsed = plugin.parse(source, options);
-      const refusal = parseRefusalOf(parsed);
-      if (refusal === undefined) return { plugin, ast: parsed };
-      attempts.push({ plugin, refusal });
+      const outcome = attempt(plugin, parsed, options, cut);
+      if (outcome.refusal === undefined) return { plugin, ast: outcome.ast };
+      attempts.push({ plugin, refusal: outcome.refusal });
     }
     return resolveAllRefused(attempts);
   }
+}
+
+/** `source` with only its first `count` body lines. */
+function truncated(source: UmlSource, count: number): UmlSource {
+  return {
+    ...source,
+    lines: source.lines.slice(0, count),
+    ...(source.linePositions === undefined ? {} : { linePositions: source.linePositions.slice(0, count) }),
+  };
+}
+
+/**
+ * One candidate's parse: its AST, or its refusal. Under a `cut`, a candidate
+ * that gets through the lines before it (an empty prefix included: the
+ * command fails on the block's first line) is refused at the cut, so a cut
+ * never yields an AST.
+ */
+function attempt(
+  plugin: DiagramPlugin,
+  source: UmlSource,
+  options: ParseOptions | undefined,
+  cut: SkinCut | undefined,
+): { readonly ast: unknown; readonly refusal?: undefined } | { readonly refusal: ParseRefusal } {
+  if (cut !== undefined && cut.index === 0) return { refusal: cut.refusal };
+  const ast = plugin.parse(source, options);
+  const refusal = parseRefusalOf(ast) ?? cut?.refusal;
+  return refusal === undefined ? { ast } : { refusal };
 }
 
 /**

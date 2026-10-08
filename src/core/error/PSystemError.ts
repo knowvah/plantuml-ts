@@ -17,16 +17,10 @@
  * emitter (`src/core/svg.ts`). The line CONTENT and its ORDER are upstream's;
  * only the drawing seam differs.
  *
- * Two upstream members are deliberately NOT ported:
- * - the time-based decorations (`addMessagePatreon` / `addMessageLiberapay` /
- *   `addMessageDedication`, selected by `System.currentTimeMillis() / 60000 %
- *   60`) and `addMessageArecibo`. `src/` may not read a clock (CLAUDE.md: no
- *   `Date.now()` — output must be reproducible), and all four draw bundled
- *   raster assets this port does not vendor. Upstream itself ships the switch
- *   that turns them off: `PSystemError.disableTimeBasedErrorDecorations()`.
- *   This port behaves as if that switch were permanently on.
- * - `getWarningOrError()`, which reads `getTitle()` off `UgDiagram` — no title
- *   layer here, and no caller.
+ * Not ported: `getWarningOrError()`, which reads `getTitle()` off
+ * `UgDiagram` — no title layer here, and no caller. The decorations
+ * `getTextBlock` adds (Welcome block, Arecibo image, and the clock-selected
+ * banners it cannot draw) are `error-renderer.ts#renderPSystemError`'s.
  *
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java
  */
@@ -91,6 +85,11 @@ export abstract class PSystemError {
   /** @see ~/git/plantuml/.../error/PSystemError.java#getFirstError */
   getFirstError(): ErrorUml {
     return this.singleError;
+  }
+
+  /** @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/core/UmlSource.java:108-114 */
+  containsIgnoreCase(searched: string): boolean {
+    return this.source.some((s) => s.getString().toLowerCase().includes(searched));
   }
 
   /** @see ~/git/plantuml/.../core/UmlSource.java#getTotalLineCountLessThan5 */

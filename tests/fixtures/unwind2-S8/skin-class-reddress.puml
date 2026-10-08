@@ -1,0 +1,6 @@
+@startuml
+skin reddress
+class Foo
+class Bar
+Foo --> Bar
+@enduml

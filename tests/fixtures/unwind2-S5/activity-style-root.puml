@@ -1,0 +1,14 @@
+@startuml
+<style>
+root {
+  FontColor #FF0000
+  LineColor #00AA00
+}
+</style>
+start
+:step one;
+if (ok?) then (yes)
+  :two;
+endif
+stop
+@enduml

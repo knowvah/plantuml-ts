@@ -65,30 +65,25 @@ function loadSkinSlow(filename: string): StyleBuilder {
   return styleBuilder;
 }
 
-/**
- * The `skin <name>` texts of `skins-builtin.ts` that are byte-identical to
- * the oracle jar's `skin/<name>.skin` (`unzip -p` + `cmp`, 1.2026.8beta1).
- * The jar's fifth resource, `sonyxperiadev.skin`, differs from the port's
- * copy and is left out; `reddress.skin` is not a jar resource at all.
- */
-const JAR_IDENTICAL_BUILTIN_SKINS: ReadonlySet<string> = new Set(['debug', 'rose']);
-
 const SKIN_SUFFIX = '.skin';
 
 /**
  * The text `/skin/<filename>` names. Upstream tries a local file, then the
  * jar resource (java:112-142); a browser-safe library has no file system,
  * so only embedded resources answer: the drift-gated jar text of
- * `plantuml.skin`/`strictuml.skin`, then the jar-identical entries of the
- * port's `skin <name>` registry. `undefined` where upstream's
- * `getResourceAsStream` returns `null`.
+ * `plantuml.skin`/`strictuml.skin`, then the port's `skin <name>` registry,
+ * whose every entry is byte-identical to the oracle jar's `skin/<name>.skin`
+ * (`unzip -p` + compare, unwind2-S8). `undefined` where upstream's
+ * `getResourceAsStream` returns `null` -- `reddress.skin` among them, since
+ * the jar no longer bundles it.
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/style/StyleLoader.java:112-142
  */
 export function getInputStreamForStyle(filename: string): string | undefined {
   if (filename === 'plantuml.skin') return PLANTUML_SKIN;
   if (filename === 'strictuml.skin') return STRICTUML_SKIN;
-  const name = filename.endsWith(SKIN_SUFFIX) ? filename.substring(0, filename.length - SKIN_SUFFIX.length) : '';
-  return JAR_IDENTICAL_BUILTIN_SKINS.has(name) ? BUILTIN_SKINS[name] : undefined;
+  if (!filename.endsWith(SKIN_SUFFIX)) return undefined;
+  const name = filename.substring(0, filename.length - SKIN_SUFFIX.length);
+  return Object.hasOwn(BUILTIN_SKINS, name) ? BUILTIN_SKINS[name] : undefined;
 }
 
 /**

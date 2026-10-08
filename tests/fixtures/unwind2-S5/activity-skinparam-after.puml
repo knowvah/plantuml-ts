@@ -1,0 +1,11 @@
+@startuml
+!theme amiga
+skinparam defaultFontColor #FF0000
+skinparam ArrowColor #00AA00
+start
+:step one;
+if (ok?) then (yes)
+  :two;
+endif
+stop
+@enduml

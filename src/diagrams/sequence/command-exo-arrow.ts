@@ -42,6 +42,7 @@
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:113-114
  */
 
+import { activate, addMessage, exoLifeEvents } from './sequence-life-state.js';
 import type { ActivationEvent, MessageExoEvent, MessageExoType } from './ast.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
 import { getRegexp, transform } from '../../core/url/UrlBuilder.js';
@@ -450,10 +451,20 @@ function executeExoArrow(state: ParseState, match: RegExpExecArray, getMessageEx
 
   const participant = getOrCreateParticipant(state, g);
   const activation = g['ACTIVATION'];
-  if (activation?.startsWith('*') === true) emit(state, { kind: 'activate', participantId: participant });
+  if (activation?.startsWith('*') === true) {
+    emit(state, { kind: 'activate', participantId: participant });
+    activate(state.life, participant, 'CREATE'); // `CommandExoArrowAny.java:105-106`
+  }
 
   const msg = messageExoOf(state, g, type, participant);
   emit(state, msg);
+  const error = addMessage(state.life, msg); // `:152-154`
+  if (error !== undefined) {
+    state.executionError = error;
+    return;
+  }
+  const autoFires = autoActivationEventOf(state, activation, msg.arrow, participant, undefined) !== undefined;
+  exoLifeEvents(state.life, activation, autoFires && msg.arrow.dashed, autoFires, participant);
 
   const post =
     activationEventOf(activation, participant, g['LIFECOLOR']) ??

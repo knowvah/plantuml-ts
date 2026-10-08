@@ -41,6 +41,8 @@ import { rect, line, text, path, ellipse, linkWrap, image } from '../../core/svg
 // styled runs / table the sizer measured -- see `state-sizing-creole.ts`.
 import type { StateTableGeo, StateTextRun } from './state-sizing-creole.js';
 import type { CreoleRunImage } from '../../core/svek/image/creole-text-lines.js';
+import { creoleRunImageHref } from '../../core/svek/image/creole-run-sprite.js';
+import type { Paint } from '../../core/paint.js';
 import { styledLines } from './state-sizing-creole.js';
 import {
   STATE_DEFAULT_BACKGROUND,
@@ -117,8 +119,20 @@ function runBaseline(lineTop: number, lineHeight: number, run: StateTextRun): nu
  * `svg-shapes.ts#image` is the repo's ONE `<image>` emitter, and its
  * attribute order is `SvgGraphics#svgImageDataUri`'s.
  */
-function runImage(img: CreoleRunImage, x: number, lineTop: number): string {
-  return image(x, lineTop + img.top, img.width, img.height, img.href);
+function runImage(img: CreoleRunImage, x: number, lineTop: number, style: RunStyle): string {
+  // unwind2-S11: a `<$sprite>` draws its raster box, tinted over the
+  // element's back (`creole-run-sprite.ts`).
+  const href = creoleRunImageHref(img, style.fill, style.back);
+  return image(x, lineTop + img.top, img.rasterWidth ?? img.width, img.rasterHeight ?? img.height, href);
+}
+
+/** What a run is drawn with: the font family/colour and, for a sprite's
+ *  tint, the `Back` the owner applied (`EntityImageStateCommon#applyColor`,
+ *  `EntityImageStateCommon.java:131-140`). */
+interface RunStyle {
+  readonly fontFamily: string;
+  readonly fill: string;
+  readonly back?: Paint;
 }
 
 /**
@@ -143,7 +157,7 @@ export function renderStateRuns(
   startX: number,
   lineTop: number,
   lineHeight: number,
-  style: { readonly fontFamily: string; readonly fill: string },
+  style: RunStyle,
 ): string {
   let x = startX;
   let out = '';
@@ -152,7 +166,7 @@ export function renderStateRuns(
     // `StateTextRun.dx`'s own doc comment.
     x += run.dx ?? 0;
     if (run.image !== undefined) {
-      out += runImage(run.image, x, lineTop);
+      out += runImage(run.image, x, lineTop, style);
       x += run.image.width;
       continue;
     }
@@ -241,12 +255,16 @@ export function renderStateTextLines(
   // `state-render-colors.ts#resolveStateFontColor`'s own doc comment.
   // Defaults to jar's own hardcoded `#000000` label-text default (every
   // pre-S15 call site's unchanged behavior).
-  opts: { readonly fill?: string; readonly fontSize?: number } = {},
+  opts: { readonly fill?: string; readonly fontSize?: number; readonly back?: Paint } = {},
 ): string {
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
   // `state-render-colors.ts#resolveStateFontSize`'s own doc comment.
   const fontSize = opts.fontSize ?? theme.fontSize;
-  const style = { fontFamily: theme.fontFamily, fill: opts.fill ?? '#000000' };
+  const style = {
+    fontFamily: theme.fontFamily,
+    fill: opts.fill ?? '#000000',
+    ...(opts.back !== undefined ? { back: opts.back } : {}),
+  };
   const ascent = textAscent(fontSize);
   let out = '';
   let lineTop = startY - ascent;
@@ -274,17 +292,6 @@ export function renderStateTextLines(
  *  this codebase's established per-module constant convention (see
  *  `SDL_MARGIN` above). */
 const TABLE_STRIPE_MARGIN_Y = 2;
-
-function renderTextLines(
-  lines: readonly StateTextLine[],
-  xForLine: (ln: StateTextLine) => number,
-  startY: number,
-  theme: Theme,
-  fill: string = '#000000',
-  fontSize: number = theme.fontSize,
-): string {
-  return renderStateTextLines(lines, xForLine, startY, theme, { fill, fontSize });
-}
 
 /**
  * `kind:'json'` (mission A4 Phase L iter 20) and any other pre-measurement
@@ -318,7 +325,7 @@ function renderUnmeasuredFallback(node: StateNodeGeo, theme: Theme, box: string)
  * 109.8889`, EXACT match.
  * @see ~/git/plantuml/.../svek/image/EntityImageStateEmptyDescription.java
  */
-function renderEmptyDescription(node: StateNodeGeo, theme: Theme, box: string): string {
+function renderEmptyDescription(node: StateNodeGeo, theme: Theme, box: string, fill: Paint): string {
   const headerLines = node.headerLines!;
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
   // `state-render-colors.ts#resolveStateFontSize`'s own doc comment.
@@ -326,13 +333,14 @@ function renderEmptyDescription(node: StateNodeGeo, theme: Theme, box: string): 
   const ascent = textAscent(fontSize);
   const textBlockHeight = headerLines.length * fontSize;
   const yDesc = (node.height - textBlockHeight) / 2;
-  const headerMarkup = renderTextLines(
+  // unwind2-S11: `applyColor` (`EntityImageStateEmptyDescription#drawU`)
+  // puts the fill on the `ug` the name draws with -- a sprite's tint back.
+  const headerMarkup = renderStateTextLines(
     headerLines,
     (ln) => node.x + node.width / 2 - ln.width / 2,
     node.y + yDesc + ascent,
     theme,
-    '#000000',
-    fontSize,
+    { fill: '#000000', fontSize, back: fill },
   );
   return box + headerMarkup;
 }
@@ -472,7 +480,7 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   }
 
   if (node.emptyDescription === true) {
-    return renderEmptyDescription(node, theme, box);
+    return renderEmptyDescription(node, theme, box, fill);
   }
 
   // mission G4 S16: `skinparam stateFontSize<<X>>` -- see
@@ -485,13 +493,15 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   // mission G4 S15: `StateFontColor<<X>>` cascade -- see
   // `resolveStateFontColor`'s own doc comment.
   const fontColor = resolveStateFontColor(node, theme, '#000000');
-  const headerMarkup = renderTextLines(
+  // unwind2-S11: `applyColor` puts the fill on the `ug` both text blocks
+  // draw with (`EntityImageState.java` `drawU`), a sprite's tint back.
+  const textOpts = { fill: fontColor, fontSize, back: fill };
+  const headerMarkup = renderStateTextLines(
     node.headerLines,
     (ln) => node.x + node.width / 2 - ln.width / 2,
     node.y + MARGIN + ascent,
     theme,
-    fontColor,
-    fontSize,
+    textOpts,
   );
 
   const dividerY = node.y + MARGIN + node.headerLines.length * fontSize + MARGIN_LINE;
@@ -501,13 +511,12 @@ export function renderNormal(node: StateNodeGeo, theme: Theme): string {
   });
 
   const bodyLines = node.bodyLines ?? [];
-  const bodyMarkup = renderTextLines(
+  const bodyMarkup = renderStateTextLines(
     bodyLines,
     () => node.x + MARGIN,
     dividerY + MARGIN_LINE + ascent,
     theme,
-    fontColor,
-    fontSize,
+    textOpts,
   );
 
   // G8: `EntityImageState.drawU`'s own order -- shape, divider hline,

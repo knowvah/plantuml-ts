@@ -1,0 +1,10 @@
+@startuml
+<style>
+root { Shadowing 4 }
+</style>
+participant A
+participant B
+group grp
+A -> B : hi
+end
+@enduml

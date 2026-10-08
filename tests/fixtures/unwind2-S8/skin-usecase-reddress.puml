@@ -1,0 +1,5 @@
+@startuml
+skin reddress
+actor User
+User --> (Login)
+@enduml

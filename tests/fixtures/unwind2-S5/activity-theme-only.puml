@@ -1,0 +1,9 @@
+@startuml
+!theme amiga
+start
+:step one;
+if (ok?) then (yes)
+  :two;
+endif
+stop
+@enduml

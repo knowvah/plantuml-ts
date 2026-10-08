@@ -19,6 +19,7 @@ import type { ActivationEvent, MessageEvent, MessageGeo, ParticipantGeo } from '
 import type { EventCursor, EventProcessingContext } from './sequence-layout-events.js';
 import { activationLevel, emitActivation, openActivation, pushActivation } from './sequence-layout-events.js';
 import { arrowFontSpecOf, LIVE_DELTA_SIZE } from './sequence-layout-shared.js';
+import { markCreated, withCreateEnd } from './sequence-layout-create.js';
 import {
   ARROW_LABEL_HEAD_CLEARANCE,
   ARROW_LABEL_PADDING_X1,
@@ -41,7 +42,8 @@ export function handleMessageEvent(
   // 204`); `dealWith` is participant1-or-participant2 membership.
   ctx.lastMessageParticipants = [event.from, event.to];
 
-  const endpoints = liveOffsetEndpoints(resolveMessageEndpoints(event, fromGeo, toGeo, ctx), event, ctx, bound);
+  const resolved = withCreateEnd(event, resolveMessageEndpoints(event, fromGeo, toGeo, ctx), toGeo);
+  const endpoints = liveOffsetEndpoints(resolved, event, ctx, bound);
   // The ARROW font (13), not the ambient 14. `messageLabelBlock` has always
   // DRAWN at 13 (`text-block-geo.ts:357-363`); reserving at 14 was the y half
   // of the sizer/renderer split `planning/sizer-renderer-parity.md` exists to
@@ -51,10 +53,11 @@ export function handleMessageEvent(
   const advance = messageTileAdvance(rows * lineHeight, endpoints.arrowDirection === 'self');
 
   const messageGeo = buildMessageGeo(event, endpoints, cursor.y + advance.arrowY, ctx);
+  const tileHeight = event.create === true ? markCreated(messageGeo, toGeo, cursor.y, advance.tileHeight) : null;
   ctx.eventGeos.push(messageGeo);
   cursor.lastMessageY = messageGeo.y;
 
-  cursor.y += advance.tileHeight;
+  cursor.y += tileHeight ?? advance.tileHeight;
 
   // Handle auto-activate/deactivate via ++ / -- shorthand on message
   applyMessageActivation(event, messageGeo, cursor, ctx);
@@ -193,14 +196,7 @@ function buildMessageGeo(
   y: number,
   ctx: EventProcessingContext,
 ): MessageGeo {
-  const block = messageLabelBlock(
-    event.label,
-    numberTextOf(event),
-    labelLeftOf(event, endpoints),
-    y,
-    ctx.theme,
-    ctx.measurer,
-  );
+  const block = messageLabelBlock(event.label, numberTextOf(event), labelLeftOf(event, endpoints), y, ctx);
   return {
     labelLines: block.lines,
     ...(block.number !== undefined ? { labelNumber: block.number } : {}),
@@ -292,6 +288,7 @@ function liveOffsetEndpoints(
   if (endpoints.arrowDirection === 'self') return liveOffsetSelf(endpoints, event, ctx, bound);
   const level1 = liveLevelAt(event.from, event, ctx, bound);
   const level2 = liveLevelAt(event.to, event, ctx, bound);
+  ctx.messageLevels?.set(event, { level1, level2 });
   let { fromX, toX } = endpoints;
 
   if (endpoints.arrowDirection === 'left') {

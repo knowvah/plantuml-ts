@@ -1,0 +1,7 @@
+@startuml
+participant A
+create B
+participant C
+C -> B : long label to the created one
+B -> A : hi
+@enduml

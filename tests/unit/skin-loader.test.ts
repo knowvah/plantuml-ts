@@ -75,103 +75,35 @@ describe('applySkinLayer -- skin-file-loading mission Batch 1', () => {
     expect(result.shadowing).toBe(0);
   });
 
-  it('is case-insensitive-safe when the collector already lowercased the name', () => {
-    // preprocessor.ts lowercases the captured directive argument before
-    // this ever runs -- verify the registry key itself is lowercase.
+  it('keys the registry by the lowercase resource name', () => {
+    // The lookup is case-sensitive, as the jar's `getResourceAsStream` is:
+    // `skin Rose` is upstream's "Cannot find style Rose" (unwind2-S8).
     const result = applySkinLayer({ skin: 'rose' }, defaultTheme);
     expect(result).not.toBe(defaultTheme);
   });
 });
 
-describe('applySkinLayer -- skin-file-loading mission Batch 4 (preprocessor+skinparam skins)', () => {
-  it('resolves sonyxperiadev colors/font/shadowing via preprocess() + resolveSkinparam', () => {
-    // sonyxperiadev.skin is embedded VERBATIM with upstream's `SkinParam`
-    // capitalization -- this also exercises the loader's own case
-    // normalization (`normalizeSkinparamKeywordCase`), not just the D1
-    // grammar routing: without it, preprocess()'s collector (which matches
-    // the literal lowercase `skinparam` keyword only) would capture NOTHING
-    // and every assertion below would see `defaultTheme`'s own values.
+describe('applySkinLayer -- the jar style-grammar sonyxperiadev.skin (unwind2-S8)', () => {
+  it('applies the sheet as runs, the later "specifics" root over the plantuml.skin copy', () => {
+    // sonyxperiadev.skin:565-570 -- `root { FontName Arial; FontColor #333333 }`
+    // after the copied plantuml.skin root (`FontName SansSerif; FontColor black`).
     const result = applySkinLayer({ skin: 'sonyxperiadev' }, defaultTheme);
-    expect(result.fontFamily).toBe('Arial'); // SkinParam DefaultFontName Arial
-    expect(result.shadowing).toBe(0); // SkinParam Shadowing false
-    expect(result.colors.elements?.entity?.background).toBe('#999999'); // SkinParam EntityBackgroundColor
-    // SkinParam NoteBackgroundColor/NoteBorderColor each appear TWICE in the
-    // verbatim upstream file -- last occurrence wins (#ffffcd/#a9a980), not
-    // the first (#fbfb77/#cbcb47).
+    expect(result.fontFamily).toBe('Arial');
+    expect(result.colors.text).toBe('#333333');
+    // sonyxperiadev.skin:576-581 -- `note { BackGroundColor #ffffcd; LineColor #a9a980 }`
+    expect(result.colors.elements?.note?.background).toBe('#ffffcd');
     expect(result.colors.elements?.note?.border).toBe('#a9a980');
   });
 
-  it('resolves reddress via the SAME preprocess() + resolveSkinparam path (no <style> mis-parse)', () => {
-    // Before Batch 4, `reddress` (leading `!ifndef`) was absent from
-    // BUILTIN_SKINS entirely (D1's Batch-1 guard) -- now it resolves
-    // SOMETHING rather than being silently dropped. `circledCharacterRadius
-    // 8` is a plain numeric literal (not a `!define`d macro token), so it
-    // resolves correctly even though the macro-substitution gap below
-    // blocks every FONTNAME/FONTSIZE/ACCENT-style reference.
-    const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
-    expect(result.colors.graph.circledCharacterRadius).toBe(8);
+  it('ignores the @media dark-scheme section (StyleParser.java:150-152)', () => {
+    // sonyxperiadev.skin's dark section sets `root { BackGroundColor #313139 }`
+    // and `document { BackGroundColor #1B1B1B }`; neither reaches a light render.
+    const result = applySkinLayer({ skin: 'sonyxperiadev' }, defaultTheme);
+    expect(result.colors.background).not.toBe('#1B1B1B');
+    expect(result.colors.graph.rootElementBackground).toBe('#f1f1f1');
   });
 
-  it(
-    "resolves reddress's unconditional !define FONTNAME (skin-reddress-variants " +
-      'Fix 1 -- skinparam VALUES now run through TIM substitution; the ' +
-      'macro-substitution gap tracked in .agent-notes/skin-batch4-preproc.md ' +
-      'is fixed for the skinparam-line path)',
-    () => {
-      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
-      // `!define FONTNAME "Verdana"` (top-level `!ifndef` default, active in
-      // EVERY reddress mode) now resolves -- the value INCLUDES the quote
-      // characters, since `!define` substitution is plain text replacement.
-      expect(result.colors.graph.classFontFamily).toBe('"Verdana"');
-    },
-  );
-
-  it(
-    'still renders BOXBG/BORDERCOLOR literally in BARE mode -- correctly, ' +
-      'not a residual bug: those macros are `!define`d only inside the ' +
-      '`!ifdef DARKSTYLE`/`!ifdef LIGHTSTYLE` branches, which a bare ' +
-      '`skin reddress` (no DARKBLUE/LIGHTBLUE/... flag) never enters, so ' +
-      "the names genuinely aren't registered functions to substitute",
-    () => {
-      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme);
-      // The unsubstituted tokens are not colors, so `resolveColor` hands back
-      // `HColorSet#getColorOrWhite`'s WHITE (java:58-63). Substitution would
-      // have produced `ccc`/`aaa` or `2e2e2e`/`1b1b1b` -- never white.
-      expect(result.colors.graph.classBackground).toBe('#FFFFFF');
-      expect(result.colors.graph.classBorder).toBe('#FFFFFF');
-    },
-  );
-
-  it("threads a bare `!define DARKBLUE` from the document into reddress's own `!ifdef` gate", () => {
-    // `!ifdef DARKBLUE` only checks EXISTENCE (EaterIfdef#isTrue). Both the
-    // gate AND the value now resolve (Fix 1): `skinparam backgroundColor 777`
-    // (a literal) and `skinparam stereotypeCBackgroundColor ACCENT` (a macro
-    // reference resolved via the SAME DARKBLUE-branch `!define ACCENT
-    // 1a66c2`) both land.
-    const withThreading = applySkinLayer({ skin: 'reddress' }, defaultTheme, ['!define DARKBLUE', 'skin reddress']);
-    // `documentRawSourceLines` omitted -- gate never fires, root theme
-    // background is untouched (default, `undefined` background override).
-    const untouched = applySkinLayer({ skin: 'reddress' }, defaultTheme);
-    expect(withThreading.colors.background).not.toBe(untouched.colors.background);
-    expect(withThreading.colors.background).toBe('777');
-  });
-
-  it(
-    "resolves reddress's DARKBLUE-branch !define ACCENT into " +
-      'stereotypeCBackgroundColor (skin-reddress-variants Fix 1 -- the ' +
-      '!ifdef GATE alone was already threaded by Batch 4; this proves the ' +
-      'VALUE macro reference inside the selected branch now resolves too, ' +
-      'not just literal tokens)',
-    () => {
-      const result = applySkinLayer({ skin: 'reddress' }, defaultTheme, ['!define DARKBLUE', 'skin reddress']);
-      // `resolveSkinparam` maps `stereotypeCBackgroundColor` to the "spot C"
-      // class-stereotype element bucket.
-      expect(result.colors.elements?.spotclass?.background).toBe('1a66c2');
-    },
-  );
-
-  it('is a no-op for a bare `!define DARKBLUE` with no matching skin (defensive)', () => {
-    const result = applySkinLayer({ skin: undefined }, defaultTheme, ['!define DARKBLUE']);
-    expect(result).toBe(defaultTheme);
+  it('has no reddress: the jar bundles no reddress.skin, so nothing applies', () => {
+    expect(applySkinLayer({ skin: 'reddress' }, defaultTheme)).toEqual(defaultTheme);
   });
 });

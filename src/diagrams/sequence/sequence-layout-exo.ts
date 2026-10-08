@@ -46,6 +46,7 @@ import { messageTileAdvance } from './sequence-layout-message.js';
 import { messageLabelBlock, messageLabelRows } from './text-block-geo.js';
 import { ARROW_DELTA_X, DIAM_CIRCLE } from './sequence-arrowhead.js';
 import { LEFT_MARGIN } from './sequence-layout-participants.js';
+import { sequenceAtomContext, sequenceLabelBlockWidth } from './sequence-creole.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -135,7 +136,8 @@ function labelBlockWidth(event: MessageExoEvent, ctx: EventProcessingContext): n
   const numberWidth = numberText === undefined ? 0 : ctx.measurer.measure(numberText, fontSpec).width;
   const gap = numberText === undefined ? 0 : MESSAGE_NUMBER_MARGIN;
   const lines = event.label === '' ? [] : event.label.split('\n');
-  const labelWidth = lines.length === 0 ? 0 : Math.max(...lines.map((l) => ctx.measurer.measure(l, fontSpec).width));
+  const atoms = sequenceAtomContext(ctx.sprites, ctx.theme.colors.text);
+  const labelWidth = sequenceLabelBlockWidth(lines, fontSpec, ctx.measurer, atoms);
   return numberWidth + gap + labelWidth;
 }
 
@@ -239,14 +241,7 @@ function buildExoGeo(event: MessageExoEvent, span: ExoSpan, y: number, ctx: Even
   // `+ blockWidth / 2` here existed only to turn it back into a centre for the
   // old signature. Exo x placement is `MessageExoArrow`'s, a different upstream
   // component, and is deliberately unchanged by this task.
-  const block = messageLabelBlock(
-    event.label,
-    numberTextOf(event),
-    exoLabelLeft(event, span),
-    y,
-    ctx.theme,
-    ctx.measurer,
-  );
+  const block = messageLabelBlock(event.label, numberTextOf(event), exoLabelLeft(event, span), y, ctx);
   return {
     kind: 'message',
     fromX: rightwards ? span.x1 : span.x2,

@@ -1,0 +1,8 @@
+@startuml
+Alice -> Bob : start
+activate Bob
+Bob -> Carol : work
+newpage
+Carol --> Bob : done
+deactivate Bob
+@enduml

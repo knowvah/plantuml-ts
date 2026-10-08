@@ -1,0 +1,5 @@
+@startuml
+map M {
+ k\tx => v\ty
+}
+@enduml

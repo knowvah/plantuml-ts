@@ -1,0 +1,11 @@
+@startuml
+actor Alice
+participant Bob
+database Store
+Alice -> Bob : one
+Bob -> Store : store
+newpage Second
+Bob -> Alice : two
+newpage
+Alice -> Store : three
+@enduml

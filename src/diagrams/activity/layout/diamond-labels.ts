@@ -22,6 +22,12 @@ import type { GPoint } from '../tiles/points.js';
 import type { Out } from './tile-coordinates.js';
 import { pushNode } from './tile-coordinates.js';
 
+/** `ActivityNodeGeo.onDiamondBack` for a slot of `diamond`: every diamond
+ *  but the EMPTY one draws its slots over its own back (that field's doc). */
+export function diamondBackOf(diamond: { readonly kind: string }): { onDiamondBack?: true } {
+  return diamond.kind === 'gtile-diamond-empty' ? {} : { onDiamondBack: true };
+}
+
 /**
  * Pushes one `if-label` node per `side` in `sides` whose `labelAt` is
  * non-null. `sides` is caller-supplied, in upstream `drawU`'s own order
@@ -53,6 +59,7 @@ export function emitDiamondLabels(
         // `create(fcArrow)` FULL blocks (`FtileWhile.java:123,127-128`,
         // `FtileRepeat.java:127-131`).
         ifLabelRole: 'full',
+        ...diamondBackOf(diamond),
       },
       lane,
     );

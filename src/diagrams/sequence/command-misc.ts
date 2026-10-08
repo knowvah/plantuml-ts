@@ -89,6 +89,9 @@ export const dividerCommand: Command = {
       // shared gap. Engine-wide, filed with the other sequence text gaps.
       text: match[1]!.replace(/\\n/g, '\n'),
     };
+    // `SequenceDiagram#divider` (`:270-276`): a divider closes off the
+    // message before it for a bare life event that follows.
+    state.life.lastEventWithDeactivate = 'notMessage';
     emit(state, ev);
   },
 };
@@ -120,6 +123,7 @@ export const delayWithTextCommand: Command = {
   pattern: /^(?:\.{3}|…)(.*)(?:\.{3}|…)$/,
   execute(state, match) {
     const ev: DelayEvent = { kind: 'delay', text: match[1]! };
+    state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
 };
@@ -136,6 +140,7 @@ export const bareDelayCommand: Command = {
   pattern: /^(?:\.{3}|…)$/,
   execute(state) {
     const ev: DelayEvent = { kind: 'delay' };
+    state.life.lastDelay = true; // `SequenceDiagram#delay` (`:288-292`)
     emit(state, ev);
   },
 };
@@ -213,9 +218,10 @@ function ensureRefParticipants(state: ParseState, raw: string): string[] {
 export const refOverCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?\s*:\s*(.*)$/i,
   execute(state, match) {
-    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
+    const participants = ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, participants);
     const label = match[3]!.trim();
-    emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label] });
+    emit(state, { kind: 'frame', frameType: 'ref', label, branches: [[]], branchLabels: [label], participants });
   },
 };
 
@@ -239,7 +245,8 @@ export const refOverCommand: Command = {
 export const refOverMultilineCommand: Command = {
   pattern: /^ref(#\w+)?\s+over\s+([^:[\]]+?)(?:\s*\[\[.*?\]\])?(?:\s*#\w+)?\s*$/i,
   execute(state, match) {
-    setLastEventWithNoteSpan(state, ensureRefParticipants(state, match[2]!));
-    state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''] };
+    const participants = ensureRefParticipants(state, match[2]!);
+    setLastEventWithNoteSpan(state, participants);
+    state.pendingRef = { kind: 'frame', frameType: 'ref', label: '', branches: [[]], branchLabels: [''], participants };
   },
 };

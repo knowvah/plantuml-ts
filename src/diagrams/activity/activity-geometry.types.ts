@@ -10,6 +10,7 @@
  */
 
 import type { SnakeTextAlign } from './layout/snake-text-position.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 
 // ---------------------------------------------------------------------------
 // Public geometry types
@@ -50,6 +51,16 @@ export interface ActivityNodeGeo {
    * elseif hexagon's slots (`FtileIfLongHorizontal.java:172-173,186`).
    */
   ifLabelRole?: 'test' | 'full';
+  /**
+   * unwind2-S11: an `'if-label'` in a north/south/west/east slot of a
+   * `FtileDiamondInside`/`FtileDiamondInside2`/`FtileDiamondSquare`, whose
+   * `drawU` applies `backColor.bg()` to the `ug` the slots are drawn with
+   * (`FtileDiamondInside.java:85,88-89,98-102`) -- so a slot's `<$sprite>`
+   * tints over the diamond fill (`SpriteMonochrome.java:216`). Absent for
+   * an EMPTY `FtileDiamond`, which applies the back to the polygon draw
+   * only (`FtileDiamond.java:85-91`).
+   */
+  onDiamondBack?: true;
   /** For note nodes: absolute coordinates of the balloon spike tip. */
   spikeTip?: { x: number; y: number };
   /** For `label`/`goto` nodes (add4-T3d): `false` when upstream draws the
@@ -275,4 +286,8 @@ export interface ActivityGeometry {
    */
   rawWidth?: number;
   rawHeight?: number;
+  /** unwind2-S11: `ast.sprites`, carried to the draw so a label's creole
+   *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
+   *  799-817`). */
+  sprites?: SpriteRegistry;
 }

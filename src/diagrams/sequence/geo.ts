@@ -37,7 +37,7 @@ import type { TextRun } from './text-block-geo.js';
 import type { ParticipantGeo } from './geo-participant.js';
 import type { MessageGeo, ActivationGeo } from './geo-message.js';
 import type { FrameGeo } from './geo-frame.js';
-import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo } from './geo-annotation.js';
+import type { NoteGeo, DividerGeo, SpaceGeo, NewpageGeo, BoxGeo, DelayGeo, LifelineSegment } from './geo-annotation.js';
 
 export type { TextRun };
 export type * from './geo-participant.js';
@@ -45,7 +45,7 @@ export type * from './geo-message.js';
 export type * from './geo-frame.js';
 export type * from './geo-annotation.js';
 
-export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo;
+export type EventGeo = MessageGeo | NoteGeo | ActivationGeo | FrameGeo | DividerGeo | SpaceGeo | NewpageGeo | DelayGeo;
 
 export interface SequenceGeometry {
   totalWidth: number;
@@ -68,9 +68,29 @@ export interface SequenceGeometry {
    * layout about where the body begins.
    */
   headHeight: number;
+  /**
+   * Where every lifeline (and its hover rect) stops. Upstream draws the
+   * lifelines over the WHOLE diagram (`livingSpaces.drawLifeLines(ugBody,
+   * fullHeight, context)`, `PlayingSpaceWithParticipants.java:221`) and lets
+   * the page's `UClip` trim them (`:213-216`), so on a `newpage` page this is
+   * the clip's bottom edge, `pageHeight + 1` below the page top, and NOT the
+   * footbox row's top -- see `footerShapeY`.
+   */
   lifelineEndY: number;
-  /** Y where non-rectangular footer shapes (actor, database) start.
-   *  Equals lifelineEndY + label-zone height so the label appears above the shape. */
+  /**
+   * Each participant's lifeline, by id, cut at every delay
+   * (`MutingLine#drawLine`) and started at its `createY` when it was created
+   * (`LivingSpace#drawLineAndLiveboxes`). Present only when the diagram has
+   * a delay or a create; absent means one `PARTICIPANT_LINE` from
+   * `headHeight` to `lifelineEndY` for everyone.
+   */
+  lifelineSegments?: Readonly<Record<string, readonly LifelineSegment[]>>;
+  /**
+   * The top of the footbox row: `UTranslate.dy(pageHeight + headHeight)`
+   * (`PlayingSpaceWithParticipants.java:225-226`). Equal to `lifelineEndY`
+   * except on a `newpage` page that is not the last, where the clip's `+ 1`
+   * leaves the lifelines one pixel BELOW it.
+   */
   footerShapeY: number;
   /** Background rectangles for box groups (rendered at z=0, behind lifelines). */
   boxes: BoxGeo[];

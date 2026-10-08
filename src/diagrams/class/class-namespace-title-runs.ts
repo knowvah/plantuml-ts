@@ -16,14 +16,18 @@ import { FontStyle } from '../../core/klimt/shape/UText.js';
 import { buildLineAtoms } from '../../core/klimt/creole/legacy/StripeSimple.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import type { SpriteDimsLookup, DrawablePrimitive } from '../../core/creole-atoms.js';
-import type { SpriteRegistry } from '../../core/sprite-commands.js';
+import { spriteDimsLookupFor, type SpriteRegistry } from '../../core/sprite-commands.js';
 import { atomFontSpec } from './class-member-creole-sea.js';
 import { resolveInlineAtom } from './class-member-atom-resolve.js';
-import { text, image, linkWrap } from '../../core/svg.js';
+import { text, linkWrap } from '../../core/svg.js';
 import { manageGuillemet } from '../../core/text/Guillemet.js';
 import type { CreoleAtomUrl } from '../../core/klimt/creole/atom/Atom.js';
 import { renderMemberRowDrawable } from './class-member-sprite-render.js';
-import { isTransparentColor } from '../../core/paint.js';
+import { isTransparentColor, type Paint } from '../../core/paint.js';
+import type { SpriteTint } from '../../core/klimt/sprite/sprite-tint.js';
+import { titleImage, type TitleRunsDraw } from './class-namespace-title-image.js';
+
+export type { TitleRunsDraw } from './class-namespace-title-image.js';
 
 /** `USymbolFolder#asBig`'s title local vertical offset before ANY text
  *  starts (`title.drawU(ug.apply(new UTranslate(4, 2)))`) — the "+2" every
@@ -105,7 +109,14 @@ export type NamespaceTitleRun =
        *  draw wraps it in `<a>` (`SvgGraphics#openLink`). */
       readonly url?: CreoleAtomUrl;
     }
-  | { readonly kind: 'image'; readonly href: string; readonly width: number; readonly height: number }
+  | {
+      readonly kind: 'image';
+      readonly href: string;
+      readonly width: number;
+      readonly height: number;
+      /** unwind2-S7: a monochrome sprite's deferred tint (`sprite-tint.ts`). */
+      readonly tint?: SpriteTint;
+    }
   /** C-4 (cdd3-T23): an SVG-backed `<$sprite>` title run -- the SAME
    *  `'drawable'` kind `class-member-render-atom.ts#MemberRenderAtom` now
    *  carries, widened onto this union by `resolveInlineAtom`'s own return
@@ -242,8 +253,13 @@ export function namespaceTitleLines(
   sprites?: SpriteRegistry,
   spriteDims?: SpriteDimsLookup,
 ): readonly NamespaceTitleLine[] {
+  // unwind2-S11: `ClusterHeader#getTitleBlock`'s `label.create(fc, align,
+  // skinParam)` (`ClusterHeader.java:128`) resolves `<$sprite>` through
+  // `skinParam.getSprite` (`StripeSimple.java:229`) -- `Theme#sprites`.
+  const registry = sprites ?? theme.sprites;
+  const dims = spriteDims ?? (registry !== undefined ? spriteDimsLookupFor(registry) : undefined);
   return splitDisplayLines(label).lines.map((line) => {
-    const runs = namespaceTitleRuns(line, theme, sprites, spriteDims);
+    const runs = namespaceTitleRuns(line, theme, registry, dims);
     let width = 0;
     let fontSize = 0;
     let nominalFontSize = 0;
@@ -332,12 +348,14 @@ export function renderNamespaceTitleBlock(
   baselines: readonly number[],
   blockTopY: number,
   xForLine: (line: NamespaceTitleLine) => number,
-  measurer: StringMeasurer,
+  draw: TitleRunsDraw,
 ): string {
   let out = '';
+  let bottom = blockTopY;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!;
-    out += renderNamespaceTitleRuns(xForLine(line), blockTopY + baselines[i]!, line.runs, measurer);
+    bottom += line.fontSize;
+    out += renderNamespaceTitleRuns(xForLine(line), { y: blockTopY + baselines[i]!, bottom }, line.runs, draw);
   }
   return out;
 }
@@ -356,15 +374,17 @@ export function renderNamespaceTitleBlock(
  *  the ONE other place this port aligns an image atom to a text baseline. */
 export function renderNamespaceTitleRuns(
   x0: number,
-  y: number,
+  at: { readonly y: number; readonly bottom: number },
   runs: readonly NamespaceTitleRun[],
-  measurer: StringMeasurer,
+  draw: TitleRunsDraw,
 ): string {
+  const { y } = at;
+  const { measurer } = draw;
   let x = x0;
   let out = '';
   for (const run of runs) {
     if (run.kind === 'image') {
-      out += image(x, y - run.height, run.width, run.height, run.href);
+      out += titleImage(run, x, at.bottom, draw.back);
       x += run.width;
       continue;
     }
@@ -409,6 +429,8 @@ export interface NamespaceTitleRenderInput {
   readonly theme: Theme;
   readonly measurer: StringMeasurer | undefined;
   readonly blockTopY: number;
+  /** unwind2-S11: the cluster's back ({@link TitleRunsDraw}). */
+  readonly back?: Paint | undefined;
 }
 
 /** {@link renderNamespaceTitleAuto}'s single-line/single-run FALLBACK draw
@@ -442,7 +464,7 @@ export function renderNamespaceTitleAuto(
   fallback: NamespaceTitleFallback,
   xForLine: (line: NamespaceTitleLine) => number,
 ): string {
-  const { label, theme, measurer, blockTopY } = input;
+  const { label, theme, measurer, blockTopY, back } = input;
   const lines = measurer === undefined ? [] : namespaceTitleLines(measurer, theme, label);
   const soleRun = lines.length <= 1 ? lines[0]?.runs[0] : undefined;
   // cdd5-T5c: a url run carries its own colour/underline/link, so it takes
@@ -468,5 +490,5 @@ export function renderNamespaceTitleAuto(
     });
   }
   const baselines = namespaceTitleLineBaselines(measurer!, theme, lines);
-  return renderNamespaceTitleBlock(lines, baselines, blockTopY, xForLine, measurer!);
+  return renderNamespaceTitleBlock(lines, baselines, blockTopY, xForLine, { measurer: measurer!, back });
 }

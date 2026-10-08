@@ -18,12 +18,13 @@ import { UText, getFont, type FontConfiguration } from '../klimt/shape/UText.js'
 import { renderLatexAsImage } from '../latex.js';
 import { emojiSquareDim } from '../klimt/creole/atom/AtomEmoji.js';
 import { drawEmojiAtom } from '../svek/image/EntityImageDescriptionEmoji.js';
-import { atomTextWidth } from '../klimt/creole/legacy/AtomText.js';
+import { atomTextWidth, layoutTabbedText } from '../klimt/creole/legacy/AtomText.js';
 import type { AtomImageResolver } from '../creole-atoms.js';
 import type { CreoleAtom, CreoleAtomUrl } from '../klimt/creole/atom/Atom.js';
 import type { Atom } from '../klimt/creole/SheetBlock1.js';
 import type { StringBounder } from '../klimt/font/StringBounder.js';
 import type { UGraphic } from '../klimt/UGraphic.js';
+import { spriteHrefOver } from '../klimt/sprite/sprite-tint.js';
 
 /** `'kind' in x` duck-typing of the plain-data `CreoleAtom` union vs a
  *  composite OOP `Atom` (`AtomTable`/`AtomTree`/`AtomMath`/…) —
@@ -126,7 +127,10 @@ function drawAtomImage(resolved: ResolvedAtomImageWithRaster, ug: UGraphic): voi
       resolved.rasterWidth !== undefined && resolved.rasterHeight !== undefined
         ? { rasterWidth: resolved.rasterWidth, rasterHeight: resolved.rasterHeight }
         : undefined;
-    ug.draw(UImage.build(resolved.width, resolved.height, resolved.href, raster));
+    // `SpriteMonochrome.java:216`: tinted over the drawing context's back.
+    ug.draw(
+      UImage.build(resolved.width, resolved.height, spriteHrefOver(resolved, ug.getParam().getBackcolor()), raster),
+    );
     return;
   }
   for (const primitive of resolved.primitives) {
@@ -140,12 +144,19 @@ function drawAtomImage(resolved: ResolvedAtomImageWithRaster, ug: UGraphic): voi
 
 const DESCENT_DIVISOR = 4.5; // WidthTableMeasurer/FixedMeasurer#getDescent's own size/4.5 (measurer.ts).
 
+/** `AtomText#drawU` (java:210-231): the baseline `ypos` is the WHOLE run's
+ *  `height - descent`; the run then tokenizes on tabs and draws each non-tab
+ *  token at its own tab-stop `x` ({@link layoutTabbedText}). */
 function drawTextAtom(atom: CreoleAtom & { kind: 'text' }, ug: UGraphic): void {
   const stringBounder = ug.getStringBounder();
   const font = measuringFont(atom.font);
   const dim = stringBounder.calculateDimension(font, atom.text);
   const descent = stringBounder.getDescent?.(font, atom.text) ?? font.size / DESCENT_DIVISOR;
-  ug.apply(new UTranslate(0, dim.getHeight() - descent)).draw(UText.build(atom.text, atom.font));
+  const ypos = dim.getHeight() - descent;
+  const widthOf = (s: string): number => stringBounder.calculateDimension(font, s).getWidth();
+  for (const token of layoutTabbedText(atom.text, font.size, widthOf).tokens) {
+    ug.apply(new UTranslate(token.x, ypos)).draw(UText.build(token.text, atom.font));
+  }
 }
 
 /** `AtomText#drawU` brackets its runs with `ug.startUrl(url)` /

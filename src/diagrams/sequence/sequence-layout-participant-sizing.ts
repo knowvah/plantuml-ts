@@ -63,14 +63,19 @@ const DB_TEXT_PADDING_X = 3;
  * - `collections` — not here: it is the plain participant rule plus
  *   `getDeltaCollection()`, applied by the caller.
  */
-export function symbolPreferredWidth(type: ParticipantType, blockWidth: number, theme: Theme): number | undefined {
+export function symbolPreferredWidth(
+  type: ParticipantType,
+  blockWidth: number,
+  theme: Theme,
+  shadow = 0,
+): number | undefined {
   switch (type) {
     case 'actor':
     case 'database':
     case 'boundary':
     case 'control':
     case 'entity':
-      return Math.max(measureParticipantSymbol(type, theme).width, blockWidth + DB_TEXT_PADDING_X * 2);
+      return Math.max(measureParticipantSymbol(type, theme, shadow).width, blockWidth + DB_TEXT_PADDING_X * 2);
     case 'queue':
       return measureParticipantSymbol('queue', theme).width + blockWidth;
     default:
@@ -82,8 +87,14 @@ export function symbolPreferredWidth(type: ParticipantType, blockWidth: number, 
  *  height to `getTextHeight()`, which is the text block plus a vertical
  *  padding of 0 for the four stacked kinds
  *  (`ComponentRoseDatabase.java:62-63,:96-99`) and the queue margin's own
- *  5 + 5 for `queue` (`USymbolQueue.java:131`). */
-export function symbolPreferredHeight(type: ParticipantType, blockHeight: number, theme: Theme): number | undefined {
+ *  5 + 5 for `queue` (`USymbolQueue.java:131`). `shadow` reaches only the
+ *  actor glyph's own dimension (`ActorStickMan.java:121`). */
+export function symbolPreferredHeight(
+  type: ParticipantType,
+  blockHeight: number,
+  theme: Theme,
+  shadow = 0,
+): number | undefined {
   switch (type) {
     case 'actor':
     case 'database':
@@ -91,7 +102,7 @@ export function symbolPreferredHeight(type: ParticipantType, blockHeight: number
     case 'control':
     case 'entity':
     case 'queue':
-      return measureParticipantSymbol(type, theme).height + blockHeight;
+      return measureParticipantSymbol(type, theme, shadow).height + blockHeight;
     default:
       return undefined;
   }
@@ -106,7 +117,7 @@ export function symbolPreferredHeight(type: ParticipantType, blockHeight: number
 // .md` names disagreement between them as this project's recurring defect
 // class. They were the renderer's private helpers until A3 gave layout the job
 // of placing the runs; the footer still needs them at render time, because a
-// foot block's own top is `lifelineEndY`, which is not known when the head is
+// foot block's own top is `footerShapeY`, which is not known when the head is
 // built.
 
 /** `getDeltaCollection()` -- how far the FRONT rectangle of a `collections`

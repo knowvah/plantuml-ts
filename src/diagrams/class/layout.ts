@@ -56,6 +56,7 @@ import {
   degenerateSingleClassifier,
 } from './class-geo-builders.js';
 import type { ClassGeometry, ClassLeafGeo } from './class-geo-types.js';
+import { tabStopMeasurer } from '../../core/klimt/creole/legacy/AtomText.js';
 
 export { formatMemberText, ROW_TEXT_LEFT_MARGIN } from './class-layout-helpers.js';
 export {
@@ -340,7 +341,8 @@ export function layoutSinglePage(ast: ClassDiagramAST, theme: Theme, measurer: S
     inNodeMapOrder(result, dotGraph), // cdd3-T16: `Bibliotekon#allNodes`
     swappedEdges,
     {
-      measurer,
+      // unwind2-S3: link-label lines are `AtomText` runs -- tab-stop widths.
+      measurer: tabStopMeasurer(measurer),
       labelFont: resolveArrowLabelFont(theme),
       fontFamily: theme.fontFamily,
       // cdd-T6 (A2a/M2): the SAME `skinparam classAttributeIconSize`
@@ -472,7 +474,10 @@ export { classPageAst, classPageCount, sliceClassGeometryPage } from './class-la
  * @param measurer - Text measurement implementation.
  * @returns        Pixel geometry for all classifiers, edges, and namespaces.
  */
-export function layoutClass(ast: ClassDiagramAST, theme: Theme, measurer: StringMeasurer): ClassGeometry {
+export function layoutClass(ast: ClassDiagramAST, skinTheme: Theme, measurer: StringMeasurer): ClassGeometry {
+  // unwind2-S11: a cluster title reads the diagram's own `sprite` map
+  // through its skin param (`StripeSimple.java:229`), `Theme#sprites` here.
+  const theme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
   const geo =
     ast.pages !== undefined ? layoutMultiPage(ast.pages, theme, measurer) : layoutSinglePage(ast, theme, measurer);
   // cdd-T30/cdd3-T34 (C-10): `theme.dpi` default 96 (`Theme.dpi`'s doc

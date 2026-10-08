@@ -40,3 +40,25 @@ export function jsonFamilyStyleInput(preprocessed: PreprocessorResult, source: U
       : { ...order, skinparam: new Map([...order.skinparam].filter(([key]) => skinparam.has(key))) };
   return { ...preprocessed, skinparam, ...(declarationOrder === undefined ? {} : { declarationOrder }) };
 }
+
+/**
+ * {@link jsonFamilyStyleInput} for `@starthcl`, which also drops every input
+ * of `StyleExtractor#applyStyles` (`StyleExtractor.java:114-138`): the
+ * `<style>` blocks, `skin`, and a `!theme`'s base layer (its `<style>`
+ * residue). `JsonDiagramFactory.java:99-101` and `YamlDiagramFactory.java:
+ * 96-98` call `applyStyles`; `HclDiagramFactory.java:86-92` has the call
+ * commented out, so an HCL diagram always renders the default style. Jar:
+ * `tests/fixtures/unwind2-S2/hcl-style-*`, `hcl-theme-amiga`.
+ */
+export function hclStyleInput(preprocessed: PreprocessorResult, source: UmlSource): PreprocessorResult {
+  const familyInput = jsonFamilyStyleInput(preprocessed, source);
+  const order = familyInput.declarationOrder;
+  return {
+    ...familyInput,
+    theme: null,
+    skin: undefined,
+    styles: [],
+    stylePositions: [],
+    ...(order === undefined ? {} : { declarationOrder: { ...order, styles: [] } }),
+  };
+}

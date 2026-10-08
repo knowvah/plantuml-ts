@@ -6,6 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseJson } from '../../../src/diagrams/json/parser.js';
 import { isEmpty } from '../../../src/core/annotations/index.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 function parse(lines: string[]) {
   return parseJson({ lines, type: 'json' as const });
@@ -17,7 +18,7 @@ describe('parseJson — directive lines (unwind-U1)', () => {
   it('single-line `title X` populates annotations.title, not the JSON body', () => {
     const ast = parse(['title My JSON', '{"a": 1}']);
     expect(ast.annotations?.title.display).toEqual(['My JSON']);
-    expect(ast.root).toEqual({ a: 1 });
+    expect(plainOf(ast.root)).toEqual({ a: 1 });
   });
 
   it('keeps quotes in the title text (jar: unwind-U1/json-title-quoted)', () => {
@@ -47,6 +48,6 @@ describe('parseJson — directive lines (unwind-U1)', () => {
   it('annotation-free fixture parses identically (no chrome, empty annotations)', () => {
     const ast = parse(['{"a": 1}']);
     expect(isEmpty(ast.annotations!)).toBe(true);
-    expect(ast.root).toEqual({ a: 1 });
+    expect(plainOf(ast.root)).toEqual({ a: 1 });
   });
 });

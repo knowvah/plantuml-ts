@@ -3,6 +3,7 @@ import { parseYaml } from '../../../src/diagrams/yaml/parser.js';
 import { renderSync } from '../../../src/index.js';
 import { isDisplayPositionedNull } from '../../../src/core/annotations/index.js';
 import type { UmlSource } from '../../../src/core/block-extractor.js';
+import { plainOf } from '../../helpers/json-object.js';
 
 function makeSource(lines: string[]): UmlSource {
   return { lines, type: 'yaml' };
@@ -20,25 +21,25 @@ describe('parseYaml', () => {
 
   it('parses simple key-values into an object', () => {
     const ast = parseYaml(makeSource(['fruit: Apple', 'size: Large']));
-    expect(ast.root).toEqual({ fruit: 'Apple', size: 'Large' });
+    expect(plainOf(ast.root)).toEqual({ fruit: 'Apple', size: 'Large' });
   });
 
   it('parses nested objects', () => {
     const ast = parseYaml(makeSource(['metadata:', '  name: foo', '  namespace: bar']));
-    expect(ast.root).toEqual({ metadata: { name: 'foo', namespace: 'bar' } });
+    expect(plainOf(ast.root)).toEqual({ metadata: { name: 'foo', namespace: 'bar' } });
   });
 
   it('returns root null and parseError for empty source', () => {
     // An empty payload converts to null (MonomorphToJson.java:44-52), drawn
     // as the error page (JsonDiagram.java:116-122; jar: unwind-U1/yaml-title-only).
     const ast = parseYaml(makeSource([]));
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
     expect(ast.parseError).toBe(true);
   });
 
   it('returns root null for source with only blank lines', () => {
     const ast = parseYaml(makeSource(['', '   ', '']));
-    expect(ast.root).toBeNull();
+    expect(plainOf(ast.root)).toBeNull();
   });
 
   // -------------------------------------------------------------------------
@@ -48,7 +49,7 @@ describe('parseYaml', () => {
   it('extracts title directive before body into annotations.title (mission G0b/T8)', () => {
     const ast = parseYaml(makeSource(['title My Title', 'foo: bar']));
     expect(ast.annotations?.title.display).toEqual(['My Title']);
-    expect(ast.root).toEqual({ foo: 'bar' });
+    expect(plainOf(ast.root)).toEqual({ foo: 'bar' });
   });
 
   it('title is absent (null DisplayPositioned) when not present', () => {
@@ -62,12 +63,12 @@ describe('parseYaml', () => {
 
   it('strips skinparam directive before body', () => {
     const ast = parseYaml(makeSource(['skinparam handwritten true', 'foo: bar']));
-    expect(ast.root).toEqual({ foo: 'bar' });
+    expect(plainOf(ast.root)).toEqual({ foo: 'bar' });
   });
 
   it('strips scale directive before body', () => {
     const ast = parseYaml(makeSource(['scale 2', 'foo: bar']));
-    expect(ast.root).toEqual({ foo: 'bar' });
+    expect(plainOf(ast.root)).toEqual({ foo: 'bar' });
   });
 
   // -------------------------------------------------------------------------
@@ -76,7 +77,7 @@ describe('parseYaml', () => {
 
   it('strips <style> block before parsing', () => {
     const ast = parseYaml(makeSource(['<style>', 'yamlDiagram { }', '</style>', 'foo: bar']));
-    expect(ast.root).toEqual({ foo: 'bar' });
+    expect(plainOf(ast.root)).toEqual({ foo: 'bar' });
   });
 
   // -------------------------------------------------------------------------
@@ -85,7 +86,7 @@ describe('parseYaml', () => {
 
   it('ignores @startyaml and @endyaml wrapper lines defensively', () => {
     const ast = parseYaml(makeSource(['@startyaml', 'fruit: Apple', '@endyaml']));
-    expect(ast.root).toEqual({ fruit: 'Apple' });
+    expect(plainOf(ast.root)).toEqual({ fruit: 'Apple' });
   });
 
   // -------------------------------------------------------------------------

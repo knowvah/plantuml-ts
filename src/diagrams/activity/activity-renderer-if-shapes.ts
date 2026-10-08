@@ -23,6 +23,10 @@ import { HEXAGON_HALF_SIZE } from './layout/hexagon-reservations.js'; // Hexagon
 import { actColors } from './activity-renderer-shapes.js';
 import { ifLabelBlock, renderDiamondTestLabel } from './activity-text-sheet-diamond.js';
 import { drawActivityTextBlock } from './activity-text-sheet.js';
+import type { UChange } from '../../core/klimt/UChange.js';
+import { Fore } from '../../core/klimt/Fore.js';
+import { Back } from '../../core/klimt/Back.js';
+import { UStroke } from '../../core/klimt/UStroke.js';
 
 /**
  * The merge rhombus (`diamond2`, D2) -- `FtileDiamond#drawU`'s
@@ -119,7 +123,22 @@ export function renderDiamond(node: ActivityNodeGeo, theme: Theme): string {
  */
 export function renderIfLabel(node: ActivityNodeGeo, theme: Theme): string {
   const { tb, fc } = ifLabelBlock(node, theme);
-  return drawActivityTextBlock(tb, node, theme, fc);
+  return drawActivityTextBlock(tb, node, theme, fc, node.onDiamondBack === true ? diamondSlotChanges(theme) : []);
+}
+
+/** unwind2-S11: `FtileDiamondInside#drawU`'s `ug.apply(borderColor).apply(
+ *  getStyle().getStroke()).apply(backColor.bg())` (`FtileDiamondInside.java:
+ *  85`), the `ug` its north/south/west/east slots draw with (`:88-89,
+ *  98-102`; `FtileDiamondInside2`/`FtileDiamondSquare` alike). The walkers
+ *  never colour a diamond (`if-split` carries no `color`), so its back is
+ *  the style's `diamondFill`. */
+function diamondSlotChanges(theme: Theme): UChange[] {
+  const c = actColors(theme);
+  return [
+    new Fore(c.diamondBorder),
+    UStroke.withThickness(activityLineThickness(theme, 'diamond')),
+    new Back(c.diamondFill),
+  ];
 }
 
 /**

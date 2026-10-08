@@ -27,6 +27,7 @@ import {
   exoArrowRightCommand,
 } from '../../../src/diagrams/sequence/command-exo-arrow.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
+import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -66,6 +67,7 @@ function freshState(): ParseState {
     currentBox: null,
     boxCounter: 0,
     executionError: undefined,
+    life: newLifeState(),
   };
 }
 

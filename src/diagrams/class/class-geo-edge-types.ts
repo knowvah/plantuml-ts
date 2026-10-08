@@ -4,6 +4,7 @@
  * cap -- a pure move (same precedent as `NamespaceGeo`/`ClassGeometry`/
  * `JsonBodyItem`), re-exported from there so no import path changed.
  */
+import type { EdgeLabelRun } from './class-edge-label-sprite-runs.js';
 import type { LinkDecor, UrlInfo } from './ast.js';
 import type { MiddleDecor } from './class-arrow-middle-decor.js';
 import type {
@@ -54,6 +55,10 @@ export interface EdgeGeo {
      *  `undefined` (the overwhelming majority) renders with no
      *  `text-decoration`, unchanged. */
     underline?: boolean;
+    /** unwind2-S11: a text+`<$sprite>` label's atoms in draw order
+     *  (`class-edge-label-sprite-runs.ts`); `x`/`y` stay the line's left/
+     *  baseline anchor. */
+    runs?: readonly EdgeLabelRun[];
   };
   /** T2d (kexaba-26-kobu577): present INSTEAD OF {@link label} when the
    *  relationship's text is ENTIRELY one `<$sprite>` inline atom

@@ -1,0 +1,12 @@
+@startuml
+<style>
+root {
+  FontColor #FF0000
+  LineColor #00AA00
+}
+</style>
+!theme amiga
+class A
+class B
+A --> B : uses
+@enduml

@@ -17,6 +17,7 @@ import { parseSequence } from '../../../src/diagrams/sequence/parser.js';
 import type { SequenceDiagramAST } from '../../../src/diagrams/sequence/ast.js';
 import { makeDefaultAST, type ParseState } from '../../../src/diagrams/sequence/sequence-parse-helpers.js';
 import { matchParticipantMultilineCommand } from '../../../src/diagrams/sequence/command-participant.js';
+import { newLifeState } from '../../../src/diagrams/sequence/sequence-life-state.js';
 
 function parse(lines: string[]): SequenceDiagramAST {
   const result = parseSequence(lines);
@@ -41,6 +42,7 @@ function freshState(): ParseState {
     currentBox: null,
     boxCounter: 0,
     executionError: undefined,
+    life: newLifeState(),
   };
 }
 
@@ -63,7 +65,7 @@ describe('participantCommand', () => {
 
 describe('createCommand', () => {
   it('declares a plain participant', () => {
-    const ast = parse(['create Dog', 'Dog -> Dog : bark']);
+    const ast = parse(['create Dog', 'Cat -> Dog : bark']);
     expect(ast.participants[0]).toMatchObject({ id: 'Dog', type: 'participant' });
   });
 });

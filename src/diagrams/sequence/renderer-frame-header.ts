@@ -16,11 +16,13 @@ import type { ScaledTheme } from './scale-geo.js';
 import { rect, path } from '../../core/svg-shapes.js';
 import { sequenceText } from './sequence-text.js';
 import { moveTo, lineTo, arcTo } from '../../core/svg-path-builder.js';
+import { frameShadowDelta, sequenceShadowFilter } from './sequence-shadow.js';
 import {
   GROUP_LINE_COLOR,
   GROUP_LINE_THICKNESS,
   HEADER_LINE_COLOR,
   HEADER_LINE_THICKNESS,
+  REFERENCE_HEADER_LINE_THICKNESS,
   HEADER_FONT_SIZE,
   HEADER_FONT_BOLD,
   CORNER_SIZE,
@@ -138,8 +140,12 @@ export function frameHeaderCornerPath(
  * `HColors.transparent()` (`:80`), so this is `fill="none"` with a stroked
  * outline -- `symbolContext` is `style.getSymbolContext()`, i.e. the
  * "group" style block (`plantuml.skin:116-121`), not `styleHeader`.
- * `rect.setDeltaShadow(...)` (`:131`) is deliberately NOT ported -- see
- * decisions.md and `DIVERGENCES.md` (T8).
+ * `rect.setDeltaShadow(symbolContext.getDeltaShadow())` (`:131`) is that
+ * style's merged `Shadowing` (`core/sequence-frame-shadow.ts`); only this
+ * background rect carries it -- `drawInternalU`'s second rect (`:144-147`)
+ * sets none, and neither does `groupHeader`'s corner `UPath` (`:142`).
+ * Jar-verified: `tests/fixtures/unwind2-S9/style-groupheader.svg` draws no
+ * filter at all.
  *
  * A `ref` frame draws NOTHING here. Upstream builds it as a `ReferenceTile`
  * (`TileBuilder.java:174-176`), not a `GroupingTile`, and its component
@@ -158,6 +164,7 @@ export function renderGroupingHeaderBackground(frame: FrameGeo, theme: ScaledThe
     strokeWidth: GROUP_LINE_THICKNESS * k,
     rx: ROUND_CORNER * k,
     ry: ROUND_CORNER * k,
+    ...sequenceShadowFilter(frameShadowDelta(frame, theme)),
   });
 }
 
@@ -174,10 +181,11 @@ function renderHeaderCorner(frame: FrameGeo, theme: ScaledTheme): string {
     CORNER_SIZE * k,
     ROUND_CORNER * k,
   );
+  const thickness = frame.frameType === 'ref' ? REFERENCE_HEADER_LINE_THICKNESS : HEADER_LINE_THICKNESS;
   return path(cornerD, {
     fill: HEADER_BACKGROUND_HEX,
     stroke: HEADER_LINE_COLOR,
-    strokeWidth: HEADER_LINE_THICKNESS * k,
+    strokeWidth: thickness * k,
   });
 }
 
@@ -231,6 +239,27 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
 }
 
 /**
+ * The foreground pass's full-area rect. A grouping frame's carries no shadow
+ * (`ComponentRoseGroupingHeader.java:144-147` builds it without
+ * `setDeltaShadow`). A `ref`'s does: `ComponentRoseReference#drawInternalU`
+ * narrows the rect by the body style's `getDeltaShadow()` and shadows it
+ * (`ComponentRoseReference.java:89-96`), the width its `getPreferredWidth`
+ * added back (`:155-159`, `ref-body-geo.ts#refBodyWidth`).
+ */
+function renderBodyRect(frame: FrameGeo, theme: ScaledTheme): string {
+  const k = theme.scaleK;
+  const delta = frame.frameType === 'ref' ? frameShadowDelta(frame, theme) : 0;
+  return rect(frame.x, frame.y, frame.width - delta * k, frame.height, {
+    fill: 'none',
+    stroke: GROUP_LINE_COLOR,
+    strokeWidth: GROUP_LINE_THICKNESS * k,
+    rx: ROUND_CORNER * k,
+    ry: ROUND_CORNER * k,
+    ...sequenceShadowFilter(delta),
+  });
+}
+
+/**
  * `ComponentRoseGroupingHeader#drawInternalU` (`:135-159`) -- the
  * foreground pass, in upstream's exact order: corner path, then the SAME
  * full-area rect the background pass drew (`:144-147`, using `symbolContext`
@@ -247,15 +276,8 @@ function renderHeaderText(frame: FrameGeo, theme: ScaledTheme): string {
  * with its own `xMargin`/`heightFooter` geometry is filed for T8.
  */
 export function renderGroupingHeaderForeground(frame: FrameGeo, theme: ScaledTheme): string {
-  const k = theme.scaleK;
   const cornerEl = renderHeaderCorner(frame, theme);
-  const bodyRectEl = rect(frame.x, frame.y, frame.width, frame.height, {
-    fill: 'none',
-    stroke: GROUP_LINE_COLOR,
-    strokeWidth: GROUP_LINE_THICKNESS * k,
-    rx: ROUND_CORNER * k,
-    ry: ROUND_CORNER * k,
-  });
+  const bodyRectEl = renderBodyRect(frame, theme);
   // The page clip took the tab: its `UPath` failed `DriverPathSvg`'s
   // min/max-corner test and its label `UText` failed `DriverTextSvg`'s
   // anchor test, so the body outline is all that is left of the header.

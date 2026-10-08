@@ -55,10 +55,10 @@
  *
  * `CommandReturn` (`:129`) lives here too. Upstream registers it in the
  * `CommandActivate2`/`CommandReturn` block after `CommandGrouping`, not
- * beside `CommandArrow`; it is filed here because it emits the same reply
- * `MessageEvent` off the same `lastMessageFrom`/`lastMessageTo` state the
- * arrow rules maintain (`CommandReturn.java:105-160` reverses the activating
- * message). Its registry position is unchanged by that filing.
+ * beside `CommandArrow`; it is filed here because it emits a reply
+ * `MessageEvent` built from the activating message the arrow rules push
+ * (`sequence-life-state.ts`; `CommandReturn.java:105-160`). Its registry
+ * position is unchanged by that filing.
  *
  * @see ~/git/plantuml/.../sequencediagram/command/CommandArrow.java:87-133,296-430
  * @see ~/git/plantuml/.../sequencediagram/SequenceDiagramFactory.java:111,129
@@ -67,6 +67,7 @@
 import type { MessageEvent } from './ast.js';
 import type { ArrowConfiguration, ArrowPart } from './sequence-arrowhead.js';
 import { isKnownColorToken } from './sequence-arrow-color.js';
+import { activate, addMessage, autoActivate, manageActivations } from './sequence-life-state.js';
 import {
   activationFlags,
   autoActivationFlags,
@@ -80,35 +81,7 @@ import {
   type ParseState,
 } from './sequence-parse-helpers.js';
 
-// ---------------------------------------------------------------------------
-// return
-// ---------------------------------------------------------------------------
-
-// 16. return — sends a reply back to the most recent message sender
-export const returnCommand: Command = {
-  pattern: /^return(?:\s+(.+))?\s*$/i,
-  execute(state, match) {
-    const label = match[1]?.trim() ?? '';
-    const from = state.lastMessageTo ?? '';
-    const to = state.lastMessageFrom ?? '';
-    ensureParticipant(state, from);
-    ensureParticipant(state, to);
-    // Upstream inherits the ACTIVATING message's configuration and only dots
-    // its body -- `message1.getArrowConfiguration().withBody(DOTTED)`
-    // (`CommandReturn.java:120`). This port has no `getActivatingMessage()`
-    // yet, so it emits the dotted plain-head arrow the spike always emitted.
-    // @see sequencediagram/command/CommandReturn.java:109-133
-    let msg: MessageEvent = {
-      kind: 'message',
-      from,
-      to,
-      label,
-      arrow: arrowConfigurationOf({ dashed: true }),
-    };
-    msg = applyAutonumber(state, msg);
-    emit(state, msg);
-  },
-};
+export { returnCommand } from './command-return.js'; // `CommandReturn`, split out
 
 // ---------------------------------------------------------------------------
 // The composed regex — split into `sequence-arrow-compose.ts` to stay under
@@ -469,7 +442,11 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
   const arrow = arrowOf(state, g, facts);
   if (state.executionError !== undefined) return;
   const activation = g['ACTIVATION'] ?? '';
-  const msg = applyAutonumber(state, {
+  // `diagram.activate(p2, CREATE)` BEFORE the message exists, result ignored
+  // (`CommandArrow.java:396-398`) -- so after a delay `**` creates nothing.
+  if (activation.startsWith('*')) activate(state.life, to, 'CREATE');
+  const auto = autoActivationFlags(state, activation, arrow, from, to);
+  const msg: MessageEvent = applyAutonumber(state, {
     kind: 'message',
     from,
     to,
@@ -481,8 +458,16 @@ function executeArrow(state: ParseState, match: RegExpExecArray): void {
     // declines whenever an explicit spec was written, so the two never both
     // fire and the spread order below is not what separates them.
     ...activationFlags(activation, from, to),
-    ...autoActivationFlags(state, activation, arrow, from, to),
+    ...auto,
   });
+  const error = addMessage(state.life, msg);
+  if (error !== undefined) {
+    state.executionError = error;
+    return;
+  }
+  if (activation !== '') manageActivations(state.life, activation, from, to);
+  else if (auto.activates !== undefined || auto.deactivates !== undefined)
+    autoActivate(state.life, arrow.dashed, from, to);
 
   state.lastMessageFrom = from;
   state.lastMessageTo = to;

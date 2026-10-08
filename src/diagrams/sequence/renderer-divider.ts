@@ -18,6 +18,13 @@ import {
   DIVIDER_LINE_THICKNESS,
 } from './divider-style.js';
 import { creoleRunText } from './renderer.js';
+import { sequenceShadowFilter } from './sequence-shadow.js';
+
+/** `ComponentRoseDivider` shadows both rectangles with its style's delta
+ *  (`ComponentRoseDivider.java:74,100,115`), adding no geometry. */
+function dividerShadow(theme: ScaledTheme): { readonly filter?: string } {
+  return sequenceShadowFilter(theme.colors.graph.sequenceShadowing?.divider ?? 0);
+}
 
 function renderDividerBand(divider: DividerGeo, theme: ScaledTheme): string {
   const k = theme.scaleK;
@@ -27,6 +34,7 @@ function renderDividerBand(divider: DividerGeo, theme: ScaledTheme): string {
     fill: DIVIDER_BACKGROUND,
     stroke: DIVIDER_BACKGROUND,
     strokeWidth: 1 * k,
+    ...dividerShadow(theme),
   });
   const ruleStyle = {
     stroke: DIVIDER_LINE_COLOR,
@@ -55,6 +63,7 @@ function renderDividerLabel(divider: DividerGeo, theme: ScaledTheme): string {
     fill: DIVIDER_BACKGROUND,
     stroke: DIVIDER_LINE_COLOR,
     strokeWidth: DIVIDER_LINE_THICKNESS * k,
+    ...dividerShadow(theme),
   });
   // One `<text>` per creole atom, as the jar's own multi-line text block emits
   // (C6). A5: each run carries a real BASELINE, resolved in layout against the

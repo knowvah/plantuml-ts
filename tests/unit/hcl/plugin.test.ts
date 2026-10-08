@@ -7,10 +7,13 @@ describe('hclPlugin', () => {
     expect(hclPlugin.type).toBe('hcl');
   });
 
-  it('renders a flat key-value HCL block to SVG', () => {
+  // HclParser.java:88 throws on a top-level `=`; the jar draws the error page
+  // (unwind2-S2, jar: tests/fixtures/unwind2-S2/hcl-top-assign-*).
+  it('renders a top-level key-value line as the HCL error page', () => {
     const svg = renderSync('@starthcl\nregion = "us-east-1"\n@endhcl');
-    expect(svg).toMatch(/^<svg/);
-    expect(svg).toContain('us-east-1');
+    // `\s`: the emitted spaces are NBSP (`core/svg-shapes.ts#text`).
+    expect(svg).toMatch(/>Your\sdata\sdoes\snot\ssound\slike\sHCL\sdata</u);
+    expect(svg).not.toContain('us-east-1');
   });
 
   it('renders a nested resource block to SVG', () => {
@@ -24,7 +27,7 @@ describe('hclPlugin', () => {
   });
 
   it('drops a leading title, as the jar does (HclDiagramFactory.java:86-92)', () => {
-    const svg = renderSync('@starthcl\ntitle My Title\nkey = "value"\n@endhcl');
+    const svg = renderSync('@starthcl\ntitle My Title\nr {\nkey = "value"\n}\n@endhcl');
     expect(svg).not.toContain('My Title');
     expect(svg).toContain('value');
   });
@@ -34,211 +37,27 @@ describe('hclPlugin', () => {
     expect(typeof svg).toBe('string');
   });
 
-  it('applies hcldiagram.node BackgroundColor style', () => {
+  // unwind2-S2: `HclDiagramFactory.java:86-92` never calls
+  // `styleExtractor.applyStyles`, so an hcl `<style>` is stripped and ignored.
+  // Jar: tests/fixtures/unwind2-S2/hcl-style-node.svg, hcl-style-document.svg.
+  it('ignores hcldiagram.node and document styles, as the jar does', () => {
     const src = [
       '@starthcl',
       '<style>',
       'hclDiagram {',
-      '  node {',
-      '    BackgroundColor "#ffcc00"',
-      '  }',
+      '  document { BackgroundColor "#abc" }',
+      '  node { BackgroundColor "#ffcc00" }',
       '}',
       '</style>',
-      'region = "us-east-1"',
+      'resource "r" {',
+      '  region = "us-east-1"',
+      '}',
       '@endhcl',
     ].join('\n');
     const svg = renderSync(src);
-    // G1c: hex colors canonicalize to uppercase.
-    expect(svg).toContain('#FC0');
-  });
-
-  it('applies hcldiagram.document background color', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  document {',
-      '    BackgroundColor "#abc"',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    // Canonicalized to the 6-digit form before the document shell, as class
-    // already does and as the jar writes it (its own root styles are
-    // unshortened -- `background:#FFFFFF`, never `#FFF`).
-    //
-    // There is no jar oracle for the VALUE here, because upstream applies no
-    // hcl style at all: `HclDiagramFactory` extracts the `<style>` block (so
-    // it is stripped from the content) but its `applyStyles` call is
-    // commented out (`HclDiagramFactory.java:86-88`). Verified rather than
-    // assumed -- on a body the jar's `HclParser` accepts, its output is
-    // byte-identical with and without a `<style>` block setting both
-    // document and node backgrounds. Honouring it is this port's documented
-    // deliberate divergence (DIVERGENCES.md, "Style selector support"), so
-    // the spelling follows the port's own convention.
-    expect(svg).toContain('#AABBCC');
-  });
-
-  it('applies all hcldiagram.node style properties', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  node {',
-      '    BackgroundColor "#abc"',
-      '    LineColor "#ff0000"',
-      '    LineThickness 2',
-      '    RoundCorner 5',
-      '    MaximumWidth 200',
-      '    HorizontalAlignment center',
-      '    FontColor "#123456"',
-      '    FontSize 14',
-      '    FontName "Arial"',
-      '    FontStyle bold',
-      '    FontWeight bold',
-      '    LineStyle dashed',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('applies hcldiagram.element style', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  element {',
-      '    BackgroundColor "#abc"',
-      '  }',
-      '}',
-      '</style>',
-      'key = "value"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('applies hcldiagram.arrow style properties', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  arrow {',
-      '    LineColor "#ff0000"',
-      '    LineThickness 2',
-      '    LineStyle dashed',
-      '  }',
-      '}',
-      '</style>',
-      'resource "aws_vpc" "main" {}',
-      'resource "aws_subnet" "sub" {}',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('applies hcldiagram.node.separator style properties', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  node {',
-      '    separator {',
-      '      LineColor "#ff0000"',
-      '      LineThickness 2',
-      '      LineStyle dashed',
-      '    }',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('covers hclElem bg-absent FALSE branch and hclNode bg-absent FALSE branch', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  element {',
-      '    LineColor "#ff0000"',
-      '  }',
-      '  node {',
-      '    LineColor "#ff0000"',
-      '    highlight {',
-      '      BackgroundColor "#ff0000"',
-      '    }',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('covers FALSE branches: empty style sections and non-numeric values', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  element {}',
-      '  arrow {',
-      '    LineThickness "not-a-number"',
-      '  }',
-      '  node {',
-      '    BackGroundColor ""',
-      '    LineThickness "bad"',
-      '    RoundCorner "bad"',
-      '    MaximumWidth "bad"',
-      '    FontSize "bad"',
-      '    HorizontalAlignment "diagonal"',
-      '    separator {',
-      '      LineThickness "bad"',
-      '    }',
-      '    highlight {}',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
-  });
-
-  it('applies hcldiagram.node.highlight style properties', () => {
-    const src = [
-      '@starthcl',
-      '<style>',
-      'hclDiagram {',
-      '  node {',
-      '    highlight {',
-      '      BackgroundColor "#abc"',
-      '      FontColor "#123456"',
-      '      FontStyle bold',
-      '    }',
-      '  }',
-      '}',
-      '</style>',
-      'region = "us-east-1"',
-      '@endhcl',
-    ].join('\n');
-    const svg = renderSync(src);
-    expect(svg).toMatch(/^<svg/);
+    expect(svg).toContain('us-east-1');
+    expect(svg).not.toContain('#FC0');
+    expect(svg).not.toContain('#AABBCC');
+    expect(svg).toContain('fill="#F1F1F1"');
   });
 });

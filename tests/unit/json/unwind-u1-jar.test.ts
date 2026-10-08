@@ -36,10 +36,8 @@ const DIR = join(dirname(fileURLToPath(import.meta.url)), '../../fixtures/unwind
  * its DIVERGENCES.md entry. Kept so the fixture still pins everything else.
  */
 const OTHER_DIVERGENCE: Readonly<Record<string, readonly string[]>> = {
-  // DIVERGENCES.md "Style selector support (limitation)": this port applies
-  // `<style>` in `@starthcl`; `HclDiagramFactory.java:86-87` never calls
-  // `applyStyles`. The red background is the attribute plus its fill rect.
-  'hcl-style': ['svg/@background', 'svg/g[1][childCount]'],
+  // `hcl-style` used to carry DIVERGENCES.md "Style selector support"; retired
+  // by unwind2-S2 (`HclDiagramFactory.java:86-92` never calls `applyStyles`).
 };
 
 /**

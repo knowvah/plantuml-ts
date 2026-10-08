@@ -4,11 +4,49 @@
  * `renderer-edge.ts` (cdd3-T33, 500-line hook cap) — a pure move,
  * re-exported from that file so no consumer's import path changed.
  */
+import { spriteTintHref } from '../../core/klimt/sprite/sprite-tint.js';
+import type { EdgeLabelRun } from './class-edge-label-sprite-runs.js';
 import { text, attrs, image } from '../../core/svg.js';
 import { formatDecimal, DEFAULT_SVG_DECIMALS } from '../../core/svg-format.js';
 import { resolveArrowLabelFont } from '../../core/arrow-label-font.js';
 import type { ScaledTheme } from './class-scale-geo.js';
 import type { EdgeGeo } from './layout.js';
+import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
+import { hasTabulation, layoutTabbedText } from '../../core/klimt/creole/legacy/AtomText.js';
+
+type LabelFontAttrs = ReturnType<typeof arrowLabelTextAttrs>;
+
+/** One `<text>` of a label line: its own x, text and `textLength`. */
+interface LabelTextRun {
+  readonly text: string;
+  readonly x: number;
+  readonly width: number;
+}
+
+/**
+ * unwind2-S3: a link-label line is ONE `AtomText` run, whose `drawU` draws
+ * one `<text>` per non-tab token at its tab stop (`AtomText.java:210-231`).
+ * The layout sized the line through the same walk (`tabStopMeasurer`), so
+ * only the split is left for draw time. The fonts here are the SCALED ones
+ * (`arrowLabelTextAttrs`), and the width table is linear in the size, so the
+ * walk lands on the scaled stops. A tab-free line (or a renderer handed no
+ * measurer) is the single run it always was.
+ */
+function labelTextRuns(
+  line: LabelTextRun,
+  font: LabelFontAttrs,
+  measurer: StringMeasurer | undefined,
+): readonly LabelTextRun[] {
+  if (measurer === undefined || !hasTabulation(line.text)) return [line];
+  const spec: FontSpec = {
+    family: font.fontFamily,
+    size: font.fontSize,
+    ...(font.fontWeight === '700' ? { weight: 'bold' as const } : {}),
+    ...(font.fontStyle === 'italic' ? { style: 'italic' as const } : {}),
+  };
+  const { tokens } = layoutTabbedText(line.text, spec.size, (s) => measurer.measure(s, spec).width);
+  return tokens.map((t) => ({ text: t.text, x: line.x + t.x, width: t.width }));
+}
 
 export function arrowLabelTextAttrs(theme: ScaledTheme): {
   fontSize: number;
@@ -56,6 +94,30 @@ export function magicArrowPolygon(points: ReadonlyArray<{ x: number; y: number }
     ['stroke-linejoin', 'miter'],
     ['stroke-miterlimit', 10],
   ])}/>`;
+}
+
+/** One `labelLines` entry's `<text>`s -- one per tab-stop token
+ *  ({@link labelTextRuns}). */
+function renderLabelLine(
+  line: NonNullable<EdgeGeo['labelLines']>[number],
+  font: LabelFontAttrs,
+  labelColor: string,
+  measurer: StringMeasurer | undefined,
+): string[] {
+  return labelTextRuns(line, font, measurer).map((run) =>
+    text(run.x, line.y, run.text, { fill: labelColor, ...font, lengthAdjust: 'spacing', textLength: run.width }),
+  );
+}
+
+/** S-8 (cdd2-T7): a per-line `<b>`/`**` override wins over the shared
+ *  arrow-font weight/style -- see `EdgeGeo.labelLines[].bold`/`.italic`'s
+ *  own doc comments (class-geo-types.ts). */
+function lineFontAttrs(base: LabelFontAttrs, line: { bold?: boolean; italic?: boolean }): LabelFontAttrs {
+  return {
+    ...base,
+    ...(line.bold === true ? { fontWeight: '700' as const } : {}),
+    ...(line.italic === true ? { fontStyle: 'italic' as const } : {}),
+  };
 }
 
 /**
@@ -107,8 +169,9 @@ export function magicArrowPolygon(points: ReadonlyArray<{ x: number; y: number }
  */
 export function renderEdgeMainLabel(
   geo: EdgeGeo,
-  labelFontAttrs: ReturnType<typeof arrowLabelTextAttrs>,
+  labelFontAttrs: LabelFontAttrs,
   labelColor: string,
+  measurer?: StringMeasurer,
 ): string[] {
   const parts: string[] = [];
   for (const line of geo.labelLines ?? []) {
@@ -117,21 +180,9 @@ export function renderEdgeMainLabel(
       if (glyph !== undefined) parts.push(glyph);
       if (line.text === '') continue;
     }
-    parts.push(
-      text(line.x, line.y, line.text, {
-        fill: labelColor,
-        ...labelFontAttrs,
-        // S-8 (cdd2-T7): a per-line `<b>`/`**` override wins over the
-        // shared arrow-font weight/style -- see `EdgeGeo.labelLines[]
-        // .bold`/`.italic`'s own doc comments (class-geo-types.ts).
-        ...(line.bold === true ? { fontWeight: '700' as const } : {}),
-        ...(line.italic === true ? { fontStyle: 'italic' as const } : {}),
-        lengthAdjust: 'spacing',
-        textLength: line.width,
-      }),
-    );
+    parts.push(...renderLabelLine(line, lineFontAttrs(labelFontAttrs, line), labelColor, measurer));
   }
-  if (geo.label !== undefined) parts.push(renderEdgeSingleLabel(geo.label, labelFontAttrs, labelColor));
+  if (geo.label !== undefined) parts.push(...renderEdgeSingleLabel(geo.label, labelFontAttrs, labelColor, measurer));
   // T2d (kexaba-26-kobu577): mutually exclusive with `geo.label` --
   // `attachEdgeLabel` sets at most one (`EdgeGeo.labelImage`'s own doc
   // comment).
@@ -157,16 +208,56 @@ function renderEdgeLabelImage(img: NonNullable<EdgeGeo['labelImage']>): string {
  *  unchanged. */
 export function renderEdgeSingleLabel(
   label: NonNullable<EdgeGeo['label']>,
-  labelFontAttrs: ReturnType<typeof arrowLabelTextAttrs>,
+  labelFontAttrs: LabelFontAttrs,
   labelColor: string,
-): string {
-  return text(label.x, label.y, label.text, {
-    fill: labelColor,
-    ...labelFontAttrs,
-    ...(label.fontSize !== undefined ? { fontSize: label.fontSize } : {}),
-    // T2d (rimeca-17-gice904): `EdgeGeo.label.underline`'s own doc comment.
-    ...(label.underline === true ? { textDecoration: 'underline' } : {}),
-    lengthAdjust: 'spacing',
-    textLength: label.width,
-  });
+  measurer?: StringMeasurer,
+): string[] {
+  const font: LabelFontAttrs =
+    label.fontSize !== undefined ? { ...labelFontAttrs, fontSize: label.fontSize } : labelFontAttrs;
+  if (label.runs !== undefined) return renderSpriteLabelRuns(label, label.runs, font, labelColor);
+  return labelTextRuns(label, font, measurer).map((run) =>
+    text(run.x, label.y, run.text, {
+      fill: labelColor,
+      ...font,
+      // T2d (rimeca-17-gice904): `EdgeGeo.label.underline`'s own doc comment.
+      ...(label.underline === true ? { textDecoration: 'underline' } : {}),
+      lengthAdjust: 'spacing',
+      textLength: run.width,
+    }),
+  );
+}
+
+/** A sprite's tint end is `forcedColor ?? fontColor` (`SpriteMonochrome
+ *  .java:216-217`) -- the label's own colour unless the markup forced one. */
+function runHref(run: Extract<EdgeLabelRun, { kind: 'image' }>, labelColor: string): string {
+  return run.tint === undefined
+    ? run.href
+    : spriteTintHref({ ...run.tint, color: run.tint.color ?? labelColor }, undefined);
+}
+
+/** unwind2-S11: a text+`<$sprite>` label (`class-edge-label-sprite-runs.ts`)
+ *  -- each text atom its own `<text>` on the shared baseline, each sprite
+ *  its `<image>` at `dy` from it, drawn at the raster's rounded size as a
+ *  class row image is (`renderer-classifier-rows.ts`). No `Back` is applied
+ *  before an edge label, so a monochrome sprite tints over white
+ *  (`SpriteMonochrome.java:181-182`). */
+function renderSpriteLabelRuns(
+  label: { readonly x: number; readonly y: number },
+  runs: readonly EdgeLabelRun[],
+  font: LabelFontAttrs,
+  labelColor: string,
+): string[] {
+  const parts: string[] = [];
+  let x = label.x;
+  for (const run of runs) {
+    if (run.kind === 'image') {
+      parts.push(image(x, label.y + run.dy, Math.round(run.width), Math.round(run.height), runHref(run, labelColor)));
+    } else if (run.text.trim() !== '') {
+      parts.push(
+        text(x, label.y, run.text, { fill: labelColor, ...font, lengthAdjust: 'spacing', textLength: run.width }),
+      );
+    }
+    x += run.width;
+  }
+  return parts;
 }

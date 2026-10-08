@@ -35,6 +35,67 @@ post-D7 measurements.
 
 ---
 
+## `unwind2` small groups 1–3 — DONE 2026-10-08 (branch `fix/unwind-small`, S1–S11)
+
+Mirror-the-jar unwinds, by user ruling: the packet spanning stub, HCL styles
+and parse errors, the json key cells and JsonObject members, tab stops, sequence
+delay ink, newpage clip, create/return, the `!theme` residue, the PNG bytes
+(pako), sprite tint over the element fill, bundled skins, the error-page logo
+and Arecibo image, frame and element shadows, the ref tile, sequence text
+`#000`, and creole sprites in every text path. The only remaining divergence
+added in these groups is the error page's clock-selected banners, which `src/`
+cannot draw because it reads no clock. Sequence Σ weightedScore fell from
+1,155,701 to about 308k with 0 rises; 1113 rows were re-pinned.
+
+**Follow-ons, all mirror defects:**
+- jucidi residuals (`.agent-notes/jucidi-mirror.md`):
+  - an elseif chain after `:receive;` crashes in snake-merge;
+  - the while backward box lane;
+  - the many-case switch label lane;
+  - the fork-merge top bar lane (`ParallelBuilderMerge.java:76`).
+- U4:
+  - engines that never draw `<$sprite>`;
+  - non-ND `<img>` re-encode. The jar decodes, resamples and re-encodes: 1 palette and 3 RGB jar PNGs (ticoxo, gabeme, kavama, kicizi).
+  - the top-level `Alice -> Bob : hi` 19-attribute diff.
+- U3: class members, description link labels and state transition labels skip `getWithNewlines`.
+- S2b:
+  - json/yaml title chrome offset;
+  - highlight paths through duplicated keys.
+- S3:
+  - map cells skip `getWithNewlines`;
+  - the object engine's private tab walk;
+  - sequence trailing tab;
+  - description multi-line labels are centred, where the jar left-aligns them.
+- S4:
+  - `destroy` does not end the lifeline;
+  - `CommandActivate2` (`X ++`/`X --`) is unported;
+  - "You cannot deactivate here" is missing;
+  - a single-line note after a message gets its own row;
+  - activated lifeline x (`LivingSpace#getPosC2`).
+- S4/S8: the refusal page names description/class where the jar names sequence. This is a tie-break in `dispatcher.ts`/`parse-refusal.ts`.
+- S5:
+  - root `Margin` is ignored by class/usecase/mindmap;
+  - sequence ignores root LineThickness/RoundCorner/LineColor and `SequenceLifeLineBorderColor`;
+  - the usecase actor label ignores root FontColor;
+  - the counter rule between two non-root selectors is not modelled.
+- S8:
+  - `@startfoo`/`@startjcckit` should draw `PSystemUnsupported`: `renderPSystemUnsupported` is ported but unreachable, and 7 goldens show it.
+  - sonyxperiadev residuals are engine style gaps: sequence participant/lifeLine/arrow styles, and root FontStyle in all engines.
+- S9b:
+  - `hnote` should be a hexagon polygon;
+  - multi-participant note text centring (`ComponentRoseNote.java:121-131`);
+  - participant `rx=2.5`;
+  - group frames should widen the canvas;
+  - `handwritten`;
+  - notes on a `ref`.
+- S9b: shadowing and frame styles are resolved once per document; upstream reads the style in force when each element's line runs.
+- S10: message label height should be the image height; note x padding is 10, where upstream uses 15.
+- S11:
+  - state transition labels draw `<$sprite>` literally (needs a core runs helper in `edge-label-box.ts`);
+  - `<img:>` atoms in state text are sized but not drawn.
+
+---
+
 ## `activity-divergence-drive-4` (add4) — DONE 2026-10-08 (T0a–T3k + T-exit/T-close-out, batches 0–4)
 
 Branch `feat/activity-divergence-drive-4` off main `1651cf200` (merge commit, not pushed).

@@ -1,0 +1,6 @@
+@startuml
+!pragma teoz true
+actor A
+participant B
+A -> B : hi
+@enduml

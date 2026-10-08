@@ -24,6 +24,9 @@ export interface NoteGeo {
   text: string;
   color?: string;
   shape?: 'rect';
+  /** The note style's merged `getDeltaShadow()` (`Note#getUsedStyles`,
+   *  `core/sequence-shadowing.ts`), UNSCALED; absent when 0. */
+  shadow?: number;
   /** The body, one placed and measured run per line of {@link text} (A5).
    *  Measured at `note { FontSize 13 }`, not the ambient font. */
   textRuns: readonly TextRun[];
@@ -113,4 +116,47 @@ export interface BoxGeo {
    *  carries no label, which is the case `renderBoxBackground` already
    *  short-circuits on. */
   labelRuns: readonly TextRun[];
+}
+
+/**
+ * `DelayTile` (`teoz/DelayTile.java`) — a `...` / `...text...` delay, as laid
+ * out. Its component is ALWAYS `ComponentType.DELAY_TEXT` (`:84-88`), the
+ * bare form included: `CommandDelay` hands it `Display.empty()` (`:83-84`), so
+ * a bare delay is the same component with a zero-height text block.
+ *
+ * The span `[y, y + height]` is what `LivingSpaces#delayOn` registers
+ * (`DelayTile.java:108`): every lifeline is cut there by `MutingLine#drawLine`
+ * and every activation bar by `LiveBoxesDrawer#doDrawing` -- see
+ * `sequence-delay.ts`.
+ */
+export interface DelayGeo {
+  kind: 'delay';
+  /** The tile's gauge min (`DelayTile.java:105`). */
+  y: number;
+  /** `ComponentRoseDelayText#getPreferredHeight`: text height + 20. */
+  height: number;
+  /** `RealUtils.middle(first.posC, last.posC)` (`DelayTile.java:79-83`). */
+  middleX: number;
+  /** `getPureTextWidth` -- the tile spans `middleX ± textWidth / 2`
+   *  (`DelayTile.java:121-129`). */
+  textWidth: number;
+  /** The label, placed absolutely; empty for a bare `...`. */
+  labelRuns: readonly TextRun[];
+}
+
+/**
+ * One piece of a lifeline as `MutingLine#drawLine` (`teoz/MutingLine.java:
+ * 73-92`) cuts it: a `PARTICIPANT_LINE` (`delay: false`) or a `DELAY_LINE`
+ * (`delay: true`). The same list serves every participant -- `LivingSpaces
+ * #delayOn` registers each delay on all of them (`LivingSpaces.java:170-173`).
+ *
+ * `clippedOut` marks a `PARTICIPANT_LINE` a page's clip removed entirely:
+ * upstream still opens its `<g><title>` (the component starts the group
+ * before the driver drops the shapes), so the group is emitted empty.
+ */
+export interface LifelineSegment {
+  y1: number;
+  y2: number;
+  delay: boolean;
+  clippedOut?: boolean;
 }

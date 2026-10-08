@@ -32,6 +32,10 @@ export const HEADER_LINE_THICKNESS = 1.5;
 export const HEADER_BACKGROUND = '#e';
 /** @see plantuml.skin:126 */
 export const HEADER_LINE_COLOR = 'black';
+/** A `ref`'s corner tab strokes with `referenceHeader { LineThickness 2.0 }`
+ *  (`ComponentRoseReference.java:72,121`), not `groupHeader`'s 1.5.
+ *  @see plantuml.skin:169 */
+export const REFERENCE_HEADER_LINE_THICKNESS = 2;
 /** @see plantuml.skin:127 */
 export const HEADER_FONT_SIZE = 13;
 /** @see plantuml.skin:128 */

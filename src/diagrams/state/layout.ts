@@ -321,7 +321,10 @@ function applyStateDocumentMargin(geo: StateGeometry): StateGeometry {
   };
 }
 
-export function layoutState(ast: StateDiagramAST, theme: Theme, measurer: StringMeasurer): StateGeometry {
+export function layoutState(ast: StateDiagramAST, skinTheme: Theme, measurer: StringMeasurer): StateGeometry {
+  // unwind2-S11: every text block reads the diagram's own `sprite` map
+  // through its skin param (`StripeSimple.java:229`), `Theme#sprites` here.
+  const theme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
   // remove/restore exclusion at the layout-input boundary -- the port's
   // equivalent of upstream's export-time isRemoved() skips. Same object
   // back when no remove directives exist (the common path); everything
@@ -340,5 +343,9 @@ export function layoutState(ast: StateDiagramAST, theme: Theme, measurer: String
   // see `StateGeometry.concurrentGlobalIds`'s own doc comment for why this
   // is a single end-of-pipeline merge rather than plumbing through every
   // intermediate flat/composite/margin-shift helper.
-  return { ...applyStateDocumentMargin(raw), concurrentGlobalIds: effAst.concurrentGlobalIds ?? new Map() };
+  return {
+    ...applyStateDocumentMargin(raw),
+    concurrentGlobalIds: effAst.concurrentGlobalIds ?? new Map(),
+    ...(ast.sprites !== undefined ? { sprites: ast.sprites } : {}),
+  };
 }

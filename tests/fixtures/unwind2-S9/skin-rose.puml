@@ -1,0 +1,9 @@
+@startuml
+skin rose
+participant A
+participant B
+group grp
+A -> B : hi
+end
+ref over A, B : init
+@enduml

@@ -425,7 +425,10 @@ function preChromeDims(geo: ActivityGeometry, theme: Theme): { width: number; he
  * (`Swimlanes.java:275`) and the output is the plain node-then-edge order,
  * byte-identical to a diagram with no swimlanes.
  */
-export function renderActivity(geo: ActivityGeometry, theme: Theme): RenderFragment {
+export function renderActivity(geo: ActivityGeometry, skinTheme: Theme): RenderFragment {
+  // unwind2-S11: the layout's `sprite` map (`layoutActivity`), so the draw
+  // resolves a label's `<$sprite>` exactly as the sizer did.
+  const theme = geo.sprites === undefined ? skinTheme : { ...skinTheme, sprites: geo.sprites };
   const children: string[] = [];
 
   // NO background rect here. The jar paints one from `SvgGraphics`'s own

@@ -1,0 +1,11 @@
+@startyaml
+<style>
+yamlDiagram {
+  node {
+    BackGroundColor #eeeeee
+    LineColor red
+  }
+}
+</style>
+ami: ami-123
+@endyaml

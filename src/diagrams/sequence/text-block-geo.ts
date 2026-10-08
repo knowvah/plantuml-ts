@@ -20,7 +20,8 @@ import type { FontSpec, StringMeasurer } from '../../core/measurer.js';
 import type { Theme } from '../../core/theme.js';
 import { splitDisplayLines } from '../../core/klimt/creole/DisplayNewlines.js';
 import { arrowFontSpecOf } from './sequence-layout-shared.js';
-import { sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import { sequenceAtomContext, sequenceCreoleFont, sequenceCreoleRuns } from './sequence-creole.js';
+import type { SpriteRegistry } from '../../core/sprite-registry.js';
 import type { SequenceRunImage } from './sequence-text.js';
 
 // ---------------------------------------------------------------------------
@@ -343,9 +344,9 @@ export function messageLabelBlock(
   numberText: string | undefined,
   leftX: number,
   arrowY: number,
-  theme: Theme,
-  measurer: StringMeasurer,
+  env: MessageLabelEnv,
 ): MessageLabelBlock {
+  const { theme, measurer } = env;
   // `AbstractTextualComponent` maps an empty display to a `TextBlockEmpty`,
   // which draws nothing (`AbstractTextualComponent.java:84-85`) -- so a
   // message with neither label nor number emits no `<text>` at all.
@@ -358,8 +359,11 @@ export function messageLabelBlock(
   const spec = arrowFontSpecOf(theme);
   // C3: the base font is rebuilt per call rather than hoisted -- a pure
   // two-flag mapping over `spec`, and hoisting costs an NLOC this has not got.
+  // unwind2-S10: the label's `<$sprite>`/`<img>` atoms draw, on no `Back`
+  // (`ComponentRoseArrow.java:179`), tinted to the component font colour.
+  const atoms = sequenceAtomContext(env.sprites, theme.colors.text);
   const runsAt = (text: string, x: number, y: number): readonly TextRun[] =>
-    sequenceCreoleRuns(text, sequenceCreoleFont(spec), { leftX: x, baselineY: y }, measurer);
+    sequenceCreoleRuns(text, sequenceCreoleFont(spec), { leftX: x, baselineY: y }, measurer, atoms);
   const lineHeight = measurer.measure('M', spec).height;
   // `posArrow = getTextHeight(stringBounder)` with `yText = 0`
   // (`ComponentRoseArrow.java:141-148`): the block's TOP sits one
@@ -385,6 +389,14 @@ export function messageLabelBlock(
   const placed = lines.flatMap((text, i) => runsAt(text, labelLeft, baselineOfRow(i)));
   const [first, ...rest] = numberRuns;
   return first === undefined ? { lines: placed } : { lines: [...rest, ...placed], number: first };
+}
+
+/** What {@link messageLabelBlock} lays a label out with -- the
+ *  `EventProcessingContext` fields it reads. */
+export interface MessageLabelEnv {
+  readonly theme: Theme;
+  readonly measurer: StringMeasurer;
+  readonly sprites?: SpriteRegistry | undefined;
 }
 
 /** Rows a label block occupies, for the caller's vertical reservation. A

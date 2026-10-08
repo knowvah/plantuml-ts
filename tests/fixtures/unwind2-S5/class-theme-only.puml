@@ -1,0 +1,6 @@
+@startuml
+!theme amiga
+class A
+class B
+A --> B : uses
+@enduml

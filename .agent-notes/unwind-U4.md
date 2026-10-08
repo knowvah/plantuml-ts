@@ -18,8 +18,8 @@
   those inputs the port's tint + scaleBilinear is pixel-identical to the jar
   on 9 real fixtures (unwind-u4-sprite.test.ts). The class/description
   creole resolvers resolve at LAYOUT time and have no back colour, so they
-  still tint over white; only sequence-layout-participant-label.ts passes the
-  real fill. Fix needs the fill threaded to render time (class rows, notes,
+  still tint over white. (Corrected by unwind2-S6: the participant path is
+  white end to end too; owned by unwind2-S7.) Fix needs the fill threaded to render time (class rows, notes,
   namespace titles, edge labels, description atoms).
 - **Impact**: open follow-on; pixels only (hrefs are exempt from compare).
 - **Confidence**: High

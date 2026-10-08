@@ -1,0 +1,19 @@
+@startuml
+skinparam shadowing true
+participant P
+actor Ac
+boundary Bo
+control Co
+entity En
+database Da
+collections Cl
+queue Qu
+P -> Ac : a
+note left of P : n1
+note over Bo : n2
+hnote over Co : n3
+rnote over En : n4
+group g
+Da -> Qu : x
+end
+@enduml

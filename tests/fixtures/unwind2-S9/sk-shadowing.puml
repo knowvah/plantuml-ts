@@ -1,0 +1,29 @@
+@startuml
+skinparam shadowing true
+participant A
+participant B
+group grp [cmt]
+A -> B : hi
+end
+loop 3 times
+A -> B : x
+end
+alt ok
+A -> B : y
+else bad
+B -> A : z
+end
+opt o
+A -> B : w
+end
+par p
+A -> B : v
+end
+break b
+A -> B : u
+end
+critical c
+A -> B : t
+end
+ref over A, B : init
+@enduml

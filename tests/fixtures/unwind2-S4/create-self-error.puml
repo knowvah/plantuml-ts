@@ -1,0 +1,4 @@
+@startuml
+create Dog
+Dog -> Dog : bark
+@enduml

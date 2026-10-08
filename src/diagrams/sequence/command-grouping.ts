@@ -13,7 +13,14 @@
  */
 
 import type { BoxGroup, FrameEvent } from './ast.js';
-import { emit, setLastEventWithNoteSpan, type Command, type ParseState } from './sequence-parse-helpers.js';
+import {
+  emit,
+  SequenceCommandRefusal,
+  setLastEventWithNoteSpan,
+  type Command,
+  type ParseState,
+} from './sequence-parse-helpers.js';
+import { DRESSED_ARROW_RE, UNDRESSED_ARROW_RE } from './sequence-arrow-compose.js';
 
 // 3a. box — opens a named/colored participant group. T13 (mission
 //     dispatch-by-parse-attempt): widened to accept an unquoted label
@@ -101,6 +108,12 @@ function resolveGroupLabel(frameType: FrameEvent['frameType'], comment: string):
 export const groupingCommand: Command = {
   pattern: /^(&\s*)?(loop|alt|opt|par2|par|break|critical|group)(#\w+)?(?:\s+(#\w+))?(?:\s+(.+))?\s*$/i,
   execute(state, match) {
+    // Upstream registers `CommandArrow` (`SequenceDiagramFactory.java:111`)
+    // ahead of `CommandGrouping` (`:126`), so `LOOP -> X : hi` -- a
+    // participant named like a group keyword -- is a MESSAGE there
+    // (`sozifu-13-zufu979`). This table lists grouping first; declining
+    // here hands such a line on to the arrow rules, as upstream's order does.
+    if (UNDRESSED_ARROW_RE.test(match.input) || DRESSED_ARROW_RE.test(match.input)) throw new SequenceCommandRefusal();
     const frameType = match[2]!.toLowerCase() as FrameEvent['frameType'];
     const backColorElement = match[3];
     const backColorGeneral = match[4];
@@ -208,6 +221,8 @@ export const endCommand: Command = {
     const frame = state.frameStack.pop();
     if (frame !== undefined) {
       emit(state, frame);
+      // `SequenceDiagram#grouping`, END (`:441-444`).
+      state.life.lastEventWithDeactivate = 'notMessage';
     }
     markGroupingLeafNoteAnchor(state);
   },

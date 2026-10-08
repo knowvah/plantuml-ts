@@ -77,15 +77,16 @@ function addText(ink: MutableInk, x: number, baseline: number, dim: { width: num
 /**
  * One physical line's runs, placed exactly as `class-namespace-title-runs.ts
  * #renderNamespaceTitleRuns` places them. A text run is a `UText`
- * (`drawText`); an image/sprite run is drawn at `(x, y - height)` and is
- * bounded by `LimitFinder#drawImage`/`drawImageSvg` (`LimitFinder.java:
- * 195-203`): `(x, y)..(x + w - 1, y + h - 1)`.
+ * (`drawText`); an image/sprite run is drawn at `(x, bottom - height)`
+ * (unwind2-S11, the line's bottom) and is bounded by `LimitFinder#drawImage`
+ * (`LimitFinder.java:195-203`): `(x, y)..(x + w - 1, y + h - 1)` over the
+ * raster's own rounded size.
  */
 function addLine(
   ink: MutableInk,
   measurer: StringMeasurer,
   line: NamespaceTitleLine,
-  at: { x: number; y: number },
+  at: { x: number; y: number; bottom: number },
 ): void {
   let x = at.x;
   for (const run of line.runs) {
@@ -95,8 +96,9 @@ function addLine(
       x += dim.width;
       continue;
     }
-    add(ink, x, at.y - run.height);
-    add(ink, x + run.width - 1, at.y - 1);
+    const top = at.bottom - run.height;
+    add(ink, x, top);
+    add(ink, x + Math.round(run.width) - 1, top + Math.round(run.height) - 1);
     x += run.width;
   }
 }
@@ -121,12 +123,14 @@ export function namespaceTitleInk(
   const ink: MutableInk = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
   const sole = lines.length === 1 && lines[0]!.runs.length === 1 && lines[0]!.runs[0]!.kind === 'text';
   if (sole) {
-    addLine(ink, measurer, lines[0]!, { x: place.singleX, y: place.singleBaseline });
+    addLine(ink, measurer, lines[0]!, { x: place.singleX, y: place.singleBaseline, bottom: place.singleBaseline });
     return ink;
   }
   const baselines = namespaceTitleLineBaselines(measurer, theme, lines);
+  let bottom = place.blockTop;
   lines.forEach((line, i) => {
-    addLine(ink, measurer, line, { x: place.xForLine(line.width), y: place.blockTop + baselines[i]! });
+    bottom += line.fontSize;
+    addLine(ink, measurer, line, { x: place.xForLine(line.width), y: place.blockTop + baselines[i]!, bottom });
   });
   return ink;
 }

@@ -1,0 +1,6 @@
+@startuml
+Alice -> Bob : one
+...
+create Carol
+Bob -> Carol : make
+@enduml

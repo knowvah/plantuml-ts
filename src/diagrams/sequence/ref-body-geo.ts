@@ -18,19 +18,19 @@ import { displayLines } from './text-block-geo.js';
 /** The body padding `ComponentRoseReference` hands to `super` --
  *  `topRightBottomLeft(4, 4, 4, 4)`, so the same value on all four sides
  *  (`ComponentRoseReference.java:69-70`). */
-const REF_PADDING = 4;
+export const REF_PADDING = 4;
 /** `heightFooter` -- the band below the body block
  *  (`ComponentRoseReference.java:61`). */
-const REF_HEIGHT_FOOTER = 5;
+export const REF_HEIGHT_FOOTER = 5;
 /** `xMargin` -- the inset between the component's box and its bounds
  *  (`ComponentRoseReference.java:62`). */
-const REF_X_MARGIN = 2;
+export const REF_X_MARGIN = 2;
 /** `getHeaderWidth` adds a flat `30 + 15` to the header text's own width
  *  (`ComponentRoseReference.java:145-148`). */
-const REF_HEADER_EXTRA_WIDTH = 45;
+export const REF_HEADER_EXTRA_WIDTH = 45;
 /** The header text itself: `stringsToDisplay.subList(0, 1)`, the frame's
  *  keyword (`ComponentRoseReference.java:78`). */
-const REF_HEADER_TEXT = 'ref';
+export const REF_HEADER_TEXT = 'ref';
 
 /**
  * `reference { FontSize 12 }` (`plantuml.skin:145-151`) — a `ref over` body
@@ -105,21 +105,25 @@ function refHeaderHeight(theme: Theme, measurer: StringMeasurer): number {
  * (`AbstractTextualComponent.java:110-114`).
  */
 export function refBodyHeight(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
-  if (body.length === 0) return 0;
+  // An empty body is an empty block: `getTextHeight` is its padding alone.
   const textHeight = body.length * measurer.measure('M', refBodyFontSpecOf(theme)).height + 2 * REF_PADDING;
   return textHeight + refHeaderHeight(theme, measurer) + REF_HEIGHT_FOOTER;
 }
 
 /**
- * `getPreferredWidth` = max(text width, header width) + 2 * xMargin
- * (`ComponentRoseReference.java:155-159`), where `getTextWidth` is the widest
- * line plus the left and right padding
- * (`AbstractTextualComponent.java:106-108`). The shadow delta that term also
- * carries is 0 here: this port draws no shadow.
+ * `getPreferredWidth` = max(text width, header width) + 2 * xMargin +
+ * `symbolContextBody.getDeltaShadow()` (`ComponentRoseReference.java:155-159`),
+ * where `getTextWidth` is the widest line plus the left and right padding
+ * (`AbstractTextualComponent.java:106-108`). The delta is the `reference`
+ * style's merged `Shadowing` (`core/sequence-frame-shadow.ts`), which
+ * `renderer-frame-header.ts#renderBodyRect` takes back off the drawn rect
+ * (`:89`). Jar-verified: `tests/fixtures/unwind2-S9/style-reference.svg`
+ * against `noshadow-reference.svg` -- the canvas widens by 3, the rect does
+ * not.
  */
 export function refBodyWidth(body: readonly string[], theme: Theme, measurer: StringMeasurer): number {
-  if (body.length === 0) return 0;
-  const widest = Math.max(...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
+  const widest = Math.max(0, ...body.map((l) => measurer.measure(l, refBodyFontSpecOf(theme)).width));
   const headerWidth = measurer.measure(REF_HEADER_TEXT, refHeaderFontSpecOf(theme)).width + REF_HEADER_EXTRA_WIDTH;
-  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN;
+  const deltaShadow = theme.colors.graph.sequenceShadowing?.reference ?? 0;
+  return Math.max(widest + 2 * REF_PADDING, headerWidth) + 2 * REF_X_MARGIN + deltaShadow;
 }

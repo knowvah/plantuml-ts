@@ -41,7 +41,7 @@
  * `{ width, height }`-only entry under a name therefore does not degrade — it
  * throws `TypeError: sprite.getGray is not a function` the moment the name is
  * referenced. Building a real entry needs a PNG *decoder* (this port has only
- * the fixed-block *encoder* at `klimt/sprite/deflate-fixed.ts`) plus a third
+ * the *encoder* at `klimt/sprite/png-encoder.ts`) plus a third
  * branch in that resolver: both under `src/core/`, both outside this
  * task's boundary.
  *

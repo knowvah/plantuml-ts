@@ -1,0 +1,7 @@
+@startuml
+Alice -> Bob : one
+newpage
+...
+...Dot vertical lines...
+Bob -> Alice : two
+@enduml

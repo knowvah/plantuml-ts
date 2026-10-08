@@ -1,6 +1,6 @@
 /**
  * Unit tests for the SI5b/T5 PNG encoder + monochrome sprite tint:
- *  - `crc32`/`adler32`/`encodePng`/`toBase64DataUri`
+ *  - `crc32`/`encodePng`/`toBase64DataUri`
  *    (src/core/klimt/sprite/png-encoder.ts)
  *  - `spriteToRgba`/`spriteToPngDataUri`
  *    (src/core/klimt/sprite/sprite-raster.ts) -- ports
@@ -13,7 +13,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { inflateSync, crc32 as nodeCrc32 } from 'node:zlib';
-import { crc32, adler32, encodePng, toBase64, toBase64DataUri } from '../../src/core/klimt/sprite/png-encoder.js';
+import { crc32, encodePng, toBase64, toBase64DataUri } from '../../src/core/klimt/sprite/png-encoder.js';
 import { spriteToRgba, spriteToPngDataUri, type SpriteLike } from '../../src/core/klimt/sprite/sprite-raster.js';
 import { AsciiEncoder } from '../../src/core/klimt/sprite/AsciiEncoder.js';
 import { decompressPlantumlZ } from '../../src/core/code/deflate/decompressPlantumlZ.js';
@@ -66,7 +66,7 @@ function grid(width: number, height: number, grayLevels: number, values: readonl
   };
 }
 
-describe('crc32 / adler32 known vectors', () => {
+describe('crc32 known vectors', () => {
   it('crc32 matches the CRC-32/ISO-HDLC check value for "123456789"', () => {
     const input = new TextEncoder().encode('123456789');
     expect(crc32(input)).toBe(0xcbf43926);
@@ -82,24 +82,9 @@ describe('crc32 / adler32 known vectors', () => {
     expect(crc32(input)).toBe(0xae426082);
     expect(crc32(input)).toBe(nodeCrc32(Buffer.from(input)));
   });
-
-  it('adler32 of the empty buffer is 1', () => {
-    expect(adler32(new Uint8Array(0))).toBe(1);
-  });
-
-  it('adler32 of a single byte 0x61 ("a") is 0x00620062', () => {
-    // a = 1 + 97 = 98 = 0x62; b = 0 + 98 = 98 = 0x62; (b<<16)|a = 0x00620062.
-    expect(adler32(new TextEncoder().encode('a'))).toBe(0x00620062);
-  });
-
-  it('adler32 of "abc" is 0x024d0127', () => {
-    // a: 1 ->98(+97) ->196(+98) ->295(+99); b: 0 ->98 ->294(+196) ->589(+295)
-    // adler32 = (589<<16)|295 = 0x024d0127.
-    expect(adler32(new TextEncoder().encode('abc'))).toBe(0x024d0127);
-  });
 });
 
-describe('encodePng: stored-block framing + scanline round-trip', () => {
+describe('encodePng: framing + scanline round-trip', () => {
   it('rejects an rgba buffer that does not match width*height*4', () => {
     expect(() => encodePng(new Uint8Array(3), 1, 1)).toThrow(/does not match/);
   });
@@ -117,11 +102,9 @@ describe('encodePng: stored-block framing + scanline round-trip', () => {
     expect(readPixel(scanlines, 1, 0, 0)).toEqual([0xff, 0x00, 0x00, 0xff]);
   });
 
-  it('splits a scanline stream larger than 64KB-1 into multiple stored blocks', () => {
-    // width chosen so width*height*4 + height (filter bytes) comfortably
-    // exceeds 0xFFFF (65535), forcing deflateStoredBlocks to emit >1 block.
+  it('round-trips an 80 KB scanline stream (PNGImageWriter deflate, level 4)', () => {
     const width = 200;
-    const height = 100; // raw size = 100 * (1 + 200*4) = 80_100 bytes > 65535
+    const height = 100; // raw size = 100 * (1 + 200*4) = 80_100 bytes
     const rgba = new Uint8Array(width * height * RGBA_BYTES);
     for (let i = 0; i < rgba.length; i++) rgba[i] = i % 256;
     const png = encodePng(rgba, width, height);
@@ -129,7 +112,7 @@ describe('encodePng: stored-block framing + scanline round-trip', () => {
     expect(w).toBe(width);
     expect(h).toBe(height);
     expect(scanlines.length).toBe(height * (1 + width * RGBA_BYTES));
-    // Spot-check a pixel deep into the second stored block's territory.
+    // Spot-check the last pixel of the stream.
     const [r, g, b, a] = readPixel(scanlines, width, width - 1, height - 1);
     const lastPixelOffset = ((height - 1) * width + (width - 1)) * RGBA_BYTES;
     expect([r, g, b, a]).toEqual([

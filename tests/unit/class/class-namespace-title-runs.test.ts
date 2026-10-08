@@ -88,7 +88,7 @@ describe('namespaceTitleWidth', () => {
 describe('renderNamespaceTitleRuns', () => {
   it('places each run sequentially from x0, at its own font, jar-exact widths', () => {
     const runs = namespaceTitleRuns(IMG_LABEL, defaultTheme);
-    const svg = renderNamespaceTitleRuns(10, 18.889, runs, measurer);
+    const svg = renderNamespaceTitleRuns(10, { y: 18.889, bottom: 22 }, runs, { measurer });
     expect(svg).toContain('<text x="10" y="18.889"');
     expect(svg).toContain('font-weight="700"');
     expect(svg).toContain('>MyNamespaceName</text>');
@@ -303,13 +303,17 @@ describe('namespaceTitleRuns — sprite/img-data in a namespace title (no oracle
     }
   });
 
-  it('renderNamespaceTitleRuns bottom-aligns an image run to the text baseline', () => {
+  // unwind2-S11: the jar draws `P <$foo>`'s 12.923-tall sprite at y=9.077
+  // with the line's top at 8 and its 14 px bottom at 22, the baseline at
+  // 18.889 (`tests/fixtures/unwind2-S7/c-package-title.svg`) -- the image
+  // sits on the LINE bottom, not the baseline.
+  it('renderNamespaceTitleRuns bottom-aligns an image run to the line bottom', () => {
     const runs = namespaceTitleRuns(`Data <img:${TINY_PNG_DATA_URI}>`, defaultTheme);
-    const svg = renderNamespaceTitleRuns(10, 20, runs, measurer);
+    const svg = renderNamespaceTitleRuns(10, { y: 20, bottom: 23 }, runs, { measurer });
     expect(svg).toContain('<image');
     expect(svg).toContain('width="2"');
     expect(svg).toContain('height="2"');
-    expect(svg).toContain('y="18"'); // baseline(20) - height(2)
+    expect(svg).toContain('y="21"'); // bottom(23) - height(2)
     expect(svg).toContain(`xlink:href="${TINY_PNG_DATA_URI}"`);
   });
 });

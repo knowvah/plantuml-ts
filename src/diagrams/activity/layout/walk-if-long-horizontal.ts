@@ -85,6 +85,9 @@ function pushDiamondLabel(ctx: LhCtx, diamond: GtileDiamondInside2, side: Diamon
       label: l.label,
       // add4-T3j: drawn as the FULL `create(fcArrow)` block it is sized as.
       ifLabelRole: 'full',
+      // unwind2-S11: `FtileDiamondInside2#drawU` draws every slot over its
+      // own back (`ActivityNodeGeo.onDiamondBack`).
+      onDiamondBack: true,
     },
     ctx.myLane,
   );

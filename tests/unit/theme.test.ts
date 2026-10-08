@@ -331,14 +331,23 @@ describe('resolveTheme', () => {
     expect(result).not.toBe(defaultTheme);
   });
 
-  it('resolves built-in theme "amiga" to its residue: the root-cascade colours only (cdd4-T7b)', () => {
+  it('resolves built-in theme "amiga" to its json-only residue (unwind2-S5)', () => {
+    // `root { FontColor; LineColor }` reach colors.text/border/arrow from the
+    // EXECUTED theme lines at the directive's position (`TContext.java:726-755`,
+    // `build-theme.ts#rootCascadeSkinparams`), not from a summary below
+    // every document line.
     const result = resolveTheme('amiga');
-    expect(result.colors.text).toBe('#FFFFFF');
-    expect(result.colors.border).toBe('#FFFFFF');
-    expect(result.colors.arrow).toBe('#FFFFFF');
-    // Carried by the EXECUTED theme now, not the residue.
+    expect(result.colors.text).toBe(defaultTheme.colors.text);
+    expect(result.colors.border).toBe(defaultTheme.colors.border);
+    expect(result.colors.arrow).toBe(defaultTheme.colors.arrow);
     expect(result.colors.background).toBe(defaultTheme.colors.background);
     expect(result.fontFamily).toBe(defaultTheme.fontFamily);
+    expect(result.colors.graph.json?.background).toBe('#0B58A8');
+  });
+
+  it('an executed !theme amiga reaches the root-cascade colours', () => {
+    const { theme } = buildTheme(preprocess('@startuml\n!theme amiga\n@enduml'));
+    expect([theme.colors.text, theme.colors.border, theme.colors.arrow]).toEqual(['#FFFFFF', '#FFFFFF', '#FFFFFF']);
   });
 
   it('an executed !theme blueprint carries its dark blue background', () => {

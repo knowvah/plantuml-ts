@@ -1,0 +1,8 @@
+@startuml
+!pragma teoz true
+skinparam shadowing true
+participant A
+participant B
+A -> B : hi
+note right of B : n
+@enduml

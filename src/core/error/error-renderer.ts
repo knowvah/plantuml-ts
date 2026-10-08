@@ -1,407 +1,83 @@
 /**
- * Draws a `PSystemError` (and the black-on-white Welcome / Unsupported blocks)
+ * Draws a `PSystemError` (and the black-on-white Welcome / Unsupported pages)
  * to SVG.
  *
- * This is the drawing half of upstream's `PSystemError#getGraphicalFormatted`
- * and `GraphicStrings`. Upstream composes `TextBlockRaw`s with
- * `TextBlockUtils.mergeTB` / `withMargin` / `addBackcolor` and hands the result
- * to a `UGraphic`; this port has no `TextBlockRaw` and klimt's `TextBlockUtils`
- * here still stubs `addBackcolor`, so the same composition is expressed
- * directly against the house SVG emitter (`src/core/svg.ts` — `rect`, `text`).
- * The document ROOT, though, goes through `core/klimt/document-shell.ts
- * #assembleDocumentShell` (CDD T32) — the SAME shared root-attribute/prolog/
- * defs shell every other diagram type reassembles through (`core/assemble-
- * svg.ts:505`), not the generic `core/svg.ts#svgRoot` this file used to call
- * directly. `svgRoot` unconditionally maps `ALL_ARROW_TYPES` into `<defs>`
- * and omits `xmlns:xlink`/`version`/`zoomAndPan`/`preserveAspectRatio`/
- * `contentStyleType` — a parallel, incomplete root builder this page never
- * needed (it draws no arrowheads at all). `assembleDocumentShell` is called
- * with `diagramType: undefined`: the jar's own error/Welcome/Unsupported
- * pages carry no `data-diagram-type` root attribute (verified against every
- * cached error-page golden), unlike a real diagram's root.
- * Fonts, colors, decorations, block order and line content are upstream's;
- * only the seam differs.
+ * This is the drawing half of upstream's `PSystemError#getTextBlock` and
+ * `GraphicStrings`, composed out of `error-block.ts`'s `TextBlock` model:
+ * the error page proper (`error-page-exact.ts`), the Welcome block with the
+ * PlantUML logo stacked on top of it when the source is shorter than 5
+ * lines, and the Arecibo image beside it when the source mentions
+ * "arecibo" (unwind2-S8). The document ROOT goes through
+ * `core/klimt/document-shell.ts#assembleDocumentShell` (CDD T32) with
+ * `diagramType: undefined`: the jar's error/Welcome/Unsupported pages carry
+ * no `data-diagram-type` root attribute.
  *
- * Verified against `oracle/dist/plantuml-oracle.jar` (`-tsvg -pipe`) on an
- * orphan `!endif`: same five parts, in this order —
- *   1. Welcome block (only when the source is shorter than 5 lines)
- *   2. version banner
- *   3. `[From string (line N) ]`, black on a green band
- *   4. a blank line, then the executed source, the last line wavy-underlined
- *   5. the message, in red
+ * The time-based decorations are not drawn: see {@link renderPSystemError}.
  *
- * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java#getGraphicalFormatted
+ * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/error/PSystemError.java#getTextBlock
  * @see ~/git/plantuml/src/main/java/net/sourceforge/plantuml/klimt/shape/GraphicStrings.java
  */
 
-import type { FontSpec, StringMeasurer } from '../measurer.js';
-import { group, rect, text } from '../svg.js';
-import { assembleDocumentShell } from '../klimt/document-shell.js';
-import type { ShellFragment } from '../klimt/document-shell.js';
+import type { StringMeasurer } from '../measurer.js';
+import { ARECIBO_IMAGE } from './arecibo-image.js';
+import { imageBlock, mergeLR, mergeTB, renderErrorBlock } from './error-block.js';
+import type { ErrorBlock } from './error-block.js';
+import { errorPageBlock } from './error-page-exact.js';
+import { blackOnWhite } from './graphic-strings.js';
+import type { GraphicPosition } from './graphic-strings.js';
+import { PLANTUML_LOGO } from './plantuml-logo.js';
 import type { PSystemError } from './PSystemError.js';
 import { PSystemWelcome } from './PSystemWelcome.js';
 import type { PSystemUnsupported } from './PSystemUnsupported.js';
-import { renderErrorPageOnly } from './error-page-exact.js';
-
-// --- Colors (klimt/color/HColors.java) ---------------------------------
-
-export const BLACK = '#000000';
-const WHITE = '#FFFFFF';
-export const RED = '#FF0000';
-/** `HColors.MY_GREEN` — the error diagram's foreground. */
-export const MY_GREEN = '#33FF02';
-
-// --- Fonts (klimt/shape/GraphicStrings.java) ----------------------------
-
-export const SANS = 'sans-serif';
-const MONO = 'monospace';
-/** `GraphicStrings.sansSerif12` — Welcome / Unsupported text, and the banner. */
-export const SIZE_12 = 12;
-/** `GraphicStrings.sansSerif14` — every line of the error block proper. */
-export const SIZE_14 = 14;
-
-// --- Metrics ------------------------------------------------------------
-//
-// This port's `StringMeasurer` reports a line's height as the font size, which
-// is the em box, not the line box: it has no ascent/descent table. The jar's
-// AWT metrics for these fonts give a line advance of 14.1328px at size 12 and
-// 16.4883px at size 14 — the same 1.1777 ratio — with the baseline 11.6016px
-// below the line top at size 12 (a 0.9668 ratio). Both ratios are taken from
-// the reference jar's own SVG output for this diagram, so the listing lines up
-// the way upstream's does instead of colliding at height == size.
-
-const LINE_ADVANCE_RATIO = 14.1328 / 12;
-const ASCENT_RATIO = 11.6016 / 12;
-
-/** `GraphicStrings#margin` */
-export const ERROR_PAGE_MARGIN = 5;
-
-/** `PSystemError#getGraphicalFormatted`: `withMargin(…, 1, 1, 1, 4)` on the
- *  `[From … ]` band — left 1, right 1, top 1, bottom 4. */
-export const BAND_PAD_X = 1;
-export const BAND_PAD_TOP = 1;
-export const BAND_PAD_BOTTOM = 4;
-
-/** `PSystemError#getGraphicalFormatted`: `result4 = withMargin(…, 0, 2, 0,
- *  8)` on the version banner — left 0, right 2, top 0, bottom 8. */
-export const HEADER_PAD_RIGHT = 2;
-export const HEADER_PAD_BOTTOM = 8;
-
-/** A run of characters sharing one font and color. */
-export interface Run {
-  readonly content: string;
-  readonly font: FontSpec;
-  readonly fill: string;
-  readonly decoration?: string;
-  /** `SvgGraphics#text`'s `textLength` (`x+textLength` measured on the
-   *  EMITTED — leading/trailing-whitespace-trimmed — content, per
-   *  `DriverTextSvg.java:114-127`). Only the exact-metrics error-page path
-   *  below sets this; `blackOnWhite`'s Creole runs leave it `undefined`
-   *  (unchanged — `svg-shapes.ts#text`'s own `textLengthOf` then omits the
-   *  attribute exactly as before). */
-  readonly textLength?: number;
-}
-
-/** One rendered line: its runs, and optionally a color band drawn behind it. */
-interface Line {
-  readonly runs: readonly Run[];
-  readonly band?: string;
-}
-
-/** A stack of lines over one background color. */
-interface Block {
-  readonly lines: readonly Line[];
-  readonly background: string;
-}
-
-function lineAdvance(line: Line): number {
-  const size = Math.max(SIZE_12, ...line.runs.map((r) => r.font.size));
-  return size * LINE_ADVANCE_RATIO;
-}
-
-function lineAscent(line: Line): number {
-  const size = Math.max(SIZE_12, ...line.runs.map((r) => r.font.size));
-  return size * ASCENT_RATIO;
-}
-
-function lineWidth(line: Line, measurer: StringMeasurer): number {
-  return line.runs.reduce((w, r) => w + measurer.measure(r.content, r.font).width, 0);
-}
-
-// --- Creole subset ------------------------------------------------------
-
-/**
- * The markup upstream's `Display`/`Creole` layer resolves inside a
- * `GraphicStrings` block, restricted to what the Welcome and Unsupported
- * strings actually use: `<b>` / `<i>` / `<u>` (which apply to the REST of the
- * line when never closed — `<b>Welcome to PlantUML!` is a bold line, not a
- * literal `<b>`), and `""…""` (monospace).
- *
- * `src/core/creole.ts` is not reused here: its documented rule for unclosed
- * markup is to emit the delimiters literally, which would print `<b>` in the
- * Welcome header, and it has no monospace span (upstream's `""…""`) to switch
- * the font family on.
- */
-const CREOLE_TOKEN = /<\/?[biu]>|""/giu;
-
-function parseCreoleSubset(source: string, baseFont: FontSpec, fill: string): Run[] {
-  const runs: Run[] = [];
-  let bold = baseFont.weight === 'bold';
-  let italic = baseFont.style === 'italic';
-  let underline = false;
-  let mono = false;
-  let cursor = 0;
-
-  const flush = (end: number): void => {
-    const content = source.slice(cursor, end);
-    if (content.length === 0) return;
-
-    runs.push({
-      content,
-      font: {
-        family: mono ? MONO : baseFont.family,
-        size: baseFont.size,
-        weight: bold ? 'bold' : 'normal',
-        style: italic ? 'italic' : 'normal',
-      },
-      fill,
-      ...(underline ? { decoration: 'underline' } : {}),
-    });
-  };
-
-  CREOLE_TOKEN.lastIndex = 0;
-  let match = CREOLE_TOKEN.exec(source);
-  while (match !== null) {
-    flush(match.index);
-    const token = match[0].toLowerCase();
-    if (token === '""') mono = !mono;
-    else if (token === '<b>') bold = true;
-    else if (token === '</b>') bold = false;
-    else if (token === '<i>') italic = true;
-    else if (token === '</i>') italic = false;
-    else if (token === '<u>') underline = true;
-    else if (token === '</u>') underline = false;
-
-    cursor = match.index + match[0].length;
-    match = CREOLE_TOKEN.exec(source);
-  }
-  flush(source.length);
-  return runs;
-}
-
-// --- Blocks -------------------------------------------------------------
-
-/**
- * `GraphicStrings.createBlackOnWhite` — the Welcome screen and the
- * "not supported" screen.
- */
-function blackOnWhite(strings: readonly string[]): Block {
-  const font: FontSpec = { family: SANS, size: SIZE_12, weight: 'normal', style: 'normal' };
-  return {
-    background: WHITE,
-    lines: strings.map((s) => ({ runs: parseCreoleSubset(s, font, BLACK) })),
-  };
-}
-
-/**
- * The error block itself, in upstream's assembly order (`result4` on top, then
- * `result0`…`result3`) — built through the SAME fitted-ratio `Block`/`Line`
- * model `blackOnWhite` uses (`lineAdvance`/`lineAscent`, no `textLength`, no
- * `(int)(x+1)` canvas growth). C-17 (`plans/class-divergence-drive-3/
- * diagnosis/C.md` § luzive/sadamo) proved that model wrong for THIS
- * composition — upstream builds it from `TextBlockRaw`/`TextBlockVertical`/
- * `TextBlockMarged`, under which the deterministic `StringBounder`'s
- * `height === size` invariant applies directly, not `blackOnWhite`'s AWT-
- * fitted line spacing (`Display`/Creole's own, different rule — unproven
- * either way, out of C-17's fixture set). `renderErrorPageOnly` below is the
- * faithful replacement and is what every fixture with `getTotalLineCountLessThan5()
- * === false` now renders through; this function survives ONLY for the rare
- * Welcome-stacked-on-error path (`addWelcome`, source < 5 lines), which no
- * cached fixture in this mission's assigned set exercises and which this
- * task therefore does not touch, to avoid an unverified blast radius into
- * `blackOnWhite`/Welcome geometry.
- * @see ~/git/plantuml/.../error/PSystemError.java#getGraphicalFormatted
- */
-function errorBlockLegacy(system: PSystemError): Block {
-  /** `fc4` — the version banner: green, bold, italic, size 12. */
-  const fc4: FontSpec = { family: SANS, size: SIZE_12, weight: 'bold', style: 'italic' };
-  /** `fc0` — the `[From … ]` stack: black on the green band, bold, size 14. */
-  const fc0: FontSpec = { family: SANS, size: SIZE_14, weight: 'bold', style: 'normal' };
-  /** `fc1` — the source listing: green, bold, size 14. */
-  const fc1: FontSpec = { family: SANS, size: SIZE_14, weight: 'bold', style: 'normal' };
-  /** `fc2` — the message: red, bold, size 14. */
-  const fc2: FontSpec = { family: SANS, size: SIZE_14, weight: 'bold', style: 'normal' };
-
-  const lines: Line[] = [];
-
-  for (const s of system.header()) lines.push({ runs: [{ content: s, font: fc4, fill: MY_GREEN }] });
-
-  for (const s of system.getTextFromStack())
-    lines.push({ runs: [{ content: s, font: fc0, fill: BLACK }], band: MY_GREEN });
-
-  const fullBody = system.getTextFullBody();
-  fullBody.forEach((s, i) => {
-    // `result2`: only the LAST body line — the one that failed — is waved red.
-    const isLast = i === fullBody.length - 1;
-    lines.push({
-      runs: [
-        {
-          content: s,
-          font: fc1,
-          fill: MY_GREEN,
-          ...(isLast ? { decoration: 'wavy underline' } : {}),
-        },
-      ],
-    });
-  });
-
-  for (const s of system.getTextError()) lines.push({ runs: [{ content: s, font: fc2, fill: RED }] });
-
-  return { background: BLACK, lines };
-}
-
-// --- Drawing ------------------------------------------------------------
-
-/**
- * G2 N18 (already cited by `svg.ts#TextStyle.fontWeight`'s own doc comment):
- * the jar's deterministic-text SVG emits font-weight as the raw numeric
- * `"700"`, never the CSS keyword `"bold"` -- and OMITS both font-weight and
- * font-style entirely for the normal/non-italic case, rather than spelling
- * out `"normal"` (jar-verified against every cached error/Welcome-page
- * golden, e.g. `gantt/papava-92-geve698/in.svg`'s Welcome screen: `<text
- * ... font-size="12"> </text>` carries neither attribute). Every `FontSpec`
- * this module builds sets `weight`/`style` explicitly (never `undefined`),
- * so the omission has to happen HERE, at emission, not by relying on
- * `text()`'s own defaults.
- */
-export function drawRun(run: Run, x: number, baseline: number): string {
-  return text(x, baseline, run.content, {
-    fontFamily: run.font.family,
-    fontSize: run.font.size,
-    ...(run.font.weight === 'bold' ? { fontWeight: '700' as const } : {}),
-    ...(run.font.style === 'italic' ? { fontStyle: 'italic' as const } : {}),
-    fill: run.fill,
-    ...(run.decoration === undefined ? {} : { textDecoration: run.decoration }),
-    ...(run.textLength === undefined ? {} : { textLength: run.textLength }),
-  });
-}
-
-/** Draw one line at `top`, returning its SVG and the height it consumed. */
-function drawLine(
-  line: Line,
-  top: number,
-  measurer: StringMeasurer,
-): { readonly svg: string[]; readonly advance: number } {
-  const svg: string[] = [];
-  const advance = lineAdvance(line);
-  const baseline = top + lineAscent(line);
-
-  if (line.band !== undefined)
-    svg.push(
-      rect(
-        ERROR_PAGE_MARGIN,
-        top - BAND_PAD_TOP,
-        lineWidth(line, measurer) + 2 * BAND_PAD_X,
-        advance + BAND_PAD_TOP + BAND_PAD_BOTTOM,
-        // `stroke-width="1"` matches the jar's own `[From ... ]` band rect
-        // exactly (`style="stroke:#33FF02;stroke-width:1;"` on every cached
-        // error-page golden) -- previously omitted entirely.
-        { fill: line.band, stroke: line.band, strokeWidth: 1 },
-      ),
-    );
-
-  let x = ERROR_PAGE_MARGIN + (line.band === undefined ? 0 : BAND_PAD_X);
-  for (const run of line.runs) {
-    svg.push(drawRun(run, x, baseline));
-    x += measurer.measure(run.content, run.font).width;
-  }
-  return { svg, advance };
-}
-
-function blockWidth(block: Block, measurer: StringMeasurer): number {
-  return 2 * ERROR_PAGE_MARGIN + Math.max(0, ...block.lines.map((l) => lineWidth(l, measurer)));
-}
-
-function blockHeight(block: Block): number {
-  return 2 * ERROR_PAGE_MARGIN + block.lines.reduce((h, l) => h + lineAdvance(l), 0);
-}
-
-/** Draw one block's lines only, at `top` -- no background rect (see
- *  {@link drawBlocks} for where and why one gets drawn). */
-function drawBlockLines(block: Block, top: number, measurer: StringMeasurer): string[] {
-  const svg: string[] = [];
-  let y = top + ERROR_PAGE_MARGIN;
-  for (const line of block.lines) {
-    const drawn = drawLine(line, y, measurer);
-    svg.push(...drawn.svg);
-    y += drawn.advance;
-  }
-  return svg;
-}
-
-/**
- * Stack the blocks top to bottom, left-aligned, each as wide as the widest,
- * and wrap the result in the shared klimt document shell (`document-shell
- * .ts#assembleDocumentShell`) rather than the generic `core/svg.ts#svgRoot`
- * this used to call -- see this file's own header comment.
- *
- * A SINGLE block's own background becomes the document's canvas background,
- * folded into the root `style` with NO separate rect -- jar-verified: a
- * lone `PSystemError`/`PSystemWelcome`/`PSystemUnsupported` page (no second
- * block stacked on it) draws zero background rects at all
- * (`test-results/dot-cache/class/sadamo-18-siva346/in.svg`'s root carries
- * `style="...background:#000000;"` and its `<g>` opens directly on the
- * version-banner `<text>`). With >1 block (a Welcome screen stacked over an
- * error page), each block still draws its own explicit background rect --
- * pre-existing behavior this task does not touch -- and the canvas itself
- * keeps the historical WHITE default.
- */
-function drawBlocks(blocks: readonly Block[], measurer: StringMeasurer): string {
-  const width = Math.max(...blocks.map((b) => blockWidth(b, measurer)));
-  const height = blocks.reduce((h, b) => h + blockHeight(b), 0);
-
-  const children: string[] = [];
-  let top = 0;
-  for (const block of blocks) {
-    if (blocks.length > 1) {
-      children.push(rect(0, top, width, blockHeight(block), { fill: block.background, stroke: block.background }));
-    }
-    children.push(...drawBlockLines(block, top, measurer));
-    top += blockHeight(block);
-  }
-  const fragment: ShellFragment = {
-    body: group(children.join('')),
-    width,
-    height,
-    background: blocks.length === 1 ? blocks[0]!.background : WHITE,
-  };
-  return assembleDocumentShell(fragment, undefined);
-}
 
 // --- Public API ---------------------------------------------------------
 
+/** Welcome block placement on an error page (`PSystemError.java:255-258`). */
+const WELCOME_ON_ERROR: GraphicPosition = 'BACKGROUND_CORNER_TOP_RIGHT';
+
+/** `getSource().containsIgnoreCase("arecibo")` (`PSystemError.java:230`). */
+const ARECIBO = 'arecibo';
+
 /**
- * Render the error diagram. The Welcome block is stacked on top only for a
- * source of fewer than 5 lines, exactly as upstream gates it.
- * @see ~/git/plantuml/.../error/PSystemError.java#getTextBlock
+ * Render the error diagram (`PSystemError#getTextBlock`,
+ * `PSystemError.java:214-235`): the Welcome block (with the logo) on top for
+ * a source of fewer than 5 lines, and the Arecibo image to the right when
+ * the source mentions it.
+ *
+ * Upstream picks ONE decoration from the clock first --
+ * `System.currentTimeMillis() / 60000L % 60`: a Patreon banner at minutes
+ * 1/8/13/55, Liberapay at 15, a dedication at 30/39/48 -- and reaches the
+ * Arecibo branch only on the other 52 minutes (`:221-231`). `src/` reads no
+ * clock, and the oracle jar has no deterministic switch for it
+ * (`PSystemError.disableTimeBasedErrorDecorations()` exists, `:87-89`, but
+ * nothing calls it); this draws what the jar draws on those 52 minutes,
+ * which is what every cached error-page golden shows.
  */
 export function renderPSystemError(system: PSystemError, measurer: StringMeasurer): string {
-  // No Welcome block: the common case (every source ≥ 5 lines), and the ONLY
-  // one this mission's C-17 fix targets — see `error-page-exact.ts`'s own
-  // header comment for why the rare combo below still uses the OLDER,
-  // fitted-ratio path.
-  if (!system.getTotalLineCountLessThan5()) return renderErrorPageOnly(system, measurer);
+  let result: ErrorBlock = errorPageBlock(system, measurer);
+  if (system.getTotalLineCountLessThan5()) {
+    const welcome = new PSystemWelcome(WELCOME_ON_ERROR);
+    result = mergeTB(welcomeBlock(welcome, measurer), result);
+  }
+  if (system.containsIgnoreCase(ARECIBO)) result = mergeLR(result, imageBlock(ARECIBO_IMAGE));
+  return renderErrorBlock(result);
+}
 
-  const blocks: Block[] = [blackOnWhite(new PSystemWelcome().getStrings()), errorBlockLegacy(system)];
-  return drawBlocks(blocks, measurer);
+/** `PSystemWelcome#getTextBlock`: the logo only when placed. @see PSystemWelcome.java */
+function welcomeBlock(system: PSystemWelcome, measurer: StringMeasurer): ErrorBlock {
+  const position = system.getPosition();
+  return position === undefined
+    ? blackOnWhite(system.getStrings(), measurer)
+    : blackOnWhite(system.getStrings(), measurer, { img: PLANTUML_LOGO, position });
 }
 
 /** @see ~/git/plantuml/.../error/PSystemUnsupported.java#getTextBlock */
 export function renderPSystemUnsupported(system: PSystemUnsupported, measurer: StringMeasurer): string {
-  return drawBlocks([blackOnWhite(system.getStrings())], measurer);
+  const position: GraphicPosition = 'BACKGROUND_CORNER_TOP_RIGHT';
+  return renderErrorBlock(blackOnWhite(system.getStrings(), measurer, { img: PLANTUML_LOGO, position }));
 }
 
 /** @see ~/git/plantuml/.../eggs/PSystemWelcome.java#getTextBlock */
 export function renderPSystemWelcome(system: PSystemWelcome, measurer: StringMeasurer): string {
-  return drawBlocks([blackOnWhite(system.getStrings())], measurer);
+  return renderErrorBlock(welcomeBlock(system, measurer));
 }

@@ -113,9 +113,8 @@ describe('message label placement against the jar', () => {
  * `DriverTextSvg`'s own `trin`-then-measure order. And `#F00` is
  * `shortenColor` acting on the `#FF0000` the creole engine resolved.
  *
- * `y` and `fill` are deliberately not asserted: this port's ambient text
- * colour is `#181818` where the jar's default skin gives `#000`, and sequence
- * y-convergence is a separate, still-open axis.
+ * `y` and `fill` are deliberately not asserted: sequence y-convergence is a
+ * separate, still-open axis.
  */
 const CREOLE_SRC = [
   '@startuml',
@@ -183,9 +182,9 @@ describe('creole in a message label (C3)', () => {
  * unchanged, which is what the identity property is about.
  */
 const PLAIN_LABEL_TEXTS = [
-  '<text x="35.681" y="61.111" font-size="13" fill="#181818" textLength="36.156">12345</text>',
-  '<text x="35.681" y="88.111" font-size="13" fill="#181818" textLength="65">こんにちわ</text>',
-  '<text x="45.681" y="115.111" font-size="13" fill="#181818" textLength="65">さようなら</text>',
+  '<text x="35.681" y="61.111" font-size="13" fill="#000" textLength="36.156">12345</text>',
+  '<text x="35.681" y="88.111" font-size="13" fill="#000" textLength="65">こんにちわ</text>',
+  '<text x="45.681" y="115.111" font-size="13" fill="#000" textLength="65">さようなら</text>',
 ];
 
 describe('a markup-free label is byte-identical apart from its baseline', () => {

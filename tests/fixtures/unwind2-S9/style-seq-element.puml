@@ -1,0 +1,10 @@
+@startuml
+<style>
+sequenceDiagram { Shadowing 3 }
+</style>
+participant A
+participant B
+group grp
+A -> B : hi
+end
+@enduml

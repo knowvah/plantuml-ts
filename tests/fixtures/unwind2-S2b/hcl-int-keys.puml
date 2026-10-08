@@ -1,0 +1,7 @@
+@starthcl
+r {
+  b = "x"
+  10 = "y"
+  2 = "z"
+}
+@endhcl

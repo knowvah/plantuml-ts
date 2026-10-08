@@ -1,0 +1,8 @@
+@startuml
+!theme materia
+participant A
+participant B
+group grp
+A -> B : hi
+end
+@enduml
