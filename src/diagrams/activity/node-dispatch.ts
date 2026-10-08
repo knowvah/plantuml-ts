@@ -52,7 +52,14 @@ import { readMultilineActionBody } from './dispatch-multiline-body.js';
 import { extractLeadingCaseNotes, tryOpenSwitch } from './switch-dispatch.js';
 import { tryOpenGroup } from './group-dispatch.js';
 import { redirectNoteOntoGroup, redirectNoteOntoWhile, tryNoteMulti, tryNoteSingle } from './note-dispatch.js';
-import { tryAnnotation, tryPragma, trySprite, tryScale } from './dispatch-common-commands.js';
+import {
+  tryAnnotation,
+  tryIgnoredCommonCommand,
+  tryLink3,
+  tryPragma,
+  trySprite,
+  tryScale,
+} from './dispatch-common-commands.js';
 import { stereogroupBackColor, stereogroupStereotype } from './dispatch-stereogroup.js';
 
 // ---------------------------------------------------------------------------
@@ -363,6 +370,8 @@ const LINE_HANDLERS: readonly LineHandler[] = [
   tryPragma,
   trySprite,
   tryScale,
+  tryIgnoredCommonCommand,
+  tryLink3,
   tryAssumeTransparent,
   // Tried LAST, immediately before the unknown-line fallback: `[-*]` is a
   // broad prefix (mission ubrr-T10 M1) and upstream itself registers
