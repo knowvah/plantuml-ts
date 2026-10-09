@@ -26,6 +26,7 @@ import { parseColor, toSvgHex } from '../../core/klimt/color/HColorSet.js';
 import { applyColorMapperToFragment, colorMapperOf } from '../../core/klimt/color/fragment-color-mapper.js';
 import { edgeDecorationVector } from './layout/compress/shapes-of-terminal.js';
 import { SVG_CANVAS_CEIL, activityDocumentMargin } from './activity-layout-constants.js';
+import { withActivityMeasurer } from './activity-string-bounder.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -428,7 +429,9 @@ function preChromeDims(geo: ActivityGeometry, theme: Theme): { width: number; he
 export function renderActivity(geo: ActivityGeometry, skinTheme: Theme): RenderFragment {
   // unwind2-S11: the layout's `sprite` map (`layoutActivity`), so the draw
   // resolves a label's `<$sprite>` exactly as the sizer did.
-  const theme = geo.sprites === undefined ? skinTheme : { ...skinTheme, sprites: geo.sprites };
+  const spriteTheme = geo.sprites === undefined ? skinTheme : { ...skinTheme, sprites: geo.sprites };
+  // isw-T2-act F1: draw through the layout's own bounder (`Swimlanes.java:239,246`).
+  const theme = geo.measurer === undefined ? spriteTheme : withActivityMeasurer(spriteTheme, geo.measurer);
   const children: string[] = [];
 
   // NO background rect here. The jar paints one from `SvgGraphics`'s own

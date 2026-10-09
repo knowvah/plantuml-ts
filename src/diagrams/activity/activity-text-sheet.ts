@@ -46,7 +46,7 @@ import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import { backColorFilterDef } from '../../core/svg-defs.js';
 import { getSprite } from '../../core/sprite-registry.js';
 
@@ -166,8 +166,6 @@ export function activitySheet(label: string, theme: Theme, params: ActivityDispl
  *  throwaway `UGraphicSvg`, for the same purpose. */
 const THROWAWAY_VERSION = '$version$';
 
-const DRAW_MEASURER = new WidthTableMeasurer();
-
 /** One `getFilterBackColor` def (`SvgGraphics.java:772-786`) as the klimt
  *  emitter writes it: its seeded id and its `flood-color`. */
 const KLIMT_BACK_FILTER_RE = /<filter id="([^"]*)"[^>]*><feFlood flood-color="([^"]*)"/g;
@@ -203,13 +201,14 @@ export function drawActivityTextBlock(
   fc: FontConfiguration,
   changes: readonly UChange[] = [],
 ): string {
+  const measurer = activityMeasurer(theme);
   const driverBounder = {
     calculateDimension(f: { readonly size: number }, text: string) {
-      return { width: DRAW_MEASURER.measure(text, { family: fc.family, size: f.size }).width };
+      return { width: measurer.measure(text, { family: fc.family, size: f.size }).width };
     },
   };
   const option = basicSvgOption(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget });
-  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, DRAW_MEASURER);
+  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, measurer);
   tb.drawU(changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(at.x, at.y))));
   const { body, extraDefs } = extractFlatContent(ug.getSvgString());
   return withBackColorFilters(body, extraDefs);

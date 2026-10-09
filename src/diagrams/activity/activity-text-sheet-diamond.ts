@@ -30,7 +30,7 @@ import { UStroke } from '../../core/klimt/UStroke.js';
 import { Fore } from '../../core/klimt/Fore.js';
 import { Back } from '../../core/klimt/Back.js';
 import { chromeAtomOps } from '../../core/annotations/blocks-creole.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import type { Stencil } from '../../core/klimt/creole/Stencil.js';
 import type { TextBlock } from '../../core/klimt/shape/TextBlock.js';
 import type { Paint } from '../../core/paint.js';
@@ -41,8 +41,6 @@ const ALIGNMENT_MAP: Record<'left' | 'center' | 'right', HorizontalAlignment> = 
   center: HorizontalAlignment.CENTER,
   right: HorizontalAlignment.RIGHT,
 };
-
-const MEASURER = new WidthTableMeasurer();
 
 /** `Hexagon.asStencil(tb)` (`ftile/Hexagon.java:84-104`): the stencil
  *  widens by `hexagonHalfSize * p` toward the middle row (`p = y / h * 2`,
@@ -105,7 +103,7 @@ export interface DiamondLabelBox {
 export function renderDiamondTestLabel(label: string, theme: Theme, box: DiamondLabelBox): string {
   const tb = diamondTestBlock(label, theme);
   const fc = activityTextFontConfiguration(theme, activityFontSize(theme, 'diamond'), 'diamond');
-  const dim = tb.calculateDimension(klimtStringBounder(MEASURER, { family: fc.family, size: fc.size }));
+  const dim = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fc.size }));
   const lx = (box.width - dim.getWidth()) / 2;
   const ly = (box.height - dim.getHeight()) / 2;
   const c = actColors(theme);

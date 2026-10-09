@@ -57,6 +57,7 @@ import {
 import { shapesOf, type CompressShape } from '../../../../../src/diagrams/activity/layout/compress/shapes-of.js';
 import { occupiesOn, overlaps } from '../../../../../src/diagrams/activity/layout/compress/slot-finder.js';
 import type { Reservation } from '../../../../../src/diagrams/activity/layout/hexagon-reservations.js';
+import { measured } from '../../../../unit/activity/measured-theme.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MANIFEST_PATH = join(HERE, '../../../../../oracle/goldens/svg-activity/diff-baseline.json');
@@ -106,7 +107,7 @@ function buildThemeForFixture(preprocessed: PreprocessorResult): Theme {
   }, new Map());
   const flatRoot = styleMap.get('') ?? new Map<string, string>();
   const withStyles = resolveSkinparam(flatRoot, withSkinparam).theme;
-  return applyStyleMap(styleMap, withStyles);
+  return measured(applyStyleMap(styleMap, withStyles));
 }
 
 function makeBounder(measurer: DeterministicMeasurer, theme: Theme): StringBounder {

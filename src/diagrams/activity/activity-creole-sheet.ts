@@ -63,7 +63,7 @@ import { UGraphicSvg } from '../../core/klimt/drawing/svg/u-graphic-svg.js';
 import { basicSvgOption } from '../../core/klimt/drawing/svg/svg-graphics.js';
 import { UTranslate } from '../../core/klimt/UTranslate.js';
 import { extractFlatContent } from '../../core/klimt/document-shell-fragment.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 import type { CreoleAtom } from '../../core/klimt/creole/atom/Atom.js';
 import type { Sheet } from '../../core/klimt/creole/Sheet.js';
 import type { StringMeasurer, FontSpec } from '../../core/measurer.js';
@@ -254,18 +254,17 @@ interface DrawContext {
  */
 export function drawActionTextBlock(tb: TextBlock, x: number, y: number, ctx: DrawContext): string {
   const { font, theme } = ctx;
+  const measurer = activityMeasurer(theme);
   const driverBounder = {
     calculateDimension(fc: { readonly size: number }, text: string) {
-      return { width: DRAW_MEASURER.measure(text, { ...font, size: fc.size }).width };
+      return { width: measurer.measure(text, { ...font, size: fc.size }).width };
     },
   };
   const option = basicSvgOption(theme.svgLinkTarget === undefined ? {} : { linkTarget: theme.svgLinkTarget });
-  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, DRAW_MEASURER);
+  const ug = UGraphicSvg.build(0, option, THROWAWAY_VERSION, driverBounder, measurer);
   tb.drawU(ctx.changes.reduce<UGraphic>((g, c) => g.apply(c), ug.apply(new UTranslate(x, y))));
   return extractFlatContent(ug.getSvgString()).body;
 }
-
-const DRAW_MEASURER = new WidthTableMeasurer();
 
 /**
  * The `renderAction` entry point: `FtileBox#drawU`'s `tb.drawU(...)`
@@ -289,7 +288,7 @@ export function renderActionLabel(
 ): string {
   const tb = buildActionTextBlock(label, theme, fontSize, 'activity', box.shield ?? 0);
   const font = { family: activityFontFamily(theme, 'activity'), size: fontSize };
-  const tbWidth = tb.calculateDimension(klimtStringBounder(DRAW_MEASURER, font)).getWidth();
+  const tbWidth = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), font)).getWidth();
   const t = actionTextTranslate(theme, box.width, tbWidth, activityPadding('activity'));
   // `FtileBox#drawU` (`FtileBox.java:205-217`): `ug.apply(borderColor)`, then
   // `ug.apply(style.getStroke())`, before `tb.drawU` -- the ink a stencilled

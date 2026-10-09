@@ -5,8 +5,11 @@ import { assembleSvg } from '../../../src/index.js';
 import type { ActivityGeometry, ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
 import { resolveTheme, deepMergeTheme, defaultTheme } from '../../../src/core/theme.js';
 import { ACTIVITY_FONT_COLOR } from '../../../src/diagrams/activity/activity-text-style.js';
+import type { Theme } from '../../../src/core/theme.js';
+import { measured } from './measured-theme.js';
+const measuredMerge = (...a: Parameters<typeof deepMergeTheme>): Theme => measured(deepMergeTheme(...a));
 
-const theme = resolveTheme('default');
+const theme = measured(resolveTheme('default'));
 
 /** A theme carrying one `<style>`/`skinparam` bucket `FontColor` override --
  *  standing in for `<style> activityDiagram { arrow { FontColor ... } } */
@@ -1109,7 +1112,7 @@ describe('stereotype action shapes', () => {
 // ---------------------------------------------------------------------------
 
 describe('renderActivity — activity theme colors', () => {
-  const activityTheme = deepMergeTheme(defaultTheme, {
+  const activityTheme = measuredMerge(defaultTheme, {
     colors: {
       ...defaultTheme.colors,
       arrow: 'red',

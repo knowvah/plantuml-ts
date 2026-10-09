@@ -9,6 +9,7 @@ import type {
 } from '../ast.js';
 import { CreoleMode } from '../../../core/klimt/creole/CreoleMode.js';
 import type { StringMeasurer } from '../../../core/measurer.js';
+import { withActivityMeasurer } from '../activity-string-bounder.js';
 import type { Theme } from '../../../core/theme.js';
 import { Pragma } from '../../../core/skin/Pragma.js';
 import type { StringBounder, Tile } from '../tiles/tile.js';
@@ -389,9 +390,12 @@ function tileRepeat(
 export function layoutActivity(ast: ActivityDiagramAST, skinTheme: Theme, measurer: StringMeasurer) {
   // unwind2-S11: every text block reads the diagram's own `sprite` map
   // through its skin param (`StripeSimple.java:229`), `Theme#sprites` here.
-  const theme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
+  // isw-T2-act F1: every sizer reads the render's measurer off `theme`
+  // (`activity-string-bounder.ts`), as upstream's read the factory's.
+  const spriteTheme = ast.sprites === undefined ? skinTheme : { ...skinTheme, sprites: ast.sprites };
+  const theme = withActivityMeasurer(spriteTheme, measurer);
   if (ast.nodes.length === 0) {
-    return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [] };
+    return { totalWidth: 0, totalHeight: 0, nodes: [], edges: [], swimlanes: [], measurer };
   }
 
   const bounder = makeBounder(measurer, theme);
@@ -410,7 +414,7 @@ export function layoutActivity(ast: ActivityDiagramAST, skinTheme: Theme, measur
   // geometry's own ink extent (`assign-coordinates-full.ts
   // #computeCanvasOrigin`) -- never a flat baseX/baseY constant.
   const geo = assignCoordinates(root, ast, { x: 0, y: 0 }, bounder, theme);
-  return ast.sprites === undefined ? geo : { ...geo, sprites: ast.sprites };
+  return ast.sprites === undefined ? { ...geo, measurer } : { ...geo, sprites: ast.sprites, measurer };
 }
 
 /** `tileNode`'s exhaustive default: an unknown kind draws nothing. */

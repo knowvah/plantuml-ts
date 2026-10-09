@@ -13,8 +13,9 @@ import { GtileAction, boxStyleName, boxStyleShield } from '../../../src/diagrams
 import { NORTH_HOOK, SOUTH_HOOK } from '../../../src/diagrams/activity/tiles/points.js';
 import { renderBoxStyleAction } from '../../../src/diagrams/activity/activity-renderer-signal-shapes.js';
 import type { ActivityNodeGeo } from '../../../src/diagrams/activity/activity-geometry.types.js';
+import { measured } from './measured-theme.js';
 
-const THEME = resolveTheme('default');
+const THEME = measured(resolveTheme('default'));
 const BOUNDER: StringBounder = {
   getDimension: (text: string, size: number) => ({ width: text.length * 10, height: size }),
 };

@@ -11,6 +11,7 @@
 
 import type { SnakeTextAlign } from './layout/snake-text-position.js';
 import type { SpriteRegistry } from '../../core/sprite-registry.js';
+import type { StringMeasurer } from '../../core/measurer.js';
 
 // ---------------------------------------------------------------------------
 // Public geometry types
@@ -290,4 +291,9 @@ export interface ActivityGeometry {
    *  `<$sprite>` resolves there too (`Theme#sprites`, `SkinParam.java:
    *  799-817`). */
   sprites?: SpriteRegistry;
+  /** isw-T2-act F1: the measurer the layout sized every text block with,
+   *  carried to the draw so `drawU` re-measures through the SAME bounder
+   *  (`Swimlanes.java:239,246` -- `ug.getStringBounder()` sizes and draws).
+   *  Optional only for hand-built `ActivityGeometry` test literals. */
+  measurer?: StringMeasurer;
 }

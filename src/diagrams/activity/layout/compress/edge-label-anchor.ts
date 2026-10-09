@@ -51,7 +51,8 @@ import { activityDisplayBlock, activityTextFontConfiguration } from '../../activ
 import { klimtStringBounder } from '../../activity-creole-sheet.js';
 import { HorizontalAlignment } from '../../../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../../../core/klimt/creole/CreoleMode.js';
-import { WidthTableMeasurer, type StringMeasurer } from '../../../../core/measurer.js';
+import type { StringMeasurer } from '../../../../core/measurer.js';
+import { activityMeasurer } from '../../activity-string-bounder.js';
 import { DEFAULT_LABEL_ALIGN, getTextBlockPosition } from '../snake-text-position.js';
 
 /** A label's draw inputs: its lines, the arrow font size, the block width
@@ -71,8 +72,6 @@ export interface LabelAnchor {
   readonly y: number;
 }
 
-const BLOCK_MEASURER = new WidthTableMeasurer();
-
 /**
  * `text.textBlock.calculateDimension(stringBounder)` (`Snake.java:247`) for
  * the block the renderer draws: `FtileFactoryDelegator#getTextBlock`'s
@@ -81,13 +80,13 @@ const BLOCK_MEASURER = new WidthTableMeasurer();
  * `AtomText` floor (`AtomText.java:179-181`) and `SheetBlock1`'s padding on
  * both axes (`SheetBlock1.java:194-197`) included. A `<back:color>` the
  * parser lifted into `edge.color` changes no extent. `measurer` is the
- * caller's `StringBounder` (the compressor's injected one); the renderer's
- * width table by default.
+ * caller's `StringBounder` (the compressor's injected one); the render's own
+ * (`activity-string-bounder.ts`) by default.
  */
 export function edgeLabelBlockSize(
   label: string,
   theme: Theme,
-  measurer: StringMeasurer = BLOCK_MEASURER,
+  measurer: StringMeasurer = activityMeasurer(theme),
 ): { width: number; height: number } {
   const size = activityFontSize(theme, 'arrow');
   const fc = activityTextFontConfiguration(theme, size, 'arrow');

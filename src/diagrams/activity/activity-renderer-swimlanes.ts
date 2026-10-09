@@ -24,7 +24,7 @@ import { klimtStringBounder } from './activity-creole-sheet.js';
 import { activityHyperlinkColor } from './activity-text-style.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 
 import {
   swimlaneBorderColor,
@@ -33,8 +33,6 @@ import {
   swimlaneTitleFontColor,
   swimlaneTitleFontSize,
 } from './activity-style-defaults.js';
-
-const TITLE_MEASURER = new WidthTableMeasurer();
 
 /**
  * The transparent (or user-coloured) title-band rect (D3). Emits
@@ -146,7 +144,7 @@ export function renderSwimlaneTitles(geo: ActivityGeometry, theme: Theme): strin
   if (geo.swimlaneBand === undefined) return '';
   const font = { family: theme.fontFamily, size: swimlaneTitleFontSize(theme), color: swimlaneTitleFontColor(theme) };
   const fc = styleFontConfiguration(theme, font, activityHyperlinkColor(theme));
-  const bounder = klimtStringBounder(TITLE_MEASURER, font);
+  const bounder = klimtStringBounder(activityMeasurer(theme), font);
   let out = '';
   for (const lane of geo.swimlanes) {
     // `Swimlanes#getTitle` (`Swimlanes.java:285-293`): `create9(fc, LEFT,

@@ -23,7 +23,7 @@ import { activityDisplayBlock, activityTextFontConfiguration, drawActivityTextBl
 import { klimtStringBounder } from './activity-creole-sheet.js';
 import { HorizontalAlignment } from '../../core/klimt/geom/HorizontalAlignment.js';
 import { CreoleMode } from '../../core/klimt/creole/CreoleMode.js';
-import { WidthTableMeasurer } from '../../core/measurer.js';
+import { activityMeasurer } from './activity-string-bounder.js';
 
 /**
  * `URectangle.build(width, height).rounded(5)` -- the `5` is upstream's
@@ -33,8 +33,6 @@ import { WidthTableMeasurer } from '../../core/measurer.js';
  * @see net/sourceforge/plantuml/activitydiagram3/ftile/vertical/FtileBlackBlock.java:101-102
  */
 const FORK_BAR_CORNER_RADIUS = 2.5;
-
-const LABEL_MEASURER = new WidthTableMeasurer();
 
 /**
  * `ug.apply(UStroke.withThickness(1.5)).draw(rect)` -- the split thin
@@ -96,7 +94,7 @@ function renderJoinBarLabel(node: ActivityNodeGeo, theme: Theme): string {
     horizontalAlignment: HorizontalAlignment.LEFT,
     creoleMode: CreoleMode.SIMPLE_LINE,
   });
-  const dim = tb.calculateDimension(klimtStringBounder(LABEL_MEASURER, { family: fc.family, size: fc.size }));
+  const dim = tb.calculateDimension(klimtStringBounder(activityMeasurer(theme), { family: fc.family, size: fc.size }));
   // `FtileBlackBlock#drawU` (`:110-111`): `UTranslate(width + labelMargin,
   // -dimLabel.getHeight() / 2)` from the bar's own origin.
   const at = { x: node.x + (node.width + JOIN_LABEL_MARGIN), y: node.y + -dim.getHeight() / 2 };

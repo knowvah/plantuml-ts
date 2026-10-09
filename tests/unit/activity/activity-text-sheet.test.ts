@@ -14,8 +14,9 @@ import { backColorFilterId } from '../../../src/core/svg-defs.js';
 import { resolveColorToSvgHex } from '../../../src/core/klimt/color/HColorSet.js';
 import { defaultTheme } from '../../../src/core/theme.js';
 import type { Theme } from '../../../src/core/theme.js';
+import { measured } from './measured-theme.js';
 
-const THEME: Theme = defaultTheme;
+const THEME: Theme = measured(defaultTheme);
 const ORIGIN = { x: 10, y: 20 };
 
 function draw(label: string, theme: Theme = THEME, mode: CreoleMode = CreoleMode.SIMPLE_LINE): string {
@@ -74,8 +75,11 @@ describe('activityDisplayBlock + drawActivityTextBlock', () => {
 
 describe('CreoleMode.SIMPLE_LINE (CommandCreoleBuilder.java:85-86)', () => {
   it('keeps `__x__` literal in a SIMPLE_LINE sheet', () => {
+    // isw-T2-act: textLength from a one-JVM jar render (seam #4) of
+    // `:A;\n-> a __u__ b;\n:B;` -- `textLength="48.881"`, the two spaces
+    // now 3.025 each at 11pt.
     expect(draw('a __u__ b')).toBe(
-      '<text x="10" y="28.556" fill="#000" font-size="11" textLength="42.831">a __u__ b</text>',
+      '<text x="10" y="28.556" fill="#000" font-size="11" textLength="48.881">a __u__ b</text>',
     );
   });
 
