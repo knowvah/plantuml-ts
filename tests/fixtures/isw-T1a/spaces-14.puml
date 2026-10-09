@@ -1,0 +1,6 @@
+@startuml
+skinparam defaultFontSize 14
+rectangle "a b" as A
+rectangle "one  two   three" as B
+A --> B : lead  gap
+@enduml

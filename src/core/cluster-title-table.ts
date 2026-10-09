@@ -23,7 +23,8 @@
  * heights, not max; `XDimension2D.java:94-98`), so `(stereoLines +
  * titleLines) * fontSize` reproduces it exactly since both text blocks
  * share the same per-line `height = fontSize` convention this port already
- * uses (`WidthTableMeasurer`, `src/core/measurer.ts:186-193`).
+ * uses (`DeterministicMeasurer` over `WidthTableMeasurer`, `src/core/measurer.ts:186-193`;
+ * `height = size`, unaffected by the U+0020 override).
  * `attributeHeight` is the composite's OWN `entry`/`exit`/body description
  * lines (`g.getStateDescription()`, `Entity.java:610-633` — NOT nested
  * children's own bodies), `marginForFields` is `IEntityImage.MARGIN` (5)

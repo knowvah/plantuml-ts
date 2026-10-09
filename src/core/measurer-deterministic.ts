@@ -21,14 +21,23 @@
  * This module does not re-port `StringBounderFromWidthTable` +
  * `UnicodeFontWidthSansSerif` a second time — that port already exists as
  * `WidthTableMeasurer` (`measurer.ts`, backed by `measurer-width-table.data.ts`),
- * built and jar-verified under an earlier mission (ADR-001, "S1-impl").
- * Duplicating ~717 lines of width-table data a second time under a new name
- * would violate this project's own no-duplicate-logic principle for zero
- * benefit — `WidthTableMeasurer` IS `StringBounderFromWidthTable`, verbatim.
- * This module re-exports it under the `DeterministicMeasurer` name the
- * dual-measurer mission brief specifies, as the stable import path the
- * conformance/ratchet scripts (`scripts/dot-sync-report.ts`, the SVG
- * conformance census) are expected to use.
+ * which stays the VERBATIM port of the table (including its U+0020 = 0).
+ * `DeterministicMeasurer` extends it and overrides exactly one thing: the
+ * width of U+0020, matching the oracle jar's seam #4
+ * (`FileFormat.getDefaultStringBounder`, patch
+ * `oracle/patches/0004-oracle-space-width.patch`).
+ *
+ * ## Why the space differs from the table (D1)
+ *
+ * The table gives U+0020 width 0 (`UnicodeFontWidthSansSerif.java` block 0,
+ * index 0x20). That is an instrument artefact: a lone space measures
+ * zero-wide, which crashes `SlotFinder` (`Slot.java:44-45`, `start >= end`).
+ * The table's own entries for the identical advance — U+0021 `!` and U+00A0
+ * NO-BREAK SPACE — are 44 tenths of a 16 pt em, and so are Helvetica
+ * (Adobe Core14 AFM: `C 32 ; WX 278 ; N space`, `C 33 ; WX 278 ; N exclam`)
+ * and Arial (569/2048 for all three). Space = 44 -> 4.4 px at 16 pt, 3.3 px
+ * at 12 pt. Only U+0020 changes; block 0's other zeros (0x09-0x0D, 0x1D,
+ * 0xAD) stay 0.
  *
  * Re-verified against the real jar (2026-07-10, `-DPLANTUML_DETERMINISTIC_TEXT=true`,
  * `plantuml-1.2026.7beta3.jar`, openjdk 21.0.1) as part of this task's own
@@ -51,4 +60,34 @@
  * — verified against the jar and fixed in `measurer.ts` as part of this
  * task (see that file's `WidthTableMeasurer.charWidth` doc comment).
  */
-export { WidthTableMeasurer as DeterministicMeasurer } from './measurer.js';
+import { WidthTableMeasurer } from './measurer.js';
+import type { FontSpec } from './measurer.js';
+
+/** Width of U+0020 in tenths of a 16 pt em (D1). */
+export const SPACE_WIDTH_TENTHS = 44;
+
+/** `StringBounderFromWidthTable.REFERENCE_SIZE` (`StringBounderFromWidthTable.java:56`). */
+const REFERENCE_SIZE = 16;
+
+/**
+ * The deterministic-mode measurer: `WidthTableMeasurer` with U+0020 = 44.
+ *
+ * Mirrors the oracle's seam #4 arithmetic exactly: the table width, then
+ * `+ spaces * 4.4 * size / 16` (the anonymous subclass in
+ * `FileFormat.getDefaultStringBounder`, `calculateDimension` override).
+ *
+ * @see oracle/patches/0004-oracle-space-width.patch (seam #4)
+ * @see WidthTableMeasurer
+ */
+export class DeterministicMeasurer extends WidthTableMeasurer {
+  override measure(text: string, font: FontSpec): { width: number; height: number } {
+    const base = super.measure(text, font);
+    let spaces = 0;
+    for (const ch of text) if (ch === ' ') spaces++;
+    if (spaces === 0) return base;
+    return {
+      width: base.width + (spaces * (SPACE_WIDTH_TENTHS / 10) * font.size) / REFERENCE_SIZE,
+      height: base.height,
+    };
+  }
+}
