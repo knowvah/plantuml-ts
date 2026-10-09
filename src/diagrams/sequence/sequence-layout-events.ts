@@ -224,7 +224,10 @@ function handleNoteEvent(event: NoteEvent, cursor: EventCursor, ctx: EventProces
   // at y=52 against a tile top of 47.
   const { shadow, reserve, drawnLess } = noteShadowGeometry(event, ctx.theme);
   const noteGeo = buildNoteGeo(event, noteWidth + reserve, noteHeight, cursor.y + NOTE_PADDING_Y, ctx.participantMap);
-  noteGeo.width -= drawnLess;
+  // `ComponentRoseNote#drawInternalU:109,115,118` (and `...NoteBox:91,97`,
+  // `...NoteHexagonal:91,97`): the polygon is drawn `(int) getTextWidth` wide,
+  // or `(int) (area - 2 * paddingX)` when the area is wider than preferred.
+  noteGeo.width = Math.trunc(noteGeo.width - drawnLess);
   if (shadow > 0) noteGeo.shadow = shadow;
   const [dx, dy] = [noteGeo.x + notePadding, noteGeo.y + NOTE_PADDING_Y];
   noteGeo.textRuns = rows.map((r) => offsetRun(r, dx, dy));
